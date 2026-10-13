@@ -77,6 +77,7 @@ import {
   runCapability,
 } from "./registry";
 import { getConversationAction } from "@/lib/conversation/action-registry";
+import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES, OVERWRITES, SENDS_EMAIL } from "./conversation-action-bridge";
 import type { CapabilityCaller } from "./contract";
 
 /**
@@ -250,6 +251,90 @@ describe("the registry itself", () => {
       // preview writes nothing and mints the one-time token the commit needs.
       "people.ingest.preview",
       "people.ingest.commit",
+      // THE CONVERSATION-ACTION BRIDGE (2026-10-13): the web chat's executable
+      // actions that had no capability, through the ONE dispatcher. A
+      // reversible_write is one tool; an important/strong write is a
+      // prepare -> confirm pair. Order = the conversation registry's order.
+      "worker.add-work-history",
+      "worker.add-document",
+      "worker.add-language",
+      "worker.add-education",
+      "worker.add-achievement",
+      "worker.save-preferences",
+      "worker.respond-booking.prepare",
+      "worker.respond-booking.confirm",
+      "worker.respond-invitation.prepare",
+      "worker.respond-invitation.confirm",
+      "company.confirm-need.prepare",
+      "company.confirm-need.confirm",
+      "company.contact-worker.prepare",
+      "company.contact-worker.confirm",
+      "company.propose-booking.prepare",
+      "company.propose-booking.confirm",
+      "company.move-worker.prepare",
+      "company.move-worker.confirm",
+      "company.invite-worker.prepare",
+      "company.invite-worker.confirm",
+      "company.rename-organization.prepare",
+      "company.rename-organization.confirm",
+      "company.respond-offer.prepare",
+      "company.respond-offer.confirm",
+      "company.respond-team-offer.prepare",
+      "company.respond-team-offer.confirm",
+      "company.accept-connection.prepare",
+      "company.accept-connection.confirm",
+      "company.decline-connection.prepare",
+      "company.decline-connection.confirm",
+      "company.share-request.prepare",
+      "company.share-request.confirm",
+      "company.create-task",
+      "company.update-stage-status",
+      "company.update-task-status",
+      "company.set-readiness-item",
+      "company.seed-readiness-checklist",
+      "company.request-readiness.prepare",
+      "company.request-readiness.confirm",
+      "company.confirm-work.prepare",
+      "company.confirm-work.confirm",
+      "company.enable-journal-review",
+      "company.create-programme.prepare",
+      "company.create-programme.confirm",
+      "company.create-cohort.prepare",
+      "company.create-cohort.confirm",
+      "company.assign-learner.prepare",
+      "company.assign-learner.confirm",
+      "company.invite-learner.prepare",
+      "company.invite-learner.confirm",
+      "agency.invite-client.prepare",
+      "agency.invite-client.confirm",
+      "agency.propose-candidate.prepare",
+      "agency.propose-candidate.confirm",
+      "engagement.end.prepare",
+      "engagement.end.confirm",
+      // WORKSPACE READS (2026-10-13): what the web chat already answers, over
+      // the same loaders (workspace-read-capabilities.ts).
+      "calendar.agenda.get",
+      "calendar.conflicts.get",
+      "capacity.available.get",
+      "organization.today.get",
+      "tasks.open.list",
+      "project.stages.list",
+      "project.risk.get",
+      "project.readiness.get",
+      "project.move.options",
+      "project.move.what_if",
+      "invitations.list",
+      "agency.clients.get",
+      "client.agency_connections.get",
+      "client.agency_offers.get",
+      "education.workspace.get",
+      "worker.projects.list",
+      "worker.engagements.list",
+      "worker.documents.gap",
+      "cv.state.get",
+      "work.find",
+      "opportunities.saved.list",
+      "jobs.new.list",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
@@ -355,12 +440,98 @@ describe("the registry itself", () => {
       // preview writes nothing and mints the one-time token the commit needs.
       "people.ingest.preview",
       "people.ingest.commit",
+      // THE CONVERSATION-ACTION BRIDGE (2026-10-13): the web chat's executable
+      // actions that had no capability, through the ONE dispatcher. A
+      // reversible_write is one tool; an important/strong write is a
+      // prepare -> confirm pair. Order = the conversation registry's order.
+      "worker.add-work-history",
+      "worker.add-document",
+      "worker.add-language",
+      "worker.add-education",
+      "worker.add-achievement",
+      "worker.save-preferences",
+      "worker.respond-booking.prepare",
+      "worker.respond-booking.confirm",
+      "worker.respond-invitation.prepare",
+      "worker.respond-invitation.confirm",
+      "company.confirm-need.prepare",
+      "company.confirm-need.confirm",
+      "company.contact-worker.prepare",
+      "company.contact-worker.confirm",
+      "company.propose-booking.prepare",
+      "company.propose-booking.confirm",
+      "company.move-worker.prepare",
+      "company.move-worker.confirm",
+      "company.invite-worker.prepare",
+      "company.invite-worker.confirm",
+      "company.rename-organization.prepare",
+      "company.rename-organization.confirm",
+      "company.respond-offer.prepare",
+      "company.respond-offer.confirm",
+      "company.respond-team-offer.prepare",
+      "company.respond-team-offer.confirm",
+      "company.accept-connection.prepare",
+      "company.accept-connection.confirm",
+      "company.decline-connection.prepare",
+      "company.decline-connection.confirm",
+      "company.share-request.prepare",
+      "company.share-request.confirm",
+      "company.create-task",
+      "company.update-stage-status",
+      "company.update-task-status",
+      "company.set-readiness-item",
+      "company.seed-readiness-checklist",
+      "company.request-readiness.prepare",
+      "company.request-readiness.confirm",
+      "company.confirm-work.prepare",
+      "company.confirm-work.confirm",
+      "company.enable-journal-review",
+      "company.create-programme.prepare",
+      "company.create-programme.confirm",
+      "company.create-cohort.prepare",
+      "company.create-cohort.confirm",
+      "company.assign-learner.prepare",
+      "company.assign-learner.confirm",
+      "company.invite-learner.prepare",
+      "company.invite-learner.confirm",
+      "agency.invite-client.prepare",
+      "agency.invite-client.confirm",
+      "agency.propose-candidate.prepare",
+      "agency.propose-candidate.confirm",
+      "engagement.end.prepare",
+      "engagement.end.confirm",
+      // WORKSPACE READS (2026-10-13): what the web chat already answers, over
+      // the same loaders (workspace-read-capabilities.ts).
+      "calendar.agenda.get",
+      "calendar.conflicts.get",
+      "capacity.available.get",
+      "organization.today.get",
+      "tasks.open.list",
+      "project.stages.list",
+      "project.risk.get",
+      "project.readiness.get",
+      "project.move.options",
+      "project.move.what_if",
+      "invitations.list",
+      "agency.clients.get",
+      "client.agency_connections.get",
+      "client.agency_offers.get",
+      "education.workspace.get",
+      "worker.projects.list",
+      "worker.engagements.list",
+      "worker.documents.gap",
+      "cv.state.get",
+      "work.find",
+      "opportunities.saved.list",
+      "jobs.new.list",
     ]);
   });
 
   it("G4 bridge: a capability that names a conversation action matches its confirmation contract", () => {
-    const bridged = listCapabilities().filter((c) => c.conversationActionId);
+    const bridgeIds = new Set(CONVERSATION_ACTION_BRIDGE_CAPABILITIES.map((c) => c.id));
+    const bridged = listCapabilities().filter((c) => c.conversationActionId && !bridgeIds.has(c.id));
     // Wagon 1 bridged express-interest; wagon 2 the work card; wagon 3 demand.
+    // (The generic conversation-action bridge has its own test below.)
     expect(bridged.map((c) => c.id).sort()).toEqual([
       "demand.close_confirm",
       "demand.close_draft",
@@ -397,10 +568,19 @@ describe("the registry itself", () => {
         "openWorldHint",
         "readOnlyHint",
       ]);
-      // Nothing in the registry reaches outside the product's own domain.
-      expect(c.annotations.openWorldHint).toBe(false);
-      // Nothing in the registry destroys data (journal writes are append-only).
-      expect(c.annotations.destructiveHint).toBe(false);
+      // Nothing in the registry reaches outside the product's own domain —
+      // except a bridged web action that sends an e-mail invitation, which
+      // says so (reviewed list `SENDS_EMAIL`).
+      const action = c.conversationActionId;
+      expect(c.annotations.openWorldHint).toBe(
+        Boolean(action && SENDS_EMAIL.has(action) && c.kind !== "draft"),
+      );
+      // Nothing in the registry destroys data (journal writes are append-only)
+      // — except a bridged web action that overwrites a stored value or ends a
+      // relationship for good, which says so (reviewed list `OVERWRITES`).
+      expect(c.annotations.destructiveHint).toBe(
+        Boolean(action && OVERWRITES.has(action) && c.kind !== "draft"),
+      );
     }
     const byId = Object.fromEntries(listCapabilities().map((c) => [c.id, c]));
     // Reads AND the write-nothing draft are read-only; the confirm is not.

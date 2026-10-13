@@ -44,6 +44,8 @@ import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
 import { COMPANY_INGEST_CAPABILITIES } from "./company-ingest-capabilities";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
+import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES } from "./conversation-action-bridge";
+import { WORKSPACE_READ_CAPABILITIES } from "./workspace-read-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -1780,6 +1782,16 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // learners alike. One flow (preview → answer → commit), one domain service
   // shared with the web import panel.
   ...PEOPLE_INGEST_CAPABILITIES,
+  // The web chat's executable actions that had no capability yet, through the
+  // ONE conversation dispatcher (same schema, role gate, tier, token and
+  // executor as the web chat). Runs as the bearer caller via the bearer
+  // caller scope. See conversation-action-bridge.ts.
+  ...CONVERSATION_ACTION_BRIDGE_CAPABILITIES,
+  // What the web chat already ANSWERS (calendar, conflicts, capacity, tasks,
+  // stages, readiness, agency/client bridges, person reads), over the same
+  // loaders, through the same bearer caller scope. See
+  // workspace-read-capabilities.ts.
+  ...WORKSPACE_READ_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { resolveApiIdentity } from "@/lib/api/api-identity";
+import { runAsBearerCaller } from "@/lib/api/bearer-caller-scope";
 import {
   classifyRefusal,
   refusalBody,
@@ -281,7 +282,12 @@ export async function POST(req: Request) {
       "write only staging rows that become records solely through the " +
       "confirmed evidence_import_commit; context_switch changes which " +
       "organization the session acts for; evidence_person_create adds one " +
-      "unlinked roster person.",
+      "unlinked roster person. Tools named after a web chat action " +
+      "(worker_*, company_*, agency_*, engagement_*) run that SAME web action: " +
+      "one without a _prepare/_confirm suffix is a reversible write the web " +
+      "chat also runs in one step; a _prepare tool writes nothing and returns " +
+      "a one-time token that its _confirm tool needs. Everything acts in the " +
+      "caller's active workspace (context_list, context_switch).",
     tools: toolDefs(),
     callTool: async (name, args) => {
       const capabilityId = capabilityIdForTool(name);
@@ -291,7 +297,14 @@ export async function POST(req: Request) {
         return { isError: true, payload: { ok: false, code: "unknown_capability" } };
       }
       const tCap = performance.now();
-      const result = await runCapability(capabilityId, caller, args);
+      // BEARER CALLER SCOPE: inside it the web's own domain entrypoints
+      // (`createClient()`) resolve to THIS verified caller's RLS client, so a
+      // capability that runs a canonical server action acts as the same
+      // person, never as nobody and never as anyone else. A cookie caller
+      // runs unchanged. See lib/api/bearer-caller-scope.ts.
+      const result = await runAsBearerCaller(auth.identity, () =>
+        runCapability(capabilityId, caller, args),
+      );
       marks.capability = performance.now() - tCap;
       // AUDIT RECEIPT for every write through this door (confirm/execute):
       // who, which capability, which object, which confirmation, outcome.

@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { currentBearerCaller } from "@/lib/api/bearer-caller-scope";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { baseIdentityForRole } from "@/lib/config/roles";
 import {
@@ -609,6 +610,16 @@ export const getWorkspaceContext = cache(async function getWorkspaceContext(): P
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return EMPTY_WORKSPACE;
+
+  // A BEARER caller (an external assistant acting through the bearer caller
+  // scope) resolves EXACTLY as the capability layer's `context.list` /
+  // `context.switch` do: no browser pointer and no web-session identity
+  // signal — only the durable pointer the caller chose. Otherwise a tool run
+  // through the scope could act in a different workspace than `context.list`
+  // just told the same client is active.
+  if (currentBearerCaller()) {
+    return resolveActiveWorkspaceForCaller({ supabase, userId: user.id }, null);
+  }
 
   const [session, sessionPointer] = await Promise.all([
     getSessionProfile(),
