@@ -7,6 +7,7 @@ import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { resolveEvidenceOrganization } from "./evidence-org-context";
 import { listAllEvidenceRecords } from "./evidence-pagination";
+import { untypedClient } from "./evidence-store";
 import { readHistoryLookups } from "./history-context-read";
 import { readCompetencySignalsForPerson, type PersonCompetencySignalsRead } from "./competency-signals-read";
 import type { EvidenceRecordView } from "./import-core";
@@ -144,12 +145,25 @@ export async function readCompanyPerson(input: {
   // does not resolve is not named (the group then says so).
   const workObjectIds = [...new Set(records.map((r) => r.workObjectId).filter((v): v is string => !!v))];
   const lookups = await readHistoryLookups(supabase, { workObjectIds, projectIds: [], organizationIds: [] });
+  // The project each place belongs to — the person card's link from a place
+  // to its project page. Same RLS session; an unreadable link is simply
+  // absent (the place then renders without one), never invented.
+  const projectOfObject = new Map<string, string | null>();
+  for (let i = 0; i < workObjectIds.length; i += 200) {
+    const res = await untypedClient(supabase)
+      .from("work_objects")
+      .select("id, project_id")
+      .in("id", workObjectIds.slice(i, i + 200));
+    for (const o of (res.data ?? []) as { id: string; project_id: string | null }[]) {
+      projectOfObject.set(o.id, o.project_id);
+    }
+  }
   const objects: PlaceObjectFacts[] = [...lookups.workObjects.entries()].map(([id, name]) => ({
     id,
     name,
     addressLine: null,
     city: null,
-    projectId: null,
+    projectId: projectOfObject.get(id) ?? null,
     archived: false,
   }));
 
