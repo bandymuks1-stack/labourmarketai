@@ -6229,7 +6229,13 @@
         "completed": "Zakończony"
       },
       "progressNone": "Brak mierzalnych postępów",
-      "progressStages": "{done} z {total} etapów oznaczono jako zakończone"
+      "progressStages": "{done} z {total} etapów oznaczono jako zakończone",
+      "documented": {
+        "label": "Udokumentowana praca",
+        "facts": "{days, plural, one {# zarejestrowany dzień} few {# zarejestrowane dni} many {# zarejestrowanych dni} other {# zarejestrowanego dnia}} · {hours} godz. · {people, plural, one {# osoba} few {# osoby} many {# osób} other {# osoby}} w ewidencji",
+        "periodHours": "+ {hours} godz. w zestawieniach okresowych",
+        "none": "Brak zarejestrowanej pracy przy tym projekcie."
+      }
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# wpis czeka na Twoje potwierdzenie} few {# wpisy czekają na Twoje potwierdzenie} many {# wpisów czeka na Twoje potwierdzenie} other {# wpisu czeka na Twoje potwierdzenie}}",
@@ -6257,7 +6263,11 @@
       "active": "Aktywne",
       "archived": "Zakończone",
       "empty": "Nie ma jeszcze zakończonych projektów.",
-      "partial": "Wyświetlono najnowsze {shown} z {total}."
+      "partial": "Wyświetlono najnowsze {shown} z {total}.",
+      "range": "Wyświetlono {from}–{to} z {total}.",
+      "pagesLabel": "Strony zakończonych projektów",
+      "prev": "Nowsze",
+      "next": "Starsze"
     },
     "moreToolsHint": "Obiekty i place budowy, galeria zdjęć"
   },

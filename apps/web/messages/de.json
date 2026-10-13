@@ -6229,7 +6229,13 @@
         "completed": "Abgeschlossen"
       },
       "progressNone": "Noch kein messbarer Fortschritt",
-      "progressStages": "{done} von {total} Phasen als erledigt markiert"
+      "progressStages": "{done} von {total} Phasen als erledigt markiert",
+      "documented": {
+        "label": "Dokumentierte Arbeit",
+        "facts": "{days, plural, one {# erfasster Tag} other {# erfasste Tage}} · {hours} Std. · {people, plural, one {# Person} other {# Personen}} im Nachweis",
+        "periodHours": "+ {hours} Std. in Zeitraum-Summen",
+        "none": "Für dieses Projekt ist keine Arbeit erfasst."
+      }
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# Eintrag wartet auf deine Bestätigung} other {# Einträge warten auf deine Bestätigung}}",
@@ -6257,7 +6263,11 @@
       "active": "Aktiv",
       "archived": "Abgeschlossen",
       "empty": "Noch keine abgeschlossenen Projekte.",
-      "partial": "Angezeigt werden die neuesten {shown} von {total}."
+      "partial": "Angezeigt werden die neuesten {shown} von {total}.",
+      "range": "{from}–{to} von {total} angezeigt.",
+      "pagesLabel": "Seiten abgeschlossener Projekte",
+      "prev": "Neuere",
+      "next": "Ältere"
     },
     "moreToolsHint": "Objekte und Baustellen, Fotogalerie"
   },

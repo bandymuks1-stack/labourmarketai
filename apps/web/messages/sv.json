@@ -1958,7 +1958,13 @@
         "completed": "Avslutad"
       },
       "progressNone": "Inga mätbara framsteg ännu",
-      "progressStages": "{done} av {total} faser markerade som klara"
+      "progressStages": "{done} av {total} faser markerade som klara",
+      "documented": {
+        "label": "Dokumenterat arbete",
+        "facts": "{days, plural, one {# registrerad dag} other {# registrerade dagar}} · {hours} h · {people, plural, one {# person} other {# personer}} i underlaget",
+        "periodHours": "+ {hours} h i periodsummeringar",
+        "none": "Inget registrerat arbete på det här projektet."
+      }
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1981,7 +1987,11 @@
       "active": "Aktiva",
       "archived": "Avslutade",
       "empty": "Inga avslutade projekt ännu.",
-      "partial": "Visar de senaste {shown} av {total}."
+      "partial": "Visar de senaste {shown} av {total}.",
+      "range": "Visar {from}–{to} av {total}.",
+      "pagesLabel": "Sidor med avslutade projekt",
+      "prev": "Nyare",
+      "next": "Äldre"
     },
     "moreToolsHint": "Sites and locations, photo gallery"
   },

@@ -1958,7 +1958,13 @@
         "completed": "Lõpetatud"
       },
       "progressNone": "Mõõdetavat edenemist veel pole",
-      "progressStages": "{done} etapist {total}-st märgitud tehtuks"
+      "progressStages": "{done} etapist {total}-st märgitud tehtuks",
+      "documented": {
+        "label": "Dokumenteeritud töö",
+        "facts": "{days, plural, one {# registreeritud päev} other {# registreeritud päeva}} · {hours} h · {people, plural, one {# inimene} other {# inimest}} kirjetes",
+        "periodHours": "+ {hours} h perioodi kokkuvõtetes",
+        "none": "Selle projekti kohta pole registreeritud tööd."
+      }
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1981,7 +1987,11 @@
       "active": "Aktiivsed",
       "archived": "Lõpetatud",
       "empty": "Lõpetatud projekte veel pole.",
-      "partial": "Kuvatakse uusimad {shown} kokku {total}-st."
+      "partial": "Kuvatakse uusimad {shown} kokku {total}-st.",
+      "range": "Kuvatakse {from}–{to} / {total}.",
+      "pagesLabel": "Lõpetatud projektide lehed",
+      "prev": "Uuemad",
+      "next": "Vanemad"
     },
     "moreToolsHint": "Sites and locations, photo gallery"
   },

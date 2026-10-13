@@ -1958,7 +1958,13 @@
         "completed": "Pabeigts"
       },
       "progressNone": "Izmērāma progresa vēl nav",
-      "progressStages": "{done} no {total} posmiem atzīmēti kā pabeigti"
+      "progressStages": "{done} no {total} posmiem atzīmēti kā pabeigti",
+      "documented": {
+        "label": "Dokumentēts darbs",
+        "facts": "{days, plural, zero {# reģistrētu dienu} one {# reģistrēta diena} other {# reģistrētas dienas}} · {hours} st. · {people, plural, zero {# cilvēku} one {# cilvēks} other {# cilvēki}} ierakstos",
+        "periodHours": "+ {hours} st. perioda kopsavilkumos",
+        "none": "Šajā projektā nav reģistrēta darba."
+      }
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1981,7 +1987,11 @@
       "active": "Aktīvie",
       "archived": "Pabeigtie",
       "empty": "Pabeigtu projektu vēl nav.",
-      "partial": "Rāda jaunākos {shown} no {total}."
+      "partial": "Rāda jaunākos {shown} no {total}.",
+      "range": "Rāda {from}–{to} no {total}.",
+      "pagesLabel": "Pabeigto projektu lapas",
+      "prev": "Jaunāki",
+      "next": "Vecāki"
     },
     "moreToolsHint": "Sites and locations, photo gallery"
   },

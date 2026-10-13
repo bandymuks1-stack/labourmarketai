@@ -27,6 +27,7 @@ import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-co
 import { getOrgWorkObjects } from "@/lib/objects/objects";
 import {
   countManagedProjects,
+  MANAGED_PROJECTS_BUCKET_LIMIT,
   listManagedProjects,
 } from "@/lib/projects/projects";
 import { getOrgMembersData } from "@/lib/operations/org-members";
@@ -70,11 +71,15 @@ export default async function ProjectsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ archived?: string }>;
+  searchParams: Promise<{ archived?: string; page?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const showArchived = (await searchParams).archived === "1";
+  const sp = await searchParams;
+  const showArchived = sp.archived === "1";
+  // Finished projects are paged (an organization's history can be 180+):
+  // `?archived=1&page=2` is projects 101–200. Garbage → the first page.
+  const finishedPage = showArchived ? Math.max(0, (Number.parseInt(sp.page ?? "1", 10) || 1) - 1) : 0;
   const t = await getTranslations("projects");
   const tRooms = await getTranslations("companyActionRooms");
   const tDisclosure = await getTranslations("common.disclosure");
@@ -242,7 +247,7 @@ export default async function ProjectsPage({
     companyGalleryLabels,
     projectTotals,
   ] = await Promise.all([
-    listProjectMap(),
+    listProjectMap({ finishedPage }),
     assignScope === "own-company-roster" && ownCompanyId
       ? listCompanyRosterWorkers(ownCompanyId)
       : listManagedWorkers(),
@@ -291,7 +296,10 @@ export default async function ProjectsPage({
   const activeTotal = Math.max(projectTotals?.active ?? 0, activeProjects.length);
   const archivedTotal = Math.max(projectTotals?.archived ?? 0, archivedProjects.length);
   const shownTotal = showArchived ? archivedTotal : activeTotal;
-  const partialView = projects.length < shownTotal;
+  const pageStart = showArchived ? finishedPage * MANAGED_PROJECTS_BUCKET_LIMIT : 0;
+  const partialView = pageStart > 0 || projects.length < shownTotal;
+  const hasPrevPage = showArchived && finishedPage > 0;
+  const hasNextPage = showArchived && pageStart + projects.length < shownTotal;
 
   // Train D — derived progress (tasks + stages done/total, computed at
   // read time; no stored number anywhere).
@@ -507,8 +515,32 @@ export default async function ProjectsPage({
           className="text-xs text-text-muted"
           data-testid="projects-partial-view"
         >
-          {t("archiveToggle.partial", { shown: projects.length, total: shownTotal })}
+          {showArchived && projects.length > 0
+            ? t("archiveToggle.range", { from: pageStart + 1, to: pageStart + projects.length, total: shownTotal })
+            : t("archiveToggle.partial", { shown: projects.length, total: shownTotal })}
         </p>
+      ) : null}
+      {hasPrevPage || hasNextPage ? (
+        <nav className="flex items-center gap-4" aria-label={t("archiveToggle.pagesLabel")} data-testid="projects-archived-pages">
+          {hasPrevPage ? (
+            <Link
+              href={`/dashboard/projects?archived=1&page=${finishedPage}` as "/dashboard"}
+              className="inline-flex min-h-11 items-center text-xs font-semibold text-brand-blue hover:underline"
+              data-testid="projects-archived-prev"
+            >
+              ← {t("archiveToggle.prev")}
+            </Link>
+          ) : null}
+          {hasNextPage ? (
+            <Link
+              href={`/dashboard/projects?archived=1&page=${finishedPage + 2}` as "/dashboard"}
+              className="inline-flex min-h-11 items-center text-xs font-semibold text-brand-blue hover:underline"
+              data-testid="projects-archived-next"
+            >
+              {t("archiveToggle.next")} →
+            </Link>
+          ) : null}
+        </nav>
       ) : null}
 
       {/* MAP — projects → teams → people; one click into each ARENA. */}

@@ -1958,7 +1958,13 @@
         "completed": "Fullført"
       },
       "progressNone": "Ingen målbar fremgang ennå",
-      "progressStages": "{done} av {total} faser markert som ferdige"
+      "progressStages": "{done} av {total} faser markert som ferdige",
+      "documented": {
+        "label": "Dokumentert arbeid",
+        "facts": "{days, plural, one {# registrert dag} other {# registrerte dager}} · {hours} t · {people, plural, one {# person} other {# personer}} i registreringen",
+        "periodHours": "+ {hours} t i periodesummer",
+        "none": "Ingen registrert arbeid på dette prosjektet."
+      }
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1981,7 +1987,11 @@
       "active": "Aktive",
       "archived": "Fullførte",
       "empty": "Ingen fullførte prosjekter ennå.",
-      "partial": "Viser de nyeste {shown} av {total}."
+      "partial": "Viser de nyeste {shown} av {total}.",
+      "range": "Viser {from}–{to} av {total}.",
+      "pagesLabel": "Sider med avsluttede prosjekter",
+      "prev": "Nyere",
+      "next": "Eldre"
     },
     "moreToolsHint": "Sites and locations, photo gallery"
   },

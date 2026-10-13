@@ -6229,7 +6229,13 @@
         "completed": "Afgerond"
       },
       "progressNone": "Nog geen meetbare voortgang",
-      "progressStages": "{done} van {total} fasen als klaar gemarkeerd"
+      "progressStages": "{done} van {total} fasen als klaar gemarkeerd",
+      "documented": {
+        "label": "Gedocumenteerd werk",
+        "facts": "{days, plural, one {# geregistreerde dag} other {# geregistreerde dagen}} · {hours} u · {people, plural, one {# persoon} other {# personen}} in de registratie",
+        "periodHours": "+ {hours} u in periodetotalen",
+        "none": "Geen geregistreerd werk op dit project."
+      }
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# vermelding wacht op je bevestiging} other {# vermeldingen wachten op je bevestiging}}",
@@ -6257,7 +6263,11 @@
       "active": "Actief",
       "archived": "Afgerond",
       "empty": "Nog geen afgeronde projecten.",
-      "partial": "De nieuwste {shown} van {total} worden getoond."
+      "partial": "De nieuwste {shown} van {total} worden getoond.",
+      "range": "{from}–{to} van {total} getoond.",
+      "pagesLabel": "Pagina's met afgeronde projecten",
+      "prev": "Nieuwer",
+      "next": "Ouder"
     },
     "moreToolsHint": "Locaties en bouwplaatsen, fotogalerij"
   },

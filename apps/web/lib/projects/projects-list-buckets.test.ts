@@ -9,6 +9,7 @@ let rows: Row[] = [];
 function builder() {
   let completed: boolean | null = null;
   let limit = Infinity;
+  let offset = 0;
   let head = false;
   let none = false;
   const q: Record<string, unknown> = {};
@@ -19,7 +20,7 @@ function builder() {
     r = [...r].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
     if (head) return { count: r.length, data: null, error: null };
     return {
-      data: r.slice(0, limit).map((x) => ({
+      data: r.slice(offset, offset + limit).map((x) => ({
         id: x.id,
         title: x.title,
         city: null,
@@ -49,6 +50,11 @@ function builder() {
   q.order = () => q;
   q.limit = (n: number) => {
     limit = n;
+    return q;
+  };
+  q.range = (from: number, to: number) => {
+    offset = from;
+    limit = to - from + 1;
     return q;
   };
   q.then = (res: (v: unknown) => unknown) => Promise.resolve(result()).then(res);
@@ -99,6 +105,18 @@ describe("listManagedProjects active/finished buckets", () => {
     rows.push({ id: "n1", title: "N", status: null, created_at: "2026-01-01" });
     const list = await listManagedProjects();
     expect(list.map((p) => p.id)).toEqual(["n1"]);
+  });
+
+  it("the finished bucket pages: 180 historical projects are all reachable, none twice (#history)", async () => {
+    seed(180, 10);
+    const first = (await listManagedProjects()).filter((p) => p.status === "completed");
+    const second = (await listManagedProjects({ finishedPage: 1 })).filter((p) => p.status === "completed");
+    expect(first).toHaveLength(MANAGED_PROJECTS_BUCKET_LIMIT);
+    expect(second).toHaveLength(180 - MANAGED_PROJECTS_BUCKET_LIMIT);
+    const ids = new Set([...first, ...second].map((p) => p.id));
+    expect(ids.size).toBe(180);
+    // the working bucket is never paged away
+    expect((await listManagedProjects({ finishedPage: 1 })).filter((p) => p.status !== "completed")).toHaveLength(10);
   });
 
   it("reports real, uncapped counts per bucket", async () => {
