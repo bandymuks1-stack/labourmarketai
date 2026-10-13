@@ -1632,6 +1632,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261012180000_conversation_message_team_offer_v1.sql",
       // 2026-10-12 (owner-approved RED in chat, APPLIED): staff review notice acceptance fact + record RPC (owner decision 1, step 2).
       "20261012190000_staff_review_notice_on_acceptance_v1.sql",
+      // 2026-10-13 (RED, needs-human-gate, NOT applied): single-use confirmation tokens.
+      "20261013120000_confirmation_spends_v1.sql",
 ]);
   });
 

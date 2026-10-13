@@ -33,7 +33,7 @@
 -- and rows are purged after a day — a token is dead after 5 minutes, so an
 -- older row can never refuse anything.
 --
--- ACCESS: RLS on; authenticated may INSERT its own row only (profile_id =
+-- ACCESS: RLS on; authenticated may INSERT its own row only (spent_by =
 -- auth.uid()); no SELECT / UPDATE / DELETE for any client role.
 -- ADDITIVE: one table, one index, one policy, one schedule. No existing object
 -- is touched. Idempotent.
@@ -43,7 +43,7 @@ begin;
 
 create table if not exists public.confirmation_spends (
   token_digest text primary key,
-  profile_id   uuid not null default auth.uid()
+  spent_by     uuid not null default auth.uid()
                references public.profiles(id) on delete cascade,
   action_id    text not null,
   spent_at     timestamptz not null default now(),
@@ -62,7 +62,7 @@ alter table public.confirmation_spends enable row level security;
 drop policy if exists confirmation_spends_insert_own on public.confirmation_spends;
 create policy confirmation_spends_insert_own on public.confirmation_spends
   for insert to authenticated
-  with check (profile_id = auth.uid());
+  with check (spent_by = auth.uid());
 
 revoke all on table public.confirmation_spends from public;
 revoke all on table public.confirmation_spends from anon;
