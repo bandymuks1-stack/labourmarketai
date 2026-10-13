@@ -6229,7 +6229,13 @@
         "completed": "Completed"
       },
       "progressNone": "No measurable progress yet",
-      "progressStages": "{done} of {total} stages marked done"
+      "progressStages": "{done} of {total} stages marked done",
+      "documented": {
+        "label": "Documented work",
+        "facts": "{days, plural, one {# recorded day} other {# recorded days}} · {hours} h · {people, plural, one {# person} other {# people}} in the record",
+        "periodHours": "+ {hours} h in period summaries",
+        "none": "No recorded work on this project."
+      }
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -6257,7 +6263,11 @@
       "active": "Active",
       "archived": "Finished",
       "empty": "No finished projects yet.",
-      "partial": "Showing the latest {shown} of {total}."
+      "partial": "Showing the latest {shown} of {total}.",
+      "range": "Showing {from}–{to} of {total}.",
+      "pagesLabel": "Finished project pages",
+      "prev": "Newer",
+      "next": "Older"
     },
     "moreToolsHint": "Sites and locations, photo gallery"
   },

@@ -10,6 +10,7 @@ import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 import { isDemandKind } from "@/lib/demand/market-direction";
 import { readDuplicateProjectIds } from "@/lib/projects/projects";
+import { readProjectDocumentedPeriods } from "@/lib/organization-evidence/project-documented-period";
 import { closeDemand, reopenDemand } from "@/lib/demand/demand-lifecycle";
 import { canCloseFrom, canReopenFrom } from "@/lib/demand/demand-lifecycle-model";
 import {
@@ -405,7 +406,13 @@ const rosterList: CapabilityDescriptor = {
 
 // ── projects.list ──────────────────────────────────────────────────────────
 
-const projectsListInput = z.object({}).strict();
+const PROJECTS_PAGE_SIZE = 100;
+const projectsListInput = z
+  .object({
+    /** 1-based page of PROJECTS_PAGE_SIZE, newest first. */
+    page: z.number().int().min(1).max(1000).optional(),
+  })
+  .strict();
 
 type ProjectRow = {
   id: string;
@@ -422,19 +429,27 @@ type ProjectRow = {
 async function readOrgProjects(
   caller: CapabilityCaller,
   employer: { companyId: string; organizationId: string },
-): Promise<{ ok: true; rows: ProjectRow[] } | { ok: false }> {
-  const { data, error } = await asAny(caller.supabase)
+  page = 1,
+): Promise<{ ok: true; rows: ProjectRow[]; total: number | null } | { ok: false }> {
+  const from = (page - 1) * PROJECTS_PAGE_SIZE;
+  const { data, error, count } = await asAny(caller.supabase)
     .from("projects")
-    .select("id, title, status, country, city, start_date, end_date, company_id, organization_id")
+    .select("id, title, status, country, city, start_date, end_date, company_id, organization_id", { count: "exact" })
     .or(`organization_id.eq.${employer.organizationId},company_id.eq.${employer.companyId}`)
     .order("created_at", { ascending: false })
-    .limit(100);
+    // A total order, so a page boundary never repeats or skips a project.
+    .order("id", { ascending: false })
+    .range(from, from + PROJECTS_PAGE_SIZE - 1);
   if (error) return { ok: false };
   // A DUPLICATE project (record fact, 20260930120000) leaves the working list
   // — the same one reader the web list uses.
   const rows = (data ?? []) as ProjectRow[];
   const duplicates = await readDuplicateProjectIds(caller.supabase, rows.map((r) => r.id));
-  return { ok: true, rows: rows.filter((r) => !duplicates.has(r.id)) };
+  return {
+    ok: true,
+    rows: rows.filter((r) => !duplicates.has(r.id)),
+    total: typeof count === "number" ? count : null,
+  };
 }
 
 const projectsList: CapabilityDescriptor = {
@@ -442,18 +457,25 @@ const projectsList: CapabilityDescriptor = {
   kind: "read",
   title: "This organization's projects and who is assigned",
   description:
-    "Lists the projects of the organization the caller is acting for (at most " +
-    "100, newest first) with status, place and dates, and for each project the " +
-    "people actively assigned to it (name + workerProfileId). Only projects the " +
-    "caller's own access admits are returned. Writes nothing.",
+    "Lists the projects of the organization the caller is acting for, 100 per " +
+    "page, newest first (`page`, 1-based; `total` and `nextPage` say whether " +
+    "more exist), with status, place and dates, and for each project the " +
+    "people actively assigned to it (name + workerProfileId). `documentedPeriod` " +
+    "is the work the project's OWN records document — first and last recorded " +
+    "day, recorded days, day hours, period-summary hours kept apart, people in " +
+    "the record — derived on read; it is not a contract start/end and not the " +
+    "current team. Only projects the caller's own access admits are returned. " +
+    "Writes nothing.",
   exposed: true,
   annotations: readOnly,
   inputSchema: projectsListInput,
-  run: async (caller): Promise<ExecResult> => {
+  run: async (caller, input): Promise<ExecResult> => {
+    const { page = 1 } = projectsListInput.parse(input ?? {});
     const employer = await employerOrRefusal(caller);
     if (!employer.ok) return demandContextRefusal(employer.reason);
-    const projects = await readOrgProjects(caller, employer);
+    const projects = await readOrgProjects(caller, employer, page);
     if (!projects.ok) return { ok: false, code: "unavailable", message: "The project read failed." };
+    const periods = await readProjectDocumentedPeriods(caller, projects.rows.map((p) => p.id));
 
     const ids = projects.rows.map((p) => p.id);
     const byProject = new Map<string, { workerProfileId: string | null; name: string | null; assignedAt: string }[]>();
@@ -494,8 +516,14 @@ const projectsList: CapabilityDescriptor = {
           endDate: p.end_date,
           // null = the assignment read failed (UNKNOWN), [] = nobody assigned.
           activeAssignments: assignmentsKnown ? (byProject.get(p.id) ?? []) : null,
+          // null = no recorded work; "unknown" = the record read failed.
+          documentedPeriod: periods.kind === "ok" ? (periods.periods.get(p.id) ?? null) : "unknown",
         })),
         assignmentsKnown,
+        page,
+        total: projects.total,
+        nextPage:
+          projects.total !== null && page * PROJECTS_PAGE_SIZE < projects.total ? page + 1 : null,
         structuredDestination: "/dashboard/projects",
       },
     };

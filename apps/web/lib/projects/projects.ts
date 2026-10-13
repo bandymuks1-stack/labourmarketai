@@ -132,8 +132,15 @@ export async function countManagedProjects(): Promise<{
  * come first and are read by their own query, then FINISHED ones by another:
  * 150 finished + 10 active always lists all 10 active. Each bucket is capped
  * at MANAGED_PROJECTS_BUCKET_LIMIT, newest first.
+ *
+ * `finishedPage` (0-based) pages the FINISHED bucket: an organization with
+ * 180 historical projects reaches every one of them (page 1 = 101–180),
+ * instead of a list that only says "100 of 180 shown".
  */
-export async function listManagedProjects(): Promise<ManagedProject[]> {
+export async function listManagedProjects(
+  opts: { readonly finishedPage?: number } = {},
+): Promise<ManagedProject[]> {
+  const finishedPage = Math.max(0, Math.floor(opts.finishedPage ?? 0));
   const supabase = await createClient();
   const {
     data: { user },
@@ -149,11 +156,14 @@ export async function listManagedProjects(): Promise<ManagedProject[]> {
     "id, title, city, country, status, organization_id, organizations(display_name, legal_name)";
   const run = (columns: string, completed: boolean) => {
     const q = asAny(supabase).from("projects").select(columns);
-    return (
+    const ordered = (
       completed ? q.eq("status", "completed") : q.or("status.is.null,status.neq.completed")
     )
       .order("created_at", { ascending: false })
-      .limit(MANAGED_PROJECTS_BUCKET_LIMIT);
+      // A total order, so a page boundary never repeats or skips a project.
+      .order("id", { ascending: false });
+    const from = completed ? finishedPage * MANAGED_PROJECTS_BUCKET_LIMIT : 0;
+    return ordered.range(from, from + MANAGED_PROJECTS_BUCKET_LIMIT - 1);
   };
   const bucket = async (completed: boolean) => {
     let r = await run(columnsV2, completed);

@@ -6229,7 +6229,13 @@
         "completed": "Užbaigtas"
       },
       "progressNone": "Išmatuojamos pažangos dar nėra",
-      "progressStages": "{done} iš {total} etapų pažymėta kaip atlikta"
+      "progressStages": "{done} iš {total} etapų pažymėta kaip atlikta",
+      "documented": {
+        "label": "Dokumentuotas darbas",
+        "facts": "{days, plural, one {# užfiksuota diena} few {# užfiksuotos dienos} other {# užfiksuotų dienų}} · {hours} val. · {people, plural, one {# žmogus} few {# žmonės} other {# žmonių}} įrašuose",
+        "periodHours": "+ {hours} val. laikotarpių suvestinėse",
+        "none": "Šiame projekte užfiksuoto darbo nėra."
+      }
     },
     "pulse": {
       "pendingTitle": "{n, plural, one {# įrašas laukia tavo patvirtinimo} few {# įrašai laukia tavo patvirtinimo} other {# įrašų laukia tavo patvirtinimo}}",
@@ -6257,7 +6263,11 @@
       "active": "Vykdomi",
       "archived": "Užbaigti",
       "empty": "Užbaigtų projektų dar nėra.",
-      "partial": "Rodoma naujausių {shown} iš {total}."
+      "partial": "Rodoma naujausių {shown} iš {total}.",
+      "range": "Rodoma {from}–{to} iš {total}.",
+      "pagesLabel": "Užbaigtų projektų puslapiai",
+      "prev": "Naujesni",
+      "next": "Senesni"
     },
     "moreToolsHint": "Objektai ir aikštelės, nuotraukų galerija"
   },

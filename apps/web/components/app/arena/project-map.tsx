@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { MapPin, MessageSquare, Users } from "lucide-react";
+import { CalendarRange, MapPin, MessageSquare, Users } from "lucide-react";
 
 import type { ProjectMapCard } from "@/lib/projects/map";
 import type { ProjectProgress } from "@/lib/projects/progress-model";
@@ -37,6 +37,11 @@ export async function ProjectMap({
   // workspace chip. One org → no chip (nothing ambiguous to label).
   const distinctOrgs = new Set(projects.map((p) => p.organizationId ?? "—"));
   const showOrg = distinctOrgs.size > 1;
+  // Server-rendered only (this is a server component), so the locale's own
+  // date and number formats cannot drift between server and browser.
+  const day = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" });
+  const fmtDay = (iso: string) => day.format(new Date(`${iso}T00:00:00Z`));
+  const num = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
 
   return (
     <section className="flex flex-col gap-3" data-testid="project-map">
@@ -98,6 +103,37 @@ export async function ProjectMap({
                 <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
                   <MapPin className="h-3.5 w-3.5" aria-hidden />
                   {p.city}
+                </span>
+              ) : null}
+              {/* DOCUMENTED WORK — the span, days, hours and people the
+                  project's OWN records carry (derived on read; a historical
+                  project has no contract dates). Recorded participation,
+                  never the current team below. Unreadable → nothing said. */}
+              {p.documentedPeriod && p.documentedPeriod.firstDate ? (
+                <span className="flex flex-col gap-1" data-testid={`project-documented-${p.id}`}>
+                  <span className="inline-flex items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted">
+                    <CalendarRange className="h-3.5 w-3.5" aria-hidden />
+                    {t("documented.label")}
+                  </span>
+                  <span className="text-sm text-text-primary" data-testid={`project-documented-span-${p.id}`}>
+                    {p.documentedPeriod.firstDate === p.documentedPeriod.lastDate
+                      ? fmtDay(p.documentedPeriod.firstDate)
+                      : `${fmtDay(p.documentedPeriod.firstDate)} – ${fmtDay(p.documentedPeriod.lastDate ?? p.documentedPeriod.firstDate)}`}
+                  </span>
+                  <span className="text-xs text-text-secondary">
+                    {t("documented.facts", {
+                      days: p.documentedPeriod.recordedDays,
+                      hours: num.format(p.documentedPeriod.dayHours),
+                      people: p.documentedPeriod.people,
+                    })}
+                    {p.documentedPeriod.periodRecords > 0
+                      ? ` · ${t("documented.periodHours", { hours: num.format(p.documentedPeriod.periodHours) })}`
+                      : ""}
+                  </span>
+                </span>
+              ) : p.documentedPeriod === null && p.status === "completed" ? (
+                <span className="text-xs text-text-muted" data-testid={`project-documented-none-${p.id}`}>
+                  {t("documented.none")}
                 </span>
               ) : null}
               {/* Train D: derived progress — leaf-task percent only (stages are a
