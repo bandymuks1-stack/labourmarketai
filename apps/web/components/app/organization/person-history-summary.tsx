@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
+import { Link } from "@/lib/i18n/navigation";
+import { topWorkDescriptions } from "@/lib/organization-evidence/company-work-history";
 import { SemanticIcon } from "@/components/app/semantic-icon";
 import { formatUtcDate } from "@/lib/time/display";
 import type { PersonHistorySummary } from "@/lib/organization-evidence/person-history-summary";
@@ -61,24 +63,70 @@ export async function PersonHistorySummaryBlock({
       <section className="flex flex-col gap-2" aria-label={t("places.title")} data-testid="company-person-places">
         <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("places.title")}</h2>
         <ul className="grid gap-2 sm:grid-cols-2">
-          {history.places.map((p) => (
-            <li key={p.key}>
-              <Card compact className="flex items-start justify-between gap-3" data-testid="company-person-place" data-place={p.key}>
-                <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="truncate text-sm font-medium text-text-primary">
-                    {p.name ?? t("places.none")}
+          {history.places.map((p) => {
+            // WHAT was done here: the organization's own words, most frequent
+            // first, and the skills its words named in THESE records.
+            const work = topWorkDescriptions(p.records);
+            const ids = new Set(p.records.map((r) => r.id));
+            const placeSkills =
+              signals.kind === "ok"
+                ? signals.signals.filter((s) => s.recordIds.some((id) => ids.has(id))).slice(0, 4)
+                : [];
+            return (
+              <li key={p.key}>
+                <Card compact className="flex flex-col gap-2" data-testid="company-person-place" data-place={p.key}>
+                  <span className="flex items-start justify-between gap-3">
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      {p.scope.projectId ? (
+                        <Link
+                          href={`/dashboard/projects/${p.scope.projectId}` as "/dashboard"}
+                          className="truncate text-sm font-medium text-brand-blue hover:underline"
+                          data-testid="company-person-place-project"
+                          data-project={p.scope.projectId}
+                        >
+                          {p.name ?? t("places.none")} →
+                        </Link>
+                      ) : (
+                        <span className="truncate text-sm font-medium text-text-primary">
+                          {p.name ?? t("places.none")}
+                        </span>
+                      )}
+                      <span className="text-meta text-text-muted">
+                        {p.firstDate ? span(p.firstDate, p.lastDate, locale) : t("places.undated")}
+                        {" · "}
+                        {t("places.days", { count: p.recordedDays })}
+                      </span>
+                    </span>
+                    <span className="shrink-0 font-mono text-sm text-text-primary" data-testid="company-person-place-hours">
+                      {nf(p.dayHours)} h
+                    </span>
                   </span>
-                  <span className="text-meta text-text-muted">
-                    {t("places.records", { count: p.records.length })}
-                    {p.firstDate ? ` · ${span(p.firstDate, p.lastDate, locale)}` : ""}
-                  </span>
-                </span>
-                <span className="shrink-0 font-mono text-sm text-text-primary">
-                  {nf(p.dayHours + p.periodHours)} h
-                </span>
-              </Card>
-            </li>
-          ))}
+                  {p.periodHours > 0 ? (
+                    <span className="text-meta text-text-muted">{t("periodApart", { hours: nf(p.periodHours) })}</span>
+                  ) : null}
+                  {work.length > 0 ? (
+                    <ul className="flex flex-col gap-0.5" data-testid="company-person-place-work">
+                      {work.map((w) => (
+                        <li key={w.text} className="text-meta leading-relaxed text-text-secondary">
+                          {w.text}
+                          {w.records > 1 ? <span className="font-mono text-text-muted"> ×{w.records}</span> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {placeSkills.length > 0 ? (
+                    <span className="flex flex-wrap gap-1.5" data-testid="company-person-place-skills">
+                      {placeSkills.map((s) => (
+                        <span key={s.slug} className="rounded-full border border-ink-600 px-2 py-0.5 text-meta text-text-secondary">
+                          {tSkill.has(s.slug) ? tSkill(s.slug) : s.slug}
+                        </span>
+                      ))}
+                    </span>
+                  ) : null}
+                </Card>
+              </li>
+            );
+          })}
         </ul>
       </section>
 

@@ -6519,7 +6519,12 @@
         "empty": "Dla tego projektu nie zapisano wcześniejszej pracy dostarczonej przez organizację.",
         "personUnknown": "Osoba nie podana",
         "hoursUnknown": "Godziny nie podane",
-        "count": "Wpisów: {n}"
+        "count": "Wpisów: {n}",
+        "people": {
+          "title": "{count, plural, one {# osoba w historii tego projektu} few {# osoby w historii tego projektu} many {# osób w historii tego projektu} other {# osoby w historii tego projektu}}",
+          "days": "{count, plural, one {# zarejestrowany dzień} few {# zarejestrowane dni} many {# zarejestrowanych dni} other {# zarejestrowanego dnia}}",
+          "periodHours": "+ {hours} godz. w zestawieniach okresowych"
+        }
       }
     },
     "workerView": {
@@ -19032,7 +19037,9 @@
     "places": {
       "title": "Według projektu lub miejsca",
       "none": "Projekt lub miejsce niezapisane",
-      "records": "Wpisy: {count}"
+      "records": "Wpisy: {count}",
+      "days": "{count, plural, one {# zarejestrowany dzień} few {# zarejestrowane dni} many {# zarejestrowanych dni} other {# zarejestrowanego dnia}}",
+      "undated": "Data nie została zarejestrowana"
     },
     "months": {
       "title": "Podane godziny według miesięcy",
@@ -19059,6 +19066,29 @@
         "none": "Żadna z Twoich otwartych potrzeb nie dotyczy umiejętności wskazanych w tej historii.",
         "unavailable": "Nie udało się teraz obliczyć dopasowania. Nie oznacza to, że go nie ma.",
         "row": "{matched} z {total} wymaganych umiejętności wskazano w tej historii"
+      }
+    },
+    "cvCompare": {
+      "title": "Ta sama osoba — dwa CV",
+      "scope": "Własny widok {organization} na zarejestrowaną przez nią pracę. To nie jest publiczny profil tej osoby — swoją historią zarządza ona dopiero po jej przejęciu.",
+      "absent": "nie zarejestrowano",
+      "traditional": {
+        "label": "Tradycyjne CV",
+        "role": "Stanowisko",
+        "employer": "Pracodawca",
+        "years": "Lata",
+        "skills": "Umiejętności",
+        "skillsSelf": "to, co osoba pisze sama o sobie",
+        "note": "Klasyczne CV kończy się tutaj: stanowisko, pracodawca, przedział lat."
+      },
+      "living": {
+        "label": "LabourMarket.ai — z ewidencji",
+        "projects": "projekty",
+        "days": "zarejestrowane dni",
+        "hours": "zarejestrowane godziny",
+        "span": "Udokumentowana praca: {span}",
+        "work": "Praca tak, jak opisuje ją ewidencja",
+        "note": "Z własnej ewidencji czasu pracy organizacji — zarejestrowane, nie potwierdzone niezależnie. Zestawienia okresowe są osobno."
       }
     }
   },

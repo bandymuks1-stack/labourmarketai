@@ -6519,7 +6519,12 @@
         "empty": "Voor dit project is geen door de organisatie aangeleverd eerder werk vastgelegd.",
         "personUnknown": "Persoon niet genoemd",
         "hoursUnknown": "Uren niet opgegeven",
-        "count": "{n} registraties"
+        "count": "{n} registraties",
+        "people": {
+          "title": "{count, plural, one {# persoon in de geschiedenis van dit project} other {# personen in de geschiedenis van dit project}}",
+          "days": "{count, plural, one {# geregistreerde dag} other {# geregistreerde dagen}}",
+          "periodHours": "+ {hours} u in periodetotalen"
+        }
       }
     },
     "workerView": {
@@ -19032,7 +19037,9 @@
     "places": {
       "title": "Per project of plek",
       "none": "Project of plek niet vastgelegd",
-      "records": "Registraties: {count}"
+      "records": "Registraties: {count}",
+      "days": "{count, plural, one {# geregistreerde dag} other {# geregistreerde dagen}}",
+      "undated": "Datum niet geregistreerd"
     },
     "months": {
       "title": "Opgegeven uren per maand",
@@ -19059,6 +19066,29 @@
         "none": "Geen van uw openstaande behoeften wordt geraakt door de vaardigheden die deze geschiedenis noemt.",
         "unavailable": "De match kon nu niet worden berekend. Dat betekent niet dat die er niet is.",
         "row": "{matched} van {total} vereiste vaardigheden genoemd in deze geschiedenis"
+      }
+    },
+    "cvCompare": {
+      "title": "Dezelfde persoon, twee cv's",
+      "scope": "De eigen weergave van {organization} van het werk dat zij registreerde. Niet het openbare profiel van deze persoon — die beheert de geschiedenis pas na het claimen.",
+      "absent": "niet geregistreerd",
+      "traditional": {
+        "label": "Een traditioneel cv",
+        "role": "Functie",
+        "employer": "Werkgever",
+        "years": "Jaren",
+        "skills": "Vaardigheden",
+        "skillsSelf": "wat de persoon over zichzelf schrijft",
+        "note": "Een klassiek cv stopt hier: een functie, een werkgever, een reeks jaren."
+      },
+      "living": {
+        "label": "LabourMarket.ai — uit de registraties",
+        "projects": "projecten",
+        "days": "geregistreerde dagen",
+        "hours": "geregistreerde uren",
+        "span": "Gedocumenteerd werk: {span}",
+        "work": "Werk zoals de registraties het beschrijven",
+        "note": "Uit de eigen urenstaten van de organisatie — geregistreerd, niet onafhankelijk bevestigd. Periodetotalen staan apart."
       }
     }
   },

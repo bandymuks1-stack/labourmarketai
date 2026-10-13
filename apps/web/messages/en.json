@@ -6519,7 +6519,12 @@
         "empty": "No organization-provided historical work is recorded for this project.",
         "personUnknown": "Person not named",
         "hoursUnknown": "Hours not stated",
-        "count": "{n} records"
+        "count": "{n} records",
+        "people": {
+          "title": "{count, plural, one {# person in this project's history} other {# people in this project's history}}",
+          "days": "{count, plural, one {# recorded day} other {# recorded days}}",
+          "periodHours": "+ {hours} h in period summaries"
+        }
       }
     },
     "workerView": {
@@ -19032,7 +19037,9 @@
     "places": {
       "title": "By project or place",
       "none": "Project or place not recorded",
-      "records": "Records: {count}"
+      "records": "Records: {count}",
+      "days": "{count, plural, one {# recorded day} other {# recorded days}}",
+      "undated": "Date not recorded"
     },
     "months": {
       "title": "Stated hours by month",
@@ -19059,6 +19066,29 @@
         "none": "None of your open needs is spoken to by the skills this history names.",
         "unavailable": "Fit could not be computed right now. That does not mean there is none.",
         "row": "{matched} of {total} required skills named in this history"
+      }
+    },
+    "cvCompare": {
+      "title": "The same person, two CVs",
+      "scope": "{organization}'s own view of the work it recorded. Not this person's public profile — they manage their history only after they claim it.",
+      "absent": "not recorded",
+      "traditional": {
+        "label": "A traditional CV",
+        "role": "Role",
+        "employer": "Employer",
+        "years": "Years",
+        "skills": "Skills",
+        "skillsSelf": "whatever the person writes about themselves",
+        "note": "A classic CV stops here: a title, an employer, a span of years."
+      },
+      "living": {
+        "label": "LabourMarket.ai — from the records",
+        "projects": "projects",
+        "days": "recorded days",
+        "hours": "recorded hours",
+        "span": "Documented work: {span}",
+        "work": "Work as the records describe it",
+        "note": "From the organization's own timesheets — recorded, not independently verified. Period summaries are kept apart."
       }
     }
   },

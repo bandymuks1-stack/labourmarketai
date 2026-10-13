@@ -6519,7 +6519,12 @@
         "empty": "Šiam projektui organizacijos pateikto istorinio darbo nėra užfiksuota.",
         "personUnknown": "Asmuo nenurodytas",
         "hoursUnknown": "Valandos nenurodytos",
-        "count": "{n} įr."
+        "count": "{n} įr.",
+        "people": {
+          "title": "{count, plural, one {# žmogus šio projekto istorijoje} few {# žmonės šio projekto istorijoje} other {# žmonių šio projekto istorijoje}}",
+          "days": "{count, plural, one {# užfiksuota diena} few {# užfiksuotos dienos} other {# užfiksuotų dienų}}",
+          "periodHours": "+ {hours} val. laikotarpių suvestinėse"
+        }
       }
     },
     "workerView": {
@@ -19032,7 +19037,9 @@
     "places": {
       "title": "Pagal projektą ar vietą",
       "none": "Projektas ar vieta neįrašyti",
-      "records": "Įrašai: {count}"
+      "records": "Įrašai: {count}",
+      "days": "{count, plural, one {# užfiksuota diena} few {# užfiksuotos dienos} other {# užfiksuotų dienų}}",
+      "undated": "Data neužfiksuota"
     },
     "months": {
       "title": "Nurodytos valandos pagal mėnesį",
@@ -19059,6 +19066,29 @@
         "none": "Nė vienam jūsų atvirų poreikių šioje istorijoje paminėti įgūdžiai neatsako.",
         "unavailable": "Atitikimo dabar apskaičiuoti nepavyko. Tai nereiškia, kad jo nėra.",
         "row": "{matched} iš {total} reikalaujamų įgūdžių paminėta šioje istorijoje"
+      }
+    },
+    "cvCompare": {
+      "title": "Tas pats žmogus — du CV",
+      "scope": "Tai {organization} vidinis jos užfiksuoto darbo vaizdas. Tai ne šio žmogaus viešas profilis — savo istoriją jis valdys tik ją atsiėmęs.",
+      "absent": "neužfiksuota",
+      "traditional": {
+        "label": "Įprastas CV",
+        "role": "Pareigos",
+        "employer": "Darbdavys",
+        "years": "Metai",
+        "skills": "Įgūdžiai",
+        "skillsSelf": "tai, ką žmogus parašo apie save",
+        "note": "Klasikinis CV čia ir baigiasi: pareigos, darbdavys, metų intervalas."
+      },
+      "living": {
+        "label": "LabourMarket.ai — iš įrašų",
+        "projects": "projektai",
+        "days": "užfiksuotos dienos",
+        "hours": "užfiksuotos valandos",
+        "span": "Dokumentuotas darbas: {span}",
+        "work": "Darbai, kaip juos aprašo įrašai",
+        "note": "Iš pačios organizacijos darbo apskaitos — užfiksuota, ne nepriklausomai patvirtinta. Laikotarpių suvestinės rodomos atskirai."
       }
     }
   },

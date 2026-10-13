@@ -2021,7 +2021,12 @@
         "empty": "Der er ikke registreret tidligere arbejde leveret af organisationen for dette projekt.",
         "personUnknown": "Person ikke angivet",
         "hoursUnknown": "Timer ikke angivet",
-        "count": "{n} poster"
+        "count": "{n} poster",
+        "people": {
+          "title": "{count, plural, one {# person i projektets historik} other {# personer i projektets historik}}",
+          "days": "{count, plural, one {# registreret dag} other {# registrerede dage}}",
+          "periodHours": "+ {hours} t i periodeopsummeringer"
+        }
       }
     },
     "workerView": {
@@ -7195,7 +7200,9 @@
     "places": {
       "title": "Efter projekt eller sted",
       "none": "Projekt eller sted ikke registreret",
-      "records": "Poster: {count}"
+      "records": "Poster: {count}",
+      "days": "{count, plural, one {# registreret dag} other {# registrerede dage}}",
+      "undated": "Dato ikke registreret"
     },
     "months": {
       "title": "Angivne timer pr. måned",
@@ -7222,6 +7229,29 @@
         "none": "Ingen af dine åbne behov berøres af de kompetencer, historikken nævner.",
         "unavailable": "Matchet kunne ikke beregnes lige nu. Det betyder ikke, at der ikke er et.",
         "row": "{matched} af {total} krævede kompetencer nævnt i denne historik"
+      }
+    },
+    "cvCompare": {
+      "title": "Samme person, to CV'er",
+      "scope": "{organization}s eget billede af det arbejde, den registrerede. Ikke personens offentlige profil — personen styrer sin historik først, når den er gjort krav på.",
+      "absent": "ikke registreret",
+      "traditional": {
+        "label": "Et traditionelt CV",
+        "role": "Rolle",
+        "employer": "Arbejdsgiver",
+        "years": "År",
+        "skills": "Kompetencer",
+        "skillsSelf": "det personen skriver om sig selv",
+        "note": "Et klassisk CV stopper her: en titel, en arbejdsgiver, et spænd af år."
+      },
+      "living": {
+        "label": "LabourMarket.ai — fra registreringerne",
+        "projects": "projekter",
+        "days": "registrerede dage",
+        "hours": "registrerede timer",
+        "span": "Dokumenteret arbejde: {span}",
+        "work": "Arbejdet, som registreringerne beskriver det",
+        "note": "Fra organisationens egne timesedler — registreret, ikke uafhængigt bekræftet. Periodeopsummeringer holdes adskilt."
       }
     }
   },
