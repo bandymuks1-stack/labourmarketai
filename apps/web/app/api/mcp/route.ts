@@ -286,7 +286,12 @@ export async function POST(req: Request) {
       "(worker_*, company_*, agency_*, engagement_*) run that SAME web action: " +
       "one without a _prepare/_confirm suffix is a reversible write the web " +
       "chat also runs in one step; a _prepare tool writes nothing and returns " +
-      "a one-time token that its _confirm tool needs. Everything acts in the " +
+      "a one-time token that its _confirm tool needs. The remaining single-step " +
+      "tools change only the caller's own data and are reversible: creating a " +
+      "DRAFT offering, listing, proposal or contract, editing one's own record, " +
+      "notification read/preferences, a leave request, a booking deadline; " +
+      "publishing, deciding, sending, deleting and legal data always go " +
+      "through _draft/_confirm. Everything acts in the " +
       "caller's active workspace (context_list, context_switch).",
     tools: toolDefs(),
     callTool: async (name, args) => {

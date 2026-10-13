@@ -46,6 +46,7 @@ import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
 import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES } from "./conversation-action-bridge";
 import { WORKSPACE_READ_CAPABILITIES } from "./workspace-read-capabilities";
+import { DOMAIN_ACTION_CAPABILITIES } from "./domain-action-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -1792,6 +1793,10 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // loaders, through the same bearer caller scope. See
   // workspace-read-capabilities.ts.
   ...WORKSPACE_READ_CAPABILITIES,
+  // The web's typed canonical actions no earlier capability covered:
+  // organization legal data, marketplace, commercial, bookings, notifications,
+  // leave, hours review and reports. See domain-action-capabilities.ts.
+  ...DOMAIN_ACTION_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

@@ -467,3 +467,16 @@ drawn its own avatar from the connector name. If the LM mark does not appear
 after this deploys, the icon must be set **inside ChatGPT's connector
 settings** by the owner, from `public/app-icon.svg`. That is a ChatGPT-side UI
 action; no repository change can perform it.
+
+---
+
+## 11. Universal coverage — the bearer caller scope (2026-10-13)
+
+**Counts above are historical.** The door now publishes **228** tools
+(`0.1.0+t228.e9e08aaf`): the web chat's executable actions through the ONE
+conversation dispatcher, the web chat's read loaders, and the web pages' typed
+canonical actions, each run as the verified caller through
+`lib/api/bearer-caller-scope.ts` (an auth-core change, shipped RED /
+`needs-human-gate`). The coverage map by product area, the operation classes,
+the named gaps and the owner's ChatGPT verification steps live in
+[`LLM_INTEGRATION_COVERAGE_V1.md`](LLM_INTEGRATION_COVERAGE_V1.md).

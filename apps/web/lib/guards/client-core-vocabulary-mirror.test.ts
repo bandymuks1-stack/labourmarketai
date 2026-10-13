@@ -195,13 +195,20 @@ describe("the canonical transport gate is open, and says so truthfully", () => {
     expect(route).toMatch(/resolveApiIdentity/);
   });
 
-  it("while the request-scoped web client stays cookie-only", () => {
+  it("while the request-scoped web client takes bearer identity ONLY from the verified caller scope", () => {
     // The same property `app-shared-core.test.ts` pins, restated from the
-    // mobile side: bearer identity lives in `lib/api/api-identity.ts` at the
-    // API boundary ONLY. If a bearer path appears in the request-scoped
-    // client, the auth-core assumptions have changed and must be re-read.
+    // mobile side: bearer identity is VERIFIED in `lib/api/api-identity.ts`
+    // at the API boundary only. The request-scoped client may hand that
+    // already-verified caller to domain code (bearer caller scope, 2026-10-13)
+    // but never reads or verifies a credential itself.
     const server = readSource(process.cwd(), "lib", "supabase", "server.ts");
     expect(server).toMatch(/from "next\/headers"/);
-    expect(server).not.toMatch(/authorization|bearer/i);
+    expect(server).toMatch(/from "@\/lib\/api\/bearer-caller-scope"/);
+    expect(server).not.toMatch(/authorization/i);
+    const scope = readSource(process.cwd(), "lib", "api", "bearer-caller-scope.ts");
+    // The scope is entered with an ApiIdentity (the verified result), and
+    // never parses a header.
+    expect(scope).toMatch(/runAsBearerCaller<T>\(identity: ApiIdentity/);
+    expect(scope).not.toMatch(/headers\.get|Authorization:/);
   });
 });

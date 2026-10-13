@@ -50,6 +50,22 @@ const SINGLE_STEP_ALLOWLIST: readonly string[] = [
   "evidence.import.resolve_row",
   "evidence.import.resolve_label",
   "evidence.import.resolve_time_semantics",
+  // DOMAIN ACTIONS (lib/capabilities/domain-action-capabilities.ts, 2026-10-13):
+  // reversible changes to the caller's OWN data that the web also makes in one
+  // click. Anything that publishes, decides for someone else, sends, deletes
+  // or sets legal identity is a draft->confirm pair there, not on this list.
+  "organization.description.set",
+  "service_offering.create",
+  "service_offering.update",
+  "marketplace_listing.create",
+  "marketplace_listing.update",
+  "proposal.create",
+  "contract.create",
+  "booking.deadline_set",
+  "notification.mark_read",
+  "notification.mark_all_read",
+  "notification.preference_set",
+  "absence.request",
 ];
 
 describe("every exposed single-step write is on an explicit allowlist", () => {
