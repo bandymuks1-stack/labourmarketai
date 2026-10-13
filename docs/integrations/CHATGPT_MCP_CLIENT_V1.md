@@ -473,7 +473,7 @@ action; no repository change can perform it.
 ## 11. Universal coverage — the bearer caller scope (2026-10-13)
 
 **Counts above are historical.** The door now publishes **229** tools
-(`0.1.0+t229.11f76105`): the web chat's executable actions through the ONE
+(`0.1.0+t229.d05cd4a7`): the web chat's executable actions through the ONE
 conversation dispatcher, the web chat's read loaders, and the web pages' typed
 canonical actions, each run as the verified caller through
 `lib/api/bearer-caller-scope.ts` (an auth-core change, shipped RED /

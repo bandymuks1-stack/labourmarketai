@@ -52,7 +52,7 @@ external client can never get a lighter confirmation than the web chat.
 | + web-chat action bridge | 56 (34 actions: 12 one-step, 22 prepare/confirm pairs) |
 | + workspace reads | 22 |
 | + domain actions | 70 (19 reads, 11 one-step, 20 draft/confirm pairs) |
-| **Now** | **229** (`0.1.0+t229.11f76105`) |
+| **Now** | **229** (`0.1.0+t229.d05cd4a7`) |
 
 10 executable web-chat actions were NOT bridged because a capability already
 performs them (no duplicate tools): log work, express interest, work card,
@@ -102,7 +102,7 @@ Legend: ✅ covered by real tools · 🟡 partly covered · ⛔ not exposed (rea
 ## 6. How the owner verifies it in ChatGPT
 
 1. After deploy, open `https://labourmarket.ai/api/mcp` in a browser: the JSON
-   must show `"toolsetVersion": "0.1.0+t229.11f76105"` and `"toolCount": 229`.
+   must show `"toolsetVersion": "0.1.0+t229.d05cd4a7"` and `"toolCount": 229`.
 2. ChatGPT → Settings → Connectors (Apps) → LabourMarket.ai → **Refresh**
    (the server is stateless and cannot push `tools/list_changed`).
 3. Start a NEW conversation and attach the LabourMarket.ai connector in the

@@ -115,6 +115,13 @@ export const SINGLE_USE_FINGERPRINTED: ReadonlySet<string> = new Set([
   "worker.respond-invitation",
   "engagement.end",
   "company.rename-organization",
+  // #2340: bound to a state their own write changes (replay audit 2026-10-13).
+  "company.create-programme",
+  "company.create-cohort",
+  "company.request-readiness",
+  "company.propose-booking",
+  "agency.propose-candidate",
+  "company.confirm-work",
 ]);
 
 type AnySchema = z.ZodTypeAny;
