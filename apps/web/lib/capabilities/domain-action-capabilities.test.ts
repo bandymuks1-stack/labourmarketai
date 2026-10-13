@@ -27,6 +27,8 @@ vi.mock("@/lib/services/service-offerings", () => ({
 }));
 
 let activeWorkspace: string | Error = "org-1";
+const reportsView = vi.fn(async (..._a: unknown[]): Promise<unknown> => ({ kind: "worker", projects: { total: 2 } }));
+vi.mock("@/lib/reports/reports-hub", () => ({ getReportsView: (...a: unknown[]) => reportsView(...a) }));
 vi.mock("@/lib/company/active-organization", () => ({
   getWorkspaceContext: async () => {
     if (activeWorkspace instanceof Error) throw activeWorkspace;
@@ -100,6 +102,14 @@ describe("domain actions — shape", () => {
       expect(single.has(id), id).toBe(false);
       expect(DOMAIN_ACTION_CAPABILITIES.some((c) => c.id === `${id}_confirm`), id).toBe(true);
     }
+  });
+});
+
+describe("reports.get (#2349)", () => {
+  it("the report's own variant tag is not a refusal: the worker report answers ok, whole", async () => {
+    const r = await inScope(() => runCapability("reports.get", bearer, { role: "worker" }));
+    expect(reportsView).toHaveBeenCalledWith("worker");
+    expect(r).toMatchObject({ ok: true, data: { report: { kind: "worker", projects: { total: 2 } } } });
   });
 });
 

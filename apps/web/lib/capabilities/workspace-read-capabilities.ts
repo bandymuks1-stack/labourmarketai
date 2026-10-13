@@ -107,6 +107,13 @@ export const WORKSPACE_READ_CAPABILITIES: readonly CapabilityDescriptor[] = [
     "Who in the organization the caller manages has a planning conflict, and which commitments collide: two commitments of one person on the same days, or a commitment/plan colliding with approved leave — the SAME rules and window as the company home's conflict count and the workforce planning timeline. A conflict is a warning, never a prohibition.",
     z.object({ days: z.number().int().min(7).max(120).optional() }).strict(),
     async ({ days }) => {
+      // The roster read below is the caller's OWN projects and cannot tell
+      // "manages no organization" from "a source failed" — both came back as
+      // `unknown` → `unavailable`, telling a worker the platform was down
+      // (prod MCP read sweep 2026-10-13, #2349). The organization context is
+      // established first, exactly as capacity.available.get does.
+      const { requireEmployerCompany } = await import("@/lib/company/employer-company-context");
+      if (!(await requireEmployerCompany()).ok) return fromLoader({ kind: "no-company" });
       const { readRosterConflicts } = await import("@/lib/planning/roster-conflicts");
       const r = await readRosterConflicts(days);
       if (r.status === "unknown") return fromLoader({ kind: "unavailable" });

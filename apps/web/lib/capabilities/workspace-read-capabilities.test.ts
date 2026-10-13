@@ -17,6 +17,9 @@ vi.mock("@/lib/conversation/capacity", () => ({ loadWhoIsAvailableForChat: (...a
 const readConflicts = vi.fn(async (..._a: unknown[]): Promise<unknown> => ({ status: "unknown" }));
 vi.mock("@/lib/planning/roster-conflicts", () => ({ readRosterConflicts: (...a: unknown[]) => readConflicts(...a) }));
 
+const employerCompany = vi.fn(async (): Promise<unknown> => ({ ok: true, companyId: "c-1", role: "owner" }));
+vi.mock("@/lib/company/employer-company-context", () => ({ requireEmployerCompany: () => employerCompany() }));
+
 import { runAsBearerCaller } from "@/lib/api/bearer-caller-scope";
 
 import type { CapabilityCaller } from "./contract";
@@ -52,6 +55,13 @@ describe("workspace reads", () => {
     expect(loadCapacity).toHaveBeenCalledWith(undefined, "2026-10-20");
     expect(r).toMatchObject({ ok: false, code: "no_organization_context" });
     expect((r as { message: string }).message).toMatch(/context_switch/);
+  });
+
+  it("conflicts for someone who manages no organization say so — not 'unavailable' (#2349)", async () => {
+    employerCompany.mockResolvedValueOnce({ ok: false, reason: "no-company" });
+    const r = await inScope(() => runCapability("calendar.conflicts.get", bearer, {}));
+    expect(r).toMatchObject({ ok: false, code: "no_organization_context" });
+    expect(readConflicts).not.toHaveBeenCalled();
   });
 
   it("an unreadable conflict source is 'unavailable', never 'no conflicts' (SEP-7)", async () => {

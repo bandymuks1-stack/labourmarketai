@@ -681,7 +681,11 @@ export const DOMAIN_ACTION_CAPABILITIES: readonly CapabilityDescriptor[] = [
     "Reports",
     "The reports hub for a role the caller holds (worker, company, agency, customer): project counts, work-window report, evidence report and finance summary as the web reports page shows them.",
     z.object({ role: z.enum(LIVE_ROLE_IDS) }).strict(),
-    async ({ role }) => (await import("@/lib/reports/reports-hub")).getReportsView(role),
+    // The view's own `kind` ("worker" | "org") is a variant tag, not a result
+    // state; returned bare, the read wrapper took it for a refusal and every
+    // report answered ok:false code "worker" (prod MCP read sweep 2026-10-13,
+    // #2349). The report travels whole under `report`.
+    async ({ role }) => ({ kind: "ok", report: await (await import("@/lib/reports/reports-hub")).getReportsView(role) }),
   ),
   read("timesheets.overview.get", "Timesheets", "The caller's timesheets and their approval state.", none, async () => (await import("@/lib/timesheets/timesheets")).getTimesheetsOverview()),
   read("finance.records.list", "Finance records", "The caller's finance records (costs, invoices, expenses) and the summary.", none, async () => {
