@@ -2021,7 +2021,12 @@
         "empty": "Inget tidigare arbete tillhandahållet av organisationen är registrerat för detta projekt.",
         "personUnknown": "Person ej angiven",
         "hoursUnknown": "Timmar ej angivna",
-        "count": "{n} poster"
+        "count": "{n} poster",
+        "people": {
+          "title": "{count, plural, one {# person i projektets historik} other {# personer i projektets historik}}",
+          "days": "{count, plural, one {# registrerad dag} other {# registrerade dagar}}",
+          "periodHours": "+ {hours} h i periodsummeringar"
+        }
       }
     },
     "workerView": {
@@ -7195,7 +7200,9 @@
     "places": {
       "title": "Per projekt eller plats",
       "none": "Projekt eller plats inte registrerad",
-      "records": "Poster: {count}"
+      "records": "Poster: {count}",
+      "days": "{count, plural, one {# registrerad dag} other {# registrerade dagar}}",
+      "undated": "Datum inte registrerat"
     },
     "months": {
       "title": "Angivna timmar per månad",
@@ -7222,6 +7229,29 @@
         "none": "[EN] None of your open needs is spoken to by the skills this history names.",
         "unavailable": "[EN] Fit could not be computed right now. That does not mean there is none.",
         "row": "[EN] {matched} of {total} required skills named in this history"
+      }
+    },
+    "cvCompare": {
+      "title": "Samma person, två cv",
+      "scope": "{organization}s egen bild av arbetet den registrerade. Inte personens offentliga profil — personen hanterar sin historik först när den gjort anspråk på den.",
+      "absent": "inte registrerat",
+      "traditional": {
+        "label": "Ett traditionellt cv",
+        "role": "Roll",
+        "employer": "Arbetsgivare",
+        "years": "År",
+        "skills": "Färdigheter",
+        "skillsSelf": "det personen skriver om sig själv",
+        "note": "Ett klassiskt cv slutar här: en titel, en arbetsgivare, ett spann av år."
+      },
+      "living": {
+        "label": "LabourMarket.ai — ur underlaget",
+        "projects": "projekt",
+        "days": "registrerade dagar",
+        "hours": "registrerade timmar",
+        "span": "Dokumenterat arbete: {span}",
+        "work": "Arbetet som underlaget beskriver det",
+        "note": "Ur organisationens egna tidrapporter — registrerat, inte oberoende bekräftat. Periodsummeringar hålls isär."
       }
     }
   },

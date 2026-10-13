@@ -7,6 +7,7 @@ import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { Card } from "@/components/ui/Card";
 import { SemanticIcon } from "@/components/app/semantic-icon";
 import { PersonImportedHistory } from "@/components/app/people/person-imported-history";
+import { CvComparison } from "@/components/app/organization/cv-comparison";
 import { PersonHistorySummaryBlock } from "@/components/app/organization/person-history-summary";
 import { EvidenceMediaStrip } from "@/components/app/evidence-media-strip";
 import { LinkedDocuments } from "@/components/app/linked-documents";
@@ -133,6 +134,17 @@ export default async function CompanyPersonHistoryPage({
       ) : null}
 
       <PersonHistorySummaryBlock summary={load.summary} signals={load.signals} locale={locale} />
+
+      {/* THE SAME PERSON, TWO CVs — the organization's own view of the
+          history it recorded (not the person's public profile). */}
+      <CvComparison
+        personName={person.name || "—"}
+        relationship={relationship}
+        organizationName={organizationName}
+        summary={load.summary}
+        signals={load.signals}
+        locale={locale}
+      />
 
       {/* THE LIVING PROFILE - Work Intelligence, the Living CV's organization
           history and the fit to this organization's own needs, built from the

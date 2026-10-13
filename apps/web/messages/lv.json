@@ -2021,7 +2021,12 @@
         "empty": "Šim projektam nav reģistrēts organizācijas sniegts iepriekšējais darbs.",
         "personUnknown": "Persona nav norādīta",
         "hoursUnknown": "Stundas nav norādītas",
-        "count": "{n} ieraksti"
+        "count": "{n} ieraksti",
+        "people": {
+          "title": "{count, plural, zero {# cilvēku projekta vēsturē} one {# cilvēks projekta vēsturē} other {# cilvēki projekta vēsturē}}",
+          "days": "{count, plural, zero {# reģistrētu dienu} one {# reģistrēta diena} other {# reģistrētas dienas}}",
+          "periodHours": "+ {hours} st. perioda kopsavilkumos"
+        }
       }
     },
     "workerView": {
@@ -7195,7 +7200,9 @@
     "places": {
       "title": "Pēc projekta vai vietas",
       "none": "Projekts vai vieta nav reģistrēta",
-      "records": "Ieraksti: {count}"
+      "records": "Ieraksti: {count}",
+      "days": "{count, plural, zero {# reģistrētu dienu} one {# reģistrēta diena} other {# reģistrētas dienas}}",
+      "undated": "Datums nav reģistrēts"
     },
     "months": {
       "title": "Norādītās stundas pa mēnešiem",
@@ -7222,6 +7229,29 @@
         "none": "[EN] None of your open needs is spoken to by the skills this history names.",
         "unavailable": "[EN] Fit could not be computed right now. That does not mean there is none.",
         "row": "[EN] {matched} of {total} required skills named in this history"
+      }
+    },
+    "cvCompare": {
+      "title": "Viens cilvēks — divi CV",
+      "scope": "{organization} pašas skatījums uz tās reģistrēto darbu. Tas nav šī cilvēka publiskais profils — savu vēsturi viņš pārvalda tikai pēc tās pieprasīšanas.",
+      "absent": "nav reģistrēts",
+      "traditional": {
+        "label": "Tradicionāls CV",
+        "role": "Amats",
+        "employer": "Darba devējs",
+        "years": "Gadi",
+        "skills": "Prasmes",
+        "skillsSelf": "tas, ko cilvēks raksta par sevi",
+        "note": "Klasisks CV ar to beidzas: amats, darba devējs, gadu posms."
+      },
+      "living": {
+        "label": "LabourMarket.ai — no ierakstiem",
+        "projects": "projekti",
+        "days": "reģistrētas dienas",
+        "hours": "reģistrētas stundas",
+        "span": "Dokumentēts darbs: {span}",
+        "work": "Darbi, kā tos apraksta ieraksti",
+        "note": "No pašas organizācijas darba laika uzskaites — reģistrēts, nav neatkarīgi apstiprināts. Perioda kopsavilkumi ir atsevišķi."
       }
     }
   },

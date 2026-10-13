@@ -2021,7 +2021,12 @@
         "empty": "Selle projekti kohta pole organisatsiooni esitatud varasemat tööd registreeritud.",
         "personUnknown": "Isik nimetamata",
         "hoursUnknown": "Tunnid märkimata",
-        "count": "{n} kirjet"
+        "count": "{n} kirjet",
+        "people": {
+          "title": "{count, plural, one {# inimene selle projekti ajaloos} other {# inimest selle projekti ajaloos}}",
+          "days": "{count, plural, one {# registreeritud päev} other {# registreeritud päeva}}",
+          "periodHours": "+ {hours} h perioodi kokkuvõtetes"
+        }
       }
     },
     "workerView": {
@@ -7195,7 +7200,9 @@
     "places": {
       "title": "Projekti või koha järgi",
       "none": "Projekti või kohta pole registreeritud",
-      "records": "Kirjed: {count}"
+      "records": "Kirjed: {count}",
+      "days": "{count, plural, one {# registreeritud päev} other {# registreeritud päeva}}",
+      "undated": "Kuupäev registreerimata"
     },
     "months": {
       "title": "Märgitud tunnid kuude kaupa",
@@ -7222,6 +7229,29 @@
         "none": "[EN] None of your open needs is spoken to by the skills this history names.",
         "unavailable": "[EN] Fit could not be computed right now. That does not mean there is none.",
         "row": "[EN] {matched} of {total} required skills named in this history"
+      }
+    },
+    "cvCompare": {
+      "title": "Sama inimene, kaks CV-d",
+      "scope": "{organization} enda vaade registreeritud tööle. See ei ole selle inimese avalik profiil — oma ajalugu haldab ta alles pärast selle enda nimele võtmist.",
+      "absent": "registreerimata",
+      "traditional": {
+        "label": "Tavaline CV",
+        "role": "Ametikoht",
+        "employer": "Tööandja",
+        "years": "Aastad",
+        "skills": "Oskused",
+        "skillsSelf": "see, mida inimene enda kohta kirjutab",
+        "note": "Klassikaline CV lõpeb siin: ametikoht, tööandja, aastate vahemik."
+      },
+      "living": {
+        "label": "LabourMarket.ai — kirjete põhjal",
+        "projects": "projektid",
+        "days": "registreeritud päevad",
+        "hours": "registreeritud tunnid",
+        "span": "Dokumenteeritud töö: {span}",
+        "work": "Töö nii, nagu kirjed seda kirjeldavad",
+        "note": "Organisatsiooni enda tööajaarvestusest — registreeritud, mitte sõltumatult kinnitatud. Perioodi kokkuvõtted on eraldi."
       }
     }
   },

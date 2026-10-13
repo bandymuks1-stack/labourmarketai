@@ -6519,7 +6519,12 @@
         "empty": "Für dieses Projekt ist keine von der Organisation bereitgestellte frühere Arbeit erfasst.",
         "personUnknown": "Person nicht genannt",
         "hoursUnknown": "Stunden nicht angegeben",
-        "count": "{n} Einträge"
+        "count": "{n} Einträge",
+        "people": {
+          "title": "{count, plural, one {# Person in der Geschichte dieses Projekts} other {# Personen in der Geschichte dieses Projekts}}",
+          "days": "{count, plural, one {# erfasster Tag} other {# erfasste Tage}}",
+          "periodHours": "+ {hours} Std. in Zeitraum-Summen"
+        }
       }
     },
     "workerView": {
@@ -19032,7 +19037,9 @@
     "places": {
       "title": "Nach Projekt oder Ort",
       "none": "Projekt oder Ort nicht erfasst",
-      "records": "Einträge: {count}"
+      "records": "Einträge: {count}",
+      "days": "{count, plural, one {# erfasster Tag} other {# erfasste Tage}}",
+      "undated": "Datum nicht erfasst"
     },
     "months": {
       "title": "Angegebene Stunden pro Monat",
@@ -19059,6 +19066,29 @@
         "none": "Keinem Ihrer offenen Bedarfe entsprechen die in dieser Historie genannten Fähigkeiten.",
         "unavailable": "Die Passung konnte gerade nicht berechnet werden. Das heißt nicht, dass es keine gibt.",
         "row": "{matched} von {total} geforderten Fähigkeiten in dieser Historie genannt"
+      }
+    },
+    "cvCompare": {
+      "title": "Dieselbe Person, zwei Lebensläufe",
+      "scope": "Die eigene Sicht von {organization} auf die erfasste Arbeit. Nicht das öffentliche Profil dieser Person — sie verwaltet ihre Geschichte erst, nachdem sie sie übernommen hat.",
+      "absent": "nicht erfasst",
+      "traditional": {
+        "label": "Ein klassischer Lebenslauf",
+        "role": "Rolle",
+        "employer": "Arbeitgeber",
+        "years": "Jahre",
+        "skills": "Fähigkeiten",
+        "skillsSelf": "was die Person über sich selbst schreibt",
+        "note": "Ein klassischer Lebenslauf endet hier: Titel, Arbeitgeber, Jahresspanne."
+      },
+      "living": {
+        "label": "LabourMarket.ai — aus den Nachweisen",
+        "projects": "Projekte",
+        "days": "erfasste Tage",
+        "hours": "erfasste Stunden",
+        "span": "Dokumentierte Arbeit: {span}",
+        "work": "Arbeit, wie die Nachweise sie beschreiben",
+        "note": "Aus den eigenen Stundenzetteln der Organisation — erfasst, nicht unabhängig bestätigt. Zeitraum-Summen bleiben getrennt."
       }
     }
   },
