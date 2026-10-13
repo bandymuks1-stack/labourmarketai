@@ -241,7 +241,7 @@ function confirmed<S extends z.ZodObject>(spec: {
           const input = spec.inputSchema.parse(rest);
           const fp = await fingerprint(input, caller);
           if (fp === null) return STATE_UNREADABLE;
-          const verdict = verifyCapabilityConfirmation({
+          const verdict = await verifyCapabilityConfirmation({
             actionId: confirmId,
             token: confirmationToken,
             input,

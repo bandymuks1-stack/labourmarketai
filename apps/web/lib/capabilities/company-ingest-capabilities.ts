@@ -278,7 +278,7 @@ const companyIngestConfirm: CapabilityDescriptor = {
     const built = await buildPlan(caller, parsed);
     if (!built.ok) return built.result;
     const hash = planHash(built.plan);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "company.ingest.confirm",
       token: confirmationToken,
       input: { planHash: hash },

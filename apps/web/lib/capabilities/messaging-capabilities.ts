@@ -322,7 +322,7 @@ const messageSendConfirm: CapabilityDescriptor = {
     const parsed = sendFields.parse(rest);
     const plan = await planSend(caller, parsed);
     if (!plan.ok) return plan.result;
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "message.send_confirm",
       token: confirmationToken,
       input: tokenInput(parsed),

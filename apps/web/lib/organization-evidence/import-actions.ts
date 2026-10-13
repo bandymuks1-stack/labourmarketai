@@ -456,7 +456,7 @@ export async function commitEvidenceImportAction(
 
   let verdict: { ok: true } | { ok: false; reason: string };
   try {
-    verdict = verifyCommitToken({
+    verdict = await verifyCommitToken({
       token,
       sessionId,
       userId: c.userId,

@@ -79,13 +79,13 @@ export function mintPeopleCommitToken(opts: {
   });
 }
 
-export function verifyPeopleCommitToken(opts: {
+export async function verifyPeopleCommitToken(opts: {
   readonly token: string;
   readonly organizationId: string;
   readonly relationship: string;
   readonly userId: string;
   readonly plan: IngestPlan;
-}): { readonly ok: true } | { readonly ok: false; readonly reason: string } {
+}): Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }> {
   return verifyCapabilityConfirmation({
     actionId: PEOPLE_COMMIT_ACTION_ID,
     token: opts.token,

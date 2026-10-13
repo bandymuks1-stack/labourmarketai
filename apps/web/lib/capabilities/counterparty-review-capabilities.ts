@@ -258,7 +258,7 @@ const decideConfirm: CapabilityDescriptor = {
     const found = await queueRowFor(caller.supabase, checked.entryId);
     if (found.kind === "unavailable") return { ok: false, code: "unavailable", message: "The review queue read failed." };
     if (found.kind === "absent") return refusal("review_authority_not_established");
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "counterparty_review.decide_confirm",
       token: confirmationToken,
       input: normalizedDecide(checked),
@@ -355,7 +355,7 @@ const submitConfirm: CapabilityDescriptor = {
     if (!linkId) return { ok: false, code: "invalid", message: "linkId (from the draft) is required." };
     const s = await submitState(caller, entryId);
     if (s.kind !== "state") return { ok: false, code: "unavailable", message: "The entry state read failed." };
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "counterparty_review.submit_confirm",
       token: confirmationToken,
       input: { entryId, linkId },

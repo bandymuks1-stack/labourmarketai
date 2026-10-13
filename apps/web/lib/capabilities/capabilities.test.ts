@@ -1,4 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
+
+// The one-time spend (lib/security/confirmation-spend) is proven on its own;
+// here every genuine token is spendable once.
+vi.mock("@/lib/security/confirmation-spend", () => ({
+  spendConfirmation: async () => "spent",
+  spendConfirmationForRequest: async () => "spent",
+}));
 import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 
 vi.mock("@/lib/env", () => ({

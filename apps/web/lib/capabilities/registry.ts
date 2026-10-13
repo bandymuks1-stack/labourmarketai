@@ -738,7 +738,7 @@ const journalConfirm: CapabilityDescriptor = {
     const { confirmationToken, ...draft } = parsed;
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "journal.confirm",
       token: confirmationToken,
       // Same null-vs-absent normalization the draft hashed — see
@@ -973,7 +973,7 @@ const interestExpressConfirm: CapabilityDescriptor = {
     const parsed = interestConfirmInput.parse(input);
     const { confirmationToken, ...draft } = parsed;
     const fingerprint = await interestStateFingerprint(caller, draft.requestId);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "interest.express_confirm",
       token: confirmationToken,
       input: normalizedInterestForHash(draft),
@@ -1397,7 +1397,7 @@ const workCardSaveConfirm: CapabilityDescriptor = {
     const parsed = workCardConfirmInput.parse(input);
     const { confirmationToken, ...draft } = parsed;
     const fingerprint = await workCardStateFingerprint(caller);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "work_card.save_confirm",
       token: confirmationToken,
       input: normalizedWorkCardForHash(draft),
@@ -1563,7 +1563,7 @@ const demandCreateConfirm: CapabilityDescriptor = {
     const parsed = demandConfirmInput.parse(input);
     const { confirmationToken, ...draft } = parsed;
     const fingerprint = await demandStateFingerprint(caller);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "demand.create_confirm",
       token: confirmationToken,
       input: normalizedDemandForHash(draft),
