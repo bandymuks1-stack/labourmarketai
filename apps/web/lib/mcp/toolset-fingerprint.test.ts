@@ -36,3 +36,12 @@ describe("the published MCP toolset is documented", () => {
     expect(rows[0], `add a row for ${version} at the TOP of the register`).toBe(version);
   });
 });
+
+describe("every published tool takes an object (strict function-calling clients)", () => {
+  it("each inputSchema root declares type: object", () => {
+    const notObject = toolDefsOf(exposedCapabilities())
+      .filter((d) => d.inputSchema.type !== "object")
+      .map((d) => d.name);
+    expect(notObject).toEqual([]);
+  });
+});
