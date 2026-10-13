@@ -132,7 +132,7 @@ describe("monitor signals", () => {
         integrity_accepted_without_acceptor: 0,
         integrity_offer_on_missing_need: 0,
         integrity_confirmation_on_deleted_entry: 0,
-        integrity_join_team_into_non_team: 0,
+        integrity_staff_accept_without_relationship: 0,
         stale_offers_real_7d: 0,
         ...integrity,
       },

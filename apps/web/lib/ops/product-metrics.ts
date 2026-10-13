@@ -52,13 +52,13 @@ export type IntegrityKey =
   | "integrity_accepted_without_acceptor"
   | "integrity_offer_on_missing_need"
   | "integrity_confirmation_on_deleted_entry"
-  | "integrity_join_team_into_non_team"
+  | "integrity_staff_accept_without_relationship"
   | "stale_offers_real_7d";
 const INTEGRITY_KEYS: readonly IntegrityKey[] = [
   "integrity_accepted_without_acceptor",
   "integrity_offer_on_missing_need",
   "integrity_confirmation_on_deleted_entry",
-  "integrity_join_team_into_non_team",
+  "integrity_staff_accept_without_relationship",
   "stale_offers_real_7d",
 ];
 
