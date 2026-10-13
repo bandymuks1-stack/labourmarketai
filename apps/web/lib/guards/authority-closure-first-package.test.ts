@@ -64,6 +64,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261012170000_",
       "20261012180000_",
       "20261012190000_",
+      // 2026-10-13 single-use confirmation tokens (RED by GRANT, needs-human-gate).
+      "20261013120000_",
       // 2026-10-08 owner-approved work-plan scope extension (roster + engagement).
       "20261007140000_",
       // 2026-10-08 E6 (brigade offer against a demand): owner-approved RED, separate hand-off RPC.

@@ -688,6 +688,9 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no
+  // content, purged after a day (20261013120000).
+  "confirmation_spends",
   // Discovered-organization provenance: the person is only the recorder of a
   // fact or identifier about a COMPANY, never its subject.
   "organization_facts",
