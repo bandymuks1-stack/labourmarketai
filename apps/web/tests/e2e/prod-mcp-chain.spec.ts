@@ -66,16 +66,35 @@ async function tool(token: string, name: string, args: Record<string, unknown> =
   if (!out) throw new Error(`${name}: no structured result (HTTP ${r.status}) ${r.text.slice(0, 300)}`);
   return out;
 }
-const own = async (token: string) => {
+/** Every offering the caller owns. `listOwnServiceOfferings` answers
+ *  `{ kind: "ok", rows }`, which the read wrapper passes through as `data.rows`. */
+const ownAll = async (token: string) => {
   const r = await tool(token, "service_offering_list_own");
   expect(r.ok, JSON.stringify(r)).toBe(true);
-  const rows = (Array.isArray(r.data) ? r.data : ((r.data?.offerings ?? r.data?.items ?? []) as unknown[])) as { id: string; title: string }[];
-  return rows.filter((o) => o.title?.startsWith(TAG));
+  const d = r.data ?? {};
+  return (Array.isArray(r.data) ? r.data : ((d.rows ?? d.offerings ?? d.items ?? []) as unknown[])) as { id: string; title: string }[];
 };
+const own = async (token: string) => (await ownAll(token)).filter((o) => o.title?.startsWith(TAG));
 
 let worker = "";
 let agency = "";
 let offeringId = "";
+
+/** Rows this walk creates — this run's, or an earlier run's that stopped
+ *  before its own delete — removed through the same two steps a person uses. */
+const WALK_ROW = /^QA-SYNTHETIC \S+ mcp /;
+test.afterAll(async () => {
+  if (!worker) return;
+  for (const row of (await ownAll(worker)).filter((o) => WALK_ROW.test(o.title ?? ""))) {
+    const draft = await tool(worker, "service_offering_delete_draft", { offeringId: row.id });
+    if (!draft.ok) continue;
+    await tool(worker, "service_offering_delete_confirm", {
+      offeringId: row.id,
+      confirmationToken: String(draft.data?.confirmationToken ?? ""),
+    });
+  }
+  expect((await ownAll(worker)).filter((o) => WALK_ROW.test(o.title ?? "")), "walk rows left behind").toHaveLength(0);
+});
 
 test("M-1. the published toolset is the universal one, and an anonymous caller is refused", async () => {
   worker = bearerOf("worker");
