@@ -177,3 +177,63 @@ describe("external worker referral contract v1", () => {
     expect(declaredContextItems({ professions: "not-a-list" })).toEqual([]);
   });
 });
+
+
+describe("residence, city, readiness and right-to-work stay separate facts (2026-10-13, lead_db65f2db)", () => {
+  const withWorker = (over: Record<string, unknown>) =>
+    envelope({ worker: { ...(envelope().worker as Record<string, unknown>), ...over } });
+
+  it('"City, Country" in the residence field becomes the country AND the city — the country is no longer lost', () => {
+    for (const raw of ["Istanbul, Turkey", "Turkey / Istanbul", "Istanbul (Türkiye)", "Istanbul - TR"]) {
+      const r = parseExternalWorkerReferral(withWorker({ residenceCountry: raw }));
+      expect(r.ok, raw).toBe(true);
+      if (!r.ok) continue;
+      expect(r.envelope.worker.residenceCountry, raw).toBe("TR");
+      expect(r.envelope.worker.city, raw).toBe("Istanbul");
+    }
+  });
+
+  it("an explicit city wins; a value with no country (or two) gives no country and no invented city", () => {
+    const explicit = parseExternalWorkerReferral(withWorker({ residenceCountry: "Istanbul, Turkey", city: "Esenyurt" }));
+    expect(explicit.ok && explicit.envelope.worker.city).toBe("Esenyurt");
+    for (const raw of ["Esenyurt district", "Turkey, Germany"]) {
+      const r = parseExternalWorkerReferral(withWorker({ residenceCountry: raw }));
+      expect(r.ok, raw).toBe(true);
+      if (!r.ok) continue;
+      expect(r.envelope.worker.residenceCountry, raw).toBeUndefined();
+      expect(r.envelope.worker.city, raw).toBeUndefined();
+    }
+  });
+
+  it("the bounds stay: an over-long residence is still refused, by path, never by value", () => {
+    const r = parseExternalWorkerReferral(withWorker({ residenceCountry: "x".repeat(81) }));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.issues).toEqual(["worker.residenceCountry: too_big"]);
+  });
+
+  it("readiness (availability) and the declared work situation travel as two fields; accommodation as a condition", () => {
+    const r = parseExternalWorkerReferral(
+      withWorker({ availability: "AVAILABLE_NOW", workStatus: "OTHER", accommodationNeed: "NEEDED", residenceCountry: "Istanbul, Turkey" }),
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const ctx = toDeclaredContext(r.envelope);
+    expect(ctx.availability).toBe("AVAILABLE_NOW");
+    expect(ctx.workStatus).toBe("OTHER");
+    expect(ctx.accommodationNeed).toBe("NEEDED");
+    expect(ctx.residenceCountry).toBe("TR");
+    expect(ctx.city).toBe("Istanbul");
+    // Unknown values are refused — the vocabulary is closed, and nothing can say "verified".
+    expect(parseExternalWorkerReferral(withWorker({ workStatus: "VERIFIED_RIGHT_TO_WORK" })).ok).toBe(false);
+    expect(parseExternalWorkerReferral(withWorker({ accommodationNeed: "maybe" })).ok).toBe(false);
+  });
+
+  it("an envelope without the new fields means exactly what it meant before", () => {
+    const r = parseExternalWorkerReferral(envelope());
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const ctx = toDeclaredContext(r.envelope);
+    expect(ctx.residenceCountry).toBe("LT");
+    expect("city" in ctx || "workStatus" in ctx || "accommodationNeed" in ctx).toBe(false);
+  });
+});
