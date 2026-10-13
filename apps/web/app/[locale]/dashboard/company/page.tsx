@@ -165,8 +165,9 @@ export default async function CompanyDashboardPage({
     // Entries submitted to THIS caller as a client (decision 0018) - a
     // different job from employer review, shown as its own labelled item.
     countCounterpartyToDecide(),
-    // People with overlapping commitments — the SAME reads and overlap rule
-    // the workforce planning page flags, so the number matches the linked list.
+    // People with a planning conflict (two commitments, or a commitment/plan
+    // against approved leave) — the SAME reads and rules the planning page's
+    // timeline flags, so the number matches what the link opens.
     companyRow ? countRosterConflicts() : Promise.resolve<number | null>(0),
   ] as const);
 
@@ -200,7 +201,7 @@ export default async function CompanyDashboardPage({
     {
       key: "conflicts",
       count: rosterConflicts,
-      href: `/${locale}/dashboard/company/planning#roster-commitments`,
+      href: `/${locale}/dashboard/company/planning#roster-timeline`,
     },
     {
       key: "invitations",

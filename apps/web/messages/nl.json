@@ -2408,7 +2408,7 @@
         "invitations": "Openstaande uitnodigingen voor werknemers",
         "claims": "Openbare aanvragen die je kunt overnemen",
         "reviewOff": "Werknemers met vastgelegd werk waarvan bevestiging uitstaat",
-        "conflicts": "Mensen met overlappende inzet (planningsconflict)",
+        "conflicts": "Mensen met een planningsconflict (overlappend werk of verlof)",
         "unreadable": "kon niet worden gelezen",
         "clientReview": "Werk dat wacht op uw beslissing als opdrachtgever"
       }
