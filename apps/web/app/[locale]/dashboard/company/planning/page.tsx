@@ -575,7 +575,8 @@ export default async function CompanyWorkforcePlanningPage({
   const timelineSection =
     timeline && timeline.people.length > 0 ? (
       <section
-        className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        id="roster-timeline"
+        className="flex scroll-mt-20 flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
         data-testid="roster-timeline"
       >
         <div className="flex flex-wrap items-center gap-2">

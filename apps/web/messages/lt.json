@@ -2408,7 +2408,7 @@
         "invitations": "Laukiantys kvietimai darbuotojams",
         "claims": "Viešos užklausos, kurias galite perimti",
         "reviewOff": "Dirbantys darbuotojai, kurių darbo patvirtinimas neįjungtas",
-        "conflicts": "Darbuotojai su persidengiančiais įsipareigojimais (planavimo konfliktas)",
+        "conflicts": "Darbuotojai su planavimo konfliktu (susikerta darbai ar atostogos)",
         "unreadable": "nepavyko perskaityti",
         "clientReview": "Darbas, laukiantis jūsų sprendimo kaip užsakovo"
       }
