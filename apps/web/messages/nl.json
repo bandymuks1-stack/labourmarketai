@@ -4884,7 +4884,8 @@
         "event_journal_review_decided_changes_requested": "Er zijn wijzigingen gevraagd voor je journaalitem",
         "event_invitation_accepted": "Iemand heeft je uitnodiging aangenomen",
         "event_weekly_digest_profile_completion": "Om je passende banen te tonen, bevestig welk werk je doet",
-        "event_weekly_digest_journal": "Het weekoverzicht van je werkjournaal is klaar"
+        "event_weekly_digest_journal": "Het weekoverzicht van je werkjournaal is klaar",
+        "event_history_link_offered": "Een organisatie biedt aan je geregistreerde werkgeschiedenis aan je account te koppelen"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat je aandacht nodig heeft.",

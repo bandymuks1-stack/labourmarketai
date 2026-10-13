@@ -4884,7 +4884,8 @@
         "event_journal_review_decided_changes_requested": "Changes were requested on your journal entry",
         "event_invitation_accepted": "Somebody accepted your invitation",
         "event_weekly_digest_profile_completion": "To see jobs that fit you, confirm what work you do",
-        "event_weekly_digest_journal": "Your week’s work journal summary is ready"
+        "event_weekly_digest_journal": "Your week’s work journal summary is ready",
+        "event_history_link_offered": "An organization offered to connect your recorded work history to your account"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",

@@ -4884,7 +4884,8 @@
         "event_journal_review_decided_changes_requested": "Für Ihren Journaleintrag wurden Änderungen angefordert",
         "event_invitation_accepted": "Jemand hat Ihre Einladung angenommen",
         "event_weekly_digest_profile_completion": "Damit wir dir passende Jobs zeigen können, bestätige, welche Arbeit du machst",
-        "event_weekly_digest_journal": "Die Wochenübersicht deines Arbeitsjournals ist fertig"
+        "event_weekly_digest_journal": "Die Wochenübersicht deines Arbeitsjournals ist fertig",
+        "event_history_link_offered": "Eine Organisation bietet an, Ihre erfasste Arbeitshistorie mit Ihrem Konto zu verbinden"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",

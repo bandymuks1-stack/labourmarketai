@@ -126,7 +126,12 @@ export type NotificationEventType =
   // requested). Recipient is the WORKER whose entry it is — never the
   // reviewer. metadata.decision names which of the three it was; the note the
   // reviewer wrote never leaves the review row.
-  | "journal_review_decided";
+  | "journal_review_decided"
+  // v11 (20261013200000): an organization offered to connect its recorded
+  // work history (a roster person) to the recipient's account. Only the
+  // recipient can accept or refuse; the offer otherwise waited, unseen, on
+  // their profile page. Carries no name, no hours — only that an offer waits.
+  | "history_link_offered";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -161,7 +166,9 @@ export type NotificationEntityType =
   // carries its (uuid-validated) conversationId, else to the inbox.
   | "conversation"
   // v10: the reviewed journal entry — resolves to the worker's journal.
-  | "journal_entry";
+  | "journal_entry"
+  // v11: one roster person an organization offered to link to the recipient.
+  | "organization_person";
 
 /**
  * The canonical RUNTIME list of the code-side event types — the union above,
@@ -197,6 +204,7 @@ export const NOTIFICATION_EVENT_TYPES = [
   "job_alert",
   "message_received",
   "journal_review_decided",
+  "history_link_offered",
 ] as const satisfies readonly NotificationEventType[];
 
 /** Compile-time exhaustiveness: a union member missing from the runtime list
@@ -278,6 +286,9 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // v10: the journal is where the worker already sees each entry's review
   // state; the reviewed entry is on the page the notification opens.
   journal_entry: "/dashboard/journal",
+  // v11: the profile page renders every pending roster-link offer at its TOP
+  // (RosterLinkOffers), with accept / refuse — the decision the row is about.
+  organization_person: "/dashboard/profile",
 };
 
 const VACANCY_ID_RE =
