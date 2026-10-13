@@ -19,6 +19,9 @@ describe("non-idempotent creates are single-use confirmations", () => {
     ["company.create-programme", 'from("education_programs")'],
     ["company.create-cohort", 'from("education_cohorts")'],
     ["company.request-readiness", 'from("conversation_messages")'],
+    ["company.propose-booking", 'from("booking_requests")'],
+    ["agency.propose-candidate", 'from("agency_candidate_offers")'],
+    ["company.confirm-work", 'from("journal_entry_confirmations")'],
   ])("%s binds to a state its own write changes", (action, binding) => {
     const at = fp.indexOf(`actionId === "${action}"`);
     expect(at, action).toBeGreaterThan(0);

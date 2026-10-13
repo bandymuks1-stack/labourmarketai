@@ -34,6 +34,7 @@ import {
   issueConfirmationToken,
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
+import { spendConfirmation } from "@/lib/security/confirmation-spend";
 import { getWorkspaceContext, type WorkspaceContext } from "@/lib/company/active-organization";
 import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import { resolveRenameTarget } from "@/lib/company/organization-rename";
@@ -337,6 +338,53 @@ async function stateFingerprint(
     const rows = (data ?? []) as { id: string }[];
     return rows.length === 0 ? "instruction:none" : `instruction:latest:${rows[0].id}`;
   }
+  if (actionId === "company.propose-booking") {
+    /** ONE PROPOSAL PER CONFIRMATION, and never over the worker's answer. The
+     *  write upserts the (need, worker) booking, so a replay used to append a
+     *  second `proposed` event — and, after the worker declined within the
+     *  TTL, set the booking back to `proposed`. Bound to that booking's row
+     *  state: proposing or answering moves it, so a replay is stale. */
+    const { data, error } = await supabase
+      .from("booking_requests")
+      .select("id, status, updated_at")
+      .eq("request_id", String(input.requestId))
+      .eq("worker_id", String(input.workerId))
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) return "booking-pair:unreadable";
+    const rows = (data ?? []) as { id: string; status: string; updated_at: string }[];
+    return rows.length === 0 ? "booking-pair:none" : `booking-pair:${rows[0].id}:${rows[0].status}:${rows[0].updated_at}`;
+  }
+  if (actionId === "agency.propose-candidate") {
+    /** Same rule for an agency's offer: after the client decided within the
+     *  TTL, a replay opened a NEW offer. Bound to the newest offer of this
+     *  (share, worker). */
+    const { data, error } = await untyped(supabase)
+      .from("agency_candidate_offers")
+      .select("id, status")
+      .eq("request_share_id", String(input.shareId))
+      .eq("worker_id", String(input.workerId))
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) return "offer-pair:unreadable";
+    const rows = (data ?? []) as { id: string; status: string }[];
+    return rows.length === 0 ? "offer-pair:none" : `offer-pair:${rows[0].id}:${rows[0].status}`;
+  }
+  if (actionId === "company.confirm-work") {
+    /** ONE CONFIRMATION ROW PER CONFIRMATION. The append-only
+     *  `journal_entry_confirmations` has no unique key, so a replay wrote a
+     *  second row (and a second audit row). Bound to the entry's newest
+     *  confirmation: confirming adds one. */
+    const { data, error } = await supabase
+      .from("journal_entry_confirmations")
+      .select("id")
+      .eq("entry_id", String(input.entryId))
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) return "entry-confirmation:unreadable";
+    const rows = (data ?? []) as { id: string }[];
+    return rows.length === 0 ? "entry-confirmation:none" : `entry-confirmation:latest:${rows[0].id}`;
+  }
   return "n/a";
 }
 
@@ -503,6 +551,12 @@ export async function dispatchWorkerAction(
     if (!verdict.ok) {
       return { ok: false, code: verdict.reason === "stale_state" ? "stale_confirmation" : "confirmation_invalid" };
     }
+    // SINGLE USE, atomically (decision 0024): a genuine token is spent before
+    // the executor runs, so a retried or concurrent second submission of the
+    // same token is refused as stale and never reaches the write.
+    const spend = await spendConfirmation(supabase, token, actionId);
+    if (spend === "already_spent") return { ok: false, code: "stale_confirmation" };
+    if (spend === "error") return { ok: false, code: "error" };
   }
 
   const executor = executorOf(actionId);
