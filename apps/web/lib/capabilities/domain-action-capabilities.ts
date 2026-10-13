@@ -116,6 +116,12 @@ function read<S extends z.ZodTypeAny>(
           if (!n.ok) return n;
         }
         if (r.ok === false) return normalizeActionResult(result);
+        // Some reads report their state in `status` (leave balances,
+        // timesheets): a non-ok status is a failure, never an empty answer.
+        if (typeof r.status === "string" && !["ok", "ready", "applied"].includes(r.status)) {
+          const n = normalizeActionResult({ kind: r.status });
+          if (!n.ok) return n;
+        }
         return { ok: true, data: Array.isArray(result) ? { items: result } : { ...r } };
       }),
   };
@@ -142,13 +148,33 @@ function oneStep<S extends z.ZodTypeAny>(spec: {
 }
 
 /** sha256 of the canonical read a write changes — the state a token binds to. */
-async function stateDigest(read: () => Promise<unknown>): Promise<string> {
+async function stateDigest(read: () => Promise<unknown>): Promise<string | null> {
   try {
     return createHash("sha256").update(JSON.stringify(await read())).digest("hex").slice(0, 32);
   } catch {
-    return "unreadable";
+    // UNREADABLE IS NOT A STATE: a token bound to "unreadable" would match any
+    // other failed read and confirm with no state binding at all.
+    return null;
   }
 }
+
+/** The active workspace, so a token minted in one organization cannot be
+ *  spent after switching to another (the bridge's dispatcher tokens bind it
+ *  the same way). */
+async function activeWorkspaceId(): Promise<string | null> {
+  try {
+    const { getWorkspaceContext } = await import("@/lib/company/active-organization");
+    return (await getWorkspaceContext()).activeWorkspaceId;
+  } catch {
+    return null;
+  }
+}
+
+const STATE_UNREADABLE: ExecResult = {
+  ok: false,
+  code: "unavailable",
+  message: "The current state could not be read, so no confirmation can be bound to it. Nothing was changed — try again.",
+};
 
 function confirmed<S extends z.ZodObject>(spec: {
   id: string;
@@ -164,8 +190,10 @@ function confirmed<S extends z.ZodObject>(spec: {
   const confirmId = `${spec.id}_confirm`;
   const confirmTool = confirmId.replace(/\./g, "_");
   const confirmInput = spec.inputSchema.extend({ confirmationToken: z.string().min(10) });
-  const fingerprint = async (input: z.infer<S>, caller: CapabilityCaller) =>
-    `${spec.id}:${await stateDigest(() => spec.state(input, caller))}`;
+  const fingerprint = async (input: z.infer<S>, caller: CapabilityCaller): Promise<string | null> => {
+    const [digest, workspace] = await Promise.all([stateDigest(() => spec.state(input, caller)), activeWorkspaceId()]);
+    return digest === null || workspace === null ? null : `${spec.id}:${workspace}:${digest}`;
+  };
   return [
     {
       id: draftId,
@@ -180,11 +208,13 @@ function confirmed<S extends z.ZodObject>(spec: {
       run: (caller, raw) =>
         guarded(caller, async () => {
           const input = spec.inputSchema.parse(raw);
+          const fp = await fingerprint(input, caller);
+          if (fp === null) return STATE_UNREADABLE;
           const token = mintCapabilityConfirmation({
             actionId: confirmId,
             input,
             userId: caller.userId,
-            stateFingerprint: await fingerprint(input, caller),
+            stateFingerprint: fp,
           });
           return {
             ok: true,
@@ -209,12 +239,14 @@ function confirmed<S extends z.ZodObject>(spec: {
         guarded(caller, async () => {
           const { confirmationToken, ...rest } = confirmInput.parse(raw) as z.infer<S> & { confirmationToken: string };
           const input = spec.inputSchema.parse(rest);
+          const fp = await fingerprint(input, caller);
+          if (fp === null) return STATE_UNREADABLE;
           const verdict = verifyCapabilityConfirmation({
             actionId: confirmId,
             token: confirmationToken,
             input,
             userId: caller.userId,
-            currentStateFingerprint: await fingerprint(input, caller),
+            currentStateFingerprint: fp,
           });
           if (!verdict.ok) {
             return {
@@ -582,13 +614,14 @@ export const DOMAIN_ACTION_CAPABILITIES: readonly CapabilityDescriptor[] = [
   read("absence.mine.list", "My leave and absences", "The caller's own absence requests and their decisions.", none, async () => (await absenceRead()).getMyAbsences()),
   read("absence.pending_review.list", "Leave waiting for my decision", "Absence requests of workers the caller manages that wait for a decision.", none, async () => (await absenceRead()).getManagerPendingAbsences()),
   read("leave.balances.get", "My leave balances", "The caller's leave balances per policy.", none, async () => (await import("@/lib/leave/balances")).getMyLeaveBalances()),
-  oneStep({
+  ...confirmed({
     id: "absence.request",
     title: "Request leave",
-    description: "Requests an absence (annual leave, sickness, unpaid, training, other) for a worker record the caller holds; the manager is notified. Cancel with absence_cancel_draft/confirm.",
+    description: "Requests an absence (annual leave, sickness, unpaid, training, other) for a worker record the caller holds. The manager is notified, so it is confirmed first. Cancel with absence_cancel_draft/confirm.",
     inputSchema: z
       .object({ workerId: uuid, absenceType: z.enum(ABSENCE_TYPES), startDate: isoDay, endDate: isoDay, halfDay: z.boolean().optional(), note: z.string().max(500).optional() })
       .strict(),
+    state: async () => (await absenceRead()).getMyAbsences(),
     run: async (input) => (await absenceMod()).requestAbsenceAction(input),
   }),
   ...confirmed({

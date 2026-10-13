@@ -100,6 +100,23 @@ export const SENDS_EMAIL: ReadonlySet<string> = new Set([
   "agency.invite-client",
 ]);
 
+/**
+ * Actions whose dispatcher token is bound to a state the write itself changes
+ * (`stateFingerprint` in lib/conversation/dispatch.ts) — so a spent token is
+ * refused as stale. Every OTHER bridged confirm is bound to caller, exact
+ * input and workspace for the token's TTL, but a repeat within it may repeat
+ * the act (the domain refuses duplicates where it can: invitations answer
+ * `duplicate_pending`, a booking is one per need and worker). Their confirm
+ * tools therefore do NOT claim `idempotentHint`. Guard-checked against
+ * dispatch.ts.
+ */
+export const SINGLE_USE_FINGERPRINTED: ReadonlySet<string> = new Set([
+  "worker.respond-booking",
+  "worker.respond-invitation",
+  "engagement.end",
+  "company.rename-organization",
+]);
+
 type AnySchema = z.ZodTypeAny;
 
 const SCHEMAS: ReadonlyMap<string, AnySchema> = new Map<string, AnySchema>([
@@ -235,6 +252,7 @@ function bridgeOne(action: ConversationActionDescriptor, actionSchema: AnySchema
     ];
   }
 
+  const singleUse = SINGLE_USE_FINGERPRINTED.has(action.id);
   const prepareId = bridgeCapabilityId(action.id, "prepare");
   const confirmId = bridgeCapabilityId(action.id, "confirm");
   const confirmToolName = confirmId.replace(/\./g, "_");
@@ -291,10 +309,14 @@ function bridgeOne(action: ConversationActionDescriptor, actionSchema: AnySchema
       conversationActionId: action.id,
       title: `Confirm: ${label}`,
       description:
-        `Carries out "${label}" after its prepare step: verifies the one-time token against the caller, the exact input, ` +
-        `the active workspace and the CURRENT state, then runs the canonical action once. A replayed or stale token is refused. ${sameAsWeb}`,
+        `Carries out "${label}" after its prepare step: verifies the confirmation token against the caller, the exact input ` +
+        `and the active workspace, then runs the canonical action. ` +
+        (singleUse
+          ? "The token is bound to the record's CURRENT state, so once used (or once the state changes) it is refused. "
+          : "Call it ONCE per prepare: repeating it within the token's lifetime may repeat the action. ") +
+        sameAsWeb,
       exposed: true,
-      annotations: { readOnlyHint: false, destructiveHint: overwrites, idempotentHint: true, openWorldHint: openWorld },
+      annotations: { readOnlyHint: false, destructiveHint: overwrites, idempotentHint: singleUse, openWorldHint: openWorld },
       inputSchema: confirmInput,
       run: async (caller, raw): Promise<ExecResult> => {
         const refused = await scopedCallerRefusal(caller);

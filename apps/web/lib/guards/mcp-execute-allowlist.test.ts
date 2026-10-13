@@ -65,7 +65,6 @@ const SINGLE_STEP_ALLOWLIST: readonly string[] = [
   "notification.mark_read",
   "notification.mark_all_read",
   "notification.preference_set",
-  "absence.request",
 ];
 
 describe("every exposed single-step write is on an explicit allowlist", () => {

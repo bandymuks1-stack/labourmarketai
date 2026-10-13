@@ -221,6 +221,21 @@ export async function POST(req: Request) {
     door: DOOR,
   });
 
+  // CSRF HARDENING for the cookie transport. A browser can send a cross-site
+  // "simple" POST (text/plain) WITH cookies and no preflight; only SameSite
+  // would stop it. MCP clients always send JSON, and a cross-origin JSON POST
+  // needs a preflight this door never answers with Allow-Credentials — so a
+  // cookie-identified call must be JSON. Bearer callers are unaffected.
+  if (
+    auth.identity.transport === "cookie" &&
+    !(req.headers.get("content-type") ?? "").toLowerCase().includes("application/json")
+  ) {
+    return NextResponse.json(
+      { ok: false, code: "unsupported_media_type", message: "This MCP endpoint accepts application/json only." },
+      { status: 415, headers: { ...CORS_HEADERS } },
+    );
+  }
+
   const raw = await req.text();
   if (raw.length > MAX_BODY_BYTES) {
     // NAME the limit. A bare `{ ok: false }` here is how "your file was too
@@ -286,10 +301,12 @@ export async function POST(req: Request) {
       "(worker_*, company_*, agency_*, engagement_*) run that SAME web action: " +
       "one without a _prepare/_confirm suffix is a reversible write the web " +
       "chat also runs in one step; a _prepare tool writes nothing and returns " +
-      "a one-time token that its _confirm tool needs. The remaining single-step " +
-      "tools change only the caller's own data and are reversible: creating a " +
-      "DRAFT offering, listing, proposal or contract, editing one's own record, " +
-      "notification read/preferences, a leave request, a booking deadline; " +
+      "a one-time token that its _confirm tool needs; call each _confirm once. " +
+      "The remaining single-step tools are reversible changes the web also " +
+      "makes in one click (creating a DRAFT offering, listing, proposal or " +
+      "contract, editing one's own record, notification read/preferences, a " +
+      "booking deadline, a task); like the web they may notify the person the " +
+      "change concerns; " +
       "publishing, deciding, sending, deleting and legal data always go " +
       "through _draft/_confirm. Everything acts in the " +
       "caller's active workspace (context_list, context_switch).",

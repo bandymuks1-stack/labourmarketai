@@ -38,6 +38,10 @@ import {
   SENDS_EMAIL,
 } from "./conversation-action-bridge";
 import { exposedCapabilities, listCapabilities, runCapability } from "./registry";
+import { RECEIPT_CAPABILITY_RX, receiptCapabilityId } from "./external-receipt";
+import { SINGLE_USE_FINGERPRINTED } from "./conversation-action-bridge";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 const supabase = {} as CapabilityCaller["supabase"];
 const bearer: CapabilityCaller = { userId: "user-1", transport: "bearer", supabase, locale: "en", actorKind: "agent" };
@@ -101,6 +105,30 @@ describe("conversation-action bridge — coverage", () => {
         ]);
         expect(tools[0].annotations.readOnlyHint).toBe(true);
       }
+    }
+  });
+});
+
+describe("conversation-action bridge — audit and confirmation honesty", () => {
+  it("every exposed write gets an audit receipt the RPC accepts (hyphens folded), and no two collide", () => {
+    const writes = exposedCapabilities().filter((c) => c.kind === "confirm" || c.kind === "execute");
+    const seen = new Map<string, string>();
+    for (const c of writes) {
+      const id = receiptCapabilityId(c.id);
+      expect(id, c.id).toMatch(RECEIPT_CAPABILITY_RX);
+      expect(id.length, c.id).toBeLessThanOrEqual(80);
+      expect(seen.get(id), `${c.id} collides with ${seen.get(id)}`).toBeUndefined();
+      seen.set(id, c.id);
+    }
+  });
+
+  it("only actions the dispatcher really fingerprints claim a single-use confirm", () => {
+    const dispatch = readFileSync(join(__dirname, "..", "conversation", "dispatch.ts"), "utf8");
+    for (const id of SINGLE_USE_FINGERPRINTED) {
+      expect(dispatch, id).toContain(`actionId === "${id}"`);
+    }
+    for (const c of CONVERSATION_ACTION_BRIDGE_CAPABILITIES.filter((x) => x.kind === "confirm")) {
+      expect(c.annotations.idempotentHint, c.id).toBe(SINGLE_USE_FINGERPRINTED.has(c.conversationActionId!));
     }
   });
 });

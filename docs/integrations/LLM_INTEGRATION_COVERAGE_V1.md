@@ -37,8 +37,8 @@ into a function the web already runs.
 | Class | Tool shape | Rule | Examples |
 |---|---|---|---|
 | **A — read** | `kind: read`, `readOnlyHint` | runs at once if RLS allows | `calendar_conflicts_get`, `projects_list`, `reports_get` |
-| **B — reversible own write** | one tool, `kind: execute` | runs at once; only the caller's OWN data; reversible; pinned by name in `lib/guards/mcp-execute-allowlist.test.ts` (or, for the bridge, by the web chat's own `reversible_write` tier) | `company_create-task`, `service_offering_create` (draft), `notification_mark_read`, `absence_request` |
-| **C — sensitive / external / irreversible** | `_prepare`/`_draft` (writes nothing, returns a one-time token) + `_confirm` | token bound to caller + exact input + CURRENT state (+ workspace for the bridge); replay / stale / tamper refused | publish a service, legal data, invitations (e-mail), accept a booking, end an engagement, approve leave or hours, deletes |
+| **B — reversible own write** | one tool, `kind: execute` | runs at once; reversible; may notify the person it concerns, exactly as the web does; pinned by name in `lib/guards/mcp-execute-allowlist.test.ts` (or, for the bridge, by the web chat's own `reversible_write` tier) | `company_create-task`, `service_offering_create` (draft), `notification_mark_read`, `booking_deadline_set` |
+| **C — sensitive / external / irreversible** | `_prepare`/`_draft` (writes nothing, returns a one-time token) + `_confirm` | token bound to caller + exact input + workspace (+ CURRENT state for domain actions and the fingerprinted web actions, so a spent token is stale); tamper / other-user / other-input refused; a mint is refused when the state cannot be read | publish a service, legal data, invitations (e-mail), accept a booking, end an engagement, approve leave or hours, deletes |
 
 For bridged web-chat actions the class is READ FROM the conversation registry
 (`reversible_write` → B; `important_write` / `strong_irreversible` → C), so an
@@ -51,8 +51,8 @@ external client can never get a lighter confirmation than the web chat.
 | Existing before this slice | **81** (`0.1.0+t81.1f8f7db4`) |
 | + web-chat action bridge | 56 (34 actions: 12 one-step, 22 prepare/confirm pairs) |
 | + workspace reads | 22 |
-| + domain actions | 69 (19 reads, 12 one-step, 19 draft/confirm pairs) |
-| **Now** | **228** (`0.1.0+t228.e9e08aaf`) |
+| + domain actions | 70 (19 reads, 11 one-step, 20 draft/confirm pairs) |
+| **Now** | **229** (`0.1.0+t229.11f76105`) |
 
 10 executable web-chat actions were NOT bridged because a capability already
 performs them (no duplicate tools): log work, express interest, work card,
@@ -93,8 +93,8 @@ Legend: ✅ covered by real tools · 🟡 partly covered · ⛔ not exposed (rea
 | No tool runs as "nobody" | every new tool refuses `not_supported` when a bearer caller is not inside the scope, or the scope is another user's |
 | No privilege escalation by argument | organization ids are selectors re-checked by RLS/RPCs; the bridge re-checks HELD roles in the active workspace; the workspace comes from the durable pointer only |
 | No lighter confirmation than the web | bridge tiers come from the conversation registry; guard `mcp-execute-allowlist.test.ts` |
-| Replay / tamper / stale confirmations refused | dispatcher tokens (workspace-bound state fingerprints) and capability tokens (hash of the canonical read the write changes) — `conversation-action-bridge.test.ts`, `domain-action-capabilities.test.ts` |
-| Audit | every `confirm`/`execute` through `/api/mcp` writes the external receipt (`recordExternalReceipt`) and a privacy-safe log line; `actorKind: "agent"` |
+| Tamper / other-user / other-workspace / stale confirmations refused (replay: see §2) | dispatcher tokens (workspace-bound state fingerprints) and capability tokens (hash of the canonical read the write changes) — `conversation-action-bridge.test.ts`, `domain-action-capabilities.test.ts` |
+| Audit | every `confirm`/`execute` through `/api/mcp` writes the external receipt (`recordExternalReceipt`; hyphenated bridge ids folded to the RPC's id format, guard-tested) and a privacy-safe log line; `actorKind: "agent"` |
 | Revoking agent access | the person revokes the connector in ChatGPT, or the OAuth grant in Supabase Auth; the next call is 401 |
 | Honest failure states | `unavailable` ≠ empty, `needs_migration`, `no_organization_context` (with what to do), `confirmation_rejected` |
 | No production data touched by this slice | no migration, no seed, no prod write; all tests use synthetic in-memory data |
@@ -102,7 +102,7 @@ Legend: ✅ covered by real tools · 🟡 partly covered · ⛔ not exposed (rea
 ## 6. How the owner verifies it in ChatGPT
 
 1. After deploy, open `https://labourmarket.ai/api/mcp` in a browser: the JSON
-   must show `"toolsetVersion": "0.1.0+t228.e9e08aaf"` and `"toolCount": 228`.
+   must show `"toolsetVersion": "0.1.0+t229.11f76105"` and `"toolCount": 229`.
 2. ChatGPT → Settings → Connectors (Apps) → LabourMarket.ai → **Refresh**
    (the server is stateless and cannot push `tools/list_changed`).
 3. Start a NEW conversation and attach the LabourMarket.ai connector in the
@@ -135,7 +135,7 @@ Legend: ✅ covered by real tools · 🟡 partly covered · ⛔ not exposed (rea
   guards, the fingerprint register.
 - NOT YET PROVEN: a live database run of the new tools (the local Supabase
   stack needs Docker, which agents do not start), real ChatGPT discovery of
-  the 228 tools, and every owner acceptance prompt above. Those are the
+  the 229 tools, and every owner acceptance prompt above. Those are the
   owner's acceptance steps; this slice does not mark them done.
 
 ## 8. Next: AI agents as labour-market participants (owner direction 2026-10-13)

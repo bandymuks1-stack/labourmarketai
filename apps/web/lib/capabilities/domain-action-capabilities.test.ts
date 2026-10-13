@@ -19,6 +19,14 @@ vi.mock("@/lib/services/service-offerings", () => ({
   setServiceOfferingStatus: (...a: unknown[]) => setStatus(...a),
 }));
 
+let activeWorkspace: string | Error = "org-1";
+vi.mock("@/lib/company/active-organization", () => ({
+  getWorkspaceContext: async () => {
+    if (activeWorkspace instanceof Error) throw activeWorkspace;
+    return { workspaces: [], activeWorkspaceId: activeWorkspace, pointerAvailable: true };
+  },
+}));
+
 import { runAsBearerCaller } from "@/lib/api/bearer-caller-scope";
 
 import type { CapabilityCaller } from "./contract";
@@ -32,6 +40,7 @@ const OFFER = "11111111-1111-4111-8111-111111111111";
 
 beforeEach(() => {
   offerings = { kind: "ok", rows: [{ id: "o-1", status: "draft" }] };
+  activeWorkspace = "org-1";
   listOwn.mockClear();
   create.mockClear();
   setStatus.mockClear();
@@ -79,6 +88,7 @@ describe("domain actions — shape", () => {
       "absence.review",
       "journal.review",
       "booking.withdraw",
+      "absence.request",
     ]) {
       expect(single.has(id), id).toBe(false);
       expect(DOMAIN_ACTION_CAPABILITIES.some((c) => c.id === `${id}_confirm`), id).toBe(true);
@@ -121,6 +131,28 @@ describe("domain actions — execution", () => {
       runCapability("service_offering.status_set_confirm", bearer, { offeringId: OFFER, status: "active", confirmationToken: token }),
     );
     expect(r).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(setStatus).not.toHaveBeenCalled();
+  });
+
+  it("a token minted in one workspace is refused after switching to another", async () => {
+    const input = { offeringId: OFFER, status: "active" };
+    const draft = await inScope(() => runCapability("service_offering.status_set_draft", bearer, input));
+    const token = (draft as unknown as { data: { confirmationToken: string } }).data.confirmationToken;
+    activeWorkspace = "org-2";
+    const r = await inScope(() => runCapability("service_offering.status_set_confirm", bearer, { ...input, confirmationToken: token }));
+    expect(r).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(setStatus).not.toHaveBeenCalled();
+  });
+
+  it("no token is minted, and nothing confirms, when the state cannot be read", async () => {
+    listOwn.mockRejectedValueOnce(new Error("db down"));
+    const r = await inScope(() => runCapability("service_offering.status_set_draft", bearer, { offeringId: OFFER, status: "active" }));
+    expect(r).toMatchObject({ ok: false, code: "unavailable" });
+    activeWorkspace = new Error("unreadable");
+    const c = await inScope(() =>
+      runCapability("service_offering.status_set_confirm", bearer, { offeringId: OFFER, status: "active", confirmationToken: "x".repeat(40) }),
+    );
+    expect(c).toMatchObject({ ok: false, code: "unavailable" });
     expect(setStatus).not.toHaveBeenCalled();
   });
 

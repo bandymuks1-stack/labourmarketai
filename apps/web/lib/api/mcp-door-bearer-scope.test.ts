@@ -83,6 +83,19 @@ describe("/api/mcp runs every tool inside the bearer caller scope", () => {
     expect(currentBearerCaller()).toBeUndefined();
   });
 
+  it("a cookie-identified call that is not JSON is refused (CSRF hardening), and nothing runs", async () => {
+    identity = { userId: "u-42", transport: "cookie", supabase: BEARER_CLIENT };
+    const res = await POST(
+      new Request("https://labourmarket.ai/api/mcp", {
+        method: "POST",
+        headers: { "content-type": "text/plain" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 7, method: "tools/call", params: { name: "probe_who", arguments: {} } }),
+      }),
+    );
+    expect(res.status).toBe(415);
+    expect(seen).toEqual([]);
+  });
+
   it("a cookie tool call is unchanged: createClient() is the cookie client", async () => {
     identity = { userId: "u-42", transport: "cookie", supabase: BEARER_CLIENT };
     await POST(call());
