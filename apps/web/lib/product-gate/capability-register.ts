@@ -1636,7 +1636,7 @@ const PLATFORM: readonly CapabilityRow[] = [
     coreModule: "lib/product-gate/entity-model.ts",
     surfaces: [],
     deferredByDesign: true,
-    note: "Recorded in ARCHITECTURE §5.1; deliberately not now.",
+    note: "Recorded in ARCHITECTURE §5.1; extended by owner direction 2026-10-13 (OWNER_TARGET_ARCHITECTURE_V1 §1.13: agents as labour-market participants, DELEGATE vs PROVIDER, operator accountability). Plan, data-minimization rules and owner decisions AGENT-1..4: docs/integrations/AI_AGENT_PARTICIPANTS_V1.md. The DELEGATE mode exists today through /api/mcp; the PROVIDER subject is not built.",
   },
   {
     id: "GOV-1",
