@@ -59,6 +59,13 @@ test("L-9. the learner records a practice day in the learning relationship", asy
     expect(learning, "the learning relationship with Alfa is offered as a context").toBeTruthy();
     await context.selectOption(learning!.v);
   }
+  // Several projects in that relationship: the product asks which one (or "not project work").
+  // Practice here is not a project's hours, so the walk says so explicitly.
+  const project = page.getByTestId("worklog-project");
+  if (await project.isVisible().catch(() => false)) {
+    const values = await project.locator("option").evaluateAll((os) => (os as HTMLOptionElement[]).map((o) => o.value));
+    await project.selectOption(values[values.length - 1]);
+  }
   await page.getByTestId("worklog-save").click();
   const confirmBtn = page.getByTestId("worklog-confirm");
   const early = page.getByTestId("worklog-error").or(page.getByTestId("worklog-blocked"));
