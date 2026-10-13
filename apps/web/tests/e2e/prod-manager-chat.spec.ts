@@ -42,19 +42,19 @@ async function open(browser: Browser): Promise<{ page: Page; close: () => Promis
 
 /** Ask, then wait for the product's own answer opening (or its honest "could not read"). */
 async function ask(page: Page, text: string, answer: RegExp, unavailable: RegExp): Promise<string> {
-  const before = (await page.locator("main").innerText()).length;
+  const before = (await page.locator("body").innerText()).length;
   await page.getByTestId("composer-input").fill(text);
   await page.getByTestId("composer-send").click();
   await expect
     .poll(
       async () => {
-        const tail = (await page.locator("main").innerText()).slice(Math.max(0, before - 50));
+        const tail = (await page.locator("body").innerText()).slice(Math.max(0, before - 50));
         return answer.test(tail) || unavailable.test(tail);
       },
       { timeout: 45_000, intervals: [1_000] },
     )
     .toBe(true);
-  const tail = (await page.locator("main").innerText()).slice(Math.max(0, before - 50));
+  const tail = (await page.locator("body").innerText()).slice(Math.max(0, before - 50));
   const m = answer.exec(tail);
   const shown = m ? tail.slice(m.index, m.index + 400).replace(/\s+/g, " ") : tail.slice(-300).replace(/\s+/g, " ");
   console.info(`[manager-chat] "${text}" → ${shown}`);
