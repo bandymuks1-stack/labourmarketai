@@ -1616,6 +1616,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261008120000_manager_approval_skill_confidence_v1.sql",
       // 2026-10-08 (RED by GRANT, needs-human-gate): SELECT to authenticated on five RLS tables whose policies were unreachable - marker is the human-gate acknowledgement.
       "20261008210000_rls_tables_missing_select_grant_v1.sql",
+      // 2026-10-11 (RED by SECURITY DEFINER replace, needs-human-gate): free-text job search matches lower() collate "C" instead of a per-row ICU ilike - marker is the human-gate acknowledgement.
+      "20261011090000_search_public_vacancy_previews_c_like_v4.sql",
       // 2026-10-11 (RED by SECURITY DEFINER + RLS policy, needs-human-gate): employers see/approve absences of invitation-joined employees - marker is the human-gate acknowledgement.
       "20261011160000_absence_authority_engagement_v1.sql",
       // 2026-10-11 (supply offer negotiation: organization offers, versioned terms, need titles; RED by SECURITY DEFINER replace, needs-human-gate) - marker is the human-gate acknowledgement.
