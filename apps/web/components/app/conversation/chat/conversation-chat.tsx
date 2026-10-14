@@ -181,6 +181,8 @@ import {
 import { ChatMessageReply } from "@/components/app/conversation/chat-message-reply";
 import { ChatPhotoStrip } from "@/components/app/conversation/chat-photo-strip";
 import { readRecentPhotosForChat } from "@/lib/conversation/evidence-photos";
+import { readWhatChangedForChat } from "@/lib/conversation/what-changed";
+import { ChatTraceStrip } from "@/components/app/conversation/chat-trace-strip";
 import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
 import { loadEmployerVisibilityForChat } from "@/lib/conversation/employer-visibility-chat";
 import { EMPLOYER_VISIBILITY_HREF } from "@/lib/privacy/employer-visibility";
@@ -3462,6 +3464,35 @@ export function ConversationChat({
         setTyping(false);
         // A failed read says it could not check — never that nothing is stored.
         assistant(t("photosUnavailable"), chips);
+      });
+  }, [assistant, pushEmbed, locale, labels.navJournal, t]);
+  /**
+   * "KAS PASIKEITĖ?" (Future Experience A, owner 2026-10-14) — the ONE
+   * consequence trace read back in the thread: what the person did → what
+   * changed → what it opened, worded by the same function the home uses.
+   * Honest states: `none` = the reads answered and nothing changed in the
+   * window; `unknown` / a thrown read = could not check (never "nothing").
+   */
+  const startWhatChanged = useCallback(() => {
+    setTyping(true);
+    const chips = [{ id: "link:/dashboard/journal#journal-entries", label: labels.navJournal }];
+    readWhatChangedForChat({ locale })
+      .then((res) => {
+        setTyping(false);
+        if (res.kind === "unknown") {
+          assistant(t("whatChangedUnavailable"), chips);
+          return;
+        }
+        if (res.kind === "none") {
+          assistant(res.partial ? `${t("whatChangedNone")} ${res.partial}` : t("whatChangedNone"), chips);
+          return;
+        }
+        assistant(t("whatChangedIntro", { count: res.items.length }), chips);
+        pushEmbed(<ChatTraceStrip items={res.items} partial={res.partial} />);
+      })
+      .catch(() => {
+        setTyping(false);
+        assistant(t("whatChangedUnavailable"), chips);
       });
   }, [assistant, pushEmbed, locale, labels.navJournal, t]);
   /**
@@ -7667,6 +7698,7 @@ export function ConversationChat({
         invitations: () => startInvitations(),
         // The stored work photos, shown back (issue #1689, defect G).
         evidencePhotos: () => startEvidencePhotos(),
+        whatChanged: () => startWhatChanged(),
         // "Kas mato mano profilį?" — state first, then the existing consent.
         employerVisibility: () => startEmployerVisibility(),
         // ACCEPT BY SENTENCE (launch completion 2026-09-20): the one waiting
@@ -7861,7 +7893,7 @@ export function ConversationChat({
           askToClarify(t("answerFailed"));
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
+    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startWhatChanged, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
   );
 
   /**

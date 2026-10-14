@@ -14540,6 +14540,9 @@
       "teamOfferAgreed": "Sutarta iš esmės — tai dar ne pasirašyta sutartis. Sąlygas suderink pokalbyje, tada priskirk komandą projektui.",
       "teamOfferDeclined": "Atmesta. Pasiūliusi įmonė matys tavo atsakymą.",
       "teamOfferThreadFailed": "Šio pokalbio atidaryti nepavyko.",
+      "whatChangedIntro": "{count, plural, one {Štai tavo naujausio darbo grandinė: ką padarei, kas pasikeitė, ką tai atvėrė.} few {Štai # tavo naujausio darbo grandinės: ką padarei, kas pasikeitė, ką tai atvėrė.} other {Štai # tavo naujausio darbo grandinių: ką padarei, kas pasikeitė, ką tai atvėrė.}}",
+      "whatChangedNone": "Per 14 dienų iš tavo darbo nieko naujo neatsirado. Kai įrašysi darbą ir jį patvirtins, parodysiu, ką jis pakeitė.",
+      "whatChangedUnavailable": "Dabar nepavyko patikrinti, kas pasikeitė. Tavo įrašai niekur nedingo — pabandyk po akimirkos arba atidaryk žurnalą.",
       "planIntro": "{count, plural, one {Tai # žingsnis.} few {Tai # žingsniai, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.} other {Tai # žingsnių, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.}}",
       "planNextOffer": "Kitas žingsnis:",
       "planStep": "{n} žingsnis iš {count}"

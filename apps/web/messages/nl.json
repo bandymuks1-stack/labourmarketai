@@ -14540,6 +14540,9 @@
       "teamOfferAgreed": "In principe akkoord — nog geen getekend contract. Spreek de voorwaarden af in het gesprek en wijs het team daarna toe aan een project.",
       "teamOfferDeclined": "Afgewezen. Het aanbiedende bedrijf ziet je antwoord.",
       "teamOfferThreadFailed": "Dit gesprek kan niet worden geopend.",
+      "whatChangedIntro": "{count, plural, one {Hier is de keten uit je recente werk: wat je deed, wat er veranderde, wat het opende.} other {Hier zijn # ketens uit je recente werk: wat je deed, wat er veranderde, wat het opende.}}",
+      "whatChangedNone": "Er kwam de laatste 14 dagen niets nieuws uit je werk. Zodra je werk registreert en het bevestigd wordt, laat ik zien wat het veranderde.",
+      "whatChangedUnavailable": "Ik kon nu niet nagaan wat er veranderde. Je registraties zijn veilig — probeer het zo opnieuw of open het logboek.",
       "planIntro": "{count, plural, one {Dat is # stap.} other {Dat zijn # stappen, op volgorde. Hier is de eerste — tik op de volgende wanneer je klaar bent.}}",
       "planNextOffer": "Volgende stap:",
       "planStep": "Stap {n} van {count}"

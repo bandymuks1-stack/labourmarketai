@@ -1151,6 +1151,14 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     de: "Zeig das Foto",
     pl: "Pokaż wgrane zdjęcie",
   },
+  "what-changed": {
+    lt: "Kas pasikeitė nuo vakar?",
+    en: "What changed since yesterday?",
+    ru: "Что изменилось со вчера?",
+    nl: "Wat is er veranderd sinds gisteren?",
+    de: "Was hat sich seit gestern geändert?",
+    pl: "Co się zmieniło od wczoraj?",
+  },
   "add-task": {
     lt: "Pridėk užduotį projektui: sumontuoti pastolius",
     en: "Add a task to the project: erect the scaffold",

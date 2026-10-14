@@ -4354,7 +4354,10 @@
       "chipOfferOurs": "Paku meie brigaadi või ettevõtet",
       "teamOfferAgreed": "Põhimõtteliselt kokku lepitud — see pole veel allkirjastatud leping. Lepi tingimused vestluses kokku ja määra seejärel meeskond projekti.",
       "teamOfferDeclined": "Tagasi lükatud. Pakkuv ettevõte näeb sinu vastust.",
-      "teamOfferThreadFailed": "Seda vestlust ei saa avada."
+      "teamOfferThreadFailed": "Seda vestlust ei saa avada.",
+      "whatChangedIntro": "{count, plural, one {Siin on ahel sinu hiljutisest tööst: mida tegid, mis muutus, mida see avas.} other {Siin on # ahelat sinu hiljutisest tööst: mida tegid, mis muutus, mida see avas.}}",
+      "whatChangedNone": "Viimase 14 päeva jooksul ei tulnud sinu tööst midagi uut. Kui salvestad töö ja see kinnitatakse, näitan, mida see muutis.",
+      "whatChangedUnavailable": "Praegu ei õnnestunud kontrollida, mis muutus. Sinu kirjed on alles — proovi hetke pärast uuesti või ava tööpäevik."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

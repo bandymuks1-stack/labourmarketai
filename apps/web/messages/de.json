@@ -14540,6 +14540,9 @@
       "teamOfferAgreed": "Grundsätzlich vereinbart — noch kein unterschriebener Vertrag. Klären Sie die Bedingungen im Gespräch und weisen Sie das Team dann einem Projekt zu.",
       "teamOfferDeclined": "Abgelehnt. Das anbietende Unternehmen sieht Ihre Antwort.",
       "teamOfferThreadFailed": "Dieses Gespräch kann nicht geöffnet werden.",
+      "whatChangedIntro": "{count, plural, one {Hier ist die Kette aus Ihrer jüngsten Arbeit: was Sie getan haben, was sich geändert hat, was es eröffnet hat.} other {Hier sind # Ketten aus Ihrer jüngsten Arbeit: was Sie getan haben, was sich geändert hat, was es eröffnet hat.}}",
+      "whatChangedNone": "In den letzten 14 Tagen ist aus Ihrer Arbeit nichts Neues entstanden. Sobald Sie Arbeit erfassen und sie bestätigt wird, zeige ich, was sie verändert hat.",
+      "whatChangedUnavailable": "Ich konnte gerade nicht prüfen, was sich geändert hat. Ihre Einträge sind sicher – versuchen Sie es gleich erneut oder öffnen Sie das Journal.",
       "planIntro": "{count, plural, one {Das ist # Schritt.} other {Das sind # Schritte, der Reihe nach. Hier ist der erste — tippen Sie auf den nächsten, wenn Sie so weit sind.}}",
       "planNextOffer": "Nächster Schritt:",
       "planStep": "Schritt {n} von {count}"
