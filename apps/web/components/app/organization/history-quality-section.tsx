@@ -73,6 +73,53 @@ export async function HistoryQualitySection({ locale }: { locale: string }) {
           : t("invariantBroken")}
       </p>
 
+      {/* THE PATH — imported rows → kept projects, then the three tiers kept apart */}
+      {load.ledgerApplied ? (
+        <section className="flex flex-col gap-4" data-testid="history-quality-path">
+          <h2 className="font-display text-xl font-semibold text-text-primary">
+            {t("path.title", { imported: q.path.imported, kept: q.path.kept })}
+          </h2>
+          <ol className="flex flex-col gap-1 text-sm text-text-secondary">
+            <li>{t("path.imported", { imported: q.path.imported })}</li>
+            <li>{t("path.merged", { rows: q.path.merged, projects: q.path.intoProjects })}</li>
+            <li>{t("path.untouched", { rows: q.path.keptUntouched })}</li>
+            <li className="font-medium text-text-primary">{t("path.kept", { projects: q.path.kept })}</li>
+          </ol>
+          <div className="grid gap-3 md:grid-cols-3">
+            <Card compact className="flex flex-col gap-2" data-testid="history-quality-tier" data-tier="established">
+              <h3 className="font-mono text-meta uppercase tracking-label text-state-success">{t("tiers.established.title")}</h3>
+              <p className="text-sm text-text-secondary">
+                {t("tiers.established.body", { merges: q.tiers.established.merges, groups: q.tiers.established.groups })}
+              </p>
+            </Card>
+            <Card compact className="flex flex-col gap-2" data-testid="history-quality-tier" data-tier="probable">
+              <h3 className="font-mono text-meta uppercase tracking-label text-state-warning">{t("tiers.probable.title")}</h3>
+              <p className="text-sm text-text-secondary">{t("tiers.probable.body", { count: q.tiers.probable.length })}</p>
+              <ul className="flex flex-col gap-1">
+                {q.tiers.probable.map((p) => (
+                  <li key={p.canonicalProjectId} className="text-meta text-text-secondary">
+                    <span className="font-mono">{p.variants.join(" · ")}</span> → <span className="font-mono text-text-primary">{p.canonicalText}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+            <Card compact className="flex flex-col gap-2" data-testid="history-quality-tier" data-tier="unresolved">
+              <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("tiers.unresolved.title")}</h3>
+              <p className="text-sm text-text-secondary">{t("tiers.unresolved.body", { count: q.tiers.unresolved.length })}</p>
+              <ul className="flex flex-col gap-1">
+                {q.tiers.unresolved.map((u) => (
+                  <li key={u.projectId} className="text-meta text-text-secondary">
+                    <span className="font-mono">{u.originalText}</span>
+                    {" — "}
+                    {u.kinds.map((k) => (t.has(`conflictKinds.${k}` as never) ? t(`conflictKinds.${k}` as never) : k)).join(", ")}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+        </section>
+      ) : null}
+
       {/* THE DEMONSTRATION — real groups from this import */}
       {example.length > 0 ? (
         <section className="flex flex-col gap-3" data-testid="history-quality-example">
@@ -115,8 +162,6 @@ export async function HistoryQualitySection({ locale }: { locale: string }) {
           <li>{t("unresolved.multi", { records: q.after.unplaced.multiple_objects.records, hours: nf(q.after.unplaced.multiple_objects.hours) })}</li>
           <li>{t("unresolved.single", { records: q.after.unplaced.single_unmatched.records, hours: nf(q.after.unplaced.single_unmatched.hours) })}</li>
           <li data-testid="history-quality-date-conflicts">{t("unresolved.dates", { personDays: q.after.dateConflicts.personDays, records: q.after.dateConflicts.records })}</li>
-          {load.ledgerApplied ? <li>{t("unresolved.probable", { count: q.after.probableMerges })}</li> : null}
-          {load.ledgerApplied ? <li>{t("unresolved.conflicts", { count: q.after.recordedConflicts })}</li> : null}
         </ul>
       </section>
 

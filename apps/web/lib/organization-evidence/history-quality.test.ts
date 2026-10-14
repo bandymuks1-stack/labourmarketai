@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildHistoryQuality, unplacedKind, type QualityProjectRow, type QualityRecord } from "./history-quality";
+import { buildHistoryQuality, unplacedKind, type QualityDecision, type QualityProjectRow, type QualityRecord } from "./history-quality";
 
 // Synthetic shapes of the 2026-10 production import (ids invented).
 let n = 0;
@@ -71,6 +71,36 @@ describe("history quality", () => {
   it("a day label reused across weeks is a date conflict — the hours are kept, not doubled", () => {
     expect(after.after.dateConflicts).toEqual({ personDays: 1, records: 3 });
     expect(after.after.hours).toBe(before.before.hours);
+  });
+
+  it("path and tiers: established, probable and unresolved never mix; a reverted merge leaves both", () => {
+    const d = (o: Partial<QualityDecision>): QualityDecision => ({
+      projectId: "", canonicalProjectId: null, decision: "kept_separate", mismatchTypes: [], certainty: "none", conflicts: [],
+      originalText: "", normalizedName: "", ruleVersion: "v1", decidedAt: "2026-10-14", reverted: false, ...o,
+    });
+    const decisions = [
+      d({ projectId: "P", decision: "canonical", certainty: "unambiguous", originalText: "W22.073",
+          conflicts: [{ with: "T", kind: "code_spans_several_addresses" }] }),
+      d({ projectId: "F1", canonicalProjectId: "P", decision: "merged", certainty: "unambiguous", originalText: "Cerero beton, W22.073" }),
+      d({ projectId: "F2", canonicalProjectId: "P", decision: "merged", certainty: "probable", originalText: "w22:073 afdichten" }),
+      d({ projectId: "Q", originalText: "Hubartlaan 6" }),
+    ];
+    const q = buildHistoryQuality({ records, projects: projects("after"), projectOfObject, decisions });
+    expect(q.path).toEqual({ imported: 4, merged: 2, intoProjects: 1, keptUntouched: 1, kept: 2 });
+    expect(q.path.imported).toBe(q.path.kept + q.path.merged);
+    expect(q.tiers.established).toEqual({ merges: 1, groups: 1 });
+    expect(q.tiers.probable).toEqual([{ canonicalProjectId: "P", canonicalText: "W22.073", variants: ["w22:073 afdichten"] }]);
+    expect(q.tiers.unresolved).toEqual([{ projectId: "P", originalText: "W22.073", decision: "canonical", kinds: ["code_spans_several_addresses"] }]);
+
+    // F2 reverted: its marker is gone and its ledger row says so.
+    const reverted = buildHistoryQuality({
+      records,
+      projects: projects("after").map((p) => (p.id === "F2" ? { ...p, recordState: "active", canonicalProjectId: null } : p)),
+      projectOfObject,
+      decisions: decisions.map((x) => (x.projectId === "F2" ? { ...x, reverted: true } : x)),
+    });
+    expect(reverted.tiers.probable).toEqual([]);
+    expect(reverted.path).toMatchObject({ merged: 1, kept: 3 });
   });
 
   it("per source: records, hours, placed and unplaced add up", () => {

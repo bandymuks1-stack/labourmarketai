@@ -19298,6 +19298,37 @@
     },
     "invariant": "Įrašai, valandos ir žmonės prieš ir po identiški: niekas neperkelta, neišskaidyta ir neištrinta.",
     "invariantBroken": "Dėmesio: sumos prieš ir po skiriasi — praneškite apie tai; niekas neturėjo pasikeisti.",
+    "path": {
+      "title": "Importo eilutės → projektai: {imported} → {kept}",
+      "imported": "Importuotos projektų eilutės: {imported}",
+      "merged": "Atpažinta kaip to paties projekto dalys — eilutės: {rows}, sujungta į projektus: {projects}",
+      "untouched": "Palikta kaip buvo (kitos eilutės tam pačiam objektui nėra): {rows}",
+      "kept": "Kanoniniai projektai dabar: {projects} — kiekvienas darbo įrašas ir valanda išsaugoti"
+    },
+    "tiers": {
+      "established": {
+        "title": "Nustatyta iš duomenų",
+        "body": "Sujungimai, nustatyti automatiškai (tas pats objekto kodas ar adresas): {merges}; projektai: {groups}. Kiekvieną vis tiek galima atšaukti."
+      },
+      "probable": {
+        "title": "Tikėtini susiejimai",
+        "body": "Tas pats adresas, bet kitas laikotarpis ar žmonės — susieta kaip tikėtina. Grupės: {count}. Bet kurią galima atšaukti registre žemiau."
+      },
+      "unresolved": {
+        "title": "Neišspręsta — palikta atskirai",
+        "body": "Eilutės su užfiksuotu prieštaravimu, nesujungtos: {count}."
+      }
+    },
+    "conflictKinds": {
+      "code_spans_several_addresses": "kodas nurodo kelis adresus",
+      "number_missing_on_one_side": "vienoje pusėje trūksta namo numerio",
+      "different_house_numbers": "skirtingi namų numeriai",
+      "different_street_names": "skirtingi gatvių pavadinimai",
+      "office_not_a_site": "biuras, ne objektas",
+      "work_type_not_a_site": "darbo rūšis, ne objektas",
+      "spelling_variant_different_dates": "panaši rašyba, skirtingos datos",
+      "recorded": "užfiksuotas prieštaravimas"
+    },
     "example": {
       "title": "Vienas objektas — daug užrašymų",
       "intro": "Tikros šio importo grupės: ką skaičiuoklės laikė atskiromis eilutėmis, LabourMarket.ai laiko vienu projektu su visa jo istorija.",
@@ -19312,9 +19343,7 @@
       "noObject": "{records} įrašų ({hours} val.) nenurodo objekto — jie lieka organizacijos istorijoje, ne išgalvotame projekte.",
       "multi": "{records} įrašų ({hours} val.) vienoje eilutėje nurodo kelis objektus — valandos tarp jų neskirstomos.",
       "single": "{records} įrašų ({hours} val.) nurodo vieną vietą, neatitinkančią jokio žinomo objekto.",
-      "dates": "{personDays} žmogaus dienų turi kelis įrašus ta pačia data ({records} įrašų): šaltinyje ta pati dienos žyma pakartota skirtingoms savaitėms. Valandos išsaugotos; datas reikia pataisyti.",
-      "probable": "{count, plural, one {# sujungimas yra tikėtinas} few {# sujungimai yra tikėtini} other {# sujungimų yra tikėtini}} (tas pats adresas, kitas laikotarpis ar žmonės).",
-      "conflicts": "{count, plural, one {# eilutė turi užfiksuotą prieštaravimą} few {# eilutės turi užfiksuotą prieštaravimą} other {# eilučių turi užfiksuotą prieštaravimą}}."
+      "dates": "{personDays} žmogaus dienų turi kelis įrašus ta pačia data ({records} įrašų): šaltinyje ta pati dienos žyma pakartota skirtingoms savaitėms. Valandos išsaugotos; datas reikia pataisyti."
     },
     "sessions": {
       "title": "Pagal šaltinio failą",

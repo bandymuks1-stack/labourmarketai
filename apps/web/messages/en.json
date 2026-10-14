@@ -19298,6 +19298,37 @@
     },
     "invariant": "Records, hours and people are identical before and after: nothing was moved, split or deleted.",
     "invariantBroken": "Warning: the totals differ before and after — report this; nothing should change.",
+    "path": {
+      "title": "Imported rows → projects: {imported} → {kept}",
+      "imported": "Imported project rows: {imported}",
+      "merged": "Recognised as parts of the same project — rows: {rows}, combined into projects: {projects}",
+      "untouched": "Kept as they were (no other row for the same object): {rows}",
+      "kept": "Canonical projects now: {projects} — every work record and hour kept"
+    },
+    "tiers": {
+      "established": {
+        "title": "Established from the data",
+        "body": "Merges established automatically (same object code or address): {merges}; projects: {groups}. Each one can still be undone."
+      },
+      "probable": {
+        "title": "Probable links",
+        "body": "Same address, but a different period or people — linked as probable. Groups: {count}. Any of them can be undone in the register below."
+      },
+      "unresolved": {
+        "title": "Unresolved — kept separate",
+        "body": "Rows with a recorded contradiction, not merged: {count}."
+      }
+    },
+    "conflictKinds": {
+      "code_spans_several_addresses": "the code names several addresses",
+      "number_missing_on_one_side": "house number missing on one side",
+      "different_house_numbers": "different house numbers",
+      "different_street_names": "different street names",
+      "office_not_a_site": "office, not a site",
+      "work_type_not_a_site": "type of work, not a site",
+      "spelling_variant_different_dates": "similar spelling, different dates",
+      "recorded": "recorded contradiction"
+    },
     "example": {
       "title": "One object, many spellings",
       "intro": "Real groups from this import: what the spreadsheets kept as separate rows, LabourMarket.ai keeps as one project with its full history.",
@@ -19312,9 +19343,7 @@
       "noObject": "{records} records ({hours} h) name no object — they stay in the organization's history, not on an invented project.",
       "multi": "{records} records ({hours} h) name several objects in one row — the hours are not split between them.",
       "single": "{records} records ({hours} h) name one place that matches no known object.",
-      "dates": "{personDays} person-days carry several records on one date ({records} records): a day label reused across weeks in the source. The hours are kept; the dates need a correction.",
-      "probable": "{count, plural, one {# merge is probable} other {# merges are probable}} (same address, different period or people).",
-      "conflicts": "{count, plural, one {# row carries a recorded conflict} other {# rows carry a recorded conflict}}."
+      "dates": "{personDays} person-days carry several records on one date ({records} records): a day label reused across weeks in the source. The hours are kept; the dates need a correction."
     },
     "sessions": {
       "title": "Per source file",

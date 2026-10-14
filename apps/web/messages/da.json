@@ -7420,6 +7420,37 @@
     },
     "invariant": "Poster, timer og personer er identiske før og efter: intet er flyttet, delt eller slettet.",
     "invariantBroken": "Bemærk: summerne afviger før og efter — meld det; intet bør ændre sig.",
+    "path": {
+      "title": "Importerede rækker → projekter: {imported} → {kept}",
+      "imported": "Importerede projektrækker: {imported}",
+      "merged": "Genkendt som dele af samme projekt — rækker: {rows}, samlet i projekter: {projects}",
+      "untouched": "Beholdt som de var (ingen anden række for samme objekt): {rows}",
+      "kept": "Kanoniske projekter nu: {projects} — hver arbejdspost og time er bevaret"
+    },
+    "tiers": {
+      "established": {
+        "title": "Fastslået ud fra data",
+        "body": "Sammenlægninger fastslået automatisk (samme objektkode eller adresse): {merges}; projekter: {groups}. Hver kan stadig fortrydes."
+      },
+      "probable": {
+        "title": "Sandsynlige koblinger",
+        "body": "Samme adresse, men en anden periode eller andre personer — koblet som sandsynlig. Grupper: {count}. Alle kan fortrydes i registret nedenfor."
+      },
+      "unresolved": {
+        "title": "Uafklaret — holdt adskilt",
+        "body": "Rækker med en registreret modstrid, ikke lagt sammen: {count}."
+      }
+    },
+    "conflictKinds": {
+      "code_spans_several_addresses": "koden nævner flere adresser",
+      "number_missing_on_one_side": "husnummer mangler på den ene side",
+      "different_house_numbers": "forskellige husnumre",
+      "different_street_names": "forskellige gadenavne",
+      "office_not_a_site": "kontor, ikke en byggeplads",
+      "work_type_not_a_site": "arbejdstype, ikke en byggeplads",
+      "spelling_variant_different_dates": "lignende stavning, forskellige datoer",
+      "recorded": "registreret modstrid"
+    },
     "example": {
       "title": "Ét objekt, mange stavemåder",
       "intro": "Reelle grupper fra denne import: det, regnearkene holdt som separate rækker, holder LabourMarket.ai som ét projekt med hele historikken.",
@@ -7434,9 +7465,7 @@
       "noObject": "{records} poster ({hours} t) angiver intet objekt — de bliver i organisationens historik, ikke på et opdigtet projekt.",
       "multi": "{records} poster ({hours} t) angiver flere objekter i én række — timerne deles ikke.",
       "single": "{records} poster ({hours} t) angiver et sted, der ikke matcher noget kendt objekt.",
-      "dates": "{personDays} persondage har flere poster på samme dato ({records} poster): i kilden blev en dagsetiket genbrugt over uger. Timerne bevares; datoerne skal rettes.",
-      "probable": "{count, plural, one {# sammenlægning er sandsynlig} other {# sammenlægninger er sandsynlige}} (samme adresse, anden periode eller personer).",
-      "conflicts": "{count, plural, one {# række har en registreret modstrid} other {# rækker har en registreret modstrid}}."
+      "dates": "{personDays} persondage har flere poster på samme dato ({records} poster): i kilden blev en dagsetiket genbrugt over uger. Timerne bevares; datoerne skal rettes."
     },
     "sessions": {
       "title": "Pr. kildefil",

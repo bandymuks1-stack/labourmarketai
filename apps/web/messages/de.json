@@ -19298,6 +19298,37 @@
     },
     "invariant": "Nachweise, Stunden und Personen sind vorher und nachher identisch: nichts wurde verschoben, aufgeteilt oder gelöscht.",
     "invariantBroken": "Achtung: die Summen weichen vorher und nachher ab — bitte melden; nichts sollte sich ändern.",
+    "path": {
+      "title": "Importierte Zeilen → Projekte: {imported} → {kept}",
+      "imported": "Importierte Projektzeilen: {imported}",
+      "merged": "Als Teile desselben Projekts erkannt — Zeilen: {rows}, zusammengeführt in Projekte: {projects}",
+      "untouched": "Unverändert belassen (keine andere Zeile für dasselbe Objekt): {rows}",
+      "kept": "Kanonische Projekte jetzt: {projects} — jeder Arbeitseintrag und jede Stunde bleibt erhalten"
+    },
+    "tiers": {
+      "established": {
+        "title": "Aus den Daten festgestellt",
+        "body": "Automatisch festgestellte Zusammenführungen (gleicher Objektcode oder gleiche Adresse): {merges}; Projekte: {groups}. Jede lässt sich weiterhin rückgängig machen."
+      },
+      "probable": {
+        "title": "Wahrscheinliche Zuordnungen",
+        "body": "Gleiche Adresse, aber anderer Zeitraum oder andere Personen — als wahrscheinlich zugeordnet. Gruppen: {count}. Jede lässt sich im Register unten rückgängig machen."
+      },
+      "unresolved": {
+        "title": "Ungeklärt — getrennt belassen",
+        "body": "Zeilen mit festgehaltenem Widerspruch, nicht zusammengeführt: {count}."
+      }
+    },
+    "conflictKinds": {
+      "code_spans_several_addresses": "der Code nennt mehrere Adressen",
+      "number_missing_on_one_side": "Hausnummer fehlt auf einer Seite",
+      "different_house_numbers": "verschiedene Hausnummern",
+      "different_street_names": "verschiedene Straßennamen",
+      "office_not_a_site": "Büro, keine Baustelle",
+      "work_type_not_a_site": "Arbeitsart, keine Baustelle",
+      "spelling_variant_different_dates": "ähnliche Schreibweise, andere Daten",
+      "recorded": "festgehaltener Widerspruch"
+    },
     "example": {
       "title": "Ein Objekt, viele Schreibweisen",
       "intro": "Echte Gruppen aus diesem Import: was die Tabellen als getrennte Zeilen führten, führt LabourMarket.ai als ein Projekt mit seiner ganzen Geschichte.",
@@ -19312,9 +19343,7 @@
       "noObject": "{records} Nachweise ({hours} Std.) nennen kein Objekt — sie bleiben in der Geschichte der Organisation, nicht auf einem erfundenen Projekt.",
       "multi": "{records} Nachweise ({hours} Std.) nennen mehrere Objekte in einer Zeile — die Stunden werden nicht aufgeteilt.",
       "single": "{records} Nachweise ({hours} Std.) nennen einen Ort, der zu keinem bekannten Objekt passt.",
-      "dates": "{personDays} Personentage tragen mehrere Nachweise an einem Datum ({records} Nachweise): in der Quelle wurde eine Tagesbezeichnung über Wochen wiederverwendet. Die Stunden bleiben; die Daten brauchen eine Korrektur.",
-      "probable": "{count, plural, one {# Zusammenführung ist wahrscheinlich} other {# Zusammenführungen sind wahrscheinlich}} (gleiche Adresse, anderer Zeitraum oder andere Personen).",
-      "conflicts": "{count, plural, one {# Zeile trägt einen erfassten Widerspruch} other {# Zeilen tragen einen erfassten Widerspruch}}."
+      "dates": "{personDays} Personentage tragen mehrere Nachweise an einem Datum ({records} Nachweise): in der Quelle wurde eine Tagesbezeichnung über Wochen wiederverwendet. Die Stunden bleiben; die Daten brauchen eine Korrektur."
     },
     "sessions": {
       "title": "Je Quelldatei",

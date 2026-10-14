@@ -96,6 +96,36 @@ export interface HistoryQuality {
     readonly probableMerges: number;
     readonly recordedConflicts: number;
   };
+  /**
+   * How the imported rows became the kept projects (owner 2026-10-14):
+   * imported = keptUntouched + keptAsCanonical + merged; kept = imported - merged.
+   */
+  readonly path: {
+    readonly imported: number;
+    readonly merged: number;
+    readonly intoProjects: number;
+    readonly keptUntouched: number;
+    readonly kept: number;
+  };
+  /**
+   * The three tiers, never mixed: what the rule established from the data
+   * alone, what it linked as probable (one undo away), and what it left
+   * unresolved as a recorded contradiction.
+   */
+  readonly tiers: {
+    readonly established: { readonly merges: number; readonly groups: number };
+    readonly probable: readonly {
+      readonly canonicalProjectId: string;
+      readonly canonicalText: string;
+      readonly variants: readonly string[];
+    }[];
+    readonly unresolved: readonly {
+      readonly projectId: string;
+      readonly originalText: string;
+      readonly decision: QualityDecision["decision"];
+      readonly kinds: readonly string[];
+    }[];
+  };
   readonly mismatchCounts: Readonly<Record<string, number>>;
   readonly bySession: readonly {
     readonly sessionId: string | null;
@@ -202,6 +232,22 @@ export function buildHistoryQuality(input: {
     })
     .sort((a, b) => b.importedRows - a.importedRows || b.records - a.records);
 
+  // A merge counts as established or probable by its ledger row only, and
+  // only while its marker is live — a marker without a ledger row is neither.
+  const liveMerges = live.filter((d) => d.decision === "merged" && d.canonicalProjectId && canonicalOf.get(d.projectId) === d.canonicalProjectId);
+  const established = liveMerges.filter((d) => d.certainty === "unambiguous");
+  const probableMerges = liveMerges.filter((d) => d.certainty === "probable");
+  const textOf = new Map(live.map((d) => [d.projectId, d.originalText]));
+  const probableByCanonical = new Map<string, string[]>();
+  for (const d of probableMerges) {
+    const arr = probableByCanonical.get(d.canonicalProjectId!);
+    if (arr) arr.push(d.originalText);
+    else probableByCanonical.set(d.canonicalProjectId!, [d.originalText]);
+  }
+  const conflictKind = (c: unknown) =>
+    c && typeof c === "object" && typeof (c as { kind?: unknown }).kind === "string" ? (c as { kind: string }).kind : "recorded";
+  const canonicals = new Set(canonicalOf.values());
+
   return {
     before: {
       importedProjectRows: historical.length,
@@ -223,6 +269,24 @@ export function buildHistoryQuality(input: {
       dateConflicts: { personDays: conflicted.length, records: conflicted.reduce((n, rs) => n + rs.length, 0) },
       probableMerges: live.filter((d) => d.decision === "merged" && d.certainty === "probable").length,
       recordedConflicts: live.filter((d) => d.conflicts.length > 0).length,
+    },
+    path: {
+      imported: historical.length,
+      merged: canonicalOf.size,
+      intoProjects: canonicals.size,
+      keptUntouched: kept.filter((p) => !canonicals.has(p.id)).length,
+      kept: kept.length,
+    },
+    tiers: {
+      established: { merges: established.length, groups: new Set(established.map((d) => d.canonicalProjectId)).size },
+      probable: [...probableByCanonical.entries()].map(([canonicalProjectId, variants]) => ({
+        canonicalProjectId,
+        canonicalText: textOf.get(canonicalProjectId) ?? historical.find((p) => p.id === canonicalProjectId)?.title ?? "—",
+        variants,
+      })),
+      unresolved: live
+        .filter((d) => d.conflicts.length > 0)
+        .map((d) => ({ projectId: d.projectId, originalText: d.originalText, decision: d.decision, kinds: [...new Set(d.conflicts.map(conflictKind))] })),
     },
     mismatchCounts,
     bySession: [...sessions.entries()]

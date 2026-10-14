@@ -7420,6 +7420,37 @@
     },
     "invariant": "Poster, timmar och personer är identiska före och efter: inget har flyttats, delats eller raderats.",
     "invariantBroken": "Obs: summorna skiljer sig före och efter — rapportera detta; inget ska ändras.",
+    "path": {
+      "title": "Importerade rader → projekt: {imported} → {kept}",
+      "imported": "Importerade projektrader: {imported}",
+      "merged": "Igenkända som delar av samma projekt — rader: {rows}, sammanslagna till projekt: {projects}",
+      "untouched": "Lämnade som de var (ingen annan rad för samma objekt): {rows}",
+      "kept": "Kanoniska projekt nu: {projects} — varje arbetspost och timme är bevarad"
+    },
+    "tiers": {
+      "established": {
+        "title": "Fastställt utifrån data",
+        "body": "Sammanslagningar fastställda automatiskt (samma objektkod eller adress): {merges}; projekt: {groups}. Var och en kan fortfarande ångras."
+      },
+      "probable": {
+        "title": "Sannolika kopplingar",
+        "body": "Samma adress, men en annan period eller andra personer — kopplat som sannolikt. Grupper: {count}. Alla kan ångras i registret nedan."
+      },
+      "unresolved": {
+        "title": "Olöst — hållet åtskilt",
+        "body": "Rader med en registrerad motsägelse, inte sammanslagna: {count}."
+      }
+    },
+    "conflictKinds": {
+      "code_spans_several_addresses": "koden anger flera adresser",
+      "number_missing_on_one_side": "husnummer saknas på ena sidan",
+      "different_house_numbers": "olika husnummer",
+      "different_street_names": "olika gatunamn",
+      "office_not_a_site": "kontor, inte en arbetsplats",
+      "work_type_not_a_site": "typ av arbete, inte en arbetsplats",
+      "spelling_variant_different_dates": "liknande stavning, olika datum",
+      "recorded": "registrerad motsägelse"
+    },
     "example": {
       "title": "Ett objekt, många stavningar",
       "intro": "Verkliga grupper ur denna import: det kalkylbladen höll som separata rader håller LabourMarket.ai som ett projekt med hela historiken.",
@@ -7434,9 +7465,7 @@
       "noObject": "{records} poster ({hours} h) anger inget objekt — de stannar i organisationens historik, inte på ett påhittat projekt.",
       "multi": "{records} poster ({hours} h) anger flera objekt på en rad — timmarna delas inte upp.",
       "single": "{records} poster ({hours} h) anger en plats som inte matchar något känt objekt.",
-      "dates": "{personDays} persondagar har flera poster på samma datum ({records} poster): i källan återanvändes en dagsetikett över veckor. Timmarna behålls; datumen behöver rättas.",
-      "probable": "{count, plural, one {# sammanslagning är sannolik} other {# sammanslagningar är sannolika}} (samma adress, annan period eller personer).",
-      "conflicts": "{count, plural, one {# rad har en registrerad motsägelse} other {# rader har en registrerad motsägelse}}."
+      "dates": "{personDays} persondagar har flera poster på samma datum ({records} poster): i källan återanvändes en dagsetikett över veckor. Timmarna behålls; datumen behöver rättas."
     },
     "sessions": {
       "title": "Per källfil",
