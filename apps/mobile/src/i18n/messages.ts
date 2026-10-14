@@ -37,6 +37,9 @@ const en = {
   "auth.register.title": "Create an account",
   "auth.register.submit": "Create account",
   "auth.register.toSignIn": "I already have an account",
+  "auth.signIn.forgot": "Forgot your password?",
+  "auth.register.legal":
+    "By creating an account you accept the terms of service and the privacy policy.",
   "auth.error.rejected": "That email and password did not match.",
   "auth.error.unreachable":
     "We could not reach the server, so we do not know whether those details are right. Check your connection and try again.",
@@ -51,6 +54,8 @@ const en = {
     "These open in your browser, on the website. Asking for your data, or for your account to be deleted, is done there under Privacy.",
   "account.privacy": "Privacy, your data and deleting your account",
   "account.terms": "Terms of service",
+  "account.privacyPolicy": "Privacy policy",
+  "account.deletionInfo": "How account deletion works (no sign-in needed)",
   "account.support": "Contact support (info@labourmarket.ai)",
   "account.external": "Browser",
   "account.openFailed": "The link could not be opened on this phone. Nothing was changed.",
@@ -235,6 +240,9 @@ const lt: Catalogue = {
   "auth.register.title": "Sukurti paskyrą",
   "auth.register.submit": "Sukurti paskyrą",
   "auth.register.toSignIn": "Jau turiu paskyrą",
+  "auth.signIn.forgot": "Pamiršai slaptažodį?",
+  "auth.register.legal":
+    "Sukurti paskyrą reiškia sutikti su naudojimo sąlygomis ir privatumo politika.",
   "auth.error.rejected": "Toks el. paštas ir slaptažodis nesutampa.",
   "auth.error.unreachable":
     "Nepavyko pasiekti serverio, todėl nežinome, ar duomenys teisingi. Patikrink ryšį ir bandyk dar kartą.",
@@ -249,6 +257,8 @@ const lt: Catalogue = {
     "Šios nuorodos atidaromos naršyklėje, svetainėje. Savo duomenų arba paskyros ištrynimo prašymas pateikiamas ten, skiltyje „Privatumas“.",
   "account.privacy": "Privatumas, tavo duomenys ir paskyros ištrynimas",
   "account.terms": "Naudojimo sąlygos",
+  "account.privacyPolicy": "Privatumo politika",
+  "account.deletionInfo": "Kaip ištrinama paskyra (prisijungti nereikia)",
   "account.support": "Susisiekti su pagalba (info@labourmarket.ai)",
   "account.external": "Naršyklė",
   "account.openFailed": "Nuorodos šiame telefone atidaryti nepavyko. Niekas nepakeista.",
@@ -429,6 +439,9 @@ const ru: Catalogue = {
   "auth.register.title": "Создать аккаунт",
   "auth.register.submit": "Создать аккаунт",
   "auth.register.toSignIn": "У меня уже есть аккаунт",
+  "auth.signIn.forgot": "Забыли пароль?",
+  "auth.register.legal":
+    "Создавая аккаунт, вы принимаете условия использования и политику конфиденциальности.",
   "auth.error.rejected": "Такая почта и пароль не совпадают.",
   "auth.error.unreachable":
     "Не удалось связаться с сервером, поэтому мы не знаем, верны ли данные. Проверьте соединение и попробуйте снова.",
@@ -443,6 +456,8 @@ const ru: Catalogue = {
     "Эти ссылки открываются в браузере, на сайте. Запросить свои данные или удаление аккаунта можно там, в разделе «Конфиденциальность».",
   "account.privacy": "Конфиденциальность, ваши данные и удаление аккаунта",
   "account.terms": "Условия использования",
+  "account.privacyPolicy": "Политика конфиденциальности",
+  "account.deletionInfo": "Как удаляется аккаунт (вход не нужен)",
   "account.support": "Связаться с поддержкой (info@labourmarket.ai)",
   "account.external": "Браузер",
   "account.openFailed": "Не удалось открыть ссылку на этом телефоне. Ничего не изменено.",
@@ -623,6 +638,9 @@ const nl: Catalogue = {
   "auth.register.title": "Account aanmaken",
   "auth.register.submit": "Account aanmaken",
   "auth.register.toSignIn": "Ik heb al een account",
+  "auth.signIn.forgot": "Wachtwoord vergeten?",
+  "auth.register.legal":
+    "Door een account aan te maken, ga je akkoord met de gebruiksvoorwaarden en het privacybeleid.",
   "auth.error.rejected": "Dit e-mailadres en wachtwoord komen niet overeen.",
   "auth.error.unreachable":
     "We konden de server niet bereiken, dus we weten niet of deze gegevens kloppen. Controleer je verbinding en probeer het opnieuw.",
@@ -637,6 +655,8 @@ const nl: Catalogue = {
     "Deze links openen in je browser, op de website. Je gegevens opvragen of je account laten verwijderen doe je daar, onder Privacy.",
   "account.privacy": "Privacy, je gegevens en je account verwijderen",
   "account.terms": "Gebruiksvoorwaarden",
+  "account.privacyPolicy": "Privacybeleid",
+  "account.deletionInfo": "Hoe het verwijderen van een account werkt (inloggen niet nodig)",
   "account.support": "Contact met support (info@labourmarket.ai)",
   "account.external": "Browser",
   "account.openFailed": "De link kon op deze telefoon niet worden geopend. Er is niets gewijzigd.",
@@ -817,6 +837,9 @@ const de: Catalogue = {
   "auth.register.title": "Konto erstellen",
   "auth.register.submit": "Konto erstellen",
   "auth.register.toSignIn": "Ich habe bereits ein Konto",
+  "auth.signIn.forgot": "Passwort vergessen?",
+  "auth.register.legal":
+    "Mit dem Erstellen eines Kontos akzeptieren Sie die Nutzungsbedingungen und die Datenschutzerklärung.",
   "auth.error.rejected": "Diese E-Mail und dieses Passwort passen nicht zusammen.",
   "auth.error.unreachable":
     "Wir konnten den Server nicht erreichen und wissen daher nicht, ob die Angaben stimmen. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
@@ -831,6 +854,8 @@ const de: Catalogue = {
     "Diese Links öffnen sich in Ihrem Browser, auf der Website. Ihre Daten anfordern oder Ihr Konto löschen lassen können Sie dort unter „Datenschutz“.",
   "account.privacy": "Datenschutz, Ihre Daten und das Löschen Ihres Kontos",
   "account.terms": "Nutzungsbedingungen",
+  "account.privacyPolicy": "Datenschutzerklärung",
+  "account.deletionInfo": "So funktioniert die Kontolöschung (ohne Anmeldung)",
   "account.support": "Support kontaktieren (info@labourmarket.ai)",
   "account.external": "Browser",
   "account.openFailed": "Der Link konnte auf diesem Telefon nicht geöffnet werden. Es wurde nichts geändert.",
@@ -1014,6 +1039,9 @@ const pl: Catalogue = {
   "auth.register.title": "Załóż konto",
   "auth.register.submit": "Załóż konto",
   "auth.register.toSignIn": "Mam już konto",
+  "auth.signIn.forgot": "Nie pamiętasz hasła?",
+  "auth.register.legal":
+    "Tworząc konto, akceptujesz warunki korzystania z usługi i politykę prywatności.",
   "auth.error.rejected": "Ten e-mail i hasło do siebie nie pasują.",
   "auth.error.unreachable":
     "Nie udało się połączyć z serwerem, więc nie wiemy, czy te dane są poprawne. Sprawdź połączenie i spróbuj ponownie.",
@@ -1186,6 +1214,8 @@ const pl: Catalogue = {
     "Te strony otwierają się w przeglądarce, na stronie internetowej. Prośbę o Twoje dane lub o usunięcie konta składasz tam, w sekcji Prywatność.",
   "account.privacy": "Prywatność, Twoje dane i usunięcie konta",
   "account.terms": "Warunki korzystania z usługi",
+  "account.privacyPolicy": "Polityka prywatności",
+  "account.deletionInfo": "Jak działa usuwanie konta (bez logowania)",
   "account.support": "Skontaktuj się z pomocą (info@labourmarket.ai)",
   "account.external": "Przeglądarka",
   "account.openFailed": "Nie udało się otworzyć linku na tym telefonie. Nic nie zostało zmienione.",
