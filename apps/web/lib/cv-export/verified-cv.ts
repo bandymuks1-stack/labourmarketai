@@ -1,3 +1,4 @@
+import { deriveGrowthReading } from "@/lib/journal/growth-reading";
 import { readOwnConfirmedWorkTotals } from "@/lib/evidence/confirmed-work-read";
 import { organizationAllTime } from "@/lib/journal/organization-all-time";
 import { cvLiveEntries } from "@/lib/cv-export/cv-entries";
@@ -213,6 +214,14 @@ export type VerifiedCvData = {
    * could not be read: the CV then shows no figure and no zero (SEP-7).
    */
   skillPractice: Record<string, SkillPracticeFacts> | null;
+  /**
+   * DERIVED directions adjacent to the person's evidenced skills — the
+   * growth reading's `adjacent_opportunity` kind, over the same work
+   * intelligence. For the person's OWN career-journey horizon only (a
+   * personal forecast, frozen contract §1.7); never printed. `null` when the
+   * journal could not be read.
+   */
+  growthAdjacent?: { professionId: string; sharedSkills: string[]; missingSkills: string[] }[] | null;
   /** How much of the journal the figures rest on (lane B, #1689): the
    *  entry read stops at a ceiling, so `truncated` means older entries MAY
    *  exist outside every figure — the CV then names the window instead of
@@ -878,6 +887,24 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         ? Object.fromEntries(confirmedHoursBySlug(workIntelligence))
         : null,
       skillPractice: workIntelligence ? skillPracticeFromIntelligence(workIntelligence) : null,
+      growthAdjacent: workIntelligence
+        ? deriveGrowthReading(workIntelligence, {
+            primaryProfessionSlug:
+              professionSlugs.find((p) => p.isPrimary && p.slug)?.slug ??
+              professionSlugs.find((p) => p.slug)?.slug ??
+              null,
+          }).directions.flatMap((d) =>
+            d.kind === "adjacent_opportunity"
+              ? [
+                  {
+                    professionId: d.professionId,
+                    sharedSkills: [...d.why.sharedSkills],
+                    missingSkills: [...d.why.missingSkills],
+                  },
+                ]
+              : [],
+          )
+        : null,
       journalCoverage: workIntelligence
         ? {
             entriesRead: workIntelligence.coverage.entriesRead,

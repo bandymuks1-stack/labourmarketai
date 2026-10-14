@@ -19504,6 +19504,23 @@
       "derived": "Wywnioskowane z faktów"
     }
   },
+  "careerJourney": {
+    "title": "Twoja droga zawodowa",
+    "summary": "Projekty to przystanki, umiejętności to linie. Linia zatrzymuje się tylko tam, gdzie Twój dziennik pokazuje pracę z tą umiejętnością.",
+    "now": "Teraz",
+    "gap": "Brak wpisów",
+    "horizon": "Horyzont",
+    "derived": "wywnioskowane, nie obietnica",
+    "linksUnknown": "Nie udało się odczytać, gdzie używano Twoich umiejętności — linie są pokazane bez przystanków.",
+    "level": {
+      "confirmed": "potwierdzone",
+      "recorded": "zapisane",
+      "declared": "zadeklarowane"
+    },
+    "focusHint": "Dotknij linii, aby prześledzić jedną umiejętność przez całą drogę.",
+    "showAll": "Pokaż wszystkie",
+    "horizonDetail": "masz już {shared} z {total} umiejętności"
+  },
   "projectCourse": {
     "title": "Trasa projektu",
     "count": "Ukończono {done} z {total} etapów",

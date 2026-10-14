@@ -19504,6 +19504,23 @@
       "derived": "Aus Fakten abgeleitet"
     }
   },
+  "careerJourney": {
+    "title": "Ihr Berufsweg",
+    "summary": "Projekte sind Haltestellen, Fähigkeiten sind Linien. Eine Linie hält nur dort, wo Ihr Journal zeigt, dass mit dieser Fähigkeit gearbeitet wurde.",
+    "now": "Jetzt",
+    "gap": "Keine Einträge",
+    "horizon": "Horizont",
+    "derived": "abgeleitet, kein Versprechen",
+    "linksUnknown": "Es konnte nicht gelesen werden, wo Ihre Fähigkeiten eingesetzt wurden – die Linien erscheinen ohne Haltestellen.",
+    "level": {
+      "confirmed": "bestätigt",
+      "recorded": "erfasst",
+      "declared": "angegeben"
+    },
+    "focusHint": "Tippen Sie auf eine Linie, um eine Fähigkeit über den ganzen Weg zu verfolgen.",
+    "showAll": "Alle zeigen",
+    "horizonDetail": "Sie haben bereits {shared} von {total} Fähigkeiten"
+  },
   "projectCourse": {
     "title": "Projektverlauf",
     "count": "{done} von {total} Phasen erledigt",

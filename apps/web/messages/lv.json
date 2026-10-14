@@ -7613,6 +7613,23 @@
       "derived": "Izsecināts no faktiem"
     }
   },
+  "careerJourney": {
+    "title": "Jūsu profesionālais ceļš",
+    "summary": "Projekti ir pieturas, prasmes ir līnijas. Līnija apstājas tikai tur, kur jūsu žurnāls rāda darbu ar šo prasmi.",
+    "now": "Tagad",
+    "gap": "Nav ierakstu",
+    "horizon": "Horizonts",
+    "derived": "izsecināts, nevis solījums",
+    "linksUnknown": "Neizdevās nolasīt, kur izmantotas jūsu prasmes, — līnijas parādītas bez pieturām.",
+    "level": {
+      "confirmed": "apstiprināts",
+      "recorded": "ierakstīts",
+      "declared": "deklarēts"
+    },
+    "focusHint": "Pieskarieties līnijai, lai izsekotu vienu prasmi visā ceļā.",
+    "showAll": "Rādīt visas",
+    "horizonDetail": "jums jau ir {shared} no {total} prasmēm"
+  },
   "projectCourse": {
     "title": "Projekta maršruts",
     "count": "Pabeigti {done} no {total} posmiem",

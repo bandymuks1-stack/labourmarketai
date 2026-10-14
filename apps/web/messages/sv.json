@@ -7613,6 +7613,23 @@
       "derived": "Härlett ur fakta"
     }
   },
+  "careerJourney": {
+    "title": "Din yrkesresa",
+    "summary": "Projekt är hållplatser, färdigheter är linjer. En linje stannar bara där din journal visar att färdigheten användes.",
+    "now": "Nu",
+    "gap": "Inga registreringar",
+    "horizon": "Horisont",
+    "derived": "härlett, inget löfte",
+    "linksUnknown": "Vi kunde inte läsa var dina färdigheter användes – linjerna visas utan hållplatser.",
+    "level": {
+      "confirmed": "bekräftat",
+      "recorded": "registrerat",
+      "declared": "angivet"
+    },
+    "focusHint": "Tryck på en linje för att följa en färdighet genom hela resan.",
+    "showAll": "Visa alla",
+    "horizonDetail": "du har redan {shared} av {total} färdigheter"
+  },
   "projectCourse": {
     "title": "Projektförlopp",
     "count": "{done} av {total} etapper klara",

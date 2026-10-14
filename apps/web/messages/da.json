@@ -7613,6 +7613,23 @@
       "derived": "Udledt af fakta"
     }
   },
+  "careerJourney": {
+    "title": "Din karrierevej",
+    "summary": "Projekter er stop, færdigheder er linjer. En linje stopper kun, hvor din journal viser, at færdigheden blev brugt.",
+    "now": "Nu",
+    "gap": "Ingen registreringer",
+    "horizon": "Horisont",
+    "derived": "udledt, ikke et løfte",
+    "linksUnknown": "Vi kunne ikke læse, hvor dine færdigheder blev brugt – linjerne vises uden stop.",
+    "level": {
+      "confirmed": "bekræftet",
+      "recorded": "registreret",
+      "declared": "angivet"
+    },
+    "focusHint": "Tryk på en linje for at følge én færdighed gennem hele vejen.",
+    "showAll": "Vis alle",
+    "horizonDetail": "du har allerede {shared} af {total} færdigheder"
+  },
   "projectCourse": {
     "title": "Projektforløb",
     "count": "{done} af {total} faser færdige",
