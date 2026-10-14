@@ -7516,5 +7516,20 @@
       "unplaced_single_unmatched": "tundmatu kohaga kirjed"
     },
     "link": "Andmekvaliteet"
+  },
+  "projectCourse": {
+    "title": "Projekti teekond",
+    "count": "Valmis {done} etappi {total}-st",
+    "unknown": "Projekti etappe ei õnnestunud lugeda.",
+    "here": "Siin me oleme",
+    "state": {
+      "done": "Valmis",
+      "now": "Käimas",
+      "risk": "Plaanist maas",
+      "blocked": "Peatatud",
+      "planned": "Planeeritud",
+      "cancelled": "Tühistatud"
+    },
+    "helpNeeded": "Abi on vaja — {stage}:"
   }
 }

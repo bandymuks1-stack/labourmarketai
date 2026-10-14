@@ -19407,5 +19407,20 @@
       "unplaced_single_unmatched": "Nachweise mit unbekanntem Ort"
     },
     "link": "Datenqualität"
+  },
+  "projectCourse": {
+    "title": "Projektverlauf",
+    "count": "{done} von {total} Phasen erledigt",
+    "unknown": "Die Projektphasen konnten nicht gelesen werden.",
+    "here": "Hier sind wir",
+    "state": {
+      "done": "Erledigt",
+      "now": "Läuft",
+      "risk": "Hinter dem Plan",
+      "blocked": "Blockiert",
+      "planned": "Geplant",
+      "cancelled": "Abgebrochen"
+    },
+    "helpNeeded": "Hilfe nötig — {stage}:"
   }
 }

@@ -7516,5 +7516,20 @@
       "unplaced_single_unmatched": "ieraksti ar nezināmu vietu"
     },
     "link": "Datu kvalitāte"
+  },
+  "projectCourse": {
+    "title": "Projekta maršruts",
+    "count": "Pabeigti {done} no {total} posmiem",
+    "unknown": "Neizdevās nolasīt projekta posmus.",
+    "here": "Mēs esam šeit",
+    "state": {
+      "done": "Pabeigts",
+      "now": "Notiek",
+      "risk": "Atpaliek no plāna",
+      "blocked": "Apturēts",
+      "planned": "Plānots",
+      "cancelled": "Atcelts"
+    },
+    "helpNeeded": "Vajadzīga palīdzība — {stage}:"
   }
 }

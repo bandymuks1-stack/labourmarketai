@@ -19407,5 +19407,20 @@
       "unplaced_single_unmatched": "įrašai su nežinoma vieta"
     },
     "link": "Duomenų kokybė"
+  },
+  "projectCourse": {
+    "title": "Projekto trasa",
+    "count": "Baigta {done} iš {total} etapų",
+    "unknown": "Nepavyko nuskaityti projekto etapų.",
+    "here": "Mes čia",
+    "state": {
+      "done": "Baigta",
+      "now": "Vyksta",
+      "risk": "Vėluoja pagal planą",
+      "blocked": "Sustabdyta",
+      "planned": "Suplanuota",
+      "cancelled": "Atšaukta"
+    },
+    "helpNeeded": "Reikia pagalbos — {stage}:"
   }
 }

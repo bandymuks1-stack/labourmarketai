@@ -19407,5 +19407,20 @@
       "unplaced_single_unmatched": "wpisy z nieznanym miejscem"
     },
     "link": "Jakość danych"
+  },
+  "projectCourse": {
+    "title": "Trasa projektu",
+    "count": "Ukończono {done} z {total} etapów",
+    "unknown": "Nie udało się odczytać etapów projektu.",
+    "here": "Tu jesteśmy",
+    "state": {
+      "done": "Ukończony",
+      "now": "W toku",
+      "risk": "Opóźniony względem planu",
+      "blocked": "Wstrzymany",
+      "planned": "Zaplanowany",
+      "cancelled": "Anulowany"
+    },
+    "helpNeeded": "Potrzebna pomoc — {stage}:"
   }
 }

@@ -7516,5 +7516,20 @@
       "unplaced_single_unmatched": "poster med okänd plats"
     },
     "link": "Datakvalitet"
+  },
+  "projectCourse": {
+    "title": "Projektförlopp",
+    "count": "{done} av {total} etapper klara",
+    "unknown": "Projektets etapper kunde inte läsas.",
+    "here": "Här är vi",
+    "state": {
+      "done": "Klar",
+      "now": "Pågår",
+      "risk": "Efter planen",
+      "blocked": "Blockerad",
+      "planned": "Planerad",
+      "cancelled": "Inställd"
+    },
+    "helpNeeded": "Hjälp behövs — {stage}:"
   }
 }

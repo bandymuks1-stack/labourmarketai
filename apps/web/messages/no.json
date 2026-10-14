@@ -7516,5 +7516,20 @@
       "unplaced_single_unmatched": "poster med ukjent sted"
     },
     "link": "Datakvalitet"
+  },
+  "projectCourse": {
+    "title": "Prosjektløp",
+    "count": "{done} av {total} faser ferdige",
+    "unknown": "Prosjektets faser kunne ikke leses.",
+    "here": "Her er vi",
+    "state": {
+      "done": "Ferdig",
+      "now": "Pågår",
+      "risk": "Etter planen",
+      "blocked": "Blokkert",
+      "planned": "Planlagt",
+      "cancelled": "Avlyst"
+    },
+    "helpNeeded": "Trenger hjelp — {stage}:"
   }
 }

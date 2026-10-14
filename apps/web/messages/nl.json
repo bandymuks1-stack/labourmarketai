@@ -19407,5 +19407,20 @@
       "unplaced_single_unmatched": "registraties met onbekende plaats"
     },
     "link": "Datakwaliteit"
+  },
+  "projectCourse": {
+    "title": "Projectroute",
+    "count": "{done} van {total} fasen klaar",
+    "unknown": "Kon de projectfasen niet lezen.",
+    "here": "Hier zijn we",
+    "state": {
+      "done": "Klaar",
+      "now": "Bezig",
+      "risk": "Achter op de planning",
+      "blocked": "Geblokkeerd",
+      "planned": "Gepland",
+      "cancelled": "Geannuleerd"
+    },
+    "helpNeeded": "Hulp nodig — {stage}:"
   }
 }
