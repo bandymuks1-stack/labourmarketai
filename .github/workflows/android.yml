@@ -150,6 +150,10 @@ jobs:
             --no-daemon --stacktrace > gradle.log 2>&1
           STATUS=$?
           if [ $STATUS -ne 0 ]; then
+            # A failing configuration-time `node` call prints its stderr BEFORE
+            # the FAILURE block — show what led up to it, not just the trace.
+            echo "===== output leading up to FAILURE ====="
+            sed -n '1,/FAILURE:/p' gradle.log | tail -150
             echo "===== error regions ====="
             grep -n -B 3 -A 25 -E "FAILURE:|error:|What went wrong" gradle.log | head -400
             echo "===== last 120 lines ====="
