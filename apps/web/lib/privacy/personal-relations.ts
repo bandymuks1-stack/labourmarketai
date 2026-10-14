@@ -691,6 +691,10 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no
   // content, purged after a day (20261013120000).
   "confirmation_spends",
+  // Historical consolidation ledger: `decided_by` / `reverted_by` are who
+  // decided or undid a merge of PROJECT rows; the subject is a project, never
+  // the person (20261014090000).
+  "historical_consolidation_decisions",
   // Discovered-organization provenance: the person is only the recorder of a
   // fact or identifier about a COMPANY, never its subject.
   "organization_facts",
