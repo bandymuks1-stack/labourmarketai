@@ -19427,7 +19427,13 @@
       "noEntriesToday": "Šiandien dar nieko neužrašyta",
       "confirmed": "Iš jų patvirtino vadovas ar užsakovas: {hours} val.",
       "confirmedNone": "Patvirtintų valandų dar nėra",
-      "barLabel": "Užrašytos ir patvirtintos valandos per 7 dienas"
+      "barLabel": "Užrašytos ir patvirtintos valandos per 7 dienas",
+      "record": {
+        "line": "Tavo rekordas: {best} patvirtintų val. per mėnesį ({month}). Šį mėnesį kol kas: {current} val.",
+        "reached": "Šį mėnesį pasiekei savo rekordą: {hours} patvirtintų val.",
+        "onlyYou": "Matai tik tu — lyginama tik su tavo ankstesniais mėnesiais.",
+        "barLabel": "Šis mėnuo, lyginant su tavo geriausiu"
+      }
     },
     "because": {
       "title": "Naujausi įvykiai",

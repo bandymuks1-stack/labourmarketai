@@ -8,9 +8,11 @@ import { buttonLinkClassName } from "@/components/ui/Button";
 import {
   loadHomeBecause,
   loadHomeOutside,
+  loadHomeRecord,
   loadHomeRunning,
   loadHomeWaiting,
 } from "@/lib/home/home-server";
+import type { PersonalRecord } from "@/lib/home/personal-record";
 import type {
   BecauseRegion,
   HomeChange,
@@ -336,15 +338,19 @@ export async function HomeWaitingView({
 // ───────────────────────── 02 · RUNNING ─────────────────────────
 
 export async function HomeRunning({ locale }: { readonly locale: ActiveLocale }) {
-  return <HomeRunningView locale={locale} running={await loadHomeRunning()} />;
+  const [running, record] = await Promise.all([loadHomeRunning(), loadHomeRecord()]);
+  return <HomeRunningView locale={locale} running={running} record={record} />;
 }
 
 export async function HomeRunningView({
   locale,
   running,
+  record,
 }: {
   readonly locale: ActiveLocale;
   readonly running: RunningRegion;
+  /** The person's own record — self-only; absent/none/unknown draws nothing. */
+  readonly record?: PersonalRecord;
 }) {
   const [t, tRegion, tSkill, tProf] = await Promise.all([
     getTranslations("todayScreen.home"),
@@ -428,6 +434,21 @@ export async function HomeRunningView({
                 none: tRegion("confirmedNone"),
               }}
             />
+            {record?.kind === "record" ? (
+              <PersonalRecordLine
+                record={record}
+                labels={{
+                  line: tRegion("record.line", {
+                    best: fmtHours(record.best.confirmedHours),
+                    month: formatUtcDate(`${record.best.month}-01`, locale, { month: "long", year: "numeric" }) ?? record.best.month,
+                    current: fmtHours(record.current.confirmedHours),
+                  }),
+                  reached: tRegion("record.reached", { hours: fmtHours(record.current.confirmedHours) }),
+                  onlyYou: tRegion("record.onlyYou"),
+                  bar: tRegion("record.barLabel"),
+                }}
+              />
+            ) : null}
             {work.today.untimed > 0 ? (
               <p className="text-meta text-text-muted" data-testid="today-work-untimed">
                 {t("work.untimed", { n: work.today.untimed })}
@@ -547,6 +568,32 @@ function ConfirmedBar({
         </div>
       </div>
       <p className="text-meta text-text-muted">{labels.confirmed(c)}</p>
+    </div>
+  );
+}
+
+/**
+ * THE PERSONAL RECORD — the person's best month of CONFIRMED hours beside
+ * this month (`derivePersonalRecord`). Their own history only: no other
+ * person, no average, no rank. Said "only you see this", and drawn quietly:
+ * a neutral bar toward their own best, never gold (gold is an action) and
+ * never green (green is a second party's confirmation of one entry).
+ */
+function PersonalRecordLine({
+  record,
+  labels,
+}: {
+  readonly record: Extract<PersonalRecord, { kind: "record" }>;
+  readonly labels: { readonly line: string; readonly reached: string; readonly onlyYou: string; readonly bar: string };
+}) {
+  const share = Math.max(0, Math.min(record.current.confirmedHours / record.best.confirmedHours, 1));
+  return (
+    <div className="flex flex-col gap-1.5 border-t border-ink-600/60 pt-3" data-testid="home-personal-record" data-record-month={record.isRecordMonth ? "true" : undefined}>
+      <div role="img" aria-label={`${labels.bar}: ${Math.round(share * 100)}%`} className="h-1.5 w-full overflow-hidden rounded-full bg-ink-600/70">
+        <div className={cn("h-full rounded-full bg-text-secondary", record.isRecordMonth && "ua-confirmed")} style={{ width: `${Math.max(share * 100, 2)}%` }} />
+      </div>
+      <p className="text-support text-text-primary">{record.isRecordMonth ? labels.reached : labels.line}</p>
+      <p className="text-meta text-text-muted">{labels.onlyYou}</p>
     </div>
   );
 }

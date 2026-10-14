@@ -7536,7 +7536,13 @@
       "noEntriesToday": "Inget registrerat i dag ännu",
       "confirmed": "Varav bekräftat av chef eller kund: {hours} h",
       "confirmedNone": "Inga bekräftade timmar ännu",
-      "barLabel": "Registrerade och bekräftade timmar, senaste 7 dagarna"
+      "barLabel": "Registrerade och bekräftade timmar, senaste 7 dagarna",
+      "record": {
+        "line": "Ditt rekord: {best} h bekräftade på en månad ({month}). Den här månaden hittills: {current} h.",
+        "reached": "Den här månaden nådde du ditt eget rekord: {hours} bekräftade h.",
+        "onlyYou": "Bara du ser detta – det jämförs bara med dina egna månader.",
+        "barLabel": "Den här månaden mot ditt bästa"
+      }
     },
     "because": {
       "title": "Senaste händelserna",

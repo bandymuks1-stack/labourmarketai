@@ -19427,7 +19427,13 @@
       "noEntriesToday": "Heute noch nichts erfasst",
       "confirmed": "Davon von Vorgesetzten oder Auftraggebern bestätigt: {hours} Std.",
       "confirmedNone": "Noch keine bestätigten Stunden",
-      "barLabel": "Erfasste und bestätigte Stunden, letzte 7 Tage"
+      "barLabel": "Erfasste und bestätigte Stunden, letzte 7 Tage",
+      "record": {
+        "line": "Ihr Rekord: {best} Std. bestätigt in einem Monat ({month}). Diesen Monat bisher: {current} Std.",
+        "reached": "Diesen Monat haben Sie Ihren eigenen Rekord erreicht: {hours} bestätigte Std.",
+        "onlyYou": "Nur Sie sehen das – verglichen wird nur mit Ihren eigenen Monaten.",
+        "barLabel": "Dieser Monat im Vergleich zu Ihrem besten"
+      }
     },
     "because": {
       "title": "Neueste Ereignisse",

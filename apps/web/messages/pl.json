@@ -19427,7 +19427,13 @@
       "noEntriesToday": "Dziś jeszcze nic nie zapisano",
       "confirmed": "Z tego potwierdzone przez kierownika lub klienta: {hours} godz.",
       "confirmedNone": "Brak potwierdzonych godzin",
-      "barLabel": "Zapisane i potwierdzone godziny z 7 dni"
+      "barLabel": "Zapisane i potwierdzone godziny z 7 dni",
+      "record": {
+        "line": "Twój rekord: {best} godz. potwierdzonych w miesiącu ({month}). W tym miesiącu na razie: {current} godz.",
+        "reached": "W tym miesiącu osiągnięto Twój rekord: {hours} potwierdzonych godz.",
+        "onlyYou": "Widzisz to tylko Ty — porównanie wyłącznie z Twoimi własnymi miesiącami.",
+        "barLabel": "Ten miesiąc względem Twojego najlepszego"
+      }
     },
     "because": {
       "title": "Najnowsze wydarzenia",

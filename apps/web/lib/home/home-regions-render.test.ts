@@ -67,6 +67,7 @@ vi.mock("@/lib/i18n/navigation", () => ({
 vi.mock("@/lib/home/home-server", () => ({
   loadHomeWaiting: vi.fn(),
   loadHomeRunning: vi.fn(),
+  loadHomeRecord: vi.fn(),
   loadHomeBecause: vi.fn(),
   loadHomeOutside: vi.fn(),
 }));
@@ -310,5 +311,45 @@ describe("events region on the home lists only PLAIN events (the trace draws the
   it("plainOnly with only causal events leaves the region out", async () => {
     const because = deriveBecause([ev("1", "booking_accepted")]);
     expect(await HomeBecauseView({ locale: "en", because, plainOnly: true })).toBeNull();
+  });
+});
+
+describe("personal record line — self-only, quiet, never shown without a record", () => {
+  const RUNNING = deriveRunning(
+    { kind: "known", today: { hours: 2, entries: 1, untimed: 0 }, week: { hours: 30, entries: 6, untimed: 0, confirmedHours: 20 }, truncated: false } as never,
+    [],
+    { kind: "none" },
+  );
+
+  it("renders the record and says only the person sees it", async () => {
+    const h = html(
+      await HomeRunningView({
+        locale: "en",
+        running: RUNNING,
+        record: { kind: "record", best: { month: "2026-08", confirmedHours: 150 }, current: { month: "2026-10", confirmedHours: 40 }, isRecordMonth: false },
+      }),
+    );
+    expect(h).toContain('data-testid="home-personal-record"');
+    expect(h).toContain("Only you see this");
+    expect(h).not.toContain("MISSING:");
+  });
+
+  it("a record month is said as reaching the person's own record", async () => {
+    const h = html(
+      await HomeRunningView({
+        locale: "en",
+        running: RUNNING,
+        record: { kind: "record", best: { month: "2026-10", confirmedHours: 160 }, current: { month: "2026-10", confirmedHours: 160 }, isRecordMonth: true },
+      }),
+    );
+    expect(h).toContain('data-record-month="true"');
+    expect(h).toContain("you reached your own record");
+  });
+
+  it("none / unknown / absent draw nothing", async () => {
+    for (const record of [{ kind: "none" } as const, { kind: "unknown" } as const, undefined]) {
+      const h = html(await HomeRunningView({ locale: "en", running: RUNNING, record }));
+      expect(h).not.toContain("home-personal-record");
+    }
   });
 });
