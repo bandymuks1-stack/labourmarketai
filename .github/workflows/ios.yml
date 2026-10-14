@@ -32,7 +32,11 @@ name: iOS
 #                                  attempt runs, the failure state is SHOWN
 #                                  (testID auth-failure), and the app survives
 #                                  it (Maestro flow apps/mobile/.maestro/)
-# What it deliberately does NOT claim: device builds, signing, App Store
+#   IOS_DEVICE_ARCHIVE_BUILT     — an UNSIGNED arm64 device archive builds,
+#                                  and its Info.plist carries the store
+#                                  answers from app.json (export compliance,
+#                                  iPhone-only)
+# What it deliberately does NOT claim: signing, App Store
 # readiness, a real-backend authenticated session or deep-link E2E (those
 # need a session against a real backend and are a later, separate proof).
 
@@ -67,7 +71,7 @@ jobs:
     runs-on: macos-26
     # Was 60 for build+launch; Release adds the embedded-bundle export and the
     # Maestro journey adds CLI install + XCTest driver startup + the flow.
-    timeout-minutes: 75
+    timeout-minutes: 100
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -236,3 +240,55 @@ jobs:
           # from --debug-output).
           include-hidden-files: true
           retention-days: 14
+
+      # ---------- DEVICE ARCHIVE proof (IOS_DEVICE_ARCHIVE_BUILT) ----------
+      # Everything above runs on the SIMULATOR. The App Store takes a DEVICE
+      # (arm64, iphoneos) archive, so this proves the same project archives
+      # for a real iPhone — UNSIGNED (CODE_SIGNING_ALLOWED=NO): signing, the
+      # provisioning profile and the upload are the owner's Apple account
+      # (docs/launch/RELEASE_SUBMISSION_PACK_2026-10-14.md §6). The archive
+      # is not uploaded anywhere; it exists to be read.
+      # It then reads the ARCHIVED Info.plist — the only place app.json's store
+      # answers can be checked, because ios/ is generated: export compliance
+      # (ITSAppUsesNonExemptEncryption=false) and iPhone-only
+      # (UIDeviceFamily=[1]), both set in #2371.
+      - name: Device archive (unsigned, App Store architecture proof)
+        if: success()
+        working-directory: apps/mobile/ios
+        run: |
+          set +e
+          xcodebuild \
+            -workspace "${{ steps.xc.outputs.workspace }}" \
+            -scheme "${{ steps.xc.outputs.scheme }}" \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath build/LabourMarket.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            archive > xcodearchive.log 2>&1
+          STATUS=$?
+          if [ $STATUS -ne 0 ]; then
+            grep -n -B 3 -A 20 " error: " xcodearchive.log | head -300
+            tail -60 xcodearchive.log
+            exit $STATUS
+          fi
+          APP=$(find build/LabourMarket.xcarchive/Products/Applications -maxdepth 1 -name "*.app" | head -1)
+          test -n "$APP" || { echo "archive holds no .app"; exit 1; }
+          PL="$APP/Info.plist"
+          ENC=$(/usr/libexec/PlistBuddy -c "Print :ITSAppUsesNonExemptEncryption" "$PL" 2>/dev/null)
+          FAM=$(/usr/libexec/PlistBuddy -c "Print :UIDeviceFamily" "$PL" 2>/dev/null | tr -d ' \n')
+          ARCH=$(lipo -archs "$APP/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$PL")")
+          echo "ITSAppUsesNonExemptEncryption=$ENC UIDeviceFamily=$FAM archs=$ARCH"
+          {
+            echo "### iOS device archive (unsigned proof)"
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Architectures | $ARCH |"
+            echo "| ITSAppUsesNonExemptEncryption | $ENC |"
+            echo "| UIDeviceFamily | $FAM |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          FAIL=0
+          [ "$ENC" = "false" ] || { echo "::error::ITSAppUsesNonExemptEncryption is '$ENC', expected false (app.json ios.config.usesNonExemptEncryption)"; FAIL=1; }
+          echo "$FAM" | grep -q "Array{1}" || { echo "::error::UIDeviceFamily is '$FAM', expected iPhone only (app.json ios.supportsTablet=false)"; FAIL=1; }
+          echo "$ARCH" | grep -q "arm64" || { echo "::error::archive is not arm64 ($ARCH)"; FAIL=1; }
+          [ $FAIL -eq 0 ] && echo "IOS_DEVICE_ARCHIVE_BUILT: unsigned arm64 device archive, export compliance + iPhone-only in the archived Info.plist"
+          exit $FAIL

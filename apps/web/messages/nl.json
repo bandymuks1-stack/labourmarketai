@@ -14542,7 +14542,10 @@
       "teamOfferThreadFailed": "Dit gesprek kan niet worden geopend.",
       "whatChangedIntro": "{count, plural, one {Hier is de keten uit je recente werk: wat je deed, wat er veranderde, wat het opende.} other {Hier zijn # ketens uit je recente werk: wat je deed, wat er veranderde, wat het opende.}}",
       "whatChangedNone": "Er kwam de laatste 14 dagen niets nieuws uit je werk. Zodra je werk registreert en het bevestigd wordt, laat ik zien wat het veranderde.",
-      "whatChangedUnavailable": "Ik kon nu niet nagaan wat er veranderde. Je registraties zijn veilig — probeer het zo opnieuw of open het logboek."
+      "whatChangedUnavailable": "Ik kon nu niet nagaan wat er veranderde. Je registraties zijn veilig — probeer het zo opnieuw of open het logboek.",
+      "planIntro": "{count, plural, one {Dat is # stap.} other {Dat zijn # stappen, op volgorde. Hier is de eerste — tik op de volgende wanneer je klaar bent.}}",
+      "planNextOffer": "Volgende stap:",
+      "planStep": "Stap {n} van {count}"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -19499,6 +19502,36 @@
       "fact": "Feit",
       "pending": "Wacht op een tweede partij",
       "derived": "Afgeleid uit feiten"
+    }
+  },
+  "projectCourse": {
+    "title": "Projectroute",
+    "count": "{done} van {total} fasen klaar",
+    "unknown": "Kon de projectfasen niet lezen.",
+    "here": "Hier zijn we",
+    "state": {
+      "done": "Klaar",
+      "now": "Bezig",
+      "risk": "Achter op de planning",
+      "blocked": "Geblokkeerd",
+      "planned": "Gepland",
+      "cancelled": "Geannuleerd"
+    },
+    "helpNeeded": "Hulp nodig — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Doel van deze week",
+    "titleMine": "Je taken deze week",
+    "count": "{done} van {total} klaar",
+    "unknown": "Kon de taken van deze week niet lezen.",
+    "mineNote": "Alleen taken die jij kunt zien: van jou en je team.",
+    "status": {
+      "todo": "Te doen",
+      "in_progress": "Bezig",
+      "blocked": "Geblokkeerd",
+      "done": "Klaar",
+      "cancelled": "Geannuleerd",
+      "overdue": "Te laat"
     }
   }
 }

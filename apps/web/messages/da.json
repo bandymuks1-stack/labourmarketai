@@ -7612,5 +7612,35 @@
       "pending": "Venter på en anden part",
       "derived": "Udledt af fakta"
     }
+  },
+  "projectCourse": {
+    "title": "Projektforløb",
+    "count": "{done} af {total} faser færdige",
+    "unknown": "Projektets faser kunne ikke læses.",
+    "here": "Her er vi",
+    "state": {
+      "done": "Færdig",
+      "now": "I gang",
+      "risk": "Bagud i forhold til planen",
+      "blocked": "Blokeret",
+      "planned": "Planlagt",
+      "cancelled": "Annulleret"
+    },
+    "helpNeeded": "Hjælp søges — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Ugens mål",
+    "titleMine": "Dine opgaver denne uge",
+    "count": "{done} af {total} færdige",
+    "unknown": "Ugens opgaver kunne ikke læses.",
+    "mineNote": "Kun de opgaver, du kan se: dine og dit teams.",
+    "status": {
+      "todo": "At gøre",
+      "in_progress": "I gang",
+      "blocked": "Blokeret",
+      "done": "Færdig",
+      "cancelled": "Annulleret",
+      "overdue": "Forsinket"
+    }
   }
 }

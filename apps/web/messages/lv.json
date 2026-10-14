@@ -7612,5 +7612,35 @@
       "pending": "Gaida otro pusi",
       "derived": "Izsecināts no faktiem"
     }
+  },
+  "projectCourse": {
+    "title": "Projekta maršruts",
+    "count": "Pabeigti {done} no {total} posmiem",
+    "unknown": "Neizdevās nolasīt projekta posmus.",
+    "here": "Mēs esam šeit",
+    "state": {
+      "done": "Pabeigts",
+      "now": "Notiek",
+      "risk": "Atpaliek no plāna",
+      "blocked": "Apturēts",
+      "planned": "Plānots",
+      "cancelled": "Atcelts"
+    },
+    "helpNeeded": "Vajadzīga palīdzība — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Šīs nedēļas mērķis",
+    "titleMine": "Jūsu šīs nedēļas uzdevumi",
+    "count": "Izpildīti {done} no {total}",
+    "unknown": "Neizdevās nolasīt šīs nedēļas uzdevumus.",
+    "mineNote": "Tikai jums redzamie uzdevumi: jūsu un jūsu komandas.",
+    "status": {
+      "todo": "Jāveic",
+      "in_progress": "Notiek",
+      "blocked": "Apturēts",
+      "done": "Izpildīts",
+      "cancelled": "Atcelts",
+      "overdue": "Nokavēts"
+    }
   }
 }
