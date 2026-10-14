@@ -488,7 +488,8 @@
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
     "uploading": "Foto uploaden…",
     "remove": "Foto verwijderen",
-    "previewAlt": "Geselecteerde foto"
+    "previewAlt": "Geselecteerde foto",
+    "takePhoto": "Foto maken"
   },
   "modes": {
     "title": "Itemtype",
