@@ -147,11 +147,13 @@ jobs:
           set +e
           ./gradlew :app:assembleRelease \
             -PreactNativeArchitectures=arm64-v8a,x86_64 \
-            --no-daemon --stacktrace > gradle.log 2>&1
+            --no-daemon --stacktrace --info > gradle.log 2>&1
           STATUS=$?
           if [ $STATUS -ne 0 ]; then
             # A failing configuration-time `node` call prints its stderr BEFORE
             # the FAILURE block — show what led up to it, not just the trace.
+            echo "===== configuration-time node invocations ====="
+            grep -n -A 3 "Starting process 'command 'node''" gradle.log | tail -40
             echo "===== output leading up to FAILURE ====="
             sed -n '1,/FAILURE:/p' gradle.log | tail -150
             echo "===== error regions ====="
@@ -163,6 +165,15 @@ jobs:
             echo "ANDROID_RELEASE_APK_BUILT"
           fi
           exit $STATUS
+
+      - name: Upload Gradle log on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: android-gradle-log-${{ github.run_id }}
+          path: apps/mobile/android/gradle.log
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Name APK, checksum, job summary
         id: apk
