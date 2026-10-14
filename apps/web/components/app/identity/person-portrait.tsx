@@ -1,3 +1,6 @@
+"use client";
+
+import { useIdentityFamily } from "@/components/app/identity/identity-family-context";
 import { FIGURE_MIN_PX, PersonFigure, personToneKey, plate } from "@/components/app/identity/identity-family";
 import {
   PLAYER_IDENTITY_AVATAR_BORDER,
@@ -22,6 +25,10 @@ import { cn } from "@/lib/utils";
  * frozen engraved figure, faintly, behind them. The canonical fallback
  * surface stays as the underlay.
  *
+ * OPT-IN. The plate renders only beneath `IdentityFamilyProvider` (the
+ * signed-in dashboard layout). Without it — the frozen public landing — the
+ * portrait renders main's legacy monogram tile unchanged (owner, 2026-10-14).
+ *
  * HONESTY. A real consented photo when one exists; otherwise initials on the
  * plate. Never a synthesised face (DESIGN_SOUL §1). `working` is an optional
  * presence dot (working now) — a fact the caller holds, never decoration.
@@ -44,6 +51,7 @@ export function PersonPortrait({
   readonly testids?: { readonly photo: string; readonly monogram: string };
   readonly className?: string;
 }) {
+  const family = useIdentityFamily();
   // The SAME plate as the person's chip/row mark (`personToneKey`).
   const key = personToneKey(name, initials);
   // A fixed small frame ("40px", "3.5rem") has no room for the figure; a
@@ -66,6 +74,20 @@ export function PersonPortrait({
           loading="lazy"
           className={cn("h-full w-full rounded-xl object-cover", PLAYER_IDENTITY_AVATAR_BORDER)}
         />
+      ) : !family ? (
+        // LEGACY (no provider): main's monogram tile, unchanged.
+        <span
+          aria-hidden
+          data-testid={testids?.monogram}
+          className={cn(
+            "flex h-full w-full items-center justify-center rounded-xl font-display font-bold tracking-tightest",
+            PLAYER_IDENTITY_FALLBACK_SURFACE,
+            PLAYER_IDENTITY_AVATAR_BORDER,
+          )}
+          style={{ fontSize: `calc(${width} * 0.36)` }}
+        >
+          {initials}
+        </span>
       ) : (
         <span
           aria-hidden

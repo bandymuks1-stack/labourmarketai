@@ -16,6 +16,7 @@ import { RoleSwitcher } from "@/components/app/role-switcher";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { SpineStream } from "@/components/app/spine-stream";
 import { OwnAvatarStream } from "@/components/app/identity/own-avatar-stream";
+import { IdentityFamilyProvider } from "@/components/app/identity/identity-family-context";
 import { AccountMenu } from "@/components/app/account-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { LmLogo } from "@/components/ui/lm-logo";
@@ -409,15 +410,20 @@ export default async function DashboardLayout({
         </Suspense>
         <SessionTelemetry />
         <AmbientGlow />
-        <DashboardChrome
-          nav={nav}
-          headerTitle={tChat("headerTitle")}
-          fullHeader={fullHeader}
-          fullBottomNav={<BottomNav />}
-          rexora={rexora}
-        >
-          {children}
-        </DashboardChrome>
+        {/* D2: the identity family's no-photo plate is the SIGNED-IN product's
+            look only; the frozen public landing keeps the legacy portrait
+            (owner 2026-10-14). The provider adds no DOM. */}
+        <IdentityFamilyProvider>
+          <DashboardChrome
+            nav={nav}
+            headerTitle={tChat("headerTitle")}
+            fullHeader={fullHeader}
+            fullBottomNav={<BottomNav />}
+            rexora={rexora}
+          >
+            {children}
+          </DashboardChrome>
+        </IdentityFamilyProvider>
         {/* v1 tester language-feedback widget — authenticated sessions only. */}
         <LanguageFeedbackWidget />
       </AuthProvider>
