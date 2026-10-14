@@ -14539,7 +14539,10 @@
       "chipOfferOurs": "Unser Team oder Unternehmen anbieten",
       "teamOfferAgreed": "Grundsätzlich vereinbart — noch kein unterschriebener Vertrag. Klären Sie die Bedingungen im Gespräch und weisen Sie das Team dann einem Projekt zu.",
       "teamOfferDeclined": "Abgelehnt. Das anbietende Unternehmen sieht Ihre Antwort.",
-      "teamOfferThreadFailed": "Dieses Gespräch kann nicht geöffnet werden."
+      "teamOfferThreadFailed": "Dieses Gespräch kann nicht geöffnet werden.",
+      "planIntro": "{count, plural, one {Das ist # Schritt.} other {Das sind # Schritte, der Reihe nach. Hier ist der erste — tippen Sie auf den nächsten, wenn Sie so weit sind.}}",
+      "planNextOffer": "Nächster Schritt:",
+      "planStep": "Schritt {n} von {count}"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
