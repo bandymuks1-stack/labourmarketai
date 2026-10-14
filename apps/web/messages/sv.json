@@ -7591,5 +7591,20 @@
       "cancelled": "Inställd"
     },
     "helpNeeded": "Hjälp behövs — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Veckans mål",
+    "titleMine": "Dina uppgifter den här veckan",
+    "count": "{done} av {total} klara",
+    "unknown": "Veckans uppgifter kunde inte läsas.",
+    "mineNote": "Bara uppgifter du kan se: dina och ditt teams.",
+    "status": {
+      "todo": "Att göra",
+      "in_progress": "Pågår",
+      "blocked": "Blockerad",
+      "done": "Klar",
+      "cancelled": "Inställd",
+      "overdue": "Försenad"
+    }
   }
 }

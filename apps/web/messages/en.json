@@ -19482,5 +19482,20 @@
       "cancelled": "Cancelled"
     },
     "helpNeeded": "Help needed — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "This week's goal",
+    "titleMine": "Your tasks this week",
+    "count": "{done} of {total} done",
+    "unknown": "Couldn't read this week's tasks.",
+    "mineNote": "Only the tasks you can see: yours and your team's.",
+    "status": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "blocked": "Blocked",
+      "done": "Done",
+      "cancelled": "Cancelled",
+      "overdue": "Overdue"
+    }
   }
 }

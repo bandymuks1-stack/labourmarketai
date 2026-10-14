@@ -16,6 +16,9 @@ import {
 import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
 import { ProjectCourseTrack } from "@/components/app/projects/project-course-track";
 import { deriveProjectCourse } from "@/lib/projects/project-course";
+import { ProjectWeekGoal } from "@/components/app/projects/project-week-goal";
+import { deriveWeeklyGoal } from "@/lib/projects/weekly-goal";
+import { listProjectTasks } from "@/lib/tasks/tasks";
 import { listProjectStages } from "@/lib/projects/stages";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
 
@@ -41,11 +44,15 @@ export async function WorkerProjectPanel({
   // THE PROJECT COURSE (Future Experience C): the stages this worker's
   // session may read (stage RLS admits assigned workers), as one shared
   // route. A failed read is UNKNOWN, never "no stages".
-  const [stages, today] = await Promise.all([
+  const [stages, today, tasks] = await Promise.all([
     listProjectStages(projectId).catch(() => null),
     viewerWorkToday(),
+    listProjectTasks(projectId).catch(() => null),
   ]);
   const course = deriveProjectCourse(stages, today.todayIso);
+  // THIS WEEK'S GOAL: the tasks this worker's session may read (their own
+  // and their team's) due this week — named as theirs, never the team's.
+  const weekGoal = deriveWeeklyGoal(tasks, { todayIso: today.todayIso, scope: "mine" });
 
   const project = view.project;
   const location = deriveProjectLocation({
@@ -111,6 +118,7 @@ export async function WorkerProjectPanel({
       </header>
 
       <ProjectCourseTrack course={course} locale={locale} />
+      <ProjectWeekGoal goal={weekGoal} locale={locale} />
 
       {/* Direct actions — journal first: the worker's real lever on a project. */}
       <section className="flex flex-wrap gap-3">

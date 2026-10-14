@@ -19482,5 +19482,20 @@
       "cancelled": "Atšaukta"
     },
     "helpNeeded": "Reikia pagalbos — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Šios savaitės tikslas",
+    "titleMine": "Tavo šios savaitės užduotys",
+    "count": "Atlikta {done} iš {total}",
+    "unknown": "Nepavyko nuskaityti šios savaitės užduočių.",
+    "mineNote": "Rodomos tik tau matomos užduotys: tavo ir tavo komandos.",
+    "status": {
+      "todo": "Laukia",
+      "in_progress": "Vyksta",
+      "blocked": "Sustabdyta",
+      "done": "Atlikta",
+      "cancelled": "Atšaukta",
+      "overdue": "Vėluoja"
+    }
   }
 }

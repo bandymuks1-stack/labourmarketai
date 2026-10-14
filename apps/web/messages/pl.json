@@ -19482,5 +19482,20 @@
       "cancelled": "Anulowany"
     },
     "helpNeeded": "Potrzebna pomoc — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Cel tego tygodnia",
+    "titleMine": "Twoje zadania w tym tygodniu",
+    "count": "Wykonano {done} z {total}",
+    "unknown": "Nie udało się odczytać zadań z tego tygodnia.",
+    "mineNote": "Tylko zadania widoczne dla Ciebie: Twoje i Twojego zespołu.",
+    "status": {
+      "todo": "Do zrobienia",
+      "in_progress": "W toku",
+      "blocked": "Wstrzymane",
+      "done": "Wykonane",
+      "cancelled": "Anulowane",
+      "overdue": "Po terminie"
+    }
   }
 }

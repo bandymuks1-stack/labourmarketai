@@ -7591,5 +7591,20 @@
       "cancelled": "Tühistatud"
     },
     "helpNeeded": "Abi on vaja — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Selle nädala eesmärk",
+    "titleMine": "Sinu selle nädala ülesanded",
+    "count": "Tehtud {done}/{total}",
+    "unknown": "Selle nädala ülesandeid ei õnnestunud lugeda.",
+    "mineNote": "Ainult sulle nähtavad ülesanded: sinu ja su meeskonna omad.",
+    "status": {
+      "todo": "Teha",
+      "in_progress": "Käimas",
+      "blocked": "Peatatud",
+      "done": "Tehtud",
+      "cancelled": "Tühistatud",
+      "overdue": "Hilinenud"
+    }
   }
 }

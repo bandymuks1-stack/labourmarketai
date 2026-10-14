@@ -7591,5 +7591,20 @@
       "cancelled": "Atcelts"
     },
     "helpNeeded": "Vajadzīga palīdzība — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Šīs nedēļas mērķis",
+    "titleMine": "Jūsu šīs nedēļas uzdevumi",
+    "count": "Izpildīti {done} no {total}",
+    "unknown": "Neizdevās nolasīt šīs nedēļas uzdevumus.",
+    "mineNote": "Tikai jums redzamie uzdevumi: jūsu un jūsu komandas.",
+    "status": {
+      "todo": "Jāveic",
+      "in_progress": "Notiek",
+      "blocked": "Apturēts",
+      "done": "Izpildīts",
+      "cancelled": "Atcelts",
+      "overdue": "Nokavēts"
+    }
   }
 }
