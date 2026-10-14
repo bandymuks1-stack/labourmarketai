@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Future Experience 2030</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: an owner decision board. Three columns of evidence (screens), then one comparison matrix,
+   then the recommendation and the integration path. Brand obsidian/ivory/gold; both themes. */
+:root{
+  --bg:#F4F6FB; --surface:#FFFFFF; --sunk:#EDF0F6; --hair:#BEC3CD;
+  --fg:#0B0D17; --fg-2:#4A5268; --muted:#545D74;
+  --gold:#8A6A12; --gold-fill:#D4AF37; --ok:#107A53; --warn:#965808;
+  --display:"Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --body:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#070706; --surface:#151513; --sunk:#1D1D1A; --hair:#2A2A26;
+  --fg:#F5F1E8; --fg-2:#CFC9BC; --muted:#A39C8D;
+  --gold:#F2D675; --gold-fill:#D4AF37; --ok:#34D399; --warn:#E09646; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#070706; --surface:#151513; --sunk:#1D1D1A; --hair:#2A2A26;
+  --fg:#F5F1E8; --fg-2:#CFC9BC; --muted:#A39C8D;
+  --gold:#F2D675; --gold-fill:#D4AF37; --ok:#34D399; --warn:#E09646; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{margin:0;font:15px/1.6 var(--body);-webkit-font-smoothing:antialiased;padding-inline:clamp(16px,4vw,56px);padding-block:0 72px}
+a{color:var(--gold)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1320px;margin-inline:auto}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+header{padding-block:64px 40px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:48px;align-items:end}
+h1{font:700 clamp(40px,5.6vw,80px)/.95 var(--display);font-stretch:85%;letter-spacing:-.02em;margin:16px 0 20px;text-wrap:balance}
+header p{margin:0;color:var(--fg-2);max-width:62ch;font-size:16.5px}
+.status{border-left:2px solid var(--gold-fill);padding-left:20px;display:grid;gap:10px;font-size:14px;color:var(--fg-2)}
+.status b{color:var(--fg)}
+h2{font:650 clamp(24px,2.6vw,34px)/1.1 var(--display);margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+section{border-top:1px solid var(--hair);padding-block:48px}
+.lead{color:var(--fg-2);max-width:70ch;margin:0 0 28px}
+.concepts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.concept{display:grid;gap:14px;align-content:start;min-width:0}
+.concept .tag{display:flex;gap:10px;align-items:baseline}
+.concept .tag b{font:800 44px/.9 var(--display);font-stretch:75%}
+.concept h3{margin:0;font:650 22px/1.15 var(--display)}
+.concept p{margin:0;color:var(--fg-2);font-size:14.5px}
+.shots{display:grid;grid-template-columns:38% 1fr;gap:10px;align-items:start}
+.shots img{width:100%;max-width:100%;height:auto;border-radius:12px;border:1px solid var(--hair);display:block;background:var(--sunk)}
+.shots .stack{display:grid;gap:10px}
+.open{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;border-radius:12px;background:var(--gold-fill);color:#0a0a0a;font:650 14px var(--body);text-decoration:none;justify-self:start}
+.feel{display:flex;gap:6px;flex-wrap:wrap}
+.feel span{font:500 12px var(--body);padding:3px 9px;border-radius:999px;border:1px solid var(--hair);color:var(--fg-2)}
+.tbl{overflow-x:auto;border:1px solid var(--hair);border-radius:16px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:820px;font-size:14px}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--hair);vertical-align:top}
+thead th{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--sunk)}
+tbody th{font-weight:600;width:24%}
+td .dots{font-family:var(--mono);letter-spacing:2px;color:var(--gold)}
+td small{display:block;color:var(--muted);font-size:12.5px}
+.rec{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.box{background:var(--surface);border:1px solid var(--hair);border-radius:18px;padding:22px;min-width:0}
+.box h3{margin:0 0 10px;font:650 19px/1.25 var(--display)}
+.box p,.box li{color:var(--fg-2);font-size:14.5px}
+.box ul,.box ol{margin:0;padding-left:20px;display:grid;gap:8px}
+.box li b{color:var(--fg)}
+.box.pick{border:2px solid var(--gold-fill)}
+.phases{display:grid;gap:0;border:1px solid var(--hair);border-radius:16px;overflow:hidden;background:var(--surface)}
+.ph{display:grid;grid-template-columns:72px minmax(0,1fr) minmax(0,1fr);gap:18px;padding:16px 18px;border-top:1px solid var(--hair)}
+.ph:first-child{border-top:0}
+.ph b.k{font:800 26px/1 var(--display);font-stretch:75%;color:var(--gold)}
+.ph h4{margin:0 0 4px;font:600 15px var(--body)}
+.ph p{margin:0;color:var(--fg-2);font-size:13.5px}
+.ph .reuse{font-size:13px;color:var(--muted)}
+.ph .reuse b{color:var(--fg-2);font-weight:600}
+.decide{display:grid;gap:10px;counter-reset:d}
+.decide div{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:baseline}
+.decide div::before{counter-increment:d;content:counter(d);font:700 13px var(--mono);color:var(--gold);border:1px solid var(--hair);border-radius:8px;text-align:center;padding:3px 0}
+footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--hair);padding-top:18px}
+@media (max-width:1000px){header,.rec{grid-template-columns:1fr}.concepts{grid-template-columns:1fr}.ph{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <div class="eyebrow">LabourMarket.ai · Future Experience 2030 · 2026-10-14</div>
+    <h1>Trys ateities darbo pasaulio kryptys</h1>
+    <p>Ne dar vienas darbo portalas, o sistema, kurioje realūs veiksmai matomai kuria ateities galimybes. Kiekviena kryptis turi telefono pradžios ekraną, kompiuterio vaizdą ir Living CV arba projekto patirties vaizdą. Visos trys remiasi tik jau egzistuojančiais duomenimis ir funkcijomis; nauja yra patirties kompozicija.</p>
+  </div>
+  <div class="status">
+    <div><b>Būsena:</b> laukia savininko pasirinkimo (A / B / C / derinys / atmesti).</div>
+    <div><b>Produkcija nekeista.</b> Jokių maršrutų, tokenų, komponentų ar D1–D7 / M2–M4 failų pakeitimų.</div>
+    <div><b>Duomenys iliustraciniai:</b> vienas išgalvotas žmogus (Rasa, elektros montuotoja) visose trijose kryptyse, kad būtų galima palyginti.</div>
+  </div>
+</header>
+
+<section aria-labelledby="h-concepts">
+  <h2 id="h-concepts">Kryptys</h2>
+  <p class="lead">Atidaryk kiekvieną kryptį: telefone yra veikiantis pagrindinis veiksmas, kuris parodo pasekmių grandinę.</p>
+  <div class="concepts">
+    <article class="concept">
+      <div class="tag"><b>A</b><span class="eyebrow">Future Command</span></div>
+      <h3>Darbo valdymo centras</h3>
+      <div class="shots"><img src="screenshots/a-phone.png" alt="A telefono pradžios ekranas: šiandienos laiko linija, vienas auksinis veiksmas, pokyčiai nuo vakar" loading="lazy"><div class="stack"><img src="screenshots/a-desktop.png" alt="A kompiuterio vaizdas: projektai, pokalbis su struktūruotu atsakymu, pasekmių žurnalas" loading="lazy"><img src="screenshots/a-living-cv.png" alt="A Living CV kaip profesinė telemetrija" loading="lazy"></div></div>
+      <p>Diena kaip prietaisų skydelis: viena laiko linija „dabar", vienas auksinis veiksmas, pokalbis kaip valdymo pultas ir pasekmių pėdsakas su šaltiniais.</p>
+      <div class="feel"><span>Ateitis</span><span>Veiksmas</span><span>Poveikis</span></div>
+      <a class="open" href="a-future-command.html">Atidaryti A</a>
+    </article>
+    <article class="concept">
+      <div class="tag"><b>B</b><span class="eyebrow">Career Universe</span></div>
+      <h3>Karjera kaip transporto žemėlapis</h3>
+      <div class="shots"><img src="screenshots/b-phone.png" alt="B telefono žemėlapis: ateities stotelės viršuje, Tu esi čia, praeitis žemyn" loading="lazy"><div class="stack"><img src="screenshots/b-desktop.png" alt="B kompiuterio žemėlapis: įgūdžių linijos, projektų stotelės, galimybių horizontas" loading="lazy"><img src="screenshots/b-project.png" alt="B projekto patirties puslapis kaip stotelės planas" loading="lazy"></div></div>
+      <p>Įgūdžiai yra linijos, projektai stotelės, bendradarbiai persėdimai, o už „Tu esi čia" prasideda punktyrinės linijos į galimybes.</p>
+      <div class="feel"><span>Profesinis augimas</span><span>Pasididžiavimas</span><span>Noras tyrinėti</span></div>
+      <a class="open" href="b-career-universe.html">Atidaryti B</a>
+    </article>
+    <article class="concept">
+      <div class="tag"><b>C</b><span class="eyebrow">Team Performance</span></div>
+      <h3>Komanda prieš tikslą</h3>
+      <div class="shots"><img src="screenshots/c-phone.png" alt="C telefono ekranas: komandos savaitės tikslas 2 iš 4, tavo savaitė, asmeninis rekordas, sudėtis" loading="lazy"><div class="stack"><img src="screenshots/c-desktop.png" alt="C komandos arena: projekto trasa, sudėtis, tikslai, pagalbos spragos, AI apie kitą savaitę" loading="lazy"><img src="screenshots/c-season.png" alt="C Mano sezonas: Living CV su rekordais ir treniruočių planu" loading="lazy"></div></div>
+      <p>Sporto principai bendradarbiavimui: savaitės tikslas, etapai kaip trasa, sudėtis su vaidmenimis, rekordai tik prieš save.</p>
+      <div class="feel"><span>Sportas ir progresas</span><span>Komandos stiprybė</span><span>Veiksmas</span></div>
+      <a class="open" href="c-team-performance.html">Atidaryti C</a>
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="h-matrix">
+  <h2 id="h-matrix">Palyginimas</h2>
+  <p class="lead">Taškai yra mano vertinimas nuo 1 iki 5, ne matavimas. Jie skirti pokalbiui, ne sprendimui už savininką.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Kriterijus</th><th>A · Future Command</th><th>B · Career Universe</th><th>C · Team Performance</th></tr></thead>
+      <tbody>
+        <tr><th>„Tai ne darbo portalas" per kelias sekundes</th><td><span class="dots">●●●●○</span><small>Atrodo kaip naujos kartos įrankis</small></td><td><span class="dots">●●●●●</span><small>Stipriausias pirmas įspūdis</small></td><td><span class="dots">●●●●○</span><small>Energija ir aiškumas</small></td></tr>
+        <tr><th>Kasdienis darbas (įrašas, patvirtinimas)</th><td><span class="dots">●●●●●</span><small>Kamera ir veiksmas po nykščiu</small></td><td><span class="dots">●●●○○</span><small>Žemėlapis apžvalgai, ne greitam įrašui</small></td><td><span class="dots">●●●●○</span><small>Greita, jei yra komanda</small></td></tr>
+        <tr><th>Profesinio augimo pojūtis</th><td><span class="dots">●●●○○</span></td><td><span class="dots">●●●●●</span></td><td><span class="dots">●●●●○</span></td></tr>
+        <tr><th>Komandos stiprybė</th><td><span class="dots">●●●○○</span></td><td><span class="dots">●●○○○</span><small>Persėdimai, bet ne gyva komanda</small></td><td><span class="dots">●●●●●</span></td></tr>
+        <tr><th>Ką padariau → kas pasikeitė → kas atsivėrė</th><td><span class="dots">●●●●●</span><small>Pasekmių pėdsakas yra šerdis</small></td><td><span class="dots">●●●●○</span><small>Linijos ir horizontas</small></td><td><span class="dots">●●●○○</span><small>Atkarpa → etapas → užsakovas</small></td></tr>
+        <tr><th>Atitikimas sprendimui 0017 (pokalbis = namai)</th><td><span class="dots">●●●●●</span></td><td><span class="dots">●●●○○</span><small>Pokalbis virš žemėlapio</small></td><td><span class="dots">●●●●○</span></td></tr>
+        <tr><th>Naujas žmogus be istorijos</th><td><span class="dots">●●●●○</span></td><td><span class="dots">●●○○○</span><small>Tuščias žemėlapis</small></td><td><span class="dots">●●●○○</span><small>Be komandos reikia asmeninės versijos</small></td></tr>
+        <tr><th>Techninis sudėtingumas</th><td>Vidutinis · ~4–6 PR</td><td>Didelis · ~6–9 PR</td><td>Vidutinis–didelis · ~6–8 PR</td></tr>
+        <tr><th>Didžiausia rizika</th><td>Per daug „valdymo centro" pirmą dieną</td><td>Žemėlapio išdėstymo algoritmas ir prieinamumas</td><td>Sporto kalba virsta žmonių lyginimu</td></tr>
+        <tr><th>Naudoja D0–D2</th><td>D0 StatusChip / Stat, D1 keturi regionai, D2 plokštelės</td><td>D0 StatusChip / Stat, D2 plokštelės</td><td>D0 Stat (dideli skaičiai), D2 plokštelės</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="h-rec">
+  <h2 id="h-rec">Rekomendacija</h2>
+  <p class="lead">Kryptys sąmoningai skirtingos, bet kiekviena stipriausia skirtingoje produkto vietoje. Todėl jas galima sujungti nekuriant konkuruojančių sistemų: vienas apvalkalas, trys kontekstai.</p>
+  <div class="rec">
+    <div class="box pick">
+      <h3>Siūlau: A kaip pagrindas, B kaip Living CV, C kaip komandos kontekstas</h3>
+      <ul>
+        <li><b>Namai ir telefonas = A.</b> Laiko linija „dabar", vienas veiksmas, kamera, pokalbis kaip valdymo pultas. Tai tiesiogiai tęsia sprendimą 0017 ir D1 keturis regionus.</li>
+        <li><b>Living CV = B.</b> Profesinė kelionė kaip žemėlapis: stipriausias „WOW" ir pasididžiavimo jausmas. Sąrašo vaizdas lieka kaip prieinamumo atitikmuo.</li>
+        <li><b>Komanda ir projektas = C.</b> Arena, savaitės tikslas, trasa ir „reikia pagalbos". Asmeniniai rekordai tik pačiam žmogui.</li>
+        <li><b>Visur bendra:</b> pasekmių pėdsakas iš A yra vienas skaitytuvas, kurį naudoja visi trys.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Ką visos trys gerbia</h3>
+      <ul>
+        <li>Jokių reitingų, žvaigždučių ar žmogaus vertės balų.</li>
+        <li>Faktas, išvesta ir prognozė visada atskirti (SEP-1); nežinoma nėra nulis (SEP-7).</li>
+        <li>Žalia tik antros šalies patvirtinimui; auksas tik veiksmui ir laukimui.</li>
+        <li>Vienas auksinis veiksmas ekrane; pokalbio laukas visada pasiekiamas.</li>
+        <li>Jokio naujo backend, jokių naujų priklausomybių, jokių mokamų integracijų.</li>
+        <li>Visas tekstas eis per esamą 11 kalbų i18n; koncepcijose tik LT su „tu".</li>
+        <li>AI siūlymai pažymėti; niekas neišsiunčiama be žmogaus patvirtinimo.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-plan">
+  <h2 id="h-plan">Integravimo programa po pasirinkimo</h2>
+  <p class="lead">Evoliucinė ir kontroliuojama: kiekvienas žingsnis yra atskiras PR, grąžinamas vienu revert, per esamus skaitytuvus. Tvarka pateikta rekomenduotam deriniui; pasirinkus vieną kryptį, eilė trumpėja.</p>
+  <div class="phases">
+    <div class="ph"><b class="k">F0</b><div><h4>Pasekmių pėdsako skaitytuvas</h4><p>Tik skaitymas: įvykiai, patvirtinimai, etapai ir Living CV pokyčiai sujungiami į grandinę su šaltiniais.</p></div><div class="reuse"><b>Naudoja:</b> notification_events, journal_entry_confirmations, project_stages, growth-reading.ts. Be migracijos.</div></div>
+    <div class="ph"><b class="k">F1</b><div><h4>Namai: „dabar" juosta ir vienas veiksmas</h4><p>D1 keturi regionai perkomponuojami į laiko liniją ir vieną veiksmą telefone.</p></div><div class="reuse"><b>Naudoja:</b> D1 #2367 (lib/home), TodayScreen, D0 StatusChip / Stat. Tik po D1 sujungimo, kad nebūtų konflikto.</div></div>
+    <div class="ph"><b class="k">F2</b><div><h4>Kamera → įrašas</h4><p>Web įvestis su kameros atributu; laikas ir projektas pasiūlomi, žmogus patvirtina.</p></div><div class="reuse"><b>Naudoja:</b> photo-upload.ts, worklog-extract.ts. Native kamera lieka savininko sprendimu (M-serija).</div></div>
+    <div class="ph"><b class="k">F3</b><div><h4>Living CV žemėlapis + sąrašo atitikmuo</h4><p>Serverinis SVG iš esamų Living CV skaitytuvų; esamas Living CV lieka kaip prieinamas sąrašas.</p></div><div class="reuse"><b>Naudoja:</b> #2228 / #2245 Living CV, evidence-tier.ts, D2 tapatybės šeima.</div></div>
+    <div class="ph"><b class="k">F4</b><div><h4>Komandos arena</h4><p>Projekto trasa, sudėtis su prieinamumu, „reikia pagalbos", AI apie kitą savaitę.</p></div><div class="reuse"><b>Naudoja:</b> project_stages, team_assignments, capacity.ts, project-risk.ts. Derinama su D4 (projektai) ir D5 (įmonė).</div></div>
+    <div class="ph"><b class="k">F5</b><div><h4>Savaitės tikslas ir asmeniniai rekordai</h4><p>Tikslas kaip work_tasks rinkinys; rekordai kaip tik skaitymo skaičiavimas. Guard'as prieš žmonių rikiavimą.</p></div><div class="reuse"><b>Naudoja:</b> work_tasks, journal_entry_metrics. Jei reikės schemos lauko — atskiras savininko sprendimas.</div></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-decide">
+  <h2 id="h-decide">Ko reikia iš savininko</h2>
+  <div class="decide">
+    <div>Pasirinkti: A, B, C, rekomenduotą derinį arba atmesti visas.</div>
+    <div>Patvirtinti, kad D1 #2367 ir D2 #2370 tęsiami kaip pagrindas (jie suderinami su visomis kryptimis) arba sustabdomi iki pasirinkimo.</div>
+    <div>Ar sporto kalba (rekordai, sezonas, trasa) priimtina darbuotojų aplinkoje, ar palikti tik komandos tikslus.</div>
+    <div>Ar Living CV žemėlapis gali būti matomas darbdaviui, ar tik pačiam žmogui.</div>
+  </div>
+</section>
+
+<footer>Koncepcijos yra savarankiški HTML prototipai šiame aplanke; ekrano nuotraukos — <code>screenshots/</code>, harness — <code>shoot.mjs</code>. Visi vardai, valandos ir galimybės yra iliustraciniai.</footer>
+</div>
+</body>
+</html>
