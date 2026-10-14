@@ -7420,6 +7420,37 @@
     },
     "invariant": "Ieraksti, stundas un cilvēki pirms un pēc ir identiski: nekas nav pārvietots, sadalīts vai dzēsts.",
     "invariantBroken": "Uzmanību: summas pirms un pēc atšķiras — ziņojiet par to; nekam nevajadzēja mainīties.",
+    "path": {
+      "title": "Importētās rindas → projekti: {imported} → {kept}",
+      "imported": "Importētās projektu rindas: {imported}",
+      "merged": "Atpazītas kā viena projekta daļas — rindas: {rows}, apvienotas projektos: {projects}",
+      "untouched": "Atstātas, kā bija (citas rindas tam pašam objektam nav): {rows}",
+      "kept": "Kanonisko projektu tagad: {projects} — katrs darba ieraksts un stunda ir saglabāti"
+    },
+    "tiers": {
+      "established": {
+        "title": "Noteikts no datiem",
+        "body": "Automātiski noteiktas apvienošanas (tas pats objekta kods vai adrese): {merges}; projekti: {groups}. Katru joprojām var atsaukt."
+      },
+      "probable": {
+        "title": "Ticamas sasaistes",
+        "body": "Tā pati adrese, bet cits periods vai cilvēki — sasaistīts kā ticams. Grupas: {count}. Jebkuru var atsaukt reģistrā zemāk."
+      },
+      "unresolved": {
+        "title": "Neatrisināts — atstāts atsevišķi",
+        "body": "Rindas ar fiksētu pretrunu, neapvienotas: {count}."
+      }
+    },
+    "conflictKinds": {
+      "code_spans_several_addresses": "kods norāda vairākas adreses",
+      "number_missing_on_one_side": "vienā pusē trūkst mājas numura",
+      "different_house_numbers": "atšķirīgi māju numuri",
+      "different_street_names": "atšķirīgi ielu nosaukumi",
+      "office_not_a_site": "birojs, nevis objekts",
+      "work_type_not_a_site": "darba veids, nevis objekts",
+      "spelling_variant_different_dates": "līdzīga rakstība, atšķirīgi datumi",
+      "recorded": "fiksēta pretruna"
+    },
     "example": {
       "title": "Viens objekts, daudz rakstības veidu",
       "intro": "Īstas šī importa grupas: ko izklājlapas glabāja kā atsevišķas rindas, LabourMarket.ai glabā kā vienu projektu ar visu vēsturi.",
@@ -7434,9 +7465,7 @@
       "noObject": "{records} ieraksti ({hours} st.) nenosauc objektu — tie paliek organizācijas vēsturē, nevis izdomātā projektā.",
       "multi": "{records} ieraksti ({hours} st.) vienā rindā nosauc vairākus objektus — stundas netiek dalītas.",
       "single": "{records} ieraksti ({hours} st.) nosauc vietu, kas neatbilst nevienam zināmam objektam.",
-      "dates": "{personDays} cilvēkdienām ir vairāki ieraksti vienā datumā ({records} ieraksti): avotā dienas apzīmējums atkārtots dažādās nedēļās. Stundas saglabātas; datumi jālabo.",
-      "probable": "{count, plural, zero {# apvienošanu ticami} one {# apvienošana ir ticama} other {# apvienošanas ir ticamas}} (tā pati adrese, cits periods vai cilvēki).",
-      "conflicts": "{count, plural, zero {# rindām ir reģistrēta pretruna} one {# rindai ir reģistrēta pretruna} other {# rindām ir reģistrēta pretruna}}."
+      "dates": "{personDays} cilvēkdienām ir vairāki ieraksti vienā datumā ({records} ieraksti): avotā dienas apzīmējums atkārtots dažādās nedēļās. Stundas saglabātas; datumi jālabo."
     },
     "sessions": {
       "title": "Pēc avota faila",

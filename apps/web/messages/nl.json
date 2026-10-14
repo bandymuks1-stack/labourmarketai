@@ -19298,6 +19298,37 @@
     },
     "invariant": "Registraties, uren en personen zijn voor en na identiek: niets is verplaatst, opgesplitst of verwijderd.",
     "invariantBroken": "Let op: de totalen verschillen voor en na — meld dit; er hoort niets te veranderen.",
+    "path": {
+      "title": "Geïmporteerde rijen → projecten: {imported} → {kept}",
+      "imported": "Geïmporteerde projectrijen: {imported}",
+      "merged": "Herkend als delen van hetzelfde project — rijen: {rows}, samengevoegd tot projecten: {projects}",
+      "untouched": "Gelaten zoals ze waren (geen andere rij voor hetzelfde object): {rows}",
+      "kept": "Canonieke projecten nu: {projects} — elke werkregistratie en elk uur blijft behouden"
+    },
+    "tiers": {
+      "established": {
+        "title": "Vastgesteld uit de gegevens",
+        "body": "Automatisch vastgestelde samenvoegingen (zelfde objectcode of adres): {merges}; projecten: {groups}. Elke blijft ongedaan te maken."
+      },
+      "probable": {
+        "title": "Waarschijnlijke koppelingen",
+        "body": "Zelfde adres, maar een andere periode of andere mensen — als waarschijnlijk gekoppeld. Groepen: {count}. Elke kan in het register hieronder ongedaan worden gemaakt."
+      },
+      "unresolved": {
+        "title": "Onopgelost — apart gehouden",
+        "body": "Rijen met een vastgelegde tegenstrijdigheid, niet samengevoegd: {count}."
+      }
+    },
+    "conflictKinds": {
+      "code_spans_several_addresses": "de code noemt meerdere adressen",
+      "number_missing_on_one_side": "huisnummer ontbreekt aan één kant",
+      "different_house_numbers": "verschillende huisnummers",
+      "different_street_names": "verschillende straatnamen",
+      "office_not_a_site": "kantoor, geen werkplek",
+      "work_type_not_a_site": "soort werk, geen werkplek",
+      "spelling_variant_different_dates": "vergelijkbare spelling, andere data",
+      "recorded": "vastgelegde tegenstrijdigheid"
+    },
     "example": {
       "title": "Eén object, veel schrijfwijzen",
       "intro": "Echte groepen uit deze import: wat de spreadsheets als aparte regels bijhielden, houdt LabourMarket.ai bij als één project met de volledige geschiedenis.",
@@ -19312,9 +19343,7 @@
       "noObject": "{records} registraties ({hours} u) noemen geen object — ze blijven in de geschiedenis van de organisatie, niet op een verzonnen project.",
       "multi": "{records} registraties ({hours} u) noemen meerdere objecten in één regel — de uren worden niet verdeeld.",
       "single": "{records} registraties ({hours} u) noemen één plaats die bij geen bekend object past.",
-      "dates": "{personDays} persoonsdagen hebben meerdere registraties op één datum ({records} registraties): in de bron is een daglabel over weken hergebruikt. De uren blijven; de datums moeten worden gecorrigeerd.",
-      "probable": "{count, plural, one {# samenvoeging is waarschijnlijk} other {# samenvoegingen zijn waarschijnlijk}} (zelfde adres, andere periode of personen).",
-      "conflicts": "{count, plural, one {# regel heeft een vastgelegde tegenstrijdigheid} other {# regels hebben een vastgelegde tegenstrijdigheid}}."
+      "dates": "{personDays} persoonsdagen hebben meerdere registraties op één datum ({records} registraties): in de bron is een daglabel over weken hergebruikt. De uren blijven; de datums moeten worden gecorrigeerd."
     },
     "sessions": {
       "title": "Per bronbestand",

@@ -19298,6 +19298,37 @@
     },
     "invariant": "Wpisy, godziny i osoby są identyczne przed i po: nic nie zostało przeniesione, podzielone ani usunięte.",
     "invariantBroken": "Uwaga: sumy przed i po się różnią — zgłoś to; nic nie powinno się zmienić.",
+    "path": {
+      "title": "Zaimportowane wiersze → projekty: {imported} → {kept}",
+      "imported": "Zaimportowane wiersze projektów: {imported}",
+      "merged": "Rozpoznane jako części tego samego projektu — wiersze: {rows}, połączone w projekty: {projects}",
+      "untouched": "Pozostawione bez zmian (brak innego wiersza dla tego samego obiektu): {rows}",
+      "kept": "Projekty kanoniczne teraz: {projects} — każdy wpis pracy i każda godzina zachowane"
+    },
+    "tiers": {
+      "established": {
+        "title": "Ustalone na podstawie danych",
+        "body": "Scalenia ustalone automatycznie (ten sam kod obiektu lub adres): {merges}; projekty: {groups}. Każde nadal można cofnąć."
+      },
+      "probable": {
+        "title": "Prawdopodobne powiązania",
+        "body": "Ten sam adres, ale inny okres lub inne osoby — powiązane jako prawdopodobne. Grupy: {count}. Każde można cofnąć w rejestrze poniżej."
+      },
+      "unresolved": {
+        "title": "Nierozstrzygnięte — pozostawione osobno",
+        "body": "Wiersze z zapisaną sprzecznością, niescalone: {count}."
+      }
+    },
+    "conflictKinds": {
+      "code_spans_several_addresses": "kod wskazuje kilka adresów",
+      "number_missing_on_one_side": "po jednej stronie brak numeru domu",
+      "different_house_numbers": "różne numery domów",
+      "different_street_names": "różne nazwy ulic",
+      "office_not_a_site": "biuro, nie miejsce pracy",
+      "work_type_not_a_site": "rodzaj pracy, nie miejsce pracy",
+      "spelling_variant_different_dates": "podobna pisownia, inne daty",
+      "recorded": "zapisana sprzeczność"
+    },
     "example": {
       "title": "Jeden obiekt, wiele zapisów",
       "intro": "Prawdziwe grupy z tego importu: to, co arkusze trzymały jako osobne wiersze, LabourMarket.ai trzyma jako jeden projekt z pełną historią.",
@@ -19312,9 +19343,7 @@
       "noObject": "{records} wpisów ({hours} godz.) nie podaje obiektu — zostają w historii organizacji, nie na wymyślonym projekcie.",
       "multi": "{records} wpisów ({hours} godz.) podaje kilka obiektów w jednym wierszu — godziny nie są dzielone.",
       "single": "{records} wpisów ({hours} godz.) podaje miejsce, które nie pasuje do żadnego znanego obiektu.",
-      "dates": "{personDays} osobodni ma kilka wpisów z jedną datą ({records} wpisów): w źródle etykietę dnia powielono w różnych tygodniach. Godziny zostają; daty wymagają korekty.",
-      "probable": "{count, plural, one {# scalenie jest prawdopodobne} few {# scalenia są prawdopodobne} many {# scaleń jest prawdopodobnych} other {# scalenia jest prawdopodobne}} (ten sam adres, inny okres lub osoby).",
-      "conflicts": "{count, plural, one {# wiersz ma zapisaną sprzeczność} few {# wiersze mają zapisaną sprzeczność} many {# wierszy ma zapisaną sprzeczność} other {# wiersza ma zapisaną sprzeczność}}."
+      "dates": "{personDays} osobodni ma kilka wpisów z jedną datą ({records} wpisów): w źródle etykietę dnia powielono w różnych tygodniach. Godziny zostają; daty wymagają korekty."
     },
     "sessions": {
       "title": "Według pliku źródłowego",

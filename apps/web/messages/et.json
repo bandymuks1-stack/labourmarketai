@@ -7420,6 +7420,37 @@
     },
     "invariant": "Kirjed, tunnid ja inimesed on enne ja pärast identsed: midagi ei liigutatud, jagatud ega kustutatud.",
     "invariantBroken": "Tähelepanu: summad enne ja pärast erinevad — teatage sellest; midagi ei tohiks muutuda.",
+    "path": {
+      "title": "Imporditud read → projektid: {imported} → {kept}",
+      "imported": "Imporditud projektiread: {imported}",
+      "merged": "Tuvastatud sama projekti osadena — read: {rows}, liidetud projektideks: {projects}",
+      "untouched": "Jäetud nii, nagu olid (sama objekti kohta teist rida pole): {rows}",
+      "kept": "Kanoonilisi projekte nüüd: {projects} — iga töökirje ja tund on säilinud"
+    },
+    "tiers": {
+      "established": {
+        "title": "Andmetest tuvastatud",
+        "body": "Automaatselt tuvastatud liitmised (sama objektikood või aadress): {merges}; projektid: {groups}. Igaühe saab endiselt tagasi võtta."
+      },
+      "probable": {
+        "title": "Tõenäolised seosed",
+        "body": "Sama aadress, kuid teine periood või teised inimesed — seotud tõenäolisena. Rühmad: {count}. Igaühe saab allolevas registris tagasi võtta."
+      },
+      "unresolved": {
+        "title": "Lahendamata — jäetud eraldi",
+        "body": "Read, millel on fikseeritud vastuolu, liitmata: {count}."
+      }
+    },
+    "conflictKinds": {
+      "code_spans_several_addresses": "kood nimetab mitut aadressi",
+      "number_missing_on_one_side": "ühel pool puudub majanumber",
+      "different_house_numbers": "erinevad majanumbrid",
+      "different_street_names": "erinevad tänavanimed",
+      "office_not_a_site": "kontor, mitte objekt",
+      "work_type_not_a_site": "töö liik, mitte objekt",
+      "spelling_variant_different_dates": "sarnane kirjapilt, erinevad kuupäevad",
+      "recorded": "fikseeritud vastuolu"
+    },
     "example": {
       "title": "Üks objekt, palju kirjapilte",
       "intro": "Tõelised rühmad sellest impordist: mida arvutustabelid hoidsid eraldi ridadena, hoiab LabourMarket.ai ühe projektina koos kogu ajalooga.",
@@ -7434,9 +7465,7 @@
       "noObject": "{records} kirjet ({hours} h) ei nimeta objekti — need jäävad organisatsiooni ajalukku, mitte väljamõeldud projekti.",
       "multi": "{records} kirjet ({hours} h) nimetavad ühes reas mitut objekti — tunde ei jagata.",
       "single": "{records} kirjet ({hours} h) nimetavad kohta, mis ei vasta ühelegi teadaolevale objektile.",
-      "dates": "{personDays} inimpäeval on mitu kirjet samal kuupäeval ({records} kirjet): allikas korrati päevasilti eri nädalatel. Tunnid säilivad; kuupäevad vajavad parandust.",
-      "probable": "{count, plural, one {# liitmine on tõenäoline} other {# liitmist on tõenäolised}} (sama aadress, teine periood või inimesed).",
-      "conflicts": "{count, plural, one {# real on registreeritud vastuolu} other {# real on registreeritud vastuolu}}."
+      "dates": "{personDays} inimpäeval on mitu kirjet samal kuupäeval ({records} kirjet): allikas korrati päevasilti eri nädalatel. Tunnid säilivad; kuupäevad vajavad parandust."
     },
     "sessions": {
       "title": "Lähtefaili kaupa",
