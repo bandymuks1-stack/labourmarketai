@@ -19272,5 +19272,98 @@
     },
     "openHistory": "Bedrijfsgeschiedenis openen",
     "note": "Leiding geven aan een organisatie staat los van je eigen werk: de uren van de organisatie tellen nooit als de jouwe."
+  },
+  "historyQuality": {
+    "back": "Terug naar geschiedenis",
+    "title": "Datakwaliteit van de geschiedenis",
+    "intro": "Wat de import van {organization} opleverde, wat LabourMarket.ai erin herkende en wat nog open staat — uit dezelfde registraties, geen ervan gewijzigd.",
+    "notApplied": "Consolidatie is nog niet toegepast: de cijfers tonen de import zoals hij is.",
+    "unavailable": "De datakwaliteit kon nu niet worden gelezen. Dat is niet hetzelfde als 'geen problemen' — probeer opnieuw.",
+    "before": {
+      "title": "Zoals geïmporteerd (spreadsheets)",
+      "note": "{sources, plural, one {# bronbestand} other {# bronbestanden}}"
+    },
+    "after": {
+      "title": "Bij LabourMarket.ai",
+      "merged": "{rows, plural, one {# geïmporteerde regel herkend als deel van een ander project} other {# geïmporteerde regels herkend als deel van een ander project}}",
+      "onProject": "{records} registraties ({hours} u) gekoppeld aan een project",
+      "peopleWithHistory": "{people, plural, one {# persoon met een projectgeschiedenis} other {# personen met een projectgeschiedenis}}"
+    },
+    "m": {
+      "projectRows": "projectregels",
+      "realProjects": "echte projecten",
+      "records": "werkregistraties",
+      "hours": "geregistreerde uren",
+      "people": "personen"
+    },
+    "invariant": "Registraties, uren en personen zijn voor en na identiek: niets is verplaatst, opgesplitst of verwijderd.",
+    "invariantBroken": "Let op: de totalen verschillen voor en na — meld dit; er hoort niets te veranderen.",
+    "example": {
+      "title": "Eén object, veel schrijfwijzen",
+      "intro": "Echte groepen uit deze import: wat de spreadsheets als aparte regels bijhielden, houdt LabourMarket.ai bij als één project met de volledige geschiedenis.",
+      "spreadsheet": "In de spreadsheets: {rows} aparte regels",
+      "more": "… en nog {count}",
+      "lm": "In LabourMarket.ai: één project",
+      "facts": "{records} registraties · {hours} u · {people, plural, one {# persoon} other {# personen}}",
+      "probable": "Waarschijnlijk: zelfde adres, andere periode of personen — vastgelegd, omkeerbaar."
+    },
+    "unresolved": {
+      "title": "Nog open — precies bewaard zoals vastgelegd",
+      "noObject": "{records} registraties ({hours} u) noemen geen object — ze blijven in de geschiedenis van de organisatie, niet op een verzonnen project.",
+      "multi": "{records} registraties ({hours} u) noemen meerdere objecten in één regel — de uren worden niet verdeeld.",
+      "single": "{records} registraties ({hours} u) noemen één plaats die bij geen bekend object past.",
+      "dates": "{personDays} persoonsdagen hebben meerdere registraties op één datum ({records} registraties): in de bron is een daglabel over weken hergebruikt. De uren blijven; de datums moeten worden gecorrigeerd.",
+      "probable": "{count, plural, one {# samenvoeging is waarschijnlijk} other {# samenvoegingen zijn waarschijnlijk}} (zelfde adres, andere periode of personen).",
+      "conflicts": "{count, plural, one {# regel heeft een vastgelegde tegenstrijdigheid} other {# regels hebben een vastgelegde tegenstrijdigheid}}."
+    },
+    "sessions": {
+      "title": "Per bronbestand",
+      "source": "Bron",
+      "onProject": "Op een project",
+      "unplaced": "Zonder object"
+    },
+    "register": {
+      "title": "Elke vastgelegde afwijking",
+      "rows": "{count, plural, one {# vastgelegde beslissing} other {# vastgelegde beslissingen}}",
+      "reverted": "teruggedraaid",
+      "rule": "regel {rule}, {at}",
+      "decision": {
+        "merged": "samengevoegd",
+        "canonical": "behouden project",
+        "kept_separate": "apart gehouden"
+      },
+      "certainty": {
+        "unambiguous": "eenduidig",
+        "probable": "waarschijnlijk",
+        "none": "niet samengevoegd"
+      }
+    },
+    "undo": {
+      "reason": "Reden voor terugdraaien",
+      "button": "Samenvoeging terugdraaien",
+      "pending": "Bezig met terugdraaien…",
+      "done": "Teruggedraaid: de regel is weer een eigen project.",
+      "failed": "Niet teruggedraaid. Herlaad en probeer opnieuw."
+    },
+    "timing": "Berekend uit {records} registraties in {ms} ms.",
+    "types": {
+      "address_spelling_variant": "zelfde adres, anders geschreven",
+      "code_spelling_variant": "zelfde objectcode, anders geschreven",
+      "name_mixed_with_work_description": "werkomschrijving in de objectnaam",
+      "object_split_into_projects": "één object verdeeld over meerdere projecten",
+      "multiple_objects_in_row": "meerdere objecten in één regel",
+      "no_object": "geen object genoemd",
+      "no_house_number": "plaats zonder huisnummer",
+      "period_mismatch": "werkperiodes ver uit elkaar",
+      "possible_duplicate_records": "mogelijk dubbele registraties",
+      "ambiguous_person": "persoon niet eenduidig herkend",
+      "conflicting_project_data": "tegenstrijdige projectgegevens",
+      "possible_same_object": "mogelijk hetzelfde object (niet samengevoegd)",
+      "date_conflict_person_days": "persoonsdagen met tegenstrijdige datums",
+      "unplaced_no_object": "registraties zonder object",
+      "unplaced_multiple_objects": "registraties met meerdere objecten",
+      "unplaced_single_unmatched": "registraties met onbekende plaats"
+    },
+    "link": "Datakwaliteit"
   }
 }

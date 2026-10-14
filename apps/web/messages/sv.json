@@ -7394,5 +7394,98 @@
     "openBuyerSetup": "Öppna köparinställning →",
     "startBuyerProfile": "Starta köparprofil →",
     "footer": "Inget här är påhittat: varje visat läge är läst från ditt konto."
+  },
+  "historyQuality": {
+    "back": "Tillbaka till historiken",
+    "title": "Datakvalitet i historiken",
+    "intro": "Vad {organization}s import skapade, vad LabourMarket.ai kände igen i den och vad som fortfarande är olöst — ur samma poster, ingen av dem ändrad.",
+    "notApplied": "Konsolideringen har inte tillämpats ännu: siffrorna visar importen som den är.",
+    "unavailable": "Datakvaliteten kunde inte läsas just nu. Det betyder inte ”inga problem” — försök igen.",
+    "before": {
+      "title": "Som importerat (kalkylblad)",
+      "note": "{sources, plural, one {# källfil} other {# källfiler}}"
+    },
+    "after": {
+      "title": "I LabourMarket.ai",
+      "merged": "{rows, plural, one {# importerad rad igenkänd som del av ett annat projekt} other {# importerade rader igenkända som del av ett annat projekt}}",
+      "onProject": "{records} poster ({hours} h) kopplade till ett projekt",
+      "peopleWithHistory": "{people, plural, one {# person med projekthistorik} other {# personer med projekthistorik}}"
+    },
+    "m": {
+      "projectRows": "projektrader",
+      "realProjects": "verkliga projekt",
+      "records": "arbetsposter",
+      "hours": "registrerade timmar",
+      "people": "personer"
+    },
+    "invariant": "Poster, timmar och personer är identiska före och efter: inget har flyttats, delats eller raderats.",
+    "invariantBroken": "Obs: summorna skiljer sig före och efter — rapportera detta; inget ska ändras.",
+    "example": {
+      "title": "Ett objekt, många stavningar",
+      "intro": "Verkliga grupper ur denna import: det kalkylbladen höll som separata rader håller LabourMarket.ai som ett projekt med hela historiken.",
+      "spreadsheet": "I kalkylbladen: {rows} separata rader",
+      "more": "… och {count} till",
+      "lm": "I LabourMarket.ai: ett projekt",
+      "facts": "{records} poster · {hours} h · {people, plural, one {# person} other {# personer}}",
+      "probable": "Sannolikt: samma adress, annan period eller andra personer — registrerat, kan ångras."
+    },
+    "unresolved": {
+      "title": "Fortfarande olöst — bevarat exakt som registrerat",
+      "noObject": "{records} poster ({hours} h) anger inget objekt — de stannar i organisationens historik, inte på ett påhittat projekt.",
+      "multi": "{records} poster ({hours} h) anger flera objekt på en rad — timmarna delas inte upp.",
+      "single": "{records} poster ({hours} h) anger en plats som inte matchar något känt objekt.",
+      "dates": "{personDays} persondagar har flera poster på samma datum ({records} poster): i källan återanvändes en dagsetikett över veckor. Timmarna behålls; datumen behöver rättas.",
+      "probable": "{count, plural, one {# sammanslagning är sannolik} other {# sammanslagningar är sannolika}} (samma adress, annan period eller personer).",
+      "conflicts": "{count, plural, one {# rad har en registrerad motsägelse} other {# rader har en registrerad motsägelse}}."
+    },
+    "sessions": {
+      "title": "Per källfil",
+      "source": "Källa",
+      "onProject": "På ett projekt",
+      "unplaced": "Utan objekt"
+    },
+    "register": {
+      "title": "Varje registrerad avvikelse",
+      "rows": "{count, plural, one {# registrerat beslut} other {# registrerade beslut}}",
+      "reverted": "ångrat",
+      "rule": "regel {rule}, {at}",
+      "decision": {
+        "merged": "sammanslaget",
+        "canonical": "behållet projekt",
+        "kept_separate": "hållet separat"
+      },
+      "certainty": {
+        "unambiguous": "entydigt",
+        "probable": "sannolikt",
+        "none": "inte sammanslaget"
+      }
+    },
+    "undo": {
+      "reason": "Skäl att ångra",
+      "button": "Ångra sammanslagning",
+      "pending": "Ångrar…",
+      "done": "Ångrat: raden är åter ett eget projekt.",
+      "failed": "Inte ångrat. Ladda om och försök igen."
+    },
+    "timing": "Beräknat ur {records} poster på {ms} ms.",
+    "types": {
+      "address_spelling_variant": "samma adress, skriven olika",
+      "code_spelling_variant": "samma objektkod, skriven olika",
+      "name_mixed_with_work_description": "arbetsbeskrivning i objektnamnet",
+      "object_split_into_projects": "ett objekt uppdelat på flera projekt",
+      "multiple_objects_in_row": "flera objekt på en rad",
+      "no_object": "inget objekt angivet",
+      "no_house_number": "plats utan husnummer",
+      "period_mismatch": "arbetsperioder långt isär",
+      "possible_duplicate_records": "möjligen dubblerade poster",
+      "ambiguous_person": "person inte entydigt identifierad",
+      "conflicting_project_data": "motsägande projektuppgifter",
+      "possible_same_object": "möjligen samma objekt (inte sammanslaget)",
+      "date_conflict_person_days": "persondagar med motsägande datum",
+      "unplaced_no_object": "poster utan objekt",
+      "unplaced_multiple_objects": "poster med flera objekt",
+      "unplaced_single_unmatched": "poster med okänd plats"
+    },
+    "link": "Datakvalitet"
   }
 }

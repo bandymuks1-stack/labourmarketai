@@ -19272,5 +19272,98 @@
     },
     "openHistory": "Unternehmensgeschichte öffnen",
     "note": "Die Leitung einer Organisation wird getrennt von Ihrer eigenen Arbeit gezeigt: Stunden der Organisation zählen nie als Ihre."
+  },
+  "historyQuality": {
+    "back": "Zurück zur Geschichte",
+    "title": "Datenqualität der Geschichte",
+    "intro": "Was der Import von {organization} erzeugt hat, was LabourMarket.ai darin erkannt hat und was noch offen ist — aus denselben Nachweisen, keiner davon verändert.",
+    "notApplied": "Die Konsolidierung ist noch nicht angewendet: die Zahlen zeigen den Import, wie er ist.",
+    "unavailable": "Die Datenqualität konnte gerade nicht gelesen werden. Das heißt nicht „keine Probleme“ — bitte erneut versuchen.",
+    "before": {
+      "title": "Wie importiert (Tabellen)",
+      "note": "{sources, plural, one {# Quelldatei} other {# Quelldateien}}"
+    },
+    "after": {
+      "title": "Bei LabourMarket.ai",
+      "merged": "{rows, plural, one {# importierte Zeile als Teil eines anderen Projekts erkannt} other {# importierte Zeilen als Teil eines anderen Projekts erkannt}}",
+      "onProject": "{records} Nachweise ({hours} Std.) einem Projekt zugeordnet",
+      "peopleWithHistory": "{people, plural, one {# Person mit Projektgeschichte} other {# Personen mit Projektgeschichte}}"
+    },
+    "m": {
+      "projectRows": "Projektzeilen",
+      "realProjects": "echte Projekte",
+      "records": "Arbeitsnachweise",
+      "hours": "erfasste Stunden",
+      "people": "Personen"
+    },
+    "invariant": "Nachweise, Stunden und Personen sind vorher und nachher identisch: nichts wurde verschoben, aufgeteilt oder gelöscht.",
+    "invariantBroken": "Achtung: die Summen weichen vorher und nachher ab — bitte melden; nichts sollte sich ändern.",
+    "example": {
+      "title": "Ein Objekt, viele Schreibweisen",
+      "intro": "Echte Gruppen aus diesem Import: was die Tabellen als getrennte Zeilen führten, führt LabourMarket.ai als ein Projekt mit seiner ganzen Geschichte.",
+      "spreadsheet": "In den Tabellen: {rows} getrennte Zeilen",
+      "more": "… und {count} weitere",
+      "lm": "In LabourMarket.ai: ein Projekt",
+      "facts": "{records} Nachweise · {hours} Std. · {people, plural, one {# Person} other {# Personen}}",
+      "probable": "Wahrscheinlich: gleiche Adresse, anderer Zeitraum oder andere Personen — erfasst, umkehrbar."
+    },
+    "unresolved": {
+      "title": "Noch offen — genau so erhalten, wie erfasst",
+      "noObject": "{records} Nachweise ({hours} Std.) nennen kein Objekt — sie bleiben in der Geschichte der Organisation, nicht auf einem erfundenen Projekt.",
+      "multi": "{records} Nachweise ({hours} Std.) nennen mehrere Objekte in einer Zeile — die Stunden werden nicht aufgeteilt.",
+      "single": "{records} Nachweise ({hours} Std.) nennen einen Ort, der zu keinem bekannten Objekt passt.",
+      "dates": "{personDays} Personentage tragen mehrere Nachweise an einem Datum ({records} Nachweise): in der Quelle wurde eine Tagesbezeichnung über Wochen wiederverwendet. Die Stunden bleiben; die Daten brauchen eine Korrektur.",
+      "probable": "{count, plural, one {# Zusammenführung ist wahrscheinlich} other {# Zusammenführungen sind wahrscheinlich}} (gleiche Adresse, anderer Zeitraum oder andere Personen).",
+      "conflicts": "{count, plural, one {# Zeile trägt einen erfassten Widerspruch} other {# Zeilen tragen einen erfassten Widerspruch}}."
+    },
+    "sessions": {
+      "title": "Je Quelldatei",
+      "source": "Quelle",
+      "onProject": "In einem Projekt",
+      "unplaced": "Ohne Objekt"
+    },
+    "register": {
+      "title": "Jede erfasste Abweichung",
+      "rows": "{count, plural, one {# erfasste Entscheidung} other {# erfasste Entscheidungen}}",
+      "reverted": "rückgängig gemacht",
+      "rule": "Regel {rule}, {at}",
+      "decision": {
+        "merged": "zusammengeführt",
+        "canonical": "beibehaltenes Projekt",
+        "kept_separate": "getrennt belassen"
+      },
+      "certainty": {
+        "unambiguous": "eindeutig",
+        "probable": "wahrscheinlich",
+        "none": "nicht zusammengeführt"
+      }
+    },
+    "undo": {
+      "reason": "Grund für das Rückgängigmachen",
+      "button": "Zusammenführung rückgängig machen",
+      "pending": "Wird rückgängig gemacht…",
+      "done": "Rückgängig gemacht: die Zeile ist wieder ein eigenes Projekt.",
+      "failed": "Nicht rückgängig gemacht. Neu laden und erneut versuchen."
+    },
+    "timing": "Berechnet aus {records} Nachweisen in {ms} ms.",
+    "types": {
+      "address_spelling_variant": "gleiche Adresse, anders geschrieben",
+      "code_spelling_variant": "gleicher Objektcode, anders geschrieben",
+      "name_mixed_with_work_description": "Arbeitsbeschreibung im Objektnamen",
+      "object_split_into_projects": "ein Objekt in mehrere Projekte aufgeteilt",
+      "multiple_objects_in_row": "mehrere Objekte in einer Zeile",
+      "no_object": "kein Objekt genannt",
+      "no_house_number": "Ort ohne Hausnummer",
+      "period_mismatch": "Arbeitszeiträume weit auseinander",
+      "possible_duplicate_records": "möglicherweise doppelte Nachweise",
+      "ambiguous_person": "Person nicht eindeutig erkannt",
+      "conflicting_project_data": "widersprüchliche Projektdaten",
+      "possible_same_object": "möglicherweise dasselbe Objekt (nicht zusammengeführt)",
+      "date_conflict_person_days": "Personentage mit widersprüchlichen Daten",
+      "unplaced_no_object": "Nachweise ohne Objekt",
+      "unplaced_multiple_objects": "Nachweise mit mehreren Objekten",
+      "unplaced_single_unmatched": "Nachweise mit unbekanntem Ort"
+    },
+    "link": "Datenqualität"
   }
 }

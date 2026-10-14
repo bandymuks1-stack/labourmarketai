@@ -19272,5 +19272,98 @@
     },
     "openHistory": "Otwórz historię firmy",
     "note": "Kierowanie organizacją jest pokazane osobno od Twojej własnej pracy: godziny organizacji nigdy nie liczą się jako Twoje."
+  },
+  "historyQuality": {
+    "back": "Wróć do historii",
+    "title": "Jakość danych historii",
+    "intro": "Co wytworzył import {organization}, co LabourMarket.ai w nim rozpoznał i co pozostaje nierozstrzygnięte — z tych samych wpisów, żaden nie został zmieniony.",
+    "notApplied": "Konsolidacja nie została jeszcze zastosowana: liczby pokazują import taki, jaki jest.",
+    "unavailable": "Nie udało się teraz odczytać jakości danych. To nie znaczy „brak problemów” — spróbuj ponownie.",
+    "before": {
+      "title": "Jak zaimportowano (arkusze)",
+      "note": "{sources, plural, one {# plik źródłowy} few {# pliki źródłowe} many {# plików źródłowych} other {# pliku źródłowego}}"
+    },
+    "after": {
+      "title": "W LabourMarket.ai",
+      "merged": "{rows, plural, one {# zaimportowany wiersz rozpoznany jako część innego projektu} few {# zaimportowane wiersze rozpoznane jako część innego projektu} many {# zaimportowanych wierszy rozpoznanych jako część innego projektu} other {# zaimportowanego wiersza rozpoznanego jako część innego projektu}}",
+      "onProject": "{records} wpisów ({hours} godz.) powiązanych z projektem",
+      "peopleWithHistory": "{people, plural, one {# osoba z historią projektów} few {# osoby z historią projektów} many {# osób z historią projektów} other {# osoby z historią projektów}}"
+    },
+    "m": {
+      "projectRows": "wiersze projektów",
+      "realProjects": "rzeczywiste projekty",
+      "records": "wpisy pracy",
+      "hours": "zarejestrowane godziny",
+      "people": "osoby"
+    },
+    "invariant": "Wpisy, godziny i osoby są identyczne przed i po: nic nie zostało przeniesione, podzielone ani usunięte.",
+    "invariantBroken": "Uwaga: sumy przed i po się różnią — zgłoś to; nic nie powinno się zmienić.",
+    "example": {
+      "title": "Jeden obiekt, wiele zapisów",
+      "intro": "Prawdziwe grupy z tego importu: to, co arkusze trzymały jako osobne wiersze, LabourMarket.ai trzyma jako jeden projekt z pełną historią.",
+      "spreadsheet": "W arkuszach: {rows} osobnych wierszy",
+      "more": "… i jeszcze {count}",
+      "lm": "W LabourMarket.ai: jeden projekt",
+      "facts": "{records} wpisów · {hours} godz. · {people, plural, one {# osoba} few {# osoby} many {# osób} other {# osoby}}",
+      "probable": "Prawdopodobne: ten sam adres, inny okres lub inne osoby — zapisane, odwracalne."
+    },
+    "unresolved": {
+      "title": "Wciąż nierozstrzygnięte — zachowane dokładnie tak, jak zapisano",
+      "noObject": "{records} wpisów ({hours} godz.) nie podaje obiektu — zostają w historii organizacji, nie na wymyślonym projekcie.",
+      "multi": "{records} wpisów ({hours} godz.) podaje kilka obiektów w jednym wierszu — godziny nie są dzielone.",
+      "single": "{records} wpisów ({hours} godz.) podaje miejsce, które nie pasuje do żadnego znanego obiektu.",
+      "dates": "{personDays} osobodni ma kilka wpisów z jedną datą ({records} wpisów): w źródle etykietę dnia powielono w różnych tygodniach. Godziny zostają; daty wymagają korekty.",
+      "probable": "{count, plural, one {# scalenie jest prawdopodobne} few {# scalenia są prawdopodobne} many {# scaleń jest prawdopodobnych} other {# scalenia jest prawdopodobne}} (ten sam adres, inny okres lub osoby).",
+      "conflicts": "{count, plural, one {# wiersz ma zapisaną sprzeczność} few {# wiersze mają zapisaną sprzeczność} many {# wierszy ma zapisaną sprzeczność} other {# wiersza ma zapisaną sprzeczność}}."
+    },
+    "sessions": {
+      "title": "Według pliku źródłowego",
+      "source": "Źródło",
+      "onProject": "W projekcie",
+      "unplaced": "Bez obiektu"
+    },
+    "register": {
+      "title": "Każda zapisana niezgodność",
+      "rows": "{count, plural, one {# zapisana decyzja} few {# zapisane decyzje} many {# zapisanych decyzji} other {# zapisanej decyzji}}",
+      "reverted": "cofnięto",
+      "rule": "reguła {rule}, {at}",
+      "decision": {
+        "merged": "scalono",
+        "canonical": "zachowany projekt",
+        "kept_separate": "pozostawiono osobno"
+      },
+      "certainty": {
+        "unambiguous": "jednoznaczne",
+        "probable": "prawdopodobne",
+        "none": "nie scalono"
+      }
+    },
+    "undo": {
+      "reason": "Powód cofnięcia",
+      "button": "Cofnij scalenie",
+      "pending": "Cofanie…",
+      "done": "Cofnięto: wiersz znów jest osobnym projektem.",
+      "failed": "Nie cofnięto. Odśwież i spróbuj ponownie."
+    },
+    "timing": "Obliczono z {records} wpisów w {ms} ms.",
+    "types": {
+      "address_spelling_variant": "ten sam adres zapisany inaczej",
+      "code_spelling_variant": "ten sam kod obiektu zapisany inaczej",
+      "name_mixed_with_work_description": "opis prac w nazwie obiektu",
+      "object_split_into_projects": "jeden obiekt podzielony na kilka projektów",
+      "multiple_objects_in_row": "kilka obiektów w jednym wierszu",
+      "no_object": "brak obiektu",
+      "no_house_number": "miejsce bez numeru domu",
+      "period_mismatch": "odległe okresy prac",
+      "possible_duplicate_records": "możliwie zdublowane wpisy",
+      "ambiguous_person": "niejednoznaczna identyfikacja osoby",
+      "conflicting_project_data": "sprzeczne dane projektu",
+      "possible_same_object": "możliwie ten sam obiekt (nie scalono)",
+      "date_conflict_person_days": "osobodni ze sprzecznymi datami",
+      "unplaced_no_object": "wpisy bez obiektu",
+      "unplaced_multiple_objects": "wpisy z kilkoma obiektami",
+      "unplaced_single_unmatched": "wpisy z nieznanym miejscem"
+    },
+    "link": "Jakość danych"
   }
 }

@@ -9,6 +9,9 @@ import { PerformingCompanyPanel } from "@/components/app/organization/performing
 import { EvidenceImportSessions } from "@/components/app/organization/evidence-import-sessions";
 import { HistoricalPhotoImport } from "@/components/app/organization/historical-photo-import";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { Fold } from "@/components/app/premium/grammar";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { HistoryQualitySection } from "@/components/app/organization/history-quality-section";
 
 /**
  * ISTORIJA — the historical import door (owner IA correction 2026-09-16,
@@ -47,17 +50,32 @@ export default async function CompanyHistoryPage({
     typeof sp.place === "string" && sp.place.trim() !== "" ? sp.place : undefined;
   const org = typeof sp.org === "string" && sp.org.trim() !== "" ? sp.org.trim() : null;
   const t = await getTranslations("organizationDoors.pages.history");
+  const tQuality = await getTranslations("historyQuality");
 
   return (
     <div className="flex flex-col gap-6" data-testid="company-history">
       <header className="flex flex-col gap-1">
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
+        <a
+          href="#history-quality"
+          className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-brand-blue hover:underline"
+          data-testid="company-history-quality-link"
+        >
+          {tQuality("link")} ↓
+        </a>
       </header>
 
       {/* WHAT IS ALREADY ON RECORD — the committed history seen by place,
           before the door for adding more. */}
       <CompanyWorkHistory locale={locale} organizationId={org} />
+
+      {/* DATA QUALITY — what the import produced vs what was recognised,
+          every recorded mismatch and its undo (owner 2026-10-14). */}
+      <DetailsHashOpener targetId="history-quality" />
+      <Fold id="history-quality" title={tQuality("title")} hint={tQuality("link")} testId="history-quality-fold">
+        <HistoryQualitySection locale={locale} />
+      </Fold>
 
       {/* WHO PERFORMED IT — only when this organization's books hold work that
           another organization of the same caller performed. */}

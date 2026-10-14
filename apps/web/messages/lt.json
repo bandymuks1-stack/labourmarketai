@@ -19272,5 +19272,98 @@
     },
     "openHistory": "Atverti verslo istoriją",
     "note": "Vadovavimas organizacijai rodomas atskirai nuo jūsų paties darbo: organizacijos valandos niekada nepriskiriamos jums."
+  },
+  "historyQuality": {
+    "back": "Atgal į istoriją",
+    "title": "Istorijos duomenų kokybė",
+    "intro": "Ką sukūrė {organization} importas, ką LabourMarket.ai jame atpažino ir kas dar neišspręsta — iš tų pačių įrašų, nė vieno nepakeitus.",
+    "notApplied": "Konsolidavimas dar nepritaikytas: skaičiai rodo importą tokį, koks jis yra.",
+    "unavailable": "Duomenų kokybės dabar nepavyko perskaityti. Tai nereiškia, kad problemų nėra — bandykite dar kartą.",
+    "before": {
+      "title": "Kaip importuota (skaičiuoklės)",
+      "note": "{sources, plural, one {# šaltinio failas} few {# šaltinio failai} other {# šaltinio failų}}"
+    },
+    "after": {
+      "title": "LabourMarket.ai",
+      "merged": "{rows, plural, one {# importo eilutė atpažinta kaip kito projekto dalis} few {# importo eilutės atpažintos kaip kito projekto dalis} other {# importo eilučių atpažinta kaip kito projekto dalis}}",
+      "onProject": "{records} įrašų ({hours} val.) susieta su projektu",
+      "peopleWithHistory": "{people, plural, one {# žmogus turi projektų istoriją} few {# žmonės turi projektų istoriją} other {# žmonių turi projektų istoriją}}"
+    },
+    "m": {
+      "projectRows": "projektų eilutės",
+      "realProjects": "realūs projektai",
+      "records": "darbo įrašai",
+      "hours": "užfiksuotos valandos",
+      "people": "žmonės"
+    },
+    "invariant": "Įrašai, valandos ir žmonės prieš ir po identiški: niekas neperkelta, neišskaidyta ir neištrinta.",
+    "invariantBroken": "Dėmesio: sumos prieš ir po skiriasi — praneškite apie tai; niekas neturėjo pasikeisti.",
+    "example": {
+      "title": "Vienas objektas — daug užrašymų",
+      "intro": "Tikros šio importo grupės: ką skaičiuoklės laikė atskiromis eilutėmis, LabourMarket.ai laiko vienu projektu su visa jo istorija.",
+      "spreadsheet": "Skaičiuoklėse: {rows} atskiros eilutės",
+      "more": "… ir dar {count}",
+      "lm": "LabourMarket.ai: vienas projektas",
+      "facts": "{records} įrašų · {hours} val. · {people, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
+      "probable": "Tikėtina: tas pats adresas, kitas laikotarpis ar žmonės — užfiksuota, atšaukiama."
+    },
+    "unresolved": {
+      "title": "Dar neišspręsta — išsaugota taip, kaip užfiksuota",
+      "noObject": "{records} įrašų ({hours} val.) nenurodo objekto — jie lieka organizacijos istorijoje, ne išgalvotame projekte.",
+      "multi": "{records} įrašų ({hours} val.) vienoje eilutėje nurodo kelis objektus — valandos tarp jų neskirstomos.",
+      "single": "{records} įrašų ({hours} val.) nurodo vieną vietą, neatitinkančią jokio žinomo objekto.",
+      "dates": "{personDays} žmogaus dienų turi kelis įrašus ta pačia data ({records} įrašų): šaltinyje ta pati dienos žyma pakartota skirtingoms savaitėms. Valandos išsaugotos; datas reikia pataisyti.",
+      "probable": "{count, plural, one {# sujungimas yra tikėtinas} few {# sujungimai yra tikėtini} other {# sujungimų yra tikėtini}} (tas pats adresas, kitas laikotarpis ar žmonės).",
+      "conflicts": "{count, plural, one {# eilutė turi užfiksuotą prieštaravimą} few {# eilutės turi užfiksuotą prieštaravimą} other {# eilučių turi užfiksuotą prieštaravimą}}."
+    },
+    "sessions": {
+      "title": "Pagal šaltinio failą",
+      "source": "Šaltinis",
+      "onProject": "Projekte",
+      "unplaced": "Be objekto"
+    },
+    "register": {
+      "title": "Visi užfiksuoti neatitikimai",
+      "rows": "{count, plural, one {# užfiksuotas sprendimas} few {# užfiksuoti sprendimai} other {# užfiksuotų sprendimų}}",
+      "reverted": "atšaukta",
+      "rule": "taisyklė {rule}, {at}",
+      "decision": {
+        "merged": "sujungta",
+        "canonical": "išlaikomas projektas",
+        "kept_separate": "palikta atskirai"
+      },
+      "certainty": {
+        "unambiguous": "vienareikšmiška",
+        "probable": "tikėtina",
+        "none": "nesujungta"
+      }
+    },
+    "undo": {
+      "reason": "Atšaukimo priežastis",
+      "button": "Atšaukti sujungimą",
+      "pending": "Atšaukiama…",
+      "done": "Atšaukta: eilutė vėl yra atskiras projektas.",
+      "failed": "Neatšaukta. Atnaujinkite ir bandykite dar kartą."
+    },
+    "timing": "Apskaičiuota iš {records} įrašų per {ms} ms.",
+    "types": {
+      "address_spelling_variant": "tas pats adresas, užrašytas skirtingai",
+      "code_spelling_variant": "tas pats objekto kodas, užrašytas skirtingai",
+      "name_mixed_with_work_description": "objekto pavadinimas sumaišytas su darbų aprašymu",
+      "object_split_into_projects": "vienas objektas išskaidytas į kelis projektus",
+      "multiple_objects_in_row": "keli objektai vienoje eilutėje",
+      "no_object": "objektas nenurodytas",
+      "no_house_number": "vieta be namo numerio",
+      "period_mismatch": "darbų laikotarpiai toli vienas nuo kito",
+      "possible_duplicate_records": "galimai pasikartojantys įrašai",
+      "ambiguous_person": "nevienareikšmis darbuotojo identifikavimas",
+      "conflicting_project_data": "prieštaringi projekto duomenys",
+      "possible_same_object": "galimai tas pats objektas (nesujungta)",
+      "date_conflict_person_days": "žmogaus dienos su prieštaringomis datomis",
+      "unplaced_no_object": "įrašai be objekto",
+      "unplaced_multiple_objects": "įrašai su keliais objektais",
+      "unplaced_single_unmatched": "įrašai su nežinoma vieta"
+    },
+    "link": "Duomenų kokybė"
   }
 }
