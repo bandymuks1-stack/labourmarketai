@@ -52,6 +52,7 @@ import {
   startEvidenceImportAction,
   withdrawEvidenceImportAction,
 } from "@/lib/organization-evidence/import-actions";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
 
 /**
  * ORGANIZATION EVIDENCE IMPORT — the human face of the one import engine.
@@ -100,30 +101,21 @@ const SECTION = "flex flex-col gap-4";
 const HEADING =
   "font-display text-lg font-bold tracking-tightest text-text-primary";
 
-const STATE_TONE: Record<string, string> = {
-  ready: "border-state-success/40 bg-state-success/10 text-state-success",
-  needs_review: "border-state-amber/40 bg-state-amber/10 text-state-amber",
-  duplicate: "border-ink-500 bg-ink-800/40 text-text-muted",
-  conflict: "border-state-warning/40 bg-state-warning/10 text-state-warning",
+/** Preview row state -> the one StatusChip pattern (word + shape). */
+const STATE_VARIANT: Record<string, StatusChipVariant> = {
+  ready: "success",
+  needs_review: "attention",
+  duplicate: "neutral",
+  conflict: "attention",
 };
-
-function Chip({ tone, children }: { tone: string; children: React.ReactNode }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${tone}`}
-    >
-      {children}
-    </span>
-  );
-}
 
 /** A row's headline state, chosen by the same precedence the core uses: a
  *  conflict outranks a duplicate, which outranks "needs a person". A row the
  *  PLAN makes ready reads as ready — the plan is part of the commit. */
-function rowTone(row: PreviewRow): string {
-  if (row.duplicateState === "conflict") return STATE_TONE.conflict;
-  if (row.duplicateState === "duplicate") return STATE_TONE.duplicate;
-  return row.ready || row.readyWithPlan ? STATE_TONE.ready : STATE_TONE.needs_review;
+function rowTone(row: PreviewRow): StatusChipVariant {
+  if (row.duplicateState === "conflict") return STATE_VARIANT.conflict;
+  if (row.duplicateState === "duplicate") return STATE_VARIANT.duplicate;
+  return row.ready || row.readyWithPlan ? STATE_VARIANT.ready : STATE_VARIANT.needs_review;
 }
 
 /** The derived-field methods the preview names in words. Anything else stays
@@ -727,11 +719,11 @@ export async function EvidenceImportSection({
                         </td>
                         <td className="px-2 py-2">
                           <div className="flex flex-col items-start gap-1">
-                            <Chip tone={rowTone(row)}>
+                            <StatusChip variant={rowTone(row)}>
                               {t(
                                 `duplicateState.${row.duplicateState}` as never,
                               )}
-                            </Chip>
+                            </StatusChip>
                             {row.factFields.length > 0 && (
                               <span className="text-xs text-text-muted">
                                 {t("preview.fact")}: {row.factFields.join(", ")}
@@ -914,13 +906,13 @@ export async function EvidenceImportSection({
                         className="flex basis-full flex-col gap-0.5"
                       />
                     )}
-                    <Chip
-                      tone={
+                    <StatusChip
+                      variant={
                         rec.withdrawn
-                          ? STATE_TONE.duplicate
+                          ? STATE_VARIANT.duplicate
                           : isSelfVouched(rec.state as never)
-                            ? STATE_TONE.needs_review
-                            : STATE_TONE.ready
+                            ? STATE_VARIANT.needs_review
+                            : STATE_VARIANT.ready
                       }
                     >
                       {rec.withdrawn
@@ -930,7 +922,7 @@ export async function EvidenceImportSection({
                             ? t("records.selfAttested")
                             : t("records.attested")
                           : t(`evidenceState.${rec.state}` as never)}
-                    </Chip>
+                    </StatusChip>
                     {/* The one trust claim this page ever makes about an import,
                       and it is always the same one. */}
                     <span className="text-xs text-text-muted">

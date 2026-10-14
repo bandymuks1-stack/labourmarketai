@@ -35,6 +35,7 @@ import { playerInitials } from "@/lib/identity/player-identity";
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
 
 /** The timeline window: four weeks, moved by whole windows. */
 const TIMELINE_DAYS = 28;
@@ -79,10 +80,11 @@ const CHIP_BASE =
   "inline-flex min-h-11 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 
 /** Accessible risk tone — always paired with a text label. */
-const RISK_TONE: Record<GapRiskLevel, string> = {
-  ok: "border-state-success/50 bg-state-success/10 text-state-success",
-  tight: "border-state-warning/50 bg-state-warning/10 text-text-primary",
-  critical: "border-state-danger/50 bg-state-danger/10 text-state-danger",
+/** Capacity risk -> the one StatusChip pattern (word + shape). */
+const RISK_VARIANT: Record<GapRiskLevel, StatusChipVariant> = {
+  ok: "success",
+  tight: "attention",
+  critical: "danger",
 };
 
 const BAR_TONE: Record<GapRiskLevel, string> = {
@@ -315,13 +317,7 @@ export default async function CompanyWorkforcePlanningPage({
   }
 
   function RiskChip({ level }: { level: GapRiskLevel }) {
-    return (
-      <span
-        className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${RISK_TONE[level]}`}
-      >
-        {t(`risk.level.${level}`)}
-      </span>
-    );
+    return <StatusChip variant={RISK_VARIANT[level]}>{t(`risk.level.${level}`)}</StatusChip>;
   }
 
   function EntryRow({ entry }: { entry: PlanningZoneEntry }) {

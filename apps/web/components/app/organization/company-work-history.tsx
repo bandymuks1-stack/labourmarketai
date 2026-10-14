@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
 import { SemanticIcon } from "@/components/app/semantic-icon";
+import { Stat as PremiumStat } from "@/components/app/premium/stat";
 import { Link } from "@/lib/i18n/navigation";
 import { formatUtcDate } from "@/lib/time/display";
 import { formatHoursAsStated, recordWhen } from "@/lib/organization-evidence/period-provenance";
@@ -46,16 +47,9 @@ function Provenance({ t, name }: { t: Awaited<ReturnType<typeof getTranslations>
   );
 }
 
+/** The history figures use THE one Stat primitive (premium/stat). */
 export function Stat({ concept, value, label }: { concept: "object" | "person" | "time" | "calendar"; value: string; label: string }) {
-  return (
-    <div className="flex items-center gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-3">
-      <SemanticIcon concept={concept} label={label} className="h-5 w-5 text-brand-cyan" />
-      <div className="flex min-w-0 flex-col">
-        <span className="font-display text-xl font-bold leading-tight text-text-primary">{value}</span>
-        <span className="text-meta text-text-muted">{label}</span>
-      </div>
-    </div>
-  );
+  return <PremiumStat concept={concept} value={value} label={label} />;
 }
 
 export function span(first: string | null, last: string | null, locale: string): string | null {
