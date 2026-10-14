@@ -14542,7 +14542,10 @@
       "teamOfferThreadFailed": "This conversation cannot be opened.",
       "whatChangedIntro": "{count, plural, one {Here is the one chain from your recent work: what you did, what changed, what it opened.} other {Here are # chains from your recent work: what you did, what changed, what it opened.}}",
       "whatChangedNone": "Nothing new came out of your work in the last 14 days. Once you record work and it is confirmed, I'll show you what it changed.",
-      "whatChangedUnavailable": "I couldn't check what changed right now. Your records are safe; try again in a moment or open the journal."
+      "whatChangedUnavailable": "I couldn't check what changed right now. Your records are safe; try again in a moment or open the journal.",
+      "planIntro": "{count, plural, one {That is # step.} other {That is # steps, in order. Here is the first — tap the next one when you are ready.}}",
+      "planNextOffer": "Next step:",
+      "planStep": "Step {n} of {count}"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -19523,5 +19526,35 @@
     "focusHint": "Tap a line to follow one skill through your whole journey.",
     "showAll": "Show all",
     "horizonDetail": "you already have {shared} of {total} skills"
+  },
+  "projectCourse": {
+    "title": "Project course",
+    "count": "{done} of {total} stages done",
+    "unknown": "Couldn't read the project's stages.",
+    "here": "We are here",
+    "state": {
+      "done": "Done",
+      "now": "In progress",
+      "risk": "Behind its planned end",
+      "blocked": "Blocked",
+      "planned": "Planned",
+      "cancelled": "Cancelled"
+    },
+    "helpNeeded": "Help needed — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "This week's goal",
+    "titleMine": "Your tasks this week",
+    "count": "{done} of {total} done",
+    "unknown": "Couldn't read this week's tasks.",
+    "mineNote": "Only the tasks you can see: yours and your team's.",
+    "status": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "blocked": "Blocked",
+      "done": "Done",
+      "cancelled": "Cancelled",
+      "overdue": "Overdue"
+    }
   }
 }

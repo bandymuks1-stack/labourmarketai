@@ -16,6 +16,8 @@ import {
   ChatActionRow,
 } from "@/components/app/conversation/chat/chat-action";
 import { Clock, X } from "lucide-react";
+
+import { CameraCaptureButton } from "@/components/app/camera-capture-button";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { compressImageFile } from "@/lib/browser/image-compress";
 import {
@@ -941,6 +943,13 @@ export function WorkerWorkLogFlow({
           void pickPhoto(e.target.files?.[0] ?? null);
         }}
         className="text-meta text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-meta file:text-text-primary"
+      />
+      {/* The camera as a second door into the SAME field (phones only). */}
+      <CameraCaptureButton
+        label={tPhoto("takePhoto")}
+        disabled={confirming || pending}
+        testId="worklog-photo-camera"
+        onFile={(f) => void pickPhoto(f)}
       />
 
       {photoError ? (

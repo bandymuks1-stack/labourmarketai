@@ -7635,5 +7635,35 @@
     "focusHint": "Puuduta liini, et jälgida üht oskust kogu teekonna vältel.",
     "showAll": "Näita kõiki",
     "horizonDetail": "sul on juba {shared} oskust {total}-st"
+  },
+  "projectCourse": {
+    "title": "Projekti teekond",
+    "count": "Valmis {done} etappi {total}-st",
+    "unknown": "Projekti etappe ei õnnestunud lugeda.",
+    "here": "Siin me oleme",
+    "state": {
+      "done": "Valmis",
+      "now": "Käimas",
+      "risk": "Plaanist maas",
+      "blocked": "Peatatud",
+      "planned": "Planeeritud",
+      "cancelled": "Tühistatud"
+    },
+    "helpNeeded": "Abi on vaja — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Selle nädala eesmärk",
+    "titleMine": "Sinu selle nädala ülesanded",
+    "count": "Tehtud {done}/{total}",
+    "unknown": "Selle nädala ülesandeid ei õnnestunud lugeda.",
+    "mineNote": "Ainult sulle nähtavad ülesanded: sinu ja su meeskonna omad.",
+    "status": {
+      "todo": "Teha",
+      "in_progress": "Käimas",
+      "blocked": "Peatatud",
+      "done": "Tehtud",
+      "cancelled": "Tühistatud",
+      "overdue": "Hilinenud"
+    }
   }
 }

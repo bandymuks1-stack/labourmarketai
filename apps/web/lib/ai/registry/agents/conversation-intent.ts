@@ -97,6 +97,25 @@ const conversationIntentData = z
      * against the caller's own authorized context.
      */
     reference: z.string().min(1).max(80).optional(),
+    /**
+     * For `action` ONLY, when ONE message asks for two or three things in
+     * order: the ordered catalogue ids, each with the span of the message
+     * that asked for it (copied verbatim). The server accepts it only as a
+     * plan of reads with at most one write as the LAST step
+     * (lib/conversation/intent-plan.ts); otherwise it uses `intent` alone.
+     */
+    steps: z
+      .array(
+        z
+          .object({
+            intent: z.string().min(1).max(60),
+            words: z.string().min(1).max(60).optional(),
+          })
+          .strict(),
+      )
+      .min(2)
+      .max(3)
+      .optional(),
   })
   .strict();
 
@@ -107,7 +126,7 @@ export const conversationIntentOutputSchema = aiEnvelopeSchema(
 
 export const conversationIntentEntry: PromptRegistryEntry = {
   agent: "conversation_intent",
-  version: "2.0.0",
+  version: "2.1.0",
   title: "Conversation Understanding Proposer",
   system: [
     "You read ONE message a signed-in user typed into a labour-market",
@@ -134,6 +153,13 @@ export const conversationIntentEntry: PromptRegistryEntry = {
     "verbatim from the catalogue. Never invent an id, never rename one,",
     "never combine two. `data.alternatives` may list up to two other",
     "catalogue ids that could also fit, most likely first.",
+    "",
+    "If ONE `action` message asks for two or three different things in a",
+    "clear order ('show my week and then my projects'), ALSO set",
+    "`data.steps`: those catalogue ids in that order, each with `words` =",
+    "the part of the message that asked for it, copied verbatim. Still set",
+    "`data.intent` to the first one. Never add a step the message did not",
+    "ask for, never more than three, never the same id twice.",
     "",
     "Set `data.reference` when `kind` is `reference` or `question` AND the",
     "message names something: copy that name verbatim out of the message.",
@@ -164,8 +190,9 @@ export const conversationIntentEntry: PromptRegistryEntry = {
     "Never repeat, extract or infer personal data from the sentence.",
     "Never answer the user's request itself — classification only.",
     "Never state that anything was done, saved or verified.",
+    "A plan (`steps`) only orders ids the message itself asked for — never an added step.",
   ],
   allowedEvidenceSources: ["conversation_sentence", "intent_catalogue"],
   blockedClaims: ["saved", "done", "verified", "confirmed", "guaranteed"],
-  lastUpdated: "2026-09-05",
+  lastUpdated: "2026-10-14",
 };
