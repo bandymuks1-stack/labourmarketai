@@ -71,6 +71,12 @@ export function buildLlmsTxt(
       ? "- Paid plans can be bought through a live checkout; the pricing page states the current plans and prices."
       : "- Payments are not enabled; pricing pages describe the intended model, not a live checkout.",
     "",
+    "## Connect an AI assistant",
+    "",
+    `- MCP server: ${o}/api/mcp (Model Context Protocol, streamable HTTP, POST). ChatGPT, Claude and other MCP clients can connect it as a connector.`,
+    `- Sign-in is OAuth 2.1 with dynamic client registration and PKCE, discovered from ${o}/.well-known/oauth-protected-resource. The person approves the connection on a consent screen and can disconnect it in their account settings.`,
+    "- The assistant acts only with the signed-in person's own permissions. Actions with consequences are prepared as a draft and need a separate confirmation; nothing is published, sent or saved as a fact on the assistant's word alone.",
+    "",
     "## Security",
     "",
     `- Vulnerability disclosure: ${o}/.well-known/security.txt`,
