@@ -5719,6 +5719,14 @@
             "Einwilligungs- und Prüfaufzeichnungen werden als Historie aufbewahrt: Ein Widerruf wird aufgezeichnet, statt den Eintrag zu löschen.",
             "Genaue Aufbewahrungsfristen sind Teil der endgültigen rechtlichen Fassung, die noch vorbereitet wird."
           ]
+        },
+        {
+          "heading": "KI und verbundene KI-Assistenten",
+          "items": [
+            "Einige Funktionen nutzen ein KI-Modell von Google (die Gemini-API): zum Übersetzen von Nachrichten und Stellenanzeigen und um vorzuschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den diese Aufgabe braucht. Das Ergebnis ist ein Vorschlag — nichts wird als Tatsache über Sie gespeichert, bevor Sie es bestätigen.",
+            "Sie können LabourMarket.ai mit einem KI-Assistenten wie ChatGPT oder Claude verbinden. Jede Verbindung bestätigen Sie selbst auf einer Einwilligungsseite; der Assistent handelt dann nur mit Ihren eigenen Berechtigungen, und folgenreiche Aktionen brauchen eine gesonderte Bestätigung. Verbundene Apps sehen und trennen Sie jederzeit in Ihren Kontoeinstellungen.",
+            "Was der Anbieter eines KI-Assistenten mit Ihrem Gespräch tut, regeln dessen eigene Datenschutzbestimmungen."
+          ]
         }
       ],
       "pendingTitle": "Noch ausstehend bis zur endgültigen rechtlichen Fassung:",
@@ -5765,8 +5773,8 @@
         {
           "heading": "Standardmäßig geschlossen",
           "items": [
-            "Derzeit nicht verfügbar.",
-            "Derzeit nicht verfügbar."
+            "Benutzerdatentabellen sind durch Zugriffsregeln in der Datenbank selbst geschützt. Wenn keine Regel den Zugriff ausdrücklich gewährt, sind die Daten nicht sichtbar — auch nicht für andere angemeldete Benutzer.",
+            "Diese Regeln wirken auf Datenbankebene, nicht nur in der Oberfläche, und sind durch automatisierte Tests abgedeckt."
           ]
         },
         {
@@ -5810,10 +5818,12 @@
         {
           "heading": "Infrastrukturanbieter (Unterauftragsverarbeiter)",
           "items": [
-            "Derzeit nicht verfügbar.",
+            "Supabase — Datenbank, Nutzeranmeldung und Dateispeicher. Die Daten werden in der Europäischen Union gehostet (Region eu-west-1).",
             "Vercel — Hosting der Anwendung und Auslieferung der Inhalte.",
             "GitHub — Speicherung des Quellcodes. Nutzerdaten werden dort nicht gespeichert.",
-            "Derzeit ist kein E-Mail-Anbieter, kein KI-Anbieter, kein Übersetzungsanbieter und kein Zahlungsanbieter aktiv. Wird einer aktiviert, wird zuerst diese Liste aktualisiert."
+            "Google (Gemini-API) — KI-Verarbeitung zum Übersetzen von Nachrichten und Stellenanzeigen und zum Vorschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den die Aufgabe braucht.",
+            "Stripe — Zahlungsabwicklung. Ein Kundendatensatz entsteht nur, wenn eine Organisation einen Abonnement-Checkout beginnt; heute ist kein Abonnement aktiv.",
+            "Kein weiterer E-Mail-, KI-, Übersetzungs- oder Zahlungsanbieter ist aktiv. Wird einer aktiviert, wird zuerst diese Liste aktualisiert."
           ]
         },
         {
@@ -5870,7 +5880,7 @@
         {
           "heading": "Wenn etwas falsch aussieht",
           "items": [
-            "Derzeit nicht verfügbar."
+            "Die Zugriffsregeln in der Datenbank sind die maßgebliche Quelle, und diese Seite folgt ihnen. Wenn etwas hier nicht mit dem übereinstimmt, was Sie sehen, kontaktieren Sie uns — ein Mensch wird es prüfen."
           ]
         }
       ],
@@ -6005,7 +6015,7 @@
     "dataDeletion": {
       "title": "Konto- und Datenlöschung",
       "description": "So beantragen Sie die Löschung Ihres LabourMarket.ai-Kontos und Ihrer personenbezogenen Daten.",
-      "intro": "Sie können LabourMarket.ai bitten, Ihr Konto und Ihre personenbezogenen Daten zu löschen. Die Löschung wird derzeit als Antrag bearbeitet, den eine Person prüft; es gibt keine Schaltfläche zur sofortigen Kontolöschung.",
+      "intro": "Sie können LabourMarket.ai bitten, Ihr Konto und Ihre personenbezogenen Daten zu löschen. Die Löschung wird derzeit als Antrag bearbeitet, den eine Person prüft; es gibt keine Schaltfläche zur sofortigen Kontolöschung. Wenn Sie sich anmelden können, können Sie den Antrag auch selbst stellen: Öffnen Sie die Datenschutz-Seite Ihres Kontos (in der mobilen App: Einstellungen → Datenschutz) und wählen Sie die Kontolöschung. In beiden Fällen antwortet ein Mensch innerhalb eines Monats.",
       "howTitle": "So beantragen Sie die Löschung",
       "howSteps": [
         "Schreiben Sie an {email} von der E-Mail-Adresse, die mit Ihrem LabourMarket.ai-Konto verknüpft ist.",
