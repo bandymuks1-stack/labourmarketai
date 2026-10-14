@@ -182,7 +182,11 @@ describe("ŠIANDIEN leaves an empty line out instead of stating it", () => {
   });
 
   it("a causal chain is drawn only from the model's closed set; an empty 'because' region is left out", () => {
-    expect(WORK).toMatch(/if \(because\.causes\.length === 0 && because\.events\.length === 0\) return null;/);
+    // On the home the causal rows move to the consequence trace (plainOnly);
+    // the region is still left out when nothing remains to list.
+    expect(WORK).toMatch(
+      /if \(\(plainOnly \|\| because\.causes\.length === 0\) && because\.events\.length === 0\) return null;/,
+    );
     expect(WORK).toMatch(/tChain\(`consequence\.\$\{c\.chain\.consequenceKey\}`\)/);
   });
 

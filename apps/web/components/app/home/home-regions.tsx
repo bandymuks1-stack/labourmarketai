@@ -41,12 +41,15 @@ import { cn } from "@/lib/utils";
  *   01 Laukia tavęs      WAITING  — the ONE next action + what waits on the
  *                                   person (offers, invitations, unread,
  *                                   journal items)
- *   02 Vyksta dabar      RUNNING  — recorded work as figures and a recorded /
+ *   02 Kas pasikeitė     TRACE    — the consequence trace (`home-trace.tsx`,
+ *                                   Future Experience A, 2026-10-14): what the
+ *                                   person did → what changed → what it opened
+ *   03 Vyksta dabar      RUNNING  — recorded work as figures and a recorded /
  *                                   confirmed bar, assigned projects as
  *                                   tiles, one growth sentence
- *   03 Tavo galimybės    OUTSIDE  — the market as a fit-band bar
- *   04 Naujausi įvykiai  BECAUSE  — what happened; event → consequence →
- *                                   state ONLY for the closed causal set
+ *   04 Tavo galimybės    OUTSIDE  — the market as a fit-band bar
+ *   05 Naujausi įvykiai  BECAUSE  — what happened; on the home only the PLAIN
+ *                                   events (the causal chains moved to 02)
  *
  * Desktop uses its width: two columns (01+02 | 03+04) from `lg`. The phone
  * reads 01→04 in DOM order, titles sit inside the card head (no separate
@@ -106,7 +109,7 @@ export function HomeRegionPending({ label }: { readonly label: string }) {
  * region. `featured` is the region that carries the one gold action — it
  * gets the brand hairline, nothing else does.
  */
-function Region({
+export function Region({
   id,
   index,
   title,
@@ -117,7 +120,7 @@ function Region({
   featured = false,
   children,
 }: {
-  readonly id: "waiting" | "running" | "because" | "outside";
+  readonly id: "waiting" | "running" | "because" | "outside" | "trace";
   /** The region number — the one mono line (a number, not a label). */
   readonly index: string;
   readonly title: string;
@@ -157,10 +160,10 @@ function Region({
   );
 }
 
-type RetryLabels = { readonly retry: string; readonly retrying: string };
+export type RetryLabels = { readonly retry: string; readonly retrying: string };
 
 /** A failed read: named, with a way to read again. */
-function Unreadable({ text, testid, labels }: { readonly text: string; readonly testid: string; readonly labels: RetryLabels }) {
+export function Unreadable({ text, testid, labels }: { readonly text: string; readonly testid: string; readonly labels: RetryLabels }) {
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between" role="status">
       <p className={NOTE} data-testid={testid}>
@@ -171,7 +174,7 @@ function Unreadable({ text, testid, labels }: { readonly text: string; readonly 
   );
 }
 
-async function retryLabels(): Promise<RetryLabels> {
+export async function retryLabels(): Promise<RetryLabels> {
   const t = await getTranslations("homeRegions");
   return { retry: t("retry"), retrying: t("retrying") };
 }
@@ -363,7 +366,7 @@ export async function HomeRunningView({
 
   if (running.kind === "unknown") {
     return (
-      <Region id="running" index="02" title={tRegion("title")} state="unknown" aside={journalLink}>
+      <Region id="running" index="03" title={tRegion("title")} state="unknown" aside={journalLink}>
         <Unreadable text={t("work.unknown")} testid="today-work-unknown" labels={rl} />
       </Region>
     );
@@ -395,7 +398,7 @@ export async function HomeRunningView({
   };
 
   return (
-    <Region id="running" index="02" title={tRegion("title")} state="known" aside={journalLink}>
+    <Region id="running" index="03" title={tRegion("title")} state="known" aside={journalLink}>
       {/* RECORDED WORK — the journal model's own period figures, drawn as
           figures and one recorded/confirmed bar; a failed journal read is
           named, never "0 h". */}
@@ -631,7 +634,7 @@ export async function HomeOutsideView({ outside }: { readonly outside: OutsideRe
   return (
     <Region
       id="outside"
-      index="03"
+      index="04"
       title={tRegion("title")}
       state={o.kind}
       testId="today-opportunity"
@@ -645,16 +648,23 @@ export async function HomeOutsideView({ outside }: { readonly outside: OutsideRe
 
 // ───────────────────────── 04 · BECAUSE (Naujausi įvykiai) ─────────────────────────
 
-export async function HomeBecause({ locale }: { readonly locale: ActiveLocale }) {
-  return <HomeBecauseView locale={locale} because={await loadHomeBecause()} />;
+/** On the home the causal chains live in the consequence trace ("Kas
+ *  pasikeitė", `home-trace.tsx`); this region then keeps only the PLAIN
+ *  events (messages, alerts, decisions without a stated consequence), so no
+ *  fact is drawn twice. */
+export async function HomeBecause({ locale, plainOnly = false }: { readonly locale: ActiveLocale; readonly plainOnly?: boolean }) {
+  return <HomeBecauseView locale={locale} because={await loadHomeBecause()} plainOnly={plainOnly} />;
 }
 
 export async function HomeBecauseView({
   locale,
   because,
+  plainOnly = false,
 }: {
   readonly locale: ActiveLocale;
   readonly because: BecauseRegion;
+  /** The trace draws the causal chains — list only the plain events. */
+  readonly plainOnly?: boolean;
 }) {
   const [tRegion, tChain, tTypes] = await Promise.all([
     getTranslations("homeRegions.because"),
@@ -670,22 +680,22 @@ export async function HomeBecauseView({
 
   if (because.kind === "unknown") {
     return (
-      <Region id="because" index="04" title={tRegion("title")} state="unknown" aside={allLink}>
+      <Region id="because" index="05" title={tRegion("title")} state="unknown" aside={allLink}>
         <Unreadable text={tRegion("unknown")} testid="home-because-unknown" labels={rl} />
       </Region>
     );
   }
   // Nothing happened that the feed carries → the region is left out.
-  if (because.causes.length === 0 && because.events.length === 0) return null;
+  if ((plainOnly || because.causes.length === 0) && because.events.length === 0) return null;
 
   // The SAME label the bell and the activity page use — never a second wording.
   const label = (c: HomeChange) => (tTypes.has(c.renderedType) ? tTypes(c.renderedType) : tTypes("generic"));
   const when = (c: HomeChange) => formatUtcDate(c.occurredAt.slice(0, 10), locale) ?? "—";
-  const causes = because.causes.slice(0, HOME_EVENTS_SHOWN);
+  const causes = plainOnly ? [] : because.causes.slice(0, HOME_EVENTS_SHOWN);
   const events = because.events.slice(0, Math.max(0, HOME_EVENTS_SHOWN - causes.length));
 
   return (
-    <Region id="because" index="04" title={tRegion("title")} state="known" aside={allLink}>
+    <Region id="because" index="05" title={tRegion("title")} state="known" aside={allLink}>
       <ol className="relative flex flex-col gap-1 before:absolute before:bottom-3 before:left-[5px] before:top-3 before:w-px before:bg-ink-600" data-testid="home-causes">
         {causes.map((c, i) => (
           <li key={c.id} className={cn("relative pl-6", i >= HOME_EVENTS_SHOWN_PHONE && "max-sm:hidden")}>

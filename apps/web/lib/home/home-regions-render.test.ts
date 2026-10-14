@@ -291,10 +291,24 @@ describe("one reading order on every screen", () => {
   it("opportunities are 03 and recent events 04 — the DOM order, so the phone needs no renumbering", async () => {
     const outside = html(await HomeOutsideView({ outside: ALL_UNKNOWN.outside }));
     const because = html(await HomeBecauseView({ locale: "en", because: ALL_UNKNOWN.because }));
-    expect(outside).toMatch(/>03</);
-    expect(because).toMatch(/>04</);
+    expect(outside).toMatch(/>04</);
+    expect(because).toMatch(/>05</);
     // A failed read always offers a way to read again.
     expect(outside).toContain('data-testid="home-opportunity-unknown-retry"');
     expect(because).toContain('data-testid="home-because-unknown-retry"');
+  });
+});
+
+describe("events region on the home lists only PLAIN events (the trace draws the chains)", () => {
+  it("plainOnly drops the causal rows and keeps the plain ones", async () => {
+    const because = deriveBecause([ev("1", "booking_accepted"), ev("2", "message_received")]);
+    const h = html(await HomeBecauseView({ locale: "en", because, plainOnly: true }));
+    expect(h).not.toContain('data-testid="home-cause-booking_accepted"');
+    expect(h).toContain('data-testid="home-events"');
+  });
+
+  it("plainOnly with only causal events leaves the region out", async () => {
+    const because = deriveBecause([ev("1", "booking_accepted")]);
+    expect(await HomeBecauseView({ locale: "en", because, plainOnly: true })).toBeNull();
   });
 });

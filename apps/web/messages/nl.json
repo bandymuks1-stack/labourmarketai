@@ -19468,6 +19468,39 @@
       "totalBody": "Je registraties zijn veilig — dit is tijdelijk. Probeer het zo opnieuw."
     }
   },
+  "homeTrace": {
+    "title": "Wat er veranderde",
+    "unknown": "Kon niet lezen wat er na je acties veranderde.",
+    "all": "Alle activiteit",
+    "empty": "Geen nieuwe gevolgen in de laatste 14 dagen. Zodra je werk registreert en het bevestigd wordt, zie je hier wat het veranderde.",
+    "openJournal": "Werklogboek openen",
+    "entryUntitled": "Werkregistratie",
+    "roleUnknown": "tweede partij",
+    "journalUnknown": "Kon het werklogboek niet lezen.",
+    "eventsUnknown": "Kon de meldingen niet lezen.",
+    "truncated": "Op basis van je nieuwste 30 registraties.",
+    "step": {
+      "recordedHours": "{hours} u geregistreerd",
+      "recordedDays": "{days} d geregistreerd",
+      "recordedUntimed": "Geregistreerd zonder duur",
+      "awaiting": "Wacht op bevestiging",
+      "selfApproved": "Door jezelf goedgekeurd — geen bevestiging door een tweede partij",
+      "approvedBy": "Bevestigd door: {role}",
+      "approvedAutomatic": "Automatisch bevestigd volgens een regel",
+      "rejected": "Afgewezen",
+      "changesRequested": "Aanpassing gevraagd",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bevestigde registratie} other {# bevestigde registraties}}} other {Living CV bijgewerkt: {skills}}}",
+      "cvUnlinked": "Living CV: bevestigd werk, nog niet aan een vaardigheid gekoppeld",
+      "cvUnknown": "Living CV: kon niet lezen",
+      "matching": "Matching ziet bevestigd werk: {skills}",
+      "matchingRepeated": "Matching ziet herhaald bevestigd werk: {skills}"
+    },
+    "legend": {
+      "fact": "Feit",
+      "pending": "Wacht op een tweede partij",
+      "derived": "Afgeleid uit feiten"
+    }
+  },
   "projectCourse": {
     "title": "Projectroute",
     "count": "{done} van {total} fasen klaar",

@@ -7577,6 +7577,39 @@
       "totalBody": "Dine registreringer er i sikkerhed – det er midlertidigt. Prøv igen om lidt."
     }
   },
+  "homeTrace": {
+    "title": "Hvad der ændrede sig",
+    "unknown": "Vi kunne ikke læse, hvad der ændrede sig efter dine handlinger.",
+    "all": "Al aktivitet",
+    "empty": "Ingen nye følger de seneste 14 dage. Når du registrerer arbejde, og det bliver bekræftet, ser du her, hvad det ændrede.",
+    "openJournal": "Åbn arbejdsjournalen",
+    "entryUntitled": "Arbejdsregistrering",
+    "roleUnknown": "anden part",
+    "journalUnknown": "Arbejdsjournalen kunne ikke læses.",
+    "eventsUnknown": "Notifikationerne kunne ikke læses.",
+    "truncated": "Baseret på dine nyeste 30 registreringer.",
+    "step": {
+      "recordedHours": "{hours} t registreret",
+      "recordedDays": "{days} d registreret",
+      "recordedUntimed": "Registreret uden varighed",
+      "awaiting": "Venter på bekræftelse",
+      "selfApproved": "Godkendt af dig selv – ikke en bekræftelse fra en anden part",
+      "approvedBy": "Bekræftet af: {role}",
+      "approvedAutomatic": "Bekræftet automatisk efter en regel",
+      "rejected": "Afvist",
+      "changesRequested": "Rettelse ønsket",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bekræftet registrering} other {# bekræftede registreringer}}} other {Living CV opdateret: {skills}}}",
+      "cvUnlinked": "Living CV: bekræftet arbejde, endnu ikke knyttet til en færdighed",
+      "cvUnknown": "Living CV: kunne ikke læses",
+      "matching": "Matchingen ser bekræftet arbejde: {skills}",
+      "matchingRepeated": "Matchingen ser gentagne gange bekræftet arbejde: {skills}"
+    },
+    "legend": {
+      "fact": "Fakta",
+      "pending": "Venter på en anden part",
+      "derived": "Udledt af fakta"
+    }
+  },
   "projectCourse": {
     "title": "Projektforløb",
     "count": "{done} af {total} faser færdige",

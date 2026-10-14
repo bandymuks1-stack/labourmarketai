@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
+import { HomeTrace } from "@/components/app/home/home-trace";
 import { EmployerVisibilityAsk } from "@/components/app/employer-visibility-ask";
 import {
   HomeAvailability,
@@ -149,6 +150,14 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
             <HomeWaiting locale={locale} />
           </Suspense>
 
+          {/* KAS PASIKEITĖ — the consequence trace (Future Experience A,
+              owner 2026-10-14): what the person did → what changed → what it
+              opened, from the ONE read-only trace reader. Directly under the
+              one action, so the screen reads "what now · what my work did". */}
+          <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
+            <HomeTrace locale={locale} />
+          </Suspense>
+
           {/* THE EMPLOYER-VISIBILITY ASK — the SAME once-only door the
               work-card save shows (never a consent of its own: it opens the
               canonical consent screen; "not now" ends it on this device). On
@@ -177,7 +186,7 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
             <HomeOutside />
           </Suspense>
           <Suspense fallback={null}>
-            <HomeBecause locale={locale} />
+            <HomeBecause locale={locale} plainOnly />
           </Suspense>
         </div>
       </div>

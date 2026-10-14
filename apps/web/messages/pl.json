@@ -19468,6 +19468,39 @@
       "totalBody": "Twoje wpisy są bezpieczne — to chwilowy problem. Spróbuj ponownie za moment."
     }
   },
+  "homeTrace": {
+    "title": "Co się zmieniło",
+    "unknown": "Nie udało się odczytać, co zmieniło się po Twoich działaniach.",
+    "all": "Cała aktywność",
+    "empty": "Brak nowych skutków w ciągu 14 dni. Gdy zapiszesz pracę i zostanie potwierdzona, zobaczysz tu, co zmieniła.",
+    "openJournal": "Otwórz dziennik pracy",
+    "entryUntitled": "Wpis o pracy",
+    "roleUnknown": "druga strona",
+    "journalUnknown": "Nie udało się odczytać dziennika pracy.",
+    "eventsUnknown": "Nie udało się odczytać powiadomień.",
+    "truncated": "Na podstawie Twoich 30 najnowszych wpisów.",
+    "step": {
+      "recordedHours": "Zapisano {hours} godz.",
+      "recordedDays": "Zapisano {days} dni",
+      "recordedUntimed": "Zapisano bez czasu trwania",
+      "awaiting": "Czeka na potwierdzenie",
+      "selfApproved": "Zatwierdzone przez Ciebie — to nie jest potwierdzenie drugiej strony",
+      "approvedBy": "Potwierdził: {role}",
+      "approvedAutomatic": "Potwierdzone automatycznie według reguły",
+      "rejected": "Odrzucono",
+      "changesRequested": "Poproszono o poprawki",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# potwierdzony wpis} few {# potwierdzone wpisy} many {# potwierdzonych wpisów} other {# potwierdzonego wpisu}}} other {Living CV uzupełnione: {skills}}}",
+      "cvUnlinked": "Living CV: potwierdzona praca, jeszcze niepowiązana z umiejętnością",
+      "cvUnknown": "Living CV: nie udało się odczytać",
+      "matching": "Dopasowanie widzi potwierdzoną pracę: {skills}",
+      "matchingRepeated": "Dopasowanie widzi wielokrotnie potwierdzoną pracę: {skills}"
+    },
+    "legend": {
+      "fact": "Fakt",
+      "pending": "Czeka na drugą stronę",
+      "derived": "Wywnioskowane z faktów"
+    }
+  },
   "projectCourse": {
     "title": "Trasa projektu",
     "count": "Ukończono {done} z {total} etapów",
