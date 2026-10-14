@@ -140,7 +140,8 @@
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
     "uploading": "Uploader foto…",
     "remove": "Fjern foto",
-    "previewAlt": "Valgt foto"
+    "previewAlt": "Valgt foto",
+    "takePhoto": "Tag et billede"
   },
   "voice": {
     "entryCta": "Optag med stemme",

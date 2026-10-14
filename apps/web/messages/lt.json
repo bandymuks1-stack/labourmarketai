@@ -14542,7 +14542,10 @@
       "teamOfferThreadFailed": "Šio pokalbio atidaryti nepavyko.",
       "whatChangedIntro": "{count, plural, one {Štai tavo naujausio darbo grandinė: ką padarei, kas pasikeitė, ką tai atvėrė.} few {Štai # tavo naujausio darbo grandinės: ką padarei, kas pasikeitė, ką tai atvėrė.} other {Štai # tavo naujausio darbo grandinių: ką padarei, kas pasikeitė, ką tai atvėrė.}}",
       "whatChangedNone": "Per 14 dienų iš tavo darbo nieko naujo neatsirado. Kai įrašysi darbą ir jį patvirtins, parodysiu, ką jis pakeitė.",
-      "whatChangedUnavailable": "Dabar nepavyko patikrinti, kas pasikeitė. Tavo įrašai niekur nedingo — pabandyk po akimirkos arba atidaryk žurnalą."
+      "whatChangedUnavailable": "Dabar nepavyko patikrinti, kas pasikeitė. Tavo įrašai niekur nedingo — pabandyk po akimirkos arba atidaryk žurnalą.",
+      "planIntro": "{count, plural, one {Tai # žingsnis.} few {Tai # žingsniai, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.} other {Tai # žingsnių, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.}}",
+      "planNextOffer": "Kitas žingsnis:",
+      "planStep": "{n} žingsnis iš {count}"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -19517,5 +19520,35 @@
     "focusHint": "Bakstelėk liniją ir sek vieną įgūdį per visą kelionę.",
     "showAll": "Rodyti visas",
     "horizonDetail": "jau turi {shared} iš {total} įgūdžių"
+  },
+  "projectCourse": {
+    "title": "Projekto trasa",
+    "count": "Baigta {done} iš {total} etapų",
+    "unknown": "Nepavyko nuskaityti projekto etapų.",
+    "here": "Mes čia",
+    "state": {
+      "done": "Baigta",
+      "now": "Vyksta",
+      "risk": "Vėluoja pagal planą",
+      "blocked": "Sustabdyta",
+      "planned": "Suplanuota",
+      "cancelled": "Atšaukta"
+    },
+    "helpNeeded": "Reikia pagalbos — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Šios savaitės tikslas",
+    "titleMine": "Tavo šios savaitės užduotys",
+    "count": "Atlikta {done} iš {total}",
+    "unknown": "Nepavyko nuskaityti šios savaitės užduočių.",
+    "mineNote": "Rodomos tik tau matomos užduotys: tavo ir tavo komandos.",
+    "status": {
+      "todo": "Laukia",
+      "in_progress": "Vyksta",
+      "blocked": "Sustabdyta",
+      "done": "Atlikta",
+      "cancelled": "Atšaukta",
+      "overdue": "Vėluoja"
+    }
   }
 }

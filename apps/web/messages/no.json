@@ -7629,5 +7629,35 @@
     "focusHint": "Trykk på en linje for å følge én ferdighet gjennom hele veien.",
     "showAll": "Vis alle",
     "horizonDetail": "du har allerede {shared} av {total} ferdigheter"
+  },
+  "projectCourse": {
+    "title": "Prosjektløp",
+    "count": "{done} av {total} faser ferdige",
+    "unknown": "Prosjektets faser kunne ikke leses.",
+    "here": "Her er vi",
+    "state": {
+      "done": "Ferdig",
+      "now": "Pågår",
+      "risk": "Etter planen",
+      "blocked": "Blokkert",
+      "planned": "Planlagt",
+      "cancelled": "Avlyst"
+    },
+    "helpNeeded": "Trenger hjelp — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Ukens mål",
+    "titleMine": "Dine oppgaver denne uken",
+    "count": "{done} av {total} ferdige",
+    "unknown": "Ukens oppgaver kunne ikke leses.",
+    "mineNote": "Bare oppgavene du kan se: dine og teamets.",
+    "status": {
+      "todo": "Å gjøre",
+      "in_progress": "Pågår",
+      "blocked": "Blokkert",
+      "done": "Ferdig",
+      "cancelled": "Avlyst",
+      "overdue": "Forsinket"
+    }
   }
 }

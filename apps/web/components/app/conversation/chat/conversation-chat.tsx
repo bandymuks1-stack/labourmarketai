@@ -147,7 +147,9 @@ import {
 import {
   dispatchIntent,
   type IntentHandlers,
+  type RoutedIntent,
 } from "@/lib/conversation/intent-registry";
+import type { PlanStep } from "@/lib/conversation/intent-plan";
 import { workspaceDisplayLabels, type WorkspaceInfo } from "@/lib/company/organization-switch";
 import { extractWorkLog, journalDraftReadiness } from "@/lib/conversation/worklog-extract";
 import { VOICE_TRANSCRIPT_DRAFT_KEY } from "@/lib/voice/constants";
@@ -188,10 +190,8 @@ import { WorkerInvitationAction } from "@/components/app/conversation/worker-inv
 import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { loadCriteriaSummaryForChat, loadWorkCardPrefillForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
-import {
-  appendAssistantTurn,
-  loadAssistantThread,
-} from "@/lib/assistant/transcript";
+import { loadAssistantThread } from "@/lib/assistant/transcript";
+import { postTranscriptTurn } from "@/lib/assistant/transcript-client";
 import { WorldStateProvider } from "@/components/app/world-state/world-state-provider";
 import { ContextPanel } from "@/components/app/world-state/context-panel";
 import { useResultParam } from "@/components/app/workspace/use-result-param";
@@ -1215,6 +1215,14 @@ export function ConversationChat({
     enabled: false,
     chain: Promise.resolve(),
   });
+  // MULTI-STEP PLAN (owner 2026-10-14 §4): the steps still to run, in order,
+  // with the handlers of the sentence that produced them. Each next step runs
+  // only when the person taps it — a human in the loop for every step.
+  const planRef = useRef<{
+    steps: readonly PlanStep[];
+    total: number;
+    run: (intent: RoutedIntent) => void;
+  } | null>(null);
   // The router compiles its patterns on first use; build them in idle slices
   // once the conversation is on screen so the first sentence finds them ready.
   useEffect(() => prewarmIntentRouter(), []);
@@ -1222,10 +1230,14 @@ export function ConversationChat({
     if (script) return; // design preview: never touches real persistence
     let cancelled = false;
     const loading = loadAssistantThread();
-    transcriptRef.current.chain = loading.then(
+    // The load only supplies a conversation-id HINT now; appends no longer
+    // wait for it (the server resolves the thread itself — see persistTurn).
+    loading.then(
       (res) => {
         if (!res.available) return;
-        transcriptRef.current.conversationId = res.conversationId;
+        if (transcriptRef.current.conversationId === null) {
+          transcriptRef.current.conversationId = res.conversationId;
+        }
         transcriptRef.current.enabled = true;
       },
       () => undefined,
@@ -1273,16 +1285,17 @@ export function ConversationChat({
     (role: "user" | "assistant", text: string) => {
       if (script || !text.trim()) return;
       const tr = transcriptRef.current;
+      // P0 2026-10-14: the append used to be a server action, and Next.js runs
+      // a page's server actions one at a time — it queued behind every other
+      // action the chat fires, so a message sent just before the person
+      // closed or left the page was never written. A keepalive fetch to the
+      // transcript route runs beside that queue and is finished by the
+      // browser even after unload. The chain still orders the appends, so a
+      // question is always written before its answer.
       tr.chain = tr.chain
         .then(async () => {
-          if (!tr.enabled) return;
-          const res = await appendAssistantTurn({
-            conversationId: tr.conversationId,
-            role,
-            text,
-            language: locale,
-          });
-          if (res.available) tr.conversationId = res.conversationId;
+          const saved = await postTranscriptTurn({ conversationId: tr.conversationId, role, text, language: locale });
+          if (saved) tr.conversationId = saved;
         })
         .catch(() => {
           /* degraded — nothing claimed */
@@ -5480,6 +5493,25 @@ export function ConversationChat({
         attachChoiceRef.current(chip);
         return;
       }
+      // The next step of a plan the person's own sentence asked for. Runs the
+      // SAME handler that sentence would have run; a write step only opens
+      // its confirm card.
+      if (chip.id.startsWith("plan-step:")) {
+        const plan = planRef.current;
+        const next = plan?.steps[0];
+        if (!plan || !next || `plan-step:${next.intent}` !== chip.id) return;
+        user(chip.label);
+        const rest = plan.steps.slice(1);
+        planRef.current = rest.length > 0 ? { ...plan, steps: rest } : null;
+        plan.run(next.intent);
+        if (rest.length > 0) {
+          const n = plan.total - rest.length + 1;
+          assistant(t("planNextOffer"), [
+            { id: `plan-step:${rest[0].intent}`, label: rest[0].label ?? t("planStep", { n, count: plan.total }) },
+          ]);
+        }
+        return;
+      }
       switch (chip.id) {
         case "capabilities":
           // The ONE door a not-understood answer offers ("Ką galiu čia
@@ -7800,6 +7832,25 @@ export function ConversationChat({
                 trackResolution(res.intent, "llm");
                 dispatchIntent(res.intent, handlers, withTyping, fallback);
                 return;
+              case "plan": {
+                // ONE SENTENCE, SEVERAL STEPS, IN ORDER (owner 2026-10-14 §4).
+                // The first step runs now; each next one is offered and runs
+                // when tapped. Every step is an existing handler; a write is
+                // only ever the last step and only opens its confirm card.
+                trackResolution(res.steps[0].intent, "llm");
+                const total = res.steps.length;
+                const rest = res.steps.slice(1);
+                planRef.current = {
+                  steps: rest,
+                  total,
+                  run: (step) => dispatchIntent(step, handlers, withTyping, fallback),
+                };
+                assistant(t("planIntro", { count: total }), [
+                  { id: `plan-step:${rest[0].intent}`, label: rest[0].label ?? t("planStep", { n: 2, count: total }) },
+                ]);
+                dispatchIntent(res.steps[0].intent, handlers, withTyping, fallback);
+                return;
+              }
               case "reference":
                 // Resolve against the caller's own world — never an operation.
                 trackResolution("unknown", "llm");

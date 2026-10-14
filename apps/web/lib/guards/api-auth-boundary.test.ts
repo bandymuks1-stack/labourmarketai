@@ -58,6 +58,10 @@ const CLASSIFICATION: Record<
     class: "cookie-only",
     why: "Money surface. It redirects a BROWSER to Stripe's hosted portal, so a non-browser caller has nothing to do with the response. No product need, and billing is where a mistake is least recoverable.",
   },
+  "assistant/transcript/route.ts": {
+    class: "cookie-only",
+    why: "The web chat's own transcript append (P0 2026-10-14): a keepalive fetch from the signed-in page so a turn survives leaving it. Same-origin only, and the hash-chaining RPC refuses anyone but the thread owner. An assistant over /api/mcp has its own door; a phone has no web chat.",
+  },
   "billing/test-checkout/route.ts": {
     class: "cookie-only",
     why: "Same reasoning as the portal, and test-mode only on top of it: it starts a Stripe Checkout a browser then completes.",
