@@ -7517,6 +7517,66 @@
     },
     "link": "Datakvalitet"
   },
+  "homeRegions": {
+    "waiting": {
+      "title": "Venter på dig",
+      "clear": "Intet venter på dig.",
+      "unknown": "Det, der venter på dig, kunne ikke læses."
+    },
+    "running": {
+      "title": "I gang nu",
+      "projectsUnknown": "Dine tildelte projekter kunne ikke læses.",
+      "today": "I dag",
+      "week": "Seneste 7 dage",
+      "hours": "{hours} t",
+      "entries": "{n, plural, one {# registrering} other {# registreringer}}",
+      "noEntriesToday": "Intet registreret i dag endnu",
+      "confirmed": "Heraf bekræftet af en leder eller kunde: {hours} t",
+      "confirmedNone": "Ingen bekræftede timer endnu",
+      "barLabel": "Registrerede og bekræftede timer, seneste 7 dage"
+    },
+    "because": {
+      "title": "Seneste hændelser",
+      "unknown": "Det, der ændrede sig, kunne ikke læses.",
+      "also": "Skete også",
+      "all": "Al aktivitet"
+    },
+    "outside": {
+      "title": "Dine muligheder",
+      "barLabel": "Muligheder efter match"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Et arbejdsforhold begyndte",
+        "relationshipEnded": "Et arbejdsforhold sluttede",
+        "bookingAgreed": "Bookingen blev aftalt",
+        "bookingRefused": "Bookingen blev afvist",
+        "bookingWithdrawn": "Bookingen blev trukket tilbage",
+        "absenceApproved": "Fraværet blev godkendt",
+        "absenceRefused": "Fraværet blev afvist",
+        "decisionRecorded": "Beslutningen blev registreret",
+        "acknowledgementRecorded": "Kvitteringen blev registreret",
+        "invitationAnswered": "Invitationen blev besvaret"
+      },
+      "state": {
+        "engagementActive": "Ansættelse: aktiv",
+        "engagementClosed": "Ansættelse: afsluttet",
+        "bookingConfirmed": "Booking: bekræftet",
+        "bookingClosed": "Booking: lukket",
+        "absenceDecided": "Fravær: afgjort",
+        "workflowClosed": "Godkendelse: afsluttet",
+        "documentAcknowledged": "Dokument: kvitteret",
+        "relationshipFormed": "Relation: etableret"
+      }
+    },
+    "retry": "Indlæs igen",
+    "retrying": "Indlæser…",
+    "availability": {
+      "partial": "En del af dine data er midlertidigt utilgængelige ({count} af 4 områder).",
+      "totalTitle": "Vi kunne ikke læse dine data lige nu",
+      "totalBody": "Dine registreringer er i sikkerhed – det er midlertidigt. Prøv igen om lidt."
+    }
+  },
   "projectCourse": {
     "title": "Projektforløb",
     "count": "{done} af {total} faser færdige",

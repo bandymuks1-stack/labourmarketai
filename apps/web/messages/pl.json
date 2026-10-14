@@ -19408,6 +19408,66 @@
     },
     "link": "Jakość danych"
   },
+  "homeRegions": {
+    "waiting": {
+      "title": "Czeka na Ciebie",
+      "clear": "Nic na Ciebie nie czeka.",
+      "unknown": "Nie udało się odczytać, co na Ciebie czeka."
+    },
+    "running": {
+      "title": "Trwa teraz",
+      "projectsUnknown": "Nie udało się odczytać przypisanych Ci projektów.",
+      "today": "Dziś",
+      "week": "Ostatnie 7 dni",
+      "hours": "{hours} godz.",
+      "entries": "{n, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+      "noEntriesToday": "Dziś jeszcze nic nie zapisano",
+      "confirmed": "Z tego potwierdzone przez kierownika lub klienta: {hours} godz.",
+      "confirmedNone": "Brak potwierdzonych godzin",
+      "barLabel": "Zapisane i potwierdzone godziny z 7 dni"
+    },
+    "because": {
+      "title": "Najnowsze wydarzenia",
+      "unknown": "Nie udało się odczytać, co się zmieniło.",
+      "also": "Wydarzyło się też",
+      "all": "Cała aktywność"
+    },
+    "outside": {
+      "title": "Twoje możliwości",
+      "barLabel": "Możliwości według dopasowania"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Rozpoczęła się współpraca",
+        "relationshipEnded": "Współpraca się zakończyła",
+        "bookingAgreed": "Rezerwacja została uzgodniona",
+        "bookingRefused": "Rezerwacja została odrzucona",
+        "bookingWithdrawn": "Rezerwacja została wycofana",
+        "absenceApproved": "Nieobecność została zatwierdzona",
+        "absenceRefused": "Nieobecność została odrzucona",
+        "decisionRecorded": "Decyzja została zapisana",
+        "acknowledgementRecorded": "Zapoznanie się zostało zapisane",
+        "invitationAnswered": "Na zaproszenie odpowiedziano"
+      },
+      "state": {
+        "engagementActive": "Zatrudnienie: aktywne",
+        "engagementClosed": "Zatrudnienie: zakończone",
+        "bookingConfirmed": "Rezerwacja: potwierdzona",
+        "bookingClosed": "Rezerwacja: zamknięta",
+        "absenceDecided": "Nieobecność: rozstrzygnięta",
+        "workflowClosed": "Zatwierdzenie: zamknięte",
+        "documentAcknowledged": "Dokument: przyjęty do wiadomości",
+        "relationshipFormed": "Relacja: nawiązana"
+      }
+    },
+    "retry": "Wczytaj ponownie",
+    "retrying": "Wczytywanie…",
+    "availability": {
+      "partial": "Część danych jest chwilowo niedostępna ({count} z 4 obszarów).",
+      "totalTitle": "Nie udało się teraz wczytać Twoich danych",
+      "totalBody": "Twoje wpisy są bezpieczne — to chwilowy problem. Spróbuj ponownie za moment."
+    }
+  },
   "projectCourse": {
     "title": "Trasa projektu",
     "count": "Ukończono {done} z {total} etapów",

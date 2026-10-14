@@ -7517,6 +7517,66 @@
     },
     "link": "Datu kvalitāte"
   },
+  "homeRegions": {
+    "waiting": {
+      "title": "Gaida jūs",
+      "clear": "Nekas jūs negaida.",
+      "unknown": "Neizdevās nolasīt, kas jūs gaida."
+    },
+    "running": {
+      "title": "Notiek tagad",
+      "projectsUnknown": "Neizdevās nolasīt jums piešķirtos projektus.",
+      "today": "Šodien",
+      "week": "Pēdējās 7 dienas",
+      "hours": "{hours} h",
+      "entries": "{n, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}",
+      "noEntriesToday": "Šodien vēl nekas nav reģistrēts",
+      "confirmed": "No tām apstiprinājis vadītājs vai klients: {hours} h",
+      "confirmedNone": "Apstiprinātu stundu vēl nav",
+      "barLabel": "Reģistrētās un apstiprinātās stundas pēdējās 7 dienās"
+    },
+    "because": {
+      "title": "Jaunākie notikumi",
+      "unknown": "Neizdevās nolasīt, kas mainījās.",
+      "also": "Notika arī",
+      "all": "Visa aktivitāte"
+    },
+    "outside": {
+      "title": "Jūsu iespējas",
+      "barLabel": "Iespējas pēc atbilstības"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Sākās darba attiecības",
+        "relationshipEnded": "Darba attiecības beidzās",
+        "bookingAgreed": "Rezervācija tika saskaņota",
+        "bookingRefused": "Rezervācija tika noraidīta",
+        "bookingWithdrawn": "Rezervācija tika atsaukta",
+        "absenceApproved": "Prombūtne tika apstiprināta",
+        "absenceRefused": "Prombūtne tika noraidīta",
+        "decisionRecorded": "Lēmums tika reģistrēts",
+        "acknowledgementRecorded": "Iepazīšanās tika reģistrēta",
+        "invitationAnswered": "Uz uzaicinājumu tika atbildēts"
+      },
+      "state": {
+        "engagementActive": "Nodarbinātība: aktīva",
+        "engagementClosed": "Nodarbinātība: beigusies",
+        "bookingConfirmed": "Rezervācija: apstiprināta",
+        "bookingClosed": "Rezervācija: slēgta",
+        "absenceDecided": "Prombūtne: izlemta",
+        "workflowClosed": "Apstiprināšana: slēgta",
+        "documentAcknowledged": "Dokuments: iepazīts",
+        "relationshipFormed": "Attiecības: izveidotas"
+      }
+    },
+    "retry": "Ielādēt vēlreiz",
+    "retrying": "Ielādē…",
+    "availability": {
+      "partial": "Daļa datu īslaicīgi nav pieejama ({count} no 4 sadaļām).",
+      "totalTitle": "Šobrīd neizdevās nolasīt jūsu datus",
+      "totalBody": "Jūsu ieraksti ir drošībā — tas ir īslaicīgi. Mēģiniet vēlreiz pēc brīža."
+    }
+  },
   "projectCourse": {
     "title": "Projekta maršruts",
     "count": "Pabeigti {done} no {total} posmiem",

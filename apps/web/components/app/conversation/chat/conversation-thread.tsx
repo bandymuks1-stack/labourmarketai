@@ -44,6 +44,7 @@ export function ConversationThread({
   emptyState,
   composer,
   intro,
+  introWide = false,
 }: {
   items: ThreadItem[];
   typing: boolean;
@@ -54,6 +55,11 @@ export function ConversationThread({
    *  greeting: the first real turn replaces it with the conversation, so it
    *  never becomes a permanent header and needs no dismissed-state to store. */
   intro?: ReactNode;
+  /** The intro is a full working home (the worker's four regions), not a
+   *  chat-width block: it renders in its own wider container above the
+   *  conversation column, so a desktop screen uses its width (owner D1
+   *  review 2026-10-14). The conversation column itself keeps its width. */
+  introWide?: boolean;
   /** The chat composer, handed in by the shell. While the conversation is
    *  still OPENING (greeting + brief only) it renders HERE, centred right
    *  under the greeting (owner audit §4.1 — "composer centre pirmo atidarymo
@@ -118,12 +124,17 @@ export function ConversationThread({
           greeting) stays scrollable from its first line on a short phone.
           `justify-content: center` in a scroll container would have made the
           overflowing top unreachable. */}
+      {isOpening && intro && introWide ? (
+        <div className="mx-auto w-full max-w-6xl flex-none px-4 pt-6 lg:px-8" data-testid="conversation-intro-wide">
+          {intro}
+        </div>
+      ) : null}
       <div
         className={`mx-auto flex w-full max-w-3xl flex-none flex-col px-4 py-6 ${
           isOpening ? "my-auto" : ""
         }`}
       >
-        {isOpening && intro ? <div className="mb-5">{intro}</div> : null}
+        {isOpening && intro && !introWide ? <div className="mb-5">{intro}</div> : null}
         {items.length === 0 && emptyState}
         {/* `ua-msg-in` animates ONLY transform + opacity, and a CSS animation
             runs on mount — so a newly appended turn rises into place while the

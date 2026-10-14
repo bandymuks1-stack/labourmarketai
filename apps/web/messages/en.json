@@ -19408,6 +19408,66 @@
     },
     "link": "Data quality"
   },
+  "homeRegions": {
+    "waiting": {
+      "title": "Waiting on you",
+      "clear": "Nothing is waiting on you.",
+      "unknown": "What is waiting on you could not be read."
+    },
+    "running": {
+      "title": "Running now",
+      "projectsUnknown": "Your assigned projects could not be read.",
+      "today": "Today",
+      "week": "Last 7 days",
+      "hours": "{hours} h",
+      "entries": "{n, plural, one {# entry} other {# entries}}",
+      "noEntriesToday": "Nothing recorded yet today",
+      "confirmed": "Of these, approved by a manager or client: {hours} h",
+      "confirmedNone": "No confirmed hours yet",
+      "barLabel": "Recorded and confirmed hours, last 7 days"
+    },
+    "because": {
+      "title": "Recent events",
+      "unknown": "What changed could not be read.",
+      "also": "Also happened",
+      "all": "All activity"
+    },
+    "outside": {
+      "title": "Your opportunities",
+      "barLabel": "Opportunities by fit"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "A working relationship started",
+        "relationshipEnded": "A working relationship ended",
+        "bookingAgreed": "The booking was agreed",
+        "bookingRefused": "The booking was refused",
+        "bookingWithdrawn": "The booking was withdrawn",
+        "absenceApproved": "The absence was approved",
+        "absenceRefused": "The absence was refused",
+        "decisionRecorded": "The decision was recorded",
+        "acknowledgementRecorded": "The acknowledgement was recorded",
+        "invitationAnswered": "The invitation was answered"
+      },
+      "state": {
+        "engagementActive": "Engagement: active",
+        "engagementClosed": "Engagement: closed",
+        "bookingConfirmed": "Booking: confirmed",
+        "bookingClosed": "Booking: closed",
+        "absenceDecided": "Absence: decided",
+        "workflowClosed": "Approval: closed",
+        "documentAcknowledged": "Document: acknowledged",
+        "relationshipFormed": "Relationship: formed"
+      }
+    },
+    "retry": "Read again",
+    "retrying": "Reading…",
+    "availability": {
+      "partial": "Part of your data is temporarily unavailable ({count} of 4 areas).",
+      "totalTitle": "We couldn't read your data right now",
+      "totalBody": "Your records are safe — this is temporary. Try again in a moment."
+    }
+  },
   "projectCourse": {
     "title": "Project course",
     "count": "{done} of {total} stages done",

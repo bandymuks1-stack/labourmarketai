@@ -19408,6 +19408,66 @@
     },
     "link": "Datenqualität"
   },
+  "homeRegions": {
+    "waiting": {
+      "title": "Wartet auf Sie",
+      "clear": "Nichts wartet auf Sie.",
+      "unknown": "Was auf Sie wartet, konnte nicht gelesen werden."
+    },
+    "running": {
+      "title": "Läuft gerade",
+      "projectsUnknown": "Ihre zugewiesenen Projekte konnten nicht gelesen werden.",
+      "today": "Heute",
+      "week": "Letzte 7 Tage",
+      "hours": "{hours} Std.",
+      "entries": "{n, plural, one {# Eintrag} other {# Einträge}}",
+      "noEntriesToday": "Heute noch nichts erfasst",
+      "confirmed": "Davon von Vorgesetzten oder Auftraggebern bestätigt: {hours} Std.",
+      "confirmedNone": "Noch keine bestätigten Stunden",
+      "barLabel": "Erfasste und bestätigte Stunden, letzte 7 Tage"
+    },
+    "because": {
+      "title": "Neueste Ereignisse",
+      "unknown": "Was sich geändert hat, konnte nicht gelesen werden.",
+      "also": "Außerdem passiert",
+      "all": "Alle Aktivitäten"
+    },
+    "outside": {
+      "title": "Ihre Möglichkeiten",
+      "barLabel": "Möglichkeiten nach Eignung"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Ein Arbeitsverhältnis hat begonnen",
+        "relationshipEnded": "Ein Arbeitsverhältnis wurde beendet",
+        "bookingAgreed": "Die Buchung wurde vereinbart",
+        "bookingRefused": "Die Buchung wurde abgelehnt",
+        "bookingWithdrawn": "Die Buchung wurde zurückgezogen",
+        "absenceApproved": "Die Abwesenheit wurde genehmigt",
+        "absenceRefused": "Die Abwesenheit wurde abgelehnt",
+        "decisionRecorded": "Die Entscheidung wurde festgehalten",
+        "acknowledgementRecorded": "Die Kenntnisnahme wurde festgehalten",
+        "invitationAnswered": "Die Einladung wurde beantwortet"
+      },
+      "state": {
+        "engagementActive": "Beschäftigung: aktiv",
+        "engagementClosed": "Beschäftigung: beendet",
+        "bookingConfirmed": "Buchung: bestätigt",
+        "bookingClosed": "Buchung: geschlossen",
+        "absenceDecided": "Abwesenheit: entschieden",
+        "workflowClosed": "Freigabe: abgeschlossen",
+        "documentAcknowledged": "Dokument: zur Kenntnis genommen",
+        "relationshipFormed": "Beziehung: entstanden"
+      }
+    },
+    "retry": "Erneut laden",
+    "retrying": "Wird geladen…",
+    "availability": {
+      "partial": "Ein Teil Ihrer Daten ist vorübergehend nicht verfügbar ({count} von 4 Bereichen).",
+      "totalTitle": "Ihre Daten konnten gerade nicht gelesen werden",
+      "totalBody": "Ihre Einträge sind sicher – das ist vorübergehend. Versuchen Sie es gleich noch einmal."
+    }
+  },
   "projectCourse": {
     "title": "Projektverlauf",
     "count": "{done} von {total} Phasen erledigt",

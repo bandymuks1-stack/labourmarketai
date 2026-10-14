@@ -7517,6 +7517,66 @@
     },
     "link": "Andmekvaliteet"
   },
+  "homeRegions": {
+    "waiting": {
+      "title": "Ootab sind",
+      "clear": "Miski ei oota sind.",
+      "unknown": "Seda, mis sind ootab, ei õnnestunud lugeda."
+    },
+    "running": {
+      "title": "Käimas praegu",
+      "projectsUnknown": "Sulle määratud projekte ei õnnestunud lugeda.",
+      "today": "Täna",
+      "week": "Viimased 7 päeva",
+      "hours": "{hours} h",
+      "entries": "{n, plural, one {# kirje} other {# kirjet}}",
+      "noEntriesToday": "Täna pole veel midagi kirja pandud",
+      "confirmed": "Neist kinnitanud juht või klient: {hours} h",
+      "confirmedNone": "Kinnitatud tunde veel pole",
+      "barLabel": "Registreeritud ja kinnitatud tunnid viimase 7 päeva jooksul"
+    },
+    "because": {
+      "title": "Viimased sündmused",
+      "unknown": "Seda, mis muutus, ei õnnestunud lugeda.",
+      "also": "Juhtus ka",
+      "all": "Kogu tegevus"
+    },
+    "outside": {
+      "title": "Sinu võimalused",
+      "barLabel": "Võimalused sobivuse järgi"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Tööalane suhe algas",
+        "relationshipEnded": "Tööalane suhe lõppes",
+        "bookingAgreed": "Broneering lepiti kokku",
+        "bookingRefused": "Broneering lükati tagasi",
+        "bookingWithdrawn": "Broneering võeti tagasi",
+        "absenceApproved": "Puudumine kinnitati",
+        "absenceRefused": "Puudumine lükati tagasi",
+        "decisionRecorded": "Otsus salvestati",
+        "acknowledgementRecorded": "Teadmiseks võtmine salvestati",
+        "invitationAnswered": "Kutsele vastati"
+      },
+      "state": {
+        "engagementActive": "Töösuhe: aktiivne",
+        "engagementClosed": "Töösuhe: lõppenud",
+        "bookingConfirmed": "Broneering: kinnitatud",
+        "bookingClosed": "Broneering: suletud",
+        "absenceDecided": "Puudumine: otsustatud",
+        "workflowClosed": "Kinnitamine: suletud",
+        "documentAcknowledged": "Dokument: teadmiseks võetud",
+        "relationshipFormed": "Suhe: loodud"
+      }
+    },
+    "retry": "Laadi uuesti",
+    "retrying": "Laadin…",
+    "availability": {
+      "partial": "Osa sinu andmetest pole ajutiselt kättesaadav ({count} valdkonda 4-st).",
+      "totalTitle": "Sinu andmeid ei õnnestunud praegu lugeda",
+      "totalBody": "Sinu kirjed on alles — see on ajutine. Proovi hetke pärast uuesti."
+    }
+  },
   "projectCourse": {
     "title": "Projekti teekond",
     "count": "Valmis {done} etappi {total}-st",
