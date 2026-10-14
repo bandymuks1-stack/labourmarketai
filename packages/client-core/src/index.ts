@@ -54,10 +54,12 @@ export type {
 
 export {
   CAPABILITY_PATH,
+  DOMAIN_REQUEST_TIMEOUT_MS,
   DOMAIN_TRANSPORT_STATUS,
   callCapability,
   callDomain,
   failureMessageKey,
+  fetchWithDeadline,
 } from "./transport";
 export type {
   IdentityRefusal,

@@ -119,11 +119,11 @@ const en = {
 
   "today.signedInAs": "Signed in as",
   "today.recentWork": "Recent work",
-  "journal.empty": "No Work Journal entries recorded yet.",
+  "journal.empty": "No work journal entries recorded yet.",
   "journal.logWork": "Log work",
   "journal.compose.title": "Log work",
   "journal.compose.intro":
-    "Write what you did, in your own words. Your Work Journal records exactly what you write.",
+    "Write what you did, in your own words. Your work journal records exactly what you write.",
   "journal.compose.date": "Date of the work",
   "journal.compose.dateHint": "Year-month-day, for example 2026-09-01",
   "journal.compose.today": "Today",
@@ -138,12 +138,12 @@ const en = {
   "journal.compose.previewTitle": "Check this before it is saved",
   "journal.compose.previewNothingSaved":
     "Nothing has been saved yet. This is exactly what will be recorded.",
-  "journal.compose.save": "Save to my Work Journal",
+  "journal.compose.save": "Save to my work journal",
   "journal.compose.edit": "Change something",
   "journal.compose.chooseContext": "Which work does this belong to?",
   "journal.compose.chooseContextBody":
     "This entry could belong to more than one of your work contexts, so nothing was prepared and nothing was saved. Choose one.",
-  "journal.compose.savedTitle": "Saved to your Work Journal",
+  "journal.compose.savedTitle": "Saved to your work journal",
   "journal.compose.savedBody":
     "This is now a recorded entry. It is what the server stored.",
   "journal.compose.another": "Log another",
@@ -160,7 +160,7 @@ const en = {
   "journal.compose.noContext":
     "This account has no active work context, so an entry has nowhere to be recorded. Add where you work on the website first, then log work here.",
   "journal.compose.unsureSaved":
-    "The connection dropped after this was sent, so we do not know whether it arrived. Open your Work Journal to check before writing it again. Trying again cannot create a duplicate.",
+    "The connection dropped after this was sent, so we do not know whether it arrived. Open your work journal to check before writing it again. Trying again cannot create a duplicate.",
   "journal.compose.skillsAdded": "New skills recorded",
   "journal.compose.skillsStrengthened": "Skills with new evidence",
   "journal.compose.skillsClaims": "Capabilities noted from your words",
@@ -177,7 +177,7 @@ const en = {
   "profile.noWorkerProfile": "This account has no worker profile yet.",
   "profile.figuresTitle": "Skills, with your recorded hours",
   "profile.groupManagerConfirmed": "Confirmed by a manager",
-  "profile.groupJournalBacked": "Backed by your Work Journal",
+  "profile.groupJournalBacked": "Backed by your work journal",
   "profile.groupDeclared": "Declared by you",
   "profile.figuresUnavailable":
     "Hours, share and entries could not be read this time. The skills below are still your recorded skills — nothing is shown as 0.",
@@ -209,7 +209,7 @@ const en = {
   "today.coverageTruncated":
     "These figures rest on the last entries read — older entries are not included.",
   "today.figuresScope":
-    "From your own Work Journal entries, by the same rule as the website. Calendar days end today (UTC).",
+    "From your own work journal entries, by the same rule as the website. Calendar days end today (UTC).",
   "today.openJournal": "Open your work journal",
   "today.openProfile": "Open your profile and skills",
 } as const;

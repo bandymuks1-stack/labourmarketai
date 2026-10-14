@@ -10,6 +10,7 @@ import { useActorContext } from "../../src/context-provider";
 import { useProfile } from "../../src/profile-provider";
 import { useAuth } from "../../src/auth-context";
 import { capability } from "../../src/domain";
+import { CapabilityFailureNotice } from "../../src/screens/capability-failure";
 import { useCapability } from "../../src/use-capability";
 import { useLocale } from "../../src/i18n/locale-context";
 import { LANGUAGE_NAMES } from "../../src/i18n/messages";
@@ -173,10 +174,21 @@ export default function Settings() {
         ) : workspaces.state.status === "failed" ? (
           // A failed read is a failure, never an empty list: "you belong to no
           // organization" is a different and false statement.
+          // The body says "try again in a moment" — so the screen offers it.
+          // Without this button a weak link left a person nothing to do but
+          // leave the screen and come back.
           <NotAvailable
+            testID="workspace-failed"
             title={t("workspace.failed.title")}
             body={t("workspace.failed.body")}
-          />
+          >
+            <Button
+              variant="quiet"
+              testID="workspace-retry"
+              label={t("domain.retry")}
+              onPress={workspaces.reload}
+            />
+          </NotAvailable>
         ) : listed === null ? null : (
           <>
             <View style={styles.list}>
@@ -242,6 +254,16 @@ export default function Settings() {
               );
             })}
           </View>
+        ) : profile.state.status === "failed" ? (
+          // The roles come from `profile.get`; when THAT read failed (a weak
+          // link, a timeout) the honest sentence is the failed read's, with a
+          // retry — not "this client cannot ask yet", which is no longer true
+          // since held roles arrive on profile.get (#1737).
+          <CapabilityFailureNotice
+            failure={profile.state.failure}
+            retry={profile.reload}
+            testID="context-failed"
+          />
         ) : (
           <NotAvailable
             title={t("context.unavailable.title")}
