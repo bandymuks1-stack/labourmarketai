@@ -7576,5 +7576,38 @@
       "totalTitle": "Vi kunde inte läsa dina uppgifter just nu",
       "totalBody": "Dina registreringar är säkra – det här är tillfälligt. Försök igen om en stund."
     }
+  },
+  "homeTrace": {
+    "title": "Vad som ändrades",
+    "unknown": "Vi kunde inte läsa vad som ändrades efter dina åtgärder.",
+    "all": "All aktivitet",
+    "empty": "Inga nya följder de senaste 14 dagarna. När du registrerar arbete och det bekräftas ser du här vad det ändrade.",
+    "openJournal": "Öppna arbetsjournalen",
+    "entryUntitled": "Arbetsregistrering",
+    "roleUnknown": "annan part",
+    "journalUnknown": "Arbetsjournalen kunde inte läsas.",
+    "eventsUnknown": "Aviseringarna kunde inte läsas.",
+    "truncated": "Baserat på dina 30 senaste registreringar.",
+    "step": {
+      "recordedHours": "{hours} h registrerat",
+      "recordedDays": "{days} d registrerat",
+      "recordedUntimed": "Registrerat utan längd",
+      "awaiting": "Väntar på bekräftelse",
+      "selfApproved": "Godkänt av dig själv – ingen bekräftelse från en annan part",
+      "approvedBy": "Bekräftat av: {role}",
+      "approvedAutomatic": "Bekräftat automatiskt enligt en regel",
+      "rejected": "Avvisat",
+      "changesRequested": "Ändring begärd",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bekräftad registrering} other {# bekräftade registreringar}}} other {Living CV uppdaterat: {skills}}}",
+      "cvUnlinked": "Living CV: bekräftat arbete, ännu inte kopplat till en färdighet",
+      "cvUnknown": "Living CV: kunde inte läsas",
+      "matching": "Matchningen ser bekräftat arbete: {skills}",
+      "matchingRepeated": "Matchningen ser upprepat bekräftat arbete: {skills}"
+    },
+    "legend": {
+      "fact": "Fakta",
+      "pending": "Väntar på en annan part",
+      "derived": "Härlett ur fakta"
+    }
   }
 }

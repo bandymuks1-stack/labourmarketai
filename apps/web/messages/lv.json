@@ -7576,5 +7576,38 @@
       "totalTitle": "Šobrīd neizdevās nolasīt jūsu datus",
       "totalBody": "Jūsu ieraksti ir drošībā — tas ir īslaicīgi. Mēģiniet vēlreiz pēc brīža."
     }
+  },
+  "homeTrace": {
+    "title": "Kas mainījās",
+    "unknown": "Neizdevās nolasīt, kas mainījās pēc jūsu darbībām.",
+    "all": "Visa aktivitāte",
+    "empty": "Pēdējās 14 dienās jaunu seku nav. Kad ierakstīsiet darbu un to apstiprinās, šeit redzēsiet, ko tas mainīja.",
+    "openJournal": "Atvērt darba žurnālu",
+    "entryUntitled": "Darba ieraksts",
+    "roleUnknown": "otrā puse",
+    "journalUnknown": "Neizdevās nolasīt darba žurnālu.",
+    "eventsUnknown": "Neizdevās nolasīt paziņojumus.",
+    "truncated": "Pēc jūsu jaunākajiem 30 ierakstiem.",
+    "step": {
+      "recordedHours": "Ierakstītas {hours} st.",
+      "recordedDays": "Ierakstītas {days} d.",
+      "recordedUntimed": "Ierakstīts bez ilguma",
+      "awaiting": "Gaida apstiprinājumu",
+      "selfApproved": "Apstiprinājāt paši — tas nav otrās puses apstiprinājums",
+      "approvedBy": "Apstiprināja: {role}",
+      "approvedAutomatic": "Apstiprināts automātiski pēc noteikuma",
+      "rejected": "Noraidīts",
+      "changesRequested": "Lūgts labot",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, zero {# apstiprinātu ierakstu} one {# apstiprināts ieraksts} other {# apstiprināti ieraksti}}} other {Living CV papildināts: {skills}}}",
+      "cvUnlinked": "Living CV: apstiprināts darbs, vēl nav saistīts ar prasmi",
+      "cvUnknown": "Living CV: neizdevās nolasīt",
+      "matching": "Atlase redz apstiprinātu darbu: {skills}",
+      "matchingRepeated": "Atlase redz atkārtoti apstiprinātu darbu: {skills}"
+    },
+    "legend": {
+      "fact": "Fakts",
+      "pending": "Gaida otro pusi",
+      "derived": "Izsecināts no faktiem"
+    }
   }
 }

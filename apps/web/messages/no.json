@@ -7576,5 +7576,38 @@
       "totalTitle": "Vi kunne ikke lese dataene dine akkurat nå",
       "totalBody": "Registreringene dine er trygge – dette er midlertidig. Prøv igjen om litt."
     }
+  },
+  "homeTrace": {
+    "title": "Hva som endret seg",
+    "unknown": "Vi kunne ikke lese hva som endret seg etter handlingene dine.",
+    "all": "All aktivitet",
+    "empty": "Ingen nye følger de siste 14 dagene. Når du registrerer arbeid og det blir bekreftet, ser du her hva det endret.",
+    "openJournal": "Åpne arbeidsjournalen",
+    "entryUntitled": "Arbeidsregistrering",
+    "roleUnknown": "annen part",
+    "journalUnknown": "Arbeidsjournalen kunne ikke leses.",
+    "eventsUnknown": "Varslene kunne ikke leses.",
+    "truncated": "Basert på dine nyeste 30 registreringer.",
+    "step": {
+      "recordedHours": "{hours} t registrert",
+      "recordedDays": "{days} d registrert",
+      "recordedUntimed": "Registrert uten varighet",
+      "awaiting": "Venter på bekreftelse",
+      "selfApproved": "Godkjent av deg selv – ikke en bekreftelse fra en annen part",
+      "approvedBy": "Bekreftet av: {role}",
+      "approvedAutomatic": "Bekreftet automatisk etter en regel",
+      "rejected": "Avvist",
+      "changesRequested": "Endring ønsket",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bekreftet registrering} other {# bekreftede registreringer}}} other {Living CV oppdatert: {skills}}}",
+      "cvUnlinked": "Living CV: bekreftet arbeid, ennå ikke knyttet til en ferdighet",
+      "cvUnknown": "Living CV: kunne ikke leses",
+      "matching": "Matchingen ser bekreftet arbeid: {skills}",
+      "matchingRepeated": "Matchingen ser gjentatt bekreftet arbeid: {skills}"
+    },
+    "legend": {
+      "fact": "Fakta",
+      "pending": "Venter på en annen part",
+      "derived": "Utledet fra fakta"
+    }
   }
 }

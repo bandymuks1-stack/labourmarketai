@@ -7576,5 +7576,38 @@
       "totalTitle": "Sinu andmeid ei õnnestunud praegu lugeda",
       "totalBody": "Sinu kirjed on alles — see on ajutine. Proovi hetke pärast uuesti."
     }
+  },
+  "homeTrace": {
+    "title": "Mis muutus",
+    "unknown": "Ei õnnestunud lugeda, mis sinu tegevuste järel muutus.",
+    "all": "Kogu tegevus",
+    "empty": "Viimase 14 päeva jooksul uusi tagajärgi pole. Kui salvestad töö ja see kinnitatakse, näed siin, mida see muutis.",
+    "openJournal": "Ava tööpäevik",
+    "entryUntitled": "Töökirje",
+    "roleUnknown": "teine osapool",
+    "journalUnknown": "Tööpäevikut ei õnnestunud lugeda.",
+    "eventsUnknown": "Teavitusi ei õnnestunud lugeda.",
+    "truncated": "Sinu 30 uusima kirje põhjal.",
+    "step": {
+      "recordedHours": "Salvestatud {hours} h",
+      "recordedDays": "Salvestatud {days} p",
+      "recordedUntimed": "Salvestatud ilma kestuseta",
+      "awaiting": "Ootab kinnitust",
+      "selfApproved": "Kinnitasid ise — see pole teise osapoole kinnitus",
+      "approvedBy": "Kinnitas: {role}",
+      "approvedAutomatic": "Kinnitatud automaatselt reegli järgi",
+      "rejected": "Tagasi lükatud",
+      "changesRequested": "Paluti parandada",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# kinnitatud kirje} other {# kinnitatud kirjet}}} other {Living CV täiendatud: {skills}}}",
+      "cvUnlinked": "Living CV: kinnitatud töö, veel oskusega sidumata",
+      "cvUnknown": "Living CV: ei õnnestunud lugeda",
+      "matching": "Sobitamine näeb kinnitatud tööd: {skills}",
+      "matchingRepeated": "Sobitamine näeb korduvalt kinnitatud tööd: {skills}"
+    },
+    "legend": {
+      "fact": "Fakt",
+      "pending": "Ootab teist osapoolt",
+      "derived": "Tuletatud faktidest"
+    }
   }
 }

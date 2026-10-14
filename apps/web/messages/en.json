@@ -19464,5 +19464,38 @@
       "totalTitle": "We couldn't read your data right now",
       "totalBody": "Your records are safe — this is temporary. Try again in a moment."
     }
+  },
+  "homeTrace": {
+    "title": "What changed",
+    "unknown": "Couldn't read what changed after your actions.",
+    "all": "All activity",
+    "empty": "No new consequences in the last 14 days. Once you record work and it is confirmed, you'll see here what it changed.",
+    "openJournal": "Open the work journal",
+    "entryUntitled": "Work entry",
+    "roleUnknown": "second party",
+    "journalUnknown": "Couldn't read the work journal.",
+    "eventsUnknown": "Couldn't read notifications.",
+    "truncated": "Based on your newest 30 entries.",
+    "step": {
+      "recordedHours": "Recorded {hours} h",
+      "recordedDays": "Recorded {days} d",
+      "recordedUntimed": "Recorded without a duration",
+      "awaiting": "Waiting for confirmation",
+      "selfApproved": "Approved by you — not a second-party confirmation",
+      "approvedBy": "Confirmed by: {role}",
+      "approvedAutomatic": "Confirmed automatically by a rule",
+      "rejected": "Rejected",
+      "changesRequested": "Changes requested",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# confirmed entry} other {# confirmed entries}}} other {Living CV updated: {skills}}}",
+      "cvUnlinked": "Living CV: confirmed work, not yet linked to a skill",
+      "cvUnknown": "Living CV: couldn't read",
+      "matching": "Matching sees confirmed work: {skills}",
+      "matchingRepeated": "Matching sees repeatedly confirmed work: {skills}"
+    },
+    "legend": {
+      "fact": "Fact",
+      "pending": "Waiting for a second party",
+      "derived": "Derived from facts"
+    }
   }
 }

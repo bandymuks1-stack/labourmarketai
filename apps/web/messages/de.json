@@ -19464,5 +19464,38 @@
       "totalTitle": "Ihre Daten konnten gerade nicht gelesen werden",
       "totalBody": "Ihre Einträge sind sicher – das ist vorübergehend. Versuchen Sie es gleich noch einmal."
     }
+  },
+  "homeTrace": {
+    "title": "Was sich geändert hat",
+    "unknown": "Wir konnten nicht lesen, was sich nach Ihren Schritten geändert hat.",
+    "all": "Alle Aktivitäten",
+    "empty": "In den letzten 14 Tagen keine neuen Folgen. Sobald Sie Arbeit erfassen und sie bestätigt wird, sehen Sie hier, was sie verändert hat.",
+    "openJournal": "Arbeitsjournal öffnen",
+    "entryUntitled": "Arbeitseintrag",
+    "roleUnknown": "zweite Partei",
+    "journalUnknown": "Das Arbeitsjournal konnte nicht gelesen werden.",
+    "eventsUnknown": "Die Benachrichtigungen konnten nicht gelesen werden.",
+    "truncated": "Auf Basis Ihrer neuesten 30 Einträge.",
+    "step": {
+      "recordedHours": "{hours} Std. erfasst",
+      "recordedDays": "{days} Tg. erfasst",
+      "recordedUntimed": "Ohne Dauer erfasst",
+      "awaiting": "Wartet auf Bestätigung",
+      "selfApproved": "Von Ihnen selbst freigegeben – keine Bestätigung durch eine zweite Partei",
+      "approvedBy": "Bestätigt von: {role}",
+      "approvedAutomatic": "Automatisch per Regel bestätigt",
+      "rejected": "Abgelehnt",
+      "changesRequested": "Änderung angefragt",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bestätigter Eintrag} other {# bestätigte Einträge}}} other {Living CV ergänzt: {skills}}}",
+      "cvUnlinked": "Living CV: bestätigte Arbeit, noch keiner Fähigkeit zugeordnet",
+      "cvUnknown": "Living CV: konnte nicht gelesen werden",
+      "matching": "Das Matching sieht bestätigte Arbeit: {skills}",
+      "matchingRepeated": "Das Matching sieht wiederholt bestätigte Arbeit: {skills}"
+    },
+    "legend": {
+      "fact": "Fakt",
+      "pending": "Wartet auf eine zweite Partei",
+      "derived": "Aus Fakten abgeleitet"
+    }
   }
 }

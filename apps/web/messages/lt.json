@@ -19464,5 +19464,38 @@
       "totalTitle": "Šiuo metu nepavyko nuskaityti tavo duomenų",
       "totalBody": "Tavo įrašai niekur nedingo — tai laikinas sutrikimas. Pabandyk dar kartą po akimirkos."
     }
+  },
+  "homeTrace": {
+    "title": "Kas pasikeitė",
+    "unknown": "Nepavyko nuskaityti, kas pasikeitė po tavo veiksmų.",
+    "all": "Visa veikla",
+    "empty": "Per 14 dienų naujų pasekmių nėra. Kai įrašysi darbą ir jį patvirtins, čia matysi, ką jis pakeitė.",
+    "openJournal": "Atidaryti darbo žurnalą",
+    "entryUntitled": "Darbo įrašas",
+    "roleUnknown": "antra šalis",
+    "journalUnknown": "Nepavyko nuskaityti darbo žurnalo.",
+    "eventsUnknown": "Nepavyko nuskaityti pranešimų.",
+    "truncated": "Rodoma pagal naujausius 30 įrašų.",
+    "step": {
+      "recordedHours": "Įrašyta {hours} val.",
+      "recordedDays": "Įrašyta {days} d.",
+      "recordedUntimed": "Įrašyta be trukmės",
+      "awaiting": "Laukia patvirtinimo",
+      "selfApproved": "Patvirtinai pats — tai nėra antros šalies patvirtinimas",
+      "approvedBy": "Patvirtino: {role}",
+      "approvedAutomatic": "Patvirtinta automatiškai pagal taisyklę",
+      "rejected": "Atmesta",
+      "changesRequested": "Prašoma pataisyti",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# patvirtintas įrašas} few {# patvirtinti įrašai} other {# patvirtintų įrašų}}} other {Living CV papildytas: {skills}}}",
+      "cvUnlinked": "Living CV: patvirtintas darbas, dar nesusietas su įgūdžiu",
+      "cvUnknown": "Living CV: nepavyko nuskaityti",
+      "matching": "Atranka mato kaip patvirtintą darbą: {skills}",
+      "matchingRepeated": "Atranka mato kaip pakartotinai patvirtintą darbą: {skills}"
+    },
+    "legend": {
+      "fact": "Faktas",
+      "pending": "Laukia antros šalies",
+      "derived": "Išvesta iš faktų"
+    }
   }
 }
