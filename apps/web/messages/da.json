@@ -4354,7 +4354,10 @@
       "chipOfferOurs": "Tilbyd vores hold eller virksomhed",
       "teamOfferAgreed": "Aftalt i princippet — endnu ikke en underskrevet kontrakt. Aftal vilkårene i samtalen, og tildel derefter holdet et projekt.",
       "teamOfferDeclined": "Afvist. Den tilbydende virksomhed ser dit svar.",
-      "teamOfferThreadFailed": "Denne samtale kan ikke åbnes."
+      "teamOfferThreadFailed": "Denne samtale kan ikke åbnes.",
+      "whatChangedIntro": "{count, plural, one {Her er kæden fra dit seneste arbejde: hvad du gjorde, hvad der ændrede sig, hvad det åbnede.} other {Her er # kæder fra dit seneste arbejde: hvad du gjorde, hvad der ændrede sig, hvad det åbnede.}}",
+      "whatChangedNone": "Der kom intet nyt ud af dit arbejde de seneste 14 dage. Når du registrerer arbejde, og det bliver bekræftet, viser jeg, hvad det ændrede.",
+      "whatChangedUnavailable": "Jeg kunne ikke tjekke, hvad der ændrede sig lige nu. Dine registreringer er i sikkerhed – prøv igen om lidt eller åbn journalen."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

@@ -14539,7 +14539,10 @@
       "chipOfferOurs": "Offer our brigade or company",
       "teamOfferAgreed": "Agreed in principle — not a signed contract. Settle the terms in the conversation, then assign the team to a project.",
       "teamOfferDeclined": "Declined. The offering company will see your answer.",
-      "teamOfferThreadFailed": "This conversation cannot be opened."
+      "teamOfferThreadFailed": "This conversation cannot be opened.",
+      "whatChangedIntro": "{count, plural, one {Here is the one chain from your recent work: what you did, what changed, what it opened.} other {Here are # chains from your recent work: what you did, what changed, what it opened.}}",
+      "whatChangedNone": "Nothing new came out of your work in the last 14 days. Once you record work and it is confirmed, I'll show you what it changed.",
+      "whatChangedUnavailable": "I couldn't check what changed right now. Your records are safe; try again in a moment or open the journal."
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",

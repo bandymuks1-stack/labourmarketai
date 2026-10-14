@@ -4354,7 +4354,10 @@
       "chipOfferOurs": "Tilby vårt lag eller vår bedrift",
       "teamOfferAgreed": "Avtalt i prinsippet — ennå ikke en signert kontrakt. Avtal vilkårene i samtalen, og tildel deretter laget et prosjekt.",
       "teamOfferDeclined": "Avslått. Bedriften som tilbød, ser svaret ditt.",
-      "teamOfferThreadFailed": "Denne samtalen kan ikke åpnes."
+      "teamOfferThreadFailed": "Denne samtalen kan ikke åpnes.",
+      "whatChangedIntro": "{count, plural, one {Her er kjeden fra ditt siste arbeid: hva du gjorde, hva som endret seg, hva det åpnet.} other {Her er # kjeder fra ditt siste arbeid: hva du gjorde, hva som endret seg, hva det åpnet.}}",
+      "whatChangedNone": "Ingenting nytt kom ut av arbeidet ditt de siste 14 dagene. Når du registrerer arbeid og det blir bekreftet, viser jeg hva det endret.",
+      "whatChangedUnavailable": "Jeg kunne ikke sjekke hva som endret seg akkurat nå. Registreringene dine er trygge – prøv igjen om litt eller åpne journalen."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

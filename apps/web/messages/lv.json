@@ -4354,7 +4354,10 @@
       "chipOfferOurs": "Piedāvāt mūsu brigādi vai uzņēmumu",
       "teamOfferAgreed": "Principā vienojušies — tas vēl nav parakstīts līgums. Saskaņojiet nosacījumus sarakstē un pēc tam piešķiriet komandu projektam.",
       "teamOfferDeclined": "Noraidīts. Piedāvātājs uzņēmums redzēs jūsu atbildi.",
-      "teamOfferThreadFailed": "Šo saraksti nevar atvērt."
+      "teamOfferThreadFailed": "Šo saraksti nevar atvērt.",
+      "whatChangedIntro": "{count, plural, zero {Lūk, # ķēdes no jūsu nesenā darba: ko izdarījāt, kas mainījās, ko tas atvēra.} one {Lūk, # ķēde no jūsu nesenā darba: ko izdarījāt, kas mainījās, ko tas atvēra.} other {Lūk, # ķēdes no jūsu nesenā darba: ko izdarījāt, kas mainījās, ko tas atvēra.}}",
+      "whatChangedNone": "Pēdējās 14 dienās no jūsu darba nekas jauns neradās. Kad ierakstīsiet darbu un to apstiprinās, parādīšu, ko tas mainīja.",
+      "whatChangedUnavailable": "Pašlaik neizdevās pārbaudīt, kas mainījās. Jūsu ieraksti ir drošībā — mēģiniet pēc brīža vai atveriet žurnālu."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",

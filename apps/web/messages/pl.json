@@ -14539,7 +14539,10 @@
       "chipOfferOurs": "Zaoferuj naszą brygadę lub firmę",
       "teamOfferAgreed": "Uzgodnione wstępnie — to jeszcze nie podpisana umowa. Ustalcie warunki w rozmowie, a potem przypisz zespół do projektu.",
       "teamOfferDeclined": "Odrzucono. Oferująca firma zobaczy twoją odpowiedź.",
-      "teamOfferThreadFailed": "Nie można otworzyć tej rozmowy."
+      "teamOfferThreadFailed": "Nie można otworzyć tej rozmowy.",
+      "whatChangedIntro": "{count, plural, one {Oto łańcuch z Twojej ostatniej pracy: co zostało zrobione, co się zmieniło, co to otworzyło.} few {Oto # łańcuchy z Twojej ostatniej pracy: co zostało zrobione, co się zmieniło, co to otworzyło.} many {Oto # łańcuchów z Twojej ostatniej pracy: co zostało zrobione, co się zmieniło, co to otworzyło.} other {Oto # łańcucha z Twojej ostatniej pracy: co zostało zrobione, co się zmieniło, co to otworzyło.}}",
+      "whatChangedNone": "W ciągu 14 dni z Twojej pracy nie wynikło nic nowego. Gdy zapiszesz pracę i zostanie potwierdzona, pokażę, co zmieniła.",
+      "whatChangedUnavailable": "Nie udało się teraz sprawdzić, co się zmieniło. Twoje wpisy są bezpieczne — spróbuj za chwilę lub otwórz dziennik."
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",
