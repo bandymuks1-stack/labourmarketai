@@ -179,3 +179,10 @@ begin
 
   return 'created';
 end $function$;
+
+-- A SECURITY DEFINER function never inherits a default EXECUTE grant
+-- (lib/guards/secdef-local-reset-reproducibility.test.ts): the replaced
+-- create_team_v1 states its grants explicitly — authenticated only.
+revoke all on function public.create_team_v1(text) from public;
+revoke all on function public.create_team_v1(text) from anon;
+grant execute on function public.create_team_v1(text) to authenticated;
