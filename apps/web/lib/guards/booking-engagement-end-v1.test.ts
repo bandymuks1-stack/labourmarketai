@@ -1638,6 +1638,9 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261013120000_confirmation_spends_v1.sql",
       // 2026-10-13 (RED, needs-human-gate, NOT applied): monitor integrity rule v2 (#2327).
       "20261013140000_ops_product_metrics_staff_acceptance_v2.sql",
+      // 2026-10-14 (RED, needs-human-gate, NOT applied): historical consolidation ledger + package.
+      "20261014090000_historical_consolidation_ledger_v1.sql",
+      "20261014090100_historical_consolidation_package_v1.sql",
 ]);
   });
 
