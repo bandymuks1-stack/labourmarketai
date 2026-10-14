@@ -1,44 +1,28 @@
-import { notFound } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { ArrowLeft } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
-import { PageTitle } from "@/components/app/premium/page-title";
 import { Stat, nf, span } from "@/components/app/organization/company-work-history";
 import { HistoryUndoMergeForm } from "@/components/app/organization/history-undo-merge-form";
-import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { Link } from "@/lib/i18n/navigation";
 import { loadHistoryQuality } from "@/lib/organization-evidence/history-quality-read";
 
 /**
- * IMPORTED HISTORY — DATA QUALITY (owner 2026-10-14). What the import
- * produced, what LabourMarket.ai recognised in it, every recorded mismatch,
- * and what is still unresolved — from the same records, none of them changed.
- * Organization governors only (RLS); a failed read is said, never drawn as
- * "no problems".
+ * IMPORTED HISTORY — DATA QUALITY (owner 2026-10-14), a section of the
+ * history page (one workspace, no new page): what the import produced, what
+ * LabourMarket.ai recognised in it, every recorded mismatch, and what is
+ * still unresolved — from the same records, none of them changed.
+ * Organization managers only (RLS); a failed read is said, never drawn as
+ * "no problems"; nothing renders without an organization.
  */
-export default async function HistoryQualityPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  await requireRoleOrRedirect(locale, "company");
+export async function HistoryQualitySection({ locale }: { locale: string }) {
   const t = await getTranslations("historyQuality");
   const load = await loadHistoryQuality(locale);
-  if (load.kind === "hidden") notFound();
-
-  const back = (
-    <Link href={"/dashboard/company/history" as "/dashboard"} className="inline-flex w-fit items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary">
-      <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-      {t("back")}
-    </Link>
-  );
+  if (load.kind === "hidden") return null;
   if (load.kind === "unavailable") {
     return (
-      <div className="mx-auto flex w-full max-w-content flex-col gap-4" data-testid="history-quality" data-state="unavailable">
-        {back}
-        <Card variant="error" compact>
-          <p className="text-sm text-text-secondary">{t("unavailable")}</p>
-        </Card>
-      </div>
+      <Card variant="error" compact data-testid="history-quality" data-state="unavailable">
+        <p className="text-sm text-text-secondary">{t("unavailable")}</p>
+      </Card>
     );
   }
 
@@ -47,10 +31,9 @@ export default async function HistoryQualityPage({ params }: { params: Promise<{
   const typeLabel = (k: string) => (t.has(`types.${k}` as never) ? t(`types.${k}` as never) : k);
 
   return (
-    <div className="mx-auto flex w-full max-w-content flex-col gap-8" data-testid="history-quality" data-state="ready" data-ledger={load.ledgerApplied ? "applied" : "none"}>
-      {back}
+    <div className="flex flex-col gap-8" data-testid="history-quality" data-state="ready" data-ledger={load.ledgerApplied ? "applied" : "none"}>
       <header className="flex flex-col gap-2">
-        <PageTitle>{t("title")}</PageTitle>
+        <h2 className="font-display text-2xl font-semibold text-text-primary">{t("title")}</h2>
         <p className="text-sm leading-relaxed text-text-secondary">{t("intro", { organization: load.organizationName })}</p>
         {!load.ledgerApplied ? (
           <p className="text-meta text-text-muted" data-testid="history-quality-not-applied">{t("notApplied")}</p>
