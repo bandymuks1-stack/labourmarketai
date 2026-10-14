@@ -283,3 +283,12 @@ describe("restraint: plain titles, real copy in every active locale", () => {
     }
   });
 });
+
+describe("the phone order reads in sequence", () => {
+  it("below md the outside region is numbered 03 and the because region 04", async () => {
+    const outside = html(await HomeOutsideView({ outside: ALL_UNKNOWN.outside }));
+    const because = html(await HomeBecauseView({ locale: "en", because: ALL_UNKNOWN.because }));
+    expect(outside).toMatch(/data-testid="home-outside-index-phone"[^>]*>03</);
+    expect(because).toMatch(/data-testid="home-because-index-phone"[^>]*>04</);
+  });
+});

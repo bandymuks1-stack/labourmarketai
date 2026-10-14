@@ -48,7 +48,9 @@ export function RegionHead({
   sub,
   className,
 }: {
-  readonly eyebrow: string;
+  /** Text, or a node when the eyebrow differs per breakpoint (e.g. a region
+   *  number that follows the phone order). */
+  readonly eyebrow: ReactNode;
   readonly title: string;
   readonly sub?: string;
   readonly className?: string;

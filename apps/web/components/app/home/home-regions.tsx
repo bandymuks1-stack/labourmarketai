@@ -105,11 +105,15 @@ function Region({
   state,
   testId,
   extra,
+  phoneIndex,
   children,
 }: {
   readonly id: "waiting" | "running" | "because" | "outside";
   /** The region number — the one mono line (a number, not a label). */
   readonly index: string;
+  /** The number on a phone when the phone order differs from the desktop
+   *  order (03/04 swap below md), so the numbers always read in sequence. */
+  readonly phoneIndex?: string;
   readonly title: string;
   readonly state: string;
   readonly testId?: string;
@@ -125,7 +129,20 @@ function Region({
       className="flex flex-col gap-3"
       {...extra}
     >
-      <RegionHead eyebrow={index} title={title} className="[&_h2]:text-[clamp(1.25rem,2vw,1.6rem)]" />
+      <RegionHead
+        eyebrow={
+          phoneIndex ? (
+            <>
+              <span className="md:hidden" data-testid={`home-${id}-index-phone`}>{phoneIndex}</span>
+              <span className="hidden md:inline">{index}</span>
+            </>
+          ) : (
+            index
+          )
+        }
+        title={title}
+        className="[&_h2]:text-[clamp(1.25rem,2vw,1.6rem)]"
+      />
       <Card compact>{children}</Card>
     </section>
   );
@@ -456,7 +473,7 @@ export async function HomeBecauseView({
 
   if (because.kind === "unknown") {
     return (
-      <Region id="because" index="03" title={tRegion("title")} state="unknown">
+      <Region id="because" index="03" phoneIndex="04" title={tRegion("title")} state="unknown">
         <p className={NOTE} role="status" data-testid="home-because-unknown">
           {tRegion("unknown")}
         </p>
@@ -471,7 +488,7 @@ export async function HomeBecauseView({
   const when = (c: HomeChange) => formatUtcDate(c.occurredAt.slice(0, 10), locale) ?? "—";
 
   return (
-    <Region id="because" index="03" title={tRegion("title")} state="known">
+    <Region id="because" index="03" phoneIndex="04" title={tRegion("title")} state="known">
       {because.causes.length > 0 ? (
         <ol data-testid="home-causes">
           {because.causes.map((c) => (
@@ -572,6 +589,7 @@ export async function HomeOutsideView({ outside }: { readonly outside: OutsideRe
     <Region
       id="outside"
       index="04"
+      phoneIndex="03"
       title={tRegion("title")}
       state={o.kind}
       testId="today-opportunity"
