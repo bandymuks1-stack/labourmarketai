@@ -14539,7 +14539,10 @@
       "chipOfferOurs": "Zaoferuj naszą brygadę lub firmę",
       "teamOfferAgreed": "Uzgodnione wstępnie — to jeszcze nie podpisana umowa. Ustalcie warunki w rozmowie, a potem przypisz zespół do projektu.",
       "teamOfferDeclined": "Odrzucono. Oferująca firma zobaczy twoją odpowiedź.",
-      "teamOfferThreadFailed": "Nie można otworzyć tej rozmowy."
+      "teamOfferThreadFailed": "Nie można otworzyć tej rozmowy.",
+      "planIntro": "{count, plural, one {To # krok.} few {To # kroki, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.} many {To # kroków, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.} other {To # kroku, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.}}",
+      "planNextOffer": "Następny krok:",
+      "planStep": "Krok {n} z {count}"
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",

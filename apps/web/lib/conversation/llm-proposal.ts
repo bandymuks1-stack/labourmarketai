@@ -8,6 +8,7 @@ import { rateLimit } from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 import { intentCatalogue } from "@/lib/conversation/intent-catalogue";
+import { validatePlan } from "@/lib/conversation/intent-plan";
 import { INTENT_REGISTRY, type RoutedIntent } from "@/lib/conversation/intent-registry";
 import {
   unsupportedReasonForAiOutcome,
@@ -122,7 +123,7 @@ export async function proposeUnderstandingAction(input: {
     }
     const envelope = outcome.value as {
       confidence?: "low" | "medium" | "high";
-      data?: { kind?: unknown; intent?: unknown; reference?: unknown };
+      data?: { kind?: unknown; intent?: unknown; reference?: unknown; steps?: unknown };
     };
     const kind = envelope.data?.kind;
     const reference = cleanReference(envelope.data?.reference);
@@ -141,6 +142,12 @@ export async function proposeUnderstandingAction(input: {
         if (envelope.confidence !== "high" && envelope.confidence !== "medium") {
           return { kind: "unsupported", reason: "not_understood", source: "model" };
         }
+        // ONE SENTENCE, AN ORDERED PLAN (owner 2026-10-14 §4). Same call,
+        // same grant; accepted only inside lib/conversation/intent-plan.ts's
+        // rule (reads, at most one write as the last step). Anything else is
+        // the single intent, exactly as before.
+        const plan = validatePlan(envelope.data?.steps, sentence);
+        if (plan && plan[0].intent === proposed) return { kind: "plan", steps: plan, source: "model" };
         return { kind: "intent", intent: proposed, score: 0, source: "model" };
       }
       case "reference":
