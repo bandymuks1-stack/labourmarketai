@@ -7338,7 +7338,19 @@
     "addableUnavailable": "Susietų darbuotojų sąrašo nepavyko nuskaityti — pridėti kol kas negalima.",
     "inviteLinkNote": "Nusiųskite šią nuorodą darbuotojui (žinute, SMS, WhatsApp). Priimti gali tik pakviestas asmuo.",
     "inviteLinkCopy": "Kopijuoti nuorodą",
-    "inviteLinkCopied": "Nukopijuota"
+    "inviteLinkCopied": "Nukopijuota",
+    "disband": {
+      "start": "Išformuoti brigadą",
+      "explain": "{count, plural, one {# nario narystė baigiasi} few {# narių narystės baigiasi} other {# narių narystės baigiasi}}, o brigada perkeliama į istoriją. Niekas neištrinama: jos darbai, pasiūlymai ir žinutės lieka. Atviri darbai (aktyvus priskyrimas, atviras pasiūlymas ar neatsakyta užklausa) turi būti užbaigti pirma.",
+      "confirm": "Išformuoti",
+      "cancel": "Palikti",
+      "done": "Brigada išformuota. Jos istorija išsaugota.",
+      "openWork": "Neišformuota: brigada dar turi atvirų darbų. Pirma užbaik aktyvų priskyrimą, atvirą pasiūlymą ar neatsakytą užklausą.",
+      "notFound": "Šios brigados tarp tavo brigadų nerasta.",
+      "failed": "Neišformuota: nepavyko užbaigti narystės. Niekas nepakeista.",
+      "historyTitle": "{count, plural, one {# išformuota brigada} few {# išformuotos brigados} other {# išformuotų brigadų}}",
+      "historyLine": "išformuota {date}"
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Pateikti užklausą šiai komandai",

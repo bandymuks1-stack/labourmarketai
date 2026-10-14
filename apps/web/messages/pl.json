@@ -7338,7 +7338,19 @@
     "addableUnavailable": "Nie udało się wczytać listy powiązanych pracowników — dodawanie nie jest teraz możliwe.",
     "inviteLinkNote": "Wyślij ten link pracownikowi (wiadomość, SMS, WhatsApp). Zaakceptować może tylko zaproszona osoba.",
     "inviteLinkCopy": "Kopiuj link",
-    "inviteLinkCopied": "Skopiowano"
+    "inviteLinkCopied": "Skopiowano",
+    "disband": {
+      "start": "Rozwiąż brygadę",
+      "explain": "{count, plural, one {Członkostwo # osoby się kończy} few {Członkostwa # osób się kończą} many {Członkostwa # osób się kończą} other {Członkostwa # osób się kończą}}, a brygada przechodzi do historii. Nic nie jest usuwane: jej prace, oferty i wiadomości zostają. Otwartą pracę (aktywne przydzielenie, otwartą ofertę lub zapytanie bez odpowiedzi) trzeba najpierw zamknąć.",
+      "confirm": "Rozwiąż",
+      "cancel": "Zostaw",
+      "done": "Brygada została rozwiązana. Jej historia jest zachowana.",
+      "openWork": "Nie rozwiązano: brygada ma jeszcze otwartą pracę. Najpierw zamknij aktywne przydzielenie, otwartą ofertę lub zapytanie bez odpowiedzi.",
+      "notFound": "Nie znaleziono tej brygady wśród Twoich.",
+      "failed": "Nie rozwiązano: nie udało się zakończyć członkostwa. Nic nie zostało zmienione.",
+      "historyTitle": "{count, plural, one {# rozwiązana brygada} few {# rozwiązane brygady} many {# rozwiązanych brygad} other {# rozwiązanych brygad}}",
+      "historyLine": "rozwiązana {date}"
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Zapytaj ten zespół o pracę",
