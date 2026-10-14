@@ -186,10 +186,8 @@ import { WorkerInvitationAction } from "@/components/app/conversation/worker-inv
 import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { loadCriteriaSummaryForChat, loadWorkCardPrefillForChat } from "@/lib/conversation/criteria-summary";
 import { loadProfileSummaryForChat } from "@/lib/conversation/profile-summary";
-import {
-  appendAssistantTurn,
-  loadAssistantThread,
-} from "@/lib/assistant/transcript";
+import { loadAssistantThread } from "@/lib/assistant/transcript";
+import { postTranscriptTurn } from "@/lib/assistant/transcript-client";
 import { WorldStateProvider } from "@/components/app/world-state/world-state-provider";
 import { ContextPanel } from "@/components/app/world-state/context-panel";
 import { useResultParam } from "@/components/app/workspace/use-result-param";
@@ -1216,10 +1214,14 @@ export function ConversationChat({
     if (script) return; // design preview: never touches real persistence
     let cancelled = false;
     const loading = loadAssistantThread();
-    transcriptRef.current.chain = loading.then(
+    // The load only supplies a conversation-id HINT now; appends no longer
+    // wait for it (the server resolves the thread itself — see persistTurn).
+    loading.then(
       (res) => {
         if (!res.available) return;
-        transcriptRef.current.conversationId = res.conversationId;
+        if (transcriptRef.current.conversationId === null) {
+          transcriptRef.current.conversationId = res.conversationId;
+        }
         transcriptRef.current.enabled = true;
       },
       () => undefined,
@@ -1267,16 +1269,17 @@ export function ConversationChat({
     (role: "user" | "assistant", text: string) => {
       if (script || !text.trim()) return;
       const tr = transcriptRef.current;
+      // P0 2026-10-14: the append used to be a server action, and Next.js runs
+      // a page's server actions one at a time — it queued behind every other
+      // action the chat fires, so a message sent just before the person
+      // closed or left the page was never written. A keepalive fetch to the
+      // transcript route runs beside that queue and is finished by the
+      // browser even after unload. The chain still orders the appends, so a
+      // question is always written before its answer.
       tr.chain = tr.chain
         .then(async () => {
-          if (!tr.enabled) return;
-          const res = await appendAssistantTurn({
-            conversationId: tr.conversationId,
-            role,
-            text,
-            language: locale,
-          });
-          if (res.available) tr.conversationId = res.conversationId;
+          const saved = await postTranscriptTurn({ conversationId: tr.conversationId, role, text, language: locale });
+          if (saved) tr.conversationId = saved;
         })
         .catch(() => {
           /* degraded — nothing claimed */
