@@ -1641,6 +1641,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-14 (RED, needs-human-gate, NOT applied): historical consolidation ledger + package.
       "20261014090000_historical_consolidation_ledger_v1.sql",
       "20261014090100_historical_consolidation_package_v1.sql",
+      // 2026-10-14 (RED, needs-human-gate, NOT applied): historical date correction v1.
+      "20261014150000_historical_date_correction_v1.sql",
 ]);
   });
 
