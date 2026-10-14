@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { resolveApiIdentity } from "@/lib/api/api-identity";
 import { runAsBearerCaller } from "@/lib/api/bearer-caller-scope";
+import { rateLimit } from "@/lib/security/rate-limit";
 import {
   classifyRefusal,
   refusalBody,
@@ -144,6 +145,12 @@ function serverInfo(origin: string) {
 
 const MAX_BODY_BYTES = 64 * 1024;
 
+/** Per verified person, across every tool: 600 calls / 5 min (2 per second
+ *  sustained) — far above a person-driven assistant, low enough to stop a
+ *  runaway loop. See the brake in POST. */
+const MCP_CALLER_LIMIT = { limit: 600, windowMs: 5 * 60 * 1000 } as const;
+const MCP_CALLER_LIMITER = "api-mcp-caller" as const;
+
 /**
  * CORS for browser-resident MCP clients (the Inspector, a web-hosted agent).
  *
@@ -234,6 +241,35 @@ export async function POST(req: Request) {
       { ok: false, code: "unsupported_media_type", message: "This MCP endpoint accepts application/json only." },
       { status: 415, headers: { ...CORS_HEADERS } },
     );
+  }
+
+  // PER-PERSON BRAKE. The failure limiter in api-identity only counts REJECTED
+  // tokens; a VALID token had no ceiling at all on this door, so one runaway
+  // assistant loop could drive unbounded tool calls (and their database work)
+  // as one person. Keyed on the verified user id — never on a header the
+  // caller controls. In-memory and per-instance (lib/security/rate-limit.ts
+  // states that limit honestly): a brake on a loop, not a quota.
+  const brake = rateLimit({ name: MCP_CALLER_LIMITER, key: auth.identity.userId, ...MCP_CALLER_LIMIT });
+  if (brake.limited) {
+    logEvent({
+      event: "external_client.auth",
+      outcome: "refused",
+      error_class: "RATE_LIMITED",
+      status: 429,
+      door: DOOR,
+    });
+    // The SAME wire contract as the resolver's own rate-limited refusal
+    // (client_action "back_off", no WWW-Authenticate: the credential is fine),
+    // plus Retry-After so a client knows when.
+    const refusal = classifyRefusal("rate-limited");
+    return NextResponse.json(refusalBody(refusal), {
+      status: refusal.status,
+      headers: {
+        ...CORS_HEADERS,
+        "MCP-Protocol-Version": negotiatedVersion(req),
+        "Retry-After": String(brake.retryAfterSeconds),
+      },
+    });
   }
 
   const raw = await req.text();
