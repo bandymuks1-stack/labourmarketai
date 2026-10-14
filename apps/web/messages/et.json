@@ -7516,5 +7516,49 @@
       "unplaced_single_unmatched": "tundmatu kohaga kirjed"
     },
     "link": "Andmekvaliteet"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Ootab teid",
+      "clear": "Miski ei oota teid.",
+      "unknown": "Seda, mis teid ootab, ei õnnestunud lugeda."
+    },
+    "running": {
+      "title": "Käimas praegu",
+      "projectsUnknown": "Teile määratud projekte ei õnnestunud lugeda."
+    },
+    "because": {
+      "title": "Selle tõttu, mis juhtus",
+      "unknown": "Seda, mis muutus, ei õnnestunud lugeda.",
+      "also": "Juhtus ka",
+      "all": "Kogu tegevus"
+    },
+    "outside": {
+      "title": "Väljaspool teie seinu"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Tööalane suhe algas",
+        "relationshipEnded": "Tööalane suhe lõppes",
+        "bookingAgreed": "Broneering lepiti kokku",
+        "bookingRefused": "Broneering lükati tagasi",
+        "bookingWithdrawn": "Broneering võeti tagasi",
+        "absenceApproved": "Puudumine kinnitati",
+        "absenceRefused": "Puudumine lükati tagasi",
+        "decisionRecorded": "Otsus salvestati",
+        "acknowledgementRecorded": "Teadmiseks võtmine salvestati",
+        "invitationAnswered": "Kutsele vastati"
+      },
+      "state": {
+        "engagementActive": "Töösuhe: aktiivne",
+        "engagementClosed": "Töösuhe: lõppenud",
+        "bookingConfirmed": "Broneering: kinnitatud",
+        "bookingClosed": "Broneering: suletud",
+        "absenceDecided": "Puudumine: otsustatud",
+        "workflowClosed": "Kinnitamine: suletud",
+        "documentAcknowledged": "Dokument: teadmiseks võetud",
+        "relationshipFormed": "Suhe: loodud"
+      }
+    }
   }
 }

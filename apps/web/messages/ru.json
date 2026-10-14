@@ -19394,5 +19394,49 @@
       "unplaced_single_unmatched": "записи с неизвестным местом"
     },
     "link": "Качество данных"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Ждёт вас",
+      "clear": "Сейчас вас ничего не ждёт.",
+      "unknown": "Не удалось прочитать, что вас ждёт."
+    },
+    "running": {
+      "title": "Идёт сейчас",
+      "projectsUnknown": "Не удалось прочитать назначенные вам проекты."
+    },
+    "because": {
+      "title": "Из-за того, что произошло",
+      "unknown": "Не удалось прочитать, что изменилось.",
+      "also": "Также произошло",
+      "all": "Вся активность"
+    },
+    "outside": {
+      "title": "За вашими стенами"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Начались рабочие отношения",
+        "relationshipEnded": "Рабочие отношения завершились",
+        "bookingAgreed": "Бронирование согласовано",
+        "bookingRefused": "Бронирование отклонено",
+        "bookingWithdrawn": "Бронирование отозвано",
+        "absenceApproved": "Отсутствие одобрено",
+        "absenceRefused": "Отсутствие отклонено",
+        "decisionRecorded": "Решение зафиксировано",
+        "acknowledgementRecorded": "Ознакомление зафиксировано",
+        "invitationAnswered": "На приглашение ответили"
+      },
+      "state": {
+        "engagementActive": "Занятость: активна",
+        "engagementClosed": "Занятость: завершена",
+        "bookingConfirmed": "Бронирование: подтверждено",
+        "bookingClosed": "Бронирование: закрыто",
+        "absenceDecided": "Отсутствие: решено",
+        "workflowClosed": "Согласование: закрыто",
+        "documentAcknowledged": "Документ: ознакомление подтверждено",
+        "relationshipFormed": "Отношения: установлены"
+      }
+    }
   }
 }

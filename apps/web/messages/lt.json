@@ -19394,5 +19394,49 @@
       "unplaced_single_unmatched": "įrašai su nežinoma vieta"
     },
     "link": "Duomenų kokybė"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Laukia jūsų",
+      "clear": "Niekas jūsų nelaukia.",
+      "unknown": "Nepavyko nuskaityti, kas laukia jūsų."
+    },
+    "running": {
+      "title": "Vyksta dabar",
+      "projectsUnknown": "Nepavyko nuskaityti jums priskirtų projektų."
+    },
+    "because": {
+      "title": "Dėl to, kas įvyko",
+      "unknown": "Nepavyko nuskaityti, kas pasikeitė.",
+      "also": "Taip pat įvyko",
+      "all": "Visa veikla"
+    },
+    "outside": {
+      "title": "Už jūsų sienų"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Prasidėjo darbo santykis",
+        "relationshipEnded": "Darbo santykis baigėsi",
+        "bookingAgreed": "Rezervacija sutarta",
+        "bookingRefused": "Rezervacija atmesta",
+        "bookingWithdrawn": "Rezervacija atšaukta",
+        "absenceApproved": "Nebuvimas patvirtintas",
+        "absenceRefused": "Nebuvimas atmestas",
+        "decisionRecorded": "Sprendimas užfiksuotas",
+        "acknowledgementRecorded": "Susipažinimas užfiksuotas",
+        "invitationAnswered": "Į kvietimą atsakyta"
+      },
+      "state": {
+        "engagementActive": "Įdarbinimas: aktyvus",
+        "engagementClosed": "Įdarbinimas: baigtas",
+        "bookingConfirmed": "Rezervacija: patvirtinta",
+        "bookingClosed": "Rezervacija: uždaryta",
+        "absenceDecided": "Nebuvimas: išspręstas",
+        "workflowClosed": "Patvirtinimas: uždarytas",
+        "documentAcknowledged": "Dokumentas: susipažinta",
+        "relationshipFormed": "Santykis: užmegztas"
+      }
+    }
   }
 }

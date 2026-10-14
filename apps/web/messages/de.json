@@ -19394,5 +19394,49 @@
       "unplaced_single_unmatched": "Nachweise mit unbekanntem Ort"
     },
     "link": "Datenqualität"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Wartet auf Sie",
+      "clear": "Nichts wartet auf Sie.",
+      "unknown": "Was auf Sie wartet, konnte nicht gelesen werden."
+    },
+    "running": {
+      "title": "Läuft gerade",
+      "projectsUnknown": "Ihre zugewiesenen Projekte konnten nicht gelesen werden."
+    },
+    "because": {
+      "title": "Wegen dem, was passiert ist",
+      "unknown": "Was sich geändert hat, konnte nicht gelesen werden.",
+      "also": "Außerdem passiert",
+      "all": "Alle Aktivitäten"
+    },
+    "outside": {
+      "title": "Außerhalb Ihrer Mauern"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Ein Arbeitsverhältnis hat begonnen",
+        "relationshipEnded": "Ein Arbeitsverhältnis wurde beendet",
+        "bookingAgreed": "Die Buchung wurde vereinbart",
+        "bookingRefused": "Die Buchung wurde abgelehnt",
+        "bookingWithdrawn": "Die Buchung wurde zurückgezogen",
+        "absenceApproved": "Die Abwesenheit wurde genehmigt",
+        "absenceRefused": "Die Abwesenheit wurde abgelehnt",
+        "decisionRecorded": "Die Entscheidung wurde festgehalten",
+        "acknowledgementRecorded": "Die Kenntnisnahme wurde festgehalten",
+        "invitationAnswered": "Die Einladung wurde beantwortet"
+      },
+      "state": {
+        "engagementActive": "Beschäftigung: aktiv",
+        "engagementClosed": "Beschäftigung: beendet",
+        "bookingConfirmed": "Buchung: bestätigt",
+        "bookingClosed": "Buchung: geschlossen",
+        "absenceDecided": "Abwesenheit: entschieden",
+        "workflowClosed": "Freigabe: abgeschlossen",
+        "documentAcknowledged": "Dokument: zur Kenntnis genommen",
+        "relationshipFormed": "Beziehung: entstanden"
+      }
+    }
   }
 }

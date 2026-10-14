@@ -7516,5 +7516,49 @@
       "unplaced_single_unmatched": "poster med ukjent sted"
     },
     "link": "Datakvalitet"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Venter på deg",
+      "clear": "Ingenting venter på deg.",
+      "unknown": "Det som venter på deg, kunne ikke leses."
+    },
+    "running": {
+      "title": "Pågår nå",
+      "projectsUnknown": "Prosjektene du er tildelt, kunne ikke leses."
+    },
+    "because": {
+      "title": "På grunn av det som skjedde",
+      "unknown": "Det som endret seg, kunne ikke leses.",
+      "also": "Skjedde også",
+      "all": "All aktivitet"
+    },
+    "outside": {
+      "title": "Utenfor dine vegger"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Et arbeidsforhold startet",
+        "relationshipEnded": "Et arbeidsforhold ble avsluttet",
+        "bookingAgreed": "Bookingen ble avtalt",
+        "bookingRefused": "Bookingen ble avslått",
+        "bookingWithdrawn": "Bookingen ble trukket tilbake",
+        "absenceApproved": "Fraværet ble godkjent",
+        "absenceRefused": "Fraværet ble avslått",
+        "decisionRecorded": "Beslutningen ble registrert",
+        "acknowledgementRecorded": "Kvitteringen ble registrert",
+        "invitationAnswered": "Invitasjonen ble besvart"
+      },
+      "state": {
+        "engagementActive": "Ansettelse: aktiv",
+        "engagementClosed": "Ansettelse: avsluttet",
+        "bookingConfirmed": "Booking: bekreftet",
+        "bookingClosed": "Booking: lukket",
+        "absenceDecided": "Fravær: avgjort",
+        "workflowClosed": "Godkjenning: avsluttet",
+        "documentAcknowledged": "Dokument: kvittert",
+        "relationshipFormed": "Relasjon: etablert"
+      }
+    }
   }
 }

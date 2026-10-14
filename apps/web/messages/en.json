@@ -19394,5 +19394,49 @@
       "unplaced_single_unmatched": "records naming an unknown place"
     },
     "link": "Data quality"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Waiting on you",
+      "clear": "Nothing is waiting on you.",
+      "unknown": "What is waiting on you could not be read."
+    },
+    "running": {
+      "title": "Running now",
+      "projectsUnknown": "Your assigned projects could not be read."
+    },
+    "because": {
+      "title": "Because of what happened",
+      "unknown": "What changed could not be read.",
+      "also": "Also happened",
+      "all": "All activity"
+    },
+    "outside": {
+      "title": "Outside your walls"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "A working relationship started",
+        "relationshipEnded": "A working relationship ended",
+        "bookingAgreed": "The booking was agreed",
+        "bookingRefused": "The booking was refused",
+        "bookingWithdrawn": "The booking was withdrawn",
+        "absenceApproved": "The absence was approved",
+        "absenceRefused": "The absence was refused",
+        "decisionRecorded": "The decision was recorded",
+        "acknowledgementRecorded": "The acknowledgement was recorded",
+        "invitationAnswered": "The invitation was answered"
+      },
+      "state": {
+        "engagementActive": "Engagement: active",
+        "engagementClosed": "Engagement: closed",
+        "bookingConfirmed": "Booking: confirmed",
+        "bookingClosed": "Booking: closed",
+        "absenceDecided": "Absence: decided",
+        "workflowClosed": "Approval: closed",
+        "documentAcknowledged": "Document: acknowledged",
+        "relationshipFormed": "Relationship: formed"
+      }
+    }
   }
 }

@@ -29,29 +29,58 @@ describe("ŠIANDIEN reads as one clear page on a phone (IA 2026-09-13 §5)", () 
   // actions as text links with the 44px floor, no arbitrary type sizes, no
   // hand-rolled card surface, and the worker's 3-tab bar at a tap height
   // the primitive already guarantees.
-  const files = readdirSync(join(root, "components", "app", "today")).filter((f) =>
-    f.startsWith("today-"),
-  );
+  // The screen is the header (today/) plus the four-region home
+  // (components/app/home — the frozen design class, re-ported in D1). The
+  // same phone invariants apply to every file that draws it.
+  const files = [
+    ...readdirSync(join(root, "components", "app", "today"))
+      .filter((f) => f.startsWith("today-"))
+      .map((f) => `components/app/today/${f}`),
+    "components/app/home/home-regions.tsx",
+  ];
 
   it("exactly one primary CTA on the whole screen", () => {
-    const all = files.map((f) => read(`components/app/today/${f}`)).join("\n");
+    const all = files.map((f) => read(f)).join("\n");
     expect(all.match(/buttonLinkClassName\("primary"\)/g)).toHaveLength(1);
     expect(all).not.toMatch(/<Button\b/);
   });
 
   it("every secondary action is a link with the 44px floor", () => {
     for (const f of files) {
-      const src = read(`components/app/today/${f}`);
+      const src = read(f);
       const links = src.match(/<Link\b[\s\S]*?>/g) ?? [];
       for (const link of links) {
-        expect(link, `${f}: ${link.slice(0, 60)}`).toMatch(/min-h-11|buttonLinkClassName|pillLinkClassName/);
+        expect(link, `${f}: ${link.slice(0, 60)}`).toMatch(
+          /min-h-11|buttonLinkClassName|pillLinkClassName|className=\{(ROW_LINK|SECONDARY)\}|\$\{(ROW_LINK|SECONDARY)\}/,
+        );
       }
     }
   });
 
+  it("the shared row-link and secondary constants carry the 44px floor the links above rely on", () => {
+    const regions = read("components/app/home/home-regions.tsx");
+    expect(regions).toMatch(/const ROW_LINK =\s*"flex min-h-11 /);
+    expect(regions).toMatch(/const SECONDARY = `\$\{buttonLinkClassName\("secondary"\)\}/);
+  });
+
+  it("on a phone every row action is full width and the primary action is reachable without decoration", () => {
+    const regions = read("components/app/home/home-regions.tsx");
+    expect(regions).toMatch(/buttonLinkClassName\("primary"\)\} shrink-0 max-md:w-full/);
+    // The WAITING region (the one primary action) is mounted directly after
+    // the header, before anything else on the screen.
+    const screen = read("components/app/today/today-screen.tsx");
+    const header = screen.indexOf('data-testid="today-header"');
+    const waiting = screen.indexOf("<HomeWaiting");
+    const others = ["<EmployerVisibilityAsk", "<HomeRunning", "<HomeBecause", "<HomeOutside"].map((m) =>
+      screen.indexOf(m),
+    );
+    expect(waiting).toBeGreaterThan(header);
+    for (const i of others) expect(i).toBeGreaterThan(waiting);
+  });
+
   it("uses the type ladder and the Card primitive, never raw sizes or raw card-border", () => {
     for (const f of files) {
-      const src = read(`components/app/today/${f}`);
+      const src = read(f);
       expect(src, f).not.toMatch(/text-xs\b|text-sm\b|text-\[[0-9.]+(px|rem)\]/);
       expect(src, f).not.toMatch(/card-border/);
     }

@@ -7516,5 +7516,49 @@
       "unplaced_single_unmatched": "ieraksti ar nezināmu vietu"
     },
     "link": "Datu kvalitāte"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Gaida jūs",
+      "clear": "Nekas jūs negaida.",
+      "unknown": "Neizdevās nolasīt, kas jūs gaida."
+    },
+    "running": {
+      "title": "Notiek tagad",
+      "projectsUnknown": "Neizdevās nolasīt jums piešķirtos projektus."
+    },
+    "because": {
+      "title": "Tā dēļ, kas notika",
+      "unknown": "Neizdevās nolasīt, kas mainījās.",
+      "also": "Notika arī",
+      "all": "Visa aktivitāte"
+    },
+    "outside": {
+      "title": "Ārpus jūsu sienām"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Sākās darba attiecības",
+        "relationshipEnded": "Darba attiecības beidzās",
+        "bookingAgreed": "Rezervācija tika saskaņota",
+        "bookingRefused": "Rezervācija tika noraidīta",
+        "bookingWithdrawn": "Rezervācija tika atsaukta",
+        "absenceApproved": "Prombūtne tika apstiprināta",
+        "absenceRefused": "Prombūtne tika noraidīta",
+        "decisionRecorded": "Lēmums tika reģistrēts",
+        "acknowledgementRecorded": "Iepazīšanās tika reģistrēta",
+        "invitationAnswered": "Uz uzaicinājumu tika atbildēts"
+      },
+      "state": {
+        "engagementActive": "Nodarbinātība: aktīva",
+        "engagementClosed": "Nodarbinātība: beigusies",
+        "bookingConfirmed": "Rezervācija: apstiprināta",
+        "bookingClosed": "Rezervācija: slēgta",
+        "absenceDecided": "Prombūtne: izlemta",
+        "workflowClosed": "Apstiprināšana: slēgta",
+        "documentAcknowledged": "Dokuments: iepazīts",
+        "relationshipFormed": "Attiecības: izveidotas"
+      }
+    }
   }
 }

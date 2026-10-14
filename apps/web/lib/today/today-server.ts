@@ -4,7 +4,7 @@ import { cache } from "react";
 
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { listMyBookings } from "@/lib/booking/booking-actions";
-import { getUnreadConversationIds } from "@/lib/communication/unread";
+import { getUnreadConversationIdsResult } from "@/lib/communication/unread";
 import {
   getPrimaryProfessionSlug,
   getProfessionEntries,
@@ -149,11 +149,15 @@ export const loadTodayAttention = cache(async (): Promise<TodayAttention> => {
     listInvitationsAddressedToMe()
       .then((res) => (res.status === "ok" ? res.total : null))
       .catch((): number | null => null),
-    getUnreadConversationIds()
-      .then((ids) => ({
-        count: ids.size,
-        onlyId: ids.size === 1 ? ([...ids][0] ?? null) : null,
-      }))
+    // The RESULT reader: a failed read is `null` (UNKNOWN), a successful
+    // empty read is a zero count. The lossy `getUnreadConversationIds` could
+    // never report a failure, which made this door's `null` unreachable.
+    getUnreadConversationIdsResult()
+      .then((res): TodayAttention["unread"] =>
+        res.status === "ok"
+          ? { count: res.ids.size, onlyId: res.ids.size === 1 ? ([...res.ids][0] ?? null) : null }
+          : null,
+      )
       .catch((): TodayAttention["unread"] => null),
   ]);
   return { offers, invitations, unread };
