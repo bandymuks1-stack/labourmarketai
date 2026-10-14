@@ -2,6 +2,8 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { readSupersededRecordIds } from "@/lib/organization-evidence/superseded-ids";
+
 import {
   proposeConsolidation,
   type ConsolidationGroup,
@@ -64,20 +66,23 @@ export async function loadConsolidationProposal(
   }
   const projectOfObject = new Map(objects.map((o) => [o.id, o.project_id]));
   const objectIds = [...projectOfObject.keys()];
-  type Rec = { work_object_id: string; activity_date: string | null; period_start: string | null; period_end: string | null; hours: number | string | null };
+  type Rec = { id: string; work_object_id: string; activity_date: string | null; period_start: string | null; period_end: string | null; hours: number | string | null };
+  // EFFECTIVE records only: a superseded original never counts beside its correction.
+  const superseded = await readSupersededRecordIds(supabase, organizationId);
+  if (!superseded) return null;
   const recs: Rec[] = [];
   for (let i = 0; i < objectIds.length; i += 200) {
     const chunk = objectIds.slice(i, i + 200);
     const got = await pages<Rec>((from, to) =>
       db(supabase)
         .from("organization_evidence_records")
-        .select("work_object_id, activity_date, period_start, period_end, hours")
+        .select("id, work_object_id, activity_date, period_start, period_end, hours")
         .in("work_object_id", chunk)
         .order("id", { ascending: true })
         .range(from, to),
     );
     if (!got) return null;
-    recs.push(...got);
+    recs.push(...got.filter((r) => !superseded.has(r.id)));
   }
 
   const stat = new Map<string, { records: number; hours: number; dates: string[] }>();

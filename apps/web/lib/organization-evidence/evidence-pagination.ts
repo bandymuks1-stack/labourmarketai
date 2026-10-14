@@ -45,19 +45,30 @@ export async function listAllEvidenceRecords(
 > {
   const list = opts.list ?? listEvidenceRecords;
   const ceiling = Math.max(opts.ceiling ?? EVIDENCE_READ_CEILING, EVIDENCE_PAGE_SIZE);
+  // Pages are read RAW (superseded originals included) so a short page means
+  // the end of the data: `listEvidenceRecords` drops superseded rows after the
+  // fetch, and a page with one corrected original would otherwise come back
+  // short and end the loop early, silently. The caller's choice is applied
+  // once, after the last page.
+  const keepSuperseded = filter.includeSuperseded === true;
+  const done = (records: EvidenceRecordView[], truncated: boolean) => ({
+    kind: "ok" as const,
+    records: keepSuperseded ? records : records.filter((r) => !r.superseded),
+    truncated,
+  });
   const all: EvidenceRecordView[] = [];
   let offset = 0;
   for (;;) {
-    const page = await list(caller, { ...filter, limit: EVIDENCE_PAGE_SIZE, offset });
+    const page = await list(caller, { ...filter, includeSuperseded: true, limit: EVIDENCE_PAGE_SIZE, offset });
     if (page.kind !== "ok") return page;
     all.push(...page.records);
-    if (page.records.length < EVIDENCE_PAGE_SIZE) return { kind: "ok", records: all, truncated: false };
+    if (page.records.length < EVIDENCE_PAGE_SIZE) return done(all, false);
     offset += EVIDENCE_PAGE_SIZE;
     if (all.length >= ceiling) {
       // Exactly at the ceiling is not truncation: peek for one more row.
-      const peek = await list(caller, { ...filter, limit: 1, offset });
+      const peek = await list(caller, { ...filter, includeSuperseded: true, limit: 1, offset });
       if (peek.kind !== "ok") return peek;
-      return { kind: "ok", records: all, truncated: peek.records.length > 0 };
+      return done(all, peek.records.length > 0);
     }
   }
 }

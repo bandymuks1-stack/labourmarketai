@@ -52,6 +52,23 @@ describe("listAllEvidenceRecords — no silent 1000 cap", () => {
     expect(res.truncated).toBe(true);
   });
 
+  it("a corrected original on a page does not end the read early: pages are raw, superseded dropped after", async () => {
+    // 3109 raw rows = 2944 records + 165 corrections; every 19th row is a superseded original.
+    const superseded = (i: number) => i % 19 === 0;
+    const supersededCount = Array.from({ length: 3109 }, (_, i) => i).filter(superseded).length;
+    const list = (async (_c: unknown, f: { limit?: number; offset?: number; includeSuperseded?: boolean }) => {
+      const from = f.offset ?? 0;
+      const n = Math.max(0, Math.min(f.limit ?? 200, 3109 - from));
+      const rows = Array.from({ length: n }, (_, i) => ({ ...rec(from + i), superseded: superseded(from + i) }) as unknown as EvidenceRecordView);
+      return { kind: "ok", records: f.includeSuperseded ? rows : rows.filter((r) => !r.superseded) };
+    }) as never;
+    const res = await listAllEvidenceRecords(caller, { organizationId: "o1" }, { list });
+    expect(res.kind === "ok" && res.records.length).toBe(3109 - supersededCount);
+    expect(res.kind === "ok" && res.records.some((r) => r.superseded)).toBe(false);
+    const raw = await listAllEvidenceRecords(caller, { organizationId: "o1", includeSuperseded: true }, { list });
+    expect(raw.kind === "ok" && raw.records.length).toBe(3109);
+  });
+
   it("is not truncated when the ceiling equals exactly what exists", async () => {
     const { list } = source(2000);
     const res = await listAllEvidenceRecords(caller, {}, { list, ceiling: 2000 });
