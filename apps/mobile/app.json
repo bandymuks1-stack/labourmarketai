@@ -10,8 +10,11 @@
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "ai.labourmarket.app",
-      "supportsTablet": true,
+      "supportsTablet": false,
       "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
           {
@@ -91,7 +94,10 @@
       },
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
       ],
       "intentFilters": [
         {
@@ -146,6 +152,8 @@
     "extra": {
       "//assets": "icon, adaptiveIcon and the expo-splash-screen image are GENERATED from the existing brand mark apps/web/public/app-icon.svg by apps/mobile/scripts/generate-app-assets.mjs (no new artwork). Final store art still needs owner approval at publishing time: docs/mobile/STORE_RELEASE_READINESS_2026-09-13.md section 4.1. The splash background is the app's own background (theme.color.background) so the first screen does not flash.",
       "//": "PUBLIC values only. A device build cannot hold a secret: the binary is on the user's phone and cannot be edited afterwards. These are read through EXPO_PUBLIC_* at build time and validated by @labourmarket/client-core, which REFUSES a key that bypasses RLS.",
+      "//blockedPermissions": "Every entry was READ from the built APK (android.yml store-policy facts, 2026-10-14) and is unused: storage (no file access), SYSTEM_ALERT_WINDOW (the React Native dev overlay; release never draws over other apps), USE_BIOMETRIC / USE_FINGERPRINT (merged in by expo-secure-store for requireAuthentication, which this app never passes). An unused permission is a claim this product does not make, and Play shows it to the person installing.",
+      "//ios": "usesNonExemptEncryption false: the app uses only the OS-provided HTTPS/TLS (exempt), so App Store Connect stops asking the export-compliance question on every build. supportsTablet false: the screens are phone layouts that have never been reviewed on iPad; an iPhone-only app still runs on iPad in compatibility mode, and the store then asks for no iPad screenshots. Turn it on only together with iPad QA.",
       "//intentFilters": "Every android.intentFilters data entry names a PATH. A host with no path claims every URL on it, and the app has eight screens while the website has some forty — an unqualified claim would open the app for every shared web link and land on +not-found. The list is the native route table (apps/mobile/app), pinned to apps/web/lib/mobile/app-association.ts NATIVE_APP_PATHS by apps/web/lib/guards/app-association.test.ts; widen it only when the app gains the screen."
     }
   }

@@ -118,6 +118,19 @@ export default function Settings() {
       label: t("account.privacy"),
       url: `${webOrigin}/${locale}/dashboard/privacy`,
     },
+    // The PUBLIC deletion page: readable without signing in again in the
+    // browser (the privacy page above needs a web session the app cannot hand
+    // over). It is also the URL the store listings declare for deletion.
+    {
+      key: "deletion",
+      label: t("account.deletionInfo"),
+      url: `${webOrigin}/${locale}/legal/data-deletion`,
+    },
+    {
+      key: "privacy-policy",
+      label: t("account.privacyPolicy"),
+      url: `${webOrigin}/${locale}/legal/privacy`,
+    },
     { key: "terms", label: t("account.terms"), url: `${webOrigin}/${locale}/legal/terms` },
     { key: "support", label: t("account.support"), url: `mailto:${SUPPORT_EMAIL}` },
   ] as const;

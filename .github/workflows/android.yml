@@ -46,6 +46,11 @@ name: Android
 #                                    "could not reach the server" (not "wrong
 #                                    password", not a spinner) and the form
 #                                    stays usable
+#   ANDROID_STORE_POLICY_FACTS_OK  — the BUILT APK targets API >= 36 (Play
+#                                    floor) and requests none of the
+#                                    permissions the product does not use
+#   ANDROID_RELEASE_AAB_BUILT      — the same project produces the Play upload
+#                                    format (debug-signed proof, not uploadable)
 # What it does NOT claim: store signing, Play readiness, an authenticated
 # session, deep-link (App Links) verification, physical-device behaviour.
 
@@ -214,6 +219,71 @@ jobs:
             echo "| Backend config | ${{ steps.cfg.outputs.mode }} |"
           } >> "$GITHUB_STEP_SUMMARY"
           echo "sha256=${SHA256} size=${BYTES} signer=${SIGNER}"
+
+      # STORE-POLICY FACTS read from the BUILT artifact, not from app.json:
+      # `apps/mobile/android` is generated, so the only honest place to see the
+      # target API level and the permission list Play will see is the APK
+      # itself. Google Play refuses a new app or update whose targetSdk is
+      # below the current floor (API 36 for new apps and updates since
+      # 2026-08-31, developer.android.com/google/play/requirements/target-sdk;
+      # API 36 is also what the
+      # RN 0.86 / Expo 57 version catalog emits). Permissions the product
+      # does not use are refused here, so a dependency bump that silently
+      # adds one fails CI instead of surfacing in a Play review.
+      - name: Store-policy facts (targetSdk, permissions)
+        run: |
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          APK="dist-apk/${{ steps.apk.outputs.apk_file }}"
+          "$BT/aapt2" dump badging "$APK" > badging.txt
+          TARGET=$(sed -n "s/^targetSdkVersion:'\([0-9]*\)'.*/\1/p" badging.txt)
+          MIN=$(sed -n "s/^minSdkVersion:'\([0-9]*\)'.*/\1/p" badging.txt)
+          PERMS=$(sed -n "s/^uses-permission: name='\([^']*\)'.*/\1/p" badging.txt | sort -u)
+          echo "minSdk=$MIN targetSdk=$TARGET"; echo "$PERMS"
+          {
+            echo
+            echo "### Store-policy facts (from the built APK)"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| minSdk | $MIN |"
+            echo "| targetSdk | $TARGET |"
+            echo "| Permissions | $(echo $PERMS | tr ' ' ',') |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          FAIL=0
+          if [ -z "$TARGET" ] || [ "$TARGET" -lt 36 ]; then
+            echo "::error::targetSdkVersion '$TARGET' is below the Google Play floor (36 since 2026-08-31)"; FAIL=1
+          fi
+          for P in android.permission.READ_EXTERNAL_STORAGE android.permission.WRITE_EXTERNAL_STORAGE \
+                   android.permission.CAMERA android.permission.RECORD_AUDIO \
+                   android.permission.ACCESS_FINE_LOCATION android.permission.ACCESS_COARSE_LOCATION \
+                   android.permission.READ_CONTACTS android.permission.READ_MEDIA_IMAGES \
+                   android.permission.SYSTEM_ALERT_WINDOW android.permission.USE_BIOMETRIC \
+                   android.permission.USE_FINGERPRINT \
+                   com.google.android.gms.permission.AD_ID; do
+            if echo "$PERMS" | grep -qx "$P"; then
+              echo "::error::$P is requested but the product does not use it (docs/mobile/STORE_RELEASE_READINESS_2026-09-13.md)"; FAIL=1
+            fi
+          done
+          [ $FAIL -eq 0 ] && echo "ANDROID_STORE_POLICY_FACTS_OK"
+          exit $FAIL
+
+      # The Play upload format is an Android App Bundle. This proves the SAME
+      # project produces one; it is debug-signed exactly like the APK and is
+      # NOT uploadable — store signing is EAS / owner territory. Not uploaded
+      # as an artifact: a debug-signed bundle has no use outside this proof.
+      - name: Gradle bundleRelease (AAB build proof, NOT uploadable)
+        working-directory: apps/mobile/android
+        env:
+          NODE_ENV: production
+        run: |
+          ./gradlew :app:bundleRelease \
+            -PreactNativeArchitectures=arm64-v8a,x86_64 \
+            --no-daemon > bundle.log 2>&1 || { tail -150 bundle.log; exit 1; }
+          AAB=app/build/outputs/bundle/release/app-release.aab
+          test -f "$AAB" || { echo "no release AAB produced"; exit 1; }
+          BYTES=$(stat -c %s "$AAB")
+          echo "ANDROID_RELEASE_AAB_BUILT ($BYTES bytes, debug-signed, not uploadable)"
+          echo "| AAB (proof only) | built, $BYTES bytes, debug-signed — NOT for upload |" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload APK
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

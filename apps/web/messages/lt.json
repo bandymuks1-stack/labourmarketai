@@ -5719,6 +5719,14 @@
             "Sutikimų ir audito įrašai saugomi kaip istorija: atšaukimas įrašomas, o ne ištrinamas.",
             "Tikslūs saugojimo terminai yra dalis galutinio teisinio teksto, kuris dar ruošiamas."
           ]
+        },
+        {
+          "heading": "DI ir prijungti DI asistentai",
+          "items": [
+            "Kai kurios funkcijos naudoja „Google“ DI modelį (Gemini API): žinutėms ir darbo skelbimams versti į kitas kalbas ir pasiūlyti, ko prašoma pokalbyje įvestu sakiniu. Siunčiamas tik tam darbui reikalingas tekstas. Rezultatas yra pasiūlymas — niekas neišsaugoma kaip faktas apie jus, kol to nepatvirtinate.",
+            "LabourMarket.ai galite prijungti prie DI asistento, pvz., ChatGPT ar Claude. Kiekvieną prijungimą patvirtinate patys sutikimo ekrane; asistentas tada veikia tik jūsų pačių teisėmis, o pasekmių turintiems veiksmams reikia atskiro patvirtinimo. Prijungtas programėles bet kada matote ir atjungiate paskyros nustatymuose.",
+            "Ką DI asistento teikėjas daro su jūsų pokalbiu, nustato to teikėjo privatumo sąlygos."
+          ]
         }
       ],
       "pendingTitle": "Dar laukia galutinio teisinio teksto:",
@@ -5765,8 +5773,8 @@
         {
           "heading": "Uždaryta pagal nutylėjimą",
           "items": [
-            "Šiuo metu nepasiekiama.",
-            "Šiuo metu nepasiekiama."
+            "Naudotojų duomenų lentelės apsaugotos prieigos taisyklėmis pačioje duomenų bazėje. Jei jokia taisyklė aiškiai nesuteikia prieigos, duomenys nematomi — net kitiems prisijungusiems naudotojams.",
+            "Šios taisyklės veikia duomenų bazės lygmenyje, ne tik sąsajoje, ir yra dengiamos automatiniais testais."
           ]
         },
         {
@@ -5810,10 +5818,12 @@
         {
           "heading": "Infrastruktūros paslaugų teikėjai (pagalbiniai tvarkytojai)",
           "items": [
-            "Šiuo metu nepasiekiama.",
+            "Supabase — duomenų bazė, naudotojų prisijungimas ir failų saugykla. Duomenys laikomi Europos Sąjungoje (eu-west-1 regione).",
             "Vercel — svetainės talpinimas ir turinio pateikimas.",
             "GitHub — programinio kodo saugykla. Naudotojų duomenys ten nesaugomi.",
-            "Šiuo metu neveikia joks el. pašto, DI, vertimo ar mokėjimų paslaugų teikėjas. Jei toks būtų įjungtas, pirmiausia būtų atnaujintas šis sąrašas."
+            "„Google“ (Gemini API) — DI apdorojimas žinutėms ir darbo skelbimams versti ir pasiūlyti, ko prašoma pokalbyje įvestu sakiniu. Siunčiamas tik tam darbui reikalingas tekstas.",
+            "„Stripe“ — mokėjimų apdorojimas. Kliento įrašas sukuriamas tik tada, kai organizacija pradeda prenumeratos apmokėjimą; šiandien jokia prenumerata neaktyvi.",
+            "Joks kitas el. pašto, DI, vertimo ar mokėjimų paslaugų teikėjas neveikia. Jei toks būtų įjungtas, pirmiausia būtų atnaujintas šis sąrašas."
           ]
         },
         {
@@ -5870,7 +5880,7 @@
         {
           "heading": "Jei kažkas atrodo ne taip",
           "items": [
-            "Šiuo metu nepasiekiama."
+            "Prieigos taisyklės duomenų bazėje yra tiesos šaltinis, o šis puslapis jas atspindi. Jei kas nors čia neatitinka to, ką matote, susisiekite su mumis — peržiūrės žmogus."
           ]
         }
       ],
@@ -6005,7 +6015,7 @@
     "dataDeletion": {
       "title": "Paskyros ir duomenų ištrynimas",
       "description": "Kaip paprašyti ištrinti savo LabourMarket.ai paskyrą ir asmens duomenis.",
-      "intro": "Galite paprašyti LabourMarket.ai ištrinti jūsų paskyrą ir asmens duomenis. Šiuo metu ištrynimas vykdomas kaip prašymas, kurį peržiūri žmogus; momentinio paskyros ištrynimo mygtuko nėra.",
+      "intro": "Galite paprašyti LabourMarket.ai ištrinti jūsų paskyrą ir asmens duomenis. Šiuo metu ištrynimas vykdomas kaip prašymas, kurį peržiūri žmogus; momentinio paskyros ištrynimo mygtuko nėra. Jei galite prisijungti, prašymą galite pateikti ir patys: atidarykite paskyros puslapį „Privatumas“ (mobiliojoje programėlėje: Nustatymai → Privatumas) ir pasirinkite paskyros ištrynimą. Bet kuriuo atveju žmogus atsako per vieną mėnesį.",
       "howTitle": "Kaip paprašyti ištrynimo",
       "howSteps": [
         "Parašykite el. laišką adresu {email} iš el. pašto adreso, susieto su jūsų LabourMarket.ai paskyra.",

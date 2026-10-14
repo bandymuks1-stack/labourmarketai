@@ -38,3 +38,13 @@ describe("llms.txt (AEO)", () => {
     expect(txt).not.toMatch(/demonstr/i);
   });
 });
+
+describe("llms.txt — AI assistants can discover the connector", () => {
+  it("names the MCP door, the OAuth discovery document and the draft → confirm rule", () => {
+    const txt = buildLlmsTxt("https://labourmarket.ai/");
+    expect(txt).toContain("## Connect an AI assistant");
+    expect(txt).toContain("https://labourmarket.ai/api/mcp");
+    expect(txt).toContain("https://labourmarket.ai/.well-known/oauth-protected-resource");
+    expect(txt).toMatch(/draft and need a separate confirmation/);
+  });
+});

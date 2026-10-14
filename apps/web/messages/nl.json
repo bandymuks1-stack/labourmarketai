@@ -5719,6 +5719,14 @@
             "Toestemmings- en auditrecords worden als geschiedenis bewaard: een intrekking wordt vastgelegd in plaats van dat het record wordt gewist.",
             "Exacte bewaartermijnen maken deel uit van de definitieve juridische verwoording die nog wordt voorbereid."
           ]
+        },
+        {
+          "heading": "AI en verbonden AI-assistenten",
+          "items": [
+            "Sommige functies gebruiken een AI-model van Google (de Gemini API): om berichten en vacatures te vertalen en om voor te stellen waar een zin die je in de chat typt om vraagt. Alleen de tekst die die taak nodig heeft, wordt verstuurd. Het resultaat is een voorstel — niets wordt als feit over jou opgeslagen voordat je het bevestigt.",
+            "Je kunt LabourMarket.ai verbinden met een AI-assistent zoals ChatGPT of Claude. Elke verbinding keur je zelf goed op een toestemmingsscherm; de assistent handelt dan alleen met jouw eigen rechten, en acties met gevolgen vragen een aparte bevestiging. Verbonden apps zie en ontkoppel je op elk moment in je accountinstellingen.",
+            "Wat de aanbieder van een AI-assistent met je gesprek doet, valt onder de eigen privacyvoorwaarden van die aanbieder."
+          ]
         }
       ],
       "pendingTitle": "Wacht nog op de definitieve juridische verwoording:",
@@ -5765,8 +5773,8 @@
         {
           "heading": "Standaard gesloten",
           "items": [
-            "Momenteel niet beschikbaar.",
-            "Momenteel niet beschikbaar."
+            "Tabellen met gebruikersgegevens worden beschermd door toegangsregels in de database zelf. Als geen regel expliciet toegang verleent, zijn de gegevens niet zichtbaar — zelfs niet voor andere ingelogde gebruikers.",
+            "Deze regels werken op databaseniveau, niet alleen in de interface, en worden gedekt door geautomatiseerde tests."
           ]
         },
         {
@@ -5810,10 +5818,12 @@
         {
           "heading": "Infrastructuurleveranciers (subverwerkers)",
           "items": [
-            "Momenteel niet beschikbaar.",
+            "Supabase — database, gebruikersaanmelding en bestandsopslag. Gegevens worden gehost in de Europese Unie (regio eu-west-1).",
             "Vercel — hosting van de applicatie en levering van inhoud.",
             "GitHub — opslag van de broncode. Er worden daar geen gebruikersgegevens bewaard.",
-            "Er is momenteel geen e-mailleverancier, AI-leverancier, vertaalleverancier of betalingsleverancier actief. Wordt er een geactiveerd, dan wordt eerst deze lijst bijgewerkt."
+            "Google (Gemini API) — AI-verwerking voor het vertalen van berichten en vacatures en voor het voorstellen waar een getypte chatzin om vraagt. Alleen de tekst die de taak nodig heeft, wordt verstuurd.",
+            "Stripe — betalingsverwerking. Een klantrecord ontstaat alleen wanneer een organisatie een abonnementsbetaling start; vandaag is geen abonnement actief.",
+            "Geen andere e-mail-, AI-, vertaal- of betalingsleverancier is actief. Wordt er een geactiveerd, dan wordt eerst deze lijst bijgewerkt."
           ]
         },
         {
@@ -5870,7 +5880,7 @@
         {
           "heading": "Als iets er niet goed uitziet",
           "items": [
-            "Momenteel niet beschikbaar."
+            "De toegangsregels in de database zijn de bron van waarheid, en deze pagina volgt ze. Als iets hier niet overeenkomt met wat je ziet, neem dan contact met ons op — een persoon zal het beoordelen."
           ]
         }
       ],
@@ -6005,7 +6015,7 @@
     "dataDeletion": {
       "title": "Account en gegevens verwijderen",
       "description": "Hoe u verwijdering van uw LabourMarket.ai-account en persoonsgegevens aanvraagt.",
-      "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Verwijdering wordt momenteel afgehandeld als een verzoek dat door een persoon wordt beoordeeld; er is geen knop om een account direct te verwijderen.",
+      "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Verwijdering wordt momenteel afgehandeld als een verzoek dat door een persoon wordt beoordeeld; er is geen knop om een account direct te verwijderen. Als je kunt inloggen, kun je het verzoek ook zelf indienen: open de privacypagina van je account (in de mobiele app: Instellingen → Privacy) en kies voor het verwijderen van je account. In beide gevallen antwoordt een mens binnen één maand.",
       "howTitle": "Hoe u verwijdering aanvraagt",
       "howSteps": [
         "Stuur een e-mail naar {email} vanaf het e-mailadres dat aan uw LabourMarket.ai-account is gekoppeld.",

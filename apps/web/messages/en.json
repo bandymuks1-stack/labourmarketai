@@ -5719,6 +5719,14 @@
             "Consent and audit records are kept as history: a revocation is recorded rather than the record being erased.",
             "Exact retention periods are part of the final legal wording that is still being prepared."
           ]
+        },
+        {
+          "heading": "AI and connected AI assistants",
+          "items": [
+            "Some features use an AI model from Google (the Gemini API): translating messages and job ads between languages, and suggesting what a sentence you type in the chat is asking for. Only the text that task needs is sent. The result is a suggestion — nothing is saved as a fact about you until you confirm it.",
+            "You can connect LabourMarket.ai to an AI assistant such as ChatGPT or Claude. You approve each connection yourself on a consent screen; the assistant then acts only with your own permissions, and actions with consequences need a separate confirmation. You can see and disconnect connected apps in your account settings at any time.",
+            "What an AI assistant's provider does with your conversation is governed by that provider's own privacy terms."
+          ]
         }
       ],
       "pendingTitle": "Still waiting for final legal wording:",
@@ -5765,8 +5773,8 @@
         {
           "heading": "Closed by default",
           "items": [
-            "Not available right now.",
-            "Not available right now."
+            "User data tables are protected by access rules inside the database itself. If no rule explicitly grants access, the data is not visible — even to other signed-in users.",
+            "These rules work at the database layer, not only in the interface, and are covered by automated tests."
           ]
         },
         {
@@ -5810,10 +5818,12 @@
         {
           "heading": "Infrastructure providers (subprocessors)",
           "items": [
-            "Not available right now.",
+            "Supabase — database, user sign-in and file storage. Data is hosted in the European Union (eu-west-1 region).",
             "Vercel — application hosting and content delivery.",
             "GitHub — source code hosting. No user data is stored there.",
-            "No email provider, no AI provider, no translation provider and no payment provider is currently active. If one is activated, this list is updated first."
+            "Google (Gemini API) — AI processing for translating messages and job ads and for suggesting what a typed chat sentence asks for. Only the text the task needs is sent.",
+            "Stripe — payment processing. A customer record is created only when an organisation starts a subscription checkout; no subscription is active today.",
+            "No other email, AI, translation or payment provider is active. If one is activated, this list is updated first."
           ]
         },
         {
@@ -5870,7 +5880,7 @@
         {
           "heading": "If something looks wrong",
           "items": [
-            "Not available right now."
+            "The access rules in the database are the source of truth, and this page follows them. If something here does not match what you see, contact us — a person will review it."
           ]
         }
       ],
@@ -6005,7 +6015,7 @@
     "dataDeletion": {
       "title": "Account and data deletion",
       "description": "How to request deletion of your LabourMarket.ai account and personal data.",
-      "intro": "You can ask LabourMarket.ai to delete your account and personal data. Deletion is currently handled as a request reviewed by a person; there is no instant account deletion button.",
+      "intro": "You can ask LabourMarket.ai to delete your account and personal data. Deletion is currently handled as a request reviewed by a person; there is no instant account deletion button. If you can sign in, you can also file the request yourself: open your account's Privacy page (in the mobile app: Settings → Privacy) and choose account deletion. Either way a person answers within one month.",
       "howTitle": "How to request deletion",
       "howSteps": [
         "Email {email} from the email address associated with your LabourMarket.ai account.",
