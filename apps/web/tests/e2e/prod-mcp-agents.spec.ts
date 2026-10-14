@@ -227,8 +227,10 @@ test("A-1. BUYER AGENT: the manager states a need (prepare → confirm), reads i
     urgency: "flexible",
   };
   // An earlier run that stopped before its wrap-up must not hold the plan's
-  // open-need ceiling: its walk needs are closed first, the normal way.
-  for (const n of (await needs(tok.manager)).filter((x) => WALK_ROW.test(x.title ?? ""))) {
+  // open-need ceiling: synthetic needs left open by ANY earlier walk (this
+  // one or another; walks never run concurrently — one concurrency group)
+  // are closed first, the normal way. Only QA-SYNTHETIC titles are touched.
+  for (const n of (await needs(tok.manager)).filter((x) => /^QA-SYNTHETIC /.test(x.title ?? ""))) {
     await prepareConfirm(tok.manager, "demand_close", { requestId: n.id }, { replay: false });
   }
   const draft = await tool(tok.manager, "demand_create_draft", input);
