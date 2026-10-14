@@ -1,5 +1,11 @@
 # Store release readiness — 2026-09-13
 
+> **Current status: [`MOBILE_STATUS_2026-10-14.md`](MOBILE_STATUS_2026-10-14.md)**
+> (M2: icon + splash generated from the existing brand mark, weak-network
+> deadline + Android airplane-mode journey, what a signed-in CI journey needs).
+> The owner gates in §4 below are unchanged; §4.1 is now "approve the
+> generated assets or supply final art" rather than "nothing exists".
+
 **This supersedes the release DIRECTION in
 [`mobile-store-readiness-v2.md`](mobile-store-readiness-v2.md) and
 [`mobile-store-assets-execution-pack-v1.md`](mobile-store-assets-execution-pack-v1.md)
@@ -153,10 +159,13 @@ In value order. None needs a credential.
    `ANDROID_NATIVE_BUILD_PROVEN` into a runtime claim, the way `ios.yml`
    already did for iOS. This is now the top item because the one that used to
    sit here — "device writes" — was already built; see §1.
-2. **Icons and splash.** `apps/mobile` has no `assets/` directory, so both
-   stores would receive the Expo placeholder. The brand source
-   (`apps/web/public/app-icon.svg`) exists and generation is mechanical —
-   but §4.1 is the owner's approval to use it as-is.
+2. ~~**Icons and splash.** `apps/mobile` has no `assets/` directory, so both
+   stores would receive the Expo placeholder.~~ **DONE technically
+   2026-10-14 (M2)** — `apps/mobile/assets/` is generated from
+   `apps/web/public/app-icon.svg` by `apps/mobile/scripts/generate-app-assets.mjs`
+   and wired in `app.json` (`icon`, `android.adaptiveIcon`, `expo-splash-screen`).
+   It is the existing brand mark, not new artwork: §4.1 (owner approval of the
+   final store art) still stands.
 3. ~~**Context holdings.** `context-provider.tsx` performs no holdings read, so
    a person with several contexts is told the app cannot list them. Honest,
    and incomplete.~~ **DONE 2026-09-14 (#1737)** — held roles from

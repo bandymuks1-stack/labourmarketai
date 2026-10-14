@@ -5719,6 +5719,14 @@
             "Zapisy zgód i audytu są przechowywane jako historia: wycofanie jest odnotowywane, zamiast usuwania zapisu.",
             "Dokładne okresy przechowywania są częścią ostatecznego brzmienia prawnego, które jest wciąż przygotowywane."
           ]
+        },
+        {
+          "heading": "AI i połączeni asystenci AI",
+          "items": [
+            "Niektóre funkcje korzystają z modelu AI firmy Google (Gemini API): do tłumaczenia wiadomości i ogłoszeń o pracy oraz do podpowiadania, o co prosi zdanie wpisane na czacie. Wysyłany jest tylko tekst potrzebny do tego zadania. Wynik jest propozycją — nic nie zostaje zapisane jako fakt o Tobie, dopóki tego nie potwierdzisz.",
+            "Możesz połączyć LabourMarket.ai z asystentem AI, takim jak ChatGPT lub Claude. Każde połączenie zatwierdzasz sam na ekranie zgody; asystent działa wtedy wyłącznie z Twoimi uprawnieniami, a działania mające skutki wymagają osobnego potwierdzenia. Połączone aplikacje widzisz i odłączasz w każdej chwili w ustawieniach konta.",
+            "To, co dostawca asystenta AI robi z Twoją rozmową, określają jego własne zasady prywatności."
+          ]
         }
       ],
       "pendingTitle": "Wciąż czeka na ostateczne brzmienie prawne:",
@@ -5765,8 +5773,8 @@
         {
           "heading": "Domyślnie zamknięte",
           "items": [
-            "Chwilowo niedostępne.",
-            "Chwilowo niedostępne."
+            "Tabele z danymi użytkowników są chronione regułami dostępu wewnątrz samej bazy danych. Jeśli żadna reguła nie przyznaje wyraźnie dostępu, dane nie są widoczne — nawet dla innych zalogowanych użytkowników.",
+            "Reguły te działają w warstwie bazy danych, a nie tylko w interfejsie, i są objęte automatycznymi testami."
           ]
         },
         {
@@ -5810,10 +5818,12 @@
         {
           "heading": "Dostawcy infrastruktury (podprocesorzy)",
           "items": [
-            "Chwilowo niedostępne.",
+            "Supabase — baza danych, logowanie użytkowników i przechowywanie plików. Dane są hostowane w Unii Europejskiej (region eu-west-1).",
             "Vercel — hosting aplikacji i dostarczanie treści.",
             "GitHub — hosting kodu źródłowego. Nie są tam przechowywane żadne dane użytkowników.",
-            "Żaden dostawca poczty e-mail, dostawca AI, dostawca tłumaczeń ani dostawca płatności nie jest obecnie aktywny. Jeśli któryś zostanie uruchomiony, ta lista zostanie wcześniej zaktualizowana."
+            "Google (Gemini API) — przetwarzanie AI do tłumaczenia wiadomości i ogłoszeń o pracy oraz do podpowiadania, o co prosi zdanie wpisane na czacie. Wysyłany jest tylko tekst potrzebny do zadania.",
+            "Stripe — obsługa płatności. Rekord klienta powstaje tylko wtedy, gdy organizacja rozpoczyna płatność za subskrypcję; dziś żadna subskrypcja nie jest aktywna.",
+            "Żaden inny dostawca poczty e-mail, AI, tłumaczeń ani płatności nie jest aktywny. Jeśli któryś zostanie uruchomiony, ta lista zostanie wcześniej zaktualizowana."
           ]
         },
         {
@@ -5870,7 +5880,7 @@
         {
           "heading": "Jeśli coś wygląda nieprawidłowo",
           "items": [
-            "Chwilowo niedostępne."
+            "Reguły dostępu w bazie danych są źródłem prawdy, a ta strona za nimi podąża. Jeśli coś tutaj nie zgadza się z tym, co widzisz, skontaktuj się z nami — człowiek to sprawdzi."
           ]
         }
       ],
@@ -6005,7 +6015,7 @@
     "dataDeletion": {
       "title": "Usunięcie konta i danych",
       "description": "Jak poprosić o usunięcie konta LabourMarket.ai i danych osobowych.",
-      "intro": "Możesz poprosić LabourMarket.ai o usunięcie konta i danych osobowych. Usunięcie jest obecnie realizowane jako wniosek rozpatrywany przez człowieka; nie ma przycisku natychmiastowego usunięcia konta.",
+      "intro": "Możesz poprosić LabourMarket.ai o usunięcie konta i danych osobowych. Usunięcie jest obecnie realizowane jako wniosek rozpatrywany przez człowieka; nie ma przycisku natychmiastowego usunięcia konta. Jeśli możesz się zalogować, możesz też złożyć prośbę samodzielnie: otwórz stronę Prywatność na swoim koncie (w aplikacji mobilnej: Ustawienia → Prywatność) i wybierz usunięcie konta. W obu przypadkach człowiek odpowiada w ciągu jednego miesiąca.",
       "howTitle": "Jak poprosić o usunięcie",
       "howSteps": [
         "Napisz na {email} z adresu e-mail powiązanego z Twoim kontem LabourMarket.ai.",

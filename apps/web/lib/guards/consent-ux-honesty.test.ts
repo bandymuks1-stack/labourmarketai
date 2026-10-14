@@ -188,6 +188,6 @@ describe("i18n completeness for the consent UI (test 23)", () => {
     expect(lt.actions.grant).toBe("Sutinku ir įjungiu matomumą");
     expect(lt.actions.decline).toBe("Dabar neįjungti");
     expect(lt.actions.review).toBe("Peržiūrėti matomumo nustatymus");
-    expect(lt.preview.title).toBe("Taip jūsų profilį matys įmonės");
+    expect(lt.preview.title).toBe("Taip tavo profilį matys įmonės");
   });
 });

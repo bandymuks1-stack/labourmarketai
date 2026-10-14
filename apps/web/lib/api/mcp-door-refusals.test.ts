@@ -136,3 +136,28 @@ describe("/api/mcp refusals are machine-readable and keep the no-oracle rule", (
     }
   });
 });
+
+describe("/api/mcp per-person brake — a VALID token is not an unlimited token", () => {
+  it("the 601st call in five minutes from one person is refused with back_off + Retry-After; another person is unaffected", async () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    nextResult = { ok: true, identity: { userId: "brake-user", transport: "bearer", supabase: {} } };
+    for (let i = 0; i < 600; i += 1) {
+      const res = await POST(initialize());
+      expect(res.status).toBe(200);
+    }
+    const refused = await POST(initialize());
+    expect(refused.status).toBe(429);
+    expect(refused.headers.get("www-authenticate")).toBeNull();
+    expect(Number(refused.headers.get("retry-after"))).toBeGreaterThan(0);
+    const body = await refused.json();
+    expect(body.error).toBe("RATE_LIMITED");
+    expect(body.client_action).toBe("back_off");
+
+    nextResult = { ok: true, identity: { userId: "someone-else", transport: "bearer", supabase: {} } };
+    expect((await POST(initialize())).status).toBe(200);
+
+    const lines = info.mock.calls.map((c) => String(c[0]));
+    expect(lines.some((l) => l.includes('"error_class":"RATE_LIMITED"') && l.includes('"status":429'))).toBe(true);
+    for (const l of lines) expect(l).not.toContain("brake-user");
+  });
+});

@@ -124,6 +124,23 @@ describe("mobile store-release config — the generated native project is only a
     );
   });
 
+  it("blocks the template permissions read from the built APK that nothing in the app uses", () => {
+    expect(appConfig.android.blockedPermissions).toEqual(
+      expect.arrayContaining([
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+      ]),
+    );
+    // Blocking the biometric pair is honest only while no secure-store call
+    // asks for biometric unlock. The day one does, this pin fails and the
+    // block is lifted in the same change.
+    const src = ["apps/mobile/src/secure-session-store.ts", "apps/mobile/src/auth-context.tsx"]
+      .map((p) => readFileSync(resolve(REPO, p), "utf8"))
+      .join("\n");
+    expect(src).not.toMatch(/requireAuthentication|LocalAuthentication/);
+  });
+
   it("carries no analytics or advertising dependency — which is what makes NSPrivacyTracking: false true", () => {
     const deps = Object.keys(mobilePkg.dependencies ?? {});
     for (const dep of deps) {
@@ -168,6 +185,43 @@ describe("mobile store-release config — the generated native project is only a
       /NOT wired yet:[^.]*writes/i.test(readme),
       "apps/mobile/README.md says journal writes are not wired, and JournalComposer calls journal.create_draft and journal.confirm. Correct the README — a document that says a built capability is missing is how it gets built twice.",
     ).toBe(false);
+  });
+
+  /**
+   * ICON AND SPLASH — generated from the existing brand mark
+   * (`apps/web/public/app-icon.svg`) by `apps/mobile/scripts/generate-app-assets.mjs`.
+   * Without them both stores receive Expo's placeholder. Apple rejects an
+   * icon that carries an alpha channel, which a PNG export adds silently, so
+   * the channel layout is read from the PNG header itself.
+   * Final store art is still the owner's approval at publishing time.
+   */
+  it("icon, adaptive icon and splash are wired to files that exist", () => {
+    const png = (rel: string) => {
+      const p = resolve(REPO, "apps/mobile", rel);
+      expect(existsSync(p), `${rel} is referenced by app.json but missing`).toBe(true);
+      const buf = readFileSync(p);
+      // IHDR: width @16, height @20 (big-endian), colour type @25.
+      return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20), colourType: buf[25] };
+    };
+    const icon = png(appConfig.icon);
+    expect([icon.w, icon.h]).toEqual([1024, 1024]);
+    // 2 = RGB, 0 = greyscale: no alpha. 4/6 carry alpha and Apple refuses them.
+    expect([0, 2], "the store icon must have no alpha channel").toContain(icon.colourType);
+
+    const fg = png(appConfig.android.adaptiveIcon.foregroundImage);
+    expect([fg.w, fg.h]).toEqual([1024, 1024]);
+    png(appConfig.android.adaptiveIcon.monochromeImage);
+    expect(appConfig.android.adaptiveIcon.backgroundColor).toMatch(/^#[0-9A-Fa-f]{6}$/);
+
+    const splash = (appConfig.plugins as unknown[]).find(
+      (p) => Array.isArray(p) && p[0] === "expo-splash-screen",
+    ) as [string, { image: string; backgroundColor: string }] | undefined;
+    expect(splash, "expo-splash-screen plugin is not configured — SDK 52+ has no top-level splash").toBeDefined();
+    png(splash![1].image);
+    expect(splash![1].backgroundColor).toMatch(/^#[0-9A-Fa-f]{6}$/);
+    expect(mobilePkg.dependencies["expo-splash-screen"], "the splash plugin needs its package").toBeDefined();
+
+    expect(existsSync(resolve(REPO, "apps/mobile/scripts/generate-app-assets.mjs"))).toBe(true);
   });
 
   it("the native projects stay generated, never committed", () => {
@@ -220,5 +274,26 @@ describe("mobile store-release config — the generated native project is only a
     ]) {
       expect(existsSync(resolve(REPO, p)), `${p} is missing — the app claims a domain that serves nothing`).toBe(true);
     }
+  });
+});
+
+describe("mobile store-release config — submission questions answered in app.json", () => {
+  it("iOS declares export compliance (HTTPS only, exempt) so no build waits on the question", () => {
+    expect(appConfig.ios.config?.usesNonExemptEncryption).toBe(false);
+  });
+
+  it("iOS is iPhone-only until the screens are reviewed on iPad", () => {
+    // supportsTablet=true makes iPad screenshots mandatory and puts layouts
+    // nobody has checked on iPad in front of App Review. Flip it only
+    // together with iPad QA.
+    expect(appConfig.ios.supportsTablet).toBe(false);
+  });
+
+  it("Android CI reads targetSdk and permissions from the BUILT APK and proves an AAB", () => {
+    const wf = readFileSync(resolve(REPO, ".github/workflows/android.yml"), "utf8");
+    expect(wf).toContain('aapt2" dump badging');
+    expect(wf).toMatch(/-lt 36/);
+    expect(wf).toContain(":app:bundleRelease");
+    expect(wf).toContain("ANDROID_RELEASE_AAB_BUILT");
   });
 });
