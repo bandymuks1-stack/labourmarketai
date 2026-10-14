@@ -19397,13 +19397,13 @@
   },
   "homeRegions": {
     "waiting": {
-      "title": "Laukia jūsų",
-      "clear": "Niekas jūsų nelaukia.",
-      "unknown": "Nepavyko nuskaityti, kas laukia jūsų."
+      "title": "Laukia tavęs",
+      "clear": "Niekas tavęs nelaukia.",
+      "unknown": "Nepavyko nuskaityti, kas tavęs laukia."
     },
     "running": {
       "title": "Vyksta dabar",
-      "projectsUnknown": "Nepavyko nuskaityti jums priskirtų projektų."
+      "projectsUnknown": "Nepavyko nuskaityti tau priskirtų projektų."
     },
     "because": {
       "title": "Dėl to, kas įvyko",
@@ -19412,7 +19412,7 @@
       "all": "Visa veikla"
     },
     "outside": {
-      "title": "Už jūsų sienų"
+      "title": "Už tavo sienų"
     },
     "chain": {
       "consequence": {
