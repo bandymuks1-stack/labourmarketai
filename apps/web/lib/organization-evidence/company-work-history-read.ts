@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { withSessionWorkspacePointer, listWorkspaceMemberships } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { resolveEvidenceOrganization } from "./evidence-org-context";
@@ -118,12 +119,19 @@ export async function loadCompanyWorkHistory(
   ]);
   if (recs.kind !== "ok" || !objs || !people) return { kind: "unavailable" };
 
+  // A place on a fragment project (record_state = duplicate) belongs to the
+  // canonical project it was merged into: periods count real projects and
+  // place links open the canonical one. Unreadable marker → nothing re-routed.
+  const { canonicalOf } = await readProjectCanonicalMap(
+    supabase,
+    objs.rows.map((o) => o.project_id).filter((id): id is string => !!id),
+  );
   const objects: PlaceObjectFacts[] = objs.rows.map((o) => ({
     id: o.id,
     name: o.name,
     addressLine: o.address_line,
     city: o.city,
-    projectId: o.project_id,
+    projectId: o.project_id ? (canonicalOf.get(o.project_id) ?? o.project_id) : null,
     archived: o.status === "archived",
   }));
   const linkedWorkers: Record<string, string> = {};

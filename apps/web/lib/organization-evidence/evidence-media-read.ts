@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { DomainCaller } from "@/lib/domain/caller";
+import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { untypedClient } from "./evidence-store";
 
 /**
@@ -132,15 +133,18 @@ const MAX_PROJECT_OBJECTS = 200;
  * Photos stated against ANY work object (= project place) of one project.
  * Resolves the project's work objects through the caller's own RLS, then reads
  * only rows whose `work_object_id` is one of them - never by date proximity.
+ * A canonical project includes the work objects of the fragments marked into
+ * it (record_state = duplicate), so a merge never hides a photo.
  */
 export async function readEvidenceMediaForProject(
   caller: DomainCaller,
   projectId: string,
 ): Promise<EvidenceMediaRead> {
+  const { fragmentsOf } = await readProjectCanonicalMap(caller.supabase, [projectId]);
   const objs = await untypedClient(caller.supabase)
     .from("work_objects")
     .select("id")
-    .eq("project_id", projectId)
+    .in("project_id", [projectId, ...(fragmentsOf.get(projectId) ?? [])])
     .limit(MAX_PROJECT_OBJECTS);
   if (objs.error) {
     return MISSING_CODES.has(objs.error.code ?? "") ? { kind: "unprovisioned" } : { kind: "unavailable" };

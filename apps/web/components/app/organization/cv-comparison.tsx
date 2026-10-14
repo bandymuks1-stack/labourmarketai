@@ -45,6 +45,9 @@ export async function CvComparison({
   const years = firstYear ? (firstYear === lastYear ? firstYear : `${firstYear}–${lastYear}`) : null;
 
   const projectPlaces = history.places.filter((p) => p.scope.projectId);
+  // Distinct projects, not places: several places (and merged fragments,
+  // already re-pointed to their canonical) can belong to one project.
+  const projectCount = new Set(projectPlaces.map((p) => p.scope.projectId)).size;
   const allRecords = history.places.flatMap((p) => p.records);
   const recordedDays = new Set(allRecords.map((r) => r.activityDate).filter((d): d is string => !!d)).size;
   const topProjects = [...projectPlaces].sort((a, b) => b.dayHours - a.dayHours).slice(0, 3);
@@ -90,7 +93,7 @@ export async function CvComparison({
           <p className="font-mono text-meta uppercase tracking-label text-brand-blue">{t("living.label")}</p>
           <div className="grid grid-cols-3 gap-2">
             <span className="flex flex-col" data-testid="cv-compare-projects">
-              <span className="font-mono text-2xl font-bold text-text-primary">{projectPlaces.length}</span>
+              <span className="font-mono text-2xl font-bold text-text-primary">{projectCount}</span>
               <span className="text-meta text-text-muted">{t("living.projects")}</span>
             </span>
             <span className="flex flex-col" data-testid="cv-compare-days">

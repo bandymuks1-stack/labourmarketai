@@ -217,7 +217,8 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
           .in("status", [...ROLLUP_OPEN_DEMAND_STATUSES]),
       ),
       count((c) =>
-        c.from("projects").select("id", { count: "exact", head: true }).eq("organization_id", organizationId),
+        // Real projects: a DUPLICATE row is a fragment of its canonical one.
+        c.from("projects").select("id", { count: "exact", head: true }).eq("organization_id", organizationId).neq("record_state", "duplicate"),
       ),
       count((c) =>
         c

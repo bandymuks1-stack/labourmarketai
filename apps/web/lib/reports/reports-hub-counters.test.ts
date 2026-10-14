@@ -20,6 +20,9 @@ function builder() {
     if (col === "status") status = val;
     return b;
   };
+  // DUPLICATE fragments of a canonical project are not projects; the counts
+  // here are already the real ones.
+  b.neq = () => b;
   b.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) =>
     Promise.resolve(
       counts.error

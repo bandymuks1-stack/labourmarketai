@@ -189,7 +189,9 @@ export async function listManagedProjects(
   const columnsV1 =
     "id, title, city, country, status, organization_id, organizations(display_name, legal_name)";
   const run = (columns: string, completed: boolean) => {
-    const q = asAny(supabase).from("projects").select(columns);
+    // DUPLICATE rows are filtered in the query, so a page holds a full
+    // bucket of real projects and its boundaries match countManagedProjects.
+    const q = asAny(supabase).from("projects").select(columns).neq("record_state", "duplicate");
     const ordered = (
       completed ? q.eq("status", "completed") : q.or("status.is.null,status.neq.completed")
     )
