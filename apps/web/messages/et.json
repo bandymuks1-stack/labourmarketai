@@ -7536,7 +7536,13 @@
       "noEntriesToday": "Täna pole veel midagi kirja pandud",
       "confirmed": "Neist kinnitanud juht või klient: {hours} h",
       "confirmedNone": "Kinnitatud tunde veel pole",
-      "barLabel": "Registreeritud ja kinnitatud tunnid viimase 7 päeva jooksul"
+      "barLabel": "Registreeritud ja kinnitatud tunnid viimase 7 päeva jooksul",
+      "record": {
+        "line": "Sinu rekord: {best} kinnitatud h kuus ({month}). Sel kuul seni: {current} h.",
+        "reached": "Sel kuul jõudsid oma rekordini: {hours} kinnitatud h.",
+        "onlyYou": "Seda näed ainult sina — võrreldakse ainult sinu enda kuudega.",
+        "barLabel": "See kuu sinu parima suhtes"
+      }
     },
     "because": {
       "title": "Viimased sündmused",

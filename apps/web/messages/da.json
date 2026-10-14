@@ -7536,7 +7536,13 @@
       "noEntriesToday": "Intet registreret i dag endnu",
       "confirmed": "Heraf bekræftet af en leder eller kunde: {hours} t",
       "confirmedNone": "Ingen bekræftede timer endnu",
-      "barLabel": "Registrerede og bekræftede timer, seneste 7 dage"
+      "barLabel": "Registrerede og bekræftede timer, seneste 7 dage",
+      "record": {
+        "line": "Din rekord: {best} t bekræftet på en måned ({month}). Denne måned indtil nu: {current} t.",
+        "reached": "Denne måned nåede du din egen rekord: {hours} bekræftede t.",
+        "onlyYou": "Kun du ser dette – det sammenlignes kun med dine egne måneder.",
+        "barLabel": "Denne måned i forhold til din bedste"
+      }
     },
     "because": {
       "title": "Seneste hændelser",

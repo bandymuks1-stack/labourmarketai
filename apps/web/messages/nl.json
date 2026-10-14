@@ -19424,7 +19424,13 @@
       "noEntriesToday": "Vandaag nog niets geregistreerd",
       "confirmed": "Waarvan bevestigd door een leidinggevende of opdrachtgever: {hours} je",
       "confirmedNone": "Nog geen bevestigde uren",
-      "barLabel": "Geregistreerde en bevestigde uren, laatste 7 dagen"
+      "barLabel": "Geregistreerde en bevestigde uren, laatste 7 dagen",
+      "record": {
+        "line": "Je record: {best} u bevestigd in een maand ({month}). Deze maand tot nu toe: {current} u.",
+        "reached": "Deze maand haalde je je eigen record: {hours} bevestigde u.",
+        "onlyYou": "Alleen jij ziet dit — het wordt alleen met je eigen maanden vergeleken.",
+        "barLabel": "Deze maand ten opzichte van je eigen beste"
+      }
     },
     "because": {
       "title": "Laatste gebeurtenissen",

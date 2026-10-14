@@ -19424,7 +19424,13 @@
       "noEntriesToday": "Nothing recorded yet today",
       "confirmed": "Of these, approved by a manager or client: {hours} h",
       "confirmedNone": "No confirmed hours yet",
-      "barLabel": "Recorded and confirmed hours, last 7 days"
+      "barLabel": "Recorded and confirmed hours, last 7 days",
+      "record": {
+        "line": "Your record: {best} h confirmed in a month ({month}). This month so far: {current} h.",
+        "reached": "This month you reached your own record: {hours} confirmed h.",
+        "onlyYou": "Only you see this — it is compared only with your own months.",
+        "barLabel": "This month toward your own best"
+      }
     },
     "because": {
       "title": "Recent events",

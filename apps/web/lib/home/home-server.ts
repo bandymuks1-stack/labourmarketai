@@ -22,6 +22,8 @@ import {
 } from "@/lib/today/today-server";
 
 import { deriveBecause, deriveOutside, deriveRunning, deriveWaiting, type HomeProject } from "./home-state";
+import { derivePersonalRecord } from "./personal-record";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * THE HOME LOADER — the PERSON's four-state home, read through the readers
@@ -96,6 +98,14 @@ export const loadHomeRunning = cache(async () => {
     loadHomeProjects(),
   ]);
   return deriveRunning(deriveTodayWork(workIntelligence), projects, deriveTodayGrowth(growth));
+});
+
+/** The person's own record (best month of CONFIRMED hours vs this month) —
+ *  from the SAME request-cached journal read the RUNNING region uses: no
+ *  extra query. Self-only by construction (the home is the person's own). */
+export const loadHomeRecord = cache(async () => {
+  const [workIntelligence, today] = await Promise.all([loadTodayWorkIntelligence(), viewerWorkToday()]);
+  return derivePersonalRecord(workIntelligence ? workIntelligence.months : null, today.todayIso.slice(0, 7));
 });
 
 export const loadHomeBecause = cache(async () => deriveBecause(await loadHomeEvents()));

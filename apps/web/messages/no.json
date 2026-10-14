@@ -7536,7 +7536,13 @@
       "noEntriesToday": "Ingenting registrert i dag ennå",
       "confirmed": "Av dette bekreftet av en leder eller kunde: {hours} t",
       "confirmedNone": "Ingen bekreftede timer ennå",
-      "barLabel": "Registrerte og bekreftede timer, siste 7 dager"
+      "barLabel": "Registrerte og bekreftede timer, siste 7 dager",
+      "record": {
+        "line": "Din rekord: {best} t bekreftet på en måned ({month}). Denne måneden så langt: {current} t.",
+        "reached": "Denne måneden nådde du din egen rekord: {hours} bekreftede t.",
+        "onlyYou": "Bare du ser dette – det sammenlignes bare med dine egne måneder.",
+        "barLabel": "Denne måneden mot din beste"
+      }
     },
     "because": {
       "title": "Siste hendelser",

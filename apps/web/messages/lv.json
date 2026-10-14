@@ -7536,7 +7536,13 @@
       "noEntriesToday": "Šodien vēl nekas nav reģistrēts",
       "confirmed": "No tām apstiprinājis vadītājs vai klients: {hours} h",
       "confirmedNone": "Apstiprinātu stundu vēl nav",
-      "barLabel": "Reģistrētās un apstiprinātās stundas pēdējās 7 dienās"
+      "barLabel": "Reģistrētās un apstiprinātās stundas pēdējās 7 dienās",
+      "record": {
+        "line": "Jūsu rekords: {best} st. apstiprinātas mēnesī ({month}). Šomēnes līdz šim: {current} st.",
+        "reached": "Šomēnes sasniedzāt savu rekordu: {hours} apstiprinātas st.",
+        "onlyYou": "To redzat tikai jūs — salīdzinājums tikai ar jūsu pašu mēnešiem.",
+        "barLabel": "Šis mēnesis pret jūsu labāko"
+      }
     },
     "because": {
       "title": "Jaunākie notikumi",
