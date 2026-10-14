@@ -7531,5 +7531,20 @@
       "cancelled": "Avlyst"
     },
     "helpNeeded": "Trenger hjelp — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Ukens mål",
+    "titleMine": "Dine oppgaver denne uken",
+    "count": "{done} av {total} ferdige",
+    "unknown": "Ukens oppgaver kunne ikke leses.",
+    "mineNote": "Bare oppgavene du kan se: dine og teamets.",
+    "status": {
+      "todo": "Å gjøre",
+      "in_progress": "Pågår",
+      "blocked": "Blokkert",
+      "done": "Ferdig",
+      "cancelled": "Avlyst",
+      "overdue": "Forsinket"
+    }
   }
 }

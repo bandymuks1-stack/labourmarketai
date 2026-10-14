@@ -19422,5 +19422,20 @@
       "cancelled": "Geannuleerd"
     },
     "helpNeeded": "Hulp nodig — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Doel van deze week",
+    "titleMine": "Je taken deze week",
+    "count": "{done} van {total} klaar",
+    "unknown": "Kon de taken van deze week niet lezen.",
+    "mineNote": "Alleen taken die jij kunt zien: van jou en je team.",
+    "status": {
+      "todo": "Te doen",
+      "in_progress": "Bezig",
+      "blocked": "Geblokkeerd",
+      "done": "Klaar",
+      "cancelled": "Geannuleerd",
+      "overdue": "Te laat"
+    }
   }
 }
