@@ -259,3 +259,24 @@ describe("mobile store-release config — the generated native project is only a
     }
   });
 });
+
+describe("mobile store-release config — submission questions answered in app.json", () => {
+  it("iOS declares export compliance (HTTPS only, exempt) so no build waits on the question", () => {
+    expect(appConfig.ios.config?.usesNonExemptEncryption).toBe(false);
+  });
+
+  it("iOS is iPhone-only until the screens are reviewed on iPad", () => {
+    // supportsTablet=true makes iPad screenshots mandatory and puts layouts
+    // nobody has checked on iPad in front of App Review. Flip it only
+    // together with iPad QA.
+    expect(appConfig.ios.supportsTablet).toBe(false);
+  });
+
+  it("Android CI reads targetSdk and permissions from the BUILT APK and proves an AAB", () => {
+    const wf = readFileSync(resolve(REPO, ".github/workflows/android.yml"), "utf8");
+    expect(wf).toContain('aapt2" dump badging');
+    expect(wf).toMatch(/-lt 35/);
+    expect(wf).toContain(":app:bundleRelease");
+    expect(wf).toContain("ANDROID_RELEASE_AAB_BUILT");
+  });
+});

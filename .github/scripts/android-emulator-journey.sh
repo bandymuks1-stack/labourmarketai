@@ -72,8 +72,17 @@ adb shell svc wifi disable || true
 adb shell svc data disable || true
 sleep 3
 adb shell settings get global airplane_mode_on
-if maestro test apps/mobile/.maestro/offline-sign-in-journey.yaml \
-  --debug-output "$OUT/maestro-debug-offline"; then
+# ONE retry, for the harness only: on main run 38579167208 Maestro died 0.2 s
+# into the flow, before its first command reported, while the same commit
+# passed on its PR twice — the driver connection, not the app. The retry
+# re-runs EVERY assertion, so a real defect still fails twice; the first
+# attempt keeps its own debug output for diagnosis.
+offline_flow() {
+  adb wait-for-device
+  maestro test apps/mobile/.maestro/offline-sign-in-journey.yaml \
+    --debug-output "$OUT/maestro-debug-offline$1"
+}
+if offline_flow "" || { echo "offline flow attempt 1 failed - retrying once"; sleep 10; offline_flow "-retry"; }; then
   echo "ANDROID_OFFLINE_JOURNEY_PROVEN: airplane mode, sign-in attempted, 'could not reach the server' surfaced, form still usable"
   summary "- ANDROID_OFFLINE_JOURNEY_PROVEN: airplane mode → sign-in attempt → 'could not reach the server' (not 'wrong password'), form still usable"
 else

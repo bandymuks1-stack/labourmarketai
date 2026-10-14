@@ -118,3 +118,20 @@ node apps/mobile/scripts/generate-app-assets.mjs --check   # nepakeista? (exit 1
 Skriptas paima ženklo `<g>` iš `app-icon.svg` pažodžiui ir tik perdėlioja jį
 platformų geometrijai (iOS: nepermatoma, kvadratiniai kampai; Android adaptive:
 66 % saugi zona; splash: tas pats, fonas = programėlės fonas `#0B0E14`).
+
+---
+
+## 6. M3 techninis parduotuvių paruošimas (2026-10-14, techninio užbaigimo agentas)
+
+| Pakeitimas | Kodėl (parduotuvės reikalavimas) | Įrodymas |
+|---|---|---|
+| Prisijungimo ekrane — „Pamiršai slaptažodį?" → web `/auth/forgot-password` | Naudotojas, sukūręs paskyrą programėlėje, turi galėti ją atkurti; viena atkūrimo eiga (web) | `mobile-account-controls.test.ts` |
+| Registracijos ekrane — sąlygų ir privatumo politikos sakinys + nuorodos | Apple 5.1.1 / GDPR 13 str.: informuoti prieš kuriant paskyrą | tas pats guard |
+| Nustatymuose — viešas `/legal/data-deletion` (be prisijungimo) ir privatumo politika | Google Play Data safety: ištrynimo URL turi veikti be prisijungimo; web privatumo puslapis reikalauja web sesijos, kurios programėlė neperduoda | tas pats guard; `submit_privacy_request_v1` gamyboje veikia (patikrinta 2026-10-14) |
+| `ios.config.usesNonExemptEncryption: false` | App Store Connect eksporto atitikties klausimas — tik OS HTTPS (atleista) | `mobile-release-config.test.ts` |
+| `ios.supportsTablet: false` | iPad ekranai niekada netikrinti; iPad ekrano nuotraukos nebebus privalomos. Įjungti tik kartu su iPad QA | tas pats guard |
+| `android.yml`: targetSdk ir leidimai skaitomi iš **sukurto APK** (`aapt2 dump badging`); targetSdk < 35 arba nenaudojamas leidimas (saugykla, kamera, mikrofonas, vieta, kontaktai, AD_ID) → CI raudonas | Google Play target API riba; RN 0.86 / Expo 57 generuoja 36 | `ANDROID_STORE_POLICY_FACTS_OK` |
+| `android.yml`: `bundleRelease` — AAB build įrodymas (debug parašas, NEįkeliamas) | Play priima tik AAB | `ANDROID_RELEASE_AAB_BUILT` |
+| Offline Maestro kelionė — vienas pakartojimas | main run 38579167208: Maestro nukrito per 0,2 s prieš pirmą komandą (draiverio ryšys), tas pats commit PR'e praėjo du kartus. Pakartojimas iš naujo tikrina VISAS sąlygas | `android-emulator-journey.sh` |
+
+`SYSTEM_ALERT_WINDOW` paliktas (RN kūrimo perdanga) — CI suvestinė dabar rodo tikrą leidimų sąrašą, kad sprendimas būtų matomas.
