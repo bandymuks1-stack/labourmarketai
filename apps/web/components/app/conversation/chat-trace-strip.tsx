@@ -24,7 +24,7 @@ export function ChatTraceStrip({
           <li key={item.id} className="py-3" data-reached-cv={item.reachedCv ? "true" : undefined}>
             <Link
               href={item.href as "/dashboard"}
-              className="-mx-2 flex flex-col gap-2 rounded-control px-2 py-1 transition-colors hover:bg-ink-700/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+              className="-mx-2 flex flex-col gap-2 rounded-control px-2 py-1 transition-colors hover:bg-ink-700/40 focus-visible:ring-2 focus-visible:ring-brand-blue"
             >
               <span className="flex items-baseline justify-between gap-3">
                 <span className="min-w-0 truncate text-body font-medium text-text-primary">{item.title}</span>
