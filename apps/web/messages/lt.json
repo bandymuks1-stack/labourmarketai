@@ -19403,16 +19403,25 @@
     },
     "running": {
       "title": "Vyksta dabar",
-      "projectsUnknown": "Nepavyko nuskaityti tau priskirtų projektų."
+      "projectsUnknown": "Nepavyko nuskaityti tau priskirtų projektų.",
+      "today": "Šiandien",
+      "week": "Per 7 dienas",
+      "hours": "{hours} val.",
+      "entries": "{n, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+      "noEntriesToday": "Šiandien dar nieko neužrašyta",
+      "confirmed": "Iš jų patvirtino vadovas ar užsakovas: {hours} val.",
+      "confirmedNone": "Patvirtintų valandų dar nėra",
+      "barLabel": "Užrašytos ir patvirtintos valandos per 7 dienas"
     },
     "because": {
-      "title": "Dėl to, kas įvyko",
+      "title": "Naujausi įvykiai",
       "unknown": "Nepavyko nuskaityti, kas pasikeitė.",
       "also": "Taip pat įvyko",
       "all": "Visa veikla"
     },
     "outside": {
-      "title": "Už tavo sienų"
+      "title": "Tavo galimybės",
+      "barLabel": "Galimybės pagal tinkamumą"
     },
     "chain": {
       "consequence": {
@@ -19421,10 +19430,10 @@
         "bookingAgreed": "Rezervacija sutarta",
         "bookingRefused": "Rezervacija atmesta",
         "bookingWithdrawn": "Rezervacija atšaukta",
-        "absenceApproved": "Nebuvimas patvirtintas",
-        "absenceRefused": "Nebuvimas atmestas",
+        "absenceApproved": "Nebuvimas darbe patvirtintas",
+        "absenceRefused": "Prašymas dėl nebuvimo atmestas",
         "decisionRecorded": "Sprendimas užfiksuotas",
-        "acknowledgementRecorded": "Susipažinimas užfiksuotas",
+        "acknowledgementRecorded": "Susipažinimas pažymėtas",
         "invitationAnswered": "Į kvietimą atsakyta"
       },
       "state": {
@@ -19432,11 +19441,18 @@
         "engagementClosed": "Įdarbinimas: baigtas",
         "bookingConfirmed": "Rezervacija: patvirtinta",
         "bookingClosed": "Rezervacija: uždaryta",
-        "absenceDecided": "Nebuvimas: išspręstas",
-        "workflowClosed": "Patvirtinimas: uždarytas",
+        "absenceDecided": "Nebuvimas darbe: sprendimas priimtas",
+        "workflowClosed": "Tvirtinimas: baigtas",
         "documentAcknowledged": "Dokumentas: susipažinta",
-        "relationshipFormed": "Santykis: užmegztas"
+        "relationshipFormed": "Ryšys: užmegztas"
       }
+    },
+    "retry": "Bandyti dar kartą",
+    "retrying": "Skaitoma…",
+    "availability": {
+      "partial": "Dalis duomenų laikinai nepasiekiama ({count} iš 4 sričių).",
+      "totalTitle": "Šiuo metu nepavyko nuskaityti tavo duomenų",
+      "totalBody": "Tavo įrašai niekur nedingo — tai laikinas sutrikimas. Pabandyk dar kartą po akimirkos."
     }
   }
 }

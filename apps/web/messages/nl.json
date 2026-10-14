@@ -19397,22 +19397,31 @@
   },
   "homeRegions": {
     "waiting": {
-      "title": "Wacht op u",
-      "clear": "Er wacht niets op u.",
-      "unknown": "Wat op u wacht, kon niet worden gelezen."
+      "title": "Wacht op je",
+      "clear": "Er wacht niets op je.",
+      "unknown": "Wat op je wacht, kon niet worden gelezen."
     },
     "running": {
       "title": "Loopt nu",
-      "projectsUnknown": "Uw toegewezen projecten konden niet worden gelezen."
+      "projectsUnknown": "Je toegewezen projecten konden niet worden gelezen.",
+      "today": "Vandaag",
+      "week": "Laatste 7 dagen",
+      "hours": "{hours} je",
+      "entries": "{n, plural, one {# registratie} other {# registraties}}",
+      "noEntriesToday": "Vandaag nog niets geregistreerd",
+      "confirmed": "Waarvan bevestigd door een leidinggevende of opdrachtgever: {hours} je",
+      "confirmedNone": "Nog geen bevestigde uren",
+      "barLabel": "Geregistreerde en bevestigde uren, laatste 7 dagen"
     },
     "because": {
-      "title": "Door wat er gebeurde",
+      "title": "Laatste gebeurtenissen",
       "unknown": "Wat er veranderde, kon niet worden gelezen.",
       "also": "Verder gebeurd",
       "all": "Alle activiteit"
     },
     "outside": {
-      "title": "Buiten uw muren"
+      "title": "Jouw kansen",
+      "barLabel": "Kansen naar geschiktheid"
     },
     "chain": {
       "consequence": {
@@ -19437,6 +19446,13 @@
         "documentAcknowledged": "Document: voor gezien getekend",
         "relationshipFormed": "Relatie: aangegaan"
       }
+    },
+    "retry": "Opnieuw laden",
+    "retrying": "Laden…",
+    "availability": {
+      "partial": "Een deel van je gegevens is tijdelijk niet beschikbaar ({count} van 4 onderdelen).",
+      "totalTitle": "We konden je gegevens nu niet lezen",
+      "totalBody": "Je registraties zijn veilig — dit is tijdelijk. Probeer het zo opnieuw."
     }
   }
 }

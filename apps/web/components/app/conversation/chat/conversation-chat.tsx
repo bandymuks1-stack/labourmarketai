@@ -877,6 +877,7 @@ export function ConversationChat({
   mobile = false,
   personalIntroPayload = null,
   openingContext = null,
+  openingContextWide = false,
   accessNotice = null,
   countryLabels,
   agencyWorkspace = false,
@@ -925,6 +926,9 @@ export function ConversationChat({
    *  home stays ONE conversation for every identity. When present it wins
    *  over the S2 payload — the page hands only one of the two. */
   openingContext?: ReactNode;
+  /** The opening context is a full working home that uses the desktop width
+   *  (the worker's four regions) rather than a chat-width block. */
+  openingContextWide?: boolean;
   /** One line explaining why this home is the screen the person got, when a
    *  role gate sent them here. Server-resolved and already localized, so the
    *  internal `needs_<role>_role` token never crosses into the client bundle.
@@ -8132,6 +8136,7 @@ export function ConversationChat({
             <ConversationThread
               items={items}
               typing={typing}
+              introWide={Boolean(openingContext) && openingContextWide && !script}
               /* "Mano erdvė" (S2). It sits INSIDE the opening composition, so
                  the workspace still opens as a conversation: the block, the
                  greeting and the composer are one centred first screen, and

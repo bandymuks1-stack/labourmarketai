@@ -7525,16 +7525,25 @@
     },
     "running": {
       "title": "Pågår nå",
-      "projectsUnknown": "Prosjektene du er tildelt, kunne ikke leses."
+      "projectsUnknown": "Prosjektene du er tildelt, kunne ikke leses.",
+      "today": "I dag",
+      "week": "Siste 7 dager",
+      "hours": "{hours} t",
+      "entries": "{n, plural, one {# registrering} other {# registreringer}}",
+      "noEntriesToday": "Ingenting registrert i dag ennå",
+      "confirmed": "Av dette bekreftet av en leder eller kunde: {hours} t",
+      "confirmedNone": "Ingen bekreftede timer ennå",
+      "barLabel": "Registrerte og bekreftede timer, siste 7 dager"
     },
     "because": {
-      "title": "På grunn av det som skjedde",
+      "title": "Siste hendelser",
       "unknown": "Det som endret seg, kunne ikke leses.",
       "also": "Skjedde også",
       "all": "All aktivitet"
     },
     "outside": {
-      "title": "Utenfor dine vegger"
+      "title": "Dine muligheter",
+      "barLabel": "Muligheter etter match"
     },
     "chain": {
       "consequence": {
@@ -7559,6 +7568,13 @@
         "documentAcknowledged": "Dokument: kvittert",
         "relationshipFormed": "Relasjon: etablert"
       }
+    },
+    "retry": "Last inn på nytt",
+    "retrying": "Laster…",
+    "availability": {
+      "partial": "En del av dataene dine er midlertidig utilgjengelige ({count} av 4 områder).",
+      "totalTitle": "Vi kunne ikke lese dataene dine akkurat nå",
+      "totalBody": "Registreringene dine er trygge – dette er midlertidig. Prøv igjen om litt."
     }
   }
 }

@@ -19403,16 +19403,25 @@
     },
     "running": {
       "title": "Trwa teraz",
-      "projectsUnknown": "Nie udało się odczytać przypisanych Ci projektów."
+      "projectsUnknown": "Nie udało się odczytać przypisanych Ci projektów.",
+      "today": "Dziś",
+      "week": "Ostatnie 7 dni",
+      "hours": "{hours} godz.",
+      "entries": "{n, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+      "noEntriesToday": "Dziś jeszcze nic nie zapisano",
+      "confirmed": "Z tego potwierdzone przez kierownika lub klienta: {hours} godz.",
+      "confirmedNone": "Brak potwierdzonych godzin",
+      "barLabel": "Zapisane i potwierdzone godziny z 7 dni"
     },
     "because": {
-      "title": "Z powodu tego, co się wydarzyło",
+      "title": "Najnowsze wydarzenia",
       "unknown": "Nie udało się odczytać, co się zmieniło.",
       "also": "Wydarzyło się też",
       "all": "Cała aktywność"
     },
     "outside": {
-      "title": "Poza Twoimi murami"
+      "title": "Twoje możliwości",
+      "barLabel": "Możliwości według dopasowania"
     },
     "chain": {
       "consequence": {
@@ -19437,6 +19446,13 @@
         "documentAcknowledged": "Dokument: przyjęty do wiadomości",
         "relationshipFormed": "Relacja: nawiązana"
       }
+    },
+    "retry": "Wczytaj ponownie",
+    "retrying": "Wczytywanie…",
+    "availability": {
+      "partial": "Część danych jest chwilowo niedostępna ({count} z 4 obszarów).",
+      "totalTitle": "Nie udało się teraz wczytać Twoich danych",
+      "totalBody": "Twoje wpisy są bezpieczne — to chwilowy problem. Spróbuj ponownie za moment."
     }
   }
 }

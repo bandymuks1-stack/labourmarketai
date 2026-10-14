@@ -19403,16 +19403,25 @@
     },
     "running": {
       "title": "Läuft gerade",
-      "projectsUnknown": "Ihre zugewiesenen Projekte konnten nicht gelesen werden."
+      "projectsUnknown": "Ihre zugewiesenen Projekte konnten nicht gelesen werden.",
+      "today": "Heute",
+      "week": "Letzte 7 Tage",
+      "hours": "{hours} Std.",
+      "entries": "{n, plural, one {# Eintrag} other {# Einträge}}",
+      "noEntriesToday": "Heute noch nichts erfasst",
+      "confirmed": "Davon von Vorgesetzten oder Auftraggebern bestätigt: {hours} Std.",
+      "confirmedNone": "Noch keine bestätigten Stunden",
+      "barLabel": "Erfasste und bestätigte Stunden, letzte 7 Tage"
     },
     "because": {
-      "title": "Wegen dem, was passiert ist",
+      "title": "Neueste Ereignisse",
       "unknown": "Was sich geändert hat, konnte nicht gelesen werden.",
       "also": "Außerdem passiert",
       "all": "Alle Aktivitäten"
     },
     "outside": {
-      "title": "Außerhalb Ihrer Mauern"
+      "title": "Ihre Möglichkeiten",
+      "barLabel": "Möglichkeiten nach Eignung"
     },
     "chain": {
       "consequence": {
@@ -19437,6 +19446,13 @@
         "documentAcknowledged": "Dokument: zur Kenntnis genommen",
         "relationshipFormed": "Beziehung: entstanden"
       }
+    },
+    "retry": "Erneut laden",
+    "retrying": "Wird geladen…",
+    "availability": {
+      "partial": "Ein Teil Ihrer Daten ist vorübergehend nicht verfügbar ({count} von 4 Bereichen).",
+      "totalTitle": "Ihre Daten konnten gerade nicht gelesen werden",
+      "totalBody": "Ihre Einträge sind sicher – das ist vorübergehend. Versuchen Sie es gleich noch einmal."
     }
   }
 }

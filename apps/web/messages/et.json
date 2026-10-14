@@ -7519,22 +7519,31 @@
   },
   "homeRegions": {
     "waiting": {
-      "title": "Ootab teid",
-      "clear": "Miski ei oota teid.",
-      "unknown": "Seda, mis teid ootab, ei õnnestunud lugeda."
+      "title": "Ootab sind",
+      "clear": "Miski ei oota sind.",
+      "unknown": "Seda, mis sind ootab, ei õnnestunud lugeda."
     },
     "running": {
       "title": "Käimas praegu",
-      "projectsUnknown": "Teile määratud projekte ei õnnestunud lugeda."
+      "projectsUnknown": "Sulle määratud projekte ei õnnestunud lugeda.",
+      "today": "Täna",
+      "week": "Viimased 7 päeva",
+      "hours": "{hours} h",
+      "entries": "{n, plural, one {# kirje} other {# kirjet}}",
+      "noEntriesToday": "Täna pole veel midagi kirja pandud",
+      "confirmed": "Neist kinnitanud juht või klient: {hours} h",
+      "confirmedNone": "Kinnitatud tunde veel pole",
+      "barLabel": "Registreeritud ja kinnitatud tunnid viimase 7 päeva jooksul"
     },
     "because": {
-      "title": "Selle tõttu, mis juhtus",
+      "title": "Viimased sündmused",
       "unknown": "Seda, mis muutus, ei õnnestunud lugeda.",
       "also": "Juhtus ka",
       "all": "Kogu tegevus"
     },
     "outside": {
-      "title": "Väljaspool teie seinu"
+      "title": "Sinu võimalused",
+      "barLabel": "Võimalused sobivuse järgi"
     },
     "chain": {
       "consequence": {
@@ -7559,6 +7568,13 @@
         "documentAcknowledged": "Dokument: teadmiseks võetud",
         "relationshipFormed": "Suhe: loodud"
       }
+    },
+    "retry": "Laadi uuesti",
+    "retrying": "Laadin…",
+    "availability": {
+      "partial": "Osa sinu andmetest pole ajutiselt kättesaadav ({count} valdkonda 4-st).",
+      "totalTitle": "Sinu andmeid ei õnnestunud praegu lugeda",
+      "totalBody": "Sinu kirjed on alles — see on ajutine. Proovi hetke pärast uuesti."
     }
   }
 }

@@ -19403,16 +19403,25 @@
     },
     "running": {
       "title": "Running now",
-      "projectsUnknown": "Your assigned projects could not be read."
+      "projectsUnknown": "Your assigned projects could not be read.",
+      "today": "Today",
+      "week": "Last 7 days",
+      "hours": "{hours} h",
+      "entries": "{n, plural, one {# entry} other {# entries}}",
+      "noEntriesToday": "Nothing recorded yet today",
+      "confirmed": "Of these, approved by a manager or client: {hours} h",
+      "confirmedNone": "No confirmed hours yet",
+      "barLabel": "Recorded and confirmed hours, last 7 days"
     },
     "because": {
-      "title": "Because of what happened",
+      "title": "Recent events",
       "unknown": "What changed could not be read.",
       "also": "Also happened",
       "all": "All activity"
     },
     "outside": {
-      "title": "Outside your walls"
+      "title": "Your opportunities",
+      "barLabel": "Opportunities by fit"
     },
     "chain": {
       "consequence": {
@@ -19437,6 +19446,13 @@
         "documentAcknowledged": "Document: acknowledged",
         "relationshipFormed": "Relationship: formed"
       }
+    },
+    "retry": "Read again",
+    "retrying": "Reading…",
+    "availability": {
+      "partial": "Part of your data is temporarily unavailable ({count} of 4 areas).",
+      "totalTitle": "We couldn't read your data right now",
+      "totalBody": "Your records are safe — this is temporary. Try again in a moment."
     }
   }
 }

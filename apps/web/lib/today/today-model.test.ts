@@ -114,7 +114,7 @@ describe("UNKNOWN ≠ ZERO — a reader that answered null is never a figure", (
     expect(deriveTodayState(wi)).toEqual({ kind: "nothing" });
     const work = deriveTodayWork(wi);
     expect(work.kind).toBe("known");
-    if (work.kind === "known") expect(work.today).toEqual({ hours: 0, entries: 0, untimed: 0 });
+    if (work.kind === "known") expect(work.today).toEqual({ hours: 0, entries: 0, untimed: 0, confirmedHours: 0 });
   });
 });
 
@@ -141,8 +141,8 @@ describe("today and this week are the model's own period figures", () => {
     const work = deriveTodayWork(wi);
     expect(work).toEqual({
       kind: "known",
-      today: { hours: today.hours, entries: today.entries, untimed: today.entriesWithoutDuration },
-      week: { hours: week.hours, entries: week.entries, untimed: week.entriesWithoutDuration },
+      today: { hours: today.hours, entries: today.entries, untimed: today.entriesWithoutDuration, confirmedHours: today.confirmedHours },
+      week: { hours: week.hours, entries: week.entries, untimed: week.entriesWithoutDuration, confirmedHours: week.confirmedHours },
       truncated: false,
     });
     expect(week.entries).toBe(3);

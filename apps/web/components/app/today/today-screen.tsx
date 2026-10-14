@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { EmployerVisibilityAsk } from "@/components/app/employer-visibility-ask";
 import {
+  HomeAvailability,
   HomeBecause,
   HomeOutside,
   HomeRegionPending,
@@ -77,7 +78,7 @@ function TodayScreenPending() {
     <div
       aria-hidden
       data-testid="today-screen-pending"
-      className="mx-auto flex w-full max-w-2xl flex-col gap-2"
+      className="mx-auto flex w-full max-w-6xl flex-col gap-2"
     >
       <span className="h-3 w-24 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
       <span className="h-8 w-56 animate-pulse rounded bg-ink-700 motion-reduce:animate-none" />
@@ -115,80 +116,83 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
       : null);
 
   return (
-    <div
-      data-testid="today-screen"
-      className="mx-auto flex w-full max-w-2xl flex-col gap-8"
-    >
+    <div data-testid="today-screen" className="mx-auto flex w-full max-w-6xl flex-col gap-4 sm:gap-5 lg:gap-6">
       {/* 1 · HEADER — who, what they do, where today stands. */}
-      <header data-testid="today-header" className="order-1 flex flex-col gap-1.5">
+      <header data-testid="today-header" className="flex flex-col gap-1">
         <p className="text-support font-medium text-text-muted">{t("eyebrow")}</p>
-        <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg">
+        <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg lg:text-title-lg">
           {head.displayName ?? t("headerNoName")}
         </h1>
-        <p className="text-support text-text-secondary" data-testid="today-profession">
-          {professionLabel ?? t("professionUnknown")}
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-support text-text-secondary">
+          <span data-testid="today-profession">{professionLabel ?? t("professionUnknown")}</span>
+          <span aria-hidden className="text-text-muted">
+            ·
+          </span>
+          <Suspense fallback={<Reading label={t("reading")} />}>
+            <TodayStateLine locale={locale} />
+          </Suspense>
         </p>
-        <Suspense fallback={<Reading label={t("reading")} />}>
-          <TodayStateLine locale={locale} />
-        </Suspense>
       </header>
 
-      {/* 2 · WAITING · 3 · RUNNING · 4 · BECAUSE · 5 · OUTSIDE — one loader
-          each, so each region streams on its own and a slow journal never
-          holds the others back. */}
-      <div className="order-2">
-        <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
-          <HomeWaiting locale={locale} />
-        </Suspense>
+      {/* PARTIAL vs TOTAL unavailability — one line above the regions, from
+          the same request-cached loaders (no extra reads). */}
+      <Suspense fallback={null}>
+        <HomeAvailability />
+      </Suspense>
+
+      {/* THE FOUR REGIONS — two columns from lg (01+02 | 03+04), one column
+          on a phone in DOM order 01→04 (the one primary action first). Each
+          streams from its own loader. */}
+      <div className="grid items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="flex flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
+          <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
+            <HomeWaiting locale={locale} />
+          </Suspense>
+
+          {/* THE EMPLOYER-VISIBILITY ASK — the SAME once-only door the
+              work-card save shows (never a consent of its own: it opens the
+              canonical consent screen; "not now" ends it on this device). On
+              the home too, because the save-only moment never reached the
+              workers who onboarded before the consent step existed (prod
+              2026-10-10: 0 of 18 real workers had ever been asked). Renders
+              nothing once decided. */}
+          <div className="empty:hidden">
+            <EmployerVisibilityAsk
+              labels={{
+                title: tCard("visibilityAsk.title"),
+                body: t("visibilityAskBody"),
+                open: tCard("visibilityAsk.open"),
+                dismiss: tCard("visibilityAsk.dismiss"),
+              }}
+            />
+          </div>
+
+          <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
+            <HomeRunning locale={locale} />
+          </Suspense>
+        </div>
+
+        <div className="flex flex-col gap-4 sm:gap-5 lg:col-span-5 lg:gap-6">
+          <Suspense fallback={null}>
+            <HomeOutside />
+          </Suspense>
+          <Suspense fallback={null}>
+            <HomeBecause locale={locale} />
+          </Suspense>
+        </div>
       </div>
 
-      {/* 2b · THE EMPLOYER-VISIBILITY ASK — the SAME once-only door the
-          work-card save shows (never a consent of its own: it opens the
-          canonical consent screen; "not now" ends it on this device). On the
-          home too, because the save-only moment never reached the workers who
-          onboarded before the consent step existed (prod 2026-10-10: 0 of 18
-          real workers had ever been asked). Renders nothing once decided. */}
-      <div className="order-3 empty:hidden">
-        <EmployerVisibilityAsk
-          labels={{
-            title: tCard("visibilityAsk.title"),
-            body: t("visibilityAskBody"),
-            open: tCard("visibilityAsk.open"),
-            dismiss: tCard("visibilityAsk.dismiss"),
-          }}
-        />
-      </div>
-
-      <div className="order-4">
-        <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
-          <HomeRunning locale={locale} />
-        </Suspense>
-      </div>
-      <div className="order-6 empty:hidden md:order-5">
-        <Suspense fallback={null}>
-          <HomeBecause locale={locale} />
-        </Suspense>
-      </div>
-      <div className="order-5 empty:hidden md:order-6">
-        <Suspense fallback={null}>
-          <HomeOutside />
-        </Suspense>
-      </div>
-
-      {/* 6 · STATIONS — the contextual workspaces as text links, one tap. */}
-      <nav
-        aria-label={t("stations.title")}
-        data-testid="today-stations"
-        className="order-7 flex flex-col gap-1 border-t border-ink-600 pt-6"
-      >
+      {/* 6 · STATIONS — the contextual workspaces, one tap each: a compact
+          grid on a phone, one row from sm up. */}
+      <nav aria-label={t("stations.title")} data-testid="today-stations" className="flex flex-col gap-1 border-t border-ink-600/70 pt-4 sm:gap-2 sm:pt-5">
         <p className="text-support font-medium text-text-muted">{t("stations.title")}</p>
-        <ul className="flex flex-wrap gap-x-5 gap-y-0">
+        <ul className="grid grid-cols-3 gap-x-3 gap-y-0 sm:flex sm:flex-wrap sm:gap-x-6">
           {TODAY_STATIONS.map((s) => (
             <li key={s.id}>
               <Link
                 href={s.href as "/dashboard"}
                 data-testid={`today-station-${s.id}`}
-                className="inline-flex min-h-11 items-center text-body text-text-primary underline-offset-4 hover:underline"
+                className="inline-flex min-h-11 items-center text-support text-text-primary underline-offset-4 hover:underline sm:text-body"
               >
                 {t(`stations.${s.id}`)}
               </Link>
@@ -219,13 +223,9 @@ async function TodayStateLine({ locale }: { locale: ActiveLocale }) {
         ? t("state.nothing")
         : t("state.unknown");
   return (
-    <p
-      className="text-support text-text-secondary"
-      data-testid="today-state"
-      data-state={state.kind}
-    >
+    <span className="text-text-secondary" data-testid="today-state" data-state={state.kind}>
       {text}
-    </p>
+    </span>
   );
 }
 
@@ -233,8 +233,8 @@ async function TodayStateLine({ locale }: { locale: ActiveLocale }) {
  *  progress — never an empty box that reads as "nothing here". */
 function Reading({ label }: { label: string }) {
   return (
-    <p role="status" aria-live="polite" className="text-support text-text-muted">
+    <span role="status" aria-live="polite" className="text-support text-text-muted">
       {label}
-    </p>
+    </span>
   );
 }

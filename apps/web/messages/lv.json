@@ -7525,16 +7525,25 @@
     },
     "running": {
       "title": "Notiek tagad",
-      "projectsUnknown": "Neizdevās nolasīt jums piešķirtos projektus."
+      "projectsUnknown": "Neizdevās nolasīt jums piešķirtos projektus.",
+      "today": "Šodien",
+      "week": "Pēdējās 7 dienas",
+      "hours": "{hours} h",
+      "entries": "{n, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}",
+      "noEntriesToday": "Šodien vēl nekas nav reģistrēts",
+      "confirmed": "No tām apstiprinājis vadītājs vai klients: {hours} h",
+      "confirmedNone": "Apstiprinātu stundu vēl nav",
+      "barLabel": "Reģistrētās un apstiprinātās stundas pēdējās 7 dienās"
     },
     "because": {
-      "title": "Tā dēļ, kas notika",
+      "title": "Jaunākie notikumi",
       "unknown": "Neizdevās nolasīt, kas mainījās.",
       "also": "Notika arī",
       "all": "Visa aktivitāte"
     },
     "outside": {
-      "title": "Ārpus jūsu sienām"
+      "title": "Jūsu iespējas",
+      "barLabel": "Iespējas pēc atbilstības"
     },
     "chain": {
       "consequence": {
@@ -7559,6 +7568,13 @@
         "documentAcknowledged": "Dokuments: iepazīts",
         "relationshipFormed": "Attiecības: izveidotas"
       }
+    },
+    "retry": "Ielādēt vēlreiz",
+    "retrying": "Ielādē…",
+    "availability": {
+      "partial": "Daļa datu īslaicīgi nav pieejama ({count} no 4 sadaļām).",
+      "totalTitle": "Šobrīd neizdevās nolasīt jūsu datus",
+      "totalBody": "Jūsu ieraksti ir drošībā — tas ir īslaicīgi. Mēģiniet vēlreiz pēc brīža."
     }
   }
 }

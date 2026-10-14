@@ -7525,16 +7525,25 @@
     },
     "running": {
       "title": "Pågår nu",
-      "projectsUnknown": "Dina tilldelade projekt kunde inte läsas."
+      "projectsUnknown": "Dina tilldelade projekt kunde inte läsas.",
+      "today": "I dag",
+      "week": "Senaste 7 dagarna",
+      "hours": "{hours} h",
+      "entries": "{n, plural, one {# registrering} other {# registreringar}}",
+      "noEntriesToday": "Inget registrerat i dag ännu",
+      "confirmed": "Varav bekräftat av chef eller kund: {hours} h",
+      "confirmedNone": "Inga bekräftade timmar ännu",
+      "barLabel": "Registrerade och bekräftade timmar, senaste 7 dagarna"
     },
     "because": {
-      "title": "På grund av det som hände",
+      "title": "Senaste händelserna",
       "unknown": "Det som ändrades kunde inte läsas.",
       "also": "Hände också",
       "all": "All aktivitet"
     },
     "outside": {
-      "title": "Utanför dina väggar"
+      "title": "Dina möjligheter",
+      "barLabel": "Möjligheter efter matchning"
     },
     "chain": {
       "consequence": {
@@ -7559,6 +7568,13 @@
         "documentAcknowledged": "Dokument: kvitterat",
         "relationshipFormed": "Relation: etablerad"
       }
+    },
+    "retry": "Läs in igen",
+    "retrying": "Läser in…",
+    "availability": {
+      "partial": "En del av dina uppgifter är tillfälligt otillgängliga ({count} av 4 områden).",
+      "totalTitle": "Vi kunde inte läsa dina uppgifter just nu",
+      "totalBody": "Dina registreringar är säkra – det här är tillfälligt. Försök igen om en stund."
     }
   }
 }

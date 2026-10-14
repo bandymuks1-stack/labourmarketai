@@ -56,6 +56,7 @@ function scoped(loc: string, ns: string) {
   return t;
 }
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {} }) }));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async (ns: string) => scoped(state.locale, ns)),
 }));
@@ -190,6 +191,7 @@ describe("the old ŠIANDIEN test ids are all still emitted by the regions", () =
             { projectId: "p2", title: null, city: null },
             { projectId: "p3", title: "C", city: null },
             { projectId: "p4", title: "D", city: null },
+            { projectId: "p5", title: "E", city: null },
           ],
           { kind: "unknown" },
         ),
@@ -210,7 +212,8 @@ describe("the old ŠIANDIEN test ids are all still emitted by the regions", () =
     ]) {
       expect(running, id).toContain(`data-testid="${id}"`);
     }
-    expect(running).not.toContain('data-testid="today-project-p4"');
+    expect(running).toContain('data-testid="today-project-p4"');
+    expect(running).not.toContain('data-testid="today-project-p5"');
     expect(running).not.toContain("bg-gradient-cta");
 
     const outside = html(
@@ -284,11 +287,14 @@ describe("restraint: plain titles, real copy in every active locale", () => {
   });
 });
 
-describe("the phone order reads in sequence", () => {
-  it("below md the outside region is numbered 03 and the because region 04", async () => {
+describe("one reading order on every screen", () => {
+  it("opportunities are 03 and recent events 04 — the DOM order, so the phone needs no renumbering", async () => {
     const outside = html(await HomeOutsideView({ outside: ALL_UNKNOWN.outside }));
     const because = html(await HomeBecauseView({ locale: "en", because: ALL_UNKNOWN.because }));
-    expect(outside).toMatch(/data-testid="home-outside-index-phone"[^>]*>03</);
-    expect(because).toMatch(/data-testid="home-because-index-phone"[^>]*>04</);
+    expect(outside).toMatch(/>03</);
+    expect(because).toMatch(/>04</);
+    // A failed read always offers a way to read again.
+    expect(outside).toContain('data-testid="home-opportunity-unknown-retry"');
+    expect(because).toContain('data-testid="home-because-unknown-retry"');
   });
 });
