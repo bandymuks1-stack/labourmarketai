@@ -115,6 +115,10 @@ export async function loadProjectsForResult(): Promise<ProjectListResult> {
       .or(
         `organization_id.eq.${ctx.organizationId},and(organization_id.is.null,company_id.eq.${ctx.companyId})`,
       )
+      // A DUPLICATE row is a fragment of its canonical project, never a
+      // project to pick (imported fragments are the newest rows and would
+      // otherwise fill every slot).
+      .neq("record_state", "duplicate")
       .order("created_at", { ascending: false })
       .limit(PROJECT_RESULT_LIMIT);
     if (res.error) return { kind: "blocked" };

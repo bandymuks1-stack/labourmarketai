@@ -9,7 +9,6 @@ import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
 import { isDemandKind } from "@/lib/demand/market-direction";
-import { readDuplicateProjectIds } from "@/lib/projects/projects";
 import { readProjectDocumentedPeriods } from "@/lib/organization-evidence/project-documented-period";
 import { closeDemand, reopenDemand } from "@/lib/demand/demand-lifecycle";
 import { canCloseFrom, canReopenFrom } from "@/lib/demand/demand-lifecycle-model";
@@ -436,18 +435,18 @@ async function readOrgProjects(
     .from("projects")
     .select("id, title, status, country, city, start_date, end_date, company_id, organization_id", { count: "exact" })
     .or(`organization_id.eq.${employer.organizationId},company_id.eq.${employer.companyId}`)
+    // A DUPLICATE project (record fact, 20260930120000) is a fragment of its
+    // canonical project, not a project: filtered in the query, so `total`
+    // and the page boundaries count real projects (85, not the 180 rows).
+    .neq("record_state", "duplicate")
     .order("created_at", { ascending: false })
     // A total order, so a page boundary never repeats or skips a project.
     .order("id", { ascending: false })
     .range(from, from + PROJECTS_PAGE_SIZE - 1);
   if (error) return { ok: false };
-  // A DUPLICATE project (record fact, 20260930120000) leaves the working list
-  // — the same one reader the web list uses.
-  const rows = (data ?? []) as ProjectRow[];
-  const duplicates = await readDuplicateProjectIds(caller.supabase, rows.map((r) => r.id));
   return {
     ok: true,
-    rows: rows.filter((r) => !duplicates.has(r.id)),
+    rows: (data ?? []) as ProjectRow[],
     total: typeof count === "number" ? count : null,
   };
 }
