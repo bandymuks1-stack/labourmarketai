@@ -19500,5 +19500,22 @@
       "pending": "Waiting for a second party",
       "derived": "Derived from facts"
     }
+  },
+  "careerJourney": {
+    "title": "Your career journey",
+    "summary": "Projects are stops, skills are lines. A line stops only where your journal shows that skill was worked.",
+    "now": "Now",
+    "gap": "No records",
+    "horizon": "Horizon",
+    "derived": "derived, not a promise",
+    "linksUnknown": "Couldn't read where your skills were worked — the lines are shown without stops.",
+    "level": {
+      "confirmed": "confirmed",
+      "recorded": "recorded",
+      "declared": "declared"
+    },
+    "focusHint": "Tap a line to follow one skill through your whole journey.",
+    "showAll": "Show all",
+    "horizonDetail": "you already have {shared} of {total} skills"
   }
 }

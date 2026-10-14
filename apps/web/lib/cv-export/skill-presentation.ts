@@ -54,6 +54,10 @@ export type SkillPracticeFacts = {
   readonly firstWorkedDay?: string | null;
   readonly lastWorkedDay: string | null;
   readonly trend?: "up" | "down" | "flat" | "new" | "none";
+  /** The engagement contexts the linked entries belong to — what lets the
+   *  career journey draw a skill line through the stop it was worked at
+   *  (never through a stop it merely overlaps in time). */
+  readonly contextIds?: readonly string[];
 };
 
 export type SkillPracticeBySlug = Readonly<Record<string, SkillPracticeFacts>>;
@@ -79,6 +83,7 @@ export function skillPracticeFromIntelligence(
       firstWorkedDay: (s as { firstWorkedDay?: string | null }).firstWorkedDay ?? null,
       lastWorkedDay: s.lastWorkedDay,
       trend: s.trend,
+      contextIds: s.contextIds,
     };
   }
   return out;

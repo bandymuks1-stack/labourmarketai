@@ -19500,5 +19500,22 @@
       "pending": "Wacht op een tweede partij",
       "derived": "Afgeleid uit feiten"
     }
+  },
+  "careerJourney": {
+    "title": "Je loopbaanreis",
+    "summary": "Projecten zijn haltes, vaardigheden zijn lijnen. Een lijn stopt alleen waar je logboek laat zien dat je met die vaardigheid werkte.",
+    "now": "Nu",
+    "gap": "Geen registraties",
+    "horizon": "Horizon",
+    "derived": "afgeleid, geen belofte",
+    "linksUnknown": "Kon niet lezen waar je vaardigheden werden ingezet — de lijnen staan er zonder haltes.",
+    "level": {
+      "confirmed": "bevestigd",
+      "recorded": "geregistreerd",
+      "declared": "opgegeven"
+    },
+    "focusHint": "Tik op een lijn om één vaardigheid door je hele reis te volgen.",
+    "showAll": "Alles tonen",
+    "horizonDetail": "je hebt al {shared} van {total} vaardigheden"
   }
 }

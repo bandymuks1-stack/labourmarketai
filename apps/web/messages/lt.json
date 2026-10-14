@@ -19500,5 +19500,22 @@
       "pending": "Laukia antros šalies",
       "derived": "Išvesta iš faktų"
     }
+  },
+  "careerJourney": {
+    "title": "Tavo profesinė kelionė",
+    "summary": "Projektai — stotelės, įgūdžiai — linijos. Linija sustoja tik ten, kur tavo žurnalas rodo, kad tuo įgūdžiu dirbta.",
+    "now": "Dabar",
+    "gap": "Be įrašų",
+    "horizon": "Horizontas",
+    "derived": "išvesta, ne pažadas",
+    "linksUnknown": "Nepavyko perskaityti, kur naudoti tavo įgūdžiai — linijos rodomos be stotelių.",
+    "level": {
+      "confirmed": "patvirtinta",
+      "recorded": "įrašyta",
+      "declared": "deklaruota"
+    },
+    "focusHint": "Bakstelėk liniją ir sek vieną įgūdį per visą kelionę.",
+    "showAll": "Rodyti visas",
+    "horizonDetail": "jau turi {shared} iš {total} įgūdžių"
   }
 }

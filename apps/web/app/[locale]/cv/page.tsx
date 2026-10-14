@@ -12,6 +12,8 @@ import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { percentOf, roundHours } from "@/lib/cv-export/professional-summary";
 import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
+import { deriveCareerJourney, type JourneyLevel } from "@/lib/cv-export/career-journey";
+import { CareerJourneyMap, type CareerJourneyLabels } from "@/components/app/cv/career-journey-map";
 import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
 import { presentSkills, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
 import {
@@ -111,6 +113,7 @@ export default async function VerifiedCvPage({
   const tTier = await getTranslations("evidenceTier");
   const tQuick = await getTranslations("quickNav");
   const tPremium = await getTranslations("cvExport.premium");
+  const tJourney = await getTranslations("careerJourney");
   const fmtHours = (h: number) =>
     new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
   const tRole = await getTranslations("auth.signup.role");
@@ -627,6 +630,93 @@ export default async function VerifiedCvPage({
     }),
   ].sort((a, b) => Number(b.current) - Number(a.current) || b.sortKey.localeCompare(a.sortKey));
 
+  // THE CAREER JOURNEY (Future Experience B, owner 2026-10-14): the SAME
+  // rows the Living CV above lists, drawn as a route — engagements and
+  // organization records as stops, skills as lines that stop only where the
+  // journal links them. Screen-only; the lists stay the accessible equivalent.
+  const yearOf = (iso: string | null) => (iso && /^\d{4}/.test(iso) ? iso.slice(0, 4) : null);
+  const journeyMeta: Record<string, string> = {};
+  const journey = deriveCareerJourney({
+    todayIso: (await viewerWorkToday()).todayIso,
+    stations: [
+      ...cv.workHistory.map((e, i) => {
+        const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
+        const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
+        const key = `own:${e.id ?? i}`;
+        const years = [yearOf(e.startedAt), e.endedAt ? yearOf(e.endedAt) : tJourney("now")].filter(Boolean).join("–");
+        journeyMeta[key] = [years, rec ? premiumHours(rec.hours) : null].filter(Boolean).join(" · ");
+        return {
+          key,
+          title: e.orgName ? (e.title ?? org) : org,
+          subtitle: e.orgName && e.title ? e.orgName : null,
+          from: e.startedAt,
+          to: e.endedAt,
+          current: !e.endedAt,
+          source: "own" as const,
+          level: (rec && rec.confirmedHours > 0 ? "confirmed" : rec ? "recorded" : "declared") as JourneyLevel,
+          contextId: e.id,
+          hours: rec?.hours ?? null,
+          confirmedHours: rec?.confirmedHours ?? null,
+        };
+      }),
+      ...(cv.organizationHistory ?? []).map((h) => {
+        const key = `org:${h.key}`;
+        const hours = h.dayHours ?? h.periodHours;
+        journeyMeta[key] = [[yearOf(h.from), yearOf(h.to)].filter(Boolean).join("–"), hours !== null ? premiumHours(hours) : null]
+          .filter(Boolean)
+          .join(" · ");
+        return {
+          key,
+          title: h.project ?? h.place ?? h.organizationName ?? tPremium("untitled"),
+          subtitle: h.organizationName ?? null,
+          from: h.from,
+          to: h.to,
+          current: false,
+          source: "organization" as const,
+          level: (h.proof.includes("INDEPENDENTLY_VERIFIED") || h.proof.includes("EMPLOYER_CONFIRMED")
+            ? "confirmed"
+            : "recorded") as JourneyLevel,
+          contextId: null,
+          hours,
+          confirmedHours: null,
+        };
+      }),
+    ],
+    skills: (["confirmed", "evidence", "declared"] as const).flatMap((tier) =>
+      cv.tiers[tier].map((slug) => ({
+        slug,
+        tier,
+        attributedHours: cv.skillPractice?.[slug]?.attributedHours ?? 0,
+        confirmedHours: cv.skillPractice?.[slug]?.confirmedHours ?? 0,
+      })),
+    ),
+    practice: cv.skillPractice
+      ? Object.fromEntries(Object.entries(cv.skillPractice).map(([slug, f]) => [slug, { contextIds: f.contextIds ?? [] }]))
+      : null,
+    horizon: cv.growthAdjacent ?? [],
+  });
+  const journeyLabels: CareerJourneyLabels = {
+    title: tJourney("title"),
+    summary: tJourney("summary"),
+    now: tJourney("now"),
+    gap: tJourney("gap"),
+    horizon: tJourney("horizon"),
+    derived: tJourney("derived"),
+    linksUnknown: tJourney("linksUnknown"),
+    level: { confirmed: tJourney("level.confirmed"), recorded: tJourney("level.recorded"), declared: tJourney("level.declared") },
+    focusHint: tJourney("focusHint"),
+    showAll: tJourney("showAll"),
+    skill: Object.fromEntries(journey.lines.map((l) => [l.slug, skillLabel(l.slug)])),
+    horizonItem: journey.horizon.map((h) => ({
+      name: tProf.has(h.professionId) ? tProf(h.professionId) : h.professionId,
+      detail: tJourney("horizonDetail", {
+        shared: h.sharedSkills.length,
+        total: h.sharedSkills.length + h.missingSkills.length,
+      }),
+    })),
+    stationMeta: journeyMeta,
+  };
+
   return (
     <div className="cv-doc min-h-screen bg-ink-900 px-6 py-8 text-text-primary print:p-0">
       <div className={`mx-auto flex max-w-3xl flex-col ${pageGap}`}>
@@ -779,6 +869,9 @@ export default async function VerifiedCvPage({
             leadership={<OrganizationsLeadership locale={locale} variant="cv" />}
           />
         ) : null}
+
+        {/* THE CAREER JOURNEY — screen-only route over the same rows. */}
+        {template !== "eu" ? <CareerJourneyMap journey={journey} labels={journeyLabels} /> : null}
 
         <header className={`rounded-xl border-2 border-ink-500 ${compact ? "p-4" : "p-6"}`}>
           <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
