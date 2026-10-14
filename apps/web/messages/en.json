@@ -19272,5 +19272,98 @@
     },
     "openHistory": "Open the business history",
     "note": "Leading an organisation is shown apart from your own work: the organisation's hours are never counted as yours."
+  },
+  "historyQuality": {
+    "back": "Back to history",
+    "title": "History data quality",
+    "intro": "What {organization}'s import produced, what LabourMarket.ai recognised in it, and what is still unresolved — from the same records, none of them changed.",
+    "notApplied": "Consolidation has not been applied yet: the figures show the import as it is.",
+    "unavailable": "The data quality could not be read right now. That is not the same as 'no problems' — try again.",
+    "before": {
+      "title": "As imported (spreadsheets)",
+      "note": "{sources, plural, one {# source file} other {# source files}}"
+    },
+    "after": {
+      "title": "In LabourMarket.ai",
+      "merged": "{rows, plural, one {# imported row recognised as part of another project} other {# imported rows recognised as part of another project}}",
+      "onProject": "{records} records ({hours} h) linked to a project",
+      "peopleWithHistory": "{people, plural, one {# person with a project history} other {# people with a project history}}"
+    },
+    "m": {
+      "projectRows": "project rows",
+      "realProjects": "real projects",
+      "records": "work records",
+      "hours": "recorded hours",
+      "people": "people"
+    },
+    "invariant": "Records, hours and people are identical before and after: nothing was moved, split or deleted.",
+    "invariantBroken": "Warning: the totals differ before and after — report this; nothing should change.",
+    "example": {
+      "title": "One object, many spellings",
+      "intro": "Real groups from this import: what the spreadsheets kept as separate rows, LabourMarket.ai keeps as one project with its full history.",
+      "spreadsheet": "In the spreadsheets: {rows} separate rows",
+      "more": "… and {count} more",
+      "lm": "In LabourMarket.ai: one project",
+      "facts": "{records} records · {hours} h · {people, plural, one {# person} other {# people}}",
+      "probable": "Probable: same address, different period or people — recorded, reversible."
+    },
+    "unresolved": {
+      "title": "Still unresolved — kept exactly as recorded",
+      "noObject": "{records} records ({hours} h) name no object — they stay in the organization's history, not on an invented project.",
+      "multi": "{records} records ({hours} h) name several objects in one row — the hours are not split between them.",
+      "single": "{records} records ({hours} h) name one place that matches no known object.",
+      "dates": "{personDays} person-days carry several records on one date ({records} records): a day label reused across weeks in the source. The hours are kept; the dates need a correction.",
+      "probable": "{count, plural, one {# merge is probable} other {# merges are probable}} (same address, different period or people).",
+      "conflicts": "{count, plural, one {# row carries a recorded conflict} other {# rows carry a recorded conflict}}."
+    },
+    "sessions": {
+      "title": "Per source file",
+      "source": "Source",
+      "onProject": "On a project",
+      "unplaced": "Without an object"
+    },
+    "register": {
+      "title": "Every recorded mismatch",
+      "rows": "{count, plural, one {# recorded decision} other {# recorded decisions}}",
+      "reverted": "undone",
+      "rule": "rule {rule}, {at}",
+      "decision": {
+        "merged": "merged",
+        "canonical": "kept project",
+        "kept_separate": "kept separate"
+      },
+      "certainty": {
+        "unambiguous": "unambiguous",
+        "probable": "probable",
+        "none": "not merged"
+      }
+    },
+    "undo": {
+      "reason": "Reason for undoing",
+      "button": "Undo merge",
+      "pending": "Undoing…",
+      "done": "Undone: the row is its own project again.",
+      "failed": "Not undone. Reload and try again."
+    },
+    "timing": "Computed from {records} records in {ms} ms.",
+    "types": {
+      "address_spelling_variant": "same address, written differently",
+      "code_spelling_variant": "same object code, written differently",
+      "name_mixed_with_work_description": "work description mixed into the object name",
+      "object_split_into_projects": "one object split into several projects",
+      "multiple_objects_in_row": "several objects in one row",
+      "no_object": "no object named",
+      "no_house_number": "place without a house number",
+      "period_mismatch": "work periods far apart",
+      "possible_duplicate_records": "possibly duplicated records",
+      "ambiguous_person": "person not clearly identified",
+      "conflicting_project_data": "conflicting project data",
+      "possible_same_object": "possibly the same object (not merged)",
+      "date_conflict_person_days": "person-days with conflicting dates",
+      "unplaced_no_object": "records without an object",
+      "unplaced_multiple_objects": "records naming several objects",
+      "unplaced_single_unmatched": "records naming an unknown place"
+    },
+    "link": "Data quality"
   }
 }

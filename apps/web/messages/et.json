@@ -7394,5 +7394,98 @@
     "openBuyerSetup": "Ava ostja seadistus →",
     "startBuyerProfile": "Alusta ostja profiili →",
     "footer": "Siin pole midagi välja mõeldud: iga kuvatud olek on loetud sinu kontolt."
+  },
+  "historyQuality": {
+    "back": "Tagasi ajaloo juurde",
+    "title": "Ajaloo andmekvaliteet",
+    "intro": "Mida {organization} import lõi, mida LabourMarket.ai selles ära tundis ja mis on veel lahendamata — samadest kirjetest, ühtegi muutmata.",
+    "notApplied": "Konsolideerimist pole veel rakendatud: numbrid näitavad importi sellisena, nagu see on.",
+    "unavailable": "Andmekvaliteeti ei õnnestunud praegu lugeda. See ei tähenda „probleeme pole” — proovige uuesti.",
+    "before": {
+      "title": "Nagu imporditud (arvutustabelid)",
+      "note": "{sources, plural, one {# lähtefail} other {# lähtefaili}}"
+    },
+    "after": {
+      "title": "LabourMarket.ai-s",
+      "merged": "{rows, plural, one {# imporditud rida tunti ära teise projekti osana} other {# imporditud rida tunti ära teise projekti osana}}",
+      "onProject": "{records} kirjet ({hours} h) seotud projektiga",
+      "peopleWithHistory": "{people, plural, one {# inimene projektiajalooga} other {# inimest projektiajalooga}}"
+    },
+    "m": {
+      "projectRows": "projektiread",
+      "realProjects": "tegelikud projektid",
+      "records": "töökirjed",
+      "hours": "registreeritud tunnid",
+      "people": "inimesed"
+    },
+    "invariant": "Kirjed, tunnid ja inimesed on enne ja pärast identsed: midagi ei liigutatud, jagatud ega kustutatud.",
+    "invariantBroken": "Tähelepanu: summad enne ja pärast erinevad — teatage sellest; midagi ei tohiks muutuda.",
+    "example": {
+      "title": "Üks objekt, palju kirjapilte",
+      "intro": "Tõelised rühmad sellest impordist: mida arvutustabelid hoidsid eraldi ridadena, hoiab LabourMarket.ai ühe projektina koos kogu ajalooga.",
+      "spreadsheet": "Arvutustabelites: {rows} eraldi rida",
+      "more": "… ja veel {count}",
+      "lm": "LabourMarket.ai-s: üks projekt",
+      "facts": "{records} kirjet · {hours} h · {people, plural, one {# inimene} other {# inimest}}",
+      "probable": "Tõenäoline: sama aadress, teine periood või inimesed — registreeritud, tagasivõetav."
+    },
+    "unresolved": {
+      "title": "Veel lahendamata — säilitatud täpselt nii, nagu registreeritud",
+      "noObject": "{records} kirjet ({hours} h) ei nimeta objekti — need jäävad organisatsiooni ajalukku, mitte väljamõeldud projekti.",
+      "multi": "{records} kirjet ({hours} h) nimetavad ühes reas mitut objekti — tunde ei jagata.",
+      "single": "{records} kirjet ({hours} h) nimetavad kohta, mis ei vasta ühelegi teadaolevale objektile.",
+      "dates": "{personDays} inimpäeval on mitu kirjet samal kuupäeval ({records} kirjet): allikas korrati päevasilti eri nädalatel. Tunnid säilivad; kuupäevad vajavad parandust.",
+      "probable": "{count, plural, one {# liitmine on tõenäoline} other {# liitmist on tõenäolised}} (sama aadress, teine periood või inimesed).",
+      "conflicts": "{count, plural, one {# real on registreeritud vastuolu} other {# real on registreeritud vastuolu}}."
+    },
+    "sessions": {
+      "title": "Lähtefaili kaupa",
+      "source": "Allikas",
+      "onProject": "Projektis",
+      "unplaced": "Objektita"
+    },
+    "register": {
+      "title": "Iga registreeritud lahknevus",
+      "rows": "{count, plural, one {# registreeritud otsus} other {# registreeritud otsust}}",
+      "reverted": "tagasi võetud",
+      "rule": "reegel {rule}, {at}",
+      "decision": {
+        "merged": "liidetud",
+        "canonical": "säilitatud projekt",
+        "kept_separate": "jäetud eraldi"
+      },
+      "certainty": {
+        "unambiguous": "ühene",
+        "probable": "tõenäoline",
+        "none": "liitmata"
+      }
+    },
+    "undo": {
+      "reason": "Tagasivõtmise põhjus",
+      "button": "Võta liitmine tagasi",
+      "pending": "Võtan tagasi…",
+      "done": "Tagasi võetud: rida on jälle eraldi projekt.",
+      "failed": "Tagasi ei võetud. Laadige uuesti ja proovige veel."
+    },
+    "timing": "Arvutatud {records} kirjest {ms} ms jooksul.",
+    "types": {
+      "address_spelling_variant": "sama aadress, kirjutatud erinevalt",
+      "code_spelling_variant": "sama objektikood, kirjutatud erinevalt",
+      "name_mixed_with_work_description": "töö kirjeldus objekti nimes",
+      "object_split_into_projects": "üks objekt jagatud mitmeks projektiks",
+      "multiple_objects_in_row": "mitu objekti ühes reas",
+      "no_object": "objekti pole nimetatud",
+      "no_house_number": "koht ilma majanumbrita",
+      "period_mismatch": "tööperioodid kaugel üksteisest",
+      "possible_duplicate_records": "võimalikud topeltkirjed",
+      "ambiguous_person": "inimene pole üheselt tuvastatud",
+      "conflicting_project_data": "vastuolulised projektiandmed",
+      "possible_same_object": "võimalik sama objekt (liitmata)",
+      "date_conflict_person_days": "vastuoluliste kuupäevadega inimpäevad",
+      "unplaced_no_object": "objektita kirjed",
+      "unplaced_multiple_objects": "mitme objektiga kirjed",
+      "unplaced_single_unmatched": "tundmatu kohaga kirjed"
+    },
+    "link": "Andmekvaliteet"
   }
 }

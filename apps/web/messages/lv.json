@@ -7394,5 +7394,98 @@
     "openBuyerSetup": "Atvērt pircēja iestatīšanu →",
     "startBuyerProfile": "Sākt pircēja profilu →",
     "footer": "Šeit nekas nav izdomāts: katrs parādītais stāvoklis nolasīts no jūsu konta."
+  },
+  "historyQuality": {
+    "back": "Atpakaļ uz vēsturi",
+    "title": "Vēstures datu kvalitāte",
+    "intro": "Ko izveidoja {organization} imports, ko LabourMarket.ai tajā atpazina un kas vēl nav atrisināts — no tiem pašiem ierakstiem, neviens nav mainīts.",
+    "notApplied": "Konsolidācija vēl nav piemērota: skaitļi rāda importu tādu, kāds tas ir.",
+    "unavailable": "Datu kvalitāti pašlaik neizdevās nolasīt. Tas nenozīmē „problēmu nav” — mēģiniet vēlreiz.",
+    "before": {
+      "title": "Kā importēts (izklājlapas)",
+      "note": "{sources, plural, zero {# avota failu} one {# avota fails} other {# avota faili}}"
+    },
+    "after": {
+      "title": "LabourMarket.ai",
+      "merged": "{rows, plural, zero {# importētu rindu atpazīts kā cita projekta daļa} one {# importēta rinda atpazīta kā cita projekta daļa} other {# importētas rindas atpazītas kā cita projekta daļa}}",
+      "onProject": "{records} ieraksti ({hours} st.) saistīti ar projektu",
+      "peopleWithHistory": "{people, plural, zero {# cilvēku ar projektu vēsturi} one {# cilvēks ar projektu vēsturi} other {# cilvēki ar projektu vēsturi}}"
+    },
+    "m": {
+      "projectRows": "projektu rindas",
+      "realProjects": "reālie projekti",
+      "records": "darba ieraksti",
+      "hours": "reģistrētās stundas",
+      "people": "cilvēki"
+    },
+    "invariant": "Ieraksti, stundas un cilvēki pirms un pēc ir identiski: nekas nav pārvietots, sadalīts vai dzēsts.",
+    "invariantBroken": "Uzmanību: summas pirms un pēc atšķiras — ziņojiet par to; nekam nevajadzēja mainīties.",
+    "example": {
+      "title": "Viens objekts, daudz rakstības veidu",
+      "intro": "Īstas šī importa grupas: ko izklājlapas glabāja kā atsevišķas rindas, LabourMarket.ai glabā kā vienu projektu ar visu vēsturi.",
+      "spreadsheet": "Izklājlapās: {rows} atsevišķas rindas",
+      "more": "… un vēl {count}",
+      "lm": "LabourMarket.ai: viens projekts",
+      "facts": "{records} ieraksti · {hours} st. · {people, plural, zero {# cilvēku} one {# cilvēks} other {# cilvēki}}",
+      "probable": "Ticami: tā pati adrese, cits periods vai cilvēki — reģistrēts, atsaucams."
+    },
+    "unresolved": {
+      "title": "Vēl neatrisināts — saglabāts tieši tā, kā reģistrēts",
+      "noObject": "{records} ieraksti ({hours} st.) nenosauc objektu — tie paliek organizācijas vēsturē, nevis izdomātā projektā.",
+      "multi": "{records} ieraksti ({hours} st.) vienā rindā nosauc vairākus objektus — stundas netiek dalītas.",
+      "single": "{records} ieraksti ({hours} st.) nosauc vietu, kas neatbilst nevienam zināmam objektam.",
+      "dates": "{personDays} cilvēkdienām ir vairāki ieraksti vienā datumā ({records} ieraksti): avotā dienas apzīmējums atkārtots dažādās nedēļās. Stundas saglabātas; datumi jālabo.",
+      "probable": "{count, plural, zero {# apvienošanu ticami} one {# apvienošana ir ticama} other {# apvienošanas ir ticamas}} (tā pati adrese, cits periods vai cilvēki).",
+      "conflicts": "{count, plural, zero {# rindām ir reģistrēta pretruna} one {# rindai ir reģistrēta pretruna} other {# rindām ir reģistrēta pretruna}}."
+    },
+    "sessions": {
+      "title": "Pēc avota faila",
+      "source": "Avots",
+      "onProject": "Projektā",
+      "unplaced": "Bez objekta"
+    },
+    "register": {
+      "title": "Katra reģistrētā neatbilstība",
+      "rows": "{count, plural, zero {# reģistrētu lēmumu} one {# reģistrēts lēmums} other {# reģistrēti lēmumi}}",
+      "reverted": "atsaukts",
+      "rule": "noteikums {rule}, {at}",
+      "decision": {
+        "merged": "apvienots",
+        "canonical": "saglabātais projekts",
+        "kept_separate": "atstāts atsevišķi"
+      },
+      "certainty": {
+        "unambiguous": "viennozīmīgi",
+        "probable": "ticami",
+        "none": "nav apvienots"
+      }
+    },
+    "undo": {
+      "reason": "Atsaukšanas iemesls",
+      "button": "Atsaukt apvienošanu",
+      "pending": "Atsauc…",
+      "done": "Atsaukts: rinda atkal ir atsevišķs projekts.",
+      "failed": "Nav atsaukts. Pārlādējiet un mēģiniet vēlreiz."
+    },
+    "timing": "Aprēķināts no {records} ierakstiem {ms} ms laikā.",
+    "types": {
+      "address_spelling_variant": "tā pati adrese, rakstīta citādi",
+      "code_spelling_variant": "tas pats objekta kods, rakstīts citādi",
+      "name_mixed_with_work_description": "darbu apraksts objekta nosaukumā",
+      "object_split_into_projects": "viens objekts sadalīts vairākos projektos",
+      "multiple_objects_in_row": "vairāki objekti vienā rindā",
+      "no_object": "objekts nav norādīts",
+      "no_house_number": "vieta bez mājas numura",
+      "period_mismatch": "darbu periodi tālu viens no otra",
+      "possible_duplicate_records": "iespējami dublēti ieraksti",
+      "ambiguous_person": "cilvēks nav viennozīmīgi identificēts",
+      "conflicting_project_data": "pretrunīgi projekta dati",
+      "possible_same_object": "iespējams, tas pats objekts (nav apvienots)",
+      "date_conflict_person_days": "cilvēkdienas ar pretrunīgiem datumiem",
+      "unplaced_no_object": "ieraksti bez objekta",
+      "unplaced_multiple_objects": "ieraksti ar vairākiem objektiem",
+      "unplaced_single_unmatched": "ieraksti ar nezināmu vietu"
+    },
+    "link": "Datu kvalitāte"
   }
 }

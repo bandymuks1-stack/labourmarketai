@@ -47,12 +47,20 @@ export default async function CompanyHistoryPage({
     typeof sp.place === "string" && sp.place.trim() !== "" ? sp.place : undefined;
   const org = typeof sp.org === "string" && sp.org.trim() !== "" ? sp.org.trim() : null;
   const t = await getTranslations("organizationDoors.pages.history");
+  const tQuality = await getTranslations("historyQuality");
 
   return (
     <div className="flex flex-col gap-6" data-testid="company-history">
       <header className="flex flex-col gap-1">
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
+        <Link
+          href={"/dashboard/company/history/quality" as "/dashboard"}
+          className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-brand-blue hover:underline"
+          data-testid="company-history-quality-link"
+        >
+          {tQuality("link")} →
+        </Link>
       </header>
 
       {/* WHAT IS ALREADY ON RECORD — the committed history seen by place,

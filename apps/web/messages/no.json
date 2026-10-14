@@ -7394,5 +7394,98 @@
     "openBuyerSetup": "Åpne kjøperoppsett →",
     "startBuyerProfile": "Start kjøperprofil →",
     "footer": "Ingenting her er oppdiktet: hver viste status er lest fra kontoen din."
+  },
+  "historyQuality": {
+    "back": "Tilbake til historikken",
+    "title": "Datakvalitet i historikken",
+    "intro": "Hva {organization}s import laget, hva LabourMarket.ai kjente igjen i den og hva som fortsatt er uløst — fra de samme postene, ingen av dem endret.",
+    "notApplied": "Konsolideringen er ikke tatt i bruk ennå: tallene viser importen slik den er.",
+    "unavailable": "Datakvaliteten kunne ikke leses akkurat nå. Det betyr ikke «ingen problemer» — prøv igjen.",
+    "before": {
+      "title": "Som importert (regneark)",
+      "note": "{sources, plural, one {# kildefil} other {# kildefiler}}"
+    },
+    "after": {
+      "title": "I LabourMarket.ai",
+      "merged": "{rows, plural, one {# importert rad gjenkjent som del av et annet prosjekt} other {# importerte rader gjenkjent som del av et annet prosjekt}}",
+      "onProject": "{records} poster ({hours} t) knyttet til et prosjekt",
+      "peopleWithHistory": "{people, plural, one {# person med prosjekthistorikk} other {# personer med prosjekthistorikk}}"
+    },
+    "m": {
+      "projectRows": "prosjektrader",
+      "realProjects": "reelle prosjekter",
+      "records": "arbeidsposter",
+      "hours": "registrerte timer",
+      "people": "personer"
+    },
+    "invariant": "Poster, timer og personer er identiske før og etter: ingenting er flyttet, delt eller slettet.",
+    "invariantBroken": "Obs: summene avviker før og etter — meld fra; ingenting skal endres.",
+    "example": {
+      "title": "Ett objekt, mange skrivemåter",
+      "intro": "Reelle grupper fra denne importen: det regnearkene holdt som separate rader, holder LabourMarket.ai som ett prosjekt med hele historikken.",
+      "spreadsheet": "I regnearkene: {rows} separate rader",
+      "more": "… og {count} til",
+      "lm": "I LabourMarket.ai: ett prosjekt",
+      "facts": "{records} poster · {hours} t · {people, plural, one {# person} other {# personer}}",
+      "probable": "Sannsynlig: samme adresse, annen periode eller andre personer — registrert, kan angres."
+    },
+    "unresolved": {
+      "title": "Fortsatt uløst — bevart nøyaktig som registrert",
+      "noObject": "{records} poster ({hours} t) oppgir ikke noe objekt — de blir i organisasjonens historikk, ikke på et oppdiktet prosjekt.",
+      "multi": "{records} poster ({hours} t) oppgir flere objekter på én rad — timene deles ikke.",
+      "single": "{records} poster ({hours} t) oppgir et sted som ikke passer noe kjent objekt.",
+      "dates": "{personDays} persondager har flere poster på samme dato ({records} poster): i kilden ble en dagsetikett gjenbrukt over uker. Timene beholdes; datoene må rettes.",
+      "probable": "{count, plural, one {# sammenslåing er sannsynlig} other {# sammenslåinger er sannsynlige}} (samme adresse, annen periode eller personer).",
+      "conflicts": "{count, plural, one {# rad har en registrert motsigelse} other {# rader har en registrert motsigelse}}."
+    },
+    "sessions": {
+      "title": "Per kildefil",
+      "source": "Kilde",
+      "onProject": "På et prosjekt",
+      "unplaced": "Uten objekt"
+    },
+    "register": {
+      "title": "Hvert registrert avvik",
+      "rows": "{count, plural, one {# registrert beslutning} other {# registrerte beslutninger}}",
+      "reverted": "angret",
+      "rule": "regel {rule}, {at}",
+      "decision": {
+        "merged": "slått sammen",
+        "canonical": "beholdt prosjekt",
+        "kept_separate": "holdt adskilt"
+      },
+      "certainty": {
+        "unambiguous": "entydig",
+        "probable": "sannsynlig",
+        "none": "ikke slått sammen"
+      }
+    },
+    "undo": {
+      "reason": "Grunn til å angre",
+      "button": "Angre sammenslåing",
+      "pending": "Angrer…",
+      "done": "Angret: raden er igjen et eget prosjekt.",
+      "failed": "Ikke angret. Last inn på nytt og prøv igjen."
+    },
+    "timing": "Beregnet fra {records} poster på {ms} ms.",
+    "types": {
+      "address_spelling_variant": "samme adresse, skrevet ulikt",
+      "code_spelling_variant": "samme objektkode, skrevet ulikt",
+      "name_mixed_with_work_description": "arbeidsbeskrivelse i objektnavnet",
+      "object_split_into_projects": "ett objekt delt på flere prosjekter",
+      "multiple_objects_in_row": "flere objekter på én rad",
+      "no_object": "intet objekt oppgitt",
+      "no_house_number": "sted uten husnummer",
+      "period_mismatch": "arbeidsperioder langt fra hverandre",
+      "possible_duplicate_records": "mulig dupliserte poster",
+      "ambiguous_person": "person ikke entydig identifisert",
+      "conflicting_project_data": "motstridende prosjektdata",
+      "possible_same_object": "muligens samme objekt (ikke slått sammen)",
+      "date_conflict_person_days": "persondager med motstridende datoer",
+      "unplaced_no_object": "poster uten objekt",
+      "unplaced_multiple_objects": "poster med flere objekter",
+      "unplaced_single_unmatched": "poster med ukjent sted"
+    },
+    "link": "Datakvalitet"
   }
 }
