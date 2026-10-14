@@ -488,7 +488,8 @@
     "uploadFailed": "Nie udało się przesłać zdjęcia. Wpis został zapisany — spróbuj dołączyć zdjęcie ponownie później.",
     "uploading": "Przesyłanie zdjęcia…",
     "remove": "Usuń zdjęcie",
-    "previewAlt": "Wybrane zdjęcie"
+    "previewAlt": "Wybrane zdjęcie",
+    "takePhoto": "Zrób zdjęcie"
   },
   "modes": {
     "title": "Typ wpisu",

@@ -14539,7 +14539,10 @@
       "chipOfferOurs": "Onze ploeg of ons bedrijf aanbieden",
       "teamOfferAgreed": "In principe akkoord — nog geen getekend contract. Spreek de voorwaarden af in het gesprek en wijs het team daarna toe aan een project.",
       "teamOfferDeclined": "Afgewezen. Het aanbiedende bedrijf ziet je antwoord.",
-      "teamOfferThreadFailed": "Dit gesprek kan niet worden geopend."
+      "teamOfferThreadFailed": "Dit gesprek kan niet worden geopend.",
+      "planIntro": "{count, plural, one {Dat is # stap.} other {Dat zijn # stappen, op volgorde. Hier is de eerste — tik op de volgende wanneer je klaar bent.}}",
+      "planNextOffer": "Volgende stap:",
+      "planStep": "Stap {n} van {count}"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -19496,6 +19499,36 @@
       "fact": "Feit",
       "pending": "Wacht op een tweede partij",
       "derived": "Afgeleid uit feiten"
+    }
+  },
+  "projectCourse": {
+    "title": "Projectroute",
+    "count": "{done} van {total} fasen klaar",
+    "unknown": "Kon de projectfasen niet lezen.",
+    "here": "Hier zijn we",
+    "state": {
+      "done": "Klaar",
+      "now": "Bezig",
+      "risk": "Achter op de planning",
+      "blocked": "Geblokkeerd",
+      "planned": "Gepland",
+      "cancelled": "Geannuleerd"
+    },
+    "helpNeeded": "Hulp nodig — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Doel van deze week",
+    "titleMine": "Je taken deze week",
+    "count": "{done} van {total} klaar",
+    "unknown": "Kon de taken van deze week niet lezen.",
+    "mineNote": "Alleen taken die jij kunt zien: van jou en je team.",
+    "status": {
+      "todo": "Te doen",
+      "in_progress": "Bezig",
+      "blocked": "Geblokkeerd",
+      "done": "Klaar",
+      "cancelled": "Geannuleerd",
+      "overdue": "Te laat"
     }
   }
 }

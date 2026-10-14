@@ -297,3 +297,14 @@ describe("mobile store-release config — submission questions answered in app.j
     expect(wf).toContain("ANDROID_RELEASE_AAB_BUILT");
   });
 });
+
+describe("iOS CI proves a DEVICE archive, not only a simulator build", () => {
+  it("archives for generic iOS unsigned and reads the store answers from the archived Info.plist", () => {
+    const wf = readFileSync(resolve(REPO, ".github/workflows/ios.yml"), "utf8");
+    expect(wf).toContain('-destination "generic/platform=iOS"');
+    expect(wf).toContain("CODE_SIGNING_ALLOWED=NO");
+    expect(wf).toContain("Print :ITSAppUsesNonExemptEncryption");
+    expect(wf).toContain("Print :UIDeviceFamily");
+    expect(wf).toContain("IOS_DEVICE_ARCHIVE_BUILT");
+  });
+});

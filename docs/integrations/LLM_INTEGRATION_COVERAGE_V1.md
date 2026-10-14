@@ -138,6 +138,34 @@ Legend: ✅ covered by real tools · 🟡 partly covered · ⛔ not exposed (rea
   the 229 tools, and every owner acceptance prompt above. Those are the
   owner's acceptance steps; this slice does not mark them done.
 
+### 7.1 Real CLIENT proof vs MCP SERVER proof (2026-10-14, owner §5)
+
+These are two different claims and are never merged.
+- A **server** test calls `/api/mcp` directly with a bearer token that the test itself minted. It proves the server.
+- A **client** test is ChatGPT or Claude doing its own discovery, OAuth, tool choice and rendering. Only that proves the integration a person will use.
+
+| What | Server proof (agent, today) | Real client proof | Status |
+|---|---|---|---|
+| Discovery (PRM → authorization server metadata) | Read live 2026-10-14: PRM → `…supabase.co/auth/v1`; AS metadata lists DCR, PKCE S256, `none` auth, refresh | **ChatGPT 2026-08-30**: DCR 201, consent 200, token 200 (`CHATGPT_MCP_CLIENT_V1.md`) | ChatGPT ✓ · **Claude NOT VERIFIED** |
+| Tool list | Public `GET /api/mcp` → `toolCount 229` (`0.1.0+t229.105ffae5`) | ChatGPT last saw **81** (a stored snapshot). The owner must press **Refresh** in the connector. | Server ✓ · ChatGPT 229 **NOT VERIFIED** · Claude **NOT VERIFIED** |
+| Read | `mcp-chain` + `mcp-agents` prod walks green (synthetic cast, minted bearer) | ChatGPT `profile.get` 2026-08-30 | ChatGPT ✓ (81-tool era) |
+| Draft → confirm write | `mcp-chain` walk; replay refused (single-use) | ChatGPT journal draft→confirm 2026-08-30, plus a DB row | ChatGPT ✓ (81-tool era) |
+| Refusals: invalid token, rate limit | `mcp-door-refusals.test.ts` (incl. the 600 / 5 min per-person brake, #2373) | — | Server ✓ |
+| Revocation | Connected Apps → revoke grant → next call 401 (`connected-apps-surface.test.ts`) | not re-run with a live client | Server ✓ · client NOT VERIFIED |
+| Domain verification (OpenAI) | `/.well-known/openai-apps-challenge` (#2374) answers 404 until the token is set | portal verification | Owner step |
+
+**The client test protocol** (owner, about 20 minutes per client; use the synthetic review account, never a personal one):
+1. **ChatGPT:**
+   - Settings → Connectors → LabourMarket.ai → **Refresh**.
+   - Confirm the tool list is larger than 81 and that `serverInfo.version` matches the top row of `MCP_TOOLSET_FINGERPRINTS.md`.
+2. **Claude:**
+   - Settings → Connectors → *Add custom connector* → `https://labourmarket.ai/api/mcp`.
+   - Complete the consent screen.
+3. In each client, run the **5 positive + 3 negative** cases from `docs/launch/RELEASE_SUBMISSION_PACK_2026-10-14.md` §4.
+4. Record per case: the tool the client called, whether a draft was confirmed before any write, and the reply.
+5. Server-side evidence for the same minutes: `vercel logs … -q external_client` shows `external_client.auth` / `external_client.tool` lines (class-only, no data).
+6. Settings → Account → Connected apps → **revoke**. The next client call must ask to reconnect.
+
 ## 8. Next: AI agents as labour-market participants (owner direction 2026-10-13)
 
 This integration makes every agent a **DELEGATE**: it acts for the signed-in

@@ -14539,7 +14539,10 @@
       "chipOfferOurs": "Offer our brigade or company",
       "teamOfferAgreed": "Agreed in principle — not a signed contract. Settle the terms in the conversation, then assign the team to a project.",
       "teamOfferDeclined": "Declined. The offering company will see your answer.",
-      "teamOfferThreadFailed": "This conversation cannot be opened."
+      "teamOfferThreadFailed": "This conversation cannot be opened.",
+      "planIntro": "{count, plural, one {That is # step.} other {That is # steps, in order. Here is the first — tap the next one when you are ready.}}",
+      "planNextOffer": "Next step:",
+      "planStep": "Step {n} of {count}"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -19496,6 +19499,36 @@
       "fact": "Fact",
       "pending": "Waiting for a second party",
       "derived": "Derived from facts"
+    }
+  },
+  "projectCourse": {
+    "title": "Project course",
+    "count": "{done} of {total} stages done",
+    "unknown": "Couldn't read the project's stages.",
+    "here": "We are here",
+    "state": {
+      "done": "Done",
+      "now": "In progress",
+      "risk": "Behind its planned end",
+      "blocked": "Blocked",
+      "planned": "Planned",
+      "cancelled": "Cancelled"
+    },
+    "helpNeeded": "Help needed — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "This week's goal",
+    "titleMine": "Your tasks this week",
+    "count": "{done} of {total} done",
+    "unknown": "Couldn't read this week's tasks.",
+    "mineNote": "Only the tasks you can see: yours and your team's.",
+    "status": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "blocked": "Blocked",
+      "done": "Done",
+      "cancelled": "Cancelled",
+      "overdue": "Overdue"
     }
   }
 }

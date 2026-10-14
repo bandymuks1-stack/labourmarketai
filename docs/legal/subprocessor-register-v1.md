@@ -1,5 +1,7 @@
 # Vendor / Subprocessor Register — v1 (2026-07-11)
 
+> **SUPERSEDED 2026-10-14 by [`subprocessor-register-v2.md`](subprocessor-register-v2.md)** — v1 missed Gemini (live since 2026-08-28) and Stripe. Kept unchanged below as history.
+
 Controller: UAB „Nonstop Group“ (302676973, Lithuania). Register of
 processors/subprocessors that touch platform personal data, plus vendors
 that do NOT. DPA status honestly marked — VERIFY items are owner actions.

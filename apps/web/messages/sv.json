@@ -7609,5 +7609,35 @@
       "pending": "Väntar på en annan part",
       "derived": "Härlett ur fakta"
     }
+  },
+  "projectCourse": {
+    "title": "Projektförlopp",
+    "count": "{done} av {total} etapper klara",
+    "unknown": "Projektets etapper kunde inte läsas.",
+    "here": "Här är vi",
+    "state": {
+      "done": "Klar",
+      "now": "Pågår",
+      "risk": "Efter planen",
+      "blocked": "Blockerad",
+      "planned": "Planerad",
+      "cancelled": "Inställd"
+    },
+    "helpNeeded": "Hjälp behövs — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Veckans mål",
+    "titleMine": "Dina uppgifter den här veckan",
+    "count": "{done} av {total} klara",
+    "unknown": "Veckans uppgifter kunde inte läsas.",
+    "mineNote": "Bara uppgifter du kan se: dina och ditt teams.",
+    "status": {
+      "todo": "Att göra",
+      "in_progress": "Pågår",
+      "blocked": "Blockerad",
+      "done": "Klar",
+      "cancelled": "Inställd",
+      "overdue": "Försenad"
+    }
   }
 }
