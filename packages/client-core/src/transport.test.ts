@@ -2,10 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   CAPABILITY_PATH,
+  DOMAIN_REQUEST_TIMEOUT_MS,
   DOMAIN_TRANSPORT_STATUS,
   callCapability,
   callDomain,
   failureMessageKey,
+  fetchWithDeadline,
   type TransportStatus,
 } from "./transport";
 
@@ -306,6 +308,156 @@ describe("callCapability speaks JSON-RPC to /api/mcp", () => {
     );
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(result.ok === false && result.failure.kind).toBe("not_authenticated");
+  });
+});
+
+/**
+ * WEAK NETWORK — what a phone on one bar actually meets.
+ *
+ * The screen-side rule (CapabilityGate, #1314) is that a failed read renders
+ * as a failure with a retry, never as an empty list. That rule only holds if
+ * every bad network ENDS in a failure: an exchange that hangs forever leaves
+ * the screen on its spinner, which is neither an answer nor an honest
+ * failure. These pin that every shape of bad network resolves to
+ * `unreachable` (the "No connection" sentence + retry), never to `ok` and
+ * never to an empty payload.
+ */
+describe("weak network: every bad link ends in an honest failure", () => {
+  const hangsForever = (() =>
+    new Promise<Response>(() => {
+      /* never settles: a dead link with no TCP reset */
+    })) as unknown as typeof fetch;
+
+  it("ships a finite default deadline", () => {
+    expect(DOMAIN_REQUEST_TIMEOUT_MS).toBeGreaterThan(0);
+    expect(DOMAIN_REQUEST_TIMEOUT_MS).toBeLessThanOrEqual(60_000);
+  });
+
+  it("a request that never answers resolves to unreachable at the deadline", async () => {
+    const result = await callCapability(
+      { ...deps(hangsForever), timeoutMs: 20 },
+      { name: "journal.list", args: { limit: 20 }, accessToken: "t" },
+    );
+    expect(result.ok).toBe(false);
+    expect(result.ok === false && result.failure).toEqual({
+      kind: "unreachable",
+      detail: "no answer within 0 s",
+    });
+  });
+
+  it("the default deadline applies when none is injected (fake timers)", async () => {
+    vi.useFakeTimers();
+    try {
+      const pending = callDomain(deps(hangsForever), {
+        path: CAPABILITY_PATH,
+        method: "POST",
+        accessToken: "t",
+      });
+      await vi.advanceTimersByTimeAsync(DOMAIN_REQUEST_TIMEOUT_MS + 1);
+      const result = await pending;
+      expect(result.ok === false && result.failure.kind).toBe("unreachable");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("headers arrive but the body stalls: still unreachable, not unreadable", async () => {
+    const stalledBody = (async (_url: string, init?: RequestInit) => {
+      const signal = init?.signal;
+      return {
+        ok: true,
+        status: 200,
+        json: () =>
+          new Promise((_, reject) => {
+            signal?.addEventListener("abort", () =>
+              reject(new Error("The operation was aborted.")),
+            );
+          }),
+      } as unknown as Response;
+    }) as unknown as typeof fetch;
+    const result = await callCapability(
+      { ...deps(stalledBody), timeoutMs: 20 },
+      { name: "profile.get", accessToken: "t" },
+    );
+    expect(result.ok === false && result.failure.kind).toBe("unreachable");
+  });
+
+  it("the deadline aborts the underlying request so a late answer cannot land", async () => {
+    let seenSignal: AbortSignal | undefined;
+    const fetchImpl = ((_url: string, init?: RequestInit) => {
+      seenSignal = init?.signal ?? undefined;
+      return new Promise<Response>(() => {});
+    }) as unknown as typeof fetch;
+    await callDomain(
+      { ...deps(fetchImpl), timeoutMs: 20 },
+      { path: "/api/mcp", accessToken: "t" },
+    );
+    expect(seenSignal?.aborted).toBe(true);
+  });
+
+  it("a slow answer inside the deadline is a success — slowness alone is not failure", async () => {
+    const slow = (async () => {
+      await new Promise((r) => setTimeout(r, 30));
+      return jsonResponse(200, {
+        jsonrpc: "2.0",
+        id: 1,
+        result: { structuredContent: { ok: true, data: { entries: [] } } },
+      });
+    }) as unknown as typeof fetch;
+    const result = await callCapability<{ entries: unknown[] }>(
+      { ...deps(slow), timeoutMs: 2_000 },
+      { name: "journal.list", accessToken: "t" },
+    );
+    // The ONE path to an empty list: the server answered, and it was empty.
+    expect(result).toEqual({ ok: true, data: { entries: [] } });
+  });
+
+  it("an offline phone (fetch rejects at once) is unreachable, never an empty list", async () => {
+    const offline = (async () => {
+      throw new TypeError("Network request failed");
+    }) as unknown as typeof fetch;
+    const result = await callCapability(deps(offline), {
+      name: "journal.list",
+      accessToken: "t",
+    });
+    expect(result.ok).toBe(false);
+    expect(result.ok === false && result.failure).toEqual({
+      kind: "unreachable",
+      detail: "Network request failed",
+    });
+    expect(
+      result.ok === false && failureMessageKey(result.failure),
+    ).toBe("domain.unavailable.offline");
+  });
+
+  it("fetchWithDeadline (the auth client's fetch) rejects a dead link like a dropped connection", async () => {
+    const guarded = fetchWithDeadline(hangsForever, 20);
+    await expect(guarded("https://auth.example/token", { method: "POST" })).rejects.toThrow(
+      /no answer within/,
+    );
+  });
+
+  it("fetchWithDeadline passes a timely answer through untouched", async () => {
+    const quick = (async () => jsonResponse(200, { ok: 1 })) as unknown as typeof fetch;
+    const res = await fetchWithDeadline(quick, 1_000)("https://auth.example/token");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: 1 });
+  });
+
+  it("a gateway timeout page (504 HTML) is unreadable — a failure, not data", async () => {
+    const gateway = (async () =>
+      new Response("<html>504 Gateway Time-out</html>", {
+        status: 504,
+        headers: { "content-type": "text/html" },
+      })) as unknown as typeof fetch;
+    const result = await callCapability(deps(gateway), {
+      name: "journal.list",
+      accessToken: "t",
+    });
+    expect(result.ok === false && result.failure).toEqual({
+      kind: "unreadable",
+      status: 504,
+    });
   });
 });
 

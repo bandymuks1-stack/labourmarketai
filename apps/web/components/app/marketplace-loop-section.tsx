@@ -26,6 +26,7 @@ import { PARTNERSHIP_CATEGORY } from "@/lib/services/service-offerings-shared";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { EmptyState } from "./empty-state";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
 
 /**
  * P0 Marketplace loop (Phase 1) — one compact surface: discover active offerings
@@ -115,19 +116,16 @@ function isoDay(ts: string | null): string | null {
   return /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null;
 }
 
-const STATUS_RING: Record<RequestStatus, string> = {
-  sent: "border-ink-500 bg-ink-800/40 text-text-muted",
-  accepted: "border-state-success/40 bg-state-success/5 text-state-success",
-  declined: "border-state-warning/40 bg-state-warning/5 text-state-warning",
-  withdrawn: "border-ink-500 bg-ink-800/40 text-text-muted",
+/** Request status -> the one StatusChip pattern (word + shape). */
+const STATUS_VARIANT: Record<RequestStatus, StatusChipVariant> = {
+  sent: "neutral",
+  accepted: "success",
+  declined: "attention",
+  withdrawn: "neutral",
 };
 
-function StatusChip({ status, label }: { status: RequestStatus; label: string }) {
-  return (
-    <span className={`inline-block rounded-full border px-2 py-0.5 text-xs ${STATUS_RING[status]}`}>
-      {label}
-    </span>
-  );
+function RequestStatusChip({ status, label }: { status: RequestStatus; label: string }) {
+  return <StatusChip variant={STATUS_VARIANT[status]}>{label}</StatusChip>;
 }
 
 /**
@@ -523,7 +521,7 @@ export function MarketplaceLoopSection({
                 <div className="min-w-0 space-y-1">
                   <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <StatusChip status={r.status} label={labels.status[r.status]} />
+                    <RequestStatusChip status={r.status} label={labels.status[r.status]} />
                     {isoDay(r.respondedAt) && (
                       <span
                         data-testid="marketplace-outgoing-responded"
@@ -635,7 +633,7 @@ export function MarketplaceLoopSection({
                     </span>
                   </div>
                   <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
-                  <StatusChip status={r.status} label={labels.status[r.status]} />
+                  <RequestStatusChip status={r.status} label={labels.status[r.status]} />
                   {r.message && (
                     <p
                       data-testid="marketplace-incoming-message"

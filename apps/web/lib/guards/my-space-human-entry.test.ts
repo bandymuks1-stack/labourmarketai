@@ -172,7 +172,7 @@ describe("'Mano erdvė' copy is human, calm, present in LT + EN", () => {
       snapshot: Record<string, string>;
     };
     expect(m.eyebrow).toBe("Aš dabar");
-    expect(m.intro).toMatch(/jūsų erdvė/i);
+    expect(m.intro).toMatch(/tavo erdvė/i);
     // First-person human framing for the snapshot ("ką dirbu / moku / įrodau").
     expect(m.snapshot.work).toMatch(/^Ką /);
   });
@@ -229,9 +229,9 @@ describe("'Mano darbo kortelė' (work card) copy is complete + honest in LT + EN
 
   it("LT why-copy matches the mandated benefit sentences", () => {
     const w = card(lt) as { why: Record<string, string> };
-    expect(w.why.work).toMatch(/kokiam darbui jus galima siūlyti/);
-    expect(w.why.pay).toMatch(/pagrįsti jūsų pageidaujamą tarifą/);
-    expect(w.why.evidence).toMatch(/galite juos pridėti vėliau/);
+    expect(w.why.work).toMatch(/kokiam darbui tave galima siūlyti/);
+    expect(w.why.pay).toMatch(/pagrįsti tavo pageidaujamą tarifą/);
+    expect(w.why.evidence).toMatch(/gali juos pridėti vėliau/);
   });
 
   it("work-card copy makes no fake score / no fabricated matching claim", () => {

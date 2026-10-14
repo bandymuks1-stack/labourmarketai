@@ -143,7 +143,96 @@ export type DomainDependencies = {
   readonly fetch: typeof fetch;
   /** Injectable so a refusing build stays testable. */
   readonly status?: TransportStatus;
+  /**
+   * How long one exchange (request AND reading the answer) may take before it
+   * is reported as `unreachable`. Defaults to `DOMAIN_REQUEST_TIMEOUT_MS`.
+   */
+  readonly timeoutMs?: number;
 };
+
+/**
+ * THE DEADLINE ON ONE EXCHANGE.
+ *
+ * React Native's `fetch` has no timeout of its own: on a weak mobile link (one
+ * bar, a lift, a basement site) a request can neither succeed nor fail for
+ * minutes, and a screen waiting on it spins with nothing to say — the "does
+ * not spin forever" promise `CapabilityGate` makes was only as good as the
+ * network. Past this deadline the exchange resolves to `unreachable`: the
+ * screen shows its honest failure with a retry, and asserts nothing about the
+ * data. A write that times out is UNSURE, not failed — the composer already
+ * treats an `unreachable` confirm as "we do not know whether it arrived".
+ *
+ * Thirty seconds, not ten: a journal confirm runs the canonical write plus
+ * the Living CV update server-side, and calling a slow success a failure
+ * would teach people to write the same entry twice.
+ */
+export const DOMAIN_REQUEST_TIMEOUT_MS = 30_000;
+
+class DeadlineExceeded extends Error {
+  constructor(ms: number) {
+    super("no answer within " + Math.round(ms / 1000) + " s");
+  }
+}
+
+/**
+ * Race `work` against the deadline. The timer is always cleared, and an
+ * `AbortController` (where the runtime has one) cancels the underlying
+ * request so a late answer cannot land after the screen moved on.
+ */
+async function withDeadline<T>(
+  ms: number,
+  work: (signal: AbortSignal | undefined) => Promise<T>,
+): Promise<T> {
+  const controller =
+    typeof AbortController === "function" ? new AbortController() : undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      controller?.abort();
+      reject(new DeadlineExceeded(ms));
+    }, ms);
+  });
+  try {
+    return await Promise.race([work(controller?.signal), deadline]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
+/**
+ * A `fetch` with the same deadline, for the one client that does not go
+ * through `callDomain`: the auth client (`supabase-js`), whose sign-in,
+ * registration and refresh would otherwise wait on a dead link indefinitely.
+ * Past the deadline it REJECTS like a dropped connection, which `supabase-js`
+ * reports as a retryable fetch error with no HTTP status — the app already
+ * maps that to "we could not reach the server", never to "wrong password".
+ *
+ * A caller's own `signal` keeps working: where the runtime has
+ * `AbortSignal.any` both signals reach the request; otherwise the caller's
+ * signal does, and the deadline still settles the call by itself.
+ */
+export function fetchWithDeadline(
+  fetchImpl: typeof fetch,
+  timeoutMs: number = DOMAIN_REQUEST_TIMEOUT_MS,
+): typeof fetch {
+  return ((input: Parameters<typeof fetch>[0], init?: RequestInit) =>
+    withDeadline(timeoutMs, (deadlineSignal) => {
+      const own = init?.signal ?? undefined;
+      const anyOf =
+        typeof AbortSignal === "undefined"
+          ? undefined
+          : (
+              AbortSignal as unknown as {
+                any?: (signals: AbortSignal[]) => AbortSignal;
+              }
+            ).any;
+      const signal =
+        own !== undefined && deadlineSignal !== undefined && typeof anyOf === "function"
+          ? anyOf([own, deadlineSignal])
+          : (own ?? deadlineSignal);
+      return fetchImpl(input, { ...init, signal });
+    })) as typeof fetch;
+}
 
 /**
  * Call a canonical API route.
@@ -176,30 +265,45 @@ export async function callDomain<T>(
   if (request.locale !== undefined) headers["Accept-Language"] = request.locale;
   if (request.body !== undefined) headers["Content-Type"] = "application/json";
 
+  const timeoutMs = deps.timeoutMs ?? DOMAIN_REQUEST_TIMEOUT_MS;
   let response: Response;
+  let payload: unknown = undefined;
   try {
-    response = await deps.fetch(deps.apiBaseUrl + request.path, {
-      method: request.method ?? "GET",
-      headers,
-      body:
-        request.body === undefined ? undefined : JSON.stringify(request.body),
-    });
+    // ONE deadline over the whole exchange: a server that sends headers and
+    // then trickles the body is as stuck, to the person holding the phone, as
+    // one that never answers.
+    ({ response, payload } = await withDeadline(timeoutMs, async (signal) => {
+      const res = await deps.fetch(deps.apiBaseUrl + request.path, {
+        method: request.method ?? "GET",
+        headers,
+        body:
+          request.body === undefined ? undefined : JSON.stringify(request.body),
+        signal,
+      });
+      let body: unknown = undefined;
+      try {
+        body = await res.json();
+      } catch (error) {
+        // A deadline that fired while the body was arriving is NOT an
+        // unreadable answer — it is no answer. Everything else is.
+        if (signal?.aborted === true) throw error;
+        body = undefined;
+      }
+      return { response: res, payload: body };
+    }));
   } catch (error) {
     return {
       ok: false,
       failure: {
         kind: "unreachable",
         detail:
-          error instanceof Error ? error.message : "network request failed",
+          error instanceof DeadlineExceeded
+            ? error.message
+            : error instanceof Error
+              ? error.message
+              : "network request failed",
       },
     };
-  }
-
-  let payload: unknown = undefined;
-  try {
-    payload = await response.json();
-  } catch {
-    payload = undefined;
   }
 
   if (!response.ok) {

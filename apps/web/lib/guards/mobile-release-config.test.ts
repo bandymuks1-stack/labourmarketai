@@ -170,6 +170,43 @@ describe("mobile store-release config — the generated native project is only a
     ).toBe(false);
   });
 
+  /**
+   * ICON AND SPLASH — generated from the existing brand mark
+   * (`apps/web/public/app-icon.svg`) by `apps/mobile/scripts/generate-app-assets.mjs`.
+   * Without them both stores receive Expo's placeholder. Apple rejects an
+   * icon that carries an alpha channel, which a PNG export adds silently, so
+   * the channel layout is read from the PNG header itself.
+   * Final store art is still the owner's approval at publishing time.
+   */
+  it("icon, adaptive icon and splash are wired to files that exist", () => {
+    const png = (rel: string) => {
+      const p = resolve(REPO, "apps/mobile", rel);
+      expect(existsSync(p), `${rel} is referenced by app.json but missing`).toBe(true);
+      const buf = readFileSync(p);
+      // IHDR: width @16, height @20 (big-endian), colour type @25.
+      return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20), colourType: buf[25] };
+    };
+    const icon = png(appConfig.icon);
+    expect([icon.w, icon.h]).toEqual([1024, 1024]);
+    // 2 = RGB, 0 = greyscale: no alpha. 4/6 carry alpha and Apple refuses them.
+    expect([0, 2], "the store icon must have no alpha channel").toContain(icon.colourType);
+
+    const fg = png(appConfig.android.adaptiveIcon.foregroundImage);
+    expect([fg.w, fg.h]).toEqual([1024, 1024]);
+    png(appConfig.android.adaptiveIcon.monochromeImage);
+    expect(appConfig.android.adaptiveIcon.backgroundColor).toMatch(/^#[0-9A-Fa-f]{6}$/);
+
+    const splash = (appConfig.plugins as unknown[]).find(
+      (p) => Array.isArray(p) && p[0] === "expo-splash-screen",
+    ) as [string, { image: string; backgroundColor: string }] | undefined;
+    expect(splash, "expo-splash-screen plugin is not configured — SDK 52+ has no top-level splash").toBeDefined();
+    png(splash![1].image);
+    expect(splash![1].backgroundColor).toMatch(/^#[0-9A-Fa-f]{6}$/);
+    expect(mobilePkg.dependencies["expo-splash-screen"], "the splash plugin needs its package").toBeDefined();
+
+    expect(existsSync(resolve(REPO, "apps/mobile/scripts/generate-app-assets.mjs"))).toBe(true);
+  });
+
   it("the native projects stay generated, never committed", () => {
     const ignore = readFileSync(resolve(REPO, "apps/mobile/.gitignore"), "utf8");
     expect(ignore).toMatch(/^\/android$/m);
