@@ -14539,7 +14539,10 @@
       "chipOfferOurs": "Zaoferuj naszą brygadę lub firmę",
       "teamOfferAgreed": "Uzgodnione wstępnie — to jeszcze nie podpisana umowa. Ustalcie warunki w rozmowie, a potem przypisz zespół do projektu.",
       "teamOfferDeclined": "Odrzucono. Oferująca firma zobaczy twoją odpowiedź.",
-      "teamOfferThreadFailed": "Nie można otworzyć tej rozmowy."
+      "teamOfferThreadFailed": "Nie można otworzyć tej rozmowy.",
+      "planIntro": "{count, plural, one {To # krok.} few {To # kroki, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.} many {To # kroków, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.} other {To # kroku, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.}}",
+      "planNextOffer": "Następny krok:",
+      "planStep": "Krok {n} z {count}"
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",
@@ -19463,6 +19466,36 @@
       "partial": "Część danych jest chwilowo niedostępna ({count} z 4 obszarów).",
       "totalTitle": "Nie udało się teraz wczytać Twoich danych",
       "totalBody": "Twoje wpisy są bezpieczne — to chwilowy problem. Spróbuj ponownie za moment."
+    }
+  },
+  "projectCourse": {
+    "title": "Trasa projektu",
+    "count": "Ukończono {done} z {total} etapów",
+    "unknown": "Nie udało się odczytać etapów projektu.",
+    "here": "Tu jesteśmy",
+    "state": {
+      "done": "Ukończony",
+      "now": "W toku",
+      "risk": "Opóźniony względem planu",
+      "blocked": "Wstrzymany",
+      "planned": "Zaplanowany",
+      "cancelled": "Anulowany"
+    },
+    "helpNeeded": "Potrzebna pomoc — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Cel tego tygodnia",
+    "titleMine": "Twoje zadania w tym tygodniu",
+    "count": "Wykonano {done} z {total}",
+    "unknown": "Nie udało się odczytać zadań z tego tygodnia.",
+    "mineNote": "Tylko zadania widoczne dla Ciebie: Twoje i Twojego zespołu.",
+    "status": {
+      "todo": "Do zrobienia",
+      "in_progress": "W toku",
+      "blocked": "Wstrzymane",
+      "done": "Wykonane",
+      "cancelled": "Anulowane",
+      "overdue": "Po terminie"
     }
   }
 }

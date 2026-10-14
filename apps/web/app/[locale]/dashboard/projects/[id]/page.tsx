@@ -17,6 +17,13 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { getProjectStadium } from "@/lib/projects/stadium";
+import { ProjectCourseTrack } from "@/components/app/projects/project-course-track";
+import { deriveProjectCourse } from "@/lib/projects/project-course";
+import { ProjectWeekGoal } from "@/components/app/projects/project-week-goal";
+import { deriveWeeklyGoal } from "@/lib/projects/weekly-goal";
+import { listProjectTasks } from "@/lib/tasks/tasks";
+import { listProjectStages } from "@/lib/projects/stages";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
 import { WorkerProjectPanel } from "@/components/app/worker-project-panel";
 import {
@@ -175,6 +182,17 @@ export default async function ProjectStadiumPage({
     : null;
   const mergedFragments = fragmentsOf.get(id)?.length ?? 0;
 
+  // The project course: the stages the manager's session reads (stage RLS),
+  // through the same model the assigned workers' view uses.
+  const [courseStages, courseToday, courseTasks] = await Promise.all([
+    listProjectStages(id).catch(() => null),
+    viewerWorkToday(),
+    listProjectTasks(id).catch(() => null),
+  ]);
+  const stadiumCourse = deriveProjectCourse(courseStages, courseToday.todayIso);
+  // This week's goal over every task the manager's session reads.
+  const stadiumWeekGoal = deriveWeeklyGoal(courseTasks, { todayIso: courseToday.todayIso, scope: "project" });
+
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="project-stadium">
       {/* ── Arena header: real project facts only ── */}
@@ -303,6 +321,11 @@ export default async function ProjectStadiumPage({
           </div>
         ) : null}
       </header>
+
+      {/* ── THE PROJECT COURSE (Future Experience C): the same route the
+            assigned workers see — one shared goal for the whole team. ── */}
+      <ProjectCourseTrack course={stadiumCourse} locale={locale} />
+      <ProjectWeekGoal goal={stadiumWeekGoal} locale={locale} />
 
       {/* ── THE FIELD comes first: the people around the work are what a
             manager opens this page for. Location, communication and the

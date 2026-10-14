@@ -52,7 +52,17 @@ async function workspace(page: Page, orgName: string): Promise<void> {
   await expect(chip).toContainText(orgName, { timeout: 30_000 });
 }
 
-const myRow = (page: Page) => page.getByTestId("my-absences-list").locator("li", { hasText: `${DAY} → ${DAY}` }).first();
+// The LIVE leave on this run's day: a row that can still be cancelled. The
+// walk day is derived from the run id, so it repeats across runs, and an
+// earlier run's CANCELLED row on the same date stays in the list as history
+// (correctly without a cancel control). Matching by date alone picked that
+// history row on 2026-10-14 (run 38623090696) and the cleanup step timed out
+// waiting for a button that, rightly, was not there.
+const myRow = (page: Page) =>
+  page
+    .getByTestId("my-absences-list")
+    .locator("li", { hasText: `${DAY} → ${DAY}`, has: page.getByTestId("absence-cancel") })
+    .first();
 
 test("1. the worker asks for a day of leave", async ({ browser }) => {
   const { page, close } = await as(browser, "worker");
