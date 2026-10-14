@@ -7796,11 +7796,8 @@
       }
     },
     "readiness": {
-      "label": "Bereitschaft",
+      "label": "Profilschritte",
       "hint": "Alles bereit.",
-      "levelReady": "Bereit",
-      "levelBuilding": "Im Aufbau",
-      "levelStart": "Am Anfang",
       "signalsTemplate": "Schritte erledigt",
       "nextLabel": "Als Nächstes:",
       "pillars": {
@@ -7810,7 +7807,11 @@
         "journal": "Arbeitsjournal",
         "evidence": "Einträge",
         "workCard": "Arbeitskarte"
-      }
+      },
+      "ringAria": "Profilschritte: {met} von {total} erledigt",
+      "stepDone": "erledigt",
+      "stepOpen": "offen",
+      "summary": "Profilschritte: {done} von {total} erledigt"
     },
     "verifiedTitle": "Vom Manager bestätigte Fähigkeiten",
     "verifiedEmpty": "Noch keine. Sie entstehen aus Ihren Arbeitseinträgen.",

@@ -163,7 +163,7 @@ export function IdentityStage({
                   data-testid="identity-stage-current-work"
                 >
                   <span className="live-dot" aria-hidden />
-                  <span className="whitespace-nowrap font-mono text-meta uppercase tracking-label text-text-muted">
+                  <span className="whitespace-nowrap text-xs font-medium text-text-muted">
                     {currentWorkLabel}
                   </span>
                   <span className="min-w-0 break-words font-medium text-text-primary">
@@ -202,7 +202,7 @@ export function IdentityStage({
                     .filter((f) => f.value !== null)
                     .map((f) => (
                       <div key={f.testid} className="flex min-w-0 flex-col gap-0.5" data-testid={f.testid}>
-                        <dt className="order-2 min-w-0 break-words font-mono text-[0.625rem] uppercase tracking-label text-text-muted sm:text-meta">
+                        <dt className="order-2 min-w-0 break-words text-xs text-text-muted">
                           {f.label}
                         </dt>
                         <dd
@@ -226,7 +226,7 @@ export function IdentityStage({
                         key={f.testid}
                         data-testid={f.testid}
                         data-absent="true"
-                        className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 py-1 font-mono text-[0.625rem] uppercase tracking-label text-text-secondary sm:text-meta"
+                        className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 py-1 text-xs text-text-secondary"
                       >
                         <CircleDashed className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
                         <span className="min-w-0 break-words">{f.label}</span>

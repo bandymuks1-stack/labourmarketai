@@ -7796,11 +7796,8 @@
       }
     },
     "readiness": {
-      "label": "Готовность",
+      "label": "Шаги профиля",
       "hint": "Всё готово.",
-      "levelReady": "Готов",
-      "levelBuilding": "Набирается",
-      "levelStart": "Начало",
       "signalsTemplate": "шагов выполнено",
       "nextLabel": "Дальше:",
       "pillars": {
@@ -7810,7 +7807,11 @@
         "journal": "Рабочий журнал",
         "evidence": "Записи",
         "workCard": "Рабочая карточка"
-      }
+      },
+      "ringAria": "Шаги профиля: выполнено {met} из {total}",
+      "stepDone": "выполнено",
+      "stepOpen": "ещё не сделано",
+      "summary": "Шаги профиля: выполнено {done} из {total}"
     },
     "verifiedTitle": "Навыки, подтверждённые руководителем",
     "verifiedEmpty": "Пока нет. Они формируются из ваших рабочих записей.",

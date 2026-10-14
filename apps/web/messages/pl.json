@@ -7796,11 +7796,8 @@
       }
     },
     "readiness": {
-      "label": "Gotowość",
+      "label": "Kroki profilu",
       "hint": "Wszystko gotowe.",
-      "levelReady": "Gotowe",
-      "levelBuilding": "W budowie",
-      "levelStart": "Na początku",
       "signalsTemplate": "wykonanych kroków",
       "nextLabel": "Dalej:",
       "pillars": {
@@ -7810,7 +7807,11 @@
         "journal": "Dziennik pracy",
         "evidence": "Wpisy",
         "workCard": "Karta pracy"
-      }
+      },
+      "ringAria": "Kroki profilu: wykonano {met} z {total}",
+      "stepDone": "wykonane",
+      "stepOpen": "do zrobienia",
+      "summary": "Kroki profilu: wykonano {done} z {total}"
     },
     "verifiedTitle": "Umiejętności potwierdzone przez kierownika",
     "verifiedEmpty": "Jeszcze żadnych. Powstają na podstawie Twoich wpisów pracy.",

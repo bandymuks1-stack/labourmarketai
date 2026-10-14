@@ -60,8 +60,11 @@ describe("the readiness ring is HONEST — met/total signals, never a fake ratin
   it("centre shows the met/total count, never a fabricated number", () => {
     expect(ring).toMatch(/\{met\}\/\{total\}/);
   });
-  it("aria label states it is signals met, not a rating", () => {
-    expect(ring).toMatch(/signals met/i);
+  it("aria label comes from the caller and names what is counted (steps done), not a rating", () => {
+    // Re-anchored (D2, from #2125): the fixed English "signals met" became a
+    // localized "Profile steps: {met} of {total} done" the card fills in.
+    expect(ring).toMatch(/aria-label=\{ariaLabel\}/);
+    expect(card).toMatch(/ringAria/);
   });
 });
 
@@ -85,7 +88,7 @@ describe("readiness copy exists in every active locale", () => {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const r = m.playerCard.readiness;
       expect(r, `${loc} readiness`).toBeTruthy();
-      for (const k of ["label", "levelReady", "levelBuilding", "levelStart", "signalsTemplate", "nextLabel"]) {
+      for (const k of ["label", "ringAria", "stepDone", "stepOpen", "signalsTemplate", "nextLabel"]) {
         expect(typeof r[k] === "string" && r[k].length > 0, `${loc} readiness.${k}`).toBe(true);
       }
       for (const p of ["profession", "availability", "skills", "journal", "evidence", "workCard"]) {

@@ -1943,7 +1943,25 @@
       "historyUnavailable": "Arbeidshistorikken din kunne ikke leses akkurat nå."
     },
     "skillsUnavailable": "Kunne ikke leses akkurat nå.",
-    "verifiedUnavailable": "Ferdigheter med leders notat kunne ikke leses akkurat nå."
+    "verifiedUnavailable": "Ferdigheter med leders notat kunne ikke leses akkurat nå.",
+    "readiness": {
+      "label": "Profiltrinn",
+      "hint": "Alt er klart.",
+      "signalsTemplate": "trinn fullført",
+      "nextLabel": "Neste:",
+      "pillars": {
+        "profession": "Yrke",
+        "availability": "Tilgjengelighet",
+        "skills": "Ferdigheter",
+        "journal": "Arbeidsjournal",
+        "evidence": "Registreringer",
+        "workCard": "Arbeidskort"
+      },
+      "ringAria": "Profiltrinn: {met} av {total} fullført",
+      "stepDone": "fullført",
+      "stepOpen": "gjenstår",
+      "summary": "Profiltrinn: {done} av {total} fullført"
+    }
   },
   "projects": {
     "map": {

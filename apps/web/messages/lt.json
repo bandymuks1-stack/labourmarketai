@@ -7796,11 +7796,8 @@
       }
     },
     "readiness": {
-      "label": "Pasirengimas",
+      "label": "Profilio žingsniai",
       "hint": "Viskas paruošta.",
-      "levelReady": "Pasiruošęs",
-      "levelBuilding": "Formuojasi",
-      "levelStart": "Pradžia",
       "signalsTemplate": "žingsnių atlikta",
       "nextLabel": "Toliau:",
       "pillars": {
@@ -7810,7 +7807,11 @@
         "journal": "Darbo žurnalas",
         "evidence": "Įrašai",
         "workCard": "Darbo kortelė"
-      }
+      },
+      "ringAria": "Profilio žingsniai: atlikta {met} iš {total}",
+      "stepDone": "atlikta",
+      "stepOpen": "dar neatlikta",
+      "summary": "Profilio žingsniai: atlikta {done} iš {total}"
     },
     "verifiedTitle": "Vadovo patvirtinti įgūdžiai",
     "verifiedEmpty": "Tokių įgūdžių dar nėra. Jie atsiranda iš jūsų darbo įrašų.",

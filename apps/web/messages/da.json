@@ -1943,7 +1943,25 @@
       "historyUnavailable": "Din arbejdshistorik kunne ikke læses lige nu."
     },
     "skillsUnavailable": "Kunne ikke læses lige nu.",
-    "verifiedUnavailable": "Færdigheder med lederens notering kunne ikke læses lige nu."
+    "verifiedUnavailable": "Færdigheder med lederens notering kunne ikke læses lige nu.",
+    "readiness": {
+      "label": "Profiltrin",
+      "hint": "Alt er på plads.",
+      "signalsTemplate": "trin udført",
+      "nextLabel": "Næste:",
+      "pillars": {
+        "profession": "Erhverv",
+        "availability": "Tilgængelighed",
+        "skills": "Færdigheder",
+        "journal": "Arbejdsjournal",
+        "evidence": "Registreringer",
+        "workCard": "Arbejdskort"
+      },
+      "ringAria": "Profiltrin: {met} af {total} udført",
+      "stepDone": "udført",
+      "stepOpen": "mangler",
+      "summary": "Profiltrin: {done} af {total} udført"
+    }
   },
   "projects": {
     "map": {

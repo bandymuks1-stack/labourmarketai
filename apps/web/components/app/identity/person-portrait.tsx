@@ -1,3 +1,4 @@
+import { FIGURE_MIN_PX, PersonFigure, personToneKey, plate } from "@/components/app/identity/identity-family";
 import {
   PLAYER_IDENTITY_AVATAR_BORDER,
   PLAYER_IDENTITY_FALLBACK_SURFACE,
@@ -9,15 +10,21 @@ import { cn } from "@/lib/utils";
  *
  * A professional seen in the card, a roster, a conversation, the calendar, a
  * team or the journal must be the SAME recognisable person: the same 4:5
- * frame, the same lit edge, the same monogram surface when there is no
+ * frame, the same lit edge, the same plate and monogram when there is no
  * consented photo. Surfaces differ only in `size`; the person never changes
  * shape. (Premium completion mission §8: "the person is persistent, the
  * context changes.")
  *
+ * ONE FAMILY (D2, 2026-10-14). This is the CARD/STAGE silhouette of the
+ * identity family (`identity-family.tsx`): a person without a photo is the
+ * family's tonal plate (theme tokens, chosen from the name) with the
+ * person's initials, and — where the frame is large enough to read it — the
+ * frozen engraved figure, faintly, behind them. The canonical fallback
+ * surface stays as the underlay.
+ *
  * HONESTY. A real consented photo when one exists; otherwise initials on the
- * canonical fallback surface. Never a synthesised face (DESIGN_SOUL §1).
- * `state` is an optional presence dot (working now) — a fact the caller holds,
- * never decoration.
+ * plate. Never a synthesised face (DESIGN_SOUL §1). `working` is an optional
+ * presence dot (working now) — a fact the caller holds, never decoration.
  */
 export function PersonPortrait({
   name,
@@ -37,6 +44,13 @@ export function PersonPortrait({
   readonly testids?: { readonly photo: string; readonly monogram: string };
   readonly className?: string;
 }) {
+  // The SAME plate as the person's chip/row mark (`personToneKey`).
+  const key = personToneKey(name, initials);
+  // A fixed small frame ("40px", "3.5rem") has no room for the figure; a
+  // fluid stage frame (clamp/vw) always does.
+  const fixed = /^(\d+(?:\.\d+)?)(px|rem)$/.exec(width);
+  const fixedPx = fixed ? Number(fixed[1]) * (fixed[2] === "rem" ? 16 : 1) : null;
+  const showFigure = fixedPx === null || fixedPx >= FIGURE_MIN_PX;
   return (
     <span
       className={cn("identity-portrait relative inline-block shrink-0 overflow-hidden rounded-xl", className)}
@@ -56,14 +70,24 @@ export function PersonPortrait({
         <span
           aria-hidden
           data-testid={testids?.monogram}
+          data-identity="person-fallback"
           className={cn(
-            "flex h-full w-full items-center justify-center rounded-xl font-display font-bold tracking-tightest",
+            "relative flex h-full w-full items-center justify-center overflow-hidden rounded-xl font-display font-semibold tracking-tightest",
             PLAYER_IDENTITY_FALLBACK_SURFACE,
             PLAYER_IDENTITY_AVATAR_BORDER,
           )}
-          style={{ fontSize: `calc(${width} * 0.36)` }}
+          style={{ background: plate(key), fontSize: `calc(${width} * ${showFigure ? 0.26 : 0.36})` }}
         >
-          {initials}
+          {showFigure ? <PersonFigure id={key} /> : null}
+          <span
+            className={cn(
+              "leading-none text-[rgb(var(--c-identity-figure)/0.88)]",
+              showFigure && "absolute inset-x-0 flex items-end justify-center",
+            )}
+            style={showFigure ? { top: "56%", bottom: "8%" } : undefined}
+          >
+            {initials}
+          </span>
         </span>
       )}
       <span

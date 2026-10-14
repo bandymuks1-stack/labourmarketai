@@ -70,7 +70,7 @@ export function PlayerCardModes({
           onClick={() => choose(key)}
           data-testid={`player-card-mode-${key}`}
           className={cn(
-            "inline-flex min-h-11 shrink-0 items-center border-b-2 px-3 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
+            "inline-flex min-h-11 shrink-0 items-center border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
             mode === key ? "border-brand-blue text-text-primary" : "border-transparent text-text-muted hover:text-text-primary",
           )}
         >

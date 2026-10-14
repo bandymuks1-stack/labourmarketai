@@ -35,6 +35,8 @@ import { ProjectLinkedDocuments } from "@/components/app/linked-documents";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
+import { playerInitials } from "@/lib/identity/player-identity";
 
 export const dynamic = "force-dynamic";
 
@@ -127,10 +129,6 @@ export default async function ProjectStadiumPage({
           ? tLoc("statusUnverified")
           : tLoc("statusTextOnly");
 
-  const initialsOf = (name: string) => {
-    const parts = name.trim().split(/\s+/).slice(0, 2);
-    return parts.map((p) => p[0]?.toUpperCase() ?? "").join("") || "•";
-  };
   const positionLabel = (workerId: string) => {
     const slug = positions.get(workerId) ?? null;
     if (slug && tProf.has(slug)) return tProf(slug);
@@ -334,16 +332,20 @@ export default async function ProjectStadiumPage({
                   className="group flex items-center gap-3"
                   data-testid={`stadium-player-open-${w.workerId}`}
                 >
+                  {/* The frame carries the TRUST state (manager-confirmed
+                      skills); the person is the ONE identity family's 4:5
+                      portrait — plate + initials (the stadium reader carries
+                      no photo, so none is shown). */}
                   <span
                     aria-hidden
                     className={cn(
-                      "flex h-16 w-14 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
+                      "flex shrink-0 rounded-[0.9rem] border p-0.5",
                       w.confirmedSkills > 0
                         ? "border-trust-accent/50"
-                        : "border-ink-500",
+                        : "border-transparent",
                     )}
                   >
-                    {initialsOf(w.name)}
+                    <PersonPortrait name={w.name} avatarUrl={null} initials={playerInitials(w.name)} width="52px" />
                   </span>
                   <div className="min-w-0">
                     <p className="font-display text-lg font-semibold leading-tight tracking-tightest text-text-primary group-hover:text-brand-blue">

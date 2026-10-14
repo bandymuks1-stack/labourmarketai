@@ -7796,11 +7796,8 @@
       }
     },
     "readiness": {
-      "label": "Readiness",
+      "label": "Profile steps",
       "hint": "All set.",
-      "levelReady": "Ready",
-      "levelBuilding": "Building",
-      "levelStart": "Getting started",
       "signalsTemplate": "steps done",
       "nextLabel": "Next:",
       "pillars": {
@@ -7810,7 +7807,11 @@
         "journal": "Work journal",
         "evidence": "Records",
         "workCard": "Work card"
-      }
+      },
+      "ringAria": "Profile steps: {met} of {total} done",
+      "stepDone": "done",
+      "stepOpen": "to do",
+      "summary": "Profile steps: {done} of {total} done"
     },
     "verifiedTitle": "Manager-confirmed skills",
     "verifiedEmpty": "None yet. They build from your work records.",

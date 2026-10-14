@@ -25,6 +25,7 @@ const preset = {
     extend: {
       colors: {
         ink: colors.ink,
+        identity: colors.identity,
         brand: colors.brand,
         state: colors.state,
         text: colors.text,
