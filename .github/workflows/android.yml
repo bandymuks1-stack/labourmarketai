@@ -257,6 +257,8 @@ jobs:
                    android.permission.CAMERA android.permission.RECORD_AUDIO \
                    android.permission.ACCESS_FINE_LOCATION android.permission.ACCESS_COARSE_LOCATION \
                    android.permission.READ_CONTACTS android.permission.READ_MEDIA_IMAGES \
+                   android.permission.SYSTEM_ALERT_WINDOW android.permission.USE_BIOMETRIC \
+                   android.permission.USE_FINGERPRINT \
                    com.google.android.gms.permission.AD_ID; do
             if echo "$PERMS" | grep -qx "$P"; then
               echo "::error::$P is requested but the product does not use it (docs/mobile/STORE_RELEASE_READINESS_2026-09-13.md)"; FAIL=1

@@ -124,6 +124,23 @@ describe("mobile store-release config — the generated native project is only a
     );
   });
 
+  it("blocks the template permissions read from the built APK that nothing in the app uses", () => {
+    expect(appConfig.android.blockedPermissions).toEqual(
+      expect.arrayContaining([
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+      ]),
+    );
+    // Blocking the biometric pair is honest only while no secure-store call
+    // asks for biometric unlock. The day one does, this pin fails and the
+    // block is lifted in the same change.
+    const src = ["apps/mobile/src/secure-session-store.ts", "apps/mobile/src/auth-context.tsx"]
+      .map((p) => readFileSync(resolve(REPO, p), "utf8"))
+      .join("\n");
+    expect(src).not.toMatch(/requireAuthentication|LocalAuthentication/);
+  });
+
   it("carries no analytics or advertising dependency — which is what makes NSPrivacyTracking: false true", () => {
     const deps = Object.keys(mobilePkg.dependencies ?? {});
     for (const dep of deps) {
