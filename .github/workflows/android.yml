@@ -143,7 +143,10 @@ jobs:
         env:
           NODE_ENV: production
         run: |
-          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> gradle.properties
+          # Leading newline: the generated gradle.properties has NO trailing
+          # newline, and a bare append glued this onto the last property
+          # (expo.inlineModules.watchedDirectories) — run 3 proved it.
+          printf '\norg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m\n' >> gradle.properties
           set +e
           ./gradlew :app:assembleRelease \
             -PreactNativeArchitectures=arm64-v8a,x86_64 \
