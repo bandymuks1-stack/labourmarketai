@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 import { resolveEvidenceOrganization } from "./evidence-org-context";
 import { untypedClient } from "./evidence-store";
+import { readSupersededRecordIds } from "./superseded-ids";
 import {
   buildHistoryQuality,
   type HistoryQuality,
@@ -93,6 +94,10 @@ export async function loadHistoryQuality(locale: string): Promise<HistoryQuality
     ),
   ]);
   if (!rawRecords || !rawProjects || !rawObjects) return { kind: "unavailable" };
+  // EFFECTIVE records only: an original a correction superseded (e.g. a
+  // reconstructed date) is history, not a second copy of the same work.
+  const superseded = await readSupersededRecordIds(db, orgId);
+  if (!superseded) return { kind: "unavailable" };
 
   // The ledger may not exist yet (migration unapplied) — then nothing has
   // been consolidated, which the page says.
@@ -114,7 +119,7 @@ export async function loadHistoryQuality(locale: string): Promise<HistoryQuality
     ledgerApplied = rawDecisions.length > 0;
   }
 
-  const records: QualityRecord[] = rawRecords.map((r) => {
+  const records: QualityRecord[] = rawRecords.filter((r) => !superseded.has(r.id)).map((r) => {
     const o = objectTextOf(r.source_fact, r.context_label);
     return {
       id: r.id,
