@@ -292,7 +292,7 @@ describe("mobile store-release config — submission questions answered in app.j
   it("Android CI reads targetSdk and permissions from the BUILT APK and proves an AAB", () => {
     const wf = readFileSync(resolve(REPO, ".github/workflows/android.yml"), "utf8");
     expect(wf).toContain('aapt2" dump badging');
-    expect(wf).toMatch(/-lt 35/);
+    expect(wf).toMatch(/-lt 36/);
     expect(wf).toContain(":app:bundleRelease");
     expect(wf).toContain("ANDROID_RELEASE_AAB_BUILT");
   });

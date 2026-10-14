@@ -46,7 +46,7 @@ name: Android
 #                                    "could not reach the server" (not "wrong
 #                                    password", not a spinner) and the form
 #                                    stays usable
-#   ANDROID_STORE_POLICY_FACTS_OK  — the BUILT APK targets API >= 35 (Play
+#   ANDROID_STORE_POLICY_FACTS_OK  — the BUILT APK targets API >= 36 (Play
 #                                    floor) and requests none of the
 #                                    permissions the product does not use
 #   ANDROID_RELEASE_AAB_BUILT      — the same project produces the Play upload
@@ -224,7 +224,9 @@ jobs:
       # `apps/mobile/android` is generated, so the only honest place to see the
       # target API level and the permission list Play will see is the APK
       # itself. Google Play refuses a new app or update whose targetSdk is
-      # below the current floor (API 35 since 2025-08-31; API 36 is what the
+      # below the current floor (API 36 for new apps and updates since
+      # 2026-08-31, developer.android.com/google/play/requirements/target-sdk;
+      # API 36 is also what the
       # RN 0.86 / Expo 57 version catalog emits). Permissions the product
       # does not use are refused here, so a dependency bump that silently
       # adds one fails CI instead of surfacing in a Play review.
@@ -248,8 +250,8 @@ jobs:
             echo "| Permissions | $(echo $PERMS | tr ' ' ',') |"
           } >> "$GITHUB_STEP_SUMMARY"
           FAIL=0
-          if [ -z "$TARGET" ] || [ "$TARGET" -lt 35 ]; then
-            echo "::error::targetSdkVersion '$TARGET' is below the Google Play floor (35)"; FAIL=1
+          if [ -z "$TARGET" ] || [ "$TARGET" -lt 36 ]; then
+            echo "::error::targetSdkVersion '$TARGET' is below the Google Play floor (36 since 2026-08-31)"; FAIL=1
           fi
           for P in android.permission.READ_EXTERNAL_STORAGE android.permission.WRITE_EXTERNAL_STORAGE \
                    android.permission.CAMERA android.permission.RECORD_AUDIO \
