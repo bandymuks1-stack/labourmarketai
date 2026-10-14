@@ -4,6 +4,7 @@
     "slug": "labourmarketai",
     "version": "0.1.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "scheme": "labourmarketai",
     "newArchEnabled": true,
@@ -83,6 +84,11 @@
     "android": {
       "package": "ai.labourmarket.app",
       "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/adaptive-icon-monochrome.png",
+        "backgroundColor": "#070706"
+      },
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
@@ -123,12 +129,22 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0B0E14"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
+      "//assets": "icon, adaptiveIcon and the expo-splash-screen image are GENERATED from the existing brand mark apps/web/public/app-icon.svg by apps/mobile/scripts/generate-app-assets.mjs (no new artwork). Final store art still needs owner approval at publishing time: docs/mobile/STORE_RELEASE_READINESS_2026-09-13.md section 4.1. The splash background is the app's own background (theme.color.background) so the first screen does not flash.",
       "//": "PUBLIC values only. A device build cannot hold a secret: the binary is on the user's phone and cannot be edited afterwards. These are read through EXPO_PUBLIC_* at build time and validated by @labourmarket/client-core, which REFUSES a key that bypasses RLS.",
       "//intentFilters": "Every android.intentFilters data entry names a PATH. A host with no path claims every URL on it, and the app has eight screens while the website has some forty — an unqualified claim would open the app for every shared web link and land on +not-found. The list is the native route table (apps/mobile/app), pinned to apps/web/lib/mobile/app-association.ts NATIVE_APP_PATHS by apps/web/lib/guards/app-association.test.ts; widen it only when the app gains the screen."
     }

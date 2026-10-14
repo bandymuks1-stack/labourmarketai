@@ -52,7 +52,7 @@ export function TodayFigures({ data }: { data: WorkIntelligenceData }) {
           <Body muted>{t("today.dominantNone")}</Body>
         ) : (
           <Text style={styles.value}>
-            {dominant.slug} — {formatShare(dominant.share)} {t("today.dominantShare")}
+            {skillLabel(dominant.slug)} — {formatShare(dominant.share)} {t("today.dominantShare")}
             {" · "}
             {formatHours(dominant.attributedHours)} {t("profile.hoursShort")}
           </Text>
@@ -101,6 +101,21 @@ function PeriodRow({
   );
 }
 
+/**
+ * A skill's machine word, readable: `tile_installation` → "Tile installation".
+ *
+ * The website names a skill from its locale catalogue and drops one it cannot
+ * name; this client has no skill catalogue yet, and printing the raw slug put
+ * an underscore-joined identifier on a person's screen (invariant I-8: name
+ * things after what a person does, not after the product's internals). This
+ * only re-spaces and sentence-cases the word the server sent — it invents no
+ * name. Localized skill names remain the open item.
+ */
+export function skillLabel(slug: string): string {
+  const words = slug.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  return words.length === 0 ? slug : words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 const GROUP_KEY: Record<ProfileSkillGroupKey, MessageKey> = {
   manager_confirmed: "profile.groupManagerConfirmed",
   journal_backed: "profile.groupJournalBacked",
@@ -136,7 +151,9 @@ export function SkillFigureList({
           <Text style={styles.groupTitle}>{t(GROUP_KEY[group.key])}</Text>
           {group.items.map((item) => (
             <View key={item.skillId} style={styles.skill} accessible>
-              <Text style={styles.skillName}>{item.slug ?? item.skillId}</Text>
+              <Text style={styles.skillName}>
+                {item.slug !== null ? skillLabel(item.slug) : item.skillId}
+              </Text>
               <Text style={styles.skillFigures}>
                 {!presentation.figuresReadable
                   ? t("profile.figuresNotRead")

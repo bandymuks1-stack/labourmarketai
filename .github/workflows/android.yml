@@ -42,6 +42,10 @@ name: Android
 #                                    attempt (fictional credentials) runs, the
 #                                    failure is SHOWN (testID auth-failure) and
 #                                    the app survives it
+#   ANDROID_OFFLINE_JOURNEY_PROVEN — the same sign-in in AIRPLANE MODE shows
+#                                    "could not reach the server" (not "wrong
+#                                    password", not a spinner) and the form
+#                                    stays usable
 # What it does NOT claim: store signing, Play readiness, an authenticated
 # session, deep-link (App Links) verification, physical-device behaviour.
 

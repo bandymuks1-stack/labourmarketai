@@ -10,6 +10,7 @@
 #   1. install the APK                  -> ANDROID_APK_INSTALLED
 #   2. launch, alive 15s later          -> ANDROID_EMU_LAUNCH_PROVEN
 #   3. Maestro auth-failure journey     -> ANDROID_RUNTIME_JOURNEY_PROVEN
+#   4. same sign-in in airplane mode    -> ANDROID_OFFLINE_JOURNEY_PROVEN
 set -euo pipefail
 
 APK="$1"
@@ -55,3 +56,28 @@ else
   summary "- ANDROID_RUNTIME_JOURNEY_PROVEN: **FAILED** (see android-runtime-journey artifact)"
   exit 1
 fi
+
+# 4. Weak network: the same sign-in with the radio OFF must surface the
+#    "could not reach the server" failure, not "wrong password", not a spinner.
+#    Airplane mode via `cmd connectivity` (API 30+) — Wi-Fi and cellular both.
+#    The network is restored on every exit path so evidence capture still works.
+restore_network() {
+  adb shell cmd connectivity airplane-mode disable >/dev/null 2>&1 || true
+  adb shell svc wifi enable >/dev/null 2>&1 || true
+  adb shell svc data enable >/dev/null 2>&1 || true
+}
+trap 'restore_network; dump_evidence' EXIT
+adb shell cmd connectivity airplane-mode enable
+adb shell svc wifi disable || true
+adb shell svc data disable || true
+sleep 3
+adb shell settings get global airplane_mode_on
+if maestro test apps/mobile/.maestro/offline-sign-in-journey.yaml \
+  --debug-output "$OUT/maestro-debug-offline"; then
+  echo "ANDROID_OFFLINE_JOURNEY_PROVEN: airplane mode, sign-in attempted, 'could not reach the server' surfaced, form still usable"
+  summary "- ANDROID_OFFLINE_JOURNEY_PROVEN: airplane mode → sign-in attempt → 'could not reach the server' (not 'wrong password'), form still usable"
+else
+  summary "- ANDROID_OFFLINE_JOURNEY_PROVEN: **FAILED** (see android-runtime-journey artifact, maestro-debug-offline)"
+  exit 1
+fi
+restore_network
