@@ -147,6 +147,9 @@ jobs:
           # newline, and a bare append glued this onto the last property
           # (expo.inlineModules.watchedDirectories) — run 3 proved it.
           printf '\norg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m\n' >> gradle.properties
+          # pipefail: the diagnostic greps below pipe into tail/head; the
+          # build's own status is captured explicitly in STATUS either way.
+          set -o pipefail
           set +e
           ./gradlew :app:assembleRelease \
             -PreactNativeArchitectures=arm64-v8a,x86_64 \
