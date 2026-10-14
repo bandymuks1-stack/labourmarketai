@@ -14539,7 +14539,10 @@
       "chipOfferOurs": "Pasiūlyti savo brigadą ar įmonę",
       "teamOfferAgreed": "Sutarta iš esmės — tai dar ne pasirašyta sutartis. Sąlygas suderink pokalbyje, tada priskirk komandą projektui.",
       "teamOfferDeclined": "Atmesta. Pasiūliusi įmonė matys tavo atsakymą.",
-      "teamOfferThreadFailed": "Šio pokalbio atidaryti nepavyko."
+      "teamOfferThreadFailed": "Šio pokalbio atidaryti nepavyko.",
+      "planIntro": "{count, plural, one {Tai # žingsnis.} few {Tai # žingsniai, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.} other {Tai # žingsnių, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.}}",
+      "planNextOffer": "Kitas žingsnis:",
+      "planStep": "{n} žingsnis iš {count}"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -19464,5 +19467,20 @@
       "totalTitle": "Šiuo metu nepavyko nuskaityti tavo duomenų",
       "totalBody": "Tavo įrašai niekur nedingo — tai laikinas sutrikimas. Pabandyk dar kartą po akimirkos."
     }
+  },
+  "projectCourse": {
+    "title": "Projekto trasa",
+    "count": "Baigta {done} iš {total} etapų",
+    "unknown": "Nepavyko nuskaityti projekto etapų.",
+    "here": "Mes čia",
+    "state": {
+      "done": "Baigta",
+      "now": "Vyksta",
+      "risk": "Vėluoja pagal planą",
+      "blocked": "Sustabdyta",
+      "planned": "Suplanuota",
+      "cancelled": "Atšaukta"
+    },
+    "helpNeeded": "Reikia pagalbos — {stage}:"
   }
 }

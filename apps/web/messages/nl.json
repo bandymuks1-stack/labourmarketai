@@ -14539,7 +14539,10 @@
       "chipOfferOurs": "Onze ploeg of ons bedrijf aanbieden",
       "teamOfferAgreed": "In principe akkoord — nog geen getekend contract. Spreek de voorwaarden af in het gesprek en wijs het team daarna toe aan een project.",
       "teamOfferDeclined": "Afgewezen. Het aanbiedende bedrijf ziet je antwoord.",
-      "teamOfferThreadFailed": "Dit gesprek kan niet worden geopend."
+      "teamOfferThreadFailed": "Dit gesprek kan niet worden geopend.",
+      "planIntro": "{count, plural, one {Dat is # stap.} other {Dat zijn # stappen, op volgorde. Hier is de eerste — tik op de volgende wanneer je klaar bent.}}",
+      "planNextOffer": "Volgende stap:",
+      "planStep": "Stap {n} van {count}"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -19464,5 +19467,20 @@
       "totalTitle": "We konden je gegevens nu niet lezen",
       "totalBody": "Je registraties zijn veilig — dit is tijdelijk. Probeer het zo opnieuw."
     }
+  },
+  "projectCourse": {
+    "title": "Projectroute",
+    "count": "{done} van {total} fasen klaar",
+    "unknown": "Kon de projectfasen niet lezen.",
+    "here": "Hier zijn we",
+    "state": {
+      "done": "Klaar",
+      "now": "Bezig",
+      "risk": "Achter op de planning",
+      "blocked": "Geblokkeerd",
+      "planned": "Gepland",
+      "cancelled": "Geannuleerd"
+    },
+    "helpNeeded": "Hulp nodig — {stage}:"
   }
 }

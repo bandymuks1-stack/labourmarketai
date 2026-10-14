@@ -7576,5 +7576,20 @@
       "totalTitle": "Sinu andmeid ei õnnestunud praegu lugeda",
       "totalBody": "Sinu kirjed on alles — see on ajutine. Proovi hetke pärast uuesti."
     }
+  },
+  "projectCourse": {
+    "title": "Projekti teekond",
+    "count": "Valmis {done} etappi {total}-st",
+    "unknown": "Projekti etappe ei õnnestunud lugeda.",
+    "here": "Siin me oleme",
+    "state": {
+      "done": "Valmis",
+      "now": "Käimas",
+      "risk": "Plaanist maas",
+      "blocked": "Peatatud",
+      "planned": "Planeeritud",
+      "cancelled": "Tühistatud"
+    },
+    "helpNeeded": "Abi on vaja — {stage}:"
   }
 }

@@ -62,6 +62,12 @@ describe("the proposer is confined to the product's existing intents", () => {
     // The kind is REQUIRED — a v1-shaped answer must not silently pass as an
     // action, because v1 could not tell an action from a name.
     expect(ok({ intent: "who-available", alternatives: [] })).toBe(false);
+    // MULTI-STEP (2026-10-14): an action MAY carry an ordered plan of 2–3
+    // catalogue ids with the person's own words — strict, bounded.
+    expect(ok({ kind: "action", intent: "figures", steps: [{ intent: "figures", words: "my week" }, { intent: "projects" }] })).toBe(true);
+    expect(ok({ kind: "action", intent: "figures", steps: [{ intent: "figures" }] })).toBe(false);
+    expect(ok({ kind: "action", intent: "figures", steps: [{ intent: "a" }, { intent: "b" }, { intent: "c" }, { intent: "d" }] })).toBe(false);
+    expect(ok({ kind: "action", intent: "figures", steps: [{ intent: "figures", run: true }, { intent: "projects" }] })).toBe(false);
   });
 
   it("the server action re-validates against the registry, needs a signed-in user, is rate-limited, and never writes or dispatches", () => {
@@ -169,7 +175,8 @@ describe("the chat: deterministic first, the proposer only for unknown, the same
     expect(goalAt).toBeLessThan(propose);
     // The window grew with the widening: the answer is now a switch over the
     // typed union rather than one ternary.
-    const flow = CHAT.slice(propose - 2600, propose + 2200);
+    // Widened again 2026-10-14 for the `plan` case (multi-step).
+    const flow = CHAT.slice(propose - 2600, propose + 3600);
     expect(flow).toContain('if (intent !== "unknown") {');
     expect(flow).toContain("dispatchIntent(intent, handlers, withTyping, fallback)");
     // THE WIDENING (2026-09-10): the answer is a typed union, so a message
@@ -183,6 +190,11 @@ describe("the chat: deterministic first, the proposer only for unknown, the same
     expect(flow).toContain('case "question":');
     expect(flow).toContain("handleQuestion(res.text, res.reference)");
     expect(flow).toContain('case "clarification":');
+    // MULTI-STEP (2026-10-14): a plan runs its FIRST step through the same
+    // dispatchIntent and offers the rest as ordered taps — never all at once.
+    expect(flow).toContain('case "plan":');
+    expect(flow).toContain("dispatchIntent(res.steps[0].intent, handlers, withTyping, fallback)");
+    expect(flow).toContain("run: (step) => dispatchIntent(step, handlers, withTyping, fallback)");
     // Anything else still lands on the honest existing fallback.
     expect(flow).toContain('dispatchIntent("unknown", handlers, withTyping, fallback)');
     // never a second router, never a model call from the client

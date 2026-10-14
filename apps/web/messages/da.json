@@ -7576,5 +7576,20 @@
       "totalTitle": "Vi kunne ikke læse dine data lige nu",
       "totalBody": "Dine registreringer er i sikkerhed – det er midlertidigt. Prøv igen om lidt."
     }
+  },
+  "projectCourse": {
+    "title": "Projektforløb",
+    "count": "{done} af {total} faser færdige",
+    "unknown": "Projektets faser kunne ikke læses.",
+    "here": "Her er vi",
+    "state": {
+      "done": "Færdig",
+      "now": "I gang",
+      "risk": "Bagud i forhold til planen",
+      "blocked": "Blokeret",
+      "planned": "Planlagt",
+      "cancelled": "Annulleret"
+    },
+    "helpNeeded": "Hjælp søges — {stage}:"
   }
 }

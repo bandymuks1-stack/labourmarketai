@@ -7576,5 +7576,20 @@
       "totalTitle": "Šobrīd neizdevās nolasīt jūsu datus",
       "totalBody": "Jūsu ieraksti ir drošībā — tas ir īslaicīgi. Mēģiniet vēlreiz pēc brīža."
     }
+  },
+  "projectCourse": {
+    "title": "Projekta maršruts",
+    "count": "Pabeigti {done} no {total} posmiem",
+    "unknown": "Neizdevās nolasīt projekta posmus.",
+    "here": "Mēs esam šeit",
+    "state": {
+      "done": "Pabeigts",
+      "now": "Notiek",
+      "risk": "Atpaliek no plāna",
+      "blocked": "Apturēts",
+      "planned": "Plānots",
+      "cancelled": "Atcelts"
+    },
+    "helpNeeded": "Vajadzīga palīdzība — {stage}:"
   }
 }
