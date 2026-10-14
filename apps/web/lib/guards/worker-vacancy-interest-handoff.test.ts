@@ -431,7 +431,7 @@ describe("interest on a public vacancy — the same table, honest surfaces", () 
       // every locale — never a hand-over promise for a row the gate holds.
       const withheld = String(v.handoffQueuedConsentWithheld).toLowerCase();
       expect(withheld, `${locale}.handoffQueuedConsentWithheld`).toMatch(
-        /nothing about you|nieko neperduodama|ничего о вас|par jums nekas|teie kohta midagi|nic na twój temat|nichts über sie|niets over jou|intet om dig|ingenting om deg|inget om dig/,
+        /nothing about you|nieko neperduodama|ничего о вас|par jums nekas|sinu kohta midagi|nic na twój temat|nichts über sie|niets over jou|intet om dig|ingenting om deg|inget om dig/,
       );
       const sent = String(v.handoffQueued).toLowerCase();
       expect(sent).not.toMatch(/application sent|applied|placement confirmed|employer accepted|paraiška išsiųsta|заявка отправлена/);

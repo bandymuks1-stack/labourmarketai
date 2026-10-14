@@ -42,7 +42,7 @@ describe("notifications/messages use 'Mano pranešimai / Kas dabar svarbu' frami
 describe("empty states are calm and reassuring (not a scary failure)", () => {
   it("LT empty states reassure + point forward", () => {
     expect(notif(lt).emptyTitle).toMatch(/nieko nereikia/i);
-    expect(notif(lt).emptyBody).toMatch(/matysite tai čia/i);
+    expect(notif(lt).emptyBody).toMatch(/matysi tai čia/i);
     // The messages empty state is one calm sentence INSIDE the workspace
     // (owner walk 2026-09-28) — no explanation of what will appear where.
     expect(comm(lt).empty).toMatch(/nėra/i);
