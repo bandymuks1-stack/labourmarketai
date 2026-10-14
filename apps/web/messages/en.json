@@ -19407,5 +19407,20 @@
       "unplaced_single_unmatched": "records naming an unknown place"
     },
     "link": "Data quality"
+  },
+  "projectCourse": {
+    "title": "Project course",
+    "count": "{done} of {total} stages done",
+    "unknown": "Couldn't read the project's stages.",
+    "here": "We are here",
+    "state": {
+      "done": "Done",
+      "now": "In progress",
+      "risk": "Behind its planned end",
+      "blocked": "Blocked",
+      "planned": "Planned",
+      "cancelled": "Cancelled"
+    },
+    "helpNeeded": "Help needed — {stage}:"
   }
 }
