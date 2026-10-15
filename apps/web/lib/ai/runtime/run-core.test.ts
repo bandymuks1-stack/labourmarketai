@@ -3,7 +3,7 @@
  * No network: the live branch is reached only to prove it self-gates on a
  * missing key BEFORE importing the SDK.
  */
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, onTestFinished } from "vitest";
 import { resolveAiRuntimeConfig, type AiRuntimeConfigInput } from "./config-core";
 import { dispatchAiCompletion, selectCompletionProvider } from "./run-core";
 import type { AiCompletionRequest } from "./types";
@@ -140,6 +140,10 @@ describe("RED-2 (owner approval 2026-09-17): the SHIPPED grant table opens trans
   });
 
   it("gemini: passes the gate and reaches the adapter (which self-gates on env — no network)", async () => {
+    process.env.AI_GEMINI_PAID_TIER_CONFIRMED = "1";
+    onTestFinished(() => {
+      delete process.env.AI_GEMINI_PAID_TIER_CONFIRMED;
+    });
     const cfg = resolveAiRuntimeConfig({ ...base, mode: "live", provider: "gemini", apiKey: "presence-only" });
     const r = await dispatchAiCompletion(translation(), cfg);
     expect(r.status).toBe("disabled");

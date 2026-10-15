@@ -95,6 +95,22 @@ export interface AiEgressGrant {
    * grant, which no owner has made).
    */
   readonly tasks?: readonly string[];
+  /**
+   * The grant's legal basis rests on the vendor's PAID-tier data terms (the
+   * free tier lets the vendor use content to improve its products). When
+   * true, the grant answers only while the deployment carries the owner's
+   * explicit confirmation that the key is on the paid tier
+   * (`AI_GEMINI_PAID_TIER_CONFIRMED=1`) — owner 2026-10-15: "jeigu tinkama
+   * asmens duomenų apsauga neįrodyta, apribok neviešų asmens duomenų
+   * perdavimą į Gemini". A code comment saying "paid tier" is not that proof.
+   */
+  readonly requiresPaidTierConfirmation?: boolean;
+}
+
+/** The owner's deployment-level confirmation that the Gemini key is on the
+ *  paid tier (billing enabled on its Google project). Absent = not proven. */
+export function geminiPaidTierConfirmed(env: Record<string, string | undefined> = process.env): boolean {
+  return env.AI_GEMINI_PAID_TIER_CONFIRMED === "1";
 }
 
 /**
@@ -120,6 +136,7 @@ export const AI_EGRESS_GRANTS: readonly AiEgressGrant[] = [
     provider: "gemini",
     maxSensitivity: "SENSITIVE_FREE_TEXT",
     tasks: ["propose_conversation_intent"],
+    requiresPaidTierConfirmation: true,
     basis:
       "Owner approval 2026-09-05 (GEMINI CONVERSATION NLU EGRESS): conversation intent proposal only; existing approved Gemini runtime, paid tier; least-privilege by task; revocable by deleting this row",
     grantedOn: "2026-09-05",
@@ -143,6 +160,7 @@ export const AI_EGRESS_GRANTS: readonly AiEgressGrant[] = [
     provider: "gemini",
     maxSensitivity: "SENSITIVE_FREE_TEXT",
     tasks: ["translate_message"],
+    requiresPaidTierConfirmation: true,
     basis:
       "Owner approval 2026-09-17 (RED-2 TRANSLATE_MESSAGE EGRESS, option 1 Gemini only): render an already-authorized message into the viewer's locale; existing approved Gemini runtime, paid tier; least-privilege by task; DeepL deferred; revocable by deleting this row",
     grantedOn: "2026-09-17",
@@ -174,11 +192,19 @@ export function egressGrantFor(
   provider: string,
   grants: readonly AiEgressGrant[] = AI_EGRESS_GRANTS,
   task?: string,
+  env: Record<string, string | undefined> = process.env,
 ): AiEgressGrant | null {
   // A task-scoped grant answers only for its tasks; a call that names no
-  // task cannot use one (fail closed — see `tasks` on AiEgressGrant).
+  // task cannot use one (fail closed — see `tasks` on AiEgressGrant). A
+  // grant that rests on paid-tier terms answers only while the owner's
+  // paid-tier confirmation is deployed (fail closed — not proven = no grant).
   return (
-    grants.find((g) => g.provider === provider && (!g.tasks || (task !== undefined && g.tasks.includes(task)))) ?? null
+    grants.find(
+      (g) =>
+        g.provider === provider &&
+        (!g.tasks || (task !== undefined && g.tasks.includes(task))) &&
+        (!g.requiresPaidTierConfirmation || geminiPaidTierConfirmed(env)),
+    ) ?? null
   );
 }
 

@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
   AI_EGRESS_GRANTS,
   MAX_GRANTABLE_FOR_FREE_TIER,
+  egressGrantFor,
   egressPermitted,
   maxPermittedSensitivity,
   type AiEgressGrant,
@@ -308,6 +309,15 @@ describe("the gate is on the PATH, not in an optional argument", () => {
 });
 
 describe("RED-2 (owner approval 2026-09-17, option 1): translate_message may leave for Gemini ONLY", () => {
+  // These pins describe the grant WHEN its paid-tier basis is confirmed; the
+  // closed default is pinned in "Gemini grants need the owner's paid-tier
+  // confirmation" below.
+  beforeAll(() => {
+    process.env.AI_GEMINI_PAID_TIER_CONFIRMED = "1";
+  });
+  afterAll(() => {
+    delete process.env.AI_GEMINI_PAID_TIER_CONFIRMED;
+  });
   // The second owner grant. Everything it opens and everything it leaves shut,
   // asserted against the SHIPPED table — not an injected fixture — so a later
   // edit to the row (or a row for another vendor) is a red test here first.
@@ -371,7 +381,7 @@ describe("RED-2 (owner approval 2026-09-17, option 1): translate_message may lea
   it("11. the mechanism is generic — the grant names a TASK, never a language pair, and the payload policy names no language", () => {
     const row = AI_EGRESS_GRANTS.find((g) => g.tasks?.includes(task))!;
     expect(JSON.stringify(row)).not.toMatch(/\b(ka|uk|lt|en|ru|de|nl)\b.*→/);
-    expect(Object.keys(row).sort()).toEqual(["basis", "grantedOn", "maxSensitivity", "provider", "tasks"]);
+    expect(Object.keys(row).sort()).toEqual(["basis", "grantedOn", "maxSensitivity", "provider", "requiresPaidTierConfirmation", "tasks"]);
     // the task policy's data boundary stays the minimal translation payload
     const src = readFileSync(join(__dirname, "..", "ai", "runtime", "task-routing.ts"), "utf8");
     const policy = src.slice(src.indexOf("translate_message: {"), src.indexOf("languageRouting: { preferredProvider: \"deepl\" }"));
@@ -385,5 +395,29 @@ describe("RED-2 (owner approval 2026-09-17, option 1): translate_message may lea
     expect(egressPermitted(cloud("gemini"), s, revoked, task).permitted).toBe(false);
     // the intent grant is unaffected by revoking translation
     expect(egressPermitted(cloud("gemini"), "SENSITIVE_FREE_TEXT", revoked, "propose_conversation_intent").permitted).toBe(true);
+  });
+});
+
+describe("Gemini grants need the owner's paid-tier confirmation (owner 2026-10-15)", () => {
+  const gem = { id: "gemini", locality: "cloud" as const, costClass: "paid" };
+  it("both personal-data grants rest on paid-tier terms and say so", () => {
+    for (const g of AI_EGRESS_GRANTS.filter((r) => r.provider === "gemini")) {
+      expect(g.requiresPaidTierConfirmation).toBe(true);
+    }
+  });
+  it("without AI_GEMINI_PAID_TIER_CONFIRMED=1 no personal data leaves for Gemini", () => {
+    const env = {};
+    for (const task of ["translate_message", "propose_conversation_intent"]) {
+      expect(egressGrantFor("gemini", AI_EGRESS_GRANTS, task, env)).toBeNull();
+    }
+    delete process.env.AI_GEMINI_PAID_TIER_CONFIRMED;
+    expect(egressPermitted(gem, "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, "translate_message").permitted).toBe(false);
+    expect(egressPermitted(gem, "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, "propose_conversation_intent").permitted).toBe(false);
+    // public data is unaffected
+    expect(egressPermitted(gem, "PUBLIC", AI_EGRESS_GRANTS, "translate_message").permitted).toBe(true);
+  });
+  it("only the exact value '1' confirms", () => {
+    expect(egressGrantFor("gemini", AI_EGRESS_GRANTS, "translate_message", { AI_GEMINI_PAID_TIER_CONFIRMED: "true" })).toBeNull();
+    expect(egressGrantFor("gemini", AI_EGRESS_GRANTS, "translate_message", { AI_GEMINI_PAID_TIER_CONFIRMED: "1" })).not.toBeNull();
   });
 });
