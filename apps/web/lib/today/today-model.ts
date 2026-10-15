@@ -53,6 +53,9 @@ export type TodayPeriodFigures = {
   readonly entries: number;
   /** Entries counted but not timed — a figure is still owed. */
   readonly untimed: number;
+  /** Of `hours`, the part on entries a manager/client APPROVED (the journal
+   *  model's own `confirmedHours`) — a second party stands behind it. */
+  readonly confirmedHours?: number;
 };
 
 export type TodayWork =
@@ -161,7 +164,7 @@ function period(wi: WorkIntelligence, key: "today" | "week"): WorkPeriodTotals |
 }
 
 function figures(p: WorkPeriodTotals): TodayPeriodFigures {
-  return { hours: p.hours, entries: p.entries, untimed: p.entriesWithoutDuration };
+  return { hours: p.hours, entries: p.entries, untimed: p.entriesWithoutDuration, confirmedHours: p.confirmedHours };
 }
 
 export function deriveTodayState(wi: WorkIntelligence | null): TodayState {

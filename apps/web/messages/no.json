@@ -4354,7 +4354,10 @@
       "chipOfferOurs": "Tilby vårt lag eller vår bedrift",
       "teamOfferAgreed": "Avtalt i prinsippet — ennå ikke en signert kontrakt. Avtal vilkårene i samtalen, og tildel deretter laget et prosjekt.",
       "teamOfferDeclined": "Avslått. Bedriften som tilbød, ser svaret ditt.",
-      "teamOfferThreadFailed": "Denne samtalen kan ikke åpnes."
+      "teamOfferThreadFailed": "Denne samtalen kan ikke åpnes.",
+      "whatChangedIntro": "{count, plural, one {Her er kjeden fra ditt siste arbeid: hva du gjorde, hva som endret seg, hva det åpnet.} other {Her er # kjeder fra ditt siste arbeid: hva du gjorde, hva som endret seg, hva det åpnet.}}",
+      "whatChangedNone": "Ingenting nytt kom ut av arbeidet ditt de siste 14 dagene. Når du registrerer arbeid og det blir bekreftet, viser jeg hva det endret.",
+      "whatChangedUnavailable": "Jeg kunne ikke sjekke hva som endret seg akkurat nå. Registreringene dine er trygge – prøv igjen om litt eller åpne journalen."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -7516,5 +7519,151 @@
       "unplaced_single_unmatched": "poster med ukjent sted"
     },
     "link": "Datakvalitet"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Venter på deg",
+      "clear": "Ingenting venter på deg.",
+      "unknown": "Det som venter på deg, kunne ikke leses."
+    },
+    "running": {
+      "title": "Pågår nå",
+      "projectsUnknown": "Prosjektene du er tildelt, kunne ikke leses.",
+      "today": "I dag",
+      "week": "Siste 7 dager",
+      "hours": "{hours} t",
+      "entries": "{n, plural, one {# registrering} other {# registreringer}}",
+      "noEntriesToday": "Ingenting registrert i dag ennå",
+      "confirmed": "Av dette bekreftet av en leder eller kunde: {hours} t",
+      "confirmedNone": "Ingen bekreftede timer ennå",
+      "barLabel": "Registrerte og bekreftede timer, siste 7 dager",
+      "record": {
+        "line": "Din rekord: {best} t bekreftet på en måned ({month}). Denne måneden så langt: {current} t.",
+        "reached": "Denne måneden nådde du din egen rekord: {hours} bekreftede t.",
+        "onlyYou": "Bare du ser dette – det sammenlignes bare med dine egne måneder.",
+        "barLabel": "Denne måneden mot din beste"
+      }
+    },
+    "because": {
+      "title": "Siste hendelser",
+      "unknown": "Det som endret seg, kunne ikke leses.",
+      "also": "Skjedde også",
+      "all": "All aktivitet"
+    },
+    "outside": {
+      "title": "Dine muligheter",
+      "barLabel": "Muligheter etter match"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Et arbeidsforhold startet",
+        "relationshipEnded": "Et arbeidsforhold ble avsluttet",
+        "bookingAgreed": "Bookingen ble avtalt",
+        "bookingRefused": "Bookingen ble avslått",
+        "bookingWithdrawn": "Bookingen ble trukket tilbake",
+        "absenceApproved": "Fraværet ble godkjent",
+        "absenceRefused": "Fraværet ble avslått",
+        "decisionRecorded": "Beslutningen ble registrert",
+        "acknowledgementRecorded": "Kvitteringen ble registrert",
+        "invitationAnswered": "Invitasjonen ble besvart"
+      },
+      "state": {
+        "engagementActive": "Ansettelse: aktiv",
+        "engagementClosed": "Ansettelse: avsluttet",
+        "bookingConfirmed": "Booking: bekreftet",
+        "bookingClosed": "Booking: lukket",
+        "absenceDecided": "Fravær: avgjort",
+        "workflowClosed": "Godkjenning: avsluttet",
+        "documentAcknowledged": "Dokument: kvittert",
+        "relationshipFormed": "Relasjon: etablert"
+      }
+    },
+    "retry": "Last inn på nytt",
+    "retrying": "Laster…",
+    "availability": {
+      "partial": "En del av dataene dine er midlertidig utilgjengelige ({count} av 4 områder).",
+      "totalTitle": "Vi kunne ikke lese dataene dine akkurat nå",
+      "totalBody": "Registreringene dine er trygge – dette er midlertidig. Prøv igjen om litt."
+    }
+  },
+  "homeTrace": {
+    "title": "Hva som endret seg",
+    "unknown": "Vi kunne ikke lese hva som endret seg etter handlingene dine.",
+    "all": "All aktivitet",
+    "empty": "Ingen nye følger de siste 14 dagene. Når du registrerer arbeid og det blir bekreftet, ser du her hva det endret.",
+    "openJournal": "Åpne arbeidsjournalen",
+    "entryUntitled": "Arbeidsregistrering",
+    "roleUnknown": "annen part",
+    "journalUnknown": "Arbeidsjournalen kunne ikke leses.",
+    "eventsUnknown": "Varslene kunne ikke leses.",
+    "truncated": "Basert på dine nyeste 30 registreringer.",
+    "step": {
+      "recordedHours": "{hours} t registrert",
+      "recordedDays": "{days} d registrert",
+      "recordedUntimed": "Registrert uten varighet",
+      "awaiting": "Venter på bekreftelse",
+      "selfApproved": "Godkjent av deg selv – ikke en bekreftelse fra en annen part",
+      "approvedBy": "Bekreftet av: {role}",
+      "approvedAutomatic": "Bekreftet automatisk etter en regel",
+      "rejected": "Avvist",
+      "changesRequested": "Endring ønsket",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bekreftet registrering} other {# bekreftede registreringer}}} other {Living CV oppdatert: {skills}}}",
+      "cvUnlinked": "Living CV: bekreftet arbeid, ennå ikke knyttet til en ferdighet",
+      "cvUnknown": "Living CV: kunne ikke leses",
+      "matching": "Matchingen ser bekreftet arbeid: {skills}",
+      "matchingRepeated": "Matchingen ser gjentatt bekreftet arbeid: {skills}"
+    },
+    "legend": {
+      "fact": "Fakta",
+      "pending": "Venter på en annen part",
+      "derived": "Utledet fra fakta"
+    }
+  },
+  "careerJourney": {
+    "title": "Din karrierevei",
+    "summary": "Prosjekter er stopp, ferdigheter er linjer. En linje stopper bare der journalen din viser at ferdigheten ble brukt.",
+    "now": "Nå",
+    "gap": "Ingen registreringer",
+    "horizon": "Horisont",
+    "derived": "utledet, ikke et løfte",
+    "linksUnknown": "Vi kunne ikke lese hvor ferdighetene dine ble brukt – linjene vises uten stopp.",
+    "level": {
+      "confirmed": "bekreftet",
+      "recorded": "registrert",
+      "declared": "oppgitt"
+    },
+    "focusHint": "Trykk på en linje for å følge én ferdighet gjennom hele veien.",
+    "showAll": "Vis alle",
+    "horizonDetail": "du har allerede {shared} av {total} ferdigheter"
+  },
+  "projectCourse": {
+    "title": "Prosjektløp",
+    "count": "{done} av {total} faser ferdige",
+    "unknown": "Prosjektets faser kunne ikke leses.",
+    "here": "Her er vi",
+    "state": {
+      "done": "Ferdig",
+      "now": "Pågår",
+      "risk": "Etter planen",
+      "blocked": "Blokkert",
+      "planned": "Planlagt",
+      "cancelled": "Avlyst"
+    },
+    "helpNeeded": "Trenger hjelp — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Ukens mål",
+    "titleMine": "Dine oppgaver denne uken",
+    "count": "{done} av {total} ferdige",
+    "unknown": "Ukens oppgaver kunne ikke leses.",
+    "mineNote": "Bare oppgavene du kan se: dine og teamets.",
+    "status": {
+      "todo": "Å gjøre",
+      "in_progress": "Pågår",
+      "blocked": "Blokkert",
+      "done": "Ferdig",
+      "cancelled": "Avlyst",
+      "overdue": "Forsinket"
+    }
   }
 }

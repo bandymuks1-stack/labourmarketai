@@ -140,7 +140,8 @@
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
     "uploading": "[EN] Uploading photo…",
     "remove": "[EN] Remove photo",
-    "previewAlt": "[EN] Selected photo"
+    "previewAlt": "[EN] Selected photo",
+    "takePhoto": "Tee foto"
   },
   "voice": {
     "entryCta": "Salvesta häälega",

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+
+import { CameraCaptureButton } from "@/components/app/camera-capture-button";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
@@ -1198,6 +1200,35 @@ export function JournalEntryComposer({
     // ONE photo field, placed by the active mode preset: photo-first mode
     // leads with it, the other modes keep it after the text (same field,
     // same free-tier rules, same after-save upload either way).
+    /* ONE photo handler, shared by the picker and the camera button. */
+    const acceptPhoto = async (f: File | null) => {
+      if (!f) {
+        setPhotoFile(null);
+        setPhotoError(null);
+        setPhotoPrep("idle");
+        return;
+      }
+      // Wrong format → honest error; size is handled by compression.
+      if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
+        setPhotoFile(null);
+        setPhotoError(t("photo.invalidFile"));
+        setPhotoPrep("idle");
+        return;
+      }
+      setPhotoError(null);
+      setPhotoPrep("preparing");
+      // Auto-resize/compress normal phone photos before upload.
+      const { file: prepared } = await compressImageFile(f);
+      if (!isValidJournalPhoto(prepared)) {
+        setPhotoFile(null);
+        setPhotoPrep("idle");
+        setPhotoError(t("photo.tooLargeAfter"));
+        return;
+      }
+      setPhotoFile(prepared);
+      setPhotoPrep("ready");
+    };
+
     const photoField = (
       <div
         className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
@@ -1217,35 +1248,14 @@ export function JournalEntryComposer({
           type="file"
           accept="image/jpeg,image/png,image/webp"
           data-testid="journal-photo-input"
-          onChange={async (e) => {
-            const f = e.target.files?.[0] ?? null;
-            if (!f) {
-              setPhotoFile(null);
-              setPhotoError(null);
-              setPhotoPrep("idle");
-              return;
-            }
-            // Wrong format → honest error; size is handled by compression.
-            if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
-              setPhotoFile(null);
-              setPhotoError(t("photo.invalidFile"));
-              setPhotoPrep("idle");
-              return;
-            }
-            setPhotoError(null);
-            setPhotoPrep("preparing");
-            // Auto-resize/compress normal phone photos before upload.
-            const { file: prepared } = await compressImageFile(f);
-            if (!isValidJournalPhoto(prepared)) {
-              setPhotoFile(null);
-              setPhotoPrep("idle");
-              setPhotoError(t("photo.tooLargeAfter"));
-              return;
-            }
-            setPhotoFile(prepared);
-            setPhotoPrep("ready");
-          }}
+          onChange={(e) => void acceptPhoto(e.target.files?.[0] ?? null)}
           className="text-xs text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-xs file:text-text-primary"
+        />
+        {/* The camera as a second door into the SAME field (phones only). */}
+        <CameraCaptureButton
+          label={t("photo.takePhoto")}
+          testId="journal-photo-camera"
+          onFile={(f) => void acceptPhoto(f)}
         />
         {photoError ? (
           <p className="text-xs text-state-danger" role="alert">

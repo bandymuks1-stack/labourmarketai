@@ -4354,7 +4354,10 @@
       "chipOfferOurs": "Piedāvāt mūsu brigādi vai uzņēmumu",
       "teamOfferAgreed": "Principā vienojušies — tas vēl nav parakstīts līgums. Saskaņojiet nosacījumus sarakstē un pēc tam piešķiriet komandu projektam.",
       "teamOfferDeclined": "Noraidīts. Piedāvātājs uzņēmums redzēs jūsu atbildi.",
-      "teamOfferThreadFailed": "Šo saraksti nevar atvērt."
+      "teamOfferThreadFailed": "Šo saraksti nevar atvērt.",
+      "whatChangedIntro": "{count, plural, zero {Lūk, # ķēdes no jūsu nesenā darba: ko izdarījāt, kas mainījās, ko tas atvēra.} one {Lūk, # ķēde no jūsu nesenā darba: ko izdarījāt, kas mainījās, ko tas atvēra.} other {Lūk, # ķēdes no jūsu nesenā darba: ko izdarījāt, kas mainījās, ko tas atvēra.}}",
+      "whatChangedNone": "Pēdējās 14 dienās no jūsu darba nekas jauns neradās. Kad ierakstīsiet darbu un to apstiprinās, parādīšu, ko tas mainīja.",
+      "whatChangedUnavailable": "Pašlaik neizdevās pārbaudīt, kas mainījās. Jūsu ieraksti ir drošībā — mēģiniet pēc brīža vai atveriet žurnālu."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -7516,5 +7519,151 @@
       "unplaced_single_unmatched": "ieraksti ar nezināmu vietu"
     },
     "link": "Datu kvalitāte"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Gaida jūs",
+      "clear": "Nekas jūs negaida.",
+      "unknown": "Neizdevās nolasīt, kas jūs gaida."
+    },
+    "running": {
+      "title": "Notiek tagad",
+      "projectsUnknown": "Neizdevās nolasīt jums piešķirtos projektus.",
+      "today": "Šodien",
+      "week": "Pēdējās 7 dienas",
+      "hours": "{hours} h",
+      "entries": "{n, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}",
+      "noEntriesToday": "Šodien vēl nekas nav reģistrēts",
+      "confirmed": "No tām apstiprinājis vadītājs vai klients: {hours} h",
+      "confirmedNone": "Apstiprinātu stundu vēl nav",
+      "barLabel": "Reģistrētās un apstiprinātās stundas pēdējās 7 dienās",
+      "record": {
+        "line": "Jūsu rekords: {best} st. apstiprinātas mēnesī ({month}). Šomēnes līdz šim: {current} st.",
+        "reached": "Šomēnes sasniedzāt savu rekordu: {hours} apstiprinātas st.",
+        "onlyYou": "To redzat tikai jūs — salīdzinājums tikai ar jūsu pašu mēnešiem.",
+        "barLabel": "Šis mēnesis pret jūsu labāko"
+      }
+    },
+    "because": {
+      "title": "Jaunākie notikumi",
+      "unknown": "Neizdevās nolasīt, kas mainījās.",
+      "also": "Notika arī",
+      "all": "Visa aktivitāte"
+    },
+    "outside": {
+      "title": "Jūsu iespējas",
+      "barLabel": "Iespējas pēc atbilstības"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Sākās darba attiecības",
+        "relationshipEnded": "Darba attiecības beidzās",
+        "bookingAgreed": "Rezervācija tika saskaņota",
+        "bookingRefused": "Rezervācija tika noraidīta",
+        "bookingWithdrawn": "Rezervācija tika atsaukta",
+        "absenceApproved": "Prombūtne tika apstiprināta",
+        "absenceRefused": "Prombūtne tika noraidīta",
+        "decisionRecorded": "Lēmums tika reģistrēts",
+        "acknowledgementRecorded": "Iepazīšanās tika reģistrēta",
+        "invitationAnswered": "Uz uzaicinājumu tika atbildēts"
+      },
+      "state": {
+        "engagementActive": "Nodarbinātība: aktīva",
+        "engagementClosed": "Nodarbinātība: beigusies",
+        "bookingConfirmed": "Rezervācija: apstiprināta",
+        "bookingClosed": "Rezervācija: slēgta",
+        "absenceDecided": "Prombūtne: izlemta",
+        "workflowClosed": "Apstiprināšana: slēgta",
+        "documentAcknowledged": "Dokuments: iepazīts",
+        "relationshipFormed": "Attiecības: izveidotas"
+      }
+    },
+    "retry": "Ielādēt vēlreiz",
+    "retrying": "Ielādē…",
+    "availability": {
+      "partial": "Daļa datu īslaicīgi nav pieejama ({count} no 4 sadaļām).",
+      "totalTitle": "Šobrīd neizdevās nolasīt jūsu datus",
+      "totalBody": "Jūsu ieraksti ir drošībā — tas ir īslaicīgi. Mēģiniet vēlreiz pēc brīža."
+    }
+  },
+  "homeTrace": {
+    "title": "Kas mainījās",
+    "unknown": "Neizdevās nolasīt, kas mainījās pēc jūsu darbībām.",
+    "all": "Visa aktivitāte",
+    "empty": "Pēdējās 14 dienās jaunu seku nav. Kad ierakstīsiet darbu un to apstiprinās, šeit redzēsiet, ko tas mainīja.",
+    "openJournal": "Atvērt darba žurnālu",
+    "entryUntitled": "Darba ieraksts",
+    "roleUnknown": "otrā puse",
+    "journalUnknown": "Neizdevās nolasīt darba žurnālu.",
+    "eventsUnknown": "Neizdevās nolasīt paziņojumus.",
+    "truncated": "Pēc jūsu jaunākajiem 30 ierakstiem.",
+    "step": {
+      "recordedHours": "Ierakstītas {hours} st.",
+      "recordedDays": "Ierakstītas {days} d.",
+      "recordedUntimed": "Ierakstīts bez ilguma",
+      "awaiting": "Gaida apstiprinājumu",
+      "selfApproved": "Apstiprinājāt paši — tas nav otrās puses apstiprinājums",
+      "approvedBy": "Apstiprināja: {role}",
+      "approvedAutomatic": "Apstiprināts automātiski pēc noteikuma",
+      "rejected": "Noraidīts",
+      "changesRequested": "Lūgts labot",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, zero {# apstiprinātu ierakstu} one {# apstiprināts ieraksts} other {# apstiprināti ieraksti}}} other {Living CV papildināts: {skills}}}",
+      "cvUnlinked": "Living CV: apstiprināts darbs, vēl nav saistīts ar prasmi",
+      "cvUnknown": "Living CV: neizdevās nolasīt",
+      "matching": "Atlase redz apstiprinātu darbu: {skills}",
+      "matchingRepeated": "Atlase redz atkārtoti apstiprinātu darbu: {skills}"
+    },
+    "legend": {
+      "fact": "Fakts",
+      "pending": "Gaida otro pusi",
+      "derived": "Izsecināts no faktiem"
+    }
+  },
+  "careerJourney": {
+    "title": "Jūsu profesionālais ceļš",
+    "summary": "Projekti ir pieturas, prasmes ir līnijas. Līnija apstājas tikai tur, kur jūsu žurnāls rāda darbu ar šo prasmi.",
+    "now": "Tagad",
+    "gap": "Nav ierakstu",
+    "horizon": "Horizonts",
+    "derived": "izsecināts, nevis solījums",
+    "linksUnknown": "Neizdevās nolasīt, kur izmantotas jūsu prasmes, — līnijas parādītas bez pieturām.",
+    "level": {
+      "confirmed": "apstiprināts",
+      "recorded": "ierakstīts",
+      "declared": "deklarēts"
+    },
+    "focusHint": "Pieskarieties līnijai, lai izsekotu vienu prasmi visā ceļā.",
+    "showAll": "Rādīt visas",
+    "horizonDetail": "jums jau ir {shared} no {total} prasmēm"
+  },
+  "projectCourse": {
+    "title": "Projekta maršruts",
+    "count": "Pabeigti {done} no {total} posmiem",
+    "unknown": "Neizdevās nolasīt projekta posmus.",
+    "here": "Mēs esam šeit",
+    "state": {
+      "done": "Pabeigts",
+      "now": "Notiek",
+      "risk": "Atpaliek no plāna",
+      "blocked": "Apturēts",
+      "planned": "Plānots",
+      "cancelled": "Atcelts"
+    },
+    "helpNeeded": "Vajadzīga palīdzība — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Šīs nedēļas mērķis",
+    "titleMine": "Jūsu šīs nedēļas uzdevumi",
+    "count": "Izpildīti {done} no {total}",
+    "unknown": "Neizdevās nolasīt šīs nedēļas uzdevumus.",
+    "mineNote": "Tikai jums redzamie uzdevumi: jūsu un jūsu komandas.",
+    "status": {
+      "todo": "Jāveic",
+      "in_progress": "Notiek",
+      "blocked": "Apturēts",
+      "done": "Izpildīts",
+      "cancelled": "Atcelts",
+      "overdue": "Nokavēts"
+    }
   }
 }

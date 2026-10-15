@@ -14540,6 +14540,9 @@
       "teamOfferAgreed": "Sutarta iš esmės — tai dar ne pasirašyta sutartis. Sąlygas suderink pokalbyje, tada priskirk komandą projektui.",
       "teamOfferDeclined": "Atmesta. Pasiūliusi įmonė matys tavo atsakymą.",
       "teamOfferThreadFailed": "Šio pokalbio atidaryti nepavyko.",
+      "whatChangedIntro": "{count, plural, one {Štai tavo naujausio darbo grandinė: ką padarei, kas pasikeitė, ką tai atvėrė.} few {Štai # tavo naujausio darbo grandinės: ką padarei, kas pasikeitė, ką tai atvėrė.} other {Štai # tavo naujausio darbo grandinių: ką padarei, kas pasikeitė, ką tai atvėrė.}}",
+      "whatChangedNone": "Per 14 dienų iš tavo darbo nieko naujo neatsirado. Kai įrašysi darbą ir jį patvirtins, parodysiu, ką jis pakeitė.",
+      "whatChangedUnavailable": "Dabar nepavyko patikrinti, kas pasikeitė. Tavo įrašai niekur nedingo — pabandyk po akimirkos arba atidaryk žurnalą.",
       "planIntro": "{count, plural, one {Tai # žingsnis.} few {Tai # žingsniai, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.} other {Tai # žingsnių, iš eilės. Štai pirmasis — paspausk kitą, kai būsi pasiruošęs.}}",
       "planNextOffer": "Kitas žingsnis:",
       "planStep": "{n} žingsnis iš {count}"
@@ -19407,5 +19410,151 @@
       "unplaced_single_unmatched": "įrašai su nežinoma vieta"
     },
     "link": "Duomenų kokybė"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Laukia tavęs",
+      "clear": "Niekas tavęs nelaukia.",
+      "unknown": "Nepavyko nuskaityti, kas tavęs laukia."
+    },
+    "running": {
+      "title": "Vyksta dabar",
+      "projectsUnknown": "Nepavyko nuskaityti tau priskirtų projektų.",
+      "today": "Šiandien",
+      "week": "Per 7 dienas",
+      "hours": "{hours} val.",
+      "entries": "{n, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+      "noEntriesToday": "Šiandien dar nieko neužrašyta",
+      "confirmed": "Iš jų patvirtino vadovas ar užsakovas: {hours} val.",
+      "confirmedNone": "Patvirtintų valandų dar nėra",
+      "barLabel": "Užrašytos ir patvirtintos valandos per 7 dienas",
+      "record": {
+        "line": "Tavo rekordas: {best} patvirtintų val. per mėnesį ({month}). Šį mėnesį kol kas: {current} val.",
+        "reached": "Šį mėnesį pasiekei savo rekordą: {hours} patvirtintų val.",
+        "onlyYou": "Matai tik tu — lyginama tik su tavo ankstesniais mėnesiais.",
+        "barLabel": "Šis mėnuo, lyginant su tavo geriausiu"
+      }
+    },
+    "because": {
+      "title": "Naujausi įvykiai",
+      "unknown": "Nepavyko nuskaityti, kas pasikeitė.",
+      "also": "Taip pat įvyko",
+      "all": "Visa veikla"
+    },
+    "outside": {
+      "title": "Tavo galimybės",
+      "barLabel": "Galimybės pagal tinkamumą"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Prasidėjo darbo santykis",
+        "relationshipEnded": "Darbo santykis baigėsi",
+        "bookingAgreed": "Rezervacija sutarta",
+        "bookingRefused": "Rezervacija atmesta",
+        "bookingWithdrawn": "Rezervacija atšaukta",
+        "absenceApproved": "Nebuvimas darbe patvirtintas",
+        "absenceRefused": "Prašymas dėl nebuvimo atmestas",
+        "decisionRecorded": "Sprendimas užfiksuotas",
+        "acknowledgementRecorded": "Susipažinimas pažymėtas",
+        "invitationAnswered": "Į kvietimą atsakyta"
+      },
+      "state": {
+        "engagementActive": "Įdarbinimas: aktyvus",
+        "engagementClosed": "Įdarbinimas: baigtas",
+        "bookingConfirmed": "Rezervacija: patvirtinta",
+        "bookingClosed": "Rezervacija: uždaryta",
+        "absenceDecided": "Nebuvimas darbe: sprendimas priimtas",
+        "workflowClosed": "Tvirtinimas: baigtas",
+        "documentAcknowledged": "Dokumentas: susipažinta",
+        "relationshipFormed": "Ryšys: užmegztas"
+      }
+    },
+    "retry": "Bandyti dar kartą",
+    "retrying": "Skaitoma…",
+    "availability": {
+      "partial": "Dalis duomenų laikinai nepasiekiama ({count} iš 4 sričių).",
+      "totalTitle": "Šiuo metu nepavyko nuskaityti tavo duomenų",
+      "totalBody": "Tavo įrašai niekur nedingo — tai laikinas sutrikimas. Pabandyk dar kartą po akimirkos."
+    }
+  },
+  "homeTrace": {
+    "title": "Kas pasikeitė",
+    "unknown": "Nepavyko nuskaityti, kas pasikeitė po tavo veiksmų.",
+    "all": "Visa veikla",
+    "empty": "Per 14 dienų naujų pasekmių nėra. Kai įrašysi darbą ir jį patvirtins, čia matysi, ką jis pakeitė.",
+    "openJournal": "Atidaryti darbo žurnalą",
+    "entryUntitled": "Darbo įrašas",
+    "roleUnknown": "antra šalis",
+    "journalUnknown": "Nepavyko nuskaityti darbo žurnalo.",
+    "eventsUnknown": "Nepavyko nuskaityti pranešimų.",
+    "truncated": "Rodoma pagal naujausius 30 įrašų.",
+    "step": {
+      "recordedHours": "Įrašyta {hours} val.",
+      "recordedDays": "Įrašyta {days} d.",
+      "recordedUntimed": "Įrašyta be trukmės",
+      "awaiting": "Laukia patvirtinimo",
+      "selfApproved": "Patvirtinai pats — tai nėra antros šalies patvirtinimas",
+      "approvedBy": "Patvirtino: {role}",
+      "approvedAutomatic": "Patvirtinta automatiškai pagal taisyklę",
+      "rejected": "Atmesta",
+      "changesRequested": "Prašoma pataisyti",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# patvirtintas įrašas} few {# patvirtinti įrašai} other {# patvirtintų įrašų}}} other {Living CV papildytas: {skills}}}",
+      "cvUnlinked": "Living CV: patvirtintas darbas, dar nesusietas su įgūdžiu",
+      "cvUnknown": "Living CV: nepavyko nuskaityti",
+      "matching": "Atranka mato kaip patvirtintą darbą: {skills}",
+      "matchingRepeated": "Atranka mato kaip pakartotinai patvirtintą darbą: {skills}"
+    },
+    "legend": {
+      "fact": "Faktas",
+      "pending": "Laukia antros šalies",
+      "derived": "Išvesta iš faktų"
+    }
+  },
+  "careerJourney": {
+    "title": "Tavo profesinė kelionė",
+    "summary": "Projektai — stotelės, įgūdžiai — linijos. Linija sustoja tik ten, kur tavo žurnalas rodo, kad tuo įgūdžiu dirbta.",
+    "now": "Dabar",
+    "gap": "Be įrašų",
+    "horizon": "Horizontas",
+    "derived": "išvesta, ne pažadas",
+    "linksUnknown": "Nepavyko perskaityti, kur naudoti tavo įgūdžiai — linijos rodomos be stotelių.",
+    "level": {
+      "confirmed": "patvirtinta",
+      "recorded": "įrašyta",
+      "declared": "deklaruota"
+    },
+    "focusHint": "Bakstelėk liniją ir sek vieną įgūdį per visą kelionę.",
+    "showAll": "Rodyti visas",
+    "horizonDetail": "jau turi {shared} iš {total} įgūdžių"
+  },
+  "projectCourse": {
+    "title": "Projekto trasa",
+    "count": "Baigta {done} iš {total} etapų",
+    "unknown": "Nepavyko nuskaityti projekto etapų.",
+    "here": "Mes čia",
+    "state": {
+      "done": "Baigta",
+      "now": "Vyksta",
+      "risk": "Vėluoja pagal planą",
+      "blocked": "Sustabdyta",
+      "planned": "Suplanuota",
+      "cancelled": "Atšaukta"
+    },
+    "helpNeeded": "Reikia pagalbos — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Šios savaitės tikslas",
+    "titleMine": "Tavo šios savaitės užduotys",
+    "count": "Atlikta {done} iš {total}",
+    "unknown": "Nepavyko nuskaityti šios savaitės užduočių.",
+    "mineNote": "Rodomos tik tau matomos užduotys: tavo ir tavo komandos.",
+    "status": {
+      "todo": "Laukia",
+      "in_progress": "Vyksta",
+      "blocked": "Sustabdyta",
+      "done": "Atlikta",
+      "cancelled": "Atšaukta",
+      "overdue": "Vėluoja"
+    }
   }
 }

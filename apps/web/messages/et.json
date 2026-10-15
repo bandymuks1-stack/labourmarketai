@@ -4354,7 +4354,10 @@
       "chipOfferOurs": "Paku meie brigaadi või ettevõtet",
       "teamOfferAgreed": "Põhimõtteliselt kokku lepitud — see pole veel allkirjastatud leping. Lepi tingimused vestluses kokku ja määra seejärel meeskond projekti.",
       "teamOfferDeclined": "Tagasi lükatud. Pakkuv ettevõte näeb sinu vastust.",
-      "teamOfferThreadFailed": "Seda vestlust ei saa avada."
+      "teamOfferThreadFailed": "Seda vestlust ei saa avada.",
+      "whatChangedIntro": "{count, plural, one {Siin on ahel sinu hiljutisest tööst: mida tegid, mis muutus, mida see avas.} other {Siin on # ahelat sinu hiljutisest tööst: mida tegid, mis muutus, mida see avas.}}",
+      "whatChangedNone": "Viimase 14 päeva jooksul ei tulnud sinu tööst midagi uut. Kui salvestad töö ja see kinnitatakse, näitan, mida see muutis.",
+      "whatChangedUnavailable": "Praegu ei õnnestunud kontrollida, mis muutus. Sinu kirjed on alles — proovi hetke pärast uuesti või ava tööpäevik."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -7516,5 +7519,151 @@
       "unplaced_single_unmatched": "tundmatu kohaga kirjed"
     },
     "link": "Andmekvaliteet"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Ootab sind",
+      "clear": "Miski ei oota sind.",
+      "unknown": "Seda, mis sind ootab, ei õnnestunud lugeda."
+    },
+    "running": {
+      "title": "Käimas praegu",
+      "projectsUnknown": "Sulle määratud projekte ei õnnestunud lugeda.",
+      "today": "Täna",
+      "week": "Viimased 7 päeva",
+      "hours": "{hours} h",
+      "entries": "{n, plural, one {# kirje} other {# kirjet}}",
+      "noEntriesToday": "Täna pole veel midagi kirja pandud",
+      "confirmed": "Neist kinnitanud juht või klient: {hours} h",
+      "confirmedNone": "Kinnitatud tunde veel pole",
+      "barLabel": "Registreeritud ja kinnitatud tunnid viimase 7 päeva jooksul",
+      "record": {
+        "line": "Sinu rekord: {best} kinnitatud h kuus ({month}). Sel kuul seni: {current} h.",
+        "reached": "Sel kuul jõudsid oma rekordini: {hours} kinnitatud h.",
+        "onlyYou": "Seda näed ainult sina — võrreldakse ainult sinu enda kuudega.",
+        "barLabel": "See kuu sinu parima suhtes"
+      }
+    },
+    "because": {
+      "title": "Viimased sündmused",
+      "unknown": "Seda, mis muutus, ei õnnestunud lugeda.",
+      "also": "Juhtus ka",
+      "all": "Kogu tegevus"
+    },
+    "outside": {
+      "title": "Sinu võimalused",
+      "barLabel": "Võimalused sobivuse järgi"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Tööalane suhe algas",
+        "relationshipEnded": "Tööalane suhe lõppes",
+        "bookingAgreed": "Broneering lepiti kokku",
+        "bookingRefused": "Broneering lükati tagasi",
+        "bookingWithdrawn": "Broneering võeti tagasi",
+        "absenceApproved": "Puudumine kinnitati",
+        "absenceRefused": "Puudumine lükati tagasi",
+        "decisionRecorded": "Otsus salvestati",
+        "acknowledgementRecorded": "Teadmiseks võtmine salvestati",
+        "invitationAnswered": "Kutsele vastati"
+      },
+      "state": {
+        "engagementActive": "Töösuhe: aktiivne",
+        "engagementClosed": "Töösuhe: lõppenud",
+        "bookingConfirmed": "Broneering: kinnitatud",
+        "bookingClosed": "Broneering: suletud",
+        "absenceDecided": "Puudumine: otsustatud",
+        "workflowClosed": "Kinnitamine: suletud",
+        "documentAcknowledged": "Dokument: teadmiseks võetud",
+        "relationshipFormed": "Suhe: loodud"
+      }
+    },
+    "retry": "Laadi uuesti",
+    "retrying": "Laadin…",
+    "availability": {
+      "partial": "Osa sinu andmetest pole ajutiselt kättesaadav ({count} valdkonda 4-st).",
+      "totalTitle": "Sinu andmeid ei õnnestunud praegu lugeda",
+      "totalBody": "Sinu kirjed on alles — see on ajutine. Proovi hetke pärast uuesti."
+    }
+  },
+  "homeTrace": {
+    "title": "Mis muutus",
+    "unknown": "Ei õnnestunud lugeda, mis sinu tegevuste järel muutus.",
+    "all": "Kogu tegevus",
+    "empty": "Viimase 14 päeva jooksul uusi tagajärgi pole. Kui salvestad töö ja see kinnitatakse, näed siin, mida see muutis.",
+    "openJournal": "Ava tööpäevik",
+    "entryUntitled": "Töökirje",
+    "roleUnknown": "teine osapool",
+    "journalUnknown": "Tööpäevikut ei õnnestunud lugeda.",
+    "eventsUnknown": "Teavitusi ei õnnestunud lugeda.",
+    "truncated": "Sinu 30 uusima kirje põhjal.",
+    "step": {
+      "recordedHours": "Salvestatud {hours} h",
+      "recordedDays": "Salvestatud {days} p",
+      "recordedUntimed": "Salvestatud ilma kestuseta",
+      "awaiting": "Ootab kinnitust",
+      "selfApproved": "Kinnitasid ise — see pole teise osapoole kinnitus",
+      "approvedBy": "Kinnitas: {role}",
+      "approvedAutomatic": "Kinnitatud automaatselt reegli järgi",
+      "rejected": "Tagasi lükatud",
+      "changesRequested": "Paluti parandada",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# kinnitatud kirje} other {# kinnitatud kirjet}}} other {Living CV täiendatud: {skills}}}",
+      "cvUnlinked": "Living CV: kinnitatud töö, veel oskusega sidumata",
+      "cvUnknown": "Living CV: ei õnnestunud lugeda",
+      "matching": "Sobitamine näeb kinnitatud tööd: {skills}",
+      "matchingRepeated": "Sobitamine näeb korduvalt kinnitatud tööd: {skills}"
+    },
+    "legend": {
+      "fact": "Fakt",
+      "pending": "Ootab teist osapoolt",
+      "derived": "Tuletatud faktidest"
+    }
+  },
+  "careerJourney": {
+    "title": "Sinu tööteekond",
+    "summary": "Projektid on peatused, oskused on liinid. Liin peatub ainult seal, kus su tööpäevik näitab selle oskusega tehtud tööd.",
+    "now": "Praegu",
+    "gap": "Kirjeid pole",
+    "horizon": "Horisont",
+    "derived": "tuletatud, mitte lubadus",
+    "linksUnknown": "Ei õnnestunud lugeda, kus su oskusi kasutati — liinid on näidatud peatusteta.",
+    "level": {
+      "confirmed": "kinnitatud",
+      "recorded": "salvestatud",
+      "declared": "deklareeritud"
+    },
+    "focusHint": "Puuduta liini, et jälgida üht oskust kogu teekonna vältel.",
+    "showAll": "Näita kõiki",
+    "horizonDetail": "sul on juba {shared} oskust {total}-st"
+  },
+  "projectCourse": {
+    "title": "Projekti teekond",
+    "count": "Valmis {done} etappi {total}-st",
+    "unknown": "Projekti etappe ei õnnestunud lugeda.",
+    "here": "Siin me oleme",
+    "state": {
+      "done": "Valmis",
+      "now": "Käimas",
+      "risk": "Plaanist maas",
+      "blocked": "Peatatud",
+      "planned": "Planeeritud",
+      "cancelled": "Tühistatud"
+    },
+    "helpNeeded": "Abi on vaja — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Selle nädala eesmärk",
+    "titleMine": "Sinu selle nädala ülesanded",
+    "count": "Tehtud {done}/{total}",
+    "unknown": "Selle nädala ülesandeid ei õnnestunud lugeda.",
+    "mineNote": "Ainult sulle nähtavad ülesanded: sinu ja su meeskonna omad.",
+    "status": {
+      "todo": "Teha",
+      "in_progress": "Käimas",
+      "blocked": "Peatatud",
+      "done": "Tehtud",
+      "cancelled": "Tühistatud",
+      "overdue": "Hilinenud"
+    }
   }
 }

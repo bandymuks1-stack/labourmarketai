@@ -14540,6 +14540,9 @@
       "teamOfferAgreed": "In principe akkoord — nog geen getekend contract. Spreek de voorwaarden af in het gesprek en wijs het team daarna toe aan een project.",
       "teamOfferDeclined": "Afgewezen. Het aanbiedende bedrijf ziet je antwoord.",
       "teamOfferThreadFailed": "Dit gesprek kan niet worden geopend.",
+      "whatChangedIntro": "{count, plural, one {Hier is de keten uit je recente werk: wat je deed, wat er veranderde, wat het opende.} other {Hier zijn # ketens uit je recente werk: wat je deed, wat er veranderde, wat het opende.}}",
+      "whatChangedNone": "Er kwam de laatste 14 dagen niets nieuws uit je werk. Zodra je werk registreert en het bevestigd wordt, laat ik zien wat het veranderde.",
+      "whatChangedUnavailable": "Ik kon nu niet nagaan wat er veranderde. Je registraties zijn veilig — probeer het zo opnieuw of open het logboek.",
       "planIntro": "{count, plural, one {Dat is # stap.} other {Dat zijn # stappen, op volgorde. Hier is de eerste — tik op de volgende wanneer je klaar bent.}}",
       "planNextOffer": "Volgende stap:",
       "planStep": "Stap {n} van {count}"
@@ -19407,5 +19410,151 @@
       "unplaced_single_unmatched": "registraties met onbekende plaats"
     },
     "link": "Datakwaliteit"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Wacht op je",
+      "clear": "Er wacht niets op je.",
+      "unknown": "Wat op je wacht, kon niet worden gelezen."
+    },
+    "running": {
+      "title": "Loopt nu",
+      "projectsUnknown": "Je toegewezen projecten konden niet worden gelezen.",
+      "today": "Vandaag",
+      "week": "Laatste 7 dagen",
+      "hours": "{hours} je",
+      "entries": "{n, plural, one {# registratie} other {# registraties}}",
+      "noEntriesToday": "Vandaag nog niets geregistreerd",
+      "confirmed": "Waarvan bevestigd door een leidinggevende of opdrachtgever: {hours} je",
+      "confirmedNone": "Nog geen bevestigde uren",
+      "barLabel": "Geregistreerde en bevestigde uren, laatste 7 dagen",
+      "record": {
+        "line": "Je record: {best} u bevestigd in een maand ({month}). Deze maand tot nu toe: {current} u.",
+        "reached": "Deze maand haalde je je eigen record: {hours} bevestigde u.",
+        "onlyYou": "Alleen jij ziet dit — het wordt alleen met je eigen maanden vergeleken.",
+        "barLabel": "Deze maand ten opzichte van je eigen beste"
+      }
+    },
+    "because": {
+      "title": "Laatste gebeurtenissen",
+      "unknown": "Wat er veranderde, kon niet worden gelezen.",
+      "also": "Verder gebeurd",
+      "all": "Alle activiteit"
+    },
+    "outside": {
+      "title": "Jouw kansen",
+      "barLabel": "Kansen naar geschiktheid"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Een werkrelatie is begonnen",
+        "relationshipEnded": "Een werkrelatie is beëindigd",
+        "bookingAgreed": "De boeking is overeengekomen",
+        "bookingRefused": "De boeking is geweigerd",
+        "bookingWithdrawn": "De boeking is ingetrokken",
+        "absenceApproved": "De afwezigheid is goedgekeurd",
+        "absenceRefused": "De afwezigheid is afgewezen",
+        "decisionRecorded": "Het besluit is vastgelegd",
+        "acknowledgementRecorded": "De kennisname is vastgelegd",
+        "invitationAnswered": "De uitnodiging is beantwoord"
+      },
+      "state": {
+        "engagementActive": "Dienstverband: actief",
+        "engagementClosed": "Dienstverband: beëindigd",
+        "bookingConfirmed": "Boeking: bevestigd",
+        "bookingClosed": "Boeking: gesloten",
+        "absenceDecided": "Afwezigheid: beslist",
+        "workflowClosed": "Goedkeuring: afgesloten",
+        "documentAcknowledged": "Document: voor gezien getekend",
+        "relationshipFormed": "Relatie: aangegaan"
+      }
+    },
+    "retry": "Opnieuw laden",
+    "retrying": "Laden…",
+    "availability": {
+      "partial": "Een deel van je gegevens is tijdelijk niet beschikbaar ({count} van 4 onderdelen).",
+      "totalTitle": "We konden je gegevens nu niet lezen",
+      "totalBody": "Je registraties zijn veilig — dit is tijdelijk. Probeer het zo opnieuw."
+    }
+  },
+  "homeTrace": {
+    "title": "Wat er veranderde",
+    "unknown": "Kon niet lezen wat er na je acties veranderde.",
+    "all": "Alle activiteit",
+    "empty": "Geen nieuwe gevolgen in de laatste 14 dagen. Zodra je werk registreert en het bevestigd wordt, zie je hier wat het veranderde.",
+    "openJournal": "Werklogboek openen",
+    "entryUntitled": "Werkregistratie",
+    "roleUnknown": "tweede partij",
+    "journalUnknown": "Kon het werklogboek niet lezen.",
+    "eventsUnknown": "Kon de meldingen niet lezen.",
+    "truncated": "Op basis van je nieuwste 30 registraties.",
+    "step": {
+      "recordedHours": "{hours} u geregistreerd",
+      "recordedDays": "{days} d geregistreerd",
+      "recordedUntimed": "Geregistreerd zonder duur",
+      "awaiting": "Wacht op bevestiging",
+      "selfApproved": "Door jezelf goedgekeurd — geen bevestiging door een tweede partij",
+      "approvedBy": "Bevestigd door: {role}",
+      "approvedAutomatic": "Automatisch bevestigd volgens een regel",
+      "rejected": "Afgewezen",
+      "changesRequested": "Aanpassing gevraagd",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bevestigde registratie} other {# bevestigde registraties}}} other {Living CV bijgewerkt: {skills}}}",
+      "cvUnlinked": "Living CV: bevestigd werk, nog niet aan een vaardigheid gekoppeld",
+      "cvUnknown": "Living CV: kon niet lezen",
+      "matching": "Matching ziet bevestigd werk: {skills}",
+      "matchingRepeated": "Matching ziet herhaald bevestigd werk: {skills}"
+    },
+    "legend": {
+      "fact": "Feit",
+      "pending": "Wacht op een tweede partij",
+      "derived": "Afgeleid uit feiten"
+    }
+  },
+  "careerJourney": {
+    "title": "Je loopbaanreis",
+    "summary": "Projecten zijn haltes, vaardigheden zijn lijnen. Een lijn stopt alleen waar je logboek laat zien dat je met die vaardigheid werkte.",
+    "now": "Nu",
+    "gap": "Geen registraties",
+    "horizon": "Vooruitblik",
+    "derived": "afgeleid, geen belofte",
+    "linksUnknown": "Kon niet lezen waar je vaardigheden werden ingezet — de lijnen staan er zonder haltes.",
+    "level": {
+      "confirmed": "bevestigd",
+      "recorded": "geregistreerd",
+      "declared": "opgegeven"
+    },
+    "focusHint": "Tik op een lijn om één vaardigheid door je hele reis te volgen.",
+    "showAll": "Alles tonen",
+    "horizonDetail": "je hebt al {shared} van {total} vaardigheden"
+  },
+  "projectCourse": {
+    "title": "Projectroute",
+    "count": "{done} van {total} fasen klaar",
+    "unknown": "Kon de projectfasen niet lezen.",
+    "here": "Hier zijn we",
+    "state": {
+      "done": "Klaar",
+      "now": "Bezig",
+      "risk": "Achter op de planning",
+      "blocked": "Geblokkeerd",
+      "planned": "Gepland",
+      "cancelled": "Geannuleerd"
+    },
+    "helpNeeded": "Hulp nodig — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Doel van deze week",
+    "titleMine": "Je taken deze week",
+    "count": "{done} van {total} klaar",
+    "unknown": "Kon de taken van deze week niet lezen.",
+    "mineNote": "Alleen taken die jij kunt zien: van jou en je team.",
+    "status": {
+      "todo": "Te doen",
+      "in_progress": "Bezig",
+      "blocked": "Geblokkeerd",
+      "done": "Klaar",
+      "cancelled": "Geannuleerd",
+      "overdue": "Te laat"
+    }
   }
 }

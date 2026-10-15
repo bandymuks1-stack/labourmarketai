@@ -14540,6 +14540,9 @@
       "teamOfferAgreed": "Uzgodnione wstępnie — to jeszcze nie podpisana umowa. Ustalcie warunki w rozmowie, a potem przypisz zespół do projektu.",
       "teamOfferDeclined": "Odrzucono. Oferująca firma zobaczy twoją odpowiedź.",
       "teamOfferThreadFailed": "Nie można otworzyć tej rozmowy.",
+      "whatChangedIntro": "{count, plural, one {Oto łańcuch z Twojej ostatniej pracy: co zostało zrobione, co się zmieniło, co to otworzyło.} few {Oto # łańcuchy z Twojej ostatniej pracy: co zostało zrobione, co się zmieniło, co to otworzyło.} many {Oto # łańcuchów z Twojej ostatniej pracy: co zostało zrobione, co się zmieniło, co to otworzyło.} other {Oto # łańcucha z Twojej ostatniej pracy: co zostało zrobione, co się zmieniło, co to otworzyło.}}",
+      "whatChangedNone": "W ciągu 14 dni z Twojej pracy nie wynikło nic nowego. Gdy zapiszesz pracę i zostanie potwierdzona, pokażę, co zmieniła.",
+      "whatChangedUnavailable": "Nie udało się teraz sprawdzić, co się zmieniło. Twoje wpisy są bezpieczne — spróbuj za chwilę lub otwórz dziennik.",
       "planIntro": "{count, plural, one {To # krok.} few {To # kroki, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.} many {To # kroków, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.} other {To # kroku, po kolei. Oto pierwszy — dotknij następnego, gdy będziesz gotowy.}}",
       "planNextOffer": "Następny krok:",
       "planStep": "Krok {n} z {count}"
@@ -19407,5 +19410,151 @@
       "unplaced_single_unmatched": "wpisy z nieznanym miejscem"
     },
     "link": "Jakość danych"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Czeka na Ciebie",
+      "clear": "Nic na Ciebie nie czeka.",
+      "unknown": "Nie udało się odczytać, co na Ciebie czeka."
+    },
+    "running": {
+      "title": "Trwa teraz",
+      "projectsUnknown": "Nie udało się odczytać przypisanych Ci projektów.",
+      "today": "Dziś",
+      "week": "Ostatnie 7 dni",
+      "hours": "{hours} godz.",
+      "entries": "{n, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+      "noEntriesToday": "Dziś jeszcze nic nie zapisano",
+      "confirmed": "Z tego potwierdzone przez kierownika lub klienta: {hours} godz.",
+      "confirmedNone": "Brak potwierdzonych godzin",
+      "barLabel": "Zapisane i potwierdzone godziny z 7 dni",
+      "record": {
+        "line": "Twój rekord: {best} godz. potwierdzonych w miesiącu ({month}). W tym miesiącu na razie: {current} godz.",
+        "reached": "W tym miesiącu osiągnięto Twój rekord: {hours} potwierdzonych godz.",
+        "onlyYou": "Widzisz to tylko Ty — porównanie wyłącznie z Twoimi własnymi miesiącami.",
+        "barLabel": "Ten miesiąc względem Twojego najlepszego"
+      }
+    },
+    "because": {
+      "title": "Najnowsze wydarzenia",
+      "unknown": "Nie udało się odczytać, co się zmieniło.",
+      "also": "Wydarzyło się też",
+      "all": "Cała aktywność"
+    },
+    "outside": {
+      "title": "Twoje możliwości",
+      "barLabel": "Możliwości według dopasowania"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Rozpoczęła się współpraca",
+        "relationshipEnded": "Współpraca się zakończyła",
+        "bookingAgreed": "Rezerwacja została uzgodniona",
+        "bookingRefused": "Rezerwacja została odrzucona",
+        "bookingWithdrawn": "Rezerwacja została wycofana",
+        "absenceApproved": "Nieobecność została zatwierdzona",
+        "absenceRefused": "Nieobecność została odrzucona",
+        "decisionRecorded": "Decyzja została zapisana",
+        "acknowledgementRecorded": "Zapoznanie się zostało zapisane",
+        "invitationAnswered": "Na zaproszenie odpowiedziano"
+      },
+      "state": {
+        "engagementActive": "Zatrudnienie: aktywne",
+        "engagementClosed": "Zatrudnienie: zakończone",
+        "bookingConfirmed": "Rezerwacja: potwierdzona",
+        "bookingClosed": "Rezerwacja: zamknięta",
+        "absenceDecided": "Nieobecność: rozstrzygnięta",
+        "workflowClosed": "Zatwierdzenie: zamknięte",
+        "documentAcknowledged": "Dokument: przyjęty do wiadomości",
+        "relationshipFormed": "Relacja: nawiązana"
+      }
+    },
+    "retry": "Wczytaj ponownie",
+    "retrying": "Wczytywanie…",
+    "availability": {
+      "partial": "Część danych jest chwilowo niedostępna ({count} z 4 obszarów).",
+      "totalTitle": "Nie udało się teraz wczytać Twoich danych",
+      "totalBody": "Twoje wpisy są bezpieczne — to chwilowy problem. Spróbuj ponownie za moment."
+    }
+  },
+  "homeTrace": {
+    "title": "Co się zmieniło",
+    "unknown": "Nie udało się odczytać, co zmieniło się po Twoich działaniach.",
+    "all": "Cała aktywność",
+    "empty": "Brak nowych skutków w ciągu 14 dni. Gdy zapiszesz pracę i zostanie potwierdzona, zobaczysz tu, co zmieniła.",
+    "openJournal": "Otwórz dziennik pracy",
+    "entryUntitled": "Wpis o pracy",
+    "roleUnknown": "druga strona",
+    "journalUnknown": "Nie udało się odczytać dziennika pracy.",
+    "eventsUnknown": "Nie udało się odczytać powiadomień.",
+    "truncated": "Na podstawie Twoich 30 najnowszych wpisów.",
+    "step": {
+      "recordedHours": "Zapisano {hours} godz.",
+      "recordedDays": "Zapisano {days} dni",
+      "recordedUntimed": "Zapisano bez czasu trwania",
+      "awaiting": "Czeka na potwierdzenie",
+      "selfApproved": "Zatwierdzone przez Ciebie — to nie jest potwierdzenie drugiej strony",
+      "approvedBy": "Potwierdził: {role}",
+      "approvedAutomatic": "Potwierdzone automatycznie według reguły",
+      "rejected": "Odrzucono",
+      "changesRequested": "Poproszono o poprawki",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# potwierdzony wpis} few {# potwierdzone wpisy} many {# potwierdzonych wpisów} other {# potwierdzonego wpisu}}} other {Living CV uzupełnione: {skills}}}",
+      "cvUnlinked": "Living CV: potwierdzona praca, jeszcze niepowiązana z umiejętnością",
+      "cvUnknown": "Living CV: nie udało się odczytać",
+      "matching": "Dopasowanie widzi potwierdzoną pracę: {skills}",
+      "matchingRepeated": "Dopasowanie widzi wielokrotnie potwierdzoną pracę: {skills}"
+    },
+    "legend": {
+      "fact": "Fakt",
+      "pending": "Czeka na drugą stronę",
+      "derived": "Wywnioskowane z faktów"
+    }
+  },
+  "careerJourney": {
+    "title": "Twoja droga zawodowa",
+    "summary": "Projekty to przystanki, umiejętności to linie. Linia zatrzymuje się tylko tam, gdzie Twój dziennik pokazuje pracę z tą umiejętnością.",
+    "now": "Teraz",
+    "gap": "Brak wpisów",
+    "horizon": "Horyzont",
+    "derived": "wywnioskowane, nie obietnica",
+    "linksUnknown": "Nie udało się odczytać, gdzie używano Twoich umiejętności — linie są pokazane bez przystanków.",
+    "level": {
+      "confirmed": "potwierdzone",
+      "recorded": "zapisane",
+      "declared": "zadeklarowane"
+    },
+    "focusHint": "Dotknij linii, aby prześledzić jedną umiejętność przez całą drogę.",
+    "showAll": "Pokaż wszystkie",
+    "horizonDetail": "masz już {shared} z {total} umiejętności"
+  },
+  "projectCourse": {
+    "title": "Trasa projektu",
+    "count": "Ukończono {done} z {total} etapów",
+    "unknown": "Nie udało się odczytać etapów projektu.",
+    "here": "Tu jesteśmy",
+    "state": {
+      "done": "Ukończony",
+      "now": "W toku",
+      "risk": "Opóźniony względem planu",
+      "blocked": "Wstrzymany",
+      "planned": "Zaplanowany",
+      "cancelled": "Anulowany"
+    },
+    "helpNeeded": "Potrzebna pomoc — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Cel tego tygodnia",
+    "titleMine": "Twoje zadania w tym tygodniu",
+    "count": "Wykonano {done} z {total}",
+    "unknown": "Nie udało się odczytać zadań z tego tygodnia.",
+    "mineNote": "Tylko zadania widoczne dla Ciebie: Twoje i Twojego zespołu.",
+    "status": {
+      "todo": "Do zrobienia",
+      "in_progress": "W toku",
+      "blocked": "Wstrzymane",
+      "done": "Wykonane",
+      "cancelled": "Anulowane",
+      "overdue": "Po terminie"
+    }
   }
 }

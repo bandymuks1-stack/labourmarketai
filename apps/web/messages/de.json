@@ -14540,6 +14540,9 @@
       "teamOfferAgreed": "Grundsätzlich vereinbart — noch kein unterschriebener Vertrag. Klären Sie die Bedingungen im Gespräch und weisen Sie das Team dann einem Projekt zu.",
       "teamOfferDeclined": "Abgelehnt. Das anbietende Unternehmen sieht Ihre Antwort.",
       "teamOfferThreadFailed": "Dieses Gespräch kann nicht geöffnet werden.",
+      "whatChangedIntro": "{count, plural, one {Hier ist die Kette aus Ihrer jüngsten Arbeit: was Sie getan haben, was sich geändert hat, was es eröffnet hat.} other {Hier sind # Ketten aus Ihrer jüngsten Arbeit: was Sie getan haben, was sich geändert hat, was es eröffnet hat.}}",
+      "whatChangedNone": "In den letzten 14 Tagen ist aus Ihrer Arbeit nichts Neues entstanden. Sobald Sie Arbeit erfassen und sie bestätigt wird, zeige ich, was sie verändert hat.",
+      "whatChangedUnavailable": "Ich konnte gerade nicht prüfen, was sich geändert hat. Ihre Einträge sind sicher – versuchen Sie es gleich erneut oder öffnen Sie das Journal.",
       "planIntro": "{count, plural, one {Das ist # Schritt.} other {Das sind # Schritte, der Reihe nach. Hier ist der erste — tippen Sie auf den nächsten, wenn Sie so weit sind.}}",
       "planNextOffer": "Nächster Schritt:",
       "planStep": "Schritt {n} von {count}"
@@ -19407,5 +19410,151 @@
       "unplaced_single_unmatched": "Nachweise mit unbekanntem Ort"
     },
     "link": "Datenqualität"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Wartet auf Sie",
+      "clear": "Nichts wartet auf Sie.",
+      "unknown": "Was auf Sie wartet, konnte nicht gelesen werden."
+    },
+    "running": {
+      "title": "Läuft gerade",
+      "projectsUnknown": "Ihre zugewiesenen Projekte konnten nicht gelesen werden.",
+      "today": "Heute",
+      "week": "Letzte 7 Tage",
+      "hours": "{hours} Std.",
+      "entries": "{n, plural, one {# Eintrag} other {# Einträge}}",
+      "noEntriesToday": "Heute noch nichts erfasst",
+      "confirmed": "Davon von Vorgesetzten oder Auftraggebern bestätigt: {hours} Std.",
+      "confirmedNone": "Noch keine bestätigten Stunden",
+      "barLabel": "Erfasste und bestätigte Stunden, letzte 7 Tage",
+      "record": {
+        "line": "Ihr Rekord: {best} Std. bestätigt in einem Monat ({month}). Diesen Monat bisher: {current} Std.",
+        "reached": "Diesen Monat haben Sie Ihren eigenen Rekord erreicht: {hours} bestätigte Std.",
+        "onlyYou": "Nur Sie sehen das – verglichen wird nur mit Ihren eigenen Monaten.",
+        "barLabel": "Dieser Monat im Vergleich zu Ihrem besten"
+      }
+    },
+    "because": {
+      "title": "Neueste Ereignisse",
+      "unknown": "Was sich geändert hat, konnte nicht gelesen werden.",
+      "also": "Außerdem passiert",
+      "all": "Alle Aktivitäten"
+    },
+    "outside": {
+      "title": "Ihre Möglichkeiten",
+      "barLabel": "Möglichkeiten nach Eignung"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "Ein Arbeitsverhältnis hat begonnen",
+        "relationshipEnded": "Ein Arbeitsverhältnis wurde beendet",
+        "bookingAgreed": "Die Buchung wurde vereinbart",
+        "bookingRefused": "Die Buchung wurde abgelehnt",
+        "bookingWithdrawn": "Die Buchung wurde zurückgezogen",
+        "absenceApproved": "Die Abwesenheit wurde genehmigt",
+        "absenceRefused": "Die Abwesenheit wurde abgelehnt",
+        "decisionRecorded": "Die Entscheidung wurde festgehalten",
+        "acknowledgementRecorded": "Die Kenntnisnahme wurde festgehalten",
+        "invitationAnswered": "Die Einladung wurde beantwortet"
+      },
+      "state": {
+        "engagementActive": "Beschäftigung: aktiv",
+        "engagementClosed": "Beschäftigung: beendet",
+        "bookingConfirmed": "Buchung: bestätigt",
+        "bookingClosed": "Buchung: geschlossen",
+        "absenceDecided": "Abwesenheit: entschieden",
+        "workflowClosed": "Freigabe: abgeschlossen",
+        "documentAcknowledged": "Dokument: zur Kenntnis genommen",
+        "relationshipFormed": "Beziehung: entstanden"
+      }
+    },
+    "retry": "Erneut laden",
+    "retrying": "Wird geladen…",
+    "availability": {
+      "partial": "Ein Teil Ihrer Daten ist vorübergehend nicht verfügbar ({count} von 4 Bereichen).",
+      "totalTitle": "Ihre Daten konnten gerade nicht gelesen werden",
+      "totalBody": "Ihre Einträge sind sicher – das ist vorübergehend. Versuchen Sie es gleich noch einmal."
+    }
+  },
+  "homeTrace": {
+    "title": "Was sich geändert hat",
+    "unknown": "Wir konnten nicht lesen, was sich nach Ihren Schritten geändert hat.",
+    "all": "Alle Aktivitäten",
+    "empty": "In den letzten 14 Tagen keine neuen Folgen. Sobald Sie Arbeit erfassen und sie bestätigt wird, sehen Sie hier, was sie verändert hat.",
+    "openJournal": "Arbeitsjournal öffnen",
+    "entryUntitled": "Arbeitseintrag",
+    "roleUnknown": "zweite Partei",
+    "journalUnknown": "Das Arbeitsjournal konnte nicht gelesen werden.",
+    "eventsUnknown": "Die Benachrichtigungen konnten nicht gelesen werden.",
+    "truncated": "Auf Basis Ihrer neuesten 30 Einträge.",
+    "step": {
+      "recordedHours": "{hours} Std. erfasst",
+      "recordedDays": "{days} Tg. erfasst",
+      "recordedUntimed": "Ohne Dauer erfasst",
+      "awaiting": "Wartet auf Bestätigung",
+      "selfApproved": "Von Ihnen selbst freigegeben – keine Bestätigung durch eine zweite Partei",
+      "approvedBy": "Bestätigt von: {role}",
+      "approvedAutomatic": "Automatisch per Regel bestätigt",
+      "rejected": "Abgelehnt",
+      "changesRequested": "Änderung angefragt",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bestätigter Eintrag} other {# bestätigte Einträge}}} other {Living CV ergänzt: {skills}}}",
+      "cvUnlinked": "Living CV: bestätigte Arbeit, noch keiner Fähigkeit zugeordnet",
+      "cvUnknown": "Living CV: konnte nicht gelesen werden",
+      "matching": "Das Matching sieht bestätigte Arbeit: {skills}",
+      "matchingRepeated": "Das Matching sieht wiederholt bestätigte Arbeit: {skills}"
+    },
+    "legend": {
+      "fact": "Fakt",
+      "pending": "Wartet auf eine zweite Partei",
+      "derived": "Aus Fakten abgeleitet"
+    }
+  },
+  "careerJourney": {
+    "title": "Ihr Berufsweg",
+    "summary": "Projekte sind Haltestellen, Fähigkeiten sind Linien. Eine Linie hält nur dort, wo Ihr Journal zeigt, dass mit dieser Fähigkeit gearbeitet wurde.",
+    "now": "Jetzt",
+    "gap": "Keine Einträge",
+    "horizon": "Horizont",
+    "derived": "abgeleitet, kein Versprechen",
+    "linksUnknown": "Es konnte nicht gelesen werden, wo Ihre Fähigkeiten eingesetzt wurden – die Linien erscheinen ohne Haltestellen.",
+    "level": {
+      "confirmed": "bestätigt",
+      "recorded": "erfasst",
+      "declared": "angegeben"
+    },
+    "focusHint": "Tippen Sie auf eine Linie, um eine Fähigkeit über den ganzen Weg zu verfolgen.",
+    "showAll": "Alle zeigen",
+    "horizonDetail": "Sie haben bereits {shared} von {total} Fähigkeiten"
+  },
+  "projectCourse": {
+    "title": "Projektverlauf",
+    "count": "{done} von {total} Phasen erledigt",
+    "unknown": "Die Projektphasen konnten nicht gelesen werden.",
+    "here": "Hier sind wir",
+    "state": {
+      "done": "Erledigt",
+      "now": "Läuft",
+      "risk": "Hinter dem Plan",
+      "blocked": "Blockiert",
+      "planned": "Geplant",
+      "cancelled": "Abgebrochen"
+    },
+    "helpNeeded": "Hilfe nötig — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Ziel dieser Woche",
+    "titleMine": "Ihre Aufgaben diese Woche",
+    "count": "{done} von {total} erledigt",
+    "unknown": "Die Aufgaben dieser Woche konnten nicht gelesen werden.",
+    "mineNote": "Nur Aufgaben, die Sie sehen können: Ihre und die Ihres Teams.",
+    "status": {
+      "todo": "Offen",
+      "in_progress": "In Arbeit",
+      "blocked": "Blockiert",
+      "done": "Erledigt",
+      "cancelled": "Abgebrochen",
+      "overdue": "Überfällig"
+    }
   }
 }

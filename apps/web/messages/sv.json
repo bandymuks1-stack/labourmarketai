@@ -4354,7 +4354,10 @@
       "chipOfferOurs": "Erbjud vårt arbetslag eller företag",
       "teamOfferAgreed": "Överenskommet i princip — ännu inte ett undertecknat avtal. Kom överens om villkoren i samtalet och tilldela sedan laget ett projekt.",
       "teamOfferDeclined": "Avböjt. Det erbjudande företaget ser ditt svar.",
-      "teamOfferThreadFailed": "Det här samtalet kan inte öppnas."
+      "teamOfferThreadFailed": "Det här samtalet kan inte öppnas.",
+      "whatChangedIntro": "{count, plural, one {Här är kedjan från ditt senaste arbete: vad du gjorde, vad som ändrades, vad det öppnade.} other {Här är # kedjor från ditt senaste arbete: vad du gjorde, vad som ändrades, vad det öppnade.}}",
+      "whatChangedNone": "Inget nytt kom ut av ditt arbete de senaste 14 dagarna. När du registrerar arbete och det bekräftas visar jag vad det ändrade.",
+      "whatChangedUnavailable": "Jag kunde inte kontrollera vad som ändrades just nu. Dina registreringar är säkra – försök igen om en stund eller öppna journalen."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -7516,5 +7519,151 @@
       "unplaced_single_unmatched": "poster med okänd plats"
     },
     "link": "Datakvalitet"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Väntar på dig",
+      "clear": "Inget väntar på dig.",
+      "unknown": "Det som väntar på dig kunde inte läsas."
+    },
+    "running": {
+      "title": "Pågår nu",
+      "projectsUnknown": "Dina tilldelade projekt kunde inte läsas.",
+      "today": "I dag",
+      "week": "Senaste 7 dagarna",
+      "hours": "{hours} h",
+      "entries": "{n, plural, one {# registrering} other {# registreringar}}",
+      "noEntriesToday": "Inget registrerat i dag ännu",
+      "confirmed": "Varav bekräftat av chef eller kund: {hours} h",
+      "confirmedNone": "Inga bekräftade timmar ännu",
+      "barLabel": "Registrerade och bekräftade timmar, senaste 7 dagarna",
+      "record": {
+        "line": "Ditt rekord: {best} h bekräftade på en månad ({month}). Den här månaden hittills: {current} h.",
+        "reached": "Den här månaden nådde du ditt eget rekord: {hours} bekräftade h.",
+        "onlyYou": "Bara du ser detta – det jämförs bara med dina egna månader.",
+        "barLabel": "Den här månaden mot ditt bästa"
+      }
+    },
+    "because": {
+      "title": "Senaste händelserna",
+      "unknown": "Det som ändrades kunde inte läsas.",
+      "also": "Hände också",
+      "all": "All aktivitet"
+    },
+    "outside": {
+      "title": "Dina möjligheter",
+      "barLabel": "Möjligheter efter matchning"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "En arbetsrelation började",
+        "relationshipEnded": "En arbetsrelation avslutades",
+        "bookingAgreed": "Bokningen avtalades",
+        "bookingRefused": "Bokningen avböjdes",
+        "bookingWithdrawn": "Bokningen drogs tillbaka",
+        "absenceApproved": "Frånvaron godkändes",
+        "absenceRefused": "Frånvaron avslogs",
+        "decisionRecorded": "Beslutet registrerades",
+        "acknowledgementRecorded": "Kvitteringen registrerades",
+        "invitationAnswered": "Inbjudan besvarades"
+      },
+      "state": {
+        "engagementActive": "Anställning: aktiv",
+        "engagementClosed": "Anställning: avslutad",
+        "bookingConfirmed": "Bokning: bekräftad",
+        "bookingClosed": "Bokning: stängd",
+        "absenceDecided": "Frånvaro: avgjord",
+        "workflowClosed": "Godkännande: avslutat",
+        "documentAcknowledged": "Dokument: kvitterat",
+        "relationshipFormed": "Relation: etablerad"
+      }
+    },
+    "retry": "Läs in igen",
+    "retrying": "Läser in…",
+    "availability": {
+      "partial": "En del av dina uppgifter är tillfälligt otillgängliga ({count} av 4 områden).",
+      "totalTitle": "Vi kunde inte läsa dina uppgifter just nu",
+      "totalBody": "Dina registreringar är säkra – det här är tillfälligt. Försök igen om en stund."
+    }
+  },
+  "homeTrace": {
+    "title": "Vad som ändrades",
+    "unknown": "Vi kunde inte läsa vad som ändrades efter dina åtgärder.",
+    "all": "All aktivitet",
+    "empty": "Inga nya följder de senaste 14 dagarna. När du registrerar arbete och det bekräftas ser du här vad det ändrade.",
+    "openJournal": "Öppna arbetsjournalen",
+    "entryUntitled": "Arbetsregistrering",
+    "roleUnknown": "annan part",
+    "journalUnknown": "Arbetsjournalen kunde inte läsas.",
+    "eventsUnknown": "Aviseringarna kunde inte läsas.",
+    "truncated": "Baserat på dina 30 senaste registreringar.",
+    "step": {
+      "recordedHours": "{hours} h registrerat",
+      "recordedDays": "{days} d registrerat",
+      "recordedUntimed": "Registrerat utan längd",
+      "awaiting": "Väntar på bekräftelse",
+      "selfApproved": "Godkänt av dig själv – ingen bekräftelse från en annan part",
+      "approvedBy": "Bekräftat av: {role}",
+      "approvedAutomatic": "Bekräftat automatiskt enligt en regel",
+      "rejected": "Avvisat",
+      "changesRequested": "Ändring begärd",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bekräftad registrering} other {# bekräftade registreringar}}} other {Living CV uppdaterat: {skills}}}",
+      "cvUnlinked": "Living CV: bekräftat arbete, ännu inte kopplat till en färdighet",
+      "cvUnknown": "Living CV: kunde inte läsas",
+      "matching": "Matchningen ser bekräftat arbete: {skills}",
+      "matchingRepeated": "Matchningen ser upprepat bekräftat arbete: {skills}"
+    },
+    "legend": {
+      "fact": "Fakta",
+      "pending": "Väntar på en annan part",
+      "derived": "Härlett ur fakta"
+    }
+  },
+  "careerJourney": {
+    "title": "Din yrkesresa",
+    "summary": "Projekt är hållplatser, färdigheter är linjer. En linje stannar bara där din journal visar att färdigheten användes.",
+    "now": "Nu",
+    "gap": "Inga registreringar",
+    "horizon": "Horisont",
+    "derived": "härlett, inget löfte",
+    "linksUnknown": "Vi kunde inte läsa var dina färdigheter användes – linjerna visas utan hållplatser.",
+    "level": {
+      "confirmed": "bekräftat",
+      "recorded": "registrerat",
+      "declared": "angivet"
+    },
+    "focusHint": "Tryck på en linje för att följa en färdighet genom hela resan.",
+    "showAll": "Visa alla",
+    "horizonDetail": "du har redan {shared} av {total} färdigheter"
+  },
+  "projectCourse": {
+    "title": "Projektförlopp",
+    "count": "{done} av {total} etapper klara",
+    "unknown": "Projektets etapper kunde inte läsas.",
+    "here": "Här är vi",
+    "state": {
+      "done": "Klar",
+      "now": "Pågår",
+      "risk": "Efter planen",
+      "blocked": "Blockerad",
+      "planned": "Planerad",
+      "cancelled": "Inställd"
+    },
+    "helpNeeded": "Hjälp behövs — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Veckans mål",
+    "titleMine": "Dina uppgifter den här veckan",
+    "count": "{done} av {total} klara",
+    "unknown": "Veckans uppgifter kunde inte läsas.",
+    "mineNote": "Bara uppgifter du kan se: dina och ditt teams.",
+    "status": {
+      "todo": "Att göra",
+      "in_progress": "Pågår",
+      "blocked": "Blockerad",
+      "done": "Klar",
+      "cancelled": "Inställd",
+      "overdue": "Försenad"
+    }
   }
 }

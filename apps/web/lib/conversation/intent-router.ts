@@ -216,6 +216,12 @@ export type ConversationIntent =
   //    door and the chat said the CV was empty about a photo that WAS
   //    stored. A read over the ONE personal-gallery projection. ──────────
   | "evidence-photos" // "parodyk įkeltą nuotrauką" / "did my photo save" — the stored work photos
+  // ── WHAT CHANGED (Future Experience A, owner 2026-10-14). "Kas
+  //    pasikeitė nuo vakar?" scored 0. The answer is the ONE consequence
+  //    trace — what the person did → what changed → what it opened — read,
+  //    never written. A company noun keeps "kas naujo mano įmonėje" on
+  //    `company-overview`. ──────────────────────────────────────────────────
+  | "what-changed" // "kas pasikeitė nuo vakar?" / "what changed since yesterday?"
   | "add-task" // "pridėk užduotį projektui …" — a work package, by sentence
   | "who-available" // "kas laisvas šią savaitę?" — capacity from the roster + absences
   | "stage-status" // "etapas pamatai baigtas" — a project stage moved to a real status
@@ -1994,6 +2000,27 @@ const RULES: IntentRule[] = [
    * a file already handed over, not handing one over. `readFileIntent`
    * ignores those forms for the same reason (file-subject.ts).
    */
+  {
+    /**
+     * "Kas pasikeitė?" — the person asking what their own work changed. The
+     * phrase alone is enough; "since yesterday / this week" strengthens it.
+     * The company-overview rule keeps the sentences that name a company
+     * (it requires the noun, and scores on its own pattern), so "kas naujo
+     * mano įmonėje" still opens the company.
+     */
+    intent: "what-changed",
+    patterns: [
+      // CHANGED only: the unqualified "kas naujo? / what's new?" stays the
+      // activity centre (pinned in intent-router.test.ts).
+      p("(kas|ka|ką)\\s+(\\w+\\s+)?(pasikeit|pasikeite|pasikeitė)\\w*", 6),
+      p("what('?s|\\s+has|\\s+have)?\\s+changed\\b", 6),
+      p("(что|чего)\\s+(\\w+\\s+)?изменил\\w*", 6),
+      p("wat\\s+(is\\s+er\\s+)?veranderd", 6),
+      p("was\\s+(hat\\s+sich\\s+)?(ge|ver)ändert", 6),
+      p("co\\s+si[eę]\\s+zmieni", 6),
+      p("(nuo\\s+vakar|since\\s+yesterday|со\\s+вчера|sinds\\s+gisteren|seit\\s+gestern|od\\s+wczoraj)", 3),
+    ],
+  },
   {
     intent: "evidence-photos",
     patterns: [

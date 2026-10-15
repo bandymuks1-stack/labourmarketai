@@ -488,7 +488,8 @@
     "uploadFailed": "Nuotraukos įkelti nepavyko. Įrašas išsaugotas — pabandyk nuotrauką pridėti vėliau.",
     "uploading": "Įkeliama nuotrauka…",
     "remove": "Pašalinti nuotrauką",
-    "previewAlt": "Pasirinkta nuotrauka"
+    "previewAlt": "Pasirinkta nuotrauka",
+    "takePhoto": "Fotografuoti"
   },
   "modes": {
     "title": "Įrašo tipas",

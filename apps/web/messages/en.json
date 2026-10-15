@@ -14540,6 +14540,9 @@
       "teamOfferAgreed": "Agreed in principle — not a signed contract. Settle the terms in the conversation, then assign the team to a project.",
       "teamOfferDeclined": "Declined. The offering company will see your answer.",
       "teamOfferThreadFailed": "This conversation cannot be opened.",
+      "whatChangedIntro": "{count, plural, one {Here is the one chain from your recent work: what you did, what changed, what it opened.} other {Here are # chains from your recent work: what you did, what changed, what it opened.}}",
+      "whatChangedNone": "Nothing new came out of your work in the last 14 days. Once you record work and it is confirmed, I'll show you what it changed.",
+      "whatChangedUnavailable": "I couldn't check what changed right now. Your records are safe; try again in a moment or open the journal.",
       "planIntro": "{count, plural, one {That is # step.} other {That is # steps, in order. Here is the first — tap the next one when you are ready.}}",
       "planNextOffer": "Next step:",
       "planStep": "Step {n} of {count}"
@@ -19407,5 +19410,151 @@
       "unplaced_single_unmatched": "records naming an unknown place"
     },
     "link": "Data quality"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Waiting on you",
+      "clear": "Nothing is waiting on you.",
+      "unknown": "What is waiting on you could not be read."
+    },
+    "running": {
+      "title": "Running now",
+      "projectsUnknown": "Your assigned projects could not be read.",
+      "today": "Today",
+      "week": "Last 7 days",
+      "hours": "{hours} h",
+      "entries": "{n, plural, one {# entry} other {# entries}}",
+      "noEntriesToday": "Nothing recorded yet today",
+      "confirmed": "Of these, approved by a manager or client: {hours} h",
+      "confirmedNone": "No confirmed hours yet",
+      "barLabel": "Recorded and confirmed hours, last 7 days",
+      "record": {
+        "line": "Your record: {best} h confirmed in a month ({month}). This month so far: {current} h.",
+        "reached": "This month you reached your own record: {hours} confirmed h.",
+        "onlyYou": "Only you see this — it is compared only with your own months.",
+        "barLabel": "This month toward your own best"
+      }
+    },
+    "because": {
+      "title": "Recent events",
+      "unknown": "What changed could not be read.",
+      "also": "Also happened",
+      "all": "All activity"
+    },
+    "outside": {
+      "title": "Your opportunities",
+      "barLabel": "Opportunities by fit"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "A working relationship started",
+        "relationshipEnded": "A working relationship ended",
+        "bookingAgreed": "The booking was agreed",
+        "bookingRefused": "The booking was refused",
+        "bookingWithdrawn": "The booking was withdrawn",
+        "absenceApproved": "The absence was approved",
+        "absenceRefused": "The absence was refused",
+        "decisionRecorded": "The decision was recorded",
+        "acknowledgementRecorded": "The acknowledgement was recorded",
+        "invitationAnswered": "The invitation was answered"
+      },
+      "state": {
+        "engagementActive": "Engagement: active",
+        "engagementClosed": "Engagement: closed",
+        "bookingConfirmed": "Booking: confirmed",
+        "bookingClosed": "Booking: closed",
+        "absenceDecided": "Absence: decided",
+        "workflowClosed": "Approval: closed",
+        "documentAcknowledged": "Document: acknowledged",
+        "relationshipFormed": "Relationship: formed"
+      }
+    },
+    "retry": "Read again",
+    "retrying": "Reading…",
+    "availability": {
+      "partial": "Part of your data is temporarily unavailable ({count} of 4 areas).",
+      "totalTitle": "We couldn't read your data right now",
+      "totalBody": "Your records are safe — this is temporary. Try again in a moment."
+    }
+  },
+  "homeTrace": {
+    "title": "What changed",
+    "unknown": "Couldn't read what changed after your actions.",
+    "all": "All activity",
+    "empty": "No new consequences in the last 14 days. Once you record work and it is confirmed, you'll see here what it changed.",
+    "openJournal": "Open the work journal",
+    "entryUntitled": "Work entry",
+    "roleUnknown": "second party",
+    "journalUnknown": "Couldn't read the work journal.",
+    "eventsUnknown": "Couldn't read notifications.",
+    "truncated": "Based on your newest 30 entries.",
+    "step": {
+      "recordedHours": "Recorded {hours} h",
+      "recordedDays": "Recorded {days} d",
+      "recordedUntimed": "Recorded without a duration",
+      "awaiting": "Waiting for confirmation",
+      "selfApproved": "Approved by you — not a second-party confirmation",
+      "approvedBy": "Confirmed by: {role}",
+      "approvedAutomatic": "Confirmed automatically by a rule",
+      "rejected": "Rejected",
+      "changesRequested": "Changes requested",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# confirmed entry} other {# confirmed entries}}} other {Living CV updated: {skills}}}",
+      "cvUnlinked": "Living CV: confirmed work, not yet linked to a skill",
+      "cvUnknown": "Living CV: couldn't read",
+      "matching": "Matching sees confirmed work: {skills}",
+      "matchingRepeated": "Matching sees repeatedly confirmed work: {skills}"
+    },
+    "legend": {
+      "fact": "Fact",
+      "pending": "Waiting for a second party",
+      "derived": "Derived from facts"
+    }
+  },
+  "careerJourney": {
+    "title": "Your career journey",
+    "summary": "Projects are stops, skills are lines. A line stops only where your journal shows that skill was worked.",
+    "now": "Now",
+    "gap": "No records",
+    "horizon": "Horizon",
+    "derived": "derived, not a promise",
+    "linksUnknown": "Couldn't read where your skills were worked — the lines are shown without stops.",
+    "level": {
+      "confirmed": "confirmed",
+      "recorded": "recorded",
+      "declared": "declared"
+    },
+    "focusHint": "Tap a line to follow one skill through your whole journey.",
+    "showAll": "Show all",
+    "horizonDetail": "you already have {shared} of {total} skills"
+  },
+  "projectCourse": {
+    "title": "Project course",
+    "count": "{done} of {total} stages done",
+    "unknown": "Couldn't read the project's stages.",
+    "here": "We are here",
+    "state": {
+      "done": "Done",
+      "now": "In progress",
+      "risk": "Behind its planned end",
+      "blocked": "Blocked",
+      "planned": "Planned",
+      "cancelled": "Cancelled"
+    },
+    "helpNeeded": "Help needed — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "This week's goal",
+    "titleMine": "Your tasks this week",
+    "count": "{done} of {total} done",
+    "unknown": "Couldn't read this week's tasks.",
+    "mineNote": "Only the tasks you can see: yours and your team's.",
+    "status": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "blocked": "Blocked",
+      "done": "Done",
+      "cancelled": "Cancelled",
+      "overdue": "Overdue"
+    }
   }
 }

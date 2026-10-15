@@ -140,7 +140,8 @@
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
     "uploading": "Laddar upp foto…",
     "remove": "Ta bort foto",
-    "previewAlt": "Valt foto"
+    "previewAlt": "Valt foto",
+    "takePhoto": "Ta ett foto"
   },
   "voice": {
     "entryCta": "Spela in med rösten",
