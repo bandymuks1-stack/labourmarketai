@@ -870,6 +870,7 @@
     },
     "hours": "{hours} u",
     "plusDayUnits": "+ {days} d (in dagen vastgelegd, nooit naar uren omgerekend)",
+    "allTimeOrgRecorded": "+ {hours} u vastgelegd door organisaties (apart, niet opgeteld)",
     "confirmedHours": "Door leidinggevende bevestigd",
     "confirmedOf": "{confirmed} van {total} u bevestigd door een registratie van de leidinggevende",
     "confirmedNone": "Nog geen bevestigingen van een leidinggevende",

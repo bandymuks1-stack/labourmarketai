@@ -8,7 +8,7 @@ import { historicalPersonIntelligence } from "@/lib/journal/work-intelligence-re
 import { buildCvOrganizationHistory } from "@/lib/cv-export/organization-history";
 import { orgLedger } from "@/lib/journal/work-in-numbers-view";
 import { readEvidenceRecordsForWorker } from "@/lib/organization-evidence/worker-evidence-read";
-import { organizationAllTime } from "./organization-all-time";
+import { organizationAllTime, organizationHoursBeyondJournal } from "./organization-all-time";
 
 /**
  * #2169 (owner correction 2026-10-09): imported historical work is recognised
@@ -147,6 +147,26 @@ describe("historical work is recognised from the record alone (#2169)", () => {
     expect(allTime.periodHours).toBe(0);
     expect(allTime.totalHours).toBe(8);
     expect(allTime.overlapping.map((p) => p.hours)).toEqual([800]);
+  });
+
+  it("the Work Intelligence all-time tile names the 800 h beside the journal figure (2026-10-15)", async () => {
+    const { wi } = await readFor([PRODUCTION_PERIOD_RECORD]);
+    expect(organizationHoursBeyondJournal(wi)).toBe(800);
+    // the tile renders it as a line of its own, from the model, never summed
+    const nav = readFileSync(join(__dirname, "..", "..", "components/app/work-in-numbers/period-nav.tsx"), "utf8");
+    expect(nav).toMatch(/const orgBeyond = organizationHoursBeyondJournal\(wi\);/);
+    expect(nav).toContain('data-testid="wi-period-all-org-hours"');
+    expect(nav).not.toMatch(/p\.hours \+ orgBeyond|orgBeyond \+ p\.hours/);
+  });
+
+  it("organization day records that describe a live journal entry are not named twice", () => {
+    const wi = {
+      organizationRecords: [{ key: "all", hours: 10, linkedHours: 6, importedHours: 0, approvedHours: 0, rejectedHours: 0, daysWorked: 2 }],
+      organizationPeriodRecords: [],
+      organizationDayRecords: [],
+    } as never;
+    expect(organizationHoursBeyondJournal(wi)).toBe(4);
+    expect(organizationHoursBeyondJournal(null)).toBeNull();
   });
 
   it("an unreadable ledger is UNKNOWN, never zero", async () => {
