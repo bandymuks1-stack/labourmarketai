@@ -61,9 +61,20 @@ const CAST: readonly { slot: string; role: string; routes: readonly string[] }[]
   { slot: "agency", role: "agency", routes: [...COMMON, ...EMPLOYER] },
 ];
 
+/** Per-route timing of the LAST check (ms): time to first byte of the
+ *  document and the whole navigation. Logged so a slow route is a number in
+ *  the run log, not a guess (owner 2026-10-15: the manager's /reports took
+ *  >45 s once, two minutes after a deploy). */
+const lastTiming: { ttfb: number | null; total: number } = { ttfb: null, total: 0 };
+
 async function check(page: Page, route: string): Promise<string | null> {
+  const started = Date.now();
   const res = await page.goto(route, { waitUntil: "domcontentloaded", timeout: 45_000 }).catch((e: Error) => e);
+  lastTiming.total = Date.now() - started;
+  lastTiming.ttfb = null;
   if (res instanceof Error) return `navigation failed: ${res.message.split("\n")[0]}`;
+  const timing = res?.request().timing();
+  if (timing && timing.responseStart > 0) lastTiming.ttfb = Math.round(timing.responseStart);
   if (res && res.status() >= 500) return `HTTP ${res.status()}`;
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   if (/\/auth\/(login|sign-?in)/.test(page.url())) return `bounced to sign-in (${new URL(page.url()).pathname})`;
@@ -92,7 +103,9 @@ for (const actor of CAST) {
       // A redirect to another surface with a notice is a role decision, not a
       // failure — it is recorded so the report shows where each role lands.
       const landed = new URL(page.url()).pathname + new URL(page.url()).search;
-      console.info(`[role-routes] ${actor.slot} ${route} -> ${landed} ${problem ? "FAIL " + problem : "ok"}`);
+      console.info(
+        `[role-routes] ${actor.slot} ${route} -> ${landed} ttfb_ms=${lastTiming.ttfb ?? "?"} nav_ms=${lastTiming.total} ${problem ? "FAIL " + problem : "ok"}`,
+      );
       if (problem) failures.push(`${route}: ${problem}`);
       expect.soft(problem, `${actor.role} ${route}`).toBeNull();
     }
