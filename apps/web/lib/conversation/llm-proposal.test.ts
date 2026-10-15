@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, onTestFinished } from "vitest";
 
 import { conversationIntentEntry, conversationIntentInputSchema, conversationIntentOutputSchema } from "@/lib/ai/registry/agents/conversation-intent";
 import { AI_EGRESS_GRANTS, egressPermitted } from "@/lib/ai/runtime/data-egress";
@@ -138,6 +138,12 @@ describe("the runtime side: one task, one grant, least privilege", () => {
   });
 
   it("the grant opens the gate for THAT task only — every other personal task stays refused for Gemini", () => {
+    // Pinned with the paid-tier confirmation set; the closed default is pinned
+    // in lib/guards/ai-data-egress.test.ts (owner 2026-10-15).
+    process.env.AI_GEMINI_PAID_TIER_CONFIRMED = "1";
+    onTestFinished(() => {
+      delete process.env.AI_GEMINI_PAID_TIER_CONFIRMED;
+    });
     expect(egressPermitted(GEMINI, "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, "propose_conversation_intent").permitted).toBe(true);
     expect(egressPermitted(GEMINI, "PERSONAL", AI_EGRESS_GRANTS, "extract_cv").permitted).toBe(false);
     expect(egressPermitted(GEMINI, "PERSONAL", AI_EGRESS_GRANTS, "normalize_work_scope").permitted).toBe(false);
