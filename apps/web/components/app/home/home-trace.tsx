@@ -39,17 +39,36 @@ import { formatUtcDate } from "@/lib/time/display";
 
 const NOTE = "text-support text-text-secondary";
 
-export async function HomeTrace({ locale }: { readonly locale: ActiveLocale }) {
-  return <HomeTraceView locale={locale} trace={await loadConsequenceTrace()} />;
+/** `surface="cv"`: the SAME trace on the Living CV (Future Experience B) —
+ *  only the journal chains (the work that feeds the CV), no region number,
+ *  its own test id. One reader, one wording, one component everywhere. */
+export async function HomeTrace({
+  locale,
+  surface = "home",
+}: {
+  readonly locale: ActiveLocale;
+  readonly surface?: "home" | "cv";
+}) {
+  return <HomeTraceView locale={locale} trace={await loadConsequenceTrace()} surface={surface} />;
 }
 
 export async function HomeTraceView({
   locale,
-  trace,
+  trace: input,
+  surface = "home",
 }: {
   readonly locale: ActiveLocale;
   readonly trace: ConsequenceTrace;
+  readonly surface?: "home" | "cv";
 }) {
+  // On the Living CV only the work chains belong; bookings and other state
+  // changes stay on the home.
+  const trace: ConsequenceTrace =
+    surface === "cv" && input.kind === "known"
+      ? { ...input, items: input.items.filter((i) => i.origin === "journal"), eventsUnknown: false }
+      : input;
+  const regionIndex = surface === "cv" ? "" : "02";
+  const regionTestId = surface === "cv" ? "cv-trace" : "home-trace";
   const [t, tChain, tTypes, tRole, tSkill] = await Promise.all([
     getTranslations("homeTrace"),
     getTranslations("homeRegions.chain"),
@@ -75,7 +94,7 @@ export async function HomeTraceView({
 
   if (trace.kind === "unknown") {
     return (
-      <Region id="trace" index="02" title={t("title")} state="unknown" testId="home-trace" aside={allLink}>
+      <Region id="trace" index={regionIndex} title={t("title")} state="unknown" testId={regionTestId} aside={allLink}>
         <Unreadable text={t("unknown")} testid="home-trace-unknown" labels={rl} />
       </Region>
     );
@@ -122,7 +141,7 @@ export async function HomeTraceView({
   if (trace.eventsUnknown) flags.push(t("eventsUnknown"));
 
   return (
-    <Region id="trace" index="02" title={t("title")} state="known" testId="home-trace" aside={allLink}>
+    <Region id="trace" index={regionIndex} title={t("title")} state="known" testId={regionTestId} aside={allLink}>
       {trace.items.length === 0 ? (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between" data-testid="home-trace-empty">
           <p className={NOTE}>{t("empty")}</p>

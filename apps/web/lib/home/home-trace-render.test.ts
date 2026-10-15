@@ -179,3 +179,19 @@ describe("home trace — every active locale renders without a raw key or a scor
     });
   }
 });
+
+describe("the SAME trace on the Living CV (surface=cv)", () => {
+  it("shows only the work chains (no booking state changes) under its own test id, no region number", async () => {
+    const h = html(await HomeTraceView({ locale: "en", trace: FULL, surface: "cv" }));
+    expect(h).toContain('data-testid="cv-trace"');
+    expect(h).not.toContain('data-testid="home-trace"');
+    expect(h).not.toContain('data-testid="home-trace-event"');
+    expect(h).toContain('data-testid="home-trace-journal"');
+    expect(h).not.toMatch(/>02</);
+  });
+
+  it("the home keeps every chain", async () => {
+    const h = html(await HomeTraceView({ locale: "en", trace: FULL }));
+    expect(h).toContain('data-testid="home-trace-event"');
+  });
+});
