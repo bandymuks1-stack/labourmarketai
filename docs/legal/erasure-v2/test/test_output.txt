@@ -1,0 +1,36 @@
+== migration + scenario loaded
+== 1 prepare (dry run) — subject has no blockers, X is last owner
+prepared
+[{"code": "last_active_owner", "count": 1, "resolve": "transfer ownership or close the organization (organization-closure runbook)"}]
+== 2 execute X -> blocked, nothing touched
+blocked
+1
+== 3 execute subject
+storage_pending ops=4
+psql:assert_after_execute.sql:69: NOTICE:  ALL POST-EXECUTE ASSERTIONS PASSED
+== 4 replay is idempotent
+true
+== 5 storage_done refuses while objects remain
+{"state": "storage_pending", "job_id": "f1f23f09-ac8d-4e98-823b-202a8aafbf69", "remaining": 8}
+   (simulate the server: Storage API delete + move)
+auth_pending
+== 6 complete refuses while auth user exists, then succeeds
+auth user still exists
+completed
+<null> ops=<null> on=2026-10-15
+0
+== 7 drift guard: a new unclassified FK onto profiles blocks every erasure
+[{"code": "no_approved_deletion_request"}, {"code": "unclassified_relation", "count": 1}, {"code": "last_active_owner", "count": 1, "resolve": "transfer ownership or close the organization (organization-closure runbook)"}, {"code": "active_engagement", "count": 1, "resolve": "end_org_membership_v1(engagement_id, 'account_deletion')"}]
+== 8 failure path: an error inside execute rolls back and marks the job failed
+prepared
+{"state": "failed", "table": "ai_runs", "job_id": "b0066efc-8551-47dd-b400-2f8d40ec765b", "sqlstate": "23514", "constraint": "test_force_failure"}
+failed 23514 table=ai_runs constraint=test_force_failure profile_kept=1 disabled_triggers=0
+   retry after the cause is fixed (resumable):
+auth_pending
+== 9 grants: no API role can execute
+anon:false authenticated:false service_role:true
+== 10 rollback refuses after a completed job
+psql:../migration_down.sql:31: ERROR:  rollback refused: an erasure has executed; ship a forward fix instead (see header)
+== done
+0|t|0
+rollback-before-execution check above (funcs|nn|col expected 0|t|0)

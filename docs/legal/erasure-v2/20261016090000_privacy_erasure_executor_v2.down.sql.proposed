@@ -1,0 +1,182 @@
+-- ROLLBACK for 20261016090000_privacy_erasure_executor_v2.sql
+-- (supabase/rollbacks/20261016090000_privacy_erasure_executor_v2.down.sql)
+--
+-- REFUSES once any erasure has executed. Why: an executed erasure deleted
+-- rows that cannot be restored, nulled links that must never be re-attached
+-- (re-attaching would re-identify an erased person), and left NULLs in the
+-- 99 columns this migration relaxed — `SET NOT NULL` would fail on them, and
+-- the consent ledger holds detached rows the old CHECK-less shape cannot
+-- represent. After the first executed erasure the only safe "rollback" is a
+-- forward fix (a new migration), never this file.
+--
+-- Before any execution it restores exactly the pre-migration state: functions
+-- and the two tables dropped, the consent-ledger trigger back to
+-- unconditional refusal, the 8 CHECKs back to their production text, the 99
+-- NOT NULLs back, and the consent detach columns removed.
+
+begin;
+
+do $$
+begin
+  if to_regclass('public.privacy_erasure_jobs') is not null and exists (
+       select 1 from public.privacy_erasure_jobs
+        where executed_on is not null or state in ('storage_pending','auth_pending','completed')) then
+    raise exception 'rollback refused: an erasure has executed; ship a forward fix instead (see header)'
+      using errcode = '55000';
+  end if;
+  if exists (select 1 from public.privacy_consent_events where user_id is null) then
+    raise exception 'rollback refused: detached consent-ledger rows exist' using errcode = '55000';
+  end if;
+end;
+$$;
+
+drop function if exists public.privacy_erasure_complete_v2(uuid);
+drop function if exists public.privacy_erasure_storage_done_v2(uuid);
+drop function if exists public.privacy_erasure_execute_v2(uuid, uuid);
+drop function if exists public.privacy_erasure_prepare_v2(uuid);
+drop function if exists public.privacy_erasure_blockers_v2(uuid);
+drop function if exists public.privacy_erasure_guard_triggers_v2();
+drop function if exists public.privacy_erasure_scrub_jsonb(jsonb, text[], text[]);
+drop table if exists public.privacy_erasure_jobs;
+drop table if exists public.privacy_erasure_relations;
+
+create or replace function public.privacy_ledger_block_mutation()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  raise exception 'privacy ledger is append-only: % on % is not allowed', tg_op, tg_table_name
+    using errcode = 'raise_exception';
+end;
+$$;
+
+alter table public.privacy_consent_events drop constraint if exists pce_subject_attached_or_detached;
+alter table public.privacy_consent_events drop column if exists erased_subject_id;
+alter table public.privacy_consent_events drop column if exists erased_at;
+alter table public.privacy_consent_events alter column user_id set not null;
+
+-- the 8 CHECKs, production text 2026-10-15
+alter table public.workflow_instance_approvers drop constraint if exists workflow_instance_approvers_decided_shape;
+alter table public.workflow_instance_approvers add constraint workflow_instance_approvers_decided_shape check ((((decision IS NULL) AND (decided_by IS NULL) AND (decided_at IS NULL)) OR ((decision IS NOT NULL) AND (decided_by IS NOT NULL) AND (decided_at IS NOT NULL))));
+alter table public.onboarding_run_items drop constraint if exists onboarding_run_items_done_shape;
+alter table public.onboarding_run_items add constraint onboarding_run_items_done_shape check ((((status = 'pending'::text) AND (completed_by IS NULL) AND (completed_at IS NULL)) OR ((status = ANY (ARRAY['done'::text, 'skipped'::text])) AND (completed_by IS NOT NULL) AND (completed_at IS NOT NULL))));
+alter table public.offboarding_run_items drop constraint if exists offboarding_run_items_done_shape;
+alter table public.offboarding_run_items add constraint offboarding_run_items_done_shape check ((((status = 'pending'::text) AND (completed_by IS NULL) AND (completed_at IS NULL)) OR ((status = ANY (ARRAY['done'::text, 'skipped'::text])) AND (completed_by IS NOT NULL) AND (completed_at IS NOT NULL))));
+alter table public.performance_reviews drop constraint if exists performance_reviews_manager_input_stamp;
+alter table public.performance_reviews add constraint performance_reviews_manager_input_stamp check ((((manager_input IS NULL) = (manager_input_at IS NULL)) AND ((manager_input IS NULL) = (manager_input_by IS NULL))));
+alter table public.organization_claims drop constraint if exists organization_claims_decision_complete;
+alter table public.organization_claims add constraint organization_claims_decision_complete check (((state <> ALL (ARRAY['representative_verified'::text, 'linked'::text])) OR ((decided_by IS NOT NULL) AND (decided_at IS NOT NULL) AND (verification_method IS NOT NULL) AND (verification_evidence_ref IS NOT NULL))));
+alter table public.work_counterparty_links drop constraint if exists work_counterparty_links_revocation_shape;
+alter table public.work_counterparty_links add constraint work_counterparty_links_revocation_shape check (((revoked_at IS NULL) = (revoked_by IS NULL)));
+alter table public.document_acknowledgements drop constraint if exists document_acknowledgements_stamp_pair;
+alter table public.document_acknowledgements add constraint document_acknowledgements_stamp_pair check (((acknowledged_at IS NULL) = (acknowledged_by IS NULL)));
+alter table public.invitations drop constraint if exists invitations_origin_chk;
+alter table public.invitations add constraint invitations_origin_chk check ((((inviter_profile_id IS NOT NULL) AND (external_source_slug IS NULL) AND (external_reference IS NULL)) OR ((inviter_profile_id IS NULL) AND (external_source_slug IS NOT NULL) AND (external_reference IS NOT NULL) AND (consent_record IS NOT NULL))));
+
+-- the 99 NOT NULLs (fails loudly if any NULL appeared; then do not force it)
+do $$
+begin
+  alter table public.agency_client_connections alter column invited_by set not null;
+  alter table public.agency_client_request_shares alter column shared_by set not null;
+  alter table public.agency_worker_invitations alter column inviter_profile_id set not null;
+  alter table public.agreement_amendments alter column created_by set not null;
+  alter table public.agreement_events alter column actor_id set not null;
+  alter table public.agreements alter column created_by set not null;
+  alter table public.asset_assignments alter column issued_by set not null;
+  alter table public.assets alter column created_by set not null;
+  alter table public.billing_checkout_operations alter column owner_id set not null;
+  alter table public.billing_customers alter column owner_id set not null;
+  alter table public.billing_subscriptions alter column owner_id set not null;
+  alter table public.booking_request_events alter column actor_id set not null;
+  alter table public.booking_requests alter column owner_id set not null;
+  alter table public.booking_requests alter column worker_id set not null;
+  alter table public.business_trips alter column created_by set not null;
+  alter table public.business_trips alter column profile_id set not null;
+  alter table public.company_demand_locations alter column owner_id set not null;
+  alter table public.company_worker_invitations alter column inviter_profile_id set not null;
+  alter table public.competency_recognitions alter column assessed_by set not null;
+  alter table public.contact_disclosure_request_events alter column actor_profile_id set not null;
+  alter table public.contact_disclosure_requests alter column owner_id set not null;
+  alter table public.contracts alter column owner_id set not null;
+  alter table public.conversation_messages alter column author_id set not null;
+  alter table public.conversations alter column created_by set not null;
+  alter table public.customer_request_attachments alter column profile_id set not null;
+  alter table public.customer_requests alter column profile_id set not null;
+  alter table public.decision_document_links alter column created_by set not null;
+  alter table public.decision_task_links alter column created_by set not null;
+  alter table public.defect_corrections alter column reviewer_id set not null;
+  alter table public.defects alter column reporter_id set not null;
+  alter table public.demand_shortlist alter column owner_id set not null;
+  alter table public.document_acknowledgements alter column assigned_by set not null;
+  alter table public.document_acknowledgements alter column assignee_profile_id set not null;
+  alter table public.document_files alter column uploaded_by set not null;
+  alter table public.employee_requests alter column requester_profile_id set not null;
+  alter table public.engagement_contexts alter column profile_id set not null;
+  alter table public.finance_records alter column created_by set not null;
+  alter table public.follow_up_tasks alter column created_by set not null;
+  alter table public.invitation_acceptances alter column profile_id set not null;
+  alter table public.journal_entries alter column worker_id set not null;
+  alter table public.journal_entry_confirmations alter column confirmer_id set not null;
+  alter table public.journal_entry_review_submissions alter column submitted_by set not null;
+  alter table public.journal_entry_review_submissions alter column worker_id set not null;
+  alter table public.journal_entry_work_items alter column worker_id set not null;
+  alter table public.leave_balance_policies alter column created_by set not null;
+  alter table public.management_decision_events alter column actor_id set not null;
+  alter table public.management_decisions alter column created_by set not null;
+  alter table public.market_rate_averages alter column entered_by set not null;
+  alter table public.offboarding_runs alter column started_by set not null;
+  alter table public.onboarding_runs alter column started_by set not null;
+  alter table public.onboarding_templates alter column created_by set not null;
+  alter table public.org_document_events alter column actor_id set not null;
+  alter table public.org_documents alter column created_by set not null;
+  alter table public.organization_claims alter column claimant_profile_id set not null;
+  alter table public.organization_evidence_media alter column imported_by_profile_id set not null;
+  alter table public.performance_review_events alter column actor_id set not null;
+  alter table public.performance_reviews alter column created_by set not null;
+  alter table public.performance_reviews alter column reviewer_profile_id set not null;
+  alter table public.performance_reviews alter column subject_profile_id set not null;
+  alter table public.personal_data_disclosures alter column disclosed_by set not null;
+  alter table public.personal_data_disclosures alter column worker_user_id set not null;
+  alter table public.pilot_outcomes alter column noted_by set not null;
+  alter table public.pilots alter column created_by set not null;
+  alter table public.privacy_consent_events alter column user_id set not null;
+  alter table public.procurement_inquiries alter column created_by set not null;
+  alter table public.procurement_inquiries alter column requester_profile_id set not null;
+  alter table public.procurement_offers alter column created_by set not null;
+  alter table public.project_budgets alter column created_by set not null;
+  alter table public.project_handover_entries alter column created_by set not null;
+  alter table public.project_stages alter column created_by set not null;
+  alter table public.project_worker_operational_statuses alter column updated_by set not null;
+  alter table public.project_worker_readiness_items alter column updated_by set not null;
+  alter table public.proposals alter column owner_id set not null;
+  alter table public.review_cycles alter column created_by set not null;
+  alter table public.review_evidence_links alter column created_by set not null;
+  alter table public.task_dependencies alter column created_by set not null;
+  alter table public.team_enquiry_events alter column actor_profile_id set not null;
+  alter table public.timesheets alter column created_by set not null;
+  alter table public.timesheets alter column worker_id set not null;
+  alter table public.training_assignment_events alter column actor_id set not null;
+  alter table public.training_assignments alter column assigned_by set not null;
+  alter table public.training_assignments alter column assignee_profile_id set not null;
+  alter table public.training_programs alter column created_by set not null;
+  alter table public.training_skill_links alter column created_by set not null;
+  alter table public.work_counterparty_links alter column established_by set not null;
+  alter table public.work_counterparty_links alter column worker_id set not null;
+  alter table public.work_hour_allocations alter column entered_by set not null;
+  alter table public.work_hour_allocations alter column worker_id set not null;
+  alter table public.work_objects alter column created_by set not null;
+  alter table public.work_plan_entries alter column created_by set not null;
+  alter table public.work_tasks alter column created_by set not null;
+  alter table public.worker_absences alter column requested_by set not null;
+  alter table public.worker_absences alter column worker_id set not null;
+  alter table public.worker_document_events alter column actor_id set not null;
+  alter table public.worker_documents alter column updated_by set not null;
+  alter table public.workflow_definition_versions alter column created_by set not null;
+  alter table public.workflow_definitions alter column created_by set not null;
+  alter table public.workflow_instance_approvers alter column approver_profile_id set not null;
+  alter table public.workflow_instances alter column requester_profile_id set not null;
+end;
+$$;
+
+commit;

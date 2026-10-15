@@ -1,0 +1,1309 @@
+-- @human-gate-approved  (acknowledgement only: PR is DRAFT + needs-human-gate; prod apply waits for the owner)
+-- 20261016090000 — privacy erasure executor v2 (#856; supersedes the unmerged #2412 draft)
+--
+-- DRAFT. NOT APPLIED. RED class: SECURITY DEFINER, 99 NOT NULL relaxations,
+-- 8 CHECK amendments, trigger-function change on the consent ledger, and
+-- destructive DML behind service_role-only RPCs. Design: DESIGN.md (same PR).
+--
+-- WHAT THIS DOES (and what it deliberately does NOT do)
+--   * ERASURE (rows deleted) and PSEUDONYMISATION (rows kept, link removed,
+--     identifiers scrubbed) are two different outcomes. Every foreign key that
+--     references public.profiles / public.workers / auth.users in production
+--     (264 measured 2026-10-15) is classified in the registry table
+--     public.privacy_erasure_relations as DELETE, PSEUDONYMISE, RETAIN
+--     (retain-detached under a stated legal hold) or BLOCK (manual resolution).
+--     A new FK that is not in the registry makes every erasure REFUSE until it
+--     is classified (drift guard).
+--   * prepare_v2 = dry run: counts per relation and action, blockers, storage
+--     objects; it writes only the job row.
+--   * execute_v2 = one transaction: detach / scrub / delete, delete the
+--     workers and profiles rows, return the Storage object list. It NEVER
+--     deletes auth.users and NEVER deletes Storage files (SQL cannot delete
+--     the bytes): the server deletes the objects through the Storage API,
+--     calls storage_done_v2, then auth.admin.deleteUser, then complete_v2.
+--   * Nothing returns or stores an identifier that links the erased person to
+--     what remains: the consent-ledger tombstone is minted inside execute_v2
+--     and never returned; erased_at is coarse (month); the job row drops the
+--     subject id at completion and keeps only aggregate counts + coarse dates.
+--
+-- Rollback: supabase/rollbacks/20261016090000_privacy_erasure_executor_v2.down.sql
+
+begin;
+
+-- ── 0. supersede the unmerged v1 draft (#2412) ──────────────────────────────
+-- v1 deleted auth.users in SQL (bypasses the Auth Admin API and Storage
+-- ownership) and returned the tombstone. Neither survives into v2.
+drop function if exists public.erase_user_account_v1(uuid);
+
+-- ── 1. job / state table (service_role read only; written by the RPCs) ──────
+create table if not exists public.privacy_erasure_jobs (
+  id               uuid primary key default gen_random_uuid(),
+  -- the reviewed account_deletion request; that row is itself RETAINED
+  -- detached for 3 years (E4), so this link names no person after completion
+  request_id       uuid references public.customer_requests(id) on delete set null,
+  -- present ONLY while the job is open; nulled by complete_v2
+  subject_user_id  uuid,
+  state            text not null default 'prepared'
+                   check (state in ('prepared','blocked','failed','storage_pending',
+                                    'auth_pending','completed','cancelled')),
+  blockers         jsonb not null default '[]'::jsonb,
+  report           jsonb not null default '{}'::jsonb,   -- aggregate counts only
+  storage_ops      jsonb,                                -- object paths; nulled at completion
+  attempts         integer not null default 0,
+  last_error       text,                                 -- sqlstate + table + constraint, never values
+  created_on       date not null default current_date,   -- coarse dates only
+  executed_on      date,
+  completed_on     date,
+  constraint privacy_erasure_jobs_subject_open check (
+    (state in ('completed','cancelled')) = (subject_user_id is null)
+  )
+);
+
+create unique index if not exists privacy_erasure_jobs_one_open
+  on public.privacy_erasure_jobs (subject_user_id)
+  where subject_user_id is not null;
+
+alter table public.privacy_erasure_jobs enable row level security;
+revoke all on public.privacy_erasure_jobs from public, anon, authenticated;
+grant select on public.privacy_erasure_jobs to service_role;
+
+comment on table public.privacy_erasure_jobs is
+  'GDPR Art. 17 erasure jobs (#856 v2). One open job per subject. After completion the row holds no subject id, no paths, only aggregate counts and coarse dates.';
+
+-- ── 2. classification registry (one row per FK column onto a person) ────────
+create table if not exists public.privacy_erasure_relations (
+  table_name    text not null,
+  column_name   text not null,
+  ref_kind      text not null check (ref_kind in ('profile','worker','auth','none')),
+  fk_on_delete  text not null,           -- pg confdeltype at classification time: a n c r, '-' = no FK
+  class         text not null check (class in ('DELETE','PSEUDONYMISE','RETAIN','BLOCK')),
+  mode          text not null check (mode in ('cascade','delete','null','special','none')),
+  note          text not null,
+  primary key (table_name, column_name)
+);
+
+alter table public.privacy_erasure_relations enable row level security;
+revoke all on public.privacy_erasure_relations from public, anon, authenticated;
+grant select on public.privacy_erasure_relations to service_role;
+
+comment on table public.privacy_erasure_relations is
+  'Every column that references a person, classified for erasure: DELETE / PSEUDONYMISE / RETAIN (detached, legal hold) / BLOCK. An FK onto profiles/workers missing here blocks every erasure.';
+
+-- ── 3. consent ledger: #2412 detach columns (idempotent) ────────────────────
+alter table public.privacy_consent_events
+  add column if not exists erased_subject_id uuid,
+  add column if not exists erased_at timestamptz;
+
+alter table public.privacy_consent_events drop constraint if exists pce_subject_attached_or_detached;
+alter table public.privacy_consent_events add constraint pce_subject_attached_or_detached check (
+  (user_id is not null and erased_subject_id is null and erased_at is null)
+  or (user_id is null and erased_subject_id is not null and erased_at is not null)
+);
+
+comment on column public.privacy_consent_events.erased_subject_id is
+  'Random uuid minted inside privacy_erasure_execute_v2 per erasure; groups one former subject''s rows so grant/withdraw pairs stay provable; never returned, never stored anywhere else.';
+comment on column public.privacy_consent_events.erased_at is
+  'Month of erasure (date_trunc month) - deliberately coarse so it cannot be joined to other rows.';
+
+create or replace function public.privacy_ledger_block_mutation()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+declare
+  v_subject text := nullif(current_setting('lm.privacy_erasure_subject', true), '');
+begin
+  -- The ONE permitted mutation: the sanctioned erasure detach of the
+  -- consent ledger (#856). DELETE stays refused for every role.
+  if tg_op = 'UPDATE'
+    and tg_table_name = 'privacy_consent_events'
+    and v_subject is not null
+    and old.user_id is not null
+    and old.user_id::text = v_subject
+    and old.erased_subject_id is null
+    and new.user_id is null
+    and new.erased_subject_id is not null
+    and new.erased_at is not null
+    and (to_jsonb(new) - 'user_id' - 'erased_subject_id' - 'erased_at')
+        = (to_jsonb(old) - 'user_id' - 'erased_subject_id' - 'erased_at')
+  then
+    return new;
+  end if;
+  raise exception 'privacy ledger is append-only: % on % is not allowed', tg_op, tg_table_name
+    using errcode = 'raise_exception';
+end;
+$$;
+
+-- ── 4. NOT NULL relaxations (99) ────────────────────────────────────────────
+-- Each column below is classified PSEUDONYMISE / RETAIN (or BLOCK-then-RETAIN):
+-- the row survives the erasure and the link to the erased person becomes NULL.
+-- A NULL actor means "a person who has since erased their account". FK
+-- columns cannot carry a random per-erasure id (it would violate the FK), and
+-- a shared sentinel profile would need a fake auth user; NULL stores nothing.
+-- Two of them (agency_client_connections.invited_by,
+-- agency_client_request_shares.shared_by) are ON DELETE SET NULL + NOT NULL
+-- today, i.e. already a latent erasure blocker.
+alter table public.agency_client_connections alter column invited_by drop not null;
+alter table public.agency_client_request_shares alter column shared_by drop not null;
+alter table public.agency_worker_invitations alter column inviter_profile_id drop not null;
+alter table public.agreement_amendments alter column created_by drop not null;
+alter table public.agreement_events alter column actor_id drop not null;
+alter table public.agreements alter column created_by drop not null;
+alter table public.asset_assignments alter column issued_by drop not null;
+alter table public.assets alter column created_by drop not null;
+alter table public.billing_checkout_operations alter column owner_id drop not null;
+alter table public.billing_customers alter column owner_id drop not null;
+alter table public.billing_subscriptions alter column owner_id drop not null;
+alter table public.booking_request_events alter column actor_id drop not null;
+alter table public.booking_requests alter column owner_id drop not null;
+alter table public.booking_requests alter column worker_id drop not null;
+alter table public.business_trips alter column created_by drop not null;
+alter table public.business_trips alter column profile_id drop not null;
+alter table public.company_demand_locations alter column owner_id drop not null;
+alter table public.company_worker_invitations alter column inviter_profile_id drop not null;
+alter table public.competency_recognitions alter column assessed_by drop not null;
+alter table public.contact_disclosure_request_events alter column actor_profile_id drop not null;
+alter table public.contact_disclosure_requests alter column owner_id drop not null;
+alter table public.contracts alter column owner_id drop not null;
+alter table public.conversation_messages alter column author_id drop not null;
+alter table public.conversations alter column created_by drop not null;
+alter table public.customer_request_attachments alter column profile_id drop not null;
+alter table public.customer_requests alter column profile_id drop not null;
+alter table public.decision_document_links alter column created_by drop not null;
+alter table public.decision_task_links alter column created_by drop not null;
+alter table public.defect_corrections alter column reviewer_id drop not null;
+alter table public.defects alter column reporter_id drop not null;
+alter table public.demand_shortlist alter column owner_id drop not null;
+alter table public.document_acknowledgements alter column assigned_by drop not null;
+alter table public.document_acknowledgements alter column assignee_profile_id drop not null;
+alter table public.document_files alter column uploaded_by drop not null;
+alter table public.employee_requests alter column requester_profile_id drop not null;
+alter table public.engagement_contexts alter column profile_id drop not null;
+alter table public.finance_records alter column created_by drop not null;
+alter table public.follow_up_tasks alter column created_by drop not null;
+alter table public.invitation_acceptances alter column profile_id drop not null;
+alter table public.journal_entries alter column worker_id drop not null;
+alter table public.journal_entry_confirmations alter column confirmer_id drop not null;
+alter table public.journal_entry_review_submissions alter column submitted_by drop not null;
+alter table public.journal_entry_review_submissions alter column worker_id drop not null;
+alter table public.journal_entry_work_items alter column worker_id drop not null;
+alter table public.leave_balance_policies alter column created_by drop not null;
+alter table public.management_decision_events alter column actor_id drop not null;
+alter table public.management_decisions alter column created_by drop not null;
+alter table public.market_rate_averages alter column entered_by drop not null;
+alter table public.offboarding_runs alter column started_by drop not null;
+alter table public.onboarding_runs alter column started_by drop not null;
+alter table public.onboarding_templates alter column created_by drop not null;
+alter table public.org_document_events alter column actor_id drop not null;
+alter table public.org_documents alter column created_by drop not null;
+alter table public.organization_claims alter column claimant_profile_id drop not null;
+alter table public.organization_evidence_media alter column imported_by_profile_id drop not null;
+alter table public.performance_review_events alter column actor_id drop not null;
+alter table public.performance_reviews alter column created_by drop not null;
+alter table public.performance_reviews alter column reviewer_profile_id drop not null;
+alter table public.performance_reviews alter column subject_profile_id drop not null;
+alter table public.personal_data_disclosures alter column disclosed_by drop not null;
+alter table public.personal_data_disclosures alter column worker_user_id drop not null;
+alter table public.pilot_outcomes alter column noted_by drop not null;
+alter table public.pilots alter column created_by drop not null;
+alter table public.privacy_consent_events alter column user_id drop not null;
+alter table public.procurement_inquiries alter column created_by drop not null;
+alter table public.procurement_inquiries alter column requester_profile_id drop not null;
+alter table public.procurement_offers alter column created_by drop not null;
+alter table public.project_budgets alter column created_by drop not null;
+alter table public.project_handover_entries alter column created_by drop not null;
+alter table public.project_stages alter column created_by drop not null;
+alter table public.project_worker_operational_statuses alter column updated_by drop not null;
+alter table public.project_worker_readiness_items alter column updated_by drop not null;
+alter table public.proposals alter column owner_id drop not null;
+alter table public.review_cycles alter column created_by drop not null;
+alter table public.review_evidence_links alter column created_by drop not null;
+alter table public.task_dependencies alter column created_by drop not null;
+alter table public.team_enquiry_events alter column actor_profile_id drop not null;
+alter table public.timesheets alter column created_by drop not null;
+alter table public.timesheets alter column worker_id drop not null;
+alter table public.training_assignment_events alter column actor_id drop not null;
+alter table public.training_assignments alter column assigned_by drop not null;
+alter table public.training_assignments alter column assignee_profile_id drop not null;
+alter table public.training_programs alter column created_by drop not null;
+alter table public.training_skill_links alter column created_by drop not null;
+alter table public.work_counterparty_links alter column established_by drop not null;
+alter table public.work_counterparty_links alter column worker_id drop not null;
+alter table public.work_hour_allocations alter column entered_by drop not null;
+alter table public.work_hour_allocations alter column worker_id drop not null;
+alter table public.work_objects alter column created_by drop not null;
+alter table public.work_plan_entries alter column created_by drop not null;
+alter table public.work_tasks alter column created_by drop not null;
+alter table public.worker_absences alter column requested_by drop not null;
+alter table public.worker_absences alter column worker_id drop not null;
+alter table public.worker_document_events alter column actor_id drop not null;
+alter table public.worker_documents alter column updated_by drop not null;
+alter table public.workflow_definition_versions alter column created_by drop not null;
+alter table public.workflow_definitions alter column created_by drop not null;
+alter table public.workflow_instance_approvers alter column approver_profile_id drop not null;
+alter table public.workflow_instances alter column requester_profile_id drop not null;
+
+-- ── 5. CHECK amendments (8) — the actor may be NULL once the person erased ──
+-- Each keeps its original shape and only stops requiring the actor id; the
+-- stamp (…_at / decision) still proves the event happened. Added NOT VALID
+-- then VALIDATEd: the new predicate is strictly weaker, so validation cannot
+-- fail on existing rows.
+
+alter table public.workflow_instance_approvers drop constraint if exists workflow_instance_approvers_decided_shape;
+alter table public.workflow_instance_approvers add constraint workflow_instance_approvers_decided_shape check (
+  ((decision is null) and (decided_by is null) and (decided_at is null))
+  or ((decision is not null) and (decided_at is not null))
+) not valid;
+alter table public.workflow_instance_approvers validate constraint workflow_instance_approvers_decided_shape;
+
+alter table public.onboarding_run_items drop constraint if exists onboarding_run_items_done_shape;
+alter table public.onboarding_run_items add constraint onboarding_run_items_done_shape check (
+  ((status = 'pending') and (completed_by is null) and (completed_at is null))
+  or ((status = any (array['done','skipped'])) and (completed_at is not null))
+) not valid;
+alter table public.onboarding_run_items validate constraint onboarding_run_items_done_shape;
+
+alter table public.offboarding_run_items drop constraint if exists offboarding_run_items_done_shape;
+alter table public.offboarding_run_items add constraint offboarding_run_items_done_shape check (
+  ((status = 'pending') and (completed_by is null) and (completed_at is null))
+  or ((status = any (array['done','skipped'])) and (completed_at is not null))
+) not valid;
+alter table public.offboarding_run_items validate constraint offboarding_run_items_done_shape;
+
+alter table public.performance_reviews drop constraint if exists performance_reviews_manager_input_stamp;
+alter table public.performance_reviews add constraint performance_reviews_manager_input_stamp check (
+  ((manager_input is null) = (manager_input_at is null))
+  and ((manager_input_by is null) or (manager_input is not null))
+) not valid;
+alter table public.performance_reviews validate constraint performance_reviews_manager_input_stamp;
+
+alter table public.organization_claims drop constraint if exists organization_claims_decision_complete;
+alter table public.organization_claims add constraint organization_claims_decision_complete check (
+  (state <> all (array['representative_verified','linked']))
+  or ((decided_at is not null) and (verification_method is not null) and (verification_evidence_ref is not null))
+) not valid;
+alter table public.organization_claims validate constraint organization_claims_decision_complete;
+
+alter table public.work_counterparty_links drop constraint if exists work_counterparty_links_revocation_shape;
+alter table public.work_counterparty_links add constraint work_counterparty_links_revocation_shape check (
+  (revoked_by is null) or (revoked_at is not null)
+) not valid;
+alter table public.work_counterparty_links validate constraint work_counterparty_links_revocation_shape;
+
+alter table public.document_acknowledgements drop constraint if exists document_acknowledgements_stamp_pair;
+alter table public.document_acknowledgements add constraint document_acknowledgements_stamp_pair check (
+  (acknowledged_by is null) or (acknowledged_at is not null)
+) not valid;
+alter table public.document_acknowledgements validate constraint document_acknowledgements_stamp_pair;
+
+-- invitations: a third origin shape "inviter erased" — no inviter, no external
+-- source, and never still pending (execute_v2 revokes pending ones first).
+alter table public.invitations drop constraint if exists invitations_origin_chk;
+alter table public.invitations add constraint invitations_origin_chk check (
+  ((inviter_profile_id is not null) and (external_source_slug is null) and (external_reference is null))
+  or ((inviter_profile_id is null) and (external_source_slug is not null) and (external_reference is not null) and (consent_record is not null))
+  or ((inviter_profile_id is null) and (external_source_slug is null) and (external_reference is null) and (status <> 'pending'))
+) not valid;
+alter table public.invitations validate constraint invitations_origin_chk;
+
+-- ── 6. registry seed (264 FK columns, production 2026-10-15) + 2 no-FK ──────
+insert into public.privacy_erasure_relations
+  (table_name, column_name, ref_kind, fk_on_delete, class, mode, note)
+values
+  ('account_classifications',             'decided_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'platform''s own classification decision; actor only')
+,  ('account_classifications',             'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'classification of the erased account itself')
+,  ('agencies',                            'profile_id',              'profile', 'n', 'PSEUDONYMISE', 'null',   'organization record outlives the person (registry: organization record)')
+,  ('agency_candidate_offers',             'created_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor on an agency''s offer')
+,  ('agency_candidate_offers',             'decided_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('agency_candidate_offers',             'withdrawn_by',            'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('agency_candidate_offers',             'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'offer of THIS person to a client; pre-engagement, no legal hold')
+,  ('agency_client_connections',           'accepted_by',             'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('agency_client_connections',           'invited_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor; NOT NULL today although ON DELETE SET NULL (latent blocker) -> drop NOT NULL')
+,  ('agency_client_connections',           'revoked_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('agency_client_request_shares',        'revoked_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('agency_client_request_shares',        'shared_by',               'profile', 'n', 'PSEUDONYMISE', 'null',   'actor; NOT NULL + SET NULL (latent blocker) -> drop NOT NULL')
+,  ('agency_clients',                      'created_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('agency_worker_invitations',           'inviter_profile_id',      'profile', 'a', 'PSEUDONYMISE', 'null',   'actor; the invitee''s e-mail is the invitee''s data, untouched')
+,  ('agency_workers',                      'worker_id',               'worker', 'c', 'BLOCK',       'cascade', 'BLOCK while status=''active'' (end via end_roster_link_v1); then DELETE by cascade')
+,  ('agreement_amendments',                'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: authored for the organization; CASCADE would delete it')
+,  ('agreement_events',                    'actor_id',                'profile', 'a', 'PSEUDONYMISE', 'null',   'append-only actor column')
+,  ('agreements',                          'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: organization''s agreement, CASCADE would delete it')
+,  ('agreements',                          'responsible_profile_id',  'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('agreements',                          'worker_id',               'worker', 'n', 'RETAIN',      'null',   'employment-related agreement with the person: contract record (Package A Decision 1 horizon)')
+,  ('ai_runs',                             'profile_id',              'profile', 'n', 'PSEUDONYMISE', 'special', 'null link AND scrub output_excerpt + request_context (G3)')
+,  ('asset_assignments',                   'issued_by',               'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('asset_assignments',                   'worker_id',               'worker', 'n', 'RETAIN',      'special', 'equipment issued to the person = employer accountability; rows with project_id null are DELETED (CHECK project_id or worker_id)')
+,  ('assets',                              'created_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('assistant_conversations',             'owner_id',                'profile', 'c', 'DELETE',      'cascade', 'own assistant transcript')
+,  ('audit_logs',                          'actor_id',                'profile', 'n', 'PSEUDONYMISE', 'special', 'null link AND redact payload keys that hold the subject id / name (G3)')
+,  ('billing_checkout_operations',         'owner_id',                'profile', 'c', 'RETAIN',      'null',   'payment-provider trail; statutory accounting (Package A Decision 2)')
+,  ('billing_customers',                   'owner_id',                'profile', 'c', 'RETAIN',      'null',   'provider customer id; statutory accounting')
+,  ('billing_subscriptions',               'owner_id',                'profile', 'c', 'BLOCK',       'null',   'BLOCK while status in (trialing, active, past_due, unpaid, incomplete); else RETAIN-DETACHED')
+,  ('booking_request_events',              'actor_id',                'profile', 'a', 'PSEUDONYMISE', 'null',   'actor on a booking lifecycle')
+,  ('booking_requests',                    'owner_id',                'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: employer-side booking record created by the person as staff')
+,  ('booking_requests',                    'worker_id',               'worker', 'c', 'BLOCK',       'special', 'BLOCK while status=''proposed'' or accepted with an active engagement; else RETAIN-DETACHED (E3), readiness_snapshot scrubbed')
+,  ('booking_requests_seen',               'user_id',                 'profile', 'c', 'DELETE',      'cascade', 'own read marker')
+,  ('business_trip_events',                'actor_profile_id',        'profile', 'a', 'PSEUDONYMISE', 'null',   'actor (append-only)')
+,  ('business_trips',                      'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: trip record created for someone else')
+,  ('business_trips',                      'profile_id',              'profile', 'c', 'RETAIN',      'null',   'employer travel / per-diem record (tax) - legal basis to confirm')
+,  ('candidate_drafts',                    'linked_profile_id',       'profile', 'n', 'PSEUDONYMISE', 'null',   'link to the person from someone else''s draft')
+,  ('candidate_drafts',                    'owner_id',                'profile', 'c', 'DELETE',      'cascade', 'the person''s own private recruiting drafts')
+,  ('candidate_skills',                    'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own content')
+,  ('commercial_handoffs',                 'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'operational handoff; the consent proof itself lives in privacy_consent_events')
+,  ('commitment_override_receipts',        'decided_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor (trigger already allows this exact change)')
+,  ('commitment_override_receipts',        'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'receipt about the person''s own calendar')
+,  ('companies',                           'profile_id',              'profile', 'n', 'PSEUDONYMISE', 'null',   'organization record outlives the person')
+,  ('company_demand_locations',            'owner_id',                'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: location of an organization''s demand')
+,  ('company_memberships',                 'invited_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('company_memberships',                 'profile_id',              'profile', 'c', 'BLOCK',       'cascade', 'BLOCK when the person is the LAST active owner of an organization; else DELETE')
+,  ('company_worker_engagements',          'created_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('company_worker_engagements',          'ended_by',                'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('company_worker_engagements',          'worker_id',               'worker', 'n', 'RETAIN',      'special', 'company-side engagement lineage (E3); subject_key RE-MINTED (G4)')
+,  ('company_worker_invitations',          'inviter_profile_id',      'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('company_workers',                     'worker_id',               'worker', 'c', 'BLOCK',       'cascade', 'BLOCK while status=''active'' (end_roster_link_v1); then DELETE by cascade')
+,  ('competency_recognitions',             'assessed_by',             'profile', 'r', 'PSEUDONYMISE', 'null',   'assessor actor (RESTRICT today)')
+,  ('competency_recognitions',             'subject_profile_id',      'profile', 'c', 'DELETE',      'cascade', 'recognition about the person; the assessor''s own trail is audit_logs')
+,  ('confirmation_spends',                 'spent_by',                'profile', 'c', 'DELETE',      'cascade', 'single-use token digests')
+,  ('consented_login_location_signals',    'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own location signal')
+,  ('consents',                            'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'legacy consent flags (0 rows); proof lives in privacy_consent_events')
+,  ('contact_disclosure_request_events',   'actor_profile_id',        'profile', 'a', 'PSEUDONYMISE', 'null',   'actor (append-only)')
+,  ('contact_disclosure_requests',         'owner_id',                'profile', 'c', 'PSEUDONYMISE', 'null',   'employer-side request created by the person as staff')
+,  ('contact_disclosure_requests',         'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'request to reveal THIS person''s contact; disclosure proof is personal_data_disclosures')
+,  ('contracts',                           'owner_id',                'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: organization''s contract')
+,  ('conversation_message_attachments',    'uploader_id',             'profile', 'c', 'DELETE',      'cascade', 'files the person attached; storage objects deleted (E5/E6)')
+,  ('conversation_messages',               'author_id',               'profile', 'a', 'PSEUDONYMISE', 'special', 'G6: author null + body/translated_text replaced by a fixed marker in threads with other participants; DELETE in solo threads')
+,  ('conversation_participants',           'added_by',                'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('conversation_participants',           'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own membership of a thread')
+,  ('conversation_participants',           'revoked_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('conversations',                       'created_by',              'profile', 'a', 'PSEUDONYMISE', 'special', 'thread survives for the other participants; DELETE when no other participant ever existed')
+,  ('customer_request_attachments',        'profile_id',              'profile', 'c', 'PSEUDONYMISE', 'special', 'org demand: row kept, object MOVED to an erased/ prefix; personal demand: DELETE + object deleted')
+,  ('customer_requests',                   'drafted_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor (connection drafting)')
+,  ('customer_requests',                   'profile_id',              'profile', 'c', 'RETAIN',      'special', 'privacy request row RETAIN 3 y (E4); org demand PSEUDONYMISE; personal demand without bookings DELETE')
+,  ('customers',                           'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'private-customer record of the person (0 rows)')
+,  ('decision_document_links',             'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('decision_task_links',                 'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('defect_corrections',                  'reviewer_id',             'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('defects',                             'assignee_profile_id',     'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('defects',                             'reporter_id',             'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('demand_interest_signals',             'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'own interest signal')
+,  ('demand_shortlist',                    'owner_id',                'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: employer''s shortlist the person kept as staff')
+,  ('demand_shortlist',                    'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'an employer''s judgement about the erased person')
+,  ('document_acknowledgements',           'acknowledged_by',         'profile', 'a', 'RETAIN',      'null',   'employer compliance proof (safety instruction acknowledged) - legal basis to confirm')
+,  ('document_acknowledgements',           'assigned_by',             'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('document_acknowledgements',           'assignee_profile_id',     'profile', 'c', 'RETAIN',      'null',   'see acknowledged_by')
+,  ('document_files',                      'uploaded_by',             'profile', 'a', 'PSEUDONYMISE', 'null',   'actor on an organization document file')
+,  ('education_cohort_members',            'added_by',                'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('education_cohort_members',            'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'learner membership (institution keeps its own official register)')
+,  ('education_cohorts',                   'created_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('education_programs',                  'created_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('email_verification_requests_v1',      'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'security state')
+,  ('email_verifications_v1',              'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'e-mail proof; no longer needed once the account is gone')
+,  ('employee_requests',                   'requester_profile_id',    'profile', 'c', 'RETAIN',      'null',   'HR request held by the employer - controller question (Q4)')
+,  ('engagement_contexts',                 'profile_id',              'profile', 'c', 'BLOCK',       'special', 'BLOCK while status=''active'' with an organization; RETAIN-DETACHED when retained journal evidence or confirmations point at it; else DELETE')
+,  ('engagement_lifecycle_events',         'actor_profile_id',        'profile', 'a', 'PSEUDONYMISE', 'null',   'actor (append-only)')
+,  ('evidence_import_events',              'actor_profile_id',        'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('evidence_import_sessions',            'created_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('experience_records',                  'author_profile_id',       'profile', 'c', 'DELETE',      'cascade', 'the person''s own reviews')
+,  ('experience_records',                  'moderated_by',            'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('experience_records',                  'subject_profile_id',      'profile', 'c', 'DELETE',      'cascade', 'reviews about the person')
+,  ('experience_responses',                'author_profile_id',       'profile', 'c', 'DELETE',      'cascade', 'own content')
+,  ('experience_responses',                'moderated_by',            'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('finance_records',                     'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: organization''s finance record (accounting)')
+,  ('first_party_supply_declarations',     'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own declaration')
+,  ('follow_up_tasks',                     'created_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('follow_up_tasks',                     'subject_profile_id',      'profile', 'c', 'DELETE',      'cascade', 'CRM note about the person')
+,  ('historical_consolidation_decisions',  'decided_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('historical_consolidation_decisions',  'reverted_by',             'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('invitation_acceptances',              'profile_id',              'profile', 'c', 'RETAIN',      'null',   'record that the person accepted, with notice version (Art 7(1)-type proof)')
+,  ('invitations',                         'accepted_by_profile_id',  'profile', 'a', 'PSEUDONYMISE', 'special', 'null + scrub invited_email / invited_name / personal_message of invitations addressed to the person')
+,  ('invitations',                         'inviter_profile_id',      'profile', 'c', 'PSEUDONYMISE', 'special', 'G2: invitations sent to others survive; pending ones become ''revoked''; CHECK amended')
+,  ('journal_entries',                     'worker_id',               'worker', 'c', 'RETAIN',      'special', 'employer-confirmed entries RETAIN-DETACHED (E1); unconfirmed own entries DELETE')
+,  ('journal_entry_confirmations',         'confirmer_id',            'profile', 'a', 'PSEUDONYMISE', 'null',   'confirmations the person GAVE keep evidential value (E1)')
+,  ('journal_entry_photos',                'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own photos; objects deleted via Storage API (E5)')
+,  ('journal_entry_review_submissions',    'submitted_by',            'profile', 'a', 'PSEUDONYMISE', 'null',   'actor (append-only)')
+,  ('journal_entry_review_submissions',    'worker_id',               'worker', 'a', 'RETAIN',      'null',   'review submission of retained evidence (append-only)')
+,  ('journal_entry_skills',                'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'derived skill inference about the person (even on retained entries)')
+,  ('journal_entry_tasks',                 'linked_by',               'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('journal_entry_tasks',                 'unlinked_by',             'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('journal_entry_work_items',            'worker_id',               'worker', 'c', 'RETAIN',      'special', 'work quantities of RETAINED entries kept detached; others deleted with their entry')
+,  ('language_feedback',                   'user_id',                 'profile', 'a', 'DELETE',      'delete', 'own feedback text (NO ACTION today)')
+,  ('leads',                               'assigned_to',             'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('learning_policy_settings',            'disabled_by',             'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('learning_policy_settings',            'enabled_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('learning_review_queue',               'reviewed_by',             'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('learning_review_queue',               'subject_worker_id',       'worker', 'c', 'DELETE',      'cascade', 'inference about the person')
+,  ('learning_signals',                    'actor_id',                'profile', 'n', 'PSEUDONYMISE', 'null',   'actor (G3: rows about OTHER subjects; nothing of the erased person left but the link)')
+,  ('learning_signals',                    'subject_worker_id',       'worker', 'c', 'DELETE',      'cascade', 'inference about the person')
+,  ('leave_balance_policies',              'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('lmc_accounts',                        'profile_id',              'profile', 'r', 'BLOCK',       'none',   'immutable credit ledger (RESTRICT + trigger): any row = manual resolution')
+,  ('lmc_settings',                        'updated_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('lmc_transactions',                    'actor_profile_id',        'profile', 'r', 'BLOCK',       'none',   'immutable credit ledger: manual resolution')
+,  ('management_decision_events',          'actor_id',                'profile', 'a', 'PSEUDONYMISE', 'null',   'actor (append-only)')
+,  ('management_decisions',                'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('management_decisions',                'responsible_profile_id',  'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('market_intelligence_insight_queries', 'profile_id',              'profile', 'n', 'DELETE',      'delete', 'own query log (SET NULL today would keep params)')
+,  ('market_rate_averages',                'entered_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('marketplace_listings',                'owner_id',                'profile', 'c', 'DELETE',      'cascade', 'own listings')
+,  ('match_actions',                       'actor_id',                'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('matches',                             'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'match about the person')
+,  ('notification_events',                 'recipient_profile_id',    'profile', 'c', 'DELETE',      'special', 'own notifications deleted; OTHER recipients'' events about the person: entity_id re-minted + metadata title dropped (G4)')
+,  ('notification_preferences',            'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own settings')
+,  ('offboarding_run_items',               'completed_by',            'profile', 'a', 'PSEUDONYMISE', 'null',   'actor; CHECK amended')
+,  ('offboarding_runs',                    'started_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('onboarding_run_items',                'completed_by',            'profile', 'a', 'PSEUDONYMISE', 'null',   'actor; CHECK amended')
+,  ('onboarding_run_items',                'responsible_profile_id',  'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('onboarding_runs',                     'started_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('onboarding_templates',                'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('org_document_events',                 'actor_id',                'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('org_documents',                       'created_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('org_documents',                       'responsible_profile_id',  'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('org_documents',                       'worker_id',               'worker', 'a', 'RETAIN',      'null',   'employer document about the person (e.g. contract copy) - controller question (Q4)')
+,  ('organization_claims',                 'claimant_profile_id',     'profile', 'c', 'PSEUDONYMISE', 'null',   'organization verification evidence')
+,  ('organization_claims',                 'decided_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor; CHECK amended')
+,  ('organization_evidence_events',        'actor_profile_id',        'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('organization_evidence_media',         'imported_by_profile_id',  'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('organization_evidence_parties',       'created_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('organization_evidence_records',       'imported_by_profile_id',  'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('organization_evidence_records',       'supplied_by_profile_id',  'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('organization_facts',                  'recorded_by',             'profile', 'n', 'PSEUDONYMISE', 'null',   'actor (append-only; SET NULL is blocked by its trigger today)')
+,  ('organization_history_periods',        'created_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('organization_identifiers',            'created_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('organization_people',                 'created_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('organization_people',                 'linked_by',               'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('organization_people',                 'linked_profile_id',       'profile', 'n', 'PSEUDONYMISE', 'special', 'roster row unlinked AND display_name/normalized_name/source_note/external_ref scrubbed (G3); evidence rows keep their org text')
+,  ('organization_people',                 'linked_worker_id',        'worker', 'n', 'PSEUDONYMISE', 'special', 'together with linked_profile_id (CHECK pairs them)')
+,  ('organizations',                       'owner_profile_id',        'profile', 'n', 'PSEUDONYMISE', 'null',   'organization outlives the person (last-owner case is a BLOCK on memberships)')
+,  ('performance_review_events',           'actor_id',                'profile', 'a', 'PSEUDONYMISE', 'null',   'actor (append-only)')
+,  ('performance_reviews',                 'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('performance_reviews',                 'manager_input_by',        'profile', 'a', 'PSEUDONYMISE', 'null',   'actor; CHECK amended')
+,  ('performance_reviews',                 'reviewer_profile_id',     'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: reviews the person wrote about others')
+,  ('performance_reviews',                 'subject_profile_id',      'profile', 'c', 'RETAIN',      'special', 'employer HR record about the person; worker_input scrubbed - legal basis to confirm')
+,  ('personal_data_disclosures',           'disclosed_by',            'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('personal_data_disclosures',           'worker_user_id',          'profile', 'c', 'RETAIN',      'special', 'disclosure ledger kept 6 y, identity detached (G5)')
+,  ('pilot_drafts',                        'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'legacy drafts')
+,  ('pilot_events',                        'profile_id',              'profile', 'a', 'DELETE',      'delete', 'analytics events of the person (E8; NO ACTION today)')
+,  ('pilot_outcomes',                      'noted_by',                'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('pilot_outcomes',                      'participant_profile_id',  'profile', 'a', 'DELETE',      'delete', 'outcome note about the person')
+,  ('pilot_participants',                  'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own participation')
+,  ('pilots',                              'created_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('platform_capability_grants',          'granted_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('platform_capability_grants',          'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'grant to the erased account')
+,  ('platform_capability_grants',          'revoked_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('preferred_locations',                 'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own content')
+,  ('privacy_consent_events',              'user_id',                 'profile', 'c', 'RETAIN',      'special', '#2412 tombstone detach (random per-erasure id, never returned); erased_at coarse to the month')
+,  ('procurement_events',                  'actor_profile_id',        'profile', 'a', 'PSEUDONYMISE', 'null',   'actor (append-only)')
+,  ('procurement_inquiries',               'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('procurement_inquiries',               'requester_profile_id',    'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('procurement_offers',                  'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('productivity_units',                  'created_by_profile_id',   'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('profile_roles',                       'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own roles')
+,  ('profile_skill_claims',                'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own content')
+,  ('profiles',                            'id',                      'auth',   'c', 'DELETE',      'special', 'PII scrubbed then row deleted in SQL; auth.users deleted LAST by the server via auth.admin.deleteUser')
+,  ('project_budgets',                     'created_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('project_handover_entries',            'created_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('project_members',                     'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'membership of the erased person')
+,  ('project_stages',                      'created_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('project_worker_assignments',          'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'staffing link of the person')
+,  ('project_worker_operational_statuses', 'updated_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('project_worker_operational_statuses', 'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'status about the person')
+,  ('project_worker_readiness_items',      'updated_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('project_worker_readiness_items',      'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'readiness about the person')
+,  ('projects',                            'responsible_profile_id',  'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('proposals',                           'owner_id',                'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: organization''s commercial proposal')
+,  ('review_cycles',                       'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('review_evidence_links',               'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('service_offering_requests',           'buyer_id',                'profile', 'c', 'DELETE',      'cascade', 'request the person sent (both parties'' copy goes; flagged Q6)')
+,  ('service_offering_requests',           'provider_id',             'profile', 'c', 'DELETE',      'cascade', 'requests to the person''s own offering')
+,  ('service_offering_requests_seen',      'user_id',                 'profile', 'c', 'DELETE',      'cascade', 'own read marker')
+,  ('service_offerings',                   'provider_id',             'profile', 'c', 'DELETE',      'cascade', 'own offering')
+,  ('skill_candidate_clarifications',      'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own content')
+,  ('subscriptions',                       'profile_id',              'profile', 'c', 'BLOCK',       'null',   'legacy billing: BLOCK while status in (trial, active, past_due); else RETAIN-DETACHED')
+,  ('task_dependencies',                   'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('team_assignments',                    'assigned_by',             'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('team_assignments',                    'ended_by',                'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('team_demand_offer_terms',             'decided_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('team_demand_offer_terms',             'proposed_by',             'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('team_demand_offers',                  'offered_by',              'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('team_demand_offers',                  'responded_by',            'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('team_enquiries',                      'owner_id',                'profile', 'c', 'DELETE',      'cascade', 'own enquiry message')
+,  ('team_enquiry_events',                 'actor_profile_id',        'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('timesheet_events',                    'actor_profile_id',        'profile', 'a', 'PSEUDONYMISE', 'null',   'actor (append-only)')
+,  ('timesheets',                          'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: timesheets the person created for others')
+,  ('timesheets',                          'worker_id',               'worker', 'c', 'BLOCK',       'null',   'BLOCK while status=''submitted'' (undecided payroll); else RETAIN-DETACHED (payroll evidence)')
+,  ('training_assignment_events',          'actor_id',                'profile', 'a', 'PSEUDONYMISE', 'null',   'actor (append-only)')
+,  ('training_assignments',                'assigned_by',             'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('training_assignments',                'assignee_profile_id',     'profile', 'c', 'RETAIN',      'null',   'employer training/safety record - legal basis to confirm')
+,  ('training_programs',                   'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('training_skill_links',                'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('usage_cost_events',                   'profile_id',              'profile', 'n', 'RETAIN',      'special', 'cost ledger kept; session_id, request_context, personal workspace_id scrubbed (G3)')
+,  ('work_counterparty_links',             'established_by',          'profile', 'a', 'PSEUDONYMISE', 'null',   'actor (append-only)')
+,  ('work_counterparty_links',             'revoked_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor; CHECK amended')
+,  ('work_counterparty_links',             'worker_id',               'worker', 'a', 'RETAIN',      'null',   'who the work counterparty was for retained evidence (append-only)')
+,  ('work_hour_allocations',               'entered_by',              'profile', 'r', 'PSEUDONYMISE', 'null',   'actor (RESTRICT today)')
+,  ('work_hour_allocations',               'worker_id',               'worker', 'r', 'RETAIN',      'null',   'hours = payroll / working-time evidence (RESTRICT today)')
+,  ('work_objects',                        'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2: 230 organization work objects would cascade away')
+,  ('work_objects',                        'responsible_profile_id',  'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('work_plan_entries',                   'cancelled_by',            'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('work_plan_entries',                   'created_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('work_plan_entries',                   'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'the person''s own plan')
+,  ('work_task_events',                    'actor_profile_id',        'profile', 'n', 'PSEUDONYMISE', 'special', 'actor null + assignee id scrubbed from before/after_state')
+,  ('work_tasks',                          'assignee_profile_id',     'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('work_tasks',                          'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('worker_absences',                     'requested_by',            'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('worker_absences',                     'reviewed_by',             'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('worker_absences',                     'worker_id',               'worker', 'c', 'RETAIN',      'special', 'absence fact = working-time record; private reason (note) scrubbed')
+,  ('worker_achievements',                 'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own content')
+,  ('worker_document_events',              'actor_id',                'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('worker_documents',                    'updated_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('worker_documents',                    'verified_by',             'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('worker_documents',                    'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'own documents + files (E5); employer copy duty = Q4')
+,  ('worker_education',                    'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own content')
+,  ('worker_external_profiles',            'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'own content')
+,  ('worker_languages',                    'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'own content')
+,  ('worker_opportunity_seen',             'profile_id',              'profile', 'c', 'DELETE',      'cascade', 'own read marker')
+,  ('worker_professions',                  'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'own content')
+,  ('worker_saved_opportunities',          'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'own content')
+,  ('worker_saved_searches',               'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'own content')
+,  ('worker_skills',                       'verified_by',             'profile', 'a', 'PSEUDONYMISE', 'null',   'actor')
+,  ('worker_skills',                       'worker_id',               'worker', 'c', 'DELETE',      'cascade', 'own content')
+,  ('workers',                             'profile_id',              'profile', 'c', 'DELETE',      'special', 'deleted in SQL after retained children are detached')
+,  ('workflow_definition_versions',        'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('workflow_definitions',                'created_by',              'profile', 'c', 'PSEUDONYMISE', 'null',   'G2')
+,  ('workflow_instance_approvers',         'approver_profile_id',     'profile', 'c', 'PSEUDONYMISE', 'null',   'approver slot on someone else''s workflow')
+,  ('workflow_instance_approvers',         'decided_by',              'profile', 'a', 'PSEUDONYMISE', 'null',   'actor; CHECK amended')
+,  ('workflow_instance_approvers',         'delegated_to_profile_id', 'profile', 'n', 'PSEUDONYMISE', 'null',   'actor')
+,  ('workflow_instances',                  'requester_profile_id',    'profile', 'c', 'RETAIN',      'null',   'HR workflow record (e.g. leave) with append-only transitions - legal basis to confirm')
+,  ('workflow_transitions',                'actor_profile_id',        'profile', 'a', 'PSEUDONYMISE', 'null',   'actor (append-only)')
+,  ('company_worker_engagements',           'subject_key',             'none',    '-', 'PSEUDONYMISE', 'special', 'G4: no FK; per-row random key RE-MINTED at erasure so no pre-erasure copy can be joined')
+,  ('worker_display_name_backfill_20260805', 'profile_id',              'none',    '-', 'DELETE',      'special', 'G4: one-off migration artifact holding before/after names')
+on conflict (table_name, column_name) do update
+  set ref_kind = excluded.ref_kind, fk_on_delete = excluded.fk_on_delete,
+      class = excluded.class, mode = excluded.mode, note = excluded.note;
+
+-- ── 7. helpers (internal; no grant to any API role) ─────────────────────────
+
+-- Remove, recursively, every JSON string equal to one of p_ids and every key
+-- named in p_drop_keys. Used on audit payloads, event before/after states and
+-- metadata of rows that SURVIVE the erasure.
+create or replace function public.privacy_erasure_scrub_jsonb(p jsonb, p_ids text[], p_drop_keys text[] default '{}')
+returns jsonb
+language plpgsql
+immutable
+set search_path = ''
+as $$
+begin
+  if p is null then
+    return null;
+  elsif jsonb_typeof(p) = 'object' then
+    return coalesce((
+      select jsonb_object_agg(e.key, public.privacy_erasure_scrub_jsonb(e.value, p_ids, p_drop_keys))
+        from jsonb_each(p) e
+       where not (e.key = any (p_drop_keys))
+         and not (jsonb_typeof(e.value) = 'string' and (e.value #>> '{}') = any (p_ids))
+    ), '{}'::jsonb);
+  elsif jsonb_typeof(p) = 'array' then
+    return coalesce((
+      select jsonb_agg(public.privacy_erasure_scrub_jsonb(a.value, p_ids, p_drop_keys) order by a.ord)
+        from jsonb_array_elements(p) with ordinality as a(value, ord)
+       where not (jsonb_typeof(a.value) = 'string' and (a.value #>> '{}') = any (p_ids))
+    ), '[]'::jsonb);
+  end if;
+  return p;
+end;
+$$;
+
+-- The guard triggers execute_v2 must suspend for the length of its own
+-- transaction: every enabled, non-internal UPDATE/DELETE trigger on a
+-- registry table or on any table reachable from one by an ON DELETE
+-- CASCADE / SET NULL / SET DEFAULT chain. Two are never suspended:
+--   * privacy_consent_events_append_only — opened only by its own GUC detach;
+--   * company_memberships.protect_last_owner — the last-owner rule is a
+--     BLOCK, never bypassed.
+-- Suspending the set_updated_at-style triggers is deliberate: a shared
+-- updated_at = now() on every touched row would itself re-link the erased
+-- person's rows across tables.
+create or replace function public.privacy_erasure_guard_triggers_v2()
+returns table (rel regclass, tgname name)
+language sql
+stable
+set search_path = ''
+as $$
+  with recursive reach(oid) as (
+    select c.oid
+      from public.privacy_erasure_relations r
+      join pg_catalog.pg_class c on c.relname = r.table_name
+      join pg_catalog.pg_namespace n on n.oid = c.relnamespace and n.nspname = 'public'
+    union
+    select k.conrelid
+      from pg_catalog.pg_constraint k
+      join reach on k.confrelid = reach.oid
+     where k.contype = 'f' and k.confdeltype in ('c','n','d')
+  )
+  select t.tgrelid::regclass, t.tgname
+    from pg_catalog.pg_trigger t
+    join reach on reach.oid = t.tgrelid
+    join pg_catalog.pg_class c on c.oid = t.tgrelid
+    join pg_catalog.pg_namespace n on n.oid = c.relnamespace and n.nspname = 'public'
+   where not t.tgisinternal
+     and t.tgenabled <> 'D'
+     and (t.tgtype & (8 | 16)) <> 0
+     and t.tgname not in ('privacy_consent_events_append_only', 'protect_last_owner')
+   order by 1, 2;
+$$;
+
+-- Every reason the erasure may NOT run yet. Each blocker is resolved by a
+-- human through the canonical product path, never worked around here.
+create or replace function public.privacy_erasure_blockers_v2(p_user uuid)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v_workers uuid[];
+  v_out jsonb := '[]'::jsonb;
+  v_n bigint;
+begin
+  select coalesce(array_agg(w.id), '{}') into v_workers from public.workers w where w.profile_id = p_user;
+
+  -- B0: a reviewed, approved account_deletion request bound to this account
+  if not exists (
+    select 1 from public.customer_requests cr
+     where cr.profile_id = p_user
+       and cr.payload->>'source' = 'privacy_self_service'
+       and cr.payload->>'privacy_request_type' = 'account_deletion'
+       and cr.status = 'approved'
+  ) then
+    v_out := v_out || jsonb_build_array(jsonb_build_object('code','no_approved_deletion_request'));
+  end if;
+
+  -- B1: drift guard — an FK onto profiles/workers nobody has classified
+  select count(*) into v_n
+    from pg_catalog.pg_constraint k
+    join pg_catalog.pg_class c on c.oid = k.conrelid
+    join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+    join pg_catalog.pg_attribute a on a.attrelid = k.conrelid and a.attnum = k.conkey[1]
+   where k.contype = 'f'
+     and k.confrelid in ('public.profiles'::regclass, 'public.workers'::regclass)
+     and not exists (select 1 from public.privacy_erasure_relations r
+                      where r.table_name = c.relname and r.column_name = a.attname and n.nspname = 'public');
+  if v_n > 0 then
+    v_out := v_out || jsonb_build_array(jsonb_build_object('code','unclassified_relation','count',v_n));
+  end if;
+
+  -- B2: last active owner of an organization
+  select count(*) into v_n from public.company_memberships m
+   where m.profile_id = p_user and m.role = 'owner' and m.status = 'active'
+     and not exists (select 1 from public.company_memberships o
+                      where o.organization_id = m.organization_id and o.role = 'owner'
+                        and o.status = 'active' and o.id <> m.id);
+  if v_n > 0 then
+    v_out := v_out || jsonb_build_array(jsonb_build_object('code','last_active_owner','count',v_n,
+      'resolve','transfer ownership or close the organization (organization-closure runbook)'));
+  end if;
+
+  -- B3: active roster links
+  select (select count(*) from public.company_workers x where x.worker_id = any (v_workers) and x.status = 'active')
+       + (select count(*) from public.agency_workers  x where x.worker_id = any (v_workers) and x.status = 'active')
+    into v_n;
+  if v_n > 0 then
+    v_out := v_out || jsonb_build_array(jsonb_build_object('code','active_roster_link','count',v_n,
+      'resolve','end_roster_link_v1(..., ''account_deletion'')'));
+  end if;
+
+  -- B4: active employment-type engagement contexts
+  select count(*) into v_n from public.engagement_contexts e
+   where e.profile_id = p_user and e.status = 'active' and e.organization_id is not null;
+  if v_n > 0 then
+    v_out := v_out || jsonb_build_array(jsonb_build_object('code','active_engagement','count',v_n,
+      'resolve','end_org_membership_v1(engagement_id, ''account_deletion'')'));
+  end if;
+
+  -- B5: open bookings / active company engagements
+  select (select count(*) from public.booking_requests b where b.worker_id = any (v_workers) and b.status = 'proposed')
+       + (select count(*) from public.company_worker_engagements e where e.worker_id = any (v_workers) and e.status = 'active')
+    into v_n;
+  if v_n > 0 then
+    v_out := v_out || jsonb_build_array(jsonb_build_object('code','open_booking_or_engagement','count',v_n,
+      'resolve','decline/withdraw the booking, end the engagement'));
+  end if;
+
+  -- B6: undecided payroll
+  select count(*) into v_n from public.timesheets t where t.worker_id = any (v_workers) and t.status = 'submitted';
+  if v_n > 0 then
+    v_out := v_out || jsonb_build_array(jsonb_build_object('code','undecided_timesheet','count',v_n,
+      'resolve','the employer approves or rejects the submitted timesheet'));
+  end if;
+
+  -- B7: open financial obligations
+  select (select count(*) from public.billing_subscriptions s where s.owner_id = p_user
+           and s.status in ('trialing','active','past_due','unpaid','incomplete'))
+       + (select count(*) from public.subscriptions s where s.profile_id = p_user
+           and s.status in ('trial','active','past_due'))
+    into v_n;
+  if v_n > 0 then
+    v_out := v_out || jsonb_build_array(jsonb_build_object('code','open_subscription','count',v_n,
+      'resolve','cancel at the payment provider; settle open invoices'));
+  end if;
+
+  -- B8: immutable credit ledger (no detach path is designed: manual decision)
+  select (select count(*) from public.lmc_accounts a where a.profile_id = p_user)
+       + (select count(*) from public.lmc_transactions t where t.actor_profile_id = p_user)
+    into v_n;
+  if v_n > 0 then
+    v_out := v_out || jsonb_build_array(jsonb_build_object('code','credit_ledger','count',v_n,
+      'resolve','owner + accountant decide; no automated path'));
+  end if;
+
+  return v_out;
+end;
+$$;
+
+-- ── 8. prepare (dry run) ────────────────────────────────────────────────────
+create or replace function public.privacy_erasure_prepare_v2(p_user uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_workers uuid[];
+  v_counts jsonb := '{}'::jsonb;
+  v_storage jsonb;
+  v_blockers jsonb;
+  v_request uuid;
+  v_job uuid;
+  v_state text;
+  v_n bigint;
+  r record;
+begin
+  if p_user is null then
+    raise exception 'privacy_erasure_prepare_v2: user id is required' using errcode = '22023';
+  end if;
+  if not exists (select 1 from auth.users u where u.id = p_user) then
+    raise exception 'privacy_erasure_prepare_v2: no such user' using errcode = 'P0002';
+  end if;
+
+  select coalesce(array_agg(w.id), '{}') into v_workers from public.workers w where w.profile_id = p_user;
+
+  for r in
+    select x.* from public.privacy_erasure_relations x
+      join pg_catalog.pg_class c on c.relname = x.table_name
+      join pg_catalog.pg_namespace n on n.oid = c.relnamespace and n.nspname = 'public'
+     where x.ref_kind in ('profile','worker','auth')
+     order by x.table_name, x.column_name
+  loop
+    execute format('select count(*) from public.%I where %I = any ($1)', r.table_name, r.column_name)
+      into v_n
+      using case when r.ref_kind = 'worker' then v_workers else array[p_user] end;
+    if v_n > 0 then
+      v_counts := v_counts || jsonb_build_object(r.table_name || '.' || r.column_name,
+                    jsonb_build_object('class', r.class, 'rows', v_n));
+    end if;
+  end loop;
+
+  select coalesce(jsonb_object_agg(s.bucket_id, s.n), '{}'::jsonb) into v_storage
+    from (select o.bucket_id, count(*) n from storage.objects o
+           where o.owner_id = p_user::text
+              or (o.bucket_id in ('profile-avatars','journal-entry-photos','customer-request-attachments')
+                  and split_part(o.name, '/', 1) = p_user::text)
+              or (o.bucket_id = 'conversation-attachments' and split_part(o.name, '/', 2) = p_user::text)
+              or (o.bucket_id = 'document-files' and split_part(o.name, '/', 1) = 'worker'
+                  and split_part(o.name, '/', 2) = any (select w::text from unnest(v_workers) w))
+           group by o.bucket_id) s;
+
+  v_blockers := public.privacy_erasure_blockers_v2(p_user);
+  v_state := case when jsonb_array_length(v_blockers) > 0 then 'blocked' else 'prepared' end;
+
+  select cr.id into v_request from public.customer_requests cr
+   where cr.profile_id = p_user
+     and cr.payload->>'source' = 'privacy_self_service'
+     and cr.payload->>'privacy_request_type' = 'account_deletion'
+     and cr.status = 'approved'
+   order by cr.created_at desc limit 1;
+
+  select j.id into v_job from public.privacy_erasure_jobs j where j.subject_user_id = p_user for update;
+  if v_job is null then
+    insert into public.privacy_erasure_jobs (request_id, subject_user_id, state, blockers, report)
+    values (v_request, p_user, v_state, v_blockers, jsonb_build_object('dry_run', v_counts, 'storage', v_storage))
+    returning id into v_job;
+  else
+    update public.privacy_erasure_jobs j
+       set request_id = coalesce(v_request, j.request_id),
+           state = case when j.state in ('storage_pending','auth_pending') then j.state else v_state end,
+           blockers = v_blockers,
+           report = j.report || jsonb_build_object('dry_run', v_counts, 'storage', v_storage)
+     where j.id = v_job
+    returning j.state into v_state;
+  end if;
+
+  return jsonb_build_object('job_id', v_job, 'state', v_state, 'request_found', v_request is not null,
+                            'blockers', v_blockers, 'counts', v_counts, 'storage', v_storage);
+end;
+$$;
+
+-- ── 9. execute (one transaction; never touches auth.users or Storage bytes) ─
+create or replace function public.privacy_erasure_execute_v2(p_user uuid, p_job uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_job       public.privacy_erasure_jobs%rowtype;
+  v_blockers  jsonb;
+  v_workers   uuid[];
+  v_ids       text[];          -- the subject's identifiers as text: profile id + worker ids
+  v_like      text[];          -- '%<id>%' patterns for jsonb/text sweeps
+  v_email     text;
+  v_tomb      uuid := gen_random_uuid();          -- consent-ledger grouping; NEVER returned or copied
+  v_month     timestamptz := date_trunc('month', now());
+  v_keep      uuid[];          -- journal entries retained as detached evidence
+  v_more      uuid[];
+  v_ctx       uuid[];          -- engagement contexts retained detached
+  v_kept_req  uuid[];          -- customer_requests retained (privacy row / org demand / referenced)
+  v_storage   jsonb := '[]'::jsonb;
+  v_counts    jsonb := '{}'::jsonb;
+  v_n         bigint;
+  v_to        text;
+  v_ext       text;
+  v_trg       record;
+  v_dis_rel   regclass[] := '{}';
+  v_dis_tg    name[] := '{}';
+  i           integer;
+  r           record;
+  v_sqlstate  text;
+  v_table     text;
+  v_constraint text;
+begin
+  if p_user is null or p_job is null then
+    raise exception 'privacy_erasure_execute_v2: user and job are required' using errcode = '22023';
+  end if;
+
+  select * into v_job from public.privacy_erasure_jobs j where j.id = p_job for update;
+  if not found then
+    raise exception 'privacy_erasure_execute_v2: no such job' using errcode = 'P0002';
+  end if;
+  if v_job.subject_user_id is distinct from p_user then
+    raise exception 'privacy_erasure_execute_v2: job does not belong to this subject' using errcode = '42501';
+  end if;
+
+  -- idempotent replay: the DB part already ran; hand back the same storage list
+  if v_job.state in ('storage_pending','auth_pending') then
+    return jsonb_build_object('job_id', v_job.id, 'state', v_job.state, 'replayed', true,
+                              'storage_ops', coalesce(v_job.storage_ops, '[]'::jsonb));
+  end if;
+  if v_job.state not in ('prepared','blocked','failed') then
+    raise exception 'privacy_erasure_execute_v2: job state % cannot execute', v_job.state using errcode = '55000';
+  end if;
+  if not exists (select 1 from auth.users u where u.id = p_user) then
+    raise exception 'privacy_erasure_execute_v2: no such user' using errcode = 'P0002';
+  end if;
+
+  v_blockers := public.privacy_erasure_blockers_v2(p_user);
+  if jsonb_array_length(v_blockers) > 0 then
+    update public.privacy_erasure_jobs set state = 'blocked', blockers = v_blockers, attempts = attempts + 1
+     where id = p_job;
+    return jsonb_build_object('job_id', p_job, 'state', 'blocked', 'blockers', v_blockers);
+  end if;
+
+  begin  -- everything below is atomic: any error rolls back to here and marks the job failed
+    perform set_config('lock_timeout', '5s', true);
+
+    select coalesce(array_agg(w.id), '{}') into v_workers from public.workers w where w.profile_id = p_user;
+    v_ids  := array[p_user::text] || coalesce((select array_agg(w::text) from unnest(v_workers) w), '{}');
+    v_like := (select array_agg('%' || x || '%') from unnest(v_ids) x);
+    select lower(nullif(btrim(coalesce(p.email, u.email)), '')) into v_email
+      from auth.users u left join public.profiles p on p.id = u.id where u.id = p_user;
+
+    -- 9.1 suspend guard triggers for THIS transaction only (re-enabled in 9.9)
+    for v_trg in select * from public.privacy_erasure_guard_triggers_v2() loop
+      execute format('alter table %s disable trigger %I', v_trg.rel, v_trg.tgname);
+      v_dis_rel := v_dis_rel || v_trg.rel;
+      v_dis_tg  := v_dis_tg  || v_trg.tgname;
+    end loop;
+
+    -- 9.2 decide what is retained BEFORE anything is removed
+    -- journal entries: employer-confirmed / submitted for review / feeding hours
+    select coalesce(array_agg(je.id), '{}') into v_keep
+      from public.journal_entries je
+     where je.worker_id = any (v_workers)
+       and (exists (select 1 from public.journal_entry_confirmations c where c.entry_id = je.id)
+         or exists (select 1 from public.journal_entry_review_submissions s
+                     where s.entry_id = je.id or s.resubmission_of_entry_id = je.id)
+         or exists (select 1 from public.work_hour_allocations h where h.journal_entry_id = je.id));
+    loop  -- close over correction / supersession chains (NO ACTION self references)
+      select coalesce(array_agg(distinct x.id), '{}') into v_more from (
+        select je.correction_of as id from public.journal_entries je where je.id = any (v_keep) and je.correction_of is not null
+        union select je.superseded_by from public.journal_entries je where je.id = any (v_keep) and je.superseded_by is not null
+        union select je.id from public.journal_entries je where je.correction_of = any (v_keep) or je.superseded_by = any (v_keep)
+      ) x where not (x.id = any (v_keep));
+      exit when cardinality(v_more) = 0;
+      v_keep := v_keep || v_more;
+    end loop;
+
+    select coalesce(array_agg(distinct x.id), '{}') into v_ctx from (
+      select je.engagement_context_id as id from public.journal_entries je where je.id = any (v_keep)
+      union select c.confirmer_engagement_context_id from public.journal_entry_confirmations c where c.confirmer_id = p_user
+      union select e.id from public.engagement_contexts e where e.profile_id = p_user and e.organization_id is not null
+    ) x;
+
+    select coalesce(array_agg(cr.id), '{}') into v_kept_req
+      from public.customer_requests cr
+     where cr.profile_id = p_user
+       and (cr.payload->>'source' = 'privacy_self_service'
+         or cr.organization_id is not null or cr.agency_client_id is not null
+         or exists (select 1 from public.booking_requests b where b.request_id = cr.id)
+         or exists (select 1 from public.invitations i where i.target_request_id = cr.id)
+         or exists (select 1 from public.team_demand_offers t where t.request_id = cr.id)
+         or exists (select 1 from public.agency_candidate_offers a where a.request_id = cr.id)
+         or exists (select 1 from public.commercial_handoffs h where h.request_id = cr.id));
+
+    -- 9.3 storage plan (paths are captured while the owning rows still exist)
+    select coalesce(jsonb_agg(jsonb_build_object('bucket', o.bucket_id, 'path', o.name, 'op', 'delete')
+                              order by o.bucket_id, o.name), '[]'::jsonb)
+      into v_storage
+      from storage.objects o
+     where (o.bucket_id in ('profile-avatars','journal-entry-photos') and split_part(o.name, '/', 1) = p_user::text)
+        or (o.bucket_id = 'conversation-attachments' and split_part(o.name, '/', 2) = p_user::text)
+        or (o.bucket_id = 'document-files' and split_part(o.name, '/', 1) = 'worker' and split_part(o.name, '/', 2) = any (v_ids))
+        or (o.bucket_id = 'customer-request-attachments' and split_part(o.name, '/', 1) = p_user::text
+            and not exists (select 1 from public.customer_request_attachments a
+                             where a.storage_path = o.name and a.request_id = any (v_kept_req)));
+
+    for r in select a.id, a.storage_path, a.file_name from public.customer_request_attachments a
+              where a.profile_id = p_user and a.request_id = any (v_kept_req) loop
+      v_ext := coalesce('.' || lower(substring(r.file_name from '\.([A-Za-z0-9]{1,8})$')), '');
+      v_to  := 'erased/' || gen_random_uuid()::text || v_ext;
+      v_storage := v_storage || jsonb_build_array(jsonb_build_object(
+                     'bucket', 'customer-request-attachments', 'path', r.storage_path, 'op', 'move', 'to', v_to));
+      update public.customer_request_attachments
+         set profile_id = null, storage_path = v_to, file_name = 'attachment' || v_ext
+       where id = r.id;
+    end loop;
+    v_counts := v_counts || jsonb_build_object('storage.objects', jsonb_array_length(v_storage));
+
+    -- 9.4 RETAIN-DETACHED (legal hold; link removed, free text scrubbed)
+    perform set_config('lm.privacy_erasure_subject', p_user::text, true);
+    update public.privacy_consent_events
+       set user_id = null, erased_subject_id = v_tomb, erased_at = v_month
+     where user_id = p_user;
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('privacy_consent_events', v_n);
+    perform set_config('lm.privacy_erasure_subject', '', true);
+
+    update public.personal_data_disclosures set worker_user_id = null, metadata = null where worker_user_id = p_user;
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('personal_data_disclosures', v_n);
+
+    update public.journal_entries set worker_id = null where id = any (v_keep) and worker_id = any (v_workers);
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('journal_entries.retained', v_n);
+    update public.journal_entry_work_items set worker_id = null
+     where journal_entry_id = any (v_keep) and worker_id = any (v_workers);
+
+    update public.engagement_contexts set profile_id = null, description = null, ended_note = null
+     where id = any (v_ctx) and profile_id = p_user;
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('engagement_contexts.retained', v_n);
+
+    update public.customer_requests
+       set profile_id = null,
+           notes = case when payload->>'source' = 'privacy_self_service' then null else notes end,
+           payload = public.privacy_erasure_scrub_jsonb(payload, v_ids,
+                       case when payload->>'source' = 'privacy_self_service'
+                            then array['email','full_name','phone','contact','contact_email','contact_phone','notes']
+                            else array['email','full_name','phone','contact','contact_email','contact_phone'] end)
+     where id = any (v_kept_req) and profile_id = p_user;
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('customer_requests.retained', v_n);
+
+    update public.booking_requests set worker_id = null, readiness_snapshot = '{}'::jsonb
+     where worker_id = any (v_workers);
+    update public.company_worker_engagements set worker_id = null, subject_key = gen_random_uuid()
+     where worker_id = any (v_workers);
+    delete from public.asset_assignments where worker_id = any (v_workers) and project_id is null;
+    update public.asset_assignments set worker_id = null where worker_id = any (v_workers);
+    update public.worker_absences set worker_id = null, note = null where worker_id = any (v_workers);
+    update public.performance_reviews set subject_profile_id = null, worker_input = null where subject_profile_id = p_user;
+    update public.usage_cost_events
+       set profile_id = null, session_id = null,
+           workspace_id = case when workspace_id = any (v_ids) then null else workspace_id end,
+           metadata = metadata - 'request_context'
+     where profile_id = p_user or workspace_id = any (v_ids);
+
+    -- 9.5 PSEUDONYMISE specials
+    update public.ai_runs set profile_id = null, output_excerpt = null, request_context = null where profile_id = p_user;
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('ai_runs', v_n);
+
+    update public.audit_logs a
+       set payload = public.privacy_erasure_scrub_jsonb(a.payload, v_ids,
+                       case when a.actor_id = p_user or a.entity_id::text = any (v_ids)
+                            then array['display_name','full_name','email','phone','invited_email']
+                            else '{}'::text[] end),
+           actor_id  = case when a.actor_id = p_user then null else a.actor_id end,
+           entity_id = case when a.entity_id::text = any (v_ids) then null else a.entity_id end
+     where a.actor_id = p_user or a.entity_id::text = any (v_ids) or a.payload::text like any (v_like);
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('audit_logs', v_n);
+
+    -- G6: threads nobody else is in disappear; in shared threads the person's
+    -- messages lose author AND words (the other party keeps their own side)
+    delete from public.conversations c
+     where c.created_by = p_user
+       and not exists (select 1 from public.conversation_participants p where p.conversation_id = c.id and p.profile_id <> p_user)
+       and not exists (select 1 from public.conversation_messages m where m.conversation_id = c.id and m.author_id <> p_user);
+    update public.conversation_messages
+       set author_id = null, body = '', translated_text = null, original_language = null,
+           target_language = null, translation_status = 'unavailable'
+     where author_id = p_user;
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('conversation_messages.redacted', v_n);
+    update public.conversations set created_by = null where created_by = p_user;
+
+    update public.invitations set status = 'revoked' where inviter_profile_id = p_user and status = 'pending';
+    update public.invitations set inviter_profile_id = null where inviter_profile_id = p_user;
+    update public.invitations
+       set accepted_by_profile_id = null, invited_email = null, invited_name = null, personal_message = null
+     where accepted_by_profile_id = p_user;
+    if v_email is not null then
+      update public.invitations
+         set status = case when status = 'pending' then 'revoked' else status end,
+             invited_email = null, invited_name = null, personal_message = null
+       where lower(invited_email) = v_email;
+      update public.agency_worker_invitations
+         set invited_email = 'erased-' || gen_random_uuid()::text || '@erased.invalid',
+             status = case when status = 'pending' then 'cancelled' else status end
+       where lower(invited_email) = v_email;
+      update public.company_worker_invitations
+         set invited_email = 'erased-' || gen_random_uuid()::text || '@erased.invalid',
+             status = case when status = 'pending' then 'cancelled' else status end
+       where lower(invited_email) = v_email;
+      update public.agency_client_connections
+         set invited_email = 'erased-' || gen_random_uuid()::text || '@erased.invalid',
+             status = case when status = 'pending' then 'revoked' else status end
+       where lower(invited_email) = v_email;
+      delete from public.waitlist where lower(email) = v_email;
+      delete from public.leads where lower(email) = v_email;
+      update public.company_need_public_intakes set contact_name = null, contact_email = null, contact_phone = null
+       where lower(contact_email) = v_email;
+    end if;
+
+    -- G3: the organization's roster row stays (its history hangs off it) but
+    -- stops naming the person
+    update public.organization_people
+       set linked_profile_id = null, linked_worker_id = null, link_state = 'unlinked',
+           link_method = null, linked_at = null,
+           display_name = 'Erased person',
+           normalized_name = 'erased ' || substr(md5(gen_random_uuid()::text), 1, 12),
+           source_note = null, external_ref = null
+     where linked_profile_id = p_user or linked_worker_id = any (v_workers);
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('organization_people', v_n);
+
+    -- G4: other recipients' notifications about the person
+    update public.notification_events
+       set entity_id = gen_random_uuid(), metadata = metadata - 'title'
+     where entity_id::text = any (v_ids) and recipient_profile_id <> p_user;
+
+    -- ids of the person inside surviving JSON (event states, metadata, payloads)
+    for r in select * from (values
+        ('agreement_events','before_state'), ('agreement_events','after_state'),
+        ('org_document_events','before_state'), ('org_document_events','after_state'),
+        ('training_assignment_events','before_state'), ('training_assignment_events','after_state'),
+        ('worker_document_events','before_state'), ('worker_document_events','after_state'),
+        ('work_task_events','before_state'), ('work_task_events','after_state'),
+        ('engagement_lifecycle_events','metadata'), ('management_decision_events','metadata'),
+        ('performance_review_events','metadata'), ('workflow_transitions','metadata'),
+        ('booking_request_events','previous_terms'), ('evidence_import_events','payload'),
+        ('learning_signals','proposed_outcome'), ('learning_review_queue','proposed_action'),
+        ('workflow_instances','payload'), ('timesheets','lines_snapshot'),
+        ('notification_events','metadata'), ('pilot_events','metadata'), ('usage_cost_events','metadata'),
+        ('organization_evidence_records','source_fact'), ('organization_evidence_records','derived'),
+        ('historical_consolidation_decisions','signals'), ('historical_consolidation_decisions','conflicts'),
+        ('commitment_override_receipts','collisions'), ('document_acknowledgements','evidence'),
+        ('invitations','declared_context'), ('invitations','consent_record')
+      ) as t(tbl, col) loop
+      execute format('update public.%I set %I = public.privacy_erasure_scrub_jsonb(%I, $1) where %I::text like any ($2)',
+                     r.tbl, r.col, r.col, r.col)
+        using v_ids, v_like;
+    end loop;
+
+    delete from public.pilot_events
+     where profile_id = p_user
+        or session_id in (select e.session_id from public.pilot_events e where e.profile_id = p_user);
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('pilot_events', v_n);
+
+    if to_regclass('public.worker_display_name_backfill_20260805') is not null then
+      delete from public.worker_display_name_backfill_20260805 where profile_id = p_user;
+    end if;
+
+    -- 9.6 generic: every registry column whose row survives -> link NULL
+    for r in select x.table_name, x.column_name, x.ref_kind, x.class from public.privacy_erasure_relations x
+              where x.mode = 'null' and x.class in ('PSEUDONYMISE','RETAIN','BLOCK')
+              order by x.table_name, x.column_name loop
+      execute format('update public.%I set %I = null where %I = any ($1)', r.table_name, r.column_name, r.column_name)
+        using case when r.ref_kind = 'worker' then v_workers else array[p_user] end;
+      get diagnostics v_n = row_count;
+      if v_n > 0 then
+        v_counts := v_counts || jsonb_build_object(r.table_name || '.' || r.column_name, v_n);
+      end if;
+    end loop;
+
+    -- 9.7 generic: DELETE rows whose FK would not cascade
+    for r in select x.table_name, x.column_name, x.ref_kind from public.privacy_erasure_relations x
+              where x.mode = 'delete' and x.class = 'DELETE' loop
+      execute format('delete from public.%I where %I = any ($1)', r.table_name, r.column_name)
+        using case when r.ref_kind = 'worker' then v_workers else array[p_user] end;
+    end loop;
+
+    -- 9.8 ERASURE of the person: workers then profiles (cascades take every
+    -- remaining DELETE-class row; an unhandled NO ACTION reference raises here
+    -- and rolls the whole erasure back — never half-erased)
+    delete from public.customer_requests where profile_id = p_user and not (id = any (v_kept_req));
+    delete from public.workers where profile_id = p_user;
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('workers', v_n);
+    delete from public.profiles where id = p_user;
+    get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('profiles', v_n);
+
+    -- Storage rows the person still owns but that are not deleted/moved
+    -- (e.g. an organization's evidence photo they uploaded): drop ownership
+    -- so auth.admin.deleteUser is not refused and the owner column names nobody.
+    update storage.objects o set owner = null, owner_id = null
+     where (o.owner = p_user or o.owner_id = p_user::text)
+       and not exists (select 1 from jsonb_array_elements(v_storage) s
+                        where s->>'bucket' = o.bucket_id and s->>'path' = o.name);
+
+    -- 9.9 re-enable exactly the suspended triggers, then prove none is left off
+    for i in 1 .. coalesce(array_length(v_dis_rel, 1), 0) loop
+      execute format('alter table %s enable trigger %I', v_dis_rel[i], v_dis_tg[i]);
+    end loop;
+    if exists (select 1 from pg_catalog.pg_trigger t
+                where t.tgenabled = 'D'
+                  and (t.tgrelid, t.tgname) in (select u.rel::oid, u.tg
+                                                  from unnest(v_dis_rel, v_dis_tg) as u(rel, tg))) then
+      raise exception 'privacy_erasure_execute_v2: a guard trigger stayed disabled' using errcode = 'XX000';
+    end if;
+
+    update public.privacy_erasure_jobs
+       set state = case when jsonb_array_length(v_storage) > 0 then 'storage_pending' else 'auth_pending' end,
+           storage_ops = v_storage, blockers = '[]'::jsonb, executed_on = current_date,
+           attempts = attempts + 1, last_error = null,
+           report = report || jsonb_build_object('executed', v_counts)
+     where id = p_job;
+
+    return jsonb_build_object('job_id', p_job,
+             'state', case when jsonb_array_length(v_storage) > 0 then 'storage_pending' else 'auth_pending' end,
+             'storage_ops', v_storage, 'counts', v_counts);
+
+  exception when others then
+    get stacked diagnostics v_sqlstate = returned_sqlstate, v_table = table_name, v_constraint = constraint_name;
+    update public.privacy_erasure_jobs
+       set state = 'failed', attempts = attempts + 1,
+           last_error = v_sqlstate || coalesce(' table=' || nullif(v_table, ''), '')
+                                   || coalesce(' constraint=' || nullif(v_constraint, ''), '')
+     where id = p_job;
+    return jsonb_build_object('job_id', p_job, 'state', 'failed', 'sqlstate', v_sqlstate,
+                              'table', nullif(v_table, ''), 'constraint', nullif(v_constraint, ''));
+  end;
+end;
+$$;
+
+-- ── 10. step 2: the server reports the Storage API work as done ─────────────
+-- Verifies instead of trusting: every 'delete' path is gone, every 'move'
+-- target exists and its source is gone, and the subject owns no object.
+create or replace function public.privacy_erasure_storage_done_v2(p_job uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_job public.privacy_erasure_jobs%rowtype;
+  v_left bigint;
+begin
+  select * into v_job from public.privacy_erasure_jobs j where j.id = p_job for update;
+  if not found then
+    raise exception 'privacy_erasure_storage_done_v2: no such job' using errcode = 'P0002';
+  end if;
+  if v_job.state = 'auth_pending' then
+    return jsonb_build_object('job_id', p_job, 'state', 'auth_pending', 'replayed', true);
+  end if;
+  if v_job.state <> 'storage_pending' then
+    raise exception 'privacy_erasure_storage_done_v2: job state % is not storage_pending', v_job.state using errcode = '55000';
+  end if;
+
+  select count(*) into v_left
+    from jsonb_array_elements(coalesce(v_job.storage_ops, '[]'::jsonb)) s
+   where exists (select 1 from storage.objects o where o.bucket_id = s->>'bucket' and o.name = s->>'path')
+      or (s->>'op' = 'move'
+          and not exists (select 1 from storage.objects o where o.bucket_id = s->>'bucket' and o.name = s->>'to'));
+  v_left := v_left + (select count(*) from storage.objects o
+                       where o.owner = v_job.subject_user_id or o.owner_id = v_job.subject_user_id::text);
+  if v_left > 0 then
+    return jsonb_build_object('job_id', p_job, 'state', 'storage_pending', 'remaining', v_left);
+  end if;
+
+  update public.privacy_erasure_jobs set state = 'auth_pending' where id = p_job;
+  return jsonb_build_object('job_id', p_job, 'state', 'auth_pending');
+end;
+$$;
+
+-- ── 11. step 3: after auth.admin.deleteUser — close the job ─────────────────
+-- Refuses while the auth user still exists. On completion the job forgets the
+-- subject id and the object paths: what stays is request id (a detached
+-- row), aggregate counts and coarse dates.
+create or replace function public.privacy_erasure_complete_v2(p_job uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_job public.privacy_erasure_jobs%rowtype;
+begin
+  select * into v_job from public.privacy_erasure_jobs j where j.id = p_job for update;
+  if not found then
+    raise exception 'privacy_erasure_complete_v2: no such job' using errcode = 'P0002';
+  end if;
+  if v_job.state = 'completed' then
+    return jsonb_build_object('job_id', p_job, 'state', 'completed', 'replayed', true);
+  end if;
+  if v_job.state <> 'auth_pending' then
+    raise exception 'privacy_erasure_complete_v2: job state % is not auth_pending', v_job.state using errcode = '55000';
+  end if;
+  if exists (select 1 from auth.users u where u.id = v_job.subject_user_id) then
+    raise exception 'privacy_erasure_complete_v2: the auth user still exists; call auth.admin.deleteUser first'
+      using errcode = '55000';
+  end if;
+
+  update public.privacy_erasure_jobs
+     set state = 'completed', subject_user_id = null, storage_ops = null,
+         completed_on = current_date,
+         report = jsonb_build_object('executed', report->'executed')  -- drop the dry-run detail
+   where id = p_job;
+  return jsonb_build_object('job_id', p_job, 'state', 'completed');
+end;
+$$;
+
+-- ── 12. grants: service_role only, behind the human-reviewed request flow ───
+do $$
+declare
+  f text;
+begin
+  foreach f in array array[
+    'public.privacy_erasure_prepare_v2(uuid)',
+    'public.privacy_erasure_execute_v2(uuid, uuid)',
+    'public.privacy_erasure_storage_done_v2(uuid)',
+    'public.privacy_erasure_complete_v2(uuid)',
+    'public.privacy_erasure_blockers_v2(uuid)',
+    'public.privacy_erasure_guard_triggers_v2()',
+    'public.privacy_erasure_scrub_jsonb(jsonb, text[], text[])'
+  ] loop
+    execute format('revoke all on function %s from public, anon, authenticated', f);
+  end loop;
+end;
+$$;
+
+grant execute on function public.privacy_erasure_prepare_v2(uuid)       to service_role;
+grant execute on function public.privacy_erasure_execute_v2(uuid, uuid) to service_role;
+grant execute on function public.privacy_erasure_storage_done_v2(uuid)  to service_role;
+grant execute on function public.privacy_erasure_complete_v2(uuid)      to service_role;
+
+comment on function public.privacy_erasure_execute_v2(uuid, uuid) is
+  'GDPR Art. 17 erasure, DB part (#856 v2): retain-detached / pseudonymise / delete per privacy_erasure_relations in ONE transaction; returns Storage ops; never deletes auth.users (the server calls auth.admin.deleteUser last). service_role only.';
+
+commit;
