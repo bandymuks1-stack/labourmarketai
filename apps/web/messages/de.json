@@ -19537,7 +19537,7 @@
     },
     "focusHint": "Tippen Sie auf eine Linie, um eine Fähigkeit über den ganzen Weg zu verfolgen.",
     "showAll": "Alle zeigen",
-    "horizonDetail": "Sie haben bereits {shared} von {total} Fähigkeiten"
+    "horizonDetail": "{shared} von {total} in deiner Arbeit · {confirmed} bestätigt"
   },
   "projectCourse": {
     "title": "Projektverlauf",
@@ -19568,5 +19568,36 @@
       "cancelled": "Abgebrochen",
       "overdue": "Überfällig"
     }
+  },
+  "projectTrace": {
+    "title": "Was sich im Projekt geändert hat",
+    "window": "Letzte 14 Tage",
+    "unknown": "Konnte nicht lesen, was sich im Projekt geändert hat.",
+    "emptyManager": "Seit 14 Tagen nichts Neues im Projekt: keine neuen Arbeitseinträge, abgeschlossenen Etappen oder erledigten Aufgaben.",
+    "emptyMember": "Seit 14 Tagen keine neuen Einträge von dir in diesem Projekt. Erfasse Arbeit im Journal – hier siehst du, was sie bewirkt hat.",
+    "teamLabel": "Arbeitskette des Teams",
+    "team": {
+      "recorded": "Erfasst: {count}",
+      "awaiting": "Wartet auf Prüfung: {count}",
+      "returned": "Zur Korrektur zurück: {count}",
+      "confirmed": "Von zweiter Seite bestätigt: {count}",
+      "confirmedUnknown": "Die Zahl der Bestätigungen ließ sich nicht ermitteln",
+      "livingCv": "Bestätigte Arbeit zählt im Living CV der Mitarbeitenden"
+    },
+    "review": "Wartende prüfen ({count})",
+    "stageDone": "Etappe „{name}“ abgeschlossen",
+    "tasksDone": "Erledigte Aufgaben: {count}",
+    "journalUnknown": "Arbeitseinträge des Projekts konnten nicht gelesen werden.",
+    "stagesUnknown": "Etappen des Projekts konnten nicht gelesen werden.",
+    "tasksUnknown": "Aufgaben des Projekts konnten nicht gelesen werden.",
+    "truncated": "Es werden die neuesten Einträge gezeigt."
+  },
+  "projectFirstStep": {
+    "title": "Erster Schritt",
+    "both": "Das Projekt hat noch keine Etappen und keine Aufgaben für diese Woche. Lege Etappen an – das Team sieht eine gemeinsame Strecke und wo ihr steht.",
+    "stages": "Das Projekt hat noch keine Etappen. Lege sie an – das Team sieht eine gemeinsame Strecke und wo ihr steht.",
+    "tasks": "Diese Woche ist keine Aufgabe fällig. Lege eine Aufgabe an – sie wird zum Wochenziel.",
+    "addStages": "Etappen anlegen",
+    "addTask": "Aufgabe anlegen"
   }
 }

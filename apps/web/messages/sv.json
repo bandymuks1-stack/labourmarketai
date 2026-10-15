@@ -7634,7 +7634,7 @@
     },
     "focusHint": "Tryck på en linje för att följa en färdighet genom hela resan.",
     "showAll": "Visa alla",
-    "horizonDetail": "du har redan {shared} av {total} färdigheter"
+    "horizonDetail": "{shared} av {total} i ditt arbete · {confirmed} bekräftade"
   },
   "projectCourse": {
     "title": "Projektförlopp",
@@ -7665,5 +7665,36 @@
       "cancelled": "Inställd",
       "overdue": "Försenad"
     }
+  },
+  "projectTrace": {
+    "title": "Vad som har ändrats i projektet",
+    "window": "Senaste 14 dagarna",
+    "unknown": "Kunde inte läsa vad som har ändrats i projektet.",
+    "emptyManager": "Inget nytt i projektet på 14 dagar: inga nya arbetsregistreringar, avslutade etapper eller stängda uppgifter.",
+    "emptyMember": "Inga nya registreringar från dig i det här projektet på 14 dagar. Registrera arbete i journalen – här ser du vad det ändrade.",
+    "teamLabel": "Lagets arbetskedja",
+    "team": {
+      "recorded": "Registrerat: {count}",
+      "awaiting": "Väntar på granskning: {count}",
+      "returned": "Skickat tillbaka för rättelse: {count}",
+      "confirmed": "Bekräftat av en annan part: {count}",
+      "confirmedUnknown": "Antalet bekräftelser kunde inte fastställas",
+      "livingCv": "Bekräftat arbete räknas i de anställdas Living CV"
+    },
+    "review": "Granska de väntande ({count})",
+    "stageDone": "Etappen ”{name}” avslutad",
+    "tasksDone": "Stängda uppgifter: {count}",
+    "journalUnknown": "Kunde inte läsa projektets arbetsregistreringar.",
+    "stagesUnknown": "Kunde inte läsa projektets etapper.",
+    "tasksUnknown": "Kunde inte läsa projektets uppgifter.",
+    "truncated": "Visar de senaste registreringarna."
+  },
+  "projectFirstStep": {
+    "title": "Första steget",
+    "both": "Projektet har ännu inga etapper och inga uppgifter för den här veckan. Lägg till etapper – laget ser en gemensam rutt och var ni är.",
+    "stages": "Projektet har ännu inga etapper. Lägg till dem – laget ser en gemensam rutt och var ni är.",
+    "tasks": "Inga uppgifter har deadline den här veckan. Skapa en uppgift – den blir veckans mål.",
+    "addStages": "Lägg till etapper",
+    "addTask": "Skapa en uppgift"
   }
 }

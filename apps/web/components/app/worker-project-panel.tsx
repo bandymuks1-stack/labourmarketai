@@ -17,6 +17,8 @@ import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
 import { ProjectCourseTrack } from "@/components/app/projects/project-course-track";
 import { deriveProjectCourse } from "@/lib/projects/project-course";
 import { ProjectWeekGoal } from "@/components/app/projects/project-week-goal";
+import { ProjectTraceRegion } from "@/components/app/projects/project-trace";
+import { loadProjectTrace } from "@/lib/projects/project-trace-server";
 import { deriveWeeklyGoal } from "@/lib/projects/weekly-goal";
 import { listProjectTasks } from "@/lib/tasks/tasks";
 import { listProjectStages } from "@/lib/projects/stages";
@@ -53,6 +55,9 @@ export async function WorkerProjectPanel({
   // THIS WEEK'S GOAL: the tasks this worker's session may read (their own
   // and their team's) due this week — named as theirs, never the team's.
   const weekGoal = deriveWeeklyGoal(tasks, { todayIso: today.todayIso, scope: "mine" });
+  // KAS PASIKEITĖ PROJEKTE: this worker's OWN chains on this project + the
+  // project's own facts — never a co-worker's entry.
+  const trace = await loadProjectTrace(projectId, "member", stages, tasks);
 
   const project = view.project;
   const location = deriveProjectLocation({
@@ -139,6 +144,8 @@ export async function WorkerProjectPanel({
           {t("chatCta")}
         </Link>
       </section>
+
+      <ProjectTraceRegion trace={trace} locale={locale} />
 
       {/* Own photo evidence on this project — session RLS shows exactly the
           photos this worker attached to their own journal entries. */}

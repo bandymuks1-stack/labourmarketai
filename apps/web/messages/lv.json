@@ -7634,7 +7634,7 @@
     },
     "focusHint": "Pieskarieties līnijai, lai izsekotu vienu prasmi visā ceļā.",
     "showAll": "Rādīt visas",
-    "horizonDetail": "jums jau ir {shared} no {total} prasmēm"
+    "horizonDetail": "{shared} no {total} tavā darbā · apstiprināti {confirmed}"
   },
   "projectCourse": {
     "title": "Projekta maršruts",
@@ -7665,5 +7665,36 @@
       "cancelled": "Atcelts",
       "overdue": "Nokavēts"
     }
+  },
+  "projectTrace": {
+    "title": "Kas projektā mainījās",
+    "window": "Pēdējās 14 dienas",
+    "unknown": "Neizdevās nolasīt, kas projektā mainījās.",
+    "emptyManager": "14 dienās projektā nekā jauna: nav jaunu darba ierakstu, pabeigtu posmu vai slēgtu uzdevumu.",
+    "emptyMember": "14 dienās tev šajā projektā nav jaunu ierakstu. Ieraksti darbu žurnālā – šeit redzēsi, ko tas mainīja.",
+    "teamLabel": "Komandas darba ķēde",
+    "team": {
+      "recorded": "Ierakstīts: {count}",
+      "awaiting": "Gaida pārskatīšanu: {count}",
+      "returned": "Atgriezts labošanai: {count}",
+      "confirmed": "Apstiprinājusi otra puse: {count}",
+      "confirmedUnknown": "Apstiprinājumu skaitu neizdevās noteikt",
+      "livingCv": "Apstiprinātais darbs tiek ieskaitīts darbinieku Living CV"
+    },
+    "review": "Pārskatīt gaidošos ({count})",
+    "stageDone": "Posms “{name}” pabeigts",
+    "tasksDone": "Slēgti uzdevumi: {count}",
+    "journalUnknown": "Neizdevās nolasīt projekta darba ierakstus.",
+    "stagesUnknown": "Neizdevās nolasīt projekta posmus.",
+    "tasksUnknown": "Neizdevās nolasīt projekta uzdevumus.",
+    "truncated": "Rādīti jaunākie ieraksti."
+  },
+  "projectFirstStep": {
+    "title": "Pirmais solis",
+    "both": "Projektam vēl nav posmu un šīs nedēļas uzdevumu. Pievieno posmus – komanda redzēs kopīgu maršrutu un to, kur jūs esat.",
+    "stages": "Projektam vēl nav posmu. Pievieno tos – komanda redzēs kopīgu maršrutu un to, kur jūs esat.",
+    "tasks": "Šonedēļ nav uzdevumu ar termiņu. Izveido uzdevumu – tas kļūs par nedēļas mērķi.",
+    "addStages": "Pievienot posmus",
+    "addTask": "Izveidot uzdevumu"
   }
 }

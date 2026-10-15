@@ -89,7 +89,13 @@ export type JourneyLine = {
 
 export type JourneyGap = { readonly fromDay: number; readonly toDay: number; readonly from: string; readonly to: string };
 
-export type JourneyHorizonItem = JourneyHorizonInput & { readonly basis: "derived" };
+export type JourneyHorizonItem = JourneyHorizonInput & {
+  readonly basis: "derived";
+  /** How many of the shared skills a second party CONFIRMED — the rest are
+   *  only in the person's own records. The horizon never says "you have" a
+   *  skill on the strength of an unconfirmed record alone. */
+  readonly confirmedShared: number;
+};
 
 export type CareerJourney = {
   /** Dated stations in time order (the map). */
@@ -222,6 +228,7 @@ export function deriveCareerJourney(input: {
     coveredUntil = Math.max(coveredUntil, end);
   }
 
+  const confirmedSlugs = new Set(input.skills.filter((s) => s.tier === "confirmed").map((s) => s.slug));
   const lineEnds = lines.map((l) => l.endDay).filter((d): d is number => d !== null);
   const spanDays = Math.max(0, ...stations.map((s) => s.endDay), ...lineEnds, starts.length > 0 ? today - first : 0);
   return {
@@ -229,7 +236,11 @@ export function deriveCareerJourney(input: {
     undated,
     lines,
     gaps,
-    horizon: input.horizon.slice(0, JOURNEY_HORIZON_MAX).map((h) => ({ ...h, basis: "derived" as const })),
+    horizon: input.horizon.slice(0, JOURNEY_HORIZON_MAX).map((h) => ({
+      ...h,
+      basis: "derived" as const,
+      confirmedShared: h.sharedSkills.filter((slug) => confirmedSlugs.has(slug)).length,
+    })),
     spanDays,
     axisStart: starts.length > 0 ? isoOf(first) : null,
     axisEnd: starts.length > 0 ? isoOf(first + spanDays) : null,

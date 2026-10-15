@@ -19537,7 +19537,7 @@
     },
     "focusHint": "Tik op een lijn om één vaardigheid door je hele reis te volgen.",
     "showAll": "Alles tonen",
-    "horizonDetail": "je hebt al {shared} van {total} vaardigheden"
+    "horizonDetail": "{shared} van {total} in je werk · {confirmed} bevestigd"
   },
   "projectCourse": {
     "title": "Projectroute",
@@ -19568,5 +19568,36 @@
       "cancelled": "Geannuleerd",
       "overdue": "Te laat"
     }
+  },
+  "projectTrace": {
+    "title": "Wat er in het project veranderde",
+    "window": "Laatste 14 dagen",
+    "unknown": "Kon niet lezen wat er in het project veranderde.",
+    "emptyManager": "Al 14 dagen niets nieuws in het project: geen nieuwe werkregistraties, afgeronde fasen of gesloten taken.",
+    "emptyMember": "Al 14 dagen geen nieuwe registraties van jou in dit project. Leg werk vast in het logboek – hier zie je wat het veranderde.",
+    "teamLabel": "De werkketen van het team",
+    "team": {
+      "recorded": "Vastgelegd: {count}",
+      "awaiting": "Wacht op beoordeling: {count}",
+      "returned": "Teruggestuurd voor correctie: {count}",
+      "confirmed": "Bevestigd door een tweede partij: {count}",
+      "confirmedUnknown": "Het aantal bevestigingen kon niet worden bepaald",
+      "livingCv": "Bevestigd werk telt mee in het Living CV van de medewerkers"
+    },
+    "review": "Bekijk de wachtende ({count})",
+    "stageDone": "Fase ‘{name}’ afgerond",
+    "tasksDone": "Gesloten taken: {count}",
+    "journalUnknown": "Kon de werkregistraties van het project niet lezen.",
+    "stagesUnknown": "Kon de fasen van het project niet lezen.",
+    "tasksUnknown": "Kon de taken van het project niet lezen.",
+    "truncated": "De nieuwste registraties worden getoond."
+  },
+  "projectFirstStep": {
+    "title": "Eerste stap",
+    "both": "Het project heeft nog geen fasen en geen taken voor deze week. Voeg fasen toe – het team ziet één gedeelde route en waar jullie staan.",
+    "stages": "Het project heeft nog geen fasen. Voeg ze toe – het team ziet één gedeelde route en waar jullie staan.",
+    "tasks": "Deze week is er geen taak met een deadline. Maak een taak aan – die wordt het weekdoel.",
+    "addStages": "Fasen toevoegen",
+    "addTask": "Taak aanmaken"
   }
 }

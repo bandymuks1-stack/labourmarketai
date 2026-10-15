@@ -23,6 +23,9 @@ import { ProjectWeekGoal } from "@/components/app/projects/project-week-goal";
 import { deriveWeeklyGoal } from "@/lib/projects/weekly-goal";
 import { listProjectTasks } from "@/lib/tasks/tasks";
 import { listProjectStages } from "@/lib/projects/stages";
+import { ProjectFirstStep } from "@/components/app/projects/project-first-step";
+import { ProjectTraceRegion } from "@/components/app/projects/project-trace";
+import { loadProjectTrace } from "@/lib/projects/project-trace-server";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
 import { WorkerProjectPanel } from "@/components/app/worker-project-panel";
@@ -192,6 +195,9 @@ export default async function ProjectStadiumPage({
   const stadiumCourse = deriveProjectCourse(courseStages, courseToday.todayIso);
   // This week's goal over every task the manager's session reads.
   const stadiumWeekGoal = deriveWeeklyGoal(courseTasks, { todayIso: courseToday.todayIso, scope: "project" });
+  // KAS PASIKEITĖ PROJEKTE: the team's chain as counts + the project's own
+  // facts, over the stages and tasks this page already read.
+  const projectTrace = await loadProjectTrace(id, "manager", courseStages, courseTasks);
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="project-stadium">
@@ -326,6 +332,14 @@ export default async function ProjectStadiumPage({
             assigned workers see — one shared goal for the whole team. ── */}
       <ProjectCourseTrack course={stadiumCourse} locale={locale} />
       <ProjectWeekGoal goal={stadiumWeekGoal} locale={locale} />
+      {/* Where the course or the week has nothing to draw: the REAL first
+          step (the stages panel, the task form), never a decorative screen. */}
+      <ProjectFirstStep
+        projectId={id}
+        stagesMissing={stadiumCourse.kind === "none"}
+        tasksMissing={stadiumWeekGoal.kind === "none"}
+      />
+      <ProjectTraceRegion trace={projectTrace} locale={locale} reviewHref="/dashboard/inbox/quick" />
 
       {/* ── THE FIELD comes first: the people around the work are what a
             manager opens this page for. Location, communication and the

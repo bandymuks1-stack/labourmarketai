@@ -19537,7 +19537,7 @@
     },
     "focusHint": "Tap a line to follow one skill through your whole journey.",
     "showAll": "Show all",
-    "horizonDetail": "you already have {shared} of {total} skills"
+    "horizonDetail": "{shared} of {total} in your work · {confirmed} confirmed"
   },
   "projectCourse": {
     "title": "Project course",
@@ -19568,5 +19568,36 @@
       "cancelled": "Cancelled",
       "overdue": "Overdue"
     }
+  },
+  "projectTrace": {
+    "title": "What changed on this project",
+    "window": "Last 14 days",
+    "unknown": "Could not read what changed on this project.",
+    "emptyManager": "Nothing new on this project in 14 days: no new work entries, finished stages or closed tasks.",
+    "emptyMember": "No new entries of yours on this project in 14 days. Record work in the journal – you will see here what it changed.",
+    "teamLabel": "The team's work chain",
+    "team": {
+      "recorded": "Recorded: {count}",
+      "awaiting": "Waiting for review: {count}",
+      "returned": "Returned for changes: {count}",
+      "confirmed": "Confirmed by a second party: {count}",
+      "confirmedUnknown": "The confirmed count could not be determined",
+      "livingCv": "Confirmed work counts on the workers' Living CVs"
+    },
+    "review": "Review the waiting ones ({count})",
+    "stageDone": "Stage “{name}” finished",
+    "tasksDone": "Tasks closed: {count}",
+    "journalUnknown": "Could not read the project's work entries.",
+    "stagesUnknown": "Could not read the project's stages.",
+    "tasksUnknown": "Could not read the project's tasks.",
+    "truncated": "Showing the newest entries."
+  },
+  "projectFirstStep": {
+    "title": "First step",
+    "both": "The project has no stages and no tasks for this week yet. Add stages – the team will see one shared course and where you are.",
+    "stages": "The project has no stages yet. Add them – the team will see one shared course and where you are.",
+    "tasks": "No tasks are due this week. Create a task – it becomes this week's goal.",
+    "addStages": "Add stages",
+    "addTask": "Create a task"
   }
 }

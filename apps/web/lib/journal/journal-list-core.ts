@@ -208,6 +208,9 @@ export async function listJournalEntries(
      *  AFTER the limit, so a bounded page can carry fewer live rows than the
      *  limit even when more exist — honest pagination, never padded. */
     limit?: number;
+    /** Only the entries attributed to this project (`journal_entries.project_id`).
+     *  Narrows the caller's own rows; it never widens what RLS returns. */
+    projectId?: string;
   } = {},
 ): Promise<JournalListResult> {
   let workerId = opts.workerId ?? null;
@@ -222,13 +225,12 @@ export async function listJournalEntries(
   // they are runtime-present but absent from some generated type snapshots —
   // the same pattern the page used inline. Newest first, `id` as the total-
   // order tiebreaker so `.range()` pages never repeat or skip a row.
-  const build = (select: string) => () =>
+  const build = (select: string) => () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (caller.supabase.from("journal_entries") as any)
-      .select(select)
-      .eq("worker_id", workerId)
-      .order("created_at", { ascending: false })
-      .order("id", { ascending: false });
+    let q = (caller.supabase.from("journal_entries") as any).select(select).eq("worker_id", workerId);
+    if (opts.projectId) q = q.eq("project_id", opts.projectId);
+    return q.order("created_at", { ascending: false }).order("id", { ascending: false });
+  };
   // A caller-bounded read is ONE page of `limit`; an unbounded one pages to
   // the end (or the ceiling) and says which.
   const read = async (
