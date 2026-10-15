@@ -1,3 +1,4 @@
+-- @human-gate-approved  (acknowledgement only: PR is DRAFT + needs-human-gate; prod apply waits for the owner)
 -- 20261015150000 — GDPR erasure no longer dies on the consent ledger (#856)
 --
 -- THE DEFECT: `privacy_consent_events.user_id` → profiles(id) ON DELETE
