@@ -19537,7 +19537,7 @@
     },
     "focusHint": "Bakstelėk liniją ir sek vieną įgūdį per visą kelionę.",
     "showAll": "Rodyti visas",
-    "horizonDetail": "jau turi {shared} iš {total} įgūdžių"
+    "horizonDetail": "{shared} iš {total} tavo darbe · patvirtinta {confirmed}"
   },
   "projectCourse": {
     "title": "Projekto trasa",
@@ -19568,5 +19568,36 @@
       "cancelled": "Atšaukta",
       "overdue": "Vėluoja"
     }
+  },
+  "projectTrace": {
+    "title": "Kas pasikeitė projekte",
+    "window": "Per 14 dienų",
+    "unknown": "Nepavyko nuskaityti, kas pasikeitė projekte.",
+    "emptyManager": "Per 14 dienų projekte nieko naujo: nėra naujų darbo įrašų, baigtų etapų ar uždarytų užduočių.",
+    "emptyMember": "Per 14 dienų šiame projekte tavo naujų įrašų nėra. Įrašyk darbą žurnale – čia matysi, ką jis pakeitė.",
+    "teamLabel": "Komandos darbo grandinė",
+    "team": {
+      "recorded": "Įrašyta: {count}",
+      "awaiting": "Laukia peržiūros: {count}",
+      "returned": "Grąžinta taisyti: {count}",
+      "confirmed": "Patvirtino antra šalis: {count}",
+      "confirmedUnknown": "Patvirtintų skaičiaus nepavyko nustatyti",
+      "livingCv": "Patvirtintas darbas įskaitomas į darbuotojų Living CV"
+    },
+    "review": "Peržiūrėti laukiančius ({count})",
+    "stageDone": "Etapas „{name}“ baigtas",
+    "tasksDone": "Uždaryta užduočių: {count}",
+    "journalUnknown": "Nepavyko nuskaityti projekto darbo įrašų.",
+    "stagesUnknown": "Nepavyko nuskaityti projekto etapų.",
+    "tasksUnknown": "Nepavyko nuskaityti projekto užduočių.",
+    "truncated": "Rodoma pagal naujausius įrašus."
+  },
+  "projectFirstStep": {
+    "title": "Pirmas žingsnis",
+    "both": "Projektas dar neturi etapų ir šios savaitės užduočių. Sudėk etapus – komanda matys bendrą trasą ir kur esate.",
+    "stages": "Projektas dar neturi etapų. Sudėk juos – komanda matys bendrą trasą ir kur esate.",
+    "tasks": "Šią savaitę užduočių su terminu nėra. Sukurk užduotį – ji taps šios savaitės tikslu.",
+    "addStages": "Pridėti etapus",
+    "addTask": "Sukurti užduotį"
   }
 }

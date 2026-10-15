@@ -57,7 +57,7 @@ export function Region({
         <span aria-hidden className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-brand-blue/70 to-transparent" />
       ) : null}
       <header className="flex items-baseline gap-3">
-        <span className="font-mono text-meta tabular-nums text-text-muted">{index}</span>
+        {index ? <span className="font-mono text-meta tabular-nums text-text-muted">{index}</span> : null}
         <h2 className="min-w-0 font-display text-body font-semibold tracking-tightest text-text-primary sm:text-title">
           {title}
         </h2>

@@ -206,6 +206,8 @@ export default async function TasksPage({
     rtask?: string;
     /** Deep link from the project timeline / planning: highlight this task. */
     task?: string;
+    /** Deep link from a project's first step: open the create form. */
+    create?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -1559,7 +1561,9 @@ export default async function TasksPage({
           disclosure so the OPEN TASKS lead the page — the ~10-field form no
           longer pushes the task list below the fold. Same form, same action. */}
       <details
-        className="group rounded-md border border-ink-500 bg-ink-800/30"
+        id="tasks-create"
+        open={sp.create === "1" ? true : undefined}
+        className="group scroll-mt-24 rounded-md border border-ink-500 bg-ink-800/30"
         data-testid="tasks-create"
       >
         <summary className="flex cursor-pointer list-none items-center gap-2 p-4 font-display text-lg font-semibold tracking-tight text-text-primary [&::-webkit-details-marker]:hidden">

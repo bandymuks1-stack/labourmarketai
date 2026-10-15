@@ -167,40 +167,7 @@ export async function HomeTraceView({
           </Link>
         </div>
       ) : (
-        <ol className="flex flex-col divide-y divide-ink-600/60" data-testid="home-trace-items">
-          {trace.items.map((item) => {
-            const reached = traceReachedLivingCv(item);
-            return (
-              <li key={item.id} className="py-3 first:pt-0 last:pb-0" data-origin={item.origin} data-reached-cv={reached ? "true" : undefined}>
-                <Link
-                  href={item.href as "/dashboard"}
-                  className="group -mx-2 flex flex-col gap-2 rounded-control px-2 py-1 transition-colors hover:bg-ink-700/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-                  data-testid={`home-trace-${item.origin}`}
-                >
-                  <span className="flex items-baseline justify-between gap-3">
-                    <span className="min-w-0 truncate text-body font-medium text-text-primary">{title(item)}</span>
-                    <span className="shrink-0 font-mono text-meta tabular-nums text-text-muted">{when(item.at)}</span>
-                  </span>
-                  {/* THE CHAIN — steps in the order they happened. A phone
-                      reads it as a column with a rail; wider screens as one
-                      wrapping line with arrows. */}
-                  <ol className="relative flex flex-col gap-1.5 pl-4 before:absolute before:bottom-2 before:left-[3px] before:top-2 before:w-px before:bg-ink-600 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1.5 sm:gap-y-1.5 sm:pl-0 sm:before:hidden">
-                    {item.steps.map((step, i) => (
-                      <li key={`${item.id}-${i}`} className="flex min-w-0 items-center gap-1.5">
-                        {i > 0 ? (
-                          <span aria-hidden className="hidden text-text-muted sm:inline">
-                            →
-                          </span>
-                        ) : null}
-                        {stepNode(step, i, reached && step.kind === "living_cv")}
-                      </li>
-                    ))}
-                  </ol>
-                </Link>
-              </li>
-            );
-          })}
-        </ol>
+        <TraceChainList items={trace.items} title={title} when={when} stepNode={stepNode} />
       )}
 
       {flags.length > 0 ? (
@@ -214,22 +181,79 @@ export async function HomeTraceView({
         </p>
       ) : null}
 
-      {/* What each shape means — the shapes are the legend, never colour alone. */}
-      <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-text-muted" data-testid="home-trace-legend">
-        <span className="inline-flex items-center gap-1.5">
-          <TraceMark tone="fact" />
-          {t("legend.fact")}
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <TraceMark tone="pending" />
-          {t("legend.pending")}
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <TraceMark tone="derived" />
-          {t("legend.derived")}
-        </span>
-      </p>
+      {/* What each shape means — the shapes are the legend, never colour
+          alone. Drawn only when there is a chain to read: on a quiet window
+          a legend explains nothing and is only noise. */}
+      {trace.items.length > 0 ? (
+        <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-text-muted" data-testid="home-trace-legend">
+          <span className="inline-flex items-center gap-1.5">
+            <TraceMark tone="fact" />
+            {t("legend.fact")}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <TraceMark tone="pending" />
+            {t("legend.pending")}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <TraceMark tone="derived" />
+            {t("legend.derived")}
+          </span>
+        </p>
+      ) : null}
     </>,
     )
+  );
+}
+
+/** The chains as rows — ONE markup for every surface that draws the trace
+ *  (home, Living CV, project): source fact first, then each step in order.
+ *  A phone reads a chain as a column with a rail; wider screens as one
+ *  wrapping line with arrows. */
+export function TraceChainList({
+  items,
+  title,
+  when,
+  stepNode,
+}: {
+  readonly items: readonly TraceItem[];
+  readonly title: (item: TraceItem) => string;
+  readonly when: (iso: string) => string;
+  readonly stepNode: (step: TraceStep, i: number, celebrate: boolean) => ReactNode;
+}) {
+  return (
+    <ol className="flex flex-col divide-y divide-ink-600/60" data-testid="home-trace-items">
+      {items.map((item) => {
+        const reached = traceReachedLivingCv(item);
+        return (
+          <li key={item.id} className="py-3 first:pt-0 last:pb-0" data-origin={item.origin} data-reached-cv={reached ? "true" : undefined}>
+            <Link
+              href={item.href as "/dashboard"}
+              className="group -mx-2 flex flex-col gap-2 rounded-control px-2 py-1 transition-colors hover:bg-ink-700/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+              data-testid={`home-trace-${item.origin}`}
+            >
+              <span className="flex items-baseline justify-between gap-3">
+                <span className="min-w-0 truncate text-body font-medium text-text-primary">{title(item)}</span>
+                <span className="shrink-0 font-mono text-meta tabular-nums text-text-muted">{when(item.at)}</span>
+              </span>
+              {/* THE CHAIN — steps in the order they happened. A phone
+                  reads it as a column with a rail; wider screens as one
+                  wrapping line with arrows. */}
+              <ol className="relative flex flex-col gap-1.5 pl-4 before:absolute before:bottom-2 before:left-[3px] before:top-2 before:w-px before:bg-ink-600 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1.5 sm:gap-y-1.5 sm:pl-0 sm:before:hidden">
+                {item.steps.map((step, i) => (
+                  <li key={`${item.id}-${i}`} className="flex min-w-0 items-center gap-1.5">
+                    {i > 0 ? (
+                      <span aria-hidden className="hidden text-text-muted sm:inline">
+                        →
+                      </span>
+                    ) : null}
+                    {stepNode(step, i, reached && step.kind === "living_cv")}
+                  </li>
+                ))}
+              </ol>
+            </Link>
+          </li>
+        );
+      })}
+    </ol>
   );
 }

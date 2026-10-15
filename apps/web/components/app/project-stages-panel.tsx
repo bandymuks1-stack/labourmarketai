@@ -404,7 +404,8 @@ export function ProjectStagesPanel({
 
   return (
     <section
-      className="card-border flex flex-col gap-4 p-5"
+      id="project-stages"
+      className="card-border flex scroll-mt-24 flex-col gap-4 p-5"
       data-testid="project-stages-panel"
     >
       <header className="flex flex-col gap-1">

@@ -7634,7 +7634,7 @@
     },
     "focusHint": "Tryk på en linje for at følge én færdighed gennem hele vejen.",
     "showAll": "Vis alle",
-    "horizonDetail": "du har allerede {shared} af {total} færdigheder"
+    "horizonDetail": "{shared} af {total} i dit arbejde · {confirmed} bekræftet"
   },
   "projectCourse": {
     "title": "Projektforløb",
@@ -7665,5 +7665,36 @@
       "cancelled": "Annulleret",
       "overdue": "Forsinket"
     }
+  },
+  "projectTrace": {
+    "title": "Hvad der er ændret i projektet",
+    "window": "Sidste 14 dage",
+    "unknown": "Kunne ikke læse, hvad der er ændret i projektet.",
+    "emptyManager": "Intet nyt i projektet i 14 dage: ingen nye arbejdsregistreringer, afsluttede etaper eller lukkede opgaver.",
+    "emptyMember": "Ingen nye registreringer fra dig i dette projekt i 14 dage. Registrér arbejde i journalen – her ser du, hvad det ændrede.",
+    "teamLabel": "Holdets arbejdskæde",
+    "team": {
+      "recorded": "Registreret: {count}",
+      "awaiting": "Venter på gennemgang: {count}",
+      "returned": "Sendt tilbage til rettelse: {count}",
+      "confirmed": "Bekræftet af en anden part: {count}",
+      "confirmedUnknown": "Antallet af bekræftelser kunne ikke fastslås",
+      "livingCv": "Bekræftet arbejde tæller i medarbejdernes Living CV"
+    },
+    "review": "Gennemgå de ventende ({count})",
+    "stageDone": "Etapen “{name}” afsluttet",
+    "tasksDone": "Lukkede opgaver: {count}",
+    "journalUnknown": "Kunne ikke læse projektets arbejdsregistreringer.",
+    "stagesUnknown": "Kunne ikke læse projektets etaper.",
+    "tasksUnknown": "Kunne ikke læse projektets opgaver.",
+    "truncated": "Viser de nyeste registreringer."
+  },
+  "projectFirstStep": {
+    "title": "Første skridt",
+    "both": "Projektet har endnu ingen etaper og ingen opgaver for denne uge. Tilføj etaper – holdet ser én fælles rute og hvor I er.",
+    "stages": "Projektet har endnu ingen etaper. Tilføj dem – holdet ser én fælles rute og hvor I er.",
+    "tasks": "Ingen opgaver har frist i denne uge. Opret en opgave – den bliver ugens mål.",
+    "addStages": "Tilføj etaper",
+    "addTask": "Opret en opgave"
   }
 }

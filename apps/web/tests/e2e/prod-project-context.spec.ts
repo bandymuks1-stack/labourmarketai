@@ -83,7 +83,8 @@ for (const slot of ["worker", "manager", "owner"] as const) {
       }
     }
 
-    // PROJECT — course + this week's goal on a project this person can open.
+    // PROJECT — course, this week's goal, the project trace and the first
+    // step on a project this person can open.
     const href = await firstProjectHref(page);
     if (!href) {
       notes.push("no project visible to this cast member");
@@ -108,6 +109,29 @@ for (const slot of ["worker", "manager", "owner"] as const) {
         if ((await course.count()) > 0) {
           const html = await course.first().innerHTML();
           if (/state-success|trust-accent/.test(html)) problems.push("project-course: uses green");
+        }
+
+        // KAS PASIKEITĖ PROJEKTE — present on every project view, read did not fail.
+        const ptrace = page.getByTestId("project-trace");
+        if ((await ptrace.count()) === 0) problems.push("project-trace: missing");
+        else {
+          const st = await ptrace.first().getAttribute("data-state");
+          if (st === "unknown") problems.push("project-trace: says its read failed");
+          const team = await page.getByTestId("project-trace-team").count();
+          if (slot === "worker" && team > 0) problems.push("project-trace: a worker sees the team's chain");
+          notes.push(`project-trace: ${st}${team > 0 ? " · team counts" : ""}${(await page.getByTestId("project-trace-empty").count()) > 0 ? " · quiet" : ""}`);
+        }
+
+        // FIRST STEP — where the course or the week has nothing to draw, a
+        // manager gets the real door (stages panel / task form), never nothing.
+        const noCourse = (await course.count()) === 0;
+        const noGoal = (await page.getByTestId("project-week-goal").count()) === 0;
+        const first = page.getByTestId("project-first-step");
+        if (await page.getByTestId("project-stadium").count()) {
+          if ((noCourse || noGoal) && (await first.count()) === 0) problems.push("project-first-step: missing where the course/goal is empty");
+          if ((await first.count()) > 0) notes.push(`project-first-step: ${await first.first().getAttribute("data-missing")}`);
+        } else if ((await first.count()) > 0) {
+          problems.push("project-first-step: shown to a non-manager");
         }
       }
     }

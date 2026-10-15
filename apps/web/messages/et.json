@@ -7634,7 +7634,7 @@
     },
     "focusHint": "Puuduta liini, et jälgida üht oskust kogu teekonna vältel.",
     "showAll": "Näita kõiki",
-    "horizonDetail": "sul on juba {shared} oskust {total}-st"
+    "horizonDetail": "{shared}/{total} sinu töös · kinnitatud {confirmed}"
   },
   "projectCourse": {
     "title": "Projekti teekond",
@@ -7665,5 +7665,36 @@
       "cancelled": "Tühistatud",
       "overdue": "Hilinenud"
     }
+  },
+  "projectTrace": {
+    "title": "Mis projektis muutus",
+    "window": "Viimased 14 päeva",
+    "unknown": "Ei õnnestunud lugeda, mis projektis muutus.",
+    "emptyManager": "Projektis pole 14 päeva jooksul midagi uut: pole uusi töökirjeid, lõpetatud etappe ega suletud ülesandeid.",
+    "emptyMember": "Sul pole selles projektis 14 päeva jooksul uusi kirjeid. Kirjuta töö päevikusse – siin näed, mida see muutis.",
+    "teamLabel": "Meeskonna tööahel",
+    "team": {
+      "recorded": "Kirja pandud: {count}",
+      "awaiting": "Ootab ülevaatust: {count}",
+      "returned": "Saadetud parandamiseks: {count}",
+      "confirmed": "Teise osapoole kinnitatud: {count}",
+      "confirmedUnknown": "Kinnituste arvu ei õnnestunud kindlaks teha",
+      "livingCv": "Kinnitatud töö läheb töötajate Living CV-sse"
+    },
+    "review": "Vaata ootel kirjeid ({count})",
+    "stageDone": "Etapp „{name}“ lõpetatud",
+    "tasksDone": "Suletud ülesandeid: {count}",
+    "journalUnknown": "Projekti töökirjeid ei õnnestunud lugeda.",
+    "stagesUnknown": "Projekti etappe ei õnnestunud lugeda.",
+    "tasksUnknown": "Projekti ülesandeid ei õnnestunud lugeda.",
+    "truncated": "Näidatakse uusimaid kirjeid."
+  },
+  "projectFirstStep": {
+    "title": "Esimene samm",
+    "both": "Projektil pole veel etappe ega selle nädala ülesandeid. Lisa etapid – meeskond näeb ühist rada ja seda, kus te olete.",
+    "stages": "Projektil pole veel etappe. Lisa need – meeskond näeb ühist rada ja seda, kus te olete.",
+    "tasks": "Sel nädalal pole tähtajaga ülesandeid. Loo ülesanne – sellest saab nädala eesmärk.",
+    "addStages": "Lisa etapid",
+    "addTask": "Loo ülesanne"
   }
 }

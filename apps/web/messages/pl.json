@@ -19537,7 +19537,7 @@
     },
     "focusHint": "Dotknij linii, aby prześledzić jedną umiejętność przez całą drogę.",
     "showAll": "Pokaż wszystkie",
-    "horizonDetail": "masz już {shared} z {total} umiejętności"
+    "horizonDetail": "{shared} z {total} w twojej pracy · potwierdzone {confirmed}"
   },
   "projectCourse": {
     "title": "Trasa projektu",
@@ -19568,5 +19568,36 @@
       "cancelled": "Anulowane",
       "overdue": "Po terminie"
     }
+  },
+  "projectTrace": {
+    "title": "Co się zmieniło w projekcie",
+    "window": "Ostatnie 14 dni",
+    "unknown": "Nie udało się odczytać, co się zmieniło w projekcie.",
+    "emptyManager": "Od 14 dni nic nowego w projekcie: brak nowych wpisów pracy, zakończonych etapów i zamkniętych zadań.",
+    "emptyMember": "Od 14 dni brak twoich nowych wpisów w tym projekcie. Zapisz pracę w dzienniku – tutaj zobaczysz, co zmieniła.",
+    "teamLabel": "Łańcuch pracy zespołu",
+    "team": {
+      "recorded": "Zapisano: {count}",
+      "awaiting": "Czeka na sprawdzenie: {count}",
+      "returned": "Zwrócono do poprawy: {count}",
+      "confirmed": "Potwierdzone przez drugą stronę: {count}",
+      "confirmedUnknown": "Nie udało się ustalić liczby potwierdzeń",
+      "livingCv": "Potwierdzona praca liczy się w Living CV pracowników"
+    },
+    "review": "Sprawdź oczekujące ({count})",
+    "stageDone": "Etap „{name}” zakończony",
+    "tasksDone": "Zamknięte zadania: {count}",
+    "journalUnknown": "Nie udało się odczytać wpisów pracy projektu.",
+    "stagesUnknown": "Nie udało się odczytać etapów projektu.",
+    "tasksUnknown": "Nie udało się odczytać zadań projektu.",
+    "truncated": "Pokazano najnowsze wpisy."
+  },
+  "projectFirstStep": {
+    "title": "Pierwszy krok",
+    "both": "Projekt nie ma jeszcze etapów ani zadań na ten tydzień. Dodaj etapy – zespół zobaczy wspólną trasę i miejsce, w którym jesteście.",
+    "stages": "Projekt nie ma jeszcze etapów. Dodaj je – zespół zobaczy wspólną trasę i miejsce, w którym jesteście.",
+    "tasks": "W tym tygodniu nie ma zadań z terminem. Utwórz zadanie – stanie się celem tygodnia.",
+    "addStages": "Dodaj etapy",
+    "addTask": "Utwórz zadanie"
   }
 }

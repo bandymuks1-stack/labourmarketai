@@ -716,6 +716,7 @@ export default async function VerifiedCvPage({
       detail: tJourney("horizonDetail", {
         shared: h.sharedSkills.length,
         total: h.sharedSkills.length + h.missingSkills.length,
+        confirmed: h.confirmedShared,
       }),
     })),
     stationMeta: journeyMeta,
