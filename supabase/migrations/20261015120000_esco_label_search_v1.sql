@@ -24,9 +24,18 @@
 -- `authenticated` only — exactly who the select policy admits; anon and
 -- public get nothing (the table already refuses them).
 --
+-- SECURITY CHECK (production, rolled back, 2026-10-15): prosecdef, search_path
+-- "", ACL postgres+authenticated only. A probe INACTIVE label was hidden from
+-- a non-admin both via the table (RLS) and via this function (1/1), and shown
+-- to an admin via both (2/2); anon is refused EXECUTE and the table. Invalid
+-- input (3-letter locale, other type, 1 or 101-char prefix, NULL, '%') answers
+-- nothing; limit is clamped to 20. Ties are ordered by concept_id, so the top
+-- 10 is deterministic (the old ILIKE query was not).
+--
 -- @human-gate-approved  (acknowledgement only: PR is DRAFT + needs-human-gate; prod apply waits for the owner)
 --
 -- UNDO: supabase/rollbacks/20261015120000_esco_label_search_v1.down.sql
+
 
 create or replace function public.search_esco_labels_v1(
   p_locale text,
@@ -41,16 +50,27 @@ security definer
 set search_path = ''
 as $$
 declare
-  v_p text := lower(coalesce(p_prefix, ''));
+  v_p text;
   v_hi text;
 begin
-  if char_length(v_p) < 2 then
+  -- Input validation: anything outside the typeahead's own contract answers
+  -- nothing (never an error, never a widened read). A 3-letter locale would
+  -- otherwise be silently truncated by the char(2) cast.
+  if p_locale is null or char_length(p_locale) <> 2 then
     return;
   end if;
-  -- Upper bound of the prefix range: the prefix with its last character
-  -- incremented (UTF-8 byte order follows code points, the order
-  -- text_pattern_ops compares in). starts_with() below keeps it exact.
-  v_hi := left(v_p, -1) || chr(ascii(right(v_p, 1)) + 1);
+  if p_concept_type is null or p_concept_type not in ('occupation', 'skill') then
+    return;
+  end if;
+  v_p := lower(coalesce(p_prefix, ''));
+  if char_length(v_p) < 2 or char_length(v_p) > 100 then
+    return;
+  end if;
+  -- Upper bound of the prefix range for text_pattern_ops (byte order): the
+  -- prefix followed by U+10FFFF, the highest code point. Every label that
+  -- starts with the prefix sorts below it (bar one followed by U+10FFFF
+  -- itself, which no ESCO label contains); starts_with() keeps it exact.
+  v_hi := v_p || chr(1114111);
   return query
     select e.concept_id, e.concept_type, e.label
       from public.esco_labels e
@@ -62,7 +82,7 @@ begin
        -- The table's own select visibility (policies esco_labels_select +
        -- esco_labels_write), applied explicitly because DEFINER skips RLS.
        and (e.is_active or public.is_admin())
-     order by lower(e.label), e.label
+     order by lower(e.label), e.label, e.concept_id
      limit least(greatest(coalesce(p_limit, 10), 1), 20);
 end;
 $$;
