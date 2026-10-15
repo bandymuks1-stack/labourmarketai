@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { Region, Unreadable, retryLabels } from "@/components/app/home/region-frame";
@@ -67,8 +68,18 @@ export async function HomeTraceView({
     surface === "cv" && input.kind === "known"
       ? { ...input, items: input.items.filter((i) => i.origin === "journal"), eventsUnknown: false }
       : input;
-  const regionIndex = surface === "cv" ? "" : "02";
-  const regionTestId = surface === "cv" ? "cv-trace" : "home-trace";
+  // One frame, two surfaces — each keeps a LITERAL test id (the e2e guards
+  // and the production walks find surfaces by their literal ids).
+  const frame = (state: "known" | "unknown", aside: ReactNode, body: ReactNode) =>
+    surface === "cv" ? (
+      <Region id="trace" index="" title={t("title")} state={state} testId="cv-trace" aside={aside}>
+        {body}
+      </Region>
+    ) : (
+      <Region id="trace" index="02" title={t("title")} state={state} testId="home-trace" aside={aside}>
+        {body}
+      </Region>
+    );
   const [t, tChain, tTypes, tRole, tSkill] = await Promise.all([
     getTranslations("homeTrace"),
     getTranslations("homeRegions.chain"),
@@ -94,9 +105,9 @@ export async function HomeTraceView({
 
   if (trace.kind === "unknown") {
     return (
-      <Region id="trace" index={regionIndex} title={t("title")} state="unknown" testId={regionTestId} aside={allLink}>
+      frame("unknown", allLink, <>
         <Unreadable text={t("unknown")} testid="home-trace-unknown" labels={rl} />
-      </Region>
+      </>)
     );
   }
 
@@ -141,7 +152,10 @@ export async function HomeTraceView({
   if (trace.eventsUnknown) flags.push(t("eventsUnknown"));
 
   return (
-    <Region id="trace" index={regionIndex} title={t("title")} state="known" testId={regionTestId} aside={allLink}>
+    frame(
+      "known",
+      allLink,
+      <>
       {trace.items.length === 0 ? (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between" data-testid="home-trace-empty">
           <p className={NOTE}>{t("empty")}</p>
@@ -215,6 +229,7 @@ export async function HomeTraceView({
           {t("legend.derived")}
         </span>
       </p>
-    </Region>
+    </>,
+    )
   );
 }
