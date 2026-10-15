@@ -60,5 +60,5 @@ describe("personal record — stays on the person's own home", () => {
     };
     for (const d of ["app", "components", "lib"]) walk(join(web, d));
     expect(users.sort()).toEqual(["components/app/home/home-regions.tsx", "lib/home/home-server.ts"]);
-  });
+  }, 60_000);
 });

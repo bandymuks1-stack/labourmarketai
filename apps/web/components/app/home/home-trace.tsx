@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { Region, Unreadable, retryLabels } from "@/components/app/home/home-regions";
+import { Region, Unreadable, retryLabels } from "@/components/app/home/region-frame";
 import { TraceMark, TraceStepNode } from "@/components/app/home/trace-step-node";
 import { loadConsequenceTrace } from "@/lib/home/consequence-trace-server";
 import {
