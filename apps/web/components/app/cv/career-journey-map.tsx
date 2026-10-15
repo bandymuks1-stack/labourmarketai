@@ -84,7 +84,7 @@ export function CareerJourneyMap({
   const TOP = 110;
   const rowY = (i: number) => TOP + i * 46;
   const rowsH = rowY(Math.max(journey.lines.length, 1) - 1) + 30;
-  const H = rowsH + 76;
+  const H = rowsH + 100;
   const span = Math.max(journey.spanDays, 1);
   const x = (day: number) => PAD_L + (day / span) * AXIS_W;
 
@@ -137,6 +137,18 @@ export function CareerJourneyMap({
     }
   }
 
+  // Year marks on the axis (1 January of every year the route spans).
+  const years: { year: number; day: number }[] = [];
+  if (journey.axisStart) {
+    const startMs = Date.parse(`${journey.axisStart}T00:00:00Z`);
+    const y0 = new Date(startMs).getUTCFullYear();
+    for (let yr = y0 + 1; ; yr++) {
+      const day = Math.round((Date.UTC(yr, 0, 1) - startMs) / 86_400_000);
+      if (day > span) break;
+      years.push({ year: yr, day });
+    }
+  }
+
   // ── Phone geometry: y = time (newest at the top), one column per line. ──
   const PW = 360;
   const colX = (i: number) => 28 + i * 22;
@@ -182,6 +194,16 @@ export function CareerJourneyMap({
             {labels.now}
           </text>
 
+          {/* year marks — the scale of the route */}
+          {years.map((yr) => (
+            <g key={`y-${yr.year}`}>
+              <line x1={x(yr.day)} x2={x(yr.day)} y1={rowsH + 4} y2={rowsH + 10} className="stroke-ink-500" />
+              <text x={x(yr.day)} y={rowsH + 92} textAnchor="middle" className="fill-text-muted font-mono text-meta">
+                {yr.year}
+              </text>
+            </g>
+          ))}
+
           {/* gaps: a quiet band — unknown time, never zero, never a failure */}
           {journey.gaps.map((g) => (
             <g key={`gap-${g.fromDay}`} data-testid="cv-journey-gap">
@@ -194,13 +216,19 @@ export function CareerJourneyMap({
 
           {/* lines: from the first stop to now (declared: a short stub) */}
           {journey.lines.map((l, i) => {
-            const stops = journey.stations.filter((s) => l.stops.includes(s.key));
-            const x0 = stops.length > 0 ? x(stops[0].startDay) : x(span) - 40;
+            // The line runs where the skill was really worked (its first stop
+            // or first own entry → its last); after that a faint trace to
+            // "now" — still on the map, never claimed as recent work.
+            const x0 = l.startDay !== null ? x(l.startDay) : x(span) - 40;
+            const x1 = l.endDay !== null ? Math.max(x(l.endDay), x0 + 6) : x(span);
             return (
-              <g key={l.slug} className={cn(toneOf(l.slug), "transition-opacity", dim(l.slug) && "opacity-20")}>
-                <line x1={x0} x2={x(span)} y1={rowY(i)} y2={rowY(i)} stroke="currentColor" strokeWidth={6} strokeLinecap="round" strokeDasharray={DASH[l.level]} />
+              <g key={l.slug} className={cn(toneOf(l.slug), "transition-opacity", dim(l.slug) && "opacity-20")} data-testid={`cv-journey-path-${l.slug}`}>
+                <line x1={x0} x2={x1} y1={rowY(i)} y2={rowY(i)} stroke="currentColor" strokeWidth={6} strokeLinecap="round" strokeDasharray={DASH[l.level]} />
                 {l.level === "declared" ? (
-                  <line x1={x0} x2={x(span)} y1={rowY(i)} y2={rowY(i)} className="stroke-ink-800" strokeWidth={2} />
+                  <line x1={x0} x2={x1} y1={rowY(i)} y2={rowY(i)} className="stroke-ink-800" strokeWidth={2} />
+                ) : null}
+                {x1 < x(span) - 8 ? (
+                  <line x1={x1 + 6} x2={x(span)} y1={rowY(i)} y2={rowY(i)} stroke="currentColor" strokeWidth={2} strokeDasharray="1 6" strokeLinecap="round" opacity={0.5} />
                 ) : null}
               </g>
             );
@@ -280,14 +308,22 @@ export function CareerJourneyMap({
           <text x={PW - 6} y={py(span) - 6} textAnchor="end" className="fill-brand-blue font-mono text-meta font-semibold">
             {labels.now}
           </text>
+          {years.map((yr) => (
+            <text key={`py-${yr.year}`} x={PW - 4} y={py(yr.day) + 4} textAnchor="end" className="fill-text-muted font-mono text-meta">
+              {yr.year}
+            </text>
+          ))}
           {journey.lines.map((l, i) => {
-            const stops = journey.stations.filter((s) => l.stops.includes(s.key));
-            const y0 = stops.length > 0 ? py(stops[0].startDay) : py(span) + 40;
+            const y0 = l.startDay !== null ? py(l.startDay) : py(span) + 40;
+            const y1 = l.endDay !== null ? Math.min(py(l.endDay), y0 - 6) : py(span);
             return (
               <g key={l.slug} className={cn(toneOf(l.slug), dim(l.slug) && "opacity-20")}>
-                <line x1={colX(i)} x2={colX(i)} y1={py(span)} y2={y0} stroke="currentColor" strokeWidth={6} strokeLinecap="round" strokeDasharray={DASH[l.level]} />
+                <line x1={colX(i)} x2={colX(i)} y1={y1} y2={y0} stroke="currentColor" strokeWidth={6} strokeLinecap="round" strokeDasharray={DASH[l.level]} />
                 {l.level === "declared" ? (
-                  <line x1={colX(i)} x2={colX(i)} y1={py(span)} y2={y0} className="stroke-ink-800" strokeWidth={2} />
+                  <line x1={colX(i)} x2={colX(i)} y1={y1} y2={y0} className="stroke-ink-800" strokeWidth={2} />
+                ) : null}
+                {y1 > py(span) + 8 ? (
+                  <line x1={colX(i)} x2={colX(i)} y1={py(span)} y2={y1 - 6} stroke="currentColor" strokeWidth={2} strokeDasharray="1 6" strokeLinecap="round" opacity={0.5} />
                 ) : null}
               </g>
             );
