@@ -193,12 +193,16 @@ export async function getOrgMembersData(
   );
 
   // Addable: workers already linked via the legacy invite/accept flow whose
-  // profile is not yet a canonical org member.
-  const linkTable = kind === "company" ? "company_workers" : "agency_workers";
-  const { data: linkRows } = await supabase
-    .from(linkTable)
-    .select("worker_id, workers(profile_id, display_name, profiles(full_name, email))")
-    .eq("status", "active");
+  // profile is not yet a canonical org member. Company roster only: legacy
+  // `agency_workers` is not API-exposed (no SELECT grant, Model A retired) —
+  // see lib/guards/agency-workers-not-api-exposed.test.ts.
+  const { data: linkRows } =
+    kind === "company"
+      ? await supabase
+          .from("company_workers")
+          .select("worker_id, workers(profile_id, display_name, profiles(full_name, email))")
+          .eq("status", "active")
+      : { data: [] };
   const addable: AddableWorker[] = (linkRows ?? [])
     .map((r) => {
       const w = (Array.isArray(r.workers) ? r.workers[0] : r.workers) as

@@ -152,13 +152,12 @@ export async function listManagedWorkers(): Promise<ManagedWorker[]> {
   const select =
     "worker:workers!inner(profile_id, display_name, profiles(full_name))";
 
-  const [cw, aw] = await Promise.all([
-    asAny(supabase)
-      .from("company_workers")
-      .select(select)
-      .eq("status", "active"),
-    asAny(supabase).from("agency_workers").select(select).eq("status", "active"),
-  ]);
+  // Legacy `agency_workers` is not API-exposed (no SELECT grant, Model A
+  // retired) — see lib/guards/agency-workers-not-api-exposed.test.ts.
+  const cw = await asAny(supabase)
+    .from("company_workers")
+    .select(select)
+    .eq("status", "active");
 
   const out = new Map<string, ManagedWorker>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -177,7 +176,6 @@ export async function listManagedWorkers(): Promise<ManagedWorker[]> {
     }
   };
   if (!cw.error) collect(cw.data);
-  if (!aw.error) collect(aw.data);
   return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 

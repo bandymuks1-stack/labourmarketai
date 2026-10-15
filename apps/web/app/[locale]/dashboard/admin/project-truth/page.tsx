@@ -123,7 +123,6 @@ export default async function ProjectTruthPage({
     profileRolesCount,
     pilotDraftsCount,
     customersCount,
-    agencyWorkersCount,
     agencyWorkerInvitationsCount,
     companyWorkersCount,
     companyWorkerInvitationsCount,
@@ -138,8 +137,6 @@ export default async function ProjectTruthPage({
       .select("id", { count: "exact", head: true }),
     untyped(supabase, "customers")
       .select("id", { count: "exact", head: true }),
-    untyped(supabase, "agency_workers")
-      .select("worker_id", { count: "exact", head: true }),
     untyped(supabase, "agency_worker_invitations")
       .select("id", { count: "exact", head: true }),
     untyped(supabase, "company_workers")
@@ -399,7 +396,13 @@ export default async function ProjectTruthPage({
               agency_workers
             </p>
             <p className="mt-1 font-display text-2xl font-bold text-text-primary">
-              {agencyWorkersCount.count ?? "—"}
+              —
+            </p>
+            {/* Legacy Model A table: the API role holds no SELECT grant, so a
+                count from this session can only be a 42501 — see
+                lib/guards/agency-workers-not-api-exposed.test.ts. */}
+            <p className="mt-1 text-meta text-text-muted">
+              not API-exposed (legacy, no SELECT grant)
             </p>
           </div>
           <div

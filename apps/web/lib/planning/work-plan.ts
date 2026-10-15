@@ -152,8 +152,9 @@ export type PlannableWorker = { readonly workerId: string; readonly name: string
  *  (migration 20261007140000) — the picker offers exactly those people. */
 const PLANNABLE_ENGAGEMENT_SLUGS = ["employee", "collaborator", "freelancer"] as const;
 
-/** Workers the caller can plan for: the active roster of the companies /
- *  agencies the caller manages, plus — for the active organization — the
+/** Workers the caller can plan for: the active roster of the companies the
+ *  caller manages (legacy `agency_workers` is not API-exposed — see
+ *  lib/guards/agency-workers-not-api-exposed.test.ts), plus — for the active organization — the
  *  people engaged through it (a "join as employee" invitation writes
  *  engagement_contexts only; walk 2026-10-11 found them unplannable although
  *  the RPC already accepts them). Names come from the worker's own display name. */
@@ -166,9 +167,8 @@ export async function listPlannableWorkers(
   } = await supabase.auth.getUser();
   if (!user) return [];
   const select = "worker_id, workers(id, display_name, profiles(full_name))";
-  const [cw, aw, ec] = await Promise.all([
+  const [cw, ec] = await Promise.all([
     asAny(supabase).from("company_workers").select(select).eq("status", "active").limit(200),
-    asAny(supabase).from("agency_workers").select(select).eq("status", "active").limit(200),
     organizationId
       ? asAny(supabase)
           .from("engagement_contexts")
@@ -197,7 +197,7 @@ export async function listPlannableWorkers(
     );
   }
   const out = new Map<string, PlannableWorker>();
-  for (const rows of [cw.data, aw.data, engaged]) {
+  for (const rows of [cw.data, engaged]) {
     for (const r of (rows ?? []) as R[]) {
       if (!r.worker_id || out.has(r.worker_id)) continue;
       out.set(r.worker_id, {

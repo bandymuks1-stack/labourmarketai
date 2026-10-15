@@ -134,10 +134,12 @@ describe("the only application caller already passes roster-derived workers", ()
     expect(callers).toEqual(["/components/app/org-members-panel.tsx"]);
 
     const read = readFileSync(join(WEB, "lib", "operations", "org-members.ts"), "utf8");
-    // `addable` = active rows of the legacy link table (company_workers /
-    // agency_workers), which since R-1 only the worker's acceptance writes.
-    expect(read).toMatch(/const linkTable = kind === "company" \? "company_workers" : "agency_workers";/);
-    expect(read).toMatch(/\.from\(linkTable\)[^;]*\.eq\("status", "active"\)/);
+    // `addable` = active rows of the legacy company link table, which since
+    // R-1 only the worker's acceptance writes. agency_workers is not
+    // API-exposed and is never read (agency-workers-not-api-exposed.test.ts);
+    // an agency org gets an empty addable list, never a non-roster one.
+    expect(read).toMatch(/kind === "company"\s*\?\s*await supabase\s*\.from\("company_workers"\)[^;]*\.eq\("status", "active"\)\s*:\s*\{ data: \[\] \}/);
+    expect(read).not.toMatch(/\.from\("agency_workers"\)/);
   });
 
   it("the roster tables themselves are RPC-only since R-1 (the consent this migration carries forward)", () => {
