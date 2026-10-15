@@ -833,14 +833,15 @@ export async function getBookingResponsesNewCount(opts?: {
    *  Absent → the badge semantics stay exactly as before (0 until seen). */
   fallbackDays?: number;
 }): Promise<number> {
-  const seen = await getBookingRequestsSeenAt();
+  // The bookings list is request-cached and the spine's pending count reads
+  // it anyway, so it starts beside the seen read instead of after it.
+  const [seen, result] = await Promise.all([getBookingRequestsSeenAt(), listMyBookings()]);
   const fallback =
     opts?.fallbackDays && opts.fallbackDays > 0
       ? new Date(Date.now() - opts.fallbackDays * 86400000).toISOString()
       : null;
   const seenAt = seen ?? fallback;
   if (!seenAt) return 0;
-  const result = await listMyBookings();
   if (result.kind !== "ok") return 0;
   return countOwnerResponsesSince(result.outgoing, seenAt);
 }

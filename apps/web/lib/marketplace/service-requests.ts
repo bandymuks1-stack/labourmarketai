@@ -142,7 +142,7 @@ export async function listDiscoverableOfferings(
 }
 
 /** The caller's own outgoing requests (buyer status view). */
-export async function listOutgoingRequests(): Promise<OutgoingListResult> {
+async function readOutgoingRequests(): Promise<OutgoingListResult> {
   const ctx = await uid();
   if (!ctx) return { kind: "not-authed" };
   const { data, error } = await asAny(ctx.supabase)
@@ -171,7 +171,7 @@ export async function listOutgoingRequests(): Promise<OutgoingListResult> {
 }
 
 /** Requests addressed to the caller's offerings (provider inbox). */
-export async function listIncomingRequests(): Promise<IncomingListResult> {
+async function readIncomingRequests(): Promise<IncomingListResult> {
   const ctx = await uid();
   if (!ctx) return { kind: "not-authed" };
   const { data, error } = await asAny(ctx.supabase)
@@ -379,4 +379,25 @@ export async function markServiceRequestsSeen(): Promise<void> {
   } catch {
     // rollout-safe: absent RPC / transient error → no-op
   }
+}
+
+/**
+ * Request-scoped (React `cache`), the same pattern as `listMyBookings`: the
+ * notification spine's pending count and its "new since seen" count both read
+ * the provider inbox on EVERY dashboard page, and each read is two round trips
+ * (the rows + the requester-identity RPC). Production 2026-10-15: the pooled
+ * PostgREST connections queue, so a duplicate read costs every other read on
+ * the page. A new navigation always re-reads.
+ */
+const readIncomingOnce = cache(readIncomingRequests);
+const readOutgoingOnce = cache(readOutgoingRequests);
+
+/** The caller's own outgoing requests (buyer status view). */
+export async function listOutgoingRequests(): Promise<OutgoingListResult> {
+  return readOutgoingOnce();
+}
+
+/** Requests addressed to the caller's offerings (provider inbox). */
+export async function listIncomingRequests(): Promise<IncomingListResult> {
+  return readIncomingOnce();
 }
