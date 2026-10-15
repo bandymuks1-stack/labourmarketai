@@ -1253,6 +1253,7 @@ export function ConversationChat({
           setItems((prev) => [
             {
               id: nid(),
+              history: true,
               embed: (
                 <HistoryBlock
                   messages={restored}

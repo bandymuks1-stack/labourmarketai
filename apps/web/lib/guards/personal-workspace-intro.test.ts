@@ -99,6 +99,17 @@ describe("Mano erdvė is a block, not a screen", () => {
     expect(src).toMatch(/isOpening && intro/);
   });
 
+  it("a returning person's collapsed earlier conversation does not end the opening", () => {
+    // Prod walk 2026-10-15: the restored-history block counted as a turn, so
+    // every worker who had ever written in the chat lost their home for good.
+    const thread = stripComments(read(THREAD));
+    expect(thread).toMatch(/const fresh = items\.filter\(\(it\) => !\("history" in it && it\.history\)\);/);
+    expect(thread).toMatch(/fresh\.length <= 3/);
+    expect(thread).toMatch(/fresh\.every\(/);
+    const chat = stripComments(read("components/app/conversation/chat/conversation-chat.tsx"));
+    expect(chat).toMatch(/history: true,\s*embed: \(\s*<HistoryBlock/);
+  });
+
   it("a taller opening stays scrollable from its first line on a short screen", () => {
     // Auto margins centre the composition when it fits and collapse when it
     // does not; `justify-content: center` alone would clip the overflowing top
