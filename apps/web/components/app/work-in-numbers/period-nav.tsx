@@ -4,7 +4,6 @@ import {
   type WorkIntelligence,
   type WorkPeriodKey,
 } from "@/lib/journal/work-intelligence";
-import { organizationHoursBeyondJournal } from "@/lib/journal/organization-all-time";
 import { formatUtcDate } from "@/lib/time/display";
 
 import { fmtHours, type Translate } from "./format";
@@ -35,22 +34,17 @@ export function PeriodNav({
   const range = wi.focusRange
     ? (wi.periods.find((p) => p.key === "range") ?? null)
     : null;
-  // The all-time tile also names what organizations recorded (imported
-  // history, timesheet lines no journal entry holds) on a line of its own —
-  // the person's all-time work is both, but the two ledgers are never summed
-  // (#2169: an 800 h imported period was invisible at the headline).
-  const orgBeyond = organizationHoursBeyondJournal(wi);
   const tile = (
     label: string,
     p: { hours: number; entries: number; daysWorked: number; dayUnits: number },
     key: string,
   ) => (
     <>
-      <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
+      <span className="truncate font-mono text-meta uppercase tracking-label text-text-secondary">
         {label}
       </span>
       <span
-        className="font-display text-xl font-bold tabular-nums text-text-primary"
+        className="whitespace-nowrap font-display text-xl font-bold tabular-nums text-text-primary"
         data-testid={`wi-period-hours-${key}`}
       >
         {t("hours", { hours: fmtHours(p.hours, locale) })}
@@ -63,19 +57,10 @@ export function PeriodNav({
           ? ` · ${t("plusDayUnits", { days: fmtHours(p.dayUnits, locale) })}`
           : ""}
       </span>
-      {key === "all" && orgBeyond !== null && orgBeyond > 0 ? (
-        <span
-          className="text-meta tabular-nums text-text-secondary"
-          data-testid="wi-period-all-org-hours"
-          data-org-hours={orgBeyond}
-        >
-          {t("allTimeOrgRecorded", { hours: fmtHours(orgBeyond, locale) })}
-        </span>
-      ) : null}
     </>
   );
   const tileClass = (active: boolean) =>
-    `flex min-h-11 flex-col gap-0.5 rounded-md border px-3 py-2.5 transition-colors ${
+    `flex min-h-11 min-w-0 flex-col gap-0.5 rounded-md border px-3 py-2.5 transition-colors ${
       active
         ? "border-brand-blue bg-brand-blue/10"
         : "border-border-subtle bg-surface-1/50 hover:border-brand-blue/60"
@@ -83,9 +68,15 @@ export function PeriodNav({
   return (
     <nav
       aria-label={t("periodLabel")}
-      className="grid grid-cols-3 gap-2 sm:grid-cols-5"
+      className="flex flex-col gap-2"
       data-testid="wi-period-nav"
     >
+      {/* The windows read the JOURNAL only — an organization's span (months,
+          no days) is never placed into a journal window (#2169, 2026-10-15). */}
+      <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-text-muted" data-testid="wi-period-nav-scope">
+        {t("experience.periodsLabel")}
+      </span>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
       {WORK_PERIOD_KEYS.map((key: WorkPeriodKey) => {
         const p = wi.periods.find((x) => x.key === key)!;
         const active = wi.scope === key;
@@ -138,6 +129,7 @@ export function PeriodNav({
           </div>
         )
       ) : null}
+      </div>
     </nav>
   );
 }

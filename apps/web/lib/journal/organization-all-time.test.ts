@@ -149,14 +149,25 @@ describe("historical work is recognised from the record alone (#2169)", () => {
     expect(allTime.overlapping.map((p) => p.hours)).toEqual([800]);
   });
 
-  it("the Work Intelligence all-time tile names the 800 h beside the journal figure (2026-10-15)", async () => {
+  it("Work Intelligence shows the 800 h as its OWN primary figure beside the journal, never summed (owner P0 2026-10-15)", async () => {
     const { wi } = await readFor([PRODUCTION_PERIOD_RECORD]);
     expect(organizationHoursBeyondJournal(wi)).toBe(800);
-    // the tile renders it as a line of its own, from the model, never summed
-    const nav = readFileSync(join(__dirname, "..", "..", "components/app/work-in-numbers/period-nav.tsx"), "utf8");
-    expect(nav).toMatch(/const orgBeyond = organizationHoursBeyondJournal\(wi\);/);
-    expect(nav).toContain('data-testid="wi-period-all-org-hours"');
-    expect(nav).not.toMatch(/p\.hours \+ orgBeyond|orgBeyond \+ p\.hours/);
+    const APP = join(__dirname, "..", "..");
+    const scale = readFileSync(join(APP, "components/app/work-in-numbers/experience-scale.tsx"), "utf8");
+    // two figures, each with its own testid and source line
+    expect(scale).toContain('testId="wi-experience-journal"');
+    expect(scale).toContain('testId="wi-experience-org"');
+    expect(scale).toMatch(/const orgHours = organizationHoursBeyondJournal\(wi\);/);
+    // never one summed number
+    expect(scale).not.toMatch(/all\.hours \+ orgHours|orgHours \+ all\.hours|totalHours \+/);
+    // the period windows say they read the journal only, and carry no org figure
+    const nav = readFileSync(join(APP, "components/app/work-in-numbers/period-nav.tsx"), "utf8");
+    expect(nav).toContain('t("experience.periodsLabel")');
+    expect(nav).not.toMatch(/organizationHoursBeyondJournal|organizationAllTime/);
+    // both surfaces render the same block
+    for (const f of ["app/[locale]/dashboard/work-in-numbers/page.tsx", "components/app/journal-work-intelligence.tsx"]) {
+      expect(readFileSync(join(APP, f), "utf8"), f).toContain("<ExperienceScale wi={wi} locale={locale} t={t} />");
+    }
   });
 
   it("organization day records that describe a live journal entry are not named twice", () => {

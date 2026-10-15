@@ -26,6 +26,7 @@ import {
 import { HoursRemainder } from "@/components/app/work-in-numbers/hours-remainder";
 import { OrgLedger } from "@/components/app/work-in-numbers/org-ledger";
 import { PeriodNav } from "@/components/app/work-in-numbers/period-nav";
+import { ExperienceScale } from "@/components/app/work-in-numbers/experience-scale";
 import { SkillShareList } from "@/components/app/work-in-numbers/skill-share-list";
 
 /**
@@ -335,6 +336,7 @@ export async function JournalWorkIntelligence({
           <>
             {/* 1 · at a glance — every period real and visible; the chosen one
               scopes the detail below (owner §4, §12) */}
+            <ExperienceScale wi={wi} locale={locale} t={t} />
             <PeriodNav wi={wi} locale={locale} t={t} href={periodHref} />
 
             {/* 1a · plausibility checks (owner §13) — warn, never corrupt:

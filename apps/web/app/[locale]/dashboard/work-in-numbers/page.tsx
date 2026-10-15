@@ -9,6 +9,7 @@ import { GrowthKinds, type GrowthSkillDirection } from "@/components/app/work-in
 import { HoursRemainder } from "@/components/app/work-in-numbers/hours-remainder";
 import { OrgLedger } from "@/components/app/work-in-numbers/org-ledger";
 import { PeriodNav, scopeText } from "@/components/app/work-in-numbers/period-nav";
+import { ExperienceScale } from "@/components/app/work-in-numbers/experience-scale";
 import { SkillShareList } from "@/components/app/work-in-numbers/skill-share-list";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { Link } from "@/lib/i18n/navigation";
@@ -205,6 +206,14 @@ export default async function WorkInNumbersPage({
         </p>
       </header>
 
+      {/* 0 · THE SCALE — all time, journal and organization history as two
+          figures of their own (owner P0 2026-10-15). Never summed. */}
+      {wi ? (
+        <Card compact>
+          <ExperienceScale wi={wi} locale={locale} t={t} />
+        </Card>
+      ) : null}
+
       {/* 1 · THE ANSWER — one sentence, the scope in the same breath, the
           period's hours under it; the period selector right after so the
           person can change the window without leaving the answer */}
@@ -213,7 +222,7 @@ export default async function WorkInNumbersPage({
           <h2 id="wi-question" className="font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("numbers.question")}
           </h2>
-          <DominantLead answer={answer} period={period} scope={scope} locale={locale} t={t} />
+          <DominantLead answer={answer} period={period} scope={scope} locale={locale} t={t} compact />
           {wi ? (
             <>
               <PeriodNav wi={wi} locale={locale} t={t} href={periodHref} rangeHref={rangeHref} />
