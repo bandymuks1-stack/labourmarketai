@@ -1643,6 +1643,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261014090100_historical_consolidation_package_v1.sql",
       // 2026-10-14 (RED, needs-human-gate, NOT applied): brigade disband v1.
       "20261014190000_team_disband_v1.sql",
+      // 2026-10-15 (RED, needs-human-gate, NOT applied): GDPR erasure consent detach v1 (#856).
+      "20261015150000_privacy_consent_erasure_detach_v1.sql",
 ]);
   });
 
