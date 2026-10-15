@@ -50,6 +50,11 @@ export function buildJobsListJsonLd(input: {
   readonly description: string;
   readonly previews: readonly PublicVacancyPreview[];
   readonly genericTitle: string;
+  /** The SAME name the board shows for a row: the catalogue profession in the
+   *  reader's language when the ad carries a known slug. Without it the
+   *  publisher's occupation label is used (production 2026-10-15: the page
+   *  read "Teacher" while the JSON-LD said "Specialistofficer"). */
+  readonly localizedName?: (p: PublicVacancyPreview) => string | null;
 }): Record<string, unknown> {
   const base = `${input.origin.replace(/\/$/, "")}/${input.locale}/jobs`;
   return {
@@ -67,7 +72,7 @@ export function buildJobsListJsonLd(input: {
           "@type": "ListItem",
           position: i + 1,
           url: `${base}/${p.id}`,
-          name: positionName(p, input.genericTitle),
+          name: input.localizedName?.(p) ?? positionName(p, input.genericTitle),
         };
         return item;
       }),
@@ -81,19 +86,23 @@ export function buildJobDetailJsonLd(input: {
   readonly description: string;
   readonly preview: PublicVacancyPreview;
   readonly genericTitle: string;
+  /** The heading's own name — the catalogue profession in the reader's
+   *  language when known (see buildJobsListJsonLd). */
+  readonly localizedName?: string | null;
 }): Record<string, unknown> {
   const p = input.preview;
+  const shown = input.localizedName ?? positionName(p, input.genericTitle);
   const url = `${input.origin.replace(/\/$/, "")}/${input.locale}/jobs/${p.id}`;
   const about: Record<string, unknown> = {
     "@type": "Occupation",
-    name: positionName(p, input.genericTitle),
+    name: shown,
   };
   const salary = salaryOf(p);
   if (salary) about.estimatedSalary = salary;
   const page: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: positionName(p, input.genericTitle),
+    name: shown,
     description: input.description,
     url,
     inLanguage: input.locale,
