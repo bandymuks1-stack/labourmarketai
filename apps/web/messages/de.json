@@ -7338,7 +7338,19 @@
     "addableUnavailable": "Die Liste der verknüpften Arbeitskräfte konnte nicht geladen werden — Hinzufügen ist derzeit nicht möglich.",
     "inviteLinkNote": "Schicken Sie diesen Link an die Arbeitskraft (Nachricht, SMS, WhatsApp). Nur die eingeladene Person kann annehmen.",
     "inviteLinkCopy": "Link kopieren",
-    "inviteLinkCopied": "Kopiert"
+    "inviteLinkCopied": "Kopiert",
+    "disband": {
+      "start": "Brigade auflösen",
+      "explain": "{count, plural, one {Die Mitgliedschaft von # Mitglied endet} other {Die Mitgliedschaften von # Mitgliedern enden}}, und die Brigade wird Teil der Historie. Nichts wird gelöscht: ihre Arbeiten, Angebote und Nachrichten bleiben. Offene Arbeit (eine aktive Zuweisung, ein offenes Angebot oder eine unbeantwortete Anfrage) muss zuerst abgeschlossen werden.",
+      "confirm": "Auflösen",
+      "cancel": "Behalten",
+      "done": "Die Brigade wurde aufgelöst. Ihre Historie bleibt erhalten.",
+      "openWork": "Nicht aufgelöst: Die Brigade hat noch offene Arbeit. Schließen Sie zuerst die aktive Zuweisung, das offene Angebot oder die unbeantwortete Anfrage ab.",
+      "notFound": "Diese Brigade wurde unter Ihren Brigaden nicht gefunden.",
+      "failed": "Nicht aufgelöst: Eine Mitgliedschaft konnte nicht beendet werden. Es wurde nichts geändert.",
+      "historyTitle": "{count, plural, one {# aufgelöste Brigade} other {# aufgelöste Brigaden}}",
+      "historyLine": "aufgelöst am {date}"
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Dieser Kolonne eine Anfrage senden",

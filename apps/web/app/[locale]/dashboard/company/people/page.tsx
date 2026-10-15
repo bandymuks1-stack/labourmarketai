@@ -392,6 +392,7 @@ export default async function CompanyPeoplePage({
           invitationsApplied={teamBrigades.invitationsApplied}
           detailsApplied={teamBrigades.detailsApplied}
           enquiriesApplied={teamBrigades.enquiriesApplied}
+          disbanded={teamBrigades.disbanded ?? []}
           projects={managedProjects
             .filter((p) => p.status !== "completed")
             .map((p) => ({ id: p.id, title: p.title }))}

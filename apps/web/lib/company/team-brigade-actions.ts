@@ -8,8 +8,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createAndSendInvitations, resendInvitationAction } from "@/lib/invitations/actions";
 import {
   createTeamBrigade,
+  disbandTeamBrigade,
   lookupLinkedWorkerEmail,
   type CreateTeamOutcome,
+  type DisbandTeamOutcome,
   type TeamAvailabilityStatus,
 } from "./team-brigades";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
@@ -71,6 +73,22 @@ export async function createTeamAction(
     });
   }
   return { outcome };
+}
+
+/**
+ * Disband a brigade the caller owns (owner directive 2026-10-14 §3.3). The
+ * brigade becomes an archived organization; each member's membership ends
+ * through the canonical lifecycle writer; assignments, offers, enquiries,
+ * messages and journal entries stay as history. Refused while open work
+ * remains — the owner closes it first with the controls that already exist.
+ */
+export async function disbandTeamAction(
+  teamId: string,
+  expectedWorkspaceId?: string,
+): Promise<{ outcome: DisbandTeamOutcome }> {
+  await refuseStaleWorkspace(expectedWorkspaceId);
+  if (!/^[0-9a-f-]{36}$/i.test(teamId)) return { outcome: "not_found" };
+  return disbandTeamBrigade(teamId);
 }
 
 export type TeamInviteOutcome =

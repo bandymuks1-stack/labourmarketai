@@ -106,7 +106,11 @@ describe("teams migration — additive typed rows on the EXISTING organizations 
         // get_team_capability_summary_v1 (among six) to close a NULL-flip
         // authorization bypass (owner MASTER ORDER §4). The documented
         // hardening re-definition is not a parallel implementation.
-        f !== "20260824130000_null_safe_owner_guards_v2.sql",
+        f !== "20260824130000_null_safe_owner_guards_v2.sql" &&
+        // 2026-10-14 brigade disband v1 re-defines create_team_v1 with ONE
+        // change — its cap of 20 counts active (non-archived) brigades — and
+        // explicitly revokes anon. A documented successor, not a parallel.
+        f !== "20261014190000_team_disband_v1.sql",
     );
     expect(others.length).toBeGreaterThan(100);
     for (const f of others) {

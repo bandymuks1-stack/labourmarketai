@@ -7338,7 +7338,19 @@
     "addableUnavailable": "The linked-worker list could not be loaded — adding is not possible right now.",
     "inviteLinkNote": "Send this link to the worker (message, SMS, WhatsApp). Only the invited person can accept it.",
     "inviteLinkCopy": "Copy link",
-    "inviteLinkCopied": "Copied"
+    "inviteLinkCopied": "Copied",
+    "disband": {
+      "start": "Disband brigade",
+      "explain": "{count, plural, one {The # member's membership ends} other {The # members' memberships end}}, and the brigade moves to history. Nothing is deleted: its work, offers and messages stay. Open work (an active assignment, an open offer or an unanswered enquiry) must be closed first.",
+      "confirm": "Disband",
+      "cancel": "Keep it",
+      "done": "The brigade was disbanded. Its history is kept.",
+      "openWork": "Not disbanded: the brigade still has open work. Close the active assignment, the open offer or the unanswered enquiry first.",
+      "notFound": "This brigade could not be found among yours.",
+      "failed": "Not disbanded: a membership could not be ended. Nothing was changed.",
+      "historyTitle": "{count, plural, one {# disbanded brigade} other {# disbanded brigades}}",
+      "historyLine": "disbanded {date}"
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Ask this team about work",
