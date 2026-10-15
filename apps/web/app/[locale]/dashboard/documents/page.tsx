@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { CredentialValidityState } from "@/lib/documents/credential-validity";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { readMyPreferredCountries } from "@/lib/documents/my-countries";
 import {
@@ -215,15 +216,11 @@ export default async function WorkerDocumentsPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  let activeRole: Role | null = null;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("active_role")
-      .eq("id", user.id)
-      .single();
-    activeRole = (profile?.active_role as Role | null) ?? null;
-  }
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const activeRole: Role | null = user
+    ? (((await getSessionProfile()).profile?.active_role as Role | null) ?? null)
+    : null;
 
   const sp = await searchParams;
 
@@ -324,9 +321,15 @@ export default async function WorkerDocumentsPage({
   // constant so the disabled branch issues exactly the queries it issued
   // before (today the constant is `true`, so that arm is unreachable; guarding
   // it keeps this change semantics-preserving if it is ever flipped).
-  const [centre, docsConsent] = await Promise.all([
+  //
+  // The person's preferred countries (below) depend only on the session too,
+  // so they start in the same batch instead of as a further serial stage.
+  const [centre, docsConsent, myCountries] = await Promise.all([
     getWorkerDocumentCentre(),
     DOCUMENTS_READINESS_ENABLED ? getDocsConsent() : Promise.resolve(null),
+    DOCUMENTS_READINESS_ENABLED && user
+      ? readMyPreferredCountries(user.id)
+      : Promise.resolve([] as string[]),
   ]);
 
   if (!DOCUMENTS_READINESS_ENABLED) {
@@ -360,7 +363,7 @@ export default async function WorkerDocumentsPage({
   // (workers.preferred_countries, owner-scoped by RLS) lead the chip row. It
   // only orders the chips and selects nothing: a preference is not a right
   // to work, and the checklist still appears only after the person picks.
-  const myCountries = user ? await readMyPreferredCountries(user.id) : [];
+  // (Read in the batch above.)
   const orderedCountries = [
     ...DOCUMENT_COUNTRIES.filter((c) => myCountries.includes(c)),
     ...DOCUMENT_COUNTRIES.filter((c) => !myCountries.includes(c)),
