@@ -31,12 +31,23 @@ import type { Notification } from "@/lib/auth/context";
  * lib/guards/notification-spine.test.ts.
  */
 export async function SpineStream({ activeRole }: { activeRole: Role | null }) {
-  const [spineCounts, durable] = await Promise.all([
-    getSpineCounts(),
+  // [perf] the streamed spine holds the HTML document open until it resolves
+  // (every dashboard page carries it). Production 2026-10-15: right after a
+  // deploy, documents arrived in 0.4–0.7 s TTFB but finished only after
+  // 25–44 s. These two numbers say whether this boundary is where that time
+  // goes. Durations only — no identity, no counts.
+  const spineStart = Date.now();
+  const timed = <T,>(p: Promise<T>): Promise<{ v: T; ms: number }> =>
+    p.then((v) => ({ v, ms: Date.now() - spineStart }));
+  const [counts, durableRead] = await Promise.all([
+    timed(getSpineCounts()),
     // Durable events (owner-gated store; [] until applied). Stored facts with
     // real timestamps and a persisted read state — NOT derived counts.
-    getDurableNotifications(),
+    timed(getDurableNotifications()),
   ]);
+  const spineCounts = counts.v;
+  const durable = durableRead.v;
+  console.info("[perf] spine-stream", { ms: Date.now() - spineStart, counts_ms: counts.ms, durable_ms: durableRead.ms });
   const navBadges = buildNavBadges(spineCounts);
   const derived = buildSpineNotifications(spineCounts, activeRole ?? "worker");
   // Weekly personal digest — materialized read-time, at most once per ISO
