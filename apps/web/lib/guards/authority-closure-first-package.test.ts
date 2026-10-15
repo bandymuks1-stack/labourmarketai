@@ -75,7 +75,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261014090100_",
       // 2026-10-14 brigade disband v1 (RED, needs-human-gate, NOT applied).
       "20261014190000_",
-      // 2026-10-15 ESCO typeahead computed field (GREEN, additive function).
+      // 2026-10-15 ESCO typeahead search function (SECURITY DEFINER taxonomy read, EXECUTE authenticated only).
       "20261015120000_",
       // 2026-10-08 owner-approved work-plan scope extension (roster + engagement).
       "20261007140000_",

@@ -16,11 +16,11 @@ import { ESCO_AUTOCOMPLETE_ENABLED } from "@/lib/config/esco";
  */
 
 const RELATION_NOT_FOUND_CODE = "42P01";
-/** PostgREST computed field (migration 20261015120000): lower(label). */
-export const LOWER_FIELD = "esco_label_lower";
-/** The field is not there yet (unapplied environment): column/function unknown. */
-export function isMissingComputedField(code: string | undefined): boolean {
-  return code === "42703" || code === "42883" || code === "PGRST100" || code === "PGRST204";
+/** Indexed prefix search (migration 20261015120000). */
+export const SEARCH_RPC = "search_esco_labels_v1";
+/** The function is not there yet (unapplied environment). */
+export function isMissingSearchRpc(code: string | undefined): boolean {
+  return code === "PGRST202" || code === "42883";
 }
 const MAX_RESULTS = 10;
 
@@ -47,20 +47,23 @@ export async function searchEscoLabels(
   if (q.length < 2) return [];
 
   const supabase = await createClient();
-  // FAST PATH (production 2026-10-15): `esco_label_lower` is a PostgREST
-  // computed field — lower(label), inlined — so this prefix match and order
-  // use esco_labels_typeahead_idx (locale, lower(label)): 4.8 ms instead of
-  // 1,665 ms per keystroke (migration 20261015120000). The ILIKE query below
-  // is the same answer for an environment where the field is not applied yet.
-  const fast = await asAny(supabase)
-    .from("esco_labels")
-    .select("concept_id, concept_type, label")
-    .eq("locale", locale)
-    .eq("concept_type", conceptType)
-    .like(LOWER_FIELD, `${escapeLike(q.toLocaleLowerCase())}%`)
-    .order(LOWER_FIELD, { ascending: true })
-    .limit(MAX_RESULTS);
-  const { data, error } = fast.error && isMissingComputedField(fast.error.code)
+  // FAST PATH (production 2026-10-15): `search_esco_labels_v1` matches the
+  // prefix as the range esco_labels_typeahead_idx (locale, lower(label))
+  // serves — 0.26 ms instead of 1.3–1.9 s per keystroke for a signed-in
+  // person. A filter on esco_labels itself cannot use that index: the table's
+  // RLS policies are a security barrier, and lower()/LIKE/ILIKE are not
+  // leakproof, so they run as a filter over every label of the locale. The
+  // function applies the same visibility the policy does. The raw prefix is
+  // passed (no LIKE escaping: the function does not use LIKE).
+  const fast = await asAny(supabase).rpc(SEARCH_RPC, {
+    p_locale: locale,
+    p_concept_type: conceptType,
+    p_prefix: q,
+    p_limit: MAX_RESULTS,
+  });
+  // The ILIKE query is the same answer for an environment where the
+  // function is not applied yet — slower, never different.
+  const { data, error } = fast.error && isMissingSearchRpc(fast.error.code)
     ? await asAny(supabase)
         .from("esco_labels")
         .select("concept_id, concept_type, label")
