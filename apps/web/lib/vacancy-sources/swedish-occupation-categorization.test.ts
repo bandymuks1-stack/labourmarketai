@@ -130,3 +130,37 @@ describe("description-text pollution stays fixed", () => {
     expect(r.origin).toBe("derived");
   });
 });
+
+/**
+ * TITLE FALLBACK MAY NOT OVERRULE A PUBLISHER WHO NAMED A NON-CATALOGUE
+ * OCCUPATION (production 2026-10-15). The page showed "Teacher" for an ad the
+ * publisher filed as "Specialistofficer" — not a translation error: the title
+ * word "lärare" picked `teacher`. Each pair below is a measured collision.
+ */
+describe("a publisher's non-catalogue occupation is not overruled by a title word", () => {
+  const COLLISIONS: readonly [string, string][] = [
+    ["Specialistofficer", "Militär lärare sjösäkerhet"],
+    ["Affärsutvecklare", "Business Developer"],
+    ["Doktorand", "Doktorand i energi- och miljöteknik med inriktning elektroteknik"],
+    ["Bilrekonditionerare", "Bil rekondare / Bil vårdare"],
+    ["Hundtrimmare", "Är du vår nya hundfrisör på Dogman and Friends på Väla?"],
+  ];
+  for (const [occupationRaw, titleRaw] of COLLISIONS) {
+    it(`"${titleRaw}" filed as ${occupationRaw} → no catalogue profession`, () => {
+      const r = categorizeVacancy({ titleRaw, descriptionRaw: "", occupationRaw });
+      expect(r.professionSlug).toBeNull();
+      expect(r.origin).toBe("derived");
+    });
+  }
+
+  it("the title fallback still works when the publisher's label is merely unknown", () => {
+    // Measured as CORRECT in production: keep these.
+    expect(categorizeVacancy({ titleRaw: "C-chaufför", descriptionRaw: "", occupationRaw: "Fjärrbilsförare" }).professionSlug).toBe("driver");
+    expect(categorizeVacancy({ titleRaw: "AI-Driven Full-Stack Developer", descriptionRaw: "", occupationRaw: "Fullstack-utvecklare" }).professionSlug).toBe("software_developer");
+    expect(categorizeVacancy({ titleRaw: "Danslärare", descriptionRaw: "", occupationRaw: "Danspedagog" }).professionSlug).toBe("teacher");
+  });
+
+  it("a recognised publisher label still wins outright", () => {
+    expect(categorizeVacancy({ titleRaw: "Business Developer", descriptionRaw: "", occupationRaw: "Lagerarbetare" }).professionSlug).toBe("warehouse_worker");
+  });
+});
