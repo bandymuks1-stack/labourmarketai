@@ -65,7 +65,15 @@ for (const slot of ["worker", "manager", "owner"] as const) {
       const trace = page.getByTestId("home-trace");
       const shown = await trace.waitFor({ state: "attached", timeout: 20_000 }).then(() => true).catch(() => false);
       if (slot === "worker") {
-        if (!shown) problems.push("home: 'Kas pasikeitė' region missing for a worker");
+        if (!shown) {
+          // Say WHY it is missing: which home rendered, which regions came,
+          // whether a region is still streaming (ids and counts only).
+          const path = new URL(page.url()).pathname;
+          const today = await page.getByTestId("today-screen").count();
+          const regions = await page.locator("[data-region]").evaluateAll((els) => els.map((e) => `${e.getAttribute("data-region")}:${e.getAttribute("data-state")}`));
+          const testids = await page.locator("main [data-testid]").evaluateAll((els) => els.slice(0, 25).map((e) => e.getAttribute("data-testid")));
+          problems.push(`home: 'Kas pasikeitė' region missing for a worker (path=${path} today-screen=${today} regions=[${regions.join(",")}] ids=[${testids.join(",")}])`);
+        }
         else if ((await trace.getAttribute("data-state")) === "unknown") problems.push("home: trace says its read failed");
         else notes.push(`home trace: ${(await trace.getAttribute("data-state")) ?? "?"}`);
       } else {
