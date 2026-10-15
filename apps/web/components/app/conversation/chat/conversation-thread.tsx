@@ -8,7 +8,7 @@ import type { ChatMessage } from "./types";
  *  (e.g. the real CV flow / inline form / booking action rendered in-stream). */
 export type ThreadItem =
   | { id: string; message: ChatMessage }
-  | { id: string; embed: ReactNode };
+  | { id: string; embed: ReactNode; history?: true };
 
 /**
  * Turn-pair rhythm.
@@ -69,13 +69,17 @@ export function ConversationThread({
 }) {
   const endRef = useRef<HTMLDivElement>(null);
 
-  /** Nothing has happened yet — the screen holds only the assistant's
-   *  opening (greeting, and possibly the real state brief). One user turn,
-   *  one embedded flow or restored history ends the opening state. */
+  /** Nothing has happened yet IN THIS VISIT — the screen holds only the
+   *  assistant's opening (greeting, and possibly the real state brief). One
+   *  user turn or one embedded flow ends the opening state. The COLLAPSED
+   *  earlier-conversation block does not: a returning worker who once wrote
+   *  in the chat must still open on their home (ŠIANDIEN), not lose it for
+   *  good (prod walk 2026-10-15: every returning worker saw no home). */
+  const fresh = items.filter((it) => !("history" in it && it.history));
   const isOpening =
     !typing &&
-    items.length <= 3 &&
-    items.every((it) => "message" in it && it.message.role === "assistant");
+    fresh.length <= 3 &&
+    fresh.every((it) => "message" in it && it.message.role === "assistant");
 
   /** The opening composition reads TOP-DOWN when the composer is not inside
    *  it (an opening context such as ŠIANDIEN hands the composer to the
