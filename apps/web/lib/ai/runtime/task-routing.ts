@@ -720,7 +720,7 @@ export function resolveRouteForPolicy(
    * needs the MODEL and call sites must never know the model (guard:
    * ai-task-routing). The caller supplies token SIZE; the router prices it.
    */
-  const modelAliasForTier = TIER_MODEL_ALIAS[tier];
+  let modelAliasForTier = TIER_MODEL_ALIAS[tier];
   const costProvider: AiCostProvider = ctx.provider ?? "anthropic";
 
   /* Price the CONCRETE model that will run, never the tier alias.
@@ -739,8 +739,8 @@ export function resolveRouteForPolicy(
     policy.expectedOutputTokens,
     ctx.maxOutputTokens ?? 0,
   );
-  const derivedEstimate =
-    ctx.expectedInputTokens === undefined || modelAliasForTier === null
+  const estimateForAlias = (alias: AiModelAlias | null): number | null | undefined =>
+    ctx.expectedInputTokens === undefined || alias === null
       ? undefined
       : costProvider === "local"
         ? // Self-hosted: the operator already paid for the hardware. Free by
@@ -751,10 +751,44 @@ export function resolveRouteForPolicy(
             // is honestly unpriceable here rather than wrong.
             null
           : estimateCostUsd(
-              modelIdForAlias(modelAliasForTier, costProvider),
+              modelIdForAlias(alias, costProvider),
               ctx.expectedInputTokens,
               outputBound,
             );
+  let derivedEstimate = estimateForAlias(modelAliasForTier);
+
+  /* The preferred tier's model carries no reviewed price FOR THIS PROVIDER,
+   * but the policy's own fallback tier does → run on the fallback tier,
+   * surfaced (fallbackApplied + reason), instead of refusing every run.
+   *
+   * Observed 2026-10-13..15 (#2407): with Gemini serving, `extract_cv` and
+   * `structure_future_work` prefer "standard" → gemini-2.5-flash, which is
+   * registered `enabled: false` with no reviewed price, so 19 of 60 runs in
+   * 7 days were blocked `cost_unpriced` before any call — while the enabled,
+   * priced gemini-3.5-flash-lite sat on the policy's declared fallback tier.
+   *
+   * Only the first route of a run moves (no escalation, no provider-failure
+   * retry): an escalation that lands on an unpriced tier must not quietly
+   * climb back down onto the model that just failed. The fallback's estimate
+   * is the one the ceiling below is judged on; if the fallback is unpriced
+   * too, the run is blocked exactly as before. */
+  if (
+    ctx.estimatedCostUsd === undefined &&
+    derivedEstimate === null &&
+    !escalated &&
+    !fallbackApplied &&
+    policy.fallbackTier !== tier
+  ) {
+    const fallbackAlias = TIER_MODEL_ALIAS[policy.fallbackTier];
+    const fallbackEstimate = estimateForAlias(fallbackAlias);
+    if (typeof fallbackEstimate === "number") {
+      reason = `preferred tier "${tier}" has no owner-reviewed price on provider "${costProvider}" — fell back to priced tier "${policy.fallbackTier}" (quality downgrade surfaced, not silent)`;
+      tier = policy.fallbackTier;
+      modelAliasForTier = fallbackAlias;
+      derivedEstimate = fallbackEstimate;
+      fallbackApplied = true;
+    }
+  }
   const estimate = ctx.estimatedCostUsd ?? derivedEstimate;
 
   // An unpriced model makes the ceiling UNCHECKABLE. A budget that cannot be
