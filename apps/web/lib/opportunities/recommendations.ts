@@ -3,7 +3,11 @@ import "server-only";
 import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
-import { loadWorkerOpportunities, type OpportunityCard } from "./load-worker-opportunities";
+import {
+  loadWorkerOpportunities,
+  loadWorkerPlatformDemand,
+  type OpportunityCard,
+} from "./load-worker-opportunities";
 import type {
   ExternalOpportunityCardV1,
   ExternalVacanciesResultV1,
@@ -137,6 +141,28 @@ const loadRecommendationsResult = cache(
     };
   },
 );
+
+/**
+ * The aggregate spine count ONLY: unseen recommendations over the platform's
+ * own demand. Identical to `newCount` above — the same board derivation, the
+ * same seen state, the same 0 while the seen store is absent — but read
+ * through `loadWorkerPlatformDemand`, which skips the external public-source
+ * ads the count never looks at. The notification spine renders on EVERY
+ * dashboard page, so it must not pay for the job-board's supply reads.
+ */
+export const loadUnseenRecommendationCount = cache(async (): Promise<number> => {
+  const board = await loadWorkerPlatformDemand();
+  if (board.kind !== "ready") return 0;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 0;
+  const seen = toSeenState(await readMyOpportunitySeen(supabase, user.id));
+  return seen.available
+    ? countUnseenRecommendations(deriveJobRecommendations(board.opportunities, seen, Date.now()))
+    : 0;
+});
 
 const DEFAULT_LIMIT = 3;
 

@@ -6,7 +6,10 @@ import {
   type SavedVacancyRow,
   type WorkerReadiness,
 } from "@/lib/opportunities/load-worker-opportunities";
-import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations";
+import {
+  getWorkerJobRecommendations,
+  loadUnseenRecommendationCount,
+} from "@/lib/opportunities/recommendations";
 import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
 import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
@@ -281,8 +284,11 @@ export async function getNewMarketplaceMatchCount(): Promise<number> {
     // attention count. Before W3 row 5 it borrowed the worker-overview card's
     // tag; that card is gone, and borrowing another render surface's name
     // would say the person was shown rows they were not.
-    const view = await loadWorkerOpportunityMatches({});
-    return view.kind === "ready" ? view.newCount : 0;
+    //
+    // The count reads only the platform's own demand (the same derivation
+    // `newCount` uses), never the external ads: this runs on every dashboard
+    // page, and the external supply reads were the heaviest part of it.
+    return await loadUnseenRecommendationCount();
   } catch {
     return 0;
   }

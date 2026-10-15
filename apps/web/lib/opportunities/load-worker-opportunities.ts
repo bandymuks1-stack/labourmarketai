@@ -178,9 +178,61 @@ export interface WorkerOpportunitiesOptions {
   };
 }
 
+type ReadyBoard = Extract<WorkerOpportunitiesResult, { kind: "ready" }>;
+
+/** The board WITHOUT the external public-source supply: the platform's own
+ *  demand, matched by the same engine, plus the worker's own signals. */
+export type WorkerPlatformDemandResult =
+  | { readonly kind: "no-worker" }
+  | (Omit<ReadyBoard, "externalVacancies" | "savedVacancies"> & {
+      readonly externalVacancies: null;
+    });
+
 export async function loadWorkerOpportunities(
   options?: WorkerOpportunitiesOptions,
 ): Promise<WorkerOpportunitiesResult> {
+  const board = await loadBoard(options, true);
+  if (board.kind !== "ready") return board;
+  if (board.externalVacancies === null) throw new Error("external supply was requested");
+  return { ...board, externalVacancies: board.externalVacancies };
+}
+
+/**
+ * The SAME board minus the external public-source ads and the saved-ad
+ * previews — for a caller that needs only the platform's own demand (the
+ * notification spine's "new matching jobs" count, which every dashboard page
+ * renders). `opportunities`, readiness and the worker's own signals are
+ * computed by exactly the code below, so a count derived from them equals the
+ * full board's.
+ *
+ * WHY (production 2026-10-15): the spine ran the full board on every dashboard
+ * page, so each page view also paid the external supply chain — profile-pool
+ * search, newest-ads search, freshness read, saved-ad previews — against the
+ * largest table, for a number that never reads it. Those reads held pooled
+ * database connections while the page's own reads queued behind them.
+ */
+export async function loadWorkerPlatformDemand(): Promise<WorkerPlatformDemandResult> {
+  const board = await loadBoard(undefined, false);
+  if (board.kind !== "ready") return board;
+  // `savedVacancies` is left out on purpose: its previews were not read, and
+  // an empty list would say "no saved ads" when we never looked.
+  const { kind, readiness, needsDataAccess, interestAvailable, vacancyInterestAvailable,
+    vacancyInterestById, handoffByVacancy, savedAvailable, savedRequestIds,
+    myInterestRows, opportunities } = board;
+  return { kind, readiness, needsDataAccess, interestAvailable, vacancyInterestAvailable,
+    vacancyInterestById, handoffByVacancy, savedAvailable, savedRequestIds,
+    myInterestRows, opportunities, externalVacancies: null };
+}
+
+async function loadBoard(
+  options: WorkerOpportunitiesOptions | undefined,
+  readExternalSupply: boolean,
+): Promise<
+  | { readonly kind: "no-worker" }
+  | (Omit<ReadyBoard, "externalVacancies"> & {
+      readonly externalVacancies: ExternalVacanciesResultV1 | null;
+    })
+> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -245,20 +297,24 @@ export async function loadWorkerOpportunities(
     // External public-source ads, RLS-scoped through the worker's OWN client —
     // a board that needed service_role to render would mean the policy was
     // wrong. Matched with the SAME subject the platform demands use below.
-    loadExternalVacancyCards(supabase, ctx.subject, {
-      nowIso,
-      professionSlug: options?.externalDiscovery?.professionSlug ?? null,
-      country: options?.externalDiscovery?.country ?? null,
-    }),
+    readExternalSupply
+      ? loadExternalVacancyCards(supabase, ctx.subject, {
+          nowIso,
+          professionSlug: options?.externalDiscovery?.professionSlug ?? null,
+          country: options?.externalDiscovery?.country ?? null,
+        })
+      : null,
     // Own saved PUBLIC VACANCIES — the second source of the same bookmark. The
     // ids come from the worker's own rows; the titles come from the live ads
     // through the same browsable predicate the board uses, so an expired
     // bookmark drops out instead of rendering a job that no longer exists.
-    listSavedPublicVacancyIds(supabase, ctx.workerId).then((saved) =>
-      saved.available && saved.vacancyIds.size > 0
-        ? listPublicVacancyPreviewsByIds(supabase, [...saved.vacancyIds], nowIso)
-        : null,
-    ),
+    readExternalSupply
+      ? listSavedPublicVacancyIds(supabase, ctx.workerId).then((saved) =>
+          saved.available && saved.vacancyIds.size > 0
+            ? listPublicVacancyPreviewsByIds(supabase, [...saved.vacancyIds], nowIso)
+            : null,
+        )
+      : null,
   ]);
   const journalEntryCount =
     typeof entryCountRes?.count === "number" ? entryCountRes.count : 0;
@@ -418,7 +474,7 @@ export async function loadWorkerOpportunities(
   );
   // The SAME join for the second source: a vacancy interest whose ad is on
   // this render is "still open"; one whose ad expired keeps its snapshot.
-  for (const card of externalVacancies.cards) {
+  for (const card of externalVacancies?.cards ?? []) {
     if (!card.vacancyId) continue;
     liveNeedById.set(vacancyLiveKey(card.vacancyId), {
       roleText: card.view.title,
