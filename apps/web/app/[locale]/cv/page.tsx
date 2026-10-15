@@ -14,6 +14,8 @@ import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
 import { deriveCareerJourney, type JourneyLevel } from "@/lib/cv-export/career-journey";
 import { CareerJourneyMap, type CareerJourneyLabels } from "@/components/app/cv/career-journey-map";
+import { HomeTrace } from "@/components/app/home/home-trace";
+import { toActiveLocale } from "@/lib/i18n/config";
 import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
 import { presentSkills, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
 import {
@@ -874,6 +876,15 @@ export default async function VerifiedCvPage({
 
         {/* THE CAREER JOURNEY — screen-only route over the same rows. */}
         {template !== "eu" ? <CareerJourneyMap journey={journey} labels={journeyLabels} /> : null}
+
+        {/* THE SHARED CONSEQUENCE TRACE (owner 2026-10-14 §4): the same
+            chains the home draws, here only the work that feeds this CV —
+            recorded → confirmed → Living CV → matching. Screen-only. */}
+        {template !== "eu" ? (
+          <div className="print:hidden">
+            <HomeTrace locale={toActiveLocale(locale)} surface="cv" />
+          </div>
+        ) : null}
 
         <header className={`rounded-xl border-2 border-ink-500 ${compact ? "p-4" : "p-6"}`}>
           <p className="font-mono text-meta uppercase tracking-widest text-text-muted">

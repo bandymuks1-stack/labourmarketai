@@ -32,7 +32,7 @@ describe("consequence trace loader — authorization and scope", () => {
     expect(code).toContain("listJournalEntries(caller, { workerId, limit: TRACE_ENTRY_WINDOW })");
     expect(code).toContain("readConfirmedWorkBySkill(");
     expect(code).toContain("readEntrySkillSlugs(");
-    expect(code).toContain("loadHomeEvents()");
+    expect(code).toContain("readMyNotificationEvents(supabase, TRACE_EVENTS_WINDOW)");
   });
 
   it("a thrown read degrades to UNKNOWN (null entries), never to an empty journal", () => {

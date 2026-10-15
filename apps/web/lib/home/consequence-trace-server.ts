@@ -15,7 +15,7 @@ import {
   type ConsequenceTrace,
   type TraceEntryInput,
 } from "./consequence-trace";
-import { loadHomeEvents } from "./home-server";
+import { readMyNotificationEvents } from "@/lib/notifications/events";
 
 /**
  * THE CONSEQUENCE TRACE LOADER — the signed-in person's own chains, read
@@ -27,7 +27,7 @@ import { loadHomeEvents } from "./home-server";
  *   skill links         ← `readEntrySkillSlugs` (those entries only)
  *   confirmed work      ← `readConfirmedWorkBySkill` (the SAME counts
  *                         matching reads)
- *   state changes       ← `loadHomeEvents` (the home's request-cached feed)
+ *   state changes       ← `readMyNotificationEvents` (the same feed and window the home reads)
  *
  * Authorization is the caller's own session (`createClient()`, RLS as the
  * signed-in user). No service role, no admin client, no identity argument —
@@ -42,9 +42,17 @@ import { loadHomeEvents } from "./home-server";
 export const TRACE_ENTRY_WINDOW = 30;
 /** How far back a chain may end and still be "what changed". */
 export const TRACE_WINDOW_DAYS = 14;
+/** The notification window — the same 20 the home's events region reads. */
+export const TRACE_EVENTS_WINDOW = 20;
 
 export const loadConsequenceTrace = cache(async (): Promise<ConsequenceTrace> => {
-  const eventsPromise = loadHomeEvents();
+  // The notification feed, read directly (the same reader and window the
+  // home's events region uses) — so a page that draws only the trace (the
+  // Living CV) does not pull in the whole home reader graph.
+  const eventsPromise = createClient()
+    .then((supabase) => readMyNotificationEvents(supabase, TRACE_EVENTS_WINDOW))
+    .then((feed) => (feed.kind === "ready" ? feed.events : null))
+    .catch(() => null);
   const sinceIso = new Date(Date.now() - TRACE_WINDOW_DAYS * 86_400_000).toISOString();
 
   let entries: TraceEntryInput[] | null = null;

@@ -1,6 +1,7 @@
+import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
-import { Region, Unreadable, retryLabels } from "@/components/app/home/home-regions";
+import { Region, Unreadable, retryLabels } from "@/components/app/home/region-frame";
 import { TraceMark, TraceStepNode } from "@/components/app/home/trace-step-node";
 import { loadConsequenceTrace } from "@/lib/home/consequence-trace-server";
 import {
@@ -39,17 +40,46 @@ import { formatUtcDate } from "@/lib/time/display";
 
 const NOTE = "text-support text-text-secondary";
 
-export async function HomeTrace({ locale }: { readonly locale: ActiveLocale }) {
-  return <HomeTraceView locale={locale} trace={await loadConsequenceTrace()} />;
+/** `surface="cv"`: the SAME trace on the Living CV (Future Experience B) —
+ *  only the journal chains (the work that feeds the CV), no region number,
+ *  its own test id. One reader, one wording, one component everywhere. */
+export async function HomeTrace({
+  locale,
+  surface = "home",
+}: {
+  readonly locale: ActiveLocale;
+  readonly surface?: "home" | "cv";
+}) {
+  return <HomeTraceView locale={locale} trace={await loadConsequenceTrace()} surface={surface} />;
 }
 
 export async function HomeTraceView({
   locale,
-  trace,
+  trace: input,
+  surface = "home",
 }: {
   readonly locale: ActiveLocale;
   readonly trace: ConsequenceTrace;
+  readonly surface?: "home" | "cv";
 }) {
+  // On the Living CV only the work chains belong; bookings and other state
+  // changes stay on the home.
+  const trace: ConsequenceTrace =
+    surface === "cv" && input.kind === "known"
+      ? { ...input, items: input.items.filter((i) => i.origin === "journal"), eventsUnknown: false }
+      : input;
+  // One frame, two surfaces — each keeps a LITERAL test id (the e2e guards
+  // and the production walks find surfaces by their literal ids).
+  const frame = (state: "known" | "unknown", aside: ReactNode, body: ReactNode) =>
+    surface === "cv" ? (
+      <Region id="trace" index="" title={t("title")} state={state} testId="cv-trace" aside={aside}>
+        {body}
+      </Region>
+    ) : (
+      <Region id="trace" index="02" title={t("title")} state={state} testId="home-trace" aside={aside}>
+        {body}
+      </Region>
+    );
   const [t, tChain, tTypes, tRole, tSkill] = await Promise.all([
     getTranslations("homeTrace"),
     getTranslations("homeRegions.chain"),
@@ -75,9 +105,9 @@ export async function HomeTraceView({
 
   if (trace.kind === "unknown") {
     return (
-      <Region id="trace" index="02" title={t("title")} state="unknown" testId="home-trace" aside={allLink}>
+      frame("unknown", allLink, <>
         <Unreadable text={t("unknown")} testid="home-trace-unknown" labels={rl} />
-      </Region>
+      </>)
     );
   }
 
@@ -122,7 +152,10 @@ export async function HomeTraceView({
   if (trace.eventsUnknown) flags.push(t("eventsUnknown"));
 
   return (
-    <Region id="trace" index="02" title={t("title")} state="known" testId="home-trace" aside={allLink}>
+    frame(
+      "known",
+      allLink,
+      <>
       {trace.items.length === 0 ? (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between" data-testid="home-trace-empty">
           <p className={NOTE}>{t("empty")}</p>
@@ -196,6 +229,7 @@ export async function HomeTraceView({
           {t("legend.derived")}
         </span>
       </p>
-    </Region>
+    </>,
+    )
   );
 }
