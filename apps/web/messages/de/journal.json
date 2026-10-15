@@ -870,6 +870,7 @@
     },
     "hours": "{hours} Std.",
     "plusDayUnits": "+ {days} Tg. (in Tagen erfasst, nie in Stunden umgerechnet)",
+    "allTimeOrgRecorded": "+ {hours} Std. von Organisationen erfasst (eigenes Register, nicht addiert)",
     "confirmedHours": "Von Führungskraft bestätigt",
     "confirmedOf": "{confirmed} von {total} Std. durch einen Eintrag der Führungskraft bestätigt",
     "confirmedNone": "Noch keine Bestätigungen einer Führungskraft",

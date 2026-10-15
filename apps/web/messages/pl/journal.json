@@ -870,6 +870,7 @@
     },
     "hours": "{hours} h",
     "plusDayUnits": "+ {days} dn. (zarejestrowane w dniach, nigdy nie przeliczane na godziny)",
+    "allTimeOrgRecorded": "+ {hours} h w ewidencji organizacji (osobno, nie dodawane)",
     "confirmedHours": "Potwierdzone przez kierownika",
     "confirmedOf": "{confirmed} z {total} godz. potwierdzonych zapisem kierownika",
     "confirmedNone": "Brak jeszcze potwierdzeń kierownika",

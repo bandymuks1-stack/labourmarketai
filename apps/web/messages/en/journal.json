@@ -870,6 +870,7 @@
     },
     "hours": "{hours} h",
     "plusDayUnits": "+ {days} d (recorded in days, never converted to hours)",
+    "allTimeOrgRecorded": "+ {hours} h recorded by organizations (own ledger, not added)",
     "confirmedHours": "Manager-confirmed",
     "confirmedOf": "{confirmed} of {total} h confirmed by a manager's record",
     "confirmedNone": "No manager confirmations yet",

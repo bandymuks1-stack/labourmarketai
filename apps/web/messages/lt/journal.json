@@ -870,6 +870,7 @@
     },
     "hours": "{hours} val.",
     "plusDayUnits": "+ {days} d. (dienomis, į valandas neverčiama)",
+    "allTimeOrgRecorded": "+ {hours} val. organizacijų apskaitoje (atskirai, nepridedama)",
     "confirmedHours": "Patvirtinta vadovo",
     "confirmedOf": "{confirmed} iš {total} val. patvirtinta vadovo įrašu",
     "confirmedNone": "Vadovo patvirtinimų dar nėra",

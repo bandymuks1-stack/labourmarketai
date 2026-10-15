@@ -4,6 +4,7 @@ import {
   type WorkIntelligence,
   type WorkPeriodKey,
 } from "@/lib/journal/work-intelligence";
+import { organizationHoursBeyondJournal } from "@/lib/journal/organization-all-time";
 import { formatUtcDate } from "@/lib/time/display";
 
 import { fmtHours, type Translate } from "./format";
@@ -34,6 +35,11 @@ export function PeriodNav({
   const range = wi.focusRange
     ? (wi.periods.find((p) => p.key === "range") ?? null)
     : null;
+  // The all-time tile also names what organizations recorded (imported
+  // history, timesheet lines no journal entry holds) on a line of its own —
+  // the person's all-time work is both, but the two ledgers are never summed
+  // (#2169: an 800 h imported period was invisible at the headline).
+  const orgBeyond = organizationHoursBeyondJournal(wi);
   const tile = (
     label: string,
     p: { hours: number; entries: number; daysWorked: number; dayUnits: number },
@@ -57,6 +63,15 @@ export function PeriodNav({
           ? ` · ${t("plusDayUnits", { days: fmtHours(p.dayUnits, locale) })}`
           : ""}
       </span>
+      {key === "all" && orgBeyond !== null && orgBeyond > 0 ? (
+        <span
+          className="text-meta tabular-nums text-text-secondary"
+          data-testid="wi-period-all-org-hours"
+          data-org-hours={orgBeyond}
+        >
+          {t("allTimeOrgRecorded", { hours: fmtHours(orgBeyond, locale) })}
+        </span>
+      ) : null}
     </>
   );
   const tileClass = (active: boolean) =>
