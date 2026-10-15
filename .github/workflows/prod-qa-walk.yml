@@ -46,6 +46,7 @@ on:
           - recognition-chain
           - mcp-chain
           - mcp-agents
+          - project-context
 
 concurrency:
   group: prod-qa-walk
@@ -124,6 +125,7 @@ jobs:
             recognition-chain) SPEC=tests/e2e/prod-recognition-chain.spec.ts ;;
             mcp-chain) SPEC=tests/e2e/prod-mcp-chain.spec.ts ;;
             mcp-agents) SPEC=tests/e2e/prod-mcp-agents.spec.ts ;;
+            project-context) SPEC=tests/e2e/prod-project-context.spec.ts ;;
           esac
           pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
             > ../../prod-qa-result.json
