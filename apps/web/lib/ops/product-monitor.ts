@@ -113,9 +113,16 @@ export function evaluateSignals(s: MetricsSnapshot, p: MonitorProbes): SignalRes
   }
   set("search-slow", p.searchMedianMs === null ? "BREACH" : p.searchMedianMs > 3000 ? "BREACH" : "OK", p.searchMedianMs === null ? "search unreachable" : `median ${Math.round(p.searchMedianMs)} ms`);
   {
-    const runs = metricTotal(metric(s, "ai_runs_7d"));
-    const bad = (metricTotal(metric(s, "ai_runs_failed_validation_7d")) ?? 0) + (metricTotal(metric(s, "ai_runs_blocked_7d")) ?? 0);
-    set("ai-failing", runs === null ? "UNKNOWN" : runs >= 10 && bad / runs > 0.3 ? "BREACH" : "OK", `${val(runs)} runs, ${bad} failed/blocked (7 d)`);
+    // Technical failures over ATTEMPTED runs: an intentional privacy refusal
+    // (#2399) is a policy outcome, never a fault (lib/ops/ai-run-outcome.ts).
+    const attempted = metricTotal(metric(s, "ai_runs_attempted_7d"));
+    const bad = metricTotal(metric(s, "ai_technical_failures_7d"));
+    const privacy = metricTotal(metric(s, "ai_outcome_privacy_blocked_7d"));
+    set(
+      "ai-failing",
+      attempted === null || bad === null ? "UNKNOWN" : attempted >= 10 && bad / attempted > 0.3 ? "BREACH" : "OK",
+      `${val(attempted)} attempted, ${val(bad)} technical failures, ${val(privacy)} privacy refusals (intentional) (7 d)`,
+    );
   }
   {
     const lag = metricTotal(metric(s, "vacancy_sync_lag_hours_max"));
