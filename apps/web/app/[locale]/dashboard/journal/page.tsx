@@ -510,21 +510,15 @@ export default async function JournalPage({
     let hasRosterLink = false;
     let rosterOrgName: string | null = null;
     if (worker) {
-      const [cw, aw] = await Promise.all([
-        supabase
-          .from("company_workers")
-          .select("companies(display_name, legal_name)")
-          .eq("worker_id", worker.id)
-          .eq("status", "active")
-          .limit(1),
-        supabase
-          .from("agency_workers")
-          .select("agencies(legal_name)")
-          .eq("worker_id", worker.id)
-          .eq("status", "active")
-          .limit(1),
-      ]);
-      hasRosterLink = (cw.data?.length ?? 0) > 0 || (aw.data?.length ?? 0) > 0;
+      // Legacy `agency_workers` is not API-exposed (no SELECT grant, Model A
+      // retired) — see lib/guards/agency-workers-not-api-exposed.test.ts.
+      const cw = await supabase
+        .from("company_workers")
+        .select("companies(display_name, legal_name)")
+        .eq("worker_id", worker.id)
+        .eq("status", "active")
+        .limit(1);
+      hasRosterLink = (cw.data?.length ?? 0) > 0;
       const cwOrg = (
         cw.data?.[0] as
           | {
@@ -535,13 +529,7 @@ export default async function JournalPage({
             }
           | undefined
       )?.companies;
-      const awOrg = (
-        aw.data?.[0] as
-          | { agencies?: { legal_name: string | null } | null }
-          | undefined
-      )?.agencies;
-      rosterOrgName =
-        cwOrg?.display_name ?? cwOrg?.legal_name ?? awOrg?.legal_name ?? null;
+      rosterOrgName = cwOrg?.display_name ?? cwOrg?.legal_name ?? null;
     }
     const contextState =
       pending.length > 0 ? "pending" : hasRosterLink ? "roster" : "none";

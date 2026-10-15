@@ -108,7 +108,9 @@ describe("R-9 application — both sides reach the ONE write, honestly gated", (
 
   it("the worker's own links are read RLS-only, bounded, in the profile's existing parallel stage", () => {
     expect(links).toMatch(/\.from\("company_workers"\)[^;]*workers!inner\(profile_id\)[^;]*\.eq\("workers\.profile_id", userId\)[^;]*\.eq\("status", "active"\)[^;]*\.limit\(TEAM_LINKS_LIMIT\)/);
-    expect(links).toMatch(/\.from\("agency_workers"\)[^;]*\.limit\(TEAM_LINKS_LIMIT\)/);
+    // Legacy agency_workers is not API-exposed (no SELECT grant) — never read;
+    // see agency-workers-not-api-exposed.test.ts.
+    expect(links).not.toMatch(/\.from\("agency_workers"\)/);
     expect(links).not.toMatch(/\.rpc\(|\.insert\(|\.update\(|\.delete\(/);
     expect(profile).toMatch(/myOrgEvidence,\s*myTeamLinks,\s*\] = await Promise\.all\(/);
     expect(profile).toMatch(/listMyTeamLinks\(supabase, user\.id\),/);
