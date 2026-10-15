@@ -57,6 +57,57 @@ async function useWorkspace(page: Page, orgName: string): Promise<void> {
 const links: Record<string, string> = {};
 let teamTestId = "";
 
+/**
+ * 0. DISBAND — the owner disbands earlier runs' synthetic brigades through the
+ * panel's own two-step control (disband_team_v1, owner-approved 2026-10-15).
+ *
+ * Two reasons, both real: it exercises disbanding in production exactly as a
+ * person does it, and it keeps this walk honest — create_team_v1 caps an owner
+ * at 20 ACTIVE brigades, and every run of this walk forms one. A brigade that
+ * still has open work answers "has open work" and is left alone; that answer
+ * is itself a correct product outcome, not a failure.
+ */
+test("0. owner disbands earlier synthetic brigades, keeping their history", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await expect(page.getByTestId("team-brigades-panel")).toBeVisible();
+  const leftovers = page
+    .locator('[data-testid^="team-brigade-"]', { hasText: "QA-SYNTHETIC Brigada" })
+    .filter({ has: page.locator('[data-testid^="team-disband-"]') });
+  let disbanded = 0;
+  let refused = 0;
+  const tried = new Set<string>();
+  for (let i = 0; i < 6; i += 1) {
+    const cards = await leftovers.all();
+    let card = null;
+    for (const c of cards) {
+      const id = (await c.getAttribute("data-testid")) ?? "";
+      if (!tried.has(id)) {
+        card = c;
+        tried.add(id);
+        break;
+      }
+    }
+    if (!card) break;
+    const teamId = ((await card.getAttribute("data-testid")) ?? "").replace("team-brigade-", "");
+    await card.getByTestId(`team-disband-${teamId}`).click();
+    await expect(card.getByTestId(`team-disband-explain-${teamId}`)).toBeVisible();
+    await card.getByTestId(`team-disband-confirm-${teamId}`).click();
+    const msg = page.getByTestId("team-brigades-msg");
+    await expect(msg).toBeVisible({ timeout: 30_000 });
+    const text = await msg.innerText();
+    if (/išformuota\. Jos istorija|was disbanded\. Its history/i.test(text)) disbanded += 1;
+    else if (/atvirų darbų|still has open work/i.test(text)) refused += 1;
+    else throw new Error(`unexpected disband answer: ${text}`);
+    await page.reload();
+    await expect(page.getByTestId("team-brigades-panel")).toBeVisible();
+  }
+  // History is kept: every disbanded brigade is listed as such.
+  if (disbanded > 0) await expect(page.getByTestId("team-brigades-disbanded")).toBeVisible();
+  console.info(`disband step: disbanded=${disbanded} refused_open_work=${refused}`);
+  await ctx.close();
+});
+
 test("1-2. owner creates the brigade in Alfa", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);

@@ -148,7 +148,18 @@ export type TeamBrigadesData =
       readonly detailsApplied: boolean;
       /** team_enquiries (20260716131000) readable. */
       readonly enquiriesApplied: boolean;
+      /** Brigades this owner DISBANDED (archived, history kept), newest
+       *  first. Empty when there are none or they could not be read. */
+      readonly disbanded?: readonly DisbandedTeam[];
     };
+
+/** A disbanded brigade: the archived organization row, nothing rewritten. */
+export type DisbandedTeam = {
+  readonly id: string;
+  readonly name: string;
+  readonly createdAt: string;
+  readonly disbandedAt: string;
+};
 
 function nameOf(p: { full_name: string | null; email: string | null } | null): string {
   return p?.full_name ?? (p?.email ? p.email.split("@")[0] : "—");
@@ -350,6 +361,10 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
     .select("id, display_name, legal_name, created_at")
     .eq("owner_profile_id", user.id)
     .eq("organization_type", "team")
+    // ACTIVE brigades only. A disbanded brigade is an archived organization
+    // (disband_team_v1): history, read separately below, and no longer
+    // counted by create_team_v1's cap of 20 — which is also this limit.
+    .is("archived_at", null)
     .order("created_at", { ascending: true })
     .limit(20);
   if (orgError) {
@@ -592,7 +607,73 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
     invitationsApplied: ledger.applied,
     detailsApplied: details.applied,
     enquiriesApplied: enquiries.applied,
+    disbanded: await readDisbandedTeams(supabase, user.id),
   };
+}
+
+/** The owner's disbanded brigades (archived team orgs), newest first. A read
+ *  failure answers an empty list: the active panel must never fail because
+ *  the history line could not be read. */
+async function readDisbandedTeams(supabase: DB, ownerId: string): Promise<DisbandedTeam[]> {
+  const { data, error } = await asAny(supabase)
+    .from("organizations")
+    .select("id, display_name, legal_name, created_at, archived_at")
+    .eq("owner_profile_id", ownerId)
+    .eq("organization_type", "team")
+    .not("archived_at", "is", null)
+    .order("archived_at", { ascending: false })
+    .limit(20);
+  if (error || !Array.isArray(data)) return [];
+  return (
+    data as {
+      id: string;
+      display_name: string | null;
+      legal_name: string | null;
+      created_at: string;
+      archived_at: string;
+    }[]
+  ).map((r) => ({
+    id: r.id,
+    name: r.display_name ?? r.legal_name ?? "—",
+    createdAt: r.created_at,
+    disbandedAt: r.archived_at,
+  }));
+}
+
+export type DisbandTeamOutcome =
+  | "disbanded"
+  | "already_disbanded"
+  | "not_found"
+  | "has_open_work"
+  | "member_end_failed"
+  | "needs_migration"
+  | "error";
+
+/** Disband a brigade through the gated disband_team_v1 RPC: members'
+ *  memberships end through the canonical lifecycle writer, the brigade is
+ *  archived, nothing is deleted. Refused while the brigade has open work. */
+export async function disbandTeamBrigade(teamId: string): Promise<{ outcome: DisbandTeamOutcome }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { outcome: "error" };
+  const { data, error } = await rpc(supabase, "disband_team_v1", { p_team_id: teamId });
+  if (error) {
+    if (error.code === RPC_NOT_FOUND_CODE || error.code === "PGRST202") return { outcome: "needs_migration" };
+    return { outcome: "error" };
+  }
+  const code = String(data ?? "");
+  if (
+    code === "disbanded" ||
+    code === "already_disbanded" ||
+    code === "not_found" ||
+    code === "has_open_work" ||
+    code === "member_end_failed"
+  ) {
+    return { outcome: code };
+  }
+  return { outcome: "error" };
 }
 
 export type CreateTeamOutcome =

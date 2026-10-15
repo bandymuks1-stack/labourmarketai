@@ -21,6 +21,9 @@ import {
   resolveOwnWorkerId,
 } from "@/lib/opportunities/saved-opportunities";
 import { listPublicVacancyPreviewsByIds } from "@/lib/vacancy-store/vacancy-read";
+import { jsonLdScript } from "@/lib/seo/json-ld";
+import { buildJobsListJsonLd } from "@/lib/seo/public-job-json-ld";
+import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import {
   PUBLIC_VACANCY_PROFESSION_SLUGS,
   readProfessionSlugParam,
@@ -77,6 +80,17 @@ const INTRO: L = {
  *  promises the employer, location and apply route "after you sign in" — said to
  *  a signed-in worker it is a false instruction (the board never reads it as
  *  such, but the sentence did). They get the same facts, one tap away. */
+/** Position name when the preview carries no occupation label (structured
+ *  data only); the same generic noun the detail page uses for its heading. */
+const GENERIC_TITLE: L = {
+  en: "Job opening",
+  lt: "Darbo pasiūlymas",
+  ru: "Вакансия",
+  nl: "Vacature",
+  de: "Stellenangebot",
+  pl: "Oferta pracy",
+};
+
 const INTRO_MEMBER: L = {
   en: "Live vacancies imported from official public employment sources. Open a vacancy to see the employer, the location and how to apply.",
   lt: "Gyvos darbo vietos iš oficialių viešų užimtumo šaltinių. Atidaryk skelbimą — pamatysi darbdavį, vietovę ir kaip kandidatuoti.",
@@ -422,6 +436,28 @@ export default async function JobsPage({
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+      {/* Anonymous-safe structured data (owner 2026-10-14 §8; port of #1433):
+          a CollectionPage/ItemList of positions by occupation label, built
+          ONLY from the anonymous preview shape — employer, location, title,
+          source and links cannot appear (guard: lib/seo/public-job-json-ld.test.ts).
+          Never on the personal "saved" view. No JobPosting by design. */}
+      {!showSaved && result.status === "ok" && result.vacancies.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: jsonLdScript(
+              buildJobsListJsonLd({
+                origin: MARKETING_ORIGIN,
+                locale: active,
+                name: H1[active],
+                description: INTRO[active],
+                previews: result.vacancies,
+                genericTitle: GENERIC_TITLE[active],
+              }),
+            ),
+          }}
+        />
+      )}
       {/* FUNNEL (acquisition loop P0): JOB_IMPRESSION — one board render per
           tab session, with how many ads it showed. An `unavailable` read
           (the search did not answer in time) is `success:false` with a zero

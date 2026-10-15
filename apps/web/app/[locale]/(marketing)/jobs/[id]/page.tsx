@@ -18,6 +18,9 @@ import {
 } from "@/lib/opportunities/saved-opportunities";
 import { SaveVacancyButton } from "@/components/marketing/save-vacancy-button";
 import { formatUtcDate } from "@/lib/time/display";
+import { jsonLdScript } from "@/lib/seo/json-ld";
+import { buildJobDetailJsonLd } from "@/lib/seo/public-job-json-ld";
+import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { TrackedCta } from "@/components/app/tracked-cta";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -714,6 +717,26 @@ export default async function JobDetailPage({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+      {/* Anonymous-safe structured data (owner 2026-10-14 §8; port of #1433):
+          a WebPage about an Occupation with the salary band, built ONLY from
+          the anonymous `preview` — never from `member`, even for a signed-in
+          visitor — so employer, location, publisher title, source and links
+          cannot appear. No JobPosting by design (it requires the employer and
+          the workplace). */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLdScript(
+            buildJobDetailJsonLd({
+              origin: MARKETING_ORIGIN,
+              locale: active,
+              description: DESCRIPTION[active],
+              preview,
+              genericTitle: GENERIC_TITLE[active],
+            }),
+          ),
+        }}
+      />
       {/* FUNNEL (acquisition loop P0): one `job_opened` per page view — the
           job it was (opaque store id) and who was looking (anonymous or
           member). `once={false}` because the beacon's tab-session dedupe is

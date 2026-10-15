@@ -690,6 +690,8 @@ export default async function VerifiedCvPage({
         tier,
         attributedHours: cv.skillPractice?.[slug]?.attributedHours ?? 0,
         confirmedHours: cv.skillPractice?.[slug]?.confirmedHours ?? 0,
+        firstWorkedDay: cv.skillPractice?.[slug]?.firstWorkedDay ?? null,
+        lastWorkedDay: cv.skillPractice?.[slug]?.lastWorkedDay ?? null,
       })),
     ),
     practice: cv.skillPractice

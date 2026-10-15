@@ -624,6 +624,23 @@ export const SCOPED_OWNER_WAIVERS = [
       //         helper); the card's own fact chips. No route, projection, auth,
       //         schema or data-source change; nothing machine-translated.
       2253,
+      // OWNER APPROVAL 2026-10-15, verbatim: "Patvirtinu scoped /jobs
+      // product-gate waiver PR #2388: pridėk tik #2388 prie esamo
+      // `public-acquisition-route-jobs` pullRequests sąrašo; tik anoniminiams
+      // naudotojams saugūs struktūriniai duomenys (`CollectionPage` /
+      // `ItemList`, `WebPage` / `Occupation`), be `JobPosting`, be darbdavio,
+      // vietos ir kitų neviešų laukų. Nekeisk ir nesilpnink pačių taisyklių."
+      //
+      // Exactly that was done: ONE number added. The axiom, the codes, the
+      // surfaces, the file list, the expected finding set, the expiry and the
+      // subset rule are byte-unchanged; `product-gate.mjs` is not touched.
+      // #2388 — JSON-LD on /jobs (CollectionPage/ItemList of occupation
+      //         labels) and /jobs/[id] (WebPage about an Occupation + salary
+      //         band + date), built ONLY from the anonymous preview shape:
+      //         never JobPosting, employer, location, publisher title, source
+      //         or links; never from the member projection; never on the
+      //         saved view (guard: public-jobs-structured-data.test.ts).
+      2388,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.

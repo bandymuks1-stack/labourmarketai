@@ -49,6 +49,11 @@ export type JourneySkillInput = {
   readonly tier: "confirmed" | "evidence" | "declared";
   readonly attributedHours: number;
   readonly confirmedHours: number;
+  /** The first / last day the person's OWN journal entries show this skill
+   *  (`SkillWorkTime.firstWorkedDay` / `lastWorkedDay`) — the line's real
+   *  span when no engagement links it to a stop. Absent = not read. */
+  readonly firstWorkedDay?: string | null;
+  readonly lastWorkedDay?: string | null;
 };
 
 /** The journal's per-skill context links, keyed by slug. `null` = unread. */
@@ -75,6 +80,11 @@ export type JourneyLine = {
   readonly confirmedHours: number;
   /** Station keys in time order. Empty for a declared skill or an unread journal. */
   readonly stops: readonly string[];
+  /** Where the line runs on the axis: from its first stop or the first day
+   *  its own entries show the skill (whichever is earlier) to its last such
+   *  day; null = nothing dated (a declared skill, an unread journal). */
+  readonly startDay: number | null;
+  readonly endDay: number | null;
 };
 
 export type JourneyGap = { readonly fromDay: number; readonly toDay: number; readonly from: string; readonly to: string };
@@ -127,7 +137,16 @@ export function deriveCareerJourney(input: {
   const dated = input.stations.filter((s) => s.from && DAY.test(s.from));
   const undated = input.stations.filter((s) => !(s.from && DAY.test(s.from)));
 
-  const first = dated.length > 0 ? Math.min(...dated.map((s) => dayNum(s.from!))) : today;
+  // The axis covers every dated stop AND every day a skill's own entries
+  // were worked — a person whose entries belong to no engagement still has a
+  // real journey to draw.
+  const workedDays = input.skills
+    .filter((s) => s.tier !== "declared" && input.practice !== null)
+    .flatMap((s) => [s.firstWorkedDay, s.lastWorkedDay])
+    .filter((d): d is string => !!d && DAY.test(d))
+    .map(dayNum);
+  const starts = [...dated.map((s) => dayNum(s.from!)), ...workedDays];
+  const first = starts.length > 0 ? Math.min(...starts) : today;
   const placed = dated
     .map((s) => {
       const start = dayNum(s.from!);
@@ -159,12 +178,25 @@ export function deriveCareerJourney(input: {
       .filter((p) => p.s.contextId !== null && contexts.has(p.s.contextId))
       .map((p) => p.s.key);
     for (const key of stops) linesAt.set(key, [...(linesAt.get(key) ?? []), skill.slug]);
+    const ownStart =
+      level !== "declared" && input.practice !== null && skill.firstWorkedDay && DAY.test(skill.firstWorkedDay)
+        ? dayNum(skill.firstWorkedDay) - first
+        : null;
+    const ownEnd =
+      level !== "declared" && input.practice !== null && skill.lastWorkedDay && DAY.test(skill.lastWorkedDay)
+        ? dayNum(skill.lastWorkedDay) - first
+        : null;
+    const stopDays = placed.filter((p) => stops.includes(p.s.key));
+    const startCandidates = [ownStart, ...stopDays.map((p) => p.start)].filter((d): d is number => d !== null);
+    const endCandidates = [ownEnd, ...stopDays.map((p) => p.end)].filter((d): d is number => d !== null);
     return {
       slug: skill.slug,
       level,
       attributedHours: skill.attributedHours,
       confirmedHours: skill.confirmedHours,
       stops,
+      startDay: startCandidates.length > 0 ? Math.min(...startCandidates) : null,
+      endDay: endCandidates.length > 0 ? Math.max(...endCandidates) : null,
     };
   });
 
@@ -175,22 +207,23 @@ export function deriveCareerJourney(input: {
     lines: linesAt.get(p.s.key) ?? [],
   }));
 
-  // Gaps: uncovered stretches between stops (coverage merged over overlaps).
+  // Gaps: stretches covered by NO stop and NO day a skill was worked
+  // (coverage merged over overlaps) — unknown time, never zero.
+  const covered = [
+    ...stations.map((st) => [st.startDay, st.endDay] as const),
+    ...lines.flatMap((l) => (l.startDay !== null && l.endDay !== null ? [[l.startDay, l.endDay] as const] : [])),
+  ].sort((x, y) => x[0] - y[0] || x[1] - y[1]);
   const gaps: JourneyGap[] = [];
-  let coveredUntil = stations.length > 0 ? stations[0].endDay : 0;
-  for (const st of stations.slice(1)) {
-    if (st.startDay - coveredUntil > GAP_MIN_DAYS) {
-      gaps.push({
-        fromDay: coveredUntil,
-        toDay: st.startDay,
-        from: isoOf(first + coveredUntil),
-        to: isoOf(first + st.startDay),
-      });
+  let coveredUntil = covered.length > 0 ? covered[0][1] : 0;
+  for (const [start, end] of covered.slice(1)) {
+    if (start - coveredUntil > GAP_MIN_DAYS) {
+      gaps.push({ fromDay: coveredUntil, toDay: start, from: isoOf(first + coveredUntil), to: isoOf(first + start) });
     }
-    coveredUntil = Math.max(coveredUntil, st.endDay);
+    coveredUntil = Math.max(coveredUntil, end);
   }
 
-  const spanDays = stations.length > 0 ? Math.max(...stations.map((s) => s.endDay)) : 0;
+  const lineEnds = lines.map((l) => l.endDay).filter((d): d is number => d !== null);
+  const spanDays = Math.max(0, ...stations.map((s) => s.endDay), ...lineEnds, starts.length > 0 ? today - first : 0);
   return {
     stations,
     undated,
@@ -198,8 +231,8 @@ export function deriveCareerJourney(input: {
     gaps,
     horizon: input.horizon.slice(0, JOURNEY_HORIZON_MAX).map((h) => ({ ...h, basis: "derived" as const })),
     spanDays,
-    axisStart: stations.length > 0 ? isoOf(first) : null,
-    axisEnd: stations.length > 0 ? isoOf(first + spanDays) : null,
+    axisStart: starts.length > 0 ? isoOf(first) : null,
+    axisEnd: starts.length > 0 ? isoOf(first + spanDays) : null,
     linksUnknown: input.practice === null,
   };
 }

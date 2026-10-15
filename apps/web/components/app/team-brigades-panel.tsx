@@ -8,9 +8,10 @@ import { Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import {
   createTeamAction,
+  disbandTeamAction,
   inviteWorkerToTeamAction,
 } from "@/lib/company/team-brigade-actions";
-import type { TeamBrigade } from "@/lib/company/team-brigades";
+import type { DisbandedTeam, TeamBrigade } from "@/lib/company/team-brigades";
 import { TeamDetailsForm } from "@/components/app/team-details-form";
 import { TeamEnquiryInbox } from "@/components/app/team-enquiry-inbox";
 import { TeamAssignForm } from "@/components/app/team-assign-form";
@@ -43,8 +44,11 @@ export function TeamBrigadesPanel({
   detailsApplied,
   enquiriesApplied,
   projects = [],
+  disbanded = [],
 }: {
   teams: readonly TeamBrigade[];
+  /** Brigades the owner disbanded — history, read-only. */
+  disbanded?: readonly DisbandedTeam[];
   locale: string;
   invitationsApplied: boolean;
   detailsApplied: boolean;
@@ -68,6 +72,7 @@ export function TeamBrigadesPanel({
   // The invitation link of the last invite — the delivery while e-mail is off.
   const [link, setLink] = useState<{ teamId: string; url: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [confirmDisband, setConfirmDisband] = useState<string | null>(null);
 
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
@@ -91,6 +96,20 @@ export function TeamBrigadesPanel({
       } else {
         setMsg(t("outcome.error"));
       }
+      router.refresh();
+    });
+  }
+
+  function disband(teamId: string) {
+    setMsg(null);
+    startTransition(async () => {
+      const res = await disbandTeamAction(teamId, expectedWorkspaceId);
+      setConfirmDisband(null);
+      if (res.outcome === "disbanded" || res.outcome === "already_disbanded") setMsg(t("disband.done"));
+      else if (res.outcome === "has_open_work") setMsg(t("disband.openWork"));
+      else if (res.outcome === "needs_migration") setMsg(t("outcome.needsMigration"));
+      else if (res.outcome === "not_found") setMsg(t("disband.notFound"));
+      else setMsg(t("disband.failed"));
       router.refresh();
     });
   }
@@ -434,9 +453,75 @@ export function TeamBrigadesPanel({
                   </p>
                 </div>
               )}
+
+              {/* DISBAND (owner 2026-10-14 §3.3). Two steps: the first press
+                  only explains what happens; the second does it. Nothing is
+                  deleted — the brigade and its members' history stay. */}
+              <div className="flex flex-col gap-1.5 border-t border-ink-600 pt-3">
+                {confirmDisband === team.id ? (
+                  <>
+                    <p className="text-xs text-text-secondary" data-testid={`team-disband-explain-${team.id}`}>
+                      {t("disband.explain", { count: team.members.length })}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        disabled={pending}
+                        onClick={() => disband(team.id)}
+                        data-testid={`team-disband-confirm-${team.id}`}
+                      >
+                        {t("disband.confirm")}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        disabled={pending}
+                        onClick={() => setConfirmDisband(null)}
+                        data-testid={`team-disband-cancel-${team.id}`}
+                      >
+                        {t("disband.cancel")}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      disabled={pending}
+                      onClick={() => setConfirmDisband(team.id)}
+                      data-testid={`team-disband-${team.id}`}
+                    >
+                      {t("disband.start")}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </li>
           ))}
         </ul>
+      )}
+
+      {disbanded.length > 0 && (
+        <details className="text-xs text-text-secondary" data-testid="team-brigades-disbanded">
+          <summary className="cursor-pointer text-text-muted">
+            {t("disband.historyTitle", { count: disbanded.length })}
+          </summary>
+          <ul className="mt-2 flex flex-col gap-0.5">
+            {disbanded.map((d) => (
+              <li key={d.id} data-testid={`team-disbanded-${d.id}`}>
+                {d.name}
+                <span className="ml-1.5 text-meta text-text-muted">
+                  {t("disband.historyLine", { date: d.disbandedAt.slice(0, 10) })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
 
       <div className="flex flex-wrap items-end gap-2 border-t border-ink-600 pt-3">

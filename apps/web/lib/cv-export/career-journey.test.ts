@@ -156,3 +156,37 @@ describe("career journey — lines and horizon", () => {
     ]);
   });
 });
+
+describe("career journey — a person whose entries belong to no engagement still has a journey", () => {
+  it("a line runs across the days its own entries show the skill, without inventing a stop", () => {
+    const j = deriveCareerJourney({
+      stations: [st({ key: "org", source: "organization", from: "2025-06-01", to: "2025-11-30" })],
+      skills: [
+        { slug: "a", tier: "evidence", attributedHours: 20, confirmedHours: 0, firstWorkedDay: "2026-09-10", lastWorkedDay: "2026-10-05" },
+        { slug: "d", tier: "declared", attributedHours: 0, confirmedHours: 0, firstWorkedDay: "2026-01-01", lastWorkedDay: "2026-02-01" },
+      ],
+      practice: { a: { contextIds: [] } },
+      horizon: [],
+      todayIso: TODAY,
+    });
+    const a = j.lines.find((l) => l.slug === "a")!;
+    expect(a.stops).toEqual([]);
+    expect(a.startDay).not.toBeNull();
+    expect(a.endDay!).toBeGreaterThan(a.startDay!);
+    // a declared skill never gets a worked span
+    expect(j.lines.find((l) => l.slug === "d")).toMatchObject({ startDay: null, endDay: null });
+    // the axis now reaches today ("Dabar"), not the last stop
+    expect(j.axisEnd).toBe(TODAY);
+  });
+
+  it("an unread journal draws no worked span either", () => {
+    const j = deriveCareerJourney({
+      stations: [],
+      skills: [{ slug: "a", tier: "evidence", attributedHours: 20, confirmedHours: 0, firstWorkedDay: "2026-09-10", lastWorkedDay: "2026-10-05" }],
+      practice: null,
+      horizon: [],
+      todayIso: TODAY,
+    });
+    expect(j.lines[0]).toMatchObject({ startDay: null, endDay: null });
+  });
+});

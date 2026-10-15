@@ -7338,7 +7338,19 @@
     "addableUnavailable": "De lijst met gekoppelde werknemers kon niet worden geladen — toevoegen is nu niet mogelijk.",
     "inviteLinkNote": "Stuur deze link naar de medewerker (bericht, sms, WhatsApp). Alleen de uitgenodigde persoon kan accepteren.",
     "inviteLinkCopy": "Link kopiëren",
-    "inviteLinkCopied": "Gekopieerd"
+    "inviteLinkCopied": "Gekopieerd",
+    "disband": {
+      "start": "Ploeg opheffen",
+      "explain": "{count, plural, one {Het lidmaatschap van # lid eindigt} other {De lidmaatschappen van # leden eindigen}} en de ploeg gaat naar de geschiedenis. Niets wordt verwijderd: het werk, de aanbiedingen en de berichten blijven. Open werk (een actieve toewijzing, een open aanbieding of een onbeantwoorde aanvraag) moet eerst worden afgesloten.",
+      "confirm": "Opheffen",
+      "cancel": "Behouden",
+      "done": "De ploeg is opgeheven. De geschiedenis blijft bewaard.",
+      "openWork": "Niet opgeheven: de ploeg heeft nog open werk. Sluit eerst de actieve toewijzing, de open aanbieding of de onbeantwoorde aanvraag af.",
+      "notFound": "Deze ploeg is niet gevonden bij jouw ploegen.",
+      "failed": "Niet opgeheven: een lidmaatschap kon niet worden beëindigd. Er is niets gewijzigd.",
+      "historyTitle": "{count, plural, one {# opgeheven ploeg} other {# opgeheven ploegen}}",
+      "historyLine": "opgeheven {date}"
+    }
   },
   "teamEnquiries": {
     "enquireButton": "Deze ploeg een aanvraag sturen",
