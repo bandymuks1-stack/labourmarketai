@@ -1943,7 +1943,25 @@
       "historyUnavailable": "Sinu töölugu ei õnnestunud praegu lugeda."
     },
     "skillsUnavailable": "Ei õnnestunud praegu lugeda.",
-    "verifiedUnavailable": "Juhi kirjega oskusi ei õnnestunud praegu lugeda."
+    "verifiedUnavailable": "Juhi kirjega oskusi ei õnnestunud praegu lugeda.",
+    "readiness": {
+      "label": "Profiili sammud",
+      "hint": "Kõik on valmis.",
+      "signalsTemplate": "sammu tehtud",
+      "nextLabel": "Järgmisena:",
+      "pillars": {
+        "profession": "Elukutse",
+        "availability": "Saadavus",
+        "skills": "Oskused",
+        "journal": "Tööpäevik",
+        "evidence": "Kirjed",
+        "workCard": "Töökaart"
+      },
+      "ringAria": "Profiili sammud: tehtud {met} / {total}",
+      "stepDone": "tehtud",
+      "stepOpen": "tegemata",
+      "summary": "Profiili sammud: tehtud {done} / {total}"
+    }
   },
   "projects": {
     "map": {

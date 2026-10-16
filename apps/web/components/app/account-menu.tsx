@@ -11,6 +11,9 @@ import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 import { FEEDBACK_OPEN_EVENT } from "@/components/app/language-feedback-widget";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { canRenderInline, type ResultContext } from "@/lib/conversation/result-registry";
+import { PersonAvatar } from "@/components/app/identity/identity-family";
+import { useOwnAvatarUrl } from "@/components/app/identity/own-avatar";
+import { PERSONAL_WORKSPACE_ID, workspaceDisplayLabels } from "@/lib/company/organization-switch";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -34,7 +37,9 @@ export function AccountMenu() {
   const tCv = useTranslations("cvExport");
   const tCommon = useTranslations("common");
   const locale = useLocale();
-  const { user, profile, roles, isAdmin, adminUiHidden, activeOrganizationId, activeOrgName } = useAuth();
+  const tChat = useTranslations("conversation.chat");
+  const ownAvatarUrl = useOwnAvatarUrl();
+  const { user, profile, roles, isAdmin, adminUiHidden, activeOrganizationId, activeOrgName, workspaces, activeWorkspaceId } = useAuth();
   const [open, setOpen] = useState(false);
 
   // The player card's ONE home is a workspace RESULT, and the registry says
@@ -125,7 +130,30 @@ export function AccountMenu() {
   // stacking context can ever trap or cover it.
 
   const displayName = profile?.full_name?.trim() || profile?.email || user?.email || "";
-  const initial = (displayName || "?").trim().charAt(0).toUpperCase() || "?";
+  // The viewer is a PERSON: the one identity family — their own photo when
+  // `getOwnAvatar` returned one (streamed by the layout), otherwise their
+  // plate and initials (personMonogram). Never a stand-in face.
+  const me = {
+    id: user?.id ?? "me",
+    name: displayName,
+    photo: ownAvatarUrl ? { src: ownAvatarUrl } : null,
+  };
+  // WHERE this person is working right now — the SAME labels the workspace
+  // chip shows (never a fabricated name; an unnamed organization says so).
+  const workspaceList = workspaces ?? [];
+  const activeWorkspace =
+    workspaceList.find((w) => w.id === (activeWorkspaceId ?? PERSONAL_WORKSPACE_ID)) ?? null;
+  const workspaceLabel = activeWorkspace
+    ? (workspaceDisplayLabels(workspaceList, {
+        personal: tChat("workspacePersonal"),
+        unnamedOrganization: {
+          company: tChat("workspaceUnnamedCompany"),
+          agency: tChat("workspaceUnnamedAgency"),
+          team: tChat("workspaceUnnamedTeam"),
+          other: tChat("workspaceUnnamed"),
+        },
+      }).get(activeWorkspace.id) ?? activeWorkspace.name)
+    : (activeOrgName ?? null);
 
   return (
     <div ref={rootRef} className="relative">
@@ -138,11 +166,13 @@ export function AccountMenu() {
         data-testid="account-menu-trigger"
         className={cn(
           // size-11 = the 44px touch-target floor every header control keeps.
-          "inline-flex size-11 items-center justify-center rounded-full border border-ink-500 bg-ink-800 text-sm font-semibold text-text-primary hover:border-brand-blue",
-          open && "border-brand-blue",
+          // The person's own mark IS the control: the family squircle inside
+          // a quiet frame; hover/open is structure (a firmer frame), not gold.
+          "inline-flex size-11 items-center justify-center rounded-xl border border-ink-600 bg-ink-800 text-sm font-semibold text-text-primary hover:border-text-muted",
+          open && "border-text-muted",
         )}
       >
-        <span aria-hidden>{initial}</span>
+        <PersonAvatar person={me} size={34} decorative testId="account-menu-avatar" />
       </button>
 
       <AnchoredOverlay
@@ -156,9 +186,22 @@ export function AccountMenu() {
           className="w-56 max-w-[calc(100vw-1.5rem)] rounded-md border border-ink-500 bg-ink-900/95 p-2 shadow-card"
         >
           {displayName && (
-            <p className="truncate px-2 py-1 font-mono text-meta uppercase tracking-label text-text-muted">
-              {displayName}
-            </p>
+            <div
+              data-testid="account-menu-identity"
+              className="mb-1 flex items-center gap-3 border-b border-ink-600 px-2 pb-3 pt-2"
+            >
+              <PersonAvatar person={me} size="row" decorative />
+              <span className="min-w-0">
+                <span className="block truncate font-display text-sm font-semibold text-text-primary">
+                  {displayName}
+                </span>
+                {workspaceLabel ? (
+                  <span className="block truncate text-xs text-text-secondary" data-testid="account-menu-workspace">
+                    {workspaceLabel}
+                  </span>
+                ) : null}
+              </span>
+            </div>
           )}
           {featureLinks.map((l) => (
             <Link

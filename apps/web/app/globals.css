@@ -1035,3 +1035,41 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .living-hero-rise, .lwh-sweep, .lwh-frag, .lwh-sheen, .lwh-dip { animation: none; }
 }
+
+/* ── IDENTITY FAMILY — tonal plates for a person/company/project with no
+   photograph (owner-frozen design class 4e695e261, re-ported in D2 through the
+   theme system). Six low-chroma tones, chosen deterministically from the id, so
+   the same party is the same everywhere. `figure` is the ink the monogram,
+   hairline and engraved figure are drawn in: light on the dark plates, deep on
+   the light plates. Structure, not colour: no tone is a state. */
+:root,
+:root[data-theme="dark"] {
+  --c-identity-1a: 45 42 38; /* warm graphite */
+  --c-identity-1b: 59 55 49;
+  --c-identity-2a: 36 40 43; /* slate */
+  --c-identity-2b: 50 59 65;
+  --c-identity-3a: 40 43 37; /* olive grey */
+  --c-identity-3b: 55 62 51;
+  --c-identity-4a: 46 39 36; /* umber */
+  --c-identity-4b: 66 53 47;
+  --c-identity-5a: 42 38 48; /* plum grey */
+  --c-identity-5b: 58 52 66;
+  --c-identity-6a: 34 43 43; /* teal grey */
+  --c-identity-6b: 47 62 62;
+  --c-identity-figure: 245 241 232;
+}
+:root[data-theme="light"] {
+  --c-identity-1a: 226 222 214;
+  --c-identity-1b: 208 202 190;
+  --c-identity-2a: 214 221 227;
+  --c-identity-2b: 192 204 214;
+  --c-identity-3a: 219 224 211;
+  --c-identity-3b: 199 208 188;
+  --c-identity-4a: 230 218 212;
+  --c-identity-4b: 214 196 186;
+  --c-identity-5a: 222 217 232;
+  --c-identity-5b: 202 195 218;
+  --c-identity-6a: 208 224 223;
+  --c-identity-6b: 186 208 206;
+  --c-identity-figure: 38 34 28;
+}
