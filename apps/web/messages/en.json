@@ -3451,6 +3451,8 @@
       "empty": "No privacy requests.",
       "needsMigration": "The privacy request intake is not enabled in this environment.",
       "unavailable": "Privacy requests cannot be read right now.",
+      "due": "Reply due by {date}",
+      "overdue": "Overdue — reply was due by {date}",
       "manualNote": "Processing is manual: a person reviews and completes each request. Nothing on this list acts automatically.",
       "type": {
         "dataExport": "Data export",
@@ -5723,7 +5725,7 @@
         {
           "heading": "AI and connected AI assistants",
           "items": [
-            "Some features use an AI model from Google (the Gemini API): translating messages and job ads between languages, and suggesting what a sentence you type in the chat is asking for. Only the text that task needs is sent. The result is a suggestion — nothing is saved as a fact about you until you confirm it.",
+            "Some features use an AI model from Google (the Gemini API). Today it receives only public market statistics — for example how many open positions a profession has — to phrase a short explanation. Translating messages and job ads, and interpreting a sentence you type in the chat, are prepared but not in use: no message text and no personal data is sent for them. If one of them is put into use, this notice will say so, and only the text that task needs would be sent. Every result is a suggestion — nothing is saved as a fact about you until you confirm it.",
             "You can connect LabourMarket.ai to an AI assistant such as ChatGPT or Claude. You approve each connection yourself on a consent screen; the assistant then acts only with your own permissions, and actions with consequences need a separate confirmation. You can see and disconnect connected apps in your account settings at any time.",
             "What an AI assistant's provider does with your conversation is governed by that provider's own privacy terms."
           ]
@@ -5752,7 +5754,7 @@
           "purpose": "Used only on administrator accounts. Remembers whether administrator controls are hidden and changes nothing about permissions."
         }
       ],
-      "localStorageNote": "Your light or dark theme choice is stored in your browser's local storage, not in a cookie.",
+      "localStorageNote": "Your browser's own storage (not cookies) holds a few items: your light or dark theme choice; which page or campaign first brought you here, stored once so a later sign-up can be attributed to it; a random per-tab session identifier that disappears when the tab closes; and small conveniences such as dismissed notices, recently viewed items and your speech-input language. None of this is shared with any third party or used for advertising, and you can clear it at any time through your browser.",
       "noTracking": "There are no analytics, advertising or third-party tracking cookies on the platform today. If this ever changes, this page will be updated first."
     },
     "pendingLegal": {

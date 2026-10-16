@@ -3451,6 +3451,8 @@
       "empty": "Privatumo prašymų nėra.",
       "needsMigration": "Privatumo prašymų priėmimas šioje aplinkoje dar neįjungtas.",
       "unavailable": "Privatumo prašymų dabar nepavyksta perskaityti.",
+      "due": "Atsakyti iki {date}",
+      "overdue": "Pavėluota — atsakyti reikėjo iki {date}",
       "manualNote": "Apdorojimas rankinis: kiekvieną prašymą peržiūri ir įvykdo žmogus. Šiame sąraše niekas nevyksta automatiškai.",
       "type": {
         "dataExport": "Duomenų eksportas",
@@ -5723,7 +5725,7 @@
         {
           "heading": "DI ir prijungti DI asistentai",
           "items": [
-            "Kai kurios funkcijos naudoja „Google“ DI modelį (Gemini API): žinutėms ir darbo skelbimams versti į kitas kalbas ir pasiūlyti, ko prašoma pokalbyje įvestu sakiniu. Siunčiamas tik tam darbui reikalingas tekstas. Rezultatas yra pasiūlymas — niekas neišsaugoma kaip faktas apie jus, kol to nepatvirtinate.",
+            "Kai kurios funkcijos naudoja „Google“ DI modelį (Gemini API). Šiandien jam perduodama tik vieša rinkos statistika — pavyzdžiui, kiek laisvų darbo vietų turi profesija — trumpam paaiškinimui parengti. Žinučių ir darbo skelbimų vertimas bei pokalbyje įvesto sakinio aiškinimas yra paruošti, bet išjungti: jiems nesiunčiamas nei žinučių tekstas, nei asmens duomenys. Jei kuri nors iš šių funkcijų būtų įjungta, šis pranešimas tai nurodys, o siunčiamas būtų tik tam darbui reikalingas tekstas. Kiekvienas rezultatas yra pasiūlymas — niekas neišsaugoma kaip faktas apie jus, kol to nepatvirtinate.",
             "LabourMarket.ai galite prijungti prie DI asistento, pvz., ChatGPT ar Claude. Kiekvieną prijungimą patvirtinate patys sutikimo ekrane; asistentas tada veikia tik jūsų pačių teisėmis, o pasekmių turintiems veiksmams reikia atskiro patvirtinimo. Prijungtas programėles bet kada matote ir atjungiate paskyros nustatymuose.",
             "Ką DI asistento teikėjas daro su jūsų pokalbiu, nustato to teikėjo privatumo sąlygos."
           ]
@@ -5752,7 +5754,7 @@
           "purpose": "Naudojama tik administratorių paskyrose. Įsimena, ar paslėpti administratoriaus valdikliai, ir nekeičia jokių teisių."
         }
       ],
-      "localStorageNote": "Jūsų šviesios ar tamsios temos pasirinkimas saugomas naršyklės vietinėje saugykloje, ne slapuke.",
+      "localStorageNote": "Naršyklės saugykloje (ne slapukuose) laikomi keli dalykai: jūsų šviesios ar tamsios temos pasirinkimas; kuris puslapis ar kampanija jus čia atvedė pirmą kartą — įrašoma vieną kartą, kad vėlesnę registraciją būtų galima jai priskirti; atsitiktinis kiekvienos kortelės sesijos identifikatorius, išnykstantis uždarius kortelę; ir smulkūs patogumai, pvz., paslėpti pranešimai, neseniai peržiūrėti įrašai ir kalbos įvesties kalba. Niekas iš to neperduodama trečiosioms šalims ir nenaudojama reklamai; viską bet kada galite išvalyti savo naršyklėje.",
       "noTracking": "Platformoje šiandien nėra analitikos, reklamos ar trečiųjų šalių sekimo slapukų. Jei tai kada nors keistųsi, pirmiausia bus atnaujintas šis puslapis."
     },
     "pendingLegal": {

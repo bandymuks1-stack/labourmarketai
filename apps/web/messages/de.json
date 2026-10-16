@@ -3451,6 +3451,8 @@
       "empty": "Keine Datenschutzanfragen.",
       "needsMigration": "Die Annahme von Datenschutzanfragen ist in dieser Umgebung noch nicht aktiviert.",
       "unavailable": "Datenschutzanfragen können gerade nicht gelesen werden.",
+      "due": "Antwort bis {date}",
+      "overdue": "Überfällig — Antwort war bis {date} fällig",
       "manualNote": "Die Bearbeitung erfolgt manuell: Jede Anfrage wird von einer Person geprüft und erledigt. Nichts in dieser Liste läuft automatisch.",
       "type": {
         "dataExport": "Datenexport",
@@ -5723,7 +5725,7 @@
         {
           "heading": "KI und verbundene KI-Assistenten",
           "items": [
-            "Einige Funktionen nutzen ein KI-Modell von Google (die Gemini-API): zum Übersetzen von Nachrichten und Stellenanzeigen und um vorzuschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den diese Aufgabe braucht. Das Ergebnis ist ein Vorschlag — nichts wird als Tatsache über Sie gespeichert, bevor Sie es bestätigen.",
+            "Einige Funktionen nutzen ein KI-Modell von Google (die Gemini-API). Heute erhält es nur öffentliche Marktstatistiken — zum Beispiel, wie viele offene Stellen ein Beruf hat —, um eine kurze Erläuterung zu verfassen. Das Übersetzen von Nachrichten und Stellenanzeigen sowie das Deuten eines im Chat eingegebenen Satzes sind vorbereitet, aber abgeschaltet: dafür werden weder Nachrichtentext noch personenbezogene Daten gesendet. Wird eine dieser Funktionen eingeschaltet, sagt dieser Hinweis das, und gesendet würde nur der Text, den diese Aufgabe braucht. Jedes Ergebnis ist ein Vorschlag — nichts wird als Tatsache über Sie gespeichert, bevor Sie es bestätigen.",
             "Sie können LabourMarket.ai mit einem KI-Assistenten wie ChatGPT oder Claude verbinden. Jede Verbindung bestätigen Sie selbst auf einer Einwilligungsseite; der Assistent handelt dann nur mit Ihren eigenen Berechtigungen, und folgenreiche Aktionen brauchen eine gesonderte Bestätigung. Verbundene Apps sehen und trennen Sie jederzeit in Ihren Kontoeinstellungen.",
             "Was der Anbieter eines KI-Assistenten mit Ihrem Gespräch tut, regeln dessen eigene Datenschutzbestimmungen."
           ]
@@ -5752,7 +5754,7 @@
           "purpose": "Wird nur bei Administratorkonten verwendet. Merkt sich, ob Administrator-Steuerelemente ausgeblendet sind, und ändert nichts an Berechtigungen."
         }
       ],
-      "localStorageNote": "Ihre Wahl des hellen oder dunklen Designs wird im lokalen Speicher Ihres Browsers gespeichert, nicht in einem Cookie.",
+      "localStorageNote": "Im eigenen Speicher Ihres Browsers (keine Cookies) liegen einige Einträge: Ihre Wahl des hellen oder dunklen Designs; welche Seite oder Kampagne Sie zuerst hierher geführt hat, einmalig gespeichert, damit eine spätere Registrierung ihr zugeordnet werden kann; eine zufällige Sitzungskennung je Tab, die beim Schließen des Tabs verschwindet; und kleine Annehmlichkeiten wie ausgeblendete Hinweise, zuletzt angesehene Einträge und Ihre Spracheingabesprache. Nichts davon wird an Dritte weitergegeben oder für Werbung genutzt, und Sie können es jederzeit über Ihren Browser löschen.",
       "noTracking": "Es gibt heute keine Analyse-, Werbe- oder Drittanbieter-Tracking-Cookies auf der Plattform. Sollte sich das jemals ändern, wird zuerst diese Seite aktualisiert."
     },
     "pendingLegal": {

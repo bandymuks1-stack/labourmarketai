@@ -3451,6 +3451,8 @@
       "empty": "Brak wniosków o prywatność.",
       "needsMigration": "Przyjmowanie wniosków o prywatność nie jest włączone w tym środowisku.",
       "unavailable": "Nie można teraz odczytać wniosków o prywatność.",
+      "due": "Odpowiedź do {date}",
+      "overdue": "Po terminie — odpowiedź była wymagana do {date}",
       "manualNote": "Przetwarzanie jest ręczne: osoba przegląda i realizuje każdy wniosek. Nic na tej liście nie działa automatycznie.",
       "type": {
         "dataExport": "Eksport danych",
@@ -5723,7 +5725,7 @@
         {
           "heading": "AI i połączeni asystenci AI",
           "items": [
-            "Niektóre funkcje korzystają z modelu AI firmy Google (Gemini API): do tłumaczenia wiadomości i ogłoszeń o pracy oraz do podpowiadania, o co prosi zdanie wpisane na czacie. Wysyłany jest tylko tekst potrzebny do tego zadania. Wynik jest propozycją — nic nie zostaje zapisane jako fakt o Tobie, dopóki tego nie potwierdzisz.",
+            "Niektóre funkcje korzystają z modelu AI firmy Google (Gemini API). Dziś otrzymuje on wyłącznie publiczne statystyki rynku — na przykład ile otwartych stanowisk ma dany zawód — aby sformułować krótkie wyjaśnienie. Tłumaczenie wiadomości i ogłoszeń o pracy oraz interpretowanie zdania wpisanego na czacie są przygotowane, ale wyłączone: nie jest dla nich wysyłana ani treść wiadomości, ani dane osobowe. Jeśli którakolwiek z tych funkcji zostanie włączona, ta informacja o tym powie, a wysyłany byłby tylko tekst potrzebny do tego zadania. Każdy wynik jest propozycją — nic nie zostaje zapisane jako fakt o Tobie, dopóki tego nie potwierdzisz.",
             "Możesz połączyć LabourMarket.ai z asystentem AI, takim jak ChatGPT lub Claude. Każde połączenie zatwierdzasz sam na ekranie zgody; asystent działa wtedy wyłącznie z Twoimi uprawnieniami, a działania mające skutki wymagają osobnego potwierdzenia. Połączone aplikacje widzisz i odłączasz w każdej chwili w ustawieniach konta.",
             "To, co dostawca asystenta AI robi z Twoją rozmową, określają jego własne zasady prywatności."
           ]
@@ -5752,7 +5754,7 @@
           "purpose": "Używany wyłącznie na kontach administratorów. Zapamiętuje, czy elementy administracyjne są ukryte, i nie zmienia niczego w uprawnieniach."
         }
       ],
-      "localStorageNote": "Twój wybór jasnego lub ciemnego motywu jest przechowywany w pamięci lokalnej przeglądarki, a nie w pliku cookie.",
+      "localStorageNote": "W pamięci przeglądarki (nie w plikach cookie) przechowywanych jest kilka elementów: Twój wybór jasnego lub ciemnego motywu; która strona lub kampania po raz pierwszy Cię tu sprowadziła — zapisane jednorazowo, aby późniejszą rejestrację można było do niej przypisać; losowy identyfikator sesji dla każdej karty, znikający po jej zamknięciu; oraz drobne udogodnienia, takie jak zamknięte powiadomienia, ostatnio oglądane elementy i język wprowadzania mową. Nic z tego nie jest udostępniane stronom trzecim ani wykorzystywane do reklam, a wszystko możesz w każdej chwili wyczyścić w przeglądarce.",
       "noTracking": "Na platformie nie ma dziś żadnych plików cookie analitycznych, reklamowych ani śledzących innych firm. Jeśli kiedykolwiek się to zmieni, ta strona zostanie zaktualizowana jako pierwsza."
     },
     "pendingLegal": {
