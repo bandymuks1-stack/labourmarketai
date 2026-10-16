@@ -127,9 +127,33 @@ jobs:
             mcp-agents) SPEC=tests/e2e/prod-mcp-agents.spec.ts ;;
             project-context) SPEC=tests/e2e/prod-project-context.spec.ts ;;
           esac
-          pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
-            > ../../prod-qa-result.json
-          echo "exit=$?" >> "$GITHUB_STEP_SUMMARY"
+          # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
+          # used to be here:
+          #  1. `--reporter=list,json > prod-qa-result.json` sent BOTH reporters
+          #     to stdout, so the uploaded "JSON result" began with the list
+          #     reporter's text and was not parseable JSON (run 38799693673:
+          #     270 kB, `JSON.parse` fails at byte 1). The JSON reporter now
+          #     writes its own file; the list output goes to a separate log
+          #     artefact (same content the old file carried — no new exposure).
+          #  2. `echo "exit=$?"` was the step's last command. A failing walk
+          #     still failed the step only because GitHub's `shell: bash`
+          #     injects `-e`; `set -uo pipefail` alone would have turned every
+          #     failure green, and on failure the summary line never ran. The
+          #     exit code is now captured, written to the summary and returned
+          #     explicitly, whatever shell flags the runner adds.
+          code=0
+          PLAYWRIGHT_JSON_OUTPUT_FILE="$GITHUB_WORKSPACE/prod-qa-result.json" \
+            pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
+            > "$GITHUB_WORKSPACE/prod-qa-walk.log" 2>&1 || code=$?
+          # Counts only (no titles, no messages) into the run summary.
+          node -e 'const s=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).stats;console.log(`passed=${s.expected} failed=${s.unexpected} flaky=${s.flaky} skipped=${s.skipped}`)' \
+            "$GITHUB_WORKSPACE/prod-qa-result.json" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null \
+            || echo "result JSON missing or unreadable" >> "$GITHUB_STEP_SUMMARY"
+          echo "walk exit=${code}" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${code}" -ne 0 ]; then
+            echo "::error::production walk failed (exit ${code}); see the prod-qa artefact"
+          fi
+          exit "${code}"
 
       - name: Destroy session files (always)
         if: always()
@@ -141,6 +165,8 @@ jobs:
       # open needs next to the synthetic cast, so they are NOT published — only
       # the step-level JSON result (titles, pass/fail, durations). A failing
       # assertion message names the testid and the expected text, nothing more.
+      # `prod-qa-walk.log` is the list reporter's text — exactly what used to be
+      # glued to the front of prod-qa-result.json, now in its own file.
       - name: Upload result (no screenshots, no traces, no sessions)
         if: always()
         uses: actions/upload-artifact@v4
@@ -148,4 +174,6 @@ jobs:
           name: prod-qa-${{ inputs.spec }}-${{ github.run_id }}
           retention-days: 14
           if-no-files-found: warn
-          path: prod-qa-result.json
+          path: |
+            prod-qa-result.json
+            prod-qa-walk.log
