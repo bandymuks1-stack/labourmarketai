@@ -10,8 +10,11 @@ name: prod-qa-walk
 # real browser, and uploads a JSON result — never a screenshot (public repo),
 # a session file or a trace.
 #
-# Manual only (workflow_dispatch). The `production-qa` environment is where the
-# owner can add a required reviewer, so every run waits for an explicit click.
+# Triggers: manual dispatch, a debounced post-merge walk and one daily
+# scheduled walk (see CADENCE below). The `production-qa` environment is where
+# the owner can add a required reviewer; if one is set, the automatic runs wait
+# for that click too (up to the environment's wait limit) instead of walking
+# unattended.
 #
 # Needs (names only):
 #   secrets.NEXT_PUBLIC_SUPABASE_URL      (exists)
