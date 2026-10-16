@@ -14019,6 +14019,7 @@
         "unsupported": "This cannot be offered through the platform. No route is available for it.",
         "legalCheckFood": "Selling food or home-grown produce falls under food sale, hygiene and marketing rules. You can prepare the listing as a draft; publishing asks you to confirm you have checked the rules that apply to you.",
         "goodsListable": "This looks like a work-related resource — you can post it as a listing on the listings board.",
+        "goodsListableGoods": "This can be listed under Goods on the marketplace board — people browsing the board would see it there. Nothing is saved until you publish it.",
         "goodsListableRental": "This looks like available work equipment — you can post it as a rental listing on the listings board.",
         "goodsCategoryUnsupported": "This cannot be listed on the marketplace board. Nothing you wrote has been saved.",
         "serviceNext": "You can post this as a service offering so others can find it.",

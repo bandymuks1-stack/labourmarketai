@@ -14019,6 +14019,7 @@
         "unsupported": "Šito per platformą pasiūlyti negalima. Kelio tam nėra.",
         "legalCheckFood": "Maisto ar užaugintos produkcijos pardavimui galioja maisto pardavimo, higienos ir prekybos taisyklės. Skelbimą gali paruošti kaip juodraštį; skelbiant paprašysime patvirtinti, kad pasitikrinai tau taikomas taisykles.",
         "goodsListable": "Tai panašu į darbo išteklių — gali paskelbti skelbimą skelbimų lentoje.",
+        "goodsListableGoods": "Tai gali paskelbti skelbimų lentoje, skiltyje „Prekės“ — ten matytų lentą naršantys žmonės. Niekas neišsaugoma, kol pats nepaskelbi.",
         "goodsListableRental": "Tai panašu į laisvą darbo įrangą — gali paskelbti nuomos skelbimą skelbimų lentoje.",
         "goodsCategoryUnsupported": "To skelbimų lentoje paskelbti negalima. Tai, ką parašei, niekur neišsaugota.",
         "serviceNext": "Gali paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų.",
