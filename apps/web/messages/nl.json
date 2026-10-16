@@ -131,6 +131,7 @@
     "myTitle": "Mijn advertenties",
     "intro": "Plaats wat je aanbiedt of nodig hebt. Alleen actieve advertenties die niet verlopen zijn, zijn zichtbaar voor anderen.",
     "notAvailable": "Momenteel niet beschikbaar.",
+    "readUnavailable": "De advertenties konden nu niet worden gelezen. Dat betekent niet dat er geen zijn — probeer het zo opnieuw.",
     "empty": "Nog geen advertenties. Voeg je eerste werkmiddel toe.",
     "addButton": "Advertentie toevoegen",
     "browseTitle": "Actieve advertenties bekijken",
@@ -8744,7 +8745,7 @@
       "pay_within_offer": "Loon binnen het aanbod",
       "accommodation_ok": "Huisvesting past",
       "city_match": "Zelfde stad",
-      "location_within_radius": "Binnen de werkradius",
+      "location_within_radius": "Binnen de werkradius (hemelsbrede afstand)",
       "profession_related": "Verwant beroep (gedeelde vaardigheden)",
       "skills_history_reported": "Vaardigheden genoemd in de geschiedenis van de organisatie (niet geverifieerd)"
     },
@@ -8755,7 +8756,7 @@
       "pay_above_offer": "Loonverwachting boven het aanbod",
       "accommodation_needed_not_provided": "Heeft huisvesting nodig, niet aangeboden",
       "profession_mismatch": "Ander beroep",
-      "location_outside_radius": "Buiten de werkradius"
+      "location_outside_radius": "Buiten de werkradius (hemelsbrede afstand)"
     },
     "candidate": "Kandidaat",
     "privacy": {
@@ -14012,14 +14013,14 @@
           "headcount": "Hoeveel mensen zijn er nodig?"
         },
         "unclear": "Ik weet niet zeker of je iets aanbiedt of iets zoekt. Schrijf wat je hebt of wat je nodig hebt.",
-        "goodsChannelGated": "Er is nog geen koperskanaal voor goederen op het platform — niemand zou dit hier te koop zien. Wat je schreef is nergens opgeslagen.",
+        "goodsChannelGated": "Je kunt dit op het advertentiebord plaatsen onder Goederen — mensen die het bord bekijken zien het daar. Er wordt niets opgeslagen tot je het publiceert.",
         "chipListings": "Advertenties openen",
         "capacityNext": "Ik kan je beschikbaarheid op je werkkaart zetten of meteen werk zoeken — de resultaten zijn de nu openstaande aanvragen.",
         "unsupported": "Dit kan niet via het platform worden aangeboden. Er is hier geen weg voor.",
-        "legalCheckFood": "Voor de verkoop van voedsel of eigen oogst gelden regels voor voedselverkoop, hygiëne en handel die eerst gecontroleerd zouden moeten worden — het platform heeft geen goedgekeurd kanaal voor eigen oogst.",
+        "legalCheckFood": "Voor de verkoop van voedsel of eigen oogst gelden regels voor voedselverkoop, hygiëne en handel. Je kunt de advertentie als concept voorbereiden; bij publicatie vragen we je te bevestigen dat je de regels hebt gecontroleerd die voor jou gelden.",
         "goodsListable": "Dit lijkt een werkgerelateerd middel — je kunt het als advertentie op het advertentiebord plaatsen.",
         "goodsListableRental": "Dit lijkt beschikbaar werkmaterieel — je kunt een verhuur-advertentie op het advertentiebord plaatsen.",
-        "goodsCategoryUnsupported": "Deze categorie wordt vandaag niet ondersteund op het werkgebonden advertentiebord van het platform. Wat je schreef is nergens opgeslagen.",
+        "goodsCategoryUnsupported": "Dit kan niet op het advertentiebord worden geplaatst. Wat je schreef is nergens opgeslagen.",
         "serviceNext": "Je kunt dit als dienstenaanbod plaatsen zodat anderen het vinden.",
         "chipServices": "Diensten openen",
         "corrected": "Bijgewerkt: {changes}.",

@@ -131,6 +131,7 @@
     "myTitle": "Meine Anzeigen",
     "intro": "Veröffentlichen Sie, was Sie anbieten oder suchen. Für andere sind nur aktive, nicht abgelaufene Anzeigen sichtbar.",
     "notAvailable": "Derzeit nicht verfügbar.",
+    "readUnavailable": "Die Anzeigen konnten gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt — versuchen Sie es gleich noch einmal.",
     "empty": "Noch keine Anzeigen. Fügen Sie Ihre erste Arbeitsressource hinzu.",
     "addButton": "Anzeige hinzufügen",
     "browseTitle": "Aktive Anzeigen durchsuchen",
@@ -8744,7 +8745,7 @@
       "pay_within_offer": "Bezahlung im Rahmen des Angebots",
       "accommodation_ok": "Unterkunft passt",
       "city_match": "Gleiche Stadt",
-      "location_within_radius": "Innerhalb des Arbeitsradius",
+      "location_within_radius": "Innerhalb des Arbeitsradius (Luftlinie)",
       "profession_related": "Verwandter Beruf (gemeinsame Fähigkeiten)",
       "skills_history_reported": "In der Organisationshistorie genannte Fähigkeiten (nicht verifiziert)"
     },
@@ -8755,7 +8756,7 @@
       "pay_above_offer": "Gehaltsvorstellung über dem Angebot",
       "accommodation_needed_not_provided": "Benötigt Unterkunft, nicht angeboten",
       "profession_mismatch": "Anderer Beruf",
-      "location_outside_radius": "Außerhalb des Arbeitsradius"
+      "location_outside_radius": "Außerhalb des Arbeitsradius (Luftlinie)"
     },
     "candidate": "Kandidat",
     "privacy": {
@@ -14012,14 +14013,14 @@
           "headcount": "Wie viele Personen werden benötigt?"
         },
         "unclear": "Ich bin nicht sicher, ob Sie etwas anbieten oder etwas suchen. Schreiben Sie, was Sie haben oder was Sie brauchen.",
-        "goodsChannelGated": "Einen Käuferkanal für Waren gibt es auf der Plattform noch nicht — niemand würde dieses Verkaufsangebot hier sehen. Das Geschriebene wurde nirgends gespeichert.",
+        "goodsChannelGated": "Sie können dies am Anzeigenbrett unter „Waren“ einstellen — dort sehen es die Personen, die das Brett durchsehen. Nichts wird gespeichert, bis Sie es veröffentlichen.",
         "chipListings": "Anzeigen öffnen",
         "capacityNext": "Ich kann Ihre Verfügbarkeit auf Ihrer Arbeitskarte eintragen oder sofort Arbeit suchen — die Ergebnisse sind die derzeit offenen Anfragen.",
         "unsupported": "Das kann über die Plattform nicht angeboten werden. Dafür gibt es keinen Weg.",
-        "legalCheckFood": "Für den Verkauf von Lebensmitteln oder eigenem Anbau gelten Regeln zu Lebensmittelverkauf, Hygiene und Handel, die zuerst geprüft werden müssten — die Plattform hat keinen freigegebenen Kanal für Erzeugnisse.",
+        "legalCheckFood": "Für den Verkauf von Lebensmitteln oder eigenem Anbau gelten Regeln zu Lebensmittelverkauf, Hygiene und Handel. Sie können die Anzeige als Entwurf vorbereiten; beim Veröffentlichen bitten wir Sie zu bestätigen, dass Sie die für Sie geltenden Regeln geprüft haben.",
         "goodsListable": "Das sieht nach einer arbeitsbezogenen Ressource aus — Sie können sie als Anzeige am Anzeigenbrett veröffentlichen.",
         "goodsListableRental": "Das sieht nach freier Arbeitsausrüstung aus — Sie können eine Miet-Anzeige am Anzeigenbrett veröffentlichen.",
-        "goodsCategoryUnsupported": "Diese Kategorie wird am arbeitsgebundenen Anzeigenbrett der Plattform heute nicht unterstützt. Das Geschriebene wurde nirgends gespeichert.",
+        "goodsCategoryUnsupported": "Das kann am Anzeigenbrett nicht eingestellt werden. Das Geschriebene wurde nirgends gespeichert.",
         "serviceNext": "Sie können dies als Dienstleistungsangebot veröffentlichen, damit andere es finden.",
         "chipServices": "Dienstleistungen öffnen",
         "corrected": "Aktualisiert: {changes}.",

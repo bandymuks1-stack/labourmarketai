@@ -6304,8 +6304,10 @@ export function ConversationChat({
           return;
         }
         if (verdict?.kind === "LEGAL_CHECK_REQUIRED") {
-          // Food/produce: name plainly WHAT would have to be checked, then
-          // the channel truth — no approved produce channel, nothing saved.
+          // Food/produce: name plainly WHAT has to be checked, then the
+          // channel truth — the goods board accepts a draft and asks for the
+          // legal acknowledgement on publish (audit 2026-10-16, M-1). Nothing
+          // is saved here; the chip opens the board.
           assistant(
             [
               understood,
@@ -6314,6 +6316,12 @@ export function ConversationChat({
             ]
               .filter((l): l is string => Boolean(l))
               .join("\n"),
+            [
+              {
+                id: "link:/dashboard/listings",
+                label: t("valueIntent.chipListings"),
+              },
+            ],
           );
           return;
         }

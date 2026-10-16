@@ -131,6 +131,7 @@
     "myTitle": "Moje ogłoszenia",
     "intro": "Dodaj to, co oferujesz lub czego potrzebujesz. Inni widzą tylko aktywne, niewygasłe ogłoszenia.",
     "notAvailable": "Chwilowo niedostępne.",
+    "readUnavailable": "Nie udało się teraz odczytać ogłoszeń. To nie znaczy, że ich nie ma — spróbuj ponownie za chwilę.",
     "empty": "Brak jeszcze ogłoszeń. Dodaj pierwszy zasób roboczy.",
     "addButton": "Dodaj ogłoszenie",
     "browseTitle": "Przeglądaj aktywne ogłoszenia",
@@ -8744,7 +8745,7 @@
       "pay_within_offer": "Wynagrodzenie mieści się w ofercie",
       "accommodation_ok": "Zakwaterowanie odpowiada",
       "city_match": "To samo miasto",
-      "location_within_radius": "W zasięgu pracy",
+      "location_within_radius": "W zasięgu pracy (odległość w linii prostej)",
       "profession_related": "Pokrewny zawód (wspólne umiejętności)",
       "skills_history_reported": "Umiejętności wskazane w historii organizacji (niezweryfikowane)"
     },
@@ -8755,7 +8756,7 @@
       "pay_above_offer": "Oczekiwane wynagrodzenie wyższe niż oferta",
       "accommodation_needed_not_provided": "Potrzebuje zakwaterowania, niezapewnione",
       "profession_mismatch": "Inny zawód",
-      "location_outside_radius": "Poza zasięgiem pracy"
+      "location_outside_radius": "Poza zasięgiem pracy (odległość w linii prostej)"
     },
     "candidate": "Kandydat",
     "privacy": {
@@ -14012,14 +14013,14 @@
           "headcount": "Ile osób jest potrzebnych?"
         },
         "unclear": "Nie jestem pewien, czy coś oferujesz, czy czegoś szukasz. Powiedz, co masz, albo czego potrzebujesz.",
-        "goodsChannelGated": "Na platformie nie ma jeszcze kanału dla kupujących towary, więc nikt tu nie zobaczy tej oferty sprzedaży. Nic z tego, co napisałeś/aś, nie zostało nigdzie zapisane.",
+        "goodsChannelGated": "Możesz wystawić to na tablicy ogłoszeń w dziale „Towary” — zobaczą to osoby przeglądające tablicę. Nic nie jest zapisywane, dopóki sam/a nie opublikujesz.",
         "chipListings": "Otwórz ogłoszenia",
         "capacityNext": "Mogę zapisać Twoją dostępność na karcie pracy albo od razu wyszukać pracę — wyniki to obecnie otwarte zapytania.",
         "unsupported": "Tego nie można zaoferować przez platformę. Nie ma dla tego dostępnej ścieżki.",
-        "legalCheckFood": "Sprzedaż żywności lub produktów z własnej uprawy podlega przepisom o sprzedaży żywności, higienie i marketingu, które trzeba by najpierw sprawdzić — platforma nie ma jeszcze zatwierdzonego kanału dla takich produktów.",
+        "legalCheckFood": "Sprzedaż żywności lub produktów z własnej uprawy podlega przepisom o sprzedaży żywności, higienie i marketingu. Możesz przygotować ogłoszenie jako wersję roboczą; przy publikacji poprosimy o potwierdzenie, że sprawdziłeś/aś przepisy, które Cię dotyczą.",
         "goodsListable": "To wygląda na zasób związany z pracą — możesz dodać go jako ogłoszenie na tablicy ogłoszeń.",
         "goodsListableRental": "To wygląda na dostępny sprzęt roboczy — możesz dodać go jako ogłoszenie wynajmu na tablicy ogłoszeń.",
-        "goodsCategoryUnsupported": "Ta kategoria nie jest dziś obsługiwana na tablicy ogłoszeń ograniczonej do tematyki pracy. Nic z tego, co napisałeś/aś, nie zostało zapisane.",
+        "goodsCategoryUnsupported": "Tego nie można wystawić na tablicy ogłoszeń. Nic z tego, co napisałeś/aś, nie zostało zapisane.",
         "serviceNext": "Możesz dodać to jako ofertę usługi, aby inni mogli ją znaleźć.",
         "chipServices": "Otwórz tablicę usług",
         "corrected": "Zaktualizowano: {changes}.",
