@@ -3507,6 +3507,25 @@
           "keep_legal": "Bewaren (juridische grondslag)",
           "keep_pending_decision": "Bewaren (bewaarbeslissing in behandeling)"
         }
+      },
+      "erasure": {
+        "title": "Wissen (AVG art. 17)",
+        "rehearse": "Wissen oefenen (proefrun)",
+        "rehearsalNote": "Proefrun: het volledige wissen wordt uitgevoerd en teruggedraaid. Er is niets gewijzigd.",
+        "confirmLabel": "Typ {word} om uit te voeren",
+        "execute": "Wissen uitvoeren",
+        "approveFirst": "Zet het verzoek eerst op ‘Goedgekeurd’.",
+        "result": {
+          "erased": "Gewist. Het onveranderlijke bewijs legt vast wat is gewist, leeggemaakt of gepseudonimiseerd.",
+          "refused": "Niet uitgevoerd: de proefrun weigerde. Er is niets gewijzigd.",
+          "not-superadmin": "Alleen een superbeheerder kan wissen uitvoeren.",
+          "not-found": "Verzoek niet gevonden.",
+          "not-deletion-request": "Dit is geen verzoek om een account te wissen.",
+          "not-approved": "Het verzoek moet eerst worden goedgekeurd.",
+          "bad-confirmation": "Het bevestigingswoord kwam niet overeen. Er is niets gewijzigd.",
+          "notInstalled": "De wisfunctie is nog niet geïnstalleerd in deze database.",
+          "error": "Wissen kon niet worden uitgevoerd. Er is niets gewijzigd."
+        }
       }
     }
   },

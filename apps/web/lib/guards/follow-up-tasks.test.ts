@@ -87,6 +87,16 @@ describe("follow-up migration — one new table + two new gated RPCs, additive o
     expect(others.length).toBeGreaterThan(100);
     for (const f of others) {
       const src = read(`supabase/migrations/${f}`);
+      if (f === "20261015200000_privacy_erasure_executor_v2.sql") {
+      // The GDPR erasure registry (#856, 20261015200000) names every person-referencing
+      // table as DATA in its treatment seed. It may never create, alter or drop one.
+        for (const n of [NEW_TABLE, NEW_CREATE_FN, NEW_STATUS_FN]) {
+          expect(src, `${f} names ${n} only as erasure-registry data`).not.toMatch(
+            new RegExp(`\\b(create|alter|drop)\\s+(table|function)(\\s+if\\s+(not\\s+)?exists)?\\s+(public\\.)?${n}\\b`, "i"),
+          );
+        }
+        continue;
+      }
       expect(src, `${f} must not define ${NEW_CREATE_FN}`).not.toContain(NEW_CREATE_FN);
       expect(src, `${f} must not define ${NEW_STATUS_FN}`).not.toContain(NEW_STATUS_FN);
       // NB: word-boundary check — "follow_up_tasks" must not appear as a

@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
-import { reviewPrivacyRequestAction } from "@/lib/admin/privacy-request-actions";
+import { executeErasureAction, reviewPrivacyRequestAction } from "@/lib/admin/privacy-request-actions";
+import { ERASURE_CONFIRMATION_WORD, rehearseErasure, type ErasureOutcome } from "@/lib/admin/privacy-erasure";
 import {
   listPrivacyRequestQueue,
   PRIVACY_REVIEW_NOTE_MAX,
@@ -25,6 +26,23 @@ import { formatUtcDateTime } from "@/lib/time/display";
  * mutating control is the review verb; destructive execution stays
  * owner-gated (docs/legal/deletion-process-design-v1.md, phases 3–4).
  */
+const ERASURE_NOTICES = [
+  "erased",
+  "refused",
+  "not-superadmin",
+  "not-found",
+  "not-deletion-request",
+  "not-approved",
+  "bad-confirmation",
+  "needs-migration",
+  "error",
+] as const;
+
+/** Outcome kind → copy key (operator copy carries no build vocabulary). */
+function erasureCopyKey(kind: string): string {
+  return kind === "needs-migration" ? "notInstalled" : kind;
+}
+
 const REVIEW_NOTICES = [
   "saved",
   "not_superadmin",
@@ -39,12 +57,18 @@ export async function PrivacyRequestsSection({
   locale,
   deletionPlanFor = null,
   reviewNotice = null,
+  erasureRehearsalFor = null,
+  erasureNotice = null,
 }: {
   locale: string;
   /** `?deletionPlanFor=` — which request row's plan preview is expanded. */
   deletionPlanFor?: string | null;
   /** `?privacyReviewNotice=` — the review action's redirect outcome. */
   reviewNotice?: string | null;
+  /** `?erasureRehearsalFor=` — run the erasure DRY RUN for this row (explicit click only). */
+  erasureRehearsalFor?: string | null;
+  /** `?privacyErasureNotice=` — the execute action's redirect outcome. */
+  erasureNotice?: string | null;
 }) {
   const t = await getTranslations("admin.privacyRequests");
   const result = await listPrivacyRequestQueue();
@@ -62,6 +86,13 @@ export async function PrivacyRequestsSection({
   const plan: DeletionPlanPreview | null = planTarget?.profileId
     ? await buildDeletionPlanPreview(planTarget.profileId)
     : null;
+  const rehearsalTarget =
+    result.kind === "ok" && erasureRehearsalFor
+      ? (result.rows.find((r) => r.id === erasureRehearsalFor && r.type === "account_deletion") ?? null)
+      : null;
+  const rehearsal: ErasureOutcome | null = rehearsalTarget ? await rehearseErasure(rehearsalTarget.id) : null;
+  const erasureNoticeKey =
+    erasureNotice && (ERASURE_NOTICES as readonly string[]).includes(erasureNotice) ? erasureNotice : null;
 
   return (
     <section
@@ -91,6 +122,20 @@ export async function PrivacyRequestsSection({
           data-testid="admin-privacy-review-notice"
         >
           {t(`review.result.${notice}` as Parameters<typeof t>[0])}
+        </p>
+      ) : null}
+
+      {erasureNoticeKey ? (
+        <p
+          role="status"
+          className={`rounded-md border px-3 py-2 text-xs ${
+            erasureNoticeKey === "erased"
+              ? "border-state-success/40 bg-state-success/10 text-state-success"
+              : "border-state-warning/40 bg-state-warning/10 text-text-secondary"
+          }`}
+          data-testid="admin-privacy-erasure-notice"
+        >
+          {t(`erasure.result.${erasureCopyKey(erasureNoticeKey)}` as Parameters<typeof t>[0])}
         </p>
       ) : null}
 
@@ -186,6 +231,23 @@ export async function PrivacyRequestsSection({
                 </button>
               </form>
 
+              {/* Phase 3 — erasure v2: an explicit DRY RUN (the real outcome,
+                  rolled back), then execution of an APPROVED request behind a
+                  typed confirmation word. */}
+              {r.type === "account_deletion" ? (
+                rehearsalTarget?.id === r.id && rehearsal ? (
+                  <ErasureBlock t={t} outcome={rehearsal} requestId={r.id} locale={locale} approved={r.status === "approved"} />
+                ) : (
+                  <a
+                    href={`?erasureRehearsalFor=${r.id}#admin-privacy-requests-heading`}
+                    className="w-fit text-xs font-medium text-brand-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                    data-testid={`admin-privacy-erasure-rehearse-${r.id}`}
+                  >
+                    {t("erasure.rehearse")} →
+                  </a>
+                )
+              ) : null}
+
               {/* Phase 2 — the read-only plan preview, same-page expand. */}
               {planTarget?.id === r.id ? (
                 <PlanPreviewBlock t={t} plan={plan} />
@@ -267,6 +329,82 @@ async function PlanPreviewBlock({
       >
         {t("plan.collapse")}
       </a>
+    </div>
+  );
+}
+
+/** Phase 3 — the dry-run outcome and, when it is executable, the execute form. */
+function ErasureBlock({
+  t,
+  outcome,
+  requestId,
+  locale,
+  approved,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations>>;
+  outcome: ErasureOutcome;
+  requestId: string;
+  locale: string;
+  approved: boolean;
+}) {
+  const plan = "plan" in outcome ? outcome.plan : [];
+  return (
+    <div
+      className="flex flex-col gap-2 rounded-md border border-state-warning/40 bg-state-warning/5 p-3"
+      data-testid="admin-privacy-erasure"
+      data-outcome={outcome.kind}
+    >
+      <p className="text-xs font-semibold text-text-primary">{t("erasure.title")}</p>
+      <p className="text-meta text-text-muted">{t("erasure.rehearsalNote")}</p>
+      {outcome.kind === "refused" ? (
+        <ul className="flex flex-col gap-1" data-testid="admin-privacy-erasure-refusals">
+          {outcome.refusals.map((x, i) => (
+            <li key={i} className="text-xs text-state-warning">
+              <span className="font-mono">{[x.table, x.column].filter(Boolean).join(".") || "—"}</span>
+              {x.rows !== null ? <span className="font-mono tabular-nums"> · {x.rows}</span> : null}
+              {" — "}
+              {x.reason}
+            </li>
+          ))}
+        </ul>
+      ) : outcome.kind === "executable" || outcome.kind === "erased" ? null : (
+        <p className="text-meta text-state-warning">{t(`erasure.result.${erasureCopyKey(outcome.kind)}` as Parameters<typeof t>[0])}</p>
+      )}
+      {plan.length > 0 ? (
+        <ul className="flex flex-col gap-0.5" data-testid="admin-privacy-erasure-plan">
+          {plan.map((p) => (
+            <li key={`${p.table}.${p.column}`} className="flex flex-wrap gap-x-3 text-xs text-text-secondary">
+              <span className="font-mono">{p.column ? `${p.table}.${p.column}` : p.table}</span>
+              <span className="font-mono tabular-nums">{p.rows}</span>
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">{p.treatment}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {outcome.kind === "executable" ? (
+        approved ? (
+          <form action={executeErasureAction} className="flex flex-wrap items-center gap-2" data-testid="admin-privacy-erasure-form">
+            <input type="hidden" name="request_id" value={requestId} />
+            <input type="hidden" name="locale" value={locale} />
+            <label className="flex items-center gap-1.5 text-xs text-text-secondary">
+              {t("erasure.confirmLabel", { word: ERASURE_CONFIRMATION_WORD })}
+              <input
+                name="confirmation"
+                autoComplete="off"
+                className="min-h-9 w-28 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1 font-mono text-xs text-text-primary"
+              />
+            </label>
+            <button
+              type="submit"
+              className="inline-flex min-h-9 items-center rounded-md border border-state-warning/60 px-3 py-1 text-xs text-state-warning transition-colors hover:bg-state-warning/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-state-warning"
+            >
+              {t("erasure.execute")}
+            </button>
+          </form>
+        ) : (
+          <p className="text-meta text-text-muted">{t("erasure.approveFirst")}</p>
+        )
+      ) : null}
     </div>
   );
 }

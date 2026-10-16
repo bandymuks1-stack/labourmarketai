@@ -79,6 +79,9 @@ export default async function AdminDashboardPage({
   searchParams?: Promise<{
     deletionPlanFor?: string;
     privacyReviewNotice?: string;
+    /** Phase 3 (#856): explicit erasure rehearsal + execution outcome. */
+    erasureRehearsalFor?: string;
+    privacyErasureNotice?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -593,6 +596,8 @@ export default async function AdminDashboardPage({
         locale={locale}
         deletionPlanFor={sp.deletionPlanFor ?? null}
         reviewNotice={sp.privacyReviewNotice ?? null}
+        erasureRehearsalFor={sp.erasureRehearsalFor ?? null}
+        erasureNotice={sp.privacyErasureNotice ?? null}
       />
 
       {/* BAND 2b — Internal follow-up task queue (§8.13, branch 24). The

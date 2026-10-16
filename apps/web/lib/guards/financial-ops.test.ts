@@ -227,6 +227,16 @@ describe("1. exactly three human-gated migration pairs own the financial-ops sli
       for (const f of readdirSync(abs).filter((n) => n.endsWith(".sql"))) {
         if (TRAIN_J.some((p) => f.startsWith(p))) continue;
         const src = readFileSync(join(abs, f), "utf8");
+        if (f === "20261015200000_privacy_erasure_executor_v2.sql" || f === "20261015200000_privacy_erasure_executor_v2.down.sql") {
+      // The GDPR erasure registry (#856, 20261015200000) names every person-referencing
+      // table as DATA in its treatment seed. It may never create, alter or drop one.
+          for (const n of OWNED) {
+          expect(src, `${f} names ${n} only as erasure-registry data`).not.toMatch(
+            new RegExp(`\\b(create|alter|drop)\\s+(table|function)(\\s+if\\s+(not\\s+)?exists)?\\s+(public\\.)?${n}\\b`, "i"),
+          );
+          }
+          continue;
+        }
         if (dir === "migrations" && TRIP_READERS.some((p) => f.startsWith(p))) {
           // A reader may name business_trips ONLY to read it: `to_regclass(...)`
           // or `from public.business_trips`. Nothing else it names may be owned.
