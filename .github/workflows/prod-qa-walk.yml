@@ -54,8 +54,8 @@ on:
   # document). Instead of ad-hoc bursts (228 manual walks 2026-10-12..15, median
   # 177 s apart) the routine signal comes from two automatic triggers:
   #   - push to main touching the product → ONE `role-routes` walk (28 routes ×
-  #     5 roles) 60 min after the LAST push of a merge burst (debounced below);
-  #     measured on main 2026-10-09..16: ~5 such bursts a day;
+  #     5 roles) 120 min after the LAST push of a merge burst (debounced below);
+  #     measured on main 2026-10-09..16: ~3 such bursts a day (21 in 7.1 days);
   #   - one scheduled walk a day, rotating through every spec (full catalogue
   #     every 19 days).
   # Manual dispatch is unchanged for targeted checks.
@@ -78,7 +78,7 @@ jobs:
   # Manual and scheduled runs pass straight through.
   debounce:
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 135
     concurrency:
       group: prod-qa-walk-debounce-${{ github.event_name == 'push' && 'push' || github.run_id }}
       cancel-in-progress: ${{ github.event_name == 'push' }}
@@ -87,7 +87,7 @@ jobs:
     steps:
       - name: Wait for the merge burst to settle (push only)
         if: github.event_name == 'push'
-        run: sleep 3600
+        run: sleep 7200
       - name: Pick the walk
         id: pick
         shell: bash
