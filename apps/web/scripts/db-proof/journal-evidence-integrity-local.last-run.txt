@@ -1,0 +1,10 @@
+journal-evidence-integrity-local proof — 2026-10-16T19:40:22.240Z
+cluster 127.0.0.1:54399 db lm_journal_integrity_proof (throwaway)
+proof aborted: Error: connect ECONNREFUSED 127.0.0.1:54399
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1645:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 54399
+}
