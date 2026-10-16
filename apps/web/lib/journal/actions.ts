@@ -20,6 +20,7 @@ import {
   type RpcMetricRow,
 } from "@/lib/journal/journal-write-core";
 import { MODULE_METRICS_FIELD } from "@/lib/journal/journal-module-fields";
+import { checkWorkDate } from "@/lib/journal/work-date";
 
 // The write implementation and its whole vocabulary moved to
 // `journal-write-core.ts` (owner-approved transport extraction, 2026-08-29
@@ -156,6 +157,23 @@ export async function supersedeJournalEntry(
       ok: false,
       code: "quantity_invalid",
       message: t("quantityInvalid"),
+    };
+  }
+  // A correction is still a FACT about work that happened (SEP-1): the same
+  // date rule as the create path (independent review of #2432, 2026-10-16 —
+  // an edit could set a future or malformed work_date past J-1).
+  const workDateCheck = checkWorkDate(workDate, { requireDate: false, rejectFuture: true });
+  if (workDateCheck) {
+    return {
+      ok: false,
+      code: workDateCheck.code,
+      message: t(
+        workDateCheck.code === "work_date_required"
+          ? "workDateRequired"
+          : workDateCheck.reason === "future"
+            ? "workDateFuture"
+            : "workDateInvalid",
+      ),
     };
   }
 

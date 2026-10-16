@@ -64,6 +64,10 @@ describe("document draft work date wiring", () => {
     // document path was the only one that did until audit 2026-10-16 (J-1).
     expect(core).toContain("rejectFuture: true,");
     expect(core).not.toContain("rejectFuture: sourceDocumentFileId");
+    // and so does a CORRECTION (supersede) — an edit may not re-date work into the future
+    const actions = readFileSync(join(__dirname, "actions.ts"), "utf8");
+    expect(actions).toContain('checkWorkDate(workDate, { requireDate: false, rejectFuture: true })');
+    expect(actions.indexOf("checkWorkDate(workDate")).toBeLessThan(actions.indexOf('("journal_entry_supersede'));
     expect(check).toBeLessThan(core.indexOf('("create_journal_entry_full", rpcParams)'));
     expect(core.indexOf('("create_journal_entry_full", rpcParams)')).toBeGreaterThan(0);
   });
