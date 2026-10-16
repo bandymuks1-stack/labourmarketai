@@ -88,7 +88,7 @@ None confirmed. (A "CRITICAL" would be data loss, a cross-tenant leak or a live 
 
 | Id | Where | Defect | Status |
 |---|---|---|---|
-| J-2 | `journal-write-core.ts:609-620`, `actions.ts:218-228`, RPC 0017 | Hash chain mixes an unstored timestamp (not recomputable), client supplies `hash_prev`, no unique index, head definition differs from supersede | RED (hash in RPC + unique `(worker_id, hash_prev)`) |
+| J-2 | `journal-write-core.ts:609-620`, `actions.ts:218-228`, RPC 0017 | Hash chain mixes an unstored timestamp (not recomputable), client supplies `hash_prev`, no unique index, head definition differs from supersede. **Raised to HIGH by the security sweep (SEC-3, §6): a worker can insert forged hashes via PostgREST.** | RED (hash + prev in a BEFORE INSERT trigger, `verify_journal_chain_v1`, unique `(worker_id, hash_prev)`) |
 | J-3 | `journal-write-core.ts:508`, `actions.ts:119` | `original_language` = raw UI locale; invalid → raw insert failure | **FIXED** (validated) — deeper fix (detect text language) OPEN-GREEN |
 | J-4 | `lib/conversation/worklog-extract.ts:12-16` | start/end/break never reach the record | **FIXED** |
 | B-3 | `supabase/migrations/20261006100300…` | Revoke of `authenticated` EXECUTE on 12 money RPCs unapplied | RED (apply before any LMC flag flip) |
@@ -186,13 +186,43 @@ The open request (filed 2026-10-14) is due about **2026-11-14**.
 
 ---
 
-## 6. Security posture summary (static; no live catalog)
+## 6. Security posture — static Supabase/PostgreSQL sweep (no live catalog)
 
-Strong: RLS everywhere with `is_admin()` branches; SECURITY DEFINER functions with pinned `search_path` and owner-scoped grants (the anon allowlist is pinned statically; the live gate waits on GOV-1); append-only triggers on journal metrics, LMC ledger, `ai_runs`, consent events, receipts; `service_role` holds almost no table grants (42501 is the expected answer on legacy tables — #2422); workspace resolved server-side and fail-closed; single-use confirmations on chat dispatch and MCP writes; CSP in report-only plus enforced frame/referrer/nosniff headers; no third-party scripts; secrets never logged in the sampled paths.
+Method of the delegated sweep: a Node extractor over all 401 migrations (tables, RLS, policies, grants, FKs, indexes), a SECURITY DEFINER grant simulator (last definition wins, grants replayed in file order), file-by-file reading of the newest 40 migrations, and application-side greps. No DB connection; "applied in production" is not knowable statically (the parity snapshot is from 2026-09-08, ~130 migrations old — refresh it via read-only MCP `list_migrations`).
 
-Weak or open: per-instance rate limiting only (SEC-1); no CAPTCHA; bearer scope (SEC-2, RED #2336); live secdef and migration-parity CI gates inactive without `SUPABASE_DB_URL` (GOV-1); production service-role key present in 5 GitHub workflows (GDPR G-27, owner); the two RED LMC items (B-3, B-4). **The consolidated Supabase static sweep (RLS coverage per table, every SECURITY DEFINER, grants, index gaps, rollback-file parity) was delegated and had not reported when this document was written; its sub-reports on PR #2426, abuse surface and the storage/retention guards are incorporated above. The per-table RLS/grant matrix must be re-run and attached before the production readiness checks in §8.**
+**Strong (confirmed by reading):**
+- **RLS coverage is total:** 240 live tables, 0 without `enable row level security`, 384 policies; the 9 tables with RLS and no policy are intentional function-only/service tables.
+- **No wide write policy.** The only `with check (true)` is the throttled anonymous `waitlist` insert; every anonymous write path has DB-enforced ceilings since 20260829130000. The 11 `using (true)` policies are all SELECT on reference/taxonomy tables. No `to anon` SELECT policy on any table; anon table grants are exactly two INSERTs.
+- **Explicit-grant model:** no `ALTER DEFAULT PRIVILEGES`, no `ON ALL TABLES/FUNCTIONS`; production `pg_default_acl` empty (documented).
+- **SECURITY DEFINER discipline:** 562 effective functions, **562/562 pin `search_path`**; the anon/PUBLIC-executable set equals the 9 entries of `lib/security/anon-secdef-allowlist.ts` exactly; zero `<> auth.uid()` null-guard bugs in client-executable bodies; the 9 RPCs that take a client-supplied organization id all gate on membership/management.
+- **Tenant isolation on the sensitive tables** (profiles, workers via `can_view_worker`, journal_entries, customer_requests, conversations, organization_roles, engagement_contexts, worker_documents, consents, billing, audit_logs, ai_runs) is scoped or admin/service-only; helper predicates are definer, pinned, `auth.uid()`-bound, granted to `authenticated` only.
+- **Views:** 3 of 4 `security_invoker`; the one definer view carries its own `auth.uid()` predicate.
+- **Storage:** all 6 buckets private, MIME + size limits, paths scoped by `auth.uid()` folder or org membership; `getPublicUrl` has zero occurrences; reads are short signed URLs.
+- **Application layer:** one service-role factory behind `server-only`; every call site behind a signature, cron secret, superadmin gate or server-resolved subject; every `/api/*` route authenticates itself (guard-pinned); the MCP door runs tools as the caller's own RLS client.
 
----
+**Findings from the sweep** (merged into §3 numbering as SEC-3..SEC-15):
+
+| Id | Sev | Where | Finding | Class |
+|---|---|---|---|---|
+| SEC-3 (= J-2, raised to HIGH) | HIGH | `journal-write-core.ts:602-620`; `20261003150700…:379-384` (`create_journal_entry_full` inserts `p_hash_prev`/`p_hash_self` verbatim); direct INSERT policy 20260530130000:47 + grant 0013:417 | Hash chain is client-computed over an unstored timestamp, `hash_prev` never verified server-side; a worker can insert via PostgREST with forged values (the e2e `integrated-fixes.spec.ts:301` already does). Doctrine §3.3 says server-side. No `verify_journal_chain` exists. | RED: BEFORE INSERT trigger deriving both hashes from stored columns and the worker's head; `verify_journal_chain_v1` |
+| SEC-4 (= B-3) | HIGH pending-apply | `20261006100300…` | Until applied, the four money RPCs keep EXECUTE for `authenticated` | RED (authored; confirm with `has_function_privilege`) |
+| SEC-5 | MED | `0013:417`, `20261006100400…` | `journal_entries` has no UPDATE/DELETE/TRUNCATE refuse trigger (RLS + narrow grants only; 10 definer RPCs legitimately update it) | RED: trigger allowing only `deleted_at/superseded_by/updated_at` + review columns; `revoke truncate` |
+| SEC-6 | MED | `0001_initial_schema.sql:269-280,625-630` | `audit_logs` mutable by admin policy; no refuse trigger; lacks before/after, ip, ua (doctrine §3.4) | RED |
+| SEC-7 | MED | `20260612091000…:217-225` | Worker can hard-delete journal evidence photos (`owner delete` storage policy); `document-files` and `evidence-media` use orphan-only delete, this bucket does not | RED (storage policy) |
+| SEC-8 (= SEC-1) | MED | `lib/security/rate-limit.ts:24-32,151-161` | Per-instance limiter keyed on the first `x-forwarded-for` hop (spoofable); limits multiply across cold instances | GREEN: shared counter (Postgres RPC) behind the same API, trusted IP only |
+| SEC-9 (= B-7) | MED | `20260720190000…:1421` | `lmc_expire_lots_v1` never scheduled → expired credit stays spendable | GREEN cron route or RED pg_cron |
+| SEC-10 (= G-7) | MED | expire_* admin functions; privacy intake | Expiry sweeps unscheduled; erasure defined, not enforced (81 profiles undeletable) | RED (#2235, #2426 after amendments) |
+| SEC-11 | MED latent | `20261012100000_assistant_transcript_v1.sql:158` | `v_owner <> auth.uid()` fails open when `auth.uid()` is NULL (same shape as the 2026-07-22 P0); unreachable today (EXECUTE authenticated only) | RED: add `or auth.uid() is null` |
+| SEC-12 | LOW | `20261006100000…:108-111` | work_hour_allocations UPDATE `using` not narrowed like the new `with check` (pre-fix forged rows stay editable) | RED or data audit |
+| SEC-13 | LOW | `20261007100000…:168-173` | evidence-media subject select branch lacks `link_method = 'worker_confirmed'` | RED |
+| SEC-14 | LOW | `20260808140000…:154` | `ai_runs_retention_health()` executable by every authenticated user, reads cron health | GREEN (gate with `is_admin()`) |
+| SEC-15 | LOW | `auth/logout/route.ts:59` (GET), `dispatch.ts:101` + `confirmable.ts:29` (service-role key reused as HMAC material when `CONVERSATION_TOKEN_SECRET` unset), `api/referrals/external/v1/route.ts:46` (partner-slug oracle), `request_organization_claim_v1` unthrottled (SUSPECTED), `20261007180000…:103` trigger not idempotent, anon-allowlist header says "four" (nine) | Nuisance / hygiene | GREEN |
+
+**Migration hygiene:** 0 naming violations, 0 duplicate versions; 69 migrations without a rollback file — all 36 legacy `000N` files plus the 33 pre-policy files before `20260612130000` (the README declares rollbacks forward-only from there; all 332 later files are paired, 0 orphan rollbacks); forward DROPs only in 0003, 20260530120000 (no executable zero-row assert) and 20260728114353 (clean start); 26 top-level data UPDATEs in 23 files, all idempotent; the newest 40 reviewed one by one — 38 human-gated RED, 2 GREEN, all with rollbacks; one order dependency (20261003151500 after 20261003151100).
+
+**Index gaps (all GREEN, `create index concurrently`):** FK columns used in policies or hot subqueries without an index — `invitations.organization_id` / `project_id` / `(organization_id, accepted_by_profile_id)` (team-offer consent subquery), `contact_disclosure_requests.organization_id`, `performance_reviews.organization_id`, `marketplace_listings.organization_id`, `billing_checkout_operations.organization_id`, `training_skill_links.organization_id`, `ai_runs.profile_id`, `work_hour_allocations.journal_entry_id`, `journal_entry_review_submissions.worker_id`, `team_assignments.task_id`, `customer_requests.drafted_by`, `contracts.customer_request_id`, `commercial_handoffs.request_id`, `team_demand_offers.{offered_by,responded_by,assignment_id}`, `team_demand_offer_terms.{proposed_by,decided_by}`, `competency_recognitions.{assessed_by,supersedes_id}`, `organization_evidence_media.imported_by_profile_id`, `assistant_message_attachments.message_id`, `historical_consolidation_decisions.{canonical_project_id,decided_by,reverted_by}`, `confirmation_spends.spent_by`, `lmc_transactions.actor_profile_id`, `company_memberships.invited_by`, `pilot_participants.profile_id`, `organization_people.linked_worker_id`, `evidence_import_rows.organization_person_id`. Core RLS columns are indexed.
+
+Still open from the earlier list: bearer scope (SEC-2, RED #2336); the live secdef and parity CI gates inactive without `SUPABASE_DB_URL` (GOV-1); the production service-role key in 5 GitHub workflows (owner).
 
 ## 7. Research summaries (kept separate from confirmed defects)
 
@@ -217,6 +247,7 @@ Evidence for NOT READY (each is a single, nameable blocker):
 3. **A real erasure request is due ~2026-11-14** and the executor is unapplied and needs amendments (§5).
 4. **No human has walked the authenticated product on the deployed build since #2421** (the last prod walks are 10-12/10-13); CI has no database, so 5 of 95 e2e specs run.
 5. **Two live security CI gates are inactive** (GOV-1) and the AI monitor is blind to provider failures (AI-2, PR #2419 unmerged).
+6. **The journal's tamper-evidence claim is unsupported until the hash chain moves server-side** (SEC-3, RED) — the legal-proof spine of the product.
 
 Checks required **after hosting is restored**, in order:
 1. `GET /api/health` on the apex reports the expected `build` (the deploy actually happened — Vercel quota silently skips).
@@ -243,5 +274,6 @@ Checks required **after hosting is restored**, in order:
 | N-6 | Resolve ARCH-3 (is zero usage a broken journey?) so "5 broken links" becomes a usable backlog. | C-1 and the register's honesty. |
 | N-7 | Workspace hygiene: remove merged/stale worktrees and the forbidden `C:\lmw-*` directories per the policy (never `--force`). | 30 worktrees; the guard blocks new ones at 20. |
 | N-8 | Adopt `vercel-react-best-practices` globally (zero cost) — yes/no. | §7.1. |
+| N-9 | Approve the RED journal integrity set: server-side hash chain (SEC-3), UPDATE/DELETE refuse trigger on `journal_entries` (SEC-5), orphan-only delete for journal photos (SEC-7), `audit_logs` immutability (SEC-6). | The product's legal-proof promise rests on them; all four are drafts for one RED PR. |
 
 Plus the standing open set: PER-11, ORG-2, EVID-6, GOV-1, ARCH-6, AGENT-1..4, COM-6, COM-8, MDD-01..14, E6, and the `needs-human-gate` PR queue listed in the master spec §14.
