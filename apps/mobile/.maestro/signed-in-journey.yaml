@@ -1,0 +1,114 @@
+# SIGNED-IN JOURNEY — the proof behind ANDROID_SIGNED_IN_JOURNEY_PROVEN.
+#
+# Runs ONLY from the workflow_dispatch job `signed-in` in android.yml, inside
+# the `production-qa` GitHub environment, against a release APK built with the
+# production PUBLIC config. The credentials arrive as Maestro env variables
+# (-e MOBILE_QA_EMAIL / -e MOBILE_QA_PASSWORD) from environment secrets; they
+# are the owner's ONE synthetic review identity, never a real person, never a
+# value in this repository. No screenshot is taken and no debug output is
+# uploaded: the repository is public.
+#
+# What a green run proves, beyond the auth-failure journey:
+#   1. a real sign-in succeeds and the entry gate lands on Today;
+#   2. Today's figures are READ through /api/mcp as the signed-in person
+#      (testID today-figures renders only on a LOADED read — a failed read
+#      renders capability-retry and the step fails);
+#   3. a journal entry is DRAFTED and CONFIRMED (journal.create_draft →
+#      journal.confirm, the one canonical write), the saved state renders;
+#   4. the profile's skill figures are read (living_cv.skills.get +
+#      journal.work_intelligence.get);
+#   5. sign-out returns to the sign-in form and the keychain is cleared.
+# Every step navigates by testID, never by a label that changes with the
+# device language.
+appId: ai.labourmarket.app
+name: signed-in-journey
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- tapOn:
+    id: "email"
+- inputText: ${MOBILE_QA_EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${MOBILE_QA_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "submit"
+
+# --- 1–2. Today, with figures actually read through the door ---
+- extendedWaitUntil:
+    visible:
+      id: "today-figures"
+    timeout: 60000
+
+# --- 3. Draft and confirm one journal entry for yesterday ---
+- tapOn:
+    id: "tab-journal"
+- extendedWaitUntil:
+    visible:
+      id: "journal-log-work"
+    timeout: 30000
+- tapOn:
+    id: "journal-log-work"
+- extendedWaitUntil:
+    visible:
+      id: "journal-compose-yesterday"
+    timeout: 30000
+- tapOn:
+    id: "journal-compose-yesterday"
+- tapOn:
+    id: "journal-compose-site"
+- inputText: "CI site"
+- tapOn:
+    id: "journal-compose-notes"
+- inputText: "Signed-in CI journey: laid floor tiles in two rooms and cleaned the site."
+- hideKeyboard
+- tapOn:
+    id: "journal-compose-review"
+# When the identity holds more than one work context the server asks the
+# human to choose; the first option is as good as any for a synthetic cast.
+- runFlow:
+    when:
+      visible:
+        id: "journal-compose-choose"
+    commands:
+      - tapOn:
+          id: "journal-compose-option-0"
+- extendedWaitUntil:
+    visible:
+      id: "journal-compose-save"
+    timeout: 60000
+- tapOn:
+    id: "journal-compose-save"
+- extendedWaitUntil:
+    visible:
+      id: "journal-compose-saved"
+    timeout: 60000
+- tapOn:
+    id: "journal-compose-back"
+
+# --- 4. Profile: skill figures read ---
+- tapOn:
+    id: "tab-profile"
+- extendedWaitUntil:
+    visible:
+      id: "profile-skill-figures"
+    timeout: 60000
+
+# --- 5. Sign out, back to the form ---
+- tapOn:
+    id: "tab-settings"
+- extendedWaitUntil:
+    visible:
+      id: "sign-out"
+    timeout: 30000
+- tapOn:
+    id: "sign-out"
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000

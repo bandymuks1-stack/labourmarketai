@@ -309,10 +309,11 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
           title={t("journal.compose.chooseContext")}
           body={t("journal.compose.chooseContextBody")}
         />
-        {state.options.map((option) => (
+        {state.options.map((option, index) => (
           <Button
             key={option.id}
             variant="quiet"
+            testID={`journal-compose-option-${index}`}
             label={option.label}
             onPress={() => void draft(option.id)}
           />
