@@ -77,6 +77,7 @@ export default async function ServiceRequestsPage({
   const isCompany = employer.kind === "ok";
   const needsMigration =
     disc.kind === "needs-migration" ||
+    disc.kind === "unavailable" ||
     out.kind === "needs-migration" ||
     inc.kind === "needs-migration";
   const ownActive =

@@ -48,6 +48,8 @@ export default async function ListingsPage({
   ]);
   const needsMigration =
     mine.kind === "needs-migration" || discovery.kind === "needs-migration";
+  // A failed read is named as such — never rendered as an empty board.
+  const readUnavailable = mine.kind === "unavailable" || discovery.kind === "unavailable";
   const extended =
     mine.kind === "ok" && discovery.kind === "ok" && mine.extended && discovery.extended;
   const myRows = mine.kind === "ok" ? mine.rows : [];
@@ -65,6 +67,7 @@ export default async function ListingsPage({
         myRows={myRows}
         discoveryRows={discoveryRows}
         needsMigration={needsMigration}
+        readUnavailable={readUnavailable}
         extended={extended}
         unavailable={unavailable}
         locale={locale}

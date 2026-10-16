@@ -62,9 +62,13 @@ export interface ChannelVerdict {
     | "outside_geography";
   /** LEGAL_CHECK_REQUIRED: the named check (stable code). */
   readonly legalCheckKey?: "food_sale_rules";
-  /** Marketplace CAN_ROUTE: the honest listing shape hint. */
+  /** Marketplace CAN_ROUTE / LEGAL_CHECK_REQUIRED: the honest listing shape
+   *  hint. The category is a REGISTERED SUBJECT (`market-model.ts`): a
+   *  work-bounded category for a work resource, or a goods subject
+   *  (`goods_food_homegrown`, `goods_other`, …) since the universal
+   *  marketplace (Option C, applied 2026-10-07). Audit 2026-10-16 (M-1). */
   readonly listingKind?: ListingKind;
-  readonly listingCategory?: ListingCategory;
+  readonly listingCategory?: ListingCategory | string;
 }
 
 export interface ChannelEligibility {
@@ -181,8 +185,12 @@ export function assessChannelEligibility(
   }
 
   const types = statementValueTypes(statement);
+  // The food check names a SELLER's obligation; a person who NEEDS produce
+  // is not subject to it (audit 2026-10-16, M-7 latent).
   const isFood =
-    statement.subject === "goods" && matchesFoodProduce(statement, text);
+    statement.axis === "offer" &&
+    statement.subject === "goods" &&
+    matchesFoodProduce(statement, text);
   const category =
     statement.subject === "goods"
       ? matchWorkBoundedCategory(statement, text)
@@ -234,20 +242,28 @@ function assessOne(
   }
 
   if (c.channelId === "internal_marketplace_listings") {
-    // Food/produce: the marketplace is work-bounded and the platform has no
-    // approved produce channel — name the check, do not route.
+    // A seeker's statement is a WANTED listing; an offer is a sale or, for
+    // capacity/availability wording, a rental (audit 2026-10-16, M-7).
+    const listingKind: ListingKind =
+      statement.axis === "seek"
+        ? "wanted"
+        : statement.offerMode === "rental" ||
+            statement.offerMode === "availability"
+          ? "rental"
+          : "sale";
+    // Food/produce: the marketplace DOES carry a goods domain
+    // (`goods_food_homegrown`, Option C, applied 2026-10-07) — a draft is
+    // allowed, and publishing asks the seller to confirm the food-sale rules
+    // (`publish-policy.ts`). Name the check AND the route. Before audit
+    // 2026-10-16 this verdict told the person "no channel, nothing saved"
+    // while the board already accepted exactly this listing (M-1).
     if (isFood) {
       return {
         channelId: c.channelId,
         kind: "LEGAL_CHECK_REQUIRED",
         legalCheckKey: "food_sale_rules",
-      };
-    }
-    if (category === null) {
-      return {
-        channelId: c.channelId,
-        kind: "CHANNEL_RESTRICTED",
-        reasonKey: "category_not_supported",
+        listingCategory: "goods_food_homegrown",
+        listingKind,
       };
     }
     if (!statement.subjectLabel) {
@@ -257,15 +273,14 @@ function assessOne(
         missingFields: ["subjectLabel"],
       };
     }
+    // A recognised work-bounded category keeps its slug; anything else that
+    // is lawful to sell is a goods listing (`goods_other`) — the board's own
+    // publish policy still refuses restricted categories by text.
     return {
       channelId: c.channelId,
       kind: "CAN_ROUTE",
-      listingCategory: category,
-      listingKind:
-        statement.offerMode === "rental" ||
-        statement.offerMode === "availability"
-          ? "rental"
-          : "sale",
+      listingCategory: category ?? "goods_other",
+      listingKind,
     };
   }
 
