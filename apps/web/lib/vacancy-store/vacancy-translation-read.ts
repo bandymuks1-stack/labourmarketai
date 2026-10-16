@@ -3,6 +3,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/types";
 import { runAiAgent } from "@/lib/ai/run-agent-server";
+import { aiTaskServableNow } from "@/lib/ai/egress-precheck-server";
 import { rateLimit } from "@/lib/security/rate-limit";
 
 import type { StoredPublicVacancyV1, VacancyLocaleTranslationV1 } from "./vacancy-read";
@@ -163,6 +164,10 @@ async function translateOne(
   targetLocale: string,
 ): Promise<{ readonly item: Item; readonly provider: string; readonly model: string } | null> {
   try {
+    // `translate_vacancy` holds no egress grant today: without a local or
+    // granted provider every call is a refusal row. Skip the run, keep the
+    // honest null (audit 2026-10-16, AI-1).
+    if (!(await aiTaskServableNow("translate_vacancy"))) return null;
     const outcome = await runAiAgent(
       "vacancy_translation",
       { sourceLocale, targetLocale, items: [item] },
