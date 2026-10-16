@@ -563,9 +563,13 @@ export async function runAiAgentCore<T = unknown>(
 }
 
 /**
- * True when the dispatcher answered with the data egress gate's own refusal —
- * the message is built by `data-egress.ts` and starts with the literal
- * "data egress gate". Structural, never payload (audit 2026-10-16, AI-1).
+ * True when the dispatcher answered with the data egress gate's own refusal.
+ * The literal "data egress gate" is built only by `data-egress.ts`; on the
+ * legacy (no-chain) path it is the whole message, on the CHAIN path — the one
+ * every production run takes — it is folded into the per-provider summary
+ * ("no provider may receive … — gemini: data egress gate: …"), so the match
+ * is `includes`, not a prefix (independent review of #2433, 2026-10-16).
+ * Structural, never payload (audit 2026-10-16, AI-1).
  */
 export function isEgressRefusal(result: {
   readonly status: string;
@@ -576,6 +580,6 @@ export function isEgressRefusal(result: {
     result.status === "error" &&
     result.code === "unsupported" &&
     typeof result.message === "string" &&
-    result.message.startsWith("data egress gate")
+    result.message.includes("data egress gate")
   );
 }

@@ -60,6 +60,16 @@ describe("isEgressRefusal — recognised structurally, never by payload", () => 
         message: 'data egress gate: "gemini" is external and holds no egress grant',
       }),
     ).toBe(true);
+    // the CHAIN path (every production run) folds the gate's reason into a
+    // per-provider summary — this is the shape that must be recognised
+    expect(
+      isEgressRefusal({
+        status: "error",
+        code: "unsupported",
+        message:
+          'no provider may receive SENSITIVE_FREE_TEXT data for task "translate_message" — gemini: data egress gate: "gemini" is external and holds no egress grant, so it may receive PUBLIC data only',
+      }),
+    ).toBe(true);
     expect(isEgressRefusal({ status: "error", code: "unsupported", message: "gemini http 404" })).toBe(false);
     expect(isEgressRefusal({ status: "error", code: "timeout", message: "data egress gate" })).toBe(false);
     expect(isEgressRefusal({ status: "ok" })).toBe(false);
