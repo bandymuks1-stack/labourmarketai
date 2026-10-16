@@ -213,7 +213,7 @@ create trigger journal_entries_truncate_guard_v1
 create or replace function public.verify_journal_chain_v1(p_worker_id uuid)
 returns table (
   entry_id    uuid,
-  position    integer,
+  "position"  integer,
   created_at  timestamptz,
   status      text
 )

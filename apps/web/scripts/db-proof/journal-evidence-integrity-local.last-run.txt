@@ -1,0 +1,119 @@
+journal-evidence-integrity-local — last real run (throwaway local PostgreSQL 16.13, 127.0.0.1:54399, no remote DB touched)
+Branch fix/cc/journal-evidence-integrity-red; migration 20261016190000_journal_evidence_integrity_v1 (+ .down.sql).
+All uuids are synthetic fixtures; no personal data.
+
+Two passes are recorded below:
+  PASS A — migration applied VERBATIM (the file as committed, after the one syntax fix noted below)
+  PASS B — the same, plus the PROPOSED_FIXES overlay (LM_PROOF_PROPOSED_FIXES=1) from the script header
+
+Changed in the migration by this proof (syntax only, unambiguous):
+  verify_journal_chain_v1: `returns table (... position integer ...)` → `"position" integer`.
+  `position` is a PostgreSQL keyword that is not allowed as a function OUT-column name; the file
+  failed to apply at all (SQLSTATE 42601 "syntax error at or near position", char 10804). Quoting keeps
+  the output column name `position` unchanged for every caller.
+
+Findings against the migration (NOT changed by this proof — author/owner decision):
+  F1  T6/T9  service_role cannot execute journal_evidence_guard_bypassed_v1(): EXECUTE is revoked
+             from public and never granted to service_role, while the SECURITY INVOKER guard
+             triggers call it as the invoking role. Every service_role UPDATE/DELETE on
+             journal_entries and audit_logs fails with 42501 "permission denied for function
+             journal_evidence_guard_bypassed_v1" — including the one sanctioned erasure bypass.
+             Fix: grant execute on function public.journal_evidence_guard_bypassed_v1() to service_role;
+  F2  T7b/T7c chain order ≠ verifier order: rows are linked in advisory-lock order, but the head
+             lookup and the verifier both order by created_at (= transaction start, or whatever a
+             direct PostgREST insert supplies). Interleaved concurrent saves → verifier reports
+             prev_mismatch on honest rows; a client-supplied backdated created_at is stored as-is
+             and the next insert chains past it (fork). Fix (verified in PASS B): under the lock,
+             `new.created_at := greatest(now(), head.created_at + 1 microsecond)` — server-
+             authoritative, strictly monotonic per worker; no live insert path supplies created_at.
+  F3  T4b    project_id is part of the hash input on INSERT but the evidence guard allows it to
+             change (the live RPCs re-attribute projects) → after a legitimate project_id update the
+             verifier reports self_mismatch for the row. Decide: drop project_id from the hash
+             input (and from the verifier), or make project_id immutable for version-2 rows.
+
+============================================================================================
+PASS A — VERBATIM
+============================================================================================
+journal-evidence-integrity-local proof — 2026-10-16T19:04:29.539Z
+cluster 127.0.0.1:54399 db lm_journal_integrity_proof (throwaway)
+PostgreSQL 16.13, compiled by Visual C++ build 1944, 64-bit
+legacy row (pre-migration) ae4cbb05-14c7-4d6b-a7df-16e06874f28d for W2
+migration applied verbatim
+PASS  T1 forged hashes are overwritten server-side  — hash_version=2, hash_prev=NULL, hash_self=15dba68a331cb003… == node sha256 over stored columns
+PASS  T1b trigger order: attribution guard ran BEFORE the chain trigger (saw the client value)  — saw 'forged'; BEFORE INSERT order = journal_entries_attribution_guard_v1 → journal_entries_chain_v1
+PASS  T2 chain: second insert links to the first; verifier ok,ok  — pos1 ok, pos2 ok (as authenticated W1)
+PASS  T3 immutability: authenticated UPDATE/DELETE and owner UPDATE/TRUNCATE → 42501  — 
+        auth UPDATE original_text: 42501 permission denied for table journal_entries
+        auth UPDATE hash_self: 42501 permission denied for table journal_entries
+        auth UPDATE worker_id: 42501 permission denied for table journal_entries
+        auth DELETE: 42501 permission denied for table journal_entries
+        owner UPDATE original_text: 42501 journal_entry_immutable: content and provenance columns cannot change; record a correction (supersede) instead
+        owner UPDATE hash_self: 42501 journal_entry_immutable: content and provenance columns cannot change; record a correction (supersede) instead
+        owner UPDATE worker_id: 42501 journal_entry_immutable: content and provenance columns cannot change; record a correction (supersede) instead
+        owner UPDATE created_at: 42501 journal_entry_immutable: content and provenance columns cannot change; record a correction (supersede) instead
+        owner UPDATE hash_version: 42501 journal_entry_immutable: content and provenance columns cannot change; record a correction (supersede) instead
+        owner DELETE: 42501 journal_entry_immutable: delete is never permitted (append-only evidence; soft-delete via deleted_at)
+        owner TRUNCATE CASCADE: 42501 journal_entry_immutable: truncate is never permitted
+PASS  T4 lifecycle columns may change; verifier still ok  — deleted_at/superseded_by/visibility_scope/project_id changed; verifier self_mismatch,ok
+FAIL  T4b verifier still ok after the lifecycle updates (project_id is part of the hash input)  — verifier 1:self_mismatch,2:ok — project_id is hashed on INSERT but the evidence guard lets it change, so the recomputed hash no longer matches
+PASS  T5 legacy row reports 'legacy'; later v2 row chained to it reports 'ok'  — pos1 legacy, pos2 ok
+FAIL  T6 bypass: only service_role + lm.evidence_guard_bypass='erasure' in one transaction  — permission denied for function journal_evidence_guard_bypassed_v1 [SQLSTATE 42501]
+PASS  T7 concurrency: two sessions insert for the same worker; no fork  — B blocked ~400 ms on the lock; A.prev=head, B.prev=A; verifier ok,ok,ok,ok
+FAIL  T7b adversarial: B's transaction BEGINs before A's but A inserts first (created_at order ≠ lock order)  — verifier 1:legacy,2:ok,3:prev_mismatch,4:prev_mismatch — B.created_at < A.created_at (verifier order ≠ chain order): rows are linked in lock order but ordered by created_at (= transaction start)
+FAIL  T7c adversarial: client-supplied backdated created_at on a direct insert cannot reorder the chain  — stored created_at 2020-01-01 00:00:00+00 was backdated below the head 2026-10-16 19:04:35.861112+00
+PASS  T8 photos: referenced object survives owner DELETE (0 rows); orphan is deleted  — referenced: 0 rows; orphan: 1 row deleted
+FAIL  T9 audit_logs immutable: owner UPDATE/DELETE/TRUNCATE → 42501; service_role + GUC allowed  — permission denied for function journal_evidence_guard_bypassed_v1 [SQLSTATE 42501]
+PASS  function attributes: verifier is SECURITY INVOKER; every new function pins search_path=public, pg_temp  — 6 functions; prosecdef=false on verifier; search_path pinned on all; execute: authenticated=yes anon=no; bypass predicate not executable by authenticated
+PASS  T10 rollback then re-apply (idempotent)  — rollback: 0 triggers, 0 functions, column gone, old photo policy back, 12 rows (11 were v2) kept their hashes; re-apply ok — rows now v1×12; new insert v2 ok; verifier W1 legacy,legacy,legacy,legacy,ok
+database lm_journal_integrity_proof dropped
+
+10/15 passed; FAILED: T4b verifier still ok after the lifecycle updates (project_id is part of the hash input), T6 bypass: only service_role + lm.evidence_guard_bypass='erasure' in one transaction, T7b adversarial: B's transaction BEGINs before A's but A inserts first (created_at order ≠ lock order), T7c adversarial: client-supplied backdated created_at on a direct insert cannot reorder the chain, T9 audit_logs immutable: owner UPDATE/DELETE/TRUNCATE → 42501; service_role + GUC allowed
+
+============================================================================================
+PASS B — VERBATIM + PROPOSED_FIXES overlay (F1 + F2; F3 left as a design decision)
+============================================================================================
+journal-evidence-integrity-local proof — 2026-10-16T19:04:37.650Z
+cluster 127.0.0.1:54399 db lm_journal_integrity_proof (throwaway)
+PostgreSQL 16.13, compiled by Visual C++ build 1944, 64-bit
+legacy row (pre-migration) faf26e06-8175-40cd-9565-6165362b9b5c for W2
+migration applied verbatim
+PROPOSED FIXES overlay applied (LM_PROOF_PROPOSED_FIXES=1): F1 grant execute to service_role; F2 server-authoritative monotonic created_at
+PASS  T1 forged hashes are overwritten server-side  — hash_version=2, hash_prev=NULL, hash_self=9e3932d2e5daa508… == node sha256 over stored columns
+PASS  T1b trigger order: attribution guard ran BEFORE the chain trigger (saw the client value)  — saw 'forged'; BEFORE INSERT order = journal_entries_attribution_guard_v1 → journal_entries_chain_v1
+PASS  T2 chain: second insert links to the first; verifier ok,ok  — pos1 ok, pos2 ok (as authenticated W1)
+PASS  T3 immutability: authenticated UPDATE/DELETE and owner UPDATE/TRUNCATE → 42501  — 
+        auth UPDATE original_text: 42501 permission denied for table journal_entries
+        auth UPDATE hash_self: 42501 permission denied for table journal_entries
+        auth UPDATE worker_id: 42501 permission denied for table journal_entries
+        auth DELETE: 42501 permission denied for table journal_entries
+        owner UPDATE original_text: 42501 journal_entry_immutable: content and provenance columns cannot change; record a correction (supersede) instead
+        owner UPDATE hash_self: 42501 journal_entry_immutable: content and provenance columns cannot change; record a correction (supersede) instead
+        owner UPDATE worker_id: 42501 journal_entry_immutable: content and provenance columns cannot change; record a correction (supersede) instead
+        owner UPDATE created_at: 42501 journal_entry_immutable: content and provenance columns cannot change; record a correction (supersede) instead
+        owner UPDATE hash_version: 42501 journal_entry_immutable: content and provenance columns cannot change; record a correction (supersede) instead
+        owner DELETE: 42501 journal_entry_immutable: delete is never permitted (append-only evidence; soft-delete via deleted_at)
+        owner TRUNCATE CASCADE: 42501 journal_entry_immutable: truncate is never permitted
+PASS  T4 lifecycle columns may change; verifier still ok  — deleted_at/superseded_by/visibility_scope/project_id changed; verifier self_mismatch,ok
+FAIL  T4b verifier still ok after the lifecycle updates (project_id is part of the hash input)  — verifier 1:self_mismatch,2:ok — project_id is hashed on INSERT but the evidence guard lets it change, so the recomputed hash no longer matches
+PASS  T5 legacy row reports 'legacy'; later v2 row chained to it reports 'ok'  — pos1 legacy, pos2 ok
+PASS  T6 bypass: only service_role + lm.evidence_guard_bypass='erasure' in one transaction  — 
+        authenticated + GUC DELETE: 42501 permission denied for table journal_entries
+        service_role without GUC DELETE: 42501 journal_entry_immutable: delete is never permitted (append-only evidence; soft-delete via deleted_at)
+        service_role without GUC UPDATE: 42501 journal_entry_immutable: content and provenance columns cannot change; record a correction (supersede) instead
+        service_role after ROLLBACK (GUC gone) DELETE: 42501 journal_entry_immutable: delete is never permitted (append-only evidence; soft-delete via deleted_at)
+        service_role + GUC DELETE: 1 row (rolled back, row kept)
+PASS  T7 concurrency: two sessions insert for the same worker; no fork  — B blocked ~400 ms on the lock; A.prev=head, B.prev=A; verifier ok,ok,ok,ok
+PASS  T7b adversarial: B's transaction BEGINs before A's but A inserts first (created_at order ≠ lock order)  — A.created_at < B.created_at (verifier order = chain order); verifier legacy,ok,ok,ok
+PASS  T7c adversarial: client-supplied backdated created_at on a direct insert cannot reorder the chain  — backdated created_at overwritten to 2026-10-16 19:04:43.771012+00; no fork; verifier ok,ok,ok,ok
+PASS  T8 photos: referenced object survives owner DELETE (0 rows); orphan is deleted  — referenced: 0 rows; orphan: 1 row deleted
+PASS  T9 audit_logs immutable: owner UPDATE/DELETE/TRUNCATE → 42501; service_role + GUC allowed  — 
+        owner UPDATE: 42501 audit_log_immutable: UPDATE is never permitted
+        owner DELETE: 42501 audit_log_immutable: DELETE is never permitted
+        owner TRUNCATE: 42501 audit_log_immutable: TRUNCATE is never permitted
+        service_role without GUC DELETE: 42501 audit_log_immutable: DELETE is never permitted
+        service_role + GUC DELETE 1 row + TRUNCATE ok (rolled back, row kept)
+PASS  function attributes: verifier is SECURITY INVOKER; every new function pins search_path=public, pg_temp  — 6 functions; prosecdef=false on verifier; search_path pinned on all; execute: authenticated=yes anon=no; bypass predicate not executable by authenticated
+PASS  T10 rollback then re-apply (idempotent)  — rollback: 0 triggers, 0 functions, column gone, old photo policy back, 12 rows (11 were v2) kept their hashes; re-apply ok — rows now v1×12; new insert v2 ok; verifier W1 legacy,legacy,legacy,legacy,ok
+database lm_journal_integrity_proof dropped
+
+14/15 passed; FAILED: T4b verifier still ok after the lifecycle updates (project_id is part of the hash input)
