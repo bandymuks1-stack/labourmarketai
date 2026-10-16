@@ -17,15 +17,40 @@
  */
 import { cpSync, existsSync, rmSync, writeFileSync, readdirSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
+// fileURLToPath decodes %20 etc., so a checkout path with spaces works.
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const webDir = path.join(repoRoot, "apps", "web");
 const standalone = path.join(webDir, ".next", "standalone");
 const outDir = path.resolve(process.argv[2] ?? path.join(repoRoot, ".standalone-dist"));
+const MARKER = ".labourmarket-standalone-artefact";
 
 const serverJs = path.join(standalone, "apps", "web", "server.js");
 if (!existsSync(serverJs)) {
   console.error(`standalone server not found at ${serverJs} — run the build with output: "standalone" first`);
+  process.exit(1);
+}
+
+// The output directory is wiped before copying. Refuse anything that could be
+// (or contain) the repo, the app, the build itself or a filesystem root, and
+// refuse to wipe a non-empty directory this script did not create (no marker).
+const isWithin = (child, parent) => {
+  const rel = path.relative(parent, child);
+  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+};
+if (
+  path.parse(outDir).root === outDir ||
+  isWithin(repoRoot, outDir) ||
+  isWithin(webDir, outDir) ||
+  isWithin(outDir, webDir) ||
+  isWithin(standalone, outDir)
+) {
+  console.error(`refusing outDir ${outDir}: it is, contains or lies inside the repo app/build tree`);
+  process.exit(1);
+}
+if (existsSync(outDir) && readdirSync(outDir).length > 0 && !existsSync(path.join(outDir, MARKER))) {
+  console.error(`refusing to wipe non-empty ${outDir}: it was not created by this script (no ${MARKER})`);
   process.exit(1);
 }
 
@@ -39,12 +64,29 @@ if (existsSync(path.join(webDir, "public"))) {
   cpSync(path.join(webDir, "public"), path.join(outDir, "apps", "web", "public"), { recursive: true });
 }
 
-// Strip any env file the tracer may have copied: secrets never ship in the artefact.
+// Strip the env files Next copies next to server.js: secrets never ship in the artefact.
 for (const dir of [outDir, path.join(outDir, "apps", "web")]) {
   for (const f of readdirSync(dir)) {
-    if (f.startsWith(".env")) rmSync(path.join(dir, f), { force: true });
+    if (f.startsWith(".env")) {
+      rmSync(path.join(dir, f), { force: true });
+      console.log(`removed ${path.relative(outDir, path.join(dir, f))}`);
+    }
   }
 }
+
+// Then FAIL (never silently fix) if anything secret-shaped is left anywhere in the tree.
+const FORBIDDEN = [/^\.env/, /\.pem$/, /\.key$/, /^id_(rsa|ed25519|ecdsa)/, /\.p12$/, /^\.vercel$/, /^\.git$/];
+const offending = [];
+for (const entry of readdirSync(outDir, { recursive: true, withFileTypes: true })) {
+  if (FORBIDDEN.some((re) => re.test(entry.name))) {
+    offending.push(path.relative(outDir, path.join(entry.parentPath ?? entry.path, entry.name)));
+  }
+}
+if (offending.length > 0) {
+  console.error(`refusing artefact: secret-shaped entries found:\n  ${offending.join("\n  ")}`);
+  process.exit(1);
+}
+writeFileSync(path.join(outDir, MARKER), "created by scripts/package-standalone.mjs\n");
 
 // A dependency-free root manifest: the host's install step becomes a no-op and
 // nothing tries to resolve the monorepo's pnpm workspace.
