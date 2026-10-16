@@ -98,11 +98,16 @@ export type PrepareResult =
  * key-derivation path — which is also one less purpose that credential serves.
  */
 function tokenSecret(): string {
-  const material = env.CONVERSATION_TOKEN_SECRET || env.SUPABASE_SERVICE_ROLE_KEY;
+  // ONE purpose, ONE key (owner direction 2026-10-16): the broad Supabase
+  // service-role key is never reused as HMAC material. Without a dedicated
+  // CONVERSATION_TOKEN_SECRET the dispatcher refuses to sign — loudly, on the
+  // first confirmation — instead of silently binding every pending
+  // confirmation to a credential whose rotation would invalidate them all.
+  const material = env.CONVERSATION_TOKEN_SECRET;
   if (!material) {
     throw new Error(
-      "conversation confirmation tokens cannot be signed: set CONVERSATION_TOKEN_SECRET " +
-        "(or SUPABASE_SERVICE_ROLE_KEY). Refusing to sign with a hardcoded fallback.",
+      "conversation confirmation tokens cannot be signed: CONVERSATION_TOKEN_SECRET is not set " +
+        "(a dedicated random secret of at least 16 characters; the service-role key is never reused for this).",
     );
   }
   return createHash("sha256").update(`conversation-confirmation:v1:${material}`).digest("hex");
