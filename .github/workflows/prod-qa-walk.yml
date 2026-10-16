@@ -87,11 +87,26 @@ jobs:
         run: |
           set -euo pipefail
           since=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
-          # Runs created in the window, excluding this one; cancelled runs that
-          # never reached the walk still count — the cap is deliberately simple.
-          used=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/prod-qa-walk.yml/runs?created=%3E%3D${since}&per_page=100" \
-            --jq "[.workflow_runs[] | select(.id != ${GITHUB_RUN_ID})] | length")
-          echo "production walks started since ${since}: ${used} (budget ${PROD_QA_WALK_DAILY_BUDGET})" | tee -a "$GITHUB_STEP_SUMMARY"
+          # A run CONSUMES the budget only when it reached production: its
+          # `walk` job's first production step (provision + mint) started.
+          # Runs this job refused, runs cancelled before the walk (a superseded
+          # pending run, a debounced merge burst) and runs still waiting for
+          # the environment never touched production. Counting them (the first
+          # version counted every created run) made each refused re-dispatch
+          # extend the very lock-out it was refused by: dispatching once an hour
+          # while over budget would never get a walk through again.
+          runs=$(gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/prod-qa-walk.yml/runs?created=%3E%3D${since}&per_page=100" \
+            --jq ".workflow_runs[] | select(.id != ${GITHUB_RUN_ID}) | .id")
+          used=0
+          for id in ${runs}; do
+            reached=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${id}/jobs?filter=all&per_page=100" \
+              --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+            if [ "${reached}" -gt 0 ]; then
+              used=$((used + 1))
+            fi
+          done
+          echo "production walks that reached production since ${since}: ${used} (budget ${PROD_QA_WALK_DAILY_BUDGET})" | tee -a "$GITHUB_STEP_SUMMARY"
           if [ "${used}" -ge "${PROD_QA_WALK_DAILY_BUDGET}" ]; then
             if [ "${OVERRIDE}" = "true" ]; then
               echo "::warning::budget exceeded; running because budget_override=true"
