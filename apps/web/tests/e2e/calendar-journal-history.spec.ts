@@ -58,15 +58,23 @@ const dateField = (page: Page) => page.locator('input[type="date"]').first();
 
 async function saveThroughConfirm(page: Page): Promise<void> {
   // preview -> explicit confirm: the first "Išsaugoti" shows "Patvirtinti
-  // įrašą?", the second commits. Never auto-confirm in product code; the test
-  // simply performs both human steps.
-  for (let i = 0; i < 3; i++) {
-    const save = page.getByRole("button", { name: /^Išsaugoti$/ }).last();
-    if ((await save.count()) === 0) break;
-    await save.click();
-    await page.waitForTimeout(2_000);
-    if ((await page.getByText(/Patvirtinti įrašą/i).count()) === 0) break;
-  }
+  // įrašą?", the second commits. Never auto-confirm in product code; the
+  // test simply performs both human steps.
+  //
+  // It WAITS FOR EACH STEP instead of sleeping a fixed 2 s. The old loop
+  // read "no confirm prompt after 2 s" as "already saved" and stopped, so on
+  // a loaded machine (the prompt arriving at 2.5 s) nothing was committed and
+  // the read-back later failed as if the entry had been lost (isolated run
+  // 2026-10-16: no row in journal_entries for that marker).
+  const save = () => page.getByRole("button", { name: /^Išsaugoti$/ }).last();
+  const confirmStep = page.getByText(/Patvirtinti įrašą/i);
+  const done = page.locator('[data-testid="worklog-done"]');
+  await save().click();
+  await expect(confirmStep.or(done).first()).toBeVisible({ timeout: 30_000 });
+  if (!(await done.isVisible())) await save().click();
+  await expect(done, "the work-log save never reached its saved state").toBeVisible({
+    timeout: 30_000,
+  });
 }
 
 test.describe("Calendar — a past journal day is visible and reachable", () => {
@@ -99,19 +107,25 @@ test.describe("Calendar — a past journal day is visible and reachable", () => 
 
     // ── the month the work HAPPENED in — today is outside this grid ─────────
     await page.goto(`/lt/dashboard/planning?view=month&date=${workDay}`);
-    await expect(page.locator('[data-testid="planning-month"]')).toBeVisible();
+    // Scoped to <main>. The page streams in through a hidden `<div id="S:n">`
+    // that Next.js swaps into place; for that moment a second, hidden copy of
+    // the month section exists outside <main>, and an unscoped locator fails
+    // strict mode at once (isolated run 2026-10-16). The person reads <main>;
+    // so does the test.
+    const main = page.getByRole("main");
+    await expect(main.locator('[data-testid="planning-month"]')).toBeVisible();
 
     // THE REGRESSION, DIRECTLY: the day carries a JOURNAL mark, not merely a
     // count. Before the fix the entry was not even read for this range.
     await expect(
-      page.locator(`[data-testid="planning-month-journal-${workDay}"]`),
+      main.locator(`[data-testid="planning-month-journal-${workDay}"]`),
     ).toBeVisible();
 
     // The legend is what makes the mark mean something to a reader.
-    await expect(page.locator('[data-testid="planning-month-legend"]')).toBeVisible();
+    await expect(main.locator('[data-testid="planning-month-legend"]')).toBeVisible();
 
     // ── open the day and read what was recorded ─────────────────────────────
-    await page.locator(`[data-testid="planning-month-cell-${workDay}"]`).click();
+    await main.locator(`[data-testid="planning-month-cell-${workDay}"]`).click();
     await page.waitForURL(new RegExp(`view=day.*date=${workDay}`), { timeout: 30_000 });
     const dayView = page.locator('[data-testid="planning-day-view"]');
     await expect(dayView).toBeVisible();
