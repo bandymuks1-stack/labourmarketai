@@ -156,6 +156,8 @@ const en = {
   "journal.compose.checkThis": "Check this first",
   "journal.compose.invalidDate":
     "Write the date as year-month-day, for example 2026-09-01. Nothing was sent.",
+  "journal.compose.futureDate":
+    "The work date cannot be in the future — a journal entry records work that has happened. Nothing was sent.",
   "journal.compose.notesRequired":
     "Write what you did before saving. Nothing was sent.",
   "journal.compose.draftFailedTitle": "We could not prepare this entry",
@@ -359,6 +361,8 @@ const lt: Catalogue = {
   "journal.compose.checkThis": "Pirmiausia patikrink",
   "journal.compose.invalidDate":
     "Datą rašyk metai-mėnuo-diena, pavyzdžiui 2026-09-01. Niekas nebuvo išsiųsta.",
+  "journal.compose.futureDate":
+    "Darbo data negali būti ateityje — žurnalo įrašas fiksuoja darbą, kuris jau įvyko. Niekas nebuvo išsiųsta.",
   "journal.compose.notesRequired":
     "Prieš įrašant aprašyk, ką nuveikei. Niekas nebuvo išsiųsta.",
   "journal.compose.draftFailedTitle": "Nepavyko paruošti šio įrašo",
@@ -558,6 +562,8 @@ const ru: Catalogue = {
   "journal.compose.checkThis": "Сначала проверьте",
   "journal.compose.invalidDate":
     "Укажите дату как год-месяц-день, например 2026-09-01. Ничего не отправлено.",
+  "journal.compose.futureDate":
+    "Дата работы не может быть в будущем — запись в журнале фиксирует уже выполненную работу. Ничего не отправлено.",
   "journal.compose.notesRequired":
     "Опишите, что вы сделали, прежде чем сохранять. Ничего не отправлено.",
   "journal.compose.draftFailedTitle": "Не удалось подготовить эту запись",
@@ -757,6 +763,8 @@ const nl: Catalogue = {
   "journal.compose.checkThis": "Controleer dit eerst",
   "journal.compose.invalidDate":
     "Schrijf de datum als jaar-maand-dag, bijvoorbeeld 2026-09-01. Er is niets verstuurd.",
+  "journal.compose.futureDate":
+    "De werkdatum kan niet in de toekomst liggen — een journaalpost legt werk vast dat al is gebeurd. Er is niets verstuurd.",
   "journal.compose.notesRequired":
     "Schrijf op wat je hebt gedaan voordat je opslaat. Er is niets verstuurd.",
   "journal.compose.draftFailedTitle": "We konden dit item niet voorbereiden",
@@ -957,6 +965,8 @@ const de: Catalogue = {
   "journal.compose.checkThis": "Bitte zuerst prüfen",
   "journal.compose.invalidDate":
     "Schreiben Sie das Datum als Jahr-Monat-Tag, zum Beispiel 2026-09-01. Es wurde nichts gesendet.",
+  "journal.compose.futureDate":
+    "Das Arbeitsdatum kann nicht in der Zukunft liegen — ein Journaleintrag hält bereits geleistete Arbeit fest. Es wurde nichts gesendet.",
   "journal.compose.notesRequired":
     "Schreiben Sie vor dem Speichern, was Sie getan haben. Es wurde nichts gesendet.",
   "journal.compose.draftFailedTitle":
@@ -1148,6 +1158,8 @@ const pl: Catalogue = {
   "journal.compose.checkThis": "Najpierw to sprawdź",
   "journal.compose.invalidDate":
     "Datę zapisz jako rok-miesiąc-dzień, na przykład 2026-09-01. Nic nie zostało wysłane.",
+  "journal.compose.futureDate":
+    "Data pracy nie może być w przyszłości — wpis w dzienniku zapisuje pracę, która już się odbyła. Nic nie zostało wysłane.",
   "journal.compose.notesRequired":
     "Przed zapisaniem opisz, co zostało zrobione. Nic nie zostało wysłane.",
   "journal.compose.draftFailedTitle": "Nie udało się przygotować tego wpisu",

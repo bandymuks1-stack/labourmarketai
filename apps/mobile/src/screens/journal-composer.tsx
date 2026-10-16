@@ -130,6 +130,14 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
         setState({ kind: "writing", localError: "journal.compose.invalidDate" });
         return;
       }
+      // A journal entry is a FACT (SEP-1; web parity with #2432): a day that
+      // has not happened in the device's own calendar is refused before any
+      // round trip. The server refuses it too; this only spares the trip and
+      // says why in the person's language. Same-day evening shifts stay valid.
+      if (workDate.trim() > deviceDay(0)) {
+        setState({ kind: "writing", localError: "journal.compose.futureDate" });
+        return;
+      }
       if (trimmedNotes.length < MIN_NOTES) {
         setState({ kind: "writing", localError: "journal.compose.notesRequired" });
         return;
