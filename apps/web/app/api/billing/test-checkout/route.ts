@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
 import { getBillingConfig } from "@/lib/billing/config";
+import { readLivePaymentsEnabled } from "@/lib/commercial/live-payments-flag";
 import { getBillingProvider } from "@/lib/billing/provider";
 import { testPriceIdFor } from "@/lib/billing/prices";
 import {
@@ -117,6 +118,23 @@ export async function POST(req: Request) {
       { ok: false, reason: gate.reason, testMode: config.testMode },
       { status: gate.status },
     );
+  }
+
+  // ── THE SECOND OWNER ACT (audit 2026-10-16, B-1; MKT-7) ──────────────────
+  // A LIVE checkout needs the env token (act one) AND the owner-only database
+  // flag `live_payments_enabled` (act two; read by lib/commercial, outside the
+  // billing modules so the Stripe ⟂ LMC-ledger separation stays literal). Until the owner sets
+  // the flag, live mode can record and reconcile what Stripe already holds,
+  // but it cannot open a new session that would charge a card. Fail closed
+  // on an unreadable flag. Test mode is unaffected.
+  if (config.state === "stripe_live") {
+    const flag = await readLivePaymentsEnabled();
+    if (flag.kind !== "enabled") {
+      return NextResponse.json(
+        { ok: false, reason: "live_not_enabled", testMode: false },
+        { status: 503 },
+      );
+    }
   }
 
   const priceId = testPriceIdFor(planKey);

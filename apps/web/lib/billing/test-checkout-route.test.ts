@@ -28,6 +28,12 @@ vi.mock("@/lib/billing/config", () => ({
   getBillingConfig: () => ({ state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" }),
 }));
 vi.mock("@/lib/billing/prices", () => ({ testPriceIdFor: (k: string) => (k === "company_pilot" ? "price_SERVER" : null) }));
+// THE SECOND OWNER ACT (audit 2026-10-16, B-1): under stripe_live a new
+// checkout needs the owner-only database flag. Enabled here so every existing
+// case keeps its meaning; one case below flips it.
+type LiveFlag = { kind: "enabled" | "disabled" | "unavailable" };
+const liveFlag = vi.fn(async (): Promise<LiveFlag> => ({ kind: "enabled" }));
+vi.mock("@/lib/commercial/live-payments-flag", () => ({ readLivePaymentsEnabled: () => liveFlag() }));
 vi.mock("@/lib/billing/billing-subject", () => ({
   resolveBillingSubject: vi.fn(async () => ({ subject: { type: "organization", id: "org-1" }, payerProfileId: "user-1", billingAuthority: true, role: "owner" })),
 }));
@@ -189,5 +195,23 @@ describe("gates that precede everything (unchanged)", () => {
     const res = await post({ planKey: "worker_plus" });
     expect(res.status).toBe(400);
     expect(admit).not.toHaveBeenCalled();
+  });
+});
+
+describe("the second owner act — live_payments_enabled gates NEW live checkouts (audit 2026-10-16)", () => {
+  it("flag disabled → 503 live_not_enabled; no operation opened, no provider session", async () => {
+    liveFlag.mockResolvedValueOnce({ kind: "disabled" });
+    const res = await post({ planKey: "company_pilot" });
+    expect(res.status).toBe(503);
+    expect((await res.json()).reason).toBe("live_not_enabled");
+    expect(open).not.toHaveBeenCalled();
+    expect(createSession).not.toHaveBeenCalled();
+  });
+  it("flag unreadable → fails CLOSED exactly like disabled", async () => {
+    liveFlag.mockResolvedValueOnce({ kind: "unavailable" });
+    const res = await post({ planKey: "company_pilot" });
+    expect(res.status).toBe(503);
+    expect((await res.json()).reason).toBe("live_not_enabled");
+    expect(createSession).not.toHaveBeenCalled();
   });
 });
