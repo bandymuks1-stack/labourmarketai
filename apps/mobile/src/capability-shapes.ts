@@ -192,3 +192,71 @@ export type ContextSwitchData =
       readonly options: readonly { readonly id: string; readonly label: string }[];
       readonly note: string;
     };
+
+/**
+ * `interest.express_draft` — the SAME two-answer shape as the journal draft.
+ * Called with no `requestId` it answers with the needs this account can SEE
+ * (its own opportunity board, under its own RLS) as labelled options and
+ * mints no token; called with one of those ids it answers with a preview and
+ * a one-time token. Neither answer sends anything. A refusal
+ * (`no_visible_demand`, `no_worker_profile`) is a finding the screen names.
+ */
+export type InterestOption = {
+  readonly id: string;
+  readonly label: string;
+};
+
+export type InterestDraftPreview = {
+  readonly requestId: string;
+  /** The server's label for the need — never composed on the device. */
+  readonly demandLabel: string;
+  readonly note: string | null;
+  /** HONEST repeat: the domain refreshes a repeat express and keeps the
+   *  status; the person is told before confirming that it is a repeat. */
+  readonly alreadyExpressed: boolean;
+};
+
+export type InterestDraftData =
+  | {
+      readonly status: "demand_choice_required";
+      readonly options: readonly InterestOption[];
+      readonly note: string;
+    }
+  | {
+      readonly preview: InterestDraftPreview;
+      readonly confirmationToken: string;
+      readonly note: string;
+    };
+
+/** `interest.express_confirm` — the canonical express-interest write. */
+export type InterestConfirmData = {
+  readonly status: string;
+  readonly structuredDestination: string;
+};
+
+/**
+ * `workforce.availability` — the caller's active roster over the next 7
+ * days in three honest states. COMMITTED IS NOT UNAVAILABLE: `constraint`
+ * and `overridable` carry the difference (SEP-2), and `absencesKnown` /
+ * `commitmentsKnown` say which inputs actually answered, so an unread
+ * source is never shown as "nobody is busy" (SEP-7). Refused outside an
+ * employer workspace (`personal_workspace`, `no_organization`,
+ * `no_company_context`, `needs_migration`).
+ */
+export type WorkforceAvailabilityData = {
+  readonly actingFor: string;
+  readonly from?: string;
+  readonly to?: string;
+  readonly rosterTotal: number;
+  readonly rows: readonly {
+    readonly label: string;
+    readonly state: "free" | "committed" | "unavailable";
+    readonly constraint: "none" | "commitment" | "hard_constraint";
+    readonly overridable: boolean;
+    readonly notFreeUntil: string | null;
+    readonly committedTo: string | null;
+  }[];
+  readonly absencesKnown?: boolean;
+  readonly commitmentsKnown?: boolean;
+  readonly note?: string;
+};
