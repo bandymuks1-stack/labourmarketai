@@ -9,6 +9,7 @@ import {
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
 import { spendConfirmationForRequest } from "@/lib/security/confirmation-spend";
+import { confirmationKeyMaterial } from "@/lib/security/confirmation-key-material";
 
 /**
  * THE capability confirmation wiring (G4 tail wagon 1) — the ONE way a
@@ -26,14 +27,20 @@ import { spendConfirmationForRequest } from "@/lib/security/confirmation-spend";
  * string — a token minted for one surface can never be replayed on the other.
  */
 export function capabilityTokenSecret(): string {
-  const material = env.CONVERSATION_TOKEN_SECRET || env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!material) {
+  // Same rule as the conversation signer: production requires the dedicated
+  // key and refuses the service-role fallback.
+  const verdict = confirmationKeyMaterial({
+    dedicated: env.CONVERSATION_TOKEN_SECRET,
+    serviceRole: env.SUPABASE_SERVICE_ROLE_KEY,
+    production: process.env.NODE_ENV === "production",
+  });
+  if (!verdict.ok) {
     throw new Error(
-      "capability confirmation tokens cannot be signed: set CONVERSATION_TOKEN_SECRET " +
-        "(or SUPABASE_SERVICE_ROLE_KEY). Refusing to sign with a hardcoded fallback.",
+      `capability confirmation tokens cannot be signed: ${verdict.reason} ` +
+        "Refusing to sign with a hardcoded fallback.",
     );
   }
-  return createHash("sha256").update(`capability-confirmation:v1:${material}`).digest("hex");
+  return createHash("sha256").update(`capability-confirmation:v1:${verdict.material}`).digest("hex");
 }
 
 /** Mint the one-time token a draft returns. `input` must be the NORMALIZED
