@@ -432,6 +432,10 @@ describe("the registry itself", () => {
       "timesheets.overview.get",
       "finance.records.list",
       "cv.verified.get",
+      // The public vacancy board for a bearer client (2026-10-16): the same
+      // read the website's /jobs page performs, anonymous projection only.
+      "jobs.search",
+      "jobs.get",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
@@ -693,6 +697,10 @@ describe("the registry itself", () => {
       "timesheets.overview.get",
       "finance.records.list",
       "cv.verified.get",
+      // The public vacancy board for a bearer client (2026-10-16): the same
+      // read the website's /jobs page performs, anonymous projection only.
+      "jobs.search",
+      "jobs.get",
     ]);
   });
 

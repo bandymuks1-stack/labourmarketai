@@ -35,7 +35,13 @@ name: signed-in-journey
 - tapOn:
     id: "password"
 - inputText: ${MOBILE_QA_PASSWORD}
-- hideKeyboard
+# hideKeyboard is a mid-screen swipe on iOS (it scrolled the auth form in an
+# earlier journey); Android dismisses the soft keyboard honestly.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
 - tapOn:
     id: "submit"
 
@@ -66,7 +72,11 @@ name: signed-in-journey
 - tapOn:
     id: "journal-compose-notes"
 - inputText: "Signed-in CI journey: laid floor tiles in two rooms and cleaned the site."
-- hideKeyboard
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
 - tapOn:
     id: "journal-compose-review"
 # When the identity holds more than one work context the server asks the

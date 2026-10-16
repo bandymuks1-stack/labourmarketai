@@ -78,12 +78,12 @@ and runs on real phones** — none of which an agent may create.
 |---|---|---|---|
 | Google / Apple sign-in | Google OAuth | password only | owner decision (keeps Apple 4.8 out of scope) |
 | Onboarding / first-run guidance | yes | none | scope (ARCH-6) |
-| Jobs board, expressing interest | yes | none | scope; `interest.express_draft/confirm` already exist at `/api/mcp` |
-| Messaging / conversations | yes | none | scope; no bearer-reachable capability yet |
+| Jobs board, expressing interest | yes | ● Jobs (`jobs.search`/`jobs.get`, commit 4), ● Opportunities + interest (commit 3) | done in PR #2447 |
+| Messaging / conversations | yes | none | scope; `conversation.*` / `message.send_*` ARE published (correction) — a screen is the gap |
 | AI chat (conversation as home) | yes | none | scope; no bearer-reachable capability yet |
-| Marketplace (listings, service requests, goods) | yes | none | scope; `demand.create_draft/confirm` exist at `/api/mcp` |
-| Company operations (projects, roster, assignments, teams) | yes | none | scope; only `context.list/switch` exist |
-| Calendar / availability | yes | none | scope; `workforce.availability` exists at `/api/mcp` |
+| Marketplace (listings, service requests, goods) | yes | ● need intake (commit 4); ○ listings, goods, service requests | listings next; `marketplace_listing.*` exists |
+| Company operations (projects, roster, assignments, teams) | yes | ● who is free (commit 3); ○ the rest | correction: `roster.list`, `projects.list`, `assignment.*` and more are published; screens are the gap |
+| Calendar / availability | yes | ● roster availability (commit 3); ○ own calendar | `calendar.agenda.get` exists for the next step |
 | Camera / photo evidence, voice | yes (photos; voice behind COM-6) | none; storage/camera/mic permissions deliberately blocked | owner decision |
 | Push notifications | — | none, no vendor | owner decision |
 | Offline queue | no service worker on web either | none | owner decision |
@@ -98,10 +98,10 @@ Legend: ● implemented and CI-proven · ◐ partial · ○ absent · — not ap
 |---|---|---|---|---|
 | **Work Journal** | 4 transports, photos, supersede, review, metrics, future-date refusal | ● list, ● compose (draft → confirm, context chooser), ● future-date refusal (this PR); ○ photos, ○ edit/supersede, ○ review | `journal.list`, `journal.create_draft`, `journal.confirm`, `journal.work_intelligence.get` | core loop at parity; evidence media and review are web-only by decision |
 | **Living CV** | `/cv`, skills with evidence tiers, EU view, export, growth | ● skills read in the web's order (confirmed → journal-backed → declared); ○ CV page, ○ export, ○ recognitions | `living_cv.skills.get`, `profile.get` | read parity on skills only |
-| **Marketplace** | listings, goods, service requests, honest failure copy | ○ | `demand.create_draft/confirm` (need intake) | absent; one draft→confirm screen is the economical first step |
-| **Company operations** | projects, stadium, roster, teams, assignments, reports | ○ (workspace switch only) | `context.list`, `context.switch` | absent; needs new bearer capabilities (RED-free: registry additions over existing cores) |
-| **AI** | conversation chat, intent → canonical actions, egress gate | ○ | none for chat | absent by scope; must reuse the one spine, never a second agent |
-| **Messaging** | threads, team-offer party, notifications | ○ | none | absent |
+| **Marketplace** | listings, goods, service requests, honest failure copy | ◐ need intake (`/need`, commit 4); ○ listings, goods, service requests | `demand.create_draft/confirm`, `marketplace_listing.*`, `service_request.*` | need intake at parity; listings next |
+| **Company operations** | projects, stadium, roster, teams, assignments, reports | ◐ who is free (`/availability`, commit 3), need intake; ○ the rest | `workforce.availability`, `roster.list`, `projects.list`, `assignment.*`, `calendar.agenda.get`, `organization.today.get` and more (229 tools published) | doors exist; screens are the gap |
+| **AI** | conversation chat, intent → canonical actions, egress gate | ○ | none for chat (the bridged actions exist as tools; the conversation itself does not) | absent by scope; must reuse the one spine, never a second agent |
+| **Messaging** | threads, team-offer party, notifications | ○ | `conversation.list`, `conversation.get`, `message.send_draft/confirm`, `notification.list` — correction 2026-10-16: these ARE published | absent on the phone; a reading screen is the next increment after beta |
 | **Authentication** | email+password, Google OAuth, recovery, email-verified boundary | ● email+password, ● keychain session, ● recovery via web, ● terms/privacy before register; ○ Google | Supabase Auth (same server) | parity minus OAuth (decision) |
 | **Localization** | 6 active UI locales (lt, en, ru, pl, de, nl) + 5 inactive | ● the same six, compiler-enforced parity, previews labelled | — | parity |
 | **Privacy / account** | in-account requests, public deletion page, consent ledger | ● links to the canonical pages on the same origin | — | parity by reuse |

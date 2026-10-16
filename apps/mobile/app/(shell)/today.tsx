@@ -90,6 +90,12 @@ export default function Screen() {
           />
           <Button
             variant="quiet"
+            testID="today-open-jobs"
+            label={t("today.openJobs")}
+            onPress={() => router.push("/(shell)/jobs")}
+          />
+          <Button
+            variant="quiet"
             testID="today-open-opportunities"
             label={t("today.openOpportunities")}
             onPress={() => router.push("/(shell)/opportunities")}
@@ -99,6 +105,12 @@ export default function Screen() {
             testID="today-open-availability"
             label={t("today.openAvailability")}
             onPress={() => router.push("/(shell)/availability")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-need"
+            label={t("today.openNeed")}
+            onPress={() => router.push("/(shell)/need")}
           />
         </View>
         <Divider />
