@@ -166,7 +166,7 @@ test.describe("Calendar — a past journal day is visible and reachable", () => 
     // since 2026-09-28; the agenda is one tap away.)
     await loginAsWorker(page);
     await page.goto("/lt/dashboard/planning?view=agenda");
-    const link = page.locator('[data-testid="planning-past-link"]');
+    const link = page.getByRole("main").locator('[data-testid="planning-past-link"]');
     await expect(link).toBeVisible();
 
     // It is a real touch target, like every other control in this toolbar.
@@ -176,7 +176,9 @@ test.describe("Calendar — a past journal day is visible and reachable", () => 
 
     await link.click();
     await page.waitForURL(/view=month/, { timeout: 30_000 });
-    await expect(page.locator('[data-testid="planning-month"]')).toBeVisible();
+    await expect(
+      page.getByRole("main").locator('[data-testid="planning-month"]'),
+    ).toBeVisible();
   });
 
   test("every calendar toolbar control meets the 44px touch minimum", async ({
@@ -190,7 +192,11 @@ test.describe("Calendar — a past journal day is visible and reachable", () => 
     for (const width of [320, 360, 375, 390, 412]) {
       await page.setViewportSize({ width, height: 844 });
       await page.goto("/lt/dashboard/planning?view=month");
-      await expect(page.locator('[data-testid="planning-views"]')).toBeVisible();
+      // Scoped to <main> for the same streaming reason as above; the height
+      // probe below skips hidden (zero-height) copies on its own.
+      await expect(
+        page.getByRole("main").locator('[data-testid="planning-views"]'),
+      ).toBeVisible();
 
       const tooSmall = await page.evaluate(() => {
         const bad: string[] = [];
