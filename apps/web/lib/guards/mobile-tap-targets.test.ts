@@ -67,7 +67,7 @@ describe("Guard: mobile tap floor lives once in globals.css", () => {
   /**
    * THE FLOOR MUST NOT BE A CEILING (isolated QA run, 2026-10-16).
    *
-   * The floor rule's specificity (0,3,1) beats any single utility (0,1,0), so
+   * The floor rule's specificity (0,3,0) beats any single utility (0,1,0), so
    * on phones it did not only RAISE small controls to 40 px — it also LOWERED
    * every control that asked for more. `min-h-11` / `min-h-[2.75rem]` (44 px,
    * ~530 call sites) rendered at 40 px below `md`; the calendar toolbar's own
