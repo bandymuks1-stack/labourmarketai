@@ -22,7 +22,8 @@ import {
 
 export interface ProjectMapCard extends ManagedProject {
   /** Active workers on the project — the real team size. */
-  readonly assignedCount: number;
+  /** Active assignments, or null when the read failed (SEP-7: UNKNOWN ≠ 0). */
+  readonly assignedCount: number | null;
   /**
    * The documented work period, derived from the project's own records
    * (`project-documented-period.ts`): `null` = no recorded work; `undefined`
@@ -46,6 +47,11 @@ export async function listProjectMap(
     ? await readProjectDocumentedPeriods({ supabase, userId: user.id }, projects.map((p) => p.id))
     : ({ kind: "unavailable" } as const);
   const counts = new Map<string, number>();
+  // Audit 2026-10-16 (C-2): `res.error` was never read and a thrown read
+  // "kept zeros", so a permission refusal or a statement timeout put "0
+  // people" on every project card. A failed read is now UNKNOWN (null) and
+  // the card says so; zero is reserved for a read that answered zero.
+  let countsKnown = true;
   try {
     // One RLS-scoped read for all counts (can_manage_project on every row).
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,16 +63,21 @@ export async function listProjectMap(
         projects.map((p) => p.id),
       )
       .eq("status", "active");
-    for (const row of (res.data ?? []) as { project_id: string }[]) {
-      counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
+    if (res.error) {
+      countsKnown = false;
+      console.error("[projects/map] assignment count read failed:", res.error.code ?? "unknown");
+    } else {
+      for (const row of (res.data ?? []) as { project_id: string }[]) {
+        counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
+      }
     }
   } catch {
-    // keep zeros — honest degradation
+    countsKnown = false;
   }
 
   return projects.map((p) => ({
     ...p,
-    assignedCount: counts.get(p.id) ?? 0,
+    assignedCount: countsKnown ? (counts.get(p.id) ?? 0) : null,
     documentedPeriod: periodsRead.kind === "ok" ? (periodsRead.periods.get(p.id) ?? null) : undefined,
   }));
 }
