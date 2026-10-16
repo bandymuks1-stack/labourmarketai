@@ -29,6 +29,10 @@ describe("20261016190000_journal_evidence_integrity_v1", () => {
     expect(up).toContain("perform pg_advisory_xact_lock(hashtext('journal_chain:' || new.worker_id::text));");
     expect(up).toContain("new.hash_prev    := v_head;");
     expect(up).toContain("new.hash_version := 2;");
+    // proof F2 (2026-10-16): the chain ORDER is server-set and monotonic per worker
+    expect(up).toContain("new.created_at   := greatest(now(), coalesce(v_head_at, now()) + interval '1 microsecond');");
+    // proof F3: project attribution is a lifecycle fact, not hashed evidence
+    expect(up).not.toMatch(/coalesce\(new\.project_id::text, ''\) \|\| '\|' \|\|\s*to_char/);
     expect(up).toMatch(/new\.hash_self\s+:= encode\(extensions\.digest\(/);
     // over STORED columns only — never a value that is not persisted
     expect(up).not.toMatch(/now\(\)\s*::text|clock_timestamp\(\)/);
@@ -56,6 +60,8 @@ describe("20261016190000_journal_evidence_integrity_v1", () => {
     expect(up).toContain("select current_user = 'service_role'");
     expect(up).toContain("coalesce(current_setting('lm.evidence_guard_bypass', true), '') = 'erasure'");
     expect(up).toMatch(/revoke all on function public\.journal_evidence_guard_bypassed_v1\(\) from public, anon, authenticated;/);
+    // proof F1: the SECURITY INVOKER guards evaluate the predicate as the caller
+    expect(up).toContain("grant execute on function public.journal_evidence_guard_bypassed_v1() to service_role;");
   });
 
   it("the verifier runs as the caller (RLS decides) and reports per entry, never a summary", () => {

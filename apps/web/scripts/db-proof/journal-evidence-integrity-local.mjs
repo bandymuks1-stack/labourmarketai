@@ -145,7 +145,6 @@ begin
       coalesce(new.profession_id::text, '') || '|' ||
       new.original_text || '|' ||
       new.original_language || '|' ||
-      coalesce(new.project_id::text, '') || '|' ||
       to_char(new.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') || '|' ||
       coalesce(v_head, ''),
       'sha256'), 'hex');
@@ -248,7 +247,7 @@ function expectedHashSelf(row) {
     row.profession_id ?? "",
     row.original_text,
     row.original_language,
-    row.project_id ?? "",
+    // project attribution is a lifecycle fact, not hashed evidence (F3 resolved 2026-10-16)
     pgTextToUsIso(row.created_at_text),
     row.hash_prev ?? "",
   ].join("|");
@@ -597,7 +596,7 @@ async function main() {
     return `deleted_at/superseded_by/visibility_scope/project_id changed; verifier ${ver.map((r) => r.status).join(",")}`;
   });
 
-  await test("T4b verifier still ok after the lifecycle updates (project_id is part of the hash input)", async () => {
+  await test("T4b verifier still ok after the lifecycle updates (project attribution is not hashed evidence)", async () => {
     try {
       const ver = await verify(w1, W1);
       assert(ver.every((r) => r.status === "ok"), `verifier ${ver.map((r) => `${r.position}:${r.status}`).join(",")} — project_id is hashed on INSERT but the evidence guard lets it change, so the recomputed hash no longer matches`);

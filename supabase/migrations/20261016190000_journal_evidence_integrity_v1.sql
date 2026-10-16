@@ -38,8 +38,13 @@
 --    chain), reads the worker's current head, and OVERWRITES whatever the
 --    client supplied: hash_prev := head.hash_self, hash_self := sha256 over
 --    the STORED columns (id, worker, engagement, type, profession, text,
---    language, project, created_at, hash_prev). Every existing RPC keeps its
---    signature — `p_hash_prev` / `p_hash_self` are simply ignored.
+--    language, created_at, hash_prev). `created_at` is server-set and strictly
+--    monotonic per worker under the lock, so a client-dated row can neither
+--    reorder nor fork the chain. `project_id` is NOT hashed: project
+--    attribution is a lifecycle fact the attribution guard (20261003151300)
+--    already validates and the live RPCs may correct; the evidence is WHAT
+--    was recorded, by whom, in which engagement, when. Every existing RPC
+--    keeps its signature — `p_hash_prev` / `p_hash_self` are simply ignored.
 -- C. BEFORE UPDATE / DELETE guard `journal_entries_evidence_guard_v1` and a
 --    statement-level BEFORE TRUNCATE guard: the content and provenance columns
 --    (id, worker_id, engagement_context_id, entry_type_slug, profession_id,
@@ -93,6 +98,10 @@ as $$
      and coalesce(current_setting('lm.evidence_guard_bypass', true), '') = 'erasure';
 $$;
 revoke all on function public.journal_evidence_guard_bypassed_v1() from public, anon, authenticated;
+-- The guard trigger functions are SECURITY INVOKER, so this nested call is
+-- checked against the CALLER's role: service_role must be able to evaluate
+-- it or the sanctioned erasure bypass itself fails 42501 (proof F1).
+grant execute on function public.journal_evidence_guard_bypassed_v1() to service_role;
 
 -- ── B. server-authoritative chain ─────────────────────────────────────────
 create or replace function public.journal_entries_chain_v1()
@@ -101,20 +110,25 @@ language plpgsql
 set search_path = public, pg_temp
 as $$
 declare
-  v_head text;
+  v_head      text;
+  v_head_at   timestamptz;
 begin
   -- One writer per worker chain at a time: without this, two concurrent
   -- inserts read the same head and the chain forks (two rows, one prev).
   perform pg_advisory_xact_lock(hashtext('journal_chain:' || new.worker_id::text));
 
-  select je.hash_self
-    into v_head
+  select je.hash_self, je.created_at
+    into v_head, v_head_at
     from public.journal_entries je
    where je.worker_id = new.worker_id
    order by je.created_at desc, je.id desc
    limit 1;
 
-  -- Client-supplied values are IGNORED, never trusted.
+  -- Client-supplied values are IGNORED, never trusted. `created_at` is part
+  -- of the chain ORDER, so it is server-authoritative and strictly monotonic
+  -- per worker under the lock (proof F2, 2026-10-16): a client-dated row can
+  -- neither reorder nor fork the chain. No live insert path supplies it.
+  new.created_at   := greatest(now(), coalesce(v_head_at, now()) + interval '1 microsecond');
   new.hash_prev    := v_head;
   new.hash_version := 2;
   new.hash_self    := encode(extensions.digest(
@@ -126,7 +140,6 @@ begin
       coalesce(new.profession_id::text, '') || '|' ||
       new.original_text || '|' ||
       new.original_language || '|' ||
-      coalesce(new.project_id::text, '') || '|' ||
       to_char(new.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') || '|' ||
       coalesce(v_head, ''),
       'sha256'), 'hex');
@@ -244,7 +257,7 @@ begin
         'v2' || '|' || r.id::text || '|' || r.worker_id::text || '|' ||
         r.engagement_context_id::text || '|' || r.entry_type_slug || '|' ||
         coalesce(r.profession_id::text, '') || '|' || r.original_text || '|' ||
-        r.original_language || '|' || coalesce(r.project_id::text, '') || '|' ||
+        r.original_language || '|' ||
         to_char(r.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') || '|' ||
         coalesce(r.hash_prev, ''), 'sha256'), 'hex');
       if v_expect <> r.hash_self then
