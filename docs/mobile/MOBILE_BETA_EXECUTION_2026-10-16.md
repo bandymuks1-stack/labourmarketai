@@ -27,7 +27,21 @@ superseded head `d7fd1d6`, not to `2cab9ad`; it was not counted.
 Recorded in the PR conversation and in the next revision of this file, never
 inferred: a run that has not finished is "in progress", not "green".
 
-Remaining failures on `2cab9ad`: **none among the completed checks.**
+Remaining failures on `2cab9ad`: **none among the completed checks.** The push of `bf64c47` superseded its iOS run (cancelled by the workflow's own concurrency rule); every proof re-ran on `bf64c47` — results in §1b.
+
+### 1b. CI results — commit `bf64c47` (commit 3: opportunities, availability, signed-in journey prepared)
+
+| Check | Result |
+|---|---|
+| quality | ✅ success |
+| mobile | ✅ success |
+| e2e-smoke | ✅ success |
+| migration-safety | ✅ success |
+| CodeQL / Analyze | ✅ success |
+| Build internal test APK | ✅ success |
+| Emulator launch + Maestro journey | ✅ success |
+| Signed-in journey (dispatch only) | skipped on a PR run, by design |
+| ios | BF64_IOS |
 
 ## 2. Signed-in mobile functionality — what is confirmed and how
 
@@ -103,32 +117,50 @@ projects, calendar editing, photo/voice evidence, push, offline queue, Google
 sign-in — each is an owner decision or needs a bearer capability that does
 not exist yet.
 
-## 6. Incremental implementation — done now and prepared next
+## 6. Incremental implementation — done and prepared
 
-Done on this branch (commit 3 of PR #2447; all on the existing doors, no
-registry change, no migration, no env):
+Correction to the readiness document's parity matrix (2026-10-16, this
+revision): the registry behind `/api/mcp` publishes **229 tools**, not the 15
+in `registry.ts` alone — among them `work.find` (the caller's ranked board),
+`jobs.new.list`, `opportunities.saved.list`, `conversation.list` /
+`conversation.get` / `message.send_draft` / `message.send_confirm`,
+`calendar.agenda.get`, `absence.*`, `notification.*`, `marketplace_listing.*`,
+`service_request.*`, `cv.state.get`. Messaging and several company reads ARE
+bearer-reachable today; what the phone lacks for them is a screen, not a
+door. The matrix's "no bearer-reachable capability" rows for messaging and
+company operations are withdrawn; AI chat remains web-only.
 
-| Increment | Capabilities used | Files | Proof |
-|---|---|---|---|
-| Opportunities + express interest | `interest.express_draft` (list = the draft's own option answer), `interest.express_draft` (requestId, note) → `interest.express_confirm` | `app/(shell)/opportunities.tsx`, `src/screens/opportunities.tsx`, shapes, six-locale copy | mobile typecheck; web guards (association, release config, account controls, weak network) 72/72; Android + iOS Hermes bundles |
-| Who is free (availability) | `workforce.availability` | `app/(shell)/availability.tsx`, shapes, six-locale copy | same |
-| Signed-in journey (prepared) | all read + the journal write | Maestro flow, emulator script, dispatch-only job | YAML parsed, shell syntax checked; execution needs O1 |
+### Done on this branch (commit 3 and commit 4 of PR #2447)
 
-Prepared next (each one PR, GREEN class, in dependency order):
+| Increment | Capabilities | Registry change | Files | Proof |
+|---|---|---|---|---|
+| Opportunities + express interest | `interest.express_draft` / `interest.express_confirm` | none | `app/(shell)/opportunities.tsx`, `src/screens/opportunities.tsx` | mobile typecheck; web guards; Hermes bundles |
+| Who is free | `workforce.availability` | none | `app/(shell)/availability.tsx` | same |
+| **F-1 Jobs** — the PUBLIC vacancy board on the phone | **new** `jobs.search`, `jobs.get` (`lib/capabilities/public-jobs-capabilities.ts`) over the existing `searchPublicVacancyPreviews` / single-preview core, through the caller's own client, anonymous projection only; read-only, idempotent, `page` bounded 1..100; toolset fingerprint `0.1.0+t231.6abffb4c` recorded | +2 exposed reads (231 tools) | `app/(shell)/jobs.tsx`, shapes, six-locale copy; `public-jobs-capabilities.test.ts` (5 tests: exposure/annotations, canonical RPC args, anonymous projection, bounded page, timeout ≠ empty, get/not_found/invalid) | registry suite 36 files / 431 tests; mobile typecheck; bundles |
+| **F-2 job deep links (within the claim contract)** | `jobs.get` | — | `labourmarketai://jobs?id=<uuid>` and the claimed `https://labourmarket.ai/jobs` open the Jobs screen; an `id` shows that one job above the board (`not_found` is a sentence); each job's `webPath` opens the member page in the browser | same |
+| **F-5 Post a need** | `demand.create_draft` / `demand.create_confirm` | none | `app/(shell)/need.tsx`, `src/screens/need-intake.tsx` — description, role, place, people, urgency → server preview naming the organization → confirm; refusals by name incl. `over_open_need_limit` | mobile typecheck; guards; bundles |
+| **F-3 iOS signed-in journey (prepared)** | all reads + the journal write | — | `.github/workflows/ios-signed-in.yml`: `workflow_dispatch` only, `production-qa` environment, production public config from `vars.PROD_QA_ANON_KEY`, `origin` input for a staging URL, same Maestro flow (keyboard dismissal is Android-only in the flow), one driver retry, nothing uploaded, app uninstalled afterwards | YAML parsed; execution needs O1 + reachable origin |
+| **F-4 App Links served-half proof (prepared)** | — | — | `.github/scripts/app-links-proof.mjs` + `.github/workflows/app-links-proof.yml` (`workflow_dispatch`, `origin` input): both `.well-known` documents fetched, JSON, our ids, well-formed fingerprints / Team ID, components = `NATIVE_APP_PATHS` exactly; 404 reported by name as the owner gate, never as a fault | `node --check`; execution needs a reachable origin (and O2/O3 for a 200) |
+| Signed-in Android journey (prepared, commit 3) | — | — | `signed-in-journey.yaml`, emulator script, `android.yml` job `signed-in` | execution needs O1 |
 
-| # | PR | Depends on | Effort |
-|---|---|---|---|
-| F-1 | `jobs.search` read capability in `registry.ts` over the existing core `searchPublicVacancyPreviews({ query, professionSlug, page })` (`lib/vacancy-store/public-vacancy-preview.ts`, cached, 20 per page), `readOnlyHint: true`, plus the toolset-fingerprint register row the `toolset-fingerprint.test.ts` guard demands (a new exposed capability changes the published fingerprint) + a Jobs screen (query, profession, paging) + deep-link `/jobs` | nothing | 2 d |
-| F-2 | Interest from a shared public job link: `/jobs/[id]` deep link opens the app on the job, with "I am interested" reusing the Opportunities flow where the job maps to a visible demand | F-1 | 1.5 d |
-| F-3 | iOS signed-in journey: `ios.yml` `workflow_dispatch` input `signed_in` → production-config simulator build + the same Maestro flow under `production-qa` | O1 | 1 d |
-| F-4 | App Links / Universal Links CI proof once the two env values exist | O2, O3 | 0.5 d |
-| F-5 | Need intake on the phone (`demand.create_draft/confirm`) for the acting organization | nothing | 2 d |
-| F-6 | Journal entry detail + supersede (needs a `journal.supersede_draft/confirm` pair in the registry over `journal_entry_supersede_v2`) | registry addition | 3 d |
+Per-job https links: website job pages are locale-prefixed
+(`/lt/jobs/<id>`); the association tables claim exact screens only
+(`app-association.test.ts` forbids wildcards and prefixes) because a claim
+is a promise to handle. Claiming `/{locale}/jobs/*` for six locales is an
+owner decision — the app can honour it (the Jobs screen reads `id`), but the
+claim widens what an installed app intercepts. Until then the custom scheme
+and `webPath` carry the link both ways.
 
-Branching: this session may push only to its own branch, so the increments
-above are specified here and the two that are done ride PR #2447; splitting
-them into separate PRs is a `git cherry-pick` of commit 3 onto fresh
-branches when the owner wants them reviewed apart.
+### Deferred, with the reason
+
+| # | Increment | Why not now |
+|---|---|---|
+| F-6 | Journal entry detail + supersede on the phone | no `journal.supersede_*` capability exists; adding one is a registry pair over `journal_entry_supersede_v2` / `supersedeJournalEntry` with its own token binding and hash-chain fingerprint — a slice of its own (3 d) that must not ride a beta PR |
+| Messaging screen | `conversation.*` / `message.send_*` exist | a reading screen is 2 d; the write needs the §8.1 contact gate surfaced honestly; after beta |
+
+Branching: this session pushes only to its own branch; commits 3 and 4 are
+each self-contained and cherry-pick cleanly onto fresh branches if the owner
+wants them reviewed apart.
 
 ## 7. Store publication readiness (unchanged gates, restated)
 

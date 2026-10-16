@@ -260,3 +260,80 @@ export type WorkforceAvailabilityData = {
   readonly commitmentsKnown?: boolean;
   readonly note?: string;
 };
+
+/**
+ * `jobs.search` / `jobs.get` — the PUBLIC vacancy board in its anonymous
+ * projection (the database function enumerates the safe columns; no title,
+ * employer, place, source or application link ever reach a client here).
+ * `webPath` is the member page for the signed-in person's browser, where the
+ * full details live — this app does not re-derive the member projection.
+ * `not_provisioned` and a timeout are refusals by name (`needs_migration`,
+ * `unavailable`), never an empty board (#1314).
+ */
+export type PublicJob = {
+  readonly id: string;
+  readonly professionSlug: string | null;
+  readonly occupation: string | null;
+  readonly employmentForm: string | null;
+  readonly workingTime: string | null;
+  readonly positions: number | null;
+  readonly compensationCurrency: string | null;
+  readonly compensationMin: number | null;
+  readonly compensationMax: number | null;
+  readonly sourceLanguage: string | null;
+  readonly publishedAt: string | null;
+  readonly webPath: string;
+};
+
+export type JobsSearchData = {
+  readonly status: "ok";
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+  readonly hasMore: boolean;
+  readonly jobs: readonly PublicJob[];
+};
+
+export type JobsGetData = { readonly job: PublicJob };
+
+/**
+ * `demand.create_draft` → `demand.create_confirm` — a worker-need for the
+ * organization the caller is ACTING FOR. The preview names that organization
+ * (the server's word), the token binds the exact draft; confirming creates
+ * the demand on the one canonical intake. Refused by name outside an employer
+ * workspace (`personal_workspace`, `no_organization`, `no_company_context`),
+ * and `over_open_need_limit` when the plan's active-position limit is reached.
+ */
+export type DemandUrgency = "flexible" | "this_week" | "urgent";
+
+export type DemandDraftFields = {
+  readonly description: string;
+  readonly role?: string;
+  readonly location?: string;
+  readonly urgency?: DemandUrgency;
+  readonly teamSize?: number;
+};
+
+export type DemandDraftPreview = {
+  readonly actingFor: string;
+  readonly intent: string;
+  readonly role: string | null;
+  readonly description: string;
+  readonly teamSize: number | null;
+  readonly country: string | null;
+  readonly workType: string | null;
+  readonly urgency: string | null;
+};
+
+export type DemandCreateDraftData = {
+  readonly preview: DemandDraftPreview;
+  readonly confirmationToken: string;
+  readonly note: string;
+};
+
+export type DemandCreateConfirmData = {
+  readonly status: string;
+  readonly requestId: string;
+  readonly actingFor: string;
+  readonly structuredDestination: string;
+};
