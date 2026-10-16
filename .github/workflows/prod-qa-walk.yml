@@ -47,6 +47,10 @@ on:
           - mcp-chain
           - mcp-agents
           - project-context
+      budget_override:
+        description: "Run even if the 24 h production-walk budget is used up (owner only)"
+        type: boolean
+        default: false
 
 concurrency:
   group: prod-qa-walk
@@ -56,7 +60,64 @@ permissions:
   contents: read
 
 jobs:
+  # PRODUCTION COMPUTE BUDGET (2026-10-16). Every walk drives a real browser
+  # through signed-in, force-dynamic dashboard pages on the production Vercel
+  # deployment, and each full document load ships the dashboard shell (~615 kB
+  # of client messages alone, lt). 228 walks ran 2026-10-12..15 (43-64 a day);
+  # Supabase edge logs show the Vercel-originated calls rising from 19.7k
+  # (2026-10-09, before the first walk) to 91.3k (2026-10-14) with the busiest
+  # hours matching the walk dispatch hours, and the Hobby team was paused on
+  # 2026-10-15 for Fluid Active CPU. This job refuses a walk once
+  # PROD_QA_WALK_DAILY_BUDGET walks have STARTED in the last 24 h, before any
+  # install, session mint or production request. `budget_override` is the
+  # explicit escape hatch. Counting reads only this workflow's run list.
+  budget:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      actions: read
+    env:
+      PROD_QA_WALK_DAILY_BUDGET: "12"
+    steps:
+      - name: Count production walks in the last 24 h
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OVERRIDE: ${{ inputs.budget_override }}
+        run: |
+          set -euo pipefail
+          since=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          # A run CONSUMES the budget only when it reached production: its
+          # `walk` job's first production step (provision + mint) started.
+          # Runs this job refused, runs cancelled before the walk (a superseded
+          # pending run, a debounced merge burst) and runs still waiting for
+          # the environment never touched production. Counting them (the first
+          # version counted every created run) made each refused re-dispatch
+          # extend the very lock-out it was refused by: dispatching once an hour
+          # while over budget would never get a walk through again.
+          runs=$(gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/prod-qa-walk.yml/runs?created=%3E%3D${since}&per_page=100" \
+            --jq ".workflow_runs[] | select(.id != ${GITHUB_RUN_ID}) | .id")
+          used=0
+          for id in ${runs}; do
+            reached=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${id}/jobs?filter=all&per_page=100" \
+              --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+            if [ "${reached}" -gt 0 ]; then
+              used=$((used + 1))
+            fi
+          done
+          echo "production walks that reached production since ${since}: ${used} (budget ${PROD_QA_WALK_DAILY_BUDGET})" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "${used}" -ge "${PROD_QA_WALK_DAILY_BUDGET}" ]; then
+            if [ "${OVERRIDE}" = "true" ]; then
+              echo "::warning::budget exceeded; running because budget_override=true"
+              exit 0
+            fi
+            echo "::error::24 h production-walk budget used (${used}/${PROD_QA_WALK_DAILY_BUDGET}). Batch the check into a walk already run, run it locally, or re-dispatch with budget_override=true."
+            exit 1
+          fi
+
   walk:
+    needs: budget
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production-qa
