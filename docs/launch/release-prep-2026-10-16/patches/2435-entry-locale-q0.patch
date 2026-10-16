@@ -1,0 +1,52 @@
+diff --git a/apps/web/lib/i18n/entry-locale.test.ts b/apps/web/lib/i18n/entry-locale.test.ts
+index ddc856c..2121fed 100644
+--- a/apps/web/lib/i18n/entry-locale.test.ts
++++ b/apps/web/lib/i18n/entry-locale.test.ts
+@@ -25,6 +25,14 @@ describe("entryLocaleForUnmatchedLanguage", () => {
+     expect(entryLocaleForUnmatchedLanguage("de-AT", null)).toBeNull();
+     expect(entryLocaleForUnmatchedLanguage("ru-RU", null)).toBeNull();
+   });
++  it("a routed language refused with q=0 is not a routed match (RFC 9110 §12.4.2)", () => {
++    expect(entryLocaleForUnmatchedLanguage("sv-SE,de;q=0", null)).toBe("en");
++    expect(entryLocaleForUnmatchedLanguage("sv-SE,sv;q=0.9,en;q=0,lt;q=0.0", null)).toBe("en");
++    // a refused language alone states no preference — the default stands
++    expect(entryLocaleForUnmatchedLanguage("de;q=0", null)).toBeNull();
++    // a weighted routed language still counts
++    expect(entryLocaleForUnmatchedLanguage("sv-SE,en;q=0.1", null)).toBeNull();
++  });
+   it("no stated preference is not a preference — the default stands", () => {
+     expect(entryLocaleForUnmatchedLanguage(null, null)).toBeNull();
+     expect(entryLocaleForUnmatchedLanguage("", null)).toBeNull();
+diff --git a/apps/web/lib/i18n/entry-locale.ts b/apps/web/lib/i18n/entry-locale.ts
+index 36b2725..43776c2 100644
+--- a/apps/web/lib/i18n/entry-locale.ts
++++ b/apps/web/lib/i18n/entry-locale.ts
+@@ -27,11 +27,27 @@ export function entryLocaleForUnmatchedLanguage(
+   if (!header) return null;
+   let stated = 0;
+   for (const part of header.split(",")) {
+-    const tag = part.split(";")[0]?.trim().toLowerCase();
++    const [rawTag, ...params] = part.split(";");
++    const tag = rawTag?.trim().toLowerCase();
+     if (!tag || tag === "*") continue;
++    // RFC 9110 §12.4.2: `q=0` means NOT acceptable. A language the browser
++    // explicitly refuses is neither a stated preference nor a routed match —
++    // `sv-SE,de;q=0` must still land on English, not on German's negotiation.
++    if (qualityOf(params) === 0) continue;
+     stated += 1;
+     const base = tag.split("-")[0];
+     if (routed.includes(base)) return null;
+   }
+   return stated > 0 ? UNSUPPORTED_LANGUAGE_FALLBACK : null;
+ }
++
++/** The `q` weight of one Accept-Language range; 1 when absent or unparseable. */
++function qualityOf(params: readonly string[]): number {
++  for (const param of params) {
++    const [key, value] = param.split("=").map((piece) => piece.trim().toLowerCase());
++    if (key !== "q") continue;
++    const q = Number(value);
++    return Number.isFinite(q) ? q : 1;
++  }
++  return 1;
++}

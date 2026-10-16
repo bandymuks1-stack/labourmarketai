@@ -560,7 +560,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 |---|---|---|---|---|---|---|
 | EVID-0 | **Work Journal** (4 transports, 1 core) | `journal_entries` + 7 satellites | **PROD_HUMAN** | R + PC | — | the product's strongest chain |
 | EVID-1 | **Organization historical evidence import** | `organization_people`, `evidence_import_*`, `organization_evidence_*` | **PARTIAL** | production data path | 0 | owner-approved 2026-09-08; recursion fix APPLIED (ledger `20260908080950`); read + write proven under real auth, rolled back, zero residue; **no human import yet** |
-| EVID-2 | Manager review / receive loop | `journal_entry_confirmations`, `review_journal_entry` | PROD_HUMAN | — | 0 | **OWNER?** self-confirmation: block in the RPC, or keep the weaker classification? |
+| EVID-2 | Manager review / receive loop | `journal_entry_confirmations`, `review_journal_entry` | PROD_HUMAN | — | 0 | **CLOSED 2026-10-16 (N-12):** self-confirmation is blocked in the RPC (`self_review_not_allowed`, migration 20261003150500 applied as ledger 20261007131826); historical self-confirmations keep their weaker classification. *Was:* **OWNER?** self-confirmation: block in the RPC, or keep the weaker classification? |
 | EVID-3 | Work verification state (8 states) | `lib/journal/work-verification-state` | IMPL | — | 1 | never walked by a human |
 | EVID-4 | Photos / task evidence | `journal_entry_photos`, `journal_entry_tasks` | PROD_DATA (8 photos) | — | 2 | — |
 | EVID-5 | Hours: journal metrics · allocations · timesheets | 3 stores + 1 dead | PARTIAL | — | 1 | reconciled inside ONE SQL function; no TS reader unions them |
@@ -665,9 +665,13 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 
 Each is independent; none blocks a code train.
 
-1. **Self-confirmation, authorization side** (EVID-2) — block in
+1. ~~**Self-confirmation, authorization side** (EVID-2) — block in
    `review_journal_entry`, or rely on the weaker classification now shipping?
-   A sole trader legitimately has nobody above them. RED.
+   A sole trader legitimately has nobody above them. RED.~~ **Closed 2026-10-16
+   (N-12 register truth):** blocked in the RPC — `review_journal_entry` raises
+   `self_review_not_allowed`; migration 20261003150500 is applied in production
+   (ledger version 20261007131826). Existing self-confirmations were not
+   rewritten.
 2. **Nine unapplied migrations** — apply the four with live UI behind them
    (agency clients, journal templates, external profiles, opportunity-seen), or
    retire them?

@@ -1,0 +1,13 @@
+diff --git a/docs/product/PRODUCT_MASTER_SPEC.md b/docs/product/PRODUCT_MASTER_SPEC.md
+index 83d2349..44a9d89 100644
+--- a/docs/product/PRODUCT_MASTER_SPEC.md
++++ b/docs/product/PRODUCT_MASTER_SPEC.md
+@@ -84,7 +84,7 @@
+ | Domain | Canonical tables / RPCs (IMPLEMENTED) | Invariants |
+ |---|---|---|
+ | Identity & context | `profiles`, `workers`, `organizations`, `organization_roles`, `engagement_contexts` (relationship slugs incl. employee, owner, student, volunteer), signed `lm_active_workspace` cookie | IDENTITY ≠ ROLE; one account, many contexts; workspace resolved server-side (decision 0024) |
+-| Real work | `journal_entries` (append-only, `create_journal_entry_full`, supersede v2, soft delete), `journal_entry_metrics` (free-slug: work_date, quantity, fragments, site, and since this audit work_start / work_end / break_minutes), `journal_entry_skills`, `journal_entry_confirmations`, photo evidence | A journal entry is a FACT: future work dates are refused on every transport since this audit (SEP-1). Hash chain exists but is a commitment, not recomputable (PROPOSED RED: hash in RPC + unique `(worker_id, hash_prev)`) |
++| Real work | `journal_entries` (append-only, `create_journal_entry_full`, supersede v2, soft delete), `journal_entry_metrics` (free-slug: work_date, quantity, fragments, site, and since this audit work_start / work_end / break_minutes), `journal_entry_skills`, `journal_entry_confirmations`, photo evidence | A journal entry is a FACT: future work dates are refused on every transport once [#2432](https://github.com/bandymuks1-stack/labourmarketai/pull/2432) (`fix/cc/audit-journal-fact-integrity`) is merged — PENDING until then; on `main` at the time of writing only writes with a source document reject a future date (SEP-1). Hash chain exists but is a commitment, not recomputable (PROPOSED RED: hash in RPC + unique `(worker_id, hash_prev)`) |
+ | Capability | `skills` (ESCO-aligned), `worker_skills` with evidence tiers, `skill_verifications`, recognitions, potential skills computed at read time (never written) | EVIDENCE ≠ VERIFICATION; demonstrated capability never satisfies a formal requirement (SEP-6) |
+ | Organization-supplied history | `organization_evidence_records` / `_events` with independence policy, subject dispute and roster-link refusal doors, consolidation ledger | Imported record = the importer's claim; the subject can see and refuse it (ARCH-5 is closed in code since 20260915180000; the canonical §10 row is stale) |
+ | Projects & execution | `projects`, stages, `work_tasks`, `project_worker_assignments`, `team_assignments`, `commitment_override_receipts`, operations report, project trace, handover passport | COMMITMENT ≠ PROHIBITION; dependencies advisory |

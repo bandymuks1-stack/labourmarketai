@@ -139,6 +139,21 @@ level, and the two most consequential — *real availability* and *expectation
 consistency* — have no enforcement at all: a candidate can be shown, both sides
 can agree, and nothing guarantees anyone is responsible for employing them.
 
+> **Correction 2026-10-16 (owner decision N-12, register truth; the 2026-07-28
+> table above is kept as history).** Read-only production catalog:
+> `public.organization_roles` (organization_id, role_slug, granted_at) exists and
+> is multi-valued — UNIQUE (organization_id, role_slug), FK `role_slug →
+> organization_role_types(slug)`; 20 rows over four slugs (employer,
+> recruitment_partner, training_provider, workforce_provider). So "roles are
+> registered" and "adding a role needs no migration" are now **YES** at the
+> schema level (a role type is a row, still seeded by migration files today).
+> `organizations.organization_type` keeps its closed CHECK and the seven legacy
+> gates still decide by it — open owner decision **ORG-2** — which is why the
+> verdict stands: the roles exist, the product does not yet decide by them. The
+> employment-model and fulfilment-chain answers are unchanged (contract in code,
+> nothing executed or validated). Machine copy: `ORCHESTRATION_ASSESSMENT` in
+> `lib/product-gate/organization-roles.ts`.
+
 By the owner's own definition, that gap is **a product architecture error, not a
 user problem**. It is recorded here, not fixed: this slice changes no schema.
 
