@@ -5725,7 +5725,7 @@
         {
           "heading": "DI ir prijungti DI asistentai",
           "items": [
-            "Kai kurios funkcijos naudoja „Google“ DI modelį (Gemini API). Šiandien jam perduodama tik vieša rinkos statistika — pavyzdžiui, kiek laisvų darbo vietų turi profesija — trumpam paaiškinimui suformuluoti. Žinučių ir darbo skelbimų vertimas bei pokalbyje įvesto sakinio aiškinimas yra paruošti, bet išjungti: jiems nesiunčiamas nei žinučių tekstas, nei asmens duomenys. Jei kuri nors iš šių funkcijų būtų įjungta, šis pranešimas tai nurodys, o siunčiamas būtų tik tam darbui reikalingas tekstas. Kiekvienas rezultatas yra pasiūlymas — niekas neišsaugoma kaip faktas apie jus, kol to nepatvirtinate.",
+            "Kai kurios funkcijos naudoja „Google“ DI modelį (Gemini API). Šiandien jam perduodama tik vieša rinkos statistika — pavyzdžiui, kiek laisvų darbo vietų turi profesija — trumpam paaiškinimui parengti. Žinučių ir darbo skelbimų vertimas bei pokalbyje įvesto sakinio aiškinimas yra paruošti, bet išjungti: jiems nesiunčiamas nei žinučių tekstas, nei asmens duomenys. Jei kuri nors iš šių funkcijų būtų įjungta, šis pranešimas tai nurodys, o siunčiamas būtų tik tam darbui reikalingas tekstas. Kiekvienas rezultatas yra pasiūlymas — niekas neišsaugoma kaip faktas apie jus, kol to nepatvirtinate.",
             "LabourMarket.ai galite prijungti prie DI asistento, pvz., ChatGPT ar Claude. Kiekvieną prijungimą patvirtinate patys sutikimo ekrane; asistentas tada veikia tik jūsų pačių teisėmis, o pasekmių turintiems veiksmams reikia atskiro patvirtinimo. Prijungtas programėles bet kada matote ir atjungiate paskyros nustatymuose.",
             "Ką DI asistento teikėjas daro su jūsų pokalbiu, nustato to teikėjo privatumo sąlygos."
           ]

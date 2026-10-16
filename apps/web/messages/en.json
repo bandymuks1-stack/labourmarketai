@@ -5725,7 +5725,7 @@
         {
           "heading": "AI and connected AI assistants",
           "items": [
-            "Some features use an AI model from Google (the Gemini API). Today it receives only public market statistics — for example how many open positions a profession has — to phrase a short explanation. Translating messages and job ads, and interpreting a sentence you type in the chat, are prepared but switched off: no message text and no personal data is sent for them. If one of them is switched on, this notice will say so, and only the text that task needs would be sent. Every result is a suggestion — nothing is saved as a fact about you until you confirm it.",
+            "Some features use an AI model from Google (the Gemini API). Today it receives only public market statistics — for example how many open positions a profession has — to phrase a short explanation. Translating messages and job ads, and interpreting a sentence you type in the chat, are prepared but not in use: no message text and no personal data is sent for them. If one of them is put into use, this notice will say so, and only the text that task needs would be sent. Every result is a suggestion — nothing is saved as a fact about you until you confirm it.",
             "You can connect LabourMarket.ai to an AI assistant such as ChatGPT or Claude. You approve each connection yourself on a consent screen; the assistant then acts only with your own permissions, and actions with consequences need a separate confirmation. You can see and disconnect connected apps in your account settings at any time.",
             "What an AI assistant's provider does with your conversation is governed by that provider's own privacy terms."
           ]
