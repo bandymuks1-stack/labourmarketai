@@ -31,6 +31,29 @@ import {
 } from "@/lib/journal/project-attribution";
 import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
 import { checkWorkDate } from "@/lib/journal/work-date";
+import { isCommunicationLocale } from "@/lib/i18n/config";
+
+/**
+ * The language code stored on the entry (`original_language`). The form field
+ * carries the UI locale the person wrote in; it is validated against the
+ * communication-locale set the DB CHECK admits, so a tampered or stale value
+ * can never surface as a raw `entry_insert_failed`. An unknown value falls
+ * back to the platform default. Audit 2026-10-16 (J-3).
+ */
+export function resolveEntryLanguage(raw: FormDataEntryValue | null): string {
+  const code = String(raw ?? "").trim().toLowerCase().slice(0, 2);
+  return isCommunicationLocale(code) ? code : "lt";
+}
+
+/** `HH:MM` on a 24-hour clock, or null. Pure. */
+export function parseClockTime(raw: string): string | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(raw.trim());
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h < 0 || h > 23 || min < 0 || min > 59) return null;
+  return `${String(h).padStart(2, "0")}:${m[2]}`;
+}
 
 /**
  * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
@@ -441,8 +464,19 @@ export async function legacyTwoStepSave(
     .insert(rows);
   if (mErr) {
     // Best-effort compensation — append-only doctrine blocks DELETE by
-    // default, so the entry likely leaks. Surface that honestly.
-    await supabase.from("journal_entries").delete().eq("id", entry.id);
+    // default, so the entry likely leaks. The result used to be discarded;
+    // it is now read, so a ghost entry is named in the log instead of being
+    // implied by silence (audit 2026-10-16, J-5).
+    const { error: delErr } = await supabase
+      .from("journal_entries")
+      .delete()
+      .eq("id", entry.id);
+    if (delErr) {
+      console.warn(
+        "[journal] legacy save: metrics failed and the entry could not be removed (append-only) — entry kept without metrics",
+        { entryId: entry.id, code: delErr.code ?? "unknown" },
+      );
+    }
     return {
       ok: false,
       code: "metrics_insert_failed",
@@ -505,7 +539,7 @@ export async function createJournalEntryCore(
     };
   }
 
-  const locale = String(formData.get("locale") ?? "lt");
+  const locale = resolveEntryLanguage(formData.get("locale"));
   const engagementId = String(formData.get("engagement_context_id") ?? "").trim();
   const siteName = String(formData.get("site_name") ?? "").trim();
   const workDirection = String(formData.get("work_direction") ?? "").trim();
@@ -520,6 +554,22 @@ export async function createJournalEntryCore(
       : "worker_input";
   const notes = String(formData.get("notes") ?? "").trim();
   const workDate = String(formData.get("work_date") ?? "").trim();
+  // Time of day the shift ran (audit 2026-10-16, J-4). The chat and MCP
+  // intake parse "nuo 8 iki 17, 30 min pertrauka" deterministically; before
+  // this the start/end/break were a parse PREVIEW only and never reached the
+  // record, so no later reader could place the work inside the day. They are
+  // optional, validated, and carry the same provenance rule as `quantity`.
+  const workStart = parseClockTime(String(formData.get("work_start") ?? ""));
+  const workEnd = parseClockTime(String(formData.get("work_end") ?? ""));
+  const breakMinutesRaw = String(formData.get("break_minutes") ?? "").trim();
+  const breakMinutes =
+    breakMinutesRaw !== "" && /^\d{1,4}$/.test(breakMinutesRaw)
+      ? Number(breakMinutesRaw)
+      : null;
+  const workTimeSource: RpcMetricRow["source"] =
+    String(formData.get("work_time_source") ?? "") === "ai_extracted"
+      ? "ai_extracted"
+      : "worker_input";
   // v3 — free-text review-only metadata. Capped lengths so a runaway paste
   // can't blow up a single metric row.
   const institutionName = String(formData.get("institution_name") ?? "")
@@ -569,9 +619,14 @@ export async function createJournalEntryCore(
       message: t("quantityInvalid"),
     };
   }
+  // A journal entry is a FACT about work that happened (SEP-1, FACT ≠
+  // FORECAST). Until audit 2026-10-16 only document-drafted entries refused a
+  // future day; the composer, the chat and the MCP door accepted one, and it
+  // then landed in calendar cells the product itself marks "never offered".
+  // Every path now refuses it, keeping the +24 h timezone tolerance.
   const workDateCheck = checkWorkDate(workDate, {
     requireDate: sourceDocumentFileId !== "",
-    rejectFuture: sourceDocumentFileId !== "",
+    rejectFuture: true,
   });
   if (workDateCheck) {
     return {
@@ -740,6 +795,22 @@ export async function createJournalEntryCore(
             metric_slug: "work_date",
             value_text: workDate,
             source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(workStart
+      ? [{ metric_slug: "work_start", value_text: workStart, source: workTimeSource }]
+      : []),
+    ...(workEnd
+      ? [{ metric_slug: "work_end", value_text: workEnd, source: workTimeSource }]
+      : []),
+    ...(breakMinutes !== null
+      ? [
+          {
+            metric_slug: "break_minutes",
+            value_numeric: breakMinutes,
+            unit_slug: "minutes",
+            source: workTimeSource,
           },
         ]
       : []),

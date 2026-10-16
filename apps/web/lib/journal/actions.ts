@@ -12,6 +12,7 @@ import {
   fragmentMetricRows,
   parseFragments,
   parseRejectedSlugs,
+  resolveEntryLanguage,
   resolveModuleMetricRows,
   runSkillPipeline,
   type CreateJournalEntryResult,
@@ -116,7 +117,7 @@ export async function supersedeJournalEntry(
     };
   }
 
-  const locale = String(formData.get("locale") ?? "lt");
+  const locale = resolveEntryLanguage(formData.get("locale"));
   const engagementId = String(formData.get("engagement_context_id") ?? "").trim();
   const siteName = String(formData.get("site_name") ?? "").trim();
   const workDirection = String(formData.get("work_direction") ?? "").trim();

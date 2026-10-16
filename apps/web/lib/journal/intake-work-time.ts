@@ -89,6 +89,10 @@ export type IntakeWorkTime = {
    *  was stated, when the items add up to it, or when there are no
    *  fragments (a lone total is then simply the entry's time). */
   readonly statedTotalMinutes: number | null;
+  /** The stated clock span (start, end, break) when the sentence carried one;
+   *  null otherwise. Written as `work_start` / `work_end` / `break_minutes`
+   *  metrics with machine provenance. */
+  readonly span: { start: string; end: string; breakMinutes: number } | null;
 };
 
 const MAX_FRAGMENTS = 20;
@@ -108,8 +112,15 @@ export function deriveIntakeWorkTime(notes: string, todayIso: string): IntakeWor
   // A stated SPAN ("nuo 8 iki 17, 30 min pertrauka") is the whole day's
   // worked time, break already subtracted by the parser. Fragments inside such
   // a sentence would count the break as work — so the span wins outright.
+  // The clock times themselves are kept (audit 2026-10-16, J-4): before, they
+  // were a parse preview only, so no record ever said WHEN in the day the
+  // work ran and overlap detection across entries had nothing to read.
   if (parsed.start && parsed.end && hasWorked) {
-    return { ...NOTHING, quantityMinutes: Math.round(worked) };
+    return {
+      ...NOTHING,
+      quantityMinutes: Math.round(worked),
+      span: { start: parsed.start, end: parsed.end, breakMinutes: parsed.breakMinutes },
+    };
   }
 
   const suggestions = extractJournalSuggestions(text);
@@ -140,6 +151,7 @@ export function deriveIntakeWorkTime(notes: string, todayIso: string): IntakeWor
       fragments,
       quantityMinutes: null,
       statedTotalMinutes: statedTotalMinutes(suggestions.statedTotal),
+      span: null,
     };
   }
 
@@ -154,6 +166,7 @@ const NOTHING: IntakeWorkTime = {
   fragments: [],
   quantityMinutes: null,
   statedTotalMinutes: null,
+  span: null,
 };
 
 /** The stated total in minutes when the items do not add up to it; a total
@@ -199,11 +212,20 @@ export function intakeWorkTimeFields(
   }
   if (t.quantityMinutes !== null) {
     // The quantity slot carries the day's minutes; a stated output has no
-    // second slot on the entry and is NOT written as if it were time.
+    // second slot on the entry and is NOT written as if it were time. A span
+    // also records its clock times, so the day is placed, not only summed.
     return {
       quantity: String(t.quantityMinutes),
       unit_slug: "minutes",
       quantity_source: "ai_extracted",
+      ...(t.span
+        ? {
+            work_start: t.span.start,
+            work_end: t.span.end,
+            break_minutes: String(t.span.breakMinutes),
+            work_time_source: "ai_extracted",
+          }
+        : {}),
     };
   }
   return intakeOutputFields(notes);
