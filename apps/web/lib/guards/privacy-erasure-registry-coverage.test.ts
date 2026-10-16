@@ -136,6 +136,8 @@ const IDENTIFIER_ALLOWLIST: Record<string, string> = {
   "customers.contact_name": "DECISION PENDING (design doc L-12): customer contact person without an e-mail column to match on",
   "companies.public_contact_email": "organisation's published contact, not a person record (owner-entered)",
   "companies.public_contact_phone": "organisation's published contact, not a person record (owner-entered)",
+  "organizations.public_contact_email": "organisation's published contact, not a person record (owner-entered)",
+  "organizations.public_contact_phone": "organisation's published contact, not a person record (owner-entered)",
   "evidence_import_rows.person_label": "report_only via the value rule (mention)",
 };
 
