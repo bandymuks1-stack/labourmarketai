@@ -75,6 +75,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261014090100_",
       // 2026-10-14 brigade disband v1 (RED, needs-human-gate, NOT applied).
       "20261014190000_",
+      // 2026-10-15 GDPR erasure executor v2 (#856; RED, needs-human-gate, NOT applied).
+      "20261015200000_",
       // 2026-10-08 owner-approved work-plan scope extension (roster + engagement).
       "20261007140000_",
       // 2026-10-08 E6 (brigade offer against a demand): owner-approved RED, separate hand-off RPC.

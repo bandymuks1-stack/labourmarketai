@@ -241,6 +241,11 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // notification emitters can read who to notify. It creates, drops,
       // alters, triggers and writes no engine object.
       "20261012120000_service_role_notification_reads_v1",
+      // GDPR erasure executor v2 (20261015200000, #856, RED draft): its treatment
+      // registry names workflow_transitions / workflow_instance_approvers as DATA
+      // (which erasure treatment applies). It creates, drops, alters, triggers and
+      // writes no engine object; the assertions below apply unchanged.
+      "20261015200000_privacy_erasure_executor_v2",
     ];
     /**
      * 20260820070000 — chain step B on-ramp. The ONE later migration that

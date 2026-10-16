@@ -3507,6 +3507,25 @@
           "keep_legal": "Behalten (rechtliche Grundlage)",
           "keep_pending_decision": "Behalten (Aufbewahrungsentscheidung ausstehend)"
         }
+      },
+      "erasure": {
+        "title": "Löschung (DSGVO Art. 17)",
+        "rehearse": "Löschung proben (Probelauf)",
+        "rehearsalNote": "Probelauf: Die gesamte Löschung wird ausgeführt und zurückgerollt. Nichts wurde geändert.",
+        "confirmLabel": "{word} eingeben, um auszuführen",
+        "execute": "Löschung ausführen",
+        "approveFirst": "Setze die Anfrage vor der Ausführung auf „Genehmigt“.",
+        "result": {
+          "erased": "Gelöscht. Der unveränderliche Beleg hält fest, was gelöscht, geleert oder pseudonymisiert wurde.",
+          "refused": "Nicht ausgeführt: Der Probelauf hat abgelehnt. Nichts wurde geändert.",
+          "not-superadmin": "Nur ein Superadmin kann eine Löschung ausführen.",
+          "not-found": "Anfrage nicht gefunden.",
+          "not-deletion-request": "Dies ist keine Anfrage auf Kontolöschung.",
+          "not-approved": "Die Anfrage muss zuerst genehmigt werden.",
+          "bad-confirmation": "Das Bestätigungswort stimmt nicht. Nichts wurde geändert.",
+          "notInstalled": "Die Löschfunktion ist in dieser Datenbank noch nicht installiert.",
+          "error": "Die Löschung konnte nicht ausgeführt werden. Nichts wurde geändert."
+        }
       }
     }
   },

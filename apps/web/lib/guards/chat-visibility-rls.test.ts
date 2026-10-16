@@ -213,6 +213,10 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    page AFTER requireSuperadmin(). From the
     //    chat tables it reads only conversations.created_at/source_type to
     //    COUNT threads — no subject, body, participant or id leaves the module.
+    //  - lib/admin/privacy-erasure.ts — GDPR erasure v2 (#856): after
+    //    isSuperadmin() and an APPROVED account-deletion request, calls the
+    //    service_role-only erase_user_account_v2 RPC and removes the person's
+    //    own Storage objects. Touches no chat table directly.
     //  - lib/admin/launch-readiness.ts — operator launch-readiness view
     //    (launch repair Scope E). READ-ONLY head-counts over workers /
     //    profiles / companies / company_need_public_intakes /
@@ -497,6 +501,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/admin/billing-actions.ts",
       "lib/admin/company-need-intakes.ts",
       "lib/admin/launch-readiness.ts",
+      "lib/admin/privacy-erasure.ts",
       "lib/ai/runtime/audit-store.ts",
       "lib/billing/checkout-operations-store.ts",
       "lib/billing/customer-store.ts",

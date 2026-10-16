@@ -3507,6 +3507,25 @@
           "keep_legal": "Keep (legal basis)",
           "keep_pending_decision": "Keep (retention decision pending)"
         }
+      },
+      "erasure": {
+        "title": "Erasure (GDPR Art. 17)",
+        "rehearse": "Rehearse erasure (dry run)",
+        "rehearsalNote": "Dry run: the whole erasure is executed and rolled back. Nothing has changed.",
+        "confirmLabel": "Type {word} to execute",
+        "execute": "Execute erasure",
+        "approveFirst": "Set the request to Approved before executing.",
+        "result": {
+          "erased": "Erased. The append-only receipt records what was deleted, nulled or pseudonymised.",
+          "refused": "Not executed: the dry run refused. Nothing was changed.",
+          "not-superadmin": "Only a superadmin can run an erasure.",
+          "not-found": "Request not found.",
+          "not-deletion-request": "This is not an account-deletion privacy request.",
+          "not-approved": "The request must be Approved first.",
+          "bad-confirmation": "The confirmation word did not match. Nothing was changed.",
+          "notInstalled": "The erasure executor is not installed in this database yet.",
+          "error": "The erasure could not run. Nothing was changed."
+        }
       }
     }
   },

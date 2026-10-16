@@ -39,3 +39,20 @@ export async function reviewPrivacyRequestAction(
     `/${locale}/dashboard/admin?privacyReviewNotice=${notice}#admin-privacy-requests-heading`,
   );
 }
+
+/**
+ * Erasure (phase 3, #856 v2): executes ONLY an approved account-deletion
+ * request after the typed confirmation word; the outcome comes back as
+ * `?privacyErasureNotice=`. Refusals never change a row (the executor
+ * rehearses first and stops on any refusal).
+ */
+export async function executeErasureAction(formData: FormData): Promise<void> {
+  const { executeErasure } = await import("@/lib/admin/privacy-erasure");
+  const locale = String(formData.get("locale") ?? "lt");
+  const requestId = String(formData.get("request_id") ?? "");
+  const result = await executeErasure(requestId, String(formData.get("confirmation") ?? ""));
+  revalidatePath("/[locale]/dashboard/admin", "page");
+  const notice = result.kind === "refused" ? "refused" : result.kind;
+  const back = result.kind === "erased" ? "" : `&erasureRehearsalFor=${encodeURIComponent(requestId)}`;
+  redirect(`/${locale}/dashboard/admin?privacyErasureNotice=${notice}${back}#admin-privacy-requests-heading`);
+}

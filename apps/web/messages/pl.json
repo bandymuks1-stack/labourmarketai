@@ -3507,6 +3507,25 @@
           "keep_legal": "Zachowaj (podstawa prawna)",
           "keep_pending_decision": "Zachowaj (decyzja o retencji oczekuje)"
         }
+      },
+      "erasure": {
+        "title": "Usunięcie (RODO art. 17)",
+        "rehearse": "Próbne usunięcie (bez zmian)",
+        "rehearsalNote": "Próba: całe usunięcie jest wykonywane i wycofywane. Nic nie zmieniono.",
+        "confirmLabel": "Wpisz {word}, aby wykonać",
+        "execute": "Wykonaj usunięcie",
+        "approveFirst": "Przed wykonaniem ustaw status wniosku na „Zatwierdzony”.",
+        "result": {
+          "erased": "Usunięto. Niezmienne potwierdzenie zapisuje, co usunięto, wyzerowano lub spseudonimizowano.",
+          "refused": "Nie wykonano: próba odmówiła. Nic nie zmieniono.",
+          "not-superadmin": "Usunięcie może wykonać tylko superadministrator.",
+          "not-found": "Nie znaleziono wniosku.",
+          "not-deletion-request": "To nie jest wniosek o usunięcie konta.",
+          "not-approved": "Wniosek musi najpierw zostać zatwierdzony.",
+          "bad-confirmation": "Słowo potwierdzenia się nie zgadza. Nic nie zmieniono.",
+          "notInstalled": "Mechanizm usuwania nie jest jeszcze zainstalowany w tej bazie danych.",
+          "error": "Nie udało się wykonać usunięcia. Nic nie zmieniono."
+        }
       }
     }
   },

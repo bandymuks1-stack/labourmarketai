@@ -3507,6 +3507,25 @@
           "keep_legal": "Palikti (teisinis pagrindas)",
           "keep_pending_decision": "Palikti (laukiama saugojimo sprendimo)"
         }
+      },
+      "erasure": {
+        "title": "Ištrynimas (BDAR 17 str.)",
+        "rehearse": "Repetuoti ištrynimą (bandomasis vykdymas)",
+        "rehearsalNote": "Bandomasis vykdymas: visas ištrynimas atliekamas ir atšaukiamas. Niekas nepakeista.",
+        "confirmLabel": "Įveskite {word}, kad įvykdytumėte",
+        "execute": "Įvykdyti ištrynimą",
+        "approveFirst": "Prieš vykdant nustatykite prašymo būseną „Priimta“.",
+        "result": {
+          "erased": "Ištrinta. Nekeičiamame kvite užfiksuota, kas ištrinta, išvalyta ar pseudonimizuota.",
+          "refused": "Neįvykdyta: bandomasis vykdymas atsisakė. Niekas nepakeista.",
+          "not-superadmin": "Ištrynimą vykdyti gali tik superadministratorius.",
+          "not-found": "Prašymas nerastas.",
+          "not-deletion-request": "Tai nėra paskyros ištrynimo prašymas.",
+          "not-approved": "Pirmiausia prašymui turi būti nustatyta būsena „Priimta“.",
+          "bad-confirmation": "Patvirtinimo žodis nesutapo. Niekas nepakeista.",
+          "notInstalled": "Ištrynimo vykdyklė šioje duomenų bazėje dar neįdiegta.",
+          "error": "Ištrynimo atlikti nepavyko. Niekas nepakeista."
+        }
       }
     }
   },

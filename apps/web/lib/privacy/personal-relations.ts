@@ -688,6 +688,10 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
+  // GDPR erasure receipts (#856, 20261015200000): `executed_by` is the
+  // operator who ran an erasure; the erased subject is never named on the row
+  // (only a random tombstone), so nothing here is a subject's to receive.
+  "privacy_erasure_receipts",
   // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no
   // content, purged after a day (20261013120000).
   "confirmation_spends",

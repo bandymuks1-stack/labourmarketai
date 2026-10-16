@@ -246,6 +246,16 @@ audit.
 
 ## 7. Service-role caller inventory — additions after the audit
 
+- **2026-10-15 — `lib/admin/privacy-erasure.ts`** (GDPR erasure v2, #856).
+  Every entry point re-checks `isSuperadmin()` and requires an account-deletion
+  privacy request; a real run also requires status Approved and a typed
+  confirmation word. The service-role client calls ONLY the service_role-only
+  RPC `erase_user_account_v2` (dry run by default; refuses with exact reasons;
+  writes an append-only receipt) and removes the person's own Storage objects
+  that the rehearsal listed. It reads no chat table itself; the RPC's account
+  delete cascades the person's own chat rows exactly like a dashboard delete.
+  Pinned in the `chat-visibility-rls.test.ts` caller inventory.
+
 - **2026-07-11 — `lib/admin/launch-readiness.ts`** (launch repair Scope E,
   operator launch-readiness view). READ-ONLY aggregate head-counts over
   `workers`, `profiles`, `companies`, `company_need_public_intakes`,

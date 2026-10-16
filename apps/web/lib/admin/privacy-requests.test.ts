@@ -319,15 +319,19 @@ describe("4 · wiring — an existing surface, visibility only", () => {
     ).toThrow();
   });
 
-  it("the section's ONLY mutating control is the review verb — deletion never", () => {
+  it("the section's mutating controls are the review verb and the GATED erasure verb — nothing else", () => {
     const section = read("components/admin/privacy-requests-section.tsx");
     expect(section).toMatch(/manualNote/);
-    // V9 phase 1: exactly ONE form action — the review verb. The honesty
-    // line renders beside it, and no destructive path is reachable.
+    // V9 phase 1: the review verb. Phase 3 (#856 erasure v2, 2026-10-15): ONE
+    // more form action, rendered only for an EXECUTABLE dry-run outcome of an
+    // APPROVED account-deletion request; the gates (superadmin, Approved,
+    // typed word, rehearsal first) live in lib/admin/privacy-erasure.ts and
+    // are pinned by its own test. No other destructive path is reachable.
     const actions = [...section.matchAll(/action=\{([^}]+)\}/g)].map((m) =>
       m[1].trim(),
     );
-    expect(actions).toEqual(["reviewPrivacyRequestAction"]);
+    expect(actions).toEqual(["reviewPrivacyRequestAction", "executeErasureAction"]);
+    expect(section).toMatch(/outcome\.kind === "executable" \? \(\s*approved \?/);
     expect(section).toMatch(/review\.honesty/);
     expect(section).not.toMatch(/\.rpc\(|\.update\(|\.delete\(/);
     // The phase-2 preview renders through the read-only plan lib only.
