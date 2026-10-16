@@ -41,7 +41,24 @@ Remaining failures on `2cab9ad`: **none among the completed checks.** The push o
 | Build internal test APK | ✅ success |
 | Emulator launch + Maestro journey | ✅ success |
 | Signed-in journey (dispatch only) | skipped on a PR run, by design |
-| ios | BF64_IOS |
+| ios | cancelled by the push of `8772ba4` (workflow concurrency); re-proven on `8772ba4`, §1c |
+
+### 1c. CI results — commit `8772ba4` (commit 4: jobs, job deep links, need intake, iOS signed-in and App Links proofs) — COMPLETE, 23:03 UTC
+
+| Check | Result | Note |
+|---|---|---|
+| quality | ✅ success | full web suite incl. the new `jobs.*` tests and the fingerprint register row |
+| mobile | ✅ success | client-core tests, mobile typecheck, both Hermes bundles |
+| e2e-smoke | ✅ success | |
+| migration-safety | ✅ success | |
+| CodeQL / Analyze | ✅ success | |
+| Build internal test APK | ✅ success | release APK + AAB, store-policy facts |
+| Emulator launch + Maestro journey | ✅ success | launch, auth-failure and airplane-mode journeys |
+| Signed-in journey (dispatch only) | skipped | by design on a PR run |
+| **ios** (run 38973762913) | ✅ **success** | Xcode build 19 min · simulator launch · **Maestro auth journey passed on the first attempt (2 min 31 s)**, the retry was not needed · unsigned device archive 23 min |
+
+**Remaining CI failures on the current head: none.** Every workflow that
+runs for this PR is green on `8772ba4`.
 
 ## 2. Signed-in mobile functionality — what is confirmed and how
 
