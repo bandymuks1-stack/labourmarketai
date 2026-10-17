@@ -4,7 +4,7 @@ vi.mock("server-only", () => ({}));
 vi.mock("@/lib/env", () => ({
   env: { CONVERSATION_TOKEN_SECRET: "unit-test-secret-with-enough-length", SUPABASE_SERVICE_ROLE_KEY: undefined },
   requireSupabaseClientEnv: () => ({
-    url: "https://gorgitwvdzxbnaxhrsrw.supabase.co",
+    url: "https://abcdefghijklmnopqrst.supabase.co",
     anonKey: "sb_publishable_unit_test_not_a_real_key",
   }),
 }));
@@ -81,7 +81,7 @@ describe("protected resource metadata (RFC 9728) — what Claude and ChatGPT rea
       await prmPathSuffixed(new Request(`${ORIGIN}/.well-known/oauth-protected-resource/api/mcp`))
     ).json();
     expect(suffixed).toEqual(root);
-    expect(root).toEqual(protectedResourceMetadata(ORIGIN, "https://gorgitwvdzxbnaxhrsrw.supabase.co"));
+    expect(root).toEqual(protectedResourceMetadata(ORIGIN, "https://abcdefghijklmnopqrst.supabase.co"));
     expect(PROTECTED_RESOURCE_METADATA_PATHS).toEqual([
       "/.well-known/oauth-protected-resource",
       "/.well-known/oauth-protected-resource/api/mcp",
@@ -89,8 +89,8 @@ describe("protected resource metadata (RFC 9728) — what Claude and ChatGPT rea
   });
 
   it("exactly one authorization server — the platform's own Supabase Auth service path — and header bearers only", () => {
-    const doc = protectedResourceMetadata(ORIGIN, "https://gorgitwvdzxbnaxhrsrw.supabase.co/");
-    expect(doc.authorization_servers).toEqual(["https://gorgitwvdzxbnaxhrsrw.supabase.co/auth/v1"]);
+    const doc = protectedResourceMetadata(ORIGIN, "https://abcdefghijklmnopqrst.supabase.co/");
+    expect(doc.authorization_servers).toEqual(["https://abcdefghijklmnopqrst.supabase.co/auth/v1"]);
     expect(doc.bearer_methods_supported).toEqual(["header"]);
     // No scopes are advertised: the platform has no product-level scope model
     // (RLS decides), and Claude would otherwise request whatever is listed.
