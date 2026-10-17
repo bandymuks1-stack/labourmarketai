@@ -45,13 +45,18 @@ const schema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   SUPABASE_DB_PASSWORD: z.string().min(1).optional(),
   /**
-   * Dedicated HMAC key for conversation confirmation tokens (audit L-02).
-   * Optional: when unset, lib/conversation/dispatch.ts falls back to the
-   * service-role key and, failing that, REFUSES to sign — it no longer falls
-   * back to a hardcoded literal. Set this to stop reusing the service-role key
-   * for a second purpose.
+   * Dedicated HMAC key for conversation + capability confirmation tokens
+   * (audit L-02). REQUIRED IN PRODUCTION: at least 32 characters of random
+   * material (`openssl rand -hex 32`); production refuses to sign without it
+   * and never falls back to the service-role key. Outside production the
+   * service-role key is still accepted so local dev works on a fresh checkout.
+   * Optional here so builds pass without secrets — the check is lazy, at sign
+   * time (lib/security/confirmation-key-material.ts).
    */
-  CONVERSATION_TOKEN_SECRET: z.string().min(16).optional(),
+  // A blank hPanel/dashboard field means "not set" — without this an empty
+  // string failed min(16) and took the WHOLE app down at boot (env is read
+  // by nearly every module), not just the confirm steps.
+  CONVERSATION_TOKEN_SECRET: z.preprocess(blankAsAbsent, z.string().min(16).optional()),
   /**
    * The public https origin a self-hosted deployment advertises to OAuth and
    * MCP clients when its hostname is not one of ours (lib/mcp/public-origin.ts).
