@@ -558,6 +558,17 @@ export default async function VerifiedCvPage({
     .map((p) => professionDisplayName(p, (slug) => (tProf.has(slug) ? tProf(slug) : null)))
     .filter((v): v is string => !!v);
   const premiumFacts: PremiumCvFact[] = [];
+  // ONE continuous professional history (decision 0025): the total first,
+  // whenever the organization history adds to the person's own journal —
+  // every work hour once; the journal and organization figures stay beside
+  // it as the two provenances it is made of.
+  const experienceTotal = cv.professionalExperience?.hours ?? null;
+  if (
+    experienceTotal !== null &&
+    experienceTotal.total > 0 &&
+    experienceTotal.organizationDays + experienceTotal.organizationPeriods > 0
+  )
+    premiumFacts.push({ value: premiumHours(experienceTotal.total), label: tPremium("facts.experienceTotal") });
   if (cv.recordedHoursTotal !== null && cv.recordedHoursTotal > 0)
     premiumFacts.push({ value: premiumHours(cv.recordedHoursTotal), label: tPremium("facts.recorded") });
   if (cv.recordedHoursConfirmed !== null && cv.recordedHoursConfirmed > 0)
@@ -1245,6 +1256,31 @@ export default async function VerifiedCvPage({
               {t("clientAcceptedWorkFact", { entries: cv.clientAcceptedEntries })}
             </p>
           )}
+          {/* ONE continuous professional history (decision 0025): the
+              all-time total — every work hour once over the journal and the
+              organization history — with what was listed but not added.
+              Shown when the organization history adds to the journal. */}
+          {experienceTotal !== null &&
+            experienceTotal.total > 0 &&
+            experienceTotal.organizationDays + experienceTotal.organizationPeriods > 0 && (
+              <p
+                className="text-meta text-text-muted"
+                data-testid="cv-professional-experience-total"
+                data-total-hours={experienceTotal.total}
+                data-journal-hours={experienceTotal.journal}
+                data-organization-hours={experienceTotal.organizationDays + experienceTotal.organizationPeriods}
+                data-not-counted-hours={experienceTotal.notCounted}
+              >
+                {t("professionalExperienceTotal", {
+                  total: fmtHours(experienceTotal.total),
+                  journal: fmtHours(experienceTotal.journal),
+                  organization: fmtHours(experienceTotal.organizationDays + experienceTotal.organizationPeriods),
+                })}
+                {experienceTotal.notCounted > 0
+                  ? ` ${t("professionalExperienceNotCounted", { hours: fmtHours(experienceTotal.notCounted) })}`
+                  : ""}
+              </p>
+            )}
           {/* The organization's own hour records (owner §19) — the second
               ledger, named beside the journal figure and added to nothing:
               an hour record proves attendance, not a skill. Shown only when

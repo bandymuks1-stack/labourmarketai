@@ -7906,6 +7906,7 @@
       "recorded": "val. užfiksuota",
       "confirmed": "val. su vadovo įrašu",
       "organizationHistory": "val. organizacijų istorijoje",
+      "experienceTotal": "val. profesinės patirties iš viso",
       "days": "{count, plural, one {darbo diena} few {darbo dienos} other {darbo dienų}}",
       "modes": {
         "label": "Kortelės dalys",
@@ -8476,12 +8477,15 @@
     "recordedHoursScopeTruncated": "Iš paskutinių {count} įrašų; senesni įrašai į šiuos skaičius neįtraukti.",
     "organizationRecordedHours": "Organizacijos apskaitoje: {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} žiniaraščiuose ar importuotuose dokumentuose ({imported} val. importuota, {approved} val. vadovo patvirtinta žiniaraštyje) — skaičiuojama atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam įgūdžiui.",
     "organizationRecordedHoursWithPeriods": "Organizacijų įrašai: iš viso {total} val. — {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} ir {periodHours} val., nurodytos kaip laikotarpio suma ({from} – {to}), darbo laiko žiniaraščiuose ar importuotuose dokumentuose ({approved} val. patvirtinta). Laikoma atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam gebėjimui.",
+    "professionalExperienceTotal": "Profesinė patirtis iš viso: {total} val. — darbo žurnale {journal} val. ir organizacijų istorijoje {organization} val. Kiekvienas darbas skaičiuojamas vieną kartą; šaltiniai rodomi atskirai.",
+    "professionalExperienceNotCounted": "Dar {hours} val. rodoma, bet į sumą neįtraukta, nes tas pats darbas jau suskaičiuotas.",
     "premium": {
       "eyebrowFallback": "Gyvas CV",
       "facts": {
         "recorded": "užfiksuota darbo žurnale",
         "confirmed": "su vadovo įrašu",
         "organization": "organizacijų įrašuose",
+        "experienceTotal": "profesinės patirties iš viso",
         "languages": "kalbos"
       },
       "capEyebrow": "Gebėjimai",
