@@ -136,6 +136,12 @@ describe("the public origin a client is told about (self-hosting, 2026-10-17)", 
     expect(requestPublicOrigin(new Request("https://labourmarket.ai/api/mcp", { headers: { "x-forwarded-host": "evil.example, labourmarket.ai" } }))).toBe("https://labourmarket.ai");
   });
 
+  it("a canonical host carrying the scheme's default port drops it; any other port is kept", () => {
+    expect(requestPublicOrigin(new Request("http://0.0.0.0:3000/api/mcp", { headers: { "x-forwarded-host": "labourmarket.ai:443", "x-forwarded-proto": "https" } }))).toBe("https://labourmarket.ai");
+    expect(requestPublicOrigin(new Request("http://0.0.0.0:3000/api/mcp", { headers: { host: "127.0.0.1:80" } }))).toBe("http://127.0.0.1");
+    expect(requestPublicOrigin(new Request("http://0.0.0.0:3000/api/mcp", { headers: { host: "127.0.0.1:3100" } }))).toBe("http://127.0.0.1:3100");
+  });
+
   it("www and the Vercel production alias collapse to the canonical origin; a preview keeps its host", () => {
     expect(requestPublicOrigin(new Request("https://www.labourmarket.ai/api/mcp", { headers: { host: "www.labourmarket.ai" } }))).toBe("https://labourmarket.ai");
     expect(requestPublicOrigin(new Request("https://x.vercel.app/api/mcp", { headers: { host: "lm-git-feature-x.vercel.app" } }))).toBe("https://lm-git-feature-x.vercel.app");

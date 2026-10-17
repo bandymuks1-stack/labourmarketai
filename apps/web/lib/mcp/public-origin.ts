@@ -30,8 +30,21 @@ export function requestPublicOrigin(req: Request): string {
   const configured = env.PUBLIC_ORIGIN?.replace(/\/$/, "");
   if (configured) return configured;
   const forwardedHost = req.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
-  const host = forwardedHost || req.headers.get("host") || new URL(req.url).host;
+  const rawHost = forwardedHost || req.headers.get("host") || new URL(req.url).host;
   const forwardedProto = req.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
   const proto = forwardedProto || new URL(req.url).protocol.replace(/:$/, "");
-  return outboundLinkOrigin(host, proto);
+  return outboundLinkOrigin(withoutDefaultPort(rawHost, proto), proto);
+}
+
+/**
+ * `Host: labourmarket.ai:443` (nginx `$http_host`, some proxies) must not
+ * become `https://labourmarket.ai:443`: the person typed no port, and Claude
+ * compares `resource` with the URL exactly. The scheme's default port is
+ * dropped; any other port (a local 3100, a preview 8443) is kept.
+ */
+function withoutDefaultPort(host: string, proto: string): string {
+  const h = host.trim().toLowerCase();
+  const defaultPort = proto === "https" ? ":443" : proto === "http" ? ":80" : null;
+  if (defaultPort && h.endsWith(defaultPort) && !h.startsWith("[")) return h.slice(0, -defaultPort.length);
+  return h;
 }
