@@ -106,7 +106,9 @@ jobs:
           set -euo pipefail
           node scripts/package-standalone.mjs .standalone-dist
           # No server secret may be baked into the artefact: only the public anon JWT (role anon) is allowed.
-          if grep -rIlE 'sk_(live|test)_|whsec_|sb_secret_|BEGIN (RSA |EC )?PRIVATE KEY' .standalone-dist >/dev/null; then echo "::error::secret-shaped string found in the artefact"; exit 1; fi
+          # Key-SHAPED values only: the app's own guards mention the prefixes (`/^sk_test_/`, `/^whsec_/`) as
+          # bare literals in the compiled bundle, which is not a key. A real key carries its random body.
+          if grep -rIlE '(sk|rk)_(live|test)_[A-Za-z0-9]{16,}|whsec_[A-Za-z0-9]{16,}|sb_secret_[A-Za-z0-9_-]{16,}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' .standalone-dist >/dev/null; then echo "::error::secret-shaped string found in the artefact"; exit 1; fi
           if grep -rIl '"role":"service_role"' .standalone-dist >/dev/null || grep -rIlE 'eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]*c2VydmljZV9yb2xl' .standalone-dist >/dev/null; then echo "::error::service-role token found in the artefact"; exit 1; fi
           tar -C .standalone-dist -czf "labourmarket-web-standalone-${SHA}.tgz" .
           sha256=$(sha256sum "labourmarket-web-standalone-${SHA}.tgz" | cut -d' ' -f1)
