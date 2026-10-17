@@ -31,7 +31,7 @@ import { formatUtcDate } from "@/lib/time/display";
 import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
 import { CvOrganizationHistory } from "@/components/app/cv/cv-organization-history";
 import { organizationHistoryLines } from "@/components/app/cv/organization-history-lines";
-import { formerNamesOf, periodLabelFor } from "@/lib/journal/professional-experience";
+import { FORMER_NAME_RELATIONS, formerNamesOf, periodFor } from "@/lib/journal/professional-experience";
 import {
   PremiumLivingCv,
   type PremiumCvCapability,
@@ -569,7 +569,23 @@ export default async function VerifiedCvPage({
   // source label resolves to a stated PERIOD (never printed raw); a period the
   // owner states as the same legal entity is a FORMER NAME of the organization.
   const businessPeriods = (cv.professionalExperience?.roles ?? []).flatMap((r) => r.businessPeriods);
-  const periodLabelOf = (sourceLabel: string) => periodLabelFor(sourceLabel, businessPeriods);
+  const orgNameOfPeriod = new Map<string, string | null>();
+  for (const r of cv.professionalExperience?.roles ?? []) {
+    for (const p of r.businessPeriods) if (!orgNameOfPeriod.has(p.id)) orgNameOfPeriod.set(p.id, r.organizationName);
+  }
+  // SEPARATE LEGAL ENTITIES (owner 2026-10-17, final): a period that is a
+  // former name bands as "Period: X"; any other relation is a separate legal
+  // entity of the time — said so, with the organization that administers the
+  // records today. The raw sheet label is never printed.
+  const periodLabelOf = (sourceLabel: string): string | null => {
+    const p = periodFor(sourceLabel, businessPeriods);
+    if (!p) return null;
+    if (FORMER_NAME_RELATIONS.has(p.legalEntityRelation)) return tOrgHist("periodBand", { label: p.label });
+    return tOrgHist("legalEntityBand", {
+      label: p.legalEntityLabel ?? p.label,
+      org: orgNameOfPeriod.get(p.id) ?? "—",
+    });
+  };
   const formerNamesByOrgName = new Map<string, string[]>();
   for (const r of cv.professionalExperience?.roles ?? []) {
     if (!r.organizationName) continue;
@@ -655,7 +671,7 @@ export default async function VerifiedCvPage({
         subtitle:
           [
             h.organizationName && h.organizationName !== title ? withFormerNames(h.organizationName) : null,
-            periodBand ? tOrgHist("periodBand", { label: periodBand }) : null,
+            periodBand,
           ]
             .filter((x): x is string => !!x)
             .join(" · ") || null,

@@ -141,7 +141,8 @@ const OWNER_RELATIONSHIPS: ExperienceRelationship[] = [
         from: null,
         to: null,
         basis: "owner_statement",
-        legalEntityRelation: "not_asserted",
+        legalEntityRelation: "sold_and_continued_by_new_entity",
+        legalEntityLabel: "Vivat Rex",
         sourceLabels: ["Vivat Rex PL", "Nonstop-Vivat Rex PL"],
       },
     ],
@@ -350,7 +351,7 @@ describe("owner scenarios (2026-10-17 §8)", () => {
       wi: model({}),
       relationships: [
         rel({ organizationId: "org-a", relationship: "manager" }),
-        rel({ organizationId: "org-b", relationship: "owner", businessPeriods: [{ id: "p", label: "Earlier name", from: "2020-01-01", to: "2022-12-31", basis: "owner_statement", legalEntityRelation: "renamed", sourceLabels: [] }] }),
+        rel({ organizationId: "org-b", relationship: "owner", businessPeriods: [{ id: "p", label: "Earlier name", from: "2020-01-01", to: "2022-12-31", basis: "owner_statement", legalEntityRelation: "renamed", legalEntityLabel: null, sourceLabels: [] }] }),
       ],
     });
     expect(exp.organizations.map((o) => [o.organizationId, o.totalHours, o.roles[0]?.relationship])).toEqual([
@@ -539,6 +540,7 @@ describe("one organization identity with a name history (owner correction 2026-1
         to: "2024-10-13",
         basis: "owner_statement",
         legalEntityRelation: "renamed",
+        legalEntityLabel: "Vivat Rex",
         sourceLabels: ["Vivat Rex PL", "Nonstop-Vivat Rex PL"],
       },
     ],
@@ -602,5 +604,127 @@ describe("one organization identity with a name history (owner correction 2026-1
     expect(none.hours?.total).toBe(26);
     expect(none.organizations[0]!.byPeriod).toEqual([{ periodLabel: null, hours: 26, records: 4 }]);
     expect(none.organizations[0]!.formerNames).toEqual([]);
+  });
+});
+
+describe("separate legal entities, one person history (owner final statement 2026-10-17: Vivat Rex was a separate company, sold; Labour Market AI is a new company)", () => {
+  const ctxOf = (sourceLabel: string | null) => ({
+    project: null,
+    place: null,
+    clients: [],
+    otherParties: [],
+    relationshipKind: "employee",
+    activityKind: "work",
+    effective: null,
+    recordedAt: null,
+    source: { kind: "xlsx", supplierRole: "employer", supplierOrganizationId: ORG_LM, supplierName: "Labour market ai Sp. z o.o", reconstructed: false, label: sourceLabel },
+    proof: { concepts: [], attestedByRole: null, contested: false },
+    hasDetail: true,
+  });
+  const day = (id: string, workDate: string, hours: number, sourceLabel: string | null): WorkIntelligenceOrganizationRecord => ({
+    id,
+    workDate,
+    hours,
+    source: "import",
+    status: "recorded",
+    organizationId: ORG_LM,
+    journalEntryId: null,
+    context: ctxOf(sourceLabel),
+  });
+  const SOLD = {
+    id: "bp-vivat",
+    label: "Vivat Rex",
+    legalEntityLabel: "Vivat Rex",
+    from: "2022-01-01",
+    to: "2024-10-13",
+    basis: "owner_statement",
+    legalEntityRelation: "sold_and_continued_by_new_entity",
+    sourceLabels: ["Vivat Rex PL", "Nonstop-Vivat Rex PL"],
+  };
+  const owner: ExperienceRelationship = { ...OWNER_RELATIONSHIPS[0]!, businessPeriods: [SOLD] };
+  const nonstop = OWNER_RELATIONSHIPS[1]!;
+  const wi = model({
+    entries: entriesOf(PRODUCTION_ENTRIES),
+    dayRecords: [day("d1", "2024-03-05", 8, "Vivat Rex PL"), day("d2", "2024-10-20", 7, "Nonstop-Vivat Rex PL"), day("d3", "2025-04-02", 6, null)],
+    periodRecords: [PRODUCTION_PERIOD],
+  });
+  const exp = deriveProfessionalExperience({ wi, relationships: [owner, nonstop] });
+  const rows = () => exp.organizations.map((o) => [o.kind, o.organizationName, o.totalHours] as const);
+
+  it("the earlier entity is its OWN row — never a former name of the continuing organization", () => {
+    const vivat = exp.organizations.find((o) => o.kind === "earlier_legal_entity")!;
+    expect(vivat).toMatchObject({
+      organizationName: "Vivat Rex",
+      legalEntityLabel: "Vivat Rex",
+      legalEntityRelation: "sold_and_continued_by_new_entity",
+      basis: "owner_statement",
+      periodId: "bp-vivat",
+      administeredBy: { organizationId: ORG_LM, organizationName: "Labour market ai Sp. z o.o" },
+      from: "2022-01-01",
+      // the row's span widens to the latest counted record placed in it
+      to: "2024-10-20",
+    });
+    const lm = exp.organizations.find((o) => o.kind === "organization" && o.organizationId === ORG_LM)!;
+    expect(lm.formerNames).toEqual([]);
+    expect(lm.earlierEntities).toEqual([{ periodId: "bp-vivat", label: "Vivat Rex" }]);
+  });
+
+  it("the work done under the earlier entity sits on its row; the rest stays with the continuing organization; the records themselves keep their organization", () => {
+    const vivat = exp.organizations.find((o) => o.kind === "earlier_legal_entity")!;
+    const lm = exp.organizations.find((o) => o.kind === "organization" && o.organizationId === ORG_LM)!;
+    expect(vivat.organizationHours).toBe(15);
+    expect(vivat.records).toBe(2);
+    expect(vivat.byPeriod).toEqual([{ periodLabel: "Vivat Rex", hours: 15, records: 2 }]);
+    // Labour market ai keeps the unlabelled day record and the 800 h period record
+    expect(lm.organizationHours).toBe(806);
+    expect(lm.byPeriod).toEqual([{ periodLabel: null, hours: 806, records: 2 }]);
+    // provenance untouched: every organization line still names the administering organization id
+    expect(exp.lines.every((l) => l.source === "journal" || l.organizationId === ORG_LM)).toBe(true);
+    // one total, every hour once
+    expect(exp.hours?.total).toBe(25.58 + 821);
+  });
+
+  it("leadership across the three: owner of Vivat Rex (derived from the statement, dated by the period) · owner of Labour market ai · manager of Nonstop Group — a manager is never projected onto the earlier entity", () => {
+    const vivat = exp.organizations.find((o) => o.kind === "earlier_legal_entity")!;
+    expect(vivat.roles).toEqual([
+      expect.objectContaining({ relationship: "owner", derived: true, startedAt: "2022-01-01", endedAt: "2024-10-13", current: false, engagementContextId: null }),
+    ]);
+    const lm = exp.organizations.find((o) => o.kind === "organization" && o.organizationId === ORG_LM)!;
+    expect(lm.roles.map((r) => [r.relationship, r.derived ?? false])).toEqual([["owner", false]]);
+    const ns = exp.organizations.find((o) => o.organizationId === ORG_NONSTOP)!;
+    expect(ns).toMatchObject({ kind: "organization", totalHours: 0 });
+    expect(ns.roles.map((r) => r.relationship)).toEqual(["manager"]);
+    const managerOnly = deriveProfessionalExperience({
+      wi,
+      relationships: [{ ...owner, relationship: "manager", source: "membership", engagementContextId: null }],
+    });
+    const vivatM = managerOnly.organizations.find((o) => o.kind === "earlier_legal_entity")!;
+    expect(vivatM.roles).toEqual([]);
+    expect(vivatM.organizationHours).toBe(15);
+  });
+
+  it("the rows read as one history: Vivat Rex · Labour market ai · Nonstop Group · personal records (the shell entries fall under personal here: its relationship was not passed)", () => {
+    expect(rows().map(([k, n]) => `${k}:${n}`).sort()).toEqual(
+      [
+        "earlier_legal_entity:Vivat Rex",
+        "organization:Labour market ai Sp. z o.o",
+        "organization:UAB Nonstop Group",
+        "personal:null",
+      ].sort(),
+    );
+  });
+
+  it("`renamed` / `same_entity` still mean ONE row with a name history — the two facts never collapse", () => {
+    const renamed = deriveProfessionalExperience({
+      wi,
+      relationships: [{ ...owner, businessPeriods: [{ ...SOLD, legalEntityRelation: "renamed" }] }],
+    });
+    expect(renamed.organizations.some((o) => o.kind === "earlier_legal_entity")).toBe(false);
+    const lm = renamed.organizations.find((o) => o.organizationId === ORG_LM)!;
+    expect(lm.formerNames).toEqual(["Vivat Rex"]);
+    expect(lm.byPeriod).toEqual([
+      { periodLabel: null, hours: 806, records: 2 },
+      { periodLabel: "Vivat Rex", hours: 15, records: 2 },
+    ]);
   });
 });

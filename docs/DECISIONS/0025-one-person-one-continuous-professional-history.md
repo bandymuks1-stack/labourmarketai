@@ -71,6 +71,8 @@ Nonstop Group management were nowhere in that experience.
 
 ## Addendum A (owner correction, 2026-10-17 evening) — Vivat Rex → Labour Market AI continuity
 
+> **Superseded in part by Addendum B below:** the legal reading in this addendum ("earlier name of the same company", relation `renamed`) was corrected by the owner the same night. The evidence tables stay valid; the `renamed` SQL proposal is withdrawn.
+
 The owner states that **Vivat Rex is the earlier name of the same company and Labour Market AI
 is its continuation**. The earlier record (`docs/design/business-history-continuity-v1.md`,
 2026-09-30) stated the opposite legal reading ("the old Vivat Rex legal entity was later sold")
@@ -192,3 +194,66 @@ beyond the one 800 h period record; none are invented.
    Vivat Rex" on their own CV. A SECURITY DEFINER read function limited to the period
    label/relation/dates of organizations the caller has an engagement or linked roster row with
    is a RED migration (needs-human-gate) — proposed, not written here.
+
+## Addendum B (owner, final, 2026-10-17 late) — SEPARATE legal entities, ONE person history
+
+**Supersedes the legal reading in Addendum A.** The owner's final statement: *Vivat Rex was a
+separate company, sold to other owners; Labour Market AI Sp. z o.o. is a NEW company through
+which the owner continues the activity. It is NOT a rename of the same company.* The legal
+relation `renamed` / `same_entity` must not be used between them. The SQL proposal in Addendum A
+with `legal_entity_relation = 'renamed'` is withdrawn.
+
+### Model (code, this PR)
+- **Separate legal entities.** A stated period whose relation is NOT a former name
+  (`sold_and_continued_by_new_entity`, `successor`, `not_asserted`, `other`) is an
+  **earlier legal entity of its own** in the person's experience: its own row
+  (`ExperienceOrganization.kind = "earlier_legal_entity"`), named by `legal_entity_label`,
+  carrying the relation words, the basis of the statement, the dates, and "records administered
+  by <continuing organization>". The continuing organization's row says which earlier entities
+  it continues. A former name (`renamed` / `same_entity`) stays a name history inside the one
+  organization row — a different fact, kept different.
+- **One person history across companies.** The person's hours route to the entity under which
+  the work happened: a record whose source label the period claims ("Vivat Rex PL",
+  "Nonstop-Vivat Rex PL") sits on the Vivat Rex row; the rest stays on Labour Market AI; the
+  journal stays with its engagement; Nonstop Group is its own row. One total, every hour once.
+- **Original provenance preserved.** No record moves: `organization_id`, `session_id`,
+  `source_fact`, `import_row_id`, events and parties are untouched. The entity-at-the-time comes
+  from the record's own source label resolved against the period statement, on read.
+- **Administration ≠ legal belonging.** The row prints both: "Legal entity at the time: Vivat
+  Rex" and "records administered by Labour market ai Sp. z o.o". Vivat Rex's historical workers
+  are never presented as the new company's staff: their roster rows stay historical persons of
+  the administering organization, and their CV groups band by the entity of the time
+  (`cvOrganizationHistory.legalEntityBand`).
+- **Leadership across the three.** The OWNER of the continuing organization is shown as the
+  owner of the earlier entity too — that is what the period statement says — as a DERIVED role,
+  dated by the period, labelled "by the organisation's period statement". A manager appointed to
+  the continuing organization is not projected. Nonstop Group stays the manager-membership row it
+  is. So the owner's history reads: Vivat Rex (owner, period dates, derived) · Labour market ai
+  (owner) · UAB Nonstop Group (manager) · personal records — no hours invented anywhere.
+
+### What needs the owner (data, NOT applied)
+The period row `5751eeef` already says `continuous_business_history` and `not_asserted`, so the
+separate-entity model renders today. To state the relation the owner confirmed and to give the
+period its dates (which places the 2,144 unlabelled records by date), a superseding row:
+
+```sql
+-- NOT APPLIED. Run via Supabase MCP apply_migration only after the owner confirms the dates.
+insert into public.organization_history_periods
+  (organization_id, period_label, legal_entity_label, legal_entity_organization_id,
+   source_labels, period_start, period_end, continuity, legal_entity_relation,
+   basis, basis_reference, statement, supersedes_id, created_by)
+values
+  ('19f47e78-7bd1-4120-9937-603dba769f8a', 'Vivat Rex', 'Vivat Rex', null,
+   array['Vivat Rex PL','Nonstop-Vivat Rex PL'],
+   '<OWNER: period_start>', '<OWNER: period_end>',
+   'continuous_business_history', 'sold_and_continued_by_new_entity',
+   'owner_statement', 'Owner statement 2026-10-17 (decision 0025 addendum B)',
+   'Vivat Rex was a separate company, later sold to other owners; the owner continues the activity through Labour Market AI Sp. z o.o., a new company. Not a rename.',
+   '5751eeef-4b5e-4959-ad82-fd8fb101e8bb', 'dc3284ea-026f-4b1a-8d28-4f043973ed34');
+```
+
+The records' source labels suggest the Vivat Rex period runs to 2024-10-12 ("Vivat Rex PL") with
+a joint "Nonstop-Vivat Rex PL" dataset 2024-10-14..11-16; 2022–2023 workbooks carry no label.
+Only the owner can state the bounds. The RED follow-up from Addendum A (a worker-readable period
+statement, so that Vivat Rex's historical workers see the entity of the time on their own CV once
+they claim their roster row) stands.

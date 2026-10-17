@@ -60,6 +60,8 @@ export type ExperienceBusinessPeriod = {
   readonly to: string | null;
   readonly basis: string;
   readonly legalEntityRelation: string;
+  /** The legal entity as then named (null = the period label stands for it). */
+  readonly legalEntityLabel: string | null;
   /** The source labels (sheet names) that place a record in this period. */
   readonly sourceLabels: readonly string[];
 };
@@ -85,6 +87,16 @@ export function formerNamesOf(periods: readonly ExperienceBusinessPeriod[]): str
 const normLabel = (s: string | null | undefined) => (s ?? "").normalize("NFKC").trim().toLocaleLowerCase();
 
 /** The stated period a record's source label belongs to, or null. */
+export function periodFor(
+  sourceLabel: string | null | undefined,
+  periods: readonly ExperienceBusinessPeriod[],
+): ExperienceBusinessPeriod | null {
+  const key = normLabel(sourceLabel);
+  if (!key) return null;
+  return periods.find((p) => p.sourceLabels.some((l) => normLabel(l) === key)) ?? null;
+}
+
+/** The stated period LABEL a record's source label belongs to, or null. */
 export function periodLabelFor(
   sourceLabel: string | null | undefined,
   periods: readonly ExperienceBusinessPeriod[],
@@ -161,13 +173,35 @@ export type ExperienceHourLine = {
 export type ExperienceRole = Pick<
   ExperienceRelationship,
   "relationship" | "title" | "startedAt" | "endedAt" | "current" | "source" | "engagementContextId"
->;
+> & {
+  /** True when the role is PROJECTED onto an earlier legal entity from the
+   *  owner's role in the continuing organization, by the organization's own
+   *  period statement — said as such, dated by the period. */
+  readonly derived?: boolean;
+};
 
 export type ExperienceOrganization = {
   readonly key: string;
-  /** null = the person's own, organization-less records. */
+  /** `organization` = an organization on the platform; `earlier_legal_entity`
+   *  = a separate legal entity the continuing organization states a period
+   *  for (sold / succeeded / not asserted), with the work done under it and
+   *  the leadership stated for it; `personal` = organization-less records. */
+  readonly kind: "organization" | "earlier_legal_entity" | "personal";
+  /** The organization that holds (administers) the records: for an earlier
+   *  legal entity this is the CONTINUING organization's id — the records
+   *  never move. null = the person's own, organization-less records. */
   readonly organizationId: string | null;
+  /** The name shown for the row: the organization, or the earlier legal
+   *  entity as then named. */
   readonly organizationName: string | null;
+  readonly legalEntityLabel: string | null;
+  readonly legalEntityRelation: string | null;
+  readonly basis: string | null;
+  readonly periodId: string | null;
+  /** Earlier-entity rows: who administers the records today. */
+  readonly administeredBy: { readonly organizationId: string; readonly organizationName: string | null } | null;
+  /** Organization rows: the earlier legal entities it continues. */
+  readonly earlierEntities: readonly { readonly periodId: string; readonly label: string }[];
   readonly roles: readonly ExperienceRole[];
   readonly businessPeriods: readonly ExperienceBusinessPeriod[];
   /** Earlier names of the SAME legal entity (`FORMER_NAME_RELATIONS`). */
@@ -484,30 +518,62 @@ export function deriveProfessionalExperience(input: {
     to = maxDay(to, l.to);
   }
 
-  // ── per organization: hours by source + roles + business periods ─────
+  // ── per organization AND per earlier legal entity ───────────────────
+  // SEPARATE LEGAL ENTITIES, ONE PERSON HISTORY (owner 2026-10-17, final):
+  // a stated period whose legal relation is NOT a former name (sold and
+  // continued by a new entity, successor, not asserted, other) is an EARLIER
+  // LEGAL ENTITY of its own — its own row in the person's history, named by
+  // the entity label, holding the work done under it (the records whose
+  // source label places them in that period) and the leadership stated for
+  // it. The records stay where they are, administered by the continuing
+  // organization; the row says both. A period that IS a former name
+  // (renamed / same_entity) stays inside the continuing organization's row
+  // with the name history.
   const orgAcc = new Map<string, ExperienceOrganization>();
   const orgKey = (id: string | null) => id ?? PERSONAL_KEY;
+  const entityKey = (periodId: string) => `entity:${periodId}`;
+  const earlierEntitiesOf = (id: string | null): ExperienceBusinessPeriod[] =>
+    id ? (periodsByOrg.get(id) ?? []).filter((p) => !FORMER_NAME_RELATIONS.has(p.legalEntityRelation)) : [];
+  const emptyRow = (
+    key: string,
+    kind: ExperienceOrganization["kind"],
+    id: string | null,
+    name: string | null,
+  ): ExperienceOrganization => ({
+    key,
+    kind,
+    organizationId: id,
+    organizationName: name,
+    legalEntityLabel: null,
+    legalEntityRelation: null,
+    basis: null,
+    periodId: null,
+    administeredBy: null,
+    earlierEntities: [],
+    roles: [],
+    businessPeriods: [],
+    formerNames: [],
+    byPeriod: [],
+    journalHours: 0,
+    journalConfirmedHours: 0,
+    organizationHours: 0,
+    notCountedHours: 0,
+    totalHours: 0,
+    entries: 0,
+    records: 0,
+    from: null,
+    to: null,
+  });
   const ensureOrg = (id: string | null, name: string | null): ExperienceOrganization => {
     const key = orgKey(id);
     let o = orgAcc.get(key);
     if (!o) {
+      const periods = id ? (periodsByOrg.get(id) ?? []) : [];
       o = {
-        key,
-        organizationId: id,
-        organizationName: nameOf(id, name),
-        roles: [],
-        businessPeriods: id ? (periodsByOrg.get(id) ?? []) : [],
-        formerNames: id ? formerNamesOf(periodsByOrg.get(id) ?? []) : [],
-        byPeriod: [],
-        journalHours: 0,
-        journalConfirmedHours: 0,
-        organizationHours: 0,
-        notCountedHours: 0,
-        totalHours: 0,
-        entries: 0,
-        records: 0,
-        from: null,
-        to: null,
+        ...emptyRow(key, id ? "organization" : "personal", id, nameOf(id, name)),
+        businessPeriods: periods,
+        formerNames: formerNamesOf(periods),
+        earlierEntities: earlierEntitiesOf(id).map((p) => ({ periodId: p.id, label: p.legalEntityLabel ?? p.label })),
       };
       orgAcc.set(key, o);
     } else if (o.organizationName === null && name) {
@@ -516,26 +582,68 @@ export function deriveProfessionalExperience(input: {
     }
     return o;
   };
+  const ensureEntity = (org: ExperienceOrganization, p: ExperienceBusinessPeriod): ExperienceOrganization => {
+    const key = entityKey(p.id);
+    let e = orgAcc.get(key);
+    if (!e) {
+      e = {
+        ...emptyRow(key, "earlier_legal_entity", org.organizationId, p.legalEntityLabel ?? p.label),
+        legalEntityLabel: p.legalEntityLabel ?? p.label,
+        legalEntityRelation: p.legalEntityRelation,
+        basis: p.basis,
+        periodId: p.id,
+        administeredBy: org.organizationId
+          ? { organizationId: org.organizationId, organizationName: org.organizationName }
+          : null,
+        businessPeriods: [p],
+        from: p.from,
+        to: p.to,
+      };
+      orgAcc.set(key, e);
+    }
+    return e;
+  };
   for (const r of relationships) {
     const o = ensureOrg(r.organizationId, r.organizationName);
-    orgAcc.set(o.key, {
-      ...o,
-      roles: [
-        ...o.roles,
-        {
-          relationship: r.relationship,
-          title: r.title,
-          startedAt: r.startedAt,
-          endedAt: r.endedAt,
-          current: r.current,
-          source: r.source,
-          engagementContextId: r.engagementContextId,
-        },
-      ],
-    });
+    const role: ExperienceRole = {
+      relationship: r.relationship,
+      title: r.title,
+      startedAt: r.startedAt,
+      endedAt: r.endedAt,
+      current: r.current,
+      source: r.source,
+      engagementContextId: r.engagementContextId,
+    };
+    orgAcc.set(o.key, { ...o, roles: [...o.roles, role] });
+    // The OWNER of the continuing organization led the earlier entity too —
+    // that is what the period statement (its basis is named on the row)
+    // says; the role is marked DERIVED and dated by the period, never by the
+    // engagement. A manager appointed to the continuing organization is NOT
+    // projected: the statement says nothing about them.
+    if (r.relationship === "owner") {
+      for (const p of earlierEntitiesOf(r.organizationId)) {
+        const e = ensureEntity(orgAcc.get(o.key)!, p);
+        if (e.roles.some((x) => x.relationship === "owner" && x.derived)) continue;
+        orgAcc.set(e.key, {
+          ...e,
+          roles: [
+            ...e.roles,
+            { ...role, startedAt: p.from, endedAt: p.to, current: false, derived: true, engagementContextId: null },
+          ],
+        });
+      }
+    }
   }
+  const rowFor = (l: ExperienceHourLine): ExperienceOrganization => {
+    const org = ensureOrg(l.organizationId, l.organizationName);
+    if (l.periodLabel && l.source !== "journal") {
+      const p = earlierEntitiesOf(l.organizationId).find((x) => x.label === l.periodLabel);
+      if (p) return ensureEntity(org, p);
+    }
+    return org;
+  };
   for (const l of lines) {
-    const o = ensureOrg(l.organizationId, l.organizationName);
+    const o = rowFor(l);
     const byPeriod =
       l.counted && l.source !== "journal"
         ? (() => {

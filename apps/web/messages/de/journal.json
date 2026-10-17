@@ -918,7 +918,11 @@
       "formerly": "früher {names}",
       "periodBand": "Zeitraum: {label}",
       "byPeriodUnplaced": "ohne angegebenen Zeitraum",
-      "relationTitle": "Rechtliche Beziehung"
+      "relationTitle": "Rechtliche Beziehung",
+      "earlierEntity": "Eigenständige juristische Person",
+      "administeredBy": "Einträge verwaltet von {name}",
+      "continues": "Setzt die Tätigkeit einer früheren juristischen Person fort: {names}",
+      "roleDerived": "laut Zeitraumsangabe der Organisation"
     },
     "confirmedHours": "Von Führungskraft bestätigt",
     "confirmedOf": "{confirmed} von {total} Std. durch einen Eintrag der Führungskraft bestätigt",

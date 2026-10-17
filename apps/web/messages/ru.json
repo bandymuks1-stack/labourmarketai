@@ -19065,7 +19065,8 @@
     "contested": "Оспорено стороной, имеющей на это право",
     "more": "Ещё {count, plural, one {# запись} few {# записи} many {# записей} other {# записи}} не показано",
     "periodBand": "Период: {label}",
-    "formerly": "ранее {names}"
+    "formerly": "ранее {names}",
+    "legalEntityBand": "Юридическое лицо на тот момент: {label} · записи администрирует {org}"
   },
   "companyPerson": {
     "eyebrow": "Историческая карточка человека",

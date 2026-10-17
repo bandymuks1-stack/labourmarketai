@@ -918,7 +918,11 @@
       "formerly": "voorheen {names}",
       "periodBand": "Periode: {label}",
       "byPeriodUnplaced": "zonder opgegeven periode",
-      "relationTitle": "Juridische relatie"
+      "relationTitle": "Juridische relatie",
+      "earlierEntity": "Afzonderlijke rechtspersoon",
+      "administeredBy": "Registraties beheerd door {name}",
+      "continues": "Zet de activiteit van een eerdere rechtspersoon voort: {names}",
+      "roleDerived": "volgens de periodeverklaring van de organisatie"
     },
     "confirmedHours": "Door leidinggevende bevestigd",
     "confirmedOf": "{confirmed} van {total} u bevestigd door een registratie van de leidinggevende",

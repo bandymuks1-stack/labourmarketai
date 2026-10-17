@@ -19065,7 +19065,8 @@
     "contested": "Von einer berechtigten Stelle bestritten",
     "more": "{count, plural, one {# weiterer Eintrag wird} other {# weitere Einträge werden}} nicht angezeigt",
     "periodBand": "Zeitraum: {label}",
-    "formerly": "früher {names}"
+    "formerly": "früher {names}",
+    "legalEntityBand": "Damalige juristische Person: {label} · Einträge verwaltet von {org}"
   },
   "companyPerson": {
     "eyebrow": "Historische Personenkarte",

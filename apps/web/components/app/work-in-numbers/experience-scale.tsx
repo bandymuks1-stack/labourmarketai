@@ -7,6 +7,7 @@ import {
 } from "@/lib/journal/organization-all-time";
 import {
   deriveProfessionalExperience,
+  FORMER_NAME_RELATIONS,
   type ExperienceHourLine,
   type ExperienceRelationship,
 } from "@/lib/journal/professional-experience";
@@ -57,6 +58,7 @@ export async function ExperienceScale({
   // The legal-entity relation words of a stated business period are the
   // business history's own vocabulary — one statement, one wording.
   const tRelation = await getTranslations("companyWorkHistory.business.relation");
+  const tBasis = await getTranslations("companyWorkHistory.business.basis");
   const org = organizationAllTime(wi);
   const orgHours = organizationHoursBeyondJournal(wi);
   const span = org ? monthSpanOf(org.from, org.to) : null;
@@ -177,21 +179,35 @@ export async function ExperienceScale({
                         ? (spanWords(r.startedAt, r.current ? null : r.endedAt) ?? "") +
                           (r.current && r.startedAt ? ` – ${t("experience.roleNow")}` : "")
                         : t("experience.roleDatesNotRecorded");
-                    return `${relName(r.relationship)}${r.title ? ` · ${r.title}` : ""} · ${when}`;
+                    return `${relName(r.relationship)}${r.title ? ` · ${r.title}` : ""} · ${when}${
+                      r.derived ? ` · ${t("experience.roleDerived")}` : ""
+                    }`;
                   });
                   const rowSpan = spanWords(o.from, o.to);
+                  const earlierEntity = o.kind === "earlier_legal_entity";
                   return (
                     <li
                       key={o.key}
                       className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0"
                       data-testid="wi-experience-org-row"
+                      data-kind={o.kind}
                       data-organization={o.organizationId ?? ""}
+                      data-period={o.periodId ?? ""}
                       data-hours={o.totalHours}
                       data-former-names={o.formerNames.join(" | ")}
                     >
                       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                         <span className="font-medium text-text-primary">
                           {o.organizationName ?? (o.organizationId ? t("experience.orgUnnamed") : t("experience.personalRecords"))}
+                          {/* SEPARATE LEGAL ENTITY (owner 2026-10-17, final): an
+                              earlier entity the continuing organization states a
+                              period for is its own row — a company of its own,
+                              sold / succeeded / not asserted — never a former name. */}
+                          {earlierEntity ? (
+                            <span className="ml-1 font-normal text-text-muted" data-testid="wi-experience-earlier-entity">
+                              · {t("experience.earlierEntity")}
+                            </span>
+                          ) : null}
                           {/* ONE organization identity with a name history: an
                               earlier period the owner states as the SAME legal
                               entity is a former name, said beside the current one. */}
@@ -214,22 +230,41 @@ export async function ExperienceScale({
                           ))}
                         </ul>
                       ) : null}
-                      {o.businessPeriods.map((p) => (
-                        <p
-                          key={p.id}
-                          className="text-meta text-text-secondary"
-                          data-testid="wi-experience-business-period"
-                          data-relation={p.legalEntityRelation}
-                        >
-                          {t("experience.businessPeriod", { label: p.label })} ·{" "}
-                          {spanWords(p.from, p.to) ?? t("experience.datesNotDocumented")} ·{" "}
-                          {tRelation(p.legalEntityRelation as never)}
+                      {earlierEntity && o.legalEntityRelation ? (
+                        <p className="text-meta text-text-secondary" data-testid="wi-experience-entity-relation" data-relation={o.legalEntityRelation}>
+                          {tRelation(o.legalEntityRelation as never)}
+                          {o.basis ? ` · ${tBasis(o.basis as never)}` : ""}
+                          {o.administeredBy?.organizationName
+                            ? ` · ${t("experience.administeredBy", { name: o.administeredBy.organizationName })}`
+                            : ""}
+                          {spanWords(o.from, o.to) ? ` · ${spanWords(o.from, o.to)}` : ` · ${t("experience.datesNotDocumented")}`}
                         </p>
-                      ))}
+                      ) : null}
+                      {!earlierEntity && o.earlierEntities.length > 0 ? (
+                        <p className="text-meta text-text-secondary" data-testid="wi-experience-continues">
+                          {t("experience.continues", { names: o.earlierEntities.map((e) => e.label).join(", ") })}
+                        </p>
+                      ) : null}
+                      {!earlierEntity
+                        ? o.businessPeriods
+                            .filter((p) => FORMER_NAME_RELATIONS.has(p.legalEntityRelation))
+                            .map((p) => (
+                              <p
+                                key={p.id}
+                                className="text-meta text-text-secondary"
+                                data-testid="wi-experience-business-period"
+                                data-relation={p.legalEntityRelation}
+                              >
+                                {t("experience.businessPeriod", { label: p.label })} ·{" "}
+                                {spanWords(p.from, p.to) ?? t("experience.datesNotDocumented")} ·{" "}
+                                {tRelation(p.legalEntityRelation as never)}
+                              </p>
+                            ))
+                        : null}
                       {/* Organization hours per stated period — the record's own
                           source label resolved against the statements; "no stated
                           period" is said, never folded into a period by guess. */}
-                      {o.byPeriod.some((b) => b.periodLabel !== null) ? (
+                      {!earlierEntity && o.byPeriod.some((b) => b.periodLabel !== null) ? (
                         <ul className="flex flex-col gap-0.5" data-testid="wi-experience-by-period">
                           {o.byPeriod.map((b) => (
                             <li key={b.periodLabel ?? ""} className="text-meta text-text-secondary" data-period={b.periodLabel ?? ""}>

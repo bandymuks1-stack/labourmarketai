@@ -19065,7 +19065,8 @@
     "contested": "Ginčijama asmens, turinčio tam teisę",
     "more": "Dar {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}} nerodoma",
     "periodBand": "Laikotarpis: {label}",
-    "formerly": "anksčiau {names}"
+    "formerly": "anksčiau {names}",
+    "legalEntityBand": "Tuometinis juridinis asmuo: {label} · įrašus administruoja {org}"
   },
   "companyPerson": {
     "eyebrow": "Istorinė asmens kortelė",

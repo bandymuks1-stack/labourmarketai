@@ -918,7 +918,11 @@
       "formerly": "formerly {names}",
       "periodBand": "Period: {label}",
       "byPeriodUnplaced": "no stated period",
-      "relationTitle": "Legal relationship"
+      "relationTitle": "Legal relationship",
+      "earlierEntity": "Separate legal entity",
+      "administeredBy": "Records administered by {name}",
+      "continues": "Continues the activity of an earlier legal entity: {names}",
+      "roleDerived": "by the organisation’s period statement"
     },
     "confirmedHours": "Manager-confirmed",
     "confirmedOf": "{confirmed} of {total} h confirmed by a manager's record",

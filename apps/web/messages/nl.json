@@ -19065,7 +19065,8 @@
     "contested": "Betwist door een daartoe bevoegde partij",
     "more": "Nog {count, plural, one {# vermelding} other {# vermeldingen}} niet getoond",
     "periodBand": "Periode: {label}",
-    "formerly": "voorheen {names}"
+    "formerly": "voorheen {names}",
+    "legalEntityBand": "Rechtspersoon destijds: {label} · registraties beheerd door {org}"
   },
   "companyPerson": {
     "eyebrow": "Historische persoonskaart",

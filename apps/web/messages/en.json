@@ -19065,7 +19065,8 @@
     "contested": "Contested by someone with standing",
     "more": "{count, plural, one {# more entry} other {# more entries}} not shown",
     "periodBand": "Period: {label}",
-    "formerly": "formerly {names}"
+    "formerly": "formerly {names}",
+    "legalEntityBand": "Legal entity at the time: {label} · records administered by {org}"
   },
   "companyPerson": {
     "eyebrow": "Historical person card",

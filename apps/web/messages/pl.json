@@ -19065,7 +19065,8 @@
     "contested": "Zakwestionowane przez uprawnioną stronę",
     "more": "Nie pokazano jeszcze {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}}",
     "periodBand": "Okres: {label}",
-    "formerly": "dawniej {names}"
+    "formerly": "dawniej {names}",
+    "legalEntityBand": "Ówczesny podmiot prawny: {label} · zapisy administruje {org}"
   },
   "companyPerson": {
     "eyebrow": "Historyczna karta osoby",
