@@ -82,8 +82,8 @@ Preconditions (all must hold; none holds today):
 | # | Precondition | How to verify without exposing anything | State 2026-10-17 |
 |---|---|---|---|
 | P1 | Owner lifts the merge hold (N-11 in `RELEASE_PREPARATION_2026-10-16.md`) | the owner's word | hold stands |
-| P2 | A host runs the web app and `GET /api/health` answers with a current `build` | one public GET | **none** — `https://labourmarket.ai` answers HTTP 402 on `/`, `/api/health` and both `.well-known` routes (Vercel account blocked since 2026-10-15); the Hostinger test address serves a placeholder only, waiting on SSH being enabled in hPanel |
-| P3 | `CONVERSATION_TOKEN_SECRET` present on that host (name only) | `node -e 'console.log(process.env.CONVERSATION_TOKEN_SECRET ? "present" : "MISSING")'` in the service's environment | **absent on every host** (hosting session, 2026-10-17) |
+| P2 | A host runs the web app and `GET /api/health` answers with a current `build` | one public GET | **none public.** `https://labourmarket.ai` answers HTTP 402 everywhere (Vercel blocked since 2026-10-15). An ISOLATED staging exists (hosting session, 2026-10-17): a container on the VPS bound to loopback only, build of PR #2452, health ok with `build: null` (`GIT_SHA` unset), production Supabase read-only (no service role) — usable for anonymous conformance reads, never for signed-in journeys. The owner's hosting cutover decides the public origin |
+| P3 | `CONVERSATION_TOKEN_SECRET` present on that host (name only) | `node -e 'console.log(process.env.CONVERSATION_TOKEN_SECRET ? "present" : "MISSING")'` in the service's environment | present on the isolated staging (a test value); **absent on production**. After #2448 + #2451 it is required wherever a confirmation is signed |
 | P4 | #2444 closed in favour of #2448 (or the reverse — one of them) | PR state | both open |
 
 Order, one squash merge at a time, `quality` + `migration-safety` green on
@@ -189,6 +189,7 @@ A1–A6, I1–I6). What this pass adds and what it deliberately does not:
 | Store listings | drafted in the submission pack §2 (Play) and §3 (App Store) | owner approves wording, icon, rating; real signed-in screenshots can only be taken after P2 + owner action 2 |
 | Versions | `0.1.0`, `versionCode 1`, `buildNumber 1` | first upload uses these; the owner bumps per upload (`eas.json` production profile has `autoIncrement: true`) |
 | Android closed-test rule | 12 testers × 14 days before production for a new personal Play account | plan the internal-testing track first; it has no such rule |
+| **Voice Work Journal** (owner direction 2026-10-17: part of the final feature audit) | **not in the beta.** The voice door exists on the web only (`/dashboard/journal/voice`; `docs/VOICE_DOOR_ADAPTER_V1.md`, owner decision U-26) and is OFF in production until the self-hosted STT service is deployed (`VOICE_TRANSCRIBE_URL` + `VOICE_TRANSCRIBE_TOKEN`; bundle and runbook in PR #2198, host not deployed). The phone has no microphone permission, no capture screen and no STT client (the APK requests INTERNET + VIBRATE only; `app.json` blocks nothing voice-related because nothing asks). Adding it later is the same adapter contract: mic → STT → editable text → the SAME `journal.create_draft` → `journal.confirm`; it would add `RECORD_AUDIO` / `NSMicrophoneUsageDescription` to the store declarations and a Data safety row (audio, processed, not stored) | owner: deploy the STT host first (hosting lane), then a mobile slice of its own; never before the first beta |
 
 ## 6. Owner actions required to distribute the first Android and iOS beta builds
 
