@@ -22,6 +22,7 @@ deploys.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API → Project API keys → `anon` `public` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API → Project API keys → `service_role` (secret — never commit, never expose to the browser) |
 | `SUPABASE_DB_PASSWORD` | Supabase Dashboard → Settings → Database → Database password |
+| `CONVERSATION_TOKEN_SECRET` | **Mandatory.** A dedicated random secret (≥16 chars, e.g. `openssl rand -hex 32`) that signs chat and capability confirmation tokens. The service-role key is never reused for this (owner direction 2026-10-16). Rotating it invalidates pending confirmations only. |
 | `NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS` | `true` for dev/preview, `false` for production |
 
 Copy `.env.example` → `apps/web/.env.local`, fill the values, and add the same

@@ -45,11 +45,13 @@ const schema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   SUPABASE_DB_PASSWORD: z.string().min(1).optional(),
   /**
-   * Dedicated HMAC key for conversation confirmation tokens (audit L-02).
-   * Optional: when unset, lib/conversation/dispatch.ts falls back to the
-   * service-role key and, failing that, REFUSES to sign — it no longer falls
-   * back to a hardcoded literal. Set this to stop reusing the service-role key
-   * for a second purpose.
+   * Dedicated HMAC key for conversation AND capability confirmation tokens
+   * (audit L-02; owner direction 2026-10-16). REQUIRED for every confirmable
+   * write to work: when unset, lib/conversation/dispatch.ts and
+   * lib/capabilities/confirmable.ts REFUSE to sign. The service-role key is
+   * never reused for this purpose. Optional in the schema only so a build
+   * without secrets still typechecks; the deployment contract
+   * (docs/DEPLOYMENT.md) lists it as mandatory.
    */
   CONVERSATION_TOKEN_SECRET: z.string().min(16).optional(),
   /**

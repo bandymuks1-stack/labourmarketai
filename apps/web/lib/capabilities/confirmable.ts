@@ -26,11 +26,13 @@ import { spendConfirmationForRequest } from "@/lib/security/confirmation-spend";
  * string — a token minted for one surface can never be replayed on the other.
  */
 export function capabilityTokenSecret(): string {
-  const material = env.CONVERSATION_TOKEN_SECRET || env.SUPABASE_SERVICE_ROLE_KEY;
+  // ONE purpose, ONE key (owner direction 2026-10-16): never the service-role
+  // key. See lib/conversation/dispatch.ts `tokenSecret` for the reasoning.
+  const material = env.CONVERSATION_TOKEN_SECRET;
   if (!material) {
     throw new Error(
-      "capability confirmation tokens cannot be signed: set CONVERSATION_TOKEN_SECRET " +
-        "(or SUPABASE_SERVICE_ROLE_KEY). Refusing to sign with a hardcoded fallback.",
+      "capability confirmation tokens cannot be signed: CONVERSATION_TOKEN_SECRET is not set " +
+        "(a dedicated random secret of at least 16 characters; the service-role key is never reused for this).",
     );
   }
   return createHash("sha256").update(`capability-confirmation:v1:${material}`).digest("hex");
