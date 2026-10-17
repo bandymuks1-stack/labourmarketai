@@ -1,0 +1,154 @@
+name: iOS signed-in journey
+# SIGNED-IN iOS PROOF — workflow_dispatch ONLY. The sibling of android.yml's
+# `signed-in` job (F-3). ios.yml deliberately builds the simulator app with
+# placeholder bad-network config so its journey proves honest failure without
+# any backend; this workflow builds the SAME app with the production PUBLIC
+# config (anon key from vars.PROD_QA_ANON_KEY, URL derived from its `ref`
+# claim, API base labourmarket.ai or the `origin` input) and walks the
+# signed-in journey as the owner's ONE synthetic review identity, whose
+# password lives in the `production-qa` GitHub environment. No screenshot,
+# simulator log or Maestro debug output is uploaded: the repository is public.
+# Claim token when green: IOS_SIGNED_IN_JOURNEY_PROVEN.
+#
+# Kept as its own file so a mistake here can never turn ios.yml (the every-PR
+# proof) red.
+
+on:
+  workflow_dispatch:
+    inputs:
+      origin:
+        description: "API origin the app talks to (production, or an isolated staging URL the hosting agent names)"
+        required: false
+        default: "https://labourmarket.ai"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-signed-in-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed-in:
+    name: Simulator build (production public config) + signed-in journey
+    runs-on: macos-26
+    environment: production-qa
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter=mobile... --filter=@labourmarket/client-core...
+
+      - name: Refuse without the review identity or the public anon key
+        env:
+          ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
+          MOBILE_QA_EMAIL: ${{ secrets.MOBILE_QA_EMAIL }}
+          MOBILE_QA_PASSWORD: ${{ secrets.MOBILE_QA_PASSWORD }}
+        run: |
+          if [ -z "$MOBILE_QA_EMAIL" ] || [ -z "$MOBILE_QA_PASSWORD" ]; then
+            echo "::error::MOBILE_QA_EMAIL / MOBILE_QA_PASSWORD are not set in the production-qa environment (owner gate O1)"; exit 1
+          fi
+          if [ -z "$ANON_KEY" ]; then
+            echo "::error::vars.PROD_QA_ANON_KEY is not set — the app cannot sign anyone in"; exit 1
+          fi
+          REF=$(node -e 'const p=JSON.parse(Buffer.from(process.env.ANON_KEY.split(".")[1],"base64url").toString());if(p.role!=="anon"){console.error("refusing: key role is "+p.role);process.exit(1)}process.stdout.write(p.ref)')
+          echo "EXPO_PUBLIC_SUPABASE_URL=https://${REF}.supabase.co" >> "$GITHUB_ENV"
+          echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY}" >> "$GITHUB_ENV"
+          echo "EXPO_PUBLIC_API_BASE_URL=${{ inputs.origin }}" >> "$GITHUB_ENV"
+
+      - name: Select newest Xcode
+        run: |
+          NEWEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          sudo xcode-select -s "$NEWEST"
+          xcodebuild -version
+
+      - name: Expo prebuild (iOS)
+        working-directory: apps/mobile
+        run: pnpm exec expo prebuild --platform ios --no-install
+
+      - name: CocoaPods install
+        working-directory: apps/mobile/ios
+        run: pod install
+
+      - name: Discover workspace and scheme
+        id: xc
+        working-directory: apps/mobile/ios
+        run: |
+          WS=$(ls -d *.xcworkspace | head -1)
+          SCHEME=$(xcodebuild -workspace "$WS" -list -json | python3 -c 'import json,sys; s=json.load(sys.stdin)["workspace"]["schemes"]; print([x for x in s if x!="Pods"][0])')
+          echo "workspace=$WS" >> "$GITHUB_OUTPUT"
+          echo "scheme=$SCHEME" >> "$GITHUB_OUTPUT"
+
+      - name: Xcode build (simulator, Release, ad-hoc signed, production public config embedded)
+        working-directory: apps/mobile/ios
+        run: |
+          set +e
+          xcodebuild \
+            -workspace "${{ steps.xc.outputs.workspace }}" \
+            -scheme "${{ steps.xc.outputs.scheme }}" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_REQUIRED=NO \
+            ONLY_ACTIVE_ARCH=YES \
+            build > xcodebuild.log 2>&1
+          STATUS=$?
+          if [ $STATUS -ne 0 ]; then
+            grep -n -B 3 -A 20 " error: " xcodebuild.log | head -300
+            tail -60 xcodebuild.log
+          fi
+          exit $STATUS
+
+      - name: Boot simulator and install
+        working-directory: apps/mobile/ios
+        run: |
+          APP=$(find build/Build/Products -maxdepth 2 -name "*.app" | head -1)
+          test -n "$APP" || { echo "no .app produced"; exit 1; }
+          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; print(next(dev["udid"] for devs in d.values() for dev in devs if dev["isAvailable"]))')
+          echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" "$APP"
+
+      - name: Install Maestro CLI
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+          "$HOME/.maestro/bin/maestro" --version
+
+      - name: Signed-in journey (sign-in → Today read → journal write → profile read → sign-out)
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
+          MAESTRO_CLI_NO_ANALYTICS: "1"
+          MOBILE_QA_EMAIL: ${{ secrets.MOBILE_QA_EMAIL }}
+          MOBILE_QA_PASSWORD: ${{ secrets.MOBILE_QA_PASSWORD }}
+        run: |
+          # No --debug-output: nothing from a signed-in session is written to disk.
+          journey() {
+            maestro test \
+              -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
+              -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
+              apps/mobile/.maestro/signed-in-journey.yaml
+          }
+          if journey || { echo "::warning::attempt 1 failed - retrying once (driver)"; sleep 15; journey; }; then
+            echo "IOS_SIGNED_IN_JOURNEY_PROVEN: sign-in, Today figures read, journal entry drafted and confirmed, profile skills read, sign-out"
+          else
+            echo "::error::iOS signed-in journey failed twice"; exit 1
+          fi
+
+      - name: Wipe the session from the simulator
+        if: always()
+        run: xcrun simctl uninstall "$SIM_UDID" ai.labourmarket.app || true

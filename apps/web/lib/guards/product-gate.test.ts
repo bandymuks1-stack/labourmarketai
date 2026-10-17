@@ -992,8 +992,14 @@ describe("organization role orchestration — the chain may never break", () => 
 
   it("is HONEST that today the platform is a single-type directory", () => {
     expect(ORCHESTRATION_ASSESSMENT.verdict).toBe("single_type_directory");
-    expect(ORCHESTRATION_ASSESSMENT.rolesAreMultiValued).toBe(false);
-    expect(ORCHESTRATION_ASSESSMENT.addingRoleNeedsMigration).toBe(true);
+    // Corrected 2026-10-16 (N-12): `organization_roles` is a live multi-valued
+    // registry in production (roles are data), but the seven legacy gates still
+    // decide by `organization_type` (ORG-2 open) — so the verdict stands while
+    // the two role answers flipped. The assessment records both.
+    expect(ORCHESTRATION_ASSESSMENT.rolesAreMultiValued).toBe(true);
+    expect(ORCHESTRATION_ASSESSMENT.rolesAreRegistered).toBe(true);
+    expect(ORCHESTRATION_ASSESSMENT.addingRoleNeedsMigration).toBe(false);
+    expect(ORCHESTRATION_ASSESSMENT.evidence).toMatch(/ORG-2 open/);
     expect(ORCHESTRATION_ASSESSMENT.employmentModelExists).toBe(false);
     expect(ORCHESTRATION_ASSESSMENT.architectureDependsOnEntityName).toBe(false);
     expect(lock()).toMatch(/single-type organization directory/i);

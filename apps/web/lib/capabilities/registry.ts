@@ -47,6 +47,7 @@ import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
 import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES } from "./conversation-action-bridge";
 import { WORKSPACE_READ_CAPABILITIES } from "./workspace-read-capabilities";
 import { DOMAIN_ACTION_CAPABILITIES } from "./domain-action-capabilities";
+import { PUBLIC_JOBS_CAPABILITIES } from "./public-jobs-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -1797,6 +1798,10 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // organization legal data, marketplace, commercial, bookings, notifications,
   // leave, hours review and reports. See domain-action-capabilities.ts.
   ...DOMAIN_ACTION_CAPABILITIES,
+  // The PUBLIC vacancy board for a bearer client (the phone's Jobs screen,
+  // 2026-10-16): the same read the website's /jobs page performs, in the same
+  // anonymous projection. See public-jobs-capabilities.ts.
+  ...PUBLIC_JOBS_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {
