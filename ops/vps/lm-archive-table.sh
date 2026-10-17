@@ -26,17 +26,21 @@ sed -n 's/^SUPABASE_SERVICE_ROLE_KEY=\(.*\)$/apikey: \1/p' "$ENVF" > "$T/h1"
 sed -n 's/^SUPABASE_SERVICE_ROLE_KEY=\(.*\)$/Authorization: Bearer \1/p' "$ENVF" > "$T/h2"
 [ -s "$T/h1" ] || { echo "STOP: no service role key in env"; exit 1; }
 STAMP=$(date -u +%Y%m%dT%H%M%SZ); OUT="$BK/archive-$NAME-$STAMP.jsonl.gz.age"
-PAGE=1000; from=0; total=0
+PAGE=1000; total=0; last=""
 : > "$T/rows.jsonl"
+# Keyset pagination on the primary key (id > last, order id asc): a deep OFFSET on a 600 MB table hit the
+# statement timeout (PostgREST 500 at offset 7000 on 2026-10-17); a keyed page is an index seek.
 while :; do
-  to=$((from+PAGE-1))
-  code=$(curl -s -o "$T/page.json" -w '%{http_code}' -H @"$T/h1" -H @"$T/h2" -H "Range: $from-$to" -H "Range-Unit: items" -H "Prefer: count=none" \
-    "$URL/rest/v1/$TABLE?select=*&order=id.asc&$FILTER")
-  case "$code" in 200|206) ;; *) echo "STOP: PostgREST answered $code at range $from-$to"; exit 1;; esac
-  n=$(python3 -c 'import json,sys; rows=json.load(open(sys.argv[1])); [print(json.dumps(r,ensure_ascii=False,separators=(",",":"))) for r in rows]; print(len(rows),file=sys.stderr)' "$T/page.json" 2>"$T/n" >> "$T/rows.jsonl")
-  got=$(cat "$T/n"); total=$((total+got))
+  if [ -n "$last" ]; then key="&id=gt.$last"; else key=""; fi
+  tries=0
+  while :; do
+    code=$(curl -s -o "$T/page.json" -w '%{http_code}' -H @"$T/h1" -H @"$T/h2" -H "Prefer: count=none"       "$URL/rest/v1/$TABLE?select=*&order=id.asc&limit=$PAGE$key&$FILTER")
+    case "$code" in 200|206) break;; 5*) tries=$((tries+1)); [ "$tries" -ge 5 ] && { echo "STOP: PostgREST answered $code five times after id $last"; exit 1; }; sleep $((tries*5));; *) echo "STOP: PostgREST answered $code after id $last"; exit 1;; esac
+  done
+  python3 -c 'import json,sys; rows=json.load(open(sys.argv[1])); [print(json.dumps(r,ensure_ascii=False,separators=(",",":"))) for r in rows]; print(len(rows), (rows[-1]["id"] if rows else ""), file=sys.stderr)' "$T/page.json" 2>"$T/n" >> "$T/rows.jsonl"
+  got=$(cut -d' ' -f1 "$T/n"); last=$(cut -d' ' -f2 "$T/n"); total=$((total+got))
+  echo "page: got=$got total=$total" >&2
   [ "$got" -lt "$PAGE" ] && break
-  from=$((from+PAGE))
 done
 gzip -9 -c "$T/rows.jsonl" > "$T/rows.jsonl.gz"
 age -R "$PUB" -o "$OUT" "$T/rows.jsonl.gz"; chmod 600 "$OUT"
