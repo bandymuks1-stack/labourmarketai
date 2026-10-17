@@ -123,3 +123,18 @@ supabase/.temp/
 /.impeccable/live/
 /.impeccable/critique/
 .standalone-dist/
+
+# Mobile signing and store-submission material — never in the repository.
+# The upload key, the Play service-account JSON, the App Store Connect API
+# key and provisioning profiles live in EAS credentials or on the owner's
+# machine (docs/mobile/SIGNING_AND_SUBMISSION_RUNBOOK_2026-10-15.md A8, I8).
+*.jks
+*.keystore
+*.p8
+*.p12
+*.mobileprovision
+*.cer
+play-service-account*.json
+google-play-*.json
+/apps/mobile/credentials/
+/apps/mobile/credentials.json
