@@ -91,8 +91,8 @@ async function timed<T>(label: string, fn: () => Promise<T>): Promise<{ value: T
   return { value, ms };
 }
 
-async function getJson(url: string, headers: Record<string, string> = {}) {
-  const res = await fetch(url, { headers: { accept: "application/json", ...headers }, redirect: "manual" });
+async function getJson(url: string, headers: Record<string, string> = {}, timeoutMs: number = LIMIT_MS.discovery) {
+  const res = await fetch(url, { headers: { accept: "application/json", ...headers }, redirect: "manual", signal: AbortSignal.timeout(timeoutMs) });
   const text = await res.text();
   let json: Json | null = null;
   try {
@@ -117,6 +117,36 @@ async function postForm(url: string, form: Record<string, string>) {
     json = null;
   }
   return { status: res.status, json, text };
+}
+
+/** The only parts of an OAuth error body a report may show: never a token, never a secret. */
+function oauthErrorOf(json: Json | null, text: string): string {
+  if (json && (json.error || json.error_description)) return JSON.stringify({ error: json.error ?? null, error_description: json.error_description ?? null });
+  return text.length > 0 ? `${text.length} bytes, no error field` : "empty body";
+}
+
+/**
+ * RFC 8414 §3 discovery for an issuer that may carry a path: the path-insertion
+ * form first, then the root form, then OpenID Connect Discovery — the MCP
+ * authorization spec (2026-07-28) requires clients to support both families,
+ * and the hosting session's isolated staging served none of them at the root.
+ */
+async function discoverAuthorizationServer(issuer: string): Promise<{ url: string; json: Json; ms: number } | { url: null; tried: string[] }> {
+  const u = new URL(issuer);
+  const path = u.pathname.replace(/\/$/, "");
+  const candidates = [
+    `${u.origin}/.well-known/oauth-authorization-server${path}`,
+    `${u.origin}/.well-known/oauth-authorization-server`,
+    `${issuer.replace(/\/$/, "")}/.well-known/openid-configuration`,
+    `${u.origin}/.well-known/openid-configuration${path}`,
+  ];
+  for (const url of candidates) {
+    const t0 = Date.now();
+    const r = await getJson(url).catch(() => null);
+    const ms = Date.now() - t0;
+    if (r && r.status === 200 && r.json && typeof r.json.issuer === "string") return { url, json: r.json, ms };
+  }
+  return { url: null, tried: candidates };
 }
 
 let rpcId = 0;
@@ -187,9 +217,12 @@ test.beforeAll(async () => {
       return;
     }
     const issuer = servers[0].replace(/\/$/, "");
-    const u = new URL(issuer);
-    const m = await getJson(`${u.origin}/.well-known/oauth-authorization-server${u.pathname}`);
-    asMeta = m.json ?? {};
+    const found = await discoverAuthorizationServer(issuer);
+    if (found.url === null) {
+      discoveryError = `no authorization server metadata at any RFC 8414 / OIDC location for ${issuer} (tried ${found.tried.join(", ")})`;
+      return;
+    }
+    asMeta = found.json;
     hasDcr = typeof asMeta.registration_endpoint === "string";
   } catch (e) {
     discoveryError = e instanceof Error ? e.message : String(e);
@@ -199,7 +232,9 @@ const NO_DCR = "authorization server has no registration_endpoint (DCR off — l
 
 test("O-1. discovery: 401 pointer → protected resource metadata → authorization server metadata", async () => {
   expect(discoveryError, "discovery reached the origin").toBeNull();
-  const unauth = await rpc(null, "initialize", { protocolVersion: "2026-07-28", capabilities: {}, clientInfo: { name: "conformance", version: "0" } });
+  const c = await timed("challenge", () => rpc(null, "initialize", { protocolVersion: "2026-07-28", capabilities: {}, clientInfo: { name: "conformance", version: "0" } }));
+  expect(c.ms, "the unauthenticated challenge answers within the discovery limit").toBeLessThan(LIMIT_MS.discovery);
+  const unauth = c.value;
   expect(unauth.status, "an unauthenticated call must be 401 (Claude starts sign-in only on a 401)").toBe(401);
   const challenge = unauth.headers.get("www-authenticate") ?? "";
   expect(challenge).toMatch(/^Bearer /);
@@ -210,6 +245,7 @@ test("O-1. discovery: 401 pointer → protected resource metadata → authorizat
 
   const d = await timed("prm", () => getJson(pointer!));
   expect(d.value.status).toBe(200);
+  expect(d.ms, "the protected resource metadata answers within the discovery limit").toBeLessThan(LIMIT_MS.discovery);
   prm = d.value.json!;
   expect(prm.resource, "RFC 9728 `resource` must equal the MCP URL the person enters, path included (PR #2450)").toBe(MCP_URL);
   const servers = prm.authorization_servers as string[];
@@ -221,15 +257,16 @@ test("O-1. discovery: 401 pointer → protected resource metadata → authorizat
   expect(suffixed.status, "path-suffixed PRM location is served (PR #2450)").toBe(200);
   expect(suffixed.json).toEqual(prm);
 
-  // Authorization server metadata: Supabase serves RFC 8414 at
-  // /.well-known/oauth-authorization-server/<issuer path>.
+  // Authorization server metadata, discovered per RFC 8414 from the issuer the
+  // PRM names (path-insertion form, root form, then OpenID Connect Discovery).
   const issuer = servers[0].replace(/\/$/, "");
-  const u = new URL(issuer);
-  const metaUrl = `${u.origin}/.well-known/oauth-authorization-server${u.pathname}`;
-  const m = await timed("as-metadata", () => getJson(metaUrl));
-  expect(m.value.status, `AS metadata at ${metaUrl}`).toBe(200);
-  expect(m.ms).toBeLessThan(LIMIT_MS.discovery);
-  asMeta = m.value.json!;
+  const found = await discoverAuthorizationServer(issuer);
+  expect(found.url, `AS metadata for ${issuer} (RFC 8414 or OIDC discovery)`).not.toBeNull();
+  if (found.url === null) return;
+  note("latency", `as-metadata: ${found.ms} ms`);
+  note("as-metadata-url", found.url);
+  expect(found.ms, "the authorization server metadata answers within the discovery limit").toBeLessThan(LIMIT_MS.discovery);
+  asMeta = found.json;
   hasDcr = typeof asMeta.registration_endpoint === "string";
   expect(String(asMeta.issuer).replace(/\/$/, ""), "issuer equals the advertised authorization server").toBe(issuer);
   expect(asMeta.code_challenge_methods_supported as string[], "S256 must be advertised").toContain("S256");
@@ -263,11 +300,14 @@ test("O-2. dynamic client registration as a public native client with a loopback
     });
     return { status: res.status, json: (await res.json().catch(() => null)) as Json | null };
   });
-  expect([200, 201], `DCR answered ${r.value.status}: ${JSON.stringify(r.value.json)}`).toContain(r.value.status);
+  expect([200, 201], `DCR answered ${r.value.status}: ${oauthErrorOf(r.value.json, "")}`).toContain(r.value.status);
   expect(r.ms).toBeLessThan(LIMIT_MS.registration);
   clientId = String(r.value.json?.client_id ?? "");
   expect(clientId).toBeTruthy();
-  expect(r.value.json?.client_secret, "a public client receives no secret").toBeUndefined();
+  // Redacted on purpose: a failure here must never print a secret into the
+  // Playwright report, which the walk uploads from a public repository.
+  const secretIssued = r.value.json !== null && "client_secret" in r.value.json;
+  expect(secretIssued, "a public client receives no secret (presence only, value never shown)").toBe(false);
   expect(r.value.json?.redirect_uris).toEqual([REDIRECT_URI]);
 });
 
@@ -295,25 +335,37 @@ test("O-3. authorization: PKCE S256 + resource; the signed-in person approves on
   const page = await ctx.newPage();
   // The loopback callback is never served: answer it ourselves and read the URL.
   await page.route("http://127.0.0.1:4455/**", (route) => route.fulfill({ status: 200, contentType: "text/plain", body: "callback received" }));
-  // LOCAL STACK ONLY: Supabase sends the consent redirect to its configured
-  // `site_url` (config.toml: localhost:3000) while the e2e server listens on
-  // E2E_PORT (3100). Re-home that one hop onto the origin under test; nothing
-  // else is intercepted, and on a public origin this route never matches.
+  // The authorization server sends the person to `<Site URL><Authorization Path>`.
+  // On production that is this origin. On the LOCAL stack Supabase's Site URL
+  // is `http://localhost:3000` (supabase/config.toml [auth]) while the e2e
+  // server listens on 127.0.0.1:<E2E_PORT>: the ONE hop from one loopback
+  // host to another is re-homed, under exactly these conditions — the origin
+  // under test is loopback, the run is not the production walk, and the
+  // redirect target is itself loopback. Anything else is a real Site URL /
+  // Authorization Path mismatch and FAILS by name below.
   const originHost = new URL(ORIGIN).host;
+  const loopback = (host: string) => /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host);
+  let consentRedirectMismatch: string | null = null;
   await page.route(/\/oauth\/consent(\?|$)/, (route) => {
     const u = new URL(route.request().url());
     if (u.host === originHost) return route.continue();
-    return route.fulfill({ status: 302, headers: { location: `${ORIGIN}${u.pathname}${u.search}` } });
+    if (!PROD && loopback(originHost) && loopback(u.host)) {
+      return route.fulfill({ status: 302, headers: { location: `${ORIGIN}${u.pathname}${u.search}` } });
+    }
+    consentRedirectMismatch = u.origin;
+    return route.fulfill({ status: 500, contentType: "text/plain", body: "consent redirect mismatch (see test failure)" });
   });
 
   await page.goto(authorize.toString(), { waitUntil: "domcontentloaded" });
   // The AS redirects to the product's consent page (authorization_url_path /oauth/consent → /{locale}/oauth/consent).
-  await page.waitForURL(/\/oauth\/consent\?authorization_id=/, { timeout: 30_000 });
-  // The consent screen names the client and its redirect host (spec: display the redirect URI's hostname).
-  await expect(page.getByText(CLIENT_NAME, { exact: false })).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText("127.0.0.1", { exact: false })).toBeVisible();
+  await page.waitForURL(/\/oauth\/consent\?authorization_id=/, { timeout: 30_000 }).catch(() => undefined);
+  expect(consentRedirectMismatch, `the authorization server redirected the consent step to ${consentRedirectMismatch ?? "?"}, expected ${ORIGIN} — Supabase Site URL / Authorization Path mismatch`).toBeNull();
+  expect(page.url(), "landed on the consent page").toMatch(/\/oauth\/consent\?authorization_id=/);
+  // The consent screen names the client and the exact redirect URI (spec: display the redirect hostname).
+  await expect(page.getByTestId("oauth-consent-client-name")).toHaveText(CLIENT_NAME, { timeout: 15_000 });
+  await expect(page.getByTestId("oauth-consent-redirect-uri")).toHaveText(REDIRECT_URI);
   // Approve — the only human-shaped step of the chain.
-  await page.locator('form button[name="decision"][value="approve"]').click();
+  await page.getByTestId("oauth-consent-approve").click();
   await page.waitForURL(/^http:\/\/127\.0\.0\.1:4455\/callback\?/, { timeout: 30_000 });
   const cb = new URL(page.url());
   await ctx.close();
@@ -340,7 +392,7 @@ test("O-3. authorization: PKCE S256 + resource; the signed-in person approves on
       resource: MCP_URL,
     }),
   );
-  expect(t.value.status, `token endpoint: ${t.value.text.slice(0, 200)}`).toBe(200);
+  expect(t.value.status, `token endpoint: ${oauthErrorOf(t.value.json, t.value.text)}`).toBe(200);
   expect(t.ms).toBeLessThan(LIMIT_MS.token);
   accessToken = String(t.value.json?.access_token ?? "");
   refreshToken = t.value.json?.refresh_token ? String(t.value.json.refresh_token) : undefined;
@@ -416,7 +468,7 @@ test("O-5. refresh: the refresh grant answers; rotation of the old token is reco
   const r = await timed("refresh", () =>
     postForm(String(asMeta.token_endpoint), { grant_type: "refresh_token", refresh_token: refreshToken!, client_id: clientId }),
   );
-  expect(r.value.status, r.value.text.slice(0, 200)).toBe(200);
+  expect(r.value.status, `refresh: ${oauthErrorOf(r.value.json, r.value.text)}`).toBe(200);
   expect(r.ms).toBeLessThan(LIMIT_MS.refresh);
   const newAccess = String(r.value.json?.access_token ?? "");
   const newRefresh = r.value.json?.refresh_token ? String(r.value.json.refresh_token) : undefined;

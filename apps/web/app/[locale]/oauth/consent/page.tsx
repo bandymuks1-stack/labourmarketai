@@ -92,11 +92,15 @@ export default async function OauthConsentPage({
       <dl className="mt-4 space-y-2 text-sm">
         <div>
           <dt className="font-medium">{t("clientLabel")}</dt>
-          <dd className="text-text-muted">{client?.name ?? t("unknownClient")}</dd>
+          <dd className="text-text-muted" data-testid="oauth-consent-client-name">
+            {client?.name ?? t("unknownClient")}
+          </dd>
         </div>
         <div>
           <dt className="font-medium">{t("redirectLabel")}</dt>
-          <dd className="break-all text-text-muted">{redirectUri}</dd>
+          <dd className="break-all text-text-muted" data-testid="oauth-consent-redirect-uri">
+            {redirectUri}
+          </dd>
         </div>
         {scopes.length > 0 && (
           <div>
@@ -120,6 +124,7 @@ export default async function OauthConsentPage({
           type="submit"
           name="decision"
           value="approve"
+          data-testid="oauth-consent-approve"
           className="rounded-md bg-brand-blue px-4 py-2 text-sm font-medium text-text-on-brand hover:opacity-90"
         >
           {t("approve")}
@@ -128,6 +133,7 @@ export default async function OauthConsentPage({
           type="submit"
           name="decision"
           value="deny"
+          data-testid="oauth-consent-deny"
           className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-surface-2"
         >
           {t("deny")}
