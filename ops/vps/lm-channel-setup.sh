@@ -14,7 +14,7 @@ chmod 700 "$RCV"; chown root:root "$RCV"
 id lmdeploy >/dev/null 2>&1 || useradd -r -m -s /bin/sh -c "LabourMarket deploy channel (forced command only)" lmdeploy
 passwd -l lmdeploy >/dev/null 2>&1 || true
 install -d -m 700 -o lmdeploy -g lmdeploy /home/lmdeploy/.ssh
-printf 'command="sudo %s",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty,restrict %s\n' "$RCV" "$(cut -d' ' -f1,2 "$PUB") deploy@github" > /home/lmdeploy/.ssh/authorized_keys
+printf 'command="sudo %s $SSH_ORIGINAL_COMMAND",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty,restrict %s\n' "$RCV" "$(cut -d' ' -f1,2 "$PUB") deploy@github" > /home/lmdeploy/.ssh/authorized_keys
 chmod 600 /home/lmdeploy/.ssh/authorized_keys; chown lmdeploy:lmdeploy /home/lmdeploy/.ssh/authorized_keys
 printf 'lmdeploy ALL=(root) NOPASSWD: %s\n' "$RCV" > /etc/sudoers.d/lmdeploy; chmod 440 /etc/sudoers.d/lmdeploy
 visudo -cf /etc/sudoers.d/lmdeploy >/dev/null || { echo "STOP: sudoers invalid"; rm -f /etc/sudoers.d/lmdeploy; exit 1; }

@@ -6,7 +6,7 @@
 #   /etc/sudoers.d/lmdeploy:
 #     lmdeploy ALL=(root) NOPASSWD: /root/lm-prod/bin/lm-deploy-receive.sh *
 #   /home/lmdeploy/.ssh/authorized_keys (one line):
-#     command="sudo /root/lm-prod/bin/lm-deploy-receive.sh",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ssh-ed25519 AAAA... deploy@github
+#     command="sudo /root/lm-prod/bin/lm-deploy-receive.sh $SSH_ORIGINAL_COMMAND",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty,restrict ssh-ed25519 AAAA... deploy@github
 # so `ssh lmdeploy@vps "<anything>"` always runs THIS script, which only honours:
 #   deploy <sha> <sha256>   (tarball on stdin)  — extract, start, health, rollback on failure
 #   status                  — current release + container health
