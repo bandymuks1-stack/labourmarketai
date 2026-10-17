@@ -52,6 +52,22 @@ const schema = z.object({
    * for a second purpose.
    */
   CONVERSATION_TOKEN_SECRET: z.string().min(16).optional(),
+  /**
+   * The public https origin a self-hosted deployment advertises to OAuth and
+   * MCP clients when its hostname is not one of ours (lib/mcp/public-origin.ts).
+   * Unset on Vercel and on production: the request host decides there.
+   */
+  PUBLIC_ORIGIN: z.preprocess(
+    blankAsAbsent,
+    z
+      .string()
+      .url()
+      .refine(
+        (v) => v.startsWith("https://") && new URL(v).origin === v.replace(/\/$/, ""),
+        "PUBLIC_ORIGIN must be an https origin with no path, query or fragment",
+      )
+      .optional(),
+  ),
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS: z
     .enum(["true", "false"])
     .default("true"),
@@ -180,6 +196,7 @@ const parsed = schema.safeParse({
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_DB_PASSWORD: process.env.SUPABASE_DB_PASSWORD,
   CONVERSATION_TOKEN_SECRET: process.env.CONVERSATION_TOKEN_SECRET,
+  PUBLIC_ORIGIN: process.env.PUBLIC_ORIGIN,
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS:
     process.env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS,
   PAYMENTS_ENABLED: process.env.PAYMENTS_ENABLED,
