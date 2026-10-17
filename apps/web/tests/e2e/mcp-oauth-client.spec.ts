@@ -40,14 +40,23 @@ import { expect, test } from "@playwright/test";
  * JSON the walk already keeps; no value of any token is written anywhere.
  *
  * WHERE IT RUNS
- *  - prod-qa-walk.yml, spec `mcp-oauth-client`: PLAYWRIGHT_BASE_URL is the
- *    public origin, the signed-in context is the walk's minted `worker2`
- *    storage state (the review identity).
+ *  - prod-qa-walk.yml, spec `mcp-oauth-client`: the walk sets E2E_BASE_URL to
+ *    the public origin (PLAYWRIGHT_BASE_URL is honoured first when set), the
+ *    signed-in context is the walk's minted `worker2` storage state (the
+ *    review identity). Dispatch it only on a host that runs #2450: O-1 asserts
+ *    the `/api/mcp` resource identity that PR introduces.
  *  - e2e:local (scripts/e2e-local.ts): E2E_BASE_URL is the local server, the
  *    signed-in context is tests/e2e/.storage-state.json from
  *    scripts/e2e-mint-session.ts, and the local Supabase must run the OAuth
  *    2.1 server (supabase/config.toml `[auth.oauth_server]`). Without
  *    `registration_endpoint` in the AS metadata the spec SKIPS by name.
+ *
+ * WHAT A RUN LEAVES BEHIND (stated, not hidden): (1) one journal entry for
+ * the synthetic review identity, tagged QA-SYNTHETIC — the journal is
+ * append-only and has no delete tool, the same class of write the
+ * `journal-confirm` walk performs; (2) one dynamically registered OAuth
+ * client row at the authorization server (every fresh Claude connection
+ * creates one too — finding C-1); (3) one revoked grant. Nothing else.
  *
  * WHAT IT DOES NOT CLAIM: that ChatGPT or Claude work. Only their own client
  * connecting is that proof (programme document §H, walks W-1 / W-2).
@@ -149,6 +158,8 @@ function claimsOf(jwt: string): Json {
 // Shared across the serial steps.
 let prm: Json;
 let asMeta: Json;
+let discoveryError: string | null = null;
+let hasDcr = false;
 let clientId: string;
 let accessToken: string;
 let refreshToken: string | undefined;
@@ -156,7 +167,38 @@ let verifier: string;
 let confirmedEntryId: string | undefined;
 const note = (type: string, description: string) => test.info().annotations.push({ type, description });
 
+/**
+ * Discovery runs ONCE before the steps: O-1 asserts it, and every later step
+ * skips BY NAME when the authorization server offers no dynamic registration
+ * (a local Supabase started without `[auth.oauth_server]`), instead of failing
+ * on an undefined endpoint. In serial mode a skipped test does not skip its
+ * successors, so each step carries its own skip.
+ */
+test.beforeAll(async () => {
+  try {
+    const unauth = await rpc(null, "initialize", { protocolVersion: "2026-07-28", capabilities: {}, clientInfo: { name: "conformance", version: "0" } });
+    const challenge = unauth.headers.get("www-authenticate") ?? "";
+    const pointer = /resource_metadata="([^"]+)"/.exec(challenge)?.[1] ?? `${ORIGIN}/.well-known/oauth-protected-resource`;
+    const d = await getJson(pointer);
+    prm = d.json ?? {};
+    const servers = (prm.authorization_servers as string[] | undefined) ?? [];
+    if (servers.length === 0) {
+      discoveryError = `no authorization_servers in ${pointer} (HTTP ${d.status})`;
+      return;
+    }
+    const issuer = servers[0].replace(/\/$/, "");
+    const u = new URL(issuer);
+    const m = await getJson(`${u.origin}/.well-known/oauth-authorization-server${u.pathname}`);
+    asMeta = m.json ?? {};
+    hasDcr = typeof asMeta.registration_endpoint === "string";
+  } catch (e) {
+    discoveryError = e instanceof Error ? e.message : String(e);
+  }
+});
+const NO_DCR = "authorization server has no registration_endpoint (DCR off — local Supabase needs [auth.oauth_server] allow_dynamic_registration = true)";
+
 test("O-1. discovery: 401 pointer → protected resource metadata → authorization server metadata", async () => {
+  expect(discoveryError, "discovery reached the origin").toBeNull();
   const unauth = await rpc(null, "initialize", { protocolVersion: "2026-07-28", capabilities: {}, clientInfo: { name: "conformance", version: "0" } });
   expect(unauth.status, "an unauthenticated call must be 401 (Claude starts sign-in only on a 401)").toBe(401);
   const challenge = unauth.headers.get("www-authenticate") ?? "";
@@ -169,7 +211,7 @@ test("O-1. discovery: 401 pointer → protected resource metadata → authorizat
   const d = await timed("prm", () => getJson(pointer!));
   expect(d.value.status).toBe(200);
   prm = d.value.json!;
-  expect(prm.resource, "RFC 9728 `resource` must equal the MCP URL the person enters, path included").toBe(MCP_URL);
+  expect(prm.resource, "RFC 9728 `resource` must equal the MCP URL the person enters, path included (PR #2450)").toBe(MCP_URL);
   const servers = prm.authorization_servers as string[];
   expect(Array.isArray(servers) && servers.length === 1, "exactly one authorization server (Claude reads only the first)").toBe(true);
   expect(prm.bearer_methods_supported).toEqual(["header"]);
@@ -188,6 +230,7 @@ test("O-1. discovery: 401 pointer → protected resource metadata → authorizat
   expect(m.value.status, `AS metadata at ${metaUrl}`).toBe(200);
   expect(m.ms).toBeLessThan(LIMIT_MS.discovery);
   asMeta = m.value.json!;
+  hasDcr = typeof asMeta.registration_endpoint === "string";
   expect(String(asMeta.issuer).replace(/\/$/, ""), "issuer equals the advertised authorization server").toBe(issuer);
   expect(asMeta.code_challenge_methods_supported as string[], "S256 must be advertised").toContain("S256");
   for (const k of ["authorization_endpoint", "token_endpoint"]) expect(typeof asMeta[k], k).toBe("string");
@@ -200,10 +243,11 @@ test("O-1. discovery: 401 pointer → protected resource metadata → authorizat
     grant_types_supported: asMeta.grant_types_supported ?? null,
     revocation_endpoint: asMeta.revocation_endpoint ?? null,
   }));
-  test.skip(typeof asMeta.registration_endpoint !== "string", "authorization server has no registration_endpoint (DCR off — local Supabase needs [auth.oauth_server] allow_dynamic_registration = true)");
+  note("dcr", hasDcr ? "registration_endpoint advertised" : NO_DCR);
 });
 
 test("O-2. dynamic client registration as a public native client with a loopback redirect", async () => {
+  test.skip(!hasDcr, NO_DCR);
   const r = await timed("registration", async () => {
     const res = await fetch(String(asMeta.registration_endpoint), {
       method: "POST",
@@ -228,6 +272,7 @@ test("O-2. dynamic client registration as a public native client with a loopback
 });
 
 test("O-3. authorization: PKCE S256 + resource; the signed-in person approves on the consent screen", async ({ browser }) => {
+  test.skip(!hasDcr, NO_DCR);
   verifier = b64url(randomBytes(48));
   const challenge = b64url(createHash("sha256").update(verifier).digest());
   const state = b64url(randomBytes(16));
@@ -309,6 +354,7 @@ test("O-3. authorization: PKCE S256 + resource; the signed-in person approves on
 });
 
 test("O-4. use the OAuth-issued bearer: initialize, tools/list, a read, a draft → confirm → replay refused", async () => {
+  test.skip(!hasDcr, NO_DCR);
   const init = await rpc(accessToken, "initialize", { protocolVersion: "2026-07-28", capabilities: {}, clientInfo: { name: "conformance", version: "0" } });
   expect(init.status, init.text.slice(0, 200)).toBe(200);
   const version = String(init.body?.result?.serverInfo?.version ?? "");
@@ -326,25 +372,46 @@ test("O-4. use the OAuth-issued bearer: initialize, tools/list, a read, a draft 
   const profile = await tool(accessToken, "profile_get");
   expect(profile.ok, JSON.stringify(profile).slice(0, 200)).toBe(true);
 
-  // One canonical write, tagged, through the OAuth bearer. Yesterday, 1 hour.
+  // One canonical write, tagged, through the OAuth bearer: the SAME two calls
+  // the phone's composer makes (apps/mobile/src/screens/journal-composer.tsx).
+  // The draft's input is workerLogWorkSchema; the confirm repeats the exact
+  // preview the server returned plus the token (the token is hash-bound to it).
   const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
-  const draft = await tool(accessToken, "journal_create_draft", {
+  const draftInput: Json = {
     workDate: yesterday,
-    hours: 1,
-    site: `${TAG} site`,
-    notes: `${TAG}: conformance client wrote this through OAuth; the walk removes it.`,
-  });
+    siteName: `${TAG} site`,
+    notes: `${TAG}: one hour of conformance work, dictated through an OAuth client; synthetic record.`,
+  };
+  let draft = await tool(accessToken, "journal_create_draft", draftInput);
+  if (draft.ok && Array.isArray(draft.data?.options) && !draft.data?.preview) {
+    // Real ambiguity between the person's work contexts: a client asks the
+    // person; here the first labelled option stands in for that answer.
+    const first = (draft.data.options as { engagementContextId?: string; id?: string }[])[0];
+    const chosen = first?.engagementContextId ?? first?.id;
+    expect(chosen, `context choice offered without an id: ${JSON.stringify(draft.data).slice(0, 300)}`).toBeTruthy();
+    draft = await tool(accessToken, "journal_create_draft", { ...draftInput, engagementContextId: chosen });
+  }
   expect(draft.ok, `draft: ${JSON.stringify(draft).slice(0, 300)}`).toBe(true);
+  const preview = draft.data?.preview as { engagementContextId: string; notes: string; workDate: string; siteName: string | null } | undefined;
   const confirmationToken = String(draft.data?.confirmationToken ?? "");
+  expect(preview, `draft returned a preview: ${JSON.stringify(draft.data).slice(0, 300)}`).toBeTruthy();
   expect(confirmationToken).toBeTruthy();
-  const confirm = await tool(accessToken, "journal_confirm", { confirmationToken });
+  const confirmInput: Json = {
+    engagementContextId: preview!.engagementContextId,
+    notes: preview!.notes,
+    workDate: preview!.workDate,
+    siteName: preview!.siteName ?? null,
+    confirmationToken,
+  };
+  const confirm = await tool(accessToken, "journal_confirm", confirmInput);
   expect(confirm.ok, `confirm: ${JSON.stringify(confirm).slice(0, 300)}`).toBe(true);
   confirmedEntryId = typeof confirm.data?.entryId === "string" ? (confirm.data.entryId as string) : undefined;
-  const replay = await tool(accessToken, "journal_confirm", { confirmationToken });
+  const replay = await tool(accessToken, "journal_confirm", confirmInput);
   expect(replay.ok, "a spent confirmation is refused").toBe(false);
 });
 
 test("O-5. refresh: the refresh grant answers; rotation of the old token is recorded", async () => {
+  test.skip(!hasDcr, NO_DCR);
   test.skip(!refreshToken, "no refresh token was issued (offline_access not granted)");
   const r = await timed("refresh", () =>
     postForm(String(asMeta.token_endpoint), { grant_type: "refresh_token", refresh_token: refreshToken!, client_id: clientId }),
@@ -364,6 +431,7 @@ test("O-5. refresh: the refresh grant answers; rotation of the old token is reco
 });
 
 test("O-6. revoke in Connected apps: the next call with the still-unexpired access token is 401 invalid_token", async ({ browser }) => {
+  test.skip(!hasDcr, NO_DCR);
   const ctx = await browser.newContext({ storageState: stateFile, locale: "en-GB" });
   const page = await ctx.newPage();
   await page.goto(`${ORIGIN}/en/dashboard/account#connected-apps`, { waitUntil: "domcontentloaded" });
@@ -386,9 +454,15 @@ test("O-6. revoke in Connected apps: the next call with the still-unexpired acce
 });
 
 test.afterAll(async () => {
-  // The written entry stays as a tagged synthetic record when the walk's
-  // identity cannot remove it through the door after revocation; the walk's
-  // existing cleanup (prod-qa-walk.yml) handles QA-SYNTHETIC rows. Recorded
-  // so the artefact names what was left.
-  test.info().annotations.push({ type: "cleanup", description: confirmedEntryId ? `journal entry ${confirmedEntryId} written as ${TAG}` : "no entry written" });
+  // The journal is append-only and has no delete tool: the one tagged entry
+  // stays, exactly as the `journal-confirm` walk's entries do (see the header,
+  // "what a run leaves behind"). The artefact names it.
+  test.info().annotations.push({
+    type: "residue",
+    description: [
+      confirmedEntryId ? `journal entry ${confirmedEntryId} (QA-SYNTHETIC, ${TAG})` : "no journal entry written",
+      clientId ? `DCR client ${clientId} (public client, no secret)` : "no client registered",
+      "one revoked grant",
+    ].join("; "),
+  });
 });
