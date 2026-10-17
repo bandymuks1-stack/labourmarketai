@@ -361,11 +361,15 @@ test("O-3. authorization: PKCE S256 + resource; the signed-in person approves on
   await page.waitForURL(/\/oauth\/consent\?authorization_id=/, { timeout: 30_000 }).catch(() => undefined);
   expect(consentRedirectMismatch, `the authorization server redirected the consent step to ${consentRedirectMismatch ?? "?"}, expected ${ORIGIN} — Supabase Site URL / Authorization Path mismatch`).toBeNull();
   expect(page.url(), "landed on the consent page").toMatch(/\/oauth\/consent\?authorization_id=/);
-  // The consent screen names the client and the exact redirect URI (spec: display the redirect hostname).
-  await expect(page.getByTestId("oauth-consent-client-name")).toHaveText(CLIENT_NAME, { timeout: 15_000 });
-  await expect(page.getByTestId("oauth-consent-redirect-uri")).toHaveText(REDIRECT_URI);
+  // The consent screen names the client and the exact redirect URI (spec: display
+  // the redirect hostname). Located structurally — the page's definition list
+  // (`dd`) and the form's named decision button — not by free text, which can
+  // match the intro sentence too. The page itself is an owner-waived surface and
+  // is not modified here.
+  await expect(page.locator("dl dd").filter({ hasText: CLIENT_NAME })).toHaveCount(1, { timeout: 15_000 });
+  await expect(page.locator("dl dd").filter({ hasText: REDIRECT_URI })).toHaveCount(1);
   // Approve — the only human-shaped step of the chain.
-  await page.getByTestId("oauth-consent-approve").click();
+  await page.locator('form button[name="decision"][value="approve"]').click();
   await page.waitForURL(/^http:\/\/127\.0\.0\.1:4455\/callback\?/, { timeout: 30_000 });
   const cb = new URL(page.url());
   await ctx.close();
