@@ -79,9 +79,10 @@ export type PrepareResult =
  *
  * `CONVERSATION_TOKEN_SECRET` holds this purpose's own key rather than reusing
  * the service-role key as HMAC material (key-purpose reuse — a rotation of one
- * should not silently invalidate the other). The service-role fallback survives
- * OUTSIDE production only (local dev on a fresh checkout); production refuses
- * it (lib/security/confirmation-key-material.ts).
+ * should not silently invalidate the other). No service-role fallback remains
+ * in any environment (owner invariant 2026-10-17;
+ * lib/security/confirmation-key-material.ts). Local stacks get the value from
+ * .env.local or from the harness scripts.
  *
  * NO `SUPABASE_DB_PASSWORD` FALLBACK — removed after CodeQL flagged it
  * (js/insufficient-password-hash, HIGH) on the first run of the scanning this
@@ -99,12 +100,11 @@ export type PrepareResult =
  * key-derivation path — which is also one less purpose that credential serves.
  */
 function tokenSecret(): string {
-  // PRODUCTION REQUIRES A DEDICATED KEY (2026-10-16) — the service-role
-  // fallback is refused there; see lib/security/confirmation-key-material.ts.
+  // ONE PURPOSE, ONE KEY, EVERYWHERE (2026-10-17) — the service-role key is
+  // never key material, in any environment; see
+  // lib/security/confirmation-key-material.ts.
   const verdict = confirmationKeyMaterial({
     dedicated: env.CONVERSATION_TOKEN_SECRET,
-    serviceRole: env.SUPABASE_SERVICE_ROLE_KEY,
-    production: process.env.NODE_ENV === "production",
   });
   if (!verdict.ok) {
     throw new Error(

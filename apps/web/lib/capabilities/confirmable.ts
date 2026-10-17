@@ -27,12 +27,10 @@ import { confirmationKeyMaterial } from "@/lib/security/confirmation-key-materia
  * string — a token minted for one surface can never be replayed on the other.
  */
 export function capabilityTokenSecret(): string {
-  // Same rule as the conversation signer: production requires the dedicated
-  // key and refuses the service-role fallback.
+  // Same rule as the conversation signer: the dedicated key or a refusal; the
+  // service-role key is never key material, in any environment.
   const verdict = confirmationKeyMaterial({
     dedicated: env.CONVERSATION_TOKEN_SECRET,
-    serviceRole: env.SUPABASE_SERVICE_ROLE_KEY,
-    production: process.env.NODE_ENV === "production",
   });
   if (!verdict.ok) {
     throw new Error(
