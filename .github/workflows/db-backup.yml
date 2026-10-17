@@ -80,7 +80,9 @@ jobs:
           curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc >/dev/null
           echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
           sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17 age >/dev/null
-          pg_dump --version; age --version
+          # The runner image ships client 16 first on PATH; the 17 binaries must win (server is 17.x).
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+          /usr/lib/postgresql/17/bin/pg_dump --version; age --version
       - name: Dump (plaintext stays on this runner only)
         env:
           DB_URL: ${{ secrets.SUPABASE_DB_URL }}
