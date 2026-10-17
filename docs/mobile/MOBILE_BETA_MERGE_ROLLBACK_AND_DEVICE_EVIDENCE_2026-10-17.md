@@ -136,7 +136,9 @@ the review identity, no `production-qa` secrets). Everything else is in
 1. **Android**: Actions → "Android" → Run workflow on `main` (after M1) or on
    the #2447 branch. Set `origin` to the reachable origin if it is not
    `https://labourmarket.ai` (this input is added by this document's PR; the
-   iOS and App Links workflows already have it). The `signed-in` job builds the
+   iOS signed-in and App Links workflows in #2447 carry the same input). The
+   origin must share production Supabase: the APK's auth target is the
+   project behind `vars.PROD_QA_ANON_KEY`. The `signed-in` job builds the
    release APK with the production public config (`vars.PROD_QA_ANON_KEY`),
    installs it on an API 34 x86_64 emulator and runs
    `.maestro/signed-in-journey.yaml`: sign in → Today figures read → one

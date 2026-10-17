@@ -71,7 +71,7 @@ on:
   workflow_dispatch:
     inputs:
       origin:
-        description: "API origin the app talks to (production, or an isolated staging URL the hosting agent names). Empty = https://labourmarket.ai"
+        description: "API origin the app talks to: https scheme + host only (production, or an isolated staging that shares production Supabase). Empty = https://labourmarket.ai"
         required: false
         default: "https://labourmarket.ai"
 
@@ -137,8 +137,18 @@ jobs:
           ORIGIN_INPUT: ${{ inputs.origin }}
         run: |
           ORIGIN="${ORIGIN_INPUT:-https://labourmarket.ai}"
-          case "$ORIGIN" in https://*) ;; *) echo "::error::origin must start with https:// (got: $ORIGIN)"; exit 1;; esac
+          # An ORIGIN only: scheme + host (+ port). A path would be baked into every
+          # API URL the app builds. The Supabase project stays the one behind
+          # vars.PROD_QA_ANON_KEY: a staging origin must share production Supabase
+          # (read-only anon), or this build signs people in to the wrong project.
+          case "$ORIGIN" in
+            https://*) ;;
+            *) echo "::error::origin must start with https:// (got: $ORIGIN)"; exit 1;;
+          esac
           ORIGIN="${ORIGIN%/}"
+          case "${ORIGIN#https://}" in
+            */*|*\?*|*\#*) echo "::error::origin must be scheme + host only, no path, query or fragment (got: $ORIGIN)"; exit 1;;
+          esac
           if [ -n "$ANON_KEY" ]; then
             REF=$(node -e 'const p=JSON.parse(Buffer.from(process.env.ANON_KEY.split(".")[1],"base64url").toString());if(p.role!=="anon"){console.error("refusing: key role is "+p.role);process.exit(1)}process.stdout.write(p.ref)')
             echo "EXPO_PUBLIC_SUPABASE_URL=https://${REF}.supabase.co" >> "$GITHUB_ENV"
