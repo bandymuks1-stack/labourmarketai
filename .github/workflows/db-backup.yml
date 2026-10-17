@@ -91,7 +91,11 @@ jobs:
           # Custom format (-Fc): compressed, restorable selectively with pg_restore. Supabase-managed
           # schemas are excluded from DATA (auth/storage settings are Supabase's; the public schema +
           # auth.users rows are what a project restore needs — auth is included as data).
-          pg_dump "$DB_URL" -Fc --no-owner --no-privileges \
+          # The stored URL carries `sslmode=no-verify` (a node-postgres value libpq does not know);
+          # libpq gets the same intent through PGSSLMODE=require with the parameter removed.
+          export PGSSLMODE=require
+          url=$(printf '%s' "$DB_URL" | sed -E 's/([?&])sslmode=[^&]*(&|$)/\1/; s/[?&]$//')
+          pg_dump "$url" -Fc --no-owner --no-privileges \
             --exclude-schema='extensions' --exclude-schema='graphql*' --exclude-schema='pgsodium*' \
             --exclude-schema='realtime' --exclude-schema='supabase_functions' --exclude-schema='vault' \
             --exclude-schema='net' --exclude-schema='cron' --exclude-schema='pgbouncer' \
