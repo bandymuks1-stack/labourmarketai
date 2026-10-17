@@ -97,11 +97,10 @@ jobs:
           # libpq gets the same intent through PGSSLMODE=require with the parameter removed.
           export PGSSLMODE=require
           url=$(printf '%s' "$DB_URL" | sed -E 's/([?&])sslmode=[^&]*(&|$)/\1/; s/[?&]$//')
-          pg_dump "$url" -Fc --no-owner --no-privileges \
-            --exclude-schema='extensions' --exclude-schema='graphql*' --exclude-schema='pgsodium*' \
-            --exclude-schema='realtime' --exclude-schema='supabase_functions' --exclude-schema='vault' \
-            --exclude-schema='net' --exclude-schema='cron' --exclude-schema='pgbouncer' \
-            -f "lm-db-$stamp.dump"
+          # The stored role may read `public` only (first drill 2026-10-17: "permission denied for schema
+          # auth"), so this is a PUBLIC-SCHEMA backup: every product table, row and function. Supabase's
+          # own schemas (auth users, storage objects) are NOT in it — see the runbook §5 for that gap.
+          pg_dump "$url" -Fc --no-owner --no-privileges --schema=public -f "lm-db-$stamp.dump"
           size=$(stat -c %s "lm-db-$stamp.dump"); echo "dump bytes=$size" | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$size" -gt 100000 ] || { echo "::error::dump is suspiciously small ($size bytes)"; exit 1; }
       - name: Restore drill (throw-away postgres:17 on this runner)
