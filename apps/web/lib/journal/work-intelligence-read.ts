@@ -109,6 +109,7 @@ export function assembleWorkIntelligence(input: {
     originalText: e.original_text,
     metrics: e.journal_entry_metrics ?? [],
     engagementContextId: e.engagement_context_id ?? null,
+    projectId: e.project_id ?? null,
     reviewResult: deriveIndependentReviewResult(
       e.journal_entry_confirmations,
       input.subjectProfileId ?? null,
