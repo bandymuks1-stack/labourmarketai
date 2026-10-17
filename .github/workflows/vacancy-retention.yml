@@ -67,11 +67,21 @@ jobs:
           printf 'apikey: %s\nAuthorization: Bearer %s\n' "$KEY" "$KEY" > hdr
           cutoff=$(date -u -d "-${GRACE_DAYS} days" +%Y-%m-%dT%H:%M:%SZ)
           dead="or=(lifecycle.eq.removed,expires_at.lt.${cutoff})"
-          # Protected ids: any public ad a person or company record points at.
-          prot=$(for t in worker_saved_opportunities demand_interest_signals commercial_handoffs; do
-                   curl -sS -H @hdr "$SUPABASE_URL/rest/v1/$t?select=public_vacancy_id&public_vacancy_id=not.is.null" | jq -r '.[].public_vacancy_id'; done | sort -u | paste -sd, -)
+          # Protected ids: any public ad a person or company record points at. FAIL CLOSED: if any of the
+          # three reads does not answer 200 with a JSON array (first dry run 2026-10-17: two of them returned
+          # an error object the service role could not read past), nothing may be deleted.
+          : > prot.txt
+          for t in worker_saved_opportunities demand_interest_signals commercial_handoffs; do
+            code=$(curl -sS -o "$t.json" -w '%{http_code}' -H @hdr "$SUPABASE_URL/rest/v1/$t?select=public_vacancy_id&public_vacancy_id=not.is.null")
+            if [ "$code" != "200" ] || ! jq -e 'type=="array"' "$t.json" >/dev/null; then
+              echo "::error::protected-id read for $t failed (http $code: $(jq -r '.message // .code // "not an array"' "$t.json" 2>/dev/null | head -c 160)) — refusing to purge"; rm -f hdr; exit 1
+            fi
+            jq -r '.[].public_vacancy_id' "$t.json" >> prot.txt
+            echo "protected source $t: $(jq 'length' "$t.json") row(s)"
+          done
+          prot=$(sort -u prot.txt | grep . | paste -sd, - || true)
           if [ -n "$prot" ]; then notin="&id=not.in.(${prot})"; else notin=""; fi
-          echo "protected ids: $(printf '%s' "$prot" | tr ',' '\n' | grep -c . || true)"
+          echo "protected ids: $(printf '%s' "$prot" | tr ',' '\n' | grep -c . || true)" | tee -a "$GITHUB_STEP_SUMMARY"
           total=$(curl -sS -o /dev/null -w '%header{content-range}' -H @hdr -H 'Prefer: count=exact' -H 'Range: 0-0' "$SUPABASE_URL/rest/v1/public_vacancies?select=id&${dead}${notin}" | sed 's#.*/##')
           echo "dead ads eligible (grace ${GRACE_DAYS} d, cutoff ${cutoff}): ${total}" | tee -a "$GITHUB_STEP_SUMMARY"
           if [ "$DRY_RUN" = "true" ]; then echo "dry run: nothing deleted" | tee -a "$GITHUB_STEP_SUMMARY"; rm -f hdr; exit 0; fi
