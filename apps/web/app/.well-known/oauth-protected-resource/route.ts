@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { requireSupabaseClientEnv } from "@/lib/env";
 import { protectedResourceMetadata } from "@/lib/mcp/protected-resource-metadata";
+import { requestPublicOrigin } from "@/lib/mcp/public-origin";
 
 export const runtime = "nodejs";
 
@@ -24,7 +25,7 @@ export const runtime = "nodejs";
  */
 export async function GET(req: Request) {
   const { url } = requireSupabaseClientEnv();
-  const origin = new URL(req.url).origin;
+  const origin = requestPublicOrigin(req);
   return NextResponse.json(protectedResourceMetadata(origin, url), {
     headers: {
       "Cache-Control": "public, max-age=3600",

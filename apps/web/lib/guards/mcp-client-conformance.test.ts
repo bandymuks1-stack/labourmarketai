@@ -1,8 +1,13 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
+const mockEnv = vi.hoisted(() => ({
+  CONVERSATION_TOKEN_SECRET: "unit-test-secret-with-enough-length",
+  SUPABASE_SERVICE_ROLE_KEY: undefined as string | undefined,
+  PUBLIC_ORIGIN: undefined as string | undefined,
+}));
 vi.mock("@/lib/env", () => ({
-  env: { CONVERSATION_TOKEN_SECRET: "unit-test-secret-with-enough-length", SUPABASE_SERVICE_ROLE_KEY: undefined },
+  env: mockEnv,
   requireSupabaseClientEnv: () => ({
     url: "https://abcdefghijklmnopqrst.supabase.co",
     anonKey: "sb_publishable_unit_test_not_a_real_key",
@@ -21,6 +26,7 @@ import {
   PROTECTED_RESOURCE_METADATA_PATHS,
   protectedResourceMetadata,
 } from "@/lib/mcp/protected-resource-metadata";
+import { requestPublicOrigin } from "@/lib/mcp/public-origin";
 import { toolDefsOf } from "@/lib/mcp/toolset";
 
 /**
@@ -99,10 +105,55 @@ describe("protected resource metadata (RFC 9728) — what Claude and ChatGPT rea
     expect(JSON.stringify(doc)).not.toMatch(/query|body/);
   });
 
-  it("the resource is derived from the request origin, never hard-coded (staging and local hosts stay honest)", async () => {
-    const res = await prmRoot(new Request("https://staging.example.test/.well-known/oauth-protected-resource"));
-    const doc = (await res.json()) as Record<string, unknown>;
-    expect(doc.resource).toBe("https://staging.example.test/api/mcp");
+  it("a local host advertises itself; a foreign or forged host yields the canonical origin", async () => {
+    const local = await prmRoot(new Request("http://127.0.0.1:3100/.well-known/oauth-protected-resource"));
+    expect(((await local.json()) as Record<string, unknown>).resource).toBe("http://127.0.0.1:3100/api/mcp");
+    const foreign = await prmRoot(new Request("https://staging.example.test/.well-known/oauth-protected-resource"));
+    expect(((await foreign.json()) as Record<string, unknown>).resource).toBe("https://labourmarket.ai/api/mcp");
+  });
+});
+
+describe("the public origin a client is told about (self-hosting, 2026-10-17)", () => {
+  afterEach(() => {
+    mockEnv.PUBLIC_ORIGIN = undefined;
+  });
+
+  it("behind the proxy: X-Forwarded-Host labourmarket.ai → the canonical https origin, whatever the bind host says", () => {
+    const req = new Request("http://0.0.0.0:3000/api/mcp", {
+      headers: { host: "0.0.0.0:3000", "x-forwarded-host": "labourmarket.ai", "x-forwarded-proto": "https" },
+    });
+    expect(requestPublicOrigin(req)).toBe("https://labourmarket.ai");
+  });
+
+  it("a direct call to a loopback port keeps that host (the hosting session's probe: Host 127.0.0.1:3100, bind 0.0.0.0:3000)", () => {
+    const req = new Request("http://0.0.0.0:3000/api/mcp", { headers: { host: "127.0.0.1:3100" } });
+    expect(requestPublicOrigin(req)).toBe("http://127.0.0.1:3100");
+  });
+
+  it("a bind address or a forged host never becomes the advertised origin", () => {
+    expect(requestPublicOrigin(new Request("http://0.0.0.0:3000/api/mcp", { headers: { host: "0.0.0.0:3000" } }))).toBe("https://labourmarket.ai");
+    expect(requestPublicOrigin(new Request("https://labourmarket.ai/api/mcp", { headers: { host: "evil.example" } }))).toBe("https://labourmarket.ai");
+    expect(requestPublicOrigin(new Request("https://labourmarket.ai/api/mcp", { headers: { "x-forwarded-host": "evil.example, labourmarket.ai" } }))).toBe("https://labourmarket.ai");
+  });
+
+  it("www and the Vercel production alias collapse to the canonical origin; a preview keeps its host", () => {
+    expect(requestPublicOrigin(new Request("https://www.labourmarket.ai/api/mcp", { headers: { host: "www.labourmarket.ai" } }))).toBe("https://labourmarket.ai");
+    expect(requestPublicOrigin(new Request("https://x.vercel.app/api/mcp", { headers: { host: "lm-git-feature-x.vercel.app" } }))).toBe("https://lm-git-feature-x.vercel.app");
+  });
+
+  it("PUBLIC_ORIGIN names a self-hosted staging on its own domain, and wins over every header", () => {
+    mockEnv.PUBLIC_ORIGIN = "https://staging.example.test/";
+    const req = new Request("http://0.0.0.0:3000/api/mcp", { headers: { host: "0.0.0.0:3000", "x-forwarded-host": "evil.example" } });
+    expect(requestPublicOrigin(req)).toBe("https://staging.example.test");
+  });
+
+  it("the 401 challenge and the metadata document agree on that origin", async () => {
+    const req = new Request("http://0.0.0.0:3000/.well-known/oauth-protected-resource", { headers: { host: "127.0.0.1:3100" } });
+    const doc = (await (await prmRoot(req)).json()) as Record<string, unknown>;
+    expect(doc.resource).toBe("http://127.0.0.1:3100/api/mcp");
+    expect(wwwAuthenticateChallenge(requestPublicOrigin(req), "CREDENTIALS_MISSING")).toBe(
+      'Bearer resource_metadata="http://127.0.0.1:3100/.well-known/oauth-protected-resource"',
+    );
   });
 });
 
