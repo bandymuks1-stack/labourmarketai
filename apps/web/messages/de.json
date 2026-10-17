@@ -19063,7 +19063,9 @@
     "hoursRecorded": "{hours} Std. erfasst in {count, plural, one {# Eintrag} other {# Einträgen}}",
     "hoursPeriod": "{hours} Std. für einen Zeitraum angegeben, in {count, plural, one {# Eintrag} other {# Einträgen}}",
     "contested": "Von einer berechtigten Stelle bestritten",
-    "more": "{count, plural, one {# weiterer Eintrag wird} other {# weitere Einträge werden}} nicht angezeigt"
+    "more": "{count, plural, one {# weiterer Eintrag wird} other {# weitere Einträge werden}} nicht angezeigt",
+    "periodBand": "Zeitraum: {label}",
+    "formerly": "früher {names}"
   },
   "companyPerson": {
     "eyebrow": "Historische Personenkarte",
@@ -19303,7 +19305,8 @@
       "stated": "rechtliche Beziehung erklärt"
     },
     "openHistory": "Unternehmensgeschichte öffnen",
-    "note": "Die Leitung einer Organisation wird getrennt von Ihrer eigenen Arbeit gezeigt: Stunden der Organisation zählen nie als Ihre."
+    "note": "Die Leitung einer Organisation wird getrennt von Ihrer eigenen Arbeit gezeigt: Stunden der Organisation zählen nie als Ihre.",
+    "formerly": "früher {names}"
   },
   "historyQuality": {
     "back": "Zurück zur Geschichte",

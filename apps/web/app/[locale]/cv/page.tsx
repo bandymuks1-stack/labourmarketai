@@ -31,6 +31,7 @@ import { formatUtcDate } from "@/lib/time/display";
 import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
 import { CvOrganizationHistory } from "@/components/app/cv/cv-organization-history";
 import { organizationHistoryLines } from "@/components/app/cv/organization-history-lines";
+import { formerNamesOf, periodLabelFor } from "@/lib/journal/professional-experience";
 import {
   PremiumLivingCv,
   type PremiumCvCapability,
@@ -563,6 +564,23 @@ export default async function VerifiedCvPage({
   // every work hour once; the journal and organization figures stay beside
   // it as the two provenances it is made of.
   const experienceTotal = cv.professionalExperience?.hours ?? null;
+  // ONE organization identity with a name history (decision 0025): the
+  // business periods the person's own leadership lets them read. A record's
+  // source label resolves to a stated PERIOD (never printed raw); a period the
+  // owner states as the same legal entity is a FORMER NAME of the organization.
+  const businessPeriods = (cv.professionalExperience?.roles ?? []).flatMap((r) => r.businessPeriods);
+  const periodLabelOf = (sourceLabel: string) => periodLabelFor(sourceLabel, businessPeriods);
+  const formerNamesByOrgName = new Map<string, string[]>();
+  for (const r of cv.professionalExperience?.roles ?? []) {
+    if (!r.organizationName) continue;
+    const names = formerNamesOf(r.businessPeriods);
+    if (names.length > 0 && !formerNamesByOrgName.has(r.organizationName)) formerNamesByOrgName.set(r.organizationName, names);
+  }
+  const withFormerNames = (orgName: string | null): string | null => {
+    if (!orgName) return null;
+    const names = formerNamesByOrgName.get(orgName);
+    return names && names.length > 0 ? `${orgName} (${tOrgHist("formerly", { names: names.join(", ") })})` : orgName;
+  };
   if (
     experienceTotal !== null &&
     experienceTotal.total > 0 &&
@@ -629,11 +647,18 @@ export default async function VerifiedCvPage({
         h.dayHours !== null ? tPremium("orgDayHours", { hours: fmtNum.format(roundHours(h.dayHours)), count: h.dayRecords }) : null,
         h.periodHours !== null ? tPremium("orgPeriodHours", { hours: fmtNum.format(roundHours(h.periodHours)) }) : null,
       ].filter((x): x is string => !!x);
+      const periodBand = h.sourceLabel ? periodLabelOf(h.sourceLabel) : null;
       return {
         key: `org:${h.key}`,
         period: from && to && from !== to ? `${from} – ${to}` : (from ?? to),
         title,
-        subtitle: h.organizationName && h.organizationName !== title ? h.organizationName : null,
+        subtitle:
+          [
+            h.organizationName && h.organizationName !== title ? withFormerNames(h.organizationName) : null,
+            periodBand ? tOrgHist("periodBand", { label: periodBand }) : null,
+          ]
+            .filter((x): x is string => !!x)
+            .join(" · ") || null,
         detail: detailParts.length > 0 ? detailParts.join(" · ") : null,
         source: tPremium("source.organization"),
         level: h.proof.includes("INDEPENDENTLY_VERIFIED") || h.proof.includes("EMPLOYER_CONFIRMED") ? "confirmed" : "recorded",
@@ -1097,6 +1122,7 @@ export default async function VerifiedCvPage({
             entries={cv.organizationHistory}
             headingClassName={sectionTitle}
             bodyClassName={bodyText}
+            periodLabelOf={periodLabelOf}
           />
         ) : null}
 

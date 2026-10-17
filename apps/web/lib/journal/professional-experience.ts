@@ -60,7 +60,42 @@ export type ExperienceBusinessPeriod = {
   readonly to: string | null;
   readonly basis: string;
   readonly legalEntityRelation: string;
+  /** The source labels (sheet names) that place a record in this period. */
+  readonly sourceLabels: readonly string[];
 };
+
+/** The legal-entity relations under which an earlier period's label is a
+ *  FORMER NAME of the same organization — the organization then carries ONE
+ *  identity with a name history ("X, formerly Y"). `not_asserted`,
+ *  `successor` and `sold_and_continued_by_new_entity` are continuity of the
+ *  business history, not of the legal person, and never rename anything. */
+export const FORMER_NAME_RELATIONS: ReadonlySet<string> = new Set(["renamed", "same_entity"]);
+
+/** The former names an organization's live period statements establish. */
+export function formerNamesOf(periods: readonly ExperienceBusinessPeriod[]): string[] {
+  const out: string[] = [];
+  for (const p of periods) {
+    if (!FORMER_NAME_RELATIONS.has(p.legalEntityRelation)) continue;
+    const name = p.label.trim();
+    if (name && !out.includes(name)) out.push(name);
+  }
+  return out;
+}
+
+const normLabel = (s: string | null | undefined) => (s ?? "").normalize("NFKC").trim().toLocaleLowerCase();
+
+/** The stated period a record's source label belongs to, or null. */
+export function periodLabelFor(
+  sourceLabel: string | null | undefined,
+  periods: readonly ExperienceBusinessPeriod[],
+): string | null {
+  const key = normLabel(sourceLabel);
+  if (!key) return null;
+  for (const p of periods) {
+    if (p.sourceLabels.some((l) => normLabel(l) === key)) return p.label;
+  }
+  return null;
+}
 
 /**
  * One relationship the person has or had with an organization: a job, a
@@ -107,6 +142,10 @@ export type ExperienceHourLine = {
   readonly place: string | null;
   /** Free text the source gave for the work (a context cell, a title). */
   readonly label: string | null;
+  /** The stated business period the record belongs to (resolved from its
+   *  source label against the organization's period statements the viewer
+   *  can read); null = not placed / no statements readable. */
+  readonly periodLabel: string | null;
   readonly from: string | null;
   readonly to: string | null;
   readonly hours: number;
@@ -131,6 +170,11 @@ export type ExperienceOrganization = {
   readonly organizationName: string | null;
   readonly roles: readonly ExperienceRole[];
   readonly businessPeriods: readonly ExperienceBusinessPeriod[];
+  /** Earlier names of the SAME legal entity (`FORMER_NAME_RELATIONS`). */
+  readonly formerNames: readonly string[];
+  /** Counted organization hours per stated business period (by the records'
+   *  source labels); records no statement places are under `null`. */
+  readonly byPeriod: readonly { readonly periodLabel: string | null; readonly hours: number; readonly records: number }[];
   readonly journalHours: number;
   readonly journalConfirmedHours: number;
   readonly organizationHours: number;
@@ -236,6 +280,8 @@ export function deriveProfessionalExperience(input: {
   }
   const nameOf = (organizationId: string | null, fallback: string | null): string | null =>
     (organizationId ? orgNameById.get(organizationId) : null) ?? fallback ?? null;
+  const periodOf = (organizationId: string | null, sourceLabel: string | null | undefined): string | null =>
+    organizationId ? periodLabelFor(sourceLabel, periodsByOrg.get(organizationId) ?? []) : null;
 
   const wi = input.wi;
   const lines: ExperienceHourLine[] = [];
@@ -258,6 +304,7 @@ export function deriveProfessionalExperience(input: {
       place: string | null;
       describesJournal: boolean;
       supplierName: string | null;
+      periodLabel: string | null;
       hours: number;
       records: number;
       from: string | null;
@@ -268,7 +315,8 @@ export function deriveProfessionalExperience(input: {
       const describesJournal = r.journalEntryId !== null && liveEntryIds.has(r.journalEntryId);
       const projectId = r.context?.project?.id ?? null;
       const place = r.context?.place?.name ?? null;
-      const key = [r.organizationId, projectId ?? "", place ?? "", describesJournal ? "j" : "o"].join("|");
+      const periodLabel = periodOf(r.organizationId, r.context?.source.label);
+      const key = [r.organizationId, projectId ?? "", place ?? "", periodLabel ?? "", describesJournal ? "j" : "o"].join("|");
       let a = dayAcc.get(key);
       if (!a) {
         a = {
@@ -278,6 +326,7 @@ export function deriveProfessionalExperience(input: {
           place,
           describesJournal,
           supplierName: r.context?.source.supplierName ?? null,
+          periodLabel,
           hours: 0,
           records: 0,
           from: null,
@@ -302,6 +351,7 @@ export function deriveProfessionalExperience(input: {
         projectName: a.projectName,
         place: a.place,
         label: null,
+        periodLabel: a.periodLabel,
         from: a.from,
         to: a.to,
         hours: round2(a.hours),
@@ -331,6 +381,7 @@ export function deriveProfessionalExperience(input: {
         projectName: p.context?.project?.name ?? null,
         place: p.context?.place?.name ?? null,
         label: recordLabel(p),
+        periodLabel: periodOf(p.organizationId, p.context?.source.label),
         from: p.periodStart,
         to: p.periodEnd,
         hours: round2(p.hours),
@@ -368,6 +419,7 @@ export function deriveProfessionalExperience(input: {
         projectName: l.projectId ? (projectNames.get(l.projectId) ?? null) : null,
         place: null,
         label: null,
+        periodLabel: null,
         from: days[0]?.day ?? null,
         to: days[days.length - 1]?.day ?? null,
         hours,
@@ -445,6 +497,8 @@ export function deriveProfessionalExperience(input: {
         organizationName: nameOf(id, name),
         roles: [],
         businessPeriods: id ? (periodsByOrg.get(id) ?? []) : [],
+        formerNames: id ? formerNamesOf(periodsByOrg.get(id) ?? []) : [],
+        byPeriod: [],
         journalHours: 0,
         journalConfirmedHours: 0,
         organizationHours: 0,
@@ -482,8 +536,20 @@ export function deriveProfessionalExperience(input: {
   }
   for (const l of lines) {
     const o = ensureOrg(l.organizationId, l.organizationName);
+    const byPeriod =
+      l.counted && l.source !== "journal"
+        ? (() => {
+            const existing = o.byPeriod.find((b) => b.periodLabel === l.periodLabel);
+            return existing
+              ? o.byPeriod.map((b) =>
+                  b === existing ? { ...b, hours: b.hours + l.hours, records: b.records + l.records } : b,
+                )
+              : [...o.byPeriod, { periodLabel: l.periodLabel, hours: l.hours, records: l.records }];
+          })()
+        : o.byPeriod;
     const next: ExperienceOrganization = {
       ...o,
+      byPeriod,
       journalHours: o.journalHours + (l.counted && l.source === "journal" ? l.hours : 0),
       journalConfirmedHours: o.journalConfirmedHours + (l.counted && l.source === "journal" ? l.confirmedHours : 0),
       organizationHours: o.organizationHours + (l.counted && l.source !== "journal" ? l.hours : 0),
@@ -499,6 +565,9 @@ export function deriveProfessionalExperience(input: {
   const organizations = [...orgAcc.values()]
     .map((o) => ({
       ...o,
+      byPeriod: o.byPeriod
+        .map((b) => ({ ...b, hours: round2(b.hours) }))
+        .sort((x, y) => y.hours - x.hours || (x.periodLabel ?? "").localeCompare(y.periodLabel ?? "")),
       journalHours: round2(o.journalHours),
       journalConfirmedHours: round2(o.journalConfirmedHours),
       organizationHours: round2(o.organizationHours),

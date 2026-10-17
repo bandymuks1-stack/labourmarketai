@@ -19063,7 +19063,9 @@
     "hoursRecorded": "{hours} h recorded in {count, plural, one {# record} other {# records}}",
     "hoursPeriod": "{hours} h stated for a period, in {count, plural, one {# record} other {# records}}",
     "contested": "Contested by someone with standing",
-    "more": "{count, plural, one {# more entry} other {# more entries}} not shown"
+    "more": "{count, plural, one {# more entry} other {# more entries}} not shown",
+    "periodBand": "Period: {label}",
+    "formerly": "formerly {names}"
   },
   "companyPerson": {
     "eyebrow": "Historical person card",
@@ -19303,7 +19305,8 @@
       "stated": "legal relationship stated"
     },
     "openHistory": "Open the business history",
-    "note": "Leading an organisation is shown apart from your own work: the organisation's hours are never counted as yours."
+    "note": "Leading an organisation is shown apart from your own work: the organisation's hours are never counted as yours.",
+    "formerly": "formerly {names}"
   },
   "historyQuality": {
     "back": "Back to history",
