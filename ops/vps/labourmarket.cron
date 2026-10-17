@@ -1,0 +1,5 @@
+# /etc/cron.d/labourmarket — PREPARED, NOT INSTALLED. Same schedule as apps/web/vercel.json (Vercel Cron = UTC).
+# VPS timezone is Etc/UTC (checked 2026-10-17), so these times equal Vercel Cron UTC.
+SHELL=/bin/sh
+0 7 * * 1 root sh /root/lm-prod/bin/lm-cron.sh weekly-digest
+0 6 * * * root sh /root/lm-prod/bin/lm-cron.sh commercial-handoffs
