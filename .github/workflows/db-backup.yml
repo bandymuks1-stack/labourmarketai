@@ -3,10 +3,11 @@ name: DB backup (Supabase → VPS, encrypted)
 # Nightly logical backup of the production Supabase database (plan: Free = no
 # automated backups from Supabase). Owner decision 2026-10-17 (P0), zero cost.
 #
-# Why GitHub Actions and not the VPS: the repository already holds the
-# read-capable `SUPABASE_DB_URL` secret (used by the migration-parity gate),
-# so NO database password has to be typed, pasted or copied anywhere new, and
-# nothing on the VPS can read the database. The runner is ephemeral.
+# Why GitHub Actions and not the VPS: the dump needs a role that can read every
+# public table; that role's connection string lives ONLY as the GitHub secret
+# `SUPABASE_BACKUP_DB_URL` (owner-created from the Supabase dashboard; the
+# parity gate's `SUPABASE_DB_URL` role cannot read product tables), nothing on
+# the VPS can read the database, and the runner is ephemeral.
 #
 # What it does, every night and on demand:
 #   1. pg_dump (PG 17 client) of the whole database — schema + data, custom format;
@@ -21,7 +22,7 @@ name: DB backup (Supabase → VPS, encrypted)
 # The plaintext dump never leaves the runner and is shredded before the job ends.
 # Nothing is uploaded as a GitHub artifact (public repository).
 #
-# Secrets (names only): SUPABASE_DB_URL (exists), VPS_DEPLOY_SSH_KEY,
+# Secrets (names only): SUPABASE_BACKUP_DB_URL (owner-created), VPS_DEPLOY_SSH_KEY,
 # VPS_DEPLOY_HOST, VPS_DEPLOY_KNOWN_HOSTS (the deploy trio). Without them the
 # job FAILS loudly — a backup that did not happen must never look green.
 
@@ -59,13 +60,13 @@ jobs:
     steps:
       - name: Require secrets (no silent no-op)
         env:
-          HAS_DB: ${{ secrets.SUPABASE_DB_URL != '' }}
+          HAS_DB: ${{ secrets.SUPABASE_BACKUP_DB_URL != '' }}
           HAS_KEY: ${{ secrets.VPS_DEPLOY_SSH_KEY != '' }}
           HAS_HOST: ${{ secrets.VPS_DEPLOY_HOST != '' }}
           HAS_KH: ${{ secrets.VPS_DEPLOY_KNOWN_HOSTS != '' }}
           DRILL_ONLY: ${{ inputs.restore_drill_only }}
         run: |
-          [ "$HAS_DB" = "true" ] || { echo "::error::secrets.SUPABASE_DB_URL is not configured — no backup taken"; exit 1; }
+          [ "$HAS_DB" = "true" ] || { echo "::error::secrets.SUPABASE_BACKUP_DB_URL is not configured (a Session-pooler URI of a role that can read every public table; the parity-gate SUPABASE_DB_URL role cannot: 'permission denied for table profiles' on 2026-10-17) — no backup taken"; exit 1; }
           if [ "$DRILL_ONLY" != "true" ]; then
             [ "$HAS_KEY" = "true" ] && [ "$HAS_HOST" = "true" ] && [ "$HAS_KH" = "true" ] \
               || { echo "::error::VPS_DEPLOY_SSH_KEY / VPS_DEPLOY_HOST / VPS_DEPLOY_KNOWN_HOSTS missing — no backup shipped"; exit 1; }
@@ -85,7 +86,7 @@ jobs:
           /usr/lib/postgresql/17/bin/pg_dump --version; age --version
       - name: Dump (plaintext stays on this runner only)
         env:
-          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          DB_URL: ${{ secrets.SUPABASE_BACKUP_DB_URL }}
         run: |
           set -euo pipefail
           umask 077
