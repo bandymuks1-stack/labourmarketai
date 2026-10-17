@@ -57,7 +57,17 @@ const schema = z.object({
    * MCP clients when its hostname is not one of ours (lib/mcp/public-origin.ts).
    * Unset on Vercel and on production: the request host decides there.
    */
-  PUBLIC_ORIGIN: z.preprocess(blankAsAbsent, z.string().url().optional()),
+  PUBLIC_ORIGIN: z.preprocess(
+    blankAsAbsent,
+    z
+      .string()
+      .url()
+      .refine(
+        (v) => v.startsWith("https://") && new URL(v).origin === v.replace(/\/$/, ""),
+        "PUBLIC_ORIGIN must be an https origin with no path, query or fragment",
+      )
+      .optional(),
+  ),
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS: z
     .enum(["true", "false"])
     .default("true"),
