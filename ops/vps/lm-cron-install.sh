@@ -21,7 +21,7 @@ for r in weekly-digest commercial-handoffs job-alerts; do
   [ "$noauth" = "401" ] || { echo "STOP: /api/cron/$r without secret answered $noauth (expected 401)"; exit 1; }
   echo "$r: unauthenticated=401 OK"
 done
-grep -q "billing-recovery" "$SRC" && { echo "STOP: billing-recovery must not be scheduled while payments are off"; exit 1; }
+grep -vE '^\s*#' "$SRC" | grep -q "billing-recovery" && { echo "STOP: billing-recovery must not be scheduled while payments are off"; exit 1; }
 if [ "$MODE" = "--dry-run" ]; then echo "dry-run OK: nothing installed (authenticated calls are made only on install)"; exit 0; fi
 install -m 644 -o root -g root "$SRC" "$DST"
 echo "installed $DST:"; grep -v '^#' "$DST"
