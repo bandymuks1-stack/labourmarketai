@@ -49,6 +49,7 @@ on:
           - recognition-chain
           - mcp-chain
           - mcp-agents
+          - mcp-oauth-client
           - project-context
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
@@ -245,6 +246,9 @@ jobs:
             recognition-chain) SPEC=tests/e2e/prod-recognition-chain.spec.ts ;;
             mcp-chain) SPEC=tests/e2e/prod-mcp-chain.spec.ts ;;
             mcp-agents) SPEC=tests/e2e/prod-mcp-agents.spec.ts ;;
+            # External-client OAuth conformance (DCR -> PKCE -> consent -> token -> use -> refresh -> revoke).
+            # Dispatch-only until its first green run; then it may join the rotation.
+            mcp-oauth-client) SPEC=tests/e2e/mcp-oauth-client.spec.ts ;;
             project-context) SPEC=tests/e2e/prod-project-context.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
