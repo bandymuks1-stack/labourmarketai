@@ -914,7 +914,15 @@
         "journal": "dziennik pracy",
         "organization_day": "zapisy dzienne organizacji",
         "organization_period": "suma organizacji za okres"
-      }
+      },
+      "formerly": "dawniej {names}",
+      "periodBand": "Okres: {label}",
+      "byPeriodUnplaced": "bez podanego okresu",
+      "relationTitle": "Relacja prawna",
+      "earlierEntity": "Odrębny podmiot prawny",
+      "administeredBy": "Zapisy administruje {name}",
+      "continues": "Kontynuuje działalność wcześniejszego podmiotu prawnego: {names}",
+      "roleDerived": "według oświadczenia organizacji o okresie"
     },
     "confirmedHours": "Potwierdzone przez kierownika",
     "confirmedOf": "{confirmed} z {total} godz. potwierdzonych zapisem kierownika",

@@ -914,7 +914,15 @@
         "journal": "рабочий журнал",
         "organization_day": "дневные записи организации",
         "organization_period": "итог организации за период"
-      }
+      },
+      "formerly": "ранее {names}",
+      "periodBand": "Период: {label}",
+      "byPeriodUnplaced": "без указанного периода",
+      "relationTitle": "Юридическая связь",
+      "earlierEntity": "Отдельное юридическое лицо",
+      "administeredBy": "Записи администрирует {name}",
+      "continues": "Продолжает деятельность более раннего юридического лица: {names}",
+      "roleDerived": "по заявлению организации о периоде"
     },
     "confirmedHours": "Подтверждено руководителем",
     "confirmedOf": "{confirmed} из {total} ч подтверждено записью руководителя",

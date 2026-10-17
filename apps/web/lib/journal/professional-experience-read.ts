@@ -84,6 +84,8 @@ export async function readOwnExperienceRelationships(
         to: p.periodEnd,
         basis: p.basis,
         legalEntityRelation: p.legalEntityRelation,
+        legalEntityLabel: p.legalEntityLabel,
+        sourceLabels: p.sourceLabels,
       })),
     );
   }

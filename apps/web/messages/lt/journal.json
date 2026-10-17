@@ -914,7 +914,15 @@
         "journal": "darbo žurnalas",
         "organization_day": "organizacijos dienų įrašai",
         "organization_period": "organizacijos laikotarpio suma"
-      }
+      },
+      "formerly": "anksčiau {names}",
+      "periodBand": "Laikotarpis: {label}",
+      "byPeriodUnplaced": "be nurodyto laikotarpio",
+      "relationTitle": "Juridinis ryšys",
+      "earlierEntity": "Atskiras juridinis asmuo",
+      "administeredBy": "Įrašus administruoja {name}",
+      "continues": "Tęsia ankstesnio juridinio asmens veiklą: {names}",
+      "roleDerived": "pagal organizacijos laikotarpio teiginį"
     },
     "confirmedHours": "Patvirtinta vadovo",
     "confirmedOf": "{confirmed} iš {total} val. patvirtinta vadovo įrašu",

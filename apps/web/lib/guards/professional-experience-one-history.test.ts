@@ -174,3 +174,97 @@ describe("3 · copy in every published locale", () => {
     });
   }
 });
+
+describe("4 · one organization identity with a name history (owner correction 2026-10-17)", () => {
+  const orgHistory = read("lib/cv-export/organization-history.ts");
+  const evidenceRead = read("lib/organization-evidence/worker-evidence-read.ts");
+  const context = read("lib/organization-evidence/professional-history-context.ts");
+  const lines = read("components/app/cv/organization-history-lines.ts");
+  const leadership = read("components/app/organization/organizations-leadership.tsx");
+
+  it("a former name follows ONLY from a period the owner states as the same legal entity (renamed / same_entity)", () => {
+    expect(reading).toContain('export const FORMER_NAME_RELATIONS: ReadonlySet<string> = new Set(["renamed", "same_entity"]);');
+    expect(reading).toMatch(/export function formerNamesOf\(/);
+    expect(reading).toMatch(/export function periodLabelFor\(/);
+  });
+  it("the record's source label travels as data from the one evidence read into the context and the CV group — and is never printed raw", () => {
+    expect(evidenceRead).toContain("source_sheet:source_fact->>source_sheet");
+    expect(evidenceRead).toContain("sourceLabel: (r.source_sheet as string | null) ?? null");
+    expect(context).toContain("label: clean(i.sourceLabel ?? null)");
+    expect(orgHistory).toContain("norm(c.source.label)");
+    expect(orgHistory).toContain("sourceLabel: c.source.label");
+    // the CV line prints the resolved PERIOD, through the caller's resolver, never e.sourceLabel itself
+    expect(lines).toMatch(/w\.periodLabel\?\.\(e\.sourceLabel\)/);
+    expect(lines).not.toMatch(/\$\{e\.sourceLabel\}|e\.sourceLabel\s*\]/);
+    expect(scale).not.toMatch(/source\.label|sourceLabel/);
+  });
+  it("the experience scale, the CV and the leadership block say the former name beside the current one and use the business history's relation words", () => {
+    expect(scale).toContain('data-testid="wi-experience-org-formerly"');
+    expect(scale).toContain('getTranslations("companyWorkHistory.business.relation")');
+    expect(scale).toContain('data-testid="wi-experience-by-period"');
+    expect(leadership).toContain('getTranslations("companyWorkHistory.business.relation")');
+    expect(leadership).toContain('data-testid="organizations-leadership-formerly"');
+    expect(leadership).not.toMatch(/relation\.\$\{p\.legalEntityRelation === "not_asserted"/);
+    expect(cvPage).toContain("periodLabelOf={periodLabelOf}");
+    expect(cvPage).toMatch(/const businessPeriods = \(cv\.professionalExperience\?\.roles \?\? \[\]\)\.flatMap\(\(r\) => r\.businessPeriods\);/);
+  });
+  it("the copy exists in every published locale", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as { intelligence: { experience: Record<string, string> } };
+      for (const k of ["formerly", "periodBand", "byPeriodUnplaced"]) {
+        expect(j.intelligence.experience[k], `${loc}.experience.${k}`).toMatch(/\S/);
+      }
+      const base = JSON.parse(read(`messages/${loc}.json`)) as {
+        cvOrganizationHistory: Record<string, string>;
+        organizationsLeadership: Record<string, string>;
+        companyWorkHistory: { business: { relation: Record<string, string> } };
+      };
+      expect(base.cvOrganizationHistory.periodBand).toContain("{label}");
+      expect(base.cvOrganizationHistory.formerly).toContain("{names}");
+      expect(base.organizationsLeadership.formerly).toContain("{names}");
+      for (const r of ["not_asserted", "same_entity", "renamed", "successor", "sold_and_continued_by_new_entity", "other"]) {
+        expect(base.companyWorkHistory.business.relation[r], `${loc}.relation.${r}`).toMatch(/\S/);
+      }
+    }
+  });
+});
+
+describe("5 · separate legal entities, one person history (owner final statement 2026-10-17)", () => {
+  it("an earlier legal entity is its own row in the reading, administered by the continuing organization; only renamed / same_entity make a former name", () => {
+    expect(reading).toContain('readonly kind: "organization" | "earlier_legal_entity" | "personal";');
+    expect(reading).toMatch(/const earlierEntitiesOf = \(id: string \| null\): ExperienceBusinessPeriod\[\] =>\s*id \? \(periodsByOrg\.get\(id\) \?\? \[\]\)\.filter\(\(p\) => !FORMER_NAME_RELATIONS\.has\(p\.legalEntityRelation\)\) : \[\];/);
+    expect(reading).toContain('"earlier_legal_entity", org.organizationId, p.legalEntityLabel ?? p.label');
+    expect(reading).toContain("administeredBy: org.organizationId");
+    // the owner is projected onto the earlier entity as a DERIVED role; nobody else is
+    expect(reading).toMatch(/if \(r\.relationship === "owner"\) \{\s*for \(const p of earlierEntitiesOf\(r\.organizationId\)\)/);
+    expect(reading).toContain("derived: true");
+    // records are never moved: a line keeps its organizationId, the row only says the entity of the time
+    expect(reading).not.toMatch(/organizationId: p\.legalEntityOrganizationId|organizationId: e\.organizationId/);
+  });
+  it("the experience scale and the CV say separate legal entity + administered by, never a former name, for such a period", () => {
+    expect(scale).toContain('data-testid="wi-experience-earlier-entity"');
+    expect(scale).toContain('data-testid="wi-experience-entity-relation"');
+    expect(scale).toContain('t("experience.administeredBy"');
+    expect(scale).toContain('t("experience.roleDerived")');
+    expect(scale).toMatch(/\.filter\(\(p\) => FORMER_NAME_RELATIONS\.has\(p\.legalEntityRelation\)\)/);
+    expect(cvPage).toContain('tOrgHist("legalEntityBand", {');
+    expect(cvPage).toMatch(/if \(FORMER_NAME_RELATIONS\.has\(p\.legalEntityRelation\)\) return tOrgHist\("periodBand"/);
+  });
+  it("the decision record carries the final owner statement and withdraws the renamed proposal", () => {
+    const doc = read("../../docs/DECISIONS/0025-one-person-one-continuous-professional-history.md");
+    expect(doc).toContain("## Addendum B");
+    expect(doc).toContain("sold_and_continued_by_new_entity");
+    expect(doc).toMatch(/Superseded in part by Addendum B/);
+  });
+  it("the copy exists in every published locale", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
+      const j = JSON.parse(read(`messages/${loc}/journal.json`)) as { intelligence: { experience: Record<string, string> } };
+      for (const k of ["earlierEntity", "administeredBy", "continues", "roleDerived"]) {
+        expect(j.intelligence.experience[k], `${loc}.experience.${k}`).toMatch(/\S/);
+      }
+      const base = JSON.parse(read(`messages/${loc}.json`)) as { cvOrganizationHistory: Record<string, string> };
+      expect(base.cvOrganizationHistory.legalEntityBand).toContain("{label}");
+      expect(base.cvOrganizationHistory.legalEntityBand).toContain("{org}");
+    }
+  });
+});

@@ -19063,7 +19063,10 @@
     "hoursRecorded": "{hours} godz. zarejestrowano ({count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}})",
     "hoursPeriod": "{hours} godz. podano dla okresu ({count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}})",
     "contested": "Zakwestionowane przez uprawnioną stronę",
-    "more": "Nie pokazano jeszcze {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}}"
+    "more": "Nie pokazano jeszcze {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}}",
+    "periodBand": "Okres: {label}",
+    "formerly": "dawniej {names}",
+    "legalEntityBand": "Ówczesny podmiot prawny: {label} · zapisy administruje {org}"
   },
   "companyPerson": {
     "eyebrow": "Historyczna karta osoby",
@@ -19303,7 +19306,8 @@
       "stated": "zadeklarowano związek prawny"
     },
     "openHistory": "Otwórz historię firmy",
-    "note": "Kierowanie organizacją jest pokazane osobno od Twojej własnej pracy: godziny organizacji nigdy nie liczą się jako Twoje."
+    "note": "Kierowanie organizacją jest pokazane osobno od Twojej własnej pracy: godziny organizacji nigdy nie liczą się jako Twoje.",
+    "formerly": "dawniej {names}"
   },
   "historyQuality": {
     "back": "Wróć do historii",
