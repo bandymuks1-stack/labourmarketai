@@ -914,7 +914,11 @@
         "journal": "work journal",
         "organization_day": "organisation day records",
         "organization_period": "organisation period total"
-      }
+      },
+      "formerly": "formerly {names}",
+      "periodBand": "Period: {label}",
+      "byPeriodUnplaced": "no stated period",
+      "relationTitle": "Legal relationship"
     },
     "confirmedHours": "Manager-confirmed",
     "confirmedOf": "{confirmed} of {total} h confirmed by a manager's record",

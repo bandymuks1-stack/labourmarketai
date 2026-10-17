@@ -19,6 +19,11 @@ export interface OrganizationHistoryWords {
   readonly relationship: (slug: string) => string | null;
   readonly hours: (n: number) => string;
   readonly date: (iso: string) => string | null;
+  /** The stated business PERIOD a source label resolves to (e.g. the sheet
+   *  "Vivat Rex PL" → the period "Vivat Rex"), when the viewer can read the
+   *  organization's period statements; null = no period, nothing shown. The
+   *  raw label is never printed: a sheet may be named after a person. */
+  readonly periodLabel?: (sourceLabel: string) => string | null;
 }
 
 export interface OrganizationHistoryLines {
@@ -37,8 +42,13 @@ export function organizationHistoryLines(
   w: OrganizationHistoryWords,
 ): OrganizationHistoryLines {
   const heading = e.project ?? e.place ?? e.organizationName ?? w.t("untitled");
+  const period_ = e.sourceLabel ? (w.periodLabel?.(e.sourceLabel) ?? null) : null;
   const subheading =
-    [e.project ? (e.place ?? null) : null, e.project || e.place ? e.organizationName : null]
+    [
+      e.project ? (e.place ?? null) : null,
+      e.project || e.place ? e.organizationName : null,
+      period_ ? w.t("periodBand", { label: period_ }) : null,
+    ]
       .filter((x): x is string => !!x)
       .join(" · ") || null;
 

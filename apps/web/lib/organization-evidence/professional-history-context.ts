@@ -89,6 +89,12 @@ export interface HistoryContextInput {
   readonly supplierOrganizationId: string | null;
   readonly sourceKind: string | null;
   readonly rowOrigin: string | null;
+  /** The source's own dataset label, verbatim (`source_fact.source_sheet`,
+   *  e.g. the sheet name "Vivat Rex PL"): the entity-at-the-time provenance
+   *  that places a record in a stated business period (decision 2026-09-30).
+   *  Data only — a surface names a PERIOD it resolved from it, never the raw
+   *  label (a sheet may be named after a person). */
+  readonly sourceLabel?: string | null;
   /** The record's REPORTED (base) state, before any lifecycle event. */
   readonly reportedState: string | null;
   readonly attestation: { readonly role: string | null; readonly self: boolean } | null;
@@ -133,6 +139,9 @@ export interface HistoryContext {
     readonly supplierName: string | null;
     /** Rebuilt from an earlier record, not entered as it happened. */
     readonly reconstructed: boolean;
+    /** The source's dataset label as the record carries it (see
+     *  `HistoryContextInput.sourceLabel`); null when the source had none. */
+    readonly label: string | null;
   };
   readonly proof: {
     /** Distinct facts that hold. Empty = nobody has said anything yet. */
@@ -291,6 +300,7 @@ export function buildHistoryContext(i: HistoryContextInput): HistoryContext {
         ? clean(i.organizationNames?.get(i.supplierOrganizationId))
         : null,
       reconstructed,
+      label: clean(i.sourceLabel ?? null),
     },
     proof,
     hasDetail,

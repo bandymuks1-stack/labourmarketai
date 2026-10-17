@@ -914,7 +914,11 @@
         "journal": "werkjournaal",
         "organization_day": "dagregistraties van de organisatie",
         "organization_period": "periodetotaal van de organisatie"
-      }
+      },
+      "formerly": "voorheen {names}",
+      "periodBand": "Periode: {label}",
+      "byPeriodUnplaced": "zonder opgegeven periode",
+      "relationTitle": "Juridische relatie"
     },
     "confirmedHours": "Door leidinggevende bevestigd",
     "confirmedOf": "{confirmed} van {total} u bevestigd door een registratie van de leidinggevende",

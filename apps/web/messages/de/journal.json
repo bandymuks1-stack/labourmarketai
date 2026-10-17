@@ -914,7 +914,11 @@
         "journal": "Arbeitsjournal",
         "organization_day": "Tageseinträge der Organisation",
         "organization_period": "Zeitraumsumme der Organisation"
-      }
+      },
+      "formerly": "früher {names}",
+      "periodBand": "Zeitraum: {label}",
+      "byPeriodUnplaced": "ohne angegebenen Zeitraum",
+      "relationTitle": "Rechtliche Beziehung"
     },
     "confirmedHours": "Von Führungskraft bestätigt",
     "confirmedOf": "{confirmed} von {total} Std. durch einen Eintrag der Führungskraft bestätigt",

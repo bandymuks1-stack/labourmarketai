@@ -54,6 +54,9 @@ export async function ExperienceScale({
   const all = wi.periods.find((p) => p.key === "all");
   if (!all) return null;
   const tRel = await getTranslations("relationshipTypes");
+  // The legal-entity relation words of a stated business period are the
+  // business history's own vocabulary — one statement, one wording.
+  const tRelation = await getTranslations("companyWorkHistory.business.relation");
   const org = organizationAllTime(wi);
   const orgHours = organizationHoursBeyondJournal(wi);
   const span = org ? monthSpanOf(org.from, org.to) : null;
@@ -184,10 +187,19 @@ export async function ExperienceScale({
                       data-testid="wi-experience-org-row"
                       data-organization={o.organizationId ?? ""}
                       data-hours={o.totalHours}
+                      data-former-names={o.formerNames.join(" | ")}
                     >
                       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                         <span className="font-medium text-text-primary">
                           {o.organizationName ?? (o.organizationId ? t("experience.orgUnnamed") : t("experience.personalRecords"))}
+                          {/* ONE organization identity with a name history: an
+                              earlier period the owner states as the SAME legal
+                              entity is a former name, said beside the current one. */}
+                          {o.formerNames.length > 0 ? (
+                            <span className="ml-1 font-normal text-text-muted" data-testid="wi-experience-org-formerly">
+                              ({t("experience.formerly", { names: o.formerNames.join(", ") })})
+                            </span>
+                          ) : null}
                         </span>
                         <span className="font-mono text-support text-text-primary [font-feature-settings:'tnum']">
                           {o.totalHours > 0 ? hours(o.totalHours) : t("experience.rowNoHours")}
@@ -203,11 +215,33 @@ export async function ExperienceScale({
                         </ul>
                       ) : null}
                       {o.businessPeriods.map((p) => (
-                        <p key={p.id} className="text-meta text-text-secondary" data-testid="wi-experience-business-period">
+                        <p
+                          key={p.id}
+                          className="text-meta text-text-secondary"
+                          data-testid="wi-experience-business-period"
+                          data-relation={p.legalEntityRelation}
+                        >
                           {t("experience.businessPeriod", { label: p.label })} ·{" "}
-                          {spanWords(p.from, p.to) ?? t("experience.datesNotDocumented")}
+                          {spanWords(p.from, p.to) ?? t("experience.datesNotDocumented")} ·{" "}
+                          {tRelation(p.legalEntityRelation as never)}
                         </p>
                       ))}
+                      {/* Organization hours per stated period — the record's own
+                          source label resolved against the statements; "no stated
+                          period" is said, never folded into a period by guess. */}
+                      {o.byPeriod.some((b) => b.periodLabel !== null) ? (
+                        <ul className="flex flex-col gap-0.5" data-testid="wi-experience-by-period">
+                          {o.byPeriod.map((b) => (
+                            <li key={b.periodLabel ?? ""} className="text-meta text-text-secondary" data-period={b.periodLabel ?? ""}>
+                              {b.periodLabel
+                                ? t("experience.periodBand", { label: b.periodLabel })
+                                : t("experience.byPeriodUnplaced")}
+                              {" · "}
+                              {t("experience.rowOrganization", { hours: fmtHours(b.hours, locale), records: b.records })}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                       <p className="text-meta text-text-muted">
                         {[
                           o.journalHours > 0 || o.entries > 0

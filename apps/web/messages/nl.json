@@ -19063,7 +19063,9 @@
     "hoursRecorded": "{hours} u geregistreerd in {count, plural, one {# registratie} other {# registraties}}",
     "hoursPeriod": "{hours} u opgegeven voor een periode, in {count, plural, one {# registratie} other {# registraties}}",
     "contested": "Betwist door een daartoe bevoegde partij",
-    "more": "Nog {count, plural, one {# vermelding} other {# vermeldingen}} niet getoond"
+    "more": "Nog {count, plural, one {# vermelding} other {# vermeldingen}} niet getoond",
+    "periodBand": "Periode: {label}",
+    "formerly": "voorheen {names}"
   },
   "companyPerson": {
     "eyebrow": "Historische persoonskaart",
@@ -19303,7 +19305,8 @@
       "stated": "juridische relatie verklaard"
     },
     "openHistory": "Bedrijfsgeschiedenis openen",
-    "note": "Leiding geven aan een organisatie staat los van je eigen werk: de uren van de organisatie tellen nooit als de jouwe."
+    "note": "Leiding geven aan een organisatie staat los van je eigen werk: de uren van de organisatie tellen nooit als de jouwe.",
+    "formerly": "voorheen {names}"
   },
   "historyQuality": {
     "back": "Terug naar geschiedenis",

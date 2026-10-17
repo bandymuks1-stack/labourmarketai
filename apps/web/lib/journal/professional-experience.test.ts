@@ -4,6 +4,8 @@ import { deriveIndependentReviewResult } from "@/lib/journal/review-status";
 import { organizationAllTime, organizationHoursBeyondJournal } from "@/lib/journal/organization-all-time";
 import {
   deriveProfessionalExperience,
+  formerNamesOf,
+  periodLabelFor,
   type ExperienceRelationship,
 } from "@/lib/journal/professional-experience";
 import {
@@ -133,7 +135,15 @@ const OWNER_RELATIONSHIPS: ExperienceRelationship[] = [
     current: true,
     source: "engagement",
     businessPeriods: [
-      { id: "bp-vivat", label: "Vivat Rex", from: null, to: null, basis: "owner_statement", legalEntityRelation: "not_asserted" },
+      {
+        id: "bp-vivat",
+        label: "Vivat Rex",
+        from: null,
+        to: null,
+        basis: "owner_statement",
+        legalEntityRelation: "not_asserted",
+        sourceLabels: ["Vivat Rex PL", "Nonstop-Vivat Rex PL"],
+      },
     ],
   },
   // The canonical Nonstop company: a manager MEMBERSHIP, no engagement row,
@@ -340,7 +350,7 @@ describe("owner scenarios (2026-10-17 §8)", () => {
       wi: model({}),
       relationships: [
         rel({ organizationId: "org-a", relationship: "manager" }),
-        rel({ organizationId: "org-b", relationship: "owner", businessPeriods: [{ id: "p", label: "Earlier name", from: "2020-01-01", to: "2022-12-31", basis: "owner_statement", legalEntityRelation: "renamed" }] }),
+        rel({ organizationId: "org-b", relationship: "owner", businessPeriods: [{ id: "p", label: "Earlier name", from: "2020-01-01", to: "2022-12-31", basis: "owner_statement", legalEntityRelation: "renamed", sourceLabels: [] }] }),
       ],
     });
     expect(exp.organizations.map((o) => [o.organizationId, o.totalHours, o.roles[0]?.relationship])).toEqual([
@@ -474,7 +484,7 @@ describe("dedup and honesty rules", () => {
             activityKind: "work",
             effective: { kind: "day", date: "2025-07-01" },
             recordedAt: null,
-            source: { kind: "csv", supplierRole: "employer", supplierOrganizationId: "org-a", supplierName: "A", reconstructed: false },
+            source: { kind: "csv", supplierRole: "employer", supplierOrganizationId: "org-a", supplierName: "A", reconstructed: false, label: null },
             proof: { concepts: [], attestedByRole: null, contested: false },
             hasDetail: true,
           },
@@ -492,5 +502,105 @@ describe("dedup and honesty rules", () => {
     const exp = deriveProfessionalExperience({ wi: model({}), relationships: [] });
     const keys = JSON.stringify(exp).toLowerCase();
     expect(keys).not.toMatch(/score|rating|"rank"|tier/);
+  });
+});
+
+describe("one organization identity with a name history (owner correction 2026-10-17: Vivat Rex → Labour Market AI)", () => {
+  const ctxOf = (sourceLabel: string | null) => ({
+    project: null,
+    place: null,
+    clients: [],
+    otherParties: [],
+    relationshipKind: "employee",
+    activityKind: "work",
+    effective: null,
+    recordedAt: null,
+    source: { kind: "xlsx", supplierRole: "employer", supplierOrganizationId: ORG_LM, supplierName: "Labour market ai Sp. z o.o", reconstructed: false, label: sourceLabel },
+    proof: { concepts: [], attestedByRole: null, contested: false },
+    hasDetail: true,
+  });
+  const day = (id: string, workDate: string, hours: number, sourceLabel: string | null): WorkIntelligenceOrganizationRecord => ({
+    id,
+    workDate,
+    hours,
+    source: "import",
+    status: "recorded",
+    organizationId: ORG_LM,
+    journalEntryId: null,
+    context: ctxOf(sourceLabel),
+  });
+  const RENAMED: ExperienceRelationship = {
+    ...OWNER_RELATIONSHIPS[0]!,
+    businessPeriods: [
+      {
+        id: "bp-vivat",
+        label: "Vivat Rex",
+        from: "2022-01-01",
+        to: "2024-10-13",
+        basis: "owner_statement",
+        legalEntityRelation: "renamed",
+        sourceLabels: ["Vivat Rex PL", "Nonstop-Vivat Rex PL"],
+      },
+    ],
+  };
+  // The production shape in miniature: a 2024 "Vivat Rex PL" row, a late-2024
+  // "Nonstop-Vivat Rex PL" row, a 2025 row the prepared file left unlabelled,
+  // and a 2022 row whose sheet is a PERSON's first name (never a period).
+  const wi = model({
+    dayRecords: [
+      day("d1", "2024-03-05", 8, "Vivat Rex PL"),
+      day("d2", "2024-10-20", 7, "Nonstop-Vivat Rex PL"),
+      day("d3", "2025-04-02", 6, null),
+      day("d4", "2022-02-01", 5, "Ramunas"),
+    ],
+  });
+
+  it("a period the owner states as the SAME legal entity (renamed) is a former name of the organization — one identity, a name history", () => {
+    const exp = deriveProfessionalExperience({ wi, relationships: [RENAMED] });
+    const lm = exp.organizations.find((o) => o.organizationId === ORG_LM)!;
+    expect(lm.organizationName).toBe("Labour market ai Sp. z o.o");
+    expect(lm.formerNames).toEqual(["Vivat Rex"]);
+    expect(formerNamesOf(RENAMED.businessPeriods)).toEqual(["Vivat Rex"]);
+  });
+
+  it("`not_asserted`, `successor` and `sold_and_continued_by_new_entity` are business continuity, not a former name", () => {
+    for (const relation of ["not_asserted", "successor", "sold_and_continued_by_new_entity", "other"]) {
+      const periods = [{ ...RENAMED.businessPeriods[0]!, legalEntityRelation: relation }];
+      expect(formerNamesOf(periods), relation).toEqual([]);
+    }
+    expect(formerNamesOf([{ ...RENAMED.businessPeriods[0]!, legalEntityRelation: "same_entity" }])).toEqual(["Vivat Rex"]);
+  });
+
+  it("a record's source label resolves to the stated period; an unlabelled or person-named sheet stays 'no stated period' — never printed raw, never guessed", () => {
+    const exp = deriveProfessionalExperience({ wi, relationships: [RENAMED] });
+    // grouped per (organization, project, place, PERIOD): the two labelled
+    // rows form the "Vivat Rex" line; the unlabelled and the person-named
+    // rows form the line with no stated period
+    expect(exp.lines.map((l) => [l.hours, l.records, l.periodLabel]).sort()).toEqual(
+      [
+        [15, 2, "Vivat Rex"],
+        [11, 2, null],
+      ].sort(),
+    );
+    expect(exp.lines.map((l) => l.periodLabel)).not.toContain("Ramunas");
+    expect(periodLabelFor("vivat rex pl", RENAMED.businessPeriods)).toBe("Vivat Rex");
+    expect(periodLabelFor("Ramunas", RENAMED.businessPeriods)).toBeNull();
+    expect(periodLabelFor(null, RENAMED.businessPeriods)).toBeNull();
+  });
+
+  it("hours per stated period inside the organization row, with the unplaced rest said as such; the total is unchanged by the naming", () => {
+    const exp = deriveProfessionalExperience({ wi, relationships: [RENAMED] });
+    const lm = exp.organizations.find((o) => o.organizationId === ORG_LM)!;
+    expect(lm.byPeriod).toEqual([
+      { periodLabel: "Vivat Rex", hours: 15, records: 2 },
+      { periodLabel: null, hours: 11, records: 2 },
+    ]);
+    expect(exp.hours?.total).toBe(26);
+    // without readable period statements (a worker who does not manage the
+    // organization) nothing is placed — and nothing is lost
+    const none = deriveProfessionalExperience({ wi, relationships: [{ ...RENAMED, businessPeriods: [] }] });
+    expect(none.hours?.total).toBe(26);
+    expect(none.organizations[0]!.byPeriod).toEqual([{ periodLabel: null, hours: 26, records: 4 }]);
+    expect(none.organizations[0]!.formerNames).toEqual([]);
   });
 });
