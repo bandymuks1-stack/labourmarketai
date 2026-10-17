@@ -72,8 +72,12 @@ on:
       - "apps/web/**"
       - "packages/**"
       - "pnpm-lock.yaml"
+  # 2026-10-17 (Supabase log-ingestion quota, 2.22 GB/month on the Free plan): one signed-in walk loads
+  # ~36 Supabase calls per dashboard document, so the eight walks of 2026-10-17 alone wrote 23,400 of the
+  # day's 25,200 edge-log entries. The routine signal is now ONE rotating walk a WEEK (Sunday 03:41 UTC)
+  # plus the debounced post-merge role-routes walk; the full catalogue is still available on dispatch.
   schedule:
-    - cron: "41 3 * * *"
+    - cron: "41 3 * * 0"
 
 permissions:
   contents: read
@@ -107,7 +111,7 @@ jobs:
           case "$EVENT" in
             workflow_dispatch) spec="$INPUT_SPEC" ;;
             push) spec=role-routes ;;
-            schedule) spec="${ROTATION[$(( 10#$(date -u +%j) % ${#ROTATION[@]} ))]}" ;;
+            schedule) spec="${ROTATION[$(( 10#$(date -u +%U) % ${#ROTATION[@]} ))]}" ;;
             *) echo "::error::unexpected event $EVENT"; exit 1 ;;
           esac
           echo "spec=$spec" >> "$GITHUB_OUTPUT"
