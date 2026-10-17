@@ -1,0 +1,139 @@
+name: DB backup (Supabase → VPS, encrypted)
+
+# Nightly logical backup of the production Supabase database (plan: Free = no
+# automated backups from Supabase). Owner decision 2026-10-17 (P0), zero cost.
+#
+# Why GitHub Actions and not the VPS: the repository already holds the
+# read-capable `SUPABASE_DB_URL` secret (used by the migration-parity gate),
+# so NO database password has to be typed, pasted or copied anywhere new, and
+# nothing on the VPS can read the database. The runner is ephemeral.
+#
+# What it does, every night and on demand:
+#   1. pg_dump (PG 17 client) of the whole database — schema + data, custom format;
+#   2. RESTORE DRILL: restore the dump into a throw-away postgres:17 service
+#      container on the runner, count tables and rows, fail if the restore fails
+#      (a backup nobody has restored is not a backup);
+#   3. encrypt with `age` to the VPS backup public key (ops/vps/backup.age.pub —
+#      the private key lives only on the VPS, 600, plus the owner's offline copy);
+#   4. ship the encrypted file over the forced-command SSH channel
+#      (`lmbackup` receiver action in ops/vps/lm-deploy-receive.sh), which stores
+#      it under /root/lm-prod/backups/ (700) and keeps 14 days.
+# The plaintext dump never leaves the runner and is shredded before the job ends.
+# Nothing is uploaded as a GitHub artifact (public repository).
+#
+# Secrets (names only): SUPABASE_DB_URL (exists), VPS_DEPLOY_SSH_KEY,
+# VPS_DEPLOY_HOST, VPS_DEPLOY_KNOWN_HOSTS (the deploy trio). Without them the
+# job FAILS loudly — a backup that did not happen must never look green.
+
+on:
+  schedule:
+    - cron: "30 3 * * *"   # 03:30 UTC nightly (after the 03:00 legacy cron, before EU office hours)
+  workflow_dispatch:
+    inputs:
+      restore_drill_only:
+        description: "Only dump + restore drill on the runner; ship nothing"
+        type: boolean
+        default: false
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      drill:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: drill
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      TZ: UTC
+    steps:
+      - name: Require secrets (no silent no-op)
+        env:
+          HAS_DB: ${{ secrets.SUPABASE_DB_URL != '' }}
+          HAS_KEY: ${{ secrets.VPS_DEPLOY_SSH_KEY != '' }}
+          HAS_HOST: ${{ secrets.VPS_DEPLOY_HOST != '' }}
+          HAS_KH: ${{ secrets.VPS_DEPLOY_KNOWN_HOSTS != '' }}
+          DRILL_ONLY: ${{ inputs.restore_drill_only }}
+        run: |
+          [ "$HAS_DB" = "true" ] || { echo "::error::secrets.SUPABASE_DB_URL is not configured — no backup taken"; exit 1; }
+          if [ "$DRILL_ONLY" != "true" ]; then
+            [ "$HAS_KEY" = "true" ] && [ "$HAS_HOST" = "true" ] && [ "$HAS_KH" = "true" ] \
+              || { echo "::error::VPS_DEPLOY_SSH_KEY / VPS_DEPLOY_HOST / VPS_DEPLOY_KNOWN_HOSTS missing — no backup shipped"; exit 1; }
+          fi
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ops/vps
+      - name: Install PostgreSQL 17 client + age
+        run: |
+          set -euo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc >/dev/null
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17 age >/dev/null
+          pg_dump --version; age --version
+      - name: Dump (plaintext stays on this runner only)
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          umask 077
+          stamp=$(date -u +%Y%m%dT%H%M%SZ); echo "STAMP=$stamp" >> "$GITHUB_ENV"
+          # Custom format (-Fc): compressed, restorable selectively with pg_restore. Supabase-managed
+          # schemas are excluded from DATA (auth/storage settings are Supabase's; the public schema +
+          # auth.users rows are what a project restore needs — auth is included as data).
+          pg_dump "$DB_URL" -Fc --no-owner --no-privileges \
+            --exclude-schema='extensions' --exclude-schema='graphql*' --exclude-schema='pgsodium*' \
+            --exclude-schema='realtime' --exclude-schema='supabase_functions' --exclude-schema='vault' \
+            --exclude-schema='net' --exclude-schema='cron' --exclude-schema='pgbouncer' \
+            -f "lm-db-$stamp.dump"
+          size=$(stat -c %s "lm-db-$stamp.dump"); echo "dump bytes=$size" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$size" -gt 100000 ] || { echo "::error::dump is suspiciously small ($size bytes)"; exit 1; }
+      - name: Restore drill (throw-away postgres:17 on this runner)
+        env:
+          PGPASSWORD: drill
+        run: |
+          set -euo pipefail
+          psql -h 127.0.0.1 -p 55432 -U postgres -c "create database drill_restore" >/dev/null
+          # Roles/extension objects referenced by the dump may not exist here; errors on those are tolerated,
+          # but the restore must end with the public tables present and populated.
+          pg_restore -h 127.0.0.1 -p 55432 -U postgres -d drill_restore --no-owner --no-privileges --exit-on-error=false "lm-db-$STAMP.dump" 2> restore.err || true
+          tables=$(psql -h 127.0.0.1 -p 55432 -U postgres -d drill_restore -tAc "select count(*) from information_schema.tables where table_schema='public'")
+          rows=$(psql -h 127.0.0.1 -p 55432 -U postgres -d drill_restore -tAc "select coalesce(sum(n_live_tup),0) from pg_stat_user_tables where schemaname='public'")
+          errs=$(grep -c "ERROR" restore.err || true)
+          echo "restore drill: public tables=$tables rows≈$rows restore-errors=$errs" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$tables" -ge 50 ] && [ "$rows" -ge 1 ] || { echo "::error::restore drill failed (tables=$tables rows=$rows)"; head -20 restore.err; exit 1; }
+      - name: Encrypt to the VPS backup key
+        run: |
+          set -euo pipefail
+          umask 077
+          [ -s ops/vps/backup.age.pub ] || { echo "::error::ops/vps/backup.age.pub missing (generate on the VPS, commit the PUBLIC key)"; exit 1; }
+          age -R ops/vps/backup.age.pub -o "lm-db-$STAMP.dump.age" "lm-db-$STAMP.dump"
+          shred -u "lm-db-$STAMP.dump"
+          sha=$(sha256sum "lm-db-$STAMP.dump.age" | cut -d' ' -f1); echo "SHA256=$sha" >> "$GITHUB_ENV"
+          echo "encrypted bytes=$(stat -c %s "lm-db-$STAMP.dump.age") sha256=$sha" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Ship to the VPS (forced-command receiver, action backup)
+        if: ${{ !inputs.restore_drill_only }}
+        env:
+          SSH_KEY: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
+          HOST: ${{ secrets.VPS_DEPLOY_HOST }}
+          KNOWN_HOSTS: ${{ secrets.VPS_DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key; printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes "lmdeploy@${HOST}" "backup lm-db-${STAMP}.dump.age ${SHA256}" < "lm-db-$STAMP.dump.age" | tee ship.log
+          grep -q '^BACKUP_OK ' ship.log || { echo "::error::receiver did not confirm BACKUP_OK"; exit 1; }
+          rm -f ~/.ssh/deploy_key
+      - name: Clean the runner
+        if: always()
+        run: shred -u lm-db-*.dump lm-db-*.dump.age 2>/dev/null || true

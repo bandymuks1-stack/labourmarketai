@@ -11,6 +11,7 @@
 #   deploy <sha> <sha256>   (tarball on stdin)  — extract, start, health, rollback on failure
 #   status                  — current release + container health
 #   rollback <sha>          — restart a previous release that is still on disk
+#   backup <name> <sha256>  — store an age-encrypted pg_dump from stdin (db-backup.yml), 14-day rotation
 # It prints names, sizes, http codes and outcomes only; never env values.
 set -eu
 umask 022
@@ -58,5 +59,19 @@ case "$ACTION" in
   rollback)
     hex40 "$SHA" && [ -d "$REL/$SHA" ] || { echo "ROLLBACK_FAIL release not on disk"; exit 1; }
     sh "$BIN/lm-prod-run.sh" "$SHA" >/dev/null && wait_healthy && echo "ROLLBACK_OK $SHA health=$(health)" || { echo "ROLLBACK_FAIL $SHA health=$(health)"; exit 1; };;
+  backup)
+    # backup <name> <sha256>  — an age-ENCRYPTED pg_dump on stdin (db-backup.yml). Stored 600 under a 700 dir,
+    # verified, 14-day rotation. The age private key (/root/lm-prod/backup.age.key, 600) is never read here.
+    NAME="$SHA"; SUM="$3"; BK=$D/backups
+    case "$NAME" in lm-db-[0-9]*T[0-9]*Z.dump.age) ;; *) echo "BACKUP_FAIL bad name"; exit 1;; esac
+    hex64 "$SUM" || { echo "BACKUP_FAIL bad sha256"; exit 1; }
+    umask 077; mkdir -p "$BK"; chmod 700 "$BK"
+    cat > "$BK/$NAME.part"
+    echo "$SUM  $BK/$NAME.part" | sha256sum -c - >/dev/null || { rm -f "$BK/$NAME.part"; echo "BACKUP_FAIL sha256 mismatch"; exit 1; }
+    head -c 8 "$BK/$NAME.part" | grep -q 'age-encr' || { rm -f "$BK/$NAME.part"; echo "BACKUP_FAIL not an age file"; exit 1; }
+    mv "$BK/$NAME.part" "$BK/$NAME"; chmod 600 "$BK/$NAME"
+    find "$BK" -name 'lm-db-*.dump.age' -mtime +14 -print -delete | sed 's/^/rotated /'
+    echo "stored bytes=$(stat -c %s "$BK/$NAME") kept=$(ls -1 "$BK" | grep -c 'dump.age$') free_mb=$(df -m "$BK" | awk 'NR==2{print $4}')"
+    echo "BACKUP_OK $NAME";;
   *) echo "refused: unknown command"; exit 1;;
 esac

@@ -81,10 +81,11 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 
 | Task | Route / job | Today | Target |
 |---|---|---|---|
-| Weekly digest | `/api/cron/weekly-digest` (Mon 07:00 UTC) | **not running** (was Vercel Cron) | VPS `cron.d/labourmarket` via `lm-cron.sh` |
-| Commercial handoffs | `/api/cron/commercial-handoffs` (06:00 UTC) | **not running** (was Vercel Cron); inert anyway until Nonstop tokens are paired | VPS cron.d |
-| Job alerts | `/api/cron/job-alerts` | GitHub `job-alerts-cadence.yml` 06:17 UTC — **designed no-op** (no `CRON_SECRET` secret in GitHub; and nginx now answers 404 for `/api/cron/*` from the internet) | VPS cron.d (add line), retire the GitHub cadence |
-| Billing recovery | `/api/cron/billing-recovery` | GitHub `billing-recovery-cadence.yml` */30 — designed no-op (same reasons; payments OFF) | VPS cron.d only when payments are ON |
+| Weekly digest | `/api/cron/weekly-digest` (Mon 07:00 UTC) | **not running** (was Vercel Cron) until `lm-cron-install.sh` is approved | VPS `cron.d/labourmarket` via `lm-cron.sh` — the ONE owner |
+| Commercial handoffs | `/api/cron/commercial-handoffs` (06:00 UTC) | **not running**; inert anyway until Nonstop tokens are paired | VPS cron.d |
+| Job alerts | `/api/cron/job-alerts` (06:17 UTC) | the GitHub `job-alerts-cadence.yml` no-op was **removed** (it never had `CRON_SECRET`; nginx 404s `/api/cron/*` from the internet) | VPS cron.d (line present in the bundle) |
+| Billing recovery | `/api/cron/billing-recovery` | `billing-recovery-cadence.yml` kept **dispatch-only** (schedule removed; its static gate stays reviewable) | VPS cron.d line added only with the Stripe GO |
+| **DB backup** | `db-backup.yml` 03:30 UTC: `pg_dump` on the runner with the existing `SUPABASE_DB_URL` secret → **restore drill** into a throw-away postgres:17 → `age`-encrypt to the VPS public key → ship via the forced-command receiver (`backup`) → `/root/lm-prod/backups/` (700/600), 14-day rotation | **prepared, needs the deploy trio + `ops/vps/backup.age.pub`** | GitHub-side dump; VPS stores ciphertext only; no DB password typed anywhere |
 | NAV (Norway) ingestion | `nav-supply-cadence.yml` 02/08/14/20 UTC (GitHub, service role) | GREEN after migration | keep (GitHub) |
 | Sweden ingestion | `sweden-supply-cadence.yml` 01/09/17 UTC | GREEN | keep |
 | Freshness check | `ingestion-freshness.yml` 04/10/16/22 UTC | GREEN | keep |
@@ -110,12 +111,29 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 
 ## 7. Changes that need separate owner approval (none done)
 
-1. Install `cron.d/labourmarket` (weekly-digest, commercial-handoffs, **+ job-alerts**) and
-   retire `job-alerts-cadence.yml` / `billing-recovery-cadence.yml` (one mechanism per task).
-2. Deploy pipeline secrets + `lmdeploy` user (§2), then one dispatch of `deploy-vps.yml` with the
-   current main sha as the proof run.
-3. Backups: nightly `pg_dump` of the Supabase database on the VPS (needs the DB password, 600,
-   owner-supplied) to `/root/lm-prod/backups/` with a restore drill; keep the legacy cron until proven.
+1. **Cron:** `sh /root/lm-prod/bin/lm-cron-install.sh --dry-run`, then without the flag (installs
+   `cron.d/labourmarket`: weekly-digest, commercial-handoffs, job-alerts; billing-recovery stays out
+   while payments are off). Rollback: `--remove`.
+2. **Deploy + backup channel:** owner creates the `lmdeploy` user + sudoers + forced-command
+   `authorized_keys` line (receiver header) and the three GitHub secrets; then one proof dispatch of
+   `deploy-vps.yml` (current main sha) and one of `db-backup.yml` with `restore_drill_only=true`.
+3. **Backup key:** on the VPS `age-keygen -o /root/lm-prod/backup.age.key` (600); the PUBLIC half is
+   committed as `ops/vps/backup.age.pub`; the owner keeps an offline copy of the private key (without
+   it no backup can be decrypted). Then the nightly schedule is live; legacy LABMA cron stays.
 4. nginx per-domain access log.
 5. Supabase dashboard: enable **leaked-password protection** (free toggle; advisor WARN).
-6. AI on (Gemini free tier) — see §6.
+6. AI on — see §6 and the privacy note: the Gemini **free tier lets Google use prompts to improve
+   its products**; CV and journal text must not go there. Paid Gemini excludes that but costs.
+   Zero-cost alternative with no training on inputs: Cloudflare Workers AI (adapter exists,
+   `AI_CLOUDFLARE_ENABLED`); needs an account id + a token with Workers AI scope.
+
+## 8. Defect found by the first production walks (fixed in this PR)
+
+`POST /api/assistant/transcript` refused every browser write with 403 since the move: its
+same-origin check compared `Origin` with `new URL(req.url).host`, which on the self-hosted server
+is the **bind host** `0.0.0.0:3000` (measured: `Origin: https://labourmarket.ai` → 403,
+`Origin: http://0.0.0.0:3000` → 400). Result: no `assistant_messages` row was written after the
+cutover (DB: last row 2026-10-15), the `chat-continuity` walk failed. Fix: `lib/http/same-origin-request.ts`
+judges the Origin against the request's public host (the MCP door's `requestPublicOrigin`); the
+Stripe portal return URL (`/api/billing/portal`) had the same `req.url` dependency and now uses the
+same helper. Guard test: `lib/http/same-origin-request.test.ts`.
