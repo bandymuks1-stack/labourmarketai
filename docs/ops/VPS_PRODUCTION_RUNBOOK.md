@@ -122,10 +122,19 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
    it no backup can be decrypted). Then the nightly schedule is live; legacy LABMA cron stays.
 4. nginx per-domain access log.
 5. Supabase dashboard: enable **leaked-password protection** (free toggle; advisor WARN).
-6. AI on — see §6 and the privacy note: the Gemini **free tier lets Google use prompts to improve
-   its products**; CV and journal text must not go there. Paid Gemini excludes that but costs.
-   Zero-cost alternative with no training on inputs: Cloudflare Workers AI (adapter exists,
-   `AI_CLOUDFLARE_ENABLED`); needs an account id + a token with Workers AI scope.
+6. **AI on, 0 €, privacy-safe by construction.** The code already encodes the free-tier rule
+   (`lib/ai/runtime/data-egress.ts`): without `AI_GEMINI_PAID_TIER_CONFIRMED=1` a Gemini key is
+   treated as free tier and may receive only `PUBLIC` / `LOW_RISK_PROJECT_DATA` tasks —
+   `explain_market_demand`, `structure_future_work`, `derive_workforce_requirements`,
+   `detect_capacity_gap`, `detect_skill_gap`. Personal and free-text tasks (`extract_cv`,
+   `explain_match`, `normalize_*`, `draft_follow_up`, `translate_*`, `propose_conversation_intent`)
+   are refused with a typed privacy refusal that never counts as a run. Enable with
+   `lm-env-set.sh` (value from a 600 file, never argv): `AI_PROVIDER_MODE=live`, `AI_PROVIDER=gemini`,
+   `AI_GEMINI_ENABLED=true`, `GEMINI_API_KEY` (from the owner's local env file via scp),
+   `AI_DAILY_RUN_BUDGET=200` (global cap; per-org default cap 100/day), then `--restart`.
+   Zero-cost guarantee = the key's Google project has **no billing account** (owner checks in
+   AI Studio: plan "Free of charge"); then over-quota answers 429 and costs nothing. The
+   Cloudflare adapter is translation-only (`@cf/meta/m2m100-1.2b`), not a general LLM.
 
 ## 8. Defect found by the first production walks (fixed in this PR)
 
