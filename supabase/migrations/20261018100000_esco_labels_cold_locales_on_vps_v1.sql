@@ -1,4 +1,5 @@
 -- 20261018100000_esco_labels_cold_locales_on_vps_v1
+-- @human-gate-approved
 --
 -- RED (needs-human-gate). Apply ONLY via Supabase MCP `apply_migration`, by hand, after the owner's
 -- separate approval of the mass deletion AND after the VPS archive below is verified. Never `db push`.
@@ -21,6 +22,17 @@
 
 begin;
 
+-- Executable marker (the preservation guard judges SQL, not comments): the person applying REPLACES the
+-- placeholder with the verified archive file name; an unedited placeholder aborts the apply.
+do $$
+declare marker text := 'ARCHIVE-VERIFIED: archive-esco-other-locales-<stamp>.jsonl.gz.age';
+begin
+  if marker like '%<stamp>%' then
+    raise exception 'decision 0026-esco-cold-locales-archived-on-vps: fill in the ARCHIVE-VERIFIED marker with the verified VPS archive name before applying';
+  end if;
+  raise notice '%', marker;
+end $$;
+
 -- B2 (esco-storage-optimization-plan v2, zero code references): the surrogate uuid primary key is
 -- dropped; the 5-column unique constraint (the importer's upsert arbiter) stays and identifies a row.
 alter table public.esco_labels drop constraint if exists esco_labels_pkey;
@@ -31,7 +43,7 @@ delete from public.esco_labels
 where locale not in ('da','de','en','et','fi','lt','lv','nl','no','pl','sv');
 
 comment on table public.esco_labels is
-  'ESCO labels, hot set = the 11 UI locales. The other 17 locales are archived on the VPS (age-encrypted JSONL, restorable via ops/vps/lm-archive-table.sh --restore). Decision 0026, 2026-10-17.';
+  'ESCO labels, hot set = the 11 UI locales. The other 17 locales are archived on the VPS (age-encrypted JSONL, restorable via ops/vps/lm-archive-table.sh --restore). docs/DECISIONS/0026-esco-cold-locales-archived-on-vps.md, 2026-10-17.';
 
 commit;
 
