@@ -3,7 +3,8 @@ import { requestPublicOrigin } from "@/lib/mcp/public-origin";
 /**
  * Same-origin check for cookie-authenticated POST routes (2026-10-17).
  *
- * The old check compared the browser's `Origin` with `new URL(req.url).host`.
+ * The old check compared the browser's `Origin` with the host parsed from
+ * `req.url`.
  * On Vercel those matched. On the self-hosted `next start` behind nginx,
  * `req.url` carries the BIND host (`0.0.0.0:3000`, measured on the VPS on
  * 2026-10-17: a POST with `Origin: https://labourmarket.ai` answered 403, one
