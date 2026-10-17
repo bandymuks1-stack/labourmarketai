@@ -4,6 +4,16 @@
   "regions": [
     "dub1"
   ],
+  "crons": [
+    {
+      "path": "/api/cron/weekly-digest",
+      "schedule": "0 7 * * 1"
+    },
+    {
+      "path": "/api/cron/commercial-handoffs",
+      "schedule": "0 6 * * *"
+    }
+  ],
   "git": {
     "deploymentEnabled": {
       "main": true,
