@@ -39,3 +39,23 @@ owner should confirm plan headroom first).
 if headroom pressure demands). Combined realistic: -80 to -210 MB, 28 languages intact.
 
 ## Explicitly rejected: any language dataset reduction (owner directive).
+
+
+## v3 — 2026-10-17 owner decision: cold locales live on the VPS (decision 0026)
+
+The directive "DO NOT delete ESCO languages" stands as a rule about the DATASET: all 28 languages
+remain owned, restorable and readable. What changed is WHERE the cold half is stored while the
+project is on the Supabase Free plan (500 MB; DB measured 1,103 MB on 2026-10-17):
+
+- Hot in Supabase: the 11 UI locales (da de en et fi lt lv nl no pl sv), 459,323 rows.
+- Cold on the Agentai VPS: the other 17 locales, 585,863 rows, age-encrypted gzip JSONL
+  (`ops/vps/lm-archive-table.sh`), sha256 + decrypt-verified, restorable row-for-row with
+  `--restore` (PostgREST upsert on the importer's unique key, idempotent) and readable in place
+  with `--grep`. The official ESCO files remain a second restore source.
+- B2 (drop the surrogate uuid pkey) is applied in the same RED migration
+  (`20261018100000_esco_labels_cold_locales_on_vps_v1.sql`, paired `.down.sql`). B1/B1b stay open
+  (performance, not storage). B3 as an in-Supabase cold TABLE was rejected for this plan: it keeps
+  the bytes inside the quota.
+- Expected: esco_labels 408 MB → ~150 MB after `vacuum full` + `reindex` (both owner-gated).
+- The guard `esco-dataset-is-preserved.test.ts` allows exactly this migration (ARCHIVE-VERIFIED
+  marker + decision reference) and still refuses any other delete.
