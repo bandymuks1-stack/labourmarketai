@@ -12,8 +12,10 @@ import { test, expect, type Page } from "@playwright/test";
  * Each route is a SOFT check, so one run reports every broken surface instead
  * of stopping at the first.
  *
- * A route FAILS when: the response is 5xx, the person is bounced to sign-in,
- * the error boundary renders, or the page shows no main content.
+ * A route FAILS when: the response is 4xx/5xx, the branded not-found page renders
+ * (it has a <main> with text, so the content checks alone passed a missing page —
+ * audit 2026-10-18), the person is bounced to sign-in, the error boundary
+ * renders, or the page shows no main content.
  */
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1";
@@ -30,7 +32,7 @@ const COMMON = [
   "/lt/dashboard/activity",
   "/lt/dashboard/learning",
   "/lt/dashboard/services",
-  "/lt/dashboard/market",
+  "/lt/dashboard/market-map",
   "/lt/dashboard/opportunities",
   "/lt/dashboard/work-in-numbers",
   "/lt/dashboard/documents",
@@ -41,7 +43,7 @@ const EMPLOYER = [
   "/lt/dashboard/company",
   "/lt/dashboard/company/people",
   "/lt/dashboard/company/needs",
-  "/lt/dashboard/company/projects",
+  "/lt/dashboard/company/projects/new",
   "/lt/dashboard/company/planning",
   "/lt/dashboard/company/scouting",
   "/lt/dashboard/company/partners",
@@ -75,11 +77,12 @@ async function check(page: Page, route: string): Promise<string | null> {
   if (res instanceof Error) return `navigation failed: ${res.message.split("\n")[0]}`;
   const timing = res?.request().timing();
   if (timing && timing.responseStart > 0) lastTiming.ttfb = Math.round(timing.responseStart);
-  if (res && res.status() >= 500) return `HTTP ${res.status()}`;
+  if (res && res.status() >= 400) return `HTTP ${res.status()}`;
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   if (/\/auth\/(login|sign-?in)/.test(page.url())) return `bounced to sign-in (${new URL(page.url()).pathname})`;
   if (await page.getByTestId("error-boundary-message").isVisible().catch(() => false)) return "error boundary rendered";
   if (await page.getByTestId("global-error-message").isVisible().catch(() => false)) return "global error rendered";
+  if (await page.getByTestId("branded-not-found").isVisible().catch(() => false)) return "not found (404 page)";
   // The home IS the chat: its proof is the composer, not a <main> text block.
   // A role redirect lands there too, with a ?notice= that explains why.
   if (new URL(page.url()).pathname.replace(/\/$/, "") === "/lt/dashboard") {

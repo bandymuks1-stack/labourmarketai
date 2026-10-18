@@ -5819,7 +5819,8 @@
           "heading": "Infrastructuurleveranciers (subverwerkers)",
           "items": [
             "Supabase — database, gebruikersaanmelding en bestandsopslag. Gegevens worden gehost in de Europese Unie (regio eu-west-1).",
-            "Vercel — hosting van de applicatie en levering van inhoud.",
+            "Hostinger — de virtuele privéserver (VPS) waarop de applicatie draait.",
+            "Cloudflare — het netwerk vóór de website: domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen. Elk verzoek aan de website loopt erdoorheen.",
             "GitHub — opslag van de broncode. Er worden daar geen gebruikersgegevens bewaard.",
             "Google (Gemini API) — AI-verwerking voor het vertalen van berichten en vacatures en voor het voorstellen waar een getypte chatzin om vraagt. Alleen de tekst die de taak nodig heeft, wordt verstuurd.",
             "Stripe — betalingsverwerking. Een klantrecord ontstaat alleen wanneer een organisatie een abonnementsbetaling start; vandaag is geen abonnement actief.",

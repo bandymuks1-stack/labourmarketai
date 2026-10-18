@@ -58,7 +58,7 @@ export default function RootLayout() {
               <Stack
                 screenOptions={{
                   headerShown: false,
-                  contentStyle: { backgroundColor: "#0B0E14" },
+                  contentStyle: { backgroundColor: "#070706" },
                 }}
               />
               </ActorContextProvider>

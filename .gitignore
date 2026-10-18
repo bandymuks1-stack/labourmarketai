@@ -14,8 +14,6 @@ next-env.d.ts
 .env.*
 !.env.example
 
-# vercel
-.vercel/
 
 # local owner-review artifacts (screenshots, static review HTML) — never committed
 /runtime/
