@@ -134,7 +134,8 @@ export default async function PersonPage({
     : discovered
       ? {
           id: discovered.id,
-          profile_id: discovered.profile_id,
+          // No profile id for a found worker (it could join to public business records).
+          profile_id: null,
           display_name: null,
           headline: null,
           experience_years: discovered.experience_years,

@@ -49,8 +49,10 @@ describe("database: the row needs a relationship, discovery gets the projection"
     const returns = projection.slice(projection.indexOf("returns table"), projection.indexOf("language"));
     expect(returns).not.toMatch(IDENTITY);
     const select = projection.slice(projection.indexOf("select w.id"), projection.indexOf("from public.workers w"));
-    // display_name is read ONLY inside the synthetic-fixture boolean, never returned.
-    expect(select.replace(/coalesce\(w\.display_name, ''\) ~\*[^\n]*/, "")).not.toMatch(IDENTITY);
+    // display_name / headline are read ONLY inside the synthetic-fixture boolean, never returned.
+    const flag = /\(coalesce\(w\.display_name, ''\) \|\| ' ' \|\| coalesce\(w\.headline, ''\)\)\s*~\*[^\n]*/;
+    expect(select).toMatch(flag);
+    expect(select.replace(flag, "")).not.toMatch(IDENTITY);
     expect(projection).toMatch(/public\.worker_profile_discoverable\(w\.profile_id\)/);
     expect(projection).toMatch(/if not \(public\.is_employer\(\) or public\.is_admin\(\)\) then/);
     expect(projection).toMatch(/cardinality\(p_worker_ids\) > 500/);
@@ -78,6 +80,42 @@ describe("database: the row needs a relationship, discovery gets the projection"
   });
 });
 
+describe("database: indirect identity paths are closed", () => {
+  it("the projection carries no profile id and no exact timestamps", () => {
+    const projection = fnBody("list_discoverable_worker_profiles_v1");
+    const returns = projection.slice(projection.indexOf("returns table"), projection.indexOf("language"));
+    expect(returns).not.toMatch(/profile_id|created_at|updated_at/);
+    expect(returns).toMatch(/last_active_week date/);
+    expect(projection).toMatch(/date_trunc\('week', coalesce\(w\.updated_at, w\.created_at\)\)::date/);
+  });
+
+  it("a worker's name reaches a conversation only by choice, relationship or disclosure", () => {
+    const names = fnBody("conversation_counterpart_identities");
+    expect(names).toMatch(/when w\.id is null then p\.full_name/);
+    expect(names).toMatch(/when c\.created_by = cp\.profile_id then p\.full_name/);
+    expect(names).toMatch(/when public\.caller_has_worker_relation_v1\(w\.id\) then p\.full_name/);
+    expect(names).toMatch(/l\.selected_fields \? 'full_name'/);
+    expect(names).toMatch(/else 'Candidate ' \|\|/);
+    // the rollback restores the previous body
+    expect(rollback).toMatch(/select cp\.conversation_id, p\.full_name\s+from public\.conversation_participants cp/);
+  });
+
+  it("the contact door needs the caller's own demand AND a shortlist or interest", () => {
+    const door = fnBody("candidate_profile_for_contact_v1");
+    expect(door).toMatch(/cr\.profile_id = auth\.uid\(\)/);
+    expect(door).toMatch(/from public\.demand_shortlist s/);
+    expect(door).toMatch(/from public\.demand_interest_signals i/);
+    expect(door).not.toMatch(/worker_profile_discoverable/);
+  });
+
+  it("legitimate organization contexts the old predicate missed are kept", () => {
+    const relation = fnBody("caller_has_worker_relation_v1");
+    expect(relation).toMatch(/o\.legacy_company_id = cw\.company_id[\s\S]*public\.manages_organization\(o\.id\)/);
+    expect(relation).toMatch(/o\.legacy_agency_id = aw\.agency_id/);
+    expect(relation).toMatch(/from public\.booking_requests b[\s\S]*b\.status = 'accepted'/);
+  });
+});
+
 describe("app: discovery reads go through the projection and never carry a name", () => {
   const helper = read("lib/visibility/discoverable-workers.ts").replace(/\/\*[\s\S]*?\*\//g, "");
 
@@ -90,30 +128,29 @@ describe("app: discovery reads go through the projection and never carry a name"
   it("the person page falls back to the projection with no name and no headline", () => {
     const page = read("app/[locale]/dashboard/people/[workerId]/page.tsx");
     expect(page).toMatch(/readDiscoverableWorkers\(supabase, \[workerId\]\)/);
-    expect(page).toMatch(/display_name: null,\s*headline: null,/);
+    expect(page).toMatch(/profile_id: null,\s*display_name: null,\s*headline: null,/);
   });
 
   it("scouting merges discovered rows without a name and filters fixtures by flag", () => {
     const match = read("lib/market/match-subject.ts");
     expect(match).toMatch(/readDiscoverableWorkerIds\(supabase, cc, STAGE1_ID_SCAN_CAP\)/);
     expect(match).toMatch(/readDiscoverableWorkerIds\(supabase, null, limit\)/);
-    expect(match).toMatch(/workers\.push\(\{ \.\.\.row, display_name: null, headline: null \}\)/);
+    expect(match).toMatch(/workers\.push\(\{\s*\.\.\.row,\s*profile_id: null,\s*display_name: null,\s*headline: null,/);
     expect(match).toMatch(/candidates\.filter\(\(c\) => !c\.syntheticFixture\)/);
   });
 
-  it("server-side profile-id resolution covers related and discovered workers", () => {
-    for (const f of [
-      "lib/communication/contact-interested-worker.ts",
-      "lib/pipeline/candidate-pipeline-facts.ts",
-      "lib/privacy/contact-disclosure-actions.ts",
-    ]) {
-      expect(read(f), f).toContain("readWorkerProfileIds(supabase, ");
-    }
-    expect(read("lib/communication/request-worker-conversation.ts")).toContain(
-      "readDiscoverableWorkers(supabase, [workerId])",
+  it("server flows reach a found worker only through context-bound doors, never a profile id", () => {
+    expect(read("lib/communication/contact-interested-worker.ts")).toContain(
+      "candidateProfileForContact(supabase, workerId, requestId)",
     );
+    const conv = read("lib/communication/request-worker-conversation.ts");
+    expect(conv).toContain("readDiscoverableWorkers(supabase, [workerId])");
+    expect(conv).toContain("candidateProfileForContact(supabase, workerId, requestId)");
+    expect(read("lib/pipeline/candidate-pipeline-facts.ts")).toContain('"my_direct_conversations_with_workers_v1"');
+    expect(read("lib/privacy/contact-disclosure-actions.ts")).toContain('"employer_disclosure_granted_v1"');
     expect(read("lib/capabilities/marketplace-capabilities.ts")).toContain(
       "workerReachable(caller.supabase, d.workerId as string)",
     );
+    expect(helper).toContain('rpc("candidate_profile_for_contact_v1"');
   });
 });

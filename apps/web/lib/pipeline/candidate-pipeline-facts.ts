@@ -84,6 +84,23 @@ export async function loadDemandPipelineFacts(
 
   const conversationByWorker = new Set<string>();
   try {
+    // 0) The definer door (20261018160000): the caller's own direct threads keyed by worker id —
+    //    no profile id ever leaves the database. Before that migration it is absent and the
+    //    relationship-scoped path below answers as before.
+    try {
+      const { data: door, error: doorError } = await asAny(supabase).rpc(
+        "my_direct_conversations_with_workers_v1",
+        { p_worker_ids: ids },
+      );
+      if (!doorError && Array.isArray(door)) {
+        for (const r of door as { worker_id: string | null }[]) {
+          if (typeof r.worker_id === "string") conversationByWorker.add(r.worker_id);
+        }
+        return { bookingByWorker, conversationByWorker };
+      }
+    } catch {
+      // fall through to the table path
+    }
     // 1) Resolve worker → profile ids server-side only (never sent to client).
     const profileToWorker = new Map<string, string>();
     for (const [workerId, profileId] of await readWorkerProfileIds(supabase, ids)) {

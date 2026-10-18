@@ -2,7 +2,10 @@
 
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { readDiscoverableWorkers } from "@/lib/visibility/discoverable-workers";
+import {
+  candidateProfileForContact,
+  readDiscoverableWorkers,
+} from "@/lib/visibility/discoverable-workers";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 import { canStartCommunicationOrBooking } from "@/lib/visibility/worker-profile-visibility";
@@ -143,9 +146,11 @@ export async function requestWorkerConversationAction(input: {
     .select("profile_id, availability_status, available_from")
     .eq("id", workerId)
     .maybeSingle();
-  const worker:
-    | { profile_id: string | null; availability_status: string | null; available_from: string | null }
-    | null = related ?? (await readDiscoverableWorkers(supabase, [workerId])).get(workerId) ?? null;
+  const discovered = related
+    ? null
+    : ((await readDiscoverableWorkers(supabase, [workerId])).get(workerId) ?? null);
+  const worker: { availability_status: string | null; available_from: string | null } | null =
+    related ?? discovered;
   const canContact = canStartCommunicationOrBooking({
     availabilityStatus: worker?.availability_status ?? null,
     availableFrom: worker?.available_from ?? null,
@@ -154,7 +159,10 @@ export async function requestWorkerConversationAction(input: {
   const decision = evaluateCommunicationRequest({ ownsDemand, shortlisted, canContact });
   if (decision !== "allowed") return { ok: false, reason: decision };
 
-  const workerProfileId = worker?.profile_id as string | null;
+  // A found worker's profile id only through the shortlist/interest door of THIS demand.
+  const workerProfileId =
+    (related?.profile_id as string | null | undefined) ??
+    (worker ? await candidateProfileForContact(supabase, workerId, requestId) : null);
   if (!workerProfileId) return { ok: false, reason: "worker_unavailable" };
 
   // Neutral subject from the demand title — no PII, no fabricated content.

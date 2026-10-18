@@ -268,17 +268,28 @@ export async function getScoutingContactRequestStates(
   await Promise.all(
     acceptedRows.map(async ({ workerId, organizationId }) => {
       try {
-        const profileId = (await readWorkerProfileIds(supabase, [workerId])).get(workerId) ?? null;
-        if (!profileId) return;
-        const { data: granted } = await asAny(supabase).rpc(
-          "has_employer_data_disclosure",
-          {
+        // By worker id first (20261018160000): a found worker's profile id never leaves the
+        // database. Before that migration the door is absent and the related-row path answers.
+        let granted: unknown = null;
+        const door = await asAny(supabase).rpc("employer_disclosure_granted_v1", {
+          p_worker_id: workerId,
+          p_organization_id: organizationId,
+          p_context_type: "company_need",
+          p_context_id: requestId,
+        });
+        if (!door.error) {
+          granted = door.data;
+        } else {
+          const profileId = (await readWorkerProfileIds(supabase, [workerId])).get(workerId) ?? null;
+          if (!profileId) return;
+          const legacy = await asAny(supabase).rpc("has_employer_data_disclosure", {
             p_worker_profile: profileId,
             p_recipient_organization_id: organizationId,
             p_context_type: "company_need",
             p_context_id: requestId,
-          },
-        );
+          });
+          granted = legacy.data;
+        }
         if (granted === true) {
           const prev = byWorker[workerId];
           if (prev) {

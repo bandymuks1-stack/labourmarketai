@@ -15,6 +15,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  *
  * Every helper here answers "the relationship read first, the discovery projection for the rest",
  * so a related viewer keeps the full row and a discovery viewer gets the anonymous projection.
+ *
+ * The projection carries NO profile id: a pseudonymous key that joins to public business records
+ * (companies / agencies / service offerings) could de-anonymise a person. A server flow that needs
+ * one for a found worker asks a CONTEXT-BOUND door instead — a worker shortlisted on, or interested
+ * in, the caller's own demand (`candidateProfileForContact`).
  * Fail-closed and migration-tolerant: an unavailable function (before the migration is applied)
  * or any error answers "nothing more" — the caller then sees exactly what the table returned.
  */
@@ -22,8 +27,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 /** The projection's row — snake_case, the same names as the `workers` columns it mirrors. */
 export interface DiscoverableWorkerRow {
   readonly id: string;
-  /** Pseudonymous key the SERVER needs (consent ledger, conversations). Never rendered. */
-  readonly profile_id: string | null;
   readonly experience_years: number | null;
   readonly current_location_country: string | null;
   readonly preferred_countries: readonly string[] | null;
@@ -39,8 +42,8 @@ export interface DiscoverableWorkerRow {
   readonly driving_licence_categories: readonly string[] | null;
   readonly own_vehicle: boolean | null;
   readonly own_tools: boolean | null;
-  readonly created_at: string | null;
-  readonly updated_at: string | null;
+  /** Monday of the week the profile was last active — a bucket, never an exact timestamp. */
+  readonly last_active_week: string | null;
   /** True for a documented QA fixture — computed in SQL, so the name never has to leave it. */
   readonly is_synthetic_fixture: boolean;
 }
@@ -105,8 +108,8 @@ export async function readDiscoverableWorkerIds(
 }
 
 /**
- * worker id → profile id, server-side only: the relationship-scoped table read first, the
- * discovery projection for the rest. Never sent to a client.
+ * worker id → profile id, server-side only, for workers this viewer has a WORKING RELATIONSHIP with
+ * (the RLS-scoped table). A found worker has no profile id here by design — see the file header.
  */
 export async function readWorkerProfileIds(
   supabase: SupabaseClient,
@@ -123,12 +126,31 @@ export async function readWorkerProfileIds(
   } catch {
     // fall through to the projection
   }
-  const missing = unique.filter((id) => !out.has(id));
-  if (missing.length > 0) {
-    const projected = await readDiscoverableWorkers(supabase, missing);
-    for (const [id, row] of projected) if (row.profile_id) out.set(id, row.profile_id);
-  }
   return out;
+}
+
+/**
+ * The profile id needed to open a thread with a candidate: a related worker from the table, a found
+ * worker ONLY when shortlisted on / interested in the caller's own demand `requestId`
+ * (candidate_profile_for_contact_v1). Null otherwise.
+ */
+export async function candidateProfileForContact(
+  supabase: SupabaseClient,
+  workerId: string,
+  requestId: string,
+): Promise<string | null> {
+  const related = (await readWorkerProfileIds(supabase, [workerId])).get(workerId);
+  if (related) return related;
+  if (!UUID_RE.test(workerId) || !UUID_RE.test(requestId)) return null;
+  try {
+    const { data, error } = await asAny(supabase).rpc("candidate_profile_for_contact_v1", {
+      p_worker_id: workerId,
+      p_request_id: requestId,
+    });
+    return !error && typeof data === "string" && UUID_RE.test(data) ? data : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Can this caller reach the worker at all — related (table) or discoverable (projection)? */

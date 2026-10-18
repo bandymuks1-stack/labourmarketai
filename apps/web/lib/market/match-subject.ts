@@ -332,7 +332,15 @@ export async function buildSupplyCandidates(
     poolIds.filter((id) => !relatedIds.has(id)),
   );
   for (const row of discoveredRows.values()) {
-    workers.push({ ...row, display_name: null, headline: null });
+    // A discovered worker: no name, no headline, no profile id; freshness from the week bucket.
+    workers.push({
+      ...row,
+      profile_id: null,
+      display_name: null,
+      headline: null,
+      created_at: null,
+      updated_at: row.last_active_week,
+    });
   }
   if (workers.length === 0) {
     return { candidates: [], retrieval: { ...retrieval, poolSize: 0 } };

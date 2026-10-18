@@ -2,38 +2,46 @@
 -- @human-gate-approved
 --
 -- RED (needs-human-gate): RLS policy replacement on public.workers, SECURITY DEFINER functions, GRANT.
--- Apply ONLY via Supabase MCP `apply_migration` after the owner's explicit approval, in the SAME step as
--- the production deploy of the app change (the scouting / person-page reads move to the projection).
--- Never `db push`.
+-- Apply ONLY via Supabase MCP `apply_migration` after the owner's explicit approval, AFTER the app
+-- change of the same PR is deployed (the app tolerates both states). Never `db push`.
 --
--- OWNER COMMAND 2026-10-18 ("Privatumo apsaugos prioritetas"): a worker found through the employer-
--- visibility consent is anonymous. Employers see only professional data; name, contacts, photo and links
--- reach one organization only with the worker's own permission; no plan (paid or VIP) opens identity.
+-- OWNER COMMANDS 2026-10-18 ("Privatumo apsaugos prioritetas", "#2477 saugumo taisymo užbaigimas"):
+-- a worker found through the employer-visibility consent is anonymous. Employers see only
+-- professional data; name, contacts, photo and links reach one organization only with the worker's
+-- own permission; no plan (paid or VIP) opens identity; owners and organizations with a legitimate
+-- working relationship keep their access.
 --
--- THE DEFECT. `workers_select` is `can_view_worker(id)`, whose discoverability branch
--- (`is_employer() AND worker_profile_discoverable(profile_id)`) returns the WHOLE `workers` row to every
--- employer account — display name, free-text availability note, location, accommodation / transport /
--- shift preferences — although the consent preview the worker saw lists only professional fields.
--- The app renders those workers anonymously, but the API row is readable with any employer session.
+-- THE DEFECTS CLOSED HERE
+--   D1. `workers_select` = `can_view_worker(id)`, whose discoverability branch returns the WHOLE row
+--       (name, free text, circumstances) to every employer account.
+--   D2. `conversation_counterpart_identities` returns `profiles.full_name` of the other participant of
+--       any direct thread, so an employer who opens a thread with a found worker gets the real name
+--       without the worker doing anything.
 --
--- THE FIX (narrowing only — no access is added anywhere):
---   1. caller_has_worker_relation_v1 — can_view_worker WITHOUT the discoverability branch. Byte-identical
---      body to the one in 20261018150000 (the profile-view limit), and the same audience rule as the
---      applied worker_recognitions_for_viewer_v1 (owner decision 2026-10-08).
---   2. workers_select uses it: the raw row (with identity) only for the worker, an admin, or a viewer
---      with a working relationship.
---   3. list_discoverable_worker_profiles_v1 — the ONLY discovery read of the row: professional columns
---      for discoverable workers (the same fields the consent preview now lists), never a name or free
---      text, plus a synthetic-fixture flag computed in SQL so QA fixtures stay out without a name.
---   4. list_discoverable_worker_ids_v1 — scouting's first stage (which workers, by country) as ids.
---   can_view_worker itself is UNCHANGED: worker_skills / worker_professions / worker_languages and the
---   definer functions that use it (contact ask, booking, profile-view gate) keep working as today.
+-- THE FIX (identity never widens; legitimate organization access is kept, see 1.)
+--   1. caller_has_worker_relation_v1 — every working-relationship branch of can_view_worker (NOT its
+--      discoverability branch), plus three legitimate organization contexts can_view_worker missed:
+--      a DELEGATED manager of the organization behind a company / agency roster, and an ACCEPTED
+--      booking of the organization. Same body in 20261018150000 (pinned by a guard).
+--   2. workers_select uses it.
+--   3. list_discoverable_worker_profiles_v1 — the ONLY discovery read of the row: professional fields
+--      only. No name, free text, profile id or exact timestamps (a week bucket instead). A synthetic-
+--      fixture flag is computed in SQL from name + headline, so neither leaves the database.
+--   4. list_discoverable_worker_ids_v1 — scouting's first stage, ids only.
+--   5. conversation_counterpart_identities — a WORKER's name only when the worker started the thread,
+--      the viewer has a working relationship, or the worker's live per-organization disclosure grant
+--      includes the name; otherwise the anonymous label.
+--   6. Context-bound doors that replace the profile id the app used to need from the row:
+--      candidate_profile_for_contact_v1 (only for a worker shortlisted on, or interested in, the
+--      caller's own demand), my_direct_conversations_with_workers_v1, employer_disclosure_granted_v1.
+--   can_view_worker itself is UNCHANGED (skills / professions / languages and the definer doors keep
+--   working exactly as today).
 --
 -- Rollback: supabase/rollbacks/20261018160000_worker_identity_split_v1.down.sql
 
 begin;
 
--- 1. The working-relationship predicate (identical to 20261018150000_employer_profile_views_v1).
+-- 1. The working-relationship predicate (identical body in 20261018150000_employer_profile_views_v1).
 create or replace function public.caller_has_worker_relation_v1(p_worker_id uuid)
 returns boolean
 language sql
@@ -49,8 +57,16 @@ as $$
        where cw.worker_id = p_worker_id and cw.status = 'active' and c.profile_id = auth.uid()
     )
     or exists (
+      select 1 from public.company_workers cw join public.organizations o on o.legacy_company_id = cw.company_id
+       where cw.worker_id = p_worker_id and cw.status = 'active' and public.manages_organization(o.id)
+    )
+    or exists (
       select 1 from public.agency_workers aw join public.agencies a on a.id = aw.agency_id
        where aw.worker_id = p_worker_id and aw.status = 'active' and a.profile_id = auth.uid()
+    )
+    or exists (
+      select 1 from public.agency_workers aw join public.organizations o on o.legacy_agency_id = aw.agency_id
+       where aw.worker_id = p_worker_id and aw.status = 'active' and public.manages_organization(o.id)
     )
     or exists (
       select 1 from public.company_worker_engagements e
@@ -67,25 +83,27 @@ as $$
       select 1 from public.project_worker_assignments pwa
        where pwa.worker_id = p_worker_id and pwa.status = 'active' and pwa.ended_at is null
          and public.can_manage_project(pwa.project_id)
+    )
+    or exists (
+      select 1 from public.booking_requests b
+       where b.worker_id = p_worker_id and b.status = 'accepted'
+         and (b.owner_id = auth.uid()
+              or (b.organization_id is not null and public.manages_organization(b.organization_id)))
     );
 $$;
 revoke all on function public.caller_has_worker_relation_v1(uuid) from public;
 revoke all on function public.caller_has_worker_relation_v1(uuid) from anon;
 grant execute on function public.caller_has_worker_relation_v1(uuid) to authenticated;
 
--- 2. The raw row only with a working relationship (or self / admin). Narrowing, not loosening.
+-- 2. The raw row only with a working relationship (or self / admin).
 drop policy if exists workers_select on public.workers;
 create policy workers_select on public.workers
   for select using (public.caller_has_worker_relation_v1(id));
 
 -- 3. The discovery projection: professional fields only, for discoverable workers, to employers.
---    Never display_name / headline / bio / availability_note or other free text; never accommodation,
---    transport, trust or document-consent internals. profile_id is a pseudonymous key the server needs
---    to address the consent ledger (contact asks) — it is never rendered.
 create or replace function public.list_discoverable_worker_profiles_v1(p_worker_ids uuid[])
 returns table (
   id uuid,
-  profile_id uuid,
   experience_years integer,
   current_location_country text,
   preferred_countries text[],
@@ -101,8 +119,7 @@ returns table (
   driving_licence_categories text[],
   own_vehicle boolean,
   own_tools boolean,
-  created_at timestamptz,
-  updated_at timestamptz,
+  last_active_week date,
   is_synthetic_fixture boolean
 )
 language plpgsql
@@ -120,19 +137,20 @@ begin
   if cardinality(p_worker_ids) > 500 then
     raise exception 'Too many workers requested' using errcode = '22023';
   end if;
-  -- Same audience as the discoverability branch it replaces: an employer (or an admin).
   if not (public.is_employer() or public.is_admin()) then
     return;
   end if;
   return query
-    select w.id, w.profile_id, w.experience_years, w.current_location_country, w.preferred_countries,
+    select w.id, w.experience_years, w.current_location_country, w.preferred_countries,
            w.availability_status, w.available_from, w.salary_min_eur, w.salary_max_eur,
            w.preferred_contract_type, w.pay_basis_preference, w.night_shifts_ok, w.weekend_shifts_ok,
            w.overtime_ok, w.driving_licence_categories, w.own_vehicle, w.own_tools,
-           w.created_at, w.updated_at,
-           -- QA fixtures are recognised by their documented markers (lib/qa/synthetic-fixture.ts);
-           -- the flag leaves the database, the name never does.
-           coalesce(w.display_name, '') ~* '(\mQA[-_ ]SYNTHETIC\M|\[E2E\]|\mE2E[-_ ]FIXTURE\M)'
+           -- a week bucket, never an exact timestamp
+           date_trunc('week', coalesce(w.updated_at, w.created_at))::date,
+           -- QA fixtures by their documented markers (lib/qa/synthetic-fixture.ts); the flag leaves
+           -- the database, the name and headline never do.
+           (coalesce(w.display_name, '') || ' ' || coalesce(w.headline, ''))
+             ~* '(\mQA[-_ ]SYNTHETIC\M|\[E2E\]|\mE2E[-_ ]FIXTURE\M)'
       from public.workers w
      where w.id = any (p_worker_ids)
        and w.profile_id is not null
@@ -143,8 +161,7 @@ revoke all on function public.list_discoverable_worker_profiles_v1(uuid[]) from 
 revoke all on function public.list_discoverable_worker_profiles_v1(uuid[]) from anon;
 grant execute on function public.list_discoverable_worker_profiles_v1(uuid[]) to authenticated;
 
--- 4. Discovery's first stage: WHICH discoverable workers, by country, as ids only (scouting Stage 1).
---    p_country null = the deterministic backfill (ordered by id). Ids carry no identity.
+-- 4. Discovery's first stage: WHICH discoverable workers, by country, as ids only.
 create or replace function public.list_discoverable_worker_ids_v1(p_country text default null, p_limit integer default 500)
 returns table (id uuid)
 language plpgsql
@@ -179,5 +196,127 @@ $$;
 revoke all on function public.list_discoverable_worker_ids_v1(text, integer) from public;
 revoke all on function public.list_discoverable_worker_ids_v1(text, integer) from anon;
 grant execute on function public.list_discoverable_worker_ids_v1(text, integer) to authenticated;
+
+-- 5. Conversation names: a worker is named only by their own choice or a working relationship.
+create or replace function public.conversation_counterpart_identities(p_conversation_ids uuid[])
+returns table (conversation_id uuid, display_name text)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select cp.conversation_id,
+         case
+           when w.id is null then p.full_name                     -- not a worker: an organization person
+           when c.created_by = cp.profile_id then p.full_name     -- the worker started this thread
+           when public.caller_has_worker_relation_v1(w.id) then p.full_name
+           when exists (
+             select 1
+               from (select distinct on (e.recipient_organization_id, e.context_type, e.context_id)
+                            e.action, e.selected_fields, e.consent_text_version, e.recipient_organization_id
+                       from public.privacy_consent_events e
+                      where e.user_id = cp.profile_id and e.purpose = 'employer_data_disclosure'
+                      order by e.recipient_organization_id, e.context_type, e.context_id,
+                               e.created_at desc, e.seq desc) l
+               join public.privacy_consent_purposes pp on pp.purpose = 'employer_data_disclosure'
+              where l.action = 'granted'
+                and l.consent_text_version = pp.current_version
+                and l.selected_fields ? 'full_name'
+                and public.manages_organization(l.recipient_organization_id)
+           ) then p.full_name                                     -- the worker's own disclosure grant
+           else 'Candidate ' || upper(left(regexp_replace(w.id::text, '[^a-zA-Z0-9]', '', 'g'), 6))
+         end
+  from public.conversation_participants cp
+  join public.conversations c on c.id = cp.conversation_id
+  join public.profiles p on p.id = cp.profile_id
+  left join public.workers w on w.profile_id = cp.profile_id
+  where cp.conversation_id = any(p_conversation_ids)
+    and c.kind = 'direct'
+    and cp.profile_id <> auth.uid()
+    and cp.revoked_at is null
+    and public.is_conversation_participant(cp.conversation_id)
+    and (
+      select count(*)
+      from public.conversation_participants cp2
+      where cp2.conversation_id = cp.conversation_id
+        and cp2.revoked_at is null
+    ) = 2;
+$$;
+revoke all on function public.conversation_counterpart_identities(uuid[]) from public;
+revoke all on function public.conversation_counterpart_identities(uuid[]) from anon;
+grant execute on function public.conversation_counterpart_identities(uuid[]) to authenticated;
+
+-- 6a. The profile id of a candidate, ONLY inside the caller's own demand context: a worker shortlisted
+--     on that demand, or one who expressed interest in it. Never for "any discoverable worker".
+create or replace function public.candidate_profile_for_contact_v1(p_worker_id uuid, p_request_id uuid)
+returns uuid
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select w.profile_id
+    from public.workers w
+    join public.customer_requests cr on cr.id = p_request_id
+   where w.id = p_worker_id
+     and auth.uid() is not null
+     and (cr.profile_id = auth.uid()
+          or (cr.organization_id is not null and public.manages_organization(cr.organization_id)))
+     and (
+       exists (select 1 from public.demand_shortlist s
+                where s.request_id = p_request_id and s.worker_id = p_worker_id
+                  and s.status in ('saved', 'interested'))
+       or exists (select 1 from public.demand_interest_signals i
+                   where i.request_id = p_request_id and i.worker_id = p_worker_id
+                     and i.status <> 'withdrawn')
+     );
+$$;
+revoke all on function public.candidate_profile_for_contact_v1(uuid, uuid) from public;
+revoke all on function public.candidate_profile_for_contact_v1(uuid, uuid) from anon;
+grant execute on function public.candidate_profile_for_contact_v1(uuid, uuid) to authenticated;
+
+-- 6b. The caller's OWN direct threads with these workers (pipeline facts), keyed by worker id.
+create or replace function public.my_direct_conversations_with_workers_v1(p_worker_ids uuid[])
+returns table (worker_id uuid, conversation_id uuid)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select w.id, mine.conversation_id
+    from public.workers w
+    join public.conversation_participants theirs on theirs.profile_id = w.profile_id and theirs.revoked_at is null
+    join public.conversation_participants mine on mine.conversation_id = theirs.conversation_id
+                                              and mine.profile_id = auth.uid() and mine.revoked_at is null
+    join public.conversations c on c.id = mine.conversation_id and c.kind = 'direct'
+   where auth.uid() is not null
+     and w.id = any (p_worker_ids)
+     and cardinality(p_worker_ids) <= 500;
+$$;
+revoke all on function public.my_direct_conversations_with_workers_v1(uuid[]) from public;
+revoke all on function public.my_direct_conversations_with_workers_v1(uuid[]) from anon;
+grant execute on function public.my_direct_conversations_with_workers_v1(uuid[]) to authenticated;
+
+-- 6c. Is the worker's per-organization disclosure live? Boolean only, for an organization the caller manages.
+create or replace function public.employer_disclosure_granted_v1(
+  p_worker_id uuid, p_organization_id uuid, p_context_type text, p_context_id uuid
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce((
+    select public.has_employer_data_disclosure(w.profile_id, p_organization_id, p_context_type, p_context_id)
+      from public.workers w
+     where w.id = p_worker_id
+       and auth.uid() is not null
+       and public.manages_organization(p_organization_id)
+  ), false);
+$$;
+revoke all on function public.employer_disclosure_granted_v1(uuid, uuid, text, uuid) from public;
+revoke all on function public.employer_disclosure_granted_v1(uuid, uuid, text, uuid) from anon;
+grant execute on function public.employer_disclosure_granted_v1(uuid, uuid, text, uuid) to authenticated;
 
 commit;
