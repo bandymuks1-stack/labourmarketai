@@ -783,18 +783,20 @@ export default async function JournalPage({
         return latest < JOURNAL_PIPELINE_VERSION;
       })
       .slice(0, 5);
-    for (const e of stale) {
-      try {
-        await processJournalEntrySkills({
+    // In PARALLEL, not one after another (2026-10-18 perf: a person with five
+    // unhealable entries paid five sequential pipeline runs on every visit).
+    // Entries are independent and the pipeline is idempotent per entry.
+    await Promise.allSettled(
+      stale.map((e) =>
+        processJournalEntrySkills({
           entryId: e.id,
           text: e.original_text ?? "",
           locale,
           revalidate: false,
-        });
-      } catch {
-        // Heal is best-effort — a failure never blocks the page.
-      }
-    }
+        }),
+      ),
+    );
+    // Heal is best-effort — a rejection never blocks the page (allSettled).
   }
 
   // EDIT preload (v5): when the worker arrived via ?editing=<id>, reconstruct
