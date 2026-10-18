@@ -34,10 +34,19 @@ describe("checkWorkDate", () => {
   it("accepts a past date", () => {
     expect(checkWorkDate("2026-09-01", DOC, NOW)).toBeNull();
   });
-  it("leaves the free-form composer behaviour unchanged (optional, no future rule)", () => {
+  it("the pure function still supports an optional date with no future rule (callers opt in)", () => {
     expect(checkWorkDate("", FREE, NOW)).toBeNull();
     expect(checkWorkDate("2030-01-01", FREE, NOW)).toBeNull();
     expect(checkWorkDate("garbage", FREE, NOW)?.code).toBe("work_date_invalid");
+  });
+  it("a free-form entry refuses a future day too — a journal entry is a FACT (audit 2026-10-16, J-1)", () => {
+    const COMPOSER = { requireDate: false, rejectFuture: true };
+    expect(checkWorkDate("", COMPOSER, NOW)).toBeNull();
+    expect(checkWorkDate("2026-10-03", COMPOSER, NOW)).toBeNull();
+    expect(checkWorkDate("2030-01-01", COMPOSER, NOW)).toEqual({
+      code: "work_date_invalid",
+      reason: "future",
+    });
   });
 });
 
@@ -51,6 +60,14 @@ describe("document draft work date wiring", () => {
     const check = core.indexOf("checkWorkDate(workDate");
     expect(check).toBeGreaterThan(0);
     expect(core).toContain("requireDate: sourceDocumentFileId !== \"\"");
+    // EVERY transport (composer, chat, MCP) refuses a future work day — the
+    // document path was the only one that did until audit 2026-10-16 (J-1).
+    expect(core).toContain("rejectFuture: true,");
+    expect(core).not.toContain("rejectFuture: sourceDocumentFileId");
+    // and so does a CORRECTION (supersede) — an edit may not re-date work into the future
+    const actions = readFileSync(join(__dirname, "actions.ts"), "utf8");
+    expect(actions).toContain('checkWorkDate(workDate, { requireDate: false, rejectFuture: true })');
+    expect(actions.indexOf("checkWorkDate(workDate")).toBeLessThan(actions.indexOf('("journal_entry_supersede'));
     expect(check).toBeLessThan(core.indexOf('("create_journal_entry_full", rpcParams)'));
     expect(core.indexOf('("create_journal_entry_full", rpcParams)')).toBeGreaterThan(0);
   });
