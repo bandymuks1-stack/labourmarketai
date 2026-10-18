@@ -1943,7 +1943,25 @@
       "historyUnavailable": "Din arbetshistorik kunde inte läsas just nu."
     },
     "skillsUnavailable": "Kunde inte läsas just nu.",
-    "verifiedUnavailable": "Färdigheter med chefens notering kunde inte läsas just nu."
+    "verifiedUnavailable": "Färdigheter med chefens notering kunde inte läsas just nu.",
+    "readiness": {
+      "label": "Profilsteg",
+      "hint": "Allt är klart.",
+      "signalsTemplate": "steg klara",
+      "nextLabel": "Nästa:",
+      "pillars": {
+        "profession": "Yrke",
+        "availability": "Tillgänglighet",
+        "skills": "Kompetenser",
+        "journal": "Arbetsjournal",
+        "evidence": "Poster",
+        "workCard": "Arbetskort"
+      },
+      "ringAria": "Profilsteg: {met} av {total} klara",
+      "stepDone": "klart",
+      "stepOpen": "kvar att göra",
+      "summary": "Profilsteg: {done} av {total} klara"
+    }
   },
   "projects": {
     "map": {

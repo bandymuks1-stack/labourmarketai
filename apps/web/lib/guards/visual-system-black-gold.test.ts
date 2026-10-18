@@ -475,16 +475,18 @@ describe("no letter stands in for the mark in the authenticated product", () => 
   /** Person-initial avatars — legitimate monograms, each with the expression
    *  that proves the initial comes from the person's own name. */
   const PERSON_MONOGRAMS: ReadonlyArray<readonly [string, RegExp]> = [
-    ["components/app/account-menu.tsx", /\{initial\}/],
+    // Re-anchored (D2): these four render the ONE identity family, whose
+    // monogram is personMonogram of the name passed here.
+    ["components/app/account-menu.tsx", /const me = \{\s*id: user\?\.id \?\? "me",\s*name: displayName,[\s\S]*<PersonAvatar person=\{me\}/],
     ["components/app/avatar-display.tsx", /\{avatarMonogram\(displayName\)\}/],
     // Renders the shared AvatarDisplay above, with the person's own name.
     ["components/app/profile-avatar.tsx", /<AvatarDisplay\b[^>]*displayName=\{displayName\}/],
     ["components/app/cv-preview.tsx", /\{initials\(personName\)\}/],
     ["components/app/worker-player-card.tsx", /\{identity\.initials\}/],
-    ["components/app/project-operations-board.tsx", /\{initials\}/],
-    ["components/app/marketplace-loop-section.tsx", /\{requester\.initials\}/],
+    ["components/app/project-operations-board.tsx", /<PersonAvatar person=\{\{ id: worker\.workerId, name: worker\.name \}\}/],
+    ["components/app/marketplace-loop-section.tsx", /<PersonAvatar person=\{\{ id: r\.id, name: requester\.displayName/],
     ["app/[locale]/dashboard/admin/matching/page.tsx", /\{initialsOf\(w\.displayName\)\}/],
-    ["app/[locale]/dashboard/projects/[id]/page.tsx", /\{initialsOf\(w\.name\)\}/],
+    ["app/[locale]/dashboard/projects/[id]/page.tsx", /<PersonPortrait name=\{w\.name\} avatarUrl=\{null\} initials=\{playerInitials\(w\.name\)\}/],
   ];
 
   const tsxUnder = (dir: string): string[] => {

@@ -1943,7 +1943,25 @@
       "historyUnavailable": "Jūsu darba vēsturi šobrīd neizdevās nolasīt."
     },
     "skillsUnavailable": "Šobrīd neizdevās nolasīt.",
-    "verifiedUnavailable": "Prasmes ar vadītāja ierakstu šobrīd neizdevās nolasīt."
+    "verifiedUnavailable": "Prasmes ar vadītāja ierakstu šobrīd neizdevās nolasīt.",
+    "readiness": {
+      "label": "Profila soļi",
+      "hint": "Viss ir gatavs.",
+      "signalsTemplate": "soļi izpildīti",
+      "nextLabel": "Tālāk:",
+      "pillars": {
+        "profession": "Profesija",
+        "availability": "Pieejamība",
+        "skills": "Prasmes",
+        "journal": "Darba žurnāls",
+        "evidence": "Ieraksti",
+        "workCard": "Darba karte"
+      },
+      "ringAria": "Profila soļi: izpildīti {met} no {total}",
+      "stepDone": "izpildīts",
+      "stepOpen": "vēl jāizdara",
+      "summary": "Profila soļi: izpildīti {done} no {total}"
+    }
   },
   "projects": {
     "map": {

@@ -103,14 +103,18 @@ describe("provider inbox renders the compact request-provider identity tile", ()
   const section = read("components/app/marketplace-loop-section.tsx");
 
   it("uses the Player Identity foundation (initials + canonical surface)", () => {
-    expect(section).toMatch(/from "@\/lib\/identity\/player-identity"/);
+    // Re-anchored (D2, 2026-10-14): the canonical surface is now the ONE
+    // identity family (PersonAvatar, whose monogram IS personMonogram — the
+    // same rule `requester.initials` used), not a local initials span with
+    // its own surface constants. Still the safe display name only.
+    expect(section).toMatch(/from "@\/components\/app\/identity\/identity-family"/);
     // PR #539: identity routed through the ONE minimum Player Card contract,
     // built from ONLY the #531-safe display name; initials come from it.
     expect(section).toMatch(/from "@\/lib\/identity\/player-card-minimum"/);
     expect(section).toMatch(/buildPlayerCardMinimum\(\{\s*fullName: r\.requesterDisplayName,?\s*\}\)/);
-    expect(section).toMatch(/requester\.initials/);
-    expect(section).toMatch(/PLAYER_IDENTITY_FALLBACK_SURFACE/);
-    expect(section).toMatch(/PLAYER_IDENTITY_AVATAR_BORDER/);
+    expect(section).toMatch(/<PersonAvatar person=\{\{ id: r\.id, name: requester\.displayName \?\? "" \}\}/);
+    // No person id / photo travels to this row: nothing beyond the name.
+    expect(section).not.toMatch(/requesterId|requester_id|requesterProfileId|requesterAvatar/);
     expect(section).toMatch(/data-testid="marketplace-incoming-requester"/);
   });
 

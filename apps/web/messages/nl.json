@@ -7818,11 +7818,8 @@
       }
     },
     "readiness": {
-      "label": "Gereedheid",
+      "label": "Profielstappen",
       "hint": "Alles klaar.",
-      "levelReady": "Klaar",
-      "levelBuilding": "In opbouw",
-      "levelStart": "Net gestart",
       "signalsTemplate": "stappen voltooid",
       "nextLabel": "Volgende:",
       "pillars": {
@@ -7832,7 +7829,11 @@
         "journal": "Werkjournaal",
         "evidence": "Registraties",
         "workCard": "Werkkaart"
-      }
+      },
+      "ringAria": "Profielstappen: {met} van {total} gedaan",
+      "stepDone": "gedaan",
+      "stepOpen": "nog te doen",
+      "summary": "Profielstappen: {done} van {total} gedaan"
     },
     "verifiedTitle": "Door manager bevestigde vaardigheden",
     "verifiedEmpty": "Nog geen. Ze worden opgebouwd uit je werkregistraties.",

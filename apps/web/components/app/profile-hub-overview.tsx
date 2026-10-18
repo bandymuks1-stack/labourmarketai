@@ -176,7 +176,7 @@ export async function ProfileHubOverview({
    * even be started. `tReview` is the absorbed SkillsReviewBanner's own copy,
    * reused verbatim — the message and destination the worker already knows.
    */
-  const [t, tStep, tState, tLive, tAction, tReview, tSkill, tVisuals, tVisibility, tProf, tIdentity, locale] =
+  const [t, tStep, tState, tLive, tAction, tReview, tSkill, tVisuals, tVisibility, tProf, tIdentity, tReadiness, locale] =
     await Promise.all([
       getTranslations("profileHub"),
       getTranslations("setupJourney"),
@@ -193,6 +193,9 @@ export async function ProfileHubOverview({
       // The identity stage: every profession's name + the fact strip's words.
       getTranslations("professions"),
       getTranslations("playerCard.identity"),
+      // The readiness count WITH its noun ("Profile steps: 4 of 6 done") —
+      // the same words as the player card's ring (D2).
+      getTranslations("playerCard.readiness"),
       getLocale(),
     ]);
 
@@ -464,36 +467,18 @@ export async function ProfileHubOverview({
                 className="text-sm text-text-secondary"
                 data-testid="profile-hub-status"
               >
-                <span
-                  data-status={readiness.level}
-                  className={
-                    readiness.level === "ready"
-                      ? "font-medium text-state-success"
-                      : "font-medium text-text-primary"
-                  }
-                >
-                  {tState(`readiness.${readiness.level}`)}
+                {/* What the count counts, said out loud (D2, from #2125): the
+                    SAME six named profile steps as the player card — one
+                    readiness, one denominator (deriveWorkerReadiness, §8
+                    2026-09-27). No judgement word ("Ready") and no green: these
+                    are the person's own steps, not a second party's
+                    confirmation. The named list is right below. */}
+                <span data-status={readiness.level} className="font-medium text-text-primary">
+                  {tReadiness("summary", {
+                    done: readiness.met,
+                    total: readiness.total,
+                  })}
                 </span>
-                {" · "}
-                {/* ONE READINESS, ONE DENOMINATOR (§8, 2026-09-27).
-                    This read `{ done: doneCount, total: steps.length }` — a
-                    fraction over the 5 actionable STEPS — and it was wrong twice.
-                    Against ITSELF: this component separately lists the two
-                    `STEPLESS_PILLARS` (journal, evidence) as missing, so the
-                    progress number excluded two things the same screen was
-                    telling the person they still had to do. And against the REST
-                    OF THE PRODUCT: the player card renders `readiness.met`/
-                    `readiness.total` over all 6 pillars, so a person moving
-                    between the hub and their card met two different
-                    denominators — "0 iš 5" here and "0/6" there — for one
-                    underlying fact, with nothing explaining the difference.
-                    The canonical readiness is `deriveWorkerReadiness`, so it is
-                    the denominator everywhere. The 5 steps are unchanged and
-                    still the ACTIONABLE list; only the count is canonical now. */}
-                {tStep("progress", {
-                  done: readiness.met,
-                  total: readiness.total,
-                })}
                 {" · "}
                 <span data-testid="profile-hub-freshness">{freshness}</span>
               </p>
@@ -506,7 +491,7 @@ export async function ProfileHubOverview({
       {/* ── WHAT IS MISSING ──────────────────────────────────────────────── */}
       {steps.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+          <h3 className="text-xs font-medium text-text-muted">
             {tLive("missingTitle")}
           </h3>
           {nothingMissing ? (
@@ -690,7 +675,7 @@ export async function ProfileHubOverview({
 
             {/* where the work happened — absorbed from LiveProfileSection */}
             <div>
-              <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+              <h3 className="text-xs font-medium text-text-muted">
                 {tLive("historyTitle")}
               </h3>
               {playerCard.unavailable.includes("workHistory") ? (
@@ -790,7 +775,7 @@ export async function ProfileHubOverview({
                 blended (F9). Absorbed from LiveProfileSection + the hub's own
                 evidence block, which stated the same fact twice. */}
             <div>
-              <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+              <h3 className="text-xs font-medium text-text-muted">
                 {tLive("evidenceTitle")}
               </h3>
               <p
@@ -843,7 +828,7 @@ export async function ProfileHubOverview({
             {/* the opportunity signal — absorbed from LiveProfileSection */}
             {signal && (
               <div>
-                <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+                <h3 className="text-xs font-medium text-text-muted">
                   {tLive("opportunityTitle")}
                 </h3>
                 {signal.matchingCount === null ? (
@@ -908,7 +893,7 @@ export async function ProfileHubOverview({
       {playerCard && (
         <details className="group rounded-md border border-border-subtle">
           <summary
-            className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+            className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 text-xs font-medium text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
             data-testid="profile-hub-done-summary"
           >
             <span

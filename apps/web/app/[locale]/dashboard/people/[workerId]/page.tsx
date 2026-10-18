@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { IdentityStage } from "@/components/app/player-card/identity-stage";
+import { playerInitials } from "@/lib/identity/player-identity";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import {
   availabilityDateLabel,
@@ -290,14 +291,7 @@ export default async function PersonPage({
         <IdentityStage
           name={name}
           avatarUrl={avatarUrl}
-          initials={
-            name
-              .trim()
-              .split(/\s+/)
-              .slice(0, 2)
-              .map((p) => p[0]?.toUpperCase() ?? "")
-              .join("") || "•"
-          }
+          initials={playerInitials(name)}
           heading={
                 <h1
                   className="font-display text-2xl font-bold tracking-tightest text-text-primary"
