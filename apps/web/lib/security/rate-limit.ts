@@ -140,22 +140,30 @@ export function rateLimitCheck(opts: {
 }
 
 /**
- * Best-effort client identity from proxy headers.
+ * Best-effort client identity from proxy headers, most trusted first.
  *
- * Returns the FIRST `x-forwarded-for` hop (the client as the edge saw it).
- * Callers can spoof this header when the app is reachable without a trusted
- * proxy, which is why this is a brake and not an identity. When nothing usable
- * is present it returns a constant so those callers share one bucket instead of
- * each getting a fresh unlimited one.
+ *   1. `x-real-ip` — set by OUR nginx (`proxy_set_header X-Real-IP $remote_addr`,
+ *      with the real client restored from Cloudflare's ranges), replacing any
+ *      value the client sent;
+ *   2. `cf-connecting-ip` — set by Cloudflare, which overwrites a client value;
+ *   3. the FIRST `x-forwarded-for` hop — last resort only: nginx APPENDS to a
+ *      client-sent header, so its first hop is whatever the caller wrote. Reading
+ *      it first (as before 2026-10-18) let any caller rotate the key and walk past
+ *      every per-IP brake.
+ * Still a brake, not an identity. When nothing usable is present it returns a
+ * constant so those callers share one bucket instead of each getting a fresh
+ * unlimited one.
  */
 export function clientKeyFromHeaders(h: Headers): string {
+  const real = h.get("x-real-ip")?.trim();
+  if (real) return real;
+  const cloudflare = h.get("cf-connecting-ip")?.trim();
+  if (cloudflare) return cloudflare;
   const forwarded = h.get("x-forwarded-for");
   if (forwarded) {
     const first = forwarded.split(",")[0]?.trim();
     if (first) return first;
   }
-  const real = h.get("x-real-ip")?.trim();
-  if (real) return real;
   const vercel = h.get("x-vercel-forwarded-for")?.trim();
   if (vercel) return vercel;
   return "unknown-client";
