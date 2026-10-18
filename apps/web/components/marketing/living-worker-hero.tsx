@@ -918,7 +918,8 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
     <section
       /* -mt-14 pt-14: the landing wrapper's py-14 top padding left a 56px band of page
          background between the header and the hero's own black (a visible seam on phone
-         and desktop). The hero now bleeds up to the header while its content keeps its place. */
+         and desktop). The hero now bleeds up to the header while its content keeps its place;
+         the desktop overlay centres on calc(50% + 1.75rem), the photograph's own midpoint. */
       className="relative isolate -mx-6 -mt-14 flex flex-col overflow-hidden bg-ink-900 pt-14 sm:-mx-12 md:block"
       aria-roledescription="carousel"
       aria-label={capM.story.name}
@@ -1084,7 +1085,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
           a phone (owner 2026-10-10: below the 78svh photograph the first
           primary action sat at ~1,035 px on a 375x812 screen — out of the
           first view; the photograph and its motion are unchanged) */}
-      <div className="relative z-10 order-first px-6 pb-6 pt-2 sm:px-12 md:order-none md:pointer-events-none md:absolute md:left-0 md:top-1/2 md:w-[40%] md:-translate-y-1/2 md:p-0 md:pl-12 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+      <div className="relative z-10 order-first px-6 pb-6 pt-2 sm:px-12 md:order-none md:pointer-events-none md:absolute md:left-0 md:top-[calc(50%+1.75rem)] md:w-[40%] md:-translate-y-1/2 md:p-0 md:pl-12 [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
         {children}
       </div>
     </section>
