@@ -84,6 +84,10 @@ export const DISCLOSABLE_FIELDS = [
   "preferred_locations",
   "availability_details",
   "salary_expectation",
+  // 2026-10-18 (owner command, consent v3): the links to external profiles (LinkedIn, GitHub,
+  // portfolio, ...) that the worker marked as shareable. Only links marked shareable AND still
+  // connected are ever returned, and only to the organization named in a live grant.
+  "external_profiles",
 ] as const;
 export type DisclosableField = (typeof DISCLOSABLE_FIELDS)[number];
 
@@ -199,12 +203,14 @@ export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
 
 export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
   purpose: "employer_data_disclosure",
-  version: "2026-07-11.v2",
+  // v3 (2026-10-18): the field list gained `external_profiles`, so the wording names it and the
+  // version moves. No v2 grant ever existed in production, so nothing is invalidated.
+  version: "2026-10-18.v3",
   recipientCategory:
     "One specific company or agency named in the confirmation, for one specific need, offer, booking or application",
   dataCategories: [
     "only the fields explicitly listed and approved in the confirmation",
-    "possible fields: full name, phone, email, CV document, preferred locations, availability details, salary expectation",
+    "possible fields: full name, phone, email, CV document, preferred locations, availability details, salary expectation, links to external profiles you marked as shareable",
   ],
   privacyNoticeRoute: "/privacy",
   texts: {
@@ -213,7 +219,7 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
       summary:
         "Jūs leidžiate LabourMarket.ai perduoti žemiau nurodytus duomenis įmonei „{companyName}“ dėl „{contextTitle}“.",
       visibleData:
-        "Bus perduoti tik patvirtinimo lange išvardyti laukai (pvz., vardas, kontaktai ar CV failas). Nieko daugiau neperduodama.",
+        "Bus perduoti tik patvirtinimo lange išvardyti laukai (pvz., vardas, kontaktai, CV failas ar jūsų pažymėtos išorinių profilių nuorodos). Nieko daugiau neperduodama.",
       invisibleData:
         "Visi kiti jūsų duomenys lieka neperduoti. Kitoms įmonėms ar kitiems poreikiams šis patvirtinimas negalioja.",
       freedom:
@@ -228,7 +234,7 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
       summary:
         "You allow LabourMarket.ai to transfer the data listed below to “{companyName}” for “{contextTitle}”.",
       visibleData:
-        "Only the fields listed in this confirmation (for example name, contact details or a CV file) will be transferred. Nothing else is shared.",
+        "Only the fields listed in this confirmation (for example name, contact details, a CV file or the external profile links you marked as shareable) will be transferred. Nothing else is shared.",
       invisibleData:
         "All your other data stays private. This confirmation is not valid for other companies or other needs.",
       freedom:
@@ -243,7 +249,7 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
       summary:
         "Вы разрешаете LabourMarket.ai передать указанные ниже данные компании «{companyName}» в связи с «{contextTitle}».",
       visibleData:
-        "Будут переданы только поля, перечисленные в этом подтверждении (например, имя, контакты или файл CV). Больше ничего не передаётся.",
+        "Будут переданы только поля, перечисленные в этом подтверждении (например, имя, контакты, файл CV или отмеченные вами ссылки на внешние профили). Больше ничего не передаётся.",
       invisibleData:
         "Все остальные ваши данные остаются закрытыми. Это подтверждение не действует для других компаний или других запросов.",
       freedom:
@@ -258,7 +264,7 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
       summary:
         "U staat LabourMarket.ai toe de hieronder vermelde gegevens over te dragen aan “{companyName}” in verband met “{contextTitle}”.",
       visibleData:
-        "Alleen de in deze bevestiging vermelde velden (bijvoorbeeld naam, contactgegevens of een cv-bestand) worden overgedragen. Verder wordt niets gedeeld.",
+        "Alleen de in deze bevestiging vermelde velden (bijvoorbeeld naam, contactgegevens, een cv-bestand of de links naar externe profielen die u als deelbaar hebt gemarkeerd) worden overgedragen. Verder wordt niets gedeeld.",
       invisibleData:
         "Al uw overige gegevens blijven privé. Deze bevestiging geldt niet voor andere bedrijven of andere aanvragen.",
       freedom:
@@ -273,7 +279,7 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
       summary:
         "Sie erlauben LabourMarket.ai, die unten aufgeführten Daten an „{companyName}“ im Zusammenhang mit „{contextTitle}“ zu übermitteln.",
       visibleData:
-        "Übermittelt werden nur die in dieser Bestätigung aufgeführten Felder (zum Beispiel Name, Kontaktdaten oder eine Lebenslauf-Datei). Sonst wird nichts weitergegeben.",
+        "Übermittelt werden nur die in dieser Bestätigung aufgeführten Felder (zum Beispiel Name, Kontaktdaten, eine Lebenslauf-Datei oder die Links zu externen Profilen, die Sie als teilbar markiert haben). Sonst wird nichts weitergegeben.",
       invisibleData:
         "Alle Ihre übrigen Daten bleiben privat. Diese Bestätigung gilt nicht für andere Unternehmen oder andere Anfragen.",
       freedom:
@@ -288,7 +294,7 @@ export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
       summary:
         "Zezwalasz LabourMarket.ai na przekazanie wymienionych poniżej danych firmie „{companyName}” w związku z „{contextTitle}”.",
       visibleData:
-        "Przekazane zostaną wyłącznie pola wymienione w tym potwierdzeniu (na przykład imię i nazwisko, dane kontaktowe lub plik CV). Nic więcej nie jest udostępniane.",
+        "Przekazane zostaną wyłącznie pola wymienione w tym potwierdzeniu (na przykład imię i nazwisko, dane kontaktowe, plik CV lub zaznaczone przez Ciebie linki do profili zewnętrznych). Nic więcej nie jest udostępniane.",
       invisibleData:
         "Wszystkie pozostałe dane pozostają prywatne. To potwierdzenie nie obowiązuje wobec innych firm ani innych zapytań.",
       freedom:

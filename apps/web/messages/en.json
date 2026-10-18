@@ -8900,7 +8900,8 @@
       "withdrawing": "Withdrawing…",
       "withdrawn": "You withdrew this request.",
       "withdrawNotOpen": "This request is no longer open — it cannot be withdrawn.",
-      "withdrawError": "The request could not be withdrawn. Please try again."
+      "withdrawError": "The request could not be withdrawn. Please try again.",
+      "sharedLinks": "Profile links the worker shared:"
     },
     "shortlistNote": {
       "label": "Note",
@@ -10973,7 +10974,8 @@
       "cv_document": "CV file",
       "preferred_locations": "Preferred locations",
       "availability_details": "Availability details",
-      "salary_expectation": "Pay expectation"
+      "salary_expectation": "Pay expectation",
+      "external_profiles": "External profile links"
     },
     "rights": {
       "notice": "More about your rights and how data is handled:",
@@ -11007,7 +11009,9 @@
       "accept": "Accept",
       "acceptedNote": "Accepted. Nothing was shared yet — allowing contact details is a separate choice below.",
       "grantTitle": "Share contact details?",
-      "grantIntro": "This is a separate decision. Only the details listed below would be passed to this company, and only for this need."
+      "grantIntro": "This is a separate decision. Only the details listed below would be passed to this company, and only for this need.",
+      "includeLinks": "Also share my external profile links marked “Shareable” ({count})",
+      "includeLinksNote": "Unless you tick this, no link is shared. Only this company receives them, and only for this need."
     },
     "partnerSupply": {
       "sectionIntro": "Being compared against a job and being named are not the same thing. This permission lets LabourMarket.ai look for suitable work for you with employers and projects outside this platform, through approved partner infrastructure. Only a professional summary without direct identifying data is passed on — never your name or contact details.",
@@ -12062,8 +12066,8 @@
     "cancel": "Cancel",
     "visibility": "Visibility",
     "visibilityPrivate": "Private",
-    "visibilityEmployers": "Employers",
-    "visibilityNote": "Not available right now.",
+    "visibilityEmployers": "Shareable",
+    "visibilityNote": "Companies do not see these links. A link marked “Shareable” goes only to a company you allow yourself, when you answer its contact request. You can revoke that at any time in your privacy settings.",
     "importNote": "Automatic import from these sites is not offered. To bring your data in, upload an exported CV file in the profile editor.",
     "importLink": "Open the profile editor",
     "empty": "No external profiles linked yet.",

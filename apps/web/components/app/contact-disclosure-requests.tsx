@@ -32,6 +32,8 @@ export interface ContactRequestCard {
   readonly createdAtDate: string;
   /** Localized labels of the requested fields (never raw enum values). */
   readonly fieldLabels: readonly string[];
+  /** True when the company's ask itself already lists the external profile links. */
+  readonly requestsExternalProfiles: boolean;
   /** Decision 2 state — the SEPARATE consent-ledger grant, read live. */
   readonly disclosureGranted: boolean;
   /** The versioned consent wording, already interpolated server-side. */
@@ -49,10 +51,13 @@ export interface ContactRequestCard {
 export function ContactDisclosureRequests({
   locale,
   requests,
+  shareableLinkCount,
   labels,
 }: {
   locale: string;
   requests: readonly ContactRequestCard[];
+  /** The worker's own links marked "Shareable" and still connected (0 → no opt-in shown). */
+  shareableLinkCount: number;
   labels: {
     empty: string;
     requestedFields: string;
@@ -75,6 +80,9 @@ export function ContactDisclosureRequests({
     withdrawGrant: string;
     withdrawGrantNote: string;
     withdrawnNote: string;
+    /** Already formatted with the shareable link count. */
+    includeLinks: string;
+    includeLinksNote: string;
     error: string;
   };
 }) {
@@ -85,6 +93,8 @@ export function ContactDisclosureRequests({
   const [granted, setGranted] = useState<
     Record<string, "granted" | "withdrawn" | "error">
   >({});
+  // The links opt-in is per request and UNCHECKED by default: doing nothing shares no link.
+  const [includeLinks, setIncludeLinks] = useState<Record<string, boolean>>({});
   const [, startTransition] = useTransition();
 
   if (requests.length === 0) {
@@ -128,7 +138,11 @@ export function ContactDisclosureRequests({
   function grantDisclosure(id: string) {
     setPendingId(id);
     startTransition(async () => {
-      const res = await grantContactDisclosureAction({ locale, id });
+      const res = await grantContactDisclosureAction({
+        locale,
+        id,
+        includeExternalProfiles: includeLinks[id] === true,
+      });
       setPendingId(null);
       setGranted((prev) => ({ ...prev, [id]: res.kind === "ok" ? "granted" : "error" }));
     });
@@ -240,6 +254,29 @@ export function ContactDisclosureRequests({
                     <p className="text-text-muted">{r.legal.controller}</p>
                   </div>
                 </details>
+                {shareableLinkCount > 0 && !r.requestsExternalProfiles ? (
+                  <label
+                    className="flex min-h-11 items-start gap-2 text-xs leading-relaxed text-text-secondary"
+                    data-testid={`contact-request-include-links-${r.id}`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 h-4 w-4 shrink-0"
+                      checked={includeLinks[r.id] === true}
+                      onChange={(e) => {
+                        const checked = e.currentTarget.checked;
+                        setIncludeLinks((prev) => ({ ...prev, [r.id]: checked }));
+                      }}
+                      disabled={pendingId !== null}
+                    />
+                    <span>
+                      <span className="block text-text-primary">
+                        {labels.includeLinks}
+                      </span>
+                      <span className="block text-text-muted">{labels.includeLinksNote}</span>
+                    </span>
+                  </label>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => grantDisclosure(r.id)}

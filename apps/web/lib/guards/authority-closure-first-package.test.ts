@@ -98,7 +98,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261012120000_",
       // 2026-10-11 (RED by SECURITY DEFINER replace, needs-human-gate): free-text job search without the per-row ICU ilike.
       "20261011090000_",
-      // 2026-10-18 (RED, needs-human-gate): external profile visibility RPC.
+      // 2026-10-18 (RED, needs-human-gate): external profile links in the contact permission.
       "20261018130000_",
     ];
     const before = names.filter(

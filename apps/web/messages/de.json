@@ -8900,7 +8900,8 @@
       "withdrawing": "Wird zurückgezogen…",
       "withdrawn": "Sie haben diese Anfrage zurückgezogen.",
       "withdrawNotOpen": "Diese Anfrage ist nicht mehr offen — sie kann nicht zurückgezogen werden.",
-      "withdrawError": "Die Anfrage konnte nicht zurückgezogen werden. Bitte versuchen Sie es erneut."
+      "withdrawError": "Die Anfrage konnte nicht zurückgezogen werden. Bitte versuchen Sie es erneut.",
+      "sharedLinks": "Vom Mitarbeitenden geteilte Profillinks:"
     },
     "shortlistNote": {
       "label": "Notiz",
@@ -10973,7 +10974,8 @@
       "cv_document": "Lebenslauf-Datei",
       "preferred_locations": "Bevorzugte Orte",
       "availability_details": "Verfügbarkeitsdetails",
-      "salary_expectation": "Gehaltsvorstellung"
+      "salary_expectation": "Gehaltsvorstellung",
+      "external_profiles": "Links zu externen Profilen"
     },
     "rights": {
       "notice": "Mehr über Ihre Rechte und die Datenverarbeitung:",
@@ -11007,7 +11009,9 @@
       "accept": "Annehmen",
       "acceptedNote": "Angenommen. Es wurde noch nichts weitergegeben — Kontaktdaten zu erlauben ist eine separate Entscheidung unten.",
       "grantTitle": "Kontaktdaten weitergeben?",
-      "grantIntro": "Dies ist eine separate Entscheidung. Nur die unten aufgeführten Daten würden an dieses Unternehmen weitergegeben, und nur für diesen Bedarf."
+      "grantIntro": "Dies ist eine separate Entscheidung. Nur die unten aufgeführten Daten würden an dieses Unternehmen weitergegeben, und nur für diesen Bedarf.",
+      "includeLinks": "Auch meine als „Teilbar“ markierten Links zu externen Profilen übermitteln ({count})",
+      "includeLinksNote": "Ohne dieses Häkchen wird kein Link übermittelt. Nur dieses Unternehmen erhält sie, und nur für diese Anfrage."
     },
     "partnerSupply": {
       "sectionIntro": "Mit einer Stelle verglichen zu werden und namentlich genannt zu werden, ist nicht dasselbe. Diese Erlaubnis erlaubt LabourMarket.ai, über geprüfte Partnerinfrastruktur passende Arbeit für Sie bei Arbeitgebern und Projekten außerhalb dieser Plattform zu suchen. Weitergegeben wird nur eine berufliche Zusammenfassung ohne direkt identifizierende Daten — niemals Ihr Name oder Ihre Kontaktdaten.",
@@ -12062,8 +12066,8 @@
     "cancel": "Abbrechen",
     "visibility": "Sichtbarkeit",
     "visibilityPrivate": "Privat",
-    "visibilityEmployers": "Arbeitgeber",
-    "visibilityNote": "Derzeit nicht verfügbar.",
+    "visibilityEmployers": "Teilbar",
+    "visibilityNote": "Unternehmen sehen diese Links nicht. Ein als „Teilbar“ markierter Link geht nur an ein Unternehmen, dem Sie es selbst erlauben, wenn Sie auf seine Kontaktanfrage antworten. Sie können das jederzeit in den Datenschutzeinstellungen widerrufen.",
     "importNote": "Ein automatischer Import von diesen Seiten wird nicht angeboten. Um Ihre Daten zu übernehmen, laden Sie im Profil-Editor eine exportierte Lebenslauf-Datei hoch.",
     "importLink": "Profil-Editor öffnen",
     "empty": "Noch keine externen Profile verknüpft.",

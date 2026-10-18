@@ -31,9 +31,27 @@ version is reproducible from this file's git history + the hash.
 - Ledger state at bump: 0 consent events in production (verified
   2026-07-11) — no re-consent flow needed, no user was auto-migrated.
 
-### employer_data_disclosure — `2026-07-11.v2` (CURRENT)
+### employer_data_disclosure — `2026-10-18.v3` (CURRENT once 20261018130000 is applied)
+
+- Hash: `20a9156662998bd93797e9dfae811ac8acfbfeabb84eb68ecf135eb29130eefa`
+  (six locales, pinned by `20261018130000_external_profile_disclosure_v1.sql`).
+- Change vs v2: the closed field whitelist gains `external_profiles` (8 fields):
+  the links to external profiles the worker marked "Shareable". The
+  `visibleData` block names them in every locale. Recipient, context and use
+  UNCHANGED: one named organization, one need, the worker's own grant.
+- The worker adds the links with an unchecked opt-in at grant time; the
+  organization reads only links still marked shareable and connected, through
+  `list_disclosed_external_profiles_v1`, re-checked against the ledger on
+  every read (withdrawal, "Private" or disconnect closes access at once).
+- Ledger state at bump: 0 employer_data_disclosure events and 0 contact
+  requests in production (read 2026-10-18) — nothing is invalidated.
+- PL/RU/NL/DE wording follows the existing native-review convention.
+
+### employer_data_disclosure — `2026-07-11.v2` (SUPERSEDED by v3 on apply)
 
 - Hash: `7d5719029a6088910e89bb2d2e854c30324d42aae5a48ecf37451669f0d5ba1a`
+  (re-pinned to `6f57d9167a6313220ba34ae46a1ca03357db0737d17f5985b3dd5f1e75b6fb81`
+  when `pl` joined the locale set on 2026-09-20).
 - Same v2 change (controller block); transfer performed only by the
   controller to the named company — never to the IP owner.
 

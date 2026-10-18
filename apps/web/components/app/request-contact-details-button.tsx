@@ -7,6 +7,7 @@ import {
   withdrawContactDisclosureAction,
 } from "@/lib/privacy/contact-disclosure-actions";
 import type { ContactDisclosureStatus } from "@/lib/privacy/contact-disclosure-shared";
+import type { SharedExternalLink } from "@/lib/privacy/contact-disclosure-actions";
 import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
@@ -40,6 +41,7 @@ export function RequestContactDetailsButton({
   requestRowId,
   currentStatus,
   disclosureGranted,
+  sharedLinks = [],
   modelApplied,
   labels,
 }: {
@@ -52,6 +54,9 @@ export function RequestContactDetailsButton({
   currentStatus: ContactDisclosureStatus | null;
   /** The SEPARATE consent-ledger grant state (live-verified server-side). */
   disclosureGranted: boolean;
+  /** External profile links the worker chose to share with this organization for this need,
+   *  re-checked against the consent ledger on every server render. */
+  sharedLinks?: readonly SharedExternalLink[];
   /** False while the draft migration is not applied — show the honest note. */
   modelApplied: boolean;
   labels: {
@@ -72,6 +77,7 @@ export function RequestContactDetailsButton({
     withdrawn: string;
     withdrawNotOpen: string;
     withdrawError: string;
+    sharedLinks: string;
   };
 }) {
   const [pending, startTransition] = useTransition();
@@ -158,17 +164,39 @@ export function RequestContactDetailsButton({
     );
   }
   if (effectiveStatus === "accepted") {
+    const links = disclosureGranted ? sharedLinks : [];
     return (
-      <p
-        className={`text-meta font-medium ${
-          disclosureGranted ? "text-state-success" : "text-text-secondary"
-        }`}
-        data-testid={`contact-request-status-${workerId}`}
-        data-status="accepted"
-        data-disclosure-granted={disclosureGranted ? "true" : "false"}
-      >
-        {disclosureGranted ? labels.granted : labels.accepted}
-      </p>
+      <div className="flex flex-col gap-1">
+        <p
+          className={`text-meta font-medium ${
+            disclosureGranted ? "text-state-success" : "text-text-secondary"
+          }`}
+          data-testid={`contact-request-status-${workerId}`}
+          data-status="accepted"
+          data-disclosure-granted={disclosureGranted ? "true" : "false"}
+        >
+          {disclosureGranted ? labels.granted : labels.accepted}
+        </p>
+        {links.length > 0 ? (
+          <div data-testid={`contact-request-shared-links-${workerId}`}>
+            <p className="text-meta text-text-secondary">{labels.sharedLinks}</p>
+            <ul className="mt-0.5 flex flex-col gap-0.5">
+              {links.map((l) => (
+                <li key={l.id} className="min-w-0">
+                  <a
+                    href={l.url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="block truncate text-meta text-brand-blue underline-offset-2 hover:underline"
+                  >
+                    {l.url.replace(/^https:\/\//, "")}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
     );
   }
 

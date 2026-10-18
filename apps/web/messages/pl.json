@@ -8900,7 +8900,8 @@
       "withdrawing": "Wycofywanie…",
       "withdrawn": "Wycofano tę prośbę.",
       "withdrawNotOpen": "Ta prośba nie jest już otwarta — nie można jej wycofać.",
-      "withdrawError": "Nie udało się wycofać prośby. Spróbuj ponownie."
+      "withdrawError": "Nie udało się wycofać prośby. Spróbuj ponownie.",
+      "sharedLinks": "Linki do profili udostępnione przez pracownika:"
     },
     "shortlistNote": {
       "label": "Notatka",
@@ -10973,7 +10974,8 @@
       "cv_document": "Plik CV",
       "preferred_locations": "Preferowane lokalizacje",
       "availability_details": "Szczegóły dostępności",
-      "salary_expectation": "Oczekiwane wynagrodzenie"
+      "salary_expectation": "Oczekiwane wynagrodzenie",
+      "external_profiles": "Linki do profili zewnętrznych"
     },
     "rights": {
       "notice": "Więcej o Twoich prawach i o tym, jak przetwarzane są dane:",
@@ -11007,7 +11009,9 @@
       "accept": "Akceptuj",
       "acceptedNote": "Zaakceptowano. Nic jeszcze nie zostało udostępnione — zgoda na dane kontaktowe to osobny wybór poniżej.",
       "grantTitle": "Udostępnić dane kontaktowe?",
-      "grantIntro": "To osobna decyzja. Tej firmie zostałyby przekazane wyłącznie dane wymienione poniżej i tylko do tego zapotrzebowania."
+      "grantIntro": "To osobna decyzja. Tej firmie zostałyby przekazane wyłącznie dane wymienione poniżej i tylko do tego zapotrzebowania.",
+      "includeLinks": "Udostępnij też moje linki do profili zewnętrznych oznaczone jako „Można udostępnić” ({count})",
+      "includeLinksNote": "Bez zaznaczenia żaden link nie zostanie przekazany. Otrzyma je tylko ta firma i tylko do tego zapotrzebowania."
     },
     "partnerSupply": {
       "sectionIntro": "Porównanie z ofertą pracy i wskazanie Twojego nazwiska to nie to samo. To pozwolenie umożliwia LabourMarket.ai szukanie dla Ciebie odpowiedniej pracy u pracodawców i w projektach poza tą platformą, przez zatwierdzoną infrastrukturę partnerską. Przekazywane jest wyłącznie podsumowanie zawodowe pozbawione bezpośrednich danych identyfikujących — nigdy Twoje imię i nazwisko ani dane kontaktowe.",
@@ -12062,8 +12066,8 @@
     "cancel": "Anuluj",
     "visibility": "Widoczność",
     "visibilityPrivate": "Prywatna",
-    "visibilityEmployers": "Pracodawcy",
-    "visibilityNote": "Chwilowo niedostępne.",
+    "visibilityEmployers": "Można udostępnić",
+    "visibilityNote": "Firmy nie widzą tych linków. Link oznaczony jako „Można udostępnić” trafi tylko do firmy, której sam na to pozwolisz, odpowiadając na jej prośbę o kontakt. Możesz to w każdej chwili cofnąć w ustawieniach prywatności.",
     "importNote": "Automatyczny import z tych stron nie jest oferowany. Aby przenieść swoje dane, prześlij wyeksportowany plik CV w edytorze profilu.",
     "importLink": "Otwórz edytor profilu",
     "empty": "Nie powiązano jeszcze żadnych profili zewnętrznych.",

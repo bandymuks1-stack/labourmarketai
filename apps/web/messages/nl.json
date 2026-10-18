@@ -8900,7 +8900,8 @@
       "withdrawing": "Intrekken…",
       "withdrawn": "Je hebt dit verzoek ingetrokken.",
       "withdrawNotOpen": "Dit verzoek staat niet meer open — het kan niet worden ingetrokken.",
-      "withdrawError": "Het verzoek kon niet worden ingetrokken. Probeer het opnieuw."
+      "withdrawError": "Het verzoek kon niet worden ingetrokken. Probeer het opnieuw.",
+      "sharedLinks": "Profiellinks die de werknemer heeft gedeeld:"
     },
     "shortlistNote": {
       "label": "Notitie",
@@ -10973,7 +10974,8 @@
       "cv_document": "Cv-bestand",
       "preferred_locations": "Gewenste locaties",
       "availability_details": "Beschikbaarheidsdetails",
-      "salary_expectation": "Loonverwachting"
+      "salary_expectation": "Loonverwachting",
+      "external_profiles": "Links naar externe profielen"
     },
     "rights": {
       "notice": "Meer over je rechten en gegevensverwerking:",
@@ -11007,7 +11009,9 @@
       "accept": "Accepteren",
       "acceptedNote": "Geaccepteerd. Er is nog niets gedeeld — contactgegevens toestaan is een aparte keuze hieronder.",
       "grantTitle": "Contactgegevens delen?",
-      "grantIntro": "Dit is een aparte beslissing. Alleen de hieronder vermelde gegevens zouden aan dit bedrijf worden doorgegeven, en alleen voor deze behoefte."
+      "grantIntro": "Dit is een aparte beslissing. Alleen de hieronder vermelde gegevens zouden aan dit bedrijf worden doorgegeven, en alleen voor deze behoefte.",
+      "includeLinks": "Ook mijn links naar externe profielen delen die als „Deelbaar” zijn gemarkeerd ({count})",
+      "includeLinksNote": "Zonder dit vinkje wordt geen link gedeeld. Alleen dit bedrijf ontvangt ze, en alleen voor deze aanvraag."
     },
     "partnerSupply": {
       "sectionIntro": "Vergeleken worden met een vacature en bij naam genoemd worden zijn twee verschillende dingen. Met deze toestemming mag LabourMarket.ai passend werk voor je zoeken bij werkgevers en projecten buiten dit platform, via goedgekeurde partnerinfrastructuur. Alleen een professionele samenvatting zonder directe identificerende gegevens wordt doorgegeven — nooit je naam of contactgegevens.",
@@ -12062,8 +12066,8 @@
     "cancel": "Annuleren",
     "visibility": "Zichtbaarheid",
     "visibilityPrivate": "Privé",
-    "visibilityEmployers": "Werkgevers",
-    "visibilityNote": "Momenteel niet beschikbaar.",
+    "visibilityEmployers": "Deelbaar",
+    "visibilityNote": "Bedrijven zien deze links niet. Een link gemarkeerd als „Deelbaar” gaat alleen naar een bedrijf dat u zelf toestemming geeft wanneer u op zijn contactverzoek antwoordt. U kunt dat altijd intrekken in uw privacy-instellingen.",
     "importNote": "Automatisch importeren vanaf deze sites wordt niet aangeboden. Upload een geëxporteerd cv-bestand in de profieleditor om je gegevens over te nemen.",
     "importLink": "Profieleditor openen",
     "empty": "Nog geen externe profielen gekoppeld.",

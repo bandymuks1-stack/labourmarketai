@@ -8,7 +8,10 @@ import { Card } from "@/components/ui/Card";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { PrivacyDeletionRequest } from "@/components/app/privacy-deletion-request";
 import { listMyPrivacyRequests } from "@/lib/privacy/actions";
-import { listMyContactDisclosureRequests } from "@/lib/privacy/contact-disclosure-actions";
+import {
+  countMyShareableExternalProfiles,
+  listMyContactDisclosureRequests,
+} from "@/lib/privacy/contact-disclosure-actions";
 import {
   getMyConsentHistory,
   getMyDiscoverabilityState,
@@ -78,6 +81,7 @@ export default async function PrivacyPage({
     myRequests,
     contactRequestsResult,
     partnerSupplyState,
+    shareableLinkCount,
   ] = await Promise.all([
     getMyDiscoverabilityState(),
     getMyConsentHistory(),
@@ -85,6 +89,7 @@ export default async function PrivacyPage({
     listMyPrivacyRequests(),
     listMyContactDisclosureRequests(),
     getMyPartnerSupplyState(),
+    countMyShareableExternalProfiles(),
   ]);
 
   // The ONE consent-locale rule (PL → English, never Lithuanian), shared with
@@ -132,6 +137,7 @@ export default async function PrivacyPage({
             needTitle: contextTitle,
             createdAtDate: r.createdAt.slice(0, 10),
             fieldLabels: r.requestedFields.map(fieldLabel),
+            requestsExternalProfiles: r.requestedFields.includes("external_profiles"),
             disclosureGranted: r.disclosureGranted,
             legal: {
               title: fill(disclosureLegal.title),
@@ -277,6 +283,7 @@ export default async function PrivacyPage({
           <ContactDisclosureRequests
             locale={locale}
             requests={contactRequestCards}
+            shareableLinkCount={shareableLinkCount}
             labels={{
               empty: tc("contactRequests.empty"),
               requestedFields: tc("contactRequests.requestedFields"),
@@ -299,6 +306,8 @@ export default async function PrivacyPage({
               withdrawGrant: tc("contactRequests.withdrawGrant"),
               withdrawGrantNote: tc("contactRequests.withdrawGrantNote"),
               withdrawnNote: tc("contactRequests.withdrawnNote"),
+              includeLinks: tc("contactRequests.includeLinks", { count: shareableLinkCount }),
+              includeLinksNote: tc("contactRequests.includeLinksNote"),
               error: tc("contactRequests.error"),
             }}
           />

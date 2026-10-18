@@ -1120,6 +1120,9 @@ export default async function CompanyScoutingPage({
                           contactRequests.byWorker[c.workerId]?.disclosureGranted ??
                           false
                         }
+                        sharedLinks={
+                          contactRequests.byWorker[c.workerId]?.sharedLinks ?? []
+                        }
                         modelApplied={contactRequests.applied}
                         labels={{
                           button: t("contactRequest.button"),
@@ -1137,6 +1140,7 @@ export default async function CompanyScoutingPage({
                           withdrawn: t("contactRequest.withdrawn"),
                           withdrawNotOpen: t("contactRequest.withdrawNotOpen"),
                           withdrawError: t("contactRequest.withdrawError"),
+                          sharedLinks: t("contactRequest.sharedLinks"),
                           fieldsNote: t("contactRequest.fieldsNote"),
                           error: t("contactRequest.error"),
                         }}

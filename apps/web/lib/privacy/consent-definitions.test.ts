@@ -46,7 +46,7 @@ const MIGRATIONS_DIR = join(
  */
 const EXPECTED_PURPOSE_VERSIONS: Readonly<Record<string, string>> = {
   profile_discoverability: "2026-07-11.v2",
-  employer_data_disclosure: "2026-07-11.v2",
+  employer_data_disclosure: "2026-10-18.v3",
   partner_supply_representation: "2026-09-04.v1",
 };
 

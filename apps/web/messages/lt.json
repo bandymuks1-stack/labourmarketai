@@ -8900,7 +8900,8 @@
       "withdrawing": "Atšaukiama…",
       "withdrawn": "Jūs atšaukėte šią užklausą.",
       "withdrawNotOpen": "Ši užklausa nebėra atvira — jos atšaukti nebegalima.",
-      "withdrawError": "Užklausos atšaukti nepavyko. Bandykite dar kartą."
+      "withdrawError": "Užklausos atšaukti nepavyko. Bandykite dar kartą.",
+      "sharedLinks": "Darbuotojo pasidalintos profilių nuorodos:"
     },
     "shortlistNote": {
       "label": "Pastaba",
@@ -10973,7 +10974,8 @@
       "cv_document": "CV failas",
       "preferred_locations": "Pageidaujamos vietos",
       "availability_details": "Prieinamumo detalės",
-      "salary_expectation": "Atlygio lūkestis"
+      "salary_expectation": "Atlygio lūkestis",
+      "external_profiles": "Išorinių profilių nuorodos"
     },
     "rights": {
       "notice": "Daugiau apie tavo teises ir duomenų tvarkymą:",
@@ -11007,7 +11009,9 @@
       "accept": "Priimti",
       "acceptedNote": "Priimta. Kol kas niekas neperduota — leisti kontaktinius duomenis yra atskiras pasirinkimas žemiau.",
       "grantTitle": "Perduoti kontaktinius duomenis?",
-      "grantIntro": "Tai atskiras sprendimas. Šiai įmonei ir tik šiam poreikiui būtų perduoti tik žemiau išvardyti duomenys."
+      "grantIntro": "Tai atskiras sprendimas. Šiai įmonei ir tik šiam poreikiui būtų perduoti tik žemiau išvardyti duomenys.",
+      "includeLinks": "Kartu perduoti mano išorinių profilių nuorodas, pažymėtas „Galima bendrinti“ ({count})",
+      "includeLinksNote": "Nepažymėjus, nuorodos neperduodamos. Jas gaus tik ši įmonė ir tik dėl šio poreikio."
     },
     "partnerSupply": {
       "sectionIntro": "Būti palygintam su darbo pasiūlymu ir būti įvardytam — ne tas pat. Šis leidimas leidžia LabourMarket.ai ieškoti tau tinkamo darbo pas darbdavius ir projektuose už šios platformos ribų, per patvirtintą partnerių infrastruktūrą. Perduodama tik profesinė santrauka be tiesioginių identifikuojančių duomenų — niekada vardas ar kontaktai.",
@@ -12062,8 +12066,8 @@
     "cancel": "Atšaukti",
     "visibility": "Matomumas",
     "visibilityPrivate": "Privatu",
-    "visibilityEmployers": "Darbdaviams",
-    "visibilityNote": "Šiuo metu nepasiekiama.",
+    "visibilityEmployers": "Galima bendrinti",
+    "visibilityNote": "Įmonės šių nuorodų nemato. Nuorodą, pažymėtą „Galima bendrinti“, gaus tik ta įmonė, kuriai pats leisi atsakydamas į jos kontaktų prašymą. Leidimą gali bet kada atšaukti privatumo nustatymuose.",
     "importNote": "Automatinio importo iš šių svetainių nėra. Jei nori perkelti savo duomenis, profilio redaktoriuje įkelk eksportuotą CV failą.",
     "importLink": "Atidaryti profilio redaktorių",
     "empty": "Išorinių profilių dar nepridėta.",
