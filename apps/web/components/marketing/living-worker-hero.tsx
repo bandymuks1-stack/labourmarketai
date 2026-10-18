@@ -916,7 +916,10 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
 
   return (
     <section
-      className="relative isolate -mx-6 flex flex-col overflow-hidden bg-ink-900 sm:-mx-12 md:block"
+      /* -mt-14 pt-14: the landing wrapper's py-14 top padding left a 56px band of page
+         background between the header and the hero's own black (a visible seam on phone
+         and desktop). The hero now bleeds up to the header while its content keeps its place. */
+      className="relative isolate -mx-6 -mt-14 flex flex-col overflow-hidden bg-ink-900 pt-14 sm:-mx-12 md:block"
       aria-roledescription="carousel"
       aria-label={capM.story.name}
       data-testid="living-worker-hero"
