@@ -12425,7 +12425,9 @@
     "viewLimitTitle": "Peržiūrų riba pasiekta",
     "viewLimitBody": "Nemokamas planas leidžia atverti {limit} skirtingas anonimines anketas organizacijai. Jau atverta: {used}.",
     "viewLimitReopen": "Jau atvertas anketas gali žiūrėti toliau. Žmonės, su kuriais dirbate, į ribą neįskaičiuojami.",
-    "viewLimitPlans": "Peržiūrėti planus"
+    "viewLimitPlans": "Peržiūrėti planus",
+    "viewNeedsOrgTitle": "Pasirink organizaciją",
+    "viewNeedsOrgBody": "Rastų žmonių anketas atveri savo organizacijos vardu. Darbo erdvėje pasirink organizaciją, kurią valdai, ir atverk anketą dar kartą."
   },
   "companyGallery": {
     "title": "Galerija",

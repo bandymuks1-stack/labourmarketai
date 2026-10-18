@@ -12425,7 +12425,9 @@
     "viewLimitTitle": "Limiet voor profielweergaven bereikt",
     "viewLimitBody": "Het gratis plan opent {limit} verschillende geanonimiseerde profielen per organisatie. Al geopend: {used}.",
     "viewLimitReopen": "Profielen die u al opende, blijven open. Mensen met wie u werkt, tellen nooit mee.",
-    "viewLimitPlans": "Plannen bekijken"
+    "viewLimitPlans": "Plannen bekijken",
+    "viewNeedsOrgTitle": "Kies een organisatie",
+    "viewNeedsOrgBody": "U opent profielen van gevonden mensen namens uw organisatie. Kies in de werkruimte een organisatie die u beheert en open het profiel opnieuw."
   },
   "companyGallery": {
     "title": "Galerij",

@@ -138,15 +138,31 @@ export default async function PersonPage({
     redirect(`/${locale}/dashboard/profile`);
   }
 
-  // PLAN LIMIT (owner directive 2026-10-18): opening a found worker's anonymized profile counts
-  // once per organization; the free plan opens 3 unique profiles. The database decides (it also
-  // never counts a working relationship); only an explicit limit answer closes the page.
-  const activeOrganizationId = await getActiveOrganizationContext()
-    .then((c) => c.activeOrganizationId)
-    .catch(() => null);
-  const viewGate = await gateWorkerProfileView(supabase, activeOrganizationId, worker.id as string);
-  if (viewGate.kind === "limit") {
-    return <ViewLimitState t={t} used={viewGate.used} limit={viewGate.limit} />;
+  // A WORKING RELATIONSHIP decides two things at once: the name (owner directive 2026-10-18 —
+  // anonymous by default, identity by permission) and whether this view is a counted plan view.
+  const nameVisible = await viewerHasWorkerRelation(
+    supabase,
+    worker.id as string,
+    (worker.profile_id as string | null) ?? null,
+  );
+
+  // PLAN LIMIT (owner directive 2026-10-18): opening a FOUND worker's anonymized profile counts once
+  // per organization; the free plan opens 3 unique profiles. The database decides; a related viewer
+  // is never gated; a found worker's view must be counted for an organization the viewer manages.
+  if (!nameVisible) {
+    const activeOrganizationId = await getActiveOrganizationContext()
+      .then((c) => c.activeOrganizationId)
+      .catch(() => null);
+    const viewGate = await gateWorkerProfileView(supabase, activeOrganizationId, worker.id as string);
+    if (viewGate.kind === "limit") {
+      return <ViewLimitState t={t} used={viewGate.used} limit={viewGate.limit} />;
+    }
+    if (viewGate.kind === "needs-organization") {
+      return <ViewNeedsOrganizationState t={t} />;
+    }
+    if (viewGate.kind === "unavailable") {
+      return <RestrictedState t={t} />;
+    }
   }
 
   // Catalogue slug is the ONLY name source — the legacy name_lt/name_en
@@ -269,11 +285,6 @@ export default async function PersonPage({
   // The row is readable through the employer-visibility consent too; the NAME
   // is shown only to a viewer with a real working relationship (owner
   // directive 2026-10-18 — anonymous by default, identity by permission).
-  const nameVisible = await viewerHasWorkerRelation(
-    supabase,
-    worker.id as string,
-    (worker.profile_id as string | null) ?? null,
-  );
   const name =
     (nameVisible ? (worker.display_name as string | null)?.trim() : null) ||
     anonymizedWorkerLabel(worker.id as string);
@@ -670,6 +681,24 @@ export default async function PersonPage({
           the person's LINKED roster row, rendered with the shared evidence
           primitives. Nothing when there is none; said when it cannot be read. */}
       <PersonImportedHistory workerId={worker.id as string} locale={locale} />
+    </div>
+  );
+}
+
+function ViewNeedsOrganizationState({
+  t,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations<"people">>>;
+}) {
+  return (
+    <div
+      className="mx-auto flex w-full max-w-content flex-col gap-4"
+      data-testid="person-view-needs-organization"
+    >
+      <PageTitle>{t("viewNeedsOrgTitle")}</PageTitle>
+      <Card compact className="text-sm leading-relaxed text-text-secondary">
+        <p>{t("viewNeedsOrgBody")}</p>
+      </Card>
     </div>
   );
 }

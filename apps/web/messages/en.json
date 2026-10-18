@@ -12425,7 +12425,9 @@
     "viewLimitTitle": "Profile view limit reached",
     "viewLimitBody": "The free plan opens {limit} different anonymized profiles per organization. Opened so far: {used}.",
     "viewLimitReopen": "Profiles you already opened stay open. People you work with never count towards the limit.",
-    "viewLimitPlans": "See plans"
+    "viewLimitPlans": "See plans",
+    "viewNeedsOrgTitle": "Choose an organization",
+    "viewNeedsOrgBody": "You open found people's profiles on behalf of your organization. Pick an organization you manage in the workspace switcher and open the profile again."
   },
   "companyGallery": {
     "title": "Gallery",

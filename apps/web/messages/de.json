@@ -12425,7 +12425,9 @@
     "viewLimitTitle": "Limit für Profilansichten erreicht",
     "viewLimitBody": "Der kostenlose Plan öffnet {limit} verschiedene anonymisierte Profile pro Organisation. Bisher geöffnet: {used}.",
     "viewLimitReopen": "Bereits geöffnete Profile bleiben offen. Personen, mit denen Sie zusammenarbeiten, zählen nie mit.",
-    "viewLimitPlans": "Pläne ansehen"
+    "viewLimitPlans": "Pläne ansehen",
+    "viewNeedsOrgTitle": "Organisation wählen",
+    "viewNeedsOrgBody": "Profile gefundener Personen öffnen Sie im Namen Ihrer Organisation. Wählen Sie im Arbeitsbereich eine Organisation, die Sie verwalten, und öffnen Sie das Profil erneut."
   },
   "companyGallery": {
     "title": "Galerie",
