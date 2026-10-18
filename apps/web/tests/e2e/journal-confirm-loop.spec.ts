@@ -71,7 +71,12 @@ for (const theme of ["dark", "light"] as Theme[]) {
 
       // ── Worker: log in, create a journal entry ────────────────────────
       const worker = await loginAs(browser, WORKER, theme);
-      await worker.goto("/lt/dashboard/journal");
+      // The full composer is behind the explicit "detaliau" door
+      // (`?compose=full`) since #1724 (2026-09-13); the bare journal page
+      // shows the one-sentence quick recorder, which has a textarea but no
+      // `journal-save-entry` button — so the old URL filled a textarea and
+      // then timed out on the click.
+      await worker.goto("/lt/dashboard/journal?compose=full");
       // The composer renders only with an active worker engagement — its
       // absence means the fixtures are not applied, which we want to FAIL,
       // not skip.
@@ -94,7 +99,13 @@ for (const theme of ["dark", "light"] as Theme[]) {
       // ── Manager: the entry is reviewable in the inbox ─────────────────
       const manager = await loginAs(browser, MANAGER, theme);
       await manager.goto("/lt/dashboard/inbox");
+      // Scoped to <main>: the page streams in through a hidden
+      // `<div id="S:n">` that Next.js swaps into place, and for that moment
+      // the same card exists twice — an unscoped locator then fails strict
+      // mode at once (isolated run 2026-10-16), which is not a product state
+      // a person ever sees.
       const entryCard = manager
+        .getByRole("main")
         .locator('li[data-testid^="inbox-entry-"]')
         .filter({ hasText: entryText });
       await expect(entryCard).toBeVisible({ timeout: 15_000 });

@@ -36,10 +36,15 @@ export function CvOrganizationHistory({
   entries,
   headingClassName,
   bodyClassName,
+  periodLabelOf,
 }: {
   entries: readonly CvOrganizationHistoryEntry[];
   headingClassName: string;
   bodyClassName: string;
+  /** Source label → the stated business period it belongs to (decision
+   *  0025): given by a caller that can read the organization's period
+   *  statements. Omitted = no period band. */
+  periodLabelOf?: (sourceLabel: string) => string | null;
 }) {
   const locale = useLocale();
   const t = useTranslations("cvOrganizationHistory");
@@ -57,6 +62,7 @@ export function CvOrganizationHistory({
     relationship: (s: string) => (RELATIONSHIPS.has(s) ? tRel(s as never) : null),
     hours: (n: number) => new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(n),
     date: (iso: string) => formatUtcDate(iso, locale),
+    periodLabel: periodLabelOf,
   };
   const shown = entries.slice(0, SHOWN);
   const folded = entries.length - shown.length;

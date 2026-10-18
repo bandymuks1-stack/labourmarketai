@@ -175,7 +175,7 @@ export async function readEvidenceRecordsForPeople(
   const res = await db(supabase)
     .from("organization_evidence_records")
     .select(
-      "id, organization_id, organization_person_id, activity_date, period_start, period_end, hours, evidence_state, derived, activity_kind, context_label, work_object_id, project_id, supplied_by_organization_id, supplier_role, source_kind, row_origin, imported_at, organization_people(relationship_kind, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
+      "id, organization_id, organization_person_id, activity_date, period_start, period_end, hours, evidence_state, derived, activity_kind, context_label, work_object_id, project_id, supplied_by_organization_id, supplier_role, source_kind, row_origin, imported_at, source_sheet:source_fact->>source_sheet, organization_people(relationship_kind, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
     )
     .in("organization_person_id", personIds)
     .order("activity_date", { ascending: false, nullsFirst: false })
@@ -244,6 +244,9 @@ export async function readEvidenceRecordsForPeople(
       supplierOrganizationId: (r.supplied_by_organization_id as string | null) ?? null,
       sourceKind: (r.source_kind as string | null) ?? null,
       rowOrigin: (r.row_origin as string | null) ?? null,
+      // The entity-at-the-time label the source gave the row (its sheet name) —
+      // what places the record in a stated business period on read.
+      sourceLabel: (r.source_sheet as string | null) ?? null,
       reportedState: (r.evidence_state as string | null) ?? null,
       attestation: standing.attestation
         ? { role: standing.attestation.role, self: standing.attestation.self }

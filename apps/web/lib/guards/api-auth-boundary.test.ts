@@ -76,19 +76,19 @@ const CLASSIFICATION: Record<
   },
   "cron/billing-recovery/route.ts": {
     class: "public",
-    why: "Triggered by the billing-recovery-cadence GitHub Actions workflow (inert until the owner enables it); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset, so never an open trigger. It only READS Stripe and applies through the canonical subscription-apply primitive; it never creates, changes, cancels or refunds a payment. Answers counts and a reason code only, no ids.",
+    why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron) once payments are on — absent from it while they are off; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset, so never an open trigger. It only READS Stripe and applies through the canonical subscription-apply primitive; it never creates, changes, cancels or refunds a payment. Answers counts and a reason code only, no ids.",
   },
   "cron/commercial-handoffs/route.ts": {
     class: "public",
-    why: "Vercel cron delivers it (once the owner schedules it); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. Inert a second time while NONSTOP_HANDOFF_ENDPOINT / NONSTOP_HANDOFF_TOKEN are unset (answers not_configured, calls nothing). Its only outbound target is the configured partner door; the body it returns is counts only.",
+    why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. Inert a second time while NONSTOP_HANDOFF_ENDPOINT / NONSTOP_HANDOFF_TOKEN are unset (answers not_configured, calls nothing). Its only outbound target is the configured partner door; the body it returns is counts only.",
   },
   "cron/job-alerts/route.ts": {
     class: "public",
-    why: "Triggered by the job-alerts-cadence GitHub Actions workflow; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. Answers counts and a reason code only.",
+    why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. Answers counts and a reason code only.",
   },
   "cron/weekly-digest/route.ts": {
     class: "public",
-    why: "Vercel cron delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",
+    why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",
   },
   "internal/supply-feed/first-party-v1/route.ts": {
     class: "public",

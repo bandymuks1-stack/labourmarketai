@@ -14,9 +14,11 @@
 # billing is inactive or the billing tables are absent.
 name: billing-recovery-cadence
 
+# 2026-10-17: the half-hourly schedule was removed — production scheduling moved to the VPS
+# (ops/vps/labourmarket.cron, one owner per task). This workflow stays dispatch-only so the
+# static gate (vars.BILLING_RECOVERY_SCHEDULE_ENABLED + secrets.CRON_SECRET) remains reviewable
+# and never produces a routine green run that could be mistaken for a working cadence.
 on:
-  schedule:
-    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 concurrency:
