@@ -26,6 +26,7 @@ import {
   rollingDayFloorIso,
 } from "@/lib/limits/request-rate-limits";
 import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
+import { readWorkerProfileIds } from "@/lib/visibility/discoverable-workers";
 
 /**
  * Contact-disclosure request lifecycle — server actions (Wagon 1, SHARED
@@ -267,12 +268,7 @@ export async function getScoutingContactRequestStates(
   await Promise.all(
     acceptedRows.map(async ({ workerId, organizationId }) => {
       try {
-        const { data: worker } = await asAny(supabase)
-          .from("workers")
-          .select("profile_id")
-          .eq("id", workerId)
-          .maybeSingle();
-        const profileId = worker?.profile_id as string | null;
+        const profileId = (await readWorkerProfileIds(supabase, [workerId])).get(workerId) ?? null;
         if (!profileId) return;
         const { data: granted } = await asAny(supabase).rpc(
           "has_employer_data_disclosure",

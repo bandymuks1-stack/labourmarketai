@@ -2,6 +2,7 @@
 
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { readDiscoverableWorkers } from "@/lib/visibility/discoverable-workers";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 import { canStartCommunicationOrBooking } from "@/lib/visibility/worker-profile-visibility";
@@ -136,11 +137,15 @@ export async function requestWorkerConversationAction(input: {
 
   // 3) Worker contactable — resolve availability + the messaging identity
   //    (profile_id) server-side ONLY. profile_id never leaves this function.
-  const { data: worker } = await asAny(supabase)
+  // The row for a related worker; the anonymous projection for one found through discovery.
+  const { data: related } = await asAny(supabase)
     .from("workers")
     .select("profile_id, availability_status, available_from")
     .eq("id", workerId)
     .maybeSingle();
+  const worker:
+    | { profile_id: string | null; availability_status: string | null; available_from: string | null }
+    | null = related ?? (await readDiscoverableWorkers(supabase, [workerId])).get(workerId) ?? null;
   const canContact = canStartCommunicationOrBooking({
     availabilityStatus: worker?.availability_status ?? null,
     availableFrom: worker?.available_from ?? null,

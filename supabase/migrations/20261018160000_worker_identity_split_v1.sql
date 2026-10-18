@@ -22,9 +22,10 @@
 --      applied worker_recognitions_for_viewer_v1 (owner decision 2026-10-08).
 --   2. workers_select uses it: the raw row (with identity) only for the worker, an admin, or a viewer
 --      with a working relationship.
---   3. list_discoverable_worker_profiles_v1 — the ONLY discovery read of the row: preview-consented
---      professional columns for discoverable workers, never a name or free text, plus a synthetic-
---      fixture flag computed in SQL so the app can keep QA fixtures out without seeing a name.
+--   3. list_discoverable_worker_profiles_v1 — the ONLY discovery read of the row: professional columns
+--      for discoverable workers (the same fields the consent preview now lists), never a name or free
+--      text, plus a synthetic-fixture flag computed in SQL so QA fixtures stay out without a name.
+--   4. list_discoverable_worker_ids_v1 — scouting's first stage (which workers, by country) as ids.
 --   can_view_worker itself is UNCHANGED: worker_skills / worker_professions / worker_languages and the
 --   definer functions that use it (contact ask, booking, profile-view gate) keep working as today.
 --
@@ -78,15 +79,28 @@ create policy workers_select on public.workers
   for select using (public.caller_has_worker_relation_v1(id));
 
 -- 3. The discovery projection: professional fields only, for discoverable workers, to employers.
+--    Never display_name / headline / bio / availability_note or other free text; never accommodation,
+--    transport, trust or document-consent internals. profile_id is a pseudonymous key the server needs
+--    to address the consent ledger (contact asks) — it is never rendered.
 create or replace function public.list_discoverable_worker_profiles_v1(p_worker_ids uuid[])
 returns table (
   id uuid,
+  profile_id uuid,
   experience_years integer,
+  current_location_country text,
   preferred_countries text[],
   availability_status text,
   available_from date,
   salary_min_eur integer,
   salary_max_eur integer,
+  preferred_contract_type text,
+  pay_basis_preference text,
+  night_shifts_ok boolean,
+  weekend_shifts_ok boolean,
+  overtime_ok boolean,
+  driving_licence_categories text[],
+  own_vehicle boolean,
+  own_tools boolean,
   created_at timestamptz,
   updated_at timestamptz,
   is_synthetic_fixture boolean
@@ -111,8 +125,11 @@ begin
     return;
   end if;
   return query
-    select w.id, w.experience_years, w.preferred_countries, w.availability_status, w.available_from,
-           w.salary_min_eur, w.salary_max_eur, w.created_at, w.updated_at,
+    select w.id, w.profile_id, w.experience_years, w.current_location_country, w.preferred_countries,
+           w.availability_status, w.available_from, w.salary_min_eur, w.salary_max_eur,
+           w.preferred_contract_type, w.pay_basis_preference, w.night_shifts_ok, w.weekend_shifts_ok,
+           w.overtime_ok, w.driving_licence_categories, w.own_vehicle, w.own_tools,
+           w.created_at, w.updated_at,
            -- QA fixtures are recognised by their documented markers (lib/qa/synthetic-fixture.ts);
            -- the flag leaves the database, the name never does.
            coalesce(w.display_name, '') ~* '(\mQA[-_ ]SYNTHETIC\M|\[E2E\]|\mE2E[-_ ]FIXTURE\M)'
@@ -125,5 +142,42 @@ $$;
 revoke all on function public.list_discoverable_worker_profiles_v1(uuid[]) from public;
 revoke all on function public.list_discoverable_worker_profiles_v1(uuid[]) from anon;
 grant execute on function public.list_discoverable_worker_profiles_v1(uuid[]) to authenticated;
+
+-- 4. Discovery's first stage: WHICH discoverable workers, by country, as ids only (scouting Stage 1).
+--    p_country null = the deterministic backfill (ordered by id). Ids carry no identity.
+create or replace function public.list_discoverable_worker_ids_v1(p_country text default null, p_limit integer default 500)
+returns table (id uuid)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_limit integer := least(greatest(coalesce(p_limit, 500), 1), 2000);
+  v_cc text := nullif(btrim(coalesce(p_country, '')), '');
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  if not (public.is_employer() or public.is_admin()) then
+    return;
+  end if;
+  return query
+    select w.id
+      from public.workers w
+     where w.profile_id is not null
+       and public.worker_profile_discoverable(w.profile_id)
+       and (
+         v_cc is null
+         or lower(coalesce(w.current_location_country, '')) = lower(v_cc)
+         or w.preferred_countries && array[upper(v_cc), lower(v_cc)]
+       )
+     order by w.id
+     limit v_limit;
+end;
+$$;
+revoke all on function public.list_discoverable_worker_ids_v1(text, integer) from public;
+revoke all on function public.list_discoverable_worker_ids_v1(text, integer) from anon;
+grant execute on function public.list_discoverable_worker_ids_v1(text, integer) to authenticated;
 
 commit;

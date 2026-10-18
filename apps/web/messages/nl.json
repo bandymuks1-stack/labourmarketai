@@ -10940,7 +10940,20 @@
       "preferredCountries": "Gewenste regio",
       "availability": "Beschikbaarheid",
       "salaryExpectation": "Loonverwachting",
-      "skillsCount": "Vaardigheden"
+      "skillsCount": "Vaardigheden",
+      "anonymousLabel": "Bedrijven zien u als",
+      "currentCountry": "Huidig land",
+      "availableFrom": "Beschikbaar vanaf",
+      "contractType": "Arbeidsvorm",
+      "payBasis": "Betalingsbasis",
+      "nightShifts": "Nachtdiensten",
+      "weekendShifts": "Weekenden",
+      "overtime": "Overuren",
+      "drivingLicence": "Rijbewijs",
+      "ownVehicle": "Eigen vervoer",
+      "ownTools": "Eigen gereedschap",
+      "yes": "Ja",
+      "no": "Nee"
     },
     "labels": {
       "decidedAt": "Gekozen",

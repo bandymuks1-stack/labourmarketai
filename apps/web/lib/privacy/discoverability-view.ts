@@ -67,5 +67,8 @@ export function discoverabilityPreviewFields(
   preview: readonly DiscoverabilityPreviewField[],
   tc: ConsentTranslator,
 ): PreviewField[] {
-  return preview.map((f) => ({ label: tc(`preview.${f.key}`), value: f.value }));
+  return preview.map((f) => ({
+    label: tc(`preview.${f.key}`),
+    value: f.value === "__yes" ? tc("preview.yes") : f.value === "__no" ? tc("preview.no") : f.value,
+  }));
 }

@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { readWorkerProfileIds } from "@/lib/visibility/discoverable-workers";
 
 /**
  * Server-side fact loading for the canonical candidate pipeline (P4).
@@ -84,13 +85,9 @@ export async function loadDemandPipelineFacts(
   const conversationByWorker = new Set<string>();
   try {
     // 1) Resolve worker → profile ids server-side only (never sent to client).
-    const { data: workers } = await asAny(supabase)
-      .from("workers")
-      .select("id, profile_id")
-      .in("id", ids);
     const profileToWorker = new Map<string, string>();
-    for (const w of (workers ?? []) as { id: string; profile_id: string | null }[]) {
-      if (w.profile_id) profileToWorker.set(w.profile_id, w.id);
+    for (const [workerId, profileId] of await readWorkerProfileIds(supabase, ids)) {
+      profileToWorker.set(profileId, workerId);
     }
     if (profileToWorker.size === 0) {
       return { bookingByWorker, conversationByWorker };

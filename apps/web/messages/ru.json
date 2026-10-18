@@ -10940,7 +10940,20 @@
       "preferredCountries": "Предпочитаемый регион",
       "availability": "Доступность",
       "salaryExpectation": "Ожидаемая оплата",
-      "skillsCount": "Навыков"
+      "skillsCount": "Навыков",
+      "anonymousLabel": "Компании видят вас как",
+      "currentCountry": "Текущая страна",
+      "availableFrom": "Доступен с",
+      "contractType": "Форма работы",
+      "payBasis": "Основа оплаты",
+      "nightShifts": "Ночные смены",
+      "weekendShifts": "Выходные",
+      "overtime": "Сверхурочные",
+      "drivingLicence": "Водительские права",
+      "ownVehicle": "Свой транспорт",
+      "ownTools": "Свои инструменты",
+      "yes": "Да",
+      "no": "Нет"
     },
     "labels": {
       "decidedAt": "Выбрано",

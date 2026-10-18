@@ -3,6 +3,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { readWorkerProfileIds } from "@/lib/visibility/discoverable-workers";
 import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 import { acknowledgeInterest } from "@/lib/opportunities/interest";
 import { revalidatePath } from "next/cache";
@@ -94,12 +95,7 @@ export async function contactInterestedWorkerAction(input: {
   }
 
   // 3) Messaging identity resolved server-side only.
-  const { data: worker } = await asAny(supabase)
-    .from("workers")
-    .select("profile_id")
-    .eq("id", workerId)
-    .maybeSingle();
-  const workerProfileId = (worker?.profile_id as string | null) ?? null;
+  const workerProfileId = (await readWorkerProfileIds(supabase, [workerId])).get(workerId) ?? null;
   if (!workerProfileId) return { ok: false, reason: "worker_unavailable" };
 
   // 4) Open/reopen the in-app thread with the just-verified grant.

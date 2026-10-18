@@ -10940,7 +10940,20 @@
       "preferredCountries": "Bevorzugte Region",
       "availability": "Verfügbarkeit",
       "salaryExpectation": "Gehaltsvorstellung",
-      "skillsCount": "Fähigkeiten"
+      "skillsCount": "Fähigkeiten",
+      "anonymousLabel": "Unternehmen sehen Sie als",
+      "currentCountry": "Aktuelles Land",
+      "availableFrom": "Verfügbar ab",
+      "contractType": "Beschäftigungsform",
+      "payBasis": "Vergütungsbasis",
+      "nightShifts": "Nachtschichten",
+      "weekendShifts": "Wochenenden",
+      "overtime": "Überstunden",
+      "drivingLicence": "Führerschein",
+      "ownVehicle": "Eigenes Fahrzeug",
+      "ownTools": "Eigenes Werkzeug",
+      "yes": "Ja",
+      "no": "Nein"
     },
     "labels": {
       "decidedAt": "Gewählt",

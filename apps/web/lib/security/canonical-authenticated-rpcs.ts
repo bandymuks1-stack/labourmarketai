@@ -97,6 +97,8 @@ export const CANONICAL_APP_RPCS = [
   "list_agency_offered_candidates_for_request_v1",
   "list_agency_offered_candidates_for_request_v2",
   "list_booking_engagement_workers_v1",
+  "list_discoverable_worker_ids_v1",
+  "list_discoverable_worker_profiles_v1",
   "list_invitations_for_me_v1",
   "list_my_contact_disclosure_requests_v1",
   "list_my_team_enquiries_v1",

@@ -8,4 +8,5 @@ drop policy if exists workers_select on public.workers;
 create policy workers_select on public.workers
   for select using (public.can_view_worker(id));
 drop function if exists public.list_discoverable_worker_profiles_v1(uuid[]);
+drop function if exists public.list_discoverable_worker_ids_v1(text, integer);
 commit;
