@@ -601,8 +601,15 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // the job-page hreflang fix." Bounded — not general authority.
     expect(jobs.pullRequests).toEqual([
       1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838, 1837, 1890,
-      1892, 1991, 1993, 2045, 2101, 2211, 2253, 2388,
+      1892, 1991, 1993, 2045, 2101, 2211, 2253, 2388, 2467,
     ]);
+    // #2467 (2026-10-18) on the owner's verbatim scoped approval: "Patvirtinu
+    //   PR #2467 įtraukimą į siaurą `/jobs` produkto vartų išimtį, skirtą tik
+    //   tuščios reikšmės „—“ kortelėje ir mobiliosios paieškos išdėstymo
+    //   taisymams. Tai nėra bendras leidimas apeiti produkto kokybės, saugumo
+    //   ar migracijų patikras."
+    // Only the card's last heading fallback (the page's own GENERIC_TITLE
+    // instead of a bare "—") and the phone layout of the search form.
     // #2388 (2026-10-15) on the owner's verbatim scoped approval: anonymous-safe
     // JSON-LD only (CollectionPage/ItemList, WebPage/Occupation), no JobPosting,
     // no employer, location or other non-public field; rules unchanged.

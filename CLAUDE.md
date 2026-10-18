@@ -196,7 +196,7 @@ auto-merge is inert and Claude Code falls back to waiting for CI then merging.
 
 ## Branch strategy
 
-- `main` — production branch, auto-deployed by Vercel
+- `main` — production branch, deployed to the VPS by `.github/workflows/deploy-vps.yml` after Quality Gates passes on `main`
 - Small fixes (≤3 files OR ≤200 LOC): commit directly to `main` is OK
 - Larger features (>3 files OR new module): use feature branch
   - Claude Code: `feat/cc/<short-name>` or `fix/cc/<short-name>`
