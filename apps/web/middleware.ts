@@ -8,6 +8,7 @@ import {
   stripLocaleSegment,
 } from "@/lib/auth/role-gated-routes";
 import { unsupportedLanguageRedirectPath } from "@/lib/i18n/unsupported-language";
+import { entryLocaleForUnmatchedLanguage } from "@/lib/i18n/entry-locale";
 import { env } from "@/lib/env";
 import {
   ONBOARDING_RETURN_HEADER,
@@ -94,6 +95,28 @@ function maybeRedirectUnroutedLanguage(
   if (target === null) return undefined;
   const url = request.nextUrl.clone();
   url.pathname = target;
+  return NextResponse.redirect(url, 307);
+}
+
+/**
+ * `/` or any unprefixed path from a browser that states only unrouted
+ * languages → the same path under `/en`. Prefixed paths, routed preferences,
+ * an existing routed-locale cookie and header-less requests all pass through
+ * to next-intl's own negotiation (audit 2026-10-16, U-1).
+ */
+function maybeRedirectUnmatchedLanguageEntry(
+  request: NextRequest,
+): NextResponse | undefined {
+  const { pathname } = request.nextUrl;
+  const first = pathname.split("/")[1] ?? "";
+  if ((routing.locales as readonly string[]).includes(first)) return undefined;
+  const target = entryLocaleForUnmatchedLanguage(
+    request.headers.get("accept-language"),
+    request.cookies.get("NEXT_LOCALE")?.value ?? null,
+  );
+  if (!target) return undefined;
+  const url = request.nextUrl.clone();
+  url.pathname = `/${target}${pathname === "/" ? "" : pathname}`;
   return NextResponse.redirect(url, 307);
 }
 
@@ -281,6 +304,13 @@ export async function middleware(request: NextRequest) {
   //     segment under the default locale and the information is then gone.
   const languageRedirect = maybeRedirectUnroutedLanguage(request);
   if (languageRedirect) return languageRedirect;
+
+  // 0d. A visitor whose browser prefers NO routed language (sv, fi, fr, …)
+  //     and who has not chosen one: English, not the Lithuanian default
+  //     (audit 2026-10-16, U-1). Only for unprefixed paths — a prefixed URL
+  //     is an explicit choice, and intl handles it unchanged.
+  const unmatchedEntry = maybeRedirectUnmatchedLanguageEntry(request);
+  if (unmatchedEntry) return unmatchedEntry;
 
   // 1. Locale routing — may redirect (`/` → `/lt`) or rewrite. When intl
   //    issues its own redirect (e.g. `/` → `/lt`, `/dashboard` → `/lt/dashboard`)
