@@ -98,6 +98,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261012120000_",
       // 2026-10-11 (RED by SECURITY DEFINER replace, needs-human-gate): free-text job search without the per-row ICU ilike.
       "20261011090000_",
+      // 2026-10-18 (RED, needs-human-gate): employer profile view limit + VIP grants.
+      "20261018150000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
