@@ -241,17 +241,37 @@ export interface OrchestrationAssessment {
  *     (`lib/privacy/consent-definitions.ts` data-controller disclosure, Terms),
  *     which the lock explicitly allows — no LOGIC depends on an entity name.
  */
+/**
+ * CORRECTED 2026-10-16 (owner decision N-12, register truth) against the
+ * production catalog, read-only:
+ *   - `public.organization_roles` (id, organization_id, role_slug, granted_at)
+ *     EXISTS and is multi-valued — UNIQUE (organization_id, role_slug), FK
+ *     role_slug → `organization_role_types(slug)`; 20 rows over four slugs
+ *     (employer, recruitment_partner, training_provider, workforce_provider);
+ *   - a role type is therefore a ROW in a registry table, not a value in a
+ *     CHECK — adding one is data, not a schema change (today those rows are
+ *     still inserted by migration files, not by any UI);
+ *   - `organizations.organization_type` keeps its closed CHECK
+ *     (company|agency|team|other) and the seven legacy gates still read it —
+ *     that is open owner decision ORG-2, and it is why the VERDICT below
+ *     stays `single_type_directory`: the roles exist, the product does not yet
+ *     decide by them;
+ *   - the employment-model CONTRACT lives in this file (EMPLOYMENT_MODELS),
+ *     but nothing in the product executes one and nothing validates a
+ *     fulfilment chain — those two answers are unchanged.
+ * The 2026-07-28 assessment is kept inside `evidence` as history.
+ */
 export const ORCHESTRATION_ASSESSMENT: OrchestrationAssessment = {
-  rolesAreMultiValued: false,
-  rolesAreRegistered: false,
-  addingRoleNeedsMigration: true,
+  rolesAreMultiValued: true,
+  rolesAreRegistered: true,
+  addingRoleNeedsMigration: false,
   employmentModelExists: false,
   fulfilmentChainValidated: false,
   architectureDependsOnEntityName: false,
   currentTypeValues: ["company", "agency", "team", "other"],
   verdict: "single_type_directory",
   evidence:
-    "organizations.organization_type is a single text column with a closed CHECK (company|agency|team|other); no employment model and no fulfilment chain exist; entity names appear only in legal copy.",
+    "2026-10-16: public.organization_roles is a multi-valued registry (FK role_slug → organization_role_types; 20 rows, four slugs) — roles are data; organizations.organization_type still carries the closed CHECK (company|agency|team|other) that the seven legacy gates read (ORG-2 open), so the product is still a single-type directory in its decisions; no employment model is executed and no fulfilment chain is validated; entity names appear only in legal copy. HISTORY 2026-07-28: organizations.organization_type is a single text column with a closed CHECK (company|agency|team|other); no employment model and no fulfilment chain exist; entity names appear only in legal copy.",
 };
 
 /** The five answers a PR touching orchestration must give. */
