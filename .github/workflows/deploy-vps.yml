@@ -24,7 +24,7 @@ name: Deploy to VPS
 #                          authorized_keys with a forced command (see
 #                          ops/vps/lm-deploy-receive.sh header). Nothing else
 #                          can be run with it.
-#   VPS_DEPLOY_HOST        76.13.77.40
+#   VPS_DEPLOY_HOST        the production host address (kept in the secret, never in this file)
 #   VPS_DEPLOY_KNOWN_HOSTS the VPS host key line (ssh-keyscan output)
 # Existing: secrets.NEXT_PUBLIC_SUPABASE_URL, vars.PROD_QA_ANON_KEY (public
 # values baked into the client bundle at build time).
