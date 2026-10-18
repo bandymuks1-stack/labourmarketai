@@ -99,8 +99,10 @@ describe("1 · /about explains the work-evidence model and the projects board li
 });
 
 describe("2 · the staffing view renders ONLY real assignment rows", () => {
-  it("rows come from listProjectAssignments (project_worker_assignments, active, RLS)", () => {
-    expect(projectsPage).toMatch(/listProjectAssignments\(p\.id\)/);
+  it("rows come from listProjectAssignments* (project_worker_assignments, active, RLS)", () => {
+    // 2026-10-18 perf: one batched read for every active project (was one per project).
+    expect(projectsPage).toMatch(/listProjectAssignmentsForProjects\(\s*activeProjects\.map\(\(p\) => p\.id\)/);
+    expect(projectsLib).toMatch(/\.in\("project_id", ids\)/);
     expect(projectsLib).toMatch(/\.from\("project_worker_assignments"\)/);
     expect(projectsLib).toMatch(/\.eq\("status", "active"\)/);
     expect(manager).toMatch(/p\.assignments\.map\(/);
