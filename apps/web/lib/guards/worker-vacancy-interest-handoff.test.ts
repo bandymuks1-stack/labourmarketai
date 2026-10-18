@@ -43,6 +43,18 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 const WEB = join(__dirname, "..", "..");
 const ROOT = join(WEB, "..", "..");
 const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
+// The VPS cron file is the ONE owner of scheduled routes since the 2026-10-17 move off
+// Vercel (vercel.json and its crons were removed 2026-10-18). Active lines only.
+const vpsCron = (text: string) =>
+  text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#") && !l.startsWith("SHELL="))
+    .map((l) => {
+      const m = l.match(/^(\S+ \S+ \S+ \S+ \S+) root sh \/root\/lm-prod\/bin\/lm-cron\.sh (\S+)$/);
+      return m ? { schedule: m[1], path: `/api/cron/${m[2]}` } : { schedule: "", path: l };
+    });
+
 
 const NOW = Date.parse("2026-09-17T12:00:00Z");
 const DAY = 24 * 60 * 60 * 1000;
@@ -344,14 +356,14 @@ describe("the dispatcher is inert without the owner's door, and never contacts a
     const route = read("app", "api", "cron", "commercial-handoffs", "route.ts");
     expect(route).toContain("authorizeCronRequest(request)");
     expect(route).toContain('reason: "not_configured"');
-    // Connection 2026-09-17: scheduled ONCE A DAY — the Vercel Hobby plan
-    // fires crons at most daily. Near-real-time delivery comes from the write
-    // path calling the same dispatcher (`dispatchAfterHandoff`), not from a
-    // second scheduler.
-    const vercel = JSON.parse(read("vercel.json")) as { crons: { path: string; schedule: string }[] };
-    const cron = vercel.crons.find((c) => c.path === "/api/cron/commercial-handoffs");
-    expect(cron?.schedule).toBe("0 6 * * *");
-    expect(vercel.crons.filter((c) => c.path === "/api/cron/commercial-handoffs")).toHaveLength(1);
+    // Connection 2026-09-17: scheduled ONCE A DAY (kept when the schedule moved
+    // from Vercel Cron to the VPS cron, 2026-10-17). Near-real-time delivery
+    // comes from the write path calling the same dispatcher
+    // (`dispatchAfterHandoff`), not from a second scheduler.
+    const cron = vpsCron(read("..", "..", "ops", "vps", "labourmarket.cron"));
+    const handoffs = cron.filter((c) => c.path === "/api/cron/commercial-handoffs");
+    expect(handoffs).toHaveLength(1);
+    expect(handoffs[0].schedule).toBe("0 6 * * *");
     const core = read("lib", "opportunities", "vacancy-interest.ts");
     expect(core).toContain("await dispatchAfterHandoff()");
     expect(core.indexOf("await createHandoffForSignal(")).toBeLessThan(core.indexOf("await dispatchAfterHandoff()"));

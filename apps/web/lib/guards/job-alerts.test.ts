@@ -15,6 +15,18 @@ import {
 const web = path.resolve(__dirname, "../..");
 const repo = path.resolve(web, "../..");
 const read = (p: string) => readFileSync(p, "utf8");
+// The VPS cron file is the ONE owner of scheduled routes since the 2026-10-17 move off
+// Vercel (vercel.json and its crons were removed 2026-10-18). Active lines only.
+const vpsCron = (text: string) =>
+  text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#") && !l.startsWith("SHELL="))
+    .map((l) => {
+      const m = l.match(/^(\S+ \S+ \S+ \S+ \S+) root sh \/root\/lm-prod\/bin\/lm-cron\.sh (\S+)$/);
+      return m ? { schedule: m[1], path: `/api/cron/${m[2]}` } : { schedule: "", path: l };
+    });
+
 
 describe("job alerts ride the EXISTING notification store", () => {
   it("is one more event type + entity type, not a new table", () => {
@@ -54,11 +66,10 @@ describe("the sweep is fail-closed and scheduled without a new cron slot", () =>
     const src = read(path.join(web, "app/api/cron/job-alerts/route.ts"));
     expect(src).toMatch(/authorizeCronRequest/);
   });
-  it("vercel.json keeps its two crons (Hobby limit); no job-alerts cron added there", () => {
-    const v = JSON.parse(read(path.join(web, "vercel.json"))) as {
-      crons: { path: string }[];
-    };
-    expect(v.crons).toHaveLength(2);
+  it("scheduled exactly once, by the VPS cron (vercel.json is gone; no second scheduler)", () => {
+    const cron = vpsCron(read(path.join(web, "..", "..", "ops/vps/labourmarket.cron")));
+    expect(cron.filter((c) => c.path === "/api/cron/job-alerts")).toHaveLength(1);
+    expect(existsSync(path.join(web, "vercel.json"))).toBe(false);
   });
 });
 
