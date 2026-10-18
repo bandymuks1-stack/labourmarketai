@@ -641,6 +641,22 @@ export const SCOPED_OWNER_WAIVERS = [
       //         or links; never from the member projection; never on the
       //         saved view (guard: public-jobs-structured-data.test.ts).
       2388,
+      // OWNER APPROVAL 2026-10-18, verbatim: "Patvirtinu PR #2467 įtraukimą į
+      //   siaurą `/jobs` produkto vartų išimtį, skirtą tik tuščios reikšmės „—“
+      //   kortelėje ir mobiliosios paieškos išdėstymo taisymams. Tai nėra
+      //   bendras leidimas apeiti produkto kokybės, saugumo ar migracijų
+      //   patikras."
+      //
+      // Exactly that was done: ONE number added. The axiom, the codes, the
+      // surfaces, the file list, the expected finding set, the expiry and the
+      // subset rule are byte-unchanged; `product-gate.mjs` is not touched.
+      // #2467 — an anonymous card with no profession match and no source
+      //         occupation label headed with a bare "—"; it now uses the
+      //         board's existing localized GENERIC_TITLE as the LAST fallback
+      //         (marked as our text). The /jobs profession select fills the
+      //         phone row beside the search button. No route, projection,
+      //         auth, schema, data-source or member-field change.
+      2467,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.

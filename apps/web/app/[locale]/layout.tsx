@@ -14,6 +14,8 @@ import { organizationJsonLd, webSiteJsonLd } from "@/lib/answer-engine/answer-se
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { BRAND_NAME, BRAND_SEO, resolveActiveLocale } from "@/lib/seo/metadata";
+import { REGEXP_LOOKBEHIND_SHIM } from "@/lib/compat/regexp-lookbehind-shim";
+import { CLIENT_ERROR_EARLY_SCRIPT } from "@/lib/telemetry/client-error-early-script";
 import "../globals.css";
 
 // TASK 07 typography lock (owner, 2026-06-11): Bricolage Grotesque carries
@@ -145,6 +147,15 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* FIRST in <head>, before any application module is evaluated:
+            browsers without regex lookbehind (Safari / iOS < 16.4, old
+            in-app web views) otherwise die on load with "Application error"
+            (2026-10-18 incident). A no-op on every current browser. */}
+        <script dangerouslySetInnerHTML={{ __html: REGEXP_LOOKBEHIND_SHIM }} />
+        {/* Second: the crash reporter for failures no error boundary can
+            see (module evaluation, unhandled rejections, a missing chunk).
+            Sanitised, at most three per page, logged — never stored. */}
+        <script dangerouslySetInnerHTML={{ __html: CLIENT_ERROR_EARLY_SCRIPT }} />
         {/* Organization + WebSite structured data on EVERY locale page
             (2026-09-19): the landing is outside the marketing route group
             and is a frozen composition, so the publisher nodes live here

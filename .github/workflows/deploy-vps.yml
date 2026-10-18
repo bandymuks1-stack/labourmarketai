@@ -11,17 +11,20 @@ name: Deploy to VPS
 # ops/vps/lm-prod-run.sh, waits for /api/health and ROLLS BACK to the previous
 # release if health never comes.
 #
-# Trigger: manual only (workflow_dispatch) until the first green run; then the
-# owner may add `workflow_run` on Quality Gates/main. It never deploys a tree
-# whose Quality Gates did not pass (the dispatch input must be a sha on main
-# whose quality run succeeded — checked below).
+# Triggers (owner decision 2026-10-18 "remove Vercel completely": GitHub Actions
+# deploys verified main to the VPS automatically):
+#   - workflow_run: every Quality Gates run that SUCCEEDS on a push to main deploys
+#     that exact head sha. A run whose sha is no longer main's head is skipped (the
+#     newer commit's own run deploys it), so a merge burst never deploys backwards.
+#   - workflow_dispatch: manual deploy / redeploy of a sha on main (rollback path).
+# It never deploys a tree whose Quality Gates did not pass (checked below for both).
 #
 # Secrets (owner-created, names only):
 #   VPS_DEPLOY_SSH_KEY     private key whose public half is in the VPS
 #                          authorized_keys with a forced command (see
 #                          ops/vps/lm-deploy-receive.sh header). Nothing else
 #                          can be run with it.
-#   VPS_DEPLOY_HOST        76.13.77.40
+#   VPS_DEPLOY_HOST        the production host address (kept in the secret, never in this file)
 #   VPS_DEPLOY_KNOWN_HOSTS the VPS host key line (ssh-keyscan output)
 # Existing: secrets.NEXT_PUBLIC_SUPABASE_URL, vars.PROD_QA_ANON_KEY (public
 # values baked into the client bundle at build time).
@@ -30,6 +33,10 @@ name: Deploy to VPS
 # green): a deploy that did not happen must never look like one that did.
 
 on:
+  workflow_run:
+    workflows: ["Quality Gates"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       sha:
@@ -51,9 +58,14 @@ permissions:
 
 jobs:
   build:
+    # Automatic path: only a SUCCESSFUL Quality Gates run that came from a push to main.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 40
     outputs:
+      skip: ${{ steps.resolve.outputs.skip }}
       sha: ${{ steps.resolve.outputs.sha }}
       sha256: ${{ steps.pack.outputs.sha256 }}
     steps:
@@ -62,15 +74,27 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           INPUT_SHA: ${{ inputs.sha }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          EVENT: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          sha="${INPUT_SHA:-$(gh api repos/${GITHUB_REPOSITORY}/branches/main --jq .commit.sha)}"
+          head=$(gh api repos/${GITHUB_REPOSITORY}/branches/main --jq .commit.sha)
+          if [ "$EVENT" = "workflow_run" ]; then
+            sha="$RUN_SHA"
+            if [ "$sha" != "$head" ]; then
+              echo "skip: ${sha:0:9} is no longer main's head (${head:0:9}); that commit's own Quality Gates run deploys it" | tee -a "$GITHUB_STEP_SUMMARY"
+              echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+          else
+            sha="${INPUT_SHA:-$head}"
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
           [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::sha must be a full 40-hex commit"; exit 1; }
           gh api "repos/${GITHUB_REPOSITORY}/compare/main...${sha}" --jq '.status' | grep -qE '^(identical|behind)$' \
             || { echo "::error::${sha} is not on main (only main is deployed to production)"; exit 1; }
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
       - name: Require a successful Quality Gates run for this sha
-        if: ${{ !inputs.skip_quality_check }}
+        if: ${{ steps.resolve.outputs.skip != 'true' && !inputs.skip_quality_check }}
         env:
           GH_TOKEN: ${{ github.token }}
           SHA: ${{ steps.resolve.outputs.sha }}
@@ -79,15 +103,20 @@ jobs:
           ok=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/quality.yml/runs?head_sha=${SHA}&status=success&per_page=1" --jq '.total_count')
           [ "$ok" -ge 1 ] || { echo "::error::no successful Quality Gates run for ${SHA}; wait for CI or (owner) set skip_quality_check"; exit 1; }
       - uses: actions/checkout@v4
+        if: steps.resolve.outputs.skip != 'true'
         with:
           ref: ${{ steps.resolve.outputs.sha }}
       - uses: pnpm/action-setup@v4
+        if: steps.resolve.outputs.skip != 'true'
       - uses: actions/setup-node@v4
+        if: steps.resolve.outputs.skip != 'true'
         with:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+        if: steps.resolve.outputs.skip != 'true'
       - name: Build (standalone; public values baked in, no secrets)
+        if: steps.resolve.outputs.skip != 'true'
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
@@ -99,6 +128,7 @@ jobs:
           [ -n "$NEXT_PUBLIC_SUPABASE_URL" ] && [ -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ] || { echo "::error::public Supabase URL/anon key not configured (secrets.NEXT_PUBLIC_SUPABASE_URL / vars.PROD_QA_ANON_KEY)"; exit 1; }
           pnpm -F web build
       - name: Package + secret scan
+        if: steps.resolve.outputs.skip != 'true'
         id: pack
         env:
           SHA: ${{ steps.resolve.outputs.sha }}
@@ -115,6 +145,7 @@ jobs:
           echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
           ls -la "labourmarket-web-standalone-${SHA}.tgz"; echo "sha256 $sha256" | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
+        if: steps.resolve.outputs.skip != 'true'
         with:
           name: standalone-${{ steps.resolve.outputs.sha }}
           path: labourmarket-web-standalone-${{ steps.resolve.outputs.sha }}.tgz
@@ -123,6 +154,7 @@ jobs:
 
   deploy:
     needs: build
+    if: needs.build.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: production-vps
