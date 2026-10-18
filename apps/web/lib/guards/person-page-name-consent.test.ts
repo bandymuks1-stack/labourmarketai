@@ -30,6 +30,13 @@ describe("person page — name only with a working relationship", () => {
     expect(helper).toContain('rpc("caller_manages_worker"');
     expect(helper).toContain('.from("engagement_contexts")');
     expect(helper).toContain('.from("project_worker_assignments")');
+    expect(helper).toContain('.from("company_workers")');
+  });
+
+  it("an engagement counts only when its relationship type grants worker visibility", () => {
+    // student / intern enrolment must not disclose the name (20260827210000 least privilege).
+    expect(helper).toContain('relationship_types!inner(grants_worker_visibility)');
+    expect(helper).toContain('.eq("relationship_types.grants_worker_visibility", true)');
     expect(helper).not.toMatch(/worker_profile_discoverable|can_view_worker|profile_discoverability/);
   });
 
