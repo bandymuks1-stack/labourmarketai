@@ -39,7 +39,7 @@ export async function ConciergeAccessBanner() {
         <span className="rounded-sm border border-brand-blue/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
           {t("badge")}
         </span>
-        <p className="min-w-0 flex-1 text-xs leading-relaxed text-text-secondary" data-billing-live={live ? "true" : "false"}>
+        <p className="min-w-0 basis-full text-xs leading-relaxed text-text-secondary sm:basis-0 sm:flex-1" data-billing-live={live ? "true" : "false"}>
           {live ? t("bodyLive") : t("body")}
         </p>
         <Link

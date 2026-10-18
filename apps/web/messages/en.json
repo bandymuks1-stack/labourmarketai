@@ -5821,7 +5821,8 @@
           "heading": "Infrastructure providers (subprocessors)",
           "items": [
             "Supabase — database, user sign-in and file storage. Data is hosted in the European Union (eu-west-1 region).",
-            "Vercel — application hosting and content delivery.",
+            "Hostinger — the virtual private server (VPS) that runs the application.",
+            "Cloudflare — the network in front of the website: domain name service, encryption in transit, caching and protection against attacks. Every request to the website passes through it.",
             "GitHub — source code hosting. No user data is stored there.",
             "Google (Gemini API) — AI processing for translating messages and job ads and for suggesting what a typed chat sentence asks for. Only the text the task needs is sent.",
             "Stripe — payment processing. A customer record is created only when an organisation starts a subscription checkout; no subscription is active today.",

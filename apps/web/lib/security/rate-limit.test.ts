@@ -102,6 +102,26 @@ describe("clientKeyFromHeaders (audit M-03)", () => {
     );
   });
 
+  it("prefers the proxy-set x-real-ip over a client-written x-forwarded-for", () => {
+    // nginx appends to a client-sent X-Forwarded-For, so its first hop is the caller's choice.
+    const h = new Headers({ "x-forwarded-for": "1.1.1.1, 203.0.113.7", "x-real-ip": "203.0.113.7" });
+    expect(clientKeyFromHeaders(h)).toBe("203.0.113.7");
+  });
+
+  it("prefers cf-connecting-ip over x-forwarded-for when nginx did not set x-real-ip", () => {
+    const h = new Headers({ "x-forwarded-for": "1.1.1.1", "cf-connecting-ip": "203.0.113.8" });
+    expect(clientKeyFromHeaders(h)).toBe("203.0.113.8");
+  });
+
+  it("a rotated x-forwarded-for cannot mint fresh buckets behind the proxy", () => {
+    const keys = new Set(
+      ["9.9.9.1", "9.9.9.2", "9.9.9.3"].map((spoof) =>
+        clientKeyFromHeaders(new Headers({ "x-forwarded-for": spoof, "x-real-ip": "203.0.113.9" })),
+      ),
+    );
+    expect([...keys]).toEqual(["203.0.113.9"]);
+  });
+
   /** Fail-CLOSED: stripping the header must not mint a fresh unlimited bucket. */
   it("returns a shared constant when no client header is present", () => {
     const a = clientKeyFromHeaders(new Headers());

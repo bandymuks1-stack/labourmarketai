@@ -5821,7 +5821,8 @@
           "heading": "Infrastruktūros paslaugų teikėjai (pagalbiniai tvarkytojai)",
           "items": [
             "Supabase — duomenų bazė, naudotojų prisijungimas ir failų saugykla. Duomenys laikomi Europos Sąjungoje (eu-west-1 regione).",
-            "Vercel — svetainės talpinimas ir turinio pateikimas.",
+            "Hostinger — virtualus privatus serveris (VPS), kuriame veikia svetainė.",
+            "Cloudflare — tinklas prieš svetainę: domeno vardų sistema, šifravimas perdavimo metu, podėlis ir apsauga nuo atakų. Per jį eina kiekviena užklausa į svetainę.",
             "GitHub — programinio kodo saugykla. Naudotojų duomenys ten nesaugomi.",
             "„Google“ (Gemini API) — DI apdorojimas žinutėms ir darbo skelbimams versti ir pasiūlyti, ko prašoma pokalbyje įvestu sakiniu. Siunčiamas tik tam darbui reikalingas tekstas.",
             "„Stripe“ — mokėjimų apdorojimas. Kliento įrašas sukuriamas tik tada, kai organizacija pradeda prenumeratos apmokėjimą; šiandien jokia prenumerata neaktyvi.",

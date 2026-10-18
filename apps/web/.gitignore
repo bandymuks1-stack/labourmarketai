@@ -38,8 +38,6 @@ yarn-error.log*
 # likewise tracks .env.example by exception.
 !.env.e2e.local.example
 
-# vercel
-.vercel
 
 # typescript
 *.tsbuildinfo

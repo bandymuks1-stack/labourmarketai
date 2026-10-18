@@ -5821,7 +5821,8 @@
           "heading": "Infrastrukturanbieter (Unterauftragsverarbeiter)",
           "items": [
             "Supabase — Datenbank, Nutzeranmeldung und Dateispeicher. Die Daten werden in der Europäischen Union gehostet (Region eu-west-1).",
-            "Vercel — Hosting der Anwendung und Auslieferung der Inhalte.",
+            "Hostinger — der virtuelle private Server (VPS), auf dem die Anwendung läuft.",
+            "Cloudflare — das Netzwerk vor der Website: Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen. Jede Anfrage an die Website läuft darüber.",
             "GitHub — Speicherung des Quellcodes. Nutzerdaten werden dort nicht gespeichert.",
             "Google (Gemini-API) — KI-Verarbeitung zum Übersetzen von Nachrichten und Stellenanzeigen und zum Vorschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den die Aufgabe braucht.",
             "Stripe — Zahlungsabwicklung. Ein Kundendatensatz entsteht nur, wenn eine Organisation einen Abonnement-Checkout beginnt; heute ist kein Abonnement aktiv.",

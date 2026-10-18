@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requestPublicOrigin } from "@/lib/mcp/public-origin";
 
 async function handle(
   request: Request,
@@ -34,7 +35,9 @@ async function handle(
   } catch {
     // Logout should never error to the user; cookies still cleared by signOut.
   }
-  const url = new URL(request.url);
+  // The public origin, not the request URL: behind the VPS proxy that is the
+  // bind host (0.0.0.0:3000) and sign-out landed on an unreachable address.
+  const origin = requestPublicOrigin(request);
   // Localized login (not the locale home) so the next action after sign
   // out is unambiguous: re-authenticate, switch account, or close the
   // tab. Owner-requested in the account-menu-logout-admin-visibility
@@ -47,7 +50,7 @@ async function handle(
   // 405 INVALID_REQUEST_METHOD. 303 forces the browser to load the
   // login page with GET, matching POST-redirect-GET semantics.
   return NextResponse.redirect(
-    new URL(`/${locale}/auth/login`, url.origin),
+    new URL(`/${locale}/auth/login`, origin),
     { status: 303 },
   );
 }
