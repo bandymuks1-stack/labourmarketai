@@ -44,14 +44,33 @@ export function PersonPortrait({
       data-testid="person-portrait"
     >
       {avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={avatarUrl}
-          alt={name}
-          data-testid={testids?.photo}
-          loading="lazy"
-          className={cn("h-full w-full rounded-xl object-cover", PLAYER_IDENTITY_AVATAR_BORDER)}
-        />
+        <>
+          {/* The initials sit UNDER the photo (2026-10-18, 390 px walk): while a
+              photo loads, or if it never does, the person is their monogram —
+              never an empty dark box. The photo covers it once painted. */}
+          <span
+            aria-hidden
+            className={cn(
+              "absolute inset-0 flex items-center justify-center rounded-xl font-display font-bold tracking-tightest",
+              PLAYER_IDENTITY_FALLBACK_SURFACE,
+            )}
+            style={{ fontSize: `calc(${width} * 0.36)` }}
+          >
+            {initials}
+          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={avatarUrl}
+            alt={name}
+            data-testid={testids?.photo}
+            loading="lazy"
+            className={cn(
+              // text-transparent: a failed image shows the initials beneath, not alt text
+              "relative h-full w-full rounded-xl object-cover text-transparent",
+              PLAYER_IDENTITY_AVATAR_BORDER,
+            )}
+          />
+        </>
       ) : (
         <span
           aria-hidden
