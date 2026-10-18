@@ -27,6 +27,7 @@ import { HoursRemainder } from "@/components/app/work-in-numbers/hours-remainder
 import { OrgLedger } from "@/components/app/work-in-numbers/org-ledger";
 import { PeriodNav } from "@/components/app/work-in-numbers/period-nav";
 import { ExperienceScale } from "@/components/app/work-in-numbers/experience-scale";
+import type { ExperienceRelationship } from "@/lib/journal/professional-experience";
 import { SkillShareList } from "@/components/app/work-in-numbers/skill-share-list";
 
 /**
@@ -156,11 +157,17 @@ export async function JournalWorkIntelligence({
   locale,
   labels,
   audience = "self",
+  relationships,
 }: {
   wi: WorkIntelligence;
   locale: string;
   labels: WorkIntelligenceLabels;
   audience?: WorkIntelligenceAudience;
+  /** The person's relationships to organizations as the surface could read
+   *  them (decision 0025) — joins the journal's contexts to organizations in
+   *  the experience scale. Omitted = this surface does not read them (the
+   *  organization views); `null` = the read failed (said on the block). */
+  relationships?: readonly ExperienceRelationship[] | null;
 }) {
   const t = await getTranslations("journal.intelligence");
   const tTier = await getTranslations("evidenceTier");
@@ -336,7 +343,7 @@ export async function JournalWorkIntelligence({
           <>
             {/* 1 · at a glance — every period real and visible; the chosen one
               scopes the detail below (owner §4, §12) */}
-            <ExperienceScale wi={wi} locale={locale} t={t} />
+            <ExperienceScale wi={wi} locale={locale} t={t} relationships={relationships} />
             <PeriodNav wi={wi} locale={locale} t={t} href={periodHref} />
 
             {/* 1a · plausibility checks (owner §13) — warn, never corrupt:

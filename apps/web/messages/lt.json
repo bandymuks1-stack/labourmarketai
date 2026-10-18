@@ -7908,6 +7908,7 @@
       "recorded": "val. užfiksuota",
       "confirmed": "val. su vadovo įrašu",
       "organizationHistory": "val. organizacijų istorijoje",
+      "experienceTotal": "val. profesinės patirties iš viso",
       "days": "{count, plural, one {darbo diena} few {darbo dienos} other {darbo dienų}}",
       "modes": {
         "label": "Kortelės dalys",
@@ -8478,12 +8479,15 @@
     "recordedHoursScopeTruncated": "Iš paskutinių {count} įrašų; senesni įrašai į šiuos skaičius neįtraukti.",
     "organizationRecordedHours": "Organizacijos apskaitoje: {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} žiniaraščiuose ar importuotuose dokumentuose ({imported} val. importuota, {approved} val. vadovo patvirtinta žiniaraštyje) — skaičiuojama atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam įgūdžiui.",
     "organizationRecordedHoursWithPeriods": "Organizacijų įrašai: iš viso {total} val. — {hours} val. per {days, plural, one {# dieną} few {# dienas} other {# dienų}} ir {periodHours} val., nurodytos kaip laikotarpio suma ({from} – {to}), darbo laiko žiniaraščiuose ar importuotuose dokumentuose ({approved} val. patvirtinta). Laikoma atskirai nuo žurnalo skaičiaus ir nepriskiriama jokiam gebėjimui.",
+    "professionalExperienceTotal": "Profesinė patirtis iš viso: {total} val. — darbo žurnale {journal} val. ir organizacijų istorijoje {organization} val. Kiekvienas darbas skaičiuojamas vieną kartą; šaltiniai rodomi atskirai.",
+    "professionalExperienceNotCounted": "Dar {hours} val. rodoma, bet į sumą neįtraukta, nes tas pats darbas jau suskaičiuotas.",
     "premium": {
       "eyebrowFallback": "Gyvas CV",
       "facts": {
         "recorded": "užfiksuota darbo žurnale",
         "confirmed": "su vadovo įrašu",
         "organization": "organizacijų įrašuose",
+        "experienceTotal": "profesinės patirties iš viso",
         "languages": "kalbos"
       },
       "capEyebrow": "Gebėjimai",
@@ -19061,7 +19065,10 @@
     "hoursRecorded": "{hours} val. užfiksuota ({count, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
     "hoursPeriod": "{hours} val. nurodyta laikotarpiui ({count, plural, one {# įrašas} few {# įrašai} other {# įrašų}})",
     "contested": "Ginčijama asmens, turinčio tam teisę",
-    "more": "Dar {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}} nerodoma"
+    "more": "Dar {count, plural, one {# įrašas} few {# įrašai} other {# įrašų}} nerodoma",
+    "periodBand": "Laikotarpis: {label}",
+    "formerly": "anksčiau {names}",
+    "legalEntityBand": "Tuometinis juridinis asmuo: {label} · įrašus administruoja {org}"
   },
   "companyPerson": {
     "eyebrow": "Istorinė asmens kortelė",
@@ -19301,7 +19308,8 @@
       "stated": "teisinis ryšys nurodytas"
     },
     "openHistory": "Atverti verslo istoriją",
-    "note": "Vadovavimas organizacijai rodomas atskirai nuo tavo darbo: organizacijos valandos niekada nepriskiriamos tau."
+    "note": "Vadovavimas organizacijai rodomas atskirai nuo tavo darbo: organizacijos valandos niekada nepriskiriamos tau.",
+    "formerly": "anksčiau {names}"
   },
   "historyQuality": {
     "back": "Atgal į istoriją",

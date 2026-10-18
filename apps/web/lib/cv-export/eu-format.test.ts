@@ -38,6 +38,7 @@ const EMPTY: VerifiedCvData = {
   recordedHoursConfirmed: null,
   organizationRecordedHours: null,
   organizationHistory: null,
+  professionalExperience: null,
   privateDetails: {
     salaryMinEur: null,
     salaryMaxEur: null,
