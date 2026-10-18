@@ -680,13 +680,13 @@ function ViewLimitState({
       data-testid="person-view-limit"
     >
       <PageTitle>{t("viewLimitTitle")}</PageTitle>
-      <div className="card-border flex flex-col gap-3 p-4 text-sm leading-relaxed text-text-secondary">
+      <Card compact className="flex flex-col gap-3 text-sm leading-relaxed text-text-secondary">
         <p>{t("viewLimitBody", { used, limit })}</p>
         <p className="text-text-muted">{t("viewLimitReopen")}</p>
         <Link href="/pricing" className="w-fit text-brand-blue underline-offset-2 hover:underline">
           {t("viewLimitPlans")}
         </Link>
-      </div>
+      </Card>
     </div>
   );
 }
