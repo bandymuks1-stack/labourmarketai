@@ -13,7 +13,7 @@
  * the recovery flag and billing state (inactive -> 503). Both layers are pinned below.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const cfg = vi.hoisted(() => ({ state: "stripe_test" as string, testMode: true }));
@@ -41,6 +41,18 @@ import { runBillingRecovery, RECOVERY_BATCH, RUN_BUDGET_MS } from "@/lib/billing
 import { GET } from "@/app/api/cron/billing-recovery/route";
 
 const REPO = join(__dirname, "..", "..", "..", "..");
+// The VPS cron file is the ONE owner of scheduled routes since the 2026-10-17 move off
+// Vercel (vercel.json and its crons were removed 2026-10-18). Active lines only.
+const vpsCron = (text: string) =>
+  text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#") && !l.startsWith("SHELL="))
+    .map((l) => {
+      const m = l.match(/^(\S+ \S+ \S+ \S+ \S+) root sh \/root\/lm-prod\/bin\/lm-cron\.sh (\S+)$/);
+      return m ? { schedule: m[1], path: `/api/cron/${m[2]}` } : { schedule: "", path: l };
+    });
+
 const read = vi.mocked(readRecoveryCandidates);
 const retrieveRaw = vi.fn();
 const upsert = vi.mocked(upsertSubscription);
@@ -125,9 +137,10 @@ describe("GATE 1 - schedule switch (workflow layer, static)", () => {
     expect(wf).toMatch(/workflow_dispatch/); // manual run still passes the same gate step
   });
 
-  it("no other scheduler is wired: not in vercel.json crons, not in any other workflow", () => {
-    const vercel = readFileSync(join(REPO, "apps/web/vercel.json"), "utf8");
-    expect(vercel).not.toMatch(/billing-recovery/);
+  it("no other scheduler is wired: not in the VPS cron (active lines), not in any other workflow", () => {
+    const cron = vpsCron(readFileSync(join(REPO, "ops/vps/labourmarket.cron"), "utf8"));
+    expect(cron.map((c) => c.path)).not.toContain("/api/cron/billing-recovery");
+    expect(existsSync(join(REPO, "apps/web/vercel.json"))).toBe(false);
   });
 });
 

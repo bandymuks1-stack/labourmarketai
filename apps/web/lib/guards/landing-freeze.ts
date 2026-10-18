@@ -705,6 +705,15 @@ export const FROZEN_LANDING_FILES = [
   // untouched — the promise stays absolute over the picture). The first CTA
   // had been at ~1,035 px on 375x812. The regeneration touched EXACTLY ONE
   // hash — living-worker-hero.tsx; no copy, photograph or motion moved.
+  // 2026-10-18 (owner directive, final product completion: "Išsaugok esamą
+  // dizaino sistemą, bet pašalink nenuoseklumus"; the 2026-10-10 rule that the
+  // freeze protects the approved design, not its defects): three defects seen
+  // on production — a 56px two-tone seam between the header and the hero
+  // (-mt-14 pt-14 on the section), the subline running past the 28% left
+  // gradient onto bright frames (gradient 46%), and carousel controls with no
+  // backdrop (the hero chips' own translucent pill). The regeneration touched
+  // EXACTLY ONE hash — living-worker-hero.tsx; no copy, photograph, motion or
+  // structure moved.
   "components/marketing/living-worker-hero.tsx",
   "lib/marketing/living-worker-hero.ts",
 ] as const;
