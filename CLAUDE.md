@@ -231,6 +231,16 @@ sector; keep evidence states apart (recorded / declared / potential / confirmed 
 wrong label or a false certainty without disabling inference. See
 `docs/DECISIONS/0023-living-cv-direct-indirect-potential-capabilities.md`.
 
+## One person, one continuous professional history (binding, decision 0025)
+
+A person's experience is one history, whoever recorded the work and under whichever role: journal
+entries, organization-supplied history (day and period records) and the person's relationships to
+organizations (employment, ownership, management, with the organization's earlier business periods).
+Every surface reads `lib/journal/professional-experience.ts` — one total, every work hour once, no
+invented days, provenance and confirmation state visible inside it, roles without hours, UNKNOWN never
+zero. Never attribute an organization's records about other people to a leader. See
+`docs/DECISIONS/0025-one-person-one-continuous-professional-history.md`.
+
 ## Policy overrides
 
 DI's explicit prompt instruction always wins. If a prompt says "do not commit" 

@@ -30,7 +30,14 @@ export type LedOrganization = {
   readonly relationship: "owner" | "manager";
   readonly periods: readonly Pick<
     HistoryPeriodStatement,
-    "id" | "periodLabel" | "legalEntityLabel" | "legalEntityRelation" | "basis" | "periodStart" | "periodEnd"
+    | "id"
+    | "periodLabel"
+    | "legalEntityLabel"
+    | "legalEntityRelation"
+    | "basis"
+    | "periodStart"
+    | "periodEnd"
+    | "sourceLabels"
   >[];
 };
 
@@ -116,6 +123,7 @@ export async function readMyLedOrganizations(): Promise<MyOrganizationsRead> {
           basis: p.basis,
           periodStart: p.periodStart,
           periodEnd: p.periodEnd,
+          sourceLabels: p.sourceLabels,
         })),
       };
     }),

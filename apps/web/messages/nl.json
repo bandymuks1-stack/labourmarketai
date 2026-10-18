@@ -7906,6 +7906,7 @@
       "recorded": "u vastgelegd",
       "confirmed": "u met registratie van leidinggevende",
       "organizationHistory": "u in organisatiehistorie",
+      "experienceTotal": "u beroepservaring in totaal",
       "days": "{count, plural, one {werkdag} other {werkdagen}}",
       "modes": {
         "label": "Onderdelen van de kaart",
@@ -8476,12 +8477,15 @@
     "recordedHoursScopeTruncated": "Uit de laatste {count} records; oudere records zitten niet in deze cijfers.",
     "organizationRecordedHours": "Registratie van de organisatie: {hours} u op {days, plural, one {# dag} other {# dagen}} in urenstaten of geïmporteerde documenten ({imported} u geïmporteerd, {approved} u goedgekeurd) — gescheiden van het journaalcijfer en aan geen enkele vaardigheid toegewezen.",
     "organizationRecordedHoursWithPeriods": "Registraties van organisaties: {total} u in totaal — {hours} u op {days, plural, one {# dag} other {# dagen}} en {periodHours} u vermeld als periodetotaal ({from} – {to}) in urenstaten of geïmporteerde documenten ({approved} u goedgekeurd). Apart gehouden van het journaalcijfer en aan geen vaardigheid toegekend.",
+    "professionalExperienceTotal": "Beroepservaring in totaal: {total} u — {journal} u in het werkjournaal en {organization} u in de organisatiehistorie. Elk stuk werk één keer geteld; bronnen apart getoond.",
+    "professionalExperienceNotCounted": "Nog {hours} u wordt getoond maar niet opgeteld, omdat hetzelfde werk al is geteld.",
     "premium": {
       "eyebrowFallback": "Levend cv",
       "facts": {
         "recorded": "vastgelegd in je werkjournaal",
         "confirmed": "met registratie van een leidinggevende",
         "organization": "in registraties van organisaties",
+        "experienceTotal": "beroepservaring in totaal",
         "languages": "talen"
       },
       "capEyebrow": "Vaardigheden",
@@ -19059,7 +19063,10 @@
     "hoursRecorded": "{hours} u geregistreerd in {count, plural, one {# registratie} other {# registraties}}",
     "hoursPeriod": "{hours} u opgegeven voor een periode, in {count, plural, one {# registratie} other {# registraties}}",
     "contested": "Betwist door een daartoe bevoegde partij",
-    "more": "Nog {count, plural, one {# vermelding} other {# vermeldingen}} niet getoond"
+    "more": "Nog {count, plural, one {# vermelding} other {# vermeldingen}} niet getoond",
+    "periodBand": "Periode: {label}",
+    "formerly": "voorheen {names}",
+    "legalEntityBand": "Rechtspersoon destijds: {label} · registraties beheerd door {org}"
   },
   "companyPerson": {
     "eyebrow": "Historische persoonskaart",
@@ -19299,7 +19306,8 @@
       "stated": "juridische relatie verklaard"
     },
     "openHistory": "Bedrijfsgeschiedenis openen",
-    "note": "Leiding geven aan een organisatie staat los van je eigen werk: de uren van de organisatie tellen nooit als de jouwe."
+    "note": "Leiding geven aan een organisatie staat los van je eigen werk: de uren van de organisatie tellen nooit als de jouwe.",
+    "formerly": "voorheen {names}"
   },
   "historyQuality": {
     "back": "Terug naar geschiedenis",
