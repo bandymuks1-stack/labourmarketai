@@ -319,7 +319,11 @@ returns table (
   own_vehicle boolean,
   own_tools boolean,
   last_active_week date,
-  is_synthetic_fixture boolean
+  is_synthetic_fixture boolean,
+  -- card tier: whether a start date is SET (the communication rule needs only that, never the date)
+  has_available_from boolean,
+  -- false when detail fields were withheld (20261018150000 plan limit), so null never reads as "not entered"
+  detail_unlocked boolean
 )
 language plpgsql
 stable
@@ -345,7 +349,8 @@ begin
   -- engagement form, pay basis, shifts, overtime, licence, vehicle, tools) come back only for a
   -- worker one of the caller's organizations has already OPENED (a counted view, see
   -- record_worker_profile_view_v1), or when one of them has no fixed view limit (VIP / paid
-  -- without a figure), or for an admin. Everyone else receives the uncounted CARD tier.
+  -- without a figure), or for an admin. Everyone else receives the uncounted CARD tier, and
+  -- detail_unlocked = false says the nulls mean "open the profile", never "not entered".
   v_unlimited := public.is_admin() or exists (
     select 1
       from (select o.id from public.organizations o where public.manages_organization(o.id)) m
@@ -371,7 +376,9 @@ begin
            -- QA fixtures by their documented markers (lib/qa/synthetic-fixture.ts); the flag leaves
            -- the database, the name and headline never do.
            (coalesce(w.display_name, '') || ' ' || coalesce(w.headline, ''))
-             ~* '(\mQA[-_ ]SYNTHETIC\M|\[E2E\]|\mE2E[-_ ]FIXTURE\M)'
+             ~* '(\mQA[-_ ]SYNTHETIC\M|\[E2E\]|\mE2E[-_ ]FIXTURE\M)',
+           w.available_from is not null,
+           d.unlocked
       from public.workers w
       cross join lateral (
         select v_unlimited or exists (
