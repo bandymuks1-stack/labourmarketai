@@ -45,7 +45,8 @@ export async function viewerHasWorkerRelation(
 
     const { data: roster, error: rErr } = await sb
       .from("company_workers")
-      .select("id")
+      // company_workers has a composite key (company_id, worker_id) and no `id` column.
+      .select("worker_id")
       .eq("worker_id", workerId)
       .eq("status", "active")
       .limit(1);

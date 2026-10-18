@@ -31,6 +31,8 @@ describe("person page — name only with a working relationship", () => {
     expect(helper).toContain('.from("engagement_contexts")');
     expect(helper).toContain('.from("project_worker_assignments")');
     expect(helper).toContain('.from("company_workers")');
+    // composite key table: selecting a non-existent `id` would make every roster read an error
+    expect(helper).toMatch(/\.from\("company_workers"\)\s*\.select\("worker_id"\)/);
   });
 
   it("an engagement counts only when its relationship type grants worker visibility", () => {
