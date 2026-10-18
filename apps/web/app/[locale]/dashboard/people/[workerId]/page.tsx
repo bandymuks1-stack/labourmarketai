@@ -34,6 +34,7 @@ import {
   type WorkPeriodKey,
 } from "@/lib/journal/work-intelligence";
 import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
+import { viewerHasWorkerRelation } from "@/lib/visibility/worker-identity-visibility";
 import { readRecordedWorkFor } from "@/lib/player-card/work-history";
 import { readWorkPhotosFor } from "@/lib/journal/personal-gallery";
 import { listActiveOfferingsByProvider } from "@/lib/services/service-offerings";
@@ -251,8 +252,16 @@ export default async function PersonPage({
     }
   }
 
+  // The row is readable through the employer-visibility consent too; the NAME
+  // is shown only to a viewer with a real working relationship (owner
+  // directive 2026-10-18 — anonymous by default, identity by permission).
+  const nameVisible = await viewerHasWorkerRelation(
+    supabase,
+    worker.id as string,
+    (worker.profile_id as string | null) ?? null,
+  );
   const name =
-    (worker.display_name as string | null)?.trim() ||
+    (nameVisible ? (worker.display_name as string | null)?.trim() : null) ||
     anonymizedWorkerLabel(worker.id as string);
   const available =
     (worker.availability_status as string | null) === "available";
