@@ -10114,6 +10114,7 @@
     "subtitle": "Tell us your trade and availability. We turn it into a draft profile you review — nothing is published automatically.",
     "fullName": "Full name",
     "profession": "Sector & work type",
+    "professionPlaceholder": "Choose your sector and work type",
     "targetCountries": "Countries you want to work in",
     "targetCountriesHelp": "The countries where you want to work, separated by commas (for example: Netherlands, Germany).",
     "availableFrom": "Available from",
