@@ -507,7 +507,7 @@ export default async function JobsPage({
           id="profession"
           name="profession"
           defaultValue={profession ?? ""}
-          className="min-w-0 flex-1 rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm sm:flex-none"
+          className="min-w-0 rounded-md border border-border-subtle bg-surface-1 px-3 py-2 text-sm"
         >
           <option value="">{PROFESSION_ANY[active]}</option>
           {professionOptions.map((o) => (
@@ -570,7 +570,6 @@ export default async function JobsPage({
                     headingFallback={
                       v.professionSlug ? professionName(v.professionSlug) : undefined
                     }
-                    genericTitle={GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     savedLabel={SAVED_BADGE[active]}
                   />
@@ -633,7 +632,6 @@ export default async function JobsPage({
                     headingFallback={
                       v.professionSlug ? professionName(v.professionSlug) : undefined
                     }
-                    genericTitle={GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     savedLabel={
                       mySaved.vacancyIds.has(v.id)
