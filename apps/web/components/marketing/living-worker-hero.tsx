@@ -962,7 +962,7 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
           <div ref={poseLight} aria-hidden className="pointer-events-none absolute inset-0 opacity-0 mix-blend-screen" />
           {/* light falls off to the words: bottom and left, never across the face */}
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900 via-ink-900/10 via-35% to-transparent" />
-          <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-[28%] bg-gradient-to-r from-ink-900 via-ink-900/60 to-transparent md:block" />
+          <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-[46%] bg-gradient-to-r from-ink-900 via-ink-900/70 via-50% to-transparent md:block" />
           {/* holding the person: the world quietly steps back */}
           <div ref={vignette} aria-hidden className="pointer-events-none absolute inset-0 opacity-0" />
           {/* the scene settles and dims while the identity forms */}
@@ -1056,7 +1056,9 @@ export function LivingWorkerHero({ data, children }: { data: LivingWorkerHeroDat
         {/* quiet controls: bottom right on a phone; top right on a wide screen,
             clear of the landing's own corner switcher */}
         <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-6 md:bottom-auto md:top-4">
-          <div className="flex shrink-0 items-center gap-1">
+          {/* the pill keeps the controls legible over a bright frame (the van and the
+              site photographs washed them out on production, 2026-10-18) */}
+          <div className="flex shrink-0 items-center gap-1 rounded-full border border-ink-500/60 bg-ink-900/70 px-1 backdrop-blur-md">
             <button type="button" onClick={() => go(-1)} className="min-h-11 min-w-11 rounded-full text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue" aria-label={data.controls.previous}>
               ‹
             </button>
