@@ -149,8 +149,16 @@ export async function requestWorkerConversationAction(input: {
   const discovered = related
     ? null
     : ((await readDiscoverableWorkers(supabase, [workerId])).get(workerId) ?? null);
+  // A discovered worker's start date may be withheld by the plan; the rule needs only whether one is set.
   const worker: { availability_status: string | null; available_from: string | null } | null =
-    related ?? discovered;
+    related ??
+    (discovered
+      ? {
+          availability_status: discovered.availability_status,
+          available_from:
+            discovered.available_from ?? (discovered.has_available_from ? "set" : null),
+        }
+      : null);
   const canContact = canStartCommunicationOrBooking({
     availabilityStatus: worker?.availability_status ?? null,
     availableFrom: worker?.available_from ?? null,

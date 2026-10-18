@@ -89,10 +89,14 @@ describe("database: indirect identity paths are closed", () => {
     expect(projection).toMatch(/date_trunc\('week', coalesce\(w\.updated_at, w\.created_at\)\)::date/);
   });
 
-  it("a worker's name reaches a conversation only by choice, relationship or disclosure", () => {
+  it("a candidate is named in a candidate thread only by relationship or their own grant", () => {
     const names = fnBody("conversation_counterpart_identities");
-    expect(names).toMatch(/when w\.id is null then p\.full_name/);
-    expect(names).toMatch(/when c\.created_by = cp\.profile_id then p\.full_name/);
+    // only candidate threads (opened from scouting / a demand interest) hide a name …
+    expect(names).toMatch(/when coalesce\(c\.source_type, ''\) not in \('scouting', 'demand_interest'\) then p\.full_name/);
+    // … and only the candidate's (the creator's side is never hidden)
+    expect(names).toMatch(/when cp\.profile_id = c\.created_by then p\.full_name/);
+    // Owner rule 2026-10-18: writing a message or being shortlisted is NEVER consent.
+    expect(names).not.toMatch(/conversation_messages|demand_shortlist/);
     expect(names).toMatch(/when public\.caller_has_worker_relation_v1\(w\.id\) then p\.full_name/);
     expect(names).toMatch(/l\.selected_fields \? 'full_name'/);
     expect(names).toMatch(/else 'Candidate ' \|\|/);
@@ -106,6 +110,8 @@ describe("database: indirect identity paths are closed", () => {
     expect(door).toMatch(/from public\.demand_shortlist s/);
     expect(door).toMatch(/from public\.demand_interest_signals i/);
     expect(door).not.toMatch(/worker_profile_discoverable/);
+    // a shortlist row alone never reaches a person the caller may not see
+    expect(door).toMatch(/public\.can_view_worker\(p_worker_id\)/);
   });
 
   it("legitimate organization contexts the old predicate missed are kept", () => {

@@ -38,9 +38,10 @@ Mechanics:
 
 ## Indirect paths closed (independent review, 2026-10-18)
 - **Conversation names.** `conversation_counterpart_identities` returned the other participant's full
-  name in any direct thread. A worker's name now comes back only when the worker started the thread,
-  the viewer has a working relationship, or the worker's live per-organization disclosure includes
-  `full_name`; otherwise the anonymous label.
+  name in any direct thread. A worker's name now comes back only when the viewer has a working
+  relationship or the worker's live per-organization disclosure includes `full_name`; otherwise the
+  anonymous label. Owner rule (2026-10-18): an employer may find, shortlist, make an offer and talk with
+  a worker anonymously; starting a thread, sending a message or shortlisting never becomes consent.
 - **Profile id.** The projection carries no profile id (it joins to public business records). Server
   flows use context-bound doors: `candidate_profile_for_contact_v1` (a worker shortlisted on, or
   interested in, the caller's own demand), `my_direct_conversations_with_workers_v1`,

@@ -26,9 +26,11 @@
 --      only. No name, free text, profile id or exact timestamps (a week bucket instead). A synthetic-
 --      fixture flag is computed in SQL from name + headline, so neither leaves the database.
 --   4. list_discoverable_worker_ids_v1 — scouting's first stage, ids only.
---   5. conversation_counterpart_identities — a WORKER's name only when the worker started the thread,
---      the viewer has a working relationship, or the worker's live per-organization disclosure grant
---      includes the name; otherwise the anonymous label.
+--   5. conversation_counterpart_identities — in a CANDIDATE thread (opened by an employer from
+--      scouting or a demand interest) the candidate is named to the other side only with a working
+--      relationship or the candidate's live per-organization disclosure grant that includes the name;
+--      otherwise the anonymous label. Starting the thread, writing a message or being shortlisted is
+--      never consent (owner rule 2026-10-18). All other threads keep their names.
 --   6. Context-bound doors that replace the profile id the app used to need from the row:
 --      candidate_profile_for_contact_v1 (only for a worker shortlisted on, or interested in, the
 --      caller's own demand), my_direct_conversations_with_workers_v1, employer_disclosure_granted_v1.
@@ -120,7 +122,11 @@ returns table (
   own_vehicle boolean,
   own_tools boolean,
   last_active_week date,
-  is_synthetic_fixture boolean
+  is_synthetic_fixture boolean,
+  -- card tier: whether a start date is SET (the communication rule needs only that, never the date)
+  has_available_from boolean,
+  -- false when detail fields were withheld (20261018150000 plan limit), so null never reads as "not entered"
+  detail_unlocked boolean
 )
 language plpgsql
 stable
@@ -150,7 +156,9 @@ begin
            -- QA fixtures by their documented markers (lib/qa/synthetic-fixture.ts); the flag leaves
            -- the database, the name and headline never do.
            (coalesce(w.display_name, '') || ' ' || coalesce(w.headline, ''))
-             ~* '(\mQA[-_ ]SYNTHETIC\M|\[E2E\]|\mE2E[-_ ]FIXTURE\M)'
+             ~* '(\mQA[-_ ]SYNTHETIC\M|\[E2E\]|\mE2E[-_ ]FIXTURE\M)',
+           w.available_from is not null,
+           true
       from public.workers w
      where w.id = any (p_worker_ids)
        and w.profile_id is not null
@@ -207,8 +215,12 @@ set search_path = public
 as $$
   select cp.conversation_id,
          case
-           when w.id is null then p.full_name                     -- not a worker: an organization person
-           when c.created_by = cp.profile_id then p.full_name     -- the worker started this thread
+           -- Only CANDIDATE threads hide a name: a thread an employer opened from discovery
+           -- (scouting) or from a demand interest, seen by its creator's side. Every other thread
+           -- (colleagues, own employer, buyer / provider, support, worker-initiated) is unchanged.
+           when coalesce(c.source_type, '') not in ('scouting', 'demand_interest') then p.full_name
+           when cp.profile_id = c.created_by then p.full_name     -- the creator side is never hidden
+           when w.id is null then p.full_name
            when public.caller_has_worker_relation_v1(w.id) then p.full_name
            when exists (
              select 1
@@ -260,6 +272,7 @@ as $$
     join public.customer_requests cr on cr.id = p_request_id
    where w.id = p_worker_id
      and auth.uid() is not null
+     and public.can_view_worker(p_worker_id)   -- a shortlist row alone never reaches a hidden person
      and (cr.profile_id = auth.uid()
           or (cr.organization_id is not null and public.manages_organization(cr.organization_id)))
      and (

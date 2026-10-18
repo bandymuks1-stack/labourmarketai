@@ -46,6 +46,11 @@ export interface DiscoverableWorkerRow {
   readonly last_active_week: string | null;
   /** True for a documented QA fixture — computed in SQL, so the name never has to leave it. */
   readonly is_synthetic_fixture: boolean;
+  /** Whether a start date is SET (card tier) — enough for the communication rule, never the date. */
+  readonly has_available_from: boolean | null;
+  /** False when the plan withheld the detail fields: their null then means "open the profile",
+   *  never "not entered". */
+  readonly detail_unlocked: boolean | null;
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
