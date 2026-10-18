@@ -541,11 +541,19 @@ export default async function ProjectStadiumPage({
         <NotebookPen
           className={cn(
             "h-6 w-6 shrink-0",
-            entriesToday > 0 ? "text-state-live" : "text-text-muted",
+            entriesToday !== null && entriesToday > 0 ? "text-state-live" : "text-text-muted",
           )}
           aria-hidden
         />
-        {entriesToday > 0 ? (
+        {entriesToday === null ? (
+          // The count could not be read: say nothing numeric (SEP-7).
+          <span
+            className="min-w-0 flex-1 font-mono text-sm text-text-muted"
+            data-testid="stadium-today-unknown"
+          >
+            —
+          </span>
+        ) : entriesToday > 0 ? (
           <>
             <CountUp
               text={String(entriesToday)}
