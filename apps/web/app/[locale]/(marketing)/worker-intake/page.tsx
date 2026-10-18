@@ -39,6 +39,7 @@ export default async function WorkerIntakePage({
     subtitle: t("subtitle"),
     fullName: t("fullName"),
     profession: t("profession"),
+    professionPlaceholder: t("professionPlaceholder"),
     targetCountries: t("targetCountries"),
     targetCountriesHelp: t("targetCountriesHelp"),
     availableFrom: t("availableFrom"),

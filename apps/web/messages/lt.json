@@ -10117,6 +10117,7 @@
     "subtitle": "Nurodyk savo amatą ir laisvumą. Iš to sukuriame profilio juodraštį, kurį peržiūri — niekas nepublikuojama automatiškai.",
     "fullName": "Vardas ir pavardė",
     "profession": "Sektorius ir darbo tipas",
+    "professionPlaceholder": "Pasirink sektorių ir darbo tipą",
     "targetCountries": "Šalys, kuriose nori dirbti",
     "targetCountriesHelp": "Šalys, kuriose nori dirbti, atskirtos kableliais (pavyzdžiui: Nyderlandai, Vokietija).",
     "availableFrom": "Laisvas nuo",

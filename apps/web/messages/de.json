@@ -10117,6 +10117,7 @@
     "subtitle": "Nennen Sie uns Ihr Gewerk und Ihre Verfügbarkeit. Wir machen daraus einen Profilentwurf, den Sie prüfen — nichts wird automatisch veröffentlicht.",
     "fullName": "Vollständiger Name",
     "profession": "Branche & Arbeitsart",
+    "professionPlaceholder": "Wähle Branche und Arbeitsart",
     "targetCountries": "Länder, in denen Sie arbeiten möchten",
     "targetCountriesHelp": "Zwei-Buchstaben-Codes, durch Kommas getrennt (z. B. NL, DE).",
     "availableFrom": "Verfügbar ab",

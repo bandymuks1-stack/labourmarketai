@@ -10117,6 +10117,7 @@
     "subtitle": "Podaj swój zawód i dostępność. Zamienimy to w szkic profilu, który sprawdzisz — nic nie jest publikowane automatycznie.",
     "fullName": "Imię i nazwisko",
     "profession": "Branża i rodzaj pracy",
+    "professionPlaceholder": "Wybierz branżę i rodzaj pracy",
     "targetCountries": "Kraje, w których chcesz pracować",
     "targetCountriesHelp": "Kraje, w których chcesz pracować, oddzielone przecinkami (na przykład: Holandia, Niemcy).",
     "availableFrom": "Dostępny od",

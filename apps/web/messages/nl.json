@@ -10117,6 +10117,7 @@
     "subtitle": "Vertel ons je vak en beschikbaarheid. Wij maken er een conceptprofiel van dat jij beoordeelt — niets wordt automatisch gepubliceerd.",
     "fullName": "Volledige naam",
     "profession": "Sector & type werk",
+    "professionPlaceholder": "Kies je sector en type werk",
     "targetCountries": "Landen waar je wilt werken",
     "targetCountriesHelp": "Tweeletterige codes, kommagescheiden (bijv. NL, DE).",
     "availableFrom": "Beschikbaar vanaf",
