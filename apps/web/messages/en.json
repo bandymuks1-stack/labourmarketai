@@ -12421,7 +12421,11 @@
     "photoAlt": "Photo of completed work",
     "historyTitle": "Imported history",
     "historyUnavailable": "Imported history could not be read",
-    "currentWork": "Working now"
+    "currentWork": "Working now",
+    "viewLimitTitle": "Profile view limit reached",
+    "viewLimitBody": "The free plan opens {limit} different anonymized profiles per organization. Opened so far: {used}.",
+    "viewLimitReopen": "Profiles you already opened stay open. People you work with never count towards the limit.",
+    "viewLimitPlans": "See plans"
   },
   "companyGallery": {
     "title": "Gallery",

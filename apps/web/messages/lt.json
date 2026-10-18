@@ -12421,7 +12421,11 @@
     "photoAlt": "Atlikto darbo nuotrauka",
     "historyTitle": "Įkelta istorija",
     "historyUnavailable": "Įkeltos istorijos nepavyko perskaityti",
-    "currentWork": "Dirba dabar"
+    "currentWork": "Dirba dabar",
+    "viewLimitTitle": "Peržiūrų riba pasiekta",
+    "viewLimitBody": "Nemokamas planas leidžia atverti {limit} skirtingas anonimines anketas organizacijai. Jau atverta: {used}.",
+    "viewLimitReopen": "Jau atvertas anketas gali žiūrėti toliau. Žmonės, su kuriais dirbate, į ribą neįskaičiuojami.",
+    "viewLimitPlans": "Peržiūrėti planus"
   },
   "companyGallery": {
     "title": "Galerija",

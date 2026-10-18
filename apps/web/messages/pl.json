@@ -12421,7 +12421,11 @@
     "photoAlt": "Zdjęcie wykonanej pracy",
     "historyTitle": "Zaimportowana historia",
     "historyUnavailable": "Nie udało się odczytać zaimportowanej historii",
-    "currentWork": "Pracuje teraz"
+    "currentWork": "Pracuje teraz",
+    "viewLimitTitle": "Osiągnięto limit wyświetleń profili",
+    "viewLimitBody": "Darmowy plan pozwala otworzyć {limit} różne zanonimizowane profile na organizację. Otwarto już: {used}.",
+    "viewLimitReopen": "Już otwarte profile pozostają dostępne. Osoby, z którymi pracujesz, nie wliczają się do limitu.",
+    "viewLimitPlans": "Zobacz plany"
   },
   "companyGallery": {
     "title": "Galeria",

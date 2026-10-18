@@ -126,6 +126,7 @@ export const CANONICAL_APP_RPCS = [
   "record_external_action_receipt_v1",
   "record_identity_resolution_event_v1",
   "record_talent_source_v1",
+  "record_worker_profile_view_v1",
   "register_conversation_message_attachment",
   "register_customer_request_attachment",
   "register_journal_entry_photo",

@@ -12421,7 +12421,11 @@
     "photoAlt": "Foto van uitgevoerd werk",
     "historyTitle": "Geïmporteerde geschiedenis",
     "historyUnavailable": "Geïmporteerde geschiedenis kon niet worden gelezen",
-    "currentWork": "Werkt nu"
+    "currentWork": "Werkt nu",
+    "viewLimitTitle": "Limiet voor profielweergaven bereikt",
+    "viewLimitBody": "Het gratis plan opent {limit} verschillende geanonimiseerde profielen per organisatie. Al geopend: {used}.",
+    "viewLimitReopen": "Profielen die u al opende, blijven open. Mensen met wie u werkt, tellen nooit mee.",
+    "viewLimitPlans": "Plannen bekijken"
   },
   "companyGallery": {
     "title": "Galerij",

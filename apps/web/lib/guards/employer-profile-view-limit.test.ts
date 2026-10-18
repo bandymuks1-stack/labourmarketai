@@ -72,6 +72,22 @@ describe("employer profile view limit (free 3 unique per organization)", () => {
     expect(code).toMatch(/set revoked_at = now\(\), revoked_by = uid/);
   });
 
+  it("the person page asks the gate and closes only on an explicit limit answer", () => {
+    const web = join(ROOT, "apps", "web");
+    const gate = readFileSync(join(web, "lib", "billing", "profile-view-gate.ts"), "utf8");
+    expect(gate).toContain('rpc("record_worker_profile_view_v1"');
+    expect(gate).toMatch(/r\.allowed === false && r\.reason === "limit_reached"/);
+    expect(gate).not.toMatch(/p_limit|display_name/);
+    const page = readFileSync(
+      join(web, "app", "[locale]", "dashboard", "people", "[workerId]", "page.tsx"),
+      "utf8",
+    );
+    expect(page).toMatch(/gateWorkerProfileView\(supabase, activeOrganizationId, worker\.id as string\)/);
+    expect(page).toMatch(/if \(viewGate\.kind === "limit"\)/);
+    // The own-row redirect runs first: a worker never counts against anyone's plan.
+    expect(page.indexOf("redirect(`/${locale}/dashboard/profile`)")).toBeLessThan(page.indexOf("gateWorkerProfileView("));
+  });
+
   it("is a RED, gated, reversible migration", () => {
     expect(sql).toMatch(/@human-gate-approved/);
     expect(code).toMatch(/revoke all on function public\.record_worker_profile_view_v1\(uuid, uuid\) from anon;/);

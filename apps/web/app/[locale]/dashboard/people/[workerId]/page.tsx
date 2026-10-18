@@ -23,6 +23,9 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { getActiveOrganizationContext } from "@/lib/company/active-organization";
+import { gateWorkerProfileView } from "@/lib/billing/profile-view-gate";
+import { Link } from "@/lib/i18n/navigation";
 import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
 import { Card } from "@/components/ui/Card";
@@ -132,6 +135,17 @@ export default async function PersonPage({
   // Own row → the canonical self surface, not a duplicate person view.
   if (worker.profile_id === user.id) {
     redirect(`/${locale}/dashboard/profile`);
+  }
+
+  // PLAN LIMIT (owner directive 2026-10-18): opening a found worker's anonymized profile counts
+  // once per organization; the free plan opens 3 unique profiles. The database decides (it also
+  // never counts a working relationship); only an explicit limit answer closes the page.
+  const activeOrganizationId = await getActiveOrganizationContext()
+    .then((c) => c.activeOrganizationId)
+    .catch(() => null);
+  const viewGate = await gateWorkerProfileView(supabase, activeOrganizationId, worker.id as string);
+  if (viewGate.kind === "limit") {
+    return <ViewLimitState t={t} used={viewGate.used} limit={viewGate.limit} />;
   }
 
   // Catalogue slug is the ONLY name source — the legacy name_lt/name_en
@@ -647,6 +661,32 @@ export default async function PersonPage({
           the person's LINKED roster row, rendered with the shared evidence
           primitives. Nothing when there is none; said when it cannot be read. */}
       <PersonImportedHistory workerId={worker.id as string} locale={locale} />
+    </div>
+  );
+}
+
+function ViewLimitState({
+  t,
+  used,
+  limit,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations<"people">>>;
+  used: number;
+  limit: number;
+}) {
+  return (
+    <div
+      className="mx-auto flex w-full max-w-content flex-col gap-4"
+      data-testid="person-view-limit"
+    >
+      <PageTitle>{t("viewLimitTitle")}</PageTitle>
+      <div className="card-border flex flex-col gap-3 p-4 text-sm leading-relaxed text-text-secondary">
+        <p>{t("viewLimitBody", { used, limit })}</p>
+        <p className="text-text-muted">{t("viewLimitReopen")}</p>
+        <Link href="/pricing" className="w-fit text-brand-blue underline-offset-2 hover:underline">
+          {t("viewLimitPlans")}
+        </Link>
+      </div>
     </div>
   );
 }

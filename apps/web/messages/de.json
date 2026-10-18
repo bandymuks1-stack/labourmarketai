@@ -12421,7 +12421,11 @@
     "photoAlt": "Foto abgeschlossener Arbeit",
     "historyTitle": "Importierter Verlauf",
     "historyUnavailable": "Importierter Verlauf konnte nicht gelesen werden",
-    "currentWork": "Arbeitet derzeit"
+    "currentWork": "Arbeitet derzeit",
+    "viewLimitTitle": "Limit für Profilansichten erreicht",
+    "viewLimitBody": "Der kostenlose Plan öffnet {limit} verschiedene anonymisierte Profile pro Organisation. Bisher geöffnet: {used}.",
+    "viewLimitReopen": "Bereits geöffnete Profile bleiben offen. Personen, mit denen Sie zusammenarbeiten, zählen nie mit.",
+    "viewLimitPlans": "Pläne ansehen"
   },
   "companyGallery": {
     "title": "Galerie",
