@@ -11,12 +11,10 @@
 -- own permission; no plan (paid or VIP) opens identity; owners and organizations with a legitimate
 -- working relationship keep their access.
 --
--- THE DEFECTS CLOSED HERE
---   D1. `workers_select` = `can_view_worker(id)`, whose discoverability branch returns the WHOLE row
---       (name, free text, circumstances) to every employer account.
---   D2. `conversation_counterpart_identities` returns `profiles.full_name` of the other participant of
---       any direct thread, so an employer who opens a thread with a found worker gets the real name
---       without the worker doing anything.
+-- WHAT CHANGES
+--   C1. `workers_select` no longer includes the discoverability branch of `can_view_worker`: the raw
+--       row needs a working relationship (or self / admin).
+--   C2. Conversation names follow the same identity rule as everything else.
 --
 -- THE FIX (identity never widens; legitimate organization access is kept, see 1.)
 --   1. caller_has_worker_relation_v1 — every working-relationship branch of can_view_worker (NOT its
