@@ -245,6 +245,7 @@ export default async function CompanyPeoplePage({
   // (worker_avatar_path_v1) already admits. The database decides per person;
   // anything else stays initials.
   const avatarByWorker: Record<string, string | null> = Object.fromEntries(avatarPairs);
+  const tProf = await getTranslations("professions");
   const professionsByWorker: Record<string, string[]> = Object.fromEntries(
     activeWorkerRows.map((w) => [
       w.workerId,
