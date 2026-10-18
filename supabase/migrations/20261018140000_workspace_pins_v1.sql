@@ -76,7 +76,37 @@ create policy workspace_pins_update on public.workspace_pins
 create policy workspace_pins_delete on public.workspace_pins
   for delete using (profile_id = auth.uid());
 
+-- Explicit, not inherited: drop the bootstrap default (TRUNCATE/REFERENCES/TRIGGER included), then
+-- grant exactly the four row privileges the owner-only policies govern.
+revoke all on table public.workspace_pins from public, anon, authenticated;
 grant select, insert, update, delete on public.workspace_pins to authenticated;
+
+-- The owner's cap ("up to 6 pins") holds in the database too, per person and workspace. The app
+-- checks first (PIN_CAP in lib/workspace/pins-model.ts); this trigger closes the count-then-insert
+-- race with a per-(person, workspace) transaction lock. Invoker rights: it counts only rows the
+-- inserting owner can already read.
+create or replace function public.workspace_pins_cap_v1()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  perform pg_advisory_xact_lock(
+    hashtextextended(new.profile_id::text || ':' || coalesce(new.organization_id::text, 'personal'), 0)
+  );
+  if (select count(*) from public.workspace_pins p
+       where p.profile_id = new.profile_id
+         and p.organization_id is not distinct from new.organization_id) >= 6 then
+    raise exception 'workspace pin cap reached' using errcode = 'P0001';
+  end if;
+  return new;
+end;
+$$;
+revoke all on function public.workspace_pins_cap_v1() from public;
+revoke all on function public.workspace_pins_cap_v1() from anon;
+create trigger workspace_pins_cap
+  before insert on public.workspace_pins
+  for each row execute function public.workspace_pins_cap_v1();
 
 commit;
 

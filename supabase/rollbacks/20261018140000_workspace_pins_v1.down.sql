@@ -8,4 +8,5 @@ drop policy if exists workspace_pins_select on public.workspace_pins;
 drop index if exists public.workspace_pins_profile_idx;
 drop index if exists public.workspace_pins_owner_ref_uidx;
 drop table if exists public.workspace_pins;
+drop function if exists public.workspace_pins_cap_v1();
 commit;

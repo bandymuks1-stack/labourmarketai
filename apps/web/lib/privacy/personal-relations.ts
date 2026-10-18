@@ -141,6 +141,9 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "profile_roles", key: "profile_id" },
   { table: "notification_preferences", key: "profile_id" },
   { table: "dashboard_preferences", key: "profile_id" },
+  // My Space pins (20261018140000, RED, applied only on owner approval): the person's own
+  // shortcuts, owner-only RLS. Until applied the relation is absent and reads as empty.
+  { table: "workspace_pins", key: "profile_id" },
   { table: "preferred_locations", key: "profile_id" },
   { table: "consented_login_location_signals", key: "profile_id" },
   // How the platform classifies the account for reporting (real / test /
