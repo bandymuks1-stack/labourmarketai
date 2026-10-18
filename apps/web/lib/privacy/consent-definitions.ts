@@ -204,7 +204,7 @@ export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
 export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
   purpose: "employer_data_disclosure",
   // v3 (2026-10-18): the field list gained `external_profiles`, so the wording names it and the
-  // version moves. No v2 grant ever existed in production, so nothing is invalidated.
+  // version moves. Checked before authoring: no existing grant is invalidated (re-check on apply).
   version: "2026-10-18.v3",
   recipientCategory:
     "One specific company or agency named in the confirmation, for one specific need, offer, booking or application",

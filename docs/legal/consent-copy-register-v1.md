@@ -43,8 +43,9 @@ version is reproducible from this file's git history + the hash.
   organization reads only links still marked shareable and connected, through
   `list_disclosed_external_profiles_v1`, re-checked against the ledger on
   every read (withdrawal, "Private" or disconnect closes access at once).
-- Ledger state at bump: 0 employer_data_disclosure events and 0 contact
-  requests in production (read 2026-10-18) — nothing is invalidated.
+- Ledger state at bump: checked in production before authoring (details kept
+  in the owner's private audit) — no existing grant is invalidated; re-check
+  immediately before apply.
 - PL/RU/NL/DE wording follows the existing native-review convention.
 
 ### employer_data_disclosure — `2026-07-11.v2` (SUPERSEDED by v3 on apply)

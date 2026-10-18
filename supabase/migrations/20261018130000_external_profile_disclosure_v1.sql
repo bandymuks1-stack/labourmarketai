@@ -25,8 +25,10 @@
 --   - profile_discoverability (anonymous discovery) never reads this table.
 --   - VIP or paid plans have no branch here: only the worker's own grant opens access.
 --
--- EFFECT ON EXISTING GRANTS (production read 2026-10-18 before authoring): employer_data_disclosure
--- has 0 consent events and 0 contact requests, so the version bump invalidates nothing.
+-- EFFECT ON EXISTING GRANTS: has_employer_data_disclosure counts only grants at the CURRENT version,
+-- so a v2 grant would stop counting after this re-pin. The production ledger was checked before
+-- authoring (details in the owner's private audit, not in this public file): no existing grant is
+-- invalidated. Re-check immediately before apply.
 --
 -- Rollback: supabase/rollbacks/20261018130000_external_profile_disclosure_v1.down.sql
 
