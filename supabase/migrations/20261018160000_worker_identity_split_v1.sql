@@ -37,6 +37,8 @@
 --   can_view_worker itself is UNCHANGED (skills / professions / languages and the definer doors keep
 --   working exactly as today).
 --
+-- APPLY ORDER: this file first, then 20261018150000_employer_profile_views_v1 (it replaces the
+-- projection below with its counted two-tier version and refuses to run before this file).
 -- Rollback: supabase/rollbacks/20261018160000_worker_identity_split_v1.down.sql
 
 begin;

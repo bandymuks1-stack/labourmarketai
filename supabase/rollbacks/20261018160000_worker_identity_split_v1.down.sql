@@ -2,10 +2,10 @@
 -- Restores the previous workers_select policy (can_view_worker, including the discoverability branch)
 -- and the previous conversation_counterpart_identities body (byte-identical to the applied
 -- 20260705170000 version), and removes the functions this migration added.
--- caller_has_worker_relation_v1 is KEPT: the same function is also created by
--- 20261018150000_employer_profile_views_v1 and may be in use there; it grants nothing on its own.
--- ORDER: if 20261018150000 is also applied, roll THIS file back first (its policy is the only object
--- that depends on caller_has_worker_relation_v1 besides that migration's own gate).
+-- ORDER: reverse of the apply order. If 20261018150000 (applied AFTER this file) is live, roll IT back
+-- first — it replaces this file's discovery projection with its counted two-tier version.
+-- caller_has_worker_relation_v1 is dropped here only when 20261018150000's gate no longer exists;
+-- otherwise it is kept (it grants nothing on its own).
 begin;
 drop policy if exists workers_select on public.workers;
 create policy workers_select on public.workers
@@ -39,4 +39,10 @@ drop function if exists public.list_discoverable_worker_ids_v1(text, integer);
 drop function if exists public.candidate_profile_for_contact_v1(uuid, uuid);
 drop function if exists public.my_direct_conversations_with_workers_v1(uuid[]);
 drop function if exists public.employer_disclosure_granted_v1(uuid, uuid, text, uuid);
+do $$
+begin
+  if to_regprocedure('public.record_worker_profile_view_v1(uuid,uuid)') is null then
+    drop function if exists public.caller_has_worker_relation_v1(uuid);
+  end if;
+end $$;
 commit;

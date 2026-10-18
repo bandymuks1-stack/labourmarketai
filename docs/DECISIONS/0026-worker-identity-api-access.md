@@ -36,6 +36,30 @@ Mechanics:
   withdrawable). The applicant-identity door (`applicant_identity_v1`) stays: a worker who applied to
   that organization's own demand chose that organization.
 
+## Indirect paths closed (independent review, 2026-10-18)
+- **Conversation names.** `conversation_counterpart_identities` returned the other participant's full
+  name in any direct thread. A worker's name now comes back only when the worker started the thread,
+  the viewer has a working relationship, or the worker's live per-organization disclosure includes
+  `full_name`; otherwise the anonymous label.
+- **Profile id.** The projection carries no profile id (it joins to public business records). Server
+  flows use context-bound doors: `candidate_profile_for_contact_v1` (a worker shortlisted on, or
+  interested in, the caller's own demand), `my_direct_conversations_with_workers_v1`,
+  `employer_disclosure_granted_v1`.
+- **Exact timestamps** are replaced by a week bucket; the synthetic-fixture flag reads name + headline
+  inside SQL.
+
+## Legitimate organization contexts kept
+The relationship predicate also admits a delegated manager of the organization behind a company or
+agency roster, and an accepted booking of the organization — contexts the old predicate only reached
+through the discoverability branch for discoverable workers.
+
+## Plan limit (with 20261018150000)
+The discovery projection is two-tier once 20261018150000 is applied: the card tier (experience,
+countries, availability, activity week) for search; the detail tier (pay, start date, engagement form,
+work conditions) only after a counted view, or for an organization without a fixed limit. Profession,
+skills and languages stay search data (`can_view_worker`). Apply order: 20261018160000, then
+20261018150000 (it refuses to run first); roll back in reverse.
+
 ## Read sites (162 in apps/web, classified 2026-10-18)
 OWNER 79 · ORG-LEGIT 47 · DISCOVERY 12 · WORK-JOURNAL 10 · ADMIN 10 · INTERNAL 4 · PUBLIC 0.
 The 12 discovery sites move to the projection (person page, scouting Stage 1 + 2 + preferences, MCP
