@@ -60,11 +60,16 @@ describe("employer profile view limit (free 3 unique per organization)", () => {
     expect(gateBody).toMatch(/not like 'manual\\_%'/);
   });
 
-  it("VIP is read-only to the API: no authenticated write policy or grant", () => {
+  it("VIP is read-only to the API and written only by a platform admin, with who and when", () => {
+    expect(code).toMatch(/revoke all on table public\.organization_access_grants from public, anon, authenticated;/);
     expect(code).toMatch(/grant select on public\.organization_access_grants to authenticated;/);
     expect(code).not.toMatch(/grant (insert|update|delete|all)[^;]*organization_access_grants/);
     expect(code).not.toMatch(/organization_access_grants[^;]*for (insert|update|delete|all)/);
-    expect(code).toMatch(/granted_by\s+uuid not null/);
+    for (const fn of ["set_organization_vip_v1", "revoke_organization_vip_v1"]) {
+      const body = code.slice(code.indexOf(`function public.${fn}`));
+      expect(body.slice(0, 900), fn).toMatch(/if uid is null or not public\.is_admin\(\) then/);
+    }
+    expect(code).toMatch(/set revoked_at = now\(\), revoked_by = uid/);
   });
 
   it("is a RED, gated, reversible migration", () => {
@@ -75,6 +80,8 @@ describe("employer profile view limit (free 3 unique per organization)", () => {
       "table if exists public.employer_profile_views",
       "table if exists public.organization_access_grants",
       "function if exists public.caller_has_worker_relation_v1",
+      "function if exists public.set_organization_vip_v1",
+      "function if exists public.revoke_organization_vip_v1",
     ]) {
       expect(rollback).toContain(`drop ${obj}`);
     }

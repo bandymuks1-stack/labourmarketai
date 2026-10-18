@@ -63,24 +63,27 @@ revoke all on function public.caller_has_worker_relation_v1(uuid) from public;
 revoke all on function public.caller_has_worker_relation_v1(uuid) from anon;
 grant execute on function public.caller_has_worker_relation_v1(uuid) to authenticated;
 
--- 2. Owner-granted organization access (VIP). Audited; writes only through the superadmin server path
---    (service role). No authenticated write policy, by design.
+-- 2. Owner-granted organization access (VIP). Audited; written ONLY through the platform-admin RPCs
+--    set_organization_vip_v1 / revoke_organization_vip_v1 below. No write policy or table write
+--    privilege for any API role, by design — an organization can never grant itself VIP.
 create table if not exists public.organization_access_grants (
   id              uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id) on delete cascade,
   grant_kind      text not null check (grant_kind in ('vip')),
   -- e.g. {"profile_views": null}  (null = no fixed limit) or {"profile_views": 50}
   scope           jsonb not null default '{}'::jsonb,
-  granted_by      uuid not null references public.profiles(id),
+  -- set null (not no-action) so erasing an admin account never blocks on this audit row
+  granted_by      uuid references public.profiles(id) on delete set null,
   granted_at      timestamptz not null default now(),
-  revoked_by      uuid references public.profiles(id),
+  revoked_by      uuid references public.profiles(id) on delete set null,
   revoked_at      timestamptz,
   note            text check (note is null or char_length(note) <= 500),
-  check ((revoked_at is null) = (revoked_by is null))
+  check (revoked_by is null or revoked_at is not null)
 );
 create unique index if not exists organization_access_grants_one_active
   on public.organization_access_grants (organization_id, grant_kind) where revoked_at is null;
 alter table public.organization_access_grants enable row level security;
+revoke all on table public.organization_access_grants from public, anon, authenticated;
 create policy organization_access_grants_select on public.organization_access_grants
   for select using (public.is_admin() or public.manages_organization(organization_id));
 grant select on public.organization_access_grants to authenticated;
@@ -94,9 +97,79 @@ create table if not exists public.employer_profile_views (
   primary key (organization_id, worker_id)
 );
 alter table public.employer_profile_views enable row level security;
+revoke all on table public.employer_profile_views from public, anon, authenticated;
 create policy employer_profile_views_select on public.employer_profile_views
   for select using (public.is_admin() or public.manages_organization(organization_id));
 grant select on public.employer_profile_views to authenticated;
+
+-- 3b. VIP is granted and revoked only by a platform admin (the owner), with who/when/why kept.
+create or replace function public.set_organization_vip_v1(
+  p_organization_id uuid,
+  p_profile_views int default null,   -- null = no fixed limit
+  p_note text default null
+)
+returns uuid
+language plpgsql
+volatile
+security definer
+set search_path = public
+as $$
+declare
+  uid uuid := auth.uid();
+  v_id uuid;
+begin
+  if uid is null or not public.is_admin() then
+    raise exception 'Only a platform admin can grant VIP' using errcode = '42501';
+  end if;
+  if p_organization_id is null
+     or not exists (select 1 from public.organizations o where o.id = p_organization_id) then
+    raise exception 'Unknown organization' using errcode = 'P0002';
+  end if;
+  if p_profile_views is not null and (p_profile_views < 1 or p_profile_views > 100000) then
+    raise exception 'Invalid profile view limit' using errcode = '22023';
+  end if;
+  if p_note is not null and char_length(p_note) > 500 then
+    raise exception 'Note too long' using errcode = '22023';
+  end if;
+  -- One active grant per organization: a new grant closes the previous one (kept as history).
+  update public.organization_access_grants
+     set revoked_at = now(), revoked_by = uid
+   where organization_id = p_organization_id and grant_kind = 'vip' and revoked_at is null;
+  insert into public.organization_access_grants (organization_id, grant_kind, scope, granted_by, note)
+  values (p_organization_id, 'vip', jsonb_build_object('profile_views', p_profile_views), uid,
+          nullif(btrim(coalesce(p_note, '')), ''))
+  returning id into v_id;
+  return v_id;
+end;
+$$;
+revoke all on function public.set_organization_vip_v1(uuid, int, text) from public;
+revoke all on function public.set_organization_vip_v1(uuid, int, text) from anon;
+grant execute on function public.set_organization_vip_v1(uuid, int, text) to authenticated;
+
+create or replace function public.revoke_organization_vip_v1(p_organization_id uuid)
+returns boolean
+language plpgsql
+volatile
+security definer
+set search_path = public
+as $$
+declare
+  uid uuid := auth.uid();
+  n int;
+begin
+  if uid is null or not public.is_admin() then
+    raise exception 'Only a platform admin can revoke VIP' using errcode = '42501';
+  end if;
+  update public.organization_access_grants
+     set revoked_at = now(), revoked_by = uid
+   where organization_id = p_organization_id and grant_kind = 'vip' and revoked_at is null;
+  get diagnostics n = row_count;
+  return n > 0;
+end;
+$$;
+revoke all on function public.revoke_organization_vip_v1(uuid) from public;
+revoke all on function public.revoke_organization_vip_v1(uuid) from anon;
+grant execute on function public.revoke_organization_vip_v1(uuid) to authenticated;
 
 -- 4. The gate. The limit is computed HERE from the organization's own state — never passed in.
 create or replace function public.record_worker_profile_view_v1(
