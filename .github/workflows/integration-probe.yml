@@ -1,0 +1,74 @@
+name: integration-probe
+
+# CRITICAL INTEGRATIONS, WATCHED (2026-10-18 incident). After the move to the VPS three things broke
+# silently for a day: every sign-in return pointed at the server's bind address, old browsers crashed on
+# load, and the Nonstop referral + handoff secrets were missing on both sides. health-probe.yml saw none of
+# it (auth + database were fine). This probe checks the shape of each failure, hourly, from outside:
+#
+#   1. auth redirects name the public origin, never a bind / internal host;
+#   2. the Nonstop referral door is CONFIGURED (a credential-free call is `unauthorized`, not `not_configured`);
+#   3. the Nonstop handoff door is reachable and paired on Nonstop's side (401, not 503 CONFIGURATION_REQUIRED);
+#   4. Nonstop's lead store is READY (a lead is a row before it is a mail);
+#   5. the MCP OAuth resource names the public origin;
+#   6. the old-browser regex shim is the first inline <head> script, and the crash-report door answers 204.
+#
+# Secret-free: every request carries no credential and changes nothing. A failed scheduled run e-mails the
+# repository owner (GitHub's default for scheduled workflows), like health-probe. Values are never printed.
+
+on:
+  schedule:
+    - cron: "41 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: integration-probe
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe critical integrations (no credential, no write)
+        shell: bash
+        run: |
+          set -u
+          LM=https://labourmarket.ai
+          NS=https://nonstopgroup.eu
+          fail=0
+          ok() { echo "ok    $1"; }
+          bad() { echo "::error::$1"; fail=1; }
+
+          # 1. auth redirects
+          for p in /en/auth/callback /lt/auth/logout; do
+            loc=$(curl -sS -o /dev/null -w '%{redirect_url}' --max-time 20 "$LM$p" || true)
+            case "$loc" in "$LM"/*) ok "auth redirect $p -> public origin" ;; *) bad "auth redirect $p -> '$loc' (not the public origin)" ;; esac
+          done
+
+          # 2. Nonstop referral door configured
+          reason=$(curl -sS --max-time 20 -X POST -H 'x-referral-source: nonstop' -H 'content-type: application/json' -d '{}' "$LM/api/referrals/external/v1" | jq -r '.reason // empty' || true)
+          [ "$reason" = "unauthorized" ] && ok "referral door configured" || bad "referral door answers '$reason' (expected unauthorized; not_configured = secret missing on the VPS)"
+
+          # 3. Nonstop handoff door paired on Nonstop's side
+          code=$(curl -sS -o ns.json -w '%{http_code}' --max-time 20 -X POST -H 'content-type: application/json' -d '{}' "$NS/api/partners/labourmarket/handoffs/v1" || echo 000)
+          [ "$code" = "401" ] && ok "Nonstop handoff door paired" || bad "Nonstop handoff door HTTP $code $(head -c 160 ns.json 2>/dev/null) (503 CONFIGURATION_REQUIRED = token missing on Nonstop)"
+
+          # 4. Nonstop lead store
+          store=$(curl -sS --max-time 20 "$NS/api/intake" | jq -r '.store // empty' || true)
+          [ "$store" = "READY" ] && ok "Nonstop lead store READY" || bad "Nonstop lead store '$store' (expected READY)"
+
+          # 5. MCP OAuth resource
+          resource=$(curl -sS --max-time 20 "$LM/.well-known/oauth-protected-resource" | jq -r '.resource // empty' || true)
+          [ "$resource" = "$LM/api/mcp" ] && ok "MCP resource = public origin" || bad "MCP resource '$resource' (expected $LM/api/mcp)"
+
+          # 6. old-browser shim first in <head>; crash-report door
+          first=$(curl -sS --max-time 20 "$LM/en" | tr '\n' ' ' | grep -o '<script>.\{0,80\}' | head -1 || true)
+          case "$first" in *'new w.RegExp'*) ok "regex shim is the first inline <head> script" ;; *) bad "regex shim missing or not first (old iPhones would crash on load)" ;; esac
+          # An empty report is dropped by the sanitiser (nothing logged) and still answers 204.
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 -X POST -H "origin: $LM" -H 'sec-fetch-site: same-origin' -H 'content-type: application/json' -d '{}' "$LM/api/client-errors" || echo 000)
+          [ "$code" = "204" ] && ok "crash-report door answers 204" || bad "crash-report door HTTP $code"
+
+          exit $fail
