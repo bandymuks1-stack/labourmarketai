@@ -91,6 +91,9 @@ export function toScoutSafeCandidate(input: {
    *  caller that had to decide it anyway must hand it over, so no surface
    *  can assemble a candidate without one. */
   readonly actionability: CandidateActionabilityV1;
+  /** A start date is set although the plan may withhold the date itself (identity split /
+   *  plan limit). Optional: absent = read the subject's own date. */
+  readonly startDateSet?: boolean;
   /** Clock for expiry arithmetic (defaults to now). */
   readonly now?: Date;
 }): ScoutSafeCandidate {
@@ -123,7 +126,8 @@ export function toScoutSafeCandidate(input: {
     mayOfferEmployerActions(input.actionability) &&
     canStartCommunicationOrBooking({
       availabilityStatus: input.subject.availabilityStatus ?? null,
-      availableFrom: input.subject.availableFrom ?? null,
+      availableFrom:
+        input.subject.availableFrom ?? (input.startDateSet === true ? "set" : null),
     });
 
   const readiness = companyCandidateReadiness(input.needCountry, preview);

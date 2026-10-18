@@ -69,6 +69,9 @@ export interface SupplyCandidate {
   /** A documented QA fixture (lib/qa/synthetic-fixture.ts) — from the name for a related row, from
    *  the projection's SQL-computed flag for a discovered one, so no name is needed to know it. */
   readonly syntheticFixture: boolean;
+  /** Whether a start date is SET — from the row, or the projection's card-tier flag when the plan
+   *  withholds the date itself. The communication gate needs only this. */
+  readonly startDateSet: boolean;
   readonly professionSlug: string | null;
   /** Profile freshness from the best REAL timestamp (workers.updated_at,
    *  falling back to created_at). Wagon 1: shown honestly on discovery and
@@ -568,6 +571,9 @@ export async function buildSupplyCandidates(
       profileId: (w.profile_id as string | null) ?? null,
       displayName: (w.display_name as string | null) ?? null,
       headline: (w.headline as string | null) ?? null,
+      startDateSet:
+        (typeof w.available_from === "string" && w.available_from !== "") ||
+        w.has_available_from === true,
       syntheticFixture:
         w.is_synthetic_fixture === true ||
         isSyntheticFixtureLabel(

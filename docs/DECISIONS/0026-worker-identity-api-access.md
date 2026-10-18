@@ -67,10 +67,16 @@ skills and languages stay search data (`can_view_worker`). Apply order: 20261018
 OWNER 79 · ORG-LEGIT 47 · DISCOVERY 12 · WORK-JOURNAL 10 · ADMIN 10 · INTERNAL 4 · PUBLIC 0.
 The 12 discovery sites move to the projection (person page, scouting Stage 1 + 2 + preferences, MCP
 shortlist, contact-interested-worker, request-worker-conversation, pipeline facts, contact-request
-states). The other 150 read own / related / admin / service rows and are unchanged. Known edges:
-`lib/booking/booking-conversation.ts` and `lib/trust/experience-entry.ts` read a booked worker after
-the booking engagement has ended — they keep working while the engagement is active and degrade to
-"no name" after it ends (a follow-up can read the profile id through the booking row).
+states). The other 150 read own / related / admin / service rows and are unchanged. Bookings: an
+ACCEPTED booking is a working relationship (the worker accepted the work), so the booking owner and the
+organization's managers keep the row — including after the engagement ends — as work history (owner
+rule: legitimate access to project history is preserved). Owner decision to confirm: whether an
+accepted booking should stop counting after its end date.
+
+Known residuals (documented, owner decisions): profession, skills and languages remain search data via
+`can_view_worker`; each organization has its own free quota; a thread co-participant can read the other
+participant's pseudonymous profile id (the existing messaging model) — it only links to a person's
+public business record if that person also publishes one.
 
 ## Consent text
 The shown consent text (`profile_discoverability` 2026-07-11.v2) never named the name; it points to

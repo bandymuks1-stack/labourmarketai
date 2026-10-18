@@ -93,10 +93,14 @@ describe("database: indirect identity paths are closed", () => {
     const names = fnBody("conversation_counterpart_identities");
     // only candidate threads (opened from scouting / a demand interest) hide a name …
     expect(names).toMatch(/when coalesce\(c\.source_type, ''\) not in \('scouting', 'demand_interest'\) then p\.full_name/);
-    // … and only the candidate's (the creator's side is never hidden)
-    expect(names).toMatch(/when cp\.profile_id = c\.created_by then p\.full_name/);
-    // Owner rule 2026-10-18: writing a message or being shortlisted is NEVER consent.
-    expect(names).not.toMatch(/conversation_messages|demand_shortlist/);
+    // … and only the CANDIDATE on that demand (interest / shortlist row), whoever opened the thread
+    expect(names).toMatch(/i\.request_id = c\.source_id and i\.worker_id = w\.id/);
+    expect(names).toMatch(/s\.request_id = c\.source_id and s\.worker_id = w\.id/);
+    expect(names).not.toMatch(/created_by/);
+    // Owner rule 2026-10-18: writing a message is NEVER consent, and the shortlist / interest rows only
+    // say WHO is the candidate — they are never a reason to name them.
+    expect(names).not.toMatch(/conversation_messages/);
+    expect(names).not.toMatch(/then p\.full_name\s+when not \(\s*exists \(select 1 from public\.demand_shortlist/);
     expect(names).toMatch(/when public\.caller_has_worker_relation_v1\(w\.id\) then p\.full_name/);
     expect(names).toMatch(/l\.selected_fields \? 'full_name'/);
     expect(names).toMatch(/else 'Candidate ' \|\|/);

@@ -215,12 +215,18 @@ set search_path = public
 as $$
   select cp.conversation_id,
          case
-           -- Only CANDIDATE threads hide a name: a thread an employer opened from discovery
-           -- (scouting) or from a demand interest, seen by its creator's side. Every other thread
-           -- (colleagues, own employer, buyer / provider, support, worker-initiated) is unchanged.
+           -- Only CANDIDATE threads hide a name: threads about a demand (scouting / demand interest),
+           -- and only the participant who is the CANDIDATE on that demand (an interest or shortlist row
+           -- on c.source_id) — whoever opened the thread. The employer side is never hidden, and every
+           -- other thread (colleagues, own employer, buyer / provider, support) is unchanged.
            when coalesce(c.source_type, '') not in ('scouting', 'demand_interest') then p.full_name
-           when cp.profile_id = c.created_by then p.full_name     -- the creator side is never hidden
            when w.id is null then p.full_name
+           when not (
+             exists (select 1 from public.demand_interest_signals i
+                      where i.request_id = c.source_id and i.worker_id = w.id)
+             or exists (select 1 from public.demand_shortlist s
+                         where s.request_id = c.source_id and s.worker_id = w.id)
+           ) then p.full_name
            when public.caller_has_worker_relation_v1(w.id) then p.full_name
            when exists (
              select 1

@@ -36,6 +36,7 @@ p4 as (select count(*) = 7 ok from pg_proc p where p.pronamespace = 'public'::re
           and has_function_privilege('authenticated', p.oid, 'execute')),
 p5 as (select coalesce((select pg_get_functiondef(p.oid) !~ 'worker_profile_discoverable'
                                and pg_get_functiondef(p.oid) ~ 'demand_shortlist'
+                               and pg_get_functiondef(p.oid) ~ 'can_view_worker'
                           from pg_proc p where p.pronamespace = 'public'::regnamespace
                            and p.proname = 'candidate_profile_for_contact_v1'), false) ok),
 p6 as (select coalesce((select pg_get_functiondef(p.oid) !~ 'worker_profile_discoverable|is_employer\(\)'
@@ -48,13 +49,15 @@ select 'PROOF 1 workers_select needs a working relationship' proof, (select ok f
 union all select 'PROOF 2 discovery projection returns no identity / profile id / exact time', (select ok from p2)
 union all select 'PROOF 3 candidate threads: the candidate is named by relationship or own grant only', (select ok from p3)
 union all select 'PROOF 4 the 7 functions: authenticated yes, anon no', (select ok from p4)
-union all select 'PROOF 5 the contact door is demand-bound, never discovery-bound', (select ok from p5)
+union all select 'PROOF 5 the contact door needs the caller''s own demand, a shortlist / interest and visibility', (select ok from p5)
 union all select 'PROOF 6 the relationship predicate has no discoverability branch', (select ok from p6)
 union all select 'PROOF 7 can_view_worker itself is unchanged (still serves skills / professions)', (select ok from p7);
 
 -- ---------------------------------------------------------------- PART B (psql -f; rolled back)
 begin;
 create temp table _proof(name text, value bigint) on commit drop;
+create temp table _names(viewer uuid, conversation_id uuid, display_name text) on commit drop;
+grant insert, select on _names to authenticated;
 do $$
 declare e record; x record; n bigint := 0; related_rows bigint := 0; unrelated_rows bigint := 0;
         anon_names bigint := 0; named bigint := 0; projected_identity bigint := 0;
@@ -76,18 +79,27 @@ begin
         unrelated_rows := unrelated_rows + n;          -- PROOF B1: must stay 0
       end if;
     end loop;
-    -- PROOF B2: names an unrelated employer receives for direct threads with workers
+    -- PROOF B2: the names this employer RECEIVES (collected under its own role) …
     execute 'set local role authenticated';
-    select count(*) filter (where i.display_name like 'Candidate %'), count(*) filter (where i.display_name not like 'Candidate %')
+    insert into _names
+      select e.id, i.conversation_id, i.display_name
+        from public.conversation_counterpart_identities(
+               array(select cp.conversation_id from public.conversation_participants cp where cp.profile_id = e.id)) i;
+    execute 'reset role';
+    -- … judged with full visibility: in a candidate thread, a candidate without relationship or grant.
+    select count(*) filter (where n.display_name like 'Candidate %'), count(*) filter (where n.display_name not like 'Candidate %')
       into anon_names, named
-      from public.conversation_counterpart_identities(
-             array(select cp.conversation_id from public.conversation_participants cp where cp.profile_id = e.id)) i
-      join public.conversation_participants op on op.conversation_id = i.conversation_id and op.profile_id <> e.id
+      from _names n
+      join public.conversations c on c.id = n.conversation_id
+      join public.conversation_participants op on op.conversation_id = n.conversation_id and op.profile_id <> e.id
       join public.workers w on w.profile_id = op.profile_id
-     where not public.caller_has_worker_relation_v1(w.id)
+     where n.viewer = e.id
+       and c.source_type in ('scouting', 'demand_interest')
+       and (exists (select 1 from public.demand_interest_signals i where i.request_id = c.source_id and i.worker_id = w.id)
+            or exists (select 1 from public.demand_shortlist s where s.request_id = c.source_id and s.worker_id = w.id))
+       and not public.caller_has_worker_relation_v1(w.id)
        and not exists (select 1 from public.privacy_consent_events ev where ev.user_id = op.profile_id
                         and ev.purpose = 'employer_data_disclosure' and ev.selected_fields ? 'full_name');
-    execute 'reset role';
     insert into _proof values ('B2 unrelated threads named without a grant (must be 0)', named),
                               ('B2 unrelated threads shown anonymously', anon_names);
   end loop;
