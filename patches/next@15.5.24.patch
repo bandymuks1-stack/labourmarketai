@@ -1,3 +1,20 @@
+diff --git a/dist/build/templates/app-page.js b/dist/build/templates/app-page.js
+index e69cf2b2c0496351f73255552fe07acd306f6f22..1b6b4160580cee4e37071eac0d0c17fbbd9cb53b 100644
+--- a/dist/build/templates/app-page.js
++++ b/dist/build/templates/app-page.js
+@@ -490,6 +490,12 @@ async function handler(req, res, ctx) {
+             if (isOnDemandRevalidate && (fallbackMode !== _fallback.FallbackMode.NOT_FOUND || previousCacheEntry)) {
+                 fallbackMode = _fallback.FallbackMode.BLOCKING_STATIC_RENDER;
+             }
++            // labourmarketai patch: a path PRERENDERED at build time is a known
++            // fallback: false path. A tag/path invalidation makes the cache return
++            // no entry at all, so regenerate it instead of the no-fallback 404.
++            if (fallbackMode === _fallback.FallbackMode.NOT_FOUND && isPrerendered) {
++                fallbackMode = _fallback.FallbackMode.BLOCKING_STATIC_RENDER;
++            }
+             if (!minimalMode && fallbackMode !== _fallback.FallbackMode.BLOCKING_STATIC_RENDER && staticPathKey && !didRespond && !isDraftMode && pageIsDynamic && (isProduction || !isPrerendered)) {
+                 // if the page has dynamicParams: false and this pathname wasn't
+                 // prerendered trigger the no fallback handling
 diff --git a/dist/compiled/react-dom/cjs/react-dom-client.development.js b/dist/compiled/react-dom/cjs/react-dom-client.development.js
 index 4376913076151ad78dcc4059ad4152fad25478da..4995c843e0dcb901efc61832ddb0e8728bd08885 100644
 --- a/dist/compiled/react-dom/cjs/react-dom-client.development.js
@@ -60,3 +77,20 @@ index 85185b07d38d122ada8ed308523b181da102ccad..3001351b0223532891beb0dff9c26af8
        : (workInProgressRootPingedLanes |= pingedLanes),
      workInProgressSuspendedRetryLanes === workInProgressRootRenderLanes &&
        (workInProgressSuspendedRetryLanes = 0));
+diff --git a/dist/esm/build/templates/app-page.js b/dist/esm/build/templates/app-page.js
+index 608080693a2ee86c94438eacaa7ca0345c79de61..70a2429778b1a3a0c1bafdd6f650659c94d90fc4 100644
+--- a/dist/esm/build/templates/app-page.js
++++ b/dist/esm/build/templates/app-page.js
+@@ -412,6 +412,12 @@ export async function handler(req, res, ctx) {
+             if (isOnDemandRevalidate && (fallbackMode !== FallbackMode.NOT_FOUND || previousCacheEntry)) {
+                 fallbackMode = FallbackMode.BLOCKING_STATIC_RENDER;
+             }
++            // labourmarketai patch: a path PRERENDERED at build time is a known
++            // fallback: false path. A tag/path invalidation makes the cache return
++            // no entry at all, so regenerate it instead of the no-fallback 404.
++            if (fallbackMode === FallbackMode.NOT_FOUND && isPrerendered) {
++                fallbackMode = FallbackMode.BLOCKING_STATIC_RENDER;
++            }
+             if (!minimalMode && fallbackMode !== FallbackMode.BLOCKING_STATIC_RENDER && staticPathKey && !didRespond && !isDraftMode && pageIsDynamic && (isProduction || !isPrerendered)) {
+                 // if the page has dynamicParams: false and this pathname wasn't
+                 // prerendered trigger the no fallback handling

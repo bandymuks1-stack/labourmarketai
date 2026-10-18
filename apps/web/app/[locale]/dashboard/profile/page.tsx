@@ -1,6 +1,8 @@
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { OrganizationsLeadership } from "@/components/app/organization/organizations-leadership";
 import { organizationAllTime } from "@/lib/journal/organization-all-time";
+import { deriveProfessionalExperience } from "@/lib/journal/professional-experience";
+import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -366,6 +368,9 @@ export default async function ProfilePage({
   // The identity stage's fact strip: the SAME model's all-time row.
   let workAllTime: { totals: WorkPeriodTotals; truncated: boolean } | null = null;
   let organizationHistoryHours: number | null = null;
+  // The ONE continuous professional history's total (decision 0025): every
+  // work hour once over the journal and the organization history.
+  let professionalExperienceHours: number | null = null;
   // Self-stated languages (P2-PR3) — `worker_languages`, APPLIED in production
   // 2026-07-11 (ledger `20260711203623`; 11 real rows). The needs-migration
   // branch is kept for fresh/local databases, not because production lacks it.
@@ -422,6 +427,7 @@ export default async function ProfilePage({
       trust,
       workIntelligence,
       playerCardRes,
+      experienceRelationships,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       // Learning Compass (Track C): own records + the board's match results;
@@ -489,6 +495,9 @@ export default async function ProfilePage({
       // The work-card editor's reads, in the SAME parallel stage (the render
       // path is stage-budgeted by profile-render-stages guards).
       loadPlayerCardResult().catch((): PlayerCardResult | null => null),
+      // Every relationship to an organization (jobs, ownership, management)
+      // for the one professional-experience reading (decision 0025).
+      readOwnExperienceRelationships(supabase, user.id).catch(() => null),
     ]);
 
     availabilityPrefs = prefsRes;
@@ -499,6 +508,10 @@ export default async function ProfilePage({
       // Imported organization history counts as experience (#2169): the ONE
       // all-time rule, day + period records, no invoice consulted.
       organizationHistoryHours = organizationAllTime(workIntelligence)?.totalHours ?? null;
+      professionalExperienceHours = workIntelligence
+        ? deriveProfessionalExperience({ wi: workIntelligence, relationships: experienceRelationships }).hours
+            ?.total ?? null
+        : null;
       workAllTime = all
         ? { totals: all, truncated: workIntelligence?.coverage.truncated ?? false }
         : null;
@@ -1144,6 +1157,7 @@ export default async function ProfilePage({
         workContexts={workContexts}
         workAllTime={workAllTime}
         organizationHistoryHours={organizationHistoryHours}
+        professionalExperienceHours={professionalExperienceHours}
         // Identity-essential presence sourced from the ONE minimum card contract
         // (launch audit §7.3) — only data already fetched above, no new reads.
         cardSource={{

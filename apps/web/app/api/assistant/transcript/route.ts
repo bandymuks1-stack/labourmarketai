@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { appendAssistantTurn } from "@/lib/assistant/transcript";
+import { isSameOriginRequest } from "@/lib/http/same-origin-request";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,25 +23,14 @@ export const dynamic = "force-dynamic";
  *
  * GUARDS: cookie session only (the RPC refuses anyone but the thread owner);
  * same-origin only (a cross-site page cannot write into someone's transcript
- * with their cookies); JSON only; bounded body. Failures answer
+ * with their cookies — judged against the request's public host, see
+ * lib/http/same-origin-request.ts: behind the VPS proxy req.url is the bind host); JSON only; bounded body. Failures answer
  * `{ saved: false }` — never a claimed success.
  */
 const MAX_BODY = 16 * 1024;
 
-function sameOrigin(req: Request): boolean {
-  const site = req.headers.get("sec-fetch-site");
-  if (site && site !== "same-origin") return false;
-  const origin = req.headers.get("origin");
-  if (origin === null) return site === "same-origin";
-  try {
-    return new URL(origin).host === new URL(req.url).host;
-  } catch {
-    return false;
-  }
-}
-
 export async function POST(req: Request) {
-  if (!sameOrigin(req)) return NextResponse.json({ saved: false }, { status: 403 });
+  if (!isSameOriginRequest(req)) return NextResponse.json({ saved: false }, { status: 403 });
   if (!(req.headers.get("content-type") ?? "").toLowerCase().includes("application/json")) {
     return NextResponse.json({ saved: false }, { status: 415 });
   }

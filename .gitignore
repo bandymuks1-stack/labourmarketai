@@ -122,3 +122,4 @@ supabase/.temp/
 /.impeccable/config.local.json
 /.impeccable/live/
 /.impeccable/critique/
+.standalone-dist/

@@ -31,6 +31,7 @@ import { formatUtcDate } from "@/lib/time/display";
 import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
 import { CvOrganizationHistory } from "@/components/app/cv/cv-organization-history";
 import { organizationHistoryLines } from "@/components/app/cv/organization-history-lines";
+import { FORMER_NAME_RELATIONS, formerNamesOf, periodFor } from "@/lib/journal/professional-experience";
 import {
   PremiumLivingCv,
   type PremiumCvCapability,
@@ -558,6 +559,50 @@ export default async function VerifiedCvPage({
     .map((p) => professionDisplayName(p, (slug) => (tProf.has(slug) ? tProf(slug) : null)))
     .filter((v): v is string => !!v);
   const premiumFacts: PremiumCvFact[] = [];
+  // ONE continuous professional history (decision 0025): the total first,
+  // whenever the organization history adds to the person's own journal —
+  // every work hour once; the journal and organization figures stay beside
+  // it as the two provenances it is made of.
+  const experienceTotal = cv.professionalExperience?.hours ?? null;
+  // ONE organization identity with a name history (decision 0025): the
+  // business periods the person's own leadership lets them read. A record's
+  // source label resolves to a stated PERIOD (never printed raw); a period the
+  // owner states as the same legal entity is a FORMER NAME of the organization.
+  const businessPeriods = (cv.professionalExperience?.roles ?? []).flatMap((r) => r.businessPeriods);
+  const orgNameOfPeriod = new Map<string, string | null>();
+  for (const r of cv.professionalExperience?.roles ?? []) {
+    for (const p of r.businessPeriods) if (!orgNameOfPeriod.has(p.id)) orgNameOfPeriod.set(p.id, r.organizationName);
+  }
+  // SEPARATE LEGAL ENTITIES (owner 2026-10-17, final): a period that is a
+  // former name bands as "Period: X"; any other relation is a separate legal
+  // entity of the time — said so, with the organization that administers the
+  // records today. The raw sheet label is never printed.
+  const periodLabelOf = (sourceLabel: string): string | null => {
+    const p = periodFor(sourceLabel, businessPeriods);
+    if (!p) return null;
+    if (FORMER_NAME_RELATIONS.has(p.legalEntityRelation)) return tOrgHist("periodBand", { label: p.label });
+    return tOrgHist("legalEntityBand", {
+      label: p.legalEntityLabel ?? p.label,
+      org: orgNameOfPeriod.get(p.id) ?? "—",
+    });
+  };
+  const formerNamesByOrgName = new Map<string, string[]>();
+  for (const r of cv.professionalExperience?.roles ?? []) {
+    if (!r.organizationName) continue;
+    const names = formerNamesOf(r.businessPeriods);
+    if (names.length > 0 && !formerNamesByOrgName.has(r.organizationName)) formerNamesByOrgName.set(r.organizationName, names);
+  }
+  const withFormerNames = (orgName: string | null): string | null => {
+    if (!orgName) return null;
+    const names = formerNamesByOrgName.get(orgName);
+    return names && names.length > 0 ? `${orgName} (${tOrgHist("formerly", { names: names.join(", ") })})` : orgName;
+  };
+  if (
+    experienceTotal !== null &&
+    experienceTotal.total > 0 &&
+    experienceTotal.organizationDays + experienceTotal.organizationPeriods > 0
+  )
+    premiumFacts.push({ value: premiumHours(experienceTotal.total), label: tPremium("facts.experienceTotal") });
   if (cv.recordedHoursTotal !== null && cv.recordedHoursTotal > 0)
     premiumFacts.push({ value: premiumHours(cv.recordedHoursTotal), label: tPremium("facts.recorded") });
   if (cv.recordedHoursConfirmed !== null && cv.recordedHoursConfirmed > 0)
@@ -618,11 +663,18 @@ export default async function VerifiedCvPage({
         h.dayHours !== null ? tPremium("orgDayHours", { hours: fmtNum.format(roundHours(h.dayHours)), count: h.dayRecords }) : null,
         h.periodHours !== null ? tPremium("orgPeriodHours", { hours: fmtNum.format(roundHours(h.periodHours)) }) : null,
       ].filter((x): x is string => !!x);
+      const periodBand = h.sourceLabel ? periodLabelOf(h.sourceLabel) : null;
       return {
         key: `org:${h.key}`,
         period: from && to && from !== to ? `${from} – ${to}` : (from ?? to),
         title,
-        subtitle: h.organizationName && h.organizationName !== title ? h.organizationName : null,
+        subtitle:
+          [
+            h.organizationName && h.organizationName !== title ? withFormerNames(h.organizationName) : null,
+            periodBand,
+          ]
+            .filter((x): x is string => !!x)
+            .join(" · ") || null,
         detail: detailParts.length > 0 ? detailParts.join(" · ") : null,
         source: tPremium("source.organization"),
         level: h.proof.includes("INDEPENDENTLY_VERIFIED") || h.proof.includes("EMPLOYER_CONFIRMED") ? "confirmed" : "recorded",
@@ -1086,6 +1138,7 @@ export default async function VerifiedCvPage({
             entries={cv.organizationHistory}
             headingClassName={sectionTitle}
             bodyClassName={bodyText}
+            periodLabelOf={periodLabelOf}
           />
         ) : null}
 
@@ -1245,6 +1298,31 @@ export default async function VerifiedCvPage({
               {t("clientAcceptedWorkFact", { entries: cv.clientAcceptedEntries })}
             </p>
           )}
+          {/* ONE continuous professional history (decision 0025): the
+              all-time total — every work hour once over the journal and the
+              organization history — with what was listed but not added.
+              Shown when the organization history adds to the journal. */}
+          {experienceTotal !== null &&
+            experienceTotal.total > 0 &&
+            experienceTotal.organizationDays + experienceTotal.organizationPeriods > 0 && (
+              <p
+                className="text-meta text-text-muted"
+                data-testid="cv-professional-experience-total"
+                data-total-hours={experienceTotal.total}
+                data-journal-hours={experienceTotal.journal}
+                data-organization-hours={experienceTotal.organizationDays + experienceTotal.organizationPeriods}
+                data-not-counted-hours={experienceTotal.notCounted}
+              >
+                {t("professionalExperienceTotal", {
+                  total: fmtHours(experienceTotal.total),
+                  journal: fmtHours(experienceTotal.journal),
+                  organization: fmtHours(experienceTotal.organizationDays + experienceTotal.organizationPeriods),
+                })}
+                {experienceTotal.notCounted > 0
+                  ? ` ${t("professionalExperienceNotCounted", { hours: fmtHours(experienceTotal.notCounted) })}`
+                  : ""}
+              </p>
+            )}
           {/* The organization's own hour records (owner §19) — the second
               ledger, named beside the journal figure and added to nothing:
               an hour record proves attendance, not a skill. Shown only when
