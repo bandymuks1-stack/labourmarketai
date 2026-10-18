@@ -12,11 +12,16 @@ anything and stops with "Remote migration versions not found in local migrations
 difference, not missing schema: the 2026-10-18 audit found the live schema consistent with the repo apart from a
 small number of findings handled privately with the owner.
 
-## Rule: production changes only after explicit owner approval
+## Rules (canonical policy: `AGENTS.md` → Migrations → PROD APPLY AUTONOMY)
 
-- Production migrations: Supabase MCP `apply_migration`, one migration at a time, after owner approval.
-- Never `supabase db push`, `db reset`, `migration repair`, rollback or `DROP` against production without a
-  separate owner approval for that exact step.
+- Production migrations go through Supabase MCP `apply_migration` only — never `supabase db push`.
+- **GREEN path (conditional autonomy, unchanged):** an agent may apply a merged migration when ALL the
+  `AGENTS.md` conditions hold — GREEN by `migration-safety`, strictly additive/widening, paired
+  `supabase/rollbacks/<name>.down.sql`, production target verified and the change verified by an MCP read
+  afterwards, reported as `APPLIED TO PROD: …`, no owner-only credential or approval needed.
+- **RED or uncertain → owner review.** Uncertainty is itself RED.
+- **History reconciliation is RED by nature** (it rewrites the migration ledger): `migration repair`,
+  `db reset`, rollback or `DROP` against production each need a separate owner approval for that exact step.
 - Never rename or renumber repo migration files (re-run hazard; `000N` files are frozen).
 - Keep the `Supabase Preview` check enabled; it is not a required merge check.
 
