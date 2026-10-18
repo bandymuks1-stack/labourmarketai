@@ -3,7 +3,7 @@
 What really works, what does not, what is unfinished, the evidence, and the blockers — feature by feature.
 Part of the master set: [MASTER-MAP](LABOURMARKET-MASTER-MAP.md) · [IMPROVEMENT-OPPORTUNITIES](LABOURMARKET-IMPROVEMENT-OPPORTUNITIES.md) · [EXECUTION-ROADMAP](LABOURMARKET-EXECUTION-ROADMAP.md).
 
-Audit of main `fb741339a`, 2026-10-18. Public-safe: production data, security evidence and exposure details are in the owner's private annex.
+Audit of main `fb741339a`, 2026-10-18; updated the same day after the production incident (rows 1.2, 1.12, 13.15–13.17; causes and prevention in MASTER-MAP §8). Public-safe: production data, security evidence and exposure details are in the owner's private annex.
 
 ## Status vocabulary
 
@@ -23,20 +23,20 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 
 | Area | LIVE_PROVEN | CODE_READY | PARTIAL | BROKEN | DORMANT | PLANNED | UNKNOWN | Total |
 |---|---|---|---|---|---|---|---|---|
-| 1 Registration, login, roles, orgs, invitations | 6 | 1 | 7 | 0 | 1 | 0 | 0 | 15 |
+| 1 Registration, login, roles, orgs, invitations | 5 | 1 | 8 | 0 | 1 | 0 | 0 | 15 |
 | 2 Worker profile, Living CV, Journal, history | 10 | 9 | 14 | 0 | 1 | 1 | 0 | 35 |
 | 3 Employer workspace | 6 | 14 | 12 | 0 | 0 | 1 | 0 | 33 |
 | 4 Demand, search, matching, scouting, consents | 8 | 9 | 7 | 0 | 4 | 1 | 0 | 29 |
 | 5 Conversations, notifications, calendar, chat | 5 | 3 | 6 | 0 | 3 | 2 | 0 | 19 |
-| 6 Universal marketplace & commerce | 2 | 5 | 8 | 0 | 3 | 3 | 0 | 21 |
+| 6 Universal marketplace & commerce | 3 | 5 | 8 | 0 | 3 | 3 | 0 | 22 |
 | 7 Plans, limits, VIP, LMC, payments | 2 | 4 | 0 | 0 | 5 | 3 | 0 | 14 |
-| 8 Multilingual, markets, SEO, mobile | 3 | 5 | 5 | 0 | 2 | 1 | 0 | 16 |
-| 9 Admin, security, RLS, API, GDPR | 2 | 8 | 9 | 0 | 4 | 1 | 0 | 24 |
-| 10 Agents OS / AI / MCP / integrations | 3 | 3 | 5 | 0 | 13 | 3 | 0 | 27 |
+| 8 Multilingual, markets, SEO, mobile | 3 | 5 | 6 | 0 | 2 | 1 | 0 | 17 |
+| 9 Admin, security, RLS, API, GDPR | 2 | 9 | 9 | 0 | 4 | 1 | 0 | 25 |
+| 10 Agents OS / AI / MCP / integrations | 3 | 3 | 6 | 0 | 13 | 3 | 0 | 28 |
 | 11 Education, institutions, RPL (added) | 4 | 2 | 2 | 0 | 1 | 1 | 0 | 10 |
 | 12 Map & market intelligence (added) | 0 | 4 | 2 | 0 | 0 | 0 | 0 | 6 |
-| 13 Platform operations & governance (added) | 4 | 2 | 5 | 3 | 0 | 0 | 0 | 14 |
-| **Total** | **55** | **69** | **82** | **3** | **37** | **17** | **0** | **263** |
+| 13 Platform operations & governance (added) | 5 | 3 | 6 | 3 | 0 | 0 | 0 | 17 |
+| **Total** | **56** | **71** | **86** | **3** | **37** | **17** | **0** | **270** |
 
 ## 2. Per-area status
 
@@ -45,7 +45,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | ID | Feature | Status | Blocker / dependency | Recommended action |
 |---|---|---|---|---|
 | 1.1 | E-mail + password sign-up / sign-in with e-mail confirmation (PER-1) | LIVE_PROVEN (register HUMAN_UI_PROVEN 2026-09-02; role-routes walks 2026-10-12 and 2026-10-17 on the VPS) | Supabase built-in SMTP rate limit (Free plan) | Configure a custom SMTP sender before any growth |
-| 1.2 | Google OAuth | LIVE_PROVEN (register PER-1 HUMAN_UI_PROVEN; before the cutover) | Not re-walked after the domain moved to the VPS | Re-walk once on the VPS; disable unused providers in Supabase or expose them |
+| 1.2 | Google OAuth | PARTIAL (BROKEN 2026-10-17→18: the sign-in return redirected to the server's bind address; fixed #2482, return redirects proven on production 2026-10-18; a full human Google sign-in on the VPS not yet walked) | A human walk with a real Google account (owner) | Owner signs in once with Google; disable unused providers in Supabase or expose them |
 | 1.3 | Password reset | CODE_READY | SMTP rate limit | Walk it once |
 | 1.4 | Onboarding + setup hub | LIVE_PROVEN (`product-completion-2026-10-09`) | — | — |
 | 1.5 | Multi-role identity (decision 0012): worker / company / agency / customer | LIVE_PROVEN (role-routes walk 5/5, 2026-10-12, and PASS on the VPS 2026-10-17) | — | — |
@@ -55,7 +55,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 1.9 | Memberships, invitations, roles (ORG-3) | LIVE_PROVEN (brigade-formation 2026-10-12 and VPS 2026-10-17; agency-chain A-2; learning-practice L-2/L-3) | E-mail off (1.13) | — |
 | 1.10 | Workspace context + switching (ORG-4) | PARTIAL (chat-continuity walk proves isolation, 2026-10-17) | — | Unify the resolvers |
 | 1.11 | Cross-org isolation (ORG-5) | PARTIAL | RED #2477 | Apply #2477 |
-| 1.12 | Universal invitation / referral network (ORG-11) | PARTIAL | Nonstop tokens (owner, both sides) | Re-pair the tokens when the owner approves |
+| 1.12 | Universal invitation / referral network (ORG-11) | PARTIAL (the partner door answers `not_configured` since the VPS move; the partner lost its copy in its own hosting move; an invitee's return link was dropped by the callback defect, fixed #2482) | Nonstop tokens (owner, both sides) | Owner re-pairs one new secret on both sides, then resends the held lead (idempotent) |
 | 1.13 | Invitation / transactional e-mail delivery | DORMANT | Owner chooses a provider + DNS (SPF/DKIM) | Configure a provider (costs 0 € on a free tier) |
 | 1.14 | Staff review notice at invite / sign-up (#2321) | LIVE_PROVEN (staff-review-notice walk 4/4, 2026-10-12) | #2322 | Owner decides #2322 |
 | 1.15 | Organization history before claim + claim of imported people (decision 0020) | PARTIAL | Owner sends the invitations | Owner runs the invitation wave |
@@ -371,6 +371,9 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 13.12 | Executable product constitution (GOV-9) | CODE_READY | — | Refresh the stale rows |
 | 13.13 | Feature-availability catalogue | PARTIAL | — | Re-baseline the catalogue |
 | 13.14 | Owner waivers / landing freeze / product gate | CODE_READY | — | — |
+| 13.15 | Browser compatibility: Safari / iOS < 16.4 and old in-app browsers | LIVE_PROVEN (2026-10-18: old-browser emulation against production — 8 entry pages crashed on load before #2483, 0 errors after; current browsers keep the native constructor; a physical old iPhone not tested) | — | Keep the shim first in `<head>`; re-run the old-browser emulation after large client changes |
+| 13.16 | Browser crash reports (sanitised, logged, not stored) | CODE_READY (#2484) | — | Read `[client-error]` lines in the container log after each release |
+| 13.17 | Environment parity after a hosting move | PARTIAL (2026-10-18 probe: the partner referral secret and the supply-feed secret are absent; payments, AI, owner alerts and voice are off by the minimal VPS configuration) | Owner: which integrations to re-enable | Hosting-move checklist (MASTER-MAP §5, §8) |
 
 ## 3. Documented but not built
 
