@@ -22,8 +22,21 @@
 
 begin;
 
--- 1. A working relationship (can_view_worker minus the employer-visibility-consent branch).
---    A related viewer is never counted against a plan.
+-- 0. ORDER: this file is applied AFTER 20261018160000_worker_identity_split_v1 (it replaces that file's
+--    discovery projection with the counted two-tier version). Refuse otherwise.
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+     where schemaname = 'public' and tablename = 'workers' and policyname = 'workers_select'
+       and qual like '%caller_has_worker_relation_v1%'
+  ) or to_regprocedure('public.list_discoverable_worker_profiles_v1(uuid[])') is null then
+    raise exception 'apply 20261018160000_worker_identity_split_v1 first' using errcode = '55000';
+  end if;
+end $$;
+
+-- 1. A working relationship — byte-identical to 20261018160000 (guard-pinned). A related viewer is
+--    never counted against a plan.
 create or replace function public.caller_has_worker_relation_v1(p_worker_id uuid)
 returns boolean
 language sql
@@ -39,8 +52,16 @@ as $$
        where cw.worker_id = p_worker_id and cw.status = 'active' and c.profile_id = auth.uid()
     )
     or exists (
+      select 1 from public.company_workers cw join public.organizations o on o.legacy_company_id = cw.company_id
+       where cw.worker_id = p_worker_id and cw.status = 'active' and public.manages_organization(o.id)
+    )
+    or exists (
       select 1 from public.agency_workers aw join public.agencies a on a.id = aw.agency_id
        where aw.worker_id = p_worker_id and aw.status = 'active' and a.profile_id = auth.uid()
+    )
+    or exists (
+      select 1 from public.agency_workers aw join public.organizations o on o.legacy_agency_id = aw.agency_id
+       where aw.worker_id = p_worker_id and aw.status = 'active' and public.manages_organization(o.id)
     )
     or exists (
       select 1 from public.company_worker_engagements e
@@ -57,6 +78,12 @@ as $$
       select 1 from public.project_worker_assignments pwa
        where pwa.worker_id = p_worker_id and pwa.status = 'active' and pwa.ended_at is null
          and public.can_manage_project(pwa.project_id)
+    )
+    or exists (
+      select 1 from public.booking_requests b
+       where b.worker_id = p_worker_id and b.status = 'accepted'
+         and (b.owner_id = auth.uid()
+              or (b.organization_id is not null and public.manages_organization(b.organization_id)))
     );
 $$;
 revoke all on function public.caller_has_worker_relation_v1(uuid) from public;
@@ -171,6 +198,45 @@ revoke all on function public.revoke_organization_vip_v1(uuid) from public;
 revoke all on function public.revoke_organization_vip_v1(uuid) from anon;
 grant execute on function public.revoke_organization_vip_v1(uuid) to authenticated;
 
+-- 3c. The plan of an organization for profile views — ONE place for the figures (free 3; live paid
+--     company_pilot: no fixed figure until the owner sets one; owner-granted VIP: its scope).
+create or replace function public.organization_profile_view_plan_v1(p_organization_id uuid)
+returns table (plan text, view_limit integer)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_free_limit constant int := 3;
+  v_paid_limit int := null;          -- owner pricing: no fixed figure yet for the paid plan
+  v_vip jsonb;
+begin
+  select g.scope into v_vip
+    from public.organization_access_grants g
+   where g.organization_id = p_organization_id and g.grant_kind = 'vip' and g.revoked_at is null
+   limit 1;
+  if v_vip is not null then
+    return query select 'vip'::text,
+      case when v_vip ? 'profile_views' and jsonb_typeof(v_vip->'profile_views') = 'number'
+           then (v_vip->>'profile_views')::int else null end;
+  elsif exists (
+    select 1 from public.billing_subscriptions s
+     where s.organization_id = p_organization_id
+       and s.plan_key = 'company_pilot'
+       and s.status in ('active', 'trialing')
+       and s.test_mode = false
+       and coalesce(s.provider_subscription_id, '') not like 'manual\_%'
+  ) then
+    return query select 'paid'::text, v_paid_limit;
+  else
+    return query select 'free'::text, v_free_limit;
+  end if;
+end;
+$$;
+revoke all on function public.organization_profile_view_plan_v1(uuid) from public;
+revoke all on function public.organization_profile_view_plan_v1(uuid) from anon;
+
 -- 4. The gate. The limit is computed HERE from the organization's own state — never passed in.
 create or replace function public.record_worker_profile_view_v1(
   p_organization_id uuid,
@@ -184,12 +250,9 @@ set search_path = public
 as $$
 declare
   uid uuid := auth.uid();
-  v_free_limit constant int := 3;
-  v_paid_limit int := null;          -- owner pricing: no fixed figure yet for the paid plan
   v_limit int;
-  v_plan text := 'free';
+  v_plan text;
   v_used int;
-  v_vip jsonb;
 begin
   if uid is null then
     raise exception 'Not authenticated' using errcode = '42501';
@@ -217,28 +280,8 @@ begin
     return jsonb_build_object('allowed', true, 'counted', false, 'reason', 'already_viewed');
   end if;
 
-  select g.scope into v_vip
-    from public.organization_access_grants g
-   where g.organization_id = p_organization_id and g.grant_kind = 'vip' and g.revoked_at is null
-   limit 1;
-
-  if v_vip is not null then
-    v_plan := 'vip';
-    v_limit := case when v_vip ? 'profile_views' and jsonb_typeof(v_vip->'profile_views') = 'number'
-                    then (v_vip->>'profile_views')::int else null end;
-  elsif exists (
-    select 1 from public.billing_subscriptions s
-     where s.organization_id = p_organization_id
-       and s.plan_key = 'company_pilot'
-       and s.status in ('active', 'trialing')
-       and s.test_mode = false
-       and coalesce(s.provider_subscription_id, '') not like 'manual\_%'
-  ) then
-    v_plan := 'paid';
-    v_limit := v_paid_limit;
-  else
-    v_limit := v_free_limit;
-  end if;
+  select pl.plan, pl.view_limit into v_plan, v_limit
+    from public.organization_profile_view_plan_v1(p_organization_id) pl;
 
   select count(*) into v_used from public.employer_profile_views where organization_id = p_organization_id;
 
@@ -255,6 +298,96 @@ begin
                             'plan', v_plan, 'used', v_used + 1, 'limit', v_limit);
 end;
 $$;
+-- 5. The discovery projection, two-tier (replaces the single-tier version of 20261018160000; same
+--    signature, same audience, same never-identity rule).
+create or replace function public.list_discoverable_worker_profiles_v1(p_worker_ids uuid[])
+returns table (
+  id uuid,
+  experience_years integer,
+  current_location_country text,
+  preferred_countries text[],
+  availability_status text,
+  available_from date,
+  salary_min_eur integer,
+  salary_max_eur integer,
+  preferred_contract_type text,
+  pay_basis_preference text,
+  night_shifts_ok boolean,
+  weekend_shifts_ok boolean,
+  overtime_ok boolean,
+  driving_licence_categories text[],
+  own_vehicle boolean,
+  own_tools boolean,
+  last_active_week date,
+  is_synthetic_fixture boolean
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_unlimited boolean;
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  if p_worker_ids is null or cardinality(p_worker_ids) = 0 then
+    return;
+  end if;
+  if cardinality(p_worker_ids) > 500 then
+    raise exception 'Too many workers requested' using errcode = '22023';
+  end if;
+  if not (public.is_employer() or public.is_admin()) then
+    return;
+  end if;
+  -- THE PLAN LIMIT HOLDS ON THE DATA, not only on a page: the DETAIL fields (pay, start date,
+  -- engagement form, pay basis, shifts, overtime, licence, vehicle, tools) come back only for a
+  -- worker one of the caller's organizations has already OPENED (a counted view, see
+  -- record_worker_profile_view_v1), or when one of them has no fixed view limit (VIP / paid
+  -- without a figure), or for an admin. Everyone else receives the uncounted CARD tier.
+  v_unlimited := public.is_admin() or exists (
+    select 1
+      from (select o.id from public.organizations o where public.manages_organization(o.id)) m
+      cross join lateral public.organization_profile_view_plan_v1(m.id) pl
+     where pl.view_limit is null
+  );
+  return query
+    select w.id, w.experience_years, w.current_location_country, w.preferred_countries,
+           w.availability_status,
+           case when d.unlocked then w.available_from end,
+           case when d.unlocked then w.salary_min_eur end,
+           case when d.unlocked then w.salary_max_eur end,
+           case when d.unlocked then w.preferred_contract_type end,
+           case when d.unlocked then w.pay_basis_preference end,
+           case when d.unlocked then w.night_shifts_ok end,
+           case when d.unlocked then w.weekend_shifts_ok end,
+           case when d.unlocked then w.overtime_ok end,
+           case when d.unlocked then w.driving_licence_categories end,
+           case when d.unlocked then w.own_vehicle end,
+           case when d.unlocked then w.own_tools end,
+           -- a week bucket, never an exact timestamp
+           date_trunc('week', coalesce(w.updated_at, w.created_at))::date,
+           -- QA fixtures by their documented markers (lib/qa/synthetic-fixture.ts); the flag leaves
+           -- the database, the name and headline never do.
+           (coalesce(w.display_name, '') || ' ' || coalesce(w.headline, ''))
+             ~* '(\mQA[-_ ]SYNTHETIC\M|\[E2E\]|\mE2E[-_ ]FIXTURE\M)'
+      from public.workers w
+      cross join lateral (
+        select v_unlimited or exists (
+          select 1 from public.employer_profile_views v
+           where v.worker_id = w.id and public.manages_organization(v.organization_id)
+        ) as unlocked
+      ) d
+     where w.id = any (p_worker_ids)
+       and w.profile_id is not null
+       and public.worker_profile_discoverable(w.profile_id);
+end;
+$$;
+revoke all on function public.list_discoverable_worker_profiles_v1(uuid[]) from public;
+revoke all on function public.list_discoverable_worker_profiles_v1(uuid[]) from anon;
+grant execute on function public.list_discoverable_worker_profiles_v1(uuid[]) to authenticated;
+
 revoke all on function public.record_worker_profile_view_v1(uuid, uuid) from public;
 revoke all on function public.record_worker_profile_view_v1(uuid, uuid) from anon;
 grant execute on function public.record_worker_profile_view_v1(uuid, uuid) to authenticated;
