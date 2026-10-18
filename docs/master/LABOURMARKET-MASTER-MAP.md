@@ -118,6 +118,8 @@ flowchart TD
 | Production proof | `prod-qa-walk.yml`: synthetic cast walks real production (budget 12 runs / 24 h) |
 | Scheduled jobs | VPS cron (digest, job alerts, handoffs) + GitHub cadences (vacancy feeds, retention, health probe) |
 | Mobile | `android.yml`, `ios.yml`, `mobile.yml` (builds and emulator journeys; store signing is owner-only) |
+| Browser crashes | Inline `<head>` reporter + error boundaries → `POST /api/client-errors` → one sanitised `[client-error]` line in the container log; nothing stored (#2484) |
+| Hosting move | Before and after any host change: every auth redirect names the public origin (no bind or internal host), and every partner door answers `unauthorized`, not `not_configured`, to a credential-free probe (§8) |
 
 ## 6. Single points of failure (summary)
 
@@ -132,10 +134,22 @@ P0/P1 and the private annex.
 · `lib/capabilities/registry.ts` · `lib/billing/entitlements*` · `lib/journal/professional-experience.ts` ·
 `lib/company/active-organization.ts` / `getWorkspaceContext` · `lib/privacy/consent-definitions.ts` (hash pins)
 · `lib/market/match-subject.ts` · `components/app/conversation/chat/conversation-chat.tsx` (≈8.3k lines) ·
-`lib/i18n/*` · `middleware.ts` · `app/[locale]/dashboard/layout.tsx` (role gates) · migration guards with
-pinned counts. Every one of them is covered by guards; change them only with the canonical §12 review.
+`lib/i18n/*` · `middleware.ts` · `app/[locale]/dashboard/layout.tsx` (role gates) · `app/[locale]/auth/callback`
+(every sign-in return) · the first `<head>` scripts in `app/[locale]/layout.tsx` (regex shim, crash reporter) ·
+migration guards with pinned counts. Every one of them is covered by guards; change them only with the canonical §12 review.
 
-## 8. How to keep this map true
+## 8. Incident log — defects, causes, prevention
+
+Public-safe summaries; evidence stays in the private annex. Newest first.
+
+| Date | Defect (who it hit) | Root cause | Fix | Prevention |
+|---|---|---|---|---|
+| 2026-10-18 | After Google sign-in, e-mail confirmation, password reset or sign-out a person was sent to an unreachable address; an invitee also lost the invitation link (every new user since the VPS move) | The sign-in callback and logout built redirects from the request URL, which behind the VPS proxy is the container's bind address | #2482 — both use `requestPublicOrigin` | Guard `redirect-public-origin`: no route builds an origin from the request URL; walks sign in by password and never covered this path → HTTP redirect probe after every host change |
+| 2026-10-18 | Home, sign-up and sign-in crashed on load — "Application error: a client-side exception" — on Safari / iOS < 16.4 and old in-app browsers | Chat text understanding builds regular expressions with lookbehind while a module loads; those browsers cannot compile lookbehind | #2483 — first-in-`<head>` compatibility shim (no-op on current browsers) | Shim test pins the order; old-browser emulation run against production; crash reports (#2484) make a recurrence visible |
+| 2026-10-18 | Partner referrals from Nonstop refused (lead delivery `NOT_CONFIGURED`) | The shared referral secret lived only in the previous host's environment; the partner also changed hosting and lost its copy | Owner re-pairs one new secret on both sides, then the same lead is resent (idempotent) | Hosting-move checklist (§5): probe every partner door; the minimal VPS environment is listed in the private annex |
+| 2026-10-18 | Browser crashes were invisible to the team | No client error reporting existed | #2484 — sanitised crash reports, logged not stored | Read `[client-error]` lines in the container log after each release |
+
+## 9. How to keep this map true
 
 1. When a capability changes state, update `apps/web/lib/product-gate/capability-register.ts` and the
    snapshot line at the top of this file in the same PR (the sync guard enforces it).
