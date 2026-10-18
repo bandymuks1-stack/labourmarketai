@@ -23,12 +23,17 @@
  */
 import "server-only";
 import { randomUUID } from "node:crypto";
+import { readRequestHost } from "@/lib/config/request-host";
 import { getAiRuntimeConfig, getAiProviderStates } from "./runtime/config";
 import {
   auditDispositionFor,
   countAiRunsTodayBestEffort,
   persistAiRunAudit,
 } from "./runtime/audit-store";
+import {
+  countOrgAiRunsTodayBestEffort,
+  resolveOrgDailyRunCap,
+} from "./runtime/org-run-cap";
 import { persistUsageCostEvent } from "@/lib/usage/usage-cost-store";
 import { resolveAnalyticsAttribution } from "@/lib/telemetry/analytics-attribution";
 import { getPromptEntry } from "./registry/registry";
@@ -41,7 +46,10 @@ export async function runAiAgent<T = unknown>(
   opts: RunAgentOptions,
 ): Promise<AiAgentOutcome<T>> {
   const entry = getPromptEntry(agent);
-  const cfg = getAiRuntimeConfig();
+  // The request's Host (null outside a request) is the second production
+  // evidence for the local-runtime host policy; read once, handed down.
+  const ctx = { requestHost: await readRequestHost() };
+  const cfg = getAiRuntimeConfig(ctx);
 
   // Persisted daily-run counter (live runs only; best-effort — see docblock).
   let runsToday = opts.runsToday;
@@ -50,13 +58,35 @@ export async function runAiAgent<T = unknown>(
     if (counted !== null) runsToday = counted;
   }
 
+  // Per-organization vendor-run cap (live runs only; fail-open, see
+  // runtime/org-run-cap.ts). Personal / cron runs have no organization and are
+  // governed by the global budget alone.
+  let orgRunsToday = opts.orgRunsToday;
+  let orgDailyRunCap = opts.orgDailyRunCap;
+  if (orgRunsToday === undefined && cfg.state === "live") {
+    try {
+      const { organizationId } = await resolveAnalyticsAttribution();
+      if (organizationId) {
+        const counted = await countOrgAiRunsTodayBestEffort(organizationId);
+        if (counted !== null) {
+          orgRunsToday = counted;
+          orgDailyRunCap = orgDailyRunCap ?? resolveOrgDailyRunCap();
+        }
+      }
+    } catch {
+      // no request context — honest skip
+    }
+  }
+
   // The server boundary is the only place that can observe what the operator
   // configured, so it is the only place that can hand the core a chain. Callers
   // that pass their own states (tests, evals) keep them.
   const outcome = await runAiAgentCore<T>(entry, input, cfg, {
     ...opts,
     runsToday,
-    providerStates: opts.providerStates ?? getAiProviderStates(),
+    orgRunsToday,
+    orgDailyRunCap,
+    providerStates: opts.providerStates ?? getAiProviderStates(ctx),
   });
 
   // Append-only audit trail for REAL runs — never blocks the outcome.

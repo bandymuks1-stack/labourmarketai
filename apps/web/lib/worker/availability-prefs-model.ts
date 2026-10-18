@@ -109,12 +109,13 @@ export function classifyPrefsError(
   return "error";
 }
 
-// ── v2 preference pack (draft migration 20260711270000, PR #721) ────────────
-// The 7 additive nullable columns + save_worker_availability_prefs_v2 RPC are
-// DRAFT and human-gated — NOT applied yet. These literals mirror the draft
-// SQL's CHECK constraints EXACTLY so the UI ships repo-safe today and lights
-// up unchanged once the owner applies the migration. Until then the read path
-// answers 42703 (undefined_column) and the RPC 42883/PGRST202 — both degrade
+// ── v2 preference pack (migration 20260711270000, PR #721) ──────────────────
+// The 7 additive nullable columns and save_worker_availability_prefs_v2 are
+// APPLIED: all seven are present on `workers` and the RPC exists in
+// production (verified 2026-09-14). These literals mirror the SQL's CHECK
+// constraints EXACTLY, so a database WITHOUT the pack — a fresh or local one,
+// not production — answers 42703 (undefined_column) on the read path and
+// 42883/PGRST202 on the RPC; both degrade
 // to an honest "not enabled" state, never a crash or a fake save.
 
 /** Mirrors the draft CHECK on workers.pay_basis_preference (PR #721). */

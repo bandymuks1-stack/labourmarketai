@@ -3,17 +3,20 @@ import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Owner-smoke follow-up (PR #490 pre-merge): the market-map page must LEAD with
- * the canonical REAL provider map (`MarketMapBase` → `MarketMapLive`, OSM tiles
- * via Leaflet), not the pseudo-map world overview, the signal board, or an
- * SVG/coordinate-only locator. The secondary surfaces must render BELOW it, and
- * the page must carry no stale external-provider copy.
+ * ONE CANONICAL MAP (owner target). The market-map page mounts exactly ONE
+ * interactive map — the canonical `<MarketMap>` through `<WorldDiscovery>`
+ * (OSM tiles via the ONE Leaflet engine). Location + radius are controls OF
+ * that map; public vacancies and the owner company's territory are LAYERS of
+ * it. History: this guard used to pin the opposite structure (a separate
+ * `MarketMapBase`/`MarketMapLive` picker map leading the page, then the signal
+ * board and the world-overview diagram below it); that structure is the
+ * regression the owner reported, so it is deliberately replaced here.
  */
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const page = read("app/[locale]/dashboard/market-map/page.tsx");
-const base = read("components/app/market-map-base.tsx");
-const live = read("components/app/market-map/location-map.tsx");
+const world = read("components/app/market-map/world-discovery.tsx");
+const map = read("components/app/market-map/market-map.tsx");
 
 function idx(src: string, needle: string): number {
   const i = src.indexOf(needle);
@@ -21,21 +24,31 @@ function idx(src: string, needle: string): number {
   return i;
 }
 
-describe("market map page — canonical coordinate map leads the flow", () => {
-  it("renders <MarketMapBase /> before the signal board and world overview", () => {
-    const baseAt = idx(page, "<MarketMapBase");
-    const shellAt = idx(page, "<MarketMapShell");
-    const worldAt = idx(page, "<LabourMarketWorldMap");
-    expect(baseAt).toBeLessThan(shellAt);
-    expect(baseAt).toBeLessThan(worldAt);
+describe("market map page — ONE canonical map leads the flow", () => {
+  it("mounts exactly one <WorldDiscovery> and no second <MarketMap>", () => {
+    expect([...page.matchAll(/<WorldDiscovery\b/g)]).toHaveLength(1);
+    expect(page).not.toMatch(/<MarketMap\b/);
+    expect(page).not.toMatch(/<MarketMapBase\b|<MarketMapLive\b|<LocationMap\b/);
   });
 
-  it("the pseudo-map world overview no longer leads (is last of the three)", () => {
-    const baseAt = idx(page, "<MarketMapBase");
-    const shellAt = idx(page, "<MarketMapShell");
-    const worldAt = idx(page, "<LabourMarketWorldMap");
-    expect(worldAt).toBeGreaterThan(baseAt);
-    expect(worldAt).toBeGreaterThan(shellAt);
+  it("the map precedes the collapsed management tools", () => {
+    expect(page).toMatch(/data-testid="market-map-page-header"/);
+    const mapAt = idx(page, "<WorldDiscovery");
+    const detailsAt = idx(page, 'data-testid="market-map-advanced"');
+    expect(mapAt).toBeLessThan(detailsAt);
+    expect(page).toMatch(/<details[^>]*market-map-advanced/);
+  });
+
+  it("carries none of the documentation / catalogue blocks the owner removed", () => {
+    for (const gone of [
+      "<MarketMapShell",
+      "<LabourMarketWorldMap",
+      "<MapLayersLegend",
+      "<MarketMapEntityLayers",
+      "<FeatureNote",
+    ]) {
+      expect(page, gone).not.toContain(gone);
+    }
   });
 
   it("has no stale external map-provider copy on the page", () => {
@@ -43,38 +56,29 @@ describe("market map page — canonical coordinate map leads the flow", () => {
     expect(page).not.toMatch(/mapbox/i);
   });
 
-  it("compact control center: secondary surfaces are collapsed behind <details>", () => {
-    // The page must lead with the title + real map; the signal board, readiness,
-    // capture and world overview must sit inside the collapsed advanced section.
-    expect(page).toMatch(/data-testid="market-map-page-header"/);
-    const baseAt = idx(page, "<MarketMapBase");
-    const detailsAt = idx(page, 'data-testid="market-map-advanced"');
-    const shellAt = idx(page, "<MarketMapShell");
-    const worldAt = idx(page, "<LabourMarketWorldMap");
-    // Map first, then the collapsed <details>, then the secondary surfaces.
-    expect(baseAt).toBeLessThan(detailsAt);
-    expect(detailsAt).toBeLessThan(shellAt);
-    expect(detailsAt).toBeLessThan(worldAt);
-    expect(page).toMatch(/<details[^>]*market-map-advanced/);
-  });
-
   it("the canonical map is the REAL provider map, not an SVG/coordinate-only locator", () => {
-    expect(base).toMatch(/<MarketMapLive\b/);
-    expect(base).not.toMatch(/<LocationMap\b/);
-    // The real map renders OSM tiles via the ONE Leaflet engine (W3 row 28).
-    expect(live).toMatch(/from "leaflet"/);
-    expect(live).toMatch(/mountLeafletMap\(/);
+    expect(map).toMatch(/from "leaflet"/);
+    expect(map).toMatch(/mountLeafletMap\(/);
     expect(read("components/app/market-map/leaflet-engine.ts")).toMatch(
       /tile\.openstreetmap\.org/,
     );
-    // The superseded SVG locator + its projection are gone.
+    // The superseded SVG locator, its projection and the second Leaflet
+    // instance (the standalone own-location picker map) are gone.
     expect(existsSync(join(ROOT, "components/app/location-map.tsx"))).toBe(false);
     expect(existsSync(join(ROOT, "lib/location/map-projection.ts"))).toBe(false);
+    expect(existsSync(join(ROOT, "components/app/market-map/location-map.tsx"))).toBe(false);
+    expect(existsSync(join(ROOT, "components/app/market-map-base.tsx"))).toBe(false);
   });
 
-  it("the real map container is mobile-safe (full width, no fixed px width → no overflow)", () => {
-    expect(live).toMatch(/data-testid="market-map-live"/);
-    expect(live).toMatch(/w-full/);
-    expect(live).toMatch(/overflow-hidden/);
+  it("location + radius are controls OF the one map, not a map of their own", () => {
+    expect(world).toMatch(/<MapLocationControls\b/);
+    expect(world).toMatch(/own=\{/);
+    expect(map).toMatch(/own\?: OwnLocationOverlay/);
+  });
+
+  it("the map container is mobile-safe (full width, hidden overflow → no horizontal scroll)", () => {
+    expect(map).toMatch(/data-testid="market-map"/);
+    expect(map).toMatch(/overflow-hidden/);
+    expect(map).toMatch(/size-full/);
   });
 });

@@ -99,6 +99,23 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "Same NULLed title/attribution boundary as the search function since 20260824120000. No JobPosting JSON-LD is emitted on the page, because that schema requires hiringOrganization and jobLocation, which are restricted fields.",
   },
   {
+    name: "public_plans_v1",
+    identityArgs: "",
+    mutates: false,
+    publicCaller:
+      "Public /pricing page (and the signed-in organisation account). Renders the price FIGURE from plans.price_eur_monthly — the one home of the figure (owner-approved 2026-09-05: FREE 0, ORGANIZATION 99).",
+    authorization:
+      "Returns the catalogue columns only — slug, name_lt, name_en, price_eur_monthly — for active plans. No profile, organisation, subscription or customer data is reachable through it.",
+    inputValidation:
+      "No parameters, so there is no input surface.",
+    abuseControls:
+      "Read-only; returns at most the handful of active catalogue rows. Nothing to enumerate beyond the public price list.",
+    definerJustification:
+      "`plans` has no anon/authenticated table privilege since the 2026-07-22 revoke pass (RLS plans_select is true, but the GRANT is absent), so the public page could not render a price. DEFINER exposes the catalogue without widening the table grant.",
+    residualRisk:
+      "Discloses the published price list, which is the purpose of the page.",
+  },
+  {
     name: "count_public_vacancies_v1",
     identityArgs: "",
     mutates: false,
@@ -193,7 +210,7 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
     authorization:
       "None by design — anonymous submission is the feature. Containment replaces authorization: it can only INSERT into company_need_public_intakes, always with status 'new', and it reads nothing. That table has RLS enabled with ZERO policies and grants nothing to anon or authenticated (only `service_role=r`), so a submitter cannot read back their own row or anyone else's.",
     inputValidation:
-      "company_name required and <=200 chars; description required and <=8000; country must match ^[A-Z]{2}$ AND appear in the ten-country allowlist; email must match a single-@ pattern and be <=254; headcount clamped to [1,100000]; urgency/accommodation/engagement_type/locale normalized to fixed enums rather than rejected; nine further per-field length ceilings each raising errcode 22023.",
+      "company_name required and <=200 chars; description required and <=8000; country must match ^[A-Z]{2}$ AND exist in public.countries (the full ISO registry since 20260922120000; the former ten-country market list was replaced by 20260922130000 under the global-access rule); email must match a single-@ pattern and be <=254; headcount clamped to [1,100000]; urgency/accommodation/engagement_type/locale normalized to fixed enums rather than rejected; nine further per-field length ceilings each raising errcode 22023.",
     abuseControls:
       "DB-enforced throttle inside the function (anon_write_bounds_v1, 20260829130000): a platform-wide ceiling of 30 intakes per hour, a per-contact-email ceiling of 3 per 24 h, and an exact-duplicate check (same company name + description + contact email within 24 h returns the earlier id and writes nothing). Every per-field length ceiling is mirrored by a table CHECK. Ceilings raise errcode P0004, which the app maps to its `rate_limited` state. Still NO per-IP throttle at the database — the function never sees an address and recording one would be new PII — and NO captcha; the app-side in-memory window (3 per 15 min per client key, per instance) remains the first brake.",
     definerJustification:

@@ -9,6 +9,11 @@ import { cn } from "@/lib/utils";
  * Pure anchor links (`<a href="#id">`) — no JS, no client bundle. The caller
  * adds matching `id` + `scroll-mt-*` to each target section. Presentational
  * only: labels arrive already-localized.
+ *
+ * NOT on the worker's home. ŠIANDIEN (`/dashboard`, worker mobile IA
+ * 2026-09-13 §4) carries its navigation in the 3-tab bar and the station
+ * links; a second nav strip there is card soup. The long journal / profile
+ * pages keep using this. Pinned by `lib/guards/worker-nav-human-labels.test.ts`.
  */
 export type QuickNavItem = {
   /** In-page anchor target, e.g. "#mano-cv-identity". */

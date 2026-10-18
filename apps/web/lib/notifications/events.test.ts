@@ -30,12 +30,14 @@ interface Recorded {
 function fakeDb(options: {
   errorCode?: string | null;
   rows?: Record<string, unknown>[];
+  /** What the head count of unread rows answers (`count`), when given. */
+  unreadTotal?: number;
 } = {}) {
   const ops: Recorded[] = [];
   const result =
     options.errorCode != null
       ? { data: null, error: { code: options.errorCode } }
-      : { data: options.rows ?? [], error: null };
+      : { data: options.rows ?? [], error: null, count: options.unreadTotal };
   const chain: Record<string, unknown> = {};
   const self = () => chain;
   chain.select = (...args: unknown[]) => {
@@ -168,6 +170,35 @@ describe("readMyNotificationEvents", () => {
     expect(feed.events[1].metadata).toEqual({ country: "SE" });
   });
 
+  it("unread is the REAL total, not the unread rows of the loaded window (F7)", async () => {
+    const { client } = fakeDb({
+      rows: [
+        {
+          id: "a",
+          event_type: "absence_approved",
+          entity_type: "worker_absence",
+          entity_id: "e1",
+          created_at: "2026-08-10T07:00:00Z",
+          read_at: null,
+          metadata: {},
+        },
+      ],
+      unreadTotal: 57,
+    });
+    const feed = await readMyNotificationEvents(client);
+    if (feed.kind !== "ready") throw new Error("expected ready");
+    // pre-fix: 1 (capped to the 20-row window)
+    expect(feed.unreadCount).toBe(57);
+    expect(feed.unreadCountIsWindowOnly).toBeUndefined();
+  });
+
+  it("without an exact count the window figure is flagged as a lower bound", async () => {
+    const { client } = fakeDb({ rows: [] });
+    const feed = await readMyNotificationEvents(client);
+    if (feed.kind !== "ready") throw new Error("expected ready");
+    expect(feed.unreadCountIsWindowOnly).toBe(true);
+  });
+
   it("an absent store is feature_unavailable — the bell renders exactly the pre-migration product", async () => {
     const { client } = fakeDb({ errorCode: "PGRST205" });
     expect(await readMyNotificationEvents(client)).toEqual({
@@ -253,6 +284,16 @@ describe("NOTIFICATION_EVENT_TYPES (runtime list)", () => {
     expect(NOTIFICATION_EVENT_TYPES).toContain("booking_proposed");
     expect(NOTIFICATION_EVENT_TYPES).toContain("weekly_digest");
     expect(NOTIFICATION_EVENT_TYPES).toContain("demand_interest_reviewed");
-    expect(NOTIFICATION_EVENT_TYPES.length).toBe(20);
+    // v7 (DEM-8): the saved-search alert.
+    expect(NOTIFICATION_EVENT_TYPES).toContain("saved_search_match");
+    // v8 (universal invitation/referral network): the inviter learns that
+    // somebody accepted.
+    expect(NOTIFICATION_EVENT_TYPES).toContain("invitation_accepted");
+    // v10: a new message in a thread, and a journal review decision.
+    expect(NOTIFICATION_EVENT_TYPES).toContain("message_received");
+    expect(NOTIFICATION_EVENT_TYPES).toContain("journal_review_decided");
+    // v11: an organization's offer to link its recorded history to the recipient.
+    expect(NOTIFICATION_EVENT_TYPES).toContain("history_link_offered");
+    expect(NOTIFICATION_EVENT_TYPES.length).toBe(26);
   });
 });

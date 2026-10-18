@@ -17,6 +17,8 @@ import { ASSET_CONDITIONS, ASSET_TYPES } from "@/lib/assets/assets-model";
 const RPC_NOT_FOUND = "42883";
 const UNDEFINED_COLUMN = "42703";
 const RELATION_NOT_FOUND = "42P01";
+/** The one-open-assignment index from 20260914120000 (MKT-3). */
+const ONE_OPEN_ASSIGNMENT_INDEX = "asset_assignments_one_open_per_asset";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
@@ -27,7 +29,15 @@ export type AssetActionResult =
   | { ok: true }
   | {
       ok: false;
-      code: "needs_migration" | "invalid" | "auth" | "not_authorized" | "error";
+      code:
+        | "needs_migration"
+        | "invalid"
+        | "auth"
+        | "not_authorized"
+        | "already_issued"
+        | "not_issuable"
+        | "not_found"
+        | "error";
       message?: string;
     };
 
@@ -37,6 +47,17 @@ function mapError(error: { code?: string; message?: string }): AssetActionResult
   }
   const msg = (error.message ?? "").toLowerCase();
   if (error.code === "42501" || msg.includes("not authorized")) return { ok: false, code: "not_authorized" };
+  // MKT-3 refusals are DECISIONS, not failures. Reporting "something went
+  // wrong" for "this drill is already in someone else's hands" would tell a
+  // manager to retry the one thing that must not succeed, and would bury the
+  // only fact they need. The unique index is checked by name because it is the
+  // only 23505 these RPCs can raise, and because a bare code would also
+  // swallow a future constraint that means something else entirely.
+  if (msg.includes("already issued") || msg.includes(ONE_OPEN_ASSIGNMENT_INDEX)) {
+    return { ok: false, code: "already_issued" };
+  }
+  if (msg.includes("not issuable")) return { ok: false, code: "not_issuable" };
+  if (msg.includes("not found")) return { ok: false, code: "not_found" };
   if (msg.includes("required") || msg.includes("invalid") || msg.includes("only an") || msg.includes("only the")) {
     return { ok: false, code: "invalid" };
   }

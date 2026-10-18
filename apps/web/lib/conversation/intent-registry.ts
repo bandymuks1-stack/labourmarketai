@@ -42,6 +42,7 @@ export type IntentDomain =
   // §9 chat-first coverage — domains that existed in the product but had no
   // sentence that could reach them.
   | "documents"
+  | "network"
   | "market"
   | "activity";
 
@@ -61,8 +62,19 @@ export type IntentAccess = "read" | "write" | "route" | "blocked";
  *  share one handler (one question, one engine — never two stacks). */
 export type IntentHandlerId =
   | "findWork"
+  | "offerCapacity"
+  | "professionStatement"
+  | "availabilityStatement"
+  | "payStatement"
+  | "languageStatement"
+  | "skillStatement"
+  | "savedOpportunities"
+  | "openTasks"
+  | "correctWork"
+  | "currentWork"
   | "skillGap"
   | "recentJournal"
+  | "workIntelligence"
   | "figures"
   | "openProject"
   | "projectsList"
@@ -84,9 +96,15 @@ export type IntentHandlerId =
   | "logWork"
   | "needWorkers"
   | "needService"
+  | "findPartners"
+  | "productHelp"
+  | "openConversation"
+  | "newJobs"
   | "offerValue"
   | "companyOverview"
   | "createOrganization"
+  // Owner program 2026-09-23: rename the ACTIVE organization by sentence.
+  | "renameOrganization"
   | "lmc"
   | "adminApprovals"
   | "adminRequests"
@@ -97,10 +115,14 @@ export type IntentHandlerId =
   | "documents"
   | "marketMap"
   | "activityCentre"
+  | "networkPeople"
   | "reminderBlocked"
   | "translateBlocked"
   | "messages"
+  | "invitations"
   | "writeEmployer"
+  // Launch completion 2026-09-20: accept what is waiting, by sentence.
+  | "acceptOffer"
   // Agency (real recruiter pilot, 2026-09-04) — the canonical bridge actions,
   // reachable by sentence; student / institution route handlers.
   | "inviteClient"
@@ -110,7 +132,42 @@ export type IntentHandlerId =
   | "proposalStatus"
   | "learningCompass"
   | "inviteStudent"
-  | "programmes";
+  | "programmes"
+  | "createProject"
+  | "clientOffers"
+  | "clientBridge"
+  | "addDocument"
+  | "cvExport"
+  // The other two halves of the CV (owner window 11 §5/§30): looking at the
+  // one that exists, and the question asked when the sentence does not say
+  // which of the five CV actions is meant.
+  | "cvView"
+  | "cvChoose"
+  // The photo shown back (issue #1689, defect G): a read over the ONE
+  // personal-gallery projection, embedded in the thread.
+  | "evidencePhotos"
+  | "whatChanged"
+  /**
+   * "Ką galiu padaryti šioje paskyroje?" — the capability question.
+   *
+   * This handler is a SEAM, not an answer. Everything a person hears is
+   * derived at ask time from the active context and the workspace's real
+   * state (`lib/conversation/capability-answer.ts`); nothing about the
+   * outcomes, their order or their wording is decided here. See the router
+   * entry for why the vocabulary needs an id at all.
+   */
+  | "capabilities"
+  | "addTask"
+  | "whoAvailable"
+  | "stageStatus"
+  | "taskStatus"
+  | "projectRisk"
+  | "projectReadiness"
+  | "confirmWork"
+  | "whoVerifiesWork"
+  | "moveWorker"
+  // "Kas mato mano profilį?" — the discoverability consent, state first.
+  | "employerVisibility";
 
 export type IntentDescriptor = {
   domain: IntentDomain;
@@ -134,6 +191,15 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   opportunities: { domain: "matching", access: "read", handler: "findWork", ownTyping: true },
   "skill-gap": { domain: "profile", access: "read", handler: "skillGap", ownTyping: true },
   "journal-recent": { domain: "journal", access: "read", handler: "recentJournal", ownTyping: true },
+  // Work intelligence by sentence (issue #1689, owner lines 2–7): ONE
+  // handler over the ONE work-in-numbers model; the intent names the facet.
+  "journal-skill": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  "journal-skills-top": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  "journal-activities-top": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  "journal-confirmed": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
+  // Owner line 8 — the growth reading over the SAME model: a fact block and
+  // a block said to be derived; never a score.
+  "journal-growth": { domain: "journal", access: "read", handler: "workIntelligence", ownTyping: true },
   figures: { domain: "journal", access: "read", handler: "figures", ownTyping: true },
   "open-project": { domain: "project", access: "read", handler: "openProject", ownTyping: true },
   // G8: the chip surfaces by SENTENCE — each routes to the SAME component
@@ -143,6 +209,10 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   candidates: { domain: "matching", access: "read", handler: "employerCandidates", ownTyping: true },
   "find-workers": { domain: "matching", access: "read", handler: "findWorkers", ownTyping: true },
   context: { domain: "context", access: "read", handler: "contextReadback", ownTyping: true },
+  // "What do you know about me" (`context`) answers with STATE. This answers
+  // with what the person can ACHIEVE from where they stand — a different
+  // question, and merging them would collapse a real distinction.
+  capabilities: { domain: "context", access: "read", handler: "capabilities", ownTyping: true },
   // Routed by IDENTITY inside the handler; the ambiguous dual-role case is
   // ASKED, never guessed (guard: interest-inbox-asks-not-guesses).
   "interest-inbox": { domain: "matching", access: "read", handler: "interestInbox", ownTyping: true },
@@ -163,17 +233,78 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   // ── synchronous answers inside the thread's typing tick ──────────────────
   cv: { domain: "cv", access: "read", handler: "cvChip", ownTyping: false },
   offers: { domain: "matching", access: "read", handler: "offersChip", ownTyping: false },
+  // ACCEPT BY SENTENCE (launch completion 2026-09-20, GREEN_COMPLETE).
+  // `write` because it opens the ONE existing accept card — the proposed
+  // booking offer or the pending invitation — whose button carries the
+  // strong-tier confirmation; the sentence itself never accepts. With
+  // nothing or several waiting it shows the list and asks which one.
+  "accept-offer": { domain: "matching", access: "write", handler: "acceptOffer", ownTyping: true },
   // Opens the confirm-gated journal write flow — the intent itself persists
   // nothing; the flow's explicit save does.
   "log-work": { domain: "journal", access: "write", handler: "logWork", ownTyping: false },
   // Opens the canonical demand-intake form (identity-gated in the handler).
   "need-workers": { domain: "company", access: "write", handler: "needWorkers", ownTyping: false },
   "need-service": { domain: "value", access: "route", handler: "needService", ownTyping: false },
+  // "Noriu rasti partnerių savo verslui" — a BUSINESS-side market question,
+  // never a job search. Route-class: it hands over chips to the marketplace
+  // surfaces that already exist (and, from the personal space, asks which
+  // company the person means) — it writes nothing and builds no second
+  // marketplace.
+  // "Kaip pridėti žmogų?" / "Kur mano valandos?" - HOW to use the product,
+  // answered in words with the chip to the surface that does it. Reads the
+  // topic from the sentence; writes nothing.
+  // "Parašyk Jonui" / "atidaryk pokalbį su Jonu" - the chat resolves WHO and
+  // opens the ONE conversation (Messages); it sends no message. May create the
+  // empty 1:1 thread through the §8.1 gate, so it is classed as a route (the gated door itself lives in the conversation system).
+  "open-conversation": { domain: "communication", access: "route", handler: "openConversation", ownTyping: false },
+  // "Kokių naujų darbų man atsirado?" - the new ads over the ONE job-alert
+  // matching; a read, writes nothing.
+  "new-jobs": { domain: "matching", access: "read", handler: "newJobs", ownTyping: true },
+  "product-help": { domain: "context", access: "read", handler: "productHelp", ownTyping: false },
+  "find-partners": { domain: "company", access: "route", handler: "findPartners", ownTyping: false },
   // V9/V10: reads the statement, runs channel discovery, renders honest
   // options — state only, nothing persisted.
   "offer-value": { domain: "value", access: "read", handler: "offerValue", ownTyping: false },
+  // "esu buhalteris" / "dirbau projektų vadovu 5 metus" — the person names
+  // their profession or a past job. Reads the sentence, offers the doors
+  // that already exist (profile, work history, the board); persists nothing.
+  "profession-statement": { domain: "profile", access: "read", handler: "professionStatement", ownTyping: false },
+  // "galiu dirbti nuo spalio 1 d." — the person states WHEN they can work.
+  // Opens the ONE work-card form (`worker.save-work-card`) with the parsed
+  // date in it; the write stays behind the form's own review.
+  availability: { domain: "profile", access: "write", handler: "availabilityStatement", ownTyping: false },
+  // "mano atlyginimo lūkestis nuo 2500 iki 3500" — the person states their
+  // pay expectation. Opens the SAME work-card form with the figures in it;
+  // the write stays behind the form's own review (2026-09-29).
+  "pay-statement": { domain: "profile", access: "write", handler: "payStatement", ownTyping: false },
+  // "kalbu angliškai ir rusiškai" — the ONE language form per stated
+  // language, prefilled; the form's save is the write (2026-09-29).
+  "language-statement": { domain: "profile", access: "write", handler: "languageStatement", ownTyping: false },
+  // "išmokau skaityti brėžinius" — the person's words offered as a skill
+  // claim; an explicit chip saves it through the profile's path (2026-09-29).
+  "skill-statement": { domain: "profile", access: "write", handler: "skillStatement", ownTyping: false },
+  // "parodyk išsaugotus darbus" — the saved list the opportunities page
+  // renders, from the same board read, with doors back into it (2026-09-29).
+  "saved-opportunities": { domain: "matching", access: "read", handler: "savedOpportunities", ownTyping: true },
+  // "kokios užduotys projekte X?" — the open tasks (the person's and, for a
+  // company, its projects'), one project when the sentence names it (2026-09-29).
+  "open-tasks": { domain: "project", access: "read", handler: "openTasks", ownTyping: true },
+  // "ne 5, o 6 valandas" / "tai buvo vakar" — names the newest entry and hands
+  // the person to the canonical supersede editor for it (a link chip); the
+  // sentence writes nothing (2026-09-29).
+  "correct-work": { domain: "journal", access: "read", handler: "correctWork", ownTyping: true },
+  // "Kur dabar dirbu?" — the person's active work contexts and the ended
+  // ones by name, from engagement_contexts (2026-09-29).
+  "current-work": { domain: "context", access: "read", handler: "currentWork", ownTyping: true },
   "company-overview": { domain: "company", access: "route", handler: "companyOverview", ownTyping: false },
   "create-organization": { domain: "company", access: "route", handler: "createOrganization", ownTyping: false },
+  // RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23). `write`: it
+  // opens the ONE confirm form over `company.rename-organization` (important
+  // tier, one-time token bound to the active workspace), prefilled with the
+  // name the sentence carried. The sentence itself renames nothing. Its own
+  // typing cue: it first asks the server whether THIS workspace can be
+  // renamed by THIS person, so a refusal is said before any form appears.
+  "rename-organization": { domain: "company", access: "write", handler: "renameOrganization", ownTyping: true },
   lmc: { domain: "money", access: "route", handler: "lmc", ownTyping: false },
   "admin-approvals": { domain: "admin", access: "route", handler: "adminApprovals", ownTyping: false },
   "admin-requests": { domain: "admin", access: "route", handler: "adminRequests", ownTyping: false },
@@ -191,7 +322,13 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   documents: { domain: "documents", access: "route", handler: "documents", ownTyping: false },
   "market-map": { domain: "market", access: "route", handler: "marketMap", ownTyping: false },
   activity: { domain: "activity", access: "route", handler: "activityCentre", ownTyping: false },
+  // "Parodyk mano komandą" (owner P0 2026-09-22 §5). The people a person
+  // works with — /dashboard/network, the EXISTING relationships surface the
+  // primary nav already carries. A route, not a new read: the chat opens the
+  // canonical page it always had a chip for.
+  "my-team": { domain: "network", access: "route", handler: "networkPeople", ownTyping: false },
   "messages-view": { domain: "communication", access: "read", handler: "messages", ownTyping: false },
+  invitations: { domain: "communication", access: "read", handler: "invitations", ownTyping: false },
 
   // ── AGENCY (real recruiter pilot, 2026-09-04) ─────────────────────────────
   // The three writes open the ONE inline form over the canonical dispatcher
@@ -214,13 +351,92 @@ export const INTENT_REGISTRY: Readonly<Record<RoutedIntent, IntentDescriptor>> =
   "learning-compass": { domain: "profile", access: "read", handler: "learningCompass", ownTyping: true },
   "invite-student": { domain: "company", access: "write", handler: "inviteStudent", ownTyping: false },
   programmes: { domain: "company", access: "write", handler: "programmes", ownTyping: true },
+  // F2 — the SITE as a project object by sentence ("sukurk projektą
+  // Roterdame"): the ONE inline form over `company.create-project`, the
+  // canonical `createProjectAction` behind it. Company identity only.
+  "create-project": { domain: "project", access: "write", handler: "createProject", ownTyping: false },
+  // The CLIENT's side of the agency bridge: the offers made on the company's
+  // own demands, decided in the chat (accept → canonical booking proposed).
+  "agency-offers": { domain: "company", access: "read", handler: "clientOffers", ownTyping: true },
+  // The CLIENT's other two bridge edges (2026-09-19): pending agency
+  // invitations and the needs it may share — read in the chat, decided by
+  // chips over `company.accept-connection` / `company.decline-connection` /
+  // `company.share-request` (the canonical bridge actions, token-confirmed).
+  "agency-invites": { domain: "company", access: "read", handler: "clientBridge", ownTyping: true },
+  // The direct employer's offer by sentence: the candidates panel of the open
+  // need answers, and the offer is that panel's token-confirmed
+  // `company.propose-booking` button — a sentence never picks a person.
+  "propose-booking": { domain: "company", access: "read", handler: "findWorkers", ownTyping: true },
+  // SUPPLY (owner window 7 §4): "turime 20 suvirintojų, ieškome jiems
+  // darbo" — capacity offered to the market. Same canonical intake as a
+  // need (`company.create-demand`, intent "partner" → kind agency_offer),
+  // so it is a company-domain WRITE behind the same confirmation token.
+  "offer-capacity": { domain: "company", access: "write", handler: "offerCapacity", ownTyping: false },
+  // Documents first-class (§12/§14): a document RECORDED by sentence through
+  // the one inline form over the canonical upsert; readiness re-answers.
+  "add-document": { domain: "documents", access: "write", handler: "addDocument", ownTyping: true },
+  // The verified CV SHEET (print-to-PDF, outside the shell so no chrome
+  // prints) — a route, because the sheet IS the canonical output (§19).
+  "cv-export": { domain: "cv", access: "route", handler: "cvExport", ownTyping: false },
+  // LOOKING at the CV that already exists — the SAME `/cv` surface, framed
+  // as a read rather than an export. Separate intent because owner §5 makes
+  // VIEW ≠ EXPORT a distinction the person must hear, not one the product
+  // may quietly collapse just because both open the same page.
+  "cv-view": { domain: "cv", access: "route", handler: "cvView", ownTyping: false },
+  // The sentence named the CV and nothing more. Route, not write: the answer
+  // is a question with the three real doors and no side effect.
+  "cv-choose": { domain: "cv", access: "route", handler: "cvChoose", ownTyping: false },
+  // THE PHOTO SHOWN BACK (issue #1689, defect G). "Parodyk įkeltą nuotrauką,
+  // ar tikrai išsisaugojo" — a READ over the ONE personal-gallery projection
+  // (`lib/journal/personal-gallery.ts`: the same journal_entry_photos rows,
+  // the same private bucket, the same signed URLs), answered INSIDE the
+  // chat with the stored photos and one chip to the gallery. Never a second
+  // photo store; never a claim about the photo beyond "it is stored".
+  "evidence-photos": { domain: "journal", access: "read", handler: "evidencePhotos", ownTyping: true },
+  "what-changed": { domain: "journal", access: "read", handler: "whatChanged", ownTyping: true },
+  // PROJECT → WORK (§11): a work package on the company's project through
+  // the one inline form over the one task create.
+  "add-task": { domain: "project", access: "write", handler: "addTask", ownTyping: true },
+  // CAPACITY (§11): the roster against approved absences for the next days.
+  "who-available": { domain: "company", access: "read", handler: "whoAvailable", ownTyping: true },
+  // PROGRESS (§11): a stage moved to a real status, by sentence — resolved
+  // against the company's real stages, token-confirmed like every write.
+  "stage-status": { domain: "project", access: "write", handler: "stageStatus", ownTyping: true },
+  // §11 WHAT-IF: a person moved between two projects — consequences on both
+  // sides shown first, the commit behind the strong-tier confirmation.
+  "move-worker": { domain: "project", access: "write", handler: "moveWorker", ownTyping: true },
+  "task-status": { domain: "project", access: "write", handler: "taskStatus", ownTyping: true },
+  "project-risk": { domain: "project", access: "read", handler: "projectRisk", ownTyping: true },
+  "project-readiness": { domain: "project", access: "read", handler: "projectReadiness", ownTyping: true },
+  "confirm-work": { domain: "journal", access: "write", handler: "confirmWork", ownTyping: true },
+  // The WORKER's side of the confirmation loop (owner P0 2026-09-06). `read`,
+  // not `write`: it answers who could verify the work already recorded and
+  // never confirms anything itself. Its whole reason to exist is that the
+  // honest answer includes "nobody yet" — see work-verification-state.ts.
+  "who-verifies-work": { domain: "journal", access: "read", handler: "whoVerifiesWork", ownTyping: true },
+  // EMPLOYER VISIBILITY (capability matrix P0, 2026-09-23): "kas mato mano
+  // profilį?", "make me visible to employers". Reads the CURRENT consent state
+  // and says it first (on / off / unknown — SEP-7, unknown is never off), then
+  // embeds the EXISTING `DiscoverabilityConsent`: the same equal grant /
+  // decline buttons behind the full hashed legal text, the same one-click
+  // withdrawal, the same server actions. `write`, not `route`, because the
+  // embedded consent CAN persist — behind its own explicit button, never by
+  // the sentence. A route intent may only hand over a chip; classifying a
+  // door that can record a grant as one would be the dishonest class. Its own
+  // typing cue: the state is read before anything is said.
+  "employer-visibility": { domain: "profile", access: "write", handler: "employerVisibility", ownTyping: true },
 
   // ── honest degradation: no engine, no fake (doctrine §7/§18) ─────────────
   reminder: { domain: "time", access: "blocked", handler: "reminderBlocked", ownTyping: false },
   translate: { domain: "communication", access: "blocked", handler: "translateBlocked", ownTyping: false },
-  // Neither acts nor refuses cleanly — recorded as gap G18; the registry
-  // states what IS, not what should be.
-  "write-employer": { domain: "communication", access: "blocked", handler: "writeEmployer", ownTyping: false },
+  // WRITE TO THE EMPLOYER (launch completion 2026-09-20, GREEN_CONNECT) —
+  // gap G18 closed. `write`, not `blocked`: the sentence resolves the
+  // caller's own ACTIVE interest signals (own rows only) and, for exactly
+  // one, opens the in-app thread through the SAME `contactEmployerAction`
+  // the interest card's button runs (server-side re-verification, nothing
+  // sent outside). None → the board with the honest "show interest first"
+  // line; several → the board, so the person picks the card.
+  "write-employer": { domain: "communication", access: "write", handler: "writeEmployer", ownTyping: true },
 };
 
 /** The component supplies one implementation per declared handler id.

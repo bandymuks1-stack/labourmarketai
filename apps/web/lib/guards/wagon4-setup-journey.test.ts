@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
+import { deriveTodayNext, WORK_CARD_EDITOR_HREF } from "@/lib/today/today-model";
+import { deriveWorkCardState } from "@/lib/worker/work-card-state";
+
 /**
  * Wagon 4 — Guided Onboarding and CV Understanding (UX Recovery Train).
  *
@@ -29,17 +32,63 @@ const read = (rel: string): string => readFileSync(join(APP, rel), "utf-8");
 const JOURNEY = read("components/app/profile-hub-overview.tsx");
 const STEP_KEYS = ["goal", "experience", "review", "location", "availability"];
 
-describe("Wagon 4 — the guide exists and fresh workers land on it", () => {
+describe("Wagon 4 — the guide exists and a fresh worker can reach it in one click", () => {
   it("profile page mounts the surface that carries the journey", () => {
     const page = read("app/[locale]/dashboard/profile/page.tsx");
     expect(page).toMatch(/<ProfileHubOverview/);
+    expect(JOURNEY).toMatch(/id="setup-journey"/);
   });
 
-  it("completeOnboarding sends a fresh worker to the setup journey", () => {
+  /**
+   * Window 6 (2026-09-06): the post-onboarding destination changed. The
+   * owner contract 2026-09-04 §3/§4A/§7 (conversation = primary control
+   * layer; CLEAR NEXT ACTION over information overload; progressive
+   * disclosure) supersedes the July pin that sent a fresh worker straight to
+   * the profile wall. The chat's first turn greets the person, names what
+   * the profile still lacks and offers the profile as a chip — so the
+   * journey is one click away. The page itself is unchanged and reachable.
+   */
+  it("completeOnboarding sends a fresh worker to /dashboard — ŠIANDIEN — not the profile wall", () => {
+    // RETIRED (worker mobile IA 2026-09-13 §2): "/dashboard is the
+    // conversation" for the worker. The route is unchanged; what a worker in
+    // their personal space finds there is ŠIANDIEN, whose ONE next action for
+    // a fresh worker (no profession yet) is the work-card engine's `work`
+    // dimension — the profile page, one tap. ŠIANDIEN is the conversation's
+    // opening context (owner decision 0017), so the composer is right there.
     const actions = read("lib/auth/actions.ts");
-    expect(actions).toMatch(
-      /worker:\s*`\/\$\{locale\}\/dashboard\/profile#setup-journey`/,
+    expect(actions).toMatch(/worker:\s*`\/\$\{locale\}\/dashboard`,/);
+    expect(actions).not.toMatch(/worker:\s*`[^`]*profile#setup-journey`/);
+    expect(read("app/[locale]/dashboard/page.tsx")).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
+    const fresh = deriveTodayNext(
+      deriveWorkCardState(
+        {
+          hasProfession: false,
+          skillsCount: 0,
+          availabilitySet: false,
+          locationSet: false,
+          paySet: false,
+          evidenceCount: 0,
+          confirmedAtMs: null,
+        },
+        0,
+      ),
     );
+    expect(fresh).toMatchObject({ kind: "action", dim: "work", href: "/dashboard/profile#profile-edit" });
+  });
+
+  it("the other identities keep their own first screens", () => {
+    const actions = read("lib/auth/actions.ts");
+    expect(actions).toMatch(/company:\s*`\/\$\{locale\}\/dashboard\/company`/);
+    expect(actions).toMatch(/agency:\s*`\/\$\{locale\}\/dashboard\/company`/);
+    expect(actions).toMatch(/customer:\s*`\/\$\{locale\}\/dashboard\/buyer`/);
+  });
+
+  it("the chat offers the profile as a chip and the registry routes it to the journey page", () => {
+    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+    expect(chat).toMatch(/\{ id: "profile", label: labels\.chipProfile \}/);
+    expect(chat).toMatch(/case "profile":/);
+    const registry = read("lib/conversation/action-registry.ts");
+    expect(registry).toMatch(/id: "worker\.complete-profile"[\s\S]*?advancedRoute: "\/dashboard\/profile"/);
   });
 });
 
@@ -70,9 +119,17 @@ describe("Wagon 4 — honest done-states, no fake understanding", () => {
     // the destinations are the same editors as before.
     expect(JOURNEY).toMatch(/href: "#profile-edit"/);
     // The `id="work-card"` anchor died with the second dashboard (W3
-    // Package 4); the location step now opens the work-card capability's
-    // canonical home — the player-card result in the workspace panel.
-    expect(JOURNEY).toMatch(/\/dashboard\?result=player-card/);
+    // Package 4). The location step then linked the player-card RESULT in
+    // the conversation — whose own "open" control sent the person straight
+    // back to this page (a ping-pong, 2026-09-23). Since 2026-09-19 the
+    // profile renders the SAME WorkCardEditor at `#cv-availability`, so the
+    // step names that in-page anchor. Negative control: the step no longer
+    // leaves the page.
+    expect(JOURNEY).toMatch(/key: "location",\s*done: pillarMet\("workCard"\),\s*href: "#cv-availability",/);
+    expect(JOURNEY).not.toContain("/dashboard?result=player-card");
+    // ŠIANDIEN (which is NOT on this page) still opens the card as the
+    // result — the conversation is where it stands there (decision 0017).
+    expect(WORK_CARD_EDITOR_HREF).toBe("/dashboard?result=player-card");
     expect(JOURNEY).not.toMatch(/href: "\/dashboard#work-card"/);
     expect(JOURNEY).toMatch(/href: "#cv-availability"/);
     // the profile anchors actually exist on their target page

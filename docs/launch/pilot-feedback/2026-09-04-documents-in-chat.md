@@ -35,3 +35,43 @@ Known limits (honest): the country name renders in the nominative
 ("reikalingas Nyderlandai"); the skills gap still names only "log work" as
 the closing step — training suggestions need a public projection of
 programmes by profession (privacy decision recorded in the checkpoint queue).
+
+## Attention from the documents gap (prod `6fc477d9`, #1485 + #1487)
+
+Worker two (preferred NL + DE, 6 required documents missing) opens the dashboard: the
+opening brief now carries **"Trūksta 6 dokumentų jūsų šalims."** with the "Mano
+dokumentai" chip (`walk-attention-prod.cjs`, 10.6 s). The first walk on `2fc998ee`
+found the line never reached an active worker (the cap of three lines was filled by
+matches / unlogged work / unread) — an EXPIRING document now sits right after the
+offer rung as a deadline; a MISSING document (for a stated country) stays lower and
+was reached here.
+
+Next: a document RECORDED by sentence ("turiu naują A1 iki 2027-03-31", #1488) so the
+gap can close from the same conversation.
+
+## A document RECORDED by sentence (prod `a726b2ce`, #1488)
+
+`walk-add-document-prod.cjs`, worker two, 40.2 s: "turiu naują A1 pažymą iki
+2027-03-31" → the one form `worker.add-document` opened with the intro line; **type
+pre-filled `a1_certificate`** from the sentence; continue → review → save →
+"Dokumentas užrašytas. Štai jūsų pasiruošimas dabar:" and the readiness answer
+re-ran. DB: `worker_documents` row `65dc3c3c…` (a1_certificate, ready) — deleted
+afterwards so the E2E baseline (6 missing) stays stable for future walks.
+
+**Defect found:** `valid until` stayed empty — `parseEndDate` read only "iki spalio
+20"-style dates, not a WRITTEN date ("iki 2027-03-31", "until 31.03.2027"), the way a
+person copies it off a certificate. Fixed on `fix/cc/end-date-written-iso` (ISO and
+d.m.yyyy forms; an impossible day is null, never "corrected").
+
+**Re-walk on `461326d2` (#1491):** "turiu naują A1 pažymą iki 2027-03-31" → type
+`a1_certificate` AND `valid until 2027-03-31` pre-filled → saved → readiness re-answered;
+DB row `85158bc2…` with `valid_until 2027-03-31` (deleted afterwards). Journey stage
+"documents completed where required" is now proven from the sentence to the row.
+
+## The CV sheet by sentence (prod `0bd1c542`, #1490)
+
+`walk-cv-sheet-prod.cjs`, E2E Worker Two, 23.8 s: "parodyk mano CV" → the hint ("Jūsų
+patvirtintas CV — vienas lapas iš to, ką sistema tikrai žino…") with ONE chip "Atidaryti
+CV lapą" (the import flow did NOT open) → `/lt/cv`: "MANO CV · E2E Worker Two · žurnalo
+įrašai 1" — the entry logged on the chat-created project is already on the sheet.
+Work/evidence returned to the professional identity, by sentence.

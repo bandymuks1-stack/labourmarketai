@@ -5,10 +5,12 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
-import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, Globe, MessageSquareWarning, type LucideIcon } from "lucide-react";
+import { User, UserRound, LogOut, Shield, Sun, Moon, FileText, Globe, MessageSquareWarning, Eye, type LucideIcon } from "lucide-react";
+import { EMPLOYER_VISIBILITY_HREF } from "@/lib/privacy/employer-visibility";
 import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
 import { FEEDBACK_OPEN_EVENT } from "@/components/app/language-feedback-widget";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { canRenderInline, type ResultContext } from "@/lib/conversation/result-registry";
 
 /**
  * Authenticated-header account dropdown. Surfaces the two controls that
@@ -32,8 +34,24 @@ export function AccountMenu() {
   const tCv = useTranslations("cvExport");
   const tCommon = useTranslations("common");
   const locale = useLocale();
-  const { user, profile, isAdmin, adminUiHidden } = useAuth();
+  const { user, profile, roles, isAdmin, adminUiHidden, activeOrganizationId, activeOrgName } = useAuth();
   const [open, setOpen] = useState(false);
+
+  // The player card's ONE home is a workspace RESULT, and the registry says
+  // in which contexts it renders (personal only). The context is derived from
+  // the same two fields the workspace itself uses (conversation-chat's
+  // `resultContext`), so an account acting as an organization is never sent
+  // to a result its workspace would refuse: it gets the person's own card
+  // section on the profile instead of a dead end.
+  const menuResultContext: ResultContext =
+    activeOrganizationId || activeOrgName ? "organization" : "personal";
+  // Company context is company management: the personal profile / CV
+  // entries are not offered while acting as an organization (owner order
+  // 2026-10-01); the workspace chip is the one way back to the person.
+  const isOrgContext = menuResultContext === "organization";
+  const playerCardHref = canRenderInline("player-card", menuResultContext)
+    ? "/dashboard?result=player-card"
+    : "/dashboard/profile#cv-availability";
   const rootRef = useRef<HTMLDivElement>(null);
 
   // First-use UX (2026-07-04): the light/dark toggle used to live ONLY deep in
@@ -42,10 +60,10 @@ export function AccountMenu() {
   // "theme" — a shared, never locale-keyed key; the no-flash bootstrap in
   // app/[locale]/layout.tsx replays it) — same mechanism, one more surface.
   // LIGHT is the product default, so an absent attribute means light.
-  const [theme, setThemeState] = useState<"dark" | "light">("light");
+  const [theme, setThemeState] = useState<"dark" | "light">("dark");
   useEffect(() => {
     const current = document.documentElement.dataset.theme;
-    setThemeState(current === "dark" ? "dark" : "light");
+    setThemeState(current === "light" ? "light" : "dark");
   }, []);
   const nextTheme: "dark" | "light" = theme === "light" ? "dark" : "light";
   function toggleTheme() {
@@ -72,15 +90,33 @@ export function AccountMenu() {
     // Profile — moved here from the top bar (owner ruling 2026-07-29, §B):
     // the bar carried TWO avatars for the same person; now this menu is the
     // one avatar and Profile is its first entry.
-    { href: "/dashboard/profile", label: t("tabs.profile"), icon: UserRound, testid: "account-menu-profile-link" },
+    // In an ORGANIZATION workspace the first entry is the organization's
+    // profile, never the owner's personal profile/CV (owner order
+    // 2026-10-01: company context is company management).
+    isOrgContext
+      ? { href: "/dashboard/company/settings", label: t("tabs.companyProfile"), icon: UserRound, testid: "account-menu-profile-link" }
+      : { href: "/dashboard/profile", label: t("tabs.profile"), icon: UserRound, testid: "account-menu-profile-link" },
     // The Premium Player Card, reachable through the avatar (owner audit
-    // §5.1) — deep-links to the canonical card block on the Mano CV surface.
-    { href: "/dashboard/journal#mano-cv-identity", label: t("tabs.playerCard"), icon: FileText, testid: "account-menu-player-card-link" },
+    // §5.1). ONE home for one object (2026-09-23): the chat, ŠIANDIEN and the
+    // profile hub all open the card as the workspace RESULT, so the menu does
+    // too — it used to open a closed disclosure on the journal instead, the
+    // same card with different surroundings. (In an organization context the
+    // result does not render — see `playerCardHref` above.)
+    ...(isOrgContext
+      ? []
+      : [{ href: playerCardHref, label: t("tabs.playerCard"), icon: FileText, testid: "account-menu-player-card-link" }]),
     // Admin — gated; kept OFF the mobile bottom nav to avoid crowding it.
     // (The advanced control-room escape hatch died with the route — W3
     // Package 4 deleted /dashboard/advanced entirely.)
+    // The label NAMES WHAT IT ADMINISTERS (owner window 11 §29). The entry
+    // itself is right and correctly gated — the owner is a platform admin and
+    // saw their own control, not a leak. But sitting under an avatar between
+    // "Mano CV" and "Nustatymai", the bare "Administravimas" reads as
+    // "administer my account", which is the one thing it is not. The nav
+    // module keeps `tabs.admin`, where the surrounding context already says
+    // which administration is meant.
     ...(isAdmin && !adminUiHidden
-      ? [{ href: "/dashboard/admin", label: t("tabs.admin"), icon: Shield, testid: "account-menu-admin-link" }]
+      ? [{ href: "/dashboard/admin", label: t("tabs.adminPlatform"), icon: Shield, testid: "account-menu-admin-link" }]
       : []),
   ];
 
@@ -171,18 +207,43 @@ export function AccountMenu() {
               <Globe className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
               {tCommon("localeSwitch")}
             </span>
-            <LocaleSwitcher />
+            {/* `inline` — this switcher is ALREADY inside this menu's
+                AnchoredOverlay, so it must not open a second portal: the
+                language rows would then sit outside `panelRef` and a tap on
+                one would read as an outside click, closing this menu between
+                mousedown and click. */}
+            <LocaleSwitcher inline />
           </div>
-          <Link
-            href="/cv"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            data-testid="account-menu-cv-link"
-            className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
-          >
-            <FileText className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
-            {tCv("pageTitle")}
-          </Link>
+          {isOrgContext ? null : (
+            <Link
+              href="/cv"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              data-testid="account-menu-cv-link"
+              className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+            >
+              <FileText className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
+              {tCv("pageTitle")}
+            </Link>
+          )}
+          {/* EMPLOYER VISIBILITY (capability matrix P0, 2026-09-23) — the
+              profile-discoverability consent, one tap from every dashboard
+              page. An account utility (a privacy setting), not a product
+              area; workers only, because it is the worker profile an employer
+              could find. The link opens the consent's canonical home; nothing
+              is switched from here. */}
+          {roles.includes("worker") ? (
+            <Link
+              href={EMPLOYER_VISIBILITY_HREF}
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              data-testid="account-menu-employer-visibility-link"
+              className="flex min-h-[2.75rem] w-full items-center gap-2 rounded-sm px-2 py-2 text-left text-sm text-text-primary hover:bg-ink-700"
+            >
+              <Eye className="h-4 w-4 text-text-secondary" strokeWidth={1.75} aria-hidden />
+              {t("account.employerVisibility")}
+            </Link>
+          ) : null}
           <Link
             href="/dashboard/account"
             role="menuitem"

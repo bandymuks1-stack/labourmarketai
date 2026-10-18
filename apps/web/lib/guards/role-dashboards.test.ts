@@ -126,9 +126,14 @@ describe("Guard: each role dashboard calls the gate FIRST", () => {
         // PR B inlined the shell on each role page (the shared
         // RoleDashboard component was removed once each page had its
         // own draft form layout). Re-assert the per-page invariants
-        // that used to live on the shared component.
-        expect(src).toMatch(/pilotDisclaimer/);
-        expect(src).toMatch(/href=["']\/dashboard\/profile["']/);
+        // that used to live on the shared component. For the company the
+        // two live on the Settings door since the IA correction 2026-09-16.
+        const shell =
+          route === "app/[locale]/dashboard/company/page.tsx"
+            ? read("app/[locale]/dashboard/company/settings/page.tsx")
+            : src;
+        expect(shell).toMatch(/pilotDisclaimer/);
+        expect(shell).toMatch(/href=["']\/dashboard\/profile["']/);
       });
     });
   }

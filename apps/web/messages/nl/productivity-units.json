@@ -8,5 +8,9 @@
   "kilograms": "kg",
   "packages": "pakketten",
   "box_per_day": "dozen/dag",
-  "square_meters_per_day": "m²/dag"
+  "square_meters_per_day": "m²/dag",
+  "kilometers": "km",
+  "pallets": "pallets",
+  "covers": "couverts",
+  "cases": "zaken"
 }

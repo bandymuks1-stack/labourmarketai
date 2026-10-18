@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -10,6 +11,7 @@ import { Label } from "@/components/ui/Label";
 import { DarkListbox } from "@/components/ui/DarkListbox";
 import {
   getOwnLastDemandPrefillAction,
+  getDemandPrefillByIdAction,
   submitDemandRequestAction,
 } from "@/lib/demand/demand-request-actions";
 import {
@@ -32,7 +34,6 @@ import {
 } from "@/lib/demand/structured-demand-v2";
 import {
   buildWorkCategoryOptions,
-  MARKET_COUNTRIES,
 } from "@/lib/taxonomy/work-categories";
 import { structureNeed } from "@/lib/structuring/structure-need";
 import { EstimateBuilder } from "@/components/app/estimate-builder";
@@ -47,6 +48,7 @@ import {
   type EstimateInputs,
 } from "@/lib/estimate/estimate";
 import { cn } from "@/lib/utils";
+import type { OpenNeedsUsageView } from "@/lib/billing/open-needs-usage";
 
 /** Required tools / equipment options (§8.6) — a CLOSED set of EXISTING
  *  canonical taxonomy skill slugs (lib/taxonomy/profession-skills.ts; labels
@@ -83,10 +85,20 @@ const REQUIRED_TOOL_OPTIONS: readonly string[] = [
 export function DemandRequestButton({
   intent,
   stepTitles,
+  repeatRequestId = null,
+  usage = null,
 }: {
   intent: "hire_workers" | "partner";
+  /** Pre-submit open-needs usage for the acting workspace: the ONE gate's
+   *  verdict reshaped (lib/billing/open-needs-usage.ts). Null / not visible
+   *  while billing is not enforced: nothing is shown. */
+  usage?: OpenNeedsUsageView | null;
   /** Localized titles for steps 1/2/3 (from auth.dashboard.wow.flow.company). */
   stepTitles: [string, string, string];
+  /** "Repeat this need": a specific past request of the caller's whose
+   *  STRUCTURE prefills the wizard on arrival (dates and urgency cleared,
+   *  execution facts never copied). Own rows only — the server re-checks. */
+  repeatRequestId?: string | null;
 }) {
   const t = useTranslations("auth.dashboard.wow.demand");
   const router = useRouter();
@@ -153,15 +165,12 @@ export function DemandRequestButton({
     workCategories.flatMap((c) =>
       c.options.map((o) => ({ value: o.slug, label: `${o.label} · ${c.sector}` })),
     );
-  const countryOptions: { value: string; label: string }[] =
-    MARKET_COUNTRIES.map((code) => ({
-      value: code,
-      label: tlm(`countryNames.${code}`),
-    }));
+  // Every ISO country, active markets first — a market list orders, it never shortens.
+  const countryOptions: { value: string; label: string }[] = countryOptionsForLocale(locale);
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
-  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration">(
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual">(
     "idle",
   );
   // Advanced structured clusters (structured_v2, PR 2) — optional; empty
@@ -207,6 +216,10 @@ export function DemandRequestButton({
         // draft" while the UI reported success (same class as the teamSize
         // loss fixed earlier).
         opportunityType: adv.opportunityType || undefined,
+        // The picked country (any ISO country — global-access rule 2026-09-22)
+        // used to be dropped by the draft leg too; the prefill reads it from
+        // `customer_requests.country`, which the action stamps.
+        country: country || undefined,
         notes,
       });
       setDraftSource(true);
@@ -266,6 +279,17 @@ export function DemandRequestButton({
     autoPrefillRan.current = true;
     void (async () => {
       try {
+        if (repeatRequestId) {
+          // Explicit repeat wins over the draft auto-continue: the person
+          // chose THIS need to start from.
+          const rep = await getDemandPrefillByIdAction(intent, repeatRequestId);
+          if (rep.found && !descRef.current.trim()) {
+            applyPrefill(rep);
+            setDraftSource(false);
+            setPrefillState("done");
+            return;
+          }
+        }
         const res = await getOwnLastDemandPrefillAction(intent);
         if (!res.found || res.source !== "draft") return;
         if (descRef.current.trim()) return; // untouched check at apply time
@@ -351,7 +375,13 @@ export function DemandRequestButton({
           ? "done"
           : res.code === "needs_migration"
             ? "needsMigration"
-            : "error",
+            : res.code === "over_open_need_limit"
+              // Owner launch pricing 2026-09-05: the plan ceiling, said honestly —
+              // the €99 plan, or the individual plan above it. Nothing charged.
+              ? res.next === "individual_plan"
+                ? "limitIndividual"
+                : "limitUpgrade"
+              : "error",
       );
       // Canonical-journey P3: the submitted request supersedes the draft it
       // was continued from — close the draft (draft→closed, guard-allowed)
@@ -495,6 +525,24 @@ export function DemandRequestButton({
 
   return (
     <div className="flex flex-col gap-5" data-testid="demand-form">
+      {usage && usage.visible ? (
+        <div
+          className={cn(
+            "flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border px-3 py-2 text-meta leading-relaxed",
+            usage.atLimit ? "border-state-warning/30 bg-state-warning/5 text-text-primary" : "border-border-subtle text-text-secondary",
+          )}
+          data-testid="demand-open-need-usage"
+          data-at-limit={usage.atLimit ? "true" : "false"}
+        >
+          <span>{t("openNeedUsage", { used: usage.used, limit: usage.limit, remaining: usage.remaining })}</span>
+          {usage.atLimit && usage.next === "upgrade" ? (
+            <Link href="/dashboard/account" className="font-medium text-accent underline underline-offset-2" data-testid="demand-open-need-upgrade-cta">
+              {t("openNeedUsageUpgradeCta")}
+            </Link>
+          ) : null}
+          {usage.atLimit && usage.next === "individual_plan" ? <span>{t("openNeedUsageIndividual")}</span> : null}
+        </div>
+      ) : null}
       {/* Progress dots — progress-only (current/done), not tap targets. */}
       <ol className="flex items-center gap-2" aria-label={t("form.progressLabel")}>
         {stepTitles.map((title, i) => {
@@ -958,6 +1006,11 @@ export function DemandRequestButton({
       {state === "error" && (
         <p className="text-xs text-state-danger" role="alert" data-testid="demand-error">
           {t("error")}
+        </p>
+      )}
+      {(state === "limitUpgrade" || state === "limitIndividual") && (
+        <p className="text-xs text-state-warning" role="alert" data-testid="demand-open-need-limit" data-next={state === "limitIndividual" ? "individual_plan" : "upgrade"}>
+          {state === "limitIndividual" ? t("errorOpenNeedLimitIndividual") : t("errorOpenNeedLimitUpgrade")}
         </p>
       )}
       {state === "needsMigration" && (

@@ -1,0 +1,4 @@
+{"step":"fresh_load_status","status":"needed"}
+{"step":"after_received","status":"received","ms":5126,"message":"Viskas čia iš įrašų: etapai ir jų datos, aktyvūs priskyrimai, jūsų vedamas sąrašas, atviri darbai ir patvirtinti nebuvim"}
+{"step":"needed_button","count":1,"disabled":false}
+{"step":"after_needed","status":"needed","ms":2667,"consoleErrors":["The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."]}

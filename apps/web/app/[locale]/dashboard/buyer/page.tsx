@@ -9,6 +9,7 @@ import { getDemandDraft } from "@/lib/demand/demand-drafts";
 import { getOwnCustomer } from "@/lib/buyer/customers";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { listOwnAttachments } from "@/lib/buyer/customer-request-attachments";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 const BUYER_FIELDS = [
   { key: "serviceType" as const, labelKey: "field.serviceType.label", placeholderKey: "field.serviceType.placeholder", variant: "text" as const },
@@ -255,14 +256,12 @@ export default async function BuyerDashboardPage({
         {/* Breadcrumb: this is an ACTION under the company identity, not a
             separate top-level system. */}
         <p
-          className="font-mono text-meta uppercase tracking-label text-brand-orange"
+          className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="company-context"
         >
           {t("companyContext")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 

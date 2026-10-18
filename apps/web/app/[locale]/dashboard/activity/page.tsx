@@ -13,6 +13,7 @@ import {
   getDurableNotifications,
   getSpineCounts,
 } from "@/lib/notifications/spine";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Unified activity centre (control room PR C) — ONE cross-module surface
@@ -34,7 +35,7 @@ import {
  */
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-11 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
 const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
@@ -84,12 +85,10 @@ export default async function ActivityCentrePage({
   return (
     <div className="flex flex-col gap-6" data-testid="activity-centre-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {tA("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {tA("title")}
-        </h1>
+        <PageTitle>{tA("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{tA("intro")}</p>
       </header>
 
@@ -184,7 +183,7 @@ export default async function ActivityCentrePage({
                   </span>
                 </span>
                 {row.count > 0 ? (
-                  <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold leading-none text-white tabular-nums">
+                  <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-brand-orange px-1.5 text-xs font-bold leading-none text-text-on-brand tabular-nums">
                     {row.count}
                   </span>
                 ) : (

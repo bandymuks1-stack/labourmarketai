@@ -28,10 +28,10 @@ export interface EvidenceReportInput {
   readonly unsupportedSkills: readonly string[];
   /** Skills supported by entries but not yet confirmed by a person (labels). */
   readonly awaitingConfirmation: readonly string[];
-  /** Real work-journal entry count. */
-  readonly journalEntries: number;
-  /** Real manager/person confirmations count. */
-  readonly confirmations: number;
+  /** Real work-journal entry count. `null` = the read failed, NOT zero. */
+  readonly journalEntries: number | null;
+  /** Real manager/person confirmations. `null` = the read failed, NOT zero. */
+  readonly confirmations: number | null;
   /** Whether a company/work-need fit context exists for this user. */
   readonly hasWorkNeedContext: boolean;
 }
@@ -82,10 +82,24 @@ export function buildEvidenceReport(i: EvidenceReportInput): EvidenceReport {
     items: [...i.supportedSkills],
   };
 
+  // "empty" is a CLAIM: we counted, and there is nothing. When the count
+  // could not be read we have no such claim to make, so the section reports
+  // `not_available` — the state this union already carried for exactly this —
+  // and omits the metric rather than publishing a 0 nobody counted. `metrics`
+  // stays `Record<string, number>`: an absent key is the honest shape, and it
+  // means downstream readers cannot silently pick up a zero.
+  const entriesUnread = i.journalEntries === null;
   const workEntrySummary: EvidenceReportSection = {
     key: "workEntrySummary",
-    state: i.journalEntries > 0 ? "real" : "empty",
-    metrics: { entries: i.journalEntries, confirmations: i.confirmations },
+    state: entriesUnread
+      ? "not_available"
+      : (i.journalEntries ?? 0) > 0
+        ? "real"
+        : "empty",
+    metrics: {
+      ...(i.journalEntries === null ? {} : { entries: i.journalEntries }),
+      ...(i.confirmations === null ? {} : { confirmations: i.confirmations }),
+    },
     items: [],
   };
 

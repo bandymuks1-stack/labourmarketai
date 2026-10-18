@@ -331,9 +331,103 @@ describe("external public-source ads cross the boundary with their provenance", 
         // here rendered verbatim in production on 2026-08-10 — the client
         // bundle has no vacancySources namespace.
         attributionText: "vacancySources.attribution.arbetsformedlingen",
+        // A card with NO engine verdict (this double carries `match: {}`) is
+        // NOT ASSESSED — never guessed into a band (#1689, defect H).
+        fitStatus: "insufficient_data",
+        band: "not_assessed",
+        gapCodes: [],
+        missingDataCodes: [],
       },
     ]);
     expect(res.totalExternal).toBe(1);
+  });
+
+  describe("the row carries the engine's verdict as a BAND with its why (#1689, defect H)", () => {
+    /* NEGATIVE CONTROL: the production defect — the projection dropped
+       `match.status`, so an `insufficient_data` "Senior AI Engineer" and a
+       `weak` "Rörmokare" reached the panel as plain rows under "Man
+       tinkantys darbai". Every case below pins that the status, the band and
+       the reason now cross the boundary, and that only strong/possible may
+       ever read as a fit. */
+    const withMatch = (key: string, match: Record<string, unknown>) => ({ ...extCard(key), match });
+
+    it("strong → band strong, status passthrough, nothing to explain", async () => {
+      loadMatchesMock.mockResolvedValue(
+        ready([], {
+          externalCards: [withMatch("af:strong", { status: "strong", eligible: true, gaps: [], missingData: [], blocking: [] })],
+          totalExternal: 1,
+        }),
+      );
+      const res = await loadOpportunitiesResultAction();
+      if (res.kind !== "ready") throw new Error("expected ready");
+      expect(res.external[0]).toMatchObject({ fitStatus: "strong", band: "strong", gapCodes: [], missingDataCodes: [] });
+    });
+
+    it("an unreadable ad (insufficient_data) → not_assessed, with the missing-data code as the why", async () => {
+      loadMatchesMock.mockResolvedValue(
+        ready([], {
+          externalCards: [
+            withMatch("af:unread", {
+              status: "insufficient_data",
+              eligible: false,
+              gaps: [],
+              missingData: ["need_not_structured"],
+              blocking: [],
+            }),
+          ],
+          totalExternal: 1,
+        }),
+      );
+      const res = await loadOpportunitiesResultAction();
+      if (res.kind !== "ready") throw new Error("expected ready");
+      expect(res.external[0]).toMatchObject({
+        fitStatus: "insufficient_data",
+        band: "not_assessed",
+        missingDataCodes: ["need_not_structured"],
+      });
+    });
+
+    it("weak with a failed hard criterion → conflict; weak but eligible → missing_requirement", async () => {
+      loadMatchesMock.mockResolvedValue(
+        ready([], {
+          externalCards: [
+            withMatch("af:conflict", {
+              status: "weak",
+              eligible: false,
+              gaps: [{ code: "country_mismatch" }],
+              missingData: [],
+              blocking: [{ criterion: "country_location", class: "hard", outcome: "failed", source: "t" }],
+            }),
+            withMatch("af:missing", {
+              status: "weak",
+              eligible: true,
+              gaps: [{ code: "skills_missing", count: 2, uris: ["a", "b"] }],
+              missingData: [],
+              blocking: [],
+            }),
+          ],
+          totalExternal: 2,
+        }),
+      );
+      const res = await loadOpportunitiesResultAction();
+      if (res.kind !== "ready") throw new Error("expected ready");
+      expect(res.external[0]).toMatchObject({ band: "conflict", gapCodes: ["country_mismatch"] });
+      expect(res.external[1]).toMatchObject({ band: "missing_requirement", gapCodes: ["skills_missing"] });
+      // neither is ever an assessed fit
+      for (const row of res.external) expect(["strong", "possible"]).not.toContain(row.band);
+    });
+
+    it("the band is a DERIVATION of the status, never an independent field the use case could contradict", async () => {
+      loadMatchesMock.mockResolvedValue(
+        ready([], {
+          externalCards: [withMatch("af:x", { status: "possible", eligible: true, band: "strong" })],
+          totalExternal: 1,
+        }),
+      );
+      const res = await loadOpportunitiesResultAction();
+      if (res.kind !== "ready") throw new Error("expected ready");
+      expect(res.external[0].band).toBe("possible");
+    });
   });
 
   it("slices to the contract's external display cap and reports the true total", async () => {

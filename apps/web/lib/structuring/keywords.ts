@@ -77,9 +77,14 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     },
     { slug: "partition-walls", needles: ["pertvar", "перегородк"] },
     { slug: "plastering", needles: ["tinkav", "tinkov", "штукатур"] },
+    // "glaisč" — the LT 1st-person past of glaistyti ("glaisčiau sienas",
+    // the commonest way a worker writes it) palatalises the stem's t → č,
+    // so the bare "glaist" stem never matched it exactly; it fell to the
+    // fuzzy tier and, being undeclared, stayed a candidate instead of a
+    // linked skill (production walk, issue #1689).
     {
       slug: "skim-coating",
-      needles: ["glaist", "шпаклев", "шпаклёв", "шпатлев"],
+      needles: ["glaist", "glaisč", "шпаклев", "шпаклёв", "шпатлев"],
     },
     {
       slug: "painting",
@@ -96,10 +101,19 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
     },
     { slug: "floor-screeding", needles: ["išlygin", "isl ygin", "стяжк"] },
     { slug: "plumbing", needles: ["santechn", "сантехник"] },
-    { slug: "electrical-install", needles: ["elektr", "электр"] },
+    {
+      slug: "electrical-install",
+      // the electrical forms, never the bare stems "elektr" / "электр" — they
+      // sat inside "elektroninis paštas" / "электронная почта" (e-mail) and
+      // read every office worker's mail as electrical work (#1689, 2026-09-12)
+      needles: ["elektros", "elektrik", "elektrin", "elektromontaz", "elektromontaž", "elektrotechn", "электрик", "электромонтаж", "электропровод", "электрощит", "электроустанов", "электрическ", "электросет"],
+    },
     {
       slug: "carpentry",
-      needles: ["stali", "medien", "столярн", "плотник", "плотниц"],
+      // the carpenter's own forms, never the bare stem "stali" — it sat
+      // inside "in-STALI-acija" and read every electrical installation as
+      // carpentry (#1689, measured 2026-09-12)
+      needles: ["stalius", "staliaus", "staliui", "staliu", "staliai", "staliams", "staliais", "medien", "столярн", "плотник", "плотниц"],
     },
     {
       slug: "insulation",
@@ -1372,6 +1386,12 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
         "arc weld",
         "elektrodu suvirin",
         "elektrodais suvirin",
+        // "Virinau elektrodu…" — the colloquial "virinti" (to weld) is only
+        // safe WITH the electrode beside it ("virinau vandenį" is boiling).
+        "virinau elektrod",
+        "virinome elektrod",
+        "elektrodu virin",
+        "elektrodais virin",
         "дуговая сварк",
         "дуговой сварк",
         "варил электрод",
@@ -1860,6 +1880,10 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
       needles: [
         "bendradarbiavimo galimyb",
         "partneryst",
+        // "ieškojau partnerių" (folded: partneriu) — the owner's own phrase.
+        "ieskojau partner",
+        "partneriu paiesk",
+        "partneriu",
         "partnership",
         "cooperation opportunit",
         "explore cooperation",
@@ -1980,11 +2004,11 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
     slug: "plumber",
     needles: ["santechn", "сантехник", "rörmokare", "vvs-montör"],
   },
-  { slug: "electrician", needles: ["elektr", "электр"] },
+  { slug: "electrician", needles: ["elektros", "elektrik", "elektrine instaliac", "elektrinė instaliac", "elektromontaz", "elektromontaž", "elektrotechn", "электрик", "электромонтаж", "электропровод", "электрощит", "электроустанов", "электрическ", "электросет"] },
   {
     slug: "carpenter",
     needles: [
-      "stali",
+      "stalius", "staliaus", "staliui", "staliu", "staliai", "staliams", "staliais",
       "medien",
       "плотник",
       "столяр",
@@ -2120,6 +2144,19 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
       "sandėlinink",
       "комплектовщик",
       "складск",
+      // 2026-09-17 production walk: a RU worker wrote "Я кладовщик" and the
+      // profession stayed unrecognised (LT-only lexicon for the noun); same
+      // for the EN / DE / NL titles. The profession hint is a PROPOSAL the
+      // person confirms — never a silent assignment.
+      "кладовщик",
+      "кладовщиц",
+      "warehouse worker",
+      "warehouse operative",
+      "warehouse assistant",
+      "lagerist",
+      "lagermitarbeiter",
+      "lagerarbeiter",
+      "magazijnmedewerker",
       "lagerarbetare",
       "lagermedarbetare",
       "terminalarbetare",
@@ -2130,6 +2167,11 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
     slug: "software_developer",
     needles: [
       "programuotoj",
+      // "programinės įrangos kūrėjas" — the formal LT title an employer
+      // writes ("Reikia programinės įrangos kūrėjo", production 2026-09-06
+      // opened the need form with the role empty). Same profession.
+      "programinės įrangos",
+      "programines irangos",
       "разработчик",
       "программист",
       "developer",
@@ -2236,6 +2278,13 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
   {
     slug: "auto_mechanic",
     needles: [
+      // The bare "mechanikas" is how a workshop owner says it ("autoservisui
+      // reikia 2 mechanikų", real-user walk 2026-09-06); this is the only
+      // mechanic profession in the catalogue, and every hit is a suggestion
+      // the person confirms, never a persisted fact.
+      "mechanik",
+      "mechanic",
+      "механик",
       "automechanik",
       "autosaltkalv",
       "autošaltkalv",
@@ -2247,6 +2296,33 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
       "personbilsmekaniker",
       "fordonsmekaniker",
       "lastbilsmekaniker",
+      // ── MEASURED GAP, production 2026-09-27 ──────────────────────────────
+      // 30 049 of 53 392 active imported ads carry no `profession_slug`. Almost
+      // all of that is the CATALOGUE not holding the profession (nurse, doctor,
+      // physiotherapist, social worker, accountant, project manager — none is a
+      // slug), and those rows must stay unmapped. But the vehicle-mechanic
+      // family was a LEXICON gap on a profession the catalogue already has, so
+      // it is recovered here and nowhere else.
+      //
+      // `hjulmekaniker` (447 ads) — the SSYK label is
+      // "Däckmontör/Däck- och hjulmekaniker", which names itself a wheel
+      // MECHANIC; the four needles above already map the same `*mekaniker`
+      // family to this slug.
+      // `däckmontör` (172 further ads labelled with the short form only) — the
+      // compound label above proves the two names are ONE occupation.
+      // `bussmekaniker` (13 ads) — same family as `lastbilsmekaniker`.
+      //
+      // DELIBERATELY NOT ADDED, because each is a different trade or has no
+      // slug, and an invented mapping would be worse than an honest gap:
+      // `Underhållsmekaniker` / `Maskinmekaniker` (industrial maintenance, not
+      // automotive), `Fordonsmontör` / `Elektronikmontör` / `Montör
+      // träprodukter` (factory ASSEMBLY, not repair), `Elmontör`,
+      // `Kylmontör`, `Ventilationsmontör`, `Industrirörmontör` (separate
+      // trades the catalogue does not carry). Ambiguous rows stay unmapped.
+      "hjulmekaniker",
+      "däckmontör",
+      "dackmontor",
+      "bussmekaniker",
     ],
   },
   {
@@ -2343,7 +2419,9 @@ export const WORK_DIRECTION_HINTS_LT: { slug: string; needles: string[] }[] = [
   },
   {
     slug: "electrician",
-    needles: ["elektros darb", "instaliac", "электромонтаж"],
+    // "instaliac" alone read a water or gas installation as electrical work
+    // (#1689, measured 2026-09-12) — the electrical forms only
+    needles: ["elektros darb", "elektros instaliac", "elektrine instaliac", "elektrinė instaliac", "электромонтаж"],
   },
   { slug: "plumber", needles: ["santechnik darb", "сантехнические работ"] },
   {
@@ -2661,11 +2739,15 @@ export const ACTIVITY_HINTS_LT: {
     needles: ["daž", "dazym", "красил", "покраск", "маляр"],
   },
   { slug: "plumber", label: "Santechnika", needles: ["santechn", "сантехник"] },
-  { slug: "electrician", label: "Elektra", needles: ["elektr", "электр"] },
+  {
+    slug: "electrician",
+    label: "Elektra",
+    needles: ["elektros", "elektrik", "elektrine instaliac", "elektrinė instaliac", "elektromontaz", "elektromontaž", "elektrotechn", "электрик", "электромонтаж", "электропровод", "электрощит", "электроустанов", "электрическ", "электросет"],
+  },
   {
     slug: "carpenter",
     label: "Staliaus darbai",
-    needles: ["stali", "medien", "столярн", "плотник", "плотниц"],
+    needles: ["stalius", "staliaus", "staliui", "staliu", "staliai", "staliams", "staliais", "medien", "столярн", "плотник", "плотниц"],
   },
   {
     slug: "mason",
@@ -3019,6 +3101,30 @@ export const ACTIVITY_HINTS_LT: {
       "стриг газон",
       "косил трав",
       "сажал",
+    ],
+  },
+  // ── Partner search (issue #1689, the owner's own day) ────────────────────
+  // "5 val. programavau, 2 val. testavau, 2 val. ieškojau partnerių": the
+  // programming phrase was recognised, the other two timed phrases were not.
+  // Label-only (slug null): the hours get a kind of work; the matching
+  // `partnership-development` SKILL needle offers the link. A bare
+  // "testavau" deliberately gets NO activity row: the recognition tiers
+  // treat any activity label as a confident signal, and "Testavau
+  // aplikaciją" must stay a qa-testing CANDIDATE the person chooses
+  // (recognition-tiers.test.ts) — its hours are counted, honestly unlabelled.
+  // Placed last so every specific row keeps winning.
+  {
+    slug: null,
+    sector: "other",
+    label: "Partnerių paieška / bendradarbiavimas",
+    needles: [
+      "partneri",
+      "partneryst",
+      "partnership",
+      "partners",
+      "bendradarbiavimo galimyb",
+      "партнер",
+      "сотрудничеств",
     ],
   },
 ];

@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 
 import { loadCalendarResult } from "@/lib/planning/calendar-result";
 import type { CalendarResultView } from "@/lib/planning/calendar-result";
+import { WeekStrip } from "@/components/app/workspace/week-strip";
+
 
 /**
  * THE CALENDAR RESULT — the Context Panel presentation of the Time Engine.
@@ -77,7 +79,7 @@ export function CalendarResult({
       data-testid="calendar-result-open-full"
       className="min-h-11 self-start rounded-full border border-ink-500 px-3.5 text-support font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue"
     >
-      {t("openFull")}
+      {t("station.calendar")}
     </button>
   );
 
@@ -145,6 +147,7 @@ export function CalendarResult({
   if (view.days.length === 0) {
     return (
       <div className="flex flex-col gap-3" data-testid="calendar-result-empty">
+        <WeekStrip week={view.week} label={t("calendarThisWeek")} />
         {partialNote}
         {conflictNote}
         <p className="text-basis text-text-secondary">
@@ -167,6 +170,7 @@ export function CalendarResult({
 
   return (
     <div className="flex flex-col gap-4" data-testid="calendar-result">
+      <WeekStrip week={view.week} label={t("calendarThisWeek")} />
       {partialNote}
       {conflictNote}
 
@@ -176,7 +180,7 @@ export function CalendarResult({
             <span
               className={
                 d.isToday
-                  ? "font-mono text-meta uppercase tracking-label text-brand-orange"
+                  ? "font-mono text-meta uppercase tracking-label text-text-muted"
                   : "font-mono text-meta uppercase tracking-label text-text-muted"
               }
             >

@@ -10,8 +10,13 @@
  *
  * Matching rules (documented in
  * docs/product/workforce-capacity-skill-gap-contract-v1.md):
- *   available  availability_status !== "unavailable" AND (available_from
- *              <= need start when both are known).
+ *   available  availability_status is KNOWN and !== "unavailable" AND
+ *              (available_from <= need start when both are known). A null
+ *              status is UNKNOWN availability, not free capacity: the worker
+ *              is reported in the headcount gap's `unknownWorkerIds`, never
+ *              counted as eligible (SEP-7 — the same null `match-v1` maps to
+ *              `unknown`). CAPABILITY (has the skill) stays a separate
+ *              question from AVAILABLE CAPACITY.
  *   free       no planned commitment overlaps the need window — INCLUSIVE
  *              calendar-day ranges, the exact booking-accept-guard
  *              semantics (rangesOverlapInclusive). Without a need window
@@ -30,6 +35,7 @@
  *
  * Pure module: no server-only import, no DB client, no IO.
  */
+import { languageLevelSatisfies } from "@/lib/market/match-criteria-v2";
 import { rangesOverlapInclusive } from "@/lib/planning/planning-model";
 import type {
   FutureWorkEntry,
@@ -118,6 +124,20 @@ export interface CapacityGap {
   readonly required: number;
   /** Workers that CAN cover this dimension (opaque ids). */
   readonly matchedWorkerIds: readonly string[];
+  /**
+   * Workers whose coverage of this dimension COULD NOT BE DETERMINED — as
+   * opposed to determined-and-negative, which is simply absence from
+   * `matchedWorkerIds`. Two dimensions produce this: the language dimension
+   * (a stated level outside the closed CEFR set ranks `null`) and the
+   * headcount / supervisor dimensions (a worker who FITS but whose
+   * availability status was never recorded). Guessing either way would put
+   * a number in front of an employer that the data does not support.
+   * `shortfall` counts these as NOT covered (the cautious reading), so a
+   * surface that ignores this field is conservative rather than wrong — but
+   * a surface that shows the shortfall should say how much of it is unknown
+   * rather than missing.
+   */
+  readonly unknownWorkerIds: readonly string[];
   readonly shortfall: number;
 }
 
@@ -143,6 +163,9 @@ export interface RequirementCapacity {
   readonly matchedWorkerIds: readonly string[];
   /** Fit + available but committed in the window — transfer candidates. */
   readonly busyMatchedWorkerIds: readonly string[];
+  /** Fit, but availability was never recorded — neither capacity nor a
+   *  proven miss. Also carried in `headcountGap.unknownWorkerIds`. */
+  readonly unknownAvailabilityWorkerIds: readonly string[];
   /** Right profession but missing required skills — training candidates. */
   readonly nearMissWorkerIds: readonly string[];
   readonly headcountGap: CapacityGap;
@@ -170,19 +193,14 @@ export interface CapacityAssessment {
 /* Deterministic matching helpers                                       */
 /* ------------------------------------------------------------------ */
 
-const CEFR_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
-
-/** level >= required on the CEFR ladder; "native" beats everything. */
-export function languageLevelSatisfies(
-  workerLevel: string,
-  requiredLevel: string,
-): boolean {
-  if (workerLevel === "native") return true;
-  const have = CEFR_ORDER.indexOf(workerLevel as (typeof CEFR_ORDER)[number]);
-  const need = CEFR_ORDER.indexOf(requiredLevel as (typeof CEFR_ORDER)[number]);
-  if (have === -1 || need === -1) return false;
-  return have >= need;
-}
+/**
+ * THE CEFR LADDER LIVES IN `match-criteria-v2`. This module used to carry its
+ * own copy, and the copies disagreed on the case that matters: the canonical
+ * one answers `null` when either level string is outside the closed set
+ * (unknown), while the copy answered `false` — so an unreadable level became
+ * "this worker does not speak it", and the employer was shown a headcount
+ * shortfall that may not exist. SEP-7: UNKNOWN is not FAILED.
+ */
 
 function norm(s: string): string {
   return s.trim().toLowerCase();
@@ -227,15 +245,25 @@ export function workerFitsRequirement(
   return covered >= Math.ceil(requirement.skills.length / 2);
 }
 
-function isAvailable(
-  worker: WorkerCapacityInput,
+export type CapacityAvailability = "available" | "unavailable" | "unknown";
+
+/**
+ * THREE answers, not two. A worker whose `availability_status` was never
+ * recorded is UNKNOWN — not free. Before 2026-09-20 this returned `true` for
+ * `null`, so every unmeasured person on the roster counted as eligible
+ * capacity while `match-v1` mapped the same null to `unknown`.
+ */
+export function availabilityOf(
+  worker: Pick<WorkerCapacityInput, "availabilityStatus" | "availableFrom">,
   needStart: string | null,
-): boolean {
-  if (worker.availabilityStatus === "unavailable") return false;
+): CapacityAvailability {
+  const status = (worker.availabilityStatus ?? "").trim();
+  if (status.length === 0) return "unknown";
+  if (status === "unavailable") return "unavailable";
   if (worker.availableFrom && needStart && worker.availableFrom > needStart) {
-    return false;
+    return "unavailable";
   }
-  return true;
+  return "available";
 }
 
 function isFree(
@@ -288,6 +316,7 @@ function gap(
   subject: string | null,
   required: number,
   matchedWorkerIds: readonly string[],
+  unknownWorkerIds: readonly string[] = [],
 ): CapacityGap {
   return {
     kind,
@@ -295,6 +324,7 @@ function gap(
     subject,
     required,
     matchedWorkerIds,
+    unknownWorkerIds,
     shortfall: Math.max(0, required - matchedWorkerIds.length),
   };
 }
@@ -313,9 +343,11 @@ function assessRequirement(
   const eligible: string[] = [];
   const busyFit: string[] = [];
   const nearMiss: string[] = [];
+  const unknownAvailability: string[] = [];
 
   for (const w of workers) {
-    const available = isAvailable(w, needStart);
+    const availability = availabilityOf(w, needStart);
+    const available = availability === "available";
     const fit = workerFitsRequirement(w, requirement);
     const free = isFree(
       commitmentsByWorker.get(w.workerId) ?? w.plannedCommitments,
@@ -324,6 +356,7 @@ function assessRequirement(
     );
     if (fit && available && free) eligible.push(w.workerId);
     else if (fit && available && !free) busyFit.push(w.workerId);
+    else if (fit && availability === "unknown") unknownAvailability.push(w.workerId);
     if (
       !fit &&
       requirement.professionSlug !== null &&
@@ -349,6 +382,7 @@ function assessRequirement(
     null,
     requirement.headcount,
     eligible,
+    unknownAvailability,
   );
 
   const requiredHours = requirement.totalHours;
@@ -393,23 +427,30 @@ function assessRequirement(
     ),
   );
 
-  const languageGaps = requirement.languages.map((need) =>
-    gap(
+  // THREE ANSWERS, NOT TWO. `languageLevelSatisfies` is now the canonical
+  // one, which returns `null` for a level string outside the closed CEFR set.
+  // A worker whose stated level cannot be ranked is neither a match nor a
+  // proven miss: they go in `unknownWorkerIds` so the shortfall can be
+  // reported with its uncertainty instead of silently absorbing it.
+  const languageGaps = requirement.languages.map((need) => {
+    const verdicts = eligibleWorkers.map((w) => {
+      const stated = w.languages.filter((l) => norm(l.lang) === norm(need.lang));
+      if (stated.length === 0) return { workerId: w.workerId, verdict: false as boolean | null };
+      // Best stated level wins: a `true` beats a `null` beats a `false`.
+      const results = stated.map((l) => languageLevelSatisfies(l.level, need.level));
+      if (results.some((r) => r === true)) return { workerId: w.workerId, verdict: true };
+      if (results.some((r) => r === null)) return { workerId: w.workerId, verdict: null };
+      return { workerId: w.workerId, verdict: false };
+    });
+    return gap(
       "language",
       requirement.id,
       need.lang,
       need.onePerTeamSufficient ? 1 : requirement.headcount,
-      eligibleWorkers
-        .filter((w) =>
-          w.languages.some(
-            (l) =>
-              norm(l.lang) === norm(need.lang) &&
-              languageLevelSatisfies(l.level, need.level),
-          ),
-        )
-        .map((w) => w.workerId),
-    ),
-  );
+      verdicts.filter((v) => v.verdict === true).map((v) => v.workerId),
+      verdicts.filter((v) => v.verdict === null).map((v) => v.workerId),
+    );
+  });
 
   const supervisorGap =
     requirement.kind === "supervisor"
@@ -422,12 +463,20 @@ function assessRequirement(
             .filter(
               (w) =>
                 workerCanSupervise(w) &&
-                isAvailable(w, needStart) &&
+                availabilityOf(w, needStart) === "available" &&
                 isFree(
                   commitmentsByWorker.get(w.workerId) ?? w.plannedCommitments,
                   needStart,
                   needEnd,
                 ),
+            )
+            .map((w) => w.workerId),
+          // A supervisor whose availability was never recorded is UNKNOWN
+          // supervision capacity — reported, never counted.
+          workers
+            .filter(
+              (w) =>
+                workerCanSupervise(w) && availabilityOf(w, needStart) === "unknown",
             )
             .map((w) => w.workerId),
         )
@@ -476,6 +525,7 @@ function assessRequirement(
     headcountRequired: requirement.headcount,
     matchedWorkerIds: eligible,
     busyMatchedWorkerIds: busyFit,
+    unknownAvailabilityWorkerIds: unknownAvailability,
     nearMissWorkerIds: nearMiss,
     headcountGap,
     hoursGap,

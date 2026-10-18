@@ -30,9 +30,8 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
     // The public job board — the highest-intent destination on the marketing
     // site, and one that shipped with no nav entry at all.
     ["jobs", "/jobs"],
-    ["workers", "/for-workers"],
-    ["companies", "/for-companies"],
-    ["agencies", "/for-agencies"],
+    // Owner window 11 §17 — the market map section's anchor.
+    ["market", "/#market"],
     // PR-H global landing: "how it works" is a REAL landing anchor (the
     // section that carries it is pinned by lib/guards/global-landing.test.ts)
     // — not a new route, not a dead link.
@@ -45,6 +44,37 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
     ["about", "/about"],
   ])("nav key %s links to %s", (key, href) => {
     expect(nav).toContain(`{ key: "${key}", href: "${href}"`);
+  });
+
+  /**
+   * THE THREE AUDIENCE PAGES LEFT THE BAR AND STAYED REACHABLE
+   * (owner window 11 §16).
+   *
+   * `Darbuotojams · Įmonėms · Agentūroms` in the primary navigation told every
+   * visitor they were one of three fixed kinds of person before they read a
+   * word of the page. The pages themselves are good and were NOT removed — so
+   * the guarantee this file used to make ("the nav names them") is replaced
+   * with the stronger one the owner actually asked for: **they remain reachable
+   * by name, from surfaces a person actually uses.**
+   *
+   * Two independent paths are required, so losing one is a failure rather than
+   * a silent single point of contact.
+   */
+  it.each([
+    ["/for-workers"],
+    ["/for-companies"],
+    ["/for-agencies"],
+  ])("%s is reachable from BOTH the footer and the starting-contexts section", (href) => {
+    const footer = read("components/layouts/site-footer.tsx");
+    const doors = read("lib/marketing/public-doors.ts");
+    expect(footer, `footer no longer links ${href}`).toContain(`href="${href}"`);
+    expect(doors, `no starting context offers ${href}`).toContain(`"${href}"`);
+  });
+
+  it("the starting-contexts section actually renders those learn-more links", () => {
+    const band = read("components/marketing/starting-contexts-band.tsx");
+    expect(band).toMatch(/learnMore/);
+    expect(band).toMatch(/context-learn-more-/);
   });
 
   it("template keys (solutions/resources/company/platform) are gone from the nav", () => {
@@ -71,6 +101,12 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
         // menuOpen/menuClose: the mobile disclosure button's accessible name
         // (beta foundation audit M1). Below `lg` the six primary links are
         // display:none, so the phone header needs its own labelled control.
+        //
+        // agencies/companies/workers: the LABELS stay in the catalogue after
+        // owner window 11 §16 removed their nav ITEMS, because the
+        // starting-contexts section and the footer still render them by name.
+        // A label without a nav item is not a template leftover — it is the
+        // audience page named where a person is actually choosing.
         [
           "about",
           "agencies",
@@ -81,6 +117,8 @@ describe("public nav uses the canonical IA (labels match destinations)", () => {
           // template leftovers this list exists to keep out.
           "jobs",
           "login",
+          // market: the §17 market-map anchor (owner window 11).
+          "market",
           "menuClose",
           "menuOpen",
           "pricing",
@@ -116,19 +154,17 @@ describe("footer matches the public IA and never duplicates 'about'", () => {
 });
 
 describe("canonical demand funnel — action CTAs route to /company-need only", () => {
-  it("landing employer-path card routes to /company-need (not /for-companies)", () => {
-    // The canonical page delegates through the shared V1 server assembler to
-    // the command surface, so depth 2 reaches the CTA without walking into
-    // unrelated application chrome.
-    // Both href forms — the JSX attribute and the CTA descriptor object. See
-    // the note in `public-market-entry.test.ts`.
+  it("landing employer-path door routes to /company-need (not /for-companies)", () => {
+    // One landing since the LIVE arm was removed (owner decision 2026-09-30):
+    // the employer path is the landing's door registry, which the starting
+    // contexts band renders. The ACTION goes to /company-need; the
+    // educational page stays only as its "learn more".
     const landing = landingTreeSource(APP_ROOT, 2);
-    const entryStart = landing.indexOf("className={styles.entryBand}");
-    const entryEnd = landing.indexOf("</section>", entryStart);
-    const employerPath = landing.slice(entryStart, entryEnd);
-    expect(entryStart).toBeGreaterThan(-1);
-    expect(employerPath).not.toMatch(/href[=:]\s*"\/for-companies"/);
-    expect(employerPath).toMatch(/href[=:]\s*"\/company-need"/);
+    expect(landing).toContain("StartingContextsBand");
+    const doors = read("lib/marketing/public-doors.ts");
+    const employer = /\{\s*key:\s*"employer"[^}]*\}/.exec(doors)?.[0] ?? "";
+    expect(employer).toMatch(/href:\s*"\/company-need"/);
+    expect(employer).not.toMatch(/href:\s*"\/for-companies"/);
   });
 
   it("for-companies hero CTA routes into /company-need (educational page, canonical action)", () => {
@@ -172,13 +208,8 @@ describe("the landing player-card is the CANONICAL card (owner audit §3.7)", ()
   // Supersedes the FUT-card stat-legend contract: the acronym codes left the
   // landing together with the concept cards. The canonical WorkerPlayerCard
   // explains itself with full localized labels, so no legend is needed.
-  it("showcase renders WorkerPlayerCard, never the FUT concept card or its stat codes", () => {
-    const showcase = read("components/marketing/player-card-showcase.tsx");
-    expect(showcase).toMatch(/WorkerPlayerCard/);
-    expect(showcase).not.toContain("<PlayerCard ");
-    expect(showcase).not.toContain("STAT_KEYS");
-    // No universal human score / medal tiers anywhere near the landing card.
-    expect(showcase).not.toMatch(/gold|silver|bronze|\bOVR\b/i);
+  it("the landing no longer mounts a sample player-card showcase (containment 2026-10-08)", () => {
+    expect(() => read("components/marketing/player-card-showcase.tsx")).toThrow();
   });
 
   it("the stat-code legend died with the concept card in every active locale (S3)", () => {

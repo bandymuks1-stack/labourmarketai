@@ -71,20 +71,76 @@ describe("the chain capabilities live on their canonical surfaces", () => {
     );
   });
 
-  it("the accept action still has exactly ONE caller and ONE write path", () => {
+  it("the accept action still has exactly ONE write path — two callers, one action, one core", () => {
     // The reason this row was cheap: unlike row 5 there was no second write
     // path to collapse. Moving the control must not have created one — so the
     // whole tree is scanned, not a hand-written file list.
+    //
+    // Owner contract 2026-09-04 §1a / ARCHITECTURE §5.5 (2026-09-05): the
+    // chat's attention item accepts the SAME roster invitation over the ONE
+    // dispatcher (`worker.respond-invitation`). That is a second CALLER of
+    // the one action, not a second write path — and the two assertions below
+    // keep it that way: nobody but the action reaches the accept core, and
+    // nobody but the dashboard card and the conversation executor reaches
+    // the action. A third name here is a regression to explain, never to add.
     const callers = sourceFiles()
       .filter((rel) => rel !== "lib/worker/invitation-actions.ts")
       .filter((rel) => read(rel).includes("acceptWorkerInvitationAction"));
-    expect(callers.sort()).toEqual(["components/app/worker-invitations.tsx"]);
+    expect(callers.sort()).toEqual([
+      "components/app/worker-invitations.tsx",
+      "lib/conversation/worker-executors.ts",
+    ]);
+    // ONE core behind the action: the SECURITY DEFINER accept RPCs are
+    // reached only through lib/worker/invitations.ts, and that core only
+    // through the action — the executor may not shortcut either.
+    const coreCallers = sourceFiles()
+      .filter((rel) => rel !== "lib/worker/invitations.ts")
+      .filter((rel) => /accept(Company|Agency)WorkerInvitation\b/.test(read(rel)));
+    expect(coreCallers.sort()).toEqual(["lib/worker/invitation-actions.ts"]);
+    const rpcCallers = sourceFiles()
+      .filter((rel) => rel !== "lib/worker/invitations.ts")
+      .filter((rel) => /["']accept_(company|agency)_worker_invitation["']/.test(read(rel)))
+      // The canonical-RPC allowlist and the generated DB types NAME every
+      // authenticated RPC; neither calls one.
+      .filter((rel) => rel !== "lib/security/canonical-authenticated-rpcs.ts" && rel !== "lib/supabase/types.ts");
+    expect(rpcCallers).toEqual([]);
   });
 });
 
 // The chain-actions card and its auth.dashboard.chainActions copy were
 // deleted with the second dashboard (W3 Package 4), so the copy checks left
 // with them — there is no surviving surface that reads those keys.
+
+describe("the chain is reachable from the worker's home — ŠIANDIEN (IA 2026-09-13 §2)", () => {
+  // The worker's `/dashboard` is a page now, not the chat. Its open items
+  // (entries owed a figure, unexplained plausibility checks) and its "my
+  // work" station link to the journal, where the review chain lives; the
+  // conversation — and the panel with the invitation control — is the
+  // composer right under ŠIANDIEN (owner decision 0017: the chat is the
+  // home, not a tab). Nothing on the page writes.
+  it("open items and the work station link to /dashboard/journal; no separate door to the chat", () => {
+    // The open items and the work row now live in the four-region home (D1).
+    const work = read("components/app/home/home-regions.tsx");
+    expect(work).toMatch(/href="\/dashboard\/journal"/);
+    expect(work).toMatch(/today-open-\$\{item\.kind\}/);
+    const screen = read("components/app/today/today-screen.tsx");
+    expect(screen).not.toMatch(/ask=1|ASK_PARAM/);
+  });
+
+  it("ŠIANDIEN performs no write of its own", () => {
+    for (const rel of [
+      "components/app/today/today-screen.tsx",
+      "components/app/home/home-regions.tsx",
+      "lib/home/home-server.ts",
+      "lib/home/home-state.ts",
+      "lib/today/today-server.ts",
+      "lib/today/today-model.ts",
+    ]) {
+      const src = read(rel);
+      expect(src, rel).not.toMatch(/<form\b|formAction|\.insert\(|\.update\(|\.upsert\(|\.delete\(/);
+    }
+  });
+});
 
 describe("the inbox review route is registered in the primary-route smoke", () => {
   it("primary-route-smoke lists /dashboard/inbox", () => {

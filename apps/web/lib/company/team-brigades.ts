@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 
 /**
  * Teams / brigades on the org spine (product-tree branch 13, §8.3) +
@@ -114,8 +115,10 @@ export type TeamBrigade = {
   /** Read-only honest counts from members' existing worker_skills; null when
    *  the summary RPC could not be read (never fabricated). */
   readonly capability: readonly TeamCapabilitySkill[] | null;
-  /** Company-linked workers not yet members of THIS team. */
-  readonly addable: readonly AddableTeamWorker[];
+  /** Company-linked workers not yet members of THIS team. `null` when the
+   *  company roster could not be read — UNKNOWN, never an empty picker that
+   *  claims nobody is left to add. */
+  readonly addable: readonly AddableTeamWorker[] | null;
   /** Team-scoped details (20260716130000); null = not saved yet OR the
    *  migration is not applied (see detailsApplied on the parent). */
   readonly details: TeamDetails | null;
@@ -145,7 +148,18 @@ export type TeamBrigadesData =
       readonly detailsApplied: boolean;
       /** team_enquiries (20260716131000) readable. */
       readonly enquiriesApplied: boolean;
+      /** Brigades this owner DISBANDED (archived, history kept), newest
+       *  first. Empty when there are none or they could not be read. */
+      readonly disbanded?: readonly DisbandedTeam[];
     };
+
+/** A disbanded brigade: the archived organization row, nothing rewritten. */
+export type DisbandedTeam = {
+  readonly id: string;
+  readonly name: string;
+  readonly createdAt: string;
+  readonly disbandedAt: string;
+};
 
 function nameOf(p: { full_name: string | null; email: string | null } | null): string {
   return p?.full_name ?? (p?.email ? p.email.split("@")[0] : "—");
@@ -169,6 +183,9 @@ function profEmail(v: unknown): string | null {
 }
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
+
+/** The invitable-pool ceiling — the canonical roster read's own bound. */
+const POOL_READ_LIMIT = 50;
 
 /**
  * Readiness probe: the capability RPC only exists once the owner applied
@@ -344,6 +361,10 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
     .select("id, display_name, legal_name, created_at")
     .eq("owner_profile_id", user.id)
     .eq("organization_type", "team")
+    // ACTIVE brigades only. A disbanded brigade is an archived organization
+    // (disband_team_v1): history, read separately below, and no longer
+    // counted by create_team_v1's cap of 20 — which is also this limit.
+    .is("archived_at", null)
     .order("created_at", { ascending: true })
     .limit(20);
   if (orgError) {
@@ -423,16 +444,28 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
   // Invitable pool: workers ALREADY linked to the caller's company via the
   // existing invite/accept flow (company_workers, RLS owns_company). We never
   // enumerate strangers — same rule as lib/operations/org-members.ts. The
-  // email is used ONLY server-side to match pending invitations; it is never
-  // exported to the client.
-  const { data: linkRows } = await asAny(supabase)
-    .from("company_workers")
-    .select("worker_id, workers(profile_id, profiles(full_name, email))")
-    .eq("status", "active");
-  const pool: { worker: AddableTeamWorker; email: string | null }[] = (
-    (linkRows ?? []) as { worker_id: string | null; workers: unknown }[]
-  )
-    .map((r) => {
+  // email is used ONLY server-side to match pending invitations (the ledger
+  // is email-keyed); it is never exported to the client.
+  //
+  // SCOPED AND BOUNDED (scale contract, >= 1M users): the read names the
+  // company the caller is acting for (the ONE employer context resolver —
+  // RLS's owns_company stays the second lock) and takes at most
+  // POOL_READ_LIMIT rows, the same ceiling the canonical roster read uses.
+  // A failed read is UNKNOWN (`pool = null`), never an empty picker.
+  const employer = await resolveEmployerCompanyContext();
+  const companyId = employer.kind === "ok" ? employer.companyId : null;
+  const linkRes = companyId
+    ? await asAny(supabase)
+        .from("company_workers")
+        .select("worker_id, workers(profile_id, profiles(full_name, email))")
+        .eq("company_id", companyId)
+        .eq("status", "active")
+        .limit(POOL_READ_LIMIT)
+    : { data: null, error: { code: "no-company" } };
+  const linkRows = linkRes.error ? null : (linkRes.data ?? []);
+  const pool: { worker: AddableTeamWorker; email: string | null }[] | null = (
+    linkRows as { worker_id: string | null; workers: unknown }[] | null
+  )?.map((r) => {
       const w = (Array.isArray(r.workers) ? r.workers[0] : r.workers) as
         | { profile_id: string | null; profiles: unknown }
         | null;
@@ -447,7 +480,73 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
         email: profEmail(w.profiles),
       };
     })
-    .filter((x): x is { worker: AddableTeamWorker; email: string | null } => x !== null);
+    .filter((x): x is { worker: AddableTeamWorker; email: string | null } => x !== null) ?? null;
+
+  // People who joined THIS organization through an invitation hold the
+  // canonical engagement only (no company_workers row) — the same split
+  // #2268/#2270 closed for People and the planner. They are the owner's own
+  // employees, so they belong in the invitable pool too (RLS: engagement
+  // reads need manages_organization; worker rows follow can_view_worker).
+  if (pool !== null && employer.kind === "ok") {
+    const { data: ecRows } = await asAny(supabase)
+      .from("engagement_contexts")
+      .select("profile_id")
+      .eq("organization_id", employer.organizationId)
+      .eq("status", "active")
+      .in("relationship_slug", [...TEAM_POOL_ENGAGEMENT_SLUGS])
+      .limit(POOL_READ_LIMIT);
+    const known = new Set(pool.map((x) => x.worker.profileId));
+    const profiles = ((ecRows ?? []) as { profile_id: string | null }[])
+      .map((r) => r.profile_id)
+      .filter((id): id is string => Boolean(id) && !known.has(id as string) && id !== user.id);
+    if (profiles.length > 0) {
+      const { data: wRows } = await asAny(supabase)
+        .from("workers")
+        .select("id, profile_id, display_name")
+        .in("profile_id", profiles);
+      for (const w of (wRows ?? []) as { id: string; profile_id: string; display_name: string | null }[]) {
+        pool.push({
+          worker: { workerId: w.id, profileId: w.profile_id, name: w.display_name?.trim() || "—", invitePending: false },
+          email: null,
+        });
+      }
+    }
+  }
+
+  // NAMES. `profiles` is own-row under RLS, so the embedded full_name is null
+  // for every OTHER person and the picker and the member list printed "—" for
+  // everyone (production walk 2026-10-12: the owner could not tell who they
+  // were inviting). The worker card's display_name is readable to the
+  // manager through can_view_worker — the same predicate that lets the
+  // manager see the person at all — so it names them; nothing is widened.
+  const unnamed = new Set<string>();
+  for (const list of membersByTeam.values()) for (const m of list) if (m.name === "—") unnamed.add(m.profileId);
+  for (const p of pool ?? []) if (p.worker.name === "—") unnamed.add(p.worker.profileId);
+  if (unnamed.size > 0) {
+    const { data: named } = await asAny(supabase)
+      .from("workers")
+      .select("profile_id, display_name")
+      .in("profile_id", [...unnamed])
+      .limit(POOL_READ_LIMIT);
+    const byProfile = new Map<string, string>();
+    for (const w of (named ?? []) as { profile_id: string | null; display_name: string | null }[]) {
+      const n = w.display_name?.trim();
+      if (w.profile_id && n) byProfile.set(w.profile_id, n);
+    }
+    for (const [teamId, list] of membersByTeam) {
+      membersByTeam.set(
+        teamId,
+        list.map((m) => (m.name === "—" && byProfile.has(m.profileId) ? { ...m, name: byProfile.get(m.profileId)! } : m)),
+      );
+    }
+    if (pool) {
+      for (const p of pool) {
+        if (p.worker.name === "—" && byProfile.has(p.worker.profileId)) {
+          p.worker = { ...p.worker, name: byProfile.get(p.worker.profileId)! };
+        }
+      }
+    }
+  }
 
   const teams: TeamBrigade[] = [];
   for (const t of teamRows) {
@@ -486,13 +585,16 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
       createdAt: t.created_at,
       members,
       capability,
-      addable: pool
-        .filter((p) => !memberProfileIds.has(p.worker.profileId))
-        .map((p) => ({
-          ...p.worker,
-          invitePending:
-            p.email !== null && (pendingEmails?.has(p.email) ?? false),
-        })),
+      addable:
+        pool === null
+          ? null
+          : pool
+              .filter((p) => !memberProfileIds.has(p.worker.profileId))
+              .map((p) => ({
+                ...p.worker,
+                invitePending:
+                  p.email !== null && (pendingEmails?.has(p.email) ?? false),
+              })),
       details: details.byTeam.get(t.id) ?? null,
       enquiries: enquiries.byTeam.get(t.id) ?? [],
     });
@@ -505,7 +607,73 @@ export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
     invitationsApplied: ledger.applied,
     detailsApplied: details.applied,
     enquiriesApplied: enquiries.applied,
+    disbanded: await readDisbandedTeams(supabase, user.id),
   };
+}
+
+/** The owner's disbanded brigades (archived team orgs), newest first. A read
+ *  failure answers an empty list: the active panel must never fail because
+ *  the history line could not be read. */
+async function readDisbandedTeams(supabase: DB, ownerId: string): Promise<DisbandedTeam[]> {
+  const { data, error } = await asAny(supabase)
+    .from("organizations")
+    .select("id, display_name, legal_name, created_at, archived_at")
+    .eq("owner_profile_id", ownerId)
+    .eq("organization_type", "team")
+    .not("archived_at", "is", null)
+    .order("archived_at", { ascending: false })
+    .limit(20);
+  if (error || !Array.isArray(data)) return [];
+  return (
+    data as {
+      id: string;
+      display_name: string | null;
+      legal_name: string | null;
+      created_at: string;
+      archived_at: string;
+    }[]
+  ).map((r) => ({
+    id: r.id,
+    name: r.display_name ?? r.legal_name ?? "—",
+    createdAt: r.created_at,
+    disbandedAt: r.archived_at,
+  }));
+}
+
+export type DisbandTeamOutcome =
+  | "disbanded"
+  | "already_disbanded"
+  | "not_found"
+  | "has_open_work"
+  | "member_end_failed"
+  | "needs_migration"
+  | "error";
+
+/** Disband a brigade through the gated disband_team_v1 RPC: members'
+ *  memberships end through the canonical lifecycle writer, the brigade is
+ *  archived, nothing is deleted. Refused while the brigade has open work. */
+export async function disbandTeamBrigade(teamId: string): Promise<{ outcome: DisbandTeamOutcome }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { outcome: "error" };
+  const { data, error } = await rpc(supabase, "disband_team_v1", { p_team_id: teamId });
+  if (error) {
+    if (error.code === RPC_NOT_FOUND_CODE || error.code === "PGRST202") return { outcome: "needs_migration" };
+    return { outcome: "error" };
+  }
+  const code = String(data ?? "");
+  if (
+    code === "disbanded" ||
+    code === "already_disbanded" ||
+    code === "not_found" ||
+    code === "has_open_work" ||
+    code === "member_end_failed"
+  ) {
+    return { outcome: code };
+  }
+  return { outcome: "error" };
 }
 
 export type CreateTeamOutcome =
@@ -545,8 +713,14 @@ export async function createTeamBrigade(
   return { outcome: "error", message: code || "unknown" };
 }
 
+/** Relationships whose people the owner may invite into a brigade. */
+const TEAM_POOL_ENGAGEMENT_SLUGS = ["employee", "collaborator", "freelancer"] as const;
+
 /** The worker's own email for a company-linked worker — server-side ONLY,
- *  used to address the consent invitation; never returned to the client. */
+ *  used to address the consent invitation; never returned to the client.
+ *  `profiles` is own-row-only under RLS, so this usually answers null —
+ *  the panel then asks the owner for the address (walk 2026-10-11: every
+ *  brigade invitation ended `no_email` and no crew could be formed). */
 export async function lookupLinkedWorkerEmail(
   workerId: string,
 ): Promise<string | null> {

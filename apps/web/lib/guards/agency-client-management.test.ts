@@ -34,7 +34,7 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 const MIGRATION = "supabase/migrations/20260713160000_agency_clients_v1.sql";
 const ROLLBACK = "supabase/rollbacks/20260713160000_agency_clients_v1.down.sql";
 
-const companyPage = read("app/[locale]/dashboard/company/page.tsx");
+const companyPage = read("app/[locale]/dashboard/company/partners/page.tsx");
 const clientsLib = read("lib/agency/clients.ts");
 const clientsModel = read("lib/agency/clients-model.ts");
 const clientsActions = read("lib/agency/clients-actions.ts");
@@ -46,18 +46,17 @@ describe("1. renders ONLY under the staffing_agency company type", () => {
     expect(
       companyPage.match(/<AgencyClientsSection/g) ?? [],
     ).toHaveLength(1);
-    const condIdx = companyPage.indexOf(
-      'companyRow.companyType === "staffing_agency" ? (',
-    );
+    // The Partners door branches on the company type ONCE, before any
+    // agency read; the section renders inside that branch.
+    const condIdx = companyPage.indexOf("if (isStaffingAgency) {");
     const sectionIdx = companyPage.indexOf("<AgencyClientsSection");
     expect(condIdx).toBeGreaterThan(-1);
     expect(sectionIdx).toBeGreaterThan(condIdx);
   });
 
   it("client/demand data is fetched only in staffing-agency mode", () => {
-    expect(companyPage).toMatch(
-      /const isStaffingAgency = companyRow\?\.companyType === "staffing_agency"/,
-    );
+    // the ONE agency rule (owner decision 2026-09-28): type OR declared role
+    expect(companyPage).toMatch(/const isStaffingAgency = await readActsAsAgency\(/);
     // The invariant is the CONDITIONAL — never the `await` keyword. Both
     // reads now sit inside the page's batched `Promise.all` (the serial
     // waterfall this dashboard used to run was the measured reason it felt
@@ -65,12 +64,16 @@ describe("1. renders ONLY under the staffing_agency company type", () => {
     // unchanged and still pinned: in any mode but staffing-agency the
     // expression is `null` and NOTHING is fetched. `await` is optional here
     // precisely so batching stays allowed; the ternary is not.
-    expect(companyPage).toMatch(
-      /isStaffingAgency \? (await )?listAgencyClients\(\) : null/,
+    // Both reads sit inside the `if (isStaffingAgency)` branch's batch — in
+    // any other mode the branch is never entered and NOTHING is fetched.
+    const branch = companyPage.slice(
+      companyPage.indexOf("if (isStaffingAgency) {"),
+      companyPage.indexOf("// Client side:"),
     );
-    expect(companyPage).toMatch(
-      /isStaffingAgency \? (await )?listAgencyDemands\(\) : null/,
-    );
+    expect(branch).toMatch(/listAgencyClients\(\)/);
+    expect(branch).toMatch(/listAgencyDemands\(\)/);
+    const outside = companyPage.replace(branch, "");
+    expect(outside).not.toMatch(/listAgencyClients\(\)/);
   });
 
   it("no new agency dashboard route exists — the legacy trio stays redirect stubs", () => {
@@ -159,12 +162,32 @@ describe("4. the owner gate is honest", () => {
     }
   });
 
-  it("APPLIED_LEDGER.md carries the Deferred entry", () => {
+  it("APPLIED_LEDGER.md records the migration as APPLIED, with its ledger name", () => {
+    // Until 2026-09-14 this asserted the entry sat under "## Deferred", which
+    // was the honest state while the owner gate was open. The owner approved it
+    // (decision round item 4d) and it was applied via Supabase MCP, so the
+    // ledger now carries an APPLIED record instead — asserting "still deferred"
+    // would now be the dishonest half.
     const ledger = readFileSync(join(REPO, "docs/APPLIED_LEDGER.md"), "utf8");
-    const deferredIdx = ledger.indexOf("## Deferred");
-    const entryIdx = ledger.indexOf("20260713160000_agency_clients_v1");
-    expect(deferredIdx).toBeGreaterThan(-1);
-    expect(entryIdx).toBeGreaterThan(deferredIdx);
+    const applied = ledger.indexOf(
+      "✅ APPLIED TO PROD — `20260713160000_agency_clients_v1`",
+    );
+    expect(
+      applied,
+      "the ledger must record agency_clients_v1 as applied, not merely mention it",
+    ).toBeGreaterThan(-1);
+
+    // Matching is on the ledger NAME, never the repo filename's timestamp —
+    // apply-time versions never match the filename, which is this ledger's own
+    // standing rule.
+    const record = ledger.slice(applied, applied + 3000);
+    expect(record).toContain("agency_clients_v1");
+    expect(record, "an applied record must name its rollback").toContain(
+      "supabase/rollbacks/20260713160000_agency_clients_v1.down.sql",
+    );
+    // The Model B scope note is load-bearing: applying this must never be read
+    // as reviving the retired Model A pool world (ORG-10).
+    expect(record).toMatch(/owns_company/);
   });
 
   it("the read service degrades honestly (42P01/PGRST205 → needs-migration; 42703 → not linkable)", () => {

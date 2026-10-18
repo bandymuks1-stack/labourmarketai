@@ -1,0 +1,881 @@
+import { getTranslations } from "next-intl/server";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Ban,
+  Bell,
+  CheckCircle2,
+  CircleDashed,
+  FileWarning,
+  Handshake,
+  Play,
+  UserPlus,
+  Users,
+} from "lucide-react";
+
+import { Link } from "@/lib/i18n/navigation";
+import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
+import { createUtcFormatter } from "@/lib/time/display";
+import { CAPABILITY_CHOICES } from "@/lib/organizations/capability-choices";
+import type { CustomerRequestRow } from "@/lib/buyer/customer-requests";
+import type { ClientConnectionInvite } from "@/lib/agency/bridge-model";
+import type { AgencyClient } from "@/lib/agency/clients-model";
+import {
+  COMPANY_HOME_BLOCK_LIMIT,
+  attentionChipHref,
+  deriveNeedFit,
+  deriveOutlookGaps,
+  selectOpenNeeds,
+  type RiskSignal,
+} from "@/lib/company/company-home-field-model";
+import type { CompanyHomeField, HomeProjectRow } from "@/lib/company/company-home-field";
+
+/**
+ * THE ORGANISATION'S HOME — projects in time × who is free (frozen design
+ * contract §2.6 C1, §5 P5; design system §I): capabilities strip → each active
+ * project as ONE row [now | next (derived) | risk] → four objects: who is free
+ * now · missing within 4 weeks · needs you · partners.
+ *
+ * An in-page section of the declared company surface (the #1453 shape), not a
+ * standalone card and not a second dashboard. NO conversation here — the chat
+ * stays on demand; every object leads to the SAME page or action the chat
+ * would dispatch (open project / operations / the need / planning / invite),
+ * so nothing is visual-only. No KPI tiles: a number appears only where it
+ * leads to an action. Empty states say what is true and offer the one next
+ * step. State is never carried by colour alone (edge + icon + text).
+ */
+
+type Tone = "now" | "next" | "risk" | "ok" | "quiet";
+
+const TONE_EDGE: Record<Tone, string> = {
+  now: "border-l-4 border-l-brand-cyan",
+  next: "border-l-4 border-l-ink-500 border-dashed",
+  risk: "border-l-4 border-l-state-amber",
+  ok: "border-l-4 border-l-state-success",
+  quiet: "border-l-4 border-l-ink-600",
+};
+
+const ACTION_LINK =
+  "inline-flex min-h-11 items-center gap-1.5 rounded-control border border-ink-500 bg-ink-800/40 px-3 py-2 text-xs font-medium text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
+const PRIMARY_LINK =
+  "inline-flex min-h-11 items-center gap-1.5 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
+
+export interface CompanyHomePartners {
+  /** Agencies connected to (or inviting) this company — client side of the bridge. */
+  readonly agencies: readonly ClientConnectionInvite[] | null;
+  /** The agency's own client records — staffing-agency mode only. */
+  readonly clients: readonly AgencyClient[] | null;
+  /** The company's own teams (brigades), when the model is applied. */
+  readonly teams: readonly { readonly id: string; readonly name: string; readonly members: number }[] | null;
+}
+
+export async function CompanyHomeFieldSection({
+  locale,
+  capabilities,
+  field,
+  needs,
+  partners,
+}: {
+  readonly locale: string;
+  readonly capabilities: readonly string[];
+  readonly field: CompanyHomeField;
+  readonly needs:
+    | { readonly kind: "ok"; readonly rows: readonly CustomerRequestRow[] }
+    | { readonly kind: "needs-migration" }
+    | { readonly kind: "error" };
+  readonly partners: CompanyHomePartners;
+}) {
+  const t = await getTranslations("companyHome");
+  const tRoot = await getTranslations();
+  const tStatus = await getTranslations("projects.map.status");
+  // UTC-pinned (W12): the canonical formatter handles date-only strings and
+  // returns null for absent/invalid input, so every empty state stays intact.
+  const day = createUtcFormatter(locale, { day: "numeric", month: "short" });
+
+  const declared = CAPABILITY_CHOICES.filter((c) => capabilities.includes(c.slug));
+  const statusLabel = (s: HomeProjectRow["status"]): string =>
+    s ? tStatus(s) : t("projects.status.unknown");
+
+  const riskLine = (s: RiskSignal): string => {
+    switch (s.code) {
+      case "overdue_tasks":
+        return t("projects.riskOverdue", { count: s.count });
+      case "blocked_stages":
+        return t("projects.riskBlocked", { count: s.count });
+      case "missing_documents":
+        return t("projects.riskDocs", { count: s.count });
+      case "nobody_on_live_project":
+        return t("projects.riskNobody");
+    }
+  };
+
+  // ── missing within 4 weeks: open needs + document gaps (already read) ──
+  const openNeeds = needs.kind === "ok" ? selectOpenNeeds(needs.rows) : [];
+  const docGaps =
+    field.projects.kind === "ok"
+      ? field.projects.rows
+          .map((r) => ({
+            projectId: r.projectId,
+            title: r.title,
+            count: r.risk.find((s) => s.code === "missing_documents")?.count ?? 0,
+          }))
+          .filter((g) => g.count > 0)
+      : [];
+
+  // ── capacity x needs: DERIVED from the SAME outlook the capacity box shows ──
+  const outlook = field.capacity.kind === "ok" ? (field.capacity.outlook ?? null) : null;
+  const gaps = deriveOutlookGaps(outlook);
+  const opportunityHref = "/dashboard/opportunities" as "/dashboard";
+
+  // ── partners: only from reads that exist for this company; omitted otherwise ──
+  const agencyRows = (partners.agencies ?? []).slice(0, COMPANY_HOME_BLOCK_LIMIT);
+  const clientRows = (partners.clients ?? []).slice(0, COMPANY_HOME_BLOCK_LIMIT);
+  const teamRows = (partners.teams ?? []).slice(0, COMPANY_HOME_BLOCK_LIMIT);
+  const partnersReadable =
+    partners.agencies !== null || partners.clients !== null || partners.teams !== null;
+  const partnerCount = agencyRows.length + clientRows.length + teamRows.length;
+
+  const projectsHref = "/dashboard/projects" as "/dashboard";
+  const planningHref = "/dashboard/company/planning" as "/dashboard";
+  const inviteHref = "/dashboard/network?type=join_as_employee" as "/dashboard";
+  const partnerInviteHref = "/dashboard/network" as "/dashboard";
+  // The doors (IA 2026-09-16): a need is asked for on the Needs door, a
+  // partner's invitation is answered on the Partners door — never an anchor
+  // into a section this screen no longer holds.
+  const needsHref = "/dashboard/company/needs#demand-intake" as "/dashboard";
+  const partnersHref = "/dashboard/company/partners#company-partners-bridge" as "/dashboard";
+
+  return (
+    <section
+      aria-labelledby="company-home-field-title"
+      data-testid="company-home-field"
+      className="flex flex-col gap-5 rounded-card border border-ink-600 border-t-2 border-t-brand-blue/50 bg-surface-1/40 p-4 sm:p-5"
+    >
+      {/* ── capabilities strip: what the organisation does, all at once ── */}
+      <header className="flex flex-col gap-2">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("eyebrow")}
+        </p>
+        <h2
+          id="company-home-field-title"
+          className="font-display text-xl font-semibold tracking-tightest text-text-primary"
+        >
+          {t("title")}
+        </h2>
+        <div className="flex flex-wrap items-center gap-1.5" data-testid="company-home-roles">
+          <span className="sr-only">{t("rolesLabel")}</span>
+          {declared.length > 0 ? (
+            declared.map((c) => (
+              <span
+                key={c.slug}
+                data-testid={`company-home-role-${c.slug}`}
+                className="rounded-full border border-ink-600 bg-surface-2/40 px-2.5 py-1 text-meta font-medium text-text-primary"
+              >
+                {tRoot(c.labelKey)}
+              </span>
+            ))
+          ) : (
+            <span className="text-meta text-text-muted">{t("rolesNone")}</span>
+          )}
+          <a
+            href="#company-capabilities"
+            className="ml-1 inline-flex min-h-11 items-center text-meta font-medium text-brand-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+            data-testid="company-home-roles-edit"
+          >
+            {t("rolesDeclare")} →
+          </a>
+        </div>
+      </header>
+
+      {/* ── projects in time: one row per active project ── */}
+      <div className="flex flex-col gap-2" data-testid="company-home-projects">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="font-display text-sm font-semibold text-text-primary">
+            {t("projects.heading")}
+          </h3>
+          {field.projects.kind === "ok" && field.projects.total > field.projects.rows.length ? (
+            <Link
+              href={projectsHref}
+              className="text-meta font-medium text-brand-blue hover:underline"
+              data-testid="company-home-projects-more"
+            >
+              {t("projects.more", { count: field.projects.total - field.projects.rows.length })} →
+            </Link>
+          ) : null}
+        </div>
+
+        {field.projects.kind === "ok" ? (
+          <>
+          {(() => {
+            const prs = field.projects.rows;
+            const unknown = prs.filter((p) => !p.riskKnown);
+            const codes = ["overdue_tasks", "blocked_stages", "missing_documents", "nobody_on_live_project"] as const;
+            const groups = codes
+              .map((code) => {
+                const hit = prs.filter((p) => p.riskKnown && p.risk.some((s) => s.code === code));
+                const total = hit.reduce((n, p) => n + (p.risk.find((s) => s.code === code)?.count ?? 0), 0);
+                return { code, projects: hit.length, total };
+              })
+              .filter((g) => g.projects > 0);
+            return (
+              <div
+                className="flex flex-col gap-2 rounded-card border border-ink-600 bg-ink-800/30 p-3"
+                data-testid="company-home-projects-summary"
+              >
+                {groups.length === 0 && unknown.length === 0 ? (
+                  <p className="inline-flex items-center gap-1.5 text-sm text-text-secondary">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-state-success" aria-hidden />
+                    {t("projects.riskNone")}
+                  </p>
+                ) : (
+                  <ul className="flex flex-col gap-1.5">
+                    {groups.map((g) => (
+                      <li
+                        key={g.code}
+                        className="inline-flex items-start gap-2 text-sm text-text-primary"
+                        data-testid={`company-home-risk-group-${g.code}`}
+                      >
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-state-amber" aria-hidden />
+                        <span className="min-w-0 break-words">
+                          {riskLine(
+                            g.code === "nobody_on_live_project"
+                              ? { code: g.code, count: 1 }
+                              : { code: g.code, count: g.total },
+                          )}
+                          <span className="ml-2 font-mono text-meta text-text-muted tabular-nums">
+                            {g.projects}/{prs.length}
+                          </span>
+                        </span>
+                      </li>
+                    ))}
+                    {unknown.length > 0 ? (
+                      <li
+                        className="inline-flex items-start gap-2 text-sm text-text-muted"
+                        data-testid="company-home-risk-group-unknown"
+                      >
+                        <CircleDashed className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                        <span className="min-w-0 break-words">
+                          {t("projects.riskUnknown")}
+                          <span className="ml-2 font-mono text-meta tabular-nums">
+                            {unknown.length}/{prs.length}
+                          </span>
+                        </span>
+                      </li>
+                    ) : null}
+                  </ul>
+                )}
+              </div>
+            );
+          })()}
+          {(() => {
+            const sorted = [...field.projects.rows].sort(
+              (a, b) => (b.riskKnown ? b.risk.length : 0) - (a.riskKnown ? a.risk.length : 0),
+            );
+            const VISIBLE = 4;
+            const render = (p: HomeProjectRow) => {
+              const nowTone: Tone =
+                p.timeline.now.kind === "in_progress"
+                  ? "now"
+                  : p.timeline.now.kind === "blocked"
+                    ? "risk"
+                    : "quiet";
+              const riskTone: Tone = !p.riskKnown ? "quiet" : p.risk.length > 0 ? "risk" : "ok";
+              const summary = [
+                p.title,
+                statusLabel(p.status),
+                p.timeline.now.kind === "in_progress" || p.timeline.now.kind === "blocked"
+                  ? `${t("projects.now")}: ${p.timeline.now.name}`
+                  : t("projects.nowNone"),
+                p.riskKnown && p.risk.length > 0
+                  ? `${t("projects.risk")}: ${p.risk.map(riskLine).join(", ")}`
+                  : null,
+                t("projects.operations"),
+              ]
+                .filter(Boolean)
+                .join(" · ");
+              // A risk that most projects share is said ONCE in the summary above;
+              // the row names only what is particular to it.
+              const shared = (code: RiskSignal["code"]): boolean => {
+                const n = field.projects.kind === "ok"
+                  ? field.projects.rows.filter((r) => r.riskKnown && r.risk.some((s) => s.code === code)).length
+                  : 0;
+                const total = field.projects.kind === "ok" ? field.projects.rows.length : 0;
+                return total >= 3 && n >= 3 && n / total >= 0.6;
+              };
+              const ownRisk = p.riskKnown ? p.risk.filter((s) => !shared(s.code)) : [];
+              return (
+                <li key={p.projectId}>
+                  <article
+                    aria-label={summary}
+                    data-testid={`company-home-project-${p.projectId}`}
+                    className="flex min-w-0 flex-col gap-2 rounded-card border border-ink-600 bg-ink-800/40 p-3"
+                  >
+                    <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    {/* identity: name · status · people chips */}
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/dashboard/projects/${p.projectId}` as "/dashboard"}
+                          className="min-w-0 break-words font-display text-base font-semibold text-text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+                          data-testid="company-home-project-open"
+                        >
+                          {p.title}
+                        </Link>
+                        <span className="rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
+                          {statusLabel(p.status)}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Users className="h-3.5 w-3.5 text-text-muted" aria-hidden />
+                        <span className="text-meta text-text-secondary">
+                          {t("projects.peopleCount", { count: p.people })}
+                        </span>
+                        {p.peopleNames.map((n, i) => (
+                          <span
+                            key={`${p.projectId}-${i}`}
+                            className="rounded-full bg-ink-700 px-2 py-0.5 text-meta text-text-primary"
+                          >
+                            {n}
+                          </span>
+                        ))}
+                        {p.people > p.peopleNames.length ? (
+                          <span className="text-meta text-text-muted">
+                            +{p.people - p.peopleNames.length}
+                          </span>
+                        ) : null}
+                      </div>
+                      {ownRisk.length > 0 ? (
+                        <ul className="flex flex-col gap-0.5">
+                          {ownRisk.map((s) => (
+                            <li key={s.code} className="inline-flex items-start gap-1.5 text-meta text-text-primary">
+                              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-state-amber" aria-hidden />
+                              <span className="min-w-0 break-words">{riskLine(s)}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                    <div className="flex shrink-0 flex-wrap gap-2">
+                        <Link
+                          href={`/dashboard/projects/${p.projectId}/operations` as "/dashboard"}
+                          className={PRIMARY_LINK}
+                          data-testid="company-home-project-operations"
+                        >
+                          {t("projects.operations")}
+                          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                        </Link>
+                    </div>
+                    </div>
+                    <details className="group" data-testid="company-home-project-detail">
+                      <summary className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-primary">
+                        {t("projects.now")} · {t("projects.next")} · {t("projects.risk")}
+                      </summary>
+                      <div className="mt-2 grid gap-3 md:grid-cols-3">
+                    {/* NOW — a fact from stage status */}
+                    <div className={`flex min-w-0 flex-col gap-1 rounded-control bg-ink-900/40 px-3 py-2 ${TONE_EDGE[nowTone]}`}>
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        {t("projects.now")}
+                      </span>
+                      {p.timeline.now.kind === "in_progress" ? (
+                        <span className="inline-flex items-start gap-1.5 text-sm text-text-primary">
+                          <Play className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-cyan" aria-hidden />
+                          <span className="min-w-0 break-words">{p.timeline.now.name}</span>
+                        </span>
+                      ) : p.timeline.now.kind === "blocked" ? (
+                        <span className="inline-flex items-start gap-1.5 text-sm text-text-primary">
+                          <Ban className="mt-0.5 h-3.5 w-3.5 shrink-0 text-state-amber" aria-hidden />
+                          <span className="min-w-0 break-words">
+                            {t("projects.nowBlocked", { name: p.timeline.now.name })}
+                          </span>
+                        </span>
+                      ) : p.timeline.now.kind === "unavailable" ? (
+                        <span className="text-sm text-text-muted">{t("projects.stagesUnavailable")}</span>
+                      ) : (
+                        <span className="text-sm text-text-muted">{t("projects.nowNone")}</span>
+                      )}
+                      {p.timeline.total > 0 ? (
+                        <span className="font-mono text-meta text-text-muted tabular-nums">
+                          {t("projects.stagesDone", { done: p.timeline.done, total: p.timeline.total })}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {/* NEXT — derived from the stage order, said so */}
+                    <div className={`flex min-w-0 flex-col gap-1 rounded-control bg-ink-900/40 px-3 py-2 ${TONE_EDGE.next}`}>
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        {t("projects.next")}
+                      </span>
+                      {p.timeline.next.kind === "derived" ? (
+                        <>
+                          <span className="inline-flex items-start gap-1.5 text-sm text-text-primary">
+                            <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-secondary" aria-hidden />
+                            <span className="min-w-0 break-words">
+                              {p.timeline.next.name}
+                              {day(p.timeline.next.plannedStart)
+                                ? ` · ${t("projects.nextFrom", { date: day(p.timeline.next.plannedStart) ?? "" })}`
+                                : ""}
+                            </span>
+                          </span>
+                          <span className="text-meta italic text-text-muted" data-testid="company-home-next-derived">
+                            {t("projects.nextDerived")}
+                          </span>
+                        </>
+                      ) : p.timeline.next.kind === "unavailable" ? (
+                        <span className="text-sm text-text-muted">{t("projects.stagesUnavailable")}</span>
+                      ) : (
+                        <span className="text-sm text-text-muted">{t("projects.nextNone")}</span>
+                      )}
+                    </div>
+
+                    {/* RISK — the chat's project-risk facts, organisation context only */}
+                    <div className={`flex min-w-0 flex-col gap-1 rounded-control bg-ink-900/40 px-3 py-2 ${TONE_EDGE[riskTone]}`}>
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        {t("projects.risk")}
+                      </span>
+                      {!p.riskKnown ? (
+                        <span className="text-sm text-text-muted">{t("projects.riskUnknown")}</span>
+                      ) : p.risk.length === 0 ? (
+                        <span className="inline-flex items-center gap-1.5 text-sm text-text-secondary">
+                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-state-success" aria-hidden />
+                          {t("projects.riskNone")}
+                        </span>
+                      ) : (
+                        <ul className="flex flex-col gap-0.5">
+                          {p.risk.map((s) => (
+                            <li key={s.code} className="inline-flex items-start gap-1.5 text-sm text-text-primary">
+                              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-state-amber" aria-hidden />
+                              <span className="min-w-0 break-words">{riskLine(s)}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {p.people === 0 ? (
+                          <Link
+                            href={
+                              `/dashboard/network?type=join_project&project=${p.projectId}` as "/dashboard"
+                            }
+                            className={ACTION_LINK}
+                            data-testid="company-home-project-invite"
+                          >
+                            <UserPlus className="h-3.5 w-3.5" aria-hidden />
+                            {t("projects.invite")}
+                          </Link>
+                        ) : null}
+                      </div>
+                    </details>
+                  </article>
+                </li>
+              );
+            };
+            const rest = sorted.slice(VISIBLE);
+            return (
+              <>
+                <ol className="flex flex-col gap-2">{sorted.slice(0, VISIBLE).map(render)}</ol>
+                {rest.length > 0 ? (
+                  <details className="group" data-testid="company-home-projects-rest">
+                    <summary className="inline-flex min-h-11 cursor-pointer items-center font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+                      {t("projects.more", { count: rest.length })}
+                    </summary>
+                    <ol className="mt-2 flex flex-col gap-2">{rest.map(render)}</ol>
+                  </details>
+                ) : null}
+              </>
+            );
+          })()}
+          </>
+        ) : field.projects.kind === "empty" ? (
+          <div className="flex flex-col gap-2 rounded-card border border-dashed border-ink-500 p-4" data-testid="company-home-projects-empty">
+            <p className="text-sm text-text-secondary">{t("projects.empty")}</p>
+            <Link href="/dashboard/company/projects/new" className={`${PRIMARY_LINK} w-fit`}>
+              {t("projects.emptyCta")}
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </Link>
+          </div>
+        ) : field.projects.kind === "no-company" ? (
+          <p className="text-sm text-text-muted">{t("projects.noCompany")}</p>
+        ) : (
+          <p className="text-sm text-text-muted" data-testid="company-home-projects-error">
+            {t("projects.error")}
+          </p>
+        )}
+      </div>
+
+      {/* ── four objects ── */}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {/* capacity now — the chat's who-is-free read */}
+        <section
+          aria-labelledby="company-home-capacity-title"
+          data-testid="company-home-capacity"
+          className="flex min-w-0 flex-col gap-2 rounded-card border border-ink-600 bg-ink-800/40 p-3"
+        >
+          <h3 id="company-home-capacity-title" className="inline-flex items-center gap-1.5 font-display text-sm font-semibold text-text-primary">
+            <Users className="h-4 w-4 text-brand-cyan" aria-hidden />
+            {t("capacity.heading")}
+          </h3>
+          {field.capacity.kind === "ok" ? (
+            <>
+              <p className="font-mono text-meta text-text-muted">
+                {day(field.capacity.from) ?? field.capacity.from} – {day(field.capacity.to) ?? field.capacity.to}
+              </p>
+              {field.capacity.counts ? (
+                <p className="text-sm text-text-primary" data-testid="company-home-capacity-summary">
+                  {t("capacity.summary", {
+                    free: field.capacity.counts.free,
+                    committed: field.capacity.counts.committed,
+                    away: field.capacity.counts.unavailable,
+                  })}
+                </p>
+              ) : null}
+              <ul className="flex flex-col gap-1">
+                {field.capacity.rows.map((w) => {
+                  // The state in words — the same strings the row always carried.
+                  const stateText =
+                    w.state === "free"
+                      ? t("capacity.free")
+                      : w.state === "committed"
+                        ? [
+                            w.committedTo
+                              ? t("capacity.onWork", { project: w.committedTo })
+                              : t("capacity.booked"),
+                            w.undated
+                              ? t("capacity.undated")
+                              : w.unavailableUntil
+                                ? t("capacity.until", { date: day(w.unavailableUntil) ?? w.unavailableUntil })
+                                : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")
+                        : w.unavailableUntil
+                          ? t("capacity.awayUntil", { date: day(w.unavailableUntil) ?? w.unavailableUntil })
+                          : t("capacity.away");
+                  return (
+                    <li
+                      key={w.workerId}
+                      className={`min-w-0 rounded-control bg-ink-900/40 px-2.5 py-1.5 ${w.state === "free" ? TONE_EDGE.ok : TONE_EDGE.quiet}`}
+                      data-testid={`company-home-capacity-${w.state}`}
+                    >
+                      {/* ONE professional identity, compact: the same card the
+                          team list and the application read use. The state
+                          rides in its meta line; nothing else is invented. */}
+                      <PersonIdentityCard
+                        variant="roster-person"
+                        density="compact"
+                        testid={`company-home-capacity-identity-${w.workerId}`}
+                        name={w.label}
+                        initials={personMonogram(w.label)}
+                        professions={[]}
+                        meta={[
+                          {
+                            key: "state",
+                            kind: w.state === "committed" ? "assignment" : "availability",
+                            label: stateText,
+                            live: w.state === "free",
+                          },
+                        ]}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+              {field.capacity.outlook ? (
+                <div className="flex flex-col gap-1" data-testid="company-home-outlook">
+                  <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    {t("capacity.outlookHeading")}
+                  </p>
+                  <ol className="grid grid-cols-4 gap-1">
+                    {field.capacity.outlook.map((w) => (
+                      <li
+                        key={w.from}
+                        className={`flex flex-col items-center rounded-control bg-ink-900/40 px-1 py-1.5 ${w.free === 0 ? TONE_EDGE.quiet : TONE_EDGE.quiet}`}
+                        aria-label={t("capacity.outlookWeek", {
+                          date: day(w.from) ?? w.from,
+                          free: w.free,
+                          total: field.capacity.kind === "ok" ? field.capacity.rosterTotal : 0,
+                        })}
+                        data-testid="company-home-outlook-week"
+                      >
+                        <span className="font-mono text-base font-semibold tabular-nums text-text-primary">
+                          {w.free}
+                        </span>
+                        <span className="text-meta text-text-muted">{day(w.from) ?? w.from}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="text-meta italic text-text-muted">{t("capacity.outlookNote")}</p>
+                </div>
+              ) : null}
+              {!field.capacity.absencesKnown ? (
+                <p className="text-meta text-text-muted">{t("capacity.absencesUnknown")}</p>
+              ) : null}
+              {field.capacity.rosterTotal > field.capacity.rows.length ? (
+                <p className="text-meta text-text-muted">
+                  {t("capacity.more", { count: field.capacity.rosterTotal - field.capacity.rows.length })}
+                </p>
+              ) : null}
+              <div className="mt-auto flex flex-wrap gap-2 pt-1">
+                <Link href={projectsHref} className={PRIMARY_LINK} data-testid="company-home-capacity-assign">
+                  {t("capacity.assign")}
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                </Link>
+                <Link href={planningHref} className={ACTION_LINK}>
+                  {t("capacity.plan")}
+                </Link>
+              </div>
+            </>
+          ) : field.capacity.kind === "empty" ? (
+            <>
+              <p className="text-sm text-text-secondary">{t("capacity.empty")}</p>
+              <Link href={inviteHref} className={`${PRIMARY_LINK} mt-auto w-fit`} data-testid="company-home-capacity-invite">
+                <UserPlus className="h-3.5 w-3.5" aria-hidden />
+                {t("capacity.emptyCta")}
+              </Link>
+            </>
+          ) : (
+            <p className="text-sm text-text-muted">{t("capacity.error")}</p>
+          )}
+        </section>
+
+        {/* missing within 4 weeks — open needs + document gaps */}
+        <section
+          aria-labelledby="company-home-missing-title"
+          data-testid="company-home-missing"
+          className="flex min-w-0 flex-col gap-2 rounded-card border border-ink-600 bg-ink-800/40 p-3"
+        >
+          <h3 id="company-home-missing-title" className="inline-flex items-center gap-1.5 font-display text-sm font-semibold text-text-primary">
+            <CircleDashed className="h-4 w-4 text-state-amber" aria-hidden />
+            {t("missing.heading")}
+          </h3>
+          {gaps && (gaps.firstEmptyWeek || gaps.unclear > 0) ? (
+            <ul className="flex flex-col gap-1" data-testid="company-home-capacity-gaps">
+              {gaps.firstEmptyWeek ? (
+                <li className={`rounded-control bg-ink-900/40 px-2.5 py-1.5 text-sm text-text-primary ${TONE_EDGE.risk}`}>
+                  {t("missing.noOneFrom", { date: day(gaps.firstEmptyWeek) ?? gaps.firstEmptyWeek })}
+                </li>
+              ) : null}
+              {gaps.unclear > 0 ? (
+                <li className={`rounded-control bg-ink-900/40 px-2.5 py-1.5 text-sm text-text-secondary ${TONE_EDGE.quiet}`}>
+                  {t("missing.unclear", { count: gaps.unclear })}
+                </li>
+              ) : null}
+            </ul>
+          ) : null}
+          {openNeeds.length === 0 && docGaps.length === 0 && !(gaps && gaps.firstEmptyWeek) ? (
+            <p className="text-sm text-text-secondary">{t("missing.nothing")}</p>
+          ) : null}
+          {openNeeds.length > 0 ? (
+            <ul className="flex flex-col gap-1">
+              {openNeeds.map((n) => (
+                <li
+                  key={n.id}
+                  className={`flex flex-col gap-1 rounded-control border border-dashed border-ink-500 bg-ink-900/40 px-2.5 py-1.5`}
+                  data-testid="company-home-need"
+                >
+                  <span className="min-w-0 break-words text-sm text-text-primary">{n.title}</span>
+                  <span className="font-mono text-meta text-text-muted">
+                    {[
+                      n.teamSize ? t("missing.people", { count: n.teamSize }) : null,
+                      n.startPeriod ? t("missing.from", { period: n.startPeriod }) : null,
+                      n.location ?? null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || t(`missing.status.${n.status}`)}
+                  </span>
+                  {n.status !== "draft" && n.status !== "approved" ? (
+                    <span className="text-meta italic text-text-muted" data-testid="company-home-need-fit">
+                      {(() => {
+                        const fit = deriveNeedFit(n.teamSize, outlook);
+                        return fit.kind === "fits"
+                          ? t("missing.fit.fits")
+                          : fit.kind === "some"
+                            ? t("missing.fit.some")
+                            : fit.kind === "from"
+                            ? t("missing.fit.from", { date: day(fit.date) ?? fit.date })
+                            : fit.kind === "short"
+                              ? t("missing.fit.short", { count: fit.short })
+                              : t("missing.fit.unknown");
+                      })()}
+                    </span>
+                  ) : null}
+                  {n.status === "draft" ? (
+                    <Link href={needsHref} className={`${ACTION_LINK} w-fit`} data-testid="company-home-need-continue">
+                      {t("missing.continueDraft")}
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/dashboard/company/scouting?request=${n.id}` as "/dashboard"}
+                      className={`${ACTION_LINK} w-fit`}
+                      data-testid="company-home-need-open"
+                    >
+                      {t("missing.openNeed")}
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {docGaps.length > 0 ? (
+            <ul className="flex flex-col gap-1">
+              {docGaps.map((g) => (
+                <li
+                  key={g.projectId}
+                  className={`flex flex-col gap-1 rounded-control bg-ink-900/40 px-2.5 py-1.5 ${TONE_EDGE.risk}`}
+                  data-testid="company-home-doc-gap"
+                >
+                  <span className="inline-flex items-start gap-1.5 text-sm text-text-primary">
+                    <FileWarning className="mt-0.5 h-3.5 w-3.5 shrink-0 text-state-amber" aria-hidden />
+                    <span className="min-w-0 break-words">
+                      {t("missing.gapsRow", { count: g.count, project: g.title })}
+                    </span>
+                  </span>
+                  <Link
+                    href={`/dashboard/projects/${g.projectId}/operations` as "/dashboard"}
+                    className={`${ACTION_LINK} w-fit`}
+                  >
+                    {t("missing.gapsCta")}
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {field.interest.kind === "ok" && field.interest.waiting > 0 ? (
+            <div className="flex flex-col gap-1" data-testid="company-home-interest">
+              <span className="text-sm text-text-primary">
+                {t("missing.interest", { count: field.interest.waiting })}
+              </span>
+              <Link href={"/dashboard/company/scouting" as "/dashboard"} className={`${ACTION_LINK} w-fit`}>
+                {t("missing.interestCta")}
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+              </Link>
+            </div>
+          ) : null}
+          {gaps && gaps.peakFree > 0 && gaps.peakFreeFrom && openNeeds.every((n) => deriveNeedFit(n.teamSize, outlook).kind !== "short") ? (
+            <div className="flex flex-col gap-1" data-testid="company-home-opportunity">
+              <span className="text-sm text-text-primary">
+                {t("missing.opportunity", { count: gaps.peakFree, date: day(gaps.peakFreeFrom) ?? gaps.peakFreeFrom })}
+              </span>
+              <Link href={opportunityHref} className={`${ACTION_LINK} w-fit`}>
+                {t("missing.opportunityCta")}
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+              </Link>
+            </div>
+          ) : null}
+          <Link href={needsHref} className={`${PRIMARY_LINK} mt-auto w-fit`} data-testid="company-home-need-new">
+            {t("missing.needsCta")}
+          </Link>
+        </section>
+
+        {/* needs you — the chat's opening brief, without the chat */}
+        <section
+          aria-labelledby="company-home-attention-title"
+          data-testid="company-home-attention"
+          className="flex min-w-0 flex-col gap-2 rounded-card border border-ink-600 bg-ink-800/40 p-3"
+        >
+          <h3 id="company-home-attention-title" className="inline-flex items-center gap-1.5 font-display text-sm font-semibold text-text-primary">
+            <Bell className="h-4 w-4 text-brand-orange" aria-hidden />
+            {t("attention.heading")}
+          </h3>
+          {field.attention.kind === "brief" ? (
+            <>
+              <ul className="flex flex-col gap-1">
+                {field.attention.lines.map((line, i) => (
+                  <li
+                    key={i}
+                    className={`rounded-control bg-ink-900/40 px-2.5 py-1.5 text-sm text-text-primary ${TONE_EDGE.risk}`}
+                    data-testid="company-home-attention-line"
+                  >
+                    {line}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-auto flex flex-wrap gap-2 pt-1">
+                {field.attention.chips.map((chip) => {
+                  const href = attentionChipHref(chip.id);
+                  if (!href) return null;
+                  return href.includes("#") ? (
+                    <a key={chip.id} href={href.replace(/^\/dashboard\/company/, "")} className={ACTION_LINK}>
+                      {chip.label}
+                    </a>
+                  ) : (
+                    <Link key={chip.id} href={href as "/dashboard"} className={ACTION_LINK}>
+                      {chip.label}
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                    </Link>
+                  );
+                })}
+              </div>
+            </>
+          ) : field.attention.kind === "unavailable" ? (
+            <p className="inline-flex items-center gap-1.5 text-sm text-text-secondary" data-testid="company-home-attention-unavailable">
+              <AlertTriangle className="h-3.5 w-3.5 text-state-amber" aria-hidden />
+              {t("attention.unavailable")}
+            </p>
+          ) : (
+            <p className="inline-flex items-center gap-1.5 text-sm text-text-secondary" data-testid="company-home-attention-none">
+              <CheckCircle2 className="h-3.5 w-3.5 text-state-success" aria-hidden />
+              {t("attention.none")}
+            </p>
+          )}
+        </section>
+
+        {/* partners — only from reads that exist; omitted when none does */}
+        {partnersReadable ? (
+          <section
+            aria-labelledby="company-home-partners-title"
+            data-testid="company-home-partners"
+            className="flex min-w-0 flex-col gap-2 rounded-card border border-ink-600 bg-ink-800/40 p-3"
+          >
+            <h3 id="company-home-partners-title" className="inline-flex items-center gap-1.5 font-display text-sm font-semibold text-text-primary">
+              <Handshake className="h-4 w-4 text-brand-blue" aria-hidden />
+              {t("partners.heading")}
+            </h3>
+            {partnerCount === 0 ? (
+              <p className="text-sm text-text-secondary">{t("partners.empty")}</p>
+            ) : (
+              <ul className="flex flex-col gap-1">
+                {agencyRows.map((a) => (
+                  <li key={a.id} className={`flex flex-wrap items-center justify-between gap-1 rounded-control bg-ink-900/40 px-2.5 py-1.5 ${a.status === "pending" ? TONE_EDGE.risk : TONE_EDGE.quiet}`} data-testid="company-home-partner-agency">
+                    <span className="min-w-0 break-words text-sm text-text-primary">{a.agencyName}</span>
+                    <span className="text-meta text-text-secondary">
+                      {t("partners.agency")} · {a.status === "pending" ? t("partners.pending") : t(`partners.status.${a.status}`)}
+                    </span>
+                  </li>
+                ))}
+                {clientRows.map((c) => (
+                  <li key={c.id} className={`flex flex-wrap items-center justify-between gap-1 rounded-control bg-ink-900/40 px-2.5 py-1.5 ${TONE_EDGE.quiet}`} data-testid="company-home-partner-client">
+                    <span className="min-w-0 break-words text-sm text-text-primary">{c.name}</span>
+                    <span className="text-meta text-text-secondary">{t("partners.client")}</span>
+                  </li>
+                ))}
+                {teamRows.map((tm) => (
+                  <li key={tm.id} className={`flex flex-wrap items-center justify-between gap-1 rounded-control bg-ink-900/40 px-2.5 py-1.5 ${TONE_EDGE.quiet}`} data-testid="company-home-partner-team">
+                    <span className="min-w-0 break-words text-sm text-text-primary">{tm.name}</span>
+                    <span className="text-meta text-text-secondary">
+                      {t("partners.team")} · {t("partners.members", { count: tm.members })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-auto flex flex-wrap gap-2 pt-1">
+              {agencyRows.some((a) => a.status === "pending") ? (
+                <Link href={partnersHref} className={PRIMARY_LINK} data-testid="company-home-partners-answer">
+                  {t("partners.answer")}
+                </Link>
+              ) : null}
+              <Link href={partnerInviteHref} className={ACTION_LINK} data-testid="company-home-partners-invite">
+                <UserPlus className="h-3.5 w-3.5" aria-hidden />
+                {t("partners.invite")}
+              </Link>
+            </div>
+          </section>
+        ) : null}
+      </div>
+    </section>
+  );
+}

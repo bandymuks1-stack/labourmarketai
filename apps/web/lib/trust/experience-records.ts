@@ -275,10 +275,45 @@ export type ExperienceRow = {
    *  author/subject migration is unapplied (column absent): the UI then
    *  simply omits the author-side label — never a guess. */
   readonly authorSide: "person" | "organization" | null;
+  /**
+   * The subject's reply, when one exists AND this viewer may read it. RLS
+   * decides: the reply's author always sees their own; the experience's author
+   * sees it under the v1 select policy. `null` means no readable reply —
+   * distinguish that from `responsesRead: false` on the list state, which
+   * means nothing about replies is known here.
+   */
+  readonly response: ExperienceResponse | null;
+};
+
+/**
+ * The subject's REPLY to an experience written about them.
+ *
+ * `experience_responses` shipped with the v1 schema, a `submit_experience_response`
+ * RPC and a form — and NO reader anywhere in the product. A person could
+ * exercise their right of reply and no surface ever rendered it, to them or to
+ * anyone else. The write path was real; the reply simply went nowhere.
+ *
+ * The reply's own moderation status travels with it, because a submitted reply
+ * and a published one are different facts to both sides.
+ */
+export type ExperienceResponse = {
+  readonly body: string;
+  readonly moderationStatus: "submitted" | "in_moderation" | "published" | "rejected";
+  readonly createdAt: string | null;
 };
 
 export type ExperienceListState =
-  | { readonly state: "list"; readonly mine: ExperienceRow[]; readonly aboutMe: ExperienceRow[] }
+  | {
+      readonly state: "list";
+      readonly mine: ExperienceRow[];
+      readonly aboutMe: ExperienceRow[];
+      /**
+       * Whether the replies could be READ at all. False means the read failed
+       * or the table is absent — which is NOT the same as "there are no
+       * replies", and the surface must not say the latter. Unknown is not zero.
+       */
+      readonly responsesRead: boolean;
+    }
   | { readonly state: "needs_migration" }
   | { readonly state: "error" };
 
@@ -330,6 +365,7 @@ function mapRow(
   r: Record<string, unknown>,
   authorSideKnown: boolean,
   viewerProfileId: string | null,
+  responses?: ReadonlyMap<string, ExperienceResponse> | null,
 ): ExperienceRow {
   return {
     id: String(r.id),
@@ -347,7 +383,43 @@ function mapRow(
       : r.author_side === "organization"
         ? "organization"
         : "person",
+    response: responses?.get(String(r.id)) ?? null,
   };
+}
+
+/**
+ * The readable replies for a set of experience records, keyed by record id.
+ *
+ * A SEPARATE bounded read rather than an embedded join: the join would make one
+ * failing relation fail the whole list, and a person's experiences disappearing
+ * because their replies could not be read is a worse outcome than a card that
+ * says nothing about replies. `null` here means "not known", never "none".
+ *
+ * Authorization is the v1 select policy and nothing else — the reply's author
+ * always reads their own; the experience's author reads it under that policy's
+ * third branch. This function adds no filtering of its own.
+ */
+async function readResponsesFor(
+  recordIds: readonly string[],
+): Promise<Map<string, ExperienceResponse> | null> {
+  if (recordIds.length === 0) return new Map();
+  const sb = await createClient();
+  const { data, error } = await // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (sb as any)
+    .from("experience_responses")
+    .select("experience_record_id, body, moderation_status, created_at")
+    .in("experience_record_id", [...recordIds])
+    .limit(recordIds.length);
+  if (error) return null;
+  const out = new Map<string, ExperienceResponse>();
+  for (const row of (data ?? []) as Record<string, unknown>[]) {
+    out.set(String(row.experience_record_id), {
+      body: String(row.body ?? ""),
+      moderationStatus: row.moderation_status as ExperienceResponse["moderationStatus"],
+      createdAt: (row.created_at as string | null) ?? null,
+    });
+  }
+  return out;
 }
 
 /** Everything the caller may see, split by side. RLS returns author rows in
@@ -362,11 +434,15 @@ export async function listExperiencesForViewer(
     (q as any).order("submitted_at", { ascending: false }).limit(100),
   );
   if ("state" in res) return res;
-  const rows = res.rows.map((r) => mapRow(r, res.authorSideKnown, viewerProfileId));
+  const responses = await readResponsesFor(res.rows.map((r) => String(r.id)));
+  const rows = res.rows.map((r) =>
+    mapRow(r, res.authorSideKnown, viewerProfileId, responses),
+  );
   return {
     state: "list",
     mine: rows.filter((r) => r.isAuthor),
     aboutMe: rows.filter((r) => !r.isAuthor),
+    responsesRead: responses !== null,
   };
 }
 
@@ -385,6 +461,9 @@ export async function listModerationQueue(): Promise<ExperienceListState> {
     state: "list",
     mine: [],
     aboutMe: res.rows.map((r) => mapRow(r, res.authorSideKnown, null)),
+    // The queues moderate the RECORD. They do not read replies, so they claim
+    // nothing about them — `false` is "not known here", not "there are none".
+    responsesRead: false,
   };
 }
 
@@ -402,5 +481,8 @@ export async function listDisputeQueue(): Promise<ExperienceListState> {
     state: "list",
     mine: [],
     aboutMe: res.rows.map((r) => mapRow(r, res.authorSideKnown, null)),
+    // The queues moderate the RECORD. They do not read replies, so they claim
+    // nothing about them — `false` is "not known here", not "there are none".
+    responsesRead: false,
   };
 }

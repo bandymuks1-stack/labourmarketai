@@ -8,5 +8,9 @@
   "kilograms": "kg",
   "packages": "pakuotės",
   "box_per_day": "pakuotės/dieną",
-  "square_meters_per_day": "m²/dieną"
+  "square_meters_per_day": "m²/dieną",
+  "kilometers": "km",
+  "pallets": "paletės",
+  "covers": "svečiai",
+  "cases": "atvejai"
 }

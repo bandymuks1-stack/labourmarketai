@@ -159,10 +159,57 @@ test.describe("the profile leads with what it exists to edit", () => {
     }
   });
 
-  test("the quick nav offers the collapsed section", async ({ page }) => {
-    await open(page, 1280, 900, "quicknav");
-    const nav = page.locator("[data-testid='page-quick-nav']");
-    await expect(nav.locator("a[href='#cv-details']")).toHaveCount(1);
-    await expect(nav.locator("a[href='#profile-edit']")).toHaveCount(1);
+  /**
+   * SUMMARY FIRST (owner P0/P1 §17, 2026-09-23). The quick-nav strip existed
+   * because the page was a long open sheet; it is gone (IA 01 §4 "REMOVE
+   * (worker)"). What replaced it is a page that opens as summary → current
+   * state → action, with every editor a closed one-tap bar — and every anchor
+   * the strip (or anybody else) links still lands on an OPEN section.
+   */
+  test("summary first: no strip; the editor bars are closed on arrival", async ({ page }) => {
+    await open(page, 1280, 900, "summary");
+    await expect(page.locator("[data-testid='page-quick-nav']")).toHaveCount(0);
+    await expect(page.locator("main [data-testid='profile-hub-overview']")).toBeVisible();
+    for (const id of ["profile-edit", "cv-details", "capabilities", "profile-about"]) {
+      await expect(page.locator(`main #${id}`), `#${id} closed`).toHaveJSProperty("open", false);
+    }
+    // Organization history, when the account has any: a closed bar whose
+    // summary line is readable without opening it.
+    const history = page.locator("main #organization-history");
+    if ((await history.count()) > 0) {
+      await expect(history).toHaveJSProperty("open", false);
+      await expect(
+        history.locator("summary [data-testid^='organization-history-summary']"),
+      ).toBeVisible();
+    }
+  });
+
+  test("every anchor lands on an OPEN bar — and only on its own bar", async ({ page }) => {
+    for (const [hash, bar, other] of [
+      ["profile-edit", "profile-edit", "cv-details"],
+      ["profile-identity", "cv-details", "capabilities"],
+      ["candidate-skills", "capabilities", "cv-details"],
+      ["profile-about", "profile-about", "profile-edit"],
+    ] as const) {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.goto(`${ROUTE}?_=${hash}#${hash}`, { waitUntil: "domcontentloaded" });
+      await page.locator("h1").first().waitFor();
+      await expect(page.locator(`main #${bar}`), `#${hash} opens #${bar}`).toHaveJSProperty("open", true);
+      // Negative control: a hash aimed inside ONE bar never opens another.
+      await expect(page.locator(`main #${other}`), `#${hash} leaves #${other} closed`).toHaveJSProperty("open", false);
+    }
+  });
+
+  test("375 px: the summary-first page does not scroll sideways", async ({ page }) => {
+    await open(page, 375, 812, "m375");
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, "no horizontal page scroll at 375 px").toBeLessThanOrEqual(0);
+    for (const id of ["profile-edit", "cv-details", "capabilities", "profile-about"]) {
+      const box = await page.locator(`main #${id} > summary`).boundingBox();
+      expect(box, `#${id} summary rendered`).not.toBeNull();
+      expect(box!.height, `#${id} summary is a 44px tap target`).toBeGreaterThanOrEqual(44);
+    }
   });
 });

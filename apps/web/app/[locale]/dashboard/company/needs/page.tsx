@@ -1,0 +1,307 @@
+import { setRequestLocale, getTranslations } from "next-intl/server";
+import { UserSearch } from "lucide-react";
+
+import { Link } from "@/lib/i18n/navigation";
+import { requireRoleOrRedirect } from "@/lib/auth/require-role";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
+import {
+  getActiveOrganizationContext,
+  governedActiveOrganizationId,
+} from "@/lib/company/active-organization";
+import { actsAsAgency, resolveNeedsAudience } from "@/lib/company/agency-capability";
+import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
+import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
+import { listClaimablePublicIntakesState } from "@/lib/company/claim-public-intake";
+import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
+import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
+import { readDemandReadbackLabels } from "@/lib/company/company-section-labels";
+import { readOpenNeedsUsage } from "@/lib/billing/open-needs-usage-read";
+import { DemandRequestButton } from "@/components/app/demand-request-button";
+import { DemandRequestsReadback } from "@/components/app/demand-requests-readback";
+import { ClaimPublicIntakeCard } from "@/components/app/claim-public-intake-card";
+import { PublicDemandSection } from "@/components/app/public-demand-section";
+import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
+import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
+import { PageTitle } from "@/components/app/premium/page-title";
+
+// W3 rows 7/8/25: the employer demand kinds the owner readback is scoped to —
+// a dual-role user's buyer service requests stay in the buyer room.
+const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
+
+/**
+ * POREIKIAI — the organization's demand door (owner IA correction
+ * 2026-09-16, design/final/03 §2).
+ *
+ * The CANONICAL demand intake (the full describe → criteria → review wizard,
+ * structured v2, estimate builder, prefill, draft auto-continue) was the
+ * first section of the company hub; it is the first section here, under the
+ * same `#demand-intake` anchor every demand door in the product targets, so
+ * `/dashboard/company/needs#demand-intake` is the one address for "I need
+ * people". The readback of what was already asked for travels WITH it, and
+ * matching is one door further (`/dashboard/company/scouting`) — the next
+ * step is named at the top, never at the far end of a page.
+ */
+export default async function CompanyNeedsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ repeat?: string; audience?: string }>;
+}) {
+  const { locale } = await params;
+  // "Repeat this need": the past request id is only a HINT for the wizard's
+  // prefill; the server action re-checks ownership, kind and workspace.
+  const sp = await searchParams;
+  const repeatRaw = sp?.repeat ?? "";
+  const repeatRequestId =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(repeatRaw)
+      ? repeatRaw
+      : null;
+  setRequestLocale(locale);
+  await requireRoleOrRedirect(locale, "company");
+
+  const tNeeds = await getTranslations("organizationDoors.pages.needs");
+  const tNeedsAgency = await getTranslations("organizationDoors.pages.needsAgency");
+  const tWow = await getTranslations("auth.dashboard.wow");
+  const tFlow = await getTranslations("auth.dashboard.wow.flow");
+  const tReadback = await getTranslations("demandReadback");
+  const tClaim = await getTranslations("companyClaimIntake");
+
+  const employerCtx = await resolveEmployerCompanyContext();
+  // READ access (any governance role the resolver accepted).
+  const companyProfile =
+    employerCtx.kind === "ok" ? await getAccessibleCompanyById(employerCtx.companyId) : null;
+  const companyRow =
+    companyProfile && companyProfile.kind === "ok" ? companyProfile.row : null;
+  // Same rule as /dashboard/company: a row with no legal name is the unnamed
+  // shell the setup form completes, not a workspace (2026-09-19 — this page
+  // and /people let the shell through while the hub did not).
+  if (!companyRow || companyRow.legalName === null) {
+    return (
+      <div className="flex flex-col gap-6" data-testid="company-needs">
+        <CompanyNoProfileGuide
+          reason={employerCtx.kind === "ok" ? null : employerCtx.reason}
+          activeWorkspaceName={employerCtx.kind === "ok" ? null : employerCtx.activeWorkspaceName}
+        />
+      </div>
+    );
+  }
+  const orgContext = await getActiveOrganizationContext();
+  const capabilityOrgId =
+    orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id ??
+    // Only a GOVERNED active organization — never an employee-only one.
+    governedActiveOrganizationId(orgContext);
+  const declaredCapabilities = capabilityOrgId
+    ? await readOrganizationCapabilities(capabilityOrgId)
+    : [];
+  // ORG-2: agency is a capability (type OR declared workforce role), not the
+  // company type alone. An organization that is BOTH agency and client chooses
+  // its audience; the choice only selects an already-allowed demand kind.
+  const { audience, canChoose } = resolveNeedsAudience({
+    companyType: companyRow.companyType,
+    capabilities: declaredCapabilities,
+    requested: sp?.audience,
+  });
+  const isStaffingAgency = audience === "offer";
+  const actsAgency = actsAsAgency(companyRow.companyType, declaredCapabilities);
+  // SEP-4: an agency's page is about what it OFFERS; the wizard below runs
+  // with the `partner` intent (agency_offer) for exactly that reason.
+  const t = isStaffingAgency ? tNeedsAgency : tNeeds;
+
+  const [demandReadback, claimableState, rPendingInterest, readbackLabels, openNeedsUsage] =
+    await Promise.all([
+      listOwnCustomerRequests(EMPLOYER_DEMAND_KINDS),
+      listClaimablePublicIntakesState(),
+      listPendingInterestCountsForCompany(),
+      readDemandReadbackLabels(),
+      readOpenNeedsUsage(),
+    ]);
+
+  // An unverified address reads NOTHING from the intake queue (the service role is
+  // never reached); the page offers the progressive proof instead — and says
+  // nothing about whether an intake exists for that address.
+  const claimableIntakes = claimableState.status === "ok" ? claimableState.intakes : [];
+
+  // WHO IS WAITING — one localized line per demand that has hands raised.
+  // Resolved here because the plural form is a locale rule.
+  const pendingInterest = new Map<string, { count: number; label: string }>();
+  for (const [requestId, count] of rPendingInterest) {
+    if (count > 0) {
+      pendingInterest.set(requestId, {
+        count,
+        label: tReadback("interestWaiting", { count }),
+      });
+    }
+  }
+
+  // Intent follows the company's own type: a staffing agency supplies
+  // candidates (partner), any other company hires (hire_workers).
+  const demandIntent = isStaffingAgency ? ("partner" as const) : ("hire_workers" as const);
+  const demandPilotKey = demandIntent === "hire_workers" ? "hire" : "partner";
+
+  return (
+    <div className="flex flex-col gap-6" data-testid="company-needs">
+      <header className="flex flex-col gap-1">
+        <PageTitle>{t("title")}</PageTitle>
+        <p className="text-sm text-text-secondary">{t("subtitle")}</p>
+      </header>
+
+      {/* THE NEXT STEP FIRST: matching lives one door further. */}
+      <Link
+        href="/dashboard/company/scouting"
+        data-testid="company-needs-matching-door"
+        className="flex items-center gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-3 transition-colors hover:border-brand-blue"
+      >
+        <UserSearch className="h-5 w-5 shrink-0 text-brand-cyan" aria-hidden />
+        <span className="flex min-w-0 flex-col">
+          <span className="font-semibold text-text-primary">{tNeeds("matchingDoor")} →</span>
+          <span className="text-xs text-text-secondary">{tNeeds("matchingNote")}</span>
+        </span>
+      </Link>
+
+      {/* The CANONICAL demand intake. #demand-intake is the stable anchor
+          every demand door in the product targets. Position pinned by
+          `lib/guards/company-demand-first-action.test.ts`. */}
+      <section
+        id="company-requests"
+        className="card-border flex flex-col gap-5 p-5 scroll-mt-20 sm:p-6"
+        data-testid="company-dashboard-first-action"
+      >
+        <div
+          id="demand-intake"
+          data-testid="demand-intake-section"
+          className="flex flex-col gap-5 scroll-mt-20"
+        >
+          <div className="flex flex-col gap-1">
+            <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+              <span className="live-dot" aria-hidden />
+              {tFlow("company.eyebrow")}
+            </span>
+            <h2 className="font-display text-2xl font-semibold tracking-tightest text-text-primary">
+              {tWow(`demand.${demandPilotKey}.title`)}
+            </h2>
+            <p className="mt-1 max-w-prose text-sm leading-relaxed text-text-secondary">
+              {tWow(`demand.${demandPilotKey}.body`)}
+            </p>
+          </div>
+          {canChoose ? (
+            <div
+              className="flex flex-wrap gap-2"
+              role="group"
+              data-testid="company-needs-audience-choice"
+            >
+              <Link
+                href="/dashboard/company/needs?audience=need#demand-intake"
+                aria-current={!isStaffingAgency ? "true" : undefined}
+                className={`rounded-md border px-3 py-1.5 text-sm ${
+                  !isStaffingAgency
+                    ? "border-brand-cyan/60 bg-brand-cyan/10 text-text-primary"
+                    : "border-border text-text-secondary"
+                }`}
+                data-testid="company-needs-audience-need"
+              >
+                {tWow("demand.hire.title")}
+              </Link>
+              <Link
+                href="/dashboard/company/needs?audience=offer#demand-intake"
+                aria-current={isStaffingAgency ? "true" : undefined}
+                className={`rounded-md border px-3 py-1.5 text-sm ${
+                  isStaffingAgency
+                    ? "border-brand-cyan/60 bg-brand-cyan/10 text-text-primary"
+                    : "border-border text-text-secondary"
+                }`}
+                data-testid="company-needs-audience-offer"
+              >
+                {tWow("demand.partner.title")}
+              </Link>
+            </div>
+          ) : null}
+          <DemandRequestButton
+            intent={demandIntent}
+            stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
+            repeatRequestId={repeatRequestId}
+            usage={openNeedsUsage}
+          />
+          {/* HONEST VISIBILITY (2026-09-22): `list_open_demand_for_workers`
+              shows a need to workers ONLY when companies.verification_status
+              = 'verified' (migration 20260906140000, the join on
+              c.verification_status). Every other status — active_unverified,
+              needs_checks, pending_verification, unverified, draft — keeps the
+              need private to this company and the review team, so the page
+              says so in the person's language instead of implying a reach it
+              does not have. Status-aware: a verified company never sees it. */}
+          {companyRow.verificationStatus !== "verified" ? (
+            <p
+              className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-meta leading-relaxed text-text-secondary"
+              data-testid="company-needs-not-verified-note"
+              data-verification-status={companyRow.verificationStatus}
+            >
+              {tReadback("notVerifiedYet")}{" "}
+              {/* The way forward, not only the fact: the company setup screen
+                  holds the registration code and the optional review request
+                  an operator verifies against. Nothing is verified here. */}
+              <Link
+                href="/dashboard/start/company"
+                className="font-semibold text-text-primary underline underline-offset-4 hover:text-brand-blue"
+                data-testid="company-needs-not-verified-howto"
+              >
+                {tReadback("notVerifiedHowTo")}
+              </Link>
+            </p>
+          ) : null}
+          {/* Static-stepper honesty note (guarded): the steps show progress,
+              they are not live modules. */}
+          <p
+            className="text-meta leading-relaxed text-text-muted"
+            data-testid="journey-progress-helper"
+          >
+            {tWow("demand.progressHelper")}
+          </p>
+        </div>
+      </section>
+
+      {/* The ONE owner readback of what this organisation already asked for —
+          honest stored status only, with the per-demand scouting deep link. */}
+      <DemandRequestsReadback
+        result={demandReadback}
+        labels={readbackLabels}
+        locale={locale}
+        pendingInterest={pendingInterest}
+      />
+
+      {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC
+          /company-need submissions continue here as a real draft demand. */}
+      {claimableState.status === "email_unverified" ? (
+        <div id="company-claims-verify" className="scroll-mt-20">
+          <VerifyEmailPrompt locale={locale} next="/dashboard/company/needs" variant="intake" />
+        </div>
+      ) : null}
+      {claimableIntakes.length > 0 ? (
+        <div id="company-claims" className="scroll-mt-20">
+          <ClaimPublicIntakeCard
+            locale={locale}
+            intakes={claimableIntakes}
+            labels={{
+              title: tClaim("title"),
+              body: tClaim("body"),
+              claimCta: tClaim("claimCta"),
+              claimed: tClaim("claimed"),
+              error: tClaim("error"),
+              workersLabel: tClaim("workersLabel"),
+            }}
+          />
+        </div>
+      ) : null}
+
+      {/* Real market demand on the first session (never an empty
+          marketplace): the public vacancy pool for staffing agencies and
+          education institutions, with its provenance stated on the card. */}
+      {actsAgency || declaredCapabilities.includes("training_provider") ? (
+        <PublicDemandSection audience={actsAgency ? "agency" : "institution"} />
+      ) : null}
+
+      <CompanyScoutingBridge />
+    </div>
+  );
+}

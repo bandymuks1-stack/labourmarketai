@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatUtcDate } from "@/lib/time/display";
+import type { SkillMagnitude, SkillPracticeFacts } from "@/lib/cv-export/skill-presentation";
 
 export type EngagementCard = {
   id: string;
@@ -13,6 +14,12 @@ export type EngagementCard = {
   endedAt: string | null;
   title: string | null;
   isPrimary: boolean;
+  /** True only when this row is one the PERSON stated about themselves and
+   *  the database would let them take back: no organization behind it, and
+   *  not the primary engagement. Mirrors `remove_self_declared_work_history_v1`'s
+   *  own preconditions so a control is never offered where it cannot work;
+   *  the RPC re-checks all of them regardless. */
+  selfDeclared?: boolean;
 };
 
 export type SkillDot = {
@@ -24,6 +31,12 @@ export type SkillDot = {
   verified?: boolean;
   /** Stored verification provenance: self_declared | work_journal | manager_confirmed. */
   source?: string;
+  /** The journal's own figures for this skill (lib/cv-export/skill-presentation):
+   *  null when nothing is recorded OR the journal could not be read —
+   *  `magnitude` tells the two apart. */
+  practice?: SkillPracticeFacts | null;
+  /** Presentation band from those figures — a size for the eye, never a score. */
+  magnitude?: SkillMagnitude;
 };
 
 // Confidence bin → dot colour (§15). Literal bin name maps to literal colour.
@@ -95,7 +108,7 @@ export function CvEngagementCards({
                   </p>
                 </div>
                 {c.isPrimary && (
-                  <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-brand-orange">
+                  <span className="flex-none rounded-sm px-1 font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("primary")}
                   </span>
                 )}
@@ -159,7 +172,7 @@ export function CvEngagementCards({
                           );
                         })()}
                         {s.isCore && (
-                          <span className="rounded-sm px-1 font-mono text-meta uppercase tracking-label text-brand-orange">
+                          <span className="rounded-sm px-1 font-mono text-meta uppercase tracking-label text-text-muted">
                             {t("primary")}
                           </span>
                         )}

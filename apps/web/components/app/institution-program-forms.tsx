@@ -6,6 +6,7 @@ import {
   createCohortAction,
   createProgramAction,
   setCohortMemberAction,
+  updateProgramAction,
   type ProgramActionState,
 } from "@/lib/education/program-actions";
 
@@ -19,6 +20,9 @@ export type ProgramFormLabels = {
   readonly noType: string;
   readonly description: string;
   readonly createProgram: string;
+  readonly editProgram: string;
+  readonly saveProgram: string;
+  readonly setDirectionHint: string;
   readonly cohortName: string;
   readonly startsOn: string;
   readonly endsOn: string;
@@ -37,11 +41,11 @@ export type ProgramFormLabels = {
 const inputCls =
   "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 const btnCls =
-  "inline-flex items-center rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-xs font-semibold text-ink-900 transition-opacity hover:opacity-90 disabled:opacity-60";
+  "inline-flex items-center rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-60";
 
 function StateLine({ state, labels }: { state: ProgramActionState; labels: ProgramFormLabels }) {
   if (state.status === "idle") return null;
-  if (state.status === "ok") return <p className="text-xs text-text-secondary">{labels.saved}</p>;
+  if (state.status === "ok") return <p className="text-xs text-text-secondary" data-testid="program-form-saved">{labels.saved}</p>;
   if (state.status === "forbidden") return <p className="text-xs text-state-danger" role="alert">{labels.forbidden}</p>;
   if (state.status === "invalid") return <p className="text-xs text-state-danger" role="alert">{labels.invalid}</p>;
   return <p className="text-xs text-state-danger" role="alert">{labels.error}</p>;
@@ -98,6 +102,104 @@ export function CreateProgramForm({
   );
 }
 
+/**
+ * CORRECT a programme that already exists.
+ *
+ * `education_programs` had one writer and no update path, so every field was
+ * fixed at creation. That is not cosmetic: the target profession is what
+ * activates the live employer-demand count beside the programme, and an
+ * institution that skipped it once could never aim at the market afterwards.
+ *
+ * Collapsed by default — correcting is the rarer act, and an always-open edit
+ * form would read as the programme being unfinished. The fields are prefilled
+ * with what is there now, and an empty select CLEARS the value, because the
+ * form always submits all four.
+ */
+export function EditProgramForm({
+  program,
+  professions,
+  educationTypes,
+  labels,
+}: {
+  readonly program: {
+    readonly id: string;
+    readonly name: string;
+    readonly targetProfessionSlug: string | null;
+    readonly educationTypeSlug: string | null;
+    readonly description: string | null;
+  };
+  readonly professions: ReadonlyArray<{ slug: string; label: string }>;
+  readonly educationTypes: ReadonlyArray<{ slug: string; label: string }>;
+  readonly labels: ProgramFormLabels;
+}) {
+  const [state, action, pending] = useActionState(updateProgramAction, IDLE);
+  return (
+    <details className="rounded-md border border-ink-600 p-2" data-testid={`edit-program-${program.id}`}>
+      <summary className="cursor-pointer text-xs text-text-secondary">{labels.editProgram}</summary>
+      <form action={action} className="mt-2 flex flex-col gap-2">
+        <input type="hidden" name="programId" value={program.id} readOnly />
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {labels.programName}
+          <input
+            name="name"
+            required
+            minLength={2}
+            maxLength={160}
+            defaultValue={program.name}
+            className={inputCls}
+            data-testid={`edit-program-name-${program.id}`}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {labels.targetProfession}
+          <select
+            name="targetProfessionSlug"
+            className={inputCls}
+            defaultValue={program.targetProfessionSlug ?? ""}
+            data-testid={`edit-program-profession-${program.id}`}
+          >
+            <option value="">{labels.noProfession}</option>
+            {professions.map((p) => (
+              <option key={p.slug} value={p.slug}>{p.label}</option>
+            ))}
+          </select>
+        </label>
+        {/* Says what the empty field COSTS, at the moment it can be filled.
+            Without this the programme reads "no direction" and the person is
+            never told that a direction is what shows them live market demand. */}
+        {program.targetProfessionSlug === null ? (
+          <p className="text-xs leading-relaxed text-text-muted" data-testid={`edit-program-direction-hint-${program.id}`}>
+            {labels.setDirectionHint}
+          </p>
+        ) : null}
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {labels.educationType}
+          <select
+            name="educationTypeSlug"
+            className={inputCls}
+            defaultValue={program.educationTypeSlug ?? ""}
+          >
+            <option value="">{labels.noType}</option>
+            {educationTypes.map((e) => (
+              <option key={e.slug} value={e.slug}>{e.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {labels.description}
+          <textarea name="description" maxLength={2000} rows={2} defaultValue={program.description ?? ""} className={inputCls} />
+        </label>
+        <div className="flex items-center gap-3">
+          <button type="submit" disabled={pending} className={btnCls} data-testid={`edit-program-save-${program.id}`}>
+            {pending ? labels.saving : labels.saveProgram}
+          </button>
+          <StateLine state={state} labels={labels} />
+        </div>
+      </form>
+    </details>
+  );
+}
+
 export function CreateCohortForm({ programId, labels }: { readonly programId: string; readonly labels: ProgramFormLabels }) {
   const [state, action, pending] = useActionState(createCohortAction, IDLE);
   return (
@@ -105,7 +207,7 @@ export function CreateCohortForm({ programId, labels }: { readonly programId: st
       <input type="hidden" name="programId" value={programId} readOnly />
       <label className="flex min-w-[10rem] flex-1 flex-col gap-1 text-xs text-text-secondary">
         {labels.cohortName}
-        <input name="name" required minLength={1} maxLength={120} className={inputCls} />
+        <input name="name" required minLength={1} maxLength={120} className={inputCls} data-testid={`cohort-name-${programId}`} />
       </label>
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
         {labels.startsOn}
@@ -115,7 +217,7 @@ export function CreateCohortForm({ programId, labels }: { readonly programId: st
         {labels.endsOn}
         <input name="endsOn" type="date" className={inputCls} />
       </label>
-      <button type="submit" disabled={pending} className={btnCls}>
+      <button type="submit" disabled={pending} className={btnCls} data-testid={`cohort-create-${programId}`}>
         {pending ? labels.saving : labels.createCohort}
       </button>
       <StateLine state={state} labels={labels} />
@@ -140,14 +242,14 @@ export function AssignLearnerForm({
       <input type="hidden" name="status" value="active" readOnly />
       <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs text-text-secondary">
         {labels.assignLearner}
-        <select name="profileId" required className={inputCls} defaultValue="">
+        <select name="profileId" required className={inputCls} defaultValue="" data-testid={`assign-learner-select-${cohortId}`}>
           <option value="" disabled>{labels.chooseLearner}</option>
           {learners.map((l) => (
             <option key={l.profileId} value={l.profileId}>{l.label}</option>
           ))}
         </select>
       </label>
-      <button type="submit" disabled={pending} className={btnCls}>
+      <button type="submit" disabled={pending} className={btnCls} data-testid={`assign-learner-submit-${cohortId}`}>
         {pending ? labels.saving : labels.assign}
       </button>
       <StateLine state={state} labels={labels} />

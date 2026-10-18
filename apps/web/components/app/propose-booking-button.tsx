@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
+import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Company "propose booking" for a shortlisted, contactable candidate (Stage 6).
@@ -51,12 +52,13 @@ export function ProposeBookingButton({
   };
 }) {
   const tPropose = useTranslations("bookings.propose");
+  const expectedWorkspaceId = useDisplayedWorkspaceId();
   const [open, setOpen] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [note, setNote] = useState("");
   const [pending, startTransition] = useTransition();
   const [state, setState] = useState<
-    "idle" | "sent" | "unavailable" | "not_entitled" | "rate_limited" | "error"
+    "idle" | "sent" | "unavailable" | "not_entitled" | "rate_limited" | "already_accepted" | "error"
   >("idle");
 
   function send() {
@@ -68,11 +70,13 @@ export function ProposeBookingButton({
         startDate,
         locationCountry: countryCode,
         note,
+        expectedWorkspaceId,
       });
       if (res.kind === "ok") setState("sent");
       else if (res.kind === "needs-migration") setState("unavailable");
       else if (res.kind === "not-entitled") setState("not_entitled");
       else if (res.kind === "rate-limited") setState("rate_limited");
+      else if (res.kind === "already-accepted") setState("already_accepted");
       else setState("error");
     });
   }
@@ -154,6 +158,12 @@ export function ProposeBookingButton({
         // Bounded request budget reached (Wagon 1) — honest limit note.
         <span className="text-meta text-state-warning" data-testid="propose-booking-limit">
           {tPropose("rateLimited")}
+        </span>
+      ) : state === "already_accepted" ? (
+        // The worker already agreed to these terms — an agreement is not
+        // rewritten by proposing again; changes are agreed in conversation.
+        <span className="text-meta text-state-warning" data-testid="propose-booking-already-accepted">
+          {tPropose("alreadyAccepted")}
         </span>
       ) : state === "error" ? (
         <span className="text-meta text-state-danger">{labels.error}</span>

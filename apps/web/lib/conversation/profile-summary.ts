@@ -63,15 +63,21 @@ export async function loadProfileSummaryForChat(
   }
 
   const readiness = deriveWorkerReadiness(card);
-  const tPillar = await getTranslations("playerCard.readinessSteps.pillar");
+  // Two label sets, one per state (prod walk 2026-09-05, fresh person): the
+  // steps list phrases a pillar as DONE ("Prieinamumas nurodytas"), so a
+  // missing pillar must be named as a thing ("Prieinamumas") - the brief said
+  // "Profilyje dar truksta: Prieinamumas nurodytas." Both namespaces are the
+  // card's own (playerCard.*), no third label set.
+  const tDone = await getTranslations("playerCard.readinessSteps.pillar");
+  const tName = await getTranslations("playerCard.readiness.pillars");
   const done: string[] = [];
   const missing: string[] = [];
   const missingKeys: ReadinessPillarKey[] = [];
   for (const pillar of readiness.pillars) {
     if (pillar.met) {
-      done.push(tPillar(pillar.key));
+      done.push(tDone(pillar.key));
     } else {
-      missing.push(tPillar(pillar.key));
+      missing.push(tName(pillar.key));
       missingKeys.push(pillar.key);
     }
   }

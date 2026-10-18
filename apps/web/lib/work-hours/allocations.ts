@@ -119,6 +119,52 @@ async function readAllocations(
   return { kind: "ok", organizationId: ctx.organizationId, rows };
 }
 
+/**
+ * ONE PERSON's live hour records, across every organization that recorded
+ * them — the Work Journal's "work in numbers" reads these beside the diary
+ * (issue #1689, owner §19: the imported-timesheet ledger must not stay a
+ * second hour universe invisible to the person).
+ *
+ * No employer context: the caller passes the worker id and RLS decides —
+ * `owns_worker(worker_id)` for the person, `manages_organization` for a
+ * manager reading a member (the person page). Superseded rows are excluded
+ * (a corrected figure is counted once). Bounded by the same read limit the
+ * operator grid uses. Distinguishes "the table is not installed" from "no
+ * rows" and from "the read failed": the consumer must render UNKNOWN for a
+ * failure, never a zero that reads as "nothing recorded" (SEP-7).
+ */
+export type WorkerAllocationsResult =
+  | { readonly kind: "ok"; readonly rows: readonly WorkHourAllocation[] }
+  | { readonly kind: "needs-migration" }
+  | { readonly kind: "error" };
+
+export async function readAllocationsForWorker(
+  supabase: SupabaseClient,
+  workerId: string,
+): Promise<WorkerAllocationsResult> {
+  const res = (await asAny(supabase)
+    .from("work_hour_allocations")
+    .select(SELECT_COLUMNS)
+    .eq("worker_id", workerId)
+    .is("superseded_by", null)
+    .order("work_date", { ascending: false })
+    .limit(ALLOCATION_READ_LIMIT)) as {
+    data: Row[] | null;
+    error: { code?: string; message?: string } | null;
+  };
+  if (res.error) {
+    if (isAllocationMigrationMissingCode(res.error.code)) {
+      return { kind: "needs-migration" };
+    }
+    console.error("[work-hours] worker read failed:", res.error.code);
+    return { kind: "error" };
+  }
+  const rows = (res.data ?? [])
+    .map(toAllocation)
+    .filter((a): a is WorkHourAllocation => a !== null);
+  return { kind: "ok", rows };
+}
+
 /** Everything recorded for one day, newest first — the quick-entry surface's
  *  running list, and what the operator checks before moving on. */
 export async function getAllocationsForDate(
@@ -152,6 +198,44 @@ export async function getAllocationsForMonth(
     q
       .gte("work_date", monthStart)
       .lt("work_date", nextIso)
+      .is("superseded_by", null)
+      .order("work_date", { ascending: true })
+      .limit(ALLOCATION_READ_LIMIT),
+  );
+}
+
+/**
+ * An inclusive calendar-day window of the organization's live hour records
+ * — the org-keyed read the windowed journal report composes BESIDE its
+ * journal figures (owner §19: one ledger next to the other, never summed).
+ * Same resolver, same RLS, same bound as the month grid.
+ */
+export async function getAllocationsForRange(
+  startIso: string,
+  endIso: string,
+): Promise<AllocationsResult> {
+  return readAllocations((q) =>
+    q
+      .gte("work_date", startIso)
+      .lte("work_date", endIso)
+      .is("superseded_by", null)
+      .order("work_date", { ascending: true })
+      .limit(ALLOCATION_READ_LIMIT),
+  );
+}
+
+/**
+ * The organization's live hour records on a set of work objects — the
+ * per-project reading (a project's objects carry `work_objects.project_id`).
+ * `objectIds` NARROWS the org-keyed read; it never widens it.
+ */
+export async function getAllocationsForObjects(
+  objectIds: readonly string[],
+): Promise<AllocationsResult> {
+  const ids = objectIds.slice(0, 100);
+  return readAllocations((q) =>
+    q
+      .in("work_object_id", ids)
       .is("superseded_by", null)
       .order("work_date", { ascending: true })
       .limit(ALLOCATION_READ_LIMIT),

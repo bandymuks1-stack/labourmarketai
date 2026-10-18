@@ -30,7 +30,8 @@ import {
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
-const COMM_ACTIONS = "lib/communication/actions.ts";
+// The capped write logic lives in the shared core since 2026-09-30 (actions.ts delegates).
+const COMM_ACTIONS = "lib/communication/communication-core.ts";
 const INSTR_ACTIONS = "lib/instructions/actions.ts";
 
 /** All non-test source files under the app-side trees. */
@@ -145,8 +146,23 @@ describe("§8.2 no bypass: only the capped actions insert into the 0021 tables",
     const callers = sources.filter(
       (rel) => rel !== "lib/communication/actions.ts" && read(rel).includes("createConversation("),
     );
+    // The browser-callable action has ONE legitimate caller (a self-only support
+    // thread). Conversations with another person go through the core, below.
+    expect(callers.sort()).toEqual(["components/app/support-conversation-launcher.tsx"]);
+  });
+
+  it("every creation-core caller is the unprivileged action or a gated direct-contact module", () => {
+    const callers = sources.filter(
+      (rel) =>
+        rel !== "lib/communication/communication-core.ts" &&
+        read(rel).includes("createConversationCore("),
+    );
     expect(callers.sort()).toEqual(
-      ["components/app/support-conversation-launcher.tsx", "lib/communication/direct-conversation.ts"].sort(),
+      [
+        "lib/communication/actions.ts",
+        "lib/communication/direct-conversation-core.ts",
+        "lib/communication/direct-conversation.ts",
+      ].sort(),
     );
   });
 });
@@ -173,10 +189,47 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     expect(team.scopeKey).toBe("scope.unknown");
   });
 
+  /**
+   * Every module allowed to call getOrCreateDirectConversation. Each one
+   * either passes NO subject or derives it from a REAL row it verified
+   * server-side — never from client input. The enumeration is exact
+   * (`toEqual`), so any OTHER module that starts calling it fails this test
+   * until it is reviewed and listed here with its own justification.
+   */
+  const DIRECT_CONVERSATION_CALLERS = [
+    "lib/booking/booking-conversation.ts",
+    // Chat door (2026-10-01) — passes NO subject (null) and NO grant.
+    "lib/communication/chat-open-conversation.ts",
+    "lib/communication/contact-interested-worker.ts",
+    "lib/communication/open-conversation-action.ts",
+    "lib/communication/request-worker-conversation.ts",
+    "lib/marketplace/listings.ts",
+    "lib/marketplace/service-request-conversation.ts",
+    // Canonical-journey P1 — worker→employer open; subject derives from
+    // the REAL demand row it verified server-side (demand.title), same
+    // honesty rule as the company-side demand-interest action.
+    "lib/opportunities/contact-employer.ts",
+    // Agency ↔ client bridge (2026-09-24) — writes NO subject at all
+    // (`null`): the thread is the relationship between the two consenting
+    // companies' people, not a demand. What it passes instead is the
+    // `allowed_agency_connection` grant, and only after the connection
+    // row was read under RLS, re-checked `active` and the caller's side
+    // resolved from the membership-validated employer context (pinned in
+    // lib/guards/agency-client-invite-delivery.test.ts §5).
+    "lib/agency/bridge-conversation.ts",
+    // Brigade offer negotiation (2026-10-11) — the subject is the offering
+    // TEAM's name read server-side from the row the caller's own authorized
+    // read proved (organizations.name / the receiver-gated listing), never a
+    // form field; the grant follows evaluateTeamOfferContact.
+    "lib/company/team-offer-conversation.ts",
+  ].sort();
+
   it("direct-subject writers are ONLY the gated fact-verified actions (demand / offering title)", () => {
     // The generic entry point passes no subject…
     const open = read("lib/communication/open-conversation-action.ts");
-    expect(open).toMatch(/getOrCreateDirectConversation\(profileId, locale\)/);
+    expect(open).toMatch(
+      /getOrCreateDirectConversation\(\s*profileId,\s*locale,\s*null,\s*undefined,\s*null,\s*projectId,?\s*\)/,
+    );
     // …the scouting action derives it from the REAL demand row it verified…
     const scout = read("lib/communication/request-worker-conversation.ts");
     expect(scout).toMatch(/demand\?\.title/);
@@ -201,26 +254,51 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     const listings = read("lib/marketplace/listings.ts");
     expect(listings).toMatch(/listing\.title\?\.slice/);
     expect(listings).toMatch(/status !== "active"/);
+    // …the agency ↔ client bridge writes NO subject: literal `null`, and the
+    // grant is the fourth argument, passed only after its gate held…
+    const bridge = read("lib/agency/bridge-conversation.ts");
+    expect(bridge).toMatch(
+      /getOrCreateDirectConversation\(\s*counterpart,\s*locale,\s*null,\s*"allowed_agency_connection",?\s*\)/,
+    );
+    expect(bridge.indexOf('evaluateAgencyConnectionContact(facts) !== "allowed"')).toBeLessThan(
+      bridge.indexOf('"allowed_agency_connection"'),
+    );
+    // …the brigade-offer negotiation derives it from the REAL team row and
+    // passes its grant only after evaluateTeamOfferContact held…
+    const offer = read("lib/company/team-offer-conversation.ts");
+    // 2026-10-12: the subject is the offering organization's real name, read
+    // through the party-gated team_offer_thread_party_v1 (never a form field).
+    expect(offer).toMatch(/rpc\("team_offer_thread_party_v1"/);
+    expect(offer).toMatch(/const subject = party\.subject/);
+    expect(offer.indexOf('evaluateTeamOfferContact({ offerStatus, side }) !== "allowed"')).toBeLessThan(
+      offer.indexOf('"allowed_team_demand_offer"'),
+    );
     // …and nobody else calls getOrCreateDirectConversation.
     const callers = walkSources().filter(
       (rel) =>
         rel !== "lib/communication/direct-conversation.ts" &&
         read(rel).includes("getOrCreateDirectConversation("),
     );
-    expect(callers.sort()).toEqual(
-      [
-        "lib/booking/booking-conversation.ts",
-        "lib/communication/contact-interested-worker.ts",
-        "lib/communication/open-conversation-action.ts",
-        "lib/communication/request-worker-conversation.ts",
-        "lib/marketplace/listings.ts",
-        "lib/marketplace/service-request-conversation.ts",
-        // Canonical-journey P1 — worker→employer open; subject derives from
-        // the REAL demand row it verified server-side (demand.title), same
-        // honesty rule as the company-side demand-interest action.
-        "lib/opportunities/contact-employer.ts",
-      ].sort(),
-    );
+    expect(callers.sort()).toEqual(DIRECT_CONVERSATION_CALLERS);
+  });
+
+  it("NEGATIVE CONTROL: no listed caller takes a subject from client input, and no entry is stale", () => {
+    for (const rel of DIRECT_CONVERSATION_CALLERS) {
+      const src = read(rel);
+      // A free-text subject from a form / body field is the one thing the
+      // allow-list exists to forbid — for the bridge as much as for the rest.
+      expect(src, `${rel} reads a subject from client input`).not.toMatch(
+        /formData\.get\(\s*["']subject["']\s*\)|body\.subject|searchParams\.subject/,
+      );
+      // Every listed module really calls the function: a stale entry would
+      // let a removed gate's slot be reused by a new writer unnoticed.
+      expect(src, `${rel} no longer calls getOrCreateDirectConversation`).toContain(
+        "getOrCreateDirectConversation(",
+      );
+    }
+    // The enumeration is exact: an unlisted module cannot pass it.
+    const intruder = [...DIRECT_CONVERSATION_CALLERS, "lib/somewhere/new-writer.ts"].sort();
+    expect(intruder).not.toEqual(DIRECT_CONVERSATION_CALLERS);
   });
 
   it("both communication pages surface the demand context from the real subject", () => {

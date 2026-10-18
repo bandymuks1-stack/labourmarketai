@@ -32,7 +32,7 @@ export async function LabourMarketEvidence() {
 
   return (
     <section className="mt-16" data-testid="labour-market-evidence">
-      <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+      <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
         <span className="live-dot" aria-hidden />
         {t("evidenceEyebrow")}
       </p>
@@ -81,7 +81,7 @@ export async function LabourMarketEvidence() {
                     href={e.sourceUrl || source.url}
                     target="_blank"
                     rel="noopener noreferrer nofollow"
-                    className="text-brand-blue hover:text-brand-cyan"
+                    className="text-brand-blue hover:text-brand-champagne"
                   >
                     {t(`sourceLabel.${e.sourceId}`)}
                   </a>

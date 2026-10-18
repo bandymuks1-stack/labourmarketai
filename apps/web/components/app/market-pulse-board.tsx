@@ -45,7 +45,7 @@ export async function MarketPulseBoard({
       className="card-border rise-in flex flex-col gap-5 p-5 sm:p-6"
       data-testid="market-pulse-board"
     >
-      <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+      <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
         <BarChart3 className="h-3.5 w-3.5" aria-hidden />
         {t("title")}
       </h2>

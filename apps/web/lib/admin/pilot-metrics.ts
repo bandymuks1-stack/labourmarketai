@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { isNonProductionOrigin } from "@/lib/telemetry/production-host";
 
 /**
  * Time-to-first-value summary (Pilot Onboarding and Measurement v1).
@@ -128,9 +129,11 @@ export async function getTimeToValueSummary(
   }
 
   const allRows: TtvRow[] = (data ?? []) as TtvRow[];
-  // Exclude events fired from non-production origins (localhost / preview) —
-  // same exclusion the acquisition funnel applies.
-  const rows = allRows.filter((r) => r.metadata?.["preview_host"] !== true);
+  // Exclude events written from non-production origins (localhost / preview
+  // deploy / local process) — the SAME rule the acquisition funnel applies,
+  // read from one place so the server-stamped origin (2026-09-20) is
+  // honoured here too rather than only the client's own marker.
+  const rows = allRows.filter((r) => !isNonProductionOrigin(r.metadata));
   const excludedPreview = allRows.length - rows.length;
 
   type SessionAgg = { startAt: number | null; values: { at: number; event: string }[] };

@@ -14,19 +14,27 @@
  * Next.js 15 strips thrown Error messages in prod), so the client renders an
  * honest done / error state.
  */
+import { runAutoMatchForDemand } from "@/lib/scouting/auto-match";
+import type { ScoutingEmployer } from "@/lib/scouting/scouting";
 import "server-only";
+import { demandWrittenLanguage } from "@/lib/demand/demand-written-language";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { gateOpenNeeds } from "@/lib/billing/open-needs-gate";
 import { recordTelemetryEvent } from "@/lib/telemetry/actions";
 import { serverEventLocale } from "@/lib/telemetry/server-locale";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { requirementFunnelEvents } from "@/lib/telemetry/requirement-funnel";
+import type { RequirementStatus } from "@/lib/telemetry/funnel-events";
 import {
   hasMeaningfulEstimate,
   validateEstimateInputs,
   type EstimateInputs,
 } from "@/lib/estimate/estimate";
 import { buildEstimatePayload } from "@/lib/estimate/estimate-payload";
-import { isWorkTypeSlug, isMarketCountry } from "@/lib/taxonomy/work-categories";
+import { isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
+import { isIsoCountry } from "@/lib/location/country-model";
 import type { DomainCaller } from "@/lib/domain/caller";
 import {
   readStructuredDemandV2,
@@ -138,7 +146,15 @@ export type DemandRequestResult =
         // W8 slice 1: the caller is not acting for a company right now
         // (personal workspace, unbound organization, company not owned…).
         | "no_company_context"
-        | "invalid_estimate";
+        | "invalid_estimate"
+        // Owner launch pricing 2026-09-05: the organization's concurrent
+        // active open needs are at its plan's ceiling (FREE 1; the
+        // ORGANIZATION plan has none since 2026-10-06). `next` names the honest
+        // way forward — the €99 plan. Nothing is charged.
+        | "over_open_need_limit";
+      limit?: number;
+      used?: number;
+      next?: "upgrade" | "individual_plan";
     };
 
 /**
@@ -207,7 +223,7 @@ export async function submitDemandRequest(
 
   const result = await submitDemandRequestCore(
     { supabase, userId: user.id },
-    { organizationId: employer.organizationId },
+    employer,
     intent,
     fields,
   );
@@ -225,7 +241,7 @@ export async function submitDemandRequest(
  */
 export async function submitDemandRequestCore(
   caller: DomainCaller,
-  employer: { organizationId: string },
+  employer: { organizationId: string } & Partial<ScoutingEmployer>,
   intent: DemandIntent,
   fields?: DemandFields,
 ): Promise<DemandRequestResult> {
@@ -251,7 +267,7 @@ export async function submitDemandRequestCore(
       ? fields.workType
       : null;
   const country =
-    typeof fields?.country === "string" && isMarketCountry(fields.country.toUpperCase())
+    typeof fields?.country === "string" && isIsoCountry(fields.country.toUpperCase())
       ? fields.country.toUpperCase()
       : null;
   const teamSize =
@@ -329,12 +345,22 @@ export async function submitDemandRequestCore(
     p_kind: kind,
     p_title: title.slice(0, MAX_TITLE),
     // The real user-entered description is the need summary (no fabricated
-    // placeholder text). p_original_language stays "lt" — the saved request
-    // surfaces on the LT-first owner UI.
+    // placeholder text), recorded in the language it was written in.
     p_need_summary: description,
     p_payload: payload,
-    p_original_language: "lt",
+    p_original_language: await demandWrittenLanguage(),
   };
+  // OPEN-NEEDS ENTITLEMENT SEAM (owner launch pricing 2026-09-05): FREE
+  // organization = 1 concurrent active need, ORGANIZATION €99 = no fixed
+  // limit (owner decision 2026-10-06). `hasFeature("company_create_needs")`
+  // is the plan boundary; the numeric ceiling is decided by the ONE gate over
+  // the organization's real count. Permissive while billing is disabled
+  // (pilot preserved — the same rule the booking gate follows); enforced the
+  // moment a Stripe adapter state is active. Never a silent charge or tier.
+  const needsGate = await gateOpenNeeds(supabase, employer.organizationId, caller.userId);
+  if (!needsGate.allowed) {
+    return { ok: false, code: "over_open_need_limit", limit: needsGate.limit, used: needsGate.used, next: needsGate.next };
+  }
   let { data, error } = await (supabase as unknown as DemandRpc).rpc(
     "submit_demand_request_v2",
     { ...rpcArgs, p_organization_id: employer.organizationId },
@@ -354,6 +380,37 @@ export async function submitDemandRequestCore(
   }
 
   const requestId = typeof data === "string" ? data : null;
+
+  // EMPLOYER FUNNEL CLOSURE (owner §23 canonical chain, 2026-09-22). This is
+  // the canonical logged-in requirement write, and until now it emitted NO
+  // pilot_event — the chain went dark exactly where a company states a real
+  // need. Both RPCs (`submit_demand_request`, and `_v2` which delegates to
+  // it) hardcode status='submitted' on the row they return the id of
+  // (migration 20260530150000), so the status carried here is the RPC's
+  // contract for THIS row, not a guess and not a second read. The events
+  // (`demand_saved` with `status`, then `requirement_activated` because
+  // `submitted` is worker-visible) are decided by the ONE pure mapping in
+  // lib/telemetry/requirement-funnel.ts. Entity ids only — never the title,
+  // the need summary or the payload. Fire-and-forget through the shared
+  // server emitter: a lost telemetry row never fails a saved requirement.
+  if (requestId) {
+    const status: RequirementStatus = "submitted";
+    for (const event of requirementFunnelEvents(status)) {
+      emitServerFunnelEvent(event, {
+        source: "demand-request",
+        route: "/dashboard/company/needs",
+        metadata: {
+          entity_type: "customer_request",
+          ref_type: "customer_request",
+          ref_id: requestId,
+          status,
+          role_context: intent === "partner" ? "agency" : "company",
+          surface: "dashboard_demand",
+          success: true,
+        },
+      });
+    }
+  }
 
   // Populate the structured, worker-board-safe COLUMNS on the row just created
   // — an owner-scoped UPDATE under the existing customer_requests RLS
@@ -392,6 +449,18 @@ export async function submitDemandRequestCore(
           }),
         )
         .catch(() => {});
+    }
+  }
+
+  // AUTOMATIC INTERNAL MATCHING (best-effort, after the row is saved and its
+  // structured columns are set). Deterministic match-v1 over existing
+  // LabourMarket.ai candidates only; a failure or throw can never fail the
+  // submit (runAutoMatchForDemand does not throw; the catch is belt-and-braces).
+  if (requestId && intent === "hire_workers") {
+    try {
+      await runAutoMatchForDemand(caller, employer, requestId, "submit");
+    } catch {
+      /* publish result is unaffected */
     }
   }
 
@@ -507,7 +576,78 @@ export async function getOwnLastDemandPrefill(
     if (lastRes.error || !lastRes.data) return { found: false };
     data = lastRes.data;
   }
+  return toDemandPrefill(data);
+}
 
+/**
+ * REPEAT THIS NEED — a specific past request of the caller's as the starting
+ * point for a new one (2026-09-19; the "next demand" edge). Same mapper as
+ * duplicate-and-edit-from-last, own rows only (RLS `profile_id`), and the
+ * SAME workspace gate. What is cloned is the reusable STRUCTURE of the ask —
+ * role, description, skills, place, country, headcount, offers, tools, the
+ * structured cluster. What is NOT cloned, on purpose: the timing (every date
+ * and the urgency are cleared so the person states them for the new period),
+ * the status (a new row starts as the wizard's own draft/submit), and every
+ * execution fact — interest signals, offers, bookings, assignments, messages,
+ * outcomes and evidence live on the OLD row and stay there.
+ */
+export async function getOwnDemandPrefillById(
+  intent: DemandIntent,
+  requestId: string,
+): Promise<DemandPrefill> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId)) {
+    return { found: false };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { found: false };
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { found: false };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = supabase as any;
+  const res = await sb
+    .from("customer_requests")
+    .select(
+      "id, status, title, need_summary, country, role_or_work_type, team_size, start_period, payload",
+    )
+    .eq("id", requestId)
+    .eq("profile_id", user.id)
+    .eq("kind", INTENT_KIND[intent])
+    .maybeSingle();
+  if (res.error || !res.data) return { found: false };
+  const base = toDemandPrefill(res.data);
+  if (!base.found) return base;
+  return {
+    ...base,
+    // A repeat is a NEW ask, never a continuation of the old row's draft.
+    source: "request",
+    fields: { ...base.fields, urgency: null },
+    structuredV2: stripTimingForRepeat(base.structuredV2),
+  };
+}
+
+/** Every date and deadline of the structured cluster is cleared for a repeat;
+ *  hours/shifts/notice (the SHAPE of the work) are kept for review. */
+export function stripTimingForRepeat(
+  v2: StructuredDemandV2 | null,
+): StructuredDemandV2 | null {
+  if (!v2 || !v2.time) return v2;
+  const {
+    start_earliest: _s,
+    start_latest: _l,
+    end_date: _e,
+    application_deadline: _d,
+    ...rest
+  } = v2.time;
+  void _s; void _l; void _e; void _d;
+  const time = Object.keys(rest).length > 0 ? rest : undefined;
+  return { ...v2, time };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toDemandPrefill(data: any): DemandPrefill {
   const isDraft = data.status === "draft";
   const payload =
     data.payload && typeof data.payload === "object"
@@ -549,7 +689,7 @@ export async function getOwnLastDemandPrefill(
           ? data.role_or_work_type
           : null,
       country:
-        typeof data.country === "string" && isMarketCountry(data.country)
+        typeof data.country === "string" && isIsoCountry(data.country)
           ? data.country
           : null,
       teamSize: typeof data.team_size === "number" ? data.team_size : null,

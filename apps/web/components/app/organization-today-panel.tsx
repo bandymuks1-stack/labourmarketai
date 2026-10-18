@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
 import type { OrganizationToday } from "@/lib/planning/organization-today";
+import { ExplainMore } from "@/components/app/premium/disclosure";
 
 /**
  * "Today in your organization" (V8 employer daily loop, GAP 2). Server-
@@ -53,6 +54,14 @@ export async function OrganizationTodayPanel({
           t={t}
           testId="awaiting-review"
         />
+        {state.clientReviewToDecide !== null && state.clientReviewToDecide > 0 ? (
+          <Fact
+            label={t("clientReviewToDecide")}
+            value={state.clientReviewToDecide}
+            t={t}
+            testId="client-review-to-decide"
+          />
+        ) : null}
       </dl>
 
       <Band
@@ -98,7 +107,9 @@ export async function OrganizationTodayPanel({
         )}
       </Band>
 
-      <p className="text-meta text-text-muted">{t("basis")}</p>
+      <ExplainMore>
+        <p>{t("basis")}</p>
+      </ExplainMore>
     </section>
   );
 }

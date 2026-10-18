@@ -25,29 +25,81 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import { loadPersonalWorkspaceIntro } from "@/lib/workspace/personal-workspace-intro-server";
 import { resolvePersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 import { baseIdentityForRole } from "@/lib/config/roles";
+import { readHeldRoles } from "@/lib/auth/held-roles";
+import {
+  actingRoleForWorkspace,
+  STALE_CONTEXT_NOTICE,
+  workspaceDisplayLabels,
+  workspaceRelationshipLabel,
+} from "@/lib/company/organization-switch";
 import { listMyEngagements } from "@/lib/invitations/network";
 import {
   loadCompanyStarterContext,
+  loadPersonStarterFacts,
   personStarterContext,
   type WorkspaceStarterContext,
 } from "@/lib/conversation/starter-signals";
-import { capabilityPhraseKeys, deriveStarters } from "@/lib/conversation/starters";
+import {
+  capabilityPhraseKeys,
+  deriveStarters,
+  personHasUsableProfile,
+} from "@/lib/conversation/starters";
+import { listMyPins } from "@/lib/workspace/pins";
+import { Link } from "@/lib/i18n/navigation";
+import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
+import {
+  getWorkspaceContext,
+  readSessionWorkspacePointer,
+} from "@/lib/company/active-organization";
+import {
+  classifyDurablePointer,
+  decideDashboardRole,
+  type DurablePointerKind,
+} from "@/lib/auth/dashboard-role-decision";
+import { TodayScreen } from "@/components/app/today/today-screen";
+import { CompanyModelScreen } from "@/components/app/organization/company-model-screen";
+import { conversationOpeningContext } from "@/lib/today/today-route";
+import { AccessRefusalNotice } from "@/components/app/access-refusal-notice";
+import {
+  accessNoticeMessageKey,
+  accessNoticeOffersSetup,
+  parseAccessNotice,
+} from "@/lib/auth/access-notice";
 
 /**
- * Dashboard root — the CONVERSATION-FIRST home. For the ordinary user the whole
- * screen is one chat (greeting → starter chips → dialogue with inline CV /
- * profile / booking flows). The former card control room (`/dashboard/advanced`)
- * was DELETED by W3 Package 4 — this chat is the one workspace root.
+ * Dashboard root — the ONE authenticated home: the conversation, for EVERY
+ * identity (owner decision 0017, 2026-09-22). What differs per person is the
+ * OPENING CONTEXT the conversation composes above its greeting, decided by
+ * ONE pure predicate (`lib/today/today-route.ts`):
  *
- * The wide module navbar is NOT hidden with an overlay any more: the layout's
- * `<DashboardChrome>` renders NO wide chrome on `/dashboard` (its DOM is absent,
- * not painted over), so the chat fills the viewport and supplies its own
- * simple-mode header + bottom nav (the 5-item nav). Deterministic (LLM off).
+ *   ŠIANDIEN (worker, personal space) — the worker's "now"
+ *   (`docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md` §2 composition):
+ *   name · profession · today's state, ONE next action, today's recorded
+ *   work, open items, one growth sentence, one opportunity sentence, the
+ *   contextual workspaces as text links. It stands INSIDE the conversation's
+ *   opening composition, with the composer right under it, and REPLACES the
+ *   opening intro card for the worker (owner direction 2026-09-13: no welcome
+ *   card). It is not a page and not a second home — the 2026-09-13 root
+ *   split (ŠIANDIEN page · PAKLAUSK `?ask=1` tab) is retired.
+ *
+ *   THE WORKSPACE COMPOSITION — for every other identity and for a worker
+ *   acting inside an organization: the opening brief, the "Mano erdvė"
+ *   block and the starters they already had. Every existing deep link
+ *   (`?result=`, `?say=`, `?intent=`, …) opens the same chat it always did.
+ *   The former card control room (`/dashboard/advanced`) was DELETED by W3
+ *   Package 4 — nothing here brings a card wall back.
+ *
+ * The wide module navbar is NOT hidden with an overlay: the layout's
+ * `<DashboardChrome>` renders NO wide chrome on `/dashboard` (its DOM is
+ * absent, not painted over). The chat fills the viewport and supplies the one
+ * top bar. Deterministic (LLM off).
  */
 export default async function DashboardHomePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -59,7 +111,77 @@ export default async function DashboardHomePage({
   if (!user) redirect(`/${locale}/auth/login`);
 
   const session = await getSessionProfile();
-  const activeRole = (session.profile?.active_role as Role | null) ?? "worker";
+  // WHICH ROLE OPENS THIS SCREEN (W6 honesty, 2026-09-06). The old null-to-
+  // worker fallback swallowed a FAILED profile read: a company owner whose row read timed
+  // out was greeted in the personal space as a person, and nothing said so.
+  // The pure decision trusts the row when it was read, falls back to the
+  // person's OWN durable workspace pointer (membership-validated) when it
+  // was not, and otherwise NAMES the failure — the real workspace chooser
+  // plus retry — never a silently chosen workspace.
+  let pointer: DurablePointerKind = null;
+  if (session.profileRead === "failed") {
+    const [stored, ws] = await Promise.all([
+      readSessionWorkspacePointer(user.id),
+      getWorkspaceContext(),
+    ]);
+    pointer = classifyDurablePointer(
+      stored,
+      ws.workspaces.filter((w) => w.kind === "organization").map((w) => w.id),
+    );
+  }
+  const decision = decideDashboardRole({
+    profileRead: session.profileRead,
+    activeRole: session.profile?.active_role ?? null,
+    pointer,
+  });
+  if (decision.kind === "read-failed") {
+    const tRead = await getTranslations("workspace.readFailed");
+    return (
+      <section
+        data-testid="dashboard-profile-read-failed"
+        role="status"
+        className="mx-auto flex min-h-[60dvh] w-full max-w-content flex-col items-center justify-center gap-4 px-4 py-16 text-center"
+      >
+        <p className="text-sm text-text-primary">{tRead("body")}</p>
+        <p className="text-xs text-text-secondary">{tRead("choose")}</p>
+        <WorkspaceChip />
+        <Link
+          href="/dashboard"
+          className="text-sm font-medium text-brand-blue underline-offset-4 hover:underline"
+        >
+          {tRead("retry")}
+        </Link>
+      </section>
+    );
+  }
+  // WHICH WORKSPACE, AND AS WHOM (owner program 2026-09-23). The workspace is
+  // the ONE resolution the chip renders (request-cached; the layout already
+  // ran it). The acting identity FOLLOWS that workspace by the person's
+  // relationship to it (`actingRoleForWorkspace`, d3) over the roles they
+  // really hold — it used to be `profiles.active_role` alone, so an employee
+  // of someone else's company was greeted as that company's employer while
+  // every employer read failed closed. `active_role` stands only where no held
+  // role fits the workspace (the switch keeps it in step anyway).
+  const [rootWorkspace, held] = await Promise.all([
+    getWorkspaceContext(),
+    readHeldRoles(supabase, user.id),
+  ]);
+  const activeOrgWorkspace =
+    rootWorkspace.workspaces.find(
+      (w) => w.kind === "organization" && w.id === rootWorkspace.activeWorkspaceId,
+    ) ?? null;
+  const activeRole: Role =
+    actingRoleForWorkspace(activeOrgWorkspace, [...held.roles]) ?? decision.role;
+
+  // WHICH opening context the ONE conversation composes — from the acting
+  // identity and the workspace. A worker in their personal space opens with
+  // ŠIANDIEN above the greeting; everyone else with the workspace composition.
+  const identity = baseIdentityForRole(activeRole) ?? "person";
+  const workerToday =
+    conversationOpeningContext({
+      activeRole,
+      activeWorkspaceId: rootWorkspace.activeWorkspaceId,
+    }) === "today";
 
   // "Mano erdvė" (S2) — resolved on the server from the readers this request
   // already runs (session profile, workspace context, worker activity, the
@@ -77,8 +199,13 @@ export default async function DashboardHomePage({
   // the chat's own invisible Suspense boundary (SpineStream pattern): the
   // conversation surface reaches the shell for every identity, and the intro
   // block appears the moment it is known.
-  const personalIntroPayload: Promise<PersonalIntroPayload> =
-    loadPersonalIntroPayload();
+  //
+  // For the worker in their personal space the block is hidden with its
+  // reason named: ŠIANDIEN's header is where their space is introduced (IA
+  // §4: the intro card is REPLACED, not shown twice).
+  const personalIntroPayload: Promise<PersonalIntroPayload> = workerToday
+    ? Promise.resolve({ intro: { kind: "hidden", reason: "replaced-by-today" }, labels: null })
+    : loadPersonalIntroPayload();
   // STARTERS ARE SUGGESTIONS, NOT A ROLE MENU (owner contract 2026-09-04
   // §5–§6, ARCHITECTURE §5.5). The company greeting used to branch on ONE
   // flag (education | agency | employer) and show that role's three chips —
@@ -89,22 +216,86 @@ export default async function DashboardHomePage({
   // RLS-scoped read answers whether an ACTIVE learner link exists, so the
   // opening can acknowledge the real learning context. Every read degrades to
   // the plain greeting — nothing is fabricated.
-  const identity = baseIdentityForRole(activeRole) ?? "person";
-  const [{ offers, labels: bookingLabels }, learnerLink, starterContext] = await Promise.all([
-    loadBookingOffers(activeRole),
-    identity === "person" ? loadActiveLearnerLink() : null,
-    identity === "company"
-      ? loadCompanyStarterContext()
-      : Promise.resolve<WorkspaceStarterContext | null>(null),
-  ]);
+  // KNOWN-STATE-FIRST (owner P0 §3, 2026-09-06): the person's suggestions
+  // are derived from what the product already holds about them, so an
+  // account with real skills, history or journal entries is no longer told
+  // its first step is to upload a CV. Read in the SAME parallel batch as the
+  // rest — three bounded head-counts, each degrading to "unknown".
+  const [{ offers, labels: bookingLabels }, learnerLink, starterContext, personFacts] =
+    await Promise.all([
+      loadBookingOffers(activeRole),
+      identity === "person" ? loadActiveLearnerLink() : null,
+      identity === "company"
+        ? loadCompanyStarterContext()
+        : Promise.resolve<WorkspaceStarterContext | null>(null),
+      identity === "person" ? loadPersonStarterFacts() : null,
+    ]);
   const workspace: WorkspaceStarterContext =
-    starterContext ?? personStarterContext(Boolean(learnerLink));
+    starterContext ??
+    personStarterContext(Boolean(learnerLink), personFacts ?? undefined);
   const { agencyWorkspace, educationWorkspace } = workspace;
   const starters = deriveStarters(workspace.signals);
-  const labels = resolveChatLabels(await getTranslations("conversation.chat"));
-  const workLogLabels = resolveWorkLogLabels(
-    await getTranslations("conversation.worklog"),
+  // MY SPACE (owner contract 2026-09-04 §4C): the person's own pins for
+  // THIS workspace, under RLS. Unavailable (migration unapplied / read
+  // failed) → `null` → no row, no ask.
+  // The READ scope is the active organization workspace — the SAME id the pin
+  // actions write to (`getActiveOrganizationContext`, a projection of the one
+  // workspace resolution). It used to be the employer-resolved org, which is
+  // null for an unbound or non-governed organization, so a pin was written to
+  // one scope and read back from another.
+  // The pins read and the translation bundles below are independent of each
+  // other — one batch, not consecutive awaits (measured: the same reads,
+  // issued together).
+  const [pinsRead, tChat, tWorkLog, tCountryNames, tRelationships] = await Promise.all([
+    listMyPins(activeOrgWorkspace?.id ?? null),
+    getTranslations("conversation.chat"),
+    getTranslations("conversation.worklog"),
+    getTranslations("labourMarket"),
+    getTranslations("relationshipTypes"),
+  ]);
+  const pins = pinsRead.kind === "ok" ? pinsRead.pins : null;
+  const tReservationLabels = await getTranslations("projects.assign.reservation");
+  const labels = resolveChatLabels(tChat, tReservationLabels);
+  const workLogLabels = resolveWorkLogLabels(tWorkLog);
+
+  // WHY THE PERSON IS HERE, when they did not choose to be.
+  //
+  // A role gate sends someone to this home carrying `?notice=needs_<role>_role`
+  // — and until 2026-09-22 nothing read it, so the refusal landed as a silent
+  // teleport. Resolved on the SERVER: the chat receives a finished element,
+  // so no message namespace is added to the client bundle and the internal
+  // token never travels to the browser. An unknown `?notice=` yields null and
+  // renders nothing, rather than echoing whatever was typed into the URL.
+  const noticeParam = (await searchParams).notice;
+  const refusedRole = parseAccessNotice(
+    typeof noticeParam === "string" ? noticeParam : null,
   );
+  const tAccess = refusedRole ? await getTranslations("workspace") : null;
+  // A WRITE REFUSED BECAUSE THE SCREEN WAS STALE (`refuseStaleWorkspace`):
+  // the person acted on a workspace that had been switched away in another
+  // window or device, nothing was saved, and they now stand here in the
+  // workspace that IS active. Same closed-token rule: only this exact value
+  // renders, and the sentence is the chat's own stale-context line.
+  const staleNotice =
+    noticeParam === STALE_CONTEXT_NOTICE ? (
+      <AccessRefusalNotice
+        reason={STALE_CONTEXT_NOTICE}
+        labels={{ body: tChat("staleContext"), setupCta: null }}
+      />
+    ) : null;
+  const accessNotice =
+    staleNotice ??
+    (refusedRole && tAccess ? (
+      <AccessRefusalNotice
+        reason={refusedRole}
+        labels={{
+          body: tAccess(accessNoticeMessageKey(refusedRole)),
+          setupCta: accessNoticeOffersSetup(refusedRole)
+            ? tAccess("accessNotice.setupCta")
+            : null,
+        }}
+      />
+    ) : null);
 
   /**
    * Localized country names for the demand prefill.
@@ -118,19 +309,16 @@ export default async function DashboardHomePage({
    * `labourMarket.countryNames` is the same node the company page uses; this
    * adds no second source.
    */
-  const tCountryNames = await getTranslations("labourMarket");
   const countryLabels = Object.fromEntries(
     MARKET_COUNTRIES.map((c) => [c, tCountryNames(`countryNames.${c}`)]),
   ) as Record<string, string>;
 
-  // M10 — the learner line is resolved HERE because it carries a placeholder
-  // (`{institution}`), same rule as `greetingNamed`: the raw placeholder must
-  // never reach the screen. Rendered only with the institution's REAL name.
-  const tChat = await getTranslations("conversation.chat");
-  const learnerContextLine =
-    identity === "person" && learnerLink
-      ? tChat("learnerGreetingContext", { institution: learnerLink })
-      : null;
+  // The learner's institution is named ONCE, by the opening brief
+  // (`briefLearner`, lib/conversation/opening-brief.ts). Measured on
+  // production 2026-09-06: this page ALSO composed its own intro line (the
+  // `{institution}` greeting key) from the same engagement, so the learner's
+  // first screen said "Mokotės su X" twice. The engagement read above still
+  // decides the person's starters. (`tChat` is the bundle batched above.)
   // The not-understood answer and the opening line describe the world the
   // person stands in, composed from the capability tracks the workspace
   // genuinely holds — an agency that is also an employer hears BOTH. Phrases
@@ -142,10 +330,56 @@ export default async function DashboardHomePage({
     identity === "company" && phraseKeys.length > 0
       ? tChat("fallbackComposed", { list: capabilityList })
       : null;
-  const workspaceContextLine =
-    identity === "company" && workspace.organizationName && phraseKeys.length > 0
-      ? tChat("workspaceIntro", { company: workspace.organizationName, list: capabilityList })
-      : null;
+  // ON WHOSE BEHALF — stated for EVERY organization workspace (owner program
+  // 2026-09-23). It used to be produced only for a company identity whose
+  // organization the employer chain resolved WITH a stored name, so in an
+  // unbound agency, in someone else's company, or in any unnamed organization
+  // nothing in the conversation said where the person was acting. The label is
+  // the chip's own (`workspaceDisplayLabels` over the same resolution) and the
+  // relationship is the resolved one, so the line and the chip cannot name two
+  // different contexts. A company workspace with capabilities keeps the richer
+  // sentence that also says what the product can do there.
+  const workspaceLabel = activeOrgWorkspace
+    ? (workspaceDisplayLabels(rootWorkspace.workspaces, {
+        personal: tChat("workspacePersonal"),
+        unnamedOrganization: {
+          company: tChat("workspaceUnnamedCompany"),
+          agency: tChat("workspaceUnnamedAgency"),
+          team: tChat("workspaceUnnamedTeam"),
+          other: tChat("workspaceUnnamed"),
+        },
+      }).get(activeOrgWorkspace.id) ?? null)
+    : null;
+  const relationshipLabel = activeOrgWorkspace
+    ? workspaceRelationshipLabel(activeOrgWorkspace, {
+        owner: tRelationships("owner"),
+        manager: tRelationships("manager"),
+        employee: tRelationships("employee"),
+        other: tChat("workspaceRelationshipMember"),
+      })
+    : null;
+  const workspaceContextLine = !workspaceLabel
+    ? null
+    : identity === "company" && workspace.organizationName && phraseKeys.length > 0
+      ? tChat("workspaceIntro", { company: workspaceLabel, list: capabilityList })
+      : tChat("workspaceActingAs", {
+          workspace: workspaceLabel,
+          relationship: relationshipLabel ?? tChat("workspaceRelationshipMember"),
+        });
+  // THE CONVERSATION'S IDENTITY IS THE ACTIVE WORKSPACE. A switch re-renders
+  // this page with new props, but React keeps a client component's state
+  // across `router.refresh` — the thread, the opening brief, the pins, the
+  // goal state and the result panel's loaders were all initialised once, so
+  // after a switch the old workspace's conversation stayed on screen until a
+  // browser reload (owner P0 case 1). Keying the ONE conversation on the
+  // workspace AND the acting identity remounts it with a fresh opening for
+  // the new context (decision d1). One-shot deep links (`?say=`, `?intent=`)
+  // were stripped from the URL on first consumption, so a remount never
+  // re-sends them.
+  // The company workspace opens on the company model (existing doors).
+  const companyOpeningContext =
+    activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
+  const conversationKey = `${rootWorkspace.activeWorkspaceId}:${identity}`;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
   // fills the viewport (its root is h-[100dvh]). The wide navbar lives only in
@@ -162,19 +396,34 @@ export default async function DashboardHomePage({
         metadata={{ surface: "dashboard_root" }}
       />
       <ConversationChat
+        key={conversationKey}
+        actingIdentity={identity}
         locale={locale as ActiveLocale}
+        /* Why this home is the screen they got, when a link asked for a space
+           they do not hold. Inside the chat rather than above it: the chat is
+           `h-[100dvh]` and owns the viewport, so a sibling banner would push
+           the composer off the bottom on a phone. */
+        accessNotice={accessNotice}
         labels={labels}
         workLogLabels={workLogLabels}
         bookingOffers={offers}
         bookingLabels={bookingLabels}
         personalIntroPayload={personalIntroPayload}
+        // ŠIANDIEN — server-rendered, streamed section by section inside the
+        // chat's own opening composition (the worker's "now" above the
+        // greeting and the composer). One home, one conversation.
+        openingContext={workerToday ? <TodayScreen locale={locale as ActiveLocale} /> : companyOpeningContext}
+        openingContextWide={Boolean(workerToday)}
         countryLabels={countryLabels}
         educationWorkspace={educationWorkspace}
         agencyWorkspace={agencyWorkspace}
-        learnerContextLine={learnerContextLine}
         starters={starters}
+        personHasProfileData={
+          personFacts ? personHasUsableProfile(personFacts) : null
+        }
         contextFallback={contextFallback}
         workspaceContextLine={workspaceContextLine}
+        pins={pins}
       />
     </>
   );
@@ -204,15 +453,14 @@ async function loadActiveLearnerLink(): Promise<string | null> {
  */
 async function loadPersonalIntroPayload(): Promise<PersonalIntroPayload> {
   const intro = await loadPersonalWorkspaceIntro();
-  const labels =
-    intro.kind === "hidden"
-      ? null
-      : resolvePersonalWorkspaceLabels(
-          await getTranslations("personalWorkspace"),
-          await getTranslations("playerCard.readinessSteps.pillar"),
-          await getTranslations("conversation.chat"),
-        );
-  return { intro, labels };
+  if (intro.kind === "hidden") return { intro, labels: null };
+  // Three independent bundles — one batch, not three consecutive awaits.
+  const [tWorkspace, tPillar, tChat] = await Promise.all([
+    getTranslations("personalWorkspace"),
+    getTranslations("playerCard.readinessSteps.pillar"),
+    getTranslations("conversation.chat"),
+  ]);
+  return { intro, labels: resolvePersonalWorkspaceLabels(tWorkspace, tPillar, tChat) };
 }
 
 async function loadBookingOffers(
@@ -221,7 +469,7 @@ async function loadBookingOffers(
   if (activeRole !== "worker") return { offers: [], labels: null };
   let offers: BookingOffer[] = [];
   try {
-    const res = await listMyBookings();
+    const [res, tBookings] = await Promise.all([listMyBookings(), getTranslations("bookings")]);
     if (res.kind === "ok") {
       offers = res.incoming
         .filter((b) => b.status === "proposed")
@@ -233,14 +481,22 @@ async function loadBookingOffers(
             b.startDate || b.expectedEndDate
               ? [b.startDate, b.expectedEndDate].filter(Boolean).join(" — ")
               : null,
+          proposerLine: b.proposerName ? tBookings("proposedBy", { name: b.proposerName }) : null,
+          changedLine: b.changedFrom
+            ? tBookings("termsChanged", {
+                previous: [b.changedFrom.startDate, b.changedFrom.expectedEndDate].filter(Boolean).join(" — ") || "—",
+              })
+            : null,
         }));
     }
   } catch {
     return { offers: [], labels: null };
   }
   if (offers.length === 0) return { offers: [], labels: null };
-  const tB = await getTranslations("bookings.actions");
-  const tC = await getTranslations("conversation.booking");
+  const [tB, tC] = await Promise.all([
+    getTranslations("bookings.actions"),
+    getTranslations("conversation.booking"),
+  ]);
   return {
     offers,
     labels: {

@@ -1,0 +1,8 @@
+{"step":"health","build":"f4b5e582","phase":"before"}
+{"step":"pricing","priceFree":null,"priceOrg":null,"individual":true,"cta":"Aktyvuoti organizacijos paskyroje"}
+{"step":"account","billingState":"stripe_live","subStatus":"none","orderButton":true,"plan":null}
+{"step":"checkout_session","status":200,"ok":true,"reason":null,"urlHost":"checkout.stripe.com"}
+{"step":"free_limit_precondition","activeOpenNeeds":null}
+{"step":"need_attempt","i":1,"saved":false,"error":"Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje."}
+{"step":"created_rows","n":0}
+{"step":"done","totalMs":119828,"readback":"select event_type, processed_at is not null processed, test_mode, created_at from payment_webhook_events order by created_at desc limit 10; select plan_key, status, organization_id, provider_subscription_id, updated_at from billing_subscriptions order by updated_at desc limit 3; select id, email, provider_customer_id from billing_customers limit 3"}

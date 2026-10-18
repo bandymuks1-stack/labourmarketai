@@ -16,6 +16,7 @@ export function PageHero({
   ctaLabel,
   ctaSource,
   ctaNext,
+  ctaAudience,
 }: {
   eyebrow: string;
   title: string;
@@ -37,6 +38,26 @@ export function PageHero({
    * destination to promise, so the default `/dashboard` is the honest landing.
    */
   ctaNext?: string;
+  /**
+   * Which audience this CTA belongs to, for funnel attribution.
+   *
+   * The signup branch hard-coded `audience="workers"` for every caller, so
+   * `/for-agencies` and `/for-companies` signup clicks were reported as
+   * WORKER-funnel events (owner readiness window 2026-09-09, Priority 6).
+   * First-touch attribution is untouched — `TrackedCta` still merges
+   * `getFirstTouchAttribution()` exactly as before; only this one label,
+   * which describes the PAGE the click happened on, is now the page's to
+   * state.
+   *
+   * It defaults to "workers", and ONLY the two pages whose audience is
+   * actually different pass it: `/for-agencies` and `/for-companies`.
+   * `/for-workers` and `/create-cv` keep the default because for them it is
+   * already correct — writing `ctaAudience="workers"` there would change
+   * nothing, and on `/create-cv` it would also drag a surface with an
+   * existing product-gate waiver into an unrelated diff and re-open its A-01
+   * findings. A no-op edit is not free.
+   */
+  ctaAudience?: string;
 }) {
   const signupHref = ctaNext
     ? `/auth/signup?next=${encodeURIComponent(ctaNext)}`
@@ -58,7 +79,7 @@ export function PageHero({
           <TrackedCta
             href={signupHref}
             ctaId={ctaSource}
-            audience="workers"
+            audience={ctaAudience ?? "workers"}
             className={buttonLinkClassName()}
           >
             {ctaLabel} →

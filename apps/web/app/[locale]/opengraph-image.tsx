@@ -57,11 +57,11 @@ export default async function OpenGraphImage({
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "64px 72px",
-          backgroundColor: "rgb(6, 7, 13)",
+          backgroundColor: "rgb(0, 0, 0)",
           backgroundImage:
-            "radial-gradient(ellipse 55% 55% at 88% 8%, rgba(0, 194, 255, 0.16), rgba(6, 7, 13, 0)), " +
-            "radial-gradient(ellipse 65% 60% at 8% 100%, rgba(62, 139, 255, 0.20), rgba(6, 7, 13, 0))",
-          color: "rgb(244, 246, 251)",
+            "radial-gradient(ellipse 55% 55% at 88% 8%, rgba(255, 217, 102, 0.14), rgba(0, 0, 0, 0)), " +
+            "radial-gradient(ellipse 65% 60% at 8% 100%, rgba(212, 175, 55, 0.20), rgba(0, 0, 0, 0))",
+          color: "rgb(255, 255, 255)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
@@ -71,7 +71,7 @@ export default async function OpenGraphImage({
               height: "14px",
               borderRadius: "999px",
               backgroundImage:
-                "linear-gradient(135deg, rgb(62, 139, 255), rgb(0, 194, 255))",
+                "linear-gradient(135deg, rgb(138, 106, 18), rgb(212, 175, 55), rgb(255, 217, 102))",
             }}
           />
           <div
@@ -79,7 +79,7 @@ export default async function OpenGraphImage({
               fontSize: "26px",
               letterSpacing: "3px",
               textTransform: "uppercase",
-              color: "rgb(155, 163, 184)",
+              color: "rgb(201, 201, 201)",
             }}
           >
             labourmarket.ai
@@ -93,19 +93,19 @@ export default async function OpenGraphImage({
               height: "8px",
               borderRadius: "999px",
               backgroundImage:
-                "linear-gradient(90deg, rgb(62, 139, 255), rgb(0, 194, 255))",
+                "linear-gradient(90deg, rgb(138, 106, 18), rgb(212, 175, 55), rgb(255, 217, 102))",
             }}
           />
           <div style={{ display: "flex", fontSize: "92px", fontWeight: 700 }}>
-            <span style={{ color: "rgb(244, 246, 251)" }}>LabourMarket</span>
-            <span style={{ color: "rgb(0, 194, 255)" }}>.ai</span>
+            <span style={{ color: "rgb(255, 255, 255)" }}>LabourMarket</span>
+            <span style={{ color: "rgb(212, 175, 55)" }}>.ai</span>
           </div>
           <div
             style={{
               fontSize: "34px",
               lineHeight: 1.35,
               maxWidth: "1000px",
-              color: "rgb(155, 163, 184)",
+              color: "rgb(201, 201, 201)",
             }}
           >
             {tagline}
@@ -117,10 +117,10 @@ export default async function OpenGraphImage({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            borderTop: "1px solid rgba(82, 93, 135, 0.5)",
+            borderTop: "1px solid rgba(42, 42, 42, 1)",
             paddingTop: "28px",
             fontSize: "24px",
-            color: "rgb(134, 144, 168)",
+            color: "rgb(154, 154, 154)",
           }}
         >
           {/* ONE template-literal child, not `text{expr}`: Satori counts

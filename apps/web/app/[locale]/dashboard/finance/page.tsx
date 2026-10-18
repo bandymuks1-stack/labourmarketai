@@ -35,6 +35,7 @@ import { ProcurementSection } from "./procurement-section";
 import { TripsSection } from "./trips-section";
 import type { ProcurementNotice } from "@/lib/procurement/procurement-model";
 import type { TripNotice } from "@/lib/trips/trips-model";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Operational finance records (control room PR I, capability gap map §9) —
@@ -176,7 +177,7 @@ const TRANSITIONS: Record<
 };
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-11 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
 const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
@@ -230,12 +231,10 @@ export default async function FinancePage({
 
   const header = (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("eyebrow")}
       </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h1>
+      <PageTitle>{t("title")}</PageTitle>
       <p className="text-sm text-text-secondary">{t("intro")}</p>
     </header>
   );
@@ -712,7 +711,7 @@ export default async function FinancePage({
       <div className="flex flex-wrap items-center gap-2">
         <a
           href={`/${locale}/dashboard/finance/export`}
-          className="inline-flex min-h-9 items-center rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
           data-testid="finance-export-csv"
         >
           {t("exportCsv")}

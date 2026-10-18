@@ -8,5 +8,6 @@
   "student": "Student",
   "unemployed": "Unemployed",
   "volunteer": "Volunteer",
+  "intern": "Intern",
   "external_manager": "External manager (client)"
 }

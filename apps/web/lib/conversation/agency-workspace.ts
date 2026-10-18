@@ -5,13 +5,15 @@ import "server-only";
 import { getTranslations } from "next-intl/server";
 
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
+import { readActsAsAgency } from "@/lib/company/agency-capability-read";
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import {
   listAgencyConnections,
   listAgencyOfferProgress,
   listSharedRequestsForAgency,
 } from "@/lib/agency/bridge-read";
+import { listAgencyPlacements } from "@/lib/agency/delegation-read";
 
 import {
   AGENCY_CHAT_LIST_LIMIT,
@@ -47,19 +49,55 @@ import {
 export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult> {
   const company = await requireEmployerCompany();
   if (!company.ok) return { kind: "no-company" };
-  const companyRead = await getOwnedCompanyById(company.companyId);
+  // A READ (the chat's bridge summary): the manager the resolver accepted
+  // may read it; the owner/admin-only read answered them "no company".
+  const companyRead = await getAccessibleCompanyById(company.companyId);
   if (companyRead.kind === "needs-migration") return { kind: "needs-migration" };
   if (companyRead.kind !== "ok" || !companyRead.row) return { kind: "no-company" };
-  if (companyRead.row.companyType !== "staffing_agency") return { kind: "not-agency" };
+  // The ONE agency rule (lib/company/agency-capability): type OR declared role.
+  if (!(await readActsAsAgency(companyRead.row.companyType, company.organizationId))) {
+    return { kind: "not-agency" };
+  }
   const agencyCompanyId = companyRead.row.id;
 
-  const [connections, shared, progress, roster, tBridge] = await Promise.all([
+  const [connections, shared, progress, roster, tBridge, tChat, placements, tLifecycle] = await Promise.all([
     listAgencyConnections(agencyCompanyId),
     listSharedRequestsForAgency(),
     listAgencyOfferProgress(),
     listActiveCompanyWorkers(agencyCompanyId),
     getTranslations("agencyBridge"),
+    // P2 object language (L1): a person or a need the rows cannot name is
+    // said in ordinary words, never as a raw id fragment.
+    getTranslations("conversation.chat"),
+    // THE PLACEMENT'S OWN OUTCOME (production chat walk 2026-09-29): the
+    // progress list said "Pasiūlyta · Klientas priėmė" for a placement the
+    // worker had DECLINED and "Rezervacija priimta" for one that had ENDED —
+    // the partners page already showed both. Same read (lifecycle only).
+    listAgencyPlacements(),
+    getTranslations("agencyDelegation.lifecycle"),
   ]);
+  const outcomeByOffer = new Map<string, string>();
+  if (placements.kind === "ok") {
+    for (const pl of placements.rows) {
+      const label =
+        pl.engagementStatus === "ended" || pl.engagementEndedAt
+          ? tLifecycle("engagementEnded")
+          : pl.assignmentEndedAt
+            ? tLifecycle("assignmentEnded")
+            : pl.bookingStatus === "declined"
+              ? tLifecycle("workerDeclined")
+              : pl.bookingStatus === "withdrawn"
+                ? tLifecycle("booking_withdrawn")
+                : pl.bookingStatus === "expired"
+                  ? tLifecycle("booking_expired")
+                  : pl.assignmentStatus === "active"
+                    ? tLifecycle("assigned")
+                    : pl.bookingStatus === "accepted"
+                      ? tLifecycle("workerAccepted")
+                      : null;
+      if (label) outcomeByOffer.set(pl.offerId, label);
+    }
+  }
 
   if (
     connections.kind === "needs-migration" ||
@@ -77,7 +115,7 @@ export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult>
     .filter((w) => w.status === "active")
     .map((w) => ({
       workerId: w.workerId,
-      label: w.displayName ?? (w.email ? w.email.split("@")[0] : `#${w.workerId.slice(0, 6)}`),
+      label: w.displayName ?? (w.email ? w.email.split("@")[0] : tChat("unnamedPerson")),
     }));
   const rosterLabel = new Map(rosterRows.map((w) => [w.workerId, w.label]));
 
@@ -98,12 +136,12 @@ export async function loadAgencyBridgeForChat(): Promise<AgencyBridgeChatResult>
   const progressRows: AgencyChatProgressRow[] = progress.rows.slice(0, AGENCY_CHAT_LIST_LIMIT).map((p) => ({
     offerId: p.offerId,
     requestId: p.requestId,
-    title: titleByRequest.get(p.requestId) ?? `#${p.requestId.slice(0, 6)}`,
-    workerLabel: rosterLabel.get(p.workerId) ?? `#${p.workerId.slice(0, 6)}`,
+    title: titleByRequest.get(p.requestId) ?? tChat("unnamedNeed"),
+    workerLabel: rosterLabel.get(p.workerId) ?? tChat("unnamedPerson"),
     stageLabel: stage(p.reviewStage),
     decisionLabel:
       p.offerStatus === "accepted" || p.offerStatus === "declined"
-        ? stage(`decision_${p.offerStatus}`)
+        ? [stage(`decision_${p.offerStatus}`), outcomeByOffer.get(p.offerId)].filter(Boolean).join(" · ")
         : null,
     offerStatus: p.offerStatus,
   }));

@@ -1,0 +1,4 @@
+# Normalize line endings so guards that match on 
+ behave the same on Windows checkouts
+# (core.autocrlf=true) as on CI. No effect on application behavior.
+* text=auto eol=lf

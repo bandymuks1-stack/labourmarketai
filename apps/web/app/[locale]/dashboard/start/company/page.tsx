@@ -4,6 +4,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { COMPANY_TYPES, type CompanyType } from "@/lib/company/company-profile-shared";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import {
   COMPANY_COUNTRY_CODES,
   getOwnedCompanyById,
@@ -11,12 +12,18 @@ import {
   type CompanyRow,
   type CompanyVerificationStatus,
 } from "@/lib/company/company-setup";
-import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import {
+  resolveEmployerCompanyContext,
+  resolveEmployerCompanyCore,
+} from "@/lib/company/employer-company-context";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { AGENCY_CONNECTION_PENDING_NOTICE } from "@/lib/invitations/model";
 import {
   CompanySetupForm,
   type CompanySetupFormLabels,
 } from "@/components/app/company-setup-form";
 import { Card } from "@/components/ui/Card";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Company profile-REQUEST setup (real persistence + honest verification).
@@ -56,7 +63,13 @@ export default async function CompanyStartPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ new?: string; type?: string; capability?: string }>;
+  searchParams?: Promise<{
+    new?: string;
+    type?: string;
+    capability?: string;
+    org?: string;
+    notice?: string;
+  }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -70,6 +83,13 @@ export default async function CompanyStartPage({
     ? (sp.type as CompanyType)
     : undefined;
   const presetCapability = sp.capability === "training_provider" ? "training_provider" : undefined;
+  // `?notice=agency_connection_pending` (review round 2, 2026-09-24): the
+  // person accepted a staffing agency's connection invitation and holds no
+  // company role yet, so the partners door — where the connection is
+  // confirmed — would refuse them. The invite action lands them here with
+  // the pending connection NAMED. Closed set; an unknown value renders
+  // nothing (an internal token never reaches the screen, doctrine §23).
+  const safeNotice = sp.notice === AGENCY_CONNECTION_PENDING_NOTICE ? sp.notice : null;
 
   const supabase = await createClient();
   const {
@@ -104,7 +124,52 @@ export default async function CompanyStartPage({
   let company: CompanyRow | null = null;
   let targetCompanyId: string = "new";
   let ambiguous = false;
-  if (createRequested && !migrationNeeded && shell) {
+
+  // ?org=<id> — "Nurodyti pavadinimą" in the workspace chip names the EXACT
+  // organization (owner program 2026-09-23). This page used to ignore it and
+  // resolve the target from the active workspace, falling back to the single
+  // owned company: for an unnamed agency-backed organization that fallback
+  // opened — and saved — the person's OTHER, verified company (proven on
+  // production). When `org` is given it is the ONLY target:
+  //   ok                  → edit THAT organization's company;
+  //   no-company-binding  → say so, with the one canonical door;
+  //   anything else       → an honest "not available here".
+  // Resolved through the SAME employer chain with that workspace as the
+  // active one, so the membership gate (`workspace.workspaces`) still
+  // decides — a foreign or made-up id resolves to nothing. No fallback.
+  const requestedOrg = typeof sp.org === "string" ? sp.org.trim() : "";
+  let requestedOrgState: "edit" | "no-company-profile" | "not-available" | null = null;
+
+  if (requestedOrg !== "") {
+    requestedOrgState = "not-available";
+    if (!migrationNeeded) {
+      // Only the membership LIST is used (the active id is replaced below),
+      // so the request's one workspace resolution serves it (lane A: the
+      // resolver takes no caller-chosen identity).
+      const memberships = await getWorkspaceContext();
+      const requested = await resolveEmployerCompanyCore(
+        { supabase, userId: user.id },
+        { ...memberships, activeWorkspaceId: requestedOrg },
+      );
+      if (requested.kind === "ok") {
+        // Created by the caller, or governed as an active owner/admin
+        // (`getOwnedCompanyById` re-checks that membership) — never merely
+        // any member: a manager runs operations, not company identity.
+        const row =
+          ownedRows.find((r) => r.id === requested.companyId) ??
+          (await getOwnedCompanyById(requested.companyId).then((res) =>
+            res.kind === "ok" ? res.row : null,
+          ));
+        if (row) {
+          company = row;
+          targetCompanyId = row.id;
+          requestedOrgState = "edit";
+        }
+      } else if (requested.reason === "no-company-binding") {
+        requestedOrgState = "no-company-profile";
+      }
+    }
+  } else if (createRequested && !migrationNeeded && shell) {
     company = shell;
     targetCompanyId = shell.id;
   } else if (!createRequested && !migrationNeeded) {
@@ -137,8 +202,6 @@ export default async function CompanyStartPage({
   // even though it technically edits an existing row.
   const firstSetup = company !== null && isShellRow(company);
 
-  const uiLocale: "lt" | "en" = locale === "lt" ? "lt" : "en";
-  const label = (lt: string, en: string) => (uiLocale === "lt" ? lt : en);
 
   const formLabels: CompanySetupFormLabels = {
     // Dead-UI rule C (owner smoke 2026-07-05): one route serves create AND
@@ -162,9 +225,18 @@ export default async function CompanyStartPage({
     },
     country: t("country"),
     countryPlaceholder: t("countryPlaceholder"),
+    // Only codes the catalogue actually names: a missing key used to print
+    // "roleDashboards.company.setup.countryOptions.FI" in the select (agency
+    // onboarding walk 2026-10-08). Without an override the option keeps the
+    // canonical Intl country name from countryOptionsForLocale.
     countryOptions: Object.fromEntries(
-      COMPANY_COUNTRY_CODES.map((code) => [code, t(`countryOptions.${code}`)]),
+      COMPANY_COUNTRY_CODES.filter((code) => t.has(`countryOptions.${code}`)).map((code) => [
+        code,
+        t(`countryOptions.${code}`),
+      ]),
     ),
+    locale,
+    countryList: countryOptionsForLocale(locale),
     statusInvalidCountry: t("statusInvalidCountry"),
     registrationCode: t("registrationCode"),
     registrationCodeHelp: t("registrationCodeHelp"),
@@ -199,20 +271,28 @@ export default async function CompanyStartPage({
   return (
     <div className="flex flex-col gap-6" data-testid="company-start-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
-          {label("ĮMONĖS NUSTATYMAS", "COMPANY SETUP")}
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {label("Įmonės profilis", "Company profile")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
       </header>
 
       <Link
         href={"/dashboard/start" as "/dashboard"}
         className="self-start text-sm text-text-secondary hover:underline"
       >
-        ← {label("Grįžti į veiklos pradžią", "Back to activity start")}
+        ← {t("backToStart")}
       </Link>
+
+      {safeNotice === AGENCY_CONNECTION_PENDING_NOTICE ? (
+        <p
+          role="status"
+          className="rounded-card border border-brand-blue/40 bg-brand-blue/10 p-4 text-sm text-text-secondary"
+          data-testid="company-start-agency-connection-pending"
+        >
+          {t("agencyConnectionPending")}
+        </p>
+      ) : null}
 
       {migrationNeeded ? (
         <section
@@ -221,7 +301,7 @@ export default async function CompanyStartPage({
         >
           <header className="flex items-center gap-2">
             <span className="rounded bg-state-warning/20 px-2 py-0.5 text-xs text-state-warning">
-              {label("blokuota", "blocked")}
+              {t("blockedBadge")}
             </span>
             <h2 className="font-display text-lg font-semibold text-text-primary">
               {t("migrationBlockerHeading")}
@@ -301,8 +381,39 @@ export default async function CompanyStartPage({
             className="self-start text-sm text-brand-blue hover:underline"
             data-testid="company-start-goto-dashboard"
           >
-            {label("Eiti į įmonės erdvę →", "Go to company space →")}
+            {t("goToCompanySpace")}
           </Link>
+        </section>
+      ) : null}
+
+      {requestedOrgState === "no-company-profile" ? (
+        // The organization the chip named has no company profile (a legacy
+        // agency-backed organization): there is nothing here that can carry
+        // its name. Said as that, and why — never a form that would quietly
+        // edit another organization, and no "create a company profile" door
+        // either: that makes a SEPARATE organization, a duplicate of this
+        // one, while the owner decision for it (a RED rename RPC, or
+        // archive/merge into the canonical organization) is open.
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="company-start-org-no-company-profile"
+        >
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("orgNoCompanyProfileHeading")}
+          </h2>
+          <p className="text-sm text-text-secondary">{t("orgNoCompanyProfileBody")}</p>
+        </section>
+      ) : null}
+
+      {requestedOrgState === "not-available" ? (
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="company-start-org-not-available"
+        >
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("orgNotAvailableHeading")}
+          </h2>
+          <p className="text-sm text-text-secondary">{t("orgNotAvailableBody")}</p>
         </section>
       ) : null}
 
@@ -316,13 +427,10 @@ export default async function CompanyStartPage({
             data-testid="company-start-ambiguous-chooser"
           >
             <h2 className="font-display text-lg font-semibold text-text-primary">
-              {label("Kurią organizaciją tvarkyti?", "Which organization to manage?")}
+              {t("pickOrgHeading")}
             </h2>
             <p className="text-sm text-text-secondary">
-              {label(
-                "Turite kelias organizacijas. Pasirinkite aktyvią erdvę viršuje arba kurkite naują.",
-                "You own several organizations. Pick the active workspace in the switcher above, or create a new one.",
-              )}
+              {t("pickOrgBody")}
             </p>
             <ul className="flex flex-col gap-1 text-sm text-text-primary">
               {ownedRows.map((row) => (
@@ -336,13 +444,15 @@ export default async function CompanyStartPage({
               className="self-start text-sm text-brand-blue hover:underline"
               data-testid="company-start-create-new-link"
             >
-              {label("+ Kurti naują organizaciją", "+ Create a new organization")}
+              {t("createNewOrg")}
             </Link>
           </div>
         </Card>
       ) : null}
 
-      {!migrationNeeded && !ambiguous ? (
+      {!migrationNeeded &&
+      !ambiguous &&
+      (requestedOrgState === null || requestedOrgState === "edit") ? (
         <section
           className="card-border flex flex-col gap-4 p-5"
           data-testid="company-start-form-section"
@@ -353,7 +463,7 @@ export default async function CompanyStartPage({
               className="self-start text-sm text-brand-blue hover:underline"
               data-testid="company-start-create-another-link"
             >
-              {label("+ Kurti naują organizaciją", "+ Create a new organization")}
+              {t("createNewOrg")}
             </Link>
           )}
           <CompanySetupForm

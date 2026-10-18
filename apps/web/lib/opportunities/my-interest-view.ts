@@ -35,7 +35,13 @@ export type MyInterestNextAction =
   | "none";
 
 export interface MyInterestViewRow {
-  readonly requestId: string;
+  /** Stable row key: the demand id, or `vacancy:<id>`. */
+  readonly key: string;
+  readonly source: "demand" | "vacancy";
+  /** The platform demand id — null for a public-vacancy interest. */
+  readonly requestId: string | null;
+  /** The public vacancy id — null for a platform-demand interest. */
+  readonly vacancyId: string | null;
   readonly status: InterestStatus;
   /** False ⇒ the demand is gone from the worker board (closed/unpublished) —
    *  the row stays visible with the honest "no longer active" label. */
@@ -59,11 +65,24 @@ export interface MyInterestViewRow {
 export function nextActionFor(
   status: InterestStatus,
   stillOpen: boolean,
+  source: "demand" | "vacancy" = "demand",
 ): MyInterestNextAction {
+  if (source === "vacancy") {
+    // A public ad has no employer inbox here (the employer never joined);
+    // the only own action on an active interest is to lower the hand.
+    if (status === "withdrawn") return "none";
+    return "withdraw";
+  }
   if (status === "contacted") return "open_conversation";
   if (status === "withdrawn") return stillOpen ? "view_demand" : "none";
   // interested | reviewed
   return stillOpen ? "contact_employer" : "withdraw";
+}
+
+/** The live-facts key for a vacancy interest (the board's external cards
+ *  are joined under this key; platform demands under their request id). */
+export function vacancyLiveKey(vacancyId: string): string {
+  return `vacancy:${vacancyId}`;
 }
 
 export interface LiveNeedFacts {
@@ -79,22 +98,38 @@ export function buildMyInterestView(
   rows: readonly MyInterestRow[],
   liveNeedById: ReadonlyMap<string, LiveNeedFacts>,
 ): MyInterestViewRow[] {
-  return rows.map((row) => {
-    const live = liveNeedById.get(row.requestId) ?? null;
+  return rows.flatMap((row) => {
+    const source: "demand" | "vacancy" = row.requestId ? "demand" : "vacancy";
+    const key =
+      source === "demand"
+        ? (row.requestId as string)
+        : row.publicVacancyId
+          ? vacancyLiveKey(row.publicVacancyId)
+          : null;
+    // A row with neither source cannot exist (DB CHECK); never render a guess.
+    if (key === null) return [];
+    const live = liveNeedById.get(key) ?? null;
     const stillOpen = live !== null;
     const ctx = parseSnapshotContext(row.matchSnapshot);
     const stash = parseInterestCvStash(row.matchSnapshot);
-    return {
-      requestId: row.requestId,
-      status: row.status,
-      stillOpen,
-      roleText: live?.roleText ?? ctx.role_text,
-      companyName: live?.companyName ?? ctx.company_name,
-      locationLabel: live?.locationLabel ?? ctx.location_label,
-      country: live?.country ?? ctx.country,
-      dateIso: row.updatedAt ?? row.createdAt,
-      nextAction: nextActionFor(row.status, stillOpen),
-      cvTemplate: stillOpen ? (stash?.template ?? DEFAULT_TEMPLATE) : null,
-    };
+    return [
+      {
+        key,
+        source,
+        requestId: row.requestId,
+        vacancyId: row.publicVacancyId,
+        status: row.status,
+        stillOpen,
+        roleText: live?.roleText ?? ctx.role_text,
+        companyName: live?.companyName ?? ctx.company_name,
+        locationLabel: live?.locationLabel ?? ctx.location_label,
+        country: live?.country ?? ctx.country,
+        dateIso: row.updatedAt ?? row.createdAt,
+        nextAction: nextActionFor(row.status, stillOpen, source),
+        // The tailored CV render needs a platform demand on the board.
+        cvTemplate:
+          source === "demand" && stillOpen ? (stash?.template ?? DEFAULT_TEMPLATE) : null,
+      },
+    ];
   });
 }

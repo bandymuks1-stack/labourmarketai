@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { isPlayerCardMode } from "@/lib/player-card/card-modes";
 
-import { WorkCardEditor } from "@/components/app/work-card-editor";
+import { WORK_CARD_SAVED_EVENT, WorkCardEditor } from "@/components/app/work-card-editor";
 import { WorkerPlayerCard } from "@/components/app/worker-player-card";
 import { loadPlayerCardResult } from "@/lib/player-card/player-card-result";
 import type { PlayerCardResult as PlayerCardResultView } from "@/lib/player-card/player-card-result";
@@ -54,6 +56,10 @@ export function PlayerCardResult({
   onOpenFull: (route: string) => void;
 }) {
   const t = useTranslations("conversation.results");
+  // The lens the chat (or a shared link) asked for — `?card=`; else the
+  // whole card.
+  const rawMode = useSearchParams()?.get("card");
+  const mode = isPlayerCardMode(rawMode) ? rawMode : "identity";
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   // Bumping this re-runs the read — that is the whole of RETRY.
   const [attempt, setAttempt] = useState(0);
@@ -75,6 +81,27 @@ export function PlayerCardResult({
   }, [attempt]);
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
+
+  // A save from the card's own editor changed the row this view was read
+  // from: re-read it QUIETLY (no loading frame — the editor and its
+  // "Išsaugota" stay mounted), so the figures above match what persisted.
+  useEffect(() => {
+    let cancelled = false;
+    const reread = () => {
+      loadPlayerCardResult()
+        .then((view) => {
+          if (!cancelled) setPhase({ kind: "loaded", view });
+        })
+        .catch(() => {
+          /* keep the card on screen; the editor already shows the saved row */
+        });
+    };
+    window.addEventListener(WORK_CARD_SAVED_EVENT, reread);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(WORK_CARD_SAVED_EVENT, reread);
+    };
+  }, []);
 
   if (phase.kind === "idle" || phase.kind === "loading") {
     return (
@@ -118,7 +145,7 @@ export function PlayerCardResult({
           data-testid="player-card-open-full"
           className="min-h-11 self-start rounded-full border border-ink-500 px-3.5 text-support font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue"
         >
-          {t("openFull")}
+          {t("station.profile")}
         </button>
       </div>
     );
@@ -131,6 +158,7 @@ export function PlayerCardResult({
         labels={view.labels}
         thermometer={view.thermometer}
         avatarUrl={view.avatarUrl}
+        initialMode={mode}
       />
 
       {/* THE EDITOR THE ABSORB HAD TO CARRY. It was folded into the premium
@@ -144,7 +172,7 @@ export function PlayerCardResult({
           className="flex flex-col gap-3 rounded-card border border-ink-600 p-4"
           data-testid="player-card-work-editor"
         >
-          <span className="font-mono text-meta uppercase tracking-label text-brand-orange">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {view.workEditorLabels.nextEyebrow}
           </span>
           <WorkCardEditor
@@ -152,17 +180,23 @@ export function PlayerCardResult({
             nextHref={view.workEditor.next.href}
             values={view.workEditor.values}
             labels={view.workEditorLabels}
+            checks={view.workEditor.checks}
           />
         </div>
       ) : null}
 
+      {/* THE PROFILE DOOR, NAMED (owner P0/P1 §17, 2026-09-23). This button
+          said "open full screen" and opened the profile page — the owner's
+          own click path out of the conversation. It still opens the profile
+          (the station where every identity editor lives), and it now says
+          so; "full screen" is the panel's own in-place expansion. */}
       <button
         type="button"
         onClick={() => onOpenFull("/dashboard/profile")}
         data-testid="player-card-open-full"
         className="min-h-11 self-start rounded-full border border-ink-500 px-3.5 text-support font-medium text-text-secondary hover:border-brand-blue hover:text-brand-blue"
       >
-        {t("openFull")}
+        {t("station.profile")}
       </button>
     </div>
   );

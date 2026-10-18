@@ -521,8 +521,13 @@ describe("9. company.assign-worker has a real client caller", () => {
   });
 
   it("offers only people the server would actually accept", () => {
-    // Same population as the RPC's caller_manages_worker gate.
+    // Same population as the RPC's TWO gates: the roster
+    // (caller_manages_worker) AND accepted-booking engagements
+    // (caller_has_booking_engagement_for_project) — the same two reads the
+    // projects page uses (D5 agency-chain walk, 2026-09-06).
     expect(adapter).toMatch(/listActiveCompanyWorkers/);
+    expect(adapter).toMatch(/listBookingEngagementWorkers\(\)/);
+    expect(adapter).toMatch(/composeAssignableWorkers\(/);
     expect(chat).toMatch(/loadAssignableWorkersForProject/);
   });
 

@@ -23,8 +23,10 @@
  *   - never carries domain logic, data reads or writes — the result components
  *     keep using the SAME `lib/*` readers the routes already use;
  *   - never replaces `advancedRoute` — that route stays the honest fallback and
- *     the "open the full screen" affordance. A result is an ADDITION, never a
- *     removal of the working path (NO REGRESSION, goal doc §2.7).
+ *     the result's NAMED station door (`stationLabelKey`). A result is an
+ *     ADDITION, never a removal of the working path (NO REGRESSION, goal doc
+ *     §2.7). "Open full screen" is not a route: it expands the result in
+ *     place (2026-09-23, owner P0/P1 §17).
  *
  * PURITY: like the action registry, this module has no `server-only` import, no
  * supabase and no fetch, so it is safe on both sides of the boundary and is
@@ -115,16 +117,40 @@ export interface ResultDescriptor {
   /** i18n key (namespace `conversation.results`) for the panel title. */
   readonly titleKey: string;
   /**
+   * The title the panel shows INSTEAD of `titleKey` while the rendered result
+   * declares itself DISCOVERY-ONLY (`data-discovery-only="true"` on its
+   * rows — nothing the engine assessed as a fit). The chrome must follow the
+   * result's own state: "jobs that fit you" over unassessed rows was the
+   * production defect (#1689, defect H). Absent = the result has no such
+   * state and `titleKey` always applies.
+   */
+  readonly discoveryTitleKey?: string;
+  /**
    * Action ids from `action-registry.ts` that open this result. Every id here
    * MUST exist in that registry — pinned by a guard test so a rename in the
    * action registry cannot silently orphan a result.
    */
   readonly openedBy: readonly string[];
   /**
-   * The existing route that performs this today. Kept as the honest fallback
-   * and the "open full screen" affordance. NEVER removed by this work.
+   * The existing route that performs this today — the result's STATION. Kept
+   * as the honest fallback and the named station door. NEVER removed by this
+   * work.
+   *
+   * It is NOT the "open full screen" affordance any more (owner P0/P1 §17,
+   * 2026-09-23: "Open full screen may expand a contextual result when more
+   * space is useful. It must not be an escape hatch into a second legacy
+   * application"). Full screen EXPANDS the result in place (`?full=`, the
+   * panel's third width); only a door that says where it goes navigates here.
    */
   readonly advancedRoute: string;
+  /**
+   * i18n key (namespace `conversation.results`) that NAMES the station at
+   * `advancedRoute` — "Open profile", "Open calendar". Every control that
+   * navigates to the station says which one, so no button promises "full
+   * screen" and delivers another page. Pinned by a guard: present in every
+   * active locale, and never the generic `openFull`.
+   */
+  readonly stationLabelKey: string;
   /** Contexts where this result is meaningful. */
   readonly contexts: readonly ResultContext[];
   /** REAL DATA ONLY gate — see `ResultDataReadiness`. */
@@ -145,6 +171,7 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     titleKey: "conversation.results.playerCard.title",
     openedBy: ["worker.complete-profile", "worker.save-work-card"],
     advancedRoute: "/dashboard/profile",
+    stationLabelKey: "conversation.results.station.profile",
     contexts: ["personal"],
     // lib/player-card/* — 8 modules, already feeding the restored charts.
     dataReadiness: "real",
@@ -154,6 +181,7 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     titleKey: "conversation.results.journal.title",
     openedBy: ["worker.log-work"],
     advancedRoute: "/dashboard/journal",
+    stationLabelKey: "conversation.results.station.journal",
     contexts: ["personal", "organization", "project"],
     // lib/journal/* — the richest domain in the tree (50+ modules), and that
     // richness is exactly what made this entry misleading: the DATA is real,
@@ -176,6 +204,7 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     titleKey: "conversation.results.calendar.title",
     openedBy: ["worker.review-bookings", "worker.respond-booking"],
     advancedRoute: "/dashboard/planning",
+    stationLabelKey: "conversation.results.station.calendar",
     contexts: ["personal", "organization", "project"],
     // lib/planning + lib/booking + lib/leave.
     dataReadiness: "real",
@@ -191,6 +220,7 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     // whose route matches its own, which is where it moved.
     openedBy: ["worker.what-next"],
     advancedRoute: "/dashboard/market-map",
+    stationLabelKey: "conversation.results.station.marketMap",
     contexts: ["personal", "organization"],
     // VERIFIED: `lib/market-map/market-result.ts` aggregates REAL rows —
     // open job_demands joined to their project's geography — and resolves
@@ -203,10 +233,14 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
   {
     kind: "opportunities",
     titleKey: "conversation.results.opportunities.title",
+    // The result heads itself "found postings (not yet assessed)" when no
+    // row is an assessed fit (lane D); the panel's chrome title follows.
+    discoveryTitleKey: "conversation.results.opportunities.titleDiscovery",
     // The action whose own advancedRoute is `/dashboard/opportunities`. The
     // result and the action now name the SAME screen.
     openedBy: ["worker.express-interest"],
     advancedRoute: "/dashboard/opportunities",
+    stationLabelKey: "conversation.results.station.opportunities",
     // PERSONAL ONLY, and that is a product statement, not an oversight: these
     // are the matches for THIS PERSON's skills. Inside an organization context
     // "my matches" answers a question nobody asked there, so it is not offered
@@ -232,6 +266,7 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     // route stays, and stays the fallback.
     openedBy: ["company.review-candidates", "company.shortlist-candidate"],
     advancedRoute: "/dashboard/company/scouting",
+    stationLabelKey: "conversation.results.station.scouting",
     // ORGANIZATION ONLY, and that is the same product statement `opportunities`
     // makes in reverse. Every read behind this result (`listCompanyDemands`,
     // `runScouting`, the three lifecycle writes) is refused outside a company
@@ -256,6 +291,7 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     titleKey: "conversation.results.project.title",
     openedBy: ["company.assign-worker", "company.who-waits"],
     advancedRoute: "/dashboard/projects",
+    stationLabelKey: "conversation.results.station.projects",
     contexts: ["organization", "project"],
     // W11 — PROMOTED unverified → real, in the SAME change that adds
     // `case "project"` to `InlineResult`, exactly as the note below required
@@ -279,6 +315,7 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     titleKey: "conversation.results.evidence.title",
     openedBy: ["worker.add-work-history", "worker.add-achievement"],
     advancedRoute: "/dashboard/documents",
+    stationLabelKey: "conversation.results.station.documents",
     contexts: ["personal", "project"],
     // Same defect as `project` (W11 audit P0-4). No `case "evidence"` in
     // `InlineResult`, so `real` bought a dead end instead of a renderer.
@@ -300,6 +337,7 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     // destination for professional identity — the fallback path the registry
     // requires — and it is the ONLY route this result names.
     advancedRoute: "/dashboard/profile",
+    stationLabelKey: "conversation.results.station.profile",
     // EVERY CONTEXT — the `journal` pattern, NOT the `opportunities` one.
     //
     // This was `["personal"]` first, copying the opportunities reasoning ("my
@@ -343,7 +381,14 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     // would be refused by Product Gate A-09, exactly as W6 slice 3B's
     // `/dashboard/experiences` was. The projects list is where an employer
     // already meets their engaged workers.
+    //
+    // A DIFFERENT OBJECT, SO THE DOOR SAYS SO (2026-09-23). The projects list
+    // is not "this result, bigger" — an engagement has no project — so the
+    // result's way there is labelled as the projects station ("Open
+    // projects"), never "open full screen". The in-place expansion is the
+    // panel's own control and keeps the engagements themselves.
     advancedRoute: "/dashboard/projects",
+    stationLabelKey: "conversation.results.station.projects",
     // BOTH personal and organization — the `journal` pattern, not the
     // `opportunities` one, and for the reason `experiences` documents above:
     // "who I am working with" is a fact about the SIGNED-IN PERSON that stays
@@ -378,6 +423,7 @@ export const CONVERSATION_RESULTS: readonly ResultDescriptor[] = [
     titleKey: "conversation.results.invoice.title",
     openedBy: ["worker.log-work"],
     advancedRoute: "/dashboard/finance",
+    stationLabelKey: "conversation.results.station.finance",
     contexts: ["personal", "organization", "project"],
     // lib/finance + journal aggregation. NOTE: preview/export only — any
     // payment, Stripe or billing behaviour is an explicit owner gate (§16).
@@ -399,6 +445,33 @@ export const RESULT_KINDS: readonly ResultKind[] = CONVERSATION_RESULTS.map(
 /** Narrowing type guard — used to validate the `?result=` deep-link value. */
 export function isResultKind(value: unknown): value is ResultKind {
   return typeof value === "string" && RESULT_KINDS.includes(value as ResultKind);
+}
+
+/**
+ * THE DEPTH THAT BELONGS TO ONE WORKSPACE (owner program 2026-09-23).
+ *
+ * `?demand=` (an employer's own demand), `?project=` + `?pr=` on the `project`
+ * result (one organization's project) and `?interaction=` (a bound
+ * experience) name OBJECTS of the workspace the person was standing in. After
+ * a switch the same address would open the previous organization's object in
+ * the new one — the server refuses it, but the panel would still be pointed at
+ * something that is not there. So a switch drops exactly that depth and keeps
+ * the rest: `?result=` re-reads for the new workspace, and a market place
+ * (`?geo=`, with its `?project=` leaf) is public geography, not an object of
+ * any workspace.
+ *
+ * Returns the query string without that depth, or null when nothing changes.
+ */
+export function withoutWorkspaceScopedDepth(search: string): string | null {
+  const q = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  const scoped = ["demand", "interaction", "pr"];
+  // A project is the workspace's own only on the `project` result; under a
+  // market geography it is a leaf of public geography.
+  if (!q.has("geo")) scoped.push("project");
+  if (!scoped.some((k) => q.has(k))) return null;
+  // Rebuilt from the kept entries, in their order — a pure string transform.
+  const qs = new URLSearchParams([...q.entries()].filter(([k]) => !scoped.includes(k))).toString();
+  return qs ? `?${qs}` : "";
 }
 
 /** Lookup by kind. Unknown kind → undefined (an invented kind never renders). */

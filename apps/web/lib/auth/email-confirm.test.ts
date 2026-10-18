@@ -11,7 +11,7 @@ import {
 } from "./email-confirm";
 
 const ORIGIN = "https://labourmarket.ai";
-const LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 describe("parseEmailVerification", () => {
   it("accepts a token_hash + allowed type", () => {

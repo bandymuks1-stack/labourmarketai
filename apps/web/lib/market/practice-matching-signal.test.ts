@@ -70,7 +70,7 @@ describe("(a) the signal is present, and it is labelled as practice", () => {
   it("the relationship set it counts is the canonical practice list, not employment", () => {
     // Guards the meaning at the source: if `student`/`volunteer` ever migrated
     // into WORKER_RELATIONSHIPS, this signal would silently become employment.
-    expect([...PRACTICE_RELATIONSHIPS]).toEqual(["student", "volunteer"]);
+    expect([...PRACTICE_RELATIONSHIPS]).toEqual(["student", "volunteer", "intern"]);
   });
 });
 

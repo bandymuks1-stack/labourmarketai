@@ -75,6 +75,10 @@ export const CLIENT_MESSAGE_ROOTS = [
   "documents",
   "draft",
   "errorBoundary",
+  /** Organization evidence import (2026-09-07): the import workspace's forms
+   *  and the subject-side "what organizations have recorded about me" card are
+   *  both client components reading `evidenceImport.*`. */
+  "evidenceImport",
   "features",
   "finance",
   "followUp",
@@ -103,17 +107,26 @@ export const CLIENT_MESSAGE_ROOTS = [
   // Client-reachable because the card is interactive; the labels are the only
   // thing the reader ever sees — the stored slug never leaves the server.
   "organizationCapabilities",
+  // Roster ingestion panel on /dashboard/company (people-import-panel).
+  "peopleImport",
   "opportunities",
   "playercards",
   "productivityUnits",
   "professions",
   "profileAvatar",
   "projectEconomics",
+  // P4 — the Field on the operations page (client scene, list equivalent,
+  // context panel). Small namespace; the projectOps labels it also needs
+  // travel as props from the page, exactly as the operations board does.
+  "projectField",
   "projectStages",
   "projects",
   "relationshipTypes",
   "reports",
   "roleDashboards",
+  /** R-9 (2026-09-19): the roster-link end control (worker "leave" on the
+   *  profile, owner "remove" on the people page) is a client form. */
+  "rosterLinkEnd",
   "salesIntake",
   "shared",
   "skillGroups",
@@ -122,7 +135,9 @@ export const CLIENT_MESSAGE_ROOTS = [
   "structuredDemand",
   "structuring",
   "tasks",
+  "teamAssignment",
   "teamBrigades",
+  "teamDemandOffer",
   "teamEnquiries",
   "waitlist",
   "waze",

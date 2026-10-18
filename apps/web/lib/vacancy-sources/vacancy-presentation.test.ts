@@ -77,8 +77,42 @@ describe("one canonical opportunity contract — not a second product", () => {
         "startDate",
         "title",
         "workingTime",
+        // Language provenance (owner P0 2026-09-22 §9): which language the
+        // reader is looking at, and the publisher's own words always carried.
+        "sourceLanguage",
+        "presentedLanguage",
+        "titleOriginal",
+        "descriptionOriginal",
+        "translationProvider",
       ].sort(),
     );
+  });
+
+  it("presents the reader's rendering when given one, and the original — named — when not", () => {
+    const original = toCanonicalOpportunityView(vacancy());
+    expect(original.title).toBe(vacancy().titleRaw);
+    expect(original.presentedLanguage).toBe(original.sourceLanguage);
+    expect(original.translationProvider).toBeNull();
+
+    const rendered = toCanonicalOpportunityView(vacancy(), {
+      translation: { targetLanguage: "lt", title: "Suvirintojas", description: null, provider: "gemini" },
+    });
+    expect(rendered.title).toBe("Suvirintojas");
+    expect(rendered.presentedLanguage).toBe("lt");
+    expect(rendered.titleOriginal).toBe(vacancy().titleRaw);
+    // A rendering without a body leaves the ORIGINAL body in place — never an
+    // empty description passed off as translated.
+    expect(rendered.description).toBe(vacancy().descriptionRaw);
+    // Employer name, place, pay and URL are identifiers/facts: untouched.
+    expect(rendered.employerName).toBe(original.employerName);
+    expect(rendered.payMin).toBe(original.payMin);
+
+    // A rendering with no title is no rendering at all.
+    const empty = toCanonicalOpportunityView(vacancy(), {
+      translation: { targetLanguage: "lt", title: null, description: "x", provider: "gemini" },
+    });
+    expect(empty.title).toBe(vacancy().titleRaw);
+    expect(empty.presentedLanguage).toBe(empty.sourceLanguage);
   });
 
   it("provenance is the ONLY axis on which it differs from a direct opportunity", () => {

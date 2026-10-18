@@ -45,6 +45,14 @@ export default function Screen() {
         >
           {(data) => <JournalEntryList entries={data.entries} />}
         </CapabilityGate>
+        {/* The station the web journal links to: what these entries add up
+            to lives on the profile (hours · share · entries per skill). */}
+        <Button
+          variant="quiet"
+          testID="journal-open-profile"
+          label={t("journal.openProfile")}
+          onPress={() => router.push("/(shell)/profile")}
+        />
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,10 +1,21 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Plus, Pencil, Trash2, Play, Archive, RotateCcw, MessageSquare } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Play,
+  Pause,
+  Archive,
+  RotateCcw,
+  MessageSquare,
+  ArrowRight,
+} from "lucide-react";
 
+import { Link } from "@/lib/i18n/navigation";
 import {
   createMarketplaceListingAction,
   updateMarketplaceListingAction,
@@ -13,61 +24,121 @@ import {
   enquireAboutListingAction,
 } from "@/lib/marketplace/listings";
 import {
+  ACTOR_KINDS,
   LISTING_CATEGORIES,
   LISTING_KINDS,
-  type ListingCategory,
   type ListingKind,
   type ListingStatus,
   type MarketplaceDiscoveryRow,
   type MarketplaceListingRow,
 } from "@/lib/marketplace/listings-model";
+import {
+  LISTING_DOMAINS,
+  SUBJECTS_BY_DOMAIN,
+  allowedKindsForDomain,
+  domainOfSubject,
+  isExpired,
+  type ListingDomain,
+} from "@/lib/marketplace/market-model";
+import { assessPublish } from "@/lib/marketplace/publish-policy";
 
 /**
- * Marketplace work-resource listings (Wagon 13, slice 1). Real data only —
- * "my" rows come from the caller's own RLS-scoped rows; discovery shows only
- * `active` rows the SELECT policy already permits. No seed rows, no payment.
- * When the table is not applied yet the parent passes `needsMigration` and we
- * show a calm "not available yet" state, never an error and never fake rows.
+ * Universal marketplace listings — work resources, goods, service needs,
+ * personal and project / contract listings. Real data only — "my" rows come
+ * from the caller's own RLS-scoped rows; discovery shows only active,
+ * not-expired rows the SELECT policy already permits (plus active service
+ * offerings, which keep their own request loop in Services). No seed rows, no
+ * payment, no held funds. When the migration is not applied yet the parent passes
+ * `extended = false` (work resources only, no new fields) or `needsMigration`
+ * and we show a calm state, never an error and never fake rows.
  *
- * Two panels over ONE entity: manage YOUR listings, and browse ACTIVE ones and
- * enquire (the enquiry opens the canonical conversation — no second messaging).
+ * Two panels over ONE discovery: manage YOUR listings, and browse ACTIVE ones
+ * and enquire (the enquiry opens the canonical conversation — no second
+ * messaging).
  */
 
 const STATUS_RING: Record<ListingStatus, string> = {
   draft: "border-ink-500 bg-ink-800/40 text-text-muted",
   active: "border-state-success/40 bg-state-success/5 text-state-success",
+  paused: "border-ink-500 bg-ink-800/40 text-text-secondary",
   closed: "border-state-warning/40 bg-state-warning/5 text-state-warning",
 };
 
 type Draft = {
-  listingKind: ListingKind;
-  category: ListingCategory;
+  domain: ListingDomain;
+  /** "" until the person chooses — no silent default (walk 2026-10-09). */
+  listingKind: ListingKind | "";
+  /** "" until the person chooses. */
+  category: string;
   title: string;
   description: string;
   locationCountry: string;
   locationLabel: string;
   priceText: string;
+  priceAmount: string;
+  currency: string;
+  quantity: string;
+  unit: string;
+  expiresOn: string;
 };
 
 const EMPTY_DRAFT: Draft = {
-  listingKind: "rental",
-  category: "accommodation",
+  domain: "work_resource",
+  // A listing that nobody chose a kind or a subject for read "For rent ·
+  // Home-grown food" once saved (walk 2026-10-09): the first option of each
+  // select was taken as the person's answer. Both start unchosen now; a
+  // select with exactly one possible value is filled (that is not a guess).
+  listingKind: "",
+  category: "",
   title: "",
   description: "",
   locationCountry: "",
   locationLabel: "",
   priceText: "",
+  priceAmount: "",
+  currency: "EUR",
+  quantity: "",
+  unit: "",
+  expiresOn: "",
 };
+
+function toNumber(v: string): number | null {
+  const t = v.trim().replace(",", ".");
+  if (!t) return null;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : Number.NaN;
+}
+
+function formatAmount(amount: number, currency: string | null, locale: string): string {
+  try {
+    return currency
+      ? new Intl.NumberFormat(locale, { style: "currency", currency }).format(amount)
+      : new Intl.NumberFormat(locale).format(amount);
+  } catch {
+    return `${amount} ${currency ?? ""}`.trim();
+  }
+}
+
+function formatDate(iso: string): string {
+  // Locale-independent ISO date (no toLocaleDateString hydration risk).
+  return iso.slice(0, 10);
+}
 
 export function MarketplaceListingsSection({
   myRows,
   discoveryRows,
   needsMigration,
+  extended,
+  unavailable = [],
   locale,
 }: {
   myRows: MarketplaceListingRow[];
   discoveryRows: MarketplaceDiscoveryRow[];
   needsMigration: boolean;
+  /** The universal-marketplace migration is applied. */
+  extended: boolean;
+  /** Federated sources that could not be read (never rendered as empty). */
+  unavailable?: readonly ("vacancies" | "workforce" | "demand")[];
   locale: string;
 }) {
   const t = useTranslations("marketplaceListings");
@@ -78,18 +149,49 @@ export function MarketplaceListingsSection({
   >({ kind: "idle" });
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [error, setError] = useState<string | null>(null);
+  const [legalAck, setLegalAck] = useState(false);
+  const [ackFor, setAckFor] = useState<string | null>(null);
+  const [domainTab, setDomainTab] = useState<string>("all");
+  const [actorTab, setActorTab] = useState<string>("all");
+  // Canonical destination of a listing: /dashboard/listings?focus=<id>. There is
+  // no per-listing route, so the section anchors and highlights that row.
+  const focusId = useSearchParams().get("focus");
+  useEffect(() => {
+    if (!focusId) return;
+    setDomainTab("all");
+    const el = document.getElementById(`listing-${focusId}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [focusId]);
+  const focusCls = (id: string) => (focusId === id ? " ring-2 ring-brand-blue" : "");
+  // Two-step delete (G-12b): the trash icon only ARMS the row; the permanent
+  // delete needs the explicit second press.
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
+  const formDomains: readonly ListingDomain[] = extended ? LISTING_DOMAINS : ["work_resource"];
+  const subjects: readonly string[] =
+    extended ? SUBJECTS_BY_DOMAIN[draft.domain] : LISTING_CATEGORIES;
+  const allowedKinds = allowedKindsForDomain(draft.domain);
+  const verdict = assessPublish({
+    subject: draft.category,
+    listingKind: draft.listingKind,
+    title: draft.title,
+    description: draft.description,
+  });
+
   function openCreate() {
     setError(null);
+    setLegalAck(false);
     setDraft(EMPTY_DRAFT);
     setMode({ kind: "create" });
   }
   function openEdit(row: MarketplaceListingRow) {
     setError(null);
+    setLegalAck(false);
     setDraft({
+      domain: domainOfSubject(row.category) ?? "work_resource",
       listingKind: row.listingKind,
       category: row.category,
       title: row.title,
@@ -97,6 +199,11 @@ export function MarketplaceListingsSection({
       locationCountry: row.locationCountry ?? "",
       locationLabel: row.locationLabel ?? "",
       priceText: row.priceText ?? "",
+      priceAmount: row.priceAmount != null ? String(row.priceAmount) : "",
+      currency: row.currency ?? "EUR",
+      quantity: row.quantity != null ? String(row.quantity) : "",
+      unit: row.unit ?? "",
+      expiresOn: row.expiresAt ? row.expiresAt.slice(0, 10) : "",
     });
     setMode({ kind: "edit", id: row.id });
   }
@@ -104,53 +211,99 @@ export function MarketplaceListingsSection({
     setMode({ kind: "idle" });
     setDraft(EMPTY_DRAFT);
     setError(null);
+    setLegalAck(false);
   }
 
-  function errorFor(kind: string, field?: string): string {
-    if (kind === "invalid" && field === "title") return t("errorTitleRequired");
-    if (kind === "invalid" && field === "locationCountry") return t("errorCountry");
-    if (kind === "needs-migration") return t("notAvailable");
+  function changeDomain(domain: ListingDomain) {
+    const nextSubjects = SUBJECTS_BY_DOMAIN[domain];
+    const kinds = allowedKindsForDomain(domain);
+    setDraft({
+      ...draft,
+      domain,
+      category: nextSubjects.length === 1 ? nextSubjects[0] : "",
+      listingKind:
+        kinds.length === 1
+          ? kinds[0]
+          : draft.listingKind !== "" && kinds.includes(draft.listingKind)
+            ? draft.listingKind
+            : "",
+    });
+  }
+
+  function errorFor(res: { kind: string; field?: string }): string {
+    if (res.kind === "invalid" && res.field === "title") return t("errorTitleRequired");
+    if (res.kind === "invalid" && res.field === "locationCountry") return t("errorCountry");
+    if (res.kind === "invalid" && res.field === "price") return t("errorPrice");
+    if (res.kind === "invalid" && res.field === "quantity") return t("errorQuantity");
+    if (res.kind === "invalid" && res.field === "expiry") return t("errorExpiry");
+    if (res.kind === "legal-check-required") return t("legalCheckFood");
+    if (res.kind === "restricted") return t("errorRestricted");
+    if (res.kind === "needs-migration") return t("notAvailable");
     return t("errorGeneric");
   }
 
   function submit() {
     setError(null);
+    const priceAmount = toNumber(draft.priceAmount);
+    const quantity = toNumber(draft.quantity);
+    const chosenKind = draft.listingKind;
+    if (chosenKind === "") return setError(t("errorKindRequired"));
+    if (draft.category === "") return setError(t("errorCategoryRequired"));
+    if (Number.isNaN(priceAmount)) return setError(t("errorPrice"));
+    if (Number.isNaN(quantity)) return setError(t("errorQuantity"));
     startTransition(async () => {
       const input = {
-        listingKind: draft.listingKind,
+        listingKind: chosenKind,
         category: draft.category,
         title: draft.title,
         description: draft.description || null,
         locationCountry: draft.locationCountry || null,
         locationLabel: draft.locationLabel || null,
         priceText: draft.priceText || null,
+        priceAmount: extended ? priceAmount : null,
+        currency: extended && priceAmount !== null ? draft.currency || null : null,
+        quantity: extended ? quantity : null,
+        unit: extended ? draft.unit || null : null,
+        expiresAt:
+          extended && draft.expiresOn
+            ? new Date(`${draft.expiresOn}T23:59:59`).toISOString()
+            : null,
       };
       const res =
         mode.kind === "edit"
-          ? await updateMarketplaceListingAction(mode.id, input)
+          ? await updateMarketplaceListingAction(mode.id, input, legalAck)
           : await createMarketplaceListingAction(input);
       if (res.kind === "ok") {
         close();
         router.refresh();
       } else {
-        setError(errorFor(res.kind, "field" in res ? res.field : undefined));
+        setError(errorFor(res));
       }
     });
   }
 
-  function changeStatus(id: string, status: ListingStatus) {
+  function changeStatus(id: string, status: ListingStatus, ack = false) {
     startTransition(async () => {
-      const res = await setMarketplaceListingStatusAction(id, status);
-      if (res.kind === "ok") router.refresh();
-      else setError(errorFor(res.kind));
+      const res = await setMarketplaceListingStatusAction(id, status, ack);
+      if (res.kind === "ok") {
+        setAckFor(null);
+        setLegalAck(false);
+        router.refresh();
+      } else if (res.kind === "legal-check-required") {
+        setError(null);
+        setAckFor(id);
+      } else {
+        setError(errorFor(res));
+      }
     });
   }
 
   function remove(id: string) {
+    setConfirmingId(null);
     startTransition(async () => {
       const res = await deleteMarketplaceListingAction(id);
       if (res.kind === "ok") router.refresh();
-      else setError(errorFor(res.kind));
+      else setError(errorFor(res));
     });
   }
 
@@ -167,12 +320,260 @@ export function MarketplaceListingsSection({
   }
 
   const otherRows = discoveryRows.filter((r) => !r.isMine);
+  // `job` and `workforce` exist only through the federation adapters
+  // (lib/marketplace/federation*.ts); `project_work` mixes listings + demand.
+  // NAVIGATION GROUPS (premium structure pass 2026-10-10): nine flat domain
+  // tabs read as nine products. Four groups say what the market holds; the
+  // group's own domains stay one tap away as sub-chips, so no filter is lost.
+  const GROUPS = {
+    work: ["job", "workforce", "project_work"],
+    services: ["service", "service_need"],
+    goods: ["goods", "work_resource"],
+    personal: ["personal"],
+  } as const satisfies Record<string, readonly string[]>;
+  type GroupKey = keyof typeof GROUPS;
+  const groupKeys = Object.keys(GROUPS) as GroupKey[];
+  const groupOf = (d: string): GroupKey | null =>
+    groupKeys.find((g) => (GROUPS[g] as readonly string[]).includes(d)) ?? null;
+  const activeGroup: GroupKey | null =
+    domainTab === "all" ? null : ((groupKeys as string[]).includes(domainTab) ? (domainTab as GroupKey) : groupOf(domainTab));
+  const groupLabel = (g: GroupKey) => (g === "personal" ? t("domains.personal") : t(`groups.${g}`));
+  const domainRows =
+    domainTab === "all"
+      ? otherRows
+      : (groupKeys as string[]).includes(domainTab)
+        ? otherRows.filter((r) => (GROUPS[domainTab as GroupKey] as readonly string[]).includes(r.domain))
+        : otherRows.filter((r) => r.domain === domainTab);
+  // Actor filter: only kinds that actually occur in the current rows, so no
+  // chip promises rows that do not exist.
+  const actorKindsPresent = ACTOR_KINDS.filter((k) => domainRows.some((r) => r.actorKind === k));
+  const shownRows =
+    actorTab === "all" ? domainRows : domainRows.filter((r) => r.actorKind === actorTab);
+
+  function subjectLabel(subject: string | null, domain: string): string {
+    if (subject && domainOfSubject(subject)) return t(`categories.${subject}`);
+    if (
+      domain === "service" ||
+      domain === "job" ||
+      domain === "workforce" ||
+      (LISTING_DOMAINS as readonly string[]).includes(domain)
+    ) {
+      return t(`domains.${domain}`);
+    }
+    return t(`domains.other`);
+  }
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Browse first (premium structure pass 2026-10-10): the marketplace is
+          for finding work, services, goods and opportunities; managing one's
+          own listings follows. */}
+      {/* ── Browse active listings + enquire ───────────────────────────── */}
+      <section className="flex flex-col gap-3">
+        <div>
+          <h2 className="font-display text-lg font-semibold text-text-primary">{t("browseTitle")}</h2>
+          <p className="text-sm text-text-secondary">{t("browseIntro")}</p>
+        </div>
+
+        {extended && (
+          <div className="flex flex-col gap-2">
+            <div
+              role="tablist"
+              aria-label={t("domainFilterLabel")}
+              data-testid="market-group-tabs"
+              className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+            >
+              {(["all", ...groupKeys] as const).map((g) => {
+                const selected = g === "all" ? domainTab === "all" : activeGroup === g;
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    data-testid={`market-group-${g}`}
+                    onClick={() => setDomainTab(g)}
+                    className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                      selected
+                        ? "border-text-primary bg-ink-700 text-text-primary"
+                        : "border-ink-500 text-text-secondary hover:border-text-secondary"
+                    }`}
+                  >
+                    {g === "all" ? t("domains.all") : groupLabel(g)}
+                  </button>
+                );
+              })}
+            </div>
+            {activeGroup && GROUPS[activeGroup].length > 1 ? (
+              <div
+                role="group"
+                aria-label={groupLabel(activeGroup)}
+                data-testid="market-domain-chips"
+                className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+              >
+                {[activeGroup, ...GROUPS[activeGroup]].map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    aria-pressed={domainTab === d}
+                    data-testid={`market-domain-${d}`}
+                    onClick={() => setDomainTab(d)}
+                    className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-1.5 text-meta transition-colors sm:min-h-9 ${
+                      domainTab === d
+                        ? "border-text-secondary text-text-primary"
+                        : "border-ink-600 text-text-secondary hover:border-text-secondary"
+                    }`}
+                  >
+                    {d === activeGroup ? t("domains.all") : t(`domains.${d}`)}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        {extended && actorKindsPresent.length > 1 && (
+          <div
+            role="group"
+            aria-label={t("actorFilterLabel")}
+            data-testid="market-actor-filter"
+            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+          >
+            {(["all", ...actorKindsPresent] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={actorTab === k}
+                onClick={() => setActorTab(k)}
+                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                  actorTab === k
+                    ? "border-text-primary bg-ink-700 text-text-primary"
+                    : "border-ink-500 text-text-secondary hover:border-text-secondary"
+                }`}
+              >
+                {t(`actorKinds.${k}`)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {unavailable.length > 0 && (
+          <p
+            role="status"
+            data-testid="federation-partial"
+            className="rounded-md border border-state-warning/40 bg-state-warning/5 p-3 text-sm text-text-secondary"
+          >
+            {t("federationPartial")}
+          </p>
+        )}
+
+        {extended && (domainTab === "job" || domainTab === "work") && (
+          <Link
+            href={"/jobs" as "/dashboard"}
+            data-testid="marketplace-all-jobs-link"
+            className="inline-flex min-h-11 w-fit items-center gap-1.5 text-sm font-medium text-text-primary underline-offset-4 hover:underline"
+          >
+            {t("allJobsLink")}
+            <ArrowRight aria-hidden className="h-4 w-4" />
+          </Link>
+        )}
+
+        {shownRows.length === 0 ? (
+          <p className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
+            {t("browseEmpty")}
+          </p>
+        ) : (
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {shownRows.map((row) => (
+              <li
+                key={`${row.sourceTable}:${row.id}`}
+                id={row.sourceTable === "marketplace_listings" ? `listing-${row.id}` : undefined}
+                data-testid="market-browse-row"
+                data-source={row.sourceTable}
+                className={`flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3${
+                  row.sourceTable === "marketplace_listings" ? focusCls(row.id) : ""
+                }`}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-text-primary">
+                    {row.title || t("titleNotStated")}
+                  </span>
+                  <span className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted">
+                    {t(`directions.${row.direction}`)}
+                  </span>
+                  <span
+                    data-testid="market-row-actor"
+                    data-actor-kind={row.actorKind}
+                    className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                  >
+                    {t(`actorKinds.${row.actorKind}`)}
+                  </span>
+                  {row.sourceTable === "public_vacancies" || row.sourceTable === "customer_requests" ? (
+                    <>
+                      <span
+                        data-testid="market-row-visibility"
+                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                      >
+                        {t(`visibility.${row.visibility}`)}
+                      </span>
+                      <span
+                        data-testid="market-row-provenance"
+                        className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                      >
+                        {t(`provenance.${row.provenance}`)}
+                      </span>
+                    </>
+                  ) : null}
+                </div>
+                {row.publisherName && (
+                  <p className="text-xs text-text-secondary">{row.publisherName}</p>
+                )}
+                <p className="text-xs text-text-muted">
+                  {subjectLabel(row.subject, row.domain)}
+                  {row.locationLabel ? ` · ${row.locationLabel}` : ""}
+                  {row.locationCountry ? ` (${row.locationCountry})` : ""}
+                  {row.priceAmount != null
+                    ? ` · ${formatAmount(row.priceAmount, row.currency, locale)}`
+                    : row.priceText
+                      ? ` · ${row.priceText}`
+                      : ""}
+                  {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
+                  {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
+                </p>
+                {row.description && (
+                  <p className="line-clamp-3 text-sm text-text-secondary">{row.description}</p>
+                )}
+                {row.contactAction === "enquire" ? (
+                  <form action={enquireAboutListingAction} className="mt-1">
+                    <input type="hidden" name="listingId" value={row.id} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <button
+                      type="submit"
+                      data-testid={`listing-enquire-${row.id}`}
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-text-secondary"
+                    >
+                      <MessageSquare aria-hidden className="h-4 w-4" />
+                      {t("enquire")}
+                    </button>
+                  </form>
+                ) : (
+                  <Link
+                    href={row.destinationPath as "/dashboard"}
+                    className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-2 text-sm text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary"
+                  >
+                    {row.contactAction === "open_source" ? t("openInSource") : t("openInServices")}
+                    <ArrowRight aria-hidden className="h-4 w-4" />
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       {/* ── Manage my listings ─────────────────────────────────────────── */}
       <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
           <div>
             <h2 className="font-display text-lg font-semibold text-text-primary">{t("myTitle")}</h2>
             <p className="text-sm text-text-secondary">{t("intro")}</p>
@@ -181,13 +582,20 @@ export function MarketplaceListingsSection({
             <button
               type="button"
               onClick={openCreate}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue/10 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-brand-blue/20"
+              data-testid="listing-add"
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue px-3 py-2 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
             >
               <Plus aria-hidden className="h-4 w-4" />
               {t("addButton")}
             </button>
           )}
         </div>
+
+        {!extended && (
+          <p className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
+            {t("moreTypesSoon")}
+          </p>
+        )}
 
         {error && (
           <p
@@ -200,15 +608,36 @@ export function MarketplaceListingsSection({
 
         {mode.kind !== "idle" && (
           <div className="flex flex-col gap-3 rounded-lg border border-ink-500 bg-surface-1 p-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {extended && (
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-text-secondary">{t("formDomainLabel")}</span>
+                  <select
+                    className={inputCls}
+                    value={draft.domain}
+                    data-testid="listing-form-domain"
+                    onChange={(e) => changeDomain(e.target.value as ListingDomain)}
+                  >
+                    {formDomains.map((d) => (
+                      <option key={d} value={d}>
+                        {t(`domains.${d}`)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="flex flex-col gap-1 text-sm">
                 <span className="text-text-secondary">{t("formKindLabel")}</span>
                 <select
                   className={inputCls}
                   value={draft.listingKind}
+                  data-testid="listing-form-kind"
                   onChange={(e) => setDraft({ ...draft, listingKind: e.target.value as ListingKind })}
                 >
-                  {LISTING_KINDS.map((k) => (
+                  <option value="" disabled>
+                    {t("formChoose")}
+                  </option>
+                  {LISTING_KINDS.filter((k) => allowedKinds.includes(k)).map((k) => (
                     <option key={k} value={k}>
                       {t(`kinds.${k}`)}
                     </option>
@@ -220,9 +649,13 @@ export function MarketplaceListingsSection({
                 <select
                   className={inputCls}
                   value={draft.category}
-                  onChange={(e) => setDraft({ ...draft, category: e.target.value as ListingCategory })}
+                  data-testid="listing-form-category"
+                  onChange={(e) => setDraft({ ...draft, category: e.target.value })}
                 >
-                  {LISTING_CATEGORIES.map((c) => (
+                  <option value="" disabled>
+                    {t("formChoose")}
+                  </option>
+                  {subjects.map((c) => (
                     <option key={c} value={c}>
                       {t(`categories.${c}`)}
                     </option>
@@ -230,12 +663,16 @@ export function MarketplaceListingsSection({
                 </select>
               </label>
             </div>
+            {draft.domain === "service_need" && (
+              <p className="text-xs text-text-muted">{t("serviceNeedHint")}</p>
+            )}
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-text-secondary">{t("formTitleLabel")}</span>
               <input
                 className={inputCls}
                 value={draft.title}
                 maxLength={160}
+                data-testid="listing-form-title"
                 placeholder={t("formTitlePlaceholder")}
                 onChange={(e) => setDraft({ ...draft, title: e.target.value })}
               />
@@ -246,6 +683,7 @@ export function MarketplaceListingsSection({
                 className={inputCls}
                 value={draft.description}
                 maxLength={2000}
+                data-testid="listing-form-description"
                 rows={3}
                 placeholder={t("formDescriptionPlaceholder")}
                 onChange={(e) => setDraft({ ...draft, description: e.target.value })}
@@ -257,6 +695,7 @@ export function MarketplaceListingsSection({
                 <input
                   className={inputCls}
                   value={draft.locationCountry}
+                  data-testid="listing-form-country"
                   maxLength={2}
                   placeholder={t("formCountryPlaceholder")}
                   onChange={(e) => setDraft({ ...draft, locationCountry: e.target.value.toUpperCase() })}
@@ -283,13 +722,86 @@ export function MarketplaceListingsSection({
                 />
               </label>
             </div>
+            {extended && (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-text-secondary">{t("formAmountLabel")}</span>
+                  <input
+                    className={inputCls}
+                    inputMode="decimal"
+                    value={draft.priceAmount}
+                    onChange={(e) => setDraft({ ...draft, priceAmount: e.target.value })}
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-text-secondary">{t("formCurrencyLabel")}</span>
+                  <input
+                    className={inputCls}
+                    value={draft.currency}
+                    maxLength={3}
+                    placeholder="EUR"
+                    onChange={(e) => setDraft({ ...draft, currency: e.target.value.toUpperCase() })}
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-text-secondary">{t("formQuantityLabel")}</span>
+                  <input
+                    className={inputCls}
+                    inputMode="decimal"
+                    value={draft.quantity}
+                    placeholder={t("formQuantityPlaceholder")}
+                    onChange={(e) => setDraft({ ...draft, quantity: e.target.value })}
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-text-secondary">{t("formUnitLabel")}</span>
+                  <input
+                    className={inputCls}
+                    value={draft.unit}
+                    maxLength={24}
+                    placeholder={t("formUnitPlaceholder")}
+                    onChange={(e) => setDraft({ ...draft, unit: e.target.value })}
+                  />
+                </label>
+                <label className="col-span-2 flex flex-col gap-1 text-sm sm:col-span-1">
+                  <span className="text-text-secondary">{t("formExpiryLabel")}</span>
+                  <input
+                    type="date"
+                    className={inputCls}
+                    value={draft.expiresOn}
+                    onChange={(e) => setDraft({ ...draft, expiresOn: e.target.value })}
+                  />
+                </label>
+              </div>
+            )}
             <p className="text-xs text-text-muted">{t("priceHint")}</p>
+            {extended && <p className="text-xs text-text-muted">{t("formExpiryHint")}</p>}
+            {verdict.kind === "LEGAL_CHECK_REQUIRED" && (
+              <div className="flex flex-col gap-2 rounded-md border border-state-warning/40 bg-state-warning/5 p-3 text-sm text-text-secondary">
+                <p>{t("legalCheckFood")}</p>
+                <label className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4"
+                    checked={legalAck}
+                    onChange={(e) => setLegalAck(e.target.checked)}
+                  />
+                  <span>{t("legalCheckAck")}</span>
+                </label>
+              </div>
+            )}
+            {verdict.kind === "CHANNEL_RESTRICTED" && verdict.reasonKey === "restricted_category" && (
+              <p role="alert" className="text-sm text-state-danger">
+                {t("errorRestricted")}
+              </p>
+            )}
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={submit}
                 disabled={pending}
-                className="inline-flex min-h-11 items-center rounded-md border border-brand-blue bg-brand-blue px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                data-testid="listing-form-save"
+                className="inline-flex min-h-11 items-center rounded-md border border-brand-blue bg-brand-blue px-4 py-2 text-sm font-medium text-text-on-brand disabled:opacity-50"
               >
                 {pending ? t("saving") : t("save")}
               </button>
@@ -314,120 +826,157 @@ export function MarketplaceListingsSection({
             {myRows.map((row) => (
               <li
                 key={row.id}
-                className="flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3 sm:flex-row sm:items-center sm:justify-between"
+                id={`listing-${row.id}`}
+                data-testid="my-listing-row"
+                className={`flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3${focusCls(row.id)}`}
               >
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium text-text-primary">{row.title}</span>
-                    <span className={`rounded-full border px-2 py-0.5 text-meta ${STATUS_RING[row.status]}`}>
-                      {t(`status.${row.status}`)}
-                    </span>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-medium text-text-primary">{row.title}</span>
+                      <span className={`rounded-full border px-2 py-0.5 text-meta ${STATUS_RING[row.status]}`}>
+                        {t(`status.${row.status}`)}
+                      </span>
+                      {isExpired(row.expiresAt) && (
+                        <span className="rounded-full border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 text-meta text-state-warning">
+                          {t("expired")}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-xs text-text-muted">
+                      {t(`kinds.${row.listingKind}`)} · {subjectLabel(row.category, "other")}
+                      {row.locationLabel ? ` · ${row.locationLabel}` : ""}
+                      {row.locationCountry ? ` (${row.locationCountry})` : ""}
+                      {row.priceAmount != null
+                        ? ` · ${formatAmount(row.priceAmount, row.currency, locale)}`
+                        : row.priceText
+                          ? ` · ${row.priceText}`
+                          : ""}
+                      {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
+                      {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
+                    </p>
                   </div>
-                  <p className="mt-0.5 text-xs text-text-muted">
-                    {t(`kinds.${row.listingKind}`)} · {t(`categories.${row.category}`)}
-                    {row.locationLabel ? ` · ${row.locationLabel}` : ""}
-                    {row.locationCountry ? ` (${row.locationCountry})` : ""}
-                    {row.priceText ? ` · ${row.priceText}` : ""}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  {row.status !== "active" ? (
+                  <div className="flex shrink-0 items-center gap-1">
+                    {row.status !== "active" ? (
+                      <button
+                        type="button"
+                        title={t("activate")}
+                        aria-label={t("activate")}
+                        onClick={() => changeStatus(row.id, "active")}
+                        data-testid={`listing-activate-${row.id}`}
+                        disabled={pending}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-success hover:border-state-success sm:h-8 sm:w-8"
+                      >
+                        <Play aria-hidden className="h-4 w-4" />
+                      </button>
+                    ) : (
+                      <>
+                        {extended && (
+                          <button
+                            type="button"
+                            title={t("pause")}
+                            aria-label={t("pause")}
+                            onClick={() => changeStatus(row.id, "paused")}
+                            disabled={pending}
+                            className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
+                          >
+                            <Pause aria-hidden className="h-4 w-4" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          title={t("close")}
+                          aria-label={t("close")}
+                          onClick={() => changeStatus(row.id, "closed")}
+                          disabled={pending}
+                          className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-warning hover:border-state-warning sm:h-8 sm:w-8"
+                        >
+                          <Archive aria-hidden className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
+                    {row.status === "closed" && (
+                      <button
+                        type="button"
+                        title={t("reopen")}
+                        aria-label={t("reopen")}
+                        onClick={() => changeStatus(row.id, "draft")}
+                        disabled={pending}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
+                      >
+                        <RotateCcw aria-hidden className="h-4 w-4" />
+                      </button>
+                    )}
                     <button
                       type="button"
-                      title={t("activate")}
-                      onClick={() => changeStatus(row.id, "active")}
+                      title={t("edit")}
+                      aria-label={t("edit")}
+                      onClick={() => openEdit(row)}
                       disabled={pending}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded border border-ink-500 text-state-success hover:border-state-success"
+                      className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
                     >
-                      <Play aria-hidden className="h-4 w-4" />
+                      <Pencil aria-hidden className="h-4 w-4" />
                     </button>
-                  ) : (
+                    {confirmingId === row.id ? (
+                      <span
+                        role="alertdialog"
+                        aria-label={t("removeConfirm")}
+                        className="inline-flex items-center gap-2 text-xs text-text-secondary"
+                      >
+                        {t("removeConfirm")}
+                        <button
+                          type="button"
+                          onClick={() => remove(row.id)}
+                          disabled={pending}
+                          data-testid={`listing-remove-confirm-${row.id}`}
+                          className="inline-flex min-h-11 items-center rounded border border-state-danger px-2 py-1 text-state-danger sm:min-h-8"
+                        >
+                          {t("remove")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingId(null)}
+                          className="inline-flex min-h-11 items-center rounded border border-ink-500 px-2 py-1 sm:min-h-8"
+                        >
+                          {t("cancel")}
+                        </button>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        title={t("remove")}
+                        aria-label={t("remove")}
+                        onClick={() => setConfirmingId(row.id)}
+                        disabled={pending}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-danger hover:border-state-danger sm:h-8 sm:w-8"
+                      >
+                        <Trash2 aria-hidden className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {ackFor === row.id && (
+                  <div className="flex flex-col gap-2 rounded-md border border-state-warning/40 bg-state-warning/5 p-3 text-sm text-text-secondary">
+                    <p>{t("legalCheckFood")}</p>
+                    <label className="flex items-start gap-2">
+                      <input
+                        type="checkbox"
+                        className="mt-1 h-4 w-4"
+                        checked={legalAck}
+                        onChange={(e) => setLegalAck(e.target.checked)}
+                      />
+                      <span>{t("legalCheckAck")}</span>
+                    </label>
                     <button
                       type="button"
-                      title={t("close")}
-                      onClick={() => changeStatus(row.id, "closed")}
-                      disabled={pending}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded border border-ink-500 text-state-warning hover:border-state-warning"
+                      disabled={pending || !legalAck}
+                      onClick={() => changeStatus(row.id, "active", true)}
+                      className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue bg-brand-blue px-4 py-2 text-sm font-medium text-text-on-brand disabled:opacity-50"
                     >
-                      <Archive aria-hidden className="h-4 w-4" />
+                      {t("activate")}
                     </button>
-                  )}
-                  {row.status === "closed" && (
-                    <button
-                      type="button"
-                      title={t("reopen")}
-                      onClick={() => changeStatus(row.id, "draft")}
-                      disabled={pending}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue"
-                    >
-                      <RotateCcw aria-hidden className="h-4 w-4" />
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    title={t("edit")}
-                    onClick={() => openEdit(row)}
-                    disabled={pending}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue"
-                  >
-                    <Pencil aria-hidden className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    title={t("remove")}
-                    onClick={() => remove(row.id)}
-                    disabled={pending}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded border border-ink-500 text-state-danger hover:border-state-danger"
-                  >
-                    <Trash2 aria-hidden className="h-4 w-4" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* ── Browse active listings + enquire ───────────────────────────── */}
-      <section className="flex flex-col gap-3">
-        <div>
-          <h2 className="font-display text-lg font-semibold text-text-primary">{t("browseTitle")}</h2>
-          <p className="text-sm text-text-secondary">{t("browseIntro")}</p>
-        </div>
-        {otherRows.length === 0 ? (
-          <p className="rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
-            {t("browseEmpty")}
-          </p>
-        ) : (
-          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {otherRows.map((row) => (
-              <li key={row.id} className="flex flex-col gap-2 rounded-lg border border-ink-500 bg-surface-1 p-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium text-text-primary">{row.title}</span>
-                  <span className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted">
-                    {t(`kinds.${row.listingKind}`)}
-                  </span>
-                </div>
-                <p className="text-xs text-text-muted">
-                  {t(`categories.${row.category}`)}
-                  {row.locationLabel ? ` · ${row.locationLabel}` : ""}
-                  {row.locationCountry ? ` (${row.locationCountry})` : ""}
-                  {row.priceText ? ` · ${row.priceText}` : ""}
-                </p>
-                {row.description && (
-                  <p className="line-clamp-3 text-sm text-text-secondary">{row.description}</p>
+                  </div>
                 )}
-                <form action={enquireAboutListingAction} className="mt-1">
-                  <input type="hidden" name="listingId" value={row.id} />
-                  <input type="hidden" name="locale" value={locale} />
-                  <button
-                    type="submit"
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue/10 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-brand-blue/20"
-                  >
-                    <MessageSquare aria-hidden className="h-4 w-4" />
-                    {t("enquire")}
-                  </button>
-                </form>
               </li>
             ))}
           </ul>

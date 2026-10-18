@@ -167,6 +167,18 @@ const DRAFTS: readonly Draft[] = [
         title: "Arbeitnehmerfreizügigkeit in der EU erklärt",
         desc: "Was Arbeitnehmerfreizügigkeit in der EU bedeutet: EU-Bürger dürfen ohne Erlaubnis in einem anderen EU-Land arbeiten, mit Gleichbehandlung — allgemeine Regel, offizielle Quellen.",
       },
+      pl: {
+        slug: "czym-jest-swoboda-przeplywu-pracownikow-w-ue",
+        h1: "Czym jest swoboda przepływu pracowników w UE?",
+        short: "Swoboda przepływu pracowników to prawo UE, które pozwala obywatelom państwa UE pracować w innym państwie UE bez zezwolenia na pracę, na tych samych warunkach co obywatele tego państwa.",
+        full: [
+          "Jako obywatel UE nie potrzebujesz zezwolenia na pracę, by podjąć pracę — najemną lub na własny rachunek — w dowolnym innym państwie UE. Przysługuje Ci też równe traktowanie z miejscowymi pracownikami w dostępie do zatrudnienia, warunkach pracy, wynagrodzeniu i świadczeniach socjalnych. Prawo to obejmuje całą UE, a w praktyce także szerszy EOG (Islandia, Liechtenstein, Norwegia) i Szwajcarię.",
+          "Swoboda przepływu jest zasadą ogólną, a nie gwarancją konkretnej pracy, i część kwestii nadal zależy od prawa krajowego — na przykład niektóre stanowiska w sektorze publicznym mogą być zastrzeżone dla obywateli, a jeśli Twój zawód jest regulowany, może być konieczne wcześniejsze uznanie kwalifikacji. Aktualne zasady dla Twojej sytuacji sprawdź w oficjalnych źródłach UE poniżej.",
+        ],
+        limitations: "To ogólna informacja na poziomie UE, a nie porada dla konkretnej sprawy. Obowiązują przepisy i wyjątki krajowe; szczegóły dla swojego kraju i zawodu potwierdź w oficjalnych źródłach.",
+        title: "Swoboda przepływu pracowników w UE — wyjaśnienie",
+        desc: "Co oznacza swoboda przepływu pracowników w UE: obywatele UE mogą pracować w innym państwie UE bez zezwolenia, na równych warunkach — zasada ogólna, oficjalne źródła.",
+      },
     },
   },
   {
@@ -232,6 +244,18 @@ const DRAFTS: readonly Draft[] = [
         limitations: "Allgemeine EU-Information, keine Rechtsberatung. Ob und wie Ihre Qualifikation anerkannt wird, hängt vom Beruf und vom jeweiligen Land ab — prüfen Sie Ihren Fall bei der offiziellen Quelle.",
         title: "Anerkennung Ihrer Qualifikation in der EU",
         desc: "Wie die Anerkennung von Qualifikationen in der EU funktioniert: nur für reglementierte Berufe nötig, entschieden vom Aufnahmeland, einige automatisch — offizielle Quelle.",
+      },
+      pl: {
+        slug: "jak-rozumiec-uznawanie-kwalifikacji-za-granica",
+        h1: "Jak rozumieć uznawanie moich kwalifikacji za granicą?",
+        short: "W UE formalne uznanie jest potrzebne tylko wtedy, gdy Twój zawód jest regulowany w kraju, w którym chcesz pracować. Dla zawodów regulowanych składasz wniosek do właściwego organu tego kraju; niektóre zawody są uznawane automatycznie.",
+        full: [
+          "To, czy potrzebujesz uznania, zależy od zawodu, a nie od Ciebie. Jeśli zawód nie jest regulowany w kraju przyjmującym, formalne uznanie nie jest wymagane — możesz starać się o pracę bezpośrednio. Jeśli jest regulowany (na przykład nauczyciel, prawnik, inżynier, część ról w ochronie zdrowia), składasz wniosek do właściwego organu, który ma na decyzję do czterech miesięcy i może wymagać dodatkowego doświadczenia, kursu lub testu umiejętności, gdy kształcenie znacząco się różni.",
+          "Kilka zawodów — takich jak lekarze, pielęgniarki odpowiedzialne za opiekę ogólną, dentyści, położne, weterynarze, farmaceuci i architekci — jest co do zasady uznawanych automatycznie w całej UE. Ponieważ zasady różnią się w zależności od zawodu i kraju, swój konkretny przypadek zawsze potwierdź w oficjalnym źródle UE poniżej, zamiast opierać się na ogólnych wskazówkach.",
+        ],
+        limitations: "Ogólna informacja na poziomie UE, a nie porada prawna. To, czy i jak Twoje kwalifikacje zostaną uznane, zależy od zawodu i konkretnego kraju — sprawdź oficjalne źródło dla swojej sytuacji.",
+        title: "Uznawanie Twoich kwalifikacji w UE",
+        desc: "Jak działa uznawanie kwalifikacji w UE: potrzebne tylko dla zawodów regulowanych, decyduje organ kraju przyjmującego, część zawodów automatycznie — oficjalne źródło.",
       },
     },
   },
@@ -324,6 +348,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Welche Länder Ihren Beruf am meisten brauchen",
         desc: "Wie Sie sehen, welche EU-Länder Ihren Beruf am meisten brauchen — mit offiziellen EURES- und CEDEFOP-Mangeldaten. Ein Marktsignal, keine Garantie.",
       },
+      pl: {
+        slug: "ktore-kraje-najbardziej-potrzebuja-mojego-zawodu",
+        h1: "Jak rozpoznać, które kraje najbardziej potrzebują mojego zawodu?",
+        short: "Skorzystaj z oficjalnych danych UE o niedoborach na rynku pracy: EURES i CEDEFOP publikują, w których zawodach brakuje pracowników w każdym kraju, więc widzisz, gdzie Twój zawód jest najbardziej potrzebny, zamiast zgadywać.",
+        full: [
+          "Zapotrzebowanie jest nierówne w Europie i zmienia się w czasie, więc wiarygodnym sposobem jego oceny są oficjalne dane, a nie pojedyncze relacje. EURES publikuje niedobory i nadwyżki pracowników według krajów, a CEDEFOP śledzi zapotrzebowanie na zawody na podstawie internetowych ofert pracy. Razem pokazują, gdzie w danym zawodzie brakuje rąk do pracy.",
+          "Na LabourMarket.ai zaczynasz od swojego prawdziwego zawodu i umiejętności; następnie możesz przeczytać oficjalne dane o niedoborach dla krajów, które rozważasz, i zestawić je z językiem, lokalizacją i własnymi preferencjami. Traktuj te liczby jako sygnał o rynku, a nie obietnicę konkretnej pracy.",
+        ],
+        steps: [
+          "Potwierdź swój zawód i umiejętności w profilu.",
+          "Sprawdź listę niedoborów EURES i dane CEDEFOP o zapotrzebowaniu dla krajów, które rozważasz.",
+          "Zanim zdecydujesz, zestaw zapotrzebowanie z językiem, lokalizacją i swoimi preferencjami.",
+        ],
+        limitations: "Dane o niedoborach są sygnałem rynkowym, a nie gwarancją pracy, i zmieniają się w czasie. Sprawdź datę publikacji w oficjalnych źródłach.",
+        title: "Które kraje najbardziej potrzebują Twojego zawodu",
+        desc: "Jak sprawdzić, które kraje UE najbardziej potrzebują Twojego zawodu, korzystając z oficjalnych danych EURES i CEDEFOP o niedoborach — sygnał rynkowy, nie gwarancja pracy.",
+      },
     },
   },
   {
@@ -415,6 +456,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Welche Berufe gefragt sind, wo Sie arbeiten möchten",
         desc: "Wie Sie gefragte Berufe in einem Land finden — mit offiziellen EURES- und CEDEFOP-Daten. Ein fundiertes Marktbild, keine Jobgarantie.",
       },
+      pl: {
+        slug: "jakie-zawody-sa-potrzebne-tam-gdzie-chce-pracowac",
+        h1: "Jak sprawdzić, jakie zawody są potrzebne tam, gdzie chcę pracować?",
+        short: "Sprawdź oficjalne źródła UE dla danego kraju: EURES wymienia zawody deficytowe, a CEDEFOP śledzi zapotrzebowanie na podstawie internetowych ofert pracy, więc zobaczysz, jakich zawodów temu krajowi realnie brakuje.",
+        full: [
+          "Zamiast ufać nagłówkom o zawodach przyszłości, spójrz na interesujący Cię kraj w oficjalnych danych. EURES publikuje zawody deficytowe i nadwyżkowe dla poszczególnych krajów, a narzędzie CEDEFOP dotyczące zapotrzebowania na zawody opiera się na prawdziwych ofertach internetowych. Lektura obu daje ugruntowany obraz tego, jakich zawodów potrzebuje konkretny kraj.",
+          "Wykorzystaj ten obraz razem ze swoim profilem na LabourMarket.ai: pokazuje on możliwości pasujące do Twoich umiejętności, a oficjalne dane mówią, jak silne jest zapotrzebowanie na Twój zawód w danym miejscu. Zapotrzebowanie się zmienia, więc zwróć uwagę, kiedy dane opublikowano.",
+        ],
+        steps: [
+          "Wybierz kraj lub kraje, które rozważasz.",
+          "Przeczytaj dla nich listę niedoborów EURES i dane CEDEFOP o zapotrzebowaniu.",
+          "Porównaj to zapotrzebowanie ze swoim zawodem i umiejętnościami.",
+        ],
+        limitations: "Dane o zapotrzebowaniu odzwierciedlają dany okres i nie gwarantują pracy w żadnej pojedynczej firmie. Zawsze sprawdź datę źródła.",
+        title: "Jakie zawody są potrzebne tam, gdzie chcesz pracować",
+        desc: "Jak znaleźć poszukiwane zawody w danym kraju przy użyciu oficjalnych danych EURES i CEDEFOP — ugruntowany obraz rynku, a nie gwarancja pracy.",
+      },
     },
   },
   {
@@ -480,6 +538,18 @@ const DRAFTS: readonly Draft[] = [
         limitations: "Dies erklärt allgemeine Treiber, keine Prognose für ein bestimmtes Unternehmen oder Jahr. Prüfen Sie Datum und Länderbezug in der offiziellen Analyse.",
         title: "Warum sich die Nachfrage zwischen Ländern unterscheidet",
         desc: "Wie Sie verstehen, warum sich die Arbeitsnachfrage zwischen EU-Ländern unterscheidet — Alterung, Mobilität und Wirtschaftsstruktur, erklärt von CEDEFOP und EURES.",
+      },
+      pl: {
+        slug: "dlaczego-zapotrzebowanie-na-prace-rozni-sie-miedzy-krajami",
+        h1: "Jak rozumieć różnice zapotrzebowania między krajami?",
+        short: "Zapotrzebowanie różni się z powodu starzenia się społeczeństw, migracji wykwalifikowanych pracowników i struktury każdej gospodarki. Oficjalne analizy UE opisują te przyczyny, więc różnice da się czytać, a nie tylko uznawać za przypadkowe.",
+        full: [
+          "Ten sam zawód może być deficytowy w jednym kraju, a w innym nie. Oficjalne analizy UE wskazują kilka stałych przyczyn: starzenie się społeczeństw zwiększa zapotrzebowanie w ochronie zdrowia i edukacji; przenoszenie się wykwalifikowanych pracowników między krajami może zostawiać luki; a struktura przemysłu każdego kraju kształtuje to, jakich zawodów potrzebuje. CEDEFOP i EURES opisują te wzorce w skali Europy.",
+          "Przy własnym wyborze czytaj zapotrzebowanie na swój zawód w poszczególnych krajach, zamiast zakładać jeden europejski trend. LabourMarket.ai pomaga porównać miejsca z Twoimi umiejętnościami, a oficjalne źródła wyjaśniają, dlaczego zapotrzebowanie wygląda tak, a nie inaczej. Zwróć uwagę na datę publikacji, bo te wzorce zmieniają się na przestrzeni lat.",
+        ],
+        limitations: "To wyjaśnia ogólne przyczyny, a nie prognozę dla konkretnej firmy czy roku. Sprawdź datę i zakres krajowy oficjalnej analizy.",
+        title: "Dlaczego zapotrzebowanie na pracę różni się między krajami",
+        desc: "Jak rozumieć różnice zapotrzebowania na pracę między krajami UE — starzenie się społeczeństw, mobilność pracowników i struktura gospodarki, według oficjalnych analiz CEDEFOP i EURES.",
       },
     },
   },
@@ -547,6 +617,18 @@ const DRAFTS: readonly Draft[] = [
         limitations: "Sprachanforderungen variieren je Arbeitgeber, Branche und Rolle. Dies ist allgemeine Information zu den Niederlanden; prüfen Sie die konkrete Stelle und die offiziellen EURES-Länderinfos.",
         title: "Brauchen Sie Niederländisch, um in den Niederlanden zu arbeiten?",
         desc: "Ob Sie Niederländisch brauchen, um in den Niederlanden zu arbeiten: hängt von der Rolle ab — Englisch passt für viele internationale Jobs, Niederländisch wird kundennah erwartet. Offizielle EURES-Quelle.",
+      },
+      pl: {
+        slug: "czy-trzeba-znac-niderlandzki-zeby-pracowac-w-holandii",
+        h1: "Czy muszę znać język lokalny, żeby pracować w Holandii?",
+        short: "To zależy od pracy. W wielu międzynarodowych i technicznych rolach w Holandii powszechnie używa się angielskiego, ale w pracy z klientem, w sektorze publicznym i w wielu codziennych zawodach zwykle oczekuje się niderlandzkiego.",
+        full: [
+          "Nie ma jednej zasady językowej dla pracy w Holandii — wymaganie pochodzi od pracodawcy i od roli, a nie z krajowego zezwolenia. W firmach międzynarodowych, IT, badaniach i części inżynierii angielski często wystarcza. W ochronie zdrowia, edukacji, handlu, gastronomii i usługach publicznych zwykle oczekuje się niderlandzkiego, bo pracujesz bezpośrednio z ludźmi.",
+          "Każde konkretne wymaganie traktuj jako pochodzące z danej oferty pracy, a nie z ogólnej zasady. W sprawie warunków życia i pracy w Holandii, w tym języka i spraw praktycznych, wiarygodnym punktem odniesienia są oficjalne strony EURES; na LabourMarket.ai możesz też wskazać języki, którymi się posługujesz, aby możliwości odpowiadały Twojemu rzeczywistemu poziomowi.",
+        ],
+        limitations: "Wymagania językowe różnią się w zależności od pracodawcy, branży i roli. To ogólna wskazówka dla Holandii; sprawdź konkretną ofertę pracy i oficjalne informacje krajowe EURES.",
+        title: "Czy do pracy w Holandii potrzebny jest niderlandzki?",
+        desc: "Czy do pracy w Holandii potrzebny jest niderlandzki: zależy od roli — angielski wystarcza w wielu międzynarodowych zawodach, w pracy z klientem oczekuje się niderlandzkiego. Oficjalne źródło EURES.",
       },
     },
   },
@@ -639,6 +721,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Arbeit finden ohne formale Qualifikationen",
         desc: "Wie Sie ohne formale Qualifikationen Arbeit finden: mit gezeigten Fähigkeiten und Belegen beginnen. LabourMarket.ai baut Ihr Profil um Ihr Können.",
       },
+      pl: {
+        slug: "jak-znalezc-prace-bez-formalnych-kwalifikacji",
+        h1: "Jak znaleźć pracę, jeśli nie mam formalnych kwalifikacji?",
+        short: "Zacznij od tego, co naprawdę potrafisz. Wiele prac ceni wykazane umiejętności i rzetelność bardziej niż certyfikaty, a LabourMarket.ai pozwala pokazać umiejętności jako dowód, a nie tylko wyliczać dyplomy.",
+        full: [
+          "Brak formalnych kwalifikacji nie oznacza braku umiejętności. Praca, którą wykonujesz — płatna, bezpłatna, w domu czy przy pomaganiu innym — buduje prawdziwe, użyteczne umiejętności. Kluczem jest jasne ich nazwanie i, gdzie to możliwe, poparcie dowodem, zamiast przedstawiania siebie wyłącznie przez dokumenty, których nie masz.",
+          "Na LabourMarket.ai Twój profil jest zbudowany wokół umiejętności i tego, co możesz pokazać, a nie wokół dyplomów. Możesz zapisywać pracę, uczciwie deklarować umiejętności i uzyskiwać ich potwierdzenie na podstawie prawdziwej aktywności, więc pracodawcy, którym zależy na realnych możliwościach, mogą to zobaczyć. Część zawodów jest regulowana i wymaga formalnych kwalifikacji — w takich przypadkach platforma uczciwie pokazuje tę lukę, zamiast ją ukrywać.",
+        ],
+        steps: [
+          "Wypisz konkretne rzeczy, które potrafisz, z każdego rodzaju pracy.",
+          "Dodaj je jako umiejętności w profilu i poprzyj prawdziwymi przykładami.",
+          "Skup się na możliwościach, które cenią wykazane umiejętności bardziej niż formalne certyfikaty.",
+        ],
+        limitations: "Część zawodów regulowanych wymaga formalnych kwalifikacji z mocy prawa; w ich przypadku żaden profil ich nie zastąpi.",
+        title: "Szukanie pracy bez formalnych kwalifikacji",
+        desc: "Jak znaleźć pracę bez formalnych kwalifikacji: zacznij od wykazanych umiejętności i dowodów. LabourMarket.ai buduje Twój profil wokół tego, co potrafisz.",
+      },
     },
   },
   {
@@ -723,6 +822,22 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Eine Lebenslauf-Lücke ehrlich darstellen",
         desc: "Wie Sie eine Lebenslauf-Lücke ehrlich darstellen: eine kurze sachliche Notiz plus Nützliches, das Sie taten. LabourMarket.ai lässt Ihre Fähigkeiten führen, nicht die Lücke.",
+      },
+      pl: {
+        slug: "jak-uczciwie-przedstawic-przerwe-w-karierze",
+        h1: "Jak uczciwie przedstawić przerwę w karierze?",
+        short: "Napisz o niej krótko i rzeczowo, wspomnij o tym, co pożytecznego przyniósł ten czas, i przejdź dalej. Przerwa jest czymś częstym, a uczciwość wobec niej wypada lepiej niż ukrywanie czy zasypywanie jej.",
+        full: [
+          "Czas poza płatną pracą — z powodu opieki, zdrowia, nauki, podróży czy trudnego rynku pracy — jest normalny i większość pracodawców już to widziała. Błędem jest próba zamaskowania przerwy, co zwykle wygląda gorzej niż ona sama. Krótkie, proste wyjaśnienie usuwa znak zapytania.",
+          "Jeśli ten czas coś zbudował — kurs, wolontariat, obowiązki opiekuńcze, własny projekt — nazwij to, bo jest to prawdziwe doświadczenie. Na LabourMarket.ai możesz utrzymywać profil aktualnym i pokazywać umiejętności jako dowód, więc okres poza formalnym zatrudnieniem nie wymazuje tego, co potrafisz.",
+        ],
+        steps: [
+          "Odnotuj przerwę krótko i rzeczowo, bez nadmiernych wyjaśnień.",
+          "Dopisz jako prawdziwe doświadczenie wszystko pożyteczne z tego okresu.",
+          "Utrzymuj profil aktualny, aby prowadziły Twoje umiejętności, a nie przerwa.",
+        ],
+        title: "Uczciwe przedstawienie przerwy w karierze",
+        desc: "Jak uczciwie przedstawić przerwę w karierze: krótka, rzeczowa notka plus wszystko pożyteczne z tego okresu. Na LabourMarket.ai prowadzą Twoje umiejętności, a nie przerwa.",
       },
     },
   },
@@ -809,6 +924,22 @@ const DRAFTS: readonly Draft[] = [
         title: "Übertragbare Fähigkeiten erkennen",
         desc: "Wie Sie übertragbare Fähigkeiten für jeden Beruf erkennen — die Fertigkeiten, die nicht an eine Stellenbezeichnung gebunden sind. LabourMarket.ai stellt sie ins Zentrum.",
       },
+      pl: {
+        slug: "jak-rozpoznac-umiejetnosci-przenoszalne",
+        h1: "Jak rozpoznać umiejętności, które mogę przenieść do każdego zawodu?",
+        short: "Szukaj tego, co robisz niezależnie od stanowiska — organizowanie, rozwiązywanie problemów, komunikowanie się, praca z narzędziami lub z ludźmi. Te przenoszalne umiejętności idą z Tobą do nowych ról.",
+        full: [
+          "Umiejętności przenoszalne to zdolności niezwiązane z jedną nazwą stanowiska: planowanie i organizowanie, rozwiązywanie problemów, komunikowanie się, szybkie uczenie się, staranna praca z narzędziami czy koordynowanie działań z ludźmi. Budujesz je w każdej pracy i właśnie dlatego przenoszą się do innego zawodu.",
+          "Dobrym sposobem, by rozpoznać własne, jest opisanie tego, co faktycznie robisz, a nie tylko nazwy stanowiska, i zauważenie powtarzających się czasowników. Na LabourMarket.ai te umiejętności są w centrum Twojego profilu, a platforma wykorzystuje je, by podpowiadać pokrewne kierunki — zawody, do których Twoje obecne umiejętności już częściowo pasują.",
+        ],
+        steps: [
+          "Opisz prostymi czasownikami konkretne zadania, które wykonujesz.",
+          "Wybierz te, które miałyby znaczenie w wielu różnych pracach.",
+          "Dodaj je jako umiejętności, aby napędzały dopasowania i pokrewne kierunki.",
+        ],
+        title: "Rozpoznawanie umiejętności przenoszalnych",
+        desc: "Jak rozpoznać umiejętności przenoszalne, które możesz zabrać do każdego zawodu — zdolności niezwiązane z jedną nazwą stanowiska. LabourMarket.ai stawia je w centrum.",
+      },
     },
   },
   {
@@ -868,6 +999,17 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Praktische Fähigkeiten versus formale Qualifikationen",
         desc: "Wie sich praktische Fähigkeiten zu formalen Qualifikationen auf LabourMarket.ai verhalten: beide ehrlich gezeigt und getrennt gehalten, keines zum anderen aufgeblasen.",
+      },
+      pl: {
+        slug: "umiejetnosci-praktyczne-a-formalne-kwalifikacje",
+        h1: "Jak umiejętności praktyczne mają się tu do formalnych kwalifikacji?",
+        short: "Liczą się oba, a platforma trzyma je osobno. Umiejętności praktyczne pokazywane są jako dowód z prawdziwej pracy, a formalne kwalifikacje jako to, czym są — żadne nie jest fałszowane ani przerabiane na drugie.",
+        full: [
+          "Formalna kwalifikacja mówi, że ktoś ukończył uznany program; umiejętność praktyczna mówi, że ktoś naprawdę potrafi coś zrobić. LabourMarket.ai nie stawia co do zasady jednego nad drugim — pokazuje każde uczciwie. Umiejętności praktyczne pojawiają się jako zadeklarowane lub potwierdzone na podstawie prawdziwej pracy, a kwalifikacje jako kwalifikacje.",
+          "Ma to znaczenie, bo wiele ról ceni wykazane możliwości, a część zawodów regulowanych wymaga określonej kwalifikacji z mocy prawa. Rozdzielenie obu pozwala pracodawcy zważyć, czego dana rola naprawdę potrzebuje, a Tobie pokazać siłę po tej stronie, po której ją masz, bez przebierania jednego za drugie.",
+        ],
+        title: "Umiejętności praktyczne a formalne kwalifikacje",
+        desc: "Jak umiejętności praktyczne mają się do formalnych kwalifikacji na LabourMarket.ai: oba pokazywane uczciwie i trzymane osobno, żadne nie jest przerabiane na drugie.",
       },
     },
   },
@@ -954,6 +1096,22 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Ein Diplom in Ihrem Profil präsentieren",
         desc: "Wie Sie ein Diplom oder eine Qualifikation auf LabourMarket.ai präsentieren: echter Titel, Einrichtung und Jahr, neben Ihren Fähigkeiten. Europass hilft europaweit.",
+      },
+      pl: {
+        slug: "jak-przedstawic-dyplom-w-profilu",
+        h1: "Jak przedstawić dyplom lub kwalifikację w profilu?",
+        short: "Dodaj go jako kwalifikację z prawdziwą nazwą, instytucją wydającą i rokiem. Trzymaj się faktów i pozwól, by obok stały Twoje umiejętności, żeby czytający widział i wykształcenie, i to, co potrafisz.",
+        full: [
+          "Kwalifikacja jest najbardziej użyteczna, gdy jest precyzyjna: prawdziwa nazwa dyplomu lub certyfikatu, kto go wydał i kiedy. Unikaj podnoszenia nazwy do czegoś, czym nie jest — to dokładność czyni ją wiarygodną dla pracodawcy, a łatwo ją sprawdzić.",
+          "Na LabourMarket.ai dyplom jest jedną z części profilu, pokazywaną obok umiejętności, które potrafisz wykazać. Jeśli przenosisz się między krajami, unijne narzędzia Europass pomagają przedstawić kwalifikacje we wspólnym europejskim formacie, rozpoznawanym przez pracodawców w całej Europie. Platforma trzyma kwalifikację osobno od potwierdzonej umiejętności, żeby jednego nie brać za drugie.",
+        ],
+        steps: [
+          "Dodaj kwalifikację z jej prawdziwą nazwą, instytucją i rokiem.",
+          "Trzymaj się faktów w opisie — nie zawyżaj poziomu ani dziedziny.",
+          "Pokaż obok umiejętności, które potrafisz wykazać, dla pełnego obrazu.",
+        ],
+        title: "Przedstawienie dyplomu w profilu",
+        desc: "Jak przedstawić dyplom lub kwalifikację na LabourMarket.ai: prawdziwa nazwa, instytucja i rok, pokazane obok Twoich umiejętności. Europass pomaga w całej Europie.",
       },
     },
   },
@@ -1046,11 +1204,28 @@ const DRAFTS: readonly Draft[] = [
         title: "Vermeiden, nicht gefragte Fähigkeiten zu lernen",
         desc: "Wie Sie vermeiden, nicht gefragte Fähigkeiten zu lernen: offizielle EURES- und CEDEFOP-Nachfragedaten nutzen, um Ihr Lernen dorthin zu richten, wo echter Bedarf ist.",
       },
+      pl: {
+        slug: "jak-uniknac-nauki-umiejetnosci-bez-zapotrzebowania",
+        h1: "Jak uniknąć nauki umiejętności, na które nie ma zapotrzebowania?",
+        short: "Sprawdź zapotrzebowanie, zanim się zaangażujesz: oficjalne źródła UE pokazują, jakich zawodów i umiejętności brakuje w Europie, więc możesz skierować naukę tam, gdzie jest realna, trwała potrzeba.",
+        full: [
+          "Nauka kosztuje czas, więc warto kierować ją na umiejętności, których pracodawcy naprawdę potrzebują. Oficjalne źródła UE — EURES o niedoborach i CEDEFOP o zapotrzebowaniu wynikającym z internetowych ofert pracy — pokazują, jakich zawodów i umiejętności brakuje i gdzie. To mocniejsza podstawa niż modny nagłówek czy pojedyncza opinia w sieci.",
+          "Połącz to z własnym punktem wyjścia: na LabourMarket.ai widzisz, jakie umiejętności już masz i jakie pokrewne kierunki one otwierają, a potem wybierasz naukę, która zamyka realną lukę w stronę poszukiwanej pracy. Zapotrzebowanie się zmienia, więc traktuj je jako aktualny sygnał i sprawdzaj ponownie datę źródła, zamiast zakładać, że jest stałe.",
+        ],
+        steps: [
+          "Przeczytaj oficjalne dane EURES i CEDEFOP o zapotrzebowaniu w swojej dziedzinie.",
+          "Porównaj je z umiejętnościami, które już masz w profilu.",
+          "Wybierz naukę, która zamyka realną lukę w stronę poszukiwanej pracy.",
+        ],
+        limitations: "Dane o zapotrzebowaniu odzwierciedlają dany okres i są sygnałem, a nie gwarancją. Przed długoterminowymi decyzjami o nauce sprawdź ponownie datę źródła.",
+        title: "Jak nie uczyć się umiejętności bez zapotrzebowania",
+        desc: "Jak uniknąć nauki umiejętności bez zapotrzebowania: wykorzystaj oficjalne dane EURES i CEDEFOP, by skierować naukę tam, gdzie jest realna potrzeba.",
+      },
     },
   },
 ];
 
-const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de"];
+const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de", "pl"];
 
 export const WAVE2C_ANSWERS: readonly LocalizedAnswer[] = DRAFTS.flatMap((d) =>
   LOCALES.map((locale): LocalizedAnswer => {

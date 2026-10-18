@@ -19,6 +19,8 @@ export const EN_FIXTURES: LanguageFixtures = {
     { text: "I looked after a child after school.", expects: ["childcare"] },
     { text: "I worked in the garden, mowed the lawn and planted plants.", expects: ["gardening"] },
     { text: "I programmed a website and fixed bugs.", expects: ["programming"] },
+    { text: "How much did I program this month?", expects: ["programming"] },
+    { text: "Where did I code?", expects: ["programming"] },
     { text: "I assembled furniture and used power tools.", expects: ["furniture-fitting"], forbids: ["electrical-install"] },
     { text: "I cleaned the office and common areas.", expects: ["cleaning-services"] },
     { text: "I communicated with clients in English and German.", expects: ["customer-service"] },

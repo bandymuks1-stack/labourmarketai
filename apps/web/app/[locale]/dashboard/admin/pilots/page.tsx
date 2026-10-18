@@ -3,6 +3,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { listPilots } from "@/lib/admin/pilots";
 import { CreatePilotForm } from "@/components/app/admin-pilots-forms";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Pilot cohort administration — list + create (Pilot Onboarding and
@@ -10,10 +11,11 @@ import { CreatePilotForm } from "@/components/app/admin-pilots-forms";
  *
  * Server-gated via requireSuperadmin (defense-in-depth under the admin
  * layout gate); the SQL SELECT is additionally admin-only via the pilots
- * RLS policies of the DRAFT-GATED migration 20260716140000_pilots_cohort_v1.
+ * RLS policies of migration 20260716140000_pilots_cohort_v1, APPLIED in
+ * production as ledger `20260716195326` (verified 2026-09-14).
  *
- * Honest degradation: while the owner has NOT applied that migration the
- * probe sees 42P01 and this page shows a plain "not enabled yet" note —
+ * Honest degradation on a database WITHOUT that migration (not production):
+ * the probe sees 42P01 and this page shows a plain "not enabled yet" note —
  * no fake list, no dead create form.
  *
  * Compact per PR #773 doctrine: the pilot list is the first screen; the
@@ -34,12 +36,10 @@ export default async function AdminPilotsPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-pilots-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 

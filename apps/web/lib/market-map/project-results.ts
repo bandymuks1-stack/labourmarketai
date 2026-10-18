@@ -1,41 +1,66 @@
 import "server-only";
 
-import { createClient } from "@/lib/supabase/server";
+import { loadCanonicalDemand } from "@/lib/demand/canonical-demand";
+import { dedupeCanonicalDemand } from "@/lib/demand/canonical-demand-model";
 import { resolveCity } from "@/lib/location/city-coordinates";
 import { geographyLabel, type GeographySelection } from "./geography-selection";
 import {
-  groupIntoProjects,
-  type DemandJoinRow,
+  groupIntoDemandUnits,
   type EvaluationDemand,
   type ProjectEvaluation,
   type ProjectResults,
 } from "./project-results-model";
 
 /**
- * THE PROJECT RESULT — which projects create the demand under the marker.
+ * THE MARKET DRILLDOWN — which demand creates the intensity under the marker.
  *
- * ONE loader for both depths of Goal 3 (the list and the evaluation). They read
- * the SAME rows through the SAME filter, because two readers would eventually
- * disagree and the person would be told a project matched in the list and did
- * not in the detail.
+ * ONE loader for both depths (the list and the evaluation). They read the SAME
+ * rows through the SAME filter, because two readers would eventually disagree
+ * and the person would be told a unit matched in the list and did not in the
+ * detail.
  *
- * SAME TABLES AS THE MARKET RESULT, ON PURPOSE. `market-result.ts` aggregates
- * open `job_demands` joined to the `projects` that carry their geography; this
- * reads the identical join and applies `projectMatchesGeography`, which mirrors
- * that aggregation exactly. So the headcount under the marker and the headcount
- * in the list are the same number by construction, not by coincidence. No new
- * table, no migration, no second project model.
+ * THE DEFECT THIS CLOSES (2026-09-05). This module used to read `job_demands`
+ * directly. W10 slice 4 moved the MARKER (`market-result.ts`) onto the ONE
+ * canonical demand read and consolidation slice 1 (2026-08-17) then deleted the
+ * dead `job_demands` leg from that read — but the drilldown behind the marker
+ * was never migrated with it. `job_demands` has held 0 rows in production for
+ * its whole life and nothing a customer touches writes it, so every marker the
+ * canonical read produced from real `customer_requests` demand opened onto an
+ * empty list, and depth 2 — the evaluation, and the continuation to people —
+ * was unreachable for every real user. The header of this file even claimed the
+ * two surfaces read the identical rows, which had silently stopped being true.
  *
- * RLS AUTHORIZES. This runs as the signed-in user. For a worker that means
- * `projects.status = 'live'` and `job_demands.status = 'open' AND visibility =
- * 'public'` — the browse policies from `0001_initial_schema.sql`. Nothing here
- * widens that: no service-role client, no RPC, no `security definer` bypass. A
- * project the person may not read simply does not come back.
+ * SAME ROWS AS THE MARKER, NOW LITERALLY. Both call `loadCanonicalDemand()`,
+ * both dedupe first, and both apply the same geography rule
+ * (`projectMatchesGeography`, which `market-result.ts` aggregates by). The
+ * intensity under the marker and the units in this list are the same rows by
+ * construction. No new table, no migration, no second demand model.
  *
- * ERROR IS NOT EMPTY. A failed query returns `state: "error"`, never an empty
- * list and never a fixture row. "There are no projects here" is a claim about
- * the market; "we could not read the market" is a claim about us, and showing
- * the first when the second is true is the silent fallback this command bans.
+ * AUTHORIZATION IS INHERITED, NEVER WIDENED. The canonical read composes only
+ * paths the caller already has: the worker-gated SECURITY DEFINER RPC
+ * `list_open_demand_for_workers` (closed column whitelist) and the caller's OWN
+ * `customer_requests` under `customer_requests_select` (`profile_id =
+ * auth.uid()`, with the employer-workspace gate). There is no service-role
+ * client here, no RPC of our own and no `security definer` bypass. Tenant
+ * isolation is exactly the tables' isolation: organisation A cannot reach
+ * organisation B's private need through this module for the same reason it
+ * cannot reach it through the table.
+ *
+ * PROVENANCE SURVIVES. Every row carries `unitKind` and the canonical id of the
+ * store it came from, so the depth-2 address is a real `customer_requests.id`
+ * and never a synthesised key.
+ *
+ * ERROR IS NOT EMPTY. A failed read returns `state: "error"`, never an empty
+ * list and never a fixture row. "There is no demand here" is a claim about the
+ * market; "we could not read the market" is a claim about us, and showing the
+ * first when the second is true is the silent fallback this platform bans.
+ *
+ * THE `job_demands → projects` SHAPE IS FROZEN, NOT FORGOTTEN. `groupIntoProjects`
+ * and `DemandJoinRow` stay in `project-results-model.ts` as the vocabulary for
+ * project-scoped demand — the same way `canonical-demand-model.ts` keeps its
+ * `job_demand` source member. The day a source writes project-scoped needs, it
+ * declares itself in the canonical read (its documented extension point) and
+ * this loader shapes it without a second reader appearing here.
  *
  * THE SHAPING LIVES IN `project-results-model.ts` — pure, and unit-tested
  * there. This half only reads.
@@ -43,6 +68,7 @@ import {
 
 export type {
   DemandJoinRow,
+  DemandUnitKind,
   EvaluationDemand,
   MatchReason,
   MissingField,
@@ -60,16 +86,12 @@ export {
 
 export interface LoadProjectResultsInput {
   readonly geography: GeographySelection;
-  /** Only 'open' demand is meaningful for a market answer, and it is the only
-   *  status a non-owning user may read. Kept explicit so the contract is
-   *  visible at the call site. */
+  /** Kept for the call site's benefit: only OPEN demand is a market answer.
+   *  The canonical read enforces it at the source (`status = 'submitted'` on
+   *  `customer_requests`, and the worker RPC's own gate), so this loader has no
+   *  status filter of its own to drift out of step with it. */
   readonly status?: "open";
 }
-
-const SELECT =
-  "id, role_title, headcount_needed, required_skills, start_date, project_id, " +
-  "projects(id, title, country, city, status, start_date, end_date, company_id, " +
-  "companies(display_name, legal_name))";
 
 /** The one place the coordinate table meets the filter. */
 const cityResolves = (country: string, city: string) =>
@@ -93,14 +115,8 @@ export async function loadProjectResults(
     };
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("job_demands")
-    .select(SELECT)
-    .eq("status", input.status ?? "open")
-    .limit(500);
-
-  if (error || !data) {
+  const canonical = await loadCanonicalDemand();
+  if (canonical.state === "error") {
     // Never a driver message: it can carry schema and connection detail. The
     // caller renders a stated failure, not this string.
     return {
@@ -108,12 +124,14 @@ export async function loadProjectResults(
       geography,
       geographyLabel: label,
       rows: [],
-      errorCode: error ? "project_query_failed" : "project_query_empty_response",
+      errorCode: "project_query_failed",
     };
   }
 
-  const rows = groupIntoProjects(
-    data as unknown as DemandJoinRow[],
+  // Dedupe FIRST, exactly as the marker does, so one demand is one unit even
+  // when two authorized branches returned it.
+  const rows = groupIntoDemandUnits(
+    dedupeCanonicalDemand(canonical.rows),
     geography,
     cityResolves,
   );
@@ -127,6 +145,7 @@ export async function loadProjectResults(
 }
 
 export interface LoadProjectEvaluationInput {
+  /** The unit's canonical id — see `ProjectResultRow.projectId`. */
   readonly projectId: string;
   readonly geography: GeographySelection;
 }
@@ -148,77 +167,56 @@ export async function loadProjectEvaluation(
   if (geography.precision === "region") {
     return { ...base, state: "unsupported_precision" };
   }
-  // The id comes from the URL. A non-uuid never reaches the database.
+  // The id comes from the URL. A non-uuid never reaches a read.
   if (!UUID.test(projectId)) return { ...base, state: "not_found" };
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("job_demands")
-    .select(SELECT)
-    .eq("status", "open")
-    .eq("project_id", projectId)
-    .limit(200);
-
-  if (error || !data) {
+  const canonical = await loadCanonicalDemand();
+  if (canonical.state === "error") {
     return {
       ...base,
       state: "error",
-      errorCode: error
-        ? "project_evaluation_query_failed"
-        : "project_evaluation_empty_response",
+      errorCode: "project_evaluation_query_failed",
     };
   }
 
-  const demandRows = data as unknown as DemandJoinRow[];
-  // The SAME grouping and the SAME geography filter as the list. A project that
-  // is not in the selected place must not open from a hand-typed URL either.
-  const rows = groupIntoProjects(demandRows, geography, cityResolves);
+  // The SAME rows, the SAME dedupe and the SAME geography filter as the list. A
+  // unit that is not in the selected place must not open from a hand-typed URL
+  // either, and one the caller may not read is simply not in the list.
+  const rows = groupIntoDemandUnits(
+    dedupeCanonicalDemand(canonical.rows),
+    geography,
+    cityResolves,
+  );
   const row = rows.find((r) => r.projectId === projectId);
   if (!row) return { ...base, state: "not_found" };
 
-  const skillIds = row.requiredSkillIds;
-  let slugById = new Map<string, string>();
-  if (skillIds.length > 0) {
-    const { data: skills, error: skillErr } = await supabase
-      .from("skills")
-      .select("id, slug")
-      .in("id", [...skillIds]);
-    if (!skillErr) {
-      for (const s of (skills ?? []) as { id: string; slug: string | null }[]) {
-        if (s.slug) slugById.set(s.id, s.slug);
-      }
-    } else {
-      // The project is real and readable; only its skill LABELS failed. Losing
-      // the whole evaluation over that would be worse than showing it with the
-      // shortfall counted below.
-      slugById = new Map();
-    }
-  }
+  // A canonical need IS one need. The evaluation lists it as itself rather than
+  // splitting it into sub-needs it does not have; a project unit with several
+  // open needs would list each, which is why this stays a list of one and not a
+  // collapsed summary.
+  const demands: EvaluationDemand[] = [
+    {
+      demandId: row.projectId,
+      roleTitle: row.roles[0] ?? null,
+      // 0 here means "not stated" (it is in `row.missing`), and printing a 0
+      // headcount as a number would be exactly the invented default the
+      // canonical model refuses.
+      headcount: row.missing.includes("headcount") ? null : row.openHeadcount,
+      startDate: row.startDate,
+      skillSlugs: [],
+    },
+  ];
 
-  const slugs = [
-    ...new Set(skillIds.map((id) => slugById.get(id)).filter(isString)),
-  ].sort();
-
-  const demands: EvaluationDemand[] = demandRows.map((d) => ({
-    demandId: d.id,
-    roleTitle: d.role_title?.trim() || null,
-    headcount: typeof d.headcount_needed === "number" ? d.headcount_needed : null,
-    startDate: d.start_date,
-    skillSlugs: [
-      ...new Set((d.required_skills ?? []).map((id) => slugById.get(id)).filter(isString)),
-    ].sort(),
-  }));
-
+  // The canonical contract carries no skill ids for a need, so there is nothing
+  // to resolve and nothing unresolved. The absence is already declared in
+  // `row.missing` as `requiredSkills`; a zero here is the honest count, not a
+  // swallowed lookup failure.
   return {
     ...base,
     state: "ok",
     row,
     demands,
-    skillSlugs: slugs,
-    unresolvedSkillCount: skillIds.length - slugs.length,
+    skillSlugs: [],
+    unresolvedSkillCount: 0,
   };
-}
-
-function isString(v: string | undefined): v is string {
-  return typeof v === "string";
 }

@@ -409,6 +409,272 @@ export function isIsoCountry(code: string): boolean {
   );
 }
 
+/**
+ * COUNTRY INPUT → ISO-3166-1 alpha-2 (global-access rule, owner 2026-09-22).
+ *
+ * A person, a partner form or an import may name a country as the code ("VN",
+ * "vn"), as its name in any product language ("Vietnam", "Vietnamas",
+ * "Вьетнам", "Wietnam"), or in a common alternate spelling ("Viet Nam",
+ * "Czech Republic", "UK"). All of these are the SAME country and none of them
+ * is a reason to refuse the person. Resolution is EXACT (trimmed, case-folded,
+ * whitespace/punctuation-insensitive) against:
+ *   1. the code itself, when it is an assigned ISO code;
+ *   2. CLDR region names for every code, in `COUNTRY_NAME_LOCALES`;
+ *   3. the small documented alias table below.
+ * Ambiguity resolves to NOTHING (null), never to a guess; a substring is never
+ * a match ("Hanoi", "Europe", "somewhere in the Gulf" → null). The caller
+ * decides what null means at its boundary — usually "residence unknown", and
+ * never "this person may not enter".
+ *
+ * MEASURED 2026-09-22 (lead_4735a23a): the partner's careers form sent
+ * `residenceCountry: "Vietnam"`, the referral contract required /^[A-Z]{2}$/
+ * and a consenting worker was refused with `invalid_envelope`. This is the one
+ * resolver every boundary uses now, so the class cannot recur one field at a
+ * time.
+ */
+export const COUNTRY_NAME_LOCALES: readonly string[] = [
+  "en", "lt", "lv", "et", "pl", "ru", "uk", "de", "nl", "sv", "no", "da", "fi",
+  "fr", "es", "it", "pt", "ro", "tr", "vi", "ka",
+];
+
+/** Alternate spellings CLDR does not carry. English/UN/ISO forms only; every
+ *  entry is unambiguous. Extend here — never with a second table elsewhere. */
+export const COUNTRY_NAME_ALIASES: Readonly<Record<string, string>> = Object.freeze({
+  "viet nam": "VN",
+  "czech republic": "CZ",
+  "czechia": "CZ",
+  "turkey": "TR",
+  "turkiye": "TR",
+  "uk": "GB",
+  "great britain": "GB",
+  "united kingdom": "GB",
+  "britain": "GB",
+  "england": "GB",
+  "usa": "US",
+  "u.s.a.": "US",
+  "u.s.": "US",
+  "united states": "US",
+  "united states of america": "US",
+  "america": "US",
+  "russia": "RU",
+  "russian federation": "RU",
+  "south korea": "KR",
+  "republic of korea": "KR",
+  "korea": "KR",
+  "north korea": "KP",
+  "moldova": "MD",
+  "republic of moldova": "MD",
+  "macedonia": "MK",
+  "north macedonia": "MK",
+  "bosnia": "BA",
+  "bosnia and herzegovina": "BA",
+  "ivory coast": "CI",
+  "cote d'ivoire": "CI",
+  "syria": "SY",
+  "iran": "IR",
+  "laos": "LA",
+  "brunei": "BN",
+  "cape verde": "CV",
+  "swaziland": "SZ",
+  "eswatini": "SZ",
+  "east timor": "TL",
+  "timor-leste": "TL",
+  "burma": "MM",
+  "myanmar": "MM",
+  "holland": "NL",
+  "the netherlands": "NL",
+  "netherlands": "NL",
+  "uae": "AE",
+  "united arab emirates": "AE",
+  "emirates": "AE",
+  "ksa": "SA",
+  "saudi": "SA",
+  "saudi arabia": "SA",
+  "palestine": "PS",
+  "vatican": "VA",
+  "vatican city": "VA",
+  "hong kong": "HK",
+  "macau": "MO",
+  "macao": "MO",
+  "taiwan": "TW",
+  "tanzania": "TZ",
+  "venezuela": "VE",
+  "bolivia": "BO",
+  "congo": "CG",
+  "dr congo": "CD",
+  "drc": "CD",
+  "democratic republic of the congo": "CD",
+  "micronesia": "FM",
+  "kosovo": "XK",
+  "sakartvelo": "GE",
+  "lithuania": "LT",
+  "latvia": "LV",
+  "estonia": "EE",
+  "poland": "PL",
+  "germany": "DE",
+  "sweden": "SE",
+  "norway": "NO",
+  "denmark": "DK",
+  "finland": "FI",
+  "ireland": "IE",
+  "belgium": "BE",
+  "france": "FR",
+  "spain": "ES",
+  "italy": "IT",
+  "austria": "AT",
+  "switzerland": "CH",
+  "portugal": "PT",
+  "greece": "GR",
+  "ukraine": "UA",
+  "belarus": "BY",
+  "georgia": "GE",
+  "india": "IN",
+  "pakistan": "PK",
+  "bangladesh": "BD",
+  "nepal": "NP",
+  "sri lanka": "LK",
+  "philippines": "PH",
+  "indonesia": "ID",
+  "malaysia": "MY",
+  "thailand": "TH",
+  "china": "CN",
+  "japan": "JP",
+  "egypt": "EG",
+  "morocco": "MA",
+  "algeria": "DZ",
+  "tunisia": "TN",
+  "nigeria": "NG",
+  "ghana": "GH",
+  "kenya": "KE",
+  "south africa": "ZA",
+  "brazil": "BR",
+  "argentina": "AR",
+  "colombia": "CO",
+  "mexico": "MX",
+  "canada": "CA",
+  "australia": "AU",
+  "new zealand": "NZ",
+  "oman": "OM",
+  "qatar": "QA",
+  "kuwait": "KW",
+  "bahrain": "BH",
+  "jordan": "JO",
+  "lebanon": "LB",
+  "iraq": "IQ",
+  "israel": "IL",
+  "albania": "AL",
+  "serbia": "RS",
+  "croatia": "HR",
+  "slovenia": "SI",
+  "slovakia": "SK",
+  "hungary": "HU",
+  "romania": "RO",
+  "bulgaria": "BG",
+  "montenegro": "ME",
+  "uzbekistan": "UZ",
+  "kazakhstan": "KZ",
+  "kyrgyzstan": "KG",
+  "tajikistan": "TJ",
+  "turkmenistan": "TM",
+  "azerbaijan": "AZ",
+  "armenia": "AM",
+  "afghanistan": "AF",
+  "mongolia": "MN",
+  "vietnam": "VN",
+});
+
+/** Fold a typed country into the comparison key: trimmed, case-folded, diacritics
+ *  stripped, every run of spaces/punctuation collapsed to one space. "Viet Nam",
+ *  "viet-nam" and "VIETNAM " compare equal; nothing else is altered. */
+export function countryNameKey(input: string): string {
+  return input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[\s\-_./'’`,()]+/g, " ")
+    .trim();
+}
+
+let countryNameIndex: Map<string, string> | null = null;
+
+function buildCountryNameIndex(): Map<string, string> {
+  const index = new Map<string, string>();
+  const ambiguous = new Set<string>();
+  const put = (key: string, code: string): void => {
+    if (key === "") return;
+    const seen = index.get(key);
+    if (seen !== undefined && seen !== code) ambiguous.add(key);
+    else index.set(key, code);
+  };
+  for (const locale of COUNTRY_NAME_LOCALES) {
+    let names: Intl.DisplayNames;
+    try {
+      names = new Intl.DisplayNames([locale], { type: "region", fallback: "none" });
+    } catch {
+      continue;
+    }
+    for (const code of ALL_ISO_COUNTRIES) {
+      let name: string | undefined;
+      try {
+        name = names.of(code);
+      } catch {
+        name = undefined;
+      }
+      if (name) put(countryNameKey(name), code);
+    }
+  }
+  for (const key of ambiguous) index.delete(key);
+  // Aliases are authored to be unambiguous and win over a CLDR collision.
+  for (const [alias, code] of Object.entries(COUNTRY_NAME_ALIASES)) {
+    if (isIsoCountry(code)) index.set(countryNameKey(alias), code);
+  }
+  return index;
+}
+
+/**
+ * ISO-3166-1 alpha-2 for a typed country, or null. Accepts the code, a CLDR
+ * name in any product language, or a documented alias. Never a guess, never a
+ * substring, never a default country.
+ */
+export function resolveCountryCode(input: string | null | undefined): string | null {
+  if (typeof input !== "string") return null;
+  const t = input.trim();
+  if (t === "") return null;
+  if (/^[A-Za-z]{2}$/.test(t)) {
+    const code = t.toUpperCase();
+    if (isIsoCountry(code)) return code;
+    // "UK" is reserved, not assigned — an alias (GB), not a code. Fall through to the index.
+  }
+  countryNameIndex ??= buildCountryNameIndex();
+  return countryNameIndex.get(countryNameKey(t)) ?? null;
+}
+
+/**
+ * A typed list of countries ("LT, Vietnam; viet nam") → distinct ISO codes in
+ * input order, plus what could not be resolved (reported, never silently
+ * dropped — the caller decides whether that is a refusal or a note). Splits on
+ * commas, semicolons and newlines ONLY, so multi-word names survive.
+ */
+export function resolveCountryList(
+  raw: string | readonly string[] | null | undefined,
+): { readonly codes: string[]; readonly unresolved: string[] } {
+  const parts = Array.isArray(raw)
+    ? (raw as readonly string[])
+    : typeof raw === "string"
+      ? raw.split(/[,;\n]+/)
+      : [];
+  const codes: string[] = [];
+  const unresolved: string[] = [];
+  for (const part of parts) {
+    const p = String(part).trim();
+    if (p === "") continue;
+    const code = resolveCountryCode(p);
+    if (code === null) unresolved.push(p);
+    else if (!codes.includes(code)) codes.push(code);
+  }
+  return { codes, unresolved };
+}
+
 /** Full metadata for a country, or null for a non-ISO code (honest null —
  *  never a guessed/default country). */
 export function getCountryMeta(code: string): CountryMeta | null {

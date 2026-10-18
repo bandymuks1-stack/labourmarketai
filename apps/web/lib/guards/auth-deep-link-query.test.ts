@@ -38,8 +38,20 @@ const redirect = readApp("lib/auth/redirect.ts");
 
 describe("W7 slice 3 — the middleware preserves the deep link", () => {
   it("builds `next` through the shared sanitiser, not by hand", () => {
-    expect(middleware).toContain(
-      'import { buildReturnValue } from "@/lib/auth/redirect"',
+    // WHAT MATTERS is that `buildReturnValue` comes from the shared module and
+    // is fed the real pathname + search — not how the import statement is
+    // punctuated. This used to pin the exact one-line form, which turned a
+    // pure re-grouping of the import list (when `ONBOARDING_RETURN_HEADER` and
+    // `getSafeReturnPath` joined it for the onboarding gate) into a red guard
+    // while the wiring it protects was untouched. A guard that fails on
+    // formatting teaches people to edit the guard, which is how a real one
+    // gets weakened by habit.
+    // No `s` flag: `[^}]` is a negated class, so it already spans the newlines
+    // of a multi-line import list, and the flag needs an es2018 target this
+    // tsconfig does not set. (vitest transpiles happily; `tsc --noEmit` is what
+    // catches it, which is why typecheck runs on guards too.)
+    expect(middleware).toMatch(
+      /import\s*\{[^}]*\bbuildReturnValue\b[^}]*\}\s*from\s*"@\/lib\/auth\/redirect"/,
     );
     expect(middleware).toMatch(/buildReturnValue\(\s*request\.nextUrl\.pathname,/);
     expect(middleware).toMatch(/request\.nextUrl\.search,/);

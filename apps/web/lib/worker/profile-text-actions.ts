@@ -3,6 +3,8 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 /** Soft cap — keeps the column from accidentally absorbing a whole novel. */
 const MAX_PROFILE_TEXT_LEN = 4000;
@@ -43,6 +45,14 @@ export async function saveWorkerProfileText(rawText: string): Promise<void> {
     throw new Error(`save failed: ${error.message}`);
   }
 
+  // Recognition funnel: a self-description was stored and suggestions were
+  // derived from it (the pure extractor runs on this text) — the moment the
+  // system "suggested". The text never reaches telemetry.
+  emitServerFunnelEvent(FUNNEL_EVENTS.recognitionSuggested, {
+    source: "profile",
+    route: "/dashboard/profile",
+    metadata: { surface: "profile_text", role_context: "worker" },
+  });
   // Profile read model is server-rendered; revalidate so the next navigation
   // sees the prefilled composer.
   revalidatePath("/", "layout");

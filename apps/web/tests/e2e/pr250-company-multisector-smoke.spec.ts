@@ -142,20 +142,25 @@ test("LT journal — non-construction entry yields honest non-construction label
   // clearly NON-construction entry and confirm the suggestion is its honest
   // sector label, never a construction trade.
   const textarea = page.getByRole("textbox").first();
-  if (await textarea.isVisible().catch(() => false)) {
-    await textarea.fill("Dirbau 3 valandas kasininku parduotuvėje");
-    const organize = page.getByTestId("journal-organize-text");
-    if (await organize.isVisible().catch(() => false)) {
-      await organize.click();
-      const summary = page.getByTestId("journal-fragment-summary").first();
-      if (await summary.isVisible({ timeout: 5_000 }).catch(() => false)) {
-        const txt = ((await summary.textContent()) ?? "").toLowerCase();
-        expect(/kasinink|parduotuv|kasos/.test(txt)).toBe(true);
-        // Must NOT be forced into a construction trade label.
-        expect(/plytel|mūr|tinkav|stog|betonav|gipso/.test(txt)).toBe(false);
-      }
-    }
-  }
+  // An absent surface is a SKIP with a reason, never a silent green: three
+  // nested `if`s here used to let the test pass with zero assertions.
+  test.skip(
+    !(await textarea.isVisible().catch(() => false)),
+    "no compose textbox on this build — the sector check did not run",
+  );
+  await textarea.fill("Dirbau 3 valandas kasininku parduotuvėje");
+  const organize = page.getByTestId("journal-organize-text");
+  test.skip(
+    !(await organize.isVisible().catch(() => false)),
+    "journal-organize-text not present — the sector check did not run",
+  );
+  await organize.click();
+  const summary = page.getByTestId("journal-fragment-summary").first();
+  await expect(summary).toBeVisible({ timeout: 5_000 });
+  const txt = ((await summary.textContent()) ?? "").toLowerCase();
+  expect(/kasinink|parduotuv|kasos/.test(txt)).toBe(true);
+  // Must NOT be forced into a construction trade label.
+  expect(/plytel|mūr|tinkav|stog|betonav|gipso/.test(txt)).toBe(false);
 });
 
 // ── EN parity (assert-only; routes must render without error) ─────────────────

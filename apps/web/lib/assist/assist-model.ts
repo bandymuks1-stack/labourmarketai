@@ -171,8 +171,9 @@ export interface WorkerEvidenceSummary {
   readonly totalSkills: number;
   readonly workSupported: number;
   readonly confirmed: number;
-  readonly journalEntries: number;
-  readonly confirmations: number;
+  /** `null` = not readable. Never a 0 that nobody counted. */
+  readonly journalEntries: number | null;
+  readonly confirmations: number | null;
   /** The full report the summary condenses. */
   readonly href: string;
   /** assist.sources.* leaves — the visible source list. */
@@ -197,8 +198,9 @@ export function buildWorkerEvidenceSummary(
     totalSkills: report.totalSkills,
     workSupported: profile?.metrics.workSupported ?? 0,
     confirmed: profile?.metrics.confirmed ?? 0,
-    journalEntries: entries?.metrics.entries ?? 0,
-    confirmations: entries?.metrics.confirmations ?? 0,
+    // Absent metric = the count could not be read (see evidence-report.ts).
+    journalEntries: entries?.metrics.entries ?? null,
+    confirmations: entries?.metrics.confirmations ?? null,
     href: EVIDENCE_REPORT_HREF,
     sourceKeys: WORKER_SUMMARY_SOURCE_KEYS,
   };

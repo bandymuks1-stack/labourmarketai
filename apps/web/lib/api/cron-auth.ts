@@ -1,5 +1,7 @@
 import "server-only";
 
+import { timingSafeEqual } from "node:crypto";
+
 /**
  * CRON AUTH (completion v1) — the one place a scheduled-job request proves it
  * came from the platform's own scheduler.
@@ -22,6 +24,12 @@ export type CronAuthResult = "ok" | "not_configured" | "unauthorized";
 export function authorizeCronRequest(request: Request): CronAuthResult {
   const secret = (process.env.CRON_SECRET ?? "").trim();
   if (!secret) return "not_configured";
-  const header = request.headers.get("authorization");
-  return header === `Bearer ${secret}` ? "ok" : "unauthorized";
+  const header = request.headers.get("authorization") ?? "";
+  // Constant-time, like the sibling machine doors (`supply-feed-auth`,
+  // `external-referral-auth`): a byte-by-byte `===` leaks how many leading
+  // characters of the secret a probe got right.
+  const expected = Buffer.from(`Bearer ${secret}`);
+  const given = Buffer.from(header);
+  if (expected.length !== given.length) return "unauthorized";
+  return timingSafeEqual(expected, given) ? "ok" : "unauthorized";
 }

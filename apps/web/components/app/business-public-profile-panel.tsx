@@ -12,6 +12,7 @@ import {
   publicBusinessPath,
   type BusinessPublicSettings,
 } from "@/lib/company/public-profile-model";
+import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Public business profile publication panel (Wagon 13 slice 2). Owner/manager
@@ -41,6 +42,7 @@ export function BusinessPublicProfilePanel({
   const [email, setEmail] = useState(settings?.contactEmail ?? "");
   const [phone, setPhone] = useState(settings?.contactPhone ?? "");
   const [notice, setNotice] = useState<string | null>(null);
+  const expectedWorkspaceId = useDisplayedWorkspaceId();
 
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
@@ -69,7 +71,7 @@ export function BusinessPublicProfilePanel({
       // publication result, so it degrades to its own notice.)
       const descRes =
         res.kind === "ok" && description !== (settings?.description ?? "")
-          ? await saveOrganizationDescriptionAction(description, locale)
+          ? await saveOrganizationDescriptionAction(description, locale, expectedWorkspaceId)
           : ({ kind: "ok" } as const);
       if (res.kind === "ok" && descRes.kind !== "ok" && descRes.kind !== "no-company") {
         setNotice(t("errorDescription"));
@@ -206,7 +208,7 @@ export function BusinessPublicProfilePanel({
               type="button"
               onClick={save}
               disabled={pending}
-              className="inline-flex min-h-11 items-center rounded-md border border-brand-blue bg-brand-blue px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              className="inline-flex min-h-11 items-center rounded-md border border-brand-blue bg-brand-blue px-4 py-2 text-sm font-medium text-text-on-brand disabled:opacity-50"
             >
               {pending ? t("saving") : t("save")}
             </button>

@@ -30,6 +30,7 @@ const CTA_PROFILE: L = {
   ru: "Создать профиль / CV →",
   nl: "Maak je profiel / CV →",
   de: "Profil / Lebenslauf erstellen →",
+  pl: "Zbuduj swój profil / CV →",
 };
 
 const CTA_EMPLOYERS: L = {
@@ -38,6 +39,7 @@ const CTA_EMPLOYERS: L = {
   ru: "Работодателям",
   nl: "Voor werkgevers",
   de: "Für Arbeitgeber",
+  pl: "Dla pracodawców",
 };
 
 const INTRO: Record<string, L> = {
@@ -47,6 +49,7 @@ const INTRO: Record<string, L> = {
     ru: "Навыки",
     nl: "Vaardigheden",
     de: "Fähigkeiten",
+    pl: "Umiejętności",
   },
   title: {
     en: "Prove and check real skills",
@@ -54,6 +57,7 @@ const INTRO: Record<string, L> = {
     ru: "Докажите и проверьте реальные навыки",
     nl: "Bewijs en controleer echte vaardigheden",
     de: "Echte Fähigkeiten nachweisen und prüfen",
+    pl: "Udowodnij i sprawdź realne umiejętności",
   },
   subcopy: {
     en: "The hardest part of the labour market is knowing what someone can really do. LabourMarket.ai keeps skills honest: every skill is shown as verified or self-declared — never silently mixed.",
@@ -61,6 +65,7 @@ const INTRO: Record<string, L> = {
     ru: "Самое сложное на рынке труда — понять, что человек действительно умеет. LabourMarket.ai держит навыки честными: каждый навык показан как подтверждённый или самозаявленный — без тихого смешивания.",
     nl: "Het moeilijkste aan de arbeidsmarkt is weten wat iemand echt kan. LabourMarket.ai houdt vaardigheden eerlijk: elke vaardigheid wordt getoond als bevestigd of zelf opgegeven — nooit stilzwijgend vermengd.",
     de: "Das Schwierigste am Arbeitsmarkt ist zu wissen, was jemand wirklich kann. LabourMarket.ai hält Fähigkeiten ehrlich: Jede Fähigkeit wird als bestätigt oder selbst angegeben angezeigt — niemals stillschweigend vermischt.",
+    pl: "Najtrudniejsze na rynku pracy jest wiedzieć, co ktoś naprawdę potrafi. LabourMarket.ai trzyma umiejętności w ryzach uczciwości: każda umiejętność jest pokazana jako zweryfikowana lub zadeklarowana — nigdy po cichu mieszane.",
   },
   cardsTitle: {
     en: "Two honest skill states",
@@ -68,6 +73,7 @@ const INTRO: Record<string, L> = {
     ru: "Два честных состояния навыка",
     nl: "Twee eerlijke statussen van een vaardigheid",
     de: "Zwei ehrliche Zustände einer Fähigkeit",
+    pl: "Dwa uczciwe stany umiejętności",
   },
   problemsTitle: {
     en: "Skill questions people search for",
@@ -75,6 +81,7 @@ const INTRO: Record<string, L> = {
     ru: "Что ищут про навыки",
     nl: "Vragen over vaardigheden waar mensen naar zoeken",
     de: "Fragen zu Fähigkeiten, nach denen Menschen suchen",
+    pl: "Pytania o umiejętności, które ludzie wyszukują",
   },
 };
 
@@ -86,6 +93,7 @@ const CARDS: { title: L; body: L }[] = [
       ru: "Подтверждено",
       nl: "Bevestigd",
       de: "Bestätigt",
+      pl: "Zweryfikowane",
     },
     body: {
       en: "Backed by evidence in the system — a manager confirmation, a work-journal link, or a checked document. Not a claim.",
@@ -93,6 +101,7 @@ const CARDS: { title: L; body: L }[] = [
       ru: "Подкреплено доказательством в системе — подтверждением руководителя, ссылкой в журнале работ или проверенным документом. Не заявление.",
       nl: "Onderbouwd met bewijs in het systeem — een bevestiging van een leidinggevende, een link naar het werkjournaal of een gecontroleerd document. Geen bewering.",
       de: "Durch Nachweise im System belegt — eine Bestätigung durch eine Führungskraft, ein Verweis im Arbeitsjournal oder ein geprüftes Dokument. Keine Behauptung.",
+      pl: "Poparte dowodem w systemie — potwierdzeniem menedżera, wpisem w Dzienniku pracy lub sprawdzonym dokumentem. To nie jest deklaracja.",
     },
   },
   {
@@ -102,6 +111,7 @@ const CARDS: { title: L; body: L }[] = [
       ru: "Самозаявлено",
       nl: "Zelf opgegeven",
       de: "Selbst angegeben",
+      pl: "Zadeklarowane",
     },
     body: {
       en: "The worker's own statement of a skill. Useful and visible — but clearly marked as not yet verified, so no one is misled.",
@@ -109,6 +119,7 @@ const CARDS: { title: L; body: L }[] = [
       ru: "Заявление самого работника о навыке. Полезно и видно — но чётко помечено как непроверенное, чтобы никого не вводить в заблуждение.",
       nl: "De eigen verklaring van de werknemer over een vaardigheid. Nuttig en zichtbaar — maar duidelijk gemarkeerd als nog niet bevestigd, zodat niemand wordt misleid.",
       de: "Die eigene Angabe der Arbeitskraft zu einer Fähigkeit. Nützlich und sichtbar — aber klar als noch nicht bestätigt gekennzeichnet, damit niemand in die Irre geführt wird.",
+      pl: "Własne oświadczenie pracownika o umiejętności. Przydatne i widoczne — ale wyraźnie oznaczone jako jeszcze niezweryfikowane, żeby nikogo nie wprowadzić w błąd.",
     },
   },
 ];

@@ -71,6 +71,15 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
         maxLength: 10,
       },
       {
+        // WHEN the work ends — stated as a date ("iki spalio 20") or a
+        // duration ("3 savaitėms"), prefilled from the sentence; optional.
+        name: "endDate",
+        kind: "text",
+        labelKey: "conversation.forms.fields.endDate",
+        placeholderKey: "conversation.forms.fields.startDatePlaceholder",
+        maxLength: 10,
+      },
+      {
         name: "urgency",
         kind: "select",
         labelKey: "conversation.forms.fields.urgency",
@@ -108,6 +117,7 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
       urgency: s(st.urgency) || null,
       opportunityType: s(st.opportunityType) || null,
       startDate: s(st.startDate) || null,
+      endDate: s(st.endDate) || null,
       // Derived by the structurer from the person's own sentence (never
       // typed): the taxonomy slug and the ISO market. They ride the form
       // state so the canonical columns (`role_or_work_type`, `country`) are
@@ -116,7 +126,98 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
       country: s(st.country) || null,
     }),
   },
+  {
+    // RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23). ONE field —
+    // the new name, prefilled from the sentence ("… į Nonstop Group UAB"),
+    // visible and editable, reviewed, then confirmed with a one-time token.
+    // No organization field exists on purpose: the server resolves it from
+    // the active workspace, so no value typed here can point elsewhere. The
+    // chat seeds `expectedOrganizationId` (not a field, never shown) with the
+    // organization the form was opened for — it can only make the save
+    // REFUSE if the workspace changed meanwhile, never choose a target.
+    actionId: "company.rename-organization",
+    titleKey: "conversation.actions.company.renameOrganization.label",
+    requiresConfirmation: true,
+    fields: [
+      {
+        name: "name",
+        kind: "text",
+        labelKey: "conversation.forms.fields.organizationName",
+        placeholderKey: "conversation.forms.fields.organizationNamePlaceholder",
+        required: true,
+        maxLength: 200,
+      },
+    ],
+    build: (st: FormState) => ({
+      name: s(st.name),
+      ...(s(st.expectedOrganizationId) ? { expectedOrganizationId: s(st.expectedOrganizationId) } : {}),
+    }),
+  },
 ] as const;
+
+/**
+ * THE SUPPLY SIDE OF THE SAME INTAKE (owner window 7 §4, 2026-09-06).
+ *
+ * "Turime 20 suvirintojų ir ieškome jiems darbo Nyderlanduose." is not a
+ * need — it is capacity offered to the market. The canonical object for it
+ * already exists and is already written by the agency's own dashboard form:
+ * a `customer_requests` row with `kind = 'agency_offer'`, which the
+ * `company.create-demand` schema has always accepted as `intent: "partner"`.
+ *
+ * What was missing was only the DOOR: the sentence had nowhere to go, so an
+ * agency stating capacity was read as a person hunting for a job.
+ *
+ * So this is the same action id, the same fields, the same zod schema, the
+ * same confirmation token, the same dispatcher and the same executor — one
+ * intake, not a second one. Exactly two things differ, and both are what the
+ * person READS:
+ *
+ *   * the labels say "offer" rather than "need" (asking an agency to
+ *     "describe the need" for twenty welders it HAS is the same inversion in
+ *     the copy that the router had in its patterns);
+ *   * `build` stamps `intent: "partner"`, so the row lands as `agency_offer`
+ *     and is never mistaken for demand.
+ *
+ * A draft is not offered: the draft payload shape is defined for the
+ * `company_request` kind only (see `companyCreateDemandSchema`), so the
+ * supply form submits or does nothing.
+ */
+export function supplyOfferFormSpec(): WorkerFormSpec {
+  const base = COMPANY_FORMS.find((f) => f.actionId === "company.create-demand");
+  if (!base) throw new Error("company.create-demand form spec missing");
+  return {
+    ...base,
+    titleKey: "conversation.actions.company.offerCapacity.label",
+    fields: base.fields
+      // The draft checkbox has no meaning for this kind — see above.
+      .filter((f) => f.name !== "asDraft")
+      .map((f) =>
+        f.name === "description"
+          ? {
+              ...f,
+              labelKey: "conversation.forms.fields.supplyDescription",
+              placeholderKey: "conversation.forms.fields.supplyDescriptionPlaceholder",
+            }
+          : f.name === "role"
+            ? {
+                ...f,
+                labelKey: "conversation.forms.fields.supplyRole",
+                placeholderKey: "conversation.forms.fields.supplyRolePlaceholder",
+              }
+            : f.name === "teamSize"
+              ? { ...f, labelKey: "conversation.forms.fields.supplyTeamSize" }
+              : f.name === "location"
+                ? { ...f, labelKey: "conversation.forms.fields.supplyLocation" }
+                : f,
+      ),
+    build: (st: FormState) => ({
+      ...base.build(st),
+      intent: "partner",
+      // `mode` is fixed: the draft shape is defined for company_request only.
+      mode: "submit",
+    }),
+  };
+}
 
 /**
  * AGENCY — real recruiter pilot (2026-09-04). "Noriu pakviesti klientą" needs
@@ -163,6 +264,31 @@ export const AGENCY_FORMS: readonly WorkerFormSpec[] = [
       },
     ],
     build: (st: FormState) => ({ email: s(st.email), note: s(st.note) || null }),
+  },
+  {
+    // F2 — the SITE as a project object, by sentence; the city the sentence
+    // named is pre-filled by the chat (visible, editable, still confirmed).
+    actionId: "company.create-project",
+    titleKey: "conversation.actions.company.createProject.label",
+    requiresConfirmation: true,
+    fields: [
+      {
+        name: "title",
+        kind: "text",
+        labelKey: "conversation.forms.fields.projectTitle",
+        placeholderKey: "conversation.forms.fields.projectTitlePlaceholder",
+        required: true,
+        maxLength: 120,
+      },
+      {
+        name: "city",
+        kind: "text",
+        labelKey: "conversation.forms.fields.projectCity",
+        placeholderKey: "conversation.forms.fields.projectCityPlaceholder",
+        maxLength: 120,
+      },
+    ],
+    build: (st: FormState) => ({ title: s(st.title), city: s(st.city) || null }),
   },
 ] as const;
 
@@ -330,6 +456,29 @@ export function educationAssignLearnerForm(
       },
     ],
     build: (st: FormState) => ({ cohortId: s(st.cohortId), profileId: s(st.profileId) }),
+  };
+}
+
+/** "Pridėk užduotį" — BUILT per turn from the company's real projects (the
+ *  same list the "projects" chip reads); priority from the closed set. */
+export function companyCreateTaskForm(
+  projects: ReadonlyArray<{ value: string; label: string }>,
+): WorkerFormSpec {
+  return {
+    actionId: "company.create-task",
+    titleKey: "conversation.actions.company.createTask.label",
+    fields: [
+      { name: "title", kind: "text", labelKey: "conversation.forms.fields.taskTitle", placeholderKey: "conversation.forms.fields.taskTitlePlaceholder", required: true, maxLength: 160 },
+      { name: "projectId", kind: "select", labelKey: "conversation.forms.fields.taskProject", options: [{ value: "", label: "—" }, ...projects.map((p) => ({ value: p.value, label: p.label }))] },
+      { name: "dueDate", kind: "text", labelKey: "conversation.forms.fields.taskDue", placeholderKey: "conversation.forms.fields.validUntilPlaceholder", maxLength: 10 },
+      { name: "priority", kind: "select", labelKey: "conversation.forms.fields.taskPriority", options: ["low", "normal", "high"].map((v) => ({ value: v, labelKey: `tasks.priority.${v}` })) },
+    ],
+    build: (st: FormState) => ({
+      title: s(st.title),
+      projectId: s(st.projectId) || null,
+      dueDate: s(st.dueDate) || null,
+      priority: (s(st.priority) || "normal") as "low" | "normal" | "high",
+    }),
   };
 }
 

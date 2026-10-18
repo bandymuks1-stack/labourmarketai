@@ -32,7 +32,7 @@ export type ChatActionTone = "primary" | "secondary" | "danger";
 const TONE: Record<ChatActionTone, string> = {
   // The one solid fill. `shadow-cta-glow` is an existing token.
   primary:
-    "bg-brand-blue text-white shadow-cta-glow hover:bg-brand-blue/90 disabled:hover:bg-brand-blue",
+    "bg-brand-blue text-text-on-brand shadow-cta-glow hover:bg-brand-blue/90 disabled:hover:bg-brand-blue",
   // Ghost: no border at all, so it cannot read as equal weight.
   secondary: "text-text-secondary hover:bg-ink-700 hover:text-text-primary",
   danger: "text-state-danger hover:bg-state-danger/10",

@@ -2,9 +2,21 @@
 
 > **Status:** canonical. Derived from **code + production**, 2026-08-27,
 > revised 2026-08-28 (closure train #1320-#1324), extended 2026-08-31 with the
-> full-product master matrix (§5, six parallel domain sweeps).
+> full-product master matrix (§5, six parallel domain sweeps), extended
+> 2026-09-07 with the **canonical master product register (§6)** — the
+> anti-forgetting mechanism every future slice must update.
+>
+> **§6 is EXECUTABLE.** Its machine-readable half is
+> [`apps/web/lib/product-gate/capability-register.ts`](../apps/web/lib/product-gate/capability-register.ts),
+> enforced by `apps/web/lib/guards/capability-register.test.ts` and by
+> `.github/scripts/product-truth.mjs`. The two halves may not drift: a
+> capability id present in one and absent from the other is a CI failure.
 > Entry point: [`docs/ARCHITECTURE.md`](ARCHITECTURE.md).
-> **A file existing is not proof. A green unit suite is not semantic proof.**
+> Reasoning and evidence behind §6:
+> [`docs/reconciliation/FULL_PRODUCT_RECONCILIATION_2026-09-07.md`](reconciliation/FULL_PRODUCT_RECONCILIATION_2026-09-07.md).
+> **A file existing is not proof. A green unit suite is not semantic proof.
+> And a migration in this repository is not proof that it is in the database —
+> read the ledger (§6.0).**
 
 **Classification**
 
@@ -21,6 +33,13 @@
 ---
 
 ## 1. PRODUCTION SNAPSHOT (2026-08-27, project `gorgitwvdzxbnaxhrsrw`)
+
+> **SUPERSEDED 2026-09-07 — see §6.1 for the current read.** The table below is
+> kept as the 2026-08-27 record. Two of its lines were already wrong by
+> 2026-08-28 and stayed wrong for ten days: **`ai_runs` and `usage_cost_events`
+> are NOT zero.** Production holds 47 of each (2026-08-28 → 2026-09-06, Gemini,
+> real spend $0.0396). "No AI has ever run in production" was a true statement
+> that nobody re-measured after it stopped being true.
 
 | table | rows | reading |
 |---|---|---|
@@ -394,3 +413,375 @@ Nothing above is fixed by more code existing. Each needs a real journey run.
 2. Review PR #1344 work-hour allocations (M3) — unlocks timesheets end-to-end.
 3. Email channel: `INVITE_EMAIL_PROVIDER/API_KEY/FROM` env + Supabase SMTP decision (M6).
 4. Unchanged existing gates: #1355 ESCO linkage, #1305 LMC compensate-spend, AI `AI_PROVIDER_MODE` env, LinkedIn/Meta developer apps (only when wanted).
+
+---
+## 6. CANONICAL MASTER PRODUCT REGISTER (2026-09-07)
+
+> **This section is the anti-forgetting mechanism.** Every future slice updates
+> a row here. Adding a capability to the product means adding a row; finishing
+> one means changing its STATUS with the evidence that justifies it. A
+> capability may be `DEFERRED_BY_DESIGN` for years — it is never deleted from
+> this register because it is not being built now. That is precisely how scope
+> was lost before.
+>
+> Method and evidence:
+> [`docs/reconciliation/FULL_PRODUCT_RECONCILIATION_2026-09-07.md`](reconciliation/FULL_PRODUCT_RECONCILIATION_2026-09-07.md)
+> — eight parallel source sweeps on `main` @ `813f1b6`, the full 1,625-commit
+> history, and live production reads (schema, RLS, ledger, row counts,
+> advisors) on 2026-09-07.
+
+### 6.0 READ THIS BEFORE CONCLUDING ANYTHING IS MISSING
+
+Three rules, each learned from a measured failure in this reconciliation:
+
+1. **The database's `supabase_migrations.schema_migrations` is the ONLY
+   authority on what is applied.** Not the migration header, not
+   `docs/APPLIED_LEDGER.md`, not a code comment. Sixteen migrations whose
+   comments say "DRAFT / not applied / approval not given" **are applied**.
+2. **A repository migration is not a deployed capability.** Nine migration
+   files have never been applied; four of them sit behind live UI that renders
+   an honest "not enabled yet" to real users. The parity gate checks
+   applied → repo; nothing checks repo → applied.
+3. **Search by synonym before declaring absence.** Calendar lives at
+   `/dashboard/planning`; teams are `organizations` rows with
+   `organization_type='team'`; "roster" means the active `company_workers`
+   list, never a schedule.
+
+### 6.1 PRODUCTION SNAPSHOT — 2026-09-07T03:46Z (HISTORICAL — superseded by the 2026-10-03 line below; the register in `capability-register.ts` is the live truth)
+
+**Re-measured 2026-10-03 (read-only, max ledger `20261003144407`):** `profiles` / `workers` 71 / 71 · `projects` 10 · `journal_entries` 97 · `ai_runs` 355 · `notification_events` 65 · `work_tasks` 3 · `education_cohort_members` 1 · `evidence_import_rows` 158 · `lmc_*` 5 base tables + 2 views · `team_details` 0. The table below is the 2026-09-07 snapshot and is kept for history, not as current counts.
+
+266 applied migrations (max `20260906202628`) · 190 tables · **RLS enabled on
+all 190**.
+
+| object | rows | object | rows |
+|---|---:|---|---:|
+| `profiles` / `workers` | 56 / 56 | `journal_entries` | 40 |
+| `organizations` / `companies` / `agencies` | 17 / 14 / 3 | `journal_entry_confirmations` | **13** (3 self-confirmed) |
+| `organization_roles` | 15 | `journal_entry_skills` / `worker_skills` | 48 / 50 |
+| `engagement_contexts` | 79 | `worker_skills` verified | **2** |
+| `company_memberships` / `company_workers` | 19 / 7 | `customer_requests` | 20 |
+| `projects` / `work_objects` | 9 / 1 | `public_vacancies` (active) | 77,366 (76,747) |
+| `work_hour_allocations` | 5 | `conversations` / messages | 5 / 18 |
+| `education_programs` / cohorts / members | 1 / 1 / 0 | **`ai_runs` / `usage_cost_events`** | **47 / 47** |
+| `market_intelligence_observations` | 76 | `pilot_events` / `audit_logs` | 3,329 / 64 |
+
+**Zero rows, ever** (~40 tables): teams, marketplace listings, matches,
+agreements, contracts, proposals, assets, trips, absences, training, reviews,
+decisions, procurement, on/offboarding, org documents, customers, leads,
+defects, follow-ups, work tasks, LMC, subscriptions, contact disclosures.
+
+### 6.2 THE REGISTER
+
+> **The machine half is authoritative for STATUS.** The Status / AI / P
+> columns below are the 2026-09-07 snapshot and are not re-checked by CI.
+> The current, CI-enforced classification of every row lives in
+> [`apps/web/lib/product-gate/capability-register.ts`](../apps/web/lib/product-gate/capability-register.ts)
+> using the owner's six-value vocabulary (BUILT_AND_USABLE ·
+> BUILT_NOT_CONNECTED · PARTIAL · ARCHITECTURE_ONLY · MISSING · BLOCKED)
+> plus the evidence ladder. **The id list is enforced in both directions:**
+> a capability in one half and not the other fails
+> `lib/guards/capability-register.test.ts`. That is what makes deleting a
+> capability from the product an explicit act rather than an omission.
+Legend — **Status**: `PROD_HUMAN` production-human-proven · `PROD_DATA`
+production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN` ·
+`DISCONNECTED` · `DUPLICATED` · `LEGACY` · `PLANNED` · `MISSING` ·
+`DEFERRED` deferred by design · `OWNER?` needs an owner decision.
+**AI**: `R` read · `W` write · `PC` preview→confirm · `—` not exposed.
+**P**: 0/1/2/3.
+
+#### A. PERSON
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| PER-1 | Account, auth, onboarding, locale | `profiles`, `profile_roles` | PROD_HUMAN | — | — | — |
+| PER-2 | Professional profile + owner narrative | `profiles.profile_text`, `workers` | PROD_HUMAN | R | 2 | `workers.headline`/`bio` have no person UI at all |
+| PER-3 | Work card (availability, pay, locations) | `workers.*`, `save_worker_card` | PROD_HUMAN | PC | 2 | editor mounts only inside the chat workspace, not on `/dashboard/profile` |
+| PER-4 | CV import (PDF/DOCX) → confirm-each-fact | `/api/cv/extract`, `cv-section-import-actions` | PROD_HUMAN | — | — | — |
+| PER-5 | Living CV / player card / EU format export | `verified-cv`, `eu-format` | PROD_HUMAN | R | 2 | `/cv` absent from primary-route smoke |
+| PER-6 | Work history (employment) | `engagement_contexts`, `save_self_declared_work_history_v1` | PROD_DATA | — | 1 | — |
+| PER-7 | **Practice / volunteering history** | same, `student`+`volunteer` slugs | **HIDDEN → fixed 2026-09-07** | — | 1 | RPC live since 2026-08-27; the profile page filtered it out |
+| PER-8 | Education records | `worker_education`, `education_types` | PROD_DATA | — | 2 | in-code comment still says DRAFT |
+| PER-9 | Achievements / declared certificates | `worker_achievements` | IMPL | — | 3 | `confirmed_by_manager` has no write path — permanently false |
+| PER-10 | Languages | `worker_languages` | PROD_DATA | — | 3 | no `verified` concept |
+| PER-11 | External profile links | `worker_external_profiles` | **DISCONNECTED** | — | 1 | **migration never applied**; UI ships an honest empty |
+| PER-12 | Privacy: consent, disclosure ledger, export, deletion | `privacy_consent_*`, `personal_data_disclosures` | PROD_DATA | — | 1 | GDPR export covers 6 relations; ~14 personal relations are missing from it |
+| PER-13 | Requirement ledger (what is missing for a role) | `lib/player-card/requirement-ledger` | PARTIAL | — | 2 | built for 3 contexts, mounted for 1 (`project`) |
+
+#### B. SKILLS · COMPETENCY · QUALIFICATION
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| SKL-1 | Skill catalogue + professions | `skills`, `professions`, `profession_skills` | PROD_HUMAN | — | — | — |
+| SKL-2 | Deterministic recognition (journal → skill) | `journal_entry_skills`, `lib/structuring` | PROD_HUMAN | — | — | no AI required (I-7) |
+| SKL-3 | Evidence tier ladder | `lib/evidence/evidence-tier`, `provenance` | PROD_HUMAN | R | 0 | self-confirmation must not read as employer-confirmed (fixed 2026-09-07) |
+| SKL-4 | Free-label skill claims | `profile_skill_claims`, `skill_candidate_clarifications` | DUPLICATED | — | 3 | 2 live stores + `candidate_skills` frozen at 0 rows |
+| SKL-5 | Transversal capabilities (8 slugs) | `skills` category `transversal.*` | PROD_DATA | — | 3 | applied 2026-08-27 |
+| SKL-6 | ESCO taxonomy | 4 tables, 1,045,186 labels | IMPL | — | 2 | 0 of 161 platform skills carry an `esco_uri` — the bridge is inert |
+| SKL-7 | Documents / credential validity | `worker_documents`, `document_files` | IMPL | W (add only) | 1 | one download door, versioned, ack-bound |
+| SKL-8 | Country requirement matrix | `lib/country-readiness` (code), `country_document_requirements` (empty) | PARTIAL | — | 2 | no route of its own |
+| SKL-9 | **Qualification recognition / RPL / equivalence** | `lib/qualification/capability-standing`, `lib/skills/recognition-model` (pure); `competency_recognitions` (unapplied RED packet P-3, PR #1741) | **PARTIAL** (EXISTS pure + READ wired; **DISCONNECTED** at the write: no assessor act, 0 training providers) | — | 2 | corrected 2026-10-01 from MISSING; `hasRecognizedEquivalence` stays false until P-3 is applied and an assessor records one |
+| SKL-10 | Training & certification register | `training_programs`, `training_assignments` | IMPL (0 rows) | — | 2 | applied; writes nothing into the skill ladder, by decision |
+
+#### C. ORGANIZATION · WORKSPACE · AUTHORITY
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| ORG-1 | Organization creation + identity + verification | `companies` (write) → `organizations` (read, mirrored) | PROD_DATA | — | 1 | identity split across two tables |
+| ORG-2 | **Multi-capability organization** | `organization_roles`, `organization_role_types` | PROD_DATA | — | 0 | **OWNER?** `companies.company_type='staffing_agency'` still hard-gates 7 agency features |
+| ORG-3 | Memberships + invitations + roles | `company_memberships`, `invitations` | PROD_DATA | — | 1 | — |
+| ORG-4 | Workspace context + switching | cookie + `profiles.active_organization_id` | PROD_DATA | W | 1 | `getActiveOrganizationContext` is owner-only while `getWorkspaceContext` is not |
+| ORG-5 | Cross-org isolation | 7 authority helpers | PARTIAL | — | 0 | manager reads/creates/updates projects and reads the roster via `manages_organization` (owner RED approval 2026-09-24, ledger `20260924092836`); roster **management** (provision/role RPCs) and project DELETE stay owner/admin; invitations are a per-person owner/admin grant, never a title (`manages_invitations`, ledger `20260924120147`); open: the manager's and a delegate's real-session walks |
+| ORG-6 | Roster (employees, historical, agency) | `engagement_contexts` + 4 legacy link tables | DUPLICATED | — | 1 | 4 parallel roster truths |
+| ORG-7 | Candidates / talent pool / scouting | `candidate_drafts`, `demand_shortlist` | PROD_DATA | — | 1 | `/dashboard/talent` is a superadmin sample preview |
+| ORG-8 | Agency ↔ client bridge | `agency_client_connections`, `agency_candidate_offers`, `agency_clients` | PROD_DATA | — | 1 | `agency_clients` APPLIED 2026-09-14 (ledger `20260914202322`) under canonical Model B — a private client record, not a rival to the bridge |
+| ORG-9 | Public organization profile | `organizations.public_*`, `/business/[slug]` | IMPL | — | 3 | no index/directory route |
+| ORG-10 | Agency worker pool (legacy `agencies` world) | `agencies`, `agency_workers` (3 / 0 rows) | **RETIRED 2026-09-14** | — | — | Model B canonical (owner). B1 retire-and-record: nothing dropped, all 3 agencies already mirrored into `organizations`; revisit a Model-B-native pool when real agency workforce exists |
+| ORG-11 | Universal invitation / referral network | `invitations` (extended: open link, campaign seats, demand target, external source + consent), `invitation_acceptances` (ledger), `/api/referrals/external/v1` | PARTIAL | — | 0 | `20260917120000` (ledger `20260917080303`) + forward fix `20260917130000` (ledger `20260917091045`) APPLIED 2026-09-17, RPCs production-proven, secret set; #1752 MERGED 2026-09-17 (`4ff163da`, on production; the "merge" owner decision was stale and is removed 2026-09-19); 3 invitations minted since; browser walk CASE 1–19 pending → BUILT_AND_USABLE / HUMAN_UI_PROVEN |
+
+#### D. WORK EXECUTION
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| WRK-1 | Projects | `projects` | IMPL | W | 1 | corrected 2026-10-03: dates DO have a writer (`project-facts-form` -> `project-admin-actions` -> `update_project_facts_v1`); 2 of 10 projects carry a start_date |
+| WRK-2 | Objects / sites | `work_objects` | IMPL (1 row) | — | 1 | no route; a section of `/dashboard/company` |
+| WRK-3 | Stages | `project_stages` | IMPL | W | 2 | — |
+| WRK-4 | Tasks | `work_tasks` (+ `follow_up_tasks` duplicate) | IMPL (3 rows) | W | 2 | 2026-10-03: 3 rows; stage + subtask structure APPLIED (#2123, ledger 20261003144407), RPC-proven, UI not browser-proven |
+| WRK-5 | Worker→project assignment | `project_worker_assignments` | PROD_DATA (1 row) | W (strong) | 1 | no overlap constraint of any kind |
+| WRK-6 | **Team→project assignment** | `project_worker_assignments` (fan-out), `team_details` (0 rows) | **PARTIAL** (corrected 2026-10-03, #2084) | — | 1 | whole team fans out through the per-person write; no unit-level assignment, no team FK; 0 teams in production |
+| WRK-7 | Readiness / operational status | `project_worker_readiness_items` | IMPL | W | 2 | — |
+| WRK-8 | Defects / corrections | `defects`, `defect_corrections` | IMPL (0 rows) | — | 3 | assignee read APPLIED 2026-09-14 (ledger `20260914195053`), proven per-row on prod; `defect_corrections` stays manager-only (owner 2b DEFER) |
+| WRK-9 | Handover passport | `project_handover_entries` (1 row) | IMPL | — | 3 | reachable on `/dashboard/projects/[id]/operations`; written once in prod — no nav tile of its own |
+| WRK-10 | Project economics | `project_budgets` (0 rows) | IMPL | — | 3 | `ProjectEconomicsPanel` renders on project operations; 0 rows is adoption, not disconnection |
+
+#### E. EVIDENCE · JOURNAL
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| EVID-0 | **Work Journal** (4 transports, 1 core) | `journal_entries` + 7 satellites | **PROD_HUMAN** | R + PC | — | the product's strongest chain |
+| EVID-1 | **Organization historical evidence import** | `organization_people`, `evidence_import_*`, `organization_evidence_*` | **PARTIAL** | production data path | 0 | owner-approved 2026-09-08; recursion fix APPLIED (ledger `20260908080950`); read + write proven under real auth, rolled back, zero residue; **no human import yet** |
+| EVID-2 | Manager review / receive loop | `journal_entry_confirmations`, `review_journal_entry` | PROD_HUMAN | — | 0 | **OWNER?** self-confirmation: block in the RPC, or keep the weaker classification? |
+| EVID-3 | Work verification state (8 states) | `lib/journal/work-verification-state` | IMPL | — | 1 | never walked by a human |
+| EVID-4 | Photos / task evidence | `journal_entry_photos`, `journal_entry_tasks` | PROD_DATA (8 photos) | — | 2 | — |
+| EVID-5 | Hours: journal metrics · allocations · timesheets | 3 stores + 1 dead | PARTIAL | — | 1 | reconciled inside ONE SQL function; no TS reader unions them |
+| EVID-6 | Experience records + disputes + right of reply | `experience_records`, `experience_responses` | PROD_DATA (2) | — | 2 | **`experience_responses` is write-only — no surface renders a reply** |
+| EVID-7 | Work intelligence: hours · activities · skill practice · evidence strength | `journal_entry_metrics` (+ `fragment_skill` rows) + `journal_entry_skills` + confirmations + photos, ONE pure model over the canonical work-time rule | PARTIAL | — | 1 | #1689: journal section + Living CV chips + conversation; fragment-level skill attribution from the worker's own split (#1692); §13 plausibility checks (day > 24 h / long day / line > 24 h / set-aside entry duration) warn in the section and at both intake surfaces, acknowledged with a reason via `work_time_override` rows, never a changed figure (#1692); archetype map covers all 43 ISCO sub-major groups; composer modules, §14 org views and a human walk remain |
+
+#### F. DEMAND · SUPPLY · MATCHING
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| DEM-1 | Canonical demand intake | `customer_requests` (4 kinds) | PROD_HUMAN | PC | — | — |
+| DEM-2 | **Demand/supply semantic boundary** | `lib/demand/market-direction` | **PARTIAL** | — | 0 | 2 boards fixed (#1588/#1596); **7 surfaces still leak**, market map worst |
+| DEM-3 | Worker opportunity board + interest | `demand_interest_signals` | PROD_HUMAN | PC | — | — |
+| DEM-4 | External vacancy ingestion | `public_vacancies` | PROD_DATA (77k) | — | 1 | **no scheduler** — manual script or admin panel only |
+| DEM-5 | Matching engine (20 criteria, both directions) | `lib/market/match-v1` | PROD_DATA | — | 1 | 1 frozen fork still reachable at `/match-preview` |
+| DEM-6 | Team matching | `match-team-v1` | IMPL | — | 2 | admin route only |
+| DEM-7 | Anon public need intake | `company_need_public_intakes` | PROD_DATA (2) | — | 2 | — |
+| DEM-8 | **Saved searches / alerts** | — | **MISSING** | — | 2 | bookmarks exist; recurring queries do not |
+| DEM-9 | **Organizational supply discovery** (agency capacity → employer) | `customer_requests` + gated reader | **BLOCKED** | — | 0 | proven in a prod transaction under 3 real users and rolled back; the migration is unapplied |
+
+#### G. TIME · CAPACITY · BOOKING
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| CAL-1 | Calendar (5 views, single projection) | `lib/planning`, 8 sources | IMPL | — | 1 | 10 further dated stores never reach it |
+| CAL-2 | Employer calendar | — | **DISCONNECTED** | — | 1 | everything exists; the page never calls `getPlanning()` |
+| CAL-3 | Availability | 4 incompatible vocabularies | **DUPLICATED** | — | 1 | none derived from another |
+| CAL-4 | Capacity / gap timeline | `lib/workforce` | **BROKEN** | — | 0 | ignores approved leave and accepted bookings |
+| CAL-5 | Absences / leave | `worker_absences` | IMPL (0 rows) | — | 2 | privacy-narrowed view is correct |
+| CAL-6 | Booking request → accept → engagement | `booking_requests` + 3-layer concurrency | PROD_DATA (1) | — | 1 | nothing past `accepted`; expiry RPC has no scheduler |
+| CAL-7 | **Capacity reservation** | — | **MISSING** | — | 1 | nothing decrements anything |
+| CAL-8 | **Shifts / rotas / rosters** | — | **MISSING** | — | 2 | keep in the architecture |
+| CAL-9 | Utilisation / FTE | — | **MISSING** | — | 3 | — |
+| CAL-10 | **Planned vs actual → learned duration/capacity** | — | **MISSING** | — | 1 | the flywheel's learning loop; a forecast may never be stored where a fact is read (SEP-1) |
+
+#### H. MARKETPLACE · COMMERCE
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| MKT-1 | Service offerings + request loop | `service_offerings`, `service_offering_requests` | **DISCONNECTED** | — | 1 | loop complete, reachability ~zero |
+| MKT-2 | Physical resource listings | `marketplace_listings` | DISCONNECTED (0 rows) | — | 2 | no bridge to `assets` |
+| MKT-3 | Assets / tools / equipment | `assets`, `asset_assignments` | IMPL (0 rows) | — | 2 | `issue_asset_v1` has no availability guard, no lock |
+| MKT-4 | Proposals / contracts / agreements | 3 stores | DUPLICATED (0 rows) | — | 3 | `contracts` is legacy of `agreements` |
+| MKT-5 | Procurement | `procurement_*` | IMPL (0 rows) | — | 3 | `ProcurementSection` renders on `/dashboard/finance`, which reports + commercial-panel link to |
+| MKT-6 | Business trips | `business_trips` (0 rows) | IMPL (0 rows) | — | 3 | `TripsSection` renders on `/dashboard/finance`; trips already feed commitment/capacity. Calendar link still open |
+| MKT-7 | Billing / plans / entitlements | `plans`, `billing_*` | DEFERRED | — | 1 | test mode; two independent owner acts to arm |
+| MKT-8 | LMC credit ledger | 5 tables, 16 RPCs | DEFERRED | — | 3 | all six flags false in code AND database |
+
+#### I. COMMUNICATION · ATTENTION
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| COM-1 | Conversations + attachments + unread | `conversations`, `conversation_*` | PROD_DATA (5/18) | — | 1 | no organization participant type; `team` threads always RESTRICTED |
+| COM-2 | Contact disclosure | `contact_disclosure_requests` | IMPL (0 rows) | — | 2 | expiry RPC has no caller — requests never expire |
+| COM-3 | Notifications (20 types) | `notification_events` | PARTIAL | — | 1 | all types emit in code; booking/engagement/task/absence emitters read ungranted domain tables via service_role and delivered nothing until 2026-09-23 (facts now travel from the write path, no grant added); **email inert** (provider unset) |
+| COM-4 | Weekly digest | cron + read-time emitter | IMPL | — | 2 | the only cron in the product |
+| COM-5 | Attention / activity centre | spine signals | PARTIAL | — | 2 | fragmented across 4 surfaces |
+| COM-6 | Voice Work Journal (record or upload, transcript, work journal) | `services/transcribe`, `lib/voice`, `voice-journal-recorder` (no table; `voice_journal_jobs` is an unapplied draft #740) | PARTIAL | — | 2 | ACCEPTED PLAN, built 2026-07-12. **Header corrected (verified live 2026-10-07):** the site sends `Permissions-Policy: microphone=(self)` (U-26 accepted), so browser recording may be permitted by the person; the 2026-10-06 `microphone=()` regression no longer holds. Production transcription config (`VOICE_TRANSCRIBE_URL`) is unverified; real mic + STT is human-proof only. 25 MB / 10 min are unreachable behind the 5 MB server-action cap; recognition language = UI locale; no voice provenance stored; transcribe service production deployment UNVERIFIED. See `apps/.evidence/audit/VOICE_FIRST_RECOVERY_AUDIT.md` |
+| COM-7 | Voice dictation in the command finder | browser Web Speech API (no table) | PARTIAL | — | 3 | search box only, never an action (#796); probably denied by the same header (live UNKNOWN), silent on denial; audio goes to the browser vendor with no disclosure |
+| COM-8 | Voice as an equal door to the canonical action spine | none | MISSING | — | 3 | frozen design doctrine section A.2 ("two equal doors ... no capability exists in only one path"), mobile "Ask (Conversation, voice)" tab, voice into composer/journal: a design target, **not implemented at any layer**. The label "voice-first" appears nowhere in the repository history. Must reuse the one intent-authorization-action spine, never a second architecture |
+
+#### J. MAP · MOBILITY · INTELLIGENCE
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| GEO-1 | Market map / world view | `lib/market-map` | PARTIAL | — | 1 | owner-scoped only; cross-user aggregate deliberately absent. ONE canonical map (2026-10-01); prior human proof not re-earned until production screenshots at 390/1280/1440 exist |
+| GEO-2 | Personal location privacy | `preferred_locations`, `consented_login_location_signals` | PROD_DATA | — | — | **no coordinates for people, by schema construction** |
+| GEO-3 | Mobility / cross-border requirements | `lib/country-readiness` | PARTIAL | — | 2 | checklist only; no permit/posting workflow |
+| GEO-4 | Labour-market intelligence | `market_intelligence_observations` (76) | PARTIAL | — | 2 | exactly one path into an operational action |
+| GEO-5 | Public answer engine / SEO | `question-registry.json` | PROD_DATA | — | 2 | — |
+
+#### K. EDUCATION
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| EDU-1 | Institution capability + learner link | `organization_roles`, `engagement_contexts` `student` | PROD_DATA | — | 1 | — |
+| EDU-2 | Programmes / cohorts / members | `education_*` | PROD_DATA (1/1/0) | W | 1 | correction path applied 2026-09-08; zero cohort members in production |
+| EDU-3 | Learner outcomes | `institution_learner_outcomes` | IMPL | — | 2 | — |
+| EDU-4 | Learning compass (student path) | `lib/learning/learning-compass` | IMPL | — | 2 | — |
+| EDU-5 | Human-in-loop learning review | `learning_review_queue` | **ORPHAN** | — | 3 | `/dashboard/learning` has zero inbound links — VERIFIED, verdict unchanged; parked on F-N1 (owner). Claim now names its module + route so it is checkable. 2026-10-01: signal→queue producer connected code-only (org derived from the entry, pending items only, manager brief count when >0); route still unlinked, policy OFF, 0 prod rows, TEST_PROVEN only |
+| EDU-6 | Institution reporting | `education_programs` + public vacancy counts | IMPL | — | 2 | CSV export built 2026-09-13; never downloaded by a human |
+
+#### L. PLATFORM · AI · GOVERNANCE
+
+| ID | Capability | Canonical objects | Status | AI | P | Next action |
+|---|---|---|---|---|---|---|
+| AI-1 | MCP door (12 capabilities) | `/api/mcp`, `lib/capabilities` | PROD_DATA | — | 0 | **no MCP e2e spec**; OAuth authorization server not enabled by the owner |
+| AI-2 | Conversation action backbone (52 actions, 38 wired) | `lib/conversation` | PROD_DATA | — | 1 | 48 of 52 tokens carry `stateFingerprint = "n/a"` |
+| AI-3 | AI runtime: providers, model registry, cost ceilings, egress | `lib/ai/runtime` | **PROD_DATA (47 runs)** | — | 1 | 6 registered agents have zero call sites |
+| AI-4 | AI agent subjects (human / agent / team) | ARCHITECTURE §5.1 | **DEFERRED** | — | 3 | architecture recorded; deliberately not now |
+| GOV-1 | Migration safety + parity gates | `.github/scripts`, `check:migration-parity` | PARTIAL | — | 0 | **OWNER?** one `SUPABASE_DB_URL` secret arms two inert gates; repo→prod direction unchecked |
+| GOV-2 | Quality gates (typecheck, lint, unit, 12 copy/doctrine guards) | `quality.yml` | PROD_DATA | — | — | strong |
+| GOV-3 | E2E in CI | `e2e-smoke.yml` | PARTIAL | — | 1 | 5 of 94 specs, 27 tests |
+| GOV-4 | Telemetry / funnel | `pilot_events` (3,329) | PROD_DATA | — | 2 | — |
+| GOV-5 | Localization | 11 locales, 5 active | PARTIAL | — | 2 | 5 inactive locales carry ~2,500 `[EN]` each and are not ratchet-tracked |
+| GOV-6 | Search / discovery | 4 incompatible stacks | DUPLICATED | — | 2 | no people search anywhere by design |
+| GOV-7 | Reporting / export | 6 real downloads | PARTIAL | — | 2 | CSV/JSON only; no PDF/XLSX generator |
+| GOV-8 | Security / RLS | 190 tables, all RLS | PROD_DATA | — | 0 | 2 real advisor items + 2 owner-only Auth settings |
+| GOV-9 | **Executable product constitution** (register + graph + journeys + separations) | `lib/product-gate/*`, `.github/scripts/product-truth.mjs` | IMPL | — | 0 | what a new agent meets before it can narrow the product |
+
+### 6.3 OWNER DECISION QUEUE (2026-09-07)
+
+Each is independent; none blocks a code train.
+
+1. **Self-confirmation, authorization side** (EVID-2) — block in
+   `review_journal_entry`, or rely on the weaker classification now shipping?
+   A sole trader legitimately has nobody above them. RED.
+2. **Nine unapplied migrations** — apply the four with live UI behind them
+   (agency clients, journal templates, external profiles, opportunity-seen), or
+   retire them?
+3. **`SUPABASE_DB_URL`** — one read-only secret arms two live CI gates.
+4. **Two Supabase Auth settings** — OTP expiry ≤ 1 h, leaked-password
+   protection on.
+5. **`companies.company_type` agency lock** (ORG-2) — migrate to
+   `organization_roles`, or keep the industry lock deliberately?
+6. **E2E in CI** (GOV-3) — build an authenticated fixture strategy, or accept
+   the suite as a local-only tool?
+7. **Org surfaces and the primary nav** — correct the feature catalogue (which
+   still calls shipped org workspaces `preparing`), or add nav routes?
+
+### 6.4 THE NINE UNAPPLIED MIGRATIONS — reconciled individually (2026-09-07)
+
+> Owner decision 4: **no bulk apply, no bulk retire.** Each reconciled against
+> current schema, production data, live dependents, superseding migrations,
+> RLS, rollback and this register. Every "PRODUCTION_SCHEMA_STATE: absent" below
+> is a direct `to_regclass` read on 2026-09-07, not an inference.
+>
+> None has been applied. Four have live UI behind them and are P0.
+
+#### P0 — live UI depends on an absent schema capability
+
+**1. `20260713160000_agency_clients_v1`**
+- CAPABILITY: an agency's own private client address book + `demand → client` link.
+- CURRENT_DEPENDENTS: `lib/agency/clients.ts`, `clients-actions.ts`, `clients-model.ts`; `AgencyClientsSection` on `/dashboard/company` (renders for `company_type='staffing_agency'`); `lib/guards/market-map-read-layer-v1.test.ts`.
+- PRODUCTION_SCHEMA_STATE: `agency_clients` **absent**; 3 RPCs absent.
+- SUPERSEDED: **NO.** `agency_client_connections` (applied `20260723155658`) is a *different* model — an invitation-based, bidirectional bridge to a real platform organization. This is a private record of a client that may not be on the platform. Both are legitimate; today only the bridge exists.
+- SAFE_TO_APPLY: **YES** — 1 table, 1 policy, 5 SECURITY DEFINER RPCs, 4 GRANTs, no data DML (the `update`/`delete` lines are inside function bodies), paired rollback present.
+- SAFE_TO_RETIRE: **NO** — retiring means deleting a shipped agency surface and its lib layer.
+- CONSEQUENCE_OF_APPLY: the agency room's client list starts working; nothing existing changes.
+- CONSEQUENCE_OF_RETIRE: an agency capability the product advertises is removed.
+- RECOMMENDATION: **prepare for the human gate.** Highest of the four — it is the only one that gates a whole role's workflow.
+- HUMAN_GATE_REQUIRED: **YES** (SECURITY DEFINER + GRANT).
+
+**2. `20260714170000_worker_opportunity_seen_v1`**
+- CAPABILITY: per-worker "already seen this opportunity" markers — the honest definition of "new".
+- CURRENT_DEPENDENTS: `lib/opportunities/seen.ts` (the single adapter), `recommendations-model.ts`, `weekly-intelligence-model.ts`, `notifications/spine-signals.ts`, `marketplace/worker-opportunities.ts`.
+- PRODUCTION_SCHEMA_STATE: `worker_opportunity_seen` **absent**; RPC absent.
+- SUPERSEDED: **NO.**
+- SAFE_TO_APPLY: **YES** — 1 table, 1 own-rows-only policy, 2 RPCs, 2 GRANTs, no data DML, paired rollback. Privacy-positive by design: the demand owner never learns who saw.
+- SAFE_TO_RETIRE: **NO** without also removing the "new matching jobs" spine signal and the recommendation "Nauja" chip.
+- CONSEQUENCE_OF_APPLY: the new-jobs count can clear; the 7-day `created_at` fallback stops standing in for it.
+- CONSEQUENCE_OF_RETIRE: the badge stays permanently 0 by design, which is honest but dead.
+- RECOMMENDATION: **prepare for the human gate.**
+- HUMAN_GATE_REQUIRED: **YES** (SECURITY DEFINER + GRANT).
+
+**3. `20260714180000_journal_profession_templates_v1`**
+- CAPABILITY: per-profession scaffolding for the journal composer (doctrine §10 slug registry, not a UI enum).
+- CURRENT_DEPENDENTS: `lib/journal/journal-templates.ts`, `journal-templates-model.ts`; `journal-entry-composer.tsx`; `/dashboard/journal`.
+- PRODUCTION_SCHEMA_STATE: `journal_profession_templates` **absent**.
+- SUPERSEDED: **NO.**
+- SAFE_TO_APPLY: **YES** — the *least* risky of the nine: 1 table, 2 policies, **no SECURITY DEFINER function at all**, 2 GRANTs, no data DML, paired rollback.
+- SAFE_TO_RETIRE: possible, but it removes the only answer to "a tiler and a cleaner should not start from the same blank textarea".
+- CONSEQUENCE_OF_APPLY: templates become seedable; the composer's empty state stops being the only state.
+- CONSEQUENCE_OF_RETIRE: journal scaffolding stays a permanent gap.
+- RECOMMENDATION: **prepare for the human gate.** Lowest risk — a reasonable first apply if the owner wants to validate the gate procedure on something small.
+- HUMAN_GATE_REQUIRED: **YES** (GRANT only — no definer body to audit).
+
+**4. `20260713210000_multi_source_talent_v1`**
+- CAPABILITY: three tables — `worker_external_profiles` (P6), `talent_source_records` (P5 provenance), `identity_resolution_events` (P7 audit).
+- CURRENT_DEPENDENTS: **split.** `worker_external_profiles` has a live consumer (`lib/worker/external-profiles.ts` + the profile page section rendering `notEnabled`). `talent_source_records` and `identity_resolution_events` have **zero runtime consumers** — guard tests only.
+- PRODUCTION_SCHEMA_STATE: all three **absent**.
+- SUPERSEDED: **NO.**
+- SAFE_TO_APPLY: **YES technically** (3 tables, 3 policies, 8 definer RPCs, 9 GRANTs, an immutability trigger, no data DML, paired rollback) — but it applies twice as much surface as the live dependency needs.
+- SAFE_TO_RETIRE: **NO** for the external-profiles third; **YES** for the other two on today's evidence.
+- CONSEQUENCE_OF_APPLY: profile external links start working; two unused tables also ship, adding audit surface with no reader.
+- CONSEQUENCE_OF_RETIRE: the profile section must be removed too.
+- RECOMMENDATION: **split before gating.** Prepare an `external_profiles_v1` migration carrying only the one table its live UI needs; leave P5/P7 as recorded architecture. Applying all three to serve one is the kind of unused-surface growth this reconciliation is meant to stop.
+- HUMAN_GATE_REQUIRED: **YES** (SECURITY DEFINER + GRANT + trigger).
+
+#### Retire / never-apply
+
+**5. `20260714210000_company_memberships_v1`**
+- SUPERSEDED: **YES** — by `20260817160000` / the applied `company_memberships` (`20260805195716`). Its own header says `DO NOT APPLY THIS FILE, EVER`: its validation trigger would 42501-reject members whose governance lives only in `company_memberships` — production holds one such active manager.
+- SAFE_TO_APPLY: **NO — applying it would break a live manager's session.**
+- SAFE_TO_RETIRE (delete the file): **NO** — `company-architecture-v1.test.ts` pins its bytes. Keep in tree, never apply.
+- RECOMMENDATION: leave exactly as is. HUMAN_GATE_REQUIRED: n/a.
+
+**6. `20260713120000_company_locations_v1`**
+- SUPERSEDED: **YES** — by `work_objects_v1` (applied `20260817204529`); the ledger already records `SUPERSEDED, MUST NOT BE APPLIED`, pinned by `work-objects-projects-v1.test.ts`.
+- CURRENT_DEPENDENTS: none.
+- SAFE_TO_APPLY: **NO** (a second location truth beside `work_objects`).
+- SAFE_TO_RETIRE: **YES**, but the file is pinned by a guard — keep in tree, never apply.
+- RECOMMENDATION: leave as is. HUMAN_GATE_REQUIRED: n/a.
+
+#### Defer — no live dependent
+
+**7. `20260714211000_dashboard_preferences_v1`**
+- CAPABILITY: server-side dashboard card order/hidden preferences.
+- CURRENT_DEPENDENTS: **none.** The configurable card grid it served was deleted in W3; `dashboard-module-registry.ts` still describes 18 routes but has no renderer.
+- SAFE_TO_APPLY: yes technically; SAFE_TO_RETIRE: yes.
+- RECOMMENDATION: **defer.** Revisit only if the card grid returns. Applying it now creates a table with no writer.
+- HUMAN_GATE_REQUIRED: not yet.
+
+**8. `20260717150000_demand_interest_seen_v1`**
+- CAPABILITY: worker-side "the company responded to my interest" seen markers.
+- CURRENT_DEPENDENTS: **none at runtime** — guards only; `spine-signals.ts` explicitly defers the signal.
+- RECOMMENDATION: **defer** until the interest-response signal is built. Applying first is the wrong order.
+- HUMAN_GATE_REQUIRED: not yet.
+
+**9. `20260717130000_open_markets_countries_draft_v1`**
+- CAPABILITY: adds GE / BE / FR / ES / AT / CH as selectable `countries` rows. Data only — no table, no policy, no function, no GRANT.
+- CURRENT_DEPENDENTS: none directly; every country selector reads `countries`.
+- SAFE_TO_APPLY: technically yes (`insert … on conflict do nothing`); SAFE_TO_RETIRE: yes.
+- RECOMMENDATION: **owner market-scope decision, not an engineering one.** The header is explicit that the static gate may call it GREEN and that the DRAFT header is authoritative. Nothing is blocked by it.
+- HUMAN_GATE_REQUIRED: **YES** — as a market-scope decision.
+
+#### Summary
+
+| | migrations |
+|---|---|
+| Prepare for the human gate (live UI blocked) | `agency_clients_v1`, `worker_opportunity_seen_v1`, `journal_profession_templates_v1`, + a **split** `external_profiles_v1` carved out of `multi_source_talent_v1` |
+| Never apply, keep in tree (guard-pinned) | `company_memberships_v1` (20260714210000), `company_locations_v1` |
+| Defer — no live dependent | `dashboard_preferences_v1`, `demand_interest_seen_v1` |
+| Owner market-scope decision | `open_markets_countries_draft_v1` |

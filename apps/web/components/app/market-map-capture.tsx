@@ -158,6 +158,7 @@ export function MarketMapCapture({
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Inline edit: change this location's visibility. */}
                   <select
+                    aria-label={t("preferred.visibility")}
                     className="rounded border border-ink-500 bg-ink-800 px-1 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary"
                     value={p.visibilityLevel}
                     disabled={pending}
@@ -172,7 +173,7 @@ export function MarketMapCapture({
                     type="button"
                     disabled={pending}
                     onClick={() => run(() => setPreferredLocationActiveAction(p.id, !p.active))}
-                    className="ml-auto text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+                    className="ml-auto text-meta font-semibold text-brand-blue hover:text-brand-champagne"
                     data-testid="capture-preferred-toggle"
                   >
                     {p.active ? t("disable") : t("enable")}
@@ -410,7 +411,7 @@ export function MarketMapCapture({
                     type="button"
                     disabled={pending}
                     onClick={() => run(() => setDemandLocationActiveAction(d.id, !d.active))}
-                    className="ml-auto text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+                    className="ml-auto text-meta font-semibold text-brand-blue hover:text-brand-champagne"
                     data-testid="capture-demand-toggle"
                   >
                     {d.active ? t("disable") : t("enable")}
@@ -423,7 +424,7 @@ export function MarketMapCapture({
         ) : (
           <p className="text-xs leading-relaxed text-text-secondary">{t("demand.empty")}</p>
         )}
-        <Link href={"/dashboard/company" as "/dashboard"} className="inline-flex w-fit text-meta font-semibold text-brand-blue hover:text-brand-cyan" data-testid="capture-demand-add">
+        <Link href={"/dashboard/company" as "/dashboard"} className="inline-flex w-fit text-meta font-semibold text-brand-blue hover:text-brand-champagne" data-testid="capture-demand-add">
           {t("demand.addCta")} →
         </Link>
       </div>

@@ -158,19 +158,51 @@ describe("candidate stage is derived at read time — never persisted", () => {
 // rule is: no FOURTH system, and no new caller of the legacy invite RPCs.
 
 describe("no new invitation system", () => {
-  it("invitation-shaped tables are the known three", () => {
+  // STRENGTHENED, never weakened. `invitation_acceptances` (20260917120000,
+  // universal invitation / referral network v1) matches the name shape but is
+  // NOT a fourth invitation system: it is the APPEND-ONLY ACCEPTANCE LEDGER of
+  // the canonical token system — one row per (invitation, person), which is
+  // what a multi-use campaign link structurally needs and what the 1:1
+  // `accepted_by_profile_id` column cannot hold. It carries no token, no
+  // addressee, no target, and no way to be created except by the canonical
+  // accept/decline RPCs. Admitted only under the structural assertions
+  // below, so a real invitation model could never enter through this door.
+  const ACCEPTANCE_LEDGER = "invitation_acceptances";
+
+  it("invitation-shaped tables are the known three + the acceptance ledger", () => {
     expect(
       tablesMatching(/invit/),
       "Closed set. Canonical transport is the token `invitations` system " +
         "(20260712200000_canonical_invitations_v1.sql, lib/invitations/*); " +
         "company_worker_invitations / agency_worker_invitations are legacy " +
         "(read-compatibility only, convergence in train L3). A new invite " +
-        `flow must ride create_invitation_v1. See ${FREEZE_REGISTER} §2.`,
+        `flow must ride create_invitation_v1/v2. See ${FREEZE_REGISTER} §2.`,
     ).toEqual([
       "agency_worker_invitations",
       "company_worker_invitations",
+      ACCEPTANCE_LEDGER,
       "invitations",
     ]);
+  });
+
+  it("the acceptance ledger is a ledger, not an invitation", () => {
+    const sql =
+      MIGRATIONS.find(
+        (m) => m.name === "20260917120000_universal_invitation_referral_network_v1.sql",
+      )?.code ?? "";
+    const ddl = /create table if not exists public\.invitation_acceptances \(([\s\S]*?)\n\);/.exec(sql)?.[1] ?? "";
+    expect(ddl.length, "the ledger DDL must be present").toBeGreaterThan(0);
+    // Every row points at ONE canonical invitation; the ledger has no token,
+    // no addressee and no target of its own — it cannot be an invitation.
+    expect(ddl).toMatch(/invitation_id\s+uuid not null references public\.invitations\(id\)/);
+    for (const forbidden of ["token_hash", "invited_email", "organization_id", "project_id", "target_request_id", "expires_at"]) {
+      expect(ddl, `${ACCEPTANCE_LEDGER} must not carry ${forbidden}`).not.toContain(forbidden);
+    }
+    // Append-only: a SELECT policy and nothing else — no INSERT/UPDATE/DELETE
+    // policy, no UPDATE/DELETE grant.
+    const policies = sql.match(/create policy \S+\s+on public\.invitation_acceptances for (\w+)/g) ?? [];
+    expect(policies.map((p) => p.split(" for ")[1])).toEqual(["select"]);
+    expect(sql).not.toMatch(/grant [^;]*(update|delete)[^;]* on public\.invitation_acceptances/i);
   });
 
   it("legacy invite RPCs gain no new callers", () => {
@@ -311,6 +343,11 @@ describe("no new employment-record model", () => {
       "20260723120000_company_worker_engagements_v1.sql", // respond_booking_request_v3 accept
       "20260802150000_booking_atomic_double_booking_v1.sql", // atomic accept rewrite
       "20260807140000_booking_engagement_org_resolution_v1.sql", // org resolution rewrite
+      // respond_booking_request_v4 — the SAME booking accept, with an explicit
+      // clash acknowledgement and its receipt. Still the booking-provenance
+      // path: the engagement is minted on an accept and nowhere else, and v3
+      // is untouched beside it. RED #4+#5, PREPARED not applied.
+      "20260915180000_subject_contest_and_clash_receipt.sql",
     ]);
     const offenders = MIGRATIONS.filter(
       (m) =>

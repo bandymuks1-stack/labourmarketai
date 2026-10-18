@@ -37,12 +37,15 @@ export default async function WorkAbroadPage({
   return (
     <div className="mx-auto max-w-container px-6 py-14 sm:px-12" id="main-content">
       <header className="max-w-3xl">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-blue">
+        {/* Same eyebrow pill and accent as the other role pages' PageHero (which this
+            page cannot use: it has no header CTA) — one header language across the site. */}
+        <p className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
+          <span className="live-dot" aria-hidden />
           {t("eyebrow")}
         </p>
-        <h1 className="mt-3 font-display text-4xl font-bold tracking-tightest text-text-primary sm:text-5xl">
+        <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] tracking-tightest text-text-primary sm:text-5xl">
           {t("title")}{" "}
-          <span className="text-brand-blue">{t("titleAccent")}</span>
+          <span className="text-gradient-accent">{t("titleAccent")}</span>
         </h1>
         <p className="mt-4 text-sm leading-relaxed text-text-secondary sm:text-base">
           {t("subcopy")}
@@ -98,7 +101,7 @@ export default async function WorkAbroadPage({
           </p>
           <Link
             href="/labour-market"
-            className="mt-4 inline-block font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan"
+            className="mt-4 inline-block font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-champagne"
           >
             {t("directionsCta")} →
           </Link>
@@ -118,7 +121,7 @@ export default async function WorkAbroadPage({
             crosses to the app host from apex (PKCE-safe OAuth origin). */}
         <AuthCtaLink
           relPath={`/${locale}/auth/signup`}
-          className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+          className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-text-on-brand hover:opacity-90"
         >
           {t("ctaProfile")}
         </AuthCtaLink>

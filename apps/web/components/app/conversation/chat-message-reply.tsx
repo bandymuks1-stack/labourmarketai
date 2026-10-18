@@ -111,7 +111,7 @@ function ThreadReply({
               onClick={send}
               disabled={pending}
               data-testid={`chat-reply-confirm-${thread.conversationId}`}
-              className="min-h-11 rounded-full bg-brand-blue px-4 text-support font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="min-h-11 rounded-full bg-brand-blue px-4 text-support font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               {pending ? t("sending") : t("confirmSend")}
             </button>

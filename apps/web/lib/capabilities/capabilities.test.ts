@@ -1,5 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
+// The one-time spend (lib/security/confirmation-spend) is proven on its own;
+// here every genuine token is spendable once.
+vi.mock("@/lib/security/confirmation-spend", () => ({
+  spendConfirmation: async () => "spent",
+  spendConfirmationForRequest: async () => "spent",
+}));
+import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
+
 vi.mock("@/lib/env", () => ({
   env: {
     CONVERSATION_TOKEN_SECRET: "unit-test-secret-with-enough-length",
@@ -26,6 +34,7 @@ const coreWrite = vi.fn(async () => ({
 }));
 vi.mock("@/lib/journal/journal-write-core", () => ({
   createJournalEntryCore: (...args: unknown[]) => coreWrite(...(args as [])),
+  projectsToChooseFrom: async () => null,
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -75,6 +84,7 @@ import {
   runCapability,
 } from "./registry";
 import { getConversationAction } from "@/lib/conversation/action-registry";
+import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES, OVERWRITES, SENDS_EMAIL } from "./conversation-action-bridge";
 import type { CapabilityCaller } from "./contract";
 
 /**
@@ -136,12 +146,33 @@ const PROFILE_ROW = {
   active_role: "worker",
 };
 
+/**
+ * Domain actions that honestly declare `destructiveHint` (reviewed list): a
+ * one-step write that REPLACES a stored value, or a confirmed delete.
+ */
+const DOMAIN_DESTRUCTIVE: readonly string[] = [
+  "organization.description.set",
+  "service_offering.update",
+  "marketplace_listing.update",
+  "booking.deadline_set",
+  "notification.mark_read",
+  "notification.mark_all_read",
+  "notification.preference_set",
+  "service_offering.delete_confirm",
+  "marketplace_listing.delete_confirm",
+  "proposal.delete_confirm",
+  "contract.delete_confirm",
+];
+
 describe("the registry itself", () => {
   it("exposes the reads AND the draft→confirm pair (write extraction landed 2026-08-29)", () => {
     expect(exposedCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
       "living_cv.skills.get",
       "journal.list",
+      // "Kiek valandų dirbau?" for an authorized assistant (2026-09-13,
+      // #1689 lane B) — the section's own figures over the ONE reader.
+      "journal.work_intelligence.get",
       "journal.create_draft",
       "journal.confirm",
       "interest.express_draft",
@@ -150,12 +181,265 @@ describe("the registry itself", () => {
       "work_card.save_confirm",
       "demand.create_draft",
       "demand.create_confirm",
+      // The READ half of the context pair (2026-09-13). `context.switch`
+      // could already be MADE to list the options by handing it a value it
+      // cannot resolve — but that is a write capability (`readOnlyHint:
+      // false`), and a client that only wants to SHOW a person which
+      // workspaces they hold should not have to propose a write to find out.
+      // Same reader, same labels, no new path.
+      "context.list",
       "context.switch",
+      // "Kas laisvas kitą savaitę?" (2026-09-07) — the first of the owner's
+      // company questions to become an authorized action rather than a
+      // chat-only answer, over the SAME core the chat calls.
+      "workforce.availability",
+      // Employer operations (2026-09-30) — demand read, roster, projects,
+      // assignments (draft → confirm) and the review queue, over the SAME
+      // cores/RPCs the web company surfaces call.
+      "demand.list",
+      "demand.close_draft",
+      "demand.close_confirm",
+      "demand.reopen_draft",
+      "demand.reopen_confirm",
+      "roster.list",
+      "projects.list",
+      "project.create_draft",
+      "project.create_confirm",
+      "project.status_set_draft",
+      "project.status_set_confirm",
+      "assignment.create_draft",
+      "assignment.create_confirm",
+      "assignment.end_draft",
+      "assignment.end_confirm",
+      "assignment.keep_draft",
+      "assignment.keep_confirm",
+      "journal.review_queue.get",
+      "counterparty_review.queue.get",
+      "counterparty_review.entry.get",
+      "counterparty_review.decide_draft",
+      "counterparty_review.decide_confirm",
+      "counterparty_review.submit_draft",
+      "counterparty_review.submit_confirm",
+      // WRK-6 — a team assigned as ONE relationship, draft → confirm over the
+      // SAME core the web project page uses.
+      "team_assignment.create_draft",
+      "team_assignment.create_confirm",
+      "team_assignment.replace_draft",
+      "team_assignment.replace_confirm",
+      "team_assignment.end_draft",
+      "team_assignment.end_confirm",
+      // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
+      // scouting cores as the web page; the activation queue names facts.
+      "candidate.search",
+      "shortlist.get",
+      "shortlist.add_draft",
+      "shortlist.add_confirm",
+      "shortlist.remove_draft",
+      "shortlist.remove_confirm",
+      "worker.activation_queue.get",
+      "marketplace.funnel.get",
+      // In-app messaging (2026-09-30) over the shared communication core.
+      "conversation.list",
+      "conversation.get",
+      "message.send_draft",
+      "message.send_confirm",
+      // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
+      "company.ingest.preview",
+      "company.ingest.confirm",
+      // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
+      // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
+      // and in order on purpose: exposing a capability is a reviewed product
+      // decision, so a new one must be added HERE, deliberately, to pass.
+      "evidence.organization.resolve",
+      "evidence.people.list",
+      "evidence.person.create",
+      "evidence.import.create_session",
+      "evidence.import.submit_rows",
+      "evidence.import.stage_file",
+      "evidence.import.preview",
+      "evidence.import.resolve_row",
+      "evidence.import.resolve_label",
+      "evidence.import.resolve_time_semantics",
+      "evidence.import.commit",
+      "evidence.records.list",
+      "evidence.record.attest_draft",
+      "evidence.record.attest_confirm",
+      "evidence.import.withdraw_draft",
+      "evidence.import.withdraw_confirm",
+      "evidence.record.correct_draft",
+      "evidence.record.correct_confirm",
+      "evidence.session.correct_date_provenance_draft",
+      "evidence.session.correct_date_provenance_confirm",
+      // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
+      // same architecture, over `lib/organization-people/ingest-service.ts`,
+      // which the web import panel calls too. Look, answer, commit: the
+      // preview writes nothing and mints the one-time token the commit needs.
+      "people.ingest.preview",
+      "people.ingest.commit",
+      // THE CONVERSATION-ACTION BRIDGE (2026-10-13): the web chat's executable
+      // actions that had no capability, through the ONE dispatcher. A
+      // reversible_write is one tool; an important/strong write is a
+      // prepare -> confirm pair. Order = the conversation registry's order.
+      "worker.add-work-history",
+      "worker.add-document",
+      "worker.add-language",
+      "worker.add-education",
+      "worker.add-achievement",
+      "worker.save-preferences",
+      "worker.respond-booking.prepare",
+      "worker.respond-booking.confirm",
+      "worker.respond-invitation.prepare",
+      "worker.respond-invitation.confirm",
+      "company.confirm-need.prepare",
+      "company.confirm-need.confirm",
+      "company.contact-worker.prepare",
+      "company.contact-worker.confirm",
+      "company.propose-booking.prepare",
+      "company.propose-booking.confirm",
+      "company.move-worker.prepare",
+      "company.move-worker.confirm",
+      "company.invite-worker.prepare",
+      "company.invite-worker.confirm",
+      "company.rename-organization.prepare",
+      "company.rename-organization.confirm",
+      "company.respond-offer.prepare",
+      "company.respond-offer.confirm",
+      "company.respond-team-offer.prepare",
+      "company.respond-team-offer.confirm",
+      "company.accept-connection.prepare",
+      "company.accept-connection.confirm",
+      "company.decline-connection.prepare",
+      "company.decline-connection.confirm",
+      "company.share-request.prepare",
+      "company.share-request.confirm",
+      "company.create-task",
+      "company.update-stage-status",
+      "company.update-task-status",
+      "company.set-readiness-item",
+      "company.seed-readiness-checklist",
+      "company.request-readiness.prepare",
+      "company.request-readiness.confirm",
+      "company.confirm-work.prepare",
+      "company.confirm-work.confirm",
+      "company.enable-journal-review",
+      "company.create-programme.prepare",
+      "company.create-programme.confirm",
+      "company.create-cohort.prepare",
+      "company.create-cohort.confirm",
+      "company.assign-learner.prepare",
+      "company.assign-learner.confirm",
+      "company.invite-learner.prepare",
+      "company.invite-learner.confirm",
+      "agency.invite-client.prepare",
+      "agency.invite-client.confirm",
+      "agency.propose-candidate.prepare",
+      "agency.propose-candidate.confirm",
+      "engagement.end.prepare",
+      "engagement.end.confirm",
+      // WORKSPACE READS (2026-10-13): what the web chat already answers, over
+      // the same loaders (workspace-read-capabilities.ts).
+      "calendar.agenda.get",
+      "calendar.conflicts.get",
+      "capacity.available.get",
+      "organization.today.get",
+      "tasks.open.list",
+      "project.stages.list",
+      "project.risk.get",
+      "project.readiness.get",
+      "project.move.options",
+      "project.move.what_if",
+      "invitations.list",
+      "agency.clients.get",
+      "client.agency_connections.get",
+      "client.agency_offers.get",
+      "education.workspace.get",
+      "worker.projects.list",
+      "worker.engagements.list",
+      "worker.documents.gap",
+      "cv.state.get",
+      "work.find",
+      "opportunities.saved.list",
+      "jobs.new.list",
+      // DOMAIN ACTIONS (2026-10-13): the web's typed canonical actions no earlier
+      // capability covered (domain-action-capabilities.ts).
+      "organization.companies.list",
+      "organization.setup_draft",
+      "organization.setup_confirm",
+      "organization.description.set",
+      "organization.capabilities.get",
+      "organization.capabilities.declare_draft",
+      "organization.capabilities.declare_confirm",
+      "organization.public_profile.get",
+      "organization.public_profile.set_draft",
+      "organization.public_profile.set_confirm",
+      "service_offering.list_own",
+      "service_offering.discover",
+      "service_offering.create",
+      "service_offering.update",
+      "service_offering.status_set_draft",
+      "service_offering.status_set_confirm",
+      "service_offering.delete_draft",
+      "service_offering.delete_confirm",
+      "service_request.outgoing.list",
+      "service_request.incoming.list",
+      "service_request.create_draft",
+      "service_request.create_confirm",
+      "service_request.respond_draft",
+      "service_request.respond_confirm",
+      "service_request.withdraw_draft",
+      "service_request.withdraw_confirm",
+      "marketplace_listing.list_own",
+      "marketplace_listing.discover",
+      "marketplace_listing.create",
+      "marketplace_listing.update",
+      "marketplace_listing.status_set_draft",
+      "marketplace_listing.status_set_confirm",
+      "marketplace_listing.delete_draft",
+      "marketplace_listing.delete_confirm",
+      "commercial.get",
+      "proposal.create",
+      "proposal.status_set_draft",
+      "proposal.status_set_confirm",
+      "proposal.delete_draft",
+      "proposal.delete_confirm",
+      "contract.create",
+      "contract.status_set_draft",
+      "contract.status_set_confirm",
+      "contract.delete_draft",
+      "contract.delete_confirm",
+      "booking.list",
+      "booking.withdraw_draft",
+      "booking.withdraw_confirm",
+      "booking.reschedule_draft",
+      "booking.reschedule_confirm",
+      "booking.deadline_set",
+      "notification.list",
+      "notification.mark_read",
+      "notification.mark_all_read",
+      "notification.preference_set",
+      "absence.mine.list",
+      "absence.pending_review.list",
+      "leave.balances.get",
+      "absence.request_draft",
+      "absence.request_confirm",
+      "absence.review_draft",
+      "absence.review_confirm",
+      "absence.cancel_draft",
+      "absence.cancel_confirm",
+      "journal.review_draft",
+      "journal.review_confirm",
+      "reports.get",
+      "timesheets.overview.get",
+      "finance.records.list",
+      "cv.verified.get",
     ]);
     expect(listCapabilities().map((c) => c.id)).toEqual([
       "profile.get",
       "living_cv.skills.get",
       "journal.list",
+      // "Kiek valandų dirbau?" for an authorized assistant (2026-09-13,
+      // #1689 lane B) — the section's own figures over the ONE reader.
+      "journal.work_intelligence.get",
       "journal.create_draft",
       "journal.confirm",
       "interest.express_draft",
@@ -164,16 +448,266 @@ describe("the registry itself", () => {
       "work_card.save_confirm",
       "demand.create_draft",
       "demand.create_confirm",
+      "context.list",
       "context.switch",
+      // "Kas laisvas kitą savaitę?" (2026-09-07) — the first of the owner's
+      // company questions to become an authorized action rather than a
+      // chat-only answer, over the SAME core the chat calls.
+      "workforce.availability",
+      // Employer operations (2026-09-30) — demand read, roster, projects,
+      // assignments (draft → confirm) and the review queue, over the SAME
+      // cores/RPCs the web company surfaces call.
+      "demand.list",
+      "demand.close_draft",
+      "demand.close_confirm",
+      "demand.reopen_draft",
+      "demand.reopen_confirm",
+      "roster.list",
+      "projects.list",
+      "project.create_draft",
+      "project.create_confirm",
+      "project.status_set_draft",
+      "project.status_set_confirm",
+      "assignment.create_draft",
+      "assignment.create_confirm",
+      "assignment.end_draft",
+      "assignment.end_confirm",
+      "assignment.keep_draft",
+      "assignment.keep_confirm",
+      "journal.review_queue.get",
+      "counterparty_review.queue.get",
+      "counterparty_review.entry.get",
+      "counterparty_review.decide_draft",
+      "counterparty_review.decide_confirm",
+      "counterparty_review.submit_draft",
+      "counterparty_review.submit_confirm",
+      // WRK-6 — a team assigned as ONE relationship, draft → confirm over the
+      // SAME core the web project page uses.
+      "team_assignment.create_draft",
+      "team_assignment.create_confirm",
+      "team_assignment.replace_draft",
+      "team_assignment.replace_confirm",
+      "team_assignment.end_draft",
+      "team_assignment.end_confirm",
+      // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
+      // scouting cores as the web page; the activation queue names facts.
+      "candidate.search",
+      "shortlist.get",
+      "shortlist.add_draft",
+      "shortlist.add_confirm",
+      "shortlist.remove_draft",
+      "shortlist.remove_confirm",
+      "worker.activation_queue.get",
+      "marketplace.funnel.get",
+      // In-app messaging (2026-09-30) over the shared communication core.
+      "conversation.list",
+      "conversation.get",
+      "message.send_draft",
+      "message.send_confirm",
+      // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
+      "company.ingest.preview",
+      "company.ingest.confirm",
+      // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
+      // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
+      // and in order on purpose: exposing a capability is a reviewed product
+      // decision, so a new one must be added HERE, deliberately, to pass.
+      "evidence.organization.resolve",
+      "evidence.people.list",
+      "evidence.person.create",
+      "evidence.import.create_session",
+      "evidence.import.submit_rows",
+      "evidence.import.stage_file",
+      "evidence.import.preview",
+      "evidence.import.resolve_row",
+      "evidence.import.resolve_label",
+      "evidence.import.resolve_time_semantics",
+      "evidence.import.commit",
+      "evidence.records.list",
+      "evidence.record.attest_draft",
+      "evidence.record.attest_confirm",
+      "evidence.import.withdraw_draft",
+      "evidence.import.withdraw_confirm",
+      "evidence.record.correct_draft",
+      "evidence.record.correct_confirm",
+      "evidence.session.correct_date_provenance_draft",
+      "evidence.session.correct_date_provenance_confirm",
+      // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
+      // same architecture, over `lib/organization-people/ingest-service.ts`,
+      // which the web import panel calls too. Look, answer, commit: the
+      // preview writes nothing and mints the one-time token the commit needs.
+      "people.ingest.preview",
+      "people.ingest.commit",
+      // THE CONVERSATION-ACTION BRIDGE (2026-10-13): the web chat's executable
+      // actions that had no capability, through the ONE dispatcher. A
+      // reversible_write is one tool; an important/strong write is a
+      // prepare -> confirm pair. Order = the conversation registry's order.
+      "worker.add-work-history",
+      "worker.add-document",
+      "worker.add-language",
+      "worker.add-education",
+      "worker.add-achievement",
+      "worker.save-preferences",
+      "worker.respond-booking.prepare",
+      "worker.respond-booking.confirm",
+      "worker.respond-invitation.prepare",
+      "worker.respond-invitation.confirm",
+      "company.confirm-need.prepare",
+      "company.confirm-need.confirm",
+      "company.contact-worker.prepare",
+      "company.contact-worker.confirm",
+      "company.propose-booking.prepare",
+      "company.propose-booking.confirm",
+      "company.move-worker.prepare",
+      "company.move-worker.confirm",
+      "company.invite-worker.prepare",
+      "company.invite-worker.confirm",
+      "company.rename-organization.prepare",
+      "company.rename-organization.confirm",
+      "company.respond-offer.prepare",
+      "company.respond-offer.confirm",
+      "company.respond-team-offer.prepare",
+      "company.respond-team-offer.confirm",
+      "company.accept-connection.prepare",
+      "company.accept-connection.confirm",
+      "company.decline-connection.prepare",
+      "company.decline-connection.confirm",
+      "company.share-request.prepare",
+      "company.share-request.confirm",
+      "company.create-task",
+      "company.update-stage-status",
+      "company.update-task-status",
+      "company.set-readiness-item",
+      "company.seed-readiness-checklist",
+      "company.request-readiness.prepare",
+      "company.request-readiness.confirm",
+      "company.confirm-work.prepare",
+      "company.confirm-work.confirm",
+      "company.enable-journal-review",
+      "company.create-programme.prepare",
+      "company.create-programme.confirm",
+      "company.create-cohort.prepare",
+      "company.create-cohort.confirm",
+      "company.assign-learner.prepare",
+      "company.assign-learner.confirm",
+      "company.invite-learner.prepare",
+      "company.invite-learner.confirm",
+      "agency.invite-client.prepare",
+      "agency.invite-client.confirm",
+      "agency.propose-candidate.prepare",
+      "agency.propose-candidate.confirm",
+      "engagement.end.prepare",
+      "engagement.end.confirm",
+      // WORKSPACE READS (2026-10-13): what the web chat already answers, over
+      // the same loaders (workspace-read-capabilities.ts).
+      "calendar.agenda.get",
+      "calendar.conflicts.get",
+      "capacity.available.get",
+      "organization.today.get",
+      "tasks.open.list",
+      "project.stages.list",
+      "project.risk.get",
+      "project.readiness.get",
+      "project.move.options",
+      "project.move.what_if",
+      "invitations.list",
+      "agency.clients.get",
+      "client.agency_connections.get",
+      "client.agency_offers.get",
+      "education.workspace.get",
+      "worker.projects.list",
+      "worker.engagements.list",
+      "worker.documents.gap",
+      "cv.state.get",
+      "work.find",
+      "opportunities.saved.list",
+      "jobs.new.list",
+      // DOMAIN ACTIONS (2026-10-13): the web's typed canonical actions no earlier
+      // capability covered (domain-action-capabilities.ts).
+      "organization.companies.list",
+      "organization.setup_draft",
+      "organization.setup_confirm",
+      "organization.description.set",
+      "organization.capabilities.get",
+      "organization.capabilities.declare_draft",
+      "organization.capabilities.declare_confirm",
+      "organization.public_profile.get",
+      "organization.public_profile.set_draft",
+      "organization.public_profile.set_confirm",
+      "service_offering.list_own",
+      "service_offering.discover",
+      "service_offering.create",
+      "service_offering.update",
+      "service_offering.status_set_draft",
+      "service_offering.status_set_confirm",
+      "service_offering.delete_draft",
+      "service_offering.delete_confirm",
+      "service_request.outgoing.list",
+      "service_request.incoming.list",
+      "service_request.create_draft",
+      "service_request.create_confirm",
+      "service_request.respond_draft",
+      "service_request.respond_confirm",
+      "service_request.withdraw_draft",
+      "service_request.withdraw_confirm",
+      "marketplace_listing.list_own",
+      "marketplace_listing.discover",
+      "marketplace_listing.create",
+      "marketplace_listing.update",
+      "marketplace_listing.status_set_draft",
+      "marketplace_listing.status_set_confirm",
+      "marketplace_listing.delete_draft",
+      "marketplace_listing.delete_confirm",
+      "commercial.get",
+      "proposal.create",
+      "proposal.status_set_draft",
+      "proposal.status_set_confirm",
+      "proposal.delete_draft",
+      "proposal.delete_confirm",
+      "contract.create",
+      "contract.status_set_draft",
+      "contract.status_set_confirm",
+      "contract.delete_draft",
+      "contract.delete_confirm",
+      "booking.list",
+      "booking.withdraw_draft",
+      "booking.withdraw_confirm",
+      "booking.reschedule_draft",
+      "booking.reschedule_confirm",
+      "booking.deadline_set",
+      "notification.list",
+      "notification.mark_read",
+      "notification.mark_all_read",
+      "notification.preference_set",
+      "absence.mine.list",
+      "absence.pending_review.list",
+      "leave.balances.get",
+      "absence.request_draft",
+      "absence.request_confirm",
+      "absence.review_draft",
+      "absence.review_confirm",
+      "absence.cancel_draft",
+      "absence.cancel_confirm",
+      "journal.review_draft",
+      "journal.review_confirm",
+      "reports.get",
+      "timesheets.overview.get",
+      "finance.records.list",
+      "cv.verified.get",
     ]);
   });
 
   it("G4 bridge: a capability that names a conversation action matches its confirmation contract", () => {
-    const bridged = listCapabilities().filter((c) => c.conversationActionId);
+    const bridgeIds = new Set(CONVERSATION_ACTION_BRIDGE_CAPABILITIES.map((c) => c.id));
+    const bridged = listCapabilities().filter((c) => c.conversationActionId && !bridgeIds.has(c.id));
     // Wagon 1 bridged express-interest; wagon 2 the work card; wagon 3 demand.
+    // (The generic conversation-action bridge has its own test below.)
     expect(bridged.map((c) => c.id).sort()).toEqual([
+      "demand.close_confirm",
+      "demand.close_draft",
       "demand.create_confirm",
       "demand.create_draft",
+      "demand.reopen_confirm",
+      "demand.reopen_draft",
       "interest.express_confirm",
       "interest.express_draft",
       "work_card.save_confirm",
@@ -203,16 +737,26 @@ describe("the registry itself", () => {
         "openWorldHint",
         "readOnlyHint",
       ]);
-      // Nothing in the registry reaches outside the product's own domain.
-      expect(c.annotations.openWorldHint).toBe(false);
-      // Nothing in the registry destroys data (journal writes are append-only).
-      expect(c.annotations.destructiveHint).toBe(false);
+      // Nothing in the registry reaches outside the product's own domain —
+      // except a bridged web action that sends an e-mail invitation, which
+      // says so (reviewed list `SENDS_EMAIL`).
+      const action = c.conversationActionId;
+      expect(c.annotations.openWorldHint).toBe(
+        Boolean(action && SENDS_EMAIL.has(action) && c.kind !== "draft"),
+      );
+      // Nothing in the registry destroys data (journal writes are append-only)
+      // — except a bridged web action that overwrites a stored value or ends a
+      // relationship for good, which says so (reviewed list `OVERWRITES`).
+      expect(c.annotations.destructiveHint, c.id).toBe(
+        Boolean(action && OVERWRITES.has(action) && c.kind !== "draft") || DOMAIN_DESTRUCTIVE.includes(c.id),
+      );
     }
     const byId = Object.fromEntries(listCapabilities().map((c) => [c.id, c]));
     // Reads AND the write-nothing draft are read-only; the confirm is not.
     expect(byId["profile.get"].annotations.readOnlyHint).toBe(true);
     expect(byId["living_cv.skills.get"].annotations.readOnlyHint).toBe(true);
     expect(byId["journal.list"].annotations.readOnlyHint).toBe(true);
+    expect(byId["journal.work_intelligence.get"].annotations.readOnlyHint).toBe(true);
     expect(byId["journal.create_draft"].annotations.readOnlyHint).toBe(true);
     expect(byId["journal.confirm"].annotations.readOnlyHint).toBe(false);
     // The one-time token makes a duplicate confirm a no-op, not a second row.
@@ -253,6 +797,7 @@ describe("profile.get", () => {
       caller({
         profiles: { data: PROFILE_ROW, error: null },
         workers: { data: { id: "worker-1" }, error: null },
+        profile_roles: { data: [{ role: "worker" }, { role: "company" }], error: null },
       }),
       {},
     );
@@ -269,7 +814,50 @@ describe("profile.get", () => {
           activeRole: "worker",
         },
         worker: { status: "exists", workerId: "worker-1" },
+        // The PLURAL of activeRole, as recorded. A person is one person with
+        // several roles at once (I-1) — `activeRole` is which one they are in
+        // right now, never the set they hold.
+        heldRoles: { status: "known", roles: ["worker", "company"] },
       },
+    });
+  });
+
+  it("a failed ROLES read is 'unavailable', never 'holds no roles'", async () => {
+    // The live defect this mirrors (web shell, 2026-08-28): a transient
+    // PostgREST failure read as an empty list stripped every role from the
+    // authenticated shell. A person who manages three companies was shown as
+    // holding nothing. The profile itself still answers — one signal failing
+    // does not blank the others.
+    const r = await runCapability(
+      "profile.get",
+      caller({
+        profiles: { data: PROFILE_ROW, error: null },
+        workers: { data: { id: "worker-1" }, error: null },
+        profile_roles: { data: null, error: { message: "pooler hiccup" } },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({
+      ok: true,
+      data: { heldRoles: { status: "unavailable" } },
+    });
+    expect((r as unknown as { data: { heldRoles: Record<string, unknown> } }).data.heldRoles)
+      .not.toHaveProperty("roles");
+  });
+
+  it("holding nothing is reported as a KNOWN empty set, not as unavailable", async () => {
+    const r = await runCapability(
+      "profile.get",
+      caller({
+        profiles: { data: PROFILE_ROW, error: null },
+        workers: { data: null, error: null },
+        profile_roles: { data: [], error: null },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({
+      ok: true,
+      data: { heldRoles: { status: "known", roles: [] } },
     });
   });
 
@@ -445,6 +1033,20 @@ describe("interest draft → confirm (G4 tail wagon 1)", () => {
     worker_languages: { data: [], error: null },
     demand_interest_signals: { data: signal, error: null },
     "rpc:list_open_demand_for_workers": { data: [DEMAND_ROW], error: null },
+    // The post-write owner resolution (2026-09-17): the gated RPC answers
+    // under the caller's session; the emitter is handed its result.
+    "rpc:contact_demand_owner_v1": {
+      data: [
+        {
+          owner_profile_id: "00000000-0000-4000-8000-0000000000bb",
+          demand_title: "Plytelių klojėjas",
+          has_own_signal: true,
+          demand_open: true,
+          company_verified: true,
+        },
+      ],
+      error: null,
+    },
     ...overrides,
   });
 
@@ -552,9 +1154,16 @@ describe("interest draft → confirm (G4 tail wagon 1)", () => {
       ok: true,
       data: { status: "interested", structuredDestination: "/dashboard/opportunities" },
     });
-    // The notification is keyed on the REAL signal row id from the upsert.
+    // The notification is keyed on the REAL signal row id from the upsert,
+    // and the recipient is the owner the gated RPC revealed — never an id the
+    // client supplied.
     expect(interestEmit).toHaveBeenCalledTimes(1);
-    expect(interestEmit).toHaveBeenCalledWith("sig-1");
+    expect(interestEmit).toHaveBeenCalledWith({
+      signalId: "sig-1",
+      ownerProfileId: "00000000-0000-4000-8000-0000000000bb",
+      actorProfileId: "00000000-0000-4000-8000-0000000000aa",
+      country: DEMAND_ROW.country ?? null,
+    });
   });
 
   it("a TAMPERED note is rejected at the token, before any write", async () => {
@@ -749,6 +1358,7 @@ describe("journal draft → confirm", () => {
         siteName: "Vilnius A1",
         notes: DRAFT.notes,
         engagementContextId: DRAFT.engagementContextId,
+        projectId: null,
         // The named context — the human sees WHERE the entry lands before
         // confirming.
         engagementLabel: "Dev Statyba",
@@ -941,14 +1551,22 @@ describe("journal draft → confirm", () => {
     ];
     expect(deps.userId).toBe("00000000-0000-4000-8000-0000000000aa");
     // Byte-for-byte the mapping worker-executors.ts "worker.log-work" uses —
-    // one write contract, no ChatGPT-specific fork.
+    // one write contract, no ChatGPT-specific fork. Since #1689 that mapping
+    // also carries the time the person stated ("6 valandos") as the same
+    // fragment rows the composer would persist (intake-work-time), so the
+    // canonical work-time rule sees it — with machine-extraction provenance.
     expect(Object.fromEntries(formData.entries())).toEqual({
       locale: "lt",
       engagement_context_id: DRAFT.engagementContextId,
       notes: DRAFT.notes,
       work_date: DRAFT.workDate,
       site_name: DRAFT.siteName,
+      project_id: "",
+      ...intakeWorkTimeFields(DRAFT.notes, DRAFT.workDate),
     });
+    const fragments = JSON.parse(String(formData.get("fragments_json")));
+    expect(fragments).toHaveLength(1);
+    expect(fragments[0]).toMatchObject({ timeValue: 6, timeUnit: "hours", source: "ai_extracted", selected: false });
   });
 
   it("a write failure maps through with its real code — never invented success", async () => {
@@ -1226,7 +1844,7 @@ describe("demand draft → confirm (G4 wagon 3)", () => {
     }
     expect(demandSubmit).toHaveBeenCalledTimes(1);
     const [, employerArg, intentArg, fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
-    expect(employerArg).toEqual({ organizationId: "org-1" });
+    expect(employerArg).toMatchObject({ organizationId: "org-1" });
     expect(intentArg).toBe("hire_workers");
     expect(fieldsArg).toMatchObject({
       description: DRAFT.description,

@@ -1,0 +1,53 @@
+-- @human-gate-approved
+-- The marker above is the human-gate ACKNOWLEDGEMENT, not an approval: NO
+-- OWNER APPROVAL EXISTS FOR THIS FILE YET. The PR is draft + needs-human-gate
+-- (privilege change on SECURITY DEFINER functions) and this migration is NOT
+-- applied to production.
+-- ============================================================================
+-- 20261003151500_invitation_v1_doors_not_api_callable_v1
+--
+-- WHY (convergence audit F3, P2). accept_invitation_v1, accept_invitation_by_id_v1
+-- and decline_invitation_v1 are a FULL PARALLEL IMPLEMENTATION of the v2 doors
+-- (20260917120000). v1 has no multi-use ledger (invitation_acceptances), no
+-- max_uses, no demand-target arm, and sets status = 'accepted' after the FIRST
+-- accept (or 'declined' on the first decline). So on a shareable multi-use
+-- campaign link ONE authenticated user calling a v1 door directly through
+-- PostgREST exhausts (or kills) the link for everybody: v2 then answers
+-- exhausted / already_accepted / declined to every other holder.
+--
+-- WHAT. EXECUTE on the three v1 doors is revoked from public, anon and
+-- authenticated. The product no longer reaches them:
+--   * the app calls the v2 doors first and falls back to v1 ONLY when v2 is
+--     ABSENT (PGRST202 / 42883) -- v2 exists wherever this migration can run,
+--     because it is ordered after 20260917120000; the fallback never fires on
+--     a permission error (apps/web/lib/invitations/actions.ts);
+--   * callers found (git grep over apps/web, scripts, supabase, docs):
+--       accept_invitation_v1        actions.ts acceptInvitationAction fallback only
+--       accept_invitation_by_id_v1  actions.ts acceptInvitationByIdAction fallback only
+--       decline_invitation_v1       actions.ts declineInvitationAction fallback only
+--     no edge function, no script, no mobile client, no e2e spec calls them.
+--
+-- NOT revoked, on purpose (legitimate callers / read-only):
+--   create_invitation_v1       called by actions.ts + e2e (distinct signature,
+--                              not superseded by v2's wider one in the app)
+--   get_invitation_preview_v1  read-only; v2 is a superset but the page
+--                              fallback and its guards name it; no write path
+--
+-- The function BODIES are not changed here (20261003151100 already binds them
+-- to the invited e-mail, so a re-grant by mistake would still not be a
+-- stranger-capability). Revoking makes them unreachable through the API; the
+-- v2 doors are untouched.
+--
+-- COMPOSITION / ORDER. Independent of 20261003151000 (#2152) and
+-- 20261003151100 (#2155): apply after both so the final ACL is this one
+-- (151100 restates the pre-existing authenticated grant on accept_invitation_v1
+-- and decline_invitation_v1 as a production-ACL no-op; this migration then
+-- revokes it). Applied before them it would simply be re-granted by 151100's
+-- restatement -- hence: AFTER 151100.
+--
+-- Rollback: supabase/rollbacks/20261003151500_invitation_v1_doors_not_api_callable_v1.down.sql
+-- ============================================================================
+
+revoke all on function public.accept_invitation_v1(text) from public, anon, authenticated;
+revoke all on function public.accept_invitation_by_id_v1(uuid) from public, anon, authenticated;
+revoke all on function public.decline_invitation_v1(text) from public, anon, authenticated;

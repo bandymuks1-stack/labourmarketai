@@ -166,7 +166,14 @@ describe("company switcher wiring", () => {
 
   it("active org resolution is membership-validated and 42703-degrading (server-side, never localStorage)", () => {
     const src = read("lib/company/active-organization.ts");
-    expect(src).toMatch(/resolveActiveOrganizationId/);
+    // RE-ANCHORED (owner program 2026-09-23): the owned-only reader no longer
+    // resolves on its own (`resolveActiveOrganizationId` over owned orgs, DB
+    // pointer first) — it is a projection of the ONE membership-validated
+    // workspace resolution, which runs `resolveActiveWorkspaceId` under the
+    // one pointer rule. Membership validation is unchanged; it simply happens
+    // in one place.
+    expect(src).toMatch(/resolveActiveWorkspaceId\(/);
+    expect(src).toMatch(/pickStoredWorkspacePointer\(/);
     expect(src).toMatch(/42703/);
     // Usage form only — prose in comments may NAME localStorage to ban it.
     expect(src).not.toMatch(/localStorage\.(get|set|remove)Item|window\.localStorage/);
@@ -207,28 +214,29 @@ describe("company overview decisions strip", () => {
     expect(page).toMatch(/reviewPendingCount/);
     // Count-gated: zero pending renders nothing (no fake urgency).
     expect(page).toMatch(/\.filter\(\(e\) => e\.count > 0\)/);
-    expect(page).toMatch(/decisionEntries\.length === 0\) return null/);
+    expect(page).toMatch(/decisionEntries\.length > 0 \?/);
   });
 
   it("every decision chip links a real destination", () => {
     expect(page).toMatch(/dashboard\/inbox/);
-    expect(page).toMatch(/#company-invitations/);
-    expect(page).toMatch(/#company-claims/);
-    expect(page).toMatch(/id="company-claims"/);
+    expect(page).toMatch(/dashboard\/company\/people#company-invitations/);
+    expect(page).toMatch(/dashboard\/company\/needs#company-claims/);
+    // The claims anchor lives on the Needs door (IA 2026-09-16).
+    expect(read("app/[locale]/dashboard/company/needs/page.tsx")).toMatch(/id="company-claims"/);
   });
 });
 
 // ── 7. i18n keys exist in every active locale ───────────────────────────────
 
 describe("company/account i18n keys (lt/en/ru/nl/de)", () => {
-  const locales = ["lt", "en", "ru", "nl", "de"] as const;
+  const locales = ["lt", "en", "ru", "nl", "de", "pl"] as const;
   for (const locale of locales) {
     it(`${locale}: companySwitcher + roleDashboards.company.decisions keys exist and are translated`, () => {
       const m = JSON.parse(read(`messages/${locale}.json`));
       expect(m.companySwitcher?.heading, `${locale} companySwitcher.heading`).toBeTypeOf("string");
       expect(m.companySwitcher?.note, `${locale} companySwitcher.note`).toBeTypeOf("string");
       const d = m.roleDashboards?.company?.decisions;
-      for (const key of ["title", "review", "invitations", "claims"]) {
+      for (const key of ["title", "review", "reviewOff", "invitations", "claims"]) {
         expect(d?.[key], `${locale} decisions.${key}`).toBeTypeOf("string");
         expect(d?.[key]).not.toMatch(/^\[EN\]/);
       }

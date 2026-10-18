@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import { useDialogFocus } from "@/lib/hooks/use-dialog-focus";
 import { usePathname } from "@/lib/i18n/navigation";
 import { submitLanguageFeedback } from "@/lib/language-feedback/actions";
 import { recordEvent } from "@/lib/telemetry/task";
@@ -59,6 +60,11 @@ export function LanguageFeedbackWidget() {
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeDialog = useCallback(() => setOpen(false), []);
+  // Modal focus contract: focus lands on the comment field, Tab stays inside
+  // the card, Escape closes, the opener gets focus back.
+  useDialogFocus(open, closeDialog, panelRef, textareaRef);
 
   // The account menu's "report a problem" item opens this. Registered before
   // any early return below, so the listener exists on EVERY dashboard route —
@@ -132,7 +138,10 @@ export function LanguageFeedbackWidget() {
             if (e.target === e.currentTarget) setOpen(false);
           }}
         >
-          <div className="card-border flex w-full max-w-md flex-col gap-4 bg-ink-900 p-5">
+          <div
+            ref={panelRef}
+            className="card-border flex w-full max-w-md flex-col gap-4 bg-ink-900 p-5"
+          >
             <header className="flex flex-col gap-1">
               <h2
                 id="language-feedback-title"

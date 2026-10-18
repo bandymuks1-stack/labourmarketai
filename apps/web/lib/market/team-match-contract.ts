@@ -24,11 +24,25 @@ export interface TeamMatchInputV1 {
     readonly slug: string;
     readonly memberCount: number;
   }>;
+  /**
+   * null = NOT READABLE (the gated summary did not answer), which is not the
+   * same fact as `[]` = answered, and the members have declared nothing.
+   * Both mean "we cannot assert skills" and neither may ever be rendered as
+   * "this team has no skills" — but a consumer handed `[]` can iterate it and
+   * conclude zero, which is exactly what this null exists to prevent. Same
+   * contract as `certificationCoverage` below.
+   *
+   * NOTE for a caller that is NOT the team's owner/manager: the summary RPC
+   * answers an unauthorized caller with zero rows rather than an error (it
+   * deliberately does not confirm the team's existence), so for them `[]`
+   * ALSO covers "not allowed to see". That is precisely why the domain layer
+   * turns an empty composition into a stated missing fact, never a zero.
+   */
   readonly skillComposition: ReadonlyArray<{
     readonly slug: string;
     readonly membersDeclared: number;
     readonly membersConfirmed: number;
-  }>;
+  }> | null;
   readonly languageComposition: ReadonlyArray<{
     readonly code: string;
     readonly level: string | null;
@@ -68,7 +82,9 @@ export function emptyTeamMatchInput(
     activeMemberCount,
     deployableSize: { min: null, max: null },
     professionComposition: [],
-    skillComposition: [],
+    // Not readable, not "declared nothing" — this value exists for adapters
+    // that can prove only identity and member count.
+    skillComposition: null,
     languageComposition: [],
     certificationCoverage: null,
     availability: { status: "unknown", availableFrom: null },

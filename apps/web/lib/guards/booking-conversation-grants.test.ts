@@ -76,7 +76,20 @@ const GENERIC_CALLER = "lib/communication/open-conversation-action.ts";
  *  absent. */
 const GRANT_ONLY_CALLERS: ReadonlyArray<
   readonly [string, ContactPermissionState]
-> = [["lib/marketplace/listings.ts", "allowed_marketplace_enquiry"]];
+> = [
+  ["lib/marketplace/listings.ts", "allowed_marketplace_enquiry"],
+  // Agency ↔ client bridge (2026-09-24): an ACTIVE `agency_client_connections`
+  // row, re-verified server-side (status + the caller's side from the
+  // membership-validated employer context), grants the conversation between
+  // the two consenting people. No stamp: the closed source-relation set has
+  // no bridge member and widening it is owner-gated SQL (residue).
+  ["lib/agency/bridge-conversation.ts", "allowed_agency_connection"],
+  // Brigade offer negotiation (2026-10-11): a LIVE team_demand_offers row, the
+  // caller's side proven by their own authorized read (offering-team RLS, or
+  // the receiver-gated listing). No stamp: the source set has no offer member
+  // yet (owner-gated CHECK widening, residue).
+  ["lib/company/team-offer-conversation.ts", "allowed_team_demand_offer"],
+];
 
 /** Where getOrCreateDirectConversation is defined (not a caller). */
 const DEFINITION = "lib/communication/direct-conversation.ts";
@@ -112,6 +125,9 @@ describe("getOrCreateDirectConversation callers in lib/ are a closed, grant-type
         ...GATED_CALLERS.map(([rel]) => rel),
         ...GRANT_ONLY_CALLERS.map(([rel]) => rel),
         GENERIC_CALLER,
+        // The chat door (owner P0 messaging 2026-10-01): same generic open,
+        // no grant, no source stamp; the server resolves the states.
+        "lib/communication/chat-open-conversation.ts",
       ].sort(),
     );
   });
@@ -165,13 +181,15 @@ describe("getOrCreateDirectConversation callers in lib/ are a closed, grant-type
     expect(src).not.toMatch(/sourceHint|source_type|source_id/);
     // It calls with exactly (profileId, locale) — the default-closed
     // server-side permission resolution inside the definition applies.
-    expect(src).toMatch(/getOrCreateDirectConversation\(profileId, locale\)/);
+    expect(src).toMatch(
+      /getOrCreateDirectConversation\(\s*profileId,\s*locale,\s*null,\s*undefined,\s*null,\s*projectId,?\s*\)/,
+    );
   });
 
   it("the definition itself stays default-closed (no_permission fails the open)", () => {
     const src = read(DEFINITION);
     expect(src).toMatch(/isContactPermitted\(grantedPermission\)/);
-    expect(src).toMatch(/resolveContactPermission\(otherProfileId\)/);
+    expect(src).toMatch(/resolveContactPermission\(otherProfileId(, \{ projectId: projectId \?\? null \})?\)/);
     expect(src).toMatch(/code: "no_permission"/);
   });
 });
@@ -239,7 +257,7 @@ describe("booking-state.ts contains no writer of 'expired' — display-only modu
   });
 
   it("the stale display copy says 'no response yet' — never 'expired' (lt/en/ru/nl/de)", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const messages = JSON.parse(read(`messages/${loc}.json`)) as {
         bookings: { displayState: Record<string, string>; status: Record<string, string> };
       };

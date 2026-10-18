@@ -143,7 +143,7 @@ export function ScoutingShortlistButtons({
             setDraft(note ?? "");
             setError(null);
           }}
-          className="w-fit text-meta font-medium text-brand-blue hover:text-brand-cyan disabled:opacity-50"
+          className="w-fit text-meta font-medium text-brand-blue hover:text-brand-champagne disabled:opacity-50"
           data-testid={`scout-shortlist-note-toggle-${workerId}`}
         >
           {note === null ? labels.note.add : labels.note.edit}
@@ -161,6 +161,7 @@ export function ScoutingShortlistButtons({
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
+            aria-label={reasonMode ? labels.note.reasonTitle : labels.note.label}
             maxLength={SHORTLIST_NOTE_MAX}
             rows={3}
             placeholder={reasonMode ? labels.note.reasonPlaceholder : labels.note.placeholder}
@@ -176,7 +177,7 @@ export function ScoutingShortlistButtons({
                   ? submit("not_fit", draft)
                   : submit(status ?? "saved", draft.trim() === "" ? null : draft)
               }
-              className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50"
+              className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
               data-testid={`scout-shortlist-note-save-${workerId}`}
             >
               {labels.note.save}

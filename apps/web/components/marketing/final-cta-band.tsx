@@ -1,25 +1,19 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
+import { FINAL_CTA_LINKS } from "@/lib/marketing/public-doors";
 import { cn } from "@/lib/utils";
 import { Reveal } from "@/components/marketing/reveal";
 
 /**
- * PR-H global landing — section I: final CTA band. Every href resolves to a
- * REAL existing route under app/[locale]/ (enforced by
- * lib/guards/global-landing.test.ts — existence-checked on every CI run):
- *   worker   → /auth/signup     (worker signup)
- *   employer → /company-need    (canonical §17 demand entry)
- *   agency   → /auth/signup     (agencies sign up through the same door)
- *   partner  → /about           (real about/contact page)
- * No dead links, no "coming soon" pages.
+ * PR-H global landing — section I: final CTA band. The doors themselves live
+ * in the PURE registry `lib/marketing/public-doors.ts` (five since window 6,
+ * 2026-09-06 — the institution door joined worker / employer / agency /
+ * partner, gap G-C1), so the landing guard, the production walk and this
+ * band read ONE list. Every href resolves to a REAL existing route
+ * (lib/guards/global-landing.test.ts); no dead links, no "coming soon".
  */
-export const FINAL_CTA_LINKS = [
-  { key: "worker", href: "/auth/signup", variant: "primary" },
-  { key: "employer", href: "/company-need", variant: "secondary" },
-  { key: "agency", href: "/auth/signup", variant: "secondary" },
-  { key: "partner", href: "/about", variant: "secondary" },
-] as const;
+export { FINAL_CTA_LINKS, INSTITUTION_DOOR_NEXT } from "@/lib/marketing/public-doors";
 
 export async function FinalCtaBand() {
   const t = await getTranslations("landing.cta");
@@ -47,6 +41,7 @@ export async function FinalCtaBand() {
               <Link
                 key={key}
                 href={href}
+                data-testid={`final-door-${key}`}
                 className={cn(
                   buttonLinkClassName(variant),
                   "w-full rounded-xl transition-transform hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0",

@@ -12,6 +12,7 @@ import {
   WORK_OBJECT_REGION_MAX,
   isObjectMigrationMissingCode,
 } from "@/lib/objects/objects-model";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Work-object write actions — thin wrappers around the four gated SECURITY
@@ -69,6 +70,7 @@ export async function saveWorkObjectAction(
   _prev: WorkObjectActionState,
   formData: FormData,
 ): Promise<WorkObjectActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const id = String(formData.get("id") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   const projectId = String(formData.get("projectId") ?? "").trim();

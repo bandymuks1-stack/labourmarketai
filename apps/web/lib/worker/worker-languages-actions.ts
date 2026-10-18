@@ -15,7 +15,8 @@ import {
 /**
  * Server actions for the worker's self-stated languages. The ONLY write paths
  * are the two owner-scoped SECURITY DEFINER RPCs from DRAFT migration
- * 20260711250000 (PR #720 — human-gated, NOT applied yet):
+ * 20260711250000 (PR #720 — APPLIED, ledger `20260711203623`; both RPCs are
+ * present in production, verified 2026-09-14):
  *   * save_worker_language_v1(p_lang, p_level) — upsert one language;
  *   * remove_worker_language_v1(p_lang) — remove one language.
  * Both re-validate the closed vocabularies server-side and touch only the

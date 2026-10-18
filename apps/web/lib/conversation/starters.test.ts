@@ -132,7 +132,7 @@ describe("education", () => {
       facts: facts({ learnersActive: 4, programmes: 0, openDemands: 1 }),
     });
     expect(companyTracks(dual)).toEqual(["employer", "operations", "education"]);
-    expect(ids(dual)).toContain("link:/dashboard/company#institution-programs-title");
+    expect(ids(dual)).toContain("link:/dashboard/company/education#institution-programs-title");
     expect(capabilityPhraseKeys(dual)).toContain("capPhraseLearners");
   });
 });

@@ -1,0 +1,21 @@
+{"step":"health","build":"ba548cb7"}
+{"leg":"person_trade_need","text":"","chips":["Mano profilis"]}
+{"check":"person 'reikia santechniko' offers the service-request door","ok":false,"detail":["Mano profilis"]}
+{"check":"person 'reikia santechniko' offers the company-setup door","ok":false,"detail":["Mano profilis"]}
+{"check":"person 'reikia santechniko' is not the not-understood menu","ok":true,"detail":""}
+{"leg":"person_offer_service_noun","text":"Market AI Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti paslaugas","chips":["Atidaryti paslaugas"]}
+{"check":"no false 'Slaugos pagalbininkas' claim","ok":true,"detail":"Market AI Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti paslaugas"}
+{"check":"offered service reaches the services door","ok":true,"detail":["Atidaryti paslaugas"]}
+{"check":"not the 'not sure whether offering or seeking' line","ok":true,"detail":"Market AI Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti paslaugas"}
+{"leg":"person_offer_activity","text":"AI Jūsų teigimu: kirpti plaukus namuose. Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti paslaugas","chips":["Atidaryti paslaugas"]}
+{"check":"'galiu kirpti plaukus' reaches the services door","ok":true,"detail":["Atidaryti paslaugas"]}
+{"check":"'galiu kirpti plaukus' is not the not-understood menu","ok":true,"detail":"AI Jūsų teigimu: kirpti plaukus namuose. Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnes"}
+{"leg":"person_failed_requests","failed":[]}
+{"leg":"company_next_step","text":"timas dar nepriimtas. 1 darbuotojas atsakė į jūsų rezervacijos pasiūlymą. L LabourMarket AI 1 studento pakvietimas dar nepriimtas. 1 darbuotojas atsakė į jūsų rezervacijos pasiūlymą. Pakviesti studentą Mano pasiūlymai","chips":["Pakviesti studentą","Mano pasiūlymai"]}
+{"check":"company 'ką man daryti toliau?' is NOT the person's profile ladder","ok":true,"detail":"timas dar nepriimtas. 1 darbuotojas atsakė į jūsų rezervacijos pasiūlymą. L LabourMarket AI 1 studento pakvietimas dar nepriimtas. 1 darbuotojas atsakė į jūsų rezervacijos pasiūlymą. Pakviesti student"}
+{"check":"company 'ką man daryti toliau?' answers with the company's own lines or the hub door","ok":true,"detail":"timas dar nepriimtas. 1 darbuotojas atsakė į jūsų rezervacijos pasiūlymą. L LabourMarket AI 1 studento pakvietimas dar nepriimtas. 1 darbuotojas atsakė į jūsų rezervacijos pasiūlymą. Pakviesti student"}
+{"leg":"company_failed_requests","failed":[]}
+{"leg":"worker_documents_gap","text":"","chips":["Užfiksuoti darbą","Įkelti CV","Ieškau darbo"]}
+{"check":"no document name is repeated in the gap line","ok":false,"detail":{"list":"","dupes":[]}}
+{"leg":"worker_failed_requests","failed":["500 /lt/dashboard"]}
+{"result":"FAIL","failed":["person 'reikia santechniko' offers the service-request door","person 'reikia santechniko' offers the company-setup door","no document name is repeated in the gap line"]}

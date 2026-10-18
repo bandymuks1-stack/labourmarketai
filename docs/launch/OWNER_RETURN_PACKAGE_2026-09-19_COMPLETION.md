@@ -1,0 +1,993 @@
+# OWNER RETURN PACKAGE — Full product / security / vision completion audit, 2026-09-19
+
+One consolidated package for the owner-away mission "LABOURMARKET.AI — FABLE
+FULL PRODUCT / SECURITY / VISION COMPLETION MISSION" (2026-09-19). Not a
+diary: each section states truth at the proof level it was actually reached.
+
+Proof levels used exactly: CODE_PROVEN < BUILD_PROVEN < LOCAL_BROWSER_PROVEN
+< PRODUCTION_DEPLOYED < PRODUCTION_BROWSER_PROVEN < HUMAN_UI_PROVEN.
+LOCAL_BROWSER_PROVEN here means the production build (`next build` +
+`next start`) against the PRODUCTION Supabase backend, walked with Playwright
+as the allow-listed synthetic QA identity, desktop 1360 px + mobile 390 px.
+
+Method: the previous receipts were NOT trusted. Seven independent read-only
+investigations traced real code and real authority (server action → data
+layer → RLS / SECURITY DEFINER / triggers) across security, the worker and
+employer marketplace loops, the agency bridge, the company OS, the four-role
+onboarding and zero-data states, i18n / mobile / a11y, data integrity,
+notifications, GDPR export and deletion, public discoverability, and test
+quality. Production was read directly (Supabase MCP, read-only SQL; the
+public site in a browser). Everything GREEN that was found was fixed on ONE
+branch in six journey-batched commits; everything else is classified below.
+
+---
+
+## A. CURRENT PRODUCTION
+
+| | |
+|---|---|
+| main SHA at start | `d1618339` (#1788) — main = prod, `/api/health` ok (auth + db), region dub1 |
+| CI on main | Quality Gates green (run 35380066714); health-probe green |
+| migration ledger | 291 applied = 291 repo files; **this mission applies ZERO migrations, ZERO RLS changes, ZERO authority changes** |
+| Supabase security advisors | 9 anon SECURITY DEFINER functions = the deliberate public preview set; `worker_absence_scheduling` definer view = documented load-bearing exception; leaked-password protection OFF (owner setting); two `usage_cost_events_*` trigger functions without pinned `search_path` (packet item R-13) |
+| branch | `fix/cc/completion-privacy-journey-2026-09-19` — PR #1789 (GREEN class: code, tests, i18n, docs; no migration; squash auto-merge armed) |
+| merged | 2026-09-19 08:32 UTC, squash `e37adc9f` (#1789) — quality 9 m 7 s, migration-safety, e2e-smoke, mobile, CodeQL all green |
+| production SHA after merge | `e37adc9f` — `/api/health.build` verified (see §C proof line) |
+
+Live production reality read on 2026-09-19 (counts): 56 profiles, 56 workers,
+17 organizations, 14 companies, 20 demands, 6 interest signals, 1 booking,
+9 projects, 40 journal entries, 147 organization evidence records (the 800 h
+period record among them), 5 conversations / 18 messages, 22 notification
+rows, 99 970 active public vacancies. `matches`, `match_actions`,
+`job_demands` = 0 rows (dead tables, already deny-listed by guards).
+
+## B. WHAT WAS FOUND
+
+### B1. Security (the receipt is §D)
+- **HIGH, RED:** `company_workers_write` and `agency_workers_write` are
+  `FOR ALL … with check (owns_company(...) or is_admin())` — live-verified in
+  `pg_policies`. A company owner can INSERT an `active` roster row naming ANY
+  discoverable worker with no invitation and no consent. The forged row then
+  satisfies `caller_manages_worker` (project assignment, absences, task
+  eligibility), the roster branch of `can_view_worker`, and the agency
+  candidate-offer roster check. The 2026-09-18 consent trigger protects
+  `organization_people` only.
+- MEDIUM, GREEN (fixed): a self-recorded, unverified document counted as a
+  valid credential → `formalRequirementMet: true` (self-award of formal
+  standing, SEP-6).
+- MEDIUM, GREEN (fixed): invitation and partner-referral links (raw token
+  inside) were built on the request's `X-Forwarded-Host`.
+- LOW, GREEN (fixed): cron secret compared with `===`; ESCO lookup let `%`
+  reach an `ilike` prefix scan over a million-row table.
+- MEDIUM, OWNER: commercial handoff rows with `proposition_consent.given =
+  false` are still dispatched to the partner (design doc treats them as
+  "review employer approach"); the code comment claiming nothing leaves the
+  platform was stale (fixed) — the rule itself is an owner call (R-14).
+- LOW (accepted / owner semantics): CSP report-only with `unsafe-inline`;
+  logout accepts GET; any account may self-declare `active_role=company` and
+  thereby read discoverable worker rows (consent wording says "employers");
+  conversation creator may add any participant; `grant_org_manager` needs no
+  acceptance; in-memory per-instance rate limits.
+- GDPR export completeness (P1, GREEN, fixed): the register and its guard only
+  saw columns literally named `profile_id`/`worker_id`; ~50 person-keyed
+  relations (consent ledger, disclosures, notifications, experience records,
+  organization roster + evidence, confirmations authored, billing, work
+  assigned) were neither exported nor named.
+- Verified-CV retraction (P1, GREEN, fixed): a later rejection did not remove
+  an earlier confirmation from "Confirmed Work Proof".
+- Two consents had no withdrawal path in the product (GREEN, fixed): the
+  contact-detail disclosure grant (`withdraw_employer_data_disclosure` had
+  zero callers since July) and a confirmed roster link.
+
+### B2. Functional / disconnected / unreachable
+- Direct-booking employer cannot see, review or confirm the booked worker's
+  journal: an accepted booking mints `company_worker_engagements`, the
+  journal review gate reads `engagement_contexts`, and nothing bridges them
+  (RED, R-2). Roster/invitation-path workers are fine.
+- The work card (availability status, available-from, country, pay — the
+  fields matching reads) had ONE editor, reachable only through the chat's
+  player-card result, not from `/dashboard/profile` (GREEN, fixed).
+- `projects.start_date / end_date / country` had no write path at all, so
+  the calendar band, the operations "dates" chip and the booking-overlap
+  check could never work ("No project dates — booking overlaps not
+  checked"). A direct RLS update was tried and reverted: the admin-action
+  guard requires gated RPCs and RLS would exclude managers who may manage the
+  project. Needs `update_project_facts_v1` (RED, R-3).
+- Roster invite / role assignment: the TS gate admitted managers, the
+  `owns_company` RPCs refused them (GREEN, fixed: gate matches SQL).
+- Inline project create skipped the manage-projects capability the dedicated
+  route enforces (GREEN, fixed).
+- `/dashboard/company/needs` and `/people` let an unnamed company shell
+  through while the hub did not (GREEN, fixed).
+- MCP `context.switch` writes only the DB pointer and was shadowed by the
+  browser cookie in an open web session (GREEN, fixed: DB pointer wins when
+  set; the personal sentinel still lives in the cookie).
+- Chat: no sentence path for the CLIENT to accept an agency connection or
+  share a request (agency side is complete); `write-employer` is honestly
+  blocked; booking by sentence absent (buttons only). GREEN_MISSING, not done
+  (chat file is 6 100 lines; batched for a chat slice).
+- Membership-only managers see the journal review queue but
+  `review_journal_entry` requires an active engagement context →
+  `no_reviewer_engagement` (RED, R-4, SQL predates the membership widening).
+- Post-approval skill-confidence recompute runs under the manager's client
+  against owner-only `worker_skills` RLS → silent zero-row update (RED, R-5:
+  needs the recompute inside the definer RPC).
+- Skill recognition reject captured no reason and `learning_signals` had
+  zero writers (BUILT_NOT_CONNECTED). GREEN, fixed in the follow-up PR
+  #1790 (merged 2026-09-19, squash `98bbefc7`): both worker decisions append an observation, the saved-entry card
+  offers an optional "why not?".
+- Notifications: every emitter has a caller and the service_role grant is
+  applied (memory said otherwise — corrected). MISSING event types: journal
+  confirmation, new human message (both need the `notification_events`
+  CHECK widened — RED, R-6). E-mail channel `not_configured` (no provider).
+- Dead code confirmed with zero callers: `lib/agency/pool.ts` chain,
+  `lib/esco/evidence-correspondence.ts` chain, ~20 exports listed in the
+  agent reports; `project_members` table has no reader/writer;
+  `buildBrigadePlan` unreachable (brigade-as-unit = existing RED).
+
+### B3. Data integrity / privacy
+- 800 h period record: ONE canonical record, monthly projection sums to
+  800.00, no code path turns it into day rows (re-verified, guarded).
+- Subject dispute policy (`20260915185038`) IS applied although its file
+  header still carries the pre-apply "PREPARED" banner (stale header text,
+  a production fact is the ledger).
+- No deletion executor exists; 57 `ON DELETE NO ACTION` FKs to profiles block
+  a hard delete; no organization archival; a worker cannot end their own
+  `company_workers` link; the applied `ai_runs` retention sweep redacts
+  `output_excerpt` but leaves `profile_id` in place (redaction, not de-linking);
+  `usage_cost_events`, `pilot_events`, `notification_events` and
+  `conversation_messages` have no purge schedule (all RED, R-7…R-10).
+
+### B4. UX / reachability / mobile / a11y
+- `MobileSheet` (`role=dialog aria-modal`) moved no focus, had no trap and
+  no return; two fixed bottom bars ignored the safe area; ten controls sat at
+  32–36 px; five spinners ignored reduced motion; four fields had no
+  accessible name; the dashboard tab bar's label was hard-coded English. All
+  GREEN, fixed.
+- Worker phone bar / stations have no map entry (map reached via a chat chip
+  only). Tried; the station list is an owner-frozen IA contract (guarded) →
+  owner decision R-11.
+- Dead-end empty states (no next action): network relationships/search,
+  communication, market-map "nothing advertised", team roster card. Not done
+  (copy decision + five locales each) — GREEN backlog.
+- i18n: LT/EN/RU/NL/DE parity 0 missing keys; `messages/fi/` is an orphan
+  directory with no `fi.json`; six unrouted catalogs ~53 % `[EN]`. Owner
+  housekeeping.
+
+### B5. Public / SEO
+- Five sitemap-listed pages exported no metadata (no canonical, no hreflang,
+  homepage title); no Organization/WebSite JSON-LD anywhere on the marketing
+  tree; public business profile had no canonical/hreflang/robots; invite
+  token pages and OAuth consent were crawlable; the public-SEO guard's robots
+  check was satisfied by a comment; questions sitemap lacked x-default; job
+  detail pages fetched the preview twice per request; manifest said
+  "construction"; llms.txt hard-coded a source country. All GREEN, fixed.
+- Job detail pages (`/jobs/[id]`) declare no hreflang and overwrite the
+  layout's OpenGraph object; the list title doubles the brand suffix. Those
+  files are behind the owner's per-PR jobs waiver → R-12.
+- `JobPosting` structured data cannot be emitted honestly while
+  `hiringOrganization`/`jobLocation` are member-only (PR #1433 correctly
+  emits WebPage/Occupation instead; it is 17 days behind main) → owner call.
+
+### B6. Test quality
+- 926 guards; ~21 assert source text only (by design); one guard was
+  satisfiable by a comment (fixed); `self-confirmation-not-independent`
+  deliberately pins a known defect (EVID-2, owner-gated).
+- Four Playwright files in `testDir` were screenshot scripts with zero or
+  permanently-red assertions; one screenshot-only test ran in the CI subset
+  and counted toward the floor; two specs passed silently when the surface
+  was absent. All fixed.
+- CI runs 6 of 96 Playwright specs (authenticated ones need a session); the
+  live secdef / migration-parity gates stay skipped until the owner adds the
+  read-only `SUPABASE_DB_URL` secret (GOV-1, unchanged).
+- Local full vitest baseline on main: 23 771 pass, 8 fail — 7 are >5 s load
+  timeouts of the local-flake class, 1 is the CRLF Windows-only class; CI is
+  green on the same tree.
+
+## C. WHAT WAS FIXED (one branch, six commits, zero migrations)
+
+| Commit | Journey | Files | Guards added / changed |
+|---|---|---|---|
+| `aa3cfa8d` | Privacy: export completeness, CV retraction, two consent withdrawals | 20 | `privacy-export-completeness` rewritten (FK-based sweep, actor-only class, column existence), `consent-withdrawal-reachable` new, `confirmation-standing.test` new |
+| `a7b1ccff` | Security + recognition honesty | 13 | `worker-project-asks.test` (+4 cases), ledger test updated |
+| `a0479b5e` | Public discoverability | 16 | `seo-indexing-audit` anchored on code |
+| `e0095565` | Company OS / marketplace connections | 5 | existing 103 test files green |
+| `f165bf7d` | Mobile / a11y / workspace pointer | 28 | — |
+| `d5efb412` | Test hygiene | 9 | orphan-testid waivers shrink by 2 |
+
+Proof: typecheck green after every commit; targeted vitest sets green
+(privacy 33, security 405, SEO 578, company-OS 2 028, mobile guards 3 082,
+e2e guards 185); full `lib/guards` suite on the branch: 917 of 919 files / 16 370 of 16 372 tests pass — the two failures are the pre-existing Windows-only CRLF case in `booking-atomic-double-booking` (green in CI) and the roster-gate guard, corrected in `26cb534c` before the PR;
+LOCAL_BROWSER_PROVEN walk (production build, production backend, QA
+identity, 1360 px + 390 px): `/en/legal/terms`, `/lt/labour-market/lt`,
+`/en/match-preview` — canonical + hreflang (lt/en/ru/nl/de/x-default) +
+Organization/WebSite JSON-LD; `/robots.txt` lists `/*/invite` and
+`/*/oauth`; `/en/invite/<token>` = `noindex, nofollow`; manifest description
+cross-sector; `/lt/dashboard/profile` renders the work-card editor inside
+the availability block on both viewports with zero horizontal overflow;
+`/lt/dashboard/privacy` renders; the export bundle downloads as an
+attachment with 106 relations incl. `notification_events` (2 rows for the QA
+identity), `privacy_consent_events`, `organization_people`,
+`organization_evidence_records/_events`, `journal_entry_confirmations`,
+`billing_customers`, and names the message tables under `withheld`. The
+withdrawal controls could not be rendered with the QA identity (it holds no
+granted disclosure and no confirmed roster link) — CODE_PROVEN + guarded;
+Donatas's walk (§K) is the first render with real rows. The landing
+JSON-LD moved to the locale layout after the walk (the landing is a frozen
+composition outside the marketing group) — BUILD_PROVEN, not walked locally.
+
+PRODUCTION_BROWSER_PROVEN 2026-09-19 08:38 UTC (anonymous, after Vercel
+served `e37adc9f`): `/en/legal/terms` canonical + six hreflang +
+Organization/WebSite JSON-LD; `/en` carries the JSON-LD; `/robots.txt`
+lists `/*/invite` and `/*/oauth`; `/en/invite/<bad token>` renders with
+`noindex, nofollow`; manifest description cross-sector; `/api/health.build =
+e37adc9f`. Authenticated surfaces (profile work card, privacy withdrawals,
+export bundle) are PRODUCTION_DEPLOYED; their PRODUCTION_BROWSER_PROVEN is
+Donatas's walk (§K).
+
+## D. SECURITY RECEIPT
+
+CRITICAL = 0 · HIGH = 1 (unresolved, RED) · MEDIUM = 2 fixed + 1 owner ·
+LOW = 3 fixed + 5 accepted/owner-semantics.
+
+> **CORRECTION 2026-09-19 (third window, §M):** H1 / R-1 is **CLOSED** —
+> applied to production (ledger `20260919104526`), hostile contract proven
+> live (5 × 42501), merged (#1791). A second HIGH of the same class was found
+> and is RED draft #1794 (R-16, `add_org_member` forge — §M3). The headline
+> therefore stays HIGH = 1, but it is a different issue with a prepared,
+> dry-run-proven fix awaiting one approval sentence.
+
+| # | ISSUE | ATTACK / FAILURE PATH | AFFECTED | CURRENT PROTECTION | WHY INSUFFICIENT | FIX | STATUS | PROOF |
+|---|---|---|---|---|---|---|---|---|
+| H1 | Roster forge on `company_workers` / `agency_workers` | owner POSTs `{company_id: own, worker_id: victim, status: active}` to PostgREST; row now proves a relationship everywhere | every worker; consent axioms | RLS `owns_company` — the forger IS the owner | authority to write the row is the company's own | revoke insert/update from `authenticated`; make `accept_worker_invitation` the only writer, or BEFORE INSERT/UPDATE trigger refusing `active` unless `auth.uid()` = worker's profile or a matching accepted invitation exists; base `caller_manages_worker` on `company_worker_engagements` | **RED R-1** | live `pg_policies` read 2026-09-19 |
+| M1 | Self-award of formal standing from own document | worker records "certificate ready" → `valid_credential`, `formalRequirementMet: true` | deployment decisions | none | reviewer verification never consulted | credential requires `verification='verified'`; provenance states it | FIXED `a7b1ccff` | unit tests |
+| M2 | Token links on attacker host | `X-Forwarded-Host` reaches link builder | invitees / referrals | Vercel normalisation (unverified) | header trusted | `outboundLinkOrigin` | FIXED `a7b1ccff` | unit tests |
+| M3 | Handoff of non-consented rows | dispatcher posts every `queued` row | worker pseudonymous fingerprint | partner contract | consent flag ignored by dispatch | owner rule (R-14) | OWNER | code read |
+| L1 | cron `===` | timing probe | scheduler | fail-closed when unset | not constant-time | `timingSafeEqual` | FIXED | tests |
+| L2 | ESCO `ilike` wildcard | `%` → full scan | availability | none | cost | strip metacharacters | FIXED | tests |
+| L3 | Logout via GET | cross-site `<img>` signs the visitor out | any user | — | CSRF-able | POST only | ACCEPTED (documented "direct link" use) | — |
+| L4 | CSP report-only + inline | stored XSS unmitigated (none found) | all | XFO/nosniff/HSTS | no enforced CSP | nonce pipeline | OWNER | — |
+| L5 | Self-declared employer reads discoverable rows | set `active_role=company` | discoverable workers | consent text v-current | wording says "employers" | narrow or reword consent | OWNER | — |
+| L6 | Unsolicited participant add / manager grant | creator adds any profile; owner grants manager w/o acceptance | any profile | RLS scoped to creator/owner | no subject acceptance | acceptance step | OWNER | — |
+| L7 | Per-instance rate limits | serverless instance memory | anon RPCs | DB limiter on need intake only | not shared | shared store | OWNER | — |
+
+VERIFIED BLOCKED (with citations in the security report): employer cannot
+consent for worker; manager cannot forge `organization_people`; agency /
+client cannot accept a booking for the worker; institution cannot enrol a
+learner; org A cannot mutate org B; worker cannot read another worker's
+journal / evidence / documents; anonymous cannot read contact data; chat and
+MCP run under the caller's RLS with re-resolved organization at execution;
+imports cannot link a person; admin escalation trigger-guarded; open
+redirects pinned; Stripe webhook signature + event idempotency; machine
+doors fail closed; PostgREST filter interpolation is server-derived only;
+invitation tokens hashed; all 450 last-defined SECDEF functions pin
+`search_path` (two trigger functions on the cost ledger do not — R-13).
+
+## E. MARKETPLACE RECEIPT
+
+WORKER: SUPPLY **LIVE_PARTIAL** (five stores; work card now reachable from
+profile; geography on the map page) → MATCH **LIVE** (deterministic,
+score-free, `strong/possible/missing_requirement/conflict/not_assessed`) →
+OPPORTUNITY **LIVE** (internal demand + 99 970 external vacancies) →
+INTEREST/APPLY **LIVE** (one table, employer notified) → COMMUNICATION
+**LIVE** (employer-initiated from interest or shortlist; worker→employer
+`write-employer` blocked in chat) → OFFER **LIVE** (`booking_requests`) →
+COMMITMENT **LIVE** (worker-only accept, atomic, clash receipt) → WORK
+**LIVE** (journal; auto-links project when exactly one assignment) →
+EVIDENCE **BROKEN for direct-booking employers / LIVE for roster workers**
+(R-2) → NEXT OPPORTUNITY **LIVE_PARTIAL** (confirmed skills change the
+evidence label, never fit order).
+
+EMPLOYER: DEMAND **LIVE** (one RPC intake; public intake rejoins via claim)
+→ MATCH **LIVE** → PEOPLE **LIVE (anonymised by design)** → INSPECT
+**PARTIAL** (person page exists; no link from the match list by design) →
+CONTACT **LIVE** → SHORTLIST **LIVE** → OFFER **LIVE** (not from the person
+page) → COMMITMENT **LIVE** → ASSIGNMENT **LIVE (manual, from /projects)** →
+WORK **LIVE** → OUTCOME **BROKEN for direct booking** (R-2) → NEXT DEMAND
+**LIVE_PARTIAL** (prefill from last demand; no per-request clone).
+
+AGENCY: invite client **LIVE** (UI+chat) → client accepts **LIVE (UI only)**
+→ share request **LIVE (UI; chat read-only)** → propose candidate **LIVE**
+(roster gate = the forgeable `company_workers` row, R-1) → client decides
+**LIVE** (auto-creates booking) → worker consent **LIVE** (worker-only RPC)
+→ deployment **PARTIAL** (generic project assignment, no agency hop).
+Model-A `agency_clients` migration deliberately unapplied (draft #1741 era).
+
+## F. COMPANY / WORKFORCE OS RECEIPT
+
+What a real employer can do TODAY (all LIVE): set up the organization and
+declare capabilities; invite governance members (from `/dashboard/start`)
+and workers (invitation or legacy roster); offer roster links from imported
+history and see the person accept/refuse/withdraw; create projects, set
+status (draft→live→paused→completed), name a responsible person; assign and
+end people (roster ∪ booking engagements); stages + Gantt + tasks + readiness
+checklist + operational status; post demand, match, shortlist, contact,
+offer, see acceptance; record hours (allocations) and import timesheets;
+review and confirm journal entries (engagement-context managers); attest
+imported evidence; run reports (org counts, per-person journal window, CSV
+exports); approvals workflow (timesheets etc.); communication threads.
+
+Added this mission: work card reachable (worker side of the same loop);
+roster gates honest; unnamed shell blocked; capability gate on inline create.
+
+Still missing for the approved Company OS: editable project facts (dates /
+place — R-3, the calendar and overlap check depend on it); required headcount
+/ open positions on a project (no column; RED); booked-worker journal
+visibility (R-2); membership-only manager confirmation (R-4); allocated-vs-
+journaled hours reconciliation view (GREEN backlog); per-request demand
+clone (GREEN backlog); project-bound communication thread (owner-gated copy
+says so); brigade-as-unit assignment (existing RED); employer-initiated
+partner/client records (no schema; RED); notification on confirmation /
+message (R-6).
+
+## G. FOUR ROLES
+
+| Role | E2E journey | Blockers | Production proof | Human proof | First useful action | First value | Remaining gaps |
+|---|---|---|---|---|---|---|---|
+| WORKER | sign-up → onboarding (name, country, profession) → Today → journal / opportunities / profile | none for the loop; evidence→matching only labels | PRODUCTION_DEPLOYED (main); this PR LOCAL_BROWSER_PROVEN (privacy + profile) | PENDING (Donatas) | "Write" / first journal entry; opportunities board | matched needs + external vacancies; interest → employer notified | withdrawal controls just added; map station (R-11) |
+| EMPLOYER | wizard → company setup (legal name) → doors: need / project / invite / import | project dates (R-3); booked-worker journal (R-2) | PRODUCTION_DEPLOYED | PENDING (Donatas / Klinkerio) | post a need → scouting | matched anonymised candidates, interest signals | R-2, R-3, R-4 |
+| AGENCY | same as employer with `staffing_agency` → partners door | roster forge exposure (R-1); role inversion in prod (Ramūnas must flip company type) | PRODUCTION_DEPLOYED | PENDING (Ramūnas) | invite client / propose candidate | client decision → booking → worker consent | chat share/accept for client (GREEN backlog) |
+| INSTITUTION | company with `training_provider` → education door → programme → invite learner → learner accepts → cohort | zero real programmes (adoption, not code) | PRODUCTION_DEPLOYED; two-sided INTERNAL_UI_PROVEN 2026-09-18 | PENDING (first real institution) | create programme | learner accepts personally; cohort membership | formal RPL (existing RED); competency→qualification (RED) |
+
+## H. FULL VISION — classification
+
+| Capability | Status | Canonical impl | Entry | Data | Authority | Verified | Fixed here | Remains | Proof |
+|---|---|---|---|---|---|---|---|---|---|
+| AUTH | LIVE_COMPLETE | Supabase auth, `middleware.ts`, callback route | /auth/* | auth.users, profiles | cookie + bearer, fail-closed | redirects pinned; logout GET accepted | — | CSP enforce (owner) | PRODUCTION_DEPLOYED |
+| ONBOARDING | LIVE_COMPLETE | onboarding-wizard, `complete_onboarding` | /onboarding | profiles.onboarded_at | RPC self | one hard gate only | unnamed-shell gate on needs/people | — | PRODUCTION_DEPLOYED |
+| CHAT_FIRST | LIVE_PARTIAL | intent-registry (76), action-registry (52), dispatch.ts | /dashboard | same readers/writers as UI | dispatcher re-checks roles + org | no parallel writes; LLM classify-only | pointer resolution | client bridge intents, booking by sentence | PRODUCTION_DEPLOYED |
+| ACTIVE_CONTEXT | LIVE_PARTIAL | active-organization.ts | chip / MCP | profiles + cookie | membership-validated per request | surface gate, not row scope (owner design) | DB pointer wins | row-scoping of demand/shortlist/bookings by org (owner) | PRODUCTION_DEPLOYED |
+| WORKER_IDENTITY | LIVE_COMPLETE | ProfileHubOverview, TrustBlock | /dashboard/profile | workers, worker_skills, journal | self + can_view_worker | no fake rating/photo/score | work card + link withdrawal | — | LOCAL_BROWSER_PROVEN |
+| WORK_HISTORY | LIVE_COMPLETE | organization_evidence + work spine | profile | organization_evidence_records | linked subject | 800 h invariant | export + withdrawal | — | PRODUCTION_DEPLOYED |
+| JOURNAL | LIVE_COMPLETE | create_journal_entry_full | /dashboard/journal + chat | journal_entries + metrics | owner RLS | deterministic recognition | — | reject reason, learning_signals writer | PRODUCTION_DEPLOYED |
+| EVIDENCE | LIVE_PARTIAL | journal_entry_confirmations, evidence events | inbox | append-only | manages_organization + engagement | latest-wins | CV retraction | R-2, R-4, R-5 | PRODUCTION_DEPLOYED |
+| SKILLS/ESCO | LIVE_PARTIAL | skill-pipeline, esco_* | journal/profile | worker_skills | self; verified via RPC only | provenance tiers | ilike hardening | evidence-correspondence chain dead; rank unaffected by evidence | PRODUCTION_DEPLOYED |
+| OPPORTUNITIES | LIVE_COMPLETE | load-worker-opportunities | /dashboard/opportunities | RPC + public_vacancies | SECDEF + RLS | fit bands, no score | — | — | PRODUCTION_DEPLOYED |
+| MARKETPLACE_WORKER | LIVE_PARTIAL | §E | — | — | — | — | work card reach | R-2 | PRODUCTION_DEPLOYED |
+| MARKETPLACE_EMPLOYER | LIVE_PARTIAL | §E | — | — | — | — | — | R-2, R-3 | PRODUCTION_DEPLOYED |
+| DEMAND | LIVE_COMPLETE | submit_demand_request_v2 | /company/needs + chat | customer_requests | has_org_demand_access; UPDATE owner-only (R-15) | one intake | — | colleague close/reopen | PRODUCTION_DEPLOYED |
+| SUPPLY | LIVE_PARTIAL | five stores | profile / map | workers cols, preferred_locations | RPC self | — | work card on profile | one declaration surface (owner) | LOCAL_BROWSER_PROVEN |
+| MATCHING | LIVE_COMPLETE | match-v1 (2.2) | scouting / board | tables only | RLS | categorical, no opaque score | — | evidence as tiebreaker (owner) | PRODUCTION_DEPLOYED |
+| PEOPLE | LIVE_COMPLETE | roster sections | /company/people | four relationship tables | RLS + RPCs | — | gates honest | company_workers removal UI | PRODUCTION_DEPLOYED |
+| TEAM | LIVE_PARTIAL | team brigades (organizations type=team) | /company/people | engagement_contexts | RPC | — | — | brigade→project (RED) | PRODUCTION_DEPLOYED |
+| PROJECTS | LIVE_PARTIAL | projects + lifecycle RPC | /dashboard/projects | projects | can_manage_project | — | capability gate | R-3 facts, headcount (RED) | PRODUCTION_DEPLOYED |
+| FIELD | LIVE_COMPLETE | operations page | /projects/[id]/operations | assignments, stages, tasks | can_manage_project | people vs slots | — | dates (R-3) | PRODUCTION_DEPLOYED |
+| CALENDAR | LIVE_PARTIAL | planning | /dashboard/planning | bookings, projects, journal, period | RLS | observed/committed/planned/unknown; no day items from aggregate | — | project dates (R-3) | PRODUCTION_DEPLOYED |
+| MAP | LIVE_PARTIAL | market-map, world-read | /dashboard/market-map | demand, projects, own supply aggregates | owner-gated people feed | country ≠ city; no inferred coordinates | — | institution layer; phone station (R-11) | PRODUCTION_DEPLOYED |
+| COMMUNICATION | LIVE_PARTIAL | conversations | /dashboard/communication | 0021 tables | creator/participant RLS + TS rules | original kept; translate-on-read | — | message notification (R-6) | PRODUCTION_DEPLOYED |
+| NOTIFICATIONS | LIVE_PARTIAL | event-emitters (18) | bell / activity | notification_events | service_role writer | grant applied | — | R-6 types; e-mail provider (external) | PRODUCTION_DEPLOYED |
+| EMPLOYER_OS / COMPANY_MANAGEMENT | LIVE_PARTIAL | §F | — | — | — | — | §F | §F | PRODUCTION_DEPLOYED |
+| AGENCY | LIVE_PARTIAL | bridge-* | /company/partners | agency_client_* | owns_company + share | — | — | R-1 roster forge; client chat intents | PRODUCTION_DEPLOYED |
+| INSTITUTION | LIVE_PARTIAL | education programs/cohorts | /company/education | education_* | training_provider | learner accepts personally | — | real data; RPL RED | PRODUCTION_DEPLOYED |
+| RPL/RECOGNITION | RED_MISSING (formal) / LIVE_PARTIAL (read-only ledger) | capability-standing, requirement-ledger | opportunities/projects | documents + skills | reviewer verification | self-award closed | credential = verified only | equivalence table (RED); employer-side ledger (GREEN backlog) | LOCAL tests |
+| PUBLIC_JOBS | LIVE_COMPLETE | jobs pages (waived) | /jobs | public_vacancies | anon SECDEF preview | 404s, canonical | preview cache() | hreflang/OG (R-12) | PRODUCTION_BROWSER_PROVEN (2026-09-18) |
+| LANDING | LIVE_COMPLETE | (marketing) | / | static | — | — | JSON-LD | — | LOCAL_BROWSER_PROVEN |
+| SEO | LIVE_COMPLETE | metadata.ts, sitemaps | — | — | — | hreflang all pages | 5 pages, robots, sitemap x-default | JobPosting (owner) | LOCAL_BROWSER_PROVEN |
+| MULTILINGUAL | LIVE_COMPLETE (5 routed) | next-intl | — | messages/* | — | 0 missing LT/RU | new keys ×5 | fi orphan; unrouted 53 % EN | TEST_PROVEN |
+| MOBILE/PWA | LIVE_PARTIAL | manifest, bottom nav | — | — | — | no SW (honest) | sheet focus, safe-area, targets | map station (R-11) | LOCAL_BROWSER_PROVEN (390 px) |
+| PAYMENTS | LIVE_PARTIAL (env-gated) | billing/* | /dashboard/billing | billing_* | owner/admin | webhook idempotent; live events rejected in test | llms.txt truth | activation = owner act (MKT-7) | PRODUCTION_DEPLOYED |
+| IMPORT | LIVE_COMPLETE | evidence import | /company/history | evidence_import_* | managers | source → preview → commit → attest | — | — | PRODUCTION_DEPLOYED |
+| EXPORT/GDPR | LIVE_PARTIAL | export-data + register | /dashboard/privacy/export | ~100 relations | caller RLS | completeness guard now real | E-1 | deletion executor (R-7) | LOCAL_BROWSER_PROVEN |
+| SECURITY | LIVE_PARTIAL | §D | — | — | — | — | M1 M2 L1 L2 | R-1 | — |
+| PRIVACY | LIVE_PARTIAL | consent ledger, disclosures | /dashboard/privacy | privacy_consent_events | latest-wins RPCs | withdraw now reachable | C-1 C-2 | L5 wording | LOCAL_BROWSER_PROVEN |
+| PERFORMANCE | LIVE_PARTIAL | — | — | — | — | bounded reads on map/vacancies | preview cache() | — | — |
+| ACCESSIBILITY | LIVE_PARTIAL | — | — | — | — | text+colour chips | §B4 | heading levels in EmptyState; `<details>` primary actions (owner IA) | — |
+| OBSERVABILITY | LIVE_PARTIAL | health probe, ai_runs, usage_cost_events | /api/health | — | — | health every 15 min | — | retention (R-10) | PRODUCTION_DEPLOYED |
+| TESTING | LIVE_PARTIAL | 926 guards, 96 e2e (6 in CI) | CI | — | — | §B6 | §C | authenticated e2e in CI (needs secret/session) | — |
+
+## I. CAPABILITY LOSS
+
+None. No route, nav id, table, RPC, policy or protected surface was removed
+or narrowed. Two attempted changes were reverted before commit (map station,
+direct project-facts update). The only stricter behaviours are deliberate
+and named: roster invite/assign now refuses managers at the gate (SQL already
+refused them); a self-recorded unverified document no longer satisfies a
+formal requirement; accept/refuse of a roster offer now acts only on an
+offer row (a withdrawal is its own decision).
+
+## J. OWNER DECISIONS — the RED packet (one batch)
+
+| # | EDGE | WHY CURRENT ARCHITECTURE CANNOT SAFELY COMPLETE IT | MINIMUM CHANGE | SCHEMA / RLS / AUTHORITY | PRIVACY | MIGRATION / ROLLBACK | ALTERNATIVES | DECISION REQUIRED |
+|---|---|---|---|---|---|---|---|---|
+| R-1 | Roster forge (`company_workers`, `agency_workers`) — HIGH | write authority = the forger's own | `revoke insert, update on public.company_workers, public.agency_workers from authenticated;` keep select; writers = `accept_worker_invitation` / agency equivalent (owner-run SECDEF) — OR a BEFORE INSERT/UPDATE trigger like `roster_link_subject_consent_guard` refusing `status='active'` unless `auth.uid()` = the worker's profile or an `accepted` `company_worker_invitations` row exists for that worker | RLS narrowing + trigger; rebase `caller_manages_worker` on `company_worker_engagements` | closes an identity-relationship forgery | timestamped migration + `.down.sql` restoring the policy; dry-run with rolled-back forge as in #1772 | none safe without SQL | approve variant (revoke vs trigger) |
+| R-2 | Booked worker's journal invisible to the booking employer | `company_worker_engagements` ≠ `engagement_contexts`; visibility = consent semantics | on `respond_booking_request_v3` accept, provision an `engagement_contexts` row (relationship `employee`, `journal_review_enabled=false`) for the booking's org — the worker still chooses that context when writing, and the org still has to enable review | additive insert inside an existing SECDEF RPC | new context row is visible to both parties only | migration redefining the RPC + down | worker opts into the context from the journal (GREEN, but the org row must exist) | approve the semantics |
+| R-3 | Project dates / place / title editable | admin writes must be gated RPCs; RLS is owner-only while managers may manage | `update_project_facts_v1(p_project_id, p_title, p_city, p_country, p_start, p_end)` SECDEF gated by `can_manage_project`, `end >= start` check, completed = read-only | one function + grant to authenticated | none | migration + down (drop function) | — | approve |
+| R-4 | Membership-only manager cannot confirm | `review_journal_entry` predates membership widening | replace the engagement-only reviewer check with `manages_organization` + a synthetic reviewer context or allow `company_memberships` role | SECDEF change | none | migration + down | — | approve |
+| R-5 | Post-approval confidence recompute silently no-ops for managers | `worker_skills` RLS owner-only | move `computeConfidence` write into `confirm_entry_and_verify_skills` | SECDEF change | none | migration + down | leave as is (labels still correct) | approve or accept |
+| R-6 | No durable notification for journal confirmation / new message | `notification_events_type_check` is a DB CHECK | widen CHECK with `journal_entry_confirmed`, `conversation_message` (+ emitters, GREEN after) | CHECK widening (canonical GREEN fixture class) | recipient-only rows | migration + down | derived bell counts only (unread already exists for messages) | approve |
+| R-7 | Account deletion executor | none exists; 57 `NO ACTION` FKs block a delete | `alter … on delete set null` on actor columns; `execute_account_deletion_v1` implementing the E1–E8 classes in `deletion-plan.ts`; superadmin-only | FK changes + SECDEF | GDPR Art. 17 | migration + down (recreate constraints) | manual owner SQL per request | approve design |
+| R-8 | Organization archival | no `archived_at`; 11 `NO ACTION` FKs | `organizations.archived_at` + read filters | column + policies | — | migration + down | membership revocation row by row | approve |
+| R-9 | Worker cannot end own `company_workers` / `agency_workers` link | write policy owner-only | subject UPDATE policy to `status='removed'` on own rows | RLS additive | consent withdrawal | migration + down | — | approve |
+| R-10 | Retention: `ai_runs.profile_id` never nulled; none for cost/pilot/notification/message tables | schedule + functions absent | extend the sweep; add purge functions with owner-set horizons | functions + cron | data minimisation | migration + down | — | set horizons |
+| R-11 | Map on the worker phone bar / stations | station list is a frozen IA contract | add `{id:"map"}` station (5 label keys prepared) | none | — | none | chat chip only (today) | approve IA change |
+| R-12 | `/jobs/[id]` hreflang + OpenGraph merge; `/jobs` title suffix | files under the per-PR jobs waiver | `buildPageMetadata({locale, path:/jobs/${id}, …})` in `generateMetadata`; drop the duplicated suffix on the list title | none | none | none | — | add this PR's follow-up number to the waiver list |
+| R-13 | `usage_cost_events_forbid_mutation/_truncate` lack pinned `search_path` | advisor WARN | `alter function … set search_path = public` | function attribute | — | migration + down | accept | approve |
+| R-14 | Handoff dispatch of `proposition_consent.given=false` rows | owner design 2026-09-17 | skip in dispatcher (GREEN) and/or `where given='true'` in the RPC | policy | worker consent | none / migration | keep as "review employer approach" | decide |
+| R-15 | `customer_requests` UPDATE owner-only (colleague close/reopen) | policy predates org spine | widen UPDATE to `has_org_demand_access` | RLS widening | org-internal | migration + down | — | approve |
+
+Also owner: `JobPosting` JSON-LD vs anonymous rule; consent wording "employers"
+(L5); CSP enforcement (L4); `messages/fi/` orphan; `<details>`-hidden primary
+actions on programmes/approvals; GOV-1 secret (unchanged).
+
+## K. HUMAN WALK (Donatas, Ramūnas) — shortest real production paths
+
+After this PR deploys (check `/api/health` build = merge SHA):
+
+1. **Donatas, worker** — sign in → Profile. Above the history you will see
+   "Confirmed links" with Labour market ai Sp. z o.o and a "This is no longer
+   me — withdraw the link" button. Do NOT press it unless you mean it: the
+   800 h history leaves your profile the moment it succeeds (the organization
+   keeps its record). Open "Details" → the availability block now starts with
+   the work card editor (status, available from, country, pay).
+2. **Donatas, privacy** — Privacy page → "Contact requests": any request you
+   ALLOWED now shows "Withdraw contact details". Press "Download my data":
+   the bundle must list `notification_events`, `privacy_consent_events`,
+   `organization_people`, `organization_evidence_records` under `data`, and
+   `conversation_messages` under `withheld` with its reason.
+3. **Donatas, employer** — /dashboard/company/needs with the unnamed shell
+   (if you still have one) sends you to setup; with Klinkerio it renders as
+   before. /dashboard/projects → create inline works for owner/admin only.
+4. **Ramūnas, Nonstop** — /dashboard/company/people → "Invite" as a manager
+   role now says it is owner/admin-only instead of failing after submit.
+5. **Anyone, public** — view-source of `/en/legal/terms`: canonical + five
+   hreflang + x-default; `/en`: two `application/ld+json` scripts
+   (Organization, WebSite); `/robots.txt` lists `/*/invite` and `/*/oauth`.
+
+Walk hygiene this mission: one minted QA session (allow-listed identity),
+reads only, deleted after the walk; no production rows written.
+
+---
+
+## L. CONTINUATION DELTA — 2026-09-19, second directive ("exhaust the queue")
+
+### L1. R-1 — proven, prepared, NOT applied
+Rolled-back probe on production (DO block + RAISE, nothing persisted): as the
+real owner of Labour market ai Sp. z o.o, `insert into company_workers
+(company_id, worker_id, status) values (own, <QA worker>, 'active')` was
+**ADMITTED — rows = 1**. Every legitimate writer of `company_workers` /
+`agency_workers` is a SECURITY DEFINER RPC (`invite_*`, `accept_*_worker_
+invitation`, `assign_*_worker_role`, `set_*_worker_journal_review`,
+`accept_invitation_v2`); the application never writes either table with the
+caller's own client (guard `red-roster-writes-rpc-only.test.ts` walks
+lib/app/components: zero). **Draft PR #1791** (label `needs-human-gate`,
+`migration-safety` = STRUCTURAL-GREEN / RISK-ACKNOWLEDGED) carries migration
+`20260919100000_roster_writes_rpc_only_v1` (revoke insert/update/delete from
+`authenticated` on both tables; drop `company_workers_write` and
+`agency_workers_write`; select policies untouched), its verbatim rollback, the
+hostile-test contract, and ONE approval statement:
+
+> **Apply 20260919100000_roster_writes_rpc_only_v1 to production.** I approve
+> revoking insert/update/delete on `public.company_workers` and
+> `public.agency_workers` from `authenticated` and dropping the policies
+> `company_workers_write` and `agency_workers_write`, so that a roster
+> relationship can only be created through the invitation → worker-acceptance
+> RPCs and managed through the owner-gated RPCs. Rollback file acknowledged.
+
+Hostile contract to run live (rolled back) right after apply — FAIL 42501:
+owner inserts an arbitrary active company_workers row; agency owner inserts an
+arbitrary active agency_workers row; owner updates an existing row's status /
+worker directly. PASS: invite → the worker accepts → row exists → role /
+journal-review by the owner → project assignment. Reads unchanged.
+
+### L2. GREEN queue — closed (PR #1792, merged 2026-09-19, squash `e37e531e`; three CI rounds: a script import of a "dead" module, a test cast, and the inquiry-terminology guard on the repeat link)
+| Item | Shipped | Proof |
+|---|---|---|
+| A · client side of the agency bridge by sentence | intent `agency-invites` → `loadClientBridgeForChat` (the partners page's three reads) → chips over NEW dispatcher actions `company.accept-connection` / `decline-connection` / `share-request` = the canonical `bridge-actions` (token-confirmed; client company from the ACTIVE workspace; RPCs re-check ownership + invited e-mail) | router sentences ×5 locales; no-direct-write; registry 76→78, actions 52→55; 55 conversation test files green |
+| B · booking by sentence | intent `propose-booking` → the candidates panel of the open need; the panel's token-confirmed `company.propose-booking` button is the offer (a sentence never picks a person) | router ×5; registry |
+| C · empty states | communication → network; market-map empty pool → work directions; team-roster card → the invitation it described | guard `empty-states-lead-somewhere`; communication exit LOCAL_BROWSER_PROVEN (§L4) |
+| D · employer requirement ledger | scouting renders MET (matchedHard + strengths) beside FAILED (blocking) and UNKNOWN (missing facts) + "evidence comparison — not a qualification, not a ranking"; no new read, no score | guard |
+| E · hours reconciliation | already exists on `/dashboard/company/people` (`team-recorded-work`: journal hours and the organization ledger per member, beside, never added). Nothing to build without new accounting semantics — proven unnecessary | code read |
+| F · per-request demand clone | "Repeat this need" on readback rows → `?repeat=<id>#demand-intake` → `getOwnDemandPrefillById` (own row, same workspace gate, same mapper); urgency and every date/deadline cleared; signals / offers / bookings / messages / evidence never read | `demand-repeat.test.ts` |
+| G · dead code | `lib/worker/reactivation-model.ts` (+test) removed. `lib/profile/skill-evidence-state.ts` was removed and RESTORED — `scripts/skills-evidence-report.ts` imports it; the audit's "orphan" list omitted `scripts/`, so the rest of that list stays untouched | CI typecheck |
+
+### L3. Notifications — final verified truth (worker interest → employer)
+Emitter `emitDemandInterestNotification` fires inside `expressInterestCore`;
+the store's service_role grant is applied (ledger 20260908061619). Per signal
+on the real demands: Klinkerio `a2ffd425` — signal 2026-07-05 17:56 HAS a
+durable `demand_interest_expressed` row (unread by Donatas); signal 17:46 has
+none; the Nonstop demand's 2026-07-05 and 2026-08-25 signals have none; every
+signal since the grant (2026-09-17 ×2) has its row. The three missing rows
+fall in the pre-grant window and cannot be re-emitted by the code (dedupe by
+signal id is the only emit path); an owner-run backfill is possible but is a
+production write and is NOT done here. Employer awareness does not depend on
+the durable row: the needs page shows "interest waiting" per demand and the
+scouting view reads the signals directly (Donatas sees 2 on Klinkerio).
+
+### L4. Proof
+- typecheck + lint green on every touched file; product gate PASS_WITH_SCOPED_TRANSITIONAL_WAIVER; migration-safety GREEN (queue) / STRUCTURAL-GREEN RISK-ACKNOWLEDGED (#1791)
+- first CI run of #1792 caught two things the local run missed: a script import of a "dead" module and a test cast — both fixed in the same PR
+- LOCAL_BROWSER_PROVEN (production build, production backend, QA identity, 1360 + 390 px): `/lt/dashboard/communication` renders the empty state with the network exit (localized href `/lt/dashboard/network`), zero horizontal overflow; the map's empty-pool exit could not be rendered with the QA identity (its pool is not empty) — guarded
+- PRODUCTION: `/api/health.build = e37e531e` at 2026-09-19 10:19 UTC (auth + db ok); `/robots.txt` still lists the invite/oauth exclusions from #1789. Authenticated surfaces of #1792 are PRODUCTION_DEPLOYED; their PRODUCTION_BROWSER_PROVEN is the human walk (§K): Donatas — /dashboard/company/needs "Repeat this inquiry" on a past request; scouting cards now show "Requirements met"; in the chat, "agentūra mane pakvietė" and "pasiūlyti darbą kandidatui". Ramūnas — same chat sentences from the Nonstop workspace once an agency invitation exists.
+
+### L5. Capability loss
+None. R-1 changes nothing until approved. The chat gained three actions that
+exist as page forms already; no intent, action, route or table was removed.
+The one deletion (`reactivation-model.ts`) had no importer anywhere.
+
+---
+
+## M. CONTINUATION DELTA — 2026-09-19, third window ("continue → secure → complete → verify → deploy")
+
+Proof levels exactly as §preamble. Nothing in this section re-audits; every
+line is a targeted trace that was needed to implement or verify one edge.
+§A–§L above are history and stay as written; where this section corrects
+them, the correction is here (owner section 19 rule).
+
+### M1. PRODUCTION
+
+| | |
+|---|---|
+| main at start | `55e97654` = production build, health ok |
+| main at close | `b2702a40` (#1796) — sequence: #1793 `db859bc7` → #1791 `b68348ab` → #1796 `b2702a40`; docs commit on top |
+| production | `/api/health.build = b68348ab` at 11:56 UTC (auth 145 ms, db 447 ms, dub1); `b2702a40` deploying at close — verify `build` before the walk |
+| migration ledger | **293 applied** (was 292): `20260919104526 roster_writes_rpc_only_v1` — the ONLY apply of this window; repo files 292 + 4 prepared RED files on draft branches (not on main) |
+| Supabase advisors | unchanged except the R-1 policies are gone; R-13 WARN still present (draft #1797) |
+
+### M2. R-1 — CLOSED (applied, hostile-proven, ledgered, merged)
+
+Owner approval received verbatim in the window handoff. Drift check before
+apply: #1791 was 2 commits behind main (no migration among them); every SQL
+writer of both tables is SECURITY DEFINER (0031, 0033, 0036, 20260829120000,
+20260902230000); zero app-side direct writes (guard). The migration matched
+the approval sentence line for line.
+
+- **Applied** via MCP `apply_migration` (target `gorgitwvdzxbnaxhrsrw` verified
+  by project listing): ledger `20260919104526 roster_writes_rpc_only_v1`.
+- **Readback:** `company_workers` relacl `authenticated=r` (was `arwd`);
+  policies left `company_workers_select` + `agency_workers_select` only.
+  **Correction to §B1/§L1:** `agency_workers` NEVER had an `authenticated`
+  grant (relacl was NULL) — its `_write` policy was inert; `company_workers`
+  was the only live hole. The migration's agency half was a harmless no-op.
+- **Hostile contract, live, rolled back** (real actors under
+  `set local role authenticated` + JWT claims): owner Donatas direct INSERT
+  active row naming an isolated E2E worker → **42501**; direct UPDATE
+  `status` → **42501**; direct UPDATE `worker_id` → **42501**; direct DELETE →
+  **42501**; owner SELECT of own roster → 1 row (reads unchanged); agency owner
+  Ramūnas direct INSERT `agency_workers` → **42501**.
+- **Legitimate path, live, rolled back:** `caller_manages_worker` false →
+  `invite_company_worker` → the WORKER's `accept_company_worker_invitation` →
+  active row → `caller_manages_worker` true → `assign_company_worker_role`
+  (row shows `foreman / Brigadininkas`) → `assign_worker_to_project` →
+  `project_worker_assignments` active row. `set_company_worker_journal_review`
+  returned its pre-existing text precondition `role_not_allowed` (needs
+  `company_admin` + engagement context) — not an R-1 effect.
+- **Merged** #1791 squash `b68348ab` after two CI rounds (a `require()` lint
+  in the guard; the marked-migration ratchet list). `docs/APPLIED_LEDGER.md`
+  carries the entry with sha256 `558cd636d618…`.
+- Proof level: PRODUCTION_DEPLOYED for the app; the authority change itself
+  is PRODUCTION-PROVEN by the rolled-back contract above.
+
+### M3. NEW HIGH FOUND WHILE TRACING R-2 — R-16 (RED draft #1794, NOT applied)
+
+`add_org_member(p_org_id, p_worker_id)` — SECURITY DEFINER, granted to
+`authenticated`, callable by an org owner/manager — mints an ACTIVE
+`employee` `engagement_contexts` row for ANY worker id. **Proven live, rolled
+back:** as Donatas, for the E2E worker with NO roster row and NO invitation →
+`added`, forged rows = 1. `relationship_types.employee.grants_worker_visibility
+= true`, so the forged context satisfies the membership branch of
+`can_view_worker` (private worker row readable without discoverability
+consent), appears in the person's own context picker as a claim they never
+made, and is the row the review toggle acts on. Same class as R-1, one table
+over; R-1 and the 2026-09-18 trigger do not reach it. The UI never offers it
+(the members panel's `addable` list is roster-derived — consent-backed since
+R-1); the RPC called directly does not apply that rule.
+
+Draft #1794 `20260919120000_add_org_member_requires_consented_roster_v1`:
+one function body gains `return 'not_linked'` unless an ACTIVE
+`company_workers` / `agency_workers` row exists on the organization's legacy
+company or agency; no exemption for any role; rollback = prior body
+verbatim. **New body dry-run on production (aborted transaction):** forge →
+`not_linked`, 0 rows; invite → the worker accepts → context exists (the
+accept RPC provisions it; `add_org_member` → `already_member`, idempotent).
+Guard `red-add-org-member-consent.test.ts`; ratchets 293.
+
+Security receipt (§D) after this window: **CRITICAL 0 · HIGH 1 (R-16, RED
+draft, NOT applied) · H1 CLOSED** · MEDIUM/LOW unchanged (M3 owner, L3–L7
+owner/accepted). SECURITY_COMPLETE is NOT declared.
+
+### M4. GREEN halves shipped (merged to main)
+
+| Edge | PR | What | Proof |
+|---|---|---|---|
+| R-2 GREEN — booked people visible | #1793 `db859bc7` | `/dashboard/company/people` lists the company's ACTIVE `company_worker_engagements` (RLS-only, bounded 50, roster rows excluded); per person the honest state: **not a member** → "Journal not reviewable yet: a booking does not create a work context. Invite this person to join as an employee — the moment they accept, the context exists… You cannot create it for them." + exit to the canonical `join_as_employee` invitation; **already a member** → governed in the members panel. `OrgMember.profileId` added. Copy ×5. | guard 15/15 incl. static render of both states; 24 guards on touched files 637/637. Production has ONE active booking whose worker is also on the roster → the non-empty state cannot be shown on real data without fabricating a booking; the QA identity is a worker. PRODUCTION_DEPLOYED; browser proof = human walk. |
+| R-4 GREEN — confirmation authority | #1796 `b2702a40` | `getOrgMembersData.governanceWithoutReviewer` (active memberships with the roles `manages_organization()` accepts, minus reviewer-engagement holders, minus the registered owner) + `viewerIsRegisteredOwner`; members panel block "Confirmation authority" drawn ONLY for the registered owner → EXISTING owner-only `grant_org_manager` (had no UI caller). Inbox + quick-confirm: `no_reviewer_engagement` is its own sentence naming who can change it. Role labels `admin` / `external_manager`. Copy ×5. | guard; 18 guards on touched files 462/462; full guards project 16408/16409 (the one failure is the Windows-CRLF-only `booking-atomic-double-booking`, identical on untouched main, green in CI). **Real production case:** the admin `875eb16b` of Labour market ai Sp. z o.o has no reviewer engagement — Donatas will see exactly one person in the block. |
+
+### M5. RED packets prepared as draft PRs (NOT applied; one approval sentence each, in the PR body)
+
+Stack (each draft's base is the previous one; ratchets 293 → 296; merge in
+this order after apply, or rebase whichever is approved first):
+
+| # | PR | Migration | What it closes | Dry run on production (aborted transaction, zero residue) |
+|---|---|---|---|---|
+| R-16 | #1794 | `20260919120000_add_org_member_requires_consented_roster_v1` | the second forge (M3) | forge → `not_linked`; consent-backed → context exists |
+| R-3 | #1795 | `20260919130000_update_project_facts_v1` — ONE SECDEF write for title / city / country / start / end, `can_manage_project`-gated (anti-oracle shape), validation before read, completed = read-only after auth, `granularity` kept truthful (city vs country), never a coordinate, idempotent, audited; **+ the form** (`ProjectFactsForm` in the operations manage strip, `setProjectFactsAction`, copy ×5) so approval + apply = a complete edge | calendar band, dates chip, overlap check, location block — all 9 production projects have country NULL and no dates | stranger → `not_found`; "Lithuania" → `invalid/country`; end < start → `invalid_dates`; 1-char title → `invalid`; owner write → `updated/changed=true` (LT, 2026-10-01→11-30, gran=city); again → `changed=false`; completed → `completed_read_only` |
+| R-13 | #1797 | `20260919140000_usage_cost_trigger_search_path_v1` — `alter function … set search_path = public` on the two cost-ledger trigger functions | advisor WARN | static classifier: zero risk findings (would be GREEN); kept on the gate because the packet lists it |
+| R-9 | #1798 | `20260919150000_end_roster_link_v1` — the worker withdraws the relationship they accepted / the owner removes a person; `end_org_membership_v1` authority ladder (admin / owner of THAT org / subject); `status → removed`, review cleared, the employee engagement ended in the same transaction, audited, never a DELETE; **+ the UI** ("My teams — I no longer work here" on the profile in the existing parallel stage; "Remove from the roster" on the owner's roster rows; one two-step control, authority never a prop) | R-9 + the §F "roster removal UI" gap (the same missing write — since R-1 nobody could end a link) | stranger → `not_found`; worker → `removed/self`, engagement ended; again → `already_removed`; owner's `caller_manages_worker_by_roster` → false; owner → `removed`; wrong kind → `not_found` |
+
+R-2 (booking context provisioning), R-5, R-6, R-7, R-8, R-10, R-11, R-12,
+R-14, R-15 — unchanged packets, no GREEN half found beyond what shipped.
+
+### M6. Capability loss
+
+None. No route, nav id, table, RPC, policy or protected surface removed or
+narrowed by anything merged. The one stricter behaviour is R-1 itself
+(direct roster writes refused), which no product path ever used.
+
+### M7. Human walk additions (Donatas, Ramūnas) — after `/api/health.build = b2702a40`
+
+- **Donatas, employer (Labour market ai):** `/dashboard/company/people` →
+  the members panel now ends with **"Confirmation authority"** listing ONE
+  person (the admin). Press "Grant confirmation authority" only if that
+  person should be able to confirm journal entries; afterwards their review
+  refusals stop. "Booked people" will NOT appear for this company (no direct
+  booking exists) — that is correct, not missing.
+- **Donatas, worker (Journal inbox):** nothing changes for the owner; a
+  membership manager without authority now reads the new sentence instead
+  of "not allowed".
+- **Ramūnas (Nonstop):** `/dashboard/company/people` — same block if any
+  governance member lacks confirmation authority; otherwise absent.
+- The four RED drafts change nothing in production until approved.
+
+---
+
+## N. CONTINUATION DELTA — 2026-09-19, fourth window ("verify → close approved REDs → continue GREEN → verify production")
+
+Same rules as §M: no re-audit; each line is a targeted trace. §A–§M stay as
+written; corrections live here.
+
+### N1. PRODUCTION (verified at window start, 13:41 UTC)
+
+| | |
+|---|---|
+| main | `5aac765a` (docs #1799) over `b2702a40` (code #1796) — local main was one commit behind and was fast-forwarded |
+| production | `/api/health.build = 5aac765a`, ok, auth 219 ms, db 432 ms, dub1 |
+| migration ledger | **293 applied**, latest `20260919104526 roster_writes_rpc_only_v1` — unchanged since §M |
+| R-1 readback | `authenticated` on `company_workers`: insert/update/delete **false**, select true; on `agency_workers`: all four false (never granted); `engagement_contexts`: writes false, select true |
+| Supabase branching | the `main` branch itself reports `MIGRATIONS_FAILED` (repo filenames ≠ ledger, the known state); the `Supabase Preview` failure on #1795 is that integration, not the R-3 SQL |
+
+### N2. R-16 (#1794) — VERIFIED, NO DRIFT, awaiting the owner sentence
+
+- Branch `fix/cc/r16-add-org-member-consent-v1` at `5659640c`: 2 behind main
+  (the #1796 code and the #1799 docs — neither touches `add_org_member`,
+  the migration set, or the ratchets); `mergeable = CLEAN`; quality,
+  migration-safety, e2e-smoke, mobile, CodeQL all SUCCESS.
+- **Rollback = production, byte for byte:** the `.down.sql` body was created
+  inside an aborted transaction and its `md5(prosrc)` read back as
+  `22167e898cb68a706e7cd4a50f53efc0` — identical to the live function's
+  `md5(prosrc)`. The migration body is that same text plus the one
+  `not_linked` precondition, placed after the worker lookup and before the
+  `already_member` short-circuit, with no role exemption.
+- **Live dry run re-run this window** (new body created inside a DO block,
+  `set local role authenticated` + the real owner's JWT claims incl. e-mail,
+  aborted by RAISE — zero residue): owner Donatas → `add_org_member(org,
+  E2E worker 7c06faf8 with 0 roster rows)` → **`not_linked`**, forged
+  context rows **0**; owner → `add_org_member(org, the one consented roster
+  worker 8af3e334)` → **`already_member`**. Legitimate behaviour unchanged.
+- Prerequisite helpers present on production: `is_admin`,
+  `manages_organization`, `organizations.legacy_company_id /
+  legacy_agency_id` (org `19f47e78` → company `788225e9`, agency NULL).
+- The ONE approval sentence stored in the PR body (verbatim):
+
+> **Apply 20260919120000_add_org_member_requires_consented_roster_v1 to production.** I approve replacing `public.add_org_member` so that it refuses (`not_linked`) unless the worker already holds an active `company_workers` / `agency_workers` row on the organization's legacy company or agency, with no exemption for any role. Rollback file acknowledged.
+
+Security receipt: **CRITICAL 0 · HIGH 1 (R-16 — packet verified, NOT
+applied) · R-1 CLOSED.** SECURITY_COMPLETE is NOT declared.
+
+### N3. R-2 — RECLASSIFIED: the RED half is SUPERSEDED by the consent-first path
+
+The §J proposal (provision an `employee` engagement context inside
+`respond_booking_request_v3` on accept) is **withdrawn**. Traced on
+production this window:
+
+1. booking accept → `company_worker_engagements` row only;
+   `respond_booking_request_v3` does not touch `engagement_contexts`
+   (correct: a booking is not consent to journal access);
+2. the employer sees the booked person on `/dashboard/company/people`
+   (#1793, merged) with the honest state and the ONE exit —
+   `/dashboard/network?type=join_as_employee`;
+3. the WORKER accepts → `accept_invitation_apply_v2` (arm
+   `join_as_employee`, slug `employee`) inserts the `engagement_contexts`
+   row for the invitation's organization — the same row
+   `accept_company_worker_invitation` inserts on the roster path;
+4. the organization enables review on that context
+   (`set_engagement_journal_review`), the worker writes journal entries in
+   it, and `review_journal_entry` admits the organization's reviewer.
+
+booking → visible booked person → explicit employee invitation → worker
+acceptance → engagement context → work → Journal → employer review is
+therefore complete and usable with no new authority. Worker agency is
+preserved at step 3. **R-2 RED: CLOSED (superseded).** No migration.
+
+### N4. R-4 — RECLASSIFIED: CLOSED by existing authority + #1796
+
+`review_journal_entry` (live body read this window) requires BOTH
+`manages_organization(org)` AND an active reviewer engagement
+(`manager` / `owner` / `external_manager`), else `no_reviewer_engagement`.
+`grant_org_manager` (owner-or-admin only) mints the `manager` engagement
+for a profile, audited. #1796 gives the registered owner the list of
+governance members without reviewer authority and the one button that
+calls that RPC, and names the refusal in the inbox. So a membership-only
+manager gains confirmation authority only when the owner grants it —
+explicit, owner-controlled, one manager model. The §J proposal (rebase the
+reviewer check on membership alone) would have made authority implicit and
+is **withdrawn**. **R-4: CLOSED (superseded).** No migration.
+
+### N5. R-3 / R-9 / R-13 — packets verified against production, NOT applied
+
+Common: each branch is 2 behind main (#1796 code + #1799 docs; no
+migration among them); quality, migration-safety, e2e-smoke, mobile, CodeQL
+SUCCESS on every one; the stacked order (#1794 → #1795 → #1797 → #1798)
+still holds; production has none of the three target objects.
+
+| # | PR | Verified this window | Approval sentence (verbatim from the PR body) |
+|---|---|---|---|
+| R-3 | #1795 `4340ab87` | `update_project_facts_v1` absent; helpers `can_manage_project`, `is_assigned_to_project`, `is_admin` present; **9 projects, 0 with country, 0 with start, 0 with end, 0 completed**; the migration is ONE function + privilege floor, no direct client write anywhere in the PR (the reverted approach is not reintroduced) | **Apply 20260919130000_update_project_facts_v1 to production.** I approve creating `public.update_project_facts_v1` (SECURITY DEFINER, `can_manage_project`-gated, `authenticated` only) as the one write for a project's title, city, country, start and end dates, with a completed project read-only. Rollback file acknowledged. |
+| R-9 | #1798 `291521c0` | `end_roster_link_v1` absent; `owns_company`, `owns_agency`, `is_admin`, `end_org_membership_v1` present; the body sets `status='removed'` (never DELETE), clears review, ends the mirrored `employee` engagement in the same transaction, audits actor capacity + self-initiated; stranger → `not_found` | **Apply 20260919150000_end_roster_link_v1 to production.** I approve creating `public.end_roster_link_v1` (SECURITY DEFINER, `authenticated` only) so that the subject worker, the owner of the company/agency, or an admin may set a `company_workers` / `agency_workers` row to `removed` and end the matching employee engagement, audited, never deleted. Rollback file acknowledged. |
+| R-13 | #1797 `59eba302` | both trigger functions still `proconfig = NULL`, `prosecdef = false`; the migration is two `alter function … set search_path = public` statements, nothing else; gate kept as the packet lists it | **Apply 20260919140000_usage_cost_trigger_search_path_v1 to production.** I approve pinning `search_path = public` on `usage_cost_events_forbid_mutation()` and `usage_cost_events_forbid_truncate()`. Rollback file acknowledged. |
+
+Each sentence approves exactly one migration. Approval of one is not
+approval of another.
+
+### N6. GREEN shipped this window
+
+| Item | What | Proof |
+|---|---|---|
+| Network dead ends (the last two of the §B4 list) | `/dashboard/network`: an empty people/company search and an empty "Active relationships" list each carry ONE link to the invite panel on the same page (`?invite=1#network-invite`, search text kept); `InvitePanel` gains `defaultOpen` so the panel is open on arrival without pre-selecting a type; copy ×5 (`network.search.emptyCta`, `network.relationships.emptyCta`) | guard `empty-states-lead-somewhere` (new case); typecheck + lint 0 errors |
+
+### N7. Remaining packets — status after this window
+
+| # | Status |
+|---|---|
+| R-2 | CLOSED (superseded, §N3) |
+| R-4 | CLOSED (superseded, §N4) |
+| R-16, R-3, R-9, R-13 | verified drafts, each waiting for its own sentence (§N2, §N5) |
+| R-12 | code-only, but the `/jobs` files sit under the owner-quoted per-PR scoped waiver (`public-acquisition-route-jobs`); adding a PR number there has been an owner act every time — stays in the owner batch |
+| R-14 | owner design decision, unchanged |
+| R-5, R-6, R-7, R-8, R-10, R-11, R-15 | unchanged packets; no newer work closed or narrowed them |
+| notification backfill (§L3) | production write, owner-run only |
+
+### N8. Capability loss
+
+None. Nothing removed, narrowed, or hidden. Two exits were added to an
+existing page; one optional prop was added to an existing component.
+
+### N9. Close of the fourth window (14:25 UTC)
+
+| | |
+|---|---|
+| #1800 | network empty-state exits + this §N — squash `b70f201d`, serving on production at 14:21 UTC (`/api/health.build = b70f201d`, auth 114 ms, db 134 ms) — PRODUCTION_DEPLOYED; local build exit 0 (BUILD_PROVEN) |
+| #1801 | register truth: ORG-11 owner gate was stale (#1752 merged 2026-09-17 as `4ff163da`) → PARTIAL, decision removed; J-INSTITUTION-OUTCOME cohort-join wording corrected (the one member row is the E2E learner fixture, left) — squash `2caedea8`; `product-truth` open owner decisions 6 → 5, BLOCKED 3 → 2 |
+| main at close | `2caedea8` |
+| ledger | 293, unchanged — nothing applied this window |
+| owner queue | R-16 (#1794) → R-3 (#1795) → R-9 (#1798) → R-13 (#1797): four sentences in §N2 and §N5, one migration each; lower priority batch: R-12 waiver number, R-14, the §L3 notification backfill |
+
+### N10. R-16 — APPLIED (owner sentence received 2026-09-19 ~14:30 UTC)
+
+The owner posted the §N2 sentence verbatim. Executed in this order, nothing skipped:
+
+| step | result |
+|---|---|
+| pre-apply drift re-check | live body md5 `22167e89…` unchanged; ledger 293; no row of this name; branch 5 behind main (#1796, #1799, #1800, #1801, docs — no migration among them) |
+| apply | Supabase MCP `apply_migration` on `gorgitwvdzxbnaxhrsrw`, name `add_org_member_requires_consented_roster_v1` → **ledger `20260919143247`, 294 applied** |
+| readback | new body md5 `11ea34068e0120de244caa77857d8262`; `not_linked` precondition present; no `is_admin` after it; SECURITY DEFINER, `search_path=public`; `anon` execute false, `authenticated` true |
+| hostile (live, rolled back) | owner Donatas → `add_org_member(19f47e78, E2E worker with 0 roster rows)` → **`not_linked`**, forged rows **0** |
+| existing (live, rolled back) | owner → the one consented roster worker → `already_member` |
+| legitimate chain (live, rolled back) | `invite_company_worker` → `invited`; the WORKER's `accept_company_worker_invitation` → `linked`, active roster row 1, employee context 0 → 1; owner `add_org_member` → `already_member` |
+| residue | 0 roster rows, 0 contexts, 0 invitations, 0 audit rows for the probe identity |
+| repo | markers flipped, `docs/APPLIED_LEDGER.md` entry (file sha256 `165bf9142c53806211d0bf05805433a881bc0fa9def9a1567f8d7f6ace8379cf`), #1794 marked ready, squash-merged **`6110e155`** at 14:45 UTC after green CI |
+
+Security receipt now: **CRITICAL 0 · HIGH 0 · R-1 CLOSED · R-16 CLOSED.**
+SECURITY_COMPLETE is still not declared: MEDIUM/LOW items and the owner-held
+gates (M3, L3–L7) are unchanged, and #1795 / #1797 / #1798 remain unapplied.
+
+### N11. R-3 — APPLIED (owner sentence received 2026-09-19 ~14:55 UTC)
+
+| step | result |
+|---|---|
+| pre-apply drift re-check | `update_project_facts_v1` absent; `can_manage_project`, `is_assigned_to_project`, `is_admin` present; ledger 294, no row of this name; branch 0 behind main after the restack |
+| apply | Supabase MCP `apply_migration`, name `update_project_facts_v1` → **ledger `20260919145731`, 295 applied** |
+| readback | SECURITY DEFINER, `search_path=public`, args `(uuid, text, text, text, date, date)`, `anon` execute false, `authenticated` true, gate present and the completed check after it |
+| contract (live, one DO block, rolled back) on real project `562c9c3e` | stranger (Ramūnas) → `not_found` · Lithuania → `invalid/country` · end < start → `invalid_dates` · 1-char title → `invalid/title` · owner write `lt` → **`updated, changed=true`**, row `LT / 2026-10-01 → 2026-11-30 / city`, audit +1 · again → `changed=false` · completed → `completed_read_only` |
+| residue | row still `country NULL`, no dates, `draft`; 0 audit rows; 0 of 9 projects carry facts (the write is now available to managers; no data was manufactured) |
+| repo | markers flipped, ledger entry (file sha256 `3a94acc577aa6e885b65f4de38a63311630380e86498454591f74e924b13f7c2`), #1795 ready, squash-merged **`c5cba480`** at 15:08 UTC after green CI (the form + action ship in the same merge, so the edge is complete on deploy) |
+| stack | #1797 (R-13) rebased onto main and retargeted; #1798 (R-9) rebased onto #1797; ratchet comments carry both the R-3 flip and the next bump; guards green on both |
+
+What this unlocks on production once `/api/health.build` reaches `c5cba480`: the operations manage strip of every non-completed project shows the facts form (title, city, country, start, end); the calendar band, the dates chip and the booking-overlap check start working the moment a manager enters dates. Human walk: Donatas → /dashboard/projects/562c9c3e/operations → set country LT and the dates.
+
+### N12. R-9 — APPLIED (owner sentence received 2026-09-19 ~15:17 UTC)
+
+| step | result |
+|---|---|
+| pre-apply drift re-check | `end_roster_link_v1` absent; `owns_company`, `owns_agency`, `is_admin`, `end_org_membership_v1`, `caller_manages_worker_by_roster` present; the 0027 CHECK admits `removed`; `engagement_contexts.ended_at` present; ledger 295, no row of this name |
+| apply | Supabase MCP `apply_migration`, name `end_roster_link_v1` → **ledger `20260919151920`, 296 applied** |
+| readback | SECURITY DEFINER, `search_path=public`, args `(text, uuid, uuid, text default null)`, `anon` execute false, `authenticated` true, all three ladder branches present |
+| contract (live, one DO block, rolled back) | setup invite → the WORKER accepts (roster 1, context 1) · stranger → `not_found` · the WORKER ends it → **`removed / self / engagement_ended=true`** · again → `already_removed` · owner's `caller_manages_worker_by_roster` afterwards → **false** · owner Donatas (admin capacity) ends the REAL consented row → `removed / admin / engagement_ended=true` · wrong kind → `not_found` · after: 2 removed rows, 0 active employee contexts, 2 audit rows |
+| residue | probe worker 0 roster rows / 0 contexts; the real row still `active` with its context active; 0 removed rows in the table; 0 audit rows; 0 invitations |
+| repo | #1798 rebased DIRECTLY onto main (the unapplied R-13 commit dropped from under it, ratchets 294 → 295, markers flipped in the resolution), ledger entry (file sha256 `ac7d8bf529f4f9e40247ef84a765873662f15bdd083fd8ed9638bfd1146f8eaf`), ready, squash-merged **`5dca2f97`** at 15:32 UTC after green CI (the "I no longer work here" control on the profile and "Remove from the roster" on the people page ship in the same merge) |
+| stack | #1797 (R-13) rebased onto the new main; ratchet comments renumbered 295 → 296; marked-migration list re-sorted by filename; guards green; still a draft, NOT applied |
+
+Security / consent receipt now: **CRITICAL 0 · HIGH 0 · R-1, R-16 CLOSED · R-3, R-9 CLOSED.**
+A roster relationship can now be created only by the worker's acceptance
+(R-1), can no longer be manufactured through the membership RPC (R-16), and
+can be ended by the worker or the owner without deleting history (R-9).
+
+### N13. R-13 — APPLIED (owner sentence received 2026-09-19 ~15:38 UTC) — the RED stack is empty
+
+| step | result |
+|---|---|
+| pre-apply drift re-check | both trigger functions `proconfig NULL`, SECURITY INVOKER, one trigger each; ledger 296, no row of this name; branch 1 behind main (docs only) |
+| apply | Supabase MCP `apply_migration`, name `usage_cost_trigger_search_path_v1` → **ledger `20260919153945`, 297 applied** |
+| readback | `proconfig = {search_path=public}` on both; still SECURITY INVOKER; still one trigger each; bodies still `raise exception` |
+| contract (live, rolled back; 65 rows, nothing changed) | UPDATE → `42501 … UPDATE is not permitted` · DELETE → `42501 … DELETE is not permitted` · TRUNCATE → `42501 … TRUNCATE is not permitted` — the append-only ledger behaves exactly as before |
+| repo | markers flipped, ledger entry (file sha256 `cb42b983bff8fcd093c247cbb66eec5621aab411ee2c512ddf5867379d5768d7`), #1797 ready, squash-merged **`c6ba6a09`** after green CI |
+
+### N14. Close of the RED queue — 2026-09-19
+
+| | |
+|---|---|
+| applied today, in order | R-1 `20260919104526` (window 3) · R-16 `20260919143247` · R-3 `20260919145731` · R-9 `20260919151920` · R-13 `20260919153945` |
+| ledger | **297 applied**; every entry above carries its `docs/APPLIED_LEDGER.md` row with the repo-file sha256, the owner sentence, the readback and the rolled-back contract |
+| drafts left from the 2026-09-19 packet | none — R-2 and R-4 closed as superseded (§N3, §N4); R-5, R-6, R-7, R-8, R-10, R-11, R-12, R-14, R-15 remain unprepared packets exactly as §J lists them |
+| security receipt | **CRITICAL 0 · HIGH 0**; advisor WARN for R-13 gone; MEDIUM/LOW owner-held items (M3, L3–L7) unchanged — SECURITY_COMPLETE is still not declared for that reason |
+| production | build = the last merge (see §N13); `/api/health` ok |
+| human walk additions | **Donatas:** /dashboard/projects/562c9c3e/operations → the facts form (country, dates) in the manage strip; /dashboard/profile → "My teams — I no longer work here" beside the history withdrawal; /dashboard/company/people → "Remove from the roster" on each roster row. **Ramūnas:** the same two roster controls on Nonstop's people page and his own profile. |
+
+---
+
+## O. WINDOW 5 — 2026-09-19 ("remaining RED truth → full-vision gap closure → real-user launch")
+
+Method: no new audit. Nine targeted traces (one per remaining R packet) plus
+four loop traces (worker, employer/company OS, agency, institution/RPL), each
+against CURRENT `main` and CURRENT production (read-only SQL). Every packet
+was reclassified from what the code and the live authority objects do today,
+not from the 2026-09-17 receipts.
+
+### O1. PRODUCTION
+
+| | at window start (16:03 UTC) | at close |
+|---|---|---|
+| main | `3bc58f53` | `2781956b` (#1802 → `143cc6c7`, §O docs → `961b04fd`, #1808 → `2781956b`) |
+| production build (`/api/health`) | `3bc58f53` | `2781956b`, ok, dub1, auth + db ok (17:11 UTC) — both GREEN PRs PRODUCTION_DEPLOYED |
+| migration ledger | **297**, latest `20260919153945_usage_cost_trigger_search_path_v1` | **297** — nothing applied this window (by design: every RED stayed a draft) |
+| security advisors | ERROR 1 (`worker_absence_scheduling` definer view — documented load-bearing exception) · WARN: 9 anon SECDEF = the public preview set, 404 authenticated SECDEF (class), leaked-password protection OFF (owner setting) | unchanged |
+
+### O2. REMAINING RED REGISTER — reclassified from current reality
+
+| R | ORIGINAL | CURRENT (main + prod) | STILL EXISTS | CLASSIFICATION | LAUNCH IMPACT | NEXT ACTION |
+|---|---|---|---|---|---|---|
+| R-5 | post-approval confidence recompute runs under the manager's RLS → silent zero-row update | unchanged: `confirm-actions.ts` UPDATE under caller RLS vs `worker_skills_write = owns_worker or is_admin`; neither RPC recomputes; **nothing renders `confidence_score`** (matching keys on `verified`/`source`, the dot reads `confidence_bin`, which the SECDEF path sets) | YES (dead write, no user-visible damage) | **GREEN half SHIPPED** (#1802: landed-row readback + logged mismatch, counts only) · **RED_REQUIRED** for the real fix · **OWNER_SEMANTICS** first: SQL sets bin `'green'` on confirmation while `binFor` means green = weakest bin — a working recompute would flip manager-confirmed dots green→yellow | POST_LAUNCH_DEPTH | owner decides the bin direction; then one SECDEF recompute inside `confirm_entry_and_verify_skills` + `review_journal_entry` |
+| R-6 | CHECK lacks `journal_entry_confirmed` + `conversation_message` | v8 CHECK verified in prod (22 types, 13 entities). **Messages: CLOSED** — unread count already drives the bell row + Messages badge (honest, clears on read). **Journal confirmation: gap real** — no emitter, no bell, no feed; worker sees it only on the journal page or the 7-day brief line | PARTIAL | **CLOSED** (message half) · **RED_REQUIRED** (journal half) — draft **#1806**: v9 widening + worker-only emitter wired into both confirmation paths | IMPORTANT_NOT_BLOCKING | sentence in O4 |
+| R-7 | no deletion executor; 56–57 `NO ACTION` FKs to profiles | request intake LIVE since 2026-07-06 (`submit_privacy_request_v1`, `customer_requests` row, superadmin queue with read-only E1–E8 preview). **Nothing executes.** 56 NO ACTION FKs still. #1789 withdrawals intact | YES | **GREEN half SHIPPED** (#1802: `docs/runbooks/account-deletion-manual-fulfilment-v1.md` — per-class DELETE / ANONYMIZE / DETACH / RETAIN, owner-run order, where a NO ACTION FK stops it) · **OWNER_SEMANTICS** (Package A Decision 1, contract-claim horizon) · **RED_REQUIRED** (nullable actor columns + superadmin-only `execute_account_deletion_v1`) | IMPORTANT_NOT_BLOCKING (a request can be fulfilled by hand inside Art. 12's month) | Decision 1, then the executor packet |
+| R-8 | no org archival | `organizations` has no lifecycle column (verified); every child object has a canonical end + audited RPC; `archived_at` pattern exists on education programmes | YES | **GREEN half SHIPPED** (#1802: `docs/runbooks/organization-closure-composition-v1.md`) · **RED_REQUIRED** for a durable state (`organizations.archived_at` + read filters + owner-only `archive_organization_v1`) | POST_LAUNCH_DEPTH | sentence in O4 |
+| R-10 | `ai_runs.profile_id` never nulled; no purge for cost/pilot/notification/message | exactly ONE automated retention exists (daily pg_cron nulls `ai_runs.output_excerpt` past 90 d — verified `cron.job`); `usage_cost_events` is trigger-immutable BY DESIGN; ai_runs and cost events are EMPTY in prod; two docs disagree about `profile_id` | YES (mostly documentation) | **GREEN half SHIPPED** (#1802: false "30-day recording" voice copy corrected in 12 locales; retention matrix no longer says the applied migrations are UNAPPLIED) · **OWNER_SEMANTICS** (horizons table, O4) · **POST_LAUNCH** for the purge jobs (empty tables) | POST_LAUNCH_DEPTH | owner sets horizons in one sitting |
+| R-11 | Map not on the worker phone bar; "chat chip only" | **the audit was wrong on current main**: PASAULIS (`/dashboard/opportunities`) EMBEDS the world map at the top; the full map page was linked only inside a collapsed `<details>`; the command search lists `market_map` at every width. Also: the catalogue "primary nav tabs" render ONLY in the admin chrome — two guards asserted a tab no real user sees | NO (reachable) — but three taps + a collapsed disclosure | **GREEN_CLOSED** (#1802: full-map link in the map header, one tap from the tab bar; both guards rewritten to assert the rendered doors) · station-list entry = **OWNER_SEMANTICS** (IA), optional | none | none required |
+| R-12 | `/jobs/[id]` no hreflang, OG overwrite; `/jobs` double brand | all three verified present on main | YES | **GREEN code SHIPPED as draft #1803** · blocked ONLY on the owner waiver number (`public-acquisition-route-jobs`) | POST_LAUNCH_DEPTH (SEO) | sentence in O4 |
+| R-14 | dispatcher posts `given=false` rows | verified LIVE: every `queued` row is POSTed to the Nonstop door within seconds (`dispatchAfterHandoff`) and daily; payload = pseudonymous refs + declared context, no name/contact/CV/journal (guard-pinned); consent box unticked by default; "may not name" enforced only inside the partner receiver. Prod: 1 row (`closed`), 0 queued-without-consent | YES | **OWNER_SEMANTICS** — the "yes" implementation is ready as draft **#1804** (dispatcher gate, withheld copy in 11 locales, own-read carries consent) | IMPORTANT_NOT_BLOCKING | sentence in O4 |
+| R-15 | `customer_requests` UPDATE owner-only | verified: UPDATE policy unchanged since 0028; SELECT widened to `has_org_demand_access`; **no close/reopen RPC exists**; app writes raw UPDATE under the creator's RLS; reads are owner-pinned. Prod: 2 multi-member orgs, 8 needs in them | YES | **RED_REQUIRED** — draft **#1805**: `close_demand_v1` / `reopen_demand_v1` (status only), UPDATE policy untouched, app RPC-first with owner fallback, org-scoped scouting read with `ownedByCaller` | IMPORTANT_NOT_BLOCKING (Nonstop is a multi-member org) | sentence in O4 |
+
+New RED found while tracing the loops: **INSTITUTION EVIDENCE → COMPETENCY** — `set_engagement_journal_review` refuses every slug but `employee` (verified in prod), so a learner's practice can never be confirmed by the training provider. Draft **#1807** makes the rule data (`relationship_types.journal_reviewable`, fail-closed, seeded employee + student) per the learner least-privilege ruling. IMPORTANT_NOT_BLOCKING for controlled launch; BLOCKS the institution role's real value.
+
+### O3. GREEN WORK SHIPPED
+
+| PR | state | what |
+|---|---|---|
+| **#1802** | MERGED `143cc6c7`, **PRODUCTION_DEPLOYED** | map one tap from PASAULIS + honest map guards; voice retention copy (12 locales); R-5 no-op named; R-7/R-8 runbooks; retention matrix corrected |
+| **#1808** | MERGED `2781956b`, **PRODUCTION_DEPLOYED** | "Who is committed where" per person/per date on company planning (the last core planning step done in Excel); 44 px client accept/decline on the agency bridge |
+
+### O4. GENUINE RED OWNER BATCH — ordered by impact, one sentence each
+
+CI at close: #1804, #1805, #1806, #1807 all green (quality · e2e-smoke · migration-safety); #1803 red on `quality` by design until the waiver number is added.
+
+1. **R-15 (#1805)** — "Apply R-15: close_demand_v1 / reopen_demand_v1 for creator, admin and has_org_demand_access colleagues — status only, UPDATE policy unchanged, with rollback."
+2. **R-14 (#1804)** — "Must proposition_consent.given = true before a commercial_handoffs row may be POSTed to the Nonstop door? YES → merge #1804. NO → close it; then a second, separate consent line on the interest form is the honest follow-up."
+3. **INSTITUTION (#1807)** — "Apply relationship_types.journal_reviewable (employee + student) and the data-driven set_engagement_journal_review, with rollback."
+4. **R-6 (#1806)** — "Apply R-6 v9: widen notification_events CHECKs with journal_entry_confirmed / journal_entry, with rollback."
+5. **R-12 (#1803)** — "Extend waiver public-acquisition-route-jobs to PR 1803 for the R-12 metadata fix."
+6. **R-5 semantics** — "Manager-confirmed skills show the bin computed by the §6.1 formula (green = early evidence, yellow = substantiated) — yes / keep the hard-coded green."
+7. **R-7 Decision 1** — "Contract-claim horizon for bookings / engagements / contracts = 6 years (or state another)." Unblocks the executor packet.
+8. **R-10 horizons** — one sitting: `ai_runs.profile_id` null at 90 d OR record as retained; notification_events 12 mo; pilot_events 24 mo; conversation_messages 36 mo after close; usage_cost_events + consent/audit ledgers = never purged (record); storage orphan cleanup; standing approval for rolling deletes (Decision 3).
+9. **R-8** — "Apply R-8: organizations.archived_at + archive_organization_v1, owner-only, with rollback."
+
+Not owner-gated, still open (GREEN backlog, not launch-blocking): bare-verb chat accept ("priimu" without naming the offer) → needs a decision UX, not a pattern; `write-employer` sentence → route to the interest card when exactly one active interest; "how long" total on the identity card; per-project allocated-vs-journaled variance; team-enquiry fan-out to individual bookings; `buildBrigadePlan` read-only mount; agency deployment stage (`accepted` → deployed) and replacement linkage (those two need a schema decision — see O9).
+
+### O5. SECURITY
+
+CRITICAL 0 · HIGH 0 · MEDIUM: unchanged owner-held items (M3 = R-14, decided by O4-2) · LOW: unchanged (L3–L7). Nothing found this window widened any authority. Advisors as in O1.
+
+### O6. MARKETPLACE LOOP — remaining broken transitions only
+
+- COMMUNICATION by sentence (worker → employer): the `write-employer` intent is a hint; the BUTTON path is LIVE from the interest card in chat and on the board. GREEN backlog.
+- OFFER → COMMITMENT by sentence: "priimu pasiūlymą" lands on the offer cards (LIVE); a bare "priimu" falls to the fallback. GREEN backlog with an ambiguity decision (offer vs invitation).
+- NEXT OPPORTUNITY: confirmed skills change the label and the tie-break order only (correct: the 2026-09-19 wording "never the order" was slightly wrong — "only on an exact tie").
+- SUPPLY: the five-state work-seeking intent (`first_party_supply_declarations`) is edited under Privacy and never read by the worker's own board; the board knows only `availability_status`. GREEN (surface + read) — not launch-blocking.
+
+### O7. COMPANY / WORKFORCE OS — remaining broken transitions only
+
+- Required headcount / open positions on a PROJECT: no column, no demand↔project link — RED (schema) — "5 of 12 placed on the Kaunas site" is counted by hand.
+- Project-bound communication thread: `conversations` has no project context — RED (new `source_type`).
+- Employer-initiated agency/partner record: bridge is agency-initiated only — RED for the invite direction; surfacing `agency_clients` to non-agency companies is GREEN.
+- Cross-project assignment overlap on the CALENDAR (today only at pick time) — GREEN model change.
+- Per-project allocated-vs-journaled variance — GREEN read view.
+- Corrections to the 2026-09-19 package: per-request demand clone is LIVE ("Repeat this need"); `company_type` is self-service editable (no admin SQL flip needed for Ramūnas); per-worker side-by-side hours already ship.
+- SHIPPED this window: per-person per-date commitments list (#1808); project facts editable (R-3, window 4).
+
+### O8. WORKER IDENTITY / JOURNAL / EVIDENCE — remaining broken transitions only
+
+- Worker is not told their entry was confirmed (R-6, #1806).
+- "How long" total per engagement on the identity card — the hours exist in the journal, never aggregate onto the card (GREEN).
+- The 800 h period record is classified and counted in the ORG importer; `periodRecords` never reaches the worker's own card/history (GREEN read).
+- Player card lives on `/dashboard/journal`, not `/dashboard/profile` (documented IA decision; not a defect).
+- No score / stars / leaderboard anywhere — re-verified.
+
+### O9. AGENCY / NONSTOP — remaining broken transitions only
+
+- DEPLOYMENT: after client accept + worker consent the assignment onto the CLIENT's project is client-authority only (2026-07-23 ruling); the agency's offer progress tops out at `accepted` — the agency cannot see whether its worker was deployed → tracked off-platform. RED (an agency-visible deployment stage, or a bound assign RPC).
+- REPLACEMENT: ending an assignment writes nothing back to `agency_candidate_offers`; re-propose from scratch, by phone. RED (linkage).
+- REPEAT: clone exists; the share and prior offers do not carry over (two manual steps). GREEN.
+- CREW: composition/presentation LIVE; atomic collective authority NOT_BUILT by decision; fan-out of individual bookings from a team enquiry (`respond_team_enquiry_v1` writes no booking) is GREEN and is the consent-preserving way.
+- SHIPPED: 44 px accept/decline (#1808). Correction: `agency_real_client_bridge` IS applied (ledger `20260723155658`); only `agency_clients` Model-A is parked.
+
+### O10. INSTITUTION / RPL — remaining broken transitions only
+
+- EVIDENCE → COMPETENCY: learner practice unconfirmable (#1807, RED).
+- PLACEMENT: no path from a cohort learner to an employer engagement that keeps the institution link; employer invites separately as `employee` (a job, not a placement). RED.
+- RPL: read-only requirement/evidence comparison exists for COUNTRY × document scope (evidenced / not evidenced / UNKNOWN on `/dashboard/documents`); no PROFESSION axis; SKL-9 formal recognition MISSING by ARCH-2. Nothing anywhere asserts a qualification — re-verified.
+
+### O11. FULL-VISION DELTA
+
+| | |
+|---|---|
+| LIVE_COMPLETE | demand intake; matching; interest + employer notification; booking → commitment → engagement; journal + review + skills confirm (employer side); project facts/status/assignment/stages; calendar bands; roster consent lifecycle (R-1/R-9/R-16); map (embedded + full page, one tap); public jobs; GDPR export + request intake; agency invite → share → propose → decide → worker consent |
+| LIVE_PARTIAL | notifications (journal confirmation missing); chat sentence paths (buttons LIVE, some verbs missing); identity card (no duration total, no period record); calendar (no cross-project overlap on the calendar itself); agency (deployment invisible to the agency; no replacement linkage); institution (confirm blocked) |
+| GENUINELY_NOT_BUILT | account-deletion executor; org archival state; project headcount; project thread; employer-initiated partner records; agency deployment stage; learner placement; profession-axis requirements; retention purge jobs |
+| OWNER_GATED | #1803 #1804 #1805 #1806 #1807 + O4 items 6–9 |
+| POST_LAUNCH_DEPTH | R-5 real fix, R-8, R-10 purges, R-12, RPL profession axis |
+| HUMAN_VALIDATION_PENDING | Donatas, Ramūnas — O13 |
+
+### O12. CAPABILITY LOSS — NONE
+
+Every change this window ADDS a door or names a truth. Protected capabilities re-checked: MAP gained a door; nothing removed, hidden or narrowed. Two guards were rewritten from a false proof to a real one (a guard that could not fail is not a guard).
+
+### O13. REAL-USER LAUNCH
+
+| role | admit now? | exact next production action | concrete blockers |
+|---|---|---|---|
+| WORKER (Donatas) | **YES** | `/dashboard/opportunities` → one tap "Market map" (new) → `/dashboard/profile` (800 h history, work card) → `/dashboard/journal` (write one real entry) → `/dashboard/privacy` (voice line now honest) | none |
+| EMPLOYER (Donatas / Klinkerio) | **YES** | `/dashboard/projects/<id>/operations` (enter REAL dates/place, R-3) → `/dashboard/company/planning` (new: who is committed where) → `/dashboard/company/people` (roster, remove) → confirm one real journal entry | none for a single-owner org; R-15 for a colleague |
+| AGENCY (Ramūnas / Nonstop) | **YES, with one known Excel step** | company settings → company type `staffing_agency` (self-service) → partners → invite the real client → client accepts (44 px now) → share request → propose → worker consents → **deployment / replacement are tracked off-platform (O9)** | O4-2 decides what leaves the platform on interest; R-15 if a second Nonstop member closes needs |
+| INSTITUTION | **YES for invite/enrol; NO for confirming practice** | create programme → invite learner → learner accepts → cohort — stop before "confirm" until #1807 applies | #1807 |
+
+### O14. NEXT ACTION
+
+Owner: answer O4 items 1–3 (R-15, R-14, institution) — three sentences; each draft is a merge away and the migrations are prepared with rollbacks and contracts. Then **Ramūnas walks the real Nonstop client workflow on production** and names the first transition that still forces WhatsApp — deployment visibility is the predicted one, and it is the next RED packet only if a real walk confirms it.
+
+---
+
+## P. WINDOW 6 — 2026-09-20 — owner decisions 1–3 applied, verified; development stopped
+
+| | |
+|---|---|
+| main | `11e58866` (#1805 → `2b2c97ff`, #1804 → `327f77fd`, #1807 → `11e58866`) |
+| production build | `11e58866` — `/api/health` 05:47:58 UTC: ok, dub1, auth 100 ms, db 60 ms (verified after all three merges; the docs-only commit `56e44b51` follows) |
+| migration ledger | **299** — `20260920051619 20260919190000_demand_lifecycle_colleague_v1`, `20260920052103 20260919210000_relationship_journal_reviewable_v1` |
+| **R-15** | APPLIED + MERGED. Drift check clean (main = origin = prod `57b278b1`, functions absent, UPDATE policy owner-only, diff = the ten prepared files). Readback: both functions SECURITY DEFINER, `search_path=public`, anon EXECUTE false / authenticated true / public false; UPDATE policy byte-identical; 4 policies, 2 triggers unchanged. |
+| **R-14** | MERGED (owner semantics = YES). Diff re-verified = the 20 prepared files; gate `propositionConsent.given !== true → withheld, row stays queued`. Production state: 1 handoff row (`closed`, given=false), 0 queued — the gate has nothing to hold yet; behaviour is pinned by `handoff-dispatch.test.ts` (withheld rows never posted / never touched; tampered `"true"` string withheld) and the handoff guard. |
+| **INSTITUTION** | APPLIED + MERGED. Readback: `relationship_types.journal_reviewable` employee=true, student=true, all others false; `grants_worker_visibility` unchanged on all ten (student still false); function SECURITY DEFINER, `search_path=public`, reads `rt.journal_reviewable`, literal gone, anon EXECUTE false / authenticated true; the one production student engagement still `journal_review_enabled=false`. |
+| **hostile / legitimate contracts** (live functions, every block aborted by RAISE, zero residue) | R-15: outsider → `not_found`; role `member` → `not_found`; colleague on draft → `invalid_transition`; colleague close → `closed/colleague`; colleague raw UPDATE under RLS → **0 rows**; colleague reopen → `submitted`, again → `already_open`; creator close/again/reopen → `closed/admin`, `already_closed`, `submitted`; outsider reopen → `not_found`; anon → `42501`; payload + agency_client_id + notes + title md5 identical; residue 0 audit rows, status `submitted`, 0 probe memberships. INSTITUTION: other-org manager → `not_authorized`; learner on own engagement → `not_authorized`; provider on student → `enabled` (flag true) then `disabled`; org owner on an active `employee` → `enabled` (identical to before); org owner on a non-reviewable relationship (`owner`) → `not_a_member_engagement`; anon → `42501`; `student.grants_worker_visibility` false; residue 0. |
+| **security** | CRITICAL 0 · HIGH 0. Advisors unchanged: ERROR 1 (`worker_absence_scheduling` definer view — documented exception), WARN 9 anon SECDEF (public preview set), 406 authenticated SECDEF (class; +2 = the two new gated functions), leaked-password protection OFF (owner setting). |
+| **capability loss** | NONE. UPDATE policy on demand untouched; worker visibility untouched; ARCH-2 untouched; every pre-existing path returns the same answer in the contracts. |
+| **drafts left** | #1803 (R-12, owner waiver number), #1806 (R-6 v9; ratchets need a restack to 299 before merge). Both remain classified per §O. |
+
+Development stopped here by owner instruction. Nothing from §O4 items 4–9, no
+agency deployment/replacement schema, no headcount, no project thread, no RPL
+expansion, no redesign.
+
+**Real-user phase:** `docs/launch/RAMUNAS_NONSTOP_REAL_WALK_2026-09-20.md` —
+the shortest real production walk for Ramūnas, starting from the production
+facts (Nonstop is `company_type = construction` today, has 2 roster workers,
+2 submitted needs and **no real client connection**), thirteen steps with the
+seven-field record per step, and the one question that decides the next P0.
+
+**Launch rule now in force:** worker admit · employer admit · agency admit
+with the known off-platform limitation · institution practice-confirmation
+eligible for real validation (applied 05:21 UTC).

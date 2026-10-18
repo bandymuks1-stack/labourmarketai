@@ -26,12 +26,22 @@ export async function RoleEnrichment({
   preview,
   ctaSource,
   ctaKind,
+  ctaNext,
+  afterPreview,
 }: {
   root: "workers" | "companies" | "agencies";
   previewKey: "profile" | "demand" | "pool";
-  preview: React.ReactNode;
+  /** Optional. Public pages pass none: no fabricated example data (containment 2026-10-08). */
+  preview?: React.ReactNode;
   ctaSource: string;
   ctaKind: "signup" | "waitlist";
+  /** Same opt-in as `PageHero.ctaNext`: an internal path the signup CTA
+   *  carries through `?next=`, so a page that promises ONE thing does not
+   *  drop the visitor on the generic dashboard. Omitted = the default. */
+  ctaNext?: string;
+  /** Optional block rendered right after the preview section (e.g. a page
+   *  that wants its benefit cards BELOW the visual proof, not above it). */
+  afterPreview?: React.ReactNode;
 }) {
   const t = await getTranslations(root);
   const sh = await getTranslations("shared");
@@ -60,8 +70,11 @@ export async function RoleEnrichment({
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-text-secondary">
           {t(`${previewKey}.subcopy`)}
         </p>
-        <div className="mt-10 grid items-center gap-10 lg:grid-cols-2">
-          <div className="flex justify-center">{preview}</div>
+        <div className={preview ? "mt-10 grid items-center gap-10 lg:grid-cols-2" : "mt-10"}>
+          {/* min-w-0: a grid item defaults to its content's min width, so a
+              wide preview pushed the column past a phone screen (622 px in
+              375 px, prod 2026-09-29) and the card was clipped. */}
+          {preview ? <div className="flex min-w-0 justify-center">{preview}</div> : null}
           <ul className="flex flex-col gap-4">
             {bullets.map((b) => (
               <li key={b} className="flex items-start gap-3 text-sm text-text-secondary">
@@ -75,6 +88,8 @@ export async function RoleEnrichment({
           </ul>
         </div>
       </section>
+
+      {afterPreview}
 
       {/* (b) journey */}
       <section className="relative mx-auto max-w-container px-6 pt-20 sm:px-12">
@@ -120,6 +135,7 @@ export async function RoleEnrichment({
           ctaKind={ctaKind}
           ctaLabel={t("cta.button")}
           ctaSource={ctaSource}
+          ctaNext={ctaNext}
         />
       </div>
     </div>

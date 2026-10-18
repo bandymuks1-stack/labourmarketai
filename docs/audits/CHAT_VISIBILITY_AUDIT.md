@@ -154,6 +154,9 @@ The service-role client (`lib/supabase/admin.ts`, `createAdminClient()`,
 | `lib/billing/subscription-store.ts` | **runtime** | **No** — billing tables only (Stripe TEST webhook; no user session exists) | ✅ legitimate; billing tables carry no authenticated write policy by design |
 | `lib/billing/customer-store.ts` | **runtime** | **No** — `billing_customers` only (Stripe TEST multi-subject v2: per-billing-subject customer mapping; webhook/checkout write side has no user session) | ✅ legitimate; same billing-table design — no authenticated write policy, service-role is the only write path; no chat table, nothing outbound |
 | `lib/admin/billing-actions.ts` | **runtime** | **No** — billing tables only (admin manual pilot override, `isSuperadmin`-gated) | ✅ legitimate; same billing-table design |
+| `lib/billing/checkout-operations-store.ts` | **runtime** | **No** — `billing_checkout_operations` only (billing safety v1: the server-side checkout-operation identity the Stripe idempotency key derives from; written by the checkout route and the webhook, neither of which has a user-session write path) | ✅ legitimate; same billing-table design — admin SELECT only, no authenticated write policy, service role is the only write path; no chat table, nothing outbound |
+| `lib/billing/reconcile.ts` | **runtime** | **No** — READ-ONLY over `billing_subscriptions` / `billing_customers` / `payment_webhook_events` / `billing_checkout_operations` (billing safety v1 reconciliation report, `isSuperadmin`-gated) | ✅ legitimate; the last three are admin-SELECT via `public.is_admin()` (active_role only) while the app admin signal is dual, so the service role is the only read path that agrees with the app gate; writes nothing (`writesPerformed: 0`), never charges; no chat table, nothing outbound |
+| `lib/billing/effective-entitlements.ts` | **runtime** | **No** — READ-ONLY `billing_subscriptions` for an ORGANIZATION billing subject only (payments production calm v1, 2026-09-22) | ✅ legitimate; the table's only SELECT policy is `owner_id = auth.uid() or is_admin()`, so through the user client an organization's plan was visible ONLY to the profile that paid — a co-manager with `manage-billing` in the same workspace resolved as free. The read is scoped by the SERVER-resolved subject (`resolveBillingSubject` → `resolveEmployerCompanyContext`, the caller's own active `company_memberships` row through the RLS-scoped session — the same subject the checkout route binds a session to), filtered by adapter mode, projects plan_key / status / provider_subscription_id / updated_at only (no payer identity, no customer id), writes nothing (P7 guard), falls back to the user client when no service key is configured; personal subjects keep the user-scoped read. No RLS change; no chat table; nothing outbound |
 | `lib/admin/company-need-intakes.ts` | **runtime** | **No** — reads/updates `company_need_public_intakes` only (Public Intake Owner Queue v1, `isSuperadmin`-gated) | ✅ legitimate; the table has no anon/authenticated RLS policy by design (PR #678: write-only via anon RPC, read-only via service role); status update only, writes nothing outbound |
 | `lib/sales/lead-intake.ts` | **runtime** | **No** — READ-ONLY `waitlist` SELECT (§8.14 intake panel, `isSuperadmin`-gated) | ✅ legitimate; `waitlist` has no authenticated read policy by design (0005: anon INSERT only, reads service-role only); writes nothing |
 | `lib/env.ts` | env plumbing (`requireSupabaseServiceEnv`) | No | ✅ |
@@ -167,10 +170,51 @@ rows above — `app/api/leads/route.ts` (writes `leads` only), the two
 billing paths (billing tables only), the superadmin-gated read-only
 `waitlist` intake read, and the superadmin-gated
 `company_need_public_intakes` owner queue — never a conversation table.** No
-user-facing chat read or write uses the service role. This inventory is pinned
+user-facing chat READ uses the service role, and — with ONE exception recorded
+below — no chat WRITE does either. This inventory is pinned
 in CI: `chat-visibility-rls.test.ts` fails if a new runtime `createAdminClient()`
 caller appears or if any chat path imports the admin client, forcing this doc to
 be updated and the new bypass justified.
+
+**Counterpart lookup for the brigade-offer negotiation thread (2026-10-11).**
+`lib/company/team-offer-conversation.ts` makes one READ-ONLY service-role
+lookup of three columns — the counterpart's profile id
+(`customer_requests.profile_id` for the supplier side,
+`team_demand_offers.offered_by` for the receiver side) and the offering team's
+name — and only AFTER the caller's side was proven by their own authorized
+read (the offer row under `team_demand_offers_select_v1`, or the
+receiver-gated `list_team_offers_for_request_v1`). It touches no chat table;
+the ids never reach the client and only become the other participant of a
+thread opened through `getOrCreateDirectConversation` with the
+`allowed_team_demand_offer` grant. Forward-fix: migration `20261011200000`
+(RED, owner-gated) can expose the counterpart via a party-gated RPC and retire
+this read.
+
+**The one exception (2026-10-06, authority closure F-1 — OWNER REVIEW
+REQUESTED).** `lib/communication/communication-core.ts` performs exactly one
+service-role write: inserting the OTHER participant(s) into a conversation the
+caller has just created under their own RLS, after a `ContactAuthority`
+(`lib/communication/contact-authority.ts`) proves the §8.1 contact gate held.
+Why it exists: migration `20261006100100_conversation_participants_server_
+authority_v1` makes the database refuse any end-user session that inserts
+ANOTHER profile into a conversation — before it, `conversation_participants_
+insert` let a conversation's creator add any profile uuid, so any signed-in
+account (directly through PostgREST, or through the exported `createConversation`
+server action) could open a thread to anyone and bypass the contact-consent
+gate, which existed only in TypeScript callers. The §8.1 permission is a
+server-side evaluation over many relationship facts and is deliberately not
+re-implemented in SQL (no parallel authorization system), so the only writer
+that can add another person is the server, after the gate.
+Constraints (pinned in `authority-closure-first-package.test.ts`): exactly one
+`createAdminClient()` call in the core, placed after the authority check, writing
+only `conversation_participants`; nothing is read with the service role
+(participants are still read under the sender's session, pinned by
+`notification-message-journal-events.test.ts`); the browser-callable
+`actions.ts` neither imports the authority nor the admin client; the authority
+is an identity-checked WeakSet token a client payload cannot reproduce. The
+alternative that keeps this section's original claim intact — a SECURITY DEFINER
+RPC callable only by `service_role` — is the same service-role write behind one
+more hop, so it was not chosen.
 
 ---
 
@@ -297,3 +341,135 @@ audit.
   site yet (the product never calls `lmc_spend_v1`); it is the prepared seam
   so the first spend caller can pair its failure path with compensation.
   Pinned in the `chat-visibility-rls.test.ts` caller inventory.
+
+- **2026-09-22 — `lib/vacancy-store/vacancy-translation-read.ts`** (reader-locale
+  rendering of PUBLIC job advertisements, owner P0 2026-09-22 §9). Touches ONE
+  table, `public_vacancies`, and within it only the `translations` column added
+  by migration `20260922150000`. Service role is genuinely required rather than
+  convenient: `20260809160000_public_vacancy_persistence_v1` grants
+  `authenticated` SELECT on that table and nothing else BY DESIGN ("there is
+  deliberately no INSERT, UPDATE or DELETE policy — ingestion runs as a trusted
+  server job"), so a rendering cannot be stored beside the original under the
+  reader's own client. The reads that DECIDE anything still run under the
+  caller's RLS: the board and `/jobs/[id]` fetch the vacancy rows themselves
+  through the signed-in client, and this module is handed those rows.
+
+  What it writes is DERIVED and regenerable: per-locale
+  `{status,title,description,sourceLanguage,sourceHash,provider,model,generatedAt}`
+  entries keyed by target locale. The publisher's own columns (`title_raw`,
+  `description_raw`, `source_language`) are never written. An entry is valid
+  only while its `sourceHash` equals the row's `content_hash`, so a re-imported
+  revision invalidates the rendering instead of outliving it.
+
+  It reads nothing about a person and stores nothing about one: the only
+  identity it takes is a viewer id, used solely as the key of an in-process
+  rate limit. Anonymous readers never reach the writer at all (the crawlable
+  `/jobs/[id]` page resolves renderings only for a signed-in member), so a
+  crawler cannot cause a vendor call or a write. Outbound traffic goes through
+  the audited AI runtime as task `translate_vacancy` (classified PUBLIC — see
+  `lib/ai/runtime/data-sensitivity.ts` and `ai-data-egress.test.ts`), which
+  admits only the advertisement's title, description and the two locale codes.
+  Touches no chat table. Pinned in the `chat-visibility-rls.test.ts` caller
+  inventory.
+
+- **2026-09-04 — `lib/supply-bridge/feed-source.ts`** (first-party supply feed
+  reader, Agentai OS `FIRST_PARTY_SUPPLY_FEED` contract). Calls exactly one
+  RPC, `first_party_supply_feed_v1()`, and reads or writes no table directly.
+  Service role is genuinely required rather than convenient: the human-gated
+  migration `20260904120000_first_party_supply_representation_v1` grants
+  EXECUTE on that function to `service_role` ONLY — revoked from `public`,
+  `anon` AND `authenticated` — because it answers with every AUTHORISED person
+  at once, which is right for the emitter and wrong for any signed-in account.
+  Proven in the production rollback harness: the same call as `authenticated`
+  fails SQLSTATE 42501.
+
+  The authority filter lives INSIDE the SQL function (a current granted
+  `partner_supply_representation` consent at the current text version, a
+  declaration that is not withdrawn, and a validity window that has not run
+  out), so the service key opens the front door and never the authority check,
+  and a second caller cannot obtain a laxer answer than the first. The
+  projection it returns carries no name, email, phone, address, document or
+  journal content — there is no such column in the function's select list, and
+  the emitter drops any row that grew one.
+
+  Touches no chat table. Sends nothing outbound: the artefact is written to
+  `runtime/labourmarket-supply/first-party-supply-feed.jsonl` (gitignored) or
+  served from the bearer-authenticated pull route
+  `/api/internal/supply-feed/first-party-v1`, which refuses 401 while
+  `SUPPLY_FEED_BEARER_TOKEN` is unset. Pinned in the
+  `chat-visibility-rls.test.ts` caller inventory. Full design and acceptance
+  evidence: `docs/handoffs/FIRST_PARTY_SUPPLY_BRIDGE_V1.md`.
+
+- **2026-10-06 — `lib/invitations/signup-bridge.ts`** (frictionless addressed
+  invite, PR #2167). Calls ONE service_role-only SECURITY DEFINER read,
+  `get_invitation_signup_context_v1` (migration `20261006100500`, RED, not
+  applied), through the admin client to prefill the invited address on the
+  signup page - the same pattern and ACL as `public-preview.ts`. It reads no
+  table directly, writes nothing, touches no chat table, answers only for a
+  still-usable addressed invitation, and grants nothing: acceptance still needs
+  the session e-mail to equal the invited address (`20261003151100`).
+
+- **2026-09-17 — `lib/invitations/external-referral-receive.ts` and
+  `lib/invitations/public-preview.ts`** (universal invitation / referral
+  network v1). Both call service_role-ONLY SECURITY DEFINER functions from
+  migration `20260917120000` (RED, unapplied at the time of writing) and
+  neither reads or writes a table directly — `service_role` holds no table
+  grant on `invitations` in production, so the key opens only the two doors.
+  The receiver runs behind a per-source machine secret
+  (`lib/api/external-referral-auth.ts`) and the strict envelope contract; the
+  SQL re-checks consent and idempotency and never looks up a person. The
+  preview serves the logged-out `/invite/[token]` landing a fixed minimal
+  object with no addressee, message, need, declared context or id, and the
+  module re-applies that allowlist. Pinned in the `chat-visibility-rls.test.ts`
+  caller inventory. Contract: `docs/integrations/EXTERNAL_WORKER_REFERRAL_V1.md`.
+
+- **2026-09-17 — `lib/commercial/handoff-dispatch.ts`** (worker → real vacancy
+  → interest → Nonstop commercial handoff v1). A cron sweep with no user
+  session that calls exactly one service_role-ONLY SECURITY DEFINER function
+  from migration `20260917160000` (RED, unapplied at the time of writing),
+  `list_queued_commercial_handoffs_v1`, which projects an allow-listed set of
+  the worker's DECLARED context from the canonical tables at read time — no
+  note, journal, CV, document or contact column — and updates
+  `commercial_handoffs.status` (service_role holds SELECT, UPDATE and never
+  INSERT there; the only insert path is the caller-owned SECDEF
+  `create_commercial_handoff_v1`). The key opens nothing else: service_role
+  has no table grant on `worker_skills`, `worker_professions`,
+  `worker_languages` or `profiles`. Its single outbound target is the
+  owner-configured partner door (`NONSTOP_HANDOFF_ENDPOINT` +
+  `NONSTOP_HANDOFF_TOKEN`); while either is unset the sweep answers
+  `not_configured` before the key is touched. Touches no chat table. Pinned
+  in the `chat-visibility-rls.test.ts` caller inventory. Contract:
+  `docs/integrations/NONSTOP_COMMERCIAL_HANDOFF_V1.md`.
+- **2026-09-30 — `lib/profile/avatar.ts` `getAvatarForVisibleWorker()`**
+  (owner decision D1: a worker's profile photo for the people who have a
+  REAL work relationship with them). The service key is used for ONE
+  operation only — `storage.createSignedUrl(path, 3600)` on the private
+  `profile-avatars` bucket — and only for a path the database has just
+  returned to the VIEWER's own session through the SECURITY DEFINER RPC
+  `worker_avatar_path_v1` (migration `20260930133500`, RED, owner-gated):
+  the worker themselves, or an ACTIVE company roster / agency roster /
+  engagement in a managed organization / assignment on a manageable
+  project. The discovery-consent branch of `can_view_worker()` is
+  deliberately NOT a basis, and a role alone never is. The path must lie in
+  the worker's own `<profile_id>/` folder. No table read with the key, no
+  chat table, no write, nothing public; any failure → the initials
+  monogram. Pinned in the `chat-visibility-rls.test.ts` caller inventory.
+
+- **2026-10-06 - `lib/email/send-ledger-store.ts`** (durable outbound-email
+  cost guardrail, migration `20261006130000_email_send_ledger_v1`, RED,
+  owner-gated). The service key is used for ONE operation only - the
+  `reserve_email_send_v1` RPC, executable by `service_role` alone, which
+  atomically counts and records a hashed recipient + organization id +
+  timestamp in `email_send_ledger_v1` (RLS on, no policy, no client grant).
+  No chat table, no other table, no raw address/subject/body stored, nothing
+  sent by this module's reserve step. Pinned in the
+  `chat-visibility-rls.test.ts` caller inventory.
+
+- **2026-10-12 — `components/admin/product-metrics-section.tsx`** (owner programme
+  2026-10-12 §8, operator product metrics). READ-ONLY aggregate counts computed by
+  `lib/ops/product-metrics.ts` with the service-role client; rendered only inside
+  `/dashboard/admin/launch-readiness`, after that page's `requireSuperadmin()`. From the chat tables it reads `conversations.created_at` and
+  `source_type` solely to COUNT threads; no subject, body, participant or id is read
+  into or rendered by the page. It writes nothing and sends nothing outbound. The same
+  module runs hourly in `scripts/product-monitor.ts` (GitHub Actions, secret held by
+  GitHub), whose issue text is aggregate numbers only.

@@ -1,18 +1,23 @@
 import "server-only";
 
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
+import { actsAsAgency } from "@/lib/company/agency-capability";
 import { createClient } from "@/lib/supabase/server";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { organizationCapabilities } from "@/lib/organizations/capabilities";
 import { isEducationFirstWorkspace } from "@/lib/conversation/education-home";
 import { listSharedRequestsForAgency, listAgencyOfferProgress } from "@/lib/agency/bridge-read";
+import { DEMAND_KIND_OR_FILTER } from "@/lib/demand/market-direction";
 import { ROLLUP_OPEN_DEMAND_STATUSES } from "@/lib/company/org-demand-rollup";
 import {
   UNKNOWN_FACTS,
+  UNKNOWN_PERSON_FACTS,
   type CompanyStarterFacts,
   type Fact,
+  type PersonStarterFacts,
   type StarterSignals,
 } from "@/lib/conversation/starters";
 
@@ -53,14 +58,88 @@ const PERSON_SIGNALS: StarterSignals = {
   learnerLinked: false,
 };
 
-export function personStarterContext(learnerLinked: boolean): WorkspaceStarterContext {
+export function personStarterContext(
+  learnerLinked: boolean,
+  personFacts: PersonStarterFacts = UNKNOWN_PERSON_FACTS,
+): WorkspaceStarterContext {
   return {
-    signals: { ...PERSON_SIGNALS, learnerLinked },
+    signals: { ...PERSON_SIGNALS, learnerLinked, personFacts },
     agencyWorkspace: false,
     educationWorkspace: false,
     organizationName: null,
     organizationId: null,
   };
+}
+
+/**
+ * KNOWN-STATE-FIRST (owner P0 §3, 2026-09-06): the few bounded counts that
+ * answer "does this account already hold something real about this person?"
+ *
+ * Same idiom as the company side: `head` counts under the caller's own RLS,
+ * each independently guarded, each degrading to `null`. `null` means UNKNOWN
+ * and never becomes a zero — claiming a person has no history because a read
+ * failed is exactly the dishonesty §10 forbids.
+ *
+ * Work history lives in `engagement_contexts` with no organisation
+ * (`save_self_declared_work_history_v1`). The signup trigger provisions ONE
+ * organisation-less row per profile with no title, so the count filters on a
+ * present title: otherwise every brand-new account would look like it already
+ * had a work history.
+ */
+export async function loadPersonStarterFacts(): Promise<PersonStarterFacts> {
+  let supabase: Awaited<ReturnType<typeof createClient>>;
+  let uid: string | null = null;
+  try {
+    supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    uid = data.user?.id ?? null;
+  } catch {
+    return UNKNOWN_PERSON_FACTS;
+  }
+  if (!uid) return UNKNOWN_PERSON_FACTS;
+
+  const count = async (
+    build: (c: ReturnType<typeof asAny>) => Promise<{ count: number | null; error: unknown }>,
+  ): Promise<Fact> => {
+    try {
+      const res = await build(asAny(supabase));
+      if (res.error) return null;
+      return typeof res.count === "number" ? res.count : null;
+    } catch {
+      return null;
+    }
+  };
+
+  // The person's OWN skills, joined to their worker row in the same request
+  // (`workers!inner`, filtered by profile). Unfiltered, this count evaluated
+  // the `can_view_worker` policy on every row of the table — 82 ms in the
+  // database against ~5 ms by index for the same answer (production,
+  // 2026-09-28), growing with every skill anyone adds — and for someone who
+  // may view other workers it counted theirs too. One request, no prior
+  // `workers` read to wait for; no worker row → 0; a failed read → null.
+  const [skills, workHistory, journalEntries] = await Promise.all([
+    count((c) =>
+      c
+        .from("worker_skills")
+        .select("id, workers!inner(profile_id)", { count: "exact", head: true })
+        .eq("workers.profile_id", uid),
+    ),
+    count((c) =>
+      c
+        .from("engagement_contexts")
+        .select("id", { count: "exact", head: true })
+        .eq("profile_id", uid)
+        .is("organization_id", null)
+        .not("title", "is", null),
+    ),
+    count((c) =>
+      liveJournalEntriesOnly(
+        c.from("journal_entries").select("id", { count: "exact", head: true }),
+      ),
+    ),
+  ]);
+
+  return { skills, workHistory, journalEntries };
 }
 
 /** Company identity: resolve the active workspace's capabilities and facts. */
@@ -89,7 +168,9 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
 
   const [staffingAgency, capabilities, legacyType] = await Promise.all([
     safe(async () => {
-      const company = await getOwnedCompanyById(companyId!);
+      // A read of the company TYPE for the greeting — any governance member
+      // the resolver accepted may know whether their organization is an agency.
+      const company = await getAccessibleCompanyById(companyId!);
       return company.kind === "ok" && company.row?.companyType === "staffing_agency";
     }, false),
     safe(() => readOrganizationCapabilities(organizationId!), [] as readonly string[]),
@@ -101,6 +182,13 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
   const held = organizationCapabilities({ roleSlugs: capabilities, legacyType });
   const educationFirst = isEducationFirstWorkspace({ roleSlugs: capabilities, legacyType });
   const hasEducation = held.includes("training_provider");
+  // THE ONE AGENCY RULE (lib/company/agency-capability, owner decision
+  // 2026-09-28): company type OR a declared workforce role. The bridge reads
+  // below were gated on the TYPE alone, so an organization that is an agency
+  // by its declared roles (production: QA-SYNTHETIC Gama, type
+  // "construction") had no agency facts and its Home brief never ran the
+  // agency rung — a worker's declined placement stayed invisible there.
+  const agencyWorkspace = actsAsAgency(staffingAgency ? "staffing_agency" : null, held);
 
   const supabase = await createClient();
   const count = async (build: (c: ReturnType<typeof asAny>) => Promise<{ count: number | null; error: unknown }>): Promise<Fact> => {
@@ -117,13 +205,20 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
     await Promise.all([
       count((c) =>
         c
+          // DIRECTION (SEP-4): this counts OPEN NEEDS. A `head: true` count
+          // returns no rows to classify, so the allow-list is applied in the
+          // query — from the one set in `market-direction.ts`, never a literal
+          // copy. Without it the chat starter told an agency it had open needs
+          // when what it had recorded was available people.
           .from("customer_requests")
           .select("id", { count: "exact", head: true })
           .eq("organization_id", organizationId)
+          .or(DEMAND_KIND_OR_FILTER)
           .in("status", [...ROLLUP_OPEN_DEMAND_STATUSES]),
       ),
       count((c) =>
-        c.from("projects").select("id", { count: "exact", head: true }).eq("organization_id", organizationId),
+        // Real projects: a DUPLICATE row is a fragment of its canonical one.
+        c.from("projects").select("id", { count: "exact", head: true }).eq("organization_id", organizationId).neq("record_state", "duplicate"),
       ),
       count((c) =>
         c
@@ -132,7 +227,7 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
           .eq("company_id", companyId)
           .eq("status", "active"),
       ),
-      staffingAgency
+      agencyWorkspace
         ? count((c) =>
             c
               .from("agency_client_connections")
@@ -141,7 +236,7 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
               .eq("status", "active"),
           )
         : Promise.resolve<Fact>(null),
-      staffingAgency
+      agencyWorkspace
         ? count((c) =>
             c
               .from("agency_client_connections")
@@ -150,13 +245,13 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
               .eq("status", "pending"),
           )
         : Promise.resolve<Fact>(null),
-      staffingAgency
+      agencyWorkspace
         ? safe(async () => {
             const res = await listSharedRequestsForAgency();
             return res.kind === "ok" ? res.rows.length : null;
           }, null as Fact)
         : Promise.resolve<Fact>(null),
-      staffingAgency
+      agencyWorkspace
         ? safe(async () => {
             const res = await listAgencyOfferProgress();
             return res.kind === "ok" ? res.rows.length : null;
@@ -204,7 +299,9 @@ export async function loadCompanyStarterContext(): Promise<WorkspaceStarterConte
       facts,
       learnerLinked: false,
     },
-    agencyWorkspace: staffingAgency,
+    // The SAME rule Home's agency track uses (lib/company/agency-capability):
+    // a declared workforce role opens the agency workspace too.
+    agencyWorkspace,
     educationWorkspace: educationFirst,
     organizationName,
     organizationId,

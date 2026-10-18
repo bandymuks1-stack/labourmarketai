@@ -4,13 +4,22 @@
  * Question pages get a SELF-referential canonical, reciprocal hreflang limited to
  * locales where a HUMAN_APPROVED answer exists (never a 404, never an English
  * fallback), and robots reflecting the page state. Structured data is limited to
- * the allowed types: a single answer is an Article + BreadcrumbList + Organization
- * (a Q&A-page schema type is never used for one editorial answer). The sitemap emits ONLY indexable answers, capped at 200,
- * with per-locale lastModified from the review date.
+ * the allowed types: a single answer is an Article + BreadcrumbList (a Q&A-page
+ * schema type is never used for one editorial answer). Organization + WebSite are
+ * emitted ONCE per page by app/[locale]/layout.tsx — question/hub pages never add
+ * a second Organization node. The sitemap emits ONLY indexable answers, capped at
+ * ANSWER_SITEMAP_MAX, with per-locale lastModified from the review date.
  */
 import type { Metadata, MetadataRoute } from "next";
 import { MARKETING_ORIGIN, MARKETING_HOST } from "@/lib/domain/canonical";
-import { BRAND_NAME } from "@/lib/seo/metadata";
+import {
+  BRAND_NAME,
+  BRAND_ORGANIZATION_DESCRIPTION,
+  BRAND_SEO,
+  OG_IMAGE_SIZE,
+  localizedUrl,
+  resolveActiveLocale,
+} from "@/lib/seo/metadata";
 import { activeLocales, defaultLocale, type ActiveLocale } from "@/lib/i18n/config";
 import {
   getAnswer,
@@ -21,11 +30,26 @@ import {
 } from "@/lib/answer-engine/publishing";
 
 const OG_LOCALE: Record<ActiveLocale, string> = {
-  en: "en_GB", lt: "lt_LT", ru: "ru_RU", nl: "nl_NL", de: "de_DE",
+  en: "en_GB", lt: "lt_LT", ru: "ru_RU", nl: "nl_NL", de: "de_DE", pl: "pl_PL",
 };
 
 const url = (locale: ActiveLocale, path: string) => `${MARKETING_ORIGIN}/${locale}${path}`;
 const questionPath = (slug: string) => `/questions/${slug}`;
+
+/**
+ * The SAME per-locale brand share card every public page uses (served by
+ * app/[locale]/opengraph-image.tsx). Without it the answer pages had no
+ * og:image and no twitter card, so chat/social previews inherited the root
+ * landing copy instead of the question (SEO/GEO gap, 2026-09-20).
+ */
+function shareImage(locale: ActiveLocale) {
+  return {
+    url: localizedUrl(locale, "/opengraph-image"),
+    width: OG_IMAGE_SIZE.width,
+    height: OG_IMAGE_SIZE.height,
+    alt: BRAND_SEO[locale].title,
+  };
+}
 
 /** Reciprocal hreflang across ONLY the locales where this question is published. */
 function questionHreflang(id: string): Record<string, string> | undefined {
@@ -56,6 +80,13 @@ export function buildQuestionMetadata(answer: LocalizedAnswer): Metadata {
       description: answer.description,
       url: canonical,
       locale: OG_LOCALE[answer.locale],
+      images: [shareImage(answer.locale)],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: answer.title,
+      description: answer.description,
+      images: [shareImage(answer.locale)],
     },
   };
 }
@@ -83,6 +114,13 @@ export function buildStaticQuestionsMetadata(
       description,
       url: canonical,
       locale: OG_LOCALE[locale],
+      images: [shareImage(locale)],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [shareImage(locale)],
     },
   };
 }
@@ -93,12 +131,32 @@ export interface BreadcrumbItem {
   readonly url: string;
 }
 
+/** The publisher, emitted ONCE per page by app/[locale]/layout.tsx. No sameAs:
+ *  no social profile URLs exist and none are invented. */
 export function organizationJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: BRAND_NAME,
     url: MARKETING_ORIGIN,
+    logo: `${MARKETING_ORIGIN}/icon-512.png`,
+    // Same owner-approved sentence as app/manifest.ts — one source.
+    description: BRAND_ORGANIZATION_DESCRIPTION,
+  };
+}
+
+/** The site itself, per locale. No SearchAction: the public site has no
+ *  search endpoint, and declaring one would be a false affordance. */
+export function webSiteJsonLd(locale: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: BRAND_NAME,
+    url: `${MARKETING_ORIGIN}/${locale}`,
+    // The per-locale brand description the homepage <meta> already carries.
+    description: BRAND_SEO[resolveActiveLocale(locale)].description,
+    inLanguage: locale,
+    publisher: { "@type": "Organization", name: BRAND_NAME, url: MARKETING_ORIGIN },
   };
 }
 
@@ -152,11 +210,9 @@ export function buildAnswerSitemap(): MetadataRoute.Sitemap {
   const params = publishedParams().slice(0, ANSWER_SITEMAP_MAX);
   return params.map(({ id, locale, slug }) => {
     const a = getAnswer(id, locale)!;
-    const languages: Record<string, string> = {};
-    for (const l of publishedLocales(id)) {
-      const la = getAnswer(id, l);
-      if (la) languages[l] = url(l, questionPath(la.localizedSlug));
-    }
+    // The SAME set the page's <head> declares (incl. x-default) — a sitemap
+    // cluster that disagrees with the page is discarded by crawlers.
+    const languages = questionHreflang(id) ?? {};
     return {
       url: url(locale, questionPath(slug)),
       lastModified: a.reviewDate,

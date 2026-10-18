@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown, Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
-import { activeLocales, tier1Locales } from "@/lib/i18n/config";
+import { AnchoredOverlay } from "@/components/ui/anchored-overlay";
+import { activeLocales } from "@/lib/i18n/config";
 import { persistLocalePreferenceAction } from "@/lib/i18n/locale-actions";
 import { cn } from "@/lib/utils";
-
-const TIER1 = new Set<string>(tier1Locales);
 
 // Native language names — language-invariant, so not in the i18n bundle.
 // Exported for other language pickers (the invitation recipient-language
@@ -31,20 +30,58 @@ export const NATIVE_LOCALE_NAMES: Record<string, string> = {
  * Compact premium locale selector (§2.4, 10 locales). Replaces the long inline
  * code list with a globe + current-language button that opens a tidy popover of
  * language NAMES. `usePathname` returns the path without the locale prefix, so
- * each entry re-links the same page in another language. Non-Tier-1 locales are
- * tagged as preview ([EN] placeholders until translated).
+ * each entry re-links the same page in another language.
+ *
+ * NO STATUS BADGE ON A LANGUAGE (owner ruling 2026-09-22). Every ACTIVE locale
+ * ships a complete catalog (zero `[EN]` placeholders — guarded by the i18n
+ * debt ratchets), so the person sees clean language names. Which locales are
+ * human-verified (Tier 1) versus AI-seeded pending §7.4 review (Tier 2) is an
+ * OPERATIONS fact, tracked in `lib/i18n/config.ts` + `docs/LANGUAGE_MATRIX.md`
+ * — it is not a label a person choosing their language has to read. The old
+ * "peržiūra" / "preview" tag leaked an internal state into the product.
  *
  * Changing language must change ONLY the locale: the same page, the same
  * query string (?next=, ?editing=, ?view=…) and the same #hash travel with
  * the switch. `usePathname` strips both, so the live search+hash is read
  * from `window.location` at the moment the menu opens (client-only —
  * avoids a useSearchParams Suspense boundary on statically rendered pages).
+ *
+ * ── THE MENU ESCAPES THE HEADER (owner window 11 §25/§27, 2026-09-07) ──────
+ * The owner opened this selector on the production dashboard and the language
+ * options rendered BEHIND the map. The cause is written down one file over,
+ * in `components/ui/anchored-overlay.tsx`: the authenticated header carries
+ * `backdrop-blur`, which creates a stacking context with `z-index: auto`, so
+ * a dropdown rendered inside it competes as part of the whole header group
+ * against later siblings — and Leaflet's panes run 400–700. **No z value
+ * inside the header can win that.** `NotificationPanel`, `AccountMenu` and
+ * `WorkspaceChip` were moved to the portal for exactly this reason (owner
+ * audit P0.3) and this component — their immediate neighbour in the same
+ * header cluster — was left behind, still painting an `absolute z-50` panel.
+ *
+ * It also explains the owner's §27 observation that only "Lietuvių" and
+ * "English" appeared: five rows are rendered from `activeLocales`, and the
+ * map card begins a few dozen pixels below the header — the rows past the
+ * first two were behind it, not missing.
  */
 export function LocaleSwitcher({
   className,
   compactBelowSm = false,
+  inline = false,
 }: {
   className?: string;
+  /**
+   * Render the panel in place instead of through the ONE overlay portal.
+   *
+   * OPT-OUT, and there is exactly one legitimate caller: the account menu
+   * renders this switcher INSIDE its own `AnchoredOverlay`, so the panel is
+   * already free of the header's stacking context — and portalling again
+   * would put the language rows outside `panelRef`, which is what
+   * AnchoredOverlay's outside-close test uses. A tap on a language would
+   * then count as "outside" the account menu, unmounting it between
+   * mousedown and click so the link never navigates (the failure mode
+   * `anchored-overlay.tsx` documents for the mobile sheet).
+   */
+  inline?: boolean;
   /**
    * Show the locale CODE ("LT") instead of the native name ("Lietuvių")
    * below `sm`. OPT-IN, because it is a downgrade in clarity that only a
@@ -66,8 +103,11 @@ export function LocaleSwitcher({
     if (open) setSuffix(window.location.search + window.location.hash);
   }, [open]);
 
+  // Outside-click + Escape are owned by AnchoredOverlay in the portal case
+  // (the ONE overlay contract); the `inline` case keeps its own listeners
+  // because there is no overlay to own them.
   useEffect(() => {
-    if (!open) return;
+    if (!open || !inline) return;
     const onDocClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
@@ -78,7 +118,7 @@ export function LocaleSwitcher({
       document.removeEventListener("mousedown", onDocClick);
       document.removeEventListener("keydown", onKey);
     };
-  }, [open]);
+  }, [open, inline]);
 
   return (
     <div ref={ref} className={cn("relative", className)}>
@@ -119,13 +159,18 @@ export function LocaleSwitcher({
         />
       </button>
 
-      {open && (
+      <Panel inline={inline} open={open} anchorRef={ref} onClose={() => setOpen(false)}>
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-2 max-h-[60vh] w-48 overflow-auto rounded-xl border border-ink-600 bg-ink-900/95 p-1.5 shadow-xl backdrop-blur-md"
+          data-testid="locale-switcher-menu"
+          className={cn(
+            "max-h-[60vh] w-48 overflow-auto rounded-xl border border-ink-600 bg-ink-900/95 p-1.5 shadow-xl backdrop-blur-md",
+            // Positioning belongs to the host: the portal panel is placed by
+            // AnchoredOverlay; the inline one hangs off the trigger itself.
+            inline && "absolute right-0 z-50 mt-2",
+          )}
         >
           {activeLocales.map((l) => {
-            const preview = !TIER1.has(l);
             const isActive = l === active;
             return (
               <Link
@@ -154,14 +199,7 @@ export function LocaleSwitcher({
                     : "text-text-secondary hover:bg-ink-800 hover:text-text-primary",
                 )}
               >
-                <span className="flex items-center gap-2">
-                  {NATIVE_LOCALE_NAMES[l] ?? l.toUpperCase()}
-                  {preview && (
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {t("localePreview")}
-                    </span>
-                  )}
-                </span>
+                <span>{NATIVE_LOCALE_NAMES[l] ?? l.toUpperCase()}</span>
                 {isActive && (
                   <Check aria-hidden className="h-3.5 w-3.5 text-brand-blue" />
                 )}
@@ -169,7 +207,34 @@ export function LocaleSwitcher({
             );
           })}
         </div>
-      )}
+      </Panel>
     </div>
+  );
+}
+
+/**
+ * The panel host. Portal by default — the header's `backdrop-blur` stacking
+ * context is escaped the same way every other header dropdown escapes it, so
+ * the map can never paint over the language options again. `inline` keeps the
+ * in-place render for the ONE caller that is already inside a portal.
+ */
+function Panel({
+  inline,
+  open,
+  anchorRef,
+  onClose,
+  children,
+}: {
+  inline: boolean;
+  open: boolean;
+  anchorRef: React.RefObject<HTMLDivElement | null>;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  if (inline) return open ? <>{children}</> : null;
+  return (
+    <AnchoredOverlay anchorRef={anchorRef} open={open} onClose={onClose} align="right">
+      {children}
+    </AnchoredOverlay>
   );
 }

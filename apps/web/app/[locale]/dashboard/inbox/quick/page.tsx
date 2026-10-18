@@ -1,16 +1,13 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
-import { EmptyState } from "@/components/app/empty-state";
-import {
-  QuickConfirmCard,
-  type QuickConfirmEntryView,
-} from "@/components/app/quick-confirm-card";
-import { QuickConfirmBatch } from "@/components/app/quick-confirm-batch";
+import type { QuickConfirmEntryView } from "@/components/app/quick-confirm-card";
+import { QuickConfirmQueue } from "@/components/app/quick-confirm-queue";
 import { fetchQuickReviewQueue } from "@/lib/journal/review-queue";
 import { fetchBatchExceptions } from "@/lib/journal/batch-review";
 import { createClient } from "@/lib/supabase/server";
 import { utcDayKey, utcTodayKey } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /** One-Tap Confirm (S3.5) — the manager's mobile-first confirm queue. Same
  *  gated reviewable set as the inbox, same write RPCs; this view only cuts
@@ -33,14 +30,23 @@ export default async function QuickConfirmPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const queue = await fetchQuickReviewQueue();
-  const entries: QuickConfirmEntryView[] = queue.map((e) => ({
+  // FAILED ≠ EMPTY (SEP-7): a read that failed gets its own named state below,
+  // never the "nothing to review" empty state.
+  let queue: Awaited<ReturnType<typeof fetchQuickReviewQueue>> | null;
+  try {
+    queue = await fetchQuickReviewQueue();
+  } catch {
+    queue = null;
+  }
+  const entries: QuickConfirmEntryView[] = (queue ?? []).map((e) => ({
     id: e.id,
     workerName: e.workerName,
     createdAt: e.createdAt,
+    workDay: e.workDay,
     originalText: e.originalText,
     recognizedNames: e.recognizedSlugs.map((slug) => tSkill(slug)),
     skills: e.skillsToConfirm.map((s) => ({ id: s.id, name: tSkill(s.slug) })),
+    confirmScope: e.confirmScope,
   }));
 
   // "Confirm all of today" — strictly the entries created today. "Today" is
@@ -53,15 +59,16 @@ export default async function QuickConfirmPage({
   // Exceptions pyramid (DESIGN_SOUL §3): the REAL server-flagged exceptions
   // for the batch candidates, surfaced BEFORE the confirm click. RPC absent
   // → empty map (the write side then enforces nothing extra either).
-  const exceptionMap = await fetchBatchExceptions(todays.map((e) => e.id));
+  const exceptionMap =
+    queue === null
+      ? new Map<string, never>()
+      : await fetchBatchExceptions(todays.map((e) => e.id));
   const exceptions = Object.fromEntries(exceptionMap);
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-5">
       <header className="flex flex-col gap-1.5">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("inbox.quick.title")}
-        </h1>
+        <PageTitle>{t("inbox.quick.title")}</PageTitle>
         <p className="text-xs leading-relaxed text-text-secondary">
           {t("inbox.quick.subtitle")}
         </p>
@@ -74,25 +81,15 @@ export default async function QuickConfirmPage({
         </Link>
       </header>
 
-      {entries.length === 0 ? (
-        <EmptyState
-          testId="quick-empty-state"
-          title={t("inbox.emptyTitle")}
-          why={t("inbox.empty")}
-          next={t("inbox.emptyNext")}
-        />
-      ) : (
-        <>
-          {todays.length > 1 ? (
-            <QuickConfirmBatch entries={todays} exceptions={exceptions} />
-          ) : null}
-          <ul className="flex flex-col gap-3">
-            {entries.map((e) => (
-              <QuickConfirmCard key={e.id} entry={e} />
-            ))}
-          </ul>
-        </>
-      )}
+      {/* One client boundary that stays mounted across the post-tap
+          revalidation, so the manager's receipt survives the queue emptying
+          (empty state + batch + cards all live inside it). */}
+      <QuickConfirmQueue
+        entries={entries}
+        todays={todays}
+        exceptions={exceptions}
+        unavailable={queue === null}
+      />
     </div>
   );
 }

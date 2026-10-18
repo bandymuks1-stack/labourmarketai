@@ -124,7 +124,17 @@ describe("M-P0-6 app-side stamping", () => {
   it("no app code sends a client-chosen org into shortlist or booking writes", () => {
     const scouting = readFileSync(join(WEB, "lib", "scouting", "scouting.ts"), "utf8");
     const booking = readFileSync(join(WEB, "lib", "booking", "booking-actions.ts"), "utf8");
-    expect(scouting).not.toMatch(/organization_id/);
+    // R-15 (2026-09-19): scouting READS the active workspace's needs with a
+    // SERVER-resolved organization (`resolveEmployerCompanyContext` /
+    // `requireEmployerCompany` — never a request parameter) inside an `.or(`
+    // filter that the SELECT policy already permits. Strip exactly those read
+    // filters; every remaining `organization_id` would be a write or a
+    // client-chosen value, and none may exist.
+    const scoutingWithoutOrgReads = scouting.replace(
+      /\.or\(`profile_id\.eq\.\$\{user\.id\},organization_id\.eq\.\$\{(ctx|employer)\.organizationId\}`\)/g,
+      "",
+    );
+    expect(scoutingWithoutOrgReads).not.toMatch(/organization_id/);
     expect(booking).not.toMatch(/organization_id/);
   });
 });

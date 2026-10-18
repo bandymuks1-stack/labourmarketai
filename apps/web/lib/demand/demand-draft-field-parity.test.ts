@@ -67,4 +67,16 @@ describe("company_request draft payload keeps every field the form collects", ()
     );
     expect(out).not.toHaveProperty("location");
   });
+
+  // Global-access rule (2026-09-22): the criteria step lets the employer pick
+  // ANY ISO country; the draft leg used to drop it exactly like teamSize. The
+  // wizard sends the code it holds in state; the action stamps it onto
+  // `customer_requests.country` (the column the prefill reads back).
+  it("keeps the picked country — Vietnam is a draft's country, not a lost field", () => {
+    const out = sanitizeDemandDraftPayload<Record<string, string>>(
+      "company_request",
+      { ...asTheFormSendsIt, country: "VN" },
+    );
+    expect(out).toHaveProperty("country", "VN");
+  });
 });

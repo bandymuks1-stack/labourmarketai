@@ -27,10 +27,13 @@ vi.mock("@/lib/communication/request-worker-conversation", () => ({
   requestWorkerConversationAction: vi.fn(),
 }));
 vi.mock("@/lib/booking/booking-actions", () => ({ proposeBookingAction: vi.fn() }));
-vi.mock("@/lib/projects/actions", () => ({ assignWorkerToProjectAction: vi.fn() }));
+vi.mock("@/lib/projects/actions", () => ({ assignWorkerToProjectAction: vi.fn(), keepAssignmentAction: vi.fn() }));
 vi.mock("@/lib/agency/bridge-actions", () => ({
   inviteClientAction: vi.fn(),
   submitOfferAction: vi.fn(),
+}));
+vi.mock("@/lib/company/organization-rename", () => ({
+  renameActiveOrganization: vi.fn(),
 }));
 
 import { COMPANY_EXECUTORS } from "@/lib/conversation/company-executors";
@@ -51,8 +54,9 @@ import {
 import { setShortlistAction } from "@/lib/scouting/scouting-actions";
 import { requestWorkerConversationAction } from "@/lib/communication/request-worker-conversation";
 import { proposeBookingAction } from "@/lib/booking/booking-actions";
-import { assignWorkerToProjectAction } from "@/lib/projects/actions";
+import { assignWorkerToProjectAction, keepAssignmentAction } from "@/lib/projects/actions";
 import { inviteClientAction, submitOfferAction } from "@/lib/agency/bridge-actions";
+import { renameActiveOrganization } from "@/lib/company/organization-rename";
 
 const UUID = "6f1d1a2e-9c1b-4f6e-8e2a-0a1b2c3d4e5f";
 const UUID2 = "0f9e8d7c-6b5a-4f3e-9d1c-2b3a4c5d6e7f";
@@ -79,13 +83,24 @@ describe("registry ↔ schema ↔ executor stay in lockstep", () => {
 
   it("authorization comes from dispatch-core over registry allowedRoles — a plain worker is denied every employer action", () => {
     const worker = new Set<Role>(["worker"]);
+    // §14 WORK PERFORMED → RESULT: a WORKER may close the task they were
+    // given — the ONE employer action whose row-level authority (creator /
+    // assignee / project manager) is re-derived inside `set_work_task_status_v2`,
+    // so its conversation role gate is the union of the three. Exactly one;
+    // a second must be named here, never slipped in.
+    const WORKER_ALLOWED = ["company.update-task-status"];
+    expect(
+      Object.keys(COMPANY_ACTION_SCHEMAS)
+        .filter((id) => getConversationAction(id)!.allowedRoles.includes("worker"))
+        .sort(),
+    ).toEqual(WORKER_ALLOWED);
     for (const id of Object.keys(COMPANY_ACTION_SCHEMAS)) {
       const decision = authorizeDispatch({
         descriptor: getConversationAction(id),
         heldRoles: worker,
         executable: true,
       });
-      expect(decision, id).toEqual({ ok: false, code: "not_authorized" });
+      expect(decision, id).toEqual(WORKER_ALLOWED.includes(id) ? { ok: true } : { ok: false, code: "not_authorized" });
       // …and the subject role itself is allowed through the same gate.
       // Every EMPLOYER action's subject is a role (§7.1 widened `subject` to
       // `Role | "engagement"`, and the one relationship action is not in this
@@ -353,6 +368,35 @@ describe("scouting / communication / booking / project executors", () => {
   });
 });
 
+describe("keep-assignment: the chat door of the knowing override", () => {
+  it("passes ONLY ids and a closed reason to the page's action; collisions are not an input", async () => {
+    asMock(keepAssignmentAction).mockResolvedValue({ ok: true, receipt: "recorded" });
+    const r = await COMPANY_EXECUTORS["company.keep-assignment"](
+      COMPANY_ACTION_SCHEMAS["company.keep-assignment"].parse({ projectId: UUID, workerProfileId: UUID2, reasonCode: "urgent_need" }),
+      ctx,
+    );
+    expect(asMock(keepAssignmentAction).mock.calls[0]).toEqual([UUID, UUID2, "urgent_need"]);
+    expect(r).toEqual({ ok: true, data: { receipt: "recorded" } });
+    // a model-supplied collision list / free-text reason is stripped or refused by the schema
+    expect(COMPANY_ACTION_SCHEMAS["company.keep-assignment"].safeParse({ projectId: UUID, workerProfileId: UUID2, reasonCode: "he was ill" }).success).toBe(false);
+    const stripped = COMPANY_ACTION_SCHEMAS["company.keep-assignment"].parse({ projectId: UUID, workerProfileId: UUID2, collisions: [{ kind: "trip" }] });
+    expect(stripped).toEqual({ projectId: UUID, workerProfileId: UUID2 });
+  });
+
+  it("is fail-loud: a refused or failed receipt is NEVER reported as kept", async () => {
+    for (const code of ["not_authorized", "needs_migration", "error", "invalid", "auth"] as const) {
+      asMock(keepAssignmentAction).mockResolvedValue({ ok: false, code });
+      expect(await COMPANY_EXECUTORS["company.keep-assignment"]({ projectId: UUID, workerProfileId: UUID2 }, ctx)).toEqual({ ok: false, code });
+    }
+  });
+
+  it("the action needs a fresh confirmation (important write) and a company role", () => {
+    const a = getConversationAction("company.keep-assignment");
+    expect(a?.confirmation).toBe("important_write");
+    expect(a?.allowedRoles).toEqual(["company"]);
+  });
+});
+
 describe("agency bridge executors", () => {
   it("invite-client: delegates via formData; bridge states map honestly", async () => {
     asMock(inviteClientAction).mockResolvedValue({ status: "ok" });
@@ -409,5 +453,70 @@ describe("agency bridge executors", () => {
     expect(formData.get("workerId")).toBe(UUID2);
     expect(formData.get("note")).toBe("solid tiler");
     expect(r).toEqual({ ok: true });
+  });
+});
+
+describe("company.rename-organization (owner program 2026-09-23)", () => {
+  it("the schema carries the NAME only — an organization id is rejected, never forwarded", () => {
+    const schema = COMPANY_ACTION_SCHEMAS["company.rename-organization"];
+    expect(schema.safeParse({ name: "Nonstop Group UAB" }).success).toBe(true);
+    expect(schema.safeParse({ name: "  Nonstop  " })).toEqual({ success: true, data: { name: "Nonstop" } });
+    // The organization is resolved server-side; a client-supplied one is a
+    // schema failure, so it can never reach the executor.
+    expect(schema.safeParse({ name: "Nonstop", organizationId: UUID }).success).toBe(false);
+    // The expected organization (a refusal check, never a target) is a uuid.
+    expect(schema.safeParse({ name: "Nonstop", expectedOrganizationId: UUID }).success).toBe(true);
+    expect(schema.safeParse({ name: "Nonstop", expectedOrganizationId: "org-a" }).success).toBe(false);
+    expect(schema.safeParse({ name: "X" }).success).toBe(false);
+    expect(schema.safeParse({ name: "A".repeat(201) }).success).toBe(false);
+  });
+
+  it("an important-tier identity write for company + agency — a plain worker is refused by the role gate", () => {
+    const d = getConversationAction("company.rename-organization")!;
+    expect(d.confirmation).toBe("important_write");
+    expect([...d.allowedRoles].sort()).toEqual(["agency", "company"]);
+    expect(
+      authorizeDispatch({ descriptor: d, heldRoles: new Set<Role>(["worker"]), executable: true }),
+    ).toEqual({ ok: false, code: "not_authorized" });
+  });
+
+  it("delegates the NAME to the domain core and returns the readback receipt", async () => {
+    asMock(renameActiveOrganization).mockResolvedValue({
+      ok: true,
+      organizationId: UUID,
+      previousName: null,
+      name: "Nonstop Group UAB",
+      unchanged: false,
+    });
+    const r = await COMPANY_EXECUTORS["company.rename-organization"]({ name: "Nonstop Group UAB" }, ctx);
+    expect(renameActiveOrganization).toHaveBeenCalledWith("Nonstop Group UAB", { expectedOrganizationId: null });
+    await COMPANY_EXECUTORS["company.rename-organization"](
+      { name: "Nonstop Group UAB", expectedOrganizationId: UUID2 },
+      ctx,
+    );
+    expect(renameActiveOrganization).toHaveBeenLastCalledWith("Nonstop Group UAB", { expectedOrganizationId: UUID2 });
+    expect(r).toEqual({
+      ok: true,
+      data: { organizationId: UUID, previousName: null, name: "Nonstop Group UAB", unchanged: false },
+    });
+  });
+
+  it("every refusal keeps its own code — never success, never a generic failure", async () => {
+    for (const code of [
+      "no_company_profile",
+      "not_authorized",
+      "legal_name_verified",
+      "personal_workspace",
+      "unavailable",
+      "duplicate_company",
+      "needs_migration",
+      "workspace_changed",
+    ] as const) {
+      asMock(renameActiveOrganization).mockResolvedValue({ ok: false, code });
+      expect(
+        await COMPANY_EXECUTORS["company.rename-organization"]({ name: "Nonstop" }, ctx),
+        code,
+      ).toEqual({ ok: false, code });
+    }
   });
 });

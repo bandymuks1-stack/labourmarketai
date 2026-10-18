@@ -10,6 +10,7 @@ import {
 } from "./worker-opportunities-contract";
 import { getTranslations } from "next-intl/server";
 
+import { deriveFitBand } from "@/lib/opportunities/fit-band";
 import { resolveInterestLabels } from "@/lib/opportunities/interest-labels";
 import {
   loadWorkerOpportunityMatches,
@@ -126,19 +127,31 @@ export async function loadOpportunitiesResultAction(): Promise<OpportunitiesResu
       );
       if (cards.length === 0) return [];
       const tRoot = await getTranslations();
-      return cards.map((c) => ({
-        key: c.key,
-        title: c.view.title,
-        employerName: c.view.employerName,
-        city: c.view.city,
-        country: c.view.country,
-        publishedAt: c.view.publishedAt.slice(0, 10),
-        originalUrl:
-          c.view.provenance.applicationRoute === "source_original"
-            ? c.view.provenance.applicationUrl
-            : null,
-        attributionText: tRoot(c.view.provenance.attributionCode as never),
-      }));
+      return cards.map((c) => {
+        // The engine's verdict travels WITH the row (#1689, defect H). It used
+        // to be dropped here, so the panel could only render every external
+        // ad as a plain row under a heading that called it suitable — an
+        // `insufficient_data` "Senior AI Engineer" included. The band is a
+        // pure derivation of that verdict, never a second judgement.
+        const fit = deriveFitBand(c.match);
+        return {
+          key: c.key,
+          title: c.view.title,
+          employerName: c.view.employerName,
+          city: c.view.city,
+          country: c.view.country,
+          publishedAt: c.view.publishedAt.slice(0, 10),
+          originalUrl:
+            c.view.provenance.applicationRoute === "source_original"
+              ? c.view.provenance.applicationUrl
+              : null,
+          attributionText: tRoot(c.view.provenance.attributionCode as never),
+          fitStatus: fit.status,
+          band: fit.band,
+          gapCodes: fit.why.gapCodes,
+          missingDataCodes: fit.why.missingDataCodes,
+        };
+      });
     })(),
     totalExternal: view.totalExternal,
   };

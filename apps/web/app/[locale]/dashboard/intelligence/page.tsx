@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { IntelligenceCard } from "@/components/intelligence/intelligence-card";
 import type { Role } from "@/lib/auth/actions";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import {
   getCompanyDemandIntelligence,
@@ -27,6 +28,7 @@ import {
   EUROSTAT_ATTRIBUTION_CODE,
   EUROSTAT_KIND_DATASET,
 } from "@/lib/intelligence/trust-card-model";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Market intelligence workspace (Labour Market Intelligence v1) — the ONE
@@ -77,11 +79,9 @@ export default async function IntelligencePage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role: Role = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : "worker";
@@ -90,12 +90,10 @@ export default async function IntelligencePage({
 
   const header = (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("page.eyebrow")}
       </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {t("page.title")}
-      </h1>
+      <PageTitle>{t("page.title")}</PageTitle>
       <p className="text-sm text-text-secondary">{t("page.intro")}</p>
     </header>
   );
@@ -147,6 +145,24 @@ export default async function IntelligencePage({
     eurostatContext && eurostatContext.kind === "ok"
       ? eurostatContext.rows
       : null;
+  // AS-OF DATE (2026-09-23). The Eurostat rows are refreshed only by an
+  // operator-run import (no hosted schedule exists), so the section states
+  // how current its figures are. `captured_at` is Eurostat's OFFICIAL
+  // PUBLICATION timestamp (`updated` in the JSON-stat body, mandatory —
+  // eurostat-jsonstat.ts), not the time the rows were inserted here; the copy
+  // therefore says "Eurostat publication of", never "imported". Derived from
+  // the real rows; nothing is rendered when there are none (the unavailable
+  // cards already say why).
+  const eurostatPublishedAtMs = (eurostatRows ?? [])
+    .map((r) => Date.parse(r.capturedAt))
+    .filter((ms) => Number.isFinite(ms))
+    .reduce((max, ms) => (ms > max ? ms : max), Number.NEGATIVE_INFINITY);
+  const eurostatAsOf = Number.isFinite(eurostatPublishedAtMs)
+    ? new Intl.DateTimeFormat(locale, {
+        dateStyle: "long",
+        timeZone: "UTC",
+      }).format(new Date(eurostatPublishedAtMs))
+    : null;
 
   return (
     <div className="flex flex-col gap-6" data-testid="intelligence-page">
@@ -212,6 +228,14 @@ export default async function IntelligencePage({
           <p className="text-xs leading-relaxed text-text-secondary">
             {t("eurostat.sectionIntro")}
           </p>
+          {eurostatAsOf ? (
+            <p
+              className="font-mono text-meta text-text-muted"
+              data-testid="intelligence-eurostat-as-of"
+            >
+              {t("eurostat.asOf", { date: eurostatAsOf })}
+            </p>
+          ) : null}
           {buildEurostatContextCards(eurostatRows, Date.now()).map((card) => (
             <div key={card.id} className="flex flex-col gap-1">
               <TrustInsightCard card={card} locale={locale} />

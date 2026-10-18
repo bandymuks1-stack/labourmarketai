@@ -41,12 +41,80 @@ export type Locale = (typeof locales)[number];
 // guarded by lib/guards/i18n-lt-en-parity.test.ts and the i18n-debt
 // zero baselines. RU/NL/DE are AI-seeded full translations pending human
 // review (§7.4) — the language selector preview-tags non-Tier-1 locales.
-export const activeLocales = ["lt", "en", "ru", "nl", "de"] as const;
+// PL activated 2026-09-20 (owner approval, acquisition loop P0): the first
+// Polish-language campaign for a Swedish welder job sent every Polish reader
+// to /en because /pl was not routed. Same rule as NL/DE: activated only
+// after the base catalog + 6 taxonomy files reached full parity with EN
+// (AI-seeded, preview-tagged, pending §7.4 human review).
+export const activeLocales = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 export type ActiveLocale = (typeof activeLocales)[number];
 
 export const defaultLocale: ActiveLocale = "lt";
+
+/**
+ * Clamp a caller-supplied locale to the closed ACTIVE set, else the default.
+ *
+ * For any value that is about to be interpolated into a redirect or a link:
+ * `redirect(\`/${locale}/…\`)` with a form-supplied `locale` of `/evil.com`
+ * yields the protocol-relative `//evil.com/…`, which the browser follows off
+ * the site. Every `String(formData.get("locale") ?? "lt")` is that hole; this
+ * is the one closing move (agency bridge, 2026-09-24 — the remaining
+ * occurrences are listed as residue, not swept). Pure.
+ */
+export function toActiveLocale(raw: string | null | undefined): ActiveLocale {
+  const value = (raw ?? "").trim();
+  return (activeLocales as readonly string[]).includes(value)
+    ? (value as ActiveLocale)
+    : defaultLocale;
+}
 
 // Tier 1 = human-verified for M1 (EN source + LT). RU is active but stays
 // Tier 2 (AI-seeded full translation pending human review per doctrine
 // §7.4) — the language selector tags it as preview until DI promotes it.
 export const tier1Locales = ["en", "lt"] as const;
+
+// ── COMMUNICATION LANGUAGES (owner decision RED-1, 2026-09-17) ──
+// UI_LANGUAGE ≠ COMMUNICATION_LANGUAGE ≠ TRANSLATION_PROVIDER_CAPABILITY.
+// A person may write a work message in a language the product PRESERVES and
+// TRANSLATES even though no full `/xx` UI route exists yet. This set is the
+// canonical "a message may be AUTHORED in this language" set: the UI `locales`
+// PLUS communication-only languages. It is exactly what the `original_language`
+// CHECK on conversation_messages / journal_entries / organization_evidence_
+// records / candidate_skills admits (kept in lockstep by
+// lib/guards/message-language-set.test.ts and the migration
+// 20260917140000_widen_original_language_uk_ka.sql).
+//
+// INVARIANT: every UI locale is communication-valid, so `locales ⊆
+// communicationLocales`. Adding a communication-only language here is a
+// content-free change; it still needs the owner-gated CHECK widening to be
+// applied before rows can carry it (see the migration above).
+//
+//   uk — Ukrainian (DeepL + LLM tier capable)
+//   ka — Georgian  (LLM tier capable; DeepL has no Georgian)
+export const communicationLocales = [...locales, "uk", "ka"] as const;
+export type CommunicationLocale = (typeof communicationLocales)[number];
+
+export function isCommunicationLocale(value: string): value is CommunicationLocale {
+  return (communicationLocales as readonly string[]).includes(value);
+}
+
+// Every communication language named in ITSELF — the one label a person
+// recognises regardless of which UI locale they are reading. Used by the
+// message composer's "I am writing in" control and by the translation prompt
+// (a target named in words, never only a code). Locale-independent by design,
+// like the worker-languages and demand-form pickers.
+export const communicationLanguageNames: Record<CommunicationLocale, string> = {
+  en: "English",
+  lt: "Lietuvių",
+  lv: "Latviešu",
+  et: "Eesti",
+  nl: "Nederlands",
+  de: "Deutsch",
+  da: "Dansk",
+  no: "Norsk",
+  sv: "Svenska",
+  pl: "Polski",
+  ru: "Русский",
+  uk: "Українська",
+  ka: "ქართული",
+};

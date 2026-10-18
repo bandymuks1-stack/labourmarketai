@@ -36,7 +36,59 @@ const en = JSON.parse(read("messages/en.json"));
 // card in the player-card result, and the copy/surface invariants below.
 const PROFILE_PAGE = "app/[locale]/dashboard/profile/page.tsx";
 
-describe("worker entry opens with the state-aware work card (canonical home)", () => {
+describe("worker entry is ŠIANDIEN — a page, not the chat and not a card stack (IA 2026-09-13)", () => {
+  // RETIRED: "the worker's calm entry is the workspace (the chat) with the
+  // intro card". The worker in their personal space opens the conversation
+  // with ŠIANDIEN as its opening context (owner decision 0017): header · ONE
+  // next action · today's work · open items · one growth line · one
+  // opportunity line · stations — and the composer right under it.
+  const SCREEN = "components/app/today/today-screen.tsx";
+
+  it("the dashboard root composes ŠIANDIEN into the worker's conversation and hides the intro card", () => {
+    const page = read("app/[locale]/dashboard/page.tsx");
+    expect(page).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
+    expect(page).toMatch(/reason: "replaced-by-today"/);
+  });
+
+  it("the ONE next action comes from the work-card engine — no second priority engine", () => {
+    const server = read("lib/today/today-server.ts");
+    expect(server).toMatch(/deriveWorkCardState\(/);
+    expect(server).toMatch(/getWorkerCard\(/);
+    // The pure model lifts `card.next` — it never re-orders dimensions.
+    const model = read("lib/today/today-model.ts");
+    expect(model).toMatch(/dim: card\.next\.dim/);
+    expect(model).toMatch(/whyKey: card\.next\.whyKey/);
+    // The next action is derived by the pure model's `deriveTodayNext` in the
+    // WAITING loader (four-region home, D1), lifted from the same card.
+    expect(read("lib/home/home-server.ts")).toMatch(/deriveTodayNext\(/);
+    // Exactly one primary CTA on the screen; everything else is a text link.
+    const screenAll = read(SCREEN) + read("components/app/home/home-regions.tsx");
+    expect(screenAll.match(/buttonLinkClassName\("primary"\)/g)).toHaveLength(1);
+  });
+
+  it("no intro card, no quick-nav strip, no chat inside ŠIANDIEN", () => {
+    const screen = read(SCREEN);
+    expect(screen).not.toMatch(/PersonalWorkspaceIntro|PageQuickNav|ConversationChat/);
+  });
+
+  it("the figures are the readers' figures, and UNKNOWN is never zero", () => {
+    const server = read("lib/today/today-server.ts");
+    expect(server).toMatch(/loadOwnWorkIntelligence\(/);
+    expect(server).toMatch(/deriveGrowthReading\(/);
+    expect(server).toMatch(/loadOpportunitiesResultAction\(/);
+    // No second vacancy query, no table read of its own.
+    expect(server).not.toMatch(/\.from\(["']|\.rpc\(|createClient/);
+    // A null reader is a named unknown in every locale, never a "0".
+    for (const [name, json] of [["lt", lt], ["en", en]] as const) {
+      const home = (json.todayScreen as { home: Record<string, Record<string, string>> }).home;
+      for (const block of ["work", "growth", "opportunity", "state"]) {
+        const v = home[block]?.unknown;
+        expect(typeof v === "string" && v.trim().length > 0, `${name} home.${block}.unknown`).toBe(true);
+        expect(v, `${name} home.${block}.unknown must not read as zero`).not.toMatch(/\b0\b/);
+      }
+    }
+  });
+
   it("the inline editor lives in the workspace player-card result", () => {
     // WorkCard was removed (dedup v1); W3 row 1 moved the state-aware
     // availability/location/pay editor into the `player-card` result — its
@@ -120,7 +172,7 @@ describe("'Mano erdvė' copy is human, calm, present in LT + EN", () => {
       snapshot: Record<string, string>;
     };
     expect(m.eyebrow).toBe("Aš dabar");
-    expect(m.intro).toMatch(/jūsų erdvė/i);
+    expect(m.intro).toMatch(/tavo erdvė/i);
     // First-person human framing for the snapshot ("ką dirbu / moku / įrodau").
     expect(m.snapshot.work).toMatch(/^Ką /);
   });
@@ -177,9 +229,9 @@ describe("'Mano darbo kortelė' (work card) copy is complete + honest in LT + EN
 
   it("LT why-copy matches the mandated benefit sentences", () => {
     const w = card(lt) as { why: Record<string, string> };
-    expect(w.why.work).toMatch(/kokiam darbui jus galima siūlyti/);
-    expect(w.why.pay).toMatch(/pagrįsti jūsų pageidaujamą tarifą/);
-    expect(w.why.evidence).toMatch(/galite juos pridėti vėliau/);
+    expect(w.why.work).toMatch(/kokiam darbui tave galima siūlyti/);
+    expect(w.why.pay).toMatch(/pagrįsti tavo pageidaujamą tarifą/);
+    expect(w.why.evidence).toMatch(/gali juos pridėti vėliau/);
   });
 
   it("work-card copy makes no fake score / no fabricated matching claim", () => {

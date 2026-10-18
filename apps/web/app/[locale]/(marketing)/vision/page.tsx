@@ -71,7 +71,7 @@ export default async function VisionPage({
       )}
 
       <header className="flex flex-col gap-4">
-        <span className="font-mono text-xs uppercase tracking-label text-brand-orange">
+        <span className="font-mono text-xs uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </span>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-5xl">

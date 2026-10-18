@@ -22,7 +22,7 @@ import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const messages = (loc: string): Record<string, unknown> =>
   JSON.parse(read(`messages/${loc}.json`)) as Record<string, unknown>;
 
@@ -142,7 +142,8 @@ describe("F2 — person page stays fail-closed and contact-free", () => {
 });
 
 describe("F12 — map location changes require explicit confirmation", () => {
-  const base = read("components/app/market-map-base.tsx");
+  // The controls of the one map (formerly market-map-base.tsx).
+  const base = read("components/app/market-map/map-location-controls.tsx");
   it("a map tap never persists directly — it stages a preview", () => {
     // pickFromMap must not call persist(); only savePreview does.
     const pick = base.slice(

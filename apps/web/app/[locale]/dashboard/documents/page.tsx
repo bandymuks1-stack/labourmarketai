@@ -2,7 +2,9 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { CredentialValidityState } from "@/lib/documents/credential-validity";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
+import { readMyPreferredCountries } from "@/lib/documents/my-countries";
 import {
   DOCUMENT_COUNTRIES,
   DOCUMENTS_READINESS_ENABLED,
@@ -11,6 +13,7 @@ import {
   computeCountryReadiness,
   type DerivedDocumentStatus,
 } from "@/lib/documents/readiness";
+import { unmatchableRequirementRows } from "@/lib/country-readiness/requirement-rows";
 import {
   getOrgDocumentCentre,
   getWorkerDocumentCentre,
@@ -31,6 +34,7 @@ import { DocumentJournalDraftReview } from "@/components/app/document-journal-dr
 import { DocumentAckInbox } from "@/components/app/document-ack-inbox";
 import { OrgDocumentsRegister } from "@/components/app/org-documents-register";
 import { TrainingRegister } from "@/components/app/training-register";
+import { OwnRecognitionsBlock } from "@/components/app/own-recognitions-block";
 import { getWorkerDocumentFiles } from "@/lib/documents/document-files";
 import { parseOrgRegisterFilters } from "@/lib/documents/document-file-model";
 import { getDocsConsent } from "@/lib/documents/consent-actions";
@@ -43,6 +47,7 @@ import {
   type WorkerCountryReadinessStatus,
 } from "@/lib/readiness/worker-readiness";
 import type { Role } from "@/lib/auth/actions";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * "Mano dokumentai" — the document & work-proof centre (control room PR H,
@@ -102,7 +107,7 @@ const OVERALL_TONE: Record<WorkerCountryReadinessStatus, string> = {
 };
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-11 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
 const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
@@ -137,6 +142,7 @@ const DOC_NOTICE_WARN = new Set([
   "not_found",
   "limit_reached",
   "version_limit_reached",
+  "storage_quota_exceeded",
   "path_mismatch",
   "file_too_large",
   "unsupported_type",
@@ -198,6 +204,10 @@ export default async function WorkerDocumentsPage({
   const t = await getTranslations("documents");
   const tc = await getTranslations("documentCentre");
   const tf = await getTranslations("documentFiles");
+  // Reused, not duplicated: the requirement explanations already live in
+  // the countryReadiness namespace, keyed by the requirement's own
+  // explanationKey, in every locale that has the matrix.
+  const tcr = await getTranslations("countryReadiness");
 
   // Role branch (page-level active_role read, the overview's pattern): org
   // sessions get the consent-gated aggregate view — a worker document row
@@ -206,15 +216,11 @@ export default async function WorkerDocumentsPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  let activeRole: Role | null = null;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("active_role")
-      .eq("id", user.id)
-      .single();
-    activeRole = (profile?.active_role as Role | null) ?? null;
-  }
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const activeRole: Role | null = user
+    ? (((await getSessionProfile()).profile?.active_role as Role | null) ?? null)
+    : null;
 
   const sp = await searchParams;
 
@@ -315,9 +321,15 @@ export default async function WorkerDocumentsPage({
   // constant so the disabled branch issues exactly the queries it issued
   // before (today the constant is `true`, so that arm is unreachable; guarding
   // it keeps this change semantics-preserving if it is ever flipped).
-  const [centre, docsConsent] = await Promise.all([
+  //
+  // The person's preferred countries (below) depend only on the session too,
+  // so they start in the same batch instead of as a further serial stage.
+  const [centre, docsConsent, myCountries] = await Promise.all([
     getWorkerDocumentCentre(),
     DOCUMENTS_READINESS_ENABLED ? getDocsConsent() : Promise.resolve(null),
+    DOCUMENTS_READINESS_ENABLED && user
+      ? readMyPreferredCountries(user.id)
+      : Promise.resolve([] as string[]),
   ]);
 
   if (!DOCUMENTS_READINESS_ENABLED) {
@@ -346,6 +358,17 @@ export default async function WorkerDocumentsPage({
   )
     ? (sp.country as string)
     : null;
+
+  // MOBILITY -> DOCUMENTS. The countries the person said they would work in
+  // (workers.preferred_countries, owner-scoped by RLS) lead the chip row. It
+  // only orders the chips and selects nothing: a preference is not a right
+  // to work, and the checklist still appears only after the person picks.
+  // (Read in the batch above.)
+  const orderedCountries = [
+    ...DOCUMENT_COUNTRIES.filter((c) => myCountries.includes(c)),
+    ...DOCUMENT_COUNTRIES.filter((c) => !myCountries.includes(c)),
+  ];
+  const hasMyCountries = orderedCountries.some((c) => myCountries.includes(c));
 
   const now = new Date();
   // S6 — the worker's documents-aggregate consent (null until the gated
@@ -697,8 +720,13 @@ export default async function WorkerDocumentsPage({
               {t("country.title")}
             </h2>
             <p className="text-xs text-text-secondary">{t("country.help")}</p>
+            {hasMyCountries ? (
+              <p className="text-xs text-text-secondary" data-testid="documents-country-mine">
+                {t("country.mine")}
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-2">
-              {DOCUMENT_COUNTRIES.map((c) => (
+              {orderedCountries.map((c) => (
                 <Link
                   key={c}
                   href={`/dashboard/documents?country=${c}` as "/dashboard"}
@@ -789,6 +817,70 @@ export default async function WorkerDocumentsPage({
                     <p className="text-meta text-text-muted">
                       {t("scopeNote")}
                     </p>
+
+                    {/* REQUIREMENTS THAT APPLY AND CANNOT BE CHECKED FROM
+                        DOCUMENTS. `matrixRequirementRows` keys on a document
+                        type and filters everything else out — correct for the
+                        join, wrong as a picture of the law: three of eleven
+                        curated archetypes carry no document slug and were
+                        invisible on every surface. "We cannot check this" was
+                        rendering as "this does not exist" (SEP-7). They are
+                        shown here as UNKNOWN, with their source, and never
+                        folded into the status above — this list changes no
+                        count and no overall verdict. */}
+                    {(() => {
+                      const unmatchable = unmatchableRequirementRows(
+                        country,
+                        "worker_posted",
+                      );
+                      if (unmatchable.length === 0) return null;
+                      return (
+                        <div
+                          className="flex flex-col gap-2 rounded-md border border-dashed border-ink-500 p-3"
+                          data-testid="documents-unmatchable-requirements"
+                        >
+                          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                            {t("unmatchable.heading")}
+                          </p>
+                          <p className="text-meta text-text-muted">
+                            {t("unmatchable.note")}
+                          </p>
+                          <ul className="flex flex-col gap-1.5">
+                            {unmatchable.map((r) => (
+                              <li
+                                key={r.requirementKey}
+                                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-600 px-2 py-1.5"
+                                data-testid="documents-unmatchable-row"
+                              >
+                                <span className="text-sm text-text-primary">
+                                  {tcr(`explanation.${r.explanationKey}` as never)}
+                                  <span className="ml-2 font-mono text-meta uppercase tracking-label text-text-muted">
+                                    {t(`requirement.${r.requirementLevel}` as never)}
+                                  </span>
+                                  {r.confidence === "needs_legal_review" ||
+                                  r.sourceStatus === "needs_legal_source" ? (
+                                    <span className="ml-2 font-mono text-meta uppercase tracking-label text-state-warning">
+                                      {t("needsLegalReview")}
+                                    </span>
+                                  ) : null}
+                                  <a
+                                    href={r.sourceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="ml-2 font-mono text-meta uppercase tracking-label text-brand-blue underline"
+                                  >
+                                    {t("sourceLink")}
+                                  </a>
+                                </span>
+                                <span className="rounded-sm border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
+                                  {t("unmatchable.state")}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })()}
                     {readiness.nextActionSlug ? (
                       <p
                         className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm text-text-secondary"
@@ -842,6 +934,10 @@ export default async function WorkerDocumentsPage({
       {/* Training & Certification v1 — the person's own training and their
           certificates. Completing is self-only; nobody records it for them. */}
       <TrainingRegister locale={locale} notice={sp.trn} />
+
+      {/* SKL-9 — the person's own recognitions (assessor decisions), read-only;
+          distinct from certificates and from work evidence (SEP-6). */}
+      {user ? <OwnRecognitionsBlock profileId={user.id} /> : null}
 
       <DocsConsentToggle current={docsConsent} />
 
@@ -962,12 +1058,10 @@ function WorkProofExports({
 function Header({ t }: { t: Awaited<ReturnType<typeof getTranslations>> }) {
   return (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("eyebrow")}
       </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h1>
+      <PageTitle>{t("title")}</PageTitle>
       <p className="text-sm text-text-secondary">{t("subtitle")}</p>
     </header>
   );

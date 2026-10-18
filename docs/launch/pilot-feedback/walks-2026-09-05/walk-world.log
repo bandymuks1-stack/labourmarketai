@@ -1,0 +1,8 @@
+{"step":"health","build":"c893557b"}
+{"step":"X1_X2_demand","mapOrigin":"live","pills":[{"id":"world-layer-demand","pressed":"true","text":"Poreikiai"},{"id":"world-layer-supply","pressed":"false","text":"Žmonės"},{"id":"world-layer-projects","pressed":"false","text":"Projektai"}],"state":{"layer":"demand","layerState":null,"inview":"Matoma: 2 vietos, 2 objektai","scale":"Mastelis: šalys","rows":2,"rowProvenance":["derived"],"aggregateNote":0},"placesWithinCap":true}
+{"step":"X3_world-layer-projects","state":{"layer":"projects","layerState":"empty","inview":"Matoma: 0 vietos, 0 objektai","scale":"Mastelis: šalys","rows":0,"rowProvenance":[],"aggregateNote":0}}
+{"step":"X3_world-layer-supply","state":{"layer":"supply","layerState":"empty","inview":"Matoma: 0 vietos, 0 objektai","scale":"Mastelis: šalys","rows":0,"rowProvenance":[],"aggregateNote":1}}
+{"step":"X5_network_writes","writes":["POST https://labourmarket.ai/lt/dashboard/market-map","POST https://labourmarket.ai/lt/dashboard/market-map","POST https://labourmarket.ai/lt/dashboard/market-map","POST https://labourmarket.ai/lt/dashboard/market-map","POST https://labourmarket.ai/lt/dashboard/market-map","POST https://labourmarket.ai/lt/dashboard/market-map","POST https://labourmarket.ai/lt/dashboard/market-map"]}
+{"step":"X6_mobile","horizontalOverflowPx":0}
+{"step":"X7_anon","url":"https://labourmarket.ai/lt/auth/login?next=%2Flt%2Fdashboard%2Fmarket-map","redirectedToLogin":true}
+{"step":"done","totalMs":70516}

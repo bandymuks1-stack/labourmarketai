@@ -106,7 +106,11 @@ describe("teams migration — additive typed rows on the EXISTING organizations 
         // get_team_capability_summary_v1 (among six) to close a NULL-flip
         // authorization bypass (owner MASTER ORDER §4). The documented
         // hardening re-definition is not a parallel implementation.
-        f !== "20260824130000_null_safe_owner_guards_v2.sql",
+        f !== "20260824130000_null_safe_owner_guards_v2.sql" &&
+        // 2026-10-14 brigade disband v1 re-defines create_team_v1 with ONE
+        // change — its cap of 20 counts active (non-archived) brigades — and
+        // explicitly revokes anon. A documented successor, not a parallel.
+        f !== "20261014190000_team_disband_v1.sql",
     );
     expect(others.length).toBeGreaterThan(100);
     for (const f of others) {
@@ -245,7 +249,7 @@ describe("teams rollback chain — nothing recreated, nothing stale to restore",
 describe("app surface — reuse of the existing spine, no parallel team system", () => {
   const lib = readWeb("lib/company/team-brigades.ts");
   const panel = readWeb("components/app/team-brigades-panel.tsx");
-  const page = readWeb("app/[locale]/dashboard/company/page.tsx");
+  const page = readWeb("app/[locale]/dashboard/company/people/page.tsx");
 
   it("CONSENT (Trust Connect v1): membership arrives ONLY via a join_team invitation — no direct add remains", () => {
     // The former direct addOrgMember call was a consent bypass: the owner
@@ -264,10 +268,14 @@ describe("app surface — reuse of the existing spine, no parallel team system",
     expect(lib).not.toMatch(/\.delete\(/);
     expect(lib).not.toMatch(/add_team_member/);
     expect(panel).not.toMatch(/add_team_member/);
-    // The invitee's email / invite link never reach the client from this
-    // surface — the action returns only a closed outcome vocabulary.
-    expect(actions).not.toMatch(/inviteLink/);
+    // The invitee's email never reaches the client from this surface. The
+    // invite LINK does (2026-10-11): with no active e-mail provider it is the
+    // only delivery, exactly as on /dashboard/network, and acceptance is bound
+    // to the invited address (accept_invitation_apply_v2 ->
+    // invitation_session_email_matches_v1), so the link is not a bearer grant.
+    // It is the creation result's own link, never re-read from storage.
     expect(actions).not.toMatch(/first\?\.email/);
+    expect(actions).toMatch(/const inviteLink = first\?\.inviteLink;/);
   });
 
   it("membership provenance is derived from the real invitations ledger, never invented", () => {
@@ -286,6 +294,13 @@ describe("app surface — reuse of the existing spine, no parallel team system",
     expect(lib).toMatch(/\.from\("engagement_contexts"\)/);
     expect(lib).toMatch(/\.eq\("relationship_slug", "employee"\)/);
     expect(lib).toMatch(/\.from\("company_workers"\)/);
+    // The invitable-pool read is SCOPED to the company the caller acts for
+    // and BOUNDED (scale contract) — never an unscoped, unbounded roster
+    // pull; and a failed read is UNKNOWN (`null`), never an empty picker.
+    const pool = lib.slice(lib.indexOf("// Invitable pool:"), lib.indexOf("const teams: TeamBrigade[] = [];"));
+    expect(pool).toMatch(/\.from\("company_workers"\)[\s\S]{0,200}\.eq\("company_id", companyId\)[\s\S]{0,120}\.limit\(POOL_READ_LIMIT\)/);
+    expect(pool).toMatch(/resolveEmployerCompanyContext\(\)/);
+    expect(lib).toMatch(/readonly addable: readonly AddableTeamWorker\[\] \| null;/);
     // No parallel team tables anywhere on the read path.
     expect(lib).not.toMatch(/\.from\("teams?"\)/);
     expect(lib).not.toMatch(/\.from\("team_members"\)/);
@@ -313,9 +328,20 @@ describe("app surface — reuse of the existing spine, no parallel team system",
     expect(panel).toMatch(/tSkill\.has\(slug\) \? tSkill\(slug\) : slug/);
     expect(panel).toMatch(/t\("honestNote"\)/);
     expect(panel).toMatch(/t\("capabilityEmpty"\)/);
-    // Never a fabricated summary: null/empty renders the empty copy.
-    expect(panel).toMatch(
-      /team\.capability === null \|\| team\.capability\.length === 0/,
+    // NEVER A FABRICATED SUMMARY — and never a fabricated ABSENCE either.
+    // This assertion used to require `team.capability === null ||
+    // team.capability.length === 0`, i.e. it pinned the defect: a read that
+    // FAILED (null) printed the same "no declared skills among members yet"
+    // as a team that genuinely has none. That is UNKNOWN rendered as ZERO
+    // (SEP-7) in a sentence shown to the team's owner. The two states are now
+    // separate, and this guard pins the separation rather than the collapse.
+    expect(panel).toMatch(/team\.capability === null \?/);
+    expect(panel).toMatch(/t\("capabilityUnknown"\)/);
+    expect(panel).toMatch(/team\.capability\.length === 0 \?/);
+    // The order matters: the null branch must come FIRST, or the length check
+    // would throw on the very state it is meant to describe.
+    expect(panel.indexOf('capabilityUnknown')).toBeLessThan(
+      panel.indexOf('capabilityEmpty'),
     );
   });
 });
@@ -370,6 +396,7 @@ describe("i18n — teamBrigades + teamEnquiries namespaces present in every ACTI
         "created",
         "deliveryFailed",
         "alreadyInvited",
+        "alreadyInvitedNewLink",
         "rateLimited",
         "notAuthorized",
         "noEmail",

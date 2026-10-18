@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronDown, ChevronUp, Info, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, Maximize2, Minimize2, X } from "lucide-react";
 
 import { WorkerInterestButton } from "@/components/app/worker-interest-button";
 import { WorkerInvitations } from "@/components/app/worker-invitations";
@@ -19,6 +19,7 @@ import type {
 import type { WorkContextView } from "@/lib/world-state/work-context-server";
 import { entityKey } from "@/lib/world-state/world-state";
 import {
+  canRenderInline,
   getResult,
   type ResultContext,
   type ResultKind,
@@ -29,6 +30,7 @@ import {
 } from "@/components/app/workspace/result-body";
 import { useWorldState } from "./world-state-provider";
 import { WorkspaceMap } from "./workspace-map";
+import { ContextHistorySpine } from "./context-history-spine";
 
 /**
  * THE CONTEXT PANEL (W3) — the third part of the one workspace.
@@ -45,6 +47,14 @@ import { WorkspaceMap } from "./workspace-map";
  * real actions available on it.
  *
  * WHAT IT IS NOT.
+ *  - NOT a home for persistent information (worker mobile IA 2026-09-13 §3,
+ *    owner direction: "persistent information needs a stable destination;
+ *    overlays are temporary only"). Today's work, open items, the growth
+ *    line and the opportunity line live on ŠIANDIEN (`/dashboard`, the
+ *    worker's page); the panel shows ONE entity or ONE result readback and
+ *    closes back to the page it came from. It never duplicates what the
+ *    page carries as a card of its own, and its chrome title follows the
+ *    result's own state (see `discoveryOnly` below).
  *  - NOT a dialog. It is never modal, never traps focus, never covers the
  *    conversation and never blocks the page. It is a complementary landmark,
  *    and the guard forbids the modal roles outright: a modal would make the
@@ -70,8 +80,13 @@ export function ContextPanel({
   resultContext = "personal",
   resultNavigation,
   wide = false,
+  full = false,
+  chipsPostedAt = null,
+  briefChipsPostedAt = null,
   onCloseResult,
   onOpenFull,
+  onExpand,
+  onCollapse,
 }: {
   /** The active locale — passed to the canonical interest control unchanged. */
   locale: string;
@@ -110,8 +125,38 @@ export function ContextPanel({
    * nothing changes: the sheet is already full width.
    */
   wide?: boolean;
+  /**
+   * THE THIRD WIDTH — FULL, and still the SAME panel (owner P0/P1 §17,
+   * 2026-09-23: "Open full screen may expand a contextual result when more
+   * space is useful. It must not be an escape hatch into a second legacy
+   * application").
+   *
+   * `wide` gives a comparison result more of the desktop column; `full` gives
+   * a result the whole workspace — on a phone the sheet takes the whole
+   * screen, on a desktop the panel takes the row while the conversation beside
+   * it steps aside (it stays MOUNTED: nothing is lost, nothing navigates).
+   * Honoured only for a result that renders inline — expanding a fallback
+   * would be a bigger empty shell, and a fallback's honest way on is its
+   * named station door.
+   */
+  full?: boolean;
+  /** When the thread last posted a question with chips (see the chat). On a
+   *  phone the sheet yields to it when it still shows the same thing. */
+  chipsPostedAt?: number | null;
+  /** When the OPENING BRIEF posted its chips. It closes only a sheet nobody
+   *  asked for (an auto-opened invitation), never a requested result or
+   *  selection. */
+  briefChipsPostedAt?: number | null;
   onCloseResult?: () => void;
+  /** A NAMED STATION DOOR — the result's own button to its station
+   *  (`/dashboard/profile`, `/dashboard/planning`, …), labelled with the
+   *  station's name. It navigates; the generic "full screen" does not. */
   onOpenFull?: (route: string) => void;
+  /** Expand the showing result in place — the workspace layer writes the
+   *  `?full=` state. The panel itself still never routes. */
+  onExpand?: () => void;
+  /** Back from the expanded state to the side-by-side workspace. */
+  onCollapse?: () => void;
 }) {
   const t = useTranslations("workspace.panel");
   const tr = useTranslations("conversation.results");
@@ -123,6 +168,15 @@ export function ContextPanel({
   const showsResult =
     result !== null && resultNavigation !== undefined && panel.mode !== "entity";
   const resultDescriptor = showsResult ? getResult(result) : undefined;
+  /** Only a result with a REAL inline renderer can be expanded: the same
+   *  registry rule that decides whether it renders here at all. Generic —
+   *  no result kind is named in this component. */
+  const canExpand =
+    showsResult &&
+    result !== null &&
+    canRenderInline(result, resultContext) &&
+    onExpand !== undefined;
+  const isFull = canExpand && full;
 
   /** Starts TRUE: a read is always pending on mount, so the first paint says
    *  "reading" instead of showing an empty body for one frame. An empty shell
@@ -134,6 +188,11 @@ export function ContextPanel({
   const [unavailable, setUnavailable] = useState<string | null>(null);
   /** Small screens open the panel on demand; from `lg` it is always open. */
   const [expanded, setExpanded] = useState(false);
+  const wideScreen = useWideScreen();
+  /** The map is asked for by a SELECTION (see the body note) and is only
+   *  mounted where it can be seen: the static column from `lg`, or the open
+   *  sheet below it. */
+  const mapAsked = panel.mode === "entity" && (expanded || wideScreen);
 
   // One request wins: a fast second selection must never be overwritten by the
   // slower first response.
@@ -157,7 +216,15 @@ export function ContextPanel({
               setUnavailable(res.reason);
             }
           })
-        : loadWorkContext().then((res) => {
+        : resultContext !== "personal"
+          ? // The personal work context is not read in an organization
+            // workspace (see `orgRestingHome` below).
+            Promise.resolve().then(() => {
+              if (cancelled || token !== requestRef.current) return;
+              setEntity(null);
+              setWork(null);
+            })
+          : loadWorkContext().then((res) => {
             if (cancelled || token !== requestRef.current) return;
             setEntity(null);
             if (res.kind === "context") setWork(res.view);
@@ -194,22 +261,123 @@ export function ContextPanel({
     if (panel.mode === "entity" || showsResult) setExpanded(true);
   }, [selectionKey, panel.mode, showsResult, result]);
 
+  // An expanded result is the whole screen on a phone — a sheet that could
+  // sit collapsed while "full" would be neither.
+  useEffect(() => {
+    if (isFull) setExpanded(true);
+  }, [isFull]);
+
   // W3 row 6 — a pending invitation opens the sheet too. The spine's bell
   // points at this workspace to clear that signal; on a phone the panel starts
   // collapsed, so leaving it shut would make the thing somebody is waiting on
   // unreachable from the notification that announced it.
+  //
+  // ORDER-INDEPENDENT (review P2 on #1856): a question the thread has already
+  // asked wins, whichever arrives first. The yield below fires only on a NEW
+  // chips stamp, so if the opening brief's chips landed BEFORE this read, an
+  // open here would cover them with nothing left to close it. Once chips are
+  // on screen the invitation waits in the collapsed sheet (its header and
+  // the bell still announce it); before any chips it opens as it always did.
   useEffect(() => {
-    if (work?.invitations) setExpanded(true);
-  }, [work]);
+    if (work?.invitations && !chipsPostedAt && !briefChipsPostedAt) setExpanded(true);
+  }, [work, chipsPostedAt, briefChipsPostedAt]);
 
+  // THE BRIEF YIELDS ONLY A SHEET NOBODY ASKED FOR (QA 2026-10-16). The
+  // opening brief's chips still win over an auto-opened invitation sheet
+  // (§20, either arrival order). A result or a selection, though, is on screen
+  // because the person asked for it — the account menu's "player card", a
+  // project link — and the brief used to shut it on arrival, so on a phone the
+  // requested result never appeared. Answers posted later still yield through
+  // the same-key rule below.
+  useEffect(() => {
+    if (briefChipsPostedAt && !showsResult && panel.mode !== "entity") setExpanded(false);
+    // Only a NEW brief stamp decides this; a later change of what the panel
+    // shows is handled by the opening rule above, not re-collapsed here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [briefChipsPostedAt]);
+
+  // Prod walk 2026-09-04 (phone): after "Priskirti darbuotoją" the question
+  // "Kas turėtų jame dirbti?" and its chips landed in the thread UNDER the
+  // open sheet. When the thread asks something while the sheet still shows
+  // the SAME selection/result it already showed, the sheet yields so the
+  // person can answer; a NEW selection or result still opens it (the effect
+  // above). Desktop ignores `expanded` altogether.
+  const yieldKeyRef = useRef<string>(`${result ?? ""}|${selectionKey}`);
+  useEffect(() => {
+    const key = `${result ?? ""}|${selectionKey}`;
+    if (chipsPostedAt && yieldKeyRef.current === key) setExpanded(false);
+    yieldKeyRef.current = key;
+  }, [chipsPostedAt, result, selectionKey]);
+
+  // THE CHROME TITLE FOLLOWS THE RESULT'S OWN STATE (#1689, defect H; IA
+  // 2026-09-13 §4). A result that renders nothing the engine assessed as a
+  // fit marks its rows `data-discovery-only="true"`; the panel observes
+  // that declaration in its own body and heads itself with the registry's
+  // discovery title instead of the resting one — never "jobs that fit you"
+  // over unassessed rows. Observed, not passed: the panel keeps knowing
+  // nothing about any result's domain (it reads a generic attribute, and the
+  // registry names the alternative title).
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [discoveryOnly, setDiscoveryOnly] = useState(false);
+  useEffect(() => {
+    const body = bodyRef.current;
+    if (!body || !showsResult) {
+      setDiscoveryOnly(false);
+      return;
+    }
+    const read = () =>
+      setDiscoveryOnly(body.querySelector('[data-discovery-only="true"]') !== null);
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["data-discovery-only"],
+    });
+    return () => observer.disconnect();
+  }, [showsResult, result]);
+
+  const resultTitleKey = resultDescriptor
+    ? discoveryOnly && resultDescriptor.discoveryTitleKey
+      ? resultDescriptor.discoveryTitleKey
+      : resultDescriptor.titleKey
+    : null;
   const title =
     panel.mode === "entity"
       ? (entity?.title ?? t("loading"))
-      : resultDescriptor
-        ? // `titleKey` is the absolute path; this hook is scoped to the
+      : resultTitleKey
+        ? // The key is the absolute path; this hook is scoped to the
           // `conversation.results` namespace, so trim the prefix.
-          tr(resultDescriptor.titleKey.replace("conversation.results.", ""))
+          tr(resultTitleKey.replace("conversation.results.", ""))
         : t("workTitle");
+
+  // A QUIET HOME TAKES NO ROOM (owner production walk 2026-09-28: an empty
+  // "Tavo darbas dabar" column consumed a third of the home screen). With
+  // nothing selected, no result open, and a work context holding no fact, no
+  // recommendation and no invitation, the panel has nothing to say — so it is
+  // not drawn, and the conversation takes the width. While the first read is
+  // in flight it is not drawn either (it appears only WITH content, never as
+  // an empty frame first). A failed read is still stated (`unavailable`).
+  // COMPANY CONTEXT SHOWS NO PERSONAL WORK COLUMN (owner order 2026-10-01).
+  // The resting work context is the PERSON'S own records ("Tavo darbas
+  // dabar — what YOUR OWN entries say") and the person's own invitations.
+  // Walked as a company owner it sat beside the company conversation and
+  // named a personal deadline. In an organization workspace the resting
+  // panel is not drawn at all; an entity or a result still opens it.
+  const orgRestingHome =
+    resultContext !== "personal" && panel.mode !== "entity" && !showsResult;
+  const quietHome =
+    orgRestingHome ||
+    (panel.mode !== "entity" &&
+      !showsResult &&
+      unavailable === null &&
+      (work === null
+      ? loading
+      : work.facts.length === 0 &&
+        work.recommendations.length === 0 &&
+        work.invitations === null));
+  if (quietHome) return null;
 
   return (
     <aside
@@ -222,19 +390,28 @@ export function ContextPanel({
       aria-label={t("regionLabel")}
       data-testid="context-panel"
       data-panel-mode={panel.mode}
+      data-panel-width={isFull ? "full" : wide ? "wide" : "narrow"}
       className={`flex flex-none flex-col ${
         expanded
-          ? // z-50 + later-in-DOM: the sheet must paint OVER the `relative z-50`
-            // composer (and the z-40 feedback FAB), not under them.
-            "fixed inset-x-0 bottom-0 z-50 max-h-[78dvh] rounded-t-2xl border border-b-0 border-ink-500 bg-ink-900 shadow-2xl"
+          ? isFull
+            ? // FULL on a phone: the whole screen, still the same panel — its
+              // close and collapse controls stay in its own header.
+              "fixed inset-0 z-50 bg-ink-900 pb-[env(safe-area-inset-bottom)]"
+            : // z-50 + later-in-DOM: the sheet must paint OVER the `relative z-50`
+              // composer (and the z-40 feedback FAB), not under them.
+              "fixed inset-x-0 bottom-0 z-50 max-h-[78dvh] rounded-t-2xl border border-b-0 border-ink-500 bg-ink-900 pb-[env(safe-area-inset-bottom)] shadow-2xl"
           : "border-t border-ink-600 bg-ink-900/60"
-      } lg:static lg:z-auto lg:h-full lg:max-h-none lg:flex-none lg:rounded-none lg:border-0 lg:border-l lg:border-t-0 lg:border-ink-600 lg:bg-ink-900/60 lg:shadow-none ${
-        wide ? "lg:w-[30rem] xl:w-[38rem]" : "lg:w-[22rem]"
+      } lg:static lg:z-auto lg:h-full lg:max-h-none lg:rounded-none lg:border-0 lg:border-l lg:border-t-0 lg:border-ink-600 lg:bg-ink-900/60 lg:shadow-none ${
+        // FULL on a desktop: the panel takes the row; the conversation beside
+        // it docks to a narrow column (the chat decides that half).
+        isFull
+          ? "lg:min-w-0 lg:flex-1"
+          : `lg:flex-none ${wide ? "lg:w-[30rem] xl:w-[38rem]" : "lg:w-[22rem]"}`
       } ${className}`}
     >
       {/* Sheet grab-handle — a visual affordance only (the chevron is the
           control), hidden on desktop where there is no sheet. */}
-      {expanded ? (
+      {expanded && !isFull ? (
         <span
           aria-hidden
           className="mx-auto mt-2 h-1 w-10 flex-none rounded-full bg-ink-500 lg:hidden"
@@ -248,6 +425,29 @@ export function ContextPanel({
         <h2 className="min-w-0 flex-1 truncate font-display text-card-title font-semibold text-text-primary">
           {title}
         </h2>
+        {/* "OPEN FULL SCREEN" EXPANDS — it never leaves (owner P0/P1 §17).
+            The generic promise lives HERE, once, and it keeps it: the same
+            result, the same depth, given the whole workspace; the same
+            control brings it back beside the conversation. A result's own
+            buttons that DO leave for a station name that station
+            ("Open profile", "Open calendar"), never "full screen". */}
+        {canExpand ? (
+          <button
+            type="button"
+            onClick={isFull ? onCollapse : onExpand}
+            data-testid="context-panel-expand"
+            data-state={isFull ? "full" : "docked"}
+            aria-label={isFull ? tr("collapseFull") : tr("openFull")}
+            title={isFull ? tr("collapseFull") : tr("openFull")}
+            className="flex size-11 flex-none items-center justify-center rounded-full border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
+          >
+            {isFull ? (
+              <Minimize2 {...iconControl()} aria-hidden />
+            ) : (
+              <Maximize2 {...iconControl()} aria-hidden />
+            )}
+          </button>
+        ) : null}
         {panel.mode === "entity" || showsResult ? (
           <button
             type="button"
@@ -288,11 +488,21 @@ export function ContextPanel({
 
       <div
         id="context-panel-body"
-        className={`mt-2.5 min-h-0 flex-1 overflow-y-auto px-4 pb-4 ${expanded ? "block max-h-[45dvh]" : "hidden"} lg:block lg:max-h-none`}
+        ref={bodyRef}
+        data-title-state={discoveryOnly ? "discovery" : undefined}
+        className={`mt-2.5 min-h-0 flex-1 overflow-y-auto px-4 pb-4 ${expanded ? (isFull ? "block" : "block max-h-[45dvh]") : "hidden"} lg:block lg:max-h-none`}
       >
         {/* W6 — THE MAP, inside the one workspace. It subscribes to the SAME
             World State: the selection flies it to the entity's place, and
             clicking a marker opens that entity here. Not a separate screen. */}
+        {/* CONTEXTUAL, NOT AMBIENT (owner §20, 2026-09-23: "do not
+            automatically display every map"). At depth 0 — the home, nothing
+            selected — the panel shows the work context and NO map: a map
+            nobody asked about is decoration competing with what matters now.
+            It appears when a SELECTION asks "where is this?" (entity mode),
+            and a place RESULT (`?result=market`) brings its own. Below `lg`
+            it also waits for the sheet to be open, so a phone never boots
+            Leaflet and its map read into a body that is `display:none`. */}
         {/* One surface per question. WorkspaceMap and the market result BOTH
             answer "where?", so stacking them puts two maps in a 22rem column
             and makes the panel argue with itself. When a result is showing, the
@@ -311,7 +521,9 @@ export function ContextPanel({
                 labels={work.invitations.labels}
               />
             ) : null}
-            <WorkspaceMap className={work?.invitations ? "my-4" : "mb-4"} />
+            {mapAsked ? (
+              <WorkspaceMap className={work?.invitations ? "my-4" : "mb-4"} />
+            ) : null}
           </>
         )}
         {showsResult && result && resultNavigation ? (
@@ -340,6 +552,32 @@ export function ContextPanel({
         ) : null}
       </div>
     </aside>
+  );
+}
+
+// ── the static-column breakpoint ────────────────────────────────────────────
+
+/** Tailwind's `lg` — where the panel stops being a sheet and becomes the
+ *  always-visible right column (the `lg:` classes on the landmark). */
+const LG_QUERY = "(min-width: 1024px)";
+
+function subscribeWide(onChange: () => void): () => void {
+  // Optional: jsdom (the render guards) has no matchMedia — same shape the
+  // thread's reduced-motion read uses.
+  const mq = window.matchMedia?.(LG_QUERY);
+  if (!mq) return () => {};
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+/** True from `lg` up. The server snapshot is `false` (phone-first): the only
+ *  consequence is that a desktop mounts the map one commit after hydration,
+ *  never that a phone mounts it into a hidden body. */
+function useWideScreen(): boolean {
+  return useSyncExternalStore(
+    subscribeWide,
+    () => window.matchMedia?.(LG_QUERY).matches ?? false,
+    () => false,
   );
 }
 
@@ -464,13 +702,7 @@ function EntityBody({
       {view.history.length > 0 && (
         <>
           <SectionTitle>{t("sectionHistory")}</SectionTitle>
-          <ul className="mt-1.5 flex flex-col gap-1" data-testid="context-panel-history">
-            {view.history.map((h) => (
-              <li key={h.text} className="text-basis text-text-secondary">
-                {h.at ? `${h.at} — ${h.text}` : h.text}
-              </li>
-            ))}
-          </ul>
+          <ContextHistorySpine history={view.history} />
         </>
       )}
 

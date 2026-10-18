@@ -29,6 +29,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   searchPublicVacancies,
   readSupplyLastRefreshedAt,
+  type StoredPublicVacancyV1,
   type VacancySearchFiltersV1,
 } from "@/lib/vacancy-store/vacancy-read";
 import {
@@ -48,6 +49,7 @@ import {
 import {
   matchWorkerToNeed,
   compareMatches,
+  declaredProfessionSlugs,
   type MatchResultV1,
   type MatchSubject,
 } from "@/lib/market/match-v1";
@@ -58,6 +60,15 @@ type VacancyDbClient = Pick<SupabaseClient, "from">;
 export interface ExternalOpportunityCardV1 {
   /** Stable render key: provider + the publisher's own id. */
   readonly key: string;
+  /** The store row id — what an interest write names (null only for a row
+   *  read without `id`, which the board's reads never do). */
+  readonly vacancyId: string | null;
+  /** The publisher's own publication date, for the outreach recency floor
+   *  (`employer-outreach-policy.ts`) — as published, never adjusted. */
+  readonly publishedAt: string;
+  /** Whether the ad names an identifiable employer (name + a stable org id
+   *  or homepage) — the commercial rule's provenance criterion. */
+  readonly employerIdentifiable: boolean;
   readonly view: CanonicalOpportunityViewV1;
   readonly capabilities: OpportunityCapabilitiesV1;
   /** The ONE engine's verdict for this worker against this ad. */
@@ -91,6 +102,26 @@ const BOARD_LIMIT = 20;
  *  engine below, and the rendered shortlist stays capped at BOARD_LIMIT. */
 const PROFILE_POOL_LIMIT = 30;
 
+/** Declared professions that feed the profile-directed pool (primary first),
+ *  one read each. Bounds the reads; a person with more still has every one of
+ *  them in the engine's profession criterion. */
+const MAX_POOL_PROFESSIONS = 4;
+
+type SearchOutcome = Awaited<ReturnType<typeof searchPublicVacancies>>;
+
+/** Round-robin merge of per-profession pools, each in its own order: where
+ *  the engine's verdicts tie, retrieval order decides, and concatenation would
+ *  let the primary's ads fill the whole capped shortlist before a second
+ *  profession's first ad (production supply: 52 tiler vs 93 painter ads). */
+function interleave<T>(lists: readonly (readonly T[])[]): T[] {
+  const out: T[] = [];
+  const longest = Math.max(0, ...lists.map((l) => l.length));
+  for (let i = 0; i < longest; i++) {
+    for (const list of lists) if (i < list.length) out.push(list[i]);
+  }
+  return out;
+}
+
 export async function loadExternalVacancyCards(
   client: VacancyDbClient,
   subject: MatchSubject,
@@ -100,21 +131,94 @@ export async function loadExternalVacancyCards(
   >,
 ): Promise<ExternalVacanciesResultV1> {
   const explicitProfession = options.professionSlug ?? null;
+  const nowIso = options.nowIso ?? new Date().toISOString();
+
+  // Profile-directed pool, read FIRST (#1689, defect H): when the person has
+  // a declared profession and the board is not already narrowed (no explicit
+  // profession filter, no free-text query), fetch ads IN that profession
+  // before the generic newest page. This is what lets a profile enrichment
+  // change which ads the shortlist is drawn from, instead of the shortlist
+  // forever being "the 20 newest ads of any kind". On production a
+  // Lithuanian worker's answer to "Ieškau naujo darbo" was "Senior AI
+  // Engineer" and "Rörmokare" — the newest ads overall — because the newest
+  // page was read first and the profession pool merged in behind it. With
+  // the pool first, ads of the person's profession stand ahead of
+  // newest-of-any-kind whenever the engine's verdicts tie; the ranking
+  // itself stays the ONE engine, and the limits are unchanged.
+  //
+  // EVERY declared profession feeds this pool (owner decision 2026-09-28): a
+  // tiler who also paints gets painting ads too, without re-declaring painting
+  // as skills. One bounded, indexed read PER profession, in parallel, so the
+  // busiest one cannot crowd the others out; primary first, and the
+  // publisher-identity dedupe below shows an ad in two of them once. With one
+  // profession this is exactly the single read it always was. Ranking stays
+  // the ONE engine below.
+  const profileProfessions = declaredProfessionSlugs(subject).slice(0, MAX_POOL_PROFESSIONS);
+  const poolApplies =
+    !explicitProfession &&
+    !(options.query && options.query.trim().length > 0) &&
+    profileProfessions.length > 0;
+  const poolReads: SearchOutcome[] | null = poolApplies
+    ? await Promise.all(
+        profileProfessions.map((professionSlug) =>
+          searchPublicVacancies(client, {
+            country: options.country ?? null,
+            professionSlug,
+            query: null,
+            limit: PROFILE_POOL_LIMIT,
+            nowIso: options.nowIso,
+          }).catch((e: unknown) => {
+            // The pool is an enrichment; a failed read leaves the board to the
+            // generic page, never breaks it.
+            if (e instanceof Error && e.message.startsWith("vacancy_search_failed")) {
+              return { status: "not_provisioned", vacancies: [], hasMore: false } as const;
+            }
+            throw e;
+          }),
+        ),
+      )
+    : null;
+  const answered = (poolReads ?? []).filter((r) => r.status === "ok");
+  const pool: SearchOutcome | null =
+    poolReads === null
+      ? null
+      : answered.length > 0
+        ? { status: "ok", vacancies: interleave(answered.map((r) => r.vacancies)), hasMore: answered.some((r) => r.hasMore) }
+        : poolReads[0];
+
+  // The generic page: the newest ads under the caller's own filters.
+  //
+  // A FAILED external read is an UNAVAILABLE source, never a broken board.
+  // On production (2026-09-06) the search timed out (57014) and the throw
+  // reached the server action: the whole worker board — and every sentence
+  // that reads it, "kas man trūksta?" included — answered the not-understood
+  // menu. The platform's own demand does not depend on a public feed, so the
+  // feed degrades to "not available" (the same honest state as an
+  // unprovisioned store) and the rest of the board stands.
   const result = await searchPublicVacancies(client, {
     country: options.country ?? null,
     professionSlug: explicitProfession,
     query: options.query ?? null,
     limit: BOARD_LIMIT,
     nowIso: options.nowIso,
+  }).catch((e: unknown) => {
+    if (e instanceof Error && e.message.startsWith("vacancy_search_failed")) {
+      return { status: "not_provisioned", vacancies: [], hasMore: false } as const;
+    }
+    throw e;
   });
 
-  if (result.status === "not_provisioned") {
+  // The store is unavailable only when NEITHER read answered. Both reads go
+  // to the same table, so a read that answered proves the store exists; the
+  // other failing is a degraded read, and the board stands on what it has.
+  const poolOk = pool !== null && pool.status === "ok";
+  if (result.status === "not_provisioned" && !poolOk) {
     return {
       available: false,
       cards: [],
       freshness: classifySourceFreshness({
         lastRefreshedAt: null,
-        nowIso: options.nowIso ?? new Date().toISOString(),
+        nowIso,
         unavailable: true,
       }),
     };
@@ -124,50 +228,38 @@ export async function loadExternalVacancyCards(
   // predicate as the cards above — it describes THESE rows, not a wider view.
   const refreshed = await readSupplyLastRefreshedAt(client, {
     country: options.country ?? null,
-    nowIso: options.nowIso ?? new Date().toISOString(),
+    nowIso,
   });
   const freshness = classifySourceFreshness({
     lastRefreshedAt: refreshed.lastRefreshedAt,
-    nowIso: options.nowIso ?? new Date().toISOString(),
+    nowIso,
     unavailable: refreshed.status === "not_provisioned",
   });
 
-  // Profile-directed pool: when the person has a declared profession and the
-  // board is not already narrowed (no explicit profession filter, no free-text
-  // query), also fetch ads IN that profession. This is what lets a profile
-  // enrichment change which ads the shortlist is drawn from, instead of the
-  // shortlist forever being "the 20 newest ads of any kind".
-  const profileProfession = subject.professionSlug ?? null;
-  let profilePool = [] as (typeof result.vacancies)[number][];
-  if (
-    !explicitProfession &&
-    !(options.query && options.query.trim().length > 0) &&
-    profileProfession
-  ) {
-    const extra = await searchPublicVacancies(client, {
-      country: options.country ?? null,
-      professionSlug: profileProfession,
-      query: null,
-      limit: PROFILE_POOL_LIMIT,
-      nowIso: options.nowIso,
-    });
-    if (extra.status === "ok") profilePool = [...extra.vacancies];
-  }
+  const profilePool = poolOk ? pool.vacancies : [];
+  const newest = result.status === "ok" ? result.vacancies : [];
 
   // Merge + dedupe by publisher identity — the newest page and the
-  // profile-directed pool can overlap.
-  const byKey = new Map<string, (typeof result.vacancies)[number]>();
-  for (const v of [...result.vacancies, ...profilePool]) {
-    byKey.set(`${v.providerKey}:${v.externalId}`, v);
+  // profile-directed pool can overlap. Profile pool FIRST: insertion order
+  // is what the stable sort below keeps between equal verdicts.
+  const byKey = new Map<string, (typeof newest)[number]>();
+  for (const v of [...profilePool, ...newest]) {
+    const key = `${v.providerKey}:${v.externalId}`;
+    if (!byKey.has(key)) byKey.set(key, v);
   }
 
-  const cards = [...byKey.values()]
+  const vacancyByKey = new Map<string, StoredPublicVacancyV1>(
+    [...byKey.values()].map((v) => [`${v.providerKey}:${v.externalId}`, v] as const),
+  );
+  const ranked = [...byKey.values()]
     .map((vacancy): ExternalOpportunityCardV1 => {
       // Skill slugs on a stored vacancy were derived by the platform's own
       // text recognizer at import time — the categorizer's tier, declared
       // rather than upgraded. An ad the recognizer could not read carries no
       // slugs, a `no_requirement_set` gap, and the engine reports
-      // insufficient data instead of a fake score.
+      // insufficient data instead of a fake score. Downstream that verdict
+      // is the NOT ASSESSED band (`fit-band.ts`): such an ad is shown as a
+      // found posting, explained, and never called suitable.
       const skillSource =
         vacancy.skillSlugs.length > 0 ? "recognized_from_text" : null;
       const { need, missingForMatching } = buildNeedFromVacancy(
@@ -177,6 +269,14 @@ export async function loadExternalVacancyCards(
       const view = toCanonicalOpportunityView(vacancy);
       return {
         key: `${vacancy.providerKey}:${vacancy.externalId}`,
+        vacancyId: vacancy.storeId,
+        publishedAt: vacancy.publishedAt,
+        employerIdentifiable:
+          Boolean(vacancy.employer.name?.trim()) &&
+          Boolean(
+            vacancy.employer.externalOrgId?.trim() ||
+              vacancy.employer.homepage?.trim(),
+          ),
         view,
         capabilities: opportunityCapabilities(view.provenance),
         match: matchWorkerToNeed(need, subject),
@@ -189,5 +289,66 @@ export async function loadExternalVacancyCards(
     // cap keeps HOW MANY render unchanged.
     .slice(0, BOARD_LIMIT);
 
+  // THE READER'S LANGUAGE — for exactly the cards that render, after the
+  // ranking (ranking reads slugs and facts, never words, so it is
+  // language-neutral by construction).
+  //
+  // OWNER DECISION 2026-09-22: this reads ONLY renderings that already
+  // exist. The board no longer translates. A foreign ad the platform has
+  // never been asked to render shows the publisher's own words with its
+  // language named, and the reader may ask for a rendering on the ad
+  // itself. Because a stored rendering costs nothing, it is applied for
+  // EVERY reader including anonymous ones — a crawler cannot trigger a
+  // vendor call because there is no vendor call on this path at all.
+  const cards = await withReaderLanguage(ranked, vacancyByKey);
+
   return { available: true, cards, freshness };
+}
+
+async function withReaderLanguage(
+  cards: readonly ExternalOpportunityCardV1[],
+  vacancyByKey: ReadonlyMap<string, StoredPublicVacancyV1>,
+): Promise<readonly ExternalOpportunityCardV1[]> {
+  // Loaded here, not at module top: the translation reader carries the AI
+  // runtime graph, and this module is imported by every board read (and by
+  // the intent-router tests, whose 5 s budget a static import would eat).
+  const [{ getLocale }, { storedVacancyTitles }] = await Promise.all([
+    import("next-intl/server"),
+    import("@/lib/vacancy-store/vacancy-translation-read"),
+  ]);
+  // NO READER LOCALE, NO SUBSTITUTION. `getLocale()` needs a request scope;
+  // outside one (a unit test, a background job) there is no reader whose
+  // language we could be rendering into. Falling back to the publisher's own
+  // words is not a swallowed error — the original IS the fact, and it is
+  // what the card renders whenever a rendering is absent for any reason.
+  // Guessing a locale here is the one thing that WOULD be wrong: it would
+  // show a Lithuanian rendering to a reader who never asked for one.
+  let locale: string;
+  try {
+    locale = await getLocale();
+  } catch {
+    return cards;
+  }
+  const vacancies = cards.flatMap((c) => {
+    const v = vacancyByKey.get(c.key);
+    return v ? [v] : [];
+  });
+  const renderings = storedVacancyTitles(vacancies, locale);
+  if (renderings.size === 0) return cards;
+  return cards.map((card) => {
+    const v = vacancyByKey.get(card.key);
+    const r = v?.storeId ? renderings.get(v.storeId) : undefined;
+    if (!v || !r) return card;
+    return {
+      ...card,
+      view: toCanonicalOpportunityView(v, {
+        translation: {
+          targetLanguage: locale,
+          title: r.title,
+          description: r.description,
+          provider: r.provider,
+        },
+      }),
+    };
+  });
 }

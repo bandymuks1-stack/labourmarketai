@@ -132,7 +132,7 @@ describe("request-again wiring — existing request action, buyer side only", ()
 });
 
 describe("i18n — the new keys exist in every active locale", () => {
-  for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+  for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
     it(`${loc}: repeat-action copy is present, non-empty and not [EN]-debt`, () => {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {
         bookings: { actions: Record<string, string>; propose: Record<string, string> };

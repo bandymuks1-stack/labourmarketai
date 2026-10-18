@@ -1,17 +1,46 @@
 import { redirect } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { IdentityStage } from "@/components/app/player-card/identity-stage";
+import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import {
+  availabilityDateLabel,
+  countryLabel,
+  mobilityLabels,
+} from "@/lib/people/person-page-labels";
+import {
+  PersonServiceRequestButton,
+  type PersonServiceRequestLabels,
+} from "@/components/app/person-service-request-button";
 import {
   BadgeCheck,
   CalendarDays,
+  Globe2,
+  Hammer,
+  History,
+  Images,
   MapPin,
   NotebookPen,
   UserRound,
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
+import { Card } from "@/components/ui/Card";
 import { MessageButton } from "@/components/app/message-button";
+import { JournalWorkIntelligence } from "@/components/app/journal-work-intelligence";
+import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import {
+  WORK_PERIOD_KEYS,
+  type WorkPeriodKey,
+} from "@/lib/journal/work-intelligence";
 import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
+import { readRecordedWorkFor } from "@/lib/player-card/work-history";
+import { readWorkPhotosFor } from "@/lib/journal/personal-gallery";
+import { listActiveOfferingsByProvider } from "@/lib/services/service-offerings";
+import { RecognisedByList } from "@/components/app/recognised-by-block";
+import { getViewerRecognisedByItems } from "@/lib/qualification/viewer-recognitions";
+import { PersonImportedHistory } from "@/components/app/people/person-imported-history";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +66,40 @@ const UUID_RE =
  */
 export default async function PersonPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; workerId: string }>;
+  searchParams?: Promise<{ period?: string }>;
 }) {
   const { locale, workerId } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("people");
   const tSkillNames = await getTranslations("skillNames");
+  // The organization's "work in numbers" period switch — the same keys and
+  // the same default the person's own journal section uses.
+  const sp = (await searchParams) ?? {};
+  const periodKey: WorkPeriodKey =
+    typeof sp.period === "string" &&
+    (WORK_PERIOD_KEYS as readonly string[]).includes(sp.period)
+      ? (sp.period as WorkPeriodKey)
+      : "all";
+  // Countries and dates are FACTS ABOUT A PERSON that an employer reads on
+  // the one page where they judge them. Both were rendered raw here — see
+  // `countryName` and the availability chip below.
+  const tCountries = await getTranslations("labourMarket");
+  // Priority 4: the action on a listed service. Copy comes from the
+  // EXISTING `marketplace` namespace the service-requests page reads, so
+  // this entry point carries no vocabulary of its own.
+  const tMarket = await getTranslations("marketplace");
+  const serviceRequestLabels: PersonServiceRequestLabels = {
+    request: tMarket("request"),
+    requested: tMarket("requested"),
+    duplicate: tMarket("duplicate"),
+    offeringInactive: tMarket("offeringInactive"),
+    notAvailable: tMarket("notAvailable"),
+    errorGeneric: tMarket("errorGeneric"),
+  };
+  const format = await getFormatter();
 
   const supabase = await createClient();
   const {
@@ -59,7 +115,10 @@ export default async function PersonPage({
   const { data: worker } = await supabase
     .from("workers")
     .select(
-      "id, profile_id, display_name, headline, experience_years, current_location_country, availability_status, available_from",
+      // `preferred_countries` is the same already-authorised row, and it is
+      // already in PROFILE_SAFE_PREVIEW_FIELDS — it was simply never
+      // rendered here, so the page could not answer WHERE CAN THEY WORK.
+      "id, profile_id, display_name, headline, experience_years, current_location_country, preferred_countries, availability_status, available_from",
     )
     .eq("id", workerId)
     .maybeSingle();
@@ -67,6 +126,8 @@ export default async function PersonPage({
   if (!worker) {
     return <RestrictedState t={t} />;
   }
+
+  const recognisedBy = await getViewerRecognisedByItems(workerId).catch(() => null);
 
   // Own row → the canonical self surface, not a duplicate person view.
   if (worker.profile_id === user.id) {
@@ -105,6 +166,91 @@ export default async function PersonPage({
   });
   const shown = skills.filter((s) => s.label);
 
+  // WHAT HAVE THEY ACTUALLY DONE — the question this page could not answer.
+  // Permission is the database's: `engagement_contexts` select RLS returns
+  // only the engagements this viewer is entitled to (their own, or an
+  // organization they manage). Nothing is loosened to render it.
+  const recordedWork = await readRecordedWorkFor(
+    (worker.profile_id as string | null) ?? "",
+  );
+  /**
+   * ── A COUNTRY CODE IS NOT A COUNTRY NAME (owner readiness window, §5B/§24)
+   *
+   * Read back from production today, this page rendered a real worker's
+   * location as "LT" and their mobility as "NL, DK, NO, SE" — the stored
+   * ISO-3166 alpha-2 codes, printed straight onto the ONE cross-person page
+   * an employer uses to decide about someone. §24 bans raw internal
+   * identifiers in the product's surfaces, and for a visitor reading in
+   * Russian or Dutch these two-letter tokens are not even a weak label.
+   *
+   * The catalogue that fixes it already exists and every other surface uses
+   * it (`labourMarket.countryNames`, all 17 markets × 5 active locales). The
+   * fallback is the CODE, never a blank and never a guess: a worker whose
+   * stored country is outside the market set — the column is free text and
+   * the location model deliberately spans all of ISO — still shows something
+   * true rather than vanishing. UNKNOWN is not EMPTY (SEP-7).
+   */
+  const countries = {
+    has: (key: string) => tCountries.has(key),
+    get: (key: string) => tCountries(key),
+  };
+  const mobility = mobilityLabels(
+    worker.preferred_countries as string[] | null,
+    countries,
+  );
+
+  // REAL WORK and WHAT THEY OFFER. Both already existed and were rendered
+  // everywhere except on a person's own page: the photos on the author's own
+  // gallery, the offerings on the provider's own list and on the ORGANIZATION
+  // public page. Both reads are RLS-scoped and neither is a second store.
+  // D1 (owner 2026-09-30): the worker's own photo, only for a viewer with a
+  // REAL work relationship with them — decided by the database
+  // (worker_avatar_path_v1), not by a manager role or a discoverable profile.
+  const [workPhotos, offerings, avatarUrl] = await Promise.all([
+    readWorkPhotosFor((worker.profile_id as string | null) ?? ""),
+    listActiveOfferingsByProvider((worker.profile_id as string | null) ?? ""),
+    getAvatarForVisibleWorker(worker.id as string),
+  ]);
+
+  /**
+   * ── WORK IN NUMBERS, FOR THE ORGANIZATION (issue #1689, owner §14) ──────
+   *
+   * The same reader and the same rendering the person's own journal uses —
+   * no second timesheet universe. What differs is the SCOPE, and the
+   * database sets it: every journal table carries an org-manager branch
+   * (`manages_organization` on the entry's engagement organization), so a
+   * manager receives exactly the entries logged against their own
+   * organization's engagements and nothing recorded for anyone else.
+   *
+   * Composed only when the viewer already sees an engagement with this
+   * person (`recordedWork` above is RLS-scoped the same way): a viewer with
+   * no standing is never shown "no recorded work" about someone — that
+   * sentence would be a claim about a record they cannot read (SEP-8: DATA
+   * EXISTS ≠ VISIBLE). A failed read withholds the section (null), never a
+   * zero that reads as "this person did nothing" (SEP-7).
+   */
+  const orgWorkIntelligence =
+    recordedWork.status === "ok" && recordedWork.entries.length > 0
+      ? await loadWorkIntelligence(
+          { supabase, userId: user.id },
+          worker.id as string,
+          { focus: periodKey },
+        )
+      : null;
+  const tProfessions = await getTranslations("professions");
+  const tUnits = await getTranslations("productivityUnits");
+  const catalogueName =
+    (tr: { has: (k: string) => boolean; (k: string): string }) =>
+    (slug: string): string | null =>
+      tr.has(slug) ? tr(slug) : null;
+  const engagementLabels = new Map<string, string>();
+  if (recordedWork.status === "ok") {
+    for (const e of recordedWork.entries) {
+      const label = e.title ?? e.organizationName;
+      if (label) engagementLabels.set(e.id, label);
+    }
+  }
+
   const name =
     (worker.display_name as string | null)?.trim() ||
     anonymizedWorkerLabel(worker.id as string);
@@ -131,58 +277,92 @@ export default async function PersonPage({
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="person-page">
       <header className="flex flex-col gap-3">
-        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <UserRound className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>
-        <div className="flex flex-wrap items-center gap-4">
-          <span
-            aria-hidden
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-ink-500 bg-ink-700 font-display text-lg font-bold text-text-primary"
-          >
-            {name
+        {/* THE PERSON — the SAME identity stage the Player Card and the
+            profile use (premium team view, 2026-09-29): one professional
+            identity language across the product. Only what THIS viewer may
+            see: current work is the RLS-visible engagements; no hours strip
+            here, because the viewer reads only their own organization's
+            entries — the scoped figures stay in the work-in-numbers section. */}
+        <IdentityStage
+          name={name}
+          avatarUrl={avatarUrl}
+          initials={
+            name
               .trim()
               .split(/\s+/)
               .slice(0, 2)
               .map((p) => p[0]?.toUpperCase() ?? "")
-              .join("") || "•"}
-          </span>
-          <div className="min-w-0">
-            <h1
-              className="font-display text-2xl font-bold tracking-tightest text-text-primary"
-              data-testid="person-name"
-            >
-              {name}
-            </h1>
-            {worker.headline ? (
-              <p className="text-sm text-text-secondary">
-                {worker.headline as string}
-              </p>
-            ) : null}
-          </div>
-        </div>
+              .join("") || "•"
+          }
+          heading={
+                <h1
+                  className="font-display text-2xl font-bold tracking-tightest text-text-primary"
+                  data-testid="person-name"
+                >
+                  {name}
+                </h1>
+          }
+          professions={[]}
+          location={
+            worker.current_location_country
+              ? countryLabel(worker.current_location_country as string, countries)
+              : null
+          }
+          availability={available ? { label: t("available"), live: true } : null}
+          currentWork={
+            recordedWork.status === "ok"
+              ? [
+                  ...new Set(
+                    recordedWork.entries
+                      .filter((e) => e.current)
+                      .map((e) => (e.organizationName ?? "").trim())
+                      .filter((n) => n.length > 0),
+                  ),
+                ]
+              : []
+          }
+          currentWorkLabel={t("currentWork")}
+        >
+              {worker.headline ? (
+                <p className="text-sm text-text-secondary">
+                  {worker.headline as string}
+                </p>
+              ) : null}
+        </IdentityStage>
         <div className="flex flex-wrap gap-2">
-          {available ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-state-success/40 bg-state-success/10 px-3 py-1 font-mono text-meta uppercase tracking-label text-state-success">
-              {t("available")}
-            </span>
-          ) : null}
           {worker.available_from ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <CalendarDays className="h-3 w-3" aria-hidden />
-              {t("availableFrom", { date: worker.available_from as string })}
-            </span>
-          ) : null}
-          {worker.current_location_country ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
-              <MapPin className="h-3 w-3" aria-hidden />
-              {worker.current_location_country as string}
+              {/* A stored `date` column arrives as "2026-07-31" and was
+                  interpolated verbatim. Formatted in the reader's locale —
+                  and parsed defensively, because a value the formatter
+                  cannot read must degrade to the stored string, never to
+                  "Invalid Date". */}
+              {t("availableFrom", {
+                date: availabilityDateLabel(
+                  worker.available_from as string,
+                  format,
+                ),
+              })}
             </span>
           ) : null}
           {typeof worker.experience_years === "number" &&
           worker.experience_years > 0 ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               {t("experienceYears", { n: worker.experience_years })}
+            </span>
+          ) : null}
+          {mobility.length > 0 ? (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
+              data-testid="person-mobility"
+            >
+              <Globe2 className="h-3 w-3" aria-hidden />
+              {t("mobility")}: {mobility.join(", ")}
             </span>
           ) : null}
         </div>
@@ -193,6 +373,162 @@ export default async function PersonPage({
           />
         </div>
       </header>
+
+      {/* RECOGNISED BY - an independent assessor's decision, read through the
+          RLS-governed viewer function. Appears only when one exists. */}
+      {recognisedBy && recognisedBy.length > 0 ? (
+        <RecognisedByList items={recognisedBy} variant="profile" locale={locale} audience="viewer" />
+      ) : null}
+
+      {/* WHAT THEY CAN DO — the concrete work offered, not a profession label.
+          Only ACTIVE offerings: the table's own discovery policy publishes
+          those and withholds drafts, so the filter matches the permission
+          rather than widening past it. */}
+      <section className="flex flex-col gap-3" data-testid="person-services">
+        <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+          <Hammer className="h-3.5 w-3.5" aria-hidden />
+          {t("servicesTitle")}
+          {offerings.kind === "ok" && offerings.rows.length > 0
+            ? ` · ${offerings.rows.length}`
+            : null}
+        </h2>
+        {offerings.kind === "unavailable" ? (
+          <Card variant="error" compact>
+            <p className="text-sm text-text-secondary" data-testid="person-services-error">
+              {t("servicesUnavailable")}
+            </p>
+          </Card>
+        ) : offerings.rows.length === 0 ? (
+          <Card variant="empty" compact>
+            <p className="text-sm text-text-secondary">{t("servicesEmpty")}</p>
+          </Card>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {offerings.rows.map((o) => (
+              <li key={o.id} data-testid="person-service">
+                <Card compact className="flex flex-col gap-1">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <span className="text-sm font-medium text-text-primary">
+                      {o.title}
+                    </span>
+                    {o.remote ? (
+                      <span className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
+                        {t("serviceRemote")}
+                      </span>
+                    ) : null}
+                    {o.locationCountry ? (
+                      <span className="inline-flex items-center gap-1 font-mono text-meta text-text-muted">
+                        <MapPin className="h-3 w-3" aria-hidden />
+                        {/* Named, not printed as an ISO code — the same
+                            correction as the person's own country above. */}
+                        {countryLabel(o.locationCountry, countries)}
+                      </span>
+                    ) : null}
+                    {/* The provider's OWN words for what it costs. Never a
+                        computed or inferred figure. */}
+                    {o.rateText ? (
+                      <span className="font-mono text-meta text-text-secondary">
+                        {o.rateText}
+                      </span>
+                    ) : null}
+                  </div>
+                  {o.description ? (
+                    <p className="text-sm text-text-secondary">{o.description}</p>
+                  ) : null}
+                  {/* THE NEXT ACTION. A listed service with no way to ask for
+                      it is a decorative list; this is the canonical request
+                      loop's own action, reached from where the visitor is
+                      actually looking. */}
+                  <div className="mt-1 flex justify-end">
+                    <PersonServiceRequestButton
+                      offeringId={o.id}
+                      labels={serviceRequestLabels}
+                    />
+                  </div>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* REAL WORK — photographs of work actually done, from the SAME journal
+          evidence store the author's own gallery reads. No portfolio model, no
+          second upload path, and no journal text: this page selects no private
+          narrative, and a photo of a finished weld is not the sentence the
+          person wrote about their day. */}
+      <section className="flex flex-col gap-3" data-testid="person-photos">
+        <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+          <Images className="h-3.5 w-3.5" aria-hidden />
+          {t("photosTitle")}
+          {workPhotos.status === "ok" && workPhotos.photos.length > 0
+            ? ` · ${workPhotos.photos.length}`
+            : null}
+        </h2>
+        {workPhotos.status === "unavailable" ? (
+          <Card variant="error" compact>
+            <p className="text-sm text-text-secondary" data-testid="person-photos-error">
+              {t("photosUnavailable")}
+            </p>
+          </Card>
+        ) : workPhotos.photos.length === 0 ? (
+          <Card variant="empty" compact>
+            <p className="text-sm text-text-secondary">{t("photosEmpty")}</p>
+          </Card>
+        ) : (
+          <>
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {workPhotos.photos.map((ph) => (
+                <li key={ph.photoId} data-testid="person-photo">
+                  <Card compact className="overflow-hidden p-0">
+                    {ph.signedUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={ph.signedUrl}
+                        alt={t("photoAlt")}
+                        className="aspect-[4/3] w-full bg-ink-800 object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      // A missing preview is said, never drawn as a broken image.
+                      <div className="flex aspect-[4/3] w-full items-center justify-center bg-ink-800 px-3 text-center text-meta leading-relaxed text-text-muted">
+                        {t("photosPreviewsUnavailable")}
+                      </div>
+                    )}
+                  </Card>
+                </li>
+              ))}
+            </ul>
+            {workPhotos.previewsUnavailable ? (
+              <p className="text-meta leading-relaxed text-text-muted">
+                {t("photosPreviewsUnavailable")}
+              </p>
+            ) : null}
+          </>
+        )}
+      </section>
+
+      {/* WHAT THEIR RECORDED WORK ADDS UP TO — in this organization's own
+          records. Hours, kinds of work, the skills the hours reach and what
+          backs them, from the one work-time rule; confirmed hours light up
+          from this organization's own approved confirmations. */}
+      {orgWorkIntelligence && (
+        <JournalWorkIntelligence
+          wi={orgWorkIntelligence}
+          locale={locale}
+          audience="organization"
+          labels={{
+            skillName: catalogueName(tSkillNames),
+            professionName: catalogueName(tProfessions),
+            unitName: catalogueName(tUnits),
+            contextLabel: (id) =>
+              (id ? engagementLabels.get(id) : null) ?? t("workTitle"),
+            primaryProfessionSlug: null,
+            periodHref: (key) =>
+              `/dashboard/people/${workerId}?period=${key}#work-intelligence`,
+          }}
+        />
+      )}
 
       <section className="flex flex-col gap-3">
         <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
@@ -238,6 +574,79 @@ export default async function PersonPage({
           {t("skillsLegend")}
         </p>
       </section>
+
+      {/* WHAT THEY HAVE ACTUALLY DONE. Skills are what a person can do; this
+          is what they did, and the page carried none of it. The rows come from
+          the SAME `engagement_contexts` spine the person's own card, CV and
+          profile read — one history, not a fourth variant of it. */}
+      <section className="flex flex-col gap-3" data-testid="person-work">
+        <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
+          <History className="h-3.5 w-3.5" aria-hidden />
+          {t("workTitle")}
+          {recordedWork.status === "ok" && recordedWork.entries.length > 0
+            ? ` · ${recordedWork.entries.length}`
+            : null}
+        </h2>
+        {recordedWork.status === "unavailable" ? (
+          // UNKNOWN is not ZERO. This section IS the evidence signal here, so
+          // a failed read must never render as "this person has done nothing".
+          <Card variant="error" compact>
+            <p className="text-sm text-text-secondary" data-testid="person-work-error">
+              {t("workUnavailable")}
+            </p>
+          </Card>
+        ) : recordedWork.entries.length === 0 ? (
+          <Card variant="empty" compact>
+            <p className="text-sm text-text-secondary">{t("workEmpty")}</p>
+          </Card>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {recordedWork.entries.map((e) => (
+              <li key={e.id} data-testid="person-work-entry">
+                <Card compact className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="text-sm font-medium text-text-primary">
+                  {e.title ?? e.organizationName ?? "—"}
+                </span>
+                {e.organizationName && e.title ? (
+                  <span className="text-sm text-text-secondary">
+                    {e.organizationName}
+                  </span>
+                ) : null}
+                {/* EMPLOYMENT and PRACTICE are not the same claim. A
+                    placement is carried as practice, never relabelled a job. */}
+                <span className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
+                  {e.kind === "practice" ? t("kindPractice") : t("kindEmployment")}
+                </span>
+                {e.startedAt ? (
+                  <span className="font-mono text-meta text-text-muted">
+                    {e.startedAt}
+                    {e.current ? ` — ${t("workCurrent")}` : e.endedAt ? ` — ${e.endedAt}` : ""}
+                  </span>
+                ) : null}
+                {e.countryCode ? (
+                  <span className="inline-flex items-center gap-1 font-mono text-meta text-text-muted">
+                    <MapPin className="h-3 w-3" aria-hidden />
+                    {e.countryCode}
+                  </span>
+                ) : null}
+                </Card>
+              </li>
+            ))}
+          </ul>
+        )}
+        {/* Said plainly, because it is true: this is the part the viewer is
+            entitled to see, which is not the same as a complete history. */}
+        <p className="inline-flex items-center gap-2 text-meta leading-relaxed text-text-muted">
+          <NotebookPen className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          {t("workScopeNote")}
+        </p>
+      </section>
+
+      {/* WHAT THIS ORGANIZATION IMPORTED ABOUT THEM. The page read no
+          imported history at all (2026-09-20): the ONE evidence read, through
+          the person's LINKED roster row, rendered with the shared evidence
+          primitives. Nothing when there is none; said when it cannot be read. */}
+      <PersonImportedHistory workerId={worker.id as string} locale={locale} />
     </div>
   );
 }
@@ -252,9 +661,7 @@ async function RestrictedState({
       className="mx-auto flex w-full max-w-content flex-col gap-4"
       data-testid="person-restricted"
     >
-      <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-        {t("restrictedTitle")}
-      </h1>
+      <PageTitle>{t("restrictedTitle")}</PageTitle>
       <p className="card-border p-4 text-sm leading-relaxed text-text-secondary">
         {t("restrictedBody")}
       </p>

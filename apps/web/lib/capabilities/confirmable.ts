@@ -8,6 +8,8 @@ import {
   issueConfirmationToken,
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
+import { spendConfirmationForRequest } from "@/lib/security/confirmation-spend";
+import { confirmationKeyMaterial } from "@/lib/security/confirmation-key-material";
 
 /**
  * THE capability confirmation wiring (G4 tail wagon 1) — the ONE way a
@@ -25,14 +27,18 @@ import {
  * string — a token minted for one surface can never be replayed on the other.
  */
 export function capabilityTokenSecret(): string {
-  const material = env.CONVERSATION_TOKEN_SECRET || env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!material) {
+  // Same rule as the conversation signer: the dedicated key or a refusal; the
+  // service-role key is never key material, in any environment.
+  const verdict = confirmationKeyMaterial({
+    dedicated: env.CONVERSATION_TOKEN_SECRET,
+  });
+  if (!verdict.ok) {
     throw new Error(
-      "capability confirmation tokens cannot be signed: set CONVERSATION_TOKEN_SECRET " +
-        "(or SUPABASE_SERVICE_ROLE_KEY). Refusing to sign with a hardcoded fallback.",
+      `capability confirmation tokens cannot be signed: ${verdict.reason} ` +
+        "Refusing to sign with a hardcoded fallback.",
     );
   }
-  return createHash("sha256").update(`capability-confirmation:v1:${material}`).digest("hex");
+  return createHash("sha256").update(`capability-confirmation:v1:${verdict.material}`).digest("hex");
 }
 
 /** Mint the one-time token a draft returns. `input` must be the NORMALIZED
@@ -54,14 +60,22 @@ export function mintCapabilityConfirmation(opts: {
 }
 
 /** Verify a confirm call's token against the SAME normalized input, caller,
- *  and freshly recomputed state fingerprint. */
-export function verifyCapabilityConfirmation(opts: {
+ *  and freshly recomputed state fingerprint — and SPEND it.
+ *
+ *  A state fingerprint refuses a replay only once the write has moved the
+ *  state; two confirms arriving together both read the old state. A genuine
+ *  token is therefore spent atomically (`public.confirmation_spends`, primary
+ *  key) before the caller's write runs: of any number of submissions of one
+ *  token exactly one passes, the rest answer `stale_state`. The client is the
+ *  request's own (`createClient()` — the verified bearer caller inside the MCP
+ *  door's scope), so the spend is RLS-bound to the same person. */
+export async function verifyCapabilityConfirmation(opts: {
   actionId: string;
   token: string;
   input: Record<string, unknown>;
   userId: string;
   currentStateFingerprint: string;
-}): { ok: true } | { ok: false; reason: string } {
+}): Promise<{ ok: true } | { ok: false; reason: string }> {
   const verdict = verifyConfirmationToken(capabilityTokenSecret(), opts.token, {
     actionId: opts.actionId,
     input: opts.input,
@@ -69,5 +83,9 @@ export function verifyCapabilityConfirmation(opts: {
     currentStateFingerprint: opts.currentStateFingerprint,
     nowMs: Date.now(),
   });
-  return verdict.ok ? { ok: true } : { ok: false, reason: verdict.reason };
+  if (!verdict.ok) return { ok: false, reason: verdict.reason };
+  const spend = await spendConfirmationForRequest(opts.token, opts.actionId);
+  if (spend === "already_spent") return { ok: false, reason: "stale_state" };
+  if (spend === "error") return { ok: false, reason: "spend_failed" };
+  return { ok: true };
 }

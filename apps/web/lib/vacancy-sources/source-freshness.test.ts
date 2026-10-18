@@ -17,6 +17,23 @@ const NOW = "2026-08-12T06:00:00.000Z";
 const hoursAgo = (n: number) =>
   new Date(Date.parse(NOW) - n * 3_600_000).toISOString();
 
+describe("classifySourceFreshness — caller-supplied thresholds (2026-09-23, /api/health)", () => {
+  const thresholds = { delayedAfterHours: 24, staleAfterHours: 72 };
+
+  it("moves the boundaries without touching the product defaults", () => {
+    expect(classifySourceFreshness({ lastRefreshedAt: hoursAgo(50), nowIso: NOW, thresholds }).state).toBe("delayed");
+    expect(classifySourceFreshness({ lastRefreshedAt: hoursAgo(72), nowIso: NOW, thresholds }).state).toBe("stale");
+    // NEGATIVE CONTROL: the same 50 h is already `stale` under the defaults.
+    expect(classifySourceFreshness({ lastRefreshedAt: hoursAgo(50), nowIso: NOW }).state).toBe("stale");
+    expect(FRESHNESS_STALE_AFTER_HOURS).toBe(48);
+  });
+
+  it("unavailable / unknown are unaffected by thresholds", () => {
+    expect(classifySourceFreshness({ lastRefreshedAt: null, nowIso: NOW, thresholds }).state).toBe("unknown");
+    expect(classifySourceFreshness({ lastRefreshedAt: hoursAgo(1), nowIso: NOW, unavailable: true, thresholds }).state).toBe("unavailable");
+  });
+});
+
 describe("classifySourceFreshness", () => {
   it("calls freshly-confirmed supply current", () => {
     const r = classifySourceFreshness({ lastRefreshedAt: hoursAgo(2), nowIso: NOW });

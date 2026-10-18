@@ -2,22 +2,59 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
 import { listProjectAssignments } from "@/lib/projects/projects";
 import { listProjectMap } from "@/lib/projects/map";
 import { getProjectsProgress } from "@/lib/projects/progress";
-import { listManagedWorkers } from "@/lib/instructions/instructions";
+import { listManagedWorkers, listCompanyRosterWorkers } from "@/lib/instructions/instructions";
+import { rosterAssignScope, rosterProjectIdsFor } from "@/lib/projects/assignment-authority";
 import { listBookingEngagementWorkers } from "@/lib/projects/booking-engagement-workers";
 import {
   ProjectAssignmentManager,
   type ProjectManagerLabels,
 } from "@/components/app/project-assignment-manager";
 import { ProjectMap } from "@/components/app/arena/project-map";
+import { HistoricalConsolidationPanel } from "@/components/app/historical-consolidation-panel";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { listWorkerProjects } from "@/lib/projects/worker-project-access";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import {
+  projectOrganizationAuthority,
+  workspaceOpensCompanySpace,
+} from "@/lib/company/organization-authority";
+import { getSessionIsAdmin } from "@/lib/auth/session-admin-signal";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { getOrgWorkObjects } from "@/lib/objects/objects";
+import {
+  countManagedProjects,
+  MANAGED_PROJECTS_BUCKET_LIMIT,
+  listManagedProjects,
+} from "@/lib/projects/projects";
+import { getOrgMembersData } from "@/lib/operations/org-members";
+import { listOrganizationMembers } from "@/lib/company/memberships";
+import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
+import {
+  readCompanyGalleryLabels,
+  readWorkObjectsLabels,
+} from "@/lib/company/company-section-labels";
+import { WorkObjectsSection } from "@/components/app/work-objects-section";
+import { CompanyGallerySection } from "@/components/app/company-gallery-section";
+import { OrganizationDoorsServer } from "@/components/app/organization/organization-doors-server";
+import { ManagerScopeNotice } from "@/components/app/organization/manager-scope-notice";
+import { getCompanyProjectContext } from "@/lib/company/project-context";
+import {
+  getAssignableTasks,
+  getAssignableTeams,
+  getProjectTeamAssignments,
+} from "@/lib/projects/team-assignment";
 import { MapPin } from "lucide-react";
+import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { type Role } from "@/lib/auth/actions";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { Fold } from "@/components/app/premium/grammar";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 
 export const dynamic = "force-dynamic";
 
@@ -36,13 +73,18 @@ export default async function ProjectsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ archived?: string }>;
+  searchParams: Promise<{ archived?: string; page?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const showArchived = (await searchParams).archived === "1";
+  const sp = await searchParams;
+  const showArchived = sp.archived === "1";
+  // Finished projects are paged (an organization's history can be 180+):
+  // `?archived=1&page=2` is projects 101–200. Garbage → the first page.
+  const finishedPage = showArchived ? Math.max(0, (Number.parseInt(sp.page ?? "1", 10) || 1) - 1) : 0;
   const t = await getTranslations("projects");
   const tRooms = await getTranslations("companyActionRooms");
+  const tDisclosure = await getTranslations("common.disclosure");
 
   const supabase = await createClient();
   const {
@@ -50,29 +92,79 @@ export default async function ProjectsPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role = (profile?.active_role as Role) ?? "worker";
-  if (!MANAGER_ROLES.has(role)) {
+  // The Work door of the ACTIVE organization opens for its governance
+  // members too (capability matrix P1, 2026-09-23): a manager whose acting
+  // identity is `worker` (they hold no company role) must not be sent to
+  // their own assignments while standing in the organization they manage.
+  //
+  // Decided from the ONE workspace resolution first (review P2 on #1859):
+  // `getWorkspaceContext()` is the request-cached read the shell already
+  // performed, so asking it here costs nothing, and `workspaceOpensCompanySpace`
+  // is the same pure rule the layout gate, the page gate and the dispatcher
+  // apply. The employer resolver — three organization reads — runs only when
+  // the acting identity is company-family or that workspace opens the company
+  // space; a plain worker in an employee workspace is answered without them.
+  const workspace = await getWorkspaceContext();
+  const employerCtx =
+    MANAGER_ROLES.has(role) || workspaceOpensCompanySpace(workspace)
+      ? await resolveEmployerCompanyContext()
+      : null;
+  if (!MANAGER_ROLES.has(role) && employerCtx?.kind !== "ok") {
     // RC2 role-aware routing (F11): a worker who lands here gets THEIR OWN
     // projects (real assignments under RLS), never a dead "managers only"
     // explanation. Honest empty state when they have no assignments yet.
     const myProjects = await listWorkerProjects();
+    const [tOpp, tJournal, tQuick] = await Promise.all([
+      getTranslations("opportunities"),
+      getTranslations("journal"),
+      getTranslations("quickNav"),
+    ]);
     return (
       <div
         className="mx-auto flex w-full max-w-content flex-col gap-4"
         data-testid="worker-projects-list"
       >
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("myProjectsTitle")}
-        </h1>
+        <PageTitle>{t("myProjectsTitle")}</PageTitle>
         {myProjects.length === 0 ? (
-          <p className="card-border p-4 text-sm text-text-secondary">
-            {t("myProjectsEmpty")}
-          </p>
+          <section
+            className="card-border flex flex-col gap-4 p-5"
+            data-testid="worker-projects-empty"
+          >
+            <div className="flex flex-col gap-2">
+              <p className="text-base text-text-primary">{t("myProjectsEmpty")}</p>
+              <p className="text-sm leading-relaxed text-text-secondary">{t("myProjectsHow")}</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+                {t("myProjectsNext")}
+              </p>
+              <ul className="grid gap-2 sm:grid-cols-3">
+                {[
+                  { href: "/dashboard/opportunities", label: tOpp("title"), primary: true },
+                  { href: "/dashboard/journal", label: tJournal("navTitle"), primary: false },
+                  { href: "/dashboard/profile", label: tQuick("identity"), primary: false },
+                ].map((a) => (
+                  <li key={a.href}>
+                    <Link
+                      href={a.href as "/dashboard"}
+                      className={
+                        a.primary
+                          ? "flex min-h-11 items-center justify-between gap-2 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+                          : "flex min-h-11 items-center justify-between gap-2 rounded-control border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+                      }
+                    >
+                      {a.label}
+                      <span aria-hidden>→</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
         ) : (
           <ul className="grid gap-3 sm:grid-cols-2">
             {myProjects.map((p) => (
@@ -102,6 +194,14 @@ export default async function ProjectsPage({
                       ? t("assignmentActive")
                       : t("assignmentEnded")}
                   </span>
+                  {p.viaTeam ? (
+                    <span
+                      className="font-mono text-meta uppercase tracking-label text-text-secondary"
+                      data-testid="worker-project-via-team"
+                    >
+                      {t("viaTeam", { team: p.viaTeam })}
+                    </span>
+                  ) : null}
                 </Link>
               </li>
             ))}
@@ -111,13 +211,74 @@ export default async function ProjectsPage({
     );
   }
 
-  const [allProjects, workers, engagementResult] = await Promise.all([
-    listProjectMap(),
-    listManagedWorkers(),
+  // DARBAI is one of the organization doors (IA 2026-09-16): the objects /
+  // sites register and the project gallery lived only inside the company
+  // hub; they belong with the projects they are attached to. Same reads,
+  // same components as the hub used; the manager's ONE company context
+  // (resolved above, before the branch) scopes them, and a manager without
+  // a company workspace simply sees the projects surface as before.
+  const ownCompanyId = employerCtx?.kind === "ok" ? employerCtx.companyId : null;
+  // `assign_worker_to_project` (migration 20261002142000) admits a roster
+  // worker for owner/admin or a platform admin, AND for a manager of the
+  // project's organization when the worker is on the ACTIVE roster of the
+  // company that owns the project. The form offers exactly that and nothing
+  // wider; the database still decides every write.
+  const isPlatformAdmin = await getSessionIsAdmin();
+  const assignScope = rosterAssignScope({
+    governs:
+      employerCtx?.kind === "ok" &&
+      projectOrganizationAuthority({ role: employerCtx.role }).canGovern,
+    isPlatformAdmin,
+    canOperate:
+      employerCtx?.kind === "ok" &&
+      projectOrganizationAuthority({ role: employerCtx.role }).canOperate,
+    hasCompanyContext: employerCtx?.kind === "ok",
+  });
+  const rosterAssignable = assignScope !== "none";
+  const [
+    allProjects,
+    workers,
+    engagementResult,
+    workObjectsRead,
+    managedProjects,
+    orgMembers,
+    tDoors,
+    workObjectsLabels,
+    companyGalleryLabels,
+    projectTotals,
+  ] = await Promise.all([
+    listProjectMap({ finishedPage }),
+    assignScope === "own-company-roster" && ownCompanyId
+      ? listCompanyRosterWorkers(ownCompanyId)
+      : listManagedWorkers(),
     // Accepted-booking engagement candidates (bridge v1) — a SEPARATE list,
     // never merged into the roster read; empty + honest until the owner
     // applies migration 20260723120000.
     listBookingEngagementWorkers(),
+    getOrgWorkObjects(),
+    ownCompanyId ? listManagedProjects() : Promise.resolve([]),
+    ownCompanyId ? getOrgMembersData("company", ownCompanyId) : Promise.resolve(null),
+    getTranslations("organizationDoors"),
+    readWorkObjectsLabels(),
+    readCompanyGalleryLabels(),
+    countManagedProjects(),
+  ]);
+  // The projects card the company hub used to carry (count · structurally
+  // ready · the honest linking note · create) — now beside the projects it
+  // counts. Read-only: `getCompanyProjectContext` performs no writes.
+  const [projectContext, tOps] = await Promise.all([
+    getCompanyProjectContext(ownCompanyId),
+    getTranslations("companyOps"),
+  ]);
+  const [orgMembersForObjects, companyGalleryProjects] = await Promise.all([
+    orgMembers ? listOrganizationMembers(orgMembers.orgId) : Promise.resolve(null),
+    Promise.all(
+      managedProjects.slice(0, 12).map(async (p) => ({
+        projectId: p.id,
+        title: p.title,
+        photoCount: (await getProjectGallerySummary(p.id)).photoCount,
+      })),
+    ),
   ]);
 
   // Train D — archived filtering: a COMPLETED project is finished work.
@@ -128,6 +289,17 @@ export default async function ProjectsPage({
   const archivedProjects = allProjects.filter((p) => p.status === "completed");
   const activeProjects = allProjects.filter((p) => p.status !== "completed");
   const projects = showArchived ? archivedProjects : activeProjects;
+  // The toggle counts are REAL totals (head count, no row cap). The list is
+  // read in two capped buckets, so when a bucket holds more than was loaded
+  // the page says so; if the count itself is unreadable we fall back to the
+  // loaded length and claim nothing more.
+  const activeTotal = Math.max(projectTotals?.active ?? 0, activeProjects.length);
+  const archivedTotal = Math.max(projectTotals?.archived ?? 0, archivedProjects.length);
+  const shownTotal = showArchived ? archivedTotal : activeTotal;
+  const pageStart = showArchived ? finishedPage * MANAGED_PROJECTS_BUCKET_LIMIT : 0;
+  const partialView = pageStart > 0 || projects.length < shownTotal;
+  const hasPrevPage = showArchived && finishedPage > 0;
+  const hasNextPage = showArchived && pageStart + projects.length < shownTotal;
 
   // Train D — derived progress (tasks + stages done/total, computed at
   // read time; no stored number anywhere).
@@ -136,9 +308,33 @@ export default async function ProjectsPage({
   const withAssignments = await Promise.all(
     activeProjects.map(async (p) => ({
       ...p,
-      assignments: await listProjectAssignments(p.id),
+      assignments: await Promise.all(
+        (await listProjectAssignments(p.id)).map(async (a) => ({
+          ...a,
+          // THE one photo rule (D1): the database decides; null = initials.
+          avatarUrl: a.workerId ? await getAvatarForVisibleWorker(a.workerId) : null,
+        })),
+      ),
     })),
   );
+
+  // WRK-6 — teams as ONE assignment per project, read from the one relation.
+  // An unprovisioned or unreadable relation hides the team control; it is never
+  // rendered as "no team assigned" (a failed read is not an empty list).
+  const activeIds = activeProjects.map((p) => p.id);
+  const [teamAssignmentsRead, assignableTeams, assignableTasks] = await Promise.all([
+    getProjectTeamAssignments(activeIds),
+    getAssignableTeams(),
+    getAssignableTasks(activeIds),
+  ]);
+  const teamWork =
+    teamAssignmentsRead.status === "ok"
+      ? {
+          byProject: Object.fromEntries(teamAssignmentsRead.byProject),
+          teams: assignableTeams,
+          tasks: assignableTasks,
+        }
+      : undefined;
 
   const labels: ProjectManagerLabels = {
     createTitle: t("create.title"),
@@ -148,6 +344,9 @@ export default async function ProjectsPage({
     createCityPlaceholder: t("create.cityPlaceholder"),
     createSubmit: t("create.submit"),
     noCompany: t("create.noCompany"),
+    // A refused CREATE (42501 — `projects_insert` is owner/admin today) names
+    // who can grant it, not the assign form's roster sentence.
+    createNotAuthorized: tOps("createProject.errorNotAuthorized"),
     assignTitle: t("assign.title"),
     projectLabel: t("assign.projectLabel"),
     projectPlaceholder: t("assign.projectPlaceholder"),
@@ -165,13 +364,48 @@ export default async function ProjectsPage({
     end: t("end"),
     sending: t("sending"),
     assignFromRoster: t("assign.fromRoster"),
+    rosterOwnerOnly: t("assign.rosterOwnerOnly"),
+    rosterOtherOrg: t("assign.rosterOtherOrg"),
     openBoard: t("map.openArena"),
     rosterGroupLabel: t("assign.rosterGroup"),
     engagementGroupLabel: t("assign.engagementGroup"),
+    reservationCollidesTitle: t("assign.reservation.collidesTitle"),
+    reservationNotBlocking: t("assign.reservation.notBlocking"),
+    reservationUnknown: t("assign.reservation.unknown"),
+    reservationAlternativesTitle: t("assign.reservation.alternativesTitle"),
+    reservationSwap: t("assign.reservation.swap"),
+    reservationUndo: t("assign.reservation.undo"),
+    reservationKeep: t("assign.reservation.keep"),
+    reservationDecided: t("assign.reservation.decided"),
+    overrideReasons: {
+      label: t("assign.reservation.reasonLabel"),
+      none: t("assign.reservation.reasonNone"),
+      failed: t("assign.reservation.keepFailed"),
+      options: {
+        agreed_with_worker: t("assign.reservation.reason.agreed_with_worker"),
+        agreed_with_client: t("assign.reservation.reason.agreed_with_client"),
+        partial_overlap: t("assign.reservation.reason.partial_overlap"),
+        urgent_need: t("assign.reservation.reason.urgent_need"),
+        other: t("assign.reservation.reason.other"),
+      },
+    },
+    precheckChecking: t("assign.reservation.precheckChecking"),
+    precheckCollidesTitle: t("assign.reservation.precheckCollidesTitle"),
+    precheckChoose: t("assign.reservation.precheckChoose"),
+    precheckAssignAnyway: t("assign.reservation.precheckAssignAnyway"),
+    precheckAdvisory: t("assign.reservation.precheckAdvisory"),
+    reservationSource: {
+      project: t("assign.reservation.source.project"),
+      booking: t("assign.reservation.source.booking"),
+      trip: t("assign.reservation.source.trip"),
+      plan: t("assign.reservation.source.plan"),
+      absence: t("assign.reservation.source.absence"),
+    },
   };
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
+      {ownCompanyId ? <OrganizationDoorsServer ariaLabel={tDoors("label")} /> : null}
       <header className="flex flex-col gap-1">
         <Link
           href="/dashboard"
@@ -181,37 +415,72 @@ export default async function ProjectsPage({
           ← {tRooms("backToActions")}
         </Link>
         <p
-          className="font-mono text-meta uppercase tracking-label text-brand-orange"
+          className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="company-context"
         >
           {tRooms("projects.context")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">
           {t("intro")}
         </p>
-        {/* WAGON 6 — compact operating-model explainer: one honest line +
-            a link to the full /about#sports-model section. No game layer. */}
-        <p
-          className="mt-1 max-w-prose rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
-          data-testid="projects-model-note"
-        >
-          {t("model.note")}{" "}
-          <Link
-            href="/about#sports-model"
-            className="whitespace-nowrap text-brand-blue hover:underline"
-          >
-            {t("model.link")} →
-          </Link>
-        </p>
       </header>
+
+      {/* A manager's honest scope on the Work door: `projects_select` shows
+          them only assigned/live rows and every create/edit answers 42501
+          until the owner grants it — said once, never rendered as a generic
+          error (a platform admin, whom `is_admin()` admits, reads nothing). */}
+      {employerCtx?.kind === "ok" ? <ManagerScopeNotice role={employerCtx.role} /> : null}
 
       <CompanyActionNextActions
         room="projects"
         primaryHref="/dashboard/company/projects/new"
+        extra={
+          /* WAGON 6 operating-model line, in the room's ONE disclosure. */
+            <p
+              className="max-w-prose"
+              data-testid="projects-model-note"
+            >
+              {t("model.note")}{" "}
+              <Link
+                href="/about#evidence"
+                className="whitespace-nowrap text-brand-blue hover:underline"
+              >
+                {t("model.link")} →
+              </Link>
+            </p>
+            }
       />
+      {ownCompanyId ? (
+        <div
+          className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-4"
+          data-testid="company-ops-projects"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-display text-sm font-semibold text-text-primary">
+              {tOps("projectsTitle")}
+            </h2>
+            <span className="rounded-full bg-brand-blue/10 px-2 py-0.5 text-meta font-medium text-brand-blue">
+              {tOps("projectsReadyBadge")}
+            </span>
+          </div>
+          <p className="text-meta text-text-muted" data-testid="company-ops-projects-count">
+            {tOps("projectsCount")}:{" "}
+            <span className="font-semibold text-text-primary">{projectContext.projects}</span>
+            {projectContext.projects === 0 ? ` · ${tOps("projectsEmpty")}` : ""}
+          </p>
+          <p className="text-meta leading-relaxed text-text-muted" data-testid="company-ops-projects-linking">
+            {tOps("projectsLinkingNote")}
+          </p>
+          <Link
+            href="/dashboard/company/projects/new"
+            className="w-fit rounded-md border border-brand-blue/40 px-3 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
+            data-testid="company-ops-projects-create"
+          >
+            {tOps("createProject.entryCta")}
+          </Link>
+        </div>
+      ) : null}
 
       {/* ARENA rhythm: the real S3.5 confirm queue pulse, never a fake. */}
       <ConfirmPulse />
@@ -229,7 +498,7 @@ export default async function ProjectsPage({
           className={`text-xs font-semibold ${!showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
           data-testid="projects-view-active"
         >
-          {t("archiveToggle.active")} ({activeProjects.length})
+          {t("archiveToggle.active")} ({activeTotal})
         </Link>
         <Link
           href={"/dashboard/projects?archived=1" as "/dashboard"}
@@ -237,9 +506,47 @@ export default async function ProjectsPage({
           className={`text-xs font-semibold ${showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
           data-testid="projects-view-archived"
         >
-          {t("archiveToggle.archived")} ({archivedProjects.length})
+          {t("archiveToggle.archived")} ({archivedTotal})
         </Link>
       </nav>
+
+      {partialView ? (
+        <p
+          className="text-xs text-text-muted"
+          data-testid="projects-partial-view"
+        >
+          {showArchived && projects.length > 0
+            ? t("archiveToggle.range", { from: pageStart + 1, to: pageStart + projects.length, total: shownTotal })
+            : t("archiveToggle.partial", { shown: projects.length, total: shownTotal })}
+        </p>
+      ) : null}
+      {hasPrevPage || hasNextPage ? (
+        <nav className="flex items-center gap-4" aria-label={t("archiveToggle.pagesLabel")} data-testid="projects-archived-pages">
+          {hasPrevPage ? (
+            <Link
+              href={`/dashboard/projects?archived=1&page=${finishedPage}` as "/dashboard"}
+              className="inline-flex min-h-11 items-center text-xs font-semibold text-brand-blue hover:underline"
+              data-testid="projects-archived-prev"
+            >
+              ← {t("archiveToggle.prev")}
+            </Link>
+          ) : null}
+          {hasNextPage ? (
+            <Link
+              href={`/dashboard/projects?archived=1&page=${finishedPage + 2}` as "/dashboard"}
+              className="inline-flex min-h-11 items-center text-xs font-semibold text-brand-blue hover:underline"
+              data-testid="projects-archived-next"
+            >
+              {t("archiveToggle.next")} →
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
+
+      {/* Imported rows that are one object — the owner decides, group by group. */}
+      {showArchived && employerCtx?.kind === "ok" && projectOrganizationAuthority({ role: employerCtx.role }).canGovern ? (
+        <HistoricalConsolidationPanel organizationId={employerCtx.organizationId} />
+      ) : null}
 
       {/* MAP — projects → teams → people; one click into each ARENA. */}
       {showArchived && projects.length === 0 ? (
@@ -265,9 +572,60 @@ export default async function ProjectsPage({
           projects={withAssignments}
           workers={workers}
           engagementWorkers={[...engagementResult.workers]}
+          rosterAssignable={rosterAssignable}
+          rosterProjectIds={rosterProjectIdsFor(
+            assignScope,
+            withAssignments,
+            employerCtx?.kind === "ok" ? employerCtx.organizationId : null,
+          )}
           labels={labels}
+          teamWork={teamWork}
         />
       </section>
+
+      {/* Sites and the gallery are secondary to the projects themselves —
+          one tap away; #company-locations / #company-gallery open the fold. */}
+      <DetailsHashOpener targetId="projects-more" />
+      <Fold id="projects-more" title={tDisclosure("moreTools")} hint={t("moreToolsHint")} testId="projects-more">
+        {/* OBJECTS / SITES — the canonical work_objects entity (membership-based
+            authority), where people, hours and photos are attached. Honest
+            gated state until applied. */}
+        <div id="company-locations" className="flex flex-col gap-2 scroll-mt-20">
+          <p className="text-xs text-text-secondary">{tDoors("pages.work.objectsIntro")}</p>
+          <WorkObjectsSection
+            state={
+              workObjectsRead.kind === "ok"
+                ? { kind: "ok", rows: workObjectsRead.rows }
+                : workObjectsRead.kind === "needs-migration"
+                  ? { kind: "needs-migration" }
+                  : workObjectsRead.kind === "no-company"
+                    ? { kind: "ok", rows: [] }
+                    : { kind: "error" }
+            }
+            projects={managedProjects.map((p) => ({
+              id: p.id,
+              title: p.title ?? p.id.slice(0, 8),
+            }))}
+            members={
+              orgMembersForObjects && orgMembersForObjects.kind === "ok"
+                ? orgMembersForObjects.members
+                    .filter((m) => m.status === "active")
+                    .map((m) => ({
+                      profileId: m.profileId,
+                      name: m.fullName ?? m.email ?? m.profileId.slice(0, 8),
+                    }))
+                : []
+            }
+            labels={workObjectsLabels}
+          />
+        </div>
+
+        {/* F13: company gallery — photo evidence across the company's own
+            projects (existing journal-photo projection; same RLS, read-only). */}
+        <div id="company-gallery" className="scroll-mt-20">
+          <CompanyGallerySection projects={companyGalleryProjects} labels={companyGalleryLabels} />
+        </div>
+      </Fold>
     </div>
   );
 }

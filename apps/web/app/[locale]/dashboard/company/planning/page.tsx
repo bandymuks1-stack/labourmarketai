@@ -9,8 +9,13 @@ import { openDemandIntakeAsCompanyAction } from "@/lib/company/demand-intake-nav
 import { PROFESSION_SKILLS } from "@/lib/taxonomy/profession-skills";
 import { getWorkforce } from "@/lib/workforce/workforce";
 import { getEmployerWorkerAvailability } from "@/lib/planning/employer-availability";
+import { WorkPlanSection } from "@/components/app/work-plan-section";
+import { getRosterUtilisation } from "@/lib/planning/roster-utilisation";
+import { getRosterCommitments } from "@/lib/planning/roster-commitments";
+import { summariseRosterUtilisation } from "@/lib/workforce/utilisation";
 import { getOrganizationToday } from "@/lib/planning/organization-today";
 import { OrganizationTodayPanel } from "@/components/app/organization-today-panel";
+import { TimeReality } from "@/components/app/work-world/primitives";
 import {
   buildPlanningZoneView,
   type PlanningZoneEntry,
@@ -18,6 +23,30 @@ import {
 } from "@/lib/workforce/planning-zone-view";
 import type { GapRiskLevel } from "@/lib/workforce/gap-timeline";
 import { createUtcFormatter } from "@/lib/time/display";
+import { parseIsoDay } from "@/lib/planning/planning-model";
+import {
+  buildRosterTimeline,
+  groupTimelineByProject,
+  mondayOf,
+  shiftDay,
+  type TimelineKind,
+} from "@/lib/planning/roster-timeline-model";
+import { playerInitials } from "@/lib/identity/player-identity";
+import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
+
+/** The timeline window: four weeks, moved by whole windows. */
+const TIMELINE_DAYS = 28;
+const TIMELINE_TONE: Record<TimelineKind, string> = {
+  project: "bg-brand-blue/40 border-brand-blue/60",
+  booking: "bg-brand-cyan/35 border-brand-cyan/60",
+  trip: "bg-brand-violet/35 border-brand-violet/60",
+  // CAL-8: a FORECAST — dashed, so a plan never reads as a fact.
+  plan: "border-dashed bg-brand-blue/15 border-brand-blue/60",
+  absence: "bg-state-amber/30 border-state-amber/60",
+};
 
 /**
  * Workforce planning zone (Labour Market OS P10) — ONE visual planning zone
@@ -48,13 +77,14 @@ import { createUtcFormatter } from "@/lib/time/display";
 export const dynamic = "force-dynamic";
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  "inline-flex min-h-11 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
 
 /** Accessible risk tone — always paired with a text label. */
-const RISK_TONE: Record<GapRiskLevel, string> = {
-  ok: "border-state-success/50 bg-state-success/10 text-state-success",
-  tight: "border-state-warning/50 bg-state-warning/10 text-text-primary",
-  critical: "border-state-danger/50 bg-state-danger/10 text-state-danger",
+/** Capacity risk -> the one StatusChip pattern (word + shape). */
+const RISK_VARIANT: Record<GapRiskLevel, StatusChipVariant> = {
+  ok: "success",
+  tight: "attention",
+  critical: "danger",
 };
 
 const BAR_TONE: Record<GapRiskLevel, string> = {
@@ -68,10 +98,14 @@ const PRIMARY_CTA_CLASS =
 
 export default async function CompanyWorkforcePlanningPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  /** `plan` — the work-plan actions' bounded return vocabulary (CAL-8). */
+  searchParams: Promise<{ from?: string; by?: string; plan?: string }>;
 }) {
   const { locale } = await params;
+  const { from: rawFrom, by: rawBy, plan: planOutcome } = await searchParams;
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
 
@@ -79,12 +113,10 @@ export default async function CompanyWorkforcePlanningPage({
 
   const header = (
     <header className="flex flex-col gap-1">
-      <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {t("eyebrow")}
       </p>
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h1>
+      <PageTitle>{t("title")}</PageTitle>
       <p className="text-sm text-text-secondary">{t("intro")}</p>
     </header>
   );
@@ -131,6 +163,21 @@ export default async function CompanyWorkforcePlanningPage({
     <TrustInsightCard card={demandTrustCard} locale={locale} linkToWorkspace />
   );
 
+  // CAL-9 — how much of the next four weeks the roster is already spoken
+  // for. Same two authorized reads as the availability projection above, over
+  // a window instead of at a moment; no new store and no invented working
+  // pattern. The DENOMINATOR is calendar days and travels with the number.
+  const rosterWorkerIds = result.workers.map((w) => w.workerId);
+  const utilisation = await getRosterUtilisation(rosterWorkerIds);
+  // Who is committed WHERE, by date — the same authorized commitment read
+  // the ratio above sums, laid out per person (2026-09-19: the last core
+  // planning question a real employer still answered in a spreadsheet).
+  const commitments = await getRosterCommitments(rosterWorkerIds);
+  const utilisationSummary =
+    utilisation.status === "ok"
+      ? summariseRosterUtilisation(utilisation.rows, utilisation.window.days)
+      : null;
+
   const view = buildPlanningZoneView({
     entries: result.entries,
     plans: result.plans,
@@ -153,6 +200,18 @@ export default async function CompanyWorkforcePlanningPage({
     month: "short",
     year: "numeric",
   });
+  /* Who-is-where date column. Explicit branches: a dated range, a single
+     day, an open-ended start, or "no dates" — never a date invented for a
+     source that recorded none. */
+  const formatCommitmentWhen = (startDate: string | null, endDate: string | null): string => {
+    // An unparseable ISO day prints as itself — never as an empty column.
+    const dd = (iso: string) => dayFmt(iso) ?? iso;
+    if (startDate && endDate) {
+      return endDate === startDate ? dd(startDate) : `${dd(startDate)} – ${dd(endDate)}`;
+    }
+    if (startDate) return t("committedWhere.openEnded", { start: dd(startDate) });
+    return t("committedWhere.noDates");
+  };
   const fmtMonth = (monthIso: string) => monthFmt(`${monthIso}-01`) ?? "";
   const fmtDay = (dayIso: string) => dayFmt(dayIso) ?? "";
 
@@ -227,7 +286,7 @@ export default async function CompanyWorkforcePlanningPage({
    *  surface; the demand form opens through the audited server action. */
   function EntryChoices() {
     const linkClass =
-      "inline-flex min-h-9 items-center rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+      "inline-flex min-h-11 items-center rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
     const links: { key: string; href: string }[] = [
       { key: "project", href: "/dashboard/company/projects/new" },
       { key: "candidates", href: "/dashboard/candidates" },
@@ -258,13 +317,7 @@ export default async function CompanyWorkforcePlanningPage({
   }
 
   function RiskChip({ level }: { level: GapRiskLevel }) {
-    return (
-      <span
-        className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${RISK_TONE[level]}`}
-      >
-        {t(`risk.level.${level}`)}
-      </span>
-    );
+    return <StatusChip variant={RISK_VARIANT[level]}>{t(`risk.level.${level}`)}</StatusChip>;
   }
 
   function EntryRow({ entry }: { entry: PlanningZoneEntry }) {
@@ -340,10 +393,385 @@ export default async function CompanyWorkforcePlanningPage({
      an employer with no demand entered yet is exactly the one about to
      schedule somebody, and the first version of this shipped unreachable for
      them. */
+  /* CAL-9 — the roster's committed share of the window.
+     Three populations, always separately: measured, floor-only (something
+     real could not be placed on a calendar) and unreadable. A percentage is
+     shown ONLY when every worker was measured, because a roster percentage is
+     the number people quote without reading the footnote. The denominator is
+     named on the line itself — this product records no contracted hours, so
+     "18 of 30 days" is measurable and "60% FTE" would be invented. */
+  const utilisationSection =
+    utilisationSummary && utilisationSummary.workers > 0 ? (
+      <section
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="roster-utilisation"
+      >
+        <h2 className="font-display text-base font-semibold text-text-primary">
+          {t("utilisation.title")}
+        </h2>
+        {utilisationSummary.committedWorkerDays !== null &&
+        utilisationSummary.countedWorkerDays !== null ? (
+          <p className="text-sm text-text-secondary" data-testid="roster-utilisation-days">
+            {t("utilisation.committedDays", {
+              committed: utilisationSummary.committedWorkerDays,
+              counted: utilisationSummary.countedWorkerDays,
+              workers: utilisationSummary.measured + utilisationSummary.partial,
+              days: utilisationSummary.windowDays,
+            })}
+          </p>
+        ) : (
+          <p className="text-sm text-text-muted" data-testid="roster-utilisation-uncounted">
+            {t("utilisation.noneCounted")}
+          </p>
+        )}
+        {utilisationSummary.partial > 0 ? (
+          <p className="text-meta text-text-muted" data-testid="roster-utilisation-partial">
+            {t("utilisation.partial", { count: utilisationSummary.partial })}
+          </p>
+        ) : null}
+        {utilisationSummary.unknown > 0 ? (
+          <p className="text-meta text-text-muted" data-testid="roster-utilisation-unknown">
+            {t("utilisation.unknown", { count: utilisationSummary.unknown })}
+          </p>
+        ) : null}
+        <p className="text-meta text-text-muted">{t("utilisation.denominatorNote")}</p>
+      </section>
+    ) : null;
+
+  /* Who is committed where — per person, per date. Only the records the
+     calendar and the capacity answer already use (project assignments,
+     accepted bookings, approved trips). Undated work is named as undated;
+     a person with nothing on record is counted, never called free. */
+  const commitmentsSection =
+    rosterWorkerIds.length === 0 ? null : commitments.status !== "ok" ? (
+      <section
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="roster-commitments-unavailable"
+      >
+        <h2 className="font-display text-base font-semibold text-text-primary">
+          {t("committedWhere.title")}
+        </h2>
+        <p className="text-sm text-text-muted">{t("committedWhere.unavailable")}</p>
+      </section>
+    ) : (
+      <section
+        id="roster-commitments"
+        className="flex scroll-mt-20 flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="roster-commitments"
+      >
+        <h2 className="font-display text-base font-semibold text-text-primary">
+          {t("committedWhere.title")}
+        </h2>
+        <p className="text-meta text-text-muted">{t("committedWhere.intro")}</p>
+        {commitments.rows.length > 0 ? (
+          <ul className="flex flex-col gap-2">
+            {commitments.rows.map((row) => (
+              <li
+                key={row.workerId}
+                className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2"
+                data-testid={`roster-commitment-${row.workerId}`}
+              >
+                <span className="text-sm font-semibold text-text-primary">
+                  {row.workerName ?? t("availability.unnamedWorker")}
+                </span>
+                <ul className="flex flex-col gap-1">
+                  {row.commitments.map((c) => (
+                    <li
+                      key={`${c.kind}:${c.sourceId}`}
+                      className="flex flex-wrap items-center gap-x-3 gap-y-1"
+                    >
+                      <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
+                        {t(`committedWhere.kind.${c.kind}`)}
+                      </span>
+                      <span className="text-sm text-text-primary">
+                        {c.label ?? t("committedWhere.untitled")}
+                      </span>
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        {formatCommitmentWhen(c.startDate, c.endDate)}
+                      </span>
+                      {/* Two committed rows on one day — the calendar's own
+                          conflict token. A warning, never a prohibition
+                          (SEP-2): both rows stay, nothing is hidden. */}
+                      {c.conflict ? (
+                        <TimeReality
+                          kind="conflict"
+                          label={t("committedWhere.conflict")}
+                        />
+                      ) : null}
+                    </li>
+                  ))}
+                  {row.undatedProjects.map((u) => (
+                    <li
+                      key={`undated:${u.projectId}`}
+                      className="text-meta text-text-muted"
+                      data-testid="roster-commitment-undated"
+                    >
+                      {t("committedWhere.undated", {
+                        label: u.label ?? t("committedWhere.untitled"),
+                      })}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {commitments.rows.some((row) => row.overlaps > 0) ? (
+          <p className="text-meta text-text-muted" data-testid="roster-commitments-conflict-note">
+            {t("committedWhere.conflictNote")}
+          </p>
+        ) : null}
+        {commitments.withoutCommitment > 0 ? (
+          <p className="text-meta text-text-muted" data-testid="roster-commitments-without">
+            {t("committedWhere.withoutCommitment", { count: commitments.withoutCommitment })}
+          </p>
+        ) : null}
+      </section>
+    );
+
+  /* WHO IS WHERE, WHEN — the same commitments and approved absences laid out
+     per person on one shared day axis. Busy / away / overlapping read at a
+     glance; an empty stretch is "nothing on record", never "free". The window
+     moves by whole four-week steps or jumps to any date (?from=). */
+  const todayIso = (await viewerWorkToday()).todayIso;
+  const timelineFrom = mondayOf(parseIsoDay(rawFrom) ?? todayIso);
+  // Same data, two readings: by person (default) or by project.
+  const byProject = rawBy === "project";
+  const timelineHref = (from: string, by: "person" | "project" = byProject ? "project" : "person") => {
+    const qs = new URLSearchParams();
+    if (from !== mondayOf(todayIso)) qs.set("from", from);
+    if (by === "project") qs.set("by", "project");
+    const s = qs.toString();
+    return (s ? `/dashboard/company/planning?${s}` : "/dashboard/company/planning") as "/dashboard";
+  };
+  const timeline =
+    commitments.status === "ok" && rosterWorkerIds.length > 0
+      ? buildRosterTimeline({
+          rows: commitments.rows,
+          absences:
+            availability.status === "ok"
+              ? availability.unavailability.map((u) => ({
+                  workerId: u.workerId,
+                  workerName: u.workerName,
+                  sourceId: u.item.id,
+                  startDate: u.item.startDate,
+                  endDate: u.item.endDate,
+                }))
+              : [],
+          from: timelineFrom,
+          days: TIMELINE_DAYS,
+          today: todayIso,
+        })
+      : null;
+  const NAV_CHIP_BASE =
+    "inline-flex min-h-11 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
+  const NAV_CHIP = `${NAV_CHIP_BASE} border-ink-500 text-text-secondary`;
+  const NAV_CHIP_ON = `${NAV_CHIP_BASE} border-brand-blue text-brand-blue`;
+  const tickFmt = createUtcFormatter(locale, { day: "numeric", month: "short" });
+  const timelineSection =
+    timeline && timeline.people.length > 0 ? (
+      <section
+        id="roster-timeline"
+        className="flex scroll-mt-20 flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="roster-timeline"
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="mr-auto font-display text-base font-semibold text-text-primary">
+            {t("committedWhere.title")}
+          </h2>
+          <nav className="flex items-center gap-2" data-testid="roster-timeline-by">
+            <Link
+              href={timelineHref(timeline.from, "person")}
+              aria-current={byProject ? undefined : "true"}
+              className={byProject ? NAV_CHIP : NAV_CHIP_ON}
+            >
+              {t("rosterTimeline.byPerson")}
+            </Link>
+            <Link
+              href={timelineHref(timeline.from, "project")}
+              aria-current={byProject ? "true" : undefined}
+              data-testid="roster-timeline-by-project"
+              className={byProject ? NAV_CHIP_ON : NAV_CHIP}
+            >
+              {t("rosterTimeline.byProject")}
+            </Link>
+          </nav>
+          <Link
+            href={timelineHref(shiftDay(timeline.from, -TIMELINE_DAYS))}
+            aria-label={t("rosterTimeline.prev")}
+            data-testid="roster-timeline-prev"
+            className={NAV_CHIP}
+          >
+            ←
+          </Link>
+          <Link
+            href={timelineHref(mondayOf(todayIso))}
+            data-testid="roster-timeline-today"
+            className={NAV_CHIP}
+          >
+            {t("rosterTimeline.today")}
+          </Link>
+          <Link
+            href={timelineHref(shiftDay(timeline.from, TIMELINE_DAYS))}
+            aria-label={t("rosterTimeline.next")}
+            data-testid="roster-timeline-next"
+            className={NAV_CHIP}
+          >
+            →
+          </Link>
+          <form
+            action={`/${locale}/dashboard/company/planning`}
+            method="get"
+            className="flex items-center gap-2"
+            data-testid="roster-timeline-jump"
+          >
+            {byProject ? <input type="hidden" name="by" value="project" /> : null}
+            <label className="sr-only" htmlFor="roster-timeline-date">
+              {t("rosterTimeline.dateLabel")}
+            </label>
+            <input
+              id="roster-timeline-date"
+              type="date"
+              name="from"
+              defaultValue={timeline.from}
+              className="min-h-11 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-xs text-text-primary"
+            />
+            <button type="submit" className={NAV_CHIP}>
+              {t("rosterTimeline.go")}
+            </button>
+          </form>
+        </div>
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {fmtDay(timeline.from)} – {fmtDay(timeline.to)}
+        </p>
+        <div className="overflow-x-auto">
+          <div className="flex min-w-[34rem] flex-col gap-1">
+            <div className="flex">
+              <div className="w-36 shrink-0 sm:w-48" />
+              <div className="relative h-5 flex-1">
+                {timeline.ticks.map((tick) => (
+                  <span
+                    key={tick.day}
+                    className="absolute top-0 font-mono text-meta text-text-muted"
+                    style={{ left: `${tick.leftPct}%` }}
+                  >
+                    {tickFmt(tick.day) ?? tick.day}
+                  </span>
+                ))}
+              </div>
+            </div>
+            {byProject
+              ? groupTimelineByProject(timeline).map((row) => (
+                  <div
+                    key={row.projectId}
+                    className="flex items-center"
+                    data-testid={`roster-timeline-project-${row.projectId}`}
+                  >
+                    <div className="w-36 shrink-0 break-words pr-2 text-xs font-semibold text-text-primary sm:w-48">
+                      {row.label ?? t("committedWhere.untitled")}
+                    </div>
+                    <div
+                      className="relative flex-1 rounded-md border border-ink-600 bg-ink-900/40"
+                      style={{ height: `${Math.max(1, row.bars.length) * 1.75 + 0.25}rem` }}
+                    >
+                      {timeline.todayPct !== null ? (
+                        <span
+                          aria-hidden
+                          className="absolute inset-y-0 w-px bg-brand-blue/60"
+                          style={{ left: `${timeline.todayPct}%` }}
+                        />
+                      ) : null}
+                      {row.bars.map((b, i) => (
+                        <span
+                          key={b.key}
+                          title={`${b.name ?? t("availability.unnamedWorker")} · ${formatCommitmentWhen(b.startDate, b.endDate)}`}
+                          data-testid={`roster-timeline-project-bar-${b.key}`}
+                          data-conflict={b.conflict ? "true" : undefined}
+                          className={`absolute flex h-6 items-center overflow-hidden rounded border px-1 text-meta text-text-primary ${TIMELINE_TONE.project} ${b.conflict ? "ring-2 ring-state-danger" : ""}`}
+                          style={{
+                            left: `${b.leftPct}%`,
+                            width: `${b.widthPct}%`,
+                            top: `${i * 1.75 + 0.25}rem`,
+                          }}
+                        >
+                          <span className="truncate">{b.name ?? t("availability.unnamedWorker")}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              : null}
+            {byProject
+              ? null
+              : timeline.people.map((p) => (
+              <div
+                key={p.workerId}
+                className="flex items-center"
+                data-testid={`roster-timeline-row-${p.workerId}`}
+              >
+                <div className="w-36 shrink-0 pr-2 sm:w-48">
+                  {/* The one shared professional identity, at row density. */}
+                  <PersonIdentityCard
+                    variant="roster-person"
+                    density="compact"
+                    testid={`roster-timeline-identity-${p.workerId}`}
+                    name={p.name ?? t("availability.unnamedWorker")}
+                    initials={playerInitials(p.name ?? "?")}
+                    professions={[]}
+                    meta={[]}
+                  />
+                </div>
+                <div className="relative h-9 flex-1 rounded-md border border-ink-600 bg-ink-900/40">
+                  {timeline.todayPct !== null ? (
+                    <span
+                      aria-hidden
+                      className="absolute inset-y-0 w-px bg-brand-blue/60"
+                      style={{ left: `${timeline.todayPct}%` }}
+                    />
+                  ) : null}
+                  {p.bars.map((b, i) => (
+                    <span
+                      key={b.key}
+                      title={`${b.kind === "absence" ? t("rosterTimeline.away") : (b.label ?? t("committedWhere.untitled"))} · ${formatCommitmentWhen(b.startDate, b.endDate)}`}
+                      data-testid={`roster-timeline-bar-${b.key}`}
+                      data-conflict={b.conflict ? "true" : undefined}
+                      className={`absolute flex items-center overflow-hidden rounded border px-1 text-meta text-text-primary ${TIMELINE_TONE[b.kind]} ${b.conflict ? "ring-2 ring-state-danger" : ""}`}
+                      style={{
+                        left: `${b.leftPct}%`,
+                        width: `${b.widthPct}%`,
+                        top: i % 2 === 0 ? "2px" : "auto",
+                        bottom: i % 2 === 0 ? "auto" : "2px",
+                        height: "calc(50% - 3px)",
+                      }}
+                    >
+                      <span className="truncate">
+                        {b.kind === "absence" ? t("rosterTimeline.away") : (b.label ?? t(`committedWhere.kind.${b.kind}`))}
+                      </span>
+                    </span>
+                  ))}
+                  {p.bars.length === 0 ? (
+                    <span className="absolute inset-0 flex items-center px-2 text-meta text-text-muted">
+                      {t("rosterTimeline.nothing")}
+                      {p.outsideWindow > 0 ? ` · ${t("rosterTimeline.outside", { count: p.outsideWindow })}` : ""}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {timeline.people.some((p) => p.bars.some((b) => b.conflict)) ? (
+          <p className="text-meta text-state-danger" data-testid="roster-timeline-conflict-note">
+            {t("committedWhere.conflictNote")}
+          </p>
+        ) : null}
+      </section>
+    ) : null;
+
   const availabilitySection =
     availability.status === "ok" && availability.unavailability.length > 0 ? (
       <section
-        className="flex flex-col gap-3 rounded-md border border-state-amber/40 bg-state-amber/5 p-4"
+        className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/30 p-4"
         data-testid="employer-availability"
       >
         <h2 className="font-display text-base font-semibold text-text-primary">
@@ -360,7 +788,7 @@ export default async function CompanyWorkforcePlanningPage({
               <span className="text-sm font-semibold text-text-primary">
                 {u.workerName ?? t("availability.unnamedWorker")}
               </span>
-              <span className="font-mono text-meta uppercase tracking-label text-state-amber">
+              <span className="font-mono text-meta uppercase tracking-label text-text-secondary">
                 {t("availability.unavailable")}
               </span>
               <span className="font-mono text-meta uppercase tracking-label text-text-muted">
@@ -391,7 +819,11 @@ export default async function CompanyWorkforcePlanningPage({
         {/* Unavailability is independent of whether any demand has been
             entered — an employer with an empty planning zone is precisely the
             one about to schedule someone. */}
+        {utilisationSection}
+        {timelineSection}
+        {commitmentsSection}
         {availabilitySection}
+        <WorkPlanSection locale={locale} outcome={planOutcome} />
         <div
           className="flex flex-col gap-3 rounded-md border border-dashed border-ink-500 p-5"
           data-testid="planning-zone-empty"
@@ -422,7 +854,11 @@ export default async function CompanyWorkforcePlanningPage({
 
       <Notes notes={view.notes} />
 
+      {utilisationSection}
+      {timelineSection}
+      {commitmentsSection}
       {availabilitySection}
+      <WorkPlanSection locale={locale} outcome={planOutcome} />
 
       {/* Capacity summary — short numbers + one bar, never a text wall. */}
       <section
@@ -461,6 +897,16 @@ export default async function CompanyWorkforcePlanningPage({
               {t("summary.coveredAll")}
             </span>
           )}
+          {view.totals.unknownCapacityWorkers > 0 ? (
+            <span
+              className="font-mono text-meta uppercase tracking-label text-text-muted"
+              data-testid="planning-zone-unknown-capacity"
+            >
+              {t("summary.unknownCapacity", {
+                count: view.totals.unknownCapacityWorkers,
+              })}
+            </span>
+          ) : null}
         </div>
         {/* Headcount provenance — the user's number is shown as the user's,
             a system placeholder as a labelled suggestion, confirmed as
@@ -495,11 +941,15 @@ export default async function CompanyWorkforcePlanningPage({
             ) : null}
           </div>
         ) : null}
-        <CapacityBar
-          pct={view.totals.coveragePct}
-          riskLevel={view.risk.level}
-          label={`${t("summary.capacityLabel")}: ${view.totals.coveragePct}%`}
-        />
+        {/* No demand, no percentage: with nothing required a bar can only say
+            "100% covered", which is a claim about a need nobody stated. */}
+        {view.totals.requiredHeadcount > 0 ? (
+          <CapacityBar
+            pct={view.totals.coveragePct}
+            riskLevel={view.risk.level}
+            label={`${t("summary.capacityLabel")}: ${view.totals.coveragePct}%`}
+          />
+        ) : null}
         {/* Risk date — text label + tone, never colour-only. */}
         <p
           className="flex flex-wrap items-center gap-2 text-sm text-text-secondary"
@@ -565,6 +1015,30 @@ export default async function CompanyWorkforcePlanningPage({
                 ? `${view.primaryAction.entryTitle} · ${t("action.optionalHint")}`
                 : t("action.optionalHint")}
             </p>
+            {/* "TRY THESE DATES" — the other half of an alternative. The crew
+                half has always been here (the CTA and the list above); the
+                timeline knew when capacity was short and nothing said when it
+                would not be. These are buckets the timeline ALREADY computed
+                in which nothing is short — a filter over present readings, so
+                it is a suggestion and never a forecast or a stored promise
+                (SEP-1). Nothing renders when no window in the horizon is
+                clear: offering the least-bad one is advice to walk into a
+                known shortfall. */}
+            {view.alternativeWindows.length > 0 ? (
+              <div className="flex flex-col gap-1 pt-1" data-testid="planning-zone-alternative-windows">
+                <p className="text-meta uppercase tracking-label text-text-muted">
+                  {t("action.altWindowsTitle")}
+                </p>
+                <ul className="flex flex-col gap-0.5 text-xs text-text-secondary">
+                  {view.alternativeWindows.map((w) => (
+                    <li key={w.bucketStart} data-testid="planning-zone-alternative-window">
+                      {fmtDay(w.bucketStart)} — {fmtDay(w.bucketEnd)}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-meta text-text-muted">{t("action.altWindowsNote")}</p>
+              </div>
+            ) : null}
             {view.secondaryActions.length > 0 ? (
               <div className="flex flex-col gap-1 pt-1">
                 <p className="text-meta uppercase tracking-label text-text-muted">

@@ -26,6 +26,10 @@ export interface DiscoveryFilterState {
   readonly transport: string | null;
   /** Required-tool slug (row must require it). */
   readonly tool: string | null;
+  /** DECLARED opportunity type (internship / apprenticeship / employment / …)
+   *  — owner contract 2026-09-04 §15: "where can I do an internship?" must
+   *  narrow the board to internships, never return everything. */
+  readonly opportunityType: string | null;
 }
 
 export type DiscoverySort = "relevance" | "newest";
@@ -35,7 +39,7 @@ export type DiscoverySort = "relevance" | "newest";
  * few strongest matches, everything else one explicit click away. "all" is
  * the person's own request to see the full authorized universe (?view=all).
  */
-export type DiscoveryView = "top" | "all";
+export type DiscoveryView = "top" | "discover" | "all";
 
 /** Default number of opportunities in the compressed first view. */
 export const INITIAL_VIEW_DEFAULT_COUNT = 3;
@@ -55,6 +59,7 @@ export const EMPTY_DISCOVERY_FILTERS: DiscoveryFilterState = {
   accommodation: null,
   transport: null,
   tool: null,
+  opportunityType: null,
 };
 
 const str = (v: string | string[] | undefined): string | null => {
@@ -77,9 +82,12 @@ export function parseDiscoveryParams(
       accommodation: str(sp.accommodation),
       transport: str(sp.transport),
       tool: str(sp.tool),
+      opportunityType: str(sp.opportunityType),
     },
     sort: str(sp.sort) === "newest" ? "newest" : "relevance",
-    view: str(sp.view) === "all" ? "all" : "top",
+    // "discover" = the free curated discovery set of the personal view
+    // (owner addendum 2026-10-09); "all" = the whole board, as before.
+    view: str(sp.view) === "all" ? "all" : str(sp.view) === "discover" ? "discover" : "top",
   };
 }
 
@@ -107,6 +115,9 @@ export function needMatchesFilters(
   if (f.accommodation != null && need.accommodation !== f.accommodation) return false;
   if (f.transport != null && need.transport !== f.transport) return false;
   if (f.tool != null && !(need.requiredTools ?? []).includes(f.tool)) return false;
+  // A demand that stated no type is NOT an internship: unknown never
+  // satisfies a stated requirement (same rule as external ads).
+  if (f.opportunityType != null && (need.opportunityType ?? null) !== f.opportunityType) return false;
   return true;
 }
 
@@ -137,7 +148,7 @@ export function externalAdMatchesFilters(
   },
   f: DiscoveryFilterState,
 ): boolean {
-  if (f.start != null || f.accommodation != null || f.transport != null || f.tool != null) {
+  if (f.start != null || f.accommodation != null || f.transport != null || f.tool != null || f.opportunityType != null) {
     return false;
   }
   if (f.profession != null && view.professionSlug !== f.profession) return false;
@@ -223,6 +234,7 @@ export interface DiscoveryFacets {
   readonly accommodations: readonly string[];
   readonly transports: readonly string[];
   readonly tools: readonly string[];
+  readonly opportunityTypes: readonly string[];
 }
 
 /** Distinct facet values present in the loaded (authorized) rows — the chips
@@ -239,6 +251,7 @@ export function collectDiscoveryFacets(
     accommodations: uniq(needs.map((n) => n.accommodation)),
     transports: uniq(needs.map((n) => n.transport ?? null)),
     tools: uniq(needs.flatMap((n) => [...(n.requiredTools ?? [])])),
+    opportunityTypes: uniq(needs.map((n) => n.opportunityType ?? null)),
   };
 }
 
@@ -259,6 +272,7 @@ export function buildDiscoveryQuery(
       "accommodation" in patch ? (patch.accommodation ?? null) : f.accommodation,
     transport: "transport" in patch ? (patch.transport ?? null) : f.transport,
     tool: "tool" in patch ? (patch.tool ?? null) : f.tool,
+    opportunityType: "opportunityType" in patch ? (patch.opportunityType ?? null) : f.opportunityType,
   };
   const nextSort = patch.sort ?? sort;
   const q = new URLSearchParams();

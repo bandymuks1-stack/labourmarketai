@@ -6,9 +6,12 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { hideQaMarked, isQaViewer } from "@/lib/marketplace/qa-marked";
 import {
+  DISCOVERY_READ_LIMIT,
   RESPOND_DECISIONS,
   computeNewCounts,
+  normalizeDiscoveryCountry,
   type DiscoverableOfferingRow,
   type DiscoveryListResult,
   type IncomingListResult,
@@ -17,6 +20,7 @@ import {
   type OutgoingRequestRow,
   type OutgoingRequestSummary,
   type RequestMutateResult,
+  rpcOutcome,
   type RespondDecision,
   type ServiceRequestsNewCounts,
 } from "@/lib/marketplace/service-requests-shared";
@@ -44,12 +48,18 @@ function isAbsent(error: { code?: string } | null): boolean {
   return !!error?.code && ABSENT.has(error.code);
 }
 
-async function uid(): Promise<{ supabase: SupabaseClient; userId: string } | null> {
+async function uid(): Promise<{
+  supabase: SupabaseClient;
+  userId: string;
+  /** The viewer is a documented QA identity (may see QA-labelled rows). */
+  qaViewer: boolean;
+} | null> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  return user ? { supabase, userId: user.id } : null;
+  if (!user) return null;
+  return { supabase, userId: user.id, qaViewer: isQaViewer(user) };
 }
 
 function offeringTitle(r: Record<string, unknown>): string | null {
@@ -83,18 +93,30 @@ async function requesterDisplayNames(
   return out;
 }
 
-/** Active offerings the caller can DISCOVER — excludes the caller's own. */
-export async function listDiscoverableOfferings(): Promise<DiscoveryListResult> {
+/**
+ * Active offerings the caller can DISCOVER — excludes the caller's own.
+ * BOUNDED (DISCOVERY_READ_LIMIT, newest first) and optionally narrowed by an
+ * exact country code (G-E1, window 6) — the only server-side filter, because
+ * it is an equality an index can serve; category is matched in memory over
+ * the page (see `filterByCategory`).
+ */
+export async function listDiscoverableOfferings(
+  filter: { country?: string | null } = {},
+): Promise<DiscoveryListResult> {
   const ctx = await uid();
   if (!ctx) return { kind: "not-authed" };
-  const { data, error } = await asAny(ctx.supabase)
+  const country = normalizeDiscoveryCountry(filter.country);
+  let query = asAny(ctx.supabase)
     .from("service_offerings")
     .select(
       "id, title, description, category_slug, location_country, remote, rate_text, provider_id, created_at",
     )
     .eq("status", "active")
-    .neq("provider_id", ctx.userId)
-    .order("created_at", { ascending: false });
+    .neq("provider_id", ctx.userId);
+  if (country) query = query.eq("location_country", country);
+  const { data, error } = await query
+    .order("created_at", { ascending: false })
+    .limit(DISCOVERY_READ_LIMIT);
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "ok", rows: [] };
@@ -110,11 +132,17 @@ export async function listDiscoverableOfferings(): Promise<DiscoveryListResult> 
     providerId: String(r.provider_id ?? ""),
     createdAt: String(r.created_at ?? ""),
   }));
-  return { kind: "ok", rows };
+  // QA-labelled rows never reach real people (owner order 2026-10-01): discovery
+  // is open to every authenticated user, so a QA-labelled service published for a
+  // production proof was visible to anyone. Only a documented QA viewer sees them.
+  return {
+    kind: "ok",
+    rows: hideQaMarked(rows, ctx.qaViewer, (r) => [r.title, r.description]),
+  };
 }
 
 /** The caller's own outgoing requests (buyer status view). */
-export async function listOutgoingRequests(): Promise<OutgoingListResult> {
+async function readOutgoingRequests(): Promise<OutgoingListResult> {
   const ctx = await uid();
   if (!ctx) return { kind: "not-authed" };
   const { data, error } = await asAny(ctx.supabase)
@@ -126,7 +154,8 @@ export async function listOutgoingRequests(): Promise<OutgoingListResult> {
     .order("created_at", { ascending: false });
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
-    return { kind: "ok", rows: [] };
+    console.error("[service-requests] outgoing read failed:", error.code ?? "unknown");
+    return { kind: "error" };
   }
   const rows: OutgoingRequestRow[] = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
     id: String(r.id),
@@ -142,7 +171,7 @@ export async function listOutgoingRequests(): Promise<OutgoingListResult> {
 }
 
 /** Requests addressed to the caller's offerings (provider inbox). */
-export async function listIncomingRequests(): Promise<IncomingListResult> {
+async function readIncomingRequests(): Promise<IncomingListResult> {
   const ctx = await uid();
   if (!ctx) return { kind: "not-authed" };
   const { data, error } = await asAny(ctx.supabase)
@@ -154,7 +183,8 @@ export async function listIncomingRequests(): Promise<IncomingListResult> {
     .order("created_at", { ascending: false });
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
-    return { kind: "ok", rows: [] };
+    console.error("[service-requests] incoming read failed:", error.code ?? "unknown");
+    return { kind: "error" };
   }
   const baseRows = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
     id: String(r.id),
@@ -205,7 +235,7 @@ export async function requestServiceOffering(
     if (/offering_not_active/.test(error.message ?? "")) return { kind: "inactive" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/service-requests");
+  revalidatePath("/[locale]/dashboard/service-requests", "page");
   return { kind: "ok", id: typeof data === "string" ? data : undefined };
 }
 
@@ -230,8 +260,13 @@ export async function respondToRequest(
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/service-requests");
-  return { kind: "ok", detail: typeof data === "string" ? data : undefined };
+  // The RPC reports a refusal as a returned status ('not_provider', 'not_found',
+  // 'not_pending', ...), not as an exception. Only 'ok' is a success - anything
+  // else must never be shown to the actor as a completed action.
+  const outcome = rpcOutcome(data);
+  if (outcome !== "ok") return { kind: "error", message: outcome };
+  revalidatePath("/[locale]/dashboard/service-requests", "page");
+  return { kind: "ok", detail: outcome };
 }
 
 /** Buyer withdraws their own pending request (via the RPC). */
@@ -247,8 +282,13 @@ export async function withdrawRequest(id: string): Promise<RequestMutateResult> 
     if (isAbsent(error)) return { kind: "needs-migration" };
     return { kind: "error", message: error.message ?? "unknown" };
   }
-  revalidatePath("/dashboard/service-requests");
-  return { kind: "ok", detail: typeof data === "string" ? data : undefined };
+  // The RPC reports a refusal as a returned status ('not_provider', 'not_found',
+  // 'not_pending', ...), not as an exception. Only 'ok' is a success - anything
+  // else must never be shown to the actor as a completed action.
+  const outcome = rpcOutcome(data);
+  if (outcome !== "ok") return { kind: "error", message: outcome };
+  revalidatePath("/[locale]/dashboard/service-requests", "page");
+  return { kind: "ok", detail: outcome };
 }
 
 /**
@@ -339,4 +379,25 @@ export async function markServiceRequestsSeen(): Promise<void> {
   } catch {
     // rollout-safe: absent RPC / transient error → no-op
   }
+}
+
+/**
+ * Request-scoped (React `cache`), the same pattern as `listMyBookings`: the
+ * notification spine's pending count and its "new since seen" count both read
+ * the provider inbox on EVERY dashboard page, and each read is two round trips
+ * (the rows + the requester-identity RPC). Production 2026-10-15: the pooled
+ * PostgREST connections queue, so a duplicate read costs every other read on
+ * the page. A new navigation always re-reads.
+ */
+const readIncomingOnce = cache(readIncomingRequests);
+const readOutgoingOnce = cache(readOutgoingRequests);
+
+/** The caller's own outgoing requests (buyer status view). */
+export async function listOutgoingRequests(): Promise<OutgoingListResult> {
+  return readOutgoingOnce();
+}
+
+/** Requests addressed to the caller's offerings (provider inbox). */
+export async function listIncomingRequests(): Promise<IncomingListResult> {
+  return readIncomingOnce();
 }

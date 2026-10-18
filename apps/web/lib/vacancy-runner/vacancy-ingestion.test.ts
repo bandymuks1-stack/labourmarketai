@@ -151,6 +151,8 @@ function fakeDb(options: {
     chain.or = self;
     chain.order = self;
     chain.range = self;
+    chain.gt = self;
+    chain.limit = self;
     chain.maybeSingle = () => Promise.resolve(single);
     chain.then = (ok: (v: unknown) => unknown, err?: (e: unknown) => unknown) => {
       if (headCount) {
@@ -356,6 +358,27 @@ describe("failure honesty", () => {
     expect(typeof written.last_failure_code).toBe("string");
     // …but the checkpoint does not move.
     expect(written).not.toHaveProperty("cursor_value");
+  });
+
+  it("a FAILED DRY RUN leaves no failure marker (diagnostics do not bump the shared streak)", async () => {
+    enableEnv();
+    ctl.activationOverride = "on";
+    stubFetch({ error: "boom" }, 503);
+    const { client, ops } = fakeDb({
+      cursorRow: {
+        provider_key: "arbetsformedlingen",
+        channel: "snapshot",
+        cursor_value: "2026-08-08T00:00:00Z",
+        consecutive_failures: 1,
+      },
+    });
+
+    const result = await runVacancyIngestionSession(client, PROVIDER, request());
+
+    expect(result.status).toBe("fetch_failed");
+    expect(ops.filter((o) => o.kind !== "select")).toHaveLength(0);
+    // The evidence is still reported in the accounting.
+    expect(Array.isArray(result.fetchDiagnostics)).toBe(true);
   });
 
   it("one provider's exception does not stop the batch", async () => {

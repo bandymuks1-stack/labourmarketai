@@ -59,12 +59,26 @@ export interface SourceFreshnessV1 {
   readonly ageHours: number | null;
 }
 
+/** The two boundaries, in hours. The defaults are the worker-facing product
+ *  thresholds above; an operator surface (`/api/health`) passes its own. */
+export interface FreshnessThresholds {
+  readonly delayedAfterHours: number;
+  readonly staleAfterHours: number;
+}
+
+export const DEFAULT_FRESHNESS_THRESHOLDS: FreshnessThresholds = {
+  delayedAfterHours: FRESHNESS_DELAYED_AFTER_HOURS,
+  staleAfterHours: FRESHNESS_STALE_AFTER_HOURS,
+};
+
 export interface ClassifyFreshnessInput {
   /** Newest `last_seen_at` across the supply in scope. */
   readonly lastRefreshedAt: string | null;
   readonly nowIso: string;
   /** True when the store itself could not be read (not provisioned/errored). */
   readonly unavailable?: boolean;
+  /** Override the boundaries (2026-09-23, /api/health). Omitted = product. */
+  readonly thresholds?: FreshnessThresholds;
 }
 
 /**
@@ -91,11 +105,13 @@ export function classifySourceFreshness(
     return { state: "unknown", lastRefreshedAt: null, ageHours: null };
   }
 
+  const { delayedAfterHours, staleAfterHours } =
+    input.thresholds ?? DEFAULT_FRESHNESS_THRESHOLDS;
   const ageHours = Math.floor((now - seen) / 3_600_000);
   const state: SourceFreshnessState =
-    ageHours >= FRESHNESS_STALE_AFTER_HOURS
+    ageHours >= staleAfterHours
       ? "stale"
-      : ageHours >= FRESHNESS_DELAYED_AFTER_HOURS
+      : ageHours >= delayedAfterHours
         ? "delayed"
         : "current";
 

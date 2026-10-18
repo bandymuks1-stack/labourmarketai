@@ -54,9 +54,13 @@ import {
 import {
   computeNextVacancyCursor,
   cursorRequestBound,
+  decodeContinuationCheckpoint,
+  encodeContinuationCheckpoint,
   decodeRecordOffsetCursor,
+  encodeContinuationTokenCursor,
   encodeRecordOffsetCursor,
   planVacancyWindows,
+  readContinuationToken,
 } from "@/lib/vacancy-sources/vacancy-cursor";
 import {
   evaluateVacancyBatchGate,
@@ -73,7 +77,7 @@ import {
   type VacancyProviderDescriptorV1,
 } from "@/lib/vacancy-sources/vacancy-provider-registry";
 import { getVacancyParser } from "@/lib/vacancy-sources/providers";
-import { fetchVacancyJsonLines, fetchVacancyPage } from "./vacancy-adapter";
+import { fetchVacancyJsonLines, fetchVacancyPage, type VacancyFetchDiagnosticsV1 } from "./vacancy-adapter";
 import { vacancySwitchState } from "./vacancy-kill-switch";
 
 export type VacancyImportMode = "dry_run" | "persist";
@@ -175,6 +179,12 @@ export interface VacancyImportResultV1 {
   readonly session: ImportSessionV1 | null;
   readonly report: ImportReportV1 | null;
   readonly metrics: VacancyImportMetricsV1;
+  /**
+   * Timing evidence per page fetched this session (listing elapsed, detail
+   * request counts/latencies, the first failing entry). Numbers and a public
+   * ad id only; empty when no network fetch ran.
+   */
+  readonly fetchDiagnostics: readonly VacancyFetchDiagnosticsV1[];
   readonly logs: readonly VacancyImportLogEventV1[];
   readonly persistedInserted: number;
   readonly persistedUpdated: number;
@@ -203,6 +213,7 @@ export async function runVacancyImport(
   const logs: VacancyImportLogEventV1[] = [];
   const reasonCounts = new Map<string, number>();
   const errors: string[] = [];
+  const fetchDiagnostics: VacancyFetchDiagnosticsV1[] = [];
 
   const log = (
     level: VacancyImportLogEventV1["level"],
@@ -213,6 +224,22 @@ export async function runVacancyImport(
   };
   const tally = (code: string): void => {
     reasonCounts.set(code, (reasonCounts.get(code) ?? 0) + 1);
+  };
+  // An HTTP failure carries its status (a bare 3-digit code, never a payload):
+  // 401 vs 403 vs 429 vs 5xx are different operator actions, and collapsing
+  // them into `http_error` hid the cause of a failing source.
+  //
+  // A two-level feed's DETAIL failure carries its cause the same way
+  // (`detail_fetch_failed:timeout`, `:http_503`, `:http_403`): a transient
+  // timeout and a permanently refused ad need different handling and were
+  // indistinguishable as a bare `detail_fetch_failed`.
+  const fetchFailureDetail = (errorCode: string, detail: string): string => {
+    if (errorCode === "http_error" && /^\d{3}$/.test(detail)) return `${errorCode}:${detail}`;
+    if (errorCode === "detail_fetch_failed") {
+      const m = /^(?:fan_out_detail_failed:)?([a-z][a-z0-9_]{0,40})/.exec(detail);
+      if (m) return `${errorCode}:${m[1]}`;
+    }
+    return errorCode;
   };
 
   const counters = {
@@ -269,22 +296,68 @@ export async function runVacancyImport(
   // checkpoint would request the whole stream — a full re-read wearing the
   // costume of a one-minute poll, on an open API we were asked to be gentle
   // with. The correct cold start is a snapshot, so this refuses instead.
-  const needsCursor = endpoint?.cadence.checkpointed === true;
+  //
+  // A CONTINUATION-TOKEN feed is the one checkpointed shape exempt from that
+  // refusal: by the publisher's design the feed IS the snapshot, a missing
+  // token is the cold start from its head, and the walk is bounded by
+  // maxPagesPerSession either way — so there is no unbounded request to
+  // refuse. Its checkpoint is the token, not an instant (added 2026-09-22).
+  const tokenWalk = endpoint?.pagination === "cursor";
+  const tokenConfig = tokenWalk ? (endpoint.cursor ?? null) : null;
+  const needsCursor = endpoint?.cadence.checkpointed === true && !tokenWalk;
   const requestBound = cursorRequestBound(req.cursor ?? null);
   const cursorMissing = needsCursor && requestBound === null;
   if (cursorMissing) {
     log("error", "cursor_required_run_snapshot_first", channel);
     tally("cursor_missing");
   }
+  // A `cursor` endpoint without its token configuration cannot be walked:
+  // the importer would not know how to ask for page two, and a single
+  // un-paged request of a feed is exactly the unbounded read this stage
+  // exists to avoid. Wrong configuration fails closed and loudly.
+  const tokenConfigMissing = tokenWalk && tokenConfig === null;
+  if (tokenConfigMissing) {
+    log("error", "cursor_config_missing", channel);
+    tally("cursor_config_missing");
+  }
 
   const runOverNetwork =
     switchState.operational &&
     parser !== null &&
     endpoint !== null &&
-    !cursorMissing;
+    !cursorMissing &&
+    !tokenConfigMissing;
 
   if (parser === null) log("error", "no_parser_for_provider", provider.key);
   if (endpoint === null) log("error", "channel_not_supported", channel);
+
+  // ── CONTINUATION-TOKEN WALK ──────────────────────────────────────────────
+  // State for a `cursor` channel. The stored checkpoint decodes to the token
+  // to send first (null = head of the feed); each fully-consumed page whose
+  // body names a successor moves the checkpoint to that successor, so the
+  // next run resumes at the first page this one did not read. A page that
+  // names no successor is the head of the feed: the walk is drained, and the
+  // checkpoint stays on THAT page so the next poll re-reads it (dedup collapses
+  // the overlap — the same reasoning as the 1 s timestamp overlap).
+  const storedCheckpoint = tokenWalk
+    ? decodeContinuationCheckpoint(req.cursor ?? null)
+    : null;
+  let continuationToken: string | null = storedCheckpoint?.token ?? null;
+  /** Entries of the CURRENT page a previous session already consumed. */
+  let pageSkip = storedCheckpoint?.skipEntries ?? 0;
+  /** The cold-start instant the head page's position refers to. */
+  const coldStartAnchorIso =
+    storedCheckpoint?.coldStartAtIso ?? req.capturedAt;
+  /** The token of the first page NOT yet consumed — the honest checkpoint. */
+  let lastContinuationToken: string | null = null;
+  /** Set when a session stops INSIDE a page: the exact checkpoint to store. */
+  let midPageCheckpoint: string | null = null;
+  /** Per-session detail-request budget of a two-level feed (null = none). */
+  const sessionDetailBudget =
+    (endpoint?.detailFanOut?.maxDetailFetchesPerSession ?? null);
+  let detailBudgetLeft: number | null = sessionDetailBudget;
+  /** True only when a page named no successor — the head was reached. */
+  let tokenWalkDrained: boolean | null = null;
 
   // ── WINDOW PLAN ──────────────────────────────────────────────────────────
   // A `time_window` channel is walked in bounded slices instead of being asked
@@ -331,6 +404,9 @@ export async function runVacancyImport(
     counters.pagesRequested += 1;
 
     const slice = await fetchVacancyJsonLines({
+      onRetry: () => {
+        counters.retriesUsed += 1;
+      },
       provider,
       channel,
       query: req.query,
@@ -345,7 +421,7 @@ export async function runVacancyImport(
       counters.pagesFailed += 1;
       tally(`fetch_${slice.errorCode}`);
       errors.push(`${channel}:${slice.errorCode}:${slice.detail}`);
-      log("error", "page_fetch_failed", slice.errorCode);
+      log("error", "page_fetch_failed", fetchFailureDetail(slice.errorCode, slice.detail));
     } else {
       counters.bytesFetched += slice.byteLength;
       counters.recordsSkipped += slice.recordsSkipped;
@@ -422,6 +498,12 @@ export async function runVacancyImport(
     let offset = Number(req.query?.offset ?? 0);
 
     for (let page = 0; page < maxPages; page += 1) {
+      // A spent budget ends the session BEFORE another listing request: the
+      // checkpoint already names where to resume.
+      if (detailBudgetLeft !== null && detailBudgetLeft <= 0) {
+        log("warn", "detail_budget_exhausted", String(page));
+        break;
+      }
       const query: Record<string, string | number> = { ...(req.query ?? {}) };
       if (endpoint.pagination === "offset_limit") {
         query.offset = offset;
@@ -433,6 +515,13 @@ export async function runVacancyImport(
         const slice = windowPlan.windows[page];
         query[windowConfig.startQueryKey] = slice.startIso;
         query[windowConfig.endQueryKey] = slice.endIso;
+      } else if (tokenConfig !== null) {
+        // Resume point for a continuation-token feed. No token = the head of
+        // the feed, which is a cold start and needs no parameter at all.
+        if (continuationToken !== null && tokenConfig.queryKey !== undefined) {
+          query[tokenConfig.queryKey] = continuationToken;
+        }
+        tokenWalkDrained = false;
       } else if (requestBound !== null) {
         // Resume point for a checkpointed channel, nudged back by the overlap
         // so a same-second publication at the boundary is not dropped.
@@ -441,17 +530,29 @@ export async function runVacancyImport(
 
       counters.pagesRequested += 1;
       const fetched = await fetchVacancyPage({
+        onRetry: () => {
+          counters.retriesUsed += 1;
+        },
         provider,
         channel,
         query,
         apiKey: req.apiKey ?? null,
+        // A feed that names its next page by PATH takes the token here; the
+        // capture instant only starts a cold walk at a time (both are no-ops
+        // for every endpoint that declares neither).
+        continuationToken: tokenConfig !== null ? continuationToken : null,
+        coldStartAtIso: tokenConfig !== null ? coldStartAnchorIso : null,
+        ...(detailBudgetLeft !== null
+          ? { detailBudget: detailBudgetLeft, skipEntries: pageSkip }
+          : {}),
       });
 
+      if (fetched.diagnostics) fetchDiagnostics.push(fetched.diagnostics);
       if (!fetched.ok) {
         counters.pagesFailed += 1;
         tally(`fetch_${fetched.errorCode}`);
         errors.push(`${channel}:${fetched.errorCode}:${fetched.detail}`);
-        log("error", "page_fetch_failed", fetched.errorCode);
+        log("error", "page_fetch_failed", fetchFailureDetail(fetched.errorCode, fetched.detail));
         break;
       }
 
@@ -482,6 +583,55 @@ export async function runVacancyImport(
       }
 
       log("info", "page_done", String(batch.outcomes.length));
+
+      if (tokenConfig !== null && fetched.fanOut) {
+        if (detailBudgetLeft !== null) {
+          detailBudgetLeft = Math.max(0, detailBudgetLeft - fetched.fanOut.detailFetched);
+        }
+        if (!fetched.fanOut.pageComplete) {
+          // The budget stopped the page part-way. The walk is NOT drained.
+          // INVARIANT: a position inside the page is stored ONLY when the page
+          // is CLOSED (it names a successor, so it can no longer receive
+          // appended entries). On the open head page nothing is stored: the
+          // checkpoint stays at the page start and the next session re-reads
+          // it whole (idempotent upsert + content_hash), so no entry can be
+          // skipped. Entries past the cut on an open page are delayed until
+          // the page closes, never lost.
+          midPageCheckpoint = fetched.fanOut.pageClosed
+            ? encodeContinuationCheckpoint({
+                token: continuationToken,
+                skipEntries: fetched.fanOut.consumedEntries,
+                coldStartAtIso: coldStartAnchorIso,
+              })
+            : null;
+          log("warn", "detail_budget_exhausted_mid_page", String(fetched.fanOut.consumedEntries));
+          break;
+        }
+        pageSkip = 0;
+      }
+
+      if (tokenConfig !== null) {
+        // This page is fully consumed. If it names a successor, that
+        // successor is the honest checkpoint: the first page not yet read.
+        // If it names none (or names itself), the head of the feed has been
+        // reached and the checkpoint stays on this page for the next poll.
+        const next = readContinuationToken(
+          fetched.body,
+          tokenConfig.nextTokenPath,
+        );
+        if (next === null || next === continuationToken) {
+          tokenWalkDrained = true;
+          log("info", "cursor_walk_drained", String(page + 1));
+          break;
+        }
+        continuationToken = next;
+        lastContinuationToken = next;
+        if (parsed.length >= bounds.maxAcceptedPerSession) {
+          log("warn", "cursor_walk_truncated_by_accept_cap", String(page + 1));
+          break;
+        }
+        continue;
+      }
 
       if (windowPlan !== null && windowConfig !== null) {
         // This slice is fully consumed, so the checkpoint may move to its end
@@ -686,6 +836,7 @@ export async function runVacancyImport(
     session,
     report,
     metrics: counters,
+    fetchDiagnostics,
     logs,
     persistedInserted,
     persistedUpdated,
@@ -714,18 +865,32 @@ export async function runVacancyImport(
     // re-reading it forever would pin the walk in place. The reader returns
     // offset 0 once the publisher ends the body, which turns the next run into
     // a fresh reconciliation pass rather than a no-op.
+    // A CONTINUATION-TOKEN walk checkpoints on the token of the first page it
+    // did not consume, persisted through the same opaque `cursor_value` with
+    // its own prefix. It moves only when a page was fully consumed AND named
+    // a successor; a failed or drained run leaves it where it was.
     nextCursor: streamedWalk
       ? streamNextOffset !== null
         ? encodeRecordOffsetCursor(streamNextOffset)
         : (req.cursor ?? null)
-      : windowPlan !== null
-        ? (lastCompletedWindowEnd ?? req.cursor ?? null)
-        : computeNextVacancyCursor(req.cursor ?? null, parsed),
+      : tokenWalk
+        ? midPageCheckpoint !== null
+          ? midPageCheckpoint
+          : lastContinuationToken !== null
+            ? (encodeContinuationTokenCursor(lastContinuationToken) ??
+              req.cursor ??
+              null)
+            : (req.cursor ?? null)
+        : windowPlan !== null
+          ? (lastCompletedWindowEnd ?? req.cursor ?? null)
+          : computeNextVacancyCursor(req.cursor ?? null, parsed),
     caughtUp: streamedWalk
       ? streamDrained
-      : windowPlan === null
-        ? null
-        : windowPlan.reachedPresent &&
-          counters.windowsCompleted === counters.windowsPlanned,
+      : tokenWalk
+        ? tokenWalkDrained
+        : windowPlan === null
+          ? null
+          : windowPlan.reachedPresent &&
+            counters.windowsCompleted === counters.windowsPlanned,
   };
 }

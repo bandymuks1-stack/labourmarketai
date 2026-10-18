@@ -1,5 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LegalDisclaimer } from "@/components/marketing/legal-notes";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 /**
  * Marketplace rules (full-completion train PR 9). Honest, launch-ready rules:
@@ -12,6 +14,16 @@ import { LegalDisclaimer } from "@/components/marketing/legal-notes";
  * pack — a review note (final binding wording owner/lawyer-gated) and the
  * informational-only disclaimer.
  */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "legal.marketplaceRules" });
+  return buildPageMetadata({ locale, path: "/legal/marketplace-rules", title: t("title") });
+}
+
 export default async function MarketplaceRulesPage({
   params,
 }: {

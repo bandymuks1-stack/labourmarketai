@@ -27,7 +27,7 @@ describe("scouting (supply) surface states honest visibility", () => {
   for (const loc of ["lt", "en", "ru"] as const) {
     it(`${loc}: visibility copy says paid access not active + no fake listings`, () => {
       const txt = (JSON.parse(read(`messages/${loc}.json`)).scouting.visibilityNote as string).toLowerCase();
-      expect(/readiness|pasiruoš|готовн/.test(txt), `${loc} mentions readiness`).toBe(true);
+      expect(/readiness|pasireng|готовн/.test(txt), `${loc} mentions readiness`).toBe(true);
       expect(/not active|neaktyv|не актив|prepared|ruošiam|готов/.test(txt), `${loc} paid not active`).toBe(true);
       expect(/fake|netikr|фальшив/.test(txt), `${loc} no fake listings`).toBe(true);
     });

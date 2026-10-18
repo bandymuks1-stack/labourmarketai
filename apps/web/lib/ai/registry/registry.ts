@@ -19,6 +19,8 @@ import { adminRiskEntry } from "./agents/admin-risk";
 import { supportOnboardingEntry } from "./agents/support-onboarding";
 import { translationCopyEntry } from "./agents/translation-copy";
 import { marketExplanationEntry } from "./agents/market-explanation";
+import { conversationIntentEntry } from "./agents/conversation-intent";
+import { vacancyTranslationEntry } from "./agents/vacancy-translation";
 
 export const AI_PROMPT_REGISTRY: Partial<
   Record<AiAgentKey, PromptRegistryEntry>
@@ -35,6 +37,8 @@ export const AI_PROMPT_REGISTRY: Partial<
   support_onboarding: supportOnboardingEntry,
   translation_copy: translationCopyEntry,
   market_explanation: marketExplanationEntry,
+  conversation_intent: conversationIntentEntry,
+  vacancy_translation: vacancyTranslationEntry,
 };
 
 /** Agent keys with a registered prompt today (all twelve). */
@@ -70,4 +74,5 @@ export const ALL_AGENT_KEYS: readonly AiAgentKey[] = [
   "support_onboarding",
   "translation_copy",
   "market_explanation",
+  "vacancy_translation",
 ];

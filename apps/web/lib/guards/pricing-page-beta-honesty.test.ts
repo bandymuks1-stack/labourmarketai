@@ -162,13 +162,17 @@ describe("M7 — /pricing sells the labour market, not agency services", () => {
 });
 
 describe("M8 — the three plan registries stay non-overlapping", () => {
-  it("the marketing registry carries names only, never a price column", () => {
+  it("the marketing registry carries names and the ONE DB price column, never a figure or a second price model", () => {
     const src = read("lib/marketing/plans.ts");
-    expect(src).toMatch(/slug, name_lt, name_en/);
+    expect(src).toMatch(/slug, name_lt, name_en, price_eur_monthly/);
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    // `price_eur_monthly` is the one home a price has (owner pricing 2026-09-05);
+    // nothing else in this module may mention a price.
     expect(
-      /price/i.test(src.replace(/\/\*[\s\S]*?\*\//g, "")),
-      "lib/marketing/plans.ts must not select or model a price",
+      /price/i.test(code.replace(/price_eur_monthly/g, "")),
+      "lib/marketing/plans.ts must not model a second price",
     ).toBe(false);
+    expect(PRICE_FIGURE.test(code), "lib/marketing/plans.ts price figure").toBe(false);
   });
 
   it("the split between the three registries is documented in code", () => {

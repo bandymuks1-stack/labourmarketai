@@ -240,6 +240,7 @@ stay identical to this table).
 | **A-11** | No feature launches without a known economic model. | PR #896 (not yet merged) | review — machine half ships with #896 |
 | **A-12** | An unmeasured metric is reported as unmeasured, never as zero. | PR #897 (not yet merged) | review — machine half ships with #897 |
 | **A-13** | The product is never reducible to a job board / recruitment platform / CV builder / ATS / marketplace / ERP / Work Journal / chatbot / data portal — those are capabilities inside the opportunity-realization flywheel (activity history → understanding of what one can offer → matching against real demand → new activity), and the flywheel is a product invariant. | docs/product/OPPORTUNITY_REALIZATION_LOCK_V1.md (owner directive 2026-08-14) | review |
+| **A-14** | Distinct user job → first-class surface, owner-gated. Existing structures are reused when a capability naturally belongs to them; duplicate or convenience-only top-level pages stay prohibited; a new first-class surface is allowed only for a genuinely distinct user job / graph edge where reuse would materially damage UX, information architecture or extensibility — demonstrated by evidence and recorded as an owner ruling in the surface declaration (`distinctSurface`). The constitution protects the vision; it does not freeze old implementations. | docs/DECISIONS/0015-distinct-user-job-surfaces.md (owner decision 2026-09-13) | machine |
 
 **Conflict rule (unchanged, restated):** where any other product, UX or
 architecture document conflicts with this constitution, **these win** — the
@@ -270,6 +271,23 @@ In `apps/web/lib/product-gate/surface-registry.ts`, five answers:
 A surface nobody can justify in five short sentences is a surface that should
 not exist. A blank answer is not a declaration.
 
+**A-14 block (optional, owner-gated).** A surface that is a *distinct user job*
+(decision 0015) adds `distinctSurface` with five more answers:
+
+| Field | Question it answers |
+|---|---|
+| `userJob` | which user job / decision space this serves, in one sentence |
+| `graphEdge` | which edge of the §14 graph it is, and why it is not the edge an existing surface already serves |
+| `whyReuseDamages` | what reusing the existing structure would materially damage (UX, IA, extensibility) |
+| `evidence` | the repository / audit / production evidence, one item each |
+| `ownerRuling` | the owner ruling that authorised it (decision id + date) |
+
+With all five present, the World-State readiness answers `changesWorldState`,
+`reflectedOnMap`, `usableWithoutLeavingWorkspace`, `needsNoNewPage` and the
+behavior answer `worldStateCanControlIt` may honestly be "no" and are reported
+as **notices** in the architecture diff, never silently. `aiControlled`,
+`usesEntity`, `registrationIsEnough` and `aiCanWorkWithIt` stay blocking.
+
 ### 13.3 Automatic RED rules
 
 CI fails — status **`PRODUCT_REVIEW_REQUIRED`**, merge blocked — when a diff:
@@ -286,6 +304,7 @@ CI fails — status **`PRODUCT_REVIEW_REQUIRED`**, merge blocked — when a diff
 | `chat_importance_reduced` | chat leaves the core nav, or the conversation root loses its chat | A-01 | certain |
 | `undeclared_surface` | any new surface has no declaration | A-09 | certain |
 | `unknown_axiom` | a declaration cites an axiom that does not exist | A-09 | certain |
+| `distinct_surface_unruled` | an A-14 `distinctSurface` block lacks its owner ruling or its evidence | A-14 | certain |
 
 `heuristic` findings still block. The reviewer either declares the surface or
 removes it — the gate never decides taste, it only refuses silence.
@@ -306,6 +325,108 @@ un-audited, not approved.**
 
 ---
 
+## 14. The canonical product graph (owner text, 2026-09-07 — binding)
+
+**LabourMarket.ai is NOT** a job board, a recruitment site, a staffing
+marketplace, a CV builder, a Work Journal, a timesheet application, a workforce
+planner, an evidence database, a qualification platform, a booking calendar, or
+an AI chatbot. Each of those is **one edge** of the following graph:
+
+> PEOPLE ↔ REAL WORK ↔ SKILLS ↔ EXPERIENCE ↔ EVIDENCE ↔ QUALIFICATIONS ↔
+> ORGANIZATIONS ↔ COMPANIES ↔ AGENCIES ↔ TEAMS/BRIGADES ↔ PROJECTS ↔
+> SITES/OBJECTS ↔ TASKS/WORK STAGES ↔ SERVICES ↔ AVAILABILITY ↔ TIME ↔
+> CAPACITY ↔ CURRENT DEMAND ↔ FUTURE DEMAND ↔ EDUCATION/TRAINING/RECOGNITION ↔
+> COUNTRIES/JURISDICTIONS ↔ MOBILITY ↔ MARKET SIGNALS ↔ COMMERCIAL
+> OPPORTUNITIES.
+
+**Value chain:** REAL WORK → EVIDENCE → CAPABILITY → CAPACITY → DEMAND → MATCH
+→ EXECUTION → VERIFIED RESULT → LIVING HISTORY → BETTER DECISION.
+
+**Flywheel:** real historical work + new real work + verified evidence + project
+results + supply + demand → better labour data → better skill understanding →
+better matching → better planning → better forecasts → better benchmarks →
+better commercial intelligence → more organizations → more real work data.
+
+A task may work on ONE edge. It may **never** redefine the product as that edge.
+
+**Two further principles carried by this section:**
+
+- **Identity ≠ role.** The fundamental entity is an ACTOR. A person is
+  simultaneously employee of one company, owner of another, student of an
+  institution, member of a brigade, assigned to a project, available for
+  another opportunity, a provider and a client. Those are relationships and
+  contexts, never mutually exclusive identities.
+- **Freedom + reality constraints.** The product models reality; it does not
+  constrain human agency. A commitment is not a prohibition and time overlap is
+  not unavailability. Detect → explain → warn → show alternatives → the
+  authorized actor decides → explicit override → audit receipt. Block only for
+  law, safety, authorization, another person's rights, or a genuine hard
+  technical constraint.
+
+**Machine half:** `apps/web/lib/product-gate/product-graph.ts`, enforced by
+`apps/web/lib/guards/product-graph-journeys.test.ts`. A node may go empty only
+with a dated `unrealized` or `narrowedOn` record naming why. `platform` and
+`communication` capabilities are deliberately not graph nodes: the platform is
+the machinery, and chat is one universal interaction surface **over** the graph,
+not the graph itself.
+
+## 15. Distinctions that may never collapse (2026-09-07)
+
+Eight separations. Each has already collapsed once in this product, and each
+collapse gave a real user a confidently wrong answer — none of them crashed, and
+none of them failed CI.
+
+| id | separates | the collapse |
+|---|---|---|
+| SEP-1 | FACT · DERIVED · FORECAST | AI extraction treated as fact |
+| SEP-2 | COMMITMENT · PROHIBITION | *not yet* — the one most likely to collapse next |
+| SEP-3 | EVIDENCE · VERIFICATION | self-confirmation counted as employer confirmation |
+| SEP-4 | DEMAND · SUPPLY | an agency's declared capacity read as its need |
+| SEP-5 | IDENTITY · ROLE | a person forced into one active role |
+| SEP-6 | demonstrated · formal · equivalence · valid credential · missing | five years of real work read as "certificate missing" |
+| SEP-7 | UNKNOWN · ZERO · FAILED · NOT_MEASURED | a failed read rendered as "you have nothing" |
+| SEP-8 | exists · reachable · visible · actionable · correctly interpreted | a complete capability nobody could open |
+
+**Machine half:** `apps/web/lib/product-gate/semantic-separations.ts`. Each
+separation declares its enforcement honestly as `machine`, `tripwire` (the
+vocabulary carrying the distinction must not disappear from its anchor module)
+or `review`.
+
+## 16. Permanent journey contracts (2026-09-07)
+
+Six chains, with permanent ids, in
+`apps/web/lib/product-gate/journey-register.ts`:
+
+`J-WORKER-EVIDENCE` · `J-COMPANY-EXECUTION` · `J-AGENCY-SUPPLY` ·
+`J-INSTITUTION-OUTCOME` · `J-IMPORT-HISTORY` · `J-TIME-FREEDOM`.
+
+Every link is `LIVE`, `BROKEN` or `NOT_BUILT`, and the last two must say why in
+words. **A link claiming to be LIVE whose capabilities are not live in the
+capability register fails CI.** A route rendering is not a journey working; that
+distinction is the whole point of this section.
+
+## 17. What is NOT machine-checkable (honest limits)
+
+The register, the graph and the journey contracts are checked by CI. These are
+not, and pretending otherwise would itself be a SEP-7 violation:
+
+1. **Whether a status is generous.** Nothing proves `PARTIAL` should not be
+   `BROKEN`. Reachability is checked; adequacy is a review question.
+2. **Whether a title still describes reality.** Ids are enforced in both halves
+   of the register; wording is not.
+3. **SEP-7 repo-wide.** Individual readers are guarded; there is no repo-wide
+   proof that every Supabase read checks `error` before using `data`.
+4. **SEP-2 at the schema level.** No unique, exclusion or trigger constraint may
+   reject an overlapping assignment or booking. A migration adding one is a
+   product decision and belongs at the human gate — the static gate cannot tell
+   it apart from ordinary data hygiene.
+5. **Human proof.** `HUMAN_UI_PROVEN` can only be granted by a human walking the
+   surface in a browser and checking the side effects. No test may raise a row
+   to it, and no agent may claim it on a suite going green.
+6. **Whether a capability is any good.** Out of scope, deliberately.
+
+---
+
 ## Hard "do not" list (product)
 
 No billing, payments, production deploy, DNS, env, Supabase migrations, RLS/RPC
@@ -316,3 +437,7 @@ or fake jobs/candidates/companies — introduced as part of product/UX work.
 
 This constitution is amended only by explicit owner/DI decision, recorded here or
 in `docs/DECISIONS/`. Implementation sprints must check their work against §1–§11.
+
+§14–§17 were added on 2026-09-07 from owner text and carry a machine half in
+`apps/web/lib/product-gate/`. Amending them means amending both halves: a rule
+that exists in prose alone is the condition this window was opened to end.

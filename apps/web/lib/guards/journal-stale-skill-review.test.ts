@@ -52,7 +52,12 @@ describe("Guard: owner examples — no random construction bundle", () => {
 describe("Guard: journal page computes a real per-entry chip source", () => {
   const page = read("app/[locale]/dashboard/journal/page.tsx");
   it("reads worker_skills.verified for the confirmed source", () => {
-    expect(page).toMatch(/select\(\s*["']skill_id,\s*verified,\s*skills\(slug\)["']/);
+    // `source` rides along since #1689 (the evidence-tier input for "work in
+    // numbers"); the assertion is that `verified` is READ, not the exact
+    // column list.
+    expect(page).toMatch(
+      /select\(\s*["']skill_id,\s*verified,(?:\s*source,)?\s*skills\(slug\)["']/,
+    );
   });
   it("recognizes skills from THIS entry's real text", () => {
     // One render-time recognition pass per entry: buildEntryDetectedSignals

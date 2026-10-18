@@ -7,6 +7,8 @@ import {
   getLaunchReadiness,
 } from "@/lib/admin/launch-readiness";
 import { getWorkerAdsReadiness } from "@/lib/ads/limited-worker-ads-readiness";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { ProductMetricsSection } from "@/components/admin/product-metrics-section";
 
 /**
  * Operator launch-readiness view (launch repair Scope E).
@@ -76,12 +78,10 @@ export default async function AdminLaunchReadinessPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-launch-readiness">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 
@@ -218,6 +218,8 @@ export default async function AdminLaunchReadinessPage({
       <p className="text-meta leading-relaxed text-text-muted">
         {t("gapNote")}
       </p>
+
+      <ProductMetricsSection />
     </div>
   );
 }

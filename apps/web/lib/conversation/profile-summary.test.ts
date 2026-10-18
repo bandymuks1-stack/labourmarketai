@@ -164,10 +164,12 @@ describe("the facts are the readiness model's, named not counted (W5 one source)
       "playerCard.readinessSteps.pillar.availability",
       "playerCard.readinessSteps.pillar.skills",
     ]);
+    // A MISSING pillar is named as a thing (readiness.pillars), never with the
+    // done-state phrasing of the steps list ("... nurodytas").
     expect(res.missing).toEqual([
-      "playerCard.readinessSteps.pillar.journal",
-      "playerCard.readinessSteps.pillar.evidence",
-      "playerCard.readinessSteps.pillar.workCard",
+      "playerCard.readiness.pillars.journal",
+      "playerCard.readiness.pillars.evidence",
+      "playerCard.readiness.pillars.workCard",
     ]);
   });
 

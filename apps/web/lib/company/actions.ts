@@ -15,6 +15,11 @@ import {
   type EmployerContextReason,
 } from "./employer-company-context";
 import { hasOrganizationCapability } from "./role-capabilities";
+
+/** The two roster RPCs below are `owns_company`-gated in SQL: owner or admin. */
+function isCompanyOwnerOrAdmin(role: string): boolean {
+  return role === "owner" || role === "admin";
+}
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import type { AssignRoleActionState } from "@/lib/operations/assign-operations-role";
@@ -22,6 +27,7 @@ import type {
   ProvisionEngagementActionState,
   SetJournalReviewActionState,
 } from "@/lib/operations/journal-review-actions";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * M-P0-3: every roster write below derives its company from the ACTIVE
@@ -67,6 +73,7 @@ export async function inviteCompanyWorkerAction(
   _prev: InviteCompanyFormState | null,
   formData: FormData,
 ): Promise<InviteCompanyFormState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const email = String(formData.get("email") ?? "");
   const note = formData.get("note") ? String(formData.get("note")) : null;
 
@@ -74,8 +81,20 @@ export async function inviteCompanyWorkerAction(
   // explicitly, never inferred from the first/only owned row.
   const company = await requireEmployerCompany();
   if (!company.ok) return { ok: false, code: noCompanyCode(company.reason) };
-  // §11 capability matrix: roster writes are operational governance.
-  if (!hasOrganizationCapability(company.role, "manage-roster")) {
+  // §11 capability matrix: inviting is `manage-invitations` — owner/admin,
+  // never a job title (owner direction 2026-09-24). `invite_company_worker`
+  // is an `owns_company` RPC (owner or admin membership), so this gate says
+  // what the database will do; the People page does not offer the form to
+  // anyone else.
+  // The creator is owner-equivalent here as in `owns_company`, even when a
+  // membership row names a narrower role; a person the owner delegated
+  // invitation management to is admitted as `invite_company_worker` admits
+  // them (`invitation_company_authority_v1`).
+  if (
+    !hasOrganizationCapability(company.role, "manage-invitations") &&
+    company.isCreator !== true &&
+    company.invitationDelegate !== true
+  ) {
     return { ok: false, code: "no_company" };
   }
 
@@ -108,6 +127,7 @@ export async function assignCompanyWorkerRoleAction(
   _prev: AssignRoleActionState | null,
   formData: FormData,
 ): Promise<AssignRoleActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const workerId = String(formData.get("workerId") ?? "").trim();
   const roleRaw = String(formData.get("operationsRole") ?? "").trim();
   const operationsRole = roleRaw === "" ? null : roleRaw;
@@ -117,7 +137,14 @@ export async function assignCompanyWorkerRoleAction(
   const company = await requireEmployerCompany();
   if (!company.ok) return { ok: false, code: noOrgCode(company.reason) };
   // §11 capability matrix: roster writes are operational governance.
-  if (!hasOrganizationCapability(company.role, "manage-roster")) {
+  // `invite_company_worker` / `assign_company_worker_role` are `owns_company`
+  // RPCs (owner or admin membership). A manager passed the capability check
+  // here and then received `not_owner` from the database (2026-09-19); the
+  // gate now says what the database will do.
+  if (
+    !hasOrganizationCapability(company.role, "manage-roster") ||
+    !isCompanyOwnerOrAdmin(company.role)
+  ) {
     return { ok: false, code: "no_org" };
   }
   if (workerId === "") return { ok: false, code: "error" };
@@ -145,6 +172,7 @@ export async function provisionCompanyWorkerEngagementContextAction(
   _prev: ProvisionEngagementActionState | null,
   formData: FormData,
 ): Promise<ProvisionEngagementActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const workerId = String(formData.get("workerId") ?? "").trim();
 
   const company = await requireEmployerCompany();
@@ -176,6 +204,7 @@ export async function setCompanyWorkerJournalReviewAction(
   _prev: SetJournalReviewActionState | null,
   formData: FormData,
 ): Promise<SetJournalReviewActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const workerId = String(formData.get("workerId") ?? "").trim();
   const enabled = String(formData.get("enabled") ?? "") === "true";
 

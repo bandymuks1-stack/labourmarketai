@@ -87,7 +87,7 @@ describe("issue 3 — no approve/reject buttons when the reviewer is not permitt
 });
 
 describe("issue 4 — the map own-marker is a real player card (real data only)", () => {
-  const live = read("components/app/market-map/location-map.tsx");
+  const live = read("components/app/market-map/own-location-layer.ts");
   const page = read("app/[locale]/dashboard/market-map/page.tsx");
 
   it("MapIdentity carries the real player-card signals", () => {
@@ -113,7 +113,9 @@ describe("issue 4 — the map own-marker is a real player card (real data only)"
   it("the marker / map is enlarged for mobile (player-card scale)", () => {
     // Avatar bumped from 40px → 52px; map taller on mobile.
     expect(live).toMatch(/width:52px;height:52px/);
-    expect(live).toMatch(/min-h-\[24rem\]/);
+    // The own marker now lives on the one canonical map, whose dashboard-mode
+    // container is tall on mobile (clamp(24rem,60vh,40rem)).
+    expect(read("components/app/market-map/market-map-model.ts")).toMatch(/clamp\(24rem,60vh,40rem\)/);
   });
 
   it("the active locales carry the availability marker labels", () => {

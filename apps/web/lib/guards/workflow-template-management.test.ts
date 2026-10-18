@@ -536,7 +536,7 @@ describe("9. the panel is a real, honest, native-nav surface — and NOT a new r
     expect(PANEL).toContain("approvals-templates-unavailable");
     expect(PANEL).toContain('t("tpl.unavailable")');
     const en = JSON.parse(read("messages/en.json")).approvals.tpl;
-    expect(en.unavailable.toLowerCase()).toContain("not enabled");
+    expect(en.unavailable.toLowerCase()).toContain("not available");
   });
 
   it("the zero-approver fail-closed warning is rendered, per step, with a fix", () => {

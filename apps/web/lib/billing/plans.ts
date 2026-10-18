@@ -7,139 +7,59 @@
  * (pilot access). The catalogue is the contract the later Stripe sprint wires.
  *
  * Honesty (guarded by lib/guards/no-live-payments.test.ts):
- *   - PAYMENTS_ENABLED is false; nothing here implies an active subscription;
+ *   - this file carries NO payments switch: whether billing is on is the
+ *     resolved billing config (lib/billing/config-core.ts, env-armed), never a
+ *     code constant here; nothing here implies an active subscription;
  *   - no plan auto-grants itself — `accessState` is explicit;
  *   - feature entitlements are limits/booleans only, never a charge.
  *
  * Pure data + types. No IO.
  */
 
-/** Global kill-switch. Stays false for the entire pre-payment sprint. */
-export const PAYMENTS_ENABLED = false as const;
+/**
+ * OWNER LAUNCH PRICING (approved 2026-09-05, corrected the same day):
+ *   PERSON            €0   — core person / worker / learner participation
+ *   ORGANIZATION FREE €0   — 1 concurrent active position / open workforce need
+ *   ORGANIZATION      €99  — NO fixed limit on concurrent active positions
+ *                            (owner decision 2026-10-06: the former ten-position
+ *                            ceiling is removed and replaced by no other cap).
+ * Prices live ONLY in `plans.price_eur_monthly` (see lib/marketing/plans.ts);
+ * this registry carries the boundary (what a plan DOES), never a figure.
+ * Deferred and NOT sold: ai_plus, vip_media, agency tiers, LMC top-ups,
+ * priority visibility, media upsells, annual and enterprise pricing.
+ */
+export const FREE_ORGANIZATION_PLAN_KEY = "free_organization" as const;
+/** The ONE paid organization plan key (historical slug kept for the
+ *  subscription store, env price slot and admin grants — the label says
+ *  "Organization"). */
+export const ORGANIZATION_PLAN_KEY = "company_pilot" as const;
 
-export type PlanAudience = "worker" | "company" | "agency" | "admin";
 
-/** How a user obtains the plan today (no checkout exists). */
-export type PlanAccessState =
-  | "free" // always available, no payment
-  | "payment_not_enabled" // a future paid tier; today only manual pilot access
-  | "internal"; // staff only
+/** Plans that exist in the registry but are not offered at launch. */
+export const DEFERRED_PLAN_KEYS = ["worker_plus", "agency_pilot"] as const;
 
-/** The CTA a premium surface should render today. */
-export type PlanCta = "use" | "request_pilot_access" | "contact";
+// The boundary TYPES and the plan DATA now live in the canonical typed catalogue
+// (lib/commercial/plan-catalogue.ts). Everything below is DERIVED from it with
+// identical values; lib/commercial/plan-catalogue.test.ts proves byte-equality
+// against a pre-change snapshot. Entitlement decisions stay in
+// lib/billing/entitlements-v1.ts (the shared resolver).
+import {
+  PLAN_CATALOGUE,
+  toBoundary,
+  type PlanAudience,
+  type PrePaymentPlan,
+} from "@/lib/commercial/plan-catalogue";
 
-/** Feature entitlement: a boolean capability or a numeric limit (null = none). */
-export type Entitlement = boolean | number;
+export type {
+  Entitlement,
+  FeatureKey,
+  PlanAccessState,
+  PlanAudience,
+  PlanCta,
+  PrePaymentPlan,
+} from "@/lib/commercial/plan-catalogue";
 
-export type FeatureKey =
-  // worker
-  | "worker_profile"
-  | "worker_journal"
-  | "worker_basic_skills"
-  | "readiness_checklist_countries" // numeric: how many target countries
-  | "document_expiry_reminders"
-  | "expanded_cv"
-  | "priority_visibility"
-  // company
-  | "company_create_needs" // numeric: concurrent open needs
-  | "candidate_readiness_summaries"
-  | "booking_requests"
-  | "communication"
-  | "team_matching"
-  // agency
-  | "agency_multi_company"
-  | "worker_pool"
-  | "doc_readiness_tracking"
-  | "booking_pipeline"
-  // admin
-  | "verify_documents"
-  | "manage_country_rules"
-  | "manage_pilots";
-
-export interface PrePaymentPlan {
-  readonly slug: string;
-  readonly audience: PlanAudience;
-  readonly accessState: PlanAccessState;
-  readonly cta: PlanCta;
-  /** i18n key suffix under namespace `plans.<slug>`. */
-  readonly labelKey: string;
-  readonly entitlements: Readonly<Partial<Record<FeatureKey, Entitlement>>>;
-}
-
-export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = [
-  {
-    slug: "free_worker",
-    audience: "worker",
-    accessState: "free",
-    cta: "use",
-    labelKey: "free_worker",
-    entitlements: {
-      worker_profile: true,
-      worker_journal: true,
-      worker_basic_skills: true,
-      readiness_checklist_countries: 1,
-    },
-  },
-  {
-    slug: "worker_plus",
-    audience: "worker",
-    accessState: "payment_not_enabled",
-    cta: "request_pilot_access",
-    labelKey: "worker_plus",
-    entitlements: {
-      worker_profile: true,
-      worker_journal: true,
-      worker_basic_skills: true,
-      expanded_cv: true,
-      readiness_checklist_countries: 10,
-      document_expiry_reminders: true,
-      priority_visibility: false, // later — never claimed active now
-    },
-  },
-  {
-    slug: "company_pilot",
-    audience: "company",
-    accessState: "payment_not_enabled",
-    cta: "request_pilot_access",
-    labelKey: "company_pilot",
-    entitlements: {
-      company_create_needs: 5,
-      candidate_readiness_summaries: true,
-      booking_requests: true,
-      communication: true,
-      team_matching: true,
-    },
-  },
-  {
-    slug: "agency_pilot",
-    audience: "agency",
-    accessState: "payment_not_enabled",
-    cta: "request_pilot_access",
-    labelKey: "agency_pilot",
-    entitlements: {
-      agency_multi_company: true,
-      worker_pool: true,
-      doc_readiness_tracking: true,
-      booking_pipeline: true,
-      company_create_needs: 25,
-      candidate_readiness_summaries: true,
-      booking_requests: true,
-      communication: true,
-    },
-  },
-  {
-    slug: "admin_internal",
-    audience: "admin",
-    accessState: "internal",
-    cta: "use",
-    labelKey: "admin_internal",
-    entitlements: {
-      verify_documents: true,
-      manage_country_rules: true,
-      manage_pilots: true,
-    },
-  },
-] as const;
+export const PRE_PAYMENT_PLANS: readonly PrePaymentPlan[] = PLAN_CATALOGUE.map(toBoundary);
 
 export function getPlan(slug: string): PrePaymentPlan | null {
   return PRE_PAYMENT_PLANS.find((p) => p.slug === slug) ?? null;
@@ -148,7 +68,12 @@ export function getPlan(slug: string): PrePaymentPlan | null {
 /** The default free plan for an audience (the one a new user starts on). */
 export function defaultPlanFor(audience: PlanAudience): PrePaymentPlan {
   if (audience === "admin") return getPlan("admin_internal")!;
-  if (audience === "company") return getPlan("company_pilot")!;
-  if (audience === "agency") return getPlan("agency_pilot")!;
+  // One organization plan family for every organization capability.
+  if (audience === "company" || audience === "agency") return getPlan(FREE_ORGANIZATION_PLAN_KEY)!;
   return getPlan("free_worker")!;
+}
+
+/** The plans a person or organization can actually buy at launch. */
+export function isSellablePlan(plan: Pick<PrePaymentPlan, "accessState" | "launch">): boolean {
+  return plan.accessState === "payment_not_enabled" && plan.launch === "sellable";
 }

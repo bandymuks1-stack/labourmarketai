@@ -19,8 +19,12 @@ const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
 describe("the employer opening brief", () => {
   it("exists, and the chat routes each identity to its OWN brief", () => {
     const chat = read("components", "app", "conversation", "chat", "conversation-chat.tsx");
-    expect(chat).toContain(
-      'identity === "person" ? loadOpeningBrief() : loadEmployerOpeningBrief()',
+    // Re-anchored 2026-09-23: the worker brief now takes the rungs ŠIANDIEN
+    // already states as an `omit` option (owner §20). The routing is the
+    // same — each identity to its OWN brief — and the employer call takes
+    // no option at all.
+    expect(chat).toMatch(
+      /identity === "person" \? loadOpeningBrief\(briefOptions\) : loadEmployerOpeningBrief\(\)/,
     );
     // The old silence gate must not come back.
     const opener = chat.slice(chat.indexOf("openedWithStateRef.current) return"));
@@ -35,12 +39,24 @@ describe("the employer opening brief", () => {
     const reviews = fn.indexOf("fetchQuickReviewQueue");
     const absences = fn.indexOf("getManagerPendingAbsences");
     const absentToday = fn.indexOf("absentOn");
-    const unread = fn.indexOf("getUnreadConversationCount");
+    const unread = fn.indexOf("getUnreadConversationIdsForOrganization");
     expect(reviews).toBeGreaterThan(-1);
     expect(absences).toBeGreaterThan(reviews);
     expect(absentToday).toBeGreaterThan(absences);
     expect(unread).toBeGreaterThan(absentToday);
-    expect(fn).not.toMatch(/candidate|scouting|create-demand|matches/i);
+    // Recruitment FUNNEL reads (scouting, demand intake, match counts) must
+    // not appear. Re-anchored 2026-09-04 (owner contract section 4D, attention):
+    // the ONE candidate mention allowed is people who already raised a hand
+    // on the company's own demand and are waiting for an answer — a pending
+    // decision on a real person, like an agency's offers awaiting — read
+    // through the pending-interest count, never a scouting run.
+    expect(fn).not.toMatch(/scouting|create-demand|matches/i);
+    expect(fn).not.toMatch(/runScouting|listCompanyDemands/);
+    const rungStart = fn.indexOf("listPendingInterestCountsForCompany");
+    const rungEnd = fn.indexOf("fetchQuickReviewQueue");
+    expect(rungStart).toBeGreaterThan(-1);
+    const outsideRung = fn.slice(0, fn.lastIndexOf("// Candidates who raised a hand", rungStart)) + fn.slice(rungEnd);
+    expect(outsideRung).not.toMatch(/candidate/i);
   });
 
   it("keeps the worker brief's honesty contract: caps and silent failure", () => {
@@ -64,6 +80,8 @@ describe("the employer opening brief", () => {
         "briefEmployerAbsentToday",
         "chipEmployerInbox",
         "chipEmployerAbsences",
+        "briefEmployerBookingResponses",
+        "chipEmployerBookings",
       ]) {
         expect(typeof chat[key], `${l}.${key}`).toBe("string");
       }

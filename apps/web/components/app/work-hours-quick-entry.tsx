@@ -6,13 +6,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { TimesheetImportReview } from "@/components/app/timesheet-import-review";
-import { recordAllocationAction } from "@/lib/work-hours/allocations-actions";
+import {
+  recordAllocationAction,
+  recordCorrectionAction,
+} from "@/lib/work-hours/allocations-actions";
 import type { AllocationActionState } from "@/lib/work-hours/allocations-actions";
 import type {
   HoursPageEntry,
   HoursPageObject,
   HoursPageWorker,
 } from "@/lib/work-hours/hours-page-data";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * QUICK ENTRY — built for a site manager entering a whole crew on a phone.
@@ -37,6 +41,16 @@ import type {
  * the operator can override — because two identical allocations are also a
  * legitimate morning and afternoon shift, and only the person standing there
  * knows which it is.
+ *
+ * A WRONG NUMBER CAN BE PUT RIGHT, and nothing is destroyed doing it. Until
+ * now every row on this list was final: `recordCorrectionAction` — which
+ * writes a NEW row carrying `correction_of` and stamps the original's
+ * `superseded_by`, so both numbers and the link between them survive — had no
+ * control anywhere, and hours somebody is paid from could only ever be added.
+ * Each entry now opens in place with its own values; saving supersedes the
+ * original, which leaves the list because every read here already filters
+ * `superseded_by is null`. There is still no delete path, here or in the
+ * database.
  */
 
 const INITIAL: AllocationActionState = { status: "idle" };
@@ -58,6 +72,12 @@ export function WorkHoursQuickEntry({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [state, action, pending] = useActionState(recordAllocationAction, INITIAL);
+  const [correction, correctAction, correctPending] = useActionState(
+    recordCorrectionAction,
+    INITIAL,
+  );
+  /** The entry open for correction — one at a time, never a bulk edit. */
+  const [correcting, setCorrecting] = useState<string | null>(null);
 
   const [date, setDate] = useState(workDate);
   const [workerId, setWorkerId] = useState("");
@@ -86,6 +106,12 @@ export function WorkHoursQuickEntry({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, router]);
 
+  useEffect(() => {
+    if (correction.status !== "saved") return;
+    setCorrecting(null);
+    router.refresh();
+  }, [correction, router]);
+
   const workersById = useMemo(
     () => new Map(workers.map((w) => [w.workerId, w])),
     [workers],
@@ -96,21 +122,23 @@ export function WorkHoursQuickEntry({
     lastSaved.current !== null && lastSaved.current === signature;
   const blockedByDuplicate = wouldRepeatLastSave && !duplicateArmed;
 
-  const errorText = (): string | null => {
-    if (state.status === "invalid") {
-      if (state.field === "hours") {
-        return state.problem === "not-a-quarter"
+  const errorText = (s: AllocationActionState): string | null => {
+    if (s.status === "invalid") {
+      if (s.field === "hours") {
+        return s.problem === "not-a-quarter"
           ? t("errors.quarter")
           : t("errors.hours");
       }
-      return t(`errors.${state.field}`);
+      return t(`errors.${s.field}`);
     }
-    if (state.status === "not-authorized") return t("errors.notAuthorized");
-    if (state.status === "needs-migration") return t("states.needsMigration");
-    if (state.status === "error") return t("errors.generic");
+    if (s.status === "not-authorized") return t("errors.notAuthorized");
+    if (s.status === "needs-migration") return t("states.needsMigration");
+    if (s.status === "error") return t("errors.generic");
     return null;
   };
-  const error = errorText();
+  const error = errorText(state);
+  // A refused correction reports in its own row, never on the entry form.
+  const correctionError = errorText(correction);
 
   // `?import=1` swaps the entry form for the TIMESHEET IMPORT surface — the
   // same screen, because a historical monthly grid and today's quick entry
@@ -133,15 +161,19 @@ export function WorkHoursQuickEntry({
   }
 
   return (
-    <div className="flex w-full flex-col gap-5">
+    <div className="grid w-full gap-6 lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)] lg:items-start">
       <Link
         href="?import=1"
-        className="self-start text-sm underline underline-offset-4"
+        className="self-start text-sm underline underline-offset-4 lg:col-span-2"
         data-testid="hours-import-link"
       >
         {t("import.entryLink")}
       </Link>
-      <form action={action} className="flex flex-col gap-4">
+      <form
+        action={action}
+        className="flex flex-col gap-4 rounded-card border border-ink-600 bg-surface-1/40 p-4 sm:p-5"
+      >
+        <DisplayedWorkspaceField />
         {/* The server reads only these. `entered_by` is never a form field —
             it is taken from the session, so an operator cannot be recorded as
             somebody else. */}
@@ -160,8 +192,11 @@ export function WorkHoursQuickEntry({
         </label>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">{t("worker")}</span>
+          <label htmlFor="hours-worker" className="text-sm font-medium">
+            {t("worker")}
+          </label>
           <select
+            id="hours-worker"
             value={workerId}
             onChange={(e) => setWorkerId(e.target.value)}
             className="min-h-12 rounded-md border border-border-subtle bg-surface-1 px-3 text-base"
@@ -269,7 +304,7 @@ export function WorkHoursQuickEntry({
               // form, decides whether it is a mistake or a second shift.
               if (wouldRepeatLastSave && !duplicateArmed) setDuplicateArmed(true);
             }}
-            className="min-h-12 rounded-md bg-accent px-4 text-base font-semibold text-white disabled:opacity-60"
+            className="min-h-12 rounded-md bg-brand-blue px-4 text-base font-semibold text-text-on-brand disabled:opacity-60"
             data-testid="hours-save"
           >
             {pending ? t("saving") : t("save")}
@@ -294,10 +329,16 @@ export function WorkHoursQuickEntry({
         </div>
       </form>
 
-      <section className="flex flex-col gap-2" data-testid="hours-entries">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-base font-semibold">{t("entriesTitle")}</h2>
-          <span className="text-sm text-text-secondary" data-testid="hours-day-total">
+      <section
+        className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-4 sm:p-5"
+        data-testid="hours-entries"
+      >
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="font-display text-lg font-semibold tracking-tight text-text-primary">{t("entriesTitle")}</h2>
+          <span
+            className="rounded-full border border-ink-500 px-2.5 py-1 font-mono text-meta tabular-nums text-text-primary"
+            data-testid="hours-day-total"
+          >
             {t("dayTotal")}: {dayTotal} h
           </span>
         </div>
@@ -308,25 +349,103 @@ export function WorkHoursQuickEntry({
             {entries.map((e) => (
               <li
                 key={e.id}
-                className="flex items-center gap-3 rounded-md border border-border-subtle p-3"
+                className="flex flex-col gap-2 rounded-md border border-border-subtle p-3"
                 data-testid="hours-entry"
               >
-                <span
-                  aria-hidden
-                  className="h-8 w-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: e.objectTint }}
-                />
-                <span className="flex min-w-0 flex-col">
-                  <span className="truncate text-sm font-medium">{e.workerName}</span>
-                  <span className="truncate text-xs text-text-secondary">
-                    {e.objectName}
-                    {e.note ? ` · ${e.note}` : ""}
-                    {e.enteredForSomeoneElse ? ` · ${t("enteredForSomeoneElse")}` : ""}
+                <div className="flex items-center gap-3">
+                  <span
+                    aria-hidden
+                    className="h-8 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: e.objectTint }}
+                  />
+                  <span className="flex min-w-0 flex-col">
+                    <span className="truncate text-sm font-medium">{e.workerName}</span>
+                    <span className="truncate text-xs text-text-secondary">
+                      {e.objectName}
+                      {e.note ? ` · ${e.note}` : ""}
+                      {e.enteredForSomeoneElse ? ` · ${t("enteredForSomeoneElse")}` : ""}
+                      {e.rejected ? ` · ${t("rejectedNotCounted")}` : ""}
+                    </span>
                   </span>
-                </span>
-                <span className="ml-auto text-base font-semibold tabular-nums">
-                  {e.hours} h
-                </span>
+                  <span
+                    className={`ml-auto text-base font-semibold tabular-nums ${e.rejected ? "text-text-muted line-through" : ""}`}
+                  >
+                    {e.hours} h
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCorrecting(correcting === e.id ? null : e.id)}
+                    data-testid={`hours-correct-${e.id}`}
+                    aria-expanded={correcting === e.id}
+                    className="shrink-0 rounded-md border border-border-subtle px-2 py-1 text-xs text-text-secondary underline-offset-4 hover:underline"
+                  >
+                    {correcting === e.id ? t("correctCancel") : t("correct")}
+                  </button>
+                </div>
+
+                {correcting === e.id ? (
+                  <form
+                    action={correctAction}
+                    className="flex flex-col gap-2 border-t border-border-subtle pt-2"
+                    data-testid="hours-correction-form"
+                  >
+                    {/* Nothing here re-opens WHO or WHEN: a correction fixes
+                        what was recorded, and moving a record onto another
+                        person or day is a different act entirely. */}
+                    <input type="hidden" name="original_id" value={e.id} />
+                    <input type="hidden" name="worker_id" value={e.workerId} />
+                    <input type="hidden" name="work_date" value={workDate} />
+                    <p className="text-xs text-text-secondary">{t("correctHint")}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <label className="flex flex-col gap-1 text-xs">
+                        {t("object")}
+                        <select
+                          name="work_object_id"
+                          defaultValue={e.workObjectId}
+                          className="rounded-md border border-border-subtle bg-transparent px-2 py-1.5 text-sm"
+                        >
+                          {objects.map((o) => (
+                            <option key={o.id} value={o.id}>
+                              {o.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="flex flex-col gap-1 text-xs">
+                        {t("hours")}
+                        <input
+                          name="hours"
+                          type="text"
+                          inputMode="decimal"
+                          defaultValue={String(e.hours)}
+                          className="w-24 rounded-md border border-border-subtle bg-transparent px-2 py-1.5 text-sm tabular-nums"
+                        />
+                      </label>
+                      <label className="flex min-w-40 flex-1 flex-col gap-1 text-xs">
+                        {t("note")}
+                        <input
+                          name="note"
+                          type="text"
+                          defaultValue={e.note ?? ""}
+                          className="rounded-md border border-border-subtle bg-transparent px-2 py-1.5 text-sm"
+                        />
+                      </label>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={correctPending}
+                      data-testid="hours-correction-save"
+                      className="self-start rounded-md border border-border-subtle px-3 py-1.5 text-sm font-medium disabled:opacity-60"
+                    >
+                      {correctPending ? t("saving") : t("save")}
+                    </button>
+                    {correctionError ? (
+                      <p className="text-xs text-state-danger" role="alert">
+                        {correctionError}
+                      </p>
+                    ) : null}
+                  </form>
+                ) : null}
               </li>
             ))}
           </ul>

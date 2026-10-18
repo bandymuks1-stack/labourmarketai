@@ -1,0 +1,22 @@
+const fs = require("node:fs"); const ROOT = "C:/Users/Mano/Documents/labourmarketai";
+const { chromium } = require(ROOT + "/node_modules/@playwright/test"); const { createClient } = require(ROOT + "/node_modules/@supabase/supabase-js");
+const txt = fs.readFileSync(ROOT + "/apps/web/.env.local", "utf8"); const get = (k) => { const m = txt.match(new RegExp("^" + k + "=(.*)$", "m")); return m ? m[1].trim() : ""; };
+(async () => {
+  const h = await (await fetch("https://labourmarket.ai/api/health")).json(); console.log(JSON.stringify({ build: h.build }));
+  const url = get("NEXT_PUBLIC_SUPABASE_URL"); const admin = createClient(url, get("SUPABASE_SERVICE_ROLE_KEY"), { auth: { autoRefreshToken: false, persistSession: false } });
+  const email = "e2e-worker2-202609021527@labourmarket.ai";
+  const { data: link } = await admin.auth.admin.generateLink({ type: "magiclink", email });
+  const anon = createClient(url, get("NEXT_PUBLIC_SUPABASE_ANON_KEY"), { auth: { autoRefreshToken: false, persistSession: false } });
+  const { data: sess } = await anon.auth.verifyOtp({ email, token: link.properties.email_otp, type: "magiclink" });
+  const b = await chromium.launch();
+  const c = await b.newContext({ viewport: { width: 390, height: 844 }, locale: "lt-LT" });
+  await c.addCookies([{ name: "sb-gorgitwvdzxbnaxhrsrw-auth-token", value: "base64-" + Buffer.from(JSON.stringify(sess.session)).toString("base64url"), domain: "labourmarket.ai", path: "/", secure: true, sameSite: "Lax" }]);
+  const p = await c.newPage(); await p.goto("https://labourmarket.ai/lt/dashboard", { waitUntil: "domcontentloaded", timeout: 60000 });
+  await p.getByTestId("composer-input").waitFor({ timeout: 90000 }); await p.waitForTimeout(5000);
+  await p.getByTestId("composer-input").fill("mano kortelė"); await p.getByTestId("composer-input").press("Enter");
+  await p.locator("[data-testid=player-card-result] [data-testid=player-card-provenance]").first().waitFor({ timeout: 45000 }); await p.waitForTimeout(1500);
+  const info = await p.locator("[data-testid=player-card-result] [data-testid=player-card-provenance]").first().evaluate((e) => { const r = e.getBoundingClientRect(); return { text: e.textContent, w: Math.round(r.width), h: Math.round(r.height), clipped: e.scrollWidth > e.clientWidth + 1, lines: Math.round(r.height / 21) }; });
+  console.log(JSON.stringify({ step: "card_390_after_wrap_fix", ...info }));
+  await p.screenshot({ path: "walk-provenance/08-card-390-wrapped.png", fullPage: false });
+  await b.close();
+})().catch((e) => { console.error("PROBE_FAILED", e.message); process.exit(1); });

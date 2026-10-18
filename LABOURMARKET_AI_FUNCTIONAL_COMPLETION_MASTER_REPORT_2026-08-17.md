@@ -1,5 +1,13 @@
 # LabourMarket.ai — Functional Completion Train V2, master report (2026-08-17/18)
 
+> 🗄️ **SUPERSEDED AS ARCHITECTURE / COMPLETION AUTHORITY — HISTORICAL EVIDENCE ONLY (2026-09-14).**
+> This document is preserved for provenance and may be read as a record of what
+> was true at its date. It is **not** current architecture, not a current
+> completion authority, and not a source of truth for planning.
+> Current architecture: [`docs/OWNER_TARGET_ARCHITECTURE_V1.md`](docs/OWNER_TARGET_ARCHITECTURE_V1.md).
+> Current completion status: [`docs/launch/AUDIT_2026-09-14_CORRECTED_vs_OWNER_TARGET.md`](docs/launch/AUDIT_2026-09-14_CORRECTED_vs_OWNER_TARGET.md).
+> Reason it is listed here: see the canonical architecture's §9 registry.
+
 **START SHA** `7bdf6874` (PR #1167 baseline)
 **END SHA** `95af44c9` (`origin/main`, PR #1180, merged 2026-08-18T04:07:11Z)
 **Report author** final-report agent (read-only; no product code changed, nothing merged, production touched with SELECTs only)

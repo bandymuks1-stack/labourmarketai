@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Agent OS admin index (v1, read-only).
@@ -178,9 +179,7 @@ export default async function AdminAgentOsPage({
           />
           {t("missionEyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary [text-shadow:_0_0_24px_rgba(57,124,255,0.18)]">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 

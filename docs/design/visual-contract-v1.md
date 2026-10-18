@@ -49,8 +49,13 @@ typography, radii, shadows, **zindex**) wired exclusively through
    AI-matched unless a real, shipped mechanism did exactly that (doctrine §7).
 4. **No meaningless numeric scores.** No score rings, gauges or meters on new
    surfaces; the one pre-existing score visual is grandfathered and gated.
-5. **No trust/reputation score.** Trust renders as the quiet gold `trust-ring`
-   on really-confirmed things only — never as a number or tier ladder.
+5. **No trust/reputation score.** Trust renders as the quiet `trust-ring` in
+   `trust-accent` (the verification GREEN — owner-ratified 2026-09-22; gold is
+   brand / action / waiting / informative and never confirmation) on
+   really-confirmed things only — never as a number or tier ladder. The ring
+   may render only when the persisted state is genuinely confirmed
+   (`journal_entry_confirmations` and the like), never inferred from
+   appearance, matching or derived data.
 6. **No technical state labels in user UI.** `ResultShell` exposes its status
    as `data-status` for tests; users read human copy, not enum values.
 7. **No duplicate dashboard or profile hub.** The workspace + Context Panel is

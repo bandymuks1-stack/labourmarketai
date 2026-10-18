@@ -80,8 +80,16 @@ describe("1. isEducationFirstWorkspace decides from the canonical capability lay
   it("works WITHIN the two-base-identity model — no third identity invented", () => {
     const roles = read("lib/config/roles.ts");
     expect(roles).toMatch(/export type BaseIdentity = "person" \| "company"/);
-    // The chat still derives identity from the SAME owner-locked mapping.
-    expect(CHAT).toMatch(/baseIdentityForRole\(auth0\.activeRole\)/);
+    // RE-ANCHORED (owner program 2026-09-23): the chat's identity is the
+    // server-resolved acting identity, typed by the SAME two-value
+    // `BaseIdentity` — it follows the active workspace (and the person's
+    // relationship to it) instead of `profiles.active_role` alone. The page
+    // still derives it through the owner-locked mapping.
+    expect(CHAT).toMatch(/const identity: BaseIdentity = actingIdentity;/);
+    expect(CHAT).toMatch(/actingIdentity\?: BaseIdentity;/);
+    expect(read("app/[locale]/dashboard/page.tsx")).toMatch(
+      /const identity = baseIdentityForRole\(activeRole\) \?\? "person";/,
+    );
   });
 });
 
@@ -99,7 +107,13 @@ describe("2. the education workspace gets education-shaped starters", () => {
   const SIGNALS = read("lib/conversation/starter-signals.ts");
 
   it("the education track exists and is decided by the canonical capability read", () => {
-    expect(STARTERS).toMatch(/capabilities\.includes\("training_provider"\)/);
+    // RE-ANCHORED (E/F/G, 2026-09-10): `companyTracks` now reads ALL the
+    // capability rows rather than this one, so the membership test moved from
+    // `capabilities.includes(...)` to a Set built from the same field. The
+    // rule is unchanged and still checked — the education track is decided by
+    // the canonical capability read, never by the legacy column.
+    expect(STARTERS).toMatch(/const held = new Set\(signals\.capabilities\)/);
+    expect(STARTERS).toMatch(/held\.has\("training_provider"\)/);
     expect(SIGNALS).toMatch(/isEducationFirstWorkspace\(/);
     expect(SIGNALS).toMatch(/readOrganizationCapabilities\(/);
   });
@@ -109,7 +123,7 @@ describe("2. the education workspace gets education-shaped starters", () => {
     // section on the company hub, the hub itself. All exist as canonical
     // screens today — link chips route, never duplicate.
     expect(STARTERS).toMatch(/id: "link:\/dashboard\/network\?relationship=student", labelKey: "chipInviteStudent"/);
-    expect(STARTERS).toMatch(/id: "link:\/dashboard\/company#institution-programs-title", labelKey: "chipProgrammes"/);
+    expect(STARTERS).toMatch(/id: "link:\/dashboard\/company\/education#institution-programs-title", labelKey: "chipProgrammes"/);
     expect(STARTERS).toMatch(/id: "link:\/dashboard\/company", labelKey: "chipEduCapabilities"/);
   });
 
@@ -156,14 +170,17 @@ describe("3. the page threads the flag from the canonical capability read", () =
     expect(PAGE).toMatch(/relationshipSlug === "student"/);
   });
 
-  it("the learner line renders only with a REAL institution name", () => {
-    // No name → null → nothing rendered. Never a placeholder on screen.
+  it("the learner's institution is named ONCE — by the opening brief, never also by this page", () => {
+    // W6 honesty (2026-09-06), measured on production: the learner's first
+    // screen said "Mokotės su X" twice — this page's own intro line AND the
+    // opening brief. The brief (`briefLearner`) is the one source; the page
+    // keeps the engagement read only for the starters, and still renders a
+    // name only when it is REAL (no placeholder on screen).
     expect(PAGE).toMatch(/organizationName\?\.trim\(\) \|\| null/);
-    expect(PAGE).toMatch(/learnerGreetingContext.*institution/);
-  });
-
-  it("the chat renders the learner line only for the person identity", () => {
-    expect(CHAT).toMatch(/learnerContextLine && identity === "person"/);
+    expect(PAGE).not.toMatch(/learnerGreetingContext/);
+    expect(PAGE).not.toMatch(/learnerContextLine=/);
+    const BRIEF = read("lib/conversation/opening-brief.ts");
+    expect(BRIEF).toMatch(/t\("briefLearner", \{ organization: learner\.organizationName \}\)/);
   });
 });
 
@@ -194,7 +211,7 @@ describe("4. i18n parity for the M10 keys", () => {
   });
 
   it("the routed locales carry REAL translations (no [EN] markers)", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const chat = (
         JSON.parse(read(`messages/${loc}.json`)) as {
           conversation: { chat: Record<string, string> };

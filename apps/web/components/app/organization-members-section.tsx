@@ -9,12 +9,14 @@ import {
   inviteMembershipAction,
   leaveOrganizationAction,
   revokeMembershipAction,
+  setMembershipInvitationManagerAction,
   type MembershipActionState,
 } from "@/lib/company/membership-actions";
 import type {
   MembershipRole,
   OrganizationMember,
 } from "@/lib/company/memberships";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * M-P0-4 Slice 2 — governance member directory of the ACTIVE workspace.
@@ -25,6 +27,12 @@ import type {
  *                  owner (the commands refuse it server-side; the UI simply
  *                  does not render those controls — no fake buttons);
  *   manager / external_manager / member → read-only directory + "leave".
+ *
+ * Invitation management (owner direction 2026-09-24) is a PER-PERSON grant,
+ * never a job title: owner and admin see, on every active member who is not
+ * owner/admin, one control that grants or withdraws it
+ * (`membership_set_invitation_manager_v1`, audited). A member who holds it
+ * carries a badge everyone in the directory can read.
  *
  * Every mutation is a server action bound to the active workspace; the
  * SECURITY DEFINER commands re-derive all authority. No client-side
@@ -43,6 +51,11 @@ export type MembersSectionLabels = {
   readonly cancelInvite: string;
   readonly revoke: string;
   readonly leave: string;
+  /** Badge: the owner delegated invitation management to this member. */
+  readonly managesInvitations: string;
+  /** Owner/admin control: grant / withdraw invitation management. */
+  readonly grantInvitations: string;
+  readonly withdrawInvitations: string;
   readonly outcomes: Record<string, string>;
 };
 
@@ -92,6 +105,7 @@ export function OrganizationMembersSection({
       if (intent === "revoke") return revokeMembershipAction(prev, formData);
       if (intent === "role") return changeMembershipRoleAction(prev, formData);
       if (intent === "leave") return leaveOrganizationAction(prev, formData);
+      if (intent === "invitations") return setMembershipInvitationManagerAction(prev, formData);
       return { ok: false, code: "invalid" };
     },
     null,
@@ -144,9 +158,18 @@ export function OrganizationMembersSection({
                     {labels.statusInvited}
                   </span>
                 )}
+                {m.status === "active" && m.managesInvitations && (
+                  <span
+                    className="rounded-sm border border-brand-blue/40 px-2 py-0.5 text-xs text-brand-blue"
+                    data-testid={`org-member-manages-invitations-${m.membershipId}`}
+                  >
+                    {labels.managesInvitations}
+                  </span>
+                )}
 
                 {canAdminister && m.status === "invited" && adminCanTouch && (
                   <form action={rowAction}>
+                    <DisplayedWorkspaceField />
                     <input type="hidden" name="intent" value="cancel" />
                     <input type="hidden" name="membershipId" value={m.membershipId} />
                     <button
@@ -163,6 +186,7 @@ export function OrganizationMembersSection({
                 {canAdminister && m.status === "active" && !isSelf && adminCanTouch && (
                   <>
                     <form action={rowAction} className="flex items-center gap-1">
+                      <DisplayedWorkspaceField />
                       <input type="hidden" name="intent" value="role" />
                       <input type="hidden" name="membershipId" value={m.membershipId} />
                       <label className="sr-only" htmlFor={`role-${m.membershipId}`}>
@@ -190,7 +214,30 @@ export function OrganizationMembersSection({
                         OK
                       </button>
                     </form>
+                    {m.role !== "owner" && m.role !== "admin" && (
+                      <form action={rowAction}>
+                        <DisplayedWorkspaceField />
+                        <input type="hidden" name="intent" value="invitations" />
+                        <input type="hidden" name="membershipId" value={m.membershipId} />
+                        <input
+                          type="hidden"
+                          name="enabled"
+                          value={m.managesInvitations ? "false" : "true"}
+                        />
+                        <button
+                          type="submit"
+                          disabled={rowPending}
+                          className="text-xs text-brand-blue underline-offset-2 hover:underline disabled:opacity-50"
+                          data-testid={`org-member-invitations-${m.membershipId}`}
+                        >
+                          {m.managesInvitations
+                            ? labels.withdrawInvitations
+                            : labels.grantInvitations}
+                        </button>
+                      </form>
+                    )}
                     <form action={rowAction}>
+                      <DisplayedWorkspaceField />
                       <input type="hidden" name="intent" value="revoke" />
                       <input type="hidden" name="membershipId" value={m.membershipId} />
                       <button
@@ -207,6 +254,7 @@ export function OrganizationMembersSection({
 
                 {isSelf && m.status === "active" && (
                   <form action={rowAction}>
+                    <DisplayedWorkspaceField />
                     <input type="hidden" name="intent" value="leave" />
                     <button
                       type="submit"
@@ -238,6 +286,7 @@ export function OrganizationMembersSection({
             className="flex flex-col gap-2 sm:flex-row sm:items-end"
             data-testid="org-members-invite-form"
           >
+            <DisplayedWorkspaceField />
             <div className="flex flex-1 flex-col gap-1">
               <label
                 className="text-xs text-text-muted"
@@ -278,7 +327,7 @@ export function OrganizationMembersSection({
             <button
               type="submit"
               disabled={invitePending}
-              className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand disabled:opacity-50"
               data-testid="org-members-invite-submit"
             >
               {labels.inviteSubmit}

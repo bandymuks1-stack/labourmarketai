@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { journalPhotoQuotaExceeded } from "@/lib/storage/org-storage-quota";
 
 /**
  * Work-report photo upload (free tier: ONE photo per journal entry).
@@ -27,6 +28,7 @@ export type JournalPhotoUploadResult =
   | "uploaded"
   | "invalid"
   | "limit"
+  | "quota"
   | "not-ready"
   | "failed";
 
@@ -49,6 +51,13 @@ export async function uploadJournalEntryPhoto(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return "failed";
+
+  // Organization fair-use cap (2 GiB default). Client pre-check against the
+  // usage RPC; personal entries (no organization) are never counted, and an
+  // unavailable RPC fails open with a warning.
+  if (await journalPhotoQuotaExceeded(supabase, entryId, file.size)) {
+    return "quota";
+  }
 
   const photoId = crypto.randomUUID();
   const safeName =

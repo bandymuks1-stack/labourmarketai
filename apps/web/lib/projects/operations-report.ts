@@ -18,6 +18,29 @@ export function csvCell(value: string): string {
   return value;
 }
 
+/**
+ * Neutralise spreadsheet FORMULA INJECTION, then RFC-4180-escape.
+ *
+ * A cell that would start with `=`, `+`, `-`, `@`, a tab or a CR is prefixed
+ * with an apostrophe, so a spreadsheet shows the text instead of evaluating
+ * it. Quoting alone does NOT prevent this: Excel and Sheets both strip the
+ * quotes and then evaluate what is inside.
+ *
+ * It matters wherever a cell can carry text one person typed and another
+ * person downloads — a project name, a programme name, a worker's own note.
+ * `csvCell` stays the plain escaper for cells that can only hold values this
+ * codebase generated (an id, a slug, a number, an ISO date).
+ *
+ * Lives here, beside `csvCell`, because a second copy of an escaping rule is
+ * how the two drift — it was previously defined inside the estimate
+ * calculator's own CSV module, which is not where an export in another domain
+ * would look for it. That module re-exports this one.
+ */
+export function csvSafeCell(value: string): string {
+  const guarded = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return csvCell(guarded);
+}
+
 function csvRow(cells: string[]): string {
   return cells.map(csvCell).join(",");
 }

@@ -18,8 +18,10 @@ import { activeLocales, tier1Locales } from "@/lib/i18n/config";
  *   3. The "write in your own language" helper text exists in en/lt/ru on
  *      the chat composer AND the instructions composer, and neither promises
  *      a future translation.
- *   4. Active-locale labels stay honest: lt/en/ru active, RU (non-Tier-1)
- *      keeps its preview tag; the account page has a UI-language line.
+ *   4. Active-locale labels stay honest: lt/en/ru/nl/de/pl active; the
+ *      selector carries NO tier badge (owner 2026-09-22 — the tier is an
+ *      operations fact, not a label a person picking a language must read);
+ *      the account page has a UI-language line.
  */
 
 const APP = resolve(__dirname, "..", "..");
@@ -79,11 +81,27 @@ const CLAIM_PATTERNS: Record<string, RegExp[]> = {
   ],
 };
 
+/**
+ * The ONE key whose copy may name machine translation, because it is a
+ * DISCLOSURE ON AN ACTUAL RENDERING, not a claim about the product.
+ *
+ * It renders only beside a translation that exists (the card / `/jobs/[id]`
+ * "Translated from X · Show original" disclosure, owner P0 2026-09-22 §9) and
+ * its job is to tell the reader that what they are reading is machine-made
+ * and that the original is the fact. Banning it would force the opposite of
+ * this file's purpose: a machine rendering presented without saying so.
+ *
+ * An ALLOWLIST of one, not a weakened pattern: any OTHER string that claims
+ * automatic translation is still a red test.
+ */
+const CLAIM_DISCLOSURE_KEYS = new Set(["vacancySources.language.machineNote"]);
+
 describe("no unsupported-language claims in active-locale copy", () => {
   for (const locale of ["en", "lt", "ru"] as const) {
     it(`${locale}.json contains no automatic-translation CLAIM`, () => {
       const values = stringValues(loadMessages(locale));
       for (const { path, value } of values) {
+        if (CLAIM_DISCLOSURE_KEYS.has(path)) continue;
         for (const pattern of CLAIM_PATTERNS[locale]) {
           expect(
             pattern.test(value),
@@ -95,29 +113,53 @@ describe("no unsupported-language claims in active-locale copy", () => {
   }
 });
 
-describe("honesty helper text — write in your own language, no translation engine", () => {
-  const NEGATION: Record<string, RegExp> = {
-    en: /no automatic translation/i,
-    lt: /automatinio vertimo nėra/i,
-    ru: /автоматического перевода нет/i,
+describe("honesty helper text — write in your own language; the original is what is promised", () => {
+  // Translation-on-read is LIVE behind the owner's egress grant (RED-2,
+  // 2026-09-17), so the helper may no longer claim "there is no automatic
+  // translation" (a false negative) — and it may not promise a translation
+  // either (the gate, the provider or the rate cap can say no). What it MUST
+  // say: the other person keeps the ORIGINAL.
+  const ORIGINAL_KEPT: Record<string, RegExp> = {
+    en: /original/i,
+    lt: /original/i,
+    ru: /оригинал/i,
   };
+  const FALSE_NEGATION = /no automatic translation|automatinio vertimo nėra|автоматического перевода нет/i;
+  const GUARANTEE = /always translated|visada išverč|всегда перевод/i;
 
   for (const locale of ["en", "lt", "ru"] as const) {
-    it(`${locale}: chat composer helper exists and says there is NO auto translation`, () => {
+    it(`${locale}: chat composer helper keeps the original as the promise — no false "no translation", no guarantee`, () => {
       const hint = get(loadMessages(locale), "communication.composer.languageHint");
       expect(hint, `${locale} communication.composer.languageHint`).toBeTruthy();
-      expect(hint).toMatch(NEGATION[locale]);
+      expect(hint).toMatch(ORIGINAL_KEPT[locale]);
+      expect(hint).not.toMatch(FALSE_NEGATION);
+      expect(hint).not.toMatch(GUARANTEE);
     });
 
     it(`${locale}: instructions language note is honest and promises nothing`, () => {
       const note = get(loadMessages(locale), "instructions.manager.languageNote");
       expect(note, `${locale} instructions.manager.languageNote`).toBeTruthy();
-      expect(note).toMatch(NEGATION[locale]);
-      // No forward-looking translation promise (the old copy said a
-      // translation "will be added later" — no engine exists, so don't).
+      expect(note).toMatch(ORIGINAL_KEPT[locale]);
+      expect(note).not.toMatch(FALSE_NEGATION);
+      expect(note).not.toMatch(GUARANTEE);
+      // No forward-looking promise either ("will be added later").
       expect(note).not.toMatch(/will be added|bus pridėt|будет добавлен/i);
     });
   }
+
+  it("the composer lets the author declare the language they wrote in, from the communication set", () => {
+    const composer = read("components/app/communication-composer.tsx");
+    expect(composer).toMatch(/data-testid="communication-composer-language"/);
+    expect(composer).toMatch(/communicationLocales\.map\(/);
+    expect(composer).toMatch(/originalLanguage: writeLang/);
+    // the server accepts only communication locales — never a guessed code
+    const actions = read("lib/communication/communication-core.ts");
+    expect(actions).toMatch(/includes\(declared\)/);
+    // the worker's clarification reply is stamped the same way
+    const instr = read("lib/instructions/actions.ts");
+    expect(instr).toMatch(/isCommunicationLocale\(locale\)/);
+    expect(instr).toMatch(/original_language: originalLanguage/);
+  });
 
   it("the chat composer renders the helper line", () => {
     const composer = read("components/app/communication-composer.tsx");
@@ -169,13 +211,19 @@ describe("message language chip — data-backed only, never guessed", () => {
     expect(vt.text).toBe("Привет");
   });
 
-  it("the send path stamps 'ru' too (11-locale set of applied 20260612130000)", () => {
-    const actions = read("lib/communication/actions.ts");
-    expect(actions).toMatch(/KNOWN_LOCALES = \[[^\]]*"ru"[^\]]*\]/);
+  it("the send path derives its accepted set from the canonical `communicationLocales` (no second hardcoded list)", () => {
+    const actions = read("lib/communication/communication-core.ts");
+    // The old private KNOWN_LOCALES array was a drift risk; the accepted set is
+    // now the product's declared COMMUNICATION languages (UI locales + the
+    // communication-only ones, owner RED-1 2026-09-17), kept in lockstep with
+    // the DB CHECK by lib/guards/message-language-set.test.ts. `ru` (and every
+    // communication locale) is therefore stamped by construction.
+    expect(actions).toMatch(/import\s*\{\s*communicationLocales\s*\}\s*from\s*"@\/lib\/i18n\/config"/);
+    expect(actions).not.toMatch(/KNOWN_LOCALES/);
     // Unknown locale stamps null (honest unknown) and the legacy-shape
     // degrade on 42703 stays — the draft column migration is owner-gated.
     expect(actions).toMatch(
-      /KNOWN_LOCALES\.includes\(input\.locale\) \? input\.locale : null/,
+      /\(communicationLocales as readonly string\[\]\)\.includes\(input\.locale\)[\s\S]*\?\s*input\.locale[\s\S]*:\s*null/,
     );
     expect(actions).toMatch(/42703/);
   });
@@ -184,7 +232,11 @@ describe("message language chip — data-backed only, never guessed", () => {
     const page = read(
       "app/[locale]/dashboard/communication/[conversationId]/page.tsx",
     );
-    expect(page).toMatch(/resolveViewerText\(/);
+    // 2026-09-17: the page resolves the whole thread once, per viewer, through
+    // `resolveViewerTexts` (which calls the same pure `resolveViewerText` per
+    // message) — the chip is still derived from data, never guessed.
+    expect(page).toMatch(/resolveViewerTexts\(/);
+    expect(read("lib/communication/translation-read.ts")).toMatch(/resolveViewerText\(\{/);
     expect(page).toMatch(/original_language/);
     // select("*") read: tolerates the column being absent pre-apply.
     expect(page).toMatch(/\.select\("\*"\)/);
@@ -192,17 +244,27 @@ describe("message language chip — data-backed only, never guessed", () => {
 });
 
 describe("UI language status stays honest and discoverable", () => {
-  it("active locales are exactly lt/en/ru/nl/de; RU/NL/DE stay non-Tier-1 (preview)", () => {
-    // NL + DE activated 2026-07-11 (launch repair Scope D) with full-parity
-    // AI-seeded catalogs pending §7.4 human review — preview-tagged like RU.
-    expect([...activeLocales]).toEqual(["lt", "en", "ru", "nl", "de"]);
+  it("active locales are exactly lt/en/ru/nl/de/pl; RU/NL/DE/PL stay Tier 2 in config (not in the UI)", () => {
+    // NL + DE activated 2026-07-11 (launch repair Scope D), PL 2026-09-20,
+    // with full-parity AI-seeded catalogs pending §7.4 human review. The tier
+    // is tracked here, never shown to the person as a badge.
+    expect([...activeLocales]).toEqual(["lt", "en", "ru", "nl", "de", "pl"]);
     expect([...tier1Locales]).toEqual(["en", "lt"]);
   });
 
-  it("the locale switcher tags non-Tier-1 locales as preview", () => {
+  it("the locale switcher shows clean language names — no tier/preview badge (owner 2026-09-22)", () => {
+    // The Tier-2 ("AI-seeded, pending §7.4 review") status is an operations
+    // fact tracked in config + docs/LANGUAGE_MATRIX.md. It used to render as
+    // a "PERŽIŪRA" tag beside Русский / Nederlands / Deutsch / Polski in the
+    // production selector — an internal state leaking into the product.
     const switcher = read("components/marketing/locale-switcher.tsx");
-    expect(switcher).toMatch(/tier1Locales/);
-    expect(switcher).toMatch(/localePreview/);
+    expect(switcher).not.toMatch(/tier1Locales/);
+    expect(switcher).not.toMatch(/localePreview/);
+    // The key is gone from every catalog, so nothing can render it again.
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
+      const common = loadMessages(locale).common as Record<string, unknown>;
+      expect(common.localePreview, `${locale}.common.localePreview`).toBeUndefined();
+    }
   });
 
   /**
@@ -233,7 +295,13 @@ describe("UI language status stays honest and discoverable", () => {
     expect(header).toContain('mobile ? "hidden" : "hidden md:flex"');
 
     // below md: the avatar menu, which the header renders at every width.
-    expect(menu).toContain("<LocaleSwitcher />");
+    // `inline` since window 11 (§25): every OTHER header dropdown escapes
+    // the header's backdrop-blur stacking context through the overlay
+    // portal, and the switcher now does too — except HERE, where it is
+    // already inside the account menu's own portal. What this guard cares
+    // about is unchanged: exactly one language control below `md`, and it is
+    // this one. See lib/guards/header-overlays-escape-the-map.test.ts.
+    expect(menu).toMatch(/<LocaleSwitcher\s+inline\s*\/>/);
     expect(menu).toContain('data-testid="account-menu-locale"');
     expect(menu).toContain("md:hidden");
     expect(header).toContain("<AccountMenu />");

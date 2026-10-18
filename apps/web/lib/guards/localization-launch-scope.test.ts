@@ -33,10 +33,10 @@ const APP_ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP_ROOT, rel), "utf8");
 
 describe("UI tier truth (routing + selector + sitemap)", () => {
-  it("active UI locales are exactly lt/en/ru/nl/de, default lt, tier1 en/lt", () => {
+  it("active UI locales are exactly lt/en/ru/nl/de/pl, default lt, tier1 en/lt", () => {
     // NL + DE activated 2026-07-11 (non-landing launch repair Scope D) after
     // their catalogs reached full parity — see i18n-lt-en-parity + i18n-debt.
-    expect([...activeLocales].sort()).toEqual(["de", "en", "lt", "nl", "ru"]);
+    expect([...activeLocales].sort()).toEqual(["de", "en", "lt", "nl", "pl", "ru"]);
     expect(defaultLocale).toBe("lt");
     expect([...tier1Locales].sort()).toEqual(["en", "lt"]);
     expect(UI_ACTIVE_LOCALES).toBe(activeLocales);
@@ -50,7 +50,7 @@ describe("UI tier truth (routing + selector + sitemap)", () => {
     const src = read("components/marketing/locale-switcher.tsx");
     expect(src).toMatch(/activeLocales/);
     expect(src).not.toMatch(/\bfi:\s*"/); // no Finnish entry in NATIVE names
-    expect(src).toMatch(/tier1Locales/); // non-Tier-1 stays preview-tagged
+    expect(src).not.toMatch(/tier1Locales|localePreview/); // no tier badge in the selector (owner 2026-09-22)
   });
 
   it("the sitemap emits only active locales", () => {

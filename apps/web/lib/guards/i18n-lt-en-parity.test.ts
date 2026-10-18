@@ -6,7 +6,8 @@ import { join } from "node:path";
  * Active-locale i18n parity (LT ↔ EN ↔ RU ↔ NL ↔ DE). LT and EN are the two
  * human-verified locales; RU is ACTIVE from 2026-06-12 and NL + DE from
  * 2026-07-11 (non-landing launch repair Scope D, AI-seeded full catalogs
- * pending §7.4 human review). Every user-facing change must land in all
+ * pending §7.4 human review); PL is ACTIVE from 2026-09-20 (owner approval,
+ * acquisition loop P0 — the Polish campaign landing). Every user-facing change must land in all
  * active locales with the SAME key structure and no empty / placeholder
  * values, so no active locale drifts weaker than another.
  * (The non-active locale files are intentionally partial and not checked here.)
@@ -43,7 +44,7 @@ function emptyValues(obj: Json, prefix = "", out: string[] = []): string[] {
 // Base files + every per-namespace file present under messages/lt/, paired
 // against every other ACTIVE locale (en/ru/nl/de) — active locales must be
 // full-parity or routed pages leak MISSING_MESSAGE (the 2026-05-28 P0).
-const OTHER_ACTIVE = ["en", "ru", "nl", "de"] as const;
+const OTHER_ACTIVE = ["en", "ru", "nl", "de", "pl"] as const;
 const NAMESPACE_FILES = readdirSync(join(messages, "lt")).filter((f) => f.endsWith(".json"));
 const PAIRS: ReadonlyArray<readonly [string, string]> = [
   ...OTHER_ACTIVE.map((loc) => [`lt.json`, `${loc}.json`] as const),

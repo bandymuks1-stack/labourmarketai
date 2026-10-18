@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useCallback, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import {
@@ -8,6 +8,7 @@ import {
   type BatchQuickConfirmState,
 } from "@/lib/journal/quick-confirm-actions";
 import type { QuickConfirmEntryView } from "./quick-confirm-card";
+import { useDialogFocus } from "@/lib/hooks/use-dialog-focus";
 import { formatUtcDate } from "@/lib/time/display";
 
 /**
@@ -41,12 +42,20 @@ export function QuickConfirmBatch({
     FormData
   >(batchQuickConfirm, null);
 
-  if (entries.length === 0) return null;
+  const done = state?.ok === true;
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeDialog = useCallback(() => setOpen(false), []);
+  // The summary dialog is modal: focus in, Tab trapped, Escape closes,
+  // opener restored (shared contract, before the early return below).
+  useDialogFocus(open && !done, closeDialog, panelRef);
+  // Shown only when there is a batch to confirm (≥2 of today's entries) — OR
+  // when a batch just completed: the route revalidation empties `entries`,
+  // and the result line must outlive that (same receipt rule as the queue).
+  if (entries.length < 2 && !done) return null;
 
   const payload = JSON.stringify(
     entries.map((e) => ({ entryId: e.id, skillIds: e.skills.map((s) => s.id) })),
   );
-  const done = state?.ok === true;
   const exceptedCount = entries.filter((e) => exceptions[e.id]?.length).length;
   const unackedCount = entries.filter(
     (e) => exceptions[e.id]?.length && !acked.has(e.id),
@@ -129,10 +138,13 @@ export function QuickConfirmBatch({
           <button
             type="button"
             aria-label={t("inbox.cancel")}
-            onClick={() => setOpen(false)}
+            onClick={closeDialog}
             className="absolute inset-0 bg-ink-900/70 backdrop-blur-sm"
           />
-          <div className="relative max-h-[85vh] w-full overflow-y-auto rounded-t-2xl border-t border-ink-500 bg-ink-900 p-4 shadow-card md:max-w-lg md:rounded-card md:border">
+          <div
+            ref={panelRef}
+            className="relative max-h-[85vh] w-full overflow-y-auto rounded-t-2xl border-t border-ink-500 bg-ink-900 p-4 shadow-card md:max-w-lg md:rounded-card md:border"
+          >
             <p className="font-display text-base font-semibold text-text-primary">
               {t("inbox.quick.batchSummaryTitle")}
             </p>
@@ -157,7 +169,7 @@ export function QuickConfirmBatch({
                         {e.workerName}
                       </span>
                       <span className="text-meta text-text-muted">
-                        {formatUtcDate(e.createdAt, locale)}
+                        {formatUtcDate(e.workDay ?? e.createdAt, locale)}
                       </span>
                     </div>
                     <p className="mt-0.5 text-meta text-text-secondary">

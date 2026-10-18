@@ -226,6 +226,21 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // survives (pinned by lib/guards/task-approval-context.test.ts).
       // It is GREEN and deliberately un-annotated.
       "20260819210000_workflow_work_task_context_v1",
+      // Organization consolidation v1 (20260923114500, owner decision
+      // 2026-09-23) is a READ-ONLY reference, the narrowest class here: it
+      // archives four duplicate/test organizations and must PROVE their
+      // workflow definitions and versions survive untouched, so it names
+      // workflow_definitions / workflow_definition_versions only in a
+      // count, an md5-over-rows integrity hash and the expected FK-sweep map.
+      // It creates, drops, alters, triggers and WRITES no engine object and
+      // defines or calls no engine command (the assertions below apply
+      // unchanged); its DOWN does not mention the engine at all.
+      "20260923114500_nonstop_org_consolidation_v1",
+      // service_role notification reads (20261012120000, owner-approved 2026-10-12):
+      // GRANT SELECT on four engine tables to service_role so the existing
+      // notification emitters can read who to notify. It creates, drops,
+      // alters, triggers and writes no engine object.
+      "20261012120000_service_role_notification_reads_v1",
     ];
     /**
      * 20260820070000 — chain step B on-ramp. The ONE later migration that
@@ -244,12 +259,71 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
      * rather than narrow it.
      */
     const COMMAND_REDEFINER = "20260820070000_workflow_work_task_definition_v1";
+    const SECURITY_FIX = "20261002141500_work_task_authz_null_safe_v1";
+    const EMAIL_BOUNDARY = "20261003151000_email_verified_boundary_v1";
 
     for (const dir of ["migrations", "rollbacks"]) {
       const abs = join(REPO, "supabase", dir);
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(ENGINE) || f.startsWith(TYPES_V3)) continue;
         const src = readFileSync(join(abs, f), "utf8");
+        if (f.startsWith(SECURITY_FIX)) {
+          // 20261002141500 — SECURITY forward-fix (NULL-safe authorization). It may
+          // replace exactly ONE engine command (start_workflow_instance_v1, only its
+          // task-visibility guard), creates/drops no engine object and adds no trigger.
+          // Pinned in detail by null-safe-authorization-guards.test.ts.
+          for (const tbl of TABLES) {
+            expect(src, `${dir}/${f} must not create or drop ${tbl}`).not.toMatch(
+              new RegExp(`(create table[^(]*\\b${tbl}\\b|drop table[^;]*\\b${tbl}\\b)`, "i"),
+            );
+          }
+          for (const fn of [...COMMANDS, ...HELPERS]) {
+            if (fn === "start_workflow_instance_v1") continue;
+            expect(src, `${dir}/${f} may replace ONLY start_workflow_instance_v1, not ${fn}`).not.toMatch(
+              new RegExp(`create (or replace )?function[^(]*\\b${fn}\\b`, "i"),
+            );
+            expect(src, `${dir}/${f} must not drop ${fn}`).not.toMatch(
+              new RegExp(`drop function[^(]*\\b${fn}\\b`, "i"),
+            );
+          }
+          expect(src, `${dir}/${f} must not create a trigger on an engine table`).not.toMatch(
+            /create\s+trigger[^;]*\bon\s+public\.workflow_/i,
+          );
+          continue;
+        }
+        if (f.startsWith(EMAIL_BOUNDARY)) {
+          // 20261003151000 (+ its rollback) — verified-email boundary, #2152.
+          // NARROW, EXPLICIT EXCEPTION. The migration patches ONE engine command
+          // IN PLACE: delegate_workflow_step_v1's invitee lookup swaps
+          // `profiles.email` for the verified-email resolver
+          // (profile_id_by_verified_email_v1) via a guarded string patch of the
+          // live definition. It touches no engine table, defines no engine
+          // command (there is no CREATE FUNCTION for one in the file), drops
+          // nothing and adds no trigger. So it may NAME delegate_workflow_step_v1
+          // and nothing else of the engine; every other assertion stays on.
+          for (const tbl of TABLES) {
+            expect(src, `${dir}/${f} must not mention engine table ${tbl}`).not.toMatch(
+              new RegExp(`\\b${tbl}\\b`, "i"),
+            );
+          }
+          for (const fn of [...COMMANDS, ...HELPERS]) {
+            expect(src, `${dir}/${f} must not create or replace engine function ${fn}`).not.toMatch(
+              new RegExp(`create (or replace )?function[^(]*\\b${fn}\\b`, "i"),
+            );
+            expect(src, `${dir}/${f} must not drop ${fn}`).not.toMatch(
+              new RegExp(`drop function[^(]*\\b${fn}\\b`, "i"),
+            );
+            if (fn !== "delegate_workflow_step_v1") {
+              expect(src, `${dir}/${f} may name ONLY delegate_workflow_step_v1, not ${fn}`).not.toMatch(
+                new RegExp(`\\b${fn}\\b`),
+              );
+            }
+          }
+          expect(src, `${dir}/${f} must not create a trigger on an engine table`).not.toMatch(
+            /create\s+trigger[^;]*\bon\s+public\.workflow_/i,
+          );
+          continue;
+        }
         if (f.startsWith(COMMAND_REDEFINER)) {
           for (const tbl of TABLES) {
             expect(
@@ -332,6 +406,24 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
           expect(src, `${dir}/${f} must not define ${fn}`).not.toContain(fn);
         }
       }
+    }
+  });
+
+  it("the organization consolidation only READS the engine tables — no engine write, ever", () => {
+    // Registered above as a read-only consumer; this pins the "read-only" half
+    // the generic consumer rules do not check (DML anywhere in the file,
+    // including inside its DO block, and any engine command call).
+    for (const [dir, suffix] of [
+      ["migrations", ".sql"],
+      ["rollbacks", ".down.sql"],
+    ] as const) {
+      const src = readFileSync(
+        join(REPO, "supabase", dir, `20260923114500_nonstop_org_consolidation_v1${suffix}`),
+        "utf8",
+      );
+      expect(src).not.toMatch(/(insert\s+into|update|delete\s+from|truncate)\s+(public\.)?workflow_/i);
+      expect(src).not.toMatch(/alter\s+table\s+(public\.)?workflow_/i);
+      for (const fn of [...COMMANDS, ...HELPERS]) expect(src).not.toContain(fn);
     }
   });
 

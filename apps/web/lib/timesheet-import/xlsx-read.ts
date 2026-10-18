@@ -1,5 +1,7 @@
 import "server-only";
 
+import { readPrefixedOoxml } from "./ooxml-fallback";
+
 /**
  * TIMESHEET XLSX READER — bytes in, a plain string grid out.
  *
@@ -148,7 +150,22 @@ export async function readTimesheetXlsx(buffer: Buffer): Promise<XlsxReadResult>
     if (sheets.length === 0) return { kind: "empty" };
     return { kind: "ok", sheets };
   } catch {
+    // exceljs refuses namespace-prefixed SpreadsheetML (`<x:workbook>`), which
+    // is what the owner's prepared workbooks are (walk 2026-09-16). The
+    // dependency-free fallback reads that container into the SAME grid; a
+    // workbook neither reader understands stays an honest `failed`.
     // Never surface the underlying parser error (could echo file bytes).
+    try {
+      const fallback = readPrefixedOoxml(buffer, {
+        maxSheets: MAX_SHEETS,
+        maxRows: MAX_ROWS_PER_SHEET,
+        maxCols: MAX_COLS_PER_SHEET,
+        maxCells: MAX_TIMESHEET_CELLS,
+      });
+      if (fallback && fallback.length > 0) return { kind: "ok", sheets: fallback };
+    } catch {
+      // fall through to the honest failure
+    }
     return { kind: "failed" };
   }
 }

@@ -25,7 +25,12 @@ export type AiAgentKey =
   | "support_onboarding"
   /** The first agent whose payload carries no data subject — aggregate
    *  public labour-market statistics. See agents/market-explanation.ts. */
-  | "market_explanation";
+  | "market_explanation"
+  /** The second agent whose payload carries no data subject of this platform:
+   *  the verbatim text of PUBLICLY published job advertisements, rendered in
+   *  the reader's language. See agents/vacancy-translation.ts. */
+  | "vacancy_translation"
+  | "conversation_intent";
 
 export interface PromptRegistryEntry {
   readonly agent: AiAgentKey;

@@ -99,15 +99,15 @@ describe("certificateDocsForCv", () => {
   it("keeps only READY, unexpired certificate/licence types", () => {
     const rows = certificateDocsForCv(
       [
-        { documentTypeSlug: "professional_certificate", country: "LT", storedStatus: "ready", validUntil: "2027-01-01" },
-        { documentTypeSlug: "a1_certificate", country: "NL", storedStatus: "ready", validUntil: null },
+        { documentTypeSlug: "professional_certificate", country: "LT", storedStatus: "ready", verification: "verified", validUntil: "2027-01-01" },
+        { documentTypeSlug: "a1_certificate", country: "NL", storedStatus: "ready", verification: "verified", validUntil: null },
         // expired — must NOT print as held
-        { documentTypeSlug: "professional_certificate", country: "DE", storedStatus: "ready", validUntil: "2026-01-01" },
+        { documentTypeSlug: "professional_certificate", country: "DE", storedStatus: "ready", verification: "verified", validUntil: "2026-01-01" },
         // not ready — worker's own checklist state says it is missing
-        { documentTypeSlug: "professional_certificate", country: null, storedStatus: "missing", validUntil: null },
+        { documentTypeSlug: "professional_certificate", country: null, storedStatus: "missing", verification: "verified", validUntil: null },
         // not certificate material
-        { documentTypeSlug: "cv", country: null, storedStatus: "ready", validUntil: null },
-        { documentTypeSlug: "id_document", country: null, storedStatus: "ready", validUntil: null },
+        { documentTypeSlug: "cv", country: null, storedStatus: "ready", verification: "verified", validUntil: null },
+        { documentTypeSlug: "id_document", country: null, storedStatus: "ready", verification: "verified", validUntil: null },
       ],
       now,
     );
@@ -116,6 +116,74 @@ describe("certificateDocsForCv", () => {
       "a1_certificate",
       "professional_certificate",
     ]);
+  });
+
+  // SEP-3, EVIDENCE != VERIFICATION. `status` is where the WORKER put the
+  // file; `verification` is what a REVIEWER decided about it. Reading only
+  // the first printed a rejected credential exactly like a verified one, with
+  // no qualifier, directly above declared certificates that ARE labelled
+  // unverified - so the contrast itself claimed a review that never happened.
+  it("drops a credential a reviewer REJECTED, however ready and unexpired", () => {
+    const rows = certificateDocsForCv(
+      [
+        {
+          documentTypeSlug: "professional_certificate",
+          country: "LT",
+          storedStatus: "ready",
+          verification: "rejected",
+          validUntil: "2027-01-01",
+        },
+      ],
+      now,
+    );
+    expect(rows).toEqual([]);
+  });
+
+  it("marks reviewerVerified ONLY for a verified review, never for the default", () => {
+    const rows = certificateDocsForCv(
+      [
+        {
+          documentTypeSlug: "professional_certificate",
+          country: "LT",
+          storedStatus: "ready",
+          verification: "verified",
+          validUntil: null,
+        },
+        {
+          documentTypeSlug: "a1_certificate",
+          country: "LT",
+          storedStatus: "ready",
+          verification: "unverified",
+          validUntil: null,
+        },
+        {
+          documentTypeSlug: "a1_certificate",
+          country: "EE",
+          storedStatus: "ready",
+          verification: "pending",
+          validUntil: null,
+        },
+      ],
+      now,
+    );
+    expect(rows.map((r) => r.reviewerVerified)).toEqual([true, false, false]);
+  });
+
+  it("still prints a pending credential - the person does hold the document", () => {
+    const rows = certificateDocsForCv(
+      [
+        {
+          documentTypeSlug: "professional_certificate",
+          country: "LT",
+          storedStatus: "ready",
+          verification: "pending",
+          validUntil: null,
+        },
+      ],
+      now,
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0].reviewerVerified).toBe(false);
   });
 });
 

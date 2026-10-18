@@ -90,7 +90,48 @@ export type NotificationEventType =
   // recomputes them at read time). entity_id is a deterministic uuid of the
   // ISO week, which with the UNIQUE (recipient, dedupe_key) constraint makes
   // the digest exactly-once per recipient per week.
-  | "weekly_digest";
+  | "weekly_digest"
+  // v7 (20260914140000): a saved search has answers the worker has not seen
+  // (DEM-8). Recipient is the worker themselves. POINTER-ONLY, for the same
+  // reason the digest is: a match count written by a background writer is a
+  // claim nobody re-checked, so the number is recomputed on the board under
+  // the worker's own read. entity_id is a deterministic uuid of
+  // `saved_search:<id>:<ISO week>`, which with UNIQUE (recipient, dedupe_key)
+  // makes the alert exactly-once per saved search per week — a saved search
+  // is a standing question, not a firehose.
+  | "saved_search_match"
+  // v8 (20260917120000, universal invitation/referral network): somebody
+  // accepted an invitation this person created. Recipient is the INVITER
+  // and only the inviter (an external-source referral has none, so it emits
+  // nothing). entity_id is the invitation id; with the UNIQUE (recipient,
+  // dedupe_key) constraint a single-use invitation notifies exactly once,
+  // and a campaign link notifies once per invitation — not once per seat,
+  // which would turn a 30-person crew into 30 bells for the same fact. The
+  // href is the network page, where the sent list already shows who joined.
+  | "invitation_accepted"
+  // v9 (20261001110000, stream N): a REAL, ACTIVE job that fits what the
+  // worker themselves said they want (profession + preferred countries +
+  // salary expectation, from their existing work card). Recipient is the
+  // worker. entity_id is a deterministic uuid of this ad IN THIS REVISION
+  // (`job_alert:<vacancy id>:<content hash>`), so with UNIQUE (recipient,
+  // dedupe_key) the same unchanged job is never announced twice. metadata
+  // carries only PUBLIC ad facts (title, country, stated EUR pay, vacancy id).
+  | "job_alert"
+  // v10 (20261002140000): a new message in a conversation the recipient takes
+  // part in. Recipient is every OTHER participant, never the author. A burst
+  // in one thread COALESCES (see messageReceivedEntityId): the row is a
+  // pointer to the thread, never a copy of what was written.
+  | "message_received"
+  // v10: a manager decided a journal entry (confirmed / rejected / changes
+  // requested). Recipient is the WORKER whose entry it is — never the
+  // reviewer. metadata.decision names which of the three it was; the note the
+  // reviewer wrote never leaves the review row.
+  | "journal_review_decided"
+  // v11 (20261013200000): an organization offered to connect its recorded
+  // work history (a roster person) to the recipient's account. Only the
+  // recipient can accept or refuse; the offer otherwise waited, unseen, on
+  // their profile page. Carries no name, no hours — only that an offer waits.
+  | "history_link_offered";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -113,7 +154,21 @@ export type NotificationEntityType =
   | "demand_interest_response"
   // v6: the weekly digest points at the opportunities board — the surface
   // that recomputes every number the digest is about, at read time.
-  | "weekly_digest";
+  | "weekly_digest"
+  // v7: a saved search points at the opportunities board, where applying its
+  // criteria recomputes the answer live.
+  | "saved_search"
+  // v8: the canonical invitation row, seen from the inviter's side.
+  | "invitation"
+  // v9: one public vacancy — resolves to its own page, /jobs/<vacancyId>.
+  | "public_vacancy"
+  // v10: one conversation — resolves to the thread itself when the row
+  // carries its (uuid-validated) conversationId, else to the inbox.
+  | "conversation"
+  // v10: the reviewed journal entry — resolves to the worker's journal.
+  | "journal_entry"
+  // v11: one roster person an organization offered to link to the recipient.
+  | "organization_person";
 
 /**
  * The canonical RUNTIME list of the code-side event types — the union above,
@@ -144,6 +199,12 @@ export const NOTIFICATION_EVENT_TYPES = [
   "demand_interest_expressed",
   "demand_interest_reviewed",
   "weekly_digest",
+  "saved_search_match",
+  "invitation_accepted",
+  "job_alert",
+  "message_received",
+  "journal_review_decided",
+  "history_link_offered",
 ] as const satisfies readonly NotificationEventType[];
 
 /** Compile-time exhaustiveness: a union member missing from the runtime list
@@ -208,20 +269,145 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // recomputed live on the opportunities board — the digest row is only the
   // pointer to them (§19: no persisted fit values).
   weekly_digest: "/dashboard/opportunities",
+  // v7: the saved search's answer is the board with its criteria applied.
+  // The href is the plain route — the criteria are the worker's to re-apply
+  // from their own saved list, and putting them in a stored href would
+  // persist the question in a second place.
+  saved_search: "/dashboard/opportunities",
+  // v8: the sent-invitations list on the network page is where an inviter
+  // already sees each invitation's state (opened / joined / accepted).
+  invitation: "/dashboard/network",
+  // v9: the bare route is a fallback only — `notificationEventHref` resolves a
+  // job alert to the SPECIFIC ad (`/jobs/<vacancyId>`) from its metadata.
+  public_vacancy: "/jobs",
+  // v10: bare route is the inbox fallback; `notificationEventHref` resolves a
+  // message row to its own thread (`/dashboard/communication/<id>`).
+  conversation: "/dashboard/communication",
+  // v10: the journal is where the worker already sees each entry's review
+  // state; the reviewed entry is on the page the notification opens.
+  journal_entry: "/dashboard/journal",
+  // v11: the profile page renders every pending roster-link offer at its TOP
+  // (RosterLinkOffers), with accept / refuse — the decision the row is about.
+  organization_person: "/dashboard/profile",
 };
+
+const VACANCY_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** The canonical surface for a stored event, or undefined for an unknown
  *  entity type — an unmapped type renders as a plain row rather than a link
  *  to nowhere. */
 export function notificationEventHref(
   entityType: string,
+  metadata?: NotificationEventMetadata,
 ): string | undefined {
+  // A profile-completion digest lands where the person can actually become
+  // matchable (the profile: describe your work → confirm the suggestions),
+  // not on the board that would only say it knows too little.
+  if (entityType === "weekly_digest" && metadata?.focus === "profile_completion") {
+    return "/dashboard/profile";
+  }
+  // A JOURNAL digest (the cron sweep, which only knows the person logged
+  // work this week) lands on the journal it speaks of — not on the board,
+  // which the bell text never promised. Found while tracing the retention
+  // loop (acquisition loop P0, 2026-09-20).
+  if (entityType === "weekly_digest" && metadata?.focus === "journal") {
+    return "/dashboard/journal";
+  }
+  // A job alert opens THE JOB it is about, not a list: the click lands on the
+  // real ad, where the worker can read it and take the next action.
+  if (
+    entityType === "public_vacancy" &&
+    typeof metadata?.vacancyId === "string" &&
+    VACANCY_ID_RE.test(metadata.vacancyId)
+  ) {
+    return `/jobs/${metadata.vacancyId}`;
+  }
+  // A message notification opens THE THREAD, not the inbox list.
+  if (
+    entityType === "conversation" &&
+    typeof metadata?.conversationId === "string" &&
+    VACANCY_ID_RE.test(metadata.conversationId)
+  ) {
+    return `/dashboard/communication/${metadata.conversationId}`;
+  }
   return NOTIFICATION_ENTITY_HREF[entityType as NotificationEntityType];
+}
+
+/**
+ * The rendered type key for a stored event — `event_<type>`, or for a
+ * focused weekly digest `event_weekly_digest_<focus>`, so the bell and the
+ * activity page label the row for what it truthfully is. Pure.
+ */
+export function notificationRenderedType(
+  eventType: string,
+  metadata?: NotificationEventMetadata,
+): string {
+  if (
+    eventType === "journal_review_decided" &&
+    metadata?.decision &&
+    (JOURNAL_REVIEW_DECISIONS as readonly string[]).includes(metadata.decision)
+  ) {
+    return `event_journal_review_decided_${metadata.decision}`;
+  }
+  if (
+    eventType === "weekly_digest" &&
+    metadata?.focus &&
+    (WEEKLY_DIGEST_FOCUS as readonly string[]).includes(metadata.focus)
+  ) {
+    return `event_weekly_digest_${metadata.focus}`;
+  }
+  return `event_${eventType}`;
 }
 
 /** The ONLY metadata keys an event may carry — safe render hints, never
  *  free-form text. Widening this list is a reviewable act. */
-const SAFE_METADATA_KEYS = ["country", "roleSlug", "startDate"] as const;
+const SAFE_METADATA_KEYS = [
+  "country",
+  "roleSlug",
+  "startDate",
+  "focus",
+  // v9 job alert: PUBLIC ad facts only — the ad's own headline, its stated EUR
+  // pay (absent when unknown) and its id. Never a worker fact, never a score.
+  "title",
+  "salary",
+  "vacancyId",
+  // v10 message: the thread's own (opaque uuid) id — a link target, never
+  // content. Validated as a uuid again when the href is built.
+  "conversationId",
+  // v10 journal review: one of JOURNAL_REVIEW_DECISIONS — which outcome the
+  // worker is being told about. Never the reviewer's note.
+  "decision",
+] as const;
+
+/** The three outcomes a journal review can record (the review RPC's own
+ *  vocabulary — lib/journal/review-status REVIEW_DECISIONS). */
+export const JOURNAL_REVIEW_DECISIONS = [
+  "approved",
+  "rejected",
+  "changes_requested",
+] as const;
+export type JournalReviewDecision = (typeof JOURNAL_REVIEW_DECISIONS)[number];
+
+/**
+ * `focus` — what a WEEKLY DIGEST row may truthfully claim (2026-09-17).
+ * The digest used to promise "your week's work AND opportunities" to every
+ * recipient, including people whose board could only answer
+ * missing_profile_info; a bell that leads to "we do not know enough about
+ * you" is not first value. The row stays a POINTER (§19(d): no counts), but
+ * it now says which kind of pointer it is:
+ *   - (absent)              — the read-time path confirmed the person is
+ *                             matchable: the digest may speak of opportunities;
+ *   - "profile_completion"  — the person is NOT matchable yet (no work type
+ *                             or no skill evidence): the digest asks them to
+ *                             confirm what work they do, and lands on the
+ *                             profile, not on an empty board;
+ *   - "journal"             — the cron sweep, which can only know the person
+ *                             logged work this week (service_role cannot read
+ *                             skills): the digest speaks of the journal only.
+ */
+export const WEEKLY_DIGEST_FOCUS = ["profile_completion", "journal"] as const;
+export type WeeklyDigestFocus = (typeof WEEKLY_DIGEST_FOCUS)[number];
 export type NotificationEventMetadata = Partial<
   Record<(typeof SAFE_METADATA_KEYS)[number], string>
 >;
@@ -248,10 +434,41 @@ export function notificationDedupeKey(
 const FEATURE_ABSENT_CODES = new Set(["42P01", "42883", "PGRST202", "PGRST205"]);
 const UNIQUE_VIOLATION = "23505";
 
+/**
+ * `42501 insufficient_privilege`: the store EXISTS but the writer role holds
+ * no INSERT grant on it. Production has answered every emit this way since
+ * 2026-07-05 (the GRANT is the owner's RED draft, PR #1566). Measured
+ * 2026-09-06: 40 identical `emit failed unexpectedly (weekly_digest): 42501`
+ * lines in 12 h of Vercel runtime logs — one per dashboard render, each
+ * preceded by three reads that only exist to feed the write.
+ *
+ * NAMED STATE, not a retry loop: after one sighting the process skips emits
+ * for `STORE_WRITE_BLOCKED_TTL_MS` and reports `write_blocked` instead of
+ * repeating a write that cannot succeed. The TTL keeps it honest — once the
+ * grant lands, a warm instance resumes within the window and a fresh one
+ * immediately. Nothing about the missing grant is hidden: the log line still
+ * fires, once per window, naming the state.
+ */
+const INSUFFICIENT_PRIVILEGE = "42501";
+const STORE_WRITE_BLOCKED_TTL_MS = 15 * 60 * 1000;
+let storeWriteBlockedUntil = 0;
+
+/** True while the store is known to refuse writes (42501 seen within the TTL). */
+export function isNotificationStoreWriteBlocked(now: number = Date.now()): boolean {
+  return now < storeWriteBlockedUntil;
+}
+
+/** Test seam — clears the process-scoped block. */
+export function resetNotificationStoreWriteBlock(): void {
+  storeWriteBlockedUntil = 0;
+}
+
 export type NotificationWriteOutcome =
   | { readonly kind: "written" }
   | { readonly kind: "duplicate" }
   | { readonly kind: "feature_unavailable" }
+  /** Store present, writer unprivileged (42501) — skipped, not retried. */
+  | { readonly kind: "write_blocked"; readonly code: string }
   | { readonly kind: "unexpected_error"; readonly code: string };
 
 function sanitizeMetadata(
@@ -276,6 +493,9 @@ export async function emitNotificationEvent(
   admin: DbClient,
   input: NotificationEventInput,
 ): Promise<NotificationWriteOutcome> {
+  if (isNotificationStoreWriteBlocked()) {
+    return { kind: "write_blocked", code: INSUFFICIENT_PRIVILEGE };
+  }
   try {
     const { error } = await admin.from("notification_events").insert({
       recipient_profile_id: input.recipientProfileId,
@@ -290,6 +510,13 @@ export async function emitNotificationEvent(
     if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
       return { kind: "feature_unavailable" };
     }
+    if (error.code === INSUFFICIENT_PRIVILEGE) {
+      storeWriteBlockedUntil = Date.now() + STORE_WRITE_BLOCKED_TTL_MS;
+      console.error(
+        `[notifications] store refuses writes (42501 insufficient_privilege) — emits skipped for ${STORE_WRITE_BLOCKED_TTL_MS / 60000} min; the INSERT grant is owner-gated (#1566)`,
+      );
+      return { kind: "write_blocked", code: INSUFFICIENT_PRIVILEGE };
+    }
     return { kind: "unexpected_error", code: error.code ?? "unknown" };
   } catch {
     return { kind: "unexpected_error", code: "thrown" };
@@ -303,8 +530,9 @@ export function emitNotificationEventInBackground(
 ): void {
   void emitNotificationEvent(admin, input).then((outcome) => {
     if (outcome.kind === "unexpected_error") {
-      // Not swallowed silently — the approved degradation (absent store)
-      // never reaches here, so this line only fires on something real.
+      // Not swallowed silently — the approved degradations (absent store,
+      // unprivileged writer) never reach here, so this line only fires on
+      // something real.
       console.error(
         `[notifications] emit failed unexpectedly (${input.eventType}): ${outcome.code}`,
       );
@@ -328,7 +556,12 @@ export type NotificationFeedResult =
   | {
       readonly kind: "ready";
       readonly events: readonly NotificationEventRow[];
+      /** The REAL unread total (a head count), not the unread rows of the
+       *  loaded window. */
       readonly unreadCount: number;
+      /** True when the exact count could not be read and `unreadCount` is only
+       *  the unread rows inside the loaded window (a lower bound). */
+      readonly unreadCountIsWindowOnly?: boolean;
     }
   | { readonly kind: "feature_unavailable" }
   | { readonly kind: "unexpected_error"; readonly code: string };
@@ -348,11 +581,20 @@ export async function readMyNotificationEvents(
 ): Promise<NotificationFeedResult> {
   const rowLimit = Math.max(1, Math.min(Math.floor(limit), FEED_LIMIT_MAX));
   try {
-    const { data, error } = await client
-      .from("notification_events")
-      .select("id, event_type, entity_type, entity_id, created_at, read_at, metadata")
-      .order("created_at", { ascending: false })
-      .limit(rowLimit);
+    const [{ data, error }, unreadRes] = await Promise.all([
+      client
+        .from("notification_events")
+        .select("id, event_type, entity_type, entity_id, created_at, read_at, metadata")
+        .order("created_at", { ascending: false })
+        .limit(rowLimit),
+      // The unread TOTAL is its own count query: counting unread rows inside
+      // the loaded window capped it at the window (20 by default) and let the
+      // "unread" number disagree with the real backlog.
+      client
+        .from("notification_events")
+        .select("id", { count: "exact", head: true })
+        .is("read_at", null),
+    ]);
     if (error) {
       if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
         return { kind: "feature_unavailable" };
@@ -371,10 +613,14 @@ export async function readMyNotificationEvents(
         metadata: (r.metadata as NotificationEventMetadata) ?? {},
       };
     });
+    const windowUnread = events.filter((e) => e.readAt === null).length;
+    const exact =
+      !unreadRes.error && typeof unreadRes.count === "number" ? unreadRes.count : null;
     return {
       kind: "ready",
       events,
-      unreadCount: events.filter((e) => e.readAt === null).length,
+      unreadCount: exact ?? windowUnread,
+      ...(exact === null ? { unreadCountIsWindowOnly: true } : {}),
     };
   } catch {
     return { kind: "unexpected_error", code: "thrown" };

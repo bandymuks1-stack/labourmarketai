@@ -58,6 +58,14 @@ export const AI_TASK_TYPES = [
   /** Aggregate PUBLIC labour-market statistics → a plain-language reading.
    *  The only task in this program whose payload carries no data subject. */
   "explain_market_demand",
+  /** ONE typed chat sentence the deterministic router could not read → ONE
+   *  EXISTING conversation intent id (owner approval 2026-09-05). Unbounded
+   *  free text; Gemini-only by a task-scoped grant. */
+  "propose_conversation_intent",
+  /** The verbatim title/description of a PUBLICLY published job advertisement
+   *  → the same words in the reader's locale. The second PUBLIC task; its
+   *  argument is the field list in `TASK_POLICIES.translate_vacancy`. */
+  "translate_vacancy",
 ] as const;
 export type AiTaskType = (typeof AI_TASK_TYPES)[number];
 
@@ -404,6 +412,96 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     // while every person-describing task here is true.
     humanReview: false,
   },
+  propose_conversation_intent: {
+    taskType: "propose_conversation_intent",
+    riskLevel: "medium",
+    // The sentence, its language, the coarse identity and the intent
+    // catalogue (ids + hints). Nothing about the person or their rows.
+    allowedFields: ["sentence", "locale", "identity", "intent_catalogue"],
+    prohibitedFields: [
+      "worker_profile",
+      "full_cv",
+      "journal_entry_text",
+      "employer_name",
+      "worker_name",
+      "profile_id",
+      "worker_id",
+      "project_id",
+      "canonical_rows",
+      ...NEVER_NEEDED,
+    ],
+    expectedSchema: "conversationIntentOutputSchema",
+    minQuality: 0.6,
+    maxEstimatedCostUsd: 0.01,
+    expectedOutputTokens: 120,
+    maxLatencyMs: 8_000,
+    preferredTier: "low_cost",
+    fallbackTier: "low_cost",
+    escalationConditions: [],
+    secondModelReview: false,
+    // The output is a proposal the chat re-validates against the intent
+    // registry and then hands to the SAME handler the deterministic router
+    // would have used; nothing is persisted from it and the human decides
+    // every write through the dispatcher's own confirmation tiers.
+    humanReview: false,
+  },
+  /**
+   * TRANSLATE A PUBLISHED ADVERTISEMENT INTO THE READER'S LOCALE.
+   *
+   * GRANT-GATED, not public (owner decision 2026-09-22): "Public source
+   * content does not automatically authorize unrestricted third-party AI
+   * transmission." `TASK_SENSITIVITY` classes this `SENSITIVE_FREE_TEXT`
+   * because `vacancy_description` is unbounded text a third party wrote, so
+   * an external provider receives it only under an owner grant naming this
+   * task. There is no such grant today; the runtime refuses and the reader
+   * shows the publisher's own words.
+   *
+   * MINIMUM NECESSARY FIELDS (owner decision 2026-09-22). Four, and the
+   * schema is `.strict()` so a caller cannot widen them: the title, the
+   * description, and the two locale codes. Employer identity, employer org
+   * id, application URL, coordinates, the reader, and the match result are
+   * all listed as prohibited and none is assembled anywhere. Before the call
+   * the reader additionally REDACTS e-mail addresses, phone numbers and URLs
+   * out of the description into opaque tokens and restores them afterwards,
+   * so contact data never leaves even though the reader still shows it.
+   *
+   * `low_cost` on both tiers, NO escalation, a tight ceiling: translating
+   * twenty short titles does not get better with a frontier model, and a
+   * board that could silently escalate is a board with an unbounded bill.
+   * The reader batches (one call per board render) and PERSISTS the result
+   * beside the original keyed by source hash + target locale, so an ad is
+   * translated ONCE per locale and never again per page view.
+   */
+  translate_vacancy: {
+    taskType: "translate_vacancy",
+    riskLevel: "low",
+    allowedFields: ["vacancy_title", "vacancy_description", "source_locale", "target_locale"],
+    prohibitedFields: [
+      "full_cv",
+      "worker_profile",
+      "journal_entry_text",
+      "employer_name",
+      "employer_external_org_id",
+      "application_url",
+      "worker_name",
+      "profile_id",
+      "worker_id",
+      "match_result",
+      ...NEVER_NEEDED,
+    ],
+    expectedSchema: "vacancyTranslationOutputSchema",
+    minQuality: 0.55,
+    maxEstimatedCostUsd: 0.03,
+    expectedOutputTokens: 1_500,
+    maxLatencyMs: 20_000,
+    preferredTier: "low_cost",
+    fallbackTier: "low_cost",
+    escalationConditions: [],
+    secondModelReview: false,
+    // A rendering shown beside the original with its provenance named; the
+    // human decision it supports is reading. Never a record of fact.
+    humanReview: false,
+  },
   draft_follow_up: {
     taskType: "draft_follow_up",
     riskLevel: "medium",
@@ -447,6 +545,8 @@ export const AGENT_TASK_TYPES: Record<AiAgentKey, AiTaskType> = {
   support_onboarding: "draft_follow_up", // guidance / next-step message drafts
   translation_copy: "translate_message",
   market_explanation: "explain_market_demand",
+  conversation_intent: "propose_conversation_intent", // one typed sentence → one EXISTING intent id (proposer, not router)
+  vacancy_translation: "translate_vacancy",
 };
 
 export function taskTypeForAgent(agent: AiAgentKey): AiTaskType {
@@ -620,7 +720,7 @@ export function resolveRouteForPolicy(
    * needs the MODEL and call sites must never know the model (guard:
    * ai-task-routing). The caller supplies token SIZE; the router prices it.
    */
-  const modelAliasForTier = TIER_MODEL_ALIAS[tier];
+  let modelAliasForTier = TIER_MODEL_ALIAS[tier];
   const costProvider: AiCostProvider = ctx.provider ?? "anthropic";
 
   /* Price the CONCRETE model that will run, never the tier alias.
@@ -639,8 +739,8 @@ export function resolveRouteForPolicy(
     policy.expectedOutputTokens,
     ctx.maxOutputTokens ?? 0,
   );
-  const derivedEstimate =
-    ctx.expectedInputTokens === undefined || modelAliasForTier === null
+  const estimateForAlias = (alias: AiModelAlias | null): number | null | undefined =>
+    ctx.expectedInputTokens === undefined || alias === null
       ? undefined
       : costProvider === "local"
         ? // Self-hosted: the operator already paid for the hardware. Free by
@@ -651,10 +751,44 @@ export function resolveRouteForPolicy(
             // is honestly unpriceable here rather than wrong.
             null
           : estimateCostUsd(
-              modelIdForAlias(modelAliasForTier, costProvider),
+              modelIdForAlias(alias, costProvider),
               ctx.expectedInputTokens,
               outputBound,
             );
+  let derivedEstimate = estimateForAlias(modelAliasForTier);
+
+  /* The preferred tier's model carries no reviewed price FOR THIS PROVIDER,
+   * but the policy's own fallback tier does → run on the fallback tier,
+   * surfaced (fallbackApplied + reason), instead of refusing every run.
+   *
+   * Observed 2026-10-13..15 (#2407): with Gemini serving, `extract_cv` and
+   * `structure_future_work` prefer "standard" → gemini-2.5-flash, which is
+   * registered `enabled: false` with no reviewed price, so 19 of 60 runs in
+   * 7 days were blocked `cost_unpriced` before any call — while the enabled,
+   * priced gemini-3.5-flash-lite sat on the policy's declared fallback tier.
+   *
+   * Only the first route of a run moves (no escalation, no provider-failure
+   * retry): an escalation that lands on an unpriced tier must not quietly
+   * climb back down onto the model that just failed. The fallback's estimate
+   * is the one the ceiling below is judged on; if the fallback is unpriced
+   * too, the run is blocked exactly as before. */
+  if (
+    ctx.estimatedCostUsd === undefined &&
+    derivedEstimate === null &&
+    !escalated &&
+    !fallbackApplied &&
+    policy.fallbackTier !== tier
+  ) {
+    const fallbackAlias = TIER_MODEL_ALIAS[policy.fallbackTier];
+    const fallbackEstimate = estimateForAlias(fallbackAlias);
+    if (typeof fallbackEstimate === "number") {
+      reason = `preferred tier "${tier}" has no owner-reviewed price on provider "${costProvider}" — fell back to priced tier "${policy.fallbackTier}" (quality downgrade surfaced, not silent)`;
+      tier = policy.fallbackTier;
+      modelAliasForTier = fallbackAlias;
+      derivedEstimate = fallbackEstimate;
+      fallbackApplied = true;
+    }
+  }
   const estimate = ctx.estimatedCostUsd ?? derivedEstimate;
 
   // An unpriced model makes the ceiling UNCHECKABLE. A budget that cannot be

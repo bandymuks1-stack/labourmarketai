@@ -1,9 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Paperclip, ArrowUp } from "lucide-react";
+import { Paperclip, ArrowUp, FileText, Mic, X } from "lucide-react";
 
-import { iconControl } from "./icon-scale";
+import { iconControl, iconInline } from "./icon-scale";
+
+/** What the paperclip offers in the OS picker: exactly the types some existing
+ *  door takes (journal photo, document file, CV reader). No forced `capture`
+ *  — a phone offers camera AND library, and the person chooses. */
+export const COMPOSER_ATTACH_ACCEPT =
+  "image/jpeg,image/png,image/webp,application/pdf,.docx,.txt";
 
 /** Grow ceiling. Past this the textarea scrolls internally instead of eating
  *  the thread — roughly nine lines at the 16px body size. */
@@ -43,17 +49,51 @@ export function Composer({
   sendLabel,
   disabled = false,
   onSend,
-  onAttach,
+  onAttachFile,
+  pendingAttachment = null,
+  onRemoveAttachment,
+  attachRemoveLabel,
+  attachSelectedLabel,
   variant = "bar",
+  prefill,
+  onVoice,
+  voiceLabel,
 }: {
+  /** The voice door: a second way to enter the SAME turn. Rendered only when
+   *  the owner-configured transcription service exists (honest absence). It
+   *  opens the capture panel; the reviewed text comes back through `onSend`
+   *  like typed text. */
+  onVoice?: () => void;
+  voiceLabel?: string;
   placeholder: string;
   attachLabel: string;
   sendLabel: string;
   disabled?: boolean;
   onSend: (text: string) => void;
-  /** Opens the canonical CV flow (the real uploader lives there, not here — one
-   *  canonical CV file-pick surface). */
-  onAttach?: () => void;
+  /** A sentence handed to the person to SEND THEMSELVES — the `?say=` hand-off
+   *  when the link did not come through our own door (QA Q-4, see
+   *  `referrerIsOurOwnDoor` in conversation-chat). Placed into the box and
+   *  focused; the composer never sends it. Text already typed stays ahead of
+   *  it, so nothing the person wrote is lost either. */
+  prefill?: string;
+  /**
+   * THE PAPERCLIP ATTACHES A FILE (owner P0 2026-09-23, CASE 5/7).
+   *
+   * It used to be a flow launcher: a click opened a work-log photo form or a
+   * CV importer, and no file was ever picked, shown or classified here. The
+   * click now opens the OS file picker; the picked file is handed up as-is.
+   * What it is FOR is decided by the conversation (which asks), and nothing
+   * is uploaded until the chosen flow's own confirm — until then the file
+   * exists only in this browser tab.
+   */
+  onAttachFile?: (file: File) => void;
+  /** The ONE file waiting for "what is this file for?". Held by the
+   *  conversation, not here: the inline and the bar composer are different
+   *  mounts, and the chip must survive the switch between them. */
+  pendingAttachment?: File | null;
+  onRemoveAttachment?: () => void;
+  attachRemoveLabel?: string;
+  attachSelectedLabel?: string;
   /** "bar" = the sticky bottom bar; "inline" = the same control rendered
    *  inside the centred opening composition (owner audit §4.1) — no border,
    *  no backdrop, it is part of the greeting, not chrome. */
@@ -61,6 +101,24 @@ export function Composer({
 }) {
   const [value, setValue] = useState("");
   const ref = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [thumb, setThumb] = useState<string | null>(null);
+
+  // The pending image's thumbnail — the work-log flow's preview rule, kept
+  // identical: ONLY a browser-minted `blob:` URL, minted from a NAMELESS Blob
+  // (bytes + MIME type, never the DOM-supplied file name), revoked whenever it
+  // is replaced or the composer unmounts.
+  useEffect(() => {
+    if (!pendingAttachment || !/^image\/(jpeg|png|webp)$/.test(pendingAttachment.type)) {
+      setThumb(null);
+      return;
+    }
+    const url = URL.createObjectURL(
+      new Blob([pendingAttachment], { type: pendingAttachment.type }),
+    );
+    setThumb(url.startsWith("blob:") ? url : null);
+    return () => URL.revokeObjectURL(url);
+  }, [pendingAttachment]);
 
   const resize = useCallback(() => {
     const el = ref.current;
@@ -98,6 +156,15 @@ export function Composer({
     if (el && el.value) setValue((prev) => (prev ? prev : el.value));
   }, []);
 
+  // The hand-off fallback (QA Q-4): the sentence appears in the box, the box
+  // takes focus, and the person decides whether to send it. Never dropped,
+  // never sent on their behalf.
+  useEffect(() => {
+    if (!prefill) return;
+    setValue((prev) => (prev.trim() ? `${prev}\n${prefill}` : prefill));
+    ref.current?.focus();
+  }, [prefill]);
+
   function submit() {
     const t = value.trim();
     if (!t || disabled) return;
@@ -119,16 +186,87 @@ export function Composer({
           : "relative flex-none"
       }
     >
+      {/* THE ONE PENDING ATTACHMENT — visible the moment the file is picked,
+          so the pick itself is the feedback (a click that only posted another
+          assistant bubble is why people clicked again). Name, an image
+          thumbnail, and a way to drop it; nothing has been uploaded yet. */}
+      {pendingAttachment ? (
+        <div className="mx-auto mb-2 flex w-full max-w-3xl">
+          <div
+            role="status"
+            aria-live="polite"
+            data-testid="composer-attachment"
+            className="flex min-w-0 max-w-full items-center gap-2 rounded-full border border-ink-500 bg-ink-800 py-0.5 pl-1.5 text-support text-text-primary"
+          >
+            {thumb?.startsWith("blob:") ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                // Re-checked AT the sink: a local object URL is the only
+                // thing this thumbnail may ever load.
+                src={thumb}
+                alt=""
+                className="size-8 flex-none rounded-full border border-ink-500 object-cover"
+              />
+            ) : (
+              <FileText {...iconInline("flex-none text-text-muted")} aria-hidden />
+            )}
+            {attachSelectedLabel ? <span className="sr-only">{attachSelectedLabel}:</span> : null}
+            <span className="min-w-0 truncate" data-testid="composer-attachment-name">
+              {pendingAttachment.name}
+            </span>
+            {onRemoveAttachment ? (
+              <button
+                type="button"
+                onClick={onRemoveAttachment}
+                aria-label={attachRemoveLabel}
+                data-testid="composer-attachment-remove"
+                className="ua-press flex size-11 flex-none items-center justify-center rounded-full text-text-secondary hover:text-brand-blue"
+              >
+                <X {...iconControl()} aria-hidden />
+              </button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
       <div className="mx-auto flex w-full max-w-3xl items-end gap-2">
-        {onAttach && (
+        {onAttachFile && (
+          <>
+            <input
+              ref={fileRef}
+              type="file"
+              accept={COMPOSER_ATTACH_ACCEPT}
+              tabIndex={-1}
+              aria-hidden="true"
+              data-testid="composer-attach-input"
+              className="sr-only"
+              onChange={(e) => {
+                const picked = e.target.files?.[0] ?? null;
+                // Reset, so picking the SAME file again still fires onChange.
+                e.target.value = "";
+                if (picked) onAttachFile(picked);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              aria-label={attachLabel}
+              data-testid="composer-attach"
+              className="ua-press flex size-11 flex-none items-center justify-center rounded-full border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+            >
+              <Paperclip {...iconControl()} aria-hidden />
+            </button>
+          </>
+        )}
+        {onVoice && (
           <button
             type="button"
-            onClick={() => onAttach()}
-            aria-label={attachLabel}
-            data-testid="composer-attach"
+            onClick={onVoice}
+            aria-label={voiceLabel}
+            data-testid="composer-voice"
+            data-tap-floor="off"
             className="ua-press flex size-11 flex-none items-center justify-center rounded-full border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue"
           >
-            <Paperclip {...iconControl()} aria-hidden />
+            <Mic {...iconControl()} aria-hidden />
           </button>
         )}
         <textarea
@@ -154,7 +292,7 @@ export function Composer({
           disabled={disabled || value.trim().length === 0}
           aria-label={sendLabel}
           data-testid="composer-send"
-          className="ua-press flex size-11 flex-none items-center justify-center rounded-full bg-brand-blue text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+          className="ua-press flex size-11 flex-none items-center justify-center rounded-full bg-brand-blue text-text-on-brand transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
         >
           <ArrowUp {...iconControl()} aria-hidden />
         </button>

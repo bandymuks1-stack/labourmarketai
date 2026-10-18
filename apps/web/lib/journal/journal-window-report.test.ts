@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  deriveWindowWorkTime,
+  inWorkWindow,
   journalReportWindow,
+  rollUpJournalWindow,
+  rollUpOrganizationLedger,
   windowCreatedAtBounds,
+  type JournalWindowEntryRow,
 } from "./journal-window-report";
 
 /**
@@ -59,5 +64,293 @@ describe("journalReportWindow — month is 30 inclusive days ending today", () =
     const b = windowCreatedAtBounds(journalReportWindow("month", "2026-12-31"));
     expect(b.gteIso).toBe("2026-12-02T00:00:00.000Z");
     expect(b.ltIso).toBe("2027-01-01T00:00:00.000Z");
+  });
+});
+
+/**
+ * Per-member roll-up (issue #1689, owner §14) — the pure part of the report:
+ * hours from THE work-intelligence model over the window's own rows, counted
+ * once per entry; confirmed hours from APPROVED confirmations only; review
+ * counts that add up; `null` (not zero) when work time was not measured.
+ */
+const WORKERS = {
+  a: { display_name: "Ona", profiles: null },
+  b: { display_name: "Jonas", profiles: null },
+};
+
+type Metric = NonNullable<JournalWindowEntryRow["journal_entry_metrics"]>[number];
+
+const hoursMetric = (index: number, hours: number): Metric => ({
+  metric_slug: "fragment_time",
+  value_text: String(index),
+  value_numeric: hours,
+  unit_slug: "hours",
+  source: "ai_extracted",
+});
+const activityMetric = (index: number, key: string): Metric => ({
+  metric_slug: "fragment_activity",
+  value_text: `${index}|${key}`,
+  value_numeric: null,
+  unit_slug: null,
+  source: "ai_extracted",
+});
+const quantityMetric = (value: number, unit: string): Metric => ({
+  metric_slug: "quantity",
+  value_text: null,
+  value_numeric: value,
+  unit_slug: unit,
+  source: "worker_input",
+});
+
+function row(
+  id: string,
+  worker: keyof typeof WORKERS,
+  createdAt: string,
+  metrics: Metric[],
+  decisions: readonly ("approved" | "rejected" | "changes_requested")[] = [],
+): JournalWindowEntryRow {
+  return {
+    id,
+    worker_id: `worker-${worker}`,
+    created_at: createdAt,
+    engagement_context_id: "ctx-1",
+    workers: WORKERS[worker],
+    journal_entry_confirmations: decisions.map((decision, i) => ({
+      confirmation_scope: { decision },
+      created_at: `2026-09-1${i}T12:00:00.000Z`,
+      confirmer_role: "manager",
+    })),
+    journal_entry_metrics: metrics,
+  };
+}
+
+const TODAY_ISO = "2026-09-11";
+
+describe("rollUpJournalWindow — hours from the one model, counted once", () => {
+  const rows = [
+    // Ona: 6 h tiling + 2 h plaster on fragments, AND an entry-level 8 h —
+    // the fragments win (never 16), approved → 8 h confirmed.
+    row(
+      "e1",
+      "a",
+      "2026-09-10T08:00:00.000Z",
+      [
+        hoursMetric(1, 6),
+        activityMetric(1, "tiler"),
+        hoursMetric(2, 2),
+        activityMetric(2, "plasterer"),
+        quantityMetric(8, "hours"),
+      ],
+      ["approved"],
+    ),
+    // Ona: 4 h tiling the next day, awaiting review.
+    row("e2", "a", "2026-09-11T08:00:00.000Z", [hoursMetric(1, 4), activityMetric(1, "tiler")]),
+    // Jonas: 2 days recorded in DAYS (never hours), rejected → returned.
+    row("e3", "b", "2026-09-09T08:00:00.000Z", [quantityMetric(2, "days")], ["rejected"]),
+    // Jonas: an entry with no duration at all, changes requested then approved
+    // (latest wins) → confirmed, but nothing to time.
+    row("e4", "b", "2026-09-11T09:00:00.000Z", [], ["changes_requested", "approved"]),
+  ];
+
+  const { workers, totals } = rollUpJournalWindow(rows, { workTime: true, todayIso: TODAY_ISO });
+  const ona = workers.find((w) => w.workerId === "worker-a")!;
+  const jonas = workers.find((w) => w.workerId === "worker-b")!;
+
+  it("sorts members by name and keys them on the worker id", () => {
+    expect(workers.map((w) => w.name)).toEqual(["Jonas", "Ona"]);
+  });
+
+  it("an entry's fragments win over its entry-level figure — 8 h, never 16", () => {
+    expect(ona.work?.hours).toBe(12);
+    expect(ona.work?.confirmedHours).toBe(8);
+    expect(ona.work?.daysWorked).toBe(2);
+    // the share is of ALL 12 of Ona's window hours, unlabelled parts included
+    expect(ona.work?.mainActivity).toEqual({ key: "tiler", hours: 10, share: 0.83 });
+    expect(ona.work?.unlabelledHours).toBe(0);
+  });
+
+  it("days-unit durations stay days; an entry without duration is counted, not timed", () => {
+    expect(jonas.work?.hours).toBe(0);
+    expect(jonas.work?.dayUnits).toBe(2);
+    // a day recorded in days is a day that carries a duration (F5)
+    expect(jonas.work?.daysWorked).toBe(1);
+    expect(jonas.work?.entriesWithoutDuration).toBe(1);
+    expect(jonas.work?.mainActivity).toBeNull();
+  });
+
+  it("confirmed = approved only; rejected / changes requested = returned; latest decision wins", () => {
+    expect(ona).toMatchObject({ entries: 2, confirmed: 1, awaitingReview: 1, returned: 0 });
+    expect(jonas).toMatchObject({ entries: 2, confirmed: 1, awaitingReview: 0, returned: 1 });
+  });
+
+  it("review counts add up to the entries, per member and in total", () => {
+    for (const w of workers) {
+      expect(w.awaitingReview + w.confirmed + w.returned).toBe(w.entries);
+    }
+    expect(totals.awaitingReview + totals.confirmed + totals.returned).toBe(totals.entries);
+    expect(totals).toMatchObject({ entries: 4, confirmed: 2, awaitingReview: 1, returned: 1, workers: 2 });
+  });
+
+  it("totals sum the members' hours and never invent a main activity", () => {
+    expect(totals.work).toEqual({
+      hours: 12,
+      confirmedHours: 8,
+      dayUnits: 2,
+      daysWorked: 3,
+      entriesWithoutDuration: 1,
+      mainActivity: null,
+      unlabelledHours: 0,
+    });
+  });
+
+  it("the latest created_at wins per member whatever order the rows arrive in", () => {
+    const reversed = rollUpJournalWindow([...rows].reverse(), { workTime: true, todayIso: TODAY_ISO });
+    expect(reversed.workers.find((w) => w.workerId === "worker-a")?.lastEntryAtIso).toBe("2026-09-11T08:00:00.000Z");
+    expect(reversed.workers.find((w) => w.workerId === "worker-b")?.lastEntryAtIso).toBe("2026-09-11T09:00:00.000Z");
+    expect(reversed.totals).toEqual(totals);
+  });
+
+  it("without the option, work time is null — not measured, never zero", () => {
+    const counts = rollUpJournalWindow(rows, { workTime: false, todayIso: TODAY_ISO });
+    expect(counts.workers.every((w) => w.work === null)).toBe(true);
+    expect(counts.totals.work).toBeNull();
+    // the counts are the same either way
+    expect(counts.totals).toMatchObject({ entries: 4, confirmed: 2, awaitingReview: 1, returned: 1 });
+  });
+});
+
+describe("deriveWindowWorkTime — the model without skill links", () => {
+  it("an 8 h entry is 8 h once, whatever else it carries", () => {
+    const wt = deriveWindowWorkTime(
+      [row("x", "a", "2026-09-11T08:00:00.000Z", [quantityMetric(8, "hours")], ["approved"])],
+      TODAY_ISO,
+    );
+    expect(wt).toEqual({
+      hours: 8,
+      confirmedHours: 8,
+      dayUnits: 0,
+      daysWorked: 1,
+      entriesWithoutDuration: 0,
+      mainActivity: null,
+      // an entry-level duration with no direction names no kind of work —
+      // the 8 h stay in the base and are named, never dropped (F2)
+      unlabelledHours: 8,
+    });
+  });
+
+  it("a rejected entry's hours are worked hours, not confirmed hours", () => {
+    const wt = deriveWindowWorkTime(
+      [row("x", "a", "2026-09-11T08:00:00.000Z", [quantityMetric(5, "hours")], ["rejected"])],
+      TODAY_ISO,
+    );
+    expect(wt.hours).toBe(5);
+    expect(wt.confirmedHours).toBe(0);
+  });
+
+  it("no rows → zeros that mean measured-empty (the caller passed rows)", () => {
+    expect(deriveWindowWorkTime([], TODAY_ISO).hours).toBe(0);
+  });
+});
+
+/**
+ * THE WINDOW IS THE DAY THE WORK HAPPENED (re-audit 2026-09-11, F6).
+ *
+ * Hours are dated by `work_date` everywhere else in the product; the report
+ * window must agree. Before this, last month's 40 h typed this morning
+ * showed under "Today" and Monday's shift logged on Friday sat in the wrong
+ * week. `inWorkWindow` is the ONE rule that decides membership after the
+ * created-in-window and worked-in-window reads are merged.
+ */
+describe("rollUpOrganizationLedger — the org's own ledger beside the journal, three states", () => {
+  const row = (workerId: string, hours: number, status = "recorded") => ({ workerId, hours, status });
+
+  it("measures live rows, keeps rejected hours visible but counted nowhere, counts distinct people", () => {
+    const l = rollUpOrganizationLedger(
+      { kind: "ok", rows: [row("w1", 8), row("w1", 4.5, "approved"), row("w2", 6), row("w2", 3, "rejected")] },
+      2000,
+    );
+    expect(l).toEqual({ state: "measured", hours: 18.5, rows: 3, workers: 2, rejectedHours: 3, truncated: false });
+  });
+
+  it("a read at its ceiling says so", () => {
+    const l = rollUpOrganizationLedger({ kind: "ok", rows: [row("w1", 1), row("w2", 1)] }, 2);
+    expect(l.state === "measured" && l.truncated).toBe(true);
+  });
+
+  it("no store is `none`; a failed read or no company is `unknown` — never 0 h", () => {
+    expect(rollUpOrganizationLedger({ kind: "needs-migration" }, 2000)).toEqual({ state: "none" });
+    expect(rollUpOrganizationLedger({ kind: "error" }, 2000)).toEqual({ state: "unknown" });
+    expect(rollUpOrganizationLedger({ kind: "no-company" }, 2000)).toEqual({ state: "unknown" });
+  });
+
+  it("an empty window is a measured zero, not unknown", () => {
+    expect(rollUpOrganizationLedger({ kind: "ok", rows: [] }, 2000)).toEqual({
+      state: "measured", hours: 0, rows: 0, workers: 0, rejectedHours: 0, truncated: false,
+    });
+  });
+});
+
+describe("inWorkWindow — membership is decided by the work day", () => {
+  const today = journalReportWindow("today", TODAY_ISO);
+  const week = journalReportWindow("week", TODAY_ISO);
+  const workDay = (day: string): Metric[] => [
+    { metric_slug: "work_date", value_text: day, value_numeric: null, unit_slug: null, source: "worker_input" },
+  ];
+
+  it("an entry typed today about last month is NOT in today", () => {
+    const r = row("late", "a", `${TODAY_ISO}T08:00:00.000Z`, workDay("2026-08-04"));
+    expect(inWorkWindow(r, today)).toBe(false);
+    expect(inWorkWindow(r, week)).toBe(false);
+  });
+
+  it("an entry worked inside the window but typed after it joins the window", () => {
+    // logged on Friday about Monday: created_at is outside "today", the
+    // stated work day is inside the week.
+    const r = row("backdated", "a", "2026-09-18T08:00:00.000Z", workDay("2026-09-07"));
+    expect(inWorkWindow(r, week)).toBe(true);
+    expect(inWorkWindow(r, today)).toBe(false);
+  });
+
+  it("an entry with no stated work day stays where created_at puts it", () => {
+    expect(inWorkWindow(row("nw", "a", `${TODAY_ISO}T22:30:00.000Z`, []), today)).toBe(true);
+    expect(inWorkWindow(row("old", "a", "2026-08-04T10:00:00.000Z", []), today)).toBe(false);
+  });
+
+  it("the window edges are inclusive on both sides", () => {
+    expect(inWorkWindow(row("s", "a", "2026-01-01T00:00:00.000Z", workDay(week.startIso)), week)).toBe(true);
+    expect(inWorkWindow(row("e", "a", "2026-01-01T00:00:00.000Z", workDay(week.endIso)), week)).toBe(true);
+    expect(inWorkWindow(row("b", "a", "2026-01-01T00:00:00.000Z", workDay("2026-09-04")), week)).toBe(false);
+  });
+});
+
+describe("review OFF is not awaiting review (handoff 2026-10-02 §8)", () => {
+  const row = (id: string, ctx: string) =>
+    ({
+      id,
+      worker_id: "w1",
+      created_at: "2026-09-30T08:00:00Z",
+      engagement_context_id: ctx,
+      workers: { display_name: "Test", profiles: null },
+      journal_entry_confirmations: [],
+      journal_entry_metrics: [],
+    }) as never;
+
+  it("a decision-less entry in a review-off context is counted as reviewNotEnabled, not awaiting", () => {
+    const { totals, workers } = rollUpJournalWindow([row("a", "off"), row("b", "on")], {
+      workTime: false,
+      todayIso: "2026-09-30",
+      reviewOffContextIds: new Set(["off"]),
+    });
+    expect(totals.awaitingReview).toBe(1);
+    expect(totals.reviewNotEnabled).toBe(1);
+    expect(totals.entries).toBe(2);
+    expect(workers[0].awaitingReview).toBe(1);
+    expect(workers[0].reviewNotEnabled).toBe(1);
+  });
+
+  it("without review-off knowledge the previous behaviour holds (awaiting)", () => {
+    const { totals } = rollUpJournalWindow([row("a", "off")], { workTime: false, todayIso: "2026-09-30" });
+    expect(totals.awaitingReview).toBe(1);
+    expect(totals.reviewNotEnabled).toBe(0);
   });
 });

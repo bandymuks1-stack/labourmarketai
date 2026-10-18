@@ -1,26 +1,34 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { workspaceDisplayLabels } from "@/lib/company/organization-switch";
 import { redirect } from "next/navigation";
 
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedOrganizations } from "@/lib/company/owned-organizations";
-import { getGovernedOrganizations } from "@/lib/company/managed-organizations";
+import {
+  getGovernedOrganizations,
+  getInvitationOrganizations,
+} from "@/lib/company/managed-organizations";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { listManagedProjects } from "@/lib/projects/projects";
 import {
   listInvitationsForMe,
-  listMyEngagements,
+  listMyEngagementsResult,
   listMySentInvitations,
   searchPeopleAndCompanies,
 } from "@/lib/invitations/network";
 import { listMyTeamEnquiries } from "@/lib/company/team-enquiries";
 import { getEmployerOwnerProfileId } from "@/lib/communication/employer-resolution";
 import { InvitePanel } from "@/components/app/invite-panel";
+import { loadCanonicalDemand } from "@/lib/demand/canonical-demand";
 import {
   IncomingInvitationList,
   SentInvitationList,
 } from "@/components/app/invitation-list";
 import { MessageButton } from "@/components/app/message-button";
+import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
+import { resolveContactPermission } from "@/lib/communication/contact-permission";
+import { isContactPermitted } from "@/lib/communication/communication-eligibility";
 import {
   MyTeamEnquiriesList,
   TeamEnquiryButton,
@@ -35,6 +43,7 @@ import { DevelopmentReviewsSection } from "@/components/app/development-reviews-
 import { ManagementDecisionsSection } from "@/components/app/management-decisions-section";
 import { ApprovalsSection } from "./approvals-section";
 import { RequestsSection } from "./requests-section";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * "Mano tinklas" (core-network area B) — a SUB-SURFACE of the person /
@@ -63,6 +72,9 @@ export default async function NetworkPage({
     /** Pre-selects the relationship in the invite panel (e.g. `student` from
      *  the institution's "Invite learners"); validated inside the panel. */
     relationship?: string;
+    /** `1` opens the invite panel on arrival — the exit the empty search and
+     *  the empty relationships list offer (no preset, nothing pre-selected). */
+    invite?: string;
     wf?: string;
     req?: string;
     reqStatus?: string;
@@ -74,12 +86,19 @@ export default async function NetworkPage({
     /** Which administration area the reader explicitly opened. Absent on the
      *  default screen, which is the whole point — see ADMIN_AREAS below. */
     area?: string;
+    /** Result of the progressive email proof the auth callback appended
+     *  (`ok` | `failed`); only ever used to word the prompt, never to claim
+     *  a verified state (the database alone establishes that). */
+    email_verify?: string;
   }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { q, type, org, project, relationship, wf, req, reqStatus, reqType, rev, dec, area } =
+  const { q, type, org, project, relationship, invite, wf, req, reqStatus, reqType, rev, dec, area, email_verify } =
     await searchParams;
+  // The invitation door, for the two empty states below. The search text is
+  // kept so the reader lands back on the same screen with the panel open.
+  const inviteHref = `/dashboard/network?${q ? `q=${encodeURIComponent(q)}&` : ""}invite=1#network-invite` as "/dashboard";
   // Approvals-area outcome notice (Workflow & Approval Engine v1) —
   // validated against the closed notice vocabulary, never rendered raw.
   const workflowNotice = wf && isWorkflowNotice(wf) ? wf : null;
@@ -144,6 +163,9 @@ export default async function NetworkPage({
   // dead namespace (title "Marketplace", map/offers/shop cards, prepareBadge)
   // was deleted; the user reads exactly the same sentences.
   const t = await getTranslations("network");
+  // The unnamed-organization phrases live with the switcher's vocabulary so
+  // both surfaces say the same thing (owner walk 2026-09-07).
+  const tChat = await getTranslations("conversation.chat");
   const supabase = await createClient();
   const {
     data: { user },
@@ -185,19 +207,37 @@ export default async function NetworkPage({
    * appeared to show "duplicated approval templates". The rows were never
    * duplicates; the two owners of them were indistinguishable.
    */
+  /**
+   * ONE resolver, not a second copy of the rule (owner walk 2026-09-07).
+   *
+   * This block used to hand-roll the switcher's positional suffix —
+   * `${unnamed} ${n}` — which is the same invented identity the owner read on
+   * production as "Įmonės erdvė 1 / 2". Two surfaces, one lie, and only one of
+   * them would ever have been fixed. It now calls `workspaceDisplayLabels`,
+   * so the honest type-aware phrase and the id-fragment tiebreak are defined
+   * in exactly one place.
+   */
   const organizations =
     orgsResult.kind === "ok"
-      ? orgsResult.organizations.map((o, i, all) => ({
-          id: o.id,
-          name:
-            o.name ||
-            // Numbered only when more than one is unnamed, so a single
-            // nameless company reads plainly. Same rule as the workspace
-            // switcher (workspaceDisplayLabels).
-            (all.filter((x) => !x.name).length > 1
-              ? `${t("organizations.unnamed")} ${all.filter((x, j) => !x.name && j <= i).length}`
-              : t("organizations.unnamed")),
-        }))
+      ? (() => {
+          const infos = orgsResult.organizations.map((o) => ({
+            id: o.id,
+            name: o.name,
+            kind: "organization" as const,
+            organizationType: o.organizationType,
+            accentIndex: 0,
+          }));
+          const byId = workspaceDisplayLabels(infos, {
+            personal: "",
+            unnamedOrganization: {
+              company: tChat("workspaceUnnamedCompany"),
+              agency: tChat("workspaceUnnamedAgency"),
+              team: tChat("workspaceUnnamedTeam"),
+              other: tChat("workspaceUnnamed"),
+            },
+          });
+          return infos.map((o) => ({ id: o.id, name: byId.get(o.id) ?? o.name }));
+        })()
       : [];
 
   /**
@@ -235,6 +275,27 @@ export default async function NetworkPage({
     capabilities: organizationCapabilities[i] ?? [],
   }));
 
+  /**
+   * The invite panel's organizations: the owned ones above, plus every other
+   * organization whose invitations this person may manage — an owner/admin
+   * membership, or a member the owner delegated invitation management to
+   * (owner direction 2026-09-24; never a job title). The mirror of
+   * `invitation_org_authority_v1`; `create_invitation_v2` re-checks it.
+   */
+  const invitationOrganizations = (await getInvitationOrganizations())
+    .filter((g) => !organizations.some((o) => o.id === g.id))
+    .map((g) => ({ id: g.id, name: g.name || t("organizations.unnamed") }));
+  const invitationCapabilities = await Promise.all(
+    invitationOrganizations.map((o) => readOrganizationCapabilities(o.id)),
+  );
+  const inviteOrganizations = [
+    ...organizationsWithCapabilities,
+    ...invitationOrganizations.map((o, i) => ({
+      ...o,
+      capabilities: invitationCapabilities[i] ?? [],
+    })),
+  ];
+
   // The strip reads each area its OWN title, from the namespace that section
   // already owns — so a link can never drift from the heading it opens, and
   // no fifth copy of these four names enters the catalogue.
@@ -257,7 +318,7 @@ export default async function NetworkPage({
         <header className="flex flex-col gap-1">
           <Link
             href={"/dashboard/network" as "/dashboard"}
-            className="inline-flex min-h-11 items-center gap-1 self-start font-mono text-meta uppercase tracking-label text-brand-orange transition-colors hover:text-text-primary"
+            className="inline-flex min-h-11 items-center gap-1 self-start font-mono text-meta uppercase tracking-label text-text-muted transition-colors hover:text-text-primary"
             data-testid="network-admin-back"
           >
             ← {t("admin.back")}
@@ -290,36 +351,81 @@ export default async function NetworkPage({
 
   const [
     projects,
-    engagements,
+    engagementsRead,
     sent,
     incoming,
     myTeamEnquiries,
     // W7-S4: joins the existing batch rather than adding a serial stage — the
     // move must not re-introduce the waterfall W7-S3 removed from the profile.
     employerOwnerProfileId,
+    // Universal network v1: the caller's OWN open needs, as targets of an
+    // employer → person invitation. Composed from the ONE canonical demand
+    // read (never a second `customer_requests` reader).
+    canonicalDemand,
   ] = await Promise.all([
     listManagedProjects(),
-    listMyEngagements(),
+    listMyEngagementsResult(),
     listMySentInvitations(),
     listInvitationsForMe(),
     listMyTeamEnquiries(),
     getEmployerOwnerProfileId(),
+    loadCanonicalDemand(),
   ]);
+  // A failed engagement read is UNKNOWN: the section says "could not load"
+  // rather than showing the empty state that invites a first invitation.
+  const engagements = engagementsRead.kind === "ok" ? engagementsRead.rows : [];
+  const myDemands =
+    canonicalDemand.state === "ok"
+      ? canonicalDemand.rows
+          .filter((r) => r.ownedByViewer && r.source === "customer_request" && r.actionable)
+          .map((r) => ({
+            id: r.id,
+            label: [r.roleText, r.country].filter(Boolean).join(" · ") || r.id.slice(0, 8),
+          }))
+      : [];
   const search = q ? await searchPeopleAndCompanies(q) : null;
+  // WHICH discovered people may actually be messaged (§8.1, default-closed):
+  // the same resolver the open-conversation action uses, so the button is
+  // drawn only where pressing it can succeed.
+  const contactable = new Set<string>();
+  if (search) {
+    await Promise.all(
+      search.people.map(async (p) => {
+        if (!p.profileId) return;
+        try {
+          if (isContactPermitted(await resolveContactPermission(p.profileId))) {
+            contactable.add(p.profileId);
+          }
+        } catch {
+          /* unknown → not contactable (default-closed) */
+        }
+      }),
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6" data-testid="network-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 
       {/* Invitations addressed to ME — the most actionable thing first. */}
+      {/* An invitation addressed to an EMAIL is only shown to that mailbox's
+          proven owner. An unverified person is not blocked from anything else
+          — they are offered the one-tap proof, here, where it is needed. */}
+      {incoming.status === "email_unverified" && (
+        <section className="flex flex-col gap-2" data-testid="network-email-unverified">
+          <VerifyEmailPrompt
+            locale={locale}
+            next="/dashboard/network"
+            result={email_verify ?? null}
+          />
+        </section>
+      )}
       {incoming.status === "ok" && incoming.items.length > 0 && (
         <section className="flex flex-col gap-2" data-testid="network-incoming">
           <h2 className="font-mono text-meta uppercase tracking-label text-text-secondary">
@@ -375,7 +481,16 @@ export default async function NetworkPage({
             )}
             {search.people.length === 0 && search.companies.length === 0 ? (
               <p className="text-xs text-text-muted" data-testid="network-search-empty">
-                {t("search.empty")}
+                {t("search.empty")}{" "}
+                {/* Zero results is not a dead end: the person who is not on the
+                    platform (or not discoverable) is reached by invitation. */}
+                <Link
+                  href={inviteHref}
+                  className="font-medium text-brand-blue underline-offset-2 hover:underline"
+                  data-testid="network-search-empty-cta"
+                >
+                  {t("search.emptyCta")}
+                </Link>
               </p>
             ) : (
               <>
@@ -398,10 +513,26 @@ export default async function NetworkPage({
                         <span className="ml-auto">
                           {/* Contact goes through the existing permission-
                               gated message flow — never a raw channel. */}
-                          <MessageButton
-                            profileId={p.profileId}
-                            labelKey="messageWorker"
-                          />
+                          {p.profileId && contactable.has(p.profileId) ? (
+                            <MessageButton
+                              profileId={p.profileId}
+                              labelKey="messageWorker"
+                            />
+                          ) : (
+                            // WAS A DEAD END (walked 2026-10-01): the button
+                            // was drawn for every discovered person, but
+                            // opening a thread needs a recorded relationship
+                            // (§8.1) — so for anyone without one it bounced
+                            // to the inbox with "cannot open". Say so, and
+                            // point at the two real ways in.
+                            <Link
+                              href={inviteHref}
+                              className="max-w-xs text-meta leading-snug text-text-muted underline-offset-2 hover:text-brand-blue hover:underline"
+                              data-testid={`network-person-no-contact-${p.workerId}`}
+                            >
+                              {t("search.noContactYet")}
+                            </Link>
+                          )}
                         </span>
                       </li>
                     ))}
@@ -418,7 +549,7 @@ export default async function NetworkPage({
                         <span className="text-sm font-medium text-text-primary">
                           {c.displayName}
                         </span>
-                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        <span className="text-meta text-text-muted">
                           {t(`search.orgType.${c.organizationType}`)}
                         </span>
                         {c.country && (
@@ -442,16 +573,21 @@ export default async function NetworkPage({
         )}
       </section>
 
-      {/* The canonical Pakviesti action. */}
-      <InvitePanel
-        locale={locale}
-        organizations={organizationsWithCapabilities}
-        projects={projects.map((p) => ({ id: p.id, title: p.title }))}
-        defaultType={type}
-        defaultOrganizationId={org}
-        defaultProjectId={project}
-        defaultRelationshipSlug={relationship}
-      />
+      {/* The canonical Pakviesti action. `id` is the anchor the two empty
+          states above link to; `?invite=1` opens it on arrival. */}
+      <div id="network-invite">
+        <InvitePanel
+          locale={locale}
+          organizations={inviteOrganizations}
+          projects={projects.map((p) => ({ id: p.id, title: p.title }))}
+          demands={myDemands}
+          defaultType={type}
+          defaultOrganizationId={org}
+          defaultProjectId={project}
+          defaultRelationshipSlug={relationship}
+          defaultOpen={invite === "1"}
+        />
+      </div>
 
       {/* My sent invitations with the real lifecycle. */}
       <section className="flex flex-col gap-2" data-testid="network-sent">
@@ -597,8 +733,25 @@ export default async function NetworkPage({
             {t("relationships.why")}
           </p>
         )}
-        {engagements.length === 0 ? (
-          <p className="text-xs text-text-muted">{t("relationships.empty")}</p>
+        {engagementsRead.kind !== "ok" ? (
+          <p
+            role="alert"
+            className="text-xs text-text-secondary"
+            data-testid="network-relationships-unavailable"
+          >
+            {t("relationships.unavailable")}
+          </p>
+        ) : engagements.length === 0 ? (
+          <p className="text-xs text-text-muted" data-testid="network-relationships-empty">
+            {t("relationships.empty")}{" "}
+            <Link
+              href={inviteHref}
+              className="font-medium text-brand-blue underline-offset-2 hover:underline"
+              data-testid="network-relationships-empty-cta"
+            >
+              {t("relationships.emptyCta")}
+            </Link>
+          </p>
         ) : (
           <ul className="flex flex-col gap-2">
             {engagements.map((e) => (
@@ -610,7 +763,7 @@ export default async function NetworkPage({
                 <span className="text-sm text-text-primary">
                   {e.organizationName ?? t("relationships.noOrg")}
                 </span>
-                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                <span className="text-meta text-text-muted">
                   {t(`relationships.slug.${e.relationshipSlug}`)}
                 </span>
                 {e.title && (

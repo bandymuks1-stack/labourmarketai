@@ -55,6 +55,17 @@ const CLASSIFICATION: Record<string, string> = {
   // Workforce planning zone (Labour Market OS P10) — the ONE visual planning
   // zone INSIDE the company workspace; composes the P1–P4 workforce reads.
   "dashboard/company/planning": "REAL_LAUNCH_SURFACE",
+  // The organization DOORS (owner IA correction 2026-09-16,
+  // docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2): the company
+  // hub split into its domains. Each composes sections that already existed
+  // on /dashboard/company; none introduces a data model or a write path.
+  "dashboard/company/people": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/people/[personId]": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/needs": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/partners": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/education": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/history": "REAL_LAUNCH_SURFACE",
+  "dashboard/company/settings": "REAL_LAUNCH_SURFACE",
   "dashboard/company/projects/new": "REAL_LAUNCH_SURFACE",
   "dashboard/company/scouting": "REAL_LAUNCH_SURFACE",
   "dashboard/documents": "REAL_LAUNCH_SURFACE",
@@ -67,10 +78,16 @@ const CLASSIFICATION: Record<string, string> = {
   // journal-only). Honest empty state points at the journal.
   "dashboard/gallery": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox": "REAL_LAUNCH_SURFACE",
+  // EDU-5 (2026-10-01): reachable ONLY through the manager brief's chip, and only
+  // while the pending review count N>0 (no static nav link, not in the command
+  // finder or module registry - preview-surfaces-unlinked / command-finder /
+  // dashboard-module-registry still enforce that). Was GATED_PREVIEW (F-N1).
+  "dashboard/learning": "REAL_LAUNCH_SURFACE",
   // Market intelligence workspace (Labour Market Intelligence v1) — sourced,
   // deterministic salary/demand signals with per-card explanations; degrades
   // honestly (insufficient_data / needs_migration), external sources OFF.
   "dashboard/intelligence": "REAL_LAUNCH_SURFACE",
+  "dashboard/inbox/counterparty": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox/quick": "REAL_LAUNCH_SURFACE",
   "dashboard/inbox/report": "REAL_LAUNCH_SURFACE",
   "dashboard/journal": "REAL_LAUNCH_SURFACE",
@@ -78,6 +95,11 @@ const CLASSIFICATION: Record<string, string> = {
   // transcript review; degrades honestly until the owner deploys the
   // self-hosted transcription service.
   "dashboard/journal/voice": "REAL_LAUNCH_SURFACE",
+  // Work in Numbers (target worker IA 2026-09-13 §2, #1724 lane F): the
+  // figures' own station over the ONE work-intelligence reader — the
+  // dominant-skill answer first, share bars, period selector, checks, the
+  // organization's ledger beside, growth kinds. UNKNOWN is said, never zero.
+  "dashboard/work-in-numbers": "REAL_LAUNCH_SURFACE",
   "dashboard/market-map": "REAL_LAUNCH_SURFACE",
   "dashboard/opportunities": "REAL_LAUNCH_SURFACE",
   // Person detail page (production UX repair v2, F2) — the single permitted
@@ -159,7 +181,6 @@ const CLASSIFICATION: Record<string, string> = {
 
   // ── GATED_PREVIEW (guard-enforced zero inbound links) ─────────────────
   "dashboard/talent": "GATED_PREVIEW",
-  "dashboard/learning": "GATED_PREVIEW", // parked pending owner entry-point decision (F-N1)
   // NOTE (dashboard consolidation v1): the former GATED_PREVIEW `dashboard/hub`
   // route was REMOVED. The premium hub is now the canonical /dashboard lead
   // surface (REAL_LAUNCH_SURFACE, classified above) — there is no separate hub

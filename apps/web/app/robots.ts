@@ -57,6 +57,8 @@ export default function robots(): MetadataRoute.Robots {
           "/*/onboarding",
           "/*/auth", // login / signup / reset / callback
           "/*/cv", // worker CV tool (authenticated surface)
+          "/*/invite", // capability-token invitation pages — never indexable
+          "/*/oauth", // OAuth consent — a session step, not a page
           "/*/design", // internal design preview, not a public page
         ],
       },

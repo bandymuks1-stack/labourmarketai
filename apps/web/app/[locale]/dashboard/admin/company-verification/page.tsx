@@ -8,6 +8,7 @@ import {
   CompanyVerificationReview,
   type CompanyVerificationReviewLabels,
 } from "@/components/app/company-verification-review";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Admin-only company verification review surface.
@@ -73,12 +74,10 @@ export default async function AdminCompanyVerificationPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-company-verification">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         <Link
           href={"/dashboard/admin" as "/dashboard"}

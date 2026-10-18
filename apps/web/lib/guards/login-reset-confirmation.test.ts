@@ -24,7 +24,7 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 /** LT/EN/RU/NL/DE — the ACTIVE set (lib/i18n/config.ts). */
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 describe("password reset ends in a confirmation", () => {
   const resetForm = read("components/app/reset-password-form.tsx");

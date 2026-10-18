@@ -66,11 +66,10 @@ test.describe("row 4 — the fake market map is gone, the capability is not", ()
     // The other half of "no capability was lost": the door has to lead
     // somewhere real.
     //
-    // NOTE — the second Leaflet chain this test once recorded (row 28) was
-    // COLLAPSED 2026-08-01: `/dashboard/market-map` renders the location
-    // picker presentation (`market-map/location-map.tsx`) on the SAME
-    // `leaflet-engine.ts` the canonical <MarketMap> boots through — one
-    // engine, guard-pinned by `w3-row28-one-leaflet-engine.test.ts`.
+    // NOTE — `/dashboard/market-map` renders ONE map: the canonical
+    // <MarketMap> (through WorldDiscovery) booted by `leaflet-engine.ts`; the
+    // location + radius controls (`market-map/map-location-controls.tsx`) are
+    // controls OF it — guard-pinned by `w3-row28-one-leaflet-engine.test.ts`.
     await page.goto("/lt/dashboard/market-map");
     await expect(page.getByTestId("market-map-base")).toBeVisible();
     // Real Leaflet, real coordinates — not an illustration.
@@ -237,10 +236,16 @@ test.describe("row 5 — the recommendations card became a result", () => {
     }
   });
 
-  test("'open full screen' leads to the board — the SAME capability, not a second dashboard", async ({
+  test("the board door NAMES its station and leads to the board — the SAME capability, not a second dashboard", async ({
     page,
   }) => {
     await page.goto("/lt/dashboard?result=opportunities");
+    // 2026-09-23 (owner P0/P1 §17): a control that leaves the conversation
+    // says where it goes. "Open full screen" is the panel's in-place
+    // expansion (`context-panel-expand`), never this door.
+    await expect(page.getByTestId("opportunities-open-full").first()).toHaveText(
+      /Atidaryti galimybes/,
+    );
     await page.getByTestId("opportunities-open-full").first().click();
 
     // The canonical board. NOT /dashboard/advanced — the whole point of the

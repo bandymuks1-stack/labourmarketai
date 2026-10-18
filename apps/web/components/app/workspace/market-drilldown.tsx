@@ -18,6 +18,7 @@ import {
 import {
   COMPLETENESS_FIELDS,
   DEMAND_SOURCE,
+  type DemandUnitKind,
   type MatchReason,
   type MissingField,
   type ProjectEvaluation,
@@ -65,6 +66,7 @@ export function MarketDrilldown({
   workspace,
   onSelectGeography,
   onSelectProject,
+  onSelectDemand,
   onBackToMarket,
   onBackToProjects,
 }: {
@@ -75,6 +77,13 @@ export function MarketDrilldown({
   workspace: string | null;
   onSelectGeography: (g: GeographySelection) => void;
   onSelectProject: (projectId: string) => void;
+  /**
+   * Open the CANDIDATES result for one of the viewer's OWN needs.
+   *
+   * Absent when the surface has no candidates depth to offer; the panel then
+   * keeps the honest not-yet state rather than rendering a dead control.
+   */
+  onSelectDemand?: (requestId: string) => void;
   onBackToMarket: () => void;
   onBackToProjects: () => void;
 }) {
@@ -85,6 +94,7 @@ export function MarketDrilldown({
         geoToken={geoToken}
         projectId={projectId}
         workspace={workspace}
+        onSelectDemand={onSelectDemand}
         onBackToMarket={onBackToMarket}
         onBackToProjects={onBackToProjects}
       />
@@ -285,6 +295,7 @@ function ProjectRow({
         onClick={() => onOpen(row.projectId)}
         data-testid="project-row"
         data-project-id={row.projectId}
+        data-unit-kind={row.unitKind}
         data-project-precision={row.precision}
         className="w-full rounded-card border border-ink-500 bg-ink-800/50 p-3 text-left hover:border-brand-blue"
       >
@@ -292,6 +303,7 @@ function ProjectRow({
           <span className="min-w-0 flex-1 break-words font-display text-card-title font-semibold text-text-primary">
             {row.title ?? t("notStated")}
           </span>
+          <UnitKindBadge kind={row.unitKind} />
           <PrecisionBadge precision={row.precision} />
         </span>
 
@@ -348,6 +360,7 @@ function ProjectEvaluationView({
   geoToken,
   projectId,
   workspace,
+  onSelectDemand,
   onBackToMarket,
   onBackToProjects,
 }: {
@@ -355,6 +368,7 @@ function ProjectEvaluationView({
   geoToken: string;
   projectId: string;
   workspace: string | null;
+  onSelectDemand?: (requestId: string) => void;
   onBackToMarket: () => void;
   onBackToProjects: () => void;
 }) {
@@ -578,13 +592,33 @@ function ProjectEvaluationView({
                 className="rounded-card border border-ink-500 bg-ink-800/50 p-3"
                 data-testid="people-continuation"
               >
-                {/* NOT a fake people list. People matching is the next goal; a
-                    list invented to make this button look functional would be
-                    the fabricated result this platform bans. What IS real is
-                    the context — so the context is what is shown. */}
-                <p className="text-basis text-state-amber">{t("peopleNotYet")}</p>
+                {/* NOT a fake people list. What IS real is the context — so
+                    the context is what is shown.
+
+                    AND, FOR THE VIEWER'S OWN NEED, A REAL NEXT STEP. Matching
+                    is not missing: the deterministic engine behind
+                    `runScouting` is live, and the `candidates` result renders
+                    it. It is simply scoped to OWN demand
+                    (`profile_id = auth.uid()`), so offering it over another
+                    tenant's row would dead-end in `not-found`. The control is
+                    therefore offered only where it actually leads somewhere,
+                    and the honest not-yet line stands everywhere else. */}
+                {row.unitKind === "need" && row.ownedByViewer && onSelectDemand ? (
+                  <button
+                    type="button"
+                    data-testid="open-candidates"
+                    onClick={() => onSelectDemand(row.projectId)}
+                    className="min-h-11 self-start rounded-full border border-brand-blue px-3.5 text-support font-medium text-brand-blue hover:bg-brand-blue/10"
+                  >
+                    {t("openCandidates")}
+                  </button>
+                ) : (
+                  <p className="text-basis text-state-amber" data-testid="people-not-yet">
+                    {t("peopleNotYet")}
+                  </p>
+                )}
                 <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2">
-                  <Field label={t("fieldProjectId")} value={row.projectId} mono />
+                  <Field label={t("fieldProject")} value={row.title ?? t("notStated")} />
                   <Field label={t("fieldRoles")} value={row.roles.join(", ")} />
                   <Field
                     label={t("fieldSkills")}
@@ -743,6 +777,28 @@ function Field({
         {empty ? t("notStated") : value}
       </span>
     </div>
+  );
+}
+
+/**
+ * WHAT KIND OF UNIT THIS ROW IS — an open need, or a project.
+ *
+ * The drilldown lists whatever the canonical demand read returned, and those
+ * are not all the same shape: a `customer_requests` row is one open need an
+ * employer created, a project row carries several. Rendering both under one
+ * word would make the list claim a structure the row does not have, so the row
+ * says which it is instead of the heading guessing for it.
+ */
+function UnitKindBadge({ kind }: { kind: DemandUnitKind }) {
+  const t = useTranslations("conversation.results");
+  return (
+    <span
+      data-testid="unit-kind-badge"
+      data-unit-kind={kind}
+      className="flex-none rounded-md border border-ink-500 px-1.5 text-meta text-text-muted"
+    >
+      {kind === "need" ? t("unitKindNeed") : t("unitKindProject")}
+    </span>
   );
 }
 

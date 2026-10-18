@@ -16,6 +16,7 @@ import {
   saveAgencyClientAction,
   type AgencyClientActionState,
 } from "@/lib/agency/clients-actions";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
 
 /**
  * "Klientai" — staffing-agency client panel (canonical journey P5).
@@ -57,14 +58,15 @@ export interface AgencyClientsLabels {
 
 const IDLE: AgencyClientActionState = { status: "idle" };
 
-const TONE_CLASS: Record<ReturnType<typeof demandStatusTone>, string> = {
-  muted: "border-ink-500 text-text-muted",
-  info: "border-brand-blue/50 text-brand-blue",
-  warning: "border-state-warning/50 text-state-warning",
-  success: "border-state-success/50 text-state-success",
+/** Demand status tone -> the one StatusChip pattern (word + shape). */
+const TONE_VARIANT: Record<ReturnType<typeof demandStatusTone>, StatusChipVariant> = {
+  muted: "neutral",
+  info: "waiting",
+  warning: "attention",
+  success: "success",
 };
 
-function StatusChip({
+function DemandStatusChip({
   status,
   labels,
 }: {
@@ -72,12 +74,9 @@ function StatusChip({
   labels: AgencyClientsLabels;
 }) {
   return (
-    <span
-      className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${TONE_CLASS[demandStatusTone(status)]}`}
-      data-testid="agency-client-demand-status"
-    >
+    <StatusChip variant={TONE_VARIANT[demandStatusTone(status)]} testid="agency-client-demand-status" className="shrink-0">
       {labels.statuses[status] ?? status}
-    </span>
+    </StatusChip>
   );
 }
 
@@ -100,7 +99,7 @@ function DemandRow({
       <span className="min-w-0 flex-1 truncate text-sm text-text-primary">
         {demand.title}
       </span>
-      <StatusChip status={demand.status} labels={labels} />
+      <DemandStatusChip status={demand.status} labels={labels} />
       {/* Link ONLY — candidates/status/communication live on the canonical
           scouting + lifecycle surface for this demand. */}
       <a
@@ -300,7 +299,7 @@ export function AgencyClientsSection({
             >
               {labels.demandsEmpty}{" "}
               <a
-                href={`/${locale}/dashboard/company#demand-intake`}
+                href={`/${locale}/dashboard/company/needs#demand-intake`}
                 className="font-semibold text-brand-blue hover:underline"
               >
                 {labels.demandsEmptyCta} →
@@ -400,7 +399,7 @@ export function AgencyClientsSection({
             >
               {labels.demandsEmpty}{" "}
               <a
-                href={`/${locale}/dashboard/company#demand-intake`}
+                href={`/${locale}/dashboard/company/needs#demand-intake`}
                 className="font-semibold text-brand-blue hover:underline"
               >
                 {labels.demandsEmptyCta} →

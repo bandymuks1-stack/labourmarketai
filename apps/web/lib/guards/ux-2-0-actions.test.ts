@@ -199,9 +199,13 @@ describe("the composer grows with its content", () => {
 
   it("keeps the Enter / Shift+Enter contract and the attach + send wiring", () => {
     expect(composer).toMatch(/e\.key === "Enter" && !e\.shiftKey/);
-    expect(composer).toMatch(/composer-attach/);
+    expect(composer).toMatch(/data-testid="composer-attach"/);
     expect(composer).toMatch(/composer-send/);
-    expect(composer).toMatch(/onAttach\(\)/);
+    // Owner P0 2026-09-23: the paperclip opens a real file input and hands the
+    // picked file up — it no longer launches a flow with no file at all.
+    expect(composer).toMatch(/data-testid="composer-attach-input"/);
+    expect(composer).toMatch(/onAttachFile\(picked\)/);
+    expect(composer, "the zero-argument launcher must not come back").not.toMatch(/onAttach\(\)/);
   });
 });
 

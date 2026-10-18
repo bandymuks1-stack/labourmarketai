@@ -1,8 +1,7 @@
 "use client";
 
+import { Explain } from "@/components/app/premium/grammar";
 import { useActionState, useState } from "react";
-import { ChevronRight } from "lucide-react";
-
 import { Link } from "@/lib/i18n/navigation";
 
 import {
@@ -17,11 +16,19 @@ import type {
   LinkedCompanyWorker,
 } from "@/lib/company/company-workers";
 import { MessageButton } from "@/components/app/message-button";
+import {
+  IdentityDisclosure,
+  PersonIdentityCard,
+  type IdentityMeta,
+} from "@/components/app/identity/person-identity-card";
+import { personMonogram } from "@/lib/visual/avatar-monogram";
+import { RosterLinkEndControl } from "@/components/app/roster-link-end";
 import { computeEmploymentJournalContext } from "@/lib/operations/employment-journal-context";
 import {
   WorkerOperationsRoleForm,
   type OperationsRoleControlLabels,
 } from "@/components/app/worker-operations-role-form";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Company workers + invitations panel.
@@ -49,9 +56,24 @@ export interface CompanyWorkersSectionLabels {
   readonly inviteSubmit: string;
   readonly invitationsHeading: string;
   readonly invitationsEmpty: string;
+  /** Shown instead of the invite form and the pending list to a person
+   *  without `manage-invitations`. */
+  readonly invitationsManagedElsewhere: string;
   readonly statusInvited: string;
+  /** No e-mail is sent for a roster invitation, so the owner gets a link to
+   *  hand over themselves (sign-up; the invitation waits for that address). */
+  readonly inviteShareLinkLabel?: string;
+  readonly inviteShareLinkHint?: string;
+  readonly inviteShareCopy?: string;
+  readonly inviteShareCopied?: string;
   readonly statusAlreadyPending: string;
   readonly statusAlreadyLinked: string;
+  readonly statusWordActive: string;
+  readonly statusWordPending: string;
+  readonly statusWordAccepted: string;
+  readonly statusWordCancelled: string;
+  readonly statusWordExpired: string;
+  readonly statusWordEnded: string;
   readonly statusNotOwner: string;
   readonly statusInvalidEmail: string;
   readonly statusError: string;
@@ -69,7 +91,36 @@ export interface CompanyWorkersSectionLabels {
   readonly coordinationBody: string;
   readonly coordinationNextAction: string;
   readonly operations: OpsCellLabels;
+  /** Identity-card copy: the worker's own stated availability, by status. */
+  readonly identity: { readonly availability: Record<string, string> };
+  /** Team-at-a-glance copy: the state of each person and the one action it asks for. */
+  readonly team: {
+    readonly free: string;
+    readonly working: string;
+    readonly away: string;
+    readonly assign: string;
+    readonly openCalendar: string;
+  };
 }
+
+/** The team as a whole + each person's state, resolved by the page from the
+ *  ONE capacity read. `byWorker` text is display-ready (dates formatted).
+ *  Absent = the read did not answer; nothing is then said about anyone. */
+export interface CompanyWorkersTeamView {
+  readonly counts: {
+    readonly free: number;
+    readonly working: number;
+    readonly away: number;
+  } | null;
+  readonly byWorker: Readonly<
+    Record<string, { readonly state: "free" | "working" | "away"; readonly text: string }>
+  >;
+}
+
+const PRIMARY_ACTION =
+  "inline-flex min-h-11 items-center rounded-control border border-ink-500 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
+const QUIET_ACTION =
+  "inline-flex min-h-11 items-center rounded-control px-2.5 py-2 text-xs font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
 
 export interface OpsCellLabels {
   readonly columnHeading: string;
@@ -85,23 +136,49 @@ export interface OpsCellLabels {
   readonly assign: OperationsRoleControlLabels;
 }
 
-/** Subtle left status rail per review capability (Step 9, visual only). */
-const REVIEW_RAIL: Record<string, string> = {
-  can_review: "border-l-2 border-l-state-success/60",
-  can_view: "border-l-2 border-l-brand-blue/50",
-  not_enabled: "border-l-2 border-l-ink-500",
-};
+/** Human word for a stored link/invitation status; an unknown value falls back to the stored word. */
+function statusWord(labels: CompanyWorkersSectionLabels, status: string): string {
+  switch (status) {
+    case "active":
+      return labels.statusWordActive;
+    case "pending":
+      return labels.statusWordPending;
+    case "accepted":
+      return labels.statusWordAccepted;
+    case "cancelled":
+      return labels.statusWordCancelled;
+    case "expired":
+      return labels.statusWordExpired;
+    case "ended":
+    case "inactive":
+      return labels.statusWordEnded;
+    default:
+      return status;
+  }
+}
 
 export function CompanyWorkersSection({
   workersResult,
   invitationsResult,
   labels,
+  avatarByWorker,
+  professionsByWorker,
   roleCoordinationEnabled,
   canAssignRoles = false,
+  reviewElsewhere,
+  canManageInvitations = false,
+  team,
 }: {
   readonly workersResult: ListState<LinkedCompanyWorker>;
   readonly invitationsResult: ListState<CompanyWorkerInvitation>;
   readonly labels: CompanyWorkersSectionLabels;
+  /** Signed photo URL per workerId, resolved by the page through the one
+   *  photo rule; absent / null = initials. */
+  readonly avatarByWorker?: Record<string, string | null>;
+  /** Profession names per workerId from the canonical profession read (primary
+   *  first), already in the viewer's language. Absent / empty = the person has
+   *  declared none that could be named; the card then shows the role alone. */
+  readonly professionsByWorker?: Record<string, readonly string[]>;
   /** From the operations role-capability map — false today (foreman /
    *  manager coordination is not enabled). When false, show the honest
    *  not-enabled note instead of pretending coordination works. */
@@ -109,12 +186,20 @@ export function CompanyWorkersSection({
   /** Owner/admin viewing their own company → show the role-select control.
    *  The RPC re-validates ownership regardless. */
   readonly canAssignRoles?: boolean;
+  /** Where the page's ONE journal-review control lives (org members panel). */
+  readonly reviewElsewhere?: { readonly href: string; readonly label: string };
+  /** `manage-invitations` (owner/admin, never a job title): the invite form
+   *  and the pending-invitations list. Without it, a neutral explanation. */
+  readonly canManageInvitations?: boolean;
+  /** Team state from the ONE capacity read (see `derivePeopleTeamState`). */
+  readonly team?: CompanyWorkersTeamView;
 }) {
   const [state, formAction, isPending] = useActionState<
     InviteCompanyFormState | null,
     FormData
   >(inviteCompanyWorkerAction, null);
   const [shouldShowOutcome, setShouldShowOutcome] = useState(true);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const migrationNeeded =
     workersResult.kind === "needs-migration" ||
@@ -159,8 +244,33 @@ export function CompanyWorkersSection({
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {labels.title}
         </h2>
-        <p className="text-sm text-text-secondary">{labels.subtitle}</p>
+        {labels.subtitle ? <p className="text-sm text-text-secondary">{labels.subtitle}</p> : null}
       </header>
+
+      {team?.counts ? (
+        <ul
+          className="grid grid-cols-3 gap-2"
+          data-testid="company-team-counts"
+          aria-label={labels.title}
+        >
+          {(
+            [
+              ["free", team.counts.free, labels.team.free],
+              ["working", team.counts.working, labels.team.working],
+              ["away", team.counts.away, labels.team.away],
+            ] as const
+          ).map(([key, n, label]) => (
+            <li
+              key={key}
+              className="flex min-w-0 flex-col rounded-control border border-ink-600 bg-ink-900/40 px-3 py-2"
+              data-testid={`company-team-count-${key}`}
+            >
+              <span className="font-display text-2xl font-bold tabular-nums text-text-primary">{n}</span>
+              <span className="min-w-0 break-words text-meta text-text-secondary">{label}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       {migrationNeeded ? (
         <div
@@ -206,58 +316,159 @@ export function CompanyWorkersSection({
                     ? labels.operations.notAssigned
                     : (labels.operations.roleLabels[ctx.operationsRole] ??
                       labels.operations.notAssigned);
+                const personName = w.displayName?.trim() || w.email || "\u2014";
+                const availabilityText = w.availabilityStatus
+                  ? (labels.identity.availability[w.availabilityStatus] ?? null)
+                  : null;
+                const ts = team?.byWorker[w.workerId] ?? null;
+                const tradeNames = professionsByWorker?.[w.workerId] ?? [];
+                // The one real role: a stated title, or an assigned role. An
+                // unassigned role is simply not said (SEP-5: identity ≠ role).
+                const roleText =
+                  w.operationsTitle?.trim() ||
+                  (ctx.operationsRole === "not_enabled" ? "" : roleLabel);
+                // State in ONE meta line: from the capacity read when it
+                // answered, otherwise the person's own stated availability.
+                const meta: IdentityMeta[] = [];
+                if (ts) {
+                  meta.push({
+                    key: "state",
+                    kind: ts.state === "working" ? "assignment" : "availability",
+                    label: ts.text,
+                    live: ts.state === "free",
+                  });
+                } else {
+                  if (availabilityText) {
+                    meta.push({
+                      key: "avail",
+                      kind: "availability",
+                      label: w.availableFrom
+                        ? `${availabilityText} · ${w.availableFrom.slice(0, 10)}`
+                        : availabilityText,
+                      live: w.availabilityStatus === "available",
+                    });
+                  }
+                  if (w.currentProjects.length > 0) {
+                    meta.push({
+                      key: "project",
+                      kind: "assignment",
+                      label: w.currentProjects.join(" · "),
+                    });
+                  }
+                }
+                if (w.locationCountry) {
+                  meta.push({ key: "loc", kind: "location", label: w.locationCountry });
+                }
+                // The trade leads the card; the role (a different fact, SEP-5)
+                // moves to its own meta entry instead of standing in for it.
+                if (tradeNames.length > 0 && roleText) {
+                  meta.unshift({ key: "role", kind: "role", label: roleText });
+                }
+                // ONE contextual primary action by state; everything else is
+                // quieter. free → give work; working → see it in time; away or
+                // unknown → reach the person.
+                const primary: "assign" | "calendar" | "message" =
+                  ts?.state === "free" ? "assign" : ts?.state === "working" ? "calendar" : "message";
                 return (
                   <li
                     key={w.workerId}
-                    className={`card-border flex flex-col gap-2 p-3 ${REVIEW_RAIL[ctx.reviewCapability] ?? ""}`}
+                    className="card-border flex flex-col gap-2 p-3"
                     data-testid={`company-worker-row-${w.workerId}`}
                     data-review-capability={ctx.reviewCapability}
+                    data-team-state={ts?.state ?? "unknown"}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      {/* F2: every permitted member row opens the real person
-                          page (fail-closed by can_view_worker RLS there). */}
-                      <Link
-                        href={`/dashboard/people/${w.workerId}`}
-                        className="group inline-flex min-w-0 items-center gap-1.5 text-sm font-medium text-text-primary hover:text-brand-blue"
-                        data-testid={`company-worker-open-${w.workerId}`}
-                      >
-                        <span className="break-all">{w.email ?? "—"}</span>
-                        <ChevronRight
-                          className="h-3.5 w-3.5 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-brand-blue"
-                          aria-hidden
-                        />
-                      </Link>
-                      <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">{w.status ?? "active"}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Link
-                        href={`/dashboard/people/${w.workerId}`}
-                        className="w-fit rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary"
-                      >
-                        {labels.openProfile}
-                      </Link>
-                      <MessageButton profileId={w.profileId} labelKey="messageWorker" />
-                    </div>
-                    <div className="flex flex-col gap-1 text-xs text-text-secondary">
-                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.operations.columnHeading}</span>
-                        <span>
-                          {w.operationsTitle?.trim()
-                            ? w.operationsTitle
-                            : roleLabel}
-                          <span className="ml-1 text-meta text-text-muted">
-                            ·{" "}
-                            {ctx.reviewCapability === "can_review"
-                              ? labels.operations.reviewEnabled
-                              : labels.operations.reviewNotEnabled}
+                    {/* ONE identity, team depth (owner 2026-10-01): the same
+                        PersonIdentityCard the employer reads an application
+                        with. Layer 1 = who, role, state, place; the role and
+                        journal controls open as a layer. */}
+                    <PersonIdentityCard
+                      variant="team-member"
+                      testid={`company-worker-identity-${w.workerId}`}
+                      name={personName}
+                      initials={personMonogram(personName)}
+                      avatarUrl={avatarByWorker?.[w.workerId] ?? null}
+                      nameHref={`/dashboard/people/${w.workerId}`}
+                      professions={tradeNames.length > 0 ? [...tradeNames] : roleText ? [roleText] : []}
+                      meta={meta}
+                      status={
+                        w.status && w.status !== "active" ? (
+                          <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
+                            {statusWord(labels, w.status)}
                           </span>
-                        </span>
-                        <span
-                          className="text-meta text-text-muted"
-                          data-testid={`company-worker-next-action-${w.workerId}`}
-                        >
-                          {labels.operations.nextActionLabels[ctx.nextAction] ??
-                            ""}
-                        </span>
+                        ) : null
+                      }
+                      actions={
+                        <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                          {primary === "assign" ? (
+                            <Link
+                              href={"/dashboard/projects" as "/dashboard"}
+                              className={PRIMARY_ACTION}
+                              data-testid={`company-worker-assign-${w.workerId}`}
+                            >
+                              {labels.team.assign}
+                            </Link>
+                          ) : null}
+                          {primary === "calendar" ? (
+                            <Link
+                              href={"/dashboard/company/planning" as "/dashboard"}
+                              className={PRIMARY_ACTION}
+                              data-testid={`company-worker-calendar-${w.workerId}`}
+                            >
+                              {labels.team.openCalendar}
+                            </Link>
+                          ) : null}
+                          <MessageButton
+                            profileId={w.profileId}
+                            labelKey="messageWorker"
+                            variant={primary === "message" ? "primary" : "quiet"}
+                          />
+                          <Link
+                            href={`/dashboard/people/${w.workerId}`}
+                            className={QUIET_ACTION}
+                            data-testid={`company-worker-open-${w.workerId}`}
+                          >
+                            {labels.openProfile}
+                          </Link>
+                          {/* R-9: the owner ends the relationship through the one
+                              gated write (the RPC re-derives ownership). Destructive,
+                              so it is the quietest control on the card. */}
+                          {canAssignRoles && w.companyId ? (
+                            <span className="ml-auto">
+                              <RosterLinkEndControl
+                                kind="company"
+                                orgLegacyId={w.companyId}
+                                workerId={w.workerId}
+                                side="owner"
+                              />
+                            </span>
+                          ) : null}
+                        </div>
+                      }
+                    >
+                      <IdentityDisclosure
+                        id="operations"
+                        title={labels.operations.columnHeading}
+                      >
+                        <div className="flex flex-col gap-1 text-xs text-text-secondary">
+                          <span>
+                            {roleText}
+                            <span className="ml-1 text-meta text-text-muted">
+                              {"\u00b7 "}
+                              {ctx.reviewCapability === "can_review"
+                                ? labels.operations.reviewEnabled
+                                : labels.operations.reviewNotEnabled}
+                            </span>
+                          </span>
+                          <span
+                            className="text-meta text-text-muted"
+                            data-testid={`company-worker-next-action-${w.workerId}`}
+                          >
+                            {labels.operations.nextActionLabels[ctx.nextAction] ?? ""}
+                          </span>
+                          {w.email ? (
+                            <span className="break-all text-meta text-text-muted">{w.email}</span>
+                          ) : null}
+                        </div>
                         {canAssignRoles ? (
                           <WorkerOperationsRoleForm
                             workerId={w.workerId}
@@ -266,20 +477,20 @@ export function CompanyWorkersSection({
                             journalReviewEnabled={w.journalReviewEnabled}
                             engagementContextLinked={w.engagementContextLinked}
                             action={assignCompanyWorkerRoleAction}
-                            provisionAction={
-                              provisionCompanyWorkerEngagementContextAction
-                            }
+                            provisionAction={provisionCompanyWorkerEngagementContextAction}
                             setReviewAction={setCompanyWorkerJournalReviewAction}
+                            reviewElsewhere={reviewElsewhere}
                             labels={{
                               ...labels.operations.assign,
                               roleOptionLabels: labels.operations.roleLabels,
                             }}
                           />
                         ) : null}
-                    </div>
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {labels.columnInvitedAt}: {w.createdAt.slice(0, 10)}
-                    </span>
+                        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                          {labels.columnInvitedAt}: {w.createdAt.slice(0, 10)}
+                        </span>
+                      </IdentityDisclosure>
+                    </PersonIdentityCard>
                   </li>
                 );
               })}
@@ -297,118 +508,177 @@ export function CompanyWorkersSection({
         </p>
       ) : null}
 
+      {/* A feature that is not on yet is a quiet line, not a block in the
+          team's way (owner 2026-10-10) — its explanation one tap away. */}
       {!roleCoordinationEnabled ? (
-        <div
-          className="rounded-md border border-ink-700 bg-surface-1 p-3"
-          data-testid="company-workers-coordination-note"
-        >
-          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {labels.coordinationHeading}
-          </p>
-          <p className="mt-1 text-xs text-text-secondary">
-            {labels.coordinationBody}
-          </p>
-          <p className="mt-1 text-meta text-text-muted">
-            {labels.coordinationNextAction}
-          </p>
-        </div>
+        <Explain summary={labels.coordinationHeading}>
+          <p data-testid="company-workers-coordination-note">{labels.coordinationBody}</p>
+          <p>{labels.coordinationNextAction}</p>
+        </Explain>
       ) : null}
 
-      <form
-        action={(fd) => {
-          setShouldShowOutcome(true);
-          return formAction(fd);
-        }}
-        className="flex flex-col gap-3"
-        data-testid="company-workers-invite-form"
-      >
-        <header className="flex flex-col gap-1">
+      {/* INVITATIONS — `manage-invitations` only (owner direction 2026-09-24):
+          owner/admin, never a job title. Anyone else reads who handles them
+          instead of an invite form the database refuses and an empty list
+          that reads as "nobody is invited" (SEP-7: refused ≠ empty). */}
+      {canManageInvitations ? (
+        <>
+          <form
+            action={(fd) => {
+              setShouldShowOutcome(true);
+              return formAction(fd);
+            }}
+            className="flex flex-col gap-3"
+            data-testid="company-workers-invite-form"
+          >
+            <DisplayedWorkspaceField />
+            <header className="flex flex-col gap-1">
+              <h3 className="font-display text-sm font-semibold text-text-primary">
+                {labels.inviteHeading}
+              </h3>
+              <p className="text-xs text-text-secondary">
+                {labels.inviteDescription}
+              </p>
+            </header>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-text-secondary">{labels.inviteEmailLabel}</span>
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder={labels.inviteEmailPlaceholder}
+                className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                data-testid="company-workers-invite-email"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-text-secondary">{labels.inviteNoteLabel}</span>
+              <textarea
+                name="note"
+                rows={2}
+                maxLength={500}
+                className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                data-testid="company-workers-invite-note"
+              />
+              <span className="text-meta text-text-muted">
+                {labels.inviteNoteHint}
+              </span>
+            </label>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+              data-testid="company-workers-invite-submit"
+            >
+              {labels.inviteSubmit}
+            </button>
+            {outcomeLabel ? (
+              <p
+                className={
+                  state?.ok && state.outcome === "invited"
+                    ? "rounded-md border border-state-success bg-state-success/10 px-3 py-2 text-xs text-state-success"
+                    : "rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
+                }
+                role="status"
+                data-testid="company-workers-invite-result"
+              >
+                {outcomeLabel}
+              </p>
+            ) : null}
+            {shouldShowOutcome && state?.ok && (state.outcome === "invited" || state.outcome === "already_pending") && labels.inviteShareLinkLabel && typeof window !== "undefined" ? (
+              <InviteShareLink
+                url={`${window.location.origin}/${window.location.pathname.split("/")[1] || "lt"}/auth/signup`}
+                labels={labels}
+                copied={linkCopied}
+                onCopied={setLinkCopied}
+              />
+            ) : null}
+          </form>
+
+          <section
+            id="company-invitations"
+            className="flex flex-col gap-2 scroll-mt-20"
+            data-testid="company-workers-pending-list"
+          >
+            <h3 className="font-display text-sm font-semibold text-text-primary">
+              {labels.invitationsHeading}
+            </h3>
+            {pendingInvitations.length === 0 ? (
+              <p className="text-xs text-text-secondary">
+                {labels.invitationsEmpty}
+              </p>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {pendingInvitations.map((inv) => (
+                  <li
+                    key={inv.id}
+                    className="card-border flex flex-col gap-1 p-3"
+                    data-testid={`company-invitation-row-${inv.id}`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="break-all text-sm text-text-primary">{inv.invitedEmail}</span>
+                      <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">{statusWord(labels, inv.status)}</span>
+                    </div>
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {labels.columnInvitedAt}: {inv.createdAt.slice(0, 10)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </>
+      ) : (
+        <section
+          id="company-invitations"
+          className="flex flex-col gap-2 scroll-mt-20"
+          data-testid="company-invitations-managed-elsewhere"
+        >
           <h3 className="font-display text-sm font-semibold text-text-primary">
-            {labels.inviteHeading}
+            {labels.invitationsHeading}
           </h3>
           <p className="text-xs text-text-secondary">
-            {labels.inviteDescription}
+            {labels.invitationsManagedElsewhere}
           </p>
-        </header>
-        <label className="flex flex-col gap-1 text-xs">
-          <span className="text-text-secondary">{labels.inviteEmailLabel}</span>
-          <input
-            type="email"
-            name="email"
-            required
-            placeholder={labels.inviteEmailPlaceholder}
-            className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-            data-testid="company-workers-invite-email"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-xs">
-          <span className="text-text-secondary">{labels.inviteNoteLabel}</span>
-          <textarea
-            name="note"
-            rows={2}
-            maxLength={500}
-            className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-            data-testid="company-workers-invite-note"
-          />
-          <span className="text-meta text-text-muted">
-            {labels.inviteNoteHint}
-          </span>
-        </label>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
-          data-testid="company-workers-invite-submit"
-        >
-          {labels.inviteSubmit}
-        </button>
-        {outcomeLabel ? (
-          <p
-            className={
-              state?.ok && state.outcome === "invited"
-                ? "rounded-md border border-state-success bg-state-success/10 px-3 py-2 text-xs text-state-success"
-                : "rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
-            }
-            role="status"
-            data-testid="company-workers-invite-result"
-          >
-            {outcomeLabel}
-          </p>
-        ) : null}
-      </form>
-
-      <section
-        id="company-invitations"
-        className="flex flex-col gap-2 scroll-mt-20"
-        data-testid="company-workers-pending-list"
-      >
-        <h3 className="font-display text-sm font-semibold text-text-primary">
-          {labels.invitationsHeading}
-        </h3>
-        {pendingInvitations.length === 0 ? (
-          <p className="text-xs text-text-secondary">
-            {labels.invitationsEmpty}
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {pendingInvitations.map((inv) => (
-              <li
-                key={inv.id}
-                className="card-border flex flex-col gap-1 p-3"
-                data-testid={`company-invitation-row-${inv.id}`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="break-all text-sm text-text-primary">{inv.invitedEmail}</span>
-                  <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">{inv.status}</span>
-                </div>
-                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                  {labels.columnInvitedAt}: {inv.createdAt.slice(0, 10)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        </section>
+      )}
     </section>
+  );
+}
+
+/** The link the owner hands over when no e-mail goes out: sign-up, after
+ *  which the pending roster invitation is found by the same address. */
+function InviteShareLink({
+  url,
+  labels,
+  copied,
+  onCopied,
+}: {
+  url: string;
+  labels: CompanyWorkersSectionLabels;
+  copied: boolean;
+  onCopied: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 p-2" data-testid="company-workers-invite-link">
+      <p className="text-xs font-semibold text-text-primary">{labels.inviteShareLinkLabel}</p>
+      <p className="text-xs text-text-secondary">{labels.inviteShareLinkHint}</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <code className="max-w-full truncate rounded bg-ink-800 px-2 py-1 text-meta text-text-primary">{url}</code>
+        <button
+          type="button"
+          data-testid="company-workers-invite-copy-link"
+          onClick={() => {
+            void navigator.clipboard?.writeText(url).then(
+              () => onCopied(true),
+              () => onCopied(false),
+            );
+          }}
+          className="inline-flex min-h-11 sm:min-h-9 items-center rounded border border-ink-500 px-2 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
+        >
+          {copied ? labels.inviteShareCopied : labels.inviteShareCopy}
+        </button>
+      </div>
+    </div>
   );
 }

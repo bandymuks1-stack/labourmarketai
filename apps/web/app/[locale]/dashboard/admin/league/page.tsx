@@ -6,6 +6,7 @@ import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { getLeague, type LeagueCell } from "@/lib/admin/league";
 import { UNKNOWN_BUCKET } from "@/lib/admin/market-analysis";
 import { cn } from "@/lib/utils";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -43,13 +44,11 @@ export default async function AdminLeaguePage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-league">
       <header className="flex flex-col gap-1">
-        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <p className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <Trophy className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
           {t("subtitle")}
         </p>

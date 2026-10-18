@@ -111,7 +111,8 @@ describe("5. role gate never bounces silently", () => {
 });
 
 describe("6. company demand intake is reachable for every held-role user", () => {
-  const page = read("app/[locale]/dashboard/company/page.tsx");
+  // Re-anchored 2026-09-16: the wizard lives on the Needs door.
+  const page = read("app/[locale]/dashboard/company/needs/page.tsx");
   it("no link into the retired root-dashboard #demand-intake anchor remains", () => {
     expect(page).not.toMatch(/\/dashboard#demand-intake/);
   });
@@ -121,7 +122,7 @@ describe("6. company demand intake is reachable for every held-role user", () =>
     expect(page).toMatch(/<DemandRequestButton/);
     const action = read("lib/company/demand-intake-navigation.ts");
     expect(action).toMatch(/switchActiveRole\("company"\)/);
-    expect(action).toMatch(/\/dashboard\/company#demand-intake/);
+    expect(action).toMatch(/\/dashboard\/company\/needs#demand-intake/);
   });
 });
 

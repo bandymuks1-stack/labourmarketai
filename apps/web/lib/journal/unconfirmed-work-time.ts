@@ -100,3 +100,26 @@ export function reviewUnconfirmedWorkTime(
     wouldSilentlyDiscard: unreviewedCount > 0,
   };
 }
+
+/**
+ * QUICK SAVE THAT NEVER REVIEWED A DURATION IT STATES (FULL_JOURNAL_HOURS_NOT_STRUCTURED).
+ *
+ * The composer's "quick" mode saves straight from the text, so a sentence such
+ * as "dirbau 2 valandas" was recorded with NO time metric — the entry existed,
+ * its project was right, and its hours were silently absent. Chat and
+ * quick-record never had this: they show the parse and the worker confirms it.
+ * Doctrine §7 forbids confirming for the worker, so the full form does the same
+ * thing the same way: when the text states a duration and the worker has made
+ * no decision about it, the save is routed into the existing review step.
+ *
+ * Pure. Takes the shape `extractJournalSuggestions` already returns, so the
+ * full form reads time with the ONE recognizer the other two paths use.
+ */
+export function statedDurationCount(suggestions: {
+  readonly time?: unknown | null;
+  readonly fragments: readonly { readonly time?: unknown | null }[];
+}): number {
+  const perFragment = suggestions.fragments.filter((f) => !!f.time).length;
+  if (perFragment > 0) return perFragment;
+  return suggestions.time ? 1 : 0;
+}

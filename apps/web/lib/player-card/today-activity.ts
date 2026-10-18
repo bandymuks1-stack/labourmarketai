@@ -1,5 +1,6 @@
 import "server-only";
 
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -21,12 +22,12 @@ export async function countTodayJournalEntries(
   try {
     const supabase = await createClient();
     const todayStartIso = `${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`;
-    const { count, error } = await supabase
-      .from("journal_entries")
-      .select("*", { count: "exact", head: true })
-      .eq("worker_id", workerId)
-      .is("deleted_at", null)
-      .gte("created_at", todayStartIso);
+    const { count, error } = await liveJournalEntriesOnly(
+      supabase
+        .from("journal_entries")
+        .select("*", { count: "exact", head: true })
+        .eq("worker_id", workerId),
+    ).gte("created_at", todayStartIso);
     if (error || typeof count !== "number") return 0;
     return count;
   } catch {

@@ -1,0 +1,984 @@
+import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
+import {
+  formatHoursAsStated,
+  periodProvenance,
+  recordWhen,
+} from "@/lib/organization-evidence/period-provenance";
+import { getTranslations } from "next-intl/server";
+
+import { Card } from "@/components/ui/Card";
+
+import { createClient } from "@/lib/supabase/server";
+import { locales } from "@/lib/i18n/config";
+import type { DomainCaller } from "@/lib/domain/caller";
+import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
+import {
+  SOURCE_KINDS,
+  SUPPLIER_ROLES,
+  buildPreview,
+  listEvidenceRecords,
+  listRosterPeople,
+  committableRows,
+  type EvidenceImportFailure,
+  type EvidenceRecordView,
+  type ImportPreview,
+  type PreviewRow,
+  type RosterPersonView,
+} from "@/lib/organization-evidence/import-core";
+import {
+  REPORTED_EVIDENCE_STATES,
+  isSelfVouched,
+} from "@/lib/organization-evidence/evidence-state";
+import { mintCommitToken } from "@/lib/organization-evidence/commit-confirmation";
+import { resolveEvidenceOrganization } from "@/lib/organization-evidence/evidence-org-context";
+import {
+  EvidenceAttestForm,
+  EvidenceCommitForm,
+  EvidenceRowResolve,
+  EvidenceSourceForm,
+  EvidenceWithdrawForm,
+  type Option,
+} from "@/components/app/evidence-import-forms";
+import { projectImport } from "@/lib/organization-evidence/import-projections";
+import { EvidenceImportReconstruction } from "@/components/app/evidence-import-reconstruction";
+import {
+  resolveTimeSemanticsAction,
+  attestEvidenceRecordAction,
+  attestSessionRecordsAction,
+  commitEvidenceImportAction,
+  createEvidencePersonAction,
+  resolveEvidenceLabelAction,
+  resolveEvidenceRowAction,
+  startEvidenceImportAction,
+  withdrawEvidenceImportAction,
+} from "@/lib/organization-evidence/import-actions";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
+
+/**
+ * ORGANIZATION EVIDENCE IMPORT — the human face of the one import engine.
+ *
+ * ── WHY THIS IS A SECTION AND NOT A PAGE ───────────────────────────────────
+ * It WAS a page (`/dashboard/company/evidence-import`) for exactly one CI run.
+ * The Product Gate caught it: a new screen must answer the five World-State
+ * questions, and four of my answers were honestly "no" — not on the map, not
+ * AI-driven, not usable without leaving the workspace, and needing a new page.
+ * The only way past that is a scoped OWNER waiver, and asking for one to bless
+ * a page I had just invented — while the same window folded supply discovery
+ * into the existing scouting page correctly — would have been asking the owner
+ * to ratify my own inconsistency.
+ *
+ * So it lives inside the company workspace, like every other thing a manager
+ * does there. Nothing about the engine changed: the same core, the same RLS,
+ * the same commit gate, the same eleven capabilities. Only the container did.
+ *
+ * ── ORGANIZATION IS THE ROOT, COMPANY IS A ROLE ────────────────────────────
+ * The page never asks "which company"; it asks which ORGANIZATION the caller
+ * is acting for and in what capacity that organization is speaking. An
+ * employer, a staffing agency, a subcontractor, a university, a vocational
+ * school, a training provider, an assessor and a public body all reach the
+ * SAME engine — what changes is the recorded `supplier_role`, and with it the
+ * words on the screen. There is no second import for institutions.
+ *
+ * That is why an agency is never rendered as the end employer: the capacity is
+ * a stored field on the session and travels onto every record, so a reader can
+ * always tell who said this and as what.
+ *
+ * ── WHAT THIS PAGE MAY AND MAY NOT CLAIM ───────────────────────────────────
+ * An import produces REPORTED evidence and nothing stronger — the commit
+ * control offers no attested and no verified value, because the column's CHECK
+ * has none. Attestation is a separate, later act with its own control; there is
+ * no "verify" control at all, because independent verification belongs to a
+ * party that is neither the supplier nor the subject.
+ *
+ * ── ONE ENGINE, TWO TRANSPORTS ─────────────────────────────────────────────
+ * Every read here (`buildPreview`, `listRosterPeople`, `listEvidenceRecords`)
+ * and every write behind the forms is the same function an authorized
+ * assistant calls through `evidence.*` on `/api/mcp`, under the same RLS, with
+ * the same commit gate. Nothing on this page is implemented twice.
+ */
+
+const SECTION = "flex flex-col gap-4";
+const HEADING =
+  "font-display text-lg font-bold tracking-tightest text-text-primary";
+
+/** Preview row state -> the one StatusChip pattern (word + shape). */
+const STATE_VARIANT: Record<string, StatusChipVariant> = {
+  ready: "success",
+  needs_review: "attention",
+  duplicate: "neutral",
+  conflict: "attention",
+};
+
+/** A row's headline state, chosen by the same precedence the core uses: a
+ *  conflict outranks a duplicate, which outranks "needs a person". A row the
+ *  PLAN makes ready reads as ready — the plan is part of the commit. */
+function rowTone(row: PreviewRow): StatusChipVariant {
+  if (row.duplicateState === "conflict") return STATE_VARIANT.conflict;
+  if (row.duplicateState === "duplicate") return STATE_VARIANT.duplicate;
+  return row.ready || row.readyWithPlan ? STATE_VARIANT.ready : STATE_VARIANT.needs_review;
+}
+
+/** The derived-field methods the preview names in words. Anything else stays
+ *  the raw slug — under-explaining is safer than inventing a sentence. */
+const NAMED_DERIVED_METHODS = new Set([
+  "iso_week_of_explicit_date",
+  "iso_week_conflicts_with_source_week",
+  "hours_exceed_day",
+]);
+
+export async function EvidenceImportSection({
+  locale,
+  /** The staged source being reviewed, from the company page's own
+   *  `?evidenceSession=` — a bookmarkable, shareable URL WITHOUT a route of
+   *  its own, which is the whole point. */
+  sessionId,
+}: {
+  locale: string;
+  sessionId?: string;
+}) {
+  const t = await getTranslations("evidenceImport");
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // The eyebrow, title and intro belong to the UPLOAD step. With a staged
+  // session open, the page's own h1 already names the door and the workspace
+  // is the explanation (constitution §B: show → label → explain on request),
+  // so the header shrinks to a single meta line: the eyebrow as the
+  // section's accessible name, nothing else above the state strip.
+  const header = sessionId ? (
+    <header>
+      <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("eyebrow")}</h2>
+    </header>
+  ) : (
+    <header className="flex flex-col gap-1">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+        {t("eyebrow")}
+      </p>
+      <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+        {t("title")}
+      </h2>
+      <p className="text-sm leading-relaxed text-text-secondary">
+        {t("intro")}
+      </p>
+    </header>
+  );
+
+  const shell = (children: React.ReactNode) => (
+    <div
+      className={sessionId ? "flex w-full flex-col gap-3" : "flex w-full flex-col gap-6"}
+      data-testid="evidence-import-section"
+      id="evidence-import"
+    >
+      {header}
+      {children}
+    </div>
+  );
+
+  /** The one honest refusal panel. The reason travels as `data-reason` so the
+   *  states stay distinguishable without printing internals at the person. */
+  const notice = (
+    reason: string,
+    options?: readonly { id: string; name: string }[],
+  ) =>
+    shell(
+      <section
+        data-testid="evidence-import-context-notice"
+        data-reason={reason}
+        className="flex flex-col gap-2 rounded-lg border border-state-warning/40 bg-state-warning/5 px-4 py-3"
+      >
+        <p className="text-sm leading-relaxed text-text-primary">
+          {t(`context.${reason}` as never)}
+        </p>
+        {options && options.length > 0 && (
+          <ul className="flex flex-col gap-1 text-xs text-text-secondary">
+            {options.map((o) => (
+              <li key={o.id}>{o.name}</li>
+            ))}
+          </ul>
+        )}
+      </section>,
+    );
+
+  if (!user) return notice("unauthenticated");
+  // Cookie transport: carries the session pointer, so the organization named
+  // here is the one the chip shows.
+  const caller: DomainCaller = await withSessionWorkspacePointer({
+    supabase,
+    userId: user.id,
+    locale,
+  });
+
+  // ACTING CONTEXT FIRST — no read happens until the organization and the
+  // authority to import for it are both established, so a personal workspace
+  // can never be shown another organization's roster.
+  const org = await resolveEvidenceOrganization(caller, null);
+  if (!org.ok) {
+    const reason =
+      org.reason === "personal-workspace"
+        ? "personalWorkspace"
+        : org.reason === "no-organization"
+          ? "noOrganization"
+          : org.reason === "not-a-member"
+            ? "notAMember"
+            : org.reason === "choice-required"
+              ? "chooseOrganization"
+              : org.reason === "not-authorized"
+                ? "notAuthorized"
+                : org.reason === "needs-migration"
+                  ? "needsMigration"
+                  : "unavailable";
+    return notice(reason, org.options);
+  }
+
+  // ── vocabularies, localized once ─────────────────────────────────────────
+  const options = <T extends string>(
+    values: readonly T[],
+    ns: string,
+  ): Option[] =>
+    values.map((v) => ({
+      value: v,
+      label: t(`${ns}.${v}` as never) as string,
+    }));
+
+  const errors = Object.fromEntries(
+    [
+      "invalid",
+      "not_found",
+      "unavailable",
+      "too_many_rows",
+      "no_source_supplied",
+      "file_too_large",
+      "file_unreadable",
+      "nothing_parsed",
+      "month_not_stated",
+      "confirmation_rejected",
+      "confirmation_unavailable",
+      "already_withdrawn",
+    ].map((k) => [k, t(`error.${k}` as never) as string]),
+  );
+  // Context refusals can also come back from an action (the workspace changed
+  // in another tab), so they share the same message table.
+  errors.not_authorized = t("context.notAuthorized");
+  errors.needs_migration = t("context.needsMigration");
+  errors.choice_required = t("context.chooseOrganization");
+  errors.unauthenticated = t("context.unauthenticated");
+
+  const RELATIONSHIP_KINDS = [
+    "employee",
+    "former_employee",
+    "agency_worker",
+    "subcontractor",
+    "contractor",
+    "student",
+    "graduate",
+    "trainee",
+    "apprentice",
+    "programme_participant",
+    "volunteer",
+    "other",
+  ] as const;
+
+  const sourceForm = (
+    <Card compact>
+      <section className={SECTION}>
+        <h2 className={HEADING}>{t("form.title")}</h2>
+        <p className="text-xs leading-relaxed text-text-muted">
+          {t("nothingWrittenYet")}
+        </p>
+        <EvidenceSourceForm
+          action={startEvidenceImportAction}
+          labels={{
+            dropzone: t("form.dropzone"),
+            dropzoneHint: t("form.dropzoneHint"),
+            chosen: t("form.chosen"),
+            advanced: t("form.advanced"),
+            auto: t("form.auto"),
+            readNow: t("form.readNow"),
+            supplierRole: t("form.supplierRole"),
+            supplierRoleHint: t("form.supplierRoleHint"),
+            sourceKind: t("form.sourceKind"),
+            sourceLanguage: t("form.sourceLanguage"),
+            filename: t("form.filename"),
+            reference: t("form.reference"),
+            referenceHint: t("form.referenceHint"),
+            notes: t("form.notes"),
+            paste: t("form.paste"),
+            pasteHint: t("form.pasteHint"),
+            file: t("form.file"),
+            submit: t("form.submit"),
+            submitting: t("form.submitting"),
+            errors,
+          }}
+          supplierRoles={options(SUPPLIER_ROLES, "role")}
+          sourceKinds={options(SOURCE_KINDS, "sourceKind")}
+          // The source's own language, from THE canonical UI locale list — the
+          // same set the column's CHECK carries.
+          languages={locales.map((l) => ({ value: l, label: l.toUpperCase() }))}
+          defaultLanguage={
+            locales.includes(locale as (typeof locales)[number]) ? locale : "en"
+          }
+        />
+      </section>
+    </Card>
+  );
+
+  const actingFor = (
+    <p
+      className="text-xs text-text-muted"
+      data-testid="evidence-import-acting-for"
+    >
+      {t("actingFor")}:{" "}
+      <span className="text-text-secondary">{org.organizationName}</span>
+    </p>
+  );
+
+  if (!sessionId)
+    return shell(
+      <>
+        {actingFor}
+        {sourceForm}
+      </>,
+    );
+
+  // ── a staged source: preview, roster, records ────────────────────────────
+  const [previewRes, rosterRes, recordsRes] = await Promise.all([
+    buildPreview(caller, sessionId),
+    listRosterPeople(caller, { limit: 500 }),
+    listEvidenceRecords(caller, { sessionId, limit: 200 }),
+  ]);
+
+  /** A failed READ is never rendered as an empty organization (#1314). Each
+   *  result is checked on its own so the narrowing survives and so the reason
+   *  the person sees is the reason that actually occurred. */
+  const readFailure = (f: EvidenceImportFailure) =>
+    notice(
+      f.kind === "needs-migration"
+        ? "needsMigration"
+        : f.kind === "not-authorized"
+          ? "notAuthorized"
+          : f.kind === "choice-required"
+            ? "chooseOrganization"
+            : "unavailable",
+      f.kind === "choice-required" ? f.options : undefined,
+    );
+  if (previewRes.kind !== "ok") return readFailure(previewRes);
+  if (rosterRes.kind !== "ok") return readFailure(rosterRes);
+  if (recordsRes.kind !== "ok") return readFailure(recordsRes);
+
+  const preview: ImportPreview = previewRes.preview;
+  // HUMAN-FACING SOURCE TRUTH (P0-C): a session staged before the kind was
+  // derived from the file recorded "csv" over a .xlsx, and re-uploading the
+  // same file resolves to that same session (fingerprint-idempotent). The
+  // envelope is not rewritten; the label follows the file's own name.
+  const shownSourceKind =
+    preview.source.filename && /\.(xlsx|xlsm)$/i.test(preview.source.filename)
+      ? "xlsx"
+      : preview.source.kind;
+  const roster: readonly RosterPersonView[] = rosterRes.people;
+  const records: readonly EvidenceRecordView[] = recordsRes.records;
+  // What the commit would write: the ready rows AND the rows the PLAN makes
+  // ready. The button's count, the token and the action's verification all
+  // read this ONE selection.
+  const ready = committableRows(preview);
+
+  // The token binds to the rows shown BELOW. If anything changes before the
+  // person approves, the commit is refused rather than quietly recording
+  // something they never read.
+  let commitToken: string | null = null;
+  try {
+    commitToken = mintCommitToken({
+      sessionId,
+      userId: caller.userId,
+      readyRows: ready,
+    });
+  } catch {
+    // No signing secret in this environment — the button is withheld and the
+    // reason is said out loud, never silently committed without the gate.
+    commitToken = null;
+  }
+
+  const rosterOptions: Option[] = roster.map((p) => ({
+    value: p.id,
+    label: p.externalRef
+      ? `${p.displayName} · ${p.externalRef}`
+      : p.displayName,
+  }));
+
+  // THE RECONSTRUCTION — computed from the preview alone (no write). What
+  // the human sees FIRST: what was understood, what genuinely needs them,
+  // the people, the places, the calendar, the company view. The row table
+  // is behind progressive disclosure; nobody reads 158 rows to decide
+  // whether an import is safe (owner command §39, §57).
+  const projection = projectImport(preview);
+  const objectOptions: Option[] = Array.from(
+    new Map(
+      preview.rows
+        .flatMap((r) => r.contexts?.segments ?? [])
+        .filter((sg) => sg.workObjectId && sg.name)
+        .map((sg) => [sg.workObjectId as string, { value: sg.workObjectId as string, label: sg.name as string }]),
+    ).values(),
+  );
+
+  // THE PLAN, IN WORDS (owner acceptance 2026-09-16: "Radau 7 objektus. 5 jau
+  // yra sistemoje. 2 naujus paruošiau sukurti."). Found = distinct labels the
+  // source names; existing = those matched to something already here.
+  const distinct = (pick: (r: PreviewRow) => string | null) =>
+    new Set(preview.rows.map(pick).filter((v): v is string => !!v && v.trim() !== "")).size;
+  const peopleFound = distinct((r) => r.personLabel?.toLowerCase() ?? null);
+  // Real places, not cells: `Hoofdgracht 3; Kantoor` is two of them, and a
+  // typo of an existing one is not a new one.
+  const objectsFound = projection.places.filter((pl) => pl.state !== "ambiguous").length;
+  const peopleNew = preview.plan.people.length;
+  const objectsNew = preview.plan.objects.length;
+  const peopleAmbiguous = preview.rows.filter((r) => r.personState === "ambiguous").length;
+  const placesAmbiguous = preview.rows.filter((r) => r.contextState === "ambiguous").length;
+  const planBlock = (
+    <section
+      className="flex flex-col gap-2 rounded-md border border-brand-cyan/30 bg-brand-cyan/5 px-4 py-3"
+      data-testid="evidence-import-plan"
+      data-people-new={peopleNew}
+      data-objects-new={objectsNew}
+    >
+      <h3 className="font-display text-sm font-semibold text-text-primary">{t("plan.title")}</h3>
+      <ul className="flex flex-col gap-1 text-sm text-text-secondary">
+        {peopleFound > 0 && (
+          <li data-testid="evidence-plan-people">
+            {t("plan.people", {
+              found: peopleFound,
+              existing: Math.max(0, peopleFound - peopleNew - (peopleAmbiguous > 0 ? 1 : 0)),
+              create: peopleNew,
+            })}
+          </li>
+        )}
+        {objectsFound > 0 && (
+          <li data-testid="evidence-plan-objects">
+            {t("plan.objects", {
+              found: objectsFound,
+              existing: Math.max(0, objectsFound - objectsNew - (placesAmbiguous > 0 ? 1 : 0)),
+              create: objectsNew,
+            })}
+          </li>
+        )}
+        {peopleAmbiguous + placesAmbiguous > 0 && (
+          <li className="text-state-amber" data-testid="evidence-plan-ambiguous">
+            {t("plan.ambiguous", { count: peopleAmbiguous + placesAmbiguous })}
+          </li>
+        )}
+        {preview.counts.conflicts > 0 && (
+          <li className="text-state-amber" data-testid="evidence-plan-conflicts">
+            {t("plan.conflicts", { count: preview.counts.conflicts })}
+          </li>
+        )}
+        {preview.counts.weekConflicts > 0 && (
+          <li className="text-state-amber" data-testid="evidence-plan-week-conflicts">
+            {t("plan.weekConflicts", { count: preview.counts.weekConflicts })}
+          </li>
+        )}
+        {peopleNew === 0 && objectsNew === 0 && (
+          <li data-testid="evidence-plan-nothing">{t("plan.nothingToCreate")}</li>
+        )}
+      </ul>
+      {peopleNew > 0 && (
+        <div className="text-xs text-text-secondary">
+          <p>{t("plan.willCreatePeople")}</p>
+          <ul className="mt-1 flex flex-wrap gap-1.5">
+            {preview.plan.people.map((p) => (
+              <li
+                key={p.label}
+                className="rounded-full border border-ink-500 bg-ink-900 px-2 py-0.5 text-text-primary"
+                data-testid="evidence-plan-person"
+              >
+                {p.label} · {t("plan.rows", { count: p.rows })}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {objectsNew > 0 && (
+        <div className="text-xs text-text-secondary">
+          <p>{t("plan.willCreateObjects")}</p>
+          <ul className="mt-1 flex flex-wrap gap-1.5">
+            {preview.plan.objects.map((o) => (
+              <li
+                key={o.label}
+                className="rounded-full border border-ink-500 bg-ink-900 px-2 py-0.5 text-text-primary"
+                data-testid="evidence-plan-object"
+                data-origin={o.origin}
+                title={o.spellings.length > 0 ? o.spellings.join(", ") : undefined}
+              >
+                {o.label} · {t("plan.rows", { count: o.rows })}
+                {o.spellings.length > 0 ? ` · ${t("plan.spellings", { count: o.spellings.length })}` : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <p className="text-xs text-state-amber">{t("plan.nothingBeforeCommit")}</p>
+    </section>
+  );
+
+  // THE COMMIT CONTROL — the plan in words, then the existing confirm form.
+  // Built here (the section owns the token and the plan) and handed to the
+  // workspace, which keeps it in a persistent decision bar instead of at the
+  // bottom of a long document (constitution §AM). The plan stays BEFORE the
+  // control, and the control is the same one, with the same token.
+  const commitNode = (
+    <section className={SECTION} data-testid="evidence-commit-section">
+      <h2 className={HEADING}>{t("commit.title")}</h2>
+      {planBlock}
+      {commitToken === null && (
+        <p
+          className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs text-text-secondary"
+          data-testid="evidence-commit-unavailable"
+        >
+          {t("error.confirmation_unavailable")}
+        </p>
+      )}
+      <EvidenceCommitForm
+        action={commitEvidenceImportAction}
+        sessionId={sessionId}
+        confirmationToken={commitToken}
+        readyCount={ready.length}
+        evidenceStates={options(REPORTED_EVIDENCE_STATES, "evidenceState")}
+        plan={{
+          people: preview.plan.people.length,
+          objects: preview.plan.objects.length,
+          relationships: options(RELATIONSHIP_KINDS, "relationship"),
+          // The relationship that LEADS follows the session's supplier
+          // role: a school imports learners, an agency its workers, an
+          // employer its employees. The person can still pick any other.
+          suggestedRelationship: "employee",
+        }}
+        labels={{
+          evidenceState: t("commit.evidenceState"),
+          evidenceStateHint: t("commit.evidenceStateHint"),
+          confirm: t("commit.confirm", { count: "{count}" }),
+          confirmNone: t("commit.confirmNone"),
+          confirming: t("commit.confirming"),
+          readOnce: t("commit.readOnce"),
+          written: t("result.written"),
+          skipped: t("result.skipped"),
+          notReady: t("result.notReady"),
+          createdPeople: t("result.createdPeople"),
+          createdObjects: t("result.createdObjects"),
+          createPeople: t("plan.createPeople"),
+          createObjects: t("plan.createObjects"),
+          relationship: t("plan.relationship"),
+          errors,
+        }}
+      />
+    </section>
+  );
+
+  return shell(
+    <>
+      {/* ONE meta line: who is acting, and THE SOURCE AS IT IS (P0-C) — the
+          file's own name and its real kind; a spreadsheet is a spreadsheet,
+          whatever the engine reads underneath. */}
+      <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-muted">
+        <span data-testid="evidence-import-acting-for">
+          {t("actingFor")}: <span className="text-text-secondary">{org.organizationName}</span>
+        </span>
+        <span className="text-text-secondary" data-testid="evidence-preview-source" data-kind={shownSourceKind}>
+          {t("preview.source")}: {preview.source.filename ?? "—"} · {t(`sourceKind.${shownSourceKind}` as never)}
+          {" · "}
+          {t(`role.${preview.source.supplierRole}` as never)} · {preview.source.language.toUpperCase()}
+        </span>
+        {/* Source lines the parser could not turn into a row (no date, no
+            person) are SAID, never dropped silently (design v3 §11). */}
+        {(preview.source.notStagedSourceRows ?? 0) > 0 && (
+          <span className="text-state-amber" data-testid="evidence-preview-not-staged">
+            {t("preview.notStaged", { count: preview.source.notStagedSourceRows ?? 0 })}
+          </span>
+        )}
+      </p>
+
+      <EvidenceImportReconstruction
+        locale={locale}
+        sessionId={sessionId}
+        projection={projection}
+        workObjects={objectOptions}
+        actions={{ resolveLabel: resolveEvidenceLabelAction, resolveTime: resolveTimeSemanticsAction }}
+        errors={errors}
+        commit={commitNode}
+        readyCount={ready.length}
+        sourceRowsId="evidence-source-rows"
+      />
+
+      {/* THE SOURCE ROWS — every one, fact and derived per field, behind
+          progressive disclosure. The workspace above is the default
+          experience; this is the evidence behind it, one action away
+          (the workspace's SOURCE control opens and scrolls to it). */}
+      <Card compact>
+        <details data-testid="evidence-preview-rows-disclosure" id="evidence-source-rows" className="scroll-mt-20">
+          <summary className="cursor-pointer text-sm font-semibold text-text-primary">
+            {t("preview.showRows", { count: preview.rows.length })}
+          </summary>
+        <section className={`${SECTION} mt-3`} data-testid="evidence-preview">
+          <p className="text-xs leading-relaxed text-state-amber">
+            {t("preview.notPersisted")}
+          </p>
+
+          {preview.rows.length === 0 ? (
+            <p className="text-sm text-text-muted">{t("preview.empty")}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[52rem] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-ink-500 text-left">
+                    {(
+                      [
+                        "row",
+                        "person",
+                        "date",
+                        "hours",
+                        "place",
+                        "work",
+                        "state",
+                      ] as const
+                    ).map((c) => (
+                      <th
+                        key={c}
+                        className="px-2 py-2 font-mono text-meta uppercase tracking-label text-text-muted"
+                      >
+                        {t(`preview.column.${c}` as never)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {preview.rows.map((row) => {
+                    // FACT vs DERIVED, per field, straight from staging — an
+                    // inference is never rendered as something the source said.
+                    const derivedKeys = Object.keys(row.derived);
+                    return (
+                      <tr
+                        key={row.id}
+                        data-testid="evidence-preview-row"
+                        data-ready={row.ready ? "true" : "false"}
+                        data-duplicate-state={row.duplicateState}
+                        data-person-state={row.personState}
+                        className="border-b border-ink-500/50 align-top"
+                      >
+                        <td className="px-2 py-2 text-text-muted">
+                          {row.rowIndex + 1}
+                        </td>
+                        <td className="px-2 py-2">
+                          <div className="text-text-primary">
+                            {row.personName ?? row.personLabel ?? "—"}
+                          </div>
+                          <div className="text-xs text-text-muted">
+                            {row.readyWithPlan
+                              ? t("personState.will_create")
+                              : t(`personState.${row.personState}` as never)}
+                            {row.personConfidence !== null
+                              ? ` · ${Math.round(row.personConfidence * 100)}%`
+                              : ""}
+                          </div>
+                        </td>
+                        <td className="px-2 py-2 text-text-secondary">
+                          {row.activityDate ??
+                            [row.periodStart, row.periodEnd]
+                              .filter(Boolean)
+                              .join(" – ") ??
+                            "—"}
+                        </td>
+                        <td className="px-2 py-2 text-text-secondary">
+                          {row.hours ?? "—"}
+                        </td>
+                        <td className="px-2 py-2">
+                          {row.contexts ? (
+                            <ul className="flex flex-col gap-0.5" data-testid="evidence-row-contexts">
+                              {row.contexts.segments.map((sg) => (
+                                <li key={sg.key} className="text-text-secondary" data-kind={sg.kind} data-state={sg.state}>
+                                  {sg.name ?? sg.label}
+                                  {sg.name && sg.name.toLowerCase() !== sg.label.toLowerCase() ? (
+                                    <span className="text-xs text-text-muted"> ({sg.label})</span>
+                                  ) : null}
+                                  {sg.hours !== null ? <span className="text-xs text-text-muted"> · {sg.hours} h</span> : null}
+                                  <span className="ml-1 text-xs text-text-muted">
+                                    {sg.kind !== "place"
+                                      ? t(`segmentKind.${sg.kind}` as never)
+                                      : t(`segmentState.${sg.state}` as never)}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <div className="text-text-secondary">{row.contextLabel ?? "—"}</div>
+                          )}
+                          <div className="text-xs text-text-muted">
+                            {row.contexts?.method === "site_from_work_text" ? t("contextState.from_text") : null}
+                            {row.contexts?.allocation?.method === "unknown_split" ? t("contextState.unknown_split") : null}
+                          </div>
+                        </td>
+                        <td className="px-2 py-2 text-text-secondary">
+                          {row.activityText ?? "—"}
+                        </td>
+                        <td className="px-2 py-2">
+                          <div className="flex flex-col items-start gap-1">
+                            <StatusChip variant={rowTone(row)}>
+                              {t(
+                                `duplicateState.${row.duplicateState}` as never,
+                              )}
+                            </StatusChip>
+                            {row.factFields.length > 0 && (
+                              <span className="text-xs text-text-muted">
+                                {t("preview.fact")}: {row.factFields.join(", ")}
+                              </span>
+                            )}
+                            {derivedKeys.length > 0 && (
+                              <span
+                                className="text-xs text-state-amber"
+                                data-testid="evidence-row-derived"
+                              >
+                                {t("preview.derived")}:{" "}
+                                {derivedKeys
+                                  .map((k) => {
+                                    const d = row.derived[k] as
+                                      | { method?: string; value?: unknown; note?: string }
+                                      | undefined;
+                                    // A named method reads as a sentence with its
+                                    // proposed value; the source's own figure rides
+                                    // along in the note so both stay visible.
+                                    return d?.method && NAMED_DERIVED_METHODS.has(d.method)
+                                      ? `${t(`derivedMethod.${d.method}` as never)} → ${String(d.value)}${d.note ? ` (${d.note})` : ""}`
+                                      : k;
+                                  })
+                                  .join(", ")}
+                              </span>
+                            )}
+                            {row.problem && !row.readyWithPlan && (
+                              <span className="text-xs text-text-secondary">
+                                {t(`problem.${row.problem}` as never)}
+                              </span>
+                            )}
+                          </div>
+                          {!row.ready && !row.readyWithPlan && row.duplicateState !== "duplicate" && (
+                            <div className="mt-2">
+                              <EvidenceRowResolve
+                                resolveAction={resolveEvidenceRowAction}
+                                createAction={createEvidencePersonAction}
+                                sessionId={sessionId}
+                                rowId={row.id}
+                                suggestedName={row.personLabel ?? ""}
+                                // Ambiguity offers exactly the real candidates;
+                                // an unmatched name offers the whole roster.
+                                people={
+                                  row.personCandidates.length > 0
+                                    ? row.personCandidates.map((c) => ({
+                                        value: c.id,
+                                        label: c.name,
+                                      }))
+                                    : rosterOptions
+                                }
+                                places={row.contextCandidates.map((c) => ({
+                                  value: c.id,
+                                  label: c.name,
+                                }))}
+                                relationships={options(
+                                  RELATIONSHIP_KINDS,
+                                  "relationship",
+                                )}
+                                labels={{
+                                  choosePerson: t("resolve.choosePerson"),
+                                  choosePlace: t("resolve.choosePlace"),
+                                  save: t("resolve.save"),
+                                  addPerson: t("resolve.addPerson"),
+                                  displayName: t("resolve.displayName"),
+                                  externalRef: t("resolve.externalRef"),
+                                  relationship: t("resolve.relationship"),
+                                  create: t("resolve.create"),
+                                  unlinkedNote: t("resolve.unlinkedNote"),
+                                  errors,
+                                }}
+                              />
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+        </details>
+      </Card>
+
+      <Card compact>
+        <section className={SECTION} data-testid="evidence-records">
+          <h2 className={HEADING}>{t("records.title")}</h2>
+          {/* THE ORGANIZATION STANDS BEHIND ALL OF IT (owner correction
+              2026-09-17): a historical timesheet whose hours were confirmed in
+              the real work process and paid is attested record by record, in
+              one append, through the same event and authority as the
+              per-record form below. Only live, not-yet-attested records are
+              offered; the count is what will be written. */}
+          {records.some((r) => !r.attestation && !r.withdrawn) && (
+            <div className="flex flex-col gap-1 rounded-md border border-ink-500 px-3 py-2">
+              <p className="text-xs text-text-secondary">
+                {t("records.attestAllHint", {
+                  count: records.filter((r) => !r.attestation && !r.withdrawn).length,
+                })}
+              </p>
+              <EvidenceAttestForm
+                action={attestSessionRecordsAction}
+                sessionId={sessionId}
+                // The organization attests in the capacity it supplied the
+                // records in — and in no other (design v3 §8 P4).
+                roles={options([preview.source.supplierRole], "role")}
+                defaultRole={preview.source.supplierRole}
+                labels={{
+                  attest: t("records.attestAll", {
+                    count: records.filter((r) => !r.attestation && !r.withdrawn).length,
+                  }),
+                  attestRole: t("records.attestRole"),
+                  attestNote: t("records.attestNote"),
+                  errors,
+                }}
+              />
+            </div>
+          )}
+          {records.length === 0 ? (
+            <p className="text-sm text-text-muted">{t("records.empty")}</p>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {records.map((rec) => (
+                <li
+                  key={rec.id}
+                  data-testid="evidence-record"
+                  data-state={rec.state}
+                  data-independently-verified={
+                    rec.independentlyVerified ? "true" : "false"
+                  }
+                  className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-900 px-3 py-2"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-text-primary">
+                      {rec.personName ?? "—"}
+                    </span>
+                    <span
+                      className="text-xs text-text-secondary"
+                      data-testid="evidence-record-when"
+                      data-provenance={periodProvenance(rec)}
+                    >
+                      {/* At the precision it has: a span a person chose at
+                          import reads as months, not as two exact dates. */}
+                      {recordWhen(rec)}
+                    </span>
+                    {/* SOURCE FACT ≠ DERIVED: a PERIOD the source never stated
+                        says how it came to be, beside it (owner P0 §18). */}
+                    {rec.activityDate === null && periodProvenance(rec) !== "source" ? (
+                      <span className="text-xs text-text-muted" data-testid="evidence-record-period-derived">
+                        {periodProvenance(rec) === "human_choice"
+                          ? t("records.periodDerivedHuman")
+                          : t("records.periodDerived")}
+                      </span>
+                    ) : null}
+                    {rec.hours !== null && (
+                      <span className="text-xs text-text-secondary">
+                        {formatHoursAsStated(rec.hours)} h
+                      </span>
+                    )}
+                    {/* The period record through the ONE reading (owner rule
+                        2026-09-23) — a monthly share only for a period the
+                        SOURCE stated; otherwise the months and the source's
+                        own words, with no monthly figure. */}
+                    {rec.activityDate === null && (
+                      <PeriodMonthlyShare
+                        hours={rec.hours}
+                        periodStart={rec.periodStart}
+                        periodEnd={rec.periodEnd}
+                        derived={rec.derived}
+                        factFields={rec.factFields}
+                        sourceText={rec.text}
+                        labels={{
+                          monthlyShare: t("records.monthlyShare"),
+                          noMonthlyFigure: t("records.noMonthlyFigure"),
+                          provenance: null,
+                          sourceStates: (words) => t("records.sourceStates", { words }),
+                          sourceDiffers: t("records.sourceDiffers"),
+                        }}
+                        className="flex basis-full flex-col gap-0.5"
+                      />
+                    )}
+                    <StatusChip
+                      variant={
+                        rec.withdrawn
+                          ? STATE_VARIANT.duplicate
+                          : isSelfVouched(rec.state as never)
+                            ? STATE_VARIANT.needs_review
+                            : STATE_VARIANT.ready
+                      }
+                    >
+                      {rec.withdrawn
+                        ? t("records.withdrawn")
+                        : rec.attestation
+                          ? rec.attestation.self
+                            ? t("records.selfAttested")
+                            : t("records.attested")
+                          : t(`evidenceState.${rec.state}` as never)}
+                    </StatusChip>
+                    {/* The one trust claim this page ever makes about an import,
+                      and it is always the same one. */}
+                    <span className="text-xs text-text-muted">
+                      {t("records.notIndependentlyVerified")}
+                    </span>
+                  </div>
+                  <p className="text-sm text-text-secondary">{rec.text}</p>
+                  <p className="text-xs text-text-muted">
+                    {t("records.supplier")}:{" "}
+                    {t(`role.${rec.supplierRole}` as never)} ·{" "}
+                    {t("records.source")}:{" "}
+                    {rec.sourceFilename ?? rec.sourceKind} ·{" "}
+                    {t("records.importedAt")}: {rec.importedAt.slice(0, 10)}
+                  </p>
+                  {rec.attestation?.self && (
+                    <p className="text-xs leading-relaxed text-state-amber">
+                      {t("records.selfAttestedHint")}
+                    </p>
+                  )}
+                  {!rec.attestation && !rec.withdrawn && (
+                    <EvidenceAttestForm
+                      action={attestEvidenceRecordAction}
+                      recordId={rec.id}
+                      sessionId={sessionId}
+                      roles={options([rec.supplierRole], "role")}
+                      defaultRole={rec.supplierRole}
+                      labels={{
+                        attest: t("records.attest"),
+                        attestRole: t("records.attestRole"),
+                        attestNote: t("records.attestNote"),
+                        errors,
+                      }}
+                    />
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </Card>
+
+      <Card compact>
+        <section className={SECTION}>
+          <h2 className={HEADING}>{t("withdraw.title")}</h2>
+          <EvidenceWithdrawForm
+            action={withdrawEvidenceImportAction}
+            sessionId={sessionId}
+            labels={{
+              note: t("withdraw.note"),
+              button: t("withdraw.button"),
+              hint: t("withdraw.hint"),
+              errors,
+            }}
+          />
+        </section>
+      </Card>
+    </>,
+  );
+}

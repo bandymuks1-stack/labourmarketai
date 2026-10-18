@@ -78,9 +78,14 @@ const ZERO: SpineCounts = {
   pendingIncomingBookings: 0,
   bookingResponsesNew: 0,
   pendingInvitations: 0,
+  pendingMembershipInvitations: 0,
   openTaskAttention: 0,
   newJobMatches: 0,
   pendingAbsenceReviews: 0,
+  pendingConnectionInvites: 0,
+  sharedRequestsAwaitingOffer: 0,
+  openCandidateOffers: 0,
+  openTeamOffers: 0,
 };
 
 const resolveKey = (msgs: unknown, path: string): unknown =>
@@ -307,9 +312,14 @@ describe("3. attention is a deterministic composition of real counts", () => {
         pendingIncomingBookings: 1,
         bookingResponsesNew: 1,
         pendingInvitations: 1,
+        pendingMembershipInvitations: 1,
         openTaskAttention: 1,
         newJobMatches: 1,
         pendingAbsenceReviews: 2,
+        pendingConnectionInvites: 1,
+        sharedRequestsAwaitingOffer: 1,
+        openCandidateOffers: 1,
+        openTeamOffers: 1,
       },
       documents: { expiring: 1, missing: 1, reviewNeeded: 1 },
       finance: { overdueCount: 1 },
@@ -333,9 +343,14 @@ describe("3. attention is a deterministic composition of real counts", () => {
           pendingIncomingBookings: 1,
           bookingResponsesNew: 1,
           pendingInvitations: 1,
+          pendingMembershipInvitations: 1,
           openTaskAttention: 1,
           newJobMatches: 1,
           pendingAbsenceReviews: 2,
+          pendingConnectionInvites: 1,
+          sharedRequestsAwaitingOffer: 1,
+          openCandidateOffers: 1,
+          openTeamOffers: 1,
         },
         documents: { expiring: 1, missing: 1, reviewNeeded: 1 },
         finance: { overdueCount: 1 },
@@ -534,8 +549,11 @@ describe("6. copy resolves in every ACTIVE locale and stays honest", () => {
   it("honest disabled copy: says no provider is connected; never claims an active AI", () => {
     const en = JSON.parse(read("messages/en.json")).assist;
     expect(en.provider.disabledBody).toMatch(/No external AI provider/i);
-    expect(en.provider.gates).toMatch(/ai_runs/);
-    expect(en.provider.gates).toMatch(/owner-gated migration/i);
+    // The gates line is read by normal users on /dashboard/assist: it says
+    // the assistant is not available yet and never names provider keys,
+    // audit tables or migrations (internal vocabulary leak, fixed 2026-09-20).
+    expect(en.provider.gates).toMatch(/not available in this environment yet/i);
+    expect(en.provider.gates).not.toMatch(/ai_runs|migration|provider key|audit/i);
     const blob = JSON.stringify(en);
     // The same active-AI-claim ban the provider-boundary guard enforces
     // repo-wide, pinned here on the assist namespace specifically.

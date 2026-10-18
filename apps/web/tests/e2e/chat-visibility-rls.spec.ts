@@ -107,6 +107,12 @@ test.describe("CHAT VISIBILITY — hostile negative tests (§4 default-closed)",
         organization_type: "company",
         display_name: `RLS Audit Org ${run}`,
         legal_name: `RLS Audit Org ${run}`,
+        // The org-creation triggers (company_memberships_seed_org_owner /
+        // ensure_org_owner_engagement) require an owner: an ownerless org is
+        // refused. The creator owns this audit org; the colleague below is a
+        // plain member — the point is that org membership grants NOTHING on
+        // conversations.
+        owner_profile_id: ids.creator,
       })
       .select("id")
       .single();
@@ -173,6 +179,82 @@ test.describe("CHAT VISIBILITY — hostile negative tests (§4 default-closed)",
       .eq("conversation_id", s.conversationId);
     expect(msgs.error).toBeNull();
     expect(msgs.data!.length).toBeGreaterThan(0);
+  });
+
+  // ── Multilingual round trip: original preserved per author, participant-only ─
+  //
+  // The owner's P0 contract at the data + authority layer: a participant writes
+  // in their own language, the ORIGINAL text and language are preserved, the
+  // other participant reads the original (and, when the egress-gated runtime
+  // produces one, its viewer-language rendering — proven separately in
+  // lib/communication/translation-read.test.ts), replies in THEIR language, and
+  // that reply's original is preserved too — while a non-participant sees
+  // neither message. Here we assert the durable facts (preservation + access);
+  // the translated STRING is external (owner egress grant + provider), never
+  // stored, so it is not asserted at the DB layer.
+  test("multilingual round trip: each author's original language is preserved and stays participant-only", async () => {
+    const tag = `ml-${Date.now()}`;
+    const creatorId = (await s.creator.auth.getUser()).data.user!.id;
+    const partnerId = (await s.partner.auth.getUser()).data.user!.id;
+
+    // A (creator) writes Lithuanian.
+    const aSend = await s.creator
+      .from("conversation_messages")
+      .insert({
+        conversation_id: s.conversationId,
+        author_id: creatorId,
+        body: `${tag} Rytoj 7 val. objekte.`,
+        original_language: "lt",
+      })
+      .select("id, body, original_language")
+      .single();
+    expect(aSend.error, "creator LT send").toBeNull();
+    expect(aSend.data!.original_language).toBe("lt");
+
+    // B (partner) reads A's original, language intact.
+    const bReadsA = await s.partner
+      .from("conversation_messages")
+      .select("body, original_language")
+      .eq("id", aSend.data!.id)
+      .single();
+    expect(bReadsA.error).toBeNull();
+    expect(bReadsA.data!.body).toBe(`${tag} Rytoj 7 val. objekte.`);
+    expect(bReadsA.data!.original_language).toBe("lt");
+
+    // B replies in Russian; the reply's original language is preserved as ru.
+    const bSend = await s.partner
+      .from("conversation_messages")
+      .insert({
+        conversation_id: s.conversationId,
+        author_id: partnerId,
+        body: `${tag} Понял, буду.`,
+        original_language: "ru",
+      })
+      .select("id, original_language")
+      .single();
+    expect(bSend.error, "partner RU reply").toBeNull();
+    expect(bSend.data!.original_language).toBe("ru");
+
+    // A reads B's reply, its original language intact — never overwritten.
+    const aReadsB = await s.creator
+      .from("conversation_messages")
+      .select("body, original_language")
+      .eq("id", bSend.data!.id)
+      .single();
+    expect(aReadsB.error).toBeNull();
+    expect(aReadsB.data!.body).toBe(`${tag} Понял, буду.`);
+    expect(aReadsB.data!.original_language).toBe("ru");
+
+    // A non-participant (same-org colleague) and an outsider see NEITHER
+    // message — the multilingual content is participant-only, like every body.
+    for (const who of [s.colleague, s.outsider]) {
+      const seen = await who
+        .from("conversation_messages")
+        .select("id")
+        .in("id", [aSend.data!.id, bSend.data!.id]);
+      expect(seen.error).toBeNull();
+      expect(seen.data).toHaveLength(0);
+    }
   });
 
   // ── 1. Same-org colleague, NOT a participant ───────────────────────────

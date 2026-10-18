@@ -13,7 +13,8 @@ import {
 /**
  * Read service for the worker's own self-stated languages — the
  * worker_languages table from DRAFT migration 20260711250000 (PR #720 —
- * human-gated, NOT applied yet). Owner-scoped: reads ONLY the signed-in
+ * APPLIED in production as ledger `20260711203623` `worker_languages_v1`,
+ * carrying 13 real rows on 2026-09-14). Owner-scoped: reads ONLY the signed-in
  * worker's own rows (worker_id resolved from the caller's workers row; RLS
  * additionally enforces can_view_worker).
  *

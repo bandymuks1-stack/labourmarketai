@@ -91,7 +91,7 @@ describe("journal entry surface stays focused", () => {
     expect(page).toMatch(/logViaChatBody/);
   });
   it("has at most one primary gradient CTA on the page", () => {
-    const n = (page.match(/from-brand-blue to-brand-cyan|variant="primary"/g) ?? []).length;
+    const n = (page.match(/from-brand-blue to-brand-cyan|bg-gradient-cta[^"`']*text-text-on-brand|variant="primary"/g) ?? []).length;
     expect(n).toBeLessThanOrEqual(1);
   });
 });

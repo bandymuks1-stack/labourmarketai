@@ -2,10 +2,13 @@
 
 import "server-only";
 
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 
 import { getWorkerPlayerCard, type WorkerPlayerCard } from "./player-card";
+import { deriveWorkCardChecks } from "@/lib/worker/work-card-plausibility";
 import { buildPlayerCardLabels } from "./labels";
+import { loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import {
   getOwnThermometer,
   toThermometerView,
@@ -15,6 +18,7 @@ import {
   getPrimaryProfessionSlug,
   getWorkerCoreRow,
 } from "@/lib/data/worker-core";
+import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { getWorkerCard, type WorkEditorVM } from "@/lib/worker/work-card";
 import { deriveWorkCardState } from "@/lib/worker/work-card-state";
 import type { WorkCardLabels } from "@/components/app/work-card-editor";
@@ -22,6 +26,7 @@ import type {
   PlayerCardLabels,
   ThermometerView,
 } from "@/components/app/worker-player-card";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * THE PLAYER CARD RESULT (W3 row 1).
@@ -71,7 +76,17 @@ export async function loadPlayerCardResult(): Promise<PlayerCardResult> {
       return { kind: "blocked", message: t("playerCardBlocked") };
     }
     const [labels, thermometer, avatar, editor] = await Promise.all([
-      buildPlayerCardLabels(card),
+      // The journal's own figures for the identity stage and the per-engagement
+      // hours — the ONE hour ledger; an unreadable journal yields no strip.
+      loadOwnWorkIntelligence()
+        .catch(() => null)
+        .then((intel) =>
+          buildPlayerCardLabels(card, {
+            contexts: intel?.contexts ?? null,
+            allTime: intel?.periods.find((p) => p.key === "all") ?? null,
+            allTimeTruncated: intel?.coverage.truncated ?? false,
+          }),
+        ),
       getOwnThermometer().then(toThermometerView),
       getOwnAvatar(),
       resolveWorkEditor(card),
@@ -106,10 +121,16 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
   if (!worker?.id) return null;
 
   const tProf = await getTranslations("professions");
-  const professionName =
-    professionSlug && tProf.has(professionSlug as never)
-      ? tProf(professionSlug as never)
-      : professionSlug;
+  // The work card said nothing at all to a person whose profession the 49-row
+  // registry does not carry: the name came from the slug alone. It now goes
+  // through the ONE module that decides this everywhere (onboarding, profile,
+  // Living CV, ŠIANDIEN), so the card cannot disagree with the screens around
+  // it. A slug the catalogue cannot name degrades to the person's own words
+  // rather than rendering a raw slug at them — that module's own rule.
+  const professionName = professionDisplayName(
+    { slug: professionSlug, label: card.professionOwnWords },
+    (slug) => (tProf.has(slug as never) ? tProf(slug as never) : null),
+  );
 
   const data = await getWorkerCard({
     workerId: worker.id,
@@ -121,8 +142,27 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
   const derived = deriveWorkCardState(data.signals, Date.now());
 
   const tw = await getTranslations("auth.dashboard.workCard");
+  // What the saved figures READ AS — derived from the same values the editor
+  // prefills; the sentence names the figure, the person decides.
+  const todayIso = (await viewerWorkToday()).todayIso;
+  const checks = deriveWorkCardChecks(
+    {
+      salaryMin: data.values.salaryMin,
+      salaryMax: data.values.salaryMax,
+      availabilityStatus: data.values.availabilityStatus,
+      availableFrom: data.values.availableFrom,
+    },
+    todayIso,
+  ).map((c) => ({
+    fingerprint: c.fingerprint,
+    text: tw(`checks.${c.code}`, {
+      min: c.salaryMin ?? "",
+      max: c.salaryMax ?? "",
+      date: c.availableFrom ?? "",
+    }),
+  }));
   return {
-    vm: { state: derived.state, next: derived.next, values: data.values },
+    vm: { state: derived.state, next: derived.next, values: data.values, checks },
     labels: {
       nextEyebrow: tw("nextEyebrow"),
       nextLabel: tw(`next.${derived.next.dim}`),
@@ -139,18 +179,34 @@ async function resolveWorkEditor(card: WorkerPlayerCard): Promise<{
       availabilityOptionBusy: tw("editor.availabilityOption.busy"),
       availabilityOptionUnavailable: tw("editor.availabilityOption.unavailable"),
       availabilityOptionNone: tw("editor.availabilityOption.none"),
+      keepOnlyHint: tw("editor.keepOnlyHint"),
       availableFromLabel: tw("editor.availableFromLabel"),
       locationLabel: tw("editor.locationLabel"),
       locationHint: tw("editor.locationHint"),
+      // The ONE country list (active markets first, then every ISO country in
+      // the person's language) — the same one the company need form uses.
+      locationOptions: countryOptionsForLocale(await getLocale()).map((o) => ({
+        code: o.value,
+        label: o.label,
+      })),
       preferredLabel: tw("editor.preferredLabel"),
       preferredHint: tw("editor.preferredHint"),
       salaryMinLabel: tw("editor.salaryMinLabel"),
       salaryMaxLabel: tw("editor.salaryMaxLabel"),
+      checksEyebrow: tw("checks.eyebrow"),
+      checkKeep: tw("checks.keep"),
+      checkCorrect: tw("checks.correct"),
       save: tw("editor.save"),
       saving: tw("editor.saving"),
       saved: tw("editor.saved"),
       errorMsg: tw("editor.error"),
       needsMigration: tw("editor.needsMigration"),
+      visibilityAsk: {
+        title: tw("visibilityAsk.title"),
+        body: tw("visibilityAsk.body"),
+        open: tw("visibilityAsk.open"),
+        dismiss: tw("visibilityAsk.dismiss"),
+      },
     },
   };
 }

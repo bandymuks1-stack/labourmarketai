@@ -1,10 +1,12 @@
 import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
   RoleSignalUnavailableError,
   readRoleSignal,
 } from "@/lib/auth/profile-roles";
+import { OPERATOR_ACCESS_NOTICE } from "@/lib/auth/role-gated-routes";
 
 /**
  * Server-side superadmin authorization.
@@ -59,11 +61,14 @@ import {
  * Throws `RoleSignalUnavailableError` when either read never answered.
  * A missing profile row is an ANSWER (not an admin), not a failure.
  */
-async function readAdminSignals(userId: string): Promise<{
+async function readAdminSignals(
+  userId: string,
+  client?: SupabaseClient,
+): Promise<{
   activeRoleAdmin: boolean;
   profileRolesAdmin: boolean;
 }> {
-  const supabase = await createClient();
+  const supabase = client ?? (await createClient());
   const profile = await readRoleSignal("profiles.active_role", () =>
     supabase.from("profiles").select("active_role").eq("id", userId).maybeSingle(),
   );
@@ -104,13 +109,29 @@ export async function isSuperadmin(): Promise<boolean> {
 }
 
 /**
+ * The same probe for an EXPLICIT caller (a bearer / agent transport): its own
+ * RLS-scoped client and verified user id instead of the cookie session, which
+ * such a request does not carry. Fails closed exactly like `isSuperadmin`.
+ */
+export async function isSuperadminFor(supabase: SupabaseClient, userId: string): Promise<boolean> {
+  try {
+    const { activeRoleAdmin, profileRolesAdmin } = await readAdminSignals(userId, supabase);
+    return activeRoleAdmin || profileRolesAdmin;
+  } catch (e) {
+    if (e instanceof RoleSignalUnavailableError) return false;
+    throw e;
+  }
+}
+
+/**
  * Server-side gate for admin pages. Call as the FIRST awaited
  * statement in the admin page/server action so non-admins never see
  * the rendered content.
  *
  * Behavior:
  *   - unauthenticated user → redirect to /<locale>/auth/login;
- *   - authenticated non-admin → redirect to /<locale>/dashboard;
+ *   - authenticated non-admin → redirect to /<locale>/dashboard, carrying
+ *     the operator reason so the home can SAY why (2026-09-22);
  *   - admin (active_role='admin' OR profile_roles has 'admin') → returns user.id;
  *   - the admin signals could not be READ → the error propagates (fails
  *     closed: the admin tree does not render) rather than pretending the
@@ -127,7 +148,14 @@ export async function requireSuperadmin(locale: string): Promise<string> {
     user.id,
   );
   if (!activeRoleAdmin && !profileRolesAdmin) {
-    redirect(`/${locale}/dashboard`);
+    // Never a silent bounce. Until 2026-09-22 this sent the person to the bare
+    // home with nothing said, so opening a stale operator link read as a
+    // broken product rather than a refusal. The reason rides the SAME
+    // `?notice=` channel the role gate uses, and the dashboard layout's
+    // earlier gate emits the identical value — one destination, one sentence,
+    // whichever gate got there first. Reached ONLY when both signals were
+    // READ (an unread signal throws above), so the sentence is always true.
+    redirect(`/${locale}/dashboard?notice=${OPERATOR_ACCESS_NOTICE}`);
   }
   return user.id;
 }

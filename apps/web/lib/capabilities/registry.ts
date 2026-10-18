@@ -1,15 +1,29 @@
 import "server-only";
 
+import { withoutCounterpartyRows } from "@/lib/journal/review-status";
 import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
-import { createJournalEntryCore } from "@/lib/journal/journal-write-core";
+import {
+  createJournalEntryCore,
+  projectsToChooseFrom,
+} from "@/lib/journal/journal-write-core";
+import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
+import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
+import { readHeldProfileRoles } from "@/lib/auth/profile-roles";
 import { readWorkerCoreRow, readWorkerSkillRows } from "@/lib/data/worker-core";
 import { listJournalEntries } from "@/lib/journal/journal-list-core";
-import { listWorkspaceMemberships } from "@/lib/company/active-organization";
+import { WORK_PERIOD_KEYS } from "@/lib/journal/work-intelligence";
+import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import {
+  readWorkspaceMemberships,
+  resolveActiveWorkspaceForCaller,
+} from "@/lib/company/active-organization";
+import { workspaceLabeller } from "@/lib/capabilities/workspace-labels";
 import { switchActiveWorkspaceCore } from "@/lib/company/workspace-switch-core";
+import { followWorkspaceRoleCore } from "@/lib/auth/active-role-core";
 import {
   expressInterestCore,
   interestStateFingerprint,
@@ -21,6 +35,18 @@ import {
   mintCapabilityConfirmation,
   verifyCapabilityConfirmation,
 } from "./confirmable";
+import { demandContextRefusal } from "./employer-context-refusal";
+import { EMPLOYER_OPERATIONS_CAPABILITIES } from "./employer-operations-capabilities";
+import { COUNTERPARTY_REVIEW_CAPABILITIES } from "./counterparty-review-capabilities";
+import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
+import { TEAM_ASSIGNMENT_CAPABILITIES } from "./team-assignment-capabilities";
+import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
+import { COMPANY_INGEST_CAPABILITIES } from "./company-ingest-capabilities";
+import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
+import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
+import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES } from "./conversation-action-bridge";
+import { WORKSPACE_READ_CAPABILITIES } from "./workspace-read-capabilities";
+import { DOMAIN_ACTION_CAPABILITIES } from "./domain-action-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -28,6 +54,7 @@ import {
   workerSaveWorkCardSchema,
 } from "@/lib/conversation/worker-schemas";
 import {
+  normalizeCountry,
   normalizeCountryList,
   saveWorkerCardCore,
   workCardStateFingerprint,
@@ -37,6 +64,7 @@ import {
   submitDemandRequestCore,
 } from "@/lib/demand/demand-request";
 import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
+import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
 import { companyCreateDemandFields } from "@/lib/conversation/company-schemas";
 import {
   resolveEngagementContext,
@@ -70,8 +98,9 @@ const profileGet: CapabilityDescriptor = {
   title: "My LabourMarket profile",
   description:
     "The caller's own profile record: name, locale, country, onboarding " +
-    "state, and whether a worker profile exists. Facts as recorded — no " +
-    "derived scores.",
+    "state, whether a worker profile exists, and the roles the account " +
+    "actually holds. Facts as recorded — no derived scores, and a read that " +
+    "failed is reported as unavailable rather than as an absence.",
   exposed: true,
   annotations: {
     readOnlyHint: true,
@@ -85,7 +114,30 @@ const profileGet: CapabilityDescriptor = {
     // (`getSessionProfile` → readProfileRow) and the SAME workers-row core
     // every web navigation reads (`getWorkerCoreRow` → readWorkerCoreRow) —
     // one query contract per table, no capability-side re-implementation.
-    const read = await readProfileRow(caller);
+    //
+    // CONCURRENT, because they are independent: both are keyed on the
+    // caller's own id (`profiles.id` and `workers.profile_id`), so neither
+    // read's query depends on the other's result. Run sequentially they cost
+    // two round trips — measured at 417 ms of pure waiting in the real
+    // ChatGPT trace of 2026-09-10 (profiles 10:29:59.952 → workers
+    // 10:30:00.369), which was most of this capability's server time.
+    //
+    // Authorization is untouched: both still execute under the caller's own
+    // RLS-scoped client. The only behavioural difference is that the workers
+    // read is also issued when the profile turns out to be missing or
+    // unreadable — a wasted query in a rare case, never a disclosed one,
+    // because RLS answers it exactly as before.
+    const [read, workerRead, heldRolesRead] = await Promise.all([
+      readProfileRow(caller),
+      readWorkerCoreRow(caller),
+      // The PLURAL of `activeRole`. Same subject — the caller's own identity
+      // facts — so it rides this capability rather than a second round trip a
+      // phone would have to make on every launch. Through the canonical
+      // `profile_roles` core, never a query written here: this registry is
+      // exactly the transport adapter `g4-domain-core-reuse` keeps out of the
+      // tables the web already owns.
+      readHeldProfileRoles(caller),
+    ]);
     if (!read.ok) {
       // A failed read is "unavailable", never "you have no profile" (#1314).
       return { ok: false, code: "unavailable", message: "Profile read failed." };
@@ -94,8 +146,6 @@ const profileGet: CapabilityDescriptor = {
     if (!profile) {
       return { ok: false, code: "not_found", message: "No profile row for this account." };
     }
-
-    const workerRead = await readWorkerCoreRow(caller);
 
     return {
       ok: true,
@@ -115,6 +165,16 @@ const profileGet: CapabilityDescriptor = {
           : workerRead.value
             ? { status: "exists" as const, workerId: workerRead.value.id }
             : { status: "none" as const },
+        // Same reason, and the reason this is not simply an array: a failed
+        // roles read that arrived as `[]` would tell a person who manages
+        // three companies that they hold nothing. That defect was live on the
+        // web shell on 2026-08-28 and is why the core throws rather than
+        // returning empty. `roles` is the RBAC set as recorded — it carries
+        // `admin`, which is not a participation mode, so a consumer mapping
+        // these to modes must FILTER rather than assume.
+        heldRoles: heldRolesRead.ok
+          ? { status: "known" as const, roles: heldRolesRead.value }
+          : { status: "unavailable" as const },
       },
     };
   },
@@ -230,8 +290,116 @@ const journalList: CapabilityDescriptor = {
             valueNumeric: m.value_numeric,
             unitSlug: m.unit_slug,
           })),
-          confirmations: (e.journal_entry_confirmations ?? []).length,
+          // Employer-path decisions only (decision 0018): a client's acceptance
+          // is not an employer confirmation.
+          confirmations: withoutCounterpartyRows(e.journal_entry_confirmations).length,
         })),
+      },
+    };
+  },
+};
+
+// ── journal.work_intelligence.get ──────────────────────────────────────────
+
+const journalWorkIntelligenceInput = z
+  .object({
+    period: z.enum(WORK_PERIOD_KEYS).optional(),
+  })
+  .strict();
+
+const journalWorkIntelligenceGet: CapabilityDescriptor = {
+  id: "journal.work_intelligence.get",
+  kind: "read",
+  title: "My work in numbers",
+  description:
+    "What the caller's own Work Journal adds up to — the SAME figures the " +
+    "web 'work in numbers' section shows, from the one work-time rule: hours, " +
+    "confirmed hours, entries and days worked per period (today / 7 / 30 / " +
+    "365 days / all, UTC calendar days ending today); per skill the hours it " +
+    "can claim (attributed), the confirmed part, hours shared with other " +
+    "skills (involvement — never a total), share of attributed hours, " +
+    "entries, days, contexts, first and last worked day and a 30-day trend; " +
+    "hours per kind of work; and `coverage` — how many entries the figures " +
+    "rest on and whether a bounded read stopped short. `period` scopes the " +
+    "skill and activity sections (default `all`); `scope` names it. No " +
+    "score, rating or rank; nothing about other people or organizations.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: journalWorkIntelligenceInput,
+  run: async (caller, input): Promise<ExecResult> => {
+    const parsed = journalWorkIntelligenceInput.parse(input);
+    // G4 bridge: the same workers-row core the web reads (readWorkerCoreRow).
+    const workerRead = await readWorkerCoreRow(caller);
+    if (!workerRead.ok) {
+      return { ok: false, code: "unavailable", message: "Worker read failed." };
+    }
+    const worker = workerRead.value;
+    if (!worker) {
+      return {
+        ok: false,
+        code: "no_worker_profile",
+        message: "This account has no worker profile, so it has no Work Journal.",
+      };
+    }
+    // THE one reader the section, the Living CV and the chat use — the
+    // canonical journal-list read + the link read + the declared skills,
+    // under the caller's own RLS. A failed read is UNKNOWN (unavailable),
+    // never an empty model that reads as "no work" (SEP-7).
+    const wi = await loadWorkIntelligence(caller, worker.id, {
+      focus: parsed.period ?? "all",
+    });
+    if (!wi) {
+      return { ok: false, code: "unavailable", message: "Work intelligence read failed." };
+    }
+    // The person's OWN figures only. The organization's hour ledger
+    // (`organizationRecords`), context ids, and plausibility checks are
+    // deliberately not exposed here — they name other parties' records.
+    return {
+      ok: true,
+      data: {
+        workerId: worker.id,
+        scope: wi.scope,
+        periods: wi.periods.map((p) => ({
+          key: p.key,
+          startIso: p.startIso,
+          endIso: p.endIso,
+          hours: p.hours,
+          confirmedHours: p.confirmedHours,
+          dayUnits: p.dayUnits,
+          entries: p.entries,
+          daysWorked: p.daysWorked,
+        })),
+        skills: wi.skills.map((sk) => ({
+          slug: sk.slug,
+          attributedHours: sk.attributedHours,
+          confirmedHours: sk.confirmedHours,
+          sharedHours: sk.sharedHours,
+          share: sk.share,
+          entries: sk.entries,
+          days: sk.days,
+          contexts: sk.contexts,
+          firstWorkedDay: sk.firstWorkedDay,
+          lastWorkedDay: sk.lastWorkedDay,
+          trend: sk.trend,
+        })),
+        activities: wi.activities.map((a) => ({
+          key: a.key,
+          hours: a.hours,
+          share: a.share,
+          entries: a.entries,
+          lastWorkedDay: a.lastWorkedDay,
+          trend: a.trend,
+        })),
+        coverage: {
+          entriesRead: wi.coverage.entriesRead,
+          truncated: wi.coverage.truncated,
+          linksTruncated: wi.coverage.linksTruncated,
+        },
       },
     };
   },
@@ -241,54 +409,10 @@ const journalList: CapabilityDescriptor = {
 // (Confirmation wiring lives in ./confirmable — ONE minting/verification
 // semantics for every bridged write capability, G4 tail wagon 1.)
 
-/**
- * The confirmation token's state fingerprint is the caller's JOURNAL CHAIN
- * HEAD — which is what makes the token genuinely ONE-TIME: a successful
- * confirm appends an entry, the head moves, and a replay of the same token
- * (a duplicate retry, a stolen token, a double-tap) fails as `stale_state`
- * instead of writing a second entry. A constant fingerprint here would have
- * made "one-time" a five-minute lie.
- */
-async function journalChainFingerprint(
-  caller: CapabilityCaller,
-): Promise<{ ok: true; fingerprint: string } | { ok: false; result: ExecResult }> {
-  // G4 bridge: the same workers-row core the web reads (readWorkerCoreRow).
-  const workerRead = await readWorkerCoreRow(caller);
-  if (!workerRead.ok) {
-    return {
-      ok: false,
-      result: { ok: false, code: "unavailable", message: "Worker read failed." },
-    };
-  }
-  const worker = workerRead.value;
-  if (!worker) {
-    return {
-      ok: false,
-      result: {
-        ok: false,
-        code: "no_worker_profile",
-        message: "This account has no worker profile, so it has no Work Journal.",
-      },
-    };
-  }
-  const { data: head, error: headError } = await caller.supabase
-    .from("journal_entries")
-    .select("hash_self")
-    .eq("worker_id", worker.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (headError) {
-    return {
-      ok: false,
-      result: { ok: false, code: "unavailable", message: "Journal read failed." },
-    };
-  }
-  return {
-    ok: true,
-    fingerprint: `journal-head:v1:${worker.id}:${head?.hash_self ?? "genesis"}`,
-  };
-}
+// The confirmation token's state fingerprint is the caller's JOURNAL CHAIN
+// HEAD (`journalChainFingerprint`, lib/journal/journal-chain-fingerprint) —
+// the ONE fingerprint the conversation dispatcher binds `worker.log-work` to
+// as well, so both transports' tokens are one-time against the same fact.
 
 /**
  * A CONFIRMATION HASH MUST NOT DEPEND ON null-vs-absent. The draft side may
@@ -303,12 +427,16 @@ function normalizedDraftForHash(draft: {
   notes: string;
   workDate: string;
   siteName?: string | null;
+  projectId?: string | null;
 }): Record<string, unknown> {
   return {
     engagementContextId: draft.engagementContextId,
     notes: draft.notes,
     workDate: draft.workDate,
     siteName: draft.siteName ?? null,
+    // The project the hours belong to ("none" = deliberately not project
+    // work) is part of what the human confirmed, so it is part of the hash.
+    projectId: draft.projectId ?? null,
   };
 }
 
@@ -527,6 +655,21 @@ const journalCreateDraft: CapabilityDescriptor = {
         },
       };
     }
+    if (!draft.projectId) {
+      const choices = await projectsToChooseFrom(caller.supabase, caller.userId, engagement.id);
+      if (choices) {
+        // NOTHING preselected, NO token minted — same shape as the
+        // engagement choice. "none" answers "not project work".
+        return {
+          ok: true,
+          data: {
+            status: "project_required",
+            options: choices.map((p) => ({ projectId: p.id, label: p.label })),
+            note: 'This worker has more than one active project here. Ask the user which project these hours belong to (or "not project work", projectId "none"), then draft again with projectId.',
+          },
+        };
+      }
+    }
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
     const resolved = {
@@ -534,6 +677,7 @@ const journalCreateDraft: CapabilityDescriptor = {
       notes: draft.notes,
       workDate: draft.workDate,
       siteName: draft.siteName ?? null,
+      projectId: draft.projectId ?? null,
     };
     const token = mintCapabilityConfirmation({
       actionId: "journal.confirm",
@@ -549,6 +693,7 @@ const journalCreateDraft: CapabilityDescriptor = {
           siteName: resolved.siteName,
           notes: resolved.notes,
           engagementContextId: resolved.engagementContextId,
+          projectId: resolved.projectId,
           // The RESOLVED context, named — the human must SEE which context
           // the entry will land in before confirming (preselect-and-show,
           // never silently assign).
@@ -593,7 +738,7 @@ const journalConfirm: CapabilityDescriptor = {
     const { confirmationToken, ...draft } = parsed;
     const state = await journalChainFingerprint(caller);
     if (!state.ok) return state.result;
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "journal.confirm",
       token: confirmationToken,
       // Same null-vs-absent normalization the draft hashed — see
@@ -622,9 +767,24 @@ const journalConfirm: CapabilityDescriptor = {
         notes: draft.notes,
         work_date: draft.workDate,
         site_name: draft.siteName ?? "",
+        project_id: draft.projectId ?? "",
+        // The stated time becomes time on the record — the same derivation
+        // the conversation executor applies (issue #1689).
+        ...intakeWorkTimeFields(draft.notes, draft.workDate),
       }),
     );
     if (!result.ok) {
+      if (result.code === "project_required" && result.projects) {
+        // The write core is the net: surface the choices, never a bare error.
+        return {
+          ok: true,
+          data: {
+            status: "project_required",
+            options: result.projects.map((p) => ({ projectId: p.id, label: p.label })),
+            note: "Nothing was saved. Ask the user which project, then draft again with projectId.",
+          },
+        };
+      }
       return { ok: false, code: result.code, message: result.message };
     }
     return {
@@ -813,7 +973,7 @@ const interestExpressConfirm: CapabilityDescriptor = {
     const parsed = interestConfirmInput.parse(input);
     const { confirmationToken, ...draft } = parsed;
     const fingerprint = await interestStateFingerprint(caller, draft.requestId);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "interest.express_confirm",
       token: confirmationToken,
       input: normalizedInterestForHash(draft),
@@ -879,14 +1039,110 @@ const contextSwitchInput = z
   })
   .strict();
 
+/**
+ * WHICH WORKSPACES AM I IN — the READ half of the context pair.
+ *
+ * `context.switch` could already be made to list the options, by handing it a
+ * value it cannot resolve. That is not a read: its `readOnlyHint` is false and
+ * a strict MCP client is entitled to ask a human before every call to it. A
+ * client that only wants to SHOW a person which workspaces they hold — the
+ * mobile settings screen is the first — needs an answer it can fetch without
+ * proposing a write.
+ *
+ * It opens NO new path. The list is `readWorkspaceMemberships`, the same
+ * RLS-scoped sources behind the web workspace chip, `context.switch` and
+ * `switchActiveWorkspaceCore`; the labels are the canonical builder, through
+ * the same `workspaceLabeller` the switch uses. There is no second membership
+ * source and no second set of names to drift.
+ *
+ * It reports the ACTIVE workspace as the durable pointer records it, so a
+ * client can show which one a write would land in — the thing a phone could
+ * not tell anyone before this existed. An open browser session may hold its
+ * own in-session choice; that is stated rather than guessed at.
+ */
+const contextList: CapabilityDescriptor = {
+  id: "context.list",
+  kind: "read",
+  title: "Which workspaces I hold",
+  description:
+    "The caller's own workspaces — their personal space and every " +
+    "organization they are a member of — with the label a person actually " +
+    "reads, and which one the DURABLE pointer currently makes active. " +
+    "Membership as recorded; no derived authority and no score.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: z.object({}).strict(),
+  run: async (caller): Promise<ExecResult> => {
+    // `resolveActiveWorkspaceForCaller` is THE transport-neutral core — its
+    // own note says it exists so that "acting for organization X" means one
+    // thing for the web session, this capability layer and mobile alike. It
+    // returns the membership list AND the resolved pointer, so there is no
+    // second read and no second resolution rule here.
+    //
+    // `identity: null` is correct for a bearer caller: it is the web session's
+    // person/company signal, which a token does not carry. Its only effect is
+    // the single-organization default for a COMPANY identity; withholding it
+    // means an unset pointer resolves to the personal workspace rather than
+    // inferring an organization this caller never chose.
+    const { workspaces, activeWorkspaceId, pointerAvailable, membershipsComplete } =
+      await resolveActiveWorkspaceForCaller(caller, null);
+    // A SHORTER LIST IS NOT A SMALLER TRUTH. The three membership sources
+    // degrade a failure to omitted rows, so without this an ordinary
+    // PostgREST or RLS blip would answer `ok` with some of the caller's
+    // organizations missing — and a person would read "these are your
+    // workspaces" with no hedge at all. Refusing is the #1314 rule: absence
+    // of an answer is never rendered as an answer of absence.
+    if (membershipsComplete === false) {
+      return {
+        ok: false,
+        code: "unavailable",
+        message:
+          "Your workspaces could not be read in full, so this list would be missing some. Nothing was changed.",
+      };
+    }
+    const labelOf = await workspaceLabeller(caller.locale, workspaces);
+    return {
+      ok: true,
+      data: {
+        workspaces: workspaces.map((w) => ({
+          id: w.id,
+          label: labelOf(w),
+          kind: w.kind,
+          organizationType: w.kind === "organization" ? (w.organizationType ?? null) : null,
+          relationship: w.relationship ?? null,
+          active: w.id === activeWorkspaceId,
+        })),
+        activeWorkspaceId,
+        // `pointerAvailable: false` means the owner-gated pointer migration is
+        // unapplied on this environment, so `activeWorkspaceId` is the
+        // RESOLVER's default rather than a recorded choice, and a bearer
+        // client cannot switch. Saying so is the difference between a client
+        // showing the truth and one showing a confident wrong answer about
+        // where a write will land.
+        pointerAvailable,
+        note: pointerAvailable
+          ? "This is the DURABLE pointer. An organization chosen here wins in every session; choosing personal here clears the durable pointer, and a browser that holds its own choice keeps it until switched there."
+          : "No durable active-workspace pointer is recorded on this environment: the active workspace shown is the resolver's default, not a stored choice, and a bearer client cannot switch yet.",
+      },
+    };
+  },
+};
+
 const contextSwitch: CapabilityDescriptor = {
   id: "context.switch",
   kind: "execute",
   title: "Switch my active workspace",
   description:
-    "Switches the caller's DURABLE active-workspace pointer — the default " +
-    "new sessions and bearer clients resolve against. An already-open " +
-    "browser session keeps its own in-session choice until changed there. " +
+    "Switches the caller's DURABLE active-workspace pointer: an organization " +
+    "chosen here wins in every session; choosing personal here clears the " +
+    "durable pointer, and a browser that holds its own choice keeps it until " +
+    "switched there. The caller's acting identity follows their relationship " +
+    "to the workspace. " +
     "`workspace` is 'personal', a workspace id, or an organization name " +
     "from the caller's own memberships; an unknown or ambiguous value " +
     "returns the labeled options and switches NOTHING.",
@@ -904,34 +1160,25 @@ const contextSwitch: CapabilityDescriptor = {
     const parsed = contextSwitchInput.parse(input);
     // G4 bridge: the SAME membership list the web workspace chip renders,
     // and the SAME switch core the web server actions run.
-    const memberships = await listWorkspaceMemberships(caller);
-
-    const t = await getTranslations({
-      locale: caller.locale,
-      namespace: "capabilities",
-    });
-    const tRelationships = await getTranslations({
-      locale: caller.locale,
-      namespace: "relationshipTypes",
-    });
-    const relationshipLabel = (slug: string): string =>
-      tRelationships.has(slug) ? tRelationships(slug) : slug;
-    // Same duplicate-qualification rule as the work-log selector (#1360):
-    // a base label that occurs more than once gains its relationship.
-    const baseOf = (w: (typeof memberships)[number]): string =>
-      w.kind === "personal" ? t("workspacePersonal") : w.name.trim() || t("notSet");
-    const baseCounts = new Map<string, number>();
-    for (const w of memberships) {
-      const base = baseOf(w);
-      baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1);
+    //
+    // The COMPLETE-aware read, because this capability SHOWS the list: on an
+    // unresolvable value it answers `workspace_choice_required` with the
+    // options a person then picks from. A degraded list is doubly wrong here —
+    // a missing row can be the very reason the requested workspace failed to
+    // match, so the person would be told their own workspace is not theirs and
+    // handed a short list to choose from instead.
+    const membershipRead = await readWorkspaceMemberships(caller);
+    if (!membershipRead.complete) {
+      return {
+        ok: false,
+        code: "unavailable",
+        message:
+          "Your workspaces could not be read in full, so nothing was switched and the options would be incomplete.",
+      };
     }
-    const labelOf = (w: (typeof memberships)[number]): string => {
-      const base = baseOf(w);
-      const duplicated = (baseCounts.get(base) ?? 0) > 1;
-      return duplicated && w.kind === "organization" && w.relationship
-        ? `${base} — ${relationshipLabel(w.relationship)}`
-        : base;
-    };
+    const memberships = membershipRead.workspaces;
+
+    const labelOf = await workspaceLabeller(caller.locale, memberships);
 
     // Resolution is deliberately EXACT (id, the personal sentinel, or a
     // full case-insensitive name) — fuzzy sentence matching stays the web
@@ -973,6 +1220,14 @@ const contextSwitch: CapabilityDescriptor = {
       }
       return { ok: false, code: "unavailable", message: "Workspace switch failed." };
     }
+    // THE ACTING IDENTITY FOLLOWS THE WORKSPACE (owner program 2026-09-23,
+    // d3) — through the SAME role core the web switch runs, from the SAME
+    // verified membership row the switch core just accepted. Before this, a
+    // switch here moved only the pointer, so the web session that read it
+    // afterwards could act as an employer inside a workspace where the person
+    // is an employee. A failed follow does not un-switch the pointer (it is the
+    // truth now); it is reported, never hidden.
+    const followed = await followWorkspaceRoleCore(caller, result.workspace);
     return {
       ok: true,
       data: {
@@ -980,6 +1235,8 @@ const contextSwitch: CapabilityDescriptor = {
         workspaceId: target.id,
         label: labelOf(target),
         durablePointer: true,
+        actingRole: followed.ok ? followed.role : null,
+        identityFollowed: followed.ok,
       },
     };
   },
@@ -1089,7 +1346,10 @@ const workCardSaveDraft: CapabilityDescriptor = {
         field === "preferredCountries"
           ? normalizeCountryList(draft.preferredCountries ?? null)
           : field === "locationCountry"
-            ? (draft.locationCountry?.toUpperCase() ?? null)
+            // The preview shows the ISO code the save will write; a typed
+            // country that does not resolve is shown as typed — the save
+            // itself refuses it (`location_country`), never truncates it.
+            ? (normalizeCountry(draft.locationCountry) ?? draft.locationCountry?.trim() ?? null)
             : (draft[field as keyof WorkCardDraft] ?? null),
     }));
 
@@ -1137,7 +1397,7 @@ const workCardSaveConfirm: CapabilityDescriptor = {
     const parsed = workCardConfirmInput.parse(input);
     const { confirmationToken, ...draft } = parsed;
     const fingerprint = await workCardStateFingerprint(caller);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "work_card.save_confirm",
       token: confirmationToken,
       input: normalizedWorkCardForHash(draft),
@@ -1217,39 +1477,6 @@ function normalizedDemandForHash(draft: DemandDraftInput): Record<string, unknow
   const out: Record<string, unknown> = {};
   for (const f of DEMAND_FIELDS) out[f] = draft[f] ?? null;
   return out;
-}
-
-/** Employer-context refusal → an honest capability failure. `context.switch`
- *  is named because it is the caller's own way out of the personal space. */
-function demandContextRefusal(reason: string): ExecResult {
-  if (reason === "personal-workspace") {
-    return {
-      ok: false,
-      code: "personal_workspace",
-      message:
-        "The caller is acting in their personal space. A structured need belongs to an organization — switch with context.switch first.",
-    };
-  }
-  if (reason === "no-organization") {
-    return {
-      ok: false,
-      code: "no_organization",
-      message: "This account belongs to no organization, so it cannot create a demand.",
-    };
-  }
-  if (reason === "needs-migration") {
-    return {
-      ok: false,
-      code: "needs_migration",
-      message: "The organization store is not enabled on this environment.",
-    };
-  }
-  return {
-    ok: false,
-    code: "no_company_context",
-    message:
-      "No employer company resolves for this caller right now (workspace not company-bound, membership missing, or the read failed).",
-  };
 }
 
 const demandCreateDraft: CapabilityDescriptor = {
@@ -1336,7 +1563,7 @@ const demandCreateConfirm: CapabilityDescriptor = {
     const parsed = demandConfirmInput.parse(input);
     const { confirmationToken, ...draft } = parsed;
     const fingerprint = await demandStateFingerprint(caller);
-    const verdict = verifyCapabilityConfirmation({
+    const verdict = await verifyCapabilityConfirmation({
       actionId: "demand.create_confirm",
       token: confirmationToken,
       input: normalizedDemandForHash(draft),
@@ -1360,7 +1587,7 @@ const demandCreateConfirm: CapabilityDescriptor = {
 
     const result = await submitDemandRequestCore(
       caller,
-      { organizationId: employer.organizationId },
+      employer,
       draft.intent,
       {
         description: draft.description,
@@ -1388,7 +1615,11 @@ const demandCreateConfirm: CapabilityDescriptor = {
             ? "The demand intake is not enabled on this environment."
             : result.code === "no_company_context"
               ? "No employer company resolves for this caller."
-              : "Demand submit failed.",
+              : result.code === "over_open_need_limit"
+                ? result.next === "individual_plan"
+                  ? "This organization has reached the active-position limit of its plan. Nothing was charged. Contact LabourMarket.ai."
+                  : "This organization's free plan allows 1 active position. Close one, or activate the Organization plan in the organization account."
+                : "Demand submit failed.",
       };
     }
     return {
@@ -1403,12 +1634,109 @@ const demandCreateConfirm: CapabilityDescriptor = {
   },
 };
 
+
+// ── workforce.availability ────────────────────────────────────────────────
+//
+// "Kas laisvas kitą savaitę?" — the FIRST of the owner's company questions to
+// become an authorized canonical action rather than a chat-only answer.
+//
+// It is the SAME `whoIsAvailableCore` the chat calls, over the same three
+// reads (roster, approved absences, committed work), under the caller's own
+// RLS. That matters more here than anywhere: the defect this module carries a
+// scar from was one surface disagreeing with another about who is free, and a
+// second capacity implementation for agents would recreate it by construction.
+
+const workforceAvailabilityInput = z.object({}).strict();
+
+const workforceAvailability: CapabilityDescriptor = {
+  id: "workforce.availability",
+  kind: "read",
+  title: "Who on my roster is free",
+  description:
+    "The caller's own active roster over the next 7 days, in three honest " +
+    "states: free, committed (an accepted booking or an active project " +
+    "assignment), or unavailable (approved leave — the reason is never " +
+    "carried). COMMITTED IS NOT UNAVAILABLE: each row carries `constraint` " +
+    "(none / commitment / hard_constraint) and `overridable`, because a " +
+    "project booked A to B does not consume a person A to B — work runs at " +
+    "variable rates and in parallel, so an overlap is a warning an authorized " +
+    "actor may accept, not a refusal. Reports which of its inputs actually " +
+    "answered, so an unread source is never presented as 'nobody is busy'. " +
+    "Writes nothing.",
+  exposed: true,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+  inputSchema: workforceAvailabilityInput,
+  run: async (caller): Promise<ExecResult> => {
+    // The employer context is resolved by the caller's OWN chain — the same
+    // gate the demand capabilities pass, never an id from the client.
+    const employer = await requireEmployerCompanyForCaller(caller);
+    if (!employer.ok) return demandContextRefusal(employer.reason);
+
+    const result = await whoIsAvailableCore(employer.companyId, {
+      supabase: caller.supabase,
+      userId: caller.userId,
+    });
+    if (result.kind === "empty") {
+      return {
+        ok: true,
+        data: {
+          actingFor: employer.organizationName,
+          rosterTotal: 0,
+          rows: [],
+          note: "This organization has no active roster members, so there is nobody to report on.",
+        },
+      };
+    }
+    if (result.kind !== "ok") {
+      return result.kind === "no-company"
+        ? demandContextRefusal("no-company-binding")
+        : { ok: false, code: "unavailable", message: "The availability read failed." };
+    }
+    return {
+      ok: true,
+      data: {
+        actingFor: employer.organizationName,
+        from: result.from,
+        to: result.to,
+        rosterTotal: result.rosterTotal,
+        rows: result.rows.map((r) => ({
+          label: r.label,
+          state: r.state,
+          // WHAT KIND of thing this is, and whether a legitimate actor may go
+          // ahead anyway. `committed` is real accepted work and is NOT a bar
+          // to more: a project booked A→B does not consume a person A→B, so an
+          // overlap is a warning to weigh, never an automatic refusal.
+          constraint: r.constraint,
+          overridable: r.overridable,
+          notFreeUntil: r.unavailableUntil,
+          committedTo: r.committedTo,
+        })),
+        // WHICH INPUTS ANSWERED. Reported rather than assumed: production
+        // carried zero absence rows and three real commitments, so
+        // "everybody is free" was once produced entirely from signals nobody
+        // had checked. A client must be able to qualify the answer.
+        absencesKnown: result.absencesKnown,
+        commitmentsKnown: result.commitmentsKnown,
+        structuredDestination: "/dashboard/company/planning",
+      },
+    };
+  },
+};
+
 // ── the registry ───────────────────────────────────────────────────────────
 
 const CAPABILITIES: readonly CapabilityDescriptor[] = [
   profileGet,
   livingCvSkillsGet,
   journalList,
+  // The figures the section shows, for an authorized assistant (#1689,
+  // lane B) — a read over the one reader, never a second derivation.
+  journalWorkIntelligenceGet,
   journalCreateDraft,
   journalConfirm,
   interestExpressDraft,
@@ -1417,7 +1745,58 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   workCardSaveConfirm,
   demandCreateDraft,
   demandCreateConfirm,
+  contextList,
   contextSwitch,
+  workforceAvailability,
+  // Employer operations — what the organization needs, who it has, where
+  // they work, what waits for its review — over the SAME cores and RPCs the
+  // web company surfaces call (`employer-operations-capabilities.ts`).
+  ...EMPLOYER_OPERATIONS_CAPABILITIES,
+  // The counterparty of a worker's work (client / customer / contracting
+  // party): list, read and decide the entries submitted to it, and the
+  // worker's explicit submit - decision 0018, over the SAME core the web
+  // queue uses (`counterparty-review-capabilities.ts`).
+  ...COUNTERPARTY_REVIEW_CAPABILITIES,
+  // A team assigned to a project / work object / task as ONE relationship:
+  // draft -> confirm over the SAME core the web project page uses
+  // (`team-assignment-capabilities.ts`, WRK-6).
+  ...TEAM_ASSIGNMENT_CAPABILITIES,
+  // The marketplace meeting point — candidate search and the shortlist over
+  // the SAME scouting/shortlist cores the web page runs, plus the named
+  // conditions that keep a person from being matchable or discoverable.
+  ...MARKETPLACE_CAPABILITIES,
+  // In-app conversations over the SAME core the web composer runs.
+  ...MESSAGING_CAPABILITIES,
+  // Real market companies in as DISCOVERED organizations (owner NULL) —
+  // the marketplace_company_ingest capability only; import is never a claim.
+  ...COMPANY_INGEST_CAPABILITIES,
+  // Organization evidence import — the FIFTEEN capabilities (thirteen steps;
+  // attest and withdraw are each a draft→confirm pair) that give an
+  // authorized assistant the same historical-import flow the web UI performs,
+  // over the same domain core (`lib/organization-evidence/import-core.ts`).
+  // Declared as a group because they are one flow, not fifteen unrelated
+  // actions; each descriptor is still reviewed individually in its own file.
+  ...EVIDENCE_IMPORT_CAPABILITIES,
+  // Organization people ingestion — the roster half of the same architecture.
+  // The evidence import READS the roster; this is what puts people on it, for
+  // a company's employees, an agency's candidates and an institution's
+  // learners alike. One flow (preview → answer → commit), one domain service
+  // shared with the web import panel.
+  ...PEOPLE_INGEST_CAPABILITIES,
+  // The web chat's executable actions that had no capability yet, through the
+  // ONE conversation dispatcher (same schema, role gate, tier, token and
+  // executor as the web chat). Runs as the bearer caller via the bearer
+  // caller scope. See conversation-action-bridge.ts.
+  ...CONVERSATION_ACTION_BRIDGE_CAPABILITIES,
+  // What the web chat already ANSWERS (calendar, conflicts, capacity, tasks,
+  // stages, readiness, agency/client bridges, person reads), over the same
+  // loaders, through the same bearer caller scope. See
+  // workspace-read-capabilities.ts.
+  ...WORKSPACE_READ_CAPABILITIES,
+  // The web's typed canonical actions no earlier capability covered:
+  // organization legal data, marketplace, commercial, bookings, notifications,
+  // leave, hours review and reports. See domain-action-capabilities.ts.
+  ...DOMAIN_ACTION_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

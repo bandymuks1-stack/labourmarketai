@@ -65,7 +65,7 @@ describe("page — request button only when contactable", () => {
   it("renders RequestCommunicationButton behind canContact", () => {
     // Tolerates an optional wrapper element (PR6 places the ProposeBookingButton
     // alongside it, both gated behind the same canContact check).
-    expect(src).toMatch(/c\.canContact\s*\?\s*\(?[\s\S]{0,200}?<RequestCommunicationButton/);
+    expect(src).toMatch(/c\.canContact(\s*&&\s*needOpen)?\s*\?\s*\(?[\s\S]{0,200}?<RequestCommunicationButton/);
   });
   it("passes no worker profileId to the button", () => {
     const idx = src.indexOf("<RequestCommunicationButton");

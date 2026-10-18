@@ -2,7 +2,9 @@ import { getTranslations } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
+import { PersonPresence } from "@/components/app/work-world/primitives";
 import { readInstitutionLearners } from "@/lib/education/institution-learners";
+import { OUTCOMES_K_ANONYMITY_FLOOR, readInstitutionLearnerOutcomes } from "@/lib/education/institution-outcomes";
 
 /**
  * Institution learners — participation state for an education institution
@@ -22,7 +24,10 @@ export async function InstitutionLearnersSection({
   readonly organizationId: string;
 }) {
   const t = await getTranslations("roleDashboards.company.learners");
-  const read = await readInstitutionLearners(organizationId);
+  const [read, outcomes] = await Promise.all([
+    readInstitutionLearners(organizationId),
+    readInstitutionLearnerOutcomes(organizationId),
+  ]);
 
   return (
     <Card compact>
@@ -60,6 +65,38 @@ export async function InstitutionLearnersSection({
             ) : null}
           </ul>
 
+          {/* OUTCOMES — a report from real state (owner contract §19), through
+              the ONE aggregate function. Counts only; below the k-anonymity
+              floor the function suppresses them and the section SAYS so —
+              never zeros pretending to be an answer. Unavailable stays
+              silent here: the participation read above already carries the
+              honest unavailable line for the section. */}
+          {outcomes.status === "ok" ? (
+            <div className="flex flex-col gap-1" data-testid="institution-learner-outcomes">
+              <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("outcomesTitle")}</h3>
+              {outcomes.outcomes.suppressed ? (
+                <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-learner-outcomes-suppressed">
+                  {t("outcomesSuppressed", { count: outcomes.outcomes.learnersConnected, floor: OUTCOMES_K_ANONYMITY_FLOOR })}
+                </p>
+              ) : (
+                <ul className="flex flex-wrap gap-2 text-xs" data-testid="institution-learner-outcomes-counts">
+                  <li className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 text-text-secondary">
+                    {t("outcomesActive", { count: outcomes.outcomes.activeLast30d ?? 0 })}
+                  </li>
+                  <li className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 text-text-secondary">
+                    {t("outcomesInterest", { count: outcomes.outcomes.withInterestSignals ?? 0 })}
+                  </li>
+                  <li className="rounded-full border border-ink-500 bg-ink-800 px-2.5 py-1 text-text-secondary">
+                    {t("outcomesBookings", { count: outcomes.outcomes.withAcceptedBookings ?? 0 })}
+                  </li>
+                  <li className="rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-1 text-text-primary">
+                    {t("outcomesEngagements", { count: outcomes.outcomes.withActiveEngagements ?? 0 })}
+                  </li>
+                </ul>
+              )}
+            </div>
+          ) : null}
+
           {read.invitations.length === 0 ? (
             <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-learners-empty">
               {t("none")}
@@ -72,9 +109,15 @@ export async function InstitutionLearnersSection({
                   className="flex items-center justify-between gap-3 py-2 text-xs"
                   data-testid={`institution-learner-${row.status}`}
                 >
-                  <span className="min-w-0 truncate text-text-primary">
-                    {row.invitedName ?? row.invitedEmail}
-                  </span>
+                  {/* A learner invitation is a PRESENCE (work-world grammar)
+                      built ONLY from what the institution typed itself — the
+                      name it entered, the e-mail beneath it — never from the
+                      learner's profile (least-privilege ruling 2026-08-27). */}
+                  <PersonPresence
+                    name={row.invitedName ?? row.invitedEmail}
+                    role={row.invitedName ? row.invitedEmail : null}
+                    size={28}
+                  />
                   <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
                     {t(
                       row.status === "accepted"
@@ -101,7 +144,7 @@ export async function InstitutionLearnersSection({
           collapsed-panel steps. Same pattern the chat home uses. */}
       <Link
         href={`/dashboard/network?type=join_organization&org=${organizationId}&relationship=student` as "/dashboard/network"}
-        className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-xs font-semibold text-ink-900 transition-opacity hover:opacity-90"
+        className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90"
         data-testid="institution-learners-invite"
       >
         {t("invite")} →

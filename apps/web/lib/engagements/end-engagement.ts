@@ -7,7 +7,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { companyStillSeesWorkerViaAssignment } from "@/lib/engagements/end-engagement-visibility";
-import { emitEngagementEndedNotification } from "@/lib/notifications/event-emitters";
+import {
+  emitEngagementEndedNotification,
+  type EngagementEndedNotificationFacts,
+} from "@/lib/notifications/event-emitters";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 
@@ -93,6 +96,53 @@ function asIsoOrNull(value: unknown): string | null {
 }
 
 /**
+ * THE FACTS THE BELL RIDES ON (2026-09-23). Read under the ACTOR's own
+ * session: the engagement row (`company_worker_engagements_select` admits
+ * both parties) and, when the worker acted, the company's owner pointer
+ * (`companies_select` admits any signed-in profile). The emitter used to
+ * read both with the admin client, which holds no grant on either table in
+ * production — so no counterparty was ever told an engagement ended
+ * (event-emitters.ts, SERVICE_ROLE GRANT TRUTH). Never throws: an
+ * unreadable row yields null facts and the emitter reports
+ * `recipient_unresolved`; the end that already happened is untouched.
+ */
+async function engagementEndedNotificationFacts(
+  client: SupabaseClient,
+  engagementId: string,
+  actorSide: EngagementActorSide,
+): Promise<EngagementEndedNotificationFacts> {
+  try {
+    const { data } = await asAny(client)
+      .from("company_worker_engagements")
+      .select("company_id, worker_id")
+      .eq("id", engagementId)
+      .maybeSingle();
+    const row = (data ?? null) as {
+      company_id?: string | null;
+      worker_id?: string | null;
+    } | null;
+    let companyOwnerProfileId: string | null = null;
+    if (actorSide === "worker" && row?.company_id) {
+      const { data: company } = await asAny(client)
+        .from("companies")
+        .select("profile_id")
+        .eq("id", row.company_id)
+        .maybeSingle();
+      companyOwnerProfileId =
+        (company as { profile_id?: string | null } | null)?.profile_id ?? null;
+    }
+    return {
+      engagementId,
+      actorSide,
+      companyOwnerProfileId,
+      workerId: row?.worker_id ?? null,
+    };
+  } catch {
+    return { engagementId, actorSide, companyOwnerProfileId: null, workerId: null };
+  }
+}
+
+/**
  * End one engagement, addressed by primary key.
  *
  * `locale` is used only to refresh the surfaces that render engagement state;
@@ -165,8 +215,11 @@ export async function endEngagementAction(
       // happen). AWAITED, not detached — the serverless runtime can freeze the
       // invocation the instant the action returns, killing a `void`-detached
       // insert mid-flight. The emitter never throws, so the end that already
-      // succeeded cannot fail on its own notification.
-      await emitEngagementEndedNotification(engagement, actorSide);
+      // succeeded cannot fail on its own notification. The facts are read
+      // here, under the actor's session (see engagementEndedNotificationFacts).
+      await emitEngagementEndedNotification(
+        await engagementEndedNotificationFacts(client, engagement, actorSide),
+      );
       // Every surface that renders engagement state re-reads.
       revalidatePath(`/${locale}/dashboard/projects`);
       revalidatePath(`/${locale}/dashboard`);

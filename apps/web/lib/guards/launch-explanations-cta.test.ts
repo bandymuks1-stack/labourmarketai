@@ -70,10 +70,9 @@ describe("FeatureNote component exists and is placed on key surfaces", () => {
   });
 
   const SURFACES: [string, string][] = [
-    ["app/[locale]/dashboard/market-map/page.tsx", "marketplaceMap"],
     ["app/[locale]/dashboard/opportunities/page.tsx", "opportunities"],
     ["app/[locale]/dashboard/profile/page.tsx", "workerProfile"],
-    ["app/[locale]/dashboard/company/page.tsx", "companySpace"],
+    ["app/[locale]/dashboard/company/settings/page.tsx", "companySpace"],
   ];
   for (const [file, key] of SURFACES) {
     it(`${file} renders FeatureNote with featureNotes.${key}`, () => {

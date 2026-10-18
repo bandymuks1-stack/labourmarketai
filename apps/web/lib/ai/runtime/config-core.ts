@@ -48,7 +48,7 @@ export type AiRuntimeState = "disabled" | "mock" | "live";
 export type AiProviderKind = "local" | "anthropic" | "openai" | "gemini" | "xai";
 /** Secondary (task-specific) providers reachable only via routing preference —
  *  never a primary AI_PROVIDER value. */
-export type AiSecondaryProviderKind = "deepl";
+export type AiSecondaryProviderKind = "deepl" | "libretranslate" | "cloudflare";
 
 export type AiDisabledReason =
   | "ok"

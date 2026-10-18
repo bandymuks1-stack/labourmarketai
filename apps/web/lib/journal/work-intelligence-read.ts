@@ -1,0 +1,446 @@
+import "server-only";
+
+import { viewerWorkToday } from "@/lib/time/viewer-day";
+import type { WorkToday } from "@/lib/time/local-day";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { readWorkerCoreRow } from "@/lib/data/worker-core";
+import type { DomainCaller } from "@/lib/domain/caller";
+import { createClient } from "@/lib/supabase/server";
+import { readWorkerEntrySkillLinks } from "@/lib/journal/entry-skill-link-read";
+import type { EntrySkillProvenance } from "@/lib/journal/entry-skill-source";
+import {
+  listJournalEntries,
+  type JournalEntryListRow,
+} from "@/lib/journal/journal-list-core";
+import { deriveIndependentReviewResult } from "@/lib/journal/review-status";
+import {
+  deriveWorkIntelligence,
+  type WorkIntelligence,
+  type WorkIntelligenceCoverage,
+  type WorkIntelligenceEntry,
+  type WorkIntelligenceOrganizationPeriodRecord,
+  type WorkIntelligenceOrganizationRecord,
+  type WorkIntelligenceSkillRow,
+  type WorkPeriodKey,
+  type WorkRange,
+} from "@/lib/journal/work-intelligence";
+import { readAllocationsForWorker } from "@/lib/work-hours/allocations";
+import {
+  readEvidenceRecordsForOrganizationPerson,
+  readEvidenceRecordsForWorker,
+  type WorkerEvidenceRead,
+} from "@/lib/organization-evidence/worker-evidence-read";
+import { readOwnOccupationPath } from "@/lib/journal/journal-occupation-path";
+
+/**
+ * Read side of work intelligence — ONE assembly over the canonical reads.
+ *
+ * Reuses, never re-implements: the entries come from THE journal-list core
+ * (the same read the page, the MCP `journal.list` capability and the export
+ * use), the skill links from the one link reader, the declared skills from
+ * `worker_skills`. RLS scopes every read to the caller; no admin client.
+ *
+ * Two entry points:
+ *  · `assembleWorkIntelligence` — for a caller that has ALREADY loaded the
+ *    rows (the journal page), so the figures are derived from exactly the
+ *    entries it renders and no second read can disagree with the diary;
+ *  · `loadWorkIntelligence` — for consumers that hold only the caller (the
+ *    Living CV, the conversation), issuing the same three reads.
+ *
+ * Honest degradation: a failed read returns `null`, and the consumer renders
+ * NOTHING for the figures rather than a zero that reads as "no work" (SEP-7:
+ * UNKNOWN ≠ ZERO).
+ *
+ * THE SECOND HOUR LEDGER (owner §19): the organization's own hour records
+ * about the person (`work_hour_allocations` — timesheet lines, imported
+ * documents) are read by the SAME reader, through the one allocation read
+ * (`readAllocationsForWorker`, RLS-scoped), and handed to the model as
+ * `organizationRecords`. They are never merged into the journal's figures
+ * and never reach a skill; a failed ledger read hands the model `null`
+ * (UNKNOWN) while the journal figures still render.
+ *
+ * COVERAGE (issue #1689, lane B): both list reads page to the end and say
+ * when they stopped at their ceiling; that fact travels into the model as
+ * `coverage`, so a section, a CV or a chat answer built over a capped read
+ * says "from the last N entries" rather than posing as a total (SEP-7).
+ */
+
+/** A `worker_skills` row as the page and the CV already select it. */
+export type WorkerSkillSourceRow = {
+  skill_id: string | null;
+  verified?: boolean | null;
+  source?: string | null;
+  skills: { slug: string | null } | null;
+};
+
+export function assembleWorkIntelligence(input: {
+  entries: readonly JournalEntryListRow[];
+  linksByEntry: ReadonlyMap<string, readonly string[]>;
+  provenanceByEntry: ReadonlyMap<string, ReadonlyMap<string, EntrySkillProvenance | null>>;
+  skillRows: readonly WorkerSkillSourceRow[];
+  todayIso: string;
+  /** Last day that is not future (`lib/time/local-day.ts`); omitted = `todayIso`. */
+  horizonIso?: string;
+  focus?: WorkPeriodKey;
+  /** An explicit window instead of a tab (see the model's `focusRange`). */
+  focusRange?: WorkRange | null;
+  /** What the reads behind `entries` covered (`listJournalEntries(...).
+   *  coverage`, `readWorkerEntrySkillLinks(...).truncated`). Omitted =
+   *  every given entry, nothing cut. */
+  coverage?: Partial<WorkIntelligenceCoverage>;
+  /** Uploaded photos per entry id (from `readPhotoCountsByEntry`); omitted
+   *  when the caller did not read photos. */
+  photoCountByEntry?: ReadonlyMap<string, number>;
+  /** The organization's hour records (from `readOrganizationRecords`);
+   *  `null` / omitted when the ledger could not be read. */
+  organizationRecords?: readonly WorkIntelligenceOrganizationRecord[] | null;
+  /** The organization's PERIOD records from the same read — beside the
+   *  day records, summed into nothing. */
+  organizationPeriodRecords?: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The person whose entries these are. With it, a decision the person made
+   *  on their own entry is not a confirmation (review-status.ts); without it
+   *  the result is the plain latest decision, as before. */
+  subjectProfileId?: string | null;
+}): WorkIntelligence {
+  const entries: WorkIntelligenceEntry[] = input.entries.map((e) => ({
+    entryId: e.id,
+    createdAt: e.created_at,
+    originalText: e.original_text,
+    metrics: e.journal_entry_metrics ?? [],
+    engagementContextId: e.engagement_context_id ?? null,
+    projectId: e.project_id ?? null,
+    reviewResult: deriveIndependentReviewResult(
+      e.journal_entry_confirmations,
+      input.subjectProfileId ?? null,
+    ),
+    linkedSkillIds: input.linksByEntry.get(e.id) ?? [],
+    linkProvenance: input.provenanceByEntry.get(e.id),
+    photoCount: input.photoCountByEntry?.get(e.id) ?? 0,
+  }));
+  const skills: WorkIntelligenceSkillRow[] = [];
+  for (const r of input.skillRows) {
+    const slug = r.skills?.slug ?? null;
+    if (!r.skill_id || !slug) continue;
+    skills.push({
+      skillId: r.skill_id,
+      slug,
+      verified: r.verified ?? null,
+      source: r.source ?? null,
+    });
+  }
+  return deriveWorkIntelligence({
+    entries,
+    skills,
+    todayIso: input.todayIso,
+    horizonIso: input.horizonIso,
+    focus: input.focus,
+    focusRange: input.focusRange ?? null,
+    coverage: input.coverage,
+    organizationRecords: input.organizationRecords ?? null,
+    organizationPeriodRecords: input.organizationPeriodRecords ?? null,
+  });
+}
+
+/**
+ * The organization's ledger about one person, as ONE reading: the day
+ * records a day ledger may sum, and the PERIOD records (a total over a span,
+ * no source days) that stand beside them. `null` = UNKNOWN for both.
+ */
+export type OrganizationLedgerRead = {
+  readonly records: readonly WorkIntelligenceOrganizationRecord[];
+  readonly periodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[];
+};
+
+/**
+ * The organization's hour records about one person, as the model reads
+ * them — ONE bounded read over `work_hour_allocations` under the caller's
+ * RLS (the person's own rows; a manager's, the rows of their organization).
+ * A table that is not installed is an EMPTY ledger (read, none); a failed
+ * read is `null` (UNKNOWN) — the journal figures still render either way.
+ */
+export async function readOrganizationRecords(
+  supabase: SupabaseClient,
+  workerId: string,
+): Promise<OrganizationLedgerRead | null> {
+  // TWO ledgers the organization keeps about the person, ONE reading:
+  // typed hour lines (`work_hour_allocations`) and imported historical
+  // evidence (`organization_evidence_records`, through the person's
+  // LINKED roster row). Both are "the organization says"; neither is the
+  // journal; both are handed to the model as `source: "import"` when they
+  // came from a document. Either read failing is UNKNOWN for the whole
+  // ledger — a half-read ledger would pose as a smaller one (SEP-7).
+  const [allocations, evidence] = await Promise.all([
+    readAllocationsForWorker(supabase, workerId),
+    readEvidenceRecordsForWorker(supabase, workerId),
+  ]);
+  if (allocations.kind === "error" || evidence.kind === "error") return null;
+  return organizationLedgerFrom(allocations, evidence);
+}
+
+/**
+ * The ONE mapping from the two reads to the model's ledger. Pure and shared:
+ * the linked worker's reading (`readOrganizationRecords`) and the historical
+ * person's reading (`loadHistoricalPersonIntelligence`) both go through it, so
+ * a person's imported-history rows are mapped identically before and after an
+ * account claim. `allocations` is `needs-migration` for a person with no
+ * account (a timesheet line is keyed on a worker; none can exist yet).
+ */
+export function organizationLedgerFrom(
+  allocations:
+    | { readonly kind: "needs-migration" }
+    | {
+        readonly kind: "ok";
+        readonly rows: readonly {
+          readonly id: string;
+          readonly workDate: string;
+          readonly hours: number;
+          readonly source: WorkIntelligenceOrganizationRecord["source"];
+          readonly status: WorkIntelligenceOrganizationRecord["status"];
+          readonly organizationId: string;
+          readonly journalEntryId: string | null;
+        }[];
+      },
+  evidence: Exclude<WorkerEvidenceRead, { kind: "error" }>,
+): OrganizationLedgerRead {
+  const fromAllocations: WorkIntelligenceOrganizationRecord[] =
+    allocations.kind === "needs-migration"
+      ? []
+      : allocations.rows.map((r) => ({
+          id: r.id,
+          workDate: r.workDate,
+          hours: r.hours,
+          source: r.source,
+          status: r.status,
+          organizationId: r.organizationId,
+          journalEntryId: r.journalEntryId,
+        }));
+  const fromEvidence: WorkIntelligenceOrganizationRecord[] =
+    evidence.kind === "needs-migration"
+      ? []
+      : evidence.rows.map((r) => ({
+          id: r.id,
+          workDate: r.workDate,
+          hours: r.hours,
+          source: "import",
+          status: "recorded",
+          organizationId: r.organizationId,
+          journalEntryId: null,
+          context: r.context,
+        }));
+  // PERIOD records come only from imported documents (a timesheet line is
+  // a day by construction). Beside the day rows, in the same reading.
+  const periodRecords: WorkIntelligenceOrganizationPeriodRecord[] =
+    evidence.kind === "needs-migration"
+      ? []
+      : evidence.periodRows.map((r) => ({
+          id: r.id,
+          periodStart: r.periodStart,
+          periodEnd: r.periodEnd,
+          hours: r.hours,
+          source: "import",
+          organizationId: r.organizationId,
+          // How the SPAN came to be travels with it (owner rule 2026-09-23).
+          provenance: r.provenance,
+          context: r.context,
+        }));
+  return { records: [...fromAllocations, ...fromEvidence], periodRecords };
+}
+
+/**
+ * WORK INTELLIGENCE OF A HISTORICAL PERSON - a roster row, no account
+ * (decision 0020). The model is the SAME one (`deriveWorkIntelligence`),
+ * built from what the organization recorded: its imported day and period
+ * records, labelled as the organization's ledger. There are no journal
+ * entries and no declared skills to include - they belong to an account and
+ * none exists - so the model carries none and invents none.
+ *
+ * `null` = the ledger could not be read (UNKNOWN, never "no work").
+ */
+export function historicalPersonIntelligence(
+  evidence: WorkerEvidenceRead,
+  today: WorkToday,
+  opts: { focus?: WorkPeriodKey } = {},
+): WorkIntelligence | null {
+  if (evidence.kind === "error") return null;
+  const ledger = organizationLedgerFrom({ kind: "needs-migration" }, evidence);
+  return assembleWorkIntelligence({
+    entries: [],
+    linksByEntry: new Map(),
+    provenanceByEntry: new Map(),
+    skillRows: [],
+    todayIso: today.todayIso,
+    horizonIso: today.horizonIso,
+    focus: opts.focus,
+    organizationRecords: ledger.records,
+    organizationPeriodRecords: ledger.periodRecords,
+  });
+}
+
+/**
+ * The company-side reading of one roster person, under the CALLER's RLS and
+ * pinned to the organization the caller governs. Same read the linked
+ * worker's CV uses, keyed on the roster row.
+ */
+export async function loadHistoricalPersonIntelligence(
+  supabase: SupabaseClient,
+  input: { readonly organizationId: string; readonly personId: string },
+  opts: { focus?: WorkPeriodKey } = {},
+): Promise<WorkIntelligence | null> {
+  const evidence = await readEvidenceRecordsForOrganizationPerson(supabase, input);
+  const today = await workIntelligenceToday();
+  return historicalPersonIntelligence(evidence, today, opts);
+}
+
+/** Entry ids per `.in()` filter — a URL-length bound, not a coverage cap:
+ *  every id is read, in chunks. */
+const PHOTO_COUNT_ID_CHUNK = 500;
+
+/**
+ * Uploaded photos per entry — bounded reads over ALL the caller's own live
+ * entry ids, chunked (`journal_entry_photos` RLS scopes it to the owner).
+ * This used to read the first 500 ids only, so a worker past that many
+ * entries had their oldest photos silently uncounted. A failed chunk yields
+ * an EMPTY map: the evidence-strength count then under-states photos rather
+ * than inventing them, and the section still renders.
+ */
+export async function readPhotoCountsByEntry(
+  // The photos table is outside the generated types (same routing as the
+  // personal gallery); RLS still scopes rows to the caller.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  entryIds: readonly string[],
+): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  if (entryIds.length === 0) return out;
+  for (let i = 0; i < entryIds.length; i += PHOTO_COUNT_ID_CHUNK) {
+    const chunk = entryIds.slice(i, i + PHOTO_COUNT_ID_CHUNK);
+    const { data, error } = await supabase
+      .from("journal_entry_photos")
+      .select("entry_id")
+      .in("entry_id", chunk)
+      .eq("upload_status", "uploaded");
+    if (error || !Array.isArray(data)) return new Map();
+    for (const r of data as { entry_id: string | null }[]) {
+      if (!r.entry_id) continue;
+      out.set(r.entry_id, (out.get(r.entry_id) ?? 0) + 1);
+    }
+  }
+  return out;
+}
+
+/** The viewer's work "today" (their local day when their zone is known, else
+ *  UTC with a UTC+1 not-future horizon) — see `lib/time/local-day.ts`. */
+export async function workIntelligenceToday(): Promise<WorkToday> {
+  return viewerWorkToday();
+}
+
+/**
+ * The same three reads for ANY caller the database lets see the rows.
+ *
+ * ORGANIZATION VIEW (issue #1689, owner §14): a manager of an organization
+ * calls this for a member's `workerId`, and RLS — not this function — decides
+ * what comes back: `journal_entries` / `_metrics` / `_skills` /
+ * `_confirmations` / `_photos` each carry an org-manager branch
+ * (`manages_organization(engagement_contexts.organization_id)`), so the
+ * manager's model is built from EXACTLY the entries logged against their own
+ * organization's engagements, and the worker's personal or other-employer
+ * entries never enter it. The organization's hour records come through the
+ * same RLS branch (`work_hour_allocations_select`: own worker OR manages the
+ * organization) and stay a ledger beside the journal, never a second hours
+ * derivation. No admin client, no widened policy: one reader, two
+ * audiences, the database's scope.
+ */
+export async function loadWorkIntelligence(
+  caller: DomainCaller,
+  workerId: string,
+  opts: { focus?: WorkPeriodKey; focusRange?: WorkRange | null } = {},
+): Promise<WorkIntelligence | null> {
+  const [entriesRead, linkRead, skillsRead, organizationLedger, subjectRead] = await Promise.all([
+    listJournalEntries(caller, { workerId }),
+    readWorkerEntrySkillLinks(caller.supabase, workerId),
+    caller.supabase
+      .from("worker_skills")
+      .select("skill_id, verified, source, skills(slug)")
+      .eq("worker_id", workerId),
+    readOrganizationRecords(caller.supabase, workerId),
+    // Whose entries these are — "confirmed" excludes the subject's own
+    // decision (review-status.ts). Unreadable = the plain latest decision.
+    caller.supabase.from("workers").select("profile_id").eq("id", workerId).limit(1),
+  ]);
+  if (!entriesRead.ok || !linkRead.ok || skillsRead.error) return null;
+  const photoCountByEntry = await readPhotoCountsByEntry(
+    caller.supabase,
+    entriesRead.entries.map((e) => e.id),
+  );
+
+  const linksByEntry = new Map<string, string[]>();
+  for (const r of linkRead.rows) {
+    const list = linksByEntry.get(r.journal_entry_id) ?? [];
+    if (!list.includes(r.skill_id)) list.push(r.skill_id);
+    linksByEntry.set(r.journal_entry_id, list);
+  }
+  const today = await workIntelligenceToday();
+  return assembleWorkIntelligence({
+    entries: entriesRead.entries,
+    linksByEntry,
+    provenanceByEntry: linkRead.provenanceByEntry,
+    skillRows: (skillsRead.data ?? []) as unknown as WorkerSkillSourceRow[],
+    todayIso: today.todayIso,
+    horizonIso: today.horizonIso,
+    focus: opts.focus,
+    focusRange: opts.focusRange ?? null,
+    coverage: {
+      entriesRead: entriesRead.coverage.entriesRead,
+      truncated: entriesRead.coverage.truncated,
+      linksTruncated: linkRead.truncated,
+    },
+    photoCountByEntry,
+    organizationRecords: organizationLedger?.records ?? null,
+    organizationPeriodRecords: organizationLedger?.periodRecords ?? null,
+    subjectProfileId: subjectRead.error
+      ? null
+      : (((subjectRead.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null),
+  });
+}
+
+/**
+ * The signed-in person's own work intelligence — for consumers that hold no
+ * caller yet (the conversation's answers). Resolves the worker through the
+ * one core worker read; a person without a worker profile, or any failed
+ * read, yields `null` (UNKNOWN), never an empty model that reads as "no work".
+ */
+export async function loadOwnWorkIntelligence(
+  opts: { focus?: WorkPeriodKey; focusRange?: WorkRange | null } = {},
+): Promise<WorkIntelligence | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const caller: DomainCaller = { supabase, userId: user.id };
+  const worker = await readWorkerCoreRow(caller);
+  if (!worker.ok || !worker.value) return null;
+  return loadWorkIntelligence(caller, worker.value.id, opts);
+}
+
+/**
+ * The signed-in person's declared PRIMARY profession slug (their first one
+ * when none is marked primary), through the ONE occupation-path read the
+ * journal page composes with — for the growth reading, which excludes it
+ * from the adjacent directions (it is not an *adjacent* one). `null` when
+ * the person declared none or the read did not answer: a reading built
+ * without it lists every direction, never a guessed profession.
+ */
+export async function loadOwnPrimaryProfessionSlug(): Promise<string | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const worker = await readWorkerCoreRow({ supabase, userId: user.id });
+  if (!worker.ok || !worker.value) return null;
+  const path = await readOwnOccupationPath(supabase, worker.value.id).catch(() => null);
+  if (!path) return null;
+  return path.directions.find((d) => d.isPrimary)?.slug ?? path.directions[0]?.slug ?? null;
+}

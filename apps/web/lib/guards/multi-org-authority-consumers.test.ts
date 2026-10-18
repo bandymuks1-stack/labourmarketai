@@ -107,10 +107,15 @@ describe("§11 employer context — membership truth is the final gate", () => {
 });
 
 describe("§11 write actions gate on capabilities", () => {
-  it("all four roster actions require manage-roster", () => {
+  it("the three roster actions require manage-roster; the invite requires manage-invitations", () => {
     const actions = read(join(WEB, "lib", "company", "actions.ts"));
     const gates = actions.match(/hasOrganizationCapability\(company\.role, "manage-roster"\)/g);
-    expect(gates?.length).toBe(4);
+    expect(gates?.length).toBe(3);
+    // Owner direction 2026-09-24: inviting is never a job title.
+    const invite = actions.slice(actions.indexOf("export async function inviteCompanyWorkerAction"));
+    expect(invite.slice(0, invite.indexOf("inviteCompanyWorker(company.companyId"))).toMatch(
+      /hasOrganizationCapability\(company\.role, "manage-invitations"\)/,
+    );
   });
 
   it("project creation requires manage-projects", () => {
@@ -134,11 +139,20 @@ describe("§11 singleton-fallback ratchet", () => {
   });
 
   it("the market map resolves its company from the active workspace", () => {
+    // The page no longer names the company itself (the company layer row was
+    // removed with the layers legend). The company's territory layer comes from
+    // the owner-scoped spatial composer, whose company source resolves the
+    // ACTIVE workspace — never the `companies.profile_id` singleton.
     const map = read(
       join(WEB, "app", "[locale]", "dashboard", "market-map", "page.tsx"),
     );
-    expect(map).toMatch(/resolveEmployerCompanyContext/);
     expect(map).not.toMatch(/getOwnCompany/);
+    expect(map).toMatch(/getOwnSpatialCollections/);
+    const objects = read(join(WEB, "lib", "objects", "objects.ts"));
+    expect(objects).toMatch(/resolveEmployerCompanyContext/);
+    expect(read(join(WEB, "lib", "market-map", "spatial-read.ts"))).toMatch(
+      /getCompanyTerritoryFromObjects/,
+    );
   });
 
   it("getOwnCompany callers may only SHRINK (ratchet)", () => {

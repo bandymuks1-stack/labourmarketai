@@ -45,13 +45,34 @@ const schema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   SUPABASE_DB_PASSWORD: z.string().min(1).optional(),
   /**
-   * Dedicated HMAC key for conversation confirmation tokens (audit L-02).
-   * Optional: when unset, lib/conversation/dispatch.ts falls back to the
-   * service-role key and, failing that, REFUSES to sign — it no longer falls
-   * back to a hardcoded literal. Set this to stop reusing the service-role key
-   * for a second purpose.
+   * Dedicated HMAC key for conversation + capability confirmation tokens
+   * (audit L-02). REQUIRED IN PRODUCTION: at least 32 characters of random
+   * material (`openssl rand -hex 32`); production refuses to sign without it
+   * and never falls back to the service-role key. Outside production the
+   * service-role key is still accepted so local dev works on a fresh checkout.
+   * Optional here so builds pass without secrets — the check is lazy, at sign
+   * time (lib/security/confirmation-key-material.ts).
    */
-  CONVERSATION_TOKEN_SECRET: z.string().min(16).optional(),
+  // A blank hPanel/dashboard field means "not set" — without this an empty
+  // string failed min(16) and took the WHOLE app down at boot (env is read
+  // by nearly every module), not just the confirm steps.
+  CONVERSATION_TOKEN_SECRET: z.preprocess(blankAsAbsent, z.string().min(16).optional()),
+  /**
+   * The public https origin a self-hosted deployment advertises to OAuth and
+   * MCP clients when its hostname is not one of ours (lib/mcp/public-origin.ts).
+   * Unset on Vercel and on production: the request host decides there.
+   */
+  PUBLIC_ORIGIN: z.preprocess(
+    blankAsAbsent,
+    z
+      .string()
+      .url()
+      .refine(
+        (v) => v.startsWith("https://") && new URL(v).origin === v.replace(/\/$/, ""),
+        "PUBLIC_ORIGIN must be an https origin with no path, query or fragment",
+      )
+      .optional(),
+  ),
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS: z
     .enum(["true", "false"])
     .default("true"),
@@ -72,6 +93,11 @@ const schema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+  // Live activation (FINAL COMPLETION D3, 2026-09-02): live mode is reachable
+  // ONLY when this carries the exact owner token AND the price table is owner-
+  // confirmed in code (PRICING_READINESS_STATE) AND every live key is present.
+  // Any other value keeps the historical hard block. See config-core.ts.
+  STRIPE_LIVE_ACTIVATION: z.string().optional(),
   // TEST price ids (price_…) per paid plan — owner sets these in Stripe test.
   STRIPE_PRICE_WORKER_PLUS: z.string().optional(),
   STRIPE_PRICE_COMPANY_PILOT: z.string().optional(),
@@ -105,6 +131,13 @@ const schema = z.object({
   // it is never a primary AI_PROVIDER value.
   AI_DEEPL_ENABLED: z.enum(["true", "false"]).default("false"),
   DEEPL_API_KEY: z.string().optional(),
+  AI_LIBRETRANSLATE_ENABLED: z.enum(["true", "false"]).default("false"),
+  AI_LIBRETRANSLATE_SELF_HOSTED: z.enum(["true", "false"]).default("false"),
+  LIBRETRANSLATE_URL: z.string().optional(),
+  LIBRETRANSLATE_API_KEY: z.string().optional(),
+  AI_CLOUDFLARE_ENABLED: z.enum(["true", "false"]).default("false"),
+  CLOUDFLARE_ACCOUNT_ID: z.string().optional(),
+  CLOUDFLARE_API_TOKEN: z.string().optional(),
   // ── Local OpenAI-compatible runtime (free_local; OFF by default) ───────────
   // The ONE provider that needs no key: it authenticates by network location.
   // Its proof of configuration is instead a VALIDATED base URL plus an explicit
@@ -168,6 +201,7 @@ const parsed = schema.safeParse({
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_DB_PASSWORD: process.env.SUPABASE_DB_PASSWORD,
   CONVERSATION_TOKEN_SECRET: process.env.CONVERSATION_TOKEN_SECRET,
+  PUBLIC_ORIGIN: process.env.PUBLIC_ORIGIN,
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS:
     process.env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS,
   PAYMENTS_ENABLED: process.env.PAYMENTS_ENABLED,
@@ -177,6 +211,7 @@ const parsed = schema.safeParse({
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  STRIPE_LIVE_ACTIVATION: process.env.STRIPE_LIVE_ACTIVATION,
   STRIPE_PRICE_WORKER_PLUS: process.env.STRIPE_PRICE_WORKER_PLUS,
   STRIPE_PRICE_COMPANY_PILOT: process.env.STRIPE_PRICE_COMPANY_PILOT,
   STRIPE_PRICE_AGENCY_PILOT: process.env.STRIPE_PRICE_AGENCY_PILOT,
@@ -196,6 +231,13 @@ const parsed = schema.safeParse({
   XAI_API_KEY: process.env.XAI_API_KEY,
   AI_DEEPL_ENABLED: process.env.AI_DEEPL_ENABLED,
   DEEPL_API_KEY: process.env.DEEPL_API_KEY,
+  AI_LIBRETRANSLATE_ENABLED: process.env.AI_LIBRETRANSLATE_ENABLED,
+  AI_LIBRETRANSLATE_SELF_HOSTED: process.env.AI_LIBRETRANSLATE_SELF_HOSTED,
+  LIBRETRANSLATE_URL: process.env.LIBRETRANSLATE_URL,
+  LIBRETRANSLATE_API_KEY: process.env.LIBRETRANSLATE_API_KEY,
+  AI_CLOUDFLARE_ENABLED: process.env.AI_CLOUDFLARE_ENABLED,
+  CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN,
   AI_LOCAL_ENABLED: process.env.AI_LOCAL_ENABLED,
   AI_LOCAL_BASE_URL: process.env.AI_LOCAL_BASE_URL,
   AI_LOCAL_MODEL: process.env.AI_LOCAL_MODEL,

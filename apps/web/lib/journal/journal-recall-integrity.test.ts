@@ -25,9 +25,13 @@ const recognizeMock = vi.fn(
     matchedText: string;
   }[] => [],
 );
-vi.mock("@/lib/structuring/skill-recognition", () => ({
-  recognizeSkills: (...args: [string, number]) => recognizeMock(...args),
-}));
+vi.mock("@/lib/structuring/skill-recognition", async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...actual,
+    recognizeSkills: (...args: [string, number]) => recognizeMock(...args),
+  };
+});
 
 const claimsMock = vi.fn((_text: string): { label: string; ambiguous?: boolean }[] => []);
 vi.mock("@/lib/profile/skill-claim-extractor", async (importOriginal) => {

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import {
   getJournalWindowReport,
@@ -18,6 +19,8 @@ import {
 import { OPEN_WORK_TASK_STATUSES } from "@/lib/tasks/task-model";
 import { createUtcFormatter } from "@/lib/time/display";
 import type { Role } from "@/lib/auth/actions";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { ExplainMore } from "@/components/app/premium/disclosure";
 
 /**
  * Reports hub (control room PR K, capability gap map §12) — the role-specific
@@ -39,6 +42,11 @@ export const dynamic = "force-dynamic";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 
+/** A member row links to the person page only on a real worker id — the
+ *  report keys an entry with no worker on "—". */
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const SECTION_CLASS =
   "flex flex-col gap-3 rounded-md border border-ink-500 bg-ink-800/30 p-4";
 const LINK_CLASS =
@@ -59,14 +67,22 @@ function journalWindowKeyFrom(
     : null;
 }
 
-function MetricTile({ label, value }: { label: string; value: number }) {
+/** `value === null` means the count could not be read. An em dash, never a
+ *  0 — this tile is a person reading their own evidence. */
+function MetricTile({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | null;
+}) {
   return (
     <div className="flex flex-col gap-0.5 rounded-md border border-ink-500 bg-ink-800/40 p-3">
       <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
         {label}
       </dt>
       <dd className="text-lg font-semibold tabular-nums text-text-primary">
-        {value}
+        {value === null ? "—" : value}
       </dd>
     </div>
   );
@@ -74,16 +90,12 @@ function MetricTile({ label, value }: { label: string; value: number }) {
 
 /** The per-figure calculation-basis label — every section renders one. */
 function BasisNote({ t, basisKey }: { t: Translate; basisKey: string }) {
+  // The basis is always one tap away, never a wall above the figures
+  // (owner 2026-10-10); the summary names it ("Calculation basis").
   return (
-    <p
-      className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-meta leading-relaxed text-text-muted"
-      data-testid={`reports-basis-${basisKey}`}
-    >
-      <span className="font-mono uppercase tracking-label">
-        {t("basis.label")}:
-      </span>{" "}
-      {t(`basis.${basisKey}`)}
-    </p>
+    <ExplainMore summary={t("basis.label")}>
+      <p data-testid={`reports-basis-${basisKey}`}>{t(`basis.${basisKey}`)}</p>
+    </ExplainMore>
   );
 }
 
@@ -119,11 +131,9 @@ export default async function ReportsHubPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role: Role = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : "worker";
@@ -136,20 +146,28 @@ export default async function ReportsHubPage({
   // invalid `?journalWindow=` renders the collapsed summary only.
   const sp = (await searchParams) ?? {};
   const journalWindowKey = journalWindowKeyFrom(sp.journalWindow);
+  // `workTime` — the per-member hours roll-up (issue #1689, owner §14) rides
+  // the same read; the collapsed tile above stays count-sized.
   const journalDetail =
     view.kind === "org" && journalWindowKey !== null
-      ? await getJournalWindowReport(journalWindowKey)
+      ? await getJournalWindowReport(journalWindowKey, undefined, {
+          workTime: true,
+        })
       : null;
+  // Activity labels recorded as a profession slug read in the viewer's
+  // language; anything else is the member's own wording, shown as recorded.
+  const tProfessions =
+    journalDetail !== null ? await getTranslations("professions") : null;
+  const activityName = (key: string): string =>
+    tProfessions !== null && tProfessions.has(key) ? tProfessions(key) : key;
 
   return (
     <div className="flex flex-col gap-6" data-testid="reports-hub">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
         <p className="text-xs text-text-muted">{t("honestyNote")}</p>
       </header>
@@ -301,6 +319,7 @@ export default async function ReportsHubPage({
           locale={locale}
           journalWindowKey={journalWindowKey}
           journalDetail={journalDetail}
+          activityName={activityName}
         />
       )}
     </div>
@@ -313,6 +332,7 @@ function OrgSections({
   locale,
   journalWindowKey,
   journalDetail,
+  activityName,
 }: {
   view: OrgReportsView;
   t: Translate;
@@ -320,6 +340,7 @@ function OrgSections({
   /** Non-null = the journal detail is expanded on this window. */
   journalWindowKey: JournalWindowKey | null;
   journalDetail: JournalWindowReport | null;
+  activityName: (key: string) => string;
 }): ReactNode {
   const { demand, projects, tasks, documents, finance, journal } = view;
   return (
@@ -428,6 +449,9 @@ function OrgSections({
                   value={projects.byStatus[s]}
                 />
               ))}
+              {projects.other > 0 ? (
+                <MetricTile label={t("org.projects.other")} value={projects.other} />
+              ) : null}
               <MetricTile label={t("org.projects.total")} value={projects.total} />
             </dl>
           )
@@ -575,6 +599,7 @@ function OrgSections({
             locale={locale}
             windowKey={journalWindowKey}
             report={journalDetail}
+            activityName={activityName}
           />
         )}
       </section>
@@ -637,28 +662,42 @@ const DETAIL_HEAD_CELL_CLASS =
 
 /**
  * The windowed journal detail (V8 GAP 4), expanded INSIDE the journal
- * section: per-worker counts of recorded work entries over a fixed UTC
- * calendar window, with review state. Window switching is plain links back
- * to this page (?journalWindow=…#journal) — no client JS, no new route.
- * Counts and timestamps only; the basis line states that absence of entries
- * is not evidence of absence of work. No rating, no score.
+ * section: per-member WORK TIME and counts of recorded work entries over a
+ * fixed UTC calendar window, with review state. Window switching is plain
+ * links back to this page (?journalWindow=…#journal) — no client JS, no new
+ * route.
+ *
+ * The hours (issue #1689, owner §14) come from the one work-intelligence
+ * model over the window's own rows — the same figures the person page shows
+ * the organization for one member, so the roll-up and the person view can
+ * never disagree. Each member's name opens that person page. Counts,
+ * durations and timestamps only; the basis line states that absence of
+ * entries is not evidence of absence of work. No rating, no score.
  */
 function JournalWindowDetail({
   t,
   locale,
   windowKey,
   report,
+  activityName,
 }: {
   t: Translate;
   locale: string;
   windowKey: JournalWindowKey;
   report: JournalWindowReport;
+  activityName: (key: string) => string;
 }): ReactNode {
   const dayFmt = createUtcFormatter(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
+  const numFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const pctFmt = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 });
+  const hours = (n: number) => t("journalWindow.hours", { hours: numFmt.format(n) });
+  /** Work time was measured for this report (the hours columns render only
+   *  then — an unmeasured report shows counts, never "0 h"). */
+  const measured = report.applied && report.totals.work !== null;
 
   return (
     <div className="flex flex-col gap-3" data-testid="journal-window-report">
@@ -681,7 +720,7 @@ function JournalWindowDetail({
             href={`/dashboard/reports?journalWindow=${key}#journal` as "/dashboard"}
             aria-current={key === windowKey ? "page" : undefined}
             data-testid={`journal-window-link-${key}`}
-            className={`inline-flex min-h-9 items-center rounded-md border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+            className={`inline-flex min-h-11 items-center rounded-md border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
               key === windowKey
                 ? "border-brand-blue bg-brand-blue/10 font-semibold text-brand-blue"
                 : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
@@ -707,6 +746,21 @@ function JournalWindowDetail({
             })}
           </p>
 
+          {/* Entries that carry no usable duration are named, not folded into
+              the hours as zero — the count column still holds them. */}
+          {measured &&
+          report.totals.work &&
+          report.totals.work.entriesWithoutDuration > 0 ? (
+            <p
+              className="text-xs text-text-muted"
+              data-testid="journal-window-without-duration"
+            >
+              {t("journalWindow.withoutDuration", {
+                count: report.totals.work.entriesWithoutDuration,
+              })}
+            </p>
+          ) : null}
+
           {report.totals.entries === 0 ? (
             <div
               className="flex flex-col gap-1 rounded-md border border-dashed border-ink-500 p-5"
@@ -722,7 +776,7 @@ function JournalWindowDetail({
           ) : (
             <div className="overflow-x-auto rounded-md border border-ink-500">
               <table
-                className="w-full min-w-[36rem] border-collapse"
+                className="w-full min-w-[56rem] border-collapse"
                 data-testid="journal-window-table"
               >
                 <thead className="border-b border-ink-500 bg-ink-800/40">
@@ -730,6 +784,28 @@ function JournalWindowDetail({
                     <th scope="col" className={DETAIL_HEAD_CELL_CLASS}>
                       {t("journalWindow.table.worker")}
                     </th>
+                    {measured && (
+                      <>
+                        <th
+                          scope="col"
+                          className={`${DETAIL_HEAD_CELL_CLASS} text-right`}
+                        >
+                          {t("journalWindow.table.hours")}
+                        </th>
+                        <th
+                          scope="col"
+                          className={`${DETAIL_HEAD_CELL_CLASS} text-right`}
+                        >
+                          {t("journalWindow.table.confirmedHours")}
+                        </th>
+                        <th
+                          scope="col"
+                          className={`${DETAIL_HEAD_CELL_CLASS} text-right`}
+                        >
+                          {t("journalWindow.table.days")}
+                        </th>
+                      </>
+                    )}
                     <th
                       scope="col"
                       className={`${DETAIL_HEAD_CELL_CLASS} text-right`}
@@ -748,6 +824,12 @@ function JournalWindowDetail({
                     >
                       {t("journalWindow.table.confirmed")}
                     </th>
+                    <th
+                      scope="col"
+                      className={`${DETAIL_HEAD_CELL_CLASS} text-right`}
+                    >
+                      {t("journalWindow.table.returned")}
+                    </th>
                     <th scope="col" className={DETAIL_HEAD_CELL_CLASS}>
                       {t("journalWindow.table.lastEntry")}
                     </th>
@@ -760,10 +842,71 @@ function JournalWindowDetail({
                       className="border-b border-ink-600/60 last:border-b-0"
                       data-testid={`journal-window-worker-${w.workerId}`}
                     >
-                      <td className={DETAIL_CELL_CLASS}>{w.name}</td>
+                      <td className={DETAIL_CELL_CLASS}>
+                        {/* The member's name opens the person page — the
+                            organization's full reading of this one person
+                            (hours by period, kinds of work, skills, evidence)
+                            over the same model. */}
+                        {UUID_RE.test(w.workerId) ? (
+                          <Link
+                            href={`/dashboard/people/${w.workerId}` as "/dashboard"}
+                            className="font-medium text-text-primary underline-offset-2 hover:text-brand-blue hover:underline"
+                            data-testid={`journal-window-person-${w.workerId}`}
+                          >
+                            {w.name}
+                          </Link>
+                        ) : (
+                          w.name
+                        )}
+                        {w.work?.mainActivity ? (
+                          <span
+                            className="mt-0.5 block text-meta text-text-muted"
+                            data-testid={`journal-window-activity-${w.workerId}`}
+                          >
+                            {w.work.mainActivity.share > 0
+                              ? t("journalWindow.mainlyShare", {
+                                  activity: activityName(w.work.mainActivity.key),
+                                  hours: numFmt.format(w.work.mainActivity.hours),
+                                  percent: pctFmt.format(w.work.mainActivity.share),
+                                  total: numFmt.format(w.work.hours),
+                                })
+                              : t("journalWindow.mainly", {
+                                  activity: activityName(w.work.mainActivity.key),
+                                  hours: numFmt.format(w.work.mainActivity.hours),
+                                })}
+                          </span>
+                        ) : null}
+                      </td>
+                      {measured && (
+                        <>
+                          <td
+                            className={DETAIL_NUM_CELL_CLASS}
+                            data-testid={`journal-window-hours-${w.workerId}`}
+                          >
+                            {w.work ? hours(w.work.hours) : "—"}
+                            {w.work && w.work.dayUnits > 0 ? (
+                              <span className="block text-meta text-text-muted">
+                                {t("journalWindow.dayUnits", {
+                                  days: numFmt.format(w.work.dayUnits),
+                                })}
+                              </span>
+                            ) : null}
+                          </td>
+                          <td
+                            className={DETAIL_NUM_CELL_CLASS}
+                            data-testid={`journal-window-confirmed-hours-${w.workerId}`}
+                          >
+                            {w.work ? hours(w.work.confirmedHours) : "—"}
+                          </td>
+                          <td className={DETAIL_NUM_CELL_CLASS}>
+                            {w.work ? w.work.daysWorked : "—"}
+                          </td>
+                        </>
+                      )}
                       <td className={DETAIL_NUM_CELL_CLASS}>{w.entries}</td>
                       <td className={DETAIL_NUM_CELL_CLASS}>{w.awaitingReview}</td>
                       <td className={DETAIL_NUM_CELL_CLASS}>{w.confirmed}</td>
+                      <td className={DETAIL_NUM_CELL_CLASS}>{w.returned}</td>
                       <td
                         className={`${DETAIL_CELL_CLASS} font-mono text-meta text-text-muted`}
                       >
@@ -782,6 +925,32 @@ function JournalWindowDetail({
                         count: report.totals.workers,
                       })}
                     </td>
+                    {measured && report.totals.work && (
+                      <>
+                        <td
+                          className={DETAIL_NUM_CELL_CLASS}
+                          data-testid="journal-window-total-hours"
+                        >
+                          {hours(report.totals.work.hours)}
+                          {report.totals.work.dayUnits > 0 ? (
+                            <span className="block text-meta font-normal text-text-muted">
+                              {t("journalWindow.dayUnits", {
+                                days: numFmt.format(report.totals.work.dayUnits),
+                              })}
+                            </span>
+                          ) : null}
+                        </td>
+                        <td
+                          className={DETAIL_NUM_CELL_CLASS}
+                          data-testid="journal-window-total-confirmed-hours"
+                        >
+                          {hours(report.totals.work.confirmedHours)}
+                        </td>
+                        <td className={DETAIL_NUM_CELL_CLASS}>
+                          {report.totals.work.daysWorked}
+                        </td>
+                      </>
+                    )}
                     <td className={DETAIL_NUM_CELL_CLASS}>
                       {report.totals.entries}
                     </td>
@@ -791,12 +960,48 @@ function JournalWindowDetail({
                     <td className={DETAIL_NUM_CELL_CLASS}>
                       {report.totals.confirmed}
                     </td>
+                    <td className={DETAIL_NUM_CELL_CLASS}>
+                      {report.totals.returned}
+                    </td>
                     <td className={DETAIL_CELL_CLASS} />
                   </tr>
                 </tfoot>
               </table>
+              {report.totals.reviewNotEnabled > 0 ? (
+                <p
+                  className="mt-2 text-meta text-text-muted"
+                  data-testid="journal-window-review-not-enabled"
+                >
+                  {t("journalWindow.reviewNotEnabled", {
+                    count: report.totals.reviewNotEnabled,
+                  })}
+                </p>
+              ) : null}
             </div>
           )}
+
+          {/* The organization's OWN hour ledger over the same window — beside
+              the journal figures, never added to them (owner §19). Three
+              states: measured, no ledger installed, could not be read. */}
+          {report.organizationLedger !== null ? (
+            <p
+              className="text-xs text-text-secondary"
+              data-testid="journal-window-organization-ledger"
+              data-state={report.organizationLedger.state}
+            >
+              {report.organizationLedger.state === "measured"
+                ? t("journalWindow.ledger.measured", {
+                    hours: numFmt.format(report.organizationLedger.hours),
+                    workers: report.organizationLedger.workers,
+                  }) +
+                  (report.organizationLedger.truncated
+                    ? ` ${t("journalWindow.ledger.truncated", { count: report.organizationLedger.rows })}`
+                    : "")
+                : report.organizationLedger.state === "none"
+                  ? t("journalWindow.ledger.none")
+                  : t("journalWindow.ledger.unknown")}
+            </p>
+          ) : null}
 
           {/* The calculation basis — including the "no entries ≠ no work" rule. */}
           <p

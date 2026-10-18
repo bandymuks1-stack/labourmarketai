@@ -26,7 +26,7 @@ const msg = (loc: string) =>
 
 const LIST_PAGE = "app/[locale]/dashboard/communication/page.tsx";
 const THREAD_PAGE = "app/[locale]/dashboard/communication/[conversationId]/page.tsx";
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 describe("unread-first inbox ordering", () => {
   const src = read(LIST_PAGE);

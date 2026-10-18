@@ -10,6 +10,7 @@ import type {
   JournalSkill,
 } from "@/components/app/journal-entry-composer";
 import { JournalEntryCompactEditor } from "@/components/app/journal-entry-compact-editor";
+import { useDialogFocus } from "@/lib/hooks/use-dialog-focus";
 import type { JournalEditingEntry } from "@/lib/journal/edit-entry";
 import { recordEvent } from "@/lib/telemetry/task";
 
@@ -151,17 +152,13 @@ function EditEntrySheet({
     if (!mounted) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onEsc);
-    // Move focus into the drawer so keyboard users land on the edit surface.
-    panelRef.current?.focus();
     return () => {
       document.body.style.overflow = previous;
-      window.removeEventListener("keydown", onEsc);
     };
-  }, [mounted, onClose]);
+  }, [mounted]);
+  // Focus into the drawer, Tab trapped inside it, Escape closes, opener
+  // restored on close — the shared modal focus contract.
+  useDialogFocus(mounted, onClose, panelRef);
 
   if (!mounted) return null;
 

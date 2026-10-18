@@ -66,7 +66,7 @@ describe("profile first screen stays focused", () => {
     expect(page).toMatch(/<ProfileHubOverview\b/);
   });
   it("has at most one primary gradient CTA on the page", () => {
-    const n = (page.match(/from-brand-blue to-brand-cyan|variant="primary"/g) ?? []).length;
+    const n = (page.match(/from-brand-blue to-brand-cyan|bg-gradient-cta[^"`']*text-text-on-brand|variant="primary"/g) ?? []).length;
     expect(n).toBeLessThanOrEqual(1);
   });
   it("renders no standalone skill-verification card", () => {

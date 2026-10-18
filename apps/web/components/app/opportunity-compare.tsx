@@ -127,7 +127,7 @@ export function CompareBar({
       {/* In-flow spacer so the fixed bar never covers the last card. */}
       <div aria-hidden className="h-16" data-testid="compare-bar-spacer" />
       <div
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-600 bg-ink-900/95 backdrop-blur"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-600 bg-ink-900/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
         data-testid="compare-bar"
       >
         {showTable ? (
@@ -198,7 +198,7 @@ export function CompareBar({
               onClick={() => setOpen((v) => !v)}
               disabled={!canCompare}
               aria-expanded={showTable}
-              className="inline-flex min-h-[2.75rem] items-center rounded-md bg-brand-blue px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-40"
+              className="inline-flex min-h-[2.75rem] items-center rounded-md bg-brand-blue px-4 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-40"
               data-testid="compare-open"
             >
               {showTable ? labels.close : labels.open}

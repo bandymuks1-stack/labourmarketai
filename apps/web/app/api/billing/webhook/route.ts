@@ -1,22 +1,37 @@
 import { NextResponse } from "next/server";
 
 import { getBillingProvider } from "@/lib/billing/provider";
+import { getBillingConfig } from "@/lib/billing/config";
 import {
   isHandledEventType,
   isRecordOnlyEventType,
-  parseSubscriptionObject,
-  parseCheckoutSessionObject,
   parseInvoiceObject,
   summarizeRecordedEvent,
   assertTestEvent,
+  eventModeMatches,
 } from "@/lib/billing/webhook-core";
 import {
   recordWebhookEvent,
   markWebhookProcessed,
   markWebhookFailed,
-  upsertSubscription,
   applyInvoicePayment,
 } from "@/lib/billing/subscription-store";
+import {
+  applyCheckoutLink,
+  applyRawSubscriptionObject,
+} from "@/lib/billing/apply-subscription-snapshot";
+import {
+  invoiceBillingReason,
+  invoiceHadPayment,
+  isTrialStart,
+  shouldEmitBillingFunnel,
+} from "@/lib/billing/billing-funnel";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import {
+  completeCheckoutOperationBySession,
+  expireCheckoutOperationBySession,
+} from "@/lib/billing/checkout-operations-store";
 
 /**
  * Stripe TEST webhook (Stripe sprint PR4). Verifies the signature (via the
@@ -42,9 +57,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, reason: "invalid_signature" }, { status: 400 });
   }
 
-  // Reject a live event outright — this chain is test-only.
-  if (!assertTestEvent(event)) {
-    return NextResponse.json({ ok: false, reason: "live_event_rejected" }, { status: 400 });
+  // The event's mode must match the adapter state: under `stripe_test` a
+  // live event is rejected outright (assertTestEvent — the historical rule);
+  // under `stripe_live` (D3, owner-armed) a TEST event is rejected, so a
+  // test-mode replay can never touch a live entitlement.
+  const billing = getBillingConfig();
+  if (!eventModeMatches(billing.state, event)) {
+    const reason =
+      billing.state === "stripe_live" && assertTestEvent(event)
+        ? "test_event_rejected"
+        : "live_event_rejected";
+    return NextResponse.json({ ok: false, reason }, { status: 400 });
   }
 
   // Idempotency: record first. Only a duplicate whose FIRST delivery finished
@@ -54,13 +77,17 @@ export async function POST(req: Request) {
   // summary with the record — that summary IS their processing outcome, so the
   // operator can read what was refunded/disputed without replaying Stripe.
   const summary = summarizeRecordedEvent(event.type, event.object);
+  // Billing safety v1: Stripe's own `created` rides with the record (ordering
+  // + incident forensics: which delivery moved which row, in what order).
+  const created = typeof event.created === "number" ? event.created : null;
+  const lean: Record<string, unknown> = { id: event.id, type: event.type };
+  if (created !== null) lean.created = created;
   const recorded = await recordWebhookEvent({
     eventId: event.id,
     eventType: event.type,
     testMode: event.testMode,
-    payload: summary
-      ? { id: event.id, type: event.type, summary }
-      : { id: event.id, type: event.type },
+    eventCreated: created,
+    payload: summary ? { ...lean, summary } : lean,
   });
   if (recorded === "duplicate-processed") {
     return NextResponse.json({ ok: true, received: true, duplicate: true });
@@ -96,32 +123,42 @@ export async function POST(req: Request) {
   }
 
   let result: string = "ok";
+  // Funnel facts observed while processing; emitted ONLY after the store
+  // reported "ok" (never on stale-event, error, throw or a duplicate).
+  let funnelSubscriptionStarted = false;
+  let funnelInvoicePaid: ReturnType<typeof invoiceBillingReason> | null = null;
+  let funnelTrialStarted = false;
   try {
     if (event.type === "checkout.session.completed") {
-      const link = parseCheckoutSessionObject(event.object, event.testMode);
-      if (link) {
-        result = await upsertSubscription({
-          providerSubscriptionId: link.providerSubscriptionId,
-          providerCustomerId: link.providerCustomerId,
-          ownerId: link.ownerId,
-          planKey: link.planKey,
-          organizationId: link.organizationId,
-          status: "incomplete",
-          currentPeriodStart: null,
-          currentPeriodEnd: null,
-          cancelAtPeriodEnd: false,
-          testMode: link.testMode,
-        });
-      }
-    } else if (event.type.startsWith("customer.subscription.")) {
-      const sub = parseSubscriptionObject(event.object, event.testMode);
-      if (sub) {
-        if (event.type === "customer.subscription.deleted") {
-          result = await upsertSubscription({ ...sub, status: "cancelled" });
-        } else {
-          result = await upsertSubscription(sub);
+      const linked = await applyCheckoutLink(event.object, {
+        testMode: event.testMode,
+        evidence: { id: event.id, created },
+      });
+      if (linked) {
+        result = linked.result;
+        funnelSubscriptionStarted = true;
+        // Bookkeeping: the server-side checkout operation behind this session
+        // is complete. Best-effort — the operation's window closes it anyway.
+        const sessionId = typeof event.object.id === "string" ? event.object.id : null;
+        if (sessionId && (result === "ok" || result === "stale-event")) {
+          await completeCheckoutOperationBySession({
+            sessionId,
+            providerSubscriptionId: linked.providerSubscriptionId,
+          });
         }
       }
+    } else if (event.type === "checkout.session.expired") {
+      // Operation bookkeeping only — no subscription state exists to change.
+      const sessionId = typeof event.object.id === "string" ? event.object.id : null;
+      if (sessionId) await expireCheckoutOperationBySession(sessionId);
+    } else if (event.type.startsWith("customer.subscription.")) {
+      const applied = await applyRawSubscriptionObject(event.object, {
+        testMode: event.testMode,
+        evidence: { id: event.id, created },
+        deleted: event.type === "customer.subscription.deleted",
+      });
+      if (applied !== null) result = applied;
+      if (isTrialStart(event.type, event.object)) funnelTrialStarted = true;
     } else if (
       event.type === "invoice.paid" ||
       event.type === "invoice.payment_succeeded" ||
@@ -131,7 +168,16 @@ export async function POST(req: Request) {
       // same invoice (distinct event ids) — applying "succeeded" twice is a
       // no-op on the subscription row.
       const inv = parseInvoiceObject(event.object, event.type !== "invoice.payment_failed");
-      result = await applyInvoicePayment(inv.providerSubscriptionId, inv.lastPaymentStatus);
+      result = await applyInvoicePayment(inv.providerSubscriptionId, inv.lastPaymentStatus, {
+        id: event.id,
+        created,
+      });
+      // Count the payment ONCE per invoice (invoice.paid only — Stripe also
+      // sends invoice.payment_succeeded for the same invoice) and only when
+      // money actually moved (a zero-amount trial invoice is not a payment).
+      if (event.type === "invoice.paid" && invoiceHadPayment(event.object)) {
+        funnelInvoicePaid = invoiceBillingReason(event.object);
+      }
     }
   } catch (e) {
     // Keep the idempotency record OPEN (processed=false) and answer non-2xx so
@@ -143,7 +189,39 @@ export async function POST(req: Request) {
     );
   }
 
-  if (result === "ok") {
+  if (result === "ok" || result === "stale-event") {
+    // "stale-event" (billing safety v1): the event is OLDER than the one that
+    // last moved the row, or the row is terminal — skipped ON PURPOSE and
+    // acknowledged as processed, so a replay does not re-apply it either.
+    if (shouldEmitBillingFunnel(result, event.testMode)) {
+      // Fire-and-forget; a lost telemetry row never fails the webhook. No
+      // ids, amounts or customer data in the payload.
+      if (funnelSubscriptionStarted) {
+        emitServerFunnelEvent(FUNNEL_EVENTS.subscriptionStarted, {
+          source: "billing-webhook",
+          route: "/api/billing/webhook",
+          metadata: { surface: "billing_webhook", success: true },
+        });
+      }
+      if (funnelTrialStarted) {
+        emitServerFunnelEvent(FUNNEL_EVENTS.trialStarted, {
+          source: "billing-webhook",
+          route: "/api/billing/webhook",
+          metadata: { surface: "billing_webhook", success: true },
+        });
+      }
+      if (funnelInvoicePaid !== null) {
+        emitServerFunnelEvent(FUNNEL_EVENTS.subscriptionInvoicePaid, {
+          source: "billing-webhook",
+          route: "/api/billing/webhook",
+          metadata: {
+            surface: "billing_webhook",
+            result_kind: funnelInvoicePaid,
+            success: true,
+          },
+        });
+      }
+    }
     await markWebhookProcessed(event.id);
     return NextResponse.json({ ok: true, received: true, processed: true, result });
   }

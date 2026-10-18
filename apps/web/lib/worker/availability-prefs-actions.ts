@@ -22,7 +22,8 @@ import {
  *   * `save_worker_availability_prefs` (applied migration 20260613100000) —
  *     the 8 v1 fields;
  *   * `save_worker_availability_prefs_v2` (DRAFT migration 20260711270000,
- *     PR #721 — human-gated, NOT applied yet) — the same 8 + the 7 v2 fields.
+ *     PR #721 — applied; the seven v2 columns are present in production,
+ *     verified 2026-09-14) — the same 8 + the 7 v2 fields.
  * Both validate again server-side and update only the caller's own workers row.
  *
  * v2 fallback honesty: when the form was rendered with the v2 section enabled

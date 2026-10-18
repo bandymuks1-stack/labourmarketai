@@ -30,6 +30,9 @@ export const typography = {
     display: ["var(--font-display)", "var(--font-sans)", "system-ui", "sans-serif"],
     sans: ["var(--font-sans)", "system-ui", "sans-serif"],
     mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+    // ACCENT ONLY — one editorial word per heading. Falls back to the display
+    // stack so a glyph the serif lacks (Cyrillic) is never a browser pick.
+    accent: ["var(--font-accent)", "var(--font-display)", "var(--font-sans)", "serif"],
   },
   letterSpacing: {
     // hero/display headings

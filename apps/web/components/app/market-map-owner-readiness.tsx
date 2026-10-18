@@ -61,7 +61,7 @@ export function MarketMapOwnerReadiness({
           <Link
             href={"/dashboard/profile" as "/dashboard"}
             data-testid="readiness-add"
-            className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+            className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-champagne"
           >
             {t("addAction")}
             <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
@@ -110,7 +110,7 @@ export function MarketMapOwnerReadiness({
               <Link
                 href={"/dashboard/profile" as "/dashboard"}
                 data-testid="readiness-mobility-add"
-                className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+                className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-champagne"
               >
                 {t("mobilityAdd")}
                 <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />
@@ -132,7 +132,7 @@ export function MarketMapOwnerReadiness({
           <Link
             href={"/dashboard/profile" as "/dashboard"}
             data-testid="capabilities-add"
-            className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+            className="inline-flex w-fit items-center gap-1 text-meta font-semibold text-brand-blue hover:text-brand-champagne"
           >
             {tc("addAction")}
             <ArrowRight className="h-3 w-3" strokeWidth={2} aria-hidden />

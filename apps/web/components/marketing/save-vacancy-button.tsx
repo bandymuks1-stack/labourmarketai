@@ -78,7 +78,7 @@ export function SaveVacancyButton({
       >
         {label}
       </Button>
-      <p className="mt-2 text-xs text-muted-foreground">{copy.note}</p>
+      <p className="mt-2 text-xs text-text-muted">{copy.note}</p>
       {problem && (
         <p className="mt-1 text-xs text-destructive" role="status">
           {problem}

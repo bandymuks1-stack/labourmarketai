@@ -43,10 +43,12 @@ describe("DESIGN_SOUL is a committed, binding document", () => {
   });
 });
 
-describe("scouting card: confirmation stays a silent signal (no public badge)", () => {
-  it("carries NO gold confirmation trust ring on the self-view card", () => {
-    // Silent-trust rule: confirmation is never advertised as a visible badge.
+describe("scouting card: gold enters ONLY as the derived provenance edge (frozen design P6)", () => {
+  it("carries NO gold confirmation trust ring on the card chrome", () => {
+    // The card chrome never advertises confirmation as a ring/badge; the one
+    // gold a person may carry is the provenance EDGE, derived from real rows.
     expect(card).not.toMatch(/trust-ring/);
+    expect(card).toMatch(/<ProvenanceEdge provenanceClass=\{card\.provenance\.class\}/);
   });
   it("verified badges come only from manager-verified worker_skills rows", () => {
     expect(cardSvc).toMatch(/\.eq\("verified", true\)/);
@@ -62,12 +64,12 @@ describe("scouting card: confirmation stays a silent signal (no public badge)", 
   });
 });
 
-describe("the player card uses no gold trust accent (silent-trust rule)", () => {
+describe("the player card names no gold class itself — the material lives in the ONE edge component", () => {
   it("--c-trust-accent token still exists for dark AND light themes", () => {
     const matches = css.match(/--c-trust-accent:/g) ?? [];
     expect(matches.length).toBe(2);
   });
-  it("the self-view card does NOT use the gold trust accent or tier-gold", () => {
+  it("the card file does NOT spell the gold trust accent or tier-gold (only provenance-edge.tsx may)", () => {
     expect(card).not.toMatch(/trust-accent/);
     expect(card).not.toMatch(/tier-gold/);
   });

@@ -81,6 +81,11 @@ const FILES = sourceFiles().map((f) => {
 });
 
 const isCanonical = (rel: string) => rel === CANONICAL.split(sep).join("/");
+/** The ONE module that reads a viewer-chosen zone on purpose — to decide which
+ *  work DAY a person is on (inclusion / "is this future"), never to format a
+ *  label. It emits `YYYY-MM-DD` keys only; display stays UTC (see its header
+ *  and `lib/time/local-day.test.ts`). Exempt from the display-zone pin only. */
+const isViewerDayKeyModule = (rel: string) => rel === "lib/time/local-day.ts";
 
 /** Offending lines for a pattern, as "path:line  <trimmed source>". */
 function hits(pattern: RegExp, skipCanonical = true): string[] {
@@ -136,7 +141,7 @@ describe("every Intl.DateTimeFormat pins its timezone", () => {
   it("no construction omits timeZone", () => {
     const bad: string[] = [];
     for (const { rel, code } of FILES) {
-      if (isCanonical(rel)) continue;
+      if (isCanonical(rel) || isViewerDayKeyModule(rel)) continue;
       const lines = code.split("\n");
       lines.forEach((line, i) => {
         if (!/new Intl\.DateTimeFormat\s*\(/.test(line)) return;
@@ -181,7 +186,11 @@ describe("day KEYS are derived in the same zone as the day LABELS", () => {
 
   it("the journal diary groups by the canonical UTC day", () => {
     const src = read("app/[locale]/dashboard/journal/page.tsx");
-    expect(src).toMatch(/utcDayKey\(/);
+    // Lane B (#1689): the diary's day key is the work-time model's own day
+    // (`resolveWorkDayDetail(...).day`, UTC) so the diary and "work in
+    // numbers" can never disagree on which day an entry belongs to; the
+    // older `utcDayKey(` derivation is the same zone and stays accepted.
+    expect(src).toMatch(/resolveWorkDayDetail\(|utcDayKey\(/);
     // The ambient-zone getters that used to build the key must not return.
     expect(src).not.toMatch(/getFullYear\s*\(\)/);
     expect(src).not.toMatch(/getMonth\s*\(\)/);

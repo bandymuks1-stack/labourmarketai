@@ -1,0 +1,104 @@
+-- @human-gate-approved
+--
+-- ── SCOPE OF THE HUMAN GATE ────────────────────────────────────────────────
+-- SAFETY CLASS: RED (a GRANT is a privilege-surface change, doctrine-guard §4).
+-- Draft PR + `needs-human-gate`; apply ONLY via Supabase MCP `apply_migration`
+-- after explicit owner approval. Never `supabase db push`. The annotation
+-- acknowledges the `grant-or-revoke` finding the static gate emits for this
+-- file — it is an acknowledgement, not an auto-merge pass.
+--
+-- 20260906060000 — the notification spine's SERVICE-ROLE grants: the two the
+-- emitters and the email dispatcher have needed since 20260810070000 /
+-- 20260823160000. ADDITIVE; NO DATA LOSS; NO RLS CHANGE; nothing for anon or
+-- authenticated changes.
+--
+-- WHY (measured on production 2026-09-06, re-measured 2026-09-07):
+--   `has_table_privilege('service_role','public.notification_events','INSERT')`
+--   → false. `has_table_privilege('service_role',
+--   'public.notification_preferences','SELECT')` → false.
+--
+--   Every emitter in lib/notifications/event-emitters.ts writes through the
+--   ADMIN client (service_role) → INSERT fails 42501 → the fire-and-forget
+--   wrapper logs `[notifications] emit failed unexpectedly (weekly_digest): 42501`
+--   (Vercel runtime log 2026-09-06 05:10 UTC; 40 identical lines in 12 h).
+--   notification_events holds 2 rows, the last from 2026-07-05, and NO
+--   weekly_digest event has ever been written.
+--
+--   Both v1 migrations state the intent this file restores. 20260810070000 §RLS
+--   DECISION: "service_role: full (the only writer; emitters run server-side
+--   after the domain write succeeded)". 20260823160000: "The dispatcher reads
+--   consent under service_role (RLS-bypassing by role); no separate grant rows
+--   are needed for service_role in Supabase". The first never issued the grant
+--   it declared; the second's assumption is false in THIS project, whose
+--   posture is narrow grants over revoked defaults (`revoke all ... from
+--   public` in v1 removes the inherited privilege service_role would otherwise
+--   have held). So this is a defect repair against the migrations' own stated
+--   decision, not a widening of it.
+--
+-- WHY notification_preferences MATTERS SEPARATELY, and why leaving it out
+-- would be worse than leaving both out: `readPrefRowsFailOpen` FAILS OPEN. A
+-- denied read returns no rows, so `resolveChannelEnabled` falls back to the
+-- channel defaults — in_app true, email FALSE. Granting only the events table
+-- would therefore make the bell work while silently discarding every stored
+-- email opt-in: a person who ticked the box would get nothing, and no surface
+-- would say so. Consent that cannot be read is consent that cannot be
+-- honoured.
+--
+-- WHAT (the minimum each caller actually uses):
+--   notification_events       SELECT (duplicate detection / read-back),
+--                             INSERT (emit), UPDATE (delivery bookkeeping).
+--                             No DELETE: append-only evidence (doctrine §3).
+--   notification_preferences  SELECT only. The service role READS consent; it
+--                             never writes it. The owner of a preference is
+--                             the only writer, through their own RLS-scoped
+--                             client (the `authenticated` grants v1 issued).
+--
+-- Production preflight (read-only): notification_events 2 rows;
+--   notification_preferences 0 rows; policies notification_events_select_own /
+--   notification_events_mark_read_own / the four notification_preferences
+--   own-row policies untouched (service_role bypasses RLS by design, as for
+--   every admin write).
+--
+-- ── PROVEN ON PRODUCTION 2026-09-07, IN A TRANSACTION, THEN ROLLED BACK ────
+--
+-- The reason was reproduced rather than inferred, and the fix was measured for
+-- SUFFICIENCY and for MINIMALITY in the same rolled-back transaction.
+--
+-- FIRST, the cause is a GRANT and not RLS. `service_role` has
+-- `rolbypassrls = true` on this project (read from pg_roles), so no policy can
+-- stop it; and `has_table_privilege('service_role', ...)` returns FALSE for
+-- INSERT, SELECT, UPDATE **and** DELETE on notification_events and for SELECT
+-- on notification_preferences. The role holds no privilege at all on either
+-- table. notification_events also has NO INSERT policy - which is consistent,
+-- because the only intended writer bypasses RLS.
+--
+-- REPRODUCTION (`set local role service_role`, the emitter's own write):
+--   1  emit a weekly_digest event BEFORE the grant
+--        -> BLOCKED 42501 "permission denied for table notification_events"
+--           - the exact error in the runtime logs.
+--   2  read notification_preferences BEFORE the grant
+--        -> BLOCKED 42501. This is the silent half: `readPrefRowsFailOpen`
+--           fails OPEN, so a denied read looks like "no preferences" and every
+--           stored email opt-in is discarded without any surface saying so.
+--
+-- SUFFICIENCY (same transaction, after applying the two statements verbatim):
+--   3  the same emit -> WROTE ok
+--   4  the same consent read -> READ 0 rows (honest zero; the table is empty)
+--
+-- MINIMALITY - the two things the grant must NOT enable:
+--   5  DELETE from notification_events -> BLOCKED 42501. Append-only survives;
+--      DELETE is deliberately not granted (doctrine 3.1).
+--   6  INSERT into notification_preferences -> BLOCKED 42501. The service role
+--      READS consent and can never write it. The owner of a preference stays
+--      its only writer, through their own RLS-scoped client.
+--   7  anon / PUBLIC privileges on notification_events -> NONE, unchanged.
+--
+-- NO RESIDUE. Re-measured after the rollback: service_role INSERT still false,
+-- preferences SELECT still false, notification_events still holds 2 rows and
+-- 0 weekly_digest rows. Production is exactly as it was.
+--
+-- ROLLBACK: supabase/rollbacks/20260906060000_notification_events_service_role_grant.down.sql
+--   (revokes exactly these privileges; nothing else changes).
+
+grant select, insert, update on public.notification_events to service_role;
+grant select on public.notification_preferences to service_role;

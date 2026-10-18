@@ -16,7 +16,9 @@ import {
  * Read service for the worker's structured work preferences — the 8
  * availability-pref columns applied by migration 20260613100000
  * (willing_to_relocate … availability_note), plus the 7 DRAFT v2 columns
- * from migration 20260711270000 (PR #721 — human-gated, NOT applied yet).
+ * from migration 20260711270000 (PR #721). ALL SEVEN v2 COLUMNS ARE PRESENT
+ * ON `workers` in production (verified 2026-09-14), so the `not-enabled`
+ * branch below never fires there. It stays for a fresh or local database.
  * Owner-scoped: reads ONLY the caller's own workers row (profile_id =
  * auth.uid() under existing RLS).
  *
@@ -43,8 +45,8 @@ function asAny(supabase: SupabaseClient): any {
 const PREF_COLS =
   "willing_to_relocate, needs_accommodation, has_transport, max_trip_days, preferred_contract_type, team_available, solo_available, availability_note";
 
-/** The 7 DRAFT v2 columns (PR #721) — absent until the owner applies the
- *  human-gated migration; selecting them then answers 42703. */
+/** The 7 v2 columns (PR #721). Present in production; a database without
+ *  them answers 42703 on the select and the read degrades to v1 only. */
 const PREF_COLS_V2 =
   "pay_basis_preference, night_shifts_ok, weekend_shifts_ok, overtime_ok, driving_licence_categories, own_vehicle, own_tools";
 

@@ -16,12 +16,35 @@
  *
  * Prereqs (see docs/TESTING.md): `npx supabase start`, `npx supabase db
  * reset`, `pnpm db:fixtures:local`, `pnpm -C apps/web e2e:install`.
+ *
+ * A stopped stack (Docker Desktop off) exits 3 with
+ * LOCAL_INTEGRATION_TEST_REQUIRES_DOCKER — an availability failure, reported
+ * as one. A URL that resolves and is not local still refuses, exit 1.
  */
 import { spawnSync } from "node:child_process";
+
+import {
+  LOCAL_STACK_UNAVAILABLE_EXIT_CODE,
+  LocalStackUnavailableError,
+  formatLocalStackUnavailable,
+} from "../lib/testing/local-supabase-guard";
+import { stderrExcerpt } from "../lib/testing/local-supabase-env";
+
+const LOCAL_CONFIRMATION_TOKEN_SECRET = "local-stack-only-confirmation-secret-not-for-production";
 
 function fail(msg: string): never {
   console.error(msg);
   process.exit(1);
+}
+
+function unavailable(detail: string): never {
+  console.error(
+    formatLocalStackUnavailable(new LocalStackUnavailableError(detail)),
+  );
+  console.error(
+    "Then, from the repo root: npx supabase db reset && pnpm db:fixtures:local",
+  );
+  process.exit(LOCAL_STACK_UNAVAILABLE_EXIT_CODE);
 }
 
 function isLocalHost(host: string): boolean {
@@ -39,13 +62,18 @@ const status = spawnSync("npx", ["supabase", "status", "-o", "json"], {
   shell: process.platform === "win32",
   encoding: "utf8",
 });
+if (status.error) {
+  unavailable(
+    `could not run \`npx supabase status\` (${status.error.message}), so no ` +
+      "local Supabase stack was found.",
+  );
+}
 if (status.status !== 0 || !status.stdout) {
-  fail(
-    "Could not read the local Supabase stack status.\n" +
-      "Start it first from the repo root:\n" +
-      "  npx supabase start\n" +
-      "  npx supabase db reset\n" +
-      "  pnpm db:fixtures:local",
+  // stderr only — never stdout, which can carry keys on a partial success.
+  unavailable(
+    `\`npx supabase status\` exited ${status.status ?? "without a status"}` +
+      `${stderrExcerpt(status.stderr ?? "")} — the local Supabase stack is ` +
+      "not running (Docker Desktop off, or `npx supabase start` not run).",
   );
 }
 
@@ -58,13 +86,18 @@ try {
 const apiUrl = parsed.API_URL ?? "";
 const anonKey = parsed.ANON_KEY ?? parsed.PUBLISHABLE_KEY ?? "";
 const serviceKey = parsed.SERVICE_ROLE_KEY ?? parsed.SECRET_KEY ?? "";
-if (!apiUrl || !anonKey) {
-  fail("supabase status did not return API_URL / ANON_KEY — is the stack up?");
-}
-if (!isLocalHost(new URL(apiUrl).hostname)) {
+// A URL that resolved is a security question first: refuse a non-local one
+// before asking whether the rest of the stack is up.
+if (apiUrl && !isLocalHost(new URL(apiUrl).hostname)) {
   fail(
     `Refusing: Supabase URL "${apiUrl}" is not local. The e2e suite only ` +
       "ever runs against the local stack (brief §10.2).",
+  );
+}
+if (!apiUrl || !anonKey) {
+  unavailable(
+    "`npx supabase status` did not return API_URL / ANON_KEY — the local " +
+      "stack is not (fully) running.",
   );
 }
 
@@ -75,6 +108,12 @@ const env = {
   NEXT_PUBLIC_SUPABASE_URL: apiUrl,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey,
   SUPABASE_SERVICE_ROLE_KEY: serviceKey,
+  // Confirmation tokens are signed ONLY with the dedicated secret (#2444):
+  // the service-role key is never reused as HMAC material, so this local
+  // harness must supply one. An exported value wins; the fallback is a
+  // local-only literal that signs nothing outside this loopback stack.
+  CONVERSATION_TOKEN_SECRET:
+    process.env.CONVERSATION_TOKEN_SECRET ?? LOCAL_CONFIRMATION_TOKEN_SECRET,
   // The LOCAL stack's JWT signing secret, forwarded for ONE purpose: the
   // auth-core spec forges a correctly-signed but EXPIRED token, which is the
   // only way to test expiry as its own failure mode rather than folding it

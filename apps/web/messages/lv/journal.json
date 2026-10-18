@@ -30,6 +30,13 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Izvēlieties iesaisti…",
   "engagementAmbiguous": "Šis darbs var piederēt vairāk nekā vienai iesaistei. Pirms saglabāšanas izvēlieties, kurai.",
+  "project": "Projekts",
+  "projectChoose": "Izvēlieties projektu…",
+  "projectNone": "Nav projekta darbs",
+  "projectAmbiguous": "Jūs esat piešķirts vairākiem projektiem. Pirms saglabāšanas izvēlieties, kuram projektam pieder šīs stundas (vai atzīmējiet, ka tas nav projekta darbs).",
+  "projectAuto": "Projekts: {name}",
+  "projectViaTeam": "{project} (caur komandu {team})",
+  "projectClient": "{project} (klienta projekts)",
   "unconfirmedTimeBlocked": "{count} reģistrētie ilgumi vēl gaida jūsu pārskatīšanu un netiktu saglabāti. Vispirms paturiet vai noņemiet tos.",
   "entry": {
     "status": {
@@ -83,13 +90,17 @@
       "ackDone": "[EN] Will be confirmed ✓",
       "excludedNote": "[EN] {count, plural, =0 {All exceptions reviewed — the whole list will be confirmed.} one {# entry with an exception will NOT be confirmed until you mark it reviewed.} other {# entries with exceptions will NOT be confirmed until you mark them reviewed.}}",
       "outcomeNotAcknowledged": "[EN] not confirmed — the exception was left unreviewed",
-      "outcomeBlocked": "[EN] not confirmed ({code})"
+      "outcomeBlocked": "[EN] not confirmed ({code})",
+      "receipt": "Apstiprināts: {title}",
+      "receiptSkills": "{count, plural, zero {# prasmju} one {# prasme} other {# prasmes}}",
+      "skillsUnavailable": "Prasmju sarakstu neizdevās nolasīt — pieskāriens apstiprinās tikai pašu ierakstu."
     },
     "result": {
       "entrySuperseded": "Ieraksts jau ir aizstāts ar jaunāku versiju — kartīte vairs nav aktuāla un tiks noņemta no saraksta.",
       "entryDeleted": "Ieraksts ir izdzēsts — kartīte vairs nav aktuāla un tiks noņemta no saraksta.",
       "staleTerminalHint": "Nekas netika ierakstīts. Ja darbinieks saglabāja jaunāku versiju, tā parādīsies iesūtnē kā jauna kartīte."
-    }
+    },
+    "loadFailed": "Neizdevās ielādēt pārskatīšanas rindu. Tas nenozīmē, ka nav ko pārskatīt — mēģiniet vēlreiz."
   },
   "listEmpty": "[EN] No entries yet.",
   "listTitle": "[EN] Entries",
@@ -119,16 +130,18 @@
     "noActivity": "[EN] Work direction not detected"
   },
   "photo": {
-    "label": "Work photo (optional)",
+    "label": "Pievienot fotoattēlu / izveidot foto atskaiti (nav obligāti)",
     "freeTierNote": "You can attach 1 photo per entry for free. More photos and extended records will be a VIP feature.",
     "invalidFile": "The photo must be JPG, PNG or WebP, up to 5 MB.",
     "uploaded": "Photo attached to the entry.",
     "limitReached": "This entry already has a photo — the free tier allows 1 photo per entry.",
+    "quotaReached": "Jūsu organizācijas krātuves limits ir sasniegts, tāpēc foto netika saglabāts. Pats ieraksts ir saglabāts.",
     "notReady": "Photo storage is not provisioned in this environment yet — the entry was saved without the photo.",
     "uploadFailed": "The photo could not be uploaded. The entry was saved — try attaching the photo again later.",
     "uploading": "[EN] Uploading photo…",
     "remove": "[EN] Remove photo",
-    "previewAlt": "[EN] Selected photo"
+    "previewAlt": "[EN] Selected photo",
+    "takePhoto": "Nofotografēt"
   },
   "voice": {
     "entryCta": "Ierakstīt ar balsi",
@@ -139,7 +152,7 @@
     "disclosureTitle": "Pirms ierakstīšanas",
     "disclosureProcessing": "Jūsu ieraksts tiek nosūtīts uz LabourMarket.ai kontrolētu apstrādes serveri, lai to pārvērstu tekstā. Trešo pušu balss pakalpojumi netiek izmantoti.",
     "disclosureWhy": "Tas tiek izmantots tikai zemāk redzamā teksta izveidei — nekam citam.",
-    "disclosureRetention": "Ieraksts tiek glabāts tikai līdz teksta sagatavošanai (ne ilgāk kā 30 dienas), un jūs to jebkurā brīdī varat izdzēst.",
+    "disclosureRetention": "Pats ieraksts netiek glabāts: tas tiek izdzēsts, tiklīdz jūsu teksts ir gatavs.",
     "disclosureNoAutoWrite": "Nekas netiek pievienots dienasgrāmatai, profilam vai CV, kamēr pats neesat pārskatījis tekstu un saglabājis katru punktu.",
     "disclosureAck": "Saprotu un piekrītu balss apstrādei",
     "start": "Sākt ierakstīšanu",
@@ -169,9 +182,35 @@
       "too_large": "Ieraksts ir pārāk liels (maks. 25 MB).",
       "too_long": "Ieraksts ir pārāk garš (maks. 10 minūtes).",
       "unavailable": "Transkripcijas serveris šobrīd nav pieejams.",
-      "undecodable": "Neizdevās nolasīt audio — mēģiniet vēlreiz."
+      "undecodable": "Neizdevās nolasīt audio — mēģiniet vēlreiz.",
+      "rate_limited": "Pārāk daudz ierakstu īsā laikā - uzgaidiet un mēģiniet vēlreiz.",
+      "token_expired": "Augšupielādes sesija beidzās - mēģiniet vēlreiz.",
+      "unauthorized": "Jūsu sesija nav autorizēta balsij - pieslēdzieties vēlreiz.",
+      "service_unreachable": "Transkripcijas serveris nav sasniedzams. Pārbaudiet savienojumu un mēģiniet vēlreiz; ieraksts paliek šajā lapā."
     },
-    "permissionDenied": "Piekļuve mikrofonam tika bloķēta. Atļaujiet mikrofonu pārlūka iestatījumos un mēģiniet vēlreiz."
+    "permissionDenied": "Piekļuve mikrofonam tika bloķēta. Atļaujiet mikrofonu pārlūka iestatījumos un mēģiniet vēlreiz.",
+    "disclosureProvenance": "Saglabātais ieraksts tiks atzīmēts kā ar balsi diktēts un jūsu pārskatīts.",
+    "state": {
+      "ready": "Gatavs. Izvēlieties runas valodu un sāciet ierakstu.",
+      "permissionRequired": "Pārlūks pieprasīs mikrofona atļauju, kad sāksiet. Pirms atļaujas nekas netiek ierakstīts.",
+      "policyBlocked": "Vietnes drošības politika šeit bloķē mikrofonu. Balss ieraksts šajā lapā nav pieejams - ierakstu varat uzrakstīt kā tekstu.",
+      "unsupported": "Šis pārlūks šeit nevar ierakstīt skaņu (vajadzīga droša lapa un mikrofona ierakstīšanas atbalsts). Varat augšupielādēt audio failu vai rakstīt tekstu.",
+      "noDevice": "Šajā ierīcē mikrofons netika atrasts.",
+      "deviceBusy": "Mikrofonu izmanto cita lietotne. Aizveriet to un mēģiniet vēlreiz.",
+      "cancelled": "Ieraksts atcelts. Nekas netika augšupielādēts vai saglabāts.",
+      "requesting": "Gaida jūsu atļauju izmantot mikrofonu...",
+      "interrupted": "Ieraksts apturēts, jo lapa bija paslēpta. Turpiniet, kad atgriezīsieties.",
+      "interruptedKept": "Mikrofons apstājās, tāpēc ieraksts beidzās agrāk. Ierakstītais ir pārrakstīts zemāk - lūdzu, pārbaudiet.",
+      "uploading": "Augšupielādē ierakstu..."
+    },
+    "language": {
+      "label": "Runas valoda",
+      "auto": "Noteikt automātiski",
+      "hint": "Izvēlieties valodu, kurā runāsiet - tai nav jāsakrīt ar vietnes valodu."
+    },
+    "recordAgain": "Ierakstīt vēlreiz",
+    "announceStarted": "Ieraksts sākās",
+    "announceMinutes": "Ierakstīts {minutes} min"
   },
   "statusExplainer": "Kā tiek izmantoti jūsu ieraksti?",
   "exampleLine": "Piemēram: montēju ģipša starpsienas, lasīju rasējumus un strādāju ar lāzera līmeņrādi.",
@@ -239,10 +278,14 @@
     "sessionExpired": "Sesija ir beigusies. Lūdzu, pierakstieties vēlreiz.",
     "noWorkerProfile": "Darbinieka profils nav atrasts. Atveriet konta iestatījumus un ieslēdziet darbinieka lomu.",
     "engagementRequired": "Izvēlieties darba kontekstu (organizāciju vai projektu), kuram pieder šis ieraksts.",
+    "projectNotAssignable": "Izvēlētais projekts jums nav piešķirts vai pieder citai organizācijai. Izvēlieties projektu no saraksta.",
     "notesRequired": "Aprakstiet, ko darījāt — brīvais teksts ir ieraksta pamats.",
+    "workDateRequired": "Izvēlieties dienu, kurā šis darbs tika paveikts.",
+    "workDateInvalid": "Darba datums nav derīgs datums.",
+    "workDateFuture": "Darba datums nevar būt nākotnē.",
     "quantityInvalid": "Daudzumam jābūt nenegatīvam skaitlim.",
-    "unitSlugUnknown": "Vienību reģistrā vēl nav: {units}. Palūdziet administratoram piemērot migrāciju 0017 (productivity_units sēklu) un mēģiniet vēlreiz.",
-    "sourceDocumentInvalid": "Norādītais avota dokuments nav atrasts starp taviem dokumentiem.",
+    "unitSlugUnknown": "Šī vienība vēl netiek atpazīta: {units}. Izvēlieties citu vienību vai mēģiniet vēlāk.",
+    "sourceDocumentInvalid": "Norādītais avota dokuments nav atrasts starp jūsu dokumentiem.",
     "saveFailed": "Neizdevās saglabāt ierakstu: {reason}",
     "unknownReason": "nezināma kļūda",
     "missingOldEntryId": "Trūkst maināmā ieraksta identifikatora.",
@@ -253,13 +296,15 @@
     "entryNotFound": "Ieraksts nav atrasts.",
     "deleteFailed": "Neizdevās noņemt ierakstu: {reason}",
     "restoreFailed": "Neizdevās atjaunot ierakstu: {reason}",
-    "rpcUnavailable": "Labojumu funkcija šajā vidē vēl nav piemērota. Palūdziet administratoram piemērot jaunāko žurnāla migrāciju (0018 / 20260720100000).",
+    "rpcUnavailable": "Labojumus šobrīd nevar saglabāt. Mēģiniet vēlāk.",
     "entryNotFoundMaybeDeleted": "Ieraksts nav atrasts (iespējams, tas jau ir noņemts).",
     "notOwner": "Nevar mainīt cita lietotāja ierakstu.",
     "alreadyConfirmed": "Šo ierakstu vairs nevar noņemt — cita puse to jau ir izskatījusi. Dzēšanas vietā nosūtiet labojuma pieprasījumu.",
     "cannotSupersedeDeleted": "Nevar mainīt noņemtu ierakstu.",
     "cannotRestoreSuperseded": "Šo ierakstu nevar atjaunot — to jau ir aizstājusi jaunāka versija.",
     "cannotRestoreCorrectionConflict": "Šo ierakstu nevar atjaunot — tam pašam darbam jau ir cita aktuāla labota versija.",
-    "metricsInsertFailed": "Ieraksts netika saglabāts pilnībā: {reason}. Ieraksts tika noraidīts — mēģiniet vēlreiz."
-  }
+    "metricsInsertFailed": "Ieraksts netika saglabāts pilnībā: {reason}. Ieraksts tika noraidīts — mēģiniet vēlreiz.",
+    "moduleFieldInvalid": "Šie lauki neatbilst šāda veida iesaistei: {fields}. Nekas netika saglabāts — noņemiet tos un mēģiniet vēlreiz."
+  },
+  "contextEnded": "beidzies"
 }

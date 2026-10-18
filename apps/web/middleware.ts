@@ -1,10 +1,19 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
 import { routing } from "@/lib/i18n/routing";
-import { LANDING_MODE_COOKIE } from "@/lib/telemetry/landing-experience";
+import {
+  DASHBOARD_PATHNAME_HEADER,
+  isDashboardPath,
+  stripLocaleSegment,
+} from "@/lib/auth/role-gated-routes";
+import { unsupportedLanguageRedirectPath } from "@/lib/i18n/unsupported-language";
 import { env } from "@/lib/env";
-import { buildReturnValue } from "@/lib/auth/redirect";
+import {
+  ONBOARDING_RETURN_HEADER,
+  buildReturnValue,
+  getSafeReturnPath,
+} from "@/lib/auth/redirect";
 import {
   CANONICAL_ORIGIN,
   isLegacyRedirectHost,
@@ -69,6 +78,25 @@ function maybeForwardStrayOauthCode(
   return NextResponse.redirect(target, 307);
 }
 
+/** A language code we do not route is not a page name.
+ *
+ *  `/sv` currently resolves to `/lt/sv` — next-intl does not recognise `sv`,
+ *  so it prefixes the default locale and a Swedish reader following Swedish
+ *  acquisition copy lands on a Lithuanian page. Runs BEFORE `intl` because
+ *  after it the language code has already become a path segment. 307, not 308:
+ *  the condition ends the day the Swedish catalog reaches parity, and a cached
+ *  permanent redirect would outlive it. Reasoning and measurements in
+ *  lib/i18n/unsupported-language.ts. */
+function maybeRedirectUnroutedLanguage(
+  request: NextRequest,
+): NextResponse | undefined {
+  const target = unsupportedLanguageRedirectPath(request.nextUrl.pathname);
+  if (target === null) return undefined;
+  const url = request.nextUrl.clone();
+  url.pathname = target;
+  return NextResponse.redirect(url, 307);
+}
+
 /** Locale-stripped pathname, e.g. "/lt/dashboard" → "/dashboard". */
 function stripLocale(pathname: string): { locale: string; rest: string } {
   const parts = pathname.split("/");
@@ -79,9 +107,27 @@ function stripLocale(pathname: string): { locale: string; rest: string } {
   return { locale: routing.defaultLocale, rest: pathname };
 }
 
-// /cv renders ONLY the caller's own session data and robots-disallows itself;
-// it was gated at the page level alone until W4 — the middleware backstop
-// keeps that protection from depending on one redirect() call surviving.
+/**
+ * Trees whose visitors are sent to login HERE when they carry no session at
+ * all, and whose session is refreshed here before the RSC layer reads it.
+ *
+ * NOT AN AUTHENTICATION BOUNDARY (owner §27). This list is an anonymous-visitor
+ * convenience redirect and a place to force the refresh — nothing more. A
+ * request that carries a session cookie whose `exp` merely LOOKS fresh leaves
+ * through the fast path below without its signature ever being checked:
+ * forged, revoked and deleted-user cookies included. The boundary is the
+ * verified `auth.getUser()` in each listed tree's top layout — above its
+ * `loading.tsx`, so a refusal is still a real 3xx — and in every page, server
+ * action and route handler beneath it.
+ *
+ * So adding a prefix here protects nothing on its own.
+ * `lib/guards/suspense-boundary-gates.test.ts` parses this array and fails
+ * until `app/[locale]/<prefix>/layout.tsx` performs that verified gate.
+ *
+ * /cv renders ONLY the caller's own session data and robots-disallows itself;
+ * it was gated at the page level alone until W4 — listing it here keeps an
+ * anonymous visitor's bounce from depending on one redirect() call surviving.
+ */
 const REQUIRES_AUTH = ["/dashboard", "/onboarding", "/cv"];
 
 /** True if the request carries a Supabase auth cookie. `@supabase/ssr` names
@@ -102,11 +148,22 @@ const TOKEN_FRESH_MARGIN_S = 120;
  * P0 auth-performance fast path: read the access token's `exp` straight from
  * the `@supabase/ssr` session cookie WITHOUT any network call. When the JWT
  * is comfortably fresh, the middleware skips its GoTrue `getUser()`
- * round-trip — the RSC layer (dashboard layout / pages) still performs the
- * REAL validated `getUser()` on every request, and RLS enforces authz at the
- * data layer, so this removes only a redundant validation hop (~100-300 ms
- * on every authenticated navigation), never an authorization boundary.
- * Unparseable/legacy/expiring cookies fall through to the full refresh path.
+ * round-trip. Unparseable/legacy/expiring cookies fall through to the full
+ * refresh path.
+ *
+ * A PERFORMANCE HINT, NEVER AUTH PROOF (owner §27). The payload is
+ * base64-decoded, not verified: nothing here checks the signature, so a forged
+ * token, a revoked session or a deleted user's cookie reads as "fresh" exactly
+ * like a genuine one. Skipping the hop is safe only because of the layers
+ * below — the REAL validated `getUser()` that every REQUIRES_AUTH tree's top
+ * layout (dashboard, onboarding, cv) runs above its `loading.tsx`, the page /
+ * server action / route-handler gates under them, and RLS at the data layer.
+ * This removes a redundant validation hop (~100-300 ms on every authenticated
+ * navigation), never an authorization boundary. Measured 2026-09-23: a session
+ * cookie with a corrupted signature and a fresh `exp` passes this check and is
+ * refused with a 307 by those layouts (`app/[locale]/cv/layout.tsx`). Pinned
+ * by `lib/guards/suspense-boundary-gates.test.ts`; exercised end to end by
+ * `tests/e2e/auth-forged-session-refusal.spec.ts`.
  */
 function readAccessTokenExpSeconds(request: NextRequest): number | null {
   try {
@@ -138,6 +195,76 @@ function hasFreshAccessToken(request: NextRequest): boolean {
   return exp - Math.floor(Date.now() / 1000) > TOKEN_FRESH_MARGIN_S;
 }
 
+/**
+ * Hand a gate that must run ABOVE a Suspense boundary the ONE fact it cannot
+ * derive for itself — nothing else.
+ *
+ * `app/[locale]/dashboard/layout.tsx` and `app/[locale]/onboarding/layout.tsx`
+ * are the LAST places in their trees that can still refuse with a real HTTP
+ * redirect: everything below them sits inside the Suspense boundary that the
+ * sibling `loading.tsx` creates, and a `redirect()` thrown inside a Suspense
+ * boundary is downgraded to a 200 document that redirects itself on the client
+ * (measured: a 600 kB authenticated shell plus ~600 ms of Next's "Application
+ * error" text before the browser moved). Both layouts already know WHO is
+ * asking. Neither can know WHAT was asked for — Next hands a layout neither the
+ * pathname nor the query.
+ *
+ * So each gets exactly one value, and they are different values because the two
+ * gates ask different questions:
+ *   - the dashboard asks "which route is this?" → the locale-stripped path,
+ *     which `ROLE_GATED_PREFIXES` turns into a required role;
+ *   - onboarding asks "where was this person going?" → the resolved safe
+ *     return path, because an already-onboarded visitor must land on the
+ *     invite/door they followed, not on a bare dashboard.
+ *
+ * Deliberately narrow:
+ *   - only for those two trees, so the static landing path and every public
+ *     route keep the exact request they have today (the 2026-08-31 cold-entry
+ *     P0 is not worth re-litigating for a header nothing reads);
+ *   - the headers are set on the request handed to `next-intl`, which copies
+ *     `new Headers(request.headers)` into its own `NextResponse.next({request})`
+ *     override — so this rides the mechanism next-intl already uses for
+ *     `x-next-intl-locale` rather than adding a second one;
+ *   - an inbound header of either name is REPLACED, never trusted: both are
+ *     values this function computes, so a client cannot forge one;
+ *   - NO authorization happens here. The path is copied verbatim and the
+ *     return value comes from `getSafeReturnPath` — the same pure sanitiser the
+ *     onboarding page has always called. This function answers "which route"
+ *     and "where would that go", never "who may go there".
+ */
+function withGateHeaders(request: NextRequest): NextRequest {
+  // GET ONLY, and not for lack of ambition. Per the Fetch spec, constructing a
+  // Request from another Request adopts its body and marks the original as
+  // used — so cloning a server-action POST here could disturb the body before
+  // the action ever reads it. A navigation that renders a shell is always a
+  // GET; a POST re-renders through the page, where the page-level gates
+  // (`requireRoleOrRedirect`, the onboarding page's own checks) still stand.
+  // Nothing is weakened, and no write path is touched.
+  if (request.method !== "GET") return request;
+  const { locale } = stripLocale(request.nextUrl.pathname);
+  // `stripLocaleSegment` is the dashboard table's own locale rule; reuse it for
+  // both trees so a path can never be classified one way here and another way
+  // in `routeRequirement`.
+  const path = stripLocaleSegment(request.nextUrl.pathname, routing.locales);
+  const dashboard = isDashboardPath(path);
+  const onboarding = path === "/onboarding" || path.startsWith("/onboarding/");
+  if (!dashboard && !onboarding) return request;
+
+  const headers = new Headers(request.headers);
+  if (dashboard) headers.set(DASHBOARD_PATHNAME_HEADER, path);
+  if (onboarding) {
+    // Always set, even with no `?next=`: `getSafeReturnPath` already answers
+    // the default (`/<locale>/dashboard`) for a missing or rejected value, so
+    // the layout never has to re-implement the fallback, and an ABSENT header
+    // means only one thing — this request did not pass through here.
+    headers.set(
+      ONBOARDING_RETURN_HEADER,
+      getSafeReturnPath(request.nextUrl.searchParams.get("next"), locale),
+    );
+  }
+  return new NextRequest(request, { headers });
+}
+
 export async function middleware(request: NextRequest) {
   // 0. Host normalization runs BEFORE locale/intl + auth so legacy
   //    aliases (www + app) never reach the app shell — they 308
@@ -149,39 +276,25 @@ export async function middleware(request: NextRequest) {
   const codeForward = maybeForwardStrayOauthCode(request);
   if (codeForward) return codeForward;
 
+  // 0c. An unrouted LANGUAGE code (`/sv`, `/pl`, `/uk`) → the English product.
+  //     Must precede intl: intl would turn the language code into a path
+  //     segment under the default locale and the information is then gone.
+  const languageRedirect = maybeRedirectUnroutedLanguage(request);
+  if (languageRedirect) return languageRedirect;
+
   // 1. Locale routing — may redirect (`/` → `/lt`) or rewrite. When intl
   //    issues its own redirect (e.g. `/` → `/lt`, `/dashboard` → `/lt/dashboard`)
   //    we return it as-is; the redirected request re-enters middleware with a
   //    locale prefix and the session/auth logic runs then.
-  const intlResponse = intl(request);
+  const intlResponse = intl(withGateHeaders(request));
   if (intlResponse.headers.get("location")) return intlResponse;
 
   const { locale, rest } = stripLocale(request.nextUrl.pathname);
 
-  // 1b. Landing arm (P0 entry-point fix, 2026-08-31). The root landing page
-  //     is STATIC (CDN-cached) and renders FOCUS — the default for every
-  //     visitor without an explicit choice, crawler included. A visitor
-  //     whose cookie records the explicit LIVE choice is rewritten to the
-  //     cookie-gated LIVE route HERE, so the arm is still resolved on the
-  //     server and only one tree is ever shipped, while the default entry
-  //     point no longer pays a serverless invocation (the failure mode
-  //     behind the 2026-08-31 ~60 s post-deploy fresh-visit report).
-  //     Rewrite, not redirect: the address bar keeps the ONE canonical
-  //     landing URL. `set-cookie`s from the intl response (NEXT_LOCALE)
-  //     are carried over so locale persistence is unaffected.
-  // `stripLocale("/lt")` yields rest === "/" — the locale root.
-  if (rest === "/") {
-    const landingMode = request.cookies.get(LANDING_MODE_COOKIE)?.value;
-    if (landingMode === "live") {
-      const liveUrl = request.nextUrl.clone();
-      liveUrl.pathname = `/${locale}/live-market-review`;
-      const liveResponse = NextResponse.rewrite(liveUrl);
-      intlResponse.headers.getSetCookie().forEach((cookie) => {
-        liveResponse.headers.append("set-cookie", cookie);
-      });
-      return liveResponse;
-    }
-  }
+  // 1b. The landing has ONE arm (owner decision 2026-09-30: the optional
+  //     LIVE arm and its cookie rewrite are removed). The root landing page
+  //     stays STATIC and CDN-cached for every visitor; an old LIVE cookie
+  //     no longer changes what is served.
 
   const needsAuth = REQUIRES_AUTH.some((p) => rest === p || rest.startsWith(p + "/"));
 

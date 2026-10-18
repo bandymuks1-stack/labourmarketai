@@ -324,16 +324,6 @@ async function ControlRoomCard() {
   // signals stay one source of truth + honest. No fake metrics.
   const rows: { labelKey: string; statusKey: string; kind: "preparing" | "blocked" | "never" }[] = [
     {
-      labelKey: "vision.controlRoom.ownerSmokeLabel",
-      statusKey: "vision.controlRoom.ownerSmokeStatus",
-      kind: "preparing",
-    },
-    {
-      labelKey: "vision.controlRoom.pr18Label",
-      statusKey: "vision.controlRoom.pr18Status",
-      kind: "blocked",
-    },
-    {
       labelKey: "vision.controlRoom.nonWorkerLabel",
       statusKey: "vision.controlRoom.nonWorkerStatus",
       kind: "preparing",

@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
   WORK_OBJECT_READ_LIMIT,
@@ -141,6 +142,42 @@ export async function getOrgWorkObjects(): Promise<OrgWorkObjectsResult> {
     .map(toObject)
     .filter((o): o is WorkObject => o !== null);
   return { kind: "ok", organizationId: ctx.organizationId, rows };
+}
+
+export type ProjectObjectIdsResult =
+  | { readonly kind: "ok"; readonly ids: readonly string[] }
+  | { readonly kind: "needs-migration" }
+  | { readonly kind: "error" };
+
+/**
+ * The ids of the work objects that belong to ONE project (`work_objects.
+ * project_id`) — the handle the organization's hour ledger is keyed on.
+ * Ids only, bounded, RLS-scoped: a project the caller cannot see yields
+ * nothing. A failed read is `error`, never an empty list (SEP-7).
+ * A canonical project includes the work objects of the fragments marked into
+ * it (record_state = duplicate), so a merge never hides their hours.
+ */
+export async function listWorkObjectIdsForProject(
+  projectId: string,
+): Promise<ProjectObjectIdsResult> {
+  const supabase = await createClient();
+  const { fragmentsOf } = await readProjectCanonicalMap(supabase, [projectId]);
+  const res = (await asAny(supabase)
+    .from("work_objects")
+    .select("id")
+    .in("project_id", [projectId, ...(fragmentsOf.get(projectId) ?? [])])
+    .limit(WORK_OBJECT_READ_LIMIT)) as {
+    data: { id: string }[] | null;
+    error: { code?: string } | null;
+  };
+  if (res.error) {
+    if (isObjectMigrationMissingCode(res.error.code)) {
+      return { kind: "needs-migration" };
+    }
+    console.error("[work-objects] project ids read failed:", res.error.code);
+    return { kind: "error" };
+  }
+  return { kind: "ok", ids: (res.data ?? []).map((r) => r.id) };
 }
 
 export type VisibleObjectsResult =

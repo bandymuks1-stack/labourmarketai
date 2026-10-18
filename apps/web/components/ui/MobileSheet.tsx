@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useDialogFocus } from "@/lib/hooks/use-dialog-focus";
 import { cn } from "@/lib/utils";
 
 /**
@@ -27,12 +28,13 @@ export function MobileSheet({
   onClose: () => void;
   title: string;
   /** Localized accessible name for the two close controls (backdrop + ✕).
-   *  Callers pass their own translated string; the English fallback exists
-   *  only so an unmigrated caller degrades to the previous behavior. */
-  closeLabel?: string;
+   *  Required: every caller passes its own translated string, so an
+   *  English fallback would only ever be a hidden untranslated label. */
+  closeLabel: string;
   children: React.ReactNode;
   className?: string;
 }) {
+  const panelRef = useRef<HTMLDivElement | null>(null);
   // SSR-safe portal: only render once the DOM is available, otherwise
   // `document.body` blows up during the server render.
   const [mounted, setMounted] = useState(false);
@@ -44,15 +46,16 @@ export function MobileSheet({
     if (!open) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onEsc);
     return () => {
       document.body.style.overflow = previous;
-      window.removeEventListener("keydown", onEsc);
     };
-  }, [open, onClose]);
+  }, [open]);
+
+  // A modal dialog owns focus while it is open (2026-09-19): focus moves
+  // INTO the sheet, Tab cycles inside it, Escape closes, and the opener gets
+  // focus back on close — without this a screen-reader or keyboard user
+  // stayed on the page underneath a sheet they could not reach.
+  useDialogFocus(open, onClose, panelRef);
 
   if (!mounted || !open) return null;
 
@@ -61,17 +64,25 @@ export function MobileSheet({
       role="dialog"
       aria-label={title}
       aria-modal="true"
+      // Portalled to <body>, so the shell's `[data-chrome]` mobile tap floor
+      // (globals.css) would not reach the sheet's controls; this attribute is
+      // the second anchor of that floor.
+      data-mobile-sheet=""
       className="fixed inset-0 z-50 flex flex-col justify-end md:hidden"
     >
       <button
         type="button"
-        aria-label={closeLabel ?? "Close"}
+        aria-label={closeLabel}
         onClick={onClose}
         className="absolute inset-0 bg-ink-900/70 backdrop-blur-sm"
       />
       <div
+        ref={panelRef}
+        tabIndex={-1}
         className={cn(
-          "relative mt-auto max-h-[85vh] w-full overflow-y-auto rounded-t-2xl border-t border-ink-500 bg-ink-900 pb-[env(safe-area-inset-bottom)] shadow-card",
+          // dvh: the sheet must not jump when the phone browser's URL bar
+          // collapses (vh is the LARGEST viewport; dvh is the current one).
+          "relative mt-auto max-h-[85dvh] w-full overflow-y-auto rounded-t-2xl border-t border-ink-500 bg-ink-900 pb-[env(safe-area-inset-bottom)] shadow-card outline-none",
           className,
         )}
       >
@@ -82,7 +93,7 @@ export function MobileSheet({
           <button
             type="button"
             onClick={onClose}
-            aria-label={closeLabel ?? "Close"}
+            aria-label={closeLabel}
             className="rounded-md border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
           >
             ✕

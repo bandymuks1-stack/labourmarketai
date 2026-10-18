@@ -4,7 +4,7 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { getSessionProfile, readProfileRow } from "@/lib/auth/session-profile";
+import { readProfileRow } from "@/lib/auth/session-profile";
 import { baseIdentityForRole } from "@/lib/config/roles";
 import {
   getWorkspaceContext,
@@ -12,6 +12,10 @@ import {
   type WorkspaceContext,
 } from "@/lib/company/active-organization";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+import {
+  ORGANIZATION_ARCHIVED_COLUMN,
+  isArchivedOrganizationRow,
+} from "@/lib/company/archived-organizations";
 import type { DomainCaller } from "@/lib/domain/caller";
 import {
   isEmployerSurfaceRole,
@@ -128,6 +132,16 @@ export type EmployerCompanyContext =
        *  the creator-compatibility arm. Never from the client, never from
        *  employment. Gate writes with `hasOrganizationCapability(role, …)`. */
       readonly role: GovernanceRole;
+      /** The caller created the bound company (`companies.profile_id`). The
+       *  database's `owns_company` admits the creator whatever their
+       *  membership role says, so an owner-equivalent capability
+       *  (`manage-invitations`) must not be lost to a membership row that
+       *  names a narrower role. Absent = not the creator (fails closed). */
+      readonly isCreator?: boolean;
+      /** The owner (or an admin) delegated invitation management to the
+       *  caller's own active membership (`manages_invitations`). Absent =
+       *  not delegated (fails closed). */
+      readonly invitationDelegate?: boolean;
     }
   | {
       readonly kind: "unavailable";
@@ -158,20 +172,14 @@ export const resolveEmployerCompanyContext = cache(
     } = await supabase.auth.getUser();
     if (!user) return unavailable("unauthenticated");
 
-    // The person's REAL current identity decides the workspace default. This
-    // is deliberately not hard-coded to "company": picking the personal
-    // workspace in the chip also switches the active role, so honouring the
-    // real identity is what makes an explicit personal choice fail closed
-    // instead of being silently overridden back to the first organization.
-    const session = await getSessionProfile();
-    const identity = session.profile?.active_role
-      ? baseIdentityForRole(session.profile.active_role)
-      : null;
-
-    // Cookie transport: the session-aware workspace resolution (session
-    // pointer wins over the durable pointer); the gate chain below is THE
-    // shared core (G4 wagon 3).
-    const workspace = await getWorkspaceContext(identity);
+    // Cookie transport: the ONE session workspace resolution — the one the
+    // chip renders. The person's REAL current identity (the session profile's
+    // `active_role`, never a hard-coded "company") decides the workspace
+    // default INSIDE it, so an explicit personal choice fails closed instead
+    // of being silently overridden back to the first organization, and this
+    // resolver can never name a different workspace than the chip in the same
+    // request. The gate chain below is THE shared core (G4 wagon 3).
+    const workspace = await getWorkspaceContext();
     return resolveEmployerCompanyCore({ supabase, userId: user.id }, workspace);
   },
 );
@@ -211,11 +219,16 @@ export async function resolveEmployerCompanyCore(
     // was `using (true)` and this read was unscoped — the gate was the ONLY
     // thing protecting it. `limit(2)` so a duplicated id would surface as
     // ambiguity rather than being silently reduced by `maybeSingle`.
-    const orgRes = await asAny(supabase)
-      .from("organizations")
-      .select("id, display_name, legal_name, legacy_company_id")
-      .eq("id", activeId)
-      .limit(2);
+    //
+    // ARCHIVED (owner decision 2026-09-23): the archive column rides this same
+    // read. An environment without it answers 42703 and is re-read without it
+    // (nothing is archived there); a 42703 on the re-read is the real
+    // needs-migration below.
+    const orgColumns = "id, display_name, legal_name, legacy_company_id";
+    const readOrg = (select: string) =>
+      asAny(supabase).from("organizations").select(select).eq("id", activeId).limit(2);
+    let orgRes = await readOrg(`${orgColumns}, ${ORGANIZATION_ARCHIVED_COLUMN}`);
+    if (orgRes.error?.code === UNDEFINED_COLUMN_CODE) orgRes = await readOrg(orgColumns);
     if (orgRes.error) {
       if (
         orgRes.error.code === UNDEFINED_COLUMN_CODE ||
@@ -233,10 +246,15 @@ export async function resolveEmployerCompanyCore(
       display_name: string | null;
       legal_name: string | null;
       legacy_company_id: string | null;
+      archived_at?: string | null;
     }[];
     if (orgRows.length > 1) return unavailable("ambiguous-binding", label);
     const org = orgRows[0];
     if (!org) return unavailable("not-a-member", label);
+    // An archived organization is no workspace anyone acts in — FAIL CLOSED
+    // even if a stale list or pointer still names it (defense in depth under
+    // the membership gate, which already leaves archived organizations out).
+    if (isArchivedOrganizationRow(org)) return unavailable("not-a-member", label);
 
     const organizationName =
       org.display_name?.trim() || org.legal_name?.trim() || active.name || "";
@@ -282,13 +300,20 @@ export async function resolveEmployerCompanyCore(
     // Feature-detected: environments without the memberships table (42P01)
     // use arm 2 alone, exactly the pre-slice behaviour.
     let role: GovernanceRole | null = null;
-    const memRes = await asAny(supabase)
-      .from("company_memberships")
-      .select("role")
-      .eq("organization_id", org.id)
-      .eq("profile_id", caller.userId)
-      .eq("status", "active")
-      .limit(1);
+    let invitationDelegate = false;
+    // The per-person invitation delegation (owner direction 2026-09-24) rides
+    // the same own-row read; without the column (42703) it re-reads the role
+    // alone — the pre-migration truth, nobody delegated.
+    const readMembership = (columns: string) =>
+      asAny(supabase)
+        .from("company_memberships")
+        .select(columns)
+        .eq("organization_id", org.id)
+        .eq("profile_id", caller.userId)
+        .eq("status", "active")
+        .limit(1);
+    let memRes = await readMembership("role, manages_invitations");
+    if (memRes.error?.code === UNDEFINED_COLUMN_CODE) memRes = await readMembership("role");
     if (memRes.error) {
       if (
         memRes.error.code !== RELATION_NOT_FOUND_CODE &&
@@ -301,10 +326,20 @@ export async function resolveEmployerCompanyCore(
       }
       // table absent — legacy environment, compatibility arm only
     } else {
-      const memberRole = (memRes.data ?? [])[0]?.role as string | undefined;
+      const memberRow = (memRes.data ?? [])[0] as
+        | { role?: string; manages_invitations?: boolean }
+        | undefined;
+      const memberRole = memberRow?.role;
       if (isGovernanceRole(memberRole)) role = memberRole;
+      invitationDelegate = memberRow?.manages_invitations === true;
     }
     if (role === null && company.profile_id === caller.userId) role = "owner";
+    // A `member` opens no employer surface — a delegation does not change
+    // that (it grants invitations, not the company's employer pages). A
+    // delegated member manages invitations from the invite panel
+    // (/dashboard/network), which offers every organization whose
+    // invitations they may manage, `join_as_employee` included
+    // (getInvitationOrganizations ↔ invitation_org_authority_v1).
     if (role === null || !isEmployerSurfaceRole(role)) {
       return unavailable("company-not-owned", organizationName || label);
     }
@@ -315,6 +350,8 @@ export async function resolveEmployerCompanyCore(
       organizationId: org.id,
       organizationName,
       role,
+      isCreator: company.profile_id === caller.userId,
+      invitationDelegate,
     };
 }
 
@@ -335,6 +372,8 @@ export async function requireEmployerCompanyForCaller(
       organizationId: string;
       organizationName: string;
       role: GovernanceRole;
+      isCreator?: boolean;
+      invitationDelegate?: boolean;
     }
   | { ok: false; reason: EmployerContextReason }
 > {
@@ -352,6 +391,8 @@ export async function requireEmployerCompanyForCaller(
         organizationId: ctx.organizationId,
         organizationName: ctx.organizationName,
         role: ctx.role,
+        isCreator: ctx.isCreator === true,
+        invitationDelegate: ctx.invitationDelegate === true,
       }
     : { ok: false, reason: ctx.reason };
 }
@@ -368,6 +409,8 @@ export async function requireEmployerCompany(): Promise<
       organizationId: string;
       organizationName: string;
       role: GovernanceRole;
+      isCreator?: boolean;
+      invitationDelegate?: boolean;
     }
   | { ok: false; reason: EmployerContextReason }
 > {
@@ -379,6 +422,8 @@ export async function requireEmployerCompany(): Promise<
         organizationId: ctx.organizationId,
         organizationName: ctx.organizationName,
         role: ctx.role,
+        isCreator: ctx.isCreator === true,
+        invitationDelegate: ctx.invitationDelegate === true,
       }
     : { ok: false, reason: ctx.reason };
 }

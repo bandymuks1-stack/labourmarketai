@@ -40,6 +40,9 @@ const ORG_D = "MP03 Delta";
 const W_PROFILE = "a0300000-0000-0000-0000-000000000003";
 
 const START = "/en/dashboard/start";
+/** The member DIRECTORY lives behind the organization's Settings door since
+ *  2026-09-23 (capability matrix P1); the invitee's panel stays on START. */
+const MEMBERS = "/en/dashboard/company/settings";
 
 const EVIDENCE = join(__dirname, "..", "..", "..", "..", "docs", "audits",
   "evidence", "multi-org-m-p0-4");
@@ -129,7 +132,7 @@ test.describe.serial("M-P0-4 slice 2 — membership commands in the real UI", ()
     await signIn(page, P_EMAIL);
     await page.goto(START);
     await ensureWorkspace(page, ORG_A);
-    await page.goto(START);
+    await page.goto(MEMBERS);
 
     const section = page.getByTestId("org-members-section");
     await expect(section).toBeVisible();
@@ -198,7 +201,9 @@ test.describe.serial("M-P0-4 slice 2 — membership commands in the real UI", ()
     await signIn(page, W_EMAIL);
     await page.goto(START);
     await switchWorkspace(page, ORG_A);
-    await page.goto(START);
+    // A plain member reaches the organization's Settings door through the
+    // membership arm of the company gate (they hold no company role).
+    await page.goto(MEMBERS);
 
     await expect(page.getByTestId("org-members-section")).toBeVisible();
     await expect(page.getByTestId("org-members-invite-form")).toHaveCount(0);

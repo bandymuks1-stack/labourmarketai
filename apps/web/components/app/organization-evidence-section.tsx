@@ -1,0 +1,877 @@
+"use client";
+
+import { PeriodMonthlyShare } from "@/components/app/period-monthly-share";
+import type { PeriodReadingLabels } from "@/components/app/period-monthly-share";
+import { EvidenceState, type EvidenceStanding } from "@/components/app/work-world/primitives";
+import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
+
+import { Card } from "@/components/ui/Card";
+import { HistoryContextBlock } from "@/components/app/history-context-block";
+import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
+
+import {
+  respondToRosterLinkAction,
+  type RosterLinkActionResult,
+} from "@/lib/organization-evidence/roster-link-actions";
+import {
+  disputeEvidenceRecordAction,
+  withdrawEvidenceContestAction,
+  type DisputeEvidenceResult,
+  type WithdrawEvidenceContestResult,
+} from "@/lib/organization-evidence/dispute-actions";
+import type {
+  EvidenceRecordView,
+  SubjectRosterLink,
+} from "@/lib/organization-evidence/import-core";
+import {
+  formatHoursAsStated,
+  periodProvenance,
+  recordWhen,
+} from "@/lib/organization-evidence/period-provenance";
+
+/**
+ * "WHAT ORGANIZATIONS HAVE RECORDED ABOUT ME" — the subject's side of the
+ * evidence import, on the person's own profile.
+ *
+ * This is the half that makes an import worth anything to the person it is
+ * about: a company's timesheet from 2019 stops being the company's private
+ * spreadsheet and becomes evidence in their Living CV, with the provenance
+ * intact — who supplied it, in what capacity, from which source, and on which
+ * day it was imported.
+ *
+ * ── WHAT IT REFUSES TO IMPLY ───────────────────────────────────────────────
+ * Every record carries the line that it is NOT independently verified, because
+ * an import never is. An organization attesting its own submission is shown as
+ * an attestation and, when the attester is the subject, as a self-attestation
+ * — real, permanent, and never counted as verification.
+ *
+ * ── CONSENT IS EXPLICIT ────────────────────────────────────────────────────
+ * A pending offer shows the organization's name and the name it holds, and
+ * offers two answers (`RosterLinkOffers`, below — rendered by the profile
+ * page ABOVE its disclosures, not inside this card). Refusing is a
+ * first-class action, not a hidden one: being named in someone's records must
+ * never be something a person can only accept. An unanswered offer stays
+ * pending — silence is not consent.
+ */
+
+const CARD = "rounded-md border border-ink-500 bg-ink-900 px-3 py-2";
+
+function OfferDecision({
+  offer,
+  labels,
+}: {
+  offer: SubjectRosterLink;
+  labels: { accept: string; refuse: string; errorMsg: string };
+}) {
+  const [state, submit, pending] = useActionState<
+    RosterLinkActionResult | null,
+    FormData
+  >(respondToRosterLinkAction, null);
+  return (
+    <form action={submit} className="flex flex-wrap items-center gap-2">
+      <input type="hidden" name="person_id" value={offer.id} />
+      <button
+        type="submit"
+        name="decision"
+        value="accept"
+        disabled={pending}
+        className="rounded-md border border-state-success/50 bg-state-success/10 px-3 py-1.5 text-xs font-semibold text-state-success disabled:opacity-50"
+      >
+        {labels.accept}
+      </button>
+      <button
+        type="submit"
+        name="decision"
+        value="refuse"
+        disabled={pending}
+        className="rounded-md border border-ink-500 bg-ink-800 px-3 py-1.5 text-xs font-semibold text-text-secondary disabled:opacity-50"
+      >
+        {labels.refuse}
+      </button>
+      <p
+        role="alert"
+        className={
+          state?.ok === false ? "text-xs text-state-warning" : "sr-only"
+        }
+      >
+        {state?.ok === false ? labels.errorMsg : ""}
+      </p>
+    </form>
+  );
+}
+
+/**
+ * "THIS IS WRONG" — the subject's objection to one record.
+ *
+ * Deliberately a two-step: the button reveals a form, and only an explicit
+ * submit writes anything. Contesting an employer's record is not a thing to
+ * do by mis-tap, and the note is where the person says what is actually
+ * wrong — optional, because "this is wrong" is already a complete statement
+ * and demanding an explanation before someone may object is its own kind of
+ * pressure.
+ *
+ * WHAT THE COPY MUST NEVER SAY is that the record has been corrected,
+ * removed, or proven false. It has not. The objection is recorded beside it,
+ * both stay readable, and the standing becomes CONTESTED — which is what the
+ * database actually holds.
+ */
+function DisputeRecord({
+  recordId,
+  labels,
+}: {
+  recordId: string;
+  labels: {
+    open: string;
+    notePlaceholder: string;
+    submit: string;
+    cancel: string;
+    recorded: string;
+    already: string;
+    notAllowed: string;
+    failed: string;
+  };
+}) {
+  const [open, setOpen] = useState(false);
+  const [state, submit, pending] = useActionState<
+    DisputeEvidenceResult | null,
+    FormData
+  >(disputeEvidenceRecordAction, null);
+
+  if (state?.ok) {
+    return (
+      <p
+        className="text-xs text-state-amber"
+        role="status"
+        data-testid="evidence-dispute-recorded"
+      >
+        {"already" in state ? labels.already : labels.recorded}
+      </p>
+    );
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-fit rounded-md border border-ink-500 bg-ink-800 px-3 py-1.5 text-xs font-semibold text-text-secondary hover:border-state-amber hover:text-state-amber"
+        data-testid="evidence-dispute-open"
+      >
+        {labels.open}
+      </button>
+    );
+  }
+
+  return (
+    <form action={submit} className="flex flex-col gap-2">
+      <input type="hidden" name="record_id" value={recordId} />
+      <textarea
+        name="note"
+        rows={2}
+        maxLength={1000}
+        placeholder={labels.notePlaceholder}
+        data-testid="evidence-dispute-note"
+        className="w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-xs text-text-primary outline-none placeholder:text-text-muted focus:border-state-amber"
+      />
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-md border border-state-amber/50 bg-state-amber/10 px-3 py-1.5 text-xs font-semibold text-state-amber disabled:opacity-50"
+          data-testid="evidence-dispute-submit"
+        >
+          {labels.submit}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          disabled={pending}
+          className="rounded-md border border-ink-500 bg-ink-800 px-3 py-1.5 text-xs font-semibold text-text-secondary disabled:opacity-50"
+        >
+          {labels.cancel}
+        </button>
+      </div>
+      {state?.ok === false ? (
+        <p
+          role="alert"
+          className="text-xs text-state-warning"
+          data-testid="evidence-dispute-error"
+        >
+          {state.code === "not_allowed" ? labels.notAllowed : labels.failed}
+        </p>
+      ) : null}
+    </form>
+  );
+}
+
+/**
+ * "I WITHDRAW MY OBJECTION" - the way back from a contest.
+ *
+ * Offered ONLY while the viewer's own contest stands (never for somebody
+ * else's - an organisation may contest too, and that is not the reader's to
+ * take back). It ends the standing of the contest; it does not erase that the
+ * contest was made, and the copy says so. A fresh contest is offered again
+ * afterwards.
+ */
+function WithdrawContest({
+  recordId,
+  labels,
+}: {
+  recordId: string;
+  labels: {
+    hint: string;
+    submit: string;
+    done: string;
+    notStanding: string;
+    notAllowed: string;
+    failed: string;
+  };
+}) {
+  const [state, submit, pending] = useActionState<
+    WithdrawEvidenceContestResult | null,
+    FormData
+  >(withdrawEvidenceContestAction, null);
+
+  if (state?.ok) {
+    return (
+      <p
+        className="text-xs text-state-amber"
+        role="status"
+        data-testid="evidence-dispute-withdrawn"
+      >
+        {state.withdrawn ? labels.done : labels.notStanding}
+      </p>
+    );
+  }
+
+  return (
+    <form action={submit} className="flex flex-col gap-2">
+      <input type="hidden" name="record_id" value={recordId} />
+      <p className="text-xs text-text-muted">{labels.hint}</p>
+      <div>
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-md border border-ink-500 bg-ink-800 px-3 py-1.5 text-xs font-semibold text-text-secondary hover:border-state-amber hover:text-state-amber disabled:opacity-50"
+          data-testid="evidence-dispute-withdraw"
+        >
+          {labels.submit}
+        </button>
+      </div>
+      {state?.ok === false ? (
+        <p
+          role="alert"
+          className="text-xs text-state-warning"
+          data-testid="evidence-dispute-withdraw-error"
+        >
+          {state.code === "not_allowed" ? labels.notAllowed : labels.failed}
+        </p>
+      ) : null}
+    </form>
+  );
+}
+
+/**
+ * "WAITING FOR YOUR ANSWER" — the pending roster-link offers, as their OWN
+ * surface at the top of the profile.
+ *
+ * Until 2026-09-17 this block lived inside `OrganizationEvidenceSection`,
+ * which the profile page renders INSIDE the closed `#cv-details` disclosure —
+ * the bar reserved for editors "filled in once and revisited rarely". A
+ * decision the person has to make is not one of those. On the first real
+ * offer in production (the owner, on their own account, from
+ * /dashboard/company/people) the target opened /dashboard/profile and saw no
+ * offer and no Accept / Decline at all: the row was persisted, RLS showed it,
+ * the read fetched it, the component rendered it — behind a closed bar with
+ * no indicator. This component is the same offer card, the same server
+ * action and the same two answers, hoisted to where a pending decision is
+ * visible on arrival. It renders nothing when there is nothing to decide.
+ *
+ * Authority is unchanged: the organization offered, only this person can
+ * answer, and `respondToRosterLinkAction` still re-derives the caller and
+ * the database still refuses any row that does not already name them.
+ */
+export function RosterLinkOffers({
+  offers,
+}: {
+  offers: readonly SubjectRosterLink[];
+}) {
+  const t = useTranslations("evidenceImport.mine");
+  if (offers.length === 0) return null;
+  return (
+    <Card compact>
+      <section
+        id="roster-link-offers"
+        className="flex flex-col gap-2 scroll-mt-20"
+        data-testid="organization-evidence-offers"
+        aria-labelledby="roster-link-offers-title"
+      >
+        <p
+          id="roster-link-offers-title"
+          className="font-mono text-meta uppercase tracking-label text-state-amber"
+        >
+          {t("offersTitle")}
+        </p>
+        <p className="text-xs leading-relaxed text-text-secondary">
+          {t("offersHint")}
+        </p>
+        {offers.map((offer) => (
+          <div
+            key={offer.id}
+            className={`${CARD} flex flex-col gap-2`}
+            data-testid="roster-link-offer"
+            data-person-id={offer.id}
+          >
+            <p className="text-sm text-text-primary">
+              {offer.organizationName ?? t("unnamedOrganization")} —{" "}
+              {offer.displayName}
+            </p>
+            <OfferDecision
+              offer={offer}
+              labels={{
+                accept: t("accept"),
+                refuse: t("refuse"),
+                errorMsg: t("decisionFailed"),
+              }}
+            />
+          </div>
+        ))}
+      </section>
+    </Card>
+  );
+}
+
+/**
+ * How the record's WHEN came to be — the ONE rule, which lives with the
+ * period reading in `lib/organization-evidence/period-provenance.ts` (owner
+ * rule 2026-09-23) and is re-exported here for the callers that imported it
+ * from this surface.
+ */
+export { periodProvenance };
+
+/**
+ * The record's STANDING — the ONE rule the evidence chip and the profile's
+ * one-line history summary share, so the two can never name a record's
+ * standing differently. A withdrawal outranks everything; an attestation is
+ * an attestation (and a SELF-attestation when the attester is the subject);
+ * otherwise the derived base state stands. Pure.
+ */
+export function recordStanding(rec: {
+  readonly withdrawn: boolean;
+  readonly attestation: { readonly self: boolean } | null;
+  readonly state: string;
+}): EvidenceStanding {
+  return (
+    rec.withdrawn
+      ? "WITHDRAWN"
+      : rec.attestation
+        ? rec.attestation.self
+          ? "SELF_ATTESTED"
+          : "ORGANIZATION_ATTESTED"
+        : rec.state
+  ) as EvidenceStanding;
+}
+
+/** The standing's words — same labels the chip always used, chosen here and
+ *  handed to the i18n-free primitive. */
+function useStandingLabel(): (standing: EvidenceStanding) => string {
+  const tState = useTranslations("evidenceImport.evidenceState");
+  const tRecords = useTranslations("evidenceImport.records");
+  return (standing) =>
+    standing === "WITHDRAWN"
+      ? tRecords("withdrawn")
+      : standing === "SELF_ATTESTED"
+        ? tRecords("selfAttested")
+        : standing === "ORGANIZATION_ATTESTED"
+          ? tRecords("attested")
+          : tState(standing as never);
+}
+
+/**
+ * THE ONE-LINE HISTORY SUMMARY (profile summary-first, 2026-09-23).
+ *
+ * What the profile shows ON ARRIVAL about organization history, in place of
+ * every record card open at once: how many records, from which
+ * organization(s), over which dates, in which standing. The full cards stay
+ * one tap away (the page wraps them in a disclosure this line heads).
+ *
+ * WHAT IT DELIBERATELY DOES NOT SAY: a total of hours. Organization records
+ * sit BESIDE each other and beside the person's own ledger — never summed
+ * (IA §2); a period aggregate and a day record are not the same kind of
+ * figure, and adding them would manufacture a number no source stated. The
+ * dates are the records' own (a day, or a period's two ends), compared as
+ * ISO strings; nothing is derived here.
+ */
+export function OrganizationEvidenceSummary({
+  records,
+  organizationNames = {},
+}: {
+  records: readonly EvidenceRecordView[];
+  organizationNames?: Readonly<Record<string, string>>;
+}) {
+  const t = useTranslations("evidenceImport.mine");
+  const standingLabel = useStandingLabel();
+  if (records.length === 0) {
+    return (
+      <span className="font-sans text-xs normal-case tracking-normal text-text-secondary" data-testid="organization-history-summary-empty">
+        {t("summaryNoRecords")}
+      </span>
+    );
+  }
+  const names: string[] = [];
+  const standings = new Map<EvidenceStanding, number>();
+  let first: string | null = null;
+  let last: string | null = null;
+  for (const rec of records) {
+    const name = organizationNames[rec.personId];
+    if (name && !names.includes(name)) names.push(name);
+    const start = rec.activityDate ?? rec.periodStart;
+    const end = rec.activityDate ?? rec.periodEnd ?? rec.periodStart;
+    if (start && (first === null || start < first)) first = start;
+    if (end && (last === null || end > last)) last = end;
+    const s = recordStanding(rec);
+    standings.set(s, (standings.get(s) ?? 0) + 1);
+  }
+  const range = first && last ? (first === last ? first : `${first} – ${last}`) : null;
+  return (
+    <span
+      className="flex flex-wrap items-center gap-x-2 gap-y-1 font-sans text-xs normal-case tracking-normal text-text-secondary"
+      data-testid="organization-history-summary"
+      data-records={records.length}
+    >
+      <span className="font-semibold text-text-primary">
+        {t("summaryRecords", { count: records.length })}
+      </span>
+      {names.length > 0 ? <span>· {names.join(", ")}</span> : null}
+      {range ? <span className="font-mono tabular-nums">· {range}</span> : null}
+      {[...standings].map(([standing, n]) => (
+        <EvidenceState
+          key={standing}
+          state={standing}
+          label={standings.size > 1 ? `${standingLabel(standing)} · ${n}` : standingLabel(standing)}
+        />
+      ))}
+    </span>
+  );
+}
+
+export function OrganizationEvidenceSection({
+  records,
+  needsMigration,
+  organizationNames = {},
+  contexts = {},
+  showTitle = true,
+}: {
+  records: readonly EvidenceRecordView[];
+  /** The work behind each record, keyed by record id: project, client,
+   *  capacity, source and the distinct proof facts. A record with no entry,
+   *  or whose context is empty, shows nothing extra. */
+  contexts?: Readonly<Record<string, HistoryContext>>;
+  /** The store is not provisioned in this environment. The card still renders,
+   *  with its honest note instead of a silently empty list. */
+  needsMigration: boolean;
+  /** WHICH organization recorded each row, keyed by the roster record
+   *  (`personId`). The record view carries no organization name of its own;
+   *  the subject read already resolves it on the roster link (the ONE
+   *  org-name rule), so the page hands it over — nothing is invented here.
+   *  First real linked history (2026-09-18): the card showed a period, hours
+   *  and a standing with no organization on it. */
+  organizationNames?: Readonly<Record<string, string>>;
+  /** False when a disclosure summary above already names the section (the
+   *  profile's `#organization-history` bar) — the heading is not said twice.
+   *  The intro stays: it is what the records are, not what they are called. */
+  showTitle?: boolean;
+}) {
+  const t = useTranslations("evidenceImport.mine");
+  const tRole = useTranslations("evidenceImport.role");
+  const tRecords = useTranslations("evidenceImport.records");
+  const standingLabel = useStandingLabel();
+  // ONE set of period words for both halves of a record's period reading —
+  // the row and its "how this was recorded" disclosure read the same labels.
+  // `provenance: null`: the provenance words already stand beside the date.
+  const periodLabels: PeriodReadingLabels = {
+    monthlyShare: tRecords("monthlyShare"),
+    noMonthlyFigure: tRecords("noMonthlyFigure"),
+    provenance: null,
+    sourceStates: (words) => tRecords("sourceStates", { words }),
+    sourceDiffers: tRecords("sourceDiffers"),
+  };
+
+  return (
+    <Card compact>
+      <section
+        className="flex flex-col gap-3"
+        data-testid="organization-evidence-section"
+      >
+        <header className="flex flex-col gap-1">
+          {showTitle ? (
+          <h2 className="font-display text-lg font-bold tracking-tightest text-text-primary">
+            {t("title")}
+          </h2>
+          ) : null}
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {t("intro")}
+          </p>
+        </header>
+
+        {needsMigration ? (
+          <p
+            className="text-xs leading-relaxed text-text-muted"
+            data-testid="organization-evidence-not-enabled"
+          >
+            {t("notEnabled")}
+          </p>
+        ) : null}
+
+        {records.length === 0 ? (
+          !needsMigration && (
+            <p
+              className="text-sm text-text-muted"
+              data-testid="organization-evidence-empty"
+            >
+              {t("empty")}
+            </p>
+          )
+        ) : (
+          <ul
+            className="flex flex-col gap-2"
+            data-testid="organization-evidence-records"
+          >
+            {records.map((rec) => (
+              <li
+                key={rec.id}
+                className={`${CARD} flex flex-col gap-1`}
+                data-state={rec.state}
+                data-independently-verified={
+                  rec.independentlyVerified ? "true" : "false"
+                }
+              >
+                {/* The organization first, then the activity the row is about:
+                    a person reads "who recorded this, and as what" before a
+                    figure. Both are the record's own facts. */}
+                {organizationNames[rec.personId] || rec.contextLabel ? (
+                  <p
+                    className="text-sm font-semibold text-text-primary"
+                    data-testid="organization-evidence-record-origin"
+                  >
+                    {organizationNames[rec.personId] ?? ""}
+                    {organizationNames[rec.personId] && rec.contextLabel ? " · " : ""}
+                    {rec.contextLabel ?? ""}
+                  </p>
+                ) : null}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className="text-sm text-text-primary"
+                    data-testid="organization-evidence-record-when"
+                    data-provenance={periodProvenance(rec)}
+                  >
+                    {/* At the precision it has: a span a person chose reads
+                        as months, never as two day-precise dates. */}
+                    {recordWhen(rec)}
+                  </span>
+                  {/* SOURCE FACT ≠ DERIVED (owner P0 2026-09-22 §11). A period
+                      the source never stated — chosen by a person at import
+                      ("800 h, at least 16 months × 50 h" became 2025-06 →
+                      2025-11) — must not read like an observed date. The
+                      record's own `derived.timeSemantics` says how the period
+                      came to be; the reader sees that beside it. */}
+                  {periodProvenance(rec) !== "source" ? (
+                    <span
+                      className="text-xs text-text-muted"
+                      data-testid="organization-evidence-record-period-derived"
+                    >
+                      {periodProvenance(rec) === "human_choice"
+                        ? tRecords("periodDerivedHuman")
+                        : tRecords("periodDerived")}
+                    </span>
+                  ) : null}
+                  {rec.hours !== null && (
+                    <span className="text-xs text-text-secondary">
+                      {formatHoursAsStated(rec.hours)} h
+                    </span>
+                  )}
+                  {/* The period record through the ONE reading (owner rule
+                      2026-09-23): an even monthly share only for a period the
+                      SOURCE stated; a span a person chose shows its months
+                      and the source's own words, with no monthly figure. The
+                      provenance words already stand beside the date above.
+                      On the row: a source period's RIBBON (with its own
+                      derived warning), or a chosen span's whole no-split
+                      reading; a source period's exact month list is inside
+                      "how this was recorded" below. */}
+                  {rec.activityDate === null && (
+                    <PeriodMonthlyShare
+                      hours={rec.hours}
+                      periodStart={rec.periodStart}
+                      periodEnd={rec.periodEnd}
+                      derived={rec.derived}
+                      factFields={rec.factFields}
+                      sourceText={rec.text}
+                      labels={periodLabels}
+                      className="flex basis-full flex-col gap-0.5"
+                      part="ribbon"
+                    />
+                  )}
+                  {/* Canonical evidence-standing chip (work-world primitive):
+                      the ONE component that colours standing, so a
+                      self-attestation reads as cyan EVIDENCE and never as
+                      green verification. Same words as before — the label is
+                      chosen here and handed in; the primitive stays i18n-free. */}
+                  <EvidenceState
+                    state={recordStanding(rec)}
+                    label={standingLabel(recordStanding(rec))}
+                  />
+                </div>
+                {/* The publisher's own words are THE fact of this record —
+                    named as such, so a precise-looking derived period above
+                    never outranks the imprecise sentence it was made from. */}
+                <p className="text-sm text-text-secondary" data-testid="organization-evidence-record-text">
+                  <span className="text-xs text-text-muted">{tRecords("sourceStatement")}: </span>
+                  {rec.text}
+                </p>
+                {/* CONTESTED is rendered as its own line rather than left to
+                    the state chip, because "someone objected to this" is the
+                    single most important thing a reader of this record can
+                    know, and because the chip's catalogue is the REPORTED
+                    states — a lifecycle standing falling through it would
+                    render a raw enum. */}
+                {rec.state === "DISPUTED" ? (
+                  <p
+                    className="text-xs text-state-amber"
+                    data-testid="evidence-record-disputed"
+                  >
+                    {rec.disputedByViewer
+                      ? tRecords("disputedByYou")
+                      : tRecords("disputed")}
+                  </p>
+                ) : null}
+                {/* HOW THIS WAS RECORDED — one tap away (profile
+                    summary-first, 2026-09-23). The row keeps what a reader
+                    needs to judge the record: who, when (with the derived
+                    label when the source stated no dates), how much, the
+                    ribbon, the standing, the source's own words, and the
+                    objection. The provenance internals — in what capacity it
+                    was supplied, the import day, the standing claim that an
+                    import is never independently verified, and the exact
+                    month figures — are the same lines, moved behind one
+                    disclosure per record. Nothing is dropped. */}
+                <details
+                  className="group/how"
+                  data-testid="organization-evidence-record-how"
+                >
+                  <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1 text-xs text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+                    <span aria-hidden className="transition-transform group-open/how:rotate-90">
+                      ›
+                    </span>
+                    {tRecords("howRecorded")}
+                  </summary>
+                  <div className="flex flex-col gap-1 pb-1">
+                    <p className="text-xs text-text-muted">
+                      {tRecords("supplier")}: {tRole(rec.supplierRole as never)} ·{" "}
+                      {tRecords("importedAt")}: {rec.importedAt.slice(0, 10)}
+                    </p>
+                    <HistoryContextBlock context={contexts[rec.id]} />
+                    {/* The one claim this surface makes about imported
+                      evidence, and it is always the same one. */}
+                    <p className="text-xs text-text-muted">
+                      {tRecords("notIndependentlyVerified")}
+                    </p>
+                    {/* A source period's exact month figures. A span with no
+                        monthly figure has none — this half renders nothing
+                        for it (the ONE reading decides, not this surface). */}
+                    {rec.activityDate === null && (
+                      <PeriodMonthlyShare
+                        hours={rec.hours}
+                        periodStart={rec.periodStart}
+                        periodEnd={rec.periodEnd}
+                        derived={rec.derived}
+                        factFields={rec.factFields}
+                        sourceText={rec.text}
+                        labels={periodLabels}
+                        className="flex flex-col gap-0.5"
+                        part="months"
+                      />
+                    )}
+                  </div>
+                </details>
+                {/* The objection is offered while the person has not already
+                    made one. It never appears on a withdrawn record: the
+                    organisation has already taken that claim back, and
+                    contesting a retracted statement would be theatre. */}
+                {rec.disputedByViewer ? (
+                  <WithdrawContest
+                    recordId={rec.id}
+                    labels={{
+                      hint: tRecords("disputeWithdrawHint"),
+                      submit: tRecords("disputeWithdraw"),
+                      done: tRecords("disputeWithdrawn"),
+                      notStanding: tRecords("disputeNotStanding"),
+                      notAllowed: tRecords("disputeNotAllowed"),
+                      failed: tRecords("disputeWithdrawFailed"),
+                    }}
+                  />
+                ) : null}
+                {/* The contest existed and was taken back. Said plainly,
+                    because a record that silently went back to normal would
+                    erase that the person once objected. */}
+                {!rec.disputedByViewer && rec.contestWithdrawnByViewer ? (
+                  <p
+                    className="text-xs text-text-muted"
+                    data-testid="evidence-dispute-withdrawn-history"
+                  >
+                    {tRecords("disputeWithdrawnHistory")}
+                  </p>
+                ) : null}
+                {!rec.disputedByViewer && !rec.withdrawn ? (
+                  <DisputeRecord
+                    recordId={rec.id}
+                    labels={{
+                      open: tRecords("disputeOpen"),
+                      notePlaceholder: tRecords("disputeNotePlaceholder"),
+                      submit: tRecords("disputeSubmit"),
+                      cancel: tRecords("disputeCancel"),
+                      recorded: tRecords("disputeRecorded"),
+                      already: tRecords("disputeAlready"),
+                      notAllowed: tRecords("disputeNotAllowed"),
+                      failed: tRecords("disputeFailed"),
+                    }}
+                  />
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </Card>
+  );
+}
+
+/**
+ * "THIS IS NO LONGER ME" — the subject withdraws a link they once confirmed.
+ *
+ * The policy `organization_people_subject_decides` has allowed the linked
+ * person to return the row to `unlinked` since the store shipped
+ * (2026-09-07); the product exposed only Accept / Refuse on an OFFER, so a
+ * person who had said yes could never say "no longer". Consent that cannot
+ * be withdrawn is not consent. This is the withdrawal — two steps, because
+ * the organization's history leaves the profile the moment it succeeds, and
+ * that is not something to do by mis-tap.
+ *
+ * Nothing is deleted: the organization keeps its own record; it stops naming
+ * this person. Renders nothing when there is no confirmed link.
+ */
+export function RosterLinkWithdrawals({
+  links,
+}: {
+  links: readonly SubjectRosterLink[];
+}) {
+  const t = useTranslations("evidenceImport.mine");
+  const confirmed = links.filter((l) => l.linkState === "linked");
+  if (confirmed.length === 0) return null;
+  return (
+    <section
+      id="roster-link-withdrawals"
+      className="flex flex-col gap-2"
+      data-testid="organization-evidence-links"
+      aria-labelledby="roster-link-withdrawals-title"
+    >
+      <p
+        id="roster-link-withdrawals-title"
+        className="font-mono text-meta uppercase tracking-label text-text-muted"
+      >
+        {t("linksTitle")}
+      </p>
+      <p className="text-xs leading-relaxed text-text-secondary">{t("linksHint")}</p>
+      <ul className="flex flex-col gap-2">
+        {confirmed.map((link) => (
+          <li
+            key={link.id}
+            className={`${CARD} flex flex-col gap-2`}
+            data-testid="roster-link-confirmed"
+            data-person-id={link.id}
+          >
+            <p className="text-sm text-text-primary">
+              {link.organizationName ?? t("unnamedOrganization")} — {link.displayName}
+            </p>
+            <WithdrawDecision
+              personId={link.id}
+              labels={{
+                open: t("withdrawLink"),
+                confirm: t("withdrawConfirm"),
+                cancel: t("withdrawCancel"),
+                done: t("withdrawDone"),
+                errorMsg: t("decisionFailed"),
+              }}
+            />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function WithdrawDecision({
+  personId,
+  labels,
+}: {
+  personId: string;
+  labels: {
+    open: string;
+    confirm: string;
+    cancel: string;
+    done: string;
+    errorMsg: string;
+  };
+}) {
+  const [open, setOpen] = useState(false);
+  const [state, submit, pending] = useActionState<
+    RosterLinkActionResult | null,
+    FormData
+  >(respondToRosterLinkAction, null);
+  if (state?.ok) {
+    return (
+      <p className="text-xs text-text-secondary" data-testid="roster-link-withdrawn">
+        {labels.done}
+      </p>
+    );
+  }
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        data-testid="roster-link-withdraw-open"
+        className="min-h-11 w-fit rounded-md border border-ink-500 bg-ink-800 px-3 text-xs font-semibold text-text-secondary hover:border-state-warning/60"
+      >
+        {labels.open}
+      </button>
+    );
+  }
+  return (
+    <form action={submit} className="flex flex-wrap items-center gap-2">
+      <input type="hidden" name="person_id" value={personId} />
+      <button
+        type="submit"
+        name="decision"
+        value="withdraw"
+        disabled={pending}
+        data-testid="roster-link-withdraw-confirm"
+        className="min-h-11 rounded-md border border-state-warning/50 bg-state-warning/10 px-3 text-xs font-semibold text-state-warning disabled:opacity-50"
+      >
+        {labels.confirm}
+      </button>
+      <button
+        type="button"
+        onClick={() => setOpen(false)}
+        disabled={pending}
+        className="min-h-11 rounded-md border border-ink-500 bg-ink-800 px-3 text-xs font-semibold text-text-secondary disabled:opacity-50"
+      >
+        {labels.cancel}
+      </button>
+      <p role="alert" className={state?.ok === false ? "text-xs text-state-warning" : "sr-only"}>
+        {state?.ok === false ? labels.errorMsg : ""}
+      </p>
+    </form>
+  );
+}

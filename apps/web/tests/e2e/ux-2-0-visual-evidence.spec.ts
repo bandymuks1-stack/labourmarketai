@@ -648,8 +648,19 @@ test.describe("composer auto-grow", () => {
     await page.getByTestId("composer-input").fill("   ");
     await expect(send).toBeDisabled();
 
-    // The attach control opens the real CV flow (unchanged wiring).
-    await page.getByTestId("composer-attach").click();
+    // The attach control opens the OS file picker (owner P0 2026-09-23); a CV
+    // picked there reaches the canonical CV flow through ONE question.
+    const [chooser] = await Promise.all([
+      page.waitForEvent("filechooser"),
+      page.getByTestId("composer-attach").click(),
+    ]);
+    await chooser.setFiles({
+      name: "cv.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("Jonas Jonaitis\nPatirtis: plytelių klojėjas, 2019–2024\n"),
+    });
+    await expect(page.getByTestId("composer-attachment")).toBeVisible();
+    await page.getByRole("button", { name: /^Mano gyvenimo aprašymas \(CV\)$/ }).click();
     await expect(page.getByTestId("conversation-cv-flow")).toBeVisible({ timeout: 20_000 });
     await shot(page, "cv-import-entry", "light", "desktop");
   });

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
+import { OVERRIDE_REASON_CODES } from "@/lib/projects/override-receipt-model";
 
 /**
  * Zod input schemas for the executable EMPLOYER-side conversation actions
@@ -90,6 +91,12 @@ export const companyCreateDemandSchema = z
       .regex(/^\d{4}-\d{2}-\d{2}$/)
       .nullable()
       .optional(),
+    /** Stated end day (ISO) → `structured_v2.time.end_date`. */
+    endDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .nullable()
+      .optional(),
   })
   .refine((v) => v.mode !== "draft" || v.intent === "hire_workers", {
     message: "drafts exist only for the hire_workers intent",
@@ -135,11 +142,30 @@ export const companyAssignWorkerSchema = z.object({
   workerProfileId: uuid,
 });
 
+/** J-TIME-FREEDOM: the manager KEEPS an assignment knowing a calendar clash.
+ *  The closed reason code is the ONLY context a model or client can supply; the
+ *  collisions are NEVER an input — they are recomputed server-side. */
+export const companyKeepAssignmentSchema = z.object({
+  projectId: uuid,
+  workerProfileId: uuid,
+  reasonCode: z.enum(OVERRIDE_REASON_CODES).optional(),
+});
+
+/** §11 what-if MOVE: the person leaves project X for project Y. Both ids are
+ *  re-checked by the two canonical RPCs (assign, end); X ≠ Y here. */
+export const companyMoveWorkerSchema = z
+  .object({
+    workerProfileId: uuid,
+    fromProjectId: uuid,
+    toProjectId: uuid,
+  })
+  .refine((v) => v.fromProjectId !== v.toProjectId, { message: "same project" });
+
 export const agencyInviteClientSchema = z.object({
   /** Optional since 2026-09-04: the chat never knows the company id — the
    *  executor resolves the ACTIVE workspace's company (M-P0-3, the same
    *  resolver every employer write uses). A supplied id is still re-checked
-   *  by the RPC (`owns_company` + staffing_agency). */
+   *  by the RPC (`owns_company` + `company_acts_as_agency`). */
   agencyCompanyId: uuid.optional(),
   /** Shape gate only — the canonical `validateInviteEmail` stays authoritative. */
   email: z.string().trim().email().max(254),
@@ -184,6 +210,125 @@ export const educationAssignLearnerSchema = z.object({
   profileId: uuid,
 });
 
+/** F2 (owner contract 2026-09-04 §9/§11 seed): the SITE as a project object,
+ *  by sentence — "sukurk projektą Roterdame". Shape gate only; the canonical
+ *  `createProjectAction` → `insertProjectForCompany` validates the title and
+ *  RLS `projects_insert` (owns_company) gates the row. */
+export const companyCreateProjectSchema = z.object({
+  title: z.string().trim().min(2).max(120),
+  city: z.string().trim().max(120).nullable().optional(),
+});
+
+/** CLIENT: the decision on an agency's candidate offer (canonical:
+ *  `respondCandidateOfferAction` → `respond_agency_candidate_offer_v1`, which
+ *  re-checks that the caller owns the demand and the offer is open). */
+/** The client's side of the agency bridge, by chip (2026-09-19). Ids only —
+ *  the RPCs re-check the connection/request belong to the ACTIVE company. */
+export const companyAcceptConnectionSchema = z.object({ connectionId: uuid });
+export const companyDeclineConnectionSchema = z.object({ connectionId: uuid });
+export const companyShareRequestSchema = z.object({ connectionId: uuid, requestId: uuid });
+
+export const companyRespondOfferSchema = z.object({
+  offerId: uuid,
+  decision: z.enum(["accepted", "declined"]),
+  note: z.string().trim().max(1000).nullable().optional(),
+});
+
+/** The receiver's answer to a brigade / company offered against its need
+ *  (`respond_team_demand_offer_v1` re-checks the receiver and that the offer
+ *  is open). Agreeing is agreed IN PRINCIPLE — never a signed contract. */
+export const companyRespondTeamOfferSchema = z.object({
+  offerId: uuid,
+  decision: z.enum(["accepted", "declined"]),
+});
+
+/** A work package (task) on the company's project, by sentence — the shape
+ *  gate only; `create_work_task_v2` validates project ownership and limits. */
+export const companyCreateTaskSchema = z.object({
+  title: z.string().trim().min(3).max(160),
+  projectId: uuid.nullable().optional(),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  priority: z.enum(["low", "normal", "high"]).default("normal"),
+  description: z.string().trim().max(2000).nullable().optional(),
+});
+
+/** PROGRESS (§11): a project stage moved to a real status — the canonical
+ *  `updateStageStatusAction` (`set_project_stage_status`) re-checks that the
+ *  caller manages the project; `blocked` needs a reason there too. */
+export const companyUpdateStageStatusSchema = z.object({
+  stageId: uuid,
+  status: z.enum(["planned", "in_progress", "blocked", "done", "cancelled"]),
+  blockedReason: z.string().trim().max(500).nullable().optional(),
+});
+
+/** §14 WORK PERFORMED → RESULT: a task moved to a real status — "užduotis
+ *  sumontuoti pastolius atlikta". `set_work_task_status_v2` re-checks that
+ *  the caller created the task, is its assignee, or manages its project;
+ *  `cancelled` stays a page decision, not a sentence. */
+export const companyUpdateTaskStatusSchema = z.object({
+  taskId: uuid,
+  status: z.enum(["in_progress", "blocked", "done"]),
+});
+
+/** §11 READINESS — the corrective actions offered right after "kas trūksta
+ *  projektui X?": the operations page's OWN writes. `upsert_worker_readiness_item`
+ *  re-checks that the caller manages the project; the seed runs that same
+ *  write per person; the request is a WORK INSTRUCTION in the project's thread
+ *  (`send_work_instruction_to_project` requires an ACTIVE assignment and that
+ *  the caller manages the worker). Nothing here is invented: the label is the
+ *  stored row's label, the body is composed from the real gap labels. */
+export const companySetReadinessItemSchema = z.object({
+  projectId: uuid,
+  workerProfileId: uuid,
+  itemKey: z.string().trim().min(1).max(80),
+  label: z.string().trim().min(1).max(160),
+  status: z.enum(["needed", "missing", "received", "checked", "not_required"]),
+});
+
+export const companySeedReadinessChecklistSchema = z.object({
+  projectId: uuid,
+});
+
+export const companyRequestReadinessSchema = z.object({
+  projectId: uuid,
+  workerProfileId: uuid,
+  body: z.string().trim().min(1).max(2000),
+});
+
+/** §14 EMPLOYER CONFIRMATION — the inbox's one-tap confirm: approve a
+ *  journal entry AND verify the declared skills it proves
+ *  (`confirm_entry_and_verify_skills`, the ONLY path that flips a skill to
+ *  verified; re-checks manager authority + the person's review flag). */
+export const companyConfirmWorkSchema = z.object({
+  entryId: uuid,
+  skillIds: z.array(uuid).max(20),
+});
+
+/** Switch a person's journal review on — the membership RPC
+ *  (`set_engagement_journal_review`: an active employee engagement of an
+ *  organization the caller manages). Reversible (the same RPC turns it off). */
+export const companyEnableJournalReviewSchema = z.object({
+  engagementId: uuid,
+});
+
+/**
+ * RENAME THE ACTIVE ORGANIZATION (owner program 2026-09-23). The NAME is the
+ * input: the organization is never client input — the executor resolves it
+ * from the server-side active workspace. Same bounds as the canonical writer
+ * (`save_company_setup_v3`: trimmed, 2–200 characters).
+ *
+ * `expectedOrganizationId` is NOT a target. It is the organization the form
+ * was opened FOR, and it can only REFUSE: when the server-resolved workspace
+ * is a different one at save time (switched in another tab), nothing is
+ * renamed. Strict: any other key — an `organizationId` above all — fails.
+ */
+export const companyRenameOrganizationSchema = z
+  .object({
+    name: z.string().trim().min(2).max(200),
+    expectedOrganizationId: uuid.optional(),
+  })
+  .strict();
+
 export const agencyProposeCandidateSchema = z.object({
   shareId: uuid,
   workerId: uuid,
@@ -213,7 +358,24 @@ export const COMPANY_ACTION_SCHEMAS = {
   "company.contact-worker": companyContactWorkerSchema,
   "company.propose-booking": companyProposeBookingSchema,
   "company.assign-worker": companyAssignWorkerSchema,
+  "company.move-worker": companyMoveWorkerSchema,
+  "company.keep-assignment": companyKeepAssignmentSchema,
+  "company.create-project": companyCreateProjectSchema,
+  "company.respond-offer": companyRespondOfferSchema,
+  "company.respond-team-offer": companyRespondTeamOfferSchema,
+  "company.accept-connection": companyAcceptConnectionSchema,
+  "company.decline-connection": companyDeclineConnectionSchema,
+  "company.share-request": companyShareRequestSchema,
+  "company.create-task": companyCreateTaskSchema,
+  "company.update-stage-status": companyUpdateStageStatusSchema,
+  "company.update-task-status": companyUpdateTaskStatusSchema,
+  "company.set-readiness-item": companySetReadinessItemSchema,
+  "company.seed-readiness-checklist": companySeedReadinessChecklistSchema,
+  "company.request-readiness": companyRequestReadinessSchema,
+  "company.confirm-work": companyConfirmWorkSchema,
+  "company.enable-journal-review": companyEnableJournalReviewSchema,
   "company.invite-worker": companyInviteWorkerSchema,
+  "company.rename-organization": companyRenameOrganizationSchema,
   "agency.invite-client": agencyInviteClientSchema,
   "agency.propose-candidate": agencyProposeCandidateSchema,
   "company.create-programme": educationCreateProgrammeSchema,

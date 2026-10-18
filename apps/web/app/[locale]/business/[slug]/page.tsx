@@ -4,6 +4,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Globe, Mail, Phone, MapPin, Store, Boxes } from "lucide-react";
 
 import { getPublicBusinessProfile } from "@/lib/company/public-profile";
+import { BRAND_NAME, buildPageMetadata } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -21,20 +22,19 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const view = await getPublicBusinessProfile(slug);
-  if (!view) return { title: "labourmarket.ai" };
+  if (!view) return { title: BRAND_NAME, robots: { index: false, follow: false } };
   const { profile } = view;
   const desc = profile.tagline ?? profile.description ?? undefined;
-  return {
-    title: `${profile.displayName} — labourmarket.ai`,
+  // Canonical + hreflang + brand share card from the one builder every other
+  // public page uses (2026-09-19: this page declared none of them).
+  return buildPageMetadata({
+    locale,
+    path: `/business/${slug}`,
+    title: profile.displayName,
     description: desc?.slice(0, 160),
-    openGraph: {
-      title: profile.displayName,
-      description: desc?.slice(0, 160),
-      type: "profile",
-    },
-  };
+  });
 }
 
 export default async function BusinessProfilePage({

@@ -28,7 +28,7 @@ const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
 /** Locales that really route (lib/i18n/config.ts `activeLocales`). */
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 /**
  * Pages whose namespace usage is simple enough to verify statically: ONE
@@ -36,7 +36,7 @@ const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
  * Deliberately a short list — a page with several namespaces or computed
  * keys needs its own assertion, not a silently-skipped scan.
  */
-const PAGES: readonly { file: string; binding: string; namespace: string }[] = [
+const PAGES: readonly { file: string; binding: string; namespace: string; hook?: true }[] = [
   {
     file: "app/[locale]/dashboard/network/page.tsx",
     binding: "t",
@@ -46,6 +46,21 @@ const PAGES: readonly { file: string; binding: string; namespace: string }[] = [
     file: "app/[locale]/dashboard/reports/page.tsx",
     binding: "t",
     namespace: "reports",
+  },
+  {
+    // A section of the company workspace, not a route — see the section's own
+    // header. The keys it asks for must still all exist.
+    file: "components/app/evidence-import-section.tsx",
+    binding: "t",
+    namespace: "evidenceImport",
+  },
+  {
+    // The historical workspace the reconstruction renders — a Client
+    // Component, so the namespace is bound with the hook, not the server call.
+    file: "components/app/historical/historical-workspace.tsx",
+    binding: "t",
+    namespace: "evidenceImport.reconstruction",
+    hook: true,
   },
 ];
 
@@ -82,7 +97,9 @@ describe("every key a dashboard page asks for resolves in every active locale", 
       // must be corrected rather than quietly doing nothing.
       expect(source).toMatch(
         new RegExp(
-          `const ${page.binding} = await getTranslations\\("${page.namespace}"\\)`,
+          page.hook
+            ? `const ${page.binding} = useTranslations\\("${page.namespace}"\\)`
+            : `const ${page.binding} = await getTranslations\\("${page.namespace}"\\)`,
         ),
       );
       expect(keys.length).toBeGreaterThan(5);

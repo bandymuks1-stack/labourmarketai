@@ -3,7 +3,7 @@
  *
  * The chain may now run in Stripe TEST mode (env-gated), but LIVE must remain
  * impossible. Fails the build if:
- *   - the static default PAYMENTS_ENABLED const is flipped true (off by default);
+ *   - billing resolves ON with no env (off by default; there is no static switch);
  *   - any source OUTSIDE the allowlisted adapter imports the Stripe SDK;
  *   - a LIVE key literal (sk_live_/pk_live_/rk_live_<chars>) appears in source;
  *   - the config resolver would ever return an ACTIVE provider for live mode or
@@ -15,7 +15,6 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { PAYMENTS_ENABLED } from "../billing/plans";
 import { resolveBillingConfig } from "../billing/config-core";
 
 const here = resolve(fileURLToPath(import.meta.url), "..");
@@ -46,8 +45,14 @@ const SDK_IMPORT =
 const LIVE_KEY_LITERAL = /\b(?:sk|pk|rk)_live_[A-Za-z0-9]{6,}/;
 
 describe("no live payments (Stripe test-mode guard)", () => {
-  it("PAYMENTS_ENABLED static default is false (off by default)", () => {
-    expect(PAYMENTS_ENABLED).toBe(false);
+  it("billing is OFF by default: an unconfigured environment resolves to disabled, and plans.ts carries no payments switch", () => {
+    const c = resolveBillingConfig({
+      paymentsEnabled: undefined, provider: undefined, mode: undefined,
+      secretKey: undefined, webhookSecret: undefined, publishableKey: undefined,
+    });
+    expect(c.state).toBe("disabled");
+    expect(c.paymentsEnabled).toBe(false);
+    expect(readFileSync(join(webRoot, "lib/billing/plans.ts"), "utf8")).not.toMatch(/export const PAYMENTS_ENABLED/);
   });
 
   it("Stripe SDK is imported ONLY in the allowlisted adapter (production code)", () => {
@@ -108,5 +113,57 @@ describe("no live payments (Stripe test-mode guard)", () => {
     expect(c.state).toBe("disabled");
     expect(c.paymentsEnabled).toBe(false);
     expect(c.reason).toBe("payments_disabled");
+  });
+});
+
+// ─── D3 (2026-09-02): live is reachable ONLY through the owner-armed path ───
+// Every assertion above still holds: with no `liveActivation` input a live
+// signal is blocked exactly as before. What is new is the NAMED path that
+// activates it — and the proof that production cannot take it from env alone.
+describe("live activation is owner-armed, never implicit", () => {
+  const LIVE_SK = ["sk", "live", "ABC123456"].join("_");
+  const LIVE_PK = ["pk", "live", "ABC123456"].join("_");
+  const base = {
+    paymentsEnabled: "true", provider: "stripe", mode: "live",
+    secretKey: LIVE_SK, webhookSecret: "whsec_abc", publishableKey: LIVE_PK,
+  };
+
+  it("without the activation input every live signal is blocked (all callers before D3)", () => {
+    expect(resolveBillingConfig(base).state).toBe("stripe_live_blocked");
+  });
+
+  it("the token alone does not activate: the price table must be owner-confirmed in code", () => {
+    const c = resolveBillingConfig({
+      ...base,
+      liveActivation: { pricingConfirmed: false, token: "approved-by-owner" },
+    });
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.paymentsEnabled).toBe(false);
+  });
+
+  it("PRICING_READINESS_STATE is owner-confirmed (approval 2026-09-05) — live still needs the env token + complete live keys", async () => {
+    const { PRICING_READINESS_STATE } = await import("../billing/readiness");
+    expect(PRICING_READINESS_STATE).toBe("owner_confirmed");
+    const c = resolveBillingConfig({
+      ...base,
+      publishableKey: undefined,
+      liveActivation: { pricingConfirmed: true, token: "approved-by-owner" },
+    });
+    // confirmed table + token, but an incomplete live key set → still blocked
+    // (the keys are the owner's env action)
+    expect(c.state).toBe("stripe_live_blocked");
+    expect(c.reason).toBe("live_keys_incomplete");
+  });
+
+  it("the resolver's live branch names every requirement", () => {
+    const src = readFileSync(join(webRoot, "lib/billing/config-core.ts"), "utf8");
+    for (const needle of [
+      "LIVE_ACTIVATION_TOKEN",
+      "pricingConfirmed",
+      "live_keys_incomplete",
+      "missing_webhook_secret",
+    ]) {
+      expect(src).toContain(needle);
+    }
   });
 });

@@ -19,8 +19,11 @@
  *   - ADMIN     — `profile_id` is set server-side from `auth.getUser()` and
  *                 matched against the current admin set. Unspoofable by a
  *                 client, and retroactive: historical rows classify too.
- *   - PREVIEW   — `metadata.preview_host`, now stamped by BOTH emitters from
- *                 one shared host rule (see lib/telemetry/production-host.ts).
+ *   - PREVIEW   — any NON-PRODUCTION origin: `metadata.preview_host` (stamped
+ *                 by both emitters from one shared host rule) OR the
+ *                 server-stamped `metadata.deploy_env` ≠ 'production'
+ *                 (2026-09-20; see lib/telemetry/production-host.ts, which
+ *                 also REFUSES writes from a local host outright).
  *   - IDENTIFIED_USER — `profile_id` set and not an admin.
  *
  * NOT DETERMINISTIC, and deliberately left UNKNOWN:
@@ -43,6 +46,8 @@
  * funnel rates compares two events of the same authentication profile. That
  * property is asserted by a test, not assumed.
  */
+
+import { isNonProductionOrigin } from "@/lib/telemetry/production-host";
 
 /** Who or what produced an event. */
 export const ANALYTICS_POPULATIONS = [
@@ -69,7 +74,12 @@ export function classifyEvent(
   event: ClassifiableEvent,
   adminProfileIds: ReadonlySet<string>,
 ): AnalyticsPopulation {
-  if (event.metadata?.["preview_host"] === true) return "preview";
+  // "preview" is the NON-PRODUCTION population: the client's `preview_host`
+  // marker OR the server-stamped `deploy_env` (2026-09-20) saying the row
+  // was written by a preview deployment or a non-Vercel (local) process.
+  // Rows older than the stamp carry no `deploy_env` and are judged by the
+  // client marker alone — exactly as before.
+  if (isNonProductionOrigin(event.metadata)) return "preview";
   const pid = typeof event.profileId === "string" ? event.profileId : null;
   if (!pid) return "anonymous";
   return adminProfileIds.has(pid) ? "admin" : "identified_user";
@@ -117,7 +127,7 @@ export function countsForBusinessFunnel(
  * Reason 2 stops accruing from `MEASUREMENT_VALID_FROM`. Reason 1 does not.
  */
 export const HISTORICAL_CONTAMINATION_UNKNOWN =
-  "Internal browsing while logged out cannot be distinguished from a real visitor, so no period can be certified free of it. Server-emitted events also carried no preview marker before the shared host rule shipped.";
+  "Internal browsing while logged out cannot be distinguished from a real visitor, so no period can be certified free of it. Server-emitted events also carried no preview marker before the shared host rule shipped, and rows written before 2026-09-20 carry no server-side origin stamp (app_version is null), so a local build's rows from that time are excluded only where the browser marked them.";
 
 /**
  * The authentication profile of each event that feeds a funnel rate. Used by

@@ -124,7 +124,17 @@ describe("§7.1 the full agreed field set exists in the model and renders", () =
 });
 
 describe("§7.2 every agreed source is really composed", () => {
-  it("the source catalogue is the agreed eight", () => {
+  it("the source catalogue is the agreed ten (nine + plan, CAL-8)", () => {
+    // CAL-8 (2026-10-01): `plan` = work_plan_entries — the organization's one-off
+    // planned work window for its own people. A FORECAST; the journal stays the
+    // fact. Same pipeline, same mapper shape, no parallel calendar.
+    // A source joins this list by a product decision, never by accident —
+    // that is what this pin is for, and it fired correctly when `trip` was
+    // added on 2026-09-14. Recorded rather than relaxed: an APPROVED or
+    // COMPLETED business trip is the person being somewhere else, the one
+    // dated personal commitment the calendar did not draw while the
+    // employer-side capacity read already counted it. Same pipeline, same
+    // mapper shape, same conflict detection — no parallel trip calendar.
     expect([...PLANNING_SOURCE_TYPES].sort()).toEqual(
       [
         "absence",
@@ -132,9 +142,11 @@ describe("§7.2 every agreed source is really composed", () => {
         "finance",
         "invitation",
         "journal",
+        "plan",
         "project",
         "stage",
         "task",
+        "trip",
       ].sort(),
     );
   });

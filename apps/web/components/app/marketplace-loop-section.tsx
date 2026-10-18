@@ -22,9 +22,11 @@ import {
   PLAYER_IDENTITY_FALLBACK_SURFACE,
 } from "@/lib/identity/player-identity";
 import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
+import { PARTNERSHIP_CATEGORY } from "@/lib/services/service-offerings-shared";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { EmptyState } from "./empty-state";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
 
 /**
  * P0 Marketplace loop (Phase 1) — one compact surface: discover active offerings
@@ -42,6 +44,11 @@ export type MarketplaceLabels = {
   discoverEmpty: string;
   request: string;
   requested: string;
+  /** Badge + request label for a "looking for partners" offering. */
+  partnershipBadge: string;
+  partnershipRequest: string;
+  /** Placeholder of the optional first message sent WITH a request. */
+  requestMessagePlaceholder: string;
   remoteBadge: string;
   outgoingHeading: string;
   outgoingEmpty: string;
@@ -50,6 +57,33 @@ export type MarketplaceLabels = {
   /** Empty discover list is not a dead end — points to /dashboard/services
    *  (activate your own services to join the loop). Audit finding F-E2. */
   discoverEmptyCta: string;
+  /** Honest empty states (window 6, lane G): each empty list says WHY it is
+   *  empty and what the next useful step is — only steps that really exist
+   *  (no "we will notify you" — that path does not exist yet). */
+  discoverEmptyWhy: string;
+  discoverEmptyNext: string;
+  /** A filter that matched nothing is a different truth from "nobody offers
+   *  anything yet" — and its way forward is clearing the filter. */
+  discoverFilteredEmpty: string;
+  discoverFilteredEmptyCta: string;
+  outgoingEmptyWhy: string;
+  /** Resolved on the server from the caller's OWN active-offering count:
+   *  "you have no active service, so no request can arrive" vs "your N
+   *  active services are listed; nobody has asked yet". */
+  incomingEmptyWhy: string;
+  /** Present only when the caller has NO active offering — the one real
+   *  next step (activate one) — otherwise null (no fake CTA). */
+  incomingEmptyCta: string | null;
+  /** Country / category discovery filter (G-E1). */
+  filterCountry: string;
+  filterCategory: string;
+  filterApply: string;
+  filterClear: string;
+  /** Optional provider note sent with accept/decline — the requester reads it
+   *  on their side ("Paslaugos teikėjo pastaba"). The RPC always took it; the
+   *  screen never offered it (window 6 readback finding). */
+  responseNoteLabel: string;
+  responseNotePlaceholder: string;
   accept: string;
   decline: string;
   withdraw: string;
@@ -82,19 +116,16 @@ function isoDay(ts: string | null): string | null {
   return /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null;
 }
 
-const STATUS_RING: Record<RequestStatus, string> = {
-  sent: "border-ink-500 bg-ink-800/40 text-text-muted",
-  accepted: "border-state-success/40 bg-state-success/5 text-state-success",
-  declined: "border-state-warning/40 bg-state-warning/5 text-state-warning",
-  withdrawn: "border-ink-500 bg-ink-800/40 text-text-muted",
+/** Request status -> the one StatusChip pattern (word + shape). */
+const STATUS_VARIANT: Record<RequestStatus, StatusChipVariant> = {
+  sent: "neutral",
+  accepted: "success",
+  declined: "attention",
+  withdrawn: "neutral",
 };
 
-function StatusChip({ status, label }: { status: RequestStatus; label: string }) {
-  return (
-    <span className={`inline-block rounded-full border px-2 py-0.5 text-xs ${STATUS_RING[status]}`}>
-      {label}
-    </span>
-  );
+function RequestStatusChip({ status, label }: { status: RequestStatus; label: string }) {
+  return <StatusChip variant={STATUS_VARIANT[status]}>{label}</StatusChip>;
 }
 
 /**
@@ -185,6 +216,7 @@ function RequestAgainButton({
         value={message}
         maxLength={2000}
         rows={3}
+        aria-label={labels.requestAgainNote}
         onChange={(e) => setMessage(e.target.value)}
         className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
       />
@@ -227,27 +259,36 @@ export function MarketplaceLoopSection({
   incoming,
   needsMigration,
   labels,
+  filter = { country: "", category: "", active: false },
 }: {
   discoverable: DiscoverableOfferingRow[];
   outgoing: OutgoingRequestRow[];
   incoming: IncomingRequestRow[];
   needsMigration: boolean;
   labels: MarketplaceLabels;
+  /** The discovery filter as applied by the page (already normalized) —
+   *  rendered back into the plain GET form so the URL stays the truth. */
+  filter?: { country: string; category: string; active: boolean };
 }) {
   const router = useRouter();
   const locale = useLocale();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // Optional provider note per incoming request (sent with accept/decline).
+  const [noteById, setNoteById] = useState<Record<string, string>>({});
+  // Optional first message per discovered offering, sent WITH the request —
+  // the existing request/accept model carries it; the provider sees it first.
+  const [draftById, setDraftById] = useState<Record<string, string>>({});
 
   // Next step for an ACCEPTED request — opens (or reopens) the buyer↔provider
   // conversation; the granting fact is re-verified server-side by the action.
-  const MessageCta = ({ requestId, testid }: { requestId: string; testid: string }) => (
+  const MessageCta = ({ requestId, testId }: { requestId: string; testId: string }) => (
     <form action={openServiceRequestConversationAction}>
       <input type="hidden" name="requestId" value={requestId} />
       <input type="hidden" name="locale" value={locale} />
       <button
         type="submit"
-        data-testid={testid}
+        data-testid={testId}
         className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-50"
       >
         <MessageSquare className="h-3 w-3" /> {labels.messageCta}
@@ -301,25 +342,96 @@ export function MarketplaceLoopSection({
       {/* 1 — Discover active offerings (find / request a service) */}
       <section className="space-y-2">
         <h3 className="text-sm font-medium text-text-secondary">{labels.discoverHeading}</h3>
+        {/* Discovery filter (G-E1): a plain GET form — the URL carries the
+            filter, the server applies the exact country equality (bounded,
+            indexable) and the in-memory category match over the page. Shown
+            whenever there is something to narrow OR a filter is already on
+            (so it can be cleared); hidden on a truly empty market. */}
+        {(discoverable.length > 0 || filter.active) && (
+          <form
+            method="get"
+            data-testid="marketplace-discover-filter"
+            className="flex flex-wrap items-end gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-2.5"
+          >
+            <label className="flex min-w-0 flex-col gap-1 text-meta text-text-muted">
+              {labels.filterCountry}
+              <input
+                name="country"
+                defaultValue={filter.country}
+                maxLength={2}
+                placeholder="LT"
+                autoCapitalize="characters"
+                data-testid="marketplace-filter-country"
+                className="w-20 rounded-md border border-ink-500 bg-ink-900 px-2 py-1.5 text-xs uppercase text-text-primary"
+              />
+            </label>
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-meta text-text-muted">
+              {labels.filterCategory}
+              <input
+                name="category"
+                defaultValue={filter.category}
+                maxLength={80}
+                data-testid="marketplace-filter-category"
+                className="w-full min-w-32 rounded-md border border-ink-500 bg-ink-900 px-2 py-1.5 text-xs text-text-primary"
+              />
+            </label>
+            <button
+              type="submit"
+              data-testid="marketplace-filter-apply"
+              className="inline-flex min-h-11 items-center rounded-md border border-brand-blue/40 px-3 text-xs text-brand-blue hover:border-brand-blue"
+            >
+              {labels.filterApply}
+            </button>
+            {filter.active && (
+              <a
+                href="?"
+                data-testid="marketplace-filter-clear"
+                className="inline-flex min-h-11 items-center px-2 text-xs text-text-muted hover:text-text-secondary"
+              >
+                {labels.filterClear}
+              </a>
+            )}
+          </form>
+        )}
         {discoverable.length === 0 ? (
-          // Shared EmptyState pattern (audit PR8) — renders the same
-          // data-testid="marketplace-discover-empty" (+ derived "-cta").
-          <EmptyState
-            testId="marketplace-discover-empty"
-            title={labels.discoverEmpty}
-            cta={{
-              label: labels.discoverEmptyCta,
-              href: "/dashboard/services",
-              variant: "secondary",
-            }}
-          />
+          filter.active ? (
+            // A filter that matched nothing: say so, offer the one real way
+            // forward (clear it) — never "nobody offers anything".
+            <EmptyState
+              testId="marketplace-discover-filtered-empty"
+              title={labels.discoverFilteredEmpty}
+              cta={{
+                label: labels.discoverFilteredEmptyCta,
+                href: "/dashboard/service-requests",
+                variant: "secondary",
+              }}
+            />
+          ) : (
+            // Shared EmptyState pattern (audit PR8) — renders the same
+            // data-testid="marketplace-discover-empty" (+ derived "-cta").
+            // WHY it is empty + the next step that really exists (activate
+            // your own service). No notification promise — that path is not
+            // live (window 6 honesty rule).
+            <EmptyState
+              testId="marketplace-discover-empty"
+              title={labels.discoverEmpty}
+              why={labels.discoverEmptyWhy}
+              next={labels.discoverEmptyNext}
+              cta={{
+                label: labels.discoverEmptyCta,
+                href: "/dashboard/services",
+                variant: "secondary",
+              }}
+            />
+          )
         ) : (
           <ul className="space-y-2">
             {discoverable.map((o) => (
               <li
                 key={o.id}
+                id={`offering-${o.id}`}
                 data-testid="marketplace-offer-row"
-                className="flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
+                className="scroll-mt-20 flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-text-primary">{o.title}</p>
@@ -327,10 +439,24 @@ export function MarketplaceLoopSection({
                     <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">{o.description}</p>
                   )}
                   <p className="mt-1 text-xs text-text-muted">
-                    {[o.categorySlug, o.locationCountry, o.remote ? labels.remoteBadge : null, o.rateText]
+                    {[o.categorySlug === PARTNERSHIP_CATEGORY ? labels.partnershipBadge : o.categorySlug, o.locationCountry, o.remote ? labels.remoteBadge : null, o.rateText]
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
+                  {!openRequestOfferingIds.has(o.id) && (
+                    <textarea
+                      rows={2}
+                      maxLength={2000}
+                      value={draftById[o.id] ?? ""}
+                      onChange={(e) =>
+                        setDraftById((d) => ({ ...d, [o.id]: e.target.value }))
+                      }
+                      placeholder={labels.requestMessagePlaceholder}
+                      aria-label={labels.requestMessagePlaceholder}
+                      data-testid="marketplace-offer-message"
+                      className="mt-2 w-full rounded-md border border-ink-500 bg-ink-900/40 px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted"
+                    />
+                  )}
                 </div>
                 {openRequestOfferingIds.has(o.id) ? (
                   <span
@@ -343,12 +469,13 @@ export function MarketplaceLoopSection({
                   <button
                     type="button"
                     disabled={pending}
+                    data-testid="marketplace-offer-request"
                     onClick={() => {
                       trackFunnel(FUNNEL_EVENTS.serviceRequestStarted, {
                         surface: "marketplace",
                       });
                       run(
-                        () => requestServiceOffering(o.id),
+                        () => requestServiceOffering(o.id, draftById[o.id] ?? null),
                         () =>
                           trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
                             surface: "marketplace",
@@ -363,7 +490,7 @@ export function MarketplaceLoopSection({
                     }}
                     className="inline-flex shrink-0 items-center gap-1 rounded-md border border-brand-blue/40 px-2 py-1 text-xs text-brand-blue disabled:opacity-50"
                   >
-                    <Send className="h-3 w-3" /> {labels.request}
+                    <Send className="h-3 w-3" /> {o.categorySlug === PARTNERSHIP_CATEGORY ? labels.partnershipRequest : labels.request}
                   </button>
                 )}
               </li>
@@ -381,6 +508,7 @@ export function MarketplaceLoopSection({
           <EmptyState
             testId="marketplace-outgoing-empty"
             title={labels.outgoingEmpty}
+            why={labels.outgoingEmptyWhy}
           />
         ) : (
           <ul className="space-y-2">
@@ -393,7 +521,7 @@ export function MarketplaceLoopSection({
                 <div className="min-w-0 space-y-1">
                   <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <StatusChip status={r.status} label={labels.status[r.status]} />
+                    <RequestStatusChip status={r.status} label={labels.status[r.status]} />
                     {isoDay(r.respondedAt) && (
                       <span
                         data-testid="marketplace-outgoing-responded"
@@ -424,7 +552,7 @@ export function MarketplaceLoopSection({
                   </button>
                 )}
                 {r.status === "accepted" && (
-                  <MessageCta requestId={r.id} testid="marketplace-outgoing-message-cta" />
+                  <MessageCta requestId={r.id} testId="marketplace-outgoing-message-cta" />
                 )}
                 {/* Repeat action (PR 6b): a concluded request is not a dead
                     end — send a NEW request for the same offering (previous
@@ -453,6 +581,16 @@ export function MarketplaceLoopSection({
           <EmptyState
             testId="marketplace-incoming-empty"
             title={labels.incomingEmpty}
+            why={labels.incomingEmptyWhy}
+            cta={
+              labels.incomingEmptyCta
+                ? {
+                    label: labels.incomingEmptyCta,
+                    href: "/dashboard/services",
+                    variant: "secondary",
+                  }
+                : undefined
+            }
           />
         ) : (
           <ul className="space-y-2">
@@ -468,7 +606,9 @@ export function MarketplaceLoopSection({
               <li
                 key={r.id}
                 data-testid="marketplace-incoming-row"
-                className="flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
+                // Stacks on a phone (the note + decision block needs the full
+                // width at 390 px), side by side from `sm` up.
+                className="flex flex-col gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3 sm:flex-row sm:items-start sm:justify-between"
               >
                 <div className="min-w-0 space-y-1.5">
                   {/* Requester identity — compact request-provider variant of the
@@ -493,7 +633,7 @@ export function MarketplaceLoopSection({
                     </span>
                   </div>
                   <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
-                  <StatusChip status={r.status} label={labels.status[r.status]} />
+                  <RequestStatusChip status={r.status} label={labels.status[r.status]} />
                   {r.message && (
                     <p
                       data-testid="marketplace-incoming-message"
@@ -505,27 +645,53 @@ export function MarketplaceLoopSection({
                   )}
                 </div>
                 {r.status === "sent" && (
-                  <div className="flex shrink-0 items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={pending}
-                      onClick={() => run(() => respondToRequest(r.id, "accepted"))}
-                      className="inline-flex min-h-11 items-center gap-1 rounded-md border border-state-success/40 px-3 py-1.5 text-xs text-state-success disabled:opacity-50"
-                    >
-                      <Check className="h-3 w-3" /> {labels.accept}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={pending}
-                      onClick={() => run(() => respondToRequest(r.id, "declined"))}
-                      className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-muted disabled:opacity-50"
-                    >
-                      <X className="h-3 w-3" /> {labels.decline}
-                    </button>
+                  <div className="flex w-full max-w-xs shrink-0 flex-col gap-2 sm:w-auto">
+                    {/* Optional note travels with the decision (the RPC's
+                        p_note) and is read back by the requester as
+                        "Paslaugos teikėjo pastaba" — a decline with a reason
+                        is not a dead end. */}
+                    <label className="flex flex-col gap-1 text-meta text-text-muted">
+                      {labels.responseNoteLabel}
+                      <textarea
+                        value={noteById[r.id] ?? ""}
+                        maxLength={2000}
+                        rows={2}
+                        placeholder={labels.responseNotePlaceholder}
+                        onChange={(e) =>
+                          setNoteById((cur) => ({ ...cur, [r.id]: e.target.value }))
+                        }
+                        data-testid="marketplace-incoming-note"
+                        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+                      />
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={pending}
+                        data-testid="marketplace-incoming-accept"
+                        onClick={() =>
+                          run(() => respondToRequest(r.id, "accepted", noteById[r.id] ?? null))
+                        }
+                        className="inline-flex min-h-11 items-center gap-1 rounded-md border border-state-success/40 px-3 py-1.5 text-xs text-state-success disabled:opacity-50"
+                      >
+                        <Check className="h-3 w-3" /> {labels.accept}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={pending}
+                        data-testid="marketplace-incoming-decline"
+                        onClick={() =>
+                          run(() => respondToRequest(r.id, "declined", noteById[r.id] ?? null))
+                        }
+                        className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-muted disabled:opacity-50"
+                      >
+                        <X className="h-3 w-3" /> {labels.decline}
+                      </button>
+                    </div>
                   </div>
                 )}
                 {r.status === "accepted" && (
-                  <MessageCta requestId={r.id} testid="marketplace-incoming-message-cta" />
+                  <MessageCta requestId={r.id} testId="marketplace-incoming-message-cta" />
                 )}
               </li>
               );
@@ -535,7 +701,7 @@ export function MarketplaceLoopSection({
       </section>
 
       {error && (
-        <p role="alert" className="text-sm text-state-warning">
+        <p role="alert" className="text-sm text-state-warning" data-testid="marketplace-loop-error">
           {error}
         </p>
       )}

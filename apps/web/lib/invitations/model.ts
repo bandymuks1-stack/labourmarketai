@@ -11,6 +11,11 @@ export const INVITATION_TYPES = [
   "collaborate_partner",
   "join_project",
   "invite_company",
+  // Universal invitation/referral network v1 (20260917120000): THE EMPLOYER
+  // FOUND THE PERSON. Targets the canonical demand object (customer_requests)
+  // and never a vacancy copy. Acceptance records EMPLOYER_INVITED_TO_TARGET
+  // (an interest row whose snapshot names its basis), never a system match.
+  "invite_to_demand",
 ] as const;
 export type InvitationType = (typeof INVITATION_TYPES)[number];
 
@@ -25,6 +30,42 @@ export const ORG_INVITATION_TYPES: readonly InvitationType[] = [
   "join_as_employee",
   "collaborate_partner",
 ];
+
+/** Types whose target is a demand (customer_requests) — the reverse-discovery
+ *  path: employer finds person, employer invites, person decides. */
+export const DEMAND_INVITATION_TYPES: readonly InvitationType[] = ["invite_to_demand"];
+
+/**
+ * MULTI-USE BOUNDS — mirrors `create_invitation_v2`, which is the enforcement
+ * point. A campaign link belongs to a context someone is answerable for (an
+ * organization, a project, a need): up to 500 seats. A plain "invite a
+ * colleague" link is crew-sized: up to 20. 1 = single-use, the default and
+ * every pre-existing invitation.
+ */
+export const MAX_CAMPAIGN_USES_WITH_CONTEXT = 500;
+export const MAX_CAMPAIGN_USES_WITHOUT_CONTEXT = 20;
+export const MAX_INVITATION_EXPIRY_DAYS = 90;
+export const DEFAULT_INVITATION_EXPIRY_DAYS = 14;
+
+/** Whether `type` carries a context an organization/project/need owner is
+ *  answerable for — the condition for a larger campaign. Pure. */
+export function invitationTypeHasContext(type: InvitationType | string): boolean {
+  return (
+    (ORG_INVITATION_TYPES as readonly string[]).includes(type) ||
+    type === "join_project" ||
+    (DEMAND_INVITATION_TYPES as readonly string[]).includes(type)
+  );
+}
+
+/** The seat count a sender may ask for, clamped to what the RPC will accept
+ *  for this type. Never widens; a forged larger value is refused server-side. */
+export function clampCampaignUses(type: InvitationType | string, requested: number): number {
+  const max = invitationTypeHasContext(type)
+    ? MAX_CAMPAIGN_USES_WITH_CONTEXT
+    : MAX_CAMPAIGN_USES_WITHOUT_CONTEXT;
+  if (!Number.isFinite(requested)) return 1;
+  return Math.min(Math.max(1, Math.floor(requested)), max);
+}
 
 export const INVITATION_STATUSES = [
   "pending",
@@ -88,13 +129,110 @@ export function buildInviteLink(
   return `${origin.replace(/\/+$/, "")}/${locale}/invite/${token}`;
 }
 
+/* ────────────────────────────────────────────────────────────────────────────
+ * AGENCY → CLIENT CONNECTION INVITATION (2026-09-24)
+ *
+ * `create_agency_client_connection_v1` only INSERTS a connection row keyed on
+ * the client's e-mail; nothing ever reached that e-mail. Delivery now rides
+ * on THIS primitive: beside the connection the agency creates an
+ * `invite_company` invitation to the same address, and the token link the
+ * primitive already mints is what the agency copies or shares.
+ *
+ * WHY `invite_company` AND WHY `proposed_role` MARKS IT. `invite_company` is
+ * the one type whose acceptance creates NO relationship (no engagement row
+ * on the client's CV, no project seat, no interest signal) — the consent
+ * that matters stays `accept_agency_client_connection_v1`, the bridge's own
+ * RPC. The create RPC exposes no free foreign-id field (`declared_context`
+ * is written only by the external-referral door, `target_request_id` is a
+ * demand FK), so the invitation carries no connection id: the connection is
+ * DERIVED on the landing — same inviter, same addressee — and the kind is
+ * marked on `proposed_role`, the role the agency proposes for the invited
+ * company. The marker is a closed slug, localized on the invite page, never
+ * rendered raw.
+ * ──────────────────────────────────────────────────────────────────────── */
+export const AGENCY_CLIENT_PROPOSED_ROLE = "agency_client";
+
+/** True for the invitation the agency bridge creates beside a connection. */
+export function isAgencyClientInvitation(input: {
+  readonly invitationType: string | null | undefined;
+  readonly proposedRole: string | null | undefined;
+}): boolean {
+  return (
+    input.invitationType === "invite_company" &&
+    (input.proposedRole ?? "").trim() === AGENCY_CLIENT_PROPOSED_ROLE
+  );
+}
+
+/**
+ * The addressee, shown to a signed-in token holder whose own e-mail differs:
+ * first character of the local part, the domain, nothing else
+ * (`j***@example.com`). Null for anything that is not an address, so a
+ * malformed stored value never renders as one. Pure.
+ */
+export function maskEmail(email: string | null | undefined): string | null {
+  const value = (email ?? "").trim().toLowerCase();
+  const at = value.indexOf("@");
+  if (at < 1 || at === value.length - 1) return null;
+  const local = value.slice(0, at);
+  const domain = value.slice(at + 1);
+  return `${local[0]}***@${domain}`;
+}
+
+/** The company-setup entry — the Activity Setup Hub's company door, open to
+ *  every signed-in person (`/dashboard/company/*` is role-gated; this is not). */
+export const COMPANY_SETUP_ENTRY = "/dashboard/start/company";
+
+/** The closed `?notice=` token the setup entry reads after an agency-client
+ *  acceptance by a person who holds no company role yet. Internal: localized
+ *  on the page, never rendered raw. */
+export const AGENCY_CONNECTION_PENDING_NOTICE = "agency_connection_pending";
+
+/**
+ * Where an ACCEPTED agency-client invitation lands the person (review round
+ * 2, 2026-09-24). The partners door is gated on the `company` role
+ * (`requireRoleOrRedirect(locale, "company")`): a person who accepted with no
+ * company workspace used to be sent there and bounced to
+ * `/dashboard?notice=needs_company_role` — a refusal, with the pending
+ * connection never named. Such a person lands on the company-setup entry
+ * with a notice that names it instead. `null` = the role read never answered:
+ * an unknown is NEVER narrowed into "no role", so the door keeps deciding
+ * (its own gate retries and answers honestly). Pure.
+ */
+export function agencyClientLanding(
+  holdsCompanyRole: boolean | null,
+): { readonly path: string; readonly notice: string } {
+  if (holdsCompanyRole === false) {
+    return { path: COMPANY_SETUP_ENTRY, notice: AGENCY_CONNECTION_PENDING_NOTICE };
+  }
+  return { path: "/dashboard/company/partners", notice: "invitation_accepted" };
+}
+
 /** Where acceptance lands the person — the exact real context. */
 export function acceptedDestination(input: {
   invitationType: InvitationType | string;
   projectId?: string | null;
+  /** The invitation's stored `proposed_role`; only the agency-client marker
+   *  changes the destination (the partners door, where the connection is
+   *  confirmed with the person's own company). */
+  proposedRole?: string | null;
 }): string {
   if (input.invitationType === "join_project" && input.projectId) {
     return `/dashboard/projects/${input.projectId}`;
+  }
+  // The agency's connection request waits on the partners door — the ONE
+  // consent path (`accept_agency_client_connection_v1`) lives there.
+  if (
+    isAgencyClientInvitation({
+      invitationType: input.invitationType,
+      proposedRole: input.proposedRole,
+    })
+  ) {
+    return "/dashboard/company/partners";
+  }
+  // The person said "interested" to a specific need — the board's own
+  // interest list is where that answer already lives.
+  if (input.invitationType === "invite_to_demand") {
+    return "/dashboard/opportunities";
   }
   if (
     (ORG_INVITATION_TYPES as readonly string[]).includes(input.invitationType)
@@ -167,6 +305,7 @@ export const RELATIONSHIP_INVITE_CHOICES: readonly RelationshipInviteChoice[] = 
   { slug: "employee", requiresOrganizationRole: null },
   { slug: "student", requiresOrganizationRole: "training_provider" },
   { slug: "volunteer", requiresOrganizationRole: null },
+  { slug: "intern", requiresOrganizationRole: null },
   { slug: "collaborator", requiresOrganizationRole: null },
   { slug: "freelancer", requiresOrganizationRole: null },
   { slug: "consultant", requiresOrganizationRole: null },
@@ -190,4 +329,134 @@ export function relationshipChoiceBlocked(
     choice.requiresOrganizationRole !== null &&
     !capabilities.includes(choice.requiresOrganizationRole)
   );
+}
+
+/**
+ * WHICH invitation addressed to me — the argument the matching canonical
+ * accept takes (owner contract §4D: the person answers from the attention
+ * item over the ONE dispatcher). `invitation` → `acceptInvitationByIdAction`
+ * (`accept_invitation_by_id_v1`, by id); the roster kinds → the dashboard
+ * card's own accept action (`accept_{company,agency}_worker_invitation`, by
+ * the company / agency id — exactly what that card submits). Pure so the
+ * server read, the zod schema and the chat card share one definition.
+ */
+export type InvitationRef =
+  | { readonly source: "invitation"; readonly invitationId: string }
+  | { readonly source: "company_roster"; readonly orgId: string }
+  | { readonly source: "agency_roster"; readonly orgId: string };
+
+/** How many invitations the attention surfaces show at once (the real total is
+ *  reported beside them). */
+export const INVITATIONS_ATTENTION_LIMIT = 5;
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * REFERRAL PROVENANCE + DECLARED CONTEXT (universal network v1)
+ *
+ * What an APPROVED EXTERNAL SOURCE may declare about a person, as stored on
+ * `invitations.declared_context`. Declared input, never evidence: the person
+ * reviews every item (accept / reject / correct) and only the profile paths
+ * that already exist may turn any of it into a profile fact.
+ * ──────────────────────────────────────────────────────────────────────── */
+export type DeclaredContextV1 = {
+  readonly v: 1;
+  readonly subjectType?: "INDIVIDUAL_WORKER" | "SPECIALIST" | "TEAM" | "BRIGADE";
+  readonly professions: readonly { readonly id?: string; readonly raw?: string }[];
+  readonly sectors: readonly string[];
+  readonly skills: readonly string[];
+  readonly yearsClaimed?: number;
+  readonly languages: readonly string[];
+  readonly residenceCountry?: string;
+  /** The town or city — a separate fact from the country (2026-10-13). */
+  readonly city?: string;
+  /** READINESS to work, as the source declared it (e.g. AVAILABLE_NOW). */
+  readonly availability?: string;
+  /** The person's declared work situation — never a verified right to work anywhere. */
+  readonly workStatus?: string;
+  /** Whether accommodation must be arranged. */
+  readonly accommodationNeed?: string;
+  readonly destinations: readonly string[];
+  readonly mobilityScope?: "LISTED" | "EU_WIDE";
+  readonly freeText?: string;
+};
+
+/** One reviewable line of a declared context, keyed so a review decision can
+ *  name it (`professions:0`, `skills:3`). Pure. */
+export type DeclaredContextItem = {
+  readonly key: string;
+  readonly group: "professions" | "sectors" | "skills" | "languages" | "destinations";
+  readonly label: string;
+};
+
+export const REVIEW_DECISIONS = ["accepted", "rejected", "corrected"] as const;
+export type ReviewDecision = (typeof REVIEW_DECISIONS)[number];
+
+export function isReviewDecision(v: unknown): v is ReviewDecision {
+  return (REVIEW_DECISIONS as readonly string[]).includes(String(v ?? ""));
+}
+
+/** The item keys `review_referral_context_v1` accepts: `<group>:<index>`. */
+export const REVIEW_ITEM_KEY_RX = /^[a-z_]+:[0-9]{1,3}$/;
+
+/** Flatten a declared context into reviewable items. Unknown shapes yield
+ *  nothing rather than throwing — a malformed stored blob renders as "nothing
+ *  to review", never as a crash on the person's own page. */
+export function declaredContextItems(raw: unknown): DeclaredContextItem[] {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return [];
+  const ctx = raw as Partial<DeclaredContextV1>;
+  const out: DeclaredContextItem[] = [];
+  const list = (
+    group: DeclaredContextItem["group"],
+    values: readonly unknown[] | undefined,
+    toLabel: (v: unknown) => string | null,
+  ) => {
+    if (!Array.isArray(values)) return;
+    values.slice(0, 100).forEach((v, i) => {
+      const label = toLabel(v);
+      if (label) out.push({ key: `${group}:${i}`, group, label });
+    });
+  };
+  list("professions", ctx.professions, (v) => {
+    if (!v || typeof v !== "object") return null;
+    const p = v as { id?: unknown; raw?: unknown };
+    const raw = typeof p.raw === "string" ? p.raw.trim() : "";
+    const id = typeof p.id === "string" ? p.id.trim() : "";
+    return raw || id || null;
+  });
+  const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
+  list("sectors", ctx.sectors, str);
+  list("skills", ctx.skills, str);
+  list("languages", ctx.languages, str);
+  list("destinations", ctx.destinations, str);
+  return out;
+}
+
+/**
+ * THE INVITE TOKEN OUT OF A SAFE RETURN PATH (frictionless addressed invite,
+ * owner decision 2026-10-06). The signup / onboarding pages receive the invite
+ * landing as `?next=/{locale}/invite/{token}`; this reads the token back out of
+ * exactly that shape and nothing else (url-safe, bounded, final path segment).
+ * Anything else - a query string, a nested path, another route - is null, so a
+ * crafted `next` can never name an arbitrary token source.
+ */
+export function inviteTokenFromNextPath(next: string | null | undefined): string | null {
+  if (!next) return null;
+  const m = /^\/(?:[a-z]{2}\/)?invite\/([A-Za-z0-9_-]{16,128})\/?$/.exec(next.trim());
+  return m ? m[1] : null;
+}
+
+/**
+ * Whether an addressed invitation CANONICALLY implies worker (person)
+ * onboarding, so the first-run role picker is redundant. Deliberately narrow:
+ * only an external-source referral of a person (the source's own consent notice
+ * is about a worker's search - see external-sources.ts) and an explicit
+ * employee invitation. Every other kind (organisation, team, partner, agency
+ * client, project, demand) names an actor that is genuinely ambiguous for the
+ * person arriving, so they still choose.
+ */
+export function invitationImpliesWorkerContext(input: {
+  invitationType: string | null | undefined;
+  externalSourceSlug: string | null | undefined;
+}): boolean {
+  if (input.invitationType === "join_as_employee") return true;
+  return input.invitationType === "join_platform" && Boolean(input.externalSourceSlug);
 }

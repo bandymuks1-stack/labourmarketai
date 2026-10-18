@@ -1,12 +1,20 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 import {
+  ZERO_BRIDGE_SPINE_COUNTS,
+  countPendingConnectionInvites,
+  countSharesAwaitingOffer,
   isMissingRpcCode,
   isMissingTableCode,
+  mergeClientConnectionStates,
   type AgencyConnection,
   type AgencyConnectionsState,
+  type BridgeSpineCounts,
   type ClientConnectionInvite,
+  type ClientInviteDeliveriesState,
   type ClientInvitesState,
   type OfferProgressRow,
   type OfferProgressState,
@@ -14,12 +22,28 @@ import {
   type SharedRequestRow,
   type SharedRequestsState,
 } from "@/lib/agency/bridge-model";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { getOwnedCompanyById } from "@/lib/company/company-setup";
+import { readActsAsAgency } from "@/lib/company/agency-capability-read";
+import { listAgencyPlacements } from "@/lib/agency/delegation-read";
+import { AGENCY_CLIENT_PROPOSED_ROLE } from "@/lib/invitations/model";
+import { listMySentInvitations } from "@/lib/invitations/network";
 
 /**
- * Real two-subject bridge — read services (issue #859). Backed by the
- * OWNER-GATED draft migration 20260723180000 (NOT applied). Until the owner
- * applies it, every read reports `needs-migration` and the UI shows the honest
- * "prepared, owner activation pending" state.
+ * Real two-subject bridge — read services (issue #859), backed by migration
+ * 20260723180000.
+ *
+ * THAT MIGRATION IS APPLIED. Read on production 2026-09-14:
+ * `agency_client_connections`, `agency_client_request_shares` and
+ * `agency_candidate_offers` all exist with RLS enabled, the share SELECT
+ * policy carries its `owns_company(c.client_company_id)` clause, and
+ * `unshare_request_v1(uuid)` is present — with 2 connections, 1 ACTIVE share
+ * and 2 offers actually stored. The header this comment replaces still said
+ * the migration was an unapplied owner-gated draft and that every read
+ * reports `needs-migration`; that stopped being true and made a live store
+ * look dormant. The `needs-migration` branches below stay exactly as they
+ * are: they are the honest degradation for an environment where the table is
+ * absent, not a statement about production.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(v: unknown): any {
@@ -121,6 +145,76 @@ export async function listMyConnectionInvites(): Promise<ClientInvitesState> {
   }
 }
 
+/**
+ * CLIENT side, keyed by the COMPANY: active connections whose
+ * `client_company_id` is the caller's own company. The invite read above is
+ * keyed by the invited EMAIL, so a connection accepted by another owner of
+ * the same company, or under an address the caller no longer signs in with,
+ * never reached the partners door although the connection SELECT policy
+ * (migration 20260723180000 §1, `owns_company(client_company_id)`) already
+ * admits it. Same table, same policy, one bounded read — `agency_clients`
+ * is NOT used (it carries no client-side predicate).
+ */
+export async function listMyClientConnections(
+  clientCompanyId: string,
+): Promise<ClientInvitesState> {
+  const supabase = await createClient();
+  const toRow = (r: Record<string, unknown>): ClientConnectionInvite => {
+    const co = (r.companies ?? {}) as { display_name?: string; legal_name?: string };
+    return {
+      id: r.id as string,
+      agencyName: co.display_name || co.legal_name || "\u2014",
+      invitedEmail: r.invited_email as string,
+      status: r.status as ClientConnectionInvite["status"],
+      createdAt: r.created_at as string,
+    };
+  };
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("agency_client_connections")
+      .select("id, invited_email, status, created_at, agency_company_id, companies!agency_client_connections_agency_company_id_fkey(display_name, legal_name)")
+      .eq("client_company_id", clientCompanyId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) {
+      if (isMissingTableCode(error.code)) return { kind: "needs-migration" };
+      // The embedded FK alias may not resolve in every schema cache; fall back.
+      const fb = await asAny(supabase)
+        .from("agency_client_connections")
+        .select("id, invited_email, status, created_at")
+        .eq("client_company_id", clientCompanyId)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (fb.error) {
+        if (isMissingTableCode(fb.error.code)) return { kind: "needs-migration" };
+        console.error("[bridge] client connections read failed:", fb.error.code);
+        return { kind: "error" };
+      }
+      return { kind: "ok", rows: (fb.data ?? []).map(toRow) };
+    }
+    return { kind: "ok", rows: (data ?? []).map(toRow) };
+  } catch {
+    return { kind: "error" };
+  }
+}
+
+/**
+ * CLIENT side, complete: the invites addressed to the caller's email PLUS
+ * every active connection the caller's company owns, as ONE list (pure
+ * merge in `bridge-model`). Either read failing makes the list UNKNOWN.
+ */
+export async function listMyClientBridgeConnections(
+  clientCompanyId: string,
+): Promise<ClientInvitesState> {
+  const [byEmail, byCompany] = await Promise.all([
+    listMyConnectionInvites(),
+    listMyClientConnections(clientCompanyId),
+  ]);
+  return mergeClientConnectionStates(byEmail, byCompany);
+}
+
 /** AGENCY side: requests connected clients shared with the caller-agency. */
 export async function listSharedRequestsForAgency(): Promise<SharedRequestsState> {
   const supabase = await createClient();
@@ -146,6 +240,80 @@ export async function listSharedRequestsForAgency(): Promise<SharedRequestsState
           status: (r.status as string | null) ?? "draft",
           sharedAt: r.shared_at as string,
         }),
+      ),
+    };
+  } catch {
+    return { kind: "error" };
+  }
+}
+
+/**
+ * CLIENT side: what this client is CURRENTLY disclosing, per connection.
+ *
+ * The agency has always been able to see what was shared with it
+ * (`list_shared_requests_for_agency_v1`); the client doing the disclosing
+ * could not see or withdraw it, and the only withdrawal available was
+ * revoking the whole relationship. This read closes that half with the
+ * authority that already exists: `agency_client_request_shares_select`
+ * (migration 20260723180000 §2) admits the client owner of the connection,
+ * and the client owns the `customer_requests` rows the titles come from, so
+ * no RPC and no new grant is needed.
+ *
+ * `connectionIds` NARROWS, never widens: a caller who happens to own both an
+ * agency and a client company sees only the connections this surface listed
+ * for them, not everything RLS would allow.
+ */
+export async function listSharedRequestsByClient(
+  connectionIds: readonly string[],
+): Promise<SharedRequestsState> {
+  const ids = connectionIds.slice(0, 100);
+  if (ids.length === 0) return { kind: "ok", rows: [] };
+  const supabase = await createClient();
+  const map = (r: Record<string, unknown>, req: Record<string, unknown>): SharedRequestRow => ({
+    shareId: r.id as string,
+    connectionId: r.connection_id as string,
+    requestId: r.request_id as string,
+    title: (req.title as string | null) ?? "\u2014",
+    roleText: (req.role_or_work_type as string | null) ?? null,
+    country: (req.country as string | null) ?? null,
+    status: (req.status as string | null) ?? "draft",
+    sharedAt: r.created_at as string,
+  });
+  try {
+    const { data, error } = await asAny(supabase)
+      .from("agency_client_request_shares")
+      .select(
+        "id, connection_id, request_id, created_at, customer_requests!agency_client_request_shares_request_id_fkey(title, role_or_work_type, country, status)",
+      )
+      .in("connection_id", ids)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) {
+      if (isMissingTableCode(error.code)) return { kind: "needs-migration" };
+      // The embedded FK alias may not resolve in every schema cache; the
+      // share rows still answer "what is disclosed", which is the point.
+      const fb = await asAny(supabase)
+        .from("agency_client_request_shares")
+        .select("id, connection_id, request_id, created_at")
+        .in("connection_id", ids)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (fb.error) {
+        if (isMissingTableCode(fb.error.code)) return { kind: "needs-migration" };
+        console.error("[bridge] client shares read failed:", fb.error.code);
+        return { kind: "error" };
+      }
+      return {
+        kind: "ok",
+        rows: (fb.data ?? []).map((r: Record<string, unknown>) => map(r, {})),
+      };
+    }
+    return {
+      kind: "ok",
+      rows: (data ?? []).map((r: Record<string, unknown>) =>
+        map(r, (r.customer_requests ?? {}) as Record<string, unknown>),
       ),
     };
   } catch {
@@ -183,6 +351,107 @@ export async function listAgencyOfferProgress(): Promise<OfferProgressState> {
   }
 }
 
+/**
+ * AGENCY side: the connection invitations this agency DELIVERED — the
+ * `invite_company` rows marked `agency_client` in the caller's own sent list
+ * (the primitive's read, inviter-pinned by `listMySentInvitations`). The
+ * partners door pairs each pending connection with its invitation by
+ * address, so it can state the real delivery outcome (`not_sent` until a
+ * provider acknowledged a send) and offer a fresh link. A failed read is
+ * UNKNOWN, never "no invitation was sent".
+ */
+export async function listMyClientInviteDeliveries(): Promise<ClientInviteDeliveriesState> {
+  try {
+    const read = await listMySentInvitations();
+    if (read.status === "needs-migration") return { kind: "needs-migration" };
+    if (read.status !== "ok") return { kind: "error" };
+    return {
+      kind: "ok",
+      rows: read.items
+        .filter(
+          (i) =>
+            i.invitationType === "invite_company" &&
+            i.proposedRole === AGENCY_CLIENT_PROPOSED_ROLE &&
+            !!i.invitedEmail,
+        )
+        .map((i) => ({
+          invitationId: i.id,
+          email: (i.invitedEmail as string).trim().toLowerCase(),
+          status: i.status,
+          deliveryStatus: i.deliveryStatus,
+          createdAt: i.createdAt,
+        })),
+    };
+  } catch {
+    return { kind: "error" };
+  }
+}
+
+/**
+ * CLIENT side: how many agency offers on this company's requests still wait
+ * for its decision. Same table and the same SELECT policy
+ * (`owns_company(client_company_id)`, migration 20260723180000 §3) the
+ * scouting page reads offers through; a head count, no rows. 0 on any
+ * failure — a spine count never fabricates attention from an unknown.
+ */
+export async function countOpenCandidateOffersForClient(
+  clientCompanyId: string,
+): Promise<number> {
+  const supabase = await createClient();
+  try {
+    const { count, error } = await asAny(supabase)
+      .from("agency_candidate_offers")
+      .select("id", { count: "exact", head: true })
+      .eq("client_company_id", clientCompanyId)
+      .eq("status", "offered");
+    if (error) return 0;
+    return typeof count === "number" ? count : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * THE BRIDGE'S SPINE COUNTS (2026-09-24), from the reads above and nothing
+ * new: the caller's ACTIVE workspace company decides the side. A staffing
+ * agency counts shared requests it has not answered; any other company
+ * counts the connection invites waiting on it and the candidate offers
+ * waiting on its decision. Zeros for a person with no company context, and
+ * zeros on any failure. Request-cached with the rest of the spine.
+ */
+export const getBridgeSpineCounts = cache(async (): Promise<BridgeSpineCounts> => {
+  try {
+    const ctx = await resolveEmployerCompanyContext();
+    if (ctx.kind !== "ok") return ZERO_BRIDGE_SPINE_COUNTS;
+    const company = await getOwnedCompanyById(ctx.companyId);
+    if (company.kind !== "ok" || !company.row) return ZERO_BRIDGE_SPINE_COUNTS;
+    if (await readActsAsAgency(company.row.companyType, ctx.organizationId)) {
+      // The placement read says whether an accepted candidate actually went
+      // (worker declined / placement ended re-opens the need for this agency).
+      const [shared, progress, placements] = await Promise.all([
+        listSharedRequestsForAgency(),
+        listAgencyOfferProgress(),
+        listAgencyPlacements(),
+      ]);
+      return {
+        ...ZERO_BRIDGE_SPINE_COUNTS,
+        sharedRequestsAwaitingOffer: countSharesAwaitingOffer(shared, progress, placements),
+      };
+    }
+    const [invites, openCandidateOffers] = await Promise.all([
+      listMyConnectionInvites(),
+      countOpenCandidateOffersForClient(company.row.id),
+    ]);
+    return {
+      ...ZERO_BRIDGE_SPINE_COUNTS,
+      pendingConnectionInvites: countPendingConnectionInvites(invites),
+      openCandidateOffers,
+    };
+  } catch {
+    return ZERO_BRIDGE_SPINE_COUNTS;
+  }
+});
+
 /** CLIENT side: agency-offered candidate worker ids for a request the caller
  *  owns — the client's scouting page renders these as candidates. */
 export async function listOfferedCandidatesForRequest(
@@ -218,4 +487,30 @@ export async function listOfferedCandidatesForRequest(
   } catch {
     return [];
   }
+}
+
+/**
+ * CLIENT side: the WORKER's answer to the bookings its accepted agency
+ * offers proposed (production walk 2026-09-28: a declined placement still
+ * read "priimtas" — the client's decision — with no trace of the worker's).
+ * The client owns those booking rows, so this is its own RLS read; an
+ * unreadable row simply shows no worker decision.
+ */
+export async function readOfferBookingStatuses(
+  bookingIds: readonly string[],
+): Promise<ReadonlyMap<string, string>> {
+  const out = new Map<string, string>();
+  if (bookingIds.length === 0) return out;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await asAny(supabase)
+      .from("booking_requests")
+      .select("id, status")
+      .in("id", [...bookingIds]);
+    if (error) return out;
+    for (const r of (data ?? []) as { id: string; status: string }[]) out.set(r.id, r.status);
+  } catch {
+    /* no worker decision shown */
+  }
+  return out;
 }

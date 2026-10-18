@@ -2,11 +2,19 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
+import { resolveWorkDay, type WorkTimeMetricRow } from "@/lib/journal/work-time";
 import {
   WORKER_NAME_FIELDS,
   resolveWorkerName,
   type WorkerNameRow,
 } from "@/lib/journal/worker-name";
+import {
+  scopeSkillsToConfirm,
+  type QuickConfirmScope,
+  type QuickQueueSkill,
+} from "@/lib/journal/quick-confirm-model";
+
+export type { QuickConfirmScope, QuickQueueSkill };
 
 /**
  * One-Tap Confirm queue (S3.5) — the shared read model for the manager's
@@ -17,20 +25,29 @@ import {
  *
  * Slugs (skills / recognized works) are returned untranslated; the page
  * translates them, mirroring the inbox page's slug→JSON name pattern (§2).
+ *
+ * CONFIRM SCOPE (window 6): the tap verifies the skills THIS entry is linked
+ * to (`journal_entry_skills`, manager-readable by its own RLS), not the
+ * worker's whole declared list — see quick-confirm-model.ts for the rule.
  */
-
-export type QuickQueueSkill = { id: string; slug: string };
 
 export type QuickQueueEntry = {
   id: string;
   workerName: string;
   createdAt: string;
+  /** The day the work happened — the SAME rule as the journal and the
+   *  calendar (`resolveWorkDay`): the stated `work_date`, else the filing day.
+   *  A reviewer confirms WORK; showing the filing day put the wrong date on
+   *  the card (production walk 2026-09-28). */
+  workDay: string;
   originalText: string;
   /** Deterministic work items recognized from the text — display only. */
   recognizedSlugs: string[];
-  /** The worker's declared, NOT-yet-verified skills — exactly the set a
-   *  one-tap confirm would verify. Shown explicitly on the card. */
+  /** Exactly the set a one-tap confirm would verify — scoped to the entry's
+   *  linked skills when it has links. Shown explicitly on the card. */
   skillsToConfirm: QuickQueueSkill[];
+  /** Which rule produced `skillsToConfirm` (named state, never guessed). */
+  confirmScope: QuickConfirmScope;
 };
 
 export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
@@ -54,48 +71,109 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   }
   if (reviewableIds.length === 0) return [];
 
-  const { data: rows } = await supabase
+  // LEFT join on workers, never !inner (walk 2026-10-11): a learner's
+  // workers row is hidden from their institution by least privilege
+  // (can_view_worker: student grants no worker visibility), so an inner join
+  // dropped every student entry the institution may read AND review. The
+  // name falls back to NO_READABLE_NAME; the entry itself stays reviewable.
+  const { data: rows, error: rowsError } = await supabase
     .from("journal_entries")
     .select(
-      `id, original_text, created_at, worker_id, workers!inner(${WORKER_NAME_FIELDS})`,
+      `id, original_text, created_at, worker_id, workers(${WORKER_NAME_FIELDS})`,
     )
     .in("id", reviewableIds)
     .order("created_at", { ascending: true });
+  // FAILED ≠ EMPTY (SEP-7). A read that failed is thrown, never returned as
+  // "nothing to review": the quick inbox names the state, and the chat and
+  // the opening brief already catch a thrown read and say nothing rather than
+  // invent an empty queue.
+  if (rowsError) {
+    throw new Error(`review_queue_unavailable:${rowsError.code ?? "unknown"}`);
+  }
   const entries = rows ?? [];
   if (entries.length === 0) return [];
 
-  // Declared-unverified skills per worker — the explicit confirm set.
+  // Declared-unverified skills per worker — the candidate set. A failed read
+  // is a NAMED state (`skillsUnavailable`), never an empty list pretending
+  // the worker has nothing to confirm.
   const workerIds = [
     ...new Set(entries.map((r) => r.worker_id).filter(Boolean)),
   ] as string[];
   const skillsByWorker = new Map<string, QuickQueueSkill[]>();
+  let skillsUnavailable = false;
   if (workerIds.length > 0) {
-    const { data: ws } = await supabase
+    const wsRes = await supabase
       .from("worker_skills")
       .select("worker_id, skill_id, verified, skills(slug)")
       .in("worker_id", workerIds);
-    for (const r of ws ?? []) {
-      const slug = (r.skills as { slug: string | null } | null)?.slug;
-      if (!r.worker_id || !r.skill_id || !slug) continue;
-      if (r.verified === true) continue; // already verified — nothing to confirm
-      const list = skillsByWorker.get(r.worker_id) ?? [];
-      list.push({ id: r.skill_id, slug });
-      skillsByWorker.set(r.worker_id, list);
+    if (wsRes.error) {
+      skillsUnavailable = true;
+    } else {
+      for (const r of wsRes.data ?? []) {
+        const slug = (r.skills as { slug: string | null } | null)?.slug;
+        if (!r.worker_id || !r.skill_id || !slug) continue;
+        if (r.verified === true) continue; // already verified — nothing to confirm
+        const list = skillsByWorker.get(r.worker_id) ?? [];
+        list.push({ id: r.skill_id, slug });
+        skillsByWorker.set(r.worker_id, list);
+      }
     }
+  }
+
+  // The entry ↔ skill links (bounded to the reviewable ids; RLS lets the
+  // manager of the entry's organization read them). A failed read means
+  // "links unknown" → the per-worker fallback applies, still fully listed.
+  const entryIds = entries.map((r) => r.id);
+  let linksByEntry: Map<string, Set<string>> | null = new Map();
+  const linkRes = await supabase
+    .from("journal_entry_skills")
+    .select("journal_entry_id, skill_id")
+    .in("journal_entry_id", entryIds);
+  if (linkRes.error) {
+    linksByEntry = null;
+  } else {
+    for (const l of linkRes.data ?? []) {
+      if (!l.journal_entry_id || !l.skill_id) continue;
+      const set = linksByEntry.get(l.journal_entry_id) ?? new Set<string>();
+      set.add(l.skill_id);
+      linksByEntry.set(l.journal_entry_id, set);
+    }
+  }
+
+  // Stated work days, one bounded read. Unreadable → the filing day, the
+  // same fallback `resolveWorkDay` applies to an entry with no stated day.
+  const workDateRows = new Map<string, WorkTimeMetricRow[]>();
+  const wdRes = await supabase
+    .from("journal_entry_metrics")
+    .select("entry_id, metric_slug, value_text, value_numeric, unit_slug, created_at")
+    .in("entry_id", entryIds)
+    .eq("metric_slug", "work_date");
+  for (const m of (wdRes.data ?? []) as (WorkTimeMetricRow & { entry_id: string })[]) {
+    const list = workDateRows.get(m.entry_id) ?? [];
+    list.push(m);
+    workDateRows.set(m.entry_id, list);
   }
 
   return entries.map((r) => {
     const workerName = resolveWorkerName(r.workers as WorkerNameRow);
     const depth = recognizeEntryDepth(r.original_text ?? "");
+    const scoped = scopeSkillsToConfirm({
+      linkedSkillIds: linksByEntry === null ? null : (linksByEntry.get(r.id) ?? new Set()),
+      workerUnverified: skillsUnavailable
+        ? null
+        : r.worker_id
+          ? (skillsByWorker.get(r.worker_id) ?? [])
+          : [],
+    });
     return {
       id: r.id,
       workerName,
       createdAt: r.created_at,
+      workDay: resolveWorkDay(workDateRows.get(r.id) ?? [], r.created_at),
       originalText: r.original_text ?? "",
       recognizedSlugs: depth.works.map((w) => w.slug),
-      skillsToConfirm: r.worker_id
-        ? (skillsByWorker.get(r.worker_id) ?? [])
-        : [],
+      skillsToConfirm: scoped.skills,
+      confirmScope: scoped.scope,
     };
   });
 }

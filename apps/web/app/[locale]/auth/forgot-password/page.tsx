@@ -1,5 +1,14 @@
+import { authPageMetadata } from "@/lib/auth/auth-page-metadata";
 import { setRequestLocale } from "next-intl/server";
 import { ForgotPasswordForm } from "@/components/app/forgot-password-form";
+
+export function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  return authPageMetadata(params, "forgotPassword");
+}
 
 export default async function ForgotPasswordPage({
   params,

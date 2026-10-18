@@ -37,11 +37,21 @@ export type DerivedDocumentStatus =
   | "expiring"
   | "blocked";
 
+/** The document's verification axis (`worker_documents.verification`,
+ *  migration worker_document_verification): set ONLY by an authorized
+ *  reviewer — never by the worker's own input. Absent = unverified. */
+export type WorkerDocumentVerification = "unverified" | "pending" | "verified" | "rejected";
+
 export interface WorkerDocumentRow {
   readonly id: string;
   readonly documentTypeSlug: string;
   readonly country: string | null;
   readonly storedStatus: "missing" | "ready" | "blocked";
+  /**
+   * Optional so a caller that read an older shape keeps working; a missing
+   * value means UNVERIFIED — it never defaults to verified.
+   */
+  readonly verification?: WorkerDocumentVerification;
   readonly validFrom: string | null;
   readonly validUntil: string | null;
   readonly note: string | null;
@@ -174,7 +184,7 @@ export async function listMyDocuments(): Promise<DocumentsListResult> {
   const { data: docs, error } = await asAny(supabase)
     .from("worker_documents")
     .select(
-      "id, document_type_slug, country, status, valid_from, valid_until, note",
+      "id, document_type_slug, country, status, valid_from, valid_until, note, verification",
     )
     .eq("worker_id", worker.id);
   if (error) {
@@ -231,6 +241,7 @@ export async function listMyDocuments(): Promise<DocumentsListResult> {
       documentTypeSlug: d.document_type_slug as string,
       country: (d.country as string | null) ?? null,
       storedStatus: d.status as "missing" | "ready" | "blocked",
+      verification: (d.verification as WorkerDocumentVerification | null | undefined) ?? "unverified",
       validFrom: (d.valid_from as string | null) ?? null,
       validUntil: (d.valid_until as string | null) ?? null,
       note: (d.note as string | null) ?? null,

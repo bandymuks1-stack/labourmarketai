@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { CameraCaptureButton } from "@/components/app/camera-capture-button";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
@@ -63,7 +65,8 @@ import {
   type JournalPhotoUploadResult,
 } from "@/lib/journal/photo-upload";
 import { compressImageFile } from "@/lib/browser/image-compress";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
+import { PLATFORM_OUTPUT_UNIT_SLUGS, WORK_TIME_UNIT_SLUGS } from "@/lib/journal/work-time";
 import {
   completeTask,
   errorTask,
@@ -72,14 +75,43 @@ import {
   trackFunnel,
 } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { reviewUnconfirmedWorkTime } from "@/lib/journal/unconfirmed-work-time";
+import {
+  reviewUnconfirmedWorkTime,
+  statedDurationCount,
+} from "@/lib/journal/unconfirmed-work-time";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/i18n/navigation";
+import type { WorkDayCheck } from "@/lib/journal/work-time-plausibility";
+import { formatUtcDate } from "@/lib/time/display";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
+import { JournalModuleFields } from "@/components/app/journal-module-fields";
+import {
+  MODULE_METRICS_FIELD,
+  serializeModuleFields,
+  type ModuleFieldValues,
+} from "@/lib/journal/journal-module-fields";
+
+import {
+  PROJECT_FIELD_NONE,
+  projectChoiceIsSatisfied,
+  projectDisplayLabel,
+  projectPromptFor,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
 
 export type JournalEngagement = {
   id: string;
   label: string;
   isPrimary: boolean;
+  /** The worker's relationship to the context (`employee`, `student`,
+   *  `volunteer`, …) — what decides which archetype module fields the
+   *  editors compose for an entry logged against it (owner §12). Optional
+   *  so older callers keep working; absent → no module fields. */
+  relationshipSlug?: string;
+  /** The projects the worker is ACTIVELY assigned to in THIS context's
+   *  organization. Two or more → the composer must ask which; one → the
+   *  database attributes it; none → a non-project entry, nothing to ask. */
+  projects?: AssignedProject[];
 };
 
 /** How the entry's engagement context was decided — see
@@ -90,7 +122,14 @@ export type JournalContextResolution = {
   rule: "A" | "B" | "C" | "D" | "NONE";
   selectedId: string | null;
 };
-export type JournalDirection = { slug: string; name: string };
+export type JournalDirection = {
+  slug: string;
+  name: string;
+  /** ISCO-08 group of the profession's ESCO occupation (server-resolved from
+   *  `professions.esco_uri`); null for an unmapped profession. Decides which
+   *  archetype module fields the entry composes (owner §12). */
+  iscoGroup?: string | null;
+};
 export type JournalSkill = { slug: string; name: string };
 /** A worker skill matched to the entry, carrying why it was suggested and how
  *  strong the evidence is (Recognition v1). */
@@ -112,16 +151,10 @@ export type ComposerNewSkillSuggestion = {
 };
 type NewSkillAddStatus = "idle" | "adding" | "added" | "error";
 
-const UNIT_OPTIONS = [
-  "hours",
-  "minutes",
-  "days",
-  "square_meters",
-  "meters",
-  "pieces",
-  "kilograms",
-  "packages",
-] as const;
+/** The quantity picker: time units first (a confirmed quantity can still be
+ *  a duration when no fragment carries it), then every platform OUTPUT unit
+ *  the registry knows — the ONE list shared with the compact editor. */
+const UNIT_OPTIONS = [...WORK_TIME_UNIT_SLUGS, ...PLATFORM_OUTPUT_UNIT_SLUGS] as const;
 
 type Stage = "compose" | "review";
 
@@ -158,6 +191,7 @@ export function JournalEntryComposer({
   directions,
   workerSkills,
   editingEntry,
+  defaultWorkDate = null,
   templates,
   onSaved,
   onCancelEdit,
@@ -172,6 +206,9 @@ export function JournalEntryComposer({
    *  `supersedeJournalEntry(editingEntry.id, …)` (RPC from migration 0018)
    *  instead of the create path. */
   editingEntry?: JournalEditingEntry | null;
+  /** The day the person already picked on the journal calendar. A NEW
+   *  record starts on it instead of today; an edit keeps its saved day. */
+  defaultWorkDate?: string | null;
   /** ACTIVE profession templates from the §10 registry
    *  (journal_profession_templates — owner-gated draft migration). Empty /
    *  omitted → the picker renders NOTHING (honest absence). A template only
@@ -194,6 +231,7 @@ export function JournalEntryComposer({
   const tUnit = useTranslations("productivityUnits");
   const tProf = useTranslations("professions");
   const tSkill = useTranslations("skillNames");
+  const tCheck = useTranslations("journal.intelligence.checks");
   const locale = useLocale();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -325,6 +363,12 @@ export function JournalEntryComposer({
   // P1 recall repair: the saved entry id (candidate confirm/reject targets it)
   // + per-candidate action state for the one-tap confirm/reject buttons.
   const [savedEntryId, setSavedEntryId] = useState<string | null>(null);
+  /** Owner §13 — the open day-level plausibility check the saved record
+   *  takes part in (its day now above 24 h / a long day). null = none or
+   *  not readable: nothing is shown, no figure is touched. */
+  const [savedDayCheck, setSavedDayCheck] = useState<WorkDayCheck | null>(
+    null,
+  );
   const [candidateStates, setCandidateStates] = useState<
     Record<string, "idle" | "working" | "confirmed" | "rejected" | "error">
   >({});
@@ -376,11 +420,46 @@ export function JournalEntryComposer({
     editingEntry?.topic ? "confirmed" : "pending",
   );
   const [topic, setTopic] = useState<string>(editingEntry?.topic ?? "");
-  const [engagementId, setEngagementId] = useState<string>(primaryId);
+  // An edit keeps the entry's OWN engagement (the compact editor already
+  // did; this path defaulted to the primary and could silently move the
+  // work). A legacy entry with no stored engagement falls back as before.
+  const [engagementId, setEngagementId] = useState<string>(
+    editingEntry?.engagementContextId ?? primaryId,
+  );
+  // WHICH PROJECT the hours belong to. Only a NEW record asks (an edit keeps
+  // the entry's own project — the supersede RPC copies it). With two or more
+  // active projects in the chosen context nothing is preselected: the
+  // database never guesses between them (handoff 2026-10-02 §7).
+  const [projectChoice, setProjectChoice] = useState<string>("");
+  const contextProjects: AssignedProject[] = editingEntry
+    ? []
+    : (engagements.find((e) => e.id === engagementId)?.projects ?? []);
+  const projectPrompt = projectPromptFor(contextProjects);
+  // A choice made for another context's projects never carries over.
+  const projectChoiceValid =
+    projectChoice === PROJECT_FIELD_NONE ||
+    contextProjects.some((p) => p.id === projectChoice)
+      ? projectChoice
+      : "";
+  // Owner §12 — archetype module fields for the selected engagement's
+  // relationship, preloaded on edit so they are re-sent, not lost.
+  const [moduleFields, setModuleFields] = useState<ModuleFieldValues>(
+    editingEntry?.moduleFields ?? {},
+  );
+  const selectedRelationship =
+    engagements.find((e) => e.id === engagementId)?.relationshipSlug ?? null;
   // Preserve the entry's saved work date on edit (do NOT reset to today).
   const [workDate, setWorkDate] = useState<string>(
-    editingEntry?.workDate ?? today,
+    editingEntry?.workDate ?? defaultWorkDate ?? today,
   );
+  // A NEW entry defaults to the PERSON's calendar day, not the server's UTC
+  // day (re-audit F10): at 01:30 in Vilnius the UTC key still says
+  // yesterday. Applied after mount so server and client hydrate the same
+  // markup; an already-edited date is left alone.
+  useEffect(() => {
+    if (editingEntry?.workDate || defaultWorkDate) return;
+    setWorkDate((d) => (d === today ? personCalendarDay() : d));
+  }, [editingEntry?.workDate, defaultWorkDate, today]);
 
   const existingSkillRefs = useMemo(
     () => workerSkills.map((s) => ({ slug: s.slug, label: s.name })),
@@ -394,6 +473,11 @@ export function JournalEntryComposer({
     () => new Map(directions.map((d) => [d.slug, d])),
     [directions],
   );
+  // Occupation path (owner §12): the ISCO group of the direction this entry
+  // names, else of the worker's primary profession (`directions` arrives
+  // primary-first); null when unmapped, so no family is guessed.
+  const selectedIscoGroup =
+    (dirSlug ? directionBySlug.get(dirSlug) : directions[0])?.iscoGroup ?? null;
 
   function analyse(raw: string) {
     setError(null);
@@ -858,6 +942,26 @@ export function JournalEntryComposer({
       setError(t("engagementAmbiguous"));
       return;
     }
+    // Two or more active projects: the hours must say which project they are
+    // for (or that they are not project work) — otherwise they would be saved
+    // against no project at all.
+    if (!projectChoiceIsSatisfied(contextProjects, projectChoiceValid)) {
+      setError(t("projectAmbiguous"));
+      return;
+    }
+    // A quick save from the text alone never parsed it: a stated duration
+    // ("dirbau 2 valandas") would be recorded with no time at all. Chat and
+    // quick-record show the parse and let the worker confirm it; the full form
+    // does the same by opening the existing review step first (doctrine §7 —
+    // never confirmed for them).
+    if (stage === "compose" && !editingEntry) {
+      const stated = statedDurationCount(extractJournalSuggestions(text));
+      if (stated > 0) {
+        analyse(text);
+        setError(t("unconfirmedTimeBlocked", { count: stated }));
+        return;
+      }
+    }
     // Saving now would discard hours the worker actually wrote. Say so and
     // stop; `confirmAllPending` (the existing control) is one tap away, and
     // discarding deliberately is also a real answer.
@@ -874,6 +978,7 @@ export function JournalEntryComposer({
       const fd = new FormData();
       fd.set("locale", locale);
       fd.set("engagement_context_id", engagementId);
+      if (projectPrompt === "ask") fd.set("project_id", projectChoiceValid);
       fd.set("notes", text);
       fd.set("work_date", workDate);
       if (siteStatus === "confirmed" && siteName.trim())
@@ -905,6 +1010,10 @@ export function JournalEntryComposer({
         fd.set("institution_name", institutionName.trim());
       if (topicStatus === "confirmed" && topic.trim())
         fd.set("topic", topic.trim());
+      // Owner §12 — module fields, one metric row each server-side, accepted
+      // by the engagement's own composition.
+      const moduleJson = serializeModuleFields(moduleFields);
+      if (moduleJson) fd.set(MODULE_METRICS_FIELD, moduleJson);
       if (confirmedFragments.length > 0) {
         fd.set("fragments_json", JSON.stringify(confirmedFragments));
       }
@@ -952,6 +1061,7 @@ export function JournalEntryComposer({
       // is the real outcome — no fire-and-forget call that can silently die.
       setSavedPipeline(result.skills);
       setSavedEntryId(result.entryId);
+      setSavedDayCheck(result.dayCheck ?? null);
       setCandidateStates({});
       setRenameDrafts({});
       setUnresolvedStates({});
@@ -1090,12 +1200,41 @@ export function JournalEntryComposer({
     // ONE photo field, placed by the active mode preset: photo-first mode
     // leads with it, the other modes keep it after the text (same field,
     // same free-tier rules, same after-save upload either way).
+    /* ONE photo handler, shared by the picker and the camera button. */
+    const acceptPhoto = async (f: File | null) => {
+      if (!f) {
+        setPhotoFile(null);
+        setPhotoError(null);
+        setPhotoPrep("idle");
+        return;
+      }
+      // Wrong format → honest error; size is handled by compression.
+      if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
+        setPhotoFile(null);
+        setPhotoError(t("photo.invalidFile"));
+        setPhotoPrep("idle");
+        return;
+      }
+      setPhotoError(null);
+      setPhotoPrep("preparing");
+      // Auto-resize/compress normal phone photos before upload.
+      const { file: prepared } = await compressImageFile(f);
+      if (!isValidJournalPhoto(prepared)) {
+        setPhotoFile(null);
+        setPhotoPrep("idle");
+        setPhotoError(t("photo.tooLargeAfter"));
+        return;
+      }
+      setPhotoFile(prepared);
+      setPhotoPrep("ready");
+    };
+
     const photoField = (
       <div
         className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
         data-testid="journal-photo-field"
       >
-        <Label>{t("photo.label")}</Label>
+        <Label htmlFor="journal-photo">{t("photo.label")}</Label>
         {mode === "photo" && (
           <p
             className="text-meta leading-relaxed text-text-secondary"
@@ -1105,38 +1244,18 @@ export function JournalEntryComposer({
           </p>
         )}
         <input
+          id="journal-photo"
           type="file"
           accept="image/jpeg,image/png,image/webp"
           data-testid="journal-photo-input"
-          onChange={async (e) => {
-            const f = e.target.files?.[0] ?? null;
-            if (!f) {
-              setPhotoFile(null);
-              setPhotoError(null);
-              setPhotoPrep("idle");
-              return;
-            }
-            // Wrong format → honest error; size is handled by compression.
-            if (!/^image\/(jpeg|png|webp)$/.test(f.type)) {
-              setPhotoFile(null);
-              setPhotoError(t("photo.invalidFile"));
-              setPhotoPrep("idle");
-              return;
-            }
-            setPhotoError(null);
-            setPhotoPrep("preparing");
-            // Auto-resize/compress normal phone photos before upload.
-            const { file: prepared } = await compressImageFile(f);
-            if (!isValidJournalPhoto(prepared)) {
-              setPhotoFile(null);
-              setPhotoPrep("idle");
-              setPhotoError(t("photo.tooLargeAfter"));
-              return;
-            }
-            setPhotoFile(prepared);
-            setPhotoPrep("ready");
-          }}
+          onChange={(e) => void acceptPhoto(e.target.files?.[0] ?? null)}
           className="text-xs text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-xs file:text-text-primary"
+        />
+        {/* The camera as a second door into the SAME field (phones only). */}
+        <CameraCaptureButton
+          label={t("photo.takePhoto")}
+          testId="journal-photo-camera"
+          onFile={(f) => void acceptPhoto(f)}
         />
         {photoError ? (
           <p className="text-xs text-state-danger" role="alert">
@@ -1212,6 +1331,36 @@ export function JournalEntryComposer({
                   {t("savedSkillsLine", savedSkillsSummary)}
                 </p>
               )}
+            {/* Owner §13 — this record pushed its day above 24 h / into a
+                long day. A warning beside the save, never a changed figure:
+                the person checks for a duplicate or stands by the record
+                with a reason in the "work in numbers" section. */}
+            {savedDayCheck !== null && (
+              <p
+                className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-state-warning"
+                data-testid="journal-saved-day-check"
+                data-check-code={savedDayCheck.code}
+              >
+                {tCheck(savedDayCheck.code, {
+                  hours: new Intl.NumberFormat(locale, {
+                    maximumFractionDigits: 1,
+                  }).format(savedDayCheck.hours),
+                  day:
+                    formatUtcDate(savedDayCheck.day, locale, {
+                      month: "short",
+                      day: "numeric",
+                    }) ?? savedDayCheck.day,
+                  entries: savedDayCheck.entries,
+                })}{" "}
+                <Link
+                  href={"/dashboard/journal#work-intelligence" as "/dashboard"}
+                  className="font-semibold underline underline-offset-2"
+                  data-testid="journal-saved-day-check-link"
+                >
+                  {tCheck("openInJournal")}
+                </Link>
+              </p>
+            )}
             {/* P0 Track B: honest SERVER-side pipeline outcome — real counts
                 from the awaited recognition→evidence→CV run, or the failure
                 line with its trace id (never a silent death). */}
@@ -1706,6 +1855,8 @@ export function JournalEntryComposer({
                   ? t("photo.uploaded")
                   : photoOutcome === "limit"
                     ? t("photo.limitReached")
+                    : photoOutcome === "quota"
+                      ? t("photo.quotaReached")
                     : photoOutcome === "not-ready"
                       ? t("photo.notReady")
                       : photoOutcome === "invalid"
@@ -1716,14 +1867,14 @@ export function JournalEntryComposer({
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               <a
                 href="#journal-entries"
-                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                className="text-xs font-semibold text-brand-blue hover:text-brand-champagne"
                 data-testid="journal-saved-see-entries"
               >
                 {t("savedSeeEntries")} →
               </a>
               <Link
                 href="/dashboard/profile#capabilities"
-                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                className="text-xs font-semibold text-brand-blue hover:text-brand-champagne"
                 data-testid="journal-saved-open-profile"
               >
                 {t("savedOpenProfile")} →
@@ -1733,7 +1884,7 @@ export function JournalEntryComposer({
                   the change becomes visible one tap away. */}
               <Link
                 href={"/cv" as "/dashboard"}
-                className="text-xs font-semibold text-brand-blue hover:text-brand-cyan"
+                className="text-xs font-semibold text-brand-blue hover:text-brand-champagne"
                 data-testid="journal-saved-open-cv"
               >
                 {t("savedOpenCv")} →
@@ -1824,7 +1975,7 @@ export function JournalEntryComposer({
                   {formatDuration(
                     Number(timeValue.replace(",", ".")) || 0,
                     timeUnit,
-                    locale === "en" || locale === "ru" ? locale : "lt",
+                    durationLocale(locale),
                   )}
                 </span>
               )}
@@ -2040,6 +2191,57 @@ export function JournalEntryComposer({
           ) : null}
         </label>
 
+        {projectPrompt === "ask" ? (
+          <label className="flex flex-col gap-1.5">
+            <Label>{t("project")}</Label>
+            <DarkListbox
+              value={projectChoiceValid}
+              onChange={setProjectChoice}
+              options={[
+                { value: "", label: t("projectChoose") },
+                ...contextProjects.map((p) => ({
+                  value: p.id,
+                  label: projectDisplayLabel(p, (k, v) => t(k, v)),
+                })),
+                { value: PROJECT_FIELD_NONE, label: t("projectNone") },
+              ]}
+              ariaLabel={t("project")}
+              testId="journal-project-switcher"
+            />
+            {projectChoiceValid === "" ? (
+              <p
+                className="text-meta leading-relaxed text-state-warning"
+                data-testid="journal-project-must-choose"
+              >
+                {t("projectAmbiguous")}
+              </p>
+            ) : null}
+          </label>
+        ) : projectPrompt === "auto" ? (
+          <p
+            className="text-meta leading-relaxed text-text-muted"
+            data-testid="journal-project-auto"
+          >
+            {t("projectAuto", {
+              name: contextProjects[0]
+                ? projectDisplayLabel(contextProjects[0], (k, v) => t(k, v))
+                : "",
+            })}
+          </p>
+        ) : null}
+
+        {/* Owner §12 — the module fields the entry's OCCUPATION (the named
+            direction, else the worker's primary profession, through its
+            ISCO group) and the relationship compose — a tiler's inspection
+            fields, a placement's supervision, a volunteer's field project;
+            nothing renders when neither source adds a module. */}
+        <JournalModuleFields
+          relationshipSlug={selectedRelationship}
+          iscoGroup={selectedIscoGroup}
+          values={moduleFields}
+          onChange={setModuleFields}
+        />
+
         {mode === "photo" && !editingEntry && photoField}
 
         {/* Photo evidence — free tier: ONE photo per entry, enforced
@@ -2130,7 +2332,7 @@ export function JournalEntryComposer({
           </p>
           <Link
             href="/dashboard/profile#capabilities"
-            className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+            className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-champagne"
             data-testid="manual-fallback-link"
           >
             {t("addManuallyCta")} →
@@ -2148,8 +2350,7 @@ export function JournalEntryComposer({
                 const timeLabel = f.time
                   ? formatDuration(
                       f.time.value,
-                      f.time.unitSlug,
-                      locale === "en" || locale === "ru" ? locale : "lt",
+                      f.time.unitSlug, durationLocale(locale),
                     )
                   : t("fragment.noTime");
                 // Label-only activity/capability labels are canonical LT — localize
@@ -2259,7 +2460,7 @@ export function JournalEntryComposer({
                 label={formatDuration(
                   Number(timeValue.replace(",", ".")) || 0,
                   timeUnit,
-                  locale === "en" || locale === "ru" ? locale : "lt",
+                  durationLocale(locale),
                 )}
                 status={timeStatus}
                 onConfirm={() => setTimeStatus("confirmed")}
@@ -2394,7 +2595,7 @@ export function JournalEntryComposer({
                   newSkillSuggestions.length === 0 && (
                     <Link
                       href="/dashboard/profile#capabilities"
-                      className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-cyan"
+                      className="w-fit text-meta font-semibold text-brand-blue hover:text-brand-champagne"
                       data-testid="skill-add-manually-link"
                     >
                       {t("addManuallyCta")} →
@@ -2622,17 +2823,17 @@ export function JournalEntryComposer({
 /** Resolve a profession slug to its localized label, falling back to the
  *  raw LT label when the taxonomy doesn't have an entry yet (rule-based
  *  matches outside the construction set, e.g. cashier — surfaced via the
- *  free-text label rather than a fake taxonomy entry). */
+ *  free-text label rather than a fake taxonomy entry). Asks `has` first: a
+ *  missing key is an expected outcome here, not an error — next-intl logged
+ *  `MISSING_MESSAGE: professions.<label>` on every such render (#1689). */
 function tProfSafe(
-  tProf: (key: string) => string,
+  tProf: { (key: string): string; has: (key: string) => boolean },
   slug: string,
   fallback: string | null,
 ): string {
-  try {
+  if (tProf.has(slug)) {
     const v = tProf(slug);
     if (v && v !== slug) return v;
-  } catch {
-    /* fall through */
   }
   return fallback ?? slug;
 }

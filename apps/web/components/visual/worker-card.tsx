@@ -24,9 +24,9 @@ export interface WorkerCardEntity {
 }
 
 const ACTIVITY_DOT: Record<WorkerCardEntity["lastActiveBucket"], string> = {
-  active: "bg-emerald-500",
-  recent: "bg-amber-500",
-  dormant: "bg-zinc-400",
+  active: "bg-state-live",
+  recent: "bg-state-amber",
+  dormant: "bg-ink-500",
 };
 
 export function WorkerCard({ worker }: { readonly worker: WorkerCardEntity }) {
@@ -37,7 +37,7 @@ export function WorkerCard({ worker }: { readonly worker: WorkerCardEntity }) {
       // Interaction contract (user-journey repair v1): this card is
       // presentational — no link/handler — so it must not advertise
       // interactivity via hover elevation that impersonates a button.
-      className="group relative flex flex-col gap-3 rounded-card border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
+      className="group relative flex flex-col gap-3 rounded-card border border-ink-600 bg-ink-800 p-4 shadow-sm"
       data-testid={`worker-card-${worker.id}`}
     >
       <header className="flex items-center gap-3">
@@ -51,17 +51,17 @@ export function WorkerCard({ worker }: { readonly worker: WorkerCardEntity }) {
           />
         ) : (
           <div
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-base font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-ink-700 text-base font-semibold text-text-secondary"
             aria-hidden="true"
           >
             {monogram}
           </div>
         )}
         <div className="flex flex-1 flex-col">
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <h3 className="text-sm font-semibold text-text-primary">
             {worker.displayName}
           </h3>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs text-text-muted">
             {worker.roleLabel} · {worker.region}
           </p>
         </div>
@@ -75,7 +75,7 @@ export function WorkerCard({ worker }: { readonly worker: WorkerCardEntity }) {
         {skills.map((skill) => (
           <li
             key={skill}
-            className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+            className="inline-flex items-center gap-1 rounded-full bg-ink-700 px-2 py-0.5 text-xs font-medium text-text-secondary"
           >
             <CircleUserRound className="h-3 w-3" aria-hidden="true" />
             <span>{skill}</span>
@@ -83,7 +83,7 @@ export function WorkerCard({ worker }: { readonly worker: WorkerCardEntity }) {
         ))}
       </ul>
 
-      <footer className="flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
+      <footer className="flex items-center gap-1.5 text-xs text-text-muted">
         <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
         <span>
           {worker.evidenceCount} evidence {worker.evidenceCount === 1 ? "item" : "items"}

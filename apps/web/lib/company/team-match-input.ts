@@ -29,11 +29,13 @@ export type TeamMatchInputV1 = {
   activeMemberCount: number;
   deployableSize: { min: number | null; max: number | null };
   professionComposition: Array<{ slug: string; memberCount: number }>;
+  /** null = the gated capability summary did not answer (see the contract in
+   *  lib/market/team-match-contract.ts). `[]` = it answered with nothing. */
   skillComposition: Array<{
     slug: string;
     membersDeclared: number;
     membersConfirmed: number;
-  }>;
+  }> | null;
   languageComposition: Array<{
     code: string;
     level: string | null;
@@ -144,7 +146,16 @@ export async function buildTeamMatchInput(
   }
 
   // Skill composition from the gated capability summary (honest counts).
-  let skillComposition: TeamMatchInputV1["skillComposition"] = [];
+  //
+  // A REFUSAL AND A FAILURE ARE NOT AN EMPTY TEAM. This started as `= []` with
+  // the read's outcome discarded, so a failed RPC produced the same value as a
+  // team whose members have declared nothing — and any consumer could iterate
+  // that array and report zero capability. It now starts NOT READABLE and only
+  // becomes an array when the read actually answered. The unauthorized case
+  // still arrives as zero rows by design (the RPC does not confirm a team's
+  // existence to a stranger), which is why an empty composition is a missing
+  // fact downstream and never a zero.
+  let skillComposition: TeamMatchInputV1["skillComposition"] = null;
   {
     const { data, error } = await asAny(supabase).rpc(
       "get_team_capability_summary_v1",

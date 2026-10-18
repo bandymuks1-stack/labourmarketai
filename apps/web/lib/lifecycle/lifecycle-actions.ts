@@ -91,7 +91,9 @@ function finish(ctx: FormContext, notice: LifecycleNotice): never {
   if ((SUCCESS_NOTICES as readonly string[]).includes(notice)) {
     revalidatePath("/", "layout");
   }
-  const page = ctx.back === "start" ? "start" : "company";
+  // The lifecycle panel lives on the organization's PEOPLE door (owner IA
+  // correction 2026-09-16); `start` keeps its own onboarding return.
+  const page = ctx.back === "start" ? "start" : "company/people";
   redirect(`/${ctx.locale}/dashboard/${page}?lc=${notice}#lifecycle`);
 }
 

@@ -16,6 +16,7 @@ import type {
 import { computeEmploymentJournalContext } from "@/lib/operations/employment-journal-context";
 import type { OpsCellLabels } from "@/components/app/company-workers-section";
 import { WorkerOperationsRoleForm } from "@/components/app/worker-operations-role-form";
+import { PersonPresence, PlaceTimeStamp } from "@/components/app/work-world/primitives";
 
 /**
  * Stage 2 PR 2 — Agency workers + invitations panel.
@@ -196,7 +197,16 @@ export function AgencyWorkersSection({
                     data-review-capability={ctx.reviewCapability}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <span className="break-all text-sm font-medium text-text-primary">{w.email ?? "—"}</span>
+                      {/* A linked worker is a real PRESENCE (work-world
+                          grammar): their permitted display name first, the
+                          invitation e-mail beneath it — never an e-mail
+                          standing in for a person when a name exists. The
+                          agency sees only its own linked workers (RLS). */}
+                      <PersonPresence
+                        name={w.displayName?.trim() || w.email || "—"}
+                        role={w.displayName?.trim() && w.email ? w.email : null}
+                        size={36}
+                      />
                       <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">{w.status ?? "active"}</span>
                     </div>
                     <div className="flex flex-col gap-1 text-xs text-text-secondary">
@@ -238,9 +248,9 @@ export function AgencyWorkersSection({
                           />
                         ) : null}
                     </div>
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    <PlaceTimeStamp>
                       {labels.columnInvitedAt}: {w.createdAt.slice(0, 10)}
-                    </span>
+                    </PlaceTimeStamp>
                   </li>
                 );
               })}
@@ -359,9 +369,11 @@ export function AgencyWorkersSection({
                 className="card-border flex flex-col gap-1 p-3"
                 data-testid={`agency-invitation-row-${inv.id}`}
               >
+                {/* Every row here IS pending (the list is filtered and titled so); the
+                    raw enum badge that used to repeat the word is gone — an enum is
+                    never rendered as copy (lib/guards/no-raw-enum-in-jsx.test.ts). */}
                 <div className="flex items-start justify-between gap-2">
                   <span className="break-all text-sm text-text-primary">{inv.invitedEmail}</span>
-                  <span className="shrink-0 rounded-full border border-state-warning/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">{inv.status}</span>
                 </div>
                 <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {labels.columnInvitedAt}: {inv.createdAt.slice(0, 10)}

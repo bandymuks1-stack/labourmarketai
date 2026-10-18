@@ -1,8 +1,8 @@
 {
-  "read_at": "2026-08-23T17:18:49Z",
-  "method": "Supabase MCP execute_sql (read-only): select version, name from supabase_migrations.schema_migrations order by version. Refreshed after two applies (notification_events_v6_weekly_digest, notification_preferences_v1) landed in production without updating this snapshot. read_at is the confirming read: count(*) = 234, max(version) = 20260823170908, taken at that instant — never stamped later than the read it describes.",
+  "read_at": "2026-09-08T11:07:02Z",
+  "method": "Supabase MCP execute_sql (read-only). Refreshed 2026-09-08 immediately after applying 20260906080000_search_public_vacancy_previews_count_v2 (#1572, owner-approved with a condition), which entered the ledger as version 20260908110702. Appended to the 272-row snapshot taken earlier the same day; the confirming read returned count(*) = 273 and max(version) = 20260908110702, so 272 + 1 = 273 closes exactly. read_at is that confirming read and is never stamped later than the read it describes.",
   "project_ref": "gorgitwvdzxbnaxhrsrw",
-  "row_count": 234,
+  "row_count": 273,
   "rows": [
     {
       "version": "0001",
@@ -939,6 +939,162 @@
     {
       "version": "20260823170908",
       "name": "notification_preferences_v1"
+    },
+    {
+      "version": "20260824075738",
+      "name": "public_vacancy_anon_boundary_v2"
+    },
+    {
+      "version": "20260824100938",
+      "name": "null_safe_owner_guards_v2"
+    },
+    {
+      "version": "20260824114251",
+      "name": "ai_runs_retention_redaction_v1"
+    },
+    {
+      "version": "20260827052801",
+      "name": "transversal_capability_skills_v1"
+    },
+    {
+      "version": "20260827062354",
+      "name": "practice_work_history_v1"
+    },
+    {
+      "version": "20260827064504",
+      "name": "organization_roles_v1"
+    },
+    {
+      "version": "20260827132137",
+      "name": "relationship_invitations_v1"
+    },
+    {
+      "version": "20260827173630",
+      "name": "learner_visibility_least_privilege_v1"
+    },
+    {
+      "version": "20260828155923",
+      "name": "lmc_spend_compensation_v1"
+    },
+    {
+      "version": "20260829103802",
+      "name": "20260829120000_profile_email_identity_binding_v1"
+    },
+    {
+      "version": "20260829131502",
+      "name": "20260829130000_anon_write_bounds_v1"
+    },
+    {
+      "version": "20260831161725",
+      "name": "work_hour_allocations_v1"
+    },
+    {
+      "version": "20260831170936",
+      "name": "timesheet_compute_allocations_v1"
+    },
+    {
+      "version": "20260901090215",
+      "name": "agency_disclosure_revocation_v1"
+    },
+    {
+      "version": "20260901091429",
+      "name": "relationship_visibility_least_privilege_v1"
+    },
+    {
+      "version": "20260901133218",
+      "name": "revoke_public_schema_create_v1"
+    },
+    {
+      "version": "20260901135820",
+      "name": "labour_economics_metric_widening_v1"
+    },
+    {
+      "version": "20260903070235",
+      "name": "public_vacancy_board_index_and_count_work_mem_v1"
+    },
+    {
+      "version": "20260903072912",
+      "name": "public_vacancy_supply_cover_index_v1"
+    },
+    {
+      "version": "20260903074823",
+      "name": "public_vacancies_autovacuum_v1"
+    },
+    {
+      "version": "20260903094724",
+      "name": "opportunity_type_internship_apprenticeship_v1"
+    },
+    {
+      "version": "20260903105726",
+      "name": "public_vacancy_supply_counts_v1"
+    },
+    {
+      "version": "20260903105753",
+      "name": "agency_candidate_offer_decision_v1"
+    },
+    {
+      "version": "20260903105839",
+      "name": "education_programs_cohorts_v1"
+    },
+    {
+      "version": "20260903105902",
+      "name": "institution_learner_outcomes_v1"
+    },
+    {
+      "version": "20260903130400",
+      "name": "education_rls_recursion_fix_v1"
+    },
+    {
+      "version": "20260904055214",
+      "name": "owns_company_governance_membership_v1"
+    },
+    {
+      "version": "20260905175428",
+      "name": "public_plans_v1"
+    },
+    {
+      "version": "20260905184921",
+      "name": "billing_safety_invariants_v1"
+    },
+    {
+      "version": "20260906072604",
+      "name": "public_vacancies_active_last_seen_idx_v1"
+    },
+    {
+      "version": "20260906194911",
+      "name": "worker_board_excludes_supply_v1"
+    },
+    {
+      "version": "20260906202628",
+      "name": "agency_board_excludes_supply_v1"
+    },
+    {
+      "version": "20260907180546",
+      "name": "employer_supply_discovery_v1"
+    },
+    {
+      "version": "20260907180944",
+      "name": "organization_evidence_import_v1"
+    },
+    {
+      "version": "20260908061619",
+      "name": "notification_events_service_role_grant"
+    },
+    {
+      "version": "20260908065654",
+      "name": "notification_recipient_discovery_service_role_select"
+    },
+    {
+      "version": "20260908080950",
+      "name": "evidence_parties_recursion_fix_v1"
+    },
+    {
+      "version": "20260908082301",
+      "name": "esco_canonical_linkage_67"
+    },
+    {
+      "version": "20260908110702",
+      "name": "search_public_vacancy_previews_count_v2"
     }
   ]
 }

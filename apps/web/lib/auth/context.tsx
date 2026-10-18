@@ -6,6 +6,7 @@ import {
   useContext,
   useMemo,
   useState,
+  useTransition,
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -18,15 +19,16 @@ import {
   switchActiveRole as switchActiveRoleAction,
   type Role,
 } from "@/lib/auth/actions";
+// The ONE workspace switch: the personal space (PERSONAL_WORKSPACE_ID — the
+// same core `clearActiveOrganization` runs) and every organization go through
+// `switchWorkspaceAction`, which moves the pointer, follows the identity and
+// revalidates once.
+import { switchWorkspaceAction } from "@/lib/company/organization-actions";
 import {
-  clearActiveOrganization as clearActiveOrganizationAction,
-  switchActiveOrganization as switchActiveOrganizationAction,
-} from "@/lib/company/organization-actions";
-import {
-  PERSONAL_WORKSPACE_ID,
   type SwitchableOrganization,
   type WorkspaceInfo,
 } from "@/lib/company/organization-switch";
+import { withoutWorkspaceScopedDepth } from "@/lib/conversation/result-registry";
 
 export type Notification = {
   id: string;
@@ -116,11 +118,15 @@ type AuthContextValue = AuthState & {
   /** Switch the ACTIVE organization (server-side pointer, then refresh). */
   switchOrganization: (organizationId: string) => Promise<void>;
   /** Switch the ACTIVE workspace — PERSONAL_WORKSPACE_ID clears the pointer,
-   *  an org id delegates to switchOrganization. Server-validated, honest
-   *  no-op on failure. Returns whether the server ACCEPTED the switch, so a
-   *  caller that reports the outcome (the chat) never claims a switch that
-   *  did not happen. */
+   *  an org id points at that organization. Server-validated, honest no-op on
+   *  failure. Returns whether the server ACCEPTED the switch (a thrown or
+   *  refused switch resolves `false`, never rejects), so a caller that reports
+   *  the outcome (the chat, the chip) never claims a switch that did not
+   *  happen. */
   switchWorkspace: (workspaceId: string) => Promise<boolean>;
+  /** The workspace a switch is in flight to — the chip shows it as pending
+   *  while the ONE server call and its re-render run. Null when idle. */
+  pendingWorkspaceId: string | null;
   markAsRead: (id: string) => void;
   markAllRead: () => void;
   /** Streamed-spine hydration hook (SpineHydrator only). */
@@ -170,44 +176,68 @@ export function AuthProvider({
     [router],
   );
 
+  /**
+   * THE workspace switch, as ONE observable server call (owner program
+   * 2026-09-23).
+   *
+   * It used to be two or three client-driven round trips — the pointer action,
+   * then `switchActiveRole` whenever the person held a company role anywhere,
+   * then `router.refresh()` — each revalidating the whole layout, with no
+   * pending state and a second action that could throw after the first had
+   * already moved the pointer. Now `switchWorkspaceAction` moves the pointer,
+   * follows the identity by the person's RELATIONSHIP to the workspace (server-
+   * side, from the verified membership row) and revalidates once; its response
+   * carries the re-rendered tree, and the dashboard page keys the conversation
+   * on the active workspace, so the new context mounts without a reload.
+   *
+   * The organization-scoped depth of an open result (`?demand=`, the project
+   * result's `?project=`, `?interaction=`) is dropped BEFORE the call, so the
+   * new workspace never mounts pointed at the previous one's object; a refused
+   * switch puts the address back exactly as it was.
+   *
+   * Never rejects: a throw (network, auth) resolves `false`, the same answer a
+   * refusal gives, so no caller can leave an unhandled rejection behind.
+   */
+  const [isSwitching, startSwitch] = useTransition();
+  const [requestedWorkspaceId, setRequestedWorkspaceId] = useState<string | null>(null);
+
+  const switchWorkspace = useCallback((workspaceId: string): Promise<boolean> => {
+    const before = typeof window === "undefined" ? null : window.location;
+    const strippedSearch = before ? withoutWorkspaceScopedDepth(before.search) : null;
+    const restore = before ? before.pathname + before.search + before.hash : null;
+    if (before && strippedSearch !== null) {
+      window.history.replaceState(
+        window.history.state,
+        "",
+        before.pathname + strippedSearch + before.hash,
+      );
+    }
+    setRequestedWorkspaceId(workspaceId);
+    return new Promise<boolean>((resolve) => {
+      startSwitch(async () => {
+        let accepted = false;
+        try {
+          accepted = (await switchWorkspaceAction(workspaceId)).ok;
+        } catch {
+          accepted = false;
+        }
+        if (!accepted && strippedSearch !== null && restore) {
+          window.history.replaceState(window.history.state, "", restore);
+        }
+        resolve(accepted);
+      });
+    });
+  }, []);
+
   const switchOrganization = useCallback(
     async (organizationId: string) => {
       // Membership is validated server-side (action + DB trigger); a failed
-      // switch simply leaves the current org active — nothing is faked.
-      const result = await switchActiveOrganizationAction(organizationId);
-      if (result.ok) router.refresh();
+      // switch simply leaves the current org active — nothing is faked. An
+      // organization switch IS a workspace switch: same call, same identity
+      // follow, so the admin role switcher and the chip cannot diverge.
+      await switchWorkspace(organizationId);
     },
-    [router],
-  );
-
-  const switchWorkspace = useCallback(
-    async (workspaceId: string) => {
-      const result =
-        workspaceId === PERSONAL_WORKSPACE_ID
-          ? await clearActiveOrganizationAction()
-          : await switchActiveOrganizationAction(workspaceId);
-      if (!result.ok) return false;
-      // The workspace IS the acting context (owner audit P0.1): choosing an
-      // organization means acting as that organization, so the base identity
-      // follows — the chat greeting, CTAs, and company surfaces all switch
-      // with it. Only roles the person REALLY holds are ever activated.
-      const toOrg = workspaceId !== PERSONAL_WORKSPACE_ID;
-      const wanted: Role | null = toOrg
-        ? initial.roles.includes("company")
-          ? "company"
-          : initial.roles.includes("agency")
-            ? "agency"
-            : null
-        : initial.roles.includes("worker")
-          ? "worker"
-          : null;
-      if (wanted && wanted !== initial.activeRole) {
-        await switchActiveRoleAction(wanted);
-      }
-      router.refresh();
-      return true;
-    },
-    [router, initial.roles, initial.activeRole],
+    [switchWorkspace],
   );
 
   const markAsRead = useCallback(
@@ -273,6 +303,7 @@ export function AuthProvider({
       addRole,
       switchOrganization,
       switchWorkspace,
+      pendingWorkspaceId: isSwitching ? requestedWorkspaceId : null,
       markAsRead,
       markAllRead,
       applySpine,
@@ -296,6 +327,8 @@ export function AuthProvider({
       addRole,
       switchOrganization,
       switchWorkspace,
+      isSwitching,
+      requestedWorkspaceId,
       markAsRead,
       markAllRead,
       applySpine,

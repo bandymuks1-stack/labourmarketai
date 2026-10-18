@@ -6,7 +6,7 @@
  * never a live-billing claim:
  *   - PRICING_READINESS_STATE is the owner-editable pricing state — prices
  *     stay drafts until the owner flips it to "owner_confirmed"; neither
- *     state makes anything purchasable (PAYMENTS_ENABLED stays false).
+ *     state makes anything purchasable (only the resolved billing config enables payments).
  *   - FEATURE_ENFORCEMENT maps EVERY plan feature key to its real
  *     enforcement seam or surface (guard-pinned: cited sites must exist and
  *     carry the real check — no phantom features, no silent claims).
@@ -43,7 +43,11 @@ export type PricingReadinessState = "draft_pricing" | "owner_confirmed";
  * landing freeze, so deleting them is a separate owner call. The real price's
  * only future home is `plans.price_eur_monthly`, surfaced after this flips.
  */
-export const PRICING_READINESS_STATE: PricingReadinessState = "draft_pricing";
+// Owner approval 2026-09-05 (launch pricing): PERSON €0 · ORGANIZATION FREE €0
+// (1 active position) · ORGANIZATION €99/month (no fixed limit on active
+// positions since the owner decision of 2026-10-06). The figure itself lives ONLY in
+// `plans.price_eur_monthly`; this flag only says the table is confirmed.
+export const PRICING_READINESS_STATE: PricingReadinessState = "owner_confirmed";
 
 // ─── Feature enforcement registry (plan boundary ↔ real checks) ─────────────
 
@@ -100,10 +104,21 @@ export const FEATURE_ENFORCEMENT: Readonly<
     kind: "declared_boundary_only",
     site: ENTITLEMENT_SEAM,
   },
+  vacancy_translations: {
+    // Owner decision 2026-09-22 (vacancy translation policy): a REAL server
+    // gate, not a declared boundary. The allowance is read before any text
+    // leaves the building and spent only after the reader receives a usable
+    // rendering; an exhausted allowance removes the convenience and never
+    // the advertisement.
+    kind: "server_gate",
+    site: "lib/vacancy-store/vacancy-translation-entitlement.ts",
+  },
   // company
   company_create_needs: {
-    kind: "declared_boundary_only",
-    site: ENTITLEMENT_SEAM,
+    // Owner launch pricing 2026-09-05: enforced on the ONE canonical demand
+    // creation path (FREE 1 / ORGANIZATION: no fixed limit, owner 2026-10-06).
+    kind: "server_gate",
+    site: "lib/billing/open-needs-gate.ts",
   },
   candidate_readiness_summaries: {
     kind: "declared_boundary_only",
@@ -228,5 +243,13 @@ export const BILLING_READINESS_ITEMS: readonly BillingReadinessItem[] = [
     key: "provider_connection",
     status: "blocked_by_design",
     proof: "apps/web/lib/billing/provider.ts",
+  },
+  {
+    // D3 (2026-09-02): the live path exists in code and is INERT until the
+    // owner arms it — token in env (G-8) + price table confirmed in code
+    // (G-7) + complete live keys. Prepared, not ready.
+    key: "live_activation",
+    status: "prepared",
+    proof: "apps/web/lib/billing/config-core.ts",
   },
 ];

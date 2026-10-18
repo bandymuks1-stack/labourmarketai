@@ -1,12 +1,23 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
+import { resolveViewerTexts } from "@/lib/communication/translation-read";
 import {
   listWorkerInstructions,
   listManagedWorkers,
 } from "@/lib/instructions/instructions";
 import { listManagedProjects } from "@/lib/projects/projects";
+import { loadOwnProjectAsks } from "@/lib/projects/worker-project-access";
+import { loadOwnProjectLedgers } from "@/lib/player-card/requirement-ledger-server";
+import { buildRequirementLedgerLabels } from "@/lib/player-card/requirement-ledger-labels";
+import type { RequirementLedger } from "@/lib/player-card/requirement-ledger";
+import {
+  InstructionProjectAsks,
+  type InstructionLedgerLabels,
+  type InstructionProjectAsksLabels,
+} from "@/components/app/instruction-project-asks";
 import {
   WorkerInstructionCard,
   type InstructionCardLabels,
@@ -16,10 +27,16 @@ import {
   type ComposerLabels,
 } from "@/components/app/manager-instruction-composer";
 import { type Role } from "@/lib/auth/actions";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
 const MANAGER_ROLES = new Set<Role>(["company", "agency"]);
+
+/** How many instruction projects get a full requirement ledger on one page
+ *  load (bounded — the shared person reads are request-cached, so each extra
+ *  project costs its own checklist read only). */
+const LEDGER_PROJECT_LIMIT = 5;
 
 /**
  * Work instructions (slice work-instructions-v1) — the multilingual instruction
@@ -46,19 +63,15 @@ export default async function InstructionsPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role = (profile?.active_role as Role) ?? "worker";
   const isManager = MANAGER_ROLES.has(role);
 
   const Header = (
     <header className="flex flex-col gap-1">
-      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-        {isManager ? t("managerTitle") : t("workerTitle")}
-      </h1>
+      <PageTitle>{isManager ? t("managerTitle") : t("workerTitle")}</PageTitle>
       <p className="text-sm leading-relaxed text-text-secondary">
         {isManager ? t("managerIntro") : t("workerIntro")}
       </p>
@@ -108,7 +121,66 @@ export default async function InstructionsPage({
   }
 
   // Worker view.
-  const read = await listWorkerInstructions();
+  const listed = await listWorkerInstructions();
+  // MULTILINGUAL WORK COMMUNICATION: an instruction written in the manager's
+  // language is rendered in THIS worker's language through the egress-gated
+  // AI runtime; the original stays on the card. Without an owner grant the
+  // status stays 'unavailable' and the original shows — honestly.
+  const read: typeof listed =
+    listed.kind === "ok"
+      ? await (async () => {
+          const texts = await resolveViewerTexts(
+            listed.instructions.map((i) => ({ id: i.id, body: i.originalText, original_language: i.originalLanguage })),
+            locale,
+            user.id,
+          );
+          return {
+            kind: "ok" as const,
+            instructions: listed.instructions.map((i) => {
+              const vt = texts.get(i.id);
+              return vt && vt.kind === "translated"
+                ? { ...i, translatedText: vt.text, translationStatus: "available" as const }
+                : i;
+            }),
+          };
+        })()
+      : listed;
+  // §11/§12 — what each instruction's project still needs from THIS person,
+  // the SAME domain read the chat's "mano projektai" renders (visual parity).
+  const asks =
+    read.kind === "ok"
+      ? await loadOwnProjectAsks(read.instructions.map((i) => i.projectId).filter((id): id is string => Boolean(id))).catch(() => new Map())
+      : new Map();
+  const asksLabels: InstructionProjectAsksLabels = {
+    title: t("card.asksTitle"),
+    ownReady: t("card.ownReady"),
+    ownExpiring: t("card.ownExpiring"),
+    ownNone: t("card.ownNone"),
+    blocked: t("card.blocked"),
+    record: t("card.record"),
+    capabilityDemonstrated: t("card.capabilityDemonstrated"),
+    capabilitySelfReported: t("card.capabilitySelfReported"),
+    capabilityStillRequired: t("card.capabilityStillRequired"),
+    capabilityRecognised: t("card.capabilityRecognised"),
+  };
+
+  // P3 — the contextual requirement ledger per instruction project (frozen
+  // design contract §5): the SAME person, the project as the context. One
+  // ledger per distinct project (bounded), rendered where the asks already
+  // render; a read that does not answer leaves the asks alone.
+  let ledgers = new Map<string, RequirementLedger>();
+  if (read.kind === "ok") {
+    const threadByProject = new Map<string, string>();
+    for (const ins of read.instructions) {
+      if (ins.projectId && !threadByProject.has(ins.projectId)) threadByProject.set(ins.projectId, ins.conversationId);
+    }
+    ledgers = await loadOwnProjectLedgers(
+      [...threadByProject.entries()].slice(0, LEDGER_PROJECT_LIMIT).map(([projectId, conversationId]) => ({ projectId, conversationId })),
+    ).catch(() => new Map<string, RequirementLedger>());
+  }
+  // THE ledger copy comes from its one home now that a second context
+  // (opportunity) renders the same rows — see requirement-ledger-labels.
+  const ledgerLabels = await buildRequirementLedgerLabels();
   const cardLabels: InstructionCardLabels = {
     autoTranslation: t("card.autoTranslation"),
     translationUnavailable: t("card.translationUnavailable"),
@@ -140,8 +212,16 @@ export default async function InstructionsPage({
       ) : (
         <ul className="flex flex-col gap-3">
           {read.instructions.map((ins) => (
-            <li key={ins.id}>
+            <li key={ins.id} className="flex flex-col gap-2">
               <WorkerInstructionCard instruction={ins} labels={cardLabels} />
+              {ins.projectId ? (
+                <InstructionProjectAsks
+                  asks={asks.get(ins.projectId)?.asks ?? []}
+                  labels={asksLabels}
+                  ledger={ledgers.get(ins.projectId) ?? null}
+                  ledgerLabels={ledgerLabels}
+                />
+              ) : null}
             </li>
           ))}
         </ul>

@@ -185,7 +185,12 @@ describe("3. project responsible + lifecycle actions", () => {
       ...ADMIN_ACTIONS.matchAll(/\.rpc\(\s*"([a-z0-9_]+)"/g),
     ].map((m) => m[1]);
     expect(new Set(rpcCalls)).toEqual(
-      new Set(["set_project_status_v1", "set_project_responsible_v1"]),
+      new Set([
+        "set_project_status_v1",
+        "set_project_responsible_v1",
+        // R-3 (2026-09-19): the one gated write for the project facts.
+        "update_project_facts_v1",
+      ]),
     );
     expect(ADMIN_ACTIONS).not.toMatch(/\.insert\(|\.update\(|\.delete\(|\.upsert\(/);
     expect(ADMIN_ACTIONS).toMatch(/notice=/);
@@ -211,6 +216,7 @@ describe("4. progress is DERIVED, never stored", () => {
       stageDone: 0,
       stageTotal: 0,
       percent: null, // NOT 0% and NOT 100% — nothing measurable exists
+      basis: "none",
     });
     expect(
       deriveProjectProgress(["done", "todo", "cancelled"], ["done", "planned"]),
@@ -219,13 +225,17 @@ describe("4. progress is DERIVED, never stored", () => {
       taskTotal: 2, // cancelled excluded from BOTH sides
       stageDone: 1,
       stageTotal: 2,
-      percent: 50,
+      percent: 50, // leaf tasks only: 1 of 2; stages are not in the percent
+      basis: "tasks",
     });
   });
 
   it("the read is status-only (no task/stage bodies flow into progress)", () => {
     expect(PROGRESS).toMatch(/select\("project_id, status"\)/);
     expect(PROGRESS).not.toMatch(/title|description|note/);
+    // a read that hit the limit or failed is unknown, never a percent
+    expect(PROGRESS).toMatch(/taskRows\.length < READ_LIMIT/);
+    expect(PROGRESS).toMatch(/tasksComplete/);
   });
 });
 

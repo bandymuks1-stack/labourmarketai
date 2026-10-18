@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { claimPublicIntakeAction } from "@/lib/company/claim-public-intake-actions";
 import type { ClaimableIntake } from "@/lib/company/claim-public-intake";
+import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
 
 /**
  * Canonical-journey P3 — "we found your earlier public submission" card.
@@ -35,6 +36,9 @@ export function ClaimPublicIntakeCard({
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useState<Set<string>>(new Set());
   const [failedId, setFailedId] = useState<string | null>(null);
+  // The claim is authorised by a VERIFIED mailbox only; when the server says the
+  // address is unverified the progressive proof is offered instead of a dead end.
+  const [needsProof, setNeedsProof] = useState(false);
 
   if (intakes.length === 0) return null;
 
@@ -45,6 +49,8 @@ export function ClaimPublicIntakeCard({
       if (r.ok) {
         setDone((prev) => new Set(prev).add(id));
         router.refresh();
+      } else if (r.reason === "email_unverified") {
+        setNeedsProof(true);
       } else {
         setFailedId(id);
       }
@@ -95,7 +101,7 @@ export function ClaimPublicIntakeCard({
                   type="button"
                   onClick={() => onClaim(intake.id)}
                   disabled={pending}
-                  className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50"
+                  className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
                   data-testid={`intake-claim-${intake.id}`}
                 >
                   {labels.claimCta}
@@ -110,6 +116,9 @@ export function ClaimPublicIntakeCard({
           </li>
         ))}
       </ul>
+      {needsProof ? (
+        <VerifyEmailPrompt locale={locale} next="/dashboard/company/needs" variant="intake" />
+      ) : null}
     </section>
   );
 }

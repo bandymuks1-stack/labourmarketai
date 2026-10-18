@@ -862,13 +862,18 @@ describe("supergrand vision surface", () => {
     expect(page).toMatch(/t\("honesty"\)/);
   });
 
-  it("vision control room declares PR #18 BLOCKED + owner smoke PENDING", () => {
+  it("vision control room carries no internal owner-smoke / PR status rows (public page)", () => {
     const lt = JSON.parse(readWeb("messages/lt.json"));
     const en = JSON.parse(readWeb("messages/en.json"));
-    expect(lt.vision.controlRoom.ownerSmokeStatus).toBe("PENDING");
-    expect(en.vision.controlRoom.ownerSmokeStatus).toBe("PENDING");
-    expect(lt.vision.controlRoom.pr18Status).toMatch(/BLOCKED/);
-    expect(en.vision.controlRoom.pr18Status).toMatch(/BLOCKED/);
+    // Internal engineering status ("Owner production smoke: PENDING",
+    // "PR #18: BLOCKED (issue #32)") was rendered to the public /vision page
+    // in every locale. Removed 2026-09-20 — the rows and their keys are gone.
+    for (const k of ["ownerSmokeLabel", "ownerSmokeStatus", "pr18Label", "pr18Status"]) {
+      expect(lt.vision.controlRoom[k], `lt vision.controlRoom.${k}`).toBeUndefined();
+      expect(en.vision.controlRoom[k], `en vision.controlRoom.${k}`).toBeUndefined();
+    }
+    const page = readWeb("components/marketing/labour-market-os-map.tsx");
+    expect(page).not.toMatch(/ownerSmoke|pr18/);
     // The fake-claims row must read "never used" in both locales.
     expect(lt.vision.controlRoom.fakeClaimsStatus).toMatch(/Niekada/);
     expect(en.vision.controlRoom.fakeClaimsStatus).toMatch(/Never/);
@@ -1007,7 +1012,11 @@ describe("auth session re-entry honours `next` (PR #43)", () => {
     // The hardcoded /dashboard redirect must be gone — replaced by an
     // assign to the sanitised return path.
     expect(txt).not.toMatch(/router\.replace\("\/dashboard"\)/);
-    expect(txt).toMatch(/window\.location\.assign\(nextPath\)/);
+    // Window 6 (2026-09-06): the sanitised path now goes through the pure
+    // `postLoginDestination` helper (a not-yet-onboarded person is routed to
+    // /onboarding?next=... so the landing sentence survives) — still a
+    // full-document assign, still built from `nextPath`.
+    expect(txt).toMatch(/window\.location\.assign\(\s*postLoginDestination\(\{\s*locale,\s*nextParam,\s*nextPath,\s*onboardedAt\s*\}\)/);
   });
 
   it("signup form reads `next` + carries it into onboarding", () => {
@@ -2362,12 +2371,341 @@ describe("no migration files added by this sprint", () => {
     // the sentence "Apply batch 2026-09-03 D". RECOUNTED from the tree, never
     // Bumped 262 -> 263 for owns_company governance membership (Lane A real
     // recruiter, 2026-09-04, RED draft).
-    // summed: `ls supabase/migrations/*.sql | wc -l` = 263.
-    // Bumped 263 -> 264 for workspace_pins v1 (My Space, owner contract
-    // 2026-09-04 §4C): ONE reference table, owner-only RLS on all four
-    // verbs, plain writes, no definer function, paired .down.sql — GREEN.
-    // RECOUNTED: `ls supabase/migrations/*.sql | wc -l` = 264.
-const SPRINT_BASELINE = 264;
+    // Bumped 263 -> 265 for public_plans_v1 (#1548, applied) + billing safety invariants v1 (2026-09-05, RED
+    // billing, draft + needs-human-gate, UNAPPLIED until owner approval):
+    // additive evidence columns + billing_checkout_operations table + the
+    // billing_customers (owner, provider, test_mode) key. No data loss.
+    // summed: `ls supabase/migrations/*.sql | wc -l` = 265.
+    // Bumped 265 -> 266 for public_vacancies_active_last_seen_idx_v1 (Lane H
+    // window 6, 2026-09-06, GREEN additive: one partial index for the board
+    // supply-freshness read measured 270.8 ms mean / 6,747 ms max; paired
+    // rollback; applied by the orchestrator via MCP). RECOUNTED from the
+    // tree: `ls supabase/migrations/*.sql | wc -l` = 266.
+    // Bumped 266 -> 267 for worker_board_excludes_supply_v1 (owner window 7
+    // §4, 2026-09-06): the worker board's gated read had NO `kind` filter, so
+    // agency SUPPLY offers (kind='agency_offer') were served to every worker
+    // as open jobs — measured 2 of 9 rows on production. RED class
+    // (SECURITY DEFINER body replace); draft + needs-human-gate, NOT applied.
+    // Bumped 267 -> 268 for agency_board_excludes_supply_v1 (2026-09-06):
+    // list_open_demand_for_agencies had no `kind` filter either, so an agency
+    // browsing for work to staff was served OTHER agencies' offers as demand —
+    // measured on production as 2 of 12 rows, through the real RPC under the
+    // agency's own auth. RED class (SECURITY DEFINER body replace).
+    // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
+    // = 273 files.
+    //
+    // 269 -> 270: the two 2026-09-07 owner-approved migrations
+    // (organization_evidence_import_v1, employer_supply_discovery_v1). Both
+    // are now APPLIED (ledger 20260907180944 and 20260907180546) and both
+    // carry `@human-gate-approved` naming the decisions EVID-1 / DEM-9. The
+    // comments that stood here called them "NOT applied" and said they carry
+    // "NO marker"; that was true when written and is false now, so it is
+    // corrected rather than carried forward. They remain RED class - a marker
+    // acknowledges risk, it never reclassifies a file to GREEN.
+    //
+    // 270 -> 271: the notification-spine service_role grant (20260906060000,
+    // #1566). Two additive grants - select/insert/update on
+    // notification_events, select on notification_preferences - so the
+    // emitters and the email dispatcher's consent read stop failing 42501.
+    // Measured on production 2026-09-07: service_role holds NO privilege on
+    // either table, and `rolbypassrls` is true, so RLS is not the blocker -
+    // the missing GRANT is. RED (privilege surface), owner-gated. The line
+    // here once said "NOT applied"; the owner approved it and it went to
+    // production 2026-09-08 as ledger 20260908061619, so that is corrected
+    // rather than carried forward. RED class is unchanged by having applied.
+    //
+    // 271 -> 272: the recipient-discovery reads (20260908070000, same PR).
+    // The write grant alone did NOT fix the cron. The first real invocation
+    // after it landed still returned HTTP 503 - not 401, so auth was fine and
+    // the function ran ~930 ms before failing. The digest sweep opens by
+    // reading journal_entries.worker_id and then workers(id, profile_id), and
+    // service_role held no privilege on EITHER, so PostgREST answered 42501
+    // and `if (error) return { kind: "unavailable" }` became the 503 before a
+    // single row could be written (notification_events was still 2 rows / 0
+    // digests afterwards - nothing was half-delivered). Reproduced under
+    // `set local role service_role` in a deliberately aborted transaction:
+    // journal_entries=BLOCKED_42501 workers=BLOCKED_42501. SELECT ONLY on
+    // both; no write privilege, because the spine reads domain rows and never
+    // writes them. It also un-breaks `workerProfileId()`, which discards its
+    // error and so reported a denied read as "row_unreadable" - the booking
+    // and absence emitters were silently dead for the same reason. Email is
+    // NOT implicated: the email hop runs only after a successful insert, is
+    // wholly try/caught, and stops at `channel_disabled` with 0 opt-ins.
+    // RED (privilege surface), owner-approved, APPLIED to production
+    // 2026-09-08 as ledger 20260908065654.
+    //
+    // 272 -> 273: the evidence-parties recursion repair (20260907220000,
+    // #1618). Owner decision EVID-1, approved 2026-09-08 and applied via
+    // Supabase MCP apply_migration as ledger 20260908080950. It breaks the
+    // mutual organization_evidence_records <-> _parties policy cycle with a
+    // SECURITY DEFINER boolean holding the predicate the policy used to
+    // inline. Verified after the apply: all four formerly-recursing tables
+    // read under a real manager, a full write chain ran in a rolled-back
+    // transaction (records + parties INSERT ... RETURNING), a person who
+    // manages nothing read 0 with no error, anon is REFUSED EXECUTE on the
+    // resolver, and residue was re-counted at 0. RED class (SECURITY DEFINER
+    // + policy replace) - applying it does not make it GREEN.
+    //
+    // 273 -> 274: the 67-row ESCO canonical linkage (20260830100000, #1635).
+    // Owner-approved 2026-09-08 and applied as ledger 20260908082301. It is a
+    // write-if-null curation: 65 mappings land (31 skills, 34 professions) and
+    // the two ambiguous cases stay UNMAPPED on purpose, because generic
+    // "teacher" had mapped to a tertiary POLITICS LECTURER and generic
+    // "caregiver" to COMPANIONS/VALETS. UNKNOWN is the correct answer for an
+    // ambiguous occupation; confidently wrong is the defect this removes.
+    // Verified by fingerprint match between production and the file.
+    //
+    // 274 -> 275: the anonymous board's total_count (20260906080000, #1572).
+    // Owner-approved 2026-09-08 WITH A CONDITION (a dedicated guard, which is
+    // lib/guards/jobs-count-secdef-v2.test.ts). `count(*) over ()` window-
+    // counted every live row on every anon call; measured on production with
+    // both bodies timed back-to-back in one transaction, warmed: unfiltered
+    // 97/90 ms warm and 3351 ms COLD -> 1/1 ms, against anon's
+    // statement_timeout=3s. The profession filter costs ~14 ms more because
+    // the filtered total became a second scan - a real regression, far below
+    // the timeout, recorded rather than hidden. RED (SECURITY DEFINER body
+    // replace); body only - same signature, same projection, no GRANT.
+    //
+    // 275 -> 276: the accepted-worker organization binding (20260902230000,
+    // #1436, port). REPRODUCED on production 2026-09-08: the legacy roster
+    // accept links a worker into company_workers and writes NO
+    // engagement_contexts row, so `belongs_to_organization` is false for them
+    // and SIX RLS policies lock them out of their own employer - including the
+    // `organizations` row itself. Four of seven active company_workers are in
+    // that state today. It binds a RELATIONSHIP, never a governance seat:
+    // company_memberships is deliberately untouched, because a membership row
+    // would hand demand-shaped access to every accepted employee and collapse
+    // the multi-actor model. Body re-derived from the LIVE function rather than
+    // the 227-commit-stale branch. RED (SECURITY DEFINER body replace);
+    // UNAPPLIED and owner-gated.
+    //
+    // 277 -> 278: EDU-7, an institution can correct a programme it created
+    //   (20260908120000, paired rollback). RED, owner-gated, UNAPPLIED.
+    //   Rebased over the supply bridge on 2026-09-09; RECOUNTED from the
+    //   tree: `ls supabase/migrations/*.sql | wc -l` = 278 files.
+    // 276 -> 277: the first-party supply bridge
+    // (20260904120000_first_party_supply_representation_v1, paired rollback).
+    // A new consent purpose, the partner_supply_representation declaration
+    // table with three owner-only policies and no delete policy, and six
+    // SECURITY DEFINER functions — one of them (first_party_supply_feed_v1)
+    // revoked from authenticated and granted to service_role ONLY. Additive:
+    // no existing table, policy or column is altered and nothing is dropped.
+    // RED class; owner approval given 2026-09-09 for THIS migration only.
+    // RECOUNTED FROM THE TREE, never summed: `ls supabase/migrations/*.sql`
+    // = 277 files.
+    // 278 -> 279: `candidate` added to organization_people.relationship_kind
+    //   (owner approval 2026-09-10). ONE additive CHECK widening — a strict
+    //   superset, 0 rows in the table, no policy/grant/function touched.
+    // 279 -> 280: four platform rows in the `productivity_units` registry —
+    //   kilometers / pallets / covers / cases
+    //   (20260911130000_productivity_units_universal_v1, paired guarded
+    //   rollback; issue #1689). INSERT … ON CONFLICT DO NOTHING only: no
+    //   table, column, policy, grant or function touched. GREEN class;
+    //   self-applied via MCP under the conditional prod-apply rule.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 280.
+    // Bumped 280 -> 281 for the WRK-8 assignee read widening
+    //   (20260914200000_defects_assignee_read_v1, owner decision 2a of
+    //   2026-09-14, paired rollback). RED by route — the scanner flags any
+    //   ALTER/DROP POLICY — and semantically a pure one-disjunct WIDENING of
+    //   `defects_select`: every caller who could read a row before still can,
+    //   and exactly one new class is admitted, the person named in
+    //   `assignee_profile_id`, for that row only. `defects` held 0 rows at
+    //   apply time, so no existing row's visibility changed.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 281.
+    // Bumped 281 -> 282 for the PER-11 split
+    //   (20260914210000_external_profiles_v1, owner decision 4e of 2026-09-14,
+    //   paired rollback). PREPARED FOR REVIEW ONLY and deliberately carries NO
+    //   @human-gate-approved annotation: the owner approved preparing it, not
+    //   applying it. Ships UNAPPLIED.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
+    // Bumped 282 -> 284: #1739 (MKT-3 asset_single_open_assignment_v1,
+    //   DEM-8 worker_saved_searches_v1) reconciled onto main after #1740. Both
+    //   were APPLIED to production as ledger 20260914144053 / 20260914144310
+    //   before the reconciliation; the files land here so main = production.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 284.
+// 284 -> 285: RED #4 + #5 — the subject-scoped contest policy and the
+//   clash-acknowledgement receipt, ONE migration
+//   (20260915180000_subject_contest_and_clash_receipt). PREPARED, NOT
+//   APPLIED: owner PREPARE approval 2026-09-15, packet in
+//   docs/DECISIONS/RED-4-5-subject-authority-packet.md. The baseline grows
+//   because the FILE exists, not because the authority is live.
+//   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 285.
+// 285 -> 286: universal invitation / referral network v1, ONE migration
+//   (20260917120000_universal_invitation_referral_network_v1). RED
+//   (SECURITY DEFINER + GRANT/REVOKE + DROP NOT NULL + CHECK widening),
+//   PREPARED, NOT APPLIED — draft PR behind `needs-human-gate`, no owner
+//   approval recorded yet. The baseline grows because the FILE exists, not
+//   because the door is live. If another migration PR merges first, this
+//   must be re-bumped to that PR's count + 1.
+//   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 286.
+// 286 -> 287: forward correction 20260917130000_invitation_preview_demand_
+//   column_fix_v1 — `get_invitation_preview_v2` read `role_text` from
+//   customer_requests (the worker-board projection name); the column is
+//   `role_or_work_type`. Found by the post-apply production proof of
+//   20260917120000 (APPLIED 2026-09-17, ledger 20260917080303). RED (SECDEF
+//   replace), PREPARED, NOT APPLIED — owner gate.
+//   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 287.
+// Bumped 287 -> 288 for 20260917140000_widen_original_language_uk_ka
+// (owner RED-1 2026-09-17): a GREEN-shaped CHECK widening (+uk,+ka) across the
+// four original_language tables, @human-gate-approved, paired rollback. Global
+// migration-count baseline — recounted from the tree, never summed.
+// Bumped 288 -> 289 for 20260917160000_vacancy_interest_commercial_handoff_v1
+// (worker → real vacancy → interest → Nonstop commercial handoff): the second
+// source on demand_interest_signals + commercial_handoffs + two SECDEF
+// functions + a trigger. RED, PREPARED, NOT APPLIED — owner gate; dry-run
+// proven in a rolled-back production transaction. RECOUNTED: 289.
+// Bumped 289 -> 290 for 20260917170000_commercial_handoff_requeue_on_reexpress_v1
+// (forward fix: a closed, never-delivered handoff is re-queued when the hand is
+// raised again; found on the production-data walk of #1760). RED, PREPARED,
+// NOT APPLIED — owner gate; dry-run proven, rolled back. RECOUNTED: 290.
+// Bumped 290 -> 291 for 20260918070000_roster_link_subject_consent_guard_v1
+// (BEFORE UPDATE trigger: only the linked subject may turn a roster row into
+// linked/worker_confirmed; a manager's forgery was ADMITTED live before it).
+// RED, APPLIED 2026-09-18 under owner approval, ledger 20260918070510;
+// hostile tests proven live, rolled back. RECOUNTED: 291.
+// Bumped 291 -> 292 for 20260919100000_roster_writes_rpc_only_v1 (R-1 HIGH:
+// revoke direct writes + drop the two FOR ALL write policies on company_workers
+// / agency_workers; every legitimate writer is a SECURITY DEFINER RPC). RED,
+// APPLIED 2026-09-19 under the owner's verbatim approval, ledger 20260919104526;
+// forge ADMITTED live rows=1 before, 42501 ×5 after, legitimate path proven —
+// all rolled back (PR #1791). RECOUNTED: 292.
+// Bumped 292 -> 293 for 20260919120000_add_org_member_requires_consented_roster_v1
+// (R-16 HIGH: add_org_member minted an active employee engagement context for
+// ANY worker — no roster row, no invitation, no consent — which unlocks
+// can_view_worker; the RPC now requires an active consent-backed roster row).
+// RED, owner-approved and APPLIED 2026-09-19 (ledger 20260919143247); forge
+// ADMITTED live rows=1 before, the LIVE function refuses (not_linked / rows=0)
+// after, invite → worker accepts → already_member — all rolled back (PR #1794).
+// RECOUNTED: 293.
+// Bumped 293 -> 294 for 20260919130000_update_project_facts_v1 (R-3: the ONE
+// gated write for projects.title/city/country/start_date/end_date — no write
+// path existed after creation; every production project has country NULL and
+// no dates). RED (new SECURITY DEFINER function), owner-approved and APPLIED
+// 2026-09-19 (ledger 20260919145731); the seven-case contract run on the LIVE
+// function and rolled back (PR #1795). RECOUNTED: 294.
+// Bumped 294 -> 295 for 20260919150000_end_roster_link_v1 (R-9: the ONE gated
+// end for a roster link — the worker withdraws the relationship they accepted
+// or the owner removes them; status → 'removed', employee engagement ended,
+// audited; never a DELETE). RED (new SECURITY DEFINER function), owner-approved
+// and APPLIED 2026-09-19 (ledger 20260919151920); the contract run on the LIVE
+// function and rolled back (PR #1798). RECOUNTED: 295.
+// Bumped 295 -> 296 for 20260919140000_usage_cost_trigger_search_path_v1 (R-13:
+// pin search_path on the two append-only trigger functions — advisor WARN,
+// hygiene only; no body / grant / policy / row change). Listed in the owner
+// packet → kept on the human gate; owner-approved and APPLIED 2026-09-19
+// (ledger 20260919153945), proconfig read back on both (PR #1797). RECOUNTED: 296.
+// Bumped 296 -> 297 for 20260919190000_demand_lifecycle_colleague_v1 (R-15: the
+// two gated lifecycle writes — close_demand_v1 / reopen_demand_v1 — for the
+// creator, an admin or a colleague with has_org_demand_access; status +
+// updated_at only, UPDATE policy untouched). RED (new SECURITY DEFINER
+// functions), owner-approved and APPLIED 2026-09-20 (ledger 20260920051619);
+// contract run on the LIVE functions and rolled back (PR #1805). RECOUNTED: 297.
+// Bumped 297 -> 298 for 20260919210000_relationship_journal_reviewable_v1
+// (INSTITUTION loop, EVIDENCE → COMPETENCY: the rule "which relationships may
+// be opened to journal review" becomes DATA on relationship_types, seeded for
+// employee + student; set_engagement_journal_review reads it). RED (column +
+// SECDEF redefinition), owner-approved and APPLIED 2026-09-20 (ledger
+// 20260920052103); contract run live and rolled back (PR #1807). RECOUNTED: 298.
+// Bumped 298 -> 299 for 20260920173000_privacy_consent_locale_pl_hash_repin_v1
+// (PL consent legal texts, owner approval 2026-09-20 with the required
+// "without direct identifying data" correction): three data-only UPDATE rows
+// on privacy_consent_purposes re-pinning current_text_hash because
+// consentTextHash() covers every locale in CONSENT_LOCALES and `pl` joined
+// it; versions unchanged, no DDL/grant/policy (GREEN). Paired rollback file.
+// Applied in the same step as the #1810 production deploy. RECOUNTED: 299.
+// Bumped 299 -> 300 for 20260922120000_countries_all_iso_v1 (global-access rule: every
+// ISO code seeded into public.countries with is_target_market=false; additive insert ...
+// on conflict do nothing; owner-gated apply). RECOUNTED: 300.
+// Bumped 300 -> 301 for 20260922140000_privacy_consent_rpc_locale_pl_v1 (consent grant RPCs accept
+// locale pl; RED SECDEF body replace, human-gated; owner-applied). RECOUNTED: 301.
+// Bumped 301 -> 302 for 20260922130000_company_need_intake_country_registry_v1 (anonymous company-need
+// intake accepts any code in public.countries; RED SECDEF body replace, human-gated; owner-applied). RECOUNTED: 302.
+// Bumped 302 -> 303 for 20260922150000_public_vacancy_translations_v1 (owner P0
+// §9 foreign-language vacancies): ONE additive jsonb column
+// public_vacancies.translations holding per-locale DERIVED renderings beside the
+// original (status, title, description, sourceLanguage, sourceHash, provider,
+// model, generatedAt) + an object-shape CHECK. No grant, policy or row change -
+// a column, not a table, because pg_default_acl is empty and a table would need
+// GRANTs (RED). GREEN by shape; paired .down.sql; APPLIED 2026-09-22, ledger
+// 20260922102211. RECOUNTED: 303.
+// Bumped 303 -> 304 for 20260923114500_nonstop_org_consolidation_v1 (owner decision
+// 2026-09-23, one canonical Nonstop Group): additive organizations.archived_at +
+// archived_reason (+ one CHECK) and ONE data DO block — workforce_provider granted to
+// 20b2c802, Donatas' manager membership added, two workspace pointers repointed, one
+// obsolete engagement ended, one test need closed, four duplicate/test organizations
+// archived (nothing deleted), every change logged old/new to audit_logs. RED (data DML),
+// human-gated, paired .down.sql, UNAPPLIED until the lead's rolled-back production dry
+// run. RECOUNTED: 304.
+// Bumped 304 -> 305 for 20260924100000_historical_timesheet_m1 (historical timesheet
+// import PR-3 = design §14 M1a–M1i + §8 P1–P9): additive NULLABLE columns —
+// projects.historical_key / created_session_id, project_clients.customer_key /
+// customer_code / customer_kind / created_session_id, records.project_id /
+// source_row_index / row_origin, sessions.source_bytes_sha256, rows.row_origin /
+// customer_label / customer_code / customer_key / project_id — unique
+// (id, organization_id) on projects and work_objects, composite FKs, the historical
+// CHECK, partial unique indexes, two event_type CHECK widenings (drop + re-add with the
+// full old list + `decided` / `source_preserved`), and 13 CREATE POLICY … AS RESTRICTIVE
+// (P1–P9, P7 split i/u/d, no SELECT restriction). No grant, no SECURITY DEFINER, no
+// trigger, no data DML, no `(true)`. GREEN by shape; paired .down.sql that refuses while
+// any new column is non-null; UNAPPLIED — applied by the lead after PR-2 (#1857) is on
+// production and the rolled-back dry run (docs/design/historical-timesheet-m1-dryrun.sql)
+// passes. RECOUNTED: 305.
+// Bumped 305 -> 306 for 20260924120000_companies_contact_minimization_v2 (K2-1 v2,
+// supersedes the unapplied #1430 draft): REVOKE the whole-table SELECT on companies
+// from authenticated + a column grant of the discovery columns + ONE SECURITY DEFINER
+// reader (creator, active ROLES_THAT_OPEN member, admin). No data change. RED
+// (grant/revoke + definer), human-gated, paired .down.sql; owner-approved 2026-09-24,
+// app half deployed first (#1868), then APPLIED (ledger 20260924083740). RECOUNTED: 306.
+// Bumped 306 -> 307 for 20260924130000_set_company_description_v1 (the public business
+// page's description save): ONE SECURITY DEFINER write gated by owns_company (creator +
+// active owner/admin), description only, <= 2000; EXECUTE for authenticated only; no
+// table grant. RED (definer + grant/revoke), owner-approved; APPLIED 2026-09-24
+// (ledger 20260924092646) after #1870 deployed; paired .down.sql. RECOUNTED: 307.
+// Bumped 307 -> 308 for 20260924140000_manager_projects_roster_rls_v1 (the approved
+// manager / recruiter role usable): four ALTER POLICY — projects select/insert/update and
+// company_workers select gain OR manages_organization(...) (the existing SECURITY DEFINER
+// helper can_manage_project already uses); projects_delete and every other table
+// untouched. RED (ALTER POLICY), owner-approved; APPLIED 2026-09-24 (ledger
+// 20260924092836) BEFORE this app half merged; paired .down.sql restores the exact
+// expressions. RECOUNTED: 308.
+// Bumped 308 -> 309 for 20260924150000_invitation_management_delegation_v1 (owner
+// direction 2026-09-24: invitation management by permission, never by job title):
+// company_memberships.manages_invitations (default false), invitation_org_authority_v1
+// = owner / owner-admin membership / delegated member, the org branch of
+// create_invitation_v1/v2 and invite_company_worker use it, one audited grant command.
+// RED (definer + grant/revoke + ALTER POLICY); owner-approved (#1875); APPLIED 2026-09-24
+// (ledger 20260924120147) BEFORE its app half merged; paired .down.sql restores production
+// byte-identically. RECOUNTED: 309.
+// Bumped 309 -> 310 for 20260927053000_worker_self_declared_profession_v1 (owner
+// direction 2026-09-27: a classifier may not be the list of permitted human answers).
+// `worker_professions` gains `label` (the person's verbatim words), a GENERATED
+// `normalized_label` dedupe key and a separate nullable `esco_occupation_id`, and
+// `profession_id` becomes nullable so a profession the 49-row registry does not carry
+// can be recorded at all. No new table, policy, grant, definer or RPC; no UPDATE/DELETE
+// and no backfill; `is_primary` gains no new constraint and no new meaning. RED for
+// exactly one reason — rule (l), `alter column ... drop not null`; owner-approved and
+// APPLIED 2026-09-27 (ledger 20260927060325), readback in docs/APPLIED_LEDGER.md: 26 rows
+// unchanged, 0 labels written. Paired rollback REFUSES while any self-declared row exists
+// and otherwise restores the pre-migration shape. RECOUNTED: 310.
+// Bumped 310 -> 311 for 20260927063000_worker_self_declared_profession_language_v1
+// (owner ruling 2026-09-27 on a Codex finding against doctrine §2.1): the person's
+// own words carry the language they were written in. ONE nullable `original_language`
+// column plus two CHECKs — a real locale or nothing, and a language only where words
+// exist. No other table, no translation, no backfill, and the value comes from the
+// real input locale, never detected from the text. Purely additive: the static gate
+// reports GREEN with zero risk findings, so the file carries no @human-gate-approved
+// annotation; it was owner-gated by procedure and APPLIED 2026-09-27, ledger
+// 20260927062927 — deliberately BEFORE any writer, so no row ever needs a backfill.
+// RECOUNTED: 311.
+// Bumped 311 -> 312 for 20260928140000_booking_accepted_not_rewritten_v1: one
+// guard in the SECURITY DEFINER propose_booking_request so an ACCEPTED booking is
+// not rewritten by proposing again (production walk 2026-09-28). RED by rule
+// (redefined definer), carries @human-gate-approved, ships as a DRAFT and is NOT
+// APPLIED until the owner approves the exact diff. RECOUNTED: 312.
+// Bumped 312 -> 314 for 20260928180000_agency_capability_one_rule_v1 (one agency rule in
+// two definers) and 20260928181000_booking_reopen_lifecycle_edges_v1 (reopened-booking
+// engagement end + expiry clock). Both RED, owner-approved 2026-09-28. RECOUNTED: 314.
+const SPRINT_BASELINE = 402; // +1 20261018140000_workspace_pins_v1 (My Space pins table, owner-only RLS; RED by GRANT, needs-human-gate, NOT applied; #1475) // was 401: // +1 20261014190000_team_disband_v1 (brigade disband keeping history + cap counts active brigades; RED SECURITY DEFINER + GRANT, needs-human-gate, NOT applied) // was 400: +2 20261014090000_historical_consolidation_ledger_v1 + 20261014090100_historical_consolidation_package_v1 (historical consolidation ledger + package; RED, needs-human-gate, NOT applied) // was 398: +1 20261013200000_roster_link_offered_notification_type_v1 (notification type for a roster history-link offer; strict CHECK superset, no RLS/grant) // was 397: +1 20261013140000_ops_product_metrics_staff_acceptance_v2 (monitor integrity rule: staff acceptance without relationship; RED by SECURITY DEFINER replace, owner-approved, APPLIED) // was 396: +1 20261011090000_search_public_vacancy_previews_c_like_v4 (free-text search without per-row ICU ilike, RED by SECURITY DEFINER replace, needs-human-gate) // was 395: +1 20261013120000_confirmation_spends_v1 (single-use confirmation tokens; RED by GRANT, needs-human-gate) // was 394: +1 20261012180000_conversation_message_team_offer_v1 (message-level offer label + party guard trigger; owner-approved RED) // was 393: +1 20261012190000_staff_review_notice_on_acceptance_v1 (staff review notice acceptance fact; RED, needs-human-gate, NOT applied) // was 392: +1 20261012170000_practice_in_company_relationship_v1 (intern relationship type row; GREEN, data-only) // was 391: +2 20261012110000_team_offer_thread_party_v1 + 20261012120000_service_role_notification_reads_v1 (owner-approved RED 2026-10-12, APPLIED) // was 389: +1 20261012100000_assistant_transcript_v1 (Chat First transcript per person + workspace; owner-approved RED 2026-10-12, APPLIED) // was 388: // +1 20261012090000_ops_product_metrics_v1 (service_role-only aggregate metrics; owner-approved RED 2026-10-12, APPLIED) // was 387: // +1 20261011200000_supply_offer_negotiation_v1 (company/agency offers itself + versioned terms; owner-approved RED 2026-10-12, APPLIED) // was 386: // +1 20261011160000_absence_authority_engagement_v1 (absence authority for engagement employees; RED by SECURITY DEFINER + RLS policy, needs-human-gate) // was 385: +1 20261008210000_rls_tables_missing_select_grant_v1 (SELECT grant on five RLS tables whose policies were unreachable; RED by GRANT, needs-human-gate) // was 384: +1 20261007180000_evidence_media_bucket_v1 (private evidence-media bucket + storage.objects policies; RED, owner-approved in chat 2026-10-08, APPLIED, PR #2189) // was 383: +1 20261007210000_worker_recognitions_for_viewer_v1 (owner-approved RED 2026-10-08, #2195; subject + current engagement audience) // was 382: +1 vs 381: 20261008120000_manager_approval_skill_confidence_v1 (R-5, owner-approved RED, APPLIED 2026-10-08) // +1 20261007150000_team_demand_offer_v1 (E6 brigade offer against a demand; owner-approved RED 2026-10-08, separate hand-off RPC) // was 380: +1 20261008090000_chain_proof_unshare_withdraws_offers_v1 (owner-approved RED 2026-10-08, #2191) // was 379: +1 vs 378: 20261007140000_work_plan_scope_roster_engagement_v1 (owner-approved RED 2026-10-08, planning scope only; does not widen assignment authority) // +8 vs main: RED tiers A2-G release (20260930130000, 20260930140000, 20260930160000, 20261006120000, 20261006130000, 20261007100000, 20261007120000, 20261007130000; all applied individually before merge) // was 370: +20 vs main: 15 RED tier B-D migrations (20261003150100..20261003151400 and 20261005100000) and 5 from #2161/#2164 (20261006100000..20261006100400); all RED, needs-human-gate, applied individually before merge // +20261006100500_invitation_signup_context_v1 (service-role-only read of the invited address for the signup page; RED, needs-human-gate, NOT applied) // +20261003150000_org2_agency_capability_authority_v1 (ORG-2 RED, needs-human-gate, NOT applied) // +20261002150000_work_tasks_stage_and_subtask_v1 (RED, needs-human-gate #2123) // +20261003120000_privacy_export_import_lines_subject_v1 (PER-12 RED SECURITY DEFINER read fn, needs-human-gate, NOT applied) // +20261003140000_subject_contest_withdraw_constraint_reconcile_v1 (forward-fix of the event_type CHECK lineage, RED, needs-human-gate, NOT applied) // +20261003110000_subject_contest_withdraw_v1 (EVID subject contest withdraw, RED, needs-human-gate, NOT applied) // +20261002142000_manager_assigns_roster_worker_on_managed_project_v1 (owner-approved RED #2079, manager authority; apply after merge) // +20261003100000_list_agency_offered_candidates_v2_connection_gate_v1 (#1815/ARCH-4 RED forward fix, needs-human-gate) // +20261002143000_experience_responses_select_reply_status_v1 (EVID-6 RED policy narrowing, needs-human-gate, NOT applied; count guards need a trivial rebase if merged after #2079/#2123/#2124) // +20261002141500_work_task_authz_null_safe_v1 (SECURITY forward-fix, RED auth-core, needs-human-gate, NOT applied; count guards need a trivial rebase if merged after #2123/#2124) // +20261002140000_message_journal_review_notification_types_v1 (additive CHECK widening, GREEN) // +20261001120000_job_alert_sweep_service_role_select (owner-approved RED 2026-10-01) +20260928190000_agency_delegated_demand_and_placement_v1 (owner-approved RED A/B/D) // +20260928200000_booking_reaccept_restores_engagement_v1 // +20260928210000_agency_placement_booking_role_v1 // +20260928220000_placement_opens_client_collaboration_v1 // +20260928230000_placement_end_closes_client_collaboration_v1 // +20260929090000_historical_organization_names_v1 // +20260930090000_external_action_receipts_v1 (owner-approved RED 2026-09-30) // +20260930100000_account_classifications_v1 // +20260930110000_discovered_organizations_v1 // +20260930120000_project_duplicate_marker_v1 // +20260930133500_worker_avatar_path_for_relations_v1 (owner-approved RED D1 2026-09-30, APPLIED) // +20261001100000_assignment_decision_audit_v1 (owner-approved RED 2026-10-01) // +20261001110000_public_vacancy_search_indexes_v1 (additive covering index, GREEN) // +20261001110000_job_alert_notification_type_v1 (additive CHECK widening, stream N) // +20261001180000_public_vacancy_board_no_parallel_v1 // +20261001180100_drop_unused_vacancy_fulltext_gin_v1 (both RED, owner-approved in chat) // +20261001200000_public_vacancy_profession_published_idx_v1 (additive index, GREEN) // +20261002120000_journal_explicit_project_attribution_v1 (additive overload, RED by GRANT; owner-approved in the 2026-10-02 handoff, APPLIED) // +20261005100000_roster_link_subject_answer_v1 (RED SECURITY DEFINER door for the subject's refuse/withdraw; needs-human-gate, NOT applied+20261001163000_applicant_identity_v1 (applicant name+photo to the demand owner only, RED SECURITY DEFINER + grant, needs-human-gate, NOT applied+20261001200100_search_public_vacancy_previews_plan_v3 (anon-reachable SECURITY DEFINER plan rewrite, RED, needs-human-gate, NOT applied+20261003150000_org2_agency_capability_authority_v1 (ORG-2 agency capability authority, RED SECURITY DEFINER re-gate + policy replace, needs-human-gate) //  +20261003150800_ai_runs_retention_classes_v2 (retention classes, RED SECURITY DEFINER + trigger, needs-human-gate, NOT applied; supersedes #1266) // +20261006100500_invitation_signup_context_v1 (service-role-only read of the invited address for the signup page; RED, needs-human-gate, NOT applied) // +20261003151000_email_verified_boundary_v1 (WORKER_REGISTRATION_FRICTION_REMOVAL #2152, RED, needs-human-gate) // +20261003151500_invitation_v1_doors_not_api_callable_v1 (revokes API EXECUTE on the v1 invitation doors, RED privilege change, needs-human-gate, NOT applied) // +20261003151100_staff_invitation_email_binding_v1 (invitation token doors bound to the invited e-mail, RED SECURITY DEFINER, needs-human-gate, NOT applied) // +20261002150000_work_tasks_stage_and_subtask_v1 (RED, needs-human-gate #2123) // +20261003120000_privacy_export_import_lines_subject_v1 (PER-12 RED SECURITY DEFINER read fn, needs-human-gate, NOT applied) // +20261003140000_subject_contest_withdraw_constraint_reconcile_v1 (forward-fix of the event_type CHECK lineage, RED, needs-human-gate, NOT applied) // +20261003110000_subject_contest_withdraw_v1 (EVID subject contest withdraw, RED, needs-human-gate, NOT applied) // +20261002142000_manager_assigns_roster_worker_on_managed_project_v1 (owner-approved RED #2079, manager authority; apply after merge) // +20261003100000_list_agency_offered_candidates_v2_connection_gate_v1 (#1815/ARCH-4 RED forward fix, needs-human-gate) // +20261002143000_experience_responses_select_reply_status_v1 (EVID-6 RED policy narrowing, needs-human-gate, NOT applied; count guards need a trivial rebase if merged after #2079/#2123/#2124) // +20261002141500_work_task_authz_null_safe_v1 (SECURITY forward-fix, RED auth-core, needs-human-gate, NOT applied; count guards need a trivial rebase if merged after #2123/#2124) // +20261002140000_message_journal_review_notification_types_v1 (additive CHECK widening, GREEN) // +20261001120000_job_alert_sweep_service_role_select (owner-approved RED 2026-10-01) +20260928190000_agency_delegated_demand_and_placement_v1 (owner-approved RED A/B/D) // +20260928200000_booking_reaccept_restores_engagement_v1 // +20260928210000_agency_placement_booking_role_v1 // +20260928220000_placement_opens_client_collaboration_v1 // +20260928230000_placement_end_closes_client_collaboration_v1 // +20260929090000_historical_organization_names_v1 // +20260930090000_external_action_receipts_v1 (owner-approved RED 2026-09-30) // +20260930100000_account_classifications_v1 // +20260930110000_discovered_organizations_v1 // +20260930120000_project_duplicate_marker_v1 // +20260930133500_worker_avatar_path_for_relations_v1 (owner-approved RED D1 2026-09-30, APPLIED) // +20261001100000_assignment_decision_audit_v1 (owner-approved RED 2026-10-01) // +20261001110000_public_vacancy_search_indexes_v1 (additive covering index, GREEN) // +20261001110000_job_alert_notification_type_v1 (additive CHECK widening, stream N) // +20261001180000_public_vacancy_board_no_parallel_v1 // +20261001180100_drop_unused_vacancy_fulltext_gin_v1 (both RED, owner-approved in chat) // +20261001200000_public_vacancy_profession_published_idx_v1 (additive index, GREEN) // +20261002120000_journal_explicit_project_attribution_v1 (additive overload, RED by GRANT; owner-approved in the 2026-10-02 handoff, APPLIED)
     // Bumped 236 -> 237 for the notification channel preferences v1 DRAFT
     // (20260823160000_notification_preferences_v1, value train 2 Wagon B3) —
     // RED by route (table grants; fail-closed), deliberately NOT
@@ -2488,6 +2826,25 @@ const SPRINT_BASELINE = 264;
     // orphaned from every crawler. ZERO tables, columns, policies, triggers,
     // indexes or DML. RECOUNTED from the tree, never summed:
     // `ls supabase/migrations/*.sql | wc -l` = 229 real files.
+    // 281 -> the count below: MKT-3, one open assignment per asset
+    //   (20260914120000_asset_single_open_assignment_v1, paired rollback).
+    //   Owner approval "OWNER DECISIONS — APPROVED EXECUTION WAVE"
+    //   (2026-09-14) for the minimum RED tightening that stops the same asset
+    //   being issued twice. Adds ONE partial unique index and replaces three
+    //   SECURITY DEFINER bodies to take the asset row lock; no table, column,
+    //   policy or authority change, and the only privilege statements are
+    //   three revokes of anon. RED class (definer replacement): merged behind
+    //   the human gate, production apply is a separate owner act.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 281.
+    // 281 -> the count below: DEM-8 saved searches
+    //   (20260914140000_worker_saved_searches_v1, paired guarded rollback).
+    //   Owner approval "OWNER DECISIONS — APPROVED EXECUTION WAVE"
+    //   (2026-09-14) for narrow query/criteria persistence. ONE new
+    //   worker-owned table with three gated RPCs + the notification type
+    //   widening by the v2..v6 drop-and-re-add idiom (a strict superset).
+    //   RED class: merged behind the human gate, production apply is a
+    //   separate owner act.
+    //   RECOUNTED from the tree: `ls supabase/migrations/*.sql | wc -l` = 282.
     expect(files.length).toBeLessThanOrEqual(SPRINT_BASELINE);
   });
 });

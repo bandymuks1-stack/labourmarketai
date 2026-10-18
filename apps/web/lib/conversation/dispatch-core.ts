@@ -17,6 +17,44 @@ export type AuthzDecision =
   | { ok: true }
   | { ok: false; code: "unknown_action" | "not_authorized" | "not_executable" };
 
+/**
+ * WAS THE WRITE MADE FROM THE WORKSPACE THE SERVER IS ACTING IN?
+ * (owner program 2026-09-23.)
+ *
+ * The client sends the workspace it DISPLAYED; the dispatcher resolves the
+ * active workspace itself. They disagree when a switch happened elsewhere —
+ * another tab (the cookie is shared), another device, the MCP door — and the
+ * screen still shows the old one. Executing then would attribute the write to
+ * an organization the person is not looking at. Membership is still enforced
+ * either way, so this is not an escalation check: it refuses attribution to
+ * the wrong one of the person's own workspaces.
+ *
+ * `expected` absent = a caller that does not bind (older client, a
+ * person-scoped surface): nothing to compare, and the confirmation token's
+ * workspace-bound fingerprint below still refuses a token minted elsewhere.
+ * The client id is NEVER used for authority — only for this comparison.
+ */
+export function isStaleWorkspaceContext(
+  expectedWorkspaceId: string | null | undefined,
+  activeWorkspaceId: string,
+): boolean {
+  if (!expectedWorkspaceId) return false;
+  return expectedWorkspaceId !== activeWorkspaceId;
+}
+
+/**
+ * The confirmation fingerprint, bound to the workspace it was minted in: a
+ * token shown in workspace A can never execute in workspace B, even where the
+ * action's own state is unchanged (the per-action fingerprint alone is `n/a`
+ * for most actions).
+ */
+export function workspaceBoundFingerprint(
+  activeWorkspaceId: string,
+  actionFingerprint: string,
+): string {
+  return `ws:${activeWorkspaceId}|${actionFingerprint}`;
+}
+
 /** Only these tiers require a server-issued confirmation token. */
 export function requiresConfirmation(tier: ConfirmationTier): boolean {
   return tier === "important_write" || tier === "strong_irreversible";

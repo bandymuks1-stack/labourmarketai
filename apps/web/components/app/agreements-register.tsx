@@ -27,6 +27,7 @@ import {
   updateAgreementAction,
 } from "@/lib/agreements/agreements-actions";
 import { getOrgDocumentRegister } from "@/lib/documents/document-files";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Agreement register (Agreement & Rights Engine v1) — the organization's
@@ -306,6 +307,7 @@ export async function AgreementsRegister({
                 action={createAgreementAction}
                 className="mt-3 flex flex-col gap-2"
               >
+                <DisplayedWorkspaceField />
                 <input type="hidden" name="locale" value={locale} />
                 <div className="grid gap-2 sm:grid-cols-2">
                   <label className="flex flex-col gap-1 text-xs text-text-secondary">

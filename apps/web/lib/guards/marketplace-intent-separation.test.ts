@@ -81,7 +81,7 @@ describe("stepper + future modules clarity", () => {
   it("a static progress helper exists (LT + EN) and is rendered", () => {
     expect(lt.auth.dashboard.wow.demand.progressHelper).toMatch(/rodo eigą/);
     expect(en.auth.dashboard.wow.demand.progressHelper).toMatch(/show progress/);
-    const page = read("app/[locale]/dashboard/company/page.tsx");
+    const page = read("app/[locale]/dashboard/company/needs/page.tsx");
     expect(page).toMatch(/journey-progress-helper/);
     expect(page).toMatch(/demand\.progressHelper/);
   });

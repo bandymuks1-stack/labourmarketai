@@ -369,8 +369,295 @@ export const SCOPED_OWNER_WAIVERS = [
      * change; the DB half is the already-applied `20260824120000` SECDEF
      * narrowing. Same surfaces, strictly less exposure — the World-State
      * answers stay honestly "no" for the anonymous visitor.
+     *
+     * ── #1649 (2026-09-08) ──────────────────────────────────────────────────
+     * OWNER APPROVAL, verbatim (2026-09-08):
+     *   "I approve adding ONLY PR 1649 to the existing
+     *    `public-acquisition-route-jobs` waiver `pullRequests` list.
+     *    This is NOT general authority to self-approve future waivers.
+     *    Do not broaden, weaken or change the waiver criteria/scope."
+     *
+     * Exactly that was done: one number added to `pullRequests`. The axiom,
+     * the six codes per surface, the three surfaces, the file list, the
+     * expected finding set, the expiry and the subset rule are byte-unchanged,
+     * and `product-gate.mjs` is not touched by this PR at all.
+     *
+     * Pre-conditions checked by RUNNING the gate on this head rather than
+     * reasoning about it — the same head, twice, differing only in the number:
+     *   BASE_SHA=origin/main PR_NUMBER=1649 → 18 violations, and EVERY
+     *                                         `not waived` line carried the
+     *                                         single reason `pr-not-covered`;
+     *                                         zero cited any other reason.
+     *   BASE_SHA=origin/main PR_NUMBER=1255 → PRODUCT_GATE_PASS_WITH_SCOPED_
+     *                                         TRANSITIONAL_WAIVER
+     * The diff adds ZERO findings; the waiver was working correctly and simply
+     * did not list this PR. The subset rule therefore still binds.
+     *
+     * WHAT #1649 ACTUALLY DOES to these surfaces: it makes a FAILURE honest.
+     * `searchPublicVacancyPreviews` re-threw a statement timeout, so the board
+     * answered HTTP 500; catching it and returning an empty list would have
+     * been worse, because that tells a person the labour market is empty when
+     * the read simply did not answer. `57014` now maps to a NAMED
+     * `unavailable` state, distinct from "not provisioned" and from a genuine
+     * zero (SEP-7). No new route, no new page, no new component, no auth
+     * change, no change to the projection or to what an anonymous visitor may
+     * see. The World-State answers stay honestly "no" for the same anonymous
+     * caller this surface exists for.
+     *
+     * ── #1786 (2026-09-18) ──────────────────────────────────────────────────
+     * OWNER APPROVAL, verbatim (2026-09-18):
+     *   "I approve adding ONLY PR 1786 to the existing
+     *    public-acquisition-route-jobs and oauth-consent-auth-infrastructure
+     *    waiver pullRequests lists."
+     *
+     * Exactly that was done: one number added to `pullRequests` here and one
+     * to the consent waiver below. The axiom, the codes, the surfaces, the
+     * file list, the expected finding set, the expiry and the subset rule are
+     * byte-unchanged, and `product-gate.mjs` is not touched.
+     *
+     * WHAT #1786 ACTUALLY DOES to these surfaces: the list page, the detail
+     * page and the vacancy card used shadcn class names
+     * (`text-muted-foreground`, `hover:bg-accent`, `border-input`,
+     * `bg-background`, `border-foreground`) that were never in the token map
+     * and compiled to NO CSS — secondary text rendered in the primary colour
+     * and the card hover did nothing. They now use the canonical tokens; the
+     * card's publication date is a mono stamp and the MEMBER-ONLY detail
+     * location carries the same place-precision chip the map wears (a stated
+     * city = city, a country alone = country, never inferred upward). No new
+     * route, page, auth change or projection change; the anonymous visitor
+     * still receives no employer, location or apply link (guarded on code in
+     * `work-world-jobs.test.ts`). The World-State answers stay honestly "no".
+     *
+     * ── #1809 (2026-09-20) ──────────────────────────────────────────────────
+     * OWNER APPROVAL, verbatim (2026-09-20):
+     *   "I approve adding ONLY PR 1809 to the existing
+     *    public-acquisition-route-jobs waiver pullRequests list."
+     *
+     * Exactly that was done: one number added to `pullRequests`. The axiom,
+     * the six codes per surface, the three surfaces, the file list, the
+     * expected finding set, the expiry and the subset rule are byte-unchanged,
+     * and `product-gate.mjs` is not touched by this PR at all.
+     *
+     * Pre-conditions checked by RUNNING the gate on this head, not by
+     * reasoning about it:
+     *   BASE_SHA=origin/main PR_NUMBER=1809 → 18 `not waived` lines, EVERY one
+     *                                         `pr-not-covered` and no other
+     *                                         reason ("covers PR 1184, 1193,
+     *                                         1203, 1208, 1255, 1649, 1786 and
+     *                                         branch main; this run is PR 1809").
+     *   CI quality run 35495974758 (head c061a4a2): the same 18, same reason.
+     * The diff adds ZERO findings; the waiver was working correctly and simply
+     * did not list this PR. The subset rule therefore still binds.
+     *
+     * WHAT #1809 ACTUALLY DOES to these surfaces (owner P0 directive
+     * 2026-09-20, the acquisition loop): the MEMBER half of `/jobs/[id]` reads
+     * the job against the person with the ONE engine (band + one honest
+     * sentence + per-criterion tiers + facts not yet provided + the ad's own
+     * unknowns), mounts the EXISTING "I want this job" control, offers up to
+     * three other live ads of the same profession beside a non-fit, sends a
+     * member without a declared profession to the profile, and tells a member
+     * whose ad closed that the AD changed; the page's own `next` carries
+     * `?via=auth` so the JOB A → REGISTER → JOB A return is measurable; both
+     * surfaces emit the public-job funnel events. No new route, page, auth
+     * change, schema or projection change; the anonymous visitor receives
+     * exactly what they received before. The World-State answers stay honestly
+     * "no" for the anonymous caller this surface exists for — same class as
+     * #1193, #1203, #1786.
+     *
+     * ── #1810 (2026-09-20) ──────────────────────────────────────────────
+     * OWNER APPROVAL, verbatim (2026-09-20):
+     *   "I approve adding ONLY PR 1810 to the existing
+     *    public-acquisition-route-jobs waiver pullRequests list.
+     *    Do not broaden the waiver."
+     *
+     * Exactly that was done: one number added to `pullRequests`. Axiom, codes,
+     * surfaces, file list, expected finding set, expiry and subset rule are
+     * byte-unchanged; `product-gate.mjs` is not touched.
+     *
+     * Pre-conditions checked by RUNNING the gate, not by reasoning:
+     *   CI quality run 35516914331 (head 9c149543) and the local run on the
+     *   merged head df8bc6ed (BASE_SHA=origin/main PR_NUMBER=1810): 42
+     *   `not waived` lines, EVERY one `pr-not-covered` and no other reason
+     *   ("covers PR 1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809 and branch
+     *   main; this run is PR 1810"). The diff adds ZERO findings.
+     *
+     * WHAT #1810 ACTUALLY DOES to these surfaces: activates `pl` as a UI
+     * locale through the existing architecture — the `/jobs` and `/jobs/[id]`
+     * pages and the public vacancy card gain their Polish entries in the
+     * `Record<ActiveLocale, …>` copy maps that the type system forces to be
+     * exhaustive. No new route, page, auth change, schema or projection
+     * change; the anonymous visitor receives the same projection, now also in
+     * Polish. The World-State answers stay honestly "no" — same class as
+     * #1193, #1203, #1786, #1809.
+     *
+     * ── #1838 (2026-09-22) ──────────────────────────────────────────────
+     * OWNER APPROVAL, verbatim (2026-09-22):
+     *   "I approve adding ONLY PR 1838 to the existing
+     *    public-acquisition-route-jobs waiver pullRequests list.
+     *    Do not broaden the waiver."
+     * The same ruling adds: "Do not add another route, finding class or
+     * permanent exception."
+     *
+     * Exactly that was done: one number added to `pullRequests`. Axiom, codes,
+     * surfaces, file list, expected finding set, expiry and subset rule are
+     * byte-unchanged; `product-gate.mjs` is not touched.
+     *
+     * Pre-conditions checked by RUNNING the gate, not by reasoning:
+     *   CI quality run 35743586467 (head 2bb419d1): 42 `not waived` lines,
+     *   EVERY one `pr-not-covered` and no other reason ("covers PR 1184, 1193,
+     *   1203, 1208, 1255, 1649, 1786, 1809, 1810 and branch main; this run is
+     *   PR 1838"). The diff adds ZERO findings.
+     *
+     * WHAT #1838 ACTUALLY DOES to these surfaces (owner decision 2026-09-22,
+     * the vacancy translation policy): it STOPS the board translating — the
+     * reader-locale path becomes a synchronous read of renderings that already
+     * exist, so no page view can reach a provider — and adds, inside the
+     * EXISTING member-only branch of `/jobs/[id]`, the advertisement's own
+     * language plus ONE explicit "translate this advertisement" control.
+     * Entitlement-gated, charged only on a usable result. No new route, page,
+     * auth change, schema or projection change; the ANONYMOUS visitor receives
+     * exactly what they received before and carries ZERO translate controls in
+     * all six served locales (verified on the built app). The World-State
+     * answers stay honestly "no" for the anonymous caller this surface exists
+     * for — same class as #1193, #1203, #1786, #1809, #1810.
      */
-    pullRequests: [1184, 1193, 1203, 1208, 1255],
+    pullRequests: [
+      1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838,
+      // OWNER APPROVAL 2026-09-27, verbatim: "I approve adding PR #1837 AND the
+      // immediately required public vacancy card localization/source-language
+      // fix to the existing `public-acquisition-route-jobs` waiver
+      // `pullRequests` scope, strictly limited to the already-defined `/jobs`,
+      // `/jobs/[id]`, and public vacancy row/card acquisition surfaces required
+      // to close this concrete localization defect." The same message states it
+      // "does not authorize unrelated waiver expansion, security weakening, new
+      // public data exposure, or general self-approval of future waivers".
+      //
+      // Exactly that was done: TWO numbers added to `pullRequests`. The axiom,
+      // the six codes per surface, the surfaces, the file list, the expected
+      // finding set, the expiry and the subset rule are byte-unchanged, and
+      // `product-gate.mjs` is not touched by either PR.
+      //
+      // #1837 — `/jobs/[id]` renders the canonical opportunity view, so the
+      //         language disclosure has something to attach to: ONE presentation
+      //         of a vacancy instead of two.
+      // #1890 — the row card stops rendering the publisher's foreign occupation
+      //         as a BARE second line beneath the localized heading, and names
+      //         the ad's language on one compact line using the same key
+      //         /jobs/[id] already uses. No new route, page, projection, auth or
+      //         schema change, no new copy in any locale, nothing translated and
+      //         nothing egressed — `translate_vacancy` stays ungranted. The
+      //         anonymous visitor receives exactly the fields they did before,
+      //         so the five World-State answers stay honestly "no" for this
+      //         surface — same class as #1809 and #1810.
+      1837, 1890,
+      // OWNER APPROVAL 2026-09-27, verbatim: "I approve adding ONLY PR #1892 to
+      // the existing `public-acquisition-route-jobs` waiver `pullRequests` list,
+      // strictly for removing the identified compensating/now-false human-facing
+      // disclaimer from the already-scoped public jobs surface. This is not
+      // general authority to expand the waiver or self-approve future waived
+      // changes."
+      //
+      // #1892 DELETES human-facing text and adds none. `ORIGINAL_LANGUAGE_NOTE`
+      // told a visitor "occupation labels are shown in the employer's language",
+      // which its own source comment admitted existed "rather than letting a
+      // visitor wonder why a Lithuanian page lists Swedish occupation labels" —
+      // a disclaimer compensating for a confusing component, and FALSE since
+      // #1890 shipped: verified on deployed production that a mapped ad heads
+      // with the localized catalogue name and every card names its own source
+      // language ("Sandėlio darbuotojas · Skelbimo kalba: švedų · Lagerarbetare").
+      //
+      // Strictly LESS content on the page: one constant and one <p> removed, no
+      // route, page, component, projection, auth or schema change, no new copy,
+      // nothing translated and nothing egressed. The anonymous visitor receives
+      // fewer words and the same fields.
+      1892,
+      // OWNER APPROVAL 2026-09-29, verbatim: "I approve adding PR #1991 and PR #1993 to the existing
+      // public-acquisition-route-jobs waiver pullRequests, strictly for the
+      // /jobs/[id] signed-in crash fix and the job-page hreflang fix."
+      // Bounded: not authority for any future waived change.
+      //
+      // #1991 — a signed-in reader of a foreign-language ad got the route
+      //         error page: server-to-client FUNCTION labels on the translate
+      //         control. Labels become template strings; no field, policy,
+      //         RLS or copy change.
+      // #1993 — the job page head declares the same language alternates its
+      //         sitemap already declares (one helper). Metadata still reads
+      //         only the anonymous projection.
+      1991, 1993,
+      // OWNER APPROVAL 2026-10-01, verbatim: "Patvirtinu #2045 įtraukimą į abu
+      // /jobs owner-waiver sąrašus."
+      // #2045 — a typed word that is exactly one catalogue profession in the
+      //         reader's language redirects to the SAME profession filter
+      //         (no second search); the search box takes the full row on
+      //         phones. No new route, projection, auth or schema change.
+      2045,
+      // OWNER AUTHORISATION 2026-10-02 (task directive, verbatim intent): the
+      // `/jobs` INTRO_MEMBER change, "if its only purpose is to remove an
+      // already-proven dead end / misleading state"; not authority for broader
+      // marketing, landing or product-structure changes.
+      // #2101 — a SIGNED-IN worker was told "sign in to see the employer…";
+      //         the intro now says to open the vacancy. One string selection,
+      //         no route, projection, auth or schema change.
+      2101,
+      // OWNER APPROVAL 2026-10-09, verbatim: "I approve the scoped
+      // public-acquisition-route-jobs owner waiver strictly for the three
+      // described /jobs fixes in PR #2211: out-of-range pagination recovery,
+      // cross-active-locale profession filter mapping, and locale-correct
+      // LT/RU number formatting. This approval does not authorize removal,
+      // narrowing or replacement of any existing /jobs functionality, data
+      // source, country, filter, route, projection, authorization rule or
+      // schema." Bounded — not authority for any future waived change.
+      // #2211 — an empty page past the end redirects to page 1 of the SAME
+      //         search; a profession word from another active catalogue maps
+      //         to the same slug filter (reader's own catalogue first, only
+      //         an unambiguous slug); the count uses Intl.NumberFormat.
+      2211,
+      // OWNER DIRECTIVE 2026-10-10, verbatim: "Darbo skelbimų pateikimo
+      // trūkumus taisyk naudodamas esamą architektūrą, išsaugodamas SEO,
+      // lokalizacijas ir faktinius skelbimų duomenis. Nepriskirk vertimų,
+      // kurių sistema negali patikimai pateikti." Bounded — not authority for
+      // any future waived change.
+      // #2253 — /jobs/[id] heads with the catalogue profession name in the
+      //         reader's language when the ad carries a known slug (the board
+      //         card's registry), else the publisher's words; metadata through
+      //         buildPageMetadata (brand suffix, share image, same hreflang
+      //         helper); the card's own fact chips. No route, projection, auth,
+      //         schema or data-source change; nothing machine-translated.
+      2253,
+      // OWNER APPROVAL 2026-10-15, verbatim: "Patvirtinu scoped /jobs
+      // product-gate waiver PR #2388: pridėk tik #2388 prie esamo
+      // `public-acquisition-route-jobs` pullRequests sąrašo; tik anoniminiams
+      // naudotojams saugūs struktūriniai duomenys (`CollectionPage` /
+      // `ItemList`, `WebPage` / `Occupation`), be `JobPosting`, be darbdavio,
+      // vietos ir kitų neviešų laukų. Nekeisk ir nesilpnink pačių taisyklių."
+      //
+      // Exactly that was done: ONE number added. The axiom, the codes, the
+      // surfaces, the file list, the expected finding set, the expiry and the
+      // subset rule are byte-unchanged; `product-gate.mjs` is not touched.
+      // #2388 — JSON-LD on /jobs (CollectionPage/ItemList of occupation
+      //         labels) and /jobs/[id] (WebPage about an Occupation + salary
+      //         band + date), built ONLY from the anonymous preview shape:
+      //         never JobPosting, employer, location, publisher title, source
+      //         or links; never from the member projection; never on the
+      //         saved view (guard: public-jobs-structured-data.test.ts).
+      2388,
+      // OWNER APPROVAL 2026-10-18, verbatim: "Patvirtinu PR #2467 įtraukimą į
+      //   siaurą `/jobs` produkto vartų išimtį, skirtą tik tuščios reikšmės „—“
+      //   kortelėje ir mobiliosios paieškos išdėstymo taisymams. Tai nėra
+      //   bendras leidimas apeiti produkto kokybės, saugumo ar migracijų
+      //   patikras."
+      //
+      // Exactly that was done: ONE number added. The axiom, the codes, the
+      // surfaces, the file list, the expected finding set, the expiry and the
+      // subset rule are byte-unchanged; `product-gate.mjs` is not touched.
+      // #2467 — an anonymous card with no profession match and no source
+      //         occupation label headed with a bare "—"; it now uses the
+      //         board's existing localized GENERIC_TITLE as the LAST fallback
+      //         (marked as our text). The /jobs profession select fills the
+      //         phone row beside the search button. No route, projection,
+      //         auth, schema, data-source or member-field change.
+      2467,
+    ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
     approvedHeadShas: [],
@@ -584,7 +871,12 @@ export const SCOPED_OWNER_WAIVERS = [
     axioms: ["A-01", "A-09"],
     scope:
       "The OAuth 2.1 consent screen /oauth/consent (owner directive 2026-08-29 §4) — the delegated Supabase Authorization Path UI",
-    pullRequests: [1347],
+    // #1786 (2026-09-18): owner approval quoted verbatim in the jobs waiver
+    // above — one number added here, nothing else changed. #1786 replaces the
+    // consent page's dead `bg-primary` / `text-primary-foreground` /
+    // `hover:bg-muted` classes (never in the token map: the primary button
+    // had no background) with the canonical tokens. No auth change.
+    pullRequests: [1347, 1786],
     approvedHeadShas: [],
     postMergeBranches: ["main"],
     files: [
@@ -636,7 +928,16 @@ export const SCOPED_OWNER_WAIVERS = [
      */
     scope:
       "The manager hour-allocation surface /dashboard/hours (M3, decision package docs/DECISIONS/0010-owner-migration-decision-package-2026-08-31.md Item 2)",
-    pullRequests: [1344],
+    // #2101 — OWNER AUTHORISATION 2026-10-02 (task directive): the `/hours`
+    // no-company state gets a link to the Work Journal; only that dead end.
+    // #2159 — OWNER DECISION 2026-10-05 (option 1): the default day when no
+    // `?d=` is given comes from `viewerWorkToday()` instead of the UTC day.
+    // One-line correctness edit; the three waived answers are unchanged.
+    // #2234 — OWNER DECISION 2026-10-09: narrowly scoped waiver for the PREMIUM
+    // REDESIGN of `/dashboard/hours` — presentation only (page title, card
+    // layout, empty-state next action). Data, permissions, accounting semantics
+    // and the three waived answers are unchanged; no other route is covered.
+    pullRequests: [1344, 2101, 2159, 2234],
     // Deliberately empty — the waiver lives IN the branch whose CI must
     // honour it, so pinning the head SHA would change the head SHA.
     approvedHeadShas: [],
@@ -663,6 +964,49 @@ export const SCOPED_OWNER_WAIVERS = [
     expiresAt: "2026-12-31",
     owner:
       "Owner decision, 2026-08-31 closure session — 'HOURS_PRODUCT_GATE_WAIVER: APPROVE' (scope: fresh #1344 / package 0010 only).",
+  },
+
+  {
+    id: "journal-photo-viewer-modal",
+    axioms: ["A-01", "A-09"],
+    /**
+     * JOURNAL PHOTO VIEWER — components/app/journal/journal-photo-viewer.tsx
+     * (PR #2026).
+     *
+     * OWNER APPROVAL, 2026-09-30, given in chat in answer to the gate block
+     * on #2026: option "Scoped owner waiver #2026 (Recommended)" — that the
+     * modal photo viewer is permitted, scoped to this PR and this file.
+     *
+     * WHAT IS BEING EXCUSED. The declaration states honest "no" answers: a
+     * photo zoom is opened by a tap on a thumbnail, not by the conversation,
+     * is not reflected on the map and cannot be operated by the World State.
+     * It refuses to claim otherwise; this record excuses exactly those
+     * answers for this one file.
+     */
+    scope:
+      "The Journal day-object photo viewer — a modal image zoom over the day's own already-signed private photos (owner request 2026-09-30)",
+    pullRequests: [2026],
+    approvedHeadShas: [],
+    postMergeBranches: ["main"],
+    files: ["components/app/journal/journal-photo-viewer.tsx"],
+    // EXACTLY the finding set produced by
+    //   BASE_SHA=origin/main PR_NUMBER=2026 node .github/scripts/product-gate.mjs
+    // on 2026-09-30, AFTER the declaration was added. Verified by running the
+    // gate, not by reading the rules.
+    expectedFindings: [
+      { code: "not_world_state_driven", file: "components/app/journal/journal-photo-viewer.tsx" },
+      { code: "not_reflected_on_map", file: "components/app/journal/journal-photo-viewer.tsx" },
+      { code: "not_ai_controlled", file: "components/app/journal/journal-photo-viewer.tsx" },
+      { code: "ai_cannot_work_with_entity", file: "components/app/journal/journal-photo-viewer.tsx" },
+      { code: "world_state_cannot_control_it", file: "components/app/journal/journal-photo-viewer.tsx" },
+    ],
+    reason:
+      "An image zoom over a private journal photo is a presentation of an already-loaded fact: it fetches, signs and stores nothing, and the assistant has no task in it. The owner asked for it explicitly and approved the waiver in chat.",
+    resolvedBy:
+      "a shared image viewer/lightbox component that the gate recognises as a declared primitive (then delete this record and fold the declaration into it)",
+    expiresAt: "2026-12-31",
+    owner:
+      "Owner decision 2026-09-30, in chat — selected 'Scoped owner waiver #2026 (Recommended)' for the Journal photo viewer modal (scope: #2026 / journal-photo-viewer.tsx only).",
   },
 ];
 

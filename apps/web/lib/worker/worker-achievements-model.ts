@@ -1,7 +1,7 @@
 /**
  * Pure model for self-declared achievements + declared certificates (DRAFT
  * migration 20260714160000_worker_education_achievements_v1 — human-gated,
- * NOT applied yet). No DB, no React.
+ * APPLIED, ledger `20260716195418`, 2 rows on 2026-09-14). No DB, no React.
  *
  * Honesty invariants:
  *   * `confirmed_by_manager` can NEVER be set from the app — the migration

@@ -11,10 +11,28 @@ import {
   getPendingIncomingRequestCount,
   getServiceRequestsNewCounts,
 } from "@/lib/marketplace/service-requests";
-import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import { listInvitationsAddressedToMe } from "@/lib/invitations/attention";
+import { listMyMembershipInvitations } from "@/lib/company/memberships";
 import { getPendingAbsenceReviewCount } from "@/lib/leave/absences";
 import { getTaskAttentionCounts } from "@/lib/tasks/tasks";
 import { getNewMarketplaceMatchCount } from "@/lib/marketplace/worker-opportunities";
+import { getBridgeSpineCounts } from "@/lib/agency/bridge-read";
+import { listCompanyDemands } from "@/lib/scouting/scouting";
+import { countOpenTeamOffersByDemand } from "@/lib/company/team-offer";
+
+/** Team / brigade offers waiting on the active company's own OPEN needs —
+ *  the same receiver RPC the scouting section renders. 0 without a company
+ *  context and on any failure (the spine is defensive). */
+async function getOpenTeamOfferCount(): Promise<number> {
+  try {
+    const open = (await listCompanyDemands()).filter((d) => d.status !== "closed");
+    if (open.length === 0) return 0;
+    const byDemand = await countOpenTeamOffersByDemand(open.map((d) => d.id));
+    return [...byDemand.values()].reduce((a, b) => a + b, 0);
+  } catch {
+    return 0;
+  }
+}
 import type { FeatureKey } from "@/lib/config/feature-availability";
 import {
   SPINE_SIGNALS,
@@ -23,7 +41,9 @@ import {
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import {
   notificationEventHref,
+  notificationRenderedType,
   readMyNotificationEvents,
+  type NotificationEventMetadata,
 } from "@/lib/notifications/events";
 
 /**
@@ -46,16 +66,30 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     pendingIncomingBookings,
     bookingResponsesNew,
     invitations,
+    membershipInvitations,
     taskAttention,
     newJobMatches,
     pendingAbsenceReviews,
+    bridge,
+    openTeamOffers,
   ] = await Promise.all([
     getUnreadConversationCount(),
     getPendingIncomingRequestCount(),
     getServiceRequestsNewCounts(),
     getPendingIncomingBookingCount(),
     getBookingResponsesNewCount(),
-    listMyPendingWorkerInvitations(),
+    // ONE canonical definition of "an invitation is waiting on me": the
+    // canonical `invitations` table PLUS the company/agency roster invitations
+    // (`listInvitationsAddressedToMe` - the read behind Today, the opening
+    // brief and the chat). The bell used to count the roster half only, so a
+    // person invited through the canonical system saw a number on Today that
+    // the bell did not carry. `total` is the real count behind the display cap.
+    // A failed or unapplied read counts 0 here (the spine is defensive).
+    listInvitationsAddressedToMe(),
+    // Governance invitations addressed to me — the SAME caller-scoped read
+    // the Activity Setup Hub renders its panel from, so the bell and the
+    // panel cannot disagree. A failed or unapplied read counts 0.
+    listMyMembershipInvitations(),
     getTaskAttentionCounts(),
     // Request-cached with the recommendation surfaces (ONE read model);
     // 0 for non-workers and while the gated seen store is unapplied.
@@ -63,6 +97,13 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     // Role-gated inside the reader (0 for worker / client), self-excluded,
     // and 0 while the leave migration is unapplied.
     getPendingAbsenceReviewCount(),
+    // The agency ↔ client bridge (2026-09-24): side-gated inside the reader
+    // by the ACTIVE workspace company (agency: shares awaiting an offer;
+    // client: pending connection invites + offers awaiting a decision), all
+    // from the SAME bridge reads the partners / scouting doors render, zeros
+    // for everyone else and on any failure.
+    getBridgeSpineCounts(),
+    getOpenTeamOfferCount(),
   ]);
   return {
     unreadConversations,
@@ -70,10 +111,16 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     serviceRequestResponsesNew: requestNewCounts.buyerNew,
     pendingIncomingBookings,
     bookingResponsesNew,
-    pendingInvitations: invitations.length,
+    pendingInvitations: invitations.status === "ok" ? invitations.total : 0,
+    pendingMembershipInvitations:
+      membershipInvitations.kind === "ok" ? membershipInvitations.invitations.length : 0,
     openTaskAttention: taskAttention.total,
     newJobMatches,
     pendingAbsenceReviews,
+    pendingConnectionInvites: bridge.pendingConnectionInvites,
+    sharedRequestsAwaitingOffer: bridge.sharedRequestsAwaitingOffer,
+    openCandidateOffers: bridge.openCandidateOffers,
+    openTeamOffers,
   };
 });
 
@@ -123,6 +170,15 @@ export async function getDurableNotifications(limit?: number): Promise<
     read_at: string | null;
     /** Canonical surface for the entity this event is about. */
     href?: string;
+    /**
+     * The stored row's own safe render hints (`SAFE_METADATA_KEYS`: country,
+     * roleSlug, startDate). Carried through so the bell can say WHICH market
+     * an event belongs to (owner window 11 §28) — production showed two
+     * "Darbuotojas pareiškė susidomėjimą jūsų poreikiu" rows that were
+     * indistinguishable, because everything the row knew beyond its type was
+     * dropped here. Never free text; the write side gates the keys.
+     */
+    metadata: NotificationEventMetadata;
   }[]
 > {
   const supabase = await createServerClient();
@@ -131,12 +187,16 @@ export async function getDurableNotifications(limit?: number): Promise<
   if (feed.kind !== "ready") return [];
   return feed.events.map((e) => ({
     id: e.id,
-    type: `event_${e.eventType}`,
+    // A focused weekly digest renders as its own type key (see
+    // `notificationRenderedType`), so the label never promises more than the
+    // writer could know.
+    type: notificationRenderedType(e.eventType, e.metadata),
     created_at: e.createdAt,
     read_at: e.readAt,
     // The stored row already knows which entity it is about; this turns that
     // into somewhere the reader can actually go. Clearing still happens by
     // marking read, not by visiting — see NOTIFICATION_ENTITY_HREF.
-    href: notificationEventHref(e.entityType),
+    href: notificationEventHref(e.entityType, e.metadata),
+    metadata: e.metadata,
   }));
 }

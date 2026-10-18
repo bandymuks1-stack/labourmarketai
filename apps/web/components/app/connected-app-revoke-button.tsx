@@ -23,7 +23,7 @@ function ConfirmSubmit({ label, pendingLabel }: { label: string; pendingLabel: s
         type="submit"
         disabled={pending}
         aria-busy={pending}
-        className="rounded-md bg-state-danger px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-md bg-state-danger px-3 py-1.5 text-xs font-medium text-text-on-danger hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         data-testid="connected-app-confirm-yes"
       >
         {pending ? pendingLabel : label}

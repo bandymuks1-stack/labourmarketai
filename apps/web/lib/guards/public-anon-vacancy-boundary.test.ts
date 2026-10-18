@@ -98,7 +98,12 @@ describe("anonymous public-vacancy boundary (owner directive 2026-08-24)", () =>
       join(ROOT, "apps", "web", "app", "[locale]", "(marketing)", "jobs", "[id]", "page.tsx"),
       "utf8",
     );
-    expect(page).toContain("member?.titleRaw ?? preview.occupation");
+    // 2026-10-10: the anonymous heading names the occupation in the reader's
+    // language when the catalogue knows it (the board card's rule); the
+    // member-only raw title still only ever comes from the member read.
+    expect(page).toContain(
+      "member?.titleRaw ?? localizedProfession ?? preview.occupation",
+    );
   });
 
   it("card heading falls back when the anonymous title is NULL", () => {

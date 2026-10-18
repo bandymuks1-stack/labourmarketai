@@ -8,5 +8,9 @@
   "kilograms": "kg",
   "packages": "pakkausta",
   "box_per_day": "laatikkoa/päivä",
-  "square_meters_per_day": "m²/päivä"
+  "square_meters_per_day": "m²/päivä",
+  "kilometers": "km",
+  "pallets": "lavaa",
+  "covers": "katetta",
+  "cases": "tapausta"
 }

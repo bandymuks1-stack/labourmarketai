@@ -21,7 +21,7 @@ import { describe, expect, it } from "vitest";
  */
 
 const APP_ROOT = join(__dirname, "..", "..");
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const ALL_LOCALES = [
   "lt",
   "en",

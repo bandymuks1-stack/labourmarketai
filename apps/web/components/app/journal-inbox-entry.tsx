@@ -19,6 +19,12 @@ export type InboxEntry = {
   originalText: string;
   workerName: string;
   createdAt: string;
+  /** The day the work was done (YYYY-MM-DD), when the worker stated one. */
+  workDate?: string | null;
+  /** False when the viewer can see this entry but holds no reviewer engagement
+   *  in its organization — the actions are replaced by the reason. The server
+   *  RPC remains the authority; this only avoids offering a refused action. */
+  canApprove?: boolean;
   metrics: { label: string; value: string }[];
   skills: InboxSkill[];
   /** Deterministic work items recognized from the entry text (display only),
@@ -94,8 +100,17 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         case "review_not_enabled":
           return { text: t("inbox.result.reviewNotEnabled"), ok: false };
         case "not_authorized":
-        case "no_reviewer_engagement":
           return { text: t("inbox.result.notAuthorized"), ok: false };
+        // R-4: the manager may SEE the entry (membership) but confirming
+        // needs a reviewer engagement the owner grants — its own truth.
+        case "no_reviewer_engagement":
+          return { text: t("inbox.result.noReviewerEngagement"), ok: false };
+        case "self_review_not_allowed":
+          return { text: t("inbox.result.selfReviewNotAllowed"), ok: false };
+        case "review_authority_not_established":
+          return { text: t("inbox.result.reviewAuthorityNotEstablished"), ok: false };
+        case "already_accepted":
+          return { text: t("inbox.result.alreadyAccepted"), ok: false };
         case "skill_not_owned":
           return { text: t("inbox.result.skillNotOwned"), ok: false };
         case "no_skills":
@@ -122,8 +137,17 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
         case "review_not_enabled":
           return { text: t("inbox.result.reviewNotEnabled"), ok: false };
         case "not_authorized":
-        case "no_reviewer_engagement":
           return { text: t("inbox.result.notAuthorized"), ok: false };
+        // R-4: the manager may SEE the entry (membership) but confirming
+        // needs a reviewer engagement the owner grants — its own truth.
+        case "no_reviewer_engagement":
+          return { text: t("inbox.result.noReviewerEngagement"), ok: false };
+        case "self_review_not_allowed":
+          return { text: t("inbox.result.selfReviewNotAllowed"), ok: false };
+        case "review_authority_not_established":
+          return { text: t("inbox.result.reviewAuthorityNotEstablished"), ok: false };
+        case "already_accepted":
+          return { text: t("inbox.result.alreadyAccepted"), ok: false };
         case "needs_migration":
           return { text: t("inbox.result.needsMigration"), ok: false };
         default:
@@ -153,6 +177,9 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
   const blockedCodes = [
     "not_authorized",
     "no_reviewer_engagement",
+    "self_review_not_allowed",
+    "review_authority_not_established",
+    "already_accepted",
     "review_not_enabled",
     "entry_superseded",
     "entry_deleted",
@@ -163,7 +190,8 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
     (confirmState?.ok === false && isBlocked(confirmState.code)) ||
     (reviewState?.ok === false && isBlocked(reviewState.code));
   // Whether the reviewer may still act (drives every action surface below).
-  const canAct = !done && !permissionBlocked;
+  const noApproveRight = entry.canApprove === false;
+  const canAct = !done && !permissionBlocked && !noApproveRight;
 
   return (
     <li className="card-border flex flex-col gap-3 p-4" data-testid={`inbox-entry-${entry.id}`}>
@@ -173,7 +201,7 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             {entry.workerName}
           </p>
           <p className="mt-0.5 text-meta text-text-muted">
-            {formatUtcDate(entry.createdAt, locale)}
+            {formatUtcDate(entry.workDate ?? entry.createdAt, locale)}
           </p>
         </div>
       </div>
@@ -367,7 +395,6 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
                     type="checkbox"
                     name="skill_id"
                     value={s.id}
-                    defaultChecked
                     data-testid={`confirm-skill-${entry.id}-${s.id}`}
                   />
                   {s.name}
@@ -441,6 +468,16 @@ export function JournalInboxEntry({ entry }: { entry: InboxEntry }) {
             </Button>
           </div>
         </form>
+      ) : null}
+
+      {noApproveRight && !resultMessage ? (
+        <p
+          className="rounded-md border border-state-warning bg-state-warning/10 px-2 py-1 text-xs text-state-warning"
+          role="status"
+          data-testid={`journal-review-no-right-${entry.id}`}
+        >
+          {t("inbox.result.noReviewerEngagement")}
+        </p>
       ) : null}
 
       {resultMessage ? (

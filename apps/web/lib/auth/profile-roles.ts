@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { CoreRead, DomainCaller } from "@/lib/domain/caller";
+
 /**
  * ONE reader for the role signals behind every authenticated surface: the
  * role gate (`lib/auth/require-role.ts`), the dashboard shell
@@ -66,13 +68,30 @@ export const KNOWN_HELD_ROLES = [
 export type HeldProfileRole = (typeof KNOWN_HELD_ROLES)[number] | (string & {});
 
 export const ROLE_SIGNAL_RETRY_DELAY_MS = 120;
+/**
+ * PostgREST answers PGRST303 "JWT issued at future" when a token's `iat` is
+ * ahead of ITS OWN clock — a sub-second-to-seconds step between the signer
+ * (GoTrue) and the validator (observed locally on Docker/WSL2 clock steps;
+ * zero occurrences in 24 h of production logs, 2026-10-09). The token is not
+ * wrong and is never altered: waiting lets the validator's clock catch up. The
+ * wait is BOUNDED (3 attempts, 250 ms then 500 ms), applies to this one error
+ * only, re-runs the SAME read with the SAME token, mints/refreshes nothing and
+ * falls back to nothing. After the cap the read is still "unknown" and throws.
+ */
+export const ROLE_SIGNAL_CLOCK_SKEW_DELAYS_MS = [250, 500] as const;
+
+function isJwtIssuedInFuture(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const e = error as { code?: unknown; message?: unknown };
+  return e.code === "PGRST303" && /issued at future/i.test(String(e.message ?? ""));
+}
 
 /** The read did NOT answer. Distinct from "the read said: no such role". */
 export class RoleSignalUnavailableError extends Error {
   readonly signal: string;
 
   constructor(signal: string, cause: unknown) {
-    super(`${signal} could not be read (two attempts); the answer is unknown`, {
+    super(`${signal} could not be read (bounded attempts); the answer is unknown`, {
       cause,
     });
     this.name = "RoleSignalUnavailableError";
@@ -115,11 +134,19 @@ export async function readRoleSignal<T>(
   read: () => PromiseLike<{ data: T; error: unknown }>,
 ): Promise<T> {
   let lastError: unknown = null;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    if (attempt > 0) await sleep(ROLE_SIGNAL_RETRY_DELAY_MS);
+  let maxAttempts = 2;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    if (attempt > 0) {
+      await sleep(
+        isJwtIssuedInFuture(lastError)
+          ? (ROLE_SIGNAL_CLOCK_SKEW_DELAYS_MS[attempt - 1] ?? ROLE_SIGNAL_CLOCK_SKEW_DELAYS_MS[1])
+          : ROLE_SIGNAL_RETRY_DELAY_MS,
+      );
+    }
     const { data, error } = await read();
     if (!error) return data;
     lastError = error;
+    if (isJwtIssuedInFuture(error)) maxAttempts = 3;
     console.error("[auth/profile-roles] read failed", {
       signal,
       attempt: attempt + 1,
@@ -138,4 +165,59 @@ export async function readActiveProfileRoles<T extends RoleRow>(
   read: () => PromiseLike<{ data: T[] | null; error: unknown }>,
 ): Promise<T[]> {
   return (await readRoleSignal("profile_roles", read)) ?? [];
+}
+
+/**
+ * THE canonical `profile_roles` read as an explicit caller (G4 bridge).
+ *
+ * WHY THIS EXISTS. `readActiveProfileRoles` above is the ERROR-SEMANTICS
+ * wrapper — it retries once and then throws, so an unanswered read can never
+ * be rendered as "this person holds no roles". It is not a reader: every
+ * caller passes its own PostgREST query, and three web surfaces (the dashboard
+ * layout, the profile page, the account page) each wrote the same one.
+ *
+ * A fourth copy was about to be written in the capability registry, which is
+ * exactly the shape `g4-domain-core-reuse` exists to refuse: a transport
+ * adapter re-implementing a read the web already owns, where the copy serving
+ * external clients is the one nobody watches.
+ *
+ * WHAT THIS DOES AND DOES NOT CENTRALIZE, stated precisely because the
+ * tempting summary — "now every transport shares one query" — would be false.
+ * The three web callers still pass their own query to
+ * `readActiveProfileRoles`, and they are RIGHT to: they let the throw reach
+ * the route error boundary, so a person never sees a shell rendered from a
+ * role state nobody could read. A capability cannot throw — it must answer
+ * with the failure inside its payload — so it needs the non-throwing shape
+ * below. Converting the web surfaces to it would either change their failure
+ * semantics or make each one re-throw, and neither is an improvement. They
+ * were checked, not changed.
+ *
+ * The result is the same honest three-state the other cores return:
+ * `{ ok: false }` when the read never answered, `{ ok: true, value: [] }` when
+ * it answered and the person holds nothing. Absence and failure are different
+ * facts (#1314) and a bearer consumer must be able to tell them apart.
+ *
+ * NOTE ON WHAT A ROLE IS. These are the RBAC rows — the small fixed technical
+ * set (doctrine §5, positions vs roles). They are NOT what a person DOES;
+ * that lives in professions, skills, positions and engagement contexts. The
+ * set also carries `admin`, which is not a participation mode: a consumer
+ * mapping these to modes must FILTER, never assume.
+ */
+export async function readHeldProfileRoles(
+  caller: DomainCaller,
+): Promise<CoreRead<HeldProfileRole[]>> {
+  try {
+    const rows = await readActiveProfileRoles<{ role: string }>(() =>
+      caller.supabase
+        .from("profile_roles")
+        .select("role")
+        .eq("profile_id", caller.userId)
+        .eq("is_active", true),
+    );
+    return { ok: true, value: rows.map((r) => r.role as HeldProfileRole) };
+  } catch {
+    // `readActiveProfileRoles` already retried and logged. A throw means the
+    // read never answered — the one thing that must not become an empty list.
+    return { ok: false };
+  }
 }

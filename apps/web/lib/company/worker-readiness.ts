@@ -1,3 +1,4 @@
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -51,10 +52,9 @@ export async function getWorkerReadiness(
   }
 
   // Journal entries the employer can see for these workers (RLS-scoped).
-  const { data: entries } = await supabase
-    .from("journal_entries")
-    .select("id, worker_id, created_at")
-    .in("worker_id", ids);
+  const { data: entries } = await liveJournalEntriesOnly(
+    supabase.from("journal_entries").select("id, worker_id, created_at").in("worker_id", ids),
+  );
   const entryWorker = new Map<string, string>();
   for (const r of (entries ?? []) as {
     id: string;

@@ -10,6 +10,8 @@ import {
   emitDemandInterestResponseNotification,
 } from "@/lib/notifications/event-emitters";
 import type { DomainCaller } from "@/lib/domain/caller";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { isApprovedRouteRow, safeApprovedCompanyName } from "./opportunity-fit";
 import { needFromDemandRow } from "./opportunity-need";
 import { buildOwnWorkerContext, buildOwnWorkerContextCore } from "./worker-subject";
@@ -123,6 +125,52 @@ export async function interestStateFingerprint(
   return `interest:${(data?.status as string) ?? "none"}`;
 }
 
+/**
+ * The notification recipient for a demand the caller just expressed interest
+ * in — from the caller's OWN session through `contact_demand_owner_v1`, never
+ * from the admin client and never from caller input. Outcomes:
+ *   - `owner`      — the demand owner's profile id (server-side use only);
+ *   - `self`       — the caller owns the demand (the RPC returns a row with a
+ *                    NULL owner because `cr.profile_id is distinct from uid`
+ *                    fails while every other gate holds);
+ *   - `unresolved` — no row / RPC missing / error. The emitter names it.
+ */
+async function resolveDemandOwnerForNotification(
+  caller: DomainCaller,
+  requestId: string,
+): Promise<
+  | { kind: "owner"; profileId: string }
+  | { kind: "self" }
+  | { kind: "unresolved" }
+> {
+  try {
+    const { data, error } = await asAny(caller.supabase).rpc(
+      "contact_demand_owner_v1",
+      { p_request_id: requestId },
+    );
+    if (error || !Array.isArray(data) || data.length === 0) {
+      return { kind: "unresolved" };
+    }
+    const row = data[0] as {
+      owner_profile_id?: string | null;
+      has_own_signal?: boolean;
+      demand_open?: boolean;
+      company_verified?: boolean;
+    };
+    if (row.owner_profile_id) {
+      return { kind: "owner", profileId: row.owner_profile_id };
+    }
+    // Every gate held and the owner is still withheld: the only branch of the
+    // RPC that does that is `cr.profile_id is distinct from uid` — the caller.
+    if (row.has_own_signal && row.demand_open && row.company_verified) {
+      return { kind: "self" };
+    }
+    return { kind: "unresolved" };
+  } catch {
+    return { kind: "unresolved" };
+  }
+}
+
 /** Express interest in a worker-visible demand. Idempotent: repeating the
  *  action refreshes the snapshot and keeps status=interested. Cookie-session
  *  wrapper over the transport-neutral core below. */
@@ -226,6 +274,25 @@ export async function expressInterestCore(
     return { kind: "error", message: error.message };
   }
 
+  // EMPLOYER FUNNEL CLOSURE (owner §23 canonical chain, 2026-09-22): the
+  // interest is STORED at this line — the sibling of
+  // `vacancy_interest_expressed` for the employer's OWN requirement. Emitted
+  // here, after the upsert and before the notification, so it is counted
+  // whether or not the owner could be told. Entity ids only (the request id
+  // is an opaque uuid) — never the note, the snapshot or the company name.
+  // Fire-and-forget through the shared server emitter.
+  emitServerFunnelEvent(FUNNEL_EVENTS.demandInterestExpressed, {
+    source: "opportunities",
+    route: "/dashboard/opportunities",
+    metadata: {
+      surface: "employer_requirement",
+      role_context: "worker",
+      ref_type: "customer_request",
+      ref_id: input.requestId,
+      success: true,
+    },
+  });
+
   // THE SIGNAL NOW REACHES SOMEONE — after the domain write succeeded and
   // never in front of it. Recipient resolution lives entirely in the emitter,
   // off the signal's own rows.
@@ -239,7 +306,26 @@ export async function expressInterestCore(
   // failed emission still cannot fail a worker's interest.
   const signalId = (signalRow as { id?: string } | null)?.id ?? null;
   if (signalId) {
-    await emitDemandInterestNotification(signalId);
+    // WHO IS TOLD is resolved HERE, under the caller's own session, through
+    // the gated SECURITY DEFINER RPC the contact action has used since
+    // 2026-07-23 (`contact_demand_owner_v1`, migration 20260723053000). It
+    // reveals the owner only when the caller holds their own active signal
+    // on an open demand of a verified company — which is exactly true at
+    // this line, and exactly the board gate — and NULL for the owner's own
+    // demand. The emitter used to look the owner up with the admin client,
+    // which holds no grant on `customer_requests`; that read was the whole
+    // silence (2026-09-17 root cause, see the emitter). No grant was added.
+    const owner = await resolveDemandOwnerForNotification(caller, input.requestId);
+    if (owner.kind === "self") {
+      // APPROVED silence: the demand owner raised a hand at their own demand.
+    } else {
+      await emitDemandInterestNotification({
+        signalId,
+        ownerProfileId: owner.kind === "owner" ? owner.profileId : null,
+        actorProfileId: caller.userId,
+        country: (visibleRow.country as string | null) ?? null,
+      });
+    }
   } else {
     // THE SILENT SKIP. The upsert reported no error, so the interest IS
     // stored — but `.select("id")` came back empty, so there is no signal id
@@ -283,7 +369,10 @@ export async function withdrawInterest(input: {
 /** One of the worker's OWN interest rows (RLS: own worker_id only) with the
  *  stored snapshot — the raw material for the "Mano susidomėjimai" list. */
 export interface MyInterestRow {
-  readonly requestId: string;
+  /** The platform demand, or null for an interest in a PUBLIC VACANCY
+   *  (second source, migration 20260917160000) — exactly one of the two. */
+  readonly requestId: string | null;
+  readonly publicVacancyId: string | null;
   readonly status: InterestStatus;
   /** The stored match_snapshot jsonb (context/cv parsed by pure readers). */
   readonly matchSnapshot: unknown;
@@ -294,12 +383,18 @@ export interface MyInterestRow {
 export interface MyInterestSignals {
   /** request_id → status. Empty when the table is not applied yet. */
   readonly byRequest: ReadonlyMap<string, InterestStatus>;
+  /** public_vacancy_id → status — the external cards' own button state.
+   *  Empty until the vacancy-interest migration is applied. */
+  readonly byVacancy: ReadonlyMap<string, InterestStatus>;
   /** The worker's own rows, newest activity first — INDEPENDENT of current
    *  board visibility (a signal on a closed demand still appears; the view
    *  layer labels it honestly). Empty when the table is not applied yet. */
   readonly rows: readonly MyInterestRow[];
   /** False until the owner-gated migration is applied. */
   readonly available: boolean;
+  /** False until migration 20260917160000 (the vacancy source) is applied —
+   *  the external cards offer the interest control only then. */
+  readonly vacancyInterestAvailable: boolean;
 }
 
 /** The worker's own interest signals (board button states + the aggregated
@@ -308,34 +403,60 @@ export async function listMyInterestSignals(
   supabase: SupabaseClient,
   workerId: string,
 ): Promise<MyInterestSignals> {
+  const empty: MyInterestSignals = {
+    byRequest: new Map(),
+    byVacancy: new Map(),
+    rows: [],
+    available: false,
+    vacancyInterestAvailable: false,
+  };
   try {
-    const { data, error } = await asAny(supabase)
+    // The vacancy column exists only once migration 20260917160000 is
+    // applied. Read WITH it first; on 42703 (undefined column) fall back to
+    // the pre-migration projection, so the board keeps rendering exactly as
+    // before until the owner applies it — honest degradation, never a dead
+    // board and never a fake "no interests".
+    let { data, error } = await asAny(supabase)
       .from("demand_interest_signals")
-      .select("request_id, status, match_snapshot, created_at, updated_at")
+      .select("request_id, public_vacancy_id, status, match_snapshot, created_at, updated_at")
       .eq("worker_id", workerId)
       .order("updated_at", { ascending: false });
-    if (error) return { byRequest: new Map(), rows: [], available: false };
+    let vacancyInterestAvailable = true;
+    if (error && (error as { code?: string }).code === "42703") {
+      vacancyInterestAvailable = false;
+      ({ data, error } = await asAny(supabase)
+        .from("demand_interest_signals")
+        .select("request_id, status, match_snapshot, created_at, updated_at")
+        .eq("worker_id", workerId)
+        .order("updated_at", { ascending: false }));
+    }
+    if (error) return empty;
     const byRequest = new Map<string, InterestStatus>();
+    const byVacancy = new Map<string, InterestStatus>();
     const rows: MyInterestRow[] = [];
     for (const r of (data ?? []) as {
-      request_id: string;
+      request_id: string | null;
+      public_vacancy_id?: string | null;
       status: InterestStatus;
       match_snapshot: unknown;
       created_at: string | null;
       updated_at: string | null;
     }[]) {
-      byRequest.set(r.request_id, r.status);
+      const vacancyId = r.public_vacancy_id ?? null;
+      if (r.request_id) byRequest.set(r.request_id, r.status);
+      if (vacancyId) byVacancy.set(vacancyId, r.status);
       rows.push({
-        requestId: r.request_id,
+        requestId: r.request_id ?? null,
+        publicVacancyId: vacancyId,
         status: r.status,
         matchSnapshot: r.match_snapshot ?? null,
         createdAt: r.created_at ?? null,
         updatedAt: r.updated_at ?? null,
       });
     }
-    return { byRequest, rows, available: true };
+    return { byRequest, byVacancy, rows, available: true, vacancyInterestAvailable };
   } catch {
-    return { byRequest: new Map(), rows: [], available: false };
+    return empty;
   }
 }
 
@@ -390,9 +511,25 @@ export async function acknowledgeInterest(input: {
     // for the same reason the outbound half is (a detached write can be frozen
     // at return) and equally unable to fail the acknowledgement, because the
     // emitter never throws.
+    //
+    // The signal id is read HERE, under the acknowledging owner's own RLS
+    // (`demand_interest_signals_demand_owner_select`) — the emitter used to
+    // read it with the admin client, which has no grant on the table, so the
+    // worker was never told (2026-09-17 root cause, same as the outbound half).
+    let signalId: string | null = null;
+    if (input.status === "reviewed") {
+      const { data: signal } = await asAny(supabase)
+        .from("demand_interest_signals")
+        .select("id")
+        .eq("request_id", input.requestId)
+        .eq("worker_id", input.workerId)
+        .maybeSingle();
+      signalId = (signal as { id?: string } | null)?.id ?? null;
+    }
     await emitDemandInterestResponseNotification({
       requestId: input.requestId,
       workerId: input.workerId,
+      signalId,
       status: input.status as "reviewed" | "contacted",
       actorProfileId: user.id,
     });
@@ -411,6 +548,8 @@ export async function listDemandInterestForCompany(
   | { kind: "ok"; byWorker: ReadonlyMap<string, InterestStatus> }
   | { kind: "not-owner" }
   | { kind: "needs-migration" }
+  /** The ownership read itself failed — UNKNOWN, not "not yours". */
+  | { kind: "unavailable" }
 > {
   const supabase = await createClient();
   const {
@@ -425,12 +564,16 @@ export async function listDemandInterestForCompany(
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { kind: "not-owner" };
 
-  const { data: req } = await asAny(supabase)
+  const { data: req, error: reqError } = await asAny(supabase)
     .from("customer_requests")
     .select("id")
     .eq("id", requestId)
     .eq("profile_id", user.id)
     .maybeSingle();
+  // A FAILED ownership read is not a negative answer: `not-owner` would
+  // tell the owner of the demand that it is not theirs. The caller renders
+  // `unavailable` as "could not load" (SEP-7).
+  if (reqError) return { kind: "unavailable" };
   if (!req) return { kind: "not-owner" };
 
   try {

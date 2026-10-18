@@ -1,0 +1,88 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  USER_METADATA_FIRST_TOUCH_KEYS,
+  USER_METADATA_FIRST_TOUCH_VALUE_MAX,
+  firstTouchFromUserMetadata,
+} from "./first-touch-user-metadata";
+
+/**
+ * The server-side first-touch reader (employer funnel closure, 2026-09-22).
+ * The bound is the whole point: the reader takes the user's OWN auth
+ * `user_metadata` — an object the signup form wrote but that any later
+ * profile update could extend — and hands back ONLY the six allowlisted,
+ * sanitized, length-capped campaign keys. Nothing else in that object may
+ * ever reach a pilot_events row through this route.
+ */
+describe("firstTouchFromUserMetadata", () => {
+  it("returns exactly the allowlisted keys that are present", () => {
+    const out = firstTouchFromUserMetadata({
+      utm_source: "facebook",
+      utm_medium: "group",
+      utm_campaign: "welder-w1",
+      utm_content: "pl",
+      referrer_host: "l.facebook.com",
+      landing_path: "/pl/jobs/e3ec6c1e",
+    });
+    expect(out).toEqual({
+      utm_source: "facebook",
+      utm_medium: "group",
+      utm_campaign: "welder-w1",
+      utm_content: "pl",
+      referrer_host: "l.facebook.com",
+      landing_path: "/pl/jobs/e3ec6c1e",
+    });
+    expect(Object.keys(out).sort()).toEqual([...USER_METADATA_FIRST_TOUCH_KEYS].sort());
+  });
+
+  it("drops everything that is not on the allowlist — locale, names, utm_term, unknown keys", () => {
+    const out = firstTouchFromUserMetadata({
+      utm_source: "google",
+      utm_term: "welder job sweden", // a typed search query — never read back
+      locale: "pl",
+      full_name: "Jan Kowalski",
+      email: "jan@example.invalid",
+      phone: "+48",
+      avatar_url: "https://x/y.png",
+      anything_else: { nested: true },
+    });
+    expect(out).toEqual({ utm_source: "google" });
+    expect(out).not.toHaveProperty("utm_term");
+    expect(out).not.toHaveProperty("full_name");
+    expect(out).not.toHaveProperty("email");
+  });
+
+  it("keeps only string values — numbers, booleans, objects and nulls are not attribution", () => {
+    const out = firstTouchFromUserMetadata({
+      utm_source: 42,
+      utm_medium: true,
+      utm_campaign: { a: 1 },
+      utm_content: null,
+      referrer_host: ["a"],
+      landing_path: "/en",
+    });
+    expect(out).toEqual({ landing_path: "/en" });
+  });
+
+  it("sanitizes like the client: control chars and angle brackets stripped, trimmed, empty dropped", () => {
+    const out = firstTouchFromUserMetadata({
+      utm_source: "  <script>fb\u0000\u001f</script>  ",
+      utm_medium: "   ",
+      utm_campaign: "\u007f",
+      landing_path: "/lt\r\n",
+    });
+    expect(out).toEqual({ utm_source: "scriptfb/script", landing_path: "/lt" });
+  });
+
+  it("caps every value at the client's own length", () => {
+    const long = "x".repeat(USER_METADATA_FIRST_TOUCH_VALUE_MAX + 50);
+    const out = firstTouchFromUserMetadata({ utm_campaign: long });
+    expect(out.utm_campaign).toHaveLength(USER_METADATA_FIRST_TOUCH_VALUE_MAX);
+  });
+
+  it("never throws: null, undefined, arrays, primitives and empty objects yield {}", () => {
+    for (const bad of [null, undefined, [], "utm_source=x", 7, true, {}]) {
+      expect(firstTouchFromUserMetadata(bad)).toEqual({});
+    }
+  });
+});

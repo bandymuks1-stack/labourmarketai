@@ -18,7 +18,7 @@ const APP = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf-8");
 
 const UPLOAD = read("components/app/cv-import-upload.tsx");
-const SERVED = ["lt", "en", "ru", "nl", "de"] as const;
+const SERVED = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 type CvCopy = {
   uploadFormats?: string;

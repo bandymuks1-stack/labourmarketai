@@ -1,0 +1,196 @@
+import type { ReactNode } from "react";
+
+import { Link } from "@/lib/i18n/navigation";
+import type { GrowthDirection } from "@/lib/journal/growth-reading";
+
+import { fmtHours, fmtPct, type Translate } from "./format";
+import { ExplainMore, RevealList } from "@/components/app/premium/disclosure";
+
+/** The skill-kinds of the growth reading — every direction except the
+ *  adjacent one, which is rendered by the directions block. */
+export type GrowthSkillDirection = Exclude<GrowthDirection, { kind: "adjacent_opportunity" }>;
+
+export type GrowthKindRow = GrowthSkillDirection & { readonly name: string };
+
+/** A POTENTIAL capability (decision 0023): named with the evidenced skills
+ *  it comes from, labelled as possible — never confirmed, never stored. */
+export type GrowthPotentialRow = {
+  readonly slug: string;
+  readonly name: string;
+  readonly fromNames: readonly string[];
+};
+
+export type GrowthDirectionRow = {
+  readonly professionId: string;
+  readonly name: string;
+  readonly sharedCount: number;
+  readonly total: number;
+  readonly missingNames: readonly string[];
+};
+
+/**
+ * WHY, in figures — every kind sentence names the evidence it was decided
+ * on: hours and share (or involvement, or "entries without a duration" —
+ * NOT_MEASURED is never 0 h), entries and contexts, dormancy, last day,
+ * trend. Self-stated says its zeros. Shared by the section and the station
+ * so one kind reads the same everywhere.
+ */
+export function growthKindWhy(
+  d: GrowthSkillDirection,
+  locale: string,
+  t: Translate,
+  dayLabel: (iso: string | null) => string | null,
+): string {
+  if (d.kind === "self_stated") return t("growthWhySelfStated");
+  const w = d.why;
+  const parts: string[] = [
+    w.attributedHours > 0
+      ? t("growthWhyHours", { hours: fmtHours(w.attributedHours, locale), percent: fmtPct(w.share, locale) })
+      : w.sharedHours > 0
+        ? t("growthWhyInvolved", { hours: fmtHours(w.sharedHours, locale) })
+        : t("growthWhyUntimed"),
+    t("growthWhyCounts", { entries: w.entries, contexts: w.contexts }),
+  ];
+  if (d.kind === "underused") parts.push(t("growthWhyDormant", { days: d.why.dormantDays }));
+  const last = dayLabel(w.lastWorkedDay);
+  if (last) parts.push(t("growthWhyLastDay", { day: last }));
+  if (w.trend !== "none") parts.push(t(`growthWhyTrend.${w.trend}`));
+  return parts.join(" · ");
+}
+
+/**
+ * GROWTH KINDS (owner requirement 5, #1689 — lane D): CORE STRENGTH ·
+ * GROWING · UNDERUSED · SELF-STATED (not evidenced) · ADJACENT OPPORTUNITY,
+ * each with its WHY in figures. A formal-qualification gap is not emitted
+ * by the model and is therefore not shown — nothing is invented. Never a
+ * score, a rank or a tier of the person; the reading is labelled derived
+ * by the caller's hint above it.
+ */
+export function GrowthKinds({
+  kinds,
+  directions,
+  locale,
+  t,
+  dayLabel,
+  kindsCap,
+  directionsCap,
+  intro,
+  potential = [],
+}: {
+  kinds: readonly GrowthKindRow[];
+  directions: readonly GrowthDirectionRow[];
+  locale: string;
+  /** Bound to `journal.intelligence`. */
+  t: Translate;
+  dayLabel: (iso: string | null) => string | null;
+  kindsCap?: ReactNode;
+  directionsCap?: ReactNode;
+  /** The station's own "this is a reading" sentence — folded into the SAME
+   *  single explanation as the hints, so a section never stacks disclosures. */
+  intro?: string;
+  potential?: readonly GrowthPotentialRow[];
+}) {
+  if (kinds.length === 0 && directions.length === 0 && potential.length === 0) return null;
+  return (
+    <>
+      {kinds.length > 0 && (
+        <div className="flex flex-col gap-1.5" data-testid="wi-growth-kinds">
+          <h4 className="text-meta font-medium text-text-secondary">{t("growthKindsTitle")}</h4>
+          <ExplainMore>
+            {intro ? <p>{intro}</p> : null}
+            <p className="text-meta leading-relaxed text-text-muted">{t("growthKindsHint")}</p>
+            {directions.length > 0 ? <p>{t("directionsHint")}</p> : null}
+          </ExplainMore>
+          <RevealList
+            listAs="ul"
+            listClassName="flex flex-col gap-1.5"
+            items={kinds.map((d) => (
+              <li
+                key={`${d.kind}:${d.slug}`}
+                className="flex flex-col gap-0.5 text-meta text-text-muted"
+                data-testid={`wi-kind-${d.slug}`}
+                data-kind={d.kind}
+              >
+                <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                  <span className="rounded-md border border-border-subtle px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
+                    {t(`growthKind.${d.kind}`)}
+                  </span>
+                  <span className="text-support font-medium text-text-primary">{d.name}</span>
+                </span>
+                <span className="leading-relaxed">{growthKindWhy(d, locale, t, dayLabel)}</span>
+              </li>
+            ))}
+          />
+          {kindsCap}
+        </div>
+      )}
+      {directions.length > 0 && (
+        <div className="flex flex-col gap-1.5" data-testid="wi-directions" data-kind="adjacent_opportunity">
+          <h4 className="flex flex-wrap items-center gap-x-2 text-meta font-medium text-text-secondary">
+            {t("directionsTitle")}
+            <span className="rounded-md border border-border-subtle px-1.5 py-0.5 font-mono text-meta font-normal uppercase tracking-label text-text-secondary">
+              {t("growthKind.adjacent_opportunity")}
+            </span>
+          </h4>
+          {kinds.length === 0 ? (
+            <ExplainMore>
+              {intro ? <p>{intro}</p> : null}
+              <p className="text-meta leading-relaxed text-text-muted">{t("directionsHint")}</p>
+            </ExplainMore>
+          ) : null}
+          <RevealList
+            listAs="ul"
+            listClassName="flex flex-col gap-1.5"
+            items={directions.map((d) => (
+              <li
+                key={d.professionId}
+                className="flex flex-col gap-0.5 rounded-md border border-border-subtle bg-surface-1/40 px-3 py-2"
+                data-testid={`wi-direction-${d.professionId}`}
+              >
+                <span className="text-support font-medium text-text-primary">{d.name}</span>
+                <span className="text-meta text-text-muted">
+                  {t("directionCoverage", { shared: d.sharedCount, total: d.total })}
+                  {d.missingNames.length > 0
+                    ? ` · ${t("directionMissing", { skills: d.missingNames.join(", ") })}`
+                    : ""}
+                </span>
+              </li>
+            ))}
+          />
+          {directionsCap}
+        </div>
+      )}
+      {/* demand is not read on this surface — the board is where real needs
+          are; said, not implied (UNKNOWN ≠ ZERO) */}
+      <p className="text-meta text-text-muted" data-testid="wi-growth-demand-note">
+        {t("growthDemandNote")}{" "}
+        <Link
+          href={"/dashboard/opportunities" as "/dashboard"}
+          className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+        >
+          {t("openOpportunities")} →
+        </Link>
+      </p>
+      {potential.length > 0 && (
+        <div className="flex flex-col gap-1.5" data-testid="wi-potential" data-evidence-state="potential">
+          <h4 className="text-meta font-medium text-text-secondary">{t("potentialTitle")}</h4>
+          <ExplainMore>
+            <p className="text-meta leading-relaxed text-text-muted">{t("potentialHint")}</p>
+          </ExplainMore>
+          <ul className="flex flex-col gap-1.5">
+            {potential.map((p) => (
+              <li
+                key={p.slug}
+                className="flex flex-col gap-0.5 rounded-md border border-dashed border-border-subtle px-3 py-2"
+                data-testid={`wi-potential-${p.slug}`}
+              >
+                <span className="text-support font-medium text-text-primary">{p.name}</span>
+                <span className="text-meta text-text-muted">{t("potentialFrom", { skills: p.fromNames.join(", ") })}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
+  );
+}

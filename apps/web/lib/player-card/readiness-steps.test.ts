@@ -16,12 +16,16 @@ const EMPTY: WorkerPlayerCard = {
   availabilityStatus: null,
   availableFrom: null,
   professionSlug: null,
+  professionOwnWords: null,
+  professions: [],
   latestEvidenceAt: null,
   workHistory: [],
+  unavailable: [],
   locationCountry: null,
   documents: null,
   evidenceTimeline: [],
   skillEvidence: [],
+  provenance: { class: "SELF_DECLARED" },
 };
 
 describe("readinessNextSteps — every unmet signal gets a real next step", () => {

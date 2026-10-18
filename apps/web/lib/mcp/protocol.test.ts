@@ -78,16 +78,19 @@ describe("notifications and malformed messages", () => {
 describe("tools", () => {
   it("tools/list returns exactly the declared tools", async () => {
     const r = await handleMcpMessage(req("tools/list"), deps());
-    expect(r?.result).toEqual({
-      tools: [
-        {
-          name: "profile_get",
-          title: "My profile",
-          description: "Own profile facts.",
-          inputSchema: TOOLS[0].inputSchema,
-        },
-      ],
-    });
+    // Exact on the TOOL SHAPE — an extra or renamed field on a tool is still
+    // a failure here. The result envelope around it (the 2026-07-28 `ttlMs` /
+    // `cacheScope` cache directives) is asserted once, in
+    // `lib/guards/mcp-protocol-2026.test.ts`, rather than restated in every
+    // tools/list test.
+    expect((r?.result as { tools: unknown[] }).tools).toEqual([
+      {
+        name: "profile_get",
+        title: "My profile",
+        description: "Own profile facts.",
+        inputSchema: TOOLS[0].inputSchema,
+      },
+    ]);
   });
 
   it("tools/list emits declared annotations verbatim (and omits the key when absent)", async () => {
@@ -101,17 +104,15 @@ describe("tools", () => {
       },
     };
     const r = await handleMcpMessage(req("tools/list"), deps({ tools: [annotated] }));
-    expect(r?.result).toEqual({
-      tools: [
-        {
-          name: "profile_get",
-          title: "My profile",
-          description: "Own profile facts.",
-          inputSchema: TOOLS[0].inputSchema,
-          annotations: annotated.annotations,
-        },
-      ],
-    });
+    expect((r?.result as { tools: unknown[] }).tools).toEqual([
+      {
+        name: "profile_get",
+        title: "My profile",
+        description: "Own profile facts.",
+        inputSchema: TOOLS[0].inputSchema,
+        annotations: annotated.annotations,
+      },
+    ]);
     // Without annotations the key is absent, not null — the first assertion
     // in this file already pins that shape.
   });

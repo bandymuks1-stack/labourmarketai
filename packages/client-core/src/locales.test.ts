@@ -48,7 +48,9 @@ describe("resolving the device language", () => {
   });
 
   it("takes the first supported language in the device's own order", () => {
-    expect(resolveDeviceLocale(["pl-PL", "en-GB", "lt"])).toBe("en");
+    // sv is not an active locale; pl is (2026-09-20), so it now wins when listed first.
+    expect(resolveDeviceLocale(["sv-SE", "en-GB", "lt"])).toBe("en");
+    expect(resolveDeviceLocale(["pl-PL", "en-GB", "lt"])).toBe("pl");
   });
 
   it("falls back to the default when nothing matches", () => {

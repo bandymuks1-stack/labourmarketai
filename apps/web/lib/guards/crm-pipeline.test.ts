@@ -69,7 +69,7 @@ const readCode = (rel: string) => stripComments(readWeb(rel));
 const MODEL = "lib/crm/pipeline-model.ts";
 const LIB = "lib/crm/pipeline.ts";
 const PAGE = "app/[locale]/dashboard/admin/pipeline/page.tsx";
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 // ── Stage mapping ────────────────────────────────────────────────────────────
 

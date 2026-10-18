@@ -110,6 +110,10 @@ describe("the structured demand actually reaches the engine", () => {
       ...n,
       structuredV2: undefined,
       languageRequirementUnknown: undefined,
+      // 2026-09-04: the declared opportunity type is carried for discovery
+      // only (null when not stated) — a declaration, never a derived
+      // requirement; normalised out here for the same reason as the two above.
+      opportunityType: undefined,
     });
     expect(fromRow.languageRequirementUnknown).toBe(true);
     expect(withoutDeclarations(fromRow)).toEqual(withoutDeclarations(fromText));

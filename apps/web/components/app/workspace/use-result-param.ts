@@ -1,5 +1,6 @@
 "use client";
 
+import type { PlayerCardMode } from "@/lib/player-card/card-modes";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -87,8 +88,27 @@ export function useResultParam(): {
    * ownership of the row before any candidate is ranked.
    */
   demandId: string | null;
+  /**
+   * FULL SCREEN IS AN EXPANSION, NEVER AN ESCAPE (owner P0/P1 §17,
+   * 2026-09-23: "Open full screen may expand a contextual result when more
+   * space is useful. It must not be an escape hatch into a second legacy
+   * application").
+   *
+   * `?full=1` beside a valid `?result=` — the SAME result, given the whole
+   * workspace. It is a state of the workspace in the query string for the
+   * same reasons depth is (reload, Back, share), and like depth it never
+   * navigates: `replace` on the same route, the conversation stays mounted.
+   * Meaningless without a result, so it reads false when there is none.
+   */
+  expanded: boolean;
+  /** Give the open result the whole workspace. Replaces; keeps the depth. */
+  expandResult: () => void;
+  /** Back to the side-by-side workspace. Replaces; keeps the depth. */
+  collapseResult: () => void;
   /** Show a result — replaces the query, never pushes a new page. */
   openResult: (kind: ResultKind) => void;
+  /** Open the Player Card result in one of its modes (`?card=`), in ONE write. */
+  openPlayerCard: (mode: PlayerCardMode) => void;
   /** Drill into one demand's candidates. Pushes, so Back returns to the list. */
   selectDemand: (requestId: string) => void;
   /** W11 — open the PROJECT result at one project, in ONE push. Distinct from
@@ -209,6 +229,9 @@ export function useResultParam(): {
     [rawDemand],
   );
 
+  // Only the one literal value counts; anything else is simply not expanded.
+  const expanded = result !== null && readParam("full") === "1";
+
   const write = useCallback(
     (patch: Record<string, string | null>, mode: "push" | "replace") => {
       const q = new URLSearchParams(params?.toString() ?? href ?? "");
@@ -231,6 +254,12 @@ export function useResultParam(): {
     projectId,
     interactionToken,
     demandId,
+    expanded,
+    // Expanding and collapsing touch ONLY the flag: the result, its depth
+    // and the conversation are exactly what they were. Replace, never push —
+    // Back must not step through "big" and "small" of the same answer.
+    expandResult: useCallback(() => write({ full: "1" }, "replace"), [write]),
+    collapseResult: useCallback(() => write({ full: null }, "replace"), [write]),
     // Opening a result from scratch clears any stale depth: a market result
     // that reopened straight into last week's project would be showing an
     // answer nobody asked for — and an experiences result that reopened onto
@@ -238,10 +267,30 @@ export function useResultParam(): {
     // for, which is worse.
     // …and a candidates result that reopened onto last month's closed demand
     // would be answering a question nobody asked, for the same reason.
+    // A fresh result also opens at its ordinary size: `full` is cleared.
     openResult: useCallback(
       (kind: ResultKind) =>
         write(
-          { result: kind, geo: null, project: null, interaction: null, demand: null },
+          { result: kind, geo: null, project: null, interaction: null, demand: null, full: null, card: null },
+          "replace",
+        ),
+      [write],
+    ),
+    // The chat asked for a LENS of the card ("kokie mano įgūdžiai
+    // patvirtinti?" → skills): the same fresh-result write, carrying the mode.
+    // IDENTITY is the card's default, so it writes no param at all.
+    openPlayerCard: useCallback(
+      (mode: PlayerCardMode) =>
+        write(
+          {
+            result: "player-card",
+            geo: null,
+            project: null,
+            interaction: null,
+            demand: null,
+            full: null,
+            card: mode === "identity" ? null : mode,
+          },
           "replace",
         ),
       [write],
@@ -267,10 +316,21 @@ export function useResultParam(): {
     // ONE write, for the same reason `selectDemand` uses one: two calls would
     // both read the not-yet-updated query string and the second would clobber
     // the first, opening the panel at the wrong depth.
+    // Re-opening the SAME project after a write (an assignment just made) must
+    // show the state the write produced, not the panel's cached answer — the
+    // prod walk 2026-09-04 read "Priskirta projektui." beside "Priskirta 0".
+    // A fresh `pr` token makes the address differ, so the detail re-reads.
     openProjectResult: useCallback(
       (projectId: string) =>
         write(
-          { result: "project", geo: null, interaction: null, demand: null, project: projectId },
+          {
+            result: "project",
+            geo: null,
+            interaction: null,
+            demand: null,
+            project: projectId,
+            pr: Date.now().toString(36),
+          },
           "push",
         ),
       [write],
@@ -311,7 +371,7 @@ export function useResultParam(): {
     closeResult: useCallback(
       () =>
         write(
-          { result: null, geo: null, project: null, interaction: null, demand: null },
+          { result: null, geo: null, project: null, interaction: null, demand: null, full: null, card: null },
           "replace",
         ),
       [write],

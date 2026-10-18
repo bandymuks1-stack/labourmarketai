@@ -1,8 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Link } from "@/lib/i18n/navigation";
+import { PageTitle } from "@/components/app/premium/page-title";
+
 import { WorkHoursQuickEntry } from "@/components/app/work-hours-quick-entry";
-import { getHoursPageData, todayKey } from "@/lib/work-hours/hours-page-data";
+import { getHoursPageData } from "@/lib/work-hours/hours-page-data";
 import { isValidWorkDate } from "@/lib/work-hours/allocations-model";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * WORK HOURS — the operator's daily surface.
@@ -28,17 +32,18 @@ export default async function WorkHoursPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("workHours");
+  const tHome = await getTranslations("companyHome");
 
   const sp = await searchParams;
   const requested = typeof sp.d === "string" ? sp.d : "";
-  const workDate = isValidWorkDate(requested) ? requested : todayKey();
+  const workDate = isValidWorkDate(requested) ? requested : (await viewerWorkToday()).todayIso;
 
   const data = await getHoursPageData(workDate);
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-5 pb-16">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-semibold">{t("title")}</h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
@@ -51,19 +56,44 @@ export default async function WorkHoursPage({
           dayTotal={data.dayTotal}
         />
       ) : (
-        <p
-          className="rounded-md border border-border-subtle p-4 text-sm"
+        <div
+          className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-5"
           data-testid={`hours-state-${data.kind}`}
           role="status"
         >
-          {data.kind === "needs-migration"
-            ? t("states.needsMigration")
-            : data.kind === "no-company"
-              ? t("states.noCompany")
-              : data.kind === "no-objects"
-                ? t("states.noObjects")
-                : t("states.error")}
-        </p>
+          <p className="max-w-prose text-base leading-relaxed text-text-primary">
+            {data.kind === "needs-migration"
+              ? t("states.needsMigration")
+              : data.kind === "no-company"
+                ? t("states.noCompany")
+                : data.kind === "no-objects"
+                  ? t("states.noObjects")
+                  : t("states.error")}
+          </p>
+          {/* A person outside a company workspace reaches this screen by link or
+              back-navigation and met a sentence with no way on. Their own hours
+              live in the Work Journal. */}
+          {data.kind === "no-company" ? (
+            <Link
+              href="/dashboard/journal"
+              data-testid="hours-no-company-journal-link"
+              className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue"
+            >
+              {t("states.noCompanyJournalLink")} →
+            </Link>
+          ) : null}
+          {/* No sites yet: say what to do next, one tap — a project is where
+              hours are recorded against. */}
+          {data.kind === "no-objects" ? (
+            <Link
+              href="/dashboard/company/projects/new"
+              data-testid="hours-no-objects-new-project"
+              className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue"
+            >
+              {tHome("projects.emptyCta")} →
+            </Link>
+          ) : null}
+        </div>
       )}
     </div>
   );

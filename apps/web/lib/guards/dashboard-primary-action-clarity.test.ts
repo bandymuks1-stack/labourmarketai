@@ -125,9 +125,11 @@ describe("Guard: no fake clickable cards in dashboard surface", () => {
 
 // A top-level primary CTA = an explicit primary Button or the CTA gradient link
 // pattern. NOTE: the decorative `bg-gradient-cta` fill (e.g. progress bars) is
-// deliberately NOT counted — only `variant="primary"` and the CTA-link gradient
-// `from-brand-blue to-brand-cyan`.
-const PRIMARY_CTA = /variant="primary"|from-brand-blue to-brand-cyan/g;
+// deliberately NOT counted — only `variant="primary"`, the canonical CTA link
+// (`bg-gradient-cta … text-text-on-brand`, 2026-09-22) and the legacy
+// `from-brand-blue to-brand-cyan` sweep still awaiting migration.
+const PRIMARY_CTA =
+  /variant="primary"|bg-gradient-cta[^"`']*text-text-on-brand|from-brand-blue to-brand-cyan/g;
 
 describe("Guard: at most one primary action per room (page level)", () => {
   for (const page of ROOM_PAGES) {

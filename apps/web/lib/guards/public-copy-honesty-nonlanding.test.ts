@@ -82,6 +82,28 @@ describe("public marketing i18n copy makes no false capability claims", () => {
   }
 });
 
+/**
+ * Entity-name consistency (SEO/GEO gap, 2026-09-20): every SEO signal names
+ * the product "LabourMarket.ai"; /about said "Labour Market AI". The spaced
+ * form is the licensor's legal name and stays ONLY where it names the
+ * company ("Labour Market AI Sp. z o.o.").
+ */
+describe("/about names the product LabourMarket.ai, not the spaced legal form", () => {
+  const SPACED_PRODUCT = /Labour Market AI(?! Sp\. z o\.o)/;
+  for (const locale of ["en", "lt", "ru", "nl", "de"] as const) {
+    it(`${locale}.json about.* uses the brand form`, () => {
+      const catalog = JSON.parse(read(`messages/${locale}.json`)) as Record<string, unknown>;
+      const leaves = flatten(catalog.about as Record<string, unknown>, "about", {});
+      const offenders = Object.entries(leaves)
+        .filter(([, v]) => SPACED_PRODUCT.test(v))
+        .map(([k, v]) => `${k}: ${v.slice(0, 80)}`);
+      expect(offenders).toEqual([]);
+      // The brand must actually appear on the page, not merely be absent.
+      expect(Object.values(leaves).some((v) => v.includes("LabourMarket.ai"))).toBe(true);
+    });
+  }
+});
+
 describe("inline copy in non-landing marketing pages is clean", () => {
   const marketingDir = join(WEB_ROOT, "app", "[locale]", "(marketing)");
   const collect = (dir: string): string[] => {
@@ -134,7 +156,6 @@ describe("curated SEO copy stays honest", () => {
 
 describe("demo previews on /for-* pages carry the always-visible Example frame", () => {
   const PAGES = [
-    "app/[locale]/(marketing)/for-workers/page.tsx",
     "app/[locale]/(marketing)/for-companies/page.tsx",
     "app/[locale]/(marketing)/for-agencies/page.tsx",
   ];
@@ -142,7 +163,9 @@ describe("demo previews on /for-* pages carry the always-visible Example frame",
   it("every fabricated preview is wrapped in ExamplePreviewFrame", () => {
     for (const rel of PAGES) {
       const src = read(rel);
-      expect(src, rel).toMatch(/<ExamplePreviewFrame>/);
+      // Containment 2026-10-08: fabricated previews were removed; a page may
+      // carry one only inside the always-visible Example frame.
+      if (/Preview/.test(src)) expect(src, rel).toMatch(/<ExamplePreviewFrame>/);
     }
   });
 

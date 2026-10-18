@@ -1,8 +1,9 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
-import { Lock } from "lucide-react";
+import { Lock, MessageSquare } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { Card } from "@/components/ui/Card";
 import { SupportConversationLauncher } from "@/components/app/support-conversation-launcher";
 import { AttentionInstructions } from "@/components/app/attention-instructions";
 import { RefreshOnFocus } from "@/components/app/refresh-on-focus";
@@ -19,6 +20,7 @@ import {
 import { ConversationQuickReply } from "@/components/app/conversation-quick-reply";
 import { getPendingIncomingBookingCount } from "@/lib/booking/booking-actions";
 import { formatUtcDateTime } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Communication v1 — thread list page.
@@ -67,12 +69,17 @@ export default async function CommunicationListPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/communication`);
 
-  const { data: conversationsRaw } = await asAny(supabase)
+  const conversationsRes = await asAny(supabase)
     .from("conversations")
     .select("id, subject, kind, created_by, updated_at")
     .order("updated_at", { ascending: false })
     .limit(100);
-  const fetched: ConversationRow[] = (conversationsRaw ?? []) as ConversationRow[];
+  // FAILED ≠ EMPTY: a read that errored must not render as "no conversations
+  // yet" — the person would believe their threads are gone.
+  const conversationsFailed = Boolean(conversationsRes.error);
+  const fetched: ConversationRow[] = conversationsFailed
+    ? []
+    : ((conversationsRes.data ?? []) as ConversationRow[]);
 
   // REAL unread state (audit PR5): a counterpart message newer than the
   // caller's last_read_at — shared with the nav badge and the bell, so the
@@ -244,6 +251,17 @@ export default async function CommunicationListPage({
                       : (card.counterpartyName ?? t("byOther")))}
                 {": "}
               </span>
+              {/* The list shows the ORIGINAL first line; when it was written
+                  in another language the same badge as the thread says so —
+                  translation happens on the thread read, never on a list. */}
+              {preview.originalLanguage && preview.originalLanguage !== locale ? (
+                <span
+                  className="mr-1 rounded-sm border border-ink-500 px-1 font-mono text-meta uppercase tracking-label text-text-muted"
+                  data-testid={`conversation-preview-lang-${c.id}`}
+                >
+                  {preview.originalLanguage}
+                </span>
+              ) : null}
               {preview.text.length > 0
                 ? preview.text
                 : t("preview.attachmentOnly")}
@@ -355,12 +373,11 @@ export default async function CommunicationListPage({
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
-        <p className="text-sm text-text-secondary">{t("subtitle")}</p>
+    <div className="flex flex-col gap-4">
+      {/* One name for one surface: the nav says "Žinutės", so does the page.
+          No explanatory subtitle — the workspace below says what it is. */}
+      <header>
+        <PageTitle>{t("title")}</PageTitle>
       </header>
 
       {/* Honest restricted state when a "message" entry point could not open a
@@ -409,59 +426,113 @@ export default async function CommunicationListPage({
             <span className="font-medium">{tBookings("pendingLink")}</span>
             <span className="text-meta text-text-muted">{tBookings("pendingNote")}</span>
           </span>
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold text-white">
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange px-1.5 text-meta font-bold text-text-on-brand">
             {pendingBookings}
           </span>
         </Link>
       )}
 
-      {conversations.length === 0 ? (
-        <p className="card-border p-4 text-sm text-text-secondary">
-          {t("empty")}
-        </p>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {/* Unread first, as a labelled section — what needs attention is
-              visible structure, not just sort order. */}
-          {unreadConversations.length > 0 && (
-            <section
-              className="flex flex-col gap-2"
-              data-testid="communication-unread-section"
+      {/* THE COMMUNICATION WORKSPACE (owner production walk 2026-09-28: the
+          empty page was a heading, an explanation, two stacked CTAs and a
+          privacy note — not a place to talk). Conversations on one side, the
+          conversation pane on the other; an empty inbox is a state INSIDE
+          this frame, never a page instead of it. A conversation still opens
+          on its own thread route (translation, attachments, composer). */}
+      <div
+        data-testid="communication-workspace"
+        className="grid gap-4 lg:min-h-[28rem] lg:grid-cols-[minmax(18rem,24rem)_1fr]"
+      >
+        <section
+          data-testid="communication-list-pane"
+          className="flex min-w-0 flex-col gap-3"
+        >
+        {conversationsFailed ? (
+          <p
+            role="alert"
+            className="card-border border-state-danger/40 p-4 text-sm text-text-secondary"
+            data-testid="communication-load-error"
+          >
+            {t("loadError")}
+          </p>
+        ) : conversations.length === 0 ? (
+          <div className="card-border flex flex-col gap-3 p-4" data-testid="communication-empty">
+            <p className="text-sm text-text-secondary">{t("empty")}</p>
+            {/* A dead end is not an empty state (2026-09-19): the next useful
+                canonical action is to find someone to work with. */}
+            <Link
+              href="/dashboard/network"
+              className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/40 px-4 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              data-testid="communication-empty-cta"
             >
-              <h2 className="flex items-baseline gap-2 font-display text-sm font-semibold text-text-primary">
-                {t("sections.unread")}
-                <span className="font-mono text-xs font-normal text-text-muted tabular-nums">
-                  {unreadConversations.length}
-                </span>
-              </h2>
-              <ul className="flex flex-col gap-2">
-                {unreadConversations.map(renderConversation)}
-              </ul>
-            </section>
-          )}
-          {readConversations.length > 0 && (
-            <section
-              className="flex flex-col gap-2"
-              data-testid="communication-read-section"
-            >
-              {unreadConversations.length > 0 && (
-                <h2 className="font-display text-sm font-semibold text-text-secondary">
-                  {t("sections.earlier")}
+              {t("emptyCta")} →
+            </Link>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {/* Unread first, as a labelled section — what needs attention is
+                visible structure, not just sort order. */}
+            {unreadConversations.length > 0 && (
+              <section
+                className="flex flex-col gap-2"
+                data-testid="communication-unread-section"
+              >
+                <h2 className="flex items-baseline gap-2 font-display text-sm font-semibold text-text-primary">
+                  {t("sections.unread")}
+                  <span className="font-mono text-xs font-normal text-text-muted tabular-nums">
+                    {unreadConversations.length}
+                  </span>
                 </h2>
+                <ul className="flex flex-col gap-2">
+                  {unreadConversations.map(renderConversation)}
+                </ul>
+              </section>
+            )}
+            {readConversations.length > 0 && (
+              <section
+                className="flex flex-col gap-2"
+                data-testid="communication-read-section"
+              >
+                {unreadConversations.length > 0 && (
+                  <h2 className="font-display text-sm font-semibold text-text-secondary">
+                    {t("sections.earlier")}
+                  </h2>
+                )}
+                <ul className="flex flex-col gap-2">
+                  {readConversations.map(renderConversation)}
+                </ul>
+              </section>
+            )}
+          </div>
+        )}
+        </section>
+
+        {/* THE CONVERSATION PANE. With conversations it asks for one; empty or
+            not, it carries the secondary support entry (after the list — real
+            conversations own the first place) and the one privacy line. No
+            composer here: a composer needs a real conversation to send into,
+            and a disabled one would pretend otherwise. */}
+        {/* With nothing to open, the pane is only a support card; on a phone it
+            stacked a second, unrelated call to action under the real one. */}
+        <section
+          data-testid="communication-thread-pane"
+          className={conversations.length === 0 ? "hidden min-w-0 flex-col lg:flex" : "flex min-w-0 flex-col"}
+        >
+          {/* Card wraps its children in one block, so the pane's own column
+              lives inside it: icon, the pick prompt, support, privacy. */}
+          <Card className="flex flex-1 flex-col justify-center">
+            <div className="flex flex-col items-center gap-4 py-6 text-center">
+              <MessageSquare className="h-8 w-8 text-text-muted" strokeWidth={1.5} aria-hidden />
+              {conversations.length > 0 && (
+                <p className="text-sm text-text-secondary" data-testid="communication-pane-pick">
+                  {t("panePick")}
+                </p>
               )}
-              <ul className="flex flex-col gap-2">
-                {readConversations.map(renderConversation)}
-              </ul>
-            </section>
-          )}
-        </div>
-      )}
-
-      {/* Support entry — secondary by design: real conversations own the top
-          of this page; help lives below the list, still one tap away. */}
-      <SupportConversationLauncher locale={locale} />
-
-      <p className="text-meta text-text-muted">{t("footnote")}</p>
+              <SupportConversationLauncher locale={locale} />
+              <p className="max-w-sm text-meta text-text-muted">{t("footnote")}</p>
+            </div>
+          </Card>
+        </section>
+      </div>
     </div>
   );
 }

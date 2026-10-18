@@ -35,7 +35,7 @@ export function CvPrivateDetails({
     <>
       {/* Screen-only control — never printed. */}
       <label
-        className="flex w-fit cursor-pointer items-center gap-2 rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-700 print:hidden"
+        className="flex w-fit cursor-pointer items-center gap-2 rounded-md border border-ink-600 px-3 py-2 text-sm text-text-secondary print:hidden"
         data-testid="cv-private-toggle"
       >
         <input
@@ -55,8 +55,8 @@ export function CvPrivateDetails({
           <dl className="grid grid-cols-1 gap-1 sm:grid-cols-2">
             {rows.map((r) => (
               <div key={r.label} className="flex items-baseline gap-2">
-                <dt className="text-xs text-zinc-500">{r.label}:</dt>
-                <dd className="text-sm text-zinc-800">{r.value}</dd>
+                <dt className="text-xs text-text-muted">{r.label}:</dt>
+                <dd className="text-sm text-text-primary">{r.value}</dd>
               </div>
             ))}
           </dl>

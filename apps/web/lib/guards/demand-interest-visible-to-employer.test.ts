@@ -23,19 +23,18 @@ const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
 
 describe("the company hub surfaces who is waiting", () => {
   it("the hub reads the pending-interest count", () => {
-    const page = read("app", "[locale]", "dashboard", "company", "page.tsx");
+    // Re-anchored 2026-09-16: the readback lives on the Needs door.
+    const page = read("app", "[locale]", "dashboard", "company", "needs", "page.tsx");
     expect(page).toMatch(/listPendingInterestCountsForCompany/);
-    // It must ride in the existing batch, not add a serial round trip to a
-    // page that already reads fourteen.
     const batch = page.slice(
-      page.indexOf("] = await Promise.all(["),
-      page.indexOf("] as const);"),
+      page.indexOf("await Promise.all(["),
+      page.indexOf("]);", page.indexOf("await Promise.all([")),
     );
     expect(batch).toMatch(/listPendingInterestCountsForCompany\(\)/);
   });
 
   it("the hub passes the resolved lines to the demand read-back", () => {
-    const page = read("app", "[locale]", "dashboard", "company", "page.tsx");
+    const page = read("app", "[locale]", "dashboard", "company", "needs", "page.tsx");
     expect(page).toMatch(/pendingInterest=\{pendingInterest\}/);
     // Plural resolution is a locale rule and belongs to the server, which owns
     // the catalogue — never to the component.
@@ -43,7 +42,7 @@ describe("the company hub surfaces who is waiting", () => {
   });
 
   it("only demands with somebody waiting get a line", () => {
-    const page = read("app", "[locale]", "dashboard", "company", "page.tsx");
+    const page = read("app", "[locale]", "dashboard", "company", "needs", "page.tsx");
     expect(page).toMatch(/if \(count > 0\)/);
   });
 

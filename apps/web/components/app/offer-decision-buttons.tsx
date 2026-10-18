@@ -58,7 +58,7 @@ export function OfferDecisionButtons({
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-3 py-1.5 text-xs font-semibold text-ink-900 transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-60"
             data-testid={`offer-accept-${offerId}`}
           >
             <Check className="h-3.5 w-3.5" aria-hidden /> {labels.accept}

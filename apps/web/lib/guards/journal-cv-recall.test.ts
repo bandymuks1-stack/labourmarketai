@@ -20,8 +20,14 @@ const CV = readFileSync(join(APP, "lib/cv-export/verified-cv.ts"), "utf-8");
 describe("verified CV — journal recall read side", () => {
   it("reads journal skill_claim metrics from LIVE entries only", () => {
     expect(CV).toMatch(/skill_claim/);
-    expect(CV).toMatch(/deleted_at == null/);
-    expect(CV).toMatch(/superseded_by == null/);
+    // The rule is UNCHANGED; only its spelling moved. This used to require
+    // the inline `deleted_at == null` / `superseded_by == null` comparisons
+    // the CV re-derived for itself. Those are now the shared
+    // `isLiveJournalEntry` predicate (ONE home — lib/journal/journal-list-core),
+    // so pinning the old text would fail a file that got strictly more
+    // correct. What must hold is that the live rule is applied here at all.
+    expect(CV).toMatch(/isLiveJournalEntry/);
+    expect(CV).toMatch(/liveEntryIds/);
   });
 
   it("honours rejection markers ENTRY-SCOPED (P2 integrity fix)", () => {

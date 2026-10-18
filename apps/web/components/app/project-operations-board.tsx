@@ -46,6 +46,8 @@ export interface OperationsBoardLabels {
   // counters
   countersTitle: string;
   totalAssigned: string;
+  /** "Via team" - tag on a person who is on the project only through a team. */
+  viaTeam: string;
   ready: string;
   readyBasis: string;
   needsDeclaredSkills: string;
@@ -425,6 +427,7 @@ function ChecklistEditor({
         <input
           value={newLabel}
           onChange={(e) => setNewLabel(e.target.value)}
+          aria-label={labels.checklist.addPlaceholder}
           placeholder={labels.checklist.addPlaceholder}
           className="min-w-0 flex-1 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 text-meta text-text-primary"
           data-testid="ops-checklist-add-input"
@@ -489,6 +492,14 @@ function WorkerCard({
           </h3>
         </span>
         <div className="flex flex-wrap items-center gap-1.5">
+          {worker.viaTeam ? (
+            <span
+              className="rounded-full border border-ink-600 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary"
+              data-testid="ops-via-team-chip"
+            >
+              {labels.viaTeam}
+            </span>
+          ) : null}
           {worker.operationalStatus ? (
             <span
               className={`rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${
@@ -514,7 +525,11 @@ function WorkerCard({
         </div>
       </header>
 
-      <StatusEditor worker={worker} labels={labels} projectId={projectId} />
+      {/* A team member has no per-person assignment row: the per-person status
+          and checklist writes are keyed to one, so they are not offered. */}
+      {worker.viaTeam ? null : (
+        <StatusEditor worker={worker} labels={labels} projectId={projectId} />
+      )}
 
       <dl className="grid grid-cols-2 gap-2 text-meta sm:grid-cols-4">
         <div>
@@ -558,7 +573,9 @@ function WorkerCard({
         </div>
       ) : null}
 
-      <ChecklistEditor worker={worker} labels={labels} projectId={projectId} />
+      {worker.viaTeam ? null : (
+        <ChecklistEditor worker={worker} labels={labels} projectId={projectId} />
+      )}
 
       <footer className="flex flex-wrap items-center gap-3 text-meta print:hidden">
         <Link href={`/${locale}/dashboard/journal`} className="text-brand-cyan hover:underline">
@@ -647,7 +664,7 @@ export function ProjectOperationsBoard({
   return (
     <div className="flex flex-col gap-6" data-testid="project-operations-board">
       <header className="flex flex-col gap-1">
-        <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {labels.eyebrow}
         </span>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">

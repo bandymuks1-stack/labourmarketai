@@ -8,7 +8,7 @@ import type { ChatMessage } from "./types";
  *  (e.g. the real CV flow / inline form / booking action rendered in-stream). */
 export type ThreadItem =
   | { id: string; message: ChatMessage }
-  | { id: string; embed: ReactNode };
+  | { id: string; embed: ReactNode; history?: true };
 
 /**
  * Turn-pair rhythm.
@@ -44,6 +44,7 @@ export function ConversationThread({
   emptyState,
   composer,
   intro,
+  introWide = false,
 }: {
   items: ThreadItem[];
   typing: boolean;
@@ -54,6 +55,11 @@ export function ConversationThread({
    *  greeting: the first real turn replaces it with the conversation, so it
    *  never becomes a permanent header and needs no dismissed-state to store. */
   intro?: ReactNode;
+  /** The intro is a full working home (the worker's four regions), not a
+   *  chat-width block: it renders in its own wider container above the
+   *  conversation column, so a desktop screen uses its width (owner D1
+   *  review 2026-10-14). The conversation column itself keeps its width. */
+  introWide?: boolean;
   /** The chat composer, handed in by the shell. While the conversation is
    *  still OPENING (greeting + brief only) it renders HERE, centred right
    *  under the greeting (owner audit §4.1 — "composer centre pirmo atidarymo
@@ -62,7 +68,31 @@ export function ConversationThread({
   composer?: ReactNode;
 }) {
   const endRef = useRef<HTMLDivElement>(null);
+
+  /** Nothing has happened yet IN THIS VISIT — the screen holds only the
+   *  assistant's opening (greeting, and possibly the real state brief). One
+   *  user turn or one embedded flow ends the opening state. The COLLAPSED
+   *  earlier-conversation block does not: a returning worker who once wrote
+   *  in the chat must still open on their home (ŠIANDIEN), not lose it for
+   *  good (prod walk 2026-10-15: every returning worker saw no home). */
+  const fresh = items.filter((it) => !("history" in it && it.history));
+  const isOpening =
+    !typing &&
+    fresh.length <= 3 &&
+    fresh.every((it) => "message" in it && it.message.role === "assistant");
+
+  /** The opening composition reads TOP-DOWN when the composer is not inside
+   *  it (an opening context such as ŠIANDIEN hands the composer to the
+   *  sticky bar, which is on screen regardless). Scrolling to the end there
+   *  lands the person BELOW the opening context: with ŠIANDIEN above the
+   *  greeting the composition is taller than the scroller on a phone
+   *  (measured past 1300px at 375x812), so the jump — on mount, and again
+   *  when the brief lands — hid ŠIANDIEN's header and its one next action.
+   *  Openings that carry their composer inline keep scrolling to it. */
+  const holdOpeningTop = isOpening && !composer;
+
   useEffect(() => {
+    if (holdOpeningTop) return;
     // WCAG 2.3.3: a motion-sensitive person gets an instant jump, not a
     // smooth glide, on every new turn.
     const reduceMotion = window.matchMedia?.(
@@ -72,15 +102,7 @@ export function ConversationThread({
       behavior: reduceMotion ? "auto" : "smooth",
       block: "end",
     });
-  }, [items.length, typing]);
-
-  /** Nothing has happened yet — the screen holds only the assistant's
-   *  opening (greeting, and possibly the real state brief). One user turn,
-   *  one embedded flow or restored history ends the opening state. */
-  const isOpening =
-    !typing &&
-    items.length <= 3 &&
-    items.every((it) => "message" in it && it.message.role === "assistant");
+  }, [items.length, typing, holdOpeningTop]);
 
   return (
     <div
@@ -106,12 +128,17 @@ export function ConversationThread({
           greeting) stays scrollable from its first line on a short phone.
           `justify-content: center` in a scroll container would have made the
           overflowing top unreachable. */}
+      {isOpening && intro && introWide ? (
+        <div className="mx-auto w-full max-w-6xl flex-none px-4 pt-6 lg:px-8" data-testid="conversation-intro-wide">
+          {intro}
+        </div>
+      ) : null}
       <div
         className={`mx-auto flex w-full max-w-3xl flex-none flex-col px-4 py-6 ${
           isOpening ? "my-auto" : ""
         }`}
       >
-        {isOpening && intro ? <div className="mb-5">{intro}</div> : null}
+        {isOpening && intro && !introWide ? <div className="mb-5">{intro}</div> : null}
         {items.length === 0 && emptyState}
         {/* `ua-msg-in` animates ONLY transform + opacity, and a CSS animation
             runs on mount — so a newly appended turn rises into place while the

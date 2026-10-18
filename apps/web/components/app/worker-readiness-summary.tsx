@@ -26,45 +26,44 @@ export async function WorkerReadinessSummary({ rows }: { rows: ReadinessRow[] })
         <p className="text-meta leading-relaxed text-text-muted">{t("note")}</p>
       </header>
 
-      <ul className="flex flex-col gap-2">
-        {rows.map((r) => (
-          <li
-            key={r.workerName}
-            className="flex flex-col gap-1 border-t border-border/60 pt-2 first:border-0 first:pt-0"
-            data-testid="worker-readiness-row"
-          >
-            <span className="break-words text-sm font-medium text-text-primary">
-              {r.workerName}
-            </span>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-meta text-text-secondary">
-              <span>
-                {t("journalEntries")}:{" "}
-                <span className="font-semibold text-text-primary">{r.readiness.journalEntries}</span>
-              </span>
-              <span>
-                {t("declaredSkills")}:{" "}
-                <span className="font-semibold text-text-primary">{r.readiness.declaredSkills}</span>
-              </span>
-              <span>
-                {t("confirmedSkills")}:{" "}
-                <span className="font-semibold text-text-primary">{r.readiness.confirmedSkills}</span>
-              </span>
-              <span>
-                {t("openReview")}:{" "}
-                <span className="font-semibold text-text-primary">{r.readiness.openReviewItems}</span>
-              </span>
-              {r.readiness.lastActivity && (
-                <span>
-                  {t("lastActivity")}:{" "}
-                  <span className="font-semibold text-text-primary">
-                    {formatUtcDate(r.readiness.lastActivity, locale)}
-                  </span>
-                </span>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
+      {/* One table: the five signal names are column headers ONCE, not
+          repeated as "Label: n" on every person (premium density pass). Rows
+          keep the given order — still not a ranking. Scrolls inside itself on
+          a phone so the page never scrolls sideways. */}
+      <div className="-mx-1 overflow-x-auto px-1">
+        <table className="w-full min-w-[34rem] border-collapse text-left text-meta">
+          <thead>
+            <tr className="text-text-muted">
+              <th scope="col" className="py-1.5 pr-3 font-medium" />
+              <th scope="col" className="py-1.5 pr-3 text-right font-medium">{t("journalEntries")}</th>
+              <th scope="col" className="py-1.5 pr-3 text-right font-medium">{t("declaredSkills")}</th>
+              <th scope="col" className="py-1.5 pr-3 text-right font-medium">{t("confirmedSkills")}</th>
+              <th scope="col" className="py-1.5 pr-3 text-right font-medium">{t("openReview")}</th>
+              <th scope="col" className="py-1.5 font-medium">{t("lastActivity")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr
+                key={r.workerName}
+                className="border-t border-border/60 text-text-secondary"
+                data-testid="worker-readiness-row"
+              >
+                <th scope="row" className="break-words py-2 pr-3 text-sm font-medium text-text-primary">
+                  {r.workerName}
+                </th>
+                <td className="py-2 pr-3 text-right tabular-nums">{r.readiness.journalEntries}</td>
+                <td className="py-2 pr-3 text-right tabular-nums">{r.readiness.declaredSkills}</td>
+                <td className="py-2 pr-3 text-right tabular-nums">{r.readiness.confirmedSkills}</td>
+                <td className="py-2 pr-3 text-right tabular-nums">{r.readiness.openReviewItems}</td>
+                <td className="py-2">
+                  {r.readiness.lastActivity ? formatUtcDate(r.readiness.lastActivity, locale) : "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }

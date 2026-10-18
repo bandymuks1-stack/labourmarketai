@@ -380,6 +380,9 @@ describe("6. filters are searchParams on the EXISTING surface", () => {
       objectId: "11111111-2222-4333-8444-555555555555",
       retention: "due",
       q: "letter from x",
+      // surface-scoped filters are set by server components only, never parsed from the URL
+      projectId: null,
+      workerId: null,
     });
     const href = orgRegisterHref(parsed);
     expect(href).toContain("regStatus=archived");

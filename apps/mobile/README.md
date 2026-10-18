@@ -15,12 +15,52 @@ This app reads product data through **one door**: the canonical capability
 boundary at **`/api/mcp`** (JSON-RPC 2.0 `tools/call`, bearer-authenticated by
 the auth-core seam merged 2026-08-29 as #1331). `DOMAIN_TRANSPORT_STATUS` is
 **open**, and the Today / Work journal / Profile tabs perform real reads —
-`profile.get`, `journal.list`, `living_cv.skills.get` — as the signed-in
+`profile.get`, `journal.list`, `living_cv.skills.get`,
+`journal.work_intelligence.get` (today / 7-day hours and entries, the
+dominant skill, and hours · share · entries per skill — the SAME figures the
+web shows, ordered the same way) — as the signed-in
 person, under their own RLS.
 
-What is NOT wired yet: writes (journal draft→confirm), context holdings, and
-on-device runtime proof of these reads against production. A failed read
-renders as the failure it is (`CapabilityGate`), never as an empty list.
+**Writing is wired too.** `/(shell)/log-work` hosts `JournalComposer`, which
+calls `journal.create_draft` and then `journal.confirm` through the same door —
+the confirm runs `createJournalEntryCore`, the one canonical write. This
+paragraph used to list the journal write among the things not yet wired, and
+it stayed that way after #1648 shipped the composer. It was found on
+2026-09-13 only because a reviewer read the code instead of this file, by which
+time the false claim had been copied into a new release document and into a
+plan to "build" the write path that already exists. **A README that says a
+capability is missing is how the same thing gets built twice** — pinned now by
+`apps/web/lib/guards/mobile-release-config.test.ts`.
+
+~~What is genuinely NOT wired: **context holdings** (`context-provider.tsx` does
+not perform the holdings read, so holdings are `unknown` and the UI says it
+cannot list contexts yet — never an invented single context).~~
+**Superseded 2026-09-14 (#1737):** context holdings ARE wired — `heldRoles`
+arrive on `profile.get` and `holdingsFromHeldRoles` (client-core) maps them;
+`unknown` only while the profile loads, `unavailable` on a failed read.
+
+**Deep links claim exactly the screens this app has** (`/`, `/sign-in`,
+`/register`, `/today`, `/journal`, `/log-work`, `/profile`, `/settings`) —
+`NATIVE_APP_PATHS` in `apps/web/lib/mobile/app-association.ts` drives both
+the Apple document and `app.json`'s Android intent filter, pinned to the route
+files by `apps/web/lib/guards/app-association.test.ts`. A web link such as
+`/lt/dashboard/journal` keeps opening in the browser, where that route exists.
+
+**Privacy, terms, support** — Settings links to the web's self-service privacy
+requests (`/<locale>/dashboard/privacy`, including account deletion; App Store
+5.1.1(v)), `/<locale>/legal/terms` and `info@labourmarket.ai`, on the same
+origin the build talks to. Not re-implemented on the phone
+(`mobile-account-controls.test.ts`).
+
+What the app does NOT have, and does not pretend to: Google sign-in,
+onboarding, jobs, interest, messaging, notifications, calendar, camera
+evidence. See `docs/mobile/STORE_RELEASE_READINESS_2026-09-13.md` §1a.
+
+What is NOT PROVEN, which is a different thing from not built: **on-device
+runtime** of any of it against production. `ios.yml` proves the auth-failure
+journey on a CI simulator; no read and no write has been walked on a real
+device. A failed read renders as the failure it is (`CapabilityGate`), never as
+an empty list.
 
 **Do not work around the door.** Querying Supabase tables directly from the
 device would re-derive on a phone the meaning the canonical domain already
@@ -71,7 +111,7 @@ src/
   domain.ts             the ONLY path to product data — capability() → /api/mcp
   use-capability.ts     one capability read as React state (loading/loaded/failed)
   capability-shapes.ts  presentation mirrors of the read capabilities' payloads
-  context-provider.tsx  one person, many contexts (holdings read not wired yet)
+  context-provider.tsx  one person, many contexts — held roles from profile.get
   i18n/                 five active locales; parity enforced by the compiler
   ui/                   primitives, not product surfaces
   screens/

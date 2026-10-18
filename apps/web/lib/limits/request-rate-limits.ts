@@ -13,9 +13,13 @@
  * unbounded.
  *
  * Defense-in-depth: the same numbers are enforced inside the DB for booking
- * proposals (draft migration 20260716121000, propose_booking_request_v3) and
- * contact-disclosure asks (draft migration 20260716120000). The conversation
- * path has no RPC seam, so its cap is app-layer only (honest limitation).
+ * proposals (`propose_booking_request_v3`) and contact-disclosure asks
+ * (`contact_disclosure_requests`) — BOTH APPLIED, verified on production
+ * 2026-09-07. They were described here as draft migrations until then, which
+ * under-stated an enforcement layer that was already running. (The
+ * `request_rate_limits` table from 20260716121000 is genuinely absent; the
+ * RPC and the disclosure table from that wave are not.) The conversation path
+ * has no RPC seam, so its cap is app-layer only (honest limitation).
  */
 
 export interface RequestBudgetLimits {

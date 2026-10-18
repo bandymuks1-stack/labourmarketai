@@ -35,6 +35,7 @@
  */
 
 import type { ChatLabels } from "@/components/app/conversation/chat/conversation-chat";
+import { actsAsAgency } from "@/lib/company/agency-capability";
 
 /** Owner ruling 2026-07-29 §D: the greeting offers 1–3 meaningful starts. */
 export const STARTER_CAP = 3;
@@ -44,6 +45,53 @@ export const STARTER_CAP = 3;
 export interface StarterChipSpec {
   readonly id: string;
   readonly labelKey: keyof ChatLabels;
+}
+
+/**
+ * KNOWN-STATE-FIRST on the person side (owner P0 §3, 2026-09-06).
+ *
+ * The company side has read its facts since this module was written; the
+ * PERSON side never did — `personStarters` took one boolean (`learnerLinked`)
+ * and returned the same three chips to everybody, "Įkelti CV" among them,
+ * whether or not the account already held a full profile.
+ *
+ * That is the row the owner saw offered twice in a conversation whose second
+ * turn was literally "tu jau turi mano duomenis". Suggesting an import to
+ * somebody whose skills, history and journal are already in the product is
+ * not a suggestion — it is the product failing to read itself.
+ *
+ * `null` is UNKNOWN, exactly as on the company side: a degraded read
+ * contributes nothing and never becomes a fabricated zero that would claim
+ * the person has no history.
+ */
+export interface PersonStarterFacts {
+  /** Rows in `worker_skills` for this person. */
+  readonly skills: Fact;
+  /** Self-declared work history (`engagement_contexts`, no organisation). */
+  readonly workHistory: Fact;
+  /** Journal entries the person has recorded. */
+  readonly journalEntries: Fact;
+}
+
+export const UNKNOWN_PERSON_FACTS: PersonStarterFacts = Object.freeze({
+  skills: null,
+  workHistory: null,
+  journalEntries: null,
+});
+
+/**
+ * Does the product already hold enough about this person to act on?
+ *
+ * Deliberately generous: ONE real signal is enough. The question this answers
+ * is not "is the profile complete?" but "may we still suggest an import as a
+ * first step?", and the honest answer is no as soon as anything real exists.
+ * All-unknown reads as "we do not know", which keeps the previous behaviour
+ * rather than hiding the import from someone who may genuinely need it.
+ */
+export function personHasUsableProfile(facts: PersonStarterFacts): boolean {
+  return [facts.skills, facts.workHistory, facts.journalEntries].some(
+    (f) => typeof f === "number" && f > 0,
+  );
 }
 
 /** Unknown = the read degraded. It contributes NOTHING — never a fabricated
@@ -80,6 +128,9 @@ export interface StarterSignals {
   readonly facts: CompanyStarterFacts;
   /** Person side: an ACTIVE learner link exists. */
   readonly learnerLinked: boolean;
+  /** Person side: what the product already holds about them (owner P0 §3).
+   *  Absent = not read; the suggestions then keep their previous shape. */
+  readonly personFacts?: PersonStarterFacts;
 }
 
 export const UNKNOWN_FACTS: CompanyStarterFacts = Object.freeze({
@@ -108,19 +159,41 @@ const CHIP = {
   clientDemand: { id: "agency:demand", labelKey: "chipClientDemand" },
   proposalStatus: { id: "agency:progress", labelKey: "chipProposalStatus" },
   inviteLearner: { id: "link:/dashboard/network?relationship=student", labelKey: "chipInviteStudent" },
-  programmes: { id: "link:/dashboard/company#institution-programs-title", labelKey: "chipProgrammes" },
+  programmes: { id: "link:/dashboard/company/education#institution-programs-title", labelKey: "chipProgrammes" },
   eduCapabilities: { id: "link:/dashboard/company", labelKey: "chipEduCapabilities" },
   logWork: { id: "logwork", labelKey: "chipLogWork" },
   cv: { id: "cv", labelKey: "chipCv" },
   jobs: { id: "jobs", labelKey: "chipJobs" },
+  /** The person's OWN state — offered instead of an import once real data
+   *  exists. Same `handleChip` id the typed "mano profilis" reaches. */
+  profile: { id: "profile", labelKey: "chipProfile" },
   learningCompass: { id: "link:/dashboard/profile#learning-compass", labelKey: "chipLearningCompass" },
 } as const satisfies Record<string, StarterChipSpec>;
 
-/** The worker default — unchanged since the §D ruling; a linked learner's
- *  first suggestion is their compass (the same person, one more context). */
-export function personStarters(signals: Pick<StarterSignals, "learnerLinked">): StarterChipSpec[] {
-  return signals.learnerLinked
-    ? [CHIP.learningCompass, CHIP.jobs, CHIP.logWork]
+/**
+ * The person's suggestions — now derived from what the product actually holds
+ * about them (owner P0 §3), not a fixed row.
+ *
+ * A linked learner's first suggestion stays their compass (the same person,
+ * one more context). Otherwise the CV import is offered ONLY while nothing
+ * real is known yet; once the person has skills, history or journal entries,
+ * the third suggestion is their own profile — the state they already built —
+ * instead of an invitation to supply it again.
+ *
+ * The chip row is still only a suggestion: the router understands every
+ * sentence whatever is shown here (contract §5–§6).
+ */
+export function personStarters(
+  signals: Pick<StarterSignals, "learnerLinked"> & {
+    readonly personFacts?: PersonStarterFacts;
+  },
+): StarterChipSpec[] {
+  if (signals.learnerLinked) {
+    return [CHIP.learningCompass, CHIP.jobs, CHIP.logWork];
+  }
+  const known = personHasUsableProfile(signals.personFacts ?? UNKNOWN_PERSON_FACTS);
+  return known
+    ? [CHIP.logWork, CHIP.jobs, CHIP.profile]
     : [CHIP.logWork, CHIP.cv, CHIP.jobs];
 }
 
@@ -141,17 +214,65 @@ export function personStarters(signals: Pick<StarterSignals, "learnerLinked">): 
  * its client chain; an education-first institution's is its learners; a plain
  * employer's is its need. After that, round-robin.
  */
+
+/**
+ * WHICH TRACKS DOES THIS ORGANIZATION ACTUALLY HOLD?
+ *
+ * ── The defect (owner walkthrough E + F, 2026-09-10) ──────────────────────
+ * This read ONE capability (`training_provider`) out of the ten the owner
+ * named, took "is this an agency?" from a DIFFERENT column
+ * (`companies.company_type`), and assumed `employer` for everybody.
+ *
+ * Production says why that is wrong. `organization_roles` is applied and IN
+ * USE — 15 rows over 14 organizations — carrying `employer` (10),
+ * `workforce_provider` (3) and `training_provider` (2), and at least one
+ * organization holds two roles at once. Meanwhile `companies.company_type`
+ * holds `construction` (6), `staffing_agency` (4) and `other` (4): a single
+ * exclusive field mixing a SECTOR with a RELATIONSHIP. A construction firm
+ * that also supplies people had to pick one, picked `construction`, and was
+ * then framed as a plain employer with its agency work invisible.
+ *
+ * ── What changed ──────────────────────────────────────────────────────────
+ * Tracks are derived from the CAPABILITY rows, and the legacy column is kept
+ * as an ADDITIONAL agency signal rather than the only one — production has
+ * four `staffing_agency` companies but three `workforce_provider`
+ * organizations, so dropping either source would erase a real agency.
+ *
+ * ── WHAT DELIBERATELY DID NOT CHANGE ──────────────────────────────────────
+ * `employer` and `operations` stay UNIVERSAL. A first draft of this fix gated
+ * `employer` on the declared role, which reads as more honest and is an
+ * architecture regression: a school or an agency may perfectly well hire, and
+ * the previous behaviour let them. That is review question B — "did we make
+ * impossible something the architecture allowed?" — and the answer was yes.
+ * Any organization may state a need and may run work; what E is about is that
+ * an agency was never RECOGNISED as one, not that employers were over-served.
+ *
+ * The change is therefore strictly ADDITIVE: no organization loses a track,
+ * and one whose capability rows say it supplies people finally gains the
+ * agency track and the agency frame.
+ */
 export function companyTracks(
   signals: Pick<StarterSignals, "capabilities" | "staffingAgency" | "educationFirst">,
 ): CapabilityTrack[] {
-  const hasEducation = signals.capabilities.includes("training_provider");
-  const primary: CapabilityTrack = signals.staffingAgency
+  const held = new Set(signals.capabilities);
+  const hasEducation = held.has("training_provider");
+  // UNION, not replacement. Production carries four `staffing_agency`
+  // companies and three `workforce_provider` organizations; reading either
+  // source alone erases a real agency.
+  // The ONE rule (lib/company/agency-capability) — the same one the chat, the
+  // partners page and the agency RPCs apply.
+  const hasAgency = actsAsAgency(
+    signals.staffingAgency ? "staffing_agency" : null,
+    signals.capabilities,
+  );
+
+  const primary: CapabilityTrack = hasAgency
     ? "agency"
     : signals.educationFirst && hasEducation
       ? "education"
       : "employer";
   const all: CapabilityTrack[] = ["employer", "operations"];
-  if (signals.staffingAgency) all.push("agency");
+  if (hasAgency) all.push("agency");
   if (hasEducation) all.push("education");
   return [primary, ...all.filter((t) => t !== primary)];
 }

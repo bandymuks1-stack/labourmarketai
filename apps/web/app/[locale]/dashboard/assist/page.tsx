@@ -2,11 +2,13 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getAssistView } from "@/lib/assist/assist";
 import { ORG_SUMMARY_SOURCE_KEYS } from "@/lib/assist/assist-model";
 import type { Role } from "@/lib/auth/actions";
 import { createUtcFormatter } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * AI assistance centre (control room PR J, capability gap map §10) — ONE
@@ -48,11 +50,9 @@ export default async function AssistPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role: Role = ROLES.has(profile?.active_role as Role)
     ? (profile!.active_role as Role)
     : "worker";
@@ -85,12 +85,10 @@ export default async function AssistPage({
   return (
     <div className="flex flex-col gap-6" data-testid="assist-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
 
@@ -191,8 +189,9 @@ export default async function AssistPage({
                   <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t(`summaries.worker.${key}`)}
                   </dt>
+                  {/* null = not readable; an em dash, never a 0. */}
                   <dd className="text-lg font-semibold tabular-nums text-text-primary">
-                    {value}
+                    {value === null ? "—" : value}
                   </dd>
                 </div>
               ))}

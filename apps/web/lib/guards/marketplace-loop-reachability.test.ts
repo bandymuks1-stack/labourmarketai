@@ -7,7 +7,7 @@ import {
   getModuleRoute,
   moduleAttentionSignalsAreValid,
 } from "@/lib/dashboard/dashboard-module-registry";
-import { VISIBLE_PRIMARY_NAV_ITEMS } from "@/lib/config/navigation";
+import { TODAY_STATIONS } from "@/lib/today/today-route";
 import { activeLocales } from "@/lib/i18n/config";
 import type { Role } from "@/lib/auth/actions";
 
@@ -26,7 +26,7 @@ import type { Role } from "@/lib/auth/actions";
  * inside the owner-frozen IA (map-first, six primary tabs, utility-only
  * account menu):
  *
- *   Žemėlapis primary tab → /dashboard/market-map
+ *   PASAULIS tab → embedded world map + full-map link → /dashboard/market-map
  *     → connections bridge → /dashboard/service-requests  (FIND half)
  *     → connections bridge → /dashboard/services          (OFFER half)
  *   plus the halves cross-link each other, the command palette carries both,
@@ -42,12 +42,33 @@ const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 const ALL_ROLES: readonly Role[] = ["worker", "company", "agency", "customer"];
 
 describe("the door: the loop hangs off a primary nav tab that really exists", () => {
-  it("Žemėlapis (market_map) is a primary nav tab at /dashboard/market-map", () => {
-    // The map is the marketplace's owner-designated primary surface
-    // (map-first correction). If the map tab is ever demoted, the loop
-    // loses its door and this guard must fail.
-    const tab = VISIBLE_PRIMARY_NAV_ITEMS.find((i) => i.id === "market_map");
-    expect(tab?.href).toBe("/dashboard/market-map");
+  it("the map is reached from the worker's opportunities station and from the universal command search", () => {
+    // R-11 reclassification (2026-09-19): the catalogue primary nav tabs
+    // render only in the admin `full` chrome, so asserting a `market_map`
+    // entry in VISIBLE_PRIMARY_NAV_ITEMS was a proof that could not fail while
+    // no real user saw the tab. The door that really renders: the
+    // opportunities station (TODAY_STATIONS `world` → /dashboard/opportunities,
+    // inside the conversation's opening context) embeds the world map in a
+    // top-level section and links the full map page from its header, both
+    // before the first collapsed <details>; the top-bar command search lists
+    // `market_map` as a starter command at every width.
+    const world = TODAY_STATIONS.find((t) => t.id === "world");
+    expect(world?.href).toBe("/dashboard/opportunities");
+    const page = read("app/[locale]/dashboard/opportunities/page.tsx");
+    // THE EMBEDDED VIEWPORT IS WITHHELD (owner decision 2026-09-27): it opened
+    // on a hardcoded Europe center that lies inside the Netherlands and had no
+    // mappable demand to draw, so it named a false work geography. What this
+    // test protects is unchanged and is the part that matters here — THE DOOR:
+    // the worker's way to the full map must stay on this page, above the first
+    // collapsed disclosure, because the primary nav tabs are invisible to
+    // non-admins (the R-11 point in the comment above).
+    const fullMapLink = page.indexOf('data-testid="opportunities-map-full-link"');
+    const firstDetails = page.indexOf('data-testid="opportunities-market-situation"');
+    expect(fullMapLink).toBeGreaterThan(-1);
+    expect(fullMapLink).toBeLessThan(firstDetails);
+    expect(page).toMatch(/href=\{`\/\$\{locale\}\/dashboard\/market-map`\}/);
+    const finder = read("components/app/command-finder.tsx");
+    expect(finder).toMatch(/STARTER_COMMAND_IDS[^;]*"market_map"/);
   });
 
   it("the map's connections bridge links BOTH loop halves", () => {

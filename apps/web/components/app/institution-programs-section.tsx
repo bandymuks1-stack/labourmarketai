@@ -1,5 +1,6 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
+import { PlaceTimeStamp } from "@/components/app/work-world/primitives";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
 import { readInstitutionPrograms } from "@/lib/education/programs";
@@ -8,6 +9,7 @@ import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
 
 import {
   AssignLearnerForm,
+  EditProgramForm,
   CreateCohortForm,
   CreateProgramForm,
   RemoveMemberButton,
@@ -23,6 +25,7 @@ import {
  * Until the batch is applied the section says so and offers nothing fake.
  */
 export async function InstitutionProgramsSection({ organizationId }: { readonly organizationId: string }) {
+  const locale = await getLocale();
   const t = await getTranslations("roleDashboards.company.programs");
   const tProf = await getTranslations("professions");
   const tEdu = await getTranslations("cvSections.educationTypes");
@@ -36,6 +39,9 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
     noType: t("form.noType"),
     description: t("form.description"),
     createProgram: t("form.createProgram"),
+    editProgram: t("form.editProgram"),
+    saveProgram: t("form.saveProgram"),
+    setDirectionHint: t("form.setDirectionHint"),
     cohortName: t("form.cohortName"),
     startsOn: t("form.startsOn"),
     endsOn: t("form.endsOn"),
@@ -72,6 +78,25 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
           <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-programs-unavailable">{t("unavailable")}</p>
         ) : (
           <>
+            {(() => {
+              // Adoption nudge: learners already accepted (and eligible) who sit
+              // in no cohort while a cohort is still empty. Derived from the
+              // same read as the assign dropdown - no extra query.
+              const inACohort = new Set(
+                read.programs.flatMap((p) =>
+                  p.cohorts.flatMap((c) => c.members.filter((m) => m.status === "active").map((m) => m.profileId)),
+                ),
+              );
+              const waiting = read.assignable.filter((l) => !inACohort.has(l.profileId)).length;
+              const hasEmptyCohort = read.programs.some((p) =>
+                p.cohorts.some((c) => c.members.every((m) => m.status !== "active")),
+              );
+              return waiting > 0 && hasEmptyCohort ? (
+                <p className="text-xs leading-relaxed text-state-warning" data-testid="institution-learners-not-in-cohort">
+                  {t("unassignedLearners", { count: waiting })}
+                </p>
+              ) : null;
+            })()}
             {read.programs.length === 0 ? (
               <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-programs-empty">{t("empty")}</p>
             ) : (
@@ -98,6 +123,23 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                         ) : null}
                       </div>
 
+                      {/* Correcting a programme was impossible before this: the
+                          table had one writer and no update path, so a target
+                          profession skipped at creation could never be added —
+                          and that field is what turns the demand count on. */}
+                      <EditProgramForm
+                        program={{
+                          id: p.id,
+                          name: p.name,
+                          targetProfessionSlug: p.targetProfessionSlug,
+                          educationTypeSlug: p.educationTypeSlug,
+                          description: p.description,
+                        }}
+                        professions={professions}
+                        educationTypes={educationTypes}
+                        labels={labels}
+                      />
+
                       {p.cohorts.length > 0 ? (
                         <ul className="flex flex-col gap-2">
                           {p.cohorts.map((c) => (
@@ -106,8 +148,18 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                                 <span className="text-text-primary">{c.name}</span>
                                 <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                                   {t("members", { count: c.members.filter((m) => m.status === "active").length })}
-                                  {c.startsOn ? ` · ${c.startsOn}` : ""}
-                                  {c.endsOn ? ` → ${c.endsOn}` : ""}
+                                  {/* The cohort's time span as a mono stamp
+                                      (work-world grammar) — the dates the
+                                      institution recorded, nothing derived. */}
+                                  {c.startsOn ? (
+                                    <>
+                                      {" · "}
+                                      <PlaceTimeStamp>
+                                        {c.startsOn}
+                                        {c.endsOn ? ` → ${c.endsOn}` : ""}
+                                      </PlaceTimeStamp>
+                                    </>
+                                  ) : null}
                                 </span>
                               </div>
                               {c.members.filter((m) => m.status === "active").length > 0 ? (
@@ -149,6 +201,22 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
                 })}
               </ul>
             )}
+            {read.programs.length > 0 ? (
+              <p className="text-xs leading-relaxed text-text-secondary">
+                {/* CSV route handler — a file download, not a page (the
+                    reports-page precedent: plain anchor with locale). The
+                    link exists only with a programme to report on; an export
+                    of nothing is a file that reads as "no programmes". */}
+                <a
+                  href={`/${locale}/dashboard/company/institution-report/export?org=${organizationId}`}
+                  className="text-brand-blue hover:underline"
+                  data-testid="institution-report-export"
+                >
+                  {t("exportReport")} →
+                </a>
+                <span className="ml-2 text-text-muted">{t("exportReportHint")}</span>
+              </p>
+            ) : null}
             {/* First session: with no programme yet the create form is the
                 only door, so it starts open instead of hiding behind a
                 collapsed disclosure. */}

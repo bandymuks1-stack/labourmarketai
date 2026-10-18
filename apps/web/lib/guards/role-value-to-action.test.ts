@@ -86,7 +86,7 @@ describe("each value line sits next to its REAL action", () => {
 
   it("the company need value line sits on the real demand intake", () => {
     // W3 rows 7/8/25: the intake's one mount is the company page.
-    const page = read("app/[locale]/dashboard/company/page.tsx");
+    const page = read("app/[locale]/dashboard/company/needs/page.tsx");
     expect(page).toContain('data-testid="demand-intake-section"');
   });
 

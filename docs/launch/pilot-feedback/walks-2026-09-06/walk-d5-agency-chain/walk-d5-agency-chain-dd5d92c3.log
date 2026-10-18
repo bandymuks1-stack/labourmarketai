@@ -1,0 +1,4 @@
+{"step":"health","build":"93b8069e","tag":"E2E-D5-mtphykqj","startedAt":"2026-09-06T07:35:19.918Z"}
+WALK_FAILED not on expected build: 93b8069e
+Assertion failed: !(handle->flags & UV_HANDLE_CLOSING), file src\win\async.c, line 76
+EXIT 127

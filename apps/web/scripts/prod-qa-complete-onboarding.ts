@@ -32,7 +32,7 @@ async function main(): Promise<void> {
     await page.getByRole("button", { name: /Asmuo/ }).first().click();
     await page.getByRole("button", { name: /Tęsti/ }).first().click();
     // Step 2: synthetic display name + country SE.
-    await page.locator('input[name="display_name"]').fill("QA Worker (sintetinis)");
+    await page.locator('input[name="display_name"]').fill("QA-SYNTHETIC Worker (sintetinis)");
     await page.locator('select[name="country"]').selectOption("SE");
     await page.locator('button[type="submit"]').click();
     await page.waitForURL(/dashboard/, { timeout: 60_000 });

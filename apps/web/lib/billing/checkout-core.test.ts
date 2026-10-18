@@ -46,10 +46,24 @@ describe("evaluateCheckoutRequest — strict gate", () => {
     if (!r.ok) expect(r.reason).toBe("not_a_paid_plan");
   });
 
-  it("a user without the plan's audience role is not eligible", () => {
-    const r = evaluateCheckoutRequest({ ...ok, userRoles: ["worker"] });
+  it("a user without the plan's audience role AND without verified organization authority is not eligible", () => {
+    const r = evaluateCheckoutRequest({ ...ok, userRoles: ["worker"], orgBinding: "missing" });
     expect(r.ok).toBe(false);
     if (!r.ok) { expect(r.reason).toBe("not_eligible"); expect(r.status).toBe(403); }
+  });
+
+  it("a worker-only / legacy-agency-only profile WITH verified organization authority is eligible (capability, not role row)", () => {
+    for (const roles of [["worker"], ["agency"], []]) {
+      const r = evaluateCheckoutRequest({ ...ok, userRoles: roles, orgBinding: "verified" });
+      expect(r.ok, roles.join(",")).toBe(true);
+    }
+  });
+
+  it("the same profile WITHOUT verified authority is still refused (fail closed)", () => {
+    for (const orgBinding of ["missing", "not_member", undefined] as const) {
+      const r = evaluateCheckoutRequest({ ...ok, userRoles: ["agency"], orgBinding });
+      expect(r.ok).toBe(false);
+    }
   });
 
   it("an admin may start a test checkout for any paid plan (internal testing)", () => {
@@ -69,11 +83,12 @@ describe("evaluateCheckoutRequest — strict gate", () => {
     if (r.ok) expect(r.planKey).toBe("company_pilot");
   });
 
-  it("isPaidPlanKey marks the pilot tiers paid, free/admin not", () => {
-    expect(isPaidPlanKey("worker_plus")).toBe(true);
+  it("isPaidPlanKey marks ONLY the sellable launch plan (ORGANIZATION); deferred, free and admin plans are not purchasable", () => {
     expect(isPaidPlanKey("company_pilot")).toBe(true);
-    expect(isPaidPlanKey("agency_pilot")).toBe(true);
+    expect(isPaidPlanKey("worker_plus")).toBe(false); // deferred — PERSON stays free
+    expect(isPaidPlanKey("agency_pilot")).toBe(false); // deferred — one organization plan
     expect(isPaidPlanKey("free_worker")).toBe(false);
+    expect(isPaidPlanKey("free_organization")).toBe(false);
     expect(isPaidPlanKey("admin_internal")).toBe(false);
   });
 });
@@ -112,18 +127,19 @@ describe("evaluateCheckoutRequest — organization binding (company/agency)", ()
     if (!r.ok) expect(r.reason).toBe("not_organization_member");
   });
 
-  it("a personal (worker) plan needs no organization at all", () => {
+  it("a deferred personal plan is refused even with everything else valid — PERSON stays free at launch", () => {
     const r = evaluateCheckoutRequest({
       ...ok, planKey: "worker_plus", userRoles: ["worker"], orgBinding: "not_required",
     });
-    expect(r.ok).toBe(true);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("plan_deferred");
   });
 
-  it("agency plan with verified membership → ok", () => {
+  it("the deferred agency tier is refused — a workforce provider buys the ONE organization plan", () => {
     const r = evaluateCheckoutRequest({
       ...ok, planKey: "agency_pilot", userRoles: ["agency"], orgBinding: "verified",
     });
-    expect(r.ok).toBe(true);
-    if (r.ok) expect(r.audience).toBe("agency");
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("plan_deferred");
   });
 });

@@ -124,13 +124,13 @@ export function HeaderSearch({
       {open && (
         <OverlayPortal>
         <div
-          // z-[70] through the ONE portal root (owner audit P0.3): rendered
+          // z-toast (70) through the ONE portal root (owner audit P0.3): rendered
           // at document.body the backdrop competes only in the root stacking
           // context, so it dims EVERYTHING — composer (z-50), panel sheet
           // (z-50), dropdown menus (z-60). Inside the header its z was
           // trapped by the backdrop-blur stacking context and the right
           // panel stayed bright over it in production.
-          className="fixed inset-0 z-[70] flex items-start justify-center bg-ink-900/70 p-4 pt-[10vh] backdrop-blur-sm"
+          className="fixed inset-0 z-toast flex items-start justify-center bg-ink-900/70 p-4 pt-[10vh] backdrop-blur-sm"
           role="presentation"
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);

@@ -212,7 +212,7 @@ export function WorkerIntakeForm({
         <button
           type="submit"
           disabled={isPending}
-          className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50"
+          className="self-start rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
           data-testid="worker-intake-submit"
         >
           {labels.submit}

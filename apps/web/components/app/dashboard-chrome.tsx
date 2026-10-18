@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "@/lib/i18n/navigation";
-import { ADMIN_NAV_ITEM } from "@/lib/config/navigation";
+import { dashboardChromeMode } from "@/lib/config/navigation";
 import {
   ConversationHeader,
   type ConversationNavLabels,
@@ -12,17 +12,36 @@ import {
  * Dashboard chrome selector. It chooses WHICH chrome is actually in the DOM per
  * route — never an overlay painted over a still-mounted navbar. Three modes:
  *
- *   • conversation (`/dashboard`) — children bare; the conversation surface is
- *     self-contained (`h-[100dvh]`, its own header).
+ *   • conversation (`/dashboard`, EVERY identity) — children bare; the
+ *     conversation surface is self-contained (`h-[100dvh]`, its own header,
+ *     the ONE top bar). The conversation is the authenticated home and the
+ *     product's control plane (owner decision 0017, 2026-09-22): there is no
+ *     "today" page beside it and no tab that opens it. A worker in their
+ *     personal space opens the SAME conversation with ŠIANDIEN as its
+ *     opening context (`lib/today/today-route.ts`).
  *   • panel (EVERY other product route) — the canonical ONE TOP BAR
- *     (`<ConversationHeader>`): back-to-chat · identity · the active workspace
- *     chip · search · language · notifications · one avatar menu.
+ *     (`<ConversationHeader>`): back-to-home · the LabourMarket logo (a link
+ *     home) · the active workspace chip · search · language · notifications
+ *     · one avatar menu. The page below it is a CONTEXTUAL WORKSPACE of the
+ *     conversation (opportunities, journal, profile, a project, a need…),
+ *     reached from the conversation, from search, or by deep link — never
+ *     from a parallel tab system. No bottom bar exists here for anyone.
  *   • full (`/dashboard/admin/*` only) — the legacy module chrome (wide tab
  *     row + role switcher + bottom nav), kept for the INTERNAL operator
  *     console, which is not the user-facing product.
  *
- * WHY panel is now the default, not a four-route exception
- * -------------------------------------------------------
+ * RETIRED HERE (2026-09-22): the fourth mode `today` and the worker's 3-tab
+ * bar ŠIANDIEN · PASAULIS · PAKLAUSK. Three bottom tabs read as three
+ * equivalent product roots and made the conversation a feature a person had
+ * to find ("Paklausk"). Frozen contract §2.3 called that tab set "a
+ * hypothesis, not irreversible architecture"; the owner retired it. What the
+ * tabs carried is preserved: ŠIANDIEN is the conversation's opening context,
+ * PASAULIS is the opportunities workspace (a station in that context, a chat
+ * intent, a search command and a deep link), PAKLAUSK is the composer that is
+ * now always on screen.
+ *
+ * WHY panel is the default, not a four-route exception
+ * ---------------------------------------------------
  * The conversation header's own contract already calls itself "THE ONE TOP BAR
  * (owner audit §4.4 + §13)", and records that the tab row and the Advanced
  * entry are gone by owner ruling. That ruling was only ever applied to four
@@ -60,27 +79,34 @@ import {
  * in as slots, so the chrome markup stays where the guard suite pins it; this
  * component only decides WHICH chrome renders.
  */
-/** The ONLY subtree that keeps the legacy module chrome: the internal operator
- *  console. It is admin-gated (`dashboard/admin/layout.tsx` fail-closes), so no
- *  ordinary user can reach the wide tab row at all.
+/** The ONLY subtree that keeps the legacy module chrome is the internal
+ *  operator console; the rule itself is `dashboardChromeMode` in
+ *  `lib/config/navigation.ts` (pure, beside the canonical admin nav item, so
+ *  the admin route has ONE source and the guards read the same predicate). */
+
+/** The one map route — it carries no partner credit line. */
+const MARKET_MAP_PATH = "/dashboard/market-map";
+
+/**
+ * HYDRATION BOUNDARY for server-authored slots (React #418, 2026-10-09).
  *
- *  Taken from the canonical admin nav item rather than spelled out again: the
- *  admin route has ONE source, and a route PREDICATE written as a literal here
- *  is indistinguishable — to `admin-visibility.test.ts` and to a reader — from
- *  an ungated admin LINK. Deriving it keeps both honest. */
-const FULL_CHROME_PREFIX = ADMIN_NAV_ITEM.href;
-
-type Mode = "conversation" | "panel" | "full";
-
-function modeFor(pathname: string): Mode {
-  if (pathname === "/dashboard") return "conversation";
-  if (
-    pathname === FULL_CHROME_PREFIX ||
-    pathname.startsWith(`${FULL_CHROME_PREFIX}/`)
-  ) {
-    return "full";
-  }
-  return "panel";
+ * `children` and the slot props arrive from the RSC payload and may still be
+ * LAZY references when hydration reaches `<main>`. Reconciling a lazy child
+ * directly under a HOST element suspends that host fiber; React then REPLAYS
+ * the host element's begin phase — but the hydration cursor already moved into
+ * `<main>` on the first attempt, so the replayed claim compares `main` against
+ * its own first child and throws #418 ("server rendered HTML didn't match").
+ * Intermittent by nature: it fires only when the RSC chunk lands after the
+ * hydrator reaches `<main>` (measured 2–4 of 12 cold loads on /opportunities,
+ * /inbox; byte-identical server HTML on failing and passing loads).
+ *
+ * A function component between the host element and the slots moves that
+ * suspension onto a fiber that claims no DOM, so its replay cannot desync the
+ * cursor. Renders exactly its children — no element, no behaviour.
+ * Guard: lib/guards/hydration-slot-boundary.test.ts.
+ */
+function SlotBoundary({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }
 
 export function DashboardChrome({
@@ -99,13 +125,14 @@ export function DashboardChrome({
   fullBottomNav: React.ReactNode;
   rexora: React.ReactNode;
 }) {
-  const mode = modeFor(usePathname());
+  const pathname = usePathname();
+  const mode = dashboardChromeMode(pathname);
 
   // Flag the conversation surface on <html> so globals.css can lift the global
-  // language-feedback FAB above the chat's composer + bottom nav. The FAB is a
-  // SIBLING of this component, so a custom property set on the chat subtree
-  // would never reach it — and without the lift the composer's `z-50` buries
-  // an interactive control that stays visible but unclickable.
+  // language-feedback FAB above the chat's composer. The FAB is a SIBLING of
+  // this component, so a custom property set on the chat subtree would never
+  // reach it — and without the lift the composer's `z-50` buries an
+  // interactive control that stays visible but unclickable.
   useEffect(() => {
     if (mode !== "conversation") return;
     const root = document.documentElement;
@@ -115,24 +142,30 @@ export function DashboardChrome({
     };
   }, [mode]);
 
-  // Conversation: bare — the chat is self-contained (h-[100dvh], own nav).
-  if (mode === "conversation") return <>{children}</>;
+  // Conversation: bare — the chat is self-contained (h-[100dvh], own header).
+  if (mode === "conversation") {
+    return <>{children}</>;
+  }
 
-  // Panel: a PROJECTION of the conversation (owner audit §4.4) — the same
-  // minimal top bar with the back-to-chat affordance; no parallel tab system
-  // and no bottom nav exists any more.
+  // Panel: a CONTEXTUAL WORKSPACE of the conversation (owner audit §4.4) —
+  // the same minimal top bar with the back-home affordance; no parallel tab
+  // system, no bottom bar.
   if (mode === "panel") {
     return (
-      <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="simple">
+      <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="simple" data-surface={mode}>
         <ConversationHeader title={headerTitle} nav={nav} />
         <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
-          {children}
-          {/* The Rexora product credit (owner directive 2026-07-14, pinned by
-              legal-entity-truth.test.ts) used to hang off the FULL chrome. Now
-              that full serves only the admin console it would have vanished
-              from every user-facing surface, so it hangs here instead — the
-              same one-line credit, in the shell the product actually uses. */}
-          {rexora}
+          <SlotBoundary>
+            {children}
+            {/* The Rexora product credit (owner directive 2026-07-14, pinned by
+                legal-entity-truth.test.ts) used to hang off the FULL chrome. Now
+                that full serves only the admin console it would have vanished
+                from every user-facing surface, so it hangs here instead — the
+                same one-line credit, in the shell the product actually uses. */}
+            {/* The map is the product's own working surface: no partner credit
+                line under it (owner direction — one clean map). */}
+            {pathname === MARKET_MAP_PATH ? null : rexora}
+          </SlotBoundary>
         </main>
       </div>
     );
@@ -141,12 +174,14 @@ export function DashboardChrome({
   // Full: the Advanced-mode chrome, rendered from the layout-authored slots.
   return (
     <div className="relative min-h-screen" data-chrome="full">
-      {fullHeader}
+      <SlotBoundary>{fullHeader}</SlotBoundary>
       <main className="relative z-10 mx-auto max-w-container px-4 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
-        {children}
-        {rexora}
+        <SlotBoundary>
+          {children}
+          {rexora}
+        </SlotBoundary>
       </main>
-      {fullBottomNav}
+      <SlotBoundary>{fullBottomNav}</SlotBoundary>
     </div>
   );
 }

@@ -16,6 +16,8 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import {
   extractProfileSkillClaims,
   normalizeClaimLabel,
@@ -141,6 +143,13 @@ export async function saveProfileSkillClaims(
     throw new Error(`save failed: ${error.message}`);
   }
 
+  // Recognition funnel (2026-09-17): the person CONFIRMED suggestions —
+  // a count only, never a label.
+  emitServerFunnelEvent(FUNNEL_EVENTS.recognitionConfirmed, {
+    source: "profile",
+    route: "/dashboard/profile",
+    metadata: { surface: "profile_text", role_context: "worker", success: true },
+  });
   revalidatePath("/", "layout");
   return listProfileSkillClaims();
 }
@@ -164,5 +173,11 @@ export async function deleteProfileSkillClaim(id: string): Promise<void> {
     throw new Error(`delete failed: ${error.message}`);
   }
 
+  // Recognition funnel: the person REJECTED a suggestion they had once kept.
+  emitServerFunnelEvent(FUNNEL_EVENTS.recognitionRejected, {
+    source: "profile",
+    route: "/dashboard/profile",
+    metadata: { surface: "profile_text", role_context: "worker", success: true },
+  });
   revalidatePath("/", "layout");
 }

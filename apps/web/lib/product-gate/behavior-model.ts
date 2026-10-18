@@ -389,8 +389,43 @@ export const BEHAVIOR_CONFORMANCE = {
   // `company.invite-learner` (the institution's commands by sentence over
   // the ONE dispatcher). Still anchored to a page; still keyed to an actor
   // type (the company holding `training_provider`), so the verdict stands.
-  conversationActions: 39,
-  actionsAnchoredToAPage: 39,
+  // 2026-09-05 (owner contract §11): +1 — `company.move-worker`, the what-if
+  // move's confirmed commit over the two canonical assignment RPCs. Anchored
+  // to the projects page; keyed to the company actor type; verdict unchanged.
+  // 2026-09-05 (owner contract §14): +1 — `company.update-task-status`, a
+  // task moved to a real status by sentence over the ONE status core. Its
+  // role gate is the union company / agency / worker because the RPC
+  // re-derives the row authority (creator / assignee / project manager) —
+  // still keyed to actor TYPES, not to a relationship; anchored to the tasks
+  // page; verdict unchanged.
+  // 2026-09-05 (owner contract §11/§12/§16): +3 — the READINESS journey's
+  // corrective actions offered right after "kas trūksta projektui X?":
+  // `company.set-readiness-item`, `company.seed-readiness-checklist` (the
+  // operations page's own checklist writes) and `company.request-readiness`
+  // (a work instruction in the project's thread). Anchored to the projects
+  // page; keyed to the company actor type; verdict unchanged.
+  // 2026-09-05 (owner contract §14): +2 — `company.confirm-work` (the inbox's
+  // one-tap confirm by chip) and `company.enable-journal-review` (the
+  // membership RPC). Anchored to the inbox; keyed to the company actor
+  // type; verdict unchanged.
+  // 2026-09-05 (owner contract 4D): +1 `worker.respond-invitation` (the network
+  // page's own accept, from the attention item). Anchored to the network page;
+  // keyed to the worker actor type; verdict unchanged.
+  // 52 → 55 (2026-09-19): the CLIENT's side of the agency bridge by chip —
+  // company.accept-connection / decline-connection / share-request, each the
+  // partners page's own canonical action, anchored to /dashboard/company/partners.
+  // 55 → 56 (2026-09-23, owner program CASE 3/4/12): +1
+  // `company.rename-organization` — the active organization renamed by
+  // sentence through the ONE rename core over the canonical name writer
+  // (saveCompanySetup → save_company_setup_v3). Anchored to
+  // /dashboard/company/settings; keyed to the company actor type (subject
+  // "company"), so actionsKeyedToARelationship stays 1 and the verdict stands.
+  // 56 → 57 (2026-10-05, J-TIME-FREEDOM): +1 `company.keep-assignment` — the chat
+  // door of the knowing override the project page already offers (one keep
+  // core behind the page action, this action and the MCP assignment.keep_*
+  // tools). Anchored to /dashboard/projects; keyed to the company actor type.
+  conversationActions: 58, // +1 company.respond-team-offer (2026-10-11: the receiver answers a brigade / company offer in the chat)
+  actionsAnchoredToAPage: 58,
   /** The one action keyed to a relationship rather than to an RBAC role. */
   actionsKeyedToARelationship: 1,
   actionsThatOnlyDeepLink: 11,

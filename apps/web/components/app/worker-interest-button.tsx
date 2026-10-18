@@ -44,6 +44,8 @@ export function WorkerInterestButton({
     contacted: string;
     withdraw: string;
     internalNote: string;
+    /** What an application shows the need's employer (name + profile photo). */
+    identityConsent: string;
     error: string;
     /** "contacted" is real (audit PR5): the company opened an in-app thread —
      *  this label links the worker to their messages, never a dead status. */
@@ -113,7 +115,7 @@ export function WorkerInterestButton({
               type="button"
               onClick={onContactEmployer}
               disabled={pending}
-              className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50"
+              className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
               data-testid="interest-contact-employer"
             >
               {labels.contactEmployer}
@@ -133,7 +135,7 @@ export function WorkerInterestButton({
             type="button"
             onClick={onExpress}
             disabled={pending}
-            className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50"
+            className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
             data-testid="interest-express"
           >
             {labels.express}
@@ -163,6 +165,7 @@ export function WorkerInterestButton({
         </Link>
       ) : null}
       {/* Honest scope line — REQUIRED copy: internal signal only. */}
+      <p className="text-meta leading-relaxed text-text-secondary" data-testid="interest-identity-consent">{labels.identityConsent}</p>
       <p className="text-meta leading-relaxed text-text-muted">{labels.internalNote}</p>
     </div>
   );

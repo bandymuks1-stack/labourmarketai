@@ -1,7 +1,10 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import {
+  FUNNEL_EVENTS,
+  REGISTRATION_CONVERSION_STEP,
+} from "@/lib/telemetry/funnel-events";
 import {
   classifyEvent,
   isBusinessFunnelCountable,
@@ -17,7 +20,11 @@ import {
  *   landing_viewed → cta_clicked → registration_started → onboarding_completed
  *   landing_viewed → company_need_started → company_need_submitted
  *
- * plus a first-touch campaign (utm_source) breakdown of the conversion events.
+ * plus a first-touch campaign (utm_source) breakdown of the conversion events,
+ * and — since 2026-09-20 — a per-(utm_campaign, utm_content) read-out of the
+ * campaign → job → registration handoff over those same rows
+ * (`CampaignReadout`), which is what makes one published post's readers
+ * traceable to an opened job and an account instead of averaged into a source.
  *
  * Reads go through the CALLER's already-superadmin-gated Supabase client; the
  * `pilot_events_select` RLS policy (migration 0020) is admin-only, so a
@@ -91,12 +98,239 @@ export const FUNNEL_STAGES = [
   { key: FUNNEL_EVENTS.experienceSubmitted, label: "Experience submitted" },
   { key: FUNNEL_EVENTS.experiencePublished, label: "Experience published" },
   { key: FUNNEL_EVENTS.organizationCreated, label: "Organization created" },
+  // ── Public job acquisition loop (P0, 2026-09-20): a campaign visitor's
+  //    path from one public advertisement to a compared, acted-on
+  //    opportunity. Read from the same table, same window, same cap.
+  { key: FUNNEL_EVENTS.jobBoardViewed, label: "Public job board viewed" },
+  { key: FUNNEL_EVENTS.jobOpened, label: "Public job opened" },
+  { key: FUNNEL_EVENTS.jobReturnedAfterAuth, label: "Returned to the same job after auth" },
+  { key: FUNNEL_EVENTS.jobCompared, label: "Job compared against the profile" },
+  { key: FUNNEL_EVENTS.jobMissingInfoShown, label: "Missing information named" },
+  { key: FUNNEL_EVENTS.vacancyInterestExpressed, label: "Interest in a public job" },
+  { key: FUNNEL_EVENTS.jobAlternativesShown, label: "Alternative jobs shown" },
+  // ── Employer funnel closure (owner §23 canonical chain, 2026-09-22): the
+  //    logged-in employer's own requirement, the worker's interest in it and
+  //    the first message — server-emitted at the real write points.
+  { key: FUNNEL_EVENTS.requirementActivated, label: "Requirement activated" },
+  { key: FUNNEL_EVENTS.demandInterestExpressed, label: "Interest in an employer requirement" },
+  { key: FUNNEL_EVENTS.conversationMessageSent, label: "Conversation message sent" },
+  // ── Remaining-instrumentation stages (funnel-emitters v1, 2026-10-07).
+  //    Each has a REAL emitter in code (see the comment on the event names in
+  //    lib/telemetry/funnel-events.ts), so each prints a real zero when no row
+  //    exists. Having an emitter makes a stage MEASURED — it does not make the
+  //    capability "working": a zero here can be a quiet period or a surface
+  //    nobody has used yet. Labels say exactly what is counted.
+  { key: FUNNEL_EVENTS.profileMatchable, label: "Worker profile matchable (useful profile)" },
+  { key: FUNNEL_EVENTS.organizationHiringReady, label: "Organization hiring-ready (useful organization)" },
+  { key: FUNNEL_EVENTS.offerCreated, label: "Offer created (listing or service offering)" },
+  { key: FUNNEL_EVENTS.subscriptionStarted, label: "Subscription checkout completed (live mode)" },
+  { key: FUNNEL_EVENTS.trialStarted, label: "Trial started (live-mode subscription created as trialing)" },
+  { key: FUNNEL_EVENTS.subscriptionInvoicePaid, label: "Subscription invoice paid (amount > 0, live mode)" },
+  { key: FUNNEL_EVENTS.returnVisitDetected, label: "Return visit detected (same browser, later day)" },
 ] as const;
 
-const CONVERSION_EVENTS: readonly string[] = [
-  FUNNEL_EVENTS.registrationStarted,
-  FUNNEL_EVENTS.companyNeedSubmitted,
+/**
+ * MEASUREMENT STATE of one funnel stage (SEP-7: UNKNOWN != ZERO != FAILED !=
+ * NOT_MEASURED). A bare `0` used to stand for all four, so a stage with no
+ * emitter, a stage that never fired and a failed read were indistinguishable.
+ *
+ *   measured      an emitter exists AND the read succeeded — `count` is a
+ *                 number and a 0 is a REAL zero;
+ *   not_measured  no event / source exists for this stage — `count` is null
+ *                 and `reasonKey` says why (i18n key under `telemetry.funnel.reason`);
+ *   unavailable   the read failed — `count` is null; nothing is known.
+ */
+export type FunnelMeasurement = "measured" | "not_measured" | "unavailable";
+
+export type FunnelStageCount = {
+  key: string;
+  label: string;
+  measurement: FunnelMeasurement;
+  /** A number only when `measurement === "measured"`; null otherwise. */
+  count: number | null;
+  /** i18n key suffix (telemetry.funnel.reason.*) when not_measured. */
+  reasonKey: string | null;
+};
+
+/**
+ * Downstream stages the product defines but has NO event or source for. They
+ * are listed so the funnel does not end silently at "engagement"; they are
+ * NOT_MEASURED — no emitter is added here and no number is ever invented.
+ */
+export const NOT_MEASURED_STAGES = [
+  { key: "commercial_value", label: "Commercial value", reasonKey: "commercialValue" },
+  { key: "paid_conversion", label: "Paid conversion", reasonKey: "paidConversion" },
+  { key: "retention_repeat_use", label: "Retention / repeat use", reasonKey: "retention" },
+] as const;
+
+/** Rates whose numerator or denominator is a NOT_MEASURED stage. */
+export const NOT_MEASURED_RATES = [
+  { label: "Engagement created → commercial value", reasonKey: "commercialValue" },
+  { label: "Trial → paid conversion", reasonKey: "paidConversion" },
+  { label: "First use → repeat use", reasonKey: "retention" },
+] as const;
+
+/**
+ * Pure state mapping for one stage. A real zero requires `measured`; the count
+ * is never defaulted for a stage whose read failed.
+ */
+export function stageCount(
+  stage: { key: string; label: string },
+  countByEvent: ReadonlyMap<string, number>,
+  readOk: boolean,
+): FunnelStageCount {
+  if (!readOk) {
+    return { key: stage.key, label: stage.label, measurement: "unavailable", count: null, reasonKey: null };
+  }
+  return {
+    key: stage.key,
+    label: stage.label,
+    measurement: "measured",
+    count: countByEvent.get(stage.key) ?? 0,
+    reasonKey: null,
+  };
+}
+
+/** Stage rows for the stages that have no event or source at all. */
+export function notMeasuredStageCounts(): FunnelStageCount[] {
+  return NOT_MEASURED_STAGES.map((s) => ({
+    key: s.key,
+    label: s.label,
+    measurement: "not_measured" as const,
+    count: null,
+    reasonKey: s.reasonKey,
+  }));
+}
+
+/**
+ * WHICH ROWS ARE CONVERSIONS for the first-touch `sources` breakdown.
+ *
+ * `registration_started` fires from BOTH auth pages: the login page's OAuth
+ * buttons are account-creating for a new identity, so they emit it too — and
+ * every returning user's login-page press was being counted here as a
+ * registration conversion. Since 2026-09-22 the emitting page names itself
+ * through the bounded `step` (`login_page` | `signup_page`,
+ * lib/telemetry/funnel-events.ts) and ONLY `signup_page` counts as a
+ * conversion. The raw `registration_started` count (the stage tile and the
+ * campaign column) still includes both pages, deliberately: the number of
+ * presses is a real measurement and stays visible; only the conversion
+ * reading is narrowed. Rows written before the step existed carry none and
+ * are raw-counted only — never guessed onto either page.
+ */
+export function isConversionRow(
+  eventName: string,
+  metadata: Record<string, unknown> | null | undefined,
+): boolean {
+  if (eventName === FUNNEL_EVENTS.registrationStarted) {
+    return metadata?.["step"] === REGISTRATION_CONVERSION_STEP;
+  }
+  return eventName === FUNNEL_EVENTS.companyNeedSubmitted;
+}
+
+/**
+ * ── PER-CAMPAIGN READ-OUT (2026-09-20) ──────────────────────────────────────
+ *
+ * `sources` above answers "which utm_source produced a conversion". It cannot
+ * answer the question the owner actually asked — WHICH POST, in WHICH GROUP,
+ * carried a reader from the advertisement to an opened job to an account —
+ * because it collapses every campaign of a source into one row and only ever
+ * looks at two conversion events.
+ *
+ * This read-out breaks the SAME rows, filtered by the SAME population
+ * classification, down by the first-touch (`utm_campaign`, `utm_content`)
+ * pair: `utm_content` is what distinguishes one published variant from
+ * another (pl / ru / uk, one group from the next), so a campaign whose
+ * variants perform differently is visible as separate rows instead of one
+ * average that hides both.
+ *
+ * It is a projection, NOT a second analytics path: no new table, no new
+ * event name, no new metadata key, no schema and no RLS change. Every column
+ * is an occurrence count of an event that was already being emitted and
+ * already being read.
+ *
+ * HONESTY LIMITS, unchanged from the counts above: these are EVENT
+ * OCCURRENCES over the same window, not unique visitors and not per-visitor
+ * journeys — a column further down the list is not a subset of the one above
+ * it, so no ratio between two columns may be presented as a conversion rate.
+ * When the read is truncated these are lower bounds exactly like every other
+ * count (`countsAreLowerBound`).
+ */
+export const CAMPAIGN_MAX_ROWS = 25;
+
+/** Placeholder for a first-touch record that carries a campaign but no
+ *  variant. Rows with NO campaign at all are excluded entirely — an
+ *  un-campaigned visit is organic traffic, and listing it here as a "(none)"
+ *  campaign would put the largest row at the top of a campaign table and
+ *  invite it to be read as the best-performing campaign. */
+const CAMPAIGN_NONE = "(none)";
+
+/** Longest campaign / content label kept, mirroring the `sources` cap. */
+const CAMPAIGN_LABEL_MAX = 60;
+
+/**
+ * One (campaign, content) row. The columns follow the real acquisition
+ * order — advertisement → job → account → back to the job → acted on — so a
+ * row can be read left to right as "where this variant's readers stopped".
+ */
+export type CampaignReadout = {
+  campaign: string;
+  content: string;
+  landing: number;
+  jobOpened: number;
+  ctaClicked: number;
+  registrationStarted: number;
+  signupCompleted: number;
+  returnedToJob: number;
+  compared: number;
+  interest: number;
+};
+
+/** Column → the already-emitted event it counts. Declared as data so the
+ *  accumulator, the type above and the panel cannot drift apart. */
+const CAMPAIGN_COLUMN_EVENTS = {
+  landing: FUNNEL_EVENTS.landingViewed,
+  jobOpened: FUNNEL_EVENTS.jobOpened,
+  ctaClicked: FUNNEL_EVENTS.ctaClicked,
+  registrationStarted: FUNNEL_EVENTS.registrationStarted,
+  signupCompleted: FUNNEL_EVENTS.signupCompleted,
+  returnedToJob: FUNNEL_EVENTS.jobReturnedAfterAuth,
+  compared: FUNNEL_EVENTS.jobCompared,
+  interest: FUNNEL_EVENTS.vacancyInterestExpressed,
+} as const satisfies Record<
+  Exclude<keyof CampaignReadout, "campaign" | "content">,
+  string
+>;
+
+/** event name → column, inverted once at module scope. */
+const CAMPAIGN_EVENT_COLUMN = new Map<string, keyof CampaignReadout>(
+  Object.entries(CAMPAIGN_COLUMN_EVENTS).map(
+    ([col, event]) => [event as string, col as keyof CampaignReadout] as const,
+  ),
+);
+
+/**
+ * Event names the read must fetch: every rendered stage PLUS any campaign
+ * column whose event is not itself a stage tile. `signup_completed` is
+ * exactly that case — it is a real step of this funnel but has never had a
+ * count tile, so without this union the campaign table would print a
+ * structural 0 for every row and the number would be indistinguishable from
+ * a measured zero. Deduplicated, because a name repeated in `.in()` is a
+ * silent way to make two lists look like one.
+ */
+export const FUNNEL_READ_EVENTS: readonly string[] = [
+  ...new Set<string>([
+    ...FUNNEL_STAGES.map((s) => s.key as string),
+    ...Object.values(CAMPAIGN_COLUMN_EVENTS).map((e) => e as string),
+  ]),
 ];
+
+/** Bounded, non-identifying label from a first-touch metadata value. */
+function campaignLabel(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) return null;
+  return trimmed.slice(0, CAMPAIGN_LABEL_MAX);
+}
 
 /**
  * WHICH KIND OF ANSWER a rate is. `pct === null` covers two genuinely
@@ -122,10 +356,17 @@ export type FunnelRate = {
 
 export type AcquisitionFunnel = {
   available: boolean;
-  counts: { key: string; label: string; count: number }[];
+  counts: FunnelStageCount[];
   rates: FunnelRate[];
+  /** Conversion shares that cannot be stated because a side is NOT_MEASURED. */
+  unmeasuredRates: { label: string; reasonKey: string }[];
   /** Top first-touch utm_source values among conversion events. */
   sources: { source: string; count: number }[];
+  /** Per-(utm_campaign, utm_content) step counts over the same rows — the
+   *  campaign → job → registration handoff, per published variant. Sorted by
+   *  `landing` desc, capped at `CAMPAIGN_MAX_ROWS`; rows with no campaign
+   *  are excluded. Event occurrences, not unique visitors. */
+  campaigns: CampaignReadout[];
   totalEvents: number;
   /** Count of non-production (localhost / preview) events excluded. */
   excludedPreview: number;
@@ -154,7 +395,9 @@ type FunnelRow = {
 /** A rate, or null. Null covers BOTH "no denominator" and "the denominator we
  *  can see is incomplete" — in neither case does the product know the answer,
  *  and in neither case is the answer 0%. */
-function pct(numerator: number, denominator: number): number | null {
+function pct(numerator: number | null, denominator: number | null): number | null {
+  // A side that is not measured / unavailable (null) is UNKNOWN, never 0.
+  if (numerator === null || denominator === null) return null;
   if (denominator <= 0) return null;
   return Math.round((numerator / denominator) * 1000) / 10;
 }
@@ -166,7 +409,9 @@ export async function getAcquisitionFunnel(
   supabase: SupabaseClient,
   now: Date = new Date(),
 ): Promise<AcquisitionFunnel> {
-  const names = FUNNEL_STAGES.map((s) => s.key);
+  // Every rendered stage plus the campaign read-out's own columns (see
+  // FUNNEL_READ_EVENTS) — one read, one window, one population.
+  const names = FUNNEL_READ_EVENTS;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fromAny = (supabase as any).from.bind(supabase) as (
     name: string,
@@ -209,9 +454,14 @@ export async function getAcquisitionFunnel(
   if (error) {
     return {
       available: false,
-      counts: [],
+      counts: [
+        ...FUNNEL_STAGES.map((st) => stageCount(st, new Map(), false)),
+        ...notMeasuredStageCounts(),
+      ],
       rates: [],
+      unmeasuredRates: NOT_MEASURED_RATES.map((r) => ({ ...r })),
       sources: [],
+      campaigns: [],
       totalEvents: 0,
       excludedPreview: 0,
       excludedAdmin: 0,
@@ -287,9 +537,47 @@ export function summariseFunnel(
   const excludedAdmin = allRows.filter((r) => classify(r) === "admin").length;
   const countByEvent = new Map<string, number>();
   const sourceCounts = new Map<string, number>();
+  // (campaign, content) → its row. Built over the SAME `rows` array as every
+  // count above, so the campaign table can never describe a different
+  // population than the funnel it sits under.
+  const campaignRows = new Map<string, CampaignReadout>();
   for (const r of rows) {
     countByEvent.set(r.event_name, (countByEvent.get(r.event_name) ?? 0) + 1);
-    if (CONVERSION_EVENTS.includes(r.event_name)) {
+
+    const column = CAMPAIGN_EVENT_COLUMN.get(r.event_name);
+    if (column) {
+      const campaign = campaignLabel(r.metadata?.["utm_campaign"]);
+      // No campaign on the first-touch record → organic / untagged traffic.
+      // Excluded rather than bucketed, so the table only ever lists things
+      // that were actually published with a campaign tag.
+      if (campaign) {
+        const content = campaignLabel(r.metadata?.["utm_content"]) ?? CAMPAIGN_NONE;
+        // A JSON-encoded pair, not a delimiter-joined string: the labels come
+        // from client-supplied metadata, and any single separator character
+        // could be smuggled INTO a label to collide two distinct variants into
+        // one row. Encoding removes the question entirely.
+        const key = JSON.stringify([campaign, content]);
+        let row = campaignRows.get(key);
+        if (!row) {
+          row = {
+            campaign,
+            content,
+            landing: 0,
+            jobOpened: 0,
+            ctaClicked: 0,
+            registrationStarted: 0,
+            signupCompleted: 0,
+            returnedToJob: 0,
+            compared: 0,
+            interest: 0,
+          };
+          campaignRows.set(key, row);
+        }
+        (row[column] as number) += 1;
+      }
+    }
+
+    if (isConversionRow(r.event_name, r.metadata)) {
       const src = r.metadata?.["utm_source"];
       const key =
         typeof src === "string" && src.trim().length > 0
@@ -299,11 +587,12 @@ export function summariseFunnel(
     }
   }
 
-  const counts = FUNNEL_STAGES.map((s) => ({
-    key: s.key,
-    label: s.label,
-    count: countByEvent.get(s.key) ?? 0,
-  }));
+  // Every FUNNEL_STAGES entry has an emitter and this read succeeded, so a 0
+  // here is a REAL zero. Stages with no event/source follow as NOT_MEASURED.
+  const counts: FunnelStageCount[] = [
+    ...FUNNEL_STAGES.map((st) => stageCount(st, countByEvent, true)),
+    ...notMeasuredStageCounts(),
+  ];
 
   const c = (k: string) => countByEvent.get(k) ?? 0;
   // The state is assigned once, below, for every rate at the same time — so
@@ -372,6 +661,18 @@ export function summariseFunnel(
     .slice(0, 10)
     .map(([source, count]) => ({ source, count }));
 
+  // Sorted by landings desc — the widest top-of-funnel first — with a
+  // deterministic (campaign, content) tie-break so two variants with equal
+  // landings keep a stable order between reads instead of shuffling.
+  const campaigns = [...campaignRows.values()]
+    .sort(
+      (a, b) =>
+        b.landing - a.landing ||
+        a.campaign.localeCompare(b.campaign) ||
+        a.content.localeCompare(b.content),
+    )
+    .slice(0, CAMPAIGN_MAX_ROWS);
+
   // ONE PLACE decides whether a share may be stated at all, and what KIND of
   // non-answer it is when it cannot be. Applying it to the whole list rather
   // than to each construction above means a rate added later cannot forget the
@@ -398,7 +699,9 @@ export function summariseFunnel(
     available: true,
     counts,
     rates: finalRates,
+    unmeasuredRates: NOT_MEASURED_RATES.map((r) => ({ ...r })),
     sources,
+    campaigns,
     totalEvents: rows.length,
     excludedPreview,
     excludedAdmin,

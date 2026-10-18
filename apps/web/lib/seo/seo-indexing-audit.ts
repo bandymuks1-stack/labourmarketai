@@ -153,7 +153,9 @@ export function auditPublicSeoIndexing(read: SeoFileReader): {
   // 4. robots: blocks app + internal, allows public root, apex sitemap.
   const robots = files["app/robots.ts"];
   if (robots) {
-    if (!/sitemap[^\n]*MARKETING_ORIGIN/.test(robots)) {
+    // Anchored on the CODE, not on a comment mentioning both words: the
+    // previous pattern matched the explanatory comment above the binding.
+    if (!/sitemap:\s*sitemapUrls\(MARKETING_ORIGIN\)/.test(robots)) {
       add(violations, "app/robots.ts", "sitemap URL must use the apex MARKETING_ORIGIN");
     }
     for (const must of ["/*/dashboard", "/*/auth"]) {

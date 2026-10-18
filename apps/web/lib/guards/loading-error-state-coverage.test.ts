@@ -114,6 +114,19 @@ const READ_SURFACES: ReadSurface[] = [
     error: /\bt\(["']objectsError["']\)/,
     empty: /\bt\(["']noResults["']\)/,
   },
+  {
+    // Real-person join (window 6, 2026-09-06): after a password sign-in the
+    // form reads its own `profiles.onboarded_at` ONCE to decide whether the
+    // person goes to onboarding (with `?next=` intact) or straight on. It is a
+    // routing read, not a list: loading = the sign-in pending state
+    // ("signing"), a failed read (`profErr`) explicitly falls back to today's
+    // destination (never a silent empty), and "no row / not onboarded" is the
+    // `?? null` branch that `postLoginDestination` maps to onboarding.
+    file: "components/app/login-form.tsx",
+    loading: /setStatus\(["']signing["']\)/,
+    error: /profErr/,
+    empty: /onboarded_at \?\? null/,
+  },
 ];
 
 // Discover every client component that reads data over the network.

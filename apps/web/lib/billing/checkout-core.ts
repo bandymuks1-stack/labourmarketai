@@ -6,7 +6,7 @@
  * test price.
  */
 
-import { PRE_PAYMENT_PLANS, type PlanAudience } from "@/lib/billing/plans";
+import { PRE_PAYMENT_PLANS, isSellablePlan, type PlanAudience } from "@/lib/billing/plans";
 import type { BillingConfig } from "@/lib/billing/config-core";
 
 export type CheckoutRejectReason =
@@ -14,6 +14,7 @@ export type CheckoutRejectReason =
   | "live_blocked"
   | "unknown_plan"
   | "not_a_paid_plan"
+  | "plan_deferred"
   | "not_eligible"
   | "price_not_configured"
   | "not_authenticated"
@@ -47,7 +48,7 @@ export type CheckoutGateResult =
 /** The plans a user can start a TEST checkout for (the paid pilot tiers). */
 export function isPaidPlanKey(planKey: string): boolean {
   const p = PRE_PAYMENT_PLANS.find((x) => x.slug === planKey);
-  return Boolean(p && p.accessState === "payment_not_enabled");
+  return Boolean(p && isSellablePlan(p));
 }
 
 export function evaluateCheckoutRequest(input: {
@@ -64,11 +65,11 @@ export function evaluateCheckoutRequest(input: {
    */
   orgBinding?: OrgBindingResult;
 }): CheckoutGateResult {
-  // Billing must be in a valid Stripe TEST state.
+  // Billing must be in an active Stripe state (test, or owner-armed live).
   if (input.config.state === "stripe_live_blocked") {
     return { ok: false, status: 403, reason: "live_blocked" };
   }
-  if (input.config.state !== "stripe_test") {
+  if (input.config.state !== "stripe_test" && input.config.state !== "stripe_live") {
     return { ok: false, status: 400, reason: "payments_disabled" };
   }
   if (!input.authenticated) {
@@ -80,9 +81,25 @@ export function evaluateCheckoutRequest(input: {
   if (plan.accessState !== "payment_not_enabled") {
     return { ok: false, status: 400, reason: "not_a_paid_plan" };
   }
+  // Owner launch pricing 2026-09-05: only the sellable launch plan reaches
+  // checkout; deferred plans (ai_plus / vip_media successors, agency tiers)
+  // are refused here even if a price id were configured for them.
+  if (!isSellablePlan(plan)) {
+    return { ok: false, status: 400, reason: "plan_deferred" };
+  }
 
-  // Eligibility: the plan's audience role, or an admin (for internal testing).
-  const eligible = input.isAdmin || input.userRoles.includes(plan.audience);
+  // Eligibility: the plan's audience role, or an admin (for internal testing) -
+  // or, for an ORGANIZATION plan, the verified manage-billing authority over
+  // the organization itself. The organization's capability and the caller's
+  // proven owner/admin membership are the canonical authority; the legacy
+  // `profile_roles` row is a derived label that an invited owner/admin, or a
+  // legacy-`agency`-only profile, may not carry. Requiring it refused those
+  // callers with `not_eligible` although they hold the authority. Anyone
+  // without verified authority is still refused (below and here, fail closed).
+  const orgAuthorityVerified =
+    planRequiresOrganization(plan.audience) && input.orgBinding === "verified";
+  const eligible =
+    input.isAdmin || input.userRoles.includes(plan.audience) || orgAuthorityVerified;
   if (!eligible) return { ok: false, status: 403, reason: "not_eligible" };
 
   // Company/agency plans are bound to a canonical organization with a

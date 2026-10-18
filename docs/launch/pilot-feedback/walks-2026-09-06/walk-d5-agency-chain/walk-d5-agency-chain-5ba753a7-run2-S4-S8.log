@@ -1,0 +1,33 @@
+{"step":"health","build":"5ba753a7","tag":"E2E-D5-mtpib1fl","start":"S4","startedAt":"2026-09-06T07:45:00.892Z"}
+{"leg":"S4_client_offers","text":"L LabourMarket AI Agentūrų pasiūlyti kandidatai jūsų poreikiams: • Suvirintojas — E2E Agentūra UAB (testinis subjektas) Priimti: Suvirintojas Atmesti: Suvirintojas","results":0,"firstAnswerMs":15334,"chips":["Priimti: Suvirintojas","Atmesti: Suvirintojas"]}
+{"check":"S4 exactly one open offer carries an accept chip","ok":true,"detail":{"count":1,"labels":["Priimti: Suvirintojas"]}}
+{"leg":"S4_decided","ms":37689,"accepted":true,"failed":false,"line":"Priimta. Kandidatui išsiųstas rezervacijos pasiūlymas — kai jis atsakys, pamatysite čia."}
+{"check":"S4 the client's acceptance proposes the canonical booking","ok":true,"detail":"Priimta. Kandidatui išsiųstas rezervacijos pasiūlymas — kai jis atsakys, pamatysite čia."}
+{"leg":"S4_failed_requests","failed":[]}
+{"leg":"S5_person_offers","text":"","results":0,"firstAnswerMs":-1,"chips":["Priimti","Atmesti"]}
+{"check":"S5 the booking card offers Priimti","ok":true,"detail":1}
+{"leg":"S5_person_accepted","ms":83489,"done":"Priėmei"}
+{"check":"S5 the person's acceptance is confirmed","ok":true,"detail":"Priėmei"}
+{"leg":"S5_failed_requests","failed":[]}
+{"leg":"S6a_projects","text":"L LabourMarket AI Štai jūsų vykdomi darbai. E2E Kauno objektas (testinis) E2E Vilniaus objektas (testinis)","results":0,"firstAnswerMs":1014,"chips":["E2E Kauno objektas (testinis)","E2E Vilniaus objektas (testinis)"]}
+{"leg":"S6a_chat_picker","said":"L LabourMarket AI Kas turėtų jame dirbti? E2E Worker Two","chips":["E2E Worker Two"]}
+{"leg":"S6a_chat_picker_offers_booking_engaged_person","inChat":false,"note":"the chat picker reads the ROSTER only (loadAssignableWorkersForProject → listActiveCompanyWorkers); the RPC gate would accept the engagement"}
+{"leg":"S6b_page_picker","present":true,"group":"assign-engagement-group","groups":[{"testid":"assign-roster-group","label":"Komandos nariai","options":["E2E Worker Two"]},{"testid":"assign-engagement-group","label":"Priimto pasiūlymo kandidatai","options":["E2E Spine Žmogus","E2E Worker Two"]}]}
+{"check":"S6b the person is offered by the ENGAGEMENT group of the page picker (not the roster)","ok":true,"detail":"assign-engagement-group"}
+{"leg":"S6b_assigned","ms":113704,"status":"Priskirti darbuotoją projektui"}
+{"check":"S6b the page confirms the assignment","ok":true,"detail":"Priskirti darbuotoją projektui"}
+{"leg":"S6_failed_requests","failed":[]}
+{"leg":"S7_worklog_sentence","text":"","results":0,"firstAnswerMs":-1,"chips":["Išsaugoti","Taisyti"]}
+{"leg":"S7_worklog_form","flow":1,"blocked":0,"contextSelectShown":0,"ctxOptions":[],"notes":"šiandien dirbau nuo 8 iki 17 Kauno objekte, klojau plyteles. E2E-D5-mtpib1fl"}
+{"check":"S7 the worklog form opens (not blocked)","ok":true,"detail":{"blocked":0}}
+{"leg":"S7_saved","ms":161829,"done":"Įrašas išsaugotas darbo žurnale. Pridėtas įgūdis: Plytelių klojimas CV papildytas šio įrašo įgūdžiais. Darbo rekomendacijos skaičiuojamos pagal atnaujintą įgūdžių sąrašą kitą kartą jas peržiūrint. Peržiūrėti atnaujintus pasiūlymus →"}
+{"check":"S7 the journal entry is saved (server outcome shown)","ok":true,"detail":"Įrašas išsaugotas darbo žurnale. Pridėtas įgūdis: Plytelių klojimas CV papildytas šio įrašo įgūdžiais. Darbo rekomendacijos skaičiuojamos pagal atnaujintą įgūdžių sąrašą kitą kartą jas peržiūrint. Peržiūrėti atnaujintus pasiūlymus →"}
+{"leg":"S7_person_history","text":"L LabourMarket AI Paskutiniai 1 tavo žurnalo įrašai: — 09-06: šiandien dirbau nuo 8 iki 17 Kauno objekte, klojau plyteles. E2E-D5-mtpib1fl Iš tavo paties žurnalo įrašų per paskutines 13 dienas. Užrašyti darbą","results":0,"firstAnswerMs":2034,"chips":["Užrašyti darbą"],"hasTag":true}
+{"check":"S7 the person's journal history shows the new entry","ok":true,"detail":"L LabourMarket AI Paskutiniai 1 tavo žurnalo įrašai: — 09-06: šiandien dirbau nuo 8 iki 17 Kauno objekte, klojau plyteles. E2E-D5-mtpib1fl Iš tavo paties žurnalo įrašų per paskutines 13 dienas. Užrašyti darbą"}
+{"leg":"S7_failed_requests","failed":[]}
+{"leg":"S8_client_engagements","text":"L LabourMarket AI Štai įrašyti darbo santykiai. Skydelyje galite vieną iš jų užbaigti.","results":0,"firstAnswerMs":1015,"chips":[]}
+{"check":"S8 the client's 'who works for me' names the agency-placed person","ok":true,"detail":"L LabourMarket AI Štai įrašyti darbo santykiai. Skydelyje galite vieną iš jų užbaigti."}
+{"leg":"S8_failed_requests","failed":[]}
+{"step":"done","tag":"E2E-D5-mtpib1fl","totalMs":181552,"endedAt":"2026-09-06T07:48:02.684Z"}
+{"result":"PASS","failed":[]}
+EXIT 0

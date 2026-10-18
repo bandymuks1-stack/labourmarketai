@@ -13,6 +13,7 @@ import {
   prepareConfirmationAction,
 } from "@/lib/conversation/dispatch";
 import { roleContextForAction } from "@/lib/conversation/action-role-context";
+import { useAuthOptional } from "@/lib/auth/context";
 import { ChatAction, ChatActionRow } from "@/components/app/conversation/chat/chat-action";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -22,6 +23,30 @@ type Phase =
   | { kind: "review" }
   | { kind: "done" }
   | { kind: "error"; message: string };
+
+/**
+ * REFUSALS SAY WHY (owner program 2026-09-23). A domain refusal that reached
+ * this form used to read "Nepavyko išsaugoti. Bandyk dar kartą." — which
+ * invites the person to retry something that will be refused again, and hides
+ * that nothing was changed. Each code below is a decision the server made,
+ * not a fault, so it gets its own sentence. Own-property lookup only (a code
+ * is server data; the own-property check keeps `constructor` & co. out).
+ */
+const REFUSAL_KEYS: Readonly<Record<string, string>> = {
+  // The rename's honest refusals (lib/company/organization-rename.ts).
+  legal_name_verified: "conversation.forms.ui.errorLegalNameVerified",
+  no_company_profile: "conversation.forms.ui.errorNoCompanyProfile",
+  personal_workspace: "conversation.forms.ui.errorNoOrganization",
+  not_authorized: "conversation.forms.ui.errorNotAllowed",
+  duplicate_company: "conversation.forms.ui.errorDuplicateName",
+  // The confirmed card no longer matches what is true now (e.g. the active
+  // workspace was switched while the form was open) — nothing was saved.
+  stale_confirmation: "conversation.forms.ui.errorStale",
+  workspace_changed: "conversation.forms.ui.errorStale",
+};
+function refusalMessageKey(code: string): string | null {
+  return Object.prototype.hasOwnProperty.call(REFUSAL_KEYS, code) ? REFUSAL_KEYS[code] : null;
+}
 
 /**
  * Inline conversation action form (Phase B). Renders a structured, deterministic
@@ -68,6 +93,10 @@ export function InlineActionForm({
 }) {
   const t = useTranslations();
   const router = useRouter();
+  // The workspace this form was opened in — sent with the write so a switch
+  // made elsewhere meanwhile is refused as `stale_context`, never written into
+  // a workspace the person is not looking at. A staleness check, not authority.
+  const expectedWorkspaceId = useAuthOptional()?.activeWorkspaceId ?? undefined;
   const [values, setValues] = useState<FormState>(initialValues ?? {});
   const [phase, setPhase] = useState<Phase>({ kind: "form" });
   const [saving, start] = useTransition();
@@ -123,6 +152,7 @@ export function InlineActionForm({
       const res = await dispatchWorkerAction(spec.actionId, input, {
         locale,
         confirmationToken,
+        expectedWorkspaceId,
       });
       if (res.ok) {
         trackFunnel(FUNNEL_EVENTS.profileSaved, {
@@ -142,14 +172,22 @@ export function InlineActionForm({
         onDone?.(res);
         router.refresh();
       } else {
+        // `stale_context`: the workspace changed elsewhere since this form
+        // opened — nothing was written, and the line says why.
         const message =
-          res.code === "invalid"
-            ? t("conversation.forms.ui.errorInvalid")
-            : res.code === "needs_migration"
-              ? t("conversation.forms.ui.errorNeedsMigration")
-              : res.code === "conflict"
-                ? t("conversation.forms.ui.errorConflict")
-                : t("conversation.forms.ui.errorGeneric");
+          res.code === "stale_context"
+            ? t("conversation.chat.staleContext")
+            : res.code === "invalid"
+              ? t("conversation.forms.ui.errorInvalid")
+              : res.code === "needs_migration"
+                ? t("conversation.forms.ui.errorNeedsMigration")
+                : res.code === "conflict"
+                  ? t("conversation.forms.ui.errorConflict")
+                  : res.code === "over_open_need_limit_upgrade"
+                    ? t("conversation.forms.ui.errorOpenNeedLimitUpgrade")
+                    : res.code === "over_open_need_limit_individual"
+                      ? t("conversation.forms.ui.errorOpenNeedLimitIndividual")
+                      : t(refusalMessageKey(res.code) ?? "conversation.forms.ui.errorGeneric");
         setPhase({ kind: "error", message });
       }
     });

@@ -11,7 +11,11 @@ import {
   resolveEngagementContext,
   type ContextResolution,
 } from "@/lib/journal/engagement-context-selection";
+import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { projectsForContext, type AssignedProject } from "@/lib/journal/project-attribution";
+import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
 
 /**
  * Read the worker's WRITABLE engagement contexts for the conversation work-log
@@ -35,6 +39,12 @@ export type WorkLogEngagement = {
   id: string;
   label: string;
   isPrimary: boolean;
+  /** The organization's own name (null = the personal context) — what a
+   *  sentence that names its employer is matched against. */
+  orgName?: string | null;
+  /** The projects the worker is ACTIVELY assigned to in this context's
+   *  organization (2+ → the flow must ask which; see project-attribution). */
+  projects?: AssignedProject[];
 };
 
 export type WorkLogEngagementsResult =
@@ -45,6 +55,10 @@ export type WorkLogEngagementsResult =
        *  are legitimately possible and `selectedId` is null — the flow must
        *  ASK rather than preselect. */
       resolution: ContextResolution;
+      /** Organizations the person's relationship with has ENDED (and none is
+       *  active) — names only, through the narrow historical-names read. A
+       *  sentence naming one of these must not be filed under another org. */
+      endedOrgNames?: string[];
     }
   | { kind: "no-worker" }
   | { kind: "no-context" }
@@ -108,57 +122,76 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
   const canonicalRelationship = (slug: string): string =>
     tRelationships.has(slug) ? tRelationships(slug) : relationshipLabel(slug);
 
-  const withBase = (ecRows ?? []).map((e) => {
+  /**
+   * ONE LABEL COMPOSER FOR EVERY CONTEXT SELECTOR (issue #1689, defect J).
+   *
+   * This file used to compose its own label (`orgName ?? title ??
+   * relationship`, then "— relationship" appended when two bases collided)
+   * while the journal page composed the same rows a different way ("Org ·
+   * Rel", "Asmeninis įrašas · title"). Two org-less employee contexts then
+   * rendered here as "Darbuotojas — Darbuotojas": the base WAS the
+   * relationship, and the ambiguity qualifier repeated it.
+   *
+   * Both surfaces now hand the same facts to `composeDistinctEngagementLabels`
+   * (`lib/journal/engagement-label.ts`): an organization context reads "Org ·
+   * Relationship" (the org TYPE when it has no name — never a dash), a
+   * personal one "Asmeninis įrašas [· title]", a collision is qualified by
+   * the title, else the start month, never by a word already present, and
+   * the list comes back pairwise distinct. A learner on placement at the
+   * company that also employs them — the ordinary education case — is told
+   * apart by the relationship word, exactly as before; the journal is
+   * evidence and the choice must not be a guess.
+   *
+   * The relationship word still comes from `canonicalRelationship` above —
+   * the ONE catalogue, with the older worklog wording as its fallback.
+   */
+  const tRole = await getTranslations("auth.signup.role");
+  const tJournal = await getTranslations("journal");
+  const personalEntryLabel = tJournal("personalEntry");
+  const rows = (ecRows ?? []).map((e) => {
     const org = e.organizations as {
       display_name: string | null;
       legal_name: string | null;
       organization_type: string | null;
     } | null;
-    const orgName = orgDisplayName(org?.display_name, org?.legal_name);
+    const orgTypeLabel =
+      org?.organization_type === "company"
+        ? tRole("company")
+        : org?.organization_type === "agency"
+          ? tRole("agency")
+          : null;
     return {
       row: e,
-      base: orgName ?? e.title ?? canonicalRelationship(e.relationship_slug),
+      input: {
+        orgName: orgDisplayName(org?.display_name, org?.legal_name) ?? null,
+        orgTypeLabel,
+        title: e.title ?? null,
+        relationshipLabel: canonicalRelationship(e.relationship_slug),
+        personalEntryLabel,
+        isPersonal: !org,
+        startedAt: (e as { started_at?: string | null }).started_at ?? null,
+      },
     };
   });
-
-  /**
-   * ONE PERSON, TWO RELATIONSHIPS WITH THE SAME ORGANIZATION.
-   *
-   * The label used to be the organization name alone, which was unambiguous
-   * only while a person could hold exactly one engagement per organization.
-   * They can now hold several — a learner on placement at the company that
-   * also employs them is the ordinary education case — and the selector then
-   * offered "Dev Construction" TWICE, with no way to tell which was the job
-   * and which was the placement. Choosing wrong files the work against the
-   * wrong relationship, and the journal is evidence: it must not be a guess.
-   *
-   * So a base label that occurs more than once is qualified by its
-   * relationship, and one that is already unique is left exactly as it was —
-   * no existing label changes wording.
-   */
-  const baseCounts = new Map<string, number>();
-  for (const { base } of withBase) {
-    baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1);
-  }
+  const labels = composeDistinctEngagementLabels(rows.map((r) => r.input));
 
   const engagements: (WorkLogEngagement & { organizationId: string | null })[] =
-    withBase.map(({ row: e, base }) => {
-      const ambiguous = (baseCounts.get(base) ?? 0) > 1;
-      const label = ambiguous
-        ? `${base} — ${canonicalRelationship(e.relationship_slug)}`
-        : base;
-      return {
-        id: e.id,
-        label,
-        isPrimary: Boolean(e.is_primary),
-        organizationId:
-          ((e as { organization_id?: string | null }).organization_id as
-            | string
-            | null) ?? null,
-      };
-    });
+    rows.map(({ row: e }, i) => ({
+      id: e.id,
+      label: labels[i],
+      isPrimary: Boolean(e.is_primary),
+      orgName: rows[i].input.orgName,
+      organizationId:
+        ((e as { organization_id?: string | null }).organization_id as
+          | string
+          | null) ?? null,
+    }));
 
   if (engagements.length === 0) return { kind: "no-context" };
+
+  // The active projects per organization — one bounded read, so the flow can
+  // ask "which project?" instead of the hours landing against none.
+  const projectsByOrg = await readActiveProjectsByOrg(supabase, worker.id);
 
   // Context Intelligence (rebuild phase 3): the ACTIVE WORKSPACE resolves the
   // default context — the engagement belonging to the active workspace's org
@@ -166,7 +199,9 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
   // preselects the context the user is already working in and only ASKS when
   // real ambiguity remains. Request-cached read; honest no-op when the
   // workspace is personal or matches nothing.
-  const workspace = await getWorkspaceContext("person");
+  // The SAME resolution the chip renders — no caller-chosen identity, so the
+  // default here can never name a different workspace than the header does.
+  const workspace = await getWorkspaceContext();
   const activeOrgId = workspace.activeWorkspaceId;
   const ordered = [...engagements].sort(
     (a, b) =>
@@ -203,9 +238,48 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
     }),
   });
 
+  // ENDED relationships, named (2026-09-29): "…betonavau pamatus Alfa
+  // objekte" by a worker whose Alfa relationship had ended preselected their
+  // only active organization. Best-effort: a failed read names nothing and the
+  // card behaves exactly as before.
+  let endedOrgNames: string[] = [];
+  try {
+    const activeOrgIds = new Set(engagements.map((e) => e.organizationId).filter(Boolean));
+    const { data: endedRows } = await supabase
+      .from("engagement_contexts")
+      .select("organization_id, organizations(display_name, legal_name)")
+      .eq("profile_id", user.id)
+      .neq("status", "active")
+      .not("organization_id", "is", null)
+      .limit(50);
+    const named = await withHistoricalOrgNames(
+      supabase,
+      ((endedRows ?? []) as unknown as {
+        organization_id: string | null;
+        organizations: { display_name: string | null; legal_name: string | null } | null;
+      }[]).filter((r) => r.organization_id && !activeOrgIds.has(r.organization_id)),
+    );
+    endedOrgNames = [
+      ...new Set(
+        named
+          .map((r) => orgDisplayName(r.organizations?.display_name, r.organizations?.legal_name))
+          .filter((n): n is string => Boolean(n)),
+      ),
+    ];
+  } catch {
+    endedOrgNames = [];
+  }
+
   return {
     kind: "ok",
-    engagements: ordered.map(({ id, label, isPrimary }) => ({ id, label, isPrimary })),
+    engagements: ordered.map(({ id, label, isPrimary, orgName, organizationId }) => ({
+      id,
+      label,
+      isPrimary,
+      orgName,
+      projects: projectsForContext(projectsByOrg, organizationId),
+    })),
     resolution,
+    endedOrgNames,
   };
 }

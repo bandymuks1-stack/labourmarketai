@@ -98,7 +98,7 @@ describe("Guard: Connected Apps — reachability", () => {
       "scopesLabel", "disconnect", "confirmTitle", "confirmBody", "confirmYes", "cancel",
       "feedbackRevoked", "feedbackError", "note", "pending",
     ];
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const cat = JSON.parse(read(`messages/${locale}.json`));
       const ns = cat.auth?.dashboard?.account?.connectedApps ?? {};
       for (const k of KEYS) {

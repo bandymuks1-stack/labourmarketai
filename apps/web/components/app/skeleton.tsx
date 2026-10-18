@@ -164,7 +164,7 @@ export function SkeletonScreen({
   return (
     <div
       data-testid={testId}
-      className={`flex animate-pulse flex-col gap-6 ${className}`.trim()}
+      className={`flex animate-pulse motion-reduce:animate-none flex-col gap-6 ${className}`.trim()}
       {...(labelled
         ? { role: "status", "aria-live": "polite" as const, "aria-busy": true }
         : { "aria-hidden": true })}

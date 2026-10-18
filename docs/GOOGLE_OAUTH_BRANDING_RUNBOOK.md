@@ -4,6 +4,26 @@
 here touches DNS, env, secrets, or product code — it is the exact step list for
 the owner to apply/approve.
 
+> ## 2026-09-07 — still open, and NOTHING an agent can do closes it
+>
+> The owner walked production (window 11 §22) and saw
+> `gorgitwvdzxbnaxhrsrw.supabase.co` on the Google screen. Re-verified against
+> the repository the same day: the flow is `signInWithOAuth` → the Supabase
+> PKCE callback, so the browser genuinely navigates through that host. **No
+> application code change moves it** — the host belongs to the auth server in
+> the middle.
+>
+> Three options, all owner-only, in the order they are worth doing:
+>
+> | # | What | Cost | Effect |
+> |---|---|---|---|
+> | **1** | Google consent-screen branding (name, logo, home page, privacy/terms, authorized domain `labourmarket.ai`) | free | The screen reads "Sign in to continue to **Labourmarket.ai**" with the logo. The `supabase.co` host may still appear in the redirect notice and the address bar. **Biggest trust win per minute; do this first.** |
+> | **1.5** | Restore the first-party GIS ID-token flow | free, but a product change | The browser never navigates through `*.supabase.co`. It was built, then **removed** by the owner ruling of 2026-07-29 — see the corrected section below. Restoring it reverses that ruling and is the owner's call, not an agent's. |
+> | **2** | Supabase custom auth domain `auth.labourmarket.ai` | ~$35/mo (Pro + Custom Domains) | Removes the string entirely. Previously **declined** by the owner. |
+>
+> Until one of these is applied this stays open. It must not be reported as
+> fixed, and no code in the repository claims that it is.
+
 ## Problem
 On the Google sign-in/consent screen, users see
 `gorgitwvdzxbnaxhrsrw.supabase.co` instead of Labourmarket.ai branding. That
@@ -75,13 +95,34 @@ external users may see an "unverified app" warning and the logo may not show).
 
 ---
 
-## Lever 1.5 — FIRST-PARTY GIS ID-token flow (free; REMOVES the visible `supabase.co` hop) ⭐ IMPLEMENTED
+## Lever 1.5 — FIRST-PARTY GIS ID-token flow (free; would REMOVE the visible `supabase.co` hop) ❌ REMOVED FROM THE PRODUCT
 
-> **Status 2026-07-19:** implemented in PR branch
+> **Status 2026-09-07 (corrected):** **NOT in the product.** This section
+> claimed "⭐ IMPLEMENTED … supersedes the need for Lever 2" for seven weeks
+> after the flow it describes had been deleted. The owner's window-11
+> production walk (§22) saw `*.supabase.co` on the Google screen, which is
+> exactly what this document said could no longer happen.
+>
+> What actually happened: **owner ruling 2026-07-29 (P0)** replaced the GIS
+> popup with ONE same-tab `signInWithOAuth` redirect through the PKCE
+> callback. Verified in the repository on 2026-09-07:
+>
+> | the flow needs | present today |
+> |---|---|
+> | `app/api/auth/google/route.ts` | **absent** |
+> | `lib/auth/google-id-token.ts` | **absent** |
+> | `signInWithIdToken` anywhere in `apps/web` | **no matches** |
+> | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | **deleted** from `lib/env.ts`, which records the ruling |
+> | `components/app/google-button.tsx` | `signInWithOAuth` — the redirect flow |
+>
+> So the browser DOES navigate through `gorgitwvdzxbnaxhrsrw.supabase.co`
+> again, and **Lever 2 is no longer superseded**. Restoring this lever is a
+> product decision, not a doc fix — it is left described below as the option
+> it is, not as a state the product is in.
+>
+> **Status 2026-07-19 (historical):** implemented in PR branch
 > `fix/first-party-google-id-token-auth-v1` (Phase 2 of the
-> single-domain task). Supersedes the need for Lever 2 for the
-> *navigation-visibility* goal — the owner decided NOT to buy the
-> custom domain. Lever 2 remains documented below for history only.
+> single-domain task).
 
 How it works (code: `apps/web/app/api/auth/google/route.ts`,
 `components/app/google-button.tsx`, `lib/auth/google-id-token.ts`):
@@ -123,7 +164,7 @@ redirect flow on the next deploy.
 
 ---
 
-## Lever 2 — Supabase custom auth domain `auth.labourmarket.ai` (paid; SUPERSEDED by Lever 1.5 — owner declined the paid add-on)
+## Lever 2 — Supabase custom auth domain `auth.labourmarket.ai` (paid; owner declined the add-on in July 2026 — NO LONGER superseded, see the correction above)
 
 ### Owner approval list (nothing applied without these)
 1. **Cost:** upgrade Supabase project **Free → Pro (~$25/mo)** **and** enable the

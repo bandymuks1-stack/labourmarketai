@@ -4,7 +4,7 @@
  * Proves that LIVE PAYMENT CAPTURE REMAINS IMPOSSIBLE while billing
  * readiness (plans, boundaries, copy, admin visibility) is closed:
  *
- *   1. PAYMENTS_ENABLED kill-switch is pinned false.
+ *   1. Payments resolve OFF unless the billing config arms them (no static switch).
  *   2. Config validation HARD-BLOCKS live mode and live keys (behavioral +
  *      source pin on the exact mechanism in config-core.ts).
  *   3. The webhook rejects live events (source pin + behavioral).
@@ -29,12 +29,11 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
-  PAYMENTS_ENABLED,
   PRE_PAYMENT_PLANS,
   type FeatureKey,
 } from "../billing/plans";
 import { resolveBillingConfig, providerKindFor } from "../billing/config-core";
-import { gateFeature, planIncludes } from "../billing/entitlements";
+import { gateFeature, limitFor, planIncludes } from "../billing/entitlements";
 import {
   resolveEntitlements,
   entitlementAllows,
@@ -79,8 +78,13 @@ function prodSources(): string[] {
 // ─── 1. Kill-switch ─────────────────────────────────────────────────────────
 
 describe("kill-switch: payments stay off in code", () => {
-  it("PAYMENTS_ENABLED is pinned false", () => {
-    expect(PAYMENTS_ENABLED).toBe(false);
+  it("payments are OFF unless the resolved billing config arms them (no static constant to drift)", () => {
+    const off = resolveBillingConfig({
+      paymentsEnabled: undefined, provider: undefined, mode: undefined,
+      secretKey: undefined, webhookSecret: undefined, publishableKey: undefined,
+    });
+    expect(off.paymentsEnabled).toBe(false);
+    expect(off.state).toBe("disabled");
   });
 });
 
@@ -157,7 +161,7 @@ describe("webhook rejects live events", () => {
     expect(src).toMatch(/live_event_rejected/);
     // rejection happens BEFORE any subscription write
     expect(src.indexOf("live_event_rejected")).toBeLessThan(
-      src.indexOf("upsertSubscription("),
+      src.indexOf("applyRawSubscriptionObject("),
     );
   });
 });
@@ -285,9 +289,13 @@ describe("plan boundary wiring is complete and real", () => {
       expect(existsSync(p), `${key}: missing site ${e.site}`).toBe(true);
       const txt = readFileSync(p, "utf8");
       if (e.kind === "server_gate") {
-        expect(txt, `${key}: site lacks hasFeature("${key}")`).toContain(
-          `hasFeature("${key}")`,
-        );
+        // `hasFeature(k)` (cookie caller) or the SAME predicate on a context
+        // resolved for an explicit caller — `entitlementAllows(ctx, k)` — which
+        // a bearer (MCP) request needs (it carries no cookie session).
+        expect(
+          txt.includes(`hasFeature("${key}")`) || txt.includes(`entitlementAllows(ctx, "${key}")`),
+          `${key}: site lacks hasFeature("${key}") / entitlementAllows(ctx, "${key}")`,
+        ).toBe(true);
       }
       if (e.kind === "admin_rbac") {
         expect(txt, `${key}: RBAC site lacks superadmin check`).toMatch(
@@ -324,8 +332,23 @@ describe("plan boundary wiring is complete and real", () => {
       let deniedCount = 0;
       for (const key of Object.keys(plan.entitlements) as FeatureKey[]) {
         if (!planIncludes(plan, key)) continue;
-        // A key legitimately covered by a FREE fallback tier stays open.
+        // A key legitimately covered by a FREE fallback tier stays open —
+        // but a NUMERIC key the fallback also carries must carry a LOWER
+        // ceiling there (owner launch pricing 2026-09-05: ORGANIZATION FREE
+        // has every organization capability at 1 active position; the paid
+        // plan buys the ceiling, not the capability).
         if (fallback.accessState === "free" && planIncludes(fallback, key)) {
+          const paidLimit = limitFor(plan, key);
+          const freeLimit = limitFor(fallback, key);
+          if (paidLimit !== null && freeLimit !== null) {
+            expect(freeLimit, `${plan.slug}.${key}: the free ceiling must be lower`).toBeLessThan(paidLimit);
+            deniedCount += 1;
+          } else if (paidLimit === null && freeLimit !== null && plan.entitlements[key] === true) {
+            // UNMETERED paid plan (owner decision 2026-10-06: the Organization
+            // plan has NO numeric active-position ceiling): the boundary is
+            // that the free fallback is capped and the paid plan is not.
+            deniedCount += 1;
+          }
           continue;
         }
         deniedCount += 1;

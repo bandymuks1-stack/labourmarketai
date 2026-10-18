@@ -18,8 +18,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * lib/admin/pilot-metrics.ts / conversion-funnel.ts.
  *
  * HONESTY CONTRACT (same stance as those modules):
- *   - production has 0 rows today (AI_PROVIDER_MODE=disabled) — the summary
- *     renders real zeros and "—", never a fake chart or an invented number;
+ *   - the summary renders REAL figures or "—", never a fake chart and never
+ *     an invented number. (This line used to assert "production has 0 rows
+ *     today (AI_PROVIDER_MODE=disabled)". It was true when written and stopped
+ *     being true on 2026-08-28: production holds 47 `ai_runs` and 47
+ *     `usage_cost_events` as of 2026-09-07 — Gemini, intent proposal and
+ *     market explanation, $0.0396 total, one run correctly blocked for
+ *     `cost_unpriced`. A hardcoded row count is a claim about live data and
+ *     does not belong in a comment.);
  *   - an unreadable table is reported as `available: false`, distinct from
  *     "available but empty";
  *   - unknown cost stays null → "—". Sums only ever include REAL figures,

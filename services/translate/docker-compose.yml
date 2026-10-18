@@ -1,0 +1,23 @@
+# Self-hosted LibreTranslate (Argos) for message translation.
+# Owner deploys on any Docker host with ~2 GB free RAM. Not exposed publicly:
+# put it behind the same private network / reverse proxy as the transcribe
+# service and give it an API key.
+services:
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      # Only the languages the product needs (keeps memory low).
+      LT_LOAD_ONLY: "en,lt,lv,et,ru,pl,de,nl,da,nb,sv,uk"
+      LT_API_KEYS: "true"
+      LT_REQ_LIMIT: "120"
+      LT_DISABLE_WEB_UI: "true"
+      LT_UPDATE_MODELS: "false"
+    volumes:
+      - lt-local:/home/libretranslate/.local
+      - lt-db:/app/db
+volumes:
+  lt-local:
+  lt-db:

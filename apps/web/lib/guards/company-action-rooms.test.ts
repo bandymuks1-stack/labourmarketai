@@ -41,8 +41,11 @@ const COMPANY = /Įmonė|Company|Компани/i;
 describe("company action rooms — consistent next-actions + framing", () => {
   for (const room of ROOMS) {
     const src = read(`app/[locale]/dashboard/${room}/page.tsx`);
-    it(`${room}: mounts the shared next-actions card`, () => {
-      expect(src).toMatch(/<CompanyActionNextActions\b/);
+    it(`${room}: mounts the shared next-actions card (or, for Dabar, the primary actions)`, () => {
+      // Dabar (IA 2026-09-16) carries its four primary actions instead of
+      // the explanatory next-actions card — first screen, no prose.
+      if (room === "company") expect(src).toMatch(/data-testid="company-primary-actions"/);
+      else expect(src).toMatch(/<CompanyActionNextActions\b/);
     });
     it(`${room}: has a company-context breadcrumb + back-to-action-center link`, () => {
       expect(src, `${room} company-context`).toMatch(/data-testid="company-context"/);

@@ -17,6 +17,7 @@ import {
 } from "@/lib/limits/request-rate-limits";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Step 4A — company → worker "request to communicate" from the scouting surface.
@@ -62,7 +63,10 @@ export async function requestWorkerConversationAction(input: {
   locale: string;
   requestId: string;
   workerId: string;
+  /** The workspace the screen displayed (`refuseStaleWorkspace`). */
+  expectedWorkspaceId?: string;
 }): Promise<RequestWorkerConversationResult> {
+  await refuseStaleWorkspace(input?.expectedWorkspaceId);
   const { locale, requestId, workerId } = input;
   if (!requestId || !workerId) return { ok: false, reason: "error" };
 

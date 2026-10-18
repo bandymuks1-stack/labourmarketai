@@ -14,6 +14,15 @@ import {
   formatProjectPlace,
 } from "@/lib/projects/location";
 import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
+import { ProjectCourseTrack } from "@/components/app/projects/project-course-track";
+import { deriveProjectCourse } from "@/lib/projects/project-course";
+import { ProjectWeekGoal } from "@/components/app/projects/project-week-goal";
+import { ProjectTraceRegion } from "@/components/app/projects/project-trace";
+import { loadProjectTrace } from "@/lib/projects/project-trace-server";
+import { deriveWeeklyGoal } from "@/lib/projects/weekly-goal";
+import { listProjectTasks } from "@/lib/tasks/tasks";
+import { listProjectStages } from "@/lib/projects/stages";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * Worker/member project view (F11 / RC2). Shown when the visitor is a real
@@ -34,6 +43,21 @@ export async function WorkerProjectPanel({
   view: WorkerProjectView;
 }) {
   const t = await getTranslations("projectOps.workerView");
+  // THE PROJECT COURSE (Future Experience C): the stages this worker's
+  // session may read (stage RLS admits assigned workers), as one shared
+  // route. A failed read is UNKNOWN, never "no stages".
+  const [stages, today, tasks] = await Promise.all([
+    listProjectStages(projectId).catch(() => null),
+    viewerWorkToday(),
+    listProjectTasks(projectId).catch(() => null),
+  ]);
+  const course = deriveProjectCourse(stages, today.todayIso);
+  // THIS WEEK'S GOAL: the tasks this worker's session may read (their own
+  // and their team's) due this week — named as theirs, never the team's.
+  const weekGoal = deriveWeeklyGoal(tasks, { todayIso: today.todayIso, scope: "mine" });
+  // KAS PASIKEITĖ PROJEKTE: this worker's OWN chains on this project + the
+  // project's own facts — never a co-worker's entry.
+  const trace = await loadProjectTrace(projectId, "member", stages, tasks);
 
   const project = view.project;
   const location = deriveProjectLocation({
@@ -49,7 +73,7 @@ export async function WorkerProjectPanel({
       data-testid="worker-project-view"
     >
       <header className="flex flex-col gap-2">
-        <span className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </span>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
@@ -66,6 +90,14 @@ export async function WorkerProjectPanel({
           >
             {active ? t("assignmentActive") : t("assignmentEnded")}
           </span>
+          {view.viaTeam ? (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
+              data-testid="worker-project-via-team"
+            >
+              {t("viaTeam", { team: view.viaTeam })}
+            </span>
+          ) : null}
           {place ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <MapPin className="h-3 w-3" aria-hidden />
@@ -90,12 +122,15 @@ export async function WorkerProjectPanel({
         )}
       </header>
 
+      <ProjectCourseTrack course={course} locale={locale} />
+      <ProjectWeekGoal goal={weekGoal} locale={locale} />
+
       {/* Direct actions — journal first: the worker's real lever on a project. */}
       <section className="flex flex-wrap gap-3">
         <Link
           href={`/${locale}/dashboard/journal`}
           data-testid="worker-project-journal-cta"
-          className="inline-flex min-h-11 items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-3 text-sm font-semibold text-ink-900 transition-transform duration-fast ease-out hover:-translate-y-0.5"
+          className="inline-flex min-h-11 items-center gap-2 rounded-md bg-gradient-cta px-5 py-3 text-sm font-semibold text-text-on-brand transition-transform duration-fast ease-out hover:-translate-y-0.5"
         >
           <NotebookPen className="h-4 w-4" aria-hidden />
           {t("journalCta")}
@@ -109,6 +144,8 @@ export async function WorkerProjectPanel({
           {t("chatCta")}
         </Link>
       </section>
+
+      <ProjectTraceRegion trace={trace} locale={locale} />
 
       {/* Own photo evidence on this project — session RLS shows exactly the
           photos this worker attached to their own journal entries. */}

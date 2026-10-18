@@ -63,7 +63,7 @@ describe("work-abroad copy does not redefine the platform as an agency", () => {
       // The narrowed forms this replaced: EN "your trade", LT "amatą",
       // NL "je vak", DE "Ihr Gewerk". A profession word must be present.
       const professionWord =
-        /profession|profesij|beroep|beruf|профес/i.test(first);
+        /profession|profesij|beroep|beruf|профес|zaw[oó]d/i.test(first);
       expect(
         professionWord,
         `${locale} work-abroad step 1 must ask for a profession, got: "${first}"`,

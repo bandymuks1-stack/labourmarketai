@@ -118,15 +118,20 @@ describe("the portable domains stay portable", () => {
 });
 
 describe("the single transport blocker is real and is where the map says", () => {
-  it("the request-scoped Supabase client resolves identity from COOKIES only", () => {
-    // This is §2 of the map. If a bearer path is ever added, it will be an
-    // owner-approved auth-core slice — and this assertion is the thing that
-    // will fail and force the map to be updated with it.
+  it("the request-scoped Supabase client resolves identity from COOKIES, or from the ONE bearer caller scope", () => {
+    // This is §2 of the map. The bearer path was added as the owner-gated
+    // auth-core slice the map anticipated (UPDATE 2026-10-13): inside an
+    // external-client door, after `resolveApiIdentity` verified a token,
+    // `createClient()` returns THAT caller's client via
+    // `lib/api/bearer-caller-scope.ts`. Everywhere else it is the cookie
+    // client. What must never appear here is a SECOND bearer path — this file
+    // reading an Authorization header, or verifying a token itself.
     const src = readFileSync(join(LIB, "supabase", "server.ts"), "utf8");
     expect(src).toContain('from "next/headers"');
     expect(src).toContain("cookieStore.getAll()");
-    expect(src, "a bearer path appeared — update APP_READINESS_MAP §2/§5")
-      .not.toMatch(/authorization|bearer/i);
+    expect(src, "the only bearer source is the caller scope").toContain('from "@/lib/api/bearer-caller-scope"');
+    expect(src, "server.ts must never read an Authorization header — update APP_READINESS_MAP §2/§5")
+      .not.toMatch(/authorization|headers\(\)/i);
   });
 
   it("no API route has grown its own private auth scheme", () => {

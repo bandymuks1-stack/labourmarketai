@@ -1,24 +1,9 @@
 "use client";
 
-import {
-  CalendarDays,
-  Home,
-  IdCard,
-  MapPin,
-  MessageSquare,
-  NotebookPen,
-  Shield,
-  Store,
-  User,
-  Users,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/i18n/navigation";
-import {
-  getAdvancedNavItems,
-  type NavIconKey,
-} from "@/lib/config/navigation";
+import { getAdvancedNavItems } from "@/lib/config/navigation";
+import { NAV_ICONS } from "@/components/app/nav-icons";
 import type { FeatureKey } from "@/lib/config/feature-availability";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
 import { useAuth } from "@/lib/auth/context";
@@ -28,23 +13,9 @@ import { cn } from "@/lib/utils";
 // from the feature-availability catalogue. Adding / removing a tab is a
 // catalogue + meta change — never a component edit.
 //
-// Icons live here because lucide is a presentation concern; the config
-// only carries the icon ID. ONE icon per destination across the whole app
-// (audit PR8 icon rule): journal = NotebookPen, messages = MessageSquare,
-// map = MapPin — the same icons the MyZone action grid uses, so the nav and
-// the grid speak one visual language. FileText stays reserved for documents.
-const ICONS: Record<NavIconKey, LucideIcon> = {
-  home: Home,
-  store: Store,
-  map: MapPin,
-  idCard: IdCard,
-  journal: NotebookPen,
-  messages: MessageSquare,
-  calendar: CalendarDays,
-  network: Users,
-  user: User,
-  shield: Shield,
-};
+// The icon map moved to `components/app/nav-icons.ts` when the one top bar
+// also had to render these destinations — one icon source for both surfaces.
+const ICONS = NAV_ICONS;
 
 /** Mobile-only (<768px) bottom tab bar — the primary nav on phones, where
  *  the horizontal DashboardTabs would overflow. Tabs come from the
@@ -95,7 +66,7 @@ export function BottomNav({
                 className={cn(
                   "relative flex h-16 flex-col items-center justify-center gap-1 text-meta font-medium tracking-tight transition-colors",
                   active
-                    ? "text-brand-orange"
+                    ? "text-brand-blue"
                     : "text-text-muted hover:text-text-secondary",
                 )}
               >
@@ -106,7 +77,7 @@ export function BottomNav({
                   <span
                     aria-hidden
                     data-testid="bottom-nav-active-indicator"
-                    className="absolute inset-x-3 top-0 h-0.5 rounded-b-full bg-brand-orange"
+                    className="absolute inset-x-3 top-0 h-0.5 rounded-b-full bg-brand-blue"
                   />
                 )}
                 <span className="relative">
@@ -114,7 +85,7 @@ export function BottomNav({
                   <NavLinkPending className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2" />
                   {badge > 0 && (
                     <span
-                      className="absolute -right-2 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-meta font-bold leading-none text-white"
+                      className="absolute -right-2 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-blue px-1 text-meta font-bold leading-none text-text-on-brand"
                       data-testid={`bottom-nav-badge-${id}`}
                     >
                       {badge > 9 ? "9+" : badge}

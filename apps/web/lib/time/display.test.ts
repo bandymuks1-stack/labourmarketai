@@ -51,7 +51,7 @@ const DATE_ONLY = "2026-08-07";
 
 // Active locales (lib/i18n/config.ts `activeLocales`), so the proof covers what
 // users can actually select rather than an arbitrary pair.
-const LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 /**
  * The NUMBER a single-field rendering denotes. Locales legitimately differ on

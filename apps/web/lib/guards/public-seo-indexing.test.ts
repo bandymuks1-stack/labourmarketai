@@ -5,7 +5,7 @@ import {
   SEO_AUDIT_FILES,
   auditPublicSeoIndexing,
 } from "@/lib/seo/seo-indexing-audit";
-import { BRAND_SEO } from "@/lib/seo/metadata";
+import { BRAND_NAME, BRAND_SEO, PAGE_SEO } from "@/lib/seo/metadata";
 import { activeLocales } from "@/lib/i18n/config";
 import {
   SEO_PROFESSIONS,
@@ -36,6 +36,22 @@ function read(rel: string): string | null {
 }
 
 describe("public SEO indexing foundation guard", () => {
+  // buildPageMetadata appends " · LabourMarket.ai" exactly once. A curated
+  // title that already ends in the brand rendered "Open jobs — LabourMarket.ai
+  // · LabourMarket.ai" on /jobs in all five locales (SEO/GEO gap, 2026-09-20).
+  it("no PAGE_SEO title ends in the brand (the suffix is appended once)", () => {
+    const offenders: string[] = [];
+    // Any dash/dot separator followed by the brand at the very end of a title.
+    const suffix = /[—·|-]\s*LabourMarket\.ai\s*$/i;
+    expect(suffix.test(`Open jobs — ${BRAND_NAME}`)).toBe(true); // the guard has teeth
+    for (const [key, byLocale] of Object.entries(PAGE_SEO)) {
+      for (const [locale, copy] of Object.entries(byLocale)) {
+        if (suffix.test(copy.title)) offenders.push(`${key}.${locale}: ${copy.title}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it("all audited SEO files exist", () => {
     for (const rel of SEO_AUDIT_FILES) {
       expect(read(rel), `${rel} missing`).not.toBeNull();

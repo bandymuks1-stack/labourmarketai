@@ -4,6 +4,15 @@ import { getBillingConfig } from "@/lib/billing/config";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { BillingPortalButton } from "@/components/app/billing-portal-button";
+import { RefreshBillingStatusButton } from "@/components/app/refresh-billing-status-button";
+import { TestCheckoutButton } from "@/components/marketing/test-checkout-button";
+import { resolveBillingSubject } from "@/lib/billing/billing-subject";
+import { ORGANIZATION_PLAN_KEY } from "@/lib/billing/plans";
+import { subscriptionBlocksCheckout } from "@/lib/billing/checkout-operations-core";
+import {
+  awaitingProviderSync,
+  classifyCheckoutReturn,
+} from "@/lib/billing/checkout-return-core";
 import { Card } from "@/components/ui/Card";
 
 /**
@@ -36,25 +45,69 @@ export async function AccountBillingSection({
   const cfg = getBillingConfig();
   const ent = await getEffectiveEntitlements();
 
+  const returnKind = classifyCheckoutReturn(billingReturn);
+  // The success words follow the ADAPTER MODE, not the flag: `returned.success`
+  // says "test-mode … no real money moved", which was rendered for a LIVE
+  // success return too (measured 2026-09-22). Live gets the live sentence.
   const returnNotice =
-    billingReturn === "test_success"
-      ? t("returned.success")
-      : billingReturn === "test_cancelled"
+    returnKind === "success"
+      ? (cfg.testMode ? t("returned.success") : t("returned.successLive"))
+      : returnKind === "cancelled"
         ? t("returned.cancelled")
-        : billingReturn === "portal_return"
+        : returnKind === "portal"
           ? t("returned.portal")
           : null;
 
   const status = ent.subscriptionStatus ?? "none";
   const hasSubscription = ent.source === "subscription";
+  // D3: the section is live for BOTH adapter states; the TEST badge only in test.
+  const billingOn = cfg.state === "stripe_test" || cfg.state === "stripe_live";
+  // Payments production calm v1 (owner §6, measured 2026-09-22): after a
+  // paid return with NO subscription row yet (the webhook is still in
+  // flight) the section used to say "No subscription" and offer the Order
+  // button again. While the return says success and no row exists, the
+  // button is withheld and a "syncing with the payment provider" notice
+  // replaces it. UI withholding only — the flag activates nothing (P7); the
+  // checkout route is untouched and still refuses a duplicate on its own.
+  const syncing = awaitingProviderSync({
+    billingOn,
+    billingReturn,
+    subscriptionStatus: ent.subscriptionStatus,
+  });
 
-  // The portal opens ONLY for a stored TEST billing customer — never offered
+  // The portal opens ONLY for a stored billing customer — never offered
   // while payments are disabled, and never a dead button.
   let portalAvailable = false;
-  if (cfg.state === "stripe_test" && ent.profileId) {
+  if (billingOn && ent.profileId) {
     const lookup = await findBillingCustomer(ent.profileId);
     portalAvailable = lookup.status === "found";
   }
+  // Owner launch pricing 2026-09-05: the ONE paid plan (ORGANIZATION, €99 —
+  // the figure lives in plans.price_eur_monthly, never here) is ordered HERE,
+  // server-bound to the organization the person acts for with billing
+  // authority; never from a public page, never for a person (PERSON stays
+  // free). The route re-checks membership, plan and price before any session.
+  const subject = billingOn ? await resolveBillingSubject() : null;
+  // Billing safety v1: the order button is also withheld while the subject's
+  // row sits in ANY billing state (incomplete / unpaid included) — the route
+  // refuses those with `subscription_exists` regardless; this keeps the UI
+  // honest about it. The Customer Portal is the path to fix or cancel.
+  const canOrder =
+    Boolean(subject && subject.subject?.type === "organization" && subject.billingAuthority) &&
+    !hasSubscription &&
+    !subscriptionBlocksCheckout(status) &&
+    !syncing;
+
+  // "Refresh billing status": a calm optional control, shown ONLY while the page
+  // is waiting on the payment provider (redirect says paid but no row yet) or
+  // the row is still incomplete, and only for a person who may act on this
+  // workspace's billing. The click sends nothing; the server resolves everything
+  // and the page re-reads the row afterwards. The flag stays a redirect, never
+  // authority (P7).
+  const showRefresh =
+    billingOn &&
+    Boolean(subject?.billingAuthority) &&
+    (syncing || status === "incomplete");
 
   return (
     <Card compact>
@@ -67,7 +120,7 @@ export async function AccountBillingSection({
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("title")}
         </p>
-        {cfg.state === "stripe_test" ? (
+        {cfg.testMode ? (
           <span className="rounded-sm border border-state-amber/50 bg-state-amber/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-amber">
             {t("testBadge")}
           </span>
@@ -84,7 +137,7 @@ export async function AccountBillingSection({
         </p>
       ) : null}
 
-      {cfg.state !== "stripe_test" ? (
+      {!billingOn ? (
         <p className="mt-2 text-sm leading-relaxed text-text-secondary">
           {t("disabled")}
         </p>
@@ -103,8 +156,45 @@ export async function AccountBillingSection({
               ) : null}
             </>
           ) : (
-            <p className="text-sm text-text-secondary">{t("none")}</p>
+            <>
+              {syncing ? (
+                <p
+                  className="text-sm text-text-secondary"
+                  data-testid="account-billing-syncing"
+                >
+                  {t("returned.syncing")}
+                </p>
+              ) : (
+                <p className="text-sm text-text-secondary">{t("none")}</p>
+              )}
+              {canOrder ? (
+                <div className="flex flex-col gap-1" data-testid="account-billing-order">
+                  <p className="text-sm font-semibold text-text-primary">{t("subscribe.title")}</p>
+                  <TestCheckoutButton
+                    planKey={ORGANIZATION_PLAN_KEY}
+                    labels={{ start: t("subscribe.cta"), starting: t("manage.opening"), error: t("manage.error") }}
+                  />
+                  <p className="text-meta text-text-muted">{t("subscribe.note")}</p>
+                </div>
+              ) : null}
+            </>
           )}
+
+          {showRefresh ? (
+            <>
+              <RefreshBillingStatusButton
+                labels={{
+                  cta: t("refresh.cta"),
+                  working: t("refresh.working"),
+                  updated: t("refresh.updated"),
+                  alreadyCurrent: t("refresh.alreadyCurrent"),
+                  notFound: t("refresh.notFound"),
+                  tryLater: t("refresh.tryLater"),
+                }}
+              />
+              <p className="text-meta text-text-muted">{t("refresh.hint")}</p>
+            </>
+          ) : null}
 
           {portalAvailable ? (
             <>

@@ -55,7 +55,7 @@ const LT = JSON.parse(
   readFileSync(join(__dirname, "..", "..", "messages", "lt.json"), "utf8"),
 ) as {
   conversation: {
-    chat: { fallback: string; reminderBlocked: string };
+    chat: { fallback: string; notUnderstood: string; reminderBlocked: string };
     criteria: { intro: string; introEmpty: string; missingIntro: string };
   };
 };
@@ -217,7 +217,10 @@ test.describe("PR-I reality matrix — authenticated chat (desktop)", () => {
     const text = await reply.innerText();
 
     // NEVER the generic fallback — that would mean the intent was not routed.
+    // (2026-09-23: the not-understood answer is `notUnderstood`; both lines
+    // are checked so the assertion can still fail.)
     expect(text).not.toContain(LT.conversation.chat.fallback);
+    expect(text).not.toContain(LT.conversation.chat.notUnderstood);
     // A real readback of the worker's persisted criteria: either listed facts
     // (intro) or the honest "none set yet" (introEmpty) — both are the REAL
     // database state. (The local fixture worker row is created empty by the
@@ -345,6 +348,7 @@ test.describe("PR-I reality matrix — authenticated chat (desktop)", () => {
       // not promise a notification that no mechanism can send.
       const text = await page.getByTestId("msg-assistant").last().innerText();
       expect(text).not.toContain(LT.conversation.chat.fallback);
+      expect(text).not.toContain(LT.conversation.chat.notUnderstood);
       expect(text.toLowerCase()).not.toContain("pranešiu");
       test.info().annotations.push({
         type: "s4-outcome",
@@ -386,15 +390,13 @@ test.describe("PR-I reality matrix — authenticated chat (desktop)", () => {
       timeout: 60_000,
     });
 
-    // The world overview lives in the collapsed "advanced" disclosure
-    // (progressive disclosure by design) — expand it, then assert.
-    await page.getByTestId("market-map-advanced").locator("summary").click();
-    await expect(page.getByTestId("labour-market-world-map")).toBeVisible({
+    // ONE map: the world view is the single canonical map with its layer
+    // pills (the conceptual zone diagram was unmounted from this page).
+    await expect(page.getByTestId("market-map")).toHaveCount(1, {
       timeout: 60_000,
     });
-    await expect(page.getByTestId("world-map-canvas")).toBeVisible();
-    await expect(page.getByTestId("world-map-legend")).toBeVisible();
-    await page.getByTestId("labour-market-world-map").scrollIntoViewIfNeeded();
+    await expect(page.getByTestId("world-layers")).toBeVisible();
+    await page.getByTestId("market-map").scrollIntoViewIfNeeded();
     await page.screenshot({
       path: evidencePath("s7-market-map-world.png"),
       fullPage: false,

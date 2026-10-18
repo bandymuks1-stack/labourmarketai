@@ -58,15 +58,23 @@ const dateField = (page: Page) => page.locator('input[type="date"]').first();
 
 async function saveThroughConfirm(page: Page): Promise<void> {
   // preview -> explicit confirm: the first "Išsaugoti" shows "Patvirtinti
-  // įrašą?", the second commits. Never auto-confirm in product code; the test
-  // simply performs both human steps.
-  for (let i = 0; i < 3; i++) {
-    const save = page.getByRole("button", { name: /^Išsaugoti$/ }).last();
-    if ((await save.count()) === 0) break;
-    await save.click();
-    await page.waitForTimeout(2_000);
-    if ((await page.getByText(/Patvirtinti įrašą/i).count()) === 0) break;
-  }
+  // įrašą?", the second commits. Never auto-confirm in product code; the
+  // test simply performs both human steps.
+  //
+  // It WAITS FOR EACH STEP instead of sleeping a fixed 2 s. The old loop
+  // read "no confirm prompt after 2 s" as "already saved" and stopped, so on
+  // a loaded machine (the prompt arriving at 2.5 s) nothing was committed and
+  // the read-back later failed as if the entry had been lost (isolated run
+  // 2026-10-16: no row in journal_entries for that marker).
+  const save = () => page.getByRole("button", { name: /^Išsaugoti$/ }).last();
+  const confirmStep = page.getByText(/Patvirtinti įrašą/i);
+  const done = page.locator('[data-testid="worklog-done"]');
+  await save().click();
+  await expect(confirmStep.or(done).first()).toBeVisible({ timeout: 30_000 });
+  if (!(await done.isVisible())) await save().click();
+  await expect(done, "the work-log save never reached its saved state").toBeVisible({
+    timeout: 30_000,
+  });
 }
 
 test.describe("Calendar — a past journal day is visible and reachable", () => {
@@ -99,19 +107,25 @@ test.describe("Calendar — a past journal day is visible and reachable", () => 
 
     // ── the month the work HAPPENED in — today is outside this grid ─────────
     await page.goto(`/lt/dashboard/planning?view=month&date=${workDay}`);
-    await expect(page.locator('[data-testid="planning-month"]')).toBeVisible();
+    // Scoped to <main>. The page streams in through a hidden `<div id="S:n">`
+    // that Next.js swaps into place; for that moment a second, hidden copy of
+    // the month section exists outside <main>, and an unscoped locator fails
+    // strict mode at once (isolated run 2026-10-16). The person reads <main>;
+    // so does the test.
+    const main = page.getByRole("main");
+    await expect(main.locator('[data-testid="planning-month"]')).toBeVisible();
 
     // THE REGRESSION, DIRECTLY: the day carries a JOURNAL mark, not merely a
     // count. Before the fix the entry was not even read for this range.
     await expect(
-      page.locator(`[data-testid="planning-month-journal-${workDay}"]`),
+      main.locator(`[data-testid="planning-month-journal-${workDay}"]`),
     ).toBeVisible();
 
     // The legend is what makes the mark mean something to a reader.
-    await expect(page.locator('[data-testid="planning-month-legend"]')).toBeVisible();
+    await expect(main.locator('[data-testid="planning-month-legend"]')).toBeVisible();
 
     // ── open the day and read what was recorded ─────────────────────────────
-    await page.locator(`[data-testid="planning-month-cell-${workDay}"]`).click();
+    await main.locator(`[data-testid="planning-month-cell-${workDay}"]`).click();
     await page.waitForURL(new RegExp(`view=day.*date=${workDay}`), { timeout: 30_000 });
     const dayView = page.locator('[data-testid="planning-day-view"]');
     await expect(dayView).toBeVisible();
@@ -130,22 +144,29 @@ test.describe("Calendar — a past journal day is visible and reachable", () => 
     // The journal grouped by `created_at` while the calendar used `work_date`,
     // so its own day chip pointed at today and its "open in calendar" link
     // landed on an empty day. Both surfaces resolve the day the same way now.
+    //
+    // The day chips became a real calendar (owner direction 2026-09-13), so
+    // the same claim is now read off the calendar's own cell for that day:
+    // the day is selected, and it carries records.
     await page.goto(`/lt/dashboard/journal?date=${workDay}`);
     await expect(page.getByText(marker, { exact: false })).toBeVisible({
       timeout: 30_000,
     });
-    await expect(
-      page.locator(`[data-testid="journal-day-nav-${workDay}"]`),
-    ).toBeVisible();
+    const dayCell = page.locator(
+      `[data-testid="journal-calendar-day"][data-day="${workDay}"]`,
+    );
+    await expect(dayCell).toBeVisible();
+    await expect(dayCell).toHaveAttribute("data-state", "selected");
   });
 
   test("the forward-only agenda offers a way into past days", async ({ page }) => {
-    // The default view is forward-only by design, which left "which days have I
-    // already filled?" unanswerable from the landing view — the note about
-    // hidden past items was a dead end rather than a door.
+    // The agenda is forward-only by design, which left "which days have I
+    // already filled?" unanswerable from it — the note about hidden past items
+    // was a dead end rather than a door. (The month grid is the default view
+    // since 2026-09-28; the agenda is one tap away.)
     await loginAsWorker(page);
-    await page.goto("/lt/dashboard/planning");
-    const link = page.locator('[data-testid="planning-past-link"]');
+    await page.goto("/lt/dashboard/planning?view=agenda");
+    const link = page.getByRole("main").locator('[data-testid="planning-past-link"]');
     await expect(link).toBeVisible();
 
     // It is a real touch target, like every other control in this toolbar.
@@ -155,7 +176,9 @@ test.describe("Calendar — a past journal day is visible and reachable", () => 
 
     await link.click();
     await page.waitForURL(/view=month/, { timeout: 30_000 });
-    await expect(page.locator('[data-testid="planning-month"]')).toBeVisible();
+    await expect(
+      page.getByRole("main").locator('[data-testid="planning-month"]'),
+    ).toBeVisible();
   });
 
   test("every calendar toolbar control meets the 44px touch minimum", async ({
@@ -169,7 +192,11 @@ test.describe("Calendar — a past journal day is visible and reachable", () => 
     for (const width of [320, 360, 375, 390, 412]) {
       await page.setViewportSize({ width, height: 844 });
       await page.goto("/lt/dashboard/planning?view=month");
-      await expect(page.locator('[data-testid="planning-views"]')).toBeVisible();
+      // Scoped to <main> for the same streaming reason as above; the height
+      // probe below skips hidden (zero-height) copies on its own.
+      await expect(
+        page.getByRole("main").locator('[data-testid="planning-views"]'),
+      ).toBeVisible();
 
       const tooSmall = await page.evaluate(() => {
         const bad: string[] = [];

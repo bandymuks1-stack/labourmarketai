@@ -4,10 +4,14 @@ export type PlanRow = {
   slug: string;
   name_lt: string | null;
   name_en: string | null;
+  /** The ONE home a price has (owner launch pricing 2026-09-05); null = unpriced. */
+  price_eur_monthly: number | null;
 };
 
 /** Canonical tier order (matches supabase/reference-data.sql). */
-export const PLAN_SLUGS = ["free", "business", "agency", "enterprise"] as const;
+// Owner launch pricing 2026-09-05: two public tiers (€0 / €99) + the individual
+// plan card; `agency` and `enterprise` rows are retired (inactive), not tiers.
+export const PLAN_SLUGS = ["free", "business"] as const;
 export type PlanSlug = (typeof PLAN_SLUGS)[number];
 
 /**
@@ -41,10 +45,16 @@ export async function getPlans(): Promise<PlanRow[] | null> {
   try {
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("plans")
-      .select("slug, name_lt, name_en")
-      .eq("active", true);
+    // Columns returned by the function: slug, name_lt, name_en, price_eur_monthly
+    // (the SAME projection the direct read used).
+    // The anon-safe path (2026-09-05): `plans` carries no table privilege for
+    // anon/authenticated (2026-07-22 revoke pass), so the catalogue is read
+    // through the ONE allowlisted SECURITY DEFINER function — the same pattern
+    // as the public job board. A direct `.from("plans")` here returned
+    // "permission denied" and the public price stayed hidden.
+    const { data, error } = await (supabase as unknown as {
+      rpc: (fn: string) => PromiseLike<{ data: PlanRow[] | null; error: unknown }>;
+    }).rpc("public_plans_v1");
     if (error || !data) return null;
     return data as PlanRow[];
   } catch {

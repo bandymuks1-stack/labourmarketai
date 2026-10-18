@@ -3,6 +3,10 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import {
+  normalizeSelfDeclaredProfession,
+  recordableInputLanguage,
+} from "@/lib/worker/self-declared-profession";
 
 /**
  * Set the current worker's PRIMARY profession. PR #5 removed profession
@@ -11,6 +15,28 @@ import { createClient } from "@/lib/supabase/server";
  * primary first so the single-primary invariant holds, then upserts the chosen
  * row. RLS (`owns_worker`) ensures a user can only touch their own worker.
  */
+/**
+ * Set the PRIMARY profession from a catalogue SLUG the person confirmed in
+ * the text-first flow (2026-09-17 fast path to matchability). The slug is
+ * resolved against the active `professions` catalogue server-side; an
+ * unknown slug is a no-op that returns false, never an insert of a guess.
+ * Everything else is `setPrimaryProfession`.
+ */
+export async function setPrimaryProfessionBySlug(slug: string): Promise<boolean> {
+  if (typeof slug !== "string" || !/^[a-z0-9_]{2,64}$/.test(slug)) return false;
+  const supabase = await createClient();
+  const { data: row } = await supabase
+    .from("professions")
+    .select("id")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .maybeSingle();
+  const id = (row as { id?: string } | null)?.id ?? null;
+  if (!id) return false;
+  await setPrimaryProfession(id);
+  return true;
+}
+
 export async function setPrimaryProfession(professionId: string): Promise<void> {
   const supabase = await createClient();
   const {
@@ -109,6 +135,66 @@ export async function removeWorkerDirection(professionId: string): Promise<void>
     .from("worker_professions")
     .delete()
     .eq("id", row.id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+}
+
+/**
+ * ── THE PERSON'S OWN WORDS, on their profile ───────────────────────────────
+ *
+ * Onboarding tells people "Vėliau galėsite jas papildyti" and the profile has
+ * to keep that promise (Codex P1 on #1880): without a writer here the words
+ * could only ever be entered once, in the first minutes of an account, and a
+ * failed insert or a later change had no route back. The registry directions
+ * above cannot serve this — they take a catalogue id, which is exactly what a
+ * profession the registry does not carry has no way of producing.
+ *
+ * Same table, same `worker_professions_write` policy (`owns_worker`), no new
+ * grant and no new RPC. The words are stored verbatim; `normalized_label` is
+ * GENERATED in the database and never written here.
+ */
+export async function addOwnProfession(
+  formData: FormData,
+): Promise<{ ok: boolean; reason?: "invalid" | "duplicate" | "failed" }> {
+  const words = normalizeSelfDeclaredProfession(
+    formData.get("label") as string | null,
+  );
+  if (!words) return { ok: false, reason: "invalid" };
+  // The language of THIS session, submitted by the form — never detected from
+  // the words, never defaulted (SEP-7).
+  const language = recordableInputLanguage(formData.get("locale") as string | null);
+  const { supabase, workerId } = await currentWorkerId();
+  const { error } = await supabase
+    .from("worker_professions")
+    .insert({ worker_id: workerId, label: words, original_language: language });
+  if (error) {
+    // 23505 = they already hold these words; nothing is lost and nothing to do.
+    if (error.code === "23505") return { ok: false, reason: "duplicate" };
+    console.error("[addOwnProfession] insert failed", {
+      code: error.code,
+      message: error.message,
+    });
+    return { ok: false, reason: "failed" };
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+/**
+ * Remove ONE self-declared profession, by its own row id. Scoped to the
+ * caller's worker and to rows that actually carry words, so this can never
+ * reach a registry direction (those have their own removal path, which keeps
+ * the primary and the skills attached to it).
+ */
+export async function removeOwnProfession(rowId: string): Promise<void> {
+  if (!/^[0-9a-f-]{36}$/i.test(rowId)) return;
+  const { supabase, workerId } = await currentWorkerId();
+  const { error } = await supabase
+    .from("worker_professions")
+    .delete()
+    .eq("id", rowId)
+    .eq("worker_id", workerId)
+    .not("label", "is", null);
   if (error) throw new Error(error.message);
   revalidatePath("/", "layout");
 }

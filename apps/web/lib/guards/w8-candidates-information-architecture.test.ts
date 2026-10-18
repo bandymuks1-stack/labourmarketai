@@ -32,7 +32,7 @@ const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 const catalog = (locale: string) =>
   JSON.parse(read(`messages/${locale}.json`)) as Record<string, never>;
 
-const ACTIVE = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const ALL = [...ACTIVE, "da", "et", "lv", "no", "pl"] as const;
 
 /** Verbs that only concept B can honour. A hand-typed private note cannot be
@@ -126,7 +126,7 @@ describe("the entry points into the drafts surface name drafts, not supply", () 
       // account. Checked structurally: both mention the same idea the page's
       // own `labels.canLinkLater` names.
       const joined = `${room.nextLine} ${room.flow.step3}`.toLowerCase();
-      expect(joined).toMatch(/link|susiek|свяж|koppel|verknüpf/);
+      expect(joined).toMatch(/link|susiek|свяж|koppel|verknüpf|połącz|powiąz|powiąż/);
     });
   }
 });

@@ -5,6 +5,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnCustomer } from "@/lib/buyer/customers";
 import { BuyerSetupForm } from "@/components/app/buyer-setup-form";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Stage 2 PR 1 — Buyer / customer setup (real persistence).
@@ -35,9 +36,6 @@ export default async function BuyerStartPage({
   const customerRead = await getOwnCustomer();
   const migrationNeeded = customerRead.kind === "needs-migration";
   const customer = customerRead.kind === "ok" ? customerRead.row : null;
-
-  const uiLocale: "lt" | "en" = locale === "lt" ? "lt" : "en";
-  const label = (lt: string, en: string) => (uiLocale === "lt" ? lt : en);
 
   const formLabels = {
     title: t("formTitle"),
@@ -75,19 +73,17 @@ export default async function BuyerStartPage({
   return (
     <div className="flex flex-col gap-6" data-testid="buyer-start-page">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
-          {label("PIRKĖJO BŪSENA", "BUYER STATE")}
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {label("Pirkėjo / kliento paskyra", "Buyer / client account")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
       </header>
 
       <Link
         href={"/dashboard/start" as "/dashboard"}
         className="self-start text-sm text-text-secondary hover:underline"
       >
-        ← {label("Grįžti į veiklos pradžią", "Back to activity start")}
+        ← {t("backToStart")}
       </Link>
 
       {migrationNeeded ? (
@@ -97,7 +93,7 @@ export default async function BuyerStartPage({
         >
           <header className="flex items-center gap-2">
             <span className="rounded bg-state-warning/20 px-2 py-0.5 text-xs text-state-warning">
-              {label("blokuota", "blocked")}
+              {t("blockedBadge")}
             </span>
             <h2 className="font-display text-lg font-semibold text-text-primary">
               {t("migrationBlockerHeading")}
@@ -114,7 +110,7 @@ export default async function BuyerStartPage({
         >
           <header className="flex items-center gap-2">
             <span className="rounded bg-state-success/20 px-2 py-0.5 text-xs text-state-success">
-              {label("✓ Pradėta", "✓ Started")}
+              {t("started")}
             </span>
             <h2 className="font-display text-lg font-semibold text-text-primary">
               {t("existingHeading")}
@@ -157,7 +153,7 @@ export default async function BuyerStartPage({
             className="self-start text-sm text-brand-blue hover:underline"
             data-testid="buyer-start-goto-buyer-dashboard"
           >
-            {label("Atidaryti pirkėjo dashboardą →", "Open buyer dashboard →")}
+            {t("openBuyerDashboard")}
           </Link>
         </section>
       ) : null}

@@ -67,7 +67,12 @@ export type HiddenReason =
   | "signed-out"
   | "organization-workspace"
   | "not-person-identity"
-  | "no-worker-profile";
+  | "no-worker-profile"
+  /** The worker's space is introduced by ŠIANDIEN's header now (worker
+   *  mobile IA 2026-09-13 §4: this card is REPLACED); the conversation the
+   *  worker opens on demand does not show it a second time. Set by the
+   *  dashboard root, never derived here. */
+  | "replaced-by-today";
 
 /**
  * Which REAL action closes which readiness pillar.

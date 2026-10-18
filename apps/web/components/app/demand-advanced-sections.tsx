@@ -19,7 +19,7 @@
  * buttons with aria-expanded; chips use aria-pressed.
  */
 import { useState, type ReactNode } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { DarkListbox } from "@/components/ui/DarkListbox";
@@ -51,7 +51,7 @@ import type {
   DeductionRow,
   LanguageRow,
 } from "@/lib/demand/structured-demand-form";
-import { MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 
 /** Language display names in their own language — locale-independent by
  *  design (the standard picker convention), so no 11-locale key set. */
@@ -71,6 +71,38 @@ const LANGUAGE_NATIVE_NAMES: Record<string, string> = {
 
 const CURRENCY_OPTIONS = ["EUR", "PLN", "SEK", "NOK", "DKK"] as const;
 
+/**
+ * THE CLUSTERS THAT OPEN ALREADY EXPANDED — the demand-first launch path.
+ *
+ * An employer states a need as: how many, doing what, where, FROM WHEN, on
+ * WHAT SHIFT, for WHAT PAY, with WHICH mandatory certificates and languages.
+ * The first three live in the wizard's own step 2. The last four live here,
+ * and they were behind a closed accordion.
+ *
+ * Production on 2026-09-15, all 20 `customer_requests`:
+ *   compensation stated .....  0
+ *   requirements stated .....  0   (certificates / languages)
+ *   time cluster stated .....  1
+ * Meanwhile only 5/20 carry a headcount and 7/20 an occupation — the rows
+ * reaching canonical DEMAND are too thin for the matching engine to rank on.
+ *
+ * This is the same defect, with the same evidence shape, that already moved
+ * `opportunityType` out of a collapsed cluster (0 of 17 demands carried a
+ * type while it was buried). A control nobody opens is a field nobody fills.
+ *
+ * NOTHING ELSE CHANGES. Same fields, same state, same wire shape, same
+ * server-side sanitizer. An untouched input is still omitted entirely — open
+ * is not pre-filled, and an expanded empty cluster states nothing. The four
+ * clusters that are NOT on the launch path (engagement, accommodation,
+ * transport, process) stay collapsed progressive disclosure; accommodation
+ * and transport additionally already have their headline select in step 2.
+ */
+const LAUNCH_PATH_SECTIONS: Readonly<Record<string, boolean>> = {
+  time: true,
+  compensation: true,
+  requirements: true,
+};
+
 type Patch = (patch: Partial<AdvancedDemandFormState>) => void;
 
 export function DemandAdvancedSections({
@@ -81,7 +113,9 @@ export function DemandAdvancedSections({
   onChange: Patch;
 }) {
   const t = useTranslations("structuredDemand");
-  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [open, setOpen] = useState<Record<string, boolean>>({
+    ...LAUNCH_PATH_SECTIONS,
+  });
   const toggle = (id: string) => setOpen((o) => ({ ...o, [id]: !o[id] }));
 
   // ── Small shared controls ──────────────────────────────────────────────────
@@ -383,7 +417,7 @@ export function DemandAdvancedSections({
             label={t("contractCountryLabel")}
             value={state.contractCountry}
             onValue={(v) => onChange({ contractCountry: v })}
-            options={MARKET_COUNTRIES.map((c) => ({ value: c, label: c }))}
+            options={countryOptionsForLocale(useLocale())}
             testId="sdv2-contract-country"
           />
         </div>

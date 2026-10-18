@@ -16,7 +16,9 @@ import { ANSWER_QUESTIONS } from "@/lib/answer-engine/registry";
 const webRoot = resolve(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(resolve(webRoot, rel), "utf-8");
 
-const ACTIVE = ["de", "en", "lt", "nl", "ru"];
+// 2026-09-20: pl added — PL is an active UI locale and the answer-engine
+// content layer now carries a reviewed pl body for every published question.
+const ACTIVE = ["de", "en", "lt", "nl", "pl", "ru"];
 const registryById = new Map(ANSWER_QUESTIONS.map((q) => [q.canonicalQuestionId, q]));
 
 describe("publishing engine — static invariants", () => {
@@ -52,7 +54,7 @@ describe("publishing engine — static invariants", () => {
     expect(src).toMatch(/author:\s*\{\s*"@type":\s*"Organization"/);
   });
 
-  it("22. no locale-key leakage: chrome + category labels cover all 5 active locales", () => {
+  it("22. no locale-key leakage: chrome + category labels cover all 6 active locales", () => {
     for (const [k, map] of Object.entries(CHROME)) {
       expect(Object.keys(map).sort(), `CHROME.${k}`).toEqual(ACTIVE);
     }
@@ -133,7 +135,7 @@ describe("publishing engine — static invariants", () => {
     }
   });
 
-  it("sitemap lists every indexable page (no truncation) within the sitemaps.org limit; 5 active locales", () => {
+  it("sitemap lists every indexable page (no truncation) within the sitemaps.org limit; 6 active locales", () => {
     // The cap is a safety ceiling (sitemaps.org 50,000/file), not a content cap:
     // it must never truncate the real published set.
     expect(ANSWER_SITEMAP_MAX).toBeLessThanOrEqual(50000);

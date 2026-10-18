@@ -41,7 +41,8 @@ import { join } from "node:path";
 const APP_ROOT = join(__dirname, "..", "..");
 
 /** Active locales only — the 6 non-active catalogs are partial by design. */
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+// 2026-09-20: PL is an active UI locale; the Polish catalog reached full parity in the same PR, so pl is covered here like the other five.
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 /**
  * Namespaces converted so far. This list IS the scope of the guard — extend it
@@ -85,6 +86,10 @@ const LEGACY: Record<
   ru: { re: /потребност|заявк/i, term: "потребность/заявка → запрос" },
   nl: { re: /behoeft/i, term: "behoefte → aanvraag" },
   de: { re: /bedarf/i, allow: /bei Bedarf/, term: "Bedarf → Anfrage" },
+  // 2026-09-20 (PL active): the legacy noun is "zapotrzebowanie" (a need);
+  // the marketplace inquiry noun is "zapytanie". The ordinary verb
+  // "potrzebować" shares no stem with the noun, so ZERO occurrences.
+  pl: { re: /zapotrzebowa/i, term: "zapotrzebowanie → zapytanie" },
   en: {
     // `[-\s]` so the hyphenated compound ("company-need queue") is caught too.
     re: /\b(?:company|work|worker|workforce|staffing|project|employer|client)[-\s]+needs?\b|\b(?:new|submitted|open|closed|structured|public|anonymous)\s+needs?\b|\b(?:submit|create|post|start|describe|open|your|this|the|a)\s+(?:a\s+|your\s+|the\s+)?needs?\b|\bneeds?\s+(?:from|received|is prepared|submitted|stay private)\b/i,
@@ -152,6 +157,7 @@ describe("the inquiry noun is actually present (not just absent)", () => {
     ru: /запрос/i,
     nl: /aanvraag|aanvragen/i,
     de: /anfrage/i,
+    pl: /zapytan/i,
   };
 
   for (const locale of ACTIVE_LOCALES) {
@@ -188,6 +194,7 @@ describe("the /company-need SEO title uses the inquiry noun", () => {
     ru: /запрос/i,
     nl: /aanvraag/i,
     de: /anfrage/i,
+    pl: /zapytan/i,
   };
 
   const source = readFileSync(
@@ -230,6 +237,7 @@ describe("for-companies page metadata names the inquiry (V6 §4)", () => {
     ru: /запрос/i,
     nl: /aanvraag/i,
     de: /anfrage/i,
+    pl: /zapytan/i,
   };
 
   const source = readFileSync(

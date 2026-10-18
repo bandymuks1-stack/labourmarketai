@@ -80,7 +80,7 @@ describe("administration opens on demand, it is not served by default", () => {
     // to the relationship screen and must sit AFTER the early return.
     const early = src.indexOf("if (openArea)");
     for (const read of [
-      "listMyEngagements()",
+      "listMyEngagementsResult()",
       "listInvitationsForMe()",
       "listMySentInvitations()",
       "listMyTeamEnquiries()",
@@ -98,10 +98,12 @@ describe("forms open after an explicit action", () => {
     const src = read("components/app/invite-panel.tsx");
     // Closed by default…
     expect(src).toContain("const [open, setOpen] = useState(");
-    // …unless the caller already named what to invite (?invite=1&type=…&org=…),
-    // which is itself the explicit action and a real entry point.
+    // …unless the caller already named what to invite (?type=…&org=…), or
+    // arrived through the plain `?invite=1` door that an empty search or an
+    // empty relationships list offers (2026-09-19) — each is itself the
+    // explicit action and a real entry point.
     expect(src).toContain(
-      "Boolean(defaultType || defaultOrganizationId || defaultProjectId)",
+      "Boolean(defaultOpen || defaultType || defaultOrganizationId || defaultProjectId)",
     );
     expect(src).toContain('data-testid="invite-panel-open"');
   });
@@ -178,8 +180,11 @@ describe("the heaviest dashboard does not queue its reads", () => {
   });
 
   it("batches the independent reads instead", () => {
+    // Since the IA correction 2026-09-16 the hub is Dabar: ONE batch of
+    // eight reads. The domains it used to stack read on their own doors.
     const batches = src.match(/await Promise\.all\(/g) ?? [];
-    expect(batches.length).toBeGreaterThanOrEqual(3);
+    expect(batches.length).toBeGreaterThanOrEqual(1);
+    expect(src.split("\n").length).toBeLessThan(420);
   });
 });
 
@@ -203,29 +208,45 @@ describe("the heaviest dashboard does not queue its reads", () => {
 describe("an organization with no name still has a label", () => {
   const src = read(NETWORK_PAGE);
 
-  it("resolves the label once, before any section receives the list", () => {
-    const build = src.slice(
-      src.indexOf("const organizations ="),
-      src.indexOf("const organizations =") + 900,
-    );
-    expect(build).toContain('t("organizations.unnamed")');
+  /**
+   * ── THIS GUARD USED TO PIN THE DEFECT (owner walk, 2026-09-07) ────────────
+   *
+   * It required this page to contain `filter((x) => !x.name).length > 1` —
+   * the hand-rolled positional counter that produced "Įmonė be pavadinimo 1 /
+   * 2". The switcher produced the same shape from its own copy of the rule,
+   * and the owner read the result on production as two real company names
+   * sitting beside "Labour market ai Sp. z o.o".
+   *
+   * A counter is not a name, but appended to a noun phrase it reads as one.
+   * The rule now: ONE resolver, an explicit type-aware "has no name" phrase,
+   * and an id fragment — never a counter — when two of the same type collide.
+   */
+  it("resolves the label through the ONE shared resolver, not a local copy", () => {
+    expect(src).toContain("workspaceDisplayLabels");
+    expect(src).toContain('from "@/lib/company/organization-switch"');
   });
 
-  it("numbers them only when more than one is nameless", () => {
-    // A single unnamed company must read plainly, with no stray "1" — the
-    // same rule the workspace switcher uses.
-    expect(src).toContain("filter((x) => !x.name).length > 1");
+  it("never hand-rolls a positional counter for a nameless organization", () => {
+    expect(src).not.toContain("filter((x) => !x.name).length > 1");
+    // Any `${something} ${n}`-shaped label built from a nameless-org count.
+    expect(src).not.toMatch(/unnamed[^\n]*\}\s*\$\{[^}]*length/i);
   });
 
-  it("carries the fallback sentence in every active locale", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+  it("uses the same unnamed vocabulary the switcher uses, in every active locale", () => {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const messages = JSON.parse(read(`messages/${loc}.json`));
-      const value = messages.network?.organizations?.unnamed;
-      expect(
-        typeof value,
-        `${loc} is missing network.organizations.unnamed`,
-      ).toBe("string");
-      expect(value.trim().length).toBeGreaterThan(0);
+      const chat = messages.conversation?.chat;
+      for (const key of [
+        "workspaceUnnamed",
+        "workspaceUnnamedCompany",
+        "workspaceUnnamedAgency",
+        "workspaceUnnamedTeam",
+      ]) {
+        expect(typeof chat?.[key], `${loc} is missing conversation.chat.${key}`).toBe(
+          "string",
+        );
+        expect(chat[key].trim().length).toBeGreaterThan(0);
+      }
     }
   });
 
@@ -298,7 +319,7 @@ describe("the surfaces that moved are still reachable in words", () => {
   });
 
   it("carries all three routing strings in every active locale", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const messages = JSON.parse(read(`messages/${loc}.json`));
       const chat = messages.conversation?.chat ?? {};
       for (const key of ["adminRouteHint", "adminApprovalsChip", "adminRequestsChip"]) {

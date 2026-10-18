@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
+import { TODAY_STATIONS } from "../today/today-route";
 
 /**
  * Human navigation guard (slice human-nav-cleanup-v1, PR E).
@@ -83,6 +84,69 @@ describe("compact action-first global nav + sub-surface reachability", () => {
   it("account/settings stays reachable via the avatar account menu", () => {
     const menu = read("components/app/account-menu.tsx");
     expect(menu).toMatch(/\/dashboard\/account/);
+  });
+});
+
+describe("ONE home — the conversation; ŠIANDIEN is its opening context (owner decision 0017, 2026-09-22)", () => {
+  // RETIRED: the worker's 3-tab bar ŠIANDIEN · PASAULIS · PAKLAUSK (IA
+  // 2026-09-13 §2). Three bottom tabs read as three product roots and made
+  // the conversation a feature to find ("Paklausk"). Frozen contract §2.3
+  // called the set "a hypothesis, not irreversible architecture"; the owner
+  // retired it. What the tabs carried is preserved: ŠIANDIEN is composed
+  // INSIDE the conversation's opening, PASAULIS is the opportunities station
+  // + a chat intent + a search command, PAKLAUSK is the always-present
+  // composer. The catalogue bar survives for the admin console only.
+  const stations = (j: Record<string, unknown>) =>
+    (j.todayScreen as { home: { stations: Record<string, string> } }).home.stations;
+
+  it("no worker bar component, no `today` chrome mode, no `?ask=1` door", () => {
+    expect(existsSync(join(root, "components/app/today/worker-bottom-nav.tsx"))).toBe(false);
+    const chrome = read("components/app/dashboard-chrome.tsx");
+    expect(chrome).not.toMatch(/WorkerBottomNav|workerNav|=== "today"|useSearchParams/);
+    expect(chrome).toMatch(/dashboardChromeMode\(pathname\)/);
+    expect(read("app/[locale]/dashboard/layout.tsx")).not.toMatch(/workerNav|todayScreen\.nav/);
+    expect(read("components/app/today/today-screen.tsx")).not.toMatch(/ask=1|ASK_PARAM|today-ask/);
+    // The retired tab labels are gone from the catalogs — nothing can render them.
+    expect((lt.todayScreen as Record<string, unknown>).nav).toBeUndefined();
+    expect((en.todayScreen as Record<string, unknown>).nav).toBeUndefined();
+  });
+
+  it("the root page renders the conversation for every identity, with ŠIANDIEN in its opening slot", () => {
+    const page = read("app/[locale]/dashboard/page.tsx");
+    expect(page).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
+    expect(page).not.toMatch(/dashboardRootSurface|rootSurface === "today"/);
+    // The bottom-nav primitive is the catalogue bar again — no caller-composed
+    // tab set, no `placement`/`visibility` variants kept "just in case".
+    expect(read("components/app/bottom-nav.tsx")).not.toMatch(/WorkerNavIconKey|explicitItems|placement/);
+  });
+
+  it("ŠIANDIEN renders no page quick-nav strip (a second nav strip is card soup)", () => {
+    const dir = join(root, "components", "app", "today");
+    for (const f of readdirSync(dir)) {
+      expect(read(`components/app/today/${f}`), f).not.toMatch(/PageQuickNav|page-quick-nav/);
+    }
+    expect(read("app/[locale]/dashboard/page.tsx")).not.toMatch(/PageQuickNav/);
+  });
+
+  it("the stations are text links, one tap from ŠIANDIEN — opportunities (the former PASAULIS) first", () => {
+    expect(TODAY_STATIONS.map((s) => s.href)).toEqual([
+      "/dashboard/opportunities",
+      "/dashboard/journal",
+      "/dashboard/work-in-numbers",
+      "/dashboard/profile",
+      "/cv",
+      "/dashboard/gallery",
+    ]);
+    const screen = read("components/app/today/today-screen.tsx");
+    expect(screen).toMatch(/TODAY_STATIONS\.map/);
+    expect(screen).toMatch(/today-station-\$\{s\.id\}/);
+    // Every station has a human label in LT and EN (the former tab label
+    // "Pasaulis" / "World" moved here, so nothing was retyped by a machine).
+    for (const s of TODAY_STATIONS) {
+      expect(stations(lt)[s.id], `lt ${s.id}`).toBeTruthy();
+      expect(stations(en)[s.id], `en ${s.id}`).toBeTruthy();
+    }
+    expect(stations(lt).world).toBe("Pasaulis");
   });
 });
 

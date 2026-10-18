@@ -1,6 +1,8 @@
 import { z } from "zod";
 
+import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { isJournalMetaRequest } from "./worklog-extract";
 
 /**
  * Zod input schemas for the executable worker conversation actions (Phase B).
@@ -32,6 +34,18 @@ export const workerAddWorkHistorySchema = z
     path: ["endYear"],
   });
 
+/** Record a document (owner contract §12/§14): the closed `document_types`
+ *  slug + the closed country set are validated by the canonical upsert
+ *  (`upsert_worker_document`); this is the shape gate only. */
+export const workerAddDocumentSchema = z.object({
+  typeSlug: z.string().trim().min(1).max(80),
+  country: z.string().trim().length(2).nullable().optional(),
+  status: z.enum(["ready", "missing", "blocked"]).default("ready"),
+  validFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  note: z.string().trim().max(500).nullable().optional(),
+});
+
 export const workerAddLanguageSchema = z.object({
   lang: z.string().trim().min(2).max(40),
   level: z.string().trim().min(1).max(8),
@@ -61,8 +75,12 @@ export const workerSaveWorkCardFields = z.object({
   availableFrom: z.string().trim().max(10).nullable().optional(), // YYYY-MM-DD
   salaryMin: z.number().int().min(0).max(100000).nullable().optional(),
   salaryMax: z.number().int().min(0).max(100000).nullable().optional(),
-  locationCountry: z.string().trim().length(2).nullable().optional(),
-  preferredCountries: z.array(z.string().trim().length(2)).max(12).optional(),
+  // A country is a CODE or a NAME (global-access rule 2026-09-22): the text
+  // travels as typed and `lib/worker/work-card-core` resolves it through the
+  // canonical `resolveCountryCode`, refusing what does not resolve. The old
+  // `.length(2)` rejected "Vietnam" before the resolver could see it.
+  locationCountry: z.string().trim().min(1).max(80).nullable().optional(),
+  preferredCountries: z.array(z.string().trim().min(1).max(80)).max(12).optional(),
 });
 
 export const workerSaveWorkCardSchema = workerSaveWorkCardFields
@@ -83,11 +101,48 @@ export const workerSavePreferencesSchema = z.object({
   availabilityNote: z.string().trim().max(500).nullable().optional(),
 });
 
+/** Accept an invitation addressed to the caller (owner contract 4D). The ref
+ *  is the shared `InvitationRef` (lib/invitations/model): a canonical
+ *  `invitations` row by id, or a company / agency ROSTER invitation by the
+ *  organisation id the roster accept RPC takes. `accepted` is the only
+ *  canonical in-app decision — decline exists by mailed token only
+ *  (`decline_invitation_v1`) and not at all for the roster — so the schema
+ *  says so rather than inventing one. */
+export const workerRespondInvitationSchema = z.discriminatedUnion("source", [
+  z.object({
+    source: z.literal("invitation"),
+    invitationId: uuid,
+    decision: z.literal("accepted"),
+    // Owner decision 1: present ONLY when the chat card showed the review
+    // sentence. Optional, so every existing caller and stored token keeps its
+    // meaning; the token binds the parsed input, so it cannot be added later.
+    reviewNotice: z.literal(REVIEW_NOTICE_VERSION).optional(),
+  }),
+  z.object({ source: z.literal("company_roster"), orgId: uuid, decision: z.literal("accepted") }),
+  z.object({ source: z.literal("agency_roster"), orgId: uuid, decision: z.literal("accepted") }),
+]);
+
 export const workerRespondBookingSchema = z.object({
   bookingId: uuid,
   decision: z.enum(["accepted", "declined"]),
   reasonKind: z.string().trim().max(64).nullable().optional(),
   reasonNote: z.string().trim().max(500).nullable().optional(),
+  /**
+   * RED #5 — the person has been shown a date clash and still wants this.
+   *
+   * OPTIONAL and absent by default, so every existing caller and every stored
+   * confirmation token keeps its exact meaning. It is the ONLY reason this
+   * schema changed: the dispatcher validates against a closed object, so an
+   * acknowledgement could not otherwise reach the executor.
+   *
+   * It carries NO authority of its own. `respond_booking_request_v4` still
+   * admits only the addressed worker, still refuses an unacknowledged overlap
+   * with the same SQLSTATE, and still leaves both bookings' dates alone. And
+   * because the confirmation token binds `canonicalInputHash(parsed.data)`,
+   * a token minted WITHOUT this flag cannot execute WITH it — acknowledging
+   * requires its own confirmation, which is the intended cost.
+   */
+  acknowledgeClash: z.boolean().optional(),
 });
 
 export const workerExpressInterestSchema = z.object({
@@ -102,23 +157,68 @@ export const workerExpressInterestSchema = z.object({
  * `create_journal_entry_full` RPC). `workDate`/`siteName` become real metrics.
  * Times/hours are NOT sent as separate claims — they already live in the notes;
  * the client shows them only as a parse preview to confirm.
+ *
+ * A sentence that only ASKS for the journal ("Užpildyk darbo žurnalą") is a
+ * request, not evidence — refused here, at the floor every write crosses, so
+ * no client path can turn the request into the record (prod 2026-09-06).
  */
 export const workerLogWorkSchema = z.object({
   engagementContextId: uuid,
-  notes: z.string().trim().min(3).max(4000),
+  notes: z
+    .string()
+    .trim()
+    .min(3)
+    .max(4000)
+    .refine((v) => !isJournalMetaRequest(v), { message: "journal_meta_request" }),
   workDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
   siteName: z.string().trim().max(200).nullable().optional(),
+  /** Which project the hours belong to: a project uuid, or "none" for work
+   *  that is not project work. Absent → the database's own rule (one active
+   *  project auto-attributes; two or more are refused, see journal-write-core). */
+  projectId: z.union([uuid, z.literal("none")]).optional(),
+  /** Provenance of the TEXT when it was dictated by voice and then reviewed and
+   *  edited by the person. It labels the entry's input origin only - it grants
+   *  no authority and changes no rule (the same schema, same confirmation). */
+  voice: z
+    .object({
+      language: z.string().trim().max(8),
+      disclosureVersion: z.string().trim().max(40),
+    })
+    .optional(),
 });
+
+/** Why the log-work write would refuse this evidence text, or `null`. */
+export type LogWorkNotesRefusal = "too-short" | "too-long" | "meta-request";
+
+/**
+ * THE ONE NOTES RULE, readable before the round-trip (owner P0 2026-09-23).
+ *
+ * The work-log form used to run its OWN, stricter rule — a keyword
+ * recogniser — and refused "Buvau pas klientą" with a red line while this
+ * schema accepted it. The verdict below is not a copy of the rule: it runs
+ * `workerLogWorkSchema.shape.notes` itself and only names which part refused,
+ * so the form and the write cannot disagree about a sentence again.
+ */
+export function logWorkNotesRefusal(notes: string): LogWorkNotesRefusal | null {
+  const parsed = workerLogWorkSchema.shape.notes.safeParse(notes);
+  if (parsed.success) return null;
+  const issue = parsed.error.issues[0];
+  if (issue?.code === "too_small") return "too-short";
+  if (issue?.code === "too_big") return "too-long";
+  return "meta-request";
+}
 
 /** Map of action id → schema for the executable worker actions. */
 export const WORKER_ACTION_SCHEMAS = {
   "worker.add-work-history": workerAddWorkHistorySchema,
   "worker.add-language": workerAddLanguageSchema,
+  "worker.add-document": workerAddDocumentSchema,
   "worker.add-education": workerAddEducationSchema,
   "worker.add-achievement": workerAddAchievementSchema,
   "worker.save-work-card": workerSaveWorkCardSchema,
   "worker.save-preferences": workerSavePreferencesSchema,
   "worker.respond-booking": workerRespondBookingSchema,
+  "worker.respond-invitation": workerRespondInvitationSchema,
   "worker.express-interest": workerExpressInterestSchema,
   "worker.log-work": workerLogWorkSchema,
 } as const;

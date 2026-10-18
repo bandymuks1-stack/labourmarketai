@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { EmployerContextReason } from "@/lib/company/employer-company-context";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { isDemandKind } from "@/lib/demand/market-direction";
 import { parseStructuredNeed } from "@/lib/market/fit";
 import {
   INTEREST_STATUSES,
@@ -102,9 +103,15 @@ export async function getOrgDemandRollup(): Promise<OrgDemandRollup> {
   const orgId = employer.organizationId;
   const supabase = await createClient();
 
+  // DIRECTION (SEP-4). This is a rollup of what the organization NEEDS. An
+  // agency's own `agency_offer` rows are the opposite side of the market and
+  // are read from the same table with the same columns, so counting them here
+  // told an agency it had open needs it had never recorded. `kind` is selected
+  // and classified rather than filtered in the query, so a row that does not
+  // classify as demand is dropped rather than guessed at.
   const demandRes = await asAny(supabase)
     .from("customer_requests")
-    .select("id, status, payload")
+    .select("id, status, payload, kind")
     .eq("organization_id", orgId)
     .limit(DEMAND_READ_LIMIT);
   if (demandRes.error) {
@@ -112,11 +119,12 @@ export async function getOrgDemandRollup(): Promise<OrgDemandRollup> {
       ? { kind: "needs-migration" }
       : { kind: "unavailable" };
   }
-  const rows = (demandRes.data ?? []) as {
+  const rows = ((demandRes.data ?? []) as {
     id: string;
     status: string;
     payload: unknown;
-  }[];
+    kind: string | null;
+  }[]).filter((r) => isDemandKind(r.kind));
 
   const byStatus = Object.fromEntries(
     ROLLUP_DEMAND_STATUSES.map((s) => [s, 0]),

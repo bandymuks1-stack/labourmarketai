@@ -17,7 +17,7 @@ import "./globals.css";
  */
 export default function RootNotFound() {
   return (
-    <html lang="en" data-theme="light">
+    <html lang="en" data-theme="dark">
       <body className="bg-ink-900 font-sans text-text-primary antialiased">
         <main
           className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center"
@@ -28,11 +28,11 @@ export default function RootNotFound() {
             This address does not exist
           </h1>
           <p className="max-w-md text-sm leading-relaxed text-text-secondary">
-            Šio adreso nėra. Nothing was found at this path — it may have moved or never existed.
+            <span lang="lt">Šio adreso nėra.</span> Nothing was found at this path — it may have moved or never existed.
           </p>
           <Link
             href="/"
-            className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+            className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90"
             data-testid="not-found-root-home-cta"
           >
             Go to labourmarket.ai

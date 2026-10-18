@@ -28,7 +28,7 @@ export const UNTRANSLATED_MARKER = "[EN]";
  *  so any future `[EN]` marker in ru.json fails the gate immediately.
  *  NL added 2026-07-11 together with the NL/DE activation: both went to
  *  ZERO baselines — an active locale may never carry an `[EN]` marker). */
-export const TRACKED_LOCALES = ["da", "de", "nl", "ru"] as const;
+export const TRACKED_LOCALES = ["da", "de", "nl", "pl", "ru"] as const;
 
 /** Locales that must stay fully translated (0 markers) — regression guard. */
 export const PRIMARY_LOCALES = ["en", "lt"] as const;
@@ -151,13 +151,27 @@ export const I18N_DEBT_BASELINE: Readonly<Record<string, number>> = {
   // auth.social continueWithLinkedIn/continueWithFacebook labels land in all
   // 11 catalogs; lt/en/ru/nl/de translated, da/lv/et/no/sv/pl [EN] until
   // human translation — only da is ratchet-tracked).
-  da: 1307,
+  // MEASURED 1309 at provenance-no-false-precision (2026-09-23, +6 on a live
+  // 1303: evidenceImport.records noMonthlyFigure/sourceStates/sourceDiffers
+  // and evidenceImport.reconstruction timePeriodBoth + the
+  // time_conflicts_source issue/why land in all 11 catalogs; lt/en/ru/nl/de/pl
+  // translated, da/lv/et/no/sv [EN] until human translation).
+  // MEASURED 1311 at agency-client-invite-delivery review round 2 (2026-09-24,
+  // +2 on a live 1309: agencyBridge.deliveryAccepted — the accepted-invitation
+  // row state — and roleDashboards.company.setup.agencyConnectionPending —
+  // the setup-entry notice after an agency-client acceptance without a
+  // company role — land in all 11 catalogs; lt/en/ru/nl/de/pl translated,
+  // da/lv/et/no/sv [EN] until human translation).
+  da: 1311,
   // DE + NL fully translated 2026-07-11 (non-landing launch repair Scope D,
   // AI-seeded full catalogs pending §7.4 human review) and ACTIVATED — the
   // ratchet drops to zero and stays there: any future `[EN]` marker in an
   // active locale fails the gate immediately.
   de: 0,
   nl: 0,
+  // PL activated 2026-09-20 (owner approval, acquisition loop P0): an active
+  // locale may never carry an [EN] marker, so the baseline is ZERO from day one.
+  pl: 0,
   // RU shipped fully translated (2026-06-12, AI-seeded pending §7.4 human
   // review) — the ratchet starts and stays at zero.
   ru: 0,

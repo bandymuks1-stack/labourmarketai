@@ -58,6 +58,238 @@
 
 # Applied Migration Ledger
 
+## Applied 2026-09-22 — countries: every ISO-3166-1 alpha-2 code (global-access rule v1)
+
+### ✅ APPLIED TO PROD — `20260922120000_countries_all_iso_v1` (owner decision "APPLY COUNTRIES SEED", 2026-09-22)
+
+Owner rule (2026-09-22): LabourMarket.ai is GLOBAL by default — MARKET PRIORITY ≠ ACCESS PERMISSION.
+`organizations.country` and `engagement_contexts.country_code` carry FKs to `public.countries(code)`,
+which held 10 rows (DE DK EE FI LT LV NL NO PL SE), so a company in Ireland, Vietnam or the United
+States could not exist in the system. PR #1825 (`3b41bc423`, deployed 06:58Z) shipped the file with its
+paired `supabase/rollbacks/20260922120000_countries_all_iso_v1.down.sql` (deletes only unreferenced
+`is_target_market = false` rows); migration-safety GREEN (additive `insert … on conflict do nothing`).
+
+Applied via Supabase MCP `apply_migration` (name `countries_all_iso_v1`, the statement from the file on
+main, sha256 of the file `5daa073f656a1fd8…`) at 07:05:48Z — never `db push`.
+`schema_migrations` row: `20260922070548` / `countries_all_iso_v1`.
+
+Pre-apply read: 10 rows, 10 target markets, 18 organizations, 0 dangling FKs.
+Read-back (immediately after): **249 rows**, `is_target_market = true` still exactly the 10
+(`DE,DK,EE,FI,LT,LV,NL,NO,PL,SE` — untouched), representative codes present
+(`LT SE DE IE VN US SA GE PH` with CLDR `name_en`/`name_lt`), 0 dangling `organizations.country`,
+0 dangling `engagement_contexts.country_code`, 18 organizations unchanged, 0 empty names.
+`is_target_market` stays a priority/data attribute; nothing reads it as an access gate.
+
+Still explicit and unwidened after this apply: `submit_company_need_public_v1` (anonymous intake,
+SECURITY DEFINER) keeps its 10-code list — its own comment says "PR #675 10-market target list", i.e. a
+market gate, not an abuse control; the one-condition replacement (`exists (select 1 from
+public.countries c where c.code = v_country)`) is an owner-applied RED change (see the 2026-09-22
+execution receipt). `market_rate_averages` and `country_document_requirements` CHECKs are data-domain
+coverage, not access.
+
+
+## Applied 2026-09-14 — owner decision round (items 2a, 4b, 4c, 4d)
+
+> Four migrations applied via Supabase MCP `apply_migration` after explicit
+> per-item owner approval. Each was verified read-only on production
+> immediately after apply; the verification output is recorded below. Ledger
+> versions are APPLY-TIME stamps and never match the repo filename — match on
+> `name`.
+>
+> **The three pre-existing files still carry their `DRAFT — needs-human-gate —
+> DO NOT APPLY` headers, and those headers are now HISTORICAL.** This entry is
+> the current truth for all three. The headers are deliberately not edited, for
+> the same reason recorded in the never-apply section below: touching a
+> migration file makes `migration-safety` re-scan it, and their contents are
+> inherently RED (SECURITY DEFINER, grants, policy changes), so every future
+> edit would fail CI for no benefit. Read apply status from this ledger, never
+> from a migration header. (`20260914200000_defects_assignee_read_v1` is new in
+> this round and its header records the owner approval directly.)
+
+### ✅ APPLIED TO PROD — `20260914200000_defects_assignee_read_v1` (owner item 2a, WRK-8)
+
+| | |
+|---|---|
+| Ledger | version `20260914195053`, name `defects_assignee_read_v1` |
+| Rollback | `supabase/rollbacks/20260914200000_defects_assignee_read_v1.down.sql` |
+| Change | ONE disjunct added to `defects_select`: `or assignee_profile_id = auth.uid()`. No other policy, grant, function or column touched. |
+| Why | `assignee_profile_id` records who must fix a defect and appeared in no policy, so the one person the row exists to instruct could not read it (SEP-8). |
+| Preconditions | `defects` 0 rows, `defect_corrections` 0 rows, 9 projects, single SELECT policy — all read immediately before apply. |
+| Post-apply proof | Three defects seeded on ONE project differing only in assignee, read under four real users' auth inside a transaction that was ROLLED BACK. ASSIGNEE 1 row (their own); the unassigned defect and the defect assigned to another worker on the SAME project both invisible (`f`, `f`) — proving a per-ROW and not per-project disclosure. Second worker 1 row (only theirs). Worker with no assignment 0 rows, no error (fails closed). MANAGER 3 rows, unchanged. Assignee sees 0 `defect_corrections`, so owner item 2b (DEFER) holds at the database. |
+| Residue | Re-counted after rollback: `defects` 0, `defect_corrections` 0. Grants unchanged (`authenticated` SELECT only). |
+
+### ✅ APPLIED TO PROD — `20260714180000_journal_profession_templates_v1` (owner item 4b)
+
+| | |
+|---|---|
+| Ledger | version `20260914202151`, name `journal_profession_templates_v1` |
+| Rollback | `supabase/rollbacks/20260714180000_journal_profession_templates_v1.down.sql` |
+| Pre-apply tightening | The owner required the privilege model to EXPRESS admin-only write authority rather than lean on RLS to neutralise a broader grant. `grant insert, update, delete … to authenticated` was REMOVED before apply. It could not be narrowed to admins instead: `is_admin()` resolves a flag on `profiles`/`profile_roles`, not a Postgres role, so an admin still connects as `authenticated`. Costs nothing — `lib/journal/journal-templates.ts` performs exactly one `.select()` and nothing in `apps/web` writes the table. |
+| Post-apply proof | 3 templates seeded, **`active` = 0** (activation stays a deliberate owner act). RLS on. `authenticated`: SELECT `true`, INSERT/UPDATE/DELETE **`false`**. `anon`: SELECT `false`. |
+
+### ✅ APPLIED TO PROD — `20260714170000_worker_opportunity_seen_v1` (owner item 4c)
+
+| | |
+|---|---|
+| Ledger | version `20260914202221`, name `worker_opportunity_seen_v1` |
+| Rollback | `supabase/rollbacks/20260714170000_worker_opportunity_seen_v1.down.sql` |
+| Post-apply proof | 0 rows. Single policy `((profile_id = auth.uid()) OR is_admin())` — worker-owned visibility, and the demand owner never learns who looked. `authenticated`: SELECT `true`, INSERT/UPDATE/DELETE **`false`** (writes RPC-only). `anon`: SELECT `false`, EXECUTE on `mark_worker_opportunities_seen_v1` `false`; `authenticated` EXECUTE `true`. |
+
+### ✅ APPLIED TO PROD — `20260713160000_agency_clients_v1` (owner item 4d)
+
+| | |
+|---|---|
+| Ledger | version `20260914202322`, name `agency_clients_v1` |
+| Rollback | `supabase/rollbacks/20260713160000_agency_clients_v1.down.sql` |
+| Scope note | Applied under the confirmed canonical **Model B** interpretation (owner item 1). `agency_clients_select` uses `owns_company(company_id)` — company/org authority, NOT the legacy `owns_agency`. This does **not** revive Model A and authorises no second agency architecture. |
+| Live-table change | ONE additive nullable column on the canonical demand: `customer_requests.agency_client_id uuid references agency_clients(id) on delete set null`, plus its index. No default, no backfill, no NOT NULL. |
+| Post-apply proof | `agency_clients` exists, 0 rows. `customer_requests` **still 20 rows** (unchanged), 0 linked. Policy `(owns_company(company_id) OR is_admin())`. `authenticated`: SELECT `true`, INSERT `false` (writes RPC-only). `anon`: SELECT `false`, and EXECUTE `false` on all three RPCs while `authenticated` holds `true` on all three. |
+| Surface readback | Run under a REAL staffing-agency owner's auth (`6fd1bd46-…`): `agency_clients` readable (0 rows) and the new demand-link column readable on their own rows. Before this apply that read returned 42P01, which is what `/dashboard/company`'s `AgencyClientsSection` had been degrading against. |
+
+## Applied 2026-09-15 — PER-11 `external_profiles_v1` (owner approval with conditions)
+
+### ✅ APPLIED TO PROD — `20260914210000_external_profiles_v1` (PER-11 split)
+
+| | |
+|---|---|
+| Ledger | version `20260915042406`, name `external_profiles_v1` |
+| Rollback | `supabase/rollbacks/20260914210000_external_profiles_v1.down.sql` |
+| Approval | Owner, 2026-09-15, after the full PER-11 approval packet. Approved as **the canonical minimal PER-11 implementation**, with three pre-apply conditions, all met in the same slice. |
+| Scope | ONE table (`worker_external_profiles`), 1 index, 1 SELECT policy, 2 SECURITY DEFINER RPCs, 7 grant/revoke. 14 executable statements. |
+
+**Pre-apply conditions, met before the apply:**
+1. `worker_external_profiles` added to the subject-access export allowlist
+   (`lib/privacy/export-data.ts`) — an unreadable relation reports as
+   `unavailable`, never as an empty list; disconnected rows are included
+   deliberately, because disconnect is soft and the row is still the subject's
+   personal data.
+2. Added to the deletion-plan accounting (`lib/privacy/deletion-plan.ts`) as the
+   `externalProfiles` class, planned action `delete`, basis E7. **The existing
+   `worker_id -> workers(id) on delete cascade` remains the actual deletion
+   mechanism, unchanged** — the new row only makes the preview tell the truth
+   about what that cascade removes.
+3. `lib/guards/external-profiles-consent.test.ts` extended (§g, §h) so its
+   privacy invariants are enforced against the file that SHIPS, not only against
+   the rejected parent. No invariant was weakened to make the split pass.
+
+**Post-apply verification, read-only on production 2026-09-15:**
+
+| Check | Result |
+|---|---|
+| Table + both functions exist | ✅ `worker_external_profiles`; `save_worker_external_profile_v1`, `disconnect_external_profile_v1` — both `SECURITY DEFINER`, `search_path=public` |
+| RLS / ACL | RLS on; exactly **1** policy, `(owns_worker(worker_id) OR is_admin())`; `authenticated` SELECT ✅, INSERT/UPDATE/DELETE ❌; `anon` SELECT ❌; both RPCs EXECUTE `authenticated` ✅ / `anon` ❌ |
+| Rows created by the migration | **0** |
+| Existing workers affected | **0** of 57 — unaffected until a worker explicitly adds a link |
+| No employer read path | Proven in a ROLLED-BACK transaction: subject worker **1**, other non-admin worker **0**, employer (company owner, non-admin) **0**, and **employer still 0 after flipping `visibility='employers'`** — the stored preference discloses nothing because no policy honours it. Admin reads 1, the documented disjunct. |
+| Privacy surfaces recognise the relation | Both the export read shape and the deletion-plan `headCount` shape execute cleanly under a real subject's auth (no 42P01) |
+| `talent_source_records` | **absent** ✅ |
+| `identity_resolution_events` | **absent** ✅ |
+| Rejected parent's other RPCs | **none appeared** — only the 2 approved functions exist; `set_external_profile_visibility_v1`, `review_external_profile_snapshot_v1`, `record_talent_source_v1`, `record_identity_resolution_event_v1` are all absent |
+| Residue | `worker_external_profiles` back to **0** rows after the proof rolled back |
+
+> **A NOTE ON THE FIRST PROOF RUN, kept because it nearly misled.** An initial
+> boundary test reported "other worker sees 1", which reads as a policy leak. It
+> was not: the worker that run picked as "other" holds the `admin` role in
+> `profile_roles`, so `is_admin()` legitimately admitted it. The test was re-run
+> selecting a genuine non-admin, and the admin case was then asserted separately
+> so the result cannot be misread either way. `owns_worker` was inspected and is
+> strict: `x.id = w and x.profile_id = auth.uid()`.
+
+### ⚠️ `20260713210000_multi_source_talent_v1` — SUPERSEDED-IN-PART, NEVER APPLY AS A WHOLE
+
+**Status: REJECTED AS WRITTEN (owner, 2026-09-14 item 4e). NEVER APPLY THIS FILE.**
+
+The one third of it that had a live consumer — `worker_external_profiles` plus
+`save_worker_external_profile_v1` and `disconnect_external_profile_v1` — shipped
+on 2026-09-15 as `external_profiles_v1` (ledger `20260915042406`), recorded
+above. Applying the parent now would attempt to re-create that table and would
+additionally bring the two tables that were deliberately left out.
+
+**What is superseded:** `worker_external_profiles` and the two RPCs above. Live
+in production via the split.
+
+**What is NOT superseded, and NOT implemented:** `talent_source_records` (P5
+provenance) and `identity_resolution_events` (P7 identity audit), together with
+`record_talent_source_v1`, `record_identity_resolution_event_v1`,
+`set_external_profile_visibility_v1`, `review_external_profile_snapshot_v1` and
+the P7 immutability trigger. These remain **DEFERRED ARCHITECTURE**: designed,
+recorded in this file's text, and **absent from production**. Their consumer
+modules (`lib/talent/*`, `lib/identity/identity-resolution*`) were deleted as
+dead code on 2026-08-17 with zero importers.
+
+**Applying the split creates NO obligation to implement P5 or P7.** The split is
+self-contained: its own table, policy, RPCs and rollback, with no FK or call
+into either deferred table. Reviving P5/P7 would be a fresh owner decision, not
+a consequence of this apply. Nothing here declares those capabilities
+implemented.
+
+The parent file stays in the tree for history and for the P5/P7 design record.
+
+## 🚫 NEVER APPLY — already live under a different ledger name (recorded 2026-09-14, owner decision 4a)
+
+> Three repository files whose objects are **already in production** under
+> different ledger names. `parity-model.ts` answers "every APPLIED row has a
+> repo file" and answers it well; it cannot answer the reverse — "this FILE
+> must never be applied" — and that direction was unguarded. A session
+> scanning the tree saw three ordinary pending migrations, two of them
+> carrying `@human-gate-approved`, which reads as pre-authorised.
+>
+> **The marker lives here, in this ledger, and not in the SQL headers.** That
+> is deliberate: editing those files makes `migration-safety` re-scan them, and
+> their already-applied contents are inherently RED, so every future touch
+> would fail CI. The only bypass the scanner offers is `@human-gate-approved`,
+> which asserts "approved to apply" — the exact opposite of the truth here.
+> `docs/APPLIED_LEDGER.md` is already where never-apply verdicts live
+> (`company_locations_v1`, `company_memberships_v1`), so the canonical register
+> is extended rather than a new one invented.
+>
+> Pinned by `apps/web/lib/guards/never-apply-already-applied-v1.test.ts`, which
+> also cross-checks every ledger name claimed below against
+> `REVIEWED_APPLY_SHAPES` in `apps/web/lib/migrations/parity-model.ts`, so this
+> record and the canonical parity accounting cannot drift apart.
+
+- **`20260612091000_journal_entry_photos.sql` — ALREADY APPLIED, MUST NOT BE APPLIED.**
+  Applied as **three** ledger rows, not one: `journal_entry_photos_table`
+  (version `20260612072652`), `journal_entry_photos_rpc` (`20260612072736`),
+  `journal_entry_photos_storage` (`20260612075300`). Accounted for in
+  `REVIEWED_APPLY_SHAPES` as `kind: "split"`, parts 1/3–3/3. Verified read-only
+  on production `gorgitwvdzxbnaxhrsrw` 2026-09-14:
+  `to_regclass('public.journal_entry_photos')` → `journal_entry_photos`;
+  `register_journal_entry_photo` present; private bucket `journal-entry-photos`
+  present; **the table holds 11 rows of real worker photo evidence.** Re-running
+  it would re-execute DDL against objects carrying live production data. The
+  file stays in the tree for history and clean-rebuild parity. *This file was
+  previously recorded only in `docs/migrations/production-parity-register.md`
+  and the 2026-08-18 technical-operations audit — never in this ledger.*
+
+- **`20260817130100_notification_events_v3_workflow_types.sql` — ALREADY APPLIED, MUST NOT BE APPLIED.**
+  Applied to production **together with** `20260817140100_notification_document_types_v3.sql`
+  as ONE ledger row: `notification_types_union_workflow_document_v3`
+  (version `20260817172306`). `REVIEWED_APPLY_SHAPES` accounts for it as
+  `kind: "union"`. Verified read-only 2026-09-14:
+  `notification_events_type_check` **already** admits `workflow_step_pending`,
+  `workflow_decided`, `workflow_delegated`, `workflow_escalated`, and
+  `notification_events_entity_type_check` **already** admits
+  `workflow_instance` — precisely what this file adds. Its drop-and-re-add of
+  those constraints is a no-op at best and live-constraint churn at worst.
+  **Its `@human-gate-approved` annotation is STALE** — the work it authorised
+  was completed by the union route. The annotation is deliberately left in the
+  file rather than edited out: history is evidence, and editing the file would
+  trip `migration-safety` for no benefit. It authorises nothing now.
+  *First recorded in the 2026-08-19 correction block at the head of this
+  document; restated here as an explicit never-apply verdict.*
+
+- **`20260817140100_notification_document_types_v3.sql` — ALREADY APPLIED, MUST NOT BE APPLIED.**
+  The other half of the same union row `notification_types_union_workflow_document_v3`
+  (version `20260817172306`). Verified read-only 2026-09-14:
+  `notification_events_type_check` **already** admits `document_ack_assigned`,
+  `document_ack_completed` and `document_expiring`, and the entity check
+  **already** admits `worker_document`, `org_document` and
+  `document_acknowledgement`. Its `@human-gate-approved` annotation is **STALE**
+  on the same reasoning as above and is likewise left in place unedited.
+
+
+
 > ## ⚠️ READ THIS BEFORE TRUSTING ANY ENTRY BELOW (added 2026-08-18)
 >
 > **This document is a SECONDARY record. The truth is production's own
@@ -1495,6 +1727,1075 @@ Both entries below were applied to production in the order shown, with a full ve
 - Append-only **trigger** guards on journal tables (defense-in-depth beyond RLS default-deny) — must respect the correction/supersede/soft-delete lifecycle; `TASKS.md`.
 - `feature_flags` / `proof_of_work` scaffolds (unshipped features) — `TASKS.md`.
 
+## Applied 2026-09-05 — launch pricing DATA update on `public.plans` (no migration, reversible)
+
+Owner approval 2026-09-05 (PERSON €0 · ORGANIZATION FREE €0 / 1 active need · ORGANIZATION €99 / up to 10 · >10 individual plan). Applied via Supabase MCP `execute_sql` as four row UPDATEs — the ONE home a price figure has (`plans.price_eur_monthly`):
+
+| slug | price_eur_monthly | active | note |
+|---|---|---|---|
+| `free` | 0 | true | the €0 card |
+| `business` | 99 | true | renders as the ORGANIZATION card (display name to be set to "Organization" / "Organizacija" at deploy time — the live page still runs the 4-tier code until then) |
+| `agency` | NULL | **false** | retired as a public tier (deferred) |
+| `enterprise` | NULL | **false** | retired as a public tier (deferred) |
+
+Readback after apply: exactly those four rows. Rollback: `update plans set price_eur_monthly = null; update plans set active = true where slug in ('agency','enterprise')`. No schema, policy or function touched; `billing_*` rows still 0.
+
+## Applied 2026-09-05 — `20260905190000_public_plans_v1.sql` (RED: grant execute to anon; owner approval "approve public_plans_v1" in chat)
+
+Applied via Supabase MCP `apply_migration` (name `public_plans_v1`) at ~18:20 UTC, then verified: anon `rpc("public_plans_v1")` → `free 0`, `business 99` (Nemokamas / Organizacija); anon direct `select` on `plans` still "permission denied"; `proacl = {postgres=X, anon=X, authenticated=X}` (PUBLIC revoked). Rollback: `drop function if exists public.public_plans_v1();` (no data touched). Code: PR #1548 (`getPlans()` reads through the function; allowlist entry; three migration ratchets +1).
+
+## Applied 2026-09-11 — `20260911130000_productivity_units_universal_v1.sql` (GREEN: four additive registry rows; conditional prod-apply autonomy)
+
+Applied via Supabase MCP `apply_migration` (name `productivity_units_universal_v1`, ledger version `20260911094312` — apply time, not the repo prefix) after `migration-safety` classified the file GREEN locally (INSERT … ON CONFLICT DO NOTHING; no table, column, policy, grant or function touched). Readback: `kilometers` (length, parent `meters` ×1000), `pallets`, `covers`, `cases` (count) — all `scope = 'platform'`, `organization_id null`, so the 20260817120000 least-privilege SELECT covers them unchanged; registry 10 → 14 rows. Rollback: `supabase/rollbacks/20260911130000_productivity_units_universal_v1.down.sql` — deletes ONLY those four slugs and only while no `journal_entry_metrics.unit_slug` / `worker_skills.current_pace_unit_slug` / registry parent references them (a referencing row is recorded evidence, never deleted). Code: issue #1689 slice — `PLATFORM_OUTPUT_UNIT_SLUGS` (both editors' pickers), recognizer km / pallets, chat + MCP intake output quantity, labels in 12 catalogues, guard `journal-units-registry.test.ts`; two migration-count ratchets 279 → 280.
+
+## Applied 2026-09-14 — `20260914120000_asset_single_open_assignment_v1.sql` (RED: SECURITY DEFINER replacement + revokes; owner approval "OWNER APPROVAL — BOTH RED APPLIES APPROVED", Decision 1)
+
+Applied via Supabase MCP `apply_migration` (name `asset_single_open_assignment_v1`, ledger version `20260914144053` — apply time, not the repo prefix). Applied FIRST, alone, and verified before Decision 2 was touched, as the approval required.
+
+**Preconditions re-verified immediately before apply, and they matched the review exactly:** 0 assets, 0 asset_assignments, no `asset_assignments_one_open_per_asset` index, `issue_asset_v1` with no `for update`, and all three lifecycle functions holding a direct `authenticated=X` grant (so revoking `public`/`anon` could not remove the product's own path).
+
+**Readback.** Index present with predicate `WHERE (status = ANY (ARRAY['issued','acknowledged']))`. All three of `issue_asset_v1`, `transfer_asset_assignment_v1`, `return_asset_v1` now contain `for update`. **ACLs UNCHANGED** before and after — `postgres=X/postgres | authenticated=X/postgres` on each, `anon` absent in both readings, so nothing gained authority. Policies on `assets` / `asset_assignments` still 2, unchanged. Ledger 278 → 279.
+
+**Invariant proven ON PRODUCTION, twice, inside blocks that roll themselves back** (final `raise` aborts the implicit transaction; readback confirmed 0 assets / 0 assignments after each):
+1. *Constraint level* — a second open assignment on one asset was refused: `duplicate key value violates unique constraint "asset_assignments_one_open_per_asset"`.
+2. *Real product write path* — as a live org manager, `issue_asset_v1` succeeded once, then refused the second call with **"asset is already issued and must be returned before it can be issued again"**, and refused an issue while the asset was in maintenance with **"asset is not issuable while it is maintenance"**.
+
+The two-session concurrency half (the loser BLOCKING on the row lock, measured at 2046 ms) was proven pre-apply on a real PostgreSQL 16 cluster against byte-identical bodies — `scripts/db-proof/asset-single-open-assignment.sh`, 22/22 — because two genuinely concurrent sessions cannot be held open through the MCP transport.
+
+Rollback: `supabase/rollbacks/20260914120000_asset_single_open_assignment_v1.down.sql` — drops the index, restores the three bodies verbatim from 20260718170000. Loses no data; re-opens the defect, and says so.
+
+## Applied 2026-09-14 — `20260914140000_worker_saved_searches_v1.sql` (RED: new table + RLS + 3 SECURITY DEFINER RPCs + grants + constraint swap; owner approval same message, Decision 2)
+
+Applied via Supabase MCP `apply_migration` (name `worker_saved_searches_v1`, ledger version `20260914144310`) AFTER Decision 1 was applied and verified.
+
+**Preconditions re-verified immediately before apply:** table absent, 0 of the 3 RPCs present, neither notification constraint carrying `saved_search_match` / `saved_search`, 10 notification events, 0 notification preference rows, 57 workers, `is_admin()` present.
+
+**Note on transaction control.** The file carries its own `begin;`/`commit;` and `apply_migration` supplies a wrapper, so the inner `commit` ends the outer transaction early (measured locally: `WARNING: there is already a transaction in progress`, then `WARNING: there is no transaction in progress`). It was applied VERBATIM anyway, deliberately: the inner `commit` is the file's LAST statement, so nothing can be stranded after it, a failure before it still rolls the whole migration back, and the local test confirmed an identical end state. Deviating from the reviewed bytes was the larger risk.
+
+**Readback.** Table present; RLS enabled; **exactly one policy, and it is SELECT** — no INSERT/UPDATE/DELETE policy exists. Table ACL `authenticated=r/postgres` (read only). All three RPCs `postgres=X | authenticated=X`, **anon absent from all three**. `notification_events_type_check` now carries `saved_search_match` AND still carries `weekly_digest` (strict superset). 0 saved-search rows, notification events still 10, **notification preference rows still 0** — so no email was activated as a consequence of this migration (the email channel defaults OFF, requires explicit opt-in, and additionally requires a transactional path that is not configured). Ledger 279 → 280; public base tables 204 → 205.
+
+**Privacy and authority boundaries proven ON PRODUCTION** in one rollback-guaranteed block, acting as the `authenticated` role with a real `request.jwt.claim.sub`, first as one worker and then as another:
+
+| Property | Result |
+|---|---|
+| the saving worker sees their own row | **1 row** |
+| a DIFFERENT worker sees it | **0 rows** |
+| an eighth criteria key | **refused** — `violates check` |
+| a direct INSERT bypassing the RPC | **refused** — `permission denied for table worker_saved_searches` |
+
+Readback after the probe: 0 rows. The RPC path itself therefore also ran successfully against production (`save_worker_search_v1` returned an id), which is what makes DEM-8's evidence `PRODUCTION_RPC_PROVEN` rather than test-only.
+
+Rollback: `supabase/rollbacks/20260914140000_worker_saved_searches_v1.down.sql` — one transaction, and it REFUSES while any saved search exists. That refusal is real only because of the transaction: the first draft raised outside one, printed its refusal and dropped the table anyway, which the paired db-proof caught before either reached production.
+
+### `subject_contest_and_clash_receipt` — RED #4 + #5 — APPLIED 2026-09-15, ledger `20260915185038`
+
+Repo file `supabase/migrations/20260915180000_subject_contest_and_clash_receipt.sql`
+(sha256 `5a1f525987098cc419cbcbaa0633e58aec2dcad53df4a356e0df11ffe2c16247`),
+applied via Supabase MCP `apply_migration` at owner-approved reviewed HEAD
+`e08e5f23405e5da25ee9fbabe9d6215f55b240b3`. **Note the version drift** — the
+repo stem is `20260915180000`, the production ledger version is
+`20260915185038`; `apply_migration` assigns its own timestamp, which is why a
+`supabase db push` would re-run applied migrations and is forbidden.
+
+**Preconditions re-verified immediately before apply:** HEAD matched, file hash
+matched, ledger collisions on `20260915180000` = 0, scope unchanged (only the
+migration and its paired rollback under `supabase/`), working tree clean.
+
+**Runtime-proven BEFORE the apply, not after.** `scripts/db-proof/subject-contest-and-clash-receipt.sh`
+ran the migration VERBATIM against a throwaway PostgreSQL 16.13 with RLS
+enabled, every subject-facing case executed as the non-owner role
+`authenticated`: **43 assertions, 43 pass**, including the rollback. Transcript:
+`docs/db-proof/RED-4-5-runtime-proof.md`. A Supabase preview branch was NOT the
+route — the organisation is on the free plan and branching requires Pro.
+
+**Post-apply readback, measured as a DELTA against a snapshot taken immediately
+before:**
+
+| | before | after |
+|---|---|---|
+| policies in `public` | 348 | **349** (+1, the new one) |
+| fingerprint of all OTHER policies | `cc57ce3a…` | **`cc57ce3a…` — identical** |
+| functions in `public` | 473 | **474** (+1, v4) |
+| `respond_booking_request_v3` body md5 | `5cb1a2ad…` | **`5cb1a2ad…` — unchanged** |
+| constraints on `booking_request_events` | 6 | **8** (FK on the new column + the receipt iff) |
+| bookings / booking events | 1 / 2 | **1 / 2** |
+| evidence records / events | 0 / 0 | **0 / 0** |
+| customer_requests | 20 | **20** |
+
+The policy-fingerprint line is the load-bearing one: recomputing the pre-apply
+hash over every policy EXCEPT the one added returns the identical digest, so
+the ONLY RLS change in the entire database is this migration's.
+
+**Authority readback.** Policy `organization_evidence_events_subject_dispute` is
+INSERT, `{authenticated}`, with the approved predicate verbatim. Unique partial
+index present. `event_type` CHECK widened by exactly `clash_acknowledged`; the
+receipt CHECK is the iff in both directions. `respond_booking_request_v4` present
+with the expected signature and `security definer`. **Both v3 and v4 hold
+`postgres=X | authenticated=X` — `anon` absent from both.** The only security
+advisor note on v4 is the same informational "SECURITY DEFINER executable by
+authenticated" line v3 already carries.
+
+**No production rows were manufactured to prove anything.** All counts are
+unchanged; the proof was done on a throwaway database, as it should be.
+
+Rollback: `supabase/rollbacks/20260915180000_subject_contest_and_clash_receipt.down.sql`,
+exercised in the same proof run — v4 gone, v3 surviving, column and CHECK
+restored, policy gone, and a dispute already written left readable. It removes
+an authority, never a record.
+
+### `universal_invitation_referral_network_v1` — RED — APPLIED 2026-09-17, ledger `20260917080303`
+
+Repo file `supabase/migrations/20260917120000_universal_invitation_referral_network_v1.sql`
+(sha256 `899bbb2c199699e7ff98b99ae8eba8db97ee9bf27895640dc32ae5c838728257`),
+applied via Supabase MCP `apply_migration` at owner-approved PR #1752 head
+`7f9328859fc2162c3f4125e0e7bc743e720d1f0f` (owner authorization 2026-09-17,
+"PR #1752 OWNER-GATED PRODUCTION PROOF"). Version drift as always: repo stem
+`20260917120000`, ledger version `20260917080303` — never `db push`.
+
+**Preconditions re-verified immediately before apply:** PR head unchanged, file
+hash at head == working copy, `origin/main` still `b94ed53c`, no migration in
+#1751, ledger head `20260915185038`, pre-apply snapshot recorded (invitations in
+v1 shape, 2 rows; no v2 function; no `invitation_acceptances`; notification
+CHECKs at v7).
+
+**Post-apply readback (authoritative catalog reads, not the apply's own
+success):** 10 new columns on `invitations` with the intended nullability and
+defaults; `invited_email` / `inviter_profile_id` nullable; CHECKs
+`invitations_uses_chk`, `_origin_chk`, `_campaign_label_chk`,
+`_external_source_slug_chk`, `_external_reference_chk`, `_declared_context_chk`,
+`_consent_record_chk`, `_open_count_chk` present; type CHECK widened by exactly
+`invite_to_demand`; context CHECK widened by exactly the demand arm; unique
+partial index `(external_source_slug, external_reference)`; table
+`invitation_acceptances` with UNIQUE `(invitation_id, profile_id)`, RLS on,
+ONE policy (`invitation_acceptances_select`, SELECT, `{authenticated}`),
+`authenticated: SELECT` only; `invitations_select` byte-identical; notification
+CHECKs widened by exactly `invitation_accepted` / `invitation`. All ten
+functions `security definer`, owner `postgres`, `search_path=public`; execute
+matrix: `accept_invitation_apply_v2` → nobody; the six user doors →
+`authenticated` only; `get_invitation_public_preview_v1`,
+`receive_external_referral_v1`, `mark_external_referral_delivery_v1` →
+`service_role` only; `anon` → nothing anywhere. Existing rows: 2 / 2, both
+still addressed, single-use, with inviter. `service_role` still holds NO
+table grant on `invitations` (proven: a direct SELECT under that role is
+42501) — the two service functions are the only door.
+
+**Runtime-proven AFTER the apply, on production, with zero residue:** one
+`DO` block that ends in `RAISE EXCEPTION` carrying its own transcript ran
+every RPC as the real roles (`set local role anon|authenticated|service_role`
++ JWT claims of the synthetic `e2e-*@labourmarket.ai` identities) — 20 cases:
+open link, logged-out preview + open count, six privilege negatives, existing
+user claims, idempotent re-accept, single-use taken, 2-seat campaign (two
+people, two ledger rows, `exhausted`), crew cap for a contextless link,
+cross-org read isolation (other org owner sees 0, unrelated worker sees 0),
+employer→need invitation (preview shows `welder / LT`, in-app door
+email-bound, interest row `basis=employer_invitation` with NO band, foreign
+id → `not_found`), decline (no interest, ledger `declined`), project
+invitation (existing `can_manage_project` decides for both the worker and the
+owner; acceptance = `assignment_created`, 0 bookings), revoked / expired
+(no ledger row), tampered token (`not_found` on all three doors), external
+referral valid / replay / no consent / wrong consent version / delivery mark,
+existing user claims the referral, declared context disclosed only to the
+acceptor, review accept/correct/reject recorded, foreign reviewer
+`not_found`, notification CHECK accepts the new type. Identity counters
+unchanged throughout: profiles 58 → 58, workers 58 → 58, worker_skills 59 →
+59, worker_professions 20 → 20, profile_skill_claims 28 → 28. Readback after
+the rollback: invitations 2, acceptances 0, v2 audit rows 0.
+
+**Defect found by that proof, corrected forward:** `get_invitation_preview_v2`
+selects `role_text` from `customer_requests`; the column is
+`role_or_work_type` (`role_text` is the worker-board RPC's projection). The
+proof exercised the corrected body inside the rolled-back transaction; the
+persistent fix is `supabase/migrations/20260917130000_invitation_preview_demand_column_fix_v1.sql`
+— **RED, PREPARED, NOT APPLIED** (owner gate; one identifier). Until it is
+applied, a demand invitation's signed-in landing renders the generic load
+error; every other path is unaffected.
+
+Rollback: `supabase/rollbacks/20260917120000_universal_invitation_referral_network_v1.down.sql`
+— refuses while any referral, acceptance or multi-use row exists.
+
+### `invitation_preview_demand_column_fix_v1` — RED (forward correction) — APPLIED 2026-09-17, ledger `20260917091045`
+
+Repo file `supabase/migrations/20260917130000_invitation_preview_demand_column_fix_v1.sql`
+(sha256 `3494f93bbc6061632038f589033e0d0f5eba844849fa2bf37c6e3dd34b84b55b`),
+applied via Supabase MCP `apply_migration` at PR #1752 head `7c6d85c9` under
+explicit owner APPLY approval ("PR #1752 FINAL OWNER AUTHORIZATION",
+2026-09-17). One identifier in one function: `get_invitation_preview_v2` now
+reads `role_or_work_type` from `customer_requests` (`role_text` does not
+exist there — it is the worker-board RPC's projection name).
+
+**Readback:** signature `(p_token text)` unchanged; `security definer`, owner
+`postgres`, `search_path=public` unchanged; execute `anon=false
+authenticated=true service_role=false` unchanged; body contains
+`select role_or_work_type, country, organization_id` and no `role_text` in
+executable code; still 1 policy on `invitations`, 1 on
+`invitation_acceptances`; table grants unchanged (`authenticated: SELECT`
+only on both). Runtime re-proof on production, zero residue: employer creates
+`invite_to_demand` → non-owner `not_authorized` → wrong invitee by id
+`not_found` → signed-in preview through the PERSISTED function returns
+`welder / LT / E2E Walker UAB` → accept `interest_recorded` → interest row
+`basis=employer_invitation`, no `status_band`, no `matched_skills`; profiles /
+workers / worker_skills / worker_professions / claims Δ0.
+
+Rollback: `supabase/rollbacks/20260917130000_invitation_preview_demand_column_fix_v1.down.sql`
+(drops the function; the app falls back to `get_invitation_preview_v1`).
+
+### `widen_original_language_uk_ka` — RED-1 (CHECK widening) — APPLIED 2026-09-17, ledger `20260917112002`
+
+Repo file `supabase/migrations/20260917140000_widen_original_language_uk_ka.sql`
+(sha256 `f5debd8cf7c8fc57b4573ea342d0e2d04b802e2a2859d2240057d4db2c5f65ff`),
+applied via Supabase MCP `apply_migration` (name `widen_original_language_uk_ka`)
+under explicit owner **RED-1** approval ("OWNER DECISION — MULTILINGUAL
+COMMUNICATION … RED-1 … APPROVED", 2026-09-17). Owner semantic correction the
+same message: UI_LANGUAGE ≠ COMMUNICATION_LANGUAGE — a message may be authored
+in a language the product PRESERVES without a full UI route. Realised by
+`apps/web/lib/i18n/config.ts` `communicationLocales` (= UI `locales` + `uk` +
+`ka`); the CHECK tracks that set (guards `message-language-set` +
+`journal-integrity-guards-migration`).
+
+Widens the `original_language` CHECK from the 11-locale set to
+`('en','lt','lv','et','nl','de','da','no','sv','pl','ru','uk','ka')` on the four
+tables that carry it: `journal_entries`, `conversation_messages`,
+`organization_evidence_records`, `candidate_skills`. Additive only — every
+previously-valid value stays valid; no column, no RLS, no authority, no data
+change.
+
+**Readback (production, `gorgitwvdzxbnaxhrsrw`, zero residue):** before — all
+four CHECKs `no_ka / no_uk`; ka insert probe on the local mirror rejected by
+`conversation_messages_original_language_chk`. After apply — all four
+constraints contain `'ka'` and `'uk'`, `convalidated = true` on all four
+(`…_chk` names; the evidence table's prior `…_check` dropped and re-added as
+`…_chk`). Functional check `'ka' IN (set)` and `'uk' IN (set)` = true. No rows
+written to production. Local mirror additionally proved a real `ka`/`uk`
+message insert preserves `original_language` (rolled back) and that
+down→forward is reversible.
+
+Rollback: `supabase/rollbacks/20260917140000_widen_original_language_uk_ka.down.sql`
+(restores the 11-locale sets; fails loudly if any `uk`/`ka` row exists).
+
+### `roster_writes_rpc_only_v1` — RED R-1 (HIGH, grant + policy narrowing) — APPLIED 2026-09-19, ledger `20260919104526`
+
+Repo file `supabase/migrations/20260919100000_roster_writes_rpc_only_v1.sql`
+(sha256 `558cd636d61860f0d4b9f28a814c52b38626df8c065d640e30449bb91d38260d`),
+applied via Supabase MCP `apply_migration` (name `roster_writes_rpc_only_v1`)
+under the owner's verbatim approval sentence in the 2026-09-19 window handoff
+("Apply 20260919100000_roster_writes_rpc_only_v1 to production. I approve
+revoking insert/update/delete on public.company_workers and
+public.agency_workers from authenticated and dropping the policies
+company_workers_write and agency_workers_write … Rollback file acknowledged.").
+PR #1791.
+
+Revokes insert/update/delete on `company_workers` and `agency_workers` from
+`authenticated` and drops the two `FOR ALL` write policies. Select policies,
+functions, triggers and rows untouched. Every legitimate writer is a SECURITY
+DEFINER RPC (`invite_*` → the WORKER's `accept_*_worker_invitation` →
+owner-gated `assign_*_worker_role` / `set_*_worker_journal_review`;
+`accept_invitation_v2`).
+
+**Readback (production `gorgitwvdzxbnaxhrsrw`, zero residue):** before —
+`company_workers` relacl `authenticated=arwd`, both `_write` policies present;
+`agency_workers` relacl NULL (it never had an `authenticated` grant — its
+`_write` policy was inert; `company_workers` was the live hole). After —
+`company_workers` `authenticated=r`; `agency_workers` relacl unchanged (null);
+policies left: `company_workers_select`, `agency_workers_select`. Hostile
+contract as the real company owner / agency owner under `set local role
+authenticated` (rolled back): direct INSERT active row naming an isolated E2E
+worker → 42501; direct UPDATE `status` → 42501; direct UPDATE `worker_id` →
+42501; direct DELETE → 42501; agency owner direct INSERT → 42501; owner SELECT
+of own roster → 1 row (reads unchanged). Legitimate path (rolled back):
+`caller_manages_worker` false → `invite_company_worker` → the worker's
+`accept_company_worker_invitation` → active row (1) → `caller_manages_worker`
+true → `assign_company_worker_role` (row shows the role) →
+`assign_worker_to_project` → `project_worker_assignments` active row (1).
+
+Rollback: `supabase/rollbacks/20260919100000_roster_writes_rpc_only_v1.down.sql`
+(restores both policies and both grants verbatim).
+
+### `add_org_member_requires_consented_roster_v1` — RED R-16 (HIGH, SECURITY DEFINER body change) — APPLIED 2026-09-19, ledger `20260919143247`
+
+Repo file `supabase/migrations/20260919120000_add_org_member_requires_consented_roster_v1.sql`
+(sha256 `165bf9142c53806211d0bf05805433a881bc0fa9def9a1567f8d7f6ace8379cf`),
+applied via Supabase MCP `apply_migration` (name
+`add_org_member_requires_consented_roster_v1`) under the owner's verbatim
+approval sentence given in chat 2026-09-19 ("Apply
+20260919120000_add_org_member_requires_consented_roster_v1 to production. I
+approve replacing public.add_org_member so that it refuses (not_linked) unless
+the worker already holds an active company_workers / agency_workers row on the
+organization's legacy company or agency, with no exemption for any role.
+Rollback file acknowledged."). PR #1794.
+
+Replaces the body of `public.add_org_member(uuid, uuid)`: after the worker
+lookup and before the `already_member` short-circuit it returns
+`not_linked` unless an ACTIVE `company_workers` / `agency_workers` row
+exists on the organization's `legacy_company_id` / `legacy_agency_id` for
+that worker. No role is exempt (admin included). Grants restated unchanged
+(`authenticated` only; `public` and `anon` revoked). No table, policy,
+row or other function touched.
+
+Pre-apply drift check: live body `md5(prosrc)` `22167e898cb68a706e7cd4a50f53efc0`
+= the rollback file's body created in an aborted transaction; ledger 293,
+no prior row of this name. Readback after apply: 294 applied; new body
+`md5(prosrc)` `11ea34068e0120de244caa77857d8262`, precondition present,
+no `is_admin` after it, `prosecdef` true, `search_path=public`,
+`anon` execute false, `authenticated` execute true.
+
+Contract on the LIVE function (real actors under `set local role
+authenticated` with JWT claims incl. e-mail; one DO block aborted by RAISE —
+zero residue verified afterwards: 0 roster rows, 0 contexts, 0 invitations,
+0 audit rows for the probe identity):
+- HOSTILE — owner Donatas → `add_org_member(19f47e78, E2E worker 7c06faf8
+  with no roster row)` → **`not_linked`**, forged context rows **0**.
+- EXISTING — owner → `add_org_member(19f47e78, the one consented roster
+  worker)` → `already_member`.
+- LEGITIMATE CHAIN — owner `invite_company_worker` → `invited`; the WORKER's
+  `accept_company_worker_invitation` → `linked`, active roster row (1),
+  employee context 0 → 1 (the accept RPC provisions it); owner
+  `add_org_member` → `already_member` (idempotent fallback). Audit delta 0
+  for the `added` path, as expected.
+
+Rollback: `supabase/rollbacks/20260919120000_add_org_member_requires_consented_roster_v1.down.sql`
+(restores the 20260824130000 body verbatim; grants unchanged).
+
+### `update_project_facts_v1` — RED R-3 (new SECURITY DEFINER write) — APPLIED 2026-09-19, ledger `20260919145731`
+
+Repo file `supabase/migrations/20260919130000_update_project_facts_v1.sql`
+(sha256 `3a94acc577aa6e885b65f4de38a63311630380e86498454591f74e924b13f7c2`), applied via Supabase MCP `apply_migration` (name
+`update_project_facts_v1`) under the owner's verbatim approval sentence given
+in chat 2026-09-19 ("Apply 20260919130000_update_project_facts_v1 to
+production. I approve creating public.update_project_facts_v1 (SECURITY
+DEFINER, can_manage_project-gated, authenticated only) as the one write for a
+project's title, city, country, start and end dates, with a completed project
+read-only. Rollback file acknowledged."). PR #1795.
+
+Creates `public.update_project_facts_v1(uuid, text, text, text, date, date)
+→ jsonb`: validation before any read (title 2..200, ISO-3166 alpha-2 country
+or absent, city ≤ 120 or absent, end ≥ start), row lock, the EXISTING
+`can_manage_project` gate with the anti-oracle shape (`not_found` unless
+assigned), `completed` = read-only checked after authority, `granularity`
+kept truthful (city written → `city`, else `country`), idempotent (same
+facts → `changed=false`, no write, no audit row), audited from/to.
+`authenticated` only; `public` and `anon` revoked. No table, policy, row or
+other function touched.
+
+Pre-apply drift check: function absent; `can_manage_project`,
+`is_assigned_to_project`, `is_admin` present; ledger 294, no prior row of
+this name; branch 0 behind main. Readback after apply: 295 applied; SECURITY
+DEFINER, `search_path=public`, `anon` execute false, `authenticated` true,
+`completed_read_only` positioned after the gate.
+
+Contract on the LIVE function (real actors under `set local role
+authenticated` with JWT claims incl. e-mail; one DO block aborted by RAISE),
+on the real project `562c9c3e` (Labour market ai Sp. z o.o, draft, city
+Pasvalys, country NULL):
+- stranger (Ramūnas, agency owner, no relation) → `not_found`
+- owner, country "Lithuania" → `invalid / country`
+- owner, end before start → `invalid_dates`
+- owner, one-character title → `invalid / title`
+- owner write (`lt` → `LT`, 2026-10-01 → 2026-11-30) → `updated, changed=true`;
+  row read back `country=LT start=2026-10-01 end=2026-11-30 granularity=city`,
+  audit delta 1
+- same write again → `updated, changed=false`
+- status flipped to completed inside the transaction → `completed_read_only`
+Residue after rollback: the row still `country NULL, no dates, status draft`;
+0 audit rows of this action; 0 of 9 projects carry facts.
+
+Rollback: `supabase/rollbacks/20260919130000_update_project_facts_v1.down.sql`
+(drops the function; rows written through it are real manager-entered facts
+and stay).
+
+### `end_roster_link_v1` — RED R-9 (new SECURITY DEFINER write) — APPLIED 2026-09-19, ledger `20260919151920`
+
+Repo file `supabase/migrations/20260919150000_end_roster_link_v1.sql`
+(sha256 `ac7d8bf529f4f9e40247ef84a765873662f15bdd083fd8ed9638bfd1146f8eaf`), applied via Supabase MCP `apply_migration` (name
+`end_roster_link_v1`) under the owner's verbatim approval sentence given in
+chat 2026-09-19 ("Apply 20260919150000_end_roster_link_v1 to production. I
+approve creating public.end_roster_link_v1 (SECURITY DEFINER, authenticated
+only) so that the subject worker, the owner of the company/agency, or an admin
+may set a company_workers / agency_workers row to removed and end the matching
+employee engagement, audited, never deleted. Rollback file acknowledged.").
+PR #1798.
+
+Creates `public.end_roster_link_v1(text, uuid, uuid, text default null) →
+jsonb`: row lock on the link per kind; authority ladder admin → owner of THAT
+company/agency (`owns_company` / `owns_agency`) → the subject worker; no
+standing → `not_found`; idempotent (`already_removed`); `status → 'removed'`,
+`journal_review_enabled → false` — never a DELETE; in the same transaction
+the ACTIVE `employee` engagement context of the mirrored organization is
+ended (`end_org_membership_v1` shape); audited with actor capacity,
+`self_initiated`, the ended engagement id and the reason. `authenticated`
+only; `public` and `anon` revoked. No table, policy, row or other function
+touched; project assignments untouched.
+
+Pre-apply drift check: function absent; `owns_company`, `owns_agency`,
+`is_admin`, `end_org_membership_v1`, `caller_manages_worker_by_roster`
+present; the 0027 CHECK still admits `removed`; `ended_at` present on
+`engagement_contexts`; ledger 295, no prior row of this name. Readback:
+296 applied; SECURITY DEFINER, `search_path=public`, `anon` execute false,
+`authenticated` true; all three ladder branches present.
+
+Contract on the LIVE function (real actors under `set local role
+authenticated` with JWT claims incl. e-mail; one DO block aborted by RAISE):
+- setup: owner `invite_company_worker` → `invited`; the WORKER's
+  `accept_company_worker_invitation` → `linked`; active roster row 1,
+  employee context 1
+- stranger (Ramūnas, agency owner, no relation) → `not_found`
+- the WORKER ends it → `removed / self / engagement_ended=true`; again →
+  `already_removed`
+- owner's `caller_manages_worker_by_roster(worker)` afterwards → **false**
+- owner Donatas (platform admin → capacity `admin`) ends the REAL consented
+  row → `removed / admin / engagement_ended=true`
+- wrong kind (`agency` with a company id) → `not_found`
+- after: removed rows 2, active employee contexts 0 for both, audit rows 2
+Residue after rollback: probe worker 0 roster rows / 0 contexts; the real row
+still `active` with its context active; 0 removed rows in the table; 0 audit
+rows of this action; 0 invitations.
+
+Rollback: `supabase/rollbacks/20260919150000_end_roster_link_v1.down.sql`
+(drops the function; rows ended through it are real decisions and stay).
+
+### `usage_cost_trigger_search_path_v1` — R-13 (function attribute, advisor hygiene) — APPLIED 2026-09-19, ledger `20260919153945`
+
+Repo file `supabase/migrations/20260919140000_usage_cost_trigger_search_path_v1.sql`
+(sha256 `cb42b983bff8fcd093c247cbb66eec5621aab411ee2c512ddf5867379d5768d7`), applied via Supabase MCP `apply_migration` (name
+`usage_cost_trigger_search_path_v1`) under the owner's verbatim approval
+sentence given in chat 2026-09-19 ("Apply
+20260919140000_usage_cost_trigger_search_path_v1 to production. I approve
+pinning search_path = public on usage_cost_events_forbid_mutation() and
+usage_cost_events_forbid_truncate(). Rollback file acknowledged."). PR #1797.
+
+Two statements: `alter function public.usage_cost_events_forbid_mutation()
+set search_path = public` and the same for `usage_cost_events_forbid_truncate()`.
+No body, grant, policy, trigger or row change. The static classifier called
+this GREEN; it stayed on the human gate only because the 2026-09-19 owner
+packet listed it.
+
+Pre-apply drift check: both functions `proconfig NULL`, SECURITY INVOKER,
+each attached to exactly one trigger; ledger 296, no prior row of this name.
+Readback: 297 applied; `proconfig = {search_path=public}` on both; still
+SECURITY INVOKER; still one trigger each; bodies still `raise exception`.
+
+Contract on the live triggers (one DO block aborted by RAISE, 65 rows in the
+table, nothing changed): DELETE → `42501 usage_cost_events is append-only:
+DELETE is not permitted`; TRUNCATE → `42501 … TRUNCATE is not permitted`;
+UPDATE (`set event_id = event_id` on one row) → `42501 usage_cost_events is
+append-only: UPDATE is not permitted`. The append-only ledger behaves exactly
+as before.
+
+Rollback: `supabase/rollbacks/20260919140000_usage_cost_trigger_search_path_v1.down.sql`
+(`reset search_path` on both; proconfig back to NULL).
+
+### `demand_lifecycle_colleague_v1` — R-15 (two SECURITY DEFINER lifecycle writes) — APPLIED 2026-09-20, ledger `20260920051619`
+
+Repo file `supabase/migrations/20260919190000_demand_lifecycle_colleague_v1.sql`
+(sha256 `e804c553a379e84b1a5a124aaa6e9ddf07add81492531b95b415cf26434ee590`), applied via Supabase MCP `apply_migration` (name
+`20260919190000_demand_lifecycle_colleague_v1`) under the owner's verbatim
+approval sentence given in chat 2026-09-20 ("Apply R-15: close_demand_v1 /
+reopen_demand_v1 for creator, admin and has_org_demand_access colleagues —
+status only, UPDATE policy unchanged, with rollback."). PR #1805.
+
+Two functions: `close_demand_v1(uuid)` (submitted → closed) and
+`reopen_demand_v1(uuid)` (closed → submitted). Authority ladder admin ·
+creator · `has_org_demand_access(organization_id)`; anything else
+`not_found`; writes ONLY `status` + `updated_at`; idempotent
+(`already_closed` / `already_open`); audited with `actor_capacity`.
+`revoke … from public, anon; grant execute … to authenticated`. No table,
+policy, grant-on-table, trigger or row change.
+
+Pre-apply drift check (05:14 UTC): main = origin/main = production build
+`57b278b1`; ledger 297 / `20260919153945`; both functions ABSENT;
+`customer_requests_update` = `(profile_id = auth.uid()) OR is_admin()`;
+PR #1805 diff = exactly the ten prepared files.
+Readback: 298 applied, version `20260920051619`; both functions
+`prosecdef = true`, `proconfig = {search_path=public}`, anon EXECUTE false,
+authenticated EXECUTE true, public false; UPDATE policy byte-identical;
+customer_requests still 4 policies, 2 triggers.
+
+Contract on the LIVE functions (one DO block aborted by RAISE, everything
+rolled back; org `19f47e78`, creator `dc3284ea`, admin-colleague `875eb16b`,
+outsider `0a749ad6`, a temporary `member`-role membership inserted inside the
+same transaction): outsider close → `not_found`; role `member` close →
+`not_found`; colleague close on `draft` → `invalid_transition/draft`;
+colleague close on `submitted` → `closed/colleague`, status read back
+`closed`; colleague raw `UPDATE … set notes` under RLS → **0 rows** (policy
+still owner-only); colleague reopen → `submitted`; reopen again →
+`already_open`; creator close → `closed/admin` (the creator is a platform
+admin, so the ladder answers admin first); close again → `already_closed`;
+creator reopen → `submitted`; outsider reopen on draft → `not_found`; anon
+(no sub) → `42501`; md5 of payload + agency_client_id + notes + title
+identical before/after; 4 audit rows written inside the transaction.
+Residue after rollback: 0 audit rows for these actions, request status
+`submitted`, 0 `member` memberships.
+
+Rollback: `supabase/rollbacks/20260919190000_demand_lifecycle_colleague_v1.down.sql`
+(sha256 `b7fba77f7b9198d77f9ac0ffcca1c52bf03c20d5b75e7dfc3fb73181e31f657a`; drops both functions; the app degrades to the
+owner-only direct update on 42883 / PGRST202).
+
+### `relationship_journal_reviewable_v1` — INSTITUTION loop (rule-as-data column + SECURITY DEFINER redefinition) — APPLIED 2026-09-20, ledger `20260920052103`
+
+Repo file `supabase/migrations/20260919210000_relationship_journal_reviewable_v1.sql`
+(sha256 `291f642bf5047bcfd6a92403c3958596e3bb1cca904f2ff459778cedb7bda175`), applied via Supabase MCP `apply_migration` (name
+`20260919210000_relationship_journal_reviewable_v1`) under the owner's
+verbatim approval sentence given in chat 2026-09-20 ("Apply
+relationship_types.journal_reviewable (employee + student) and the
+data-driven set_engagement_journal_review, with rollback."). PR #1807.
+Owner-stated invariant: the training provider may confirm/review learner
+PRACTICE evidence where the authorized learner/institution relationship
+permits it; this grants no formal recognition, no RPL equivalence, no wider
+worker visibility, no enrolment without consent (ARCH-2 untouched).
+
+One column `relationship_types.journal_reviewable boolean not null default
+false` (fail-closed), seeded TRUE for exactly `employee` and `student`; one
+function redefinition — `set_engagement_journal_review` now reads that column
+instead of the `v_slug <> 'employee'` literal, body otherwise identical,
+SECURITY DEFINER + `set search_path = public` restated; explicit
+`revoke … from public, anon; grant execute … to authenticated`. No policy,
+no table grant, no trigger, no other row change.
+
+Pre-apply drift check (05:14 UTC): column ABSENT; production function body
+carried the `employee` literal; ledger 298 after R-15.
+Readback: 299 applied, version `20260920052103`; relationship_types rows:
+employee(rev=true,vis=true) student(rev=true,vis=false), every other slug
+rev=false, `grants_worker_visibility` unchanged on all ten; function
+`prosecdef = true`, `proconfig = {search_path=public}`, anon EXECUTE false,
+authenticated true, public false, body reads `rt.journal_reviewable`, literal
+gone; the one production student engagement still `journal_review_enabled =
+false`.
+
+Contract on the LIVE function (two DO blocks aborted by RAISE, everything
+rolled back; provider org `a996113c`, provider owner `98212ae5`, learner
+`5b9ea226`, student engagement `923a996d`, other-org manager `875eb16b`):
+other-org manager → `not_authorized`; learner on own engagement →
+`not_authorized`; provider on the student engagement → `enabled` (flag read
+back true), then `disabled`; an existing org owner on an active `employee`
+engagement → `enabled` (pre-existing behaviour identical); an org owner on an
+active non-reviewable relationship (`owner`) → `not_a_member_engagement`;
+anon → `42501`; `student.grants_worker_visibility` still false. Residue: 0
+audit rows for the engagement, flag false.
+
+Rollback: `supabase/rollbacks/20260919210000_relationship_journal_reviewable_v1.down.sql`
+(sha256 `114f4835c7224fa96e620a27106542cb001784f72fe52e13d5b2c4cf79be3047`; restores the employee-literal production function
+byte-for-byte with its grants, drops the column).
+
+### `privacy_consent_locale_pl_hash_repin_v1` — data-only hash re-pin (PL consent texts), RED `data-dml` by route, owner-approved — APPLIED 2026-09-20, ledger `20260920185851`
+
+Repo file `supabase/migrations/20260920173000_privacy_consent_locale_pl_hash_repin_v1.sql`
+(sha256 `16dc82a50d9852d9c46016ff48cc089396d4e83337cbec1aab64bf5d7f132627`); rollback
+`supabase/rollbacks/20260920173000_privacy_consent_locale_pl_hash_repin_v1.down.sql`
+(sha256 `99b287689f41b7dd9e355c8c0d6531f79120f0766247fbae8097b8256de686f9`, restores the
+three 5-locale hashes). Owner approval 2026-09-20: "APPROVE PL CONSENT TEXTS v1 WITH
+REQUIRED INLINE EDITS" (docs/human-gates/pl-consent-texts-owner-review-v1.md). PR #1810.
+
+Three UPDATE rows on `privacy_consent_purposes`: `current_text_hash` only — versions stay
+2026-07-11.v2 / 2026-07-11.v2 / 2026-09-04.v1 because `consentTextHash()` hashes every
+locale in `CONSENT_LOCALES` and `pl` joined it; the partner_supply_representation texts
+also carry the owner's required correction (professional summary WITHOUT DIRECT
+IDENTIFYING DATA, never "anonymised") in all six locales — scope/recipients/data
+unchanged, verified against the live `first_party_supply_feed_v1()` body.
+
+Pre-authoring production read (2026-09-20): pins 4562…acf4 / 7d57…ba1a / 1e75…788f matched
+the registry on main exactly (recomputed with the real `consentTextHash`);
+profile_discoverability 8 events / 5 grants at v2 (stay `granted` — the readers compare
+VERSION only), employer_data_disclosure 0 events, partner_supply_representation 0 events,
+0 declarations, 0 feed rows. Grant RPCs compare version AND hash and fail closed, so the
+apply and the registry deploy belong to one step; in between a new grant is refused
+(`stale_consent_version`), never recorded against the wrong text.
+
+Owner approval (2026-09-20, verbatim): "APPROVE MIGRATION 20260920173000_privacy_consent_locale_pl_hash_repin_v1.
+Apply only the reviewed migration. Preserve historical consent evidence and verify all three resulting
+pins by read-back after application." #1810 squash-merged as `c289ac57` (required checks quality +
+migration-safety green); Vercel production deployment 6556470209 success; then applied via Supabase MCP
+`apply_migration` (name `20260920173000_privacy_consent_locale_pl_hash_repin_v1`, the file on main,
+sha256 `4dcca3d06c5d8d6940a962892b56295561be875c5cee93c64992deb65c0782cb`) — never `db push`.
+
+Read-back (18:58:51Z, immediately after apply): `profile_discoverability` 2026-07-11.v2 →
+`d4145ac3d118b17e5bc3bd68c3f2737ff0c872e08a38df034464213aad534549`; `employer_data_disclosure`
+2026-07-11.v2 → `6f57d9167a6313220ba34ae46a1ca03357db0737d17f5985b3dd5f1e75b6fb81`;
+`partner_supply_representation` 2026-09-04.v1 → `28b2a552ae56b5e0f260896664a9f5f7a5a918fe536e613c62c0028ac267db7f`;
+all three `updated_at = 2026-09-20 18:58:51Z`, versions unchanged. `privacy_consent_events` untouched:
+profile_discoverability 8 events / 5 grants, all 5 at the current version (still `granted`);
+employer_data_disclosure 0; partner_supply_representation 0. `schema_migrations` newest row
+`20260920185851` = this migration. Production `/pl/jobs/e3ec6c1e…` answered `lang="pl"` with Polish copy,
+0 `[EN]` markers and `/pl/auth/signup?next=/pl/jobs/…?via=auth` CTAs at 18:59Z.
+
+### `public_vacancy_translations_v1` — GREEN (ONE additive jsonb column, no grant/policy/row change) — APPLIED 2026-09-22, ledger `20260922102211`
+
+Repo file `supabase/migrations/20260922150000_public_vacancy_translations_v1.sql`
+(paired `supabase/rollbacks/…down.sql`). Owner P0 2026-09-22 §9 (foreign-language
+vacancies in the reader's locale). Finding: 101,885 published SV ads, 100%
+`translation_status='unavailable'`, provider null — the importer's translation
+stage ran with `NO_PROVIDER_CONFIGURED` into ONE target language. Change:
+`public_vacancies.translations jsonb not null default '{}'` + CHECK
+`jsonb_typeof(translations) = 'object'` + column comment. A column, not a table,
+because `pg_default_acl` is empty on this project (a new table would need GRANTs
+→ RED); the existing `authenticated` SELECT under `is_active` and `service_role`
+ALL cover the column. Entries are DERIVED per-locale renderings (status, title,
+description, sourceLanguage, sourceHash = `content_hash` at generation, provider,
+model, generatedAt) written on read by the ONE AI runtime for a signed-in
+reader's bounded set (task `translate_vacancy`, PUBLIC); the originals are
+untouched. Readback after apply: column present (`jsonb`, default `'{}'::jsonb`),
+103,406 rows, 0 renderings (generated on read, as designed); `schema_migrations`
+newest row `20260922102211` = this migration. Applied autonomously under the
+GREEN prod-apply policy (AGENTS.md → PROD APPLY AUTONOMY): static gate GREEN,
+reviewed, reversible, tests green, target verified.
+
+### `companies_contact_minimization_v2` — RED (column grant narrowed + ONE SECURITY DEFINER reader, no data change) — APPLIED 2026-09-24, ledger `20260924083740`
+
+Repo file `supabase/migrations/20260924120000_companies_contact_minimization_v2.sql`
+(paired `supabase/rollbacks/…down.sql`). K2-1 v2; supersedes the never-applied
+#1430 draft (`20260902210000_companies_contact_minimization_v1`, which must not
+be applied). Security analysis and production evidence: owner channel only
+(AGENTS.md — this repository is public).
+
+Owner RED approval 2026-09-24, applied in the approved order: #1868 merged
+(`04f7b741`) → Vercel Production deployment of exactly that commit `success` →
+rolled-back production dry run → Supabase MCP `apply_migration` of the file on
+main (sha256 `48da75dd0e704648e0154df63000ed125e1c9630856f40dc9bd349626960441d`)
+— never `db push`. Read-back: the `schema_migrations` row is present and the
+grant, function and per-role checks passed (details in the owner channel);
+PostgREST reloaded its schema cache right after the apply.
+
+Status: DB-level PRODUCTION-PROVEN. App path NOT PROVEN — pending a signed-in
+company-page walk as the owner AND as the manager, each seeing their own
+company's details rendered. A bare HTTP 200 from the reader is not proof: an
+unauthorized caller also gets 200 with zero rows.
+
+### `set_company_description_v1` — RED (ONE SECURITY DEFINER write, no grant on the table, no data change) — APPLIED 2026-09-24, ledger `20260924092646`
+
+Repo file `supabase/migrations/20260924130000_set_company_description_v1.sql`
+(paired `supabase/rollbacks/…down.sql`). The public business page's
+description save: `owns_company` (creator + active owner/admin) only,
+description only, <= 2000, EXECUTE for `authenticated` only; the existing
+mirror trigger carries it to the organization.
+
+Owner RED approval 2026-09-24 (option b), applied in the approved order: #1870
+merged (`b17014a0`) → Vercel Production deployment of exactly that commit
+`success` → rolled-back production dry run → Supabase MCP `apply_migration` of
+the file on main (sha256
+`6599fe428749b0bff627b3da16b1a512ef1ddd74b4a17bcd35eaf8b34d20d6d1`) — never
+`db push`. Read-back: the `schema_migrations` row is present and the function,
+grant and per-role checks passed (details in the owner channel); no
+description was written by the verification (rolled back).
+
+Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN — pending a signed-in owner
+saving a description on the business profile panel and seeing it on the public
+page.
+
+### `manager_projects_roster_rls_v1` — RED (four ALTER POLICY via the existing `manages_organization`, no grant, no data change) — APPLIED 2026-09-24, ledger `20260924092836`
+
+Repo file `supabase/migrations/20260924140000_manager_projects_roster_rls_v1.sql`
+(paired `supabase/rollbacks/…down.sql` restoring the exact previous
+expressions). projects select / insert / update and company_workers select
+gain `OR manages_organization(...)`; `projects_delete`, every other table,
+grants, functions and roles untouched.
+
+Owner RED approval 2026-09-24, applied in the approved order (the reverse of
+an app-first change): rolled-back production dry run (before/after in one
+statement, with a temporary non-admin manager seeded inside the rolled-back
+transaction) → Supabase MCP `apply_migration` of the reviewed file (sha256
+`da03784a309e1d7d8b280e3f2825ded1fc1411b041f154ffc4fe742dfc8e3652`) → read-back
+(the four policy expressions and unchanged grants; per-role checks passed —
+details in the owner channel) → THEN the app half (#1871) merged.
+
+Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN — pending the manager's own
+walk (create a project, open the roster) in a real session.
+
+### `worker_self_declared_profession_v1` — RED (one loosened column guarantee) — APPLIED 2026-09-27, ledger `20260927060325`
+
+Repo file `supabase/migrations/20260927053000_worker_self_declared_profession_v1.sql`
+(paired `supabase/rollbacks/…down.sql`, which REFUSES while any self-declared
+row exists and otherwise restores the pre-migration shape). Owner direction
+2026-09-27, final approval of #1879: **a classifier may not be the list of
+permitted human answers.** `worker_professions.profession_id` was a NOT NULL
+foreign key into the 49-row registry and no person-scoped free-text occupation
+column existed, so a profession the registry does not carry could not be
+recorded at all — the owner's test user typed "LLM programuotojas" and the
+dashboard then read "Profesija dar nenurodyta".
+
+The SAME table now carries the person's words: `label` (verbatim, shown as
+typed), `normalized_label` (GENERATED `lower(btrim(label))`, a dedupe key
+only) and a SEPARATE nullable `esco_occupation_id` for a standardized link the
+person picked; `profession_id` became nullable. Two check constraints (a row
+names something; the label is 2..200 after trimming) and one partial unique
+index per `(worker_id, normalized_label)`. No new table, policy, grant,
+definer or RPC; `is_primary` gained no new constraint and no new meaning.
+
+RED for exactly one reason — migration-safety rule (l), `alter column ... drop
+not null`; `@human-gate-approved` in the file is the acknowledgement, and the
+owner's final approval in the session is the gate.
+
+Applied via Supabase MCP `apply_migration` (never `db push`).
+
+**Before:** 26 rows, 15 of 65 workers, `profession_id NOT NULL`, 6 check
+constraints. **Readback after:** 26 rows unchanged, 0 rows without a registry
+profession, 0 rows with a label — nothing was written, backfilled or
+interpreted. `profession_id` nullable; `normalized_label` reported by
+`information_schema` as `ALWAYS / lower(btrim(label))`; both new constraints
+and both new indexes present; the pre-existing
+`worker_professions_one_primary` and `worker_professions_worker_id_profession_id_key`
+intact.
+
+**Behavioural readback on production, in a transaction that was rolled back**
+(the owner's own case): `'  LLM programuotojas  '` stored verbatim with its
+spacing while the generated key folded to `llm programuotojas`; a case-variant
+duplicate refused (`unique_violation`); a row naming nothing refused
+(`check_violation`); a 201-character label refused (`check_violation`). Row
+count returned to 26 with 0 labels after the rollback.
+
+Status: DB-level PRODUCTION-PROVEN. The app chain (onboarding → save →
+profile → Living CV) is a separate change; until it ships, nothing writes
+`label`, so the column is live and empty by design. UI NOT PROVEN.
+
+### `worker_self_declared_profession_language_v1` — additive (nullable column + two CHECKs) — APPLIED 2026-09-27, ledger `20260927062927`
+
+Repo file `supabase/migrations/20260927063000_worker_self_declared_profession_language_v1.sql`
+(paired `supabase/rollbacks/…down.sql`, which REFUSES while any row records a
+language). Owner ruling 2026-09-27, on a Codex finding against doctrine §2.1:
+`worker_professions.label` is the person's own words, so the language they
+wrote it in is recorded beside it.
+
+Applied BEFORE the writer exists, deliberately: nothing writes `label` yet, so
+the language lands before the first row and no row ever needs reconstructing
+or backfilling — the window Codex pointed at, taken while it was still open.
+
+Scope as the owner set it: ONLY `worker_professions`; no §2.1 audit or
+harmonisation of the five other person-authored label columns; no automatic
+translation and no translation columns (§2.2); `original_language` never
+changes `label`; the value comes from the REAL input locale the product
+already carries (the wizard's `useLocale()`, submitted as the form's `locale`
+and validated against `lib/i18n/config.ts`), NEVER detected from the text; and
+it is NULLABLE, because an unknown language stays unknown rather than being
+defaulted (SEP-7).
+
+Shape: `text` + a NULL-permitting CHECK over the platform's 13-code set,
+mirroring `conversation_messages_original_language_chk` (the newest, closest
+precedent), plus a second CHECK that a language can only exist where words do.
+
+CLASSIFICATION: `.github/scripts/migration-safety.mjs` reports **GREEN — zero
+risk findings**; it is purely additive. It carries NO `@human-gate-approved`
+annotation, because there is nothing to acknowledge and marking an unrisky
+file as acknowledged-risky would be a false signal. It was owner-gated by
+PROCEDURE instead: the exact diff was shown and explicitly approved before
+apply.
+
+**Before:** 26 rows, no `original_language` column. **Readback after:** 26 rows
+unchanged, 0 with a language, 0 with a label; `original_language` is
+`text / nullable`; all four check constraints present
+(`worker_professions_label_len`, `worker_professions_language_needs_label`,
+`worker_professions_names_something`,
+`worker_professions_original_language_chk`).
+
+**Behavioural readback on production, in transactions that were rolled back:**
+`'LLM programuotojas'` + `'lt'` stored together; an invented locale `'xx'`
+refused (`check_violation`); a language set on a registry row that carries no
+words refused (`check_violation`, verified against a worker that really holds
+a registry row, after a first probe updated zero rows and proved nothing).
+Row counts returned to 26 / 0 / 0.
+
+Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN — the app chain is next.
+
 ## Deferred / rejected — NEVER-APPLY register
 
 - **PR #379 `supabase/migrations/20260614120000_ai_runs_suggestions.sql` — MUST NEVER BE APPLIED (hygiene pass 2026-08-24).** Recorded on closing #379 as SUPERSEDED. Two independent collisions with the already-applied `ai_runs` table (created by `20260714150000_ai_runs_audit_v1.sql`): (1) **shape/policy** — #379 re-declares `ai_runs` with a different, incompatible schema and rewrites its RLS policy against a column the live table does not have, so applying it would drop the production admin-only policy and either error or widen exposure; its `create table if not exists` would silently no-op over the live table, hiding the mismatch. (2) **filename/version** — its `20260614120000_` prefix collides with the already-present `20260614120000_worker_demand_visibility.sql`. The code side is superseded too: `apps/web/lib/ai/runtime/audit-store.ts` + `persistAiRunAudit(...)` + guard `ai-cost-accounting.test.ts` are canonical; `apps/web/lib/ai/audit/` does not exist. The `ai_suggestions` lifecycle idea is already described in `docs/ai/INTERNAL_LLM_AGENTS_V1.md`. Reminder [CORRECTED 2026-08-24]: the `ai_runs` 90-day retention block is now SATISFIED (canonical retention applied 2026-08-08 — see the ai_runs_audit_v1 row's correction). It is no longer a precondition; remaining AI-activation decisions (provider selection, budget/key-handling, DPA/locale) stay owner-gated per `docs/commercial/ai-provider-decision-package-v1.md`. Branch `feat/cc/ai-agents-v1-audit-store` is preserved.
+- **PR #1806 `supabase/migrations/20260919200000_notification_events_v9_journal_confirmed.sql` - MUST NEVER BE APPLIED (closed SUPERSEDED 2026-10-03).** Superseded by #2116 (`message_journal_review_notification_types_v1`, ledger 20261002184321): `journal_review_decided` (decision=approved) delivers the behaviour on all three review paths. This draft's v9 CHECK lists (23 event types / 12 entity types) omit `job_alert`, `message_received`, `journal_review_decided`, `public_vacancy` and `conversation`, so applying it would fail on existing rows or narrow the live constraint. Applied history is untouched.
+
+### `invitation_management_delegation_v1` — RED (per-person invitation delegation; definer functions, one ALTER POLICY, grant/revoke) — APPLIED 2026-09-24, ledger `20260924120147`
+
+Repo file `supabase/migrations/20260924150000_invitation_management_delegation_v1.sql`
+(paired `supabase/rollbacks/…down.sql`, which refuses while a delegation is
+active and restores the previous definitions byte-identically). Owner
+direction 2026-09-24: invitation management by permission, never by job
+title — `company_memberships.manages_invitations` (default false, no
+backfill), written only by the audited owner/admin command
+`membership_set_invitation_manager_v1`; the organization-invitation authority
+and company worker invitations admit the owner, an owner/admin member or a
+delegated member; project and need invitations unchanged; governance
+membership invitations stay owner/admin.
+
+Owner RED approval of #1875 on 2026-09-24, applied in the approved order:
+rolled-back production dry run (before/after in one transaction, temporary
+non-admin members seeded inside it; the function sources of the dry run equal
+the reviewed file's) → Supabase MCP `apply_migration` of the reviewed file
+(sha256 `e2cdac8ae7304d00f8458506bb652b422453eac73cfb5d1dc962123ccd034a1a`) → read-back (ledger row, the six function sources, EXECUTE
+for authenticated only, the column, the policy expression, 0 delegations;
+per-role checks passed — details in the owner channel) → THEN the app half
+(grant control, the member's own flag, delegated organizations in the invite
+panel) merged with #1875.
+
+Status: DB-level PRODUCTION-PROVEN. UI NOT PROVEN — pending the owner granting
+the permission to a member in Settings and that member inviting from the
+People page and the invite panel in a real session.
+
+
+## 20261002102903 — journal_explicit_project_attribution_v1 (#2103)
+
+JOURNAL_PROJECT_ATTRIBUTION_AMBIGUOUS. Additive 12-arg overload of
+`create_journal_entry_full` (explicit `p_project_id` + `p_project_explicit`;
+validated: active assignment AND the entry's own organization, else 42501
+`project_not_assignable`); the 10-arg function keeps signature, grants and
+behaviour as a wrapper. SECURITY INVOKER, search_path pinned, EXECUTE for
+authenticated only. No DROP, no backfill.
+
+Owner approval: 2026-10-02 handoff §7, restated in chat the same day. Applied via
+Supabase MCP `apply_migration` to project `gorgitwvdzxbnaxhrsrw` (version
+20261002102903) from the reviewed file (sha256 of the file at apply time
+`e98e62118d0e101995e27e1e2efdcfa7aee63ba3c8f94f4a7c15f50405c85443`, minus the begin/commit wrapper). Read-back: both overloads present,
+invoker, `search_path=public`, ACL authenticated+postgres only. Before the apply
+the same SQL was exercised in a rolled-back transaction (6 cases incl. foreign
+and ended assignment rejections).
+
+Status: DB APPLIED + READ-BACK. App half in #2103 (not merged). End-to-end
+(worker with 2 active projects -> picker -> save -> project hours -> owner
+confirmation) NOT PROVEN.
+
+## 20261002184321 - message_journal_review_notification_types_v1 (#2116)
+
+Repo file `20261002140000_message_journal_review_notification_types_v1.sql`. Widens the two CHECK
+constraints on `notification_events` (`event_type` +`message_received`, +`journal_review_decided`;
+`entity_type` +`conversation`, +`journal_entry`) by drop and re-add; strict superset, no data, RLS or
+grant change. Before the apply the production constraint lists were read back and matched the migration's
+base sets exactly (23 event types, 14 entity types), so the re-add narrowed nothing. Applied 2026-10-02 via
+Supabase MCP `apply_migration` to project `gorgitwvdzxbnaxhrsrw` (version 20261002184321). Read-back: both
+constraints contain the new values and are validated.
+
+Status: DB APPLIED + READ-BACK; emitters deployed with #2116. End-to-end (message sent -> durable
+`message_received` -> recipient -> read/unread; journal decision -> `journal_review_decided`) NOT PROVEN
+(PRODUCTION_E2E_BLOCKED_QA_IDENTITY).
+
+## 20261003090939 - experience_responses_select_reply_status_v1 (#2131) - EVID-6, APPLIED 2026-10-03
+
+Repo file `20261002143000_experience_responses_select_reply_status_v1.sql` (squash-merged as 5933d507e, reviewed head
+52988d06 unchanged, required checks green). One `ALTER POLICY experience_responses_select ... USING`: the record
+author's branch additionally requires the REPLY's own `moderation_status = 'published'` (it previously bound to the
+record's status). Strictly narrowing; reply-author and admin branches unchanged; name, command and roles untouched.
+Owner approval: chat 2026-10-03. Exposure before: 1 reply (`submitted`) under a published record.
+Read-back: ledger row present; `pg_policies` shows the new expression, `check=NULL`, RLS enabled. Rolled-back JWT
+proof (same transaction, reply status cycled): record author sees the reply only when the reply is `published` (0 for
+submitted / in_moderation / rejected); reply author 1 in every state; stranger 0; NULL uid 0; anon denied by grant.
+Row state unchanged afterwards. Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk). Rollback file
+documents that it reintroduces the defect.
+
+## 20261003095641 - list_agency_offered_candidates_v2_connection_gate_v1 (#2135, successor of #1815) - APPLIED 2026-10-03
+
+Repo file `20261003100000_list_agency_offered_candidates_v2_connection_gate_v1.sql` (squash-merged as fccb3a3d5; the
+migration is byte-identical to the reviewed head 901a7e15, the only later change being test-only count guards).
+`CREATE OR REPLACE` of `list_agency_offered_candidates_for_request_v2`, identical signature/return/SECURITY DEFINER/
+STABLE/search_path/ACL; adds the v1 gate (`connection.status='active'` and `share.status='active'`). Revoke/unshare
+removes future read access; accepted/declined offers leave this read while the authorizing connection/share is inactive
+and remain stored. Old #1815 was NOT merged.
+Owner approval: chat 2026-10-03. Read-back: ledger row, definition contains both predicates, SECURITY DEFINER, STABLE,
+search_path=public, ACL postgres+authenticated. Rolled-back JWT proof on real prod rows (request with 2 offers):
+active conn+share owner=2; connection revoked owner=0; share unshared owner=0; re-activated owner=2; wrong client 0;
+stranger 0; NULL uid 0; anon denied. Connection/share statuses, 4 offers and 163 audit rows unchanged afterwards.
+Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk).
+
+## 20261003110012 - manager_assigns_roster_worker_on_managed_project_v1 (#2079) - APPLIED 2026-10-03
+
+Repo file `20261002142000_manager_assigns_roster_worker_on_managed_project_v1.sql` (squash-merged as 6ca35e7fd; byte-identical
+to the reviewed head 54235f91, later changes test-only count guards). `CREATE OR REPLACE assign_worker_to_project`: one added
+authorization arm - the caller manages THIS project's organization and the worker is an ACTIVE member of the roster of the
+company that owns the project - inside the existing fail-closed `not coalesce((...), false)`. Pre-image checked on production
+before apply (booking arm and placement block present, manager arm absent). Owner approval: chat 2026-10-03.
+Read-back: ledger row; SECURITY DEFINER, search_path=public, ACL postgres+authenticated; manager arm, booking arm, null-safe
+wrapper and placement block all present. Rolled-back JWT proof on real rows: manager + managed project + roster worker ALLOWED;
+manager + project of another organization DENIED (42501); manager + off-roster worker DENIED; ordinary worker DENIED; organization
+owner ALLOWED; anon DENIED; NULL uid DENIED. Assignments (8), audit rows (163) and engagements (105) unchanged afterwards.
+The booking-engagement arm and the admin arm are confirmed structurally in the live body, not exercised with a live fixture.
+Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk).
+
+## 2026-10-03 - billing stack merged, recovery stays OFF (no migration)
+
+#2122 (8d5510bd6), #2126 (d3af7ae73) and #2127 (a637c8137) merged in order, each re-read and green before merge. Option B: the
+server env `BILLING_RECOVERY_ENABLED` (default OFF, only the literal `true`) gates the cron route, `runBillingRecovery` and the
+self-service refresh write; a valid CRON_SECRET alone does not permit a write. Production read-back after the merges: 0
+`reconcile.subscription` audit rows, 0 webhook rows, 0 subscriptions, 0 LMC transactions, no LMC flag on. The env var was not
+set anywhere. Runtime proof of the 503 path needs the CRON_SECRET and was not attempted.
+
+## 2026-10-03 - company_workers two-row repair: PERFORMED (data repair, no migration)
+
+Owner-approved targeted additive repair of the two historical pre-fix accepted rows (accepted 2026-09-04 / 2026-09-05, before
+ledger 20260908143925). Each row's preconditions were re-asserted INSIDE the writing statement (roster row active; org resolves via
+legacy_company_id; accepted invitation exists; NO engagement and NO membership of ANY status for that person+org); a failed
+precondition would have written nothing. Per row: one `engagement_contexts` (employee, active, is_primary=false, hash_self as in
+the forward-path function) and one `audit_logs` row (action `repair_company_worker_engagement`, actor null, result `org_bound_repair`).
+Read-back: engagements 105 -> 107, audit 163 -> 165, memberships for the two pairs 0, stranded rows remaining 0; under each worker's own
+JWT `belongs_to_organization` is now true (was false in a rolled-back dry run) and `is_active_org_member` stays false, i.e. exactly the
+state a forward-path acceptance produces; no governance seat granted. No other row changed.
+
+## 20261003131904 - subject_contest_withdraw_v1 (#2138) and 20261003141047 - subject_contest_withdraw_constraint_reconcile_v1 (#2140) - APPLIED 2026-10-03
+
+#2138 (squash 32ff363ec; file `20261003110000_subject_contest_withdraw_v1.sql`) applied as reviewed: BEFORE INSERT trigger
+`organization_evidence_events_dispute_state_guard` (SECURITY DEFINER; 23505 duplicate standing contest, 23514 withdrawal without a standing
+contest), old one-contest-ever unique index dropped, RPC `withdraw_organization_evidence_dispute_v1` (SECURITY DEFINER, search_path=public, ACL
+postgres+authenticated), event_type CHECK widened. DEFECT FOUND BY THE PRODUCTION PROOF: production already carried
+`organization_evidence_events_event_type_chk` (20260924100000_historical_timesheet_m1; allows source_preserved, not dispute_withdrawn); #2138
+added a differently named `..._event_type_check`, so two CHECKs applied together (the withdraw RPC failed closed with 23514 and source_preserved
+was newly refused; 0 such rows, no writer on main, nothing live broke). FIX-FORWARD #2140 (squash 4afe910aa; file
+`20261003140000_subject_contest_withdraw_constraint_reconcile_v1.sql`, applied 20261003141047): drops both names, adds ONE
+`organization_evidence_events_event_type_chk` with the union set (attested, attestation_withdrawn, independently_verified, verification_withdrawn,
+withdrawn, reinstated, disputed, dispute_withdrawn, corrected, source_preserved). No data rewrite, no policy change.
+Read-back: exactly one event_type set CHECK (`_chk`, validated, 10 values); the 158 events intact (all attested). Rolled-back JWT proof on production
+(fixture subject re-linked inside the transaction): contest OK; second standing contest 23505; manager, stranger, NULL uid and anon withdraw all
+DENIED (42501); subject withdraw appends one dispute_withdrawn; second withdraw idempotent (no new row); direct dispute_withdrawn insert DENIED (23514);
+UPDATE and DELETE DENIED; re-contest OK; history kept (2 disputed + 1 dispute_withdrawn); another actor's contest untouched; an unlisted type is
+refused. source_preserved is CHECK-compatible (inserted as postgres only) - writer/RLS authority for source_preserved is NOT claimed proven.
+Post-rollback: 158 events, 0 non-attested, trigger present. Status: PASS_REAL_PRODUCTION at RPC/data level (no browser walk).
+#1646 closed as superseded (canonical home recorded in its close comment).
+
+## 20261003142847 - privacy_export_import_lines_subject_v1 (#2132) - APPLIED 2026-10-03
+
+Repo file `20261003120000_privacy_export_import_lines_subject_v1.sql` (squash 16de402ed; migration byte-identical to the reviewed head). One new
+function `privacy_export_evidence_import_rows_v1()` (no argument, returns setof jsonb, SECURITY DEFINER, STABLE, search_path=public, ACL postgres +
+authenticated): subject = auth.uid() via the linked organization_people row; a column ALLOWLIST (no source_fact, fact_fields, derived, customer_*,
+activity_text, context_label, session_id, person_match_*, record_fingerprint, problem); person_label only when it equals the roster display name.
+No table, policy or grant changed. Read-back: ledger row; signature; none of the excluded columns appear in the body; evidence_import_rows policies
+unchanged; 158 rows intact. Proof on production (read-only): the one real linked subject gets 1 of 158 rows with exactly the 16 allowlisted keys and 0
+rows of other people; a stranger gets 0 rows via the RPC and 0 via a direct table select (RLS not widened); NULL uid 0; anon DENIED (42501); no
+caller-supplied-id signature exists. LIMIT: production has a single linked subject, so cross-subject isolation is shown by the data, not by a second
+subject; a trigger-bypass fixture for that was refused by the permission layer and not worked around. Authenticated end-to-end bundle download:
+BLOCKED_QA_IDENTITY. Status: the LIVE evidence_import_rows PER-12 gap is closed at RPC level; PER-12 overall stays PARTIAL (agreement_events and
+agreement_amendments are a FUTURE_CONTRACT_GAP, 0 rows).
+
+## 20261003144407 - work_tasks_stage_and_subtask_v1 (#2123) - APPLIED 2026-10-03
+
+Repo file `20261002150000_work_tasks_stage_and_subtask_v1.sql` (squash 1d8237860; byte-identical to the reviewed head 5faba5928 - only the
+count guards and a sorted allow-list entry changed afterwards). Applied as one statement set WITHOUT the file's comment lines (code identical).
+Adds `work_tasks.stage_id` (FK project_stages, on delete set null) and `parent_task_id` (self FK, no action) with partial indexes; trigger
+`trg_work_tasks_structure_guard` (SECURITY DEFINER guard fn; same-project stage/parent, no cycle, depth <= 3, no re-pointing a task's project
+while live Journal evidence is linked); internal `work_task_structure_check_v1`; `create_work_task_v2` (now 9-arg, old 7-arg dropped) and
+`update_work_task_v2` (now 8-arg, old 6-arg dropped) with optional stage/parent; new `set_project_stage_responsible_v1`;
+`link_journal_entry_to_task_v1` re-issued with project/organization consistency. Owner approval: chat 2026-10-03.
+Pre-apply production checks: every referenced column and helper present; production `create_work_task_v2` body identical to the repo
+pre-state after stripping comments and whitespace (2540 chars); production `update_work_task_v2` / `link_journal_entry_to_task_v1` md5 equal to the
+proof pre-state (the #2128 NULL-safe bodies); no existing stage_id/parent_task_id columns or colliding indexes/triggers; the old overloads were exactly
+the 7-arg and 6-arg signatures the migration drops.
+Read-back: ledger row; one overload of each function (9-arg create, 8-arg update; `old_overloads_left` = 0); ACLs authenticated on the five public
+functions and postgres only on the two internal ones; both columns and indexes; both triggers; the 3 existing tasks intact and unstructured.
+Rolled-back JWT proof on production: PROJECT -> STAGE -> TASK -> SUBTASK (owner creates staged task; subtasks L2/L3 inherit the stage; L4
+refused `depth_exceeded`); legacy 7-arg create and 6-arg update still work; cycle refused; cross-project parent refused; stage-responsible set by
+the owner, a foreign-organization engagement refused; ordinary worker create/update/set-responsible all refused; outsider, stranger refused
+(`not_found` / `not_allowed`); NULL uid and anon DENIED (42501); a pure non-admin manager creates a staged task on their own project and gets
+`not_allowed` on another organization's project; owner preserved; direct cycle update refused by the trigger (23514) and a parent with children
+cannot be deleted (23503); Journal -> task: a project entry links to a same-project task (`ok`, then `already_linked`). Post-rollback: 3 tasks, 0
+structured, no proof rows, audit count unchanged.
+NOT EXERCISED ON PRODUCTION (scratch-DB proof only): restage cascade to descendants and the `evidence_linked` refusal (no project has 2+ stages),
+a Journal entry of ANOTHER project being refused (no second project with entries), the pure-manager set-responsible on an existing stage. A first
+proof run showed a "manager" creating on another organization's project; that identity was a platform admin and owner of that organization (fixture
+error, not a defect), and was redone with a non-admin manager. Rollback semantics: scratch proof only, no destructive rollback on production.
+Status: PASS_REAL_PRODUCTION at schema/RPC/data level; UI is STATIC/RENDER_PROVEN only (not BROWSER_PROVEN).
+
+## Correction 2026-10-03 - #1436 invitation binding IS applied
+
+`docs/consolidation/PR_TABLE.md` called `20260902230000_accept_invitation_binds_org_membership_v1` unapplied. It is applied
+(ledger `20260908143925 accept_invitation_binds_org_membership_v1`). Only the optional backfill was never run: 2 historical
+`company_workers` rows (accepted 2026-09-04 / 2026-09-05, before the fix) have no employee engagement in their org.
+Owner decision pending: additive backfill (engagement_contexts + audit row, no membership), 2 rows.
+
+## 20261003071338 - work_task_authz_null_safe_v1 (#2128) - P0 SECURITY, APPLIED 2026-10-03
+
+Repo file `20261002141500_work_task_authz_null_safe_v1.sql` (sha256 of the LF file on main at e30915a47:
+`5959a6b2d329dd633c63a0ceb0f243a3d18abcede71fbdd174b474e1b8a4545e`, applied minus the begin/commit
+wrapper). Root cause: authorization guards of the shape `if not (A or <nullable col> = uid or ...)` evaluate
+to NULL when the column is NULL, `IF NULL` does not deny, and an outsider passes. Fix: every such guard is
+`if not coalesce((<same predicate>), false) then deny` - authorization succeeds only when explicitly TRUE.
+Eight SECURITY DEFINER functions re-issued with unchanged signatures and grants:
+`update_work_task_v2(6)`, `set_work_task_status_v2`, `link_journal_entry_to_task_v1`,
+`unlink_journal_entry_from_task_v1`, `add_work_task_dependency_v1` (blocker check),
+`start_workflow_instance_v1` (all LIVE-exploitable on unassigned / NULL-keyed rows), and
+`create_invitation_v1` / `create_invitation_v2` org branch (LATENT: needed an organization with a NULL
+`owner_profile_id`; 0 of 21 at apply time). Not vulnerable: `create_invitation_v2` demand branch,
+`remove_work_task_dependency_v1`, `reopen_work_task_v1`, `assign_work_task_v1`.
+
+Owner approval: chat 2026-10-03 (conditional on green CI; CI was green). Exposure at apply time: 3 work_tasks
+(all unassigned), 0 events/links/dependencies by non-creator/assignee/manager actors - no evidence of
+exploitation. Read-back after apply (md5 of `prosrc` / length): update_work_task_v2
+`499f020726deb9370c25edbe70437152`/2643, set_work_task_status_v2 `a7911a78f50e6f527622d07ec90061a0`/1352,
+link_journal_entry_to_task_v1 `f1725edb679f346166ae1586acdcfa62`/1985, add_work_task_dependency_v1
+`f679a9eb723cc2892740714a1e7fdbcb`/3157, unlink_journal_entry_from_task_v1
+`20592dd1c01b05ef01d3361d30ccf65d`/1535, start_workflow_instance_v1 `c0ec9f2584fb2eba27a3b2c610f73c61`/5462,
+create_invitation_v1 `1a2d9550e182108487e8c707eac850a5`/6387, create_invitation_v2
+`84d3d1e7500150a0a3fdda2564a34a73`/8121 - all equal to the values computed from the reviewed file. ACL unchanged
+on all eight: `{postgres=X/postgres,authenticated=X/postgres}`, SECURITY DEFINER, `search_path=public`;
+anon/PUBLIC have no EXECUTE; one overload each. Scratch-Postgres 16 proof (not production): 109 passed, 0
+failed, including before-fix exploit reproduction, after-fix refusal, authorized paths unchanged, rollback and
+re-apply. No exploit was run on production. Regression guard:
+`apps/web/lib/guards/null-safe-authorization-guards.test.ts`.
+
+Status: P0_FIXED_PRODUCTION (CI green, merged, applied, read-back and ACL match, Vercel deployment success).
+Ordering consequence: #2123 re-issues `update_work_task_v2` (8-arg) and `link_journal_entry_to_task_v1` and
+MUST carry the same NULL-safe guard form; #2079 is independent.
+
+## apply_migration version reconciliation (repo file timestamp <-> production ledger version)
+
+`apply_migration` assigns its own version at apply time, so the production ledger version differs from the
+repo file's timestamp. Matched by migration name, read from `supabase_migrations.schema_migrations` on
+2026-10-03 (entries from 2026-09-15 onward; 53 entries). Documentation only - nothing here is replayed.
+
+| Repo file timestamp | Production ledger version | Name |
+|---|---|---|
+| `20260914210000` | `20260915042406` | external_profiles_v1 |
+| `20260915180000` | `20260915185038` | subject_contest_and_clash_receipt |
+| `20260917120000` | `20260917080303` | universal_invitation_referral_network_v1 |
+| `20260917130000` | `20260917091045` | invitation_preview_demand_column_fix_v1 |
+| `20260917140000` | `20260917112002` | widen_original_language_uk_ka |
+| `20260917160000` | `20260917145229` | vacancy_interest_commercial_handoff_v1 |
+| `20260917170000` | `20260917155456` | commercial_handoff_requeue_on_reexpress_v1 |
+| `20260918070000` | `20260918070510` | roster_link_subject_consent_guard_v1 |
+| `20260919100000` | `20260919104526` | roster_writes_rpc_only_v1 |
+| `20260919120000` | `20260919143247` | add_org_member_requires_consented_roster_v1 |
+| `20260919130000` | `20260919145731` | update_project_facts_v1 |
+| `20260919150000` | `20260919151920` | end_roster_link_v1 |
+| `20260919140000` | `20260919153945` | usage_cost_trigger_search_path_v1 |
+| `20260919190000` | `20260920051619` | 20260919190000_demand_lifecycle_colleague_v1 |
+| `20260919210000` | `20260920052103` | 20260919210000_relationship_journal_reviewable_v1 |
+| `20260920173000` | `20260920185851` | 20260920173000_privacy_consent_locale_pl_hash_repin_v1 |
+| `20260922120000` | `20260922070548` | countries_all_iso_v1 |
+| `20260922140000` | `20260922091458` | privacy_consent_rpc_locale_pl_v1 |
+| `20260922130000` | `20260922095848` | company_need_intake_country_registry_v1 |
+| `20260922150000` | `20260922102211` | public_vacancy_translations_v1 |
+| `20260923114500` | `20260923142823` | nonstop_org_consolidation_v1 |
+| `20260924100000` | `20260924021637` | historical_timesheet_m1 |
+| `20260924120000` | `20260924083740` | companies_contact_minimization_v2 |
+| `20260924130000` | `20260924092646` | set_company_description_v1 |
+| `20260924140000` | `20260924092836` | manager_projects_roster_rls_v1 |
+| `20260924150000` | `20260924120147` | invitation_management_delegation_v1 |
+| `20260927053000` | `20260927060325` | worker_self_declared_profession_v1 |
+| `20260927063000` | `20260927062927` | worker_self_declared_profession_language_v1 |
+| `20260928140000` | `20260928170332` | booking_accepted_not_rewritten_v1 |
+| `20260928180000` | `20260928174954` | agency_capability_one_rule_v1 |
+| `20260928181000` | `20260928175006` | booking_reopen_lifecycle_edges_v1 |
+| `20260928190000` | `20260928181421` | agency_delegated_demand_and_placement_v1 |
+| (no standalone file - see note) | `20260928182413` | agency_drafted_needs_output_column_v1 |
+| `20260928200000` | `20260928183552` | booking_reaccept_restores_engagement_v1 |
+| `20260928210000` | `20260928185542` | agency_placement_booking_role_v1 |
+| `20260928220000` | `20260928195132` | placement_opens_client_collaboration_v1 |
+| `20260928230000` | `20260928202514` | placement_end_closes_client_collaboration_v1 |
+| `20260929090000` | `20260929055920` | historical_organization_names_v1 |
+| `20260930090000` | `20260930073055` | external_action_receipts_v1 |
+| `20260930100000` | `20260930083109` | account_classifications_v1 |
+| `20260930110000` | `20260930093158` | discovered_organizations_v1 |
+| `20260930120000` | `20260930101028` | project_duplicate_marker_v1 |
+| `20260930133500` | `20260930133928` | worker_avatar_path_for_relations_v1 |
+| `20261001090000` | `20261001065328` | public_vacancy_search_indexes_v1 |
+| `20261001100000` | `20261001072621` | assignment_decision_audit_v1 |
+| `20261001110000` | `20261001073331` | job_alert_notification_type_v1 |
+| `20261001120000` | `20261001084610` | job_alert_sweep_service_role_select |
+| `20261001180000` | `20261001085606` | public_vacancy_board_no_parallel_v1 |
+| `20261001180100` | `20261001085611` | drop_unused_vacancy_fulltext_gin_v1 |
+| `20261001200000` | `20261001091852` | public_vacancy_profession_published_idx_v1 |
+| `20261002120000` | `20261002102903` | journal_explicit_project_attribution_v1 |
+| `20261002140000` | `20261002184321` | message_journal_review_notification_types_v1 |
+| `20261002141500` | `20261003071338` | work_task_authz_null_safe_v1 |
+| `20261002143000` | `20261003090939` | experience_responses_select_reply_status_v1 |
+| `20261003100000` | `20261003095641` | list_agency_offered_candidates_v2_connection_gate_v1 |
+| `20261002142000` | `20261003110012` | manager_assigns_roster_worker_on_managed_project_v1 |
+| `20261003110000` | `20261003131904` | subject_contest_withdraw_v1 |
+| `20261003120000` | `20261003142847` | privacy_export_import_lines_subject_v1 |
+| `20261003140000` | `20261003141047` | subject_contest_withdraw_constraint_reconcile_v1 |
+| `20261002150000` | `20261003144407` | work_tasks_stage_and_subtask_v1 |
+
+Note on `agency_drafted_needs_output_column_v1` (ledger 20260928182413): applied as a standalone statement
+sequence (`drop function if exists public.list_agency_drafted_needs_v1(); create function ...` - `create or
+replace` cannot change a function's OUT columns), with `revoke all ... from public, anon` and `grant execute
+... to authenticated`. No standalone file ever existed in git history; the final definition is carried by
+`20260928190000_agency_delegated_demand_and_placement_v1.sql` (same signature and return columns). Recorded
+here so the ledger entry is not an unexplained apply.
+

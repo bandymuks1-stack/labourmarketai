@@ -79,7 +79,7 @@ export type VacancySearchStatus =
 
 export interface VacancySearchResultV1 {
   readonly status: VacancySearchStatus;
-  readonly vacancies: readonly PublicVacancyV1[];
+  readonly vacancies: readonly StoredPublicVacancyV1[];
   /** True when more rows exist past this page. */
   readonly hasMore: boolean;
 }
@@ -131,8 +131,20 @@ export async function searchPublicVacancies(
 
   // One row past the page so "is there more" is answered by evidence rather
   // than by a second count query.
+  //
+  // ORDER DIRECTION IS THE INDEX (production, 2026-09-06). The generic path
+  // (no country, no profession) is served by
+  // `public_vacancies_active_published_idx (published_at DESC NULLS LAST, id)
+  // WHERE is_active`; a plain `DESC` means NULLS FIRST, which that index
+  // cannot deliver, so the planner seq-scanned 47k rows and top-N sorted them:
+  // measured 6,947 ms — mean 2.85 s over 897 calls, max 7.9 s against the
+  // 8 s statement timeout, i.e. the worker board and every sentence that
+  // reads it ("kas man trūksta?") were failing with 57014. With NULLS LAST
+  // the same query walks the index: 2.8 ms. The country and profession
+  // indexes are plain `published_at DESC`, so those paths keep the default.
+  const genericPath = !filters.country && !filters.professionSlug;
   const { data, error } = await q
-    .order("published_at", { ascending: false })
+    .order("published_at", { ascending: false, nullsFirst: !genericPath })
     .range(offset, offset + limit);
 
   if (error) {
@@ -159,7 +171,7 @@ export async function getPublicVacancy(
   providerKey: string,
   externalId: string,
 ): Promise<
-  | { readonly status: "ok"; readonly vacancy: PublicVacancyV1 }
+  | { readonly status: "ok"; readonly vacancy: StoredPublicVacancyV1 }
   | { readonly status: "not_found" }
   | { readonly status: "not_provisioned" }
 > {
@@ -214,7 +226,7 @@ export async function getPublicVacancyById(
   client: VacancyDbClient,
   id: string,
 ): Promise<
-  | { readonly status: "ok"; readonly vacancy: PublicVacancyV1 }
+  | { readonly status: "ok"; readonly vacancy: StoredPublicVacancyV1 }
   | { readonly status: "not_found" }
   | { readonly status: "not_provisioned" }
 > {
@@ -358,9 +370,67 @@ function sanitizeSearchTerm(raw: string): string {
  * or promotes a derived guess into a publisher fact, and a unit test catches
  * that where an integration test would not.
  */
+/**
+ * A stored ad = the import contract PLUS the store's own row id. The id is
+ * what a worker-side write (bookmark, interest) must name — the publisher
+ * identity (provider + external id) is for dedupe and attribution. Optional
+ * at the type level only because the same mapper serves rows that were
+ * selected without `id`; every `select("*")` read carries it.
+ */
+/**
+ * ONE per-locale rendering of the original (`public_vacancies.translations`,
+ * migration 20260922150000). DERIVED, never the fact: it is valid only while
+ * `sourceHash` equals the row's `contentHash` — a re-imported revision makes
+ * it stale and the reader treats stale as absent.
+ */
+export interface VacancyLocaleTranslationV1 {
+  readonly status: "available" | "needs_review" | "failed";
+  /** Non-null ONLY when status === "available". Never the original echoed. */
+  readonly title: string | null;
+  /** Null until a reader asked for the body of THIS ad in THIS locale. */
+  readonly description: string | null;
+  readonly sourceLanguage: string;
+  readonly sourceHash: string;
+  readonly provider: string | null;
+  readonly model: string | null;
+  readonly generatedAt: string;
+}
+
+export type StoredPublicVacancyV1 = PublicVacancyV1 & {
+  readonly storeId: string | null;
+  /** Per-locale renderings keyed by target locale (`{}` when none). */
+  readonly translations: Readonly<Record<string, VacancyLocaleTranslationV1>>;
+};
+
+function readTranslations(
+  raw: unknown,
+): Readonly<Record<string, VacancyLocaleTranslationV1>> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: Record<string, VacancyLocaleTranslationV1> = {};
+  for (const [locale, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (!v || typeof v !== "object") continue;
+    const e = v as Record<string, unknown>;
+    const status = e.status;
+    if (status !== "available" && status !== "needs_review" && status !== "failed") continue;
+    if (typeof e.sourceHash !== "string" || typeof e.sourceLanguage !== "string") continue;
+    out[locale] = {
+      status,
+      title: typeof e.title === "string" && e.title.trim() ? e.title : null,
+      description:
+        typeof e.description === "string" && e.description.trim() ? e.description : null,
+      sourceLanguage: e.sourceLanguage,
+      sourceHash: e.sourceHash,
+      provider: typeof e.provider === "string" ? e.provider : null,
+      model: typeof e.model === "string" ? e.model : null,
+      generatedAt: typeof e.generatedAt === "string" ? e.generatedAt : "",
+    };
+  }
+  return out;
+}
+
 export function fromPublicVacancyRow(
   row: Record<string, unknown>,
-): PublicVacancyV1 {
+): StoredPublicVacancyV1 {
   const str = (k: string): string | null => {
     const v = row[k];
     return typeof v === "string" ? v : null;
@@ -382,6 +452,7 @@ export function fromPublicVacancyRow(
   const translationStatus = str("translation_status");
 
   return {
+    storeId: str("id"),
     providerKey: (str("provider_key") ?? "") as VacancyProviderKey,
     externalId: str("external_id") ?? "",
     contentHash: str("content_hash") ?? "",
@@ -448,6 +519,10 @@ export function fromPublicVacancyRow(
 
     transformVersion: str("transform_version") ?? "",
     requestRef: str("request_ref") ?? "",
+
+    // A row read before migration 20260922150000 (or through a column list
+    // that omits it) simply has no renderings — never a fabricated one.
+    translations: readTranslations(row.translations),
   };
 }
 
@@ -477,8 +552,17 @@ export async function readSupplyLastRefreshedAt(
     q = q.eq("country", filters.country.trim().toUpperCase());
   }
 
+  // ORDER DIRECTION IS THE INDEX (Lane H, 2026-09-06) — the same trap the
+  // board listing above fell into. `last_seen_at` is NOT NULL, so DESC NULLS
+  // LAST returns exactly what plain DESC did; the difference is that
+  // `public_vacancies_active_last_seen_idx (last_seen_at DESC NULLS LAST, id)
+  // WHERE is_active` (migration 20260906070000) can only serve an ORDER BY
+  // whose null placement matches. Measured before: 869 calls, mean 270.8 ms,
+  // max 6,747 ms — an index-only scan over every live row plus a top-N sort
+  // to find ONE value, on every board render. Walked from the top, the read
+  // stops at the first live row.
   const { data, error } = await q
-    .order("last_seen_at", { ascending: false })
+    .order("last_seen_at", { ascending: false, nullsFirst: false })
     .limit(1);
 
   if (error) {

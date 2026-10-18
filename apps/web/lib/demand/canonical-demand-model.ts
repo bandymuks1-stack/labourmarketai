@@ -39,6 +39,32 @@ export interface CanonicalDemand {
   /** People needed. `null` means UNKNOWN — never rendered as a number. */
   readonly quantity: number | null;
   readonly roleText: string | null;
+  /**
+   * The organisation behind the demand, WHEN THE SOURCE ALREADY DISCLOSES IT.
+   *
+   * This carries no new privilege. `list_open_demand_for_workers` is a
+   * SECURITY DEFINER function with a worker-only caller gate that already
+   * returns `company_name`, and only for a company whose
+   * `verification_status = 'verified'`; this field is that column, unchanged.
+   * The employer's own-rows branch has no company column in its select, so it
+   * contributes `null` and the surface states the gap.
+   *
+   * `null` means "not disclosed by the branch that answered", NEVER "no
+   * organisation". A surface renders it as an explicit gap, never as a guess
+   * and never by borrowing a name from the viewer's own workspace.
+   */
+  readonly organizationName: string | null;
+  /**
+   * TRUE when this demand is the VIEWER'S OWN — it came back through the
+   * own-rows branch, the one scoped by RLS to the signed-in user's own rows.
+   *
+   * It is provenance, not a permission: nothing is unlocked by setting it. It
+   * exists so a surface can offer the caller an action on their OWN need
+   * (scouting their demand) without offering it over someone else's row, where
+   * the action would dead-end in `not-found`. The worker RPC branch sets it
+   * false — that branch returns other tenants' demand by design.
+   */
+  readonly ownedByViewer: boolean;
   readonly createdAt: string | null;
 }
 
@@ -71,6 +97,10 @@ export interface CanonicalDemandInput {
   readonly cityLabel: string | null | undefined;
   readonly quantity: number | null | undefined;
   readonly roleText: string | null | undefined;
+  /** Only ever the disclosing branch's own column — see `CanonicalDemand`. */
+  readonly organizationName?: string | null | undefined;
+  /** True ONLY on the own-rows branch. Defaults false — see `CanonicalDemand`. */
+  readonly ownedByViewer?: boolean | undefined;
   readonly createdAt: string | null | undefined;
 }
 
@@ -89,6 +119,8 @@ export function toCanonicalDemand(input: CanonicalDemandInput): CanonicalDemand 
     cityLabel: text(input.cityLabel),
     quantity: quantity(input.quantity),
     roleText: text(input.roleText),
+    organizationName: text(input.organizationName),
+    ownedByViewer: input.ownedByViewer === true,
     createdAt: text(input.createdAt),
   };
 }
@@ -100,6 +132,19 @@ export function toCanonicalDemand(input: CanonicalDemandInput): CanonicalDemand 
  * authorized branches, the one that grants a real next step wins; otherwise
  * the first occurrence is kept. Dropping to the non-actionable copy would
  * silently remove a worker's ability to act on a live need.
+ *
+ * AND IT MERGES THE FACTS, RATHER THAN PICKING A WINNER. An employer who is also
+ * a worker reaches their own request through BOTH branches, and the branches
+ * know different things about the SAME row: the worker RPC discloses the
+ * verified company name, the own-rows read knows the row is the viewer's own.
+ * Keeping whichever arrived first would make the name — or the ownership —
+ * appear and vanish with branch order.
+ *
+ * Merging is safe precisely because the key is `source:id`: two entries under
+ * one key are the same row in the same store, seen through two paths the caller
+ * was ALREADY authorized to use. So this discloses nothing new; it just stops
+ * throwing away half of what those paths returned. (A `job_demand` and a
+ * `customer_request` that share a uuid have different keys and never merge.)
  *
  * ORDER IS TOTAL AND DATA-INDEPENDENT — country (unknown last), then city
  * (unknown last), then source, then id. `id` is the final tiebreak so the
@@ -115,7 +160,15 @@ export function dedupeCanonicalDemand(
       byKey.set(row.key, row);
       continue;
     }
-    if (!existing.actionable && row.actionable) byKey.set(row.key, row);
+    // Actionability comes from the copy that grants a real next step; the
+    // FACTS are merged from both.
+    const base = !existing.actionable && row.actionable ? row : existing;
+    const other = base === existing ? row : existing;
+    byKey.set(row.key, {
+      ...base,
+      organizationName: base.organizationName ?? other.organizationName,
+      ownedByViewer: base.ownedByViewer || other.ownedByViewer,
+    });
   }
 
   const nullsLast = (a: string | null, b: string | null): number => {

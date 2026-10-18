@@ -118,9 +118,39 @@ const MONTH_NAMES: readonly (readonly [RegExp, number])[] = [
 export function detectTimesheetMonth(
   rows: readonly (readonly string[])[],
 ): TimesheetMonth | null {
+  // 1. The sheet's OWN dates first: a real template carries the period as
+  //    ISO dates ("2026-08-01 … 2026-08-31" under the day header). The most
+  //    frequent year-month among them is the month; it beats every heading.
+  const isoMonths = new Map<string, number>();
+  for (const row of rows) {
+    for (const cell of row) {
+      const m = /^(20\d{2})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.exec(cell.trim());
+      if (m) isoMonths.set(`${m[1]}-${m[2]}`, (isoMonths.get(`${m[1]}-${m[2]}`) ?? 0) + 1);
+    }
+  }
+  if (isoMonths.size > 0) {
+    const [best] = [...isoMonths.entries()].sort((a, b) => b[1] - a[1])[0];
+    return { year: Number(best.slice(0, 4)), month: Number(best.slice(5, 7)) };
+  }
+  // 2. A heading split across cells ("2026 | METŲ | RUGPJŪČIO | MĖNESIO …")
+  //    is read as ONE line. A line that names a specific DAY ("2004 m.
+  //    sausio 27 d." — the approval decree printed on every state template)
+  //    is a document date, not the timesheet's month, and is skipped.
+  for (const row of rows) {
+    const line = row.filter((c) => c !== "").join(" ").trim();
+    if (line === "" || line.length > 200) continue;
+    if (/\b(20\d{2})\s*m\.?\s+\S+\s+\d{1,2}\s*d\b/i.test(line)) continue;
+    const year = line.match(/\b(20\d{2})\b/);
+    if (!year) continue;
+    for (const [rx, month] of MONTH_NAMES) {
+      if (rx.test(line)) return { year: Number(year[1]), month };
+    }
+  }
+  // 3. The single-cell forms.
   for (const row of rows) {
     for (const cell of row) {
       if (cell === "" || cell.length > 120) continue;
+      if (/\b(20\d{2})\s*m\.?\s+\S+\s+\d{1,2}\s*d\b/i.test(cell)) continue;
       // "2026-05", "2026.05", "2026/05" — year first.
       let m = cell.match(/\b(20\d{2})\s*[-./]\s*(0?[1-9]|1[0-2])(?!\d)/);
       if (m) return { year: Number(m[1]), month: Number(m[2]) };
@@ -235,11 +265,21 @@ function findDayHeader(rows: readonly (readonly string[])[]): DayHeader | null {
 }
 
 /** A label column whose data cells are just 1,2,3,… is a row-number column
- *  ("Eil. Nr."), not a name column. */
+ *  ("Eil. Nr."), not a name column. Increasing small integers count too: a
+ *  template that numbers 1,2,…,7 and then prints "8" beside a totals line is
+ *  still numbering rows, not naming people. */
 function isSequentialIndexColumn(values: readonly string[]): boolean {
   const nonEmpty = values.filter((v) => v !== "");
   if (nonEmpty.length === 0) return false;
-  return nonEmpty.every((v, i) => v === String(i + 1));
+  if (nonEmpty.every((v, i) => v === String(i + 1))) return true;
+  let prev = 0;
+  for (const v of nonEmpty) {
+    if (!/^\d{1,3}$/.test(v)) return false;
+    const n = Number(v);
+    if (n <= prev) return false;
+    prev = n;
+  }
+  return true;
 }
 
 function parseMonthlyGrid(
@@ -250,9 +290,20 @@ function parseMonthlyGrid(
 ): { proposals: TimesheetGridProposal[]; skipped: TimesheetSkippedCell[] } {
   const dataRows = rows.slice(header.rowIndex + 1);
 
-  // Label columns sit LEFT of the day run. Among those with content, the
-  // first non-index column names the worker; a second one (when present)
-  // names the object — the per-worker-per-object row family.
+  // Label columns sit LEFT of the day run. The HEADER decides when it can
+  // (the state template says "Vardas, pavardė" over the names and
+  // "Profesija (pareigos)" over the trade — a trade is not an object); only
+  // a sheet with no such header falls back to position, where the first
+  // non-index column names the worker and a second one the object.
+  const headerRows = rows.slice(0, header.rowIndex + 1);
+  const headed = (rx: RegExp): number | null => {
+    for (let c = 0; c < header.firstDayCol; c++) {
+      if (headerRows.some((row) => rx.test((row[c] ?? "").trim()))) return c;
+    }
+    return null;
+  };
+  const headedWorker = headed(LONG_HEADERS.worker);
+  const headedObject = headed(LONG_HEADERS.object);
   const labelCols: number[] = [];
   for (let c = 0; c < header.firstDayCol; c++) {
     const values = dataRows.map((row) => (row[c] ?? "").trim());
@@ -260,8 +311,13 @@ function parseMonthlyGrid(
     if (isSequentialIndexColumn(values)) continue;
     labelCols.push(c);
   }
-  const workerCol = labelCols[0] ?? null;
-  const objectCol = labelCols.length > 1 ? labelCols[1] : null;
+  const workerCol = headedWorker ?? labelCols[0] ?? null;
+  const objectCol =
+    headedWorker !== null
+      ? headedObject
+      : labelCols.length > 1
+        ? labelCols[1]
+        : null;
 
   const proposals: TimesheetGridProposal[] = [];
   const skipped: TimesheetSkippedCell[] = [];
@@ -378,6 +434,15 @@ function findLongHeader(rows: readonly (readonly string[])[]): {
  *  and slashed European forms this pilot's documents use. */
 function toIsoDate(raw: string): string | null {
   const text = raw.trim();
+  // An Excel date serial (see `readDate` in parse-tabular): arithmetic, not a
+  // guess, and bounded to 1950..2149.
+  const serial = /^(\d{5})(?:\.0+)?$/.exec(text);
+  if (serial) {
+    const n = Number(serial[1]);
+    if (n < 18264 || n > 91311) return null;
+    const iso = new Date(Date.UTC(1899, 11, 30) + n * 86_400_000).toISOString().slice(0, 10);
+    return isValidWorkDate(iso) ? iso : null;
+  }
   let m = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (m) {
     const iso = `${m[1]}-${m[2]}-${m[3]}`;

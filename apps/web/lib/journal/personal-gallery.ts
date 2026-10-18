@@ -125,3 +125,98 @@ export async function getPersonalGallery(): Promise<PersonalGallery> {
     return EMPTY; // honest degradation
   }
 }
+
+/**
+ * ANOTHER PERSON'S WORK PHOTOS — the same table, the same bucket, the same
+ * signing pattern. There is no second photo store and no portfolio model.
+ *
+ * PERMISSION IS THE DATABASE'S, AT BOTH LAYERS. `journal_entry_photos` carries
+ * an org-manager select policy beside the owner one, and `storage.objects`
+ * carries the MATCHING policy for the `journal-entry-photos` bucket — so a
+ * manager of the organization the work was done for can read the row AND mint
+ * a signed URL, and nobody else can do either. This adds no policy, no grant
+ * and no service-role client; a viewer without standing simply gets nothing.
+ *
+ * NO JOURNAL TEXT. The personal gallery shows each photo beside the entry's
+ * own words, because it is the author looking at their own diary. This page's
+ * standing rule is that no private narrative is selected here, so the photos
+ * arrive as work evidence with a date and nothing else. A photo of a finished
+ * weld is not the sentence the person wrote about their day.
+ *
+ * A failed read is `unavailable`, never an empty gallery.
+ */
+export type WorkPhoto = {
+  readonly photoId: string;
+  readonly takenAt: string;
+  readonly signedUrl: string | null;
+};
+
+export type WorkPhotoRead =
+  | {
+      readonly status: "ok";
+      readonly photos: readonly WorkPhoto[];
+      readonly previewsUnavailable: boolean;
+    }
+  | { readonly status: "unavailable" };
+
+/** Bounded: a profile shows recent proof of work, not a photo archive. */
+export const PROFILE_WORK_PHOTO_LIMIT = 6;
+
+export async function readWorkPhotosFor(
+  profileId: string,
+  limit = PROFILE_WORK_PHOTO_LIMIT,
+): Promise<WorkPhotoRead> {
+  if (!profileId) return { status: "ok", photos: [], previewsUnavailable: false };
+  const supabase = await createClient();
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from("journal_entry_photos")
+      .select(
+        "id, storage_path, created_at, journal_entries!inner(id, created_at, deleted_at)",
+      )
+      .eq("profile_id", profileId)
+      .is("journal_entries.deleted_at", null)
+      .eq("upload_status", "uploaded")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) return { status: "unavailable" };
+
+    const rows = ((data ?? []) as Array<Record<string, unknown>>).filter(
+      (r) => r.journal_entries,
+    );
+    if (rows.length === 0) {
+      return { status: "ok", photos: [], previewsUnavailable: false };
+    }
+
+    const paths = rows.map((r) => String(r.storage_path));
+    const urlByPath = new Map<string, string>();
+    try {
+      const { data: signed } = await supabase.storage
+        .from("journal-entry-photos")
+        .createSignedUrls(paths, SIGNED_URL_TTL_SECONDS);
+      for (const sig of signed ?? []) {
+        if (sig.signedUrl && sig.path) urlByPath.set(sig.path, sig.signedUrl);
+      }
+    } catch {
+      // keep the map empty — previewsUnavailable reports it honestly rather
+      // than rendering broken images.
+    }
+
+    const photos: WorkPhoto[] = rows.map((r) => ({
+      photoId: String(r.id),
+      takenAt: String(
+        (r.journal_entries as { created_at?: string } | null)?.created_at ?? "",
+      ),
+      signedUrl: urlByPath.get(String(r.storage_path)) ?? null,
+    }));
+
+    return {
+      status: "ok",
+      photos,
+      previewsUnavailable: photos.every((ph) => ph.signedUrl === null),
+    };
+  } catch {
+    return { status: "unavailable" };
+  }
+}

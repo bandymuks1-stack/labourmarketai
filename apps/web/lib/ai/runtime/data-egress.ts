@@ -38,12 +38,16 @@
  *
  * ── DEFAULT DENY IS THE POINT ──────────────────────────────────────────────
  *
- * `AI_EGRESS_GRANTS` is EMPTY, and that is the correct current state, not an
- * unfinished one. No external provider is enabled today, and no owner decision
- * has yet permitted any category of private content to leave. An empty grant
- * table means the gate is closed; adding a provider to the runtime cannot open
- * it as a side effect, because opening it is a separate, dated, sourced edit
- * here.
+ * `AI_EGRESS_GRANTS` was EMPTY from 2026-08-19 to 2026-09-05, and that was the
+ * correct state, not an unfinished one. It now holds exactly TWO rows — the
+ * owner's dated, sourced, TASK-SCOPED grants for the conversation intent
+ * proposer (2026-09-05) and for message translation-on-read (RED-2,
+ * 2026-09-17), both for the one production-configured provider — and nothing
+ * else changed: no other external provider is enabled, and no owner decision
+ * has permitted any other category of private content to leave. An empty
+ * grant table means the gate is closed; adding a provider to the runtime
+ * cannot open it as a side effect, because opening it is a separate, dated,
+ * sourced edit here.
  *
  * Since no task is classed `PUBLIC` today (see `TASK_SENSITIVITY` — a recorded
  * finding, not an omission), the live consequence is: every task either runs on
@@ -83,6 +87,30 @@ export interface AiEgressGrant {
   readonly basis: string;
   /** ISO date the grant was made. */
   readonly grantedOn: string;
+  /**
+   * LEAST PRIVILEGE (owner approval 2026-09-05): the task types this grant
+   * covers. When present, a run for any OTHER task sees no grant at all —
+   * it is refused exactly as before the row existed. Absent = every task
+   * (the shape the 2026-08-19 decision anticipated for a provider-wide
+   * grant, which no owner has made).
+   */
+  readonly tasks?: readonly string[];
+  /**
+   * The grant's legal basis rests on the vendor's PAID-tier data terms (the
+   * free tier lets the vendor use content to improve its products). When
+   * true, the grant answers only while the deployment carries the owner's
+   * explicit confirmation that the key is on the paid tier
+   * (`AI_GEMINI_PAID_TIER_CONFIRMED=1`) — owner 2026-10-15: "jeigu tinkama
+   * asmens duomenų apsauga neįrodyta, apribok neviešų asmens duomenų
+   * perdavimą į Gemini". A code comment saying "paid tier" is not that proof.
+   */
+  readonly requiresPaidTierConfirmation?: boolean;
+}
+
+/** The owner's deployment-level confirmation that the Gemini key is on the
+ *  paid tier (billing enabled on its Google project). Absent = not proven. */
+export function geminiPaidTierConfirmed(env: Record<string, string | undefined> = process.env): boolean {
+  return env.AI_GEMINI_PAID_TIER_CONFIRMED === "1";
 }
 
 /**
@@ -93,7 +121,51 @@ export interface AiEgressGrant {
  * date, and the same scrutiny as any other data-processing decision. A free
  * tier is not exempt from that scrutiny — see `MAX_GRANTABLE_FOR_FREE_TIER`.
  */
-export const AI_EGRESS_GRANTS: readonly AiEgressGrant[] = [];
+export const AI_EGRESS_GRANTS: readonly AiEgressGrant[] = [
+  {
+    // OWNER APPROVAL 2026-09-05 — "GEMINI CONVERSATION NLU EGRESS" (owner
+    // message in the autonomous run, recorded in
+    // docs/launch/pilot-feedback/2026-09-05-night-continuation.md). Scope:
+    // a sentence the deterministic router could not read may leave for the
+    // EXISTING production Gemini runtime (paid tier — actual costs billed
+    // since 2026-08-28) so that Gemini proposes ONE existing canonical
+    // intent id. Nothing else: CV, journal, match, translation and every
+    // other personal task stay refused for Gemini by the `tasks` scope.
+    // Auditable: every run is an `ai_runs` row (task, provider, model,
+    // blocked_reason). Revocable: delete this row.
+    provider: "gemini",
+    maxSensitivity: "SENSITIVE_FREE_TEXT",
+    tasks: ["propose_conversation_intent"],
+    requiresPaidTierConfirmation: true,
+    basis:
+      "Owner approval 2026-09-05 (GEMINI CONVERSATION NLU EGRESS): conversation intent proposal only; existing approved Gemini runtime, paid tier; least-privilege by task; revocable by deleting this row",
+    grantedOn: "2026-09-05",
+  },
+  {
+    // OWNER APPROVAL 2026-09-17 — "RED-2 translate_message DATA EGRESS",
+    // OPTION 1: GEMINI ONLY (owner decision message in the release lane;
+    // packet recorded in docs/launch/OWNER_RELEASE_GATE_2026-09-17.md).
+    // Scope: a conversation message the viewer has ALREADY read under the
+    // participant-only RLS (lib/communication/translation-read.ts reads
+    // nothing itself) may leave for the EXISTING production Gemini runtime
+    // (paid tier) so that the viewer gets a rendering in their own locale.
+    // Payload is the task policy's allowedFields only: body (≤8000 chars),
+    // source language, target locale, the fixed "work message between
+    // colleagues" context — never ids, names, roles, attachments, other
+    // rows. The rendering is never stored in conversation_messages; the
+    // original stays canonical and one tap away. Every run (and every
+    // refusal) is an `ai_runs` row. DeepL / Anthropic / OpenAI / xAI stay
+    // refused for this task: DeepL authorization is explicitly DEFERRED, not
+    // implied. Revocable: delete this row and redeploy — no data to unwind.
+    provider: "gemini",
+    maxSensitivity: "SENSITIVE_FREE_TEXT",
+    tasks: ["translate_message"],
+    requiresPaidTierConfirmation: true,
+    basis:
+      "Owner approval 2026-09-17 (RED-2 TRANSLATE_MESSAGE EGRESS, option 1 Gemini only): render an already-authorized message into the viewer's locale; existing approved Gemini runtime, paid tier; least-privilege by task; DeepL deferred; revocable by deleting this row",
+    grantedOn: "2026-09-17",
+  },
+];
 
 /**
  * A free cloud tier may never be granted personal data, whatever a grant says.
@@ -119,19 +191,33 @@ export const MAX_GRANTABLE_FOR_FREE_TIER: AiDataSensitivity =
 export function egressGrantFor(
   provider: string,
   grants: readonly AiEgressGrant[] = AI_EGRESS_GRANTS,
+  task?: string,
+  env: Record<string, string | undefined> = process.env,
 ): AiEgressGrant | null {
-  return grants.find((g) => g.provider === provider) ?? null;
+  // A task-scoped grant answers only for its tasks; a call that names no
+  // task cannot use one (fail closed — see `tasks` on AiEgressGrant). A
+  // grant that rests on paid-tier terms answers only while the owner's
+  // paid-tier confirmation is deployed (fail closed — not proven = no grant).
+  return (
+    grants.find(
+      (g) =>
+        g.provider === provider &&
+        (!g.tasks || (task !== undefined && g.tasks.includes(task))) &&
+        (!g.requiresPaidTierConfirmation || geminiPaidTierConfirmed(env)),
+    ) ?? null
+  );
 }
 
 /** What this provider is permitted to receive at most. */
 export function maxPermittedSensitivity(
   profile: { readonly id: string; readonly locality: "local" | "cloud"; readonly costClass: string },
   grants: readonly AiEgressGrant[] = AI_EGRESS_GRANTS,
+  task?: string,
 ): AiDataSensitivity {
   // Inside our own infrastructure: no egress, nothing to permit.
   if (profile.locality === "local") return "SENSITIVE_FREE_TEXT";
 
-  const grant = egressGrantFor(profile.id, grants);
+  const grant = egressGrantFor(profile.id, grants, task);
   if (!grant) return "PUBLIC";
 
   // A free tier's ceiling is capped regardless of what the grant claims.
@@ -154,15 +240,16 @@ export function egressPermitted(
   profile: { readonly id: string; readonly locality: "local" | "cloud"; readonly costClass: string },
   sensitivity: AiDataSensitivity,
   grants: readonly AiEgressGrant[] = AI_EGRESS_GRANTS,
+  task?: string,
 ): EgressVerdict {
   if (profile.locality === "local") return { permitted: true };
 
-  const ceiling = maxPermittedSensitivity(profile, grants);
+  const ceiling = maxPermittedSensitivity(profile, grants, task);
   if (SENSITIVITY_RANK[sensitivity] <= SENSITIVITY_RANK[ceiling]) {
     return { permitted: true };
   }
 
-  const grant = egressGrantFor(profile.id, grants);
+  const grant = egressGrantFor(profile.id, grants, task);
   return {
     permitted: false,
     reason: grant

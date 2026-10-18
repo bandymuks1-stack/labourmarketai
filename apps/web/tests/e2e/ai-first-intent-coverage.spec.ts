@@ -164,9 +164,12 @@ test("«Parodyk mano rytojaus planą» reaches the agenda, not the fallback", as
     .toBe(true);
 
   const texts = await page.getByTestId("msg-assistant").allInnerTexts();
-  expect(texts.some((t) => t.trim() === LT.conversation.chat.fallback)).toBe(
-    false,
-  );
+  // 2026-09-23: the not-understood answer is the clarifying question
+  // `notUnderstood` (the composed `fallback` copy no longer answers it), so
+  // BOTH are checked — asserting only the retired line could never fail.
+  for (const notUnderstood of [LT.conversation.chat.fallback, LT.conversation.chat.notUnderstood]) {
+    expect(texts.some((t) => t.trim() === notUnderstood)).toBe(false);
+  }
 
   await page.screenshot({
     path: "test-results/ai-first-tomorrow-plan.png",

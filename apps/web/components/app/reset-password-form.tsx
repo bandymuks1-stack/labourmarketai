@@ -93,7 +93,7 @@ export function ResetPasswordForm() {
         <p className="mt-3 text-sm text-text-secondary">{t("invalid_body")}</p>
         <Link
           href="/auth/forgot-password"
-          className="mt-4 inline-block text-sm text-brand-blue hover:text-brand-cyan"
+          className="mt-4 inline-block text-sm text-brand-blue hover:text-brand-champagne"
         >
           {t("request_new")}
         </Link>

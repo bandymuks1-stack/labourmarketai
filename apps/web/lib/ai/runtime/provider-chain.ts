@@ -174,6 +174,17 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
       "translate_message",
       "draft_follow_up",
       "explain_market_demand",
+      // UNDERSTANDING IS NOT A GEMINI FEATURE (owner audit 2026-09-10).
+      // This task was listed for gemini ALONE, so the chain excluded every
+      // other provider before health, egress or cost were even consulted —
+      // a vendor-neutral router with one vendor written into it. Declaring
+      // the capability CONNECTS NOTHING: a cloud provider still needs a key
+      // AND an owner egress grant (the grant table names gemini only), and
+      // the local runtime still needs an operator actually running one.
+      "propose_conversation_intent",
+      // A public job advertisement rendered in the reader's language —
+      // vendor-neutral like every other task; PUBLIC, so no grant is needed.
+      "translate_vacancy",
     ],
     // Small local models drift from a schema more often than the frontier
     // cloud models do, so the runtime keeps its JSON repair pass for them.
@@ -196,6 +207,10 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
       "translate_message",
       "draft_follow_up",
       "explain_market_demand",
+      "propose_conversation_intent",
+      // A public job advertisement rendered in the reader's language —
+      // vendor-neutral like every other task; PUBLIC, so no grant is needed.
+      "translate_vacancy",
     ],
     structuredOutput: true,
     priority: 10,
@@ -216,6 +231,17 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
       "translate_message",
       "draft_follow_up",
       "explain_market_demand",
+      // UNDERSTANDING IS NOT A GEMINI FEATURE (owner audit 2026-09-10).
+      // This task was listed for gemini ALONE, so the chain excluded every
+      // other provider before health, egress or cost were even consulted —
+      // a vendor-neutral router with one vendor written into it. Declaring
+      // the capability CONNECTS NOTHING: a cloud provider still needs a key
+      // AND an owner egress grant (the grant table names gemini only), and
+      // the local runtime still needs an operator actually running one.
+      "propose_conversation_intent",
+      // A public job advertisement rendered in the reader's language —
+      // vendor-neutral like every other task; PUBLIC, so no grant is needed.
+      "translate_vacancy",
     ],
     structuredOutput: true,
     priority: 20,
@@ -236,6 +262,17 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
       "translate_message",
       "draft_follow_up",
       "explain_market_demand",
+      // UNDERSTANDING IS NOT A GEMINI FEATURE (owner audit 2026-09-10).
+      // This task was listed for gemini ALONE, so the chain excluded every
+      // other provider before health, egress or cost were even consulted —
+      // a vendor-neutral router with one vendor written into it. Declaring
+      // the capability CONNECTS NOTHING: a cloud provider still needs a key
+      // AND an owner egress grant (the grant table names gemini only), and
+      // the local runtime still needs an operator actually running one.
+      "propose_conversation_intent",
+      // A public job advertisement rendered in the reader's language —
+      // vendor-neutral like every other task; PUBLIC, so no grant is needed.
+      "translate_vacancy",
     ],
     structuredOutput: true,
     priority: 30,
@@ -256,6 +293,17 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
       "translate_message",
       "draft_follow_up",
       "explain_market_demand",
+      // UNDERSTANDING IS NOT A GEMINI FEATURE (owner audit 2026-09-10).
+      // This task was listed for gemini ALONE, so the chain excluded every
+      // other provider before health, egress or cost were even consulted —
+      // a vendor-neutral router with one vendor written into it. Declaring
+      // the capability CONNECTS NOTHING: a cloud provider still needs a key
+      // AND an owner egress grant (the grant table names gemini only), and
+      // the local runtime still needs an operator actually running one.
+      "propose_conversation_intent",
+      // A public job advertisement rendered in the reader's language —
+      // vendor-neutral like every other task; PUBLIC, so no grant is needed.
+      "translate_vacancy",
     ],
     structuredOutput: true,
     priority: 40,
@@ -350,7 +398,7 @@ export function resolveProviderChain(
   // Pass 1 — the privacy veto. Ineligible providers leave the chain entirely;
   // they are not candidates for the first attempt OR for a later retry.
   for (const p of ordered) {
-    const verdict = providerEligibleForSensitivity(p, sensitivity, grants);
+    const verdict = providerEligibleForSensitivity(p, sensitivity, grants, decision.taskType);
     if (verdict.eligible) {
       eligible.push(p);
     } else {

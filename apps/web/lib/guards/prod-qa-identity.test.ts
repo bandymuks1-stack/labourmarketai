@@ -4,6 +4,10 @@ import { describe, expect, it } from "vitest";
 
 import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
 import {
+  assertBareStorageFilename,
+  assertIgnoredStorageTarget,
+} from "@/lib/testing/e2e-storage-target";
+import {
   PRODUCTION_ORIGIN,
   PROD_QA_IDENTITIES,
   PROD_QA_WORKER_EMAIL,
@@ -54,14 +58,23 @@ const FORBIDDEN_PROVISIONING_SQL: readonly RegExp[] = [
   /alter\s+table/i,
 ];
 
-describe("exactly one synthetic identity is allowlisted", () => {
-  it("the allowlist has one entry, and it is unmistakably synthetic", () => {
-    expect(PROD_QA_IDENTITIES).toHaveLength(1);
+describe("exactly the synthetic cast is allowlisted", () => {
+  it("the allowlist is exactly these five, each unmistakably synthetic", () => {
+    // Widening is a reviewed code change (owner decision 2026-09-28 added the
+    // three +multiw identities beside the worker). Pinned exactly.
+    expect([...PROD_QA_IDENTITIES].sort()).toEqual(
+      [
+        "qa.agency+multiw@labourmarket.ai",
+        "qa.manager+multiw@labourmarket.ai",
+        "qa.owner+multiw@labourmarket.ai",
+        "qa.worker+goal3@labourmarket.ai",
+        "qa.worker+multiw@labourmarket.ai",
+      ].sort(),
+    );
     expect(PROD_QA_IDENTITIES[0]).toBe(PROD_QA_WORKER_EMAIL);
-    expect(PROD_QA_WORKER_EMAIL).toMatch(/^qa\./);
-    // `+` addressing keeps it routable to a mailbox the owner controls while
-    // being obviously not a person's address.
-    expect(PROD_QA_WORKER_EMAIL).toContain("+");
+    for (const email of PROD_QA_IDENTITIES) {
+      expect(email).toMatch(/^qa\.[a-z]+\+[a-z0-9]+@labourmarket\.ai$/);
+    }
   });
 
   it("accepts the allowlisted identity against production", () => {
@@ -85,6 +98,9 @@ describe("exactly one synthetic identity is allowlisted", () => {
       "qa.worker+goal4@labourmarket.ai", //  same prefix, different tag
       "qa.worker+goal3@evil.example", //     same local part, other domain
       "qa.worker+goal3@labourmarket.ai.evil.example", // suffix attack
+      "qa.owner@labourmarket.ai", //         cast prefix without its tag
+      "qa.owner+multiw2@labourmarket.ai", // cast tag extended
+      "qa.agency+other@labourmarket.ai", // plausible, never allowlisted
       "", //                                  nothing
       undefined,
     ]) {
@@ -139,6 +155,49 @@ describe("the target must be production — this is not a general-purpose mint",
   });
 });
 
+describe("the current Supabase key formats are accepted — strictly, by role", () => {
+  const secret = "sb_secret_" + "a1B2c3D4e5F6g7H8i9J0";
+  const publishable = "sb_publishable_" + "a1B2c3D4e5F6g7H8i9J0";
+
+  it("accepts a current-format service key and anon key against production", () => {
+    expect(() =>
+      assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, serviceKey: secret, anonKey: publishable }),
+    ).not.toThrow();
+  });
+
+  it("a key of the wrong role, a truncated key or a lookalike is still refused", () => {
+    for (const bad of [
+      { serviceKey: publishable },
+      { anonKey: secret },
+      { serviceKey: "sb_secret_short" },
+      { serviceKey: "sb_secret_" + "a".repeat(20) + " x" },
+      { serviceKey: "xsb_secret_" + "a".repeat(20) },
+      { serviceKey: "not-a-key-at-all" },
+    ]) {
+      expect(
+        () => assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, ...bad }),
+        JSON.stringify(Object.keys(bad)),
+      ).toThrow(ProdQaGuardError);
+    }
+  });
+
+  it("the production origin and the allowlisted identity are still required with such a key", () => {
+    expect(() =>
+      assertProdQaTarget({ url: "https://some-other-ref.supabase.co", email: PROD_QA_WORKER_EMAIL, serviceKey: secret }),
+    ).toThrow(ProdQaGuardError);
+    expect(() =>
+      assertProdQaTarget({ url: PROD_URL, email: "someone.real@example.com", serviceKey: secret }),
+    ).toThrow(ProdQaGuardError);
+  });
+
+  it("the redacted form of such a key never contains the key", () => {
+    const line = describeProdQaTarget(
+      assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, serviceKey: secret }),
+    );
+    expect(line).not.toContain("sb_secret_");
+  });
+});
+
 describe("no secret ever reaches a log, a report or an artefact", () => {
   it("the target description carries origin and identity, never a key", () => {
     const line = describeProdQaTarget(
@@ -163,6 +222,71 @@ describe("no secret ever reaches a log, a report or an artefact", () => {
   it("the minted session file is gitignored", () => {
     const ignore = readFileSync(join(WEB, "..", "..", ".gitignore"), "utf8");
     expect(ignore).toContain("/apps/web/tests/e2e/.storage-state.prod-qa.json");
+  });
+});
+
+/**
+ * #1842 ON THE PRODUCTION MINT. The file it writes is a live PRODUCTION
+ * session, so "it is gitignored" is proven by `git check-ignore` at run time —
+ * the same guards the local mint uses — and not left to the `.gitignore` line
+ * asserted above. The ORDER is the property: both guards must complete before
+ * `generateLink`, or a refusal is a refusal with a live token already minted.
+ */
+describe("the production mint proves its output path is ignored BEFORE it mints", () => {
+  const src = read(MINT);
+  const at = (needle: string): number => {
+    const i = src.indexOf(needle);
+    expect(i, `expected to find "${needle}" in ${MINT}`).toBeGreaterThan(-1);
+    return i;
+  };
+
+  it("bare name -> production target -> ignored target -> mint -> write", () => {
+    const name = at("assertBareStorageFilename(OUT_NAME)");
+    const prodTarget = at("assertProdQaTarget({");
+    const ignored = at("assertIgnoredStorageTarget({");
+    const mint = at("admin.auth.admin.generateLink");
+    const write = at("writeFileSync(out.path,");
+
+    expect(name).toBeLessThan(prodTarget);
+    expect(prodTarget).toBeLessThan(ignored);
+    expect(ignored).toBeLessThan(mint);
+    expect(mint).toBeLessThan(write);
+  });
+
+  it("writes only to the guarded target — no raw path survives", () => {
+    // A second, unguarded `join(... ".storage-state.prod-qa.json")` would let a
+    // later edit write around the guard.
+    expect(src).not.toMatch(/writeFileSync\(OUT\b/);
+    expect(src.match(/writeFileSync\(/g)).toHaveLength(1);
+  });
+
+  it("ANTI-VACUITY: the real output name passes the real git decision", () => {
+    // Without this, a guard that refused EVERY name would pass the order test
+    // above while making the production gate impossible to run.
+    const filename = /const OUT_FILENAME = "([^"]+)";/.exec(src)?.[1];
+    expect(filename).toBe(".storage-state.prod-qa.json");
+    const target = assertIgnoredStorageTarget({
+      filename: assertBareStorageFilename(filename),
+      e2eDir: join(WEB, "tests", "e2e"),
+    });
+    expect(target.ignoreRule).toContain(".gitignore:");
+  });
+
+  it("a per-identity slot (multi-actor walks) stays a bare, ignored name", () => {
+    expect(src).toMatch(/\/\^\[a-z0-9-\]\{1,24\}\$\/\.test\(SLOT\)/);
+    expect(src).toMatch(/assertBareStorageFilename\(OUT_NAME\)/);
+    for (const slot of ["owner", "worker", "worker2", "manager", "agency"]) {
+      const target = assertIgnoredStorageTarget({
+        filename: assertBareStorageFilename(`.storage-state.prod-qa.${slot}.json`),
+        e2eDir: join(WEB, "tests", "e2e"),
+      });
+      expect(target.ignoreRule, slot).toContain(".gitignore:");
+    }
+  });
+
+  it("refuses by the #1842 code, before any session exists", () => {
+    expect(src).toContain("UnsafeStorageTargetError");
+    expect(src).toContain("STORAGE_TARGET_REFUSAL_CODE");
   });
 });
 

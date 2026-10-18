@@ -1,5 +1,7 @@
 import "server-only";
 
+import { withoutCounterpartyRows } from "@/lib/journal/review-status";
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -23,9 +25,22 @@ import {
  *   - worker documents are NEVER read here (owner-only RLS). Country
  *     readiness is an AGGREGATE of availability + declared countries only;
  *     document-level readiness waits for the consent switch (draft + gate);
- *   - demand positioning rides the S5 draft RPCs
- *     (list_open_demand_for_agencies / mark_agency_can_offer) and degrades
- *     to an honest needs-gate state until the owner applies the draft.
+ *   - demand positioning rides list_open_demand_for_agencies /
+ *     mark_agency_can_offer, which are APPLIED in production (both verified
+ *     present 2026-09-14; this header called them "S5 draft RPCs ... until
+ *     the owner applies the draft"). The needs-gate state stays for a
+ *     database without them.
+ *
+ * NOT MOUNTED, AND RETIRED. `getAgencyPool()` has no caller anywhere in the
+ * product, and neither does `markCanOfferAction`; the only "pool" on a page is
+ * the clearly labelled marketing preview built from `content/placeholders.ts`.
+ * This header used to say that which of the two agency models a screen should
+ * be built on was an open owner decision. IT WAS ANSWERED on 2026-09-14
+ * (#1740): Model B — the agency<->client bridge, `lib/agency/bridge-*.ts` — is
+ * canonical, and this Model A pool is RETIRED on the record as ORG-10. Do not
+ * mount it. `lib/guards/agency-model-b-canonical-v1.test.ts` bans importing
+ * this module from any route or component for exactly that reason; the file
+ * stays so the product's own history remains readable.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -168,10 +183,9 @@ export async function getAgencyPool(): Promise<AgencyPoolResult> {
   const confirmationsByWorker = new Map<string, number>();
   if (linkedIds.length > 0) {
     try {
-      const { data: entryRows } = await asAny(supabase)
-        .from("journal_entries")
-        .select("id, worker_id")
-        .in("worker_id", linkedIds);
+      const { data: entryRows } = await liveJournalEntriesOnly(
+        asAny(supabase).from("journal_entries").select("id, worker_id").in("worker_id", linkedIds),
+      );
       const entryIds: string[] = [];
       const entryWorker = new Map<string, string>();
       for (const e of (entryRows ?? []) as { id: string; worker_id: string }[]) {
@@ -189,9 +203,13 @@ export async function getAgencyPool(): Promise<AgencyPoolResult> {
       if (entryIds.length > 0) {
         const { data: confRows } = await asAny(supabase)
           .from("journal_entry_confirmations")
-          .select("entry_id")
+          .select("entry_id, confirmation_scope")
           .in("entry_id", entryIds);
-        for (const c of (confRows ?? []) as { entry_id: string }[]) {
+        // Employer confirmations only (decision 0018): a client acceptance is
+        // its own signal and never raises the pool's confirmation count.
+        for (const c of withoutCounterpartyRows(
+          (confRows ?? []) as { entry_id: string; confirmation_scope: unknown }[],
+        )) {
           const wid = entryWorker.get(c.entry_id);
           if (!wid) continue;
           confirmationsByWorker.set(

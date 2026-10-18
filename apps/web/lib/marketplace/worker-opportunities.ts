@@ -6,9 +6,13 @@ import {
   type SavedVacancyRow,
   type WorkerReadiness,
 } from "@/lib/opportunities/load-worker-opportunities";
-import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations";
+import {
+  getWorkerJobRecommendations,
+  loadUnseenRecommendationCount,
+} from "@/lib/opportunities/recommendations";
 import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import type { JobRecommendation } from "@/lib/opportunities/recommendations-model";
+import type { InterestStatus } from "@/lib/opportunities/interest-snapshot";
 import type { MyInterestViewRow } from "@/lib/opportunities/my-interest-view";
 import type {
   ExternalOpportunityCardV1,
@@ -81,6 +85,8 @@ export interface MarketplaceCapabilities {
   readonly seenReadDegraded: boolean;
   /** The owner-gated interest table exists. */
   readonly interestAvailable: boolean;
+  /** The vacancy source of the interest table exists (20260917160000). */
+  readonly vacancyInterestAvailable: boolean;
   /** The #723 saved-opportunities store exists. */
   readonly savedAvailable: boolean;
 }
@@ -95,9 +101,13 @@ export type MarketplaceBoardView =
        *  of invented state this layer exists to remove. */
       readonly capabilities: Pick<
         MarketplaceCapabilities,
-        "boardAvailable" | "interestAvailable" | "savedAvailable"
+        "boardAvailable" | "interestAvailable" | "vacancyInterestAvailable" | "savedAvailable"
       >;
       readonly readiness: WorkerReadiness;
+      /** Own interest status per public vacancy id (external cards). */
+      readonly vacancyInterestById: ReadonlyMap<string, InterestStatus>;
+      /** Own commercial handoff per vacancy id (own RLS rows). */
+      readonly handoffByVacancy: ReadonlyMap<string, { status: string; outreachState: string }>;
       /** Ranked, explained cards — best first (shared §19 comparator). */
       readonly opportunities: readonly OpportunityCard[];
       readonly savedRequestIds: readonly string[];
@@ -168,9 +178,12 @@ export async function loadWorkerOpportunityBoard(
     capabilities: {
       boardAvailable: !board.needsDataAccess,
       interestAvailable: board.interestAvailable,
+      vacancyInterestAvailable: board.vacancyInterestAvailable,
       savedAvailable: board.savedAvailable,
     },
     readiness: board.readiness,
+    vacancyInterestById: board.vacancyInterestById,
+    handoffByVacancy: board.handoffByVacancy,
     opportunities: board.opportunities,
     savedRequestIds: board.savedRequestIds,
     savedVacancies: board.savedVacancies,
@@ -271,8 +284,11 @@ export async function getNewMarketplaceMatchCount(): Promise<number> {
     // attention count. Before W3 row 5 it borrowed the worker-overview card's
     // tag; that card is gone, and borrowing another render surface's name
     // would say the person was shown rows they were not.
-    const view = await loadWorkerOpportunityMatches({});
-    return view.kind === "ready" ? view.newCount : 0;
+    //
+    // The count reads only the platform's own demand (the same derivation
+    // `newCount` uses), never the external ads: this runs on every dashboard
+    // page, and the external supply reads were the heaviest part of it.
+    return await loadUnseenRecommendationCount();
   } catch {
     return 0;
   }

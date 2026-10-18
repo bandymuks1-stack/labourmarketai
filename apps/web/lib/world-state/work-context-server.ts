@@ -14,6 +14,7 @@ import {
 } from "@/lib/worker/invitations";
 import type { WorkerInvitationsLabels } from "@/components/app/worker-invitations";
 import type { ContextFact, ContextRecommendation } from "./entity-context";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 
 /**
  * The Context Panel with NOTHING selected — "what is going on with my work
@@ -82,9 +83,13 @@ const CHIP_FOR_SUGGESTION: Record<string, string | null> = {
 };
 
 export async function resolveWorkContext(locale: string): Promise<WorkContextResult> {
-  const tPanel = await getTranslations({ locale, namespace: "workspace.panel" });
+  const [tPanel, tPlanning, tAll] = await Promise.all([
+    getTranslations({ locale, namespace: "workspace.panel" }),
+    getTranslations({ locale, namespace: "planning" }),
+    getTranslations({ locale }),
+  ]);
 
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = (await viewerWorkToday()).todayIso;
   const range = visibleRange("agenda", todayIso);
   // Independent reads — the Time Engine window and "who is waiting on me" have
   // nothing to say to each other, so they run together.
@@ -137,11 +142,17 @@ export async function resolveWorkContext(locale: string): Promise<WorkContextRes
     });
   }
   if (ctx.nextDeadline?.startDate) {
+    // A labelled item reads "<label> — <day>". An item WITHOUT a real label
+    // (a sent invitation whose invitee set no name, a task without a title)
+    // reads the same fallback noun + status the calendar uses — "Kvietimas
+    // (Laukiama) — 2026-09-18" — never a bare date and never a raw identifier
+    // (G-H1, window 6).
+    const d = ctx.nextDeadline;
+    const name =
+      d.label ?? `${tPlanning(`fallback.${d.sourceType}`)} (${tAll(d.statusKey)})`;
     facts.push({
       label: tPanel("factDeadline"),
-      value: ctx.nextDeadline.label
-        ? `${ctx.nextDeadline.label} — ${ctx.nextDeadline.startDate}`
-        : ctx.nextDeadline.startDate,
+      value: `${name} — ${d.startDate}`,
     });
   }
 
@@ -194,6 +205,7 @@ async function resolveInvitations(
       outcomeLinked: t("outcomeLinked"),
       outcomeAlreadyLinked: t("outcomeAlreadyLinked"),
       outcomeNoInvitation: t("outcomeNoInvitation"),
+      outcomeEmailUnverified: t("outcomeEmailUnverified"),
       outcomeNoWorker: t("outcomeNoWorker"),
       outcomeError: t("outcomeError"),
       outcomeNeedsMigration: t("outcomeNeedsMigration"),

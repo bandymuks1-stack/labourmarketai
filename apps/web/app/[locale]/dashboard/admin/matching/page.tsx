@@ -23,6 +23,7 @@ import {
 import { StructureNeedForm } from "@/components/app/structure-need-form";
 import { openDirectConversationAction } from "@/lib/communication/open-conversation-action";
 import type { DarkListboxOption } from "@/components/ui/DarkListbox";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Phase 3.2 — Human-Run Matching Workbench (Marketplace v1 heart, product
@@ -160,12 +161,10 @@ export default async function AdminMatchingWorkbenchPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-matching-workbench">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         {/* Honest method statement — the match is a human decision. */}
         <p
@@ -425,7 +424,7 @@ export default async function AdminMatchingWorkbenchPage({
                           className="rounded-md border border-brand-cyan/20 bg-brand-cyan/5 p-2.5"
                           data-testid={`matching-team-${r.id}`}
                         >
-                          <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+                          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                             {t("team.title")}
                           </p>
                           {teamsRead === null || teamsRead.kind === "unreadable" ? (
@@ -475,7 +474,7 @@ export default async function AdminMatchingWorkbenchPage({
                                       <span className="text-xs font-semibold text-text-primary">
                                         {team.name}
                                       </span>
-                                      <span className="rounded-sm border border-brand-cyan/30 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-brand-cyan">
+                                      <span className="rounded-sm border border-brand-cyan/30 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                                         {t(`engine.status.${teamMatch.status}` as never)}
                                       </span>
                                     </span>
@@ -570,7 +569,7 @@ export default async function AdminMatchingWorkbenchPage({
                             className="rounded-md border border-brand-cyan/20 bg-brand-cyan/5 p-2.5"
                             data-testid={`matching-fit-${r.id}`}
                           >
-                            <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+                            <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                               {t("fit.title")}
                             </p>
                             <p className="text-meta leading-relaxed text-text-secondary">

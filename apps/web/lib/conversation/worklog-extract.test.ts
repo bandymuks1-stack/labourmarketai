@@ -55,6 +55,31 @@ describe("extractWorkLog — variants + honest ambiguity", () => {
     expect(p.workedMinutes).toBe(9 * 60);
   });
 
+  it("a break stated in HOURS is subtracted from the span like one stated in minutes", () => {
+    const cases: Array<[string, number, number]> = [
+      ["8-17 with 1 h break", 60, 8 * 60],
+      ["8-17 with 30 min break", 30, 8 * 60 + 30],
+      ["8-17, 1 val. pertrauka", 60, 8 * 60],
+      ["nuo 8 iki 17, pertrauka 1 valanda", 60, 8 * 60],
+      ["с 8 до 17, перерыв 1 час", 60, 8 * 60],
+      ["с 8 до 17, 1 ч перерыв", 60, 8 * 60],
+    ];
+    for (const [text, breakMinutes, workedMinutes] of cases) {
+      const p = extractWorkLog(text, TODAY);
+      expect([text, p.breakMinutes, p.workedMinutes]).toEqual([text, breakMinutes, workedMinutes]);
+    }
+  });
+
+  it("the day's own hours are never read as the break", () => {
+    const p = extractWorkLog("dirbau 9 valandas, 1 val. pertrauka", TODAY);
+    expect([p.breakMinutes, p.workedMinutes]).toEqual([60, 8 * 60]);
+  });
+
+  it("a word that merely contains 'break' is work, not a break", () => {
+    const p = extractWorkLog("8-17, 45 min breakdown of old formwork", TODAY);
+    expect([p.breakMinutes, p.workedMinutes]).toEqual([0, 9 * 60]);
+  });
+
   it("no date/time signal → hasSignal false (flow asks one question)", () => {
     expect(extractWorkLog("montavau langus", TODAY).hasSignal).toBe(false);
   });
@@ -63,5 +88,104 @@ describe("extractWorkLog — variants + honest ambiguity", () => {
     const p = extractWorkLog("today from 8 to 16, installed windows", TODAY);
     expect(p.start).toBe("08:00");
     expect(p.end).toBe("16:00");
+  });
+});
+
+describe("extractWorkLog — a digit run inside a code, a date or a list is not a clock span", () => {
+  // Measured on production (2026-09-11): the reference token below was read
+  // as 13:00–17:00 and became four worked hours on a real record.
+  it("a reference token with hyphenated digit runs yields no span and no worked time", () => {
+    const p = extractWorkLog("QA-S13-1789111905948 klojau plyteles", TODAY);
+    expect(p.start).toBeNull();
+    expect(p.end).toBeNull();
+    expect(p.workedMinutes).toBeNull();
+  });
+  it("an ISO date is a date, never a span of its own digits", () => {
+    const p = extractWorkLog("2026-09-11 klojau plyteles", TODAY);
+    expect(p.date).toBe("2026-09-11");
+    expect(p.start).toBeNull();
+    expect(p.workedMinutes).toBeNull();
+  });
+  it("a three-part number list and an object code are not spans", () => {
+    expect(extractWorkLog("nr. 12-13-14 patikrinau", TODAY).start).toBeNull();
+    expect(extractWorkLog("Objektas A-7-12, montavau", TODAY).start).toBeNull();
+  });
+  it("a real span next to a date still parses", () => {
+    const p = extractWorkLog("2026-09-11 dirbau 9-18", TODAY);
+    expect(p.date).toBe("2026-09-11");
+    expect(p.start).toBe("09:00");
+    expect(p.end).toBe("18:00");
+    expect(p.workedMinutes).toBe(9 * 60);
+  });
+  it("a dotted span still parses", () => {
+    const p = extractWorkLog("dirbau nuo 7.30 iki 16.00", TODAY);
+    expect(p.start).toBe("07:30");
+    expect(p.end).toBe("16:00");
+  });
+});
+
+describe("extractWorkLog — the context slot (issue #1689, re-audit line 0): the object, place, project or client the work was for", () => {
+  it("the owner's sentence: the dotted name after the work verb is the context, the colon is not part of it", () => {
+    const p = extractWorkLog(
+      "Šiandien 9 valandas dirbau LabourMarket.ai: 5 val. programavau, 2 val. testavau, 2 val. ieškojau partnerių.",
+      TODAY,
+    );
+    expect(p.site).toBe("LabourMarket.ai");
+    // the time reading is untouched by the context reading
+    expect(p.workedMinutes).toBe(9 * 60);
+    expect(p.date).toBe(TODAY);
+  });
+
+  it("a place noun followed by a name — warehouse, project, company — in five languages", () => {
+    expect(extractWorkLog("Iškroviau 36 paletes sandėlyje Kaune", TODAY).site).toBe("Kaune");
+    expect(extractWorkLog("projekte LabourMarket.ai programavau 5 val.", TODAY).site).toBe("LabourMarket.ai");
+    expect(extractWorkLog("Šiandien įmonėje UAB Statyba klojau plyteles 6 val.", TODAY).site).toBe("UAB Statyba");
+    expect(extractWorkLog("Worked 8 hours at the warehouse Rimi today", TODAY).site).toBe("Rimi");
+    expect(extractWorkLog("Сегодня работал 8 часов на складе Maxima", TODAY).site).toBe("Maxima");
+    expect(extractWorkLog("Vandaag 8 uur gewerkt in het magazijn Bol", TODAY).site).toBe("Bol");
+    expect(extractWorkLog("Heute 8 Stunden im Lager Bosch gearbeitet", TODAY).site).toBe("Bosch");
+  });
+
+  it("a name right after the work verb — 'dirbau Kaune', 'worked at Acme', 'работал в Maxima', 'gewerkt bij Bol', 'gearbeitet bei Bosch'", () => {
+    expect(extractWorkLog("Vakar dirbau Kaune nuo 8 iki 17", TODAY).site).toBe("Kaune");
+    expect(extractWorkLog("worked at Acme Corp from 8 to 17", TODAY).site).toBe("Acme Corp");
+    expect(extractWorkLog("работал в Maxima с 8 до 17", TODAY).site).toBe("Maxima");
+    expect(extractWorkLog("gewerkt bij Bol van 8 tot 17", TODAY).site).toBe("Bol");
+    expect(extractWorkLog("gearbeitet bei Bosch von 8 bis 17", TODAY).site).toBe("Bosch");
+  });
+
+  it("a place noun followed by a verb, a number or a lower-case word names NO context — the person is not handed a guess", () => {
+    expect(extractWorkLog("sandėlyje iškroviau 36 paletes", TODAY).site).toBeNull();
+    expect(extractWorkLog("dirbau 8 valandas", TODAY).site).toBeNull();
+    expect(extractWorkLog("dirbau nuo 8 iki 17, montavau langus", TODAY).site).toBeNull();
+    expect(extractWorkLog("worked for 8 hours at home", TODAY).site).toBeNull();
+  });
+
+  it("the explicit 'objekte X' reading still wins, and the words stay verbatim in the evidence", () => {
+    const p = extractWorkLog("Šiandien objekte Roterdame dirbau Kaune nuo 8 iki 17", TODAY);
+    expect(p.site).toBe("Roterdame");
+    expect(p.notes).toContain("dirbau Kaune");
+  });
+
+  it("a named context is work content: the flow no longer asks what was done", () => {
+    expect(extractWorkLog("dirbau LabourMarket.ai", TODAY).site).toBe("LabourMarket.ai");
+  });
+});
+
+describe("relative days in Polish, and the day before yesterday in every language", () => {
+  const TODAY = "2026-10-11";
+  it.each([
+    ["Wczoraj malowałem ściany w hali przez 6 godzin.", "2026-10-10"],
+    ["Dzisiaj spawałem 8 godzin.", "2026-10-11"],
+    ["Przedwczoraj pracowałem 7 godzin.", "2026-10-09"],
+    ["Užvakar dirbau 8 valandas.", "2026-10-09"],
+    ["Позавчера работал 8 часов.", "2026-10-09"],
+    ["Vorgestern habe ich 8 Stunden gearbeitet.", "2026-10-09"],
+    ["Eergisteren 8 uur gewerkt.", "2026-10-09"],
+    ["The day before yesterday I worked 8 hours.", "2026-10-09"],
+    ["Vakar dirbau 8 valandas.", "2026-10-10"],
+    ["Вчера работал 8 часов.", "2026-10-10"],
+  ])("%s → %s", (text, day) => {
+    expect(extractWorkLog(text, TODAY).date).toBe(day);
   });
 });

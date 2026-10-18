@@ -103,7 +103,7 @@ describe("no surface bypasses the confirm step with a direct anchor", () => {
 
 describe("the confirm copy exists in the 5 routed locales", () => {
   const KEYS = ["confirmNotice", "confirmContinue", "confirmDismiss"] as const;
-  for (const locale of ["lt", "en", "ru", "nl", "de"] as const) {
+  for (const locale of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
     it(`${locale}: opportunities.external confirm keys are real strings`, () => {
       const json = JSON.parse(read(`messages/${locale}.json`)) as {
         opportunities?: { external?: Record<string, unknown> };

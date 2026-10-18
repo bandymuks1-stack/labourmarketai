@@ -19,7 +19,7 @@ const code = (src: string) =>
 
 const form = read("components/app/demand-request-button.tsx");
 // W3 rows 7/8/25: the wizard's ONE mount is the company page.
-const page = read("app/[locale]/dashboard/company/page.tsx");
+const page = read("app/[locale]/dashboard/company/needs/page.tsx");
 const helper = read("lib/demand/demand-request.ts");
 const readback = read("components/app/demand-requests-readback.tsx");
 const requestsLib = read("lib/buyer/customer-requests.ts");

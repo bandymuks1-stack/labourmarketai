@@ -1,5 +1,7 @@
 "use client";
 
+import type { CountryOption } from "@/lib/location/country-options";
+
 import { useActionState, useRef } from "react";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -8,7 +10,6 @@ import {
   type CompanySetupFormState,
 } from "@/lib/company/setup-actions";
 import {
-  COMPANY_COUNTRY_CODES,
   COMPANY_TYPES,
   type CompanyType,
 } from "@/lib/company/company-profile-shared";
@@ -44,6 +45,13 @@ export interface CompanySetupFormLabels {
   readonly countryPlaceholder: string;
   /** countries.code → localized country name (only seeded codes). */
   readonly countryOptions: Record<string, string>;
+  /** The page locale — country labels for the whole world come from CLDR in it. */
+  readonly locale: string;
+  /** Every country, named ON THE SERVER (countryOptionsForLocale). Built here
+   *  in the browser, the browser's ICU named four countries differently from
+   *  Node's ("Hong Kong" vs "Hong Kong SAR China") and the page failed to
+   *  hydrate (React #418, agency onboarding walk 2026-10-08). */
+  readonly countryList: readonly CountryOption[];
   readonly statusInvalidCountry: string;
   readonly registrationCode: string;
   readonly registrationCodeHelp: string;
@@ -254,9 +262,9 @@ export function CompanySetupForm({
           <option value="" disabled>
             {labels.countryPlaceholder}
           </option>
-          {COMPANY_COUNTRY_CODES.map((code) => (
-            <option key={code} value={code}>
-              {labels.countryOptions[code] ?? code}
+          {labels.countryList.map((o) => (
+            <option key={o.value} value={o.value}>
+              {labels.countryOptions[o.value] ?? o.label}
             </option>
           ))}
         </select>
@@ -397,7 +405,7 @@ export function CompanySetupForm({
           ) : null}
           <Link
             href="/dashboard/company"
-            className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-opacity hover:opacity-90"
+            className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90"
             data-testid="company-setup-go-workspace"
           >
             {labels.goToWorkspace} →

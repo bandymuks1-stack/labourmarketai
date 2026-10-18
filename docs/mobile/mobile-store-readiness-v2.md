@@ -1,5 +1,14 @@
 # Mobile app store readiness v2 — assets, metadata drafts, decisions
 
+> **SUPERSEDED IN DIRECTION, 2026-09-13.** This pack is written against a
+> PWA + Android TWA route. A native Expo client shipped after it
+> (`ANDROID_NATIVE_BUILD_PROVEN` 2026-08-30, `IOS_RUNTIME_JOURNEY_PROVEN`
+> 2026-08-31), so the TWA path is no longer the plan. The asset specs,
+> honesty rules and owner-decision list below remain valid and are carried
+> forward by
+> [`STORE_RELEASE_READINESS_2026-09-13.md`](STORE_RELEASE_READINESS_2026-09-13.md),
+> which is the current release truth.
+
 Status: quality-train PR J (2026-07-06). Continues PR #644's PWA baseline
 (`mobile-app-readiness-v1.md`). Nothing is submitted to any store; no
 native wrapper is added; no service worker exists (still intentional —

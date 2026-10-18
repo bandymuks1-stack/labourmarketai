@@ -9,7 +9,7 @@
 
 | What appeared | Kind | Why it appeared | Why it cannot be a conversation | Permitting axiom | Declared |
 |---|---|---|---|---|---|
-| `/oauth/consent` | screen | The one screen where a signed-in person approves or denies an external OAuth client | Deliberate security property, not a limitation: granting an external agent standing access to the account is the ONE decision an assistant must never make or be able to make on a person | A-04 | yes |
+| `/dashboard/company/people/[personId]` | screen | One roster person of the supplying organization as a historical Person card: who they are to this organization, ALL of the history the organization supplied (including records tied to no known project), the stated hours, the skills the history points to, and whether an account has claimed them yet. It exists whether or not the person has claimed an account. | The conversation can answer a single question about a person, but the card is where a manager stands while reading one person | A-14 | yes |
 
 ## Axiom checks
 
@@ -42,18 +42,68 @@
 | `requires_new_page` | A-01 | `/` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
 | `not_reflected_on_map` | A-01 | `components/app/organization-capabilities-card.tsx` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
 | `not_ai_controlled` | A-01 | `components/app/organization-capabilities-card.tsx` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
+| `not_reflected_on_map` | A-01 | `/dashboard/hours` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
+| `not_ai_controlled` | A-01 | `/dashboard/hours` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
+| `requires_new_page` | A-01 | `/dashboard/hours` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
 | `not_world_state_driven` | A-01 | `/oauth/consent` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
 | `not_reflected_on_map` | A-01 | `/oauth/consent` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
 | `not_ai_controlled` | A-01 | `/oauth/consent` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
 | `requires_leaving_workspace` | A-01 | `/oauth/consent` | certain | "usableWithoutLeavingWorkspace" is false — AI-first, one workspace, no page switching |
 | `requires_new_page` | A-01 | `/oauth/consent` | certain | "needsNoNewPage" is false — AI-first, one workspace, no page switching |
+| `not_world_state_driven` | A-01 | `components/app/journal/journal-photo-viewer.tsx` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
+| `not_reflected_on_map` | A-01 | `components/app/journal/journal-photo-viewer.tsx` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
+| `not_ai_controlled` | A-01 | `components/app/journal/journal-photo-viewer.tsx` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
 | `ai_cannot_work_with_entity` | A-09 | `/oauth/consent` | certain | "aiCanWorkWithIt" is false — Entity is the only base thing in the world |
+| `ai_cannot_work_with_entity` | A-09 | `components/app/journal/journal-photo-viewer.tsx` | certain | "aiCanWorkWithIt" is false — Entity is the only base thing in the world |
 | `world_state_cannot_control_it` | A-01 | `/create-cv` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 | `world_state_cannot_control_it` | A-01 | `/jobs` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 | `world_state_cannot_control_it` | A-01 | `/jobs/[id]` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 | `world_state_cannot_control_it` | A-01 | `components/marketing/public-vacancy-card.tsx` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 | `world_state_cannot_control_it` | A-01 | `/` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
 | `world_state_cannot_control_it` | A-01 | `/oauth/consent` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
+| `world_state_cannot_control_it` | A-01 | `components/app/journal/journal-photo-viewer.tsx` | certain | "worldStateCanControlIt" is false — World State cannot control it, so this decision must be REDESIGNED, not reviewed |
+
+## A-14 notices (owner-ruled distinct surfaces — decision 0015)
+
+- `not_world_state_driven` on `components/app/historical-player-card.tsx` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `components/app/historical-player-card.tsx` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `components/app/identity/person-identity-card.tsx` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `components/app/identity/person-identity-card.tsx` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `/dashboard/work-in-numbers` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `/dashboard/work-in-numbers` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `requires_leaving_workspace` on `/dashboard/work-in-numbers` — "usableWithoutLeavingWorkspace" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `requires_new_page` on `/dashboard/work-in-numbers` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `/dashboard/company/people` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `/dashboard/company/people` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `requires_new_page` on `/dashboard/company/people` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `/dashboard/company/people/[personId]` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `/dashboard/company/people/[personId]` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `requires_new_page` on `/dashboard/company/people/[personId]` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `/dashboard/company/needs` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `/dashboard/company/needs` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `requires_new_page` on `/dashboard/company/needs` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `/dashboard/company/partners` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `/dashboard/company/partners` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `requires_new_page` on `/dashboard/company/partners` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `/dashboard/company/education` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `/dashboard/company/education` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `requires_new_page` on `/dashboard/company/education` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `/dashboard/company/history` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `/dashboard/company/history` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `requires_new_page` on `/dashboard/company/history` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `/dashboard/company/settings` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `/dashboard/company/settings` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `requires_new_page` on `/dashboard/company/settings` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `world_state_cannot_control_it` on `components/app/historical-player-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `components/app/identity/person-identity-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `/dashboard/work-in-numbers` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `/dashboard/company/people` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `/dashboard/company/people/[personId]` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `/dashboard/company/needs` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `/dashboard/company/partners` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `/dashboard/company/education` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `/dashboard/company/history` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `/dashboard/company/settings` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 
 ## Rules that were checked
 

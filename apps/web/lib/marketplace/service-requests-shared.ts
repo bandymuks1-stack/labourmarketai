@@ -28,6 +28,51 @@ export function canRequestAgain(status: RequestStatus): boolean {
   return status === "declined" || status === "withdrawn";
 }
 
+/**
+ * Discovery is a BOUNDED read (owner scale constraint 2026-09-05: design for
+ * ≥1M users — never an unbounded list). Newest active offerings first, at most
+ * this many per page; a narrower question is asked with the country filter,
+ * not by reading more rows.
+ */
+export const DISCOVERY_READ_LIMIT = 100;
+
+const COUNTRY_CODE_RX = /^[A-Z]{2}$/;
+
+/**
+ * Normalize a discovery country filter from a query string: a 2-letter code
+ * (case-insensitive) or nothing. Anything else is ignored rather than passed
+ * to the database — the filter never becomes an error surface.
+ */
+export function normalizeDiscoveryCountry(raw: string | null | undefined): string | null {
+  const v = typeof raw === "string" ? raw.trim().toUpperCase() : "";
+  return COUNTRY_CODE_RX.test(v) ? v : null;
+}
+
+/**
+ * Normalize a discovery category filter: free text matched IN MEMORY over the
+ * bounded page (`filterByCategory`) — never an `ilike` scan over the table.
+ * Bounded to a short needle; empty → no filter.
+ */
+export function normalizeDiscoveryCategory(raw: string | null | undefined): string | null {
+  const v = typeof raw === "string" ? raw.trim().slice(0, 80) : "";
+  return v.length > 0 ? v : null;
+}
+
+/**
+ * In-memory category match over an already-bounded discovery page (G-E1,
+ * window 6). `category_slug` is free text in production ("apdaila", "DI
+ * sprendimai, Automatizacija, …"), so the honest filter is a case-insensitive
+ * substring over the rows already read — pure, no I/O, no table scan.
+ */
+export function filterByCategory<T extends { readonly categorySlug: string | null }>(
+  rows: readonly T[],
+  category: string | null,
+): T[] {
+  if (!category) return [...rows];
+  const needle = category.toLocaleLowerCase();
+  return rows.filter((r) => (r.categorySlug ?? "").toLocaleLowerCase().includes(needle));
+}
+
 /** A discoverable (active) offering — only the fields the provider published. */
 export interface DiscoverableOfferingRow {
   readonly id: string;
@@ -130,12 +175,16 @@ export type DiscoveryListResult =
 export type OutgoingListResult =
   | { kind: "ok"; rows: OutgoingRequestRow[] }
   | { kind: "needs-migration" }
-  | { kind: "not-authed" };
+  | { kind: "not-authed" }
+  /** The read failed — UNKNOWN, never "no requests" (SEP-7). */
+  | { kind: "error" };
 
 export type IncomingListResult =
   | { kind: "ok"; rows: IncomingRequestRow[] }
   | { kind: "needs-migration" }
-  | { kind: "not-authed" };
+  | { kind: "not-authed" }
+  /** The read failed — UNKNOWN, never "no requests" (SEP-7). */
+  | { kind: "error" };
 
 export type RequestMutateResult =
   | { kind: "ok"; id?: string; detail?: string }
@@ -147,3 +196,9 @@ export type RequestMutateResult =
    *  honestly instead of a generic "try again" (repeat actions, PR 6b). */
   | { kind: "inactive" }
   | { kind: "error"; message: string };
+
+/** The status string a status-returning RPC handed back; anything that is not a
+ *  string is treated as an unknown (non-ok) outcome, never as success. */
+export function rpcOutcome(data: unknown): string {
+  return typeof data === "string" && data.length > 0 ? data : "unknown";
+}

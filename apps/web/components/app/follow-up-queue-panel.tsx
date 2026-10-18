@@ -220,7 +220,7 @@ export function FollowUpQueuePanel({ data }: { data: FollowUpQueueData }) {
                       type="button"
                       disabled={pending}
                       onClick={() => setStatus(task.id, "pending")}
-                      className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan"
+                      className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-champagne"
                       data-testid={`follow-up-reopen-${task.id}`}
                     >
                       {t("actions.reopen")}

@@ -1,0 +1,25 @@
+{"step":"health","build":"6ba74343","region":"dub1"}
+{"check":"S1 own rows readable as the person","ok":true,"detail":1}
+{"step":"S1","total":1,"agency_offer":0}
+{"check":"S2 the OFFER form opened, carrying the trade and the count","ok":true,"detail":{"roleValue":"Suvirintojas","sizeValue":"20"}}
+{"check":"S2 the offer was saved and said so","ok":false,"detail":{"formError":"Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje."}}
+{"check":"S2 the refusal is the known open-needs ceiling, not something new","ok":true,"detail":"Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn., iki 10) organizacijos paskyroje."}
+{"step":"S2 seed","seeded":true,"error":null}
+{"check":"S2 the canonical supply row exists to be read back","ok":true,"detail":null}
+{"step":"S2 write path","human":false,"seededThroughRpc":true}
+{"step":"S2 persisted","created":[{"id":"b135bfad-0a24-4f3e-9f3a-f94bca8c6e1b","kind":"agency_offer","status":"submitted","title":"Suvirintojas","role_or_work_type":null,"team_size":null,"created_at":"2026-09-06T18:41:39.762285+00:00"}]}
+{"check":"S2 exactly one new row was written","ok":true,"detail":[{"id":"b135bfad-0a24-4f3e-9f3a-f94bca8c6e1b","kind":"agency_offer","status":"submitted"}]}
+{"check":"S2 the new row is SUPPLY, not demand","ok":true,"detail":"agency_offer"}
+{"check":"S3 the supply section exists","ok":true,"detail":null}
+{"check":"S3 every row in the supply section IS supply","ok":true,"detail":["supply"]}
+{"check":"S3 no scouting link over an offer","ok":true,"detail":0}
+{"check":"S3 the supply section states the honest gap in real words","ok":true,"detail":"Čia žmonės, kuriuos rinkai nurodėte TURINTYS, o ne tie, kurių ieškote. Jie išsaugoti ir matomi jums. Darbdaviai kol kas negali ieškoti pasiūlytų pajėgumų, todėl"}
+{"check":"S3 the supply heading is a real sentence, not a key","ok":true,"detail":"Jūsų pasiūlyti pajėgumai"}
+{"check":"S3 the needs section still renders","ok":true,"detail":null}
+{"check":"S3 NO supply row is listed among the needs","ok":true,"detail":["demand"]}
+{"check":"S3 no raw translation key on the company dashboard","ok":true,"detail":null}
+{"check":"S3 no failed requests","ok":true,"detail":[]}
+{"step":"S4 MANUAL CLEANUP REQUIRED","reason":"permission denied for table customer_requests","sql":"delete from public.customer_requests where id = 'b135bfad-0a24-4f3e-9f3a-f94bca8c6e1b';"}
+{"check":"S4 the row this walk created is gone","ok":false,"detail":{"delErr":"permission denied for table customer_requests","newId":"b135bfad-0a24-4f3e-9f3a-f94bca8c6e1b"}}
+{"check":"S4 the identity is back to its starting shape","ok":false,"detail":{"before":1,"after":2,"beforeOffers":0,"endOffers":1}}
+{"result":"FAIL","failed":["S2 the offer was saved and said so","S4 the row this walk created is gone","S4 the identity is back to its starting shape"]}

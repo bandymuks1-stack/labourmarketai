@@ -264,7 +264,7 @@ describe("5. the existing scouting screen is never taken away", () => {
     expect(r).toBeDefined();
     expect(r?.advancedRoute).toBe("/dashboard/company/scouting");
     expect(r?.advancedRoute).toMatch(/^\//);
-    expect(r?.advancedRoute).not.toMatch(/^\/(lt|en|ru|nl|de)\//);
+    expect(r?.advancedRoute).not.toMatch(/^\/(lt|en|ru|nl|de|pl)\//);
   });
 
   it("every honest state offers the way to the full screen", () => {

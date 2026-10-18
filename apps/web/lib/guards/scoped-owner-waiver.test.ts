@@ -304,7 +304,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // "no" answers and refused to waive itself; the waiver record arrived
     // WITH the owner approval, in the same commit that carries the
     // @human-gate-approved annotation on the RED migration.
-    expect(SCOPED_OWNER_WAIVERS).toHaveLength(6);
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(7);
     expect(SCOPED_OWNER_WAIVERS.map((r) => r.id)).toEqual([
       "public-acquisition-route-create-cv",
       "public-acquisition-route-jobs",
@@ -312,13 +312,14 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
       "organization-multi-capability-card",
       "oauth-consent-auth-infrastructure",
       "work-hours-allocation-surface",
+      "journal-photo-viewer-modal",
     ]);
 
     // The 2026-08-31 boundary, executable rather than trusted: three codes,
     // one route (plus its page path for diff matching), one PR, A-01 only.
     const hours = SCOPED_OWNER_WAIVERS[5];
     expect(hours.axioms).toEqual(["A-01"]);
-    expect(hours.pullRequests).toEqual([1344]);
+    expect(hours.pullRequests).toEqual([1344, 2101, 2159, 2234]);
     expect(hours.files).toEqual([
       "/dashboard/hours",
       "apps/web/app/[locale]/dashboard/hours/page.tsx",
@@ -342,7 +343,13 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // covering nothing beyond the single ai_cannot_work_with_entity finding.
     const oauth = SCOPED_OWNER_WAIVERS[4];
     expect(oauth.axioms).toEqual(["A-01", "A-09"]);
-    expect(oauth.pullRequests).toEqual([1347]);
+    // #1786 (2026-09-18) joins on the owner's verbatim approval — "I approve
+    // adding ONLY PR 1786 to the existing public-acquisition-route-jobs and
+    // oauth-consent-auth-infrastructure waiver pullRequests lists" — for a
+    // dead-class fix: `bg-primary` / `text-primary-foreground` /
+    // `hover:bg-muted` were never tokens (the primary button had no
+    // background). Canonical tokens only; no auth change. Exact list, as ever.
+    expect(oauth.pullRequests).toEqual([1347, 1786]);
     expect(oauth.files).toEqual([
       "/oauth/consent",
       "apps/web/app/[locale]/oauth/consent/page.tsx",
@@ -476,13 +483,149 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // addresses; attribution stops naming the source country; search stops
     // matching the hidden title. Same surfaces, strictly less exposure.
     //
+    // #1649 (2026-09-08) is the sixth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1649 ... This is NOT general authority to
+    // self-approve future waivers. Do not broaden, weaken or change the waiver
+    // criteria/scope." It makes a FAILURE honest rather than the surface more
+    // permissive — a statement timeout (57014) stops re-throwing into an HTTP
+    // 500 and stops being renderable as a genuine zero, becoming a named
+    // `unavailable` state instead (SEP-7). No new route, page, component or
+    // auth change, and nothing about what an anonymous visitor may see.
+    // Verified by running the gate on the same head twice, differing only in
+    // the number: 1649 produced 18 violations, every one rejected for
+    // `pr-not-covered` and no other reason, while 1255 passed.
+    //
     // Widening the PR binding is the ONLY change each time: same axiom, same
     // six codes, same three surfaces, same expiry, same reason. Each PR's
     // finding set is byte-identical to `expectedFindings`, so the subset rule
     // still bites. This stays an EXACT list — a `toContain` here would let the
     // next number drift in without a decision, which is the whole thing this
-    // pin exists to prevent.
-    expect(jobs.pullRequests).toEqual([1184, 1193, 1203, 1208, 1255]);
+    // pin exists to prevent. THIS ASSERTION FAILING IS THE FEATURE: it caught
+    // the 1649 extension and forced it to be deliberate.
+    //
+    // #1786 (2026-09-18) is the seventh, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1786 to the existing
+    // public-acquisition-route-jobs and oauth-consent-auth-infrastructure
+    // waiver pullRequests lists." It replaces shadcn class names that were
+    // never in the token map and compiled to NO CSS (secondary text in the
+    // primary colour, a dead card hover) with the canonical tokens, makes the
+    // card's date a mono stamp and gives the MEMBER-ONLY detail location the
+    // map's place-precision chip. No new route, page, component or auth
+    // change; the anonymous projection still carries no employer, location or
+    // apply link (`work-world-jobs.test.ts` pins that on code, not comments).
+    // Verified by running the gate on the head as PR 1786 vs origin/main:
+    // PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER. It caught this
+    // extension too and forced it to be deliberate.
+    //
+    // #1809 (2026-09-20) is the eighth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1809 to the existing
+    // public-acquisition-route-jobs waiver pullRequests list." It is the P0
+    // acquisition loop: the MEMBER half of /jobs/[id] compares the job with
+    // the person through the ONE engine, mounts the existing interest control,
+    // offers same-profession alternatives and makes the JOB A → REGISTER →
+    // JOB A return measurable (`?via=auth`). No new route, page, auth change,
+    // schema or projection change; the anonymous visitor receives exactly what
+    // they received before. Verified by running the gate on the head as PR
+    // 1809 vs origin/main: 18 findings, every one `pr-not-covered` before the
+    // extension; PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER after. It
+    // caught this extension too and forced it to be deliberate.
+    //
+    // #1810 (2026-09-20) is the ninth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1810 to the existing
+    // public-acquisition-route-jobs waiver pullRequests list. Do not broaden
+    // the waiver." It activates `pl` as a UI locale: the `/jobs` pages and the
+    // public vacancy card gain Polish entries in their exhaustive
+    // `Record<ActiveLocale, …>` copy maps. No new route, page, auth change,
+    // schema or projection change; the anonymous projection is unchanged.
+    // Verified by running the gate on the merged head df8bc6ed as PR 1810 vs
+    // origin/main: 42 findings, every one `pr-not-covered` before the
+    // extension. It caught this extension too and forced it to be deliberate.
+    //
+    // #1838 (2026-09-22) is the tenth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1838 to the existing
+    // public-acquisition-route-jobs waiver pullRequests list. Do not broaden
+    // the waiver." It retires automatic translation of the board (the
+    // reader-locale path becomes a SYNCHRONOUS read of renderings that already
+    // exist, so no page view can reach a provider) and adds, inside the
+    // EXISTING member-only branch, the ad's own language plus ONE explicit
+    // translate control. No new route, page, auth change, schema or projection
+    // change; the anonymous projection is unchanged and carries zero translate
+    // controls in all six served locales. Verified by the CI quality run on
+    // head 2bb419d1 as PR 1838 vs origin/main: 42 findings, every one
+    // `pr-not-covered` before the extension. It caught this extension too and
+    // forced it to be deliberate.
+    //
+    // #1837 and #1890 (2026-09-27) are the eleventh and twelfth, on the owner's
+    // verbatim approval: "I approve adding PR #1837 AND the immediately required
+    // public vacancy card localization/source-language fix to the existing
+    // `public-acquisition-route-jobs` waiver `pullRequests` scope, strictly
+    // limited to the already-defined `/jobs`, `/jobs/[id]`, and public vacancy
+    // row/card acquisition surfaces required to close this concrete localization
+    // defect." The same message adds that it "does not authorize unrelated waiver
+    // expansion, security weakening, new public data exposure, or general
+    // self-approval of future waivers".
+    //
+    // They make the surface MORE honest, not more permissive. Production `/lt`
+    // showed the publisher's Swedish occupation as a BARE second line under the
+    // localized heading ("Sandėlio darbininkas" over "Lagerarbetare") and, on
+    // ads with no mapped profession — 30 049 of 53 392 active rows — as the
+    // heading itself with nothing saying it was Swedish. #1890 keeps the
+    // localized catalogue name primary and names the ad's language on ONE compact
+    // line using the key `/jobs/[id]` already used; #1837 is the same concern on
+    // the detail page.
+    //
+    // NOTHING about what an anonymous visitor may see changed: no new route,
+    // page, component, projection, auth or schema change, no new copy in any
+    // locale, and nothing is translated or sent externally —
+    // `translate_vacancy` stays ungranted. Same class as #1809 and #1810.
+    //
+    // THIS ASSERTION CAUGHT THIS EXTENSION TOO, in CI, and forced it to be
+    // deliberate: the waiver list was widened first and `quality` failed here
+    // until the same two numbers were recorded with this reasoning.
+    //
+    // #1892 (2026-09-27) is the thirteenth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR #1892 ... strictly for removing the identified
+    // compensating/now-false human-facing disclaimer from the already-scoped
+    // public jobs surface. This is not general authority to expand the waiver or
+    // self-approve future waived changes."
+    //
+    // It is the only entry on this list that makes the page STRICTLY SMALLER:
+    // one constant and one paragraph deleted, nothing added. The sentence it
+    // removes was a disclaimer compensating for a confusing component — its own
+    // source comment said so — and became false when #1890 gave every card its
+    // own language line. Verified on deployed production before removal.
+    //
+    // #1991 and #1993 (2026-09-29) on the owner's verbatim approval: "I approve
+    // adding PR #1991 and PR #1993 to the existing public-acquisition-route-jobs
+    // waiver pullRequests, strictly for the /jobs/[id] signed-in crash fix and
+    // the job-page hreflang fix." Bounded — not general authority.
+    expect(jobs.pullRequests).toEqual([
+      1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838, 1837, 1890,
+      1892, 1991, 1993, 2045, 2101, 2211, 2253, 2388, 2467,
+    ]);
+    // #2467 (2026-10-18) on the owner's verbatim scoped approval: "Patvirtinu
+    //   PR #2467 įtraukimą į siaurą `/jobs` produkto vartų išimtį, skirtą tik
+    //   tuščios reikšmės „—“ kortelėje ir mobiliosios paieškos išdėstymo
+    //   taisymams. Tai nėra bendras leidimas apeiti produkto kokybės, saugumo
+    //   ar migracijų patikras."
+    // Only the card's last heading fallback (the page's own GENERIC_TITLE
+    // instead of a bare "—") and the phone layout of the search form.
+    // #2388 (2026-10-15) on the owner's verbatim scoped approval: anonymous-safe
+    // JSON-LD only (CollectionPage/ItemList, WebPage/Occupation), no JobPosting,
+    // no employer, location or other non-public field; rules unchanged.
+    // #2253 (2026-10-10) on the owner's verbatim directive: "Darbo skelbimų
+    // pateikimo trūkumus taisyk naudodamas esamą architektūrą, išsaugodamas
+    // SEO, lokalizacijas ir faktinius skelbimų duomenis. Nepriskirk vertimų,
+    // kurių sistema negali patikimai pateikti." Strictly the /jobs/[id]
+    // presentation fix (catalogue profession heading, shared metadata builder,
+    // the card's own fact chips). Bounded.
+    // #2211 (2026-10-09) on the owner's verbatim approval, strictly for the three
+    // /jobs fixes: out-of-range pagination recovery, cross-active-locale
+    // profession filter mapping, locale-correct LT/RU number formatting. Bounded.
+    // #2045 (2026-10-01) on the owner's verbatim approval: "Patvirtinu #2045
+    // įtraukimą į abu /jobs owner-waiver sąrašus." A typed catalogue profession
+    // word redirects to the existing profession filter. Bounded; axiom, codes,
+    // surfaces, expiry and subset rule byte-unchanged.
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
     expect(jobs.expiresAt).toBe("2026-12-31");

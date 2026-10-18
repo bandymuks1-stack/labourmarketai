@@ -66,7 +66,7 @@ function TargetPicker({
       <select aria-label={t("workerLabel")} value={workerId} onChange={(e) => onWorker(e.target.value)}
         className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="asset-worker">
         <option value="">{t("noWorker")}</option>
-        {workers.map((w) => (<option key={w.id} value={w.id}>{w.name}</option>))}
+        {workers.map((w) => (<option key={w.id} value={w.id}>{w.name ?? t("unnamedWorker")}</option>))}
       </select>
     </>
   );
@@ -227,7 +227,7 @@ export function AssetsRegistry({ data }: { data: AssetsOverview }) {
                     orgLabel={
                       org
                         ? {
-                            name: org.name,
+                            name: org.name ?? t("unnamedOrganization"),
                             dot: WORKSPACE_ACCENT_DOT[
                               workspaceAccentIndex(org.id) % WORKSPACE_ACCENT_DOT.length
                             ],
@@ -246,7 +246,7 @@ export function AssetsRegistry({ data }: { data: AssetsOverview }) {
               {data.orgs.length > 1 && (
                 <select aria-label={t("orgLabel")} value={effectiveOrg} onChange={(e) => setOrgId(e.target.value)}
                   className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="asset-org">
-                  {data.orgs.map((o) => (<option key={o.id} value={o.id}>{o.name}</option>))}
+                  {data.orgs.map((o) => (<option key={o.id} value={o.id}>{o.name ?? t("unnamedOrganization")}</option>))}
                 </select>
               )}
               <select aria-label={t("typeLabel")} value={assetType} onChange={(e) => setAssetType(e.target.value as AssetType)}

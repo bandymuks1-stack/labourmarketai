@@ -1,6 +1,6 @@
 /**
  * Pure model for the worker's self-stated languages (DRAFT migration
- * 20260711250000, PR #720 — human-gated, NOT applied yet). No DB, no React —
+ * 20260711250000, PR #720 — APPLIED, ledger `20260711203623`). No DB, no React —
  * extracted so the honesty rules are guard-testable in isolation.
  *
  * The two vocabularies mirror the draft SQL's CHECK constraints EXACTLY:

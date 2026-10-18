@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import {
   OPERATIONAL_STATUSES,
@@ -11,6 +12,7 @@ import {
 } from "@/lib/projects/operations-derive";
 import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
 import { getOperationsCentre } from "@/lib/projects/operations-centre";
+import { isProjectStatus } from "@/lib/projects/project-lifecycle-model";
 import {
   OPS_BOARD_ANCHOR,
   OPS_CENTRE_ATTENTION_MAX,
@@ -19,18 +21,26 @@ import {
   deriveWorkerResources,
   openProjectTasks,
 } from "@/lib/projects/operations-centre-model";
-import { isOverdue } from "@/lib/tasks/task-model";
+import { isBlockingStatus, isOverdue } from "@/lib/tasks/task-model";
 import {
   ProjectOperationsBoard,
   type OperationsBoardLabels,
 } from "@/components/app/project-operations-board";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { HandoverPassportPanel } from "@/components/app/handover-passport-panel";
+import { ProjectFactsForm } from "@/components/app/project-facts-form";
 import { ProjectStagesPanel } from "@/components/app/project-stages-panel";
+import { getLearnedStageDurations } from "@/lib/projects/learned-stage-duration";
 import { ProjectStageGantt } from "@/components/app/project-stage-gantt";
 import { ProjectEconomicsPanel } from "@/components/app/project-economics-panel";
 import { listProjectStages } from "@/lib/projects/stages";
-import { buildStageGantt, type StageGantt } from "@/lib/projects/stage-gantt";
+import { listOrgEmployeeEngagements } from "@/lib/company/org-employee-engagements";
+import {
+  buildResponsibleOptions,
+  responsibleNameMap,
+} from "@/lib/projects/stage-responsible";
+import { buildActivityTimeline } from "@/lib/projects/stage-gantt";
+import { getTaskCollaboration } from "@/lib/tasks/tasks";
 import { getProjectEconomics } from "@/lib/economics/economics";
 import { getProjectAssets } from "@/lib/assets/assets";
 import { ProjectDefectsPanel } from "@/components/app/project-defects-panel";
@@ -42,8 +52,14 @@ import {
   setProjectResponsibleAction,
 } from "@/lib/projects/project-admin-actions";
 import { getProjectsProgress } from "@/lib/projects/progress";
+import { ProjectField } from "@/components/app/project-field";
+import { buildProjectField } from "@/lib/projects/field-model";
+import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
 import { getProjectManageFacts } from "@/lib/projects/responsible";
 import { listOrganizationMembers } from "@/lib/company/memberships";
+import { getProjectHoursSideBySide } from "@/lib/projects/project-hours";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +82,8 @@ const OPS_NOTICES = new Set([
   "updated",
   "invalid",
   "invalid_transition",
+  "invalid_dates",
+  "completed_read_only",
   "needs_migration",
   "not_authorized",
   "not_found",
@@ -92,11 +110,9 @@ export default async function ProjectOperationsPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role = (profile?.active_role as Role) ?? "worker";
 
   if (!MANAGER_ROLES.has(role)) {
@@ -107,9 +123,7 @@ export default async function ProjectOperationsPage({
     if (workerView) redirect(`/${locale}/dashboard/projects/${id}`);
     return (
       <div className="mx-auto flex w-full max-w-content flex-col gap-4">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("eyebrow")}
-        </h1>
+        <PageTitle>{t("eyebrow")}</PageTitle>
         <p className="card-border p-4 text-sm text-text-secondary">{t("managerOnly")}</p>
       </div>
     );
@@ -119,9 +133,7 @@ export default async function ProjectOperationsPage({
   if (!centre) {
     return (
       <div className="mx-auto flex w-full max-w-content flex-col gap-4">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("eyebrow")}
-        </h1>
+        <PageTitle>{t("eyebrow")}</PageTitle>
         <p className="card-border p-4 text-sm text-text-secondary" data-testid="ops-not-authorized">
           {t("notAuthorized")}
         </p>
@@ -148,14 +160,33 @@ export default async function ProjectOperationsPage({
    * the responsible pointer (gated migration → null pre-apply) and the org
    * member list for the responsible select.
    */
-  const [progressById, manageFacts, stages, economics, projectAssets, defects] =
-    await Promise.all([
+  const [
+    progressById,
+    manageFacts,
+    stages,
+    economics,
+    projectAssets,
+    defects,
+    capacity,
+    learnedStageDurations,
+    // Allocated vs journaled hours — the organization's ledger BESIDE the
+    // people's journal, each through its own reader, never summed.
+    projectHours,
+  ] = await Promise.all([
       getProjectsProgress([id]),
       getProjectManageFacts(id),
       listProjectStages(id),
       getProjectEconomics(id),
       getProjectAssets(id),
       getProjectDefects(id),
+      // P4 — the ready edge: the SAME capacity read the chat answers
+      // "who is available" with (roster vs approved absences, WHEN only).
+      loadWhoIsAvailableForChat(),
+      // CAL-10 — what comparable finished stages have really taken. Derived
+      // from the SAME project_stages rows, never stored, and authorized by
+      // the same policy: a caller learns only from stages they can open.
+      getLearnedStageDurations(),
+      getProjectHoursSideBySide(id),
     ]);
   const progress = progressById[id] ?? null;
   const projectOrgId: string | null = manageFacts?.organizationId ?? null;
@@ -164,6 +195,16 @@ export default async function ProjectOperationsPage({
   const orgMembersRead = projectOrgId
     ? await listOrganizationMembers(projectOrgId)
     : null;
+  // Stage responsible picker: ONLY engagements ACTIVE in this project's own
+  // organization (the eligibility set_project_stage_responsible_v1 enforces),
+  // read through the existing readable-name resolver. null = unreadable.
+  const stageEngagementsRead = projectOrgId
+    ? await listOrgEmployeeEngagements(projectOrgId)
+    : null;
+  const stageResponsibleOptions =
+    stageEngagementsRead && stageEngagementsRead.kind === "ok"
+      ? buildResponsibleOptions(stageEngagementsRead.rows)
+      : null;
   const responsibleOptions =
     orgMembersRead && orgMembersRead.kind === "ok"
       ? orgMembersRead.members
@@ -186,10 +227,58 @@ export default async function ProjectOperationsPage({
           ? ["live", "completed"]
           : [];
 
-  const gantt: StageGantt = stages.applied
-    ? buildStageGantt(stages.stages, new Date().toISOString().slice(0, 10))
-    : { hasTimeline: false };
+  // Activity timeline: the real stages + this project's real tasks. Open
+  // blocker counts come from the SAME bounded collaboration read the tasks
+  // page uses; assignee names resolve from the project's workers first (those
+  // may be opened) and the org roster second (plain text, never a dead link).
+  const timelineTasks = tasks.status === "ok" ? tasks.tasks : [];
+  const timelineCollab = await getTaskCollaboration(timelineTasks.map((x) => x.id));
+  const waitingOnByTask: Record<string, number> = {};
+  for (const [taskId, blockers] of Object.entries(timelineCollab.blockersByTask)) {
+    waitingOnByTask[taskId] = blockers.filter((b) => isBlockingStatus(b.status)).length;
+  }
+  const timeline = buildActivityTimeline({
+    projectId: id,
+    stages: stages.applied ? stages.stages : [],
+    tasks: timelineTasks,
+    waitingOnByTask,
+    stageResponsibleNames: responsibleNameMap(stageResponsibleOptions ?? []),
+    blockersByTask: timelineCollab.blockersByTask,
+    meProfileId: user.id,
+    people: ops.workers.map((w) => ({
+      profileId: w.workerProfileId,
+      name: w.name,
+      workerId: w.workerId,
+    })),
+    memberNameByProfileId: new Map(
+      responsibleOptions.map((m) => [m.profileId, m.name] as const),
+    ),
+    todayIso: (await viewerWorkToday()).todayIso,
+  });
+
+  // P4 — THE FIELD (frozen design §5, §1.5): a pure projection over the reads
+  // above — stages as lanes in time, the people on the project as tokens,
+  // open unassigned work as dashed slots, the capacity read as the ready
+  // edge. Nothing below is removed; the Field is added on top of it.
+  const readAt = new Date().toISOString();
+  const field = buildProjectField({
+    stages: stages.applied ? stages.stages : [],
+    stagesApplied: stages.applied,
+    workers: ops.workers,
+    tasks: tasks.status === "ok" ? tasks.tasks : [],
+    tasksApplied: tasks.status === "ok",
+    capacity,
+    todayIso: readAt.slice(0, 10),
+  });
   const tAssets = await getTranslations("assets");
+  // The stored lifecycle value in the person's language (the same label set
+  // the projects map and the planning page use). An unknown value is shown
+  // as stored — never invented — but the four canonical states no longer
+  // leak the raw English enum ("BŪSENA: DRAFT" on /lt, production 2026-09-21).
+  const tProjectStatus = await getTranslations("projects.map.status");
+  const projectStatusText = isProjectStatus(ops.project.status)
+    ? tProjectStatus(ops.project.status)
+    : (ops.project.status ?? t("notSet"));
 
   const labels: OperationsBoardLabels = {
     eyebrow: t("eyebrow"),
@@ -201,6 +290,7 @@ export default async function ProjectOperationsPage({
     schemaNote: t("schemaNote"),
     countersTitle: t("countersTitle"),
     totalAssigned: t("counters.totalAssigned"),
+    viaTeam: t("counters.viaTeam"),
     ready: t("counters.ready"),
     readyBasis: t("counters.readyBasis"),
     needsDeclaredSkills: t("counters.needsDeclaredSkills"),
@@ -308,6 +398,7 @@ export default async function ProjectOperationsPage({
   const openTasks = openProjectTasks(taskList);
   const openTaskCount = openProjectTasks(taskList, taskList.length).length;
   const readiness = deriveProjectReadinessRatio(ops.workers);
+  const hoursFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
   const now = new Date();
   const attention = deriveAttention({
     workers: ops.workers,
@@ -351,6 +442,21 @@ export default async function ProjectOperationsPage({
           pulse — the real gated reviewable count, one tap to confirm. */}
       <ConfirmPulse />
 
+      {/* P4 — the Field: the primary operational view, ADDED on the page
+          (§1.5). Every control is a registered canonical action the chat
+          already executes, with a readback; the sections below stay. */}
+      <ProjectField
+        field={field}
+        tasks={tasks.status === "ok" ? tasks.tasks.filter((x) => x.status !== "done" && x.status !== "cancelled") : []}
+        projectId={id}
+        locale={locale}
+        readAt={readAt}
+        labels={{
+          readinessStatus: labels.readinessStatusLabels,
+          operationalStatus: labels.statusLabels,
+        }}
+      />
+
       {/* ── PR G header strip: real project facts + real counts only.
             Status is the stored enum VERBATIM; every number is a raw count
             of rows this session read under RLS. ── */}
@@ -361,7 +467,7 @@ export default async function ProjectOperationsPage({
         <h2 className={sectionTitleClass}>{tCentre("summaryTitle")}</h2>
         <div className="flex flex-wrap gap-2">
           <span className={chipClass} data-testid="ops-centre-status">
-            {t("statusLabel")}: {ops.project.status ?? t("notSet")}
+            {t("statusLabel")}: {projectStatusText}
           </span>
           <span className={chipClass} data-testid="ops-centre-dates">
             {tCentre("datesLabel")}: {ops.project.startDate ?? t("notSet")} →{" "}
@@ -369,6 +475,9 @@ export default async function ProjectOperationsPage({
           </span>
           <span className={chipClass}>
             {t("counters.totalAssigned")}: {ops.counters.totalAssigned}
+            {(ops.counters.viaTeam ?? 0) > 0
+              ? ` (${t("counters.viaTeam")}: ${ops.counters.viaTeam})`
+              : ""}
           </span>
           {tasks.status === "ok" ? (
             <span className={chipClass} data-testid="ops-centre-open-tasks">
@@ -399,6 +508,48 @@ export default async function ProjectOperationsPage({
         </div>
       </section>
 
+      {/* ── Hours on this project, two ledgers side by side: what the
+            organization allocated (its own hour records on the project's
+            work objects) and what people journaled (their entries on this
+            project, confirmed = approved review). Bridged, never merged:
+            no total across the two, and a failed read says so. ── */}
+      <section
+        className="card-border flex flex-col gap-2 p-5"
+        data-testid="ops-centre-hours"
+      >
+        <h2 className={sectionTitleClass}>{tCentre("hours.title")}</h2>
+        <div className="flex flex-wrap gap-2">
+          <span className={chipClass} data-testid="ops-centre-hours-allocated">
+            {tCentre("hours.allocated")}:{" "}
+            {projectHours.allocated.state === "measured"
+              ? tCentre("hours.value", { hours: hoursFmt.format(projectHours.allocated.hours) })
+              : projectHours.allocated.state === "none"
+                ? tCentre("hours.noLedger")
+                : tCentre("hours.unavailable")}
+          </span>
+          <span className={chipClass} data-testid="ops-centre-hours-journaled">
+            {tCentre("hours.journaled")}:{" "}
+            {projectHours.journaled.state === "measured"
+              ? tCentre("hours.value", { hours: hoursFmt.format(projectHours.journaled.hours) })
+              : tCentre("hours.unavailable")}
+          </span>
+          <span className={chipClass} data-testid="ops-centre-hours-confirmed">
+            {tCentre("hours.confirmed")}:{" "}
+            {projectHours.journaled.state === "measured"
+              ? tCentre("hours.value", {
+                  hours: hoursFmt.format(projectHours.journaled.confirmedHours),
+                })
+              : tCentre("hours.unavailable")}
+          </span>
+        </div>
+        <p className="text-meta leading-relaxed text-text-muted">
+          {tCentre("hours.note")}
+          {projectHours.journaled.state === "measured" && projectHours.journaled.truncated
+            ? ` ${tCentre("hours.truncated", { count: projectHours.journaled.entries })}`
+            : ""}
+        </p>
+      </section>
+
       {/* ── Train D: project management strip — derived progress (never a
             stored number), the accountable person, and the applied W11
             lifecycle as REAL forms (no dead buttons; completed is terminal
@@ -409,12 +560,25 @@ export default async function ProjectOperationsPage({
       >
         <h2 className={sectionTitleClass}>{t("manage.title")}</h2>
 
+        {/* R-3: the project's FACTS — title, place, dates — through the one
+            gated write (update_project_facts_v1). These are the columns the
+            calendar band, the dates chip above and the booking-overlap check
+            read; until this form they had no write path after creation. */}
+        <ProjectFactsForm locale={locale} projectId={id} project={ops.project} />
+
         <div className="flex flex-wrap items-center gap-2">
           {progress && progress.percent !== null ? (
             <span className={chipClass} data-testid="ops-manage-progress">
               {t("manage.progressLabel")}: {progress.percent}% (
-              {progress.taskDone + progress.stageDone}/
-              {progress.taskTotal + progress.stageTotal})
+              {progress.taskDone}/{progress.taskTotal})
+            </span>
+          ) : progress && progress.basis === "stages" ? (
+            <span className={chipClass} data-testid="ops-manage-progress-stages">
+              {t("manage.progressLabel")}:{" "}
+              {t("manage.progressStages", {
+                done: progress.stageDone,
+                total: progress.stageTotal,
+              })}
             </span>
           ) : (
             <span className={chipClass} data-testid="ops-manage-progress-none">
@@ -521,12 +685,18 @@ export default async function ProjectOperationsPage({
             project spine. Managers add stages, set real status and planned
             dates; no fabricated progress. Honest "not yet available" state
             while the owner-gated migration is unapplied. */}
-      <ProjectStagesPanel projectId={id} data={stages} />
+      <ProjectStagesPanel
+        projectId={id}
+        data={stages}
+        learned={learnedStageDurations}
+        canManage={manageFacts !== null}
+        responsibleOptions={stageResponsibleOptions}
+      />
 
       {/* Gantt projection over the SAME stage truth (no stored events) — bars
             from real planned/actual dates, today marker, overdue highlight,
             mobile list fallback. */}
-      <ProjectStageGantt gantt={gantt} />
+      <ProjectStageGantt timeline={timeline} />
 
       {/* Wagon 8 — Project Economics: budget vs actual. Actual cost is read
             from the canonical finance_records ledger (no second cost ledger);
@@ -630,7 +800,7 @@ export default async function ProjectOperationsPage({
 
       <div id={OPS_BOARD_ANCHOR.slice(1)} className="flex flex-col gap-6">
         <ProjectOperationsBoard
-          ops={ops}
+          ops={{ ...ops, project: { ...ops.project, status: projectStatusText } }}
           labels={labels}
           locale={locale}
           projectId={id}

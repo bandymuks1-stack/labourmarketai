@@ -9,6 +9,7 @@ import {
   prepareConfirmationAction,
 } from "@/lib/conversation/dispatch";
 import { roleContextForAction } from "@/lib/conversation/action-role-context";
+import { useAuthOptional } from "@/lib/auth/context";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import {
@@ -172,7 +173,7 @@ function DemandPicker({
       <Explained
         testId="candidates-no-company"
         text={t("candidatesNoCompany")}
-        openLabel={t("openFull")}
+        openLabel={t("station.scouting")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -182,7 +183,7 @@ function DemandPicker({
       <Explained
         testId="candidates-blocked"
         text={t("candidatesBlocked")}
-        openLabel={t("openFull")}
+        openLabel={t("station.scouting")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -192,7 +193,7 @@ function DemandPicker({
       <Explained
         testId="candidates-no-demands"
         text={t("candidatesNoDemands")}
-        openLabel={t("openFull")}
+        openLabel={t("station.scouting")}
         onOpenFull={() => onOpenFull(FULL_ROUTE)}
       />
     );
@@ -226,7 +227,7 @@ function DemandPicker({
           </li>
         ))}
       </ul>
-      <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+      <OpenFull label={t("station.scouting")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
     </div>
   );
 }
@@ -326,7 +327,7 @@ function CandidateList({
         <Explained
           testId={`candidates-${view.kind}`}
           text={text}
-          openLabel={t("openFull")}
+          openLabel={t("station.scouting")}
           onOpenFull={() => onOpenFull(FULL_ROUTE)}
         />
       </div>
@@ -341,7 +342,7 @@ function CandidateList({
         {/* NOT "no candidates": there is nothing to match against yet. */}
         <p className="text-basis text-text-secondary">{t("candidatesNotStructured")}</p>
         <DemandActions demand={view.demand} locale={locale} onDone={reload} />
-        <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+        <OpenFull label={t("station.scouting")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
       </div>
     );
   }
@@ -388,7 +389,7 @@ function CandidateList({
         </p>
       )}
 
-      <OpenFull label={t("openFull")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
+      <OpenFull label={t("station.scouting")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
     </div>
   );
 }
@@ -785,6 +786,11 @@ function ActionButton({
 }) {
   const t = useTranslations("conversation.results");
   const tUi = useTranslations("conversation.forms.ui");
+  const tChat = useTranslations("conversation.chat");
+  // The organization these rows were read for — sent with the write so a
+  // switch made elsewhere meanwhile is refused (`stale_context`) instead of
+  // acting in an organization other than the one on screen.
+  const expectedWorkspaceId = useAuthOptional()?.activeWorkspaceId ?? undefined;
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -813,6 +819,7 @@ function ActionButton({
       const res = await dispatchWorkerAction(actionId, input, {
         locale,
         confirmationToken,
+        expectedWorkspaceId,
       });
       if (res.ok) {
         trackFunnel(FUNNEL_EVENTS.companyDemandActionClicked, {
@@ -825,22 +832,24 @@ function ActionButton({
         return;
       }
       setError(
-        res.code === "invalid"
-          ? tUi("errorInvalid")
-          : res.code === "needs_migration"
-            ? tUi("errorNeedsMigration")
-            : res.code === "conflict"
-              ? tUi("errorConflict")
-              : res.code === "nothing_to_confirm"
-                ? t("actionNothingToConfirm")
-                : res.code === "reason_required"
-                  ? t("actionReasonRequired")
-                  : res.code === "not_authorized"
-                    ? t("actionNotAuthorized")
-                    : tUi("errorGeneric"),
+        res.code === "stale_context"
+          ? tChat("staleContext")
+          : res.code === "invalid"
+            ? tUi("errorInvalid")
+            : res.code === "needs_migration"
+              ? tUi("errorNeedsMigration")
+              : res.code === "conflict"
+                ? tUi("errorConflict")
+                : res.code === "nothing_to_confirm"
+                  ? t("actionNothingToConfirm")
+                  : res.code === "reason_required"
+                    ? t("actionReasonRequired")
+                    : res.code === "not_authorized"
+                      ? t("actionNotAuthorized")
+                      : tUi("errorGeneric"),
       );
     });
-  }, [actionId, input, locale, needsToken, onDone, t, tUi]);
+  }, [actionId, input, locale, needsToken, onDone, t, tUi, tChat, expectedWorkspaceId]);
 
   return (
     <span className="flex flex-col gap-1">

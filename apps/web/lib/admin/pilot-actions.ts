@@ -16,13 +16,15 @@ import {
  * Admin pilot-cohort server actions (Pilot Onboarding and Measurement v1).
  *
  * Double-gated: requireSuperadmin() here (app layer) AND public.is_admin()
- * inside every SECURITY DEFINER RPC of the DRAFT-GATED migration
- * 20260716140000_pilots_cohort_v1.sql (DB layer). A non-admin is redirected
+ * inside every SECURITY DEFINER RPC of migration
+ * 20260716140000_pilots_cohort_v1.sql — APPLIED in production as ledger
+ * `20260716195326` (the three tables and `create_pilot_v1` verified present
+ * 2026-09-14) (DB layer). A non-admin is redirected
  * by requireSuperadmin before any RPC is reached; a caller who somehow got
  * past the app gate still receives 'not_authorized' from the RPC.
  *
- * Honest degradation: while the owner has NOT applied the migration, the
- * RPCs do not exist (42883) and every action returns the tagged
+ * Honest degradation on a database WITHOUT that migration (not production):
+ * the RPCs do not exist (42883) and every action returns the tagged
  * `needs_migration` code — the UI states that plainly and fakes nothing.
  */
 

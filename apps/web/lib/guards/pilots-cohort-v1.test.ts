@@ -287,7 +287,10 @@ describe("W5 onboarding step events — bounded, no PII", () => {
 
 describe("time-to-value — honest limits", () => {
   it("excludes preview/non-production traffic like the acquisition funnel", () => {
-    expect(metrics).toContain("preview_host");
+    // Since 2026-09-20 the exclusion is the SHARED origin rule
+    // (lib/telemetry/production-host.ts: client `preview_host` marker OR
+    // server-stamped `deploy_env`), not a hand-written preview_host filter.
+    expect(metrics).toMatch(/isNonProductionOrigin\(/);
     expect(metrics).toMatch(/excludedPreview/);
   });
 

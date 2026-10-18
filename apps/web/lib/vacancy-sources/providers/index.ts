@@ -16,6 +16,7 @@ import {
   type ArbetsformedlingenParseRequest,
   type ArbetsformedlingenParseResult,
 } from "./arbetsformedlingen-parse";
+import { parseNavBatch } from "./nav-parse";
 
 /** Every provider parser has the same shape: one response body → outcomes. */
 export type VacancyBatchParser = (
@@ -28,6 +29,10 @@ export type VacancyParseOutcome = VacancyParseResult["outcomes"][number];
 
 const PARSERS: Readonly<Record<VacancyProviderKey, VacancyBatchParser>> = {
   arbetsformedlingen: parseArbetsformedlingenBatch,
+  // SCAFFOLD (2026-09-22): registered so the dispatch is complete for every
+  // key in VacancyProviderKey. The provider is governance-off and env-off,
+  // so this parser sees no real payload until the NAV gate opens.
+  nav: parseNavBatch,
 };
 
 /** The parser for a provider key, or null when the key is unknown. */
@@ -35,4 +40,4 @@ export function getVacancyParser(key: string): VacancyBatchParser | null {
   return (PARSERS as Record<string, VacancyBatchParser>)[key] ?? null;
 }
 
-export { parseArbetsformedlingenBatch };
+export { parseArbetsformedlingenBatch, parseNavBatch };

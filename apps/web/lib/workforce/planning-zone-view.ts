@@ -53,6 +53,8 @@ import {
   type GapRiskLevel,
   type RecommendedAction,
   type RecommendedActionType,
+  alternativeWindows,
+  type AlternativeWindow,
 } from "@/lib/workforce/gap-timeline";
 import type { WorkforceSources } from "@/lib/workforce/workforce";
 
@@ -159,6 +161,21 @@ export interface PlanningZoneView {
     readonly confirmedRequiredHeadcount: number | null;
     readonly requiredHours: number | null;
     readonly shortfallHours: number | null;
+    /**
+     * How many DISTINCT people could not be assessed against a requirement at
+     * all — today only a language level outside the closed CEFR set, which
+     * `languageLevelSatisfies` ranks `null` rather than guessing.
+     *
+     * `capacity-model.ts` counts these as NOT covered, the cautious reading,
+     * so the shortfall above is conservative rather than wrong. But cautious
+     * is not the same as known: some of those people may well qualify. That
+     * module's own contract says a surface showing the shortfall "should say
+     * how much of it is unknown rather than missing", and until 2026-09-14
+     * nothing did — `unknownWorkerIds` existed in the model and reached no
+     * screen, so a manager read a number without its uncertainty (SEP-7 held
+     * in the arithmetic and lost at the last step, which is SEP-8).
+     */
+    readonly unknownCapacityWorkers: number;
   };
   /** Skill slugs with a non-zero shortfall anywhere in the assessment. */
   readonly missingSkills: readonly string[];
@@ -171,6 +188,12 @@ export interface PlanningZoneView {
   readonly primaryAction: ZoneAction | null;
   /** Remaining recommendations, deduplicated by kind — quiet text list. */
   readonly secondaryActions: readonly ZoneAction[];
+  /** "Try these dates" — the nearest already-computed buckets after the risk
+   *  date in which nothing is short. A filter over present readings, never a
+   *  forecast and never stored (SEP-1). Empty when nothing in the horizon is
+   *  clear, because offering the least-bad window is advice to walk into a
+   *  known shortfall. */
+  readonly alternativeWindows: readonly AlternativeWindow[];
   readonly notes: readonly PlanningZoneNoteId[];
 }
 
@@ -205,7 +228,7 @@ export function resolveActionTarget(
     case "transfer_from_project":
       return { kind: "route", href: "/dashboard/projects" };
     case "form_brigade":
-      return { kind: "route", href: "/dashboard/company#company-team" };
+      return { kind: "route", href: "/dashboard/company/people#company-team" };
     case "train_existing_worker":
       // No training surface exists today — honest status, never a dead button.
       return { kind: "status" };
@@ -454,6 +477,20 @@ export function buildPlanningZoneView(
       ? hourRows.reduce((s, r) => s + (r.hoursGap.shortfallHours ?? 0), 0)
       : null;
 
+  // DISTINCT people, not occurrences: one person unrankable on two
+  // requirements is one person the manager cannot assess, not two.
+  const unknownWorkerCount = new Set(
+    assessment.requirements.flatMap((r) => [
+      // A fitting worker whose availability was never recorded is neither
+      // capacity nor a miss — the same "cannot tell" as an unrankable level.
+      ...r.headcountGap.unknownWorkerIds,
+      ...(r.supervisorGap?.unknownWorkerIds ?? []),
+      ...r.skillGaps.flatMap((g) => [...g.unknownWorkerIds]),
+      ...r.languageGaps.flatMap((g) => [...g.unknownWorkerIds]),
+      ...r.certificateGaps.flatMap((g) => [...g.unknownWorkerIds]),
+    ]),
+  ).size;
+
   const missingSkills = [
     ...new Set(
       assessment.requirements.flatMap((r) =>
@@ -510,6 +547,7 @@ export function buildPlanningZoneView(
       confirmedRequiredHeadcount: sumProvenance("confirmed"),
       requiredHours,
       shortfallHours,
+      unknownCapacityWorkers: unknownWorkerCount,
     },
     missingSkills,
     risk: {
@@ -518,6 +556,7 @@ export function buildPlanningZoneView(
     },
     primaryAction,
     secondaryActions,
+    alternativeWindows: alternativeWindows(timeline, timeline.riskDate),
     notes: collectNotes(input.sources),
   };
 }

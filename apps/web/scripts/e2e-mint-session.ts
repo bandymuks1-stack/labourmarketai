@@ -17,7 +17,28 @@
  *     only reach a GoTrue that is actually running locally;
  *   * it never prints a key.
  *
+ * A STOPPED STACK IS NOT A REFUSAL. With Docker Desktop off there is no target
+ * at all, and the script says so with LOCAL_INTEGRATION_TEST_REQUIRES_DOCKER
+ * (exit 3) — not with the security code above, which is reserved for a target
+ * that resolved and is not local.
+ *
  * It cannot create or modify a cloud user.
+ *
+ * FAIL-CLOSED ON THE OUTPUT PATH TOO. What this script writes is a live
+ * credential, so WHERE it writes is a second safety question with its own
+ * guard: `lib/testing/e2e-storage-target.ts` asks `git check-ignore` whether
+ * the exact resolved target is covered by the repository's ignore rules, and
+ * refuses with REFUSED_UNSAFE_E2E_STORAGE_TARGET when it is not. `.gitignore`
+ * stays the source of truth; no pattern is duplicated here. The order is
+ * deliberate and must stay this way:
+ *
+ *   resolve the requested output name (bare filename, no traversal)
+ *     -> assert the LOCAL stack        (REFUSED_NON_LOCAL_E2E_SESSION_MINT)
+ *     -> assert the target is inside tests/e2e/ and is ignored by git
+ *     -> only then obtain and write session material.
+ *
+ * Both checks therefore complete before a single token exists. A refused run
+ * exits non-zero having created no file and printed no cookie.
  *
  * NOT a production script. NOT a build step. Run on demand:
  *
@@ -26,23 +47,33 @@
  * Writes: tests/e2e/.storage-state.json (gitignored).
  *
  * A second actor goes to its own file — `E2E_STORAGE_FILE` is a bare filename
- * resolved inside tests/e2e/:
+ * resolved inside tests/e2e/, and must follow the `.storage-state-*.json`
+ * convention that the ignore rules cover:
  *
  *   E2E_OWNER_EMAIL=dev.company@local.test \
  *   E2E_STORAGE_FILE=.storage-state-manager.json \
  *   pnpm tsx scripts/e2e-mint-session.ts
  */
-import { basename, join } from "node:path";
+import { join } from "node:path";
 import { writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import {
+  LOCAL_STACK_UNAVAILABLE_EXIT_CODE,
+  LocalStackUnavailableError,
   NonLocalTargetError,
   REFUSAL_CODE,
+  formatLocalStackUnavailable,
 } from "../lib/testing/local-supabase-guard";
 import {
   describeLocalTarget,
   resolveLocalSupabaseEnv,
 } from "../lib/testing/local-supabase-env";
+import {
+  STORAGE_TARGET_REFUSAL_CODE,
+  UnsafeStorageTargetError,
+  assertBareStorageFilename,
+  assertIgnoredStorageTarget,
+} from "../lib/testing/e2e-storage-target";
 
 const REPO_ROOT = join(__dirname, "..", "..", "..");
 
@@ -50,6 +81,9 @@ const REPO_ROOT = join(__dirname, "..", "..", "..");
  * Confirm a LOCAL GoTrue is actually answering before we call the Admin API.
  * The origin is already allowlisted; this proves something local is listening
  * rather than the request silently going somewhere else.
+ *
+ * A failed CONNECTION is availability, not security: the origin was already
+ * proven local, and nothing answered on it.
  */
 async function assertLocalGoTrue(url: string, anonKey: string): Promise<void> {
   const health = `${url.replace(/\/$/, "")}/auth/v1/health`;
@@ -57,10 +91,9 @@ async function assertLocalGoTrue(url: string, anonKey: string): Promise<void> {
   try {
     res = await fetch(health, { headers: { apikey: anonKey } });
   } catch (err) {
-    throw new NonLocalTargetError(
+    throw new LocalStackUnavailableError(
       `local GoTrue is not reachable at ${health} ` +
-        `(${err instanceof Error ? err.message : String(err)}). ` +
-        "Start the stack with `npx supabase start`.",
+        `(${err instanceof Error ? err.message : String(err)}).`,
     );
   }
   if (!res.ok) {
@@ -71,10 +104,36 @@ async function assertLocalGoTrue(url: string, anonKey: string): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  /**
+   * STEP 1 — resolve the requested output name, before anything else.
+   *
+   * The filename is a parameter because a CROSS-ACTOR spec needs two sessions
+   * at once. `quick-confirm-cv-export` is the case that forced it: a manager
+   * confirms a worker's entry and the worker then reads the result on their
+   * own CV, so one storage state can never express the flow — and the spec
+   * sat behind an unconditional `test.skip` for exactly that reason.
+   */
+  const requested = assertBareStorageFilename(process.env.E2E_STORAGE_FILE);
+
+  // STEP 2 — the LOCAL-stack guard, unchanged.
   const local = resolveLocalSupabaseEnv(REPO_ROOT);
   const { url, anonKey, serviceKey } = local;
   // Host + project ref only — never a key.
   console.log(`[e2e-mint] ${describeLocalTarget(local)}`);
+
+  /**
+   * STEP 3 — the target must be inside tests/e2e/ AND ignored by git.
+   *
+   * This runs BEFORE the Admin API call on purpose: once `generateLink` and
+   * `verifyOtp` have run, a real session exists, and a refusal afterwards
+   * would be a refusal with a live token already minted. Checking here means a
+   * refused run never obtains session material at all.
+   */
+  const target = assertIgnoredStorageTarget({
+    filename: requested,
+    e2eDir: join(process.cwd(), "tests", "e2e"),
+  });
+  console.log(`[e2e-mint] target ignored by ${target.ignoreRule}`);
 
   await assertLocalGoTrue(url, anonKey);
 
@@ -194,26 +253,9 @@ async function main(): Promise<void> {
   }
 
   const storageState = { cookies, origins: [] };
-  /**
-   * The filename is a parameter because a CROSS-ACTOR spec needs two sessions
-   * at once. `quick-confirm-cv-export` is the case that forced it: a manager
-   * confirms a worker's entry and the worker then reads the result on their
-   * own CV, so one storage state can never express the flow — and the spec
-   * sat behind an unconditional `test.skip` for exactly that reason.
-   *
-   * `E2E_STORAGE_FILE` is a BARE FILENAME, never a path: it is resolved inside
-   * `tests/e2e/` and rejected if it tries to escape. A mint script that will
-   * happily write an attacker-chosen path is not a thing to leave lying around
-   * in a repo, and the callers only ever need a name.
-   */
-  const requested = process.env.E2E_STORAGE_FILE ?? ".storage-state.json";
-  if (requested !== basename(requested)) {
-    throw new Error(
-      `E2E_STORAGE_FILE must be a bare filename, got "${requested}". ` +
-        "It is resolved inside tests/e2e/.",
-    );
-  }
-  const out = join(process.cwd(), "tests", "e2e", requested);
+  // The target was resolved, contained and proven ignored in step 3, before
+  // any of the session material above existed. Nothing left to validate here.
+  const out = target.path;
   writeFileSync(out, JSON.stringify(storageState, null, 2));
 
   // Print only metadata, never the tokens themselves.
@@ -225,12 +267,30 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   const message = (err as Error).message ?? String(err);
+  if (err instanceof LocalStackUnavailableError) {
+    // No stack, so no target: nothing was resolved, reached or minted.
+    console.error(`[e2e-mint] ${formatLocalStackUnavailable(err)}`);
+    console.error(
+      "[e2e-mint] no session was minted and no user was created or modified.",
+    );
+    process.exit(LOCAL_STACK_UNAVAILABLE_EXIT_CODE);
+  }
   if (err instanceof NonLocalTargetError) {
     // The refusal code is the grep-able contract for this failure mode.
     console.error(`[e2e-mint] ${message}`);
     console.error(
       `[e2e-mint] ${REFUSAL_CODE} — no session was minted and no user was ` +
         "created or modified.",
+    );
+    process.exit(1);
+  }
+  if (err instanceof UnsafeStorageTargetError) {
+    // Refused on the OUTPUT PATH. This fires before the Admin API is called,
+    // so there is nothing to clean up and nothing to rotate.
+    console.error(`[e2e-mint] ${message}`);
+    console.error(
+      `[e2e-mint] ${STORAGE_TARGET_REFUSAL_CODE} — no session was minted, no ` +
+        "file was written and no token was printed.",
     );
     process.exit(1);
   }

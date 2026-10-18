@@ -16,6 +16,7 @@ import {
   getUsageLedgerSummary,
 } from "@/lib/admin/ai-cost";
 import { formatUtcDateTime } from "@/lib/time/display";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Pilot telemetry admin inbox (v1, read-only).
@@ -97,8 +98,8 @@ export default async function AdminTelemetryPage({
   const ttfv = await getTimeToFirstValueByActor(supabase);
 
   // AI cost & usage (W14 Pilot Analytics slice v1) — caller's RLS client
-  // over ai_runs + usage_cost_events. Production has 0 rows while
-  // AI_PROVIDER_MODE stays 'disabled'; the section states that honestly.
+  // over ai_runs + usage_cost_events. Counts come only from these live reads;
+  // an unreadable table is `available: false` (shown as a dash), never 0.
   const [aiRuns, usageLedger] = await Promise.all([
     getAiRunsSummary(supabase),
     getUsageLedgerSummary(supabase),
@@ -202,9 +203,7 @@ export default async function AdminTelemetryPage({
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
@@ -232,7 +231,7 @@ export default async function AdminTelemetryPage({
             visitors; no revenue attribution. Use the &ldquo;exclude
             admins&rdquo; filter below to remove owner/test navigation.
             {funnel.excludedPreview > 0
-              ? ` ${funnel.excludedPreview} non-production (localhost/preview) event(s) excluded.`
+              ? ` ${funnel.excludedPreview} event(s) from non-production origins (localhost / preview deploy / local build) excluded.`
               : ""}
             {funnel.excludedAdmin > 0
               ? ` ${funnel.excludedAdmin} platform-admin event(s) excluded.`
@@ -266,21 +265,44 @@ export default async function AdminTelemetryPage({
           ) : null}
         </div>
         {!funnel.available ? (
-          <p className="text-sm text-text-secondary">
-            No funnel events yet, or the event store is unavailable.
+          <p
+            className="rounded-md border border-state-warning/50 bg-state-warning/5 px-3 py-2 text-sm text-state-warning"
+            data-testid="telemetry-funnel-unavailable"
+          >
+            {t("funnel.unavailableBanner")}
           </p>
-        ) : (
+        ) : null}
+        {(
           <div className="flex flex-col gap-4">
+            {/* SEP-7: a stage is MEASURED (a number, and 0 is a real zero),
+                NOT MEASURED (no event or source — a reason, never a number) or
+                UNAVAILABLE (the read failed — never a number). */}
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {funnel.counts.map((s) => (
                 <div
                   key={s.key}
                   className="rounded-md border border-ink-600/60 px-3 py-2"
+                  data-testid={`funnel-stage-${s.measurement}`}
                 >
-                  <div className="font-mono text-lg text-text-primary">
-                    {funnel.countsAreLowerBound ? `≥ ${s.count}` : s.count}
-                  </div>
+                  {s.measurement === "measured" ? (
+                    <div className="font-mono text-lg text-text-primary">
+                      {funnel.countsAreLowerBound ? `≥ ${s.count}` : s.count}
+                    </div>
+                  ) : s.measurement === "not_measured" ? (
+                    <div className="text-sm font-medium text-text-muted">
+                      {t("funnel.notMeasured")}
+                    </div>
+                  ) : (
+                    <div className="text-sm font-medium text-state-warning">
+                      {t("funnel.unavailable")}
+                    </div>
+                  )}
                   <div className="text-meta text-text-muted">{s.label}</div>
+                  {s.measurement === "not_measured" && s.reasonKey ? (
+                    <div className="text-meta text-text-muted">
+                      {t(`funnel.reason.${s.reasonKey}`)}
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -312,6 +334,22 @@ export default async function AdminTelemetryPage({
                   <span className="text-meta text-text-muted">{r.note}</span>
                 </div>
               ))}
+              {funnel.unmeasuredRates.map((r) => (
+                <div key={r.label} className="flex flex-col gap-0.5">
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    <span className="text-text-secondary">{r.label}</span>
+                    <span
+                      className="font-mono text-text-muted"
+                      data-testid="funnel-rate-not_measured"
+                    >
+                      {t("funnel.rateNotMeasured")}
+                    </span>
+                  </div>
+                  <span className="text-meta text-text-muted">
+                    {t(`funnel.reason.${r.reasonKey}`)}
+                  </span>
+                </div>
+              ))}
             </div>
             <div className="flex flex-col gap-1">
               <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
@@ -319,7 +357,9 @@ export default async function AdminTelemetryPage({
               </h3>
               {funnel.sources.length === 0 ? (
                 <p className="text-xs text-text-secondary">
-                  No attributed conversions yet.
+                  {funnel.available
+                    ? "No attributed conversions yet."
+                    : t("funnel.unavailable")}
                 </p>
               ) : (
                 funnel.sources.map((s) => (
@@ -336,6 +376,102 @@ export default async function AdminTelemetryPage({
                   </div>
                 ))
               )}
+            </div>
+            {/* Per-campaign handoff (2026-09-20). The source list above
+                averages every variant of a campaign into one row, which is
+                exactly the resolution at which "did that post work?" stops
+                being answerable. Same rows, same window, same population
+                filter — broken down by the published variant
+                (utm_campaign × utm_content). Occurrence counts, NOT unique
+                visitors and NOT per-visitor journeys, so no column is a
+                subset of the one before it and no ratio between two columns
+                is a conversion rate. */}
+            <div className="flex flex-col gap-1">
+              <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
+                {t("campaigns.title")}
+              </h3>
+              {funnel.campaigns.length === 0 ? (
+                <p className="text-xs text-text-secondary">
+                  {funnel.available
+                    ? t("campaigns.empty")
+                    : t("funnel.unavailable")}
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-[760px] text-left text-xs">
+                    <thead className="border-b border-ink-600/60 text-text-muted">
+                      <tr>
+                        <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.campaign")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.landing")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.jobOpened")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.ctaClicked")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.registrationStarted")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.signupCompleted")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.returnedToJob")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.compared")}
+                        </th>
+                        <th className="px-2 py-1 text-right font-mono text-meta uppercase tracking-label">
+                          {t("campaigns.col.interest")}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {funnel.campaigns.map((c) => (
+                        <tr
+                          key={JSON.stringify([c.campaign, c.content])}
+                          className="border-b border-ink-700/40 align-top"
+                        >
+                          <td className="px-2 py-1">
+                            <div className="font-mono text-text-primary">
+                              {c.campaign}
+                            </div>
+                            <div className="font-mono text-meta text-text-muted">
+                              {c.content}
+                            </div>
+                          </td>
+                          {(
+                            [
+                              c.landing,
+                              c.jobOpened,
+                              c.ctaClicked,
+                              c.registrationStarted,
+                              c.signupCompleted,
+                              c.returnedToJob,
+                              c.compared,
+                              c.interest,
+                            ] as const
+                          ).map((n, i) => (
+                            <td
+                              key={i}
+                              className="px-2 py-1 text-right font-mono text-text-primary"
+                            >
+                              {funnel.countsAreLowerBound ? `≥ ${n}` : n}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              <p className="text-meta text-text-muted">
+                {t("campaigns.help")}
+              </p>
             </div>
           </div>
         )}
@@ -426,12 +562,7 @@ export default async function AdminTelemetryPage({
             AI cost and usage
           </h2>
           <p className="text-meta text-text-muted">
-            First-party AI accounting: per-run audit rows (ai_runs, USD from
-            the reviewed pricing table) and the canonical EUR-cent usage
-            ledger (usage_cost_events). While the AI provider mode stays
-            disabled in production both tables hold 0 rows — the zeros below
-            are real measurements, not placeholders. Unknown cost is shown as
-            a dash, never as 0.
+            {t("funnel.aiHelp")}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -689,14 +820,14 @@ export default async function AdminTelemetryPage({
           <table className="w-full text-left text-sm" data-testid="telemetry-ttfv-table">
             <thead className="text-meta uppercase tracking-label text-text-muted">
               <tr>
-                <th className="py-1 pr-3 font-normal">Actor</th>
-                <th className="py-1 pr-3 font-normal">People</th>
-                <th className="py-1 pr-3 font-normal">Reached action</th>
-                <th className="py-1 pr-3 font-normal">Median to action</th>
-                <th className="py-1 pr-3 font-normal">System result (n)</th>
-                <th className="py-1 pr-3 font-normal">Median to system result</th>
-                <th className="py-1 pr-3 font-normal">Human response (n)</th>
-                <th className="py-1 pr-3 font-normal">Median to human response</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Actor</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">People</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Reached action</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Median to action</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">System result (n)</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Median to system result</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Human response (n)</th>
+                <th className="px-2 py-1 font-mono text-meta uppercase tracking-label">Median to human response</th>
               </tr>
             </thead>
             <tbody>

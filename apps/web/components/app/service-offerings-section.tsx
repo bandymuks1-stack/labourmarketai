@@ -9,6 +9,7 @@ import {
   setServiceOfferingStatus,
   deleteServiceOffering,
 } from "@/lib/services/service-offerings";
+import { PARTNERSHIP_CATEGORY } from "@/lib/services/service-offerings-shared";
 import type {
   ServiceOfferingRow,
   ServiceOfferingStatus,
@@ -30,6 +31,8 @@ export type ServiceOfferingsLabels = {
   notAvailable: string;
   empty: string;
   addButton: string;
+  /** Quick path: publish a "we are looking for partners" offering. */
+  addPartnership: string;
   formTitleLabel: string;
   formTitlePlaceholder: string;
   formDescriptionLabel: string;
@@ -106,6 +109,12 @@ export function ServiceOfferingsSection({
   function openCreate() {
     setError(null);
     setDraft(EMPTY_DRAFT);
+    setMode({ kind: "create" });
+  }
+
+  function openCreatePartnership() {
+    setError(null);
+    setDraft({ ...EMPTY_DRAFT, categorySlug: PARTNERSHIP_CATEGORY });
     setMode({ kind: "create" });
   }
 
@@ -205,15 +214,26 @@ export function ServiceOfferingsSection({
       ) : (
         <>
           {mode.kind === "idle" ? (
-            <button
-              type="button"
-              onClick={openCreate}
-              data-testid="service-offering-add"
-              className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
-            >
-              <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-              {labels.addButton}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={openCreate}
+                data-testid="service-offering-add"
+                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
+              >
+                <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+                {labels.addButton}
+              </button>
+              <button
+                type="button"
+                onClick={openCreatePartnership}
+                data-testid="service-offering-add-partnership"
+                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+              >
+                <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+                {labels.addPartnership}
+              </button>
+            </div>
           ) : (
             <div
               className="flex flex-col gap-3 rounded-lg border border-ink-500 bg-ink-800/40 p-4"
@@ -246,6 +266,7 @@ export function ServiceOfferingsSection({
                   <input
                     className={inputCls}
                     value={draft.categorySlug}
+                    data-testid="service-offering-category"
                     onChange={(e) => setDraft({ ...draft, categorySlug: e.target.value })}
                     placeholder={labels.formCategoryPlaceholder}
                     maxLength={80}
@@ -256,6 +277,7 @@ export function ServiceOfferingsSection({
                   <input
                     className={inputCls}
                     value={draft.locationCountry}
+                    data-testid="service-offering-country"
                     onChange={(e) => setDraft({ ...draft, locationCountry: e.target.value })}
                     placeholder={labels.formCountryPlaceholder}
                     maxLength={2}
@@ -267,6 +289,7 @@ export function ServiceOfferingsSection({
                 <input
                   className={inputCls}
                   value={draft.rateText}
+                  data-testid="service-offering-rate"
                   onChange={(e) => setDraft({ ...draft, rateText: e.target.value })}
                   placeholder={labels.formRatePlaceholder}
                   maxLength={120}

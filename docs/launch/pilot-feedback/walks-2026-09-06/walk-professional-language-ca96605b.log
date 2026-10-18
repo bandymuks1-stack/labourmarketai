@@ -1,0 +1,78 @@
+{"step":"health","build":"ca96605b"}
+{"leg":"employer","sentence":"Reikia 2 automechanikų.","text":"","results":0,"firstAnswerMs":5651,"chips":["Tęsti","Atšaukti"],"form":{"role":"Automechanikas","teamSize":"2","startDate":"","location":""}}
+{"check":"[E1] 'Reikia 2 automechanikų.' opens the need form","ok":true,"detail":""}
+{"check":"[E1] role prefilled /automechanik/i","ok":true,"detail":"Automechanikas"}
+{"check":"[E1] headcount 2","ok":true,"detail":"2"}
+{"leg":"employer","sentence":"Reikia buhalterio.","text":"","results":0,"firstAnswerMs":6728,"chips":["Tęsti","Atšaukti"],"form":{"role":"","teamSize":"","startDate":"","location":""}}
+{"check":"[E2] 'Reikia buhalterio.' opens the need form","ok":true,"detail":""}
+{"check":"[E2] role prefilled /buhalter/i","ok":false,"detail":""}
+{"leg":"employer","sentence":"Reikia programinės įrangos kūrėjo.","text":"","results":0,"firstAnswerMs":5235,"chips":["Tęsti","Atšaukti"],"form":{"role":"","teamSize":"","startDate":"","location":""}}
+{"check":"[E3] 'Reikia programinės įrangos kūrėjo.' opens the need form","ok":true,"detail":""}
+{"check":"[E3] role prefilled /programuotoj|kūrėj/i","ok":false,"detail":""}
+{"leg":"employer","sentence":"Reikia projektų vadovo.","text":"L LabourMarket AI Štai jūsų vykdomi darbai. E2E Kauno objektas (testinis) E2E Vilniaus objektas (testinis)","results":0,"firstAnswerMs":3757,"chips":["E2E Kauno objektas (testinis)","E2E Vilniaus objektas (testinis)"],"form":null}
+{"check":"[E4] 'Reikia projektų vadovo.' opens the need form","ok":false,"detail":"L LabourMarket AI Štai jūsų vykdomi darbai. E2E Kauno objektas (testinis) E2E Vilniaus objektas (testinis)"}
+{"check":"[E4] role prefilled /projekt.*vadov/i","ok":false,"detail":null}
+{"leg":"employer","sentence":"reikia suvirintojo nuo spalio","text":"","results":0,"firstAnswerMs":1150,"chips":["Tęsti","Atšaukti"],"form":{"role":"Suvirintojas","teamSize":"","startDate":"","location":""}}
+{"check":"[E5] 'reikia suvirintojo nuo spalio' opens the need form","ok":true,"detail":""}
+{"check":"[E5] role prefilled /suvirintoj/i","ok":true,"detail":"Suvirintojas"}
+{"check":"[E5] start date /^\\d{4}-10-01$/","ok":false,"detail":""}
+{"leg":"employer","sentence":"ieškome pardavimų specialisto Vilniuje","text":"","results":0,"firstAnswerMs":5183,"chips":["Tęsti","Atšaukti"],"form":{"role":"","teamSize":"","startDate":"","location":"Vilnius, Lietuva"}}
+{"check":"[E6] 'ieškome pardavimų specialisto Vilniuje' opens the need form","ok":true,"detail":""}
+{"check":"[E6] role prefilled /pardav/i","ok":false,"detail":""}
+{"check":"[E6] location /vilni/i","ok":true,"detail":"Vilnius, Lietuva"}
+{"leg":"employer","sentence":"reikia inžinieriaus","text":"","results":0,"firstAnswerMs":5427,"chips":["Tęsti","Atšaukti"],"form":{"role":"","teamSize":"","startDate":"","location":""}}
+{"check":"[E7] 'reikia inžinieriaus' opens the need form","ok":true,"detail":""}
+{"check":"[E7] role prefilled /inžinier/i","ok":false,"detail":""}
+{"leg":"employer","sentence":"reikia teisininko","text":"","results":0,"firstAnswerMs":6185,"chips":["Tęsti","Atšaukti"],"form":{"role":"","teamSize":"","startDate":"","location":""}}
+{"check":"[E8] 'reikia teisininko' opens the need form","ok":true,"detail":""}
+{"check":"[E8] role prefilled /teisinink/i","ok":false,"detail":""}
+{"leg":"employer","sentence":"reikia dizainerio","text":"","results":0,"firstAnswerMs":6786,"chips":["Tęsti","Atšaukti"],"form":{"role":"","teamSize":"","startDate":"","location":""}}
+{"check":"[E9] 'reikia dizainerio' opens the need form","ok":true,"detail":""}
+{"check":"[E9] role prefilled /dizainer/i","ok":false,"detail":""}
+{"leg":"employer","sentence":"reikia mokytojo","text":"","results":0,"firstAnswerMs":5357,"chips":["Tęsti","Atšaukti"],"form":{"role":"Mokytojas","teamSize":"","startDate":"","location":""}}
+{"check":"[E10] 'reikia mokytojo' opens the need form","ok":true,"detail":""}
+{"check":"[E10] role prefilled /mokytoj/i","ok":true,"detail":"Mokytojas"}
+{"leg":"employer","sentence":"restoranui reikia virėjo Kaune nuo spalio","text":"","results":0,"firstAnswerMs":1083,"chips":["Tęsti","Atšaukti"],"form":{"role":"Virėjas","teamSize":"","startDate":"","location":"Kaunas, Lietuva"}}
+{"check":"[E11] 'restoranui reikia virėjo Kaune nuo spalio' opens the need form","ok":true,"detail":""}
+{"check":"[E11] role prefilled /virėj/i","ok":true,"detail":"Virėjas"}
+{"check":"[E11] headcount 1","ok":false,"detail":""}
+{"check":"[E11] start date /^\\d{4}-10-01$/","ok":false,"detail":""}
+{"check":"[E11] location /kaun/i","ok":true,"detail":"Kaunas, Lietuva"}
+{"leg":"employer_failed_requests","failed":[]}
+{"leg":"worker","sentence":"esu buhalteris, ieškau darbo","text":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","results":0,"firstAnswerMs":7748,"chips":[],"form":null}
+{"check":"[P1] 'esu buhalteris, ieškau darbo' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai."}
+{"check":"[P1] answer reads the fact /buhalter|profesij/i","ok":false,"detail":{"text":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","chips":[]}}
+{"check":"[P1] chip /profesij|buhalter/i","ok":false,"detail":[]}
+{"leg":"person","sentence":"esu programuotojas","text":"","results":0,"firstAnswerMs":-1,"chips":["Prieinamumą ir atlygį","Kalbą","Darbo patirtį"],"form":null}
+{"check":"[P2] 'esu programuotojas' answers (not the menu)","ok":false,"detail":""}
+{"check":"[P2] answer reads the fact /programuotoj|profesij/i","ok":false,"detail":{"text":"","chips":["Prieinamumą ir atlygį","Kalbą","Darbo patirtį"]}}
+{"leg":"person","sentence":"dirbau projektų vadovu 5 metus","text":"L LabourMarket AI Jūsų projektai (1 aktyv.): • E2E Spine objektas — Vilnius Vadovas laukia: Kliento specifinis reikalavimas · Kelionės / pradžios prieinamumas · Saugos instruktažo patvirtinimas · Kvalifikacijos / įgūdžių įrodymas (neįrašyta) Įrašyti: Kvalifikacijos / įgūdžių įrodymas Atidaryti: E2E Spine objektas","results":0,"firstAnswerMs":6579,"chips":["Įrašyti: Kvalifikacijos / įgūdžių įrodymas","Atidaryti: E2E Spine objektas"],"form":null}
+{"check":"[P3] 'dirbau projektų vadovu 5 metus' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Jūsų projektai (1 aktyv.): • E2E Spine objektas — Vilnius Vadovas laukia: Kliento specifinis reikalavimas · Kelionės / pradžios prieinamumas · Saugos instruktažo patvirtinimas · Kval"}
+{"check":"[P3] answer reads the fact /projekt|vadov|patirt|žurnal|profesij/i","ok":true,"detail":{"text":"L LabourMarket AI Jūsų projektai (1 aktyv.): • E2E Spine objektas — Vilnius Vadovas laukia: Kliento specifinis reikalavimas · Kelionės / pradžios prieinamumas · Saugos instruktažo patvirtinimas · Kval","chips":["Įrašyti: Kvalifikacijos / įgūdžių įrodymas","Atidaryti: E2E Spine objektas"]}}
+{"leg":"worker","sentence":"esu elektrikas, ieškau darbo Norvegijoje","text":"L LabourMarket AI Supratau „Norvegijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi.","results":0,"firstAnswerMs":5634,"chips":[],"form":null}
+{"check":"[P4] 'esu elektrikas, ieškau darbo Norvegijoje' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Supratau „Norvegijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi."}
+{"check":"[P4] answer reads the fact /elektrik|norveg/i","ok":true,"detail":{"text":"L LabourMarket AI Supratau „Norvegijoje“, bet ten dabar tau nieko nematoma. Matoma: NL. Iš poreikių, kurie tau dabar matomi.","chips":[]}}
+{"leg":"person","sentence":"esu dėstytojas","text":"","results":0,"firstAnswerMs":-1,"chips":["Prieinamumą ir atlygį","Kalbą","Darbo patirtį"],"form":null}
+{"check":"[P5] 'esu dėstytojas' answers (not the menu)","ok":false,"detail":""}
+{"check":"[P5] answer reads the fact /dėstytoj|mokytoj|profesij/i","ok":false,"detail":{"text":"","chips":["Prieinamumą ir atlygį","Kalbą","Darbo patirtį"]}}
+{"leg":"person","sentence":"galiu konsultuoti finansų klausimais","text":"L LabourMarket AI Jūsų teigimu: konsultuoti finansų klausimais. Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti paslaugas","results":0,"firstAnswerMs":1528,"chips":["Atidaryti paslaugas"],"form":null}
+{"check":"[P6] 'galiu konsultuoti finansų klausimais' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Jūsų teigimu: konsultuoti finansų klausimais. Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti pasl"}
+{"check":"[P6] answer reads the fact /paslaug/i","ok":true,"detail":{"text":"L LabourMarket AI Jūsų teigimu: konsultuoti finansų klausimais. Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti pasl","chips":["Atidaryti paslaugas"]}}
+{"check":"[P6] chip /paslaug/i","ok":true,"detail":["Atidaryti paslaugas"]}
+{"leg":"person","sentence":"dirbu inžinieriumi","text":"","results":0,"firstAnswerMs":-1,"chips":["Prieinamumą ir atlygį","Kalbą","Darbo patirtį"],"form":null}
+{"check":"[P7] 'dirbu inžinieriumi' answers (not the menu)","ok":false,"detail":""}
+{"check":"[P7] answer reads the fact /inžinier|profesij/i","ok":false,"detail":{"text":"","chips":["Prieinamumą ir atlygį","Kalbą","Darbo patirtį"]}}
+{"leg":"person","sentence":"siūlau korepetitoriaus paslaugas","text":"L LabourMarket AI Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti paslaugas","results":0,"firstAnswerMs":1509,"chips":["Atidaryti paslaugas"],"form":null}
+{"check":"[P8] 'siūlau korepetitoriaus paslaugas' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti paslaugas"}
+{"check":"[P8] answer reads the fact /paslaug/i","ok":true,"detail":{"text":"L LabourMarket AI Galite paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų. Kur (miestas ar šalis)? Kada — kurią savaitę ar mėnesį? Atidaryti paslaugas","chips":["Atidaryti paslaugas"]}}
+{"check":"[P8] chip /paslaug/i","ok":true,"detail":["Atidaryti paslaugas"]}
+{"leg":"person","sentence":"reikia dažytojo butui","text":"L LabourMarket AI Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas. Rasti paslaugą Sukurti organizaciją","results":0,"firstAnswerMs":1356,"chips":["Rasti paslaugą","Sukurti organizaciją"],"form":null}
+{"check":"[P9] 'reikia dažytojo butui' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas. Rasti paslaugą Sukurti organizaciją"}
+{"check":"[P9] answer reads the fact /darbas, kurį reikia atlikti|paslaug/i","ok":true,"detail":{"text":"L LabourMarket AI Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas. Rasti paslaugą Sukurti organizaciją","chips":["Rasti paslaugą","Sukurti organizaciją"]}}
+{"check":"[P9] chip /paslaug/i","ok":true,"detail":["Rasti paslaugą","Sukurti organizaciją"]}
+{"leg":"person","sentence":"reikia valymo paslaugų","text":"L LabourMarket AI Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas. Rasti paslaugą Sukurti organizaciją","results":0,"firstAnswerMs":1107,"chips":["Rasti paslaugą","Sukurti organizaciją"],"form":null}
+{"check":"[P10] 'reikia valymo paslaugų' answers (not the menu)","ok":true,"detail":"L LabourMarket AI Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas. Rasti paslaugą Sukurti organizaciją"}
+{"check":"[P10] answer reads the fact /darbas, kurį reikia atlikti|paslaug/i","ok":true,"detail":{"text":"L LabourMarket AI Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas. Rasti paslaugą Sukurti organizaciją","chips":["Rasti paslaugą","Sukurti organizaciją"]}}
+{"check":"[P10] chip /paslaug/i","ok":true,"detail":["Rasti paslaugą","Sukurti organizaciją"]}
+{"leg":"person_failed_requests","failed":[],"worker":[]}
+{"result":"PASS","failed":[],"measureOnly":true}

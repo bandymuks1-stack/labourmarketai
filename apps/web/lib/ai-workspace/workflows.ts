@@ -1,20 +1,35 @@
 "use server";
 
 import "server-only";
+import { resolveMyVerifiers } from "@/lib/journal/verifier-read";
 
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { findWorkForChat } from "@/lib/conversation/find-work";
 import { loadWorkerOpportunityBoard } from "@/lib/marketplace/worker-opportunities";
 import { getReportsView } from "@/lib/reports/reports-hub";
+import { getJournalWindowReport, type JournalWindowKey } from "@/lib/journal/journal-window-report";
 import { listManagedProjects } from "@/lib/projects/projects";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getPlanning } from "@/lib/planning/planning";
-import { visibleRange } from "@/lib/planning/planning-model";
-import { DOCUMENT_GAP_LINE_CAP, type DocumentGap } from "@/lib/conversation/documents-gap";
+import { loadOwnPrimaryProfessionSlug, loadOwnWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import type { WorkIntelligence, WorkPeriodKey, WorkPeriodScope } from "@/lib/journal/work-intelligence";
+import { deriveGrowthReading } from "@/lib/journal/growth-reading";
+import { readTargetOccupationGap, targetOccupationFromSentence } from "@/lib/conversation/target-occupation-gap";
+import { parseJournalPeriodPhrase, type JournalPeriodPhrase } from "@/lib/conversation/journal-period-phrase";
+import type { ConversationIntent } from "@/lib/conversation/intent-router";
+import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
+import {
+  DOCUMENT_GAP_LINE_CAP,
+  groupMissingDocumentsByType,
+  type DocumentGap,
+} from "@/lib/conversation/documents-gap";
 import { loadWorkerDocumentGap } from "@/lib/conversation/documents-gap-server";
 import { readLearningCompass } from "@/lib/learning/learning-compass";
+import { loadUnchosenCountryNextSteps } from "@/lib/conversation/country-next-steps-server";
+import { mergeFilters as mergeCarriedFilters } from "@/lib/conversation/conversation-goal";
+import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import { loadAiWorkspaceContext } from "./ai-context";
 import { buildUnavailableCountryTerms, buildWorkspaceVocabulary } from "./vocabulary-server";
 import { readWorldState, type WorldStateMatch } from "./world-state-language";
@@ -62,7 +77,15 @@ const ANSWER_LIMIT = 5;
  * honestly — with the countries that ARE there — rather than filtered to an
  * unexplained empty list.
  */
-export async function runFindWork(text: string): Promise<WorkflowResult> {
+export async function runFindWork(
+  text: string,
+  /**
+   * What earlier turns of the SAME goal already narrowed (owner P0 §4). The
+   * caller — the chat's conversation goal — owns this; a new goal hands
+   * nothing, so a fresh search starts in an unnarrowed world.
+   */
+  carry?: DiscoveryFilterState,
+): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const ctx = await loadAiWorkspaceContext();
   if (!ctx.hasWorkerProfile) {
@@ -71,7 +94,15 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
 
   const board = await loadWorkerOpportunityBoard("conversation");
   const needs = board.kind === "ready" ? board.opportunities.map((o) => o.need) : [];
-  const { terms, facets } = await buildWorkspaceVocabulary(needs);
+  // The board's public ads are part of what the person can see (the page
+  // renders them) — their countries count as "there is work there".
+  const adCountries =
+    board.kind === "ready"
+      ? board.externalVacancies.cards
+          .map((c) => c.view.country?.toUpperCase() ?? null)
+          .filter((c): c is string => Boolean(c))
+      : [];
+  const { terms, facets } = await buildWorkspaceVocabulary(needs, adCountries);
   const unavailable = await buildUnavailableCountryTerms(facets);
 
   const reading = readWorldState(text, [...terms, ...unavailable]);
@@ -79,37 +110,90 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
   const missed = reading.matches.filter((m) => !m.available);
 
   // Named something the world does not have: say what it DOES have. This is
-  // the difference between "no results" and an answer.
+  // the difference between "no results" and an answer. What it DOES have is
+  // listed on the SAME dimension the person named: an absent opportunity
+  // type is answered with the types that are visible, an absent country
+  // with the countries — never "no internships; visible: LT, NL".
   if (applied.length === 0 && missed.length > 0) {
-    const countries = facets.countries.join(", ");
-    return {
-      kind: "answer",
-      text: countries
-        ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: countries })
-        : t("noSuchValue", { asked: missed[0].matchedText }),
-      explanation: {
-        why: t("whyFromYourBoard"),
-        unsupported: reading.unsupported.length > 0 ? [...reading.unsupported] : undefined,
-      },
+    const missedDimension = missed[0].dimension;
+    const alternatives =
+      missedDimension === "country"
+        ? facets.countries.join(", ")
+        : terms
+            .filter((v) => v.dimension === missedDimension && v.available)
+            .map((v) => v.terms[0])
+            .filter((label): label is string => typeof label === "string" && label.length > 0)
+            .join(", ");
+    const honest = alternatives
+      ? t("noSuchValueWithAlternatives", { asked: missed[0].matchedText, available: alternatives })
+      : t("noSuchValue", { asked: missed[0].matchedText });
+    const explanation = {
+      why: t("whyFromYourBoard"),
+      unsupported: reading.unsupported.length > 0 ? [...reading.unsupported] : undefined,
     };
+    // MATCHING CONTINUES AFTER "NO" (owner contract §16; prod walk 2026-09-05,
+    // gap G-C2): a student asking for an internship when none is visible is
+    // told so honestly — and then handed the EXISTING next steps (choose a
+    // direction, ask the institution, the compass, the whole board), never a
+    // dead end. The decision and its reads live in the education domain.
+    if (missedDimension === "opportunityType") {
+      const { loadInternshipNextSteps } = await import("@/lib/conversation/education-next-steps-server");
+      const next = await loadInternshipNextSteps();
+      return { kind: "answer", text: [honest, ...next.lines].join("\n"), explanation: explanation, chips: next.chips };
+    }
+    // A COUNTRY THE PERSON HAS NOT CHOSEN YET (real-person join walk,
+    // production ca96605b, 2026-09-06): "ieškau darbo Norvegijoje" from a
+    // worker whose countries were NL ended in "nothing visible there. Visible:
+    // NL." — a dead end with no chip, on the very sentence the landing
+    // advertises. The answer now carries the two doors that already exist:
+    // the work card, where the person adds the country to their own list
+    // (prefilled: their current countries plus the one they just named), and
+    // the documents readiness ("what do I lack for that country?"). It also
+    // says, honestly and from a bounded indexed read, whether public ads from
+    // official sources exist there at all — no manufactured listing either
+    // way; a failed read is named as a failed read, never as "none". The
+    // reads live in the conversation domain (`country-next-steps-server`).
+    if (missedDimension === "country") {
+      const country = await loadUnchosenCountryNextSteps(missed[0].value);
+      const supplyLine =
+        country.supply === "yes"
+          ? t("countryNotChosenListings")
+          : country.supply === "no"
+            ? t("countryNotChosenNoListings")
+            : t("countryNotChosenSupplyUnknown");
+      return {
+        kind: "answer",
+        text: [honest, supplyLine, t("countryNotChosenDoors")].join("\n"),
+        explanation: explanation,
+        chips: [
+          {
+            id: `f:worker.save-work-card?preferredCountries=${country.nextCountries.join(",")}`,
+            label: t("chipAddCountry"),
+          },
+          { id: "documents-gap", label: t("chipDocsGap") },
+        ],
+      };
+    }
+    return { kind: "answer", text: honest, explanation: explanation };
   }
 
   /**
-   * ── W6 EXTENSION POINT (persistent filters) ──────────────────────────────
-   * `reading.filters` is the World State the person just expressed. Today it is
-   * applied to THIS search only and then forgotten, so a later sentence starts
-   * from an unnarrowed world.
+   * ── PERSISTENT FILTERS, wired at the seam this comment reserved ──────────
+   * `reading.filters` is the World State THIS sentence expressed. Until the
+   * owner's P0 of 2026-09-06 it was applied to this search only and then
+   * forgotten, so "gerai, tada ieškok visoje Europoje" started from an
+   * unnarrowed world and the profession stated one turn earlier was lost.
    *
-   * When the owner approves persistence, this is the seam: the caller dispatches
-   * `change_world_state` per entry of `reading.filters` before searching, and
-   * the search reads `state.activeFilters` instead of this local value. The
-   * reducer transition already exists and is unit-tested; the map subscribes to
-   * the same slot in W6. See docs/product/AI_WORKSPACE_W4_V1.md §7.
-   *
-   * NOT wired here on purpose: persistence changes behaviour across turns
-   * (when do filters clear?), which is a product decision, not a refactor.
+   * The product decision this was waiting on ("when do filters clear?") has
+   * been made and lives in `lib/conversation/conversation-goal.ts`: they
+   * accumulate for as long as ONE goal is in flight, a later mention of the
+   * same dimension replaces it (that is what a correction is), and an
+   * asserted NEW goal starts from nothing. This function stays stateless —
+   * the goal is the caller's, handed in as `carry` and handed back as
+   * `worldState`.
    */
-  const result = await findWorkForChat(reading.filters);
+  const effective = carry ? mergeCarriedFilters(carry, reading.filters) : reading.filters;
+  const result = await findWorkForChat(effective);
   const dimensionLabel = async (m: WorldStateMatch): Promise<string> =>
     t(`dimension.${m.dimension}` as never) as string;
 
@@ -126,6 +210,7 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
     appliedFilters: await Promise.all(
       applied.map(async (m) => ({ label: await dimensionLabel(m), matchedText: m.matchedText })),
     ),
+    worldState: effective,
   };
 }
 
@@ -141,10 +226,19 @@ export async function runFindWork(text: string): Promise<WorkflowResult> {
  * matched/missing sets the Context Panel shows for one demand. This aggregates
  * them; it computes no score and invents no "recommended skill".
  */
-export async function runSkillGap(): Promise<WorkflowResult> {
+export async function runSkillGap(text = ""): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const ctx = await loadAiWorkspaceContext();
   if (!ctx.hasWorkerProfile) return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+
+  // "Ką turėčiau išmokti, kad galėčiau dirbti X?" names ITS target — the
+  // answer measures against X, not against whatever the board happens to
+  // hold (owner 2026-09-29 §13).
+  const target = text ? targetOccupationFromSentence(text) : null;
+  if (target) {
+    const answer = await runTargetOccupationGap(target, t);
+    if (answer) return answer;
+  }
 
   const board = await loadWorkerOpportunityBoard("conversation");
   if (board.kind !== "ready") return blocked(t("blockedNoWorker"), t("whyNoWorker"));
@@ -208,6 +302,48 @@ export async function runSkillGap(): Promise<WorkflowResult> {
   };
 }
 
+/**
+ * The named-target gap: what occupation X needs (canonical
+ * `profession_skills`) against the person's OWN evidence rows (the one
+ * work-intelligence reader), each required skill on the rung the rows
+ * support — confirmed / recorded / said only / not yet. No score, no
+ * verdict. `null` when X has no requirements on file or the rows could not
+ * be read — the general answer then stands (never "nothing missing").
+ */
+async function runTargetOccupationGap(
+  professionSlug: string,
+  t: Awaited<ReturnType<typeof getTranslations>>,
+): Promise<WorkflowResult | null> {
+  const wi = await loadOwnWorkIntelligence({ focus: "all" }).catch(() => null);
+  if (wi === null) return null;
+  const gap = readTargetOccupationGap(professionSlug, wi.skills);
+  if (gap === null) return null;
+  const tSkill = await getTranslations("skillNames");
+  const tProf = await getTranslations("professions");
+  const list = (slugs: readonly string[]): string =>
+    slugs.map((slug) => (tSkill.has(slug) ? tSkill(slug) : slug)).join(", ");
+  const occupation = tProf.has(professionSlug) ? tProf(professionSlug) : professionSlug;
+  const lines = [t("targetGapIntro", { occupation })];
+  if (gap.confirmed.length > 0) lines.push(t("targetGapConfirmed", { list: list(gap.confirmed) }));
+  if (gap.recorded.length > 0) lines.push(t("targetGapRecorded", { list: list(gap.recorded) }));
+  if (gap.stated.length > 0) lines.push(t("targetGapStated", { list: list(gap.stated) }));
+  lines.push(
+    gap.missing.length > 0
+      ? t("targetGapMissing", { list: list(gap.missing) })
+      : t("targetGapNoneMissing"),
+  );
+  if (gap.missing.length > 0 || gap.stated.length > 0) lines.push(t("targetGapHow"));
+  return {
+    kind: "answer",
+    text: lines.join("\n"),
+    explanation: { why: t("whyTargetGap", { occupation }) },
+    chips: [
+      { id: "logwork", label: t("chipLogWork") },
+      { id: "compass-page", label: t("targetGapChipCompass") },
+    ],
+  };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // 2b. Documents — "what documents am I missing / what expires?"
 // ═══════════════════════════════════════════════════════════════════════════
@@ -233,9 +369,15 @@ async function documentGapSentence(
   t: Awaited<ReturnType<typeof getTranslations>>,
 ): Promise<string> {
   const tDocs = await getTranslations("documents");
-  const list = gap.missing
-    .slice(0, DOCUMENT_GAP_LINE_CAP)
-    .map((m) => (tDocs.has(`types.${m.documentTypeSlug}`) ? (tDocs(`types.${m.documentTypeSlug}` as never) as string) : m.documentTypeSlug))
+  // One name per document TYPE, the countries beside it when there are
+  // several — never the same name repeated per country.
+  const list = groupMissingDocumentsByType(gap.missing, DOCUMENT_GAP_LINE_CAP)
+    .map((g) => {
+      const name = tDocs.has(`types.${g.documentTypeSlug}`)
+        ? (tDocs(`types.${g.documentTypeSlug}` as never) as string)
+        : g.documentTypeSlug;
+      return g.countries.length > 1 ? `${name} (${g.countries.join(", ")})` : name;
+    })
     .join(", ");
   return t("docsGapTail", { count: gap.missing.length, list });
 }
@@ -343,10 +485,10 @@ export async function runLearningCompass(): Promise<WorkflowResult> {
 
   // BECOMING
   lines.push(`${tc("becoming")}: ${becoming.professionSlug ? prof(becoming.professionSlug) : tc("becomingNone")}`);
-  if (becoming.currentEducation?.institutionName) {
+  if (becoming.studyingAt) {
     lines.push(
-      tc("studyingAt", { institution: becoming.currentEducation.institutionName }) +
-        (becoming.currentEducation.programOrField ? ` · ${tc("program", { program: becoming.currentEducation.programOrField })}` : ""),
+      tc("studyingAt", { institution: becoming.studyingAt }) +
+        (becoming.currentEducation?.programOrField ? ` · ${tc("program", { program: becoming.currentEducation.programOrField })}` : ""),
     );
   }
   for (const c of becoming.cohorts.slice(0, 2)) {
@@ -416,28 +558,172 @@ export async function runLearningCompass(): Promise<WorkflowResult> {
 // 3. Journal — "show my latest journal"
 // ═══════════════════════════════════════════════════════════════════════════
 
+/** "Recent" for the journal answer: the last two weeks INCLUDING today. */
+const RECENT_JOURNAL_DAYS = 14;
+
+/** Inclusive UTC calendar-day window the section's period keys describe —
+ *  the SAME numbers as `PERIOD_DAYS` in work-intelligence.ts (7 / 30 / 365). */
+const PERIOD_WINDOW_DAYS: Record<Exclude<JournalPeriodPhrase, "all" | "today" | "yesterday">, number> = {
+  week: 7,
+  month: 30,
+  year: 365,
+};
+
 /**
  * The person's most recent real journal entries, from the canonical Time Engine
  * projection (the same rows the calendar shows). No second journal read.
+ *
+ * THE WINDOW LOOKS BACK (issue #1689). This used to read the calendar's
+ * `agenda` range — today and the 13 days AFTER it — while its copy said "in
+ * the last N days". The journal is FACT: what really happened, so nearly
+ * every entry sat before the window and "kiek valandų dirbau šiandien?" was
+ * answered from tomorrow onward. The range now ends today and starts
+ * `RECENT_JOURNAL_DAYS - 1` days earlier, and the answer carries the hours
+ * those entries add up to — each entry's own canonical duration label, the
+ * same one the calendar shows, summed once per entry.
+ *
+ * THE WINDOW IS THE ONE THE PERSON ASKED ABOUT (issue #1689, outcome 1 —
+ * production 2026-09-11: "kiek valandų dirbau šiandien?" answered "Iš viso
+ * per 13 d.: 27 val." while the section showed today as 20 h). When the
+ * sentence names a period, the figure comes from `loadOwnWorkIntelligence`'s
+ * `periods` — the SAME model and the SAME number the work-in-numbers section
+ * shows for that tab (today / 7 / 30 / 365 days / all, confirmed hours told
+ * apart) — and the entry lines are read over that window. No period word →
+ * the recent window, as before. Every answer names its window, so nothing
+ * is silently reinterpreted.
+ *
+ * ONE TIME SCOPE (issue #1689, lane B). "Yesterday" and the recent default
+ * used to be summed a second way — from the planning strip's "<value>|<unit>"
+ * duration labels — beside the model the section renders. They are now
+ * passed to the model as an explicit `focusRange` and answered from its
+ * `range` row: the same arithmetic, the same confirmed-hours split, the same
+ * counted-once rule. Planning only LISTS the entry lines. An unreadable
+ * model is said as such (UNKNOWN), never re-derived from another surface;
+ * a model built over a capped read says how many entries it rests on.
  */
-export async function runRecentJournal(): Promise<WorkflowResult> {
+/**
+ * "Kiek valandų komanda dirbo šią savaitę?" asked in a COMPANY space
+ * (production walk 2026-09-29) was answered from the owner's PERSONAL
+ * journal ("Iš tavo paties žurnalo įrašų"). The organization's answer is its
+ * own journal report — the SAME `getJournalWindowReport` the reports page
+ * renders (org-manager RLS, per-member work time, approved = confirmed).
+ * today / week (default) / month; nothing else is re-derived here.
+ */
+export async function runOrganizationJournal(text?: string): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const locale = await getLocale();
+  const period = parseJournalPeriodPhrase(text);
+  const key: JournalWindowKey = period === "today" ? "today" : period === "month" ? "month" : "week";
+  const report = await getJournalWindowReport(key, undefined, { workTime: true });
+  if (!report.applied) {
+    return blocked(t("orgJournalUnavailable"), t("whyOrgJournal"));
+  }
+  const windowLabel = t(`orgJournalWindow_${key}` as never) as string;
+  const why = t("whyOrgJournal");
+  if (report.totals.entries === 0) {
+    return {
+      kind: "answer",
+      text: t("orgJournalEmpty", { window: windowLabel }),
+      explanation: { why },
+    };
+  }
+  const work = report.totals.work;
+  const lines = [
+    t("orgJournalTotals", {
+      window: windowLabel,
+      hours: fmtHours(work?.hours ?? 0, locale),
+      confirmed: fmtHours(work?.confirmedHours ?? 0, locale),
+      entries: report.totals.entries,
+      workers: report.totals.workers,
+      awaiting: report.totals.awaitingReview,
+    }),
+    ...[...report.workers]
+      .sort((a, b) => (b.work?.hours ?? 0) - (a.work?.hours ?? 0))
+      .slice(0, ANSWER_LIMIT)
+      .map((w) =>
+        t("orgJournalMember", {
+          name: w.name,
+          hours: fmtHours(w.work?.hours ?? 0, locale),
+          entries: w.entries,
+        }),
+      ),
+  ];
+  return {
+    kind: "answer",
+    text: lines.join("\n"),
+    explanation: { why },
+  };
+}
+
+export async function runRecentJournal(text?: string): Promise<WorkflowResult> {
   const t = await getTranslations("workspace.ai");
   const locale = await getLocale();
   const todayIso = new Date().toISOString().slice(0, 10);
-  const range = visibleRange("agenda", todayIso);
+  const period = parseJournalPeriodPhrase(text);
+  const range =
+    period === null
+      ? { start: isoDayMinus(todayIso, RECENT_JOURNAL_DAYS - 1), end: todayIso }
+      : period === "today"
+        ? { start: todayIso, end: todayIso }
+        : period === "yesterday"
+          ? { start: isoDayMinus(todayIso, 1), end: isoDayMinus(todayIso, 1) }
+          : period === "all"
+            ? // The lines are bounded to the year; the FIGURE below is all-time.
+              { start: isoDayMinus(todayIso, PERIOD_WINDOW_DAYS.year - 1), end: todayIso }
+            : { start: isoDayMinus(todayIso, PERIOD_WINDOW_DAYS[period] - 1), end: todayIso };
   const planning = await getPlanning({ rangeStart: range.start, rangeEnd: range.end });
   if (planning.status !== "ok") return blocked(t("blockedNoPlan"), t("whyNoPlan"));
 
-  const entries = planning.items
-    .filter((it) => it.sourceType === "journal" && it.startDate !== null)
-    .sort((a, b) => (a.startDate! < b.startDate! ? 1 : -1))
-    .slice(0, ANSWER_LIMIT);
+  // The planning read also returns entries CREATED in the range whose work
+  // day lies outside it (D-13 keeps them for the calendar, which places each
+  // on its own day). An answer about a WINDOW keeps only the entries worked
+  // inside it — measured 2026-09-11: "today" listed yesterday's entry, typed
+  // today, under a figure that (correctly) did not count it.
+  const journalItems = planning.items
+    .filter(
+      (it) =>
+        it.sourceType === "journal" &&
+        it.startDate !== null &&
+        it.startDate >= range.start &&
+        it.startDate <= range.end,
+    )
+    .sort((a, b) => (a.startDate! < b.startDate! ? 1 : -1));
+  const entries = journalItems.slice(0, ANSWER_LIMIT);
 
-  if (entries.length === 0) {
+  // THE FIGURE IS THE MODEL'S. A named section tab is its own `periods`
+  // row; the recent default and "yesterday" have no tab, so the window is
+  // passed as an explicit `focusRange` and read from the model's `range`
+  // row. The model is FOCUSED on the same window, so its outputs and the
+  // organization ledger (below) describe the window the figure does.
+  const focus: WorkPeriodKey | null = period !== null && period !== "yesterday" ? period : null;
+  const wi = await loadOwnWorkIntelligence(
+    focus !== null
+      ? { focus }
+      : { focus: "all", focusRange: { startIso: range.start, endIso: range.end } },
+  ).catch(() => null);
+  const scopeKey: WorkPeriodScope = focus ?? "range";
+  const totals = wi?.periods.find((p) => p.key === scopeKey) ?? null;
+  const days = rangeDays(range.start, range.end);
+
+  // Every answer names its window: the tab's own word, "yesterday", or the
+  // recent window's own length in days.
+  const periodLabel = period === null ? null : t(`journalPeriod_${period}`);
+  const scopeLabel = periodLabel ?? t("journalPeriod_range", { days });
+  const why =
+    periodLabel === null
+      ? t("whyJournalWindow", { days })
+      : t("whyJournalPeriod", { period: periodLabel });
+
+  const periodEntries = totals?.entries ?? journalItems.length;
+
+  if (periodEntries === 0 && entries.length === 0) {
     return {
       kind: "answer",
-      text: t("journalEmpty", { days: rangeDays(range.start, range.end) }),
-      explanation: { why: t("whyJournalWindow", { days: rangeDays(range.start, range.end) }) },
+      text:
+        periodLabel === null
+          ? t("journalEmpty", { days })
+          : t("journalEmptyPeriod", { period: periodLabel }),
+      explanation: { why },
       chips: [{ id: "logwork", label: t("chipLogWork") }],
     };
   }
@@ -454,12 +740,518 @@ export async function runRecentJournal(): Promise<WorkflowResult> {
     }),
   );
 
+  // The window's figure — hours, confirmed hours and entries from the ONE
+  // model row for this window. `days`-unit work stays in days. A model that
+  // could not be read is said as UNKNOWN: no figure is re-derived from the
+  // planning lines (the second arithmetic this closes).
+  const dayUnits = totals?.dayUnits ?? 0;
+  const dayUnitsLine = dayUnits > 0 ? " " + t("journalDayUnits", { days: fmtHours(dayUnits, locale) }) : "";
+  const hoursLine =
+    totals === null
+      ? t("wiUnread")
+      : totals.hours > 0 || totals.dayUnits > 0
+        ? (periodLabel === null
+            ? t("journalHoursWindow", {
+                days,
+                hours: fmtHours(totals.hours, locale),
+                confirmed: fmtHours(totals.confirmedHours, locale),
+                entries: totals.entries,
+              })
+            : t("journalHoursPeriod", {
+                period: periodLabel,
+                hours: fmtHours(totals.hours, locale),
+                confirmed: fmtHours(totals.confirmedHours, locale),
+                entries: totals.entries,
+              })) + dayUnitsLine
+        : periodLabel === null
+          ? t("journalHoursNone", { entries: totals.entries })
+          : t("journalHoursNonePeriod", { period: periodLabel, entries: totals.entries });
+
+  // A figure over a capped read names its base (SEP-7): "from the last N
+  // entries", never a total that quietly stops at a page ceiling.
+  const coverageLine =
+    wi !== null && wi.coverage.truncated
+      ? t("journalCoverageTruncated", { count: wi.coverage.entriesRead })
+      : null;
+
+  // WHAT WAS PRODUCED (issue #1689, owner line 6 — "ką padariau per tą
+  // laiką?"): the completed outputs in their recorded units, from the same
+  // model, over the same window as the figure — the line says which.
+  // Never converted, never time.
+  const outputsLine = wi === null ? null : await formatOutputsLine(wi, scopeLabel, locale);
+
+  // THE ORGANIZATION'S OWN RECORDS (owner §19): when an organization
+  // recorded hours about the person in the same window (timesheet lines,
+  // imported documents), the answer names that ledger beside the journal
+  // figure — the model's own row for the SAME window, added to nothing.
+  const orgLedger = wi?.organizationRecords?.find((p) => p.key === scopeKey) ?? null;
+  const orgLine =
+    orgLedger !== null && orgLedger.hours > 0
+      ? t("journalOrgRecords", {
+          period: scopeLabel,
+          hours: fmtHours(orgLedger.hours, locale),
+          days: orgLedger.daysWorked,
+        })
+      : null;
+
+  // A period question is answered with its FIGURE first, then the entries.
+  const body =
+    periodLabel === null
+      ? [
+          t("journalIntro", { count: entries.length }),
+          ...lines,
+          hoursLine,
+          ...(coverageLine ? [coverageLine] : []),
+          ...(orgLine ? [orgLine] : []),
+          ...(outputsLine ? [outputsLine] : []),
+        ]
+      : [
+          hoursLine,
+          ...(coverageLine ? [coverageLine] : []),
+          ...(orgLine ? [orgLine] : []),
+          ...(outputsLine ? [outputsLine] : []),
+          ...(lines.length > 0 ? [t("journalPeriodLines"), ...lines] : []),
+        ];
+
   return {
     kind: "answer",
-    text: [t("journalIntro", { count: entries.length }), ...lines].join("\n"),
-    explanation: { why: t("whyJournalWindow", { days: rangeDays(range.start, range.end) }) },
-    chips: [{ id: "logwork", label: t("chipLogWork") }],
+    text: body.join("\n"),
+    explanation: { why },
+    chips: [
+      { id: "logwork", label: t("chipLogWork") },
+      { id: "journal-numbers", label: t("chipJournalNumbers") },
+    ],
   };
+}
+
+/** ISO day `days` before `todayIso` (UTC calendar days — never local time). */
+function isoDayMinus(todayIso: string, days: number): string {
+  const d = new Date(`${todayIso}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() - days);
+  return d.toISOString().slice(0, 10);
+}
+
+function fmtHours(hours: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(hours);
+}
+
+function fmtPct(share: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(share);
+}
+
+/** The model's focus-period outputs as one sentence naming its window
+ *  (`periodLabel` — the tab's word, "yesterday", or the recent window's
+ *  length), or null when nothing was produced in a non-time unit. Unit
+ *  names come from the ONE `productivityUnits` catalogue the section and
+ *  the pickers use. */
+async function formatOutputsLine(
+  wi: WorkIntelligence,
+  periodLabel: string,
+  locale: string,
+): Promise<string | null> {
+  if (wi.outputs.length === 0) return null;
+  const t = await getTranslations("workspace.ai");
+  const tUnit = await getTranslations("productivityUnits");
+  const tProf = await getTranslations("professions");
+  // one unit is totalled only inside one kind of work (re-audit F9) — the
+  // kind is named so "km driven" and "km of cable" read as two outputs
+  const list = wi.outputs
+    .slice(0, ANSWER_LIMIT)
+    .map((o) =>
+      o.activity
+        ? t("wiOutputItemActivity", {
+            value: fmtHours(o.value, locale),
+            unit: tUnit.has(o.unit) ? tUnit(o.unit) : o.unit,
+            activity: tProf.has(o.activity) ? tProf(o.activity) : o.activity,
+            entries: o.entries,
+          })
+        : t("wiOutputItem", {
+            value: fmtHours(o.value, locale),
+            unit: tUnit.has(o.unit) ? tUnit(o.unit) : o.unit,
+            entries: o.entries,
+          }),
+    )
+    .join("; ");
+  return t("wiOutputs", { period: periodLabel, list });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 3b. Work intelligence by sentence — "kiek programavau?", "kokius įgūdžius
+//     naudoju daugiausia?", "kokia veikla užima daugiausia laiko?", "kas
+//     patvirtinta?", "kur galėčiau augti?"
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The demand side of the growth reading (owner line 8): how many of the
+ * person's VISIBLE demands ask for each skill their profile lacks — the
+ * SAME `skillFit.missingUris` aggregation the skill-gap answer makes, over
+ * the same board read. `null` when the board could not be read or the
+ * person has no board (UNKNOWN, not zero — the answer says demand was not
+ * read rather than "nothing asks for anything").
+ */
+async function readDemandBySkillForGrowth(): Promise<ReadonlyMap<string, number> | null> {
+  try {
+    const board = await loadWorkerOpportunityBoard("conversation");
+    if (board.kind !== "ready" || !board.capabilities.boardAvailable) return null;
+    const demandsPerSkill = new Map<string, number>();
+    for (const card of board.opportunities) {
+      for (const slug of card.match.skillFit?.missingUris ?? []) {
+        demandsPerSkill.set(slug, (demandsPerSkill.get(slug) ?? 0) + 1);
+      }
+    }
+    return demandsPerSkill;
+  } catch {
+    return null;
+  }
+}
+
+
+/**
+ * The questions the work-in-numbers section answers, asked in words (issue
+ * #1689, re-audit 2026-09-11, owner chat lines 2–5 and 7). Measured before
+ * this: every one of them fell to the generic fallback or to the PROFILE
+ * answer. The data was there — `loadOwnWorkIntelligence` carries hours per
+ * skill (attributed / confirmed / shared), activities, contexts and
+ * confirmations — only the door was missing.
+ *
+ * ONE MODEL, ONE READER. Nothing is re-derived here: every figure is a field
+ * of the same `WorkIntelligence` the section renders, focused on the period
+ * the sentence names (`parseJournalPeriodPhrase`; none → all time). Every
+ * answer NAMES ITS WINDOW AND ITS DENOMINATOR — "5 h attributed of 36 h
+ * recorded", "38 % of the 13 h attributed to skills" — because a share of an
+ * unstated base is the F3 defect the re-audit found on the section itself.
+ *
+ * THE SUBJECT IS READ BY THE JOURNAL RECOGNIZER. "Kiek programavau?" names
+ * its skill the way an intake sentence does, so the SAME recognizer
+ * (`extractJournalSuggestions`) reads it: `programming` as the skill,
+ * `software_developer` as the kind of work. A subject it cannot recognise
+ * falls back to the plain period answer (`runRecentJournal`) — an honest
+ * total, never a guess at which skill was meant.
+ *
+ * SOURCE ENTRIES are one chip away through the journal's EXISTING
+ * drill-down (`?skill=<slug>&period=<key>`), emitted by the chat as a route;
+ * this layer hands over the slug and the period, never a path (W4).
+ *
+ * NO LLM. Deterministic floor; every figure is a real row or an honest
+ * "could not read" (never a zero nobody counted — SEP-7).
+ */
+export async function runWorkIntelligenceQuestion(
+  text: string,
+  intent: ConversationIntent,
+): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const locale = await getLocale();
+  const phrase = parseJournalPeriodPhrase(text);
+  // "Yesterday" is a single day the model has no window for: answered over
+  // all time, and the answer says so (the window is always named).
+  const focus: WorkPeriodKey = phrase === null || phrase === "yesterday" ? "all" : phrase;
+  const periodLabel = t(`journalPeriod_${focus}`);
+  const why = t("whyWi", { period: periodLabel });
+
+  const wi = await loadOwnWorkIntelligence({ focus }).catch(() => null);
+  if (wi === null) return blocked(t("wiUnread"), why);
+  const totals = wi.periods.find((p) => p.key === focus) ?? null;
+  if (totals === null) return blocked(t("wiUnread"), why);
+
+  const tSkill = await getTranslations("skillNames");
+  const tProf = await getTranslations("professions");
+  const skillName = (slug: string): string => (tSkill.has(slug) ? tSkill(slug) : slug);
+  // profession slug (LT lexicon) or skill slug (compact editor / intake's strong skill reading) — #1689
+  const activityName = (key: string): string =>
+    tProf.has(key) ? tProf(key) : tSkill.has(key) ? tSkill(key) : key;
+  const fmtDay = new Intl.DateTimeFormat(locale, { month: "2-digit", day: "2-digit", timeZone: "UTC" });
+  const dayOf = (iso: string | null): string => (iso ? fmtDay.format(new Date(`${iso}T00:00:00Z`)) : "—");
+  const chips = [{ id: "journal-numbers", label: t("chipJournalNumbers") }];
+  const totalHours = fmtHours(totals.hours, locale);
+
+  if (totals.entries === 0) {
+    return {
+      kind: "answer",
+      text: t("journalEmptyPeriod", { period: periodLabel }),
+      explanation: { why },
+      chips: [{ id: "logwork", label: t("chipLogWork") }],
+    };
+  }
+
+  if (intent === "journal-skill") {
+    const read = extractJournalSuggestions(text);
+    const skill =
+      read.skillSlugs.map((slug) => wi.skills.find((s) => s.slug === slug)).find((s) => s !== undefined) ?? null;
+    if (skill) {
+      const name = skillName(skill.slug);
+      const lines = [
+        t("wiSkillHours", {
+          skill: name,
+          hours: fmtHours(skill.attributedHours, locale),
+          total: totalHours,
+          period: periodLabel,
+          confirmed: fmtHours(skill.confirmedHours, locale),
+        }),
+      ];
+      if (skill.sharedHours > 0) lines.push(t("wiSkillShared", { hours: fmtHours(skill.sharedHours, locale) }));
+      lines.push(
+        skill.entries > 0
+          ? t("wiSkillWhere", {
+              entries: skill.entries,
+              days: skill.days,
+              contexts: skill.contexts,
+              day: dayOf(skill.lastWorkedDay),
+            })
+          : t("wiSkillNoEntries", { period: periodLabel }),
+      );
+      return {
+        kind: "answer",
+        text: lines.join("\n"),
+        explanation: { why },
+        chips: [
+          ...(skill.entries > 0
+            ? [{ id: `journal-entries:${skill.slug}:${focus}`, label: t("chipSkillEntries", { skill: name }) }]
+            : []),
+          ...chips,
+        ],
+      };
+    }
+    // No catalogue skill — perhaps a kind of work ("Kiek klojau plyteles?"
+    // → tiler) the activity list carries under its slug or its own label.
+    const keys = read.fragments
+      .flatMap((f) => [f.activitySlug, f.activityLabel])
+      .filter((k): k is string => Boolean(k));
+    const activity = keys.map((k) => wi.activities.find((a) => a.key === k)).find((a) => a !== undefined) ?? null;
+    if (activity) {
+      return {
+        kind: "answer",
+        text: t("wiActivityHours", {
+          activity: activityName(activity.key),
+          hours: fmtHours(activity.hours, locale),
+          total: totalHours,
+          period: periodLabel,
+          entries: activity.entries,
+          day: dayOf(activity.lastWorkedDay),
+        }),
+        explanation: { why },
+        chips,
+      };
+    }
+    const subject = read.skillSlugs[0] ? skillName(read.skillSlugs[0]) : keys[0] ? activityName(keys[0]) : null;
+    if (subject) {
+      // Recognised, but nothing recorded under it in this window.
+      return {
+        kind: "answer",
+        text: t("wiSubjectNone", { subject, period: periodLabel, total: totalHours, entries: totals.entries }),
+        explanation: { why },
+        chips,
+      };
+    }
+    // No subject the recognizer knows: the plain period answer, unchanged.
+    return runRecentJournal(text);
+  }
+
+  if (intent === "journal-skills-top") {
+    const top = wi.skills.filter((s) => s.attributedHours > 0 || s.sharedHours > 0).slice(0, ANSWER_LIMIT);
+    if (top.length === 0) {
+      return {
+        kind: "answer",
+        text: t("wiSkillsNone", { period: periodLabel, total: totalHours, entries: totals.entries }),
+        explanation: { why },
+        chips,
+      };
+    }
+    const attributed = fmtHours(wi.attributedHours, locale);
+    const lines = [
+      t("wiSkillsIntro", { period: periodLabel, attributed, total: totalHours, entries: totals.entries }),
+      ...top.map((s) =>
+        t("wiSkillLine", {
+          skill: skillName(s.slug),
+          hours: fmtHours(s.attributedHours, locale),
+          pct: fmtPct(s.share, locale),
+          attributed,
+          confirmed: fmtHours(s.confirmedHours, locale),
+          shared: fmtHours(s.sharedHours, locale),
+        }),
+      ),
+    ];
+    if (wi.sharedHours + wi.multiActivityHours + wi.unattributedHours > 0) {
+      lines.push(
+        t("wiSkillsRemainder", {
+          shared: fmtHours(wi.sharedHours + wi.multiActivityHours, locale),
+          unlinked: fmtHours(wi.unattributedHours, locale),
+        }),
+      );
+    }
+    return { kind: "answer", text: lines.join("\n"), explanation: { why }, chips };
+  }
+
+  if (intent === "journal-activities-top") {
+    const top = wi.activities.filter((a) => a.hours > 0).slice(0, ANSWER_LIMIT);
+    if (top.length === 0) {
+      return {
+        kind: "answer",
+        text: t("wiActivitiesNone", { period: periodLabel, total: totalHours, entries: totals.entries }),
+        explanation: { why },
+        chips,
+      };
+    }
+    // The coverage figures are the MODEL's (`activityHours` + `unlabelledHours`
+    // = the period's hours; `share` is of all recorded hours) — the same ones
+    // the section's "Kinds of work" states, never re-derived here.
+    const lines = [
+      t("wiActivitiesIntro", { period: periodLabel, labelled: fmtHours(wi.activityHours, locale), total: totalHours }),
+      ...top.map((a) =>
+        t("wiActivityLine", {
+          activity: activityName(a.key),
+          hours: fmtHours(a.hours, locale),
+          pct: fmtPct(a.share, locale),
+          entries: a.entries,
+        }),
+      ),
+    ];
+    if (wi.unlabelledHours > 0) lines.push(t("wiActivitiesUnlabelled", { hours: fmtHours(wi.unlabelledHours, locale) }));
+    return { kind: "answer", text: lines.join("\n"), explanation: { why }, chips };
+  }
+
+  if (intent === "journal-growth") {
+    // Owner line 8 — "kur yra didžiausias augimo potencialas?". ONE pure
+    // derivation shared with the section (`deriveGrowthReading`): the FACT
+    // block first (the skills the entries back, in hours, and the declared
+    // skills left out), then the reading, said to be derived — deepen /
+    // expand / what real demand asks. Never a score, a rank or a tier.
+    // the declared primary profession is excluded from the adjacent
+    // directions (it is not an *adjacent* one) — read through the ONE
+    // work-intelligence reader, never a query here (W4)
+    const [primaryProfessionSlug, demandBySkill] = await Promise.all([
+      loadOwnPrimaryProfessionSlug().catch(() => null),
+      readDemandBySkillForGrowth(),
+    ]);
+    const growth = deriveGrowthReading(wi, { primaryProfessionSlug, demandBySkill });
+    // every list below is capped at ANSWER_LIMIT; what the cap leaves out is
+    // SAID ("… ir dar 3"), never implied to be all (#1689, 2026-09-12)
+    const withMore = (list: string, shown: number, total: number, sep: string): string =>
+      total > shown ? `${list}${sep}${t("wiGrowthMore", { count: total - shown })}` : list;
+    const basisList = growth.basis.skills
+      .slice(0, ANSWER_LIMIT)
+      .map((s) =>
+        s.attributedHours > 0
+          ? t("wiGrowthBasisSkill", { skill: skillName(s.slug), hours: fmtHours(s.attributedHours, locale) })
+          : s.sharedHours > 0
+            ? t("wiGrowthBasisSkillInvolved", { skill: skillName(s.slug), hours: fmtHours(s.sharedHours, locale) })
+            : // backed only by untimed entries — counted, not timed (SEP-7)
+              t("wiGrowthBasisSkillUntimed", { skill: skillName(s.slug), entries: s.entries }),
+      )
+      .join(", ")
+      // the sentence template closes with its own full stop; a unit
+      // abbreviation ("val.") at the end of the list must not double it
+      .replace(/\.$/, "");
+    const lines = [
+      t("wiGrowthBasis", {
+        period: periodLabel,
+        count: growth.basis.skills.length,
+        total: totalHours,
+        entries: totals.entries,
+        list: withMore(basisList, Math.min(ANSWER_LIMIT, growth.basis.skills.length), growth.basis.skills.length, " · "),
+      }),
+    ];
+    if (growth.basis.declaredOnly > 0) lines.push(t("wiGrowthDeclaredOnly", { count: growth.basis.declaredOnly }));
+    lines.push(t("wiGrowthDerived"));
+    if (growth.limitation === "insufficient_skills") {
+      lines.push(t("wiGrowthInsufficient"));
+    } else {
+      if (growth.deepen.length > 0) {
+        lines.push(
+          t("wiGrowthDeepen", {
+            list: withMore(
+              growth.deepen
+                .slice(0, ANSWER_LIMIT)
+                .map((d) =>
+                  t("wiGrowthDeepenItem", {
+                    skill: skillName(d.slug),
+                    reasons: d.reasons.map((r) => t(`wiGrowthReason_${r}`)).join("; "),
+                  }),
+                )
+                .join("\n"),
+              Math.min(ANSWER_LIMIT, growth.deepen.length),
+              growth.deepenTotal,
+              "\n",
+            ),
+          }),
+        );
+      }
+      if (growth.expand.length > 0) {
+        lines.push(
+          t("wiGrowthExpand", {
+            list: withMore(
+              growth.expand
+                .slice(0, ANSWER_LIMIT)
+                .map((d) =>
+                  t("wiGrowthExpandItem", {
+                    direction: activityName(d.professionId),
+                    shared: d.sharedCount,
+                    missing: d.missingSkills.map(skillName).join(", "),
+                  }),
+                )
+                .join("\n"),
+              Math.min(ANSWER_LIMIT, growth.expand.length),
+              growth.expand.length,
+              "\n",
+            ),
+          }),
+        );
+      }
+    }
+    if (growth.demand === null) lines.push(t("wiGrowthDemandUnread"));
+    else if (growth.demand.length === 0) lines.push(t("wiGrowthDemandNone"));
+    else {
+      lines.push(
+        t("wiGrowthDemand", {
+          list: withMore(
+            growth.demand
+              .slice(0, ANSWER_LIMIT)
+              .map((d) => t("wiGrowthDemandItem", { skill: skillName(d.slug), demands: d.demands }))
+              .join(", "),
+            Math.min(ANSWER_LIMIT, growth.demand.length),
+            growth.demandTotal ?? growth.demand.length,
+            ", ",
+          ),
+        }),
+      );
+    }
+    return {
+      kind: "answer",
+      text: lines.join("\n"),
+      explanation: { why: t("whyWiGrowth", { period: periodLabel }) },
+      // the journal is where a reading becomes evidence — never a self-declaration
+      chips: [...chips, { id: "logwork", label: t("chipLogWork") }],
+    };
+  }
+
+  // journal-confirmed
+  const confirmedSkills = wi.skills.filter((s) => s.confirmedHours > 0).slice(0, ANSWER_LIMIT);
+  if (totals.confirmedHours <= 0 && wi.evidence.confirmed === 0) {
+    return {
+      kind: "answer",
+      text: t("wiConfirmedNone", { period: periodLabel, total: totalHours, entries: totals.entries }),
+      explanation: { why },
+      chips,
+    };
+  }
+  const lines = [
+    t("wiConfirmedHours", {
+      period: periodLabel,
+      confirmed: fmtHours(totals.confirmedHours, locale),
+      total: totalHours,
+      confirmedEntries: wi.evidence.confirmed,
+      entries: totals.entries,
+    }),
+  ];
+  if (confirmedSkills.length > 0) {
+    lines.push(
+      t("wiConfirmedSkills", {
+        list: confirmedSkills
+          .map((s) => t("wiConfirmedSkillItem", { skill: skillName(s.slug), hours: fmtHours(s.confirmedHours, locale) }))
+          .join(", "),
+      }),
+    );
+  }
+  return { kind: "answer", text: lines.join("\n"), explanation: { why }, chips };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -494,18 +1286,51 @@ export async function runFigures(): Promise<WorkflowResult> {
         chips: [{ id: "logwork", label: t("chipLogWork") }],
       };
     }
+    // A count we could not read must not be STATED as a number. The two
+    // journal figures are nullable (see lib/reports/evidence-report.ts), and
+    // interpolating null here would put a number nobody counted — or the word
+    // itself — into a sentence the person reads as fact. The skills figures
+    // are always counted, so those are still given.
+    const entriesUnread =
+      view.evidence.journalEntries === null ||
+      view.evidence.confirmations === null;
+    // HOURS, at last (issue #1689). The old line said the platform keeps no
+    // hours figure. Since the canonical work-time rule (owner ruling
+    // 2026-08-18) it does: every entry's recorded duration, counted once,
+    // with the confirmed part told apart. An unreadable journal says so —
+    // it never states a zero nobody counted.
+    const locale = await getLocale();
+    const wi = await loadOwnWorkIntelligence().catch(() => null);
+    const month = wi?.periods.find((p) => p.key === "month") ?? null;
+    const all = wi?.periods.find((p) => p.key === "all") ?? null;
+    const hoursLine =
+      wi === null || all === null || month === null
+        ? t("figuresWorkerHoursUnread")
+        : all.hours > 0
+          ? t("figuresWorkerHours", {
+              total: fmtHours(all.hours, locale),
+              confirmed: fmtHours(all.confirmedHours, locale),
+              month: fmtHours(month.hours, locale),
+            })
+          : t("figuresWorkerHoursNone", { entries: all.entries });
     return {
       kind: "answer",
       text: [
-        t("figuresWorker", {
-          entries: view.evidence.journalEntries,
-          confirmations: view.evidence.confirmations,
-          skills: view.evidence.totalSkills,
-          confirmed: view.evidence.confirmed,
-        }),
-        t("figuresNoHoursLedger"),
+        entriesUnread
+          ? t("figuresWorkerUnread", {
+              skills: view.evidence.totalSkills,
+              confirmed: view.evidence.confirmed,
+            })
+          : t("figuresWorker", {
+              entries: view.evidence.journalEntries ?? 0,
+              confirmations: view.evidence.confirmations ?? 0,
+              skills: view.evidence.totalSkills,
+              confirmed: view.evidence.confirmed,
+            }),
+        hoursLine,
       ].join("\n"),
       explanation: { why: t("whyFigures") },
+      chips: [{ id: "journal-numbers", label: t("chipJournalNumbers") }],
     };
   }
 
@@ -519,10 +1344,21 @@ export async function runFigures(): Promise<WorkflowResult> {
   if (parts.length === 0) {
     return blocked(t("figuresOrgUnavailable"), t("whyFigures"));
   }
+  // §19 EXPORT / DOWNLOAD by sentence: the report a manager can take away is
+  // the project operations CSV the operations page already serves (the ONE
+  // route, manager-gated + RLS there). Offered for the projects the person
+  // really manages — bounded, never a report store of its own.
+  const locale = await getLocale();
+  const managed = await listManagedProjects();
+  const chips = managed.slice(0, 3).map((p) => ({
+    id: `download:/${locale}/dashboard/projects/${p.id}/operations/report`,
+    label: t("chipProjectCsv", { title: p.title ?? p.id.slice(0, 8) }),
+  }));
   return {
     kind: "answer",
     text: [t("figuresOrgIntro"), ...parts].join("\n"),
     explanation: { why: t("whyFigures") },
+    ...(chips.length > 0 ? { chips } : {}),
   };
 }
 
@@ -720,9 +1556,12 @@ async function blocked(text: string, why: string): Promise<WorkflowResult> {
   return { kind: "blocked", text, explanation: { why } };
 }
 
+/** Calendar days in an INCLUSIVE `[start, end]` window — the recent window
+ *  of `RECENT_JOURNAL_DAYS` is named as that many days, not one fewer (the
+ *  old difference-only count said "13 d." for a 14-day window, #1689). */
 function rangeDays(start: string, end: string): number {
   const ms = Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`);
-  return Math.max(1, Math.round(ms / 86_400_000));
+  return Math.max(1, Math.round(ms / 86_400_000) + 1);
 }
 
 /**
@@ -742,4 +1581,101 @@ function matchByName(
     if (hay.includes(name)) out.push({ id: o.id, name: o.name, matchedText: o.name });
   }
   return out;
+}
+
+/**
+ * "KAM PATEIKTI ATLIKTĄ DARBĄ?" — who can verify the work this person already
+ * did (owner P0, 2026-09-06).
+ *
+ * THE DEFECT: this sentence matched `find-work` on the bare noun `darbą` and
+ * the person was shown job adverts. They had not asked for work; they had
+ * asked who RECEIVES work they had already done.
+ *
+ * Window 8 refused to route it somewhere plausible, because guessing a
+ * direction was that window's entire defect class. The product decision was
+ * made instead, and this implements it literally:
+ *
+ *   exactly one valid verifier → name it and say whether it can confirm today
+ *   several                    → present the legitimate choices, choose none
+ *   none                       → say so plainly; the work stays real,
+ *                                self-reported evidence, and the next step is
+ *                                to identify the responsible person
+ *
+ * A VERIFIER IS NEVER INVENTED. Every organization named here is one the
+ * person genuinely holds an active relationship with, read under their own
+ * RLS. `none` is a real answer, not a failure to compute one.
+ *
+ * UNKNOWN IS NOT "NOBODY" (§54). When the contexts cannot be read, this says
+ * it could not check — never "nobody can confirm your work", which would be a
+ * lie produced by an outage.
+ */
+export async function runWhoVerifiesWork(): Promise<WorkflowResult> {
+  const t = await getTranslations("workspace.ai");
+  const ctx = await loadAiWorkspaceContext();
+  if (!ctx.hasWorkerProfile) return blocked(t("blockedNoWorker"), t("whyNoWorker"));
+
+  const answer = await resolveMyVerifiers();
+
+  // The read failed. Say that, and nothing else.
+  if (answer.unavailable) {
+    return blocked(t("verifierUnavailable"), t("whyVerifierUnavailable"));
+  }
+
+  const nameOf = (organizationId: string): string => {
+    const hit = answer.options.find((o) => o.organizationId === organizationId);
+    // An organization with neither display nor legal name is real and common
+    // on production. "your employer" is honest; an empty string is not.
+    return hit?.organizationName?.trim() || t("verifierUnnamedOrganization");
+  };
+  const canConfirm = (organizationId: string): boolean =>
+    answer.options.find((o) => o.organizationId === organizationId)?.confirmationEnabled === true;
+
+  // NO CHIP. W4 (`w4-ai-workspace.test.ts`): a workspace answer never offers a
+  // chip that navigates out of the workspace — the answer IS the answer. The
+  // first draft of this handed over a `link:/dashboard/journal` chip, which is
+  // the old "here is a page, go figure it out" reflex the chat exists to
+  // replace. Every branch below therefore says the whole thing in words,
+  // including the next step.
+
+  switch (answer.resolution.kind) {
+    case "organization": {
+      const id = answer.resolution.organizationId;
+      // Two different truths, never merged: someone can confirm today, or the
+      // employer is known but nobody there is set up to confirm yet.
+      return {
+        kind: "answer",
+        text: canConfirm(id)
+          ? t("verifierOne", { organization: nameOf(id) })
+          : t("verifierOneNotEnabled", { organization: nameOf(id) }),
+        explanation: { why: t("whyVerifier") },
+      };
+    }
+    case "choice": {
+      const names = answer.resolution.organizationIds.map(nameOf).join(" · ");
+      // Several are legitimate, so NOTHING is preselected — the same rule
+      // `resolveEngagementContext` follows when it refuses to guess a context.
+      return {
+        kind: "answer",
+        text: t("verifierChoice", { organizations: names }),
+        explanation: { why: t("whyVerifierChoice") },
+      };
+    }
+    case "self": {
+      return {
+        kind: "answer",
+        text: t("verifierSelf", { organization: nameOf(answer.resolution.organizationId) }),
+        explanation: { why: t("whyVerifierSelf") },
+      };
+    }
+    case "none":
+    default: {
+      // The 15 orphaned records' answer. The work is NOT dismissed: it stays
+      // the person's own recorded evidence, and the honest next step is named.
+      return {
+        kind: "answer",
+        text: t("verifierNone"),
+        explanation: { why: t("whyVerifierNone") },
+      };
+    }
+  }
 }

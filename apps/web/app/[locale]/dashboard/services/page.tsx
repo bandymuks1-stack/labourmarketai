@@ -9,6 +9,7 @@ import {
   ServiceOfferingsSection,
   type ServiceOfferingsLabels,
 } from "@/components/app/service-offerings-section";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Services — provider-owned service offerings (W8 Phase 1). Authenticated
@@ -44,6 +45,7 @@ export default async function ServicesPage({
     notAvailable: t("notAvailable"),
     empty: t("empty"),
     addButton: t("addButton"),
+    addPartnership: t("addPartnership"),
     formTitleLabel: t("form.titleLabel"),
     formTitlePlaceholder: t("form.titlePlaceholder"),
     formDescriptionLabel: t("form.descriptionLabel"),
@@ -82,9 +84,7 @@ export default async function ServicesPage({
   return (
     <div className="flex flex-col gap-4" data-testid="services-page">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageLead")}</p>
       </header>
       <ServiceOfferingsSection

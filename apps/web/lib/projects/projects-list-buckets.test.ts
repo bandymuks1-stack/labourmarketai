@@ -1,0 +1,143 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
+
+type Row = { id: string; title: string; status: string | null; created_at: string; record_state?: "duplicate" };
+let rows: Row[] = [];
+
+/** Minimal PostgREST-like builder over `rows` for the filters the list uses. */
+function builder() {
+  let completed: boolean | null = null;
+  let limit = Infinity;
+  let offset = 0;
+  let head = false;
+  let none = false;
+  let noDuplicates = false;
+  const q: Record<string, unknown> = {};
+  const result = () => {
+    let r = none ? [] : rows.filter((x) =>
+      completed === null ? true : completed ? x.status === "completed" : x.status !== "completed",
+    );
+    if (noDuplicates) r = r.filter((x) => x.record_state !== "duplicate");
+    r = [...r].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+    if (head) return { count: r.length, data: null, error: null };
+    return {
+      data: r.slice(offset, offset + limit).map((x) => ({
+        id: x.id,
+        title: x.title,
+        city: null,
+        country: null,
+        status: x.status,
+        responsible_profile_id: null,
+        organization_id: "o1",
+        organizations: null,
+      })),
+      error: null,
+    };
+  };
+  q.select = (_c: string, opts?: { head?: boolean }) => {
+    head = !!opts?.head;
+    return q;
+  };
+  q.eq = (col: string, v: string) => {
+    if (col === "status" && v === "completed") completed = true;
+    if (col === "record_state") none = true; // duplicate marker lookup: nothing marked
+    return q;
+  };
+  q.in = () => q;
+  q.neq = (col: string, v: string) => {
+    if (col === "record_state" && v === "duplicate") noDuplicates = true;
+    return q;
+  };
+  q.or = (expr: string) => {
+    if (expr.startsWith("status.is.null")) completed = false;
+    return q;
+  };
+  q.order = () => q;
+  q.limit = (n: number) => {
+    limit = n;
+    return q;
+  };
+  q.range = (from: number, to: number) => {
+    offset = from;
+    limit = to - from + 1;
+    return q;
+  };
+  q.then = (res: (v: unknown) => unknown) => Promise.resolve(result()).then(res);
+  return q;
+}
+
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: async () => ({
+    auth: { getUser: async () => ({ data: { user: { id: "u1" } } }) },
+    from: () => builder(),
+  }),
+}));
+vi.mock("@/lib/company/employer-company-context", () => ({
+  isEmployerContextFailure: () => false,
+  resolveEmployerCompanyContext: async () => ({ kind: "ok" }),
+}));
+
+import {
+  MANAGED_PROJECTS_BUCKET_LIMIT,
+  countManagedProjects,
+  listManagedProjects,
+} from "./projects";
+
+function seed(completedN: number, activeN: number) {
+  rows = [];
+  // completed rows are NEWER than the active ones: the old single
+  // ORDER BY created_at DESC LIMIT 100 would evict every active project.
+  for (let i = 0; i < activeN; i++)
+    rows.push({ id: `a${i}`, title: `A${i}`, status: i % 2 ? "live" : "draft", created_at: `2026-01-${String(i + 1).padStart(2, "0")}` });
+  for (let i = 0; i < completedN; i++)
+    rows.push({ id: `c${i}`, title: `C${i}`, status: "completed", created_at: `2026-09-${String((i % 28) + 1).padStart(2, "0")}-${i}` });
+}
+
+describe("listManagedProjects active/finished buckets", () => {
+  beforeEach(() => seed(0, 0));
+
+  it("150 completed + 10 active: all 10 active are present and listed first", async () => {
+    seed(150, 10);
+    const list = await listManagedProjects();
+    const active = list.filter((p) => p.status !== "completed");
+    expect(active).toHaveLength(10);
+    expect(list.slice(0, 10).every((p) => p.status !== "completed")).toBe(true);
+    expect(list.filter((p) => p.status === "completed")).toHaveLength(MANAGED_PROJECTS_BUCKET_LIMIT);
+  });
+
+  it("a project with a null status counts as working, not finished", async () => {
+    seed(0, 0);
+    rows.push({ id: "n1", title: "N", status: null, created_at: "2026-01-01" });
+    const list = await listManagedProjects();
+    expect(list.map((p) => p.id)).toEqual(["n1"]);
+  });
+
+  it("the finished bucket pages: 180 historical projects are all reachable, none twice (#history)", async () => {
+    seed(180, 10);
+    const first = (await listManagedProjects()).filter((p) => p.status === "completed");
+    const second = (await listManagedProjects({ finishedPage: 1 })).filter((p) => p.status === "completed");
+    expect(first).toHaveLength(MANAGED_PROJECTS_BUCKET_LIMIT);
+    expect(second).toHaveLength(180 - MANAGED_PROJECTS_BUCKET_LIMIT);
+    const ids = new Set([...first, ...second].map((p) => p.id));
+    expect(ids.size).toBe(180);
+    // the working bucket is never paged away
+    expect((await listManagedProjects({ finishedPage: 1 })).filter((p) => p.status !== "completed")).toHaveLength(10);
+  });
+
+  it("DUPLICATE rows are filtered in the query: full pages of real projects, boundaries match the count", async () => {
+    seed(150, 10);
+    // 40 of the finished rows are fragments marked into a canonical project
+    for (const r of rows.filter((x) => x.status === "completed").slice(0, 40)) r.record_state = "duplicate";
+    const first = (await listManagedProjects()).filter((p) => p.status === "completed");
+    const second = (await listManagedProjects({ finishedPage: 1 })).filter((p) => p.status === "completed");
+    expect(first).toHaveLength(MANAGED_PROJECTS_BUCKET_LIMIT);
+    expect(second).toHaveLength(110 - MANAGED_PROJECTS_BUCKET_LIMIT);
+    expect(new Set([...first, ...second].map((p) => p.id)).size).toBe(110);
+  });
+
+  it("reports real, uncapped counts per bucket", async () => {
+    seed(180, 10);
+    expect(await countManagedProjects()).toEqual({ active: 10, archived: 180 });
+  });
+});

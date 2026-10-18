@@ -35,6 +35,15 @@ export interface SpineCounts {
   readonly bookingResponsesNew: number;
   /** Pending company/agency invitations addressed to this user's email. */
   readonly pendingInvitations: number;
+  /** GOVERNANCE invitations addressed to this person — `company_memberships`
+   *  rows in status `invited`, read through the caller-scoped
+   *  `membership_my_invitations_v1` (the SAME read the Activity Setup Hub
+   *  renders its panel from). A roster invitation (above) is employment; this
+   *  one is a seat in the organization's governance (owner / admin / manager
+   *  / member) — the two truths stay separate (doctrine, membership ≠
+   *  engagement). Accepting or declining IS what clears it; 0 while the
+   *  membership schema is unapplied. */
+  readonly pendingMembershipInvitations: number;
   /** Open work tasks needing attention (overdue or blocked) for the caller
    *  (assignee or creator). State-derived like pending bookings — resolving
    *  or rescheduling the task IS what clears it.
@@ -71,6 +80,29 @@ export interface SpineCounts {
    *  approving or rejecting IS what clears it. No seen-marker exists or is
    *  needed. */
   readonly pendingAbsenceReviews: number;
+  /** CLIENT side of the agency ↔ client bridge (2026-09-24): connection
+   *  invitations addressed to this person's e-mail still `pending` — a
+   *  staffing agency is waiting on an answer. Accepting or declining on the
+   *  partners door IS what clears it (state-derived like pending-bookings;
+   *  no seen marker). 0 for people with no company workspace and 0 for a
+   *  staffing agency (it is never the invited side of its own bridge). */
+  readonly pendingConnectionInvites: number;
+  /** AGENCY side: requests a connected client shared with this agency that
+   *  carry no open or accepted offer from it yet — the client is waiting on
+   *  a candidate. Offering one on the partners door clears it; a withdrawn
+   *  or declined offer makes the share wait again. 0 for non-agencies. */
+  readonly sharedRequestsAwaitingOffer: number;
+  /** CLIENT side: agency candidate offers on this company's requests still
+   *  `offered` — awaiting the client's own decision on its scouting page,
+   *  where accepting or declining clears it. Offer DECISIONS (the agency
+   *  learning it was accepted / declined) are deliberately NOT a spine
+   *  count: a terminal state never clears by visiting and no seen marker
+   *  exists — that fact belongs to the durable notification_events channel. */
+  readonly openCandidateOffers: number;
+  /** CLIENT side: team / brigade offers on this company's own needs still
+   *  `offered` — accepting or declining on the need's scouting page clears
+   *  it (state-derived, like openCandidateOffers). 0 for everyone else. */
+  readonly openTeamOffers: number;
 }
 
 export interface SpineSignalDef {
@@ -120,6 +152,28 @@ export const SPINE_SIGNALS: readonly SpineSignalDef[] = [
     count: (c) => c.pendingInvitations,
   },
   {
+    id: "pending-membership-invitations",
+    type: "pending_membership_invitations",
+    // The INVITEE's own surface. An invitee holds no company role and no
+    // membership yet, so the inviting organization's Settings door (where
+    // its members are administered) cannot be the clearing surface — it is
+    // gated. The Activity Setup Hub renders the invitations panel for every
+    // authenticated person, and accepting or declining there clears the
+    // count. No featureKey: the hub is not a primary-nav tab.
+    href: "/dashboard/start",
+    count: (c) => c.pendingMembershipInvitations,
+  },
+  {
+    id: "pending-connection-invites",
+    type: "pending_connection_invites",
+    // A staffing agency is waiting on this company's answer. The partners
+    // door carries the accept / decline controls, so answering there IS
+    // what clears it. No featureKey: partners is a door inside the company
+    // workspace, not a primary-nav tab (the badge stays on the company card).
+    href: "/dashboard/company/partners",
+    count: (c) => c.pendingConnectionInvites,
+  },
+  {
     id: "unread-messages",
     type: "unread_messages",
     href: "/dashboard/communication",
@@ -149,6 +203,36 @@ export const SPINE_SIGNALS: readonly SpineSignalDef[] = [
     type: "booking_responses",
     href: "/dashboard/bookings",
     count: (c) => c.bookingResponsesNew,
+  },
+  {
+    id: "shared-requests-awaiting-offer",
+    type: "shared_requests_awaiting_offer",
+    // A connected client shared a request and this agency has not offered
+    // anyone yet — offering a roster worker on the partners door clears it
+    // (state-derived; a withdrawn offer, or a placement the worker declined /
+    // that ended, makes it wait again — `sharedNeedsAwaitingWorker`). No featureKey,
+    // same reasoning as the connection invites above.
+    href: "/dashboard/company/partners",
+    count: (c) => c.sharedRequestsAwaitingOffer,
+  },
+  {
+    id: "open-candidate-offers",
+    type: "open_candidate_offers",
+    // An agency proposed a candidate for one of this company's requests and
+    // the company has not decided — accepting or declining on its own
+    // scouting page clears it. No featureKey: scouting is a door inside the
+    // company workspace.
+    href: "/dashboard/company/scouting",
+    count: (c) => c.openCandidateOffers,
+  },
+  {
+    id: "open-team-offers",
+    type: "open_team_offers",
+    // A brigade offered itself as one unit against one of this company's
+    // needs. The scouting page opens that need by default (most offers
+    // first), where accepting or declining clears it.
+    href: "/dashboard/company/scouting",
+    count: (c) => c.openTeamOffers,
   },
   {
     id: "open-task-attention",

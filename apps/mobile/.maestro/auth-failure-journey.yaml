@@ -1,10 +1,14 @@
-# iOS runtime JOURNEY proof — the flow behind IOS_RUNTIME_JOURNEY_PROVEN.
+# Runtime JOURNEY proof — the flow behind IOS_RUNTIME_JOURNEY_PROVEN and
+# ANDROID_RUNTIME_JOURNEY_PROVEN. One flow, both platforms (same appId).
 #
-# Runs in CI (.github/workflows/ios.yml) against a Release simulator build
-# whose bundle was compiled with deterministic bad-network configuration
+# iOS (.github/workflows/ios.yml): a Release simulator build whose bundle was
+# compiled with deterministic bad-network configuration
 # (EXPO_PUBLIC_SUPABASE_URL=https://example.supabase.co, placeholder key,
-# EXPO_PUBLIC_API_BASE_URL=https://example.invalid). No real backend is ever
-# reached; no secret exists anywhere in this proof.
+# EXPO_PUBLIC_API_BASE_URL=https://example.invalid) — no backend is reached.
+# Android (.github/workflows/android.yml): a Release APK built with the
+# production PUBLIC config (anon key only); the fictional credentials below
+# are REJECTED by the real auth server, which surfaces the same failure block.
+# No secret exists anywhere in either proof.
 #
 # What each stage proves, beyond the old process-liveness smoke:
 #   1. The auth screen actually RENDERS — a blank white screen used to pass
@@ -43,6 +47,14 @@ name: auth-failure-journey
 - tapOn:
     id: "password"
 - inputText: "not-a-real-password-1"
+# Android only: the form's KeyboardAvoidingView has no behaviour on Android, so
+# the soft keyboard can cover the submit button. Maestro's Android hideKeyboard
+# is a BACK press while the keyboard is up — no swipe, no navigation.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
 - tapOn:
     id: "submit"
 

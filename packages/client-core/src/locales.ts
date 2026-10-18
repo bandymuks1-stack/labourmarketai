@@ -58,7 +58,8 @@ export type Locale = (typeof LOCALES)[number];
  * verified — the honesty rule (doctrine §7.4) applies to a phone exactly as
  * it applies to a browser.
  */
-export const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+// PL activated 2026-09-20 (owner approval, acquisition loop P0) — mirrors apps/web/lib/i18n/config.ts.
+export const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 export type ActiveLocale = (typeof ACTIVE_LOCALES)[number];
 

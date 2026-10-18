@@ -11,8 +11,11 @@
  * lands in the append-only `worker_document_events` audit. No file upload
  * exists yet — the RPC carries facts about a document the worker HOLDS, and
  * the page says so honestly (`uploadNote`). Degrades fail-closed: while the
- * migration is unapplied (production today) the RPC is absent and the action
- * returns `needs_migration` — never a fake success.
+ * migration is unapplied the RPC is absent and the action returns
+ * `needs_migration` — never a fake success. That is a fresh-database branch,
+ * NOT production: `upsert_worker_document` is present there (verified
+ * 2026-09-14). This line used to name production as the place it was
+ * missing from, which had stopped being true.
  */
 
 import { revalidatePath } from "next/cache";

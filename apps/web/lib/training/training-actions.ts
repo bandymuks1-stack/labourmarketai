@@ -14,6 +14,7 @@ import {
   noticeForTrainingOutcome,
   type TrainingNotice,
 } from "@/lib/training/training-model";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Training & Certification write actions (v1).
@@ -99,6 +100,7 @@ async function callRpc(
 
 /** Org owner/admin authors a reusable programme. */
 export async function createTrainingProgramAction(formData: FormData): Promise<void> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const locale = readLocale(formData);
   const org = await requireEmployerCompany();
   if (!org.ok) finish(locale, "not_authorized");

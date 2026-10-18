@@ -13,7 +13,7 @@ import { chromium } from "@playwright/test";
 
 const BASE = process.argv[2] ?? "http://localhost:3000";
 
-const FULL_LOCALES = ["nl", "de"] as const;
+const FULL_LOCALES = ["nl", "de", "pl"] as const; // PL activated 2026-09-20
 const LIGHT_LOCALES = ["lt", "en", "ru"] as const;
 const FULL_PATHS = ["", "/for-workers", "/for-companies", "/company-need", "/pricing", "/auth/signup", "/worker-intake", "/about", "/for-agencies"];
 const LIGHT_PATHS = ["", "/for-workers", "/pricing", "/company-need"];
@@ -66,7 +66,7 @@ async function main() {
               e.getAttribute("hreflang"),
             ),
           );
-          for (const need of ["lt", "en", "ru", "nl", "de", "x-default"]) {
+          for (const need of ["lt", "en", "ru", "nl", "de", "pl", "x-default"]) {
             if (!langs.includes(need)) {
               failures.push(`${viewport.name} ${url}: hreflang missing ${need} (got ${langs.join(",")})`);
               break;

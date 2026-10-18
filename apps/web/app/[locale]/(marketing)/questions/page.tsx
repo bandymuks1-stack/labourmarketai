@@ -4,7 +4,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { publishedCategories } from "@/lib/answer-engine/publishing";
-import { buildStaticQuestionsMetadata, breadcrumbJsonLd, organizationJsonLd } from "@/lib/answer-engine/answer-seo";
+import { buildStaticQuestionsMetadata, breadcrumbJsonLd } from "@/lib/answer-engine/answer-seo";
 import { CHROME, CATEGORY_LABELS, pickL } from "@/lib/answer-engine/chrome";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 
@@ -31,7 +31,8 @@ export default async function QuestionsHub({
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }} />
+      {/* Organization + WebSite JSON-LD come from app/[locale]/layout.tsx —
+          a second Organization node here was a duplicate entity. */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
+import { WorkLifecycleSection } from "@/components/marketing/work-lifecycle-section";
 import { BenefitCards } from "@/components/marketing/benefit-cards";
 
 export async function generateMetadata({
@@ -13,8 +14,6 @@ export async function generateMetadata({
 }
 import { PageHero } from "@/components/marketing/page-hero";
 import { RoleEnrichment } from "@/components/marketing/role-enrichment";
-import { ExamplePreviewFrame } from "@/components/marketing/example-preview-frame";
-import { DemandPreviewCard } from "@/components/app/demand-preview-card";
 
 export default async function ForCompaniesPage({
   params,
@@ -38,16 +37,13 @@ export default async function ForCompaniesPage({
         ctaKind="companyNeed"
         ctaLabel={t("cta")}
         ctaSource="companies_hero"
+        ctaAudience="companies"
       />
+      <WorkLifecycleSection audience="companies" />
       <BenefitCards items={benefits} />
       <RoleEnrichment
         root="companies"
         previewKey="demand"
-        preview={
-          <ExamplePreviewFrame>
-            <DemandPreviewCard id="demand.featured.1" />
-          </ExamplePreviewFrame>
-        }
         ctaSource="companies_cta"
         ctaKind="signup"
       />

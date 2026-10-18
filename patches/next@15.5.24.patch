@@ -1,0 +1,96 @@
+diff --git a/dist/build/templates/app-page.js b/dist/build/templates/app-page.js
+index e69cf2b2c0496351f73255552fe07acd306f6f22..1b6b4160580cee4e37071eac0d0c17fbbd9cb53b 100644
+--- a/dist/build/templates/app-page.js
++++ b/dist/build/templates/app-page.js
+@@ -490,6 +490,12 @@ async function handler(req, res, ctx) {
+             if (isOnDemandRevalidate && (fallbackMode !== _fallback.FallbackMode.NOT_FOUND || previousCacheEntry)) {
+                 fallbackMode = _fallback.FallbackMode.BLOCKING_STATIC_RENDER;
+             }
++            // labourmarketai patch: a path PRERENDERED at build time is a known
++            // fallback: false path. A tag/path invalidation makes the cache return
++            // no entry at all, so regenerate it instead of the no-fallback 404.
++            if (fallbackMode === _fallback.FallbackMode.NOT_FOUND && isPrerendered) {
++                fallbackMode = _fallback.FallbackMode.BLOCKING_STATIC_RENDER;
++            }
+             if (!minimalMode && fallbackMode !== _fallback.FallbackMode.BLOCKING_STATIC_RENDER && staticPathKey && !didRespond && !isDraftMode && pageIsDynamic && (isProduction || !isPrerendered)) {
+                 // if the page has dynamicParams: false and this pathname wasn't
+                 // prerendered trigger the no fallback handling
+diff --git a/dist/compiled/react-dom/cjs/react-dom-client.development.js b/dist/compiled/react-dom/cjs/react-dom-client.development.js
+index 4376913076151ad78dcc4059ad4152fad25478da..4995c843e0dcb901efc61832ddb0e8728bd08885 100644
+--- a/dist/compiled/react-dom/cjs/react-dom-client.development.js
++++ b/dist/compiled/react-dom/cjs/react-dom-client.development.js
+@@ -16469,8 +16469,9 @@
+           (workInProgressRootRenderLanes & 62914560) ===
+             workInProgressRootRenderLanes &&
+           now$1() - globalMostRecentFallbackTime < FALLBACK_THROTTLE_MS)
+-          ? (executionContext & RenderContext) === NoContext &&
+-            prepareFreshStack(root, 0)
++          ? (executionContext & RenderContext) === NoContext
++            ? prepareFreshStack(root, 0)
++            : (workInProgressRootPingedLanes |= pingedLanes)
+           : (workInProgressRootPingedLanes |= pingedLanes),
+         workInProgressSuspendedRetryLanes === workInProgressRootRenderLanes &&
+           (workInProgressSuspendedRetryLanes = 0));
+diff --git a/dist/compiled/react-dom/cjs/react-dom-client.production.js b/dist/compiled/react-dom/cjs/react-dom-client.production.js
+index 755076a5cf15273f024c18fdc6a8805f1e36860b..8ba86221b864cfa4b416dec9af6023219835eab9 100644
+--- a/dist/compiled/react-dom/cjs/react-dom-client.production.js
++++ b/dist/compiled/react-dom/cjs/react-dom-client.production.js
+@@ -11733,7 +11733,9 @@ function pingSuspendedRoot(root, wakeable, pingedLanes) {
+       (workInProgressRootRenderLanes & 62914560) ===
+         workInProgressRootRenderLanes &&
+       300 > now() - globalMostRecentFallbackTime)
+-      ? 0 === (executionContext & 2) && prepareFreshStack(root, 0)
++      ? 0 === (executionContext & 2)
++        ? prepareFreshStack(root, 0)
++        : (workInProgressRootPingedLanes |= pingedLanes)
+       : (workInProgressRootPingedLanes |= pingedLanes),
+     workInProgressSuspendedRetryLanes === workInProgressRootRenderLanes &&
+       (workInProgressSuspendedRetryLanes = 0));
+diff --git a/dist/compiled/react-dom/cjs/react-dom-profiling.development.js b/dist/compiled/react-dom/cjs/react-dom-profiling.development.js
+index 43d0363849598f796873fffaf33117d54b76de19..a03eab081f3b7250ca271b28955b0901908590c0 100644
+--- a/dist/compiled/react-dom/cjs/react-dom-profiling.development.js
++++ b/dist/compiled/react-dom/cjs/react-dom-profiling.development.js
+@@ -16477,8 +16477,9 @@
+           (workInProgressRootRenderLanes & 62914560) ===
+             workInProgressRootRenderLanes &&
+           now$1() - globalMostRecentFallbackTime < FALLBACK_THROTTLE_MS)
+-          ? (executionContext & RenderContext) === NoContext &&
+-            prepareFreshStack(root, 0)
++          ? (executionContext & RenderContext) === NoContext
++            ? prepareFreshStack(root, 0)
++            : (workInProgressRootPingedLanes |= pingedLanes)
+           : (workInProgressRootPingedLanes |= pingedLanes),
+         workInProgressSuspendedRetryLanes === workInProgressRootRenderLanes &&
+           (workInProgressSuspendedRetryLanes = 0));
+diff --git a/dist/compiled/react-dom/cjs/react-dom-profiling.profiling.js b/dist/compiled/react-dom/cjs/react-dom-profiling.profiling.js
+index 85185b07d38d122ada8ed308523b181da102ccad..3001351b0223532891beb0dff9c26af8172878c4 100644
+--- a/dist/compiled/react-dom/cjs/react-dom-profiling.profiling.js
++++ b/dist/compiled/react-dom/cjs/react-dom-profiling.profiling.js
+@@ -12404,7 +12404,9 @@ function pingSuspendedRoot(root, wakeable, pingedLanes) {
+       (workInProgressRootRenderLanes & 62914560) ===
+         workInProgressRootRenderLanes &&
+       300 > now$1() - globalMostRecentFallbackTime)
+-      ? 0 === (executionContext & 2) && prepareFreshStack(root, 0)
++      ? 0 === (executionContext & 2)
++        ? prepareFreshStack(root, 0)
++        : (workInProgressRootPingedLanes |= pingedLanes)
+       : (workInProgressRootPingedLanes |= pingedLanes),
+     workInProgressSuspendedRetryLanes === workInProgressRootRenderLanes &&
+       (workInProgressSuspendedRetryLanes = 0));
+diff --git a/dist/esm/build/templates/app-page.js b/dist/esm/build/templates/app-page.js
+index 608080693a2ee86c94438eacaa7ca0345c79de61..70a2429778b1a3a0c1bafdd6f650659c94d90fc4 100644
+--- a/dist/esm/build/templates/app-page.js
++++ b/dist/esm/build/templates/app-page.js
+@@ -412,6 +412,12 @@ export async function handler(req, res, ctx) {
+             if (isOnDemandRevalidate && (fallbackMode !== FallbackMode.NOT_FOUND || previousCacheEntry)) {
+                 fallbackMode = FallbackMode.BLOCKING_STATIC_RENDER;
+             }
++            // labourmarketai patch: a path PRERENDERED at build time is a known
++            // fallback: false path. A tag/path invalidation makes the cache return
++            // no entry at all, so regenerate it instead of the no-fallback 404.
++            if (fallbackMode === FallbackMode.NOT_FOUND && isPrerendered) {
++                fallbackMode = FallbackMode.BLOCKING_STATIC_RENDER;
++            }
+             if (!minimalMode && fallbackMode !== FallbackMode.BLOCKING_STATIC_RENDER && staticPathKey && !didRespond && !isDraftMode && pageIsDynamic && (isProduction || !isPrerendered)) {
+                 // if the page has dynamicParams: false and this pathname wasn't
+                 // prerendered trigger the no fallback handling

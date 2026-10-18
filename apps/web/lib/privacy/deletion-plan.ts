@@ -50,6 +50,10 @@ export const DELETION_PLAN_CLASSES = [
   "messages",
   "inquiries",
   "notifications",
+  // PER-11 (owner approval 2026-09-15). The worker's own external profile
+  // links are personal data and were absent from this accounting, so the
+  // deletion preview under-reported what a deletion would remove.
+  "externalProfiles",
 ] as const;
 export type DeletionPlanClass = (typeof DELETION_PLAN_CLASSES)[number];
 
@@ -135,6 +139,7 @@ export async function buildDeletionPlanPreview(
     engagements,
     messages,
     inquiries,
+    externalProfiles,
   ] = await Promise.all([
     headCount(supabase, "profiles", (q) => asAny(q).eq("id", profileId)),
     headCount(supabase, "journal_entries", byWorker("worker_id")),
@@ -162,6 +167,12 @@ export async function buildDeletionPlanPreview(
     headCount(supabase, "customer_requests", (q) =>
       asAny(q).eq("profile_id", profileId),
     ),
+    // Counted at the SAME access level as every other class — RLS decides.
+    // Before the PER-11 migration is applied the relation does not exist and
+    // headCount degrades to null ("not countable"), never to a fabricated 0.
+    // Disconnected rows are counted too: disconnect is soft, so those rows
+    // still exist and a deletion still removes them.
+    headCount(supabase, "worker_external_profiles", byWorker("worker_id")),
   ]);
 
   // Account = the profiles row + its worker rows (one cascade root).
@@ -179,6 +190,10 @@ export async function buildDeletionPlanPreview(
     { dataClass: "messages", rowCount: messages, plannedAction: "anonymize_detach", basis: "E6" },
     { dataClass: "skills", rowCount: skills, plannedAction: "delete", basis: "E7" },
     { dataClass: "skillClaims", rowCount: skillClaims, plannedAction: "delete", basis: "E7" },
+    // DELETE via the existing `worker_id -> workers(id) on delete cascade`.
+    // The cascade is the actual mechanism and is unchanged; this row only
+    // makes the preview tell the truth about what that cascade will remove.
+    { dataClass: "externalProfiles", rowCount: externalProfiles, plannedAction: "delete", basis: "E7" },
     { dataClass: "account", rowCount: account, plannedAction: "delete", basis: "E7" },
     { dataClass: "notifications", rowCount: null, plannedAction: "delete", basis: "E8" },
   ];

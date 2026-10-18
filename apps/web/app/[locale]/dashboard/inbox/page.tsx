@@ -11,12 +11,15 @@ import {
 } from "@/components/app/evidence-status-strip";
 import { EmptyState } from "@/components/app/empty-state";
 import { createClient } from "@/lib/supabase/server";
+import { readCounterpartyQueue } from "@/lib/journal/counterparty-review";
+import { queueBucket } from "@/lib/journal/counterparty-review-model";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 import {
   WORKER_NAME_FIELDS,
   resolveWorkerName,
   type WorkerNameRow,
 } from "@/lib/journal/worker-name";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 // Structured-field slugs that have a localized label; others fall back to slug.
 const FIELD_LABEL_SLUGS = new Set(["site_name", "tile_type", "area_done"]);
@@ -46,14 +49,20 @@ export default async function InboxPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  // Gated reviewable set (migration 0034). Degrades to an empty inbox until the
-  // RPC is applied (42883) — honest, no mock data.
+  // Gated reviewable set (migration 0034, applied). A failed RPC — an RLS or
+  // network failure, or the function missing (42883) — is UNKNOWN, not an
+  // empty inbox: "nothing to review" is a claim of completeness the page can
+  // only make after a read that answered (SEP-7). `loadFailed` renders an
+  // honest "could not load" state instead.
   let reviewableIds: string[] = [];
+  let loadFailed = false;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: idRows } = await (supabase as any).rpc(
+  const { data: idRows, error: idError } = await (supabase as any).rpc(
     "reviewable_journal_entry_ids",
   );
-  if (Array.isArray(idRows)) {
+  if (idError) {
+    loadFailed = true;
+  } else if (Array.isArray(idRows)) {
     reviewableIds = idRows
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((r: any) =>
@@ -64,17 +73,52 @@ export default async function InboxPage({
       .filter((v: unknown): v is string => typeof v === "string");
   }
 
+  // CLIENT REVIEW is its own surface (/dashboard/inbox/counterparty): entries
+  // submitted to this caller as a client / customer / contracting party are
+  // decided there (accept / request correction / dispute), never as an
+  // employer confirmation with skill verification. The employer set above is
+  // employer-only (20261003150550); this only counts what waits over there.
+  const counterpartyQueue = await readCounterpartyQueue(supabase);
+  const counterpartyToDecide = (counterpartyQueue ?? []).filter(
+    (r) => queueBucket(r) === "to_decide",
+  ).length;
+
   let pending: InboxEntry[] = [];
-  if (reviewableIds.length > 0) {
-    const { data: rows } = await supabase
+  if (!loadFailed && reviewableIds.length > 0) {
+    // LEFT join on workers, never !inner (walk 2026-10-11): a learner's
+    // workers row is hidden from their institution by least privilege
+    // (can_view_worker: student grants no worker visibility), so an inner join
+    // dropped every student entry the institution may read AND review. The
+    // name falls back to NO_READABLE_NAME; the entry itself stays reviewable.
+    const { data: rows, error: rowsError } = await supabase
       .from("journal_entries")
       .select(
-        `id, original_text, created_at, worker_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers!inner(${WORKER_NAME_FIELDS})`,
+        `id, original_text, created_at, worker_id, engagement_contexts(organization_id), journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers(${WORKER_NAME_FIELDS})`,
       )
       .in("id", reviewableIds)
       .order("created_at", { ascending: true });
+    // The ids answered but the entries did not: the manager must not be
+    // shown an empty queue over rows that exist.
+    if (rowsError) loadFailed = true;
 
-    const unconfirmed = rows ?? [];
+    const unconfirmed = rowsError ? [] : (rows ?? []);
+
+    // WHO CAN ACTUALLY DECIDE. Seeing the queue is `manages_organization()`;
+    // deciding needs an ACTIVE manager/owner/external_manager engagement in the
+    // entry's organization (the RPC's own `no_reviewer_engagement` rule). A
+    // manager without it used to be shown live "Approve" buttons that refused
+    // on click. The read below mirrors that predicate so the card can say so up
+    // front; the RPC stays the authority, and a failed read leaves the buttons
+    // (never hides an action on a guess).
+    const { data: engRows, error: engError } = await supabase
+      .from("engagement_contexts")
+      .select("organization_id")
+      .eq("profile_id", user.id)
+      .eq("status", "active")
+      .in("relationship_slug", ["manager", "owner", "external_manager"]);
+    const reviewerOrgs = new Set(
+      (engRows ?? []).map((e) => e.organization_id).filter(Boolean) as string[],
+    );
 
     // Batch the workers' declared skills WITH ids + verified state — the manager
     // picks which of these the entry proves, to confirm/verify them.
@@ -99,9 +143,40 @@ export default async function InboxPage({
       }
     }
 
+    // A manager confirms what THIS entry shows, never the worker's whole skill
+    // list (walk 2026-10-11: every unverified skill of the worker was offered,
+    // pre-ticked, so one submit verified skills detected in unrelated entries).
+    // Only skills linked to the entry are offered; unreadable links → none.
+    const linksByEntry = new Map<string, Set<string>>();
+    const entryIds = unconfirmed.map((r) => r.id);
+    if (entryIds.length > 0) {
+      const { data: links, error: linksError } = await supabase
+        .from("journal_entry_skills")
+        .select("journal_entry_id, skill_id")
+        .in("journal_entry_id", entryIds);
+      if (!linksError) {
+        for (const l of links ?? []) {
+          if (!l.journal_entry_id || !l.skill_id) continue;
+          const set = linksByEntry.get(l.journal_entry_id) ?? new Set<string>();
+          set.add(l.skill_id);
+          linksByEntry.set(l.journal_entry_id, set);
+        }
+      }
+    }
+
     pending = unconfirmed.map((r) => {
       const workerName = resolveWorkerName(r.workers as WorkerNameRow);
-      const metrics = (r.journal_entry_metrics ?? []).map((m) => {
+      // The reviewer sees only metrics that have a human label. The parser's
+      // provenance rows (work_date, parsed_fragment, fragment_*, pipeline_
+      // version …) stay in the database but are never shown as raw slugs — the
+      // work date is carried separately and rendered as the entry's date.
+      const workDate =
+        (r.journal_entry_metrics ?? []).find(
+          (m) => m.metric_slug === "work_date" && /^\d{4}-\d{2}-\d{2}$/.test(m.value_text ?? ""),
+        )?.value_text ?? null;
+      const metrics = (r.journal_entry_metrics ?? [])
+        .filter((m) => FIELD_LABEL_SLUGS.has(m.metric_slug))
+        .map((m) => {
         const label = FIELD_LABEL_SLUGS.has(m.metric_slug)
           ? tField(`field.${m.metric_slug}`)
           : m.metric_slug;
@@ -131,8 +206,19 @@ export default async function InboxPage({
         originalText: r.original_text,
         workerName,
         createdAt: r.created_at,
+        workDate,
+        canApprove: engError
+          ? true
+          : reviewerOrgs.has(
+              ((r as unknown as { engagement_contexts?: { organization_id?: string | null } | null })
+                .engagement_contexts?.organization_id ?? "") as string,
+            ),
         metrics,
-        skills: r.worker_id ? (skillsByWorker.get(r.worker_id) ?? []) : [],
+        skills: r.worker_id
+          ? (skillsByWorker.get(r.worker_id) ?? []).filter((s) =>
+              linksByEntry.get(r.id)?.has(s.id),
+            )
+          : [],
         recognized,
         hours,
         certainty: depth.certainty,
@@ -148,11 +234,20 @@ export default async function InboxPage({
     .select("confirmation_scope");
   let autoConfirmedCount = 0;
   if (Array.isArray(confRows)) {
-    const scopes = confRows.map(
-      (r) =>
-        (r as { confirmation_scope?: { action?: string; decision?: string } | null })
-          .confirmation_scope ?? null,
-    );
+    // Employer decisions only: a client's acceptance is a different claim
+    // (CLIENT_ACCEPTED) and is counted on the client review surface.
+    const scopes = confRows
+      .map(
+        (r) =>
+          (r as {
+            confirmation_scope?: {
+              action?: string;
+              decision?: string;
+              authority?: { basis?: string } | null;
+            } | null;
+          }).confirmation_scope ?? null,
+      )
+      .filter((s) => s?.authority?.basis !== "counterparty");
     confirmedCount = scopes.filter(
       (s) => s?.decision === "approved" || s?.action === "confirm" || s?.action === "auto_confirm",
     ).length;
@@ -172,16 +267,16 @@ export default async function InboxPage({
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("inbox.title")}
-        </h1>
+        <PageTitle>{t("inbox.title")}</PageTitle>
         <div
           className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-secondary"
           data-testid="inbox-summary"
         >
           <span>
             {t("inbox.summary.pending")}:{" "}
-            <span className="font-semibold text-text-primary">{pending.length}</span>
+            <span className="font-semibold text-text-primary">
+              {loadFailed ? "—" : pending.length}
+            </span>
           </span>
           <span>
             {t("inbox.summary.confirmed")}:{" "}
@@ -221,6 +316,14 @@ export default async function InboxPage({
             {t("inbox.quick.openQuick")}
           </Link>
           <Link
+            href="/dashboard/inbox/counterparty"
+            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            data-testid="inbox-counterparty-link"
+          >
+            {t("counterparty.queue.openLink")}
+            {counterpartyToDecide > 0 ? ` (${counterpartyToDecide})` : ""}
+          </Link>
+          <Link
             href="/dashboard/inbox/report"
             className="w-fit text-xs font-medium text-brand-blue hover:underline"
             data-testid="inbox-report-link"
@@ -230,7 +333,15 @@ export default async function InboxPage({
         </div>
       </header>
 
-      {pending.length === 0 ? (
+      {loadFailed ? (
+        <p
+          role="alert"
+          className="rounded-md border border-state-warning/40 bg-state-warning/10 p-4 text-sm text-text-secondary"
+          data-testid="inbox-load-failed"
+        >
+          {t("inbox.loadFailed")}
+        </p>
+      ) : pending.length === 0 ? (
         <EmptyState
           testId="inbox-empty-state"
           title={t("inbox.emptyTitle")}

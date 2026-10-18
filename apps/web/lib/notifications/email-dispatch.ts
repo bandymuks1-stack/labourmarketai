@@ -41,6 +41,7 @@ import {
   isTransactionalEmailPathActive,
   sendTransactionalEmail,
 } from "@/lib/email/transactional";
+import { reserveEmailSend } from "@/lib/email/send-ledger-store";
 import { renderNotificationEmail } from "@/lib/email/notification-email";
 import {
   resolveChannelEnabled,
@@ -70,6 +71,8 @@ export type NotificationEmailDispatchOutcome =
   | { readonly kind: "not_configured" }
   | { readonly kind: "no_recipient_email" }
   | { readonly kind: "render_failed" }
+  /** Fan-out ceiling reached (email-send-guard.ts) — bell notification stands. */
+  | { readonly kind: "rate_limited" }
   | { readonly kind: "send_failed"; readonly reason: string };
 
 /** Greppable marker for a REAL send failure (provider refused / transport
@@ -80,7 +83,7 @@ export async function maybeDispatchNotificationEmail(
   admin: DbClient,
   input: Pick<
     NotificationEventInput,
-    "recipientProfileId" | "eventType" | "entityType"
+    "recipientProfileId" | "eventType" | "entityType" | "metadata"
   >,
   prefRows: readonly NotificationPreferenceRow[],
 ): Promise<NotificationEmailDispatchOutcome> {
@@ -99,21 +102,38 @@ export async function maybeDispatchNotificationEmail(
     // ran. No row / no value → tagged skip, never a guessed address.
     const { data, error } = await admin
       .from("profiles")
-      .select("email")
+      .select("email, locale")
       .eq("id", input.recipientProfileId)
       .maybeSingle();
-    const email =
-      !error && data ? ((data as { email?: string | null }).email ?? null) : null;
+    const row = !error && data ? (data as { email?: string | null; locale?: string | null }) : null;
+    const email = row?.email ?? null;
     if (!email || !email.includes("@")) {
       return { kind: "no_recipient_email" };
     }
 
-    // 4. Same copy as the bell, absolute canonical-origin deep link.
+    // 4. Same copy as the bell, absolute canonical-origin deep link — in the
+    // recipient's OWN stored locale (`profiles.locale`), with the row's safe
+    // render hints so a focused digest keeps its focus in the subject and
+    // the link. An unknown/absent locale falls back inside the renderer.
     const rendered = await renderNotificationEmail({
       eventType: input.eventType,
       entityType: input.entityType,
+      locale: row?.locale ?? undefined,
+      metadata: input.metadata,
     });
     if (!rendered) return { kind: "render_failed" };
+
+    // 4b. DURABLE fan-out ceiling (500 / org / 24h + 5 / recipient / 24h,
+    // atomic in the database - lib/email/durable-send-guard.ts). Unreadable
+    // store => fail open (loud warning) behind a per-instance backstop.
+    const slot = await reserveEmailSend({
+      recipientEmail: email,
+      recipientProfileId: input.recipientProfileId,
+      kind: "notification",
+    });
+    if (!slot.allowed) {
+      return { kind: "rate_limited" };
+    }
 
     // 5. Truthful adapter outcome — "sent" only on a provider 2xx.
     const result = await sendTransactionalEmail({

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { groupWorkAreas, UNKNOWN_WORK_AREA } from "@/lib/projects/work-areas";
 import {
   Activity,
   CalendarDays,
@@ -13,8 +14,20 @@ import {
   Users,
 } from "lucide-react";
 
+import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
+import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { getProjectStadium } from "@/lib/projects/stadium";
+import { ProjectCourseTrack } from "@/components/app/projects/project-course-track";
+import { deriveProjectCourse } from "@/lib/projects/project-course";
+import { ProjectWeekGoal } from "@/components/app/projects/project-week-goal";
+import { deriveWeeklyGoal } from "@/lib/projects/weekly-goal";
+import { listProjectTasks } from "@/lib/tasks/tasks";
+import { listProjectStages } from "@/lib/projects/stages";
+import { ProjectFirstStep } from "@/components/app/projects/project-first-step";
+import { ProjectTraceRegion } from "@/components/app/projects/project-trace";
+import { loadProjectTrace } from "@/lib/projects/project-trace-server";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
 import { WorkerProjectPanel } from "@/components/app/worker-project-panel";
 import {
@@ -22,10 +35,17 @@ import {
   formatProjectPlace,
 } from "@/lib/projects/location";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
+import { MessageButton } from "@/components/app/message-button";
 import { CountUp } from "@/components/app/today/count-up";
 import { ProjectWorkGallery } from "@/components/app/project-work-gallery";
+import { CounterpartyLinkPanel } from "@/components/app/counterparty-link-panel";
+import { readLinkCandidates } from "@/lib/journal/counterparty-review";
+import { ProjectHistoricalWork } from "@/components/app/project-historical-work";
+import { EvidenceMediaStrip } from "@/components/app/evidence-media-strip";
+import { ProjectLinkedDocuments } from "@/components/app/linked-documents";
 import { type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -43,10 +63,13 @@ const MANAGER_ROLES = new Set<Role>(["company", "agency"]);
  */
 export default async function ProjectStadiumPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ area?: string }>;
 }) {
   const { locale, id } = await params;
+  const { area: rawArea } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("projectOps.stadium");
   const tOps = await getTranslations("projectOps");
@@ -58,11 +81,9 @@ export default async function ProjectStadiumPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login`);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .single();
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
   const role = (profile?.active_role as Role) ?? "worker";
 
   // RC2 role-aware routing (F11): one canonical project route that branches
@@ -80,9 +101,7 @@ export default async function ProjectStadiumPage({
     }
     return (
       <div className="mx-auto flex w-full max-w-content flex-col gap-4">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("eyebrow")}
-        </h1>
+        <PageTitle>{t("eyebrow")}</PageTitle>
         <p
           className="card-border p-4 text-sm text-text-secondary"
           data-testid="stadium-not-authorized"
@@ -95,6 +114,9 @@ export default async function ProjectStadiumPage({
 
   const { ops, positions, entriesToday } = stadium;
   const hasTeam = ops.workers.length > 0;
+  // Workers with a real relationship here + their active counterparty link
+  // (null = unreadable, rendered as "could not load", never as "none").
+  const linkCandidates = await readLinkCandidates(supabase, id);
 
   // systemic-ux-project-v1: honest location status (no fake marker) + project
   // place line, reusing the signal-only market-map mappability rule.
@@ -125,17 +147,79 @@ export default async function ProjectStadiumPage({
     return t("positionUnknown");
   };
 
+  // ── WORK AREAS (premium project field, 2026-09-29) ──────────────────────
+  // People organized around the work: grouped by each person's PRIMARY
+  // profession — the fact the stadium already reads. An assignment carries
+  // no trade, so the grouping is named for what it is ("by primary
+  // profession") and a person with none sits in an explicit unknown area.
+  const UNKNOWN_AREA = UNKNOWN_WORK_AREA;
+  const areas = groupWorkAreas({
+    workers: ops.workers,
+    positions,
+    labelOf: (slug) => (tProf.has(slug) ? tProf(slug) : slug.replace(/-/g, " ")),
+    unknownLabel: t("areaUnknown"),
+  });
+  const selectedArea = areas.some((a) => a.key === rawArea) ? rawArea! : null;
+  const shownAreas = selectedArea ? areas.filter((a) => a.key === selectedArea) : areas;
+  const areaHref = (key: string | null) =>
+    `/${locale}/dashboard/projects/${id}${key ? `?area=${encodeURIComponent(key)}` : ""}#stadium-field`;
+  const AREA_TONES = [
+    "bg-brand-cyan/70",
+    "bg-brand-blue/70",
+    "bg-brand-violet/70",
+    "bg-brand-orange/70",
+    "bg-state-success/60",
+    "bg-brand-purple/70",
+  ];
+  const toneOf = (i: number, key: string) =>
+    key === UNKNOWN_AREA ? "bg-ink-500" : AREA_TONES[i % AREA_TONES.length];
+
+  // CONSOLIDATION (marker 20260930120000): a fragment says where it was merged
+  // and links there; a canonical project says how many rows it now includes.
+  // Both rows and all their records are kept.
+  const { canonicalOf, fragmentsOf } = await readProjectCanonicalMap(supabase, [id]);
+  const mergedInto = canonicalOf.get(id) ?? null;
+  const mergedIntoTitle = mergedInto
+    ? (((await supabase.from("projects").select("title").eq("id", mergedInto).maybeSingle()).data?.title as string | null) ?? null)
+    : null;
+  const mergedFragments = fragmentsOf.get(id)?.length ?? 0;
+
+  // The project course: the stages the manager's session reads (stage RLS),
+  // through the same model the assigned workers' view uses.
+  const [courseStages, courseToday, courseTasks] = await Promise.all([
+    listProjectStages(id).catch(() => null),
+    viewerWorkToday(),
+    listProjectTasks(id).catch(() => null),
+  ]);
+  const stadiumCourse = deriveProjectCourse(courseStages, courseToday.todayIso);
+  // This week's goal over every task the manager's session reads.
+  const stadiumWeekGoal = deriveWeeklyGoal(courseTasks, { todayIso: courseToday.todayIso, scope: "project" });
+  // KAS PASIKEITĖ PROJEKTE: the team's chain as counts + the project's own
+  // facts, over the stages and tasks this page already read.
+  const projectTrace = await loadProjectTrace(id, "manager", courseStages, courseTasks);
+
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="project-stadium">
       {/* ── Arena header: real project facts only ── */}
       <header className="flex flex-col gap-2">
-        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-brand-cyan">
+        <span className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <Activity className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {ops.project.title ?? tOps("untitledProject")}
-        </h1>
+        <PageTitle>{ops.project.title ?? tOps("untitledProject")}</PageTitle>
+        {mergedInto ? (
+          <p className="text-sm text-text-secondary" data-testid="project-merged-into">
+            {t("merged.into")}{" "}
+            <Link href={`/${locale}/dashboard/projects/${mergedInto}`} className="font-medium text-brand-blue hover:underline">
+              {mergedIntoTitle ?? t("merged.canonical")} →
+            </Link>
+          </p>
+        ) : null}
+        {mergedFragments > 0 ? (
+          <p className="text-meta text-text-muted" data-testid="project-merged-fragments">
+            {t("merged.includes", { count: mergedFragments })}
+          </p>
+        ) : null}
         <div className="flex flex-wrap gap-2">
           {ops.project.city ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
@@ -152,6 +236,12 @@ export default async function ProjectStadiumPage({
           <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
             <Users className="h-3 w-3" aria-hidden />
             {t("fieldCount", { n: ops.counters.totalAssigned })}
+            {(ops.counters.viaTeam ?? 0) > 0 ? (
+              <span data-testid="field-via-team">
+                {" · "}
+                {t("fieldViaTeam", { n: ops.counters.viaTeam ?? 0 })}
+              </span>
+            ) : null}
           </span>
         </div>
 
@@ -169,7 +259,209 @@ export default async function ProjectStadiumPage({
         >
           {t("openOps")} →
         </Link>
+
+        {/* THE FORMATION — who is on this project, by work area: the real
+            count per primary profession as one band, each segment a door
+            into that area of the field below. Counts, never a score. */}
+        {hasTeam ? (
+          <div
+            className="mt-2 flex flex-col gap-3 rounded-2xl border border-ink-600 bg-surface-1/60 p-4 sm:p-6"
+            data-testid="stadium-formation"
+          >
+            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+              <div className="flex flex-col">
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                  {place ?? t("teamLabel")}
+                </span>
+                <span className="font-display text-4xl font-bold leading-none tracking-tightest text-text-primary tabular-nums sm:text-5xl">
+                  {ops.workers.length}
+                </span>
+              </div>
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                {t("areaBasis")}
+              </span>
+            </div>
+            <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-ink-800" aria-hidden>
+              {areas.map((a, i) => (
+                <span
+                  key={a.key}
+                  className={cn("rhythm-grow-x h-full border-r border-ink-900 last:border-r-0", toneOf(i, a.key))}
+                  style={{ width: `${(a.workers.length / ops.workers.length) * 100}%`, animationDelay: `${i * 60}ms` }}
+                />
+              ))}
+            </div>
+            <nav aria-label={t("areasLabel")} className="flex flex-wrap gap-2" data-testid="stadium-areas">
+              <Link
+                href={areaHref(null)}
+                aria-current={selectedArea === null ? "true" : undefined}
+                className={cn(
+                  "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 font-mono text-meta uppercase tracking-label transition-colors",
+                  selectedArea === null
+                    ? "border-brand-blue text-brand-blue"
+                    : "border-ink-500 text-text-secondary hover:border-brand-blue",
+                )}
+              >
+                {t("allAreas")}
+                <span className="tabular-nums text-text-primary">{ops.workers.length}</span>
+              </Link>
+              {areas.map((a, i) => (
+                <Link
+                  key={a.key}
+                  href={areaHref(a.key)}
+                  aria-current={selectedArea === a.key ? "true" : undefined}
+                  data-testid={`stadium-area-${a.key}`}
+                  className={cn(
+                    "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm transition-colors",
+                    selectedArea === a.key
+                      ? "border-brand-blue text-text-primary"
+                      : "border-ink-500 text-text-secondary hover:border-brand-blue",
+                  )}
+                >
+                  <span aria-hidden className={cn("size-2 rounded-full", toneOf(i, a.key))} />
+                  {a.label}
+                  <span className="font-mono tabular-nums text-text-primary">{a.workers.length}</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
+        ) : null}
       </header>
+
+      {/* ── THE PROJECT COURSE (Future Experience C): the same route the
+            assigned workers see — one shared goal for the whole team. ── */}
+      <ProjectCourseTrack course={stadiumCourse} locale={locale} />
+      <ProjectWeekGoal goal={stadiumWeekGoal} locale={locale} />
+      {/* Where the course or the week has nothing to draw: the REAL first
+          step (the stages panel, the task form), never a decorative screen. */}
+      <ProjectFirstStep
+        projectId={id}
+        stagesMissing={stadiumCourse.kind === "none"}
+        tasksMissing={stadiumWeekGoal.kind === "none"}
+      />
+      <ProjectTraceRegion trace={projectTrace} locale={locale} reviewHref="/dashboard/inbox/quick" />
+
+      {/* ── THE FIELD comes first: the people around the work are what a
+            manager opens this page for. Location, communication and the
+            pulses follow — same sections, same facts. ── */}
+      {/* ── THE FIELD: real assigned workers as positioned cards ── */}
+      <section id="stadium-field" className="flex scroll-mt-20 flex-col gap-3" data-testid="stadium-field">
+        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("fieldTitle")}
+        </h2>
+        {hasTeam ? (
+          <div className="flex flex-col gap-6">
+          {shownAreas.map((area) => (
+          <div key={area.key} className="flex flex-col gap-3" data-testid={`stadium-area-block-${area.key}`}>
+            <h3 className="flex items-baseline gap-3 border-b border-ink-600 pb-2">
+              <span className="font-display text-lg font-semibold text-text-primary">{area.label}</span>
+              <span className="font-mono text-sm tabular-nums text-text-muted">{area.workers.length}</span>
+            </h3>
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {area.workers.map((w) => (
+              <li
+                key={w.workerId}
+                className="card-border rise-in flex flex-col gap-3 p-4"
+                data-testid="stadium-player"
+              >
+                {/* F2/RC2: a fielded worker card opens the permitted person
+                    page (fail-closed by can_view_worker RLS there). */}
+                <Link
+                  href={`/${locale}/dashboard/people/${w.workerId}`}
+                  className="group flex items-center gap-3"
+                  data-testid={`stadium-player-open-${w.workerId}`}
+                >
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "flex h-16 w-14 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
+                      w.confirmedSkills > 0
+                        ? "border-trust-accent/50"
+                        : "border-ink-500",
+                    )}
+                  >
+                    {initialsOf(w.name)}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-display text-lg font-semibold leading-tight tracking-tightest text-text-primary group-hover:text-brand-blue">
+                      {w.name}
+                    </p>
+                    <p className="truncate font-mono text-meta uppercase tracking-label text-text-muted">
+                      {positionLabel(w.workerId)}
+                    </p>
+                  </div>
+                </Link>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 font-mono text-meta text-text-secondary">
+                    <NotebookPen className="h-3 w-3" aria-hidden />
+                    {w.journalEntries}
+                  </span>
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-meta",
+                      w.confirmedSkills > 0
+                        ? "border-state-success/30 bg-state-success/10 text-state-success"
+                        : "border-ink-600 bg-ink-800/40 text-text-secondary",
+                    )}
+                  >
+                    <ShieldCheck className="h-3 w-3" aria-hidden />
+                    {w.confirmedSkills}
+                  </span>
+                  {w.openReviewItems > 0 ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-1 font-mono text-meta text-state-warning">
+                      <ClipboardCheck className="h-3 w-3" aria-hidden />
+                      {w.openReviewItems}
+                    </span>
+                  ) : null}
+                  {w.docsMissing > 0 ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-1 font-mono text-meta text-state-warning">
+                      <FileWarning className="h-3 w-3" aria-hidden />
+                      {t("docsMissingChip", { n: w.docsMissing })}
+                    </span>
+                  ) : w.docsChecked > 0 ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-success/30 bg-state-success/10 px-2 py-1 font-mono text-meta text-state-success">
+                      <ShieldCheck className="h-3 w-3" aria-hidden />
+                      {t("docsCheckedChip", { n: w.docsChecked })}
+                    </span>
+                  ) : null}
+                </div>
+                <p className="text-meta leading-relaxed text-text-muted">
+                  {w.lastActivity
+                    ? t("lastActivity", { date: w.lastActivity.slice(0, 10) })
+                    : t("noActivity")}
+                </p>
+                {/* WRITE — the person on the project opens the ONE conversation
+                    (the §8.1 gate reads the caller's own authority over this
+                    project; nothing is sent until the manager writes). */}
+                <MessageButton
+                  profileId={w.workerProfileId}
+                  projectId={id}
+                  labelKey="messageWorker"
+                />
+              </li>
+            ))}
+          </ul>
+          </div>
+          ))}
+          </div>
+        ) : (
+          <div
+            className="card-border flex flex-col items-start gap-3 p-6"
+            data-testid="stadium-empty-team"
+          >
+            <p className="text-sm leading-relaxed text-text-secondary">
+              {t("emptyTeam")}
+            </p>
+            <Link
+              href={`/${locale}/dashboard/projects`}
+              data-testid="stadium-draft-cta"
+              className="inline-flex min-h-11 items-center gap-2 rounded-md bg-gradient-cta px-5 py-3 text-sm font-semibold text-text-on-brand transition-transform duration-fast ease-out hover:-translate-y-0.5"
+            >
+              {t("emptyTeamCta")} →
+            </Link>
+          </div>
+        )}
+      </section>
+
 
       {/* ── Location: a project is a real work object, with honest place
             context. NO fake marker — a map point only ever appears with
@@ -227,6 +519,17 @@ export default async function ProjectStadiumPage({
         </p>
       </section>
 
+      {/* ── Client acceptance of the work: the owning organization's
+            authorized representative registers itself as the counterparty of
+            a worker who has a REAL active assignment here (person or team),
+            and can revoke it. Nothing is manufactured; the database derives
+            the candidates and re-checks every write. ── */}
+      <CounterpartyLinkPanel
+        projectId={id}
+        candidates={linkCandidates ?? []}
+        loadFailed={linkCandidates === null}
+      />
+
       {/* ── Confirm pulse — the S3.5 queue in the stadium rhythm ── */}
       <ConfirmPulse />
 
@@ -259,107 +562,6 @@ export default async function ProjectStadiumPage({
         )}
       </section>
 
-      {/* ── THE FIELD: real assigned workers as positioned cards ── */}
-      <section className="flex flex-col gap-3" data-testid="stadium-field">
-        <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t("fieldTitle")}
-        </h2>
-        {hasTeam ? (
-          <ul className="grid gap-4 sm:grid-cols-2">
-            {ops.workers.map((w) => (
-              <li
-                key={w.workerId}
-                className="card-border rise-in flex flex-col gap-3 p-4"
-                data-testid="stadium-player"
-              >
-                {/* F2/RC2: a fielded worker card opens the permitted person
-                    page (fail-closed by can_view_worker RLS there). */}
-                <Link
-                  href={`/${locale}/dashboard/people/${w.workerId}`}
-                  className="group flex items-center gap-3"
-                  data-testid={`stadium-player-open-${w.workerId}`}
-                >
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-sm font-bold text-text-primary",
-                      w.confirmedSkills > 0
-                        ? "border-trust-accent/50"
-                        : "border-ink-500",
-                    )}
-                  >
-                    {initialsOf(w.name)}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate font-display text-base font-semibold tracking-tightest text-text-primary group-hover:text-brand-blue">
-                      {w.name}
-                    </p>
-                    <p className="truncate font-mono text-meta uppercase tracking-label text-text-muted">
-                      {positionLabel(w.workerId)}
-                    </p>
-                  </div>
-                </Link>
-                <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1 font-mono text-meta text-text-secondary">
-                    <NotebookPen className="h-3 w-3" aria-hidden />
-                    {w.journalEntries}
-                  </span>
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-meta",
-                      w.confirmedSkills > 0
-                        ? "border-state-success/30 bg-state-success/10 text-state-success"
-                        : "border-ink-600 bg-ink-800/40 text-text-secondary",
-                    )}
-                  >
-                    <ShieldCheck className="h-3 w-3" aria-hidden />
-                    {w.confirmedSkills}
-                  </span>
-                  {w.openReviewItems > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-1 font-mono text-meta text-state-warning">
-                      <ClipboardCheck className="h-3 w-3" aria-hidden />
-                      {w.openReviewItems}
-                    </span>
-                  ) : null}
-                  {w.docsMissing > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-1 font-mono text-meta text-state-warning">
-                      <FileWarning className="h-3 w-3" aria-hidden />
-                      {t("docsMissingChip", { n: w.docsMissing })}
-                    </span>
-                  ) : w.docsChecked > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-md border border-state-success/30 bg-state-success/10 px-2 py-1 font-mono text-meta text-state-success">
-                      <ShieldCheck className="h-3 w-3" aria-hidden />
-                      {t("docsCheckedChip", { n: w.docsChecked })}
-                    </span>
-                  ) : null}
-                </div>
-                <p className="text-meta leading-relaxed text-text-muted">
-                  {w.lastActivity
-                    ? t("lastActivity", { date: w.lastActivity.slice(0, 10) })
-                    : t("noActivity")}
-                </p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div
-            className="card-border flex flex-col items-start gap-3 p-6"
-            data-testid="stadium-empty-team"
-          >
-            <p className="text-sm leading-relaxed text-text-secondary">
-              {t("emptyTeam")}
-            </p>
-            <Link
-              href={`/${locale}/dashboard/projects`}
-              data-testid="stadium-draft-cta"
-              className="inline-flex min-h-11 items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-5 py-3 text-sm font-semibold text-ink-900 transition-transform duration-fast ease-out hover:-translate-y-0.5"
-            >
-              {t("emptyTeamCta")} →
-            </Link>
-          </div>
-        )}
-      </section>
-
       {/* ── Work gallery: photo evidence from this project's journal entries.
             Read-only projection of what workers attached to their OWN entries;
             visibility is exactly the session's RLS (WAGON 8, areas 15/16). ── */}
@@ -371,6 +573,15 @@ export default async function ProjectStadiumPage({
           }
         />
       </div>
+
+      {/* ── Historical work: organization-provided imported history on this project ── */}
+      <ProjectHistoricalWork projectId={id} locale={locale} />
+
+      {/* ── Historical photos the organization supplied, by their stated work-object anchor ── */}
+      <EvidenceMediaStrip locale={locale} anchor={{ kind: "project", projectId: id }} />
+
+      {/* ── Register documents linked to this project (read-only, RLS-scoped) ── */}
+      <ProjectLinkedDocuments projectId={id} />
 
       {/* ── Missing positions: the needs model does not exist yet — say so ── */}
       <section className="flex flex-col gap-2" data-testid="stadium-positions-note">

@@ -60,13 +60,11 @@ test("admin sees requests, approves one, sees verified", async ({ page }) => {
   await shot(page, "01-admin-list");
 
   // If the migration isn't applied, the honest blocker shows — screenshot + stop.
-  if (await page.getByTestId("admin-company-verification-migration-blocker").isVisible().catch(() => false)) {
-    test.info().annotations.push({
-      type: "note",
-      description: "admin_company_verification migration not applied on this DB — blocker shown.",
-    });
-    return;
-  }
+  // A blocker is a SKIP with its reason, not a green run that checked nothing.
+  test.skip(
+    await page.getByTestId("admin-company-verification-migration-blocker").isVisible().catch(() => false),
+    "admin_company_verification migration not applied on this DB — blocker shown.",
+  );
 
   const firstApprove = page.locator('[data-testid^="company-verification-approve-"]').first();
   if (!(await firstApprove.isVisible().catch(() => false))) {

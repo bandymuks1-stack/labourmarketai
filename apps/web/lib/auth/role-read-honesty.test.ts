@@ -180,8 +180,10 @@ describe("superadmin: an unanswered read is not 'you are not an admin'", () => {
       profile_roles: [{ data: null, error: null }],
     });
 
+    // The destination is the canonical home, and since 2026-09-22 it carries
+    // the reason: a refusal the product cannot explain reads as breakage.
     expect(await redirectedTo(() => requireSuperadmin("lt"))).toBe(
-      "/lt/dashboard",
+      "/lt/dashboard?notice=needs_operator_access",
     );
   });
 

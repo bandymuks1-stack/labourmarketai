@@ -7,11 +7,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getTranslations } from "next-intl/server";
 
+import { outboundLinkOrigin } from "@/lib/domain/canonical";
 import { createClient } from "@/lib/supabase/server";
 import {
   isTransactionalEmailConfigured,
-  sendTransactionalEmail,
 } from "@/lib/email/transactional";
+import { guardedSendTransactionalEmail } from "@/lib/email/send-ledger-store";
 import {
   buildInvitationBody,
   buildInvitationSubject,
@@ -19,11 +20,24 @@ import {
 } from "@/lib/invitations/email-content";
 import {
   buildInviteLink,
+  clampCampaignUses,
+  DEFAULT_INVITATION_EXPIRY_DAYS,
   isInvitationType,
   isRelationshipInviteSlug,
+  isReviewDecision,
+  MAX_INVITATION_EXPIRY_DAYS,
   parseEmailList,
+  REVIEW_ITEM_KEY_RX,
   type InvitationType,
 } from "@/lib/invitations/model";
+import {
+  emitDemandInterestNotification,
+  emitInvitationAcceptedNotification,
+} from "@/lib/notifications/event-emitters";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { recordStaffReviewNotice } from "@/lib/operations/auto-review";
+import { acceptedReviewNotice, type ReviewNoticeSurface } from "@/lib/operations/auto-review-model";
 
 /**
  * Canonical invitation server actions (core-network area B).
@@ -56,6 +70,26 @@ function isMissingSchema(error: { code?: string; message?: string } | null): boo
   );
 }
 
+/**
+ * The v2 RPCs (20260917120000, RED, owner-gated) may not exist on the
+ * database this build runs against. PostgREST reports a missing function as
+ * `PGRST202` (schema cache), Postgres as `42883`. Either means: fall back to
+ * the v1 function that IS applied, so the flow that works today keeps
+ * working until the owner applies the migration — never a fake "not
+ * enabled" for an invitation v1 can serve.
+ *
+ * THE FALLBACK FIRES ON FUNCTION-ABSENT ERRORS ONLY. A permission error
+ * (42501: the v1 accept / decline doors are revoked from the API roles by
+ * 20261003151500, because v1 has no multi-use ledger and one caller could
+ * exhaust a shareable link for everyone) or any other failure must never be
+ * retried through the weaker v1 door. Pinned by
+ * lib/guards/staff-invitation-email-binding-v1.test.ts.
+ */
+function isMissingV2(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  return error.code === "PGRST202" || error.code === "42883";
+}
+
 function sha256Hex(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }
@@ -67,9 +101,12 @@ function mintToken(): { token: string; hash: string } {
 
 async function requestOrigin(): Promise<string> {
   const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "labourmarket.ai";
-  const proto = h.get("x-forwarded-proto") ?? "https";
-  return `${proto}://${host}`;
+  // The link carries the raw token, so its host is never taken from the
+  // request on trust — see `outboundLinkOrigin`.
+  return outboundLinkOrigin(
+    h.get("x-forwarded-host") ?? h.get("host"),
+    h.get("x-forwarded-proto"),
+  );
 }
 
 export type InvitationSendOutcome = {
@@ -221,21 +258,32 @@ export async function createAndSendInvitations(input: {
       continue;
     }
 
-    const sendResult = await sendTransactionalEmail({
+    const sendResult = await guardedSendTransactionalEmail({
       to: email,
       subject: buildInvitationSubject(tEmail, type),
       text: buildInvitationBody(tEmail, {
         link: inviteLink,
         personalMessage: input.personalMessage ?? null,
       }),
-    });
+    }, { kind: "invitation", organizationId: input.organizationId ?? null });
     const deliveryOutcome =
       sendResult.status === "sent" ? "sent" : "delivery_failed";
     // Record the TRUTHFUL provider result (never 'sent' without an ack).
-    await asAny(supabase).rpc("mark_invitation_delivery_v1", {
+    // The mail has already left (or failed) at the provider, so a bookkeeping
+    // failure here must not turn the send result into a lie in either
+    // direction — but it must not vanish either (G-12b): log it, never throw.
+    const markRes = (await asAny(supabase).rpc("mark_invitation_delivery_v1", {
       p_invitation_id: invitationId,
       p_outcome: deliveryOutcome,
-    });
+    })) as { error?: { message?: string } | null } | null;
+    if (markRes?.error) {
+      console.error(
+        "[invitations] mark_invitation_delivery_v1 failed:",
+        invitationId,
+        deliveryOutcome,
+        markRes.error.message,
+      );
+    }
     results.push({
       email,
       outcome: sendResult.status === "sent" ? "sent" : "delivery_failed",
@@ -318,19 +366,22 @@ export async function resendInvitationAction(input: {
     input.locale,
   );
   const inviteLink = buildInviteLink(origin, recipientLocale, token);
-  if (isTransactionalEmailConfigured() && isInvitationType(input.invitationType)) {
+  // An open link (no addressee) has nobody to e-mail: the rotation itself is
+  // the result and the new link is handed back for sharing.
+  const addressee = (input.email ?? "").trim();
+  if (addressee && isTransactionalEmailConfigured() && isInvitationType(input.invitationType)) {
     const tEmail = await getTranslations({
       locale: recipientLocale,
       namespace: "invitations.email",
     });
-    const sendResult = await sendTransactionalEmail({
-      to: input.email,
+    const sendResult = await guardedSendTransactionalEmail({
+      to: addressee,
       subject: buildInvitationSubject(tEmail, input.invitationType),
       text: buildInvitationBody(tEmail, {
         link: inviteLink,
         personalMessage: input.personalMessage ?? null,
       }),
-    });
+    }, { kind: "invitation" });
     await asAny(supabase).rpc("mark_invitation_delivery_v1", {
       p_invitation_id: input.invitationId,
       p_outcome: sendResult.status === "sent" ? "sent" : "delivery_failed",
@@ -346,36 +397,139 @@ export async function resendInvitationAction(input: {
   return { status: "ok", outcome: "created", inviteLink };
 }
 
-export async function acceptInvitationAction(input: {
-  token: string;
-}): Promise<
+export type AcceptInvitationResult =
   | { status: "needs-migration" }
   | { status: "not-authed" }
   | {
       status: "ok";
       outcome: string;
       invitationType?: string;
+      invitationId?: string | null;
       projectId?: string | null;
-    }
-> {
+      targetRequestId?: string | null;
+      /** What acceptance created (`engagement_created`, `interest_recorded`, …). */
+      relationship?: string | null;
+      externalSourceSlug?: string | null;
+      hasDeclaredContext?: boolean;
+    };
+
+/**
+ * What EVERY real acceptance does afterwards, whichever door it came through
+ * (the invite page's token door, the network page / chat by-id door): the
+ * inviter learns somebody accepted (AWAITED: a serverless runtime may freeze
+ * the instant the action returns), an employer-targeted invitation reaches
+ * the demand owner through the SAME emitter a worker's own click uses, the
+ * funnel event is recorded, and the network page is revalidated. One helper,
+ * so the two doors cannot drift apart again (convergence audit F5).
+ *
+ * The recipients come from the RPC's own return; nothing is read through the
+ * admin client.
+ */
+async function afterInvitationAccepted(args: {
+  userId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
+  invitationId: string | null;
+  surface: "invite_page" | "network";
+  locale?: string | null;
+  /** Where the person accepted and which review sentence that surface showed
+   *  (null = it showed none; review then stays on the manual door). */
+  noticeSurface: ReviewNoticeSurface;
+  reviewNotice: unknown;
+}): Promise<void> {
+  const { userId, data, invitationId, surface, locale } = args;
+  // FIRST, in the person's own session: the auditable acceptance fact for a
+  // staff invitation accepted under the review sentence (owner decision 1).
+  // Never blocks the accept; the RPC re-checks every condition in SQL.
+  await recordStaffReviewNotice({
+    invitationId,
+    surface: args.noticeSurface,
+    notice: acceptedReviewNotice(args.reviewNotice),
+  });
+  if (invitationId) {
+    await emitInvitationAcceptedNotification({
+      inviterProfileId: (data?.inviter_profile_id ?? null) as string | null,
+      acceptedByProfileId: userId,
+      invitationId,
+    });
+  }
+  // EMPLOYER_INVITED_TO_TARGET: the recipient is the INVITER (for an
+  // employer-to-worker targeted invitation the inviter is the demand owner,
+  // and the accept RPC returns that id itself; service_role holds no grant on
+  // customer_requests, 2026-09-17 root cause in the emitter).
+  if (data?.relationship === "interest_recorded" && data?.relationship_id) {
+    await emitDemandInterestNotification({
+      signalId: String(data.relationship_id),
+      ownerProfileId: (data?.inviter_profile_id ?? null) as string | null,
+      actorProfileId: userId,
+      country: null,
+    });
+  }
+  emitServerFunnelEvent(FUNNEL_EVENTS.invitationAccepted, {
+    source: "invitations",
+    route: "/invite",
+    metadata: {
+      surface,
+      entity_type: String(data?.invitation_type ?? "unknown"),
+      success: true,
+    },
+  });
+  if (locale) revalidatePath(`/${locale}/dashboard/network`);
+}
+
+export async function acceptInvitationAction(input: {
+  token: string;
+  /** Lets the network page refresh after an accept (same as the by-id door). */
+  locale?: string | null;
+  /** The surface that accepted (invite page, addressed signup, onboarding). */
+  noticeSurface?: ReviewNoticeSurface;
+  /** `REVIEW_NOTICE_VERSION` only when that surface showed the review sentence. */
+  reviewNotice?: string | null;
+}): Promise<AcceptInvitationResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { status: "not-authed" };
-  const { data, error } = await asAny(supabase).rpc("accept_invitation_v1", {
+
+  // v2 first (multi-use, demand target, ledger row); v1 when v2 is absent.
+  let { data, error } = await asAny(supabase).rpc("accept_invitation_v2", {
     p_token: input.token,
   });
+  if (error && isMissingV2(error)) {
+    ({ data, error } = await asAny(supabase).rpc("accept_invitation_v1", {
+      p_token: input.token,
+    }));
+  }
   if (error) {
     return isMissingSchema(error)
       ? { status: "needs-migration" }
       : { status: "ok", outcome: "error" };
   }
+  const outcome = (data?.outcome ?? "error") as string;
+  const invitationId = (data?.invitation_id ?? null) as string | null;
+  const relationship = (data?.relationship ?? null) as string | null;
+  if (outcome === "accepted") {
+    await afterInvitationAccepted({
+      userId: user.id,
+      data,
+      invitationId,
+      surface: "invite_page",
+      locale: input.locale,
+      noticeSurface: input.noticeSurface ?? "invite_page",
+      reviewNotice: input.reviewNotice ?? null,
+    });
+  }
   return {
     status: "ok",
-    outcome: (data?.outcome ?? "error") as string,
+    outcome,
     invitationType: data?.invitation_type as string | undefined,
+    invitationId,
     projectId: (data?.project_id ?? null) as string | null,
+    targetRequestId: (data?.target_request_id ?? null) as string | null,
+    relationship,
+    externalSourceSlug: (data?.external_source_slug ?? null) as string | null,
+    hasDeclaredContext: Boolean(data?.has_declared_context),
   };
 }
 
@@ -387,35 +541,277 @@ export async function declineInvitationAction(input: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { status: "not-authed" };
-  const { data, error } = await asAny(supabase).rpc("decline_invitation_v1", {
+  let { data, error } = await asAny(supabase).rpc("decline_invitation_v2", {
     p_token: input.token,
   });
+  let outcome: string;
+  if (error && isMissingV2(error)) {
+    ({ data, error } = await asAny(supabase).rpc("decline_invitation_v1", {
+      p_token: input.token,
+    }));
+    outcome = typeof data === "string" ? data : "error";
+  } else {
+    outcome = (data?.outcome ?? "error") as string;
+  }
   if (error) {
     return isMissingSchema(error)
       ? { status: "needs-migration" }
       : { status: "ok", outcome: "error" };
   }
-  return { status: "ok", outcome: data as string };
+  if (outcome === "declined") {
+    emitServerFunnelEvent(FUNNEL_EVENTS.invitationDeclined, {
+      source: "invitations",
+      route: "/invite",
+      metadata: {
+        surface: "invite_page",
+        entity_type: String(data?.invitation_type ?? "unknown"),
+        success: true,
+      },
+    });
+  }
+  return { status: "ok", outcome };
 }
 
 export async function acceptInvitationByIdAction(input: {
   invitationId: string;
   locale: string;
+  /** The network list or the chat card. */
+  noticeSurface?: ReviewNoticeSurface;
+  /** `REVIEW_NOTICE_VERSION` only when that surface showed the review sentence. */
+  reviewNotice?: string | null;
 }): Promise<SimpleInvitationResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { status: "not-authed" };
-  const { data, error } = await asAny(supabase).rpc(
-    "accept_invitation_by_id_v1",
-    { p_invitation_id: input.invitationId },
-  );
+  // v2 (the shared acceptance core — demand arm, ledger, seats) first; the
+  // v1 by-id function while v2 is not applied.
+  let { data, error } = await asAny(supabase).rpc("accept_invitation_by_id_v2", {
+    p_invitation_id: input.invitationId,
+  });
+  if (error && isMissingV2(error)) {
+    ({ data, error } = await asAny(supabase).rpc("accept_invitation_by_id_v1", {
+      p_invitation_id: input.invitationId,
+    }));
+  }
   if (error) {
     return isMissingSchema(error)
       ? { status: "needs-migration" }
       : { status: "ok", outcome: "error" };
   }
+  const outcome = (data?.outcome ?? "error") as string;
+  if (outcome === "accepted") {
+    await afterInvitationAccepted({
+      userId: user.id,
+      data,
+      invitationId: input.invitationId,
+      surface: "network",
+      noticeSurface: input.noticeSurface ?? "network",
+      reviewNotice: input.reviewNotice ?? null,
+    });
+  }
   revalidatePath(`/${input.locale}/dashboard/network`);
+  return { status: "ok", outcome };
+}
+
+export type ShareableInvitationOutcome =
+  | "created"
+  | "sent"
+  | "delivery_failed"
+  | "duplicate_pending"
+  | "invalid_email"
+  | "invalid_max_uses"
+  | "invalid_expiry"
+  | "limit_reached"
+  | "rate_limited"
+  | "not_authorized"
+  | "invalid_relationship"
+  | "organization_capability_required"
+  | "demand_required"
+  | "demand_not_found"
+  | "demand_closed"
+  | "error";
+
+export type ShareableInvitationResult =
+  | { status: "needs-migration" }
+  | { status: "not-authed" }
+  | {
+      status: "ok";
+      outcome: ShareableInvitationOutcome;
+      invitationId?: string;
+      /** Returned ONLY to the inviter who minted it. */
+      inviteLink?: string;
+      maxUses?: number;
+    };
+
+/**
+ * ONE secure shareable invitation — the distribution primitive. No addressee
+ * needed (copy the link, hand it to the person yourself); optionally
+ * addressed (then it is also e-mailed when a provider is configured);
+ * optionally a CAMPAIGN (`maxUses` > 1: one controlled link many people may
+ * accept, each acceptance its own identity and its own ledger row);
+ * optionally targeted at a DEMAND the caller is answerable for.
+ *
+ * Every limit is re-imposed by `create_invitation_v2`; this layer only
+ * clamps to what the screen offered so a tampered form cannot produce a
+ * confusing refusal.
+ */
+export async function createShareableInvitationAction(input: {
+  invitationType: string;
+  locale: string;
+  recipientLocale?: string | null;
+  email?: string | null;
+  organizationId?: string | null;
+  projectId?: string | null;
+  targetRequestId?: string | null;
+  invitedName?: string | null;
+  proposedRole?: string | null;
+  personalMessage?: string | null;
+  relationshipSlug?: string | null;
+  maxUses?: number | null;
+  campaignLabel?: string | null;
+  expiresInDays?: number | null;
+}): Promise<ShareableInvitationResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "not-authed" };
+  if (!isInvitationType(input.invitationType)) {
+    return { status: "ok", outcome: "error" };
+  }
+  const type: InvitationType = input.invitationType;
+  const email = (input.email ?? "").trim().toLowerCase() || null;
+  if (email) {
+    const parsed = parseEmailList(email);
+    if (parsed.valid.length !== 1) return { status: "ok", outcome: "invalid_email" };
+  }
+  const maxUses = clampCampaignUses(type, input.maxUses ?? 1);
+  const expiresInDays = Math.min(
+    Math.max(1, Math.floor(input.expiresInDays ?? DEFAULT_INVITATION_EXPIRY_DAYS)),
+    MAX_INVITATION_EXPIRY_DAYS,
+  );
+  const relationshipSlug = isRelationshipInviteSlug(input.relationshipSlug)
+    ? (input.relationshipSlug as string)
+    : null;
+  const recipientLocale = resolveRecipientLocale(input.recipientLocale, input.locale);
+  const origin = await requestOrigin();
+  const { token, hash } = mintToken();
+
+  const { data, error } = await asAny(supabase).rpc("create_invitation_v2", {
+    p_token_hash: hash,
+    p_invitation_type: type,
+    p_invited_email: email,
+    p_invited_name: input.invitedName ?? null,
+    p_organization_id: input.organizationId ?? null,
+    p_project_id: input.projectId ?? null,
+    p_target_request_id: input.targetRequestId ?? null,
+    p_proposed_role: input.proposedRole ?? null,
+    p_personal_message: input.personalMessage ?? null,
+    p_locale: recipientLocale,
+    p_relationship_slug: relationshipSlug,
+    p_max_uses: maxUses,
+    p_campaign_label: input.campaignLabel ?? null,
+    p_expires_in_days: expiresInDays,
+  });
+  if (error) {
+    return isMissingV2(error) || isMissingSchema(error)
+      ? { status: "needs-migration" }
+      : { status: "ok", outcome: "error" };
+  }
+  const outcome = (data?.outcome ?? "error") as string;
+  if (outcome !== "created") {
+    const known: readonly ShareableInvitationOutcome[] = [
+      "duplicate_pending",
+      "invalid_email",
+      "invalid_max_uses",
+      "invalid_expiry",
+      "limit_reached",
+      "rate_limited",
+      "not_authorized",
+      "invalid_relationship",
+      "organization_capability_required",
+      "demand_required",
+      "demand_not_found",
+      "demand_closed",
+    ];
+    return {
+      status: "ok",
+      outcome: (known as readonly string[]).includes(outcome)
+        ? (outcome as ShareableInvitationOutcome)
+        : "error",
+    };
+  }
+  const invitationId = data.invitation_id as string;
+  const inviteLink = buildInviteLink(origin, recipientLocale, token);
+  emitServerFunnelEvent(FUNNEL_EVENTS.invitationCreated, {
+    source: "invitations",
+    route: "/dashboard/network",
+    metadata: {
+      surface: maxUses > 1 ? "campaign_link" : email ? "addressed" : "open_link",
+      entity_type: type,
+      success: true,
+    },
+  });
+  revalidatePath(`/${input.locale}/dashboard/network`);
+
+  if (!email || !isTransactionalEmailConfigured()) {
+    return { status: "ok", outcome: "created", invitationId, inviteLink, maxUses };
+  }
+  const tEmail = await getTranslations({
+    locale: recipientLocale,
+    namespace: "invitations.email",
+  });
+  const sendResult = await guardedSendTransactionalEmail({
+    to: email,
+    subject: buildInvitationSubject(tEmail, type),
+    text: buildInvitationBody(tEmail, {
+      link: inviteLink,
+      personalMessage: input.personalMessage ?? null,
+    }),
+  }, { kind: "invitation", organizationId: input.organizationId ?? null });
+  const deliveryOutcome = sendResult.status === "sent" ? "sent" : "delivery_failed";
+  await asAny(supabase).rpc("mark_invitation_delivery_v1", {
+    p_invitation_id: invitationId,
+    p_outcome: deliveryOutcome,
+  });
+  return { status: "ok", outcome: deliveryOutcome, invitationId, inviteLink, maxUses };
+}
+
+/**
+ * ACCEPT / REJECT / CORRECT one declared item (universal network v1, R:
+ * the worker confirmation boundary). Records the person's decision on their
+ * own acceptance row with provenance. It never writes a skill or a
+ * profession: the existing profile paths remain the only writers, and the
+ * screen points the person at them.
+ */
+export async function reviewReferralContextAction(input: {
+  invitationId: string;
+  itemKey: string;
+  decision: string;
+  correction?: string | null;
+  reason?: string | null;
+}): Promise<SimpleInvitationResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "not-authed" };
+  if (!REVIEW_ITEM_KEY_RX.test(input.itemKey) || !isReviewDecision(input.decision)) {
+    return { status: "ok", outcome: "invalid_item" };
+  }
+  const { data, error } = await asAny(supabase).rpc("review_referral_context_v1", {
+    p_invitation_id: input.invitationId,
+    p_item_key: input.itemKey,
+    p_decision: input.decision,
+    p_correction: input.correction ?? null,
+    p_reason: input.reason ?? null,
+  });
+  if (error) {
+    return isMissingV2(error) || isMissingSchema(error)
+      ? { status: "needs-migration" }
+      : { status: "ok", outcome: "error" };
+  }
   return { status: "ok", outcome: (data?.outcome ?? "error") as string };
 }

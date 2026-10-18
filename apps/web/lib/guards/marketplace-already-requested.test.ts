@@ -31,7 +31,7 @@ describe("discover marks offerings the buyer already has an open request for", (
   });
 
   it("still offers the active Request action for not-yet-requested offerings", () => {
-    expect(section).toMatch(/requestServiceOffering\(o\.id\)/);
+    expect(section).toMatch(/requestServiceOffering\(o\.id(, draftById\[o\.id\] \?\? null)?\)/);
     expect(section).toMatch(/labels\.request\b/);
   });
 

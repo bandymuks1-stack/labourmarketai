@@ -36,6 +36,7 @@ import {
   setOrgDocumentRetentionAction,
   submitOrgDocumentForApprovalAction,
 } from "@/lib/documents/org-document-actions";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Org document register (Document & Evidence Engine v1 + register delta v1)
@@ -243,6 +244,7 @@ export async function OrgDocumentsRegister({
                 action={createOrgDocumentAction}
                 className="mt-3 flex flex-col gap-2"
               >
+                <DisplayedWorkspaceField />
                 <input type="hidden" name="locale" value={locale} />
                 <label className="flex flex-col gap-1 text-xs text-text-secondary">
                   {t("create.typeLabel")}

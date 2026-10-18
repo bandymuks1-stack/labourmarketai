@@ -1,5 +1,7 @@
 import "server-only";
+import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
 
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -15,6 +17,7 @@ import {
 import { needFromDemandRow } from "./opportunity-need";
 import { buildOwnWorkerContext } from "./worker-subject";
 import { listMyInterestSignals } from "./interest";
+import { listMyHandoffsByVacancy, type MyHandoffRow } from "./vacancy-interest";
 import {
   listMySavedOpportunities,
   listSavedPublicVacancyIds,
@@ -23,15 +26,18 @@ import { listPublicVacancyPreviewsByIds } from "@/lib/vacancy-store/vacancy-read
 import type { InterestStatus } from "./interest-snapshot";
 import {
   buildMyInterestView,
+  vacancyLiveKey,
   type LiveNeedFacts,
   type MyInterestViewRow,
 } from "./my-interest-view";
 import {
   matchWorkerToNeed,
   compareMatches,
+  declaredProfessionSlugs,
   type MatchResultV1,
 } from "@/lib/market/match-v1";
 import { bestEvidencedProfession } from "./adjacent-directions";
+import type { AssessedAgainstFacts } from "./opportunities-view";
 import {
   readStructuredDemandPublic,
   type StructuredDemandPublic,
@@ -45,7 +51,7 @@ import {
  * Worker-facing opportunities loader. READ-ONLY, own-data only.
  *
  * Readiness is built from the worker's OWN rows (workers / worker_skills /
- * worker_documents / worker_professions — all self-readable under existing
+ * worker_professions - all self-readable under existing
  * RLS). The open-demand list comes from the gated, curated SECURITY DEFINER
  * RPC `list_open_demand_for_workers()` (applied; Model A approved routes).
  *
@@ -67,12 +73,22 @@ export interface WorkerReadiness extends WorkerOpportunityProfile {
   readonly availabilityStatus: string | null;
   /** The profession the worker DECLARED, or null. Never inferred. */
   readonly professionSlug: string | null;
+  /** Every catalogue profession they declared, primary first — what the
+   *  board actually retrieved and matched on (owner decision 2026-09-28). */
+  readonly professionSlugs: readonly string[];
   /**
    * The profession their recorded work already evidences, present ONLY when
    * they declared none. A reading of real held skills, never a claim about
    * the person — every surface that uses it must say so.
    */
   readonly evidencedProfessionSlug: string | null;
+  /**
+   * The subject facts the ONE engine compared against — a projection of the
+   * SAME subject the matches below were computed from, so the destination
+   * can state in words what "fit" was assessed against (#1689, defect H:
+   * discovery ≠ matching). Every field is "as stated"; nothing is defaulted.
+   */
+  readonly assessedAgainst: AssessedAgainstFacts;
 }
 
 export interface OpportunityCard {
@@ -115,6 +131,15 @@ export type WorkerOpportunitiesResult =
       /** True only when the interest table exists (owner-gated migration) —
        *  the UI offers the express-interest action only then. */
       readonly interestAvailable: boolean;
+      /** True only when the vacancy source of the SAME table exists
+       *  (migration 20260917160000) — the external cards offer "I want this
+       *  job" only then. Never a dead button. */
+      readonly vacancyInterestAvailable: boolean;
+      /** The worker's own interest status per PUBLIC VACANCY id. */
+      readonly vacancyInterestById: ReadonlyMap<string, InterestStatus>;
+      /** The worker's own commercial handoff per vacancy id (own RLS rows) —
+       *  so "the commercial partner was informed" is said only when a row exists. */
+      readonly handoffByVacancy: ReadonlyMap<string, MyHandoffRow>;
       /** True only when the #723 saved-opportunities store exists — the save
        *  toggle is rendered only then (feature-detected once per load). */
       readonly savedAvailable: boolean;
@@ -153,9 +178,61 @@ export interface WorkerOpportunitiesOptions {
   };
 }
 
+type ReadyBoard = Extract<WorkerOpportunitiesResult, { kind: "ready" }>;
+
+/** The board WITHOUT the external public-source supply: the platform's own
+ *  demand, matched by the same engine, plus the worker's own signals. */
+export type WorkerPlatformDemandResult =
+  | { readonly kind: "no-worker" }
+  | (Omit<ReadyBoard, "externalVacancies" | "savedVacancies"> & {
+      readonly externalVacancies: null;
+    });
+
 export async function loadWorkerOpportunities(
   options?: WorkerOpportunitiesOptions,
 ): Promise<WorkerOpportunitiesResult> {
+  const board = await loadBoard(options, true);
+  if (board.kind !== "ready") return board;
+  if (board.externalVacancies === null) throw new Error("external supply was requested");
+  return { ...board, externalVacancies: board.externalVacancies };
+}
+
+/**
+ * The SAME board minus the external public-source ads and the saved-ad
+ * previews — for a caller that needs only the platform's own demand (the
+ * notification spine's "new matching jobs" count, which every dashboard page
+ * renders). `opportunities`, readiness and the worker's own signals are
+ * computed by exactly the code below, so a count derived from them equals the
+ * full board's.
+ *
+ * WHY (production 2026-10-15): the spine ran the full board on every dashboard
+ * page, so each page view also paid the external supply chain — profile-pool
+ * search, newest-ads search, freshness read, saved-ad previews — against the
+ * largest table, for a number that never reads it. Those reads held pooled
+ * database connections while the page's own reads queued behind them.
+ */
+export async function loadWorkerPlatformDemand(): Promise<WorkerPlatformDemandResult> {
+  const board = await loadBoard(undefined, false);
+  if (board.kind !== "ready") return board;
+  // `savedVacancies` is left out on purpose: its previews were not read, and
+  // an empty list would say "no saved ads" when we never looked.
+  const { kind, readiness, needsDataAccess, interestAvailable, vacancyInterestAvailable,
+    vacancyInterestById, handoffByVacancy, savedAvailable, savedRequestIds,
+    myInterestRows, opportunities } = board;
+  return { kind, readiness, needsDataAccess, interestAvailable, vacancyInterestAvailable,
+    vacancyInterestById, handoffByVacancy, savedAvailable, savedRequestIds,
+    myInterestRows, opportunities, externalVacancies: null };
+}
+
+async function loadBoard(
+  options: WorkerOpportunitiesOptions | undefined,
+  readExternalSupply: boolean,
+): Promise<
+  | { readonly kind: "no-worker" }
+  | (Omit<ReadyBoard, "externalVacancies"> & {
+      readonly externalVacancies: ExternalVacanciesResultV1 | null;
+    })
+> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -165,7 +242,14 @@ export async function loadWorkerOpportunities(
   const ctx = await buildOwnWorkerContext(supabase, user.id);
   if (!ctx) return { kind: "no-worker" };
 
-  // Both depend only on `ctx.workerId`, so they travel as one round trip.
+  // EVERY read below depends only on `ctx` — none on another's result — so
+  // they start together and are awaited once. They used to run as ~8
+  // sequential round trips (documents+entries → interest → handoffs → saved →
+  // demand RPC → external vacancies → saved vacancy ids → their previews) in
+  // front of Today's opportunities (production trace 2026-09-28); now the
+  // longest single branch sets the pace. Each read keeps its own error
+  // behaviour: the demand RPC's absence still means `needsDataAccess`, and a
+  // read that threw before still throws.
   //
   // The entry count exists to tell two different silences apart. `hasSkills`
   // still gates the fit — with no skill evidence there is genuinely nothing to
@@ -173,15 +257,64 @@ export async function loadWorkerOpportunities(
   // who already did: production has two workers with journal entries and no
   // confirmed skills, and the board was telling them to start writing. Their
   // real next step is confirming what their entries already describe.
-  const [{ data: docs }, entryCountRes] = await Promise.all([
-    asAny(supabase)
-      .from("worker_documents")
-      .select("id")
-      .eq("worker_id", ctx.workerId),
-    asAny(supabase)
-      .from("journal_entries")
-      .select("id", { count: "exact", head: true })
-      .eq("worker_id", ctx.workerId),
+  const nowIso = new Date().toISOString();
+  const [
+    [entryCountRes],
+    { myInterest, handoffByVacancy },
+    mySaved,
+    demandRead,
+    externalVacancies,
+    savedVacancyPreviews,
+  ] = await Promise.all([
+    Promise.all([
+      // Document records are READINESS, not fit (decision 0021): the board no longer
+      // reads them at all.
+      liveJournalEntriesOnly(
+        asAny(supabase)
+          .from("journal_entries")
+          .select("id", { count: "exact", head: true })
+          .eq("worker_id", ctx.workerId),
+      ),
+    ]),
+    // Own interest map (empty + unavailable until the owner-gated table
+    // exists), then own handoff rows (empty until migration 20260917160000
+    // is applied) — the one read here that depends on another.
+    listMyInterestSignals(supabase, ctx.workerId).then(async (interest) => ({
+      myInterest: interest,
+      handoffByVacancy: interest.vacancyInterestAvailable
+        ? await listMyHandoffsByVacancy(supabase, ctx.workerId)
+        : new Map<string, MyHandoffRow>(),
+    })),
+    // Own PRIVATE bookmarks (P2-PR5) — same honest feature detection: absent
+    // store → unavailable, and the board never renders the save toggle.
+    listMySavedOpportunities(supabase, ctx.workerId),
+    // Gated worker-visibility RPC — a throw is kept as a value so the honest
+    // fallback below still applies instead of failing the whole board.
+    Promise.resolve(asAny(supabase).rpc("list_open_demand_for_workers")).then(
+      (res: { data: unknown; error: unknown }) => ({ threw: false as const, res }),
+      () => ({ threw: true as const }),
+    ),
+    // External public-source ads, RLS-scoped through the worker's OWN client —
+    // a board that needed service_role to render would mean the policy was
+    // wrong. Matched with the SAME subject the platform demands use below.
+    readExternalSupply
+      ? loadExternalVacancyCards(supabase, ctx.subject, {
+          nowIso,
+          professionSlug: options?.externalDiscovery?.professionSlug ?? null,
+          country: options?.externalDiscovery?.country ?? null,
+        })
+      : null,
+    // Own saved PUBLIC VACANCIES — the second source of the same bookmark. The
+    // ids come from the worker's own rows; the titles come from the live ads
+    // through the same browsable predicate the board uses, so an expired
+    // bookmark drops out instead of rendering a job that no longer exists.
+    readExternalSupply
+      ? listSavedPublicVacancyIds(supabase, ctx.workerId).then((saved) =>
+          saved.available && saved.vacancyIds.size > 0
+            ? listPublicVacancyPreviewsByIds(supabase, [...saved.vacancyIds], nowIso)
+            : null,
+        )
+      : null,
   ]);
   const journalEntryCount =
     typeof entryCountRes?.count === "number" ? entryCountRes.count : 0;
@@ -223,34 +356,49 @@ export async function loadWorkerOpportunities(
     availabilitySet:
       ctx.worker.availability_status === "available" ||
       Boolean(ctx.worker.available_from),
-    documentsCount: docs?.length ?? 0,
     availabilityStatus: ctx.worker.availability_status,
     professionSlug: ctx.subject.professionSlug ?? null,
+    professionSlugs: declaredProfessionSlugs(ctx.subject),
     // What their WORK says, when they never said it themselves — computed
     // once above and reused, so the readiness gate and the market panel can
     // never disagree about which occupation this person is.
     evidencedProfessionSlug,
+    // What the engine ran on — the subject reader's own facts, projected,
+    // never re-read from a second source.
+    assessedAgainst: {
+      skillCount: ctx.subject.skills.length,
+      // The engine reads the person's languages as `languageLevels` (from
+      // worker_languages); `languages` is set by neither subject builder, so
+      // the board said "kalbos nenurodytos" to a worker who had saved English
+      // B2 (production walk 2026-09-29). Report what the engine ran on.
+      languages:
+        ctx.subject.languages ?? (ctx.subject.languageLevels ?? []).map((l) => l.lang),
+      salaryMinEur: ctx.subject.salaryMinEur ?? null,
+      city: ctx.subject.city ?? null,
+      preferredCountries: ctx.subject.preferredCountries ?? [],
+    },
   };
-
-  // Own interest map (empty + unavailable until the owner-gated table exists).
-  const myInterest = await listMyInterestSignals(supabase, ctx.workerId);
-
-  // Own PRIVATE bookmarks (P2-PR5) — same honest feature detection: absent
-  // store → unavailable, and the board never renders the save toggle.
-  const mySaved = await listMySavedOpportunities(supabase, ctx.workerId);
 
   // Gated worker-visibility RPC — honest fallback when not yet applied.
   let needsDataAccess = true;
   let opportunities: OpportunityCard[] = [];
   try {
-    const { data, error } = await asAny(supabase).rpc(
-      "list_open_demand_for_workers",
-    );
+    if (demandRead.threw) throw new Error("list_open_demand_for_workers threw");
+    const { data, error } = demandRead.res;
     if (!error && Array.isArray(data)) {
       needsDataAccess = false;
       opportunities = (data as Record<string, unknown>[])
         // DEFAULT-CLOSED: only approved supply routes (Model A) reach a worker.
         .filter(isApprovedRouteRow)
+        // Synthetic QA subjects are not opportunities for a real person
+        // (lib/qa/synthetic-fixture.ts).
+        .filter(
+          (row) =>
+            !isSyntheticFixtureLabel(
+              row.role_text as string | null,
+              row.company_name as string | null,
+            ),
+        )
         .map((row) => {
           const need: OpportunityNeed = {
             id: String(row.id),
@@ -324,36 +472,23 @@ export async function loadWorkerOpportunities(
       },
     ]),
   );
+  // The SAME join for the second source: a vacancy interest whose ad is on
+  // this render is "still open"; one whose ad expired keeps its snapshot.
+  for (const card of externalVacancies?.cards ?? []) {
+    if (!card.vacancyId) continue;
+    liveNeedById.set(vacancyLiveKey(card.vacancyId), {
+      roleText: card.view.title,
+      companyName: card.view.employerName,
+      locationLabel: card.view.city,
+      country: card.view.country,
+    });
+  }
   const myInterestRows = buildMyInterestView(myInterest.rows, liveNeedById);
 
-  // External public-source ads, RLS-scoped through the worker's OWN client —
-  // a board that needed service_role to render would mean the policy was
-  // wrong. Matched with the SAME subject the platform demands used above.
-  const externalVacancies = await loadExternalVacancyCards(
-    supabase,
-    ctx.subject,
-    {
-      nowIso: new Date().toISOString(),
-      professionSlug: options?.externalDiscovery?.professionSlug ?? null,
-      country: options?.externalDiscovery?.country ?? null,
-    },
-  );
-
-  // Own saved PUBLIC VACANCIES — the second source of the same bookmark. The
-  // ids come from the worker's own rows; the titles come from the live ads
-  // through the same browsable predicate the board uses, so an expired
-  // bookmark drops out instead of rendering a job that no longer exists.
+  // Own saved public vacancies, read above (ids → live previews).
   let savedVacancies: readonly SavedVacancyRow[] = [];
-  const mySavedVacancies = await listSavedPublicVacancyIds(
-    supabase,
-    ctx.workerId,
-  );
-  if (mySavedVacancies.available && mySavedVacancies.vacancyIds.size > 0) {
-    const previews = await listPublicVacancyPreviewsByIds(
-      supabase,
-      [...mySavedVacancies.vacancyIds],
-      new Date().toISOString(),
-    );
+  if (savedVacancyPreviews) {
+    const previews = savedVacancyPreviews;
     if (previews.status === "ok") {
       savedVacancies = previews.previews.map((v) => ({
         id: v.id,
@@ -371,6 +506,9 @@ export async function loadWorkerOpportunities(
     readiness,
     needsDataAccess,
     interestAvailable: myInterest.available,
+    vacancyInterestAvailable: myInterest.vacancyInterestAvailable,
+    vacancyInterestById: myInterest.byVacancy,
+    handoffByVacancy,
     savedAvailable: mySaved.available,
     savedRequestIds: [...mySaved.requestIds],
     savedVacancies,

@@ -147,13 +147,25 @@ describe("liveness is decided at read time", () => {
     expect(filters.some((f) => f.op === "eq" && f.args[0] === "is_active")).toBe(true);
   });
 
-  it("orders by publisher recency, not by when we happened to import", async () => {
+  it("orders by publisher recency, not by when we happened to import — NULLS LAST on the generic path (the index's own order)", async () => {
+    // Production 2026-09-06: a plain DESC (NULLS FIRST) could not use
+    // `public_vacancies_active_published_idx (published_at DESC NULLS LAST)`
+    // and seq-scanned 47k rows (6.9 s, timeouts). NULLS LAST walks it (2.8 ms).
     const { client, filters } = fakeClient({ data: [] });
     await searchPublicVacancies(client, { nowIso: NOW });
 
     const order = filters.find((f) => f.op === "order");
     expect(order?.args[0]).toBe("published_at");
-    expect(order?.args[1]).toEqual({ ascending: false });
+    expect(order?.args[1]).toEqual({ ascending: false, nullsFirst: false });
+  });
+
+  it("the country and profession paths keep plain DESC — their indexes are plain DESC", async () => {
+    for (const extra of [{ country: "LT" }, { professionSlug: "cleaner" }]) {
+      const { client, filters } = fakeClient({ data: [] });
+      await searchPublicVacancies(client, { nowIso: NOW, ...extra });
+      const order = filters.find((f) => f.op === "order");
+      expect(order?.args[1]).toEqual({ ascending: false, nullsFirst: true });
+    }
   });
 });
 
@@ -259,7 +271,16 @@ describe("row -> contract is the exact inverse of contract -> row", () => {
     const row = toPublicVacancyRow(original, NOW, null);
     const back = fromPublicVacancyRow(row as unknown as Record<string, unknown>);
 
-    expect(back).toEqual(original);
+    // The store's own row id rides along when the row carries one (a
+    // `select("*")` read); an unsaved contract has none. Everything else is
+    // the exact inverse.
+    // …and so do the per-locale renderings (`{}` on a row that has none —
+    // migration 20260922150000), which are a store fact, not a contract one.
+    const { storeId, translations, ...contract } = back;
+    expect(storeId).toBeNull();
+    expect(translations).toEqual({});
+    expect(contract).toEqual(original);
+    expect(fromPublicVacancyRow({ ...(row as unknown as Record<string, unknown>), id: "row-1" }).storeId).toBe("row-1");
   });
 
   it("reads numeric columns that PostgREST returns as strings", () => {

@@ -171,8 +171,8 @@ export const LIVE_WORLD_CAPABILITIES = [
  */
 export const MAP_ARCHITECTURE_FILES = [
   "apps/web/lib/market-map/spatial-entities.ts",
-  "apps/web/components/app/market-map-entity-layers.tsx",
-  "apps/web/components/app/market-map-base.tsx",
+  "apps/web/components/app/market-map/world-discovery.tsx",
+  "apps/web/lib/market-map/territory-view.ts",
 ] as const;
 
 /**

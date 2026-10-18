@@ -4,9 +4,10 @@
  * Renders the full contract from the registry + localized answer layer: H1,
  * short direct answer first, full answer, practical steps, limitations, country
  * scope, sources, review date + editorial responsibility, related questions,
- * category link, breadcrumb, real CTA (or none), and Article + BreadcrumbList +
- * Organization JSON-LD (a single editorial answer uses Article only, never a
- * Q&A-page schema type). Fully in the initial HTML — no
+ * category link, breadcrumb, real CTA (or none), and Article + BreadcrumbList
+ * JSON-LD (a single editorial answer uses Article only, never a Q&A-page schema
+ * type; the Organization + WebSite nodes are emitted once per page by
+ * app/[locale]/layout.tsx, never duplicated here). Fully in the initial HTML — no
  * client fetch, no login. Semantic landmarks + keyboard-navigable links.
  */
 import { Link } from "@/lib/i18n/navigation";
@@ -18,11 +19,7 @@ import {
   relatedPublished,
 } from "@/lib/answer-engine/publishing";
 import { CHROME, CATEGORY_LABELS, CTA_FOR_CAPABILITY, pickL } from "@/lib/answer-engine/chrome";
-import {
-  answerArticleJsonLd,
-  breadcrumbJsonLd,
-  organizationJsonLd,
-} from "@/lib/answer-engine/answer-seo";
+import { answerArticleJsonLd, breadcrumbJsonLd } from "@/lib/answer-engine/answer-seo";
 import { jsonLdScript } from "@/lib/seo/json-ld";
 import { AnswerTrackedLink } from "@/components/marketing/answer-tracked-link";
 import { AnswerPageViewed } from "@/components/marketing/answer-analytics";
@@ -78,7 +75,6 @@ export function AnswerArticle({ id, locale }: { id: string; locale: ActiveLocale
   return (
     <article className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
       <AnswerPageViewed category={category} />
-      <JsonLd data={organizationJsonLd()} />
       <JsonLd data={breadcrumbJsonLd(crumbs.map((c) => ({ name: c.name, url: c.url })))} />
       <JsonLd data={answerArticleJsonLd(answer)} />
 

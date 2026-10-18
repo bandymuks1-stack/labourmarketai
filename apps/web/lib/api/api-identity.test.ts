@@ -116,6 +116,22 @@ describe("an auth-server FAILURE is identity-unavailable (503), never a fact abo
       expect(r.identity.transport).toBe("bearer");
     }
   });
+
+  it("the bearer client answers the no-argument getUser() with THIS verification (the cookie client's idiom)", async () => {
+    const user = { id: "00000000-0000-4000-8000-000000000002" };
+    bearerAuthResult = { data: { user }, error: null };
+    const r = await resolveApiIdentity(bearerRequest());
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    // A later answer from the auth server cannot change who THIS request is:
+    // the domain helpers asking `auth.getUser()` see the verified caller.
+    bearerAuthResult = { data: { user: null }, error: verdictError };
+    const asked = await r.identity.supabase.auth.getUser();
+    expect(asked.data.user).toBe(user);
+    // An explicit-JWT call still goes to the auth server untouched.
+    const explicit = await r.identity.supabase.auth.getUser("some.other.jwt");
+    expect(explicit.data.user).toBeNull();
+  });
 });
 
 describe("the failure limiter meters FAILURES, never legitimate traffic", () => {

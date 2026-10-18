@@ -109,8 +109,12 @@ describe("no fakery (identity ONLY via the safe reader; no contact buttons)", ()
       expect(src).toMatch(/readCounterpartIdentities/);
       expect(src).not.toMatch(/participantName|otherProfile|profiles\([^)]*name|full_name/i);
       // The rendered name is the model's permitted field, with the honest
-      // i18n fallback — never a raw fabricated string.
-      expect(src).toMatch(/card\.counterpartyName \?\? t\(card\.counterpartyKey\)/);
+      // i18n fallback — never a raw fabricated string. The thread renders the
+      // permitted name as a work-world PersonPresence (same field, same
+      // fallback, no photo); the list keeps the plain expression.
+      expect(src).toMatch(
+        /card\.counterpartyName \?\? t\(card\.counterpartyKey\)|card\.counterpartyName \? \(\s*<PersonPresence name=\{card\.counterpartyName\}[^]*?\) : \(\s*t\(card\.counterpartyKey\)/,
+      );
       // No stranger-contact CTA wired into the thread surfaces.
       expect(src).not.toMatch(/MessageButton|RequestCommunicationButton/);
     });

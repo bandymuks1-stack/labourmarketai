@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+import lt from "../../messages/lt.json";
+
 /**
  * Auth flow e2e (slice 6). Each spec checks `SUPABASE_TEST_URL` up front
  * and skips if it isn't configured — keeps `pnpm e2e` green until the
@@ -38,6 +40,14 @@ const requiresTestEnv = (): void => {
  */
 const E2E_PASSWORD = "E2ePass!23x";
 
+/**
+ * The signup heading is read from the LT catalogue, not hard-coded: the worker
+ * copy moved from formal "Sukurkite" to informal "Sukurk" (owner 2026-10-14,
+ * #2369) and a literal here went stale with no product change. Exact match, so
+ * a missing key (the raw key rendered) still fails.
+ */
+const SIGNUP_HEADLINE_LT = lt.auth.signup.headline;
+
 test.describe("Signup → password → onboarding", () => {
   test("signup with email+password lands the NEW user in onboarding", async ({
     page,
@@ -46,7 +56,7 @@ test.describe("Signup → password → onboarding", () => {
     const email = `e2e.signup.${Date.now()}@local.test`;
     await page.goto("/lt/auth/signup");
     await expect(
-      page.getByRole("heading", { name: /Sukurkite paskyrą/i }),
+      page.getByRole("heading", { name: SIGNUP_HEADLINE_LT, exact: true }),
     ).toBeVisible();
     await page.locator('input[type="email"]').fill(email);
     // Structural selectors: the password label's accessible name carries the
@@ -57,12 +67,13 @@ test.describe("Signup → password → onboarding", () => {
     await expect(page).toHaveURL(/\/onboarding/, { timeout: 30_000 });
   });
 
-  test("onboarding offers BOTH the worker and the company role", async ({
+  test("onboarding starts with the six work contexts, multi-select", async ({
     page,
   }) => {
     requiresTestEnv();
-    // The role choice moved from the signup form into onboarding — the
-    // company path must still exist there (the old test's real intent).
+    // Owner correction 2026-09-26: the first screen names the contexts a
+    // person is in today (a daily work system), not an episode of searching —
+    // and a person can be in several at once.
     const email = `e2e.roles.${Date.now()}@local.test`;
     await page.goto("/lt/auth/signup");
     await page.locator('input[type="email"]').fill(email);
@@ -72,14 +83,16 @@ test.describe("Signup → password → onboarding", () => {
     await page.locator('input[type="password"]').nth(1).fill(E2E_PASSWORD);
     await page.getByRole("button", { name: /Registruotis|Sign up/i }).click();
     await expect(page).toHaveURL(/\/onboarding/, { timeout: 30_000 });
-    // The REAL card copy (onboarding.rolePicker): person = "Asmuo",
-    // organization = "Įmonė" — both paths must be offered.
-    await expect(
-      page.getByRole("button", { name: /Asmuo|Person/i }),
-    ).toBeVisible({ timeout: 30_000 });
-    await expect(
-      page.getByRole("button", { name: /Įmonė|Company/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Pradėkime" })).toBeVisible({ timeout: 30_000 });
+    for (const intent of ["work", "member", "hire", "agency", "student", "education"]) {
+      await expect(page.getByTestId(`onboarding-intent-${intent}`)).toBeVisible();
+    }
+    // Multi-select: two contexts stay selected together.
+    await page.getByTestId("onboarding-intent-work").click();
+    await page.getByTestId("onboarding-intent-member").click();
+    await expect(page.getByTestId("onboarding-intent-work")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("onboarding-intent-member")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("onboarding-intents-continue")).toBeEnabled();
   });
 });
 

@@ -124,6 +124,323 @@ export function pendingInvites(
   return rows.filter((r) => r.status === "pending");
 }
 
+/**
+ * The client's ONE connection list from its two keyed reads — by invited
+ * email (pending + accepted invites) and by client company (every active
+ * connection the company owns). Pure. Rows are deduplicated by id, newest
+ * first. Either read failing makes the whole list UNKNOWN: a list that
+ * silently dropped one read's rows would present a partial relationship set
+ * as the complete one (SEP-7).
+ */
+export function mergeClientConnectionStates(
+  byEmail: ClientInvitesState,
+  byCompany: ClientInvitesState,
+): ClientInvitesState {
+  if (byEmail.kind === "needs-migration" || byCompany.kind === "needs-migration") {
+    return { kind: "needs-migration" };
+  }
+  if (byEmail.kind !== "ok" || byCompany.kind !== "ok") return { kind: "error" };
+  const byId = new Map<string, ClientConnectionInvite>();
+  for (const r of [...byEmail.rows, ...byCompany.rows]) {
+    const prev = byId.get(r.id);
+    // The joined read may name the agency where the fallback read could not.
+    if (!prev || (prev.agencyName === "\u2014" && r.agencyName !== "\u2014")) byId.set(r.id, r);
+  }
+  return {
+    kind: "ok",
+    rows: [...byId.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+  };
+}
+
+/**
+ * The review stage THIS offer may wear.
+ *
+ * `list_agency_offer_progress_v1` derives `review_stage` per (request, worker)
+ * pair — a booking / shortlist / thread for that worker on that request — and
+ * never looks at the offer's own status. So when the same worker was offered
+ * twice on one request and the client accepted the second offer, the FIRST,
+ * declined offer also reads `accepted` ("booking accepted · client declined"
+ * on one row — production 2026-09-21). A closed offer cannot carry a live
+ * booking stage: a declined offer is `rejected`, a withdrawn one stays at
+ * `offered`. Open and accepted offers keep the derived stage. Correcting the
+ * derivation itself (key on `o.booking_id` / `o.status`) is a SECDEF body
+ * change = RED; this is the honest presentation until that is applied.
+ */
+export function effectiveReviewStage(
+  offerStatus: OfferStatus,
+  reviewStage: OfferReviewStage,
+): OfferReviewStage {
+  if (offerStatus === "declined") return "rejected";
+  if (offerStatus === "withdrawn") return "offered";
+  return reviewStage;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * DELIVERY (2026-09-24). The connection row alone reached nobody; beside it
+ * the agency now creates an invitation through the ONE invitation primitive
+ * (lib/invitations) and gets the token link back. This is the pure shape of
+ * that delivery result and the mapping from the primitive's own outcomes —
+ * the section renders it with the primitive's own localized outcome copy.
+ * ──────────────────────────────────────────────────────────────────────── */
+export type BridgeInviteOutcome =
+  /** Stored; e-mail delivery not configured — the agency shares the link. */
+  | "created"
+  /** Stored AND the provider acknowledged the e-mail. */
+  | "sent"
+  /** Stored; the provider refused — the link still works, share it. */
+  | "delivery_failed"
+  /** A pending invitation to this address already exists (the primitive's
+   *  idempotency key: inviter + address + type + context); nothing new was
+   *  minted — a fresh link comes from the rotate path. */
+  | "duplicate_pending"
+  /** The primitive refused (limit, rate, authorization…); `reason` names
+   *  the primitive's outcome. The connection exists, nothing was delivered. */
+  | "refused"
+  /** The primitive is absent or failed outright — UNKNOWN, not "not sent". */
+  | "unavailable";
+
+export interface BridgeInviteDelivery {
+  readonly email: string;
+  readonly outcome: BridgeInviteOutcome;
+  readonly invitationId: string | null;
+  /** The shareable link — returned ONLY to the inviter who minted it, and
+   *  only when a token was minted in THIS call. */
+  readonly inviteLink: string | null;
+  /** The primitive's own outcome slug when `refused`; null otherwise. */
+  readonly reason: string | null;
+}
+
+/** The primitive's create / resend result, structurally (no import of the
+ *  server module here — this file stays pure). */
+export interface PrimitiveInvitationResult {
+  readonly status: "ok" | "needs-migration" | "not-authed";
+  readonly outcome?: string;
+  readonly invitationId?: string;
+  readonly inviteLink?: string;
+}
+
+export function toBridgeInviteDelivery(
+  email: string,
+  result: PrimitiveInvitationResult | null | undefined,
+): BridgeInviteDelivery {
+  const base = { email, invitationId: null, inviteLink: null, reason: null };
+  if (!result || result.status !== "ok") return { ...base, outcome: "unavailable" };
+  const outcome = result.outcome ?? "error";
+  if (outcome === "created" || outcome === "sent" || outcome === "delivery_failed") {
+    return {
+      ...base,
+      outcome,
+      invitationId: result.invitationId ?? null,
+      inviteLink: result.inviteLink ?? null,
+    };
+  }
+  if (outcome === "duplicate_pending") return { ...base, outcome: "duplicate_pending" };
+  return { ...base, outcome: "refused", reason: outcome.slice(0, 60) };
+}
+
+/** One sent agency-client invitation as the partners door lists it beside
+ *  the connection with the same address (the primitive's own rows, read by
+ *  the inviter). */
+export interface ClientInviteDeliveryRow {
+  readonly invitationId: string;
+  readonly email: string;
+  readonly status: string;
+  readonly deliveryStatus: string;
+  readonly createdAt: string;
+}
+
+export type ClientInviteDeliveriesState =
+  | { kind: "ok"; rows: readonly ClientInviteDeliveryRow[] }
+  | { kind: "needs-migration" }
+  | { kind: "error" };
+
+/**
+ * The invitation that COUNTS for each address (lower-cased), from the
+ * inviter's own sent list. Pure.
+ *
+ * Two statuses matter for a pending connection: `pending` (the link is out,
+ * nothing answered yet) and `accepted` (single-use, consumed — the client
+ * accepted the invitation and now confirms the CONNECTION on their partners
+ * door). An accepted row wins over a pending one regardless of age: once the
+ * client has accepted, the agency's next move is to wait, not to rotate or
+ * mint links — showing the pending row instead invited exactly that (review
+ * round 2, 2026-09-24: an accepted invitation read "no invitation link yet"
+ * and "Get link" minted a second one). Within one status the newest wins.
+ * Declined, expired and revoked rows are dropped: they leave the address
+ * without a live invitation, so a fresh one may be minted.
+ */
+export function deliveryByEmail(
+  rows: readonly ClientInviteDeliveryRow[],
+): ReadonlyMap<string, ClientInviteDeliveryRow> {
+  const rank = (status: string): number =>
+    status === "accepted" ? 2 : status === "pending" ? 1 : 0;
+  const out = new Map<string, ClientInviteDeliveryRow>();
+  for (const r of rows) {
+    const score = rank(r.status);
+    if (score === 0) continue;
+    const key = r.email.trim().toLowerCase();
+    const prev = out.get(key);
+    if (
+      !prev ||
+      score > rank(prev.status) ||
+      (score === rank(prev.status) && r.createdAt.localeCompare(prev.createdAt) > 0)
+    ) {
+      out.set(key, r);
+    }
+  }
+  return out;
+}
+
+/**
+ * The state a PENDING connection row wears on the agency's partners door,
+ * in the primitive's own vocabulary:
+ *   - `none`            — no live invitation for this address: mint one;
+ *   - `accepted`        — delivered and accepted; the client's confirmation
+ *                         of the connection is what is awaited — no link;
+ *   - `created` / `sent` / `delivery_failed` — a pending invitation's stored
+ *                         delivery_status (`not_sent` = the link is ready,
+ *                         nothing was e-mailed): a fresh link may be rotated.
+ * Pure.
+ */
+export type ClientInviteRowState = "none" | "accepted" | "created" | "sent" | "delivery_failed";
+
+export function clientInviteRowState(
+  row: ClientInviteDeliveryRow | null | undefined,
+): ClientInviteRowState {
+  if (!row) return "none";
+  if (row.status === "accepted") return "accepted";
+  if (row.deliveryStatus === "sent") return "sent";
+  if (row.deliveryStatus === "delivery_failed") return "delivery_failed";
+  return "created";
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * SPINE COUNTS (2026-09-24). Three STATE-DERIVED bridge signals, each with a
+ * surface whose own action clears it — the spine's rule (a count that
+ * cannot clear is permanent noise). Offer DECISIONS (accepted / declined,
+ * agency side) are deliberately absent: a terminal state never clears by
+ * visiting and no seen marker exists; that fact belongs to the durable
+ * notification_events channel, not here.
+ * ──────────────────────────────────────────────────────────────────────── */
+export interface BridgeSpineCounts {
+  /** CLIENT: connection invitations addressed to me still pending. */
+  readonly pendingConnectionInvites: number;
+  /** AGENCY: open shared needs with nobody on the way (`sharedNeedsAwaitingWorker`). */
+  readonly sharedRequestsAwaitingOffer: number;
+  /** CLIENT: agency offers on my requests still awaiting my decision. */
+  readonly openCandidateOffers: number;
+}
+
+export const ZERO_BRIDGE_SPINE_COUNTS: BridgeSpineCounts = {
+  pendingConnectionInvites: 0,
+  sharedRequestsAwaitingOffer: 0,
+  openCandidateOffers: 0,
+};
+
+/** Pending invites in an `ok` read; a failed read counts 0 — the bell never
+ *  fabricates attention from an unknown. Pure. */
+export function countPendingConnectionInvites(state: ClientInvitesState): number {
+  return state.kind === "ok" ? pendingInvites(state.rows).length : 0;
+}
+
+/**
+ * Shared requests the agency has not answered: no offer of this agency on
+ * that request is `offered`, or `accepted` with a placement still going (a
+ * withdrawn or declined offer, or a placement the worker declined / that
+ * ended, leaves the request unanswered again). Count of
+ * `sharedNeedsAwaitingWorker`. Either bridge read failing counts 0. Pure.
+ */
+export function countSharesAwaitingOffer(
+  shared: SharedRequestsState,
+  progress: OfferProgressState,
+  placements?: PlacementOutcomesState,
+): number {
+  return sharedNeedsAwaitingWorker(shared, progress, placements).length;
+}
+
+/**
+ * What the agency's placement read (`list_agency_placements_v1`, one row per
+ * ACCEPTED offer) says about how that placement went — only the two facts
+ * this rule needs, so the pure model does not import the server read.
+ */
+export interface PlacementOutcome {
+  readonly offerId: string;
+  readonly bookingStatus: string | null;
+  readonly engagementStatus: string | null;
+}
+export type PlacementOutcomesState =
+  | { kind: "ok"; rows: readonly PlacementOutcome[] }
+  | { kind: "error" };
+
+/** Booking answers after which the placement did not go ahead. */
+const PLACEMENT_FELL_THROUGH_BOOKING = new Set(["declined", "withdrawn", "expired"]);
+
+/** The client's accepted candidate is no longer going to / no longer working
+ *  there: the worker declined, the booking lapsed, or the placement ended. */
+export function placementNoLongerFillsNeed(p: PlacementOutcome): boolean {
+  return (
+    (p.bookingStatus !== null && PLACEMENT_FELL_THROUGH_BOOKING.has(p.bookingStatus)) ||
+    p.engagementStatus === "ended"
+  );
+}
+
+export interface SharedNeedAwaitingWorker {
+  readonly requestId: string;
+  readonly title: string;
+  /** `no_offer` — nobody proposed yet; `placement_did_not_proceed` — an
+   *  accepted candidate declined / lapsed / ended and nobody replaced them. */
+  readonly reason: "no_offer" | "placement_did_not_proceed";
+}
+
+/**
+ * THE ONE RULE (production walk 2026-09-29): which OPEN needs a client shared
+ * with this agency still have nobody on the way. The Home bell, the opening
+ * brief and the starter chips all read it — they used to carry three copies
+ * that treated ANY accepted offer as "answered", so after the worker declined
+ * the booking the need stayed open and shared while the agency Home went
+ * silent.
+ *
+ * A candidate is ON THE WAY when their offer is `offered` (client deciding) or
+ * `accepted` and the placement read does not show it fell through. A placement
+ * read that failed keeps every accepted offer counting as on the way — the
+ * bell never invents attention from an unknown. A closed request is not open.
+ * Derived from current state only; a new offer clears it. Pure.
+ */
+export function sharedNeedsAwaitingWorker(
+  shared: SharedRequestsState,
+  progress: OfferProgressState,
+  placements?: PlacementOutcomesState,
+): readonly SharedNeedAwaitingWorker[] {
+  if (shared.kind !== "ok" || progress.kind !== "ok") return [];
+  const fellThrough = new Set(
+    placements?.kind === "ok"
+      ? placements.rows.filter(placementNoLongerFillsNeed).map((p) => p.offerId)
+      : [],
+  );
+  const onTheWay = new Set<string>();
+  const didNotProceed = new Set<string>();
+  for (const p of progress.rows) {
+    if (p.offerStatus === "offered") onTheWay.add(p.requestId);
+    else if (p.offerStatus === "accepted") {
+      if (fellThrough.has(p.offerId)) didNotProceed.add(p.requestId);
+      else onTheWay.add(p.requestId);
+    }
+  }
+  const out: SharedNeedAwaitingWorker[] = [];
+  const seen = new Set<string>();
+  for (const s of shared.rows) {
+    if (s.status === "closed" || s.status === "draft") continue;
+    if (onTheWay.has(s.requestId) || seen.has(s.requestId)) continue;
+    seen.add(s.requestId);
+    out.push({
+      requestId: s.requestId,
+      title: s.title,
+      reason: didNotProceed.has(s.requestId) ? "placement_did_not_proceed" : "no_offer",
+    });
+  }
+  return out;
+}
+
 /** Visual tone per derived review stage — display only. */
 export function reviewStageTone(
   stage: OfferReviewStage,

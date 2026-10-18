@@ -9,6 +9,7 @@ import {
   discoverMarketplaceListings,
 } from "@/lib/marketplace/listings";
 import { MarketplaceListingsSection } from "@/components/app/marketplace-listings-section";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -47,15 +48,16 @@ export default async function ListingsPage({
   ]);
   const needsMigration =
     mine.kind === "needs-migration" || discovery.kind === "needs-migration";
+  const extended =
+    mine.kind === "ok" && discovery.kind === "ok" && mine.extended && discovery.extended;
   const myRows = mine.kind === "ok" ? mine.rows : [];
   const discoveryRows = discovery.kind === "ok" ? discovery.rows : [];
+  const unavailable = discovery.kind === "ok" ? (discovery.unavailable ?? []) : [];
 
   return (
     <div className="flex flex-col gap-4" data-testid="listings-page">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageIntro")}</p>
       </header>
 
@@ -63,6 +65,8 @@ export default async function ListingsPage({
         myRows={myRows}
         discoveryRows={discoveryRows}
         needsMigration={needsMigration}
+        extended={extended}
+        unavailable={unavailable}
         locale={locale}
       />
 
@@ -71,7 +75,7 @@ export default async function ListingsPage({
       <Link
         href={"/dashboard/services" as "/dashboard"}
         data-testid="listings-to-services-link"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
+        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-text-primary"
       >
         {t("linkToServices")}
         <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />

@@ -18,6 +18,10 @@ export type ConversationPreview = {
   text: string;
   /** True when the newest message is a work instruction. */
   isInstruction: boolean;
+  /** The author's recorded language (lower-case code) or null when unknown.
+   *  The list shows the ORIGINAL first line (no translation call on a list
+   *  read); this lets it carry the same language badge as the thread. */
+  originalLanguage: string | null;
   createdAt: string;
 };
 
@@ -42,7 +46,7 @@ export async function getConversationPreviews(
     const supabase = await createClient();
     const { data, error } = await asAny(supabase)
       .from("conversation_messages")
-      .select("conversation_id, author_id, body, is_instruction, created_at")
+      .select("conversation_id, author_id, body, is_instruction, original_language, created_at")
       .in("conversation_id", [...conversationIds])
       .order("created_at", { ascending: false })
       .limit(300);
@@ -54,6 +58,7 @@ export async function getConversationPreviews(
       author_id: string;
       body: string | null;
       is_instruction: boolean | null;
+      original_language?: string | null;
       created_at: string;
     }[]) {
       if (previews.has(m.conversation_id)) continue; // newest wins
@@ -66,6 +71,7 @@ export async function getConversationPreviews(
             ? `${firstLine.slice(0, PREVIEW_MAX_CHARS - 1)}…`
             : firstLine,
         isInstruction: m.is_instruction === true,
+        originalLanguage: m.original_language?.trim().toLowerCase() || null,
         createdAt: m.created_at,
       });
     }

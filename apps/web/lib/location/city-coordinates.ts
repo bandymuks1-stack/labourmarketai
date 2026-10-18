@@ -142,6 +142,31 @@ export function resolveCity(
   return null;
 }
 
+/**
+ * Every city the controlled table can place, with its country and coordinate.
+ *
+ * Read-only projection for viewport-bounded reads (P8 World): a map viewport
+ * is translated into the set of countries that own at least one PLACEABLE
+ * point inside it (a known city here, or the country centroid), so a bounded
+ * read filters on the existing `country` column instead of scanning. Adding a
+ * city row above makes it discoverable here with no other change.
+ */
+export interface KnownCity {
+  readonly country: string;
+  readonly label: string;
+  readonly coord: CityCoord;
+}
+
+export function listKnownCities(): readonly KnownCity[] {
+  const out: KnownCity[] = [];
+  for (const [country, rows] of Object.entries(CITY_TABLE)) {
+    for (const row of rows) {
+      out.push({ country, label: row.names[0], coord: row.coord });
+    }
+  }
+  return out;
+}
+
 function escapeRe(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

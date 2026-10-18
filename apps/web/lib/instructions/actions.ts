@@ -5,6 +5,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { isCommunicationLocale } from "@/lib/i18n/config";
 import {
   MESSAGE_RATE_CAP,
   evaluateRateCap,
@@ -117,6 +118,11 @@ export async function sendWorkInstructionAction(
 export async function requestInstructionClarificationAction(
   conversationId: string,
   body: string,
+  /** The worker's language (their UI locale). Stamped as `original_language`
+   *  through the same communication-language rule as `sendMessage`, so the
+   *  manager reads the reply through the translation resolver like any other
+   *  message instead of an unlabelled, never-translated line. Unknown → NULL. */
+  locale?: string,
 ): Promise<InstructionActionResult> {
   const supabase = await createClient();
   const {
@@ -146,14 +152,30 @@ export async function requestInstructionClarificationAction(
     return { ok: false, code: "rate_limited" };
   }
 
-  const { error } = await asAny(supabase)
+  const originalLanguage =
+    typeof locale === "string" && isCommunicationLocale(locale) ? locale : null;
+  let insert = await asAny(supabase)
     .from("conversation_messages")
     .insert({
       conversation_id: conversationId,
       author_id: user.id,
       body: text.slice(0, 10000),
       is_clarification_request: true,
+      original_language: originalLanguage,
     });
+  if (insert.error?.code === UNDEFINED_COLUMN && /original_language/.test(insert.error.message ?? "")) {
+    // Same honest degrade as sendMessage: a stack without the language
+    // column still accepts the reply, unlabelled.
+    insert = await asAny(supabase)
+      .from("conversation_messages")
+      .insert({
+        conversation_id: conversationId,
+        author_id: user.id,
+        body: text.slice(0, 10000),
+        is_clarification_request: true,
+      });
+  }
+  const { error } = insert;
 
   if (error) {
     if (migMissing(error.code)) return { ok: false, code: "needs_migration" };

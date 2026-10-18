@@ -136,8 +136,15 @@ describe("publisher text is marked with the language it is written in", () => {
       "utf8",
     );
     expect(page).toContain("preview.sourceLanguage");
+    // Occupation subline and description always carry the publisher's lang.
     const marked = page.match(/lang=\{sourceLang\}/g) ?? [];
-    expect(marked.length, "title, occupation and description").toBe(3);
+    expect(marked.length, "occupation and description").toBe(2);
+    // The heading carries it whenever it shows the PUBLISHER'S words (member
+    // raw title, or the occupation when the catalogue has no name) and none
+    // when it shows OUR catalogue name in the reader's language (2026-10-10).
+    expect(page).toContain(
+      "lang={member?.titleRaw || !localizedProfession ? sourceLang : undefined}",
+    );
   });
 
   it("OUR text is not mislabelled as the publisher's language", () => {

@@ -149,7 +149,7 @@ function ExperiencesList() {
     );
   }
 
-  const { counts, aboutMe, mine } = phase.view;
+  const { counts, aboutMe, mine, responsesRead } = phase.view;
 
   return (
     <div className="flex flex-col gap-5" data-testid="experiences-result">
@@ -172,12 +172,19 @@ function ExperiencesList() {
           <ul className="flex flex-col gap-3">
             {aboutMe.map((r) => (
               <li key={r.id}>
-                <ExperienceCard row={r}>
+                <ExperienceCard row={r} responsesRead={responsesRead}>
                   {/* The dispute door opens only where a dispute can exist. */}
                   {r.disputeStatus === "none" ? (
                     <ExperienceDisputeForm experienceId={r.id} />
                   ) : null}
-                  <ExperienceResponseForm experienceId={r.id} />
+                  {/* One reply per experience, by schema. Offering the form
+                      again once a reply exists is a door that can only fail —
+                      the RPC answers `response_exists`. It stays open while
+                      replies are UNREADABLE, because a form that might work is
+                      better than silently removing the right of reply. */}
+                  {r.response === null ? (
+                    <ExperienceResponseForm experienceId={r.id} />
+                  ) : null}
                 </ExperienceCard>
               </li>
             ))}
@@ -199,7 +206,11 @@ function ExperiencesList() {
               <li key={r.id}>
                 {/* No reply and no dispute door on my OWN submission: both
                     belong to the person it is about. */}
-                <ExperienceCard row={r} testId="experience-mine-item" />
+                <ExperienceCard
+                  row={r}
+                  testId="experience-mine-item"
+                  responsesRead={responsesRead}
+                />
               </li>
             ))}
           </ul>
@@ -384,10 +395,14 @@ function ExperienceSubmitDepth({
 function ExperienceCard({
   row,
   testId = "experience-about-me-item",
+  responsesRead,
   children,
 }: {
   row: ExperienceRow;
   testId?: string;
+  /** Whether replies could be READ. False = nothing is known about replies
+   *  here, which is not the same as there being none. */
+  responsesRead: boolean;
   children?: React.ReactNode;
 }) {
   const t = useTranslations("experience");
@@ -427,6 +442,53 @@ function ExperienceCard({
         ) : null}
       </div>
       <p className="text-sm leading-relaxed text-text-secondary break-words">{row.body}</p>
+
+      {/* THE RIGHT OF REPLY, RENDERED.
+          A reply is shown to the person who WROTE it in every state, and to the
+          author of the experience only once it is PUBLISHED. That second
+          condition is enforced here rather than left to RLS, because the v1
+          select policy's third branch compares the unqualified
+          `moderation_status` inside a subquery over `experience_records` — so
+          Postgres resolves it to the RECORD's status, and the policy hands the
+          experience's author a reply that is still submitted, in moderation, or
+          rejected. Correcting the policy is a schema change and belongs at the
+          human gate; until then this surface does not disclose what moderation
+          has not released. Recorded on EVID-6.
+          `experience_responses` shipped with a schema, an RPC and a form, and
+          no reader: a person could reply and nobody — including them — ever saw
+          it again. The reply carries its own moderation state, because a
+          submitted reply and a published one are different facts to both
+          sides. When replies could not be read at all, the card says so instead
+          of leaving an absence that reads as "no reply". */}
+      {row.response !== null && (row.response.moderationStatus === "published" || !row.isAuthor) ? (
+        <div
+          className="flex flex-col gap-1 rounded-md border border-border-subtle bg-surface-2/40 p-2"
+          data-testid="experience-response"
+          data-response-moderation={row.response.moderationStatus}
+        >
+          <div className="flex flex-wrap items-baseline gap-x-2">
+            <span className="text-meta font-medium text-text-primary">
+              {t("response.heading")}
+            </span>
+            <span className="text-meta text-text-muted">
+              · {t(`moderation.${row.response.moderationStatus}`)}
+            </span>
+          </div>
+          <p className="text-sm leading-relaxed text-text-secondary break-words">
+            {row.response.body}
+          </p>
+          {row.response.moderationStatus !== "published" ? (
+            <p className="text-meta text-text-muted" data-testid="experience-response-not-public">
+              {t("response.notPublicYet")}
+            </p>
+          ) : null}
+        </div>
+      ) : !responsesRead ? (
+        <p className="text-meta text-text-muted" data-testid="experience-response-unknown">
+          {t("response.unreadable")}
+        </p>
+      ) : null}
+
       {children}
     </div>
   );

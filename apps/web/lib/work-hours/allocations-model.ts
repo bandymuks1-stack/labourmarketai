@@ -153,6 +153,26 @@ export function sumHours(values: readonly number[]): number {
   return cents / 100;
 }
 
+/**
+ * THE ONE RULE FOR "COUNTED HOURS": a row a timesheet REJECTED is visible
+ * (it stays in the record and in the list) but counted nowhere. The project
+ * hours, the work-intelligence ledger and the window report already excluded
+ * `status = 'rejected'`; the day total and the monthly grid did not, so the
+ * same person's day read 10 h on the hours page and 8 h on the project. Every
+ * total built from allocation rows filters through this - rows without a
+ * `status` (older projections) are counted, exactly as before.
+ */
+export function isCountedAllocation(row: { readonly status?: string | null }): boolean {
+  return row.status !== "rejected";
+}
+
+/** Sum of the COUNTED hours of `rows` (rejected rows excluded). */
+export function countedHours(
+  rows: readonly { readonly hours: number; readonly status?: string | null }[],
+): number {
+  return sumHours(rows.filter(isCountedAllocation).map((r) => r.hours));
+}
+
 export type WorkerDayTotal = {
   readonly workerId: string;
   readonly workDate: string;
@@ -168,10 +188,13 @@ export type WorkerDayTotal = {
  * the two rows should have been one.
  */
 export function workerDayTotals(
-  rows: readonly Pick<WorkHourAllocation, "workerId" | "workDate" | "hours">[],
+  rows: readonly (Pick<WorkHourAllocation, "workerId" | "workDate" | "hours"> & {
+    readonly status?: string | null;
+  })[],
 ): readonly WorkerDayTotal[] {
   const acc = new Map<string, WorkerDayTotal>();
   for (const r of rows) {
+    if (!isCountedAllocation(r)) continue;
     const key = `${r.workerId}|${r.workDate}`;
     const prev = acc.get(key);
     acc.set(key, {
@@ -206,9 +229,13 @@ export type MonthlyGrid = {
  * disappears looks like the object was deleted.
  */
 export function monthlyGrid(
-  rows: readonly Pick<WorkHourAllocation, "workerId" | "workObjectId" | "hours">[],
+  allRows: readonly (Pick<WorkHourAllocation, "workerId" | "workObjectId" | "hours"> & {
+    readonly status?: string | null;
+  })[],
   objectIds?: readonly string[],
 ): MonthlyGrid {
+  // Rejected rows are counted nowhere (`isCountedAllocation`).
+  const rows = allRows.filter(isCountedAllocation);
   const columns = objectIds
     ? [...objectIds]
     : [...new Set(rows.map((r) => r.workObjectId))].sort();

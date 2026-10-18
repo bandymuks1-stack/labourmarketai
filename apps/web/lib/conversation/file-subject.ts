@@ -1,0 +1,434 @@
+/**
+ * WHOSE FILE IS THIS? — the subject/owner dimension the product never had.
+ * Pure: no server-only import, no IO, no env.
+ *
+ * ── The defect ────────────────────────────────────────────────────────────
+ * The conversation's file vocabulary encodes WHICH SURFACE a document belongs
+ * to and never WHOSE DOCUMENT IT IS. Measured on the real router:
+ *
+ *     "Įkeliu 20 kandidatų CV."          -> cv          (the person's OWN import)
+ *     "I am uploading 20 candidate CVs." -> candidates  (the demand surface)
+ *
+ * Two different wrong answers in two languages, and the Lithuanian one is the
+ * dangerous kind: a bulk candidate import aimed straight at the uploader's own
+ * professional history. Every CV confirm action in
+ * `lib/profile/cv-section-import-actions.ts` takes NO subject parameter — the
+ * subject is always the caller, resolved server-side. That is a good safety
+ * property and it is also why a mis-read sentence writes other people's
+ * careers into the uploader's own record.
+ *
+ * ── What this module does ─────────────────────────────────────────────────
+ * It reads TWO things a human states plainly and the product never listened
+ * for: whose the file is, and what kind of file it is. It then says which
+ * EXISTING capability serves that combination — or, honestly, that none does.
+ *
+ * It does NOT parse, store, upload, resolve a person, or name a row. Subject
+ * RESOLUTION (which candidate, which worker) belongs to
+ * `lib/organization-evidence/person-matching.ts`, which already refuses to
+ * invent a person; this module only decides which door the file is standing
+ * at, and whether that door exists.
+ *
+ * ── The safety rule ───────────────────────────────────────────────────────
+ * A file may never be attached to the wrong person. So the DEFAULT is not
+ * "self" — it is `unstated`, which asks. Only an explicit first-person
+ * possessive makes a file the speaker's own.
+ */
+import { fold } from "@/lib/conversation/intent-router";
+import { guessDocumentType } from "@/lib/conversation/document-type-guess";
+
+/** Whose the file is. `unstated` is a question, never an assumption. */
+export type FileSubject =
+  | "self"
+  | "another_person"
+  | "many_people"
+  | "organization"
+  | "cohort"
+  | "unstated";
+
+/**
+ * What kind of file it is, in the product's own terms. `document` covers the
+ * whole certificate/permit/ID family — `guessDocumentType` already owns that
+ * taxonomy and is reused rather than restated.
+ */
+export type FileKind = "cv" | "document" | "work_evidence" | "workforce_table" | "unstated";
+
+export interface FileIntent {
+  readonly subject: FileSubject;
+  readonly kind: FileKind;
+  /** The document type slug when the sentence named one (reused taxonomy). */
+  readonly documentTypeSlug: string | null;
+}
+
+/**
+ * A DEPOSIT SIGNAL — the person is HANDING something over, not asking about
+ * it. Without one this module returns null and the ordinary intent path runs.
+ *
+ * This is what keeps slice D safe: "Noriu pamatyti savo CV" and "rodyk CV"
+ * carry no deposit signal, so they stay reads.
+ */
+const DEPOSIT = [
+  // lt — "čia mano CV", "įkeliu", "prisegu", "siunčiu", "pridedu"
+  "cia ", "stai ", "ikeliu", "ikelsiu", "ikelk", "prisegu", "prisegiau",
+  "siunciu", "pridedu", "pridesiu", "imetu", "uzkeliu",
+  // en
+  "here is", "here are", "here's", "attaching", "attached", "i am uploading",
+  "i'm uploading", "uploading", "upload", "sending you", "this is my",
+  "this is the", "these are",
+  // ru
+  "вот ", "это мо", "это резюме", "загружаю", "прикрепляю", "отправляю", "прилагаю",
+  // nl
+  "hierbij", "dit is mijn", "dit zijn", "ik upload", "bijgevoegd",
+  // de
+  "hier ist", "hier sind", "anbei", "ich lade", "beigefugt", "das ist mein",
+] as const;
+
+/** First-person possessive — the ONLY thing that makes a file the speaker's. */
+const SELF = [
+  "mano ", "savo ", "my ", "mijn ", "mein ", "meine ", "moj", "мой", "моя",
+  "мое", "моё", "мои", "свое", "своё", "свой", "своя",
+] as const;
+
+/** Another single human, named by role rather than by name. */
+const ANOTHER_PERSON = [
+  "kandidato ", "kandidata ", "darbuotojo ", "zmogaus ", "asmens ",
+  "candidate", "applicant", "worker's", "employee's", "person's",
+  "кандидата", "соискателя", "работника", "сотрудника",
+  "kandidaat", "sollicitant", "medewerker", "bewerber", "mitarbeiter",
+] as const;
+
+/** Several humans. Plural role nouns, and any of them beside a number. */
+const MANY_PEOPLE = [
+  "kandidatu", "darbuotoju", "zmoniu", "asmenu",
+  "candidates", "applicants", "workers", "employees", "people",
+  "кандидатов", "соискателей", "работников", "сотрудников",
+  "kandidaten", "sollicitanten", "medewerkers", "bewerber", "mitarbeiter",
+] as const;
+
+/** The organization itself is the owner ("mūsų darbuotojų", "įmonės"). */
+const ORGANIZATION = [
+  "imones ", "imone ", "musu ", "kompanijos ", "organizacijos ",
+  "our ", "company's ", "the company", "of the company",
+  "нашей компании", "наших", "компании", "организации",
+  "ons bedrijf", "onze ", "unser", "unsere", "der firma", "firmen",
+] as const;
+
+/** Learners — an institution's cohort. */
+const COHORT = [
+  "studentu", "studento", "mokiniu", "mokinio", "besimokanciu", "grupes ",
+  "students", "student's", "learners", "cohort", "class list",
+  "студентов", "учащихся", "группы",
+  "studenten", "leerlingen", "schuler", "kursteilnehmer",
+] as const;
+
+/** Photographs / images of finished work. */
+const WORK_EVIDENCE = [
+  "nuotrauk", "foto", "photo", "picture", "image", "фото", "снимк",
+  "afbeelding", "bild", "bilder",
+] as const;
+
+/** A table of people rather than one person's document. */
+const TABLE = ["excel", "xlsx", ".csv", "csv", "lentel", "sarasas", "sąrašas", "spreadsheet", "tabel", "tabelle", "таблиц", "список"] as const;
+
+const hasAny = (hay: string, needles: readonly string[]): boolean =>
+  needles.some((n) => hay.includes(n));
+
+/**
+ * A READBACK, NOT A DEPOSIT (issue #1689, defect G).
+ *
+ * "Parodyk įkeltą nuotrauką", "show the photo I just uploaded", "покажи
+ * загруженное фото", "zeig das hochgeladene Foto", "laat de geüploade foto
+ * zien" — every one of these carries the upload verb in a PAST form: the
+ * person is asking about a file already handed over, not handing one over.
+ * The English one used to trip the DEPOSIT list on the bare stem "upload",
+ * which read a question about a stored photo as a new file with no stated
+ * owner — and asked whose it was.
+ *
+ * These forms are blanked before the deposit test, so the sentence falls
+ * through to the ordinary intent path (where the `evidence-photos` rule
+ * answers it) unless it ALSO carries a genuine present deposit signal
+ * ("čia mano įkeltas CV" is still a deposit — "čia" says so).
+ */
+// Written in already-FOLDED form (the query is folded before it is tested):
+// "įkeltą" → "ikelta", "geüpload" → "geupload".
+const READBACK_FORMS =
+  /(?<!\p{L})(ikelt\p{L}*|uploaded|загружен\p{L}*|hochgeladen\p{L}*|geupload\p{L}*)(?!\p{L})/giu;
+
+/** The sentence with its past upload forms removed — what the deposit test sees. */
+export function withoutReadbackForms(folded: string): string {
+  return folded.replace(READBACK_FORMS, " ");
+}
+
+/**
+ * Read the file intent out of a sentence, or `null` when the sentence is not
+ * handing a file over at all.
+ *
+ * Order matters and encodes the safety rule. The widest, most dangerous
+ * subject wins: if a sentence mentions many people AND says "mano", the
+ * plural reading is taken, because "mano kandidatų CV" is the agency's
+ * candidates, not the agency owner's own history.
+ */
+export function readFileIntent(text: string): FileIntent | null {
+  const raw = (text ?? "").trim();
+  if (!raw) return null;
+  const q = ` ${fold(raw)} `;
+  // "Ką ČIA galiu padaryti?" asks WHERE/WHAT, it hands nothing over: a question
+  // word directly before "čia" is not the deposit "čia mano CV" (production
+  // 2026-10-01: the capabilities question was answered with "Kieno šis dokumentas?").
+  const asked = withoutReadbackForms(q).replace(/(?<!\p{L})(ka|kas|kur|kaip|kodel|kam|ko|kuo|koks|kokia|kokie)\s+cia(?!\p{L})/gu, " ");
+  if (!hasAny(asked, DEPOSIT)) return null;
+
+  const documentTypeSlug = guessDocumentType(raw);
+  const evidence = hasAny(q, WORK_EVIDENCE);
+  const table = hasAny(q, TABLE);
+
+  // ── SUBJECT ─────────────────────────────────────────────────────────────
+  //
+  // Order encodes the safety rule, and it is NOT simply "widest first". An
+  // explicit OWNER outranks a plural role noun, because "įmonės darbuotojų
+  // Excel" states both ("the company's employees") and the organization is
+  // the one that actually owns the file — and the organization door is the
+  // one with person matching, explicit resolution and an atomic commit.
+  //
+  // What the order must never do is let a non-self sentence reach `self`.
+  // `self` is last before `unstated` for exactly that reason, and a guard
+  // pins that no subject except `self` can reach the self CV importer.
+  const numbered = /\d/.test(q);
+  let subject: FileSubject;
+  if (hasAny(q, COHORT)) subject = "cohort";
+  else if (hasAny(q, ORGANIZATION)) subject = "organization";
+  else if (hasAny(q, MANY_PEOPLE) || (numbered && hasAny(q, ANOTHER_PERSON)))
+    subject = "many_people";
+  else if (hasAny(q, ANOTHER_PERSON)) subject = "another_person";
+  else if (hasAny(q, SELF)) subject = "self";
+  else subject = "unstated";
+
+  // ── KIND ────────────────────────────────────────────────────────────────
+  let kind: FileKind;
+  if (evidence) kind = "work_evidence";
+  else if (table) kind = "workforce_table";
+  else if (documentTypeSlug === "cv") kind = "cv";
+  else if (documentTypeSlug) kind = "document";
+  else kind = "unstated";
+
+  return { subject, kind, documentTypeSlug };
+}
+
+// ── Which EXISTING capability serves this file? ─────────────────────────────
+
+/** The actor's current context, as the chat already knows it. */
+export interface FileActorContext {
+  /** The ACTIVE workspace, not who the person is. */
+  readonly identity: "person" | "company";
+  /** True when the active organization holds the education capability. */
+  readonly educationWorkspace: boolean;
+}
+
+/**
+ * `capability` names a door that EXISTS today; `unavailable` names a subject
+ * the product understood and cannot yet serve. The distinction is the whole
+ * point: an honest "we cannot do that yet" is what stops a candidate's CV
+ * being written into the uploader's own history.
+ */
+export type FileRoute =
+  | { readonly kind: "capability"; readonly capability: FileCapability }
+  | { readonly kind: "ask_subject" }
+  | { readonly kind: "needs_organization" }
+  | { readonly kind: "unavailable"; readonly subject: FileSubject };
+
+/** Doors that exist in the product today. Nothing here is new. */
+export type FileCapability =
+  /** `worker-cv-flow` → `cv-section-import-actions` (self, confirmed row by row). */
+  | "self_cv_import"
+  /** `worker.add-document` → `upsert_worker_document` (self). */
+  | "self_document"
+  /** `worker-worklog-flow` → the work entry is saved FIRST, then the photo is
+   *  attached to it (`uploadJournalEntryPhoto` → `register_journal_entry_photo`,
+   *  1-photo free tier). A photo is evidence OF an entry, never a loose drop. */
+  | "self_work_evidence"
+  /** `lib/organization-evidence/import-core` — sessions, person matching,
+   *  preview, explicit resolve, one atomic commit, withdraw/reinstate. */
+  | "organization_evidence_import";
+
+/** The capabilities that write into the CALLER'S own record. Only a `self`
+ *  subject may reach one — pinned exhaustively by a-file-belongs-to-someone. */
+export const SELF_SCOPED_CAPABILITIES: ReadonlySet<FileCapability> = new Set([
+  "self_cv_import",
+  "self_document",
+  "self_work_evidence",
+]);
+
+export function routeFileIntent(
+  intent: FileIntent,
+  actor: FileActorContext,
+): FileRoute {
+  switch (intent.subject) {
+    case "unstated":
+      // NEVER default to self. Ask whose it is.
+      return { kind: "ask_subject" };
+
+    case "self":
+      if (intent.kind === "cv") return { kind: "capability", capability: "self_cv_import" };
+      if (intent.kind === "document") return { kind: "capability", capability: "self_document" };
+      // A person's own work photos: the journal photo door (owner P0
+      // 2026-09-23). It used to answer "no door yet" while the paperclip
+      // already routed the very same photo into the work-log flow — two
+      // routers disagreeing about one file. The photo attaches to a work
+      // entry the person saves first, so it is still never a loose drop.
+      if (intent.kind === "work_evidence") {
+        return { kind: "capability", capability: "self_work_evidence" };
+      }
+      return { kind: "unavailable", subject: "self" };
+
+    case "another_person":
+    case "many_people":
+      // THE DEFECT THIS CLOSES. There is no candidate-CV import: every CV
+      // confirm action binds to the caller. Saying so is the only safe
+      // answer; routing to the self importer is what used to happen.
+      return { kind: "unavailable", subject: intent.subject };
+
+    case "organization":
+      if (actor.identity !== "company") return { kind: "needs_organization" };
+      // A table of the organization's people, or evidence about their work,
+      // is exactly what the organization evidence import takes.
+      if (intent.kind === "workforce_table" || intent.kind === "work_evidence") {
+        return { kind: "capability", capability: "organization_evidence_import" };
+      }
+      return { kind: "unavailable", subject: "organization" };
+
+    case "cohort":
+      if (actor.identity !== "company" || !actor.educationWorkspace) {
+        return { kind: "needs_organization" };
+      }
+      // Learners join by invitation today; there is no cohort FILE import.
+      return { kind: "unavailable", subject: "cohort" };
+  }
+}
+
+// ── A PICKED file (the composer paperclip) ─────────────────────────────────
+//
+// The paperclip used to be a flow launcher with its own two-door router,
+// bypassing this module: it never opened a file picker, and it routed own
+// work photos into the journal while `routeFileIntent` above still called
+// them "no door yet". A picked file now goes through THIS router, so a typed
+// deposit sentence and a paperclip pick obey one set of subject-safety rules.
+
+/** What a picked file's BYTES are. Read from the MIME type the browser
+ *  reports — never from the words in its name (`cv.jpg` is a photo). */
+export type PickedFileMedia = "image" | "pdf" | "docx" | "text";
+
+const MEDIA_BY_MIME: Readonly<Record<string, PickedFileMedia>> = {
+  "image/jpeg": "image",
+  "image/png": "image",
+  "image/webp": "image",
+  "application/pdf": "pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "text/plain": "text",
+};
+
+/** ONLY for a file the browser typed as "" (some report no MIME for .docx
+ *  where no office suite is installed). A STATED type always wins: a GIF
+ *  renamed `photo.png` is still a GIF, and is refused. */
+const MEDIA_BY_EXTENSION: Readonly<Record<string, PickedFileMedia>> = {
+  pdf: "pdf",
+  docx: "docx",
+  txt: "text",
+};
+
+export interface PickedFileLike {
+  readonly type: string;
+  readonly name: string;
+}
+
+/** The picked file's media, or `null` for a type no door takes. */
+export function pickedFileMedia(file: PickedFileLike): PickedFileMedia | null {
+  const mime = (file.type ?? "").trim().toLowerCase();
+  if (mime) return MEDIA_BY_MIME[mime] ?? null;
+  const ext = /\.([a-z0-9]+)$/i.exec(file.name ?? "")?.[1]?.toLowerCase() ?? "";
+  return MEDIA_BY_EXTENSION[ext] ?? null;
+}
+
+/**
+ * The MIME-derived FileKinds a picked file can honestly be, most likely
+ * first. An image is a work photo or a photographed certificate; a PDF or
+ * DOCX is a CV or a document; plain text only ever reaches the CV reader.
+ * Which one it IS, only the person can say — so the attach question asks.
+ */
+export function fileKindsForMedia(media: PickedFileMedia): readonly FileKind[] {
+  switch (media) {
+    case "image":
+      return ["work_evidence", "document"];
+    case "pdf":
+    case "docx":
+      return ["cv", "document"];
+    case "text":
+      return ["cv"];
+  }
+}
+
+/** An existing page with its own uploader. The file does not travel there —
+ *  the person attaches it again on that page, and the chat says so. */
+export type AttachSurface = "work_report" | "organization_document" | "organization_people";
+
+/**
+ * One answer the attach question ("what is this file for?") may offer.
+ *
+ *   door     — the person STATES the subject ("my CV") and the router names
+ *              an existing in-conversation door; the file is handed to that
+ *              flow's own field, never to a new uploader;
+ *   not_yet  — "someone else's file": understood, routed, honestly refused;
+ *   surface  — a link to an existing page (no in-chat door yet).
+ */
+export type AttachAnswer =
+  | { readonly kind: "door"; readonly intent: FileIntent; readonly capability: FileCapability }
+  | { readonly kind: "not_yet"; readonly intent: FileIntent }
+  | { readonly kind: "surface"; readonly surface: AttachSurface };
+
+/**
+ * The answers the attach question offers for ONE picked file, narrowed by
+ * its MIME type and by the ACTIVE identity.
+ *
+ * A picked file states nothing about whose it is, so it is never routed on
+ * its own (an `unstated` subject asks — the rule above). Each door answer is
+ * a self-STATED intent, and it is offered only when `routeFileIntent` names a
+ * self-scoped door for it: the paperclip cannot reach a door the typed
+ * sentence could not. Another person's file is offered as an answer precisely
+ * so that it is refused out loud, never written into the uploader's record.
+ *
+ * A company workspace gets its organization's existing pages. Its own
+ * uploaders take the file there; the personal doors write into the PERSON's
+ * record and are not what someone acting for an organization is doing.
+ */
+export function attachAnswersForFile(
+  file: PickedFileLike,
+  actor: FileActorContext,
+): readonly AttachAnswer[] {
+  const media = pickedFileMedia(file);
+  if (!media) return [];
+  const kinds = fileKindsForMedia(media);
+
+  if (actor.identity === "company") {
+    const out: AttachAnswer[] = [];
+    // The organization's document register takes photos, PDFs and DOCX.
+    if (media !== "text") out.push({ kind: "surface", surface: "organization_document" });
+    // A list of people goes to the roster importer, which reads tables.
+    if (media !== "image") out.push({ kind: "surface", surface: "organization_people" });
+    return out;
+  }
+
+  const out: AttachAnswer[] = [];
+  for (const kind of kinds) {
+    const intent: FileIntent = { subject: "self", kind, documentTypeSlug: null };
+    const route = routeFileIntent(intent, actor);
+    if (route.kind === "capability" && SELF_SCOPED_CAPABILITIES.has(route.capability)) {
+      out.push({ kind: "door", intent, capability: route.capability });
+    }
+  }
+  // An uploaded work report becomes a journal DRAFT on the documents page
+  // (the `?draftFrom=` chain) — it needs its stored file first.
+  if (media === "pdf" || media === "docx") out.push({ kind: "surface", surface: "work_report" });
+  out.push({
+    kind: "not_yet",
+    intent: { subject: "another_person", kind: kinds[0]!, documentTypeSlug: null },
+  });
+  return out;
+}

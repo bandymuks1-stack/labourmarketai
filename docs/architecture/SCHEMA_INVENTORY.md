@@ -363,7 +363,7 @@ is_target_market  boolean NOT NULL DEFAULT true
 RLS: select true / write admin. **No grant to `authenticated`** — despite the
 permissive policy, direct user-session reads fail at the privilege layer.
 
-### `productivity_units` — scoped unit registry (0013, seeded 0013+0017)
+### `productivity_units` — scoped unit registry (0013, seeded 0013+0017+20260911130000)
 ```
 slug                  text PK
 category              text NOT NULL
@@ -375,7 +375,12 @@ parent_unit_slug      text NULL  FK → productivity_units(slug)
 conversion_factor     numeric NULL                              -- no updated_at
 ```
 Platform seed: square_meters, square_meters_per_day, box_per_day, hours, minutes,
-days, meters, pieces, kilograms, packages. RLS: select true / write admin. Grant: SELECT.
+days, meters, pieces, kilograms, packages (0013+0017); kilometers (parent meters
+×1000), pallets, covers, cases (20260911130000, issue #1689 — the universal
+journal's distance / units-handled / cases quantities). RLS: select
+`organization_id is null` or member/admin (20260817120000) / write admin. Grant:
+SELECT. Code mirror: `PLATFORM_OUTPUT_UNIT_SLUGS` + `WORK_TIME_UNIT_SLUGS` in
+`apps/web/lib/journal/work-time.ts`; guard `journal-units-registry.test.ts`.
 
 ### `profession_templates` — structured-entry form registry (0013)
 ```

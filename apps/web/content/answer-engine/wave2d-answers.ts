@@ -181,6 +181,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Ihr Profil für Arbeitgeber sichtbar machen",
         desc: "Wie Sie Ihr LabourMarket.ai-Profil für Arbeitgeber sichtbar machen: Sichtbarkeit öffnen und echte Fähigkeiten, Sprachen und Verfügbarkeit eintragen, damit die richtigen Sie finden.",
       },
+      pl: {
+        slug: "jak-uczynic-profil-widocznym-dla-pracodawcow",
+        h1: "Jak uczynić mój profil widocznym dla pracodawców?",
+        short: "Uzupełnij profil i ustaw jego widoczność na otwartą. Pełniejszy profil z prawdziwymi umiejętnościami i dostępnością jest łatwiejszy do znalezienia i zrozumienia dla właściwych pracodawców.",
+        full: [
+          "Bycie znalezionym zależy częściowo od ustawień widoczności, a częściowo od treści. Na LabourMarket.ai to Ty decydujesz, czy Twój profil jest możliwy do odnalezienia, i możesz to włączyć, gdy szukasz nowych możliwości. Sama widoczność jednak nie wystarczy — ubogi profil trudno dobrze dopasować.",
+          "Do właściwych pracodawców trafiasz dzięki profilowi, który nazywa Twoje prawdziwe umiejętności, języki, miejsca, w których możesz pracować, i termin dostępności. Im więcej z tego jest obecne i, gdzie to możliwe, poparte dowodem, tym trafniej pojawiasz się w dopasowaniach, zamiast zostać pominiętym.",
+        ],
+        steps: [
+          "Uzupełnij umiejętności, języki, lokalizacje i dostępność.",
+          "Ustaw widoczność profilu na otwartą, gdy szukasz pracy.",
+          "Dodaj dowody do kluczowych umiejętności, aby dopasowania były trafne.",
+        ],
+        limitations: "Ustawienia widoczności decydują o tym, kto może Cię znaleźć; nie gwarantują, że pracodawca nawiąże kontakt.",
+        title: "Uczyń swój profil widocznym dla pracodawców",
+        desc: "Jak uczynić profil na LabourMarket.ai widocznym dla pracodawców: otwórz widoczność i uzupełnij prawdziwe umiejętności, języki i dostępność, by znaleźli Cię właściwi.",
+      },
     },
   },
   {
@@ -271,6 +288,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Erfahren, ob ein Arbeitgeber interessiert ist",
         desc: "Wie Sie erfahren, ob ein Arbeitgeber interessiert ist auf LabourMarket.ai: Sie werden über echte Aktivität an Ihrem Profil benachrichtigt, statt Stille nach der Bewerbung.",
       },
+      pl: {
+        slug: "skad-bede-wiedziec-ze-pracodawca-jest-zainteresowany",
+        h1: "Skąd będę wiedzieć, że pracodawca jest mną zainteresowany?",
+        short: "Dostajesz powiadomienie, gdy pracodawca zareaguje na Twój profil lub na zgłoszone przez Ciebie zainteresowanie. Platforma pokazuje prawdziwą aktywność, zamiast zostawiać Cię w niepewności po zgłoszeniu.",
+        full: [
+          "Częstą frustracją gdzie indziej jest cisza po wysłaniu zgłoszenia. LabourMarket.ai jest zbudowany tak, by zainteresowanie było widoczne: gdy pracodawca wchodzi w interakcję z Twoim profilem lub odpowiada na zgłoszone zainteresowanie, widzisz to i nie odświeżasz skrzynki bez żadnego sygnału.",
+          "Żadna platforma nie zmusi jednak pracodawcy do odpowiedzi, a nie każda możliwość dokądś prowadzi. Uczciwy obraz jest taki, że zobaczysz prawdziwą aktywność, gdy się pojawi, a najlepszą rzeczą pod Twoją kontrolą jest kompletny, aktualny profil, dzięki któremu przyciągane zainteresowanie będzie dobrze dopasowane.",
+        ],
+        steps: [
+          "Utrzymuj profil aktualny, aby dopasowania były trafne.",
+          "Zgłaszaj zainteresowanie możliwościami, które naprawdę pasują.",
+          "Obserwuj powiadomienia o prawdziwej aktywności pracodawców na Twoim profilu.",
+        ],
+        limitations: "Platforma pokazuje prawdziwą aktywność, ale nie może zagwarantować, że każdy pracodawca odpowie.",
+        title: "Skąd wiadomo, że pracodawca jest zainteresowany",
+        desc: "Skąd wiesz, że pracodawca jest zainteresowany na LabourMarket.ai: dostajesz powiadomienia o prawdziwej aktywności na profilu i przy zgłoszonym zainteresowaniu, zamiast ciszy po zgłoszeniu.",
+      },
     },
   },
   {
@@ -356,6 +390,22 @@ const DRAFTS: readonly Draft[] = [
         title: "Ihr Arbeitsprofil aufbauen",
         desc: "Wie Sie Ihr Arbeitsprofil auf LabourMarket.ai aufbauen: mit Beruf, echten Fähigkeiten, Sprachen und Verfügbarkeit beginnen und Schritt für Schritt Belege hinzufügen.",
       },
+      pl: {
+        slug: "jak-zbudowac-profil-zawodowy",
+        h1: "Jak zbudować swój profil zawodowy?",
+        short: "Zacznij od zawodu i prawdziwych umiejętności, dodaj języki, lokalizacje i dostępność, a potem dołącz dowody tam, gdzie możesz. Buduj go krok po kroku — nie musi być od razu idealny.",
+        full: [
+          "Profil zawodowy buduje się z prawdy o tym, co robisz, a nie z szablonu wypełnianego po to, by zrobić wrażenie. Zacznij od zawodu i konkretnych umiejętności, które faktycznie masz, a potem dodaj języki, miejsca, w których możesz pracować, i termin. Możesz zaimportować istniejące CV, by oszczędzić pisania, i przejrzeć każdą podpowiedź.",
+          "Profil poprawia się z czasem: gdy zapisujesz pracę i uzyskujesz potwierdzenia umiejętności, rośnie w obraz poparty dowodami, a nie pozostaje statyczną deklaracją. Traktuj pierwszą wersję jako fundament, który stale aktualizujesz, a nie jednorazowy dokument.",
+        ],
+        steps: [
+          "Dodaj swój zawód i prawdziwe umiejętności, które masz.",
+          "Ustaw języki, lokalizacje i dostępność.",
+          "Zaimportuj CV lub zapisuj pracę, a z czasem dołączaj dowody.",
+        ],
+        title: "Budowanie profilu zawodowego",
+        desc: "Jak zbudować profil zawodowy na LabourMarket.ai: zacznij od zawodu, prawdziwych umiejętności, języków i dostępności, a potem krok po kroku dodawaj dowody.",
+      },
     },
   },
   {
@@ -440,6 +490,22 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Aus Berufserfahrung ein Profil machen",
         desc: "Wie Sie aus Berufserfahrung ein Profil machen auf LabourMarket.ai: beschreiben, was Sie taten, Aufgaben in benannte Fähigkeiten überführen und die wichtigsten belegen.",
+      },
+      pl: {
+        slug: "jak-zamienic-doswiadczenie-zawodowe-w-profil",
+        h1: "Jak zamienić moje doświadczenie zawodowe w profil?",
+        short: "Opisz, na czym naprawdę polegała Twoja praca w każdej roli, a potem pozwól, by te zadania stały się nazwanymi umiejętnościami. Doświadczenie staje się profilem, gdy działanie zostaje przełożone na konkretne, sprawdzalne umiejętności.",
+        full: [
+          "Lista dawnych stanowisk mówi niewiele; to, na czym polegała w nich praca, mówi dużo. Przejdź rola po roli i opisz prostymi słowami konkretne zadania i obowiązki. Stają się one surowcem dla umiejętności — każde prawdziwe zadanie wskazuje umiejętność, którą możesz nazwać i później poprzeć dowodem.",
+          "Na LabourMarket.ai zamienia to historię pracy w żywy profil: zapisywane zadania wspierają deklarowane umiejętności, a potwierdzenia od przełożonych je wzmacniają. Celem jest uczciwy obraz możliwości, a nie dopracowana opowieść oderwana od tego, co wydarzyło się naprawdę.",
+        ],
+        steps: [
+          "Przejdź przez każdą rolę i zanotuj konkretne wykonywane zadania.",
+          "Zamień powtarzające się zadania w nazwane umiejętności w profilu.",
+          "Dodaj dowody i poproś o potwierdzenie tych kluczowych.",
+        ],
+        title: "Zamiana doświadczenia zawodowego w profil",
+        desc: "Jak zamienić doświadczenie zawodowe w profil na LabourMarket.ai: opisz swoją pracę, zamień zadania w nazwane umiejętności i poprzyj dowodem te kluczowe.",
       },
     },
   },
@@ -531,6 +597,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Fähigkeiten von einer Führungskraft bestätigen lassen",
         desc: "Wie Sie Fähigkeiten auf LabourMarket.ai bestätigen lassen: eine Führungskraft, die Ihre Arbeit sah, verifiziert eine bestimmte Fähigkeit — von angegeben zu bestätigt.",
       },
+      pl: {
+        slug: "jak-uzyskac-potwierdzenie-umiejetnosci-od-przelozonego",
+        h1: "Jak uzyskać potwierdzenie moich umiejętności od przełożonego?",
+        short: "Poproś kogoś, kto widział Twoją pracę — przełożonego lub lidera zespołu — o potwierdzenie konkretnej umiejętności. Weryfikuje ją na podstawie prawdziwej pracy, a umiejętność przechodzi z zadeklarowanej na potwierdzoną wraz z zapisem, kto ją potwierdził.",
+        full: [
+          "Potwierdzenie sprawia, że samodzielnie zadeklarowana umiejętność zyskuje oparcie w dowodzie. Najlepiej nadaje się do tego osoba, która faktycznie widziała Cię przy pracy: przełożony, lider zespołu lub kierownik. Prosisz o potwierdzenie konkretnej umiejętności, a ona weryfikuje ją na podstawie prawdziwej pracy, a nie testu.",
+          "To utrzymuje sygnał uczciwym i użytecznym. Umiejętność potwierdzona waży więcej w dopasowaniu, bo stanęła za nią prawdziwa osoba, a platforma zapisuje, kto ją potwierdził. Umiejętności, których nie da się jeszcze potwierdzić, pozostają wyraźnie oznaczone jako zadeklarowane — nic nie jest wymyślane w Twoim imieniu.",
+        ],
+        steps: [
+          "Wybierz umiejętność, której użycie przełożony lub lider faktycznie widział.",
+          "Poproś o potwierdzenie tej konkretnej umiejętności.",
+          "Po weryfikacji pokazuje się jako potwierdzona, z zapisem osoby potwierdzającej.",
+        ],
+        limitations: "Umiejętność powinna potwierdzać wyłącznie osoba, która może poręczyć za Twoją prawdziwą pracę; platforma nigdy nie potwierdza umiejętności sama.",
+        title: "Uzyskanie potwierdzenia umiejętności od przełożonego",
+        desc: "Jak uzyskać potwierdzenie umiejętności na LabourMarket.ai: poproś przełożonego lub lidera, który widział Twoją pracę, o weryfikację konkretnej umiejętności.",
+      },
     },
   },
   {
@@ -621,6 +704,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Wie Ihre Fähigkeiten standardmäßig privat bleiben",
         desc: "Wie LabourMarket.ai Ihre Fähigkeiten standardmäßig privat hält: Einträge sind geschlossen, bis Sie teilen — Sie steuern, was Arbeitgeber wann sehen.",
       },
+      pl: {
+        slug: "jak-moje-umiejetnosci-pozostaja-prywatne",
+        h1: "Jak moje umiejętności domyślnie pozostają prywatne dla pracodawców?",
+        short: "Twoje zapisy są domyślnie prywatne. To Ty wybierasz, co staje się widoczne, gdy szukasz pracy; nic o Twoich umiejętnościach ani historii nie jest pokazywane pracodawcom, dopóki nie zdecydujesz się tym podzielić.",
+        full: [
+          "Prywatność jest stanem wyjściowym, a nie dodatkiem. Domyślnie Twoje szczegółowe zapisy — to, co rejestrujesz, i pełna historia — pozostają zamknięte. Ma to szczególne znaczenie, gdy rozglądasz się za opcjami, nadal pracując, i nie chcesz, by obecny pracodawca widział tę aktywność.",
+          "Gdy uznasz, że to właściwy moment, decydujesz, co otworzyć: możesz uczynić profil możliwym do odnalezienia i wybrać, co widzą pracodawcy. Kontrola przez cały czas zostaje przy Tobie, a otwarcie widoczności jest wyraźnym wyborem, który możesz cofnąć, a nie czymś, co dzieje się samo.",
+        ],
+        steps: [
+          "Pamiętaj, że szczegółowe zapisy są domyślnie prywatne.",
+          "Zdecyduj, co uczynić widocznym, gdy aktywnie szukasz pracy.",
+          "Zmień lub cofnij widoczność w dowolnym momencie.",
+        ],
+        limitations: "Gdy zdecydujesz się udostępnić pracodawcy konkretne informacje, może on zobaczyć to, co zostało udostępnione; to Ty decydujesz, co to jest.",
+        title: "Jak Twoje umiejętności domyślnie pozostają prywatne",
+        desc: "Jak LabourMarket.ai domyślnie chroni prywatność Twoich umiejętności: zapisy są zamknięte, dopóki nie zdecydujesz się nimi podzielić, więc kontrolujesz, co i kiedy widzą pracodawcy.",
+      },
     },
   },
   {
@@ -706,6 +806,22 @@ const DRAFTS: readonly Draft[] = [
         title: "Aktuelle Fähigkeiten für einen neuen Beruf nutzen",
         desc: "Wie Sie aktuelle Fähigkeiten für einen Berufswechsel auf LabourMarket.ai nutzen: auf Fähigkeiten-Überschneidung mit benachbarten Richtungen aufbauen und die Lücke schließen.",
       },
+      pl: {
+        slug: "jak-wykorzystac-obecne-umiejetnosci-do-zmiany-zawodu",
+        h1: "Jak wykorzystać obecne umiejętności, by przejść do nowego zawodu?",
+        short: "Zestaw umiejętności, które już masz, z tym, czego wymaga docelowy zawód, buduj na pokryciu i zamknij niewielką pozostałą lukę. Ruszaj z miejsca swoich mocnych stron, a nie od zera.",
+        full: [
+          "Zmiana zawodu rzadko oznacza porzucenie wszystkiego, co umiesz. Większość Twoich umiejętności — sposób organizowania pracy, rozwiązywania problemów, pracy z narzędziami czy z ludźmi — przenosi się dalej. Praktyczny ruch to porównanie tego, co masz, z tym, czego potrzebuje nowy zawód, i oparcie się na pokryciu.",
+          "Na LabourMarket.ai jest to konkretne: Twoje umiejętności wskazują pokrewne kierunki, a każdy z nich pokazuje, które umiejętności Cię z nim łączą i czego może Ci jeszcze brakować. Wysiłek kierujesz wtedy na niewielką pozostałą lukę, zamiast traktować zmianę jak pełny start od nowa.",
+        ],
+        steps: [
+          "Wypisz prostymi słowami umiejętności, których już używasz.",
+          "Zobacz, jakie pokrewne kierunki otwierają Twoje umiejętności.",
+          "Skieruj naukę na konkretną lukę pokazaną przez docelowy kierunek.",
+        ],
+        title: "Wykorzystanie obecnych umiejętności do zmiany zawodu",
+        desc: "Jak wykorzystać obecne umiejętności do zmiany zawodu na LabourMarket.ai: buduj na pokryciu umiejętności z pokrewnymi kierunkami i zamknij pozostałą lukę.",
+      },
     },
   },
   {
@@ -790,6 +906,22 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Von körperlicher Arbeit in eine Bürorolle wechseln",
         desc: "Wie Sie von körperlicher Arbeit in eine Bürorolle wechseln auf LabourMarket.ai: übertragbare Stärken in Büro-Richtungen überführen und die konkrete Lücke schließen.",
+      },
+      pl: {
+        slug: "jak-przejsc-z-pracy-fizycznej-do-pracy-biurowej",
+        h1: "Jak przejść z pracy fizycznej do pracy biurowej?",
+        short: "Nazwij przenoszalne mocne strony, które buduje praca fizyczna — rzetelność, planowanie, bezpieczeństwo, koordynację, rozwiązywanie problemów — dopasuj je do ról biurowych, które je cenią, a potem zamknij konkretną lukę umiejętności.",
+        full: [
+          "Praca fizyczna buduje prawdziwe, cenione zdolności: planowanie zadania, bezpieczną i precyzyjną pracę, koordynację z zespołem, rozwiązywanie problemów na bieżąco i niezawodną obecność. To dokładnie te mocne strony, których potrzebuje wiele ról biurowych, więc przejście jest zmianą kierunku, a nie startem od czystej kartki.",
+          "Praktyczna droga to uczynienie tych mocnych stron wyraźnymi, a potem przyjrzenie się kierunkom biurowym, które na nich budują — koordynacji, planowaniu, jakości, nadzorowi, rolom w kontakcie z klientem — i wskazanie konkretnych narzędzi lub wiedzy do uzupełnienia. Na LabourMarket.ai to Twoje umiejętności napędzają to odkrywanie, więc widzisz realne kierunki biurowe i konkretną lukę do zamknięcia.",
+        ],
+        steps: [
+          "Wypisz przenoszalne mocne strony zbudowane przez pracę fizyczną.",
+          "Poznaj kierunki biurowe, które cenią te mocne strony.",
+          "Uzupełnij konkretne narzędzie lub wiedzę, których wymaga każdy kierunek.",
+        ],
+        title: "Przejście z pracy fizycznej do pracy biurowej",
+        desc: "Jak przejść z pracy fizycznej do pracy biurowej na LabourMarket.ai: zamień przenoszalne mocne strony na kierunki biurowe i zamknij konkretną lukę.",
       },
     },
   },
@@ -882,6 +1014,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Umschulung bei Länderwechsel planen",
         desc: "Wie Sie Umschulung bei Länderwechsel planen: die Fähigkeit aufbauen und mit den EU-Tools EQF und Europass Qualifikationsniveaus in Europa vergleichen.",
       },
+      pl: {
+        slug: "jak-zaplanowac-przekwalifikowanie-przy-zmianie-kraju",
+        h1: "Jak zaplanować przekwalifikowanie, jeśli chcę też zmienić kraj?",
+        short: "Zaplanuj umiejętność, którą chcesz zbudować, i osobno zrozum, jak poziom Twoich kwalifikacji wypada za granicą. Unijne narzędzia ERK i Europass pozwalają porównywać poziomy kwalifikacji między krajami.",
+        full: [
+          "Przekwalifikowanie z myślą o innym kraju ma dwie części: samą umiejętność i to, jak czytane są tam Twoje kwalifikacje. Umiejętność planuj jak zwykle — celuj w realną lukę w stronę pracy, na którą jest zapotrzebowanie. W przypadku kwalifikacji skorzystaj z europejskich ram kwalifikacji (ERK), ośmiopoziomowej skali działającej jak narzędzie tłumaczące między systemami krajowymi, oraz z narzędzia Europass do porównywania kwalifikacji między krajami.",
+          "Pozwala to zobaczyć, gdzie mniej więcej plasuje się Twoja obecna lub planowana kwalifikacja wobec systemu innego kraju, zanim zaangażujesz czas lub pieniądze. Uznawanie zawodów regulowanych jest osobnym, formalnym krokiem prowadzonym przez kraj docelowy, a praktyka krajowa bywa różna — użyj więc narzędzi UE, by się zorientować, a szczegóły sprawdź na oficjalnej ścieżce kraju docelowego.",
+        ],
+        steps: [
+          "Zdecyduj, jaką konkretną umiejętność lub kwalifikację chcesz zbudować.",
+          "Skorzystaj z ERK i narzędzia porównawczego Europass, by zobaczyć, jak poziomy przekładają się między krajami.",
+          "W przypadku zawodu regulowanego sprawdź oficjalną ścieżkę uznawania w kraju docelowym.",
+        ],
+        limitations: "ERK pomaga porównywać poziomy; sam nie przyznaje uznania, a przepisy krajowe dla zawodów regulowanych się różnią. Sprawdź oficjalne źródło kraju docelowego.",
+        title: "Planowanie przekwalifikowania przy zmianie kraju",
+        desc: "Jak zaplanować przekwalifikowanie przy zmianie kraju: zbuduj umiejętność i użyj unijnych narzędzi ERK oraz Europass, by zobaczyć, jak poziomy kwalifikacji przekładają się w Europie.",
+      },
     },
   },
   {
@@ -973,6 +1122,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Wissen, welche Fähigkeiten als Nächstes lernen",
         desc: "Wie Sie wissen, welche Fähigkeiten als Nächstes lernen: offizielle EU-Nachfragedaten (CEDEFOP, EURES) mit der Lücke zur Zielrichtung verbinden und dort lernen, wo sie sich treffen.",
       },
+      pl: {
+        slug: "skad-wiedziec-jakich-umiejetnosci-uczyc-sie-dalej",
+        h1: "Skąd wiedzieć, jakich umiejętności uczyć się dalej?",
+        short: "Połącz dwie rzeczy: stronę zapotrzebowania, korzystając z oficjalnych danych UE o brakujących umiejętnościach, i swoją stronę, czyli lukę między obecnymi umiejętnościami a kierunkiem, który Cię interesuje. Ucz się tam, gdzie się spotykają.",
+        full: [
+          "Wybór nauki działa najlepiej, gdy jest oparty na danych, a nie na zgadywaniu. Po stronie zapotrzebowania oficjalne źródła UE — analizy umiejętności CEDEFOP i dane EURES o niedoborach — pokazują, jakie zawody i umiejętności są poszukiwane i brakujące w Europie. To mówi, gdzie jest trwała potrzeba, a nie chwilowy trend z internetu.",
+          "Po Twojej stronie użyteczne pytanie dotyczy luki: czego wymaga interesujący Cię kierunek, a czego jeszcze nie masz? Na LabourMarket.ai Twoje umiejętności wskazują pokrewne kierunki i konkretną lukę przy każdym z nich. Ucz się tej umiejętności, która zamyka realną lukę i leży tam, gdzie zapotrzebowanie jest prawdziwe — tam wysiłek się zwraca.",
+        ],
+        steps: [
+          "Sprawdź analizy umiejętności CEDEFOP i dane EURES o poszukiwanych umiejętnościach.",
+          "Porównaj je z luką, którą pokazuje w profilu Twój docelowy kierunek.",
+          "Wybierz umiejętność, która zamyka realną lukę i odpowiada realnemu zapotrzebowaniu.",
+        ],
+        limitations: "Dane o zapotrzebowaniu są sygnałem dla danego okresu, a nie gwarancją, i zmieniają się. Przed długą nauką sprawdź datę źródła.",
+        title: "Skąd wiedzieć, jakich umiejętności uczyć się dalej",
+        desc: "Jak wiedzieć, jakich umiejętności uczyć się dalej: połącz oficjalne dane UE o zapotrzebowaniu (CEDEFOP, EURES) z luką do docelowego kierunku i ucz się tam, gdzie się spotykają.",
+      },
     },
   },
   {
@@ -1057,6 +1223,22 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Die benötigte Rolle oder Arbeitsart beschreiben",
         desc: "Wie Sie die benötigte Rolle oder Arbeitsart auf LabourMarket.ai beschreiben: mit Aufgaben und nötigen Fähigkeiten beginnen, nicht nur einem Titel, für genaue Abgleiche.",
+      },
+      pl: {
+        slug: "jak-opisac-role-lub-rodzaj-pracy-ktorej-potrzebuje",
+        h1: "Jak opisać rolę lub rodzaj pracy, której potrzebuję?",
+        short: "Opisz samą pracę — zadania, wymagane umiejętności i kontekst — a nie tylko nazwę stanowiska. Jasne zadania i wymagane umiejętności dają znacznie trafniejsze dopasowania niż sama etykieta.",
+        full: [
+          "Nazwa stanowiska znaczy dla różnych osób co innego, więc opieranie się tylko na niej osłabia dopasowanie. Opisz, na czym praca faktycznie polega: główne zadania, umiejętności naprawdę potrzebne i kontekst — na przykład miejsce, narzędzia czy tempo. To daje platformie konkretne sygnały do dopasowania.",
+          "Na LabourMarket.ai jaśniejszy opis pracy łączy Cię z osobami, których prawdziwe umiejętności pasują, wraz z uczciwym wyjaśnieniem dlaczego. Odróżnij umiejętności konieczne od mile widzianych, aby nie odfiltrować zdolnych osób z powodu nieistotnego wymagania.",
+        ],
+        steps: [
+          "Opisz główne zadania, z których składa się praca.",
+          "Wymień naprawdę wymagane umiejętności, oddzielając konieczne od mile widzianych.",
+          "Dodaj kontekst, taki jak miejsce, narzędzia czy tempo, jeśli ma znaczenie.",
+        ],
+        title: "Opisanie roli lub rodzaju pracy, której potrzebujesz",
+        desc: "Jak opisać rolę lub rodzaj pracy na LabourMarket.ai: zacznij od zadań i wymaganych umiejętności, a nie od samej nazwy stanowiska, by dopasowania były trafne.",
       },
     },
   },
@@ -1148,6 +1330,23 @@ const DRAFTS: readonly Draft[] = [
         title: "Was passiert, nachdem Sie einen Personalbedarf einreichen",
         desc: "Was passiert, nachdem Sie einen Personalbedarf auf LabourMarket.ai einreichen: Er geht in den Abgleich, passende Menschen erscheinen mit ehrlicher Begründung, und Sie entscheiden.",
       },
+      pl: {
+        slug: "co-dzieje-sie-po-przeslaniu-zapotrzebowania",
+        h1: "Co dzieje się po przesłaniu zapotrzebowania?",
+        short: "Twoje zapotrzebowanie trafia do dopasowania, a platforma pokazuje osoby, których umiejętności pasują, każdą z uczciwym wyjaśnieniem. Przeglądasz je i decydujesz, z kim się skontaktować — nie ma jednej ogólnej oceny osoby.",
+        full: [
+          "Przesłanie zapotrzebowania to nie to samo co rozesłanie ogłoszenia i czekanie. Po przesłaniu platforma zestawia Twoje wymagania z osobami, których prawdziwe umiejętności i dostępność pasują, i przedstawia je z jasnym powodem każdego dopasowania, a nie z rankingiem z czarnej skrzynki.",
+          "To, co dalej, pozostaje pod Twoją kontrolą: przeglądasz dopasowania, patrzysz na dowody stojące za umiejętnościami i decydujesz, z kim się skontaktować. Zapotrzebowanie pozostaje Twoje i prywatne dla Twojej strony, a jeśli dopasowania sugerują, że opis wymaga korekty, możesz je dopracować.",
+        ],
+        steps: [
+          "Platforma zestawia Twoje zapotrzebowanie z pasującymi osobami.",
+          "Przeglądasz każde dopasowanie z uczciwym wyjaśnieniem i dowodami.",
+          "Decydujesz, z kim się skontaktować, i możesz dopracować zapotrzebowanie.",
+        ],
+        limitations: "Dopasowanie zależy od tego, kto jest obecny i otwarty na platformie; przesłane zapotrzebowanie nie gwarantuje, że odpowiednie dopasowanie pojawi się natychmiast.",
+        title: "Co dzieje się po przesłaniu zapotrzebowania",
+        desc: "Co dzieje się po przesłaniu zapotrzebowania na LabourMarket.ai: trafia do dopasowania, pasujące osoby pokazywane są z uczciwym wyjaśnieniem, a Ty decydujesz, z kim się skontaktować.",
+      },
     },
   },
   {
@@ -1233,6 +1432,22 @@ const DRAFTS: readonly Draft[] = [
         title: "Erste Arbeitsmöglichkeiten als Studierender finden",
         desc: "Wie Sie als Studierender erste Arbeitsmöglichkeiten auf LabourMarket.ai finden: echte Fähigkeiten aus Studium und Projekten als Beleg zeigen und Einsteiger-Rollen anvisieren.",
       },
+      pl: {
+        slug: "jak-znalezc-pierwsze-mozliwosci-pracy-jako-student",
+        h1: "Jak znaleźć pierwsze możliwości pracy jako student?",
+        short: "Pokaż potencjał zamiast tytułów: wpisz do profilu prawdziwe umiejętności ze studiów, projektów i jakiejkolwiek pracy i szukaj możliwości otwartych dla osób zaczynających. Dowód tego, co potrafisz, znaczy więcej niż ubogie CV.",
+        full: [
+          "Bez długiej historii zatrudnienia najmocniejszą rzeczą, jaką możesz pokazać, są Twoje możliwości. Umiejętności z zajęć, projektów, pracy dorywczej, wolontariatu czy własnych przedsięwzięć są prawdziwe i się liczą. Ich jasne nazwanie i poparcie, gdzie się da, daje pracodawcy coś konkretnego zamiast pustego CV.",
+          "Na LabourMarket.ai Twój profil jest zbudowany wokół umiejętności i dowodów, a nie lat doświadczenia, więc osoba zaczynająca może uczciwie przedstawić swój potencjał. Szukaj możliwości odpowiednich dla pierwszych ról i zachowaj szczerość co do swojego poziomu — jasny, uczciwy profil startowy przekonuje bardziej niż zawyżony.",
+        ],
+        steps: [
+          "Dodaj umiejętności ze studiów, projektów, pracy dorywczej i wolontariatu.",
+          "Poprzyj kluczowe przykładami lub dowodami.",
+          "Szukaj możliwości otwartych dla osób zaczynających i zgłaszaj zainteresowanie.",
+        ],
+        title: "Pierwsze możliwości pracy dla studenta",
+        desc: "Jak znaleźć pierwsze możliwości pracy jako student na LabourMarket.ai: pokaż prawdziwe umiejętności ze studiów i projektów jako dowód i celuj w role otwarte dla zaczynających.",
+      },
     },
   },
   {
@@ -1317,6 +1532,22 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Ein echtes Arbeitsteam oder eine Kolonne vertreten",
         desc: "Wie Sie ein echtes Arbeitsteam oder eine Kolonne auf LabourMarket.ai vertreten: die Kolonne als Einheit mit kombinierten Fähigkeiten, Größe und Verfügbarkeit zeigen.",
+      },
+      pl: {
+        slug: "jak-reprezentowac-prawdziwy-zespol-lub-brygade",
+        h1: "Jak reprezentować prawdziwy zespół roboczy lub brygadę?",
+        short: "Przedstaw zespół jako całość: rodzaj pracy, którą wykonuje razem, jego łączne umiejętności, wielkość i dostępność. Ekipa, która pracuje jak jedność, może być pokazana jako jedność, a nie tylko jako osobne osoby.",
+        full: [
+          "Część pracy wykonują zgrane zespoły — ekipa, brygada lub mała jednostka, która już dobrze ze sobą pracuje. Rozbicie ich na niepowiązane profile indywidualne gubi to, co czyni ich wartościowymi: koordynację i łączne możliwości. LabourMarket.ai pozwala firmie przedstawić taki zespół jako całość.",
+          "Opisz pracę, którą zespół wykonuje, zestaw umiejętności, jakie wnosi, jego wielkość i termin dostępności. Umiejętności każdego członka nadal należą do niego i pozostają pod jego kontrolą, ale zespół może być przedstawiany i dopasowywany jako jednostka robocza, którą naprawdę jest, co odpowiada temu, jak zorganizowana jest duża część prawdziwej pracy.",
+        ],
+        steps: [
+          "Utwórz zespół w przestrzeni swojej firmy i opisz pracę, którą wykonuje.",
+          "Zapisz łączne umiejętności, wielkość i dostępność.",
+          "Zostaw indywidualne umiejętności każdego członka pod jego własną kontrolą.",
+        ],
+        title: "Reprezentowanie prawdziwego zespołu lub brygady",
+        desc: "Jak reprezentować prawdziwy zespół roboczy lub brygadę na LabourMarket.ai: pokaż ekipę jako całość z jej łącznymi umiejętnościami, wielkością i dostępnością, a nie tylko jako osoby.",
       },
     },
   },
@@ -1409,11 +1640,28 @@ const DRAFTS: readonly Draft[] = [
         title: "Wie sich Automatisierung auf Ihren Beruf auswirkt",
         desc: "Wie sich Automatisierung auf Ihren Beruf auswirkt: sie gestaltet meist Aufgaben um, statt Jobs zu löschen. Offizielle EU-Analyse (CEDEFOP) hilft bei der Vorbereitung — allgemeine Trends.",
       },
+      pl: {
+        slug: "jak-automatyzacja-wplynie-na-moj-zawod",
+        h1: "Jak automatyzacja wpłynie na mój zawód?",
+        short: "Automatyzacja zwykle bardziej zmienia zadania w ramach zawodu, niż całkiem go usuwa. Oficjalne unijne analizy umiejętności śledzą te przesunięcia, więc możesz się przygotować, budując umiejętności, na które zapotrzebowanie się utrzymuje.",
+        full: [
+          "Uczciwa odpowiedź brzmi, że automatyzacja raczej przekształca pracę, niż po prostu ją kasuje: część zadań zostaje zautomatyzowana, pojawiają się nowe, a zestaw umiejętności potrzebnych w zawodzie się przesuwa. Oficjalne źródła UE — analizy umiejętności CEDEFOP oraz jego analiza niedoborów i zmian — śledzą, jak zapotrzebowanie na zawody i umiejętności zmienia się w Europie, co jest pewniejszą podstawą niż alarmujące nagłówki.",
+          "W przypadku własnego zawodu praktyczną reakcją nie jest zgadywanie tak lub nie w sprawie zastąpienia, lecz obserwowanie, które zadania się zmieniają, i budowanie umiejętności, które pozostają wartościowe. Na LabourMarket.ai widzisz pokrewne kierunki, które Twoje umiejętności już wspierają, więc możesz dostosowywać się stopniowo, zamiast reagować z opóźnieniem.",
+        ],
+        steps: [
+          "Przeczytaj analizy umiejętności CEDEFOP o tym, jak zmienia się zapotrzebowanie w Twojej dziedzinie.",
+          "Ustal, które z Twoich zadań są stabilne, a które się zmieniają.",
+          "Buduj umiejętności, na które zapotrzebowanie się utrzymuje, i poznawaj pokrewne kierunki.",
+        ],
+        limitations: "To opisuje ogólne trendy, a nie prognozę dla konkretnej pracy czy roku. Skutki różnią się w zależności od roli i kraju; sprawdź datowaną oficjalną analizę.",
+        title: "Jak automatyzacja wpływa na Twój zawód",
+        desc: "Jak automatyzacja wpływa na Twój zawód: zwykle bardziej przekształca zadania, niż usuwa pracę. Oficjalne analizy UE (CEDEFOP) pomagają się przygotować — ogólne trendy, nie prognoza.",
+      },
     },
   },
 ];
 
-const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de"];
+const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de", "pl"];
 
 export const WAVE2D_ANSWERS: readonly LocalizedAnswer[] = DRAFTS.flatMap((d) =>
   LOCALES.map((locale): LocalizedAnswer => {

@@ -58,13 +58,41 @@ const CLASSIFICATION: Record<
     class: "cookie-only",
     why: "Money surface. It redirects a BROWSER to Stripe's hosted portal, so a non-browser caller has nothing to do with the response. No product need, and billing is where a mistake is least recoverable.",
   },
+  "assistant/transcript/route.ts": {
+    class: "cookie-only",
+    why: "The web chat's own transcript append (P0 2026-10-14): a keepalive fetch from the signed-in page so a turn survives leaving it. Same-origin only, and the hash-chaining RPC refuses anyone but the thread owner. An assistant over /api/mcp has its own door; a phone has no web chat.",
+  },
   "billing/test-checkout/route.ts": {
     class: "cookie-only",
     why: "Same reasoning as the portal, and test-mode only on top of it: it starts a Stripe Checkout a browser then completes.",
   },
+  "billing/refresh/route.ts": {
+    class: "cookie-only",
+    why: "Money surface, user self-service: 'refresh my billing status' for the person's CURRENT workspace. It takes no input (workspace, customer and subscription are resolved server-side from the cookie session), only READS the provider, and answers one status word - a non-browser caller has no product reason to poke it, and billing is where a mistake is least recoverable.",
+  },
+  "billing/reconcile/route.ts": {
+    class: "cookie-only",
+    why: "Billing safety v1: the superadmin's READ-ONLY reconciliation report (local billing tables vs the provider's view). Operator surface for a browser session; it takes no input, writes nothing and never charges — a non-browser caller has no product reason to read an anomaly report.",
+  },
+  "cron/billing-recovery/route.ts": {
+    class: "public",
+    why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron) once payments are on — absent from it while they are off; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset, so never an open trigger. It only READS Stripe and applies through the canonical subscription-apply primitive; it never creates, changes, cancels or refunds a payment. Answers counts and a reason code only, no ids.",
+  },
+  "cron/commercial-handoffs/route.ts": {
+    class: "public",
+    why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. Inert a second time while NONSTOP_HANDOFF_ENDPOINT / NONSTOP_HANDOFF_TOKEN are unset (answers not_configured, calls nothing). Its only outbound target is the configured partner door; the body it returns is counts only.",
+  },
+  "cron/job-alerts/route.ts": {
+    class: "public",
+    why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. Answers counts and a reason code only.",
+  },
   "cron/weekly-digest/route.ts": {
     class: "public",
-    why: "Vercel cron delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",
+    why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",
+  },
+  "internal/supply-feed/first-party-v1/route.ts": {
+    class: "public",
+    why: "The partner opportunity network pulls it; identity is the SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open worker API. Deliberately NOT shared: it answers with every authorised person’s projection at once, which no signed-in account has a reason to ask for, so there is no user path to conflate. The body carries the v1 projection only — opaque actorRef, trades, availability, geography, agreed markets, four authorities — and holds no name, email, phone or address to leak.",
   },
   "health/route.ts": {
     class: "public",
@@ -85,6 +113,10 @@ const CLASSIFICATION: Record<
   "documents/file/[fileId]/route.ts": {
     class: "shared",
     why: "The one document download door, and the most authorization-heavy read in app/api — which is exactly why it is worth proving over the new transport rather than avoiding.",
+  },
+  "referrals/external/v1/route.ts": {
+    class: "public",
+    why: "The approved-partner referral door (universal invitation/referral network v1). Identity is the SOURCE'S OWN machine secret (lib/api/external-referral-auth.ts, one secret per registered source, constant-time compared, refused while unset) — not a user — so there is no cookie path and no bearer-user path. It stores exactly one canonical invitation per (source, reference) through a service_role-only SECURITY DEFINER function that re-checks consent and idempotency itself, and answers with the invitation id and a one-time link; it never reads or returns any existing worker.",
   },
   "mcp/route.ts": {
     class: "shared",

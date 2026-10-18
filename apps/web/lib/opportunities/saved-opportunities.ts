@@ -6,10 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * Worker saved opportunities (Marketplace Precision Phase-2 PR 5).
  *
- * #723-compat: the human-gated draft migration
- * `20260711310000_worker_saved_opportunities_v1.sql` (branch
- * feat/worker-saved-opportunities-migration-v1) adds — WHEN THE OWNER APPLIES
- * IT — the private-bookmark table `worker_saved_opportunities` (SELECT
+ * #723-compat: migration `20260711310000_worker_saved_opportunities_v1.sql`
+ * is APPLIED — verified on production 2026-09-07. It was described here as
+ * awaiting the owner until then. It provides the private-bookmark table
+ * `worker_saved_opportunities` (SELECT
  * own-rows-only under RLS; the demand owner NEVER sees who saved) and two
  * RPC-only write paths:
  *

@@ -110,7 +110,12 @@ describe("RU personalWorkspace copy", () => {
     for (const v of values(ns("ru"))) {
       expect(v, `RU personalWorkspace string: ${v}`).not.toContain("[EN]");
       // Values must be Russian — a Latin word here means an untranslated leftover.
-      expect(v, `RU personalWorkspace string: ${v}`).not.toMatch(/[A-Za-z]{2,}/);
+      // ICU placeholders are code, not copy: `{count}` is substituted before
+      // anyone reads it, so it is stripped before the Latin-leftover test.
+      // Without this the test forbids a QUANTIFIED sentence in Russian —
+      // which is exactly what §24 required of `readiness.complete`.
+      const prose = v.replace(/\{[^}]*\}/g, "");
+      expect(prose, `RU personalWorkspace string: ${v}`).not.toMatch(/[A-Za-z]{2,}/);
     }
   });
 

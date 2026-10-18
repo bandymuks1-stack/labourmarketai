@@ -2,6 +2,8 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { applyApprovalSkillEffects } from "./confirm-actions";
+import { notifyJournalReviewDecisions } from "./review-notification";
 
 /**
  * Batch review with the EXCEPTIONS PYRAMID (DESIGN_SOUL §3) — read side.
@@ -87,13 +89,32 @@ export async function reviewEntriesBatch(
       },
     );
     if (error || !Array.isArray(data)) return { ok: false, outcomes: [] };
-    return {
-      ok: true,
-      outcomes: (data as { entry_id: string; outcome: string }[]).map((r) => ({
-        entryId: r.entry_id,
-        outcome: r.outcome,
-      })),
-    };
+    const outcomes = (data as { entry_id: string; outcome: string }[]).map((r) => ({
+      entryId: r.entry_id,
+      outcome: r.outcome,
+    }));
+    // DURABLE NOTIFICATION (journal_review_decided): each entry the RPC
+    // actually approved tells its worker. Awaited, never throws.
+    const approved = outcomes.filter((o) => o.outcome === "approved");
+    if (approved.length > 0) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        await notifyJournalReviewDecisions(
+          supabase,
+          user.id,
+          approved.map((o) => ({ entryId: o.entryId, decision: "approved" as const })),
+        );
+        // R-5: each batch-approved entry raises its linked skills' confidence
+        // through the same bounded, idempotent SECURITY DEFINER door the single
+        // approval uses. Confidence only - nothing is verified.
+        for (const o of approved) {
+          await applyApprovalSkillEffects(supabase, { entryId: o.entryId, confirmerId: user.id });
+        }
+      }
+    }
+    return { ok: true, outcomes };
   } catch {
     return { ok: false, outcomes: [] };
   }

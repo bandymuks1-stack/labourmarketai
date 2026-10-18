@@ -41,6 +41,55 @@ describe("readiness panel makes signals actionable + is mounted", () => {
     expect(panel).toMatch(/data-testid="readiness-country-fit"/);
     expect(panel).toMatch(/readinessPanel\.countryFit/);
   });
+
+  it("the documents caveat is rendered in BOTH branches, not only the incomplete one", () => {
+    // OWNER-REPORTED CONTRADICTION, 2026-09-07. The panel told a worker their
+    // profile was complete while another surface reported missing documents.
+    // Neither surface was lying: `deriveWorkerReadiness` measures six
+    // PROFILE-CARD pillars and documents are not one of them. What made two
+    // honest statements read as a contradiction is that this panel takes an
+    // EARLY RETURN when all six pillars are met, and the country-fit line -
+    // the single sentence that explains documents are a separate axis - lived
+    // only in the branch below it. The caveat vanished at exactly the moment
+    // the claim was largest.
+    //
+    // The guard above could not catch that: it asks whether the file mentions
+    // the line ANYWHERE, and one occurrence satisfied it. This one splits the
+    // component at the complete-branch return and requires the line on BOTH
+    // sides, so re-introducing the defect fails here rather than in production.
+    // Normalised first: the working tree is CRLF on Windows and LF in CI, and
+    // a guard that only holds on one of them is worse than no guard.
+    const src = panel.replace(/\r\n/g, "\n");
+    const marker = "  }\n\n  return (";
+    const cut = src.indexOf(marker);
+    expect(cut, "the complete-branch early return should still be there").toBeGreaterThan(0);
+    const completeBranch = src.slice(0, cut);
+    const incompleteBranch = src.slice(cut);
+    for (const [name, half] of [
+      ["complete branch", completeBranch],
+      ["incomplete branch", incompleteBranch],
+    ] as const) {
+      expect(half, `${name} renders the country-fit line`).toContain(
+        'data-testid="readiness-country-fit"',
+      );
+      expect(half, `${name} uses the countryFit copy`).toContain("readinessPanel.countryFit");
+    }
+  });
+
+  it("the all-ready claim names its scope instead of claiming the whole profile", () => {
+    // The copy may say the CARD is complete; it may not say the person is.
+    // Every active locale must also point at documents as a separate matter,
+    // so the sentence cannot drift back into a universal claim in one language
+    // while staying scoped in another.
+    for (const loc of ["lt", "en", "ru", "de", "nl"] as const) {
+      const m = JSON.parse(read(`messages/${loc}.json`));
+      const allReady: string = m.playerCard.readinessPanel.allReady;
+      expect(
+        /document|dokument|документ/i.test(allReady),
+        `${loc}: the all-ready line must name documents as separate`,
+      ).toBe(true);
+    }
+  });
 });
 
 describe("readiness copy is honest in every active locale", () => {

@@ -1,19 +1,23 @@
 "use client";
 
 import { useActionState } from "react";
-import { Handshake, Check, X, Trash2 } from "lucide-react";
+import { Handshake, Check, MessageSquare, X, Trash2 } from "lucide-react";
 
 import {
   pendingInvites,
   type ClientInvitesState,
+  type SharedRequestsState,
 } from "@/lib/agency/bridge-model";
 import {
   acceptConnectionAction,
   declineConnectionAction,
   revokeConnectionAction,
   shareRequestAction,
+  unshareRequestAction,
   type BridgeActionState,
 } from "@/lib/agency/bridge-actions";
+import { openAgencyConnectionConversationAction } from "@/lib/agency/bridge-conversation";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 
 /**
  * Client side of the REAL two-subject bridge (issue #859). A real client
@@ -21,6 +25,12 @@ import {
  * active agencies, shares specific OWN requests, and revokes. The client is the
  * ONLY reviewer of proposed candidates (on its own scouting surface). Renders
  * only when the caller owns a company that is NOT itself a staffing agency.
+ *
+ * DISCLOSURE IS VISIBLE AND WITHDRAWABLE. The agency could always see what was
+ * shared with it while the client doing the sharing could see nothing and had
+ * no way back except revoking the entire relationship. Each active agency now
+ * lists the requests currently shared with it, each with the per-share
+ * withdrawal `unshare_request_v1` was written for.
  */
 export interface ClientBridgeLabels {
   readonly title: string;
@@ -40,6 +50,11 @@ export interface ClientBridgeLabels {
   readonly noDemands: string;
   readonly errorLabel: string;
   readonly fromAgency: string;
+  readonly sharedHeading: string;
+  readonly noShared: string;
+  readonly unshareButton: string;
+  /** Opens the conversation with the agency person who invited (2026-09-24). */
+  readonly messageButton: string;
 }
 
 const IDLE: BridgeActionState = { status: "idle" };
@@ -48,22 +63,31 @@ export function ClientAgencyBridgeSection({
   invites,
   clientCompanyId,
   demands,
+  shared,
   labels,
+  locale,
 }: {
   invites: ClientInvitesState;
   clientCompanyId: string;
   demands: readonly { id: string; title: string }[];
+  /** What this client currently discloses, per connection. */
+  shared: SharedRequestsState;
   labels: ClientBridgeLabels;
+  locale: string;
 }) {
   const [acceptState, acceptAction, acceptPending] = useActionState(acceptConnectionAction, IDLE);
   const [declineState, declineAction] = useActionState(declineConnectionAction, IDLE);
   const [revokeState, revokeAction] = useActionState(revokeConnectionAction, IDLE);
   const [shareState, shareAction, sharePending] = useActionState(shareRequestAction, IDLE);
+  const [unshareState, unshareAction] = useActionState(unshareRequestAction, IDLE);
 
   const gated = invites.kind === "needs-migration" || shareState.status === "needs-migration";
   const rows = invites.kind === "ok" ? invites.rows : [];
   const pend = pendingInvites(rows);
   const active = rows.filter((r) => r.status === "active");
+  // A share whose read failed must not render as "nothing is shared": an
+  // absent list is UNKNOWN, not zero, so only an `ok` read draws the roster.
+  const sharedRows = shared.kind === "ok" ? shared.rows : [];
 
   return (
     <section className="card-border flex flex-col gap-4 p-5" data-testid="client-bridge-section">
@@ -98,14 +122,14 @@ export function ClientAgencyBridgeSection({
                       <input type="hidden" name="connectionId" value={c.id} />
                       <input type="hidden" name="clientCompanyId" value={clientCompanyId} />
                       <button type="submit" disabled={acceptPending} data-testid={`client-bridge-accept-${c.id}`}
-                        className="inline-flex h-8 items-center gap-1 rounded-md border border-state-success/50 bg-state-success/10 px-3 text-xs font-semibold text-state-success transition-colors hover:border-state-success disabled:opacity-60">
+                        className="inline-flex min-h-11 items-center gap-1 rounded-md border border-state-success/50 bg-state-success/10 px-3 text-xs font-semibold text-state-success transition-colors hover:border-state-success disabled:opacity-60">
                         <Check className="h-3.5 w-3.5" aria-hidden /> {labels.acceptButton}
                       </button>
                     </form>
                     <form action={declineAction} className="shrink-0">
                       <input type="hidden" name="connectionId" value={c.id} />
                       <button type="submit" title={labels.declineButton} aria-label={labels.declineButton}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
                         <X className="h-3.5 w-3.5" aria-hidden />
                       </button>
                     </form>
@@ -126,6 +150,18 @@ export function ClientAgencyBridgeSection({
                   <li key={c.id} className="card-border flex flex-col gap-2 p-3" data-testid="client-bridge-active-row">
                     <div className="flex items-center gap-2">
                       <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text-primary">{c.agencyName}</span>
+                      {/* The conversation with the agency person who invited —
+                          the action re-verifies the ACTIVE connection and the
+                          caller's side server-side before opening (§8.1). */}
+                      <form action={openAgencyConnectionConversationAction} className="shrink-0">
+                        <DisplayedWorkspaceField />
+                        <input type="hidden" name="connectionId" value={c.id} />
+                        <input type="hidden" name="locale" value={locale} />
+                        <button type="submit" data-testid={`client-bridge-message-${c.id}`}
+                          className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue">
+                          <MessageSquare className="h-3.5 w-3.5" aria-hidden /> {labels.messageButton}
+                        </button>
+                      </form>
                       <form action={revokeAction} className="shrink-0">
                         <input type="hidden" name="connectionId" value={c.id} />
                         <button type="submit" title={labels.revokeButton} aria-label={labels.revokeButton}
@@ -133,6 +169,32 @@ export function ClientAgencyBridgeSection({
                           <Trash2 className="h-3.5 w-3.5" aria-hidden />
                         </button>
                       </form>
+                    </div>
+                    <div className="flex flex-col gap-1" data-testid="client-bridge-shared">
+                      <h4 className="font-mono text-meta uppercase tracking-label text-text-muted">
+                        {labels.sharedHeading}
+                      </h4>
+                      {shared.kind !== "ok" ? null : sharedRows.filter((s) => s.connectionId === c.id).length === 0 ? (
+                        <p className="text-xs text-text-muted">{labels.noShared}</p>
+                      ) : (
+                        <ul className="flex flex-col gap-1">
+                          {sharedRows
+                            .filter((s) => s.connectionId === c.id)
+                            .map((s) => (
+                              <li key={s.shareId} className="flex items-center gap-2 rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1.5" data-testid="client-bridge-shared-row">
+                                <span className="min-w-0 flex-1 truncate text-xs text-text-primary">{s.title}</span>
+                                <form action={unshareAction} className="shrink-0">
+                                  <input type="hidden" name="shareId" value={s.shareId} />
+                                  <button type="submit" title={labels.unshareButton} aria-label={labels.unshareButton}
+                                    data-testid={`client-bridge-unshare-${s.shareId}`}
+                                    className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-ink-500 text-text-muted transition-colors hover:border-state-danger hover:text-state-danger">
+                                    <X className="h-3 w-3" aria-hidden />
+                                  </button>
+                                </form>
+                              </li>
+                            ))}
+                        </ul>
+                      )}
                     </div>
                     {demands.length === 0 ? (
                       <p className="text-xs text-text-muted">{labels.noDemands}</p>
@@ -149,7 +211,7 @@ export function ClientAgencyBridgeSection({
                             ))}
                           </select>
                         </label>
-                        <button type="submit" disabled={sharePending}
+                        <button type="submit" disabled={sharePending} data-testid="client-bridge-share-submit"
                           className="inline-flex h-10 items-center rounded-lg border border-brand-blue/50 bg-brand-blue/10 px-4 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-60">
                           {labels.shareButton}
                         </button>
@@ -162,7 +224,7 @@ export function ClientAgencyBridgeSection({
           </div>
           {/* A failed accept / decline / revoke used to be silent (the action
               state was discarded); every non-ok outcome now shows the error. */}
-          {[shareState, acceptState, declineState, revokeState].some(
+          {[shareState, acceptState, declineState, revokeState, unshareState].some(
             (s) => s.status === "error" || s.status === "forbidden" || s.status === "invalid" || s.status === "not-found",
           ) && (
             <p className="text-xs text-state-danger" role="alert">{labels.errorLabel}</p>

@@ -90,7 +90,7 @@ export function InlineConfirmBar({
           type="button"
           className={
             danger
-              ? "rounded-md bg-state-danger px-2 py-1 text-xs font-semibold text-white"
+              ? "rounded-md bg-state-danger px-2 py-1 text-xs font-semibold text-text-on-danger"
               : "rounded-md bg-brand-cyan px-2 py-1 text-xs font-semibold text-ink-900"
           }
           onClick={onConfirm}
@@ -170,7 +170,7 @@ export function InlineConfirm({
         type="button"
         className={
           danger
-            ? "rounded-md bg-state-danger px-2 py-1 text-xs font-semibold text-white"
+            ? "rounded-md bg-state-danger px-2 py-1 text-xs font-semibold text-text-on-danger"
             : "rounded-md bg-brand-cyan px-2 py-1 text-xs font-semibold text-ink-900"
         }
         onClick={() => {

@@ -1,0 +1,117 @@
+# Daily freshness contract for the two vacancy sources (owner decision 2026-10-09:
+# one complete, reliable update cycle per 24 h for each source is sufficient).
+#
+# Measures NAV and Sweden SEPARATELY (one matrix leg each, fail-fast off, own
+# issue label, own dispatch), from each provider's own durable cursor
+# (vacancy_import_cursors.last_success_at). A source is FRESH when its last
+# successful session is <= 26 h old (24 h target + 2 h for GitHub's throttled cron).
+#
+# When a source is STALE this workflow
+#   1. opens ONE `freshness-<source>` issue per unresolved incident (the single
+#      owner notification) and comments on it (at most once per run) while it lasts;
+#   2. recovers it: dispatches the source's OWN existing workflow (the canonical
+#      idempotent importer; it resumes from the durable cursor), unless a run is
+#      already queued/in progress or one was dispatched in the last 2 h;
+#   3. closes the issue with a recovery comment on the first fresh reading.
+# It ingests nothing itself and holds no credential beyond the default
+# GITHUB_TOKEN (actions: write to dispatch, issues: write) and the existing
+# service-role secret used read-only on one table.
+#
+# Kill switch: honours VACANCY_SCHEDULE_ENABLED and each provider's own
+# VACANCY_SOURCE_*_ENABLED variable exactly like the cadence workflows.
+name: ingestion-freshness
+
+on:
+  schedule:
+    - cron: "43 4,10,16,22 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ingestion-freshness
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: write
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - source: nav
+            provider_key: nav
+            workflow: nav-supply-cadence.yml
+            dispatch_args: "-f mode=persist"
+          - source: sweden
+            provider_key: arbetsformedlingen
+            workflow: sweden-supply-cadence.yml
+            dispatch_args: "-f channel=stream"
+    steps:
+      - name: Freshness of ${{ matrix.source }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SOURCE: ${{ matrix.source }}
+          PROVIDER_KEY: ${{ matrix.provider_key }}
+          WORKFLOW: ${{ matrix.workflow }}
+          DISPATCH_ARGS: ${{ matrix.dispatch_args }}
+          SCHEDULE_ENABLED: ${{ vars.VACANCY_SCHEDULE_ENABLED }}
+          PROVIDER_ENABLED: ${{ matrix.source == 'nav' && vars.VACANCY_SOURCE_NAV_ENABLED || vars.VACANCY_SOURCE_ARBETSFORMEDLINGEN_ENABLED }}
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -u
+          STALE_AFTER_S=$(( 26 * 3600 ))
+          REDISPATCH_AFTER_S=$(( 2 * 3600 ))
+          LABEL="freshness-$SOURCE"
+          if [ "$SCHEDULE_ENABLED" != "true" ] || [ "$PROVIDER_ENABLED" != "true" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
+            echo "| $SOURCE | disabled / not configured | - | SKIPPED |" >> "$GITHUB_STEP_SUMMARY"
+            echo "Kill switch or configuration absent; nothing to measure."; exit 0
+          fi
+          row=$(curl -sS --max-time 20 \
+            "$SUPABASE_URL/rest/v1/vacancy_import_cursors?provider_key=eq.$PROVIDER_KEY&channel=eq.stream&select=last_success_at,last_run_at,consecutive_failures,last_failure_code" \
+            -H "apikey: $SUPABASE_KEY" -H "Authorization: Bearer $SUPABASE_KEY" || true)
+          last=$(printf '%s' "$row" | node -e 'try{const r=JSON.parse(require("fs").readFileSync(0,"utf8"));console.log(r[0]&&r[0].last_success_at||"")}catch{console.log("")}')
+          fails=$(printf '%s' "$row" | node -e 'try{const r=JSON.parse(require("fs").readFileSync(0,"utf8"));console.log(r[0]?r[0].consecutive_failures+" "+(r[0].last_failure_code||""):"")}catch{console.log("")}')
+          if [ -z "$last" ]; then
+            echo "::warning title=$SOURCE cursor unreadable::could not read last_success_at; no judgement made"
+            echo "| $SOURCE | unreadable | - | UNKNOWN |" >> "$GITHUB_STEP_SUMMARY"; exit 0
+          fi
+          age=$(( $(date +%s) - $(date -d "$last" +%s) ))
+          hours=$(( age / 3600 ))
+          open_issue=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty' || true)
+
+          if [ "$age" -le "$STALE_AFTER_S" ]; then
+            echo "| $SOURCE | $last | ${hours} h | FRESH (streak: $fails) |" >> "$GITHUB_STEP_SUMMARY"
+            if [ -n "$open_issue" ]; then
+              gh issue comment "$open_issue" --body "Recovered: $SOURCE last successful session $last (${hours} h ago). $RUN_URL. Closing."
+              gh issue close "$open_issue"
+            fi
+            exit 0
+          fi
+
+          echo "| $SOURCE | $last | ${hours} h | STALE (streak: $fails) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "::error title=$SOURCE not fresh::last successful session $last (${hours} h ago; target 24 h)"
+          if [ -n "$open_issue" ]; then
+            gh issue comment "$open_issue" --body "Still stale: $SOURCE last success $last (${hours} h ago; streak $fails). $RUN_URL"
+          else
+            gh label create "$LABEL" --color B60205 --description "Daily freshness target missed (auto-managed)" 2>/dev/null || true
+            gh issue create --label "$LABEL" --title "$SOURCE vacancy feed missed its daily freshness target" \
+              --body "Last successful session: $last (${hours} h ago; target: one complete cycle per 24 h). Failure streak: $fails. Automatic recovery (dispatching the existing $WORKFLOW, which resumes from the durable cursor) runs below; this issue closes itself on the first fresh reading. $RUN_URL"
+          fi
+
+          busy=$(gh run list --workflow "$WORKFLOW" --json status --jq '[.[]|select(.status=="queued" or .status=="in_progress")]|length' || echo 0)
+          if [ "${busy:-0}" -gt 0 ]; then echo "$WORKFLOW already queued/running; not dispatching."; exit 0; fi
+          recent=$(gh run list --workflow "$WORKFLOW" --event workflow_dispatch --limit 1 --json createdAt --jq '.[0].createdAt // empty' || true)
+          if [ -n "$recent" ] && [ $(( $(date +%s) - $(date -d "$recent" +%s) )) -lt "$REDISPATCH_AFTER_S" ]; then
+            echo "A dispatch ran at $recent (< 2 h ago); not dispatching again."; exit 0
+          fi
+          # shellcheck disable=SC2086
+          gh workflow run "$WORKFLOW" $DISPATCH_ARGS
+          echo "Dispatched $WORKFLOW ($DISPATCH_ARGS) for $SOURCE."

@@ -3,10 +3,13 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { CountrySignals } from "@/components/marketing/country-signals";
 import { LabourMarketEvidence } from "@/components/marketing/labour-market-evidence";
+import { CountryReadinessRequirements } from "@/components/marketing/country-readiness-requirements";
 import {
   SUPPORTED_COUNTRIES,
   isSupportedCountry,
 } from "@/lib/labour-market/country-evidence";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 /**
  * Per-country labour-market evidence page (Step 5/6). Source-backed, honest:
@@ -15,6 +18,25 @@ import {
  */
 export function generateStaticParams() {
   return SUPPORTED_COUNTRIES.map((c) => ({ country: c.toLowerCase() }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; country: string }>;
+}): Promise<Metadata> {
+  const { locale, country } = await params;
+  const code = country.toUpperCase();
+  if (!(SUPPORTED_COUNTRIES as readonly string[]).includes(code)) {
+    return { robots: { index: false, follow: false } };
+  }
+  const t = await getTranslations({ locale, namespace: "labourMarket" });
+  return buildPageMetadata({
+    locale,
+    path: `/labour-market/${country.toLowerCase()}`,
+    title: t(`countryNames.${code}`),
+    description: t(`countryEvidence.${code}.intro`),
+  });
 }
 
 export default async function CountryPage({
@@ -34,7 +56,7 @@ export default async function CountryPage({
     <div className="mx-auto max-w-container px-6 py-14 sm:px-12" id="main-content">
       <Link
         href="/labour-market"
-        className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-cyan"
+        className="font-mono text-meta uppercase tracking-label text-brand-blue hover:text-brand-champagne"
       >
         ← {t("countryBackToIndex")}
       </Link>
@@ -60,6 +82,14 @@ export default async function CountryPage({
       <section className="mt-10">
         <CountrySignals country={code} />
       </section>
+
+      {/* SKL-8 + GEO-3. The researched country-readiness matrix — 18 sourced
+          requirements across all four mobility scopes — had exactly one
+          reader before this: the personal document checklist, which uses the
+          `worker_posted` scope only. This page is where the chain that
+          already pointed here (capability -> /work-abroad -> /labour-market ->
+          here) finally arrives at the requirements themselves. */}
+      <CountryReadinessRequirements country={code} />
 
       {/* EU regional backdrop — the already-verified EU evidence module. */}
       <LabourMarketEvidence />

@@ -73,6 +73,11 @@ export interface WorkerOps {
   workerProfileId: string;
   name: string;
   assignedAt: string;
+  /** True when the person is on the project ONLY through an actively assigned
+   *  team (lib/projects/assigned-people.ts); false for an individual assignment
+   *  (also when they are in a team too - they count once). Manager controls that
+   *  write a per-person row (status, checklist) are not offered for these. */
+  viaTeam?: boolean;
   journalEntries: number;
   declaredSkills: number;
   confirmedSkills: number;
@@ -95,7 +100,11 @@ export interface WorkerOps {
 }
 
 export interface OpsCounters {
+  /** DISTINCT people on the project: individual assignments + members of
+   *  actively assigned teams, a person assigned both ways counted once. */
   totalAssigned: number;
+  /** Of totalAssigned, the people who reach the project only via a team. */
+  viaTeam?: number;
   ready: number;
   needsDeclaredSkills: number;
   needsEvidence: number;
@@ -126,6 +135,8 @@ export interface WorkerOpsInput {
   /** True when `name` is a real stored name, not the id-prefix fallback. */
   hasRealName: boolean;
   assignedAt: string;
+  /** Team-only member (see WorkerOps.viaTeam). Default false. */
+  viaTeam?: boolean;
   readiness: WorkerReadiness;
   /** v2: manager-set operational status, or null if none set. */
   operationalStatus?: OperationalStatus | null;
@@ -171,6 +182,7 @@ export function deriveWorkerOps(input: WorkerOpsInput): WorkerOps {
     workerProfileId: input.workerProfileId,
     name: input.name,
     assignedAt: input.assignedAt,
+    viaTeam: input.viaTeam === true,
     journalEntries: readiness.journalEntries,
     declaredSkills: readiness.declaredSkills,
     confirmedSkills: readiness.confirmedSkills,
@@ -199,6 +211,7 @@ export function deriveOpsCounters(
   }
   return {
     totalAssigned: workers.length,
+    viaTeam: workers.filter((w) => w.viaTeam).length,
     ready: workers.filter((w) => w.ready).length,
     needsDeclaredSkills: workers.filter((w) => w.missing.includes("declared_skills")).length,
     needsEvidence: workers.filter((w) => w.missing.includes("work_evidence")).length,

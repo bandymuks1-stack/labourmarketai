@@ -72,7 +72,7 @@ export function EstimateSummaryView({
 
   return (
     <div className="flex flex-col gap-3" data-testid="estimate-summary">
-      <p className="font-mono text-meta uppercase tracking-label text-brand-cyan">
+      <p className="font-mono text-meta uppercase tracking-label text-text-muted">
         {labels.sectionResult}
       </p>
       <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-4 text-sm">

@@ -31,6 +31,7 @@ import { computeContextFit, type FitBasis, type SubjectEscoSkill } from "./fit";
 import { professionRelatedness } from "@/lib/taxonomy/profession-skills";
 import type { NeedSkillSource } from "./need-skills";
 import type { StructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
+import type { ReadinessSummary } from "@/lib/readiness/readiness-model";
 import {
   MATCH_CALC_VERSION,
   compareCompensationV2,
@@ -74,7 +75,7 @@ export type {
  *  module — re-exported here so every existing import keeps working. */
 export type { EvidenceTier } from "@/lib/evidence/evidence-tier";
 export { sourceToEvidence } from "@/lib/evidence/evidence-tier";
-import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
+import { deriveConfirmedWorkTier, type EvidenceTier } from "@/lib/evidence/evidence-tier";
 
 /**
  * EVIDENCE CONFIDENCE — the answer to "how sure are we the matched skills are
@@ -100,6 +101,11 @@ export interface MatchSubjectSkill {
   readonly uri: string;
   /** Evidence tier from worker_skills.source (NEVER inferred). */
   readonly evidence: EvidenceTier;
+  /** Manager-confirmed REAL WORK entries that mention this skill, and the
+   *  distinct days they span (see lib/evidence/evidence-tier.ts). Optional:
+   *  absent means "not known", never "zero" — and it never lowers a match. */
+  readonly confirmedWorkEntries?: number;
+  readonly confirmedDays?: number;
 }
 
 /** The company need, as much as the structured payload + demand row carry.
@@ -117,6 +123,9 @@ export interface MatchNeed {
    *  presented as human-structured. */
   readonly needSource?: NeedSkillSource | null;
   readonly professionSlug?: string | null;
+  /** DECLARED opportunity type (internship / apprenticeship / …) carried for
+   *  discovery filtering; never a matching input. Absent = not stated. */
+  readonly opportunityType?: string | null;
   /** ISO-3166 alpha-2 country the work is in. */
   readonly country?: string | null;
   /** City/locality of the work (free-form; compared normalized). */
@@ -168,7 +177,14 @@ export interface MatchNeed {
 
 export interface MatchSubject {
   readonly skills: readonly MatchSubjectSkill[];
+  /** The PRIMARY profession — where a single designation is genuinely needed. */
   readonly professionSlug?: string | null;
+  /** EVERY declared catalogue profession (primary first). Owner decision
+   *  2026-09-28: a person may be tiler + painter + scaffolder; each is a real
+   *  profession, and any of them can meet a need's profession. Absent → the
+   *  primary alone, exactly as before. Own-words professions with no catalogue
+   *  mapping are not here — they are never matched to a guessed profession. */
+  readonly professionSlugs?: readonly string[] | null;
   /** ISO-3166 alpha-2 of where the worker currently is. */
   readonly country?: string | null;
   /** City/locality the worker is in or prefers (free-form). */
@@ -234,6 +250,31 @@ export interface MatchSubject {
    * "this person has none".
    */
   readonly practiceEngagements?: number | null;
+
+  /**
+   * HISTORY SIGNALS - skills an ORGANIZATION'S imported history of this
+   * person names (`organization_evidence_competency_signals`, linked worker,
+   * live records only), as `{ uri: canonical skill slug, records }`.
+   *
+   * A labelled SIGNAL, evidence class ORGANIZATION_REPORTED, provenance
+   * `organization_provided`: evidence that work was described that way
+   * (SEP-3 - EVIDENCE != VERIFICATION). It is NEVER a declared or verified
+   * skill and is never added to `skills`.
+   *
+   * OWNER DECISION (2026-10-07, B): supported historical skill signals DO
+   * contribute to matching. A required skill the person did not declare but
+   * the organization's history names counts toward skill fit as its OWN
+   * class (`evidence.matchedOrganizationReported`) - never as self-declared,
+   * journal-supported or manager-confirmed, and never lifting
+   * `evidenceConfidence` above "unverified". For a skill the person also
+   * declares, the signal stays a labelled count beside the ladder
+   * (`evidence.matchedHistorySignal`).
+   *
+   * null / undefined = unknown (no linked history, or the read was
+   * unavailable) - NEVER "the history says nothing". A worker without history
+   * is scored exactly as before (SEP-7: unknown != zero).
+   */
+  readonly historySignals?: readonly { readonly uri: string; readonly records: number }[] | null;
 }
 
 /** Great-circle distance in km (haversine). Pure; used only when BOTH sides
@@ -273,6 +314,10 @@ export type MatchReason =
   | { readonly code: "skill_fit"; readonly matched: number; readonly total: number; readonly confirmed: number }
   | { readonly code: "skills_journal_supported"; readonly count: number }
   | { readonly code: "skills_manager_confirmed"; readonly count: number }
+  /** Required skills held ONLY through an organization's history of the
+   *  person (class ORGANIZATION_REPORTED). Its own code and label so it can
+   *  never read as a declared, journal-supported or confirmed skill. */
+  | { readonly code: "skills_history_reported"; readonly count: number }
   /** Completed PRACTICE placements (student / volunteer). Its own code, with
    *  its own localized label, so it can never be read as employment. */
   | { readonly code: "practice_experience"; readonly count: number }
@@ -334,6 +379,21 @@ export interface MatchResultV1 {
     readonly matchedManagerConfirmed: number;
     readonly matchedJournalSupported: number;
     readonly matchedSelfDeclared: number;
+    /** Matched skills with >= 1 manager-confirmed work entry (entry-level
+     *  confirmation — NOT a skill certification). Counts, never a percentage. */
+    readonly matchedConfirmedWork?: number;
+    /** Matched skills whose confirmed work repeats across entries and days. */
+    readonly matchedRepeatedConfirmed?: number;
+    /** Matched skills that an organization's imported history of the person
+     *  also NAMES (provenance `organization_provided`). A labelled signal
+     *  beside the ladder - not a tier, not verification, not an input to
+     *  status or ordering. Absent = unknown, never zero. */
+    readonly matchedHistorySignal?: number;
+    /** Matched skills the person holds ONLY through organization history
+     *  (class ORGANIZATION_REPORTED): not self-declared, not verified. They
+     *  count toward `skillFit` but in no tier above. Absent = no history
+     *  signals known, never zero. */
+    readonly matchedOrganizationReported?: number;
   };
   /**
    * Verification truth over the MATCHED skills, separate from `status` by
@@ -373,6 +433,13 @@ export interface MatchResultV1 {
    *  Missing data NEVER fabricates an outcome. (Sits beside the legacy
    *  `missingData` code list, which stays untouched for compatibility.) */
   readonly missingFacts: readonly MatchMissingFact[];
+  /**
+   * READINESS (decision 0021) - a SIBLING of fit, never an input to it.
+   * Attached by `attachReadiness` (lib/readiness/with-readiness.ts) AFTER the
+   * match is computed; `matchWorkerToNeed` never sets it and nothing in this
+   * file reads it. Absent = readiness not assessed (not "ready", not "clear").
+   */
+  readonly readiness?: ReadinessSummary;
 }
 
 /**
@@ -390,11 +457,51 @@ export function compareMatches(a: MatchResultV1, b: MatchResultV1): number {
   const ca = a.skillFit?.matchedConfirmed ?? 0;
   const cb = b.skillFit?.matchedConfirmed ?? 0;
   if (cb !== ca) return cb - ca;
+  // Accumulated confirmed WORK breaks ties only INSIDE the same status and
+  // coverage — it never reorders by coverage, and missing counts read as 0
+  // without penalising eligibility (a tiebreak, not a score).
+  const ra = a.evidence?.matchedRepeatedConfirmed ?? 0;
+  const rb = b.evidence?.matchedRepeatedConfirmed ?? 0;
+  if (rb !== ra) return rb - ra;
+  const wa = a.evidence?.matchedConfirmedWork ?? 0;
+  const wb = b.evidence?.matchedConfirmedWork ?? 0;
+  if (wb !== wa) return wb - wa;
   const AV: Record<MatchAvailability, number> = { available: 3, busy: 2, unknown: 1, unavailable: 0 };
   return AV[b.availability] - AV[a.availability];
 }
 
 const norm = (s: string | null | undefined): string => (s ?? "").trim().toLowerCase();
+
+/** The subject's declared professions, primary first, de-duplicated. */
+export function declaredProfessionSlugs(subject: MatchSubject): string[] {
+  const out: string[] = [];
+  for (const s of [subject.professionSlug, ...(subject.professionSlugs ?? [])]) {
+    const v = norm(s);
+    if (v && !out.includes(v)) out.push(v);
+  }
+  return out;
+}
+
+/** Which declared profession to judge a need's profession against: an exact
+ *  match if one exists, else the most related (ties keep declaration order,
+ *  so the primary wins them), else the primary. Pure and deterministic — it
+ *  CHOOSES a profession; it invents no score. */
+function bestDeclaredProfession(needProfession: string, subject: MatchSubject): string | null {
+  const declared = declaredProfessionSlugs(subject);
+  if (declared.length === 0) return null;
+  const want = norm(needProfession);
+  if (declared.includes(want)) return want;
+  let best = declared[0];
+  let bestRel = professionRelatedness(needProfession, best);
+  for (const slug of declared.slice(1)) {
+    const rel = professionRelatedness(needProfession, slug);
+    if (rel > bestRel) {
+      best = slug;
+      bestRel = rel;
+    }
+  }
+  return best;
+}
 
 /**
  * Deterministic worker↔need match. Pure: same inputs → same output.
@@ -430,6 +537,16 @@ export function matchWorkerToNeed(
     uri: s.uri,
     verified: s.evidence === "manager_confirmed",
   }));
+  // History-only skills (owner decision 2026-10-07 B): a skill the
+  // organization's history names and the person did not declare is held as
+  // ORGANIZATION_REPORTED - never `verified`, never a declared tier.
+  const declaredUris = new Set(subject.skills.map((s) => s.uri));
+  const historyOnlyUris = new Set(
+    (subject.historySignals ?? [])
+      .filter((h) => h.records > 0 && !declaredUris.has(h.uri))
+      .map((h) => h.uri),
+  );
+  for (const uri of historyOnlyUris) fitSubject.push({ uri, verified: false });
   const skillFit = computeContextFit(needSkillIds, fitSubject);
 
   // Unstructured need ⇒ no percentage exists, ever (§19). Cannot match.
@@ -471,13 +588,34 @@ export function matchWorkerToNeed(
 
   // ── Evidence breakdown over the MATCHED skills. ──
   const tierByUri = new Map<string, EvidenceTier>();
-  for (const s of subject.skills) tierByUri.set(s.uri, s.evidence);
+  const workByUri = new Map<string, ReturnType<typeof deriveConfirmedWorkTier>>();
+  for (const s of subject.skills) {
+    tierByUri.set(s.uri, s.evidence);
+    workByUri.set(s.uri, deriveConfirmedWorkTier(s));
+  }
+  let matchedConfirmedWork = 0;
+  let matchedRepeatedConfirmed = 0;
+  // History signals: counted over the MATCHED skills only, and only when the
+  // subject carries them (unknown stays unknown - the field is then omitted).
+  const historyUris = subject.historySignals
+    ? new Set(subject.historySignals.filter((h) => h.records > 0).map((h) => h.uri))
+    : null;
+  let matchedHistorySignal = 0;
+  let matchedOrganizationReported = 0;
 
   let matchedManagerConfirmed = 0;
   let matchedJournalSupported = 0;
   let matchedSelfDeclared = 0;
   for (const uri of skillFit.matchedUris) {
     const tier = tierByUri.get(uri) ?? "self_declared";
+    const work = workByUri.get(uri) ?? "none";
+    if (work !== "none") matchedConfirmedWork += 1;
+    if (historyUris?.has(uri)) matchedHistorySignal += 1;
+    if (work === "repeated_confirmed") matchedRepeatedConfirmed += 1;
+    if (historyOnlyUris.has(uri)) {
+      matchedOrganizationReported += 1;
+      continue;
+    }
     if (tier === "manager_confirmed") matchedManagerConfirmed += 1;
     else if (tier === "work_journal") matchedJournalSupported += 1;
     else matchedSelfDeclared += 1;
@@ -490,11 +628,11 @@ export function matchWorkerToNeed(
       ? null
       : matchedManagerConfirmed === matchedCount
         ? "confirmed"
-        : matchedSelfDeclared === matchedCount
+        : matchedSelfDeclared + matchedOrganizationReported === matchedCount
           ? "unverified"
           : "mixed";
 
-  if (subject.skills.length === 0) {
+  if (subject.skills.length === 0 && historyOnlyUris.size === 0) {
     missingData.push("no_subject_skills");
     missingFacts.push({
       criterion: "skills_coverage",
@@ -522,6 +660,8 @@ export function matchWorkerToNeed(
     reasons.push({ code: "skills_manager_confirmed", count: matchedManagerConfirmed });
   if (matchedJournalSupported > 0)
     reasons.push({ code: "skills_journal_supported", count: matchedJournalSupported });
+  if (matchedOrganizationReported > 0)
+    reasons.push({ code: "skills_history_reported", count: matchedOrganizationReported });
   if (matchedManagerConfirmed + matchedJournalSupported > 0) {
     strengths.push({
       criterion: "evidence_tiers",
@@ -641,9 +781,14 @@ export function matchWorkerToNeed(
   }
 
   // Profession — direct match, or related via shared profession_skills links
-  // (Jaccard over the static 232-link mirror; deterministic).
-  if (need.professionSlug && subject.professionSlug) {
-    if (norm(need.professionSlug) === norm(subject.professionSlug)) {
+  // (Jaccard over the static 232-link mirror; deterministic). Judged against
+  // the declared profession that fits this need best (see
+  // `MatchSubject.professionSlugs`); with one profession, that is it.
+  const subjectProfession = need.professionSlug
+    ? bestDeclaredProfession(need.professionSlug, subject)
+    : null;
+  if (need.professionSlug && subjectProfession) {
+    if (norm(need.professionSlug) === norm(subjectProfession)) {
       reasons.push({ code: "profession_match" });
       strengths.push({
         criterion: "profession",
@@ -652,7 +797,7 @@ export function matchWorkerToNeed(
         source: "worker_professions",
       });
     } else {
-      const rel = professionRelatedness(need.professionSlug, subject.professionSlug);
+      const rel = professionRelatedness(need.professionSlug, subjectProfession);
       if (rel >= 0.2) {
         reasons.push({
           code: "profession_related",
@@ -1448,7 +1593,7 @@ export function matchWorkerToNeed(
     skillFit.needTotal > 0 ? skillFit.matchedTotal / skillFit.needTotal : 0;
   let status: MatchStatus;
   if (skillFit.matchedTotal === 0) {
-    status = subject.skills.length === 0 ? "insufficient_data" : "weak";
+    status = subject.skills.length === 0 && historyOnlyUris.size === 0 ? "insufficient_data" : "weak";
   } else if (rawCoverage >= 0.8) status = "strong";
   else if (rawCoverage >= 0.5) status = "possible";
   else status = "weak";
@@ -1484,7 +1629,14 @@ export function matchWorkerToNeed(
   return {
     status,
     skillFit,
-    evidence: { matchedManagerConfirmed, matchedJournalSupported, matchedSelfDeclared },
+    evidence: {
+      matchedManagerConfirmed,
+      matchedJournalSupported,
+      matchedSelfDeclared,
+      matchedConfirmedWork,
+      matchedRepeatedConfirmed,
+      ...(historyUris ? { matchedHistorySignal, matchedOrganizationReported } : {}),
+    },
     evidenceConfidence,
     reasons,
     gaps,

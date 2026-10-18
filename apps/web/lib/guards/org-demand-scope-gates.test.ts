@@ -20,6 +20,11 @@
  *     workspace, never "first owned org by created_at".
  */
 import { describe, expect, it } from "vitest";
+
+import {
+  DEMAND_KIND_OR_FILTER,
+  NON_EMPLOYER_DEMAND_KIND_OR_FILTER,
+} from "@/lib/demand/market-direction";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -124,9 +129,30 @@ describe("2. the gates are scoped to the EMPLOYER paths only", () => {
   it("the market-map employer leg is gated; non-employer kinds keep flowing", () => {
     const src = read("lib/demand/canonical-demand.ts");
     expect(src).toMatch(/requireEmployerCompany\(\)/);
+
     // Fail-closed for employer demand = the kind filter excludes the employer
     // kinds when there is no resolved workspace, and ONLY then.
-    expect(src).toMatch(/kind\.is\.null,kind\.eq\.buyer_request,kind\.eq\.customer_request/);
+    //
+    // This used to pin the literal `kind.is.null,kind.eq.buyer_request,
+    // kind.eq.customer_request`. Two modules carried that string, and a kind
+    // added to `market-direction.ts` would have updated the rule and silently
+    // not them — so the literal moved into the rule and both callers now
+    // derive it (2026-09-07). Pinning a string would have made the ONE-source
+    // fix look like a regression, so the guard pins the PROPERTY instead, in
+    // both halves: the value excludes the employer kind, and the module
+    // applies it on the non-employer branch only.
+    expect(NON_EMPLOYER_DEMAND_KIND_OR_FILTER).not.toMatch(/company_request/);
+    expect(NON_EMPLOYER_DEMAND_KIND_OR_FILTER).toMatch(/kind\.is\.null/);
+    expect(NON_EMPLOYER_DEMAND_KIND_OR_FILTER).toMatch(/kind\.eq\.buyer_request/);
+    expect(NON_EMPLOYER_DEMAND_KIND_OR_FILTER).toMatch(/kind\.eq\.customer_request/);
+    expect(DEMAND_KIND_OR_FILTER).toMatch(/kind\.eq\.company_request/);
+
+    const guarded = src.slice(src.indexOf("if (!employer.ok)"));
+    expect(
+      guarded.slice(0, 400),
+      "the narrower filter must be applied on the NO-workspace branch, and only there",
+    ).toMatch(/NON_EMPLOYER_DEMAND_KIND_OR_FILTER/);
+
     // The module still takes no caller-supplied identifiers (W10 rule).
     expect(src).toMatch(/export async function loadCanonicalDemand\(\): Promise/);
   });

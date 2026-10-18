@@ -4,8 +4,6 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import { getSessionProfile } from "@/lib/auth/session-profile";
-import { baseIdentityForRole } from "@/lib/config/roles";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
 import {
@@ -17,10 +15,12 @@ import {
   inviteMembership,
   leaveOrganization,
   revokeMembership,
+  setMembershipInvitationManager,
   type MembershipCommandOutcome,
   type MembershipCommandResult,
   type MembershipRole,
 } from "./memberships";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * M-P0-4 Slice 2 — membership server actions.
@@ -61,11 +61,9 @@ function asAny(supabase: SupabaseClient): any {
 
 /** The membership-validated active ORGANIZATION workspace, or null. */
 async function activeOrganizationId(): Promise<string | null> {
-  const session = await getSessionProfile();
-  const identity = session.profile?.active_role
-    ? baseIdentityForRole(session.profile.active_role)
-    : null;
-  const workspace = await getWorkspaceContext(identity);
+  // The ONE session resolution the chip renders — its identity default is read
+  // from the session profile inside it.
+  const workspace = await getWorkspaceContext();
   const activeId = workspace.activeWorkspaceId;
   if (activeId === PERSONAL_WORKSPACE_ID) return null;
   const active = workspace.workspaces.find(
@@ -103,6 +101,8 @@ function mapResult(r: MembershipCommandResult): MembershipActionState {
     "revoked",
     "left",
     "unchanged",
+    "granted",
+    "withdrawn",
   ];
   return SUCCESS.includes(r.outcome)
     ? { ok: true, outcome: r.outcome }
@@ -120,6 +120,7 @@ export async function inviteMembershipAction(
   _prev: MembershipActionState | null,
   formData: FormData,
 ): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const email = String(formData.get("email") ?? "").trim();
   const role = parseRole(formData.get("role"));
   if (email === "" || role === null) return { ok: false, code: "invalid" };
@@ -159,6 +160,7 @@ export async function cancelMembershipInviteAction(
   _prev: MembershipActionState | null,
   formData: FormData,
 ): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const membershipId = String(formData.get("membershipId") ?? "").trim();
   if (membershipId === "") return { ok: false, code: "invalid" };
 
@@ -177,6 +179,7 @@ export async function changeMembershipRoleAction(
   _prev: MembershipActionState | null,
   formData: FormData,
 ): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const membershipId = String(formData.get("membershipId") ?? "").trim();
   const role = parseRole(formData.get("role"));
   if (membershipId === "" || role === null) return { ok: false, code: "invalid" };
@@ -192,10 +195,37 @@ export async function changeMembershipRoleAction(
   return state;
 }
 
+/** Owner/admin grants or withdraws invitation management for one member of
+ *  the ACTIVE workspace's organization (owner direction 2026-09-24). */
+export async function setMembershipInvitationManagerAction(
+  _prev: MembershipActionState | null,
+  formData: FormData,
+): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
+  const membershipId = String(formData.get("membershipId") ?? "").trim();
+  const enabledRaw = String(formData.get("enabled") ?? "");
+  if (membershipId === "" || (enabledRaw !== "true" && enabledRaw !== "false")) {
+    return { ok: false, code: "invalid" };
+  }
+
+  const orgId = await activeOrganizationId();
+  if (!orgId) return { ok: false, code: "no_workspace" };
+  if (!(await membershipBelongsToOrg(membershipId, orgId))) {
+    return { ok: false, code: "not_found" };
+  }
+
+  const state = mapResult(
+    await setMembershipInvitationManager(membershipId, enabledRaw === "true"),
+  );
+  if (state.ok) revalidatePath("/", "layout");
+  return state;
+}
+
 export async function revokeMembershipAction(
   _prev: MembershipActionState | null,
   formData: FormData,
 ): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const membershipId = String(formData.get("membershipId") ?? "").trim();
   if (membershipId === "") return { ok: false, code: "invalid" };
 
@@ -214,6 +244,7 @@ export async function leaveOrganizationAction(
   _prev: MembershipActionState | null,
   _formData: FormData,
 ): Promise<MembershipActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(_formData));
   const orgId = await activeOrganizationId();
   if (!orgId) return { ok: false, code: "no_workspace" };
   const state = mapResult(await leaveOrganization(orgId));

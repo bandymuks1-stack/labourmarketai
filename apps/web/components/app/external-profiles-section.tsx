@@ -10,7 +10,6 @@ import { DarkListbox } from "@/components/ui/DarkListbox";
 import {
   addExternalProfileAction,
   disconnectExternalProfileAction,
-  setExternalProfileVisibilityAction,
   type ExternalProfileActionResult,
 } from "@/lib/worker/external-profiles-actions";
 import {
@@ -86,17 +85,12 @@ function ProfileRow({
   labels: ExternalProfilesLabels;
 }) {
   const [confirming, setConfirming] = useState(false);
-  const [visState, visAction, visPending] = useActionState<
-    ExternalProfileActionResult | null,
-    FormData
-  >(setExternalProfileVisibilityAction, null);
   const [discState, discAction, discPending] = useActionState<
     ExternalProfileActionResult | null,
     FormData
   >(disconnectExternalProfileAction, null);
 
-  const nextVisibility = entry.visibility === "private" ? "employers" : "private";
-  const rowError = actionErrorText(visState, labels) ?? actionErrorText(discState, labels);
+  const rowError = actionErrorText(discState, labels);
 
   return (
     <li
@@ -114,22 +108,17 @@ function ProfileRow({
         </span>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          {/* Visibility toggle — writes the SAVED PREFERENCE via the RPC. */}
-          <form action={visAction}>
-            <input type="hidden" name="id" value={entry.id} />
-            <input type="hidden" name="visibility" value={nextVisibility} />
-            <button
-              type="submit"
-              disabled={visPending}
-              className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary transition-colors hover:text-text-primary disabled:opacity-50"
-              data-testid={`external-profile-visibility-${entry.id}`}
-            >
-              {labels.visibility}:{" "}
-              {entry.visibility === "private"
-                ? labels.visibilityPrivate
-                : labels.visibilityEmployers}
-            </button>
-          </form>
+          {/* Visibility is SHOWN, not toggled: the RPC that would save a change is not part of the
+              applied schema (the 2026-09-15 split shipped save/disconnect only), so a toggle could
+              never save. The stored value is still shown, and the note below says employer viewing
+              is not switched on. */}
+          <span
+            className="inline-flex min-h-11 items-center rounded-md border border-ink-600 px-2 py-1 text-xs text-text-secondary"
+            data-testid={`external-profile-visibility-${entry.id}`}
+          >
+            {labels.visibility}:{" "}
+            {entry.visibility === "private" ? labels.visibilityPrivate : labels.visibilityEmployers}
+          </span>
 
           {/* Soft disconnect behind an inline two-step confirm. */}
           {confirming ? (
@@ -333,7 +322,7 @@ export function ExternalProfilesSection({
             {labels.importNote}{" "}
             <a
               href="#profile-edit"
-              className="font-mono text-meta uppercase tracking-label text-brand-blue hover:underline"
+              className="text-sm font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline"
               data-testid="external-profiles-import-link"
             >
               {labels.importLink} →

@@ -77,6 +77,11 @@ export async function getOwnThermometer(): Promise<OwnThermometer | null> {
   const professionId: string | null = wp?.profession_id ?? null;
 
   // The worker's single active project assignment (ambiguous → no link).
+  // This is NOT a headcount: it only finds the one roster project the salary
+  // aggregate (project_position_salary_avg) is asked about. That aggregate is a
+  // peer-salary read and is deliberately NOT widened to team members
+  // (20261003150700), so a team-only worker honestly gets no project link here
+  // rather than a figure computed over people they are not rostered with.
   let projectId: string | null = null;
   const { data: pwa } = await asAny(supabase)
     .from("project_worker_assignments")

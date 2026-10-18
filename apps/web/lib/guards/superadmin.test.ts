@@ -32,11 +32,18 @@ describe("Guard: server-side superadmin gate", () => {
     expect(helper).toMatch(/profile\??\.active_role\s*===\s*["']admin["']/);
   });
 
-  it("requireSuperadmin redirects non-admins server-side", () => {
+  it("requireSuperadmin redirects non-admins server-side, and SAYS why", () => {
     // Must use next/navigation redirect, not a client-side throw.
     expect(helper).toMatch(/from\s+["']next\/navigation["']/);
     expect(helper).toMatch(/redirect\(`\/\$\{locale\}\/auth\/login`\)/);
-    expect(helper).toMatch(/redirect\(`\/\$\{locale\}\/dashboard`\)/);
+    // 2026-09-22: the destination is unchanged — the canonical home — but the
+    // bounce now carries its reason, so the home can render one honest line
+    // instead of teleporting the person with nothing said. The bare
+    // `/${locale}/dashboard` form must NOT come back: that was the silence.
+    expect(helper).toMatch(
+      /redirect\(`\/\$\{locale\}\/dashboard\?notice=\$\{OPERATOR_ACCESS_NOTICE\}`\)/,
+    );
+    expect(helper).not.toMatch(/redirect\(`\/\$\{locale\}\/dashboard`\)/);
   });
 
   it("requireSuperadmin runs BEFORE rendering admin pages", () => {

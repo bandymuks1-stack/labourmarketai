@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { type Role } from "@/lib/auth/actions";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 
 /**
  * Server-side role gate for role-context dashboards (company / agency
@@ -36,6 +38,24 @@ import { type Role } from "@/lib/auth/actions";
  * a thrown `RoleSignalUnavailableError` fails CLOSED (the user does
  * not enter the role space) onto the honest generic error surface
  * (`app/[locale]/error.tsx`) instead of a false claim about their roles.
+ *
+ * WHERE THE REFUSAL IS NORMALLY DECIDED NOW (2026-09-22). This gate is
+ * correct but it runs too LATE to be an HTTP redirect: every page under
+ * `app/[locale]/dashboard/` sits inside the Suspense boundary that
+ * `dashboard/loading.tsx` creates, and a `redirect()` thrown inside a
+ * Suspense boundary cannot set a status — Next has already committed a
+ * 200, so the refusal was carried out by the browser after painting
+ * ~600ms of "Application error: a client-side exception has occurred".
+ * The dashboard LAYOUT, one frame above that boundary, now refuses first
+ * using the same `profile_roles` read it already performs and the route
+ * table in `lib/auth/role-gated-routes.ts`.
+ *
+ * This function stays, unchanged in behaviour, and every gated page keeps
+ * calling it. It is the authority on a SOFT navigation (React reuses the
+ * layout, so the layout gate does not re-run) and on any request that
+ * reaches the page without the middleware's path header. Two gates, ONE
+ * decision rule — the layout can only ever refuse earlier, never admit
+ * someone this function would turn away.
  */
 export async function requireRoleOrRedirect(
   locale: string,
@@ -60,10 +80,31 @@ export async function requireRoleOrRedirect(
 
   const heldRoles = new Set(rolesRows.map((r) => r.role as string));
   if (!heldRoles.has(expectedRole)) {
-    // Never a silent bounce (audit PR4): the overview renders a banner
-    // explaining WHICH space the link needed and where to add that role,
-    // instead of teleporting the user home with zero explanation. Reached
-    // ONLY when the read answered, so the banner is always a true statement.
+    // MEMBERSHIP IS THE COMPANY GATE TOO (capability matrix P1, 2026-09-23).
+    // `membership_accept_v1` never grants `profile_roles.company`, so a
+    // person invited into an organization as its manager held every
+    // membership the employer resolver accepts and was still refused at
+    // this door. The gate is DERIVED from the workspace the person is
+    // standing in — the ONE request-cached resolution the chip renders
+    // (#1849) — never written to `profile_roles` from here. Only the ACTIVE
+    // workspace counts: a membership in another organization opens nothing,
+    // and the personal workspace still needs the held role.
+    if (
+      expectedRole === "company" &&
+      workspaceOpensCompanySpace(await getWorkspaceContext())
+    ) {
+      return user.id;
+    }
+    // Never a silent bounce (audit PR4): the reason travels with the redirect
+    // so the overview can say WHICH space the link needed instead of
+    // teleporting the person home with no explanation. Reached ONLY when the
+    // read answered, so the sentence is always a true statement.
+    //
+    // This comment used to assert the overview "renders a banner". It did
+    // not — measured 2026-09-22, nothing on `/lt/dashboard` read the
+    // parameter at all, so every refusal WAS the silent teleport the audit
+    // set out to remove. `lib/auth/access-notice.ts` reads it now and
+    // `components/app/access-refusal-notice.tsx` says it.
     redirect(`/${locale}/dashboard?notice=needs_${expectedRole}_role`);
   }
   return user.id;

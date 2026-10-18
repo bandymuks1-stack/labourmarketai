@@ -22,7 +22,7 @@ describe("intelligence source governance", () => {
     // (vacancies, approved 2026-08-09 —
     // docs/human-gates/arbetsformedlingen-activation-gate.md). Everything
     // else imports nothing.
-    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen"]);
+    const ACTIVATED = new Set(["eurostat", "arbetsformedlingen", "nav"]);
     const external = INTELLIGENCE_SOURCE_PROFILES.filter(
       (p) => p.sourceKind !== "internal_aggregated" && !ACTIVATED.has(p.key),
     );

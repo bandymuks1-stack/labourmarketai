@@ -1,0 +1,380 @@
+import { getTranslations } from "next-intl/server";
+
+import type { ActiveLocale } from "@/lib/i18n/config";
+import { NavLinkPending } from "@/components/app/nav-link-pending";
+import { Link } from "@/lib/i18n/navigation";
+import {
+  WEEKDAY_ANCHOR_ISO,
+  type JournalCalendarGrid,
+  type JournalCalendarScale,
+} from "@/lib/journal/journal-calendar";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
+// The observed-reality colour of the work-world grammar (primitives.tsx
+// REALITY_CLASS.observed). That file is landing-frozen, so the class pair is
+// mirrored here verbatim rather than exported from it; the journal grid must
+// paint a recorded day with the SAME colour the TimeReality chip wears.
+const REALITY_CLASS = { observed: "text-brand-cyan border-brand-cyan/40" } as const;
+
+/**
+ * THE WORK JOURNAL CALENDAR — the day navigator on `/dashboard/journal`
+ * (owner direction 2026-09-13).
+ *
+ * WHAT IT REPLACES. A horizontal strip of day chips over an endless list of
+ * date headings: the person could not see the shape of their own month, and
+ * every visit was a scroll. This is a real calendar — month or week, tap a
+ * day, and the page below shows exactly that day's records and that day's
+ * actions. Quick recording stays where it is, above.
+ *
+ * WHAT IT IS. Links and text (the only client leaf is the in-flight tap
+ * indicator). No client state, no store: the
+ * selected day, the scale and the anchored period all live in the URL
+ * (`?date=`, `?cal=`, `?month=`), so a day is shareable, survives a reload
+ * and works with JS still loading. Every figure in a cell is the journal's
+ * own figure, handed down through `buildJournalCalendar` — this component
+ * reads nothing.
+ *
+ * HONESTY. An empty cell is a real zero over a known day (SEP-7): the
+ * journal knows what was recorded, and nothing was. A future day is not a
+ * place where recorded work could be, so it is shown and not offered.
+ */
+export async function JournalCalendar({
+  grid,
+  locale,
+  selected,
+  /** The journal's other active query params, preserved on every cell link. */
+  carry,
+}: {
+  grid: JournalCalendarGrid;
+  locale: ActiveLocale;
+  selected: string | null;
+  carry?: Readonly<Record<string, string>>;
+}) {
+  const t = await getTranslations("journal.calendar");
+  // The day whose week / fortnight / month the hours export covers.
+  const exportDay =
+    selected ??
+    grid.weeks.flat().find((c) => c.isToday && c.inScope)?.iso ??
+    grid.rangeEnd;
+
+  const href = (params: Readonly<Record<string, string | null>>): "/dashboard" => {
+    const q = new URLSearchParams({ ...(carry ?? {}) });
+    for (const [k, v] of Object.entries(params)) {
+      if (v === null) q.delete(k);
+      else q.set(k, v);
+    }
+    const s = q.toString();
+    return (`/dashboard/journal${s ? `?${s}` : ""}#journal-entries` as "/dashboard");
+  };
+
+  const periodLabel = new Intl.DateTimeFormat(locale, {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${grid.anchor}T00:00:00Z`));
+  const weekLabel = `${new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).format(new Date(`${grid.rangeStart}T00:00:00Z`))} – ${new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).format(new Date(`${grid.rangeEnd}T00:00:00Z`))}`;
+
+  const weekdayFmt = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    timeZone: "UTC",
+  });
+  const dayTitleFmt = new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  });
+
+  /**
+   * The hours figure ON the date — compact enough for a 48 px cell, so it is
+   * the NUMBER only; the unit is carried by the cell's aria-label and by the
+   * period summary under the grid. Rounded to one decimal and never to zero:
+   * a day with recorded time always reads as some time.
+   */
+  const hoursFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const hoursLabel = (minutes: number) => {
+    const hours = Math.round((minutes / 60) * 10) / 10;
+    // A day of one or two recorded minutes rounds to 0.0. It must not be
+    // floored up to 0,1 — that would print MORE time than the journal holds,
+    // on the surface whose whole job is to state recorded time honestly.
+    return hours === 0 ? `<${hoursFmt.format(0.1)}` : hoursFmt.format(hours);
+  };
+
+  const scaleHref = (scale: JournalCalendarScale) =>
+    href({ cal: scale === "month" ? null : scale, month: grid.anchor });
+
+  const totalLabel =
+    grid.recordedMinutes > 0
+      ? formatDuration(grid.recordedMinutes, "minutes", durationLocale(locale))
+      : null;
+
+  return (
+    <section
+      aria-label={t("title")}
+      data-testid="journal-calendar"
+      data-scale={grid.scale}
+      data-anchor={grid.anchor}
+      className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1/40 p-2"
+    >
+      {/* Period header: back · the period · forward, then the scale switch. */}
+      <div className="flex items-center justify-between gap-2">
+        <Link
+          href={href({ month: grid.prevAnchor, date: null })}
+          data-testid="journal-calendar-prev"
+          aria-label={t("prev")}
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+        >
+          ‹
+        </Link>
+        <span
+          className="min-w-0 flex-1 truncate text-center font-display text-sm font-semibold text-text-primary"
+          data-testid="journal-calendar-period"
+        >
+          {grid.scale === "week" ? weekLabel : periodLabel}
+        </span>
+        <Link
+          href={href({ month: grid.nextAnchor, date: null })}
+          data-testid="journal-calendar-next"
+          aria-label={t("next")}
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
+        >
+          ›
+        </Link>
+      </div>
+
+      <div className="flex items-center justify-between gap-2">
+        <nav aria-label={t("scaleLabel")} className="flex items-center gap-1">
+          {(["month", "week"] as const).map((scale) => (
+            <Link
+              key={scale}
+              href={scaleHref(scale)}
+              data-testid={`journal-calendar-scale-${scale}`}
+              aria-current={grid.scale === scale ? "page" : undefined}
+              className={`inline-flex min-h-11 items-center rounded-full border px-3 text-xs transition-colors ${
+                grid.scale === scale
+                  ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+                  : "border-ink-500 text-text-secondary hover:border-brand-blue"
+              }`}
+            >
+              {t(`scale.${scale}`)}
+            </Link>
+          ))}
+        </nav>
+        {selected && (
+          <Link
+            href={href({ date: null, month: grid.anchor })}
+            data-testid="journal-calendar-clear"
+            className="inline-flex min-h-11 items-center rounded-full border border-ink-500 px-3 text-xs text-text-secondary transition-colors hover:border-brand-blue"
+          >
+            {t("allDays")}
+          </Link>
+        )}
+      </div>
+
+      {/* The grid. One row of weekday initials, then whole Monday-first weeks. */}
+      <div className="grid grid-cols-7 gap-0.5" role="presentation">
+        {WEEKDAY_ANCHOR_ISO.map((iso) => (
+          <span
+            key={iso}
+            aria-hidden
+            className="py-1 text-center font-mono text-[0.625rem] uppercase tracking-label text-text-muted"
+          >
+            {weekdayFmt.format(new Date(`${iso}T00:00:00Z`)).slice(0, 2)}
+          </span>
+        ))}
+        {grid.weeks.flat().map((cell) => {
+          const dayTitle = dayTitleFmt.format(new Date(`${cell.iso}T00:00:00Z`));
+          const shared = [
+            "relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md border text-center tabular-nums transition-colors",
+          ];
+          if (cell.isFuture || !cell.inScope) {
+            // Out of the period, or a day that has not happened: shown so the
+            // week reads as a week, never offered as a place to look.
+            return (
+              <span
+                key={cell.iso}
+                aria-hidden={!cell.inScope}
+                data-testid="journal-calendar-day"
+                data-day={cell.iso}
+                data-state={cell.inScope ? "future" : "outside"}
+                className={`${shared.join(" ")} border-transparent text-xs ${
+                  cell.inScope ? "text-text-muted" : "text-text-muted/40"
+                }`}
+              >
+                {cell.dayOfMonth}
+              </span>
+            );
+          }
+          const state = cell.isSelected
+            ? "selected"
+            : cell.entryCount > 0
+              ? "recorded"
+              : cell.reportedMinutes > 0
+                ? "reported"
+                : "empty";
+          const reportedLabel =
+            cell.reportedMinutes > 0
+              ? t("reported", { time: formatDuration(cell.reportedMinutes, "minutes", durationLocale(locale)) })
+              : null;
+          return (
+            <Link
+              key={cell.iso}
+              href={href({ date: cell.iso, month: grid.anchor })}
+              data-testid="journal-calendar-day"
+              data-day={cell.iso}
+              data-state={state}
+              data-entries={cell.entryCount}
+              data-reported-minutes={cell.reportedMinutes}
+              aria-current={cell.isSelected ? "date" : undefined}
+              aria-label={`${
+                cell.entryCount === 0
+                  ? t("dayEmpty", { day: dayTitle })
+                  : `${t("dayWithRecords", { day: dayTitle, count: cell.entryCount })}${
+                      cell.totalMinutes > 0
+                        ? `, ${formatDuration(cell.totalMinutes, "minutes", durationLocale(locale))}`
+                        : ""
+                    }, ${t(`confirmation.${cell.confirmation}`)}`
+              }${reportedLabel ? `, ${reportedLabel}` : ""}`}
+              className={`${shared.join(" ")} text-xs ${
+                cell.isSelected
+                  ? "border-brand-blue bg-brand-blue/15 font-semibold text-text-primary"
+                  : cell.entryCount > 0
+                    ? // A recorded day is OBSERVED work — the work-world grammar's
+                      // cyan (`REALITY_CLASS.observed`), the same colour the
+                      // planning calendar gives the same day. Blue is the
+                      // selection / commitment colour, never a diary's.
+                      `${REALITY_CLASS.observed} bg-brand-cyan/5 hover:border-brand-cyan`
+                    : cell.reportedMinutes > 0
+                      ? // An organization's record of the day is observed too
+                        // (PAST = ACTUAL) — the same reality; the square
+                        // marker below says whose observation it is.
+                        `${REALITY_CLASS.observed} hover:border-brand-cyan`
+                      : "border-transparent text-text-secondary hover:border-ink-500"
+              } ${cell.isToday && !cell.isSelected ? "ring-1 ring-inset ring-ink-500" : ""}`}
+            >
+              {/* The tap is acknowledged at once: the day re-reads on the
+                  server, and until it answers the cell says so (owner walk
+                  2026-09-28 — "the click seemed dead"). Honest: shown only
+                  while that navigation is actually in flight. */}
+              <NavLinkPending className="absolute right-1 top-1 h-2.5 w-2.5 text-brand-blue" />
+              <span aria-hidden>{cell.dayOfMonth}</span>
+              {/* WHAT THE DAY HOLDS, on the date itself: the recorded HOURS
+                  when the day carries time, and the confirmation STATE as the
+                  marker's material. A day with entries but no recorded time
+                  shows the marker alone — an untimed record is real work, not
+                  "0 h" (SEP-7). The state is never colour alone: the full
+                  words are in the cell's aria-label (design system §M). */}
+              {cell.entryCount > 0 && (
+                <span
+                  aria-hidden
+                  data-testid="journal-calendar-day-marker"
+                  data-confirmation={cell.confirmation}
+                  className="flex items-center gap-0.5 leading-none"
+                >
+                  {cell.totalMinutes > 0 ? (
+                    <span className="font-mono text-[0.5625rem] text-text-secondary">
+                      {hoursLabel(cell.totalMinutes)}
+                    </span>
+                  ) : null}
+                  <span
+                    className={`size-1.5 rounded-full border ${
+                      cell.confirmation === "all"
+                        ? "border-state-success bg-state-success"
+                        : cell.confirmation === "partial"
+                          ? "border-state-success bg-transparent"
+                          : "border-text-muted bg-text-muted/40"
+                    }`}
+                  />
+                </span>
+              )}
+              {/* THE ORGANIZATION'S LAYER — PAST = ACTUAL as the organization
+                  recorded it (timesheet, imported document): a square mark
+                  where the journal's confirmation dot is round, and the hours
+                  when the journal has none of its own. Beside, never summed;
+                  the full words are in the aria-label. */}
+              {cell.reportedMinutes > 0 && (
+                <span
+                  aria-hidden
+                  data-testid="journal-calendar-day-reported"
+                  title={reportedLabel ?? undefined}
+                  className="flex items-center gap-0.5 leading-none"
+                >
+                  {cell.entryCount === 0 ? (
+                    <span className="font-mono text-[0.5625rem] text-text-secondary">
+                      {hoursLabel(cell.reportedMinutes)}
+                    </span>
+                  ) : null}
+                  <span className="size-1.5 rounded-[1px] border border-brand-cyan/70 bg-brand-cyan/30" />
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* What this period actually holds — the honest sum of the cells above. */}
+      <p
+        className="text-meta leading-relaxed text-text-muted"
+        data-testid="journal-calendar-summary"
+        data-recorded-days={grid.recordedDays}
+      >
+        {grid.recordedDays === 0 && grid.reportedDays > 0
+          ? t("periodReportedOnly", {
+              days: grid.reportedDays,
+              time: formatDuration(grid.reportedMinutes, "minutes", durationLocale(locale)),
+            })
+          : grid.recordedDays === 0
+          ? t("periodEmpty")
+          : totalLabel
+            ? t("periodSummaryWithTime", {
+                days: grid.recordedDays,
+                entries: grid.recordedEntries,
+                time: totalLabel,
+              })
+            : t("periodSummary", {
+                days: grid.recordedDays,
+                entries: grid.recordedEntries,
+              })}
+      </p>
+      {/* HOURS OUT (owner command 2026-09-28 §13): the same canonical hours as
+          a file, for one week, two weeks or one calendar month around the
+          picked day (else today in view, else the period's last day). A
+          download link to a route handler — not a navigation — and nothing
+          is stored: the file is a representation of the journal's facts. */}
+      <p
+        className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-text-muted"
+        data-testid="journal-hours-export"
+      >
+        <span>{t("exportHours")}</span>
+        {(["week", "2weeks", "month"] as const).map((period) => (
+          <a
+            key={period}
+            href={`/${locale}/dashboard/journal/hours?period=${period}&date=${exportDay}`}
+            download
+            className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+            data-testid={`journal-hours-export-${period}`}
+          >
+            {t(`exportPeriod.${period}`)}
+          </a>
+        ))}
+      </p>
+      {/* THE ORGANIZATION'S LAYER COULD NOT BE READ. Nothing was placed on
+          any day above — and that is not the same as "the organization
+          recorded nothing". Said in words, once (SEP-7: UNKNOWN ≠ ZERO). */}
+      {grid.reportedUnknown && (
+        <p
+          className="text-meta leading-relaxed text-text-muted"
+          data-testid="journal-calendar-reported-unknown"
+        >
+          {t("reportedUnknown")}
+        </p>
+      )}
+    </section>
+  );
+}

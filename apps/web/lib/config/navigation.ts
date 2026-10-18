@@ -181,6 +181,32 @@ export const ADMIN_NAV_ITEM: NavItem = {
   iconKey: "shield",
 };
 
+/** The canonical authenticated home — the ONE route the logo, the back
+ *  affordance and every "go home" lead to, for every identity and context
+ *  (owner decision 0017, 2026-09-22). */
+export const CANONICAL_HOME = "/dashboard";
+
+export type DashboardChromeMode = "conversation" | "panel" | "full";
+
+/**
+ * WHICH chrome a dashboard route renders (pure; the client
+ * `<DashboardChrome>` and the guards read the same rule):
+ *   · `conversation` — the home itself, bare (the chat carries the one top bar);
+ *   · `full`         — the internal operator console only (`ADMIN_NAV_ITEM.href`);
+ *   · `panel`        — every other product route: the one top bar over a
+ *                      contextual workspace.
+ */
+export function dashboardChromeMode(pathname: string): DashboardChromeMode {
+  if (pathname === CANONICAL_HOME) return "conversation";
+  if (
+    pathname === ADMIN_NAV_ITEM.href ||
+    pathname.startsWith(`${ADMIN_NAV_ITEM.href}/`)
+  ) {
+    return "full";
+  }
+  return "panel";
+}
+
 /** Plain feature list backing the nav — used by audit / route-check docs. */
 export const PRIMARY_NAV_SOURCE_FEATURES: readonly FeatureConfig[] =
   getVisiblePrimaryFeatures().filter((f) => TAB_META[f.key] !== undefined);

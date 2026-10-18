@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { resolveApiIdentity } from "@/lib/api/api-identity";
+import { runAsBearerCaller } from "@/lib/api/bearer-caller-scope";
+import { rateLimit } from "@/lib/security/rate-limit";
 import {
   classifyRefusal,
   refusalBody,
@@ -12,12 +13,17 @@ import {
   exposedCapabilities,
   runCapability,
 } from "@/lib/capabilities/registry";
+import { recordExternalReceipt } from "@/lib/capabilities/external-receipt";
 import {
   handleMcpMessage,
   parseErrorResponse,
+  MCP_PROTOCOL_VERSION,
+  SUPPORTED_PROTOCOL_VERSIONS,
   type McpToolDef,
 } from "@/lib/mcp/protocol";
 import { localeFromAcceptLanguage } from "@/lib/mcp/accept-language";
+import { requestPublicOrigin } from "@/lib/mcp/public-origin";
+import { toolDefsOf, toolName, toolsetVersionOf } from "@/lib/mcp/toolset";
 import { summarizeCapabilityResult } from "@/lib/capabilities/presentation";
 
 export const runtime = "nodejs";
@@ -66,22 +72,120 @@ function logEvent(event: Parameters<typeof serializeAuthEvent>[0]): void {
   }
 }
 
-/** MCP tool names allow [a-zA-Z0-9_-]; capability ids use dots. */
-const toolName = (capabilityId: string): string => capabilityId.replace(/\./g, "_");
+
+/**
+ * The tool list is DERIVED FROM THE REGISTRY AND CONSTANT for the lifetime of
+ * the process — `exposedCapabilities()` is a static array and every schema is
+ * a module-level zod object. Converting all of them to JSON Schema on every
+ * `tools/list` was pure repeated work on the hot path a client hits on each
+ * new conversation. Computed once, lazily, so nothing is paid at import time
+ * either (that would land on cold start, which the 2026-09-10 trace already
+ * showed is this door's largest single cost).
+ *
+ * Memoizing a DERIVED VIEW is safe in a way memoizing a read never is: it
+ * contains no user data, no caller identity and no authorization decision —
+ * only the capability descriptions every authorized client is shown.
+ */
+let TOOL_DEFS: McpToolDef[] | null = null;
 
 function toolDefs(): McpToolDef[] {
-  return exposedCapabilities().map((c) => ({
-    name: toolName(c.id),
-    title: c.title,
-    description: c.description,
-    inputSchema: z.toJSONSchema(c.inputSchema) as Record<string, unknown>,
-    // Honest behavior hints declared per capability in review — clients can
-    // tell reads from writes without parsing prose.
-    annotations: c.annotations,
-  }));
+  if (TOOL_DEFS) return TOOL_DEFS;
+  TOOL_DEFS = toolDefsOf(exposedCapabilities());
+  return TOOL_DEFS;
+}
+
+/** Capability lookup by MCP tool name, memoized for the same reason. */
+let BY_TOOL_NAME: Map<string, string> | null = null;
+
+function capabilityIdForTool(name: string): string | undefined {
+  if (!BY_TOOL_NAME) {
+    BY_TOOL_NAME = new Map(exposedCapabilities().map((c) => [toolName(c.id), c.id]));
+  }
+  return BY_TOOL_NAME.get(name);
+}
+
+/**
+ * THE CANONICAL BRAND, DECLARED TO THE CLIENT.
+ *
+ * The mark is the owner's original vector — `docs/brand/source/LM_Color
+ * Single.svg` — served at these paths as geometry-verbatim derivations
+ * (`public/brand/lm-mark.svg`, `public/app-icon.svg`). Nothing here draws,
+ * re-traces or substitutes a logo, and the ChatGPT-side fallback letter avatar
+ * is not ours.
+ *
+ * `title`, `websiteUrl` and `icons` are the MCP spec's own identity fields.
+ * They are additive: a client that predates them ignores them, exactly as
+ * JSON has always worked, so declaring them cannot regress an older client.
+ * Whether a given host actually renders a server-declared icon is the HOST's
+ * decision — see docs/integrations/CHATGPT_MCP_CLIENT_V1.md for what remains
+ * an owner action inside ChatGPT itself.
+ */
+/** The published toolset as a version (`lib/mcp/toolset.ts`), memoized. */
+let TOOLSET_VERSION: string | null = null;
+
+function toolsetVersion(): string {
+  if (!TOOLSET_VERSION) TOOLSET_VERSION = toolsetVersionOf(toolDefs());
+  return TOOLSET_VERSION;
+}
+
+function serverInfo(origin: string) {
+  return {
+    name: "labourmarket-ai",
+    version: toolsetVersion(),
+    title: "LabourMarket.ai",
+    websiteUrl: origin,
+    icons: [
+      // The full metallic-gold mark, for anywhere with room to render it.
+      { src: `${origin}/brand/lm-mark.svg`, mimeType: "image/svg+xml", sizes: ["any"] },
+      // The tile: same geometry, flat #D4AF37 on the ink plate, for small
+      // sizes where a five-stop gradient resolves into mud.
+      { src: `${origin}/app-icon.svg`, mimeType: "image/svg+xml", sizes: ["any"] },
+    ],
+  };
 }
 
 const MAX_BODY_BYTES = 64 * 1024;
+
+/** Per verified person, across every tool: 600 calls / 5 min (2 per second
+ *  sustained) — far above a person-driven assistant, low enough to stop a
+ *  runaway loop. See the brake in POST. */
+const MCP_CALLER_LIMIT = { limit: 600, windowMs: 5 * 60 * 1000 } as const;
+const MCP_CALLER_LIMITER = "api-mcp-caller" as const;
+
+/**
+ * CORS for browser-resident MCP clients (the Inspector, a web-hosted agent).
+ *
+ * `*` WITHOUT `Access-Control-Allow-Credentials`. That pairing is the whole
+ * security argument and it is not an oversight: with a wildcard origin and no
+ * credentials flag, a browser REFUSES to attach cookies, so the cookie-session
+ * branch of `resolveApiIdentity` is unreachable cross-origin and no CSRF is
+ * introduced. A cross-origin caller can only present a bearer token, which is
+ * exactly what an MCP client has. Adding `Allow-Credentials: true` here would
+ * turn this door into a CSRF hole against every signed-in browser session.
+ *
+ * `WWW-Authenticate` is EXPOSED because it carries the RFC 9728 pointer a
+ * client needs to start OAuth; unexposed, a browser client sees a bare 401
+ * and cannot discover where to authenticate.
+ */
+const CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Authorization, Content-Type, MCP-Protocol-Version, Accept-Language",
+  "Access-Control-Expose-Headers": "WWW-Authenticate, MCP-Protocol-Version, Server-Timing",
+  "Access-Control-Max-Age": "86400",
+};
+
+/**
+ * The protocol version this response is spoken in, echoed per 2026-07-28.
+ *
+ * A client that stated a version we serve gets its own back; one that stated
+ * nothing gets the default. `handleMcpMessage` has already REFUSED anything
+ * we do not serve, so this never echoes a version we cannot honour.
+ */
+function negotiatedVersion(req: Request): string {
+  const stated = req.headers.get("mcp-protocol-version");
+  return stated && SUPPORTED_PROTOCOL_VERSIONS.includes(stated) ? stated : MCP_PROTOCOL_VERSION;
+}
 
 /**
  * Server-Timing (RFC-standard header) for the three server-side phases a
@@ -102,8 +206,12 @@ export async function POST(req: Request) {
   const authMs = performance.now() - t0;
   if (!auth.ok) {
     const refusal = classifyRefusal(auth.reason);
-    const headers: Record<string, string> = { "Server-Timing": serverTiming({ auth: authMs }) };
-    const challenge = wwwAuthenticateChallenge(new URL(req.url).origin, refusal.errorClass);
+    const headers: Record<string, string> = {
+      ...CORS_HEADERS,
+      "MCP-Protocol-Version": negotiatedVersion(req),
+      "Server-Timing": serverTiming({ auth: authMs }),
+    };
+    const challenge = wwwAuthenticateChallenge(requestPublicOrigin(req), refusal.errorClass);
     if (challenge) headers["WWW-Authenticate"] = challenge;
     logEvent({
       event: "external_client.auth",
@@ -121,9 +229,69 @@ export async function POST(req: Request) {
     door: DOOR,
   });
 
+  // CSRF HARDENING for the cookie transport. A browser can send a cross-site
+  // "simple" POST (text/plain) WITH cookies and no preflight; only SameSite
+  // would stop it. MCP clients always send JSON, and a cross-origin JSON POST
+  // needs a preflight this door never answers with Allow-Credentials — so a
+  // cookie-identified call must be JSON. Bearer callers are unaffected.
+  if (
+    auth.identity.transport === "cookie" &&
+    !(req.headers.get("content-type") ?? "").toLowerCase().includes("application/json")
+  ) {
+    return NextResponse.json(
+      { ok: false, code: "unsupported_media_type", message: "This MCP endpoint accepts application/json only." },
+      { status: 415, headers: { ...CORS_HEADERS } },
+    );
+  }
+
+  // PER-PERSON BRAKE. The failure limiter in api-identity only counts REJECTED
+  // tokens; a VALID token had no ceiling at all on this door, so one runaway
+  // assistant loop could drive unbounded tool calls (and their database work)
+  // as one person. Keyed on the verified user id — never on a header the
+  // caller controls. In-memory and per-instance (lib/security/rate-limit.ts
+  // states that limit honestly): a brake on a loop, not a quota.
+  const brake = rateLimit({ name: MCP_CALLER_LIMITER, key: auth.identity.userId, ...MCP_CALLER_LIMIT });
+  if (brake.limited) {
+    logEvent({
+      event: "external_client.auth",
+      outcome: "refused",
+      error_class: "RATE_LIMITED",
+      status: 429,
+      door: DOOR,
+    });
+    // The SAME wire contract as the resolver's own rate-limited refusal
+    // (client_action "back_off", no WWW-Authenticate: the credential is fine),
+    // plus Retry-After so a client knows when.
+    const refusal = classifyRefusal("rate-limited");
+    return NextResponse.json(refusalBody(refusal), {
+      status: refusal.status,
+      headers: {
+        ...CORS_HEADERS,
+        "MCP-Protocol-Version": negotiatedVersion(req),
+        "Retry-After": String(brake.retryAfterSeconds),
+      },
+    });
+  }
+
   const raw = await req.text();
   if (raw.length > MAX_BODY_BYTES) {
-    return NextResponse.json({ ok: false }, { status: 413 });
+    // NAME the limit. A bare `{ ok: false }` here is how "your file was too
+    // big for this door" reaches a user as "the import did not work" — the
+    // §12 failure this product refuses to ship. The people-ingest tools can
+    // carry a workforce list inline, so this is a boundary a real user meets,
+    // and the answer has to say what to do instead.
+    return NextResponse.json(
+      {
+        ok: false,
+        code: "request_too_large",
+        message:
+          `This MCP endpoint accepts at most ${MAX_BODY_BYTES} bytes per request ` +
+          "(roughly 48 KB of base64-encoded file). NOTHING was read or written. " +
+          "Import a larger workforce list from the web people-import panel at " +
+          "/dashboard/company/people#people-import.",
+      },
+      { status: 413 },
+    );
   }
   let message: unknown;
   try {
@@ -141,26 +309,69 @@ export async function POST(req: Request) {
     // the DB as a "locale" and tripping the original_language constraint.
     // Only an ACTIVE locale is accepted; everything else is the default.
     locale: localeFromAcceptLanguage(req.headers.get("accept-language")),
+    // Everything arriving here is an authorized assistant acting for the
+    // person, never the person's own click — recorded as such wherever the
+    // store keeps a performer (evidence import audit today).
+    actorKind: "agent" as const,
   };
 
   const marks: Record<string, number> = { auth: authMs };
   const response = await handleMcpMessage(message, {
-    serverInfo: { name: "labourmarket-ai", version: "0.1.0" },
+    // 2026-07-28 carries the protocol version per request. `Mcp-Session-Id`
+    // is deliberately NOT read: the revision removed protocol-level sessions,
+    // and a server on it must ignore the header an older client may still
+    // send rather than mint or echo one. This door has never been stateful,
+    // so there is nothing to stop doing — only something never to start.
+    transportProtocolVersion: req.headers.get("mcp-protocol-version"),
+    serverInfo: serverInfo(requestPublicOrigin(req)),
     instructions:
       "LabourMarket.ai capabilities for the signed-in user. Reads return " +
-      "recorded facts under the user's own permissions. Nothing here writes " +
-      "without an explicit draft→confirm step.",
+      "recorded facts under the user's own permissions. Consequential writes " +
+      "need an explicit draft→confirm step. The exceptions are single-step " +
+      "and named: the evidence-import staging steps (evidence_import_create_session, " +
+      "evidence_import_submit_rows, evidence_import_stage_file, evidence_import_resolve_row, " +
+      "evidence_import_resolve_label, evidence_import_resolve_time_semantics) " +
+      "write only staging rows that become records solely through the " +
+      "confirmed evidence_import_commit; context_switch changes which " +
+      "organization the session acts for; evidence_person_create adds one " +
+      "unlinked roster person. Tools named after a web chat action " +
+      "(worker_*, company_*, agency_*, engagement_*) run that SAME web action: " +
+      "one without a _prepare/_confirm suffix is a reversible write the web " +
+      "chat also runs in one step; a _prepare tool writes nothing and returns " +
+      "a one-time token that its _confirm tool needs; call each _confirm once. " +
+      "The remaining single-step tools are reversible changes the web also " +
+      "makes in one click (creating a DRAFT offering, listing, proposal or " +
+      "contract, editing one's own record, notification read/preferences, a " +
+      "booking deadline, a task); like the web they may notify the person the " +
+      "change concerns; " +
+      "publishing, deciding, sending, deleting and legal data always go " +
+      "through _draft/_confirm. Everything acts in the " +
+      "caller's active workspace (context_list, context_switch).",
     tools: toolDefs(),
     callTool: async (name, args) => {
-      const capability = exposedCapabilities().find((c) => toolName(c.id) === name);
+      const capabilityId = capabilityIdForTool(name);
       // Unknown names are already refused by the protocol layer; this guard
       // is for the race where exposure changes between list and call.
-      if (!capability) {
+      if (!capabilityId) {
         return { isError: true, payload: { ok: false, code: "unknown_capability" } };
       }
       const tCap = performance.now();
-      const result = await runCapability(capability.id, caller, args);
+      // BEARER CALLER SCOPE: inside it the web's own domain entrypoints
+      // (`createClient()`) resolve to THIS verified caller's RLS client, so a
+      // capability that runs a canonical server action acts as the same
+      // person, never as nobody and never as anyone else. A cookie caller
+      // runs unchanged. See lib/api/bearer-caller-scope.ts.
+      const result = await runAsBearerCaller(auth.identity, () =>
+        runCapability(capabilityId, caller, args),
+      );
       marks.capability = performance.now() - tCap;
+      // AUDIT RECEIPT for every write through this door (confirm/execute):
+      // who, which capability, which object, which confirmation, outcome.
+      // Never undoes nor fails the write; the client is told its state.
+      const descriptor = exposedCapabilities().find((c) => c.id === capabilityId);
+      const receipt = descriptor
+        ? await recordExternalReceipt(caller, descriptor, args, result)
+        : ({ state: "not_applicable" } as const);
       logEvent({
         event: "external_client.tool",
         door: DOOR,
@@ -169,7 +380,7 @@ export async function POST(req: Request) {
         ...(result.ok
           ? {}
           : {
-              code:
+              result_code:
                 typeof (result as { code?: unknown }).code === "string"
                   ? (result as { code: string }).code
                   : "error",
@@ -184,7 +395,7 @@ export async function POST(req: Request) {
         try {
           humanText =
             (await summarizeCapabilityResult(
-              capability.id,
+              capabilityId,
               result.data ?? {},
               caller.locale,
             )) ?? undefined;
@@ -193,21 +404,47 @@ export async function POST(req: Request) {
         }
         marks.presentation = performance.now() - tPres;
       }
-      return { isError: !result.ok, payload: result, humanText };
+      return {
+        isError: !result.ok,
+        payload: receipt.state === "not_applicable" ? result : { ...result, receipt },
+        humanText,
+      };
     },
   });
 
   marks.total = performance.now() - t0;
-  const timing = { "Server-Timing": serverTiming(marks) };
+  const headers = {
+    ...CORS_HEADERS,
+    "MCP-Protocol-Version": negotiatedVersion(req),
+    "Server-Timing": serverTiming(marks),
+  };
   // A notification produces no body — 202 per streamable-HTTP MCP.
-  if (response === null) return new Response(null, { status: 202, headers: timing });
-  return NextResponse.json(response, { headers: timing });
+  if (response === null) return new Response(null, { status: 202, headers });
+  return NextResponse.json(response, { headers });
+}
+
+/**
+ * CORS preflight. A browser-resident MCP client cannot POST here at all
+ * without it — the request never leaves the browser, so the door looks dead
+ * rather than protected.
+ */
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
 /** No SSE stream: this server is deliberately stateless (single-response). */
 export async function GET() {
   return NextResponse.json(
-    { ok: false, message: "This MCP endpoint is POST-only (stateless streamable HTTP)." },
-    { status: 405, headers: { Allow: "POST" } },
+    {
+      ok: false,
+      message: "This MCP endpoint is POST-only (stateless streamable HTTP).",
+      // The published toolset as a version — the same value `initialize`
+      // reports as serverInfo.version. Public on purpose: it derives only from
+      // the static tool descriptions every authorized client is shown, so a
+      // release can be verified without a credential.
+      toolsetVersion: toolsetVersion(),
+      toolCount: toolDefs().length,
+    },
+    { status: 405, headers: { ...CORS_HEADERS, Allow: "POST, OPTIONS" } },
   );
 }

@@ -71,10 +71,12 @@ test("the market-map route renders the engine-booted picker; manual save works",
   const w = watch(page);
   await page.goto("/lt/dashboard/market-map", { waitUntil: "networkidle" });
   await expect(page.getByTestId("market-map-base")).toBeVisible();
-  // The ONE engine actually booted a real Leaflet map (tile pane present).
-  await expect(page.getByTestId("market-map-live")).toBeVisible();
+  // The ONE engine actually booted ONE real Leaflet map (tile pane present):
+  // the location + radius controls above it are controls of that same map.
+  await expect(page.getByTestId("market-map")).toHaveCount(1);
+  await expect(page.getByTestId("market-map")).toBeVisible();
   await expect(
-    page.getByTestId("market-map-live").locator(".leaflet-tile-pane"),
+    page.getByTestId("market-map").locator(".leaflet-tile-pane"),
   ).toHaveCount(1);
 
   // Manual fallback (provider-free): country-only save → honest APPROXIMATE
@@ -90,7 +92,7 @@ test("the market-map route renders the engine-booted picker; manual save works",
   });
   // Clean up the device-local selection so re-runs start from the empty state.
   await page.getByTestId("map-locator-reset").click();
-  await expect(page.getByTestId("market-map-base-empty")).toBeVisible();
+  await expect(page.getByTestId("location-map-tap-hint")).toBeVisible();
   w.assertClean();
 });
 

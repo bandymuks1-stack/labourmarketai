@@ -13,12 +13,14 @@ export type ExecResult =
 /**
  * Workspace context carried into every executor (rebuild W4). Resolved
  * SERVER-SIDE by the dispatcher from the canonical workspace resolver
- * (`getWorkspaceContext` — engagement_contexts spine + the owner-gated
- * active-organization pointer) — never trusted from the client. `null`
- * organizationId = the personal workspace. Executors pass it through to
- * canonical actions THAT ACCEPT an explicit organization; actions without
- * an org parameter keep their own server-side resolution (one authority,
- * no parallel resolution paths).
+ * (`getWorkspaceContext` — the ONE resolution the chip renders; its identity
+ * comes from the session, never from a caller-chosen argument) — never
+ * trusted from the client. `null` organizationId = the personal workspace.
+ * Executors pass it through to canonical actions THAT ACCEPT an explicit
+ * organization; actions without an org parameter keep their own server-side
+ * resolution (one authority, no parallel resolution paths). No executor reads
+ * it today (verified 2026-09-23): employer executors resolve their company
+ * through `requireEmployerCompany`, over the same request-cached resolution.
  */
 export type ExecWorkspace = { organizationId: string | null };
 

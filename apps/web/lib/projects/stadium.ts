@@ -1,5 +1,6 @@
 import "server-only";
 
+import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { createClient } from "@/lib/supabase/server";
 import {
   getProjectOperations,
@@ -63,13 +64,13 @@ export async function getProjectStadium(
           .select("worker_id, professions(slug)")
           .in("worker_id", workerIds)
           .eq("is_primary", true),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any)
-          .from("journal_entries")
-          .select("*", { count: "exact", head: true })
-          .in("worker_id", workerIds)
-          .is("deleted_at", null)
-          .gte("created_at", dayStartIso()),
+        liveJournalEntriesOnly(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (supabase as any)
+            .from("journal_entries")
+            .select("*", { count: "exact", head: true })
+            .in("worker_id", workerIds),
+        ).gte("created_at", dayStartIso()),
       ]);
       for (const row of (profRes.data ?? []) as {
         worker_id: string;

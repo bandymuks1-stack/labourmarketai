@@ -54,10 +54,12 @@ export type {
 
 export {
   CAPABILITY_PATH,
+  DOMAIN_REQUEST_TIMEOUT_MS,
   DOMAIN_TRANSPORT_STATUS,
   callCapability,
   callDomain,
   failureMessageKey,
+  fetchWithDeadline,
 } from "./transport";
 export type {
   IdentityRefusal,
@@ -72,10 +74,33 @@ export type {
 export {
   PARTICIPATION_MODES,
   contextKey,
+  holdingsFromHeldRoles,
+  isParticipationMode,
   sameContext,
   initialSelection,
   selectContext,
 } from "./actor-context";
+
+export {
+  PROFILE_SKILL_GROUP_ORDER,
+  periodFigures,
+  dominantSkill,
+  presentProfileSkills,
+  formatHours,
+  formatShare,
+} from "./work-figures";
+export type {
+  WorkPeriodFigures,
+  WorkSkillFigures,
+  WorkActivityFigures,
+  WorkCoverage,
+  WorkIntelligenceData,
+  LivingCvSkillRow,
+  ProfileSkillGroupKey,
+  ProfileSkillItem,
+  ProfileSkillGroup,
+  ProfileSkillPresentation,
+} from "./work-figures";
 export type {
   ParticipationMode,
   ActorContext,

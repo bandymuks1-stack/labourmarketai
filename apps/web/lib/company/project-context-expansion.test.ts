@@ -15,7 +15,9 @@ const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 
 const journalPage = read("app/[locale]/dashboard/journal/page.tsx");
-const companyPage = read("app/[locale]/dashboard/company/page.tsx");
+// Re-anchored 2026-09-16: the projects card lives on the Work door
+// (/dashboard/projects, manager branch), beside the projects it counts.
+const companyPage = read("app/[locale]/dashboard/projects/page.tsx");
 
 describe("journal page — project-context note removed (P0 UX rescue)", () => {
   it("no longer renders the read-only project-context note (noise removed)", () => {
@@ -76,7 +78,11 @@ describe("copy is honest in LT + EN (no fake project data, states the truth)", (
       const link = base.companyOps.projectsLinkingNote.toLowerCase();
       expect(body).toMatch(/neaktyv|not active/);
       expect(body).toMatch(/automati/);
-      expect(link).toMatch(/neįjungt|not enabled/);
+      // 2026-10-09: journal entries ARE attributed to projects in production
+      // (by the people who record them); the note says that, and that nothing
+      // is filled in automatically. It no longer claims linking is off.
+      expect(link).toMatch(/priskiria|attributed/);
+      expect(link).toMatch(/automati/);
     });
     it(`${locale} new copy contains no fake/mock/demo/sample wording`, () => {
       const blob = (journal.projectContext.body + base.companyOps.projectsLinkingNote).toLowerCase();

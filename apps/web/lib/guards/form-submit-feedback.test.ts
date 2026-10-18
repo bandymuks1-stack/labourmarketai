@@ -131,6 +131,12 @@ const NATIVE_NAV = new Set([
   // banner at the top of the page), exactly the tasks/finance pattern.
   // Pure server component — no client state.
   "app/[locale]/dashboard/projects/[id]/operations/page.tsx",
+  // Project facts form (R-3, 2026-09-19) — mounted in the same manage strip:
+  // setProjectFactsAction ALWAYS redirects back with ?notice= (updated /
+  // invalid / invalid_dates / completed_read_only / needs_migration / …),
+  // rendered by the operations page's role="status" banner. Pure server
+  // component — no client state.
+  "components/app/project-facts-form.tsx",
   // Admin privacy-request review verbs (V9 phase 1) — a NATIVE-NAV server
   // action that ALWAYS redirects back to the admin control room with an
   // honest ?privacyReviewNotice= outcome (rendered as a role="status"

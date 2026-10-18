@@ -1,5 +1,7 @@
 {
   "demandReadback": {
+    "notVerifiedYet": "Ditt företag är ännu inte verifierat, så de behov du skickar in här visas inte för arbetare förrän verifieringen är klar.",
+    "notVerifiedHowTo": "Lägg till organisationsnummer och begär en granskning",
     "heading": "[EN] Your submitted requests",
     "note": "[EN] Saved to your private space and reviewed manually — we don't suggest candidates automatically. Status updates appear here.",
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
@@ -11,7 +13,11 @@
       "agencyPartnership": "Partnerskapserbjudande"
     },
     "interestWaiting": "{count, plural, one {# person väntar på svar} other {# personer väntar på svar}}",
-    "untitledInquiry": "Förfrågan utan titel"
+    "untitledInquiry": "Förfrågan utan titel",
+    "supplyHeading": "Kapacitet du har erbjudit",
+    "supplyNote": "Det här är personer som du har sagt till marknaden att du HAR, inte personer du söker. De är sparade och synliga för dig. Arbetsgivare kan ännu inte söka bland erbjuden kapacitet, så ingen har hört av sig om dessa.",
+    "capacityNeeded": "{count} behövs",
+    "capacityInterested": "{count} intresserade"
   },
   "journey": {
     "eyebrow": "Så fungerar det",
@@ -216,7 +222,12 @@
           "sending": "[EN] Sending...",
           "done": "[EN] Saved. Your need is now visible in your space.",
           "error": "[EN] Couldn't send. Please try again.",
-          "progressHelper": "[EN] These steps show progress. Active actions are shown below."
+          "progressHelper": "[EN] These steps show progress. Active actions are shown below.",
+          "errorOpenNeedLimitUpgrade": "Den här organisationens gratisplan tillåter 1 aktiv position. Stäng en, eller aktivera planen Organisation (99 €/månad) i organisationskontot.",
+          "errorOpenNeedLimitIndividual": "Den här organisationen har nått gränsen för aktiva positioner i sin plan. Inget har debiterats eller ändrats. Kontakta oss.",
+          "openNeedUsage": "Aktiva positioner: {used} av {limit} använda · {remaining} kvar",
+          "openNeedUsageUpgradeCta": "Aktivera planen Organisation",
+          "openNeedUsageIndividual": "Du har nått gränsen för din plan. Kontakta oss för att diskutera dina behov."
         }
       },
       "account": {
@@ -228,7 +239,8 @@
           "help": "Theme",
           "toDark": "Dark",
           "toLight": "Light"
-        }
+        },
+        "employerVisibility": "Synlighet för arbetsgivare"
       },
       "comingSoon": {
         "body_main": "[EN] We're finishing the company / agency functionality right now.",
@@ -284,7 +296,8 @@
         "journal": "Mitt CV",
         "search": "[EN] Search",
         "advanced": "Avancerad hantering",
-        "playerCard": "Mitt kort"
+        "playerCard": "Min yrkesprofil",
+        "companyProfile": "Företagsprofil"
       },
       "moreSection": {
         "title": "Detaljerad översikt",
@@ -332,7 +345,7 @@
       "password_label": "[EN] Password",
       "signing": "[EN] Signing in...",
       "signup_link": "[EN] Sign up",
-      "subcopy": "[EN] Continue with Google, or sign in with your email and password.",
+      "subcopy": "[EN] Continue with a social account, or sign in with your email and password.",
       "submit_label": "[EN] Sign in",
       "google_recovery_label": "[EN] Sign in with Google — backup route (temporary, via an external sign-in page)",
       "resend_confirmation": "Skicka en ny bekräftelselänk",
@@ -351,6 +364,7 @@
       "types": {
         "generic": "Avisering",
         "pending_invitations": "Inbjudningar väntar på ditt svar",
+        "pending_membership_invitations": "Inbjudningar till en organisations ledning väntar på ditt svar",
         "unread_messages": "Olästa meddelanden",
         "incoming_service_requests": "Tjänsteförfrågningar väntar på svar",
         "service_request_responses": "Svar på dina förfrågningar",
@@ -378,7 +392,17 @@
         "event_work_task_assigned": "En uppgift har tilldelats dig",
         "event_demand_interest_expressed": "En arbetstagare har visat intresse för ditt behov",
         "event_demand_interest_reviewed": "Ett företag har markerat ditt intresse som granskat",
-        "event_weekly_digest": "Din veckoöversikt över arbete och möjligheter är klar"
+        "event_weekly_digest": "Din veckoöversikt över arbete och möjligheter är klar",
+        "event_saved_search_match": "En sparad sökning har nya resultat",
+        "event_job_alert": "Det finns ett nytt jobb som passar det du söker",
+        "event_message_received": "Du har ett nytt meddelande",
+        "event_journal_review_decided": "Din journalpost har granskats",
+        "event_journal_review_decided_approved": "Din journalpost har bekräftats",
+        "event_journal_review_decided_rejected": "Din journalpost har avvisats",
+        "event_journal_review_decided_changes_requested": "Ändringar har begärts i din journalpost",
+        "event_weekly_digest_profile_completion": "För att visa dig passande jobb, bekräfta vilket arbete du utför",
+        "event_weekly_digest_journal": "Veckans sammanfattning av din arbetsjournal är klar",
+        "event_history_link_offered": "En organisation erbjuder att koppla din registrerade arbetshistorik till ditt konto"
       },
       "email": {
         "open": "Öppna i LabourMarket.ai:",
@@ -389,11 +413,16 @@
       "back": "[EN] Back",
       "country_label": "[EN] Country",
       "country_placeholder": "Välj land",
+      "country_search_placeholder": "Sök efter ett land",
+      "country_search_empty": "Inget land hittades. Prova ett annat namn.",
       "error_country_required": "Välj ett land.",
-      "profession_label": "Vilket arbete utför du?",
-      "profession_placeholder": "Välj ditt arbete",
-      "profession_hint": "Vi använder detta för att hitta arbete som ditt. Sedan anger du dina färdigheter — matchningen behöver båda. Du kan ändra det senare.",
-      "error_profession_required": "Välj vilket arbete du utför.",
+      "profession_label": "Vad är ditt yrke eller din arbetslivserfarenhet?",
+      "profession_placeholder": "Skriv ett yrke eller arbetsområde",
+      "profession_add": "Lägg till",
+      "profession_hint": "Du kan ange ett eller flera yrken eller arbetsområden. Du kan lägga till fler senare.",
+      "profession_search_placeholder": "Sök efter ett yrke eller arbetsområde",
+      "profession_search_empty": "Inga träffar. Du kan fylla i din profil senare.",
+      "profession_remove": "Ta bort",
       "nextSteps": {
         "eyebrow": "Efter detta — din riktiga profil",
         "s1": "Importera ditt CV (valfritt) för att fylla i profilen snabbare",
@@ -402,10 +431,47 @@
         "s4": "Lägg till arbetslivserfarenhet och bevis",
         "note": "Färdigheter är först självangivna. Dokument, din arbetsdagbok och bekräftelser från personer gör dem starkare med tiden."
       },
+      "nextStepsOrganization": {
+        "eyebrow": "Därefter — din organisation",
+        "s1": "Namnge din organisation och vad den gör (anställer, hyr ut personal, rekryterar, utbildar, driver projekt)",
+        "s2": "Lägg till dina medarbetare, team eller den personal du levererar",
+        "s3": "Publicera ett behov, erbjud kapacitet — eller båda",
+        "s4": "Prata med de personer och organisationer som passar och utför arbetet tillsammans",
+        "note": "Din organisation kan användas direkt. Verifiering är ett separat, starkare förtroendesteg."
+      },
       "display_name_label": "[EN] Display name",
       "error_generic": "[EN] Something went wrong. Please try again.",
       "error_name_required": "[EN] Please enter a display name.",
       "rolePicker": {
+        "intentHeading": "Nu sätter vi igång",
+        "intentLead": "LabourMarket.ai hjälper dig att bygga din yrkeshistorik, styra ditt nuvarande arbete och hitta nya möjligheter.",
+        "intentNote": "Du kan välja flera och ändra dem senare.",
+        "intent": {
+          "work": {
+            "title": "Jag arbetar / har yrkeserfarenhet",
+            "desc": "Ditt arbete, dina färdigheter och din arbetsjournal bygger din yrkeshistorik — nya möjligheter växer fram ur den."
+          },
+          "member": {
+            "title": "Jag är en del av ett företag eller ett team",
+            "desc": "Företaget, teamet eller arbetslaget du arbetar med varje dag — arbetet där läggs till din yrkeshistorik."
+          },
+          "hire": {
+            "title": "Jag leder ett företag eller ett team",
+            "desc": "Människor, team, projekt, arbetsplatser och uppdrag — och nya personer när du behöver dem."
+          },
+          "agency": {
+            "title": "Jag arbetar med rekrytering eller bemanning",
+            "desc": "Utbud av arbetskraft, kunder, behov, placeringar och pågående arbete."
+          },
+          "student": {
+            "title": "Jag studerar / förbereder mig för ett yrke",
+            "desc": "Lärande och praktik är redan en del av din yrkeshistorik. Anslut dig till din utbildningsanordnare."
+          },
+          "education": {
+            "title": "Jag representerar en utbildningsanordnare",
+            "desc": "Bjud in studerande, se deras deltagande och koppla dem till praktik och jobb."
+          }
+        },
         "agency": {
           "desc": "[EN] Staff workers, manage contracts.",
           "title": "[EN] Agency"
@@ -420,7 +486,6 @@
           "title": "[EN] Customer"
         },
         "heading": "[EN] Choose how you'll use the platform",
-        "infoBox": "[EN] 💡 Whatever role you pick — your work experience is quietly recorded in your Work Journal. One day it could be the most valuable part of your CV.",
         "multiNote": "[EN] You can choose several. Change later in settings.",
         "worker": {
           "desc": "[EN] Seek work, build your CV, get confirmed.",
@@ -487,7 +552,7 @@
         "admin": "Administratör"
       },
       "signing": "[EN] Creating...",
-      "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with Google or with email and password; you'll pick your role next.",
+      "subcopy": "[EN] One profile for your real skills, availability and work experience — so people and companies can see where you fit real work needs. Sign up with a social account or with email and password; you'll pick your role next.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Skicka länken igen",
       "resend_sent": "Skickat igen. Kontrollera inkorgen och skräppostmappen.",
@@ -495,10 +560,14 @@
     }
   },
   "common": {
+    "disclosure": {
+      "showAll": "Visa alla ({count})",
+      "moreTools": "Fler verktyg",
+      "details": "Så fungerar det"
+    },
     "backHome": "[EN] Back to home",
     "en": "[EN] English",
     "localeSwitch": "[EN] Language",
-    "localePreview": "[EN] preview",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content"
@@ -651,7 +720,7 @@
     "legalGroup": "[EN] Legal",
     "preview": "[EN] M0 preview build — not a public launch.",
     "product": "[EN] Product",
-    "rexora": "Skapad av Rexora",
+    "rexora": "Byggs tillsammans: LabourMarket.ai × Nonstop Group × <rexora>Rexora</rexora>",
     "rights": "[EN] All rights reserved.",
     "tagline": "[EN] A labour market across every sector — locally and internationally across Europe."
   },
@@ -939,74 +1008,92 @@
   },
   "pricing": {
     "checkoutReturn": {
-      "cancelled": "Betalningen avbröts — inget debiterades och inget ändrades på ditt konto."
+      "cancelled": "Betalningen avbröts – inget debiterades och inget ändrades på ditt konto."
     },
-    "eyebrow": "[EN] Pricing",
+    "eyebrow": "Priser",
     "faq": [
       {
-        "a": "[EN] We're pre-launch. Setting a price we can't yet stand behind would be dishonest, so tiers show their scope and the price is confirmed before launch.",
-        "q": "[EN] Why is there no price shown yet?"
+        "q": "Varför bara en betald plan?",
+        "a": "Varje organisation – arbetsgivare, bemanningsföretag, entreprenör eller utbildningsanordnare – får samma produkt. Det som skiljer är omfattningen: 1 aktiv position gratis, och ingen fast gräns för aktiva positioner för 99 €/månad."
       },
       {
-        "a": "[EN] Yes. The Free tier is meant to get workers and small employers onto the market with no cost.",
-        "q": "[EN] Will the Free tier stay free?"
+        "q": "Förblir gratisnivån gratis?",
+        "a": "Ja. Personer förblir kostnadsfria, och en organisation kan driva en aktiv position utan kostnad."
       },
       {
-        "a": "[EN] Billing integration is planned for a later milestone. In M0 you can only join a waitlist — no card is collected.",
-        "q": "[EN] How is billing handled?"
+        "q": "Hur hanteras betalningen?",
+        "a": "Kortbetalning via Stripe med moms hanterad av Stripe Tax; fakturor, uppsägning och ändringar finns i ditt organisationskonto."
       },
       {
-        "a": "[EN] Yes. Tiers are meant to follow your needs; you'll be able to move up or down.",
-        "q": "[EN] Can I change tiers later?"
+        "q": "Finns det en gräns för aktiva positioner?",
+        "a": "Gratisplanen omfattar 1 aktiv position. Organisationsplanen har ingen fast gräns för aktiva positioner. Vanligt skydd mot missbruk, till exempel begränsning av antalet förfrågningar, gäller fortfarande."
       }
     ],
-    "faqTitle": "[EN] Pricing FAQ",
-    "featuresLabel": "[EN] Includes",
-    "planCta": "[EN] Join the waitlist for this plan",
+    "faqTitle": "Vanliga frågor om priser",
+    "featuresLabel": "Ingår",
+    "planCta": "Gå med i väntelistan för den här planen",
     "plans": {
       "agency": {
         "features": [
-          "[EN] Unlimited managed workers",
-          "[EN] Broker tools",
-          "[EN] Worker search",
-          "[EN] Priority support"
+          "Obegränsat antal hanterade arbetare",
+          "Förmedlingsverktyg",
+          "Arbetarsökning",
+          "Prioriterad support"
         ],
-        "name": "[EN] Agency",
-        "tagline": "[EN] For staffing partners."
+        "name": "Agentur",
+        "tagline": "För bemanningspartner."
       },
       "business": {
+        "name": "Organisation",
+        "tagline": "För organisationer som aktivt rekryterar och bygger team",
         "features": [
-          "[EN] 10 projects",
-          "[EN] 25 job demands",
-          "[EN] Worker search",
-          "[EN] Email support"
-        ],
-        "name": "[EN] Business",
-        "tagline": "[EN] For active employers."
+          "Ingen fast gräns för aktiva positioner",
+          "Allt i Gratis, i driftskala",
+          "En plan för alla typer av organisationer",
+          "Projektdrift, rapporter och CSV-export"
+        ]
       },
       "enterprise": {
         "features": [
-          "[EN] Unlimited projects",
-          "[EN] SSO",
-          "[EN] SLA",
-          "[EN] Dedicated support"
+          "Obegränsat antal projekt",
+          "SSO",
+          "SLA",
+          "Dedikerad support"
         ],
-        "name": "[EN] Enterprise",
-        "tagline": "[EN] For scale and control."
+        "name": "Enterprise",
+        "tagline": "För skala och kontroll."
       },
       "free": {
+        "name": "Gratis",
+        "tagline": "För att komma igång",
         "features": [
-          "[EN] 1 project",
-          "[EN] 1 job demand",
-          "[EN] Community support"
-        ],
-        "name": "[EN] Free",
-        "tagline": "[EN] Get on the market."
+          "1 aktiv position",
+          "Matchningslista och kontakt med kandidater",
+          "Bokningar, projekt, instruktioner",
+          "Arbetsbekräftelse från arbetsgivaren"
+        ]
       }
     },
-    "subcopy": "[EN] Prices are not finalised yet and billing is never started for you on this page. The tiers below describe scope; activation is manual — reach out and we'll confirm pricing and scope with you before anything starts.",
-    "title": "[EN] Simple tiers,",
-    "titleAccent": "[EN] set fairly."
+    "subcopyLive": "Priserna är bekräftade av ägaren och gäller. Aktivering sker i organisationskontot genom en säker Stripe-betalning; inget debiteras på den här sidan.",
+    "subcopy": "Priserna är inte slutgiltiga, och fakturering startas aldrig åt dig på den här sidan. Nivåerna nedan beskriver omfattning; aktiveringen är manuell – hör av dig så bekräftar vi pris och omfattning med dig innan något startar.",
+    "subcopyConfirmed": "Priserna är bekräftade. Aktivering online är inte öppen ännu – gå med i väntelistan så kontaktar vi dig för att starta din organisation manuellt; inget debiteras på den här sidan.",
+    "trialNote": "En organisations första prenumeration börjar med en 14 dagars provperiod. Därefter debiteras kortet månadspriset, och du kan avsluta innan provperioden tar slut.",
+    "title": "Enkla nivåer,",
+    "titleAccent": "satta rättvist.",
+    "individual": {
+      "name": "Särskilda behov",
+      "tagline": "För behov utöver standardplanerna",
+      "question": "Något särskilt i åtanke?",
+      "body": "Kontakta oss om du har särskilda behov – vi kommer överens om dem tillsammans. Ingen automatisk nivå, inget publicerat pris.",
+      "cta": "Kontakta oss"
+    },
+    "priceFree": "€0",
+    "pricePerMonth": "€{price}/månad",
+    "ctaStartFree": "Kom igång gratis i ditt organisationskonto",
+    "ctaSubscribe": "Aktivera i ditt organisationskonto",
+    "priceState": {
+      "owner_confirmed": "Priserna är bekräftade av ägaren. Aktivering sker i ditt organisationskonto; inget debiteras på den här sidan."
+    }
   },
   "secondary": {
     "comm": {
@@ -1057,6 +1144,12 @@
   },
   "skills": {
     "workDirectionsTitle": "[EN] Work directions",
+    "ownProfessionsTitle": "Yrken du har angett",
+    "ownProfessionsNote": "Du angav dessa med dina egna ord. De visas exakt som du skrev dem.",
+    "ownProfessionAdd": "Lägg till",
+    "ownProfessionPlaceholder": "Skriv ett yrke eller arbetsområde",
+    "ownProfessionRemove": "Ta bort",
+    "ownProfessionRemoveConfirm": "Ta bort ”{name}”?",
     "editingDirection": "[EN] Editing direction",
     "skillsForDirection": "[EN] Skills for this direction",
     "othersRemainSaved": "[EN] Other directions remain saved",
@@ -1076,10 +1169,10 @@
     "primaryBadge": "[EN] Primary",
     "directionAdded": "[EN] Direction added",
     "coreBadge": "[EN] Core",
-    "customComingSoon": "[EN] coming soon",
+    "customComingSoon": "Inte tillgängligt just nu.",
     "customPrompt": "[EN] Can't find your skill?",
     "empty": "[EN] No skills yet for this profession",
-    "importComingSoon": "[EN] CV import will be enabled in M2.",
+    "importComingSoon": "Inte tillgängligt just nu.",
     "importNotSaved": "[EN] Selected: {file}. The file isn't uploaded or stored yet.",
     "importPrompt": "[EN] Have an old CV? Upload PDF or DOCX",
     "loading": "[EN] Loading...",
@@ -1096,7 +1189,9 @@
     "saving": "[EN] Saving...",
     "selfDeclared": "[EN] Awaiting confirmation",
     "verified": "[EN] Confirmed",
-    "viewProfile": "[EN] View profile"
+    "viewProfile": "[EN] View profile",
+    "editDisclosure": "Yrke, färdigheter och beskrivning",
+    "aboutDisclosure": "Så läses den här profilen"
   },
   "stats": {
     "activeWorkers": "[EN] Active workers",
@@ -1202,7 +1297,7 @@
         },
         {
           "desc": "[EN] Completed work strengthens your proof and readiness.",
-          "title": "[EN] Work, earn, level up"
+          "title": "[EN] Work, earn, build your record"
         }
       ]
     },
@@ -1231,7 +1326,7 @@
       "confirmNote": "Optional note",
       "confirmSubmit": "Confirm & verify",
       "alreadyVerified": "Already verified",
-      "noSkillsToConfirm": "This worker has no declared skills left to confirm.",
+      "noSkillsToConfirm": "This entry has no linked skills left to confirm. Approving the entry confirms the work itself.",
       "result": {
         "skillsVerified": "Verified {count} skill(s).",
         "skillNotOwned": "That skill is not declared by this worker.",
@@ -1464,7 +1559,7 @@
     "hub": {
       "matching": "[EN] Matching workbench",
       "market": "[EN] Market situation",
-      "league": "[EN] Country league"
+      "league": "[EN] Country labour market"
     },
     "market": {
       "eyebrow": "[EN] Admin · Market",
@@ -1538,12 +1633,12 @@
       }
     },
     "league": {
-      "eyebrow": "[EN] Country league",
-      "title": "[EN] Labour market league",
+      "eyebrow": "[EN] Country labour market",
+      "title": "[EN] Labour market by country",
       "subtitle": "[EN] Profession tables per country — real teams, availability and the market thermometer.",
       "methodNote": "[EN] A thermometer value renders ONLY where an admin entered a sourced market average AND the declared-expectation sample is at least 2 people. Everywhere else the cell says \"insufficient market data\" — the table never assesses a person.",
       "back": "[EN] Back to admin hub",
-      "empty": "[EN] No league data yet — tables appear by themselves once workers set their professions.",
+      "empty": "[EN] No data yet — tables appear by themselves once workers set their professions.",
       "unknownCountry": "[EN] Country not set",
       "cellCount": "[EN] {n, plural, one {# profession} other {# professions}}",
       "availableNow": "[EN] available now",
@@ -1575,7 +1670,7 @@
       "items": {
         "public_market_entry": "[EN] Public market entry",
         "user_identity": "[EN] User identity system",
-        "worker_profile_player_card": "[EN] Worker profile / player card",
+        "worker_profile_player_card": "[EN] Worker professional profile",
         "skill_intelligence": "[EN] Skill intelligence",
         "work_journal": "[EN] Work journal / real work records",
         "company_demand": "[EN] Company / demand system",
@@ -1595,9 +1690,9 @@
     "eyebrow": "[EN] MY DOCUMENTS",
     "title": "[EN] My documents",
     "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
-    "preparing": "[EN] Document readiness is being prepared — it goes live once the document storage layer is reviewed and enabled. Nothing here is active yet.",
+    "preparing": "Inte tillgängligt just nu.",
     "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
-    "needsMigration": "[EN] The documents storage layer is not enabled in this environment yet.",
+    "needsMigration": "Inte tillgängligt just nu.",
     "noWorker": "[EN] Create your worker profile first — documents attach to it.",
     "error": "[EN] Could not load your documents.",
     "empty": "[EN] No documents recorded yet. Start with your CV and ID document.",
@@ -1616,6 +1711,7 @@
     "country": {
       "title": "[EN] What is missing for a country",
       "help": "[EN] Pick a destination country to see which documents it asks for.",
+      "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "[EN] Next step: take care of — {doc}.",
       "ok": "[EN] All curated requirements for {country} are covered."
@@ -1643,7 +1739,7 @@
     "consent": {
       "title": "[EN] What my agency may see",
       "explainer": "[EN] If you switch this on, YOUR agency sees only category-level counts of your document readiness (valid / expiring / needs attention). It never sees document contents, files, notes or types. Default is off; you can switch it off any time.",
-      "needsGate": "[EN] The consent layer is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Inte tillgängligt just nu.",
       "onLabel": "[EN] Sharing aggregates: ON",
       "offLabel": "[EN] Sharing aggregates: OFF",
       "onHint": "[EN] Your agency sees counts only. Tap to switch off.",
@@ -1675,9 +1771,12 @@
       "placeholder": "[EN] A short reply…",
       "send": "[EN] Send",
       "sent": "[EN] Reply sent."
-    }
+    },
+    "translationUnavailable": "Original ({lang}) — ingen översättning tillgänglig",
+    "loadError": "Meddelandena kunde inte läsas in just nu. Det du ser är inte hela bilden — försök igen."
   },
   "trust": {
+    "unreadHint": "En del av detta gick inte att räkna just nu och visas som ”—”. Det betyder inte att du saknar dem — siffrorna gick bara inte att läsa. Ladda om om en stund.",
     "title": "[EN] Trust signals",
     "caption": "[EN] These counts come straight from your work records.",
     "verifiedSkills": "[EN] Manager-confirmed skills",
@@ -1758,7 +1857,7 @@
       "sections": {
         "action": "[EN] Today's action",
         "overview": "[EN] Week & growth",
-        "playerCard": "[EN] Player card"
+        "playerCard": "[EN] Professional profile"
       }
     }
   },
@@ -1784,7 +1883,8 @@
       "opportunityCount": "[EN] {count} currently visible opportunities match your profile.",
       "opportunityUnavailable": "[EN] Open demands are not available to your account yet, so this has not been measured.",
       "opportunityNoWorker": "[EN] This is measured once you have a worker profile.",
-      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager."
+      "closestBasis": "[EN] Closest — {what}: matches {matched} of {required} required skills, {confirmed} recorded by a manager.",
+      "historyUnavailable": "Din arbetshistorik kunde inte läsas just nu."
     },
     "readinessSteps": {
       "pillar": {
@@ -1838,8 +1938,12 @@
       "historyRange": "[EN] {from} – {to}",
       "historyEmpty": "[EN] No work periods recorded yet.",
       "historyAria": "[EN] Work periods on a time band, from {from} to {to}.",
-      "skillsScaleNote": "Stapelns längd är antalet arbetsposter bakom varje färdighet (full stapel = {scale}+), inte ett färdighetsbetyg."
-    }
+      "skillsScaleNote": "Stapelns längd är antalet arbetsposter bakom varje färdighet (full stapel = {scale}+), inte ett färdighetsbetyg.",
+      "historyHours": "{hours} h registrerade · {confirmed} h med chefens notering",
+      "historyUnavailable": "Din arbetshistorik kunde inte läsas just nu."
+    },
+    "skillsUnavailable": "Kunde inte läsas just nu.",
+    "verifiedUnavailable": "Färdigheter med chefens notering kunde inte läsas just nu."
   },
   "projects": {
     "map": {
@@ -1854,7 +1958,14 @@
         "paused": "Pausad",
         "completed": "Avslutad"
       },
-      "progressNone": "Inga mätbara framsteg ännu"
+      "progressNone": "Inga mätbara framsteg ännu",
+      "progressStages": "{done} av {total} faser markerade som klara",
+      "documented": {
+        "label": "Dokumenterat arbete",
+        "facts": "{days, plural, one {# registrerad dag} other {# registrerade dagar}} · {hours} h · {people, plural, one {# person} other {# personer}} i underlaget",
+        "periodHours": "+ {hours} h i periodsummeringar",
+        "none": "Inget registrerat arbete på det här projektet."
+      }
     },
     "pulse": {
       "pendingTitle": "[EN] {n, plural, one {# entry is waiting for your confirmation} other {# entries are waiting for your confirmation}}",
@@ -1870,18 +1981,42 @@
     "myProjectsEmpty": "Du är ännu inte tilldelad något projekt. När ett företag tilldelar dig visas projektet här.",
     "assignmentActive": "Aktiv",
     "assignmentEnded": "Avslutad",
+    "viaTeam": "via team {team}",
     "untitledProject": "Projekt utan titel",
     "archiveToggle": {
       "label": "Aktiva eller avslutade projekt",
       "active": "Aktiva",
       "archived": "Avslutade",
-      "empty": "Inga avslutade projekt ännu."
+      "empty": "Inga avslutade projekt ännu.",
+      "partial": "Visar de senaste {shown} av {total}.",
+      "range": "Visar {from}–{to} av {total}.",
+      "pagesLabel": "Sidor med avslutade projekt",
+      "prev": "Nyare",
+      "next": "Äldre"
+    },
+    "moreToolsHint": "Sites and locations, photo gallery",
+    "consolidation": {
+      "title": "Importerade rader som är ett objekt",
+      "summary": "Importen skapade {rows} projektrader; {fragments} av dem upprepar ett objekt som en annan rad redan nämner. Efter sammanslagning av de föreslagna grupperna återstår {after} projekt.",
+      "safety": "Sammanslagning behåller varje rad, post, timme och person — raderna pekar på det behållna projektet och deras poster räknas där. Varje sammanslagning loggas i granskningsloggen.",
+      "counts": "{rows} rader · {records} poster · {hours} h",
+      "caution": {
+        "two-numbers": "En rad nämner två husnummer — slå bara ihop om det är samma objekt.",
+        "periods-apart": "Arbetsperioderna ligger långt isär — det kan vara en separat order. Slå bara ihop om det är samma objekt.",
+        "other": "Ditt beslut behövs."
+      },
+      "decide": "Dessa rader är samma objekt",
+      "apply": "{rows, plural, one {Slå ihop # rad} other {Slå ihop # rader}}",
+      "pending": "Slår ihop…",
+      "done": "Sammanslaget. Raderna och deras poster finns kvar; projektlistan visar nu det behållna projektet.",
+      "failed": "Inte sammanslaget. Inget ändrades för rader som inte gick igenom — ladda om och försök igen."
     }
   },
   "projectOps": {
     "stadium": {
       "eyebrow": "[EN] Stadium",
       "fieldCount": "[EN] {n, plural, one {# person on the field} other {# people on the field}}",
+      "fieldViaTeam": "{n} via team",
       "todayCount": "[EN] {n, plural, one {# journal entry today — the day is moving} other {# journal entries today — the day is moving}}",
       "todayZero": "[EN] No entries yet today — the day is still waiting for its first record.",
       "fieldTitle": "[EN] The field — who is on the team today",
@@ -1894,13 +2029,33 @@
       "emptyTeamCta": "[EN] Start the draft",
       "positionsTitle": "[EN] Missing positions",
       "positionsEmpty": "[EN] The position-needs module is still in preparation — once it lands, you will see here which people are missing.",
-      "openOps": "[EN] Open the management arena"
+      "openOps": "[EN] Open the management arena",
+      "history": {
+        "title": "Tidigare arbete i detta projekt",
+        "provenance": "Historik tillhandahållen av organisationen, importerad från organisationens egna uppgifter. Inte oberoende verifierad.",
+        "unavailable": "Tidigare arbete kunde inte läsas just nu. Det betyder inte att inget finns.",
+        "empty": "Inget tidigare arbete tillhandahållet av organisationen är registrerat för detta projekt.",
+        "personUnknown": "Person ej angiven",
+        "hoursUnknown": "Timmar ej angivna",
+        "count": "{n} poster",
+        "people": {
+          "title": "{count, plural, one {# person i projektets historik} other {# personer i projektets historik}}",
+          "days": "{count, plural, one {# registrerad dag} other {# registrerade dagar}}",
+          "periodHours": "+ {hours} h i periodsummeringar"
+        }
+      },
+      "merged": {
+        "into": "Raden slogs ihop med",
+        "canonical": "det behållna projektet",
+        "includes": "{count, plural, one {Omfattar # sammanslagen projektrad — dess poster visas här.} other {Omfattar # sammanslagna projektrader — deras poster visas här.}}"
+      }
     },
     "workerView": {
       "eyebrow": "Mitt projekt",
       "untitled": "Projekt utan titel",
       "assignmentActive": "Aktiv tilldelning",
       "assignmentEnded": "Tilldelning avslutad",
+      "viaTeam": "via team {team}",
       "projectRestricted": "Projektdetaljer är inte tillgängliga för dig just nu. Din tilldelning förblir synlig.",
       "journalCta": "Skriv journalinlägg",
       "chatCta": "Skicka meddelande",
@@ -1910,6 +2065,7 @@
       "title": "Projektstyrning",
       "progressLabel": "Framsteg",
       "progressNone": "Inga mätbara framsteg ännu",
+      "progressStages": "{done} av {total} faser markerade som klara",
       "responsibleLabel": "Ansvarig person",
       "responsibleNone": "Inte angiven",
       "responsibleSave": "Spara",
@@ -1964,7 +2120,7 @@
     "demand": {
       "title": "[EN] Open demand",
       "humanNote": "[EN] \"We can offer\" is your proposal on a request — the final match is always recorded by a person on the platform side.",
-      "needsGate": "[EN] Open-demand visibility for agencies is in preparation — it activates after the owner-gated change is applied.",
+      "needsGate": "Inte tillgängligt just nu.",
       "empty": "[EN] No open requests right now.",
       "noRole": "[EN] Role not specified",
       "teamSize": "[EN] {n} people",
@@ -2164,7 +2320,7 @@
     "external": {
       "sectionTitle": "Offentliga jobbannonser",
       "sectionNote": "Annonser från officiella offentliga arbetsförmedlingar. De publiceras av arbetsgivaren vid källan — labourmarket.ai visar dem så att du kan hitta dem; ansökan sker via originalannonsen.",
-      "shownOfTotal": "topp {shown} av {total}",
+      "shownOfTotal": "visar {shown} av {total}",
       "bandBest": "Passar bäst",
       "bandPossible": "Möjligen passande",
       "bandExplore": "Övriga annonser",
@@ -2187,9 +2343,57 @@
         "no_start_date": "startdatum",
         "pay_not_comparable": "lön ej jämförbar (ej i EUR)"
       }
+    },
+    "vacancyInterest": {
+      "express": "Jag vill ha det här jobbet",
+      "sent": "Intresse registrerat",
+      "withdraw": "Dra tillbaka",
+      "consentLabel": "Nonstop Group får presentera mig för den här arbetsgivaren för det här jobbet.",
+      "consentHint": "(bara dina angivna yrken, färdigheter, språk och tillgänglighet — aldrig din arbetsjournal eller ditt CV; frivilligt)",
+      "handoffTooNew": "Ditt intresse är registrerat och väntar på Nonstop Group. Annonsen är yngre än 30 dagar, så arbetsgivaren får ännu inte kontaktas om den — intresset ligger kvar.",
+      "handoffPending": "Ditt intresse är registrerat. Överlämning till Nonstop Group är ännu inte aktiverad.",
+      "ineligible": {
+        "worker_not_matchable": "Ditt intresse är registrerat. Det kan lämnas vidare till Nonstop Group när din profil säger vilket arbete du utför och vilka färdigheter du har.",
+        "employer_not_identifiable": "Ditt intresse är registrerat. Annonsen anger ingen arbetsgivare, så den kan inte lämnas vidare till Nonstop Group.",
+        "vacancy_not_live": "Ditt intresse är registrerat, men annonsen är inte längre öppen.",
+        "not_public_vacancy": "Ditt intresse är registrerat.",
+        "interest_not_active": "Ditt intresse är registrerat.",
+        "publication_date_unusable": "Ditt intresse är registrerat. Annonsen saknar användbart publiceringsdatum, så den kan inte lämnas vidare till Nonstop Group."
+      },
+      "scopeNote": "Detta är ingen ansökan och inget meddelande går till arbetsgivaren. Man söker fortfarande via originalannonsen.",
+      "error": "Kunde inte spara. Försök igen.",
+      "handoffQueued": "Ditt intresse är registrerat och väntar på att lämnas vidare till Nonstop Groups kommersiella team. LabourMarket.ai har inte skickat något till arbetsgivaren.",
+      "handoffQueuedConsentWithheld": "Ditt intresse är registrerat. Du kryssade inte i rutan för presentation, så inget om dig lämnas vidare till Nonstop Group. Vill du bli presenterad, återkalla intresset och visa det igen med rutan ikryssad. LabourMarket.ai har inte skickat något till arbetsgivaren.",
+      "handoffDelivered": "Ditt intresse har lämnats vidare till Nonstop Group. Nonstop kan kontakta arbetsgivaren genom sin egen kommersiella process; LabourMarket.ai har inte skickat något till arbetsgivaren.",
+      "handoffClosed": "Ditt intresse är registrerat. Den tidigare överlämningen till Nonstop Group stängdes när du drog tillbaka; inget skickades."
+    },
+    "intent": {
+      "label": "Min situation",
+      "notDeclared": "Inte angivet ännu — berätta om du söker jobb och var du får arbeta",
+      "states": {
+        "AVAILABLE_NOW": "Kan börja nu",
+        "AVAILABLE_FROM": "Kan börja från ett datum",
+        "OPEN_TO_OFFERS": "Arbetar, men öppen för erbjudanden",
+        "LOOKING_FOR_WORK": "Söker arbete",
+        "LOOKING_FOR_PROJECTS": "Söker projekt"
+      }
+    },
+    "jobAlerts": {
+      "title": "Aviseringar om nya jobb",
+      "ready": "När ett nytt riktigt jobb dyker upp som passar ditt yrke och de länder du valt visas det i dina aviseringar. Ett jobb utan angiven lön döljs aldrig på grund av lönen.",
+      "missing": "För att få aviseringar om nya jobb, ange:",
+      "profession": "vilket arbete du gör",
+      "country": "vilka länder du vill arbeta i",
+      "cta": "Fyll i mina önskemål"
     }
   },
   "scouting": {
+    "pool": {
+      "factsUnreadable": "En del av det dessa personer har registrerat gick inte att läsa just nu, så den här ordningen är inte tillförlitlig. Ingen visas här med mindre än vad de har — det är fakta bakom jämförelsen som saknas. Ladda om om en stund.",
+      "historyUnavailable": "Historik från organisationer kunde inte läsas just nu och visas därför inte. Det betyder inte att det saknas någon, och ordningen ovan beror inte på den.",
+      "capped": "Alla jämfördes inte. Fler synliga arbetare passar det här behovet än vad en lista rymmer, så de {count} vars kompetenser, yrke och land stämmer mest direkt hämtades först — aldrig de senast registrerade. Avgränsa behovet för att vara säker på att rätt personer jämförs.",
+      "complete": "Alla {count} synliga arbetare jämfördes mot det här behovet."
+    },
     "tiers": {
       "negotiables": "[EN] Discussion points",
       "missing": "[EN] Missing information",
@@ -2208,8 +2412,12 @@
     "needsSetup": "[EN] Scouting is not available yet on this environment.",
     "noCandidates": "[EN] No matching workers yet for this need.",
     "namePlaceholder": "[EN] Worker",
-    "skillFit": "[EN] {pct}% — {matched}/{total} required skills, {confirmed} manager-confirmed",
+    "skillFit": "[EN] {matched}/{total} required skills, {confirmed} manager-confirmed",
     "evidence": "[EN] Evidence — confirmed: {confirmed} · journal: {journal} · self-declared: {self}",
+    "confirmedWork": "Bekräftat genom arbete: {work} av {matched} matchande färdigheter (upprepat: {repeated})",
+    "historySignal": "Nämnd i historik från organisationer: {history} av {matched} matchande färdigheter (en signal, inte verifiering)",
+    "evidenceNone": "Inte bekräftat",
+    "experienceYearsValue": "{years, plural, one {# år} other {# år}}",
     "shortlistError": "[EN] Could not save. Try again.",
     "footnote": "[EN] Matches are computed deterministically for this need only. No global rating, no fake candidates.",
     "status": {
@@ -2237,7 +2445,8 @@
       "accommodation_ok": "[EN] Accommodation works",
       "city_match": "[EN] Same city",
       "location_within_radius": "[EN] Within the work radius",
-      "profession_related": "[EN] Related profession (shared skills)"
+      "profession_related": "[EN] Related profession (shared skills)",
+      "skills_history_reported": "[EN] Skills named in organization history (not verified)"
     },
     "gap": {
       "skills_missing": "[EN] Some required skills missing",
@@ -2266,7 +2475,7 @@
       "markContacted": "[EN] Mark contacted",
       "internalNote": "[EN] Internal record only — nothing is sent to the worker or outside the platform.",
       "error": "[EN] Could not save. Try again.",
-      "notAvailable": "[EN] Acknowledgement is not enabled yet."
+      "notAvailable": "Inte tillgängligt just nu."
     },
     "lifecycle": {
       "confirm": "[EN] Confirm recognized skills",
@@ -2274,7 +2483,10 @@
       "close": "[EN] Close this need",
       "reopen": "[EN] Reopen this need",
       "closedNote": "[EN] Closed — hidden from workers.",
-      "error": "[EN] Could not save. Try again."
+      "error": "[EN] Could not save. Try again.",
+      "limitUpgrade": "Den här organisationens gratisplan tillåter 1 aktiv position. Stäng en, eller aktivera planen Organisation (99 €/månad) i organisationskontot.",
+      "limitIndividual": "Den här organisationen har nått gränsen för aktiva positioner i sin plan. Inget har debiterats eller ändrats. Kontakta oss.",
+      "closedCandidatesHistory": "[EN] This need is closed. Below is who was compared and what was decided while it was open — history, not an action list. Reopen the need to assess candidates again."
     },
     "verdict": {
       "eligible": "Uppfyller de angivna kraven",
@@ -2284,6 +2496,22 @@
         "mixed": "Underlag: delvis bekräftat",
         "unverified": "Underlag: endast egenuppgivet"
       }
+    },
+    "sharedNeed": "Need shared by the client: {title}",
+    "agencyPresent": {
+      "note": "Your client shared this need with you. You present candidates to the client from your own roster.",
+      "link": "Present a candidate"
+    },
+    "identity": {
+      "noRecords": "Inga arbetsregistreringar ännu",
+      "noManagerRecord": "Ännu ingen registrering från chefen",
+      "why": "Varför den här personen är relevant",
+      "skills": "Relevanta färdigheter och vad de vilar på",
+      "readiness": "Tillgänglighet, beredskap och dokument",
+      "openTo": "Även öppen för: {countries}",
+      "skillCount": "{matched} av {total} efterfrågade färdigheter",
+      "nameHidden": "Namn och kontaktuppgifter visas först när personen tillåter det.",
+      "appliedToYou": "Har ansökt om detta behov — namn och foto följer med ansökan. Telefon och e-post förblir dolda."
     }
   },
   "waze": {
@@ -2513,7 +2741,7 @@
     "saving": "[EN] Saving…",
     "saved": "[EN] Preferences saved.",
     "error": "[EN] Saving failed. Please try again.",
-    "needsMigration": "[EN] This section is not enabled yet — nothing was saved.",
+    "needsMigration": "Inte tillgängligt just nu. Inget sparades.",
     "v2": {
       "title": "[EN] More work preferences",
       "hint": "[EN] Same rule as above — anything left as “Not stated” stays not stated.",
@@ -2528,7 +2756,7 @@
       "licenceCategories": "[EN] Driving licence categories",
       "ownVehicle": "[EN] Has own vehicle",
       "ownTools": "[EN] Has own tools",
-      "notEnabled": "[EN] These extra preferences are not enabled yet — nothing here is saved for now.",
+      "notEnabled": "Inte tillgängligt just nu.",
       "notSaved": "[EN] Saved, except the extra preferences — that part is not enabled yet."
     }
   },
@@ -2543,7 +2771,7 @@
     "adding": "[EN] Adding…",
     "remove": "[EN] Remove",
     "empty": "[EN] No languages added yet.",
-    "notEnabled": "[EN] This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Inte tillgängligt just nu. Inget sparades.",
     "error": "[EN] Saving failed. Please try again.",
     "invalid": "[EN] Choose a language and a level."
   },
@@ -2562,11 +2790,11 @@
     "visibility": "[EN] Visibility",
     "visibilityPrivate": "[EN] Private",
     "visibilityEmployers": "[EN] Employers",
-    "visibilityNote": "[EN] Employer viewing is not switched on yet — your visibility choice is saved and will apply once it is.",
+    "visibilityNote": "Inte tillgängligt just nu.",
     "importNote": "[EN] Automatic import from these sites is not offered. To bring your data in, upload an exported CV file in the profile editor.",
     "importLink": "[EN] Open the profile editor",
     "empty": "[EN] No external profiles linked yet.",
-    "notEnabled": "[EN] This section is not enabled yet — nothing was saved.",
+    "notEnabled": "Inte tillgängligt just nu. Inget sparades.",
     "error": "[EN] Saving failed. Please try again.",
     "invalid": "[EN] Enter a full https:// link and choose a site.",
     "platformNames": {
@@ -2610,7 +2838,8 @@
     "propose": {
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
-      "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then."
+      "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
+      "alreadyAccepted": "Arbetstagaren har redan accepterat detta förslag — överenskomna villkor skrivs inte över här. Kom överens om ändringar i samtalet."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -2641,7 +2870,11 @@
       "save": "[EN] Save new dates",
       "saved": "[EN] Dates updated. The worker sees the new dates.",
       "notChanged": "[EN] The dates weren't changed. Please try again later.",
-      "cancel": "[EN] Cancel"
+      "cancel": "[EN] Cancel",
+      "openAccepted": "Ändra datum (arbetstagaren bestämmer igen)",
+      "reopenHint": "Arbetstagaren har redan godkänt. Nya datum öppnar förslaget igen: arbetstagaren måste godkänna på nytt. Den tidigare överenskommelsen finns kvar i historiken.",
+      "reopened": "Nya datum skickade. Arbetstagaren måste godkänna på nytt.",
+      "sameDates": "Det här är de godkända datumen — inget ändrades."
     },
     "deadline": {
       "open": "[EN] Set a respond-by date",
@@ -2651,13 +2884,21 @@
       "notSet": "[EN] The respond-by date wasn't saved. Please try again later.",
       "respondBy": "[EN] Respond by {date}",
       "cancel": "[EN] Cancel"
-    }
+    },
+    "clash": {
+      "acceptAnyway": "Jag vet att det överlappar — acceptera ändå",
+      "stillStands": "Att acceptera tar inte bort överlappet. Båda bokningarna behåller sina datum, konflikten syns fortfarande i kalendern, och ditt val registreras.",
+      "acknowledged": "Accepterad med känd överlappning. {count} befintlig(a) bokning(ar) överlappar fortfarande — inget avbokades eller doldes, och ditt val är registrerat."
+    },
+    "proposedBy": "Föreslagen av {name}",
+    "termsChanged": "Företaget ändrade villkoren. Du hade godkänt: {previous}. Bestäm igen om de nya datumen."
   },
   "marketplace": {
     "requestAgain": "[EN] Request again",
     "requestAgainNote": "[EN] This sends a new request for the same service. Your previous message is prefilled — edit it if you like. The provider decides again.",
     "cancel": "[EN] Cancel",
-    "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent."
+    "offeringInactive": "[EN] This service is no longer active, so a new request can't be sent.",
+    "loopReadFailed": "Dina förfrågningar kunde inte laddas — listan kan vara ofullständig. Ladda om sidan."
   },
   "people": {
     "eyebrow": "Personprofil",
@@ -2671,7 +2912,26 @@
     "skillVerified": "[EN] Confirmed by a manager's record",
     "skillWorkBacked": "[EN] Backed by work journal entries",
     "skillDeclared": "[EN] Self-declared",
-    "skillsLegend": "Bekräftad — godkänd av en chef. Styrkt av arbete — syns i arbetsjournalens inlägg. Självangiven — tillagd av personen, ännu inte kontrollerad."
+    "skillsLegend": "Bekräftad — godkänd av en chef. Styrkt av arbete — syns i arbetsjournalens inlägg. Självangiven — tillagd av personen, ännu inte kontrollerad.",
+    "workTitle": "Registrerat arbete",
+    "workEmpty": "Inget registrerat arbete ännu",
+    "workUnavailable": "Kunde inte ladda registrerat arbete",
+    "workScopeNote": "Visar bara det arbete du har behörighet att se.",
+    "workCurrent": "Nu",
+    "kindEmployment": "Anställning",
+    "kindPractice": "Praktik",
+    "mobility": "Kan arbeta i",
+    "photosTitle": "Verkligt arbete",
+    "photosEmpty": "Inga arbetsbilder att visa",
+    "photosUnavailable": "Kunde inte ladda arbetsbilder",
+    "photosPreviewsUnavailable": "Förhandsvisningar av bilder är inte tillgängliga just nu",
+    "servicesTitle": "Vad personen kan",
+    "servicesEmpty": "Inget erbjudet ännu",
+    "servicesUnavailable": "Kunde inte ladda erbjudna tjänster",
+    "serviceRemote": "På distans",
+    "photoAlt": "Foto på utfört arbete",
+    "historyTitle": "Importerad historik",
+    "historyUnavailable": "Importerad historik kunde inte läsas"
   },
   "marketMapBase": {
     "previewTitle": "Ny plats vald — inte sparad ännu",
@@ -2920,6 +3180,7 @@
       "statGovLt": "Litauens statistik (osp.stat.gov.lt)",
       "eurostat": "Eurostat",
       "arbetsformedlingen": "Arbetsförmedlingen",
+      "nav": "NAV / Arbeidsplassen.no (Norges arbets- och välfärdsförvaltning)",
       "cvbankasSalary": "CVbankas lönedata — föreslagen extern referens (inte aktiv)",
       "key": {
         "internal_platform_aggregates": "LabourMarket.ai interna aggregat",
@@ -2936,6 +3197,7 @@
         "statGovLt": "Officiell statistik; källhänvisning krävs; aktivering väntar på ägarens bekräftelse.",
         "eurostat": "Officiell EU-statistik; källhänvisning krävs; aktivering väntar på ägarens bekräftelse.",
         "arbetsformedlingen": "Aktiv källa. Användningsvillkor bekräftade: en kostnadsfri offentlig datakälla (CC0). Källan visas vid varje annons, och varje annons länkar tillbaka till den ursprungliga annonsen.",
+        "nav": "Aktiv källa. NAV:s API-villkor är godkända och åtkomst har beviljats. De löpande skyldigheterna följs: en indragen annons tas bort omedelbart, en uppdaterad uppdateras snabbt och ansökningslänken leder till den ursprungliga annonsen.",
         "cvbankas": "Endast ett förslag — användningstillstånd obekräftat; blandas aldrig med interna siffror.",
         "eures": "Föreslagen källa. Användarvillkoren har inte granskats ännu — aktivering kräver ägarens bekräftelse. Inget hämtas i dag.",
         "uztLt": "Föreslagen källa. Användarvillkoren har inte granskats ännu — aktivering kräver ägarens bekräftelse. Inget hämtas i dag."
@@ -3227,8 +3489,8 @@
     "progress": "{done} av {total}",
     "steps": {
       "goal": {
-        "title": "Vilket slags arbete söker du?",
-        "hint": "Välj ditt yrke."
+        "title": "Vad är ditt yrke eller din arbetslivserfarenhet?",
+        "hint": "Du kan ange ett eller flera yrken eller arbetsområden. Du kan lägga till fler senare."
       },
       "experience": {
         "title": "Ladda upp CV eller svara på några frågor",
@@ -3294,6 +3556,10 @@
           "label": "[EN] Add a language",
           "description": "[EN] State a language you speak and your level."
         },
+        "addDocument": {
+          "label": "Registrera dokument",
+          "description": "Ett certifikat, ett tillstånd eller en ID-handling — med giltighetstid, så att beredskapen är verklig."
+        },
         "saveSkills": {
           "label": "[EN] Choose your skills",
           "description": "[EN] Select the skills for your work direction."
@@ -3341,6 +3607,10 @@
         "reviewEngagements": {
           "label": "Mina arbetsrelationer",
           "description": "Se vem du arbetar med och avsluta en arbetsrelation."
+        },
+        "respondInvitation": {
+          "label": "Acceptera inbjudan",
+          "description": "Att acceptera skapar en verklig relation till organisationen — ett viktigt steg."
         }
       },
       "company": {
@@ -3391,6 +3661,61 @@
         "inviteWorker": {
           "label": "[EN] Invite a worker",
           "description": "[EN] Invite a person to your roster by e-mail."
+        },
+        "createProject": {
+          "label": "Skapa projekt",
+          "description": "En arbetsplats eller ett uppdrag du tilldelar folk till."
+        },
+        "createTask": {
+          "label": "Lägg till uppgift",
+          "description": "Ett arbetspaket i projektet — vad som ska göras och till när."
+        },
+        "updateStageStatus": {
+          "label": "Sätt fasstatus",
+          "description": "En projektfas får sin verkliga status — pågår, klar, blockerad."
+        },
+        "updateTaskStatus": {
+          "label": "Ändra uppgiftsstatus",
+          "description": "En uppgift markeras med en verklig status — pågående, klar, blockerad."
+        },
+        "setReadinessItem": {
+          "label": "Markera listpunkt",
+          "description": "En listpunkt för en projektmedarbetare markeras med en verklig status — krävs, mottaget, kontrollerat."
+        },
+        "seedReadinessChecklist": {
+          "label": "Starta dokumentlistan",
+          "description": "Standardlistan för beredskap / dokument startas för alla på projektet."
+        },
+        "requestReadiness": {
+          "label": "Be om det som saknas",
+          "description": "Medarbetaren får en arbetsinstruktion med det projektet fortfarande saknar från dem."
+        },
+        "confirmWork": {
+          "label": "Bekräfta arbetspost",
+          "description": "En chef bekräftar en medarbetares arbetspost och de färdigheter den styrker — de blir bekräftade."
+        },
+        "enableJournalReview": {
+          "label": "Slå på arbetsgranskning",
+          "description": "En medarbetares arbetsposter blir synliga och kan bekräftas av chefen."
+        },
+        "respondOffer": {
+          "label": "Svara på en byrås erbjudande",
+          "description": "Acceptera eller avböj en kandidat som en byrå erbjudit för ert behov."
+        },
+        "moveWorker": {
+          "label": "Flytta en person till ett annat projekt",
+          "description": "Tilldelar det nya projektet och avslutar den tidigare tilldelningen — efter konsekvensvisningen."
+        },
+        "keepAssignment": {
+          "label": "Behåll en tilldelning trots en kalenderkonflikt",
+          "description": "Registrerar ditt beslut att behålla tilldelningen med vetskap om konflikten, med en sluten orsakskod. Inget sparas utan kvitto."
+        },
+        "offerCapacity": {
+          "label": "Registrera vad ni erbjuder"
+        },
+        "respondTeamOffer": {
+          "label": "Svara på ett arbetslags eller företags erbjudande",
+          "description": "Kom överens i princip med, eller avböj, ett arbetslag eller företag som erbjudits för ditt behov."
         }
       },
       "education": {
@@ -3488,6 +3813,7 @@
         "needsAccommodation": "[EN] Need accommodation?",
         "availabilityNote": "[EN] Note (optional)",
         "availabilityNotePlaceholder": "[EN] e.g. available from August, prefer 2-week rotations",
+        "availableFrom": "Tillgänglig från (ÅÅÅÅ-MM-DD)",
         "demandDescription": "Beskriv behovet",
         "demandDescriptionPlaceholder": "T.ex.: behöver 4 murare i Kaunas från augusti, 3 månaders arbete, erfarenhet krävs",
         "demandRole": "Roll",
@@ -3495,6 +3821,7 @@
         "demandLocation": "Plats",
         "startDate": "Startdatum",
         "startDatePlaceholder": "ÅÅÅÅ-MM-DD",
+        "endDate": "Slutdatum",
         "programmeName": "Programnamn",
         "programmeNamePlaceholder": "t.ex. Svetskurs",
         "programmeDescription": "Beskrivning (valfritt)",
@@ -3517,8 +3844,28 @@
         "workerEmailPlaceholder": "[EN] name@example.com",
         "inviteNote": "[EN] Note (optional)",
         "inviteNotePlaceholder": "[EN] E.g. start in October, site in Kaunas",
+        "documentType": "Dokumenttyp",
+        "documentCountry": "Land (valfritt)",
+        "validUntil": "Giltig till",
+        "validUntilPlaceholder": "t.ex. 2027-03-31",
+        "documentNote": "Anteckning (valfritt)",
+        "taskTitle": "Uppgift",
+        "taskTitlePlaceholder": "t.ex. Montera ställning",
+        "taskProject": "Projekt (valfritt)",
+        "taskDue": "Förfallodag",
+        "taskPriority": "Prioritet",
+        "projectTitle": "Projektnamn",
+        "projectTitlePlaceholder": "t.ex. Lager i Rotterdam",
+        "projectCity": "Stad (valfritt)",
+        "projectCityPlaceholder": "t.ex. Rotterdam",
         "rosterWorker": "[EN] Roster worker",
-        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday"
+        "proposalNotePlaceholder": "[EN] E.g. 5 years' experience, can start Monday",
+        "supplyDescription": "Vad ni erbjuder",
+        "supplyDescriptionPlaceholder": "T.ex. 20 svetsare med VCA, lediga från oktober, Nederländerna eller Belgien",
+        "supplyRole": "Vilket yrke",
+        "supplyRolePlaceholder": "T.ex. svetsare",
+        "supplyTeamSize": "Hur många personer ni har",
+        "supplyLocation": "Var de kan arbeta"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3546,7 +3893,9 @@
         "errorGeneric": "[EN] Could not save. Please try again.",
         "errorInvalid": "[EN] Please check the fields and try again.",
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
-        "errorConflict": "[EN] This value already differs. Open advanced mode to replace it."
+        "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
+        "errorOpenNeedLimitUpgrade": "Den här organisationens gratisplan tillåter 1 aktiv position. Stäng en, eller aktivera planen Organisation (99 €/månad) i organisationskontot.",
+        "errorOpenNeedLimitIndividual": "Den här organisationen har nått gränsen för aktiva positioner i sin plan. Inget har debiterats eller ändrats. Kontakta oss."
       },
       "urgency": {
         "flexible": "Flexibel",
@@ -3612,7 +3961,7 @@
       "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
-      "writeEmployerHint": "[EN] You can message an employer from a specific opening. Type “find work” and I'll show real needs — you can reach out from there.",
+      "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
       "experiencesEligible": "[EN] I found finished interactions you can describe. Pick which one.",
       "experiencesAllSubmitted": "[EN] You have already described every finished interaction. One interaction, one experience.",
       "experiencesNothingYet": "[EN] There is no finished interaction to describe yet. An experience is grounded in real work that has ended.",
@@ -3655,17 +4004,26 @@
       "briefOverdue": "[EN] {count} tasks are past their due day.",
       "briefLogToday": "[EN] You are working today and nothing is logged yet.",
       "briefProfileGap": "[EN] Your profile is still missing: {step}.",
-      "playerCardOpened": "Ditt kort är öppet i panelen — riktiga data från dina egna poster.",
+      "playerCardOpened": "Din yrkesprofil är öppen i panelen — riktiga data från dina egna poster.",
       "attachChoice": "Vad är den här filen till för?",
-      "chipAttachPhoto": "Arbetsfoto",
-      "chipAttachCv": "CV",
+      "chipAttachPhoto": "Mitt arbetsfoto",
+      "chipAttachCv": "Mitt CV",
       "userAttachPhoto": "Jag vill bifoga ett arbetsfoto",
+      "chipAttachDocument": "Mitt dokument eller certifikat",
+      "chipAttachWorkReport": "Arbetsrapport",
+      "chipAttachOrgDocument": "Organisationens eller projektets dokument",
+      "chipAttachOther": "Någon annans fil",
+      "attachUnsupported": "Den här filen kan jag inte bifoga. Ett foto (JPG, PNG, WEBP), PDF, DOCX eller TXT fungerar.",
+      "attachLinkNote": "En länk öppnar en egen sida — där väljer du filen igen. Tills du väljer är filen inte uppladdad någonstans.",
+      "attachRemove": "Ta bort den valda filen",
+      "attachSelected": "Vald fil",
+      "fileSelfWorkEvidence": "Uppfattat: ett foto av ditt eget arbete. Det hör till en arbetspost — öppna posten och välj fotot; det laddas upp först när du sparar posten.",
       "userCandidates": "[EN] Show me candidates",
       "candidatesOpened": "[EN] Here are your needs and the people behind them.",
       "candidatesNoDemands": "[EN] Your company has not described a need yet, so there is nobody to match.",
       "candidatesNoCompany": "[EN] You are in your personal space right now, so there are no company needs here. Switch space to work as your company.",
       "candidatesUnavailable": "[EN] I could not read your company's needs right now.",
-      "chipProjects": "[EN] Projects",
+      "chipProjects": "Projekt",
       "userProjects": "[EN] Show me my projects",
       "projectsOpened": "[EN] Here is your running work.",
       "projectsNone": "[EN] There is no project yet.",
@@ -3674,8 +4032,14 @@
       "assignPickWorker": "[EN] Who should work on it?",
       "assignNoWorkers": "[EN] There is nobody on your team to assign yet.",
       "assignUnavailable": "[EN] I could not read your team right now.",
+      "assignEngagementCandidate": "[EN] accepted-offer candidate",
       "assignDone": "[EN] Assigned to the project.",
+      "assignAlreadyCommitted": "[EN] Note: they are already committed on some of these dates ({count}). The assignment stands — you decide.",
+      "assignCommitmentUnknown": "[EN] We could not confirm these dates are free. That is not the same as free.",
       "assignFailed": "[EN] The assignment could not be made.",
+      "keepPrompt": "Personen är redan bunden de här dagarna. Behåller du tilldelningen medvetet? Välj en orsak - beslutet registreras.",
+      "keepRecorded": "Registrerat: du behöll tilldelningen medvetet.",
+      "keepFailed": "Beslutet kunde inte registreras, så inget sparades. Försök igen.",
       "chipEngagements": "Vem jag arbetar med",
       "userEngagements": "Vem arbetar jag med?",
       "engagementsOpened": "Här är de registrerade arbetsrelationerna. Du kan avsluta en av dem i panelen.",
@@ -3683,8 +4047,61 @@
       "engagementsNoCompany": "Du agerar inte för en organisation just nu, så det finns ingen lista att visa.",
       "engagementsUnavailable": "Arbetsrelationerna kan inte läsas just nu. Det är inte samma sak som att inte ha några.",
       "employerBridgeHint": "Du kan publicera detta som ditt företag — jag öppnar behovsformuläret.",
+      "professionStatement": {
+        "understood": "Uppfattat: {label}.",
+        "inCatalogue": "Jag kan ange det som ditt yrke i profilen — då visar listan din marknad.",
+        "notInCatalogue": "Det yrket finns inte i vallistan ännu — skriv in det med egna ord i din arbetslivserfarenhet: det syns på ditt kort och i ditt CV.",
+        "pastJob": "Uppfattat: {label}. Vi skriver in det i arbetslivserfarenheten — titeln är redan ifylld, fyll i resten.",
+        "readBesideSearch": "Uppfattat: {label}. När yrket finns i profilen visar listan din marknad i stället för alla annonser.",
+        "chipSetProfession": "Ange yrke",
+        "chipRecordExperience": "Registrera erfarenhet"
+      },
+      "availability": {
+        "understood": "Uppfattat — du kan arbeta. Vi lägger in det på ditt arbetskort: ange datumet från när.",
+        "understoodFrom": "Uppfattat: du kan arbeta från {date}. Vi lägger in det på ditt arbetskort — datumet är redan ifyllt, granska och spara.",
+        "notInCompany": "När du kan arbeta är ditt eget faktum, inte företagets. Byt till ditt personliga utrymme och säg det igen."
+      },
+      "findWorkInCompanyContext": "Att söka jobb är din egen handling — i företagsutrymmet kör jag den inte. Byt till ditt personliga utrymme och fråga igen.",
+      "findWorkInCompanyWhy": "En person söker jobb, inte ett företag — jag svarar från ditt personliga utrymme.",
+      "personalOnlyInCompany": "Det är en personlig åtgärd — i ett företagsutrymme utför jag den inte. Byt till ditt personliga utrymme och fortsätt där.",
+      "newJobsIntro": "Nya annonser som passar dina önskemål: {count}.",
+      "newJobsAll": "Alla möjligheter",
+      "newJobsNone": "Inga nya annonser som passar dina önskemål har kommit de senaste dagarna. Alla möjligheter hittar du på sidan för möjligheter.",
+      "newJobsNeedProfession": "För att visa nya jobb behöver du säga vilket yrke du söker.",
+      "newJobsNeedCountry": "För att visa nya jobb behöver du säga i vilka länder du vill arbeta.",
+      "newJobsNoProfile": "För att visa nya jobb behöver jag först din profil.",
+      "newJobsUnavailable": "Nya jobb kunde inte kontrolleras just nu. Försök igen senare.",
+      "openConversationOpening": "Öppnar samtalet med {name}.",
+      "openConversationNone": "Jag hittade inte den personen bland dina samtal eller i ditt team. Dina meddelanden finns under meddelanden.",
+      "openConversationWhich": "Vilken person menar du?",
+      "openConversationNoPermission": "Jag kan inte öppna ett samtal med {name} — du har inte behörighet.",
+      "openConversationFailed": "Samtalet kunde inte öppnas. Försök igen eller öppna dina meddelanden.",
+      "journalAskWhatYouDid": "Vad gjorde du i dag? Skriv det i fältet ”Vad du gjorde” med egna ord — t.ex. ”monterade fönster på bygget i Kaunas från 8 till 17”. Själva begäran sparas inte i dagboken.",
       "serviceNeedHint": "Det är ett jobb som ska göras — jag visar vem som erbjuder den tjänsten.",
       "chipServiceRequests": "Hitta en tjänst",
+      "findPartnersDoors": "Det här är en sökning efter affärspartners, inte efter jobb. Den går via den befintliga marknadsplatsen — välj var du vill börja.",
+      "findPartnersPickCompany": "Affärspartners söks på ett företags vägnar. Vilket företag menar du?",
+      "findPartnersNoCompany": "Affärspartners söks på ett företags vägnar, och det finns ännu ingen företagsprofil. Skapa en eller bläddra i tjänstemarknaden.",
+      "chipPartnersServices": "Tjänsteleverantörer",
+      "chipPartnersListings": "Marknadsplatsens annonser",
+      "chipPartnersRelations": "Kunder och partners",
+      "productHelp": {
+        "projectUse": "Ett projekt är platsen för arbete, människor och tidsfrister. Öppna ett projekt, lägg till uppgifter och personer, så syns det utförda arbetet direkt där.",
+        "addPerson": "Du lägger till en person med en inbjudan: ange kontakten, så bekräftar personen i sitt eget konto. Inbjudningar och ditt team hittar du under team.",
+        "hours": "Timmar finns i timavsnittet — där ser du dagar, veckan och tidrapporten.",
+        "offerService": "Du erbjuder en tjänst under tjänster: beskriv den, så kan andra företag och personer se den.",
+        "warning": "En varning visas när något kan hindra arbetet — till exempel ett dokument som går ut eller saknade uppgifter. Alla aviseringar och orsakerna ser du under aviseringar.",
+        "forecast": "En prognos är en beräkning utifrån de timmar som redan registrerats och det arbete som planerats. Den är en fingervisning, inte ett löfte, och ändras med uppgifterna. Planen och siffrorna hittar du under planering.",
+        "scheduleWorker": "Du planerar en medarbetare under planering: välj dag och projekt och tilldela personen på samma ställe.",
+        "doneWork": "Utfört arbete ser du där det registrerats — i arbetsjournalen eller timavsnittet: registreringar, timmar och bekräftelser.",
+        "chips": {
+          "chipHelpProjects": "Öppna projekt",
+          "chipHelpPeople": "Team och inbjudningar",
+          "chipHelpPlanning": "Öppna planering",
+          "chipHelpServices": "Mina tjänster",
+          "chipHelpJournal": "Arbetsjournal"
+        }
+      },
       "interestInboxAmbiguous": "Det kan betyda två saker — vad vill du se?",
       "chipInterestOnMyNeeds": "Intresse för mina förfrågningar",
       "chipMyOwnInterest": "Mitt eget intresse",
@@ -3695,6 +4112,10 @@
       "fallbackEducation": "[EN] I can help invite learners, manage programmes and cohorts, and show market demand. What would you like to do?",
       "fallbackComposed": "Jag kan hjälpa till med {list}. Vad vill du göra?",
       "workspaceIntro": "Du agerar för {company}. Här kan jag hjälpa till med {list}.",
+      "workspaceActingAs": "Du agerar som: {workspace} · {relationship}",
+      "workspaceRelationshipMember": "Medlem",
+      "staleContext": "Din aktiva arbetsyta byttes i ett annat fönster eller på en annan enhet, så inget sparades. Uppdatera och försök igen.",
+      "staleContextRefresh": "Uppdatera",
       "capPhraseNeedWorkers": "personalbehov",
       "capPhraseCandidates": "kandidater",
       "capPhraseProjects": "projekt och ditt team",
@@ -3709,6 +4130,9 @@
       "agencyNotAgencyWorkspace": "[EN] This workspace is not a staffing agency, so client invitations do not apply here. Agency actions live in an agency workspace.",
       "agencySwitchHint": "[EN] You can do that as your company — pick the workspace:",
       "agencyClientDemandIntro": "[EN] Requests your clients shared:",
+      "agencyClientsLine": "Kunder: {list}.",
+      "agencyClientActive": "aktiv",
+      "agencyClientPending": "väntar på bekräftelse",
       "agencyClientDemandNone": "[EN] No client has shared a request yet. Once a connected client shares one, it appears here.",
       "agencyProposalsIntro": "[EN] Your proposals:",
       "agencyProposalsNone": "[EN] No proposals yet. Once a client shares a need, you can propose a roster worker.",
@@ -3720,6 +4144,7 @@
       "chipInviteClient": "[EN] Invite a client",
       "chipInviteCandidate": "[EN] Invite a candidate",
       "chipClientDemand": "[EN] Client requests",
+      "chipProposeReplacement": "Föreslå en annan kandidat",
       "chipProposalStatus": "[EN] Proposal status",
       "chipProposeFor": "[EN] Propose a candidate",
       "userClientDemand": "[EN] Show client requests",
@@ -3744,10 +4169,195 @@
       "eduAssignDone": "Elev tilldelad gruppen.",
       "eduNotInstitution": "Den här organisationen är ännu inte markerad som utbildningsinstitution. Markera det i företagsavsnittet.",
       "eduUnavailable": "Programmen kan inte läsas just nu. Det betyder inte att det inte finns några.",
+      "eduOutcomesConnected": "Anslutna studenter: {count}.",
+      "eduOutcomesUnavailable": "Resultaten kan inte läsas just nu. Det betyder inte att det inte finns några.",
+      "eduStudentsPrivacy": "Institutionen ser inte studenternas färdigheter, dokument eller journal — det är deras egna uppgifter. Du ser deltagande och resultatsiffror; vem som passar ser arbetsgivaren själv för sitt eget behov.",
+      "eduPracticeHow": "Praktikplatser läggs upp av arbetsgivare: en partner skapar ett företagskonto och lägger upp ett behov av typen ”praktik” (ett behov gratis). Dina studenter ser det på sin tavla när arbetsgivaren är verifierad.",
       "eduNext": "Vad händer nu?",
       "chipCreateProgramme": "Skapa program",
       "chipCreateCohort": "Skapa grupp",
-      "chipAssignLearner": "Tilldela elev"
+      "chipAssignLearner": "Tilldela elev",
+      "mySpaceTitle": "Mitt utrymme",
+      "chipManagePins": "Hantera",
+      "pinAsk": "Du använder detta ofta. Lägga till i Mitt utrymme?",
+      "chipPinYes": "Lägg till",
+      "chipPinNo": "Inte nu",
+      "pinDone": "Tillagt i Mitt utrymme — du hittar det högst upp.",
+      "pinCap": "Mitt utrymme har redan {max} poster. Ta bort en för att lägga till en ny.",
+      "pinUnavailable": "Mitt utrymme kan inte sparas just nu.",
+      "pinsManageIntro": "Ditt Mitt utrymme. Tryck på det du vill ta bort:",
+      "pinsNone": "Mitt utrymme är tomt. När du använder något ofta föreslår jag att lägga till det.",
+      "unpinPrefix": "Ta bort",
+      "unpinDone": "Borttaget från Mitt utrymme.",
+      "projectCreateIntro": "Ett nytt projekt. Namn och stad — sedan tilldelar du folk direkt här.",
+      "projectCreatedNext": "Projekt skapat. Tilldela folk direkt här — eller återkom till det senare från ”Mina projekt”.",
+      "clientOffersIntro": "Kandidater som byråer erbjudit för era behov:",
+      "clientOffersNone": "Ingen har ännu erbjudit kandidater, ett arbetslag eller ett företag för dina öppna behov.",
+      "chipOfferAccept": "Acceptera",
+      "chipOfferDecline": "Avböj",
+      "offerAccepted": "Accepterat. Kandidaten fick ett bokningsförslag — svaret ser du här.",
+      "offerDeclined": "Avböjt. Byrån ser ditt beslut.",
+      "offerDecisionFailed": "Beslutet kunde inte sparas — erbjudandet kan redan vara stängt. Kontrollera kandidatlistan.",
+      "documentAddIntro": "Låt oss registrera dokumentet: typ, land och giltighet. Filen kan du bifoga direkt efter att du sparat.",
+      "documentAddDone": "Dokument registrerat. Så här ser din beredskap ut nu:",
+      "documentAddUnavailable": "Dokumentkatalogen kunde inte läsas in just nu — registrera dokumentet i dokumentcentret.",
+      "cvExportHint": "Ditt verifierade CV — ett blad med det systemet verkligen vet. Öppna det och skriv ut till PDF.",
+      "chipCvSheet": "Öppna CV-bladet",
+      "taskCreateIntro": "En ny uppgift: vad som ska göras, i vilket projekt och till när.",
+      "taskCreatedNext": "Uppgift registrerad. Projektpulsen visar den som öppen; tilldela en person på uppgiftsskärmen.",
+      "capacityIntro": "Team {from} – {to} ({count} personer):",
+      "capacityFree": "ledig",
+      "capacityBusyUntil": "otillgänglig till {date}",
+      "capacityAbsencesUnknown": "Inte tillgängligt just nu.",
+      "capacityEmpty": "Ingen är i teamet ännu — bjud in personer.",
+      "capacityUnavailable": "Teamets tillgänglighet kunde inte läsas just nu.",
+      "chipAddTask": "Lägg till uppgift",
+      "workerProjectsIntro": "Dina projekt ({count} aktiva):",
+      "workerProjectsEnded": "avslutat",
+      "chipOpenProjectPrefix": "Öppna",
+      "workerProjectAsks": "Chefen väntar på: {items}",
+      "askOwnReady": "du har det",
+      "askOwnExpiring": "går snart ut",
+      "askOwnNone": "inte registrerat",
+      "chipRecordDocument": "Registrera: {label}",
+      "askReplyIntro": "{name} bad om det här dokumentet — du kan svara här (skickas först efter bekräftelse):",
+      "askReplyIntroUnnamed": "Din chef bad om det här dokumentet — du kan svara här (skickas först efter bekräftelse):",
+      "stageAsk": "Vilken fas? Välj:",
+      "stageNotFound": "Jag hittar inte den fasen bland dina öppna faser. Vilken menade du?",
+      "stageNone": "Inga öppna faser ännu — faser läggs in i projektstyrningen.",
+      "stageDone": "Fas markerad som klar.",
+      "stageStarted": "Fas markerad som pågående.",
+      "stageBlocked": "Fas markerad som blockerad.",
+      "stageFailed": "Fasstatusen kunde inte ändras.",
+      "chipStagePrefix": "Fas",
+      "taskAsk": "Vilken uppgift? Välj en:",
+      "taskNotFound": "Jag hittar inte den uppgiften bland de öppna. Vilken menade du?",
+      "taskNone": "Det finns inga öppna uppgifter än.",
+      "taskUnavailable": "Uppgifterna kunde inte läsas just nu.",
+      "taskDone": "Uppgiften är markerad som klar.",
+      "taskStarted": "Uppgiften är markerad som pågående.",
+      "taskBlocked": "Uppgiften är markerad som blockerad.",
+      "taskFailed": "Uppgiftens status kunde inte ändras.",
+      "chipTaskPrefix": "Uppgift",
+      "riskIntro": "Projektläge ({count} aktiva):",
+      "riskLine": "• {title} — {people} pers.; öppna uppgifter {open}, försenade {overdue}; blockerade etapper {blocked}; {docs} pers. saknar dokument; beredskap {checked}/{total}",
+      "riskOkLine": "• {title} — inga risksignaler ({people} pers., {open} öppna uppgifter)",
+      "riskUnknownLine": "• {title} — läget kunde inte läsas just nu",
+      "riskNobody": "aktivt projekt utan personer",
+      "riskNone": "Inga aktiva projekt än — skapa det första.",
+      "riskUnavailable": "Projektens läge kunde inte läsas just nu.",
+      "chipCreateProject": "Skapa projekt",
+      "readinessIntro": "Beredskap för ”{title}” — {ready} av {people} redo:",
+      "readinessReadyLine": "• {name} — redo ({checked}/{total})",
+      "readinessGapLine": "• {name} — saknas: {gaps} ({checked}/{total})",
+      "readinessNoChecklist": "Ingen dokumentlista förs ännu — börja den i projektstyrningen.",
+      "readinessNoPeople": "Ingen är på projektet ännu.",
+      "readinessAsk": "Vilket projekt? Välj ett:",
+      "readinessNotFound": "Jag hittar inte det projektet bland de aktiva. Vilket menade du?",
+      "readinessRepliedSuffix": "svarade {date}: ”{text}”",
+      "readinessUnavailable": "Beredskapen kunde inte läsas just nu.",
+      "chipReadinessPrefix": "Beredskap",
+      "chipOpenOperations": "Öppna projektstyrning",
+      "missingName": "ett namn",
+      "missingDeclaredSkills": "angivna färdigheter",
+      "missingEvidence": "arbetsbevis",
+      "blockedSuffix": "(avvisad / utgången)",
+      "readinessSeedChip": "Starta dokumentlistan ({count} pers.)",
+      "readinessSeeded": "Lista startad: {count} pers. × {items} punkter — alla ”krävs”.",
+      "readinessGotChip": "Mottaget: {label} ({name})",
+      "readinessGotDone": "Markerat som mottaget: {label} ({name}).",
+      "readinessCheckedChip": "Kontrollerad: {label} ({name})",
+      "readinessCheckedDone": "Markerad som kontrollerad: {label} ({name}).",
+      "readinessAskChip": "Be om: {name}",
+      "readinessAskDone": "Instruktion skickad: {name} ser den bland sina meddelanden.",
+      "readinessRequestBody": "För projektet ”{title}” ber vi dig lämna: {items}.",
+      "readinessWriteFailed": "Ändringen kunde inte göras.",
+      "briefInstructions": "Väntande instruktioner: {count}.",
+      "chipInstructions": "Instruktioner",
+      "briefWorkConfirmed": "En chef har bekräftat {count, plural, one {# av dina arbetsposter} other {# av dina arbetsposter}} de senaste 7 dagarna — bekräftade kompetenser: {skills}.",
+      "chipMyCard": "Min yrkesprofil",
+      "confirmIntro": "Väntar på din bekräftelse: {count} poster.",
+      "confirmLine": "• {name} · {date} — {text} (+{skills} färdigh.)",
+      "confirmChip": "Bekräfta: {name} · {date}",
+      "confirmDone": "Bekräftat: {name} — bekräftade färdigheter: {count}.",
+      "confirmNone": "Inga arbetsposter väntar.",
+      "confirmNotEnabled": "Inte tillgängligt just nu.",
+      "confirmEnableChip": "Slå på granskning: {name}",
+      "confirmEnabled": "Inte tillgängligt just nu.",
+      "confirmFailed": "Bekräftelsen kunde inte göras.",
+      "confirmUnavailable": "Bekräftelser kunde inte läsas just nu.",
+      "chipOpenInbox": "Öppna bekräftelseinkorgen",
+      "pinFirstPrefix": "Sätt först",
+      "reorderDone": "Klart: ”{label}” är nu först.",
+      "documentFileOffer": "Dokument registrerat. Du kan bifoga filen här — PDF, Word eller ett foto upp till 5 MB.",
+      "documentFileChoose": "Välj en fil",
+      "documentFileSubmit": "Ladda upp fil",
+      "documentFileUploading": "Laddar upp…",
+      "documentFileSkip": "Senare",
+      "documentFileUploaded": "Filen är bifogad till dokumentet. Här är din beredskap nu:",
+      "documentFileTooLarge": "Filen är större än 5 MB — inget sparades.",
+      "documentFileUnsupported": "Den här filtypen stöds inte — använd PDF, Word eller ett foto.",
+      "documentFileFailed": "Filen kunde inte laddas upp — inget sparades. Försök i dokumentcentret.",
+      "moveNotFound": "Jag hittar inte den personen på det projektet — välj från listan.",
+      "moveNoOptions": "Inget att flytta: det kräver minst två projekt och en tilldelad person.",
+      "moveAskWorker": "Vem ska flyttas? Välj:",
+      "moveAskProject": "Vart ska {name} flyttas? Välj:",
+      "moveWhatIfTitle": "Om {name} flyttas från “{from}” till “{to}”:",
+      "moveFromLine": "• “{from}”: personer {before} → {after}; {tasks} av hans öppna arbetspaket stannar där; beredskapslista där: {checked}/{total}.",
+      "moveToLine": "• “{to}”: personer {before} → {after}; beredskapslistan där börjar på 0/{total}.",
+      "moveCountryLine": "• Landet byts: {from} → {to} — andra dokumentkrav.",
+      "moveNoDatesLine": "• “{to}” saknar datum — frånvaro kan inte kontrolleras.",
+      "moveAvailabilityUnknownLine": "• Frånvaro okänd.",
+      "moveAvailabilityLine": "• Inom {start}–{end} har han {count} frånvaroposter.",
+      "moveAvailabilityFreeLine": "• Ingen frånvaro inom datumen för “{to}”.",
+      "moveOnlyConfirmLine": "Inget har ändrats ännu — bara din bekräftelse ändrar något.",
+      "moveConfirmChip": "Flytta",
+      "moveCancelChip": "Lämna som det är",
+      "moveDone": "Flyttad: tilldelad det nya projektet, den tidigare tilldelningen avslutad.",
+      "moveDonePartial": "Tilldelad det nya projektet, men den tidigare tilldelningen kunde inte avslutas — han finns på båda; avsluta i projektpanelen.",
+      "moveFailed": "Flytten misslyckades — inget ändrades.",
+      "chipMovePrefix": "Flytta till",
+      "briefInvitations": "{who} {count, plural, one {har bjudit in dig (# inbjudan)} other {har bjudit in dig (# inbjudningar)}}.",
+      "chipInvitations": "Inbjudningar",
+      "invitationSomeone": "Någon",
+      "invitationsIntro": "Inbjudningar till dig: {count}.",
+      "invitationsEmpty": "Det finns inga inbjudningar till dig just nu.",
+      "invitationsUnavailable": "Inbjudningarna kunde inte läsas just nu.",
+      "userInvitations": "Mina inbjudningar",
+      "chipNetwork": "Nätverk",
+      "invAccept": "Acceptera",
+      "invLater": "Senare",
+      "invConfirmTitle": "Bekräftelse",
+      "invConfirmNote": "Genom att acceptera blir du medlem i den här organisationen — en verklig relation som den kan se.",
+      "invConfirm": "Ja, acceptera",
+      "invCancel": "Avbryt",
+      "invWorking": "Arbetar…",
+      "invDone": "Accepterat — ni är nu kopplade.",
+      "invAlreadyAnswered": "Den här inbjudan är inte längre öppen eller har redan besvarats.",
+      "invErrorStale": "Läget ändrades — uppdatera och försök igen.",
+      "invErrorGeneric": "Kunde inte acceptera. Försök igen.",
+      "knownState": {
+        "usingProfile": "Du behöver inte ladda upp något — jag söker med det som redan finns i din profil.",
+        "usingProfileNarrowed": "Du behöver inte ladda upp något — jag söker med din profil och det du har berättat hittills.",
+        "profileEmpty": "Det finns ännu inget i din profil, så jag kan inte söka utifrån den. Registrera ett jobb eller säg vilket yrke du har — så söker jag direkt."
+      },
+      "writeEmployerMany": "[EN] You have several interests — pick on the card which employer you're writing to.",
+      "writeEmployerFailed": "[EN] The conversation couldn't be opened. Try from the opening's card.",
+      "acceptOfferOne": "[EN] Here it is. The button below confirms it.",
+      "acceptOfferWhich": "[EN] Which one? Choose below.",
+      "visibilityUnavailable": "Synligheten för arbetsgivare kunde inte kontrolleras. Det betyder inte att den är avstängd — öppna inställningarna.",
+      "chipVisibility": "Synlighet för arbetsgivare",
+      "teamOffersIntro": "Arbetslag och företag som erbjudit sig för dina behov:",
+      "teamOfferStatusAgreed": "överenskommet i princip",
+      "chipTeamOfferAgree": "Kom överens i princip",
+      "chipTeamOfferThread": "Skriv",
+      "chipOfferOurs": "Erbjud vårt arbetslag eller företag",
+      "teamOfferAgreed": "Överenskommet i princip — ännu inte ett undertecknat avtal. Kom överens om villkoren i samtalet och tilldela sedan laget ett projekt.",
+      "teamOfferDeclined": "Avböjt. Det erbjudande företaget ser ditt svar.",
+      "teamOfferThreadFailed": "Det här samtalet kan inte öppnas.",
+      "whatChangedIntro": "{count, plural, one {Här är kedjan från ditt senaste arbete: vad du gjorde, vad som ändrades, vad det öppnade.} other {Här är # kedjor från ditt senaste arbete: vad du gjorde, vad som ändrades, vad det öppnade.}}",
+      "whatChangedNone": "Inget nytt kom ut av ditt arbete de senaste 14 dagarna. När du registrerar arbete och det bekräftas visar jag vad det ändrade.",
+      "whatChangedUnavailable": "Jag kunde inte kontrollera vad som ändrades just nu. Dina registreringar är säkra – försök igen om en stund eller öppna journalen."
     },
     "worklog": {
       "understood": "[EN] Here's what I understood — save it?",
@@ -3765,6 +4375,7 @@
       "labelContext": "[EN] Work context",
       "contextChoose": "Välj arbetskontext…",
       "contextAmbiguous": "Det här arbetet kan höra till mer än en kontext. Välj vilken innan du sparar.",
+      "contextEndedOrg": "Meningen nämner en organisation där ditt arbetsförhållande har upphört — posten räknas inte som arbete för den. Välj var du gjorde detta:",
       "save": "[EN] Save",
       "cancel": "[EN] Edit",
       "working": "[EN] Saving…",
@@ -3772,6 +4383,16 @@
       "saved": "[EN] Entry saved to your work journal.",
       "errorGeneric": "[EN] Couldn't save. Please try again.",
       "minutesUnit": "[EN] min",
+      "errorNoWorkContent": "En post behöver arbetet: vad du gjorde, var eller hur länge. Skriv med egna ord, t.ex. ”monterade fönster från 8 till 17”.",
+      "errorNotesTooLong": "Posten är för lång — korta den till 4000 tecken.",
+      "noWorkSignalHint": "Jag kände inte igen någon tid, plats eller aktivitet i texten — posten sparas exakt som du skrev den.",
+      "recordTitle": "Registreras som arbetstid",
+      "recordNoActivity": "typ av arbete inte igenkänd",
+      "recordTotalStated": "Angivet totalt",
+      "recordPartsSum": "delarna ger",
+      "recordTotalDiffers": "skillnaden visas som en kontroll och läggs aldrig till dina timmar",
+      "recordNone": "Ingen tid hittades i texten — posten räknas, men utan varaktighet. Lägg till timmarna om de ska ingå i dina summor.",
+      "hoursUnit": "h",
       "addedSkillPrefix": "Färdighet tillagd",
       "strengthenedSkillPrefix": "Färdighet stärkt",
       "pendingConfirmPrefix": "Väntar på din bekräftelse",
@@ -3785,7 +4406,7 @@
       "introOne": "[EN] I found 1 suitable option:",
       "emptyState": "[EN] I didn't find any active openings matching your criteria right now. I have no alerts yet, so I won't promise to notify you — ask me again later, or add more to your profile so more needs match.",
       "blockedNoWorker": "[EN] To search for work, enable the worker role in account settings.",
-      "blockedNoAccess": "[EN] The opportunities list isn't enabled in this environment yet. When it is, I'll show real needs.",
+      "blockedNoAccess": "Inte tillgängligt just nu.",
       "fitStrong": "[EN] Strong fit",
       "fitPossible": "[EN] Possible fit",
       "fitWeak": "[EN] Weak fit",
@@ -3863,6 +4484,18 @@
     },
     "results": {
       "openFull": "Öppna helskärm",
+      "station": {
+        "profile": "Öppna profil",
+        "journal": "Öppna arbetsjournal",
+        "calendar": "Öppna kalender",
+        "marketMap": "Öppna marknadskarta",
+        "opportunities": "Öppna möjligheter",
+        "scouting": "Öppna kandidatsökning",
+        "projects": "Öppna projekt",
+        "documents": "Öppna dokument",
+        "finance": "Öppna ekonomiposter"
+      },
+      "collapseFull": "Förminska",
       "pendingInline": "Resultatet förbereds.",
       "retry": "Försök igen",
       "engagements": {
@@ -3870,7 +4503,7 @@
       },
       "engagementsError": "Arbetsrelationerna kunde inte laddas.",
       "engagementsBlocked": "Arbetsrelationerna kan inte läsas just nu. Det är inte samma sak som att inte ha några.",
-      "engagementsNeedsMigration": "Arbetsrelationer är ännu inte tillgängliga i den här miljön.",
+      "engagementsNeedsMigration": "Inte tillgängligt just nu.",
       "engagementsEmptyCompany": "Den här organisationen har inga registrerade arbetsrelationer.",
       "engagementsEmptyWorker": "Du har inga registrerade arbetsrelationer.",
       "engagementsUnavailable": "Den här arbetsrelationen är inte tillgänglig för dig.",
@@ -3992,11 +4625,12 @@
     },
     "cta": {
       "title": "Börja där du är",
-      "subcopy": "Fyra dörrar in till samma plattform — välj din.",
+      "subcopy": "Fem dörrar in till samma plattform — välj din.",
       "worker": "Jag är arbetstagare",
       "employer": "Jag är arbetsgivare",
       "agency": "Jag företräder en byrå",
-      "partner": "Jag vill bli partner"
+      "partner": "Jag vill bli partner",
+      "institution": "Jag företräder en skola eller ett universitet"
     },
     "loop": {
       "chip": "[EN] Sample sequence — real product flow",
@@ -4119,10 +4753,15 @@
         }
       },
       "topTitle": "Mest efterfrågade yrken just nu",
-      "topNote": "Rankat efter aktiva platsannonser på plattformen. En del annonser är ännu inte kopplade till ett yrke."
+      "topNote": "Rankat efter aktiva platsannonser på plattformen."
     }
   },
   "workspace": {
+    "readFailed": {
+      "body": "Ditt konto kunde inte läsas just nu, så inget utrymme valdes åt dig.",
+      "choose": "Välj ett utrymme eller försök igen.",
+      "retry": "Försök igen"
+    },
     "panel": {
       "regionLabel": "[EN] Context",
       "workTitle": "[EN] Your work right now",
@@ -4189,10 +4828,15 @@
         "start": "[EN] Start",
         "accommodation": "[EN] Housing",
         "transport": "[EN] Transport",
-        "tool": "[EN] Required tool"
+        "tool": "[EN] Required tool",
+        "opportunityType": "Typ av möjlighet",
+        "salary": "lön",
+        "language": "språk",
+        "employment": "anställningsform",
+        "radius": "avstånd"
       },
       "whyFiltered": "[EN] You said: {words}. I narrowed the search to that.",
-      "whyUnfiltered": "[EN] I searched your whole board — you did not narrow it.",
+      "whyUnfiltered": "Inga extra filter — jag visar allt som är synligt för dig.",
       "whyFromYourBoard": "[EN] From the demands that are visible to you right now.",
       "whyNoWorker": "[EN] This needs a worker profile, and there is none on this account yet.",
       "whyNoAccess": "[EN] Open demands are not available to your account yet.",
@@ -4215,6 +4859,11 @@
       "unsupportedDimension": "Jag kan inte filtrera på {dimension} ännu.",
       "noSuchValue": "[EN] I understood “{asked}”, but nothing there is visible to you right now.",
       "noSuchValueWithAlternatives": "[EN] I understood “{asked}”, but nothing there is visible to you right now. What is: {available}.",
+      "internshipChooseDirection": "Välj först en arbetsinriktning — utan den kan praktiksökningen inte avgränsas.",
+      "internshipAskInstitution": "Fråga din utbildningsinstitution ({institution}): den ser programmets efterfrågan på marknaden och kan bjuda in en arbetsgivare att lägga upp en praktikplats.",
+      "internshipCompass": "Kompassen visar vad som passar dig nu och vad som saknas.",
+      "chipChooseDirection": "Välj inriktning",
+      "chipAllOpportunities": "Alla möjligheter",
       "skillGapIntro": "[EN] {count} required skills are missing from your profile. The ones asked for most:",
       "skillGapLine": "[EN] — {skill}: required by {demands} of them",
       "skillGapNone": "[EN] Nothing is missing: you hold every skill the {demands} visible demands ask for.",
@@ -4238,12 +4887,19 @@
       "whyDocs": "Från dina dokument och kravlistan för {countries}.",
       "whyDocsNoCountry": "Från dina dokument; utan valt land finns inget att jämföra med.",
       "chipWhereToWork": "Var vill du arbeta?",
+      "countryNotChosenListings": "Där finns offentliga annonser från officiella källor — lägg till landet i dina önskemål så visar jag dem också.",
+      "countryNotChosenNoListings": "Offentliga annonser från officiella källor finns inte där just nu.",
+      "countryNotChosenSupplyUnknown": "Källan för offentliga annonser kunde inte läsas just nu — jag kan inte säga om det finns annonser där.",
+      "countryNotChosenDoors": "Du kan lägga till landet bland dina länder — behov där ser du så snart de dyker upp — och kontrollera vilka dokument som krävs där.",
+      "chipAddCountry": "Lägg till landet i mina önskemål",
+      "chipDocsGap": "Vilka dokument saknar jag?",
       "skillGapNoDemands": "[EN] There are no demands visible to you yet, so there is no gap to measure.",
       "journalIntro": "[EN] Your last {count} journal entries:",
       "journalLine": "[EN] — {day}: {what}",
       "journalUnlabelled": "[EN] (no description)",
       "journalEmpty": "[EN] You have no journal entries in the last {days} days.",
       "figuresWorker": "[EN] {entries} journal entries, {confirmations} of them confirmed by a manager. {skills} skills saved, {confirmed} confirmed.",
+      "figuresWorkerUnread": "{skills} färdigheter sparade, {confirmed} bekräftade. Jag kunde inte läsa antalet journalanteckningar och bekräftelser just nu — det är inte samma sak som att sakna dem. Fråga igen om en stund.",
       "figuresNoHoursLedger": "[EN] The platform does not keep an approved-hours ledger, so there is no hours figure to give you — what it records is confirmed entries.",
       "figuresWorkerEmpty": "[EN] You have no recorded work evidence yet.",
       "figuresOrgIntro": "[EN] Your organization, as recorded:",
@@ -4272,7 +4928,33 @@
       "unnamedOrganization": "[EN] (unnamed organization)",
       "chipLogWork": "[EN] Log work",
       "chipCreateDemand": "[EN] Describe a need",
-      "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace."
+      "scoutingPickDemand": "[EN] Pick one and I will show its candidates right here in the workspace.",
+      "chipProjectCsv": "Ladda ner CSV: {title}",
+      "offerCapacity": {
+        "needsCompany": "Att erbjuda personal hör till en organisation, och du är i ditt personliga utrymme nu. Välj företaget — så registrerar jag erbjudandet direkt.",
+        "personalSpace": "Att erbjuda personer eller ett team kräver en organisation, och du har ingen ännu. Du kan skapa ett företag, eller erbjuda din egen tjänst."
+      },
+      "verifierOne": "{organization} kan bekräfta arbetet du har utfört. Dina poster väntar redan på bekräftelse.",
+      "verifierOneNotEnabled": "Din arbetsgivare är {organization}, men ingen där kan ännu bekräfta arbete. Be företaget aktivera det — då kan de bekräfta.",
+      "verifierChoice": "Fler än en organisation skulle kunna bekräfta ditt arbete: {organizations}. Välj vilken arbetet hör till — jag gissar inte åt dig.",
+      "verifierSelf": "{organization} ägs av dig, så det finns ingen över dig som kan bekräfta ditt eget arbete. Posterna stannar i din historik som din egen notering.",
+      "verifierNone": "Det finns ännu ingen som kan bekräfta det här arbetet — du är inte kopplad till en organisation som kan göra det. Arbetet försvinner inte: det stannar i din historik som ditt eget, obekräftade underlag. När du anger ansvarig person eller arbetsgivare kan det bekräftas.",
+      "verifierUnavailable": "Jag kunde inte kontrollera vem som kan bekräfta ditt arbete.",
+      "verifierUnnamedOrganization": "din arbetsgivare",
+      "whyVerifier": "Jag visar bara organisationer som du faktiskt har en aktiv relation med.",
+      "whyVerifierChoice": "Flera organisationer passar lika bra, så jag gissar inte — du väljer.",
+      "whyVerifierSelf": "Du kan inte bekräfta ditt eget arbete — bekräftelsen måste komma från någon annan.",
+      "whyVerifierNone": "Ingen av dina aktiva relationer pekar på en organisation som kan bekräfta arbete.",
+      "whyVerifierUnavailable": "Det betyder att data inte kunde läsas — inte att ingen kan bekräfta.",
+      "targetGapIntro": "Vad arbetet som ”{occupation}” kräver och vad dina poster redan visar:",
+      "targetGapConfirmed": "— Bekräftat genom arbete: {list}",
+      "targetGapRecorded": "— I journalen, inte bekräftat än: {list}",
+      "targetGapStated": "— Angett av dig, inga poster än: {list}",
+      "targetGapMissing": "— Inte än: {list}",
+      "targetGapNoneMissing": "— Alla färdigheter för det här arbetet finns redan i din profil.",
+      "targetGapHow": "En färdighet blir starkare när du skriver in den som utfört arbete — provarbete, praktik eller arbete med utbildning.",
+      "whyTargetGap": "Jämfört med de färdigheter plattformen kopplar till ”{occupation}” och med dina egna journal- och profilposter.",
+      "targetGapChipCompass": "Vad du kan lära dig"
     },
     "project": {
       "fieldStatus": "[EN] Status",
@@ -4300,6 +4982,7 @@
     "workJournal": "[EN] Backed by work journal entries",
     "selfDeclared": "[EN] Self-declared",
     "autoConfirmQualifier": "[EN] confirmed by a preset rule",
+    "selfConfirmQualifier": "bekräftad av samma person som utförde arbetet",
     "binLegendTitle": "[EN] Evidence assurance",
     "binLegendRed": "[EN] no records yet",
     "binLegendGreen": "[EN] first records",
@@ -4312,7 +4995,7 @@
     "page": {
       "title": "[EN] Experiences",
       "lead": "[EN] Subjective experiences from real, completed work interactions. An experience is one person's account — not a fact about anyone's professional ability.",
-      "unavailableTitle": "[EN] Experiences are not available in this environment yet.",
+      "unavailableTitle": "Inte tillgängligt just nu.",
       "unavailableBody": "[EN] Nothing was saved. You can keep working as usual.",
       "aboutMe": "[EN] About me",
       "aboutMeEmpty": "[EN] No published experiences about you yet.",
@@ -4327,7 +5010,7 @@
       "caution": "[EN] More negative than positive experiences — worth looking closer before deciding.",
       "meaning": "[EN] These are subjective accounts of real interactions. They are not a rating, not a score, and not a platform verdict.",
       "notEnough": "[EN] Not enough published experiences yet.",
-      "unavailable": "[EN] Experience counts are not available in this environment yet."
+      "unavailable": "Inte tillgängligt just nu."
     },
     "sentiment": {
       "positive": "[EN] Positive experience",
@@ -4352,7 +5035,7 @@
       "rejected": "[EN] Rejected",
       "title": "[EN] Experience moderation",
       "lead": "[EN] Every experience passes moderation before it is published. Each decision needs a reason and is recorded in the audit trail.",
-      "unavailable": "[EN] The experience domain is not available in this environment.",
+      "unavailable": "Inte tillgängligt just nu.",
       "queueTitle": "[EN] Awaiting moderation",
       "queueEmpty": "[EN] Nothing is waiting for moderation.",
       "disputeQueueTitle": "[EN] Disputes",
@@ -4369,7 +5052,7 @@
         "removed": "[EN] Remove from public view"
       },
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Inte tillgängligt just nu. Inget sparades.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -4399,7 +5082,7 @@
       "sending": "[EN] Opening…",
       "openedNote": "[EN] Dispute opened. The experience stays published until a moderator decides.",
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Inte tillgängligt just nu. Inget sparades.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -4423,7 +5106,7 @@
       "sending": "[EN] Sending…",
       "submitted": "[EN] Reply submitted. It becomes visible once moderation is finished.",
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Inte tillgängligt just nu. Inget sparades.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -4438,7 +5121,10 @@
         "invalid_transition": "[EN] That step is not possible from the current state.",
         "not_found": "[EN] Not found.",
         "error": "[EN] Something went wrong. Nothing was saved."
-      }
+      },
+      "heading": "[EN] Reply from the person this is about",
+      "notPublicYet": "[EN] This reply is not published yet. It becomes visible to the other side once moderation is finished.",
+      "unreadable": "[EN] Replies could not be read here. That is not the same as there being none."
     },
     "submit": {
       "about": "[EN] Your experience with {name}",
@@ -4454,7 +5140,7 @@
       "submitted": "[EN] Experience submitted.",
       "awaitingModeration": "[EN] It is waiting for moderation and is not published yet.",
       "errors": {
-        "needs_migration": "[EN] Experiences are not available in this environment yet. Nothing was saved.",
+        "needs_migration": "Inte tillgängligt just nu. Inget sparades.",
         "not_authenticated": "[EN] Please sign in first.",
         "not_eligible": "[EN] You can only describe an interaction you actually took part in and that is finished.",
         "duplicate_for_interaction": "[EN] You have already submitted an experience for this interaction.",
@@ -4524,7 +5210,8 @@
   },
   "vacancySources": {
     "attribution": {
-      "arbetsformedlingen": "Källa: Arbetsförmedlingen (JobTech Development). Annonsens innehåll tillhör den arbetsgivare som publicerat den."
+      "arbetsformedlingen": "Källa: Arbetsförmedlingen (JobTech Development). Annonsens innehåll tillhör den arbetsgivare som publicerat den.",
+      "nav": "Källa: NAV / Arbeidsplassen.no. Annonsens innehåll tillhör den arbetsgivare som publicerat den; ansökningar går via den ursprungliga annonsen."
     },
     "provenance": {
       "externalPublicSource": "Publicerad av en offentlig arbetsförmedling. Visas här så att du kan hitta den — det är inte en labourmarket.ai-annons.",
@@ -4571,6 +5258,14 @@
       "stateNoRunYet": "Ingen körning ännu",
       "stateOk": "Senaste körning OK",
       "stateFailing": "Misslyckas"
+    },
+    "language": {
+      "translatedFrom": "[EN] Translated from {language}",
+      "originalIn": "[EN] Advertisement language: {language}",
+      "showOriginal": "[EN] Show original",
+      "hideOriginal": "[EN] Hide original",
+      "machineNote": "[EN] Automatic translation. Numbers, currency, dates and names are as in the original; the original remains the fact.",
+      "originalTitle": "[EN] Original title"
     }
   },
   "profileIdentityNotice": {
@@ -4584,7 +5279,7 @@
   "approvals": {
     "title": "Godkännanden",
     "intro": "Godkännandeförfrågningar i dina organisationer: skicka in en förfrågan, besluta om det som väntar på dig och följ varje runda.",
-    "unavailable": "Godkännanden är inte aktiverade i den här miljön ännu. Inget går förlorat — det här området öppnas när godkännandelagret har granskats och tagits i bruk.",
+    "unavailable": "Inte tillgängligt just nu.",
     "honestNote": "Beslut stannar inne i produkten. Inget skickas via e-post eller andra kanaler — uppdateringar syns på den här sidan och i notisklockan.",
     "loadError": "En del av godkännandedata kunde inte läsas in just nu. Det du ser är äkta men kan vara ofullständigt.",
     "inbox": {
@@ -4723,7 +5418,7 @@
       "not_pending": "Den här förfrågan är inte längre öppen.",
       "invalid": "Kontrollera de angivna värdena och försök igen.",
       "invalid_delegate": "Den kollegan kunde inte hittas i den här organisationen.",
-      "needs_migration": "Godkännanden är inte aktiverade i den här miljön ännu. Inget sparades.",
+      "needs_migration": "Inte tillgängligt just nu. Inget sparades.",
       "not_authorized": "Du får inte göra det här.",
       "not_found": "Förfrågan hittades inte.",
       "limit_reached": "Gränsen för öppna poster har nåtts. Stäng något först.",
@@ -4739,7 +5434,7 @@
     "tpl": {
       "title": "Mallinställningar",
       "intro": "Bestäm vem som godkänner vad i var och en av dina organisationer. Allt du ändrar här gäller bara nya förfrågningar.",
-      "unavailable": "Mallinställningarna är förberedda men ännu inte påslagna i den här miljön.",
+      "unavailable": "Inte tillgängligt just nu.",
       "runningImmuneNote": "Att publicera en ny version påverkar bara förfrågningar som startar därefter. En förfrågan som redan pågår behåller de rundor och de personer den startade med.",
       "templateCount": "Mallar: {count}",
       "installTitle": "Installera standarduppsättningen",
@@ -4813,7 +5508,8 @@
       "refusedType": "Den här filtypen kan inte läsas som text.",
       "empty": "Ingen läsbar text hittades i dokumentet.",
       "failed": "Dokumentet kunde inte läsas.",
-      "noEngagement": "Du behöver först en arbetskontext — öppna panelen och skapa en."
+      "noEngagement": "Du behöver först en arbetskontext — öppna panelen och skapa en.",
+      "workDateHint": "Dokumentet anger inte vilken dag arbetet utfördes. Välj datumet själv — inget fylls i åt dig."
     },
     "currentVersion": "[EN] Version {n}",
     "download": "[EN] Download",
@@ -4852,10 +5548,11 @@
       "not_found": "[EN] That document was not found.",
       "limit_reached": "[EN] The document list limit was reached.",
       "version_limit_reached": "[EN] This document reached its version limit.",
+      "storage_quota_exceeded": "Er organisations lagringsgräns (2 GB) är nådd. Ta bort gamla filer eller kontakta supporten innan ni laddar upp fler.",
       "path_mismatch": "[EN] The upload could not be verified — nothing was saved. Please try again.",
       "file_too_large": "[EN] The file is larger than 5 MB — nothing was saved.",
       "unsupported_type": "[EN] This file type is not supported — use PDF, Word or a photo.",
-      "needs_migration": "[EN] File upload is not enabled in this environment yet — nothing was saved.",
+      "needs_migration": "Inte tillgängligt just nu. Inget sparades.",
       "error": "[EN] Something went wrong — nothing was saved.",
       "updated": "[EN] The change was saved.",
       "submitted": "[EN] The document was sent for approval.",
@@ -4870,7 +5567,7 @@
     "title": "[EN] Company document register",
     "intro": "[EN] Documents of {org}: policies, procedures, instructions and correspondence, with versions and read confirmations.",
     "unavailable": "[EN] The document register could not be loaded right now.",
-    "preparing": "[EN] The document register is prepared but not enabled in this environment yet.",
+    "preparing": "Inte tillgängligt just nu.",
     "error": "[EN] The document register could not be loaded — try again later.",
     "empty": "[EN] No documents registered yet.",
     "scopeNote": "[EN] This register holds the organization's own documents. Workers' personal documents stay in their own hands and are never shown here.",
@@ -4881,7 +5578,8 @@
       "org_correspondence_incoming": "[EN] Incoming correspondence",
       "org_correspondence_outgoing": "[EN] Outgoing correspondence",
       "org_internal": "[EN] Internal document",
-      "org_agreement_attachment": "[EN] Agreement attachment"
+      "org_agreement_attachment": "[EN] Agreement attachment",
+      "org_import_source": "[EN] Import source (original timesheet file)"
     },
     "status": {
       "active": "[EN] Active",
@@ -4973,7 +5671,7 @@
   "timesheets": {
     "title": "Tidrapporter",
     "intro": "Timdokument per period, härledda ur din arbetsjournal. Timmar rättas alltid i journalen; en tidrapport är en fryst kopia som skickas för godkännande.",
-    "needsMigration": "Tidrapporter är ännu inte aktiverade i den här miljön.",
+    "needsMigration": "Inte tillgängligt just nu.",
     "readError": "En del av tidrapportdata kunde inte läsas in just nu.",
     "noLines": "Inga registrerade timmar under den här perioden ännu. Anteckna ditt arbete i journalen och uppdatera.",
     "linesTitle": "Rader ({count})",
@@ -5051,7 +5749,7 @@
       "no_approvers": "Inga godkännare kunde hittas för organisationens mall.",
       "not_published": "Godkännandemallen är ännu inte publicerad.",
       "invalid": "Begäran var ogiltig.",
-      "needs_migration": "Tidrapporter är ännu inte aktiverade i den här miljön.",
+      "needs_migration": "Inte tillgängligt just nu.",
       "not_authorized": "Du får inte göra detta.",
       "not_found": "Tidrapporten hittades inte.",
       "limit_reached": "För många öppna tidrapporter — lämna in eller städa upp de befintliga först.",
@@ -5062,7 +5760,7 @@
   "requests": {
     "title": "Förfrågningar",
     "intro": "Be din arbetsgivare om något och följ vad som händer. Varje förfrågan följer det godkännandeflöde som ditt företag har satt upp.",
-    "unavailable": "Förfrågningar är inte påslagna i den här miljön ännu. Inget går förlorat — avsnittet öppnas när uppdateringen har granskats och installerats.",
+    "unavailable": "Inte tillgängligt just nu.",
     "honestNote": "En förfrågan avgörs av riktiga människor i ditt företag. Inget godkänns automatiskt och inget lämnar produkten.",
     "notice": {
       "created": "Förfrågan skickad. Rätt personer har ombetts att granska den.",
@@ -5075,7 +5773,7 @@
       "not_published": "Godkännandeflödet för förfrågningar är inte klart ännu.",
       "not_pending": "Den här förfrågan väntar inte längre — nedan visas dess aktuella läge.",
       "invalid": "Kontrollera uppgifterna och försök igen.",
-      "needs_migration": "Inte tillgängligt ännu — uppdateringen är inte installerad i den här miljön.",
+      "needs_migration": "Inte tillgängligt just nu.",
       "not_authorized": "Det får du inte göra.",
       "not_found": "Hittades inte.",
       "limit_reached": "För många öppna förfrågningar. Vänta först på beslut om de befintliga.",
@@ -5182,12 +5880,12 @@
   },
   "agreements": {
     "title": "Avtalsregister",
-    "intro": "Det kanoniska registret över {org}s avtal — anställningsrelaterade och allmänna. Endast registrering.",
+    "intro": "Registret över {org}s avtal — anställningsrelaterade och allmänna. Endast registrering.",
     "noSignatureNote": "Statusarna i det här registret är enbart registreringstillstånd — inget här betyder att ett avtal är undertecknat, juridiskt giltigt eller bindande. LabourMarket.ai utför ingen juridisk signering: signering sker utanför plattformen, och en bifogad fil är bara underlag du själv tillhandahåller.",
     "relationshipNote": "Kontraktslistan ovan är det tidigare personliga kommersiella registret och fortsätter fungera oförändrat. Nya avtal hör hemma här.",
     "unavailable": "Avtalsregistret kan inte visas just nu.",
     "needsOrgWorkspace": "Avtalsregistret fungerar i en organisationsarbetsyta. Byt till din organisation.",
-    "preparing": "Avtalsregistret är förberett men ännu inte aktiverat i den här miljön.",
+    "preparing": "Inte tillgängligt just nu.",
     "error": "Avtalsregistret kunde inte läsas.",
     "empty": "Inga avtal registrerade ännu.",
     "emptyFiltered": "Inga avtal matchar dessa filter.",
@@ -5290,14 +5988,14 @@
       "not_found": "Registreringen hittades inte.",
       "not_allowed": "Bara organisationens ägare eller administratör kan göra detta.",
       "limit_reached": "Registergränsen är nådd.",
-      "needs_migration": "Avtalsregistret är ännu inte aktiverat i den här miljön.",
+      "needs_migration": "Inte tillgängligt just nu.",
       "error": "Något gick fel. Inget sparades."
     }
   },
   "lifecycle": {
     "title": "Anställningens livscykel",
     "intro": "Onboarding, provanställning, förändringar, offboarding och avslut för organisationens anställningar — med checklistor och full historik.",
-    "unavailable": "Anställningens livscykel är ännu inte aktiverad i den här miljön. Inget går förlorat — området öppnas när lagringen är granskad och införd.",
+    "unavailable": "Inte tillgängligt just nu.",
     "honestNote": "Allt här stannar i produkten. Att bocka av ett steg registrerar bara vem som bekräftade vad och när — inget skickas någonstans.",
     "loadError": "Vissa data kunde inte läsas in just nu. Det du ser är äkta men kan vara ofullständigt.",
     "stage": {
@@ -5428,7 +6126,7 @@
       "last_owner": "Den sista ägarens anställning kan inte avslutas — utse en annan ägare först.",
       "limit_reached": "Gränsen för den här organisationen är nådd.",
       "invalid": "Ogiltig inmatning.",
-      "needs_migration": "Den här funktionen är ännu inte aktiverad i den här miljön.",
+      "needs_migration": "Inte tillgängligt just nu.",
       "not_authorized": "Du har inte behörighet för detta.",
       "not_found": "Posten är inte tillgänglig.",
       "error": "Misslyckades — försök igen."
@@ -5469,7 +6167,7 @@
   "procurement": {
     "title": "Inköp",
     "intro": "Be om material eller tjänster, anteckna leverantörsofferter och registrera vad som valdes. Inget här kontaktar en leverantör eller beställer något — det är din dokumentation.",
-    "needsMigration": "Inköpsförfrågningar är ännu inte aktiverade i denna miljö.",
+    "needsMigration": "Inte tillgängligt just nu.",
     "readError": "Inköpsförfrågningar kunde inte läsas in. Försök igen.",
     "empty": "Inga inköpsförfrågningar än.",
     "noOffers": "Inga leverantörsofferter antecknade än.",
@@ -5528,7 +6226,7 @@
       "unlinked": "Fakturakopplingen borttagen.",
       "cancelled": "Inköpsförfrågan avbruten.",
       "invalid": "Kontrollera de angivna uppgifterna.",
-      "needs_migration": "Inköpsförfrågningar är ännu inte aktiverade i denna miljö.",
+      "needs_migration": "Inte tillgängligt just nu.",
       "not_authorized": "Det kan du inte göra för denna förfrågan.",
       "not_found": "Denna inköpsförfrågan hittades inte.",
       "not_editable": "I detta läge är det steget inte möjligt.",
@@ -5547,7 +6245,7 @@
   "trips": {
     "title": "Tjänsteresor",
     "intro": "Begär en resa, få den godkänd och håll ihop dess kostnader. Inget här bokar resor eller betalar ut pengar — det är din dokumentation.",
-    "needsMigration": "Tjänsteresor är ännu inte aktiverade i denna miljö.",
+    "needsMigration": "Inte tillgängligt just nu.",
     "readError": "Tjänsteresor kunde inte läsas in. Försök igen.",
     "empty": "Inga tjänsteresor än.",
     "orgHeading": "Resor för personer du leder",
@@ -5600,7 +6298,7 @@
       "unlinked": "Post borttagen från resan.",
       "invalid": "Kontrollera de angivna uppgifterna.",
       "invalid_dates": "Kontrollera resedatumen.",
-      "needs_migration": "Tjänsteresor är ännu inte aktiverade i denna miljö.",
+      "needs_migration": "Inte tillgängligt just nu.",
       "not_authorized": "Det kan du inte göra för denna resa.",
       "not_found": "Denna resa hittades inte.",
       "not_editable": "I detta läge är det steget inte möjligt.",
@@ -5617,7 +6315,7 @@
     "title": "[EN] Training and certificates",
     "intro": "[EN] Courses your organization asks people to complete, and the certificates that follow.",
     "evidenceNote": "[EN] A certificate here shows that a course was finished. It does not say how well someone works — that stays your work entries and your manager's confirmations.",
-    "notAvailable": "[EN] Training is not switched on in this workspace yet.",
+    "notAvailable": "Inte tillgängligt just nu.",
     "status": {
       "assigned": "[EN] To do",
       "completed": "[EN] Done",
@@ -5644,7 +6342,13 @@
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
-      "markExpired": "[EN] Mark out of date"
+      "markExpired": "[EN] Mark out of date",
+      "editProgram": "Redigera den här kursen",
+      "saveProgram": "Spara ändringar",
+      "activeLabel": "Pågår fortfarande",
+      "activeYes": "Ja — kan tilldelas",
+      "activeNo": "Nej — avvecklad",
+      "retired": "Avvecklad"
     },
     "certificates": {
       "heading": "[EN] Certificates",
@@ -5673,7 +6377,7 @@
       "invalid_file": "[EN] That file is not in your organization.",
       "invalid_skill": "[EN] That skill was not found.",
       "invalid_state": "[EN] That cannot be done at this step.",
-      "needs_migration": "[EN] Training is not switched on in this workspace yet.",
+      "needs_migration": "Inte tillgängligt just nu.",
       "not_authorized": "[EN] You do not have the rights for this.",
       "not_found": "[EN] Not found.",
       "limit_reached": "[EN] There is too much here already.",
@@ -5684,7 +6388,7 @@
     "title": "[EN] Development conversations",
     "intro": "[EN] A recorded conversation between two named people about work and what comes next.",
     "noScoreNote": "[EN] There is no rating, no score and no ranking here — by design. Everything below is either a recorded fact, a link to real work, or one person's own words, clearly labelled.",
-    "notAvailable": "[EN] Development conversations are not switched on in this workspace yet.",
+    "notAvailable": "Inte tillgängligt just nu.",
     "empty": "[EN] No conversation involves you yet.",
     "cycles": {
       "heading": "[EN] Periods",
@@ -5750,7 +6454,7 @@
       "invalid_subject": "[EN] That person is not in your organization.",
       "invalid_reviewer": "[EN] That person cannot be the reviewer.",
       "invalid_reference": "[EN] That link does not point at real work of this person.",
-      "needs_migration": "[EN] Development conversations are not switched on in this workspace yet.",
+      "needs_migration": "Inte tillgängligt just nu.",
       "not_authorized": "[EN] You do not have the rights for this.",
       "not_found": "[EN] Not found.",
       "limit_reached": "[EN] There is too much here already.",
@@ -5761,7 +6465,7 @@
     "title": "[EN] Management decisions",
     "intro": "[EN] What was put to the management team, what was decided, who is responsible and by when.",
     "engineNote": "[EN] The vote happens in the approvals list above: a template that needs every approver is a unanimous vote, one that needs any approver is decided by the first answer. Nothing here counts votes.",
-    "notAvailable": "[EN] Management decisions are not switched on in this workspace yet.",
+    "notAvailable": "Inte tillgängligt just nu.",
     "empty": "[EN] No decisions recorded yet.",
     "form": {
       "title": "[EN] Question",
@@ -5814,11 +6518,16 @@
       "invalid_document": "[EN] That document is not in your organization.",
       "invalid_task": "[EN] That task is not yours.",
       "invalid_responsible": "[EN] That person is not in your organization.",
-      "needs_migration": "[EN] Management decisions are not switched on in this workspace yet.",
+      "needs_migration": "Inte tillgängligt just nu.",
       "not_authorized": "[EN] You do not have the rights for this.",
       "not_found": "[EN] Not found.",
       "limit_reached": "[EN] There is too much here already.",
       "error": "[EN] Something went wrong. Nothing was saved."
+    },
+    "edit": {
+      "open": "[EN] Correct this draft",
+      "save": "[EN] Save changes",
+      "responsible": "[EN] Change responsible person (leave blank to keep)"
     }
   },
   "talentPreview": {
@@ -5827,7 +6536,7 @@
     "badge": "Förhandsvisning / ägarens granskning · endast exempeldata",
     "workers": {
       "title": "Arbetarkort",
-      "description": "Genomarbetade arbetarrutor i spelarkortsstil. Geometriskt monogram som reserv — ett ansikte hittas aldrig på.",
+      "description": "Genomarbetade arbetarprofiler. Geometriskt monogram som reserv — ett ansikte hittas aldrig på.",
       "listLabel": "Exempel på arbetarkort"
     },
     "jobs": {
@@ -5939,10 +6648,1053 @@
         "duplicatesFound": "Identiska befintliga poster: {count}. Inget skrevs — bocka i bekräftelsen för att skriva dem ändå.",
         "noRows": "Inga rader att skriva.",
         "tooManyRows": "För många rader för en import — dela upp filen.",
-        "needsMigration": "Den här funktionen är ännu inte aktiverad i den här databasen.",
+        "needsMigration": "Inte tillgängligt just nu.",
         "notAuthorized": "Du får inte registrera dessa timmar.",
         "generic": "Bearbetningen misslyckades. Försök igen."
       }
+    },
+    "correct": "Rätta",
+    "correctCancel": "Avbryt",
+    "correctHint": "När du sparar skapas en ny post och den ursprungliga behålls bredvid — inget raderas."
+  },
+  "companyHome": {
+    "eyebrow": "Din organisation nu",
+    "title": "Projekt i tid och vem som är ledig",
+    "rolesLabel": "Vad organisationen gör",
+    "rolesNone": "Ännu inte angivet vad organisationen gör.",
+    "rolesDeclare": "Ange vad ni gör",
+    "projects": {
+      "heading": "Projekt i tid",
+      "more": "{count, plural, =1 {1 projekt till} other {# projekt till}}",
+      "empty": "Inga projekt ännu. I ett projekt möts människor, faser och dokument.",
+      "emptyCta": "Skapa det första projektet",
+      "noCompany": "Välj organisationen du agerar för att se dess projekt.",
+      "error": "Projekt kunde inte läsas just nu.",
+      "now": "Nu",
+      "next": "Nästa",
+      "risk": "Risk",
+      "nowNone": "Ingen fas pågår",
+      "nowBlocked": "Blockerad: {name}",
+      "stagesUnavailable": "Faser är inte tillgängliga här ännu",
+      "stagesDone": "{done} av {total} faser klara",
+      "nextNone": "Ingen nästa fas planerad",
+      "nextDerived": "härlett från fasernas ordning",
+      "nextFrom": "från {date}",
+      "peopleCount": "{count, plural, =0 {ingen tilldelad} =1 {1 person} other {# personer}}",
+      "riskNone": "Inga signaler",
+      "riskUnknown": "Kan inte läsas just nu",
+      "riskOverdue": "{count, plural, =1 {1 försenad uppgift} other {# försenade uppgifter}}",
+      "riskBlocked": "{count, plural, =1 {1 blockerad fas} other {# blockerade faser}}",
+      "riskDocs": "{count, plural, =1 {1 person med saknade dokument} other {# personer med saknade dokument}}",
+      "riskNobody": "Pågående projekt utan folk",
+      "operations": "Öppna drift",
+      "invite": "Bjud in folk",
+      "status": {
+        "unknown": "Status okänd"
+      }
+    },
+    "capacity": {
+      "heading": "Vem är ledig nu",
+      "free": "ledig",
+      "away": "borta",
+      "awayUntil": "borta till {date}",
+      "summary": "{free} lediga · {committed} i arbete · {away} borta",
+      "onWork": "på {project}",
+      "booked": "bokad",
+      "until": "till {date}",
+      "undated": "utan datum",
+      "outlookHeading": "Lediga personer, nästa 4 veckor",
+      "outlookWeek": "Från {date}: {free} av {total} lediga",
+      "outlookNote": "Utifrån registrerade bokningar och frånvaro — en uppskattning, inget löfte.",
+      "absencesUnknown": "Frånvaro registreras inte ännu — ledig betyder att ingen sagt något annat.",
+      "more": "{count, plural, =1 {1 person till på planeringssidan} other {# personer till på planeringssidan}}",
+      "assign": "Sätt på ett projekt",
+      "plan": "Öppna planering",
+      "empty": "Ingen i laget ännu.",
+      "emptyCta": "Bjud in folk",
+      "error": "Tillgänglighet kunde inte läsas just nu."
+    },
+    "missing": {
+      "heading": "Saknas inom 4 veckor",
+      "nothing": "Inget saknas just nu.",
+      "people": "{count, plural, =1 {1 person} other {# personer}}",
+      "from": "från {period}",
+      "status": {
+        "draft": "Utkast",
+        "submitted": "Inskickad",
+        "in_review": "Under granskning",
+        "needs_followup": "Kräver din uppföljning",
+        "approved": "Godkänd",
+        "closed": "Stängd"
+      },
+      "continueDraft": "Fortsätt utkastet",
+      "openNeed": "Öppna behovet",
+      "gapsRow": "{count, plural, =1 {1 person på {project} saknar dokument} other {# personer på {project} saknar dokument}}",
+      "gapsCta": "Kontrollera dokument",
+      "needsCta": "Beskriv ett behov",
+      "noOneFrom": "Ingen är ledig från {date}",
+      "unclear": "{count, plural, =1 {1 person har arbete utan datum — ledig tid kan vara mindre} other {# personer har arbete utan datum — ledig tid kan vara mindre}}",
+      "fit": {
+        "fits": "Lediga personer räcker",
+        "from": "Lediga personer räcker från {date}",
+        "short": "{count, plural, =1 {Saknar 1 person} other {Saknar # personer}}",
+        "some": "Lediga personer räcker bara vissa veckor",
+        "unknown": "För lite information för att jämföra"
+      },
+      "opportunity": "{count, plural, =1 {Upp till 1 person är ledig från {date}} other {Upp till # personer är lediga från {date}}}",
+      "opportunityCta": "Hitta arbete",
+      "interest": "{count, plural, =1 {1 person har visat intresse för era behov} other {# personer har visat intresse för era behov}}",
+      "interestCta": "Se vem"
+    },
+    "attention": {
+      "heading": "Behöver dig",
+      "unavailable": "Kunde inte läsas just nu — inget här är bekräftat som i ordning.",
+      "none": "Allt i ordning — inget väntar på dig."
+    },
+    "partners": {
+      "heading": "Partner",
+      "empty": "Inga partner ännu.",
+      "agency": "Byrå",
+      "client": "Kund",
+      "team": "Lag",
+      "members": "{count, plural, =1 {1 medlem} other {# medlemmar}}",
+      "pending": "väntar på ditt svar",
+      "status": {
+        "active": "ansluten",
+        "declined": "avböjd",
+        "revoked": "avslutad"
+      },
+      "answer": "Svara på inbjudan",
+      "invite": "Bjud in en partner"
     }
+  },
+  "agencyBridge": {
+    "deliveryAccepted": "[EN] Delivered — the client accepted the invitation and now confirms the connection on their Partners page."
+  },
+  "roleDashboards": {
+    "company": {
+      "programs": {
+        "exportReport": "[EN] Download the report (CSV)",
+        "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
+      },
+      "setup": {
+        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+      },
+      "workers": {
+        "invitationsManagedElsewhere": "Inbjudningar hanteras av den person i företaget som ansvarar för dem.",
+        "team": {
+          "free": "Ledig",
+          "working": "Arbetar",
+          "away": "Borta",
+          "countFree": "Lediga",
+          "countWorking": "Arbetar",
+          "countAway": "Borta",
+          "workingOn": "Arbetar på: {project}",
+          "until": "till {date}",
+          "awayUntil": "Borta till {date}",
+          "assign": "Tilldela projekt",
+          "openCalendar": "Öppna kalender"
+        },
+        "inviteShareLinkLabel": "Länk till den inbjudna",
+        "inviteShareLinkHint": "Skicka länken som du vill (sms, meddelande). Efter registrering med samma e-post hittar personen inbjudan i sitt konto.",
+        "inviteShareCopy": "Kopiera länk",
+        "inviteShareCopied": "Kopierad"
+      }
+    }
+  },
+  "historyContext": {
+    "project": "Projekt",
+    "place": "Plats eller arbetspaket",
+    "client": "Beställare",
+    "otherParties": "Andra inblandade",
+    "capacity": "Roll",
+    "source": "Källa",
+    "suppliedBy": "Levererat av {name}",
+    "reconstructed": "Rekonstruerat från tidigare uppgifter",
+    "recordedAt": "Registrerat i systemet",
+    "proofTitle": "Vad som ligger bakom",
+    "proof": {
+      "SELF_DECLARED": "Uppgett av personen",
+      "EVIDENCE_SUPPORTED": "Stöds av en organisations registrering",
+      "EMPLOYER_CONFIRMED": "Bekräftat av arbetsgivaren",
+      "CLIENT_ACCEPTED": "Godkänt av beställaren",
+      "SUPERVISOR_CONFIRMED": "Bekräftat av en arbetsledare",
+      "INDEPENDENTLY_VERIFIED": "Oberoende verifierat"
+    },
+    "attestedAs": "bekräftat som {role}",
+    "proofNote": "Varje rad är ett eget faktum. En bekräftelse från den levererande organisationen är inte beställarens godkännande och inte betalning, och ingen av dem är oberoende verifiering om det inte står så."
+  },
+  "evidenceImport": {
+    "records": {
+      "periodDerivedHuman": "[EN] Period set at import (human choice) — the source stated no dates",
+      "periodDerived": "[EN] Period derived — the source stated no dates",
+      "sourceStatement": "[EN] Source statement (fact)",
+      "noMonthlyFigure": "[EN] No monthly figure — the source states only the total",
+      "sourceStates": "[EN] Source states: “{words}”",
+      "sourceDiffers": "[EN] This span differs from what the source's own words state — both are kept",
+      "howRecorded": "Så registrerades det"
+    },
+    "reconstruction": {
+      "timePeriodBoth": "[EN] Months: the first and the last — both, or leave both empty. A start alone is not a period.",
+      "issue": {
+        "time_conflicts_source": "[EN] {count} rows — the period you set differs from the source's own words"
+      },
+      "issueWhy": {
+        "time_conflicts_source": "[EN] Your decision is kept — you know the work. The source's own words state a different duration or rate, so no monthly figure is made from the total, and the difference stays visible beside the record."
+      }
+    }
+  },
+  "organizationMembers": {
+    "roles": {
+      "owner": "Ägare",
+      "admin": "Administratör",
+      "manager": "Chef",
+      "external_manager": "Extern chef",
+      "member": "Medlem"
+    },
+    "outcomes": {
+      "invited": "Inbjudan skapad — inget e-postmeddelande skickas; personen ser den i sitt arbetsutrymme efter inloggning.",
+      "accepted": "Inbjudan accepterad.",
+      "declined": "Inbjudan avböjd.",
+      "cancelled": "Inbjudan avbruten.",
+      "role_changed": "Roll ändrad.",
+      "revoked": "Medlemskap återkallat.",
+      "left": "Du har lämnat organisationen.",
+      "unchanged": "Roll oförändrad.",
+      "granted": "Får nu hantera inbjudningar.",
+      "withdrawn": "Hantering av inbjudningar har återkallats.",
+      "held_by_role": "Ägaren och administratörer hanterar inbjudningar genom sin roll.",
+      "already_member": "Är redan medlem.",
+      "already_invited": "Inbjudan väntar redan.",
+      "already_active": "Medlemskapet är redan aktivt.",
+      "not_invited": "Inbjudan inte tillgänglig.",
+      "not_active": "Medlemskapet är inte aktivt.",
+      "not_a_member": "Du är inte medlem.",
+      "not_found": "Posten är inte tillgänglig.",
+      "not_authorized": "Du har inte rätt att göra detta.",
+      "no_such_user": "Ingen användare med den här e-postadressen.",
+      "cannot_invite_self": "Du kan inte bjuda in dig själv.",
+      "invalid_role": "Ogiltig roll.",
+      "last_owner": "Den sista ägaren kan inte avgå — aktivera först en annan ägare.",
+      "no_workspace": "Välj först en organisationsarbetsyta.",
+      "needs_migration": "Inte tillgängligt just nu.",
+      "invalid": "Ogiltiga uppgifter.",
+      "error": "Något gick fel — försök igen."
+    },
+    "invitations": {
+      "heading": "Inbjudningar från organisationer",
+      "explainer": "Ledningsinbjudningar riktade till dig. När du accepterar visas organisationen i din arbetsyteväljare.",
+      "accept": "Acceptera",
+      "decline": "Avböj"
+    },
+    "members": {
+      "heading": "Organisationens medlemmar",
+      "explainer": "Ledningsmedlemskap i den aktiva arbetsytan. Medlemskap är inte anställning — det skapar eller avslutar aldrig en arbetsrelation.",
+      "statusInvited": "inbjuden",
+      "inviteHeading": "Bjud in en medlem",
+      "inviteEmail": "E-postadress",
+      "inviteRole": "Roll",
+      "inviteSubmit": "Bjud in",
+      "cancelInvite": "Avbryt inbjudan",
+      "revoke": "Återkalla medlemskap",
+      "leave": "Lämna organisationen",
+      "managesInvitations": "Hanterar inbjudningar",
+      "grantInvitations": "Tillåt att hantera inbjudningar",
+      "withdrawInvitations": "Återkalla hantering av inbjudningar",
+      "unavailable": "Medlemslistan kunde inte läsas just nu. Det betyder inte att organisationen saknar medlemmar."
+    },
+    "start": {
+      "membersMoved": "Medlemmar och inbjudningar för {workspace} hanteras i organisationens Inställningar.",
+      "unnamedOrganization": "din organisation",
+      "openSettings": "Öppna medlemmar i Inställningar"
+    },
+    "entry": {
+      "memberOnly": "Du tillhör den här organisationen som medlem. Dess arbetsskärmar är för ägare, administratörer och chefer; medlemslistan och dina inbjudningar finns under Inställningar.",
+      "openMembers": "Öppna medlemmar"
+    },
+    "managerScope": {
+      "title": "Din roll här: chef",
+      "body": "Du kan öppna den här organisationen och arbeta i den. Att skapa eller redigera projekt och att se laglistan ligger tills vidare hos ägaren eller administratören — tills de ger tillgång visas skapande eller redigering av ett projekt som nekat, och laglistan nedan kan se tom ut även om det finns personer på den."
+    }
+  },
+  "organizationDoors": {
+    "pages": {
+      "people": {
+        "summaryWithoutInvitations": "{active} aktiva · {members} medlemmar · {review} granskar journaler",
+        "moreToolsHint": "People import, organisation records, member review, employment"
+      }
+    }
+  },
+  "agencyDelegation": {
+    "title": "Work for clients",
+    "intro": "Draft a need for a connected client. It becomes the client's need only when the client confirms it.",
+    "clientLabel": "Client",
+    "needTitle": "Need title",
+    "role": "Role / work",
+    "location": "Location",
+    "country": "Country (2 letters)",
+    "teamSize": "Team size",
+    "summary": "Description",
+    "draftSubmit": "Draft for client",
+    "draftSaved": "Draft sent to the client to confirm.",
+    "draftFailed": "Could not draft the need.",
+    "draftsTitle": "Drafted needs",
+    "awaitingClient": "Waiting for the client to confirm",
+    "confirmedShared": "Client confirmed and shared",
+    "openScouting": "Find candidates",
+    "placementsTitle": "Placements",
+    "placementsEmpty": "No accepted candidates yet.",
+    "unavailable": "Could not read.",
+    "lifecycle": {
+      "presented": "Candidate presented",
+      "clientAccepted": "Client accepted",
+      "workerProposed": "Proposed to worker",
+      "workerAccepted": "Worker accepted",
+      "workerDeclined": "Worker declined",
+      "booking_withdrawn": "Proposal withdrawn",
+      "booking_expired": "Proposal expired",
+      "assigned": "Assigned to work",
+      "assignmentEnded": "Work ended",
+      "engagementEnded": "Placement ended"
+    },
+    "client": {
+      "title": "Needs drafted by your agency",
+      "intro": "Your agency drafted these needs for you. They become your needs and are shared with the agency only when you confirm.",
+      "draftedBy": "Drafted by {agency}",
+      "confirm": "Confirm and share",
+      "confirmed": "Confirmed and shared",
+      "failed": "Could not confirm."
+    }
+  },
+  "companyWorkHistory": {
+    "title": "Importerad arbetshistorik för företaget",
+    "subtitle": "Vad {name} har registrerat från egna gamla tidrapporter: var arbetet utfördes, när, vem som arbetade, vad som gjordes och hur länge.",
+    "badge": "Importerad företagshistorik",
+    "provenance": "Hämtat från {name}s egen tidrapport. Personerna använde inte LabourMarket.ai då, och uppgifterna är inte oberoende verifierade.",
+    "unavailable": "Den importerade arbetshistoriken kunde inte läsas just nu. Det betyder inte att det saknas någon.",
+    "empty": "{name} har ingen importerad arbetshistorik registrerad.",
+    "elsewhere": "{name} har {count, plural, one {# importerad post} other {# importerade poster}} om tidigare arbete. Byt till den arbetsytan för att se dem.",
+    "stats": {
+      "places": "Platser",
+      "people": "Personer",
+      "hours": "Registrerade timmar",
+      "period": "Period"
+    },
+    "place": "Plats",
+    "noPlaceName": "Ingen plats angiven",
+    "open": "Öppna",
+    "people": "{count, plural, one {# person} other {# personer}}",
+    "entries": "{count, plural, one {# post} other {# poster}}",
+    "hoursShare": "{hours} h på denna plats, jämfört med den mest arbetade platsen",
+    "noPlace": "{count, plural, one {# post} other {# poster}} ({hours} h) anger ingen plats i källan.",
+    "periodAside": "Av detta är {hours} h periodsummor angivna för en tidsrymd, hållna åtskilda från enskilda dagar.",
+    "scope": {
+      "title": "Vad denna import innehåller",
+      "carried": "Källan innehåller: vem som arbetade, vilken dag, hur många timmar, vad som gjordes och platsen som den skrevs.",
+      "missing": "Finns inte i källan: kunden, adressen och projektet. De visas som saknade i källan och fylls aldrig i."
+    },
+    "facts": {
+      "customer": "Kund",
+      "address": "Adress",
+      "project": "Projekt",
+      "notInSource": "Finns inte i källan",
+      "linked": "Länkad"
+    },
+    "whoWorked": "Vem som arbetade här",
+    "timeline": "Vad som gjordes",
+    "back": "Tillbaka till historiken",
+    "placeMissing": "Den här platsen finns inte i den importerade historiken för den aktiva arbetsytan.",
+    "attributedNote": "Omfattar {count, plural, one {# post} other {# poster}} som ligger i en annan organisations böcker och är tillskrivna här som det utförande företaget.",
+    "attribution": {
+      "title": "Vem utförde det här arbetet?",
+      "intro": "Arbete i den här organisationens böcker kan tillskrivas en annan av dina organisationer som utförande företag. Inget flyttas eller kopieras: posterna finns kvar och den andra organisationen kan läsa dem.",
+      "performedBy": "Utfört av",
+      "note": "Anteckning (valfri), till exempel den angivna andelen timmar",
+      "button": "Tillskriv",
+      "progress": "{attributed} av {total} tillskrivna {name}",
+      "done": "{count} poster tillskrivna; {skipped} var redan tillskrivna.",
+      "refused": "Det gick inte att spara. Inget ändrades.",
+      "person": "{hours} h, {count, plural, one {# post} other {# poster}}"
+    },
+    "truncated": "Det finns fler poster än en vy läser. De {count} lästa visas; summorna omfattar bara dem."
+  },
+  "workLifecycle": {
+    "pending": "Ännu inte",
+    "title": "Vad som händer med arbetet du utför",
+    "titleCompany": "Vad som händer med arbetet du driver",
+    "example": "Exempel — inte en riktig person eller riktiga data",
+    "hint": "Välj ett steg. Varje steg öppnar den verkliga platsen i din arbetsyta.",
+    "open": "Öppna i din arbetsyta",
+    "list": "Steg i arbetets livscykel",
+    "workers": {
+      "person": {
+        "label": "Du",
+        "fact": "Kock — professionell identitet",
+        "detail": "En professionell identitet som är din — inte knuten till en enda arbetsgivare."
+      },
+      "team": {
+        "label": "Lag",
+        "fact": "Kökslag",
+        "detail": "Du går med i ett riktigt lag, med dem du arbetar med och den som leder det."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lansering av höstmenyn",
+        "detail": "Arbete hör till ett projekt, så det har en plats, ett syfte och en tid."
+      },
+      "work": {
+        "label": "Arbete",
+        "fact": "Kvällsservice — 8 tim",
+        "detail": "Vad du gjorde, när och hur länge — registrerat medan det sker."
+      },
+      "evidence": {
+        "label": "Underlag",
+        "fact": "Foto + journalpost",
+        "detail": "Utfört arbete blir underlag i stället för att försvinna."
+      },
+      "confirmation": {
+        "label": "Bekräftat",
+        "fact": "Bekräftat av chef",
+        "detail": "En chef bekräftar det. Inget kallas verifierat utan det."
+      },
+      "history": {
+        "label": "Historik",
+        "fact": "Tillagt i din historik",
+        "detail": "Bekräftat arbete bygger din professionella historik — den stannar hos dig till nästa jobb."
+      }
+    },
+    "companies": {
+      "need": {
+        "label": "Behov",
+        "fact": "4 kockar, från måndag",
+        "detail": "Du anger det verkliga behovet en gång: vem, var och från när."
+      },
+      "people": {
+        "label": "Personer",
+        "fact": "Professionella som passar",
+        "detail": "Professionella vars verkliga arbetshistorik passar behovet — med det som är verifierat och det som inte är det ännu."
+      },
+      "team": {
+        "label": "Lag",
+        "fact": "Kökslag",
+        "detail": "Personer blir ett lag med en ledare, pass och en plats att arbeta på."
+      },
+      "project": {
+        "label": "Projekt",
+        "fact": "Lansering av höstmenyn",
+        "detail": "Lag organiseras kring det projekt de levererar."
+      },
+      "work": {
+        "label": "Arbete",
+        "fact": "Kvällsservice — 8 tim",
+        "detail": "Arbete registreras där det sker, inte rekonstrueras efteråt."
+      },
+      "confirmation": {
+        "label": "Bekräftat",
+        "fact": "Väntar på din bekräftelse",
+        "detail": "Du ser vad som fortfarande ska bekräftas och vad som redan är klart."
+      },
+      "report": {
+        "label": "Rapport",
+        "fact": "Rapport från verkligt arbete",
+        "detail": "Rapporter bygger på bekräftat arbete — ingen skriver om dem."
+      }
+    }
+  },
+  "twoSides": {
+    "title": "Anställning är början, inte slutet.",
+    "professional": "Yrkesperson",
+    "company": "Företag",
+    "steps": {
+      "find": {
+        "label": "Hitta",
+        "worker": "Hittar arbete som passar det de faktiskt gjort",
+        "company": "Hittar personer vars verkliga arbete passar behovet"
+      },
+      "connect": {
+        "label": "Koppla",
+        "worker": "Pratar på sitt eget språk",
+        "company": "Anställer genom ett riktigt samtal"
+      },
+      "work": {
+        "label": "Arbeta",
+        "worker": "Registrerar arbetet medan det pågår",
+        "company": "Driver arbetet tillsammans med sina medarbetare"
+      },
+      "verify": {
+        "label": "Bekräfta",
+        "worker": "En chef bekräftar det",
+        "company": "Bekräftar vad som faktiskt gjordes"
+      },
+      "grow": {
+        "label": "Växa",
+        "worker": "Bekräftat arbete blir deras historik",
+        "company": "Rapporter bygger på bekräftat arbete"
+      },
+      "continue": {
+        "label": "Fortsätt",
+        "worker": "Tar historiken med till nästa jobb",
+        "company": "Planerar nästa projekt med personer de känner"
+      }
+    }
+  },
+  "evidenceChain": {
+    "label": "Postens status",
+    "own": "Av dig",
+    "nodes": {
+      "recorded": "Registrerad",
+      "photo": "Foto",
+      "manager": "Chefens post",
+      "history": "I din historik"
+    },
+    "status": {
+      "done": "Klar",
+      "waiting": "Väntar",
+      "absent": "Inte än",
+      "attention": "Behöver dig",
+      "unknown": "Okänd"
+    }
+  },
+  "livingCvStory": {
+    "eyebrow": "Levande CV",
+    "title": "Ditt arbete blir din historia",
+    "now": "Nu",
+    "noRecords": "Inga arbetsposter ännu",
+    "legend": {
+      "managerRecord": "Chefens registrering",
+      "recorded": "Registrerat av dig"
+    },
+    "skillsTitle": "Vad ditt arbete visar",
+    "next": {
+      "title": "Din historia följer med dig",
+      "body": "Varje jobb du registrerar bygger på den. Ta den med till nästa möjlighet.",
+      "cta": "Se vart du kan gå"
+    }
+  },
+  "workContext": {
+    "title": "Ditt arbete på ett ställe",
+    "nodes": {
+      "current": "Arbetar nu",
+      "records": "Registreringar",
+      "manager": "Chefens registrering",
+      "history": "Historik",
+      "skills": "Färdigheter",
+      "next": "Nästa"
+    },
+    "facts": {
+      "records": "{count, plural, one {# registrering} other {# registreringar}}",
+      "manager": "{count, plural, one {# registrering från chefen} other {# registreringar från chefen}}",
+      "history": "{count, plural, one {# jobb} other {# jobb}}",
+      "skills": "{count, plural, one {# färdighet baserad på dina registreringar} other {# färdigheter baserade på dina registreringar}}",
+      "next": "Vart du kan gå"
+    }
+  },
+  "cvOrganizationHistory": {
+    "title": "Arbetshistorik som tillhandahållits av organisationer",
+    "note": "Hämtad ur de angivna organisationernas egna uppgifter. Den är varken självdeklarerad eller oberoende verifierad.",
+    "untitled": "Arbete registrerat av en organisation",
+    "hoursTerm": "Timmar",
+    "hoursRecorded": "{hours} h registrerade i {count, plural, one {# registrering} other {# registreringar}}",
+    "hoursPeriod": "{hours} h angivna för en period, i {count, plural, one {# registrering} other {# registreringar}}",
+    "contested": "Bestridd av en part med rätt att göra det",
+    "more": "{count, plural, one {# post till} other {# poster till}} visas inte"
+  },
+  "companyPerson": {
+    "eyebrow": "Historiskt personkort",
+    "back": "Personer",
+    "badge": "Lämnat av organisationen, inte oberoende verifierat",
+    "provenance": "Detta är vad {name} har registrerat om personen. Ingen annan har bekräftat det, och det beror inte på om personen har ett konto.",
+    "claim": {
+      "unlinked": "Ännu inte kopplat till ett konto — historiken är redan registrerad här.",
+      "link_proposed": "En koppling till ett konto har erbjudits och väntar på personens svar — historiken är redan registrerad här.",
+      "linked": "Kopplat till personens eget konto.",
+      "openProfile": "Öppna personens sida"
+    },
+    "unavailable": "Personens historik kunde inte läsas just nu. Det betyder inte att det saknas någon.",
+    "empty": "Det finns ännu inga historikposter för den här personen. Läsningen lyckades — det finns inga.",
+    "stats": {
+      "records": "Poster",
+      "hours": "Timmar som angivna",
+      "period": "Period"
+    },
+    "noHours": "Poster utan angivna timmar: {count}. Okända timmar räknas inte som noll.",
+    "undated": "Poster utan angivet datum: {count}. De finns kvar i historiken nedan.",
+    "periodApart": "{hours} h av summan är periodsummor, hållna isär och aldrig fördelade på dagar eller månader.",
+    "noWorkObject": "Poster utan koppling till ett projekt eller en plats som plattformen känner till: {count}. De finns kvar i den här historiken under sin källbeteckning.",
+    "places": {
+      "title": "Per projekt eller plats",
+      "none": "Projekt eller plats inte registrerad",
+      "records": "Poster: {count}",
+      "days": "{count, plural, one {# registrerad dag} other {# registrerade dagar}}",
+      "undated": "Datum inte registrerat"
+    },
+    "months": {
+      "title": "Angivna timmar per månad",
+      "note": "Endast poster för enstaka dagar. Periodsummor fördelas aldrig på dagar eller månader."
+    },
+    "skills": {
+      "title": "Färdigheter som historiken pekar på",
+      "note": "Härlett ur organisationens historik, inte verifierat. En färdighet visas när organisationen själv har nämnt den; det är inget påstående om personen.",
+      "records": "Poster: {count}",
+      "empty": "Ingen färdighet nämns i de här posterna.",
+      "unavailable": "Färdighetssignaler kunde inte läsas just nu. Det betyder inte att det saknas några.",
+      "truncated": "Det finns fler färdighetssignaler än den här vyn läser."
+    },
+    "shown": "Visar de senaste {shown} av {total} posterna. Resten finns kvar i registret.",
+    "truncated": "Det finns fler poster än en vy läser. De {count} lästa visas; summorna omfattar bara dem.",
+    "profile": {
+      "title": "[EN] Living profile from this organization's history",
+      "subtitle": "[EN] Built from the records your organization supplied, before any account exists. Organization-reported, not independently verified. If the person later claims an account, it is linked without changing this history.",
+      "unavailable": "[EN] The work picture could not be read right now. That does not mean there is no work.",
+      "fit": {
+        "title": "[EN] Fit to your open needs",
+        "note": "[EN] Worked out inside your organization from the skills this history names. Organization-reported, not verified. Nothing here is shown to other organizations.",
+        "noSignals": "[EN] This history names no catalogue skill yet, so it cannot be matched. That is unknown, not a poor fit.",
+        "none": "[EN] None of your open needs is spoken to by the skills this history names.",
+        "unavailable": "[EN] Fit could not be computed right now. That does not mean there is none.",
+        "row": "[EN] {matched} of {total} required skills named in this history"
+      }
+    },
+    "cvCompare": {
+      "title": "Samma person, två cv",
+      "scope": "{organization}s egen bild av arbetet den registrerade. Inte personens offentliga profil — personen hanterar sin historik först när den gjort anspråk på den.",
+      "absent": "inte registrerat",
+      "traditional": {
+        "label": "Ett traditionellt cv",
+        "role": "Roll",
+        "employer": "Arbetsgivare",
+        "years": "År",
+        "skills": "Färdigheter",
+        "skillsSelf": "det personen skriver om sig själv",
+        "note": "Ett klassiskt cv slutar här: en titel, en arbetsgivare, ett spann av år."
+      },
+      "living": {
+        "label": "LabourMarket.ai — ur underlaget",
+        "projects": "projekt",
+        "days": "registrerade dagar",
+        "hours": "registrerade timmar",
+        "span": "Dokumenterat arbete: {span}",
+        "work": "Arbetet som underlaget beskriver det",
+        "note": "Ur organisationens egna tidrapporter — registrerat, inte oberoende bekräftat. Periodsummeringar hålls isär."
+      }
+    }
+  },
+  "recognisedBy": {
+    "title": "Erkänt av en institution",
+    "recognisedBy": "Erkänt av {institution}",
+    "recognisedByUnnamed": "Erkänt av en bedömande institution",
+    "validUntil": "giltigt till {date}",
+    "note": "En oberoende bedömare har beslutat att ditt visade arbete motsvarar detta. Det är inte en arbetsgivares bekräftelse och inte ett betyg.",
+    "noteViewer": "En oberoende bedömare har beslutat att personens visade arbete motsvarar detta. Det är inte en arbetsgivares bekräftelse, inte ett betyg och ändrar ingen rangordning."
+  },
+  "evidenceMedia": {
+    "title": "Historiska foton",
+    "provenance": "Foton som organisationen lämnat från sina egna register. Uppgivet, inte verifierat.",
+    "reported": "Uppgivet, inte verifierat",
+    "unavailable": "Historiska foton kunde inte läsas just nu. Det betyder inte att det inte finns några.",
+    "emptyProject": "Inga historiska foton är registrerade för det här projektet.",
+    "emptyPerson": "Inga historiska foton är registrerade för den här personen.",
+    "previewUnavailable": "Förhandsvisning saknas",
+    "photoAlt": "Historiskt arbetsfoto",
+    "taken": "Taget {date}",
+    "takenUnknown": "Datum inte angivet",
+    "basis": {
+      "exif": "datum från fotots egna metadata",
+      "source_metadata": "datum från källsystemets metadata",
+      "organization_stated": "datum angivet av organisationen",
+      "unknown": "datum okänt"
+    },
+    "source": "Källa: {system}",
+    "more": "{n} fler foton visas inte här.",
+    "import": {
+      "title": "Historiska foton: bifoga källfiler",
+      "intro": "Bifoga de bildfiler organisationen har till en registrering, en plats, en person eller själva organisationen. Ni anger vad de hör till och var de kommer ifrån; ingenting kopplas efter datum eller filnamn. Foton lagras privat och är uppgivna, inte verifierade.",
+      "anchorKind": "Bifoga till",
+      "kind": {
+        "record": "En registrering",
+        "place": "En plats",
+        "person": "En person",
+        "organization": "Organisationen"
+      },
+      "choose": {
+        "record": "Registrering",
+        "place": "Plats",
+        "person": "Person"
+      },
+      "none": {
+        "record": "Inga registreringar ännu. Importera registreringar först, eller bifoga till en plats, en person eller organisationen.",
+        "place": "Inga platser registrerade ännu.",
+        "person": "Inga personer i listan ännu."
+      },
+      "truncated": "Bara de första posterna visas.",
+      "sourceSystem": "Källsystem",
+      "sourceSystemHint": "Var filerna kommer ifrån, till exempel namnet på arkivet eller programvaran.",
+      "sourceReference": "Källhänvisning (valfri)",
+      "files": "Bildfiler",
+      "filesHint": "JPEG, PNG, WebP eller HEIC, upp till {mb} MB per fil.",
+      "date": "Datum taget (valfritt)",
+      "dateHint": "Lämna tomt om ni inte vet det. Det sparas då som okänt, aldrig gissat. Ett datum gäller för alla filer i den här omgången.",
+      "basis": "Var datumet kommer ifrån",
+      "bases": {
+        "organization_stated": "Uppgivet av vår organisation",
+        "source_metadata": "Från källsystemets metadata",
+        "exif": "Från fotots egna metadata"
+      },
+      "caption": "Bildtext (valfri)",
+      "submit": "Bifoga foton",
+      "working": "Bifogar...",
+      "resultTitle": "Resultat",
+      "registered": "Bifogat.",
+      "duplicate": "Redan bifogat tidigare (samma fil). Inget ändrat.",
+      "unavailable": "Platserna, personerna och registreringarna att bifoga till kunde inte läsas just nu. Det betyder inte att det inte finns några.",
+      "refusal": {
+        "invalid": "Filen kunde inte användas.",
+        "no_anchor": "Välj först vad fotona hör till.",
+        "bad_date": "Ett datum måste ha sitt underlag och vara ett riktigt datum.",
+        "unsupported_type": "Inte en JPEG-, PNG-, WebP- eller HEIC-bild.",
+        "file_too_large": "Större än {mb} MB, så den skickades inte. Inget sparades.",
+        "anchor_not_found": "Registreringen, platsen eller personen hittades inte i den här organisationen.",
+        "needs_migration": "Uppladdning av foton är inte tillgänglig ännu. Inget sparades.",
+        "not_allowed": "Bara personer som administrerar organisationen kan bifoga foton.",
+        "error": "Något gick fel. Fotot bifogades inte; försök igen."
+      }
+    }
+  },
+  "linkedDocuments": {
+    "title": "Kopplade dokument",
+    "introProject": "Registerdokument som är kopplade till det här projektet. Skrivskyddat – hantera dem i dokumentregistret.",
+    "introPerson": "Registerdokument som är kopplade till den här personen. Skrivskyddat – hantera dem i dokumentregistret.",
+    "unavailable": "Kopplade dokument kunde inte läsas just nu. Det betyder inte att det inte finns några.",
+    "emptyProject": "Inga registerdokument är kopplade till det här projektet.",
+    "emptyPerson": "Inga registerdokument är kopplade till den här personen.",
+    "personNotLinked": "Registerdokument knyts till en person när personens personalpost är kopplad till ett konto.",
+    "noFile": "Ingen fil uppladdad ännu",
+    "download": "Ladda ned",
+    "openRegister": "Öppna dokumentregistret",
+    "more": "{n} fler dokument finns i registret."
+  },
+  "activitySetupHub": {
+    "eyebrow": "KOM IGÅNG",
+    "title": "Var du ska börja",
+    "subtitle": "Tre sätt att delta. Var och ett visar var du är — redan påbörjat eller väntar på ditt nästa steg.",
+    "agency": "Byrå",
+    "started": "✓ Påbörjad",
+    "agencyStarted": "Byråprofil påbörjad.",
+    "agencyIsCompanyType": "Framöver är en byrå en företagstyp — skapa en ny byrå som ett företag av typen ”Bemanningsföretag”.",
+    "legalName": "Juridiskt namn",
+    "country": "Land",
+    "company": "Företag",
+    "notStarted": "inte påbörjad",
+    "companyStarted": "Företagsprofil påbörjad.",
+    "openCompanySetup": "Öppna företagsinställning →",
+    "goToCompanyDashboard": "Gå till företagets arbetsyta →",
+    "companyIntro": "Skapa en företagsprofil. Typen (bygg, bemanningsföretag, underentreprenör, tillverkning, tjänster, kund / beställare, annat) väljer du i profilen — en profil för alla typer.",
+    "startCompanySetup": "Starta företagsinställning →",
+    "buyer": "Köpare",
+    "buyerStarted": "Köparprofil påbörjad. Du kan skapa arbetsförfrågningar — de förblir privata tills du bestämmer annat.",
+    "nameContact": "Namn / kontakt",
+    "buyerIntro": "Letar du efter en person eller en tjänst åt dig själv? Skapa en köparprofil och beskriv vad du behöver. Ditt utkast sparas och förblir privat. Köper du för ett företags räkning? Skapa i stället en företagsprofil av typen ”Kund / beställare”.",
+    "openBuyerSetup": "Öppna köparinställning →",
+    "startBuyerProfile": "Starta köparprofil →",
+    "footer": "Inget här är påhittat: varje visat läge är läst från ditt konto."
+  },
+  "historyQuality": {
+    "back": "Tillbaka till historiken",
+    "title": "Datakvalitet i historiken",
+    "intro": "Vad {organization}s import skapade, vad LabourMarket.ai kände igen i den och vad som fortfarande är olöst — ur samma poster, ingen av dem ändrad.",
+    "notApplied": "Konsolideringen har inte tillämpats ännu: siffrorna visar importen som den är.",
+    "unavailable": "Datakvaliteten kunde inte läsas just nu. Det betyder inte ”inga problem” — försök igen.",
+    "before": {
+      "title": "Som importerat (kalkylblad)",
+      "note": "{sources, plural, one {# källfil} other {# källfiler}}"
+    },
+    "after": {
+      "title": "I LabourMarket.ai",
+      "merged": "{rows, plural, one {# importerad rad igenkänd som del av ett annat projekt} other {# importerade rader igenkända som del av ett annat projekt}}",
+      "onProject": "{records} poster ({hours} h) kopplade till ett projekt",
+      "peopleWithHistory": "{people, plural, one {# person med projekthistorik} other {# personer med projekthistorik}}"
+    },
+    "m": {
+      "projectRows": "projektrader",
+      "realProjects": "verkliga projekt",
+      "records": "arbetsposter",
+      "hours": "registrerade timmar",
+      "people": "personer"
+    },
+    "invariant": "Poster, timmar och personer är identiska före och efter: inget har flyttats, delats eller raderats.",
+    "invariantBroken": "Obs: summorna skiljer sig före och efter — rapportera detta; inget ska ändras.",
+    "path": {
+      "title": "Importerade rader → projekt: {imported} → {kept}",
+      "imported": "Importerade projektrader: {imported}",
+      "merged": "Igenkända som delar av samma projekt — rader: {rows}, sammanslagna till projekt: {projects}",
+      "untouched": "Lämnade som de var (ingen annan rad för samma objekt): {rows}",
+      "kept": "Kanoniska projekt nu: {projects} — varje arbetspost och timme är bevarad"
+    },
+    "tiers": {
+      "established": {
+        "title": "Fastställt utifrån data",
+        "body": "Sammanslagningar fastställda automatiskt (samma objektkod eller adress): {merges}; projekt: {groups}. Var och en kan fortfarande ångras."
+      },
+      "probable": {
+        "title": "Sannolika kopplingar",
+        "body": "Samma adress, men en annan period eller andra personer — kopplat som sannolikt. Grupper: {count}. Alla kan ångras i registret nedan."
+      },
+      "unresolved": {
+        "title": "Olöst — hållet åtskilt",
+        "body": "Rader med en registrerad motsägelse, inte sammanslagna: {count}."
+      }
+    },
+    "conflictKinds": {
+      "code_spans_several_addresses": "koden anger flera adresser",
+      "number_missing_on_one_side": "husnummer saknas på ena sidan",
+      "different_house_numbers": "olika husnummer",
+      "different_street_names": "olika gatunamn",
+      "office_not_a_site": "kontor, inte en arbetsplats",
+      "work_type_not_a_site": "typ av arbete, inte en arbetsplats",
+      "spelling_variant_different_dates": "liknande stavning, olika datum",
+      "recorded": "registrerad motsägelse"
+    },
+    "example": {
+      "title": "Ett objekt, många stavningar",
+      "intro": "Verkliga grupper ur denna import: det kalkylbladen höll som separata rader håller LabourMarket.ai som ett projekt med hela historiken.",
+      "spreadsheet": "I kalkylbladen: {rows} separata rader",
+      "more": "… och {count} till",
+      "lm": "I LabourMarket.ai: ett projekt",
+      "facts": "{records} poster · {hours} h · {people, plural, one {# person} other {# personer}}",
+      "probable": "Sannolikt: samma adress, annan period eller andra personer — registrerat, kan ångras."
+    },
+    "unresolved": {
+      "title": "Fortfarande olöst — bevarat exakt som registrerat",
+      "noObject": "{records} poster ({hours} h) anger inget objekt — de stannar i organisationens historik, inte på ett påhittat projekt.",
+      "multi": "{records} poster ({hours} h) anger flera objekt på en rad — timmarna delas inte upp.",
+      "single": "{records} poster ({hours} h) anger en plats som inte matchar något känt objekt.",
+      "dates": "{personDays} persondagar har flera poster på samma datum ({records} poster): i källan återanvändes en dagsetikett över veckor. Timmarna behålls; datumen behöver rättas."
+    },
+    "sessions": {
+      "title": "Per källfil",
+      "source": "Källa",
+      "onProject": "På ett projekt",
+      "unplaced": "Utan objekt"
+    },
+    "register": {
+      "title": "Varje registrerad avvikelse",
+      "rows": "{count, plural, one {# registrerat beslut} other {# registrerade beslut}}",
+      "reverted": "ångrat",
+      "rule": "regel {rule}, {at}",
+      "decision": {
+        "merged": "sammanslaget",
+        "canonical": "behållet projekt",
+        "kept_separate": "hållet separat"
+      },
+      "certainty": {
+        "unambiguous": "entydigt",
+        "probable": "sannolikt",
+        "none": "inte sammanslaget"
+      }
+    },
+    "undo": {
+      "reason": "Skäl att ångra",
+      "button": "Ångra sammanslagning",
+      "pending": "Ångrar…",
+      "done": "Ångrat: raden är åter ett eget projekt.",
+      "failed": "Inte ångrat. Ladda om och försök igen."
+    },
+    "timing": "Beräknat ur {records} poster på {ms} ms.",
+    "types": {
+      "address_spelling_variant": "samma adress, skriven olika",
+      "code_spelling_variant": "samma objektkod, skriven olika",
+      "name_mixed_with_work_description": "arbetsbeskrivning i objektnamnet",
+      "object_split_into_projects": "ett objekt uppdelat på flera projekt",
+      "multiple_objects_in_row": "flera objekt på en rad",
+      "no_object": "inget objekt angivet",
+      "no_house_number": "plats utan husnummer",
+      "period_mismatch": "arbetsperioder långt isär",
+      "possible_duplicate_records": "möjligen dubblerade poster",
+      "ambiguous_person": "person inte entydigt identifierad",
+      "conflicting_project_data": "motsägande projektuppgifter",
+      "possible_same_object": "möjligen samma objekt (inte sammanslaget)",
+      "date_conflict_person_days": "persondagar med motsägande datum",
+      "unplaced_no_object": "poster utan objekt",
+      "unplaced_multiple_objects": "poster med flera objekt",
+      "unplaced_single_unmatched": "poster med okänd plats"
+    },
+    "link": "Datakvalitet"
+  },
+  "homeRegions": {
+    "waiting": {
+      "title": "Väntar på dig",
+      "clear": "Inget väntar på dig.",
+      "unknown": "Det som väntar på dig kunde inte läsas."
+    },
+    "running": {
+      "title": "Pågår nu",
+      "projectsUnknown": "Dina tilldelade projekt kunde inte läsas.",
+      "today": "I dag",
+      "week": "Senaste 7 dagarna",
+      "hours": "{hours} h",
+      "entries": "{n, plural, one {# registrering} other {# registreringar}}",
+      "noEntriesToday": "Inget registrerat i dag ännu",
+      "confirmed": "Varav bekräftat av chef eller kund: {hours} h",
+      "confirmedNone": "Inga bekräftade timmar ännu",
+      "barLabel": "Registrerade och bekräftade timmar, senaste 7 dagarna",
+      "record": {
+        "line": "Ditt rekord: {best} h bekräftade på en månad ({month}). Den här månaden hittills: {current} h.",
+        "reached": "Den här månaden nådde du ditt eget rekord: {hours} bekräftade h.",
+        "onlyYou": "Bara du ser detta – det jämförs bara med dina egna månader.",
+        "barLabel": "Den här månaden mot ditt bästa"
+      }
+    },
+    "because": {
+      "title": "Senaste händelserna",
+      "unknown": "Det som ändrades kunde inte läsas.",
+      "also": "Hände också",
+      "all": "All aktivitet"
+    },
+    "outside": {
+      "title": "Dina möjligheter",
+      "barLabel": "Möjligheter efter matchning"
+    },
+    "chain": {
+      "consequence": {
+        "relationshipStarted": "En arbetsrelation började",
+        "relationshipEnded": "En arbetsrelation avslutades",
+        "bookingAgreed": "Bokningen avtalades",
+        "bookingRefused": "Bokningen avböjdes",
+        "bookingWithdrawn": "Bokningen drogs tillbaka",
+        "absenceApproved": "Frånvaron godkändes",
+        "absenceRefused": "Frånvaron avslogs",
+        "decisionRecorded": "Beslutet registrerades",
+        "acknowledgementRecorded": "Kvitteringen registrerades",
+        "invitationAnswered": "Inbjudan besvarades"
+      },
+      "state": {
+        "engagementActive": "Anställning: aktiv",
+        "engagementClosed": "Anställning: avslutad",
+        "bookingConfirmed": "Bokning: bekräftad",
+        "bookingClosed": "Bokning: stängd",
+        "absenceDecided": "Frånvaro: avgjord",
+        "workflowClosed": "Godkännande: avslutat",
+        "documentAcknowledged": "Dokument: kvitterat",
+        "relationshipFormed": "Relation: etablerad"
+      }
+    },
+    "retry": "Läs in igen",
+    "retrying": "Läser in…",
+    "availability": {
+      "partial": "En del av dina uppgifter är tillfälligt otillgängliga ({count} av 4 områden).",
+      "totalTitle": "Vi kunde inte läsa dina uppgifter just nu",
+      "totalBody": "Dina registreringar är säkra – det här är tillfälligt. Försök igen om en stund."
+    }
+  },
+  "homeTrace": {
+    "title": "Vad som ändrades",
+    "unknown": "Vi kunde inte läsa vad som ändrades efter dina åtgärder.",
+    "all": "All aktivitet",
+    "empty": "Inga nya följder de senaste 14 dagarna. När du registrerar arbete och det bekräftas ser du här vad det ändrade.",
+    "openJournal": "Öppna arbetsjournalen",
+    "entryUntitled": "Arbetsregistrering",
+    "roleUnknown": "annan part",
+    "journalUnknown": "Arbetsjournalen kunde inte läsas.",
+    "eventsUnknown": "Aviseringarna kunde inte läsas.",
+    "truncated": "Baserat på dina 30 senaste registreringar.",
+    "step": {
+      "recordedHours": "{hours} h registrerat",
+      "recordedDays": "{days} d registrerat",
+      "recordedUntimed": "Registrerat utan längd",
+      "awaiting": "Väntar på bekräftelse",
+      "selfApproved": "Godkänt av dig själv – ingen bekräftelse från en annan part",
+      "approvedBy": "Bekräftat av: {role}",
+      "approvedAutomatic": "Bekräftat automatiskt enligt en regel",
+      "rejected": "Avvisat",
+      "changesRequested": "Ändring begärd",
+      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bekräftad registrering} other {# bekräftade registreringar}}} other {Living CV uppdaterat: {skills}}}",
+      "cvUnlinked": "Living CV: bekräftat arbete, ännu inte kopplat till en färdighet",
+      "cvUnknown": "Living CV: kunde inte läsas",
+      "matching": "Matchningen ser bekräftat arbete: {skills}",
+      "matchingRepeated": "Matchningen ser upprepat bekräftat arbete: {skills}"
+    },
+    "legend": {
+      "fact": "Fakta",
+      "pending": "Väntar på en annan part",
+      "derived": "Härlett ur fakta"
+    }
+  },
+  "careerJourney": {
+    "title": "Din yrkesresa",
+    "summary": "Projekt är hållplatser, färdigheter är linjer. En linje stannar bara där din journal visar att färdigheten användes.",
+    "now": "Nu",
+    "gap": "Inga registreringar",
+    "horizon": "Horisont",
+    "derived": "härlett, inget löfte",
+    "linksUnknown": "Vi kunde inte läsa var dina färdigheter användes – linjerna visas utan hållplatser.",
+    "level": {
+      "confirmed": "bekräftat",
+      "recorded": "registrerat",
+      "declared": "angivet"
+    },
+    "focusHint": "Tryck på en linje för att följa en färdighet genom hela resan.",
+    "showAll": "Visa alla",
+    "horizonDetail": "{shared} av {total} i ditt arbete · {confirmed} bekräftade"
+  },
+  "projectCourse": {
+    "title": "Projektförlopp",
+    "count": "{done} av {total} etapper klara",
+    "unknown": "Projektets etapper kunde inte läsas.",
+    "here": "Här är vi",
+    "state": {
+      "done": "Klar",
+      "now": "Pågår",
+      "risk": "Efter planen",
+      "blocked": "Blockerad",
+      "planned": "Planerad",
+      "cancelled": "Inställd"
+    },
+    "helpNeeded": "Hjälp behövs — {stage}:"
+  },
+  "projectWeekGoal": {
+    "titleProject": "Veckans mål",
+    "titleMine": "Dina uppgifter den här veckan",
+    "count": "{done} av {total} klara",
+    "unknown": "Veckans uppgifter kunde inte läsas.",
+    "mineNote": "Bara uppgifter du kan se: dina och ditt teams.",
+    "status": {
+      "todo": "Att göra",
+      "in_progress": "Pågår",
+      "blocked": "Blockerad",
+      "done": "Klar",
+      "cancelled": "Inställd",
+      "overdue": "Försenad"
+    }
+  },
+  "projectTrace": {
+    "title": "Vad som har ändrats i projektet",
+    "window": "Senaste 14 dagarna",
+    "unknown": "Kunde inte läsa vad som har ändrats i projektet.",
+    "emptyManager": "Inget nytt i projektet på 14 dagar: inga nya arbetsregistreringar, avslutade etapper eller stängda uppgifter.",
+    "emptyMember": "Inga nya registreringar från dig i det här projektet på 14 dagar. Registrera arbete i journalen – här ser du vad det ändrade.",
+    "teamLabel": "Lagets arbetskedja",
+    "team": {
+      "recorded": "Registrerat: {count}",
+      "awaiting": "Väntar på granskning: {count}",
+      "returned": "Skickat tillbaka för rättelse: {count}",
+      "confirmed": "Bekräftat av en annan part: {count}",
+      "confirmedUnknown": "Antalet bekräftelser kunde inte fastställas",
+      "livingCv": "Bekräftat arbete räknas i de anställdas Living CV"
+    },
+    "review": "Granska de väntande ({count})",
+    "stageDone": "Etappen ”{name}” avslutad",
+    "tasksDone": "Stängda uppgifter: {count}",
+    "journalUnknown": "Kunde inte läsa projektets arbetsregistreringar.",
+    "stagesUnknown": "Kunde inte läsa projektets etapper.",
+    "tasksUnknown": "Kunde inte läsa projektets uppgifter.",
+    "truncated": "Visar de senaste registreringarna."
+  },
+  "projectFirstStep": {
+    "title": "Första steget",
+    "both": "Projektet har ännu inga etapper och inga uppgifter för den här veckan. Lägg till etapper – laget ser en gemensam rutt och var ni är.",
+    "stages": "Projektet har ännu inga etapper. Lägg till dem – laget ser en gemensam rutt och var ni är.",
+    "tasks": "Inga uppgifter har deadline den här veckan. Skapa en uppgift – den blir veckans mål.",
+    "addStages": "Lägg till etapper",
+    "addTask": "Skapa en uppgift"
   }
 }

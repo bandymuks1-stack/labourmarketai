@@ -10,7 +10,8 @@
  * a suggestion can be applied to the structured columns the worker board reads
  * without ever exposing free text.
  */
-import { ALL_WORK_TYPE_SLUGS, MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import { ALL_WORK_TYPE_SLUGS } from "@/lib/taxonomy/work-categories";
+import { isIsoCountry } from "@/lib/location/country-model";
 
 export type StartPeriod = "flexible" | "this_week" | "urgent";
 export type AccommodationOffer =
@@ -50,44 +51,44 @@ export const WORK_TYPE_RULES: { slug: string; needles: string[] }[] = [
   { slug: "plasterer", needles: ["plasterer", "tinkuotoj", "штукатур", "stuckateur", "stukadoor", "tynkarz"] },
   { slug: "steel_fixer", needles: ["steel fixer", "rebar", "armaturinink", "арматурщик", "eisenflechter", "betonstaalvlechter", "zbrojarz"] },
   { slug: "insulation_worker", needles: ["insulation worker", "insulator", "izoliuotoj", "изолировщик", "isolierer", "isolatiemonteur"] },
-  { slug: "welder", needles: ["welder", "weld", "suvirin", "сварщик", "сварк"] },
-  { slug: "electrician", needles: ["electrician", "elektrik", "электрик"] },
-  { slug: "plumber", needles: ["plumber", "santechnik", "сантехник"] },
-  { slug: "carpenter", needles: ["carpenter", "stalius", "столяр", "плотник"] },
-  { slug: "mason", needles: ["mason", "bricklayer", "mūrinink", "murinink", "каменщик"] },
-  { slug: "painter", needles: ["painter", "dažytoj", "dazytoj", "маляр"] },
-  { slug: "tiler", needles: ["tiler", "plytel", "плиточник"] },
-  { slug: "roofer", needles: ["roofer", "stogden", "кровельщик"] },
-  { slug: "crane_operator", needles: ["crane operator", "crane", "krano operat", "крановщик"] },
+  { slug: "welder", needles: ["welder", "weld", "suvirin", "сварщик", "сварк", "lassers", "schweisser", "spawacz"] },
+  { slug: "electrician", needles: ["electrician", "elektrik", "электрик", "elektricien", "elektryk"] },
+  { slug: "plumber", needles: ["plumber", "santechnik", "сантехник", "loodgieter", "klempner", "hydraulik"] },
+  { slug: "carpenter", needles: ["carpenter", "stalius", "столяр", "плотник", "timmerman", "timmerlieden", "timmerlui", "zimmerer", "zimmermann", "tischler", "schreiner", "stolarz", "ciesl"] },
+  { slug: "mason", needles: ["mason", "bricklayer", "mūrinink", "murinink", "каменщик", "metselaar", "maurer", "murarz", "murarzy"] },
+  { slug: "painter", needles: ["painter", "dažytoj", "dazytoj", "маляр", "schilders", "malarz", "malarzy"] },
+  { slug: "tiler", needles: ["tiler", "plytel", "плиточник", "tegelzetter", "fliesenleger", "glazurnik", "plytkarz"] },
+  { slug: "roofer", needles: ["roofer", "stogden", "кровельщик", "dakdekker", "dachdecker", "dekarz", "dekarzy"] },
+  { slug: "crane_operator", needles: ["crane operator", "crane", "krano operat", "крановщик", "kraanmachinist", "kranfuhrer", "operator zurawia"] },
   { slug: "excavator_operator", needles: ["excavator", "ekskavator", "экскаватор"] },
   { slug: "heavy_equipment_operator", needles: ["heavy equipment", "heavy machine", "sunkiosios technik", "спецтехник"] },
-  { slug: "forklift_operator", needles: ["forklift", "krautuv", "погрузчик"] },
+  { slug: "forklift_operator", needles: ["forklift", "krautuv", "погрузчик", "heftruckchauffeur", "heftruck", "staplerfahrer", "wozek widlowy", "operator wozka"] },
   { slug: "truck_driver_ce", needles: ["ce driver", "driver ce", "vilkik", "фуры", "фура"] },
-  { slug: "truck_driver_c", needles: ["truck driver", "lorry", "sunkvežim", "sunkvezim", "грузовик"] },
+  { slug: "truck_driver_c", needles: ["truck driver", "lorry", "sunkvežim", "sunkvezim", "грузовик", "vrachtwagenchauffeur", "lkw-fahrer", "lkw fahrer", "berufskraftfahrer"] },
   { slug: "delivery_driver", needles: ["delivery driver", "delivery", "pristatym", "доставк"] },
   { slug: "courier", needles: ["courier", "kurjer", "курьер"] },
   { slug: "order_picker", needles: ["order picker", "picker", "rinkėj", "rinkej", "комплектов"] },
   { slug: "packer", needles: ["packer", "packing", "pakuotoj", "упаковщик"] },
-  { slug: "warehouse_worker", needles: ["warehouse", "sandėl", "sandel", "склад"] },
+  { slug: "warehouse_worker", needles: ["warehouse", "sandėl", "sandel", "склад", "magazijnmedewerker", "lagerist", "lagermitarbeiter", "lagerhelfer", "magazynier"] },
   { slug: "assembler", needles: ["assembler", "assembly", "surink", "сборщик", "сборк"] },
   { slug: "machine_operator", needles: ["machine operator", "cnc", "staklių operat", "stakliu operat", "оператор станк"] },
   { slug: "quality_control", needles: ["quality control", "quality inspector", "kokybės kontrol", "kokybes kontrol", "контролёр качества", "контролер качества"] },
-  { slug: "production_worker", needles: ["production worker", "factory worker", "gamybos darbinink", "производственн"] },
-  { slug: "cook", needles: ["cook", "chef", "virėj", "virej", "повар"] },
+  { slug: "production_worker", needles: ["production worker", "factory worker", "gamybos darbinink", "производственн", "productiemedewerker", "produktionsmitarbeiter", "pracownik produkcj", "pracownikow produkcj"] },
+  { slug: "cook", needles: ["cook", "chef", "virėj", "virej", "повар", "kucharz", "kucharzy"] },
   { slug: "kitchen_helper", needles: ["kitchen helper", "kitchen porter", "virtuvės pagalb", "virtuves pagalb", "помощник повара"] },
   { slug: "dishwasher", needles: ["dishwasher", "indų plov", "indu plov", "посудомой"] },
-  { slug: "waiter", needles: ["waiter", "waitress", "padavėj", "padavej", "официант"] },
+  { slug: "waiter", needles: ["waiter", "waitress", "padavėj", "padavej", "официант", "kellner", "kelner"] },
   { slug: "housekeeper", needles: ["housekeeper", "housekeeping", "room attendant", "kambarin", "горничн"] },
   { slug: "elderly_carer", needles: ["elderly care", "elderly carer", "senior care", "pagyvenusi", "сиделк"] },
-  { slug: "care_assistant", needles: ["care assistant", "caregiver", "nurse", "nursing", "slaug", "уход", "сиделк"] },
+  { slug: "care_assistant", needles: ["care assistant", "caregiver", "nurse", "nursing", "slaug", "уход", "сиделк", "verzorgende", "verzorger", "pflegekraft", "pflegekrafte", "altenpfleger", "pfleger", "opiekun"] },
   { slug: "support_worker", needles: ["support worker", "pagalbos darbuotoj", "социальн"] },
   { slug: "industrial_cleaner", needles: ["industrial clean", "pramoninis valytoj", "промышленн уборщ"] },
-  { slug: "cleaner", needles: ["cleaner", "cleaning", "valytoj", "valymas", "уборщик", "уборк"] },
+  { slug: "cleaner", needles: ["cleaner", "cleaning", "valytoj", "valymas", "уборщик", "уборк", "schoonmaker", "reinigungskraft", "sprzatacz"] },
   { slug: "facility_worker", needles: ["facility", "patalpų prižiūr", "patalpu priziur", "обслуживан"] },
   { slug: "harvest_worker", needles: ["harvest", "picking fruit", "derliaus", "сбор урожая", "сборщик урожая"] },
   { slug: "greenhouse_worker", needles: ["greenhouse", "šiltnam", "siltnam", "теплич"] },
   { slug: "farm_worker", needles: ["farm", "agricultur", "žemės ūki", "zemes uki", "сельхоз", "ферм"] },
-  { slug: "general_laborer", needles: ["laborer", "labourer", "general worker", "helper", "pagalbinis darbinink", "разнорабоч", "подсобн"] },
+  { slug: "general_laborer", needles: ["laborer", "labourer", "general worker", "helper", "pagalbinis darbinink", "разнорабоч", "подсобн", "bauhelfer", "pomocnik", "pomocnikow"] },
 ];
 
 const KNOWN_SLUGS = new Set(ALL_WORK_TYPE_SLUGS);
@@ -107,7 +108,7 @@ export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   { code: "DE", needles: ["germany", "vokietij", "deutschland", "герман", "berlin", "berlyn", "hamburg", "munich", "münchen", "munchen", "miunchen", "frankfurt", "cologne", "köln", "koln", "keln", "stuttgart", "stutgart"] },
   { code: "NL", needles: ["netherlands", "holland", "nyderland", "niderland", "нидерланд", "голланд", "amsterdam", "rotterdam", "roterdam", "роттердам", "hague", "haag", "haga", "eindhoven", "utrecht"] },
   { code: "DK", needles: ["denmark", "danij", "дани", "copenhagen", "kopenhag", "копенгаг", "aarhus"] },
-  { code: "NO", needles: ["norway", "norveg", "норвег", "oslo", "bergen", "trondheim"] },
+  { code: "NO", needles: ["norway", "norveg", "норвег", "oslo", "осло", "bergen", "берген", "trondheim"] },
   { code: "SE", needles: ["sweden", "švedij", "svedij", "sverige", "швец", "stockholm", "stokholm", "gothenburg", "göteborg", "goteborg", "gioteborg", "malmö", "malmo", "malme"] },
   { code: "FI", needles: ["finland", "suomi", "suomij", "финлянд", "helsinki", "helsink", "espoo", "tampere"] },
   // Open-markets update 2026-07-17 — the six newly opened markets.
@@ -125,7 +126,6 @@ export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   { code: "US", needles: ["u.s.", "united states", "amerik", "америк", "сша", "штаты", "new york", "los angeles", "chicago", "houston", "miami", "dallas", "phoenix", "philadelphia", "atlanta", "seattle", "boston", "denver", "washington"] },
 ];
 
-const KNOWN_COUNTRIES = new Set<string>(MARKET_COUNTRIES);
 
 /**
  * CITY LABELS — which COUNTRY_RULES needles name a city, and how that city is
@@ -174,6 +174,18 @@ function firstMatch<T extends { needles: string[] }>(
  *  needs the needle itself: it is the occupation word the employer actually
  *  typed, in their own language, and a number sitting immediately before it is
  *  that occupation's headcount. */
+/**
+ * The SERVICE NOUN is never an occupation. Folded "paslaugas" contains the
+ * care-assistant needle "slaug", and on production (2026-09-06) "noriu
+ * siūlyti buhalterijos paslaugas" was echoed back as "Jūsų teigimu: Slaugos
+ * pagalbininkas" — a claim the person never made. Every occupation match
+ * over free text runs on the masked hay; the honest reading is the service.
+ */
+const SERVICE_NOUN_RE = /\bpaslaug\S*/gu;
+export function maskServiceNoun(hay: string): string {
+  return hay.replace(SERVICE_NOUN_RE, " ");
+}
+
 function firstMatchWithNeedle<T extends { needles: string[] }>(
   rules: T[],
   hay: string,
@@ -282,12 +294,14 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
   const roleHay = `${norm(input.role)} ${norm(input.description)} ${norm(input.notes)}`.trim();
   const locHay = `${norm(input.location)} ${roleHay}`.trim();
 
-  const wtHit = firstMatchWithNeedle(WORK_TYPE_RULES, roleHay);
+  // The service noun is masked first: "buhalterijos paslaugos" must not read
+  // as a care assistant because "paslaug" contains the needle "slaug".
+  const wtHit = firstMatchWithNeedle(WORK_TYPE_RULES, maskServiceNoun(roleHay));
   const workType = wtHit && KNOWN_SLUGS.has(wtHit.rule.slug) ? wtHit.rule.slug : null;
   if (workType) reasons.push(`work_type:${workType}`);
 
   const cc = firstMatch(COUNTRY_RULES, locHay);
-  const country = cc && KNOWN_COUNTRIES.has(cc.code) ? cc.code : null;
+  const country = cc && isIsoCountry(cc.code) ? cc.code : null;
   if (country) reasons.push(`country:${country}`);
 
   // Only the needle of a RECOGNISED work type is handed to the counter — an

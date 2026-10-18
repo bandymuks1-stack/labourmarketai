@@ -48,7 +48,7 @@ const panel = read("components/app/help-request-panel.tsx");
 const explanations = read("lib/help/help-explanations-lt.ts");
 const intakeLib = read("lib/sales/lead-intake.ts");
 const intakePanel = read("components/app/sales-intake-panel.tsx");
-const companyPage = read("app/[locale]/dashboard/company/page.tsx");
+const companyPage = read("app/[locale]/dashboard/company/settings/page.tsx");
 
 describe("closed help-type set, mirrored app ↔ DB", () => {
   it("exactly the five owner-specified types", () => {

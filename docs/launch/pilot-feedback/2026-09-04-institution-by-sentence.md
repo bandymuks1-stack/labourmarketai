@@ -48,3 +48,18 @@ Still open: learner invitations are stored, not e-mailed (owner gate: the
 transactional e-mail provider); `institution_learner_outcomes_v1` has no
 caller; REAL_EDUCATION_INSTITUTION_USED_PRODUCT stays FALSE until a real
 institution does it.
+
+## Learner OUTCOMES (prod `d543867d`, #1484)
+
+`institution_learner_outcomes_v1` had been in production since 2026-09-03 with no
+caller. The learners section now reports, from real state, how many learners
+logged work in 30 days / showed interest / accepted an offer / are working now —
+counts only, through the SQL function that is itself the privacy boundary.
+
+**Walk (`walk-outcomes-prod.cjs`, E2E Walker UAB, org `a996113c`, 14.0 s):** the
+block rendered under the participation counts; with 1 connected learner the
+function suppressed the four counts and the section SAID so:
+
+> Rezultatai rodomi, kai prisijungę bent 5 besimokantieji (dabar 1). Tik skaičiai, niekada vardai.
+
+No zeros pretending to be an answer; no learner row read by the caller.

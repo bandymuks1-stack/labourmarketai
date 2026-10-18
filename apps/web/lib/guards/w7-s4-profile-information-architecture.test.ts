@@ -114,7 +114,7 @@ describe("W7-S4 — organizations: capability preserved on /dashboard/network", 
     // sentences, honest home: neither page may reference the dead namespace.
     expect(NETWORK).not.toMatch(/marketplaceHub/);
     expect(PROFILE).not.toMatch(/marketplaceHub/);
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const messages = JSON.parse(read(`messages/${locale}.json`)) as {
         marketplaceHub?: unknown;
         network?: { organizations?: Record<string, string> };

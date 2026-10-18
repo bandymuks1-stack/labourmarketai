@@ -11,6 +11,7 @@
  */
 
 import type { FindWorkResult } from "@/lib/conversation/find-work-contract";
+import type { DiscoveryFilterState } from "@/lib/opportunities/discovery-filters";
 import type { EntityRef } from "@/lib/world-state/world-state";
 
 /** An existing conversation chip id (`logwork`, `profile`, `f:worker.*`, …).
@@ -40,6 +41,14 @@ export type WorkflowResult =
       /** Filters actually applied, as `dimension: matched words` — the AI says
        *  what it changed about the world, in the person's own words. */
       readonly appliedFilters: readonly { readonly label: string; readonly matchedText: string }[];
+      /**
+       * The world the search actually ran in, after this turn's sentence was
+       * merged over what earlier turns had already narrowed (owner P0 §4,
+       * 2026-09-06). The caller carries it on the conversation goal and hands
+       * it back on the next turn, so "and also in Belgium" adds to the search
+       * instead of restarting it. Absent when nothing is narrowed.
+       */
+      readonly worldState?: DiscoveryFilterState;
     }
   /** The AI opens an entity in the workspace instead of navigating (W3 panel). */
   | {

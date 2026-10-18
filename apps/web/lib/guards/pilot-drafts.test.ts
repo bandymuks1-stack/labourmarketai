@@ -192,8 +192,8 @@ describe("Guard: role dashboard pages gate BEFORE any data fetch", () => {
     });
   }
 
-  it("company/page.tsx gates before its demand reads and mounts the wizard, not the light form", () => {
-    const src = read("app/[locale]/dashboard/company/page.tsx");
+  it("company/needs/page.tsx gates before its demand reads and mounts the wizard, not the light form", () => {
+    const src = read("app/[locale]/dashboard/company/needs/page.tsx");
     const requireAt = src.indexOf("requireRoleOrRedirect");
     const fetchAt = src.indexOf("listOwnCustomerRequests(");
     expect(requireAt).toBeGreaterThan(-1);

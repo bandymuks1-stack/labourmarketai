@@ -14,6 +14,12 @@ import { cn } from "@/lib/utils";
  * non-zero — green for manager-verified facts, never for ambition. Zero
  * renders as a plain zero with the growth hint (Augimo testas), never
  * inflated, never "verified" without the manager-confirmed flag behind it.
+ *
+ * AND A COUNT WE COULD NOT READ IS NOT A ZERO. `null` renders as an em dash
+ * with a line saying so, and it SUPPRESSES the growth hint — because offering
+ * someone the how-to-get-started advice when the truth may be twelve
+ * confirmations is the one thing this block must never do. Zero keeps its
+ * ordinary meaning: checked, and there is none yet.
  */
 export interface TrustBlockLabels {
   readonly title: string;
@@ -22,6 +28,8 @@ export interface TrustBlockLabels {
   readonly managerConfirmations: string;
   readonly journalEntries: string;
   readonly zeroHint: string;
+  /** Shown when at least one count could not be read. */
+  readonly unreadHint: string;
 }
 
 export function TrustBlock({
@@ -31,10 +39,15 @@ export function TrustBlock({
   readonly signals: OwnTrustSignals;
   readonly labels: TrustBlockLabels;
 }) {
-  const allZero =
-    signals.verifiedSkills === 0 &&
-    signals.managerConfirmations === 0 &&
-    signals.journalEntries === 0;
+  const counts = [
+    signals.verifiedSkills,
+    signals.managerConfirmations,
+    signals.journalEntries,
+  ];
+  const anyUnread = counts.some((c) => c === null);
+  // Every count CHECKED, and every one of them zero. An unread count makes
+  // this unknowable, so the growth hint stays away rather than guessing.
+  const allZero = !anyUnread && counts.every((c) => c === 0);
   return (
     <section
       className="card-border rise-in flex flex-col gap-4 p-5"
@@ -51,14 +64,14 @@ export function TrustBlock({
           value={signals.verifiedSkills}
           label={labels.verifiedSkills}
           icon={<Layers className="h-3.5 w-3.5" aria-hidden />}
-          highlight={signals.verifiedSkills > 0}
+          highlight={(signals.verifiedSkills ?? 0) > 0}
           testId="trust-verified-skills"
         />
         <Stat
           value={signals.managerConfirmations}
           label={labels.managerConfirmations}
           icon={<Eye className="h-3.5 w-3.5" aria-hidden />}
-          highlight={signals.managerConfirmations > 0}
+          highlight={(signals.managerConfirmations ?? 0) > 0}
           testId="trust-confirmations"
         />
         <Stat
@@ -69,7 +82,14 @@ export function TrustBlock({
           testId="trust-entries"
         />
       </dl>
-      {allZero ? (
+      {anyUnread ? (
+        <p
+          className="rounded-md border border-state-warning/40 bg-state-warning/10 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+          data-testid="trust-unread-hint"
+        >
+          {labels.unreadHint}
+        </p>
+      ) : allZero ? (
         <p className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-xs leading-relaxed text-text-muted">
           {labels.zeroHint}
         </p>
@@ -85,7 +105,8 @@ function Stat({
   highlight,
   testId,
 }: {
-  readonly value: number;
+  /** null = the read failed. Rendered as an em dash, never as 0. */
+  readonly value: number | null;
   readonly label: string;
   readonly icon: React.ReactNode;
   readonly highlight: boolean;
@@ -110,7 +131,11 @@ function Stat({
         className="mt-1 font-mono text-2xl font-bold tracking-tightest text-text-primary"
         data-testid={testId}
       >
-        <CountUp text={String(value)} />
+        {value === null ? (
+          <span aria-hidden>—</span>
+        ) : (
+          <CountUp text={String(value)} />
+        )}
       </dd>
     </div>
   );

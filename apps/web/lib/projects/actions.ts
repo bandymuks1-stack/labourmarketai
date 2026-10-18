@@ -9,6 +9,12 @@ import { callerCompanyId } from "./projects";
 import { insertProjectForCompany } from "@/lib/projects/create-project-core";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { freeColleagues } from "@/lib/projects/free-colleagues";
+import type { ReservationVerdict } from "@/lib/workforce/commitment-reservation";
+import { keepOverrideCore, reservationVerdictFor, type KeepOverrideResult } from "@/lib/projects/override-keep-core";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * Project + assignment server actions (slice f4-worker-project-assignment-v1).
@@ -27,12 +33,42 @@ const UNDEFINED_COLUMN = "42703";
 const RELATION_NOT_FOUND = "42P01";
 
 export type ProjectActionResult =
-  | { ok: true; id?: string }
+  | {
+      ok: true;
+      id?: string;
+      /**
+       * CAL-7. What this person was ALREADY committed to across the project's
+       * dates, measured at the moment of commitment. Present only on assign,
+       * and only when the check could run at all.
+       *
+       * It arrives AFTER the write and can never prevent one (SEP-2: a
+       * reservation warns, it never prohibits). The manager is told
+       * immediately, on the screen where they can act on it, instead of
+       * discovering the clash later on a calendar they were not looking at.
+       */
+      reservation?: ReservationVerdict;
+      /** The assignment this call just wrote — so the screen can offer the
+       *  human decision (keep / undo / swap) without guessing which row. */
+      assigned?: { projectId: string; workerProfileId: string };
+      /** Present only when the verdict collides: colleagues CONFIRMED free on
+       *  the same dates (never an unknown) — the alternatives step of the
+       *  conflict flow. Names are the roster's own display names. */
+      alternatives?: { profileId: string; name: string }[];
+    }
   | {
       ok: false;
       code: "needs_migration" | "invalid" | "auth" | "no_company" | "not_authorized" | "error";
       message?: string;
     };
+
+/** The success branch, named. Callers that map a successful assignment into
+ *  another shape (the chat executors) need this type; spelling it inline as
+ *  `Extract<ProjectActionResult, { ok: true }>` puts a literal `ok: true` in
+ *  their source, which the fake-success guard in
+ *  `lib/conversation/worker-journey-security.test.ts` reads as a fabricated
+ *  success. The guard is right to be blunt about that pattern; a named type
+ *  is the better spelling anyway. */
+export type ProjectActionOk = Extract<ProjectActionResult, { ok: true }>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function asAny(c: SupabaseClient): any {
@@ -46,6 +82,7 @@ export async function createProjectAction(
   _prev: ProjectActionResult | null,
   formData: FormData,
 ): Promise<ProjectActionResult> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const supabase = await createClient();
   const {
     data: { user },
@@ -55,8 +92,16 @@ export async function createProjectAction(
   const title = String(formData.get("title") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim() || null;
 
-  const companyId = await callerCompanyId();
-  if (!companyId) return { ok: false, code: "no_company" };
+  // Same gate as the dedicated create route (`project-context-actions`):
+  // the ACTIVE workspace's company AND the manage-projects capability. Until
+  // 2026-09-19 this inline path checked only the company, so a `member`
+  // governance role could create projects here and not there.
+  const company = await requireEmployerCompany();
+  if (!company.ok) return { ok: false, code: "no_company" };
+  if (!hasOrganizationCapability(company.role, "manage-projects")) {
+    return { ok: false, code: "not_authorized" };
+  }
+  const companyId = company.companyId;
 
   // Rebuild W5: BOTH project-create entry points insert through the ONE core
   // (validation + W10 org binding + insert shape live in exactly one place).
@@ -109,7 +154,100 @@ export async function assignWorkerToProjectAction(
     source: "projects",
     metadata: { surface: "projects", role_context: "company" },
   });
-  return { ok: true };
+  const reservation = await reservationAfterAssign(supabase, projectId, workerProfileId);
+  const assigned = { projectId, workerProfileId };
+  if (!reservation) return { ok: true, assigned };
+  return reservation.alternatives.length > 0
+    ? { ok: true, assigned, reservation: reservation.verdict, alternatives: reservation.alternatives }
+    : { ok: true, assigned, reservation: reservation.verdict };
+}
+
+/**
+ * CAL-7 — the reservation check, run AFTER the assignment succeeded.
+ *
+ * AFTER, deliberately. A capacity warning may never decide whether a
+ * commitment happens (SEP-2), and running it first would make a slow or
+ * failing read able to delay or break a write it has no authority over.
+ * Everything here is wrapped so that no failure of the check can turn a
+ * successful assignment into an error: the worst case is that the manager is
+ * told nothing extra, which is exactly where the product was before.
+ *
+ * The project being assigned to is excluded — the assignment just written
+ * would otherwise be reported as a collision with itself.
+ */
+async function reservationAfterAssign(
+  supabase: SupabaseClient,
+  projectId: string,
+  workerProfileId: string,
+): Promise<{
+  verdict: ReservationVerdict;
+  alternatives: { profileId: string; name: string }[];
+} | null> {
+  try {
+    const computed = await reservationVerdictFor(supabase, projectId, workerProfileId);
+    if (!computed) return null;
+    const { verdict, window } = computed;
+    if (verdict.state !== "collides") return { verdict, alternatives: [] };
+    return {
+      verdict,
+      alternatives: await freeColleagues(supabase, workerProfileId, projectId, window),
+    };
+  } catch (error) {
+    console.error("[projects] reservation check failed:", error);
+    return null;
+  }
+}
+
+/**
+ * AUDIT of the human decision on a collision (kept / undone / swapped). One
+ * append to the existing `audit_logs` through a narrow SECURITY DEFINER writer.
+ * Best-effort by design: the decision itself already happened, so a missing
+ * function (not yet applied) or a failed write must never undo or fail it.
+ */
+export async function recordAssignmentDecisionAction(
+  projectId: string,
+  workerProfileId: string,
+  decision: "kept" | "undone" | "swapped",
+): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const { error } = await asAny(supabase).rpc("record_assignment_decision", {
+      p_project_id: projectId,
+      p_worker_profile_id: workerProfileId,
+      p_decision: decision,
+    });
+    if (error && !migMissing(error.code)) {
+      console.error("[projects] decision audit failed:", error.message);
+    }
+  } catch (error) {
+    console.error("[projects] decision audit failed:", error);
+  }
+}
+
+export type KeepAssignmentResult = KeepOverrideResult;
+
+/**
+ * KEEP an assignment despite a known calendar clash = an explicit override.
+ *
+ * The business logic lives in ONE core (lib/projects/override-keep-core.ts),
+ * shared with the chat door (`company.keep-assignment`) and the MCP tools
+ * (`assignment.keep_draft` / `assignment.keep_confirm`): collisions recomputed
+ * SERVER-SIDE at the moment of the decision, fail-loud, immutable receipt,
+ * closed reason code. This action only adds the session and the revalidation.
+ */
+export async function keepAssignmentAction(
+  projectId: string,
+  workerProfileId: string,
+  reasonCode?: string | null,
+): Promise<KeepAssignmentResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, code: "auth" };
+  const r = await keepOverrideCore(supabase, { projectId, workerProfileId, reasonCode });
+  if (r.ok && r.receipt === "recorded") revalidatePath("/", "layout");
+  return r;
 }
 
 export async function endAssignmentAction(

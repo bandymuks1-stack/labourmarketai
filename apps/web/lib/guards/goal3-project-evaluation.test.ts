@@ -43,9 +43,10 @@ const DRILLDOWN = "components/app/workspace/market-drilldown.tsx";
 const HOOK = "components/app/workspace/use-result-param.ts";
 const PANEL = "components/app/world-state/context-panel.tsx";
 const MARKET_RESULT = "lib/market-map/market-result.ts";
+const CANONICAL_IO = "lib/demand/canonical-demand.ts";
 
 /** The locales that carry the `conversation.results` namespace today. */
-const RESULT_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const RESULT_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 // ── W4.1 — the geography contract ──────────────────────────────────────────
 
@@ -442,18 +443,36 @@ describe("a failed read is stated, never rendered as an empty market", () => {
 // ── RLS is the authorization ───────────────────────────────────────────────
 
 describe("the loader reads as the signed-in user", () => {
-  it("uses the authenticated server client and nothing stronger", () => {
+  it("reaches the database ONLY through the canonical demand read", () => {
+    // RE-ANCHORED 2026-09-05. The rule is unchanged — the drilldown may not
+    // out-read the signed-in user — but its subject moved: the loader no
+    // longer opens a client of its own, it composes `loadCanonicalDemand()`,
+    // which is where the authenticated client and the worker-gated RPC live.
+    // Asserting the old shape here would have quietly stopped checking
+    // anything the day the read moved, so it checks the new one.
     const src = read(LOADER);
-    expect(src).toMatch(/from "@\/lib\/supabase\/server"/);
+    expect(src).toMatch(/from "@\/lib\/demand\/canonical-demand"/);
+    expect(src).toMatch(/loadCanonicalDemand\(/);
+    // No table of its own: a second reader here is how the two-truths defect
+    // came back last time.
+    expect(src).not.toMatch(/\.from\(\s*["']/);
     // A service-role client, an admin client or a security-definer RPC would
     // each replace RLS with our own judgement about who may see what.
     expect(src).not.toMatch(/SERVICE_ROLE|serviceRole|createAdminClient|\.rpc\(/);
   });
 
+  it("the canonical read the loader depends on is still the signed-in user's", () => {
+    const src = read(CANONICAL_IO);
+    expect(src).toMatch(/from "@\/lib\/supabase\/server"/);
+    expect(src).not.toMatch(/SERVICE_ROLE|serviceRole|createAdminClient/);
+  });
+
   it("reads only OPEN demand — the status a non-owning user may browse", () => {
-    const src = read(LOADER);
-    expect(src).toMatch(/\.eq\("status", input\.status \?\? "open"\)/);
-    expect(src).toMatch(/\.eq\("status", "open"\)/);
+    // The status filter moved WITH the read. It is enforced once, at the
+    // source, instead of twice in two modules that could drift apart.
+    expect(read(CANONICAL_IO)).toMatch(/\.eq\("status", "submitted"\)/);
+    // And the loader keeps none of its own, so there is nothing to drift.
+    expect(read(LOADER)).not.toMatch(/\.eq\(/);
   });
 
   it("re-validates the geography token on the server side of the boundary", () => {
@@ -559,17 +578,31 @@ describe("every depth is a real, restorable address", () => {
     // it — which is the guard working: a new depth cannot be added without
     // someone confirming, here, that closing clears it too. The invariant
     // form lives in the next test and needed no edit at all.
+    //
+    // 2026-09-23 (owner P0/P1 §17) edited this literal again, for `full` —
+    // and it is NOT a depth. It is the result's SIZE: "open full screen"
+    // expands the same result in place instead of navigating away. Closing a
+    // result must still drop it (a stale `full=1` would make the NEXT result
+    // open already expanded), which is exactly what this line confirms.
     expect(src).toMatch(
-      /result: null, geo: null, project: null, interaction: null, demand: null \}/,
+      /result: null, geo: null, project: null, interaction: null, demand: null, full: null, card: null \}/,
     );
-    expect(src).toMatch(/demand: null \},\s*"replace",?\s*\)/);
+    expect(src).toMatch(/full: null \},\s*"replace",?\s*\)/);
+    // Expanding and collapsing touch ONLY the flag — never the result, never
+    // a depth — and replace, so Back never steps through "big" and "small".
+    expect(src).toMatch(/expandResult: useCallback\(\(\) => write\(\{ full: "1" \}, "replace"\)/);
+    expect(src).toMatch(/collapseResult: useCallback\(\(\) => write\(\{ full: null \}, "replace"\)/);
   });
 
   it("opening a result clears any stale depth — EVERY depth", () => {
     const src = read(HOOK);
     // W8 added `demand` as the fourth depth — see the note in the test above.
+    // `full` (2026-09-23) is the size, not a depth: a fresh result opens at
+    // its ordinary size, and the invariant below holds it to closing too.
+    // `card` (2026-09-29) is the Player Card's lens: a fresh result never
+    // reopens the card on a lens nobody asked for this time.
     expect(src).toMatch(
-      /result: kind, geo: null, project: null, interaction: null, demand: null \}/,
+      /result: kind, geo: null, project: null, interaction: null, demand: null, full: null, card: null \}/,
     );
     // Stated as an invariant, not a snapshot: whatever `write` clears when a
     // result opens must also be cleared when it closes. A depth that survived

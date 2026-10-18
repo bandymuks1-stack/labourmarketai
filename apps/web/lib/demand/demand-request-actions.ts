@@ -9,6 +9,7 @@ import "server-only";
 import {
   submitDemandRequest as _submitDemandRequest,
   getOwnLastDemandPrefill as _getOwnLastDemandPrefill,
+  getOwnDemandPrefillById as _getOwnDemandPrefillById,
   type DemandIntent,
   type DemandFields,
   type DemandPrefill,
@@ -27,4 +28,12 @@ export async function getOwnLastDemandPrefillAction(
   intent: DemandIntent,
 ): Promise<DemandPrefill> {
   return _getOwnLastDemandPrefill(intent);
+}
+
+/** Repeat a specific past request of the caller's — structure only. */
+export async function getDemandPrefillByIdAction(
+  intent: DemandIntent,
+  requestId: string,
+): Promise<DemandPrefill> {
+  return _getOwnDemandPrefillById(intent, requestId);
 }

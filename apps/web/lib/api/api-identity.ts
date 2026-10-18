@@ -236,6 +236,17 @@ async function identityFromBearer(
       return { ok: false, reason: authErrorIsInfrastructure(error) ? "identity-unavailable" : "invalid-bearer" };
     }
     if (!data?.user) return { ok: false, reason: "invalid-bearer" };
+    // The no-argument `auth.getUser()` of a session-less client has no session
+    // to read and answers "no user" — so any domain helper that asks the
+    // client who is calling (the cookie client's own idiom) would see an
+    // anonymous caller. Answer it with THIS verification, memoised for the
+    // request exactly as the cookie client memoises its own
+    // (lib/supabase/server.ts). An explicit-JWT call still goes to the auth
+    // server untouched.
+    const realGetUser = supabase.auth.getUser.bind(supabase.auth);
+    const verified = { data: { user: data.user }, error: null };
+    supabase.auth.getUser = ((jwt?: string) =>
+      jwt !== undefined ? realGetUser(jwt) : Promise.resolve(verified)) as typeof supabase.auth.getUser;
     return {
       ok: true,
       identity: { userId: data.user.id, transport: "bearer", supabase },

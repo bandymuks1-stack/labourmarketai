@@ -17,20 +17,18 @@ import {
   type ManagerAbsencesData,
   type MyAbsencesData,
 } from "@/lib/leave/absences-model";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
 
-const STATUS_TONE: Record<AbsenceStatus, string> = {
-  requested: "border-state-warning/40 text-state-warning",
-  approved: "border-state-success/40 text-state-success",
-  rejected: "border-state-danger/40 text-state-danger",
-  cancelled: "border-ink-500 text-text-muted",
+/** Absence status -> the one StatusChip pattern (word + shape, semantic tokens). */
+const STATUS_VARIANT: Record<AbsenceStatus, StatusChipVariant> = {
+  requested: "waiting",
+  approved: "success",
+  rejected: "danger",
+  cancelled: "neutral",
 };
 
-function StatusChip({ status, label }: { status: AbsenceStatus; label: string }) {
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[status]}`}>
-      {label}
-    </span>
-  );
+function AbsenceStatusChip({ status, label }: { status: AbsenceStatus; label: string }) {
+  return <StatusChip variant={STATUS_VARIANT[status]}>{label}</StatusChip>;
 }
 
 /** Worker: request an absence + see own requests. */
@@ -101,7 +99,7 @@ export function MyAbsencesPanel({ data }: { data: MyAbsencesData }) {
                 <li key={a.id} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3">
                   <span className="text-sm text-text-primary">{t(`types.${a.absenceType}`)}</span>
                   <span className="font-mono text-meta text-text-muted">{a.startDate} → {a.endDate}{a.halfDay ? ` · ${t("halfDay")}` : ""}</span>
-                  <StatusChip status={a.status} label={t(`statuses.${a.status}`)} />
+                  <AbsenceStatusChip status={a.status} label={t(`statuses.${a.status}`)} />
                   {(a.status === "requested" || a.status === "approved") && (
                     <button type="button" onClick={() => cancel(a.id)} disabled={pending}
                       className="ml-auto rounded-md border border-ink-500 px-2 py-1 text-meta text-text-muted hover:border-state-danger hover:text-state-danger"

@@ -8,6 +8,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { emitWorkTaskAssignedNotification } from "@/lib/notifications/event-emitters";
+import { createWorkTaskCore, isStructureOutcome } from "@/lib/tasks/create-task-core";
+import { setWorkTaskStatusCore, type SetWorkTaskStatusCoreResult } from "@/lib/tasks/set-task-status-core";
+import { checkTaskAssignmentReservation } from "@/lib/tasks/task-reservation";
+import { getTaskCollaboration, readWorkTaskAssignmentFacts } from "@/lib/tasks/tasks";
 import {
   WORK_TASK_DESCRIPTION_MAX,
   WORK_TASK_TITLE_MAX,
@@ -15,6 +19,7 @@ import {
   isMigrationMissingCode,
   isValidWorkTaskPriority,
   isValidWorkTaskStatus,
+  statusChangeAdvisory,
 } from "@/lib/tasks/task-model";
 
 /**
@@ -73,6 +78,8 @@ type Notice =
   | "not_found"
   | "limit_reached"
   | "cycle"
+  | "invalid_structure"
+  | "relink_required"
   | "error";
 
 /** Rebuild the tasks-page URL from VALIDATED parts only (never raw input). */
@@ -81,13 +88,33 @@ function tasksUrl(
   notice: Notice,
   view: string | null,
   project: string | null,
+  advisory: Advisory = {},
 ): string {
   const params = new URLSearchParams();
   if (view === "board") params.set("view", "board");
   if (project && UUID_RX.test(project)) params.set("project", project);
   params.set("notice", notice);
+  // ADVISORY ONLY (SEP-2) — codes and counts, never names or labels: the
+  // page re-derives any detail under the viewer's own session.
+  if (advisory.blockersOpen && advisory.blockersOpen > 0) {
+    params.set("advisory", "blockers_open");
+    params.set("n", String(Math.min(advisory.blockersOpen, 99)));
+  }
+  if (advisory.reservation && advisory.reservationTaskId) {
+    params.set("reservation", advisory.reservation);
+    params.set("rtask", advisory.reservationTaskId);
+  }
   return `/${locale}/dashboard/tasks?${params.toString()}`;
 }
+
+/** Non-blocking notes riding on a SUCCESSFUL write's redirect. */
+type Advisory = {
+  /** Open blockers of a task just moved to in_progress / done. */
+  blockersOpen?: number;
+  /** Assignee's calendar verdict on the task's due day. */
+  reservation?: "collides" | "unknown";
+  reservationTaskId?: string;
+};
 
 type FormContext = {
   locale: string;
@@ -119,14 +146,18 @@ function noticeForOutcome(outcome: string, okNotice: Notice): Notice {
     return "limit_reached";
   }
   if (outcome === "cycle") return "cycle";
+  if (isStructureOutcome(outcome)) return "invalid_structure";
+  // The task (or a subtask) has live journal evidence: re-staging it would
+  // silently move that evidence to another stage — unlink/relink first.
+  if (outcome === "evidence_linked") return "relink_required";
   return "invalid";
 }
 
-function finish(ctx: FormContext, notice: Notice): never {
+function finish(ctx: FormContext, notice: Notice, advisory: Advisory = {}): never {
   if (notice === "created" || notice === "updated") {
     revalidatePath("/", "layout");
   }
-  redirect(tasksUrl(ctx.locale, notice, ctx.view, ctx.project));
+  redirect(tasksUrl(ctx.locale, notice, ctx.view, ctx.project, advisory));
 }
 
 /** Create a work task through create_work_task_v2 (v1 fallback while the
@@ -140,72 +171,22 @@ export async function createWorkTaskAction(formData: FormData): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) finish(ctx, "not_authorized");
 
-  const title = String(formData.get("title") ?? "").trim();
-  if (title.length < WORK_TASK_TITLE_MIN || title.length > WORK_TASK_TITLE_MAX) {
-    finish(ctx, "invalid");
-  }
-
-  const description = String(formData.get("description") ?? "").trim();
-  if (description.length > WORK_TASK_DESCRIPTION_MAX) finish(ctx, "invalid");
-
-  const priority = String(formData.get("priority") ?? "normal");
-  if (!isValidWorkTaskPriority(priority)) finish(ctx, "invalid");
-
-  const dueDate = String(formData.get("dueDate") ?? "").trim();
-  if (dueDate && !DATE_RX.test(dueDate)) finish(ctx, "invalid");
-
-  const projectId = String(formData.get("projectId") ?? "").trim();
-  if (projectId && !UUID_RX.test(projectId)) finish(ctx, "invalid");
-
-  const objectId = String(formData.get("objectId") ?? "").trim();
-  if (objectId && !UUID_RX.test(objectId)) finish(ctx, "invalid");
-
-  // The assign select posts a profile id; the plain checkbox posts "on"
-  // (self-assign). An empty value means unassigned — exactly like v1.
-  const assigneeRaw = String(formData.get("assigneeProfileId") ?? "").trim();
-  const assignSelf = formData.get("assignSelf") === "on";
-  const assignee = assigneeRaw || (assignSelf ? user!.id : "");
-  if (assignee && !UUID_RX.test(assignee)) finish(ctx, "invalid");
-
-  const { data, error } = await asAny(supabase).rpc("create_work_task_v2", {
-    p_title: title,
-    p_description: description,
-    p_priority: priority,
-    p_due_date: dueDate,
-    p_project_id: projectId,
-    p_object_id: objectId,
-    p_assignee_profile_id: assignee,
+  // THE ONE create (lib/tasks/create-task-core.ts): the chat's
+  // `company.create-task` inserts through the same core. This action keeps
+  // its form contract and its redirect-with-notice; nothing else.
+  const result = await createWorkTaskCore(supabase, user!.id, {
+    title: String(formData.get("title") ?? ""),
+    description: String(formData.get("description") ?? ""),
+    priority: String(formData.get("priority") ?? "normal"),
+    dueDate: String(formData.get("dueDate") ?? ""),
+    projectId: String(formData.get("projectId") ?? ""),
+    objectId: String(formData.get("objectId") ?? ""),
+    stageId: String(formData.get("stageId") ?? ""),
+    parentTaskId: String(formData.get("parentTaskId") ?? ""),
+    assigneeProfileId: String(formData.get("assigneeProfileId") ?? ""),
+    assignSelf: formData.get("assignSelf") === "on",
   });
-
-  if (error && isMigrationMissingCode(error.code)) {
-    // v2 not applied yet. Plain creates fall back to the APPLIED v1 RPC;
-    // v2-only capabilities report the honest pre-apply state instead.
-    if (objectId || (assignee && assignee !== user!.id)) {
-      finish(ctx, "needs_migration");
-    }
-    const v1 = await asAny(supabase).rpc("create_work_task_v1", {
-      p_title: title,
-      p_description: description,
-      p_priority: priority,
-      p_due_date: dueDate,
-      p_project_id: projectId,
-      p_assign_to_self: assignee === user!.id,
-    });
-    if (v1.error) finish(ctx, noticeForRpcError(v1.error));
-    finish(ctx, noticeForOutcome(String(v1.data ?? ""), "created"));
-  }
-  if (error) finish(ctx, noticeForRpcError(error));
-
-  const outcome = String(data ?? "");
-  // Success returns the new task id — emit the durable assignment event for
-  // assign-to-other. AWAITED, not detached: a `void`-detached insert is
-  // killable the instant the serverless invocation returns (the mechanism
-  // that made the live interest emitter deliver nothing). The emitter never
-  // throws, so the create that already succeeded cannot fail on its bell.
-  if (UUID_RX.test(outcome) && assignee && assignee !== user!.id) {
-    await emitWorkTaskAssignedNotification(outcome, user!.id);
-  }
-  finish(ctx, noticeForOutcome(outcome, "created"));
+  finish(ctx, result.kind === "created" ? "created" : result.kind);
 }
 
 /** Move a task along the honest forward transitions
@@ -226,20 +207,40 @@ export async function setWorkTaskStatusAction(
   const status = String(formData.get("status") ?? "").trim();
   if (!isValidWorkTaskStatus(status)) finish(ctx, "invalid");
 
-  const { data, error } = await asAny(supabase).rpc("set_work_task_status_v2", {
-    p_task_id: taskId,
-    p_status: status,
-  });
-  if (error && isMigrationMissingCode(error.code)) {
-    const v1 = await asAny(supabase).rpc("set_work_task_status_v1", {
-      p_task_id: taskId,
-      p_status: status,
-    });
-    if (v1.error) finish(ctx, noticeForRpcError(v1.error));
-    finish(ctx, noticeForOutcome(String(v1.data ?? ""), "updated"));
+  // THE ONE status write (owner contract §5.5) — shared with the chat's
+  // sentence; the core carries the v2 → v1 fallback and the RPC's outcomes.
+  const r = await setWorkTaskStatusCore(supabase, taskId, status);
+  if (r.kind !== "updated") finish(ctx, noticeForCoreOutcome(r.kind));
+
+  // ADVISORY (SEP-2): the RPC does not enforce dependencies and neither does
+  // this. The move has happened; if open blockers remain the result says so.
+  // A failed or hidden read yields no note — it never turns into a refusal.
+  let blockersOpen = 0;
+  try {
+    const collab = await getTaskCollaboration([taskId]);
+    blockersOpen =
+      statusChangeAdvisory(status, collab.blockersByTask[taskId] ?? [])?.openBlockers ?? 0;
+  } catch {
+    blockersOpen = 0;
   }
-  if (error) finish(ctx, noticeForRpcError(error));
-  finish(ctx, noticeForOutcome(String(data ?? ""), "updated"));
+  finish(ctx, "updated", { blockersOpen });
+}
+
+function noticeForCoreOutcome(kind: SetWorkTaskStatusCoreResult["kind"]): Notice {
+  switch (kind) {
+    case "updated":
+      return "updated";
+    case "needs_migration":
+      return "needs_migration";
+    case "not_authorized":
+      return "not_authorized";
+    case "not_found":
+      return "not_found";
+    case "error":
+      return "error";
+    default:
+      return "invalid";
+  }
 }
 
 /** Edit bounded task fields through update_work_task_v2 (v1 fallback while
@@ -273,6 +274,17 @@ export async function updateWorkTaskAction(formData: FormData): Promise<void> {
   const objectId = String(formData.get("objectId") ?? "").trim();
   if (objectId && !UUID_RX.test(objectId)) finish(ctx, "invalid");
 
+  // Stage / parent are posted only when the edit form rendered them (the
+  // structure columns are readable). Present → sent ('' clears, uuid sets);
+  // absent → NOT sent, so the RPC leaves the structure untouched and the
+  // call keeps the exact pre-migration argument set.
+  const hasStage = formData.has("stageId");
+  const hasParent = formData.has("parentTaskId");
+  const stageId = String(formData.get("stageId") ?? "").trim();
+  const parentTaskId = String(formData.get("parentTaskId") ?? "").trim();
+  if (stageId && !UUID_RX.test(stageId)) finish(ctx, "invalid");
+  if (parentTaskId && !UUID_RX.test(parentTaskId)) finish(ctx, "invalid");
+
   const { data, error } = await asAny(supabase).rpc("update_work_task_v2", {
     p_task_id: taskId,
     p_title: title,
@@ -280,9 +292,13 @@ export async function updateWorkTaskAction(formData: FormData): Promise<void> {
     p_priority: priority,
     p_due_date: dueDate,
     p_object_id: objectId,
+    // A subtask INHERITS its parent's stage: when a parent is chosen the
+    // stage field is not sent (the RPC would otherwise compare it).
+    ...(hasStage && !parentTaskId ? { p_stage_id: stageId } : {}),
+    ...(hasParent ? { p_parent_task_id: parentTaskId } : {}),
   });
   if (error && isMigrationMissingCode(error.code)) {
-    if (objectId) finish(ctx, "needs_migration");
+    if (objectId || hasStage || hasParent) finish(ctx, "needs_migration");
     const v1 = await asAny(supabase).rpc("update_work_task_v1", {
       p_task_id: taskId,
       p_title: title,
@@ -322,10 +338,26 @@ export async function assignWorkTaskAction(formData: FormData): Promise<void> {
 
   const outcome = String(data ?? "");
   if (outcome === "updated" && assignee && assignee !== user!.id) {
-    // AWAITED — survives the serverless freeze; never throws.
-    await emitWorkTaskAssignedNotification(taskId, user!.id);
+    // AWAITED — survives the serverless freeze; never throws. The recipient
+    // is the STORED assignee, read back under the actor's own session.
+    await emitWorkTaskAssignedNotification(
+      await readWorkTaskAssignmentFacts(supabase, taskId, user!.id),
+    );
   }
-  finish(ctx, noticeForOutcome(outcome, "updated"));
+  const notice = noticeForOutcome(outcome, "updated");
+  if (outcome !== "updated" || !assignee || notice !== "updated") finish(ctx, notice);
+
+  // ADVISORY (SEP-2): is the new assignee already committed on the due day?
+  // Asked AFTER the write, never throws, records nothing. `clear` and "not
+  // applicable" say nothing; `unknown` is surfaced as unknown, never as clear.
+  const verdict = await checkTaskAssignmentReservation(supabase, taskId);
+  finish(
+    ctx,
+    "updated",
+    verdict && verdict.state !== "clear"
+      ? { reservation: verdict.state, reservationTaskId: taskId }
+      : {},
+  );
 }
 
 /** Reopen finished work (reopen_work_task_v1 — managing roles; done →

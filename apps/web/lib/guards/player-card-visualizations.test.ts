@@ -29,7 +29,6 @@ const read = (rel: string): string => readFileSync(join(APP, rel), "utf-8");
 const CARD = read("components/app/worker-player-card.tsx");
 const DATA = read("lib/player-card/player-card.ts");
 const LABELS = read("lib/player-card/labels.ts");
-const SHOWCASE = read("components/marketing/player-card-showcase.tsx");
 const VISUALS = read("lib/player-card/evidence-visuals.ts");
 const CHART_EVIDENCE = read(
   "components/app/player-card/evidence-timeline-chart.tsx",
@@ -48,7 +47,13 @@ describe("§5.2 the card really carries data visualizations", () => {
     ]) {
       expect(CARD, `card must render ${marker}`).toContain(marker);
     }
-    expect(CARD).toContain('data-testid="player-card-visualizations"');
+    // Since 2026-09-30 the charts live in the lens that answers their
+    // question (work over time → WORK/EVIDENCE, skill strength → SKILLS,
+    // the history band → HISTORY) instead of one always-open chart block.
+    const flat = CARD.replace(/\s+/g, "");
+    expect(flat).toContain("{secEvidenceChart}");
+    expect(flat).toContain("{secSkillChart}");
+    expect(flat).toContain("{secE}");
   });
 
   it("each chart draws geometry — not another list of sentences", () => {
@@ -84,7 +89,10 @@ describe("§5.2 the series are REAL rows, never invented", () => {
   it("the evidence timeline reads the worker's own live journal entries", () => {
     expect(DATA).toContain("journalEntryTimestamps");
     expect(DATA).toMatch(/\.from\("journal_entries"\)[\s\S]{0,200}\.select\("created_at"\)/);
-    expect(DATA).toMatch(/\.is\("deleted_at", null\)/);
+    // Was `.is("deleted_at", null)` written inline — which let a SUPERSEDED
+    // entry keep drawing a mark on the timeline. The read now goes through
+    // the shared live-entry rule, which filters BOTH lifecycle columns.
+    expect(DATA).toMatch(/liveJournalEntriesOnly\(/);
     expect(DATA).toMatch(/\.gte\("created_at", windowStart\.toISOString\(\)\)/);
   });
 
@@ -125,22 +133,15 @@ describe("§5.2 the series are REAL rows, never invented", () => {
 });
 
 describe("§5.2 landing and product cannot drift apart", () => {
-  it("the landing renders the canonical component, not a marketing copy", () => {
-    expect(SHOWCASE).toContain("WorkerPlayerCard");
-    expect(SHOWCASE).toContain("buildPlayerCardLabels");
-    expect(SHOWCASE).not.toMatch(/<PlayerCard\b/);
-  });
-
   it("the landing sample goes through the SAME derivers as the real card", () => {
     // S3: the sample literal moved into the ONE shared module both public
     // surfaces build from (the showcase must import it). The deriver rule
     // holds inside that module — and neither file may hand-build a series
     // object, which is how a prettier fake marketing chart would get in.
-    expect(SHOWCASE).toContain("buildSampleWorkerPlayerCard");
     const sample = read("lib/player-card/sample-card.ts");
     expect(sample).toContain("deriveEvidenceTimeline(");
     expect(sample).toContain("deriveSkillEvidence(");
-    for (const src of [SHOWCASE, sample]) {
+    for (const src of [sample]) {
       expect(src).not.toMatch(/evidenceTimeline:\s*\[\s*\{/);
       expect(src).not.toMatch(/skillEvidence:\s*\[\s*\{/);
     }
@@ -152,10 +153,6 @@ describe("§5.2 landing and product cannot drift apart", () => {
     expect(read("lib/player-card/sample-card.ts")).toMatch(
       /verified: false, source: "self"/,
     );
-  });
-
-  it("the landing still says out loud that the card is a sample", () => {
-    expect(SHOWCASE).toContain("conceptNote");
   });
 });
 
@@ -172,9 +169,31 @@ describe("§5.2 the card stays reachable in the authenticated product", () => {
     }
   });
 
-  it("the avatar menu still deep-links to the card", () => {
-    expect(read("components/app/account-menu.tsx")).toMatch(
-      /\/dashboard\/journal#mano-cv-identity/,
+  it("the avatar menu still deep-links to the card — at its ONE home", () => {
+    // RE-ANCHORED 2026-09-23. The menu used to open the card as a closed
+    // disclosure on the journal, while the chat, ŠIANDIEN and the profile hub
+    // open it as the workspace RESULT — one object, two homes, different
+    // surroundings. The menu now names the same address as ŠIANDIEN's
+    // canonical constant; the journal disclosure below stays reachable from
+    // the journal itself.
+    const menu = read("components/app/account-menu.tsx");
+    expect(menu).toMatch(/\{ href: playerCardHref, label: t\("tabs\.playerCard"\)/);
+    // The result is personal-only (registry): the menu asks the SAME rule, in
+    // the SAME context the workspace derives, and an organization-context
+    // account falls back to the person's own card section on the profile —
+    // never a result its workspace refuses to render.
+    expect(menu).toMatch(
+      /const playerCardHref = canRenderInline\("player-card", menuResultContext\)\s*\?\s*"\/dashboard\?result=player-card"\s*:\s*"\/dashboard\/profile#cv-availability";/,
+    );
+    expect(menu).toMatch(
+      /const menuResultContext: ResultContext =\s*activeOrganizationId \|\| activeOrgName \? "organization" : "personal";/,
+    );
+    expect(read("components/app/conversation/chat/conversation-chat.tsx")).toMatch(
+      /auth0\?\.activeOrganizationId \|\| auth0\?\.activeOrgName \? "organization" : "personal";/,
+    );
+    expect(menu).not.toMatch(/href: "\/dashboard\/journal#mano-cv-identity"/);
+    expect(read("lib/today/today-model.ts")).toMatch(
+      /WORK_CARD_EDITOR_HREF = "\/dashboard\?result=player-card"/,
     );
   });
 
@@ -236,7 +255,11 @@ describe("§5.2 the card stays reachable in the authenticated product", () => {
    */
   it("the collapsed row and the avatar menu name the card identically", () => {
     const journal = read("app/[locale]/dashboard/journal/page.tsx");
-    expect(journal).toContain('label: tTabs("playerCard")');
+    // Target worker IA 2026-09-13 §4: the page-local quick-nav strip (which
+    // carried a second `label: tTabs("playerCard")`) is REMOVED for the
+    // worker — the collapsed row is now the ONE thing naming the card here,
+    // and it still names it exactly as the avatar menu does.
+    expect(journal).not.toMatch(/<PageQuickNav/);
     expect(journal).toContain('{tTabs("playerCard")}');
     expect(read("components/app/account-menu.tsx")).toContain(
       't("tabs.playerCard")',

@@ -119,6 +119,22 @@ const DRAFTS: readonly Draft[] = [
         title: "Wie LabourMarket.ai Ihnen hilft, Arbeit zu finden",
         desc: "Wie LabourMarket.ai Ihnen hilft, Arbeit zu finden: Chancen nach Fähigkeiten abgleichen mit ehrlicher Begründung — und Sie behalten die Kontrolle.",
       },
+      pl: {
+        slug: "jak-labourmarket-ai-pomaga-znalezc-prace",
+        h1: "Jak LabourMarket.ai pomaga mi znaleźć pracę?",
+        short: "Dopasowuje Twoje prawdziwe umiejętności i preferencje do możliwości pracy i pokazuje przy każdej uczciwy powód, dlaczego pasuje — inicjatywa zostaje przy Tobie i sam wybierasz, czym się zająć.",
+        full: [
+          "LabourMarket.ai nie wysyła Twoich danych do pracodawców ani nie obiecuje Ci pracy. Zamiast tego czyta umiejętności, języki, dostępność i lokalizacje z Twojego profilu i pokazuje możliwości, które naprawdę się z nimi pokrywają, na tablicy, którą kontrolujesz.",
+          "Przy każdej możliwości widzisz, dlaczego się pojawiła: które Twoje umiejętności się z nią łączą i czego może jeszcze brakować. Nic nie jest decydowane za Ciebie i nie ma jednego wyniku, który ustawiałby Cię w rankingu wobec innych osób — zainteresowanie zgłaszasz tylko tym, co Ci odpowiada.",
+        ],
+        steps: [
+          "Uzupełnij profil, aby odzwierciedlał Twoje prawdziwe umiejętności i preferencje.",
+          "Otwórz tablicę możliwości i przeczytaj wyjaśnienie dopasowania przy każdej pozycji.",
+          "Zgłoś zainteresowanie tymi, które Ci odpowiadają; resztę pomiń.",
+        ],
+        title: "Jak LabourMarket.ai pomaga znaleźć pracę",
+        desc: "Jak LabourMarket.ai pomaga znaleźć pracę: dopasowanie możliwości na podstawie umiejętności z uczciwym wyjaśnieniem, a kontrola zostaje przy Tobie.",
+      },
     },
   },
   {
@@ -179,6 +195,17 @@ const DRAFTS: readonly Draft[] = [
         title: "Ist die Arbeitssuche auf LabourMarket.ai kostenlos?",
         desc: "Die Arbeitssuche auf LabourMarket.ai ist kostenlos: Profil, Abgleich und Interesse zeigen kosten Arbeitskräfte nichts. Kein Bezahl-Ranking.",
       },
+      pl: {
+        slug: "czy-szukanie-pracy-jest-platne",
+        h1: "Czy muszę płacić za szukanie pracy na LabourMarket.ai?",
+        short: "Nie. Budowanie profilu, oglądanie pasujących możliwości i zgłaszanie zainteresowania są bezpłatne dla osób szukających pracy. Nigdy nie płacisz za to, by ktoś Cię znalazł, ani za zgłoszenie się.",
+        full: [
+          "Dla pracowników i osób szukających pracy rdzeń platformy jest bezpłatny: tworzenie profilu, import CV, dopasowywanie umiejętności do możliwości i kontakt w sprawie tych, które pasują. Nie ma opłaty za pojawianie się w wynikach ani płatnego pierwszeństwa w rankingu.",
+          "Funkcje płatne istnieją po stronie pracodawców i firm — dla organizacji, które zgłaszają zapotrzebowania i prowadzą rekrutację — a nie dla osób szukających pracy. Gdyby cokolwiek kiedykolwiek żądało od pracownika opłaty za bycie widocznym, byłoby to sprzeczne z tym, jak zaprojektowano tę platformę.",
+        ],
+        title: "Czy szukanie pracy na LabourMarket.ai jest bezpłatne?",
+        desc: "Szukanie pracy na LabourMarket.ai jest bezpłatne: profil, dopasowania i zgłaszanie zainteresowania nic nie kosztują pracowników. Bez płatnego pierwszeństwa w rankingu.",
+      },
     },
   },
   {
@@ -238,6 +265,17 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Arbeitsprofil versus Papier-Lebenslauf auf LabourMarket.ai",
         desc: "Wie sich ein LabourMarket.ai-Arbeitsprofil von einem Papier-Lebenslauf unterscheidet: lebendig, belegbasiert und aktuell statt feste Momentaufnahme.",
+      },
+      pl: {
+        slug: "profil-zawodowy-a-papierowe-cv",
+        h1: "Czym profil zawodowy różni się od papierowego CV?",
+        short: "Papierowe CV to zamrożona migawka, którą przepisujesz ręcznie; profil zawodowy to żywy zapis, który aktualizuje się wraz z Twoją pracą i może pokazać dowód stojący za każdym stwierdzeniem.",
+        full: [
+          "CV pisze się raz, na dany moment, i od razu zaczyna się starzeć: wymienia to, co o sobie mówisz, bez możliwości sprawdzenia tego przez czytającego. Profil zawodowy zawiera te same informacje, ale pozostaje aktualny i oddziela to, co deklarujesz, od tego, co zostało potwierdzone.",
+          "Ponieważ profil jest połączony z Twoją prawdziwą aktywnością, umiejętności i potwierdzenia można dołączyć jako dowód, a Ty decydujesz, co jest widoczne. Uzupełnia CV, zamiast zastępować samą ideę — nadal możesz je wyeksportować lub zaimportować — ale nie dezaktualizuje się w chwili zapisania.",
+        ],
+        title: "Profil zawodowy a papierowe CV na LabourMarket.ai",
+        desc: "Czym profil zawodowy na LabourMarket.ai różni się od papierowego CV: żywy, oparty na dowodach i aktualny zamiast zamrożonej, starzejącej się migawki.",
       },
     },
   },
@@ -324,6 +362,22 @@ const DRAFTS: readonly Draft[] = [
         title: "Ihren Lebenslauf in LabourMarket.ai importieren",
         desc: "Wie Sie einen vorhandenen Lebenslauf in LabourMarket.ai importieren: hochladen, die ausgelesenen Vorschläge prüfen und nur Bestätigtes übernehmen.",
       },
+      pl: {
+        slug: "jak-zaimportowac-moje-cv",
+        h1: "Jak zaimportować moje istniejące CV?",
+        short: "Wgraj plik CV, a platforma odczyta go w postaci uporządkowanych podpowiedzi do profilu. Przeglądasz każdą pozycję i nic nie trafia do profilu, dopóki tego nie potwierdzisz.",
+        full: [
+          "Import CV oszczędza przepisywanie. Platforma wyciąga z dokumentu prawdopodobne role, umiejętności i doświadczenie i przedstawia je jako podpowiedzi przypisane do pól Twojego profilu zawodowego.",
+          "Wynik pozostaje pod Twoją kontrolą: każdą podpowiedź możesz przyjąć, poprawić lub odrzucić, a zaimportowane umiejętności mają najpierw status zadeklarowanych, nie potwierdzonych. Oryginalny plik to Twoje dane — możesz go usunąć — a import nigdy sam nie zmienia Twojego profilu.",
+        ],
+        steps: [
+          "Otwórz profil i wybierz import CV.",
+          "Wgraj plik i pozwól platformie odczytać go w postaci podpowiedzi.",
+          "Przejrzyj każdą podpowiedź i potwierdź tylko to, co jest prawidłowe.",
+        ],
+        title: "Zaimportuj swoje CV do LabourMarket.ai",
+        desc: "Jak zaimportować istniejące CV do LabourMarket.ai: wgraj plik, przejrzyj wyciągnięte podpowiedzi i potwierdź tylko to, co zatwierdzasz.",
+      },
     },
   },
   {
@@ -383,6 +437,17 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Rote, gelbe und grüne Fähigkeitssignale erklärt",
         desc: "Was die roten, gelben und grünen Fähigkeitssignale auf LabourMarket.ai bedeuten: ein transparentes Maß dafür, wie viel Beleg jede Fähigkeit stützt.",
+      },
+      pl: {
+        slug: "co-oznaczaja-czerwone-zolte-i-zielone-sygnaly-umiejetnosci",
+        h1: "Co oznaczają czerwone, żółte i zielone sygnały przy umiejętnościach?",
+        short: "Pokazują, ile dowodów stoi za umiejętnością: zielony oznacza potwierdzoną na podstawie prawdziwej pracy, żółty zadeklarowaną lub częściowo popartą, a czerwony podaną, ale jeszcze bez dowodu.",
+        full: [
+          "Kolor jest sygnałem uczciwości, a nie oceną Twojego poziomu. Zielony oznacza umiejętność, którą przełożony potwierdził na podstawie faktycznie wykonanej przez Ciebie pracy; żółty — umiejętność zadeklarowaną lub mającą częściowe oparcie w aktywności; czerwony — umiejętność wpisaną, dla której nie ma jeszcze dowodu.",
+          "Chodzi o to, by umiejętności zadeklarowane i poparte dowodem pozostały widocznie rozdzielone, żeby i Ty, i pracodawca wiedzieli, co jest udowodnione. Czerwony sygnał nie jest zarzutem — po prostu pokazuje, gdzie można dodać potwierdzenie.",
+        ],
+        title: "Czerwone, żółte i zielone sygnały przy umiejętnościach",
+        desc: "Co oznaczają czerwone, żółte i zielone sygnały przy umiejętnościach na LabourMarket.ai: przejrzysta miara tego, ile dowodów stoi za każdą umiejętnością.",
       },
     },
   },
@@ -444,6 +509,17 @@ const DRAFTS: readonly Draft[] = [
         title: "Wie eine Fähigkeit auf LabourMarket.ai bestätigt wird",
         desc: "Wie eine Fähigkeit auf LabourMarket.ai bestätigt wird: jemand, der Ihre echte Arbeit sah, verifiziert sie — von angegeben zu belegt.",
       },
+      pl: {
+        slug: "jak-potwierdza-sie-umiejetnosc",
+        h1: "Jak umiejętność jest potwierdzana na platformie?",
+        short: "Umiejętność staje się potwierdzona, gdy zweryfikuje ją ktoś, kto widział Twoją prawdziwą pracę — zwykle przełożony lub lider zespołu. Do tego czasu pozostaje umiejętnością zadeklarowaną, wyraźnie tak oznaczoną.",
+        full: [
+          "Potwierdzenie jest powiązane z dowodem, a nie z testem czy samooceną. Gdy wykonasz pracę, która pokazuje daną umiejętność, osoba mogąca za tę pracę ręczyć potwierdza ją, a umiejętność przechodzi z zadeklarowanej na potwierdzoną wraz z zapisem, kto ją potwierdził.",
+          "To utrzymuje sygnał uczciwym: umiejętność potwierdzona oznacza, że prawdziwa osoba stanęła za prawdziwą pracą, i nie może jej przyznać sama platforma ani nie da się jej kupić. Umiejętności zadeklarowane możesz mieć bezterminowo; potwierdzenie jest po prostu mocniejszym, popartym dowodem stanem.",
+        ],
+        title: "Jak umiejętność jest potwierdzana na LabourMarket.ai",
+        desc: "Jak umiejętność jest potwierdzana na LabourMarket.ai: osoba, która widziała Twoją prawdziwą pracę, weryfikuje ją, przenosząc ją z zadeklarowanej do stanu popartego dowodem.",
+      },
     },
   },
   {
@@ -504,6 +580,17 @@ const DRAFTS: readonly Draft[] = [
         title: "Benachbarte Berufe auf LabourMarket.ai entdecken",
         desc: "Wie LabourMarket.ai Ihnen hilft, benachbarte Berufe zu entdecken: Es gleicht Ihre vorhandenen Fähigkeiten mit verwandten Rollen ab und zeigt die verbindenden Fähigkeiten.",
       },
+      pl: {
+        slug: "jak-platforma-odkrywa-pokrewne-zawody",
+        h1: "Jak platforma pomaga odkrywać pokrewne zawody?",
+        short: "Porównuje umiejętności, które już masz, z umiejętnościami potrzebnymi w różnych zawodach, a potem pokazuje te o największym pokryciu jako realne pokrewne kierunki — wraz z łączącymi je umiejętnościami.",
+        full: [
+          "Zamiast kazać Ci zgadywać, platforma wychodzi od Twoich faktycznych umiejętności. Sprawdza, które zawody dzielą ich wiele, i przedstawia je jako pokrewne kierunki, uporządkowane według tego, jaką część przejścia już masz za sobą.",
+          "Przy każdym kierunku widzisz umiejętności, które Cię z nim łączą, oraz — uczciwie — te, których możesz jeszcze potrzebować, więc podpowiedź jest punktem wyjścia do prawdziwej decyzji, a nie obietnicą. Kierunki wynikają z Twoich umiejętności, a nie ze stałej listy popularnych zawodów.",
+        ],
+        title: "Odkrywanie pokrewnych zawodów na LabourMarket.ai",
+        desc: "Jak LabourMarket.ai pomaga odkrywać pokrewne zawody: dopasowuje Twoje obecne umiejętności do powiązanych ról i pokazuje łączące je umiejętności.",
+      },
     },
   },
   {
@@ -563,6 +650,17 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Welcher Berufswechsel ist für Ihre Fähigkeiten realistisch?",
         desc: "Wie Sie erkennen, welcher Berufswechsel auf LabourMarket.ai realistisch ist: Fähigkeiten-Überschneidung gegen die verbleibende Lücke je Richtung abwägen.",
+      },
+      pl: {
+        slug: "jak-poznac-ktora-zmiana-zawodu-jest-realna",
+        h1: "Jak poznać, która zmiana zawodu jest realna dla moich umiejętności?",
+        short: "Porównaj umiejętności wymagane przez dany kierunek z tymi, które już masz. Im większe pokrycie i mniejsza pozostała luka, tym bardziej realna jest zmiana już teraz.",
+        full: [
+          "Realna zmiana to taka, w której większość wymaganych umiejętności już jest Twoja, a brakujący element da się uzupełnić rozsądnym krokiem, a nie pełnym startem od zera. LabourMarket.ai pokazuje to wprost: przy każdym kierunku widać pokrycie i konkretną lukę.",
+          "Wykorzystaj to, by zważyć wysiłek wobec dopasowania: kierunek o dużym pokryciu i małej, jasnej luce to ruch na najbliższy czas; kierunek o małym pokryciu to dłuższy projekt. Narzędzie uczciwie wspiera decyzję — nie podejmuje jej za Ciebie i nie ukrywa, czego zmiana wymaga.",
+        ],
+        title: "Która zmiana zawodu jest realna dla Twoich umiejętności?",
+        desc: "Jak rozpoznać realną zmianę zawodu na LabourMarket.ai: zważ pokrycie umiejętności wobec pozostałej luki przy każdym kierunku.",
       },
     },
   },
@@ -649,6 +747,22 @@ const DRAFTS: readonly Draft[] = [
         title: "Was ein Personalbedarf auf LabourMarket.ai braucht",
         desc: "Welche Informationen ein LabourMarket.ai-Personalbedarf braucht: Rolle, Teamgröße, Ort, Zeit und Sprache — mit optionalem Detail für einen schärferen Abgleich.",
       },
+      pl: {
+        slug: "jakie-informacje-zawiera-zapotrzebowanie",
+        h1: "Jakie informacje są potrzebne w zapotrzebowaniu?",
+        short: "Podstawy: rola lub rodzaj pracy, ile osób, kraj i lokalizacja, kiedy się zaczyna i na jak długo oraz ewentualne wymagania językowe. Cała reszta to szczegóły opcjonalne.",
+        full: [
+          "Zapotrzebowanie to uporządkowany opis tego, czego szukasz, dzięki czemu dopasowanie może być precyzyjne. Wymagane części to rola lub rodzaj pracy, wielkość zespołu, kraj i lokalizacja, termin rozpoczęcia i czas trwania oraz język, którego potrzebujesz — pozwalają one platformie znaleźć osoby, których umiejętności i dostępność naprawdę pasują.",
+          "Możesz dodać szczegóły opcjonalne — konkretne umiejętności, kontekst pracy — by wyostrzyć dopasowanie, i zapisać zapotrzebowanie jako wersję roboczą przed przesłaniem. Zapotrzebowanie pozostaje prywatne dla Twojej strony; pracownicy są do niego dopasowywani, a Ty przeglądasz tych, których umiejętności pasują, zawsze z uczciwym wyjaśnieniem, a nie z jedną ogólną oceną osoby.",
+        ],
+        steps: [
+          "Podaj rolę lub rodzaj pracy i liczbę potrzebnych osób.",
+          "Wskaż kraj, lokalizację, termin rozpoczęcia i czas trwania.",
+          "Dodaj ewentualne wymagania językowe i opcjonalne umiejętności, a potem zapisz lub prześlij.",
+        ],
+        title: "Co zawiera zapotrzebowanie na LabourMarket.ai",
+        desc: "Informacje wymagane w zapotrzebowaniu na LabourMarket.ai: rola, wielkość zespołu, lokalizacja, terminy i język — plus opcjonalne szczegóły wyostrzające dopasowanie.",
+      },
     },
   },
   {
@@ -708,6 +822,17 @@ const DRAFTS: readonly Draft[] = [
         ],
         title: "Für wen LabourMarket.ai ist",
         desc: "Für wen LabourMarket.ai ist: Arbeitskräfte jedes Berufs und Niveaus und Arbeitgeber, Unternehmen, Teams und Agenturen — in ganz Europa.",
+      },
+      pl: {
+        slug: "dla-kogo-jest-labourmarket-ai",
+        h1: "Dla kogo jest LabourMarket.ai?",
+        short: "Dla wszystkich w świecie pracy: dla osób każdego zawodu i poziomu wykształcenia szukających pracy lub rozwoju oraz dla pracodawców, firm, zespołów i agencji szukających ludzi.",
+        full: [
+          "Po stronie pracowników jest dla każdego — rzemiosło i praca fizyczna, opieka, usługi, praca biurowa i specjalistyczna, absolwenci i studenci, osoby zmieniające kierunek — a nie dla jednej wąskiej grupy. Niezależnie od poziomu możesz zbudować profil, pokazać prawdziwe umiejętności i znaleźć możliwości.",
+          "Po stronie organizacji jest dla pracodawców, firm, zespołów i agencji, które muszą znaleźć pracowników, zbudować zespoły lub prowadzić projekty. Platforma jest zaprojektowana tak, by obie strony spotykały się uczciwie, w różnych zawodach i w całej Europie.",
+        ],
+        title: "Dla kogo jest LabourMarket.ai",
+        desc: "Dla kogo jest LabourMarket.ai: dla pracowników każdego zawodu i poziomu oraz dla pracodawców, firm, zespołów i agencji — w całej Europie.",
       },
     },
   },
@@ -769,6 +894,17 @@ const DRAFTS: readonly Draft[] = [
         title: "Ist LabourMarket.ai nur für eine Branche?",
         desc: "LabourMarket.ai ist branchenübergreifend: Das fähigkeitsbasierte Modell funktioniert über Handwerk, Pflege, Dienstleistungen, Logistik und Büroarbeit — nicht eine Branche.",
       },
+      pl: {
+        slug: "czy-labourmarket-ai-jest-tylko-dla-jednej-branzy",
+        h1: "Czy LabourMarket.ai jest tylko dla jednej branży?",
+        short: "Nie. Z założenia obejmuje wiele branż — to samo podejście oparte na umiejętnościach działa tak samo w rzemiośle, opiece, usługach, logistyce, pracy biurowej i specjalistycznej, a nie w jednym sektorze.",
+        full: [
+          "Platforma opisuje ludzi przez ich prawdziwe umiejętności, a nie przez jedną etykietę branżową, więc nie jest przywiązana do konkretnego sektora. Zawód w budownictwie, ochronie zdrowia, gastronomii, transporcie czy rola biurowa mieszczą się w tym samym modelu umiejętności, dowodów i dopasowania.",
+          "Jest to zamierzone: umiejętności często przenoszą się między branżami, a ograniczenie platformy do jednej ukrywałoby realne możliwości i kierunki. Z jakiejkolwiek dziedziny pochodzisz, Twój opis powstaje tak samo uczciwie, a dopasowanie opiera się na tym, co naprawdę potrafisz.",
+        ],
+        title: "Czy LabourMarket.ai jest tylko dla jednej branży?",
+        desc: "LabourMarket.ai z założenia obejmuje wiele branż: model oparty na umiejętnościach działa w rzemiośle, opiece, usługach, logistyce i pracy biurowej — nie w jednym sektorze.",
+      },
     },
   },
   {
@@ -829,11 +965,22 @@ const DRAFTS: readonly Draft[] = [
         title: "Ist LabourMarket.ai nur eine Jobbörse?",
         desc: "LabourMarket.ai ist ein Arbeitsmarkt-Betriebssystem: Abgleich von Möglichkeiten rund um ein lebendiges Arbeitsprofil, belegte Fähigkeiten, benachbarte Richtungen, Unternehmens- und Team-Werkzeuge und Marktverständnis.",
       },
+      pl: {
+        slug: "czy-labourmarket-ai-to-tylko-portal-z-ofertami-pracy",
+        h1: "Czy LabourMarket.ai to tylko portal z ofertami pracy?",
+        short: "Nie. Znajdowanie pracy to jedna część. To także żywy profil zawodowy, umiejętności oparte na dowodach, odkrywanie pokrewnych kierunków, narzędzia dla firm i zespołów oraz rozumienie rynku pracy.",
+        full: [
+          "Portal z ofertami pracy głównie wylicza oferty pracy i na tym poprzestaje. LabourMarket.ai zawiera dopasowywanie możliwości, ale jest zbudowany wokół Twojej tożsamości zawodowej: profilu zawodowego pokazującego prawdziwe, poparte dowodem umiejętności, oraz kierunków, w których te umiejętności mogą rosnąć.",
+          "Dla organizacji idzie dalej niż zgłoszenie jednej roli — reprezentowanie firmy, opisywanie zapotrzebowań, budowanie zespołów i prowadzenie projektów. Obok tego pomaga wszystkim zrozumieć rynek pracy. Lista możliwości jest funkcją, a nie całym produktem.",
+        ],
+        title: "Czy LabourMarket.ai to tylko portal z ofertami pracy?",
+        desc: "LabourMarket.ai to system operacyjny rynku pracy: dopasowywanie możliwości wokół żywego profilu zawodowego, umiejętności poparte dowodami, pokrewne kierunki, narzędzia dla firm i zespołów oraz wiedza o rynku.",
+      },
     },
   },
 ];
 
-const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de"];
+const LOCALES: Loc[] = ["lt", "en", "ru", "nl", "de", "pl"];
 
 export const WAVE2B_ANSWERS: readonly LocalizedAnswer[] = DRAFTS.flatMap((d) =>
   LOCALES.map((locale): LocalizedAnswer => {

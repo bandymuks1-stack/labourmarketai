@@ -16,7 +16,6 @@ const read = (rel: string): string => readFileSync(join(APP, rel), "utf-8");
 const CARD = read("components/app/worker-player-card.tsx");
 const DATA = read("lib/player-card/player-card.ts");
 const LABELS = read("lib/player-card/labels.ts");
-const SHOWCASE = read("components/marketing/player-card-showcase.tsx");
 
 describe("§5.2 the card carries every agreed dimension", () => {
   it("avatar, identity, availability, location", () => {
@@ -25,7 +24,9 @@ describe("§5.2 the card carries every agreed dimension", () => {
       "professionName", // professional identity
       "player-card-availability",
       "player-card-available-from",
-      "player-card-location", // §5.2 addition
+      // §5.2 addition — since 2026-09-30 said once, in the identity stage
+      // (closed card: who, what, WHERE now), not as a chip in a lens.
+      "location={labels.locationName}",
     ]) {
       expect(CARD, marker).toContain(marker);
     }
@@ -84,25 +85,15 @@ describe("§5.2 every new dimension is REAL data, honestly absent otherwise", ()
 });
 
 describe("§5.2 landing and product are the SAME component", () => {
-  it("the landing showcase renders the canonical WorkerPlayerCard", () => {
-    expect(SHOWCASE).toContain("WorkerPlayerCard");
-    expect(SHOWCASE).toContain("buildPlayerCardLabels");
-    expect(SHOWCASE).not.toMatch(/<PlayerCard\b/);
-  });
-
   it("the landing sample fills the SAME §5.2 fields", () => {
     // S3: the sample literal moved into the ONE shared module both public
     // surfaces build from; the showcase must import it, and the sample must
     // still fill the same §5.2 fields.
-    expect(SHOWCASE).toContain("buildSampleWorkerPlayerCard");
     const sample = read("lib/player-card/sample-card.ts");
     expect(sample).toContain("locationCountry");
     expect(sample).toContain("documents:");
   });
 
-  it("the landing still says out loud that the sample is not a real person", () => {
-    expect(SHOWCASE).toContain("conceptNote");
-  });
 });
 
 describe("§5.2 premium self-check — no zero-as-verdict, no repeated placeholder rows", () => {
@@ -126,7 +117,7 @@ describe("§5.2 premium self-check — no zero-as-verdict, no repeated placehold
       ),
     ];
     expect(keys.length).toBeGreaterThan(20);
-    for (const loc of ["lt", "en", "ru", "nl", "de"] as const) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"] as const) {
       const msgs = JSON.parse(read(`messages/${loc}.json`)) as Record<
         string,
         unknown

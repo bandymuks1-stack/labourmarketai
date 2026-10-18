@@ -124,14 +124,18 @@ describe("Journal entry card — rendered DOM order proof", () => {
   const html = renderCard();
   const idx = (s: string) => html.indexOf(s);
 
-  it("renders all five sections in order, status + actions last", () => {
+  // 2026-10-10 (owner: action first, details on demand): text → understood
+  // → MAIN action (Redaguoti) → the details disclosure (summary, then skills
+  // → earlier links → status).
+  it("renders the entry, its main action, then the details in order", () => {
     const order = [
       journalLT.entry.textLabel, // 1 Įrašo tekstas
       journalLT.entry.understoodLabel, // 2 Sistema suprato
-      baseLT.journalSkillLinks.signalsHeading, // 3 Susieti įgūdžiai
-      baseLT.journalSkillLinks.reviewHeading, // 4 Ankstesni ryšiai
-      "STATUS_TIMELINE_MARKER", // 5a status (quiet, bottom)
-      journalLT.entry.edit, // 5b actions (Redaguoti)
+      journalLT.entry.edit, // 3 main action (Redaguoti)
+      journalLT.entry.more, // 4 details disclosure
+      baseLT.journalSkillLinks.signalsHeading, // 5 Susieti įgūdžiai
+      baseLT.journalSkillLinks.reviewHeading, // 6 Ankstesni ryšiai
+      "STATUS_TIMELINE_MARKER", // 7 status (quiet, inside details)
     ];
     const positions = order.map(idx);
     for (const p of positions) expect(p).toBeGreaterThan(-1);

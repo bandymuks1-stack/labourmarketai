@@ -1,9 +1,10 @@
 import "server-only";
 
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { countryDisplayName } from "@/lib/location/country-model";
 import { collectDiscoveryFacets, type DiscoveryFacets } from "@/lib/opportunities/discovery-filters";
+import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
 import type { OpportunityNeed } from "@/lib/opportunities/opportunity-fit";
 import { activeLocales } from "@/lib/i18n/config";
 import { buildWorkTypeLabelMap, MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
@@ -33,6 +34,47 @@ import type { VocabularyTerm, WorldStateDimension } from "./world-state-language
  * both are their own words.
  */
 
+/**
+ * Everyday words for an ENUM value, per dimension — the stems a person types
+ * instead of the catalogue label. Closed, and additive only: a word here can
+ * make an existing value recognisable, never create a value or a filter.
+ *
+ * "Su būstu" / "with housing" is asked as a YES, and the board's yes is
+ * `provided_*`: the person means "an ad that provides accommodation", so the
+ * same words belong to each providing value. `not_provided` keeps only its
+ * label plus the explicit negatives, so "be būsto" never narrows to "with".
+ */
+const EVERYDAY_ENUM_WORDS: Readonly<
+  Partial<Record<WorldStateDimension, Readonly<Record<string, readonly string[]>>>>
+> = {
+  accommodation: {
+    provided_free: [
+      "su būstu", "būstas", "apgyvendinimu", "apgyvendinimas", "nakvyne", "nakvynė",
+      "with housing", "with accommodation", "housing", "accommodation", "lodging",
+      "с жильем", "с жильём", "жилье", "жильё", "проживание", "проживанием",
+      "met huisvesting", "huisvesting", "onderdak",
+      "mit unterkunft", "unterkunft", "wohnung gestellt",
+      "z zakwaterowaniem", "zakwaterowanie", "mieszkanie zapewnione",
+    ],
+    provided_paid: [
+      "su būstu", "būstas", "apgyvendinimu", "with housing", "with accommodation",
+      "housing", "accommodation", "с жильем", "с жильём", "жилье", "жильё",
+      "проживание", "met huisvesting", "huisvesting", "mit unterkunft",
+      "unterkunft", "z zakwaterowaniem", "zakwaterowanie",
+    ],
+    provided_deducted: [
+      "su būstu", "būstas", "apgyvendinimu", "with housing", "with accommodation",
+      "housing", "accommodation", "с жильем", "с жильём", "жилье", "жильё",
+      "проживание", "met huisvesting", "huisvesting", "mit unterkunft",
+      "unterkunft", "z zakwaterowaniem", "zakwaterowanie",
+    ],
+    not_provided: [
+      "be būsto", "be apgyvendinimo", "without housing", "no accommodation",
+      "без жилья", "zonder huisvesting", "ohne unterkunft", "bez zakwaterowania",
+    ],
+  },
+};
+
 /** Enum dimensions and the `opportunities.*` subtree that labels each one. */
 const ENUM_LABEL_NAMESPACES = {
   accommodation: "accommodation",
@@ -54,8 +96,19 @@ export interface WorkspaceVocabulary {
  */
 export async function buildWorkspaceVocabulary(
   needs: readonly OpportunityNeed[],
+  /**
+   * Countries of the public ads the SAME board read carries (the page shows
+   * them). Production walk 2026-09-29: a worker's page listed Swedish ads
+   * while the chat, reading only platform needs, said "nothing visible in
+   * Sweden — visible: NL".
+   */
+  extraCountries: readonly string[] = [],
 ): Promise<WorkspaceVocabulary> {
-  const facets = collectDiscoveryFacets(needs);
+  const base = collectDiscoveryFacets(needs);
+  const facets = {
+    ...base,
+    countries: [...new Set([...base.countries, ...extraCountries.filter(Boolean)])].sort(),
+  };
   const terms: VocabularyTerm[] = [];
 
   // ── countries ────────────────────────────────────────────────────────────
@@ -115,6 +168,14 @@ export async function buildWorkspaceVocabulary(
       for (const t of catalogues) {
         if (t.has(value)) names.add(t(value) as string);
       }
+      // THE WORDS PEOPLE ACTUALLY TYPE (owner P0 2026-09-22 §5). Measured:
+      // the accommodation vocabulary held ONLY the enum LABELS
+      // ("Suteikiamas, nemokamai"), which nobody writes — so "Tik su būstu"
+      // read as nothing and the refinement silently did not happen. This
+      // file's own docstring used that very sentence as an example. Same
+      // idiom as EVERYDAY_TYPE_WORDS below: the catalogue labels stay the
+      // display names; the everyday stems only make the value recognisable.
+      for (const word of EVERYDAY_ENUM_WORDS[dimension]?.[value] ?? []) names.add(word);
       if (names.size > 0) {
         terms.push({ dimension, value, terms: [...names], available: true });
       }
@@ -133,6 +194,52 @@ export async function buildWorkspaceVocabulary(
     }
     if (names.size > 0) {
       terms.push({ dimension: "tool", value: slug, terms: [...names], available: true });
+    }
+  }
+
+  // ── opportunity types ────────────────────────────────────────────────────
+  // Owner contract 2026-09-04 §4A/§15: "Where can I do an internship?" must
+  // narrow the board to internships. Values are the DECLARED types present on
+  // the board; the words are the catalogue labels in every active language
+  // plus the everyday stems a person actually types ("praktika", "stažuotė",
+  // "стажировка", "stage", "Praktikum", "pameistrystė", "apprenticeship").
+  const currentLocale = await getLocale();
+  const typeCatalogues = await Promise.all(
+    activeLocales.map(async (locale) => ({
+      locale,
+      t: await getTranslations({ locale, namespace: "structuredDemand.opportunityType" }),
+    })),
+  );
+  const EVERYDAY_TYPE_WORDS: Readonly<Record<string, readonly string[]>> = {
+    internship: ["praktika", "stažuotė", "internship", "стажировка", "практика", "stage", "praktikum"],
+    apprenticeship: ["pameistrystė", "apprenticeship", "ученичество", "leerwerkplek", "ausbildung", "lehrstelle"],
+  };
+  // EVERY type of the closed set is a term, marked available only when a
+  // demand of that type is on the person's board. Prod walk 2026-09-04: with
+  // no internship on the board the word "praktiką" was simply unknown and
+  // the student got the whole board — the honest answer is "I understood
+  // internships; none is visible to you right now" (same rule as a country
+  // that is not on the board).
+  // Term order matters for DISPLAY only: the first term is what the answer
+  // shows when it lists what IS visible ("Matoma: darbas, pameistrystė"), so
+  // the person's own language comes first, then the other catalogues, then
+  // the everyday stems.
+  for (const value of OPPORTUNITY_TYPES) {
+    const names = new Set<string>();
+    for (const { locale, t } of typeCatalogues) {
+      if (locale === currentLocale && t.has(value)) names.add(t(value) as string);
+    }
+    for (const { t } of typeCatalogues) {
+      if (t.has(value)) names.add(t(value) as string);
+    }
+    for (const word of EVERYDAY_TYPE_WORDS[value] ?? []) names.add(word);
+    if (names.size > 0) {
+      terms.push({
+        dimension: "opportunityType",
+        value,
+        terms: [...names],
+        available: facets.opportunityTypes.includes(value),
+      });
     }
   }
 

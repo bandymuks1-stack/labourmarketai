@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { loadUnstructuredNeeds } from "@/lib/admin/need-backfill";
 import { NeedStructureRow } from "@/components/app/need-structure-row";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * Admin need-structuring backfill (superadmin-only). Lists SUBMITTED demands
@@ -27,9 +28,7 @@ export default async function NeedStructuringPage({
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" id="main-content">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-          {t("pageTitle")}
-        </h1>
+        <PageTitle>{t("pageTitle")}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{t("pageIntro")}</p>
       </header>
 

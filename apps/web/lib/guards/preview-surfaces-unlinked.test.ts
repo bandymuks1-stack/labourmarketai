@@ -32,10 +32,11 @@ const NAV_SURFACES = [
   "app/[locale]/dashboard/admin/page.tsx",
 ];
 
-// `/dashboard/learning` added 2026-07-02 (route-truth-map): the human-in-loop
-// learning review surface works but is deliberately PARKED — zero inbound
-// links until the owner decides its entry point (audit finding F-N1). Listing
-// it here makes the parked state explicit and enforced instead of accidental.
+// `/dashboard/learning` (route-truth-map): the human-in-loop learning review
+// surface has NO static navigation entry. Since EDU-5 (2026-10-01) its ONLY
+// door is the manager brief chip shown while pending review items exist (N>0);
+// that door lives in lib/conversation/opening-brief.ts, which is not a nav
+// surface, so the zero-state (no items, no door) stays enforced here.
 // NOTE (dashboard consolidation v1): `/dashboard/hub` was REMOVED. The premium
 // hub is now the canonical /dashboard lead surface (a real launch route, in
 // nav via the existing "overview" tab) — it is no longer a parked preview, so

@@ -18,6 +18,8 @@
  * Pure module: no IO. `today` (YYYY-MM-DD) is passed in so the function stays
  * deterministic and unit-testable; the client supplies the real current date.
  */
+import { isExplicitJournalRequest } from "./intent-router";
+import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 
 export type WorkLogParse = {
   /** ISO date (YYYY-MM-DD) — parsed or defaulted to `today`. */
@@ -31,7 +33,11 @@ export type WorkLogParse = {
   workedMinutes: number | null;
   /** Human label for worked time, e.g. "8 val. 15 min." — null when unknown. */
   hoursLabel: string | null;
-  /** Best-effort work site (word(s) after "objekte"/"site"/"на объекте"). */
+  /** Best-effort context — the entry's ONE `site_name` slot ("Objektas /
+   *  vieta"): the word after "objekte"/"site"/"на объекте", a NAME after a
+   *  place noun ("sandėlyje Kaune", "projekte LabourMarket.ai") or after
+   *  the work verb ("dirbau LabourMarket.ai"). Shown for correction, never
+   *  saved unseen. */
   site: string | null;
   /** Best-effort activity phrase (trailing clause) — display only. */
   task: string | null;
@@ -69,20 +75,83 @@ function durationLabel(mins: number): string {
 }
 
 // "nuo 8 iki 17", "from 8:30 to 17", "с 8 до 17", or a bare "8-17" / "8:00–17:00".
+// A clock span is a number PAIR standing on its own: a digit run glued to a
+// letter, another digit or a connector is a reference, a date or a code, not
+// a working day — measured on production (2026-09-11), "QA-S13-1789111905948"
+// was read as 13:00–17:00 and became four worked hours. So the first number
+// may not follow a letter / digit / connector, and the last may not run on
+// into more digits or a further "-NN" segment ("2026-09-11", "12-13-14",
+// "A-7-12" are none of them spans).
 const SPAN_RE =
-  /(?:nuo|from|с|von|van)?\s*(\d{1,2})(?:[:.](\d{2}))?\s*(?:iki|to|до|bis|tot|[-–—])\s*(\d{1,2})(?:[:.](\d{2}))?/iu;
+  /(?<![\p{L}\p{N}_\-–—/.:])(?:nuo|from|с|von|van)?\s*(\d{1,2})(?:[:.](\d{2}))?\s*(?:iki|to|до|bis|tot|[-–—])\s*(\d{1,2})(?:[:.](\d{2}))?(?!\p{N}|[-–—/]\p{N})/iu;
+// Polish "od 7 do 16" — read ONLY as the od…do PAIR: a bare "2 do 3 godzin"
+// is a range of hours (2–3 h), never the clock span 02:00–03:00. Measured
+// 2026-10-11: without it a Polish welder's "od 7 do 16, 30 min przerwy"
+// saved the 30-minute break as the day's work.
+const PL_SPAN_RE =
+  /(?<![\p{L}\p{N}_])od\s*(\d{1,2})(?:[:.](\d{2}))?\s*do\s*(\d{1,2})(?:[:.](\d{2}))?(?!\p{N}|[-–—/]\p{N})/iu;
 // "45 min", "45 minučių", "45 мин", optionally near a break word.
 const BREAK_RE =
   /(\d{1,3})\s*(?:min|минут|мин)\w*/iu;
-const BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|break|lunch|обед|перерыв|pauze|pause)/iu;
+// `\b` bounds the ASCII "break" only — "breakdown" is work, not a pause.
+const BREAK_CONTEXT_RE = /(pertrauk|piet[uū]|\bbreaks?\b|lunch|обед|перерыв|pauze|pause|przerw|mittag)/iu;
+// A break stated in HOURS — "1 h break", "1 val. pertrauka", "перерыв 1 час".
+// Read only when the hour figure stands BESIDE the break word, so the day's
+// own "9 valandas" is never taken for the break.
+const BREAK_HOUR_UNIT = String.raw`(\d{1,2})(?:[.,](\d))?\s*(?:h(?!\p{L})|hrs?(?!\p{L})|hour\w*|val\.?|valand\w*|ч(?!\p{L})|час\w*)`;
+const BREAK_WORD = String.raw`(?:pertrauk\w*|piet\w*|\bbreaks?\b|lunch|обед\w*|перерыв\w*|pauze|pause|przerw\w*|mittag\w*)`;
+const BREAK_HOURS_RE = new RegExp(
+  `${BREAK_HOUR_UNIT}\\s*${BREAK_WORD}|${BREAK_WORD}\\s*(?:of\\s+|for\\s+|[:–—-]\\s*)?${BREAK_HOUR_UNIT}`,
+  "iu",
+);
 // explicit "8 valandas / hours / часов"
-const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?)/iu;
-// site after "objekte X" / "site X" / "на объекте в X"
+// pl "8,5 godziny" / "8 godz." and de "8 Std." were not read (walk 2026-10-11:
+// a Polish entry saved with no duration).
+const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?|godz\w*|std\.?(?!\p{L}))/iu;
+// site after "objekte X" / "statyboje X" / "site X" / "на объекте в X" —
+// the locative forms only: "Statyba" inside a company name is a NAME, not
+// a place word (the context rules below read it)
 const SITE_RE =
-  /(?:objekt\w*|statyb\w*|site|на\s+объекте(?:\s+в)?|op\s+de\s+locatie|auf\s+der\s+baustelle)\s+([A-Za-zÀ-ÿА-Яа-яĀ-ž][\wÀ-ÿА-Яа-яĀ-ž-]{1,40})/iu;
+  /(?:objekt\w*|statybo(?:je|se)|site|на\s+объекте(?:\s+в)?|op\s+de\s+locatie|auf\s+der\s+baustelle)\s+([A-Za-zÀ-ÿА-Яа-яĀ-ž][\wÀ-ÿА-Яа-яĀ-ž-]{1,40})/iu;
+// ── the CONTEXT slot (issue #1689, re-audit line 0) ────────────────────────
+// The entry carries ONE free context — `site_name`, "Objektas / vieta": the
+// object, place, project or client the work was for. The owner's own
+// sentence, "Šiandien 9 valandas dirbau LabourMarket.ai: …", named its
+// context and the flow captured nothing, so the person had to retype it.
+// Two further readings, both a PARSE PREVIEW the person corrects before
+// the save (never a silent claim):
+//   · a place noun the sentence names — warehouse / office / project /
+//     company / shop / at the client — followed by a NAME: a capitalised
+//     token or a dotted one ("LabourMarket.ai"), optionally two words
+//     ("UAB Statyba"). The name requirement is what keeps "sandėlyje
+//     iškroviau" from reading the verb as the place;
+//   · the work verb itself followed by such a NAME — "dirbau LabourMarket.ai",
+//     "worked at Acme", "работал в Maxima", "gewerkt bij Bol", "gearbeitet
+//     bei Bosch". A digit after the verb ("dirbau 8 valandas", "nuo 8") is
+//     never a name, so the time reading is untouched.
+// A proper NAME: starts with an upper-case letter; may carry dots, digits,
+// "&", an apostrophe or a hyphen; a second capitalised word may follow.
+const NAME = String.raw`(\p{Lu}[\p{L}\p{N}.&'’-]{1,40}(?:\s\p{Lu}[\p{L}\p{N}.&'’-]{1,40})?)`;
+const SITE_PLACE_NOUN_RE = new RegExp(
+  String.raw`(?<!\p{L})(?:[Ss]andėl\p{L}*|[Bb]iur\p{L}*|[Pp]rojekt\p{L}*|[Įį]mon\p{L}*|[Ff]irm\p{L}*|[Pp]arduotuv\p{L}*|[Kk]lientui|[Pp]as\s+klient\p{L}*|[Ww]arehouse|[Oo]ffice|[Pp]roject|[Cc]ompany|[Ss]hop|[Ss]tore|[Aa]t\s+the\s+client|[Ff]or\s+client|[Нн]а\s+складе|[Вв]\s+офисе|[Нн]а\s+проекте|[Вв]\s+компании|[Вв]\s+фирме|[Вв]\s+магазине|[Уу]\s+клиента|[Ii]n\s+het\s+magazijn|[Oo]p\s+kantoor|[Ii]n\s+het\s+project|[Bb]ij\s+de\s+klant|[Ii]m\s+Lager|[Ii]m\s+Büro|[Ii]m\s+Projekt|[Ii]n\s+der\s+Firma|[Bb]eim\s+Kunden)\s+` + NAME,
+  "u",
+);
+const SITE_AFTER_WORK_VERB_RE = new RegExp(
+  String.raw`(?<!\p{L})(?:[Dd]irbau|[Dd]irbome|[Ww]orked\s+(?:at|for|on)|[Рр]аботал[аи]?\s+(?:в|на|у|для)|[Gg]ewerkt\s+(?:bij|voor|aan)|[Gg]earbeitet\s+(?:bei|für|an))\s+` + NAME,
+  "u",
+);
+/** Trailing sentence punctuation is never part of a name ("LabourMarket.ai:"). */
+function trimName(name: string): string {
+  return name.replace(/[.,:;!?]+$/u, "").trim();
+}
 // "šiandien" today, "vakar" yesterday, explicit ISO, "liepos 24"/"24 d."
-const TODAY_RE = /(šiandien|today|сегодня|vandaag|heute)/iu;
-const YESTERDAY_RE = /(vakar|yesterday|вчера|gisteren|gestern)/iu;
+const TODAY_RE = /(šiandien|today|сегодня|vandaag|heute|dzisiaj|dziś)/iu;
+const YESTERDAY_RE = /(vakar|yesterday|вчера|gisteren|gestern|wczoraj)/iu;
+// Checked FIRST: every one of these CONTAINS its language's "yesterday"
+// (už-VAKAR, поза-ВЧЕРА, vor-GESTERN, eer-GISTEREN, przed-WCZORAJ), so a
+// day-before-yesterday sentence used to be filed one day late.
+const DAY_BEFORE_YESTERDAY_RE =
+  /(užvakar|uzvakar|day\s+before\s+yesterday|позавчера|vorgestern|eergisteren|przedwczoraj)/iu;
 const ISO_RE = /\b(\d{4})-(\d{2})-(\d{2})\b/;
 
 /** Add `deltaDays` to an ISO date string, staying pure (no Date.now). */
@@ -93,16 +162,28 @@ function shiftIso(iso: string, deltaDays: number): string {
   return `${dt.getUTCFullYear()}-${pad2(dt.getUTCMonth() + 1)}-${pad2(dt.getUTCDate())}`;
 }
 
-export function extractWorkLog(text: string, today: string): WorkLogParse {
+/**
+ * `defaultDay` is the day the person already chose (the journal calendar's
+ * selected day). It is used ONLY when the sentence names no day of its own;
+ * "vakar"/"šiandien" stay relative to the real `today`. Omitted → `today`.
+ */
+export function extractWorkLog(
+  text: string,
+  today: string,
+  defaultDay: string = today,
+): WorkLogParse {
   const raw = (text ?? "").trim();
   const q = raw.toLowerCase();
 
   // ── date ────────────────────────────────────────────────────────────────
-  let date = today;
+  let date = defaultDay;
   let dateSignal = false;
   const iso = raw.match(ISO_RE);
   if (iso) {
     date = `${iso[1]}-${iso[2]}-${iso[3]}`;
+    dateSignal = true;
+  } else if (DAY_BEFORE_YESTERDAY_RE.test(q)) {
+    date = shiftIso(today, -2);
     dateSignal = true;
   } else if (YESTERDAY_RE.test(q)) {
     date = shiftIso(today, -1);
@@ -116,7 +197,7 @@ export function extractWorkLog(text: string, today: string): WorkLogParse {
   let start: string | null = null;
   let end: string | null = null;
   let spanMinutes: number | null = null;
-  const span = raw.match(SPAN_RE);
+  const span = raw.match(SPAN_RE) ?? raw.match(PL_SPAN_RE);
   if (span) {
     const s = toMinutes(span[1], span[2]);
     const e = toMinutes(span[3], span[4]);
@@ -136,6 +217,14 @@ export function extractWorkLog(text: string, today: string): WorkLogParse {
     if (br) {
       const n = Number(br[1]);
       if (Number.isFinite(n) && n >= 0 && n <= 600) breakMinutes = n;
+    } else {
+      const bh = raw.match(BREAK_HOURS_RE);
+      if (bh) {
+        const h = Number(bh[1] ?? bh[3]);
+        const tenth = Number(bh[2] ?? bh[4] ?? 0);
+        const n = Math.round((h + tenth / 10) * 60);
+        if (Number.isFinite(n) && n >= 0 && n <= 600) breakMinutes = n;
+      }
     }
   }
 
@@ -158,8 +247,8 @@ export function extractWorkLog(text: string, today: string): WorkLogParse {
 
   // ── site ──────────────────────────────────────────────────────────────────
   let site: string | null = null;
-  const siteM = raw.match(SITE_RE);
-  if (siteM) site = siteM[1];
+  const siteM = raw.match(SITE_RE) ?? raw.match(SITE_PLACE_NOUN_RE) ?? raw.match(SITE_AFTER_WORK_VERB_RE);
+  if (siteM) site = trimName(siteM[1]!) || null;
 
   // ── task (best effort, display only) ──────────────────────────────────────
   // Trailing clause after the last comma, when it looks like an activity
@@ -172,7 +261,9 @@ export function extractWorkLog(text: string, today: string): WorkLogParse {
     parts.length > 1 &&
     /[A-Za-zÀ-ÿА-Яа-яĀ-ž]/.test(last) &&
     !SPAN_RE.test(last) &&
+    !PL_SPAN_RE.test(last) &&
     !BREAK_RE.test(last) &&
+    !BREAK_HOURS_RE.test(last) &&
     last.length <= 80
   ) {
     task = last;
@@ -192,4 +283,59 @@ export function extractWorkLog(text: string, today: string): WorkLogParse {
     notes: raw,
     hasSignal,
   };
+}
+
+/**
+ * IS THIS SENTENCE THE WORK, OR A REQUEST ABOUT THE JOURNAL?
+ *
+ * Production 2026-09-06 (real-person join walk): "Užpildyk darbo žurnalą"
+ * opened the journal flow — correctly, it is an explicit request — but the
+ * flow carried the REQUEST SENTENCE as the entry's evidence, and two taps
+ * later `journal_entries.original_text = 'Užpildyk darbo žurnalą'`. The
+ * request became the record.
+ *
+ * A draft may persist only when the sentence carries WORK CONTENT — at
+ * least one of:
+ *   - a time span or a worked duration ("nuo 8 iki 17", "8 valandas");
+ *   - a place ("objekte Kaune");
+ *   - a recognised activity (the canonical skill recogniser reads it — the
+ *     same one the journal pipeline uses — or a past-tense work verb in the
+ *     person's own language: "montavau", "dirbau", "installed", "работал",
+ *     "gearbeitet").
+ * Otherwise the flow ASKS what was done. A sentence that names the journal
+ * and carries nothing else is a META REQUEST and is refused at the schema
+ * floor too, so no path can save it.
+ *
+ * `today` does not matter here (a date alone is not work content), so the
+ * function takes none and stays trivially pure.
+ */
+export type JournalDraftReadiness = "ok" | "meta-request" | "no-content";
+
+// Past-tense work verbs. LT: the explicit "dirbau/dirbome" plus the regular
+// 1st-person past endings (-avau, -ojau, -ėjau/-ejau, -iau, -inau, -ovau,
+// -uvau, -davau and their plurals) — NEVER a bare "-au", which is also the
+// present tense ("taisau", "valau", "pildau"). EN: a regular "-ed" verb. RU: the
+// -л/-ла/-ли past, with the journal word itself ("журнал" ends in "-ал")
+// excluded. DE/NL: a "ge…t / ge…en" participle.
+const PAST_WORK_VERB_RE =
+  /(?<![\p{L}])(?:dirbau|dirbome|dirbom|worked|работал|работала|работали|gewerkt|gearbeitet)(?![\p{L}])|(?<![\p{L}])[\p{L}]{2,}(?:avau|ojau|ėjau|ejau|iau|inau|ovau|uvau|davau|avome|ojome|ėjome|ejome|iome|inome|ovome|uvome)(?![\p{L}])|(?<![\p{L}])[a-z]{3,}ed(?![\p{L}])|(?<![\p{L}])(?!журнал)[\p{L}]{3,}(?:ал|ала|али|ил|ила|или|ял|яла|яли)(?![\p{L}])|(?<![\p{L}])ge[\p{L}]{3,}(?:t|en)(?![\p{L}])/iu;
+
+export function journalDraftReadiness(text: string): JournalDraftReadiness {
+  const raw = (text ?? "").trim();
+  if (!raw) return "no-content";
+  const parse = extractWorkLog(raw, "2000-01-01");
+  const hasContent =
+    parse.start !== null ||
+    parse.workedMinutes !== null ||
+    parse.site !== null ||
+    PAST_WORK_VERB_RE.test(raw) ||
+    recognizeSkills(raw, 1).length > 0;
+  if (hasContent) return "ok";
+  return isExplicitJournalRequest(raw) ? "meta-request" : "no-content";
+}
+
+/** The server-floor form of the rule: a sentence that only ASKS for the
+ *  journal is never evidence. Used by the log-work input schema. */
+export function isJournalMetaRequest(text: string): boolean {
+  return journalDraftReadiness(text) === "meta-request";
 }

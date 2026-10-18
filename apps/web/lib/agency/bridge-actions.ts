@@ -6,11 +6,20 @@ import { createClient } from "@/lib/supabase/server";
 import {
   isBridgeUuid,
   isMissingRpcCode,
+  toBridgeInviteDelivery,
   validateInviteEmail,
   validateOfferNote,
+  type BridgeInviteDelivery,
 } from "@/lib/agency/bridge-model";
+import { toActiveLocale } from "@/lib/i18n/config";
+import {
+  createShareableInvitationAction,
+  resendInvitationAction,
+} from "@/lib/invitations/actions";
+import { AGENCY_CLIENT_PROPOSED_ROLE } from "@/lib/invitations/model";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { displayedWorkspaceOf, refuseStaleWorkspace } from "@/lib/company/stale-workspace";
 
 /**
  * TIME TO FIRST REAL VALUE (real recruiter pilot, 2026-09-04). Every bridge
@@ -43,15 +52,38 @@ function emitFirstRealAction(
 
 /**
  * Real two-subject bridge — server actions (issue #859). Thin wrappers around
- * the owner-gated RPCs from migration 20260723180000. EVERY authorization rule
- * lives server-side in the SECURITY DEFINER RPCs (agency/client identity,
- * connection-active, share-active, roster ownership, own-request-only,
- * own-JWT-email accept). Until the migration is applied each action reports
- * `needs-migration`. No outbound action of any kind.
+ * the RPCs from migration 20260723180000, which IS APPLIED on production
+ * (verified 2026-09-14: the three tables, the share SELECT policy and
+ * `unshare_request_v1(uuid)` are all present). The old wording here —
+ * "owner-gated RPCs … until the migration is applied" — described a state
+ * that has passed. EVERY authorization rule lives server-side in the SECURITY
+ * DEFINER RPCs (agency/client identity, connection-active, share-active,
+ * roster ownership, own-request-only, own-JWT-email accept). The
+ * `needs-migration` outcome remains for an environment where the objects are
+ * absent.
+ *
+ * DELIVERY (2026-09-24). "No outbound action of any kind" used to be true of
+ * this file — and that was the defect: `create_agency_client_connection_v1`
+ * inserts a row keyed on the client's e-mail and nothing ever reached that
+ * e-mail, so step 1 of the owner's own acceptance walk ended in a row nobody
+ * could see. The invite action now ALSO creates an invitation through the
+ * ONE invitation primitive (lib/invitations — `invite_company`, marked
+ * `proposed_role = agency_client`, same address), which hands the agency the
+ * token link to copy or share. The primitive's e-mail is the only outbound
+ * step and it stays inert until INVITE_EMAIL_* exists: the result says
+ * `created` (link ready, not e-mailed) unless a provider acknowledged a
+ * send — never a fake "sent". Never a second invitation system, never a
+ * second consent path: the connection is still accepted only through
+ * `accept_agency_client_connection_v1`.
  */
 export type BridgeActionState =
   | { status: "idle" }
-  | { status: "ok" }
+  | {
+      status: "ok";
+      /** The invitation delivery beside a connection invite (invite / new
+       *  link); absent on every other action. */
+      invite?: BridgeInviteDelivery;
+    }
   | { status: "needs-migration" }
   | { status: "invalid" }
   | { status: "forbidden" }
@@ -75,7 +107,45 @@ function rpc(supabase: unknown): any {
   return supabase;
 }
 
-/** AGENCY: invite a client company by email. */
+/** The invite link's language: an active locale from the form, else the
+ *  default. Never trusted beyond the closed active set (the clamp itself
+ *  lives with the locale set, so the conversation opener and the invite
+ *  page share it instead of each re-deriving it). */
+function inviteLocale(formData: FormData): string {
+  return toActiveLocale(String(formData.get("locale") ?? ""));
+}
+
+/**
+ * The delivery half of a client invite: ONE `invite_company` invitation
+ * through the primitive, addressed to the same e-mail, expiring with the
+ * connection (14 days). Idempotent per address: the primitive answers
+ * `duplicate_pending` while an earlier one is open, and a fresh link then
+ * comes from the rotate path (`refreshClientInviteLinkAction`), never from a
+ * second row. A throwing primitive is `unavailable` — the connection
+ * exists, delivery is UNKNOWN, and the section says so.
+ */
+async function deliverClientInvitation(
+  email: string,
+  locale: string,
+): Promise<BridgeInviteDelivery> {
+  try {
+    const result = await createShareableInvitationAction({
+      invitationType: "invite_company",
+      locale,
+      recipientLocale: locale,
+      email,
+      proposedRole: AGENCY_CLIENT_PROPOSED_ROLE,
+      maxUses: 1,
+      expiresInDays: 14,
+    });
+    return toBridgeInviteDelivery(email, result);
+  } catch {
+    return toBridgeInviteDelivery(email, null);
+  }
+}
+
+/** AGENCY: invite a client company by email — the connection row PLUS the
+ *  invitation that delivers it. */
 export async function inviteClientAction(
   _prev: BridgeActionState,
   formData: FormData,
@@ -90,8 +160,45 @@ export async function inviteClientAction(
   });
   if (error) return mapErr(error.code, error.message);
   emitFirstRealAction("agency", "invite_client", "agency_client_connection");
+  // The connection is recorded; now it must REACH the person. Awaited: a
+  // serverless runtime may freeze the instant the action returns.
+  const invite = await deliverClientInvitation(email.value, inviteLocale(formData));
   revalidatePath("/[locale]/dashboard/company", "page");
-  return { status: "ok" };
+  revalidatePath("/[locale]/dashboard/company/partners", "page");
+  return { status: "ok", invite };
+}
+
+/**
+ * AGENCY: a fresh link for an invitation that already exists — the
+ * primitive's own rotate path (`resend_invitation_v1`: the previous link
+ * stops working, the inviter gets the new one, an addressee is e-mailed
+ * only when a provider is configured). The invitation id comes from the
+ * agency's own sent list; the RPC re-checks that the caller is its inviter.
+ */
+export async function refreshClientInviteLinkAction(
+  _prev: BridgeActionState,
+  formData: FormData,
+): Promise<BridgeActionState> {
+  const invitationId = String(formData.get("invitationId") ?? "");
+  const email = validateInviteEmail(String(formData.get("email") ?? ""));
+  if (!isBridgeUuid(invitationId) || !email.ok) return { status: "invalid" };
+  const locale = inviteLocale(formData);
+  let invite: BridgeInviteDelivery;
+  try {
+    const result = await resendInvitationAction({
+      invitationId,
+      email: email.value,
+      locale,
+      recipientLocale: locale,
+      invitationType: "invite_company",
+    });
+    if (result.status === "not-authed") return { status: "forbidden" };
+    invite = toBridgeInviteDelivery(email.value, result);
+  } catch {
+    invite = toBridgeInviteDelivery(email.value, null);
+  }
+  revalidatePath("/[locale]/dashboard/company/partners", "page");
+  return { status: "ok", invite };
 }
 
 /** CLIENT: accept a connection invite as one of the caller's own companies. */
@@ -246,6 +353,60 @@ export async function withdrawOfferAction(
     p_offer_id: offerId,
   });
   if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "page");
+  return { status: "ok" };
+}
+
+/**
+ * AGENCY: draft a staffing need FOR a connected client (owner decision
+ * 2026-09-28 A). The row is the client's own `customer_requests` draft with
+ * the agency as provenance — not shared, not scoutable, not confirmed until
+ * the client says so (`confirmDraftedNeedAction`).
+ */
+export async function draftClientNeedAction(
+  _prev: BridgeActionState,
+  formData: FormData,
+): Promise<BridgeActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
+  const connectionId = String(formData.get("connectionId") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  if (!isBridgeUuid(connectionId) || title.length === 0 || title.length > 200) {
+    return { status: "invalid" };
+  }
+  const size = Number.parseInt(String(formData.get("teamSize") ?? ""), 10);
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("draft_client_need_v1", {
+    p_connection_id: connectionId,
+    p_title: title,
+    p_role: String(formData.get("role") ?? "").trim() || null,
+    p_country: String(formData.get("country") ?? "").trim() || null,
+    p_location: String(formData.get("location") ?? "").trim() || null,
+    p_summary: String(formData.get("summary") ?? "").trim() || null,
+    p_team_size: Number.isFinite(size) && size > 0 ? size : null,
+  });
+  if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "page");
+  return { status: "ok" };
+}
+
+/**
+ * CLIENT: confirm a need an agency drafted — it becomes the client's own
+ * submitted requirement and is shared on the same connection (the existing
+ * share row), which is what lets the agency work on it.
+ */
+export async function confirmDraftedNeedAction(
+  _prev: BridgeActionState,
+  formData: FormData,
+): Promise<BridgeActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
+  const requestId = String(formData.get("requestId") ?? "");
+  if (!isBridgeUuid(requestId)) return { status: "invalid" };
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("confirm_agency_drafted_need_v1", {
+    p_request_id: requestId,
+  });
+  if (error) return mapErr(error.code, error.message);
+  emitFirstRealAction("company", "share_request", "agency_client_request_share");
   revalidatePath("/[locale]/dashboard/company", "page");
   return { status: "ok" };
 }

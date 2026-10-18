@@ -21,7 +21,7 @@ import { PersonalWorkspaceIntro } from "@/components/app/workspace/personal-work
  */
 
 const APP = join(__dirname, "..", "..");
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 const catalogs: Record<string, Record<string, unknown>> = {};
 const catalog = (loc: string): Record<string, unknown> =>
@@ -38,11 +38,19 @@ function scoped(loc: string, ns: string) {
       (o, k) => (o?.[k] ?? {}) as Record<string, unknown>,
       catalog(loc),
     );
-  const fn = (key: string) => {
+  const fn = (key: string, values?: Record<string, string | number>) => {
     const v = key
       .split(".")
       .reduce<unknown>((o, k) => (o as Record<string, unknown>)?.[k], root);
-    return typeof v === "string" ? v : `MISSING:${ns}.${key}`;
+    if (typeof v !== "string") return `MISSING:${ns}.${key}`;
+    // Substitute simple `{name}` placeholders. Without this the stub happily
+    // rendered a literal "{count}" into the HTML and every assertion still
+    // passed — a translator stub that ignores its values proves the copy
+    // renders, not that it renders READABLY.
+    if (!values) return v;
+    return v.replace(/\{(\w+)\}/g, (whole, name: string) =>
+      name in values ? String(values[name]) : whole,
+    );
   };
   return fn as unknown as Parameters<typeof resolvePersonalWorkspaceLabels>[0];
 }
@@ -114,7 +122,7 @@ describe("what each kind of account actually sees", () => {
     expect(html).toContain("Jonas Petraitis");
     expect(html).toContain("Asmeninė erdvė");
     expect(html).toContain("Mano darbo profilis");
-    expect(html).toContain("Darbo pasiruošimas");
+    expect(html).toContain("Darbo pasirengimas");
     expect(html).toContain("Pradėti nuo savęs");
     // Nothing is met yet — the "already set" line must be absent, not "0".
     expect(html).not.toContain("personal-workspace-intro-known");
@@ -139,7 +147,12 @@ describe("what each kind of account actually sees", () => {
 
   it("a COMPLETE profile is never offered a completion CTA", () => {
     const html = render(model({ readiness: deriveWorkerReadiness(card(FULL)) }));
-    expect(html).toContain("Viskas, kas svarbiausia, jau nurodyta.");
+    // The completion line NAMES the set it counts (owner window 11 §24): it
+    // used to read "Viskas, kas svarbiausia, jau nurodyta" on a screen that
+    // also said an instruction was waiting and nine documents were missing.
+    expect(html).toContain("Visos 6 darbo kortelės sritys nurodytos.");
+    expect(html).toContain("skaičiuojami atskirai");
+    expect(html).not.toContain("Viskas, kas svarbiausia");
     expect(html).toContain("Peržiūrėti mano darbo profilį");
     expect(html).not.toContain("Papildyti mano darbo profilį");
     expect(html).not.toContain("Svarbiausia dabar:");
@@ -147,7 +160,7 @@ describe("what each kind of account actually sees", () => {
 
   it("a readiness failure says so plainly — no raw state, no readiness CTA", () => {
     const html = render(model({ readiness: null }));
-    expect(html).toContain("Darbo pasiruošimo dabar parodyti nepavyko");
+    expect(html).toContain("Darbo pasirengimo dabar parodyti nepavyko");
     expect(html).not.toContain("<button");
     expect(html).not.toMatch(/needs_migration|SQLSTATE|undefined|null|Error/);
   });

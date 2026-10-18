@@ -35,6 +35,15 @@ export const PLANNING_SOURCE_TYPES = [
   "invitation",
   "absence",
   "stage",
+  // 2026-09-14: an approved business trip is the person BEING SOMEWHERE ELSE.
+  // The employer's capacity read already counted it as a commitment; the
+  // person's own plan did not draw it, so the one view that should have shown
+  // "you are in Rotterdam that week" was the one that did not.
+  "trip",
+  // CAL-8 (2026-10-01): the organization's one-off PLAN for its own people —
+  // a planned work window for one worker (work_plan_entries). A FORECAST,
+  // never a fact: the work journal stays the fact.
+  "plan",
 ] as const;
 export type PlanningSourceType = (typeof PLANNING_SOURCE_TYPES)[number];
 
@@ -199,6 +208,8 @@ export function planningMeta(
 export function hrefForSource(
   sourceType: PlanningSourceType,
   sourceId: string,
+  /** Task only: the task's project, so the tasks page opens project-scoped. */
+  projectId?: string | null,
 ): string {
   switch (sourceType) {
     case "booking":
@@ -206,7 +217,11 @@ export function hrefForSource(
     case "project":
       return `/dashboard/projects/${sourceId}`;
     case "task":
-      return "/dashboard/tasks";
+      // Deep link to THE task (the tasks page highlights + scrolls to
+      // `#task-<id>`), not the bare list.
+      return projectId
+        ? `/dashboard/tasks?project=${projectId}&task=${sourceId}#task-${sourceId}`
+        : `/dashboard/tasks?task=${sourceId}#task-${sourceId}`;
     case "journal":
       // The entry's own editor — the calendar never grows a duplicate
       // journal detail page; the source record stays canonical.
@@ -226,6 +241,15 @@ export function hrefForSource(
       // project-operations href from the project id (this generic fallback
       // only anchors the projects surface).
       return "/dashboard/projects";
+    case "trip":
+      // List-anchored like bookings and finance: the trip lifecycle, its
+      // advance and its expenses live ONLY on the finance surface under that
+      // surface's own permissions. The calendar draws the DAYS, not the money.
+      return "/dashboard/finance";
+    case "plan":
+      // The plan list lives on the workforce planning zone; the projector
+      // overrides this with the dated day-view link.
+      return `/dashboard/company/planning#work-plan-${sourceId}`;
   }
 }
 
@@ -262,6 +286,12 @@ export function statusKeyForSource(
     case "stage":
       // Reuses the project-stages panel's own lifecycle copy (W6 model).
       return `projectStages.statuses.${status}`;
+    case "trip":
+      // Reuses the trips section's own lifecycle copy — no second vocabulary
+      // for the same six states.
+      return `trips.status.${status}`;
+    case "plan":
+      return `planning.planStatus.${status}`;
   }
 }
 
@@ -384,6 +414,20 @@ export function isConflictEligible(item: PlanningItem): boolean {
   }
   if (item.sourceType === "absence") {
     return item.status === "approved";
+  }
+  if (item.sourceType === "trip") {
+    // Being in another city IS a physical constraint on the same axis as an
+    // accepted booking, so an overlap between the two is a real impossible
+    // plan and the calendar should say so. Only the statuses that put the
+    // person there count — `PLANNED_TRIP_STATUSES` decides, not this branch.
+    return (PLANNED_TRIP_STATUSES as readonly string[]).includes(item.status);
+  }
+  if (item.sourceType === "plan") {
+    // CAL-8: only the caller's OWN planned window is on the caller's axis. A
+    // manager also sees windows planned for OTHER people; comparing those with
+    // the manager's own commitments would invent a clash no record proves —
+    // the roster collision flow (checkWorkerReservation) answers that.
+    return item.status === "planned" && item.roleContext === "assigned";
   }
   return false;
 }
@@ -1019,7 +1063,8 @@ export interface SentInvitationPlanningInput {
   /** Display status — stale pending already reads as expired upstream. */
   readonly status: string;
   readonly invitedName: string | null;
-  readonly invitedEmail: string;
+  /** NULL for an open link (universal network v1) — never projected anyway. */
+  readonly invitedEmail: string | null;
   readonly expiresAt: string;
   readonly acceptedAt: string | null;
   readonly declinedAt: string | null;
@@ -1068,7 +1113,12 @@ export function invitationEventDay(
 export function projectSentInvitationItem(
   row: SentInvitationPlanningInput,
 ): PlanningItem {
-  const name = row.invitedName?.trim() ? row.invitedName : row.invitedEmail;
+  // A NAME or nothing — never the raw address (G-H1, window 6). An e-mail is
+  // an identifier, not a label: the calendar and the context panel already
+  // render the honest fallback noun ("Kvietimas") + the lifecycle status for a
+  // null label, and the address stays on the network surface this item links
+  // to. `invitedEmail` is part of the row subset but is never projected.
+  const name = row.invitedName?.trim() ? row.invitedName.trim() : null;
   // The invited person IS the counterpart on this row (the caller invited
   // them, so the name is already theirs to see).
   const meta = planningMeta({ counterpart: name });
@@ -1190,6 +1240,58 @@ export function projectAbsenceItem(
     status: row.status,
     statusKey: statusKeyForSource("absence", row.status),
     href: hrefForSource("absence", row.id),
+    roleContext: "mine",
+    ...meta,
+  };
+}
+
+/** The trip fields the calendar sees. Deliberately four: a trip is a date
+ *  band and a place, and the calendar has no business with the rest. */
+export interface TripPlanningInput {
+  readonly id: string;
+  readonly destination: string | null;
+  readonly startDate: string | null;
+  readonly endDate: string | null;
+  readonly status: string;
+}
+
+/**
+ * Statuses that put a person somewhere else. The SAME two the employer-side
+ * commitment read counts, and for the same reason: `approved` is authorized,
+ * `completed` demonstrably happened. `draft` and `submitted` are intentions,
+ * and drawing a pending request on a calendar would show a plan nobody agreed
+ * to; `rejected` and `cancelled` are not trips at all.
+ */
+export const PLANNED_TRIP_STATUSES = ["approved", "completed"] as const;
+
+/**
+ * ONE calendar item per real trip, at its real date band.
+ *
+ * The label IS the destination — unlike an absence, where the reason is
+ * private, where a person is going is the useful half and is already theirs.
+ * The PURPOSE is never carried here, and the read that feeds this never asks
+ * for it.
+ */
+export function projectTripItem(row: TripPlanningInput): PlanningItem | null {
+  if (!(PLANNED_TRIP_STATUSES as readonly string[]).includes(row.status)) {
+    return null;
+  }
+  const start = toIsoDay(row.startDate);
+  if (!start) return null;
+  const meta = planningMeta({
+    duration: daySpanDays(start, toIsoDay(row.endDate)),
+  });
+  return {
+    id: `trip:${row.id}`,
+    sourceType: "trip",
+    sourceId: row.id,
+    label: row.destination && row.destination.trim() !== "" ? row.destination : null,
+    detail: null,
+    startDate: start,
+    endDate: toIsoDay(row.endDate),
+    status: row.status,
+    statusKey: statusKeyForSource("trip", row.status),
+    href: hrefForSource("trip", row.id),
     roleContext: "mine",
     ...meta,
   };

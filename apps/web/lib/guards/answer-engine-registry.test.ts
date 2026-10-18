@@ -123,10 +123,11 @@ describe("answer-engine registry — Wave 0 invariants", () => {
     expect(V.indexableButNotReady).toEqual([]));
 
   it("17. status maps cover EXACTLY the active locales (no disabled locale leaks)", () => {
-    expect([...ANSWER_ENGINE_LOCALES].sort()).toEqual(["de", "en", "lt", "nl", "ru"]);
+    // 2026-09-20: pl added (PL activated as a UI locale; registry regenerated).
+    expect([...ANSWER_ENGINE_LOCALES].sort()).toEqual(["de", "en", "lt", "nl", "pl", "ru"]);
     for (const q of ANSWER_QUESTIONS) {
-      expect(Object.keys(q.translationStatusByLocale).sort()).toEqual(["de", "en", "lt", "nl", "ru"]);
-      expect(Object.keys(q.indexingStatusByLocale).sort()).toEqual(["de", "en", "lt", "nl", "ru"]);
+      expect(Object.keys(q.translationStatusByLocale).sort()).toEqual(["de", "en", "lt", "nl", "pl", "ru"]);
+      expect(Object.keys(q.indexingStatusByLocale).sort()).toEqual(["de", "en", "lt", "nl", "pl", "ru"]);
     }
   });
 

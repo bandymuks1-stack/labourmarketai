@@ -31,7 +31,7 @@ describe("worker-management coordination note is capability-driven", () => {
   // until the owner-gated agencies→companies data task retires it.
   const cases = [
     {
-      page: "app/[locale]/dashboard/company/page.tsx",
+      page: "app/[locale]/dashboard/company/people/page.tsx",
       section: "components/app/company-workers-section.tsx",
       note: "company-workers-coordination-note",
     },

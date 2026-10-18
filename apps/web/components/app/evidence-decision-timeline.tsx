@@ -21,15 +21,16 @@ import type { ReviewTimelineEvent } from "@/lib/journal/review-status";
 
 const DOT: Record<ReviewTimelineEvent["result"] | "created" | "waiting", string> = {
   created: "bg-text-muted",
-  waiting: "bg-amber-500",
-  approved: "bg-emerald-500",
-  changes_requested: "bg-amber-500",
+  // Waiting for a review is a normal state, not a warning: a hollow neutral dot.
+  waiting: "border border-text-muted bg-transparent",
+  approved: "bg-state-success",
+  changes_requested: "bg-state-warning",
   rejected: "bg-state-danger",
 };
 
 const TEXT: Record<ReviewTimelineEvent["result"], string> = {
-  approved: "text-emerald-700",
-  changes_requested: "text-amber-700",
+  approved: "text-state-success",
+  changes_requested: "text-state-warning",
   rejected: "text-state-danger",
 };
 
@@ -38,9 +39,13 @@ const SUPPORTED_ROLES = ["manager", "owner", "external_manager"] as const;
 export async function EvidenceDecisionTimeline({
   createdAt,
   events,
+  awaiting,
 }: {
   createdAt: string;
   events: readonly ReviewTimelineEvent[];
+  /** False when the organisation has not switched confirmation on: the entry
+   *  is NOT in anyone's queue, so "waiting for a human" would be untrue. */
+  awaiting?: boolean;
 }) {
   const t = await getTranslations("journal");
   const tTier = await getTranslations("evidenceTier");
@@ -62,11 +67,18 @@ export async function EvidenceDecisionTimeline({
         </span>
       </li>
 
-      {events.length === 0 ? (
+      {events.length === 0 && awaiting === false ? (
+        <li className="flex items-start gap-2" data-step="not-enabled">
+          <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${DOT.waiting}`} aria-hidden />
+          <span className="text-meta leading-tight text-text-muted">
+            {t("entry.timeline.notEnabled")}
+          </span>
+        </li>
+      ) : events.length === 0 ? (
         /* No human decision yet — honestly "waiting", never auto-confirmed. */
         <li className="flex items-start gap-2" data-step="waiting">
           <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${DOT.waiting}`} aria-hidden />
-          <span className="text-meta leading-tight text-amber-700">
+          <span className="text-meta leading-tight text-text-secondary">
             {t("entry.timeline.waiting")}
           </span>
         </li>

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { COUNTED_ONCE_READ_CAP, countedOnceTotal } from "@/lib/journal/counted-once-count";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -89,23 +90,26 @@ export async function getProjectGallerySummary(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any)
         .from("journal_entries")
-        .select("*", { count: "exact", head: true })
+        // id + correction_of: a corrected-and-resubmitted entry counts once.
+        .select("id, correction_of")
         .eq("project_id", projectId)
-        .is("deleted_at", null),
+        .is("deleted_at", null)
+        .is("superseded_by", null)
+        .limit(COUNTED_ONCE_READ_CAP),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any)
         .from("journal_entry_photos")
-        .select("id, journal_entries!inner(project_id, deleted_at)", {
+        .select("id, journal_entries!inner(project_id, deleted_at, superseded_by)", {
           count: "exact",
           head: true,
         })
         .eq("journal_entries.project_id", projectId)
         .is("journal_entries.deleted_at", null)
+        .is("journal_entries.superseded_by", null)
         .eq("upload_status", "uploaded"),
     ]);
-    if (!entriesRes.error && typeof entriesRes.count === "number") {
-      entryCount = entriesRes.count;
-    }
+    const counted = countedOnceTotal(entriesRes);
+    if (counted !== null) entryCount = counted;
     if (!photosRes.error && typeof photosRes.count === "number") {
       photoCount = photosRes.count;
     }

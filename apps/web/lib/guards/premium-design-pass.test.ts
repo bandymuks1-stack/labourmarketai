@@ -98,8 +98,14 @@ describe("§12 one component vocabulary on the authenticated surfaces", () => {
 
   it("overlays share ONE portal root and ONE z scale", () => {
     const overlay = read("components/ui/anchored-overlay.tsx");
-    expect(overlay).toMatch(/z-\[60\]/); // dropdowns
-    expect(read("components/app/header-search.tsx")).toMatch(/z-\[70\]/); // dialogs
+    // Named tiers from tokens/zindex.ts (2026-09-22): z-modal (60) for the
+    // anchored dropdowns, z-toast (70) for the command-search dialog. A raw
+    // z-[n] in either file is a regression to the ad-hoc scale.
+    expect(overlay).toMatch(/\bz-modal\b/); // dropdowns
+    expect(overlay).not.toMatch(/z-\[\d+\]/);
+    const search = read("components/app/header-search.tsx");
+    expect(search).toMatch(/\bz-toast\b/); // dialogs
+    expect(search).not.toMatch(/z-\[\d+\]/);
     for (const rel of [
       "components/app/account-menu.tsx",
       "components/app/notification-panel.tsx",

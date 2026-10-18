@@ -49,6 +49,7 @@ import {
   type VacancyImportResultV1,
 } from "@/lib/vacancy-import/vacancy-importer";
 import { vacancySwitchState } from "@/lib/vacancy-import/vacancy-kill-switch";
+import { providerApiToken } from "@/lib/vacancy-import/vacancy-provider-secret";
 import {
   VACANCY_PROVIDERS,
   type VacancyProviderDescriptorV1,
@@ -98,6 +99,8 @@ export interface VacancyIngestionSessionResultV1 {
   readonly blockedReason: string | null;
   /** The importer's exact-sum metrics, verbatim. Null only on exception. */
   readonly metrics: VacancyImportResultV1["metrics"] | null;
+  /** Per-page timing evidence (see the importer). Absent on exception/blocked. */
+  readonly fetchDiagnostics?: VacancyImportResultV1["fetchDiagnostics"];
   readonly persisted: {
     readonly inserted: number;
     readonly updated: number;
@@ -120,44 +123,98 @@ export interface VacancyIngestionBatchResultV1 {
   readonly sessions: readonly VacancyIngestionSessionResultV1[];
 }
 
+/** Waits between retries of one dedup page read that hit a statement timeout. */
+const DEDUP_READ_RETRY_DELAYS_MS: readonly number[] = [1_000, 3_000, 8_000];
+let dedupSleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+/** Test seam: swap the backoff sleep so retry paths run instantly. */
+export function __setDedupRetrySleepForTest(
+  fn: ((ms: number) => Promise<void>) | null,
+): void {
+  dedupSleep = fn ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+}
+
 /**
  * Dedup state from what storage already holds for this provider — the input
  * that turns the deduper's three-way classification (replay / revision /
  * withdrawal) from a theory into a fact. Reads ONLY the two identity columns.
  */
-async function loadDedupState(
+export async function loadDedupState(
   client: VacancyDbClient,
   providerKey: string,
 ): Promise<VacancyDedupState> {
-  const { data, error } = await client
-    .from("public_vacancies")
-    .select("external_id, content_hash")
-    .eq("provider_key", providerKey);
-
-  if (error) {
-    // A missing table (owner has not applied the migration) is a legitimate
-    // empty store, not an exception — the importer then treats everything as
-    // new, which is exactly right for a first run.
-    if (error.code === "42P01") {
-      return {
-        knownContentHashes: new Set(),
-        knownIdentityHashes: new Map(),
-      };
-    }
-    throw new Error(`dedup_state_read_failed:${error.code ?? "unknown"}`);
-  }
-
+  // PAGED. PostgREST answers at most `max_rows` (1,000 by default) per request,
+  // and a single unpaged select silently returns a PREFIX of the store: every
+  // stored ad beyond it would then look "unheld", so its withdrawal would be
+  // classified as a replay and never applied. That is the removal duty broken
+  // without an error.
+  //
+  // KEYSET, not OFFSET (2026-10-09). The pages used to be `.range(n*1000, …)`:
+  // Postgres must walk and discard all n*1000 preceding index entries, so
+  // page 131 of the ~131,700 Swedish rows cost ~20 s (EXPLAIN ANALYZE, prod:
+  // 19,952 ms at OFFSET 130000) against the 8 s statement timeout — the whole
+  // read is O(n²) and the late pages died as `dedup_state_read_failed:57014`
+  // in 5 of the last 10 failed scheduled runs. `external_id > last` on the
+  // unique (provider_key, external_id) index is O(page): 36 ms at the same
+  // depth. The pages are the same rows in the same order, so the resulting
+  // state is identical; (provider_key, external_id) is unique, so the strict
+  // `>` can neither skip nor repeat a row.
+  const PAGE = 1000;
+  const MAX_PAGES = 1000;
   const hashes = new Set<string>();
   const identities = new Map<string, string>();
-  for (const row of data ?? []) {
-    const r = row as { external_id: string; content_hash: string };
-    hashes.add(r.content_hash);
-    identities.set(
-      vacancyIdentityKey(providerKey as never, r.external_id),
-      r.content_hash,
-    );
+  let lastExternalId: string | null = null;
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    let rows: unknown[] = [];
+    for (let stall = 0; ; stall += 1) {
+      let query = client
+        .from("public_vacancies")
+        .select("external_id, content_hash")
+        .eq("provider_key", providerKey)
+        .order("external_id", { ascending: true });
+      if (lastExternalId !== null) query = query.gt("external_id", lastExternalId);
+      const { data, error } = await query.limit(PAGE);
+
+      if (!error) {
+        rows = data ?? [];
+        break;
+      }
+      // A missing table (owner has not applied the migration) is a legitimate
+      // empty store, not an exception — the importer then treats everything as
+      // new, which is exactly right for a first run.
+      if (error.code === "42P01") {
+        return {
+          knownContentHashes: new Set(),
+          knownIdentityHashes: new Map(),
+        };
+      }
+      // A page read is idempotent: a transient statement timeout (57014) is
+      // waited out with bounded backoff instead of failing the whole session.
+      if (
+        error.code === "57014" &&
+        stall < DEDUP_READ_RETRY_DELAYS_MS.length
+      ) {
+        await dedupSleep(DEDUP_READ_RETRY_DELAYS_MS[stall] as number);
+        continue;
+      }
+      throw new Error(`dedup_state_read_failed:${error.code ?? "unknown"}`);
+    }
+
+    for (const row of rows) {
+      const r = row as { external_id: string; content_hash: string };
+      hashes.add(r.content_hash);
+      identities.set(
+        vacancyIdentityKey(providerKey as never, r.external_id),
+        r.content_hash,
+      );
+      lastExternalId = r.external_id;
+    }
+    if (rows.length < PAGE) {
+      return { knownContentHashes: hashes, knownIdentityHashes: identities };
+    }
   }
-  return { knownContentHashes: hashes, knownIdentityHashes: identities };
+  // An incomplete state must never be used: fail the session closed.
+  throw new Error("dedup_state_read_failed:too_many_rows");
 }
 
 /** One provider, one channel, one session. Never throws — every failure is a
@@ -203,6 +260,16 @@ export async function runVacancyIngestionSession(
     // traces back to exactly one ingestion session.
     const sessionId = `${provider.key}-${req.channel}-${req.nowIso}`;
 
+    // The provider's credential, when its endpoints need one, read from the
+    // conventional per-provider env NAME (VACANCY_SOURCE_<KEY>_API_TOKEN)
+    // and handed to the adapter as a header — never logged, never stored,
+    // never in `requestRef`. Keyless providers get null and nothing changes;
+    // a key-requiring provider without one is refused by the adapter
+    // (`api_key_required`) before any request. Provisioning is an owner gate.
+    const apiKey = provider.endpoints.some((e) => e.requiresApiKey)
+      ? providerApiToken(provider.key)
+      : null;
+
     const result = await runVacancyImport({
       provider,
       channel: req.channel,
@@ -213,6 +280,7 @@ export async function runVacancyIngestionSession(
       capturedAt: req.nowIso,
       dedupState,
       cursor: cursor.cursorValue,
+      apiKey,
       persist: async (rows) => {
         const outcome = await persistVacancies(client, rows, req.nowIso, sessionId);
         persistedInserted = outcome.inserted;
@@ -242,6 +310,7 @@ export async function runVacancyIngestionSession(
         status: "blocked",
         blockedReason: result.blockedReason,
         metrics: result.metrics,
+        fetchDiagnostics: result.fetchDiagnostics,
         errors,
       };
     }
@@ -265,7 +334,10 @@ export async function runVacancyIngestionSession(
           ? result.nextCursor
           : null;
 
-      await writeVacancyCursor(client, {
+      // A DRY RUN is a diagnostic: it must not write failure markers to the
+      // shared cursor row (it would bump the failure streak that drives the
+      // persist cadence's incident de-duplication). Persist semantics unchanged.
+      if (req.mode === "persist") await writeVacancyCursor(client, {
         providerKey: provider.key,
         channel: req.channel,
         succeeded: false,
@@ -280,6 +352,7 @@ export async function runVacancyIngestionSession(
         status: "fetch_failed",
         blockedReason: null,
         metrics: result.metrics,
+        fetchDiagnostics: result.fetchDiagnostics,
         // Rows consumed before the failure WERE written. Reporting zero here
         // would understate what production now holds.
         persisted: {
@@ -299,6 +372,7 @@ export async function runVacancyIngestionSession(
         status: "dry_run_complete",
         blockedReason: null,
         metrics: result.metrics,
+        fetchDiagnostics: result.fetchDiagnostics,
         caughtUp: result.caughtUp,
         errors,
       };
@@ -321,6 +395,7 @@ export async function runVacancyIngestionSession(
       status: "imported",
       blockedReason: null,
       metrics: result.metrics,
+      fetchDiagnostics: result.fetchDiagnostics,
       persisted: {
         inserted: persistedInserted,
         updated: persistedUpdated,
@@ -331,14 +406,38 @@ export async function runVacancyIngestionSession(
       errors,
     };
   } catch (err) {
+    // The message is one of OUR stable codes (every layer below throws
+    // `code:detail` strings it built itself) — never a provider payload.
+    const code = err instanceof Error ? err.message.slice(0, 200) : "unknown";
+    // Source health must be observable on THIS path too: before 2026-10-09 a
+    // runner_exception left the cursor row untouched, so consecutive_failures
+    // read 0 through a run of failed sessions. Best-effort and strictly
+    // failure-only — cursor_value never moves, a missing/unreadable row is
+    // left alone (no row is invented), and a failure here never masks `code`.
+    if (req.mode === "persist") {
+      try {
+        const existing = await readVacancyCursor(client, provider.key, req.channel);
+        if (existing.cursorValue !== null) {
+          await writeVacancyCursor(client, {
+            providerKey: provider.key,
+            channel: req.channel,
+            succeeded: false,
+            nextCursor: null,
+            previousFailures: existing.consecutiveFailures,
+            failureCode: code.slice(0, 120),
+            runAtIso: req.nowIso,
+          });
+        }
+      } catch {
+        // swallowed deliberately: the exit code and accounting still report it
+      }
+    }
     return {
       ...base,
       status: "runner_exception",
       blockedReason: null,
       metrics: null,
-      // The message is one of OUR stable codes (every layer below throws
-      // `code:detail` strings it built itself) — never a provider payload.
-      errors: [err instanceof Error ? err.message.slice(0, 200) : "unknown"],
+      errors: [code],
     };
   }
 }

@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   contextKey,
+  holdingsFromHeldRoles,
   initialSelection,
   selectContext,
   type ActorContext,
   type ContextHoldings,
+  type ParticipationMode,
 } from "./actor-context";
 
 const worker: ActorContext = { mode: "worker", organizationId: null, label: "Mano darbas" };
@@ -85,5 +87,52 @@ describe("switching context", () => {
   it("two organizations in the same mode are different contexts", () => {
     expect(contextKey(acme)).not.toBe(contextKey(beta));
     expect(contextKey(worker)).toBe("worker");
+  });
+});
+
+describe("held roles → contexts", () => {
+  const label = (m: ParticipationMode) => `label:${m}`;
+
+  it("drops recorded roles that are not participation modes", () => {
+    // `admin` is a real `profile_roles` value and is NOT a mode. Passing it
+    // through would offer a context this client has no surface for.
+    const holdings = holdingsFromHeldRoles(
+      { status: "known", roles: ["worker", "admin", "company"] },
+      label,
+    );
+    expect(holdings.status).toBe("known");
+    if (holdings.status !== "known") throw new Error("unreachable");
+    expect(holdings.contexts.map((c) => c.mode)).toEqual(["worker", "company"]);
+  });
+
+  it("keeps an unavailable read unavailable — never an empty set", () => {
+    // The defect this exists to prevent: a failed read rendered as "you hold
+    // nothing" to someone who manages three companies.
+    const holdings = holdingsFromHeldRoles({ status: "unavailable" }, label);
+    expect(holdings.status).toBe("unavailable");
+  });
+
+  it("an empty KNOWN set is an answer, not a failure", () => {
+    const holdings = holdingsFromHeldRoles({ status: "known", roles: [] }, label);
+    expect(holdings).toEqual({ status: "known", contexts: [] });
+  });
+
+  it("names no organization — that is the workspace axis", () => {
+    const holdings = holdingsFromHeldRoles({ status: "known", roles: ["company"] }, label);
+    if (holdings.status !== "known") throw new Error("unreachable");
+    expect(holdings.contexts[0]).toEqual({
+      mode: "company",
+      organizationId: null,
+      label: "label:company",
+    });
+  });
+
+  it("de-duplicates a role recorded twice", () => {
+    const holdings = holdingsFromHeldRoles(
+      { status: "known", roles: ["worker", "worker"] },
+      label,
+    );
+    if (holdings.status !== "known") throw new Error("unreachable");
+    expect(holdings.contexts).toHaveLength(1);
   });
 });

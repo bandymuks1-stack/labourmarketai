@@ -183,7 +183,7 @@ export function ManagerInstructionComposer({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex w-fit items-center gap-2 rounded-md bg-gradient-to-r from-brand-blue to-brand-cyan px-4 py-2 text-sm font-semibold text-ink-900 transition-transform hover:-translate-y-0.5"
+          className="inline-flex w-fit items-center gap-2 rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-transform hover:-translate-y-0.5"
         >
           {pending ? labels.sending : labels.send}
         </button>

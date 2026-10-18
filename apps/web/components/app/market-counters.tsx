@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
 import { placeholderCycle } from "@/content/placeholders";
@@ -25,6 +25,9 @@ export function MarketCounters() {
   const t = useTranslations("live.counters");
   const reduce = useReducedMotion();
   const [idx, setIdx] = useState(0);
+  // Delta grouping follows the ROUTE locale (1 234 / 1.234), never the
+  // server's default en-US — the page is rendered in LT/RU/NL/DE too.
+  const deltaFormat = useMemo(() => new Intl.NumberFormat(locale), [locale]);
 
   useEffect(() => {
     const id = setInterval(() => setIdx((v) => v + 1), 8000);
@@ -76,7 +79,7 @@ export function MarketCounters() {
             >
               {dir > 0 ? "▲" : dir < 0 ? "▼" : "■"}{" "}
               {a != null && b != null
-                ? Math.abs(a - b).toLocaleString()
+                ? deltaFormat.format(Math.abs(a - b))
                 : "·"}
             </span>
           </div>

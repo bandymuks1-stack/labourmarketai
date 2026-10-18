@@ -209,7 +209,9 @@ Legend: **S**=SELECT **I**=INSERT **U**=UPDATE **D**=DELETE.
 
 ### Testing the policies
 
-After `pnpm db:push`, verify in the Supabase SQL editor with
+After the migration is applied (production: Supabase MCP `apply_migration`
+after review; local: `npx supabase db reset` on the local stack — `pnpm
+db:push` refuses, see `docs/DEPLOYMENT.md`), verify in the SQL editor with
 `set role authenticated; set request.jwt.claims = '{"sub":"<uuid>"}';` and
 confirm: a worker cannot `select` another worker's `worker_skills`; an
 anonymous request gets rows only from `skills`/`countries`/`plans`; a company
@@ -220,7 +222,8 @@ auth feature slice in M1.)
 
 ## Slice 6 — Multi-role + customer (migration `0003_multi_role.sql`)
 
-Status: **applied in M1** (founder runs `pnpm db:push`, see
+Status: **applied in M1** (applied by the founder through the reviewed
+migration path — today Supabase MCP `apply_migration`; see
 `docs/AUTH_SETUP.md`). ADR 0012.
 
 - `profiles.role` (M0) is **dropped**; replaced by

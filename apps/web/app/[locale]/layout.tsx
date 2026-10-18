@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import {
@@ -9,6 +9,9 @@ import {
 import { notFound } from "next/navigation";
 import { routing } from "@/lib/i18n/routing";
 import { ThemeReapply } from "@/components/app/theme-reapply";
+import { ViewerTimeZone } from "@/components/app/viewer-time-zone";
+import { organizationJsonLd, webSiteJsonLd } from "@/lib/answer-engine/answer-seo";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { BRAND_NAME, BRAND_SEO, resolveActiveLocale } from "@/lib/seo/metadata";
 import "../globals.css";
@@ -35,6 +38,16 @@ const sans = Inter({
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
   variable: "--font-sans",
 });
+// ACCENT ONLY (frozen premium design class 4e695e261): the one accent word of
+// an editorial heading — never body or UI text. Latin + latin-ext (LT
+// diacritics); no Cyrillic face exists, so RU falls through to the display
+// stack (tokens/typography.ts `accent`). Wired as --font-accent.
+const accent = Instrument_Serif({
+  subsets: ["latin", "latin-ext"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-accent",
+});
 const mono = JetBrains_Mono({
   subsets: ["latin", "latin-ext", "cyrillic"],
   variable: "--font-mono",
@@ -53,7 +66,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#06070D" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
     { media: "(prefers-color-scheme: light)", color: "#F4F6FB" },
   ],
 };
@@ -128,10 +141,22 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      className={`${display.variable} ${sans.variable} ${mono.variable} ${accent.variable}`}
       suppressHydrationWarning
     >
       <head>
+        {/* Organization + WebSite structured data on EVERY locale page
+            (2026-09-19): the landing is outside the marketing route group
+            and is a frozen composition, so the publisher nodes live here
+            once. Real values only — name, url, logo, language. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(webSiteJsonLd(locale)) }}
+        />
         {/* No-flash theme bootstrap: resolve the theme before paint so the
             light↔dark token swap never flickers. LIGHT is the product default
             (`:root`), so the attribute is always stamped to a definite value —
@@ -139,7 +164,7 @@ export default async function LocaleLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var s=localStorage.getItem('theme');var t=s==='dark'?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();",
+              "(function(){try{var s=localStorage.getItem('theme');var t=s==='light'?'light':'dark';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='dark';}})();",
           }}
         />
       </head>
@@ -148,6 +173,7 @@ export default async function LocaleLayout({
             <html lang> and React strips the bootstrap's data-theme — this
             watcher restores the saved theme before the next paint. */}
         <ThemeReapply />
+        <ViewerTimeZone />
         {/* Performance Reality Audit v1+v2: v1 replaced the FULL runtime
             message tree (~440 KB minified serialized into EVERY page's RSC
             flight payload) with the union client allowlist. v2 moves the

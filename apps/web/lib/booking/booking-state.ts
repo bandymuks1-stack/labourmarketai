@@ -175,14 +175,20 @@ export function normalizeBookingReason(
 }
 
 /**
- * Reschedule affordance (P2-PR6): ONLY an open `proposed` row may have its
- * dates changed by the proposing company. Default-closed for every other
- * status — an ACCEPTED booking is never mutated in place (changing an
- * accepted engagement = withdraw + new proposal, visible in events), and a
- * closed row has nothing to reschedule.
+ * Reschedule affordance (P2-PR6): the proposing company may change the dates
+ * of an open `proposed` row, and of an `accepted` one — but an acceptance
+ * covers only the terms the worker saw (owner decision 2026-09-28): changing
+ * an accepted booking's dates REOPENS it (`reschedulingReopensDecision`), the
+ * previous accepted terms kept in the event log, and the worker decides
+ * again. Closed rows (declined / withdrawn / expired) have nothing to change.
  */
 export function canRescheduleProposal(status: BookingStatus): boolean {
-  return status === "proposed";
+  return status === "proposed" || status === "accepted";
+}
+
+/** Changing this booking's terms asks the worker to decide again. */
+export function reschedulingReopensDecision(status: BookingStatus): boolean {
+  return status === "accepted";
 }
 
 /**

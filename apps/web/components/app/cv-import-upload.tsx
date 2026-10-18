@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, Upload } from "lucide-react";
 import {
@@ -27,10 +27,16 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 export function CvImportUpload({
   onExtracted,
   disabled,
+  file,
 }: {
   /** Called with the extracted raw CV text once a file is read successfully. */
   onExtracted: (text: string) => void;
   disabled?: boolean;
+  /** A file handed over by the conversation (the composer paperclip, after
+   *  the person said it is their CV). Read exactly like a pick in this
+   *  control — the same `/api/cv/extract`, which stores nothing — once per
+   *  File object. */
+  file?: File | null;
 }) {
   const t = useTranslations("structuring.cv");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -80,11 +86,22 @@ export function CvImportUpload({
     }
   }
 
+  // A handed-over file takes the pick path above, once per File object, so a
+  // development double-mount or a re-render cannot read it twice.
+  const handledRef = useRef<File | null>(null);
+  const handleFileRef = useRef(handleFile);
+  handleFileRef.current = handleFile;
+  useEffect(() => {
+    if (!file || handledRef.current === file) return;
+    handledRef.current = file;
+    void handleFileRef.current(file);
+  }, [file]);
+
   return (
     <div className="flex flex-col gap-2" data-testid="cv-import-upload">
       <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-ink-500 bg-ink-700 px-3 text-xs font-semibold text-text-primary transition-colors hover:border-brand-blue">
         {busy ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+          <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
         ) : (
           <Upload className="h-3.5 w-3.5" aria-hidden />
         )}

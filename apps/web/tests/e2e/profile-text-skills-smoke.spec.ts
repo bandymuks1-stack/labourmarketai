@@ -44,6 +44,20 @@ test.use({ storageState: STORAGE_STATE });
 
 mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
+/**
+ * Summary first (2026-09-23): the composer lives in the closed
+ * `#profile-edit` bar, which its DetailsHashOpener opens for this hash — the
+ * same address the hub's "add what is missing" action uses. A worker with no
+ * primary profession lands in the profession picker; this smoke is about the
+ * TEXT flow, so it steps back to the composer the way a person would.
+ */
+async function openComposer(page: Page): Promise<void> {
+  await page.goto("/lt/dashboard/profile#profile-edit", { waitUntil: "networkidle" });
+  await expect(page.locator("main #profile-edit")).toHaveJSProperty("open", true);
+  const back = page.getByTestId("profile-text-flow-manual-back");
+  if (await back.isVisible()) await back.click();
+}
+
 async function shot(page: Page, name: string): Promise<void> {
   await page.screenshot({
     path: join(SCREENSHOT_DIR, `${name}.png`),
@@ -94,7 +108,7 @@ test("broad narrative produces many capabilities incl. specializations", async (
 }) => {
   test.setTimeout(120_000);
 
-  await page.goto("/lt/dashboard/profile", { waitUntil: "networkidle" });
+  await openComposer(page);
   await expect(page).toHaveURL(/\/lt\/dashboard\/profile/);
 
   const composer = page.locator("textarea").first();
@@ -142,7 +156,7 @@ test("edit flow — type → suggest → back → edit → re-suggest", async ({
 }) => {
   test.setTimeout(90_000);
 
-  await page.goto("/lt/dashboard/profile", { waitUntil: "networkidle" });
+  await openComposer(page);
 
   const composer = page.locator("textarea").first();
   await composer.waitFor({ state: "visible", timeout: 30_000 });

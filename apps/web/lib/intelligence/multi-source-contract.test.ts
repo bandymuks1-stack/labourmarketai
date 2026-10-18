@@ -80,7 +80,11 @@ describe("registry names every roadmap provider — all external ones OFF", () =
     expect(external.length).toBeGreaterThanOrEqual(4);
     expect(new Set(external.map((p) => p.key)).size).toBe(external.length);
     for (const p of external) {
-      if (p.key === "eurostat" || p.key === "arbetsformedlingen") {
+      if (
+        p.key === "eurostat" ||
+        p.key === "arbetsformedlingen" ||
+        p.key === "nav"
+      ) {
         // The two owner-activated externals: eurostat (metrics) and
         // arbetsformedlingen (vacancies, approved 2026-08-09).
         expect(isExternalSourceActive(p.key), p.key).toBe(true);
@@ -90,10 +94,9 @@ describe("registry names every roadmap provider — all external ones OFF", () =
         // sits in `approved`; one that has not answered stays `proposed`.
         // Neither imports anything.
         expect(isExternalSourceActive(p.key), p.key).toBe(false);
-        expect(
-          ["proposed", "approved"],
-          `${p.key} lifecycle`,
-        ).toContain(deriveSourceLifecycleState(p));
+        expect(["proposed", "approved"], `${p.key} lifecycle`).toContain(
+          deriveSourceLifecycleState(p),
+        );
       }
     }
     // eurostat is active → not all off

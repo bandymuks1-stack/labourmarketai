@@ -1,0 +1,130 @@
+import { setRequestLocale, getTranslations } from "next-intl/server";
+import { FileSpreadsheet, ClipboardList } from "lucide-react";
+
+import { Link } from "@/lib/i18n/navigation";
+import { requireRoleOrRedirect } from "@/lib/auth/require-role";
+import { EvidenceImportSection } from "@/components/app/evidence-import-section";
+import { CompanyWorkHistory, CompanyPlaceHistory } from "@/components/app/organization/company-work-history";
+import { PerformingCompanyPanel } from "@/components/app/organization/performing-company-panel";
+import { EvidenceImportSessions } from "@/components/app/organization/evidence-import-sessions";
+import { HistoricalPhotoImport } from "@/components/app/organization/historical-photo-import";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { Fold } from "@/components/app/premium/grammar";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { HistoryQualitySection } from "@/components/app/organization/history-quality-section";
+
+/**
+ * ISTORIJA — the historical import door (owner IA correction 2026-09-16,
+ * design/final/03 §2, §3 P0).
+ *
+ * THE canonical destination of "noriu įkelti istorinius duomenis". One
+ * import engine (`lib/organization-evidence/import-core.ts`) stands behind
+ * it: upload → inspect → detect structure → identify people / sites / dates /
+ * hours / work → match what exists → PREPARE what is missing → detect
+ * duplicates and contradictions → one preview → the human decides only the
+ * real ambiguities → explicit commit → canonical records with provenance.
+ *
+ * The monthly hours grid (person × day) is a FORMAT this same engine reads
+ * (`rowsFromTimesheetProposals`), so the operator's day-to-day hours surface
+ * is linked from here as a neighbour, never as a second importer.
+ *
+ * `?evidenceSession=` keeps a staged source bookmarkable, exactly as the hub
+ * did — the section itself decides everything else.
+ */
+export default async function CompanyHistoryPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  await requireRoleOrRedirect(locale, "company");
+  const sp = (await searchParams) ?? {};
+  const evidenceSession =
+    typeof sp.evidenceSession === "string" && sp.evidenceSession.trim() !== ""
+      ? sp.evidenceSession.trim()
+      : undefined;
+  const place =
+    typeof sp.place === "string" && sp.place.trim() !== "" ? sp.place : undefined;
+  const org = typeof sp.org === "string" && sp.org.trim() !== "" ? sp.org.trim() : null;
+  const t = await getTranslations("organizationDoors.pages.history");
+  const tQuality = await getTranslations("historyQuality");
+
+  return (
+    <div className="flex flex-col gap-6" data-testid="company-history">
+      <header className="flex flex-col gap-1">
+        <PageTitle>{t("title")}</PageTitle>
+        <p className="text-sm text-text-secondary">{t("subtitle")}</p>
+        <a
+          href="#history-quality"
+          className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-brand-blue hover:underline"
+          data-testid="company-history-quality-link"
+        >
+          {tQuality("link")} ↓
+        </a>
+      </header>
+
+      {/* WHAT IS ALREADY ON RECORD — the committed history seen by place,
+          before the door for adding more. */}
+      <CompanyWorkHistory locale={locale} organizationId={org} />
+
+      {/* DATA QUALITY — what the import produced vs what was recognised,
+          every recorded mismatch and its undo (owner 2026-10-14). */}
+      <DetailsHashOpener targetId="history-quality" />
+      <Fold id="history-quality" title={tQuality("title")} hint={tQuality("link")} testId="history-quality-fold">
+        <HistoryQualitySection locale={locale} />
+      </Fold>
+
+      {/* WHO PERFORMED IT — only when this organization's books hold work that
+          another organization of the same caller performed. */}
+      <PerformingCompanyPanel locale={locale} />
+
+      <div id="evidence-import-zone" className="scroll-mt-20">
+        <EvidenceImportSection locale={locale} sessionId={evidenceSession} />
+      </div>
+
+      {/* YOUR IMPORTS — every source this organization has read, newest
+          first, each a way back into the section above. Without it a session
+          was reachable only by its bookmark (class F: rendered ≠ reachable). */}
+      <EvidenceImportSessions locale={locale} activeSessionId={evidenceSession ?? null} />
+
+      {/* HISTORICAL PHOTOS — source image files attached to a STATED record,
+          place, person or the organization; provenance + date basis kept. */}
+      <HistoricalPhotoImport />
+
+      {/* Neighbouring doors of the same evidence: the hours surface (whose
+          grid this engine also reads) and the evidence reports. */}
+      <nav
+        aria-label={t("hoursGridTitle")}
+        className="grid gap-2 sm:grid-cols-2"
+        data-testid="company-history-neighbours"
+      >
+        <Link
+          href="/dashboard/hours"
+          data-testid="company-history-hours-door"
+          className="flex items-start gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-3 transition-colors hover:border-brand-blue"
+        >
+          <FileSpreadsheet className="mt-0.5 h-5 w-5 shrink-0 text-brand-cyan" aria-hidden />
+          <span className="flex min-w-0 flex-col">
+            <span className="font-semibold text-text-primary">{t("hoursDoor")} →</span>
+            <span className="text-xs leading-relaxed text-text-secondary">
+              {t("hoursGridNote")}
+            </span>
+          </span>
+        </Link>
+        <Link
+          href="/dashboard/reports/evidence"
+          data-testid="company-history-evidence-reports-door"
+          className="flex items-start gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-3 transition-colors hover:border-brand-blue"
+        >
+          <ClipboardList className="mt-0.5 h-5 w-5 shrink-0 text-brand-cyan" aria-hidden />
+          <span className="font-semibold text-text-primary">
+            {t("evidenceReportsDoor")} →
+          </span>
+        </Link>
+      </nav>
+    </div>
+  );
+}

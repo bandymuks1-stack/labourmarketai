@@ -117,31 +117,20 @@ describe("the map is the primary surface; marketplace is secondary", () => {
     );
   });
 
-  it("the map page is map-first: the live map leads", () => {
-    expect(map).toMatch(/<MarketMapBase\b/);
+  it("the map page is map-first: the ONE map leads (WorldDiscovery)", () => {
+    expect(map).toMatch(/<WorldDiscovery\b/);
+    expect(map).not.toMatch(/<MarketMapBase\b/);
   });
 
-  it("the map page carries a layers legend (visible now / future layers)", () => {
-    expect(map).toMatch(/<MapLayersLegend\b/);
+  it("the map page carries NO layers catalogue — layers appear only where data exists", () => {
+    // Deliberately removed (one-canonical-map): the "visible now / coming
+    // later" legend (`MapLayersLegend`) was a catalogue of layers that do not
+    // exist. The layer pills of the one map come from real reads only.
+    expect(map).not.toMatch(/<MapLayersLegend\b/);
   });
 
   it("/dashboard/marketplace is secondary — redirects to the map", () => {
     expect(isCanonicallyRedirected("/dashboard/marketplace", "/dashboard/market-map")).toBe(true);
-  });
-});
-
-describe("the map layers legend is honest — real signals only, no fake data", () => {
-  const legend = read("components/app/map-layers-legend.tsx");
-
-  it("future layers render as DISABLED chips (aria-disabled), not fake markers", () => {
-    expect(legend).toMatch(/aria-disabled="true"/);
-    expect(legend).toMatch(/map-layers-future/);
-    expect(legend).toMatch(/map-layers-visible/);
-  });
-
-  it("no seeded marker / coordinate / fake data arrays in the legend", () => {
-    expect(legend).not.toMatch(/markers?\s*[:=]\s*\[/i);
-    expect(legend).not.toMatch(/coordinates\s*[:=]\s*\[/i);
   });
 });
 
@@ -152,24 +141,8 @@ describe("compact map-first nav + legend i18n exists in every active locale", ()
       expect(m.auth.dashboard.tabs.marketMap).toBeTruthy();
       expect(m.auth.dashboard.tabs.admin).toBeTruthy();
     });
-    it(`${loc}: mapLayers legend has visible-now + the future-layer items`, () => {
-      const ml = m.mapLayers;
-      expect(ml).toBeTruthy();
-      expect(ml.visibleNow && ml.futureLayers && ml.futureBadge).toBeTruthy();
-      for (const k of [
-        "selfSignal",
-        "companies",
-        "teams",
-        "opportunities",
-        "workNeeds",
-        "services",
-        "rentals",
-        "shops",
-        "availability",
-        "trust",
-      ]) {
-        expect(ml.items?.[k], `${loc}.mapLayers.items.${k}`).toBeTruthy();
-      }
+    it(`${loc}: the removed layers catalogue is gone (no mapLayers namespace)`, () => {
+      expect(m.mapLayers).toBeUndefined();
     });
   }
 });

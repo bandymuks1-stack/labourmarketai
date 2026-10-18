@@ -4,6 +4,7 @@ import {
   deriveEntryWorkTime,
   isWorkTimeUnit,
   resolveWorkDay,
+  resolveWorkDayDetail,
   workTimeDurationLabel,
   workTimeHours,
   workTimeHoursByDay,
@@ -167,6 +168,28 @@ describe("work-date / timezone semantics", () => {
 
   it("without a stated work_date the created UTC day is the fallback", () => {
     expect(entryOf([], { createdAt: "2026-08-15T21:45:00Z" }).day).toBe("2026-08-15");
+  });
+
+  it("the basis of the day is named: a stated work_date is `stated`, the save-day fallback is `created` (re-audit F10)", () => {
+    const stated = entryOf([
+      metric({ metric_slug: "work_date", value_text: "2026-06-30" }),
+      metric({ metric_slug: "quantity", value_numeric: 8, unit_slug: "hours" }),
+    ], { createdAt: "2026-08-15T21:45:00Z" });
+    expect(stated.dayBasis).toBe("stated");
+    // a 22:30 UTC save with no stated day is placed on the UTC day — and SAYS so
+    const late = entryOf([metric({ metric_slug: "quantity", value_numeric: 8, unit_slug: "hours" })], {
+      createdAt: "2026-08-15T22:30:00Z",
+    });
+    expect(late.day).toBe("2026-08-15");
+    expect(late.dayBasis).toBe("created");
+    // a malformed work_date is a fallback too, never a guessed FACT
+    const malformed = entryOf([metric({ metric_slug: "work_date", value_text: "2026-6-3" })], {
+      createdAt: "2026-08-15T21:45:00Z",
+    });
+    expect(malformed.dayBasis).toBe("created");
+    expect(resolveWorkDayDetail([], "2026-08-15T22:30:00Z")).toEqual({ day: "2026-08-15", basis: "created" });
+    expect(resolveWorkDayDetail([metric({ metric_slug: "work_date", value_text: "2026-08-16" })], "2026-08-15T22:30:00Z"))
+      .toEqual({ day: "2026-08-16", basis: "stated" });
   });
 
   it("a malformed work_date is ignored rather than guessed at", () => {

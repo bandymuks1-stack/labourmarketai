@@ -15,7 +15,7 @@ import {
 /**
  * Server actions for self-declared education entries. Writes go through the
  * owner-only RLS on worker_education (DRAFT migration 20260714160000 —
- * human-gated, NOT applied yet): direct inserts/updates/deletes are permitted
+ * APPLIED, ledger `20260716195418`): direct inserts/updates/deletes are permitted
  * ONLY on the caller's own rows (profile_id = auth.uid(), enforced by the
  * insert/update WITH CHECK policies).
  *

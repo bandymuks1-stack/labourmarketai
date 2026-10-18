@@ -12,6 +12,7 @@ import {
   type PipelineSourceType,
   type PipelineStage,
 } from "@/lib/crm/pipeline-model";
+import { PageTitle } from "@/components/app/premium/page-title";
 
 /**
  * CRM / demand pipeline — operator read surface (control room PR F,
@@ -77,12 +78,10 @@ export default async function AdminPipelinePage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-pipeline">
       <header className="flex flex-col gap-1">
-        <p className="font-mono text-meta uppercase tracking-label text-brand-orange">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
-          {t("title")}
-        </h1>
+        <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
         <Link
           href={"/dashboard/admin" as "/dashboard"}

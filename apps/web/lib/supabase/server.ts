@@ -3,6 +3,7 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { requireSupabaseClientEnv } from "@/lib/env";
+import { currentBearerCaller } from "@/lib/api/bearer-caller-scope";
 import type { Database } from "@/lib/supabase/types";
 
 /**
@@ -20,7 +21,7 @@ import type { Database } from "@/lib/supabase/types";
  * (callback exchange, logout) never read getUser before mutating, so the
  * memo can't serve a pre-mutation value.
  */
-export const createClient = cache(async () => {
+const createCookieClient = cache(async () => {
   const cookieStore = await cookies();
   const { url, anonKey } = requireSupabaseClientEnv();
 
@@ -66,3 +67,22 @@ export const createClient = cache(async () => {
 
   return client;
 });
+
+/**
+ * The caller's RLS-scoped client for this request.
+ *
+ * Inside a BEARER CALLER SCOPE (`lib/api/bearer-caller-scope.ts` — entered
+ * only by an external-client door after `resolveApiIdentity` verified the
+ * token) this is that caller's own bearer client, so the same server actions
+ * and helpers run as the same person under the same RLS. Everywhere else —
+ * every browser request — it is the cookie client above, unchanged.
+ */
+export async function createClient(): ReturnType<typeof createCookieClient> {
+  const bearer = currentBearerCaller();
+  if (bearer) {
+    // Same Database generic, different construction path (supabase-js vs
+    // @supabase/ssr); the query surface the callers use is identical.
+    return bearer.supabase as unknown as Awaited<ReturnType<typeof createCookieClient>>;
+  }
+  return createCookieClient();
+}

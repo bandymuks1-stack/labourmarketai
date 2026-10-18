@@ -90,6 +90,12 @@ export const FUNNEL_EVENTS = {
   bookingViewed: "booking_viewed",
   bookingAccepted: "booking_accepted",
   bookingDeclined: "booking_declined",
+  //    Owner contract §4D (2026-09-05): an invitation addressed to the person
+  //    was ACCEPTED from the chat's attention item — server-emitted by the
+  //    conversation executor only on a real `accepted` / `linked` outcome
+  //    (the SAME accept RPCs the network page and the dashboard card call).
+  //    Bounded scalars only (surface / entity_type / success); no PII.
+  invitationAccepted: "invitation_accepted",
   // ── Mid-funnel marketplace progression (W14 Pilot Analytics slice v1).
   //    The gap between "booking_*" and nothing: the stages where a demand
   //    actually turns into work — match preview → shortlist → contact →
@@ -160,7 +166,159 @@ export const FUNNEL_EVENTS = {
   chatMissingDataAsked: "chat_missing_data_asked",
   chatActionAttempted: "chat_action_attempted",
   chatActionPersisted: "chat_action_persisted",
+  // ── Public entry (frozen design contract 2026-09-05, package P1). An
+  //    anonymous visitor types a sentence on the landing and the SAME
+  //    deterministic router reads it before any account exists. One event,
+  //    fired through the anon-insert path (profile_id NULL) with the chat
+  //    funnel's own shape: `step` = the routed intent id, "unrecognised", or
+  //    "chip" (the two-chip answer to the one question), `intent` = the
+  //    first-run family it belongs to, `resolution` = "deterministic". The
+  //    sentence itself is NEVER recorded.
+  landingIntent: "landing_intent",
+  // ── Universal invitation / referral network v1 (2026-09-17). The referral
+  //    funnel's REAL stages, each emitted only where the fact is observable:
+  //    `invitation_created` in the create action on a stored row;
+  //    `invitation_opened` from the logged-out landing's server read (the
+  //    one door that sees an open before an account exists; profile_id NULL);
+  //    `invitation_declined` on a stored decline; `external_referral_received`
+  //    in the partner door on a stored referral (`surface` = the source
+  //    slug). `invitation_accepted` (above) already carries the acceptance.
+  //    OPENED ≠ ACCEPTED ≠ PROFILE READY: no later stage is inferred from an
+  //    earlier one. Bounded scalars only (entity_type = the invitation type,
+  //    surface, success) — never a token, an e-mail or an id.
+  invitationCreated: "invitation_created",
+  invitationOpened: "invitation_opened",
+  invitationDeclined: "invitation_declined",
+  externalReferralReceived: "external_referral_received",
+  // ── Worker → real vacancy → interest → Nonstop commercial handoff
+  //    (2026-09-17). The funnel states the owner asked to measure, as
+  //    bounded scalars at the real action points: `recognition_*` when the
+  //    person confirms / corrects / rejects a suggestion (server-emitted by
+  //    the existing claim + journal-skill actions), `profile_matchable` the
+  //    first time the board's own gate reads true for a person (once per
+  //    board render that crosses it), `real_opportunities_loaded` when the
+  //    board rendered ≥1 real row, `vacancy_interest_expressed` on a stored
+  //    interest in a public vacancy, `commercial_handoff_created` on a NEW
+  //    `commercial_handoffs` row (never on the idempotent replay).
+  //    No ids, no employer names, no counts beyond `success`/`result_kind`.
+  recognitionSuggested: "recognition_suggested",
+  recognitionConfirmed: "recognition_confirmed",
+  recognitionCorrected: "recognition_corrected",
+  recognitionRejected: "recognition_rejected",
+  profileMatchable: "profile_matchable",
+  realOpportunitiesLoaded: "real_opportunities_loaded",
+  vacancyInterestExpressed: "vacancy_interest_expressed",
+  commercialHandoffCreated: "commercial_handoff_created",
+  // ── Public job acquisition loop (P0, 2026-09-20): the steps a campaign
+  //    visitor takes from one public advertisement to a compared, acted-on
+  //    opportunity — the stages the owner asked to measure "without
+  //    inventing analytics". Anonymous-safe (pilot_events admits
+  //    profile_id NULL). `ref_type`/`ref_id` carry the opaque public
+  //    vacancy id so "where do visitors leave" can be answered PER JOB;
+  //    `surface` says whether the viewer was anonymous or a member.
+  //    - job_board_viewed         the public board rendered (candidate_count
+  //                               = rows shown; `unavailable` rendered as
+  //                               success:false, never as zero jobs)
+  //    - job_opened               one public job page rendered
+  //    - job_returned_after_auth  the same job page rendered right after the
+  //                               auth round trip (`?via=auth` carried by the
+  //                               page's own signup/login `next`)
+  //    - job_compared             the member half rendered the ONE engine's
+  //                               requirement-by-requirement reading
+  //                               (result_kind = the fit band)
+  //    - job_missing_info_shown   that reading named facts the person has
+  //                               not provided (unresolved_unknown_count)
+  //    - job_alternatives_shown   other current ads of the same profession
+  //                               were offered beside a non-fit
+  //                               (candidate_count = how many)
+  jobBoardViewed: "job_board_viewed",
+  jobOpened: "job_opened",
+  jobReturnedAfterAuth: "job_returned_after_auth",
+  jobCompared: "job_compared",
+  jobMissingInfoShown: "job_missing_info_shown",
+  jobAlternativesShown: "job_alternatives_shown",
+  // ── Employer funnel closure (owner §23 canonical chain, 2026-09-22). The
+  //    logged-in employer's own requirement path (`submit_demand_request_v2`
+  //    → `customer_requests`) emitted NO pilot_event, so the chain stopped
+  //    being measurable exactly where a company first states a real need.
+  //    All three are SERVER-emitted at the real write points, through the
+  //    same RLS-safe insert path, with entity ids only — never a title, a
+  //    need summary, a note or a message body.
+  //    - requirement_activated      the stored requirement's status is one a
+  //                                 worker can see (`submitted` | `approved`);
+  //                                 `demand_saved` (above) carries the write
+  //                                 itself with `status` for the other cases.
+  //    - demand_interest_expressed  a worker stored interest in an employer's
+  //                                 OWN requirement (ref_type
+  //                                 `customer_request`) — the sibling of
+  //                                 `vacancy_interest_expressed`, which is the
+  //                                 public-vacancy source of the same object.
+  //    - conversation_message_sent  one message row was inserted through the
+  //                                 communication composer (ref_type
+  //                                 `conversation`, ref_id = the conversation).
+  requirementActivated: "requirement_activated",
+  demandInterestExpressed: "demand_interest_expressed",
+  conversationMessageSent: "conversation_message_sent",
+  // ── Remaining-instrumentation emitters (funnel-emitters v1, 2026-10-07).
+  //    Each is emitted ONLY after the product write / verified billing event
+  //    it names has succeeded; a failure emits nothing. Bounded scalars only.
+  //    - offer_created              the OFFER side became real: a marketplace
+  //                                 listing of an offering kind (sale|rental,
+  //                                 never `wanted`) was stored, or a service
+  //                                 offering went draft -> active.
+  //                                 `entity_type` says which.
+  //    - organization_hiring_ready  a company save moved the stored company from
+  //                                 not-hiring-ready to `hiring_ready` per
+  //                                 computeCompanyReadiness (all legal/billing
+  //                                 fields + a stated activity). Transition-only.
+  //    - subscription_started       verified Stripe checkout.session.completed
+  //                                 whose subscription link was persisted (ok).
+  //    - subscription_invoice_paid  verified Stripe invoice.paid with amount_paid
+  //                                 > 0, persisted ok. `result_kind` = the
+  //                                 invoice billing_reason (bounded). A zero-
+  //                                 amount (trial) invoice is NOT a payment.
+  offerCreated: "offer_created",
+  organizationHiringReady: "organization_hiring_ready",
+  subscriptionStarted: "subscription_started",
+  // trial_started: a verified LIVE-mode `customer.subscription.created` whose
+  // subscription status is "trialing" with a trial_end, persisted ok. One per
+  // subscription (Stripe sends `created` once). NOT a payment and not paid
+  // conversion.
+  trialStarted: "trial_started",
+  subscriptionInvoicePaid: "subscription_invoice_paid",
 } as const;
+
+/**
+ * The bounded `step` a `registration_started` event may carry (2026-09-22).
+ *
+ * BOTH auth pages render the OAuth buttons with `context="signup"` because a
+ * new Google identity creates an account from either page — so the login
+ * page's returning users were being counted as registration CONVERSIONS
+ * (`lib/admin/conversion-funnel.ts`). The page now says WHICH page the press
+ * came from through this closed set; the admin funnel counts a conversion
+ * only for `signup_page` and keeps the raw `registration_started` count
+ * visible for both. Rows written before this step existed carry no `step`
+ * and are therefore raw-counted only.
+ */
+export const REGISTRATION_STEPS = ["login_page", "signup_page"] as const;
+export type RegistrationStep = (typeof REGISTRATION_STEPS)[number];
+/** The one `step` value the admin funnel counts as a registration conversion. */
+export const REGISTRATION_CONVERSION_STEP: RegistrationStep = "signup_page";
+
+/**
+ * The bounded `status` a requirement funnel event may carry (2026-09-22):
+ * the `customer_requests` status set, never free text. Mirrors the admin
+ * pipeline statuses documented in lib/demand/demand-lifecycle-model.ts.
+ */
+export const REQUIREMENT_STATUSES = [
+  "draft",
+  "submitted",
+  "in_review",
+  "needs_followup",
+  "approved",
+  "closed",
+] as const;
+export type RequirementStatus = (typeof REQUIREMENT_STATUSES)[number];
 
 export type FunnelEventName =
   (typeof FUNNEL_EVENTS)[keyof typeof FUNNEL_EVENTS];
@@ -177,10 +335,19 @@ export const FUNNEL_EVENT_NAMES: readonly FunnelEventName[] =
 export type FunnelMetadata = {
   /** Source surface, e.g. 'dashboard' | 'profile' | 'google' | 'password'. */
   surface?: string;
+  /** Bounded outcome word (already on the server allowlist), e.g. the
+   *  outreach state a commercial handoff was created in. Never free text. */
+  result_kind?: string;
   /** A coarse step label inside a multi-step flow, e.g. 'compose'. */
   step?: string;
   /** Coarse role context: 'worker' | 'company' | 'agency' | 'customer' | 'person'. */
   role_context?: string;
+  /** How a chat sentence was resolved: 'deterministic' (the always-on
+   *  router), 'goal' (the ACTIVE CONVERSATION GOAL — a continuation such as
+   *  "Nuo spalio." that the router alone reads as unknown; owner P0
+   *  2026-09-06) or 'llm' (the Gemini proposer, owner approval 2026-09-05).
+   *  Never the sentence. */
+  resolution?: "deterministic" | "goal" | "llm";
   /** First-run intent: 'work' | 'hire' | 'agency' | 'student' | 'education',
    *  or a comma-joined set of them. Never free text. */
   intent?: string;
@@ -190,8 +357,16 @@ export type FunnelMetadata = {
   success?: boolean;
   /** True when the event was fired from a non-production origin (localhost /
    *  Vercel preview). Stamped automatically by `trackFunnel` so dev/preview
-   *  traffic can be excluded from the owner's real acquisition funnel. */
+   *  traffic can be excluded from the owner's real acquisition funnel. Since
+   *  2026-09-20 the server action ALSO stamps it from the request's Host
+   *  header, so the client marker is no longer the only defence. */
   preview_host?: boolean;
+  /** Where the row was WRITTEN from — 'production' | 'preview' | 'local' —
+   *  stamped SERVER-SIDE from Vercel's own VERCEL_ENV (see
+   *  lib/telemetry/production-host.ts). A client value is overwritten; it is
+   *  typed here only so readers of the metadata know the key exists. Writes
+   *  from a LOCAL host are refused outright and never reach a row. */
+  deploy_env?: "production" | "preview" | "local";
   /** Coarse audience of a public marketing surface: 'workers' | 'companies' | 'agencies' | 'home'. */
   audience?: string;
   /** Stable, non-PII identifier of a CTA button, e.g. 'hero_signup' | 'company_need'. */
@@ -231,4 +406,13 @@ export type FunnelMetadata = {
   ref_type?: string;
   /** Referenced entity id (opaque uuid). */
   ref_id?: string;
+  /** How many facts a reading named as not yet provided (a count, never the
+   *  facts). Already allowlisted server-side for the journal review flow;
+   *  typed here so the public job comparison can report it. */
+  unresolved_unknown_count?: number;
+  /** The stored requirement's status at emission time (2026-09-22) — one of
+   *  `REQUIREMENT_STATUSES`, never free text. Carried by `demand_saved` from
+   *  the server submit path so a draft, a submitted and an approved
+   *  requirement are distinguishable without a second event per status. */
+  status?: RequirementStatus;
 };

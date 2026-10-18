@@ -24,13 +24,27 @@ vi.mock("react", async () => {
   return { ...actual, cache: <T,>(fn: T) => fn };
 });
 
-const { resolveAnalyticsAttribution, analyticsAttributionMetadata } =
-  await import("./analytics-attribution");
+// The user's OWN auth record, as `getUser()` exposes it (employer funnel
+// closure, 2026-09-22): the first-touch reader takes `user_metadata` from
+// here and from nowhere else. Default: no user (anonymous / no request).
+const getUserMock = vi.fn();
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: async () => ({ auth: { getUser: (...a: unknown[]) => getUserMock(...a) } }),
+}));
+
+const {
+  resolveAnalyticsAttribution,
+  resolveFirstTouchAttribution,
+  analyticsAttributionMetadata,
+} = await import("./analytics-attribution");
 
 const ORG_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const ORG_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  getUserMock.mockResolvedValue({ data: { user: null } });
+});
 
 describe("resolveAnalyticsAttribution", () => {
   it("workspace A attributes ONLY A; workspace B attributes ONLY B", async () => {
@@ -109,6 +123,102 @@ describe("analyticsAttributionMetadata", () => {
     });
     await expect(analyticsAttributionMetadata()).resolves.toEqual({
       workspace_type: "personal",
+    });
+  });
+});
+
+/**
+ * FIRST-TOUCH ON SERVER EVENTS (employer funnel closure, 2026-09-22). The
+ * signup form stores the bounded first-touch keys on the account
+ * (`signUp({ options: { data } })`); the server reads them back from the
+ * authenticated user's OWN `user_metadata`. No migration, no trigger, no
+ * client value on a product action — and never anything but the six keys.
+ */
+describe("resolveFirstTouchAttribution", () => {
+  const personal = () =>
+    resolveBillingSubjectMock.mockResolvedValueOnce({
+      subject: { type: "profile", id: "p" },
+      payerProfileId: "p",
+      billingAuthority: true,
+      role: null,
+    });
+
+  it("reads the allowlisted keys from the user's own metadata", async () => {
+    getUserMock.mockResolvedValueOnce({
+      data: {
+        user: {
+          id: "u1",
+          user_metadata: {
+            utm_source: "facebook",
+            utm_campaign: "welder-w1",
+            utm_content: "pl",
+            locale: "pl",
+            full_name: "never read",
+          },
+        },
+      },
+    });
+    await expect(resolveFirstTouchAttribution()).resolves.toEqual({
+      utm_source: "facebook",
+      utm_campaign: "welder-w1",
+      utm_content: "pl",
+    });
+  });
+
+  it("an anonymous request carries nothing", async () => {
+    getUserMock.mockResolvedValueOnce({ data: { user: null } });
+    await expect(resolveFirstTouchAttribution()).resolves.toEqual({});
+  });
+
+  it("a metadata read failure degrades to {} — never into the product action", async () => {
+    getUserMock.mockRejectedValueOnce(new Error("auth unavailable"));
+    await expect(resolveFirstTouchAttribution()).resolves.toEqual({});
+    getUserMock.mockResolvedValueOnce({ data: { user: { id: "u1", user_metadata: "garbage" } } });
+    await expect(resolveFirstTouchAttribution()).resolves.toEqual({});
+  });
+
+  it("analyticsAttributionMetadata merges first-touch UNDER the workspace keys", async () => {
+    resolveBillingSubjectMock.mockResolvedValueOnce({
+      subject: { type: "organization", id: ORG_A },
+      payerProfileId: "p",
+      billingAuthority: false,
+      role: "manager",
+    });
+    getUserMock.mockResolvedValueOnce({
+      data: {
+        user: {
+          id: "u1",
+          user_metadata: {
+            utm_source: "facebook",
+            utm_medium: "group",
+            referrer_host: "l.facebook.com",
+            landing_path: "/pl/jobs/e3ec6c1e",
+            // A metadata record can never reassign the workspace: these are
+            // reserved keys and are not on the first-touch allowlist.
+            workspace_type: "organization",
+            organization_id: ORG_B,
+          },
+        },
+      },
+    });
+    await expect(analyticsAttributionMetadata()).resolves.toEqual({
+      utm_source: "facebook",
+      utm_medium: "group",
+      referrer_host: "l.facebook.com",
+      landing_path: "/pl/jobs/e3ec6c1e",
+      workspace_type: "organization",
+      organization_id: ORG_A,
+      org_role: "manager",
+      billing_subject: "organization",
+    });
+  });
+
+  it("a user with no stored first-touch yields the pre-existing shape exactly", async () => {
+    personal();
+    getUserMock.mockResolvedValueOnce({ data: { user: { id: "u1", user_metadata: { locale: "lt" } } } });
+    await expect(analyticsAttributionMetadata()).resolves.toEqual({
+      workspace_type: "personal",
+      billing_subject: "profile",
     });
   });
 });

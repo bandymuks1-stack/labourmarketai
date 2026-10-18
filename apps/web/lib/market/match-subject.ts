@@ -1,6 +1,8 @@
 import "server-only";
+import { readConfirmedWorkBySkill } from "@/lib/evidence/confirmed-work-read";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { excludeSyntheticFixtures } from "@/lib/qa/synthetic-fixture";
 import {
   sourceToEvidence,
   type EvidenceTier,
@@ -14,6 +16,7 @@ import {
   selectPoolIds,
   STAGE1_ID_SCAN_CAP,
   SUPPLY_POOL_BUDGET,
+  type SupplyFactRead,
   type SupplyRetrievalPlan,
   type SupplyRetrievalReport,
   type TierResult,
@@ -23,6 +26,7 @@ import {
   type LastActiveBucket,
 } from "@/lib/scouting/profile-freshness";
 import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+import { readSignalsForWorkers } from "@/lib/organization-evidence/history-signals-read";
 
 /**
  * Read layer for matching v1 — assembles a `MatchSubject` for each
@@ -75,8 +79,10 @@ export interface SupplyPool {
  *  states its retrieval basis, so "which workers did we even look at?" always
  *  has an answer. */
 export type SupplyRetrievalInput =
-  /** Plan Stage 1 from this demand (company scouting). */
-  | { readonly need: MatchNeed; readonly budget?: number }
+  /** Plan Stage 1 from this demand (company scouting). `excludeFixtures`
+   *  drops fixture-marked workers (lib/qa/synthetic-fixture.ts) — set for a
+   *  real organization's scouting, off for a synthetic one. */
+  | { readonly need: MatchNeed; readonly budget?: number; readonly excludeFixtures?: boolean }
   /** The caller already knows which workers it wants (admin workbench). */
   | { readonly workerIds: readonly string[]; readonly budget?: number };
 
@@ -285,7 +291,17 @@ export async function buildSupplyCandidates(
       "id, profile_id, display_name, headline, availability_status, available_from, current_location_country, preferred_countries, salary_min_eur, preferred_contract_type, experience_years, created_at, updated_at",
     )
     .in("id", poolIds);
-  if (error || !Array.isArray(workers) || workers.length === 0) {
+  if (error) {
+    // A FAILED read is not an empty pool. Returning poolSize 0 alone told the
+    // employer "we compared nobody", which is true, while leaving out that we
+    // could not read the pool at all — and an empty candidate list reads as a
+    // statement about the supply.
+    return {
+      candidates: [],
+      retrieval: { ...retrieval, poolSize: 0, unreadableFacts: ["workers"] },
+    };
+  }
+  if (!Array.isArray(workers) || workers.length === 0) {
     return { candidates: [], retrieval: { ...retrieval, poolSize: 0 } };
   }
 
@@ -336,7 +352,7 @@ export async function buildSupplyCandidates(
   // null — an honest "not stated", exactly like the gated stores above. The
   // superadmin matching workbench, which is where a human actually weighs a
   // learner's placement today, reads the real rows.
-  const [skillsRes, profsRes, prefsRes, langsRes, practiceRes] = await Promise.all([
+  const [skillsRes, profsRes, prefsRes, langsRes, practiceRes, confirmedWork, historyRead] = await Promise.all([
     asAny(supabase)
       .from("worker_skills")
       .select("worker_id, source, verified, skills ( slug, esco_uri )")
@@ -377,7 +393,38 @@ export async function buildSupplyCandidates(
             (r: { data: unknown; error: unknown }) => (r.error ? { data: null } : r),
             () => ({ data: null }),
           ),
+    // CONFIRMED WORK per skill (handoff 2026-10-02 §5): ONE batched read for
+    // the whole pool, under the caller's RLS. null/empty = not known — the
+    // matcher reads that as "no evidence", never as a penalty.
+    readConfirmedWorkBySkill(
+      supabase,
+      rows.map((w) => ({
+        id: w.id as string,
+        profileId: (w.profile_id as string | null) ?? null,
+      })),
+    ),
+    // HISTORY SIGNALS (organization-provided): one batched read under the
+    // caller's RLS. Never throws into the ranking - an unavailable read leaves
+    // the signal UNKNOWN on every subject and is reported on the retrieval.
+    readSignalsForWorkers(supabase, workerIds).catch(
+      (): Awaited<ReturnType<typeof readSignalsForWorkers>> => ({
+        kind: "unavailable",
+        reason: "read_failed",
+      }),
+    ),
   ]);
+
+  // WHY THESE TWO ARE CHECKED AND THE OTHERS ARE NOT. `prefsRes`, `langsRes`
+  // and `practiceRes` map their errors to `null` ON PURPOSE above: those
+  // stores are human-gated and may not be applied, and null travels to the
+  // subject as an honest "not stated". `worker_skills` and
+  // `worker_professions` are neither gated nor optional — they are the facts
+  // the ranking is MADE of. Falling back to an empty set there does not say
+  // "not stated"; it says "this worker has no skills", and the engine then
+  // ranks a fully skilled person as unskilled, confidently.
+  const unreadableFacts: SupplyFactRead[] = [];
+  if (skillsRes.error) unreadableFacts.push("skills");
+  if (profsRes.error) unreadableFacts.push("professions");
 
   for (const s of (skillsRes.data ?? []) as {
     worker_id: string;
@@ -468,7 +515,17 @@ export async function buildSupplyCandidates(
         (w.updated_at as string | null) ?? (w.created_at as string | null),
       ),
       subject: {
-        skills: [...skillMap.entries()].map(([uri, evidence]) => ({ uri, evidence })),
+        skills: [...skillMap.entries()].map(([uri, evidence]) => {
+          const work = confirmedWork?.get(w.id as string)?.get(uri);
+          return work
+            ? {
+                uri,
+                evidence,
+                confirmedWorkEntries: work.confirmedWorkEntries,
+                confirmedDays: work.confirmedDays,
+              }
+            : { uri, evidence };
+        }),
         professionSlug: professionByWorker.get(w.id as string) ?? null,
         country: (w.current_location_country as string | null) ?? null,
         preferredCountries: (w.preferred_countries as string[] | null) ?? [],
@@ -499,9 +556,33 @@ export async function buildSupplyCandidates(
           practiceByProfile === null
             ? null
             : (practiceByProfile.get((w.profile_id as string | null) ?? "") ?? 0),
+        // Organization-provided history signals: only for a worker whose
+        // linked history named at least one skill. Everyone else stays
+        // `undefined` (unknown) - never an empty list that reads as "none".
+        historySignals:
+          historyRead.kind === "ok" && historyRead.byWorker.has(w.id as string)
+            ? historyRead.byWorker
+                .get(w.id as string)!
+                .map((s) => ({ uri: s.slug, records: s.records }))
+            : undefined,
       } satisfies MatchSubject,
     };
   });
 
-  return { candidates, retrieval: { ...retrieval, poolSize: candidates.length } };
+  // Test accounts are not candidates for a real organization (production walk
+  // 2026-09-28: every scoutable worker was one). Filtered here, where names
+  // already live, so the scouting layer never handles them; `poolSize` then
+  // counts only what the viewer may see.
+  const shown =
+    "need" in input && input.excludeFixtures
+      ? excludeSyntheticFixtures(candidates, (c) => [c.displayName, c.headline])
+      : candidates;
+  return {
+    candidates: shown,
+    retrieval: {
+      ...retrieval,
+      poolSize: shown.length, unreadableFacts,
+      ...(historyRead.kind === "unavailable" ? { historySignalsUnavailable: true } : {}),
+    },
+  };
 }

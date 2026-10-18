@@ -27,7 +27,6 @@ import type {
   FunnelEventName,
   FunnelMetadata,
 } from "@/lib/telemetry/funnel-events";
-import { readLandingMode } from "@/lib/telemetry/landing-experience";
 import { isNonProductionHostname } from "@/lib/telemetry/production-host";
 
 const SESSION_KEY = "lm.pilot.session";
@@ -222,8 +221,6 @@ export function trackFunnel(
   metadata?: FunnelMetadata,
 ): void {
   const enriched: Record<string, unknown> = { ...(metadata ?? {}) };
-  const landingMode = readLandingMode();
-  if (landingMode) enriched.mode = landingMode;
   if (isNonProductionHost()) enriched.preview_host = true;
   fire(eventName, "info", { metadata: enriched });
 }

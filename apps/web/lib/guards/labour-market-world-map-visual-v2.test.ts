@@ -36,16 +36,13 @@ describe("world map v2 — map canvas + routes + mobile path", () => {
   });
 });
 
-describe("market-map page — canonical coordinate map leads, world view is secondary", () => {
-  // Updated for the owner-smoke follow-up (PR #490): the canonical provider-free
-  // coordinate map (<MarketMapBase>) must now be the FIRST impression; the
-  // conceptual world overview is a secondary surface mounted below it. (Full
-  // ordering is covered by lib/guards/market-map-canonical.test.ts.)
-  it("mounts the canonical coordinate map before the world overview", () => {
-    const wm = page.indexOf("<LabourMarketWorldMap");
-    const base = page.indexOf("<MarketMapBase");
-    expect(wm).toBeGreaterThan(-1);
-    expect(base).toBeGreaterThan(-1);
-    expect(base).toBeLessThan(wm);
+describe("market-map page — the conceptual world overview is no longer mounted", () => {
+  // The one-canonical-map change unmounted this non-geographic zone diagram
+  // from /dashboard/market-map (it was one of the several "maps" the owner
+  // asked to collapse). The component and its zone model are kept intact —
+  // nothing here is deleted — but the map page now mounts ONE real map only.
+  it("the page mounts neither the zone diagram nor a second map", () => {
+    expect(page).not.toMatch(/<LabourMarketWorldMap/);
+    expect(page).toMatch(/<WorldDiscovery\b/);
   });
 });

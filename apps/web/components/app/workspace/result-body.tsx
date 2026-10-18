@@ -1,17 +1,54 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
-import { CalendarResult } from "@/components/app/workspace/calendar-result";
-import { CandidatesResult } from "@/components/app/workspace/candidates-result";
-import { EngagementsResult } from "@/components/app/workspace/engagements-result";
-import { ExperiencesResult } from "@/components/app/workspace/experiences-result";
-import { MarketDrilldown } from "@/components/app/workspace/market-drilldown";
-import { OpportunitiesResult } from "@/components/app/workspace/opportunities-result";
-import { PlayerCardResult } from "@/components/app/workspace/player-card-result";
-import { ProjectResult } from "@/components/app/workspace/project-result";
+import { SkeletonText } from "@/components/app/skeleton";
 import type { GeographySelection } from "@/lib/market-map/geography-selection";
+
+/*
+ * Each result renders only after the person opens it, and at most one is on
+ * screen at a time — so each loads when it is first rendered instead of with
+ * Home. Measured on production 2026-09-28: these eight, with what they pull
+ * in (the player card's motion ring, the market drilldown, the candidate and
+ * project views), were ~190 KB of Home's initial script that nothing on the
+ * first screen used. Same components, same props; a deep link that opens a
+ * result still renders it on the server.
+ */
+const loadingResult = () => <SkeletonText lines={4} />;
+const CalendarResult = dynamic(
+  () => import("@/components/app/workspace/calendar-result").then((m) => m.CalendarResult),
+  { loading: loadingResult },
+);
+const CandidatesResult = dynamic(
+  () => import("@/components/app/workspace/candidates-result").then((m) => m.CandidatesResult),
+  { loading: loadingResult },
+);
+const EngagementsResult = dynamic(
+  () => import("@/components/app/workspace/engagements-result").then((m) => m.EngagementsResult),
+  { loading: loadingResult },
+);
+const ExperiencesResult = dynamic(
+  () => import("@/components/app/workspace/experiences-result").then((m) => m.ExperiencesResult),
+  { loading: loadingResult },
+);
+const MarketDrilldown = dynamic(
+  () => import("@/components/app/workspace/market-drilldown").then((m) => m.MarketDrilldown),
+  { loading: loadingResult },
+);
+const OpportunitiesResult = dynamic(
+  () => import("@/components/app/workspace/opportunities-result").then((m) => m.OpportunitiesResult),
+  { loading: loadingResult },
+);
+const PlayerCardResult = dynamic(
+  () => import("@/components/app/workspace/player-card-result").then((m) => m.PlayerCardResult),
+  { loading: loadingResult },
+);
+const ProjectResult = dynamic(
+  () => import("@/components/app/workspace/project-result").then((m) => m.ProjectResult),
+  { loading: loadingResult },
+);
 
 import {
   canRenderInline,
@@ -66,6 +103,9 @@ export interface ResultNavigation {
    * part of the workspace was touched.
    */
   readonly onAssignWorker: (projectId: string) => void;
+  /** W11 / §11 — a stage row's own status control hands the change back to
+   *  the conversation, which dispatches `company.update-stage-status`. */
+  readonly onStageStatus: (projectId: string, stageId: string, status: "done") => void;
 }
 
 /**
@@ -107,7 +147,9 @@ export function ResultBody({
    *  pass it to the canonical dispatcher so the server action revalidates the
    *  caller's own locale path — the same value the inline form supplies. */
   locale: string;
-  /** Wired by the workspace layer to reach the result's existing full screen. */
+  /** Wired by the workspace layer to reach the result's STATION — a named
+   *  door that navigates. (The prop keeps its historical name; the generic
+   *  "full screen" is the panel's in-place expansion, not this.) */
   onOpenFull: (route: string) => void;
 }) {
   const t = useTranslations("conversation.results");
@@ -129,6 +171,9 @@ export function ResultBody({
   }
 
   // Honest degradation — see the header note. The reason is stated, not hidden.
+  // The way on NAMES its station ("Open work journal"), because it leaves the
+  // conversation for that page; "full screen" is the panel's own in-place
+  // expansion and is never offered for a result that cannot render here.
   return (
     <div className="flex flex-col gap-3" data-testid="result-body-fallback">
       <p className="text-basis text-text-secondary">
@@ -141,9 +186,10 @@ export function ResultBody({
         variant="pill"
         onClick={() => onOpenFull(descriptor.advancedRoute)}
         data-testid="result-body-open-full"
+        data-station={descriptor.advancedRoute}
         className="self-start"
       >
-        {t("openFull")}
+        {t(descriptor.stationLabelKey.replace("conversation.results.", ""))}
       </Button>
     </div>
   );
@@ -198,6 +244,7 @@ function InlineResult({
           workspace={navigation.workspace}
           onSelectGeography={navigation.onSelectGeography}
           onSelectProject={navigation.onSelectProject}
+          onSelectDemand={navigation.onSelectDemand}
           onBackToMarket={navigation.onBackToMarket}
           onBackToProjects={navigation.onBackToProjects}
         />
@@ -255,6 +302,7 @@ function InlineResult({
           onBack={navigation.onBackToProjects}
           onOpenFull={onOpenFull}
           onAssignWorker={navigation.onAssignWorker}
+          onStageStatus={navigation.onStageStatus}
         />
       );
     case "engagements":

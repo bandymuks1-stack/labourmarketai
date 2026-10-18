@@ -91,12 +91,20 @@ export function isCleaningFloorContext(foldedText: string): boolean {
 // power-tool forms (folded) alongside LT/EN/RU. Genuine electrical WORK words
 // per language live in ELECTRICAL_WORK_RE so real electricians never lose the
 // suggestion.
+//
+// The welding ELECTRODE (journal walk 2026-09-06, lane D): "Virinau
+// elektrodu…" suggested `electrical-install` from the `elektr` stem inside
+// "elektrodu" — a welder's consumable, not electrical work. Same guard, same
+// rule: the stem alone is not the trade.
 const POWER_TOOL_RE =
-  /elektrin[a-z]* irank|электроинструмент|power tool|power drill|elektrisch gereedschap|elektrowerkzeug|elektronarzedz|elverktyg|elvaerktoj|elektrisk verktoy|elektrisk drill|elektrili[a-z]* toorii|elektroinstrument|sahkotyokalu|elektronik|электроник/;
+  /elektrin[a-z]* irank|электроинструмент|power tool|power drill|elektrisch gereedschap|elektrowerkzeug|elektronarzedz|elverktyg|elvaerktoj|elektrisk verktoy|elektrisk drill|elektrili[a-z]* toorii|elektroinstrument|sahkotyokalu|elektronik|электроник|elektronin|электронн|elektrod|электрод|electrode|elektrode/;
 const ELECTRICAL_WORK_RE =
   /instaliac|rozet|jungikl|kabel|elektros darb|elektros mont|elektrik|wiring|rewir|electrical install|electrical work|проводк|розетк|электромонтаж|выключател|кабел|электрик|bedrading|stopcontact|groepenkast|elektra aangelegd|steckdose|verkabelt|verdrahtet|elektroinstallation|gniazdk|instalacje elektryczne|elektryk|ukladalem przewody|eluttag|stikkontakt|stopselkontakt|ledninger trukket|elinstallation|elarbete|elektriker|elektroniker|pistorasi|sahkoasennu|sahkotoi|rozete|elektroinstalac|vadus|elektrivarust|pistikup|elektritoo/;
 
-/** True when electricity is named ONLY through a power-tool mention. */
+/** True when electricity is named ONLY through a power-tool or electronics
+ *  mention — "elektroninis paštas" / "электронная почта" (e-mail),
+ *  "elektroninė prekyba", an electronic signature — never through electrical
+ *  WORK (#1689, 2026-09-12: the fuzzy tier sat one edit from "elektros"). */
 export function isPowerToolOnlyElectricalContext(foldedText: string): boolean {
   return POWER_TOOL_RE.test(foldedText) && !ELECTRICAL_WORK_RE.test(foldedText);
 }
@@ -106,7 +114,17 @@ export function isPowerToolOnlyElectricalContext(foldedText: string): boolean {
  *  hallucinated construction skills in ordinary sentences — "filled" (invoices)
  *  → "filler" (skim-coating), "helped" (around the house) → "helper"
  *  (general-labour). Exact/synonym tiers are unaffected. */
-const FUZZY_TOKEN_BLOCKLIST: ReadonlySet<string> = new Set(["filled", "helped"]);
+const FUZZY_TOKEN_BLOCKLIST: ReadonlySet<string> = new Set([
+  "filled",
+  "helped",
+  // LT (measured 2026-09-12 over 49 common work verbs, #1689): "kėliau"
+  // (lifted) is one edit from "kepiau" (baked) → cooking; "veržiau" /
+  // "veržimas" (tightened / tightening) one edit from "verčiau" (translated)
+  // → translation. Folded forms.
+  "keliau",
+  "verziau",
+  "verzimas",
+]);
 
 type Term = {
   slug: string;
@@ -187,6 +205,43 @@ function originalWordFor(
  * ordered strongest-evidence-first (exact > synonym > fuzzy, then longer match,
  * then slug). One entry per slug (its best tier wins).
  */
+/**
+ * Workplace-context guard for warehouse-operations (walk 2026-10-11). The
+ * warehouse needles are PLACE words in every pack ("sandėlyje", "warehouse",
+ * "w magazynie"/"magazynowej", "im Lager", "magazijn"…). "Vakar dirbau
+ * sandėlyje 7 valandas" is warehouse work, but "Wczoraj malowałem ściany w hali
+ * magazynowej" is painting that happened in a warehouse — it put "Prace
+ * magazynowe" on the painter's CV. Owner rule: a wrong signal is worse than
+ * none. When ANOTHER, non-logistics trade explains the sentence and no
+ * warehouse WORK word is present, the place is context, not a competence.
+ */
+const LOGISTICS_SLUGS: ReadonlySet<string> = new Set([
+  "warehouse-operations",
+  "order-picking",
+  "barcode-scanning",
+  "pallet-handling",
+  "stock-taking",
+  "delivery-driving",
+  "cargo-transport",
+  "forklift-operation",
+  "packaging",
+  "loading-unloading",
+  "inventory-management",
+]);
+/** Warehouse WORK (folded, all packs' languages): the role noun or an activity. */
+const WAREHOUSE_WORK_RE =
+  /sandelinink|kladovsch|кладовщ|складск|magazynier|lagerist|lagermitarbeit|lagerarbe|magazijnmedewerk|warehouse (work|operativ|assistant|associate)|lagermedarbe|lagerarbejd|lagerarbeid|laotoo|varastotyo|noliktavas darb|inventor|inventur|inventar|инвентар|komplektav|kompletow|комплект|picking|pick(ed)? orders|sortav|sortow|sortier|sorteer|sorter|сортир|krov|разгруз|загруз|rozladow|zaladow|unload|load(ed|ing) (truck|goods|pallet)/;
+
+/** True when warehouse-operations rests on a PLACE word while another trade
+ *  explains the work. Input must be FOLDED text. */
+export function isWarehousePlaceOnlyContext(
+  foldedText: string,
+  recognizedSlugs: Iterable<string>,
+): boolean {
+  const otherTrade = [...recognizedSlugs].some((s) => !LOGISTICS_SLUGS.has(s));
+  return otherTrade && !WAREHOUSE_WORK_RE.test(foldedText);
+}
+
 export function recognizeSkills(
   text: string,
   limit: number = RECOGNITION_LIMIT,
@@ -253,6 +308,16 @@ export function recognizeSkills(
   // because a power tool was named (e.g. "naudojau elektrinius įrankius").
   if (best.has("electrical-install") && isPowerToolOnlyElectricalContext(folded)) {
     best.delete("electrical-install");
+  }
+
+  // Workplace guard: drop a warehouse-operations suggestion that exists only
+  // because the work happened IN a warehouse (e.g. "malowałem ściany w hali
+  // magazynowej").
+  // Only a FIRM other trade explains the work — a low-confidence fuzzy hit
+  // ("pakket" ≈ "parket") never takes a warehouse worker's skill away.
+  const firm = [...best.entries()].filter(([, b]) => b.via !== "fuzzy").map(([slug]) => slug);
+  if (best.has("warehouse-operations") && isWarehousePlaceOnlyContext(folded, firm)) {
+    best.delete("warehouse-operations");
   }
 
   const list: RecognizedSkill[] = [...best.entries()].map(([slug, b]) => ({

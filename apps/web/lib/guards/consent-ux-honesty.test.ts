@@ -40,7 +40,7 @@ describe("no dark patterns (test 3 + Phase 6)", () => {
   });
 
   it("no coercive or scare copy in any active locale (Phase 6 bans)", () => {
-    for (const locale of ["lt", "en", "ru", "nl", "de"]) {
+    for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const catalog = JSON.parse(read(`messages/${locale}.json`));
       const pc = JSON.stringify(catalog.privacyConsent);
       expect(pc, locale).toBeTruthy();
@@ -165,7 +165,7 @@ describe("i18n completeness for the consent UI (test 23)", () => {
     "history.action.withdrawn",
   ];
 
-  it.each(["lt", "en", "ru", "nl", "de"])("%s has every consent UI key, none [EN]-marked", (locale) => {
+  it.each(["lt", "en", "ru", "nl", "de", "pl"])("%s has every consent UI key, none [EN]-marked", (locale) => {
     const catalog = JSON.parse(read(`messages/${locale}.json`));
     for (const path of REQUIRED_LEAVES) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -188,6 +188,6 @@ describe("i18n completeness for the consent UI (test 23)", () => {
     expect(lt.actions.grant).toBe("Sutinku ir įjungiu matomumą");
     expect(lt.actions.decline).toBe("Dabar neįjungti");
     expect(lt.actions.review).toBe("Peržiūrėti matomumo nustatymus");
-    expect(lt.preview.title).toBe("Taip jūsų profilį matys įmonės");
+    expect(lt.preview.title).toBe("Taip tavo profilį matys įmonės");
   });
 });

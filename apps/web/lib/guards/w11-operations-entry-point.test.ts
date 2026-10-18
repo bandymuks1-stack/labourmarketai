@@ -41,7 +41,7 @@ const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 const result = read("components/app/workspace/project-result.tsx");
 const stadium = read("app/[locale]/dashboard/projects/[id]/page.tsx");
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 
 describe("W11 F7 — the project result exits to the project, not to a list", () => {
   it("builds a project-scoped operations route", () => {

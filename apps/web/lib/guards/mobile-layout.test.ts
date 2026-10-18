@@ -31,7 +31,24 @@ describe("mobile layout invariants", () => {
     });
 
     it("brand link can shrink + truncate so it never pushes the cluster off-screen", () => {
-      expect(src).toMatch(/min-w-0[^"]*shrink[^"]*truncate/);
+      // Re-anchored 2026-09-23 (owner §19): the canonical mark now sits
+      // beside the wordmark, so the Link is a flex row and `truncate` moved
+      // to the wordmark SPAN — `text-overflow: ellipsis` only applies to a
+      // block's inline content, never to a flex container. The invariant is
+      // the same: the Link shrinks (`min-w-0 shrink`), the TEXT truncates,
+      // and the mark (`shrink-0`) never collapses into the wordmark.
+      const link = src.match(
+        /<Link\s+href="\/dashboard"\s+data-testid="shell-logo-home"[\s\S]*?<\/Link>/,
+      );
+      expect(link, "the brand Link").not.toBeNull();
+      expect(link![0]).toMatch(/className="[^"]*min-w-0[^"]*shrink[^"]*"/);
+      expect(link![0]).toMatch(/<span className="[^"]*truncate[^"]*">\s*LabourMarket/);
+      expect(link![0]).toMatch(/<LmLogo[^>]*className="[^"]*shrink-0[^"]*"/);
+      // Negative control: the retired single-line Link (no mark, `truncate`
+      // on the Link) passed the OLD pattern and must fail the new one.
+      const retired =
+        '<Link href="/dashboard" data-testid="shell-logo-home" className="min-w-0 shrink truncate font-display">LabourMarket<span className="text-gradient-accent">.ai</span></Link>';
+      expect(retired).not.toMatch(/<span className="[^"]*truncate[^"]*">\s*LabourMarket/);
     });
 
     it("right-side cluster does not shrink (header items stay tappable, brand truncates instead)", () => {

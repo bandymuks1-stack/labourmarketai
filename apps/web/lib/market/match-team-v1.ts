@@ -296,9 +296,14 @@ function matchByTeamAggregate(
   const v2 = need.structuredV2 ?? null;
   const priorities = v2?.requirement_priorities ?? null;
 
-  // Skills — [] means NOT STATED (contract), never "holds nothing".
+  // Skills — null (not readable: refused, or the read failed) and [] (read,
+  // and nothing declared) are DIFFERENT FACTS but they license the SAME
+  // conclusion: we cannot assert this team's skills. Neither is "holds
+  // nothing". Both become a stated missing fact, so the employer is told the
+  // basis is absent rather than shown a zero they would read as a judgement
+  // about the team.
   let coverage: TeamCoverageBasis | null = null;
-  if (team.skillComposition.length === 0) {
+  if (team.skillComposition === null || team.skillComposition.length === 0) {
     missingData.push("team_skills_not_stated");
     missingFacts.push({
       criterion: "skills_coverage",
@@ -308,7 +313,7 @@ function matchByTeamAggregate(
     });
   } else {
     const declaredBySlug = new Map<string, number>();
-    for (const s of team.skillComposition) {
+    for (const s of team.skillComposition ?? []) {
       declaredBySlug.set(s.slug, s.membersDeclared);
     }
     const entries: TeamSkillCoverage[] = needSkillIds.map((skillId) => ({

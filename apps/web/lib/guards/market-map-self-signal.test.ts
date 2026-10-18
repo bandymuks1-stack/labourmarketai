@@ -35,7 +35,13 @@ describe("market map is the primary 'Žemėlapis' nav surface", () => {
     const bottom = read("components/app/bottom-nav.tsx");
     expect(tabs).toMatch(/getAdvancedNavItems|VISIBLE_PRIMARY_NAV_ITEMS/);
     expect(bottom).toMatch(/getAdvancedNavItems|VISIBLE_PRIMARY_NAV_ITEMS/);
-    expect(bottom).toMatch(/map:\s*MapPin/); // audit PR8: one icon per destination
+    // Audit PR8: ONE icon per destination. The map used to be asserted inside
+    // bottom-nav.tsx; it moved to `components/app/nav-icons.ts` when the one
+    // top bar also had to render these destinations, so the rule is now pinned
+    // at that single source and the surfaces are pinned to USE it — which is
+    // strictly stronger than checking one surface's private copy.
+    expect(read("components/app/nav-icons.ts")).toMatch(/map:\s*MapPin/);
+    expect(bottom).toMatch(/NAV_ICONS/);
   });
 
   it("the feature catalogue keeps market_map ACTIVE with its canonical route", () => {

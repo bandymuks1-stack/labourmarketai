@@ -64,6 +64,11 @@ const PROCUREMENT_MIGRATION = "20260817221000_procurement_v1";
 const TRIPS_MIGRATION = "20260817222000_business_trips_v1";
 const TRAIN_J = [INVOICE_MIGRATION, PROCUREMENT_MIGRATION, TRIPS_MIGRATION];
 
+/** Migrations that only READ the trips table (never define it). The override
+ *  receipt validator verifies each claimed trip clash against its real
+ *  `business_trips` row. Every occurrence must be a read position. */
+const TRIP_READERS = ["20261003150950_commitment_override_collision_validation_v1"];
+
 /**
  * CRLF IS NORMALISED AT THE READ, deliberately.
  *
@@ -222,6 +227,19 @@ describe("1. exactly three human-gated migration pairs own the financial-ops sli
       for (const f of readdirSync(abs).filter((n) => n.endsWith(".sql"))) {
         if (TRAIN_J.some((p) => f.startsWith(p))) continue;
         const src = readFileSync(join(abs, f), "utf8");
+        if (dir === "migrations" && TRIP_READERS.some((p) => f.startsWith(p))) {
+          // A reader may name business_trips ONLY to read it: `to_regclass(...)`
+          // or `from public.business_trips`. Nothing else it names may be owned.
+          const code = src.replace(/\r/g, "").replace(/--.*$/gm, "");
+          for (const m of code.matchAll(/business_trips\b/g)) {
+            const before = code.slice(Math.max(0, m.index! - 40), m.index!);
+            expect(/(from public\.|to_regclass\('public\.)$/.test(before), `${f}: business_trips used outside a read position`).toBe(true);
+          }
+          for (const name of OWNED.filter((n) => n !== "business_trips")) {
+            expect(src, `${dir}/${f} must not define ${name}`).not.toContain(name);
+          }
+          continue;
+        }
         for (const name of OWNED) {
           expect(src, `${dir}/${f} must not define ${name}`).not.toContain(
             name,

@@ -48,15 +48,24 @@ const ROLLBACK =
 // ── 1. Permission states are enumerated + default-closed ────────────────
 
 describe("§8.1 permission states — enumerated, no silent drift", () => {
-  it("the enumeration is EXACTLY the eight agreed states", () => {
+  it("the enumeration is EXACTLY the ten agreed states", () => {
     // allowed_accepted_service_request added in audit PR4 (accepted
     // marketplace rows open a conversation); allowed_demand_interest added
     // in audit PR5 ("contacted" opens a real thread on the worker's OWN
     // interest signal); allowed_accepted_booking added in booking lifecycle
-    // v1 (an accepted booking opens the company↔worker conversation) —
-    // deliberate, reviewed extensions, each verified server-side by its
-    // gated action (service-request-conversation.ts /
-    // contact-interested-worker.ts / booking-conversation.ts).
+    // v1 (an accepted booking opens the company↔worker conversation);
+    // allowed_agency_connection added 2026-09-24 (an ACTIVE agency ↔ client
+    // connection opens the conversation between the two consenting
+    // companies' people) — deliberate, reviewed extensions, each verified
+    // allowed_team_demand_offer added 2026-10-11 (the B2B negotiation thread
+    // of a LIVE brigade offer, both sides proven by their own authorized read
+    // in lib/company/team-offer-conversation.ts).
+    // allowed_team added 2026-10-01 (owner P0 messaging: team member ↔ team
+    // member — both ACTIVE on one organization, verified under the caller's
+    // own RLS reads; the one generic state a real team relationship mints) —
+    // each verified server-side by its gated action (service-request-conversation.ts /
+    // contact-interested-worker.ts / booking-conversation.ts /
+    // agency/bridge-conversation.ts).
     expect([...CONTACT_PERMISSION_STATES].sort()).toEqual(
       [
         "allowed_admin",
@@ -67,9 +76,29 @@ describe("§8.1 permission states — enumerated, no silent drift", () => {
         "allowed_demand_interest",
         "allowed_accepted_booking",
         "allowed_marketplace_enquiry",
+        "allowed_agency_connection",
+        "allowed_team_demand_offer",
+        "allowed_team",
         "no_permission",
       ].sort(),
     );
+  });
+
+  it("NEGATIVE: the grant-only bridge state is never minted from generic facts", () => {
+    // allowed_agency_connection is passed by its gated action after the
+    // connection row was verified server-side; the generic resolver has no
+    // fact that could produce it.
+    for (const sharesConversation of [true, false]) {
+      for (const hasEngagement of [true, false]) {
+        for (const scoutingAllowed of [true, false]) {
+          for (const isAdmin of [true, false]) {
+            expect(
+              evaluateContactPermission({ sharesConversation, hasEngagement, scoutingAllowed, isAdmin }),
+            ).not.toBe("allowed_agency_connection");
+          }
+        }
+      }
+    }
   });
 
   it("default-closed: all-false facts land on no_permission", () => {
@@ -100,11 +129,15 @@ describe("no contact without permission — the create path is gated", () => {
     expect(direct).toMatch(/isContactPermitted/);
     // The default-closed denial exists and carries the tagged code.
     expect(direct).toMatch(/code:\s*"no_permission"/);
-    // The gate sits BEFORE the createConversation call in source order.
+    // The gate sits BEFORE the creation call in source order. Creation goes
+    // through the core with an authority minted from THIS gate's result - never
+    // through the browser-callable `createConversation` action (audit F-1).
     const gate = direct.indexOf('code: "no_permission"');
-    const create = direct.indexOf("return createConversation(");
+    const create = direct.indexOf("await createConversationCore(");
     expect(gate).toBeGreaterThan(-1);
     expect(create).toBeGreaterThan(gate);
+    expect(direct).toMatch(/issueContactAuthority\(permission\)/);
+    expect(direct).not.toMatch(/createConversation\(/);
   });
 
   it("a caller-supplied grant is honoured ONLY when it is an allowed_* state", () => {
@@ -127,7 +160,11 @@ describe("no contact without permission — the create path is gated", () => {
 
   it("the generic open action passes NO grant (server resolves the states)", () => {
     const src = stripTs(read(OPEN_ACTION));
-    expect(src).toMatch(/getOrCreateDirectConversation\(profileId, locale\)/);
+    // The only extra argument is the project the contact was opened from — a
+    // verified engagement FACT the server resolves, never a grant.
+    expect(src).toMatch(
+      /getOrCreateDirectConversation\(\s*profileId,\s*locale,\s*null,\s*undefined,\s*null,\s*projectId,?\s*\)/,
+    );
     expect(src).not.toMatch(/allowed_/);
     // Denial lands on the existing honest notice — never a silent success.
     expect(src).toMatch(/notice=cannot_open/);
@@ -153,14 +190,24 @@ describe("no contact without permission — the create path is gated", () => {
     };
     for (const r of ["app", "components", "lib"]) walk(join(APP, r), `/${r}`);
     expect(callers.sort()).toEqual([
+      // Agency ↔ client bridge (2026-09-24) — agency-connection grant (the
+      // connection row read under RLS, status `active` and the caller's side
+      // verified server-side before the conversation opens).
+      "lib/agency/bridge-conversation.ts",
       // Booking lifecycle v1 — accepted-booking grant (participant + status
       // verified server-side before the conversation opens).
       "lib/booking/booking-conversation.ts",
       // Audit PR5 — demand-interest grant ("contacted" opens the real
       // thread), verified server-side before the conversation opens.
+      // Owner P0 messaging (2026-10-01) — THE chat door: opens the thread with
+      // NO grant (the §8.1 states resolve server-side) and returns its route.
+      "lib/communication/chat-open-conversation.ts",
       "lib/communication/contact-interested-worker.ts",
       "lib/communication/open-conversation-action.ts",
       "lib/communication/request-worker-conversation.ts",
+      // Brigade offer negotiation (2026-10-11) — team-demand-offer grant (the
+      // caller's side proven by their own authorized read, offer live).
+      "lib/company/team-offer-conversation.ts",
       // W13 Marketplace — marketplace-enquiry grant, verified server-side
       // (listing exists, is active, caller is not the owner) before the
       // conversation opens.

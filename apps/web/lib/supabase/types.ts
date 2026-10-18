@@ -7793,6 +7793,10 @@ export type Database = {
           contact_email: string | null
           contact_name: string | null
           created_at: string
+          created_session_id: string | null
+          customer_code: string | null
+          customer_key: string | null
+          customer_kind: string | null
           id: string
           name: string
           notes: string | null
@@ -7803,6 +7807,10 @@ export type Database = {
           contact_email?: string | null
           contact_name?: string | null
           created_at?: string
+          created_session_id?: string | null
+          customer_code?: string | null
+          customer_key?: string | null
+          customer_kind?: string | null
           id?: string
           name: string
           notes?: string | null
@@ -7813,6 +7821,10 @@ export type Database = {
           contact_email?: string | null
           contact_name?: string | null
           created_at?: string
+          created_session_id?: string | null
+          customer_code?: string | null
+          customer_key?: string | null
+          customer_kind?: string | null
           id?: string
           name?: string
           notes?: string | null
@@ -7820,6 +7832,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "project_clients_created_session_fk"
+            columns: ["created_session_id"]
+            isOneToOne: false
+            referencedRelation: "evidence_import_sessions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "project_clients_project_id_fkey"
             columns: ["project_id"]
@@ -8153,8 +8172,10 @@ export type Database = {
           company_id: string | null
           country: string | null
           created_at: string
+          created_session_id: string | null
           end_date: string | null
           granularity: string
+          historical_key: string | null
           housing_provided: boolean | null
           id: string
           location_confirmed: boolean
@@ -8171,8 +8192,10 @@ export type Database = {
           company_id?: string | null
           country?: string | null
           created_at?: string
+          created_session_id?: string | null
           end_date?: string | null
           granularity?: string
+          historical_key?: string | null
           housing_provided?: boolean | null
           id?: string
           location_confirmed?: boolean
@@ -8189,8 +8212,10 @@ export type Database = {
           company_id?: string | null
           country?: string | null
           created_at?: string
+          created_session_id?: string | null
           end_date?: string | null
           granularity?: string
+          historical_key?: string | null
           housing_provided?: boolean | null
           id?: string
           location_confirmed?: boolean
@@ -8209,6 +8234,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_created_session_fk"
+            columns: ["created_session_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "evidence_import_sessions"
+            referencedColumns: ["id", "organization_id"]
           },
           {
             foreignKeyName: "projects_organization_id_fkey"
@@ -8356,6 +8388,7 @@ export type Database = {
           translation_status: string | null
           translation_target_language: string | null
           translation_title_text: string | null
+          translations: Json
           updated_at: string
           working_time: string
         }
@@ -8406,6 +8439,7 @@ export type Database = {
           translation_status?: string | null
           translation_target_language?: string | null
           translation_title_text?: string | null
+          translations?: Json
           updated_at?: string
           working_time?: string
         }
@@ -8456,6 +8490,7 @@ export type Database = {
           translation_status?: string | null
           translation_target_language?: string | null
           translation_title_text?: string | null
+          translations?: Json
           updated_at?: string
           working_time?: string
         }
@@ -10204,29 +10239,48 @@ export type Database = {
       worker_professions: {
         Row: {
           created_at: string
+          esco_occupation_id: string | null
           id: string
           is_primary: boolean
-          profession_id: string
+          label: string | null
+          normalized_label: string | null
+          original_language: string | null
+          profession_id: string | null
           updated_at: string
           worker_id: string
         }
         Insert: {
           created_at?: string
+          esco_occupation_id?: string | null
           id?: string
           is_primary?: boolean
-          profession_id: string
+          label?: string | null
+          normalized_label?: string | null
+          original_language?: string | null
+          profession_id?: string | null
           updated_at?: string
           worker_id: string
         }
         Update: {
           created_at?: string
+          esco_occupation_id?: string | null
           id?: string
           is_primary?: boolean
-          profession_id?: string
+          label?: string | null
+          normalized_label?: string | null
+          original_language?: string | null
+          profession_id?: string | null
           updated_at?: string
           worker_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "worker_professions_esco_occupation_id_fkey"
+            columns: ["esco_occupation_id"]
+            isOneToOne: false
+            referencedRelation: "esco_occupations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "worker_professions_profession_id_fkey"
             columns: ["profession_id"]
@@ -11679,8 +11733,10 @@ export type Database = {
           p_description: string
           p_due_date: string
           p_object_id: string
+          p_parent_task_id?: string
           p_priority: string
           p_project_id: string
+          p_stage_id?: string
           p_title: string
         }
         Returns: string
@@ -13356,7 +13412,9 @@ export type Database = {
           p_description: string
           p_due_date: string
           p_object_id: string
+          p_parent_task_id?: string
           p_priority: string
+          p_stage_id?: string
           p_task_id: string
           p_title: string
         }

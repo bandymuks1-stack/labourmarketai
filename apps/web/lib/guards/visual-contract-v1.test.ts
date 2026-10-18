@@ -46,7 +46,9 @@ describe("Ratchet: raw card styling only shrinks", () => {
   // components/ outside the canonical Card primitive. S3 removed one with the
   // FUT concept card; S2 migrated ProfileStateStrip onto <Card>. MEASURED 325
   // — the ratchet is tightened to the real count so it can only shrink again.
-  const CARD_BORDER_BASELINE = 325;
+  // 2026-09-06: the demand read-back's two direction sections migrated onto
+  // <Card compact>, removing the file's last raw usage. 325 -> 324.
+  const CARD_BORDER_BASELINE = 324;
 
   it(`raw card-border usage stays ≤ ${CARD_BORDER_BASELINE}`, () => {
     const total = surfaceFiles()
@@ -73,9 +75,10 @@ describe("Ratchet: raw card styling only shrinks", () => {
     ).toBeLessThanOrEqual(PILL_BASELINE);
   });
 
-  // Baseline at S1: 4 arbitrary z-[n] values. New stacking uses the named
+  // Baseline at S1 was 4 arbitrary z-[n] values; 0 since 2026-09-22 (the
+  // anchored-overlay and command-search tiers are z-modal / z-toast). All stacking uses the named
   // scale (z-sticky, z-modal, …) from tokens/zindex.ts.
-  const Z_ARBITRARY_BASELINE = 4;
+  const Z_ARBITRARY_BASELINE = 0;
 
   it(`arbitrary z-[n] usage stays ≤ ${Z_ARBITRARY_BASELINE}`, () => {
     const total = surfaceFiles().reduce(

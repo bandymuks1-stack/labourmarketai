@@ -47,6 +47,19 @@ const ROLLBACK = join(
   "20260827200000_relationship_invitations_v1.down.sql",
 );
 
+// Later registry rows (data-only, same table) that add an invitable relationship.
+const INTERN_MIGRATION = join(
+  REPO,
+  "supabase",
+  "migrations",
+  "20261012170000_practice_in_company_relationship_v1.sql",
+);
+const internSqlFlat = readFileSync(INTERN_MIGRATION, "utf8")
+  .split("\n")
+  .filter((l) => !l.trim().startsWith("--"))
+  .join(" ")
+  .replace(/\s+/g, " ");
+
 const sql = readFileSync(MIGRATION, "utf8");
 const rollbackSql = readFileSync(ROLLBACK, "utf8");
 const norm = (s: string) => s.replace(/\s+/g, " ");
@@ -61,7 +74,7 @@ const sqlFlat = norm(sql);
  */
 const sqlCode = norm(sql.replace(/--[^\n]*/g, " "));
 
-const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de"] as const;
+const ACTIVE_LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
 const messages = (loc: string) =>
   JSON.parse(readFileSync(join(WEB, "messages", `${loc}.json`), "utf8"));
 const relationshipNames = (loc: string) =>
@@ -151,6 +164,12 @@ describe("relationship invitations — the anti-narrowing contract", () => {
     // The whole point: a learner invitation is `join_organization` carrying a
     // relationship slug. Growing this list per relationship is the taxonomy
     // hardcoding the extensibility contract names as a rejectable move.
+    // `invite_to_demand` (universal network v1, 20260917120000) is NOT a
+    // relationship and NOT a counter-example: it is a TARGET type — the
+    // employer invites a person to a canonical need (customer_requests) —
+    // the same kind of thing `join_project` is. A relationship (student,
+    // volunteer, mentor…) is still DATA on `relationship_slug`; the guard
+    // below that `join_as_student` never exists is unchanged.
     expect([...INVITATION_TYPES]).toEqual([
       "join_platform",
       "join_organization",
@@ -159,6 +178,7 @@ describe("relationship invitations — the anti-narrowing contract", () => {
       "collaborate_partner",
       "join_project",
       "invite_company",
+      "invite_to_demand",
     ]);
     // Asserted against the EXECUTABLE sql: the file's own prose explains why
     // this type was refused, and that explanation must not trip the guard.
@@ -183,10 +203,24 @@ describe("relationship invitations — the anti-narrowing contract", () => {
       /set invitable = true where slug in \(([^)]*)\)/,
     )?.[1] as string;
     for (const choice of RELATIONSHIP_INVITE_CHOICES) {
+      if (choice.slug === "intern") continue; // seeded by its own row, asserted below
       expect(seed, `${choice.slug} is offered but not seeded invitable`).toContain(
         `'${choice.slug}'`,
       );
     }
+  });
+
+  it("offers practice in a company without requiring training-provider status", () => {
+    const intern = RELATIONSHIP_INVITE_CHOICES.find((c) => c.slug === "intern");
+    expect(intern).toBeDefined();
+    expect(intern?.requiresOrganizationRole).toBeNull();
+    // The row that makes it creatable: invitable, no org-role requirement,
+    // no worker-profile visibility, journal-reviewable, idempotent.
+    expect(internSqlFlat).toContain(
+      "values ('intern', 'education', true, true, null, false, true) on conflict (slug) do nothing",
+    );
+    // Negative control: the same assertion must fail against a different row.
+    expect(internSqlFlat).not.toContain("values ('manager'");
   });
 
   it("mirrors the capability rule the database enforces", () => {

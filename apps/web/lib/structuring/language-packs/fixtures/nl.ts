@@ -21,6 +21,8 @@ export const NL_FIXTURES: LanguageFixtures = {
     { text: "Ik programmeerde een website en loste bugs op.", expects: ["programming"] },
     { text: "Ik heb meubels gemonteerd met elektrisch gereedschap.", expects: ["furniture-fitting"], forbids: ["electrical-install"] },
     { text: "Ik heb muren gemetseld en specie gemengd.", expects: ["bricklaying"] },
+    { text: "Ik heb de badkamer getegeld.", expects: ["tiling"] },
+    { text: "Waar heb ik tegelen gebruikt?", expects: ["tiling"] },
     { text: "Ik repareerde auto's in de garage.", expects: ["auto-repair"] },
     { text: "Ik knipte haren in de kapsalon.", expects: ["hairdressing"] },
     { text: "Ik voerde sollicitatiegesprekken en wierf personeel.", expects: ["recruitment"] },
@@ -45,5 +47,8 @@ export const NL_FIXTURES: LanguageFixtures = {
     // NL "muren" (walls) must not brush masonry — the base needle used to be
     // the bare folded stem "mur" (fixed in the PR3C needle surgery).
     { text: "Ik verfde de muren in de woonkamer.", forbids: ["bricklaying"] },
+    // "tegelijk" (at the same time) contains "tegel" — the tiling needles
+    // carry their verb endings.
+    { text: "We werkten tegelijk aan het dak.", forbids: ["tiling"] },
   ],
 };

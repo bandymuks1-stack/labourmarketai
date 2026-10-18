@@ -164,7 +164,7 @@ export function MatchPreviewForm({
         </fieldset>
 
         <div className="md:col-span-2">
-          <button type="submit" disabled={isPending} className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-white hover:bg-brand-blue/80 disabled:opacity-50" data-testid="match-preview-submit">
+          <button type="submit" disabled={isPending} className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50" data-testid="match-preview-submit">
             {labels.submit}
           </button>
         </div>

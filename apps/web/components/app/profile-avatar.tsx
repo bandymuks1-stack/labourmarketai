@@ -94,7 +94,7 @@ export function ProfileAvatar({
           data-testid="profile-avatar-label"
         >
           {working ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+            <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
           ) : (
             <Camera className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
           )}

@@ -57,7 +57,7 @@ export async function SiteFooter() {
     <footer className="relative z-10 mt-24 border-t border-ink-600/60">
       <div className="mx-auto max-w-container px-6 sm:px-12">
         <div className="py-8 opacity-70">
-          <p className="mb-3 font-mono text-meta uppercase tracking-label text-text-muted">
+          <p className="mb-3 font-mono text-meta uppercase tracking-label text-text-secondary">
             {t("activity")}
           </p>
           <ActivityMap />
@@ -159,20 +159,32 @@ export async function SiteFooter() {
           <p data-testid="footer-entity-disclosure">{t("operatedBy")}</p>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <span data-testid="footer-copyright">
-              {copyrightLine(new Date().getFullYear())}. {t("ipNotice")}
+              {/* The entity name already ends in "o.o." — no second full stop. */}
+              {copyrightLine(new Date().getFullYear())} {t("ipNotice")}
             </span>
             {/* Created by Rexora — owner-approved URL (2026-07-14):
                 https://aiprocessautomation.eu. External link, so a plain <a>
                 (not the locale-aware Link) with noopener/noreferrer. Pinned by
                 legal-entity-truth.test.ts. */}
-            <a
-              href="https://aiprocessautomation.eu"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-text-secondary"
-            >
-              {t("rexora")}
-            </a>
+            {/* Meaning corrected 2026-09-27: the line names all three
+                collaborators (LabourMarket.ai × Nonstop Group × Rexora) instead
+                of crediting Rexora as sole author, and only REXORA carries the
+                link — the approved URL is Rexora's, so wrapping the whole
+                sentence would point the other partners' names at their site. */}
+            <p>
+              {t.rich("rexora", {
+                rexora: (chunks) => (
+                  <a
+                    href="https://aiprocessautomation.eu"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-text-secondary hover:underline"
+                  >
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </p>
           </div>
         </div>
       </div>

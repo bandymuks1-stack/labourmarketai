@@ -20,7 +20,9 @@ function asAny(c: SupabaseClient): any {
 export type SentInvitationRow = {
   id: string;
   invitationType: string;
-  invitedEmail: string;
+  /** NULL for an open link (universal network v1) — no addressee, the token
+   *  is the only capability. */
+  invitedEmail: string | null;
   invitedName: string | null;
   status: string;
   deliveryStatus: string;
@@ -35,9 +37,28 @@ export type SentInvitationRow = {
   organizationId: string | null;
   projectId: string | null;
   personalMessage: string | null;
+  /** The role the inviter proposed — free text on most invitations; the
+   *  closed `agency_client` marker on the agency bridge's connection
+   *  invitations (lib/invitations/model, 2026-09-24), which is how the
+   *  partners door pairs a sent invitation with its connection. */
+  proposedRole: string | null;
   /** The RECIPIENT'S language the invitation was created with (V8 W4-B
    *  item 6) — a resend keeps it instead of the sender's UI locale. */
   recipientLocale: string | null;
+  /**
+   * INVITER STATUS (universal network v1) — the smallest useful operational
+   * view, only what is actually evidenced: seats (1 = single-use), opens
+   * counted by the logged-out landing, and the acceptance ledger's own
+   * counts. Absent (zeros / 1) while the owner-gated migration is not
+   * applied. Never a score.
+   */
+  maxUses: number;
+  useCount: number;
+  openCount: number;
+  campaignLabel: string | null;
+  targetRequestId: string | null;
+  acceptedCount: number;
+  declinedCount: number;
 };
 
 export type SentInvitationsRead =
@@ -56,22 +77,51 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { status: "error" };
-  const { data, error } = await asAny(supabase)
+  const BASE_COLUMNS =
+    "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, accepted_at, declined_at, revoked_at, resend_count, organization_id, project_id, personal_message, proposed_role, locale";
+  const V2_COLUMNS = ", max_uses, use_count, open_count, campaign_label, target_request_id";
+  // The v2 columns (20260917120000, owner-gated) may not exist yet: an
+  // undefined-column error (42703) means "read the v1 shape", never "no
+  // invitations".
+  let { data, error } = await asAny(supabase)
     .from("invitations")
-    .select(
-      "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, accepted_at, declined_at, revoked_at, resend_count, organization_id, project_id, personal_message, locale",
-    )
+    .select(BASE_COLUMNS + V2_COLUMNS)
     .eq("inviter_profile_id", user.id)
     .order("created_at", { ascending: false })
     .limit(100);
+  if (error && error.code === "42703") {
+    ({ data, error } = await asAny(supabase)
+      .from("invitations")
+      .select(BASE_COLUMNS)
+      .eq("inviter_profile_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(100));
+  }
   if (error) {
     if (error.code === "42P01") return { status: "needs-migration" };
     return { status: "error" };
   }
+  // The acceptance ledger, under its own RLS (the inviter reads the rows of
+  // invitations they sent). Absent table → zeros, honestly typed as such.
+  const ids = ((data ?? []) as { id: string }[]).map((r) => r.id);
+  const counts = new Map<string, { accepted: number; declined: number }>();
+  if (ids.length > 0) {
+    const { data: acc } = await asAny(supabase)
+      .from("invitation_acceptances")
+      .select("invitation_id, decision")
+      .in("invitation_id", ids)
+      .limit(5000);
+    for (const a of (acc ?? []) as { invitation_id: string; decision: string }[]) {
+      const c = counts.get(a.invitation_id) ?? { accepted: 0, declined: 0 };
+      if (a.decision === "accepted") c.accepted += 1;
+      else if (a.decision === "declined") c.declined += 1;
+      counts.set(a.invitation_id, c);
+    }
+  }
   type Row = {
     id: string;
     invitation_type: string;
-    invited_email: string;
+    invited_email: string | null;
     invited_name: string | null;
     status: string;
     delivery_status: string;
@@ -84,7 +134,13 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
     organization_id: string | null;
     project_id: string | null;
     personal_message: string | null;
+    proposed_role: string | null;
     locale: string | null;
+    max_uses?: number | null;
+    use_count?: number | null;
+    open_count?: number | null;
+    campaign_label?: string | null;
+    target_request_id?: string | null;
   };
   return {
     status: "ok",
@@ -104,7 +160,15 @@ export async function listMySentInvitations(): Promise<SentInvitationsRead> {
       organizationId: r.organization_id,
       projectId: r.project_id,
       personalMessage: r.personal_message,
+      proposedRole: r.proposed_role ?? null,
       recipientLocale: r.locale,
+      maxUses: r.max_uses ?? 1,
+      useCount: r.use_count ?? 0,
+      openCount: r.open_count ?? 0,
+      campaignLabel: r.campaign_label ?? null,
+      targetRequestId: r.target_request_id ?? null,
+      acceptedCount: counts.get(r.id)?.accepted ?? 0,
+      declinedCount: counts.get(r.id)?.declined ?? 0,
     })),
   };
 }
@@ -138,16 +202,23 @@ export type IncomingInvitationRow = {
 
 export type IncomingInvitationsRead =
   | { status: "ok"; items: IncomingInvitationRow[] }
+  /** The caller's address is not VERIFIED (database `email_unverified`): what is
+   *  addressed to an email is only shown to that mailbox's proven owner. Distinct
+   *  from "none" and from "error" so the UI can offer the progressive proof. */
+  | { status: "email_unverified" }
   | { status: "needs-migration" }
   | { status: "error" };
 
-/** Pending invitations addressed to the caller's own verified email. */
+/** Pending invitations addressed to the caller's own VERIFIED email. */
 export async function listInvitationsForMe(): Promise<IncomingInvitationsRead> {
   const supabase = await createClient();
   const { data, error } = await asAny(supabase).rpc("list_invitations_for_me_v1");
   if (error) {
     if (error.code === "42883") return { status: "needs-migration" };
     return { status: "error" };
+  }
+  if ((data as { email_unverified?: unknown } | null)?.email_unverified === true) {
+    return { status: "email_unverified" };
   }
   type Item = {
     id: string;
@@ -328,13 +399,23 @@ export type NetworkRelationship = {
   title: string | null;
 };
 
-/** The caller's own active engagements (their side of the network). */
-export async function listMyEngagements(): Promise<NetworkRelationship[]> {
+export type MyEngagementsResult =
+  | { readonly kind: "ok"; readonly rows: readonly NetworkRelationship[] }
+  /** The read failed (or no session) — UNKNOWN, never "no relationships". */
+  | { readonly kind: "unavailable" };
+
+/**
+ * The caller's own active engagements (their side of the network), with
+ * the read's outcome kept apart from its rows: a surface that LISTS the
+ * relationships (`/dashboard/network`) renders `unavailable` as "could not
+ * load", never as the empty state that invites a first invitation.
+ */
+export async function listMyEngagementsResult(): Promise<MyEngagementsResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return [];
+  if (!user) return { kind: "unavailable" };
   const { data, error } = await asAny(supabase)
     .from("engagement_contexts")
     .select("id, relationship_slug, organization_id, started_at, title, organizations(display_name, legal_name)")
@@ -342,7 +423,7 @@ export async function listMyEngagements(): Promise<NetworkRelationship[]> {
     .eq("status", "active")
     .order("created_at", { ascending: false })
     .limit(50);
-  if (error) return [];
+  if (error) return { kind: "unavailable" };
   type Row = {
     id: string;
     relationship_slug: string;
@@ -351,13 +432,28 @@ export async function listMyEngagements(): Promise<NetworkRelationship[]> {
     title: string | null;
     organizations: { display_name: string | null; legal_name: string | null } | null;
   };
-  return ((data ?? []) as Row[]).map((r) => ({
-    engagementId: r.id,
-    relationshipSlug: r.relationship_slug,
-    organizationId: r.organization_id ?? null,
-    organizationName:
-      r.organizations?.display_name ?? r.organizations?.legal_name ?? null,
-    startedAt: r.started_at,
-    title: r.title,
-  }));
+  return {
+    kind: "ok",
+    rows: ((data ?? []) as Row[]).map((r) => ({
+      engagementId: r.id,
+      relationshipSlug: r.relationship_slug,
+      organizationId: r.organization_id ?? null,
+      organizationName:
+        r.organizations?.display_name ?? r.organizations?.legal_name ?? null,
+      startedAt: r.started_at,
+      title: r.title,
+    })),
+  };
+}
+
+/**
+ * The rows alone — for consumers that DELIBERATELY treat the read as an
+ * optional signal (the opening brief, the learning compass, the education
+ * next steps, the dashboard greeting): each of them already degrades to "no
+ * link named" on failure and never renders an empty relationship list as a
+ * fact. A surface that lists relationships uses `listMyEngagementsResult`.
+ */
+export async function listMyEngagements(): Promise<NetworkRelationship[]> {
+  const read = await listMyEngagementsResult();
+  return read.kind === "ok" ? [...read.rows] : [];
 }

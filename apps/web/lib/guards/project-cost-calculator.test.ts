@@ -86,11 +86,22 @@ describe("quantity pack — rounding can never go down", () => {
 
 describe("CSV export — formula-injection safe", () => {
   it("every cell goes through csvSafeCell on top of the shared csvCell", () => {
+    // The escaper pair MOVED (2026-09-13): `csvSafeCell` now lives beside
+    // `csvCell` in operations-report, so every export in every domain reaches
+    // one definition — this module had the only copy, and a second export in
+    // the education domain would otherwise have written a third. What this
+    // guard protects is unchanged and is not about the file it lives in: the
+    // calculator's cells go through the formula-safe escaper, and the rule
+    // itself still exists exactly once.
     expect(csvSrc).toMatch(
-      /import\s*\{\s*csvCell\s*\}\s*from\s*"@\/lib\/projects\/operations-report"/,
+      /from\s*"@\/lib\/projects\/operations-report"/,
     );
-    expect(csvSrc).toMatch(/\^\[=\+\\-@\\t\\r\]/); // the guard regex
     expect(csvSrc).toMatch(/cells\.map\(csvSafeCell\)/);
+    const shared = read("lib/projects/operations-report.ts");
+    expect(shared).toMatch(/\^\[=\+\\-@\\t\\r\]/); // the guard regex, at its one home
+    expect(shared).toMatch(/export function csvSafeCell/);
+    // And nowhere else: a reimplementation is how the two drift apart.
+    expect(csvSrc).not.toMatch(/export function csvSafeCell/);
   });
 });
 
@@ -128,8 +139,8 @@ describe("honest incompleteness — never a fake zero total", () => {
 describe("every CTA resolves to a real route", () => {
   it("the dashboard bridge targets the existing anchored demand intake", () => {
     // W3 rows 7/8/25: the anchor's canonical home is the company page.
-    expect(component).toContain("/dashboard/company#demand-intake");
-    const dashboard = read("app/[locale]/dashboard/company/page.tsx");
+    expect(component).toContain("/dashboard/company/needs#demand-intake");
+    const dashboard = read("app/[locale]/dashboard/company/needs/page.tsx");
     expect(dashboard).toContain('id="demand-intake"');
   });
   it("the anonymous bridge targets the existing public company-need page", () => {

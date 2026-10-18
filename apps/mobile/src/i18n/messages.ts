@@ -15,8 +15,8 @@ import type { ActiveLocale } from "@labourmarket/client-core";
  * missing translation is a typecheck failure, not a string that quietly falls
  * back to English on someone's phone.
  *
- * The five locales here are exactly the ACTIVE set (doctrine §2.4 / the web
- * app's `activeLocales`). The other six exist in the platform's catalogues but
+ * The six locales here are exactly the ACTIVE set (doctrine §2.4 / the web
+ * app's `activeLocales`). The other five exist in the platform's catalogues but
  * are not offered to anyone yet, on any client.
  */
 
@@ -37,6 +37,9 @@ const en = {
   "auth.register.title": "Create an account",
   "auth.register.submit": "Create account",
   "auth.register.toSignIn": "I already have an account",
+  "auth.signIn.forgot": "Forgot your password?",
+  "auth.register.legal":
+    "By creating an account you accept the terms of service and the privacy policy.",
   "auth.error.rejected": "That email and password did not match.",
   "auth.error.unreachable":
     "We could not reach the server, so we do not know whether those details are right. Check your connection and try again.",
@@ -45,6 +48,17 @@ const en = {
   "auth.error.notConfigured":
     "This build has no server configuration, so it cannot sign anyone in.",
   "auth.signOut": "Sign out",
+
+  "account.title": "Privacy & account",
+  "account.body":
+    "These open in your browser, on the website. Asking for your data, or for your account to be deleted, is done there under Privacy.",
+  "account.privacy": "Privacy, your data and deleting your account",
+  "account.terms": "Terms of service",
+  "account.privacyPolicy": "Privacy policy",
+  "account.deletionInfo": "How account deletion works (no sign-in needed)",
+  "account.support": "Contact support (info@labourmarket.ai)",
+  "account.external": "Browser",
+  "account.openFailed": "The link could not be opened on this phone. Nothing was changed.",
 
   "session.unavailable.title": "We could not check your session",
   "session.unavailable.body":
@@ -64,6 +78,19 @@ const en = {
   "config.problem.body":
     "The app cannot start until these values are set. No data has been sent anywhere.",
 
+  "workspace.title": "Acting for",
+  "workspace.loading": "Reading your workspaces…",
+  "workspace.active": "Active",
+  "workspace.switching": "Switching…",
+  "workspace.failed.title": "We could not read your workspaces",
+  "workspace.failed.body":
+    "This is a failed read, not an answer: it does not mean you belong to no organization. Try again in a moment.",
+  "workspace.pointerUnavailable":
+    "This is worked out from what you belong to, not a choice saved for you, and it cannot be changed here yet.",
+  "workspace.switchFailed": "The workspace was not changed. Nothing was moved.",
+  "context.loading": "Reading your roles…",
+  "context.active": "Active",
+  "context.none": "No participation role is recorded on this account yet. That is what we read — not a problem with the app.",
   "context.title": "You are working as",
   "context.unavailable.title": "We cannot list your contexts yet",
   "context.unavailable.body":
@@ -97,11 +124,11 @@ const en = {
 
   "today.signedInAs": "Signed in as",
   "today.recentWork": "Recent work",
-  "journal.empty": "No Work Journal entries recorded yet.",
+  "journal.empty": "No work journal entries recorded yet.",
   "journal.logWork": "Log work",
   "journal.compose.title": "Log work",
   "journal.compose.intro":
-    "Write what you did, in your own words. Your Work Journal records exactly what you write.",
+    "Write what you did, in your own words. Your work journal records exactly what you write.",
   "journal.compose.date": "Date of the work",
   "journal.compose.dateHint": "Year-month-day, for example 2026-09-01",
   "journal.compose.today": "Today",
@@ -116,12 +143,12 @@ const en = {
   "journal.compose.previewTitle": "Check this before it is saved",
   "journal.compose.previewNothingSaved":
     "Nothing has been saved yet. This is exactly what will be recorded.",
-  "journal.compose.save": "Save to my Work Journal",
+  "journal.compose.save": "Save to my work journal",
   "journal.compose.edit": "Change something",
   "journal.compose.chooseContext": "Which work does this belong to?",
   "journal.compose.chooseContextBody":
     "This entry could belong to more than one of your work contexts, so nothing was prepared and nothing was saved. Choose one.",
-  "journal.compose.savedTitle": "Saved to your Work Journal",
+  "journal.compose.savedTitle": "Saved to your work journal",
   "journal.compose.savedBody":
     "This is now a recorded entry. It is what the server stored.",
   "journal.compose.another": "Log another",
@@ -138,7 +165,7 @@ const en = {
   "journal.compose.noContext":
     "This account has no active work context, so an entry has nowhere to be recorded. Add where you work on the website first, then log work here.",
   "journal.compose.unsureSaved":
-    "The connection dropped after this was sent, so we do not know whether it arrived. Open your Work Journal to check before writing it again. Trying again cannot create a duplicate.",
+    "The connection dropped after this was sent, so we do not know whether it arrived. Open your work journal to check before writing it again. Trying again cannot create a duplicate.",
   "journal.compose.skillsAdded": "New skills recorded",
   "journal.compose.skillsStrengthened": "Skills with new evidence",
   "journal.compose.skillsClaims": "Capabilities noted from your words",
@@ -151,11 +178,45 @@ const en = {
     "The Living CV update did not run this time. The entry itself is saved.",
   "journal.compose.reviewOnWeb":
     "What is waiting for review is confirmed on the website.",
-  "profile.skillsTitle": "Living CV skills",
   "profile.skillsEmpty": "No skills recorded yet.",
   "profile.noWorkerProfile": "This account has no worker profile yet.",
-  "profile.skillVerified": "Verified",
-  "profile.skillUnverified": "Unverified",
+  "profile.figuresTitle": "Skills, with your recorded hours",
+  "profile.groupManagerConfirmed": "Confirmed by a manager",
+  "profile.groupJournalBacked": "Backed by your work journal",
+  "profile.groupDeclared": "Declared by you",
+  "profile.figuresUnavailable":
+    "Hours, share and entries could not be read this time. The skills below are still your recorded skills — nothing is shown as 0.",
+  "profile.figuresLegend":
+    "Hours · share of the hours attributed to a skill · entries, all time. The same figures as the website.",
+  "profile.figuresNotRead": "figures could not be read",
+  "profile.noFigures": "no recorded hours",
+  "profile.hoursShort": "h",
+  "profile.entriesLabel": "entries",
+  "profile.selfStatedMissing":
+    "Capabilities you noted in your own words are not carried to this screen yet; the website shows them under your skills.",
+  "profile.openJournal": "Open your work journal",
+  "journal.openProfile": "See what these entries add up to on your profile",
+
+  "today.figuresTitle": "Your work in numbers",
+  "today.periodToday": "Today",
+  "today.periodWeek": "Last 7 days",
+  "today.hoursLabel": "Hours",
+  "today.daysUnitLabel": "recorded in days",
+  "today.entriesLabel": "Entries",
+  "today.daysLabel": "Days",
+  "today.confirmedLabel": "Confirmed by a manager, h",
+  "today.periodEmpty": "Nothing recorded in this window.",
+  "today.periodMissing": "The server sent no figure for this window.",
+  "today.dominantTitle": "Largest share of your hours, last 7 days",
+  "today.dominantShare": "of the hours attributed to a skill",
+  "today.dominantNone":
+    "No hours attributed to a single skill in the last 7 days.",
+  "today.coverageTruncated":
+    "These figures rest on the last entries read — older entries are not included.",
+  "today.figuresScope":
+    "From your own work journal entries, by the same rule as the website. Calendar days end today (UTC).",
+  "today.openJournal": "Open your work journal",
+  "today.openProfile": "Open your profile and skills",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -170,7 +231,7 @@ const lt: Catalogue = {
   "nav.profile": "Profilis",
   "nav.settings": "Nustatymai",
 
-  "auth.checking": "Tikriname jūsų seansą…",
+  "auth.checking": "Tikriname tavo seansą…",
   "auth.signIn.title": "Prisijungti",
   "auth.signIn.email": "El. paštas",
   "auth.signIn.password": "Slaptažodis",
@@ -179,37 +240,64 @@ const lt: Catalogue = {
   "auth.register.title": "Sukurti paskyrą",
   "auth.register.submit": "Sukurti paskyrą",
   "auth.register.toSignIn": "Jau turiu paskyrą",
+  "auth.signIn.forgot": "Pamiršai slaptažodį?",
+  "auth.register.legal":
+    "Sukurti paskyrą reiškia sutikti su naudojimo sąlygomis ir privatumo politika.",
   "auth.error.rejected": "Toks el. paštas ir slaptažodis nesutampa.",
   "auth.error.unreachable":
-    "Nepavyko pasiekti serverio, todėl nežinome, ar duomenys teisingi. Patikrinkite ryšį ir bandykite dar kartą.",
+    "Nepavyko pasiekti serverio, todėl nežinome, ar duomenys teisingi. Patikrink ryšį ir bandyk dar kartą.",
   "auth.error.confirmationRequired":
-    "Paskyra sukurta. Patvirtinkite nuorodą el. laiške ir tada prisijunkite.",
+    "Paskyra sukurta. Patvirtink nuorodą el. laiške ir tada prisijunk.",
   "auth.error.notConfigured":
     "Ši versija neturi serverio konfigūracijos, todėl prijungti negali.",
   "auth.signOut": "Atsijungti",
 
-  "session.unavailable.title": "Nepavyko patikrinti jūsų seanso",
+  "account.title": "Privatumas ir paskyra",
+  "account.body":
+    "Šios nuorodos atidaromos naršyklėje, svetainėje. Savo duomenų arba paskyros ištrynimo prašymas pateikiamas ten, skiltyje „Privatumas“.",
+  "account.privacy": "Privatumas, tavo duomenys ir paskyros ištrynimas",
+  "account.terms": "Naudojimo sąlygos",
+  "account.privacyPolicy": "Privatumo politika",
+  "account.deletionInfo": "Kaip ištrinama paskyra (prisijungti nereikia)",
+  "account.support": "Susisiekti su pagalba (info@labourmarket.ai)",
+  "account.external": "Naršyklė",
+  "account.openFailed": "Nuorodos šiame telefone atidaryti nepavyko. Niekas nepakeista.",
+
+  "session.unavailable.title": "Nepavyko patikrinti tavo seanso",
   "session.unavailable.body":
-    "Tai nereiškia, kad esate atsijungę — telefono saugykla neatsakė. Bandykite dar kartą.",
+    "Tai nereiškia, kad atsijungei — telefono saugykla neatsakė. Bandyk dar kartą.",
   "session.unavailable.retry": "Bandyti dar kartą",
 
   "route.notFound.title": "Tokio ekrano šioje programėlėje nėra",
   "route.notFound.body":
-    "Nuoroda, kuria atėjote, čia niekur neveda. Ji gali būti skirta svetainei arba būti pasenusi. Niekas niekur nebuvo išsiųsta.",
+    "Nuoroda, kuria atėjai, čia niekur neveda. Ji gali būti skirta svetainei arba būti pasenusi. Niekas niekur nebuvo išsiųsta.",
   "route.notFound.action": "Grįžti į programėlę",
 
   "crash.title": "Programėlėje įvyko klaida",
   "crash.body":
-    "Tai pačios programėlės klaida, ne jūsų veiksmas, ir niekas niekur nebuvo išsiųsta. Bandykite dar kartą — jei kartojasi, uždarykite programėlę ir atidarykite iš naujo.",
+    "Tai pačios programėlės klaida, ne tavo veiksmas, ir niekas niekur nebuvo išsiųsta. Bandyk dar kartą — jei kartojasi, uždaryk programėlę ir atidaryk iš naujo.",
 
   "config.problem.title": "Ši versija nesukonfigūruota",
   "config.problem.body":
     "Programa negali pasileisti, kol nenustatytos šios reikšmės. Jokie duomenys niekur nebuvo išsiųsti.",
 
-  "context.title": "Dirbate kaip",
-  "context.unavailable.title": "Kol kas negalime parodyti jūsų kontekstų",
+  "workspace.title": "Veiki kaip",
+  "workspace.loading": "Skaitome tavo darbo erdves…",
+  "workspace.active": "Aktyvi",
+  "workspace.switching": "Keičiama…",
+  "workspace.failed.title": "Nepavyko perskaityti tavo darbo erdvių",
+  "workspace.failed.body":
+    "Tai nepavykęs skaitymas, o ne atsakymas: tai nereiškia, kad nepriklausai jokiai organizacijai. Pabandyk po akimirkos.",
+  "workspace.pointerUnavailable":
+    "Tai apskaičiuota iš to, kam priklausai, o ne tavo išsaugotas pasirinkimas, ir kol kas čia to pakeisti negalima.",
+  "workspace.switchFailed": "Darbo erdvė nepakeista. Niekas neperkelta.",
+  "context.loading": "Skaitome tavo roles…",
+  "context.active": "Aktyvi",
+  "context.none": "Šioje paskyroje kol kas neįrašyta nė viena dalyvavimo rolė. Tai perskaitėme — ne programėlės klaida.",
+  "context.title": "Dirbi kaip",
+  "context.unavailable.title": "Kol kas negalime parodyti tavo kontekstų",
   "context.unavailable.body":
-    "Programa gali jus prijungti, bet dar negali nuskaityti, kurioms organizacijoms priklausote. Jūsų paskyroje nieko netrūksta — tiesiog ši programa dar negali to paklausti.",
+    "Programa gali tave prijungti, bet dar negali nuskaityti, kurioms organizacijoms priklausai. Tavo paskyroje nieko netrūksta — tiesiog ši programa dar negali to paklausti.",
   "context.mode.worker": "Aš pats",
   "context.mode.company": "Įmonė",
   "context.mode.agency": "Agentūra",
@@ -222,20 +310,20 @@ const lt: Catalogue = {
   "domain.retry": "Bandyti dar kartą",
   "domain.failedTitle": "Nepavyko įkelti",
   "domain.unavailable.notConnectedYet": "Dar neprijungta",
-  "domain.unavailable.signInAgain": "Prisijunkite iš naujo.",
+  "domain.unavailable.signInAgain": "Prisijunk iš naujo.",
   "domain.unavailable.offline": "Nėra ryšio. Niekas nebuvo išsiųsta.",
   "domain.unavailable.unexpectedAnswer":
     "Serveris atsakė tuo, ko ši programa nesuprato.",
-  "domain.refused.no_credentials": "Prisijunkite iš naujo.",
-  "domain.refused.invalid_token": "Jūsų seansas baigėsi. Prisijunkite iš naujo.",
+  "domain.refused.no_credentials": "Prisijunk iš naujo.",
+  "domain.refused.invalid_token": "Tavo seansas baigėsi. Prisijunk iš naujo.",
   "domain.refused.no_profile": "Ši paskyra dar neturi profilio.",
   "domain.refused.not_authorized":
     "Serveris atmetė šią užklausą šiai paskyrai.",
   "domain.refused.rate_limited":
-    "Serveris paprašė programos sulėtėti. Bandykite po akimirkos.",
+    "Serveris paprašė programos sulėtėti. Bandyk po akimirkos.",
   "domain.refused.capability": "Serveris atmetė šią užklausą.",
   "domain.refused.identity_unavailable":
-    "Nepavyko patvirtinti, kas esate. Tai nėra atsisakymas — bandykite dar kartą.",
+    "Nepavyko patvirtinti, kas esi. Tai nėra atsisakymas — bandyk dar kartą.",
 
   "today.signedInAs": "Prisijungta kaip",
   "today.recentWork": "Naujausi darbai",
@@ -243,48 +331,48 @@ const lt: Catalogue = {
   "journal.logWork": "Įrašyti darbą",
   "journal.compose.title": "Įrašyti darbą",
   "journal.compose.intro":
-    "Aprašykite savais žodžiais, ką nuveikėte. Darbo dienoraštis užfiksuos būtent tai, ką parašysite.",
+    "Aprašyk savais žodžiais, ką nuveikei. Darbo dienoraštis užfiksuos būtent tai, ką parašysi.",
   "journal.compose.date": "Darbo data",
   "journal.compose.dateHint": "Metai-mėnuo-diena, pavyzdžiui 2026-09-01",
   "journal.compose.today": "Šiandien",
   "journal.compose.yesterday": "Vakar",
-  "journal.compose.notes": "Ką nuveikėte",
+  "journal.compose.notes": "Ką nuveikei",
   "journal.compose.notesHint":
     "Savais žodžiais. Laikas ir vietos rašomi taip pat čia.",
   "journal.compose.site": "Objektas arba vieta (nebūtina)",
   "journal.compose.context": "Darbo kontekstas",
   "journal.compose.contextUnnamed": "Nenurodyta",
   "journal.compose.review": "Peržiūrėti prieš įrašant",
-  "journal.compose.previewTitle": "Patikrinkite prieš įrašant",
+  "journal.compose.previewTitle": "Patikrink prieš įrašant",
   "journal.compose.previewNothingSaved":
     "Kol kas niekas neįrašyta. Bus užfiksuota būtent tai.",
   "journal.compose.save": "Įrašyti į darbo dienoraštį",
   "journal.compose.edit": "Pakeisti",
   "journal.compose.chooseContext": "Kuriam darbui tai priklauso?",
   "journal.compose.chooseContextBody":
-    "Šis įrašas gali priklausyti daugiau nei vienam jūsų darbo kontekstui, todėl niekas neparuošta ir niekas neįrašyta. Pasirinkite vieną.",
+    "Šis įrašas gali priklausyti daugiau nei vienam tavo darbo kontekstui, todėl niekas neparuošta ir niekas neįrašyta. Pasirink vieną.",
   "journal.compose.savedTitle": "Įrašyta į darbo dienoraštį",
   "journal.compose.savedBody":
     "Tai jau užfiksuotas įrašas. Serveris išsaugojo būtent tai.",
   "journal.compose.another": "Įrašyti dar vieną",
   "journal.compose.backToJournal": "Grįžti į dienoraštį",
-  "journal.compose.checkThis": "Pirmiausia patikrinkite",
+  "journal.compose.checkThis": "Pirmiausia patikrink",
   "journal.compose.invalidDate":
-    "Datą rašykite metai-mėnuo-diena, pavyzdžiui 2026-09-01. Niekas nebuvo išsiųsta.",
+    "Datą rašyk metai-mėnuo-diena, pavyzdžiui 2026-09-01. Niekas nebuvo išsiųsta.",
   "journal.compose.notesRequired":
-    "Prieš įrašydami aprašykite, ką nuveikėte. Niekas nebuvo išsiųsta.",
+    "Prieš įrašant aprašyk, ką nuveikei. Niekas nebuvo išsiųsta.",
   "journal.compose.draftFailedTitle": "Nepavyko paruošti šio įrašo",
   "journal.compose.saveFailedTitle": "Nepavyko įrašyti šio įrašo",
   "journal.compose.staleDraft":
-    "Neįrašyta: po paruošimo jūsų dienoraštis pasikeitė, todėl patikra nebegalioja. Peržiūrėkite dar kartą.",
+    "Neįrašyta: po paruošimo tavo dienoraštis pasikeitė, todėl patikra nebegalioja. Peržiūrėk dar kartą.",
   "journal.compose.noContext":
-    "Ši paskyra neturi aktyvaus darbo konteksto, todėl įrašui nėra kur atsidurti. Pirmiausia svetainėje nurodykite, kur dirbate, o tada įrašykite darbą čia.",
+    "Ši paskyra neturi aktyvaus darbo konteksto, todėl įrašui nėra kur atsidurti. Pirmiausia svetainėje nurodyk, kur dirbi, o tada įrašyk darbą čia.",
   "journal.compose.unsureSaved":
-    "Ryšys nutrūko jau išsiuntus, todėl nežinome, ar įrašas pasiekė serverį. Prieš rašydami iš naujo atsidarykite darbo dienoraštį ir patikrinkite. Bandymas dar kartą dublikato nesukurs.",
+    "Ryšys nutrūko jau išsiuntus, todėl nežinome, ar įrašas pasiekė serverį. Prieš rašant iš naujo atsidaryk darbo dienoraštį ir patikrink. Bandymas dar kartą dublikato nesukurs.",
   "journal.compose.skillsAdded": "Nauji užfiksuoti įgūdžiai",
   "journal.compose.skillsStrengthened": "Įgūdžiai su naujais įrodymais",
-  "journal.compose.skillsClaims": "Iš jūsų žodžių pastebėti gebėjimai",
-  "journal.compose.skillsReview": "Laukia jūsų peržiūros",
+  "journal.compose.skillsClaims": "Iš tavo žodžių pastebėti gebėjimai",
+  "journal.compose.skillsReview": "Laukia tavo peržiūros",
   "journal.compose.noCvChange":
     "Iš šio įrašo į gyvąjį CV nieko naujo nepridėta.",
   "journal.compose.skillsPartial":
@@ -293,11 +381,45 @@ const lt: Catalogue = {
     "Šįkart gyvojo CV atnaujinimas nebuvo atliktas. Pats įrašas išsaugotas.",
   "journal.compose.reviewOnWeb":
     "Tai, kas laukia peržiūros, patvirtinama svetainėje.",
-  "profile.skillsTitle": "Gyvojo CV įgūdžiai",
   "profile.skillsEmpty": "Įgūdžių dar neužfiksuota.",
   "profile.noWorkerProfile": "Ši paskyra dar neturi darbuotojo profilio.",
-  "profile.skillVerified": "Patvirtinta",
-  "profile.skillUnverified": "Nepatvirtinta",
+  "profile.figuresTitle": "Įgūdžiai su tavo užrašytomis valandomis",
+  "profile.groupManagerConfirmed": "Vadovo patvirtinta",
+  "profile.groupJournalBacked": "Paremta tavo darbo dienoraščiu",
+  "profile.groupDeclared": "Tavo nurodyta",
+  "profile.figuresUnavailable":
+    "Valandų, dalies ir įrašų šį kartą perskaityti nepavyko. Įgūdžiai žemiau vis tiek yra tavo užfiksuoti įgūdžiai — niekas nerodoma kaip 0.",
+  "profile.figuresLegend":
+    "Valandos · dalis iš įgūdžiams priskirtų valandų · įrašai, per visą laiką. Tie patys skaičiai kaip svetainėje.",
+  "profile.figuresNotRead": "skaičių perskaityti nepavyko",
+  "profile.noFigures": "užrašytų valandų nėra",
+  "profile.hoursShort": "val.",
+  "profile.entriesLabel": "įr.",
+  "profile.selfStatedMissing":
+    "Gebėjimai, kuriuos užrašei savais žodžiais, į šį ekraną dar neperkeliami; svetainė juos rodo prie tavo įgūdžių.",
+  "profile.openJournal": "Atidaryti darbo dienoraštį",
+  "journal.openProfile": "Kiek šie įrašai sudaro — tavo profilyje",
+
+  "today.figuresTitle": "Tavo veikla skaičiais",
+  "today.periodToday": "Šiandien",
+  "today.periodWeek": "Paskutinės 7 dienos",
+  "today.hoursLabel": "Valandos",
+  "today.daysUnitLabel": "užrašyta dienomis",
+  "today.entriesLabel": "Įrašai",
+  "today.daysLabel": "Dienos",
+  "today.confirmedLabel": "Vadovo patvirtinta, val.",
+  "today.periodEmpty": "Šiame lange nieko neužrašyta.",
+  "today.periodMissing": "Serveris šiam langui skaičiaus neatsiuntė.",
+  "today.dominantTitle": "Didžiausia tavo valandų dalis per 7 dienas",
+  "today.dominantShare": "iš įgūdžiams priskirtų valandų",
+  "today.dominantNone":
+    "Per paskutines 7 dienas nė vienam įgūdžiui valandos nepriskirtos.",
+  "today.coverageTruncated":
+    "Šie skaičiai remiasi paskutiniais perskaitytais įrašais — senesni įrašai neįtraukti.",
+  "today.figuresScope":
+    "Iš tavo darbo dienoraščio įrašų, pagal tą pačią taisyklę kaip svetainėje. Kalendorinės dienos baigiasi šiandien (UTC).",
+  "today.openJournal": "Atidaryti darbo dienoraštį",
+  "today.openProfile": "Atidaryti profilį ir įgūdžius",
 };
 
 const ru: Catalogue = {
@@ -317,6 +439,9 @@ const ru: Catalogue = {
   "auth.register.title": "Создать аккаунт",
   "auth.register.submit": "Создать аккаунт",
   "auth.register.toSignIn": "У меня уже есть аккаунт",
+  "auth.signIn.forgot": "Забыли пароль?",
+  "auth.register.legal":
+    "Создавая аккаунт, вы принимаете условия использования и политику конфиденциальности.",
   "auth.error.rejected": "Такая почта и пароль не совпадают.",
   "auth.error.unreachable":
     "Не удалось связаться с сервером, поэтому мы не знаем, верны ли данные. Проверьте соединение и попробуйте снова.",
@@ -325,6 +450,17 @@ const ru: Catalogue = {
   "auth.error.notConfigured":
     "В этой сборке нет настроек сервера, поэтому вход невозможен.",
   "auth.signOut": "Выйти",
+
+  "account.title": "Конфиденциальность и аккаунт",
+  "account.body":
+    "Эти ссылки открываются в браузере, на сайте. Запросить свои данные или удаление аккаунта можно там, в разделе «Конфиденциальность».",
+  "account.privacy": "Конфиденциальность, ваши данные и удаление аккаунта",
+  "account.terms": "Условия использования",
+  "account.privacyPolicy": "Политика конфиденциальности",
+  "account.deletionInfo": "Как удаляется аккаунт (вход не нужен)",
+  "account.support": "Связаться с поддержкой (info@labourmarket.ai)",
+  "account.external": "Браузер",
+  "account.openFailed": "Не удалось открыть ссылку на этом телефоне. Ничего не изменено.",
 
   "session.unavailable.title": "Не удалось проверить вашу сессию",
   "session.unavailable.body":
@@ -344,6 +480,19 @@ const ru: Catalogue = {
   "config.problem.body":
     "Приложение не запустится, пока не заданы эти значения. Никакие данные никуда не отправлялись.",
 
+  "workspace.title": "Действуете от имени",
+  "workspace.loading": "Читаем ваши рабочие пространства…",
+  "workspace.active": "Активное",
+  "workspace.switching": "Переключаем…",
+  "workspace.failed.title": "Не удалось прочитать ваши рабочие пространства",
+  "workspace.failed.body":
+    "Это неудавшееся чтение, а не ответ: оно не означает, что вы не состоите ни в одной организации. Попробуйте через мгновение.",
+  "workspace.pointerUnavailable":
+    "Это выведено из того, где вы состоите, а не сохранённый вами выбор, и изменить это здесь пока нельзя.",
+  "workspace.switchFailed": "Рабочее пространство не изменено. Ничего не перенесено.",
+  "context.loading": "Читаем ваши роли…",
+  "context.active": "Активная",
+  "context.none": "В этой учётной записи пока не записана ни одна роль участия. Это то, что мы прочитали, а не сбой приложения.",
   "context.title": "Вы работаете как",
   "context.unavailable.title": "Пока мы не можем показать ваши контексты",
   "context.unavailable.body":
@@ -431,11 +580,45 @@ const ru: Catalogue = {
     "Обновление живого CV в этот раз не выполнялось. Сама запись сохранена.",
   "journal.compose.reviewOnWeb":
     "То, что ждёт проверки, подтверждается на сайте.",
-  "profile.skillsTitle": "Навыки живого CV",
   "profile.skillsEmpty": "Навыки пока не записаны.",
   "profile.noWorkerProfile": "У этого аккаунта пока нет профиля работника.",
-  "profile.skillVerified": "Подтверждено",
-  "profile.skillUnverified": "Не подтверждено",
+  "profile.figuresTitle": "Навыки с вашими записанными часами",
+  "profile.groupManagerConfirmed": "Подтверждено руководителем",
+  "profile.groupJournalBacked": "Подкреплено вашим дневником работы",
+  "profile.groupDeclared": "Указано вами",
+  "profile.figuresUnavailable":
+    "Часы, долю и записи в этот раз прочитать не удалось. Навыки ниже по-прежнему ваши записанные навыки — ничего не показывается как 0.",
+  "profile.figuresLegend":
+    "Часы · доля от часов, отнесённых к навыкам · записи, за всё время. Те же цифры, что и на сайте.",
+  "profile.figuresNotRead": "цифры прочитать не удалось",
+  "profile.noFigures": "записанных часов нет",
+  "profile.hoursShort": "ч",
+  "profile.entriesLabel": "зап.",
+  "profile.selfStatedMissing":
+    "Умения, которые вы записали своими словами, на этот экран пока не переносятся; сайт показывает их рядом с вашими навыками.",
+  "profile.openJournal": "Открыть дневник работы",
+  "journal.openProfile": "Что складывается из этих записей — в вашем профиле",
+
+  "today.figuresTitle": "Ваша работа в цифрах",
+  "today.periodToday": "Сегодня",
+  "today.periodWeek": "Последние 7 дней",
+  "today.hoursLabel": "Часы",
+  "today.daysUnitLabel": "записано в днях",
+  "today.entriesLabel": "Записи",
+  "today.daysLabel": "Дни",
+  "today.confirmedLabel": "Подтверждено руководителем, ч",
+  "today.periodEmpty": "В этом окне ничего не записано.",
+  "today.periodMissing": "Сервер не прислал цифру для этого окна.",
+  "today.dominantTitle": "Наибольшая доля ваших часов за 7 дней",
+  "today.dominantShare": "от часов, отнесённых к навыкам",
+  "today.dominantNone":
+    "За последние 7 дней ни одному навыку часы не отнесены.",
+  "today.coverageTruncated":
+    "Эти цифры опираются на последние прочитанные записи — более старые не включены.",
+  "today.figuresScope":
+    "Из ваших собственных записей дневника работы, по тому же правилу, что и на сайте. Календарные дни заканчиваются сегодня (UTC).",
+  "today.openJournal": "Открыть дневник работы",
+  "today.openProfile": "Открыть профиль и навыки",
 };
 
 const nl: Catalogue = {
@@ -455,6 +638,9 @@ const nl: Catalogue = {
   "auth.register.title": "Account aanmaken",
   "auth.register.submit": "Account aanmaken",
   "auth.register.toSignIn": "Ik heb al een account",
+  "auth.signIn.forgot": "Wachtwoord vergeten?",
+  "auth.register.legal":
+    "Door een account aan te maken, ga je akkoord met de gebruiksvoorwaarden en het privacybeleid.",
   "auth.error.rejected": "Dit e-mailadres en wachtwoord komen niet overeen.",
   "auth.error.unreachable":
     "We konden de server niet bereiken, dus we weten niet of deze gegevens kloppen. Controleer je verbinding en probeer het opnieuw.",
@@ -463,6 +649,17 @@ const nl: Catalogue = {
   "auth.error.notConfigured":
     "Deze versie heeft geen serverconfiguratie en kan daarom niemand inloggen.",
   "auth.signOut": "Uitloggen",
+
+  "account.title": "Privacy en account",
+  "account.body":
+    "Deze links openen in je browser, op de website. Je gegevens opvragen of je account laten verwijderen doe je daar, onder Privacy.",
+  "account.privacy": "Privacy, je gegevens en je account verwijderen",
+  "account.terms": "Gebruiksvoorwaarden",
+  "account.privacyPolicy": "Privacybeleid",
+  "account.deletionInfo": "Hoe het verwijderen van een account werkt (inloggen niet nodig)",
+  "account.support": "Contact met support (info@labourmarket.ai)",
+  "account.external": "Browser",
+  "account.openFailed": "De link kon op deze telefoon niet worden geopend. Er is niets gewijzigd.",
 
   "session.unavailable.title": "We konden je sessie niet controleren",
   "session.unavailable.body":
@@ -482,6 +679,19 @@ const nl: Catalogue = {
   "config.problem.body":
     "De app kan niet starten totdat deze waarden zijn ingesteld. Er zijn geen gegevens verstuurd.",
 
+  "workspace.title": "Handelt namens",
+  "workspace.loading": "Je werkruimtes worden gelezen…",
+  "workspace.active": "Actief",
+  "workspace.switching": "Wisselen…",
+  "workspace.failed.title": "We konden je werkruimtes niet lezen",
+  "workspace.failed.body":
+    "Dit is een mislukte leesactie, geen antwoord: het betekent niet dat je bij geen enkele organisatie hoort. Probeer het zo opnieuw.",
+  "workspace.pointerUnavailable":
+    "Dit is afgeleid uit waar je bij hoort, niet een keuze die voor jou is bewaard, en het kan hier nog niet gewijzigd worden.",
+  "workspace.switchFailed": "De werkruimte is niet gewijzigd. Er is niets verplaatst.",
+  "context.loading": "Je rollen worden gelezen…",
+  "context.active": "Actief",
+  "context.none": "Voor dit account is nog geen deelnamerol vastgelegd. Dat is wat we gelezen hebben — geen fout in de app.",
   "context.title": "Je werkt als",
   "context.unavailable.title": "We kunnen je contexten nog niet tonen",
   "context.unavailable.body":
@@ -569,11 +779,45 @@ const nl: Catalogue = {
     "De Living CV-update is deze keer niet uitgevoerd. Het item zelf is opgeslagen.",
   "journal.compose.reviewOnWeb":
     "Wat op beoordeling wacht, bevestig je op de website.",
-  "profile.skillsTitle": "Living CV-vaardigheden",
   "profile.skillsEmpty": "Nog geen vaardigheden vastgelegd.",
   "profile.noWorkerProfile": "Dit account heeft nog geen werkersprofiel.",
-  "profile.skillVerified": "Geverifieerd",
-  "profile.skillUnverified": "Niet geverifieerd",
+  "profile.figuresTitle": "Vaardigheden, met je vastgelegde uren",
+  "profile.groupManagerConfirmed": "Bevestigd door een leidinggevende",
+  "profile.groupJournalBacked": "Onderbouwd door je werkdagboek",
+  "profile.groupDeclared": "Door jou opgegeven",
+  "profile.figuresUnavailable":
+    "Uren, aandeel en items konden deze keer niet worden gelezen. De vaardigheden hieronder zijn nog steeds je vastgelegde vaardigheden — niets wordt als 0 getoond.",
+  "profile.figuresLegend":
+    "Uren · aandeel van de aan een vaardigheid toegekende uren · items, alle tijd. Dezelfde cijfers als op de website.",
+  "profile.figuresNotRead": "cijfers konden niet worden gelezen",
+  "profile.noFigures": "geen vastgelegde uren",
+  "profile.hoursShort": "u",
+  "profile.entriesLabel": "items",
+  "profile.selfStatedMissing":
+    "Vaardigheden die je in je eigen woorden noteerde, komen nog niet op dit scherm; de website toont ze bij je vaardigheden.",
+  "profile.openJournal": "Werkdagboek openen",
+  "journal.openProfile": "Wat deze items samen opleveren — op je profiel",
+
+  "today.figuresTitle": "Je werk in cijfers",
+  "today.periodToday": "Vandaag",
+  "today.periodWeek": "Laatste 7 dagen",
+  "today.hoursLabel": "Uren",
+  "today.daysUnitLabel": "vastgelegd in dagen",
+  "today.entriesLabel": "Items",
+  "today.daysLabel": "Dagen",
+  "today.confirmedLabel": "Bevestigd door een leidinggevende, u",
+  "today.periodEmpty": "Niets vastgelegd in dit venster.",
+  "today.periodMissing": "De server stuurde geen cijfer voor dit venster.",
+  "today.dominantTitle": "Grootste aandeel van je uren, laatste 7 dagen",
+  "today.dominantShare": "van de aan een vaardigheid toegekende uren",
+  "today.dominantNone":
+    "In de laatste 7 dagen zijn geen uren aan één vaardigheid toegekend.",
+  "today.coverageTruncated":
+    "Deze cijfers berusten op de laatst gelezen items — oudere items zijn niet meegenomen.",
+  "today.figuresScope":
+    "Uit je eigen werkdagboek-items, volgens dezelfde regel als de website. Kalenderdagen eindigen vandaag (UTC).",
+  "today.openJournal": "Werkdagboek openen",
+  "today.openProfile": "Profiel en vaardigheden openen",
 };
 
 const de: Catalogue = {
@@ -584,7 +828,7 @@ const de: Catalogue = {
   "nav.profile": "Profil",
   "nav.settings": "Einstellungen",
 
-  "auth.checking": "Wir prüfen deine Sitzung…",
+  "auth.checking": "Wir prüfen Ihre Sitzung…",
   "auth.signIn.title": "Anmelden",
   "auth.signIn.email": "E-Mail",
   "auth.signIn.password": "Passwort",
@@ -593,37 +837,64 @@ const de: Catalogue = {
   "auth.register.title": "Konto erstellen",
   "auth.register.submit": "Konto erstellen",
   "auth.register.toSignIn": "Ich habe bereits ein Konto",
+  "auth.signIn.forgot": "Passwort vergessen?",
+  "auth.register.legal":
+    "Mit dem Erstellen eines Kontos akzeptieren Sie die Nutzungsbedingungen und die Datenschutzerklärung.",
   "auth.error.rejected": "Diese E-Mail und dieses Passwort passen nicht zusammen.",
   "auth.error.unreachable":
-    "Wir konnten den Server nicht erreichen und wissen daher nicht, ob die Angaben stimmen. Prüfe deine Verbindung und versuche es erneut.",
+    "Wir konnten den Server nicht erreichen und wissen daher nicht, ob die Angaben stimmen. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
   "auth.error.confirmationRequired":
-    "Dein Konto wurde erstellt. Bestätige den Link in deiner E-Mail und melde dich dann an.",
+    "Ihr Konto wurde erstellt. Bestätigen Sie den Link in Ihrer E-Mail und melden Sie sich dann an.",
   "auth.error.notConfigured":
     "Diese Version hat keine Serverkonfiguration und kann daher niemanden anmelden.",
   "auth.signOut": "Abmelden",
 
-  "session.unavailable.title": "Wir konnten deine Sitzung nicht prüfen",
+  "account.title": "Datenschutz und Konto",
+  "account.body":
+    "Diese Links öffnen sich in Ihrem Browser, auf der Website. Ihre Daten anfordern oder Ihr Konto löschen lassen können Sie dort unter „Datenschutz“.",
+  "account.privacy": "Datenschutz, Ihre Daten und das Löschen Ihres Kontos",
+  "account.terms": "Nutzungsbedingungen",
+  "account.privacyPolicy": "Datenschutzerklärung",
+  "account.deletionInfo": "So funktioniert die Kontolöschung (ohne Anmeldung)",
+  "account.support": "Support kontaktieren (info@labourmarket.ai)",
+  "account.external": "Browser",
+  "account.openFailed": "Der Link konnte auf diesem Telefon nicht geöffnet werden. Es wurde nichts geändert.",
+
+  "session.unavailable.title": "Wir konnten Ihre Sitzung nicht prüfen",
   "session.unavailable.body":
-    "Das heißt nicht, dass du abgemeldet bist — der sichere Speicher deines Telefons hat nicht geantwortet. Versuche es erneut.",
+    "Das heißt nicht, dass Sie abgemeldet sind — der sichere Speicher Ihres Telefons hat nicht geantwortet. Versuchen Sie es erneut.",
   "session.unavailable.retry": "Erneut versuchen",
 
   "route.notFound.title": "Diesen Bildschirm gibt es in dieser App nicht",
   "route.notFound.body":
-    "Der Link, dem du gefolgt bist, führt hier nirgendwohin. Vielleicht gehört er zur Website, vielleicht ist er veraltet. Es wurde nichts gesendet.",
+    "Der Link, dem Sie gefolgt sind, führt hier nirgendwohin. Vielleicht gehört er zur Website, vielleicht ist er veraltet. Es wurde nichts gesendet.",
   "route.notFound.action": "Zurück zur App",
 
   "crash.title": "Die App ist auf einen Fehler gestoßen",
   "crash.body":
-    "Das ist ein Fehler in der App selbst und nicht deiner, und es wurde nichts gesendet. Versuche es erneut — wenn es weiter passiert, schließe die App und öffne sie neu.",
+    "Das ist ein Fehler in der App selbst und nicht Ihrer, und es wurde nichts gesendet. Versuchen Sie es erneut — wenn es weiter passiert, schließen Sie die App und öffnen Sie sie neu.",
 
   "config.problem.title": "Diese Version ist nicht konfiguriert",
   "config.problem.body":
     "Die App kann erst starten, wenn diese Werte gesetzt sind. Es wurden keine Daten gesendet.",
 
-  "context.title": "Du arbeitest als",
-  "context.unavailable.title": "Wir können deine Kontexte noch nicht anzeigen",
+  "workspace.title": "Handelt für",
+  "workspace.loading": "Ihre Arbeitsbereiche werden gelesen…",
+  "workspace.active": "Aktiv",
+  "workspace.switching": "Wird gewechselt…",
+  "workspace.failed.title": "Wir konnten Ihre Arbeitsbereiche nicht lesen",
+  "workspace.failed.body":
+    "Das ist ein fehlgeschlagener Lesevorgang, keine Antwort: Es bedeutet nicht, dass Sie zu keiner Organisation gehören. Versuchen Sie es gleich noch einmal.",
+  "workspace.pointerUnavailable":
+    "Das ist daraus abgeleitet, wo Sie dazugehören, und keine für Sie gespeicherte Wahl; ändern lässt es sich hier noch nicht.",
+  "workspace.switchFailed": "Der Arbeitsbereich wurde nicht geändert. Es wurde nichts verschoben.",
+  "context.loading": "Ihre Rollen werden gelesen…",
+  "context.active": "Aktiv",
+  "context.none": "Für dieses Konto ist noch keine Teilnahmerolle erfasst. Das haben wir gelesen — kein Fehler der App.",
+  "context.title": "Sie arbeiten als",
+  "context.unavailable.title": "Wir können Ihre Kontexte noch nicht anzeigen",
   "context.unavailable.body":
-    "Die App kann dich anmelden, aber noch nicht lesen, zu welchen Organisationen du gehörst. In deinem Konto fehlt nichts — dieser Client kann nur noch nicht danach fragen.",
+    "Die App kann Sie anmelden, aber noch nicht lesen, zu welchen Organisationen Sie gehören. In Ihrem Konto fehlt nichts — dieser Client kann nur noch nicht danach fragen.",
   "context.mode.worker": "Ich selbst",
   "context.mode.company": "Unternehmen",
   "context.mode.agency": "Agentur",
@@ -636,21 +907,21 @@ const de: Catalogue = {
   "domain.retry": "Erneut versuchen",
   "domain.failedTitle": "Konnte nicht geladen werden",
   "domain.unavailable.notConnectedYet": "Noch nicht verbunden",
-  "domain.unavailable.signInAgain": "Bitte melde dich erneut an.",
+  "domain.unavailable.signInAgain": "Bitte melden Sie sich erneut an.",
   "domain.unavailable.offline": "Keine Verbindung. Es wurde nichts gesendet.",
   "domain.unavailable.unexpectedAnswer":
     "Der Server hat mit etwas geantwortet, das diese App nicht verstanden hat.",
-  "domain.refused.no_credentials": "Bitte melde dich erneut an.",
+  "domain.refused.no_credentials": "Bitte melden Sie sich erneut an.",
   "domain.refused.invalid_token":
-    "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
+    "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
   "domain.refused.no_profile": "Dieses Konto hat noch kein Profil.",
   "domain.refused.not_authorized":
     "Der Server hat diese Anfrage für dieses Konto abgelehnt.",
   "domain.refused.rate_limited":
-    "Der Server hat diese App gebeten, langsamer zu machen. Versuche es gleich erneut.",
+    "Der Server hat diese App gebeten, langsamer zu machen. Versuchen Sie es gleich erneut.",
   "domain.refused.capability": "Der Server hat diese Anfrage abgelehnt.",
   "domain.refused.identity_unavailable":
-    "Wir konnten nicht bestätigen, wer du bist. Das ist keine Ablehnung — versuche es erneut.",
+    "Wir konnten nicht bestätigen, wer Sie sind. Das ist keine Ablehnung — versuchen Sie es erneut.",
 
   "today.signedInAs": "Angemeldet als",
   "today.recentWork": "Aktuelle Arbeit",
@@ -658,66 +929,299 @@ const de: Catalogue = {
   "journal.logWork": "Arbeit erfassen",
   "journal.compose.title": "Arbeit erfassen",
   "journal.compose.intro":
-    "Schreibe in deinen eigenen Worten, was du getan hast. Dein Arbeitstagebuch hält genau das fest.",
+    "Schreiben Sie in Ihren eigenen Worten, was Sie getan haben. Ihr Arbeitstagebuch hält genau das fest.",
   "journal.compose.date": "Datum der Arbeit",
   "journal.compose.dateHint": "Jahr-Monat-Tag, zum Beispiel 2026-09-01",
   "journal.compose.today": "Heute",
   "journal.compose.yesterday": "Gestern",
-  "journal.compose.notes": "Was du getan hast",
+  "journal.compose.notes": "Was Sie getan haben",
   "journal.compose.notesHint":
-    "In deinen eigenen Worten. Zeiten und Orte gehören ebenfalls hierher.",
+    "In Ihren eigenen Worten. Zeiten und Orte gehören ebenfalls hierher.",
   "journal.compose.site": "Baustelle oder Ort (optional)",
   "journal.compose.context": "Arbeitskontext",
   "journal.compose.contextUnnamed": "Nicht benannt",
   "journal.compose.review": "Vor dem Speichern prüfen",
-  "journal.compose.previewTitle": "Prüfe das, bevor es gespeichert wird",
+  "journal.compose.previewTitle": "Prüfen Sie das, bevor es gespeichert wird",
   "journal.compose.previewNothingSaved":
     "Es wurde noch nichts gespeichert. Genau das wird erfasst.",
   "journal.compose.save": "In mein Arbeitstagebuch speichern",
   "journal.compose.edit": "Etwas ändern",
   "journal.compose.chooseContext": "Zu welcher Arbeit gehört das?",
   "journal.compose.chooseContextBody":
-    "Dieser Eintrag könnte zu mehr als einem deiner Arbeitskontexte gehören, deshalb wurde nichts vorbereitet und nichts gespeichert. Wähle einen aus.",
-  "journal.compose.savedTitle": "In deinem Arbeitstagebuch gespeichert",
+    "Dieser Eintrag könnte zu mehr als einem Ihrer Arbeitskontexte gehören, deshalb wurde nichts vorbereitet und nichts gespeichert. Wählen Sie einen aus.",
+  "journal.compose.savedTitle": "In Ihrem Arbeitstagebuch gespeichert",
   "journal.compose.savedBody":
     "Das ist jetzt ein erfasster Eintrag. Genau das hat der Server gespeichert.",
   "journal.compose.another": "Noch einen erfassen",
   "journal.compose.backToJournal": "Zurück zum Tagebuch",
   "journal.compose.checkThis": "Bitte zuerst prüfen",
   "journal.compose.invalidDate":
-    "Schreibe das Datum als Jahr-Monat-Tag, zum Beispiel 2026-09-01. Es wurde nichts gesendet.",
+    "Schreiben Sie das Datum als Jahr-Monat-Tag, zum Beispiel 2026-09-01. Es wurde nichts gesendet.",
   "journal.compose.notesRequired":
-    "Schreibe vor dem Speichern, was du getan hast. Es wurde nichts gesendet.",
+    "Schreiben Sie vor dem Speichern, was Sie getan haben. Es wurde nichts gesendet.",
   "journal.compose.draftFailedTitle":
     "Wir konnten diesen Eintrag nicht vorbereiten",
   "journal.compose.saveFailedTitle":
     "Wir konnten diesen Eintrag nicht speichern",
   "journal.compose.staleDraft":
-    "Nicht gespeichert: Dein Tagebuch hat sich geändert, nachdem dies vorbereitet wurde, deshalb ist die Prüfung veraltet. Prüfe es erneut.",
+    "Nicht gespeichert: Ihr Tagebuch hat sich geändert, nachdem dies vorbereitet wurde, deshalb ist die Prüfung veraltet. Prüfen Sie es erneut.",
   "journal.compose.noContext":
-    "Dieses Konto hat keinen aktiven Arbeitskontext, deshalb hat ein Eintrag keinen Ort. Gib zuerst auf der Website an, wo du arbeitest, und erfasse Arbeit dann hier.",
+    "Dieses Konto hat keinen aktiven Arbeitskontext, deshalb hat ein Eintrag keinen Ort. Geben Sie zuerst auf der Website an, wo Sie arbeiten, und erfassen Sie Arbeit dann hier.",
   "journal.compose.unsureSaved":
-    "Die Verbindung brach ab, nachdem dies gesendet wurde, deshalb wissen wir nicht, ob es angekommen ist. Öffne dein Arbeitstagebuch und prüfe es, bevor du es erneut schreibst. Ein erneuter Versuch kann keinen doppelten Eintrag erzeugen.",
+    "Die Verbindung brach ab, nachdem dies gesendet wurde, deshalb wissen wir nicht, ob es angekommen ist. Öffnen Sie Ihr Arbeitstagebuch und prüfen Sie es, bevor Sie es erneut schreiben. Ein erneuter Versuch kann keinen doppelten Eintrag erzeugen.",
   "journal.compose.skillsAdded": "Neu erfasste Fähigkeiten",
   "journal.compose.skillsStrengthened": "Fähigkeiten mit neuem Nachweis",
-  "journal.compose.skillsClaims": "Aus deinen Worten notierte Fähigkeiten",
-  "journal.compose.skillsReview": "Wartet auf deine Prüfung",
+  "journal.compose.skillsClaims": "Aus Ihren Worten notierte Fähigkeiten",
+  "journal.compose.skillsReview": "Wartet auf Ihre Prüfung",
   "journal.compose.noCvChange":
-    "Aus diesem Eintrag wurde deinem Living CV nichts Neues hinzugefügt.",
+    "Aus diesem Eintrag wurde Ihrem Living CV nichts Neues hinzugefügt.",
   "journal.compose.skillsPartial":
     "Ein Teil der Living-CV-Aktualisierung wurde nicht abgeschlossen. Der Eintrag selbst ist gespeichert.",
   "journal.compose.skillsFailed":
     "Die Living-CV-Aktualisierung lief diesmal nicht. Der Eintrag selbst ist gespeichert.",
   "journal.compose.reviewOnWeb":
     "Was auf Prüfung wartet, wird auf der Website bestätigt.",
-  "profile.skillsTitle": "Living-CV-Fähigkeiten",
   "profile.skillsEmpty": "Noch keine Fähigkeiten erfasst.",
   "profile.noWorkerProfile": "Dieses Konto hat noch kein Arbeiterprofil.",
-  "profile.skillVerified": "Bestätigt",
-  "profile.skillUnverified": "Unbestätigt",
+  "profile.figuresTitle": "Fähigkeiten mit Ihren erfassten Stunden",
+  "profile.groupManagerConfirmed": "Von einer Führungskraft bestätigt",
+  "profile.groupJournalBacked": "Durch Ihr Arbeitstagebuch belegt",
+  "profile.groupDeclared": "Von Ihnen angegeben",
+  "profile.figuresUnavailable":
+    "Stunden, Anteil und Einträge konnten diesmal nicht gelesen werden. Die Fähigkeiten unten sind weiterhin Ihre erfassten Fähigkeiten — nichts wird als 0 gezeigt.",
+  "profile.figuresLegend":
+    "Stunden · Anteil an den einer Fähigkeit zugeordneten Stunden · Einträge, gesamt. Dieselben Zahlen wie auf der Website.",
+  "profile.figuresNotRead": "Zahlen konnten nicht gelesen werden",
+  "profile.noFigures": "keine erfassten Stunden",
+  "profile.hoursShort": "Std.",
+  "profile.entriesLabel": "Einträge",
+  "profile.selfStatedMissing":
+    "Fähigkeiten, die Sie in eigenen Worten notiert haben, erreichen diesen Bildschirm noch nicht; die Website zeigt sie bei Ihren Fähigkeiten.",
+  "profile.openJournal": "Arbeitstagebuch öffnen",
+  "journal.openProfile": "Was diese Einträge ergeben — in Ihrem Profil",
+
+  "today.figuresTitle": "Ihre Arbeit in Zahlen",
+  "today.periodToday": "Heute",
+  "today.periodWeek": "Letzte 7 Tage",
+  "today.hoursLabel": "Stunden",
+  "today.daysUnitLabel": "in Tagen erfasst",
+  "today.entriesLabel": "Einträge",
+  "today.daysLabel": "Tage",
+  "today.confirmedLabel": "Von einer Führungskraft bestätigt, Std.",
+  "today.periodEmpty": "In diesem Zeitfenster nichts erfasst.",
+  "today.periodMissing": "Der Server hat für dieses Zeitfenster keine Zahl gesendet.",
+  "today.dominantTitle": "Größter Anteil Ihrer Stunden, letzte 7 Tage",
+  "today.dominantShare": "der einer Fähigkeit zugeordneten Stunden",
+  "today.dominantNone":
+    "In den letzten 7 Tagen wurden keiner einzelnen Fähigkeit Stunden zugeordnet.",
+  "today.coverageTruncated":
+    "Diese Zahlen beruhen auf den zuletzt gelesenen Einträgen — ältere Einträge sind nicht enthalten.",
+  "today.figuresScope":
+    "Aus Ihren eigenen Arbeitstagebuch-Einträgen, nach derselben Regel wie die Website. Kalendertage enden heute (UTC).",
+  "today.openJournal": "Arbeitstagebuch öffnen",
+  "today.openProfile": "Profil und Fähigkeiten öffnen",
 };
 
-export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de };
+const pl: Catalogue = {
+  "app.name": "LabourMarket.ai",
+
+  "nav.today": "Dziś",
+  "nav.journal": "Dziennik pracy",
+  "nav.profile": "Profil",
+  "nav.settings": "Ustawienia",
+
+  "auth.checking": "Sprawdzamy Twoją sesję…",
+  "auth.signIn.title": "Zaloguj się",
+  "auth.signIn.email": "E-mail",
+  "auth.signIn.password": "Hasło",
+  "auth.signIn.submit": "Zaloguj się",
+  "auth.signIn.toRegister": "Załóż konto",
+  "auth.register.title": "Załóż konto",
+  "auth.register.submit": "Załóż konto",
+  "auth.register.toSignIn": "Mam już konto",
+  "auth.signIn.forgot": "Nie pamiętasz hasła?",
+  "auth.register.legal":
+    "Tworząc konto, akceptujesz warunki korzystania z usługi i politykę prywatności.",
+  "auth.error.rejected": "Ten e-mail i hasło do siebie nie pasują.",
+  "auth.error.unreachable":
+    "Nie udało się połączyć z serwerem, więc nie wiemy, czy te dane są poprawne. Sprawdź połączenie i spróbuj ponownie.",
+  "auth.error.confirmationRequired":
+    "Twoje konto zostało utworzone. Potwierdź link w e-mailu, a potem zaloguj się.",
+  "auth.error.notConfigured":
+    "Ta wersja nie ma konfiguracji serwera, więc nie może nikogo zalogować.",
+  "auth.signOut": "Wyloguj się",
+
+  "session.unavailable.title": "Nie udało się sprawdzić Twojej sesji",
+  "session.unavailable.body":
+    "To nie to samo co wylogowanie — bezpieczna pamięć Twojego telefonu nie odpowiedziała. Spróbuj ponownie.",
+  "session.unavailable.retry": "Spróbuj ponownie",
+
+  "route.notFound.title": "Tego ekranu nie ma w tej aplikacji",
+  "route.notFound.body":
+    "Link, który tu prowadzi, nigdzie w tej aplikacji nie trafia. Może należeć do strony internetowej albo być nieaktualny. Nic nigdzie nie zostało wysłane.",
+  "route.notFound.action": "Wróć do aplikacji",
+
+  "crash.title": "W aplikacji wystąpił błąd",
+  "crash.body":
+    "To błąd samej aplikacji, a nie Twoje działanie, i nic nigdzie nie zostało wysłane. Spróbuj ponownie — jeśli powtarza się dalej, zamknij aplikację i otwórz ją od nowa.",
+
+  "config.problem.title": "Ta wersja nie jest skonfigurowana",
+  "config.problem.body":
+    "Aplikacja nie uruchomi się, dopóki te wartości nie zostaną ustawione. Żadne dane nigdzie nie zostały wysłane.",
+
+  "workspace.title": "Działasz w imieniu",
+  "workspace.loading": "Wczytujemy Twoje przestrzenie robocze…",
+  "workspace.active": "Aktywna",
+  "workspace.switching": "Przełączanie…",
+  "workspace.failed.title": "Nie udało się odczytać Twoich przestrzeni roboczych",
+  "workspace.failed.body":
+    "To nieudany odczyt, a nie odpowiedź: nie oznacza, że nie należysz do żadnej organizacji. Spróbuj za chwilę.",
+  "workspace.pointerUnavailable":
+    "To jest wyliczane z tego, do czego należysz, a nie zapisany dla Ciebie wybór, i nie da się tego tutaj jeszcze zmienić.",
+  "workspace.switchFailed": "Przestrzeń robocza nie została zmieniona. Nic nie zostało przeniesione.",
+  "context.loading": "Wczytujemy Twoje role…",
+  "context.active": "Aktywna",
+  "context.none": "Na tym koncie nie zapisano jeszcze żadnej roli uczestnictwa. Tyle odczytaliśmy — to nie błąd aplikacji.",
+  "context.title": "Pracujesz jako",
+  "context.unavailable.title": "Nie możemy jeszcze pokazać Twoich kontekstów",
+  "context.unavailable.body":
+    "Aplikacja potrafi Cię zalogować, ale nie potrafi jeszcze odczytać, do których organizacji należysz. W Twoim koncie niczego nie brakuje — ten klient po prostu nie umie jeszcze o to zapytać.",
+  "context.mode.worker": "Ja",
+  "context.mode.company": "Firma",
+  "context.mode.agency": "Agencja",
+  "context.mode.customer": "Zleceniodawca",
+
+  "language.title": "Język",
+  "language.preview": "Tłumaczenie poglądowe",
+
+  "domain.loading": "Pytamy serwer…",
+  "domain.retry": "Spróbuj ponownie",
+  "domain.failedTitle": "Nie udało się tego wczytać",
+  "domain.unavailable.notConnectedYet": "Jeszcze niepołączone",
+  "domain.unavailable.signInAgain": "Zaloguj się ponownie.",
+  "domain.unavailable.offline": "Brak połączenia. Nic nie zostało wysłane.",
+  "domain.unavailable.unexpectedAnswer":
+    "Serwer odpowiedział czymś, czego ta aplikacja nie zrozumiała.",
+  "domain.refused.no_credentials": "Zaloguj się ponownie.",
+  "domain.refused.invalid_token":
+    "Twoja sesja wygasła. Zaloguj się ponownie.",
+  "domain.refused.no_profile": "To konto nie ma jeszcze profilu.",
+  "domain.refused.not_authorized":
+    "Serwer odrzucił to żądanie dla tego konta.",
+  "domain.refused.rate_limited":
+    "Serwer poprosił aplikację o zwolnienie tempa. Spróbuj za chwilę.",
+  "domain.refused.capability": "Serwer odrzucił to żądanie.",
+  "domain.refused.identity_unavailable":
+    "Nie udało się potwierdzić, kim jesteś. To nie jest odmowa — spróbuj ponownie.",
+
+  "today.signedInAs": "Zalogowano jako",
+  "today.recentWork": "Ostatnie prace",
+  "journal.empty": "W Dzienniku pracy nie ma jeszcze żadnych wpisów.",
+  "journal.logWork": "Zapisz pracę",
+  "journal.compose.title": "Zapisz pracę",
+  "journal.compose.intro":
+    "Opisz własnymi słowami swoją pracę. Twój Dziennik pracy zapisuje dokładnie to, co napiszesz.",
+  "journal.compose.date": "Data pracy",
+  "journal.compose.dateHint": "Rok-miesiąc-dzień, na przykład 2026-09-01",
+  "journal.compose.today": "Dziś",
+  "journal.compose.yesterday": "Wczoraj",
+  "journal.compose.notes": "Co zostało zrobione",
+  "journal.compose.notesHint":
+    "Własnymi słowami. Godziny i miejsca też należą tutaj.",
+  "journal.compose.site": "Budowa lub miejsce (opcjonalnie)",
+  "journal.compose.context": "Kontekst pracy",
+  "journal.compose.contextUnnamed": "Nie podano",
+  "journal.compose.review": "Sprawdź przed zapisaniem",
+  "journal.compose.previewTitle": "Sprawdź to, zanim zostanie zapisane",
+  "journal.compose.previewNothingSaved":
+    "Nic jeszcze nie zostało zapisane. Dokładnie to zostanie zarejestrowane.",
+  "journal.compose.save": "Zapisz w moim Dzienniku pracy",
+  "journal.compose.edit": "Zmień coś",
+  "journal.compose.chooseContext": "Do której pracy to należy?",
+  "journal.compose.chooseContextBody":
+    "Ten wpis mógłby należeć do więcej niż jednego z Twoich kontekstów pracy, więc nic nie zostało przygotowane ani zapisane. Wybierz jeden.",
+  "journal.compose.savedTitle": "Zapisano w Twoim Dzienniku pracy",
+  "journal.compose.savedBody":
+    "To jest już zarejestrowany wpis. Dokładnie to zapisał serwer.",
+  "journal.compose.another": "Zapisz kolejny wpis",
+  "journal.compose.backToJournal": "Wróć do dziennika",
+  "journal.compose.checkThis": "Najpierw to sprawdź",
+  "journal.compose.invalidDate":
+    "Datę zapisz jako rok-miesiąc-dzień, na przykład 2026-09-01. Nic nie zostało wysłane.",
+  "journal.compose.notesRequired":
+    "Przed zapisaniem opisz, co zostało zrobione. Nic nie zostało wysłane.",
+  "journal.compose.draftFailedTitle": "Nie udało się przygotować tego wpisu",
+  "journal.compose.saveFailedTitle": "Nie udało się zapisać tego wpisu",
+  "journal.compose.staleDraft":
+    "Nie zapisano: Twój dziennik zmienił się po przygotowaniu tego wpisu, więc sprawdzenie, na którym się opierał, jest nieaktualne. Przejrzyj go jeszcze raz.",
+  "journal.compose.noContext":
+    "To konto nie ma aktywnego kontekstu pracy, więc wpis nie ma gdzie zostać zarejestrowany. Najpierw wskaż na stronie internetowej, gdzie pracujesz, a potem zapisuj pracę tutaj.",
+  "journal.compose.unsureSaved":
+    "Połączenie zerwało się już po wysłaniu, więc nie wiemy, czy wpis dotarł. Zanim napiszesz go ponownie, otwórz Dziennik pracy i sprawdź. Ponowna próba nie utworzy duplikatu.",
+  "journal.compose.skillsAdded": "Nowo zapisane umiejętności",
+  "journal.compose.skillsStrengthened": "Umiejętności z nowym dowodem",
+  "journal.compose.skillsClaims": "Kompetencje zauważone w Twoich słowach",
+  "journal.compose.skillsReview": "Czeka na Twoje sprawdzenie",
+  "journal.compose.noCvChange":
+    "Z tego wpisu nie dodano nic nowego do Twojego Living CV.",
+  "journal.compose.skillsPartial":
+    "Część aktualizacji Living CV nie została ukończona. Sam wpis jest zapisany.",
+  "journal.compose.skillsFailed":
+    "Aktualizacja Living CV tym razem nie została wykonana. Sam wpis jest zapisany.",
+  "journal.compose.reviewOnWeb":
+    "To, co czeka na sprawdzenie, potwierdza się na stronie internetowej.",
+  "profile.skillsEmpty": "Nie zapisano jeszcze żadnych umiejętności.",
+  "profile.noWorkerProfile": "To konto nie ma jeszcze profilu pracownika.",
+  "profile.figuresTitle": "Umiejętności wraz z Twoimi zapisanymi godzinami",
+  "profile.groupManagerConfirmed": "Potwierdzone przez kierownika",
+  "profile.groupJournalBacked": "Poparte Twoim Dziennikiem pracy",
+  "profile.groupDeclared": "Zadeklarowane przez Ciebie",
+  "profile.figuresUnavailable":
+    "Godzin, udziału i wpisów nie udało się tym razem odczytać. Umiejętności poniżej nadal są Twoimi zapisanymi umiejętnościami — nic nie jest pokazywane jako 0.",
+  "profile.figuresLegend":
+    "Godziny · udział w godzinach przypisanych do umiejętności · wpisy, od początku. Te same liczby co na stronie internetowej.",
+  "profile.figuresNotRead": "nie udało się odczytać liczb",
+  "profile.noFigures": "brak zapisanych godzin",
+  "profile.hoursShort": "godz.",
+  "profile.entriesLabel": "wpisy",
+  "profile.selfStatedMissing":
+    "Kompetencje zapisane przez Ciebie własnymi słowami nie trafiają jeszcze na ten ekran; strona internetowa pokazuje je przy Twoich umiejętnościach.",
+  "profile.openJournal": "Otwórz Dziennik pracy",
+  "journal.openProfile": "Zobacz w profilu, co dają te wpisy",
+
+  "today.figuresTitle": "Twoja praca w liczbach",
+  "today.periodToday": "Dziś",
+  "today.periodWeek": "Ostatnie 7 dni",
+  "today.hoursLabel": "Godziny",
+  "today.daysUnitLabel": "zapisane w dniach",
+  "today.entriesLabel": "Wpisy",
+  "today.daysLabel": "Dni",
+  "today.confirmedLabel": "Potwierdzone przez kierownika, godz.",
+  "today.periodEmpty": "W tym okresie nic nie zapisano.",
+  "today.periodMissing": "Serwer nie przysłał liczby dla tego okresu.",
+  "today.dominantTitle": "Największy udział Twoich godzin, ostatnie 7 dni",
+  "today.dominantShare": "godzin przypisanych do umiejętności",
+  "today.dominantNone":
+    "W ostatnich 7 dniach żadnej pojedynczej umiejętności nie przypisano godzin.",
+  "today.coverageTruncated":
+    "Te liczby opierają się na ostatnio odczytanych wpisach — starsze wpisy nie są uwzględnione.",
+  "today.figuresScope":
+    "Z Twoich własnych wpisów w Dzienniku pracy, według tej samej zasady co strona internetowa. Dni kalendarzowe kończą się dzisiaj (UTC).",
+  "today.openJournal": "Otwórz Dziennik pracy",
+  "today.openProfile": "Otwórz profil i umiejętności",
+  "account.title": "Prywatność i konto",
+  "account.body":
+    "Te strony otwierają się w przeglądarce, na stronie internetowej. Prośbę o Twoje dane lub o usunięcie konta składasz tam, w sekcji Prywatność.",
+  "account.privacy": "Prywatność, Twoje dane i usunięcie konta",
+  "account.terms": "Warunki korzystania z usługi",
+  "account.privacyPolicy": "Polityka prywatności",
+  "account.deletionInfo": "Jak działa usuwanie konta (bez logowania)",
+  "account.support": "Skontaktuj się z pomocą (info@labourmarket.ai)",
+  "account.external": "Przeglądarka",
+  "account.openFailed": "Nie udało się otworzyć linku na tym telefonie. Nic nie zostało zmienione.",
+};
+
+export const MESSAGES: Record<ActiveLocale, Catalogue> = { en, lt, ru, nl, de, pl };
 
 export const LANGUAGE_NAMES: Record<ActiveLocale, string> = {
   // Each language named in itself — a person looking for their own language
@@ -727,4 +1231,5 @@ export const LANGUAGE_NAMES: Record<ActiveLocale, string> = {
   ru: "Русский",
   nl: "Nederlands",
   de: "Deutsch",
+  pl: "Polski",
 };

@@ -2,9 +2,11 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
+import { NavAuthCtas } from "@/components/layouts/nav-auth-ctas";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
+import { LmLogo } from "@/components/ui/lm-logo";
 import { isVisionPublic } from "@/lib/config/vision-publication";
 
 // `/vision` is gated by `lib/config/vision-publication.ts`. While the
@@ -16,9 +18,7 @@ type LinkVisibility = "always" | "vision-gate";
 type NavLink = {
   key:
     | "jobs"
-    | "workers"
-    | "companies"
-    | "agencies"
+    | "market"
     | "how"
     | "pricing"
     | "about"
@@ -41,17 +41,30 @@ type NavLink = {
 // section to justify a nav item; the audience it named already has a real
 // page behind "Agentūroms" (/for-agencies). A nav item that goes nowhere is a
 // dead CTA, and the shortest honest fix is to stop offering it.
+//
+// ── THE THREE AUDIENCE ITEMS LEFT THE BAR (owner window 11 §16) ────────────
+//
+// `Darbuotojams · Įmonėms · Agentūroms` sat in the primary navigation and, with
+// `Darbo skelbimai` beside them, told every visitor the same thing before they
+// read a word of the page: *this is a job board, and you are one of three kinds
+// of person.* That is the §16 misreading and the §20 identity trap, stated by
+// the navigation itself.
+//
+// NOTHING BECAME UNREACHABLE, which is the condition the owner set. The three
+// pages keep two real paths, and both name the audience:
+//   · the FOOTER already links all three plus `/jobs` (site-footer.tsx);
+//   · the STARTING CONTEXTS section links each one by name, in the place where
+//     a person is actually deciding where to begin.
+//
+// `Darbo skelbimai` STAYS in the bar. It is not a role — it is the public board
+// over the live imported vacancies, the highest-intent destination on the
+// marketing site, and the only internal path a crawler has to it.
+//
+// `Rinka` is new and points at the market map section — the landing's answer to
+// "where does this work?" (§17).
 const ALL_LINKS: readonly NavLink[] = [
-  // FIRST, deliberately. `/jobs` is the public board over 39,241 live imported
-  // vacancies and the highest-intent destination on the marketing site — a
-  // visitor looking for work wants the ads, not an audience page about them.
-  // It shipped with NO link from anywhere: the only route in was the card on
-  // the board itself, so a person landing on the homepage could not reach it
-  // at all and a crawler had no internal path to it either.
   { key: "jobs", href: "/jobs", visibility: "always" },
-  { key: "workers", href: "/for-workers", visibility: "always" },
-  { key: "companies", href: "/for-companies", visibility: "always" },
-  { key: "agencies", href: "/for-agencies", visibility: "always" },
+  { key: "market", href: "/#market", visibility: "always" },
   { key: "how", href: "/#how-it-works", visibility: "always" },
   { key: "pricing", href: "/pricing", visibility: "always" },
   { key: "about", href: "/about", visibility: "always" },
@@ -66,6 +79,9 @@ function visibleLinks(): readonly NavLink[] {
 
 export async function SiteNav() {
   const t = await getTranslations("nav");
+  // "My space" already exists as the dashboard's own tab label; reusing it keeps
+  // the frozen `nav` namespace untouched.
+  const tSpace = await getTranslations("auth.dashboard.tabs");
   const locale = await getLocale();
   const links = visibleLinks();
 
@@ -73,20 +89,32 @@ export async function SiteNav() {
   // header from `sm` up, inside the disclosure below it. Sharing the fragment
   // is what keeps the two mounts from drifting into different destinations.
   const authCtas = (
-    <>
-      <AuthCtaLink
-        relPath={`/${locale}/auth/login`}
-        className="flex min-h-11 items-center text-sm text-text-secondary transition-colors hover:text-text-primary sm:min-h-0"
-      >
-        {t("login")}
-      </AuthCtaLink>
-      <AuthCtaLink
-        relPath={`/${locale}/auth/signup`}
-        className={buttonLinkClassName("primary", "sm")}
-      >
-        {t("startNow")}
-      </AuthCtaLink>
-    </>
+    <NavAuthCtas
+      guest={
+        <>
+          <AuthCtaLink
+            relPath={`/${locale}/auth/login`}
+            className="flex min-h-11 items-center text-sm text-text-secondary transition-colors hover:text-text-primary sm:min-h-0"
+          >
+            {t("login")}
+          </AuthCtaLink>
+          <AuthCtaLink
+            relPath={`/${locale}/auth/signup`}
+            className={buttonLinkClassName("primary", "sm")}
+          >
+            {t("startNow")}
+          </AuthCtaLink>
+        </>
+      }
+      member={
+        <AuthCtaLink
+          relPath={`/${locale}/dashboard`}
+          className={buttonLinkClassName("primary", "sm")}
+        >
+          {tSpace("overview")}
+        </AuthCtaLink>
+      }
+    />
   );
 
   return (
@@ -101,9 +129,14 @@ export async function SiteNav() {
       <div className="mx-auto flex max-w-container items-center gap-2 px-4 py-4 sm:gap-6 sm:px-12">
         <Link
           href="/"
-          className="min-w-0 shrink truncate font-display text-base font-bold tracking-tightest text-text-primary sm:text-lg"
+          className="flex min-w-0 shrink items-center gap-2 font-display text-base font-bold tracking-tightest text-text-primary sm:text-lg"
         >
-          LabourMarket<span className="text-gradient-accent">.ai</span>
+          {/* The mark is decorative here — the wordmark beside it already
+              names the product, so announcing both would read it twice. */}
+          <LmLogo title="" className="h-6 w-auto shrink-0 sm:h-7" />
+          <span className="truncate">
+            LabourMarket<span className="text-gradient-accent">.ai</span>
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">

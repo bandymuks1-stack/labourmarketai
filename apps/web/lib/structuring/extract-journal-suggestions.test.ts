@@ -23,6 +23,20 @@ describe("extractJournalSuggestions (rule-based, LT)", () => {
     expect(s.hasAny).toBe(true);
   });
 
+  it("keeps the stated hours when a day mention precedes them (production walk 2026-09-28)", () => {
+    // "25 d." is how Lithuanian writes a date ("rugsėjo 25 d."). It split off
+    // as a time-only "25 d" fragment, merged into the next one, and the merge
+    // kept 25 DAYS and dropped the 6 hours — Home then showed 0 h for the week.
+    const s = extractJournalSuggestions("25 d. 6 valandas klijavau plyteles vonioje");
+    expect(s.fragments).toHaveLength(1);
+    expect(s.fragments[0]?.time).toEqual({ value: 6, unitSlug: "hours" });
+    // Days alone are still days.
+    expect(extractJournalSuggestions("Dirbau 2 dienas objektuose.").time).toEqual({
+      value: 2,
+      unitSlug: "days",
+    });
+  });
+
   it("recognises days as a time unit when no hours are mentioned", () => {
     const s = extractJournalSuggestions("Dirbau 2 dienas objektuose.");
     expect(s.time).toEqual({ value: 2, unitSlug: "days" });
@@ -581,5 +595,50 @@ describe("skill suggestions are ranked + capped (no broad cloud)", () => {
     const text = "plyteles, gipso, tinkavau".toLowerCase();
     const ranked = rankSkillSlugs(text, ["tiling", "drywall", "plastering"], 1);
     expect(ranked).toHaveLength(1);
+  });
+});
+
+// Output in the unit the work comes in (issue #1689, registry row
+// 20260911130000): a driver's kilometres and a warehouse worker's pallets are
+// read the same way a tiler's m² always was — and never as time.
+describe("extractJournalSuggestions — kilometres and pallets", () => {
+  it("reads a distance in km (LT / EN / RU) and keeps the stated time beside it", () => {
+    const lt = extractJournalSuggestions("Nuvažiavau 320 km į Klaipėdą, dirbau 8 val.");
+    expect(lt.quantity).toEqual({ value: 320, unitSlug: "kilometers" });
+    expect(lt.time).toEqual({ value: 8, unitSlug: "hours" });
+    expect(extractJournalSuggestions("Drove 120.5 km today").quantity).toEqual({
+      value: 120.5,
+      unitSlug: "kilometers",
+    });
+    expect(extractJournalSuggestions("Проехал 450 км, 9 часов").quantity).toEqual({
+      value: 450,
+      unitSlug: "kilometers",
+    });
+  });
+
+  it("a kilometre figure is never demoted to metres, and a bare metre figure stays metres", () => {
+    expect(extractJournalSuggestions("320 km").quantity?.unitSlug).toBe("kilometers");
+    expect(extractJournalSuggestions("Paklojau 12 m kabelio").quantity).toEqual({
+      value: 12,
+      unitSlug: "meters",
+    });
+  });
+
+  it("reads pallets in LT / EN / RU word forms", () => {
+    for (const [text, value] of [
+      ["Iškroviau 36 paletes sandėlyje", 36],
+      ["Sukroviau 18 palečių", 18],
+      ["Perkėliau 7 padėklus", 7],
+      ["Moved 24 pallets in zone B", 24],
+      ["Разгрузил 40 паллет", 40],
+      ["Перевёз 5 поддонов", 5],
+    ] as const) {
+      expect(extractJournalSuggestions(text).quantity, text).toEqual({ value, unitSlug: "pallets" });
+    }
+  });
+
+  it("covers and cases are picker-only: nothing is guessed from prose", () => {
+    expect(extractJournalSuggestions("Aptarnavau 120 svečių per vakarą").quantity).toBeNull();
+    expect(extractJournalSuggestions("Closed 3 cases this week").quantity).toBeNull();
   });
 });
