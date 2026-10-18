@@ -604,3 +604,54 @@ describe("auth/callback route — OAuth display-name repair (#1820)", () => {
     warnSpy.mockRestore();
   });
 });
+
+/** 2026-10-18 production incident: behind the VPS proxy `request.url` is the
+ *  BIND host. Every redirect must name the public origin the person used. */
+describe("auth/callback route — behind the VPS proxy (bind host in request.url)", () => {
+  const BIND = "http://0.0.0.0:3000";
+  const proxied = (path: string) =>
+    new Request(`${BIND}${path}`, {
+      headers: { host: "labourmarket.ai", "x-forwarded-host": "labourmarket.ai", "x-forwarded-proto": "https" },
+    });
+
+  it("a finished Google sign-in from an invitation lands on the public invitation URL", async () => {
+    exchangeMock.mockResolvedValue({ error: null });
+    getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
+    profile("2025-01-01T00:00:00Z");
+    const res = await GET(proxied("/en/auth/callback?code=X&next=%2Fen%2Finvite%2Ftok123"), {
+      params: Promise.resolve({ locale: "en" }),
+    });
+    expect(res.headers.get("location")).toBe(`${ORIGIN}/en/invite/tok123`);
+  });
+
+  it("a new user goes to public onboarding, error bounces go to the public login", async () => {
+    exchangeMock.mockResolvedValue({ error: null });
+    getUserMock.mockResolvedValue({ data: { user: { id: "u-new" } } });
+    profile(null);
+    const res = await GET(proxied("/en/auth/callback?code=X"), { params: Promise.resolve({ locale: "en" }) });
+    expect(res.headers.get("location") ?? "").toMatch(/^https:\/\/labourmarket\.ai\/en\/onboarding/);
+
+    const bounce = await GET(proxied("/en/auth/callback"), { params: Promise.resolve({ locale: "en" }) });
+    expect(bounce.headers.get("location") ?? "").toMatch(/^https:\/\/labourmarket\.ai\/en\/auth\/login\?/);
+    expect(bounce.headers.get("location") ?? "").not.toContain("0.0.0.0");
+  });
+
+  it("the e-mail link's rt hint (locale + invitation next) is accepted on the public origin", async () => {
+    verifyOtpMock.mockResolvedValue({ error: null });
+    getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
+    profile("2025-01-01T00:00:00Z");
+    const rt = `${ORIGIN}/en/auth/callback?flow=email_confirm&next=%2Fen%2Finvite%2Ftok123`;
+    const res = await GET(proxied(`/lt/auth/callback?token_hash=${HASH}&type=signup&rt=${encodeURIComponent(rt)}`), {
+      params: Promise.resolve({ locale: "lt" }),
+    });
+    expect(res.headers.get("location")).toBe(`${ORIGIN}/en/invite/tok123`);
+  });
+
+  it("a forged foreign Host header never becomes the redirect origin", async () => {
+    const res = await GET(
+      new Request(`${BIND}/en/auth/callback`, { headers: { host: "evil.example", "x-forwarded-host": "evil.example" } }),
+      { params: Promise.resolve({ locale: "en" }) },
+    );
+    expect(res.headers.get("location") ?? "").toMatch(/^https:\/\/labourmarket\.ai\/en\/auth\/login/);
+  });
+});
