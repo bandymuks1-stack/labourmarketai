@@ -16,8 +16,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * by the discoverability consent:
  *   - `caller_manages_worker`: active company / agency roster or engagement the
  *     caller owns;
+ *   - an active `company_workers` roster link the caller can read (policy:
+ *     company owner, the worker, admin, or a manager of the organization —
+ *     delegated managers already see this person by name on the roster);
  *   - an active `engagement_contexts` row of that person the caller can read
- *     (policy: own row, `manages_organization`, admin);
+ *     (policy: own row, `manages_organization`, admin) WHOSE relationship type
+ *     grants worker visibility — the same registry filter `can_view_worker`
+ *     applies, so `student` / `intern` enrolment (least-privilege learner
+ *     visibility, 20260827210000) never discloses the name by itself;
  *   - an active `project_worker_assignments` row the caller can read
  *     (policy: `owns_worker` or `can_manage_project`).
  *
@@ -37,12 +43,21 @@ export async function viewerHasWorkerRelation(
     });
     if (!mErr && manages === true) return true;
 
+    const { data: roster, error: rErr } = await sb
+      .from("company_workers")
+      .select("id")
+      .eq("worker_id", workerId)
+      .eq("status", "active")
+      .limit(1);
+    if (!rErr && Array.isArray(roster) && roster.length > 0) return true;
+
     if (workerProfileId) {
       const { data: contexts, error: cErr } = await sb
         .from("engagement_contexts")
-        .select("id")
+        .select("id, relationship_types!inner(grants_worker_visibility)")
         .eq("profile_id", workerProfileId)
         .eq("status", "active")
+        .eq("relationship_types.grants_worker_visibility", true)
         .limit(1);
       if (!cErr && Array.isArray(contexts) && contexts.length > 0) return true;
     }
