@@ -32,6 +32,14 @@ export async function viewerHasWorkerRelation(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any;
   try {
+    // The ONE predicate (20261018160000): the same working-relationship rule as the workers row
+    // policy, incl. delegated roster managers and accepted bookings. Before that migration it is
+    // absent and the relationship-scoped reads below answer as before.
+    const { data: related, error: rErr0 } = await sb.rpc("caller_has_worker_relation_v1", {
+      p_worker_id: workerId,
+    });
+    if (!rErr0 && typeof related === "boolean") return related;
+
     const { data: manages, error: mErr } = await sb.rpc("caller_manages_worker", {
       p_worker_id: workerId,
     });

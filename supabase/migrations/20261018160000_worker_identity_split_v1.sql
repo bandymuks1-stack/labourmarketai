@@ -291,11 +291,16 @@ grant execute on function public.candidate_profile_for_contact_v1(uuid, uuid) to
 -- 6b. The caller's OWN direct threads with these workers (pipeline facts), keyed by worker id.
 create or replace function public.my_direct_conversations_with_workers_v1(p_worker_ids uuid[])
 returns table (worker_id uuid, conversation_id uuid)
-language sql
+language plpgsql
 stable
 security definer
 set search_path = public
 as $$
+begin
+  if cardinality(p_worker_ids) > 500 then
+    raise exception 'Too many workers requested' using errcode = '22023';   -- never a silent empty answer
+  end if;
+  return query
   select w.id, mine.conversation_id
     from public.workers w
     join public.conversation_participants theirs on theirs.profile_id = w.profile_id and theirs.revoked_at is null
@@ -303,8 +308,8 @@ as $$
                                               and mine.profile_id = auth.uid() and mine.revoked_at is null
     join public.conversations c on c.id = mine.conversation_id and c.kind = 'direct'
    where auth.uid() is not null
-     and w.id = any (p_worker_ids)
-     and cardinality(p_worker_ids) <= 500;
+     and w.id = any (p_worker_ids);
+end;
 $$;
 revoke all on function public.my_direct_conversations_with_workers_v1(uuid[]) from public;
 revoke all on function public.my_direct_conversations_with_workers_v1(uuid[]) from anon;
