@@ -1,4 +1,4 @@
-# 0026 — Worker identity: one API access policy (PROPOSED, awaiting owner approval, 2026-10-18)
+# 0027 — Worker identity: one API access policy (PROPOSED, awaiting owner approval, 2026-10-18)
 
 Status: **PROPOSED.** It becomes binding when the owner approves migration
 `20261018160000_worker_identity_split_v1` (RED). Until then the rule below is the target, and the
