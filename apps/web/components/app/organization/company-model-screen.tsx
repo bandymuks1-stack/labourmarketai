@@ -69,7 +69,8 @@ function Tile({ entry, label }: { entry: Entry; label: string }) {
       className="flex min-h-11 items-center gap-2 rounded-lg border border-ink-500 bg-ink-800/40 px-3 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-text-secondary"
     >
       <entry.Icon className="size-4 flex-none text-text-secondary" />
-      <span className="min-w-0 truncate">{label}</span>
+      {/* Wraps, never truncates (2026-10-18, 390 px): "Ko mums rei…" told nobody what the door does. */}
+      <span className="min-w-0 break-words leading-tight">{label}</span>
     </Link>
   );
 }
