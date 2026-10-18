@@ -164,6 +164,11 @@ begin
   return jsonb_build_object('ok', true, 'status', 'granted', 'consent_event_id', v_id);
 end;
 $$;
+-- Restates the live privileges exactly (EXECUTE for authenticated only); CREATE OR REPLACE keeps them,
+-- the explicit lines make the anon closure visible in the file.
+revoke all on function public.grant_employer_data_disclosure(text, text, text, text, uuid, text, uuid, jsonb) from public;
+revoke all on function public.grant_employer_data_disclosure(text, text, text, text, uuid, text, uuid, jsonb) from anon;
+grant execute on function public.grant_employer_data_disclosure(text, text, text, text, uuid, text, uuid, jsonb) to authenticated;
 
 -- 3. The employer's ask uses the SAME closed whitelist (the shared contract keeps the two equal).
 --    Body identical to the applied function except the whitelist and the count bound.
@@ -276,6 +281,11 @@ begin
   return jsonb_build_object('ok', true, 'status', 'created', 'request_id', v_id);
 end;
 $$;
+-- Restates the live privileges exactly (EXECUTE for authenticated only); CREATE OR REPLACE keeps them,
+-- the explicit lines make the anon closure visible in the file.
+revoke all on function public.propose_contact_disclosure_request_v1(uuid, uuid, uuid, jsonb, text) from public;
+revoke all on function public.propose_contact_disclosure_request_v1(uuid, uuid, uuid, jsonb, text) from anon;
+grant execute on function public.propose_contact_disclosure_request_v1(uuid, uuid, uuid, jsonb, text) to authenticated;
 
 -- 4. The admin delivery ledger can record all eight categories (widening only; 0 rows today).
 alter table public.personal_data_disclosures
