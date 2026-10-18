@@ -7907,6 +7907,7 @@
       "recorded": "godz. zapisano",
       "confirmed": "godz. z wpisem przełożonego",
       "organizationHistory": "godz. w historii organizacji",
+      "experienceTotal": "godz. doświadczenia zawodowego łącznie",
       "days": "{count, plural, one {dzień pracy} few {dni pracy} many {dni pracy} other {dnia pracy}}",
       "modes": {
         "label": "Części karty",
@@ -8477,12 +8478,15 @@
     "recordedHoursScopeTruncated": "Na podstawie ostatnich {count} wpisów; starsze wpisy nie są ujęte w tych liczbach.",
     "organizationRecordedHours": "Zapisy organizacji: {hours} h w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dniu}} w ewidencji czasu pracy lub zaimportowanych dokumentach ({imported} h zaimportowanych, {approved} h zatwierdzonych) — oddzielnie od liczby z dziennika i nieprzypisane do żadnej umiejętności.",
     "organizationRecordedHoursWithPeriods": "Zapisy organizacji: łącznie {total} godz. — {hours} godz. w {days, plural, one {# dniu} few {# dniach} many {# dniach} other {# dnia}} oraz {periodHours} godz. podane jako suma za okres ({from} – {to}) w ewidencjach czasu pracy lub zaimportowanych dokumentach ({approved} godz. zatwierdzonych). Liczone oddzielnie od dziennika i nieprzypisane do żadnej umiejętności.",
+    "professionalExperienceTotal": "Doświadczenie zawodowe łącznie: {total} godz. — {journal} godz. w dzienniku pracy i {organization} godz. w historii organizacji. Każda praca liczona raz; źródła pokazane osobno.",
+    "professionalExperienceNotCounted": "Kolejne {hours} godz. jest pokazane, ale nie dodane, ponieważ ta sama praca jest już policzona.",
     "premium": {
       "eyebrowFallback": "Żywe CV",
       "facts": {
         "recorded": "zapisane w dzienniku pracy",
         "confirmed": "z wpisem kierownika",
         "organization": "w zapisach organizacji",
+        "experienceTotal": "doświadczenia zawodowego łącznie",
         "languages": "języki"
       },
       "capEyebrow": "Umiejętności",
@@ -19061,7 +19065,10 @@
     "hoursRecorded": "{hours} godz. zarejestrowano ({count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}})",
     "hoursPeriod": "{hours} godz. podano dla okresu ({count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}})",
     "contested": "Zakwestionowane przez uprawnioną stronę",
-    "more": "Nie pokazano jeszcze {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}}"
+    "more": "Nie pokazano jeszcze {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}}",
+    "periodBand": "Okres: {label}",
+    "formerly": "dawniej {names}",
+    "legalEntityBand": "Ówczesny podmiot prawny: {label} · zapisy administruje {org}"
   },
   "companyPerson": {
     "eyebrow": "Historyczna karta osoby",
@@ -19301,7 +19308,8 @@
       "stated": "zadeklarowano związek prawny"
     },
     "openHistory": "Otwórz historię firmy",
-    "note": "Kierowanie organizacją jest pokazane osobno od Twojej własnej pracy: godziny organizacji nigdy nie liczą się jako Twoje."
+    "note": "Kierowanie organizacją jest pokazane osobno od Twojej własnej pracy: godziny organizacji nigdy nie liczą się jako Twoje.",
+    "formerly": "dawniej {names}"
   },
   "historyQuality": {
     "back": "Wróć do historii",

@@ -131,6 +131,7 @@ export async function ProfileHubOverview({
   workContexts = null,
   workAllTime = null,
   organizationHistoryHours = null,
+  professionalExperienceHours = null,
 }: {
   cvProvided: boolean;
   selfDeclaredCount: number;
@@ -165,6 +166,8 @@ export async function ProfileHubOverview({
   workAllTime?: { readonly totals: WorkPeriodTotals; readonly truncated: boolean } | null;
   /** All-time hours organizations recorded (day + period records), #2169. */
   organizationHistoryHours?: number | null;
+  /** The one continuous professional history's total (decision 0025). */
+  professionalExperienceHours?: number | null;
 }) {
   /**
    * W7-S3: seven namespaces and the locale in ONE stage. They were eight
@@ -450,6 +453,7 @@ export async function ProfileHubOverview({
           allTime: workAllTime?.totals,
           truncated: workAllTime?.truncated ?? false,
           organizationHistoryHours,
+          professionalExperienceHours,
           locale,
           t: (key, values) => tIdentity(key, values),
         })}

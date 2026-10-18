@@ -1316,6 +1316,12 @@ export function ConversationChat({
    *  thing — prod walk 2026-09-04: "Kas turėtų jame dirbti?" and its chips
    *  sat under the open project sheet and could not be tapped. */
   const [chipsPostedAt, setChipsPostedAt] = useState<number | null>(null);
+  /** The moment the OPENING BRIEF posted its chips. Kept apart from
+   *  `chipsPostedAt`: the brief is not an answer about what the sheet shows,
+   *  so it may close a sheet that opened on its own (a pending invitation) but
+   *  never a result or selection the person asked for — sharing the stamp
+   *  collapsed every `?result=` deep link on a phone (QA 2026-10-16). */
+  const [briefChipsPostedAt, setBriefChipsPostedAt] = useState<number | null>(null);
 
   /**
    * THE ACTIVE CONVERSATION GOAL (owner P0 §1/§5, 2026-09-06).
@@ -1829,7 +1835,7 @@ export function ConversationChat({
         // The brief asks with chips like any assistant() turn, so the phone
         // sheet (auto-opened for a pending invitation) yields to it the same
         // way instead of staying over the home.
-        if (brief.chips.length > 0) setChipsPostedAt(Date.now());
+        if (brief.chips.length > 0) setBriefChipsPostedAt(Date.now());
       })
       .catch(() => {
         /* the greeting stands on its own — never a fabricated brief */
@@ -8315,6 +8321,7 @@ export function ConversationChat({
             wide={panelWide}
             full={resultFull}
             chipsPostedAt={chipsPostedAt}
+            briefChipsPostedAt={briefChipsPostedAt}
             onCloseResult={closeResult}
             // Two different verbs, two different callbacks: the station door
             // navigates and says where; "full screen" expands in place.

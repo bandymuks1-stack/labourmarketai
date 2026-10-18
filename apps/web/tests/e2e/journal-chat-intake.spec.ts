@@ -56,16 +56,21 @@ async function saveThroughConfirm(page: Page): Promise<void> {
   // preview -> explicit confirm: the first "Išsaugoti" shows "Patvirtinti
   // įrašą?", the second commits. Never auto-confirm in product code; the
   // test simply performs both human steps.
-  for (let i = 0; i < 3; i++) {
-    const save = page.getByRole("button", { name: /^Išsaugoti$/ }).last();
-    if ((await save.count()) === 0) break;
-    await save.click();
-    await page.waitForTimeout(2_000);
-    const stillConfirming = await page
-      .getByText(/Patvirtinti įrašą/i)
-      .count();
-    if (stillConfirming === 0) break;
-  }
+  //
+  // It WAITS FOR EACH STEP instead of sleeping a fixed 2 s. The old loop
+  // read "no confirm prompt after 2 s" as "already saved" and stopped, so on
+  // a loaded machine (the prompt arriving at 2.5 s) nothing was committed and
+  // the read-back later failed as if the entry had been lost (isolated run
+  // 2026-10-16: no row in journal_entries for that marker).
+  const save = () => page.getByRole("button", { name: /^Išsaugoti$/ }).last();
+  const confirmStep = page.getByText(/Patvirtinti įrašą/i);
+  const done = page.locator('[data-testid="worklog-done"]');
+  await save().click();
+  await expect(confirmStep.or(done).first()).toBeVisible({ timeout: 30_000 });
+  if (!(await done.isVisible())) await save().click();
+  await expect(done, "the work-log save never reached its saved state").toBeVisible({
+    timeout: 30_000,
+  });
 }
 
 test.describe("Work Journal — chat-first intake actually accepts an entry", () => {
@@ -132,32 +137,26 @@ test.describe("Work Journal — chat-first intake actually accepts an entry", ()
     await chooseWorkContextIfAsked(page);
     await saveThroughConfirm(page);
 
-    // Reopen the journal from scratch — a full server round trip, not the
-    // optimistic client state that produced the save.
-    await page.goto("/lt/dashboard/journal");
-
     /**
-     * TWO ASSERTIONS, BECAUSE THE DIARY IS A DATED DIARY.
+     * Reopen the journal from scratch — a full server round trip, not the
+     * optimistic client state that produced the save — ON THE DAY WORKED.
      *
      * The entry above is deliberately BACK-DATED to 2026-08-07 ("yesterday's
-     * shift logged tonight" is the ordinary case). The journal groups entries
-     * by the day WORKED and renders `<details open={idx === 0}>` — the newest
-     * day open, older days collapsed. So a back-dated entry is present in the
-     * DOM and correctly `hidden` whenever the fixtures contain a NEWER day,
-     * which they now do (2026-08-14 and 2026-08-20).
+     * shift logged tonight" is the ordinary case). Since #2256 (owner launch
+     * order 2026-10-10 §7) the journal's default view is ONE day — the most
+     * recent one — and history is the calendar: pick a date, see that date.
+     * A back-dated entry is therefore not in the DOM of the bare
+     * `/dashboard/journal` at all whenever any newer day exists (the fixtures
+     * hold 2026-08-14 and 2026-08-20). Asserting it there reported "real data
+     * loss" while the row sat in `journal_entries`, unsuperseded — a stale
+     * expectation, not a product defect.
      *
-     * A bare `toBeVisible` here therefore fails for a reason that has nothing
-     * to do with data loss — and it did, once the fixtures grew past the
-     * hard-coded date. That is a fixture-drift trap, not a product defect: the
-     * row was in the database, unsuperseded and undeleted, the whole time.
-     *
-     * What the test actually means is asserted properly instead:
+     * What the test means is asserted on the product's own day navigation:
      *   1. the text SURVIVED the round trip at all (no silent data loss), and
-     *   2. it is genuinely REACHABLE — visible on its own day, through the
-     *      product's own day navigation rather than by hoping it landed in the
-     *      one group that happens to be expanded.
-     * Both are now independent of which days the fixtures happen to hold.
+     *   2. it is genuinely REACHABLE and visible on the day it was worked.
+     * Both are independent of which days the fixtures happen to hold.
      */
+    await page.goto("/lt/dashboard/journal?date=2026-08-07");
     const saved = page.getByText(marker, { exact: false });
     await expect(
       saved,

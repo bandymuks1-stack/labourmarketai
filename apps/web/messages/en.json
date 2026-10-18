@@ -7907,6 +7907,7 @@
       "recorded": "h recorded",
       "confirmed": "h with a manager's record",
       "organizationHistory": "h in organization history",
+      "experienceTotal": "h of professional experience in total",
       "days": "{count, plural, one {day worked} other {days worked}}",
       "modes": {
         "label": "Card sections",
@@ -8477,12 +8478,15 @@
     "recordedHoursScopeTruncated": "From the last {count} entries; older entries are not in these figures.",
     "organizationRecordedHours": "Organization records: {hours} h on {days, plural, one {# day} other {# days}} in timesheets or imported documents ({imported} h imported, {approved} h approved) — kept apart from the journal figure and attributed to no skill.",
     "organizationRecordedHoursWithPeriods": "Organization records: {total} h in total — {hours} h on {days, plural, one {# day} other {# days}} and {periodHours} h stated as period totals ({from} – {to}) in timesheets or imported documents ({approved} h approved). Kept apart from the journal figure and attributed to no skill.",
+    "professionalExperienceTotal": "Professional experience in total: {total} h — {journal} h in the work journal and {organization} h in organisation history. Every piece of work counted once; sources shown separately.",
+    "professionalExperienceNotCounted": "A further {hours} h is shown but not added, because the same work is already counted.",
     "premium": {
       "eyebrowFallback": "Living CV",
       "facts": {
         "recorded": "recorded in your work journal",
         "confirmed": "with a manager's record",
         "organization": "in organisation records",
+        "experienceTotal": "professional experience in total",
         "languages": "languages"
       },
       "capEyebrow": "Capabilities",
@@ -19061,7 +19065,10 @@
     "hoursRecorded": "{hours} h recorded in {count, plural, one {# record} other {# records}}",
     "hoursPeriod": "{hours} h stated for a period, in {count, plural, one {# record} other {# records}}",
     "contested": "Contested by someone with standing",
-    "more": "{count, plural, one {# more entry} other {# more entries}} not shown"
+    "more": "{count, plural, one {# more entry} other {# more entries}} not shown",
+    "periodBand": "Period: {label}",
+    "formerly": "formerly {names}",
+    "legalEntityBand": "Legal entity at the time: {label} · records administered by {org}"
   },
   "companyPerson": {
     "eyebrow": "Historical person card",
@@ -19301,7 +19308,8 @@
       "stated": "legal relationship stated"
     },
     "openHistory": "Open the business history",
-    "note": "Leading an organisation is shown apart from your own work: the organisation's hours are never counted as yours."
+    "note": "Leading an organisation is shown apart from your own work: the organisation's hours are never counted as yours.",
+    "formerly": "formerly {names}"
   },
   "historyQuality": {
     "back": "Back to history",

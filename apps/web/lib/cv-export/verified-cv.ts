@@ -39,6 +39,11 @@ import {
 } from "@/lib/journal/work-intelligence";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
 import {
+  deriveProfessionalExperience,
+  type ProfessionalExperience,
+} from "@/lib/journal/professional-experience";
+import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
+import {
   certificateDocsForCv,
   projectsFromProof,
   splitAchievementsForCv,
@@ -320,6 +325,17 @@ export type VerifiedCvData = {
    * could not be read (UNKNOWN, not "no history"); `[]` = read, none.
    */
   organizationHistory: CvOrganizationHistoryEntry[] | null;
+  /**
+   * ONE continuous professional history (decision 0025, 2026-10-17): the
+   * all-time total — every work hour once, whoever recorded it — over the
+   * journal and the organization history, with the breakdown per
+   * organization (roles, ownership and management included, earlier business
+   * periods), per project and per source, and every line listed but not
+   * added, with its reason. The same reading Work in Numbers, the profile and
+   * the MCP `cv.verified.get` hand out. `null` when the journal was
+   * unreadable (UNKNOWN).
+   */
+  professionalExperience: ProfessionalExperience | null;
   privateDetails: VerifiedCvPrivateDetails;
   signals: OwnTrustSignals;
   proof: VerifiedCvProofRow[];
@@ -498,6 +514,13 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
           ]),
       )
     : null;
+
+  // Every relationship of the person — jobs, ownership, management, ended
+  // ones too — for the one professional-experience reading (decision 0025).
+  // null = unreadable; the reading then carries the work model alone.
+  const experienceRelationships = await readOwnExperienceRelationships(supabase, user.id).catch(
+    () => null,
+  );
 
   // An ENDED relationship keeps naming its organization (owner 2026-09-29).
   const ecNamed = await withHistoricalOrgNames(
@@ -918,6 +941,15 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         ? (workIntelligence.periods.find((p) => p.key === "all")?.confirmedHours ?? null)
         : null,
       organizationRecordedHours: organizationRecordedHoursOf(workIntelligence),
+      professionalExperience: workIntelligence
+        ? deriveProfessionalExperience({
+            wi: workIntelligence,
+            relationships: experienceRelationships,
+            projectNames: new Map(
+              [...projectNameById.entries()].flatMap(([id, name]) => (name ? [[id, name] as const] : [])),
+            ),
+          })
+        : null,
       organizationHistory: workIntelligence?.organizationContextRecords
         ? buildCvOrganizationHistory(
             workIntelligence.organizationContextRecords,

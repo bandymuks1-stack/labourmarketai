@@ -7907,6 +7907,7 @@
       "recorded": "Std. erfasst",
       "confirmed": "Std. mit Eintrag der Leitung",
       "organizationHistory": "Std. in der Organisationshistorie",
+      "experienceTotal": "Std. Berufserfahrung insgesamt",
       "days": "{count, plural, one {Arbeitstag} other {Arbeitstage}}",
       "modes": {
         "label": "Teile der Karte",
@@ -8477,12 +8478,15 @@
     "recordedHoursScopeTruncated": "Aus den letzten {count} Einträgen; ältere Einträge sind in diesen Zahlen nicht enthalten.",
     "organizationRecordedHours": "Erfassung der Organisation: {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} in Stundenzetteln oder importierten Dokumenten ({imported} Std. importiert, {approved} Std. genehmigt) — getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet.",
     "organizationRecordedHoursWithPeriods": "Aufzeichnungen von Organisationen: insgesamt {total} Std. — {hours} Std. an {days, plural, one {# Tag} other {# Tagen}} und {periodHours} Std. als Zeitraumsumme ({from} – {to}) in Stundenzetteln oder importierten Dokumenten ({approved} Std. bestätigt). Getrennt von der Journalzahl geführt und keiner Fähigkeit zugeordnet.",
+    "professionalExperienceTotal": "Berufserfahrung insgesamt: {total} Std. — {journal} Std. im Arbeitsjournal und {organization} Std. in der Organisationshistorie. Jede Arbeit einmal gezählt; Quellen getrennt ausgewiesen.",
+    "professionalExperienceNotCounted": "Weitere {hours} Std. werden angezeigt, aber nicht addiert, weil dieselbe Arbeit bereits gezählt ist.",
     "premium": {
       "eyebrowFallback": "Lebendiger Lebenslauf",
       "facts": {
         "recorded": "im Arbeitsjournal erfasst",
         "confirmed": "mit Eintrag der Leitung",
         "organization": "in Aufzeichnungen von Organisationen",
+        "experienceTotal": "Berufserfahrung insgesamt",
         "languages": "Sprachen"
       },
       "capEyebrow": "Fähigkeiten",
@@ -19061,7 +19065,10 @@
     "hoursRecorded": "{hours} Std. erfasst in {count, plural, one {# Eintrag} other {# Einträgen}}",
     "hoursPeriod": "{hours} Std. für einen Zeitraum angegeben, in {count, plural, one {# Eintrag} other {# Einträgen}}",
     "contested": "Von einer berechtigten Stelle bestritten",
-    "more": "{count, plural, one {# weiterer Eintrag wird} other {# weitere Einträge werden}} nicht angezeigt"
+    "more": "{count, plural, one {# weiterer Eintrag wird} other {# weitere Einträge werden}} nicht angezeigt",
+    "periodBand": "Zeitraum: {label}",
+    "formerly": "früher {names}",
+    "legalEntityBand": "Damalige juristische Person: {label} · Einträge verwaltet von {org}"
   },
   "companyPerson": {
     "eyebrow": "Historische Personenkarte",
@@ -19301,7 +19308,8 @@
       "stated": "rechtliche Beziehung erklärt"
     },
     "openHistory": "Unternehmensgeschichte öffnen",
-    "note": "Die Leitung einer Organisation wird getrennt von Ihrer eigenen Arbeit gezeigt: Stunden der Organisation zählen nie als Ihre."
+    "note": "Die Leitung einer Organisation wird getrennt von Ihrer eigenen Arbeit gezeigt: Stunden der Organisation zählen nie als Ihre.",
+    "formerly": "früher {names}"
   },
   "historyQuality": {
     "back": "Zurück zur Geschichte",
