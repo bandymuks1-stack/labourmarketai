@@ -66,7 +66,15 @@ function maybeForwardStrayOauthCode(
 ): NextResponse | undefined {
   const { pathname, searchParams } = request.nextUrl;
   const code = searchParams.get("code");
-  if (!code || !UUID_RE.test(code)) return undefined;
+  // A FAILED provider round trip comes back the same way, carrying GoTrue's
+  // `error` + `error_code` instead of a code (2026-10-18: `bad_oauth_state`
+  // after a slow Google step). On the bare home page nothing reads it, so the
+  // person was silently back on the landing with no way to know why. The
+  // callback already turns `?error=` into the localized sign-in message.
+  const goTrueError =
+    searchParams.has("error") &&
+    /^[a-z_]{2,64}$/.test(searchParams.get("error_code") ?? "");
+  if (!goTrueError && (!code || !UUID_RE.test(code))) return undefined;
   const parts = pathname.split("/").filter(Boolean);
   const isRoot = parts.length === 0;
   const isBareLocale =
