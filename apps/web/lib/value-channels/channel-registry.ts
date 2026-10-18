@@ -101,7 +101,7 @@ export const VALUE_CHANNELS: readonly ValueChannelDescriptorV1[] = [
     dataRequired: ["subjectLabel"],
     freshness: "live",
     provenanceNote:
-      "marketplace_listings (live in production) — WORK-BOUNDED resources only; sale/rental/wanted; no payments, no merchant role.",
+      "marketplace_listings (live in production) — work resources AND the universal domains (goods incl. home-grown/handmade/household, service needs, personal, project work; Option C applied 2026-10-07); sale/rental/wanted; publish policy refuses restricted categories and gates food on an explicit legal acknowledgement; no payments, no merchant role.",
     workBoundedCategories: LISTING_CATEGORIES,
     listingKinds: LISTING_KINDS,
   },
@@ -136,6 +136,25 @@ export const VALUE_CHANNELS: readonly ValueChannelDescriptorV1[] = [
     freshness: "imported_periodically",
     provenanceNote:
       "Arbetsförmedlingen public job ads (CC0, attribution shown, terms confirmed 2026-08-04, owner-activated 2026-08-09) — browsed through the existing opportunities surface.",
+  },
+  {
+    // Registry completeness (audit 2026-10-16): NAV Norway ingestion has been
+    // live since 2026-10-08 (own importer, token-gated feed, terms accepted —
+    // see docs/ingestion). A NO-located work statement used to see only the
+    // SE channel marked outside_geography and know of no Norwegian one.
+    channelId: "external_job_supply_nav",
+    channelType: "external",
+    valueTypesSupported: ["work_capacity"],
+    geography: ["NO"],
+    actionType: ["browse"],
+    destination: "conversation:find-work",
+    permissionStatus: "approved",
+    termsStatus: "confirmed",
+    attributionRequirement: "vacancySources.attribution.nav",
+    dataRequired: [],
+    freshness: "imported_periodically",
+    provenanceNote:
+      "NAV / Arbeidsplassen.no public job ads (token-gated feed, API terms accepted, owner-activated 2026-10-08; withdrawn ads removed immediately, apply link leads to the original posting) — browsed through the existing opportunities surface.",
   },
 ] as const;
 

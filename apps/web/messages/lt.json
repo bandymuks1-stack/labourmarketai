@@ -131,6 +131,7 @@
     "myTitle": "Mano skelbimai",
     "intro": "Paskelbk, ką siūlai ar ko reikia. Kiti mato tik aktyvius, nepasibaigusius skelbimus.",
     "notAvailable": "Šiuo metu nepasiekiama.",
+    "readUnavailable": "Skelbimų šiuo metu nepavyko perskaityti. Tai nereiškia, kad jų nėra — pabandyk dar kartą po akimirkos.",
     "empty": "Skelbimų dar nėra. Pridėk pirmą darbo išteklių.",
     "addButton": "Pridėti skelbimą",
     "browseTitle": "Naršyti aktyvius skelbimus",
@@ -8749,7 +8750,7 @@
       "pay_within_offer": "Atlygis telpa į pasiūlymą",
       "accommodation_ok": "Apgyvendinimas tinka",
       "city_match": "Tas pats miestas",
-      "location_within_radius": "Darbo spinduliu",
+      "location_within_radius": "Darbo spinduliu (atstumas tiesia linija)",
       "profession_related": "Susijusi profesija (bendri įgūdžiai)",
       "skills_history_reported": "Įgūdžiai, paminėti organizacijos istorijoje (nepatvirtinta)"
     },
@@ -8760,7 +8761,7 @@
       "pay_above_offer": "Atlygio lūkestis viršija pasiūlymą",
       "accommodation_needed_not_provided": "Reikia apgyvendinimo, nesiūloma",
       "profession_mismatch": "Kita profesija",
-      "location_outside_radius": "Už darbo spindulio ribų"
+      "location_outside_radius": "Už darbo spindulio ribų (atstumas tiesia linija)"
     },
     "candidate": "Kandidatas",
     "privacy": {
@@ -14017,14 +14018,15 @@
           "headcount": "Kiek žmonių reikia?"
         },
         "unclear": "Nesu tikras, ar kažką siūlai, ar ko nors ieškai. Parašyk, ką turi arba ko reikia.",
-        "goodsChannelGated": "Prekių pirkėjų kanalo platformoje kol kas nėra — pardavimo skelbimo čia niekas nepamatytų. Tai, ką parašei, niekur neišsaugota.",
+        "goodsChannelGated": "Tai gali paskelbti skelbimų lentoje, skiltyje „Prekės“ — ten matytų lentą naršantys žmonės. Niekas neišsaugoma, kol pats nepaskelbi.",
         "chipListings": "Atidaryti skelbimus",
         "capacityNext": "Galiu įrašyti tavo prieinamumą į darbo kortelę arba iš karto paieškoti darbo — rezultatai yra šiuo metu atviros užklausos.",
         "unsupported": "Šito per platformą pasiūlyti negalima. Kelio tam nėra.",
-        "legalCheckFood": "Maisto ar užaugintos produkcijos pardavimui galioja maisto pardavimo, higienos ir prekybos taisyklės, kurias pirmiausia reikėtų pasitikrinti — patvirtinto produkcijos kanalo platformoje nėra.",
+        "legalCheckFood": "Maisto ar užaugintos produkcijos pardavimui galioja maisto pardavimo, higienos ir prekybos taisyklės. Skelbimą gali paruošti kaip juodraštį; skelbiant paprašysime patvirtinti, kad pasitikrinai tau taikomas taisykles.",
         "goodsListable": "Tai panašu į darbo išteklių — gali paskelbti skelbimą skelbimų lentoje.",
+        "goodsListableGoods": "Tai gali paskelbti skelbimų lentoje, skiltyje „Prekės“ — ten matytų lentą naršantys žmonės. Niekas neišsaugoma, kol pats nepaskelbi.",
         "goodsListableRental": "Tai panašu į laisvą darbo įrangą — gali paskelbti nuomos skelbimą skelbimų lentoje.",
-        "goodsCategoryUnsupported": "Ši kategorija platformos darbo srities skelbimų lentoje šiandien nepalaikoma. Tai, ką parašei, niekur neišsaugota.",
+        "goodsCategoryUnsupported": "To skelbimų lentoje paskelbti negalima. Tai, ką parašei, niekur neišsaugota.",
         "serviceNext": "Gali paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų.",
         "chipServices": "Atidaryti paslaugas",
         "corrected": "Atnaujinau: {changes}.",
