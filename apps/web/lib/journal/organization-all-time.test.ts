@@ -149,24 +149,28 @@ describe("historical work is recognised from the record alone (#2169)", () => {
     expect(allTime.overlapping.map((p) => p.hours)).toEqual([800]);
   });
 
-  it("Work Intelligence shows the 800 h as its OWN primary figure beside the journal, never summed (owner P0 2026-10-15)", async () => {
+  it("Work Intelligence shows the 800 h as a figure of its own beside the journal AND inside the one professional-experience total (decision 0025 supersedes the 2026-10-15 'never summed' P0 for the all-time total)", async () => {
     const { wi } = await readFor([PRODUCTION_PERIOD_RECORD]);
     expect(organizationHoursBeyondJournal(wi)).toBe(800);
     const APP = join(__dirname, "..", "..");
     const scale = readFileSync(join(APP, "components/app/work-in-numbers/experience-scale.tsx"), "utf8");
-    // two figures, each with its own testid and source line
+    // the total first, then the two provenances, each with its own testid and source line
+    expect(scale).toContain('testId="wi-experience-total"');
     expect(scale).toContain('testId="wi-experience-journal"');
     expect(scale).toContain('testId="wi-experience-org"');
     expect(scale).toMatch(/const orgHours = organizationHoursBeyondJournal\(wi\);/);
-    // never one summed number
+    // the total is the ONE reading's figure — no arithmetic in the component
+    expect(scale).toMatch(/deriveProfessionalExperience\(\{ wi, relationships, projectNames \}\)/);
     expect(scale).not.toMatch(/all\.hours \+ orgHours|orgHours \+ all\.hours|totalHours \+/);
     // the period windows say they read the journal only, and carry no org figure
     const nav = readFileSync(join(APP, "components/app/work-in-numbers/period-nav.tsx"), "utf8");
     expect(nav).toContain('t("experience.periodsLabel")');
-    expect(nav).not.toMatch(/organizationHoursBeyondJournal|organizationAllTime/);
-    // both surfaces render the same block
+    expect(nav).not.toMatch(/organizationHoursBeyondJournal|organizationAllTime|deriveProfessionalExperience/);
+    // both surfaces render the same block, handing it the person's relationships
     for (const f of ["app/[locale]/dashboard/work-in-numbers/page.tsx", "components/app/journal-work-intelligence.tsx"]) {
-      expect(readFileSync(join(APP, f), "utf8"), f).toContain("<ExperienceScale wi={wi} locale={locale} t={t} />");
+      expect(readFileSync(join(APP, f), "utf8"), f).toContain(
+        "<ExperienceScale wi={wi} locale={locale} t={t} relationships={relationships} />",
+      );
     }
   });
 

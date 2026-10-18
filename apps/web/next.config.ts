@@ -179,6 +179,16 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Never advertise the framework version to attackers scanning for CVEs.
   poweredByHeader: false,
+  // Self-hosting (P0 restore, 2026-10-16): `standalone` emits
+  // `.next/standalone/apps/web/server.js` plus a traced minimal node_modules,
+  // so the app can run with plain `node server.js` on any Node host (Hostinger
+  // Web Apps, a VPS) from an artefact built elsewhere. Vercel ignores this
+  // setting for its own output, so it is harmless there.
+  output: "standalone",
+  // Trace from the monorepo root. Without this Next "infers" the root from the
+  // nearest lockfile it finds walking up — on a developer machine that can be a
+  // stray ~/package-lock.json, which silently breaks standalone tracing.
+  outputFileTracingRoot: path.resolve(process.cwd(), "../.."),
   experimental: {
     // Document uploads (DOCUMENT_FILE_MAX_BYTES = 5 MB) go through server
     // actions; Next's 1 MB default rejected anything larger before the handler

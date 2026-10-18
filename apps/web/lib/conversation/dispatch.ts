@@ -35,6 +35,7 @@ import {
   verifyConfirmationToken,
 } from "@/lib/conversation/confirmation-token";
 import { spendConfirmation } from "@/lib/security/confirmation-spend";
+import { confirmationKeyMaterial } from "@/lib/security/confirmation-key-material";
 import { getWorkspaceContext, type WorkspaceContext } from "@/lib/company/active-organization";
 import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import { resolveRenameTarget } from "@/lib/company/organization-rename";
@@ -76,11 +77,12 @@ export type PrepareResult =
  * caller surfaces an error and the action does not run. Silently signing with a
  * known constant is the unsafe direction, and it looks identical to working.
  *
- * `CONVERSATION_TOKEN_SECRET` is preferred so this purpose can hold its own key
- * rather than reusing the service-role key as HMAC material (key-purpose reuse
- * — a rotation of one should not silently invalidate the other). The
- * service-role fallback keeps existing deployments working, since production
- * already sets it.
+ * `CONVERSATION_TOKEN_SECRET` holds this purpose's own key rather than reusing
+ * the service-role key as HMAC material (key-purpose reuse — a rotation of one
+ * should not silently invalidate the other). No service-role fallback remains
+ * in any environment (owner invariant 2026-10-17;
+ * lib/security/confirmation-key-material.ts). Local stacks get the value from
+ * .env.local or from the harness scripts.
  *
  * NO `SUPABASE_DB_PASSWORD` FALLBACK — removed after CodeQL flagged it
  * (js/insufficient-password-hash, HIGH) on the first run of the scanning this
@@ -98,14 +100,19 @@ export type PrepareResult =
  * key-derivation path — which is also one less purpose that credential serves.
  */
 function tokenSecret(): string {
-  const material = env.CONVERSATION_TOKEN_SECRET || env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!material) {
+  // ONE PURPOSE, ONE KEY, EVERYWHERE (2026-10-17) — the service-role key is
+  // never key material, in any environment; see
+  // lib/security/confirmation-key-material.ts.
+  const verdict = confirmationKeyMaterial({
+    dedicated: env.CONVERSATION_TOKEN_SECRET,
+  });
+  if (!verdict.ok) {
     throw new Error(
-      "conversation confirmation tokens cannot be signed: set CONVERSATION_TOKEN_SECRET " +
-        "(or SUPABASE_SERVICE_ROLE_KEY). Refusing to sign with a hardcoded fallback.",
+      `conversation confirmation tokens cannot be signed: ${verdict.reason} ` +
+        "Refusing to sign with a hardcoded fallback.",
     );
   }
-  return createHash("sha256").update(`conversation-confirmation:v1:${material}`).digest("hex");
+  return createHash("sha256").update(`conversation-confirmation:v1:${verdict.material}`).digest("hex");
 }
 
 /**

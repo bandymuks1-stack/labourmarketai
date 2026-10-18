@@ -10,8 +10,11 @@ name: prod-qa-walk
 # real browser, and uploads a JSON result — never a screenshot (public repo),
 # a session file or a trace.
 #
-# Manual only (workflow_dispatch). The `production-qa` environment is where the
-# owner can add a required reviewer, so every run waits for an explicit click.
+# Triggers: manual dispatch, a debounced post-merge walk and one daily
+# scheduled walk (see CADENCE below). The `production-qa` environment is where
+# the owner can add a required reviewer; if one is set, the automatic runs wait
+# for that click too (up to the environment's wait limit) instead of walking
+# unattended.
 #
 # Needs (names only):
 #   secrets.NEXT_PUBLIC_SUPABASE_URL      (exists)
@@ -47,16 +50,137 @@ on:
           - mcp-chain
           - mcp-agents
           - project-context
+      budget_override:
+        description: "Run even if the 24 h production-walk budget is used up (owner only)"
+        type: boolean
+        default: false
 
-concurrency:
-  group: prod-qa-walk
-  cancel-in-progress: false
+  # CADENCE (2026-10-16, Vercel Hobby Active-CPU pause). Production walks are
+  # Vercel compute: every document a walk loads is a signed-in, force-dynamic
+  # render (measured locally: ~255 ms CPU and ~725 kB HTML per dashboard
+  # document). Instead of ad-hoc bursts (228 manual walks 2026-10-12..15, median
+  # 177 s apart) the routine signal comes from two automatic triggers:
+  #   - push to main touching the product → ONE `role-routes` walk (28 routes ×
+  #     5 roles) 120 min after the LAST push of a merge burst (debounced below);
+  #     measured on main 2026-10-09..16: ~3 such bursts a day (21 in 7.1 days);
+  #   - one scheduled walk a day, rotating through every spec (full catalogue
+  #     every 19 days).
+  # Manual dispatch is unchanged for targeted checks.
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+  # 2026-10-17 (Supabase log-ingestion quota, 2.22 GB/month on the Free plan): one signed-in walk loads
+  # ~36 Supabase calls per dashboard document, so the eight walks of 2026-10-17 alone wrote 23,400 of the
+  # day's 25,200 edge-log entries. The routine signal is now ONE rotating walk a WEEK (Sunday 03:41 UTC)
+  # plus the debounced post-merge role-routes walk; the full catalogue is still available on dispatch.
+  schedule:
+    - cron: "41 3 * * 0"
 
 permissions:
   contents: read
 
 jobs:
+  # A merge burst produces ONE walk: every newer push cancels the waiting
+  # debounce of the previous one (cancel-in-progress), so only the last push's
+  # run reaches `walk`. The wait also covers the Vercel production build.
+  # Manual and scheduled runs pass straight through.
+  debounce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 135
+    concurrency:
+      group: prod-qa-walk-debounce-${{ github.event_name == 'push' && 'push' || github.run_id }}
+      cancel-in-progress: ${{ github.event_name == 'push' }}
+    outputs:
+      spec: ${{ steps.pick.outputs.spec }}
+    steps:
+      - name: Wait for the merge burst to settle (push only)
+        if: github.event_name == 'push'
+        run: sleep 7200
+      - name: Pick the walk
+        id: pick
+        shell: bash
+        env:
+          INPUT_SPEC: ${{ inputs.spec }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context)
+          case "$EVENT" in
+            workflow_dispatch) spec="$INPUT_SPEC" ;;
+            push) spec=role-routes ;;
+            schedule) spec="${ROTATION[$(( 10#$(date -u +%U) % ${#ROTATION[@]} ))]}" ;;
+            *) echo "::error::unexpected event $EVENT"; exit 1 ;;
+          esac
+          echo "spec=$spec" >> "$GITHUB_OUTPUT"
+          echo "walk: $spec (event: $EVENT)" >> "$GITHUB_STEP_SUMMARY"
+
+  # PRODUCTION COMPUTE BUDGET (2026-10-16). Every walk drives a real browser
+  # through signed-in, force-dynamic dashboard pages on the production Vercel
+  # deployment, and each full document load ships the dashboard shell (~615 kB
+  # of client messages alone, lt). 228 walks ran 2026-10-12..15 (43-64 a day);
+  # Supabase edge logs show the Vercel-originated calls rising from 19.7k
+  # (2026-10-09, before the first walk) to 91.3k (2026-10-14) with the busiest
+  # hours matching the walk dispatch hours, and the Hobby team was paused on
+  # 2026-10-15 for Fluid Active CPU. This job refuses a walk once
+  # PROD_QA_WALK_DAILY_BUDGET walks have STARTED in the last 24 h, before any
+  # install, session mint or production request. `budget_override` is the
+  # explicit escape hatch. Counting reads only this workflow's run list.
+  budget:
+    # After the debounce, so a cancelled merge-burst run never counts or spends the budget.
+    needs: debounce
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      actions: read
+    env:
+      PROD_QA_WALK_DAILY_BUDGET: "12"
+    steps:
+      - name: Count production walks in the last 24 h
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OVERRIDE: ${{ inputs.budget_override }}
+        run: |
+          set -euo pipefail
+          since=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          # A run CONSUMES the budget only when it reached production: its
+          # `walk` job's first production step (provision + mint) started.
+          # Runs this job refused, runs cancelled before the walk (a superseded
+          # pending run, a debounced merge burst) and runs still waiting for
+          # the environment never touched production. Counting them (the first
+          # version counted every created run) made each refused re-dispatch
+          # extend the very lock-out it was refused by: dispatching once an hour
+          # while over budget would never get a walk through again.
+          runs=$(gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/prod-qa-walk.yml/runs?created=%3E%3D${since}&per_page=100" \
+            --jq ".workflow_runs[] | select(.id != ${GITHUB_RUN_ID}) | .id")
+          used=0
+          for id in ${runs}; do
+            reached=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${id}/jobs?filter=all&per_page=100" \
+              --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+            if [ "${reached}" -gt 0 ]; then
+              used=$((used + 1))
+            fi
+          done
+          echo "production walks that reached production since ${since}: ${used} (budget ${PROD_QA_WALK_DAILY_BUDGET})" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "${used}" -ge "${PROD_QA_WALK_DAILY_BUDGET}" ]; then
+            if [ "${OVERRIDE}" = "true" ]; then
+              echo "::warning::budget exceeded; running because budget_override=true"
+              exit 0
+            fi
+            echo "::error::24 h production-walk budget used (${used}/${PROD_QA_WALK_DAILY_BUDGET}). Batch the check into a walk already run, run it locally, or re-dispatch with budget_override=true."
+            exit 1
+          fi
+
   walk:
+    needs: [debounce, budget]
+    # One walk at a time against the shared synthetic cast (unchanged).
+    concurrency:
+      group: prod-qa-walk
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production-qa
@@ -106,7 +230,7 @@ jobs:
         run: |
           set -uo pipefail
           cd apps/web
-          case "${{ inputs.spec }}" in
+          case "${{ needs.debounce.outputs.spec }}" in
             brigade-formation) SPEC=tests/e2e/prod-brigade-formation.spec.ts ;;
             employee-beta-gate) SPEC=tests/e2e/employee-beta-gate.spec.ts ;;
             role-routes) SPEC=tests/e2e/prod-role-routes.spec.ts ;;
@@ -126,10 +250,35 @@ jobs:
             mcp-chain) SPEC=tests/e2e/prod-mcp-chain.spec.ts ;;
             mcp-agents) SPEC=tests/e2e/prod-mcp-agents.spec.ts ;;
             project-context) SPEC=tests/e2e/prod-project-context.spec.ts ;;
+            *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
-          pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
-            > ../../prod-qa-result.json
-          echo "exit=$?" >> "$GITHUB_STEP_SUMMARY"
+          # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
+          # used to be here:
+          #  1. `--reporter=list,json > prod-qa-result.json` sent BOTH reporters
+          #     to stdout, so the uploaded "JSON result" began with the list
+          #     reporter's text and was not parseable JSON (run 38799693673:
+          #     270 kB, `JSON.parse` fails at byte 1). The JSON reporter now
+          #     writes its own file; the list output goes to a separate log
+          #     artefact (same content the old file carried — no new exposure).
+          #  2. `echo "exit=$?"` was the step's last command. A failing walk
+          #     still failed the step only because GitHub's `shell: bash`
+          #     injects `-e`; `set -uo pipefail` alone would have turned every
+          #     failure green, and on failure the summary line never ran. The
+          #     exit code is now captured, written to the summary and returned
+          #     explicitly, whatever shell flags the runner adds.
+          code=0
+          PLAYWRIGHT_JSON_OUTPUT_FILE="$GITHUB_WORKSPACE/prod-qa-result.json" \
+            pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
+            > "$GITHUB_WORKSPACE/prod-qa-walk.log" 2>&1 || code=$?
+          # Counts only (no titles, no messages) into the run summary.
+          node -e 'const s=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).stats;console.log(`passed=${s.expected} failed=${s.unexpected} flaky=${s.flaky} skipped=${s.skipped}`)' \
+            "$GITHUB_WORKSPACE/prod-qa-result.json" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null \
+            || echo "result JSON missing or unreadable" >> "$GITHUB_STEP_SUMMARY"
+          echo "walk exit=${code}" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${code}" -ne 0 ]; then
+            echo "::error::production walk failed (exit ${code}); see the prod-qa artefact"
+          fi
+          exit "${code}"
 
       - name: Destroy session files (always)
         if: always()
@@ -141,11 +290,15 @@ jobs:
       # open needs next to the synthetic cast, so they are NOT published — only
       # the step-level JSON result (titles, pass/fail, durations). A failing
       # assertion message names the testid and the expected text, nothing more.
+      # `prod-qa-walk.log` is the list reporter's text — exactly what used to be
+      # glued to the front of prod-qa-result.json, now in its own file.
       - name: Upload result (no screenshots, no traces, no sessions)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: prod-qa-${{ inputs.spec }}-${{ github.run_id }}
+          name: prod-qa-${{ needs.debounce.outputs.spec }}-${{ github.run_id }}
           retention-days: 14
           if-no-files-found: warn
-          path: prod-qa-result.json
+          path: |
+            prod-qa-result.json
+            prod-qa-walk.log

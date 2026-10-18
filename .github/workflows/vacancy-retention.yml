@@ -1,0 +1,97 @@
+name: Vacancy retention (purge dead public ads)
+
+# Keeps `public_vacancies` to the ads the product can still show (Supabase Free quota, owner
+# decision 2026-10-17). A public ad is DEAD when the provider withdrew it (`lifecycle = removed`)
+# or its application deadline passed more than GRACE_DAYS ago. Dead ads are never shown
+# (every board/search predicate is `is_active and expires_at > now()`), they only cost storage:
+# measured 2026-10-17, 99,442 dead rows = 206 MB of descriptions + ~200 MB heap/index/TOAST.
+#
+# Protection: an ad referenced by a person's or a company's own records
+# (worker_saved_opportunities, demand_interest_signals, commercial_handoffs — all FK CASCADE)
+# is NEVER purged, whatever its state: those rows are the person's history, not feed cache.
+#
+# Gate: runs only when the repo variable VACANCY_RETENTION_ENABLED is "true" (owner flips it
+# after the archive of the dead set is on the VPS — ops/vps/lm-archive-table.sh). Otherwise it
+# exits as a visible SKIPPED step, never a false green "purged".
+#
+# Writes go through PostgREST with the service role (the same identity the importers use);
+# no SQL function, no migration. Batches of 5,000 ordered by id with `limit`, counted with
+# `Prefer: count=exact`, so one run is bounded and resumable.
+
+on:
+  schedule:
+    - cron: "10 5 * * *"   # 05:10 UTC daily, after the 02:11 NAV and 01:17 Sweden sessions
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Count only; delete nothing"
+        type: boolean
+        default: true
+      grace_days:
+        description: "Days after the application deadline before an expired ad is purged"
+        default: "7"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vacancy-retention
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      ENABLED: ${{ vars.VACANCY_RETENTION_ENABLED }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+      GRACE_DAYS: ${{ github.event_name == 'workflow_dispatch' && inputs.grace_days || '7' }}
+    steps:
+      - name: Gate (variable + secrets; a disabled gate is a visible skip, not a green purge)
+        env:
+          HAS_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
+        run: |
+          if [ "$ENABLED" != "true" ] && [ "$DRY_RUN" != "true" ]; then
+            echo "SKIPPED: vars.VACANCY_RETENTION_ENABLED is not 'true' (owner gate). Nothing counted, nothing deleted." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "gated=true" >> "$GITHUB_ENV"; exit 0
+          fi
+          [ "$HAS_KEY" = "true" ] && [ -n "$SUPABASE_URL" ] || { echo "::error::SUPABASE_SERVICE_ROLE_KEY / NEXT_PUBLIC_SUPABASE_URL missing"; exit 1; }
+      - name: Count and purge dead public ads (protected ids excluded)
+        if: env.gated != 'true'
+        env:
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf 'apikey: %s\nAuthorization: Bearer %s\n' "$KEY" "$KEY" > hdr
+          cutoff=$(date -u -d "-${GRACE_DAYS} days" +%Y-%m-%dT%H:%M:%SZ)
+          dead="or=(lifecycle.eq.removed,expires_at.lt.${cutoff})"
+          # Protected ids: any public ad a person or company record points at. FAIL CLOSED: if any of the
+          # three reads does not answer 200 with a JSON array (first dry run 2026-10-17: two of them returned
+          # an error object the service role could not read past), nothing may be deleted.
+          : > prot.txt
+          for t in worker_saved_opportunities demand_interest_signals commercial_handoffs; do
+            code=$(curl -sS -o "$t.json" -w '%{http_code}' -H @hdr "$SUPABASE_URL/rest/v1/$t?select=public_vacancy_id&public_vacancy_id=not.is.null")
+            if [ "$code" != "200" ] || ! jq -e 'type=="array"' "$t.json" >/dev/null; then
+              echo "::error::protected-id read for $t failed (http $code: $(jq -r '.message // .code // "not an array"' "$t.json" 2>/dev/null | head -c 160)) — refusing to purge"; rm -f hdr; exit 1
+            fi
+            jq -r '.[].public_vacancy_id' "$t.json" >> prot.txt
+            echo "protected source $t: $(jq 'length' "$t.json") row(s)"
+          done
+          prot=$(sort -u prot.txt | grep . | paste -sd, - || true)
+          if [ -n "$prot" ]; then notin="&id=not.in.(${prot})"; else notin=""; fi
+          echo "protected ids: $(printf '%s' "$prot" | tr ',' '\n' | grep -c . || true)" | tee -a "$GITHUB_STEP_SUMMARY"
+          total=$(curl -sS -o /dev/null -w '%header{content-range}' -H @hdr -H 'Prefer: count=exact' -H 'Range: 0-0' "$SUPABASE_URL/rest/v1/public_vacancies?select=id&${dead}${notin}" | sed 's#.*/##')
+          echo "dead ads eligible (grace ${GRACE_DAYS} d, cutoff ${cutoff}): ${total}" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$DRY_RUN" = "true" ]; then echo "dry run: nothing deleted" | tee -a "$GITHUB_STEP_SUMMARY"; rm -f hdr; exit 0; fi
+          deleted=0
+          while :; do
+            n=$(curl -sS -X DELETE -o /dev/null -w '%header{content-range}' -H @hdr -H 'Prefer: return=minimal, count=exact' \
+                  "$SUPABASE_URL/rest/v1/public_vacancies?${dead}${notin}&order=id.asc&limit=5000" | sed 's#.*/##')
+            n=${n:-0}; [ "$n" -gt 0 ] || break
+            deleted=$((deleted+n)); echo "batch deleted=$n total=$deleted"
+            [ "$deleted" -ge 60000 ] && { echo "run cap reached (60,000); the next run continues"; break; }
+          done
+          rm -f hdr
+          echo "purged ${deleted} dead public ads this run" | tee -a "$GITHUB_STEP_SUMMARY"
