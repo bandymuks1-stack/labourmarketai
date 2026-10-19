@@ -61,5 +61,11 @@ as $function$
   )
 $function$;
 
+-- The ACL restated exactly as production holds it (postgres + authenticated EXECUTE, no PUBLIC,
+-- no anon), so the file is reproducible on a clean reset. Net privilege change: none.
+revoke all on function public.worker_profile_discoverable(uuid) from public;
+revoke all on function public.worker_profile_discoverable(uuid) from anon;
+grant execute on function public.worker_profile_discoverable(uuid) to authenticated;
+
 comment on function public.worker_profile_discoverable(uuid) is
   'True only with a current-version profile_discoverability grant as the newest ledger row AND no open account_deletion privacy request (20261019070000).';

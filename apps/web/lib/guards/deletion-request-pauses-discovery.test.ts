@@ -31,7 +31,15 @@ describe("an open account deletion request pauses discoverability", () => {
     expect(sql).toMatch(/stable security definer/);
     expect(sql).toMatch(/set search_path to 'public'/);
     // The COMMENT ON text describes the ledger rule in words; only executable SQL is checked.
-    const exec = sql.replace(/comment on function[\s\S]*?';/i, "");
+    // The ACL is restated exactly as production holds it (no PUBLIC, no anon, authenticated EXECUTE);
+    // no other privilege statement may appear.
+    const ACL = [
+      "revoke all on function public.worker_profile_discoverable(uuid) from public;",
+      "revoke all on function public.worker_profile_discoverable(uuid) from anon;",
+      "grant execute on function public.worker_profile_discoverable(uuid) to authenticated;",
+    ];
+    for (const stmt of ACL) expect(sql).toContain(stmt);
+    const exec = ACL.reduce((s, stmt) => s.replace(stmt, ""), sql.replace(/comment on function[\s\S]*?';/i, ""));
     expect(exec).not.toMatch(/\b(insert|update|delete)\b/i);
     expect(exec).not.toMatch(/\b(grant|revoke)\b/i);
     expect(exec).not.toMatch(/privacy_consent_events\s+set|into\s+public\.privacy_consent_events/i);
