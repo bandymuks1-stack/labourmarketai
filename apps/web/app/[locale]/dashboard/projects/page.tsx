@@ -34,7 +34,7 @@ import {
 } from "@/lib/projects/projects";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { listOrganizationMembers } from "@/lib/company/memberships";
-import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
+import { getProjectPhotoCounts } from "@/lib/journal/project-gallery";
 import {
   readCompanyGalleryLabels,
   readWorkObjectsLabels,
@@ -270,16 +270,16 @@ export default async function ProjectsPage({
     getCompanyProjectContext(ownCompanyId),
     getTranslations("companyOps"),
   ]);
-  const [orgMembersForObjects, companyGalleryProjects] = await Promise.all([
+  const galleryProjects = managedProjects.slice(0, 12);
+  const [orgMembersForObjects, photoCounts] = await Promise.all([
     orgMembers ? listOrganizationMembers(orgMembers.orgId) : Promise.resolve(null),
-    Promise.all(
-      managedProjects.slice(0, 12).map(async (p) => ({
-        projectId: p.id,
-        title: p.title,
-        photoCount: (await getProjectGallerySummary(p.id)).photoCount,
-      })),
-    ),
+    getProjectPhotoCounts(galleryProjects.map((p) => p.id)),
   ]);
+  const companyGalleryProjects = galleryProjects.map((p) => ({
+    projectId: p.id,
+    title: p.title,
+    photoCount: photoCounts.get(p.id) ?? 0,
+  }));
 
   // Train D — archived filtering: a COMPLETED project is finished work.
   // The map and the draft (assignment) flow show ACTIVE work by default;
