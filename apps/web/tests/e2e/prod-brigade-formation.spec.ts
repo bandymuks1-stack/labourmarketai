@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { inviteCapGate } from "./invite-cap";
+import { chooseWorkContextIfAsked } from "./worklog-context";
 import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
 
 /**
@@ -346,11 +347,42 @@ test("B2B-6. supplier agrees to v2: agreed in principle, history kept, message v
 // ONE reusable synthetic project for the buyer, created only when it is missing,
 // so runs never pile projects up. The team assignment itself is per run.
 const GAMA_PROJECT = "QA-SYNTHETIC Gama brigados projektas";
+let gamaProjectId = "";
+let journaledBefore = 0;
+
+/** The project's journaled hours as the operations centre shows them (the
+ *  buyer's own view of work done on its project). */
+async function journaledHours(page: Page, projectId: string): Promise<number> {
+  await page.goto(`/lt/dashboard/projects/${projectId}/operations`);
+  const chip = page.getByTestId("ops-centre-hours-journaled");
+  await expect(chip).toBeVisible({ timeout: 30_000 });
+  // "Žurnale: 1 002,5 val." — the value follows the label's colon; grouping
+  // separators (space, no-break space, narrow no-break space) are dropped
+  // before parsing, so totals past 1,000 read as one number.
+  const text = await chip.innerText();
+  const value = text.slice(text.lastIndexOf(":") + 1).replace(/[\s  ]/g, "");
+  const match = value.match(/\d+(?:[.,]\d+)?/);
+  return match ? Number(match[0].replace(",", ".")) : 0;
+}
 
 test("B2B-7. buyer hands the agreed brigade into its own project as ONE team assignment", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto("/lt/dashboard/projects");
+  // Self-healing: an earlier run that stopped before B2B-10 left its brigade
+  // assigned, and step 0 cannot disband a brigade with open work. End those
+  // leftovers here (history is kept) so brigades never pile up to the cap.
+  for (let i = 0; i < 6; i += 1) {
+    const leftover = page
+      .getByTestId("project-team-row")
+      .filter({ hasText: "QA-SYNTHETIC Brigada" })
+      .filter({ hasNotText: TEAM })
+      .first();
+    if ((await leftover.count()) === 0) break;
+    await leftover.getByTestId("project-team-end").click();
+    await page.waitForTimeout(2_000);
+    await page.reload();
+  }
   if ((await page.getByText(GAMA_PROJECT, { exact: false }).count()) === 0) {
     const form = page.getByTestId("project-create");
     await expect(form).toBeVisible({ timeout: 30_000 });
@@ -364,9 +396,66 @@ test("B2B-7. buyer hands the agreed brigade into its own project as ONE team ass
   if (await accept.isVisible().catch(() => false)) await accept.click();
   const assign = page.getByTestId(`team-offer-assign-${offerId}`);
   await expect(assign, "an accepted offer offers the hand-off into a project").toBeVisible({ timeout: 30_000 });
-  await assign.locator("select").selectOption({ label: GAMA_PROJECT });
+  const projectOption = assign.locator("select option", { hasText: GAMA_PROJECT }).first();
+  gamaProjectId = (await projectOption.getAttribute("value")) ?? "";
+  expect(gamaProjectId, "the buyer's project is offered for the hand-off").not.toBe("");
+  journaledBefore = await journaledHours(page, gamaProjectId);
+  await page.goto(`/lt/dashboard/company/scouting?request=${needId}`);
+  await page.getByTestId(`team-offer-assign-${offerId}`).locator("select").selectOption(gamaProjectId);
   await page.getByTestId(`team-offer-assign-submit-${offerId}`).click();
   await expect(page.getByTestId(`team-offer-received-${offerId}`)).toContainText(/Priskirta|Assigned/i, { timeout: 30_000 });
   console.info("[b2b] hand-off: the brigade is one team assignment on the buyer's project");
+  await ctx.close();
+});
+
+const WORK = `QA-SYNTHETIC ${RUN}: šiandien 6 valandas brigada mūrijo sieną užsakovo objekte`;
+
+test("B2B-8. a brigade member sees the buyer's project through the team and records the day's work on it", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker");
+  await page.goto("/lt/dashboard/projects");
+  const card = page.getByTestId("worker-project-card").filter({ hasText: GAMA_PROJECT }).first();
+  await expect(card, "the team assignment makes the project the member's work context").toBeVisible({ timeout: 30_000 });
+  await expect(card.getByTestId("worker-project-via-team")).toBeVisible();
+  await page.goto("/lt/dashboard/journal");
+  await page.getByTestId("journal-quick-record-text").fill(WORK);
+  await page.getByTestId("journal-quick-record-understand").click();
+  await expect(page.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  await chooseWorkContextIfAsked(page, /QA-SYNTHETIC Alfa/);
+  const project = page.getByTestId("worklog-project");
+  if (await project.isVisible().catch(() => false)) {
+    await project.selectOption(gamaProjectId);
+  } else {
+    await expect(page.getByTestId("worklog-project-auto")).toContainText(GAMA_PROJECT, { timeout: 10_000 });
+  }
+  await page.getByTestId("worklog-save").click();
+  await page.getByTestId("worklog-confirm").click();
+  const done = page.getByTestId("worklog-done");
+  const failed = page.getByTestId("worklog-error").or(page.getByTestId("worklog-blocked"));
+  await expect(done.or(failed)).toBeVisible({ timeout: 30_000 });
+  if (!(await done.isVisible())) throw new Error(`the member's work was not saved: ${await failed.innerText()}`);
+  await ctx.close();
+});
+
+test("B2B-9. the buyer sees the brigade's work on its own project", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  let after = journaledBefore;
+  for (let i = 0; i < 6 && after < journaledBefore + 6; i++) {
+    after = await journaledHours(page, gamaProjectId);
+    if (after < journaledBefore + 6) await page.waitForTimeout(5_000);
+  }
+  console.info(`[b2b] journaled hours on the buyer's project: ${journaledBefore} → ${after}`);
+  expect(after, "the member's 6 hours reach the buyer's project").toBeGreaterThanOrEqual(journaledBefore + 6);
+  await ctx.close();
+});
+
+test("B2B-10. the buyer ends this run's team assignment (history kept), so the next run can disband the brigade", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  await page.goto("/lt/dashboard/projects");
+  const row = page.getByTestId("project-team-row").filter({ hasText: TEAM }).first();
+  await expect(row, "this run's brigade is assigned on the buyer's project").toBeVisible({ timeout: 30_000 });
+  await row.getByTestId("project-team-end").click();
+  await expect(page.getByTestId("project-team-row").filter({ hasText: TEAM })).toHaveCount(0, { timeout: 30_000 });
   await ctx.close();
 });
