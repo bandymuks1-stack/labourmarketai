@@ -6,7 +6,7 @@
 #   sh lm-archive-table.sh <table> "<postgrest filter>" <name>        # e.g. public_vacancies "or=(is_active.eq.false,expires_at.lt.2026-10-17T00:00:00Z)" vacancies-dead
 #   sh lm-archive-table.sh --verify <archive.jsonl.gz.age>             # decrypt with the VPS private key, count + validate JSON lines
 #   sh lm-archive-table.sh --grep <archive> <text>                       # read the cold data in place (no restore)
-#   sh lm-archive-table.sh --restore <archive> <table> <on_conflict cols> [max_rows]   # upsert back into Supabase
+#   sh lm-archive-table.sh --restore <archive> <table> <on_conflict cols> [max_rows] [merge|ignore]   # upsert back into Supabase
 #
 # Output: /root/lm-prod/backups/archive-<name>-<stamp>.jsonl.gz.age (600) + .sha256 + a count line. Prints no values.
 set -eu
@@ -25,8 +25,11 @@ if [ "${1:-}" = "--grep" ]; then
 fi
 if [ "${1:-}" = "--restore" ]; then
   # Restore archived rows into Supabase through PostgREST upsert on the table's unique key (idempotent:
-  # rows that already exist are merged, not duplicated). --restore <archive> <table> <on_conflict cols> [max_rows]
-  F="${2:?archive path}"; TABLE="${3:?table}"; ONC="${4:?on_conflict columns}"; MAX="${5:-0}"
+  # rows that already exist are merged, not duplicated). --restore <archive> <table> <on_conflict cols> [max_rows] [merge|ignore]
+  # `ignore` (resolution=ignore-duplicates) inserts only the rows that are ABSENT and never overwrites a
+  # row that changed after the archive — the mode for undoing a prune of a table that keeps being written.
+  F="${2:?archive path}"; TABLE="${3:?table}"; ONC="${4:?on_conflict columns}"; MAX="${5:-0}"; MODE="${6:-merge}"
+  case "$MODE" in merge) RES=merge-duplicates;; ignore) RES=ignore-duplicates;; *) echo "STOP: mode is merge or ignore"; exit 1;; esac
   case "$TABLE$ONC" in *[!a-zA-Z0-9_,]*) echo "STOP: bad table/columns"; exit 1;; esac
   URL=$(sed -n 's/^NEXT_PUBLIC_SUPABASE_URL=//p' "$ENVF")
   T=$(mktemp -d "$D/.restore.XXXXXX"); trap 'rm -rf "$T"' EXIT INT TERM
@@ -38,11 +41,11 @@ if [ "${1:-}" = "--restore" ]; then
   split -l 500 -d -a 5 "$T/rows.jsonl" "$T/chunk."
   for c in "$T"/chunk.*; do
     python3 -c 'import json,sys; print(json.dumps([json.loads(l) for l in open(sys.argv[1],encoding="utf8") if l.strip()]))' "$c" > "$c.json"
-    code=$(curl -s -o "$T/resp" -w '%{http_code}' -X POST -H @"$T/h1" -H @"$T/h2" -H 'content-type: application/json'       -H 'Prefer: resolution=merge-duplicates, return=minimal' --data-binary @"$c.json" "$URL/rest/v1/$TABLE?on_conflict=$ONC")
+    code=$(curl -s -o "$T/resp" -w '%{http_code}' -X POST -H @"$T/h1" -H @"$T/h2" -H 'content-type: application/json'       -H "Prefer: resolution=$RES, return=minimal" --data-binary @"$c.json" "$URL/rest/v1/$TABLE?on_conflict=$ONC")
     case "$code" in 200|201|204) ;; *) echo "STOP: PostgREST answered $code after $done_rows rows: $(head -c 200 "$T/resp")"; exit 1;; esac
     done_rows=$((done_rows+$(wc -l < "$c")))
   done
-  echo "restored rows=$done_rows of $total into $TABLE (upsert on $ONC, merge-duplicates)"; exit 0
+  echo "restored rows=$done_rows of $total into $TABLE (upsert on $ONC, $RES)"; exit 0
 fi
 TABLE="${1:?table}"; FILTER="${2:?postgrest filter}"; NAME="${3:?name}"
 case "$TABLE$NAME" in *[!a-zA-Z0-9_-]*) echo "STOP: bad table/name"; exit 1;; esac
