@@ -67,3 +67,27 @@ describe("transactional email adapter — offline states", () => {
     expect(isTransactionalEmailPathActive()).toBe(false);
   });
 });
+
+describe("transactional email adapter — the platform mailbox (smtp)", () => {
+  it("smtp without the LM_SMTP_* mailbox is not configured (no silent half-setup)", async () => {
+    vi.stubEnv("INVITE_EMAIL_PROVIDER", "smtp");
+    vi.stubEnv("LM_SMTP_HOST", "");
+    vi.stubEnv("LM_SMTP_USER", "");
+    vi.stubEnv("LM_SMTP_PASS", "");
+    vi.stubEnv("LM_SMTP_FROM", "");
+    expect(isTransactionalEmailConfigured()).toBe(false);
+    expect(await sendTransactionalEmail(MESSAGE)).toEqual({ status: "not_configured" });
+  });
+
+  it("smtp with the mailbox is configured and needs no API key", () => {
+    vi.stubEnv("INVITE_EMAIL_PROVIDER", "smtp");
+    vi.stubEnv("INVITE_EMAIL_API_KEY", "");
+    vi.stubEnv("LM_SMTP_HOST", "smtp.example.test");
+    vi.stubEnv("LM_SMTP_PORT", "465");
+    vi.stubEnv("LM_SMTP_USER", "info@example.test");
+    vi.stubEnv("LM_SMTP_PASS", "not-a-real-password");
+    vi.stubEnv("LM_SMTP_FROM", "Example <info@example.test>");
+    expect(isTransactionalEmailConfigured()).toBe(true);
+    expect(isTransactionalEmailPathActive()).toBe(true);
+  });
+});
