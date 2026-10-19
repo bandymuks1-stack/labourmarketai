@@ -92,7 +92,9 @@ test("C-0. the worker's own worker id (own row, own token)", async () => {
 
 test("C-1. the worker raises a hand on Gama's need from the opportunities board", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
-  await page.goto("/lt/dashboard/opportunities");
+  // The pristine page is the worker's PERSONAL first view (owner addendum
+  // 2026-10-09); the whole board, with every need's card, is `?view=all`.
+  await page.goto("/lt/dashboard/opportunities?view=all");
   await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const cards = page
     .locator('li[id^="opp-"]')
@@ -141,7 +143,7 @@ test("C-3 (4.16). Gama contacts them: a real thread opens", async ({ browser }) 
 
 test("C-4 (4.16). the worker sees they were contacted, on the phone", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker", true);
-  await page.goto("/lt/dashboard/opportunities");
+  await page.goto("/lt/dashboard/opportunities?view=all");
   const card = page.locator(`li[id="opp-${requestId}"]`);
   await expect(card.getByTestId("interest-sent")).toHaveAttribute("data-interest-status", "contacted", {
     timeout: 60_000,
