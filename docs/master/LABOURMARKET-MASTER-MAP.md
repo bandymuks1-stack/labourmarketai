@@ -155,3 +155,7 @@ Public-safe summaries; evidence stays in the private annex. Newest first.
    snapshot line at the top of this file in the same PR (the sync guard enforces it).
 2. When a production walk proves or breaks a feature, update the FUNCTIONAL-AUDIT row and its evidence.
 3. When the owner decides, move the item in the EXECUTION-ROADMAP and record the decision under `docs/DECISIONS/`.
+4. The owner's interactive **Product Master Map** (value chain, journeys, commercial model, priorities) is a VIEW of
+   these documents, never a second source: regenerate it with
+   `python .github/scripts/product-map/build.py docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md <out.html> <sha> [private-facts.json]`
+   after every FUNCTIONAL-AUDIT change. Production numbers come only from the private facts file.
