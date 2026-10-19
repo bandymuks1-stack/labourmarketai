@@ -101,7 +101,7 @@ tr:last-child td { border-bottom: 0; }
     <p class="lede">Visas produktas vienoje vietoje: funkcijos ir jų būsenos, kaip juda žmonės, darbas ir pinigai, kur yra pajamos ir kokia tvarka užbaigti. Būsenos imamos iš kanoninio funkcijų audito ir papildomos tik realiais produkcijos įrodymais.</p>
     <p class="muted" id="source" style="font:12px var(--mono);margin:0"></p>
     <nav class="toc" aria-label="Skyriai">
-      <a href="#summary">Santrauka</a><a href="#chain">Vertės grandinė</a><a href="#journeys">Kelionės</a><a href="#money">Pajamos</a><a href="#commercial">Komercinis modelis</a><a href="#priorities">Prioritetai</a><a href="#gaps">Spragos</a><a href="#register">Funkcijų registras</a>
+      <a href="#summary">Santrauka</a><a href="#funnel">Piltuvas</a><a href="#activation">Pirmas klientas</a><a href="#chain">Vertės grandinė</a><a href="#journeys">Kelionės</a><a href="#money">Pajamos</a><a href="#commercial">Komercinis modelis</a><a href="#priorities">Prioritetai</a><a href="#gaps">Spragos</a><a href="#register">Funkcijų registras</a>
     </nav>
   </header>
 
@@ -126,6 +126,19 @@ tr:last-child td { border-bottom: 0; }
     <div class="eyebrow">Vartotojų kelionės</div>
     <h2>Penki pagrindiniai keliai per sistemą</h2>
     <div id="journeyList" style="display:flex;flex-direction:column;gap:18px"></div>
+  </section>
+
+  <section id="funnel">
+    <div class="eyebrow">Pajamų piltuvas</div>
+    <h2>Registracija → aktyvacija → planas → checkout → apmokėjimas → išlaikymas</h2>
+    <p class="lede">Tik realūs naudotojai, be sintetinių QA ir E2E paskyrų. Žingsnis be skaičiaus šiandien nematuojamas.</p>
+    <div id="funnelList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </section>
+
+  <section id="activation">
+    <div class="eyebrow">Pirmas mokantis klientas</div>
+    <h2>Aktyvavimo eilė pagal priklausomybes</h2>
+    <div class="tablewrap"><table id="activationTable"></table></div>
   </section>
 
   <section id="money">
@@ -207,6 +220,16 @@ document.getElementById("journeyList").innerHTML = D.journeys.map((j) => {
   const live = j.steps.filter((s) => s.s === "LIVE_PROVEN").length;
   return `<div class="journey"><h3>${esc(j.name)} <span class="muted" style="font-weight:400;font-size:13px">· ${live} iš ${j.steps.length} žingsnių įrodyti</span></h3><div class="steps">${j.steps.map((s, i) => `${i ? '<span class="arrow" aria-hidden="true">→</span>' : ""}<span class="stepchip s-${s.s}" title="${esc(s.id + " " + s.feature)}"><span>${esc(s.label)}</span><small>${s.s}</small></span>`).join("")}</div></div>`;
 }).join("");
+
+// Funnel (private numbers; absent in a public build)
+const fl = document.getElementById("funnelList");
+const fMax = Math.max(1, ...(D.funnel || []).map((s) => (typeof s[1] === "number" ? s[1] : 0)));
+fl.innerHTML = (D.funnel || []).length
+  ? D.funnel.map(([label, n, note]) => `<div style="display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:12px;align-items:center"><span><b>${esc(label)}</b><br><small class="muted">${esc(note)}</small></span><span style="display:flex;align-items:center;gap:10px;min-width:0">${typeof n === "number" ? `<span style="height:16px;border-radius:4px;background:var(--gold);width:${Math.max(2, (n / fMax) * 100)}%"></span><b style="font-variant-numeric:tabular-nums">${n}</b>` : '<span class="chip s-BLOCKED">NEMATUOJAMA</span>'}</span></div>`).join("")
+  : '<p class="muted">Skaičiai įtraukiami tik privačioje versijoje.</p>';
+
+// Activation queue
+document.getElementById("activationTable").innerHTML = `<thead><tr><th>#</th><th>Žingsnis</th><th>Kas tai</th><th>Funkcijos</th><th>Kas atlieka</th><th>Priklauso nuo</th></tr></thead><tbody>${(D.activation || []).map(([n, t, what, ids, who, dep]) => `<tr><td class="id">${esc(n)}</td><td><b>${esc(t)}</b></td><td>${esc(what)}</td><td class="id">${esc(ids)}${ids.split(/,\s*/).filter((i) => byId[i]).map((i) => " " + chip(byId[i].s)).join("")}</td><td>${esc(who)}</td><td class="id">${esc(dep)}</td></tr>`).join("")}</tbody>`;
 
 // Money
 document.getElementById("scenarios").innerHTML = D.scenarios.map(([title, math, lines]) => `<div class="card"><h3>${esc(title)}</h3><span class="tag">${esc(math)}</span><ul>${lines.map((l) => { const isFact = l.startsWith("FAKTAS"); const isAss = l.startsWith("PRIELAIDA"); const body = l.replace(/^(FAKTAS|PRIELAIDA): /, ""); return `<li>${isFact ? '<span class="tag fact-tag">FAKTAS</span> ' : isAss ? '<span class="tag assume-tag">PRIELAIDA</span> ' : ""}${esc(body)}</li>`; }).join("")}</ul></div>`).join("");

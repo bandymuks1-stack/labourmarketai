@@ -134,9 +134,26 @@ COMMERCIAL = {
 # ── 4. Facts (production, 2026-10-19, aggregates only) ──────────────────────────────────
 # Production facts are telemetry and never live in the public repository: pass them as a
 # private JSON file (a list of [label, value, note]) — output/ is gitignored.
-FACTS = []
+FACTS, FUNNEL = [], []
 if len(sys.argv) > 4:
-    FACTS = json.load(open(sys.argv[4], encoding="utf8"))
+    _private = json.load(open(sys.argv[4], encoding="utf8"))
+    if isinstance(_private, dict):
+        FACTS, FUNNEL = _private.get("facts", []), _private.get("funnel", [])
+    else:
+        FACTS = _private
+
+# ── 4b. First paying customer: the activation queue (dependency order) ─────────────────
+# Each step names the register rows it closes, who acts, and what it depends on.
+ACTIVATION = [
+    ("1", "Pajamų piltuvo matavimas", "Kainų puslapio peržiūra, plano mygtuko paspaudimas, checkout pradžia ir pabaiga kaip įvykiai", "7.1, 7.4", "Agentas", "—"),
+    ("2", "Stripe raktai ir webhook", "Slaptas raktas, webhook paslaptis, kainos ID; webhook adresas /api/billing/webhook Stripe pusėje", "7.4", "Savininkas (Stripe)", "—"),
+    ("3", "Mokėjimų jungikliai", "PAYMENTS_ENABLED, BILLING_PROVIDER=stripe, STRIPE_MODE=live, STRIPE_LIVE_ACTIVATION VPS aplinkoje", "7.5", "Agentas (po 2)", "2"),
+    ("4", "Antras savininko veiksmas", "live_payments_enabled duomenų bazėje (jei sujungtas #2441)", "7.5", "Savininkas", "3"),
+    ("5", "Vienas apmokėjimas iki galo", "Tikras €99 apmokėjimas produkcijoje, webhook atnaujina prenumeratą, planas įsijungia (7.3)", "7.3, 7.4, 7.5", "Savininkas + agentas", "4"),
+    ("6", "Įmonės kelias iki mokėjimo", "Poreikis → kandidatai → kontaktas → riba (1 aktyvi pozicija) → €99 pasiūlymas tinkamu momentu", "4.10, 4.16, 4.18, 7.2", "Agentas", "5"),
+    ("7", "Pirmo kliento pasiūlymas", "Šiltas tinklas: įmonės, kurios jau paskelbė poreikį ar pakvietė žmones", "—", "Savininkas", "6"),
+    ("A", "Alternatyva be Stripe", "Sąskaita faktūra + rankinis plano suteikimas (7.7) – galima jau dabar", "7.7", "Savininkas + agentas", "—"),
+]
 
 # ── 5. Priorities ──────────────────────────────────────────────────────────────────────
 PRIORITIES = [
@@ -226,6 +243,7 @@ for r in rows:
 DATA = {
     "sha": SHA, "rows": rows, "areas": AREA_LT, "chain": chain, "counts": counts,
     "commercial": {str(k): v for k, v in COMMERCIAL.items()}, "facts": FACTS, "priorities": PRIORITIES,
+    "funnel": FUNNEL, "activation": ACTIVATION,
     "scenarios": SCENARIOS, "reco": RECO, "gaps": GAPS, "journeys": journeys,
 }
 
