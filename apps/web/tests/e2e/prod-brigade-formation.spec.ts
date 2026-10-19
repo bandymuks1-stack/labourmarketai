@@ -420,7 +420,11 @@ test("B2B-8. a brigade member sees the buyer's project through the team and reco
   await page.getByTestId("journal-quick-record-text").fill(WORK);
   await page.getByTestId("journal-quick-record-understand").click();
   await expect(page.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
-  await chooseWorkContextIfAsked(page, /QA-SYNTHETIC Alfa/);
+  // The buyer's project is reached THROUGH THE BRIGADE, so it is offered under
+  // the brigade's own work context (addTeamProjects: team org + project org),
+  // never under the member's employer Alfa — picking Alfa showed only Alfa's
+  // own project (run 39301125551).
+  await chooseWorkContextIfAsked(page, new RegExp(TEAM));
   const project = page.getByTestId("worklog-project");
   if (await project.isVisible().catch(() => false)) {
     await project.selectOption(gamaProjectId);
