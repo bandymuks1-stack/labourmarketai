@@ -2,7 +2,7 @@
 # LabourMarket.ai VPS stage 1 (owner-approved 2026-10-17): private container start + RUNBOOK smoke tests.
 # Touches nothing else: no DNS, nginx, SSL, cron. Prints no secret values.
 SHA=c3cf5b799ad8477f9111fc254d616107bcd6444c
-H=http://127.0.0.1:3200
+H=http://127.0.0.1:$(cat /root/lm-prod/active-port 2>/dev/null || echo 3200)
 echo "== 0. pre: agentai os =="
 docker ps --format '{{.Names}} {{.Status}}' | grep -i agentai
 echo "== 0. pre: config present (names only) =="
@@ -13,7 +13,7 @@ echo "== 1. start =="
 sh /root/lm-prod/bin/lm-prod-run.sh $SHA || { echo "START FAILED"; exit 1; }
 echo "== 2. inspect =="
 docker inspect labourmarket-prod --format 'cpus={{.HostConfig.NanoCpus}} mem={{.HostConfig.Memory}} swap={{.HostConfig.MemorySwap}} pids={{.HostConfig.PidsLimit}} capdrop={{.HostConfig.CapDrop}} secopt={{.HostConfig.SecurityOpt}} user={{.Config.User}} ports={{json .HostConfig.PortBindings}}'
-ss -ltnp | grep ':3200 '
+ss -ltnp | grep ":$(cat /root/lm-prod/active-port 2>/dev/null || echo 3200) "
 echo "== 3. wait for health (max 120 s) =="
 i=0; while [ $i -lt 24 ]; do s=$(docker inspect --format '{{.State.Health.Status}}' labourmarket-prod 2>/dev/null); r=$(docker inspect --format '{{.State.Status}}' labourmarket-prod 2>/dev/null); echo "t=$((i*5))s state=$r health=$s"; [ "$s" = "healthy" ] && break; [ "$r" != "running" ] && break; i=$((i+1)); sleep 5; done
 echo "== 4. smoke =="
