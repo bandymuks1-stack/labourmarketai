@@ -9,12 +9,14 @@ import { test, expect, type Browser, type BrowserContext, type Page } from "@pla
  *
  *   4.11 Candidates — a company opens a need and sees the person who raised a hand on it;
  *   4.16 Contact    — it contacts that person, and the person sees they were contacted;
- *   3.33 Hours      — the company records a day's hours for its worker on a site.
+ *   3.33 Hours      — the company AND the agency each record a day's hours for
+ *                     their worker on a site (the agency path's one open step).
  *
  * Cast (`lib/testing/prod-qa-guard.ts`, all synthetic):
  *   worker   qa.worker+multiw — Vytas Darbininkas, employee of Alfa
  *   manager  runs "QA-SYNTHETIC Gama" — the need the worker raises a hand on
- *   owner    owns "QA-SYNTHETIC Alfa" — records Vytas's hours
+ *   owner    owns "QA-SYNTHETIC Alfa" — records Vytas's hours (company)
+ *   agency   runs "QA-SYNTHETIC Agentūra" — records hours for its roster worker (agency)
  *
  * Every step is what a person does in the browser. The one API call reads the
  * worker's OWN row with the worker's own token, to know which candidate card
@@ -25,6 +27,7 @@ const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const SUPA = process.env.PROD_QA_SUPABASE_URL ?? "";
 const ANON = process.env.PROD_QA_ANON_KEY ?? "";
 const ALFA = "QA-SYNTHETIC Alfa";
+const AGENCY = "QA-SYNTHETIC Agentūra";
 const GAMA = "QA-SYNTHETIC Gama";
 const SITE = "QA-SYNTHETIC objektas";
 const NOTE = `QA-SYNTHETIC ${RUN}`;
@@ -33,7 +36,7 @@ const ENABLED =
   process.env.PROD_QA_WALK === "1" &&
   SUPA !== "" &&
   ANON !== "" &&
-  ["worker", "manager", "owner"].every((s) => existsSync(state(s)));
+  ["worker", "manager", "owner", "agency"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 240_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
@@ -147,15 +150,15 @@ test("C-4 (4.16). the worker sees they were contacted, on the phone", async ({ b
   await ctx.close();
 });
 
-test("H-1 (3.33). Alfa has a site to record hours against (the no-sites door adds one)", async ({ browser }) => {
-  const { ctx, page } = await as(browser, "owner");
-  await useWorkspace(page, ALFA);
+/** 3.33 for one workspace: a site exists (the no-sites door adds one), then a day's hours persist. */
+async function siteReady(page: Page, org: string): Promise<void> {
+  await useWorkspace(page, org);
   await page.goto("/lt/dashboard/hours");
   const noSites = page.getByTestId("hours-state-no-objects");
   const picker = page.getByTestId("hours-object-picker");
   await expect(noSites.or(picker)).toBeVisible({ timeout: 60_000 });
   if (await noSites.isVisible()) {
-    console.info("[hours] no site yet: following the page's own door");
+    console.info(`[hours] ${org}: no site yet, following the page's own door`);
     await page.getByTestId("hours-no-objects-add-site").click();
     await page.waitForURL(/\/dashboard\/projects/, { timeout: 60_000 });
     const form = page.getByTestId("work-object-add-form");
@@ -168,26 +171,39 @@ test("H-1 (3.33). Alfa has a site to record hours against (the no-sites door add
     await page.goto("/lt/dashboard/hours");
   }
   await expect(picker).toBeVisible({ timeout: 60_000 });
-  await ctx.close();
-});
+}
 
-test("H-2 (3.33). Alfa records today's hours for its worker, and they persist", async ({ browser }) => {
-  const { ctx, page } = await as(browser, "owner");
-  await useWorkspace(page, ALFA);
+async function recordHours(page: Page, org: string, note: string): Promise<void> {
+  await useWorkspace(page, org);
   await page.goto("/lt/dashboard/hours");
   await page.getByTestId("hours-worker-select").selectOption(workerId);
   await page.getByTestId("hours-object-picker").locator('[data-testid^="hours-object-"]').first().click();
   await page.getByTestId("hours-input").fill("1.5");
-  await page.getByTestId("hours-note").fill(NOTE);
+  await page.getByTestId("hours-note").fill(note);
   await page.getByTestId("hours-save").click();
   const saved = page.getByTestId("hours-saved");
   const error = page.getByTestId("hours-error");
   await expect(saved.or(error)).toBeVisible({ timeout: 30_000 });
-  if (await error.isVisible()) throw new Error(`hours not saved: ${await error.innerText()}`);
-
+  if (await error.isVisible()) throw new Error(`hours not saved in ${org}: ${await error.innerText()}`);
   // Persistence: a fresh load of the day lists the entry.
   await page.goto("/lt/dashboard/hours");
-  await expect(page.getByTestId("hours-entry").filter({ hasText: NOTE })).toHaveCount(1, { timeout: 30_000 });
+  await expect(page.getByTestId("hours-entry").filter({ hasText: note })).toHaveCount(1, { timeout: 30_000 });
   await expect(page.getByTestId("hours-day-total")).toBeVisible();
-  await ctx.close();
-});
+}
+
+for (const { slot, org, label } of [
+  { slot: "owner", org: ALFA, label: "Alfa (company)" },
+  { slot: "agency", org: AGENCY, label: "the agency" },
+]) {
+  test(`H-1 (3.33). ${label} has a site to record hours against`, async ({ browser }) => {
+    const { ctx, page } = await as(browser, slot);
+    await siteReady(page, org);
+    await ctx.close();
+  });
+
+  test(`H-2 (3.33). ${label} records today's hours for its worker, and they persist`, async ({ browser }) => {
+    const { ctx, page } = await as(browser, slot);
+    await recordHours(page, org, `${NOTE} ${slot}`);
+    await ctx.close();
+  });
+}
