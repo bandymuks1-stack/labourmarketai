@@ -71,6 +71,9 @@ export type JournalEntryListRow = {
   /** The confirmed original this row corrects (0018), when it is one. */
   correction_of?: string | null;
   engagement_context_id?: string | null;
+  /** The project the entry was written against (0018 attribution), when the
+   *  row carries one. */
+  project_id?: string | null;
   journal_entry_metrics: JournalMetricRow[] | null;
   journal_entry_confirmations: JournalConfirmationRow[] | null;
 };
@@ -193,7 +196,7 @@ export const JOURNAL_ENTRY_METRICS_EMBED =
 export const JOURNAL_ENTRY_CONFIRMATIONS_EMBED =
   "journal_entry_confirmations(confirmation_scope, created_at, confirmer_role, confirmer_id)";
 
-const V3_SELECT = `id, original_text, created_at, deleted_at, superseded_by, correction_of, engagement_context_id, ${JOURNAL_ENTRY_METRICS_EMBED}, ${JOURNAL_ENTRY_CONFIRMATIONS_EMBED}`;
+const V3_SELECT = `id, original_text, created_at, deleted_at, superseded_by, correction_of, engagement_context_id, project_id, ${JOURNAL_ENTRY_METRICS_EMBED}, ${JOURNAL_ENTRY_CONFIRMATIONS_EMBED}`;
 
 const LEGACY_SELECT = `id, original_text, created_at, engagement_context_id, ${JOURNAL_ENTRY_METRICS_EMBED}, ${JOURNAL_ENTRY_CONFIRMATIONS_EMBED}`;
 

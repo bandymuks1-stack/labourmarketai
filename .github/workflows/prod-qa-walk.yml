@@ -50,6 +50,7 @@ on:
           - mcp-chain
           - mcp-agents
           - project-context
+          - worker-identity-split
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -72,8 +73,12 @@ on:
       - "apps/web/**"
       - "packages/**"
       - "pnpm-lock.yaml"
+  # 2026-10-17 (Supabase log-ingestion quota, 2.22 GB/month on the Free plan): one signed-in walk loads
+  # ~36 Supabase calls per dashboard document, so the eight walks of 2026-10-17 alone wrote 23,400 of the
+  # day's 25,200 edge-log entries. The routine signal is now ONE rotating walk a WEEK (Sunday 03:41 UTC)
+  # plus the debounced post-merge role-routes walk; the full catalogue is still available on dispatch.
   schedule:
-    - cron: "41 3 * * *"
+    - cron: "41 3 * * 0"
 
 permissions:
   contents: read
@@ -103,11 +108,11 @@ jobs:
           EVENT: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context)
+          ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context worker-identity-split)
           case "$EVENT" in
             workflow_dispatch) spec="$INPUT_SPEC" ;;
             push) spec=role-routes ;;
-            schedule) spec="${ROTATION[$(( 10#$(date -u +%j) % ${#ROTATION[@]} ))]}" ;;
+            schedule) spec="${ROTATION[$(( 10#$(date -u +%U) % ${#ROTATION[@]} ))]}" ;;
             *) echo "::error::unexpected event $EVENT"; exit 1 ;;
           esac
           echo "spec=$spec" >> "$GITHUB_OUTPUT"
@@ -246,6 +251,7 @@ jobs:
             mcp-chain) SPEC=tests/e2e/prod-mcp-chain.spec.ts ;;
             mcp-agents) SPEC=tests/e2e/prod-mcp-agents.spec.ts ;;
             project-context) SPEC=tests/e2e/prod-project-context.spec.ts ;;
+            worker-identity-split) SPEC=tests/e2e/prod-worker-identity-split.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
+import { cookies } from "next/headers";
 
 import { getUnreadConversationCount } from "@/lib/communication/unread";
 import {
@@ -19,6 +20,27 @@ import { getNewMarketplaceMatchCount } from "@/lib/marketplace/worker-opportunit
 import { getBridgeSpineCounts } from "@/lib/agency/bridge-read";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { countOpenTeamOffersByDemand } from "@/lib/company/team-offer";
+import { ACTIVE_WORKSPACE_COOKIE } from "@/lib/company/active-organization";
+import { rememberBadge } from "@/lib/perf/badge-ttl-cache";
+
+/** Who is looking, in which workspace — the key the slow badges are remembered under. */
+async function badgeViewerKey(): Promise<string | null> {
+  try {
+    const supabase = await createServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser(); // request-memoised: no extra round trip
+    if (!user) return null;
+    const jar = await cookies();
+    return `${user.id}|${jar.get(ACTIVE_WORKSPACE_COOKIE)?.value ?? "-"}`;
+  } catch {
+    return null;
+  }
+}
+
+/** 2026-10-19 perf: these three were most of the bell's ~30 reads per page view. */
+const JOB_MATCHES_TTL_MS = 10 * 60_000;
+const SLOW_BADGE_TTL_MS = 2 * 60_000;
 
 /** Team / brigade offers waiting on the active company's own OPEN needs —
  *  the same receiver RPC the scouting section renders. 0 without a company
@@ -59,6 +81,7 @@ import {
  * twice.
  */
 export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
+  const viewerKey = await badgeViewerKey();
   const [
     unreadConversations,
     pendingIncomingServiceRequests,
@@ -93,7 +116,7 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     getTaskAttentionCounts(),
     // Request-cached with the recommendation surfaces (ONE read model);
     // 0 for non-workers and while the gated seen store is unapplied.
-    getNewMarketplaceMatchCount(),
+    rememberBadge("jobMatches", viewerKey, JOB_MATCHES_TTL_MS, () => getNewMarketplaceMatchCount()),
     // Role-gated inside the reader (0 for worker / client), self-excluded,
     // and 0 while the leave migration is unapplied.
     getPendingAbsenceReviewCount(),
@@ -102,8 +125,8 @@ export const getSpineCounts = cache(async (): Promise<SpineCounts> => {
     // client: pending connection invites + offers awaiting a decision), all
     // from the SAME bridge reads the partners / scouting doors render, zeros
     // for everyone else and on any failure.
-    getBridgeSpineCounts(),
-    getOpenTeamOfferCount(),
+    rememberBadge("bridge", viewerKey, SLOW_BADGE_TTL_MS, () => getBridgeSpineCounts()),
+    rememberBadge("teamOffers", viewerKey, SLOW_BADGE_TTL_MS, () => getOpenTeamOfferCount()),
   ]);
   return {
     unreadConversations,

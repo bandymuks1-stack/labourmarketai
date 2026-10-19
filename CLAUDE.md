@@ -196,7 +196,7 @@ auto-merge is inert and Claude Code falls back to waiting for CI then merging.
 
 ## Branch strategy
 
-- `main` — production branch, auto-deployed by Vercel
+- `main` — production branch, deployed to the VPS by `.github/workflows/deploy-vps.yml` after Quality Gates passes on `main`
 - Small fixes (≤3 files OR ≤200 LOC): commit directly to `main` is OK
 - Larger features (>3 files OR new module): use feature branch
   - Claude Code: `feat/cc/<short-name>` or `fix/cc/<short-name>`
@@ -230,6 +230,16 @@ Keep direct AND indirect/potential capability discovery, growth and reskilling p
 sector; keep evidence states apart (recorded / declared / potential / confirmed / certified). Fix a
 wrong label or a false certainty without disabling inference. See
 `docs/DECISIONS/0023-living-cv-direct-indirect-potential-capabilities.md`.
+
+## One person, one continuous professional history (binding, decision 0025)
+
+A person's experience is one history, whoever recorded the work and under whichever role: journal
+entries, organization-supplied history (day and period records) and the person's relationships to
+organizations (employment, ownership, management, with the organization's earlier business periods).
+Every surface reads `lib/journal/professional-experience.ts` — one total, every work hour once, no
+invented days, provenance and confirmation state visible inside it, roles without hours, UNKNOWN never
+zero. Never attribute an organization's records about other people to a leader. See
+`docs/DECISIONS/0025-one-person-one-continuous-professional-history.md`.
 
 ## Policy overrides
 

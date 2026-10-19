@@ -101,6 +101,20 @@ describe("auth/logout route — 303 redirect to localized login", () => {
   });
 });
 
+describe("auth/logout route — behind the VPS proxy (2026-10-18 incident)", () => {
+  it("redirects to the public login, never the bind host in request.url", async () => {
+    const res = await POST(
+      new Request("http://0.0.0.0:3000/en/auth/logout", {
+        method: "POST",
+        headers: { host: "labourmarket.ai", "x-forwarded-host": "labourmarket.ai", "x-forwarded-proto": "https" },
+      }),
+      { params: Promise.resolve({ locale: "en" }) },
+    );
+    expect(res.status).toBe(303);
+    expect(res.headers.get("location")).toBe(`${ORIGIN}/en/auth/login`);
+  });
+});
+
 describe("auth/logout route — no data mutation", () => {
   it("only calls supabase.auth.signOut, never .from(...) / .rpc(...) / .delete(...)", async () => {
     // The createClient mock exposes ONLY .auth.signOut. Any attempt to

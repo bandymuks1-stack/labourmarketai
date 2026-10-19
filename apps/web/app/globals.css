@@ -990,6 +990,31 @@ a {
     min-height: 2.5rem;
     align-content: center;
   }
+  /* A FLOOR, NOT A CEILING (2026-10-16). The rules above out-specify any
+     single utility, so they also LOWERED every control that asked for more:
+     `min-h-11` (44 px, ~530 call sites) rendered at 40 px on phones. These
+     rules are as specific and come later, so a declared minimum above the
+     floor wins again. The list is derived and enforced by the guard. */
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href], label):is(.min-h-11, .min-h-\[2\.75rem\]) {
+    min-height: 2.75rem;
+  }
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href], label):is(.min-h-12) {
+    min-height: 3rem;
+  }
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href], label):is(.min-h-\[3\.25rem\]) {
+    min-height: 3.25rem;
+  }
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href], label):is(.min-h-14, .min-h-\[3\.5rem\]) {
+    min-height: 3.5rem;
+  }
+  :is([data-chrome], [data-mobile-sheet])
+    :is(button, [role="button"], a[href], label):is(.min-h-16) {
+    min-height: 4rem;
+  }
 }
 
 /* ── living worker hero (landing) ─────────────────────────────────────────

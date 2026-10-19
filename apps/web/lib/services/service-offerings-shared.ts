@@ -35,6 +35,8 @@ export interface ServiceOfferingRow {
 export type ServiceOfferingListResult =
   | { kind: "ok"; rows: ServiceOfferingRow[] }
   | { kind: "needs-migration" }
+  /** The read failed — never shown as "no offerings" (SEP-7, audit 2026-10-16). */
+  | { kind: "unavailable" }
   | { kind: "not-authed" };
 
 export type ServiceOfferingMutateResult =

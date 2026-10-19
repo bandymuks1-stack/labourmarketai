@@ -596,7 +596,16 @@ export interface AiTaskRouteContext {
 export type RouteBlockReason =
   | "cost_ceiling"
   | "cost_unpriced"
-  | "needs_human_confirmation";
+  | "needs_human_confirmation"
+  /**
+   * The data egress gate refused every provider (owner decision 2026-08-19,
+   * AI DATA BOUNDARY). No vendor received a byte. Audit 2026-10-16 (AI-1):
+   * before this value existed such a run was recorded with NO block reason,
+   * so it counted toward the daily run budget and the per-organization cap,
+   * and its pre-run estimate landed in the money ledger as spend for a model
+   * that never ran. A refusal is now named as one.
+   */
+  | "egress_refused";
 
 export interface TaskRouteDecision {
   readonly taskType: AiTaskType;

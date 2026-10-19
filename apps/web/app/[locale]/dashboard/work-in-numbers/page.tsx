@@ -32,6 +32,7 @@ import {
   loadOwnPrimaryProfessionSlug,
   loadOwnWorkIntelligence,
 } from "@/lib/journal/work-intelligence-read";
+import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
 import { createClient } from "@/lib/supabase/server";
 import { skillsForProfession } from "@/lib/taxonomy/profession-skills";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -119,10 +120,14 @@ export default async function WorkInNumbersPage({
     .maybeSingle();
   if (!worker) redirect(`/${locale}/dashboard`);
 
-  const [wi, primaryProfessionSlug, ownPath] = await Promise.all([
+  const [wi, primaryProfessionSlug, ownPath, relationships] = await Promise.all([
     loadOwnWorkIntelligence({ focus: periodKey, focusRange }),
     loadOwnPrimaryProfessionSlug(),
     readOwnOccupationPath(supabase, worker.id).catch(() => null),
+    // The person's relationships to organizations (jobs, ownership,
+    // management) — the one professional-experience reading joins the
+    // journal's contexts to them (decision 0025). null = could not be read.
+    readOwnExperienceRelationships(supabase, user.id).catch(() => null),
   ]);
 
   const safeName = (tx: (k: string) => string, ns: string) => (slug: string): string | null => {
@@ -206,11 +211,14 @@ export default async function WorkInNumbersPage({
         </p>
       </header>
 
-      {/* 0 · THE SCALE — all time, journal and organization history as two
-          figures of their own (owner P0 2026-10-15). Never summed. */}
+      {/* 0 · THE SCALE — ONE continuous professional history (decision 0025,
+          2026-10-17): the all-time total, every work hour once, over the
+          journal and the organization history as its two provenances; roles
+          (ownership, management, jobs) and the organization's earlier business
+          periods inside it. */}
       {wi ? (
         <Card compact>
-          <ExperienceScale wi={wi} locale={locale} t={t} />
+          <ExperienceScale wi={wi} locale={locale} t={t} relationships={relationships} />
         </Card>
       ) : null}
 

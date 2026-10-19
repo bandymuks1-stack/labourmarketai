@@ -9,8 +9,8 @@ construction and more). First-stage candidate selection is
 organises selection; it does not claim automatic matching.
 
 > Stack: Next.js 15 · TypeScript (strict) · Supabase · Tailwind v3 + brand
-> preset · next-intl · pnpm workspace. Hosting: Vercel, production on the
-> real domain (see Domains).
+> preset · next-intl · pnpm workspace. Hosting: the project's VPS (Docker,
+> Cloudflare in front), production on the real domain (see Domains).
 
 ## Domains (production)
 
@@ -35,7 +35,7 @@ See `apps/web/lib/i18n/config.ts` and `lib/i18n/launch-language-scope.ts`.
 
 ## Prerequisites (Windows)
 
-- Node 20 LTS (`.nvmrc` pins 20; CI/Vercel use 20).
+- Node 20 LTS (`.nvmrc` pins 20; local dev uses 20, CI builds with 22).
 - `pnpm` (`corepack enable` then `corepack prepare pnpm@latest --activate`).
 - Git Bash or PowerShell. Paths use `C:\Users\Mano\Documents\labourmarketai`.
 
@@ -57,7 +57,7 @@ copy .env.example apps\web\.env.local
 
 ```powershell
 pnpm dev                        # http://localhost:3000 → redirects to /lt
-pnpm build                      # production build (Vercel runs this)
+pnpm build                      # production build (the deploy workflow runs it on CI)
 pnpm lint                       # eslint
 pnpm typecheck                  # tsc --noEmit
 pnpm -C apps/web test           # vitest (unit + ~520 guard files)
@@ -81,9 +81,11 @@ human-gated process** — reviewed PR + owner-approved manual apply; never
 
 ## Deploy
 
-Vercel auto-builds and deploys `main` to production (`labourmarket.ai`;
-the legacy `www`/`app` hosts 308-redirect there). Secrets live only in
-Vercel project env vars.
+`.github/workflows/deploy-vps.yml` builds every `main` commit whose Quality
+Gates passed and deploys it to the VPS (`labourmarket.ai`; health check +
+automatic rollback; the legacy `www`/`app` hosts 308-redirect there).
+Server secrets live only in `/root/lm-prod/env` on the VPS
+(`ops/vps/lm-env-set.sh`).
 **Public payments are NOT active**: billing config is hard-blocked from
 live mode (`apps/web/lib/billing/config-core.ts`); the pricing page shows
 the concierge early-access offer, never a live checkout.

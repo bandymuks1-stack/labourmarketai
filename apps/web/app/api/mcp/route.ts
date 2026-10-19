@@ -22,6 +22,7 @@ import {
   type McpToolDef,
 } from "@/lib/mcp/protocol";
 import { localeFromAcceptLanguage } from "@/lib/mcp/accept-language";
+import { requestPublicOrigin } from "@/lib/mcp/public-origin";
 import { toolDefsOf, toolName, toolsetVersionOf } from "@/lib/mcp/toolset";
 import { summarizeCapabilityResult } from "@/lib/capabilities/presentation";
 
@@ -210,7 +211,7 @@ export async function POST(req: Request) {
       "MCP-Protocol-Version": negotiatedVersion(req),
       "Server-Timing": serverTiming({ auth: authMs }),
     };
-    const challenge = wwwAuthenticateChallenge(new URL(req.url).origin, refusal.errorClass);
+    const challenge = wwwAuthenticateChallenge(requestPublicOrigin(req), refusal.errorClass);
     if (challenge) headers["WWW-Authenticate"] = challenge;
     logEvent({
       event: "external_client.auth",
@@ -322,7 +323,7 @@ export async function POST(req: Request) {
     // send rather than mint or echo one. This door has never been stateful,
     // so there is nothing to stop doing — only something never to start.
     transportProtocolVersion: req.headers.get("mcp-protocol-version"),
-    serverInfo: serverInfo(new URL(req.url).origin),
+    serverInfo: serverInfo(requestPublicOrigin(req)),
     instructions:
       "LabourMarket.ai capabilities for the signed-in user. Reads return " +
       "recorded facts under the user's own permissions. Consequential writes " +

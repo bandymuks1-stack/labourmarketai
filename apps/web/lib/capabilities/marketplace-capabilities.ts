@@ -12,6 +12,7 @@ import {
   type ShortlistWriteResult,
 } from "@/lib/scouting/scouting";
 import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
+import { workerReachable } from "@/lib/visibility/discoverable-workers";
 import type { ExecResult } from "@/lib/conversation/executor-contract";
 
 import {
@@ -298,14 +299,10 @@ function makeShortlistPair(op: ShortlistOp): [CapabilityDescriptor, CapabilityDe
       return { ok: false, result: shortlistWriteFailure({ kind: "not-owner" }) };
     }
     if (need.status === "closed") return { ok: false, result: shortlistWriteFailure({ kind: "closed" }) };
-    // The person must be someone this caller may SEE (can_view_worker) — a
-    // shortlist is never a way to reach a person discovery does not admit.
-    const { data: worker } = await asAny(caller.supabase)
-      .from("workers")
-      .select("id")
-      .eq("id", d.workerId as string)
-      .maybeSingle();
-    if (!worker) {
+    // The person must be someone this caller may SEE — related (the row) or found through the
+    // employer-visibility consent (the anonymous projection). A shortlist is never a way to reach
+    // a person discovery does not admit.
+    if (!(await workerReachable(caller.supabase, d.workerId as string))) {
       return { ok: false, result: { ok: false, code: "not_found", message: "No such candidate visible to this organization." } };
     }
     const own = await readShortlist(caller, need.id, d.workerId as string);
