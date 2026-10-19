@@ -1,5 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
+import { TrackedCta } from "@/components/app/tracked-cta";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { getPlans, PLAN_SLUGS } from "@/lib/marketing/plans";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
@@ -90,13 +91,14 @@ export async function PricingTable() {
 
             <div className="mt-6">
               {billingOn && confirmed ? (
-                <Link
+                <TrackedCta
                   href="/dashboard/account"
+                  ctaId={`pricing_plan_${slug}`}
                   className="text-sm font-semibold text-brand-blue hover:underline"
                   data-testid={`pricing-cta-${slug}`}
                 >
                   {price === 0 ? t("ctaStartFree") : t("ctaSubscribe")}
-                </Link>
+                </TrackedCta>
               ) : (
                 <WaitlistModal
                   trigger={t("planCta")}

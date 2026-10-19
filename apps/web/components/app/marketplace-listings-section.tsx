@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getCountryMeta } from "@/lib/location/country-model";
 import {
   createMarketplaceListingAction,
   updateMarketplaceListingAction,
@@ -128,6 +129,7 @@ export function MarketplaceListingsSection({
   myRows,
   discoveryRows,
   needsMigration,
+  readUnavailable = false,
   extended,
   unavailable = [],
   locale,
@@ -135,6 +137,8 @@ export function MarketplaceListingsSection({
   myRows: MarketplaceListingRow[];
   discoveryRows: MarketplaceDiscoveryRow[];
   needsMigration: boolean;
+  /** The platform's own listings read failed (audit 2026-10-16, M-2). */
+  readUnavailable?: boolean;
   /** The universal-marketplace migration is applied. */
   extended: boolean;
   /** Federated sources that could not be read (never rendered as empty). */
@@ -307,13 +311,16 @@ export function MarketplaceListingsSection({
     });
   }
 
-  if (needsMigration) {
+  if (needsMigration || readUnavailable) {
     return (
       <section className="card-border p-4">
         <h2 className="font-display text-lg font-semibold text-text-primary">{t("title")}</h2>
         <p className="mt-2 text-sm text-text-secondary">{t("intro")}</p>
-        <p className="mt-3 rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
-          {t("notAvailable")}
+        <p
+          className="mt-3 rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted"
+          data-testid={readUnavailable ? "listings-read-unavailable" : undefined}
+        >
+          {readUnavailable ? t("readUnavailable") : t("notAvailable")}
         </p>
       </section>
     );
@@ -698,7 +705,16 @@ export function MarketplaceListingsSection({
                   data-testid="listing-form-country"
                   maxLength={2}
                   placeholder={t("formCountryPlaceholder")}
-                  onChange={(e) => setDraft({ ...draft, locationCountry: e.target.value.toUpperCase() })}
+                  onChange={(e) => {
+                    const code = e.target.value.toUpperCase();
+                    // The price currency follows the country while the person
+                    // has not chosen one themselves (audit 2026-10-16, M-4):
+                    // a Norwegian seller no longer publishes an EUR price by
+                    // inertia. A deliberate choice is never overwritten.
+                    const inherited = draft.currency === "" || draft.currency === EMPTY_DRAFT.currency;
+                    const next = inherited ? (getCountryMeta(code)?.currency ?? EMPTY_DRAFT.currency) : draft.currency;
+                    setDraft({ ...draft, locationCountry: code, currency: next });
+                  }}
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">

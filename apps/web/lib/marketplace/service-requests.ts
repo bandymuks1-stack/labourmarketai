@@ -119,7 +119,7 @@ export async function listDiscoverableOfferings(
     .limit(DISCOVERY_READ_LIMIT);
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
-    return { kind: "ok", rows: [] };
+    return { kind: "unavailable" };
   }
   const rows: DiscoverableOfferingRow[] = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
     id: String(r.id),

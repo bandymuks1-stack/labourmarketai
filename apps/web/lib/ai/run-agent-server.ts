@@ -134,7 +134,12 @@ export async function runAiAgent<T = unknown>(
     // for a model that never ran. It belongs in the audit trail above, which
     // says what happened, and NOT here, which says what it cost.
     let costPersisted = true;
-    if (disposition === "vendor_run") {
+    // A refusal by the data egress gate engaged no vendor: it is audited
+    // above (blocked_reason = egress_refused) and NEVER costed — the ledger
+    // used to receive the pre-run estimate of a model that did not run, and
+    // the per-organization cap counted it as usage (audit 2026-10-16, AI-1).
+    const egressRefused = outcome.routing.blocked === "egress_refused";
+    if (disposition === "vendor_run" && !egressRefused) {
       let organizationId: string | null = null;
       try {
         const attribution = await resolveAnalyticsAttribution();

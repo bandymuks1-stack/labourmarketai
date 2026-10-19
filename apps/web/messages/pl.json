@@ -131,6 +131,7 @@
     "myTitle": "Moje ogłoszenia",
     "intro": "Dodaj to, co oferujesz lub czego potrzebujesz. Inni widzą tylko aktywne, niewygasłe ogłoszenia.",
     "notAvailable": "Chwilowo niedostępne.",
+    "readUnavailable": "Nie udało się teraz odczytać ogłoszeń. To nie znaczy, że ich nie ma — spróbuj ponownie za chwilę.",
     "empty": "Brak jeszcze ogłoszeń. Dodaj pierwszy zasób roboczy.",
     "addButton": "Dodaj ogłoszenie",
     "browseTitle": "Przeglądaj aktywne ogłoszenia",
@@ -3451,6 +3452,8 @@
       "empty": "Brak wniosków o prywatność.",
       "needsMigration": "Przyjmowanie wniosków o prywatność nie jest włączone w tym środowisku.",
       "unavailable": "Nie można teraz odczytać wniosków o prywatność.",
+      "due": "Odpowiedź do {date}",
+      "overdue": "Po terminie — odpowiedź była wymagana do {date}",
       "manualNote": "Przetwarzanie jest ręczne: osoba przegląda i realizuje każdy wniosek. Nic na tej liście nie działa automatycznie.",
       "type": {
         "dataExport": "Eksport danych",
@@ -5723,7 +5726,7 @@
         {
           "heading": "AI i połączeni asystenci AI",
           "items": [
-            "Niektóre funkcje korzystają z modelu AI firmy Google (Gemini API): do tłumaczenia wiadomości i ogłoszeń o pracy oraz do podpowiadania, o co prosi zdanie wpisane na czacie. Wysyłany jest tylko tekst potrzebny do tego zadania. Wynik jest propozycją — nic nie zostaje zapisane jako fakt o Tobie, dopóki tego nie potwierdzisz.",
+            "Niektóre funkcje korzystają z modelu AI firmy Google (Gemini API). Dziś otrzymuje on wyłącznie publiczne statystyki rynku — na przykład ile otwartych stanowisk ma dany zawód — aby sformułować krótkie wyjaśnienie. Tłumaczenie wiadomości i ogłoszeń o pracy oraz interpretowanie zdania wpisanego na czacie są przygotowane, ale wyłączone: nie jest dla nich wysyłana ani treść wiadomości, ani dane osobowe. Jeśli którakolwiek z tych funkcji zostanie włączona, ta informacja o tym powie, a wysyłany byłby tylko tekst potrzebny do tego zadania. Każdy wynik jest propozycją — nic nie zostaje zapisane jako fakt o Tobie, dopóki tego nie potwierdzisz.",
             "Możesz połączyć LabourMarket.ai z asystentem AI, takim jak ChatGPT lub Claude. Każde połączenie zatwierdzasz sam na ekranie zgody; asystent działa wtedy wyłącznie z Twoimi uprawnieniami, a działania mające skutki wymagają osobnego potwierdzenia. Połączone aplikacje widzisz i odłączasz w każdej chwili w ustawieniach konta.",
             "To, co dostawca asystenta AI robi z Twoją rozmową, określają jego własne zasady prywatności."
           ]
@@ -5752,7 +5755,7 @@
           "purpose": "Używany wyłącznie na kontach administratorów. Zapamiętuje, czy elementy administracyjne są ukryte, i nie zmienia niczego w uprawnieniach."
         }
       ],
-      "localStorageNote": "Twój wybór jasnego lub ciemnego motywu jest przechowywany w pamięci lokalnej przeglądarki, a nie w pliku cookie.",
+      "localStorageNote": "W pamięci przeglądarki (nie w plikach cookie) przechowywanych jest kilka elementów: Twój wybór jasnego lub ciemnego motywu; która strona lub kampania po raz pierwszy Cię tu sprowadziła — zapisane jednorazowo, aby późniejszą rejestrację można było do niej przypisać; losowy identyfikator sesji dla każdej karty, znikający po jej zamknięciu; oraz drobne udogodnienia, takie jak zamknięte powiadomienia, ostatnio oglądane elementy i język wprowadzania mową. Nic z tego nie jest udostępniane stronom trzecim ani wykorzystywane do reklam, a wszystko możesz w każdej chwili wyczyścić w przeglądarce.",
       "noTracking": "Na platformie nie ma dziś żadnych plików cookie analitycznych, reklamowych ani śledzących innych firm. Jeśli kiedykolwiek się to zmieni, ta strona zostanie zaktualizowana jako pierwsza."
     },
     "pendingLegal": {
@@ -8749,7 +8752,7 @@
       "pay_within_offer": "Wynagrodzenie mieści się w ofercie",
       "accommodation_ok": "Zakwaterowanie odpowiada",
       "city_match": "To samo miasto",
-      "location_within_radius": "W zasięgu pracy",
+      "location_within_radius": "W zasięgu pracy (odległość w linii prostej)",
       "profession_related": "Pokrewny zawód (wspólne umiejętności)",
       "skills_history_reported": "Umiejętności wskazane w historii organizacji (niezweryfikowane)"
     },
@@ -8760,7 +8763,7 @@
       "pay_above_offer": "Oczekiwane wynagrodzenie wyższe niż oferta",
       "accommodation_needed_not_provided": "Potrzebuje zakwaterowania, niezapewnione",
       "profession_mismatch": "Inny zawód",
-      "location_outside_radius": "Poza zasięgiem pracy"
+      "location_outside_radius": "Poza zasięgiem pracy (odległość w linii prostej)"
     },
     "candidate": "Kandydat",
     "privacy": {
@@ -10114,6 +10117,7 @@
     "subtitle": "Podaj swój zawód i dostępność. Zamienimy to w szkic profilu, który sprawdzisz — nic nie jest publikowane automatycznie.",
     "fullName": "Imię i nazwisko",
     "profession": "Branża i rodzaj pracy",
+    "professionPlaceholder": "Wybierz branżę i rodzaj pracy",
     "targetCountries": "Kraje, w których chcesz pracować",
     "targetCountriesHelp": "Kraje, w których chcesz pracować, oddzielone przecinkami (na przykład: Holandia, Niemcy).",
     "availableFrom": "Dostępny od",
@@ -10619,7 +10623,7 @@
     "navLabel": "O LabourMarket.ai",
     "eyebrow": "O platformie",
     "title": "Czym jest LabourMarket.ai",
-    "lede": "LabourMarket.ai to operacyjna platforma rynku pracy. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — a nie tylko wyszukiwania ofert.",
+    "lede": "LabourMarket.ai to operacyjna platforma rynku pracy. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — od pierwszej rozmowy do następnej szansy.",
     "hero": {
       "lead": "Zawodowa wartość człowieka nie powinna znikać za każdym razem, gdy zmienia pracodawcę. Prawdziwa praca może stać się trwałą historią zawodową: co osoba robiła, gdzie, kiedy, jak długo, w jakiej roli, z jakimi umiejętnościami i jakie dowody oraz potwierdzenia to wspierają.",
       "leadOrg": "Dla organizacji ta sama prawdziwa praca buduje historię tego, co firma faktycznie zrobiła: projekty, zespoły, wykonane prace, godziny, kompetencje i dowody.",
@@ -14030,14 +14034,15 @@
           "headcount": "Ile osób jest potrzebnych?"
         },
         "unclear": "Nie jestem pewien, czy coś oferujesz, czy czegoś szukasz. Powiedz, co masz, albo czego potrzebujesz.",
-        "goodsChannelGated": "Na platformie nie ma jeszcze kanału dla kupujących towary, więc nikt tu nie zobaczy tej oferty sprzedaży. Nic z tego, co napisałeś/aś, nie zostało nigdzie zapisane.",
+        "goodsChannelGated": "Możesz wystawić to na tablicy ogłoszeń w dziale „Towary” — zobaczą to osoby przeglądające tablicę. Nic nie jest zapisywane, dopóki sam/a nie opublikujesz.",
         "chipListings": "Otwórz ogłoszenia",
         "capacityNext": "Mogę zapisać Twoją dostępność na karcie pracy albo od razu wyszukać pracę — wyniki to obecnie otwarte zapytania.",
         "unsupported": "Tego nie można zaoferować przez platformę. Nie ma dla tego dostępnej ścieżki.",
-        "legalCheckFood": "Sprzedaż żywności lub produktów z własnej uprawy podlega przepisom o sprzedaży żywności, higienie i marketingu, które trzeba by najpierw sprawdzić — platforma nie ma jeszcze zatwierdzonego kanału dla takich produktów.",
+        "legalCheckFood": "Sprzedaż żywności lub produktów z własnej uprawy podlega przepisom o sprzedaży żywności, higienie i marketingu. Możesz przygotować ogłoszenie jako wersję roboczą; przy publikacji poprosimy o potwierdzenie, że sprawdziłeś/aś przepisy, które Cię dotyczą.",
         "goodsListable": "To wygląda na zasób związany z pracą — możesz dodać go jako ogłoszenie na tablicy ogłoszeń.",
+        "goodsListableGoods": "Możesz wystawić to w dziale „Towary” na tablicy ogłoszeń — zobaczą to osoby przeglądające tablicę. Nic nie jest zapisywane, dopóki sam/a nie opublikujesz.",
         "goodsListableRental": "To wygląda na dostępny sprzęt roboczy — możesz dodać go jako ogłoszenie wynajmu na tablicy ogłoszeń.",
-        "goodsCategoryUnsupported": "Ta kategoria nie jest dziś obsługiwana na tablicy ogłoszeń ograniczonej do tematyki pracy. Nic z tego, co napisałeś/aś, nie zostało zapisane.",
+        "goodsCategoryUnsupported": "Tego nie można wystawić na tablicy ogłoszeń. Nic z tego, co napisałeś/aś, nie zostało zapisane.",
         "serviceNext": "Możesz dodać to jako ofertę usługi, aby inni mogli ją znaleźć.",
         "chipServices": "Otwórz tablicę usług",
         "corrected": "Zaktualizowano: {changes}.",

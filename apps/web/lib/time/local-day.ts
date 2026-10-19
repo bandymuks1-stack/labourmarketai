@@ -103,6 +103,32 @@ export function resolveWorkToday(opts: {
   };
 }
 
+/**
+ * The UTC instant at which calendar day `dayIso` begins in `timeZone`
+ * (null/unknown zone → UTC midnight). Pure; uses Intl only. Audit 2026-10-16.
+ */
+export function dayStartInstantIso(dayIso: string, timeZone: string | null): string {
+  const utcMidnight = new Date(`${dayIso}T00:00:00.000Z`);
+  if (Number.isNaN(utcMidnight.getTime())) return new Date(NaN).toString();
+  if (!isValidTimeZone(timeZone)) return utcMidnight.toISOString();
+  // What wall-clock time does UTC midnight show in the zone? The difference
+  // is the zone offset at that instant; subtracting it gives local midnight.
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(utcMidnight);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? "0");
+  const asIfUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
+  const offsetMs = asIfUtc - utcMidnight.getTime();
+  return new Date(utcMidnight.getTime() - offsetMs).toISOString();
+}
+
 /** True when `day` is later than the horizon (a truly future work day). */
 export function isFutureWorkDay(day: string, today: Pick<WorkToday, "horizonIso">): boolean {
   return DAY_RX.test(day) && day > today.horizonIso;

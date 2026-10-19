@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 
+import { reportClientError } from "@/lib/telemetry/report-client-error";
+
 /**
  * Root error boundary for all locale pages (P0: previously there was NONE, so
  * any client error showed Next's dead "Application error" screen with no
@@ -54,6 +56,9 @@ export default function LocaleError({
   const chunk = isChunkError(error);
 
   useEffect(() => {
+    // One sanitised crash report (no identity, no query string; never throws,
+    // and a beacon survives the reload below). 2026-10-18 incident.
+    reportClientError("boundary", error);
     if (chunk && typeof window !== "undefined") {
       // Reload at most once per tab-session so a genuinely broken chunk can't
       // loop forever — after that the retry UI shows instead.
