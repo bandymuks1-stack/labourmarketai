@@ -116,6 +116,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261019190000_",
       // 2026-10-19: the worker board finds a need's company through its organization.
       "20261019200000_",
+      // 2026-10-19: B2B-9 — the project manager reads the brigade's hours on the project.
+      "20261019210000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
