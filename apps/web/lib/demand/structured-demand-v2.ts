@@ -113,6 +113,7 @@ export const REQUIREMENT_LANGUAGES = [
   "sv",
   "pl",
   "ru",
+  "uk",
 ] as const;
 
 export const LISTING_KINDS = ["active_vacancy", "talent_pool"] as const;
