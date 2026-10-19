@@ -1,7 +1,9 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
+
+import { bearerOf, qaApi } from "./prod-qa-api";
 
 /**
  * PRODUCTION COMPANY CHAIN — the three company-path steps the Product Master
@@ -62,28 +64,13 @@ async function useWorkspace(page: Page, orgName: string): Promise<void> {
   await expect(chip).toContainText(orgName, { timeout: 30_000 });
 }
 
-/** The access token out of a minted @supabase/ssr storage state. */
-function bearerOf(slot: string): string {
-  const s = JSON.parse(readFileSync(state(slot), "utf8")) as { cookies: { name: string; value: string }[] };
-  const raw = s.cookies
-    .filter((c) => /^sb-.*-auth-token(\.\d+)?$/.test(c.name))
-    .sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }))
-    .map((c) => c.value)
-    .join("");
-  const b64 = raw.startsWith("base64-") ? raw.slice(7) : raw;
-  const json = JSON.parse(Buffer.from(b64.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
-  return json.access_token as string;
-}
-
 let workerId = "";
 let requestId = "";
 
 test("C-0. the worker's own worker id (own row, own token)", async () => {
   const token = bearerOf("worker");
   const sub = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8")).sub as string;
-  const res = await fetch(`${SUPA}/rest/v1/workers?select=id&profile_id=eq.${sub}`, {
-    headers: { apikey: ANON, authorization: `Bearer ${token}` },
-  });
+  const res = await qaApi(`/rest/v1/workers?select=id&profile_id=eq.${encodeURIComponent(sub)}`, token);
   expect(res.status, "own worker row answered").toBe(200);
   const rows = (await res.json()) as { id: string }[];
   expect(rows.length, "exactly one own worker row").toBe(1);

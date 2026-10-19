@@ -1,7 +1,9 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect } from "@playwright/test";
+
+import { bearerOf, qaApi } from "./prod-qa-api";
 
 /**
  * PRODUCTION — a found worker is anonymous IN THE API (#2477, decision 0027).
@@ -57,38 +59,14 @@ const PROJECTION_KEYS = new Set([
   "detail_unlocked",
 ]);
 
-/** The access token out of a minted @supabase/ssr storage state. */
-function bearerOf(slot: string): string {
-  const s = JSON.parse(readFileSync(state(slot), "utf8")) as { cookies: { name: string; value: string }[] };
-  const parts = s.cookies
-    .filter((c) => /^sb-.*-auth-token(\.\d+)?$/.test(c.name))
-    .sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }));
-  const raw = parts.map((c) => c.value).join("");
-  const b64 = raw.startsWith("base64-") ? raw.slice(7) : raw;
-  const json = JSON.parse(Buffer.from(b64.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
-  return json.access_token as string;
-}
-
-function headers(token: string | null): Record<string, string> {
-  return {
-    apikey: ANON,
-    authorization: `Bearer ${token ?? ANON}`,
-    "content-type": "application/json",
-  };
-}
-
 async function workerRows(token: string | null): Promise<{ status: number; rows: { id: string }[] }> {
-  const res = await fetch(`${SUPA}/rest/v1/workers?select=id&limit=1000`, { headers: headers(token) });
+  const res = await qaApi("/rest/v1/workers?select=id&limit=1000", token);
   const body = res.ok ? ((await res.json()) as { id: string }[]) : [];
   return { status: res.status, rows: body };
 }
 
 async function rpc(token: string | null, fn: string, args: Record<string, unknown>): Promise<{ status: number; data: unknown }> {
-  const res = await fetch(`${SUPA}/rest/v1/rpc/${fn}`, {
-    method: "POST",
-    headers: headers(token),
-    body: JSON.stringify(args),
-  });
+  const res = await qaApi(`/rest/v1/rpc/${fn}`, token, { method: "POST", body: args });
   let data: unknown = null;
   try {
     data = await res.json();

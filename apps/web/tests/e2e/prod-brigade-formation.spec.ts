@@ -1,8 +1,9 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { inviteCapGate } from "./invite-cap";
 import { chooseWorkContextIfAsked } from "./worklog-context";
+import { bearerOf, qaApi } from "./prod-qa-api";
 import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
 
 /**
@@ -453,26 +454,11 @@ test("B2B-9. the buyer sees the brigade's work on its own project", async ({ bro
   await ctx.close();
 });
 
-/** The access token out of a minted @supabase/ssr storage state. */
-function bearerOf(slot: string): string {
-  const st = JSON.parse(readFileSync(state(slot), "utf8")) as { cookies: { name: string; value: string }[] };
-  const raw = st.cookies
-    .filter((c) => /^sb-.*-auth-token(\.\d+)?$/.test(c.name))
-    .sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }))
-    .map((c) => c.value)
-    .join("");
-  const b64 = raw.startsWith("base64-") ? raw.slice(7) : raw;
-  return JSON.parse(Buffer.from(b64.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8")).access_token as string;
-}
-
 /** Hours the hours-only door returns to `token` for the buyer's project (counts only, never a field). */
 async function teamDoor(token: string | null): Promise<{ status: number; rows: number; hours: number; textFields: number }> {
-  const SUPA = process.env.PROD_QA_SUPABASE_URL ?? "";
-  const ANON = process.env.PROD_QA_ANON_KEY ?? "";
-  const res = await fetch(`${SUPA}/rest/v1/rpc/project_team_journal_hour_rows_v1`, {
+  const res = await qaApi("/rest/v1/rpc/project_team_journal_hour_rows_v1", token, {
     method: "POST",
-    headers: { apikey: ANON, authorization: `Bearer ${token ?? ANON}`, "content-type": "application/json" },
-    body: JSON.stringify({ p_project_id: gamaProjectId }),
+    body: { p_project_id: gamaProjectId },
   });
   const data = res.ok ? ((await res.json()) as { metrics: { metric_slug: string; value_numeric: number | null; unit_slug: string | null; value_text: string | null }[] }[]) : [];
   let hours = 0;

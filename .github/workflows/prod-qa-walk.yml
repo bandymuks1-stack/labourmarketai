@@ -221,7 +221,7 @@ jobs:
           mint "qa.worker+goal3@labourmarket.ai"   worker2
           mint "qa.agency+multiw@labourmarket.ai"  agency
           # employee-beta-gate.spec.ts reads the original single-worker file.
-          cp tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
+          install -m 600 tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
 
       - name: Walk
         shell: bash
@@ -296,6 +296,17 @@ jobs:
       # assertion message names the testid and the expected text, nothing more.
       # `prod-qa-walk.log` is the list reporter's text — exactly what used to be
       # glued to the front of prod-qa-result.json, now in its own file.
+      # Sessions never outlive the walk: every minted session's refresh token is
+      # revoked at Supabase and every session file deleted, pass or fail
+      # (scripts/prod-qa-revoke-sessions.ts prints counts only).
+      - name: Revoke and delete the synthetic sessions
+        if: always()
+        shell: bash
+        run: |
+          cd apps/web
+          pnpm exec tsx scripts/prod-qa-revoke-sessions.ts
+          ls tests/e2e/.storage-state.prod-qa*.json 2>/dev/null && { echo "::error::a session file survived cleanup"; exit 1; } || echo "no session file left"
+
       - name: Upload result (no screenshots, no traces, no sessions)
         if: always()
         uses: actions/upload-artifact@v4
