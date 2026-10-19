@@ -10944,7 +10944,20 @@
       "preferredCountries": "Preferred region",
       "availability": "Availability",
       "salaryExpectation": "Pay expectation",
-      "skillsCount": "Skills"
+      "skillsCount": "Skills",
+      "anonymousLabel": "Shown to companies as",
+      "currentCountry": "Current country",
+      "availableFrom": "Available from",
+      "contractType": "Engagement form",
+      "payBasis": "Pay basis",
+      "nightShifts": "Night shifts",
+      "weekendShifts": "Weekends",
+      "overtime": "Overtime",
+      "drivingLicence": "Driving licence",
+      "ownVehicle": "Own vehicle",
+      "ownTools": "Own tools",
+      "yes": "Yes",
+      "no": "No"
     },
     "labels": {
       "decidedAt": "Chosen",

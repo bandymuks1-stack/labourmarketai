@@ -10944,7 +10944,20 @@
       "preferredCountries": "Pageidaujamas regionas",
       "availability": "Prieinamumas",
       "salaryExpectation": "Atlygio lūkestis",
-      "skillsCount": "Įgūdžių"
+      "skillsCount": "Įgūdžių",
+      "anonymousLabel": "Įmonėms rodomas kaip",
+      "currentCountry": "Dabartinė šalis",
+      "availableFrom": "Gali pradėti nuo",
+      "contractType": "Darbo forma",
+      "payBasis": "Apmokėjimo būdas",
+      "nightShifts": "Naktinės pamainos",
+      "weekendShifts": "Savaitgaliai",
+      "overtime": "Viršvalandžiai",
+      "drivingLicence": "Vairuotojo pažymėjimas",
+      "ownVehicle": "Nuosavas transportas",
+      "ownTools": "Nuosavi įrankiai",
+      "yes": "Taip",
+      "no": "Ne"
     },
     "labels": {
       "decidedAt": "Pasirinkta",

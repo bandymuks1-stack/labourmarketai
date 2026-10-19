@@ -438,6 +438,7 @@ export async function runScoutingCore(
         shortlistNote: shortlist.get(c.workerId)?.note ?? null,
         lastActiveBucket: c.lastActiveBucket,
         actionability,
+        startDateSet: c.startDateSet,
       }),
     )
     // Rank via the SHARED need-context comparator (§19 — strength, coverage,

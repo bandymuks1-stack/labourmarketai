@@ -42,6 +42,11 @@ describe("person page — name only with a working relationship", () => {
     expect(helper).not.toMatch(/worker_profile_discoverable|can_view_worker|profile_discoverability/);
   });
 
+  it("prefers the ONE database predicate, with the relationship reads as the pre-apply fallback", () => {
+    expect(helper).toContain('rpc("caller_has_worker_relation_v1"');
+    expect(helper.indexOf('rpc("caller_has_worker_relation_v1"')).toBeLessThan(helper.indexOf('rpc("caller_manages_worker"'));
+  });
+
   it("fails closed: any error means no relationship", () => {
     expect(helper).toMatch(/catch \{\s*return false;\s*\}/);
     expect(helper).toMatch(/return false;\s*\}\s*$/);
