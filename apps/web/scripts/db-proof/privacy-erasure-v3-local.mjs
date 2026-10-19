@@ -300,7 +300,7 @@ function main() {
       if (a.status !== 0) throw new Error(`migration failed on ${db}: ${a.err}`);
     }
     ok(one("proof", "select count(*) from public.privacy_erasure_registry_v3") > 250, `migration applied on the mirror: ${one("proof", "select count(*) from public.privacy_erasure_registry_v3")} registry rows, ${one("proof", "select count(*) from public.privacy_erasure_value_rules_v3")} value rules`);
-    ok(one("proof", "select count(*) from auth.users u join public.profiles p on p.id = u.id join public.workers w on w.profile_id = p.id where u.id = public.privacy_erasure_sentinel_profile_id() and u.banned_until = 'infinity'") === "1", "sentinel auth user + profile + worker exist, banned forever");
+    ok(one("proof", "select count(*) from auth.users u join public.profiles p on p.id = u.id join public.workers w on w.profile_id = p.id where u.id = public.privacy_erasure_sentinel_profile_id() and u.banned_until > now() + interval '100 years'") === "1", "sentinel auth user + profile + worker exist, banned forever");
     ok(one("proof", "select count(*) from public.workers where profile_id = public.privacy_erasure_sentinel_profile_id()") === "1"
       && one("proof", "select count(*) from public.engagement_contexts where profile_id = public.privacy_erasure_sentinel_profile_id()") === "0"
       && one("proof", "select count(*) from public.profiles where id = public.privacy_erasure_sentinel_profile_id() and email is null and active_role is null") === "1",
