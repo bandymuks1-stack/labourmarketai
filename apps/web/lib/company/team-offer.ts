@@ -124,6 +124,13 @@ export async function offerNegotiationAvailable(): Promise<boolean> {
   return r.status === "ok";
 }
 
+function parseOfferedCount(raw: unknown): { requestId: string; offered: number } | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as { request_id?: unknown; offered?: unknown };
+  if (typeof r.request_id !== "string" || typeof r.offered !== "number") return null;
+  return { requestId: r.request_id, offered: r.offered };
+}
+
 /** Bound on how many of the caller's own needs are asked per read. */
 export const OPEN_TEAM_OFFER_SCAN_LIMIT = 20;
 
@@ -138,6 +145,17 @@ export async function countOpenTeamOffersByDemand(
   demandIds: readonly string[],
 ): Promise<Map<string, number>> {
   const ids = [...new Set(demandIds)].slice(0, OPEN_TEAM_OFFER_SCAN_LIMIT);
+  if (ids.length === 0) return new Map();
+  // ONE read (production 2026-10-15): the spine renders on every dashboard
+  // page and used to call the per-need list once per open need (up to 20
+  // round trips) only to count `offered` rows. count_received_team_offers_v1
+  // applies the same receiver rule and the same filter in one call.
+  const counted = await readRows("count_received_team_offers_v1", { p_request_ids: ids }, parseOfferedCount);
+  if (counted.status === "ok") {
+    return new Map(counted.rows.filter((r) => r.offered > 0).map((r) => [r.requestId, r.offered]));
+  }
+  if (counted.status === "unavailable") return new Map();
+  // Not applied yet: the per-need reads give the same answer, more slowly.
   const reads = await Promise.all(ids.map((id) => listReceivedOffers(id)));
   const out = new Map<string, number>();
   reads.forEach((r, i) => {
