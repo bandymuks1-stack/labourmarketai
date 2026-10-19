@@ -173,7 +173,7 @@ ACQUISITION = [
      "Atsakę partneriai gauna įmonės ar agentūros paskyrą ir pirmą poreikį ar pasiūlymą kartu su agentu",
      "1.5, 4.1, 4.15", "Atsakymai → paskyros → pirmas poreikis", "Savininkas"),
     ("A5", "Viešos svetainės (LabourMarket, darbo skelbimai, nonstopgroup.eu)",
-     "Kiekviena nuoroda „Paskelbti poreikį“ sekama (#2515); vieša poreikio forma veikia be paskyros",
+     "Nuorodos „Paskelbti poreikį“ sekamos nuo #2515, išskyrus pradinio puslapio duris (pradinis puslapis įšaldytas iki jo plano); vieša poreikio forma veikia be paskyros",
      "4.1, 9.14", "Įmonės mygtukų paspaudimai → pateikti poreikiai", "Agentas (matavimas), savininkas (turinys)"),
     ("A6", "Aktyvacija per 24 val.",
      "Kiekvienam naujam poreikiui – kandidatai ir brigados iš esamos paieškos ir pasiūlymų, žinutė per pokalbius",
