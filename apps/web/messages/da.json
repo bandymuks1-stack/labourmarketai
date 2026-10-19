@@ -7696,5 +7696,9 @@
     "tasks": "Ingen opgaver har frist i denne uge. Opret en opgave – den bliver ugens mål.",
     "addStages": "Tilføj etaper",
     "addTask": "Opret en opgave"
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: hvad du har, og hvad der mangler",
+    "anyCountry": "ethvert land"
   }
 }

@@ -7696,5 +7696,9 @@
     "tasks": "Sel nädalal pole tähtajaga ülesandeid. Loo ülesanne – sellest saab nädala eesmärk.",
     "addStages": "Lisa etapid",
     "addTask": "Loo ülesanne"
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: mis sul on ja mis puudub",
+    "anyCountry": "iga riik"
   }
 }

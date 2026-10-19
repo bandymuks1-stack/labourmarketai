@@ -7696,5 +7696,9 @@
     "tasks": "Inga uppgifter har deadline den här veckan. Skapa en uppgift – den blir veckans mål.",
     "addStages": "Lägg till etapper",
     "addTask": "Skapa en uppgift"
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: vad du har och vad som saknas",
+    "anyCountry": "vilket land som helst"
   }
 }

@@ -7696,5 +7696,9 @@
     "tasks": "Šonedēļ nav uzdevumu ar termiņu. Izveido uzdevumu – tas kļūs par nedēļas mērķi.",
     "addStages": "Pievienot posmus",
     "addTask": "Izveidot uzdevumu"
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: kas tev jau ir un kā trūkst",
+    "anyCountry": "jebkura valsts"
   }
 }
