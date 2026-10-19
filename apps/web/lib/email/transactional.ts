@@ -1,5 +1,7 @@
 import "server-only";
 
+import { sendSmtp, smtpConfigFromEnv, type SmtpConfig } from "@/lib/email/smtp";
+
 /**
  * Provider-neutral transactional email adapter (core-network area B).
  *
@@ -38,8 +40,18 @@ const SEND_TIMEOUT_MS = 10_000;
 
 function config():
   | { provider: "resend" | "postmark"; apiKey: string; from: string }
+  | { provider: "smtp"; smtp: SmtpConfig }
   | null {
   const provider = (process.env.INVITE_EMAIL_PROVIDER ?? "").trim().toLowerCase();
+  // 'smtp' = the platform's own mailbox (owner decision 2026-10-19: Hostinger,
+  // info@labourmarket.ai) — the same LM_SMTP_* channel the GDPR notices use,
+  // not a second integration. INVITE_EMAIL_FROM may override the sender.
+  if (provider === "smtp") {
+    const smtp = smtpConfigFromEnv();
+    if (!smtp) return null;
+    const from = (process.env.INVITE_EMAIL_FROM ?? "").trim();
+    return { provider: "smtp", smtp: from ? { ...smtp, from } : smtp };
+  }
   const apiKey = (process.env.INVITE_EMAIL_API_KEY ?? "").trim();
   const from = (process.env.INVITE_EMAIL_FROM ?? "").trim();
   if ((provider !== "resend" && provider !== "postmark") || !apiKey || !from) {
@@ -93,6 +105,14 @@ export async function sendTransactionalEmail(
     // address or key can never leak; the caller logs what it needs.
     if (logProviderActive()) return { status: "logged" };
     return { status: "not_configured" };
+  }
+
+  if (cfg.provider === "smtp") {
+    // `sent` only after the mail server answered 250 to the end of DATA.
+    const r = await sendSmtp(cfg.smtp, { to: message.to, subject: message.subject, text: message.text });
+    if (r.status === "sent") return { status: "sent" };
+    if (r.status === "not_configured") return { status: "not_configured" };
+    return { status: "failed", reason: r.reason };
   }
 
   const controller = new AbortController();

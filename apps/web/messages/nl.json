@@ -19639,5 +19639,17 @@
     "tasks": "Deze week is er geen taak met een deadline. Maak een taak aan – die wordt het weekdoel.",
     "addStages": "Fasen toevoegen",
     "addTask": "Taak aanmaken"
+  },
+  "workerPublicSummary": {
+    "title": "Professionele samenvatting voor werkgevers",
+    "audience": "Alleen bedrijven en bureaus waarmee je een werkrelatie hebt zien dit (je werkt voor hen, zit in hun team of hebt hun aanbod aangenomen). Het wordt niet getoond in de open zoekfunctie. Je persoonlijke beschrijving hierboven blijft alleen voor jou zichtbaar.",
+    "headline": "Kop (max. 120 tekens)",
+    "headlinePlaceholder": "bijv. Tegelzetter, 8 jaar, werk in LT en NO",
+    "bio": "Korte samenvatting (max. 1000 tekens)",
+    "bioPlaceholder": "Waar je het beste in bent, welk werk je hebt gedaan, wat je zoekt.",
+    "save": "Opslaan",
+    "saved": "Opgeslagen",
+    "tooLong": "De tekst is te lang.",
+    "error": "Opslaan mislukt. Probeer het opnieuw."
   }
 }

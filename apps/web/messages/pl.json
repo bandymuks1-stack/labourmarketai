@@ -19639,5 +19639,17 @@
     "tasks": "W tym tygodniu nie ma zadań z terminem. Utwórz zadanie – stanie się celem tygodnia.",
     "addStages": "Dodaj etapy",
     "addTask": "Utwórz zadanie"
+  },
+  "workerPublicSummary": {
+    "title": "Profesjonalne przedstawienie dla pracodawców",
+    "audience": "Ten tekst widzą tylko firmy i agencje, z którymi masz relację zawodową (pracujesz dla nich, jesteś w ich zespole lub przyjąłeś ich ofertę). Nie jest pokazywany w otwartym wyszukiwaniu. Twój osobisty opis powyżej pozostaje widoczny tylko dla ciebie.",
+    "headline": "Nagłówek (do 120 znaków)",
+    "headlinePlaceholder": "np. Glazurnik, 8 lat, pracuję w LT i NO",
+    "bio": "Krótki opis (do 1000 znaków)",
+    "bioPlaceholder": "W czym jesteś najlepszy, jakie prace wykonałeś, czego szukasz.",
+    "save": "Zapisz",
+    "saved": "Zapisano",
+    "tooLong": "Tekst jest za długi.",
+    "error": "Nie udało się zapisać. Spróbuj ponownie."
   }
 }

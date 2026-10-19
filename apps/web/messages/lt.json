@@ -19639,5 +19639,17 @@
     "tasks": "Šią savaitę užduočių su terminu nėra. Sukurk užduotį – ji taps šios savaitės tikslu.",
     "addStages": "Pridėti etapus",
     "addTask": "Sukurti užduotį"
+  },
+  "workerPublicSummary": {
+    "title": "Profesinis prisistatymas darbdaviams",
+    "audience": "Šį tekstą mato tik įmonės ir agentūros, su kuriomis turi darbo ryšį (dirbi joms, esi jų komandoje ar priėmei jų pasiūlymą). Atvirai paieškai jis nerodomas. Tavo asmeninis aprašymas aukščiau lieka matomas tik tau.",
+    "headline": "Antraštė (iki 120 ženklų)",
+    "headlinePlaceholder": "pvz. Plytelių klojėjas, 8 metai, dirbu LT ir NO",
+    "bio": "Trumpas aprašymas (iki 1000 ženklų)",
+    "bioPlaceholder": "Ką geriausiai moki, kokius darbus atlikai, ko ieškai.",
+    "save": "Išsaugoti",
+    "saved": "Išsaugota",
+    "tooLong": "Per ilgas tekstas.",
+    "error": "Nepavyko išsaugoti. Pabandyk dar kartą."
   }
 }

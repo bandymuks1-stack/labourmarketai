@@ -1655,6 +1655,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261019140000_privacy_erasure_executor_v3.sql",
       // 2026-10-19 (RED by data UPDATE, owner-approved with the executor): two registry rows.
       "20261019150000_privacy_erasure_registry_not_null_authors_v1.sql",
+      // 2026-10-19 (RED by SECURITY DEFINER + GRANT): the person's own public summary (PER-2).
+      "20261019160000_worker_public_summary_v1.sql",
 ]);
   });
 

@@ -204,7 +204,7 @@ const PERSON: readonly CapabilityRow[] = [
     anchors: ["lib/profile", "lib/worker"],
     coreModule: "lib/worker/work-card-core.ts",
     surfaces: ["app/[locale]/dashboard/profile/page.tsx"],
-    note: "`workers.headline` and `workers.bio` still have no person-facing editor.",
+    note: "The person writes their own employer-facing headline and summary on the profile page (save_worker_public_summary_v1, own row only); organisations with a working relationship read them on the person page. The private narrative stays profiles.profile_text.",
   },
   {
     id: "PER-3",
