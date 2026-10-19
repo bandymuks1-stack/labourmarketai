@@ -201,6 +201,43 @@ export async function requestContactDisclosureAction(input: {
   return { kind: "ok", status: "created" };
 }
 
+/** One external profile link the worker chose to share with THIS organization for THIS need.
+ *  Read through list_disclosed_external_profiles_v1, which re-checks the consent ledger on every
+ *  read: a withdrawal, a link made private again or a disconnect empties this immediately. */
+export interface SharedExternalLink {
+  readonly id: string;
+  readonly platform: string;
+  readonly url: string;
+}
+
+const SHARED_LINK_PLATFORMS = new Set([
+  "linkedin",
+  "github",
+  "behance",
+  "portfolio",
+  "certification_registry",
+  "other",
+]);
+
+/** Defence in depth on the read: only https links of the closed platform set leave this module. */
+function toSharedLinks(rows: unknown): SharedExternalLink[] {
+  if (!Array.isArray(rows)) return [];
+  const out: SharedExternalLink[] = [];
+  for (const r of rows as { id?: unknown; platform?: unknown; url?: unknown }[]) {
+    if (
+      typeof r?.id === "string" &&
+      typeof r.platform === "string" &&
+      SHARED_LINK_PLATFORMS.has(r.platform) &&
+      typeof r.url === "string" &&
+      r.url.startsWith("https://") &&
+      r.url.length <= 500
+    ) {
+      out.push({ id: r.id, platform: r.platform, url: r.url });
+    }
+  }
+  return out;
+}
+
 export interface ScoutingContactRequestState {
   /** The ask row's own id — what `withdraw_contact_disclosure_request_v1`
    *  addresses. Carried because the employer sees the ask here and, until
@@ -211,6 +248,8 @@ export interface ScoutingContactRequestState {
    *  (verified live via has_employer_data_disclosure — a worker withdrawal
    *  flips this immediately; never derived from the request row). */
   readonly disclosureGranted: boolean;
+  /** External profile links shared under the live grant; empty unless the worker chose them. */
+  readonly sharedLinks: readonly SharedExternalLink[];
 }
 
 export interface ScoutingContactRequestStates {
@@ -257,7 +296,12 @@ export async function getScoutingContactRequestStates(
       Date.parse(r.expires_at) <= Date.now();
     const status = expired ? "expired" : r.status;
     if (!isContactDisclosureStatus(status)) continue;
-    byWorker[r.worker_id] = { requestRowId: r.id, status, disclosureGranted: false };
+    byWorker[r.worker_id] = {
+      requestRowId: r.id,
+      status,
+      disclosureGranted: false,
+      sharedLinks: [],
+    };
     if (status === "accepted") {
       acceptedRows.push({ workerId: r.worker_id, organizationId: r.organization_id });
     }
@@ -291,9 +335,31 @@ export async function getScoutingContactRequestStates(
           granted = legacy.data;
         }
         if (granted === true) {
+          // The links the worker chose to share, if any. The RPC re-checks the ledger (latest
+          // event, current consent version, `external_profiles` in the granted fields) and returns
+          // only links still marked shareable and connected; any failure leaves the list empty.
+          let sharedLinks: SharedExternalLink[] = [];
+          try {
+            const { data: links, error: linksError } = await asAny(supabase).rpc(
+              "list_disclosed_external_profiles_v1",
+              {
+                p_worker_id: workerId,
+                p_organization_id: organizationId,
+                p_request_id: requestId,
+              },
+            );
+            if (!linksError) sharedLinks = toSharedLinks(links);
+          } catch {
+            sharedLinks = [];
+          }
           const prev = byWorker[workerId];
           if (prev) {
-            byWorker[workerId] = { ...prev, status: "accepted", disclosureGranted: true };
+            byWorker[workerId] = {
+              ...prev,
+              status: "accepted",
+              disclosureGranted: true,
+              sharedLinks,
+            };
           }
         }
       } catch {
@@ -434,6 +500,29 @@ export async function listMyContactDisclosureRequests(): Promise<WorkerContactRe
   return { kind: "ok", requests };
 }
 
+/** How many of the caller's OWN external profile links are marked "Shareable" and still
+ *  connected. Owner-scoped (RLS). Any failure answers 0, so the opt-in is simply not offered. */
+export async function countMyShareableExternalProfiles(): Promise<number> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 0;
+  const { data: worker } = await asAny(supabase)
+    .from("workers")
+    .select("id")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  if (!worker?.id) return 0;
+  const { count, error } = await asAny(supabase)
+    .from("worker_external_profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("worker_id", worker.id)
+    .eq("visibility", "employers")
+    .is("disconnected_at", null);
+  return error || typeof count !== "number" ? 0 : count;
+}
+
 export type RespondContactDisclosureResult =
   | { kind: "ok"; status: "accepted" | "declined" }
   | { kind: "needs-migration" }
@@ -490,6 +579,9 @@ export type GrantContactDisclosureResult =
 export async function grantContactDisclosureAction(input: {
   locale: string;
   id: string;
+  /** The worker's own opt-in (unchecked by default): also share the external profile links they
+   *  marked "Shareable". Added to the granted fields only when at least one such link exists. */
+  includeExternalProfiles?: boolean;
 }): Promise<GrantContactDisclosureResult> {
   if (!input.id) return { kind: "error" };
   const supabase = await createClient();
@@ -521,8 +613,22 @@ export async function grantContactDisclosureAction(input: {
     .maybeSingle();
   if (!worker) return { kind: "error" };
 
-  const fields = validateRequestedFields(row.requested_fields);
-  if (!fields) return { kind: "error" };
+  const requested = validateRequestedFields(row.requested_fields);
+  if (!requested) return { kind: "error" };
+  let fields: ContactDisclosureField[] = requested;
+  if (input.includeExternalProfiles === true && !requested.includes("external_profiles")) {
+    // Owner-scoped read (RLS: the worker's own rows only). No shareable link → nothing to add.
+    const { count } = await asAny(supabase)
+      .from("worker_external_profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("worker_id", row.worker_id)
+      .eq("visibility", "employers")
+      .is("disconnected_at", null);
+    if (typeof count === "number" && count > 0) {
+      const withLinks = validateRequestedFields([...requested, "external_profiles"]);
+      if (withLinks) fields = withLinks;
+    }
+  }
 
   const def = EMPLOYER_DATA_DISCLOSURE_V1;
   const { data: grant, error: grantError } = await asAny(supabase).rpc(

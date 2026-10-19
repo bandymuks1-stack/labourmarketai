@@ -17,8 +17,10 @@ import {
  * paths are the owner-scoped SECURITY DEFINER RPCs from DRAFT migration
  * 20260713210000_multi_source_talent_v1 (human-gated, NOT applied yet):
  *   * save_worker_external_profile_v1(platform, url) — add a link;
- *   * set_external_profile_visibility_v1(id, visibility) — saved preference
- *     only in v1 (no employer read path exists — the UI says so);
+ *   * set_external_profile_visibility_v1(id, visibility) — marks a link
+ *     "Shareable" (eligible) or private. Eligible is not visible: a company
+ *     receives a link only through the worker's own per-need disclosure grant
+ *     (20261018130000, read in lib/privacy/contact-disclosure-actions.ts);
  *   * disconnect_external_profile_v1(id) — stamps disconnected_at; NEVER a
  *     hard delete (provenance preserved).
  * All re-validate closed vocabularies + the https-only URL server-side and

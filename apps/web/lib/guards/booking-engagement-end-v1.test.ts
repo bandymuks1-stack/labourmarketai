@@ -1643,6 +1643,10 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261014090100_historical_consolidation_package_v1.sql",
       // 2026-10-14 (RED, needs-human-gate, NOT applied): brigade disband v1.
       "20261014190000_team_disband_v1.sql",
+      // 2026-10-18: external profile links in the contact permission (RED SECURITY DEFINER + GRANT). The
+      // annotation acknowledges the RED class so CI can run; the PR stays a draft with
+      // needs-human-gate and is applied only on the owner's explicit approval.
+      "20261018130000_external_profile_disclosure_v1.sql",
       // 2026-10-18: the worker identity split (RED RLS policy + SECURITY DEFINER + GRANT). The
       // annotation acknowledges the RED class so CI can run; the PR stays a draft with
       // needs-human-gate and is applied only on the owner's explicit approval.
