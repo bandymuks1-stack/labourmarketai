@@ -35,6 +35,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "../../../..");
 const migration = join(repo, "supabase/migrations/20261019140000_privacy_erasure_executor_v3.sql");
 const rollback = join(repo, "supabase/rollbacks/20261019140000_privacy_erasure_executor_v3.down.sql");
+const forwardFix = join(repo, "supabase/migrations/20261019190000_erasure_sentinel_finite_ban_v1.sql");
+const forwardFixRollback = join(repo, "supabase/rollbacks/20261019190000_erasure_sentinel_finite_ban_v1.down.sql");
 const pgBin = process.env.PG16_BIN || "C:\\Program Files\\PostgreSQL\\16\\bin";
 const port = Number(process.env.PG_PROOF_PORT || 5499);
 const tmp = join(repo, ".tmp", `pg-erasure-v3-${process.pid}`);
@@ -300,7 +302,18 @@ function main() {
       if (a.status !== 0) throw new Error(`migration failed on ${db}: ${a.err}`);
     }
     ok(one("proof", "select count(*) from public.privacy_erasure_registry_v3") > 250, `migration applied on the mirror: ${one("proof", "select count(*) from public.privacy_erasure_registry_v3")} registry rows, ${one("proof", "select count(*) from public.privacy_erasure_value_rules_v3")} value rules`);
-    ok(one("proof", "select count(*) from auth.users u join public.profiles p on p.id = u.id join public.workers w on w.profile_id = p.id where u.id = public.privacy_erasure_sentinel_profile_id() and u.banned_until > now() + interval '100 years'") === "1", "sentinel auth user + profile + worker exist, banned forever");
+    // The executor migration alone writes 'infinity', which GoTrue cannot scan
+    // (incident 2026-10-19). The forward fix 20261019190000 must change it to a
+    // FINITE date — asserted on the value itself, because 'infinity' also
+    // passes any "far in the future" comparison.
+    ok(one("proof", "select banned_until::text from auth.users where id = public.privacy_erasure_sentinel_profile_id()") === "infinity", "before the forward fix the sentinel carries 'infinity' (the incident state)");
+    const fix = psqlFile("proof", forwardFix);
+    if (fix.status !== 0) throw new Error(`forward fix failed: ${fix.err}`);
+    ok(one("proof", "select count(*) from auth.users u join public.profiles p on p.id = u.id join public.workers w on w.profile_id = p.id where u.id = public.privacy_erasure_sentinel_profile_id() and isfinite(u.banned_until) and u.banned_until = '2999-12-31 00:00:00+00'") === "1", "sentinel auth user + profile + worker exist, banned until the finite date 2999-12-31 (20261019190000)");
+    ok(one("proof", "select count(*) from auth.users where not isfinite(banned_until)") === "0", "no auth user carries an infinite ban after the forward fix");
+    ok(psqlFile("proof", forwardFixRollback).status !== 0
+      && one("proof", "select banned_until::text from auth.users where id = public.privacy_erasure_sentinel_profile_id()") !== "infinity",
+      "the forward fix's rollback REFUSES (no safe inverse) and leaves the finite ban in place");
     ok(one("proof", "select count(*) from public.workers where profile_id = public.privacy_erasure_sentinel_profile_id()") === "1"
       && one("proof", "select count(*) from public.engagement_contexts where profile_id = public.privacy_erasure_sentinel_profile_id()") === "0"
       && one("proof", "select count(*) from public.profiles where id = public.privacy_erasure_sentinel_profile_id() and email is null and active_role is null") === "1",

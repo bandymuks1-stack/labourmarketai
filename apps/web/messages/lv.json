@@ -7712,5 +7712,8 @@
   "roleLedger": {
     "title": "{profession}, {country}: kas tev jau ir un kā trūkst",
     "anyCountry": "jebkura valsts"
+  },
+  "workObjects": {
+    "addButton": "Pievienot objektu"
   }
 }
