@@ -7712,5 +7712,8 @@
   "roleLedger": {
     "title": "{profession}, {country}: hvad du har, og hvad der mangler",
     "anyCountry": "ethvert land"
+  },
+  "workObjects": {
+    "addButton": "Tilføj objekt"
   }
 }

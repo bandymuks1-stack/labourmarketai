@@ -7712,5 +7712,8 @@
   "roleLedger": {
     "title": "{profession}, {country}: hva du har, og hva som mangler",
     "anyCountry": "hvilket som helst land"
+  },
+  "workObjects": {
+    "addButton": "Legg til objekt"
   }
 }

@@ -7712,5 +7712,8 @@
   "roleLedger": {
     "title": "{profession}, {country}: mis sul on ja mis puudub",
     "anyCountry": "iga riik"
+  },
+  "workObjects": {
+    "addButton": "Lisa objekt"
   }
 }
