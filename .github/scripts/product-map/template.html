@@ -204,13 +204,16 @@ const mix = (ids) => { const c = {}; ids.forEach((id) => { const s = byId[id].s;
 const grid = document.getElementById("chainGrid");
 grid.innerHTML = D.chain.map((n, i) => {
   const c = mix(n.ids); const t = n.ids.length || 1;
-  return `<button class="link" type="button" id="link-${n.key}" data-k="${n.key}" aria-pressed="false"><span class="step">${String(i + 1).padStart(2, "0")} →</span><strong>${esc(n.name)}</strong><small>${esc(n.desc)}</small><span class="mini">${ORDER.map((s) => `<span class="bg-${s}" style="width:${((c[s] || 0) / t) * 100}%"></span>`).join("")}</span><small>${c.LIVE_PROVEN || 0} iš ${n.ids.length} veikia</small></button>`;
+  return `<button class="link" type="button" id="link-${n.key}" data-k="${n.key}" aria-pressed="false"><span class="step">${String(i + 1).padStart(2, "0")} →</span><strong>${esc(n.name)}</strong><small>${esc(n.desc)}</small><span class="mini">${ORDER.map((s) => `<span class="bg-${s}" style="width:${((c[s] || 0) / t) * 100}%"></span>`).join("")}</span><small>${c.LIVE_PROVEN || 0} iš ${n.ids.length} veikia</small>${n.stage ? `<small class="muted">→ ${esc(n.stage)}</small>` : ""}</button>`;
 }).join("");
 function openLink(key) {
   const n = D.chain.find((x) => x.key === key);
   grid.querySelectorAll(".link").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === key)));
   const groups = ORDER.map((s) => [s, n.ids.map((id) => byId[id]).filter((r) => r.s === s)]).filter(([, l]) => l.length);
-  document.getElementById("chainPanel").innerHTML = `<h3>${esc(n.name)} <span class="muted" style="font-weight:400">· ${n.ids.length} funkcijos</span></h3><div class="cols">${groups.map(([s, list]) => `<div>${chip(s, ` · ${list.length}`)}<ul class="flist" style="margin-top:8px">${list.map((r) => `<li><span class="id">${r.id}</span><span>${esc(r.feature)}${r.blocker ? ` <span class="muted">— ${esc(r.blocker)}</span>` : ""}</span></li>`).join("")}</ul></div>`).join("")}</div>`;
+  const impact = n.stage
+    ? `<p style="margin:0 0 12px"><b>Poveikis: ${esc(n.stage)}</b>${n.metric ? ` — ${esc(n.metric)}` : ""}${n.blocker ? `<br><span class="muted">Stabdo: ${esc(n.blocker)}</span>` : ""}</p>`
+    : "";
+  document.getElementById("chainPanel").innerHTML = `<h3>${esc(n.name)} <span class="muted" style="font-weight:400">· ${n.ids.length} funkcijos</span></h3>${impact}<div class="cols">${groups.map(([s, list]) => `<div>${chip(s, ` · ${list.length}`)}<ul class="flist" style="margin-top:8px">${list.map((r) => `<li><span class="id">${r.id}</span><span>${esc(r.feature)}${r.blocker ? ` <span class="muted">— ${esc(r.blocker)}</span>` : ""}</span></li>`).join("")}</ul></div>`).join("")}</div>`;
 }
 grid.addEventListener("click", (e) => { const b = e.target.closest(".link"); if (b) openLink(b.dataset.k); });
 openLink("match");
