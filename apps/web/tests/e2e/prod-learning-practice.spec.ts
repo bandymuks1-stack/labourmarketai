@@ -223,3 +223,38 @@ test("L-8. a company can offer practice without being a school: the intern capac
   // Nothing is submitted.
   await close();
 });
+
+test("L-9 (11.5). the institution sees its learner outcomes, counted and never naming one person", async ({ browser }) => {
+  const { page, close } = await as(browser, "owner");
+  await page.goto("/lt/dashboard");
+  await workspace(page, ALFA);
+  await page.goto("/lt/dashboard/company/education");
+  const outcomes = page.getByTestId("institution-learner-outcomes");
+  await expect(outcomes, "the outcomes report renders for the institution").toBeVisible({ timeout: 30_000 });
+  // Below the k-anonymity floor the counts are withheld; above it they are counts.
+  // Either is the honest answer — a missing block is not.
+  await expect(
+    outcomes.getByTestId("institution-learner-outcomes-suppressed").or(outcomes.getByTestId("institution-learner-outcomes-counts")),
+  ).toBeVisible();
+  await expect(outcomes, "no learner is named inside the outcomes block").not.toContainText(LEARNER);
+  await close();
+});
+
+test("L-10 (11.6). the institution downloads its programme report as a CSV", async ({ browser }) => {
+  const { page, close } = await as(browser, "owner");
+  await page.goto("/lt/dashboard");
+  await workspace(page, ALFA);
+  await page.goto("/lt/dashboard/company/education");
+  const link = page.getByTestId("institution-report-export");
+  await expect(link).toBeVisible({ timeout: 30_000 });
+  const href = await link.getAttribute("href");
+  expect(href, "the export link carries the organization claim").toMatch(/institution-report\/export\?org=/);
+  // The same signed-in session that sees the button fetches the file.
+  const res = await page.request.get(href!);
+  expect(res.status(), "the export answers").toBe(200);
+  expect(res.headers()["content-type"] ?? "").toMatch(/text\/csv/);
+  const csv = await res.text();
+  expect(csv, "the report lists the programme").toContain(PROGRAM);
+  expect(csv, "no learner is named in the file").not.toMatch(LEARNER);
+  await close();
+});
