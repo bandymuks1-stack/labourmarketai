@@ -131,6 +131,7 @@
     "myTitle": "My listings",
     "intro": "List what you offer or need. Only active listings that have not expired are visible to others.",
     "notAvailable": "Not available right now.",
+    "readUnavailable": "Listings could not be read right now. That does not mean there are none — try again in a moment.",
     "empty": "No listings yet. Add your first work resource.",
     "addButton": "Add listing",
     "browseTitle": "Browse active listings",
@@ -3451,6 +3452,8 @@
       "empty": "No privacy requests.",
       "needsMigration": "The privacy request intake is not enabled in this environment.",
       "unavailable": "Privacy requests cannot be read right now.",
+      "due": "Reply due by {date}",
+      "overdue": "Overdue — reply was due by {date}",
       "manualNote": "Processing is manual: a person reviews and completes each request. Nothing on this list acts automatically.",
       "type": {
         "dataExport": "Data export",
@@ -5723,7 +5726,7 @@
         {
           "heading": "AI and connected AI assistants",
           "items": [
-            "Some features use an AI model from Google (the Gemini API): translating messages and job ads between languages, and suggesting what a sentence you type in the chat is asking for. Only the text that task needs is sent. The result is a suggestion — nothing is saved as a fact about you until you confirm it.",
+            "Some features use an AI model from Google (the Gemini API). Today it receives only public market statistics — for example how many open positions a profession has — to phrase a short explanation. Translating messages and job ads, and interpreting a sentence you type in the chat, are prepared but not in use: no message text and no personal data is sent for them. If one of them is put into use, this notice will say so, and only the text that task needs would be sent. Every result is a suggestion — nothing is saved as a fact about you until you confirm it.",
             "You can connect LabourMarket.ai to an AI assistant such as ChatGPT or Claude. You approve each connection yourself on a consent screen; the assistant then acts only with your own permissions, and actions with consequences need a separate confirmation. You can see and disconnect connected apps in your account settings at any time.",
             "What an AI assistant's provider does with your conversation is governed by that provider's own privacy terms."
           ]
@@ -5752,7 +5755,7 @@
           "purpose": "Used only on administrator accounts. Remembers whether administrator controls are hidden and changes nothing about permissions."
         }
       ],
-      "localStorageNote": "Your light or dark theme choice is stored in your browser's local storage, not in a cookie.",
+      "localStorageNote": "Your browser's own storage (not cookies) holds a few items: your light or dark theme choice; which page or campaign first brought you here, stored once so a later sign-up can be attributed to it; a random per-tab session identifier that disappears when the tab closes; and small conveniences such as dismissed notices, recently viewed items and your speech-input language. None of this is shared with any third party or used for advertising, and you can clear it at any time through your browser.",
       "noTracking": "There are no analytics, advertising or third-party tracking cookies on the platform today. If this ever changes, this page will be updated first."
     },
     "pendingLegal": {
@@ -8749,7 +8752,7 @@
       "pay_within_offer": "Pay within offer",
       "accommodation_ok": "Accommodation works",
       "city_match": "Same city",
-      "location_within_radius": "Within the work radius",
+      "location_within_radius": "Within the work radius (straight-line distance)",
       "profession_related": "Related profession (shared skills)",
       "skills_history_reported": "Skills named in organization history (not verified)"
     },
@@ -8760,7 +8763,7 @@
       "pay_above_offer": "Pay expectation above offer",
       "accommodation_needed_not_provided": "Needs accommodation, not provided",
       "profession_mismatch": "Different profession",
-      "location_outside_radius": "Outside the work radius"
+      "location_outside_radius": "Outside the work radius (straight-line distance)"
     },
     "candidate": "Candidate",
     "privacy": {
@@ -10114,6 +10117,7 @@
     "subtitle": "Tell us your trade and availability. We turn it into a draft profile you review — nothing is published automatically.",
     "fullName": "Full name",
     "profession": "Sector & work type",
+    "professionPlaceholder": "Choose your sector and work type",
     "targetCountries": "Countries you want to work in",
     "targetCountriesHelp": "The countries where you want to work, separated by commas (for example: Netherlands, Germany).",
     "availableFrom": "Available from",
@@ -10619,7 +10623,7 @@
     "navLabel": "About LabourMarket.ai",
     "eyebrow": "About the platform",
     "title": "What is LabourMarket.ai",
-    "lede": "LabourMarket.ai is a labour-market operating platform. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — not just a job search.",
+    "lede": "LabourMarket.ai is a labour-market operating platform. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — from the first conversation to the next opportunity.",
     "hero": {
       "lead": "A person's professional value should not disappear every time they change employer. Real work can become lasting professional history: what the person did, where, when, for how long, in what role, with which skills, and what evidence and confirmation supports it.",
       "leadOrg": "For organisations, the same real work builds the record of what the company has actually done: projects, teams, work performed, hours, competencies and evidence.",
@@ -10940,7 +10944,20 @@
       "preferredCountries": "Preferred region",
       "availability": "Availability",
       "salaryExpectation": "Pay expectation",
-      "skillsCount": "Skills"
+      "skillsCount": "Skills",
+      "anonymousLabel": "Shown to companies as",
+      "currentCountry": "Current country",
+      "availableFrom": "Available from",
+      "contractType": "Engagement form",
+      "payBasis": "Pay basis",
+      "nightShifts": "Night shifts",
+      "weekendShifts": "Weekends",
+      "overtime": "Overtime",
+      "drivingLicence": "Driving licence",
+      "ownVehicle": "Own vehicle",
+      "ownTools": "Own tools",
+      "yes": "Yes",
+      "no": "No"
     },
     "labels": {
       "decidedAt": "Chosen",
@@ -14023,14 +14040,15 @@
           "headcount": "How many people are needed?"
         },
         "unclear": "I am not sure whether you are offering something or looking for something. Tell me what you have, or what you need.",
-        "goodsChannelGated": "There is no buyer channel for goods on the platform yet, so nobody here would see this for sale. Nothing you wrote has been saved anywhere.",
+        "goodsChannelGated": "You can list this on the marketplace board under Goods — people browsing the board would see it there. Nothing is saved until you publish it.",
         "chipListings": "Open the listings",
         "capacityNext": "I can record your availability on your work card, or search for work right away — the results are the currently open inquiries.",
         "unsupported": "This cannot be offered through the platform. No route is available for it.",
-        "legalCheckFood": "Selling food or home-grown produce falls under food sale, hygiene and marketing rules that would have to be checked first — the platform has no approved channel for produce.",
+        "legalCheckFood": "Selling food or home-grown produce falls under food sale, hygiene and marketing rules. You can prepare the listing as a draft; publishing asks you to confirm you have checked the rules that apply to you.",
         "goodsListable": "This looks like a work-related resource — you can post it as a listing on the listings board.",
+        "goodsListableGoods": "This can be listed under Goods on the marketplace board — people browsing the board would see it there. Nothing is saved until you publish it.",
         "goodsListableRental": "This looks like available work equipment — you can post it as a rental listing on the listings board.",
-        "goodsCategoryUnsupported": "This category is not supported on the platform's work-bounded listings board today. Nothing you wrote has been saved.",
+        "goodsCategoryUnsupported": "This cannot be listed on the marketplace board. Nothing you wrote has been saved.",
         "serviceNext": "You can post this as a service offering so others can find it.",
         "chipServices": "Open the services board",
         "corrected": "Updated: {changes}.",

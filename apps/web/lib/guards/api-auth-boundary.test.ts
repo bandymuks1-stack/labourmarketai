@@ -50,6 +50,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Stripe delivers it; identity is the webhook signature, not a user.",
   },
+  "client-errors/route.ts": {
+    class: "public",
+    why: "Browser crash reports (2026-10-18 incident): a crash can happen before or without a session. Same-origin only, 2 KB, rate-limited, sanitised; logs one line and stores nothing; no identity read at all.",
+  },
   "waitlist/route.ts": {
     class: "public",
     why: "The pre-auth funnel. Anonymous by design, rate-limited, its own client.",

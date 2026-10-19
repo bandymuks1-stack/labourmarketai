@@ -5,7 +5,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { CompanyActionNextActions } from "@/components/app/company-action-next-actions";
-import { listProjectAssignments } from "@/lib/projects/projects";
+import { listProjectAssignmentsForProjects } from "@/lib/projects/projects";
 import { listProjectMap } from "@/lib/projects/map";
 import { getProjectsProgress } from "@/lib/projects/progress";
 import { listManagedWorkers, listCompanyRosterWorkers } from "@/lib/instructions/instructions";
@@ -34,7 +34,7 @@ import {
 } from "@/lib/projects/projects";
 import { getOrgMembersData } from "@/lib/operations/org-members";
 import { listOrganizationMembers } from "@/lib/company/memberships";
-import { getProjectGallerySummary } from "@/lib/journal/project-gallery";
+import { getProjectPhotoCounts } from "@/lib/journal/project-gallery";
 import {
   readCompanyGalleryLabels,
   readWorkObjectsLabels,
@@ -270,16 +270,16 @@ export default async function ProjectsPage({
     getCompanyProjectContext(ownCompanyId),
     getTranslations("companyOps"),
   ]);
-  const [orgMembersForObjects, companyGalleryProjects] = await Promise.all([
+  const galleryProjects = managedProjects.slice(0, 12);
+  const [orgMembersForObjects, photoCounts] = await Promise.all([
     orgMembers ? listOrganizationMembers(orgMembers.orgId) : Promise.resolve(null),
-    Promise.all(
-      managedProjects.slice(0, 12).map(async (p) => ({
-        projectId: p.id,
-        title: p.title,
-        photoCount: (await getProjectGallerySummary(p.id)).photoCount,
-      })),
-    ),
+    getProjectPhotoCounts(galleryProjects.map((p) => p.id)),
   ]);
+  const companyGalleryProjects = galleryProjects.map((p) => ({
+    projectId: p.id,
+    title: p.title,
+    photoCount: photoCounts.get(p.id) ?? 0,
+  }));
 
   // Train D — archived filtering: a COMPLETED project is finished work.
   // The map and the draft (assignment) flow show ACTIVE work by default;
@@ -305,18 +305,32 @@ export default async function ProjectsPage({
   // read time; no stored number anywhere).
   const progressById = await getProjectsProgress(projects.map((p) => p.id));
 
-  const withAssignments = await Promise.all(
-    activeProjects.map(async (p) => ({
-      ...p,
-      assignments: await Promise.all(
-        (await listProjectAssignments(p.id)).map(async (a) => ({
-          ...a,
-          // THE one photo rule (D1): the database decides; null = initials.
-          avatarUrl: a.workerId ? await getAvatarForVisibleWorker(a.workerId) : null,
-        })),
-      ),
-    })),
+  // ONE read for every active project's assignments (was one per project), and
+  // ONE avatar decision per distinct worker (a worker on five projects was
+  // asked five times). Same data, same RLS, same photo rule (2026-10-18 perf).
+  const assignmentsByProject = await listProjectAssignmentsForProjects(
+    activeProjects.map((p) => p.id),
   );
+  const workerIds = [
+    ...new Set(
+      [...assignmentsByProject.values()].flatMap((list) =>
+        list.map((a) => a.workerId).filter((id): id is string => Boolean(id)),
+      ),
+    ),
+  ];
+  const avatarByWorker = new Map(
+    await Promise.all(
+      // THE one photo rule (D1): the database decides; null = initials.
+      workerIds.map(async (id) => [id, await getAvatarForVisibleWorker(id)] as const),
+    ),
+  );
+  const withAssignments = activeProjects.map((p) => ({
+    ...p,
+    assignments: (assignmentsByProject.get(p.id) ?? []).map((a) => ({
+      ...a,
+      avatarUrl: a.workerId ? (avatarByWorker.get(a.workerId) ?? null) : null,
+    })),
+  }));
 
   // WRK-6 — teams as ONE assignment per project, read from the one relation.
   // An unprovisioned or unreadable relation hides the team control; it is never

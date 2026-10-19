@@ -131,6 +131,7 @@
     "myTitle": "Mijn advertenties",
     "intro": "Plaats wat je aanbiedt of nodig hebt. Alleen actieve advertenties die niet verlopen zijn, zijn zichtbaar voor anderen.",
     "notAvailable": "Momenteel niet beschikbaar.",
+    "readUnavailable": "De advertenties konden nu niet worden gelezen. Dat betekent niet dat er geen zijn — probeer het zo opnieuw.",
     "empty": "Nog geen advertenties. Voeg je eerste werkmiddel toe.",
     "addButton": "Advertentie toevoegen",
     "browseTitle": "Actieve advertenties bekijken",
@@ -3451,6 +3452,8 @@
       "empty": "Geen privacyverzoeken.",
       "needsMigration": "De ontvangst van privacyverzoeken is in deze omgeving nog niet ingeschakeld.",
       "unavailable": "Privacyverzoeken kunnen nu niet worden gelezen.",
+      "due": "Antwoord uiterlijk {date}",
+      "overdue": "Te laat — antwoord moest uiterlijk {date}",
       "manualNote": "De verwerking is handmatig: elk verzoek wordt door een persoon beoordeeld en afgehandeld. Niets in deze lijst gebeurt automatisch.",
       "type": {
         "dataExport": "Gegevensexport",
@@ -5723,7 +5726,7 @@
         {
           "heading": "AI en verbonden AI-assistenten",
           "items": [
-            "Sommige functies gebruiken een AI-model van Google (de Gemini API): om berichten en vacatures te vertalen en om voor te stellen waar een zin die je in de chat typt om vraagt. Alleen de tekst die die taak nodig heeft, wordt verstuurd. Het resultaat is een voorstel — niets wordt als feit over jou opgeslagen voordat je het bevestigt.",
+            "Sommige functies gebruiken een AI-model van Google (de Gemini API). Vandaag ontvangt het alleen openbare marktstatistieken — bijvoorbeeld hoeveel openstaande posities een beroep heeft — om een korte toelichting op te stellen. Het vertalen van berichten en vacatures en het interpreteren van een zin die je in de chat typt zijn voorbereid maar uitgeschakeld: daarvoor wordt geen berichttekst en geen persoonsgegeven verstuurd. Als een ervan wordt ingeschakeld, vermeldt deze kennisgeving dat, en zou alleen de tekst die die taak nodig heeft worden verstuurd. Elk resultaat is een voorstel — niets wordt als feit over jou opgeslagen voordat je het bevestigt.",
             "Je kunt LabourMarket.ai verbinden met een AI-assistent zoals ChatGPT of Claude. Elke verbinding keur je zelf goed op een toestemmingsscherm; de assistent handelt dan alleen met jouw eigen rechten, en acties met gevolgen vragen een aparte bevestiging. Verbonden apps zie en ontkoppel je op elk moment in je accountinstellingen.",
             "Wat de aanbieder van een AI-assistent met je gesprek doet, valt onder de eigen privacyvoorwaarden van die aanbieder."
           ]
@@ -5752,7 +5755,7 @@
           "purpose": "Wordt alleen gebruikt op beheerdersaccounts. Onthoudt of beheerdersbedieningen verborgen zijn en verandert niets aan rechten."
         }
       ],
-      "localStorageNote": "Je keuze voor een licht of donker thema wordt opgeslagen in de lokale opslag van je browser, niet in een cookie.",
+      "localStorageNote": "In de eigen opslag van je browser (geen cookies) staan enkele zaken: je keuze voor een licht of donker thema; welke pagina of campagne je hier voor het eerst bracht, eenmalig opgeslagen zodat een latere registratie eraan kan worden toegeschreven; een willekeurige sessie-identificatie per tabblad die verdwijnt als het tabblad sluit; en kleine gemakken zoals weggeklikte meldingen, recent bekeken items en je spraakinvoertaal. Niets hiervan wordt met derden gedeeld of voor advertenties gebruikt, en je kunt het op elk moment via je browser wissen.",
       "noTracking": "Er zijn vandaag geen analyse-, advertentie- of trackingcookies van derden op het platform. Als dit ooit verandert, wordt deze pagina als eerste bijgewerkt."
     },
     "pendingLegal": {
@@ -8749,7 +8752,7 @@
       "pay_within_offer": "Loon binnen het aanbod",
       "accommodation_ok": "Huisvesting past",
       "city_match": "Zelfde stad",
-      "location_within_radius": "Binnen de werkradius",
+      "location_within_radius": "Binnen de werkradius (hemelsbrede afstand)",
       "profession_related": "Verwant beroep (gedeelde vaardigheden)",
       "skills_history_reported": "Vaardigheden genoemd in de geschiedenis van de organisatie (niet geverifieerd)"
     },
@@ -8760,7 +8763,7 @@
       "pay_above_offer": "Loonverwachting boven het aanbod",
       "accommodation_needed_not_provided": "Heeft huisvesting nodig, niet aangeboden",
       "profession_mismatch": "Ander beroep",
-      "location_outside_radius": "Buiten de werkradius"
+      "location_outside_radius": "Buiten de werkradius (hemelsbrede afstand)"
     },
     "candidate": "Kandidaat",
     "privacy": {
@@ -10114,6 +10117,7 @@
     "subtitle": "Vertel ons je vak en beschikbaarheid. Wij maken er een conceptprofiel van dat jij beoordeelt — niets wordt automatisch gepubliceerd.",
     "fullName": "Volledige naam",
     "profession": "Sector & type werk",
+    "professionPlaceholder": "Kies je sector en type werk",
     "targetCountries": "Landen waar je wilt werken",
     "targetCountriesHelp": "Tweeletterige codes, kommagescheiden (bijv. NL, DE).",
     "availableFrom": "Beschikbaar vanaf",
@@ -10619,7 +10623,7 @@
     "navLabel": "Over LabourMarket.ai",
     "eyebrow": "Over het platform",
     "title": "Wat is LabourMarket.ai",
-    "lede": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — niet alleen een zoektocht naar vacatures.",
+    "lede": "LabourMarket.ai is een besturingsplatform voor de arbeidsmarkt. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
     "hero": {
       "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
       "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
@@ -10940,7 +10944,20 @@
       "preferredCountries": "Gewenste regio",
       "availability": "Beschikbaarheid",
       "salaryExpectation": "Loonverwachting",
-      "skillsCount": "Vaardigheden"
+      "skillsCount": "Vaardigheden",
+      "anonymousLabel": "Bedrijven zien u als",
+      "currentCountry": "Huidig land",
+      "availableFrom": "Beschikbaar vanaf",
+      "contractType": "Arbeidsvorm",
+      "payBasis": "Betalingsbasis",
+      "nightShifts": "Nachtdiensten",
+      "weekendShifts": "Weekenden",
+      "overtime": "Overuren",
+      "drivingLicence": "Rijbewijs",
+      "ownVehicle": "Eigen vervoer",
+      "ownTools": "Eigen gereedschap",
+      "yes": "Ja",
+      "no": "Nee"
     },
     "labels": {
       "decidedAt": "Gekozen",
@@ -14023,14 +14040,15 @@
           "headcount": "Hoeveel mensen zijn er nodig?"
         },
         "unclear": "Ik weet niet zeker of je iets aanbiedt of iets zoekt. Schrijf wat je hebt of wat je nodig hebt.",
-        "goodsChannelGated": "Er is nog geen koperskanaal voor goederen op het platform — niemand zou dit hier te koop zien. Wat je schreef is nergens opgeslagen.",
+        "goodsChannelGated": "Je kunt dit op het advertentiebord plaatsen onder Goederen — mensen die het bord bekijken zien het daar. Er wordt niets opgeslagen tot je het publiceert.",
         "chipListings": "Advertenties openen",
         "capacityNext": "Ik kan je beschikbaarheid op je werkkaart zetten of meteen werk zoeken — de resultaten zijn de nu openstaande aanvragen.",
         "unsupported": "Dit kan niet via het platform worden aangeboden. Er is hier geen weg voor.",
-        "legalCheckFood": "Voor de verkoop van voedsel of eigen oogst gelden regels voor voedselverkoop, hygiëne en handel die eerst gecontroleerd zouden moeten worden — het platform heeft geen goedgekeurd kanaal voor eigen oogst.",
+        "legalCheckFood": "Voor de verkoop van voedsel of eigen oogst gelden regels voor voedselverkoop, hygiëne en handel. Je kunt de advertentie als concept voorbereiden; bij publicatie vragen we je te bevestigen dat je de regels hebt gecontroleerd die voor jou gelden.",
         "goodsListable": "Dit lijkt een werkgerelateerd middel — je kunt het als advertentie op het advertentiebord plaatsen.",
+        "goodsListableGoods": "Dit kun je onder Goederen op het advertentiebord plaatsen — mensen die het bord bekijken zien het daar. Er wordt niets opgeslagen tot je het publiceert.",
         "goodsListableRental": "Dit lijkt beschikbaar werkmaterieel — je kunt een verhuur-advertentie op het advertentiebord plaatsen.",
-        "goodsCategoryUnsupported": "Deze categorie wordt vandaag niet ondersteund op het werkgebonden advertentiebord van het platform. Wat je schreef is nergens opgeslagen.",
+        "goodsCategoryUnsupported": "Dit kan niet op het advertentiebord worden geplaatst. Wat je schreef is nergens opgeslagen.",
         "serviceNext": "Je kunt dit als dienstenaanbod plaatsen zodat anderen het vinden.",
         "chipServices": "Diensten openen",
         "corrected": "Bijgewerkt: {changes}.",

@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
@@ -202,6 +204,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, reason: result.reason }, { status: 400 });
   }
   if (operation) await attachProviderSession(operation.id, result.sessionId);
+  // Revenue funnel (2026-10-19): a provider session exists — the person is at
+  // the payment step. Bounded metadata only: no identity, no price figures.
+  emitServerFunnelEvent(FUNNEL_EVENTS.checkoutStarted, {
+    source: "billing",
+    route: "/api/billing/test-checkout",
+    metadata: { entity_type: "checkout", surface: planKey, success: true },
+  });
   return NextResponse.json({
     ok: true,
     url: result.url,

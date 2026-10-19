@@ -125,8 +125,13 @@ export async function listAttentionInstructions(): Promise<WorkerInstruction[]> 
     lastRead.set(p.conversation_id, p.last_read_at ?? null);
 
   return read.instructions.filter((ins) => {
+    // Only the viewer's OWN threads (2026-10-18): the instruction read also
+    // admits is_admin(), and a thread the viewer is not part of used to read
+    // as "never opened", so an admin's attention card showed other people's
+    // instructions (including a documented test fixture's).
+    if (!lastRead.has(ins.conversationId)) return false;
     const lr = lastRead.get(ins.conversationId);
-    if (lr == null) return true; // never opened → needs attention
+    if (lr == null) return true; // a participant who never opened it → needs attention
     return Date.parse(ins.createdAt) > Date.parse(lr);
   });
 }

@@ -2748,6 +2748,7 @@ export function JournalEntryComposer({
           <Input
             type="date"
             value={workDate}
+            max={personCalendarDay()}
             onChange={(e) => setWorkDate(e.target.value)}
           />
         </label>

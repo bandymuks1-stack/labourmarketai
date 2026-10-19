@@ -18,6 +18,8 @@ export interface WorkerIntakeFormLabels {
   readonly subtitle: string;
   readonly fullName: string;
   readonly profession: string;
+  /** The empty choice of the trade select — words, never a bare dash. */
+  readonly professionPlaceholder: string;
   readonly targetCountries: string;
   readonly targetCountriesHelp: string;
   readonly availableFrom: string;
@@ -88,7 +90,10 @@ export function WorkerIntakeForm({
     <div className="flex flex-col gap-6">
       <form action={formAction} className="flex flex-col gap-4" data-testid="worker-intake-form">
         <header className="flex flex-col gap-1">
-          <h2 className="font-display text-lg font-semibold text-text-primary">{labels.title}</h2>
+          {/* The page's one title (2026-10-18 design pass): same scale as every public page title. */}
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary sm:text-4xl">
+            {labels.title}
+          </h1>
           <p className="text-sm text-text-secondary">{labels.subtitle}</p>
         </header>
 
@@ -100,7 +105,7 @@ export function WorkerIntakeForm({
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.profession}</span>
           <select name="profession" required defaultValue="" className={FIELD}>
-            <option value="" disabled>—</option>
+            <option value="" disabled>{labels.professionPlaceholder}</option>
             {categories.map((c) => (
               <optgroup key={c.key} label={c.sector}>
                 {c.options.map((o) => (

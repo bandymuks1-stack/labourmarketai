@@ -1,6 +1,7 @@
 import "server-only";
 
 import { runAiAgent } from "@/lib/ai/run-agent-server";
+import { aiTaskServableNow } from "@/lib/ai/egress-precheck-server";
 import { communicationLanguageNames, isCommunicationLocale } from "@/lib/i18n/config";
 import { rateLimit } from "@/lib/security/rate-limit";
 
@@ -194,6 +195,12 @@ async function translateOnce(
   key: string,
 ): Promise<TranslateResult | { ok: false; reason: "transient" }> {
   try {
+    // No configured provider may receive a message body right now (grant
+    // suspended / only external providers): the gate would refuse every
+    // message of this read. Decline with zero ledger IO (audit 2026-10-16).
+    if (!(await aiTaskServableNow("translate_message"))) {
+      return { ok: false, reason: "declined" };
+    }
     const outcome = await runAiAgent(
       "translation_copy",
       {

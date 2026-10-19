@@ -1,0 +1,265 @@
+<title>LabourMarket Product Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one long operating map — summary first, the value chain as the spine, detail below. */
+:root {
+  --bg: #0b0a08; --surface: #15130f; --raise: #1d1a15; --line: #2e2a22; --fg: #f3efe6; --muted: #a8a094;
+  --gold: #d4af37; --gold-ink: #1a1408;
+  --live: #5fbf7f; --code: #7aa7e0; --broken: #e06a5f; --blocked: #e0a84f; --planned: #8a8478;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #f7f4ec; --surface: #ffffff; --raise: #f0ebdf; --line: #ddd5c4; --fg: #1a1712; --muted: #6b6457;
+  --gold: #9a7a12; --gold-ink: #fffaf0; --live: #2f8a52; --code: #2f63a8; --broken: #b5392e; --blocked: #a36a12; --planned: #7a7468;
+  color-scheme: light; } }
+:root[data-theme="light"] {
+  --bg: #f7f4ec; --surface: #ffffff; --raise: #f0ebdf; --line: #ddd5c4; --fg: #1a1712; --muted: #6b6457;
+  --gold: #9a7a12; --gold-ink: #fffaf0; --live: #2f8a52; --code: #2f63a8; --broken: #b5392e; --blocked: #a36a12; --planned: #7a7468;
+  color-scheme: light; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.55 var(--body); margin: 0; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 44px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.05; }
+h2 { font-size: 24px; }
+h3 { font-size: 16px; }
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+.muted { color: var(--muted); }
+.lede { max-width: 68ch; color: var(--muted); margin: 10px 0 0; }
+section { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+nav.toc { display: flex; flex-wrap: wrap; gap: 8px; }
+nav.toc a { color: var(--fg); text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13px; }
+nav.toc a:hover, nav.toc a:focus-visible { border-color: var(--gold); outline: none; }
+.statusbar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; border: 1px solid var(--line); }
+.statusbar span { display: block; height: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font: 500 11px/1 var(--mono); letter-spacing: 0.04em; padding: 5px 8px; border-radius: 6px; border: 1px solid currentColor; white-space: nowrap; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.s-LIVE_PROVEN { color: var(--live); } .s-CODE_READY { color: var(--code); } .s-BROKEN { color: var(--broken); }
+.s-BLOCKED { color: var(--blocked); } .s-PLANNED { color: var(--planned); }
+.bg-LIVE_PROVEN { background: var(--live); } .bg-CODE_READY { background: var(--code); } .bg-BROKEN { background: var(--broken); }
+.bg-BLOCKED { background: var(--blocked); } .bg-PLANNED { background: var(--planned); }
+.facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+.fact b { font: 700 24px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.fact small { color: var(--muted); font-size: 12.5px; }
+.fact.money b { color: var(--gold); }
+/* Value chain: a wrapping row of links; the selected link opens its features below. */
+.chain { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; counter-reset: link; }
+.link { text-align: left; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; font: inherit; min-width: 0; }
+.link:hover, .link:focus-visible { border-color: var(--gold); outline: none; }
+.link[aria-pressed="true"] { border-color: var(--gold); background: var(--raise); }
+.link .step { font: 500 11px/1 var(--mono); color: var(--gold); }
+.link strong { font-family: var(--display); font-size: 15px; }
+.link .mini { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--line); }
+.link .mini span { display: block; }
+.link small { color: var(--muted); font-size: 12px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.panel .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.flist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.flist li { display: flex; gap: 8px; align-items: baseline; font-size: 13.5px; min-width: 0; }
+.flist li .id { font: 12px var(--mono); color: var(--muted); flex: none; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.controls input, .controls select { background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; min-width: 0; }
+.controls input { flex: 1 1 220px; }
+.fbtn { background: transparent; border: 1px solid var(--line); color: var(--fg); border-radius: 999px; padding: 6px 10px; font: 500 12px var(--mono); cursor: pointer; }
+.fbtn[aria-pressed="true"] { border-color: currentColor; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+th { font: 500 11px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--raise); position: sticky; top: 0; }
+td.id { font: 12px var(--mono); color: var(--muted); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.journey { display: flex; flex-direction: column; gap: 8px; }
+.steps { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.steps .arrow { color: var(--muted); }
+.stepchip { display: inline-flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid currentColor; border-radius: 8px; padding: 6px 9px; }
+.stepchip span { color: var(--fg); font-size: 13px; }
+.stepchip small { font: 11px var(--mono); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.card ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.tag { font: 500 11px var(--mono); padding: 3px 7px; border-radius: 5px; background: var(--raise); color: var(--muted); }
+.fact-tag { color: var(--live); } .assume-tag { color: var(--blocked); }
+.prio { display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: start; }
+.prio .p { font: 700 18px var(--display); color: var(--gold); }
+.note { border-left: 3px solid var(--gold); padding: 8px 12px; background: var(--surface); border-radius: 0 8px 8px 0; color: var(--muted); font-size: 13.5px; }
+@media (prefers-reduced-motion: no-preference) { .link, nav.toc a { transition: border-color .15s, background .15s; } }
+</style>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:12px">
+    <div class="eyebrow">LabourMarket.ai · produkto žemėlapis</div>
+    <h1>Viena darbo rinka: kas veikia, kas uždirba, ką daryti toliau</h1>
+    <p class="lede">Visas produktas vienoje vietoje: funkcijos ir jų būsenos, kaip juda žmonės, darbas ir pinigai, kur yra pajamos ir kokia tvarka užbaigti. Būsenos imamos iš kanoninio funkcijų audito ir papildomos tik realiais produkcijos įrodymais.</p>
+    <p class="muted" id="source" style="font:12px var(--mono);margin:0"></p>
+    <nav class="toc" aria-label="Skyriai">
+      <a href="#summary">Santrauka</a><a href="#funnel">Piltuvas</a><a href="#activation">Pirmas klientas</a><a href="#chain">Vertės grandinė</a><a href="#journeys">Kelionės</a><a href="#money">Pajamos</a><a href="#commercial">Komercinis modelis</a><a href="#priorities">Prioritetai</a><a href="#gaps">Spragos</a><a href="#register">Funkcijų registras</a>
+    </nav>
+  </header>
+
+  <section id="summary">
+    <div class="eyebrow">Santrauka</div>
+    <h2 id="summaryTitle"></h2>
+    <div class="statusbar" id="statusbar" role="img"></div>
+    <div class="legend" id="legend"></div>
+    <div class="facts" id="facts"></div>
+    <p class="note">Svarbiausia: produktas plačiai sukurtas ir didelė dalis veikia produkcijoje, bet pajamų dar nėra. Trumpiausias kelias į pirmus pinigus – įjungti mokėjimus, sutvarkyti darbalaukio greitį ir užbaigti įmonės kelią nuo poreikio iki mokamo plano.</p>
+  </section>
+
+  <section id="chain">
+    <div class="eyebrow">Vertės grandinė</div>
+    <h2>Kaip juda žmonės, darbas ir pinigai</h2>
+    <p class="lede">Kiekviena grandis rodo, kiek joje esančių funkcijų veikia. Paspauskite grandį, kad pamatytumėte jos funkcijas ir būsenas.</p>
+    <div class="chain" id="chainGrid"></div>
+    <div class="panel" id="chainPanel" aria-live="polite"></div>
+  </section>
+
+  <section id="journeys">
+    <div class="eyebrow">Vartotojų kelionės</div>
+    <h2>Penki pagrindiniai keliai per sistemą</h2>
+    <div id="journeyList" style="display:flex;flex-direction:column;gap:18px"></div>
+  </section>
+
+  <section id="funnel">
+    <div class="eyebrow">Pajamų piltuvas</div>
+    <h2>Registracija → aktyvacija → planas → checkout → apmokėjimas → išlaikymas</h2>
+    <p class="lede">Tik realūs naudotojai, be sintetinių QA ir E2E paskyrų. Žingsnis be skaičiaus šiandien nematuojamas.</p>
+    <div id="funnelList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </section>
+
+  <section id="activation">
+    <div class="eyebrow">Pirmas mokantis klientas</div>
+    <h2>Aktyvavimo eilė pagal priklausomybes</h2>
+    <div class="tablewrap"><table id="activationTable"></table></div>
+  </section>
+
+  <section id="money">
+    <div class="eyebrow">Pajamos ir pelningumas</div>
+    <h2>Nuo €0 iki pelningo augimo</h2>
+    <p class="lede">Kainodara (patvirtinta): darbuotojams nemokamai, įmonės planas €99 per mėnesį, nemokamas įmonės planas su viena aktyvia pozicija, LMC kreditai (1 LMC = €1). Nemokamas VIP tik savininko individualiai patvirtintoms įmonėms. Komisiniai už sandorius neimami, kol nėra patvirtinto verslo ir techninio pagrindo. Žalia žyma – faktas, geltona – prielaida.</p>
+    <div class="grid2" id="scenarios"></div>
+  </section>
+
+  <section id="commercial">
+    <div class="eyebrow">Komercinis modelis</div>
+    <h2>Ką kiekviena sritis sprendžia ir kaip kuria vertę</h2>
+    <div class="tablewrap"><table id="commercialTable"></table></div>
+  </section>
+
+  <section id="priorities">
+    <div class="eyebrow">Prioritetai</div>
+    <h2>P0–P3: tvarka pagal pajamas, aktyvavimą ir riziką</h2>
+    <div id="prioList" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div class="grid2" id="reco"></div>
+  </section>
+
+  <section id="gaps">
+    <div class="eyebrow">Spragos ir dubliavimai</div>
+    <h2>Kas sukurta, bet nepasiekiama, kas kartojasi, ko trūksta</h2>
+    <div class="grid2" id="gapList"></div>
+  </section>
+
+  <section id="register">
+    <div class="eyebrow">Funkcijų registras</div>
+    <h2 id="registerTitle"></h2>
+    <div class="controls">
+      <label for="q" class="muted" style="font-size:13px">Paieška</label>
+      <input id="q" type="search" placeholder="pvz. journal, matching, Stripe">
+      <label for="areaSel" class="muted" style="font-size:13px">Sritis</label>
+      <select id="areaSel"></select>
+    </div>
+    <div class="controls" id="statusFilters"></div>
+    <div class="tablewrap"><table id="regTable"></table></div>
+  </section>
+</div>
+
+<script>
+const D = /*__DATA__*/null;
+const ORDER = ["LIVE_PROVEN", "CODE_READY", "BLOCKED", "BROKEN", "PLANNED"];
+const LABEL = { LIVE_PROVEN: "Veikia produkcijoje", CODE_READY: "Kodas paruoštas", BLOCKED: "Blokuota", BROKEN: "Neveikia", PLANNED: "Planuojama" };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const byId = Object.fromEntries(D.rows.map((r) => [r.id, r]));
+const chip = (s, extra = "") => `<span class="chip s-${s}"><span class="dot bg-${s}"></span>${s}${extra}</span>`;
+
+document.getElementById("source").textContent = `Šaltinis: docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md @ ${D.sha} + produkcijos įrodymai iki 2026-10-19`;
+
+// Summary
+const total = D.rows.length;
+document.getElementById("summaryTitle").textContent = `${total} funkcijų, iš jų ${D.counts.LIVE_PROVEN || 0} įrodytai veikia produkcijoje`;
+document.getElementById("statusbar").innerHTML = ORDER.map((s) => `<span class="bg-${s}" style="width:${((D.counts[s] || 0) / total) * 100}%" title="${s}: ${D.counts[s] || 0}"></span>`).join("");
+document.getElementById("statusbar").setAttribute("aria-label", ORDER.map((s) => `${LABEL[s]} ${D.counts[s] || 0}`).join(", "));
+document.getElementById("legend").innerHTML = ORDER.map((s) => `<span>${chip(s)} <span class="muted">${LABEL[s]} · ${D.counts[s] || 0}</span></span>`).join("");
+document.getElementById("facts").innerHTML = D.facts.map(([k, v, note], i) => `<div class="fact${i === 0 ? " money" : ""}"><span class="eyebrow" style="color:var(--muted)">${esc(k)}</span><b>${esc(v)}</b><small>${esc(note)}</small></div>`).join("");
+
+// Value chain
+const mix = (ids) => { const c = {}; ids.forEach((id) => { const s = byId[id].s; c[s] = (c[s] || 0) + 1; }); return c; };
+const grid = document.getElementById("chainGrid");
+grid.innerHTML = D.chain.map((n, i) => {
+  const c = mix(n.ids); const t = n.ids.length || 1;
+  return `<button class="link" type="button" id="link-${n.key}" data-k="${n.key}" aria-pressed="false"><span class="step">${String(i + 1).padStart(2, "0")} →</span><strong>${esc(n.name)}</strong><small>${esc(n.desc)}</small><span class="mini">${ORDER.map((s) => `<span class="bg-${s}" style="width:${((c[s] || 0) / t) * 100}%"></span>`).join("")}</span><small>${c.LIVE_PROVEN || 0} iš ${n.ids.length} veikia</small></button>`;
+}).join("");
+function openLink(key) {
+  const n = D.chain.find((x) => x.key === key);
+  grid.querySelectorAll(".link").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === key)));
+  const groups = ORDER.map((s) => [s, n.ids.map((id) => byId[id]).filter((r) => r.s === s)]).filter(([, l]) => l.length);
+  document.getElementById("chainPanel").innerHTML = `<h3>${esc(n.name)} <span class="muted" style="font-weight:400">· ${n.ids.length} funkcijos</span></h3><div class="cols">${groups.map(([s, list]) => `<div>${chip(s, ` · ${list.length}`)}<ul class="flist" style="margin-top:8px">${list.map((r) => `<li><span class="id">${r.id}</span><span>${esc(r.feature)}${r.blocker ? ` <span class="muted">— ${esc(r.blocker)}</span>` : ""}</span></li>`).join("")}</ul></div>`).join("")}</div>`;
+}
+grid.addEventListener("click", (e) => { const b = e.target.closest(".link"); if (b) openLink(b.dataset.k); });
+openLink("match");
+
+// Journeys
+document.getElementById("journeyList").innerHTML = D.journeys.map((j) => {
+  const live = j.steps.filter((s) => s.s === "LIVE_PROVEN").length;
+  return `<div class="journey"><h3>${esc(j.name)} <span class="muted" style="font-weight:400;font-size:13px">· ${live} iš ${j.steps.length} žingsnių įrodyti</span></h3><div class="steps">${j.steps.map((s, i) => `${i ? '<span class="arrow" aria-hidden="true">→</span>' : ""}<span class="stepchip s-${s.s}" title="${esc(s.id + " " + s.feature)}"><span>${esc(s.label)}</span><small>${s.s}</small></span>`).join("")}</div></div>`;
+}).join("");
+
+// Funnel (private numbers; absent in a public build)
+const fl = document.getElementById("funnelList");
+const fMax = Math.max(1, ...(D.funnel || []).map((s) => (typeof s[1] === "number" ? s[1] : 0)));
+fl.innerHTML = (D.funnel || []).length
+  ? D.funnel.map(([label, n, note]) => `<div style="display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:12px;align-items:center"><span><b>${esc(label)}</b><br><small class="muted">${esc(note)}</small></span><span style="display:flex;align-items:center;gap:10px;min-width:0">${typeof n === "number" ? `<span style="height:16px;border-radius:4px;background:var(--gold);width:${Math.max(2, (n / fMax) * 100)}%"></span><b style="font-variant-numeric:tabular-nums">${n}</b>` : '<span class="chip s-BLOCKED">NEMATUOJAMA</span>'}</span></div>`).join("")
+  : '<p class="muted">Skaičiai įtraukiami tik privačioje versijoje.</p>';
+
+// Activation queue
+document.getElementById("activationTable").innerHTML = `<thead><tr><th>#</th><th>Žingsnis</th><th>Kas tai</th><th>Funkcijos</th><th>Kas atlieka</th><th>Priklauso nuo</th></tr></thead><tbody>${(D.activation || []).map(([n, t, what, ids, who, dep]) => `<tr><td class="id">${esc(n)}</td><td><b>${esc(t)}</b></td><td>${esc(what)}</td><td class="id">${esc(ids)}${ids.split(/,\s*/).filter((i) => byId[i]).map((i) => " " + chip(byId[i].s)).join("")}</td><td>${esc(who)}</td><td class="id">${esc(dep)}</td></tr>`).join("")}</tbody>`;
+
+// Money
+document.getElementById("scenarios").innerHTML = D.scenarios.map(([title, math, lines]) => `<div class="card"><h3>${esc(title)}</h3><span class="tag">${esc(math)}</span><ul>${lines.map((l) => { const isFact = l.startsWith("FAKTAS"); const isAss = l.startsWith("PRIELAIDA"); const body = l.replace(/^(FAKTAS|PRIELAIDA): /, ""); return `<li>${isFact ? '<span class="tag fact-tag">FAKTAS</span> ' : isAss ? '<span class="tag assume-tag">PRIELAIDA</span> ' : ""}${esc(body)}</li>`; }).join("")}</ul></div>`).join("");
+
+// Commercial
+const ct = document.getElementById("commercialTable");
+ct.innerHTML = `<thead><tr><th>Sritis</th><th>Sprendžiama problema</th><th>Kas moka</th><th>Pajamų rūšis</th><th>Sąnaudos</th><th>Poveikis</th><th>Kada</th><th>Būsena</th></tr></thead><tbody>${Object.entries(D.commercial).map(([a, v]) => { const rs = D.rows.filter((r) => String(r.area) === a); const live = rs.filter((r) => r.s === "LIVE_PROVEN").length; return `<tr><td><b>${esc(D.areas[a])}</b></td>${v.map((x) => `<td>${esc(x)}</td>`).join("")}<td class="id">${live}/${rs.length} veikia</td></tr>`; }).join("")}</tbody>`;
+
+// Priorities
+document.getElementById("prioList").innerHTML = D.priorities.map(([p, t, what, dep, unlocks, why]) => `<div class="card prio"><span class="p">${p}</span><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><h3>${esc(t)}</h3><span>${esc(what)}</span><span class="muted" style="font-size:13px">Priklauso nuo: ${esc(dep)} · Atveria: ${esc(unlocks)} · Dėl: ${esc(why)}</span></div></div>`).join("");
+document.getElementById("reco").innerHTML = Object.entries(D.reco).map(([k, list]) => `<div class="card"><h3>${esc(k)}</h3><ul>${list.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
+
+// Gaps
+document.getElementById("gapList").innerHTML = Object.entries(D.gaps).filter(([, l]) => l.length).map(([k, list]) => `<div class="card"><h3>${esc(k)}</h3><ul>${list.map((x) => `<li style="font-size:13.5px">${esc(x.replace(/\*\*/g, "").replace(/`/g, ""))}</li>`).join("")}</ul></div>`).join("");
+
+// Register
+const areaSel = document.getElementById("areaSel");
+areaSel.innerHTML = `<option value="">Visos sritys</option>` + Object.entries(D.areas).map(([a, n]) => `<option value="${a}">${a}. ${esc(n)}</option>`).join("");
+const active = new Set(ORDER);
+const sf = document.getElementById("statusFilters");
+sf.innerHTML = ORDER.map((s) => `<button type="button" class="fbtn s-${s}" data-s="${s}" aria-pressed="true">${LABEL[s]} · ${D.counts[s] || 0}</button>`).join("");
+sf.addEventListener("click", (e) => { const b = e.target.closest(".fbtn"); if (!b) return; const s = b.dataset.s; if (active.has(s)) active.delete(s); else active.add(s); b.setAttribute("aria-pressed", String(active.has(s))); renderReg(); });
+function renderReg() {
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const a = areaSel.value;
+  const list = D.rows.filter((r) => active.has(r.s) && (!a || String(r.area) === a) && (!q || (r.id + " " + r.feature + " " + r.blocker + " " + r.action + " " + r.evidence).toLowerCase().includes(q)));
+  document.getElementById("registerTitle").textContent = `${list.length} iš ${total} funkcijų`;
+  document.getElementById("regTable").innerHTML = `<thead><tr><th>ID</th><th>Funkcija</th><th>Būsena</th><th>Įrodymas</th><th>Kliūtis</th><th>Kitas žingsnis</th></tr></thead><tbody>${list.map((r) => `<tr><td class="id">${r.id}</td><td>${esc(r.feature)}</td><td>${chip(r.s)}${r.partial ? ' <span class="tag">dalinai</span>' : ""}</td><td class="muted">${esc(r.evidence)}</td><td>${esc(r.blocker)}</td><td>${esc(r.action)}</td></tr>`).join("")}</tbody>`;
+}
+document.getElementById("q").addEventListener("input", renderReg);
+areaSel.addEventListener("change", renderReg);
+renderReg();
+</script>
