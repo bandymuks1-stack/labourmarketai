@@ -73,7 +73,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 2.7 | Education records (PER-8) | CODE_READY | — | Fix the stale comment |
 | 2.8 | Achievements / declared certificates (PER-9) | PARTIAL | Future confirmation flow | Keep deferred |
 | 2.9 | Languages (PER-10) | CODE_READY | — | Add `uk` as a worker language |
-| 2.10 | External profile links (PER-11) | PARTIAL | #2471 | Owner decides #2471 |
+| 2.10 | External profile links (PER-11) | PARTIAL | #2471 (RED, prepared for the owner's final approval 2026-10-19) | Owner approves #2471 |
 | 2.11 | Requirement ledger (PER-13) | PARTIAL | — | Mount the third context |
 | 2.12 | Skill catalogue + professions (SKL-1) | LIVE_PROVEN (HUMAN_UI_PROVEN) | — | — |
 | 2.13 | Deterministic recognition, journal → skill (SKL-2) | LIVE_PROVEN (sectors-languages walk 5/5, 2026-10-12) | — | Merge the #2403 fix |
@@ -163,7 +163,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 4.19 | Contact disclosure requests (COM-2) | PARTIAL | Expiry design | Machine-safe expiry RPC (RED) |
 | 4.20 | Discovery identity protection (not in register) | PARTIAL — #2477 applied 2026-10-19: the raw worker row needs a working relationship; discovery returns professional fields only (database checks pass; API walk pending) | — | Run the walk (#2505), then LIVE_PROVEN |
 | 4.21 | Person page name gating (#2473/#2475/#2476) | CODE_READY | Cast member | Add an unrelated synthetic employer to the cast |
-| 4.22 | Free 3 unique profile views per org + VIP (RED #2474) | PLANNED | Owner figures + approval | #2477 is applied; #2474 can follow |
+| 4.22 | Free 3 unique profile views per org + VIP (RED #2474) | PLANNED | **Owner decision 2026-10-19: deferred until the payment chain works** (a free organization must not be limited without a way to pay) | Revisit when billing is live |
 | 4.23 | `/dashboard/talent` sample preview | DORMANT | — | Remove or link from admin |
 | 4.24 | Legacy agency worker pool (ORG-10) | DORMANT | — | Keep retired |
 | 4.25 | Admin matching workbench, candidate pool, need structuring | CODE_READY | — | — |
@@ -236,7 +236,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 7.7 | Manual pilot grant (admin) | CODE_READY | — | — |
 | 7.8 | LMC credit ledger (MKT-8) | DORMANT | Owner (spend reversal design) | Keep off until the owner designs it |
 | 7.9 | LMC top-ups, VIP media (€24.99), `ai_plus`, agency tiers, referral rates | PLANNED | — | — |
-| 7.10 | Free 3 unique profile views / org + VIP + two-tier projection | PLANNED | Owner figures | #2477 applied 2026-10-19; next #2474 → #2471 → #1475 |
+| 7.10 | Free 3 unique profile views / org + VIP + two-tier projection | PLANNED | Owner figures | #2477 applied 2026-10-19. Owner 2026-10-19: #2474 deferred (payments first), #2471 prepared for final approval, #1475 deferred (not critical) |
 | 7.11 | Deferred plans: `worker_plus`, `agency_pilot` | PLANNED | Owner | — |
 | 7.12 | AI cost metering + per-org run cap | CODE_READY | — | — |
 | 7.13 | Plan-gated feature `booking_requests` | CODE_READY | — | — |
