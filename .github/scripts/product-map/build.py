@@ -147,12 +147,12 @@ if len(sys.argv) > 4:
     if isinstance(_private, dict):
         FACTS, FUNNEL = _private.get("facts", []), _private.get("funnel", [])
         IMPACT = _private.get("impact", {})
+    else:
+        FACTS = _private
 for _link in chain:
     _measured = IMPACT.get(_link["key"])
     if _measured:
         _link["metric"], _link["blocker"] = _measured[0], _measured[1]
-    else:
-        FACTS = _private
 
 # ── 4b. First paying customer: the activation queue (dependency order) ─────────────────
 # Each step names the register rows it closes, who acts, and what it depends on.
