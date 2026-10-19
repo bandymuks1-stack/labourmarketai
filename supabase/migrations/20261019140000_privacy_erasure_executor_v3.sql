@@ -78,15 +78,26 @@ begin
   end;
 end $$;
 
-insert into public.profiles (id, role, locale, full_name, email, phone, onboarded)
-values (public.privacy_erasure_sentinel_profile_id(), null, 'en', 'Erased person', null, null, false)
+-- handle_new_user has created the profile row, and on_profile_created_ensure_worker a
+-- worker with a random id (which created a personal engagement): normalise all three.
+insert into public.profiles (id, locale, full_name, email, phone, onboarded)
+values (public.privacy_erasure_sentinel_profile_id(), 'en', 'Erased person', null, null, false)
 on conflict (id) do update
-  set role = null, full_name = 'Erased person', email = null, phone = null;
+  set active_role = null, full_name = 'Erased person', email = null, phone = null;
 
+delete from public.workers
+ where profile_id = public.privacy_erasure_sentinel_profile_id()
+   and id <> public.privacy_erasure_sentinel_worker_id();
 insert into public.workers (id, profile_id, display_name, headline, bio, availability_status)
 values (public.privacy_erasure_sentinel_worker_id(), public.privacy_erasure_sentinel_profile_id(),
         'Erased person', null, null, 'unavailable')
 on conflict (id) do nothing;
+-- the sentinel is nobody's employee: its auto-created personal engagement is removed
+-- while nothing references it, so "rows pointing at the sentinel" means erasures only
+delete from public.engagement_contexts ec
+ where ec.profile_id = public.privacy_erasure_sentinel_profile_id()
+   and ec.organization_id is null
+   and not exists (select 1 from public.journal_entries je where je.engagement_context_id = ec.id);
 
 create or replace function public.privacy_erasure_is_sentinel(p_id uuid)
 returns boolean language sql immutable parallel safe as $$

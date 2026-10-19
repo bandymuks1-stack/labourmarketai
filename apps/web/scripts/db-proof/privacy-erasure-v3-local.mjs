@@ -101,13 +101,13 @@ create table storage.objects (id uuid primary key default gen_random_uuid(), buc
 create table public.organizations (id uuid primary key default gen_random_uuid(), display_name text);
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
-  role text check (role in ('worker','company','agency','admin')), locale text not null default 'lt',
+  active_role text check (active_role in ('worker','company','agency','admin')), locale text not null default 'lt',
   full_name text, email text, phone text, country text, onboarded boolean not null default false,
   avatar_url text, profile_text text, active_organization_id uuid,
   created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
 create function public.handle_new_user() returns trigger language plpgsql security definer as $$
-begin insert into public.profiles (id, email, role, locale) values (new.id, new.email, nullif(new.raw_user_meta_data->>'role',''), 'lt') on conflict (id) do nothing; return new; end $$;
+begin insert into public.profiles (id, email, active_role, locale) values (new.id, new.email, nullif(new.raw_user_meta_data->>'role',''), 'lt') on conflict (id) do nothing; return new; end $$;
 create trigger on_auth_user_created after insert on auth.users for each row execute function public.handle_new_user();
 create table public.workers (
   id uuid primary key default gen_random_uuid(), profile_id uuid unique references public.profiles(id) on delete cascade,
@@ -119,6 +119,19 @@ create table public.engagement_contexts (
   organization_id uuid references public.organizations(id) on delete set null, relationship_slug text not null default 'worker',
   status text not null default 'active', title text, description text, hash_self text not null default 'h', created_at timestamptz not null default now()
 );
+-- production signup chain (2026-10-19): a profile gets a worker, a worker gets a personal "employee" engagement
+create function public.ensure_worker_profile() returns trigger language plpgsql security definer as $$
+begin insert into public.workers (profile_id) values (new.id) on conflict (profile_id) do nothing; return new; end $$;
+create trigger on_profile_created_ensure_worker after insert on public.profiles for each row execute function public.ensure_worker_profile();
+create function public.ensure_worker_personal_engagement() returns trigger language plpgsql security definer as $$
+begin
+  if new.profile_id is null then return new; end if;
+  insert into public.engagement_contexts (profile_id, relationship_slug, status)
+  select new.profile_id, 'employee', 'active'
+   where not exists (select 1 from public.engagement_contexts ec where ec.profile_id = new.profile_id and ec.relationship_slug = 'employee');
+  return new;
+end $$;
+create trigger on_worker_personal_engagement after insert on public.workers for each row execute function public.ensure_worker_personal_engagement();
 create table public.journal_entries (
   id uuid primary key default gen_random_uuid(), worker_id uuid not null references public.workers(id) on delete cascade,
   engagement_context_id uuid not null references public.engagement_contexts(id) on delete restrict, project_id uuid,
@@ -208,10 +221,13 @@ function seed(db) {
     update public.profiles set full_name = '${NAME_A}', phone = '${PHONE_A}' where id = '${SUBJECT}';
     update public.profiles set full_name = 'Other Beta' where id = '${OTHER}';
     insert into public.organizations (id, display_name) values ('99999999-0000-4000-8000-000000000001', 'Org One');
+    -- the signup chain made a random-id worker + personal engagement per person; the fixture uses fixed ids
+    delete from public.workers where profile_id in ('${SUBJECT}', '${OTHER}', '${THIRD}', '${FOURTH}', '${FIFTH}');
     insert into public.workers (id, profile_id, display_name) values
       ('aaaa0000-0000-4000-8000-000000000001', '${SUBJECT}', 'Subject A'), ('bbbb0000-0000-4000-8000-000000000002', '${OTHER}', 'Other B'),
       ('cccc0000-0000-4000-8000-000000000003', '${THIRD}', 'Third C'), ('dddd0000-0000-4000-8000-000000000004', '${FOURTH}', 'Fourth D'),
       ('eeee0000-0000-4000-8000-000000000005', '${FIFTH}', 'Fifth E');
+    delete from public.engagement_contexts where profile_id in ('${SUBJECT}', '${OTHER}', '${THIRD}', '${FOURTH}', '${FIFTH}');
     insert into public.engagement_contexts (id, profile_id, organization_id, title, description) values
       ('ec000000-0000-4000-8000-000000000001', '${SUBJECT}', null, 'my job', 'private note'),
       ('ec000000-0000-4000-8000-000000000002', '${OTHER}', '99999999-0000-4000-8000-000000000001', 'manager', null),
@@ -285,6 +301,12 @@ function main() {
     }
     ok(one("proof", "select count(*) from public.privacy_erasure_registry_v3") > 250, `migration applied on the mirror: ${one("proof", "select count(*) from public.privacy_erasure_registry_v3")} registry rows, ${one("proof", "select count(*) from public.privacy_erasure_value_rules_v3")} value rules`);
     ok(one("proof", "select count(*) from auth.users u join public.profiles p on p.id = u.id join public.workers w on w.profile_id = p.id where u.id = public.privacy_erasure_sentinel_profile_id() and u.banned_until = 'infinity'") === "1", "sentinel auth user + profile + worker exist, banned forever");
+    ok(one("proof", "select count(*) from public.workers where profile_id = public.privacy_erasure_sentinel_profile_id()") === "1"
+      && one("proof", "select count(*) from public.engagement_contexts where profile_id = public.privacy_erasure_sentinel_profile_id()") === "0"
+      && one("proof", "select count(*) from public.profiles where id = public.privacy_erasure_sentinel_profile_id() and email is null and active_role is null") === "1",
+      "sentinel under the production signup chain: exactly one worker (the fixed id), no personal engagement, no e-mail, no role");
+    ok(psqlFile("proof", migration).status === 0 && one("proof", "select count(*) from public.workers where profile_id = public.privacy_erasure_sentinel_profile_id()") === "1",
+      "migration re-applies on the same database (idempotent) without a second sentinel worker");
 
     seed("proof");
     const before = json("proof", `select jsonb_build_object('je', (select count(*) from public.journal_entries), 'uce', (select count(*) from public.usage_cost_events), 'pce', (select count(*) from public.privacy_consent_events), 'users', (select count(*) from auth.users))`);
