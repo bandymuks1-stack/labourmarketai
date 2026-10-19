@@ -8,10 +8,8 @@
 --
 -- WHY: a person who asked to delete their account stays discoverable to
 -- employers until the request is executed, because discoverability reads the
--- consent ledger only. Production 2026-10-19: the one open account_deletion
--- request (filed 2026-10-14) still had a live discoverability grant, so the
--- person's worker row stayed readable to employers with no relationship.
--- Processing the profile for discovery after the person asked for erasure is
+-- consent ledger only, so the person's worker row stays readable to
+-- employers with no relationship. Processing the profile for discovery after the person asked for erasure is
 -- exactly what the request objects to.
 --
 -- WHAT: worker_profile_discoverable() keeps its ledger rule unchanged and adds
@@ -30,12 +28,11 @@
 --     keeps the ACL.
 --
 -- EFFECT is narrowing only: every caller (can_view_worker, the partner-supply
--- authorisation, admin privacy counts) sees "not discoverable" for that one
--- person while the request is open. When the request is closed the ledger
--- rule alone decides again.
+-- authorisation, admin privacy counts) sees "not discoverable" for a person
+-- while their request is open. When the request is closed the ledger rule
+-- alone decides again.
 --
--- COST: one indexed lookup (customer_requests_profile_idx) per call; the
--- table holds 36 rows.
+-- COST: one indexed lookup (customer_requests_profile_idx) per call.
 --
 -- ROLLBACK: supabase/rollbacks/20261019070000_discoverability_paused_by_open_deletion_request_v1.down.sql
 -- restores the previous body verbatim.
