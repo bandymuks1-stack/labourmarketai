@@ -16,7 +16,7 @@
  *     state so the UI explains itself instead of crashing or faking a list.
  */
 
-/** Mirrors the draft CHECK on worker_languages.lang (PR #720). */
+/** Mirrors the CHECK on worker_languages.lang (PR #720; 'uk' added by 20261019170000). */
 export const WORKER_LANGUAGES = [
   "en",
   "lt",
@@ -29,6 +29,7 @@ export const WORKER_LANGUAGES = [
   "sv",
   "pl",
   "ru",
+  "uk",
 ] as const;
 
 export type WorkerLanguageCode = (typeof WORKER_LANGUAGES)[number];
@@ -61,6 +62,7 @@ export const WORKER_LANGUAGE_NATIVE_NAMES: Record<WorkerLanguageCode, string> = 
   sv: "Svenska",
   pl: "Polski",
   ru: "Русский",
+  uk: "Українська",
 };
 
 export function isWorkerLanguage(value: string): value is WorkerLanguageCode {

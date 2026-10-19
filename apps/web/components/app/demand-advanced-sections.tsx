@@ -52,22 +52,10 @@ import type {
   LanguageRow,
 } from "@/lib/demand/structured-demand-form";
 import { countryOptionsForLocale } from "@/lib/location/country-options";
+import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 
-/** Language display names in their own language — locale-independent by
- *  design (the standard picker convention), so no 11-locale key set. */
-const LANGUAGE_NATIVE_NAMES: Record<string, string> = {
-  en: "English",
-  lt: "Lietuvių",
-  lv: "Latviešu",
-  et: "Eesti",
-  nl: "Nederlands",
-  de: "Deutsch",
-  da: "Dansk",
-  no: "Norsk",
-  sv: "Svenska",
-  pl: "Polski",
-  ru: "Русский",
-};
+/** Language display names: the ONE native-name map (worker-languages-model). */
+const LANGUAGE_NATIVE_NAMES: Record<string, string> = WORKER_LANGUAGE_NATIVE_NAMES;
 
 const CURRENCY_OPTIONS = ["EUR", "PLN", "SEK", "NOK", "DKK"] as const;
 
