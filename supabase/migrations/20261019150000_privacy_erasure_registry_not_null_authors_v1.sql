@@ -1,3 +1,5 @@
+-- @human-gate-approved (acknowledgement: RED by data UPDATE; owner-approved 2026-10-19 with the erasure executor v3)
+--
 -- 20261019150000 — erasure registry: two NOT NULL author columns are severed, not nulled.
 --
 -- The production dry run of the executor v3 (20261019140000) refused every
