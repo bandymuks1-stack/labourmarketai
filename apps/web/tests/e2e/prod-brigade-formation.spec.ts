@@ -356,14 +356,33 @@ async function journaledHours(page: Page, projectId: string): Promise<number> {
   await page.goto(`/lt/dashboard/projects/${projectId}/operations`);
   const chip = page.getByTestId("ops-centre-hours-journaled");
   await expect(chip).toBeVisible({ timeout: 30_000 });
-  const nums = (await chip.innerText()).match(/\d+(?:[.,]\d+)?/g) ?? [];
-  return nums.length ? Number(nums[nums.length - 1].replace(",", ".")) : 0;
+  // "Žurnale: 1 002,5 val." — the value follows the label's colon; grouping
+  // separators (space, no-break space, narrow no-break space) are dropped
+  // before parsing, so totals past 1,000 read as one number.
+  const text = await chip.innerText();
+  const value = text.slice(text.lastIndexOf(":") + 1).replace(/[\s  ]/g, "");
+  const match = value.match(/\d+(?:[.,]\d+)?/);
+  return match ? Number(match[0].replace(",", ".")) : 0;
 }
 
 test("B2B-7. buyer hands the agreed brigade into its own project as ONE team assignment", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto("/lt/dashboard/projects");
+  // Self-healing: an earlier run that stopped before B2B-10 left its brigade
+  // assigned, and step 0 cannot disband a brigade with open work. End those
+  // leftovers here (history is kept) so brigades never pile up to the cap.
+  for (let i = 0; i < 6; i += 1) {
+    const leftover = page
+      .getByTestId("project-team-row")
+      .filter({ hasText: "QA-SYNTHETIC Brigada" })
+      .filter({ hasNotText: TEAM })
+      .first();
+    if ((await leftover.count()) === 0) break;
+    await leftover.getByTestId("project-team-end").click();
+    await page.waitForTimeout(2_000);
+    await page.reload();
+  }
   if ((await page.getByText(GAMA_PROJECT, { exact: false }).count()) === 0) {
     const form = page.getByTestId("project-create");
     await expect(form).toBeVisible({ timeout: 30_000 });
@@ -427,5 +446,16 @@ test("B2B-9. the buyer sees the brigade's work on its own project", async ({ bro
   }
   console.info(`[b2b] journaled hours on the buyer's project: ${journaledBefore} → ${after}`);
   expect(after, "the member's 6 hours reach the buyer's project").toBeGreaterThanOrEqual(journaledBefore + 6);
+  await ctx.close();
+});
+
+test("B2B-10. the buyer ends this run's team assignment (history kept), so the next run can disband the brigade", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  await page.goto("/lt/dashboard/projects");
+  const row = page.getByTestId("project-team-row").filter({ hasText: TEAM }).first();
+  await expect(row, "this run's brigade is assigned on the buyer's project").toBeVisible({ timeout: 30_000 });
+  await row.getByTestId("project-team-end").click();
+  await expect(page.getByTestId("project-team-row").filter({ hasText: TEAM })).toHaveCount(0, { timeout: 30_000 });
   await ctx.close();
 });
