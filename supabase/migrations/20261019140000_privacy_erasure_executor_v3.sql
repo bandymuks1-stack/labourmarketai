@@ -1,6 +1,6 @@
 -- @human-gate-approved (acknowledgement only: RED, NOT applied; owner/legal approval required)
 --
--- 20261016150000 — GDPR Art. 17 erasure executor v3 (#856).
+-- 20261019140000 — GDPR Art. 17 erasure executor v3 (#856).
 -- SUPERSEDES the approach of PR #2426 (erasure v2) after the 2026-10-16 audit
 -- review. v2 stays blocked; this file is a DRAFT for the human gate and is
 -- NOT applied anywhere. Design: docs/legal/gdpr-2026-10-15/internal/erasure-v3-design.md
@@ -38,7 +38,7 @@
 -- RED class: SECURITY DEFINER, GRANT/REVOKE, auth.users insert + delete,
 -- DROP NOT NULL, DML in function bodies, dynamic SQL, DISABLE TRIGGER in the
 -- execute path. The annotation is an acknowledgement, not an approval.
--- Rollback: supabase/rollbacks/20261016150000_privacy_erasure_executor_v3.down.sql
+-- Rollback: supabase/rollbacks/20261019140000_privacy_erasure_executor_v3.down.sql
 
 begin;
 
@@ -142,6 +142,9 @@ create table if not exists public.privacy_erasure_registry_v3 (
 );
 comment on table public.privacy_erasure_registry_v3 is
   'GDPR erasure decision per person-referencing FK column (#856, v3). An FK without a row REFUSES by name. allow_cascade = the cascade is the decision. sever_sentinel = row retained, person column re-pointed to the sentinel (legal_basis names the Art. 17(3) ground; legal_review marks rows awaiting the lawyer). guard_triggers are disabled around the ONE statement in the EXECUTE path only. A change of treatment ships as a reviewed migration.';
+alter table public.privacy_erasure_registry_v3 add column if not exists retention text;
+comment on column public.privacy_erasure_registry_v3.retention is
+  'Documented retention period for a class RETAINED about the person (sever_sentinel / pseudonymise_ledger). Owner rule 2026-10-19: no documented legal basis AND retention period -> the plan refuses -> human review.';
 alter table public.privacy_erasure_registry_v3 enable row level security;
 revoke all on public.privacy_erasure_registry_v3 from public, anon, authenticated;
 
@@ -163,6 +166,7 @@ create table if not exists public.privacy_erasure_value_rules_v3 (
 );
 comment on table public.privacy_erasure_value_rules_v3 is
   'Person references the FK catalog cannot see. email_exact/phone_exact match the subject''s own identifiers; mention scans text/jsonb for the subject''s e-mail(s) or id. report_only = counted in the receipt, never printed. Undecided or refuse with rows > 0 refuses.';
+alter table public.privacy_erasure_value_rules_v3 add column if not exists retention text;
 alter table public.privacy_erasure_value_rules_v3 enable row level security;
 revoke all on public.privacy_erasure_value_rules_v3 from public, anon, authenticated;
 
@@ -360,6 +364,12 @@ begin
         continue;
       end if;
     end if;
+    if t.treatment in ('sever_sentinel', 'pseudonymise_ledger')
+       and (nullif(btrim(coalesce(t.legal_basis, '')), '') is null or nullif(btrim(coalesce(t.retention, '')), '') is null) then
+      v_refusals := v_refusals || jsonb_build_object('table', r.tbl, 'column', r.col, 'rows', v_n,
+        'reason', 'retained about the person without a documented legal basis and retention period - human review');
+      continue;
+    end if;
     v_actions := v_actions || jsonb_build_object('table', r.tbl, 'column', r.col, 'parent', r.parent, 'rows', v_n,
       'treatment', t.treatment, 'guards', to_jsonb(coalesce(t.guard_triggers, '{}'::text[])),
       'scrub', to_jsonb(coalesce(t.scrub_columns, '{}'::text[])), 'legal_basis', t.legal_basis,
@@ -399,6 +409,9 @@ begin
     if t.decided_by is null or t.treatment = 'refuse' then
       v_refusals := v_refusals || jsonb_build_object('table', t.schema_name || '.' || t.table_name, 'column', t.column_name,
         'rows', v_n, 'reason', t.note);
+    elsif t.treatment = 'report_only' and nullif(btrim(coalesce(t.retention, '')), '') is null then
+      v_refusals := v_refusals || jsonb_build_object('table', t.schema_name || '.' || t.table_name, 'column', t.column_name,
+        'rows', v_n, 'reason', 'text retained about the person without a documented retention period - human review');
     elsif t.treatment = 'report_only' then
       v_retained := v_retained || jsonb_build_object('table', t.schema_name || '.' || t.table_name, 'column', t.column_name,
         'rows', v_n, 'why', t.note);
@@ -463,7 +476,11 @@ declare
   v_id uuid;
   v_expires timestamptz;
 begin
-  if coalesce(p_external->>'notice', '') <> 'sent' then
+  if coalesce(p_external->>'notice', '') not in ('sent', 'queued')
+     or (p_external->>'notice' = 'queued' and not exists (
+           select 1 from public.privacy_erasure_notices_v1 n
+            where n.request_id = p_request_id and n.kind = 'erasure_completed' and n.status = 'held'
+              and n.recipient_email is not null)) then
     return jsonb_build_object('authorized', false,
       'refusals', jsonb_build_array(jsonb_build_object('reason',
         'completion notice to the person must be recorded as sent before authorization (external.notice = "sent"); the account e-mail no longer exists afterwards')));
@@ -979,6 +996,7 @@ on conflict (schema_name, table_name, column_name) do nothing;
 -- ─────────────────────────────────────────────────────────────────────────
 -- 11 · value-rule seed — person references the FK catalog cannot see
 -- ─────────────────────────────────────────────────────────────────────────
+-- REGISTRY-SEED-BEGIN
 insert into public.privacy_erasure_value_rules_v3
   (schema_name, table_name, column_name, match, treatment, decided_by, legal_review, scrub_columns, note) values
   ('public', 'invitations', 'invited_email', 'email_exact', 'pseudonymise_value', 'engineering', false, array['invited_name', 'personal_message'], 'invitation addressed to the person: address replaced by the sentinel address, name and message removed; the inviter keeps the fact that an invitation existed'),
@@ -1003,5 +1021,272 @@ insert into public.privacy_erasure_value_rules_v3
   ('public', 'organization_people', 'display_name', 'mention', 'report_only', 'engineering', true, null, 'organisation-supplied person card (D9): counted, not changed'),
   ('auth', 'audit_log_entries', 'payload', 'mention', 'report_only', 'engineering', true, null, 'GoTrue security log; retained security evidence - LEGAL: retention window')
 on conflict (schema_name, table_name, column_name) do nothing;
+-- REGISTRY-SEED-END
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- 12 · OWNER DECISIONS 2026-10-19 (chat): automated self-service erasure
+--   L-1  personal free text of the work journal is ERASED; an entry linked to an
+--        employer (engagement with an organisation, or a project) is working-time
+--        evidence whose retention per jurisdiction is not documented (L-2) -> the
+--        plan refuses -> human review. Its child rows go with it.
+--   Retention: a class retained about the person needs a documented legal basis AND
+--        a retention period (data-flow-legal-basis-retention-matrix-v2): consent
+--        ledger M39, privacy request M40, engagement M30, disclosure M10,
+--        confirmations M29, security log M41. Anything else retained -> review.
+--   Who executes: the system (no administrator), after the account holder's own
+--        confirmation with a fresh sign-in, or an owner's written approval.
+-- ─────────────────────────────────────────────────────────────────────────
+update public.privacy_erasure_registry_v3
+   set treatment = 'delete_rows', decided_by = 'owner', legal_review = false,
+       legal_basis = 'Art. 17(1)(a)/(b): the person''s own work record; owner decision 2026-10-19 (L-1): personal free text is erased',
+       refuse_where = '(project_id is not null or engagement_context_id in (select ec.id from public.engagement_contexts ec where ec.organization_id is not null))',
+       note = 'employer-linked journal entries are an organisation''s working-time evidence; no documented retention per jurisdiction (L-2) - human review',
+       updated_at = now()
+ where schema_name = 'public' and table_name = 'journal_entries' and column_name = 'worker_id';
+update public.privacy_erasure_registry_v3
+   set treatment = 'allow_cascade', decided_by = 'owner', legal_review = false,
+       legal_basis = 'Art. 17(1)(a)/(b): child rows of the person''s own journal entries (L-1, owner 2026-10-19)',
+       note = 'deleted with the entries / the worker row', updated_at = now()
+ where schema_name = 'public' and table_name in ('journal_entry_skills', 'journal_entry_work_items') and column_name = 'worker_id';
+
+update public.privacy_erasure_registry_v3 set retention = '6 years after erasure (matrix M39; Art. 7(1))', decided_by = 'owner', updated_at = now()
+ where schema_name = 'public' and table_name = 'privacy_consent_events' and column_name = 'user_id';
+update public.privacy_erasure_registry_v3 set retention = 'privacy request records 3 years after completion (M40); demand records 24 months (M31)', decided_by = 'owner', updated_at = now()
+ where schema_name = 'public' and table_name = 'customer_requests' and column_name = 'profile_id';
+update public.privacy_erasure_registry_v3 set retention = '6 years after the engagement ended (M30)', decided_by = 'owner', updated_at = now()
+ where schema_name = 'public' and table_name = 'engagement_contexts' and column_name = 'profile_id';
+update public.privacy_erasure_registry_v3 set retention = '6 years (M10)', decided_by = 'owner', updated_at = now()
+ where schema_name = 'public' and table_name = 'personal_data_disclosures';
+update public.privacy_erasure_registry_v3 set retention = 'as long as the confirmed record is retained (M29)', decided_by = 'owner', updated_at = now()
+ where schema_name = 'public' and table_name = 'journal_entry_confirmations' and column_name = 'confirmer_id';
+update public.privacy_erasure_value_rules_v3 set retention = 'as long as the containing entry is retained (M06/M25)', decided_by = 'owner'
+ where schema_name = 'public' and table_name = 'journal_entries' and column_name = 'original_text';
+update public.privacy_erasure_value_rules_v3 set retention = '24 months (M31)', decided_by = 'owner'
+ where schema_name = 'public' and table_name = 'customer_requests' and column_name = 'need_summary';
+update public.privacy_erasure_value_rules_v3 set retention = '6 years (M41; Art. 32 security evidence)', decided_by = 'owner'
+ where schema_name = 'auth' and table_name = 'audit_log_entries' and column_name = 'payload';
+
+-- 12.1 the account holder's confirmation (fresh sign-in) or the owner's written approval
+create table if not exists public.privacy_erasure_confirmations_v1 (
+  request_id        uuid primary key,
+  profile_id        uuid not null,
+  method            text not null check (method in ('fresh_sign_in', 'owner_written_approval')),
+  fresh_sign_in_at  timestamptz,
+  confirmed_at      timestamptz not null default now(),
+  note              text
+);
+comment on table public.privacy_erasure_confirmations_v1 is
+  'The verified go-ahead for one account-deletion request: the holder confirmed it with a sign-in no older than 15 minutes, or the owner approved it in writing. The automated runner executes only confirmed requests. No e-mail, no name.';
+alter table public.privacy_erasure_confirmations_v1 enable row level security;
+revoke all on public.privacy_erasure_confirmations_v1 from public, anon, authenticated;
+
+create or replace function public.privacy_confirm_account_deletion_v1()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_req uuid;
+  v_signed timestamptz;
+begin
+  if v_uid is null then
+    return jsonb_build_object('ok', false, 'error', 'not_authenticated');
+  end if;
+  select cr.id into v_req
+    from public.customer_requests cr
+   where cr.profile_id = v_uid
+     and cr.payload->>'privacy_request_type' = 'account_deletion'
+     and cr.status in ('submitted', 'in_review', 'needs_followup')
+   order by cr.created_at desc
+   limit 1;
+  if v_req is null then
+    return jsonb_build_object('ok', false, 'error', 'no_open_deletion_request');
+  end if;
+  select u.last_sign_in_at into v_signed from auth.users u where u.id = v_uid;
+  if v_signed is null or v_signed < now() - interval '15 minutes' then
+    return jsonb_build_object('ok', false, 'error', 'reauth_required');
+  end if;
+  insert into public.privacy_erasure_confirmations_v1 (request_id, profile_id, method, fresh_sign_in_at)
+  values (v_req, v_uid, 'fresh_sign_in', v_signed)
+  on conflict (request_id) do nothing;
+  return jsonb_build_object('ok', true, 'request_id', v_req);
+end;
+$$;
+revoke all on function public.privacy_confirm_account_deletion_v1() from public, anon;
+grant execute on function public.privacy_confirm_account_deletion_v1() to authenticated;
+
+-- 12.2 notices: the address is captured BEFORE the account is deleted and erased once sent
+create table if not exists public.privacy_erasure_notices_v1 (
+  id                  uuid primary key default gen_random_uuid(),
+  request_id          uuid not null,
+  kind                text not null check (kind in ('erasure_completed', 'erasure_review')),
+  recipient_email     text,
+  locale              text not null default 'lt',
+  status              text not null default 'held' check (status in ('held', 'queued', 'sent', 'failed')),
+  attempts            int not null default 0,
+  last_error          text,
+  provider_message_id text,
+  created_at          timestamptz not null default now(),
+  sent_at             timestamptz,
+  unique (request_id, kind)
+);
+comment on table public.privacy_erasure_notices_v1 is
+  'GDPR notices to the person. held = address captured before the erasure; queued = ready; sent = delivered to the SMTP server (provider_message_id kept, the address is erased); failed = gave up after the retry budget. Service-role only.';
+alter table public.privacy_erasure_notices_v1 enable row level security;
+revoke all on public.privacy_erasure_notices_v1 from public, anon, authenticated;
+
+-- 12.3 runner primitives (service_role only; the runner holds no table grants)
+create or replace function public.privacy_erasure_due_v1(p_limit int default 5)
+returns table (request_id uuid, status text, method text)
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select cr.id, cr.status, c.method
+    from public.customer_requests cr
+    join public.privacy_erasure_confirmations_v1 c on c.request_id = cr.id
+   where cr.payload->>'privacy_request_type' = 'account_deletion'
+     and cr.status in ('submitted', 'in_review', 'approved')
+     and exists (select 1 from auth.users u where u.id = cr.profile_id)
+   order by c.confirmed_at
+   limit greatest(1, least(coalesce(p_limit, 5), 50));
+$$;
+
+create or replace function public.privacy_erasure_mark_v1(p_request_id uuid, p_status text, p_note text default null)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if p_status not in ('approved', 'needs_followup') then
+    raise exception 'privacy_erasure_mark_v1: status must be approved or needs_followup' using errcode = '22023';
+  end if;
+  if not exists (select 1 from public.privacy_erasure_confirmations_v1 where request_id = p_request_id) then
+    return jsonb_build_object('ok', false, 'error', 'not_confirmed');
+  end if;
+  update public.customer_requests
+     set status = p_status,
+         manual_review_note = left(coalesce(p_note, manual_review_note), 2000),
+         payload = jsonb_set(coalesce(payload, '{}'::jsonb), '{privacy_review_log}',
+           coalesce(payload->'privacy_review_log', '[]'::jsonb)
+             || jsonb_build_array(jsonb_build_object('status', p_status, 'at', now(), 'by', 'system')))
+         , updated_at = now()
+   where id = p_request_id and payload->>'privacy_request_type' = 'account_deletion'
+     and status <> 'closed';
+  if not found then
+    return jsonb_build_object('ok', false, 'error', 'not_open');
+  end if;
+  if p_status = 'needs_followup' then
+    -- the account stays: a completion notice captured for it must not keep the address
+    delete from public.privacy_erasure_notices_v1
+     where request_id = p_request_id and kind = 'erasure_completed' and status = 'held';
+  end if;
+  return jsonb_build_object('ok', true);
+end;
+$$;
+
+create or replace function public.privacy_erasure_notice_hold_v1(p_request_id uuid, p_kind text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_email text;
+  v_locale text;
+begin
+  select coalesce(u.email::text, p.email), coalesce(nullif(p.locale, ''), 'lt')
+    into v_email, v_locale
+    from public.customer_requests cr
+    join public.profiles p on p.id = cr.profile_id
+    left join auth.users u on u.id = cr.profile_id
+   where cr.id = p_request_id;
+  if v_email is null then
+    return jsonb_build_object('ok', false, 'error', 'no_address');
+  end if;
+  insert into public.privacy_erasure_notices_v1 (request_id, kind, recipient_email, locale, status)
+  values (p_request_id, p_kind, lower(v_email), v_locale, case when p_kind = 'erasure_review' then 'queued' else 'held' end)
+  on conflict (request_id, kind) do update
+     set recipient_email = coalesce(public.privacy_erasure_notices_v1.recipient_email, excluded.recipient_email)
+   where public.privacy_erasure_notices_v1.status in ('held', 'queued');
+  return jsonb_build_object('ok', true);
+end;
+$$;
+
+-- releases a held completion notice only once a receipt proves the erasure ran;
+-- p_request_id null = sweep every such notice (a crash between erase and release
+-- can never strand one)
+create or replace function public.privacy_erasure_notice_release_v1(p_request_id uuid default null)
+returns jsonb
+language sql
+security definer
+set search_path = public, pg_temp
+as $$
+  with u as (
+    update public.privacy_erasure_notices_v1 n set status = 'queued'
+     where (p_request_id is null or n.request_id = p_request_id)
+       and n.kind = 'erasure_completed' and n.status = 'held'
+       and exists (select 1 from public.privacy_erasure_receipts_v3 r where r.request_id = n.request_id)
+     returning 1)
+  select jsonb_build_object('ok', true, 'released', (select count(*) from u));
+$$;
+
+create or replace function public.privacy_erasure_notices_due_v1(p_limit int default 10)
+returns table (id uuid, request_id uuid, kind text, recipient_email text, locale text, attempts int)
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select n.id, n.request_id, n.kind, n.recipient_email, n.locale, n.attempts
+    from public.privacy_erasure_notices_v1 n
+   where n.status = 'queued' and n.recipient_email is not null and n.attempts < 8
+   order by n.created_at
+   limit greatest(1, least(coalesce(p_limit, 10), 50));
+$$;
+
+create or replace function public.privacy_erasure_notice_result_v1(p_id uuid, p_ok boolean, p_message_id text default null, p_error text default null)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if p_ok then
+    update public.privacy_erasure_notices_v1
+       set status = 'sent', sent_at = now(), provider_message_id = left(p_message_id, 300),
+           recipient_email = null, attempts = attempts + 1, last_error = null
+     where id = p_id and status = 'queued';
+  else
+    update public.privacy_erasure_notices_v1
+       set attempts = attempts + 1, last_error = left(p_error, 300),
+           status = case when attempts + 1 >= 8 then 'failed' else 'queued' end,
+           -- a notice that can no longer be delivered keeps no address
+           recipient_email = case when attempts + 1 >= 8 then null else recipient_email end
+     where id = p_id and status = 'queued';
+  end if;
+  return jsonb_build_object('ok', found);
+end;
+$$;
+
+revoke all on function public.privacy_erasure_due_v1(int) from public, anon, authenticated;
+revoke all on function public.privacy_erasure_mark_v1(uuid, text, text) from public, anon, authenticated;
+revoke all on function public.privacy_erasure_notice_hold_v1(uuid, text) from public, anon, authenticated;
+revoke all on function public.privacy_erasure_notice_release_v1(uuid) from public, anon, authenticated;
+revoke all on function public.privacy_erasure_notices_due_v1(int) from public, anon, authenticated;
+revoke all on function public.privacy_erasure_notice_result_v1(uuid, boolean, text, text) from public, anon, authenticated;
+grant execute on function public.privacy_erasure_due_v1(int) to service_role;
+grant execute on function public.privacy_erasure_mark_v1(uuid, text, text) to service_role;
+grant execute on function public.privacy_erasure_notice_hold_v1(uuid, text) to service_role;
+grant execute on function public.privacy_erasure_notice_release_v1(uuid) to service_role;
+grant execute on function public.privacy_erasure_notices_due_v1(int) to service_role;
+grant execute on function public.privacy_erasure_notice_result_v1(uuid, boolean, text, text) to service_role;
+
+-- the executor's own new tables reference no person by FK; the confirmation's
+-- profile_id is a plain uuid (the account is deleted later) - no registry row needed.
 
 commit;

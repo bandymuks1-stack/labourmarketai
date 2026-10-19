@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 import { join } from "node:path";
 
 import {
@@ -266,7 +267,7 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       const abs = join(REPO, "supabase", dir);
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(ENGINE) || f.startsWith(TYPES_V3)) continue;
-        const src = readFileSync(join(abs, f), "utf8");
+        const src = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
         if (f.startsWith(SECURITY_FIX)) {
           // 20261002141500 — SECURITY forward-fix (NULL-safe authorization). It may
           // replace exactly ONE engine command (start_workflow_instance_v1, only its

@@ -2,7 +2,7 @@
 
 > Status: DRAFT 2026-10-16 · RED — NOT applied to any database · Supersedes the **approach** of PR #2426 (erasure v2) after the 2026-10-16 audit review. #2426 stays blocked in its current form; nothing in it is edited by this document.
 > Owner gate: draft PR + `needs-human-gate` + explicit owner **and** lawyer approval of §15 before `apply_migration`.
-> Sources: `erasure-v2-technical-plan.md`, `data-subject-request-procedure-v1.md` (SOP), `data-retention-matrix-v1.md`, `deletion-process-design-v1.md` (E1–E8), decision 0024 (single-use confirmations), doctrine §3 / §16 / §20, the 2026-10-16 audit review of #2426, migration `20261016150000_privacy_erasure_executor_v3.sql` (+ rollback), harness `apps/web/scripts/db-proof/privacy-erasure-v3-local.mjs`, guard `apps/web/lib/guards/privacy-erasure-registry-coverage.test.ts`.
+> Sources: `erasure-v2-technical-plan.md`, `data-subject-request-procedure-v1.md` (SOP), `data-retention-matrix-v1.md`, `deletion-process-design-v1.md` (E1–E8), decision 0024 (single-use confirmations), doctrine §3 / §16 / §20, the 2026-10-16 audit review of #2426, migration `20261019140000_privacy_erasure_executor_v3.sql` (+ rollback), harness `apps/web/scripts/db-proof/privacy-erasure-v3-local.mjs`, guard `apps/web/lib/guards/privacy-erasure-registry-coverage.test.ts`.
 >
 > **Santrauka (LT).** v2 leido kaskadoms (ON DELETE CASCADE) veikti be sprendimo: su paskyra dingtų visas darbo žurnalas su patvirtinimais ir Stripe kliento susiejimas; `usage_cost_events` sever'inimas buvo blokuojamas tos lentelės trigerio, tad kiekviena paskyra su AI naudojimu nepavyktų; patvirtinimas buvo statinis žodis „ERASE“, o bandomasis vykdymas ėmė DDL užraktus puslapio atvaizdavimo metu. v3: **kiekviena** nuoroda į asmenį (įskaitant kaskadas) turi aiškų registro sprendimą; išsaugomos eilutės **atskiriamos** nuo asmens (sentinel „ištrintas asmuo“), bet lieka; bandomasis vykdymas — tik skaitymas; vienkartinis, galiojimo laiką turintis, būsenai ir planui pririštas leidimo žetonas; kvitai be identifikatorių. Teisinius klausimus (§15) sprendžia savininkas ir teisininkas — ne inžinerija.
 
@@ -213,7 +213,7 @@ Proven: T2 (forged, consumed, expired, cross-request, state-drift, fresh-token-t
 ## 14. Production runbook (after owner + lawyer approval)
 
 1. **Approve**: owner signs §15 decisions (or defers them explicitly — a deferred decision keeps `legal_review = true` rows runnable only if the owner accepts the engineering basis for now). Lawyer initials the Art. 17(3) grounds per class.
-2. **Apply**: Supabase MCP `apply_migration` with the exact file content of `20261016150000_privacy_erasure_executor_v3.sql` on the verified production project (never `supabase db push` / `prisma migrate deploy`; the ledger and filenames do not match). Record `APPLIED TO PROD: 20261016150000_privacy_erasure_executor_v3 (rollback: supabase/rollbacks/20261016150000_privacy_erasure_executor_v3.down.sql)`.
+2. **Apply**: Supabase MCP `apply_migration` with the exact file content of `20261019140000_privacy_erasure_executor_v3.sql` on the verified production project (never `supabase db push` / `prisma migrate deploy`; the ledger and filenames do not match). Record `APPLIED TO PROD: 20261019140000_privacy_erasure_executor_v3 (rollback: supabase/rollbacks/20261019140000_privacy_erasure_executor_v3.down.sql)`.
 3. **Verify the apply** (MCP read queries, counts only):
    ```sql
    select count(*) from public.privacy_erasure_registry_v3;            -- expect 273 (271 FK columns from existing migrations + 2 executor rows)

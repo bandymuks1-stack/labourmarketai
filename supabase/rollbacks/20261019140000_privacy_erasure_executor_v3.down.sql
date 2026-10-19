@@ -1,4 +1,4 @@
--- ROLLBACK for 20261016150000_privacy_erasure_executor_v3.sql
+-- ROLLBACK for 20261019140000_privacy_erasure_executor_v3.sql
 --
 -- Reverses the executor, the token table, both registries and the sentinel.
 -- EVIDENCE IS NEVER DESTROYED: receipts, severed rows and pseudonymised ledger
@@ -10,6 +10,13 @@
 
 begin;
 
+drop function if exists public.privacy_erasure_notice_result_v1(uuid, boolean, text, text);
+drop function if exists public.privacy_erasure_notices_due_v1(int);
+drop function if exists public.privacy_erasure_notice_release_v1(uuid);
+drop function if exists public.privacy_erasure_notice_hold_v1(uuid, text);
+drop function if exists public.privacy_erasure_mark_v1(uuid, text, text);
+drop function if exists public.privacy_erasure_due_v1(int);
+drop function if exists public.privacy_confirm_account_deletion_v1();
 drop function if exists public.erase_user_account_v3(uuid, text, uuid);
 drop function if exists public.privacy_erasure_authorize_v3(uuid, uuid, jsonb, interval);
 drop function if exists public.privacy_erasure_state_fingerprint_v3(uuid);
@@ -45,6 +52,9 @@ begin
     raise exception 'rollback refused (single transaction, nothing changed): % receipt(s) and % severed row(s) reference the sentinel; evidence is kept. Remove the executor with a reviewed follow-up that leaves receipts and the sentinel in place.', v_receipts, v_refs;
   end if;
 
+  -- clean database: no erasure ran, so no notice or confirmation is evidence of one
+  drop table if exists public.privacy_erasure_notices_v1;
+  drop table if exists public.privacy_erasure_confirmations_v1;
   -- clean database: remove receipts, the sentinel worker/profile/auth user
   drop trigger if exists privacy_erasure_receipts_v3_append_only on public.privacy_erasure_receipts_v3;
   drop table if exists public.privacy_erasure_receipts_v3;

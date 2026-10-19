@@ -33,8 +33,8 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "../../../..");
-const migration = join(repo, "supabase/migrations/20261016150000_privacy_erasure_executor_v3.sql");
-const rollback = join(repo, "supabase/rollbacks/20261016150000_privacy_erasure_executor_v3.down.sql");
+const migration = join(repo, "supabase/migrations/20261019140000_privacy_erasure_executor_v3.sql");
+const rollback = join(repo, "supabase/rollbacks/20261019140000_privacy_erasure_executor_v3.down.sql");
 const pgBin = process.env.PG16_BIN || "C:\\Program Files\\PostgreSQL\\16\\bin";
 const port = Number(process.env.PG_PROOF_PORT || 5499);
 const tmp = join(repo, ".tmp", `pg-erasure-v3-${process.pid}`);
@@ -48,6 +48,8 @@ const FOURTH = "d4d4d4d4-0000-4000-8000-000000000004";
 const REQ_A = "11111111-0000-4000-8000-00000000000a";
 const REQ_C = "11111111-0000-4000-8000-00000000000c";
 const REQ_D = "11111111-0000-4000-8000-00000000000d";
+const FIFTH = "e5e5e5e5-0000-4000-8000-000000000005";
+const REQ_E = "11111111-0000-4000-8000-00000000000e";
 const EMAIL_A = "subject-a@example.test"; // synthetic; never printed
 const NAME_A = "Subject Alpha Example"; // synthetic; never printed
 const PHONE_A = "+370 600 00001"; // synthetic; never printed
@@ -84,14 +86,14 @@ const json = (db, sql) => JSON.parse(one(db, sql) || "null");
 
 const MIRROR = String.raw`
 create schema auth; create schema storage;
-create function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
+create function auth.uid() returns uuid language sql stable as $$ select nullif(nullif(current_setting('request.jwt.claims', true), '')::jsonb->>'sub', '')::uuid $$;
 create table auth.users (
   instance_id uuid, id uuid primary key, aud text, role text, email text, encrypted_password text,
   email_confirmed_at timestamptz, raw_app_meta_data jsonb, raw_user_meta_data jsonb,
   created_at timestamptz default now(), updated_at timestamptz default now(), banned_until timestamptz,
   is_sso_user boolean not null default false, confirmation_token text, recovery_token text, email_change text,
   email_change_token_new text, email_change_token_current text, phone_change text, phone_change_token text,
-  reauthentication_token text
+  reauthentication_token text, last_sign_in_at timestamptz
 );
 create table auth.audit_log_entries (id uuid primary key default gen_random_uuid(), payload jsonb, created_at timestamptz default now());
 create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text not null, name text not null, owner_id text);
@@ -119,7 +121,7 @@ create table public.engagement_contexts (
 );
 create table public.journal_entries (
   id uuid primary key default gen_random_uuid(), worker_id uuid not null references public.workers(id) on delete cascade,
-  engagement_context_id uuid not null references public.engagement_contexts(id) on delete restrict,
+  engagement_context_id uuid not null references public.engagement_contexts(id) on delete restrict, project_id uuid,
   entry_type_slug text not null default 'freeform', original_text text not null, original_language text not null default 'lt',
   hash_prev text, hash_self text not null default 'h', visibility_scope text not null default 'closed', created_at timestamptz not null default now()
 );
@@ -201,23 +203,27 @@ function seed(db) {
   psql(db, String.raw`
     insert into auth.users (id, email, raw_user_meta_data) values
       ('${SUBJECT}', '${EMAIL_A}', '{"role":"worker"}'), ('${OTHER}', 'other-b@example.test', '{"role":"company"}'),
-      ('${THIRD}', 'third-c@example.test', '{"role":"worker"}'), ('${FOURTH}', 'fourth-d@example.test', '{"role":"worker"}');
+      ('${THIRD}', 'third-c@example.test', '{"role":"worker"}'), ('${FOURTH}', 'fourth-d@example.test', '{"role":"worker"}'),
+      ('${FIFTH}', 'fifth-e@example.test', '{"role":"worker"}');
     update public.profiles set full_name = '${NAME_A}', phone = '${PHONE_A}' where id = '${SUBJECT}';
     update public.profiles set full_name = 'Other Beta' where id = '${OTHER}';
     insert into public.organizations (id, display_name) values ('99999999-0000-4000-8000-000000000001', 'Org One');
     insert into public.workers (id, profile_id, display_name) values
       ('aaaa0000-0000-4000-8000-000000000001', '${SUBJECT}', 'Subject A'), ('bbbb0000-0000-4000-8000-000000000002', '${OTHER}', 'Other B'),
-      ('cccc0000-0000-4000-8000-000000000003', '${THIRD}', 'Third C'), ('dddd0000-0000-4000-8000-000000000004', '${FOURTH}', 'Fourth D');
+      ('cccc0000-0000-4000-8000-000000000003', '${THIRD}', 'Third C'), ('dddd0000-0000-4000-8000-000000000004', '${FOURTH}', 'Fourth D'),
+      ('eeee0000-0000-4000-8000-000000000005', '${FIFTH}', 'Fifth E');
     insert into public.engagement_contexts (id, profile_id, organization_id, title, description) values
-      ('ec000000-0000-4000-8000-000000000001', '${SUBJECT}', '99999999-0000-4000-8000-000000000001', 'my job', 'private note'),
+      ('ec000000-0000-4000-8000-000000000001', '${SUBJECT}', null, 'my job', 'private note'),
       ('ec000000-0000-4000-8000-000000000002', '${OTHER}', '99999999-0000-4000-8000-000000000001', 'manager', null),
       ('ec000000-0000-4000-8000-000000000003', '${THIRD}', null, null, null),
-      ('ec000000-0000-4000-8000-000000000004', '${FOURTH}', null, null, null);
+      ('ec000000-0000-4000-8000-000000000004', '${FOURTH}', null, null, null),
+      ('ec000000-0000-4000-8000-000000000005', '${FIFTH}', '99999999-0000-4000-8000-000000000001', 'site work', null);
     insert into public.journal_entries (id, worker_id, engagement_context_id, original_text) values
       ('e0000000-0000-4000-8000-000000000001', 'aaaa0000-0000-4000-8000-000000000001', 'ec000000-0000-4000-8000-000000000001', 'laid 40 m2 of tiles'),
       ('e0000000-0000-4000-8000-000000000002', 'aaaa0000-0000-4000-8000-000000000001', 'ec000000-0000-4000-8000-000000000001', 'grouting, 8 h'),
       ('e0000000-0000-4000-8000-000000000003', 'bbbb0000-0000-4000-8000-000000000002', 'ec000000-0000-4000-8000-000000000002', 'site inspection'),
-      ('e0000000-0000-4000-8000-000000000004', 'cccc0000-0000-4000-8000-000000000003', 'ec000000-0000-4000-8000-000000000003', 'c entry');
+      ('e0000000-0000-4000-8000-000000000004', 'cccc0000-0000-4000-8000-000000000003', 'ec000000-0000-4000-8000-000000000003', 'c entry'),
+      ('e0000000-0000-4000-8000-000000000005', 'eeee0000-0000-4000-8000-000000000005', 'ec000000-0000-4000-8000-000000000005', 'e worked 8 h for the employer');
     -- B confirms A's entry; A confirms B's entry
     insert into public.journal_entry_confirmations (entry_id, confirmer_id, confirmer_engagement_context_id) values
       ('e0000000-0000-4000-8000-000000000001', '${OTHER}', 'ec000000-0000-4000-8000-000000000002'),
@@ -237,6 +243,7 @@ function seed(db) {
       ('${REQ_A}', '${SUBJECT}', 'Account deletion', 'please delete me, ${NAME_A}', 'approved', '{"source":"privacy_self_service","privacy_request_type":"account_deletion","privacy_review_log":[{"status":"approved"}]}'),
       ('${REQ_C}', '${THIRD}', 'Account deletion', null, 'approved', '{"source":"privacy_self_service","privacy_request_type":"account_deletion"}'),
       ('${REQ_D}', '${FOURTH}', 'Account deletion', null, 'approved', '{"source":"privacy_self_service","privacy_request_type":"account_deletion"}'),
+      ('${REQ_E}', '${FIFTH}', 'Account deletion', null, 'submitted', '{"source":"privacy_self_service","privacy_request_type":"account_deletion"}'),
       ('22222222-0000-4000-8000-000000000001', '${OTHER}', 'Need tilers', 'we need 3 tilers', 'submitted', '{}');
     insert into public.invitations (token_hash, invited_email, invited_name, personal_message, inviter_profile_id, organization_id) values
       (repeat('a', 64), '${EMAIL_A}', '${NAME_A}', 'join us', '${OTHER}', '99999999-0000-4000-8000-000000000001'),
@@ -292,12 +299,18 @@ function main() {
     ok(p0.refusals.some((r) => r.table === "public.billing_subscriptions" && /external\.stripe/.test(r.reason)), "T1a billing_subscriptions refuses without external.stripe");
 
     psql("proof", `delete from storage.objects where bucket_id in ('profile-avatars','journal-entry-photos') and name like '${SUBJECT}/%'`); // the app's Storage API step
+    const p1r = json("proof", `select public.privacy_erasure_plan_v3('${REQ_A}', '{"stripe":"customer_deleted"}')`);
+    ok(p1r.executable === false && p1r.refusals.some((r) => r.table === "public.billing_subscriptions" && /retention period - human review/.test(r.reason)),
+      "T1b owner rule: a class retained about the person (accounting) without a documented retention period -> human review");
+    ok(p1r.refusals.length === 1, `T1b ...and it is the only open point (${reasons(p1r).join("; ")})`);
+    // a reviewed migration later documents the accounting retention; simulated here
+    psql("proof", "update public.privacy_erasure_registry_v3 set retention = '10 years (test: accounting, decided in review)' where table_name = 'billing_subscriptions'");
     const p1 = json("proof", `select public.privacy_erasure_plan_v3('${REQ_A}', '{"stripe":"customer_deleted"}')`);
     ok(p1.executable === true, `T1b executable with files gone + external.stripe (${(p1.actions || []).length} actions, ${(p1.retained || []).length} retained classes)`);
     for (const a of actions(p1)) console.log(`      action   ${a}`);
     for (const r of p1.retained || []) console.log(`      retained ${r.table}.${r.column} rows=${r.rows}`);
     const want = [
-      ["public.journal_entries", "worker_id", "sever_sentinel", 2],
+      ["public.journal_entries", "worker_id", "delete_rows", 2],
       ["public.engagement_contexts", "profile_id", "sever_sentinel", 1],
       ["public.journal_entry_confirmations", "confirmer_id", "sever_sentinel", 1],
       ["public.usage_cost_events", "profile_id", "set_null", 2],
@@ -323,7 +336,12 @@ function main() {
 
     const a0 = json("proof", `select public.privacy_erasure_authorize_v3('${REQ_A}', '${OTHER}', '{"stripe":"customer_deleted"}')`);
     ok(a0.authorized === false && /notice/.test(JSON.stringify(a0.refusals)), "T1c authorization refused until the completion notice is recorded as sent");
-    const a1 = json("proof", `select public.privacy_erasure_authorize_v3('${REQ_A}', '${OTHER}', '{"stripe":"customer_deleted","notice":"sent"}')`);
+    const aq = json("proof", `select public.privacy_erasure_authorize_v3('${REQ_A}', '${OTHER}', '{"stripe":"customer_deleted","notice":"queued"}')`);
+    ok(aq.authorized === false, "T1c notice=queued is refused while no completion notice holds the address");
+    ok(json("proof", `select public.privacy_erasure_notice_hold_v1('${REQ_A}', 'erasure_completed')`).ok === true
+      && one("proof", `select status || '|' || (recipient_email = '${EMAIL_A}')::text from public.privacy_erasure_notices_v1 where request_id = '${REQ_A}'`) === "held|true",
+      "T1c the completion notice is HELD with the address captured before the account is deleted");
+    const a1 = json("proof", `select public.privacy_erasure_authorize_v3('${REQ_A}', '${OTHER}', '{"stripe":"customer_deleted","notice":"queued"}')`);
     ok(a1.authorized === true && /^[0-9a-f]{64}$/.test(a1.token || ""), "T1c token issued (64 hex, shown once)");
     ok(one("proof", `select count(*) from public.privacy_erasure_authorizations_v3 where token_digest = encode(sha256(convert_to('${a1.token}', 'UTF8')), 'hex') and consumed_at is null`) === "1", "T1c only sha256(token) is stored, unconsumed, bound to the request");
 
@@ -332,9 +350,11 @@ function main() {
     const S = "public.privacy_erasure_sentinel_profile_id()";
     const SW = "public.privacy_erasure_sentinel_worker_id()";
     ok(one("proof", `select count(*) from auth.users where id = '${SUBJECT}'`) === "0" && one("proof", `select count(*) from public.profiles where id = '${SUBJECT}'`) === "0", "T1d auth user and profile are gone");
-    ok(one("proof", `select count(*) from public.journal_entries where worker_id = ${SW}`) === "2" && one("proof", "select count(*) from public.journal_entries") === "4", "T1d journal rows retained (2 under the sentinel worker, 4 in total)");
+    ok(one("proof", `select count(*) from public.journal_entries where worker_id = ${SW}`) === "0" && one("proof", "select count(*) from public.journal_entries") === "3"
+      && one("proof", `select count(*) from public.journal_entries where original_text like '%tiles%' or original_text like '%grouting%'`) === "0",
+      "T1d L-1: the person's own journal entries and their free text are ERASED (3 other entries remain)");
     ok(one("proof", `select count(*) from public.engagement_contexts where profile_id = ${S} and title is null and description is null`) === "1", "T1d engagement context retained under the sentinel, labels scrubbed");
-    ok(one("proof", `select count(*) from public.journal_entry_confirmations c join public.journal_entries e on e.id = c.entry_id where e.worker_id = ${SW} and c.confirmer_id = '${OTHER}'`) === "1", "T1d the manager's confirmation of the subject's entry survives");
+    ok(one("proof", `select count(*) from public.journal_entry_confirmations where entry_id = 'e0000000-0000-4000-8000-000000000001'`) === "0", "T1d a confirmation OF the erased entry goes with it");
     ok(one("proof", `select count(*) from public.journal_entry_confirmations where confirmer_id = ${S}`) === "1", "T1d the subject's confirmation of the other worker's entry survives, confirmer severed");
     ok(one("proof", "select count(*) from public.usage_cost_events") === "3" && one("proof", `select count(*) from public.usage_cost_events where profile_id is null`) === "2", "T1d usage_cost_events retained (3), subject rows severed (2) despite the append-only trigger");
     ok(one("proof", "select count(*) from public.usage_cost_events where false") === "0" && psql("proof", "update public.usage_cost_events set measures = '{}' where profile_id is null", { allowFail: true }).status !== 0, "T1d usage_cost_events guard trigger is back in force after execution");
@@ -351,6 +371,18 @@ function main() {
     ok(one("proof", `select status || '|' || coalesce(need_summary, '<null>') || '|' || (profile_id = ${S})::text from public.customer_requests where id = '${REQ_A}'`) === "closed|<null>|true", "T1d the privacy request row survives: closed, severed, free text scrubbed");
     ok(one("proof", `select count(*) from public.journal_entries where worker_id = 'bbbb0000-0000-4000-8000-000000000002'`) === "1" && one("proof", `select count(*) from public.profiles where id = '${OTHER}' and full_name = 'Other Beta'`) === "1", "T1d the other person is untouched");
     ok(one("proof", `select outcome from public.privacy_erasure_authorizations_v3 where request_id = '${REQ_A}'`) === "erased", "T1d authorization marked consumed with outcome=erased");
+
+    console.log("\n[T1e] completion notice: release after success, send, erase the address");
+    ok(json("proof", `select public.privacy_erasure_notice_release_v1('${REQ_A}')`).released === 1, "T1e notice released to the queue only after the erasure committed");
+    const due = json("proof", "select coalesce(jsonb_agg(d), '[]') from public.privacy_erasure_notices_due_v1(10) d");
+    ok(due.length === 1 && due[0].kind === "erasure_completed" && due[0].recipient_email === EMAIL_A, "T1e the sender sees exactly one due notice with the captured address");
+    ok(json("proof", `select public.privacy_erasure_notice_result_v1('${due[0].id}', false, null, 'smtp timeout')`).ok === true
+      && one("proof", `select status || '|' || attempts from public.privacy_erasure_notices_v1 where id = '${due[0].id}'`) === "queued|1", "T1e a failed send stays queued for retry (attempts=1)");
+    ok(json("proof", `select public.privacy_erasure_notice_result_v1('${due[0].id}', true, '<msg-1@labourmarket.ai>')`).ok === true
+      && one("proof", `select status || '|' || (recipient_email is null)::text || '|' || provider_message_id from public.privacy_erasure_notices_v1 where id = '${due[0].id}'`) === "sent|true|<msg-1@labourmarket.ai>",
+      "T1e sent: message id kept as proof, the address erased");
+    ok(json("proof", `select public.privacy_erasure_notice_result_v1('${due[0].id}', true, '<msg-2>')`).ok === false, "T1e a second 'sent' result is a no-op (idempotent)");
+    ok(one("proof", `select count(*) from public.privacy_erasure_notices_v1 where recipient_email ilike '%${EMAIL_A}%'`) === "0", "T1e no table keeps the person's address after the notice");
 
     // ── T2 ───────────────────────────────────────────────────────────────
     console.log("\n[T2] forged / expired / reused / cross-request tokens");
@@ -388,6 +420,54 @@ function main() {
     psql("proof", "alter table public.new_feature_notes drop constraint new_feature_notes_author_id_fkey, add constraint new_feature_notes_author_id_fkey foreign key (author_id) references public.profiles(id) on delete no action");
     const t3c = json("proof", `select public.privacy_erasure_plan_v3('${REQ_D}', '{"notice":"sent"}')`);
     ok(t3c.executable === false && t3c.refusals.some((r) => /schema drift/.test(r.reason)), "T3 registry says allow_cascade but the live rule changed -> refused (drift)");
+
+    // ── T5 ───────────────────────────────────────────────────────────────
+    console.log("\n[T5] self-service confirmation (fresh sign-in) and grants");
+    const asUser = (uid, sql) => `begin; select set_config('request.jwt.claims', '{"sub":"${uid}","role":"authenticated"}', true); set local role authenticated; ${sql}; commit;`;
+    const confirm = (uid) => JSON.parse(psql("proof", asUser(uid, "select public.privacy_confirm_account_deletion_v1()")).out.split("\n").filter(Boolean).pop());
+    ok(JSON.parse(psql("proof", "begin; set local role authenticated; select public.privacy_confirm_account_deletion_v1(); commit;").out.split("\n").filter(Boolean).pop()).error === "not_authenticated", "T5 no session -> not_authenticated");
+    ok(confirm(OTHER).error === "no_open_deletion_request", "T5 a person without an open deletion request cannot confirm anything");
+    ok(confirm(FIFTH).error === "reauth_required", "T5 never signed in -> reauth_required");
+    psql("proof", `update auth.users set last_sign_in_at = now() - interval '30 minutes' where id = '${FIFTH}'`);
+    ok(confirm(FIFTH).error === "reauth_required", "T5 sign-in 30 min ago -> reauth_required (window 15 min)");
+    psql("proof", `update auth.users set last_sign_in_at = now() - interval '1 minute' where id = '${FIFTH}'`);
+    const c5 = confirm(FIFTH);
+    ok(c5.ok === true && c5.request_id === REQ_E, "T5 fresh sign-in -> confirmed, bound to the person's own request");
+    ok(confirm(FIFTH).ok === true && one("proof", `select count(*) from public.privacy_erasure_confirmations_v1 where request_id = '${REQ_E}'`) === "1", "T5 confirming twice is idempotent (one row)");
+    ok(psql("proof", asUser(FIFTH, "select count(*) from public.privacy_erasure_confirmations_v1"), { allowFail: true }).status !== 0, "T5 the person cannot read the confirmation table directly");
+    ok(psql("proof", asUser(FIFTH, "select * from public.privacy_erasure_due_v1(5)"), { allowFail: true }).status !== 0
+      && psql("proof", asUser(FIFTH, `select public.privacy_erasure_mark_v1('${REQ_E}', 'approved')`), { allowFail: true }).status !== 0
+      && psql("proof", asUser(FIFTH, "select * from public.privacy_erasure_notices_due_v1(5)"), { allowFail: true }).status !== 0,
+      "T5 runner primitives are not callable by a signed-in user");
+    ok(one("proof", "select has_function_privilege('anon', 'public.privacy_confirm_account_deletion_v1()', 'execute')") === "f", "T5 anon cannot call the confirmation");
+
+    // ── T6 ───────────────────────────────────────────────────────────────
+    console.log("\n[T6] runner path: employer-linked journal -> human review, no deletion");
+    const dueReq = json("proof", "select coalesce(jsonb_agg(d), '[]') from public.privacy_erasure_due_v1(10) d");
+    ok(dueReq.length === 1 && dueReq[0].request_id === REQ_E, `T6 only the confirmed request is due (${dueReq.length})`);
+    ok(json("proof", `select public.privacy_erasure_mark_v1('${REQ_D}', 'approved')`).error === "not_confirmed", "T6 an unconfirmed request cannot be moved by the runner");
+    ok(json("proof", `select public.privacy_erasure_mark_v1('${REQ_E}', 'approved')`).ok === true, "T6 runner marks the confirmed request approved");
+    const p6 = json("proof", `select public.privacy_erasure_plan_v3('${REQ_E}', '{"notice":"queued"}')`);
+    ok(p6.executable === false && p6.refusals.some((r) => r.table === "public.journal_entries" && /working-time/.test(r.reason)), "T6 employer-linked journal entry refuses (L-2, retention not documented)");
+    psql("proof", `select public.privacy_erasure_notice_hold_v1('${REQ_E}', 'erasure_completed')`);
+    ok(json("proof", "select public.privacy_erasure_notice_release_v1(null)").released === 0, "T6 a held completion notice is NOT released without a receipt");
+    ok(json("proof", `select public.privacy_erasure_mark_v1('${REQ_E}', 'needs_followup', 'automatic erasure paused: employer-linked working-time record - human review')`).ok === true
+      && json("proof", `select public.privacy_erasure_notice_hold_v1('${REQ_E}', 'erasure_review')`).ok === true, "T6 runner records the block and queues a review notice");
+    ok(one("proof", `select status from public.customer_requests where id = '${REQ_E}'`) === "needs_followup"
+      && one("proof", `select payload->'privacy_review_log'->-1->>'by' from public.customer_requests where id = '${REQ_E}'`) === "system", "T6 the request shows needs_followup with a system review-log entry");
+    ok(one("proof", `select status from public.privacy_erasure_notices_v1 where request_id = '${REQ_E}' and kind = 'erasure_review'`) === "queued", "T6 the review notice is queued at once (the account still exists)");
+    ok(one("proof", `select count(*) from public.privacy_erasure_notices_v1 where request_id = '${REQ_E}' and kind = 'erasure_completed'`) === "0", "T6 the held completion notice (and its address) is dropped when the request goes to review");
+    ok(one("proof", `select count(*) from auth.users where id = '${FIFTH}'`) === "1" && one("proof", "select count(*) from public.journal_entries where worker_id = 'eeee0000-0000-4000-8000-000000000005'") === "1", "T6 nothing of the person was deleted");
+    ok(json("proof", "select coalesce(jsonb_agg(d), '[]') from public.privacy_erasure_due_v1(10) d").length === 0, "T6 the blocked request is no longer due (no retry loop)");
+    const rn = one("proof", `select id from public.privacy_erasure_notices_v1 where request_id = '${REQ_E}'`);
+    for (let i = 0; i < 8; i += 1) psql("proof", `select public.privacy_erasure_notice_result_v1('${rn}', false, null, 'smtp down')`);
+    ok(one("proof", `select status || '|' || attempts || '|' || (recipient_email is null)::text from public.privacy_erasure_notices_v1 where id = '${rn}'`) === "failed|8|true"
+      && json("proof", "select coalesce(jsonb_agg(d), '[]') from public.privacy_erasure_notices_due_v1(10) d").length === 0, "T6 after 8 failed sends the notice is failed, leaves the queue and keeps no address");
+
+    // ── T7 ───────────────────────────────────────────────────────────────
+    console.log("\n[T7] an erased request is never due again");
+    psql("proof", `insert into public.privacy_erasure_confirmations_v1 (request_id, profile_id, method) values ('${REQ_A}', '${SUBJECT}', 'owner_written_approval')`);
+    ok(json("proof", "select coalesce(jsonb_agg(d), '[]') from public.privacy_erasure_due_v1(10) d").length === 0, "T7 the erased (closed, no auth user) request is not due even with a confirmation");
 
     // ── T4 ───────────────────────────────────────────────────────────────
     console.log("\n[T4] receipt without identifiers");

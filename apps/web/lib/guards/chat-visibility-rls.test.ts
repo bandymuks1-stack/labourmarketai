@@ -492,6 +492,12 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
     ).toEqual([
+      // 2026-10-19: the automated GDPR erasure sweep. It calls ONLY the
+      // service-role-granted privacy_erasure_* / erase_user_account_v3 RPCs and
+      // the Storage API for the listed files of the person being erased; it
+      // reads no chat table itself (the executor severs message authorship
+      // inside the database, by the reviewed registry).
+      "app/api/cron/privacy-erasure/route.ts",
       "components/admin/product-metrics-section.tsx",
       "components/admin/vacancy-sources-section.tsx",
       "lib/admin/billing-actions.ts",

@@ -473,3 +473,12 @@ audit.
   into or rendered by the page. It writes nothing and sends nothing outbound. The same
   module runs hourly in `scripts/product-monitor.ts` (GitHub Actions, secret held by
   GitHub), whose issue text is aggregate numbers only.
+
+- **2026-10-19 — `app/api/cron/privacy-erasure/route.ts`** (owner decision
+  2026-10-19, automated GDPR account erasure). CRON_SECRET-gated sweep run by the
+  VPS cron. With the service-role client it calls ONLY the service-role-granted
+  `privacy_erasure_*` RPCs and `erase_user_account_v3`, and the Storage API to
+  remove the files the database plan lists for the person being erased. It reads
+  no chat table itself; where a conversation message was authored by the erased
+  person, the executor severs the author inside the database under the reviewed
+  registry, and the message stays for the counterparty. Responses are counts only.

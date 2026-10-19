@@ -5582,15 +5582,22 @@
     },
     "deletion": {
       "title": "Paskyros šalinimo užklausa",
-      "body": "Tai užklausa, kurią peržiūri žmogus — šis puslapis nieko neištrina iš karto. Peržiūrėjus užklausą su tavimi bus susisiekta šiuo paskyros el. paštu.",
-      "confirmLabel": "Suprantu, kad pateikiu paskyros šalinimo užklausą ir ją peržiūrės žmogus.",
+      "body": "Paskyrą ištrina sistema pati: pateik užklausą, tada ją patvirtink prisijungęs iš naujo. Sistema patikrins, ar kažko nereikia saugoti pagal įstatymą ar dėl kitų žmonių, ištrins paskyrą ir atsiųs patvirtinimą paskyros el. paštu. Jei kažką reikia peržiūrėti, tau bus pranešta.",
+      "confirmLabel": "Suprantu, kad patvirtinus paskyra ir jos duomenys bus ištrinti negrįžtamai.",
       "noteLabel": "Pastaba (nebūtina)",
       "submit": "Pateikti šalinimo užklausą",
       "submitted": "Užklausa pateikta",
-      "submittedBody": "Žmogus ją peržiūrės ir susisieks su tavimi paskyros el. paštu.",
+      "submittedBody": "Liko vienas žingsnis — patvirtink užklausą žemiau.",
       "unavailable": "Šiuo metu nepasiekiama.",
       "tooManyOpen": "Turi per daug atvirų užklausų — palauk, kol bus peržiūrėtos.",
-      "error": "Kažkas nepavyko. Pabandyk dar kartą."
+      "error": "Kažkas nepavyko. Pabandyk dar kartą.",
+      "confirmStepBody": "Tavo paskyros šalinimo užklausa pateikta. Patvirtink ją — sistema paskyrą ištrins automatiškai ir atsiųs patvirtinimą el. paštu. To atšaukti nebus galima.",
+      "confirmStep": "Patvirtinti paskyros ištrynimą",
+      "reauthBody": "Saugumo sumetimais patvirtinti galima tik ką tik prisijungus (per paskutines 15 min.). Prisijunk iš naujo — grįši į šį puslapį.",
+      "reauth": "Prisijungti iš naujo",
+      "confirmedTitle": "Ištrynimas patvirtintas",
+      "confirmedBody": "Sistema paskyrą ištrins per artimiausias kelias minutes ir atsiųs patvirtinimą paskyros el. paštu. Jei kažką reikės peržiūrėti, apie tai pranešime.",
+      "inReview": "Automatinis ištrynimas sustabdytas peržiūrai: paskyroje yra duomenų, kuriuos gali tekti saugoti pagal įstatymą arba kurie susiję su kitais žmonėmis. Sprendimą ir priežastis gausi el. paštu per vieną mėnesį. Tuo metu tavo profilis nerodomas paieškoje."
     },
     "requests": {
       "title": "Tavo pateiktos užklausos",

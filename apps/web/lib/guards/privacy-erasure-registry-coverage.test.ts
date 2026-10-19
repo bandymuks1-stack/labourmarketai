@@ -19,7 +19,7 @@ import { describe, expect, it } from "vitest";
  */
 
 const MIGRATIONS = join(__dirname, "../../../../supabase/migrations");
-const V3 = "20261016150000_privacy_erasure_executor_v3.sql";
+const V3 = "20261019140000_privacy_erasure_executor_v3.sql";
 
 const PARENT = /references\s+(?:public\.)?(profiles|workers)\s*\(\s*id\s*\)/i;
 const IDENT = /^(?:\w*(?:email|phone)\w*|contact_name|invited_name|full_name|first_name|last_name|person_label|person_name)$/i;
@@ -126,6 +126,7 @@ const IDENTIFIER_ALLOWLIST: Record<string, string> = {
   "profiles.email": "the subject row itself: deleted with auth.users",
   "profiles.phone": "the subject row itself: deleted with auth.users",
   "profiles.full_name": "the subject row itself: deleted with auth.users",
+  "privacy_erasure_notices_v1.recipient_email": "the address the deletion notice goes to, captured before the account is deleted and set to NULL by privacy_erasure_notice_result_v1 once sent (owner decision 2026-10-19: confirm by e-mail)",
   "companies.contact_phone": "scrubbed by the companies.contact_email value rule (scrub_columns)",
   "agency_clients.contact_name": "scrubbed by the agency_clients.contact_email value rule",
   "project_clients.contact_name": "scrubbed by the project_clients.contact_email value rule",
