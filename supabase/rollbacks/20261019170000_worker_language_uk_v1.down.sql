@@ -9,6 +9,12 @@ begin
   if exists (select 1 from public.worker_languages where lang = 'uk') then
     raise exception 'rollback refused: % worker language row(s) are uk', (select count(*) from public.worker_languages where lang = 'uk');
   end if;
+  -- a demand that requires Ukrainian would silently lose that requirement in the
+  -- restored projection; refuse instead of changing its meaning
+  if exists (select 1 from public.customer_requests
+              where jsonb_path_exists(payload, '$.structured_v2.requirements.languages[*] ? (@.lang == "uk")')) then
+    raise exception 'rollback refused: a demand requires Ukrainian';
+  end if;
 end $$;
 
 alter table public.worker_languages drop constraint if exists worker_languages_lang_check;
