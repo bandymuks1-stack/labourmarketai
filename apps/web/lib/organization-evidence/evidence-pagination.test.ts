@@ -86,7 +86,14 @@ describe("listAllEvidenceRecords — no silent 1000 cap", () => {
     expect((await listAllEvidenceRecords(caller, {}, { list })).kind).toBe("error");
   });
 
-  it("reads one window of pages concurrently, and never past a short page", async () => {
+  it("a short history is ONE request (the first page is always read alone)", async () => {
+    const { list, calls } = source(593);
+    const res = await listAllEvidenceRecords(caller, { organizationPersonId: "p1" }, { list });
+    expect(res.kind === "ok" && res.records.length).toBe(593);
+    expect(calls.map((c) => c.offset)).toEqual([0]);
+  });
+
+  it("after a full first page reads a window of pages concurrently, and never past a short page", async () => {
     let inFlight = 0;
     let maxInFlight = 0;
     const offsets: number[] = [];
@@ -102,9 +109,9 @@ describe("listAllEvidenceRecords — no silent 1000 cap", () => {
     }) as never;
     const res = await listAllEvidenceRecords(caller, {}, { list });
     expect(res.kind === "ok" && res.records.length).toBe(4500);
-    expect(maxInFlight).toBe(3);
-    // window 1: 0,1000,2000 (all full); window 2: 3000,4000,5000 — 4000 is short, so the read ends there.
-    expect(offsets).toEqual([0, 1000, 2000, 3000, 4000, 5000]);
+    expect(maxInFlight).toBe(2);
+    // 0 alone (full); then 1000+2000 together (full); then 3000+4000 — 4000 is short, so the read ends there.
+    expect(offsets).toEqual([0, 1000, 2000, 3000, 4000]);
   });
 
   it("an empty read is ok with no records", async () => {
