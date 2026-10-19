@@ -98,6 +98,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261012120000_",
       // 2026-10-11 (RED by SECURITY DEFINER replace, needs-human-gate): free-text job search without the per-row ICU ilike.
       "20261011090000_",
+      // 2026-10-18 (RED, needs-human-gate): worker identity split.
+      "20261018160000_",
       // 2026-10-19 (RED, needs-human-gate): an open account deletion request pauses discoverability.
       "20261019070000_",
     ];

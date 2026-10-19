@@ -30,9 +30,11 @@ describe("an open account deletion request pauses discoverability", () => {
     expect(sql).toMatch(/create or replace function public\.worker_profile_discoverable\(p_profile uuid\)/);
     expect(sql).toMatch(/stable security definer/);
     expect(sql).toMatch(/set search_path to 'public'/);
-    expect(sql).not.toMatch(/\b(insert|update|delete)\b/i);
-    expect(sql).not.toMatch(/\b(grant|revoke)\b/i);
-    expect(sql).not.toMatch(/privacy_consent_events\s+set|into\s+public\.privacy_consent_events/i);
+    // The COMMENT ON text describes the ledger rule in words; only executable SQL is checked.
+    const exec = sql.replace(/comment on function[\s\S]*?';/i, "");
+    expect(exec).not.toMatch(/\b(insert|update|delete)\b/i);
+    expect(exec).not.toMatch(/\b(grant|revoke)\b/i);
+    expect(exec).not.toMatch(/privacy_consent_events\s+set|into\s+public\.privacy_consent_events/i);
   });
 
   it("ships a rollback that restores the ledger-only body", () => {

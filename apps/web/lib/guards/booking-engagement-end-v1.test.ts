@@ -1643,6 +1643,10 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261014090100_historical_consolidation_package_v1.sql",
       // 2026-10-14 (RED, needs-human-gate, NOT applied): brigade disband v1.
       "20261014190000_team_disband_v1.sql",
+      // 2026-10-18: the worker identity split (RED RLS policy + SECURITY DEFINER + GRANT). The
+      // annotation acknowledges the RED class so CI can run; the PR stays a draft with
+      // needs-human-gate and is applied only on the owner's explicit approval.
+      "20261018160000_worker_identity_split_v1.sql",
       // 2026-10-19 (RED, needs-human-gate, NOT applied): an open account deletion request pauses discoverability.
       "20261019070000_discoverability_paused_by_open_deletion_request_v1.sql",
 ]);

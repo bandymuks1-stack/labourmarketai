@@ -2,7 +2,11 @@ import "server-only";
 import { readConfirmedWorkBySkill } from "@/lib/evidence/confirmed-work-read";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { excludeSyntheticFixtures } from "@/lib/qa/synthetic-fixture";
+import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
+import {
+  readDiscoverableWorkerIds,
+  readDiscoverableWorkers,
+} from "@/lib/visibility/discoverable-workers";
 import {
   sourceToEvidence,
   type EvidenceTier,
@@ -58,8 +62,16 @@ function asAny(c: SupabaseClient): any {
 export interface SupplyCandidate {
   readonly workerId: string;
   readonly profileId: string | null;
+  /** Only for a viewer with a working relationship (the raw row). A worker found through the
+   *  employer-visibility consent arrives through the anonymous projection: always null. */
   readonly displayName: string | null;
   readonly headline: string | null;
+  /** A documented QA fixture (lib/qa/synthetic-fixture.ts) — from the name for a related row, from
+   *  the projection's SQL-computed flag for a discovered one, so no name is needed to know it. */
+  readonly syntheticFixture: boolean;
+  /** Whether a start date is SET — from the row, or the projection's card-tier flag when the plan
+   *  withholds the date itself. The communication gate needs only this. */
+  readonly startDateSet: boolean;
   readonly professionSlug: string | null;
   /** Profile freshness from the best REAL timestamp (workers.updated_at,
    *  falling back to created_at). Wagon 1: shown honestly on discovery and
@@ -203,7 +215,7 @@ async function retrievePoolIds(
   // trim+lowercase comparison (match-v1.ts:322).
   if (plan.countryCode) {
     const cc = plan.countryCode;
-    const [here, mobile] = await Promise.all([
+    const [here, mobile, discovered] = await Promise.all([
       readIdTier(
         "location",
         asAny(supabase)
@@ -224,12 +236,16 @@ async function retrievePoolIds(
           .limit(STAGE1_ID_SCAN_CAP),
         "id",
       ),
+      // Workers found through the employer-visibility consent: the table no longer returns their
+      // row to a viewer without a working relationship, so their ids come from the definer read.
+      readDiscoverableWorkerIds(supabase, cc, STAGE1_ID_SCAN_CAP),
     ]);
     // One `location` tier, so being both resident AND mobile scores once.
     tiers.push({
       tier: "location",
-      ids: [...here.ids, ...mobile.ids],
-      truncated: here.truncated || mobile.truncated,
+      ids: [...here.ids, ...mobile.ids, ...discovered.ids],
+      truncated:
+        here.truncated || mobile.truncated || discovered.ids.length >= STAGE1_ID_SCAN_CAP,
     });
   }
 
@@ -239,17 +255,26 @@ async function retrievePoolIds(
   // newer registration again.
   const matched = new Set(tiers.flatMap((t) => t.ids));
   if (matched.size < plan.budget) {
-    tiers.push(
-      await readIdTier(
+    const limit = Math.min(plan.budget + 1, STAGE1_ID_SCAN_CAP);
+    const [related, discovered] = await Promise.all([
+      readIdTier(
         "backfill",
         asAny(supabase)
           .from("workers")
           .select("id")
           .order("id", { ascending: true })
-          .limit(Math.min(plan.budget + 1, STAGE1_ID_SCAN_CAP)),
+          .limit(limit),
         "id",
       ),
-    );
+      readDiscoverableWorkerIds(supabase, null, limit),
+    ]);
+    // Same deterministic id order across both sources.
+    const ids = [...new Set([...related.ids, ...discovered.ids])].sort().slice(0, limit);
+    tiers.push({
+      tier: "backfill",
+      ids,
+      truncated: related.truncated || discovered.ids.length >= limit,
+    });
   }
 
   return tiers;
@@ -284,8 +309,9 @@ export async function buildSupplyCandidates(
   }
   if (poolIds.length === 0) return { candidates: [], retrieval: { ...retrieval, poolSize: 0 } };
 
-  // Stage 2 — full rows for the retrieved ids only (primary-key lookup).
-  const { data: workers, error } = await asAny(supabase)
+  // Stage 2 — full rows for the retrieved ids only (primary-key lookup). The table answers for the
+  // workers this viewer has a working relationship with; the rest come from the anonymous projection.
+  const { data: relatedRows, error } = await asAny(supabase)
     .from("workers")
     .select(
       "id, profile_id, display_name, headline, availability_status, available_from, current_location_country, preferred_countries, salary_min_eur, preferred_contract_type, experience_years, created_at, updated_at",
@@ -301,7 +327,25 @@ export async function buildSupplyCandidates(
       retrieval: { ...retrieval, poolSize: 0, unreadableFacts: ["workers"] },
     };
   }
-  if (!Array.isArray(workers) || workers.length === 0) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const workers: any[] = Array.isArray(relatedRows) ? [...relatedRows] : [];
+  const relatedIds = new Set(workers.map((w) => w.id as string));
+  const discoveredRows = await readDiscoverableWorkers(
+    supabase,
+    poolIds.filter((id) => !relatedIds.has(id)),
+  );
+  for (const row of discoveredRows.values()) {
+    // A discovered worker: no name, no headline, no profile id; freshness from the week bucket.
+    workers.push({
+      ...row,
+      profile_id: null,
+      display_name: null,
+      headline: null,
+      created_at: null,
+      updated_at: row.last_active_week,
+    });
+  }
+  if (workers.length === 0) {
     return { candidates: [], retrieval: { ...retrieval, poolSize: 0 } };
   }
 
@@ -469,6 +513,23 @@ export async function buildSupplyCandidates(
   for (const p of ((prefsRes.data ?? []) as WorkerPrefsRow[])) {
     prefsByWorker.set(p.id, p);
   }
+  // A discovered worker's preferences arrive with the projection (the table read above returns
+  // only related rows).
+  for (const d of discoveredRows.values()) {
+    if (prefsByWorker.has(d.id)) continue;
+    prefsByWorker.set(d.id, {
+      id: d.id,
+      pay_basis_preference: d.pay_basis_preference,
+      night_shifts_ok: d.night_shifts_ok,
+      weekend_shifts_ok: d.weekend_shifts_ok,
+      overtime_ok: d.overtime_ok,
+      driving_licence_categories: d.driving_licence_categories
+        ? [...d.driving_licence_categories]
+        : null,
+      own_vehicle: d.own_vehicle,
+      own_tools: d.own_tools,
+    });
+  }
 
   // MP-1 worker_languages keyed by worker (absent pre-apply → empty map).
   const languagesByWorker = new Map<string, WorkerLanguageFact[]>();
@@ -510,6 +571,15 @@ export async function buildSupplyCandidates(
       profileId: (w.profile_id as string | null) ?? null,
       displayName: (w.display_name as string | null) ?? null,
       headline: (w.headline as string | null) ?? null,
+      startDateSet:
+        (typeof w.available_from === "string" && w.available_from !== "") ||
+        w.has_available_from === true,
+      syntheticFixture:
+        w.is_synthetic_fixture === true ||
+        isSyntheticFixtureLabel(
+          (w.display_name as string | null) ?? null,
+          (w.headline as string | null) ?? null,
+        ),
       professionSlug: professionByWorker.get(w.id as string) ?? null,
       lastActiveBucket: lastActiveBucket(
         (w.updated_at as string | null) ?? (w.created_at as string | null),
@@ -575,7 +645,7 @@ export async function buildSupplyCandidates(
   // counts only what the viewer may see.
   const shown =
     "need" in input && input.excludeFixtures
-      ? excludeSyntheticFixtures(candidates, (c) => [c.displayName, c.headline])
+      ? candidates.filter((c) => !c.syntheticFixture)
       : candidates;
   return {
     candidates: shown,
