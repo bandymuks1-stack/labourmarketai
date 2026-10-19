@@ -239,17 +239,26 @@ export async function loadOwnRoleLedgers(
     })
     .slice(0, OWN_ROLE_LEDGERS_LIMIT);
   if (distinct.length === 0) return [];
+  // A country whose document requirements are not curated is UNKNOWN, not "nothing
+  // required" (the readiness model's requirementsKnown=false). Deriving a ledger for it
+  // would render an empty requirement slice as a complete ratio — so it gets none.
+  const docs = await cachedDocuments().catch(() => null);
+  const knownCountries = new Set(
+    docs && docs.kind === "ok" ? docs.requirements.map((r) => r.country.toUpperCase()) : [],
+  );
+  const answerable = distinct.filter((r) => r.country !== null && knownCountries.has(r.country.toUpperCase()));
+  if (answerable.length === 0) return [];
   const personId = await getOwnWorkerId();
   if (!personId) return [];
   const results = await Promise.all(
-    distinct.map((r) =>
+    answerable.map((r) =>
       loadRequirementLedger({
         personId,
         context: { kind: "role", professionSlug: r.professionSlug, country: r.country },
       }).catch(() => null),
     ),
   );
-  return results.flatMap((res, i) => (res && res.kind === "ok" ? [{ ...distinct[i], ledger: res.ledger }] : []));
+  return results.flatMap((res, i) => (res && res.kind === "ok" ? [{ ...answerable[i], ledger: res.ledger }] : []));
 }
 
 export async function loadRequirementLedger(args: {
