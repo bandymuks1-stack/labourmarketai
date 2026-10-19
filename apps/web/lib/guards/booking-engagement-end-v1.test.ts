@@ -1656,6 +1656,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261019160000_worker_public_summary_v1.sql",
       // 2026-10-19 (RED by SECURITY DEFINER replace): the language save RPC accepts uk.
       "20261019180000_worker_language_uk_rpc_v1.sql",
+      // 2026-10-19 incident fix (RED by auth.users update): sentinel banned until 2999.
+      "20261019190000_erasure_sentinel_finite_ban_v1.sql",
 ]);
   });
 
