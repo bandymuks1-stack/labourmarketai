@@ -177,7 +177,11 @@ function LazyEditDetails({ summary, children }: { summary: string; children: Rea
   return (
     <details
       className="rounded-md border border-ink-600 bg-ink-800/40 p-2"
-      onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}
+      // LATCHED: once opened the form stays mounted, so collapsing the panel
+      // never discards unsaved edits (the closed list is what stays light).
+      onToggle={(e) => {
+        if ((e.currentTarget as HTMLDetailsElement).open) setOpen(true);
+      }}
     >
       <summary className="cursor-pointer text-xs text-text-secondary">{summary}</summary>
       {open ? children : null}

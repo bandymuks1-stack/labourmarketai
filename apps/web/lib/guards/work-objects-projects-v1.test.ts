@@ -151,6 +151,9 @@ describe("2. app layer: RPC-only writes, RLS-scoped bounded reads, honest degrad
     // 200 closed panels × ~120 picker options were ~2.9 MB of the projects page HTML.
     expect(SECTION).toContain("<LazyEditDetails summary={labels.editButton}>");
     expect(SECTION).toContain("{open ? children : null}");
+    // Latched: collapsing an opened panel never unmounts the form (unsaved edits survive).
+    expect(SECTION).toContain("if ((e.currentTarget as HTMLDetailsElement).open) setOpen(true);");
+    expect(SECTION).not.toMatch(/setOpen\(\(e\.currentTarget as HTMLDetailsElement\)\.open\)/);
   });
 
   it("statuses are exactly active/archived; place summary is pure", () => {
