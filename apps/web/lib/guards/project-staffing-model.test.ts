@@ -108,6 +108,12 @@ describe("2 · the staffing view renders ONLY real assignment rows", () => {
     expect(manager).toMatch(/p\.assignments\.map\(/);
   });
 
+  it("the gallery photo counts are one batched read, not a request pair per project", () => {
+    // 2026-10-19 perf: 12 projects cost 24 gallery reads (the entry count was never shown).
+    expect(projectsPage).toMatch(/getProjectPhotoCounts\(galleryProjects\.map\(\(p\) => p\.id\)\)/);
+    expect(projectsPage).not.toContain("getProjectGallerySummary");
+  });
+
   it("no sample/demo/fixture data pin anywhere on the roster path", () => {
     for (const [name, src] of [
       ["manager", manager],
