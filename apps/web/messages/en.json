@@ -19633,5 +19633,17 @@
     "tasks": "No tasks are due this week. Create a task – it becomes this week's goal.",
     "addStages": "Add stages",
     "addTask": "Create a task"
+  },
+  "workerPublicSummary": {
+    "title": "Professional summary for employers",
+    "audience": "Only companies and agencies you have a working relationship with see this (you work for them, are in their team or accepted their offer). It is not shown in open search. Your personal description above stays visible to you only.",
+    "headline": "Headline (up to 120 characters)",
+    "headlinePlaceholder": "e.g. Tiler, 8 years, working in LT and NO",
+    "bio": "Short summary (up to 1000 characters)",
+    "bioPlaceholder": "What you do best, what work you have done, what you are looking for.",
+    "save": "Save",
+    "saved": "Saved",
+    "tooLong": "The text is too long.",
+    "error": "Could not save. Try again."
   }
 }

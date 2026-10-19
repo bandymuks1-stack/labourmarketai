@@ -122,7 +122,7 @@ export default async function PersonPage({
       // `preferred_countries` is the same already-authorised row, and it is
       // already in PROFILE_SAFE_PREVIEW_FIELDS — it was simply never
       // rendered here, so the page could not answer WHERE CAN THEY WORK.
-      "id, profile_id, display_name, headline, experience_years, current_location_country, preferred_countries, availability_status, available_from",
+      "id, profile_id, display_name, headline, bio, experience_years, current_location_country, preferred_countries, availability_status, available_from",
     )
     .eq("id", workerId)
     .maybeSingle();
@@ -138,6 +138,7 @@ export default async function PersonPage({
           profile_id: null,
           display_name: null,
           headline: null,
+          bio: null,
           experience_years: discovered.experience_years,
           current_location_country: discovered.current_location_country,
           preferred_countries: discovered.preferred_countries
@@ -363,6 +364,13 @@ export default async function PersonPage({
               {worker.headline ? (
                 <p className="text-sm text-text-secondary">
                   {worker.headline as string}
+                </p>
+              ) : null}
+              {/* PER-2: the person's own summary for the organisations they work with
+                  (the row is readable only under caller_has_worker_relation_v1). */}
+              {worker.bio ? (
+                <p className="max-w-prose whitespace-pre-line text-sm leading-relaxed text-text-secondary" data-testid="person-public-bio">
+                  {worker.bio as string}
                 </p>
               ) : null}
         </IdentityStage>
