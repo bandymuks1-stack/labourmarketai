@@ -230,8 +230,8 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 7.1 | Plan catalogue + `/pricing` | LIVE_PROVEN (public page; 28/28 public pages after cutover, 2026-10-17) | — | — |
 | 7.2 | Free organization limit: 1 open need | LIVE_PROVEN (brigade walk "free plan = 1 open need", 2026-10-12) | — | — |
 | 7.3 | Entitlement resolver (`hasFeature`) | CODE_READY | — | — |
-| 7.4 | Stripe test checkout / portal / refresh / webhook | DORMANT | Owner env + rebuild | — |
-| 7.5 | Live charging (MKT-7, "two owner acts") | DORMANT | Owner; #2441 | Owner decides #2441; configure the webhook before arming |
+| 7.4 | Stripe test checkout / portal / refresh / webhook | DORMANT (BUILT; REGRESSION of the 2026-10-17 hosting move: code intact, 34 billing test files pass; the Stripe secret, webhook secret, price id and publishable key did not carry over, because Vercel kept them as unreadable sensitive values while blocked) | Restore the four values on the VPS (hidden input, `lm-env-set.sh`); they exist only in the owner's Stripe dashboard | Restore, rebuild for the publishable key, keep PAYMENTS_ENABLED=false until the owner's activation decision |
+| 7.5 | Live charging (MKT-7, "two owner acts") | DORMANT (BUILT; was LIVE-ARMED on Vercel until 2026-10-16, 0 webhooks; same hosting-move regression as 7.4) | Activation stays the owner's earlier decision (#2441) | After 7.4 is restored: webhook at /api/billing/webhook, then activation per that decision |
 | 7.6 | Billing recovery cron | DORMANT | — | — |
 | 7.7 | Manual pilot grant (admin) | CODE_READY | — | — |
 | 7.8 | LMC credit ledger (MKT-8) | DORMANT | Owner (spend reversal design) | Keep off until the owner designs it |
@@ -303,7 +303,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 10.3 | OAuth 2.1 for MCP clients (Supabase AS, DCR, PKCE, consent page) | PARTIAL | Owner: #2454 | Merge #2454; run W-1/W-2 walks |
 | 10.4 | MCP scopes enforcement | PLANNED | — | — |
 | 10.5 | ChatGPT app / Claude directory listings (distribution surfaces 4 and 5) | PARTIAL | Owner portals | — |
-| 10.6 | AI runtime: providers, registry, cost ceilings, egress gate (AI-3) | DORMANT | Owner: provider / paid tier (0 € rule) | Decide a 0 € path (self-hosted / Cloudflare) per task class |
+| 10.6 | AI runtime: providers, registry, cost ceilings, egress gate (AI-3) | DORMANT (BUILT; Gemini ran live on Vercel up to 2026-10-16; the 2026-10-17 minimal VPS configuration left AI_PROVIDER_MODE disabled and did not carry GEMINI_API_KEY) | Not a new decision: the provider was chosen earlier; the key is still held locally | Restore GEMINI_API_KEY + AI_PROVIDER_MODE on the VPS (hidden input) |
 | 10.7 | Conversation intent proposal (LLM) | DORMANT | 10.6 | — |
 | 10.8 | CV AI structuring / worker intake AI | DORMANT | 10.6 | — |
 | 10.9 | Journal AI suggestions | DORMANT | 10.6 | — |
