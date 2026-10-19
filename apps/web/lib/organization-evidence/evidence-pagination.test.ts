@@ -86,6 +86,27 @@ describe("listAllEvidenceRecords — no silent 1000 cap", () => {
     expect((await listAllEvidenceRecords(caller, {}, { list })).kind).toBe("error");
   });
 
+  it("reads one window of pages concurrently, and never past a short page", async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const offsets: number[] = [];
+    const list = (async (_c: unknown, f: { limit?: number; offset?: number }) => {
+      offsets.push(f.offset ?? 0);
+      inFlight += 1;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((r) => setTimeout(r, 5));
+      inFlight -= 1;
+      const from = f.offset ?? 0;
+      const n = Math.max(0, Math.min(f.limit ?? 200, 4500 - from));
+      return { kind: "ok", records: Array.from({ length: n }, (_, i) => rec(from + i)) };
+    }) as never;
+    const res = await listAllEvidenceRecords(caller, {}, { list });
+    expect(res.kind === "ok" && res.records.length).toBe(4500);
+    expect(maxInFlight).toBe(3);
+    // window 1: 0,1000,2000 (all full); window 2: 3000,4000,5000 — 4000 is short, so the read ends there.
+    expect(offsets).toEqual([0, 1000, 2000, 3000, 4000, 5000]);
+  });
+
   it("an empty read is ok with no records", async () => {
     const { list } = source(0);
     const res = await listAllEvidenceRecords(caller, {}, { list });
