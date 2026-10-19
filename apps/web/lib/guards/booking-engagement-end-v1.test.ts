@@ -1658,6 +1658,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261019180000_worker_language_uk_rpc_v1.sql",
       // 2026-10-19 incident fix (RED by auth.users update): sentinel banned until 2999.
       "20261019190000_erasure_sentinel_finite_ban_v1.sql",
+      // 2026-10-19 (RED by SECURITY DEFINER replace): worker board company via the need's organization.
+      "20261019200000_worker_board_org_company_v1.sql",
 ]);
   });
 

@@ -114,6 +114,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261019180000_",
       // 2026-10-19 incident fix: the erasure sentinel is banned until a finite date.
       "20261019190000_",
+      // 2026-10-19: the worker board finds a need's company through its organization.
+      "20261019200000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
