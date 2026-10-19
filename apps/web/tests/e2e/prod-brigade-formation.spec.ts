@@ -342,3 +342,31 @@ test("B2B-6. supplier agrees to v2: agreed in principle, history kept, message v
   await expect(page.locator("body")).toContainText(MSG);
   await ctx.close();
 });
+
+// ONE reusable synthetic project for the buyer, created only when it is missing,
+// so runs never pile projects up. The team assignment itself is per run.
+const GAMA_PROJECT = "QA-SYNTHETIC Gama brigados projektas";
+
+test("B2B-7. buyer hands the agreed brigade into its own project as ONE team assignment", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  await page.goto("/lt/dashboard/projects");
+  if ((await page.getByText(GAMA_PROJECT, { exact: false }).count()) === 0) {
+    const form = page.getByTestId("project-create");
+    await expect(form).toBeVisible({ timeout: 30_000 });
+    await form.locator('input[name="title"]').fill(GAMA_PROJECT);
+    await form.locator('button[type="submit"]').click();
+    await expect(page.getByText(GAMA_PROJECT, { exact: false }).first()).toBeVisible({ timeout: 30_000 });
+    console.info("[b2b] buyer project created");
+  }
+  await page.goto(`/lt/dashboard/company/scouting?request=${needId}`);
+  const accept = page.getByTestId(`team-offer-accept-${offerId}`);
+  if (await accept.isVisible().catch(() => false)) await accept.click();
+  const assign = page.getByTestId(`team-offer-assign-${offerId}`);
+  await expect(assign, "an accepted offer offers the hand-off into a project").toBeVisible({ timeout: 30_000 });
+  await assign.locator("select").selectOption({ label: GAMA_PROJECT });
+  await page.getByTestId(`team-offer-assign-submit-${offerId}`).click();
+  await expect(page.getByTestId(`team-offer-received-${offerId}`)).toContainText(/Priskirta|Assigned/i, { timeout: 30_000 });
+  console.info("[b2b] hand-off: the brigade is one team assignment on the buyer's project");
+  await ctx.close();
+});
