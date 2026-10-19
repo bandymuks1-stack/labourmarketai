@@ -84,6 +84,7 @@ import {
   type PlayerCardResult,
 } from "@/lib/player-card/player-card-result";
 import { WorkCardEditor } from "@/components/app/work-card-editor";
+import { WorkerPublicSummaryEditor } from "@/components/app/worker-public-summary-editor";
 import { listMyOrganizationEvidence } from "@/lib/organization-evidence/import-core";
 import { OrganizationHistorySkillSuggestionsSection } from "@/components/app/organization-history-skill-suggestions-section";
 import { listMyTeamLinks } from "@/lib/company/team-links";
@@ -168,6 +169,7 @@ export default async function ProfilePage({
     tIdentityNotice,
     tPrivacySections,
     tEvidenceMine,
+    tPublicSummary,
   ] = await Promise.all([
     getTranslations("skills"),
     getTranslations("spaces"),
@@ -202,6 +204,7 @@ export default async function ProfilePage({
     // Summary first: the organization-history bar names its section with the
     // card's own title. Same ONE batch — never a standalone await (W7-S3).
     getTranslations("evidenceImport.mine"),
+    getTranslations("workerPublicSummary"),
   ]);
 
   /**
@@ -270,7 +273,7 @@ export default async function ProfilePage({
     supabase
       .from("workers")
       .select(
-        "id, availability_status, available_from, current_location_country, salary_min_eur, salary_max_eur",
+        "id, availability_status, available_from, current_location_country, salary_min_eur, salary_max_eur, headline, bio",
       )
       .eq("profile_id", user.id)
       .maybeSingle(),
@@ -1301,6 +1304,27 @@ export default async function ProfilePage({
           </span>
         </summary>
         <div className="flex flex-col gap-6 px-4 pb-4">
+      {/* PER-2: the employer-facing summary the person writes themselves
+          (save_worker_public_summary_v1). Worker-only: it lives on the
+          workers row. */}
+      {workerId ? (
+        <WorkerPublicSummaryEditor
+          initialHeadline={(worker as { headline?: string | null } | null)?.headline ?? ""}
+          initialBio={(worker as { bio?: string | null } | null)?.bio ?? ""}
+          labels={{
+            title: tPublicSummary("title"),
+            audience: tPublicSummary("audience"),
+            headline: tPublicSummary("headline"),
+            headlinePlaceholder: tPublicSummary("headlinePlaceholder"),
+            bio: tPublicSummary("bio"),
+            bioPlaceholder: tPublicSummary("bioPlaceholder"),
+            save: tPublicSummary("save"),
+            saved: tPublicSummary("saved"),
+            tooLong: tPublicSummary("tooLong"),
+            error: tPublicSummary("error"),
+          }}
+        />
+      ) : null}
       {/* The avatar EDITOR (upload / replace). The hub shows the avatar on
           arrival; changing it is a personal detail like the ones below, so
           it opens with them. `#profile-identity` still lands here: the

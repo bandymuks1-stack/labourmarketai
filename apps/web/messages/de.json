@@ -19633,5 +19633,17 @@
     "tasks": "Diese Woche ist keine Aufgabe fällig. Lege eine Aufgabe an – sie wird zum Wochenziel.",
     "addStages": "Etappen anlegen",
     "addTask": "Aufgabe anlegen"
+  },
+  "workerPublicSummary": {
+    "title": "Berufliche Kurzvorstellung für Arbeitgeber",
+    "audience": "Diesen Text sehen nur Unternehmen und Agenturen, mit denen Sie in einem Arbeitsverhältnis stehen (Sie arbeiten für sie, sind in ihrem Team oder haben ihr Angebot angenommen). In der offenen Suche wird er nicht angezeigt. Ihre persönliche Beschreibung oben bleibt nur für Sie sichtbar.",
+    "headline": "Überschrift (bis 120 Zeichen)",
+    "headlinePlaceholder": "z. B. Fliesenleger, 8 Jahre, tätig in LT und NO",
+    "bio": "Kurzbeschreibung (bis 1000 Zeichen)",
+    "bioPlaceholder": "Was Sie am besten können, welche Arbeiten Sie gemacht haben, was Sie suchen.",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "tooLong": "Der Text ist zu lang.",
+    "error": "Speichern fehlgeschlagen. Bitte erneut versuchen."
   }
 }

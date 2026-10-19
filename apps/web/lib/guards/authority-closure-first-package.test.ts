@@ -106,6 +106,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261019140000_",
       // 2026-10-19: two NOT NULL author columns of the erasure registry are severed, not nulled.
       "20261019150000_",
+      // 2026-10-19 (RED): the person writes their own employer-facing summary (PER-2).
+      "20261019160000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
