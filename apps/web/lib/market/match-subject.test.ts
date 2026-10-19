@@ -399,3 +399,41 @@ describe("explicit-id retrieval (admin workbench)", () => {
     expect(candidates.map((c) => c.workerId)).toEqual([STAR, "w-005"]);
   });
 });
+
+describe("a raised hand is always looked at (alwaysInclude)", () => {
+  it("a worker the plan never searched is in the pool once they raise a hand", async () => {
+    // w-010 is a painter: the welder plan, at a budget of 2, never reaches them.
+    const plain = await buildSupplyCandidates(createFakeSupabase(buildTables()).client, {
+      need: WELDER_IN_NL,
+      budget: 2,
+    });
+    expect(plain.candidates.map((c) => c.workerId)).not.toContain("w-010");
+
+    const withHand = await buildSupplyCandidates(createFakeSupabase(buildTables()).client, {
+      need: WELDER_IN_NL,
+      budget: 2,
+      alwaysInclude: ["w-010"],
+    });
+    const ids = withHand.candidates.map((c) => c.workerId);
+    expect(ids).toContain("w-010");
+    // Pinning adds; it never pushes the demand's best match out.
+    expect(ids).toContain(STAR);
+  });
+
+  it("pinning an id the viewer cannot read reveals nobody", async () => {
+    const { candidates } = await buildSupplyCandidates(createFakeSupabase(buildTables()).client, {
+      need: WELDER_IN_NL,
+      budget: 2,
+      alwaysInclude: ["w-not-visible"],
+    });
+    expect(candidates.map((c) => c.workerId)).not.toContain("w-not-visible");
+  });
+
+  it("a pinned worker is listed once, even when the plan also found them", async () => {
+    const { candidates } = await buildSupplyCandidates(createFakeSupabase(buildTables()).client, {
+      need: WELDER_IN_NL,
+      alwaysInclude: [STAR, STAR],
+    });
+    expect(candidates.filter((c) => c.workerId === STAR)).toHaveLength(1);
+  });
+});

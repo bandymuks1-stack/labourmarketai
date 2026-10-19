@@ -94,7 +94,17 @@ export type SupplyRetrievalInput =
   /** Plan Stage 1 from this demand (company scouting). `excludeFixtures`
    *  drops fixture-marked workers (lib/qa/synthetic-fixture.ts) — set for a
    *  real organization's scouting, off for a synthetic one. */
-  | { readonly need: MatchNeed; readonly budget?: number; readonly excludeFixtures?: boolean }
+  | {
+      readonly need: MatchNeed;
+      readonly budget?: number;
+      readonly excludeFixtures?: boolean;
+      /** Workers who raised their hand on THIS demand. They asked to be
+       *  contacted, so they are always in the pool — never lost to the budget
+       *  or to a tier the plan did not search (a welder who raised a hand on a
+       *  carpentry need). Visibility is unchanged: a hidden worker answers from
+       *  neither read below, so pinning an id never reveals anyone. */
+      readonly alwaysInclude?: readonly string[];
+    }
   /** The caller already knows which workers it wants (admin workbench). */
   | { readonly workerIds: readonly string[]; readonly budget?: number };
 
@@ -304,7 +314,11 @@ export async function buildSupplyCandidates(
   } else {
     const plan = planSupplyRetrieval(input.need, budget);
     const selection = selectPoolIds(await retrievePoolIds(supabase, plan), plan.budget);
-    poolIds = selection.ids;
+    const pinned = [
+      ...new Set((input.alwaysInclude ?? []).filter((id) => typeof id === "string" && id !== "")),
+    ].slice(0, plan.budget);
+    const pinnedSet = new Set(pinned);
+    poolIds = [...pinned, ...selection.ids.filter((id) => !pinnedSet.has(id))];
     retrieval = selection.report;
   }
   if (poolIds.length === 0) return { candidates: [], retrieval: { ...retrieval, poolSize: 0 } };
