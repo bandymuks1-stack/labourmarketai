@@ -17,7 +17,7 @@ Audit of main `fb741339a`, 2026-10-18; updated the same day after the production
 | PLANNED | Only in documents, drafts or unmerged PRs. |
 | UNKNOWN | Not enough evidence. |
 
-A green CI run is **never** counted as functional proof. Walks before 2026-10-17 ran on the previous host; since the move to the VPS these specs have been re-run: role-routes, brigade-formation, journal-confirm, living-cv-growth, marketplace, mcp-chain, calendar-planning, chat-continuity.
+A green CI run is **never** counted as functional proof. Walks before 2026-10-17 ran on the previous host; since the move to the VPS these specs have been re-run: role-routes, brigade-formation, journal-confirm, living-cv-growth, marketplace, mcp-chain, calendar-planning, chat-continuity; and on 2026-10-18 also project-context, agency-chain and staff-review-notice.
 
 ## 1. Summary — features per area × status
 
@@ -52,12 +52,12 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 1.6 | Organization creation + identity (ORG-1) | PARTIAL | Identity is split across two tables | Converge on one identity table (owner schema gate) |
 | 1.7 | Organization verification | PARTIAL | Operator capacity | Add a self-serve evidence path (registration code / website) |
 | 1.8 | Multi-capability organization (ORG-2) | PARTIAL (register BLOCKED) | **Owner decision ORG-2** | Owner decides ORG-2 |
-| 1.9 | Memberships, invitations, roles (ORG-3) | LIVE_PROVEN (brigade-formation 2026-10-12 and VPS 2026-10-17; agency-chain A-2; learning-practice L-2/L-3) | E-mail off (1.13) | — |
+| 1.9 | Memberships, invitations, roles (ORG-3) | LIVE_PROVEN (brigade-formation 2026-10-12 and VPS 2026-10-17; agency-chain A-2, VPS 2026-10-18; learning-practice L-2/L-3) | E-mail off (1.13) | — |
 | 1.10 | Workspace context + switching (ORG-4) | PARTIAL (chat-continuity walk proves isolation, 2026-10-17) | — | Unify the resolvers |
 | 1.11 | Cross-org isolation (ORG-5) | PARTIAL | RED #2477 | Apply #2477 |
 | 1.12 | Universal invitation / referral network (ORG-11) | PARTIAL (the partner door answers `not_configured` since the VPS move; the partner lost its copy in its own hosting move; an invitee's return link was dropped by the callback defect, fixed #2482) | Nonstop tokens (owner, both sides) | Owner re-pairs one new secret on both sides, then resends the held lead (idempotent) |
 | 1.13 | Invitation / transactional e-mail delivery | DORMANT | Owner chooses a provider + DNS (SPF/DKIM) | Configure a provider (costs 0 € on a free tier) |
-| 1.14 | Staff review notice at invite / sign-up (#2321) | LIVE_PROVEN (staff-review-notice walk 4/4, 2026-10-12) | #2322 | Owner decides #2322 |
+| 1.14 | Staff review notice at invite / sign-up (#2321) | LIVE_PROVEN (staff-review-notice walk 4/4, 2026-10-12; VPS 2026-10-18) | #2322 | Owner decides #2322 |
 | 1.15 | Organization history before claim + claim of imported people (decision 0020) | PARTIAL | Owner sends the invitations | Owner runs the invitation wave |
 
 ### Area 2 — Worker profiles, Living CV, Work Journal, confirmed history
@@ -105,7 +105,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | ID | Feature | Status | Blocker / dependency | Recommended action |
 |---|---|---|---|---|
 | 3.1 | Company home | LIVE_PROVEN (role-routes; mobile-surfaces 2026-10-12) | Availability catalogue says `company_workspace: preparing` (stale) | Fix the stale availability flag (§7) |
-| 3.2 | Projects (WRK-1) | LIVE_PROVEN (mcp-agents A-6 2026-10-14; project-context walk) | — | — |
+| 3.2 | Projects (WRK-1) | LIVE_PROVEN (mcp-agents A-6 2026-10-14; project-context walk, VPS 2026-10-18) | — | — |
 | 3.3 | Objects / sites (WRK-2) | PARTIAL | — | Delete the superseded draft from docs |
 | 3.4 | Stages (WRK-3) | CODE_READY | — | — |
 | 3.5 | Tasks (WRK-4) | CODE_READY | — | — |
@@ -156,7 +156,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 4.12 | Shortlist + notes | LIVE_PROVEN (company-chain walk 2026-09-28; old) | — | Re-walk on the VPS |
 | 4.13 | Auto-match + receipt (not in register) | CODE_READY | — | — |
 | 4.14 | Candidate drafts (not in register) | CODE_READY | — | — |
-| 4.15 | Agency ↔ client bridge (ORG-8) | LIVE_PROVEN (agency-chain 7/7, 2026-10-12 and 2026-10-14) | — | — |
+| 4.15 | Agency ↔ client bridge (ORG-8) | LIVE_PROVEN (agency-chain 7/7, 2026-10-12 and 2026-10-14; VPS 2026-10-18) | — | — |
 | 4.16 | Interested-worker contact | CODE_READY | — | — |
 | 4.17 | Discoverability consent | LIVE_PROVEN (#2217, 2026-10-09) | — | — |
 | 4.18 | Employer data disclosure grant (consent v2) | CODE_READY | #2471 | — |
@@ -470,7 +470,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | CAL-8 / COM-8 | MISSING | PLANNED | Same meaning, mapped. |
 | ORG-10 | RETIRED | DORMANT | Mapped. The anti-revival guard is correct. |
 
-The walks cited above use the synthetic QA cast on production. They are stronger than CI and weaker than a real person's use. Rows marked LIVE_PROVEN from before 2026-10-17 were proven on the Vercel deployment; since the VPS cutover only these specs have been re-run: role-routes, brigade-formation, journal-confirm, living-cv-growth, marketplace, mcp-chain, calendar-planning and chat-continuity.
+The walks cited above use the synthetic QA cast on production. They are stronger than CI and weaker than a real person's use. Rows marked LIVE_PROVEN from before 2026-10-17 were proven on the Vercel deployment; since the VPS cutover only these specs have been re-run: role-routes, brigade-formation, journal-confirm, living-cv-growth, marketplace, mcp-chain, calendar-planning and chat-continuity, plus project-context, agency-chain and staff-review-notice on 2026-10-18.
 
 ## 7. How to keep this audit current
 
