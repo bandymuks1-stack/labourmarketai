@@ -7708,5 +7708,9 @@
     "saved": "Saglabāts",
     "tooLong": "Teksts ir pārāk garš.",
     "error": "Neizdevās saglabāt. Mēģini vēlreiz."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: kas tev jau ir un kā trūkst",
+    "anyCountry": "jebkura valsts"
   }
 }

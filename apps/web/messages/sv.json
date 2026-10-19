@@ -7708,5 +7708,9 @@
     "saved": "Sparat",
     "tooLong": "Texten är för lång.",
     "error": "Det gick inte att spara. Försök igen."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: vad du har och vad som saknas",
+    "anyCountry": "vilket land som helst"
   }
 }

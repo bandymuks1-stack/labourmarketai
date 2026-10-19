@@ -19645,5 +19645,9 @@
     "saved": "Saved",
     "tooLong": "The text is too long.",
     "error": "Could not save. Try again."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: what you have and what is missing",
+    "anyCountry": "any country"
   }
 }

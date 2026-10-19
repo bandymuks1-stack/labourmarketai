@@ -19645,5 +19645,9 @@
     "saved": "Zapisano",
     "tooLong": "Tekst jest za długi.",
     "error": "Nie udało się zapisać. Spróbuj ponownie."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: co już masz, a czego brakuje",
+    "anyCountry": "dowolny kraj"
   }
 }

@@ -7708,5 +7708,9 @@
     "saved": "Gemt",
     "tooLong": "Teksten er for lang.",
     "error": "Kunne ikke gemme. Prøv igen."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: hvad du har, og hvad der mangler",
+    "anyCountry": "ethvert land"
   }
 }

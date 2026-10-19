@@ -7708,5 +7708,9 @@
     "saved": "Lagret",
     "tooLong": "Teksten er for lang.",
     "error": "Kunne ikke lagre. Prøv igjen."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: hva du har, og hva som mangler",
+    "anyCountry": "hvilket som helst land"
   }
 }

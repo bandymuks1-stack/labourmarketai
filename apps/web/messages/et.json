@@ -7708,5 +7708,9 @@
     "saved": "Salvestatud",
     "tooLong": "Tekst on liiga pikk.",
     "error": "Salvestamine ebaõnnestus. Proovi uuesti."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: mis sul on ja mis puudub",
+    "anyCountry": "iga riik"
   }
 }

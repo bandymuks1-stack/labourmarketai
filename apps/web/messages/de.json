@@ -19645,5 +19645,9 @@
     "saved": "Gespeichert",
     "tooLong": "Der Text ist zu lang.",
     "error": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: was Sie schon haben und was noch fehlt",
+    "anyCountry": "jedes Land"
   }
 }
