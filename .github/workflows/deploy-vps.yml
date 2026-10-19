@@ -121,6 +121,11 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
           NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS: "true"
+          # The Stripe PUBLISHABLE key (public by design, pk_…). The Vercel build
+          # carried it; the 2026-10-17 move to this pipeline dropped it, so the
+          # payments UI could never load even with the server keys restored.
+          # Empty while the repository variable is unset — the same as today.
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
           NEXT_TELEMETRY_DISABLED: "1"
           NODE_OPTIONS: --max-old-space-size=6144
         run: |
