@@ -7696,5 +7696,17 @@
     "tasks": "Šonedēļ nav uzdevumu ar termiņu. Izveido uzdevumu – tas kļūs par nedēļas mērķi.",
     "addStages": "Pievienot posmus",
     "addTask": "Izveidot uzdevumu"
+  },
+  "workerPublicSummary": {
+    "title": "Profesionāls prezentējums darba devējiem",
+    "audience": "Šo tekstu redz tikai uzņēmumi un aģentūras, ar kurām tev ir darba attiecības (tu strādā viņiem, esi viņu komandā vai pieņēmi viņu piedāvājumu). Atvērtajā meklēšanā tas netiek rādīts. Tavs personīgais apraksts augstāk ir redzams tikai tev.",
+    "headline": "Virsraksts (līdz 120 rakstzīmēm)",
+    "headlinePlaceholder": "piem. Flīzētājs, 8 gadi, strādāju LT un NO",
+    "bio": "Īss apraksts (līdz 1000 rakstzīmēm)",
+    "bioPlaceholder": "Kas tev padodas vislabāk, kādus darbus esi veicis, ko meklē.",
+    "save": "Saglabāt",
+    "saved": "Saglabāts",
+    "tooLong": "Teksts ir pārāk garš.",
+    "error": "Neizdevās saglabāt. Mēģini vēlreiz."
   }
 }
