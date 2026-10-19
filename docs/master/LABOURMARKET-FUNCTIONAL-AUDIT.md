@@ -3,7 +3,7 @@
 What really works, what does not, what is unfinished, the evidence, and the blockers — feature by feature.
 Part of the master set: [MASTER-MAP](LABOURMARKET-MASTER-MAP.md) · [IMPROVEMENT-OPPORTUNITIES](LABOURMARKET-IMPROVEMENT-OPPORTUNITIES.md) · [EXECUTION-ROADMAP](LABOURMARKET-EXECUTION-ROADMAP.md).
 
-Audit of main `fb741339a`, 2026-10-18; updated the same day after the production incident (rows 1.2, 1.12, 13.15–13.17; causes and prevention in MASTER-MAP §8). Public-safe: production data, security evidence and exposure details are in the owner's private annex.
+Audit of main `fb741339a`, 2026-10-18; updated the same day after the production incident (rows 1.2, 1.12, 13.15–13.17; causes and prevention in MASTER-MAP §8); updated 2026-10-19 on main `eb21423b3` after the owner-approved apply of #2477 and #2503 (rows 1.11, 4.11, 4.20, 4.22, 7.10, 9.4, 9.7; §3 item 8). Public-safe: production data, security evidence and exposure details are in the owner's private annex.
 
 ## Status vocabulary
 
@@ -236,7 +236,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 7.7 | Manual pilot grant (admin) | CODE_READY | — | — |
 | 7.8 | LMC credit ledger (MKT-8) | DORMANT | Owner (spend reversal design) | Keep off until the owner designs it |
 | 7.9 | LMC top-ups, VIP media (€24.99), `ai_plus`, agency tiers, referral rates | PLANNED | — | — |
-| 7.10 | Free 3 unique profile views / org + VIP + two-tier projection | PLANNED | Owner figures | Merge order #2477 → #2474 → #2471 → #1475 |
+| 7.10 | Free 3 unique profile views / org + VIP + two-tier projection | PLANNED | Owner figures | #2477 applied 2026-10-19; next #2474 → #2471 → #1475 |
 | 7.11 | Deferred plans: `worker_plus`, `agency_pilot` | PLANNED | Owner | — |
 | 7.12 | AI cost metering + per-org run cap | CODE_READY | — | — |
 | 7.13 | Plan-gated feature `booking_requests` | CODE_READY | — | — |
@@ -384,7 +384,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 5. RPL / recognised-equivalence structure (ARCH-2, deferred).
 6. The subject's right to refuse an imported record (ARCH-5).
 7. GDPR erasure executor (RED #2442). Journal evidence hash chain + immutable audit log (RED #2439).
-8. Worker identity split / anonymous discovery (RED #2477). Profile-view limit + VIP (RED #2474). External profiles under consent v3 (RED #2471). My Space pins (RED #1475; `workspace_pins` is absent in prod, the UI is hidden by `pinsAvailable`). Auto-enabled staff review (RED #2322). Offer label per thread (RED #2319). Machine-safe expiry for bookings and contact disclosures.
+8. Profile-view limit + VIP (RED #2474). External profiles under consent v3 (RED #2471). My Space pins (RED #1475; `workspace_pins` is absent in prod, the UI is hidden by `pinsAvailable`). Auto-enabled staff review (RED #2322). Offer label per thread (RED #2319). Machine-safe expiry for bookings and contact disclosures.
 9. Live-payment DB flag (RED #2441). LMC top-ups, VIP media, `ai_plus`, agency tiers, referral rates. The `worker_plus` and `agency_pilot` plans.
 10. Orders, logistics / delivery / freight, a cross-border deals module, a permit / posting workflow.
 11. MCP scope enforcement (PR-4). Claude connector / directory listing. ChatGPT app store submission.
