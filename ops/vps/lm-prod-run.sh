@@ -58,6 +58,7 @@ if [ "$ok" != 1 ]; then
 fi
 
 # switch nginx (graceful) — restore the previous upstream if the config does not validate
+[ -f "$INC" ] || printf 'proxy_pass http://127.0.0.1:%s;\n' "$CUR_PORT" > "$INC"
 cp "$INC" "$INC.prev" 2>/dev/null || true
 printf 'proxy_pass http://127.0.0.1:%s;\n' "$NEW_PORT" > "$INC.new" && mv "$INC.new" "$INC"
 if ! nginx -t >/dev/null 2>&1 || ! nginx -s reload; then
@@ -68,8 +69,15 @@ fi
 echo "$NEW_PORT" > "$D/active-port"
 ln -sfn "releases/$SHA" "$D/current"
 
-# let in-flight requests on the old container finish, then retire it
-sleep 5
+# let in-flight requests on the old container finish (MCP / AI / SSE may run up to the vhost's
+# 120 s proxy timeout): wait until no connection to the old port is open, at most 125 s
+sleep 2
+w=0
+while [ $w -lt 125 ] && [ "$(ss -Htn state established "( dport = :$CUR_PORT )" 2>/dev/null | wc -l)" -gt 0 ]; do
+  sleep 1; w=$((w+1))
+done
+echo "old port $CUR_PORT drained after ${w}s"
+docker stop -t 10 labourmarket-prod >/dev/null 2>&1 || true
 docker rm -f labourmarket-prod >/dev/null 2>&1 || true
 docker rename labourmarket-prod-next labourmarket-prod
 echo "started labourmarket-prod @ $SHA on 127.0.0.1:$NEW_PORT (previous port $CUR_PORT retired)"
