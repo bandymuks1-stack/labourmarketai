@@ -54,7 +54,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 1.8 | Multi-capability organization (ORG-2) | PARTIAL (register BLOCKED) | **Owner decision ORG-2** | Owner decides ORG-2 |
 | 1.9 | Memberships, invitations, roles (ORG-3) | LIVE_PROVEN (brigade-formation 2026-10-12 and VPS 2026-10-17; agency-chain A-2, VPS 2026-10-18; learning-practice L-2/L-3) | E-mail off (1.13) | — |
 | 1.10 | Workspace context + switching (ORG-4) | PARTIAL (chat-continuity walk proves isolation, 2026-10-17) | — | Unify the resolvers |
-| 1.11 | Cross-org isolation (ORG-5) | PARTIAL | RED #2477 | Apply #2477 |
+| 1.11 | Cross-org isolation (ORG-5) | PARTIAL — #2477 applied 2026-10-19 (database checks pass; production API walk `worker-identity-split` pending) | — | Run the walk (#2505) |
 | 1.12 | Universal invitation / referral network (ORG-11) | PARTIAL (the partner door answers `not_configured` since the VPS move; the partner lost its copy in its own hosting move; an invitee's return link was dropped by the callback defect, fixed #2482) | Nonstop tokens (owner, both sides) | Owner re-pairs one new secret on both sides, then resends the held lead (idempotent) |
 | 1.13 | Invitation / transactional e-mail delivery | DORMANT | Owner chooses a provider + DNS (SPF/DKIM) | Configure a provider (costs 0 € on a free tier) |
 | 1.14 | Staff review notice at invite / sign-up (#2321) | LIVE_PROVEN (staff-review-notice walk 4/4, 2026-10-12; VPS 2026-10-18) | #2322 | Owner decides #2322 |
@@ -152,7 +152,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 4.8 | Anonymous public need intake (DEM-7) | LIVE_PROVEN (real production intakes, register DEM-7) | — | — |
 | 4.9 | Saved searches + job alerts (DEM-8) | PARTIAL | E-mail (1.13) | — |
 | 4.10 | Organizational supply discovery (DEM-9) | CODE_READY | — | — |
-| 4.11 | Candidates / scouting (ORG-7) | PARTIAL | Identity split #2477 | — |
+| 4.11 | Candidates / scouting (ORG-7) | PARTIAL — anonymous discovery projection live since #2477 (2026-10-19) | — | Production API walk (#2505) |
 | 4.12 | Shortlist + notes | LIVE_PROVEN (company-chain walk 2026-09-28; old) | — | Re-walk on the VPS |
 | 4.13 | Auto-match + receipt (not in register) | CODE_READY | — | — |
 | 4.14 | Candidate drafts (not in register) | CODE_READY | — | — |
@@ -161,9 +161,9 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 4.17 | Discoverability consent | LIVE_PROVEN (#2217, 2026-10-09) | — | — |
 | 4.18 | Employer data disclosure grant (consent v2) | CODE_READY | #2471 | — |
 | 4.19 | Contact disclosure requests (COM-2) | PARTIAL | Expiry design | Machine-safe expiry RPC (RED) |
-| 4.20 | Discovery identity protection (not in register) | PARTIAL — API-level hardening pending | Owner approves #2477 | Apply #2477 (P0) |
+| 4.20 | Discovery identity protection (not in register) | PARTIAL — #2477 applied 2026-10-19: the raw worker row needs a working relationship; discovery returns professional fields only (database checks pass; API walk pending) | — | Run the walk (#2505), then LIVE_PROVEN |
 | 4.21 | Person page name gating (#2473/#2475/#2476) | CODE_READY | Cast member | Add an unrelated synthetic employer to the cast |
-| 4.22 | Free 3 unique profile views per org + VIP (RED #2474) | PLANNED | Owner figures + approval | Owner decides after #2477 |
+| 4.22 | Free 3 unique profile views per org + VIP (RED #2474) | PLANNED | Owner figures + approval | #2477 is applied; #2474 can follow |
 | 4.23 | `/dashboard/talent` sample preview | DORMANT | — | Remove or link from admin |
 | 4.24 | Legacy agency worker pool (ORG-10) | DORMANT | — | Keep retired |
 | 4.25 | Admin matching workbench, candidate pool, need structuring | CODE_READY | — | — |
@@ -271,10 +271,10 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 9.1 | Superadmin console hub (about 18 pages) | CODE_READY | — | — |
 | 9.2 | Admin pilots, telemetry, league, market, launch readiness, project truth, readiness verify/reject | CODE_READY | — | — |
 | 9.3 | Admin user inspect `/dashboard/admin/users/[id]` | CODE_READY | — | — |
-| 9.4 | Privacy request intake + admin queue + deletion preview | PARTIAL | — | Execute the open request manually or by #2442 before the deadline |
+| 9.4 | Privacy request intake + admin queue + deletion preview | PARTIAL — an open account deletion request pauses discoverability (#2503, applied 2026-10-19) | Owner: acknowledgement + erasure approval | Execute the open request manually or by #2442 before the deadline (private annex) |
 | 9.5 | GDPR export, bundle v3 (PER-12) | PARTIAL | — | Walk it once on the VPS |
 | 9.6 | GDPR erasure executor (account deletion) | PLANNED | Owner approval | Approve #2442 |
-| 9.7 | Worker row access policy (identity split, decision 0027) | PARTIAL | security hardening in progress — details in the private annex | see EXECUTION-ROADMAP P0 |
+| 9.7 | Worker row access policy (identity split, decision 0027) | PARTIAL — applied 2026-10-19 (#2477); production API walk pending | — | Run the walk (#2505); details in the private annex |
 | 9.8 | RLS on every table (GOV-8) | PARTIAL | — | — |
 | 9.9 | Audit trail | PARTIAL | #2439 | — |
 | 9.10 | Rate limiting | CODE_READY | — | Fine while there is one instance |
