@@ -104,6 +104,10 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261019070000_",
       // 2026-10-18 (RED, needs-human-gate): employer profile view limit + VIP grants.
       "20261018150000_",
+      // 2026-10-19 (RED, needs-human-gate): automated GDPR account erasure (executor v3).
+      "20261019140000_",
+      // 2026-10-19: two NOT NULL author columns of the erasure registry are severed, not nulled.
+      "20261019150000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

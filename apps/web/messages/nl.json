@@ -5582,15 +5582,22 @@
     },
     "deletion": {
       "title": "Verzoek tot accountverwijdering",
-      "body": "Dit is een verzoek dat door een persoon wordt beoordeeld — deze pagina verwijdert niets onmiddellijk. Na de beoordeling word je benaderd via het e-mailadres van je account.",
-      "confirmLabel": "Ik begrijp dat ik een verzoek tot accountverwijdering indien en dat een persoon dit zal beoordelen.",
+      "body": "Het systeem verwijdert het account zelf: dien het verzoek in en bevestig het nadat je opnieuw bent ingelogd. Het systeem controleert of iets wettelijk of vanwege andere mensen bewaard moet blijven, verwijdert het account en stuurt een bevestiging naar het e-mailadres van je account. Moet iets worden beoordeeld, dan hoor je dat.",
+      "confirmLabel": "Ik begrijp dat het account en de gegevens na bevestiging onherroepelijk worden verwijderd.",
       "noteLabel": "Opmerking (optioneel)",
       "submit": "Dien verwijderingsverzoek in",
       "submitted": "Verzoek ingediend",
-      "submittedBody": "Een persoon beoordeelt het en neemt contact met je op via het e-mailadres van je account.",
+      "submittedBody": "Nog één stap — bevestig het verzoek hieronder.",
       "unavailable": "Momenteel niet beschikbaar.",
       "tooManyOpen": "Je hebt te veel openstaande verzoeken — wacht tot ze zijn beoordeeld.",
-      "error": "Er is iets misgegaan. Probeer het opnieuw."
+      "error": "Er is iets misgegaan. Probeer het opnieuw.",
+      "confirmStepBody": "Je verzoek om je account te verwijderen is ingediend. Bevestig het — het systeem verwijdert het account automatisch en stuurt je een bevestiging per e-mail. Dit kan niet ongedaan worden gemaakt.",
+      "confirmStep": "Verwijdering van account bevestigen",
+      "reauthBody": "Om veiligheidsredenen kun je alleen direct na het inloggen bevestigen (binnen de laatste 15 minuten). Log opnieuw in — je komt terug op deze pagina.",
+      "reauth": "Opnieuw inloggen",
+      "confirmedTitle": "Verwijdering bevestigd",
+      "confirmedBody": "Het systeem verwijdert het account binnen enkele minuten en stuurt een bevestiging naar het e-mailadres van je account. Moet iets worden beoordeeld, dan laten we het je weten.",
+      "inReview": "Automatische verwijdering is gepauzeerd voor beoordeling: het account bevat gegevens die mogelijk wettelijk bewaard moeten blijven of die andere mensen betreffen. Je ontvangt het besluit en de redenen binnen een maand per e-mail. Intussen wordt je profiel niet getoond in zoekresultaten."
     },
     "requests": {
       "title": "Je ingediende verzoeken",

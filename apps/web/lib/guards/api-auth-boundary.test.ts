@@ -86,6 +86,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. Inert a second time while NONSTOP_HANDOFF_ENDPOINT / NONSTOP_HANDOFF_TOKEN are unset (answers not_configured, calls nothing). Its only outbound target is the configured partner door; the body it returns is counts only.",
   },
+  "cron/privacy-erasure/route.ts": {
+    class: "public",
+    why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it every 10 minutes; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. It acts only on account-deletion requests the holder confirmed with a fresh sign-in (or the owner approved in writing), and every decision is the database's own plan (privacy_erasure_executor_v3). Answers counts only — no ids, no addresses.",
+  },
   "cron/job-alerts/route.ts": {
     class: "public",
     why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. Answers counts and a reason code only.",

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 import { join } from "node:path";
 
 import {
@@ -147,7 +148,7 @@ describe("1. exactly one migration owns finance_records — the human-gated I2 p
       if (!existsSync(abs)) continue;
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(I2) || f.startsWith(ORG_AUTHORITY)) continue;
-        const src = readFileSync(join(abs, f), "utf8");
+        const src = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
         if (TRAIN_J.some((p) => f.startsWith(p))) {
           // An EXTENSION may name the table (alter/insert/select) but must
           // never create or drop it, and must never (re)define a v1 RPC.

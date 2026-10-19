@@ -3,7 +3,7 @@
 What really works, what does not, what is unfinished, the evidence, and the blockers — feature by feature.
 Part of the master set: [MASTER-MAP](LABOURMARKET-MASTER-MAP.md) · [IMPROVEMENT-OPPORTUNITIES](LABOURMARKET-IMPROVEMENT-OPPORTUNITIES.md) · [EXECUTION-ROADMAP](LABOURMARKET-EXECUTION-ROADMAP.md).
 
-Audit of main `fb741339a`, 2026-10-18; updated the same day after the production incident (rows 1.2, 1.12, 13.15–13.17; causes and prevention in MASTER-MAP §8). Public-safe: production data, security evidence and exposure details are in the owner's private annex.
+Audit of main `fb741339a`, 2026-10-18; updated the same day after the production incident (rows 1.2, 1.12, 13.15–13.17; causes and prevention in MASTER-MAP §8); updated 2026-10-19 on main `eb21423b3` after the owner-approved apply of #2477 and #2503 (rows 1.11, 4.11, 4.20, 4.22, 7.10, 9.4, 9.7; §3 item 8). Public-safe: production data, security evidence and exposure details are in the owner's private annex.
 
 ## Status vocabulary
 
@@ -54,7 +54,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 1.8 | Multi-capability organization (ORG-2) | PARTIAL (register BLOCKED) | **Owner decision ORG-2** | Owner decides ORG-2 |
 | 1.9 | Memberships, invitations, roles (ORG-3) | LIVE_PROVEN (brigade-formation 2026-10-12 and VPS 2026-10-17; agency-chain A-2, VPS 2026-10-18; learning-practice L-2/L-3) | E-mail off (1.13) | — |
 | 1.10 | Workspace context + switching (ORG-4) | PARTIAL (chat-continuity walk proves isolation, 2026-10-17) | — | Unify the resolvers |
-| 1.11 | Cross-org isolation (ORG-5) | PARTIAL | RED #2477 | Apply #2477 |
+| 1.11 | Cross-org isolation (ORG-5) | PARTIAL — #2477 applied 2026-10-19 (database checks pass; production API walk `worker-identity-split` pending) | — | Run the walk (#2505) |
 | 1.12 | Universal invitation / referral network (ORG-11) | PARTIAL (the partner door answers `not_configured` since the VPS move; the partner lost its copy in its own hosting move; an invitee's return link was dropped by the callback defect, fixed #2482) | Nonstop tokens (owner, both sides) | Owner re-pairs one new secret on both sides, then resends the held lead (idempotent) |
 | 1.13 | Invitation / transactional e-mail delivery | DORMANT | Owner chooses a provider + DNS (SPF/DKIM) | Configure a provider (costs 0 € on a free tier) |
 | 1.14 | Staff review notice at invite / sign-up (#2321) | LIVE_PROVEN (staff-review-notice walk 4/4, 2026-10-12; VPS 2026-10-18) | #2322 | Owner decides #2322 |
@@ -73,7 +73,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 2.7 | Education records (PER-8) | CODE_READY | — | Fix the stale comment |
 | 2.8 | Achievements / declared certificates (PER-9) | PARTIAL | Future confirmation flow | Keep deferred |
 | 2.9 | Languages (PER-10) | CODE_READY | — | Add `uk` as a worker language |
-| 2.10 | External profile links (PER-11) | PARTIAL | #2471 | Owner decides #2471 |
+| 2.10 | External profile links (PER-11) | PARTIAL | #2471 (RED, prepared for the owner's final approval 2026-10-19) | Owner approves #2471 |
 | 2.11 | Requirement ledger (PER-13) | PARTIAL | — | Mount the third context |
 | 2.12 | Skill catalogue + professions (SKL-1) | LIVE_PROVEN (HUMAN_UI_PROVEN) | — | — |
 | 2.13 | Deterministic recognition, journal → skill (SKL-2) | LIVE_PROVEN (sectors-languages walk 5/5, 2026-10-12) | — | Merge the #2403 fix |
@@ -152,7 +152,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 4.8 | Anonymous public need intake (DEM-7) | LIVE_PROVEN (real production intakes, register DEM-7) | — | — |
 | 4.9 | Saved searches + job alerts (DEM-8) | PARTIAL | E-mail (1.13) | — |
 | 4.10 | Organizational supply discovery (DEM-9) | CODE_READY | — | — |
-| 4.11 | Candidates / scouting (ORG-7) | PARTIAL | Identity split #2477 | — |
+| 4.11 | Candidates / scouting (ORG-7) | PARTIAL — anonymous discovery projection live since #2477 (2026-10-19) | — | Production API walk (#2505) |
 | 4.12 | Shortlist + notes | LIVE_PROVEN (company-chain walk 2026-09-28; old) | — | Re-walk on the VPS |
 | 4.13 | Auto-match + receipt (not in register) | CODE_READY | — | — |
 | 4.14 | Candidate drafts (not in register) | CODE_READY | — | — |
@@ -161,9 +161,9 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 4.17 | Discoverability consent | LIVE_PROVEN (#2217, 2026-10-09) | — | — |
 | 4.18 | Employer data disclosure grant (consent v2) | CODE_READY | #2471 | — |
 | 4.19 | Contact disclosure requests (COM-2) | PARTIAL | Expiry design | Machine-safe expiry RPC (RED) |
-| 4.20 | Discovery identity protection (not in register) | PARTIAL — API-level hardening pending | Owner approves #2477 | Apply #2477 (P0) |
+| 4.20 | Discovery identity protection (not in register) | PARTIAL — #2477 applied 2026-10-19: the raw worker row needs a working relationship; discovery returns professional fields only (database checks pass; API walk pending) | — | Run the walk (#2505), then LIVE_PROVEN |
 | 4.21 | Person page name gating (#2473/#2475/#2476) | CODE_READY | Cast member | Add an unrelated synthetic employer to the cast |
-| 4.22 | Free 3 unique profile views per org + VIP (RED #2474) | PLANNED | Owner figures + approval | Owner decides after #2477 |
+| 4.22 | Free 3 unique profile views per org + VIP (RED #2474) | PLANNED | **Owner decision 2026-10-19: deferred until the payment chain works** (a free organization must not be limited without a way to pay) | Revisit when billing is live |
 | 4.23 | `/dashboard/talent` sample preview | DORMANT | — | Remove or link from admin |
 | 4.24 | Legacy agency worker pool (ORG-10) | DORMANT | — | Keep retired |
 | 4.25 | Admin matching workbench, candidate pool, need structuring | CODE_READY | — | — |
@@ -236,7 +236,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 7.7 | Manual pilot grant (admin) | CODE_READY | — | — |
 | 7.8 | LMC credit ledger (MKT-8) | DORMANT | Owner (spend reversal design) | Keep off until the owner designs it |
 | 7.9 | LMC top-ups, VIP media (€24.99), `ai_plus`, agency tiers, referral rates | PLANNED | — | — |
-| 7.10 | Free 3 unique profile views / org + VIP + two-tier projection | PLANNED | Owner figures | Merge order #2477 → #2474 → #2471 → #1475 |
+| 7.10 | Free 3 unique profile views / org + VIP + two-tier projection | PLANNED | Owner figures | #2477 applied 2026-10-19. Owner 2026-10-19: #2474 deferred (payments first), #2471 prepared for final approval, #1475 deferred (not critical) |
 | 7.11 | Deferred plans: `worker_plus`, `agency_pilot` | PLANNED | Owner | — |
 | 7.12 | AI cost metering + per-org run cap | CODE_READY | — | — |
 | 7.13 | Plan-gated feature `booking_requests` | CODE_READY | — | — |
@@ -271,10 +271,10 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 | 9.1 | Superadmin console hub (about 18 pages) | CODE_READY | — | — |
 | 9.2 | Admin pilots, telemetry, league, market, launch readiness, project truth, readiness verify/reject | CODE_READY | — | — |
 | 9.3 | Admin user inspect `/dashboard/admin/users/[id]` | CODE_READY | — | — |
-| 9.4 | Privacy request intake + admin queue + deletion preview | PARTIAL | — | Execute the open request manually or by #2442 before the deadline |
+| 9.4 | Privacy request intake + admin queue + deletion preview | PARTIAL — an open account deletion request pauses discoverability (#2503, applied 2026-10-19) | Owner: acknowledgement + erasure approval | Execute the open request manually or by #2442 before the deadline (private annex) |
 | 9.5 | GDPR export, bundle v3 (PER-12) | PARTIAL | — | Walk it once on the VPS |
 | 9.6 | GDPR erasure executor (account deletion) | PLANNED | Owner approval | Approve #2442 |
-| 9.7 | Worker row access policy (identity split, decision 0027) | PARTIAL | security hardening in progress — details in the private annex | see EXECUTION-ROADMAP P0 |
+| 9.7 | Worker row access policy (identity split, decision 0027) | PARTIAL — applied 2026-10-19 (#2477); production API walk pending | — | Run the walk (#2505); details in the private annex |
 | 9.8 | RLS on every table (GOV-8) | PARTIAL | — | — |
 | 9.9 | Audit trail | PARTIAL | #2439 | — |
 | 9.10 | Rate limiting | CODE_READY | — | Fine while there is one instance |
@@ -384,7 +384,7 @@ A green CI run is **never** counted as functional proof. Walks before 2026-10-17
 5. RPL / recognised-equivalence structure (ARCH-2, deferred).
 6. The subject's right to refuse an imported record (ARCH-5).
 7. GDPR erasure executor (RED #2442). Journal evidence hash chain + immutable audit log (RED #2439).
-8. Worker identity split / anonymous discovery (RED #2477). Profile-view limit + VIP (RED #2474). External profiles under consent v3 (RED #2471). My Space pins (RED #1475; `workspace_pins` is absent in prod, the UI is hidden by `pinsAvailable`). Auto-enabled staff review (RED #2322). Offer label per thread (RED #2319). Machine-safe expiry for bookings and contact disclosures.
+8. Profile-view limit + VIP (RED #2474). External profiles under consent v3 (RED #2471). My Space pins (RED #1475; `workspace_pins` is absent in prod, the UI is hidden by `pinsAvailable`). Auto-enabled staff review (RED #2322). Offer label per thread (RED #2319). Machine-safe expiry for bookings and contact disclosures.
 9. Live-payment DB flag (RED #2441). LMC top-ups, VIP media, `ai_plus`, agency tiers, referral rates. The `worker_plus` and `agency_pilot` plans.
 10. Orders, logistics / delivery / freight, a cross-border deals module, a permit / posting workflow.
 11. MCP scope enforcement (PR-4). Claude connector / directory listing. ChatGPT app store submission.

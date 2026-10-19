@@ -399,4 +399,21 @@ revoke all on function public.record_worker_profile_view_v1(uuid, uuid) from pub
 revoke all on function public.record_worker_profile_view_v1(uuid, uuid) from anon;
 grant execute on function public.record_worker_profile_view_v1(uuid, uuid) to authenticated;
 
+-- 4. GDPR erasure decisions for the four person references above (executor v3,
+--    20261019140000, is applied before this file in production; on a database
+--    without it the block is skipped and the plan refuses these FKs by name).
+do $$
+begin
+  if to_regclass('public.privacy_erasure_registry_v3') is null then
+    return;
+  end if;
+  insert into public.privacy_erasure_registry_v3
+    (schema_name, table_name, column_name, parent, fk_rule_expected, treatment, decided_by, legal_review, legal_basis, note) values
+  ('public', 'organization_access_grants', 'granted_by', 'profiles', 'set null', 'set_null', 'engineering', false, 'nullable reference; severed by NULL', 'admin identity on an audit row; the grant stays with the organisation'),
+  ('public', 'organization_access_grants', 'revoked_by', 'profiles', 'set null', 'set_null', 'engineering', false, 'nullable reference; severed by NULL', 'admin identity on an audit row; the grant stays with the organisation'),
+  ('public', 'employer_profile_views', 'worker_id', 'workers', 'cascade', 'allow_cascade', 'engineering', false, 'Art. 17(1)(a)/(b): the record that an organisation viewed this person; deleted with the account', 'cascade confirmed as the decision (the person''s own data)'),
+  ('public', 'employer_profile_views', 'first_viewed_by', 'profiles', 'set null', 'set_null', 'engineering', false, 'nullable reference; severed by NULL', 'the viewer''s identity on the organisation''s view counter')
+  on conflict (schema_name, table_name, column_name) do nothing;
+end $$;
+
 commit;

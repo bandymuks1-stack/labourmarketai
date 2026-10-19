@@ -5582,15 +5582,22 @@
     },
     "deletion": {
       "title": "Antrag auf Kontolöschung",
-      "body": "Dies ist ein Antrag, den ein Mensch prüft — diese Seite löscht nichts sofort. Nach der Prüfung werden Sie über Ihre Konto-E-Mail-Adresse kontaktiert.",
-      "confirmLabel": "Ich verstehe, dass ich einen Antrag auf Kontolöschung stelle und ein Mensch ihn prüfen wird.",
+      "body": "Das System löscht das Konto selbst: Stellen Sie den Antrag und bestätigen Sie ihn nach erneuter Anmeldung. Das System prüft, ob etwas gesetzlich oder wegen anderer Personen aufbewahrt werden muss, löscht das Konto und sendet eine Bestätigung an Ihre Konto-E-Mail-Adresse. Muss etwas geprüft werden, werden Sie informiert.",
+      "confirmLabel": "Ich verstehe, dass das Konto und seine Daten nach der Bestätigung unwiderruflich gelöscht werden.",
       "noteLabel": "Anmerkung (optional)",
       "submit": "Löschantrag stellen",
       "submitted": "Antrag gestellt",
-      "submittedBody": "Ein Mensch wird ihn prüfen und Sie über Ihre Konto-E-Mail-Adresse kontaktieren.",
+      "submittedBody": "Ein Schritt fehlt noch — bestätigen Sie den Antrag unten.",
       "unavailable": "Derzeit nicht verfügbar.",
       "tooManyOpen": "Sie haben zu viele offene Anträge — warten Sie, bis sie geprüft wurden.",
-      "error": "Etwas ist schiefgelaufen. Versuchen Sie es erneut."
+      "error": "Etwas ist schiefgelaufen. Versuchen Sie es erneut.",
+      "confirmStepBody": "Ihr Antrag auf Kontolöschung ist gestellt. Bestätigen Sie ihn — das System löscht das Konto automatisch und sendet Ihnen eine Bestätigung per E-Mail. Dies kann nicht rückgängig gemacht werden.",
+      "confirmStep": "Kontolöschung bestätigen",
+      "reauthBody": "Aus Sicherheitsgründen ist die Bestätigung nur direkt nach der Anmeldung möglich (innerhalb der letzten 15 Minuten). Melden Sie sich erneut an — Sie kehren auf diese Seite zurück.",
+      "reauth": "Erneut anmelden",
+      "confirmedTitle": "Löschung bestätigt",
+      "confirmedBody": "Das System löscht das Konto in den nächsten Minuten und sendet eine Bestätigung an Ihre Konto-E-Mail-Adresse. Muss etwas geprüft werden, informieren wir Sie.",
+      "inReview": "Die automatische Löschung ist zur Prüfung angehalten: Das Konto enthält Daten, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen könnten. Entscheidung und Gründe erhalten Sie innerhalb eines Monats per E-Mail. Bis dahin wird Ihr Profil in der Suche nicht angezeigt."
     },
     "requests": {
       "title": "Ihre gestellten Anträge",

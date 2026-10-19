@@ -76,6 +76,13 @@ drop table if exists public.employer_profile_views;
 drop table if exists public.organization_access_grants;
 do $$
 begin
+  if to_regclass('public.privacy_erasure_registry_v3') is not null then
+    delete from public.privacy_erasure_registry_v3
+     where schema_name = 'public' and table_name in ('employer_profile_views', 'organization_access_grants');
+  end if;
+end $$;
+do $$
+begin
   if not exists (select 1 from pg_policies where qual like '%caller_has_worker_relation_v1%') then
     drop function if exists public.caller_has_worker_relation_v1(uuid);
   end if;

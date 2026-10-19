@@ -1,5 +1,4 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/lib/i18n/navigation";
 import { TrackedCta } from "@/components/app/tracked-cta";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { getPlans, PLAN_SLUGS } from "@/lib/marketing/plans";
@@ -123,13 +122,15 @@ export async function PricingTable() {
         </p>
         <p className="mt-3 flex-1 text-sm text-text-secondary">{t("individual.body")}</p>
         <div className="mt-6">
-          <Link
+          <TrackedCta
             href="/company-need"
+            ctaId="pricing_individual_need"
+            audience="companies"
             className="text-sm font-semibold text-brand-blue hover:underline"
             data-testid="pricing-cta-individual"
           >
             {t("individual.cta")}
-          </Link>
+          </TrackedCta>
         </div>
       </div>
     </section>
