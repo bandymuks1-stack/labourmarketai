@@ -205,7 +205,7 @@ export async function POST(req: Request) {
   }
   if (operation) await attachProviderSession(operation.id, result.sessionId);
   // Revenue funnel (2026-10-19): a provider session exists — the person is at
-  // the payment step. Bounded metadata only; never the e-mail or amounts.
+  // the payment step. Bounded metadata only: no identity, no price figures.
   emitServerFunnelEvent(FUNNEL_EVENTS.checkoutStarted, {
     source: "billing",
     route: "/api/billing/test-checkout",
