@@ -561,6 +561,21 @@ export type WithheldRelation = {
  */
 export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
   {
+    table: "privacy_erasure_confirmations_v1",
+    reason:
+      "your confirmation of an account-deletion request (how and when you confirmed it) — held server-side as evidence that the deletion was yours to ask for; the request and its status are shown to you on the privacy page",
+  },
+  {
+    table: "privacy_erasure_authorizations_v3",
+    reason:
+      "single-use technical authorizations of an account deletion (a digest, the plan fingerprint and timestamps; never the token) — security state with no read path for your own session",
+  },
+  {
+    table: "privacy_erasure_receipts_v3",
+    reason:
+      "the receipt of an executed account deletion (what was deleted, retained and why) — written after your account no longer exists; it names no identifier of you and is available on request through the data-protection channel",
+  },
+  {
     table: "email_verifications_v1",
     reason:
       "proof that you control an email address (address, method, time) — held server-side as security evidence with no read path for your own session; whether your address is verified is shown to you in the product, and the evidence is available on request through the data-protection channel",

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 import { join } from "node:path";
 
 import { activeLocales, locales } from "@/lib/i18n/config";
@@ -226,7 +227,7 @@ describe("1. exactly three human-gated migration pairs own the financial-ops sli
       const abs = join(REPO, "supabase", dir);
       for (const f of readdirSync(abs).filter((n) => n.endsWith(".sql"))) {
         if (TRAIN_J.some((p) => f.startsWith(p))) continue;
-        const src = readFileSync(join(abs, f), "utf8");
+        const src = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
         if (dir === "migrations" && TRIP_READERS.some((p) => f.startsWith(p))) {
           // A reader may name business_trips ONLY to read it: `to_regclass(...)`
           // or `from public.business_trips`. Nothing else it names may be owned.

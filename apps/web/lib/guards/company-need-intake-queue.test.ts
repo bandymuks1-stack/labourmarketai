@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 
 /**
  * PUBLIC INTAKE OWNER QUEUE v1 — SAFETY GUARDS.
@@ -124,7 +125,7 @@ describe("the feature sends nothing outbound and adds no DB weakening", () => {
   it("adds no migration and no RLS policy / anon grant for the table", () => {
     const migDir = join(REPO_ROOT, "supabase", "migrations");
     const touching = readdirSync(migDir).filter((f) =>
-      readFileSync(join(migDir, f), "utf8").includes(TABLE),
+      withoutErasureRegistrySeed(readFileSync(join(migDir, f), "utf8")).includes(TABLE),
     );
     // The original PR #678 migration + the canonical-journey P3 defect fix
     // (service-role-ONLY grants — the table was created with no grant at

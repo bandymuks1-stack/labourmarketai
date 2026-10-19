@@ -5582,15 +5582,22 @@
     },
     "deletion": {
       "title": "Wniosek o usunięcie konta",
-      "body": "To wniosek, który rozpatruje osoba — ta strona niczego nie usuwa natychmiast. Po rozpatrzeniu skontaktujemy się z Tobą na adres e-mail konta.",
-      "confirmLabel": "Rozumiem, że składam wniosek o usunięcie konta i rozpatrzy go osoba.",
+      "body": "System sam usuwa konto: złóż wniosek, a następnie potwierdź go po ponownym zalogowaniu. System sprawdza, czy coś trzeba zachować na mocy prawa lub ze względu na inne osoby, usuwa konto i wysyła potwierdzenie na adres e-mail konta. Jeśli coś wymaga przeglądu, otrzymasz informację.",
+      "confirmLabel": "Rozumiem, że po potwierdzeniu konto i jego dane zostaną usunięte nieodwracalnie.",
       "noteLabel": "Notatka (opcjonalnie)",
       "submit": "Złóż wniosek o usunięcie",
       "submitted": "Wniosek złożony",
-      "submittedBody": "Osoba go rozpatrzy i skontaktuje się z Tobą na adres e-mail konta.",
+      "submittedBody": "Został jeden krok — potwierdź wniosek poniżej.",
       "unavailable": "Chwilowo niedostępne.",
       "tooManyOpen": "Masz zbyt wiele otwartych wniosków — poczekaj, aż zostaną rozpatrzone.",
-      "error": "Coś poszło nie tak. Spróbuj ponownie."
+      "error": "Coś poszło nie tak. Spróbuj ponownie.",
+      "confirmStepBody": "Twój wniosek o usunięcie konta został złożony. Potwierdź go — system usunie konto automatycznie i wyśle potwierdzenie e-mailem. Tego nie można cofnąć.",
+      "confirmStep": "Potwierdź usunięcie konta",
+      "reauthBody": "Ze względów bezpieczeństwa potwierdzić można tylko zaraz po zalogowaniu (w ciągu ostatnich 15 minut). Zaloguj się ponownie — wrócisz na tę stronę.",
+      "reauth": "Zaloguj się ponownie",
+      "confirmedTitle": "Usunięcie potwierdzone",
+      "confirmedBody": "System usunie konto w ciągu kilku minut i wyśle potwierdzenie na adres e-mail konta. Jeśli coś będzie wymagało przeglądu, poinformujemy Cię.",
+      "inReview": "Automatyczne usunięcie wstrzymano do przeglądu: konto zawiera dane, które mogą wymagać przechowywania na mocy prawa lub dotyczą innych osób. Decyzję i jej uzasadnienie otrzymasz e-mailem w ciągu miesiąca. Do tego czasu Twój profil nie jest widoczny w wyszukiwaniu."
     },
     "requests": {
       "title": "Twoje złożone wnioski",

@@ -149,7 +149,10 @@ describe("deletion is a reviewed REQUEST — never a destructive action", () => 
     expect(down).toMatch(/drop function if exists public\.submit_privacy_request_v1/);
   });
 
-  it("the page copy says a person reviews it, in every served locale", () => {
+  // Owner decision 2026-10-19: deletion is AUTOMATIC after the holder's
+  // confirmation; a case the database plan cannot settle goes to human review.
+  // The copy must say both — and still never claim an instant deletion.
+  it("the page copy says the system deletes it and unclear cases are reviewed, in every served locale", () => {
     for (const loc of ["lt", "en", "ru"] as const) {
       const msgs = JSON.parse(read(`messages/${loc}.json`)) as {
         privacySelfService: {
@@ -160,9 +163,10 @@ describe("deletion is a reviewed REQUEST — never a destructive action", () => 
       };
       const ns = msgs.privacySelfService;
       expect(ns, `${loc}: privacySelfService missing`).toBeTruthy();
-      // Human-review honesty is stated, not implied.
       const deletionBlob = JSON.stringify(ns.deletion).toLowerCase();
-      expect(deletionBlob).toMatch(/žmogus|person|человек/);
+      expect(deletionBlob).toMatch(/sistema|system|систем/);
+      expect(deletionBlob).toMatch(/peržiūr|review|провер/);
+      expect(deletionBlob).toMatch(/15/); // the fresh sign-in window is stated
       // No instant-deletion claim anywhere.
       expect(deletionBlob).not.toMatch(
         /ištrinta iš karto|deleted immediately|удалено немедленно/,

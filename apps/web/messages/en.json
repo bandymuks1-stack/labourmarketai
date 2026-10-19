@@ -5582,15 +5582,22 @@
     },
     "deletion": {
       "title": "Account deletion request",
-      "body": "This is a request a person reviews — this page deletes nothing immediately. After review you will be contacted at your account email.",
-      "confirmLabel": "I understand I am filing an account-deletion request and a person will review it.",
+      "body": "The system deletes the account itself: file the request, then confirm it after signing in again. The system checks whether anything must be kept by law or because it concerns other people, deletes the account and sends a confirmation to your account email. If something needs review, you will be told.",
+      "confirmLabel": "I understand that once confirmed, the account and its data are deleted irreversibly.",
       "noteLabel": "Note (optional)",
       "submit": "File deletion request",
       "submitted": "Request filed",
-      "submittedBody": "A person will review it and contact you at your account email.",
+      "submittedBody": "One step left — confirm the request below.",
       "unavailable": "Not available right now.",
       "tooManyOpen": "You have too many open requests — wait until they are reviewed.",
-      "error": "Something went wrong. Try again."
+      "error": "Something went wrong. Try again.",
+      "confirmStepBody": "Your account deletion request is filed. Confirm it — the system deletes the account automatically and emails you a confirmation. This cannot be undone.",
+      "confirmStep": "Confirm account deletion",
+      "reauthBody": "For your security, confirming is possible only right after signing in (within the last 15 minutes). Sign in again — you will come back to this page.",
+      "reauth": "Sign in again",
+      "confirmedTitle": "Deletion confirmed",
+      "confirmedBody": "The system will delete the account within the next few minutes and send a confirmation to your account email. If anything needs review, we will tell you.",
+      "inReview": "Automatic deletion is paused for review: the account holds data that may have to be kept by law or that concerns other people. You will receive the decision and its reasons by email within one month. Meanwhile your profile is not shown in search."
     },
     "requests": {
       "title": "Your filed requests",
