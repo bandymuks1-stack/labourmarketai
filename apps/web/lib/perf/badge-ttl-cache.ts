@@ -22,19 +22,23 @@ type Entry = { readonly at: number; readonly value: unknown };
 const MAX_ENTRIES = 5000;
 const store = new Map<string, Entry>();
 
-/** Remember `load()` for `ttlMs` under (badge, viewer, workspace). A failed load is never cached. */
+/** Remember `load()` for `ttlMs` under (badge, viewer, workspace). A load that
+ *  throws is never cached; `keep` lets a caller refuse to cache a value that
+ *  reports a failed read (e.g. `{ kind: "unavailable" }`). */
 export async function rememberBadge<T>(
   badge: string,
   viewerKey: string | null,
   ttlMs: number,
   load: () => Promise<T>,
   now: () => number = Date.now,
+  keep: (value: T) => boolean = () => true,
 ): Promise<T> {
   if (!viewerKey) return load();
   const key = `${badge}|${viewerKey}`;
   const hit = store.get(key);
   if (hit && now() - hit.at < ttlMs) return hit.value as T;
   const value = await load();
+  if (!keep(value)) return value;
   store.set(key, { at: now(), value });
   if (store.size > MAX_ENTRIES) {
     const oldest = store.keys().next().value;
