@@ -1660,6 +1660,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261019190000_erasure_sentinel_finite_ban_v1.sql",
       // 2026-10-19 (RED by SECURITY DEFINER replace): worker board company via the need's organization.
       "20261019200000_worker_board_org_company_v1.sql",
+      // 2026-10-19 (RED by SECURITY DEFINER + GRANT): B2B-9 hours-only door for the project manager.
+      "20261019210000_project_team_journal_hours_v1.sql",
 ]);
   });
 

@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { inviteCapGate } from "./invite-cap";
@@ -451,6 +451,55 @@ test("B2B-9. the buyer sees the brigade's work on its own project", async ({ bro
   console.info(`[b2b] journaled hours on the buyer's project: ${journaledBefore} → ${after}`);
   expect(after, "the member's 6 hours reach the buyer's project").toBeGreaterThanOrEqual(journaledBefore + 6);
   await ctx.close();
+});
+
+/** The access token out of a minted @supabase/ssr storage state. */
+function bearerOf(slot: string): string {
+  const st = JSON.parse(readFileSync(state(slot), "utf8")) as { cookies: { name: string; value: string }[] };
+  const raw = st.cookies
+    .filter((c) => /^sb-.*-auth-token(\.\d+)?$/.test(c.name))
+    .sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }))
+    .map((c) => c.value)
+    .join("");
+  const b64 = raw.startsWith("base64-") ? raw.slice(7) : raw;
+  return JSON.parse(Buffer.from(b64.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8")).access_token as string;
+}
+
+/** Hours the hours-only door returns to `token` for the buyer's project (counts only, never a field). */
+async function teamDoor(token: string | null): Promise<{ status: number; rows: number; hours: number; textFields: number }> {
+  const SUPA = process.env.PROD_QA_SUPABASE_URL ?? "";
+  const ANON = process.env.PROD_QA_ANON_KEY ?? "";
+  const res = await fetch(`${SUPA}/rest/v1/rpc/project_team_journal_hour_rows_v1`, {
+    method: "POST",
+    headers: { apikey: ANON, authorization: `Bearer ${token ?? ANON}`, "content-type": "application/json" },
+    body: JSON.stringify({ p_project_id: gamaProjectId }),
+  });
+  const data = res.ok ? ((await res.json()) as { metrics: { metric_slug: string; value_numeric: number | null; unit_slug: string | null; value_text: string | null }[] }[]) : [];
+  let hours = 0;
+  let textFields = 0;
+  for (const r of data) {
+    for (const m of r.metrics ?? []) {
+      if (m.metric_slug === "fragment_time" && m.unit_slug === "hours") hours += Number(m.value_numeric ?? 0);
+      if (m.value_text !== null && m.metric_slug !== "work_date" && m.metric_slug !== "fragment_time") textFields += 1;
+    }
+    for (const k of Object.keys(r)) if (!["entry_key", "correction_of_key", "created_at", "context_key", "metrics", "confirmations"].includes(k)) textFields += 1;
+  }
+  return { status: res.status, rows: data.length, hours, textFields };
+}
+
+test("B2B-9b. the same hours by API: the buyer reads them, a third organization and an anonymous caller read nothing", async () => {
+  test.skip(!existsSync(state("agency")) || !process.env.PROD_QA_SUPABASE_URL, "needs the agency session and the API url");
+  const buyer = await teamDoor(bearerOf("manager"));
+  expect(buyer.status, "the buyer's API call answers").toBe(200);
+  expect(buyer.hours, "the buyer reads the brigade's hours on its own project").toBeGreaterThanOrEqual(6);
+  expect(buyer.textFields, "no free text and no extra field leaves the door").toBe(0);
+  const third = await teamDoor(bearerOf("agency"));
+  expect(third.status, "an unrelated organization is answered").toBe(200);
+  expect(third.rows, "an unrelated organization gets no rows").toBe(0);
+  const anon = await teamDoor(null);
+  expect(anon.rows, "an anonymous caller gets no rows").toBe(0);
+  expect(anon.status, "an anonymous caller is refused").not.toBe(200);
+  console.info(`[b2b] API door: buyer ${buyer.rows} row(s) ${buyer.hours} h; third org ${third.rows}; anon ${anon.status}`);
 });
 
 test("B2B-10. the buyer ends this run's team assignment (history kept), so the next run can disband the brigade", async ({ browser }) => {
