@@ -4,7 +4,7 @@
 #   sh lm-cron-install.sh --dry-run  — verify only (syntax, secret presence, one authenticated call per route)
 #   sh lm-cron-install.sh --remove   — uninstall (rollback)
 # Prerequisites it checks: /root/lm-prod/env has CRON_SECRET (600); the container answers /api/health on
-# 127.0.0.1:3200; each route answers 401 WITHOUT the secret (fail-closed) and 200/202 WITH it.
+# 127.0.0.1:<active port>; each route answers 401 WITHOUT the secret (fail-closed) and 200/202 WITH it.
 set -eu
 SRC=/root/lm-prod/bin/labourmarket.cron; DST=/etc/cron.d/labourmarket; RUN=/root/lm-prod/bin/lm-cron.sh
 MODE="${1:-install}"
@@ -12,12 +12,12 @@ MODE="${1:-install}"
 [ -f "$SRC" ] && [ -f "$RUN" ] || { echo "STOP: $SRC or $RUN missing"; exit 1; }
 [ "$(stat -c %a /root/lm-prod/env)" = "600" ] || { echo "STOP: env not 600"; exit 1; }
 grep -q '^CRON_SECRET=.\{32,\}' /root/lm-prod/env || { echo "STOP: CRON_SECRET missing or short"; exit 1; }
-[ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3200/api/health)" = "200" ] || { echo "STOP: container health not 200"; exit 1; }
+[ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$(cat /root/lm-prod/active-port 2>/dev/null || echo 3200)/api/health)" = "200" ] || { echo "STOP: container health not 200"; exit 1; }
 # cron syntax: every non-comment line must have 5 fields + user + command
 awk '!/^(#|SHELL=|$)/ { if (NF < 7) { print "STOP: bad cron line: " $0; bad=1 } } END { exit bad }' "$SRC"
 for r in weekly-digest commercial-handoffs job-alerts privacy-erasure; do
   grep -q " $r\$" "$SRC" || { echo "STOP: $r not scheduled in $SRC"; exit 1; }
-  noauth=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: labourmarket.ai' "http://127.0.0.1:3200/api/cron/$r")
+  noauth=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: labourmarket.ai' "http://127.0.0.1:$(cat /root/lm-prod/active-port 2>/dev/null || echo 3200)/api/cron/$r")
   [ "$noauth" = "401" ] || { echo "STOP: /api/cron/$r without secret answered $noauth (expected 401)"; exit 1; }
   echo "$r: unauthenticated=401 OK"
 done

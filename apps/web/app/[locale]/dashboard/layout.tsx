@@ -36,6 +36,7 @@ import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getSessionProfile } from "@/lib/auth/session-profile";
+import { StaleBuildRecovery } from "@/components/app/stale-build-recovery";
 import { createClient } from "@/lib/supabase/server";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
@@ -401,6 +402,9 @@ export default async function DashboardLayout({
           <SpineStream activeRole={activeRole} />
         </Suspense>
         <SessionTelemetry />
+        {/* A page from the build before a deploy reloads once instead of
+            failing its next action ("Failed to find Server Action"). */}
+        <StaleBuildRecovery />
         <AmbientGlow />
         <DashboardChrome
           nav={nav}
