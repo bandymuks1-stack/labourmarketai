@@ -32,7 +32,30 @@ const ENABLED =
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 180_000, retries: 0 });
 
-const IDENTITY_KEYS = ["display_name", "headline", "bio", "availability_note", "profile_id", "created_at", "updated_at"];
+/** The projection's EXACT public schema (migration 20261018160000, `returns table (...)`). Any other
+ *  key — a name, contact, free text, profile id, timestamp, trust or consent field — is a leak. */
+const PROJECTION_KEYS = new Set([
+  "id",
+  "experience_years",
+  "current_location_country",
+  "preferred_countries",
+  "availability_status",
+  "available_from",
+  "salary_min_eur",
+  "salary_max_eur",
+  "preferred_contract_type",
+  "pay_basis_preference",
+  "night_shifts_ok",
+  "weekend_shifts_ok",
+  "overtime_ok",
+  "driving_licence_categories",
+  "own_vehicle",
+  "own_tools",
+  "last_active_week",
+  "is_synthetic_fixture",
+  "has_available_from",
+  "detail_unlocked",
+]);
 
 /** The access token out of a minted @supabase/ssr storage state. */
 function bearerOf(slot: string): string {
@@ -104,8 +127,8 @@ test("I-2. discovery still works, and the projection carries no identity", async
   expect(proj.status, "projection answered").toBe(200);
   const rows = (Array.isArray(proj.data) ? proj.data : []) as Record<string, unknown>[];
   expect(rows.length, "the projection returns the found workers").toBeGreaterThan(0);
-  const leaking = rows.filter((r) => IDENTITY_KEYS.some((k) => k in r)).length;
-  expect(leaking, `${leaking} projection rows carried an identity field`).toBe(0);
+  const leaking = rows.filter((r) => Object.keys(r).some((k) => !PROJECTION_KEYS.has(k))).length;
+  expect(leaking, `${leaking} projection rows carried a field outside the professional projection`).toBe(0);
 });
 
 test("I-3. an anonymous caller gets no worker row and no projection", async () => {
@@ -113,4 +136,9 @@ test("I-3. an anonymous caller gets no worker row and no projection", async () =
   expect(rows.length, `${rows.length} worker rows answered without a session`).toBe(0);
   const ids = await rpc(null, "list_discoverable_worker_ids_v1", { p_country: null, p_limit: 5 });
   expect(ids.status, "anonymous call to the discovery door is refused").not.toBe(200);
+  // The projection itself, with any uuid-shaped input, must refuse an anonymous caller too.
+  const proj = await rpc(null, "list_discoverable_worker_profiles_v1", {
+    p_worker_ids: ["00000000-0000-4000-8000-000000000000"],
+  });
+  expect(proj.status, "anonymous call to the projection is refused").not.toBe(200);
 });
