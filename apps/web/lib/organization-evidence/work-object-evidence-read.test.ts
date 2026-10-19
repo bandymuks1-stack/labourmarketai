@@ -112,19 +112,21 @@ describe("readEvidenceForProject", () => {
 describe("history beyond one page is never silently cut", () => {
   it("reads past 200 (and past one 1000-row page) and says nothing was truncated", async () => {
     const mk = (n: number, start: number) => Array.from({ length: n }, (_, i) => row(`r${start + i}`));
-    let page = 0;
     const c = {
       supabase: {
         from: (t: string) => {
+          // Each builder answers by ITS OWN range, so pages read concurrently stay correct.
+          let from = 0;
           const b: Record<string, unknown> = {};
           for (const m of ["select", "order", "limit", "eq", "in"]) b[m] = () => b;
-          b.range = () => {
-            if (t === "organization_evidence_records") page += 1;
+          b.range = (f: number) => {
+            from = f;
             return b;
           };
+          const records = () => (from === 0 ? mk(1000, 0) : from === 1000 ? mk(593, 1000) : []);
           b.then = (res: (v: Result) => unknown) =>
             Promise.resolve({
-              data: t === "organization_evidence_records" ? (page === 1 ? mk(1000, 0) : mk(593, 1000)) : [{ id: "w1" }],
+              data: t === "organization_evidence_records" ? records() : [{ id: "w1" }],
               error: null,
             }).then(res);
           return b;
