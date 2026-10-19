@@ -129,6 +129,14 @@ jobs:
   # PROD_QA_WALK_DAILY_BUDGET walks have STARTED in the last 24 h, before any
   # install, session mint or production request. `budget_override` is the
   # explicit escape hatch. Counting reads only this workflow's run list.
+  #
+  # 2026-10-19: production moved from Vercel to the Hostinger VPS on 2026-10-17,
+  # so the Vercel Active-CPU meter this cap was sized for no longer exists. What
+  # remains to protect is the shared Supabase Free project and the one VPS
+  # container. 30 walks a day (~40 min of signed-in browsing at ~80 s each,
+  # still ONE at a time via the `prod-qa-walk` concurrency group) keeps that
+  # load small while letting a normal day of fixes be verified without an
+  # override. The 10-12..15 burst rate (43-64 a day) stays out of reach.
   budget:
     # After the debounce, so a cancelled merge-burst run never counts or spends the budget.
     needs: debounce
@@ -137,7 +145,7 @@ jobs:
     permissions:
       actions: read
     env:
-      PROD_QA_WALK_DAILY_BUDGET: "12"
+      PROD_QA_WALK_DAILY_BUDGET: "30"
     steps:
       - name: Count production walks in the last 24 h
         shell: bash
