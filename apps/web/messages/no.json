@@ -7697,6 +7697,18 @@
     "addStages": "Legg til etapper",
     "addTask": "Opprett en oppgave"
   },
+  "workerPublicSummary": {
+    "title": "Profesjonell presentasjon for arbeidsgivere",
+    "audience": "Bare bedrifter og byråer du har et arbeidsforhold til, ser denne teksten (du jobber for dem, er i teamet deres eller har akseptert tilbudet deres). Den vises ikke i åpent søk. Din personlige beskrivelse over er bare synlig for deg.",
+    "headline": "Overskrift (opptil 120 tegn)",
+    "headlinePlaceholder": "f.eks. Flislegger, 8 år, jobber i LT og NO",
+    "bio": "Kort beskrivelse (opptil 1000 tegn)",
+    "bioPlaceholder": "Hva du er best på, hvilket arbeid du har gjort, hva du ser etter.",
+    "save": "Lagre",
+    "saved": "Lagret",
+    "tooLong": "Teksten er for lang.",
+    "error": "Kunne ikke lagre. Prøv igjen."
+  },
   "roleLedger": {
     "title": "{profession}, {country}: hva du har, og hva som mangler",
     "anyCountry": "hvilket som helst land"

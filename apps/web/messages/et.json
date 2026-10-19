@@ -7697,6 +7697,18 @@
     "addStages": "Lisa etapid",
     "addTask": "Loo ülesanne"
   },
+  "workerPublicSummary": {
+    "title": "Professionaalne tutvustus tööandjatele",
+    "audience": "Seda teksti näevad ainult ettevõtted ja agentuurid, kellega sul on tööalane suhe (töötad nende heaks, oled nende meeskonnas või võtsid vastu nende pakkumise). Avatud otsingus seda ei näidata. Sinu isiklik kirjeldus ülal on nähtav ainult sulle.",
+    "headline": "Pealkiri (kuni 120 tähemärki)",
+    "headlinePlaceholder": "nt Plaatija, 8 aastat, töötan LT-s ja NO-s",
+    "bio": "Lühikirjeldus (kuni 1000 tähemärki)",
+    "bioPlaceholder": "Milles oled parim, milliseid töid oled teinud, mida otsid.",
+    "save": "Salvesta",
+    "saved": "Salvestatud",
+    "tooLong": "Tekst on liiga pikk.",
+    "error": "Salvestamine ebaõnnestus. Proovi uuesti."
+  },
   "roleLedger": {
     "title": "{profession}, {country}: mis sul on ja mis puudub",
     "anyCountry": "iga riik"

@@ -7697,6 +7697,18 @@
     "addStages": "Lägg till etapper",
     "addTask": "Skapa en uppgift"
   },
+  "workerPublicSummary": {
+    "title": "Professionell presentation för arbetsgivare",
+    "audience": "Bara företag och bemanningsföretag som du har en arbetsrelation med ser den här texten (du arbetar för dem, är i deras team eller har tackat ja till deras erbjudande). Den visas inte i öppen sökning. Din personliga beskrivning ovan är bara synlig för dig.",
+    "headline": "Rubrik (upp till 120 tecken)",
+    "headlinePlaceholder": "t.ex. Plattsättare, 8 år, arbetar i LT och NO",
+    "bio": "Kort beskrivning (upp till 1000 tecken)",
+    "bioPlaceholder": "Vad du är bäst på, vilket arbete du har gjort, vad du söker.",
+    "save": "Spara",
+    "saved": "Sparat",
+    "tooLong": "Texten är för lång.",
+    "error": "Det gick inte att spara. Försök igen."
+  },
   "roleLedger": {
     "title": "{profession}, {country}: vad du har och vad som saknas",
     "anyCountry": "vilket land som helst"

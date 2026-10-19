@@ -110,6 +110,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261019160000_",
       // 2026-10-19: Ukrainian as a worker and requirement language.
       "20261019170000_",
+      // 2026-10-19: forward fix — the language save RPC accepts uk.
+      "20261019180000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

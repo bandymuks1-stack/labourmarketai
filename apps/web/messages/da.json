@@ -7697,6 +7697,18 @@
     "addStages": "Tilføj etaper",
     "addTask": "Opret en opgave"
   },
+  "workerPublicSummary": {
+    "title": "Professionel præsentation til arbejdsgivere",
+    "audience": "Kun virksomheder og bureauer, du har en arbejdsrelation med, ser denne tekst (du arbejder for dem, er i deres team eller har accepteret deres tilbud). Den vises ikke i åben søgning. Din personlige beskrivelse ovenfor er kun synlig for dig.",
+    "headline": "Overskrift (op til 120 tegn)",
+    "headlinePlaceholder": "f.eks. Flisemurer, 8 år, arbejder i LT og NO",
+    "bio": "Kort beskrivelse (op til 1000 tegn)",
+    "bioPlaceholder": "Hvad du er bedst til, hvilket arbejde du har udført, hvad du søger.",
+    "save": "Gem",
+    "saved": "Gemt",
+    "tooLong": "Teksten er for lang.",
+    "error": "Kunne ikke gemme. Prøv igen."
+  },
   "roleLedger": {
     "title": "{profession}, {country}: hvad du har, og hvad der mangler",
     "anyCountry": "ethvert land"
