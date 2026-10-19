@@ -112,6 +112,10 @@ describe("2 · the staffing view renders ONLY real assignment rows", () => {
     // 2026-10-19 perf: 12 projects cost 24 gallery reads (the entry count was never shown).
     expect(projectsPage).toMatch(/getProjectPhotoCounts\(galleryProjects\.map\(\(p\) => p\.id\)\)/);
     expect(projectsPage).not.toContain("getProjectGallerySummary");
+    // A truncated batch (PostgREST max_rows) is never accepted as the count.
+    const gallery = read("lib/journal/project-gallery.ts");
+    expect(gallery).toContain('{ count: "exact" }');
+    expect(gallery).toContain("data.length === count");
   });
 
   it("no sample/demo/fixture data pin anywhere on the roster path", () => {

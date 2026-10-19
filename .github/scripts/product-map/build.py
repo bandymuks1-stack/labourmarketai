@@ -60,17 +60,6 @@ EVIDENCE = {
     "9.16": ("CODE_READY", "Durys sukonfigūruotos (atsako unauthorized); pilnas siuntimas dar neįvykdytas"),
     "10.22": ("CODE_READY", "Abi kryptys suporuotos; perdavimas veikia, referalo siuntimas laukia savininko"),
     "13.16": ("LIVE_PROVEN", "Naršyklės klaidų pranešimai įdiegti, durys atsako 204 (#2484)"),
-    "1.5": ("LIVE_PROVEN", "role-routes produkcijos patikra PASS 2026-10-18 (VPS)"),
-    "1.9": ("LIVE_PROVEN", "brigade-formation ir agency-chain produkcijos patikros PASS 2026-10-18 (VPS)"),
-    "1.14": ("LIVE_PROVEN", "staff-review-notice produkcijos patikra PASS 2026-10-18 (VPS)"),
-    "2.4": ("LIVE_PROVEN", "living-cv-growth produkcijos patikra PASS 2026-10-18 (VPS)"),
-    "2.20": ("LIVE_PROVEN", "journal-confirm produkcijos patikra PASS 2026-10-18 (VPS)"),
-    "2.29": ("LIVE_PROVEN", "living-cv-growth produkcijos patikra PASS 2026-10-18 (VPS)"),
-    "3.7": ("LIVE_PROVEN", "brigade-formation produkcijos patikra PASS 2026-10-18 (VPS)"),
-    "4.15": ("LIVE_PROVEN", "agency-chain produkcijos patikra PASS 2026-10-18 (VPS)"),
-    "5.4": ("LIVE_PROVEN", "Gautuosiuose tik žiūrinčiojo pokalbiai, 0 QA gijų produkcijoje 2026-10-19 (#2493, #2496)"),
-    "6.1": ("LIVE_PROVEN", "marketplace produkcijos patikra PASS 2026-10-18 (VPS)"),
-    "6.2": ("LIVE_PROVEN", "marketplace produkcijos patikra PASS 2026-10-18 (VPS)"),
 }
 for r in rows:
     if r["id"] in EVIDENCE:
