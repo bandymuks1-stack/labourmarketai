@@ -119,6 +119,52 @@ export async function getProjectGallerySummary(
   return { entryCount, photoCount };
 }
 
+/** Photo rows the batched count asks for in one request (the API's own row
+ *  cap, `max_rows`, is 1000). The batch is accepted only when every matching
+ *  row came back (rows read = exact count); otherwise the count falls back to
+ *  one head count per project, so it stays exact under any server cap. */
+export const PROJECT_PHOTO_COUNT_BATCH_CAP = 1000;
+
+/** Uploaded-photo counts for several projects in ONE read — the projects page
+ *  shows only this number per card, so it needs neither the entry count nor a
+ *  request pair per project. SAME table, SAME filters, SAME RLS as
+ *  getProjectGallerySummary. A failed batch falls back to the per-project
+ *  reads, which degrade exactly as getProjectGallerySummary does. */
+export async function getProjectPhotoCounts(
+  projectIds: readonly string[],
+): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  const ids = [...new Set(projectIds)];
+  if (ids.length === 0) return counts;
+  const supabase = await createClient();
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error, count } = await (supabase as any)
+      .from("journal_entry_photos")
+      .select("journal_entries!inner(project_id, deleted_at, superseded_by)", { count: "exact" })
+      .in("journal_entries.project_id", ids)
+      .is("journal_entries.deleted_at", null)
+      .is("journal_entries.superseded_by", null)
+      .eq("upload_status", "uploaded")
+      .limit(PROJECT_PHOTO_COUNT_BATCH_CAP);
+    if (!error && Array.isArray(data) && typeof count === "number" && data.length === count) {
+      for (const id of ids) counts.set(id, 0);
+      for (const row of data as { journal_entries: { project_id: string } | null }[]) {
+        const pid = row.journal_entries?.project_id;
+        if (pid && counts.has(pid)) counts.set(pid, (counts.get(pid) ?? 0) + 1);
+      }
+      return counts;
+    }
+  } catch {
+    // fall through to the exact per-project head counts
+  }
+  const each = await Promise.all(
+    ids.map(async (id) => [id, (await getProjectGallerySummary(id)).photoCount] as const),
+  );
+  for (const [id, n] of each) counts.set(id, n);
+  return counts;
+}
+
 export async function getProjectGallery(
   projectId: string,
 ): Promise<ProjectGallery> {

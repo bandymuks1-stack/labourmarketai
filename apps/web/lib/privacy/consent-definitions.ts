@@ -96,8 +96,10 @@ export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
   version: "2026-07-11.v2",
   recipientCategory:
     "Registered and signed-in companies and staffing agencies on LabourMarket.ai",
+  // 2026-10-18 (migration 20261018160000): companies see an anonymous label, never the name; the
+  // preview lists exactly the discovery projection. Metadata only — not part of the hashed text.
   dataCategories: [
-    "chosen display name",
+    "an anonymous label (never the name)",
     "profession(s)",
     "experience years",
     "skills and safely published work-evidence descriptions",
@@ -105,6 +107,7 @@ export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
     "availability status",
     "languages",
     "pay expectation (only if the worker entered it)",
+    "current country, available-from date, engagement form, pay basis and work conditions (shifts, overtime, driving licence, own vehicle, own tools) the worker entered",
   ],
   privacyNoticeRoute: "/privacy",
   texts: {

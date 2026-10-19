@@ -6293,9 +6293,14 @@ export function ConversationChat({
           assistant(
             [
               understood,
-              verdict.listingKind === "rental"
-                ? t("valueIntent.goodsListableRental")
-                : t("valueIntent.goodsListable"),
+              // review of #2434: a goods subject (produce, handmade, household,
+              // other) is not a "work-related resource" — say Goods.
+              typeof verdict.listingCategory === "string" &&
+              verdict.listingCategory.startsWith("goods_")
+                ? t("valueIntent.goodsListableGoods")
+                : verdict.listingKind === "rental"
+                  ? t("valueIntent.goodsListableRental")
+                  : t("valueIntent.goodsListable"),
               ...questions,
             ]
               .filter((l): l is string => Boolean(l))
@@ -6310,8 +6315,10 @@ export function ConversationChat({
           return;
         }
         if (verdict?.kind === "LEGAL_CHECK_REQUIRED") {
-          // Food/produce: name plainly WHAT would have to be checked, then
-          // the channel truth — no approved produce channel, nothing saved.
+          // Food/produce: name plainly WHAT has to be checked, then the
+          // channel truth — the goods board accepts a draft and asks for the
+          // legal acknowledgement on publish (audit 2026-10-16, M-1). Nothing
+          // is saved here; the chip opens the board.
           assistant(
             [
               understood,
@@ -6320,20 +6327,17 @@ export function ConversationChat({
             ]
               .filter((l): l is string => Boolean(l))
               .join("\n"),
+            [
+              {
+                id: "link:/dashboard/listings",
+                label: t("valueIntent.chipListings"),
+              },
+            ],
           );
           return;
         }
-        if (
-          verdict?.kind === "CHANNEL_RESTRICTED" &&
-          verdict.reasonKey === "category_not_supported"
-        ) {
-          assistant(
-            [understood, t("valueIntent.goodsCategoryUnsupported")]
-              .filter((l): l is string => Boolean(l))
-              .join("\n"),
-          );
-          return;
-        }
+        // (The former category_not_supported branch is gone: since M-1 the
+        // marketplace channel never emits it for a lawful goods statement.)
         // NEEDS_MORE_INFORMATION → the unclear branch below asks for it.
       }
 

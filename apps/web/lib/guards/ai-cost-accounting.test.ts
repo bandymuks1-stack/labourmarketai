@@ -216,7 +216,7 @@ describe("only real runs are persisted", () => {
     // `usage_cost_events` records spend and its own CHECKs forbid a fabricated
     // zero, so a vendorless route must not reach it.
     expect(RUN_AGENT_SERVER).toMatch(
-      /if \(disposition === "vendor_run"\)[\s\S]{0,400}persistUsageCostEvent/,
+      /if \(disposition === "vendor_run" && !egressRefused\)[\s\S]{0,400}persistUsageCostEvent/,
     );
   });
 });

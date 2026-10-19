@@ -131,6 +131,7 @@
     "myTitle": "Meine Anzeigen",
     "intro": "Veröffentlichen Sie, was Sie anbieten oder suchen. Für andere sind nur aktive, nicht abgelaufene Anzeigen sichtbar.",
     "notAvailable": "Derzeit nicht verfügbar.",
+    "readUnavailable": "Die Anzeigen konnten gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt — versuchen Sie es gleich noch einmal.",
     "empty": "Noch keine Anzeigen. Fügen Sie Ihre erste Arbeitsressource hinzu.",
     "addButton": "Anzeige hinzufügen",
     "browseTitle": "Aktive Anzeigen durchsuchen",
@@ -3451,6 +3452,8 @@
       "empty": "Keine Datenschutzanfragen.",
       "needsMigration": "Die Annahme von Datenschutzanfragen ist in dieser Umgebung noch nicht aktiviert.",
       "unavailable": "Datenschutzanfragen können gerade nicht gelesen werden.",
+      "due": "Antwort bis {date}",
+      "overdue": "Überfällig — Antwort war bis {date} fällig",
       "manualNote": "Die Bearbeitung erfolgt manuell: Jede Anfrage wird von einer Person geprüft und erledigt. Nichts in dieser Liste läuft automatisch.",
       "type": {
         "dataExport": "Datenexport",
@@ -5723,7 +5726,7 @@
         {
           "heading": "KI und verbundene KI-Assistenten",
           "items": [
-            "Einige Funktionen nutzen ein KI-Modell von Google (die Gemini-API): zum Übersetzen von Nachrichten und Stellenanzeigen und um vorzuschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den diese Aufgabe braucht. Das Ergebnis ist ein Vorschlag — nichts wird als Tatsache über Sie gespeichert, bevor Sie es bestätigen.",
+            "Einige Funktionen nutzen ein KI-Modell von Google (die Gemini-API). Heute erhält es nur öffentliche Marktstatistiken — zum Beispiel, wie viele offene Stellen ein Beruf hat —, um eine kurze Erläuterung zu verfassen. Das Übersetzen von Nachrichten und Stellenanzeigen sowie das Deuten eines im Chat eingegebenen Satzes sind vorbereitet, aber abgeschaltet: dafür werden weder Nachrichtentext noch personenbezogene Daten gesendet. Wird eine dieser Funktionen eingeschaltet, sagt dieser Hinweis das, und gesendet würde nur der Text, den diese Aufgabe braucht. Jedes Ergebnis ist ein Vorschlag — nichts wird als Tatsache über Sie gespeichert, bevor Sie es bestätigen.",
             "Sie können LabourMarket.ai mit einem KI-Assistenten wie ChatGPT oder Claude verbinden. Jede Verbindung bestätigen Sie selbst auf einer Einwilligungsseite; der Assistent handelt dann nur mit Ihren eigenen Berechtigungen, und folgenreiche Aktionen brauchen eine gesonderte Bestätigung. Verbundene Apps sehen und trennen Sie jederzeit in Ihren Kontoeinstellungen.",
             "Was der Anbieter eines KI-Assistenten mit Ihrem Gespräch tut, regeln dessen eigene Datenschutzbestimmungen."
           ]
@@ -5752,7 +5755,7 @@
           "purpose": "Wird nur bei Administratorkonten verwendet. Merkt sich, ob Administrator-Steuerelemente ausgeblendet sind, und ändert nichts an Berechtigungen."
         }
       ],
-      "localStorageNote": "Ihre Wahl des hellen oder dunklen Designs wird im lokalen Speicher Ihres Browsers gespeichert, nicht in einem Cookie.",
+      "localStorageNote": "Im eigenen Speicher Ihres Browsers (keine Cookies) liegen einige Einträge: Ihre Wahl des hellen oder dunklen Designs; welche Seite oder Kampagne Sie zuerst hierher geführt hat, einmalig gespeichert, damit eine spätere Registrierung ihr zugeordnet werden kann; eine zufällige Sitzungskennung je Tab, die beim Schließen des Tabs verschwindet; und kleine Annehmlichkeiten wie ausgeblendete Hinweise, zuletzt angesehene Einträge und Ihre Spracheingabesprache. Nichts davon wird an Dritte weitergegeben oder für Werbung genutzt, und Sie können es jederzeit über Ihren Browser löschen.",
       "noTracking": "Es gibt heute keine Analyse-, Werbe- oder Drittanbieter-Tracking-Cookies auf der Plattform. Sollte sich das jemals ändern, wird zuerst diese Seite aktualisiert."
     },
     "pendingLegal": {
@@ -8749,7 +8752,7 @@
       "pay_within_offer": "Bezahlung im Rahmen des Angebots",
       "accommodation_ok": "Unterkunft passt",
       "city_match": "Gleiche Stadt",
-      "location_within_radius": "Innerhalb des Arbeitsradius",
+      "location_within_radius": "Innerhalb des Arbeitsradius (Luftlinie)",
       "profession_related": "Verwandter Beruf (gemeinsame Fähigkeiten)",
       "skills_history_reported": "In der Organisationshistorie genannte Fähigkeiten (nicht verifiziert)"
     },
@@ -8760,7 +8763,7 @@
       "pay_above_offer": "Gehaltsvorstellung über dem Angebot",
       "accommodation_needed_not_provided": "Benötigt Unterkunft, nicht angeboten",
       "profession_mismatch": "Anderer Beruf",
-      "location_outside_radius": "Außerhalb des Arbeitsradius"
+      "location_outside_radius": "Außerhalb des Arbeitsradius (Luftlinie)"
     },
     "candidate": "Kandidat",
     "privacy": {
@@ -10115,6 +10118,7 @@
     "subtitle": "Nennen Sie uns Ihr Gewerk und Ihre Verfügbarkeit. Wir machen daraus einen Profilentwurf, den Sie prüfen — nichts wird automatisch veröffentlicht.",
     "fullName": "Vollständiger Name",
     "profession": "Branche & Arbeitsart",
+    "professionPlaceholder": "Wähle Branche und Arbeitsart",
     "targetCountries": "Länder, in denen Sie arbeiten möchten",
     "targetCountriesHelp": "Zwei-Buchstaben-Codes, durch Kommas getrennt (z. B. NL, DE).",
     "availableFrom": "Verfügbar ab",
@@ -10620,7 +10624,7 @@
     "navLabel": "Über LabourMarket.ai",
     "eyebrow": "Über die Plattform",
     "title": "Was ist LabourMarket.ai",
-    "lede": "LabourMarket.ai ist eine Betriebsplattform für den Arbeitsmarkt. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — nicht nur die Stellensuche.",
+    "lede": "LabourMarket.ai ist eine Betriebsplattform für den Arbeitsmarkt. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — vom ersten Gespräch bis zur nächsten Gelegenheit.",
     "hero": {
       "lead": "Der berufliche Wert eines Menschen sollte nicht jedes Mal verschwinden, wenn er den Arbeitgeber wechselt. Echte Arbeit kann zu dauerhafter beruflicher Geschichte werden: was die Person getan hat, wo, wann, wie lange, in welcher Rolle, mit welchen Fähigkeiten und welche Nachweise und Bestätigungen das stützen.",
       "leadOrg": "Für Organisationen baut dieselbe echte Arbeit die Historie dessen auf, was das Unternehmen tatsächlich geleistet hat: Projekte, Teams, ausgeführte Arbeiten, Stunden, Kompetenzen und Nachweise.",
@@ -10941,7 +10945,20 @@
       "preferredCountries": "Bevorzugte Region",
       "availability": "Verfügbarkeit",
       "salaryExpectation": "Gehaltsvorstellung",
-      "skillsCount": "Fähigkeiten"
+      "skillsCount": "Fähigkeiten",
+      "anonymousLabel": "Unternehmen sehen Sie als",
+      "currentCountry": "Aktuelles Land",
+      "availableFrom": "Verfügbar ab",
+      "contractType": "Beschäftigungsform",
+      "payBasis": "Vergütungsbasis",
+      "nightShifts": "Nachtschichten",
+      "weekendShifts": "Wochenenden",
+      "overtime": "Überstunden",
+      "drivingLicence": "Führerschein",
+      "ownVehicle": "Eigenes Fahrzeug",
+      "ownTools": "Eigenes Werkzeug",
+      "yes": "Ja",
+      "no": "Nein"
     },
     "labels": {
       "decidedAt": "Gewählt",
@@ -14021,14 +14038,15 @@
           "headcount": "Wie viele Personen werden benötigt?"
         },
         "unclear": "Ich bin nicht sicher, ob Sie etwas anbieten oder etwas suchen. Schreiben Sie, was Sie haben oder was Sie brauchen.",
-        "goodsChannelGated": "Einen Käuferkanal für Waren gibt es auf der Plattform noch nicht — niemand würde dieses Verkaufsangebot hier sehen. Das Geschriebene wurde nirgends gespeichert.",
+        "goodsChannelGated": "Sie können dies am Anzeigenbrett unter „Waren“ einstellen — dort sehen es die Personen, die das Brett durchsehen. Nichts wird gespeichert, bis Sie es veröffentlichen.",
         "chipListings": "Anzeigen öffnen",
         "capacityNext": "Ich kann Ihre Verfügbarkeit auf Ihrer Arbeitskarte eintragen oder sofort Arbeit suchen — die Ergebnisse sind die derzeit offenen Anfragen.",
         "unsupported": "Das kann über die Plattform nicht angeboten werden. Dafür gibt es keinen Weg.",
-        "legalCheckFood": "Für den Verkauf von Lebensmitteln oder eigenem Anbau gelten Regeln zu Lebensmittelverkauf, Hygiene und Handel, die zuerst geprüft werden müssten — die Plattform hat keinen freigegebenen Kanal für Erzeugnisse.",
+        "legalCheckFood": "Für den Verkauf von Lebensmitteln oder eigenem Anbau gelten Regeln zu Lebensmittelverkauf, Hygiene und Handel. Sie können die Anzeige als Entwurf vorbereiten; beim Veröffentlichen bitten wir Sie zu bestätigen, dass Sie die für Sie geltenden Regeln geprüft haben.",
         "goodsListable": "Das sieht nach einer arbeitsbezogenen Ressource aus — Sie können sie als Anzeige am Anzeigenbrett veröffentlichen.",
+        "goodsListableGoods": "Das können Sie am Anzeigenbrett unter „Waren“ einstellen — dort sehen es die Personen, die das Brett durchsehen. Nichts wird gespeichert, bis Sie es veröffentlichen.",
         "goodsListableRental": "Das sieht nach freier Arbeitsausrüstung aus — Sie können eine Miet-Anzeige am Anzeigenbrett veröffentlichen.",
-        "goodsCategoryUnsupported": "Diese Kategorie wird am arbeitsgebundenen Anzeigenbrett der Plattform heute nicht unterstützt. Das Geschriebene wurde nirgends gespeichert.",
+        "goodsCategoryUnsupported": "Das kann am Anzeigenbrett nicht eingestellt werden. Das Geschriebene wurde nirgends gespeichert.",
         "serviceNext": "Sie können dies als Dienstleistungsangebot veröffentlichen, damit andere es finden.",
         "chipServices": "Dienstleistungen öffnen",
         "corrected": "Aktualisiert: {changes}.",

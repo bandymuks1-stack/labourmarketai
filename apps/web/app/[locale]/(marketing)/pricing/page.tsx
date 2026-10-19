@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { PageHero } from "@/components/marketing/page-hero";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 export async function generateMetadata({
   params,
@@ -59,6 +61,8 @@ export default async function PricingPage({
 
   return (
     <>
+      {/* Revenue funnel (2026-10-19): who saw the price. Once per tab session. */}
+      <TelemetryView event={FUNNEL_EVENTS.pricingViewed} metadata={{ surface: "pricing" }} />
       <PageHero
         eyebrow={t("eyebrow")}
         title={t("title")}
