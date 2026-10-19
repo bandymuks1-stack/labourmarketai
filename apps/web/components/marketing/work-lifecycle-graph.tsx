@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 import { PersonPortrait } from "@/components/app/identity/person-portrait";
-import { Link } from "@/lib/i18n/navigation";
+import { TrackedCta } from "@/components/app/tracked-cta";
 import { cn } from "@/lib/utils";
 
 /**
@@ -308,12 +308,14 @@ export function WorkLifecycleGraph({
                   {isCurrent ? (
                     <div className="mt-2 flex flex-col gap-2 pl-7 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-sm text-text-secondary">{current.detail}</p>
-                      <Link
+                      <TrackedCta
                         href={current.href}
+                        ctaId={`lifecycle_${current.key}`}
+                        audience={current.href === "/company-need" ? "companies" : undefined}
                         className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-brand-blue px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
                       >
                         {openLabel} →
-                      </Link>
+                      </TrackedCta>
                     </div>
                   ) : null}
                 </li>
