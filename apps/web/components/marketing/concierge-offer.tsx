@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/lib/i18n/navigation";
+import { TrackedCta } from "@/components/app/tracked-cta";
 import { getBillingConfig } from "@/lib/billing/config";
 import { isStripeActive } from "@/lib/billing/config-core";
 
@@ -42,12 +42,14 @@ export async function ConciergeAccessBanner() {
         <p className="min-w-0 basis-full text-xs leading-relaxed text-text-secondary sm:basis-0 sm:flex-1" data-billing-live={live ? "true" : "false"}>
           {live ? t("bodyLive") : t("body")}
         </p>
-        <Link
+        <TrackedCta
           href="/company-need"
+          ctaId="concierge_banner_need"
+          audience="companies"
           className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-blue px-4 py-2 text-xs font-semibold text-text-on-brand hover:opacity-90"
         >
           {t("cta")}
-        </Link>
+        </TrackedCta>
       </div>
     </section>
   );
@@ -84,12 +86,14 @@ export async function ConciergeOfferSection() {
         {t("note")}
       </p>
       <div className="mt-6">
-        <Link
+        <TrackedCta
           href="/company-need"
+          ctaId="concierge_card_need"
+          audience="companies"
           className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-text-on-brand hover:opacity-90"
         >
           {t("ctaLabel")}
-        </Link>
+        </TrackedCta>
       </div>
     </section>
   );

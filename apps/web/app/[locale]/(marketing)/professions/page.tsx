@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { TrackedCta } from "@/components/app/tracked-cta";
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
@@ -210,9 +211,9 @@ export default async function ProfessionsPage({
         <Link href="/worker-intake" className={buttonLinkClassName()}>
           {pick(CTA_PROFILE, l)}
         </Link>
-        <Link href="/company-need" className={buttonLinkClassName("secondary")}>
+        <TrackedCta href="/company-need" ctaId="professions_need" audience="companies" className={buttonLinkClassName("secondary")}>
           {pick(CTA_NEED, l)}
-        </Link>
+        </TrackedCta>
         <Link href="/for-agencies" className={buttonLinkClassName("secondary")}>
           {pick(CTA_AGENCIES, l)}
         </Link>
