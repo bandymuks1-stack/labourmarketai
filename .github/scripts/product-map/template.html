@@ -101,7 +101,7 @@ tr:last-child td { border-bottom: 0; }
     <p class="lede">Visas produktas vienoje vietoje: funkcijos ir jų būsenos, kaip juda žmonės, darbas ir pinigai, kur yra pajamos ir kokia tvarka užbaigti. Būsenos imamos iš kanoninio funkcijų audito ir papildomos tik realiais produkcijos įrodymais.</p>
     <p class="muted" id="source" style="font:12px var(--mono);margin:0"></p>
     <nav class="toc" aria-label="Skyriai">
-      <a href="#summary">Santrauka</a><a href="#funnel">Piltuvas</a><a href="#activation">Pirmas klientas</a><a href="#chain">Vertės grandinė</a><a href="#journeys">Kelionės</a><a href="#money">Pajamos</a><a href="#commercial">Komercinis modelis</a><a href="#priorities">Prioritetai</a><a href="#gaps">Spragos</a><a href="#register">Funkcijų registras</a>
+      <a href="#summary">Santrauka</a><a href="#funnel">Piltuvas</a><a href="#acquisition">Įmonės</a><a href="#activation">Pirmas klientas</a><a href="#chain">Vertės grandinė</a><a href="#journeys">Kelionės</a><a href="#money">Pajamos</a><a href="#commercial">Komercinis modelis</a><a href="#priorities">Prioritetai</a><a href="#gaps">Spragos</a><a href="#register">Funkcijų registras</a>
     </nav>
   </header>
 
@@ -133,6 +133,12 @@ tr:last-child td { border-bottom: 0; }
     <h2>Registracija → aktyvacija → planas → checkout → apmokėjimas → išlaikymas</h2>
     <p class="lede">Tik realūs naudotojai, be sintetinių QA ir E2E paskyrų. Žingsnis be skaičiaus šiandien nematuojamas.</p>
     <div id="funnelList" style="display:flex;flex-direction:column;gap:8px"></div>
+  </section>
+
+  <section id="acquisition">
+    <div class="eyebrow">Įmonių pritraukimas</div>
+    <h2>Poreikių generavimas per jau veikiančius kanalus</h2>
+    <div class="tablewrap"><table id="acquisitionTable"></table></div>
   </section>
 
   <section id="activation">
@@ -232,6 +238,7 @@ fl.innerHTML = (D.funnel || []).length
   : '<p class="muted">Skaičiai įtraukiami tik privačioje versijoje.</p>';
 
 // Activation queue
+document.getElementById("acquisitionTable").innerHTML = `<thead><tr><th>#</th><th>Kanalas</th><th>Kas vyksta</th><th>Funkcijos</th><th>Matas</th><th>Dabar</th><th>Kas atlieka</th></tr></thead><tbody>${(D.acquisition || []).map(([n, t, what, ids, measure, who]) => `<tr><td class="id">${esc(n)}</td><td><b>${esc(t)}</b></td><td>${esc(what)}</td><td class="id">${esc(ids)}${ids.split(/,\s*/).filter((i) => byId[i]).map((i) => " " + chip(byId[i].s)).join("")}</td><td>${esc(measure)}</td><td>${esc((D.acq_now || {})[n] || "—")}</td><td>${esc(who)}</td></tr>`).join("")}</tbody>`;
 document.getElementById("activationTable").innerHTML = `<thead><tr><th>#</th><th>Žingsnis</th><th>Kas tai</th><th>Funkcijos</th><th>Kas atlieka</th><th>Priklauso nuo</th></tr></thead><tbody>${(D.activation || []).map(([n, t, what, ids, who, dep]) => `<tr><td class="id">${esc(n)}</td><td><b>${esc(t)}</b></td><td>${esc(what)}</td><td class="id">${esc(ids)}${ids.split(/,\s*/).filter((i) => byId[i]).map((i) => " " + chip(byId[i].s)).join("")}</td><td>${esc(who)}</td><td class="id">${esc(dep)}</td></tr>`).join("")}</tbody>`;
 
 // Money
