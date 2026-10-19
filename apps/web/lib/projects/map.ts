@@ -41,6 +41,36 @@ export interface ProjectMapCard extends ManagedProject {
 /** How long one viewer's documented periods are remembered (see listProjectMap). */
 export const PROJECT_PERIODS_TTL_MS = 2 * 60_000;
 
+/** A hash of everything that decides which evidence the viewer may read:
+ *  memberships (role, status), management engagement contexts and active
+ *  platform roles, each with its updated_at. Null when any read fails. */
+async function readAccessFingerprint(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<string | null> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db = supabase as any;
+    const [memberships, contexts, roles] = await Promise.all([
+      db.from("company_memberships").select("organization_id, role, status, updated_at").eq("profile_id", userId),
+      db
+        .from("engagement_contexts")
+        .select("organization_id, relationship_slug, status, updated_at")
+        .eq("profile_id", userId),
+      db.from("profile_roles").select("role, is_active").eq("profile_id", userId),
+    ]);
+    if (memberships.error || contexts.error || roles.error) return null;
+    const rows = [
+      ...((memberships.data ?? []) as Record<string, unknown>[]).map((r) => `m:${r.organization_id}:${r.role}:${r.status}:${r.updated_at}`),
+      ...((contexts.data ?? []) as Record<string, unknown>[]).map((r) => `e:${r.organization_id}:${r.relationship_slug}:${r.status}:${r.updated_at}`),
+      ...((roles.data ?? []) as Record<string, unknown>[]).map((r) => `r:${r.role}:${r.is_active}`),
+    ].sort();
+    return createHash("sha1").update(rows.join("|")).digest("hex");
+  } catch {
+    return null;
+  }
+}
+
 export async function listProjectMap(
   opts: { readonly finishedPage?: number } = {},
 ): Promise<ProjectMapCard[]> {
@@ -58,17 +88,27 @@ export async function listProjectMap(
   // workspace and per exact project set (RLS decides what each viewer reads,
   // so a viewer only ever gets their own answer back); a failed read is never
   // remembered. Run beside the assignment counts, not before them.
+  //
+  // ACCESS FINGERPRINT (review on #2514): evidence RLS follows who manages an
+  // organization, so the key also carries a hash of the viewer's memberships,
+  // management contexts and admin roles (each with its updated_at). A role
+  // change, a demotion or a revocation changes the key — a cached answer is
+  // never served past a change of access. If the fingerprint cannot be read,
+  // nothing is cached.
   const projectIds = projects.map((p) => p.id);
   const periodsPromise = user
     ? (async () => {
+        const load = () => readProjectDocumentedPeriods({ supabase, userId: user.id }, projectIds);
+        const access = await readAccessFingerprint(supabase, user.id);
+        if (!access) return load();
         const jar = await cookies();
         const setKey = createHash("sha1").update([...projectIds].sort().join(",")).digest("hex");
-        const viewerKey = `${user.id}|${jar.get(ACTIVE_WORKSPACE_COOKIE)?.value ?? "-"}|${setKey}`;
+        const viewerKey = `${user.id}|${jar.get(ACTIVE_WORKSPACE_COOKIE)?.value ?? "-"}|${setKey}|${access}`;
         return rememberBadge(
           "projectDocumentedPeriods",
           viewerKey,
           PROJECT_PERIODS_TTL_MS,
-          () => readProjectDocumentedPeriods({ supabase, userId: user.id }, projectIds),
+          load,
           Date.now,
           (read) => read.kind === "ok",
         );
