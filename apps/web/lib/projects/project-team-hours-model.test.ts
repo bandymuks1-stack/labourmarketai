@@ -57,17 +57,30 @@ describe("brigade hours on the buyer's project", () => {
 });
 
 describe("the database door is hours-only and project-bound", () => {
+  // The CURRENT body is the latest migration that replaces the function (v2).
   const sql = readFileSync(
-    join(__dirname, "..", "..", "..", "..", "supabase", "migrations", "20261019210000_project_team_journal_hours_v1.sql"),
+    join(__dirname, "..", "..", "..", "..", "supabase", "migrations", "20261019220000_project_team_journal_hours_v2.sql"),
     "utf8",
   );
+  it("review notes never leave: the scope is rebuilt from decision / action / authority.basis", () => {
+    expect(sql).not.toMatch(/'confirmation_scope', c\.confirmation_scope,/);
+    expect(sql).toMatch(/jsonb_strip_nulls\(jsonb_build_object\(/);
+    expect(sql).toMatch(/'decision', case when jsonb_typeof/);
+    expect(sql).not.toMatch(/'note'/);
+  });
+  it("a late correction stays in: eligibility is anchored to the chain root", () => {
+    expect(sql).toMatch(/with recursive up as/);
+    expect(sql).toMatch(/ta\.assigned_at <= a\.anchor_at/);
+  });
+  it("an admin gets nothing here (they already read everything through RLS)", () => {
+    expect(sql).toMatch(/or public\.is_admin\(\)/);
+  });
   it("only a manager of THIS project gets rows", () => {
     expect(sql).toMatch(/not public\.can_manage_project\(p_project_id\)/);
   });
   it("only legitimately assigned team work: a team context, inside the assignment window", () => {
     expect(sql).toMatch(/organization_type = 'team'/);
-    expect(sql).toMatch(/ta\.assigned_at <= je\.created_at/);
-    expect(sql).toMatch(/ta\.ended_at is null or ta\.ended_at >= je\.created_at/);
+    expect(sql).toMatch(/ta\.ended_at is null or ta\.ended_at >= a\.anchor_at/);
   });
   it("disjoint from what the caller already reads (never counted twice)", () => {
     expect(sql).toMatch(/and not public\.owns_worker\(je\.worker_id\)/);

@@ -1662,6 +1662,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261019200000_worker_board_org_company_v1.sql",
       // 2026-10-19 (RED by SECURITY DEFINER + GRANT): B2B-9 hours-only door for the project manager.
       "20261019210000_project_team_journal_hours_v1.sql",
+      // 2026-10-19 (RED by SECURITY DEFINER replace): B2B-9 review fixes.
+      "20261019220000_project_team_journal_hours_v2.sql",
 ]);
   });
 
