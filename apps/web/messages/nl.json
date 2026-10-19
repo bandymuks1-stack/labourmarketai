@@ -19645,5 +19645,9 @@
     "saved": "Opgeslagen",
     "tooLong": "De tekst is te lang.",
     "error": "Opslaan mislukt. Probeer het opnieuw."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: wat je al hebt en wat nog ontbreekt",
+    "anyCountry": "elk land"
   }
 }

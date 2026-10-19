@@ -340,8 +340,8 @@ const PERSON: readonly CapabilityRow[] = [
     strongestEvidence: "TEST_PROVEN",
     anchors: ["lib/player-card/requirement-ledger.ts"],
     coreModule: "lib/player-card/requirement-ledger.ts",
-    surfaces: ["app/[locale]/dashboard/projects"],
-    note: "Built for three contexts, mounted for TWO. `project` renders under an instruction (/dashboard/instructions); `opportunity` now renders inside the opportunity card (/dashboard/opportunities) through `loadOwnOpportunityLedgers` — the loader branch that existed with no caller until Step B. Both surfaces render the SAME `RequirementLedgerRows` with the SAME copy (lib/player-card/requirement-ledger-labels.ts), so 'what is missing for me' cannot acquire two wordings. `role` (professionSlug + country) remains unmounted: it needs a surface where a person picks a profession to aim at, which does not exist yet.",
+    surfaces: ["app/[locale]/dashboard/projects", "app/[locale]/dashboard/profile/page.tsx"],
+    note: "Built for three contexts, mounted for all three. `project` renders under an instruction (/dashboard/instructions); `opportunity` now renders inside the opportunity card (/dashboard/opportunities) through `loadOwnOpportunityLedgers` — the loader branch that existed with no caller until Step B. Both surfaces render the SAME `RequirementLedgerRows` with the SAME copy (lib/player-card/requirement-ledger-labels.ts), so 'what is missing for me' cannot acquire two wordings. `role` (professionSlug + country) is mounted on the person's own profile (/dashboard/profile) for their primary profession in each country they aim at (preferred countries, else their location) through `loadOwnRoleLedgers`, with the SAME rows and copy — all three contexts are now mounted.",
   },
 ];
 

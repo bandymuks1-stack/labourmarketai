@@ -19645,5 +19645,9 @@
     "saved": "Išsaugota",
     "tooLong": "Per ilgas tekstas.",
     "error": "Nepavyko išsaugoti. Pabandyk dar kartą."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: ką jau turi ir ko trūksta",
+    "anyCountry": "bet kurioje šalyje"
   }
 }
