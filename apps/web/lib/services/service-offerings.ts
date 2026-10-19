@@ -107,8 +107,9 @@ export async function listOwnServiceOfferings(): Promise<ServiceOfferingListResu
     .order("created_at", { ascending: false });
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
-    // Any other read failure degrades to an empty list — never a fake row.
-    return { kind: "ok", rows: [] };
+    // Any other read failure is UNAVAILABLE — never an empty list that reads
+    // as "you have no offerings" (SEP-7, audit 2026-10-16).
+    return { kind: "unavailable" };
   }
   const rows: ServiceOfferingRow[] = (
     (data ?? []) as Record<string, unknown>[]

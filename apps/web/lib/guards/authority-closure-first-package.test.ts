@@ -100,6 +100,10 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261011090000_",
       // 2026-10-18 (RED, needs-human-gate): My Space pins table (#1475, renamed from the colliding 20260904120000).
       "20261018140000_",
+      // 2026-10-18 (RED, needs-human-gate): worker identity split.
+      "20261018160000_",
+      // 2026-10-19 (RED, needs-human-gate): an open account deletion request pauses discoverability.
+      "20261019070000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

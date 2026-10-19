@@ -17,8 +17,10 @@ import type {
  *   - It does not prohibit anything (SEP-2). The final assign is NOT re-checked
  *     server-side against this verdict: two managers can still race, and a
  *     verdict that was `clear` a minute ago is not a guarantee. The durable
- *     "assigned anyway" receipt and a transactional server-side re-check are a
- *     later RED PR that depends on #2079 — there is NO receipt yet.
+ *     "kept anyway" receipt now exists (`override-keep-core.ts`,
+ *     `record_commitment_override_v1`, 20261003150100) and is written when the
+ *     manager explicitly keeps a clashing assignment; a transactional
+ *     server-side re-check at assign time remains a later RED change.
  *   - `clear` only when every source answered; an undated project window, an
  *     unreadable project or worker, or a failed source is `unknown` (SEP-7).
  *

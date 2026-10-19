@@ -280,6 +280,15 @@ export const FUNNEL_EVENTS = {
   offerCreated: "offer_created",
   organizationHiringReady: "organization_hiring_ready",
   subscriptionStarted: "subscription_started",
+  // The top of the revenue funnel (2026-10-19, owner "PRODUCT TO REVENUE"):
+  // nothing measured who saw the price or started paying, so the step between
+  // activation and payment was invisible. Plan-button clicks use cta_clicked
+  // with cta_id "pricing_plan_<slug>" (one click event, one vocabulary).
+  //    - pricing_viewed     the public /pricing page rendered for a visitor.
+  //    - checkout_started   the server created a provider checkout session
+  //                         (live or test, metadata carries no identity).
+  pricingViewed: "pricing_viewed",
+  checkoutStarted: "checkout_started",
   // trial_started: a verified LIVE-mode `customer.subscription.created` whose
   // subscription status is "trialing" with a trial_end, persisted ok. One per
   // subscription (Stripe sends `created` once). NOT a payment and not paid

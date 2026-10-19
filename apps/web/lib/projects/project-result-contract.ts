@@ -83,8 +83,8 @@ export interface ProjectStageRow {
  * second count. `null` = the reads were not available (not "zero").
  */
 export interface ProjectPulse {
-  /** Journal entries written TODAY by assigned workers. */
-  readonly entriesToday: number;
+  /** Journal entries written TODAY by assigned workers; null = not readable. */
+  readonly entriesToday: number | null;
   /** Journal entries / photos on this project, all time. */
   readonly evidenceEntries: number;
   readonly evidencePhotos: number;

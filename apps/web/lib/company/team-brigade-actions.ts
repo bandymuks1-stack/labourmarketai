@@ -33,8 +33,9 @@ import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
  *
  * Privacy: the invitee's email is looked up server-side from the already
  * RLS-visible company_workers link and handed to the canonical invitation
- * action; neither the email nor the invite link is ever returned to the
- * client from here.
+ * action; the email is never returned to the client. The invite LINK is
+ * returned (by design since the 2026-10-11 walk) so the manager can hand it
+ * over on a channel the platform does not deliver on.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

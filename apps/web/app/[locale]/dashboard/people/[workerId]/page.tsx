@@ -35,6 +35,7 @@ import {
 } from "@/lib/journal/work-intelligence";
 import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
 import { viewerHasWorkerRelation } from "@/lib/visibility/worker-identity-visibility";
+import { readDiscoverableWorkers } from "@/lib/visibility/discoverable-workers";
 import { readRecordedWorkFor } from "@/lib/player-card/work-history";
 import { readWorkPhotosFor } from "@/lib/journal/personal-gallery";
 import { listActiveOfferingsByProvider } from "@/lib/services/service-offerings";
@@ -112,8 +113,10 @@ export default async function PersonPage({
     return <RestrictedState t={t} />;
   }
 
-  // RLS does the permission work: no relation / no consent → zero rows.
-  const { data: worker } = await supabase
+  // RLS does the permission work. The raw row (name, free text) comes back only with a working
+  // relationship; a worker found through the employer-visibility consent comes back through the
+  // anonymous projection instead (no name, no headline). Neither → restricted.
+  const { data: relatedWorker } = await supabase
     .from("workers")
     .select(
       // `preferred_countries` is the same already-authorised row, and it is
@@ -123,6 +126,27 @@ export default async function PersonPage({
     )
     .eq("id", workerId)
     .maybeSingle();
+  const discovered = relatedWorker
+    ? null
+    : ((await readDiscoverableWorkers(supabase, [workerId])).get(workerId) ?? null);
+  const worker = relatedWorker
+    ? relatedWorker
+    : discovered
+      ? {
+          id: discovered.id,
+          // No profile id for a found worker (it could join to public business records).
+          profile_id: null,
+          display_name: null,
+          headline: null,
+          experience_years: discovered.experience_years,
+          current_location_country: discovered.current_location_country,
+          preferred_countries: discovered.preferred_countries
+            ? [...discovered.preferred_countries]
+            : null,
+          availability_status: discovered.availability_status,
+          available_from: discovered.available_from,
+        }
+      : null;
 
   if (!worker) {
     return <RestrictedState t={t} />;

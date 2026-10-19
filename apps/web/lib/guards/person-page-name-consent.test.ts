@@ -30,7 +30,21 @@ describe("person page — name only with a working relationship", () => {
     expect(helper).toContain('rpc("caller_manages_worker"');
     expect(helper).toContain('.from("engagement_contexts")');
     expect(helper).toContain('.from("project_worker_assignments")');
+    expect(helper).toContain('.from("company_workers")');
+    // composite key table: selecting a non-existent `id` would make every roster read an error
+    expect(helper).toMatch(/\.from\("company_workers"\)\s*\.select\("worker_id"\)/);
+  });
+
+  it("an engagement counts only when its relationship type grants worker visibility", () => {
+    // student / intern enrolment must not disclose the name (20260827210000 least privilege).
+    expect(helper).toContain('relationship_types!inner(grants_worker_visibility)');
+    expect(helper).toContain('.eq("relationship_types.grants_worker_visibility", true)');
     expect(helper).not.toMatch(/worker_profile_discoverable|can_view_worker|profile_discoverability/);
+  });
+
+  it("prefers the ONE database predicate, with the relationship reads as the pre-apply fallback", () => {
+    expect(helper).toContain('rpc("caller_has_worker_relation_v1"');
+    expect(helper.indexOf('rpc("caller_has_worker_relation_v1"')).toBeLessThan(helper.indexOf('rpc("caller_manages_worker"'));
   });
 
   it("fails closed: any error means no relationship", () => {

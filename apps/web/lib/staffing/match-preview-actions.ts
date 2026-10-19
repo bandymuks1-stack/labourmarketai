@@ -16,6 +16,7 @@
  */
 import { getLocale } from "next-intl/server";
 import { runAiAgent } from "../ai/run-agent-server";
+import { aiTaskServableNow } from "../ai/egress-precheck-server";
 import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { workerIntakeSchema } from "./worker-intake";
 import { companyNeedSchema } from "./company-need";
@@ -106,6 +107,10 @@ export async function previewMatchAction(
   let explanation: string | null = null;
   let explanationStatus: MatchPreviewState["explanationStatus"];
   if (limited) {
+    explanationStatus = "disabled";
+  } else if (!(await aiTaskServableNow("explain_match"))) {
+    // An anonymous marketing surface must not write audit/ledger rows for a
+    // PERSONAL-class task the gate refuses by construction (audit 2026-10-16).
     explanationStatus = "disabled";
   } else {
     const explainOutcome = await runAiAgent(

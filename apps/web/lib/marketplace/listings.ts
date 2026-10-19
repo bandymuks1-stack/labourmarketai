@@ -164,7 +164,9 @@ export async function listMyMarketplaceListings(): Promise<MarketplaceListingLis
   }
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
-    return { kind: "ok", rows: [], extended };
+    // A 42501 / 57014 / RLS refusal used to render as "no listings" — an
+    // UNKNOWN shown as ZERO (audit 2026-10-16, M-2).
+    return { kind: "unavailable" };
   }
   return {
     kind: "ok",
@@ -328,7 +330,7 @@ async function discoverIndexRows(filters?: {
       extended: true,
     };
   }
-  if (!isAbsent(error)) return { kind: "ok", rows: [], extended: true };
+  if (!isAbsent(error)) return { kind: "unavailable" };
 
   // Legacy fallback (index view not applied yet): work resources only.
   if (domainFilter && domainFilter !== "work_resource") {
@@ -349,7 +351,7 @@ async function discoverIndexRows(filters?: {
   const legacy = await lq;
   if (legacy.error) {
     if (isAbsent(legacy.error)) return { kind: "needs-migration" };
-    return { kind: "ok", rows: [], extended: false };
+    return { kind: "unavailable" };
   }
   const rows: MarketplaceDiscoveryRow[] = (legacy.data ?? []).map(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

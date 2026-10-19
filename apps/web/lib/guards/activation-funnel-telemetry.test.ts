@@ -158,6 +158,9 @@ const EXPECTED_EVENTS = [
   "subscription_started",
   "trial_started",
   "subscription_invoice_paid",
+  // the top of the revenue funnel (2026-10-19, PRODUCT TO REVENUE)
+  "pricing_viewed",
+  "checkout_started",
 ] as const;
 
 describe("activation funnel — event registry", () => {

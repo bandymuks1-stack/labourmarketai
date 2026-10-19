@@ -313,16 +313,22 @@ export async function listProjectAssignments(
     if (migMissing(res.error.code)) return [];
     return [];
   }
-  type Row = {
-    assigned_at: string;
-    worker: {
-      id: string | null;
-      profile_id: string | null;
-      display_name: string | null;
-      profiles: { full_name: string | null } | null;
-    } | null;
-  };
-  return ((res.data ?? []) as Row[])
+  return toProjectAssignments((res.data ?? []) as AssignmentRow[]);
+}
+
+type AssignmentRow = {
+  project_id?: string;
+  assigned_at: string;
+  worker: {
+    id: string | null;
+    profile_id: string | null;
+    display_name: string | null;
+    profiles: { full_name: string | null } | null;
+  } | null;
+};
+
+function toProjectAssignments(rows: readonly AssignmentRow[]): ProjectAssignment[] {
+  return rows
     .map((r): ProjectAssignment | null => {
       const w = r.worker;
       if (!w?.profile_id) return null;
@@ -334,6 +340,52 @@ export async function listProjectAssignments(
       };
     })
     .filter((x: ProjectAssignment | null): x is ProjectAssignment => x !== null);
+}
+
+/** Ids per `.in()` read: keeps the PostgREST URL well under proxy limits. */
+const ASSIGNMENT_BATCH = 100;
+
+/**
+ * Active worker assignments for MANY projects in one read per 100 projects
+ * (2026-10-18: the projects page read them one project at a time — one round
+ * trip per active project, the main cause of a 5.5 s page). Same table, same
+ * columns, same RLS (can_manage_project) and the same per-project order
+ * (newest first) as `listProjectAssignments`; a project with none maps to [].
+ */
+export async function listProjectAssignmentsForProjects(
+  projectIds: readonly string[],
+): Promise<Map<string, ProjectAssignment[]>> {
+  const out = new Map<string, ProjectAssignment[]>(projectIds.map((id) => [id, []]));
+  if (projectIds.length === 0) return out;
+  const supabase = await createClient();
+  const chunks: string[][] = [];
+  for (let i = 0; i < projectIds.length; i += ASSIGNMENT_BATCH) {
+    chunks.push(projectIds.slice(i, i + ASSIGNMENT_BATCH));
+  }
+  const reads = await Promise.all(
+    chunks.map((ids) =>
+      asAny(supabase)
+        .from("project_worker_assignments")
+        .select(
+          "project_id, assigned_at, worker:workers!inner(id, profile_id, display_name, profiles(full_name))",
+        )
+        .in("project_id", ids)
+        .eq("status", "active")
+        .order("assigned_at", { ascending: false }),
+    ),
+  );
+  const byProject = new Map<string, AssignmentRow[]>();
+  for (const res of reads as Array<{ data: AssignmentRow[] | null; error: unknown }>) {
+    if (res.error) continue; // a failed chunk reads as "no assignments", exactly like the single read
+    for (const row of res.data ?? []) {
+      if (!row.project_id) continue;
+      const list = byProject.get(row.project_id) ?? [];
+      list.push(row);
+      byProject.set(row.project_id, list);
+    }
+  }
+  for (const [id, rows] of byProject) out.set(id, toProjectAssignments(rows));
+  return out;
 }
 
 /**
