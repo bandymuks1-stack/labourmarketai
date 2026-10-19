@@ -1014,7 +1014,7 @@ const DEMAND_SUPPLY: readonly CapabilityRow[] = [
     title: "Team matching",
     worldElement: "teams",
     status: "PARTIAL",
-    strongestEvidence: "TEST_PROVEN",
+    strongestEvidence: "PRODUCTION_PERSISTENCE_PROVEN",
     anchors: [
       "lib/market/match-team-v1.ts",
       "lib/company/team-offer.ts",
