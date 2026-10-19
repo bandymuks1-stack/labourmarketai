@@ -109,10 +109,12 @@ export default async function ProjectsPage({
   // the acting identity is company-family or that workspace opens the company
   // space; a plain worker in an employee workspace is answered without them.
   const workspace = await getWorkspaceContext();
-  const employerCtx =
-    MANAGER_ROLES.has(role) || workspaceOpensCompanySpace(workspace)
-      ? await resolveEmployerCompanyContext()
-      : null;
+  const opensCompanySpace = MANAGER_ROLES.has(role) || workspaceOpensCompanySpace(workspace);
+  // The admin signal is request-cached; on the company path it is read beside
+  // the employer resolver instead of after it (one round trip fewer).
+  const [employerCtx, isPlatformAdmin] = opensCompanySpace
+    ? await Promise.all([resolveEmployerCompanyContext(), getSessionIsAdmin()])
+    : ([null, false] as const);
   if (!MANAGER_ROLES.has(role) && employerCtx?.kind !== "ok") {
     // RC2 role-aware routing (F11): a worker who lands here gets THEIR OWN
     // projects (real assignments under RLS), never a dead "managers only"
@@ -223,7 +225,6 @@ export default async function ProjectsPage({
   // project's organization when the worker is on the ACTIVE roster of the
   // company that owns the project. The form offers exactly that and nothing
   // wider; the database still decides every write.
-  const isPlatformAdmin = await getSessionIsAdmin();
   const assignScope = rosterAssignScope({
     governs:
       employerCtx?.kind === "ok" &&
@@ -235,51 +236,49 @@ export default async function ProjectsPage({
     hasCompanyContext: employerCtx?.kind === "ok",
   });
   const rosterAssignable = assignScope !== "none";
+  // Wave B — every read that needs only the session and the company context.
+  // (2026-10-19 perf: the page ran ~8 sequential waves; now B, C, D.)
   const [
-    allProjects,
-    workers,
-    engagementResult,
-    workObjectsRead,
-    managedProjects,
-    orgMembers,
-    tDoors,
-    workObjectsLabels,
-    companyGalleryLabels,
-    projectTotals,
+    [
+      allProjects,
+      workers,
+      engagementResult,
+      workObjectsRead,
+      managedProjects,
+      orgMembers,
+      tDoors,
+      workObjectsLabels,
+      companyGalleryLabels,
+      projectTotals,
+    ],
+    // The projects card the company hub used to carry (count · structurally
+    // ready · the honest linking note · create) — now beside the projects it
+    // counts. Read-only: `getCompanyProjectContext` performs no writes.
+    projectContext,
+    tOps,
+    assignableTeams,
   ] = await Promise.all([
-    listProjectMap({ finishedPage }),
-    assignScope === "own-company-roster" && ownCompanyId
-      ? listCompanyRosterWorkers(ownCompanyId)
-      : listManagedWorkers(),
-    // Accepted-booking engagement candidates (bridge v1) — a SEPARATE list,
-    // never merged into the roster read; empty + honest until the owner
-    // applies migration 20260723120000.
-    listBookingEngagementWorkers(),
-    getOrgWorkObjects(),
-    ownCompanyId ? listManagedProjects() : Promise.resolve([]),
-    ownCompanyId ? getOrgMembersData("company", ownCompanyId) : Promise.resolve(null),
-    getTranslations("organizationDoors"),
-    readWorkObjectsLabels(),
-    readCompanyGalleryLabels(),
-    countManagedProjects(),
-  ]);
-  // The projects card the company hub used to carry (count · structurally
-  // ready · the honest linking note · create) — now beside the projects it
-  // counts. Read-only: `getCompanyProjectContext` performs no writes.
-  const [projectContext, tOps] = await Promise.all([
+    Promise.all([
+      listProjectMap({ finishedPage }),
+      assignScope === "own-company-roster" && ownCompanyId
+        ? listCompanyRosterWorkers(ownCompanyId)
+        : listManagedWorkers(),
+      // Accepted-booking engagement candidates (bridge v1) — a SEPARATE list,
+      // never merged into the roster read; empty + honest until the owner
+      // applies migration 20260723120000.
+      listBookingEngagementWorkers(),
+      getOrgWorkObjects(),
+      ownCompanyId ? listManagedProjects() : Promise.resolve([]),
+      ownCompanyId ? getOrgMembersData("company", ownCompanyId) : Promise.resolve(null),
+      getTranslations("organizationDoors"),
+      readWorkObjectsLabels(),
+      readCompanyGalleryLabels(),
+      countManagedProjects(),
+    ]),
     getCompanyProjectContext(ownCompanyId),
     getTranslations("companyOps"),
+    getAssignableTeams(),
   ]);
-  const galleryProjects = managedProjects.slice(0, 12);
-  const [orgMembersForObjects, photoCounts] = await Promise.all([
-    orgMembers ? listOrganizationMembers(orgMembers.orgId) : Promise.resolve(null),
-    getProjectPhotoCounts(galleryProjects.map((p) => p.id)),
-  ]);
-  const companyGalleryProjects = galleryProjects.map((p) => ({
-    projectId: p.id,
-    title: p.title,
-    photoCount: photoCounts.get(p.id) ?? 0,
-  }));
 
   // Train D — archived filtering: a COMPLETED project is finished work.
   // The map and the draft (assignment) flow show ACTIVE work by default;
@@ -289,6 +288,35 @@ export default async function ProjectsPage({
   const archivedProjects = allProjects.filter((p) => p.status === "completed");
   const activeProjects = allProjects.filter((p) => p.status !== "completed");
   const projects = showArchived ? archivedProjects : activeProjects;
+  const activeIds = activeProjects.map((p) => p.id);
+  const galleryProjects = managedProjects.slice(0, 12);
+
+  // Wave C — everything keyed by the project list read in wave B, at once:
+  // members for the objects register, gallery photo counts, Train D derived
+  // progress (tasks + stages done/total, computed at read time; no stored
+  // number anywhere), ONE read for every active project's assignments (was
+  // one per project), and WRK-6 teams as ONE assignment per project.
+  const [
+    orgMembersForObjects,
+    photoCounts,
+    progressById,
+    assignmentsByProject,
+    teamAssignmentsRead,
+    assignableTasks,
+  ] = await Promise.all([
+    orgMembers ? listOrganizationMembers(orgMembers.orgId) : Promise.resolve(null),
+    getProjectPhotoCounts(galleryProjects.map((p) => p.id)),
+    getProjectsProgress(projects.map((p) => p.id)),
+    listProjectAssignmentsForProjects(activeProjects.map((p) => p.id)),
+    getProjectTeamAssignments(activeIds),
+    getAssignableTasks(activeIds),
+  ]);
+  const companyGalleryProjects = galleryProjects.map((p) => ({
+    projectId: p.id,
+    title: p.title,
+    photoCount: photoCounts.get(p.id) ?? 0,
+  }));
+
   // The toggle counts are REAL totals (head count, no row cap). The list is
   // read in two capped buckets, so when a bucket holds more than was loaded
   // the page says so; if the count itself is unreadable we fall back to the
@@ -301,16 +329,8 @@ export default async function ProjectsPage({
   const hasPrevPage = showArchived && finishedPage > 0;
   const hasNextPage = showArchived && pageStart + projects.length < shownTotal;
 
-  // Train D — derived progress (tasks + stages done/total, computed at
-  // read time; no stored number anywhere).
-  const progressById = await getProjectsProgress(projects.map((p) => p.id));
-
-  // ONE read for every active project's assignments (was one per project), and
-  // ONE avatar decision per distinct worker (a worker on five projects was
-  // asked five times). Same data, same RLS, same photo rule (2026-10-18 perf).
-  const assignmentsByProject = await listProjectAssignmentsForProjects(
-    activeProjects.map((p) => p.id),
-  );
+  // Wave D — ONE avatar decision per distinct worker (a worker on five
+  // projects was asked five times). Same data, same RLS, same photo rule.
   const workerIds = [
     ...new Set(
       [...assignmentsByProject.values()].flatMap((list) =>
@@ -335,12 +355,7 @@ export default async function ProjectsPage({
   // WRK-6 — teams as ONE assignment per project, read from the one relation.
   // An unprovisioned or unreadable relation hides the team control; it is never
   // rendered as "no team assigned" (a failed read is not an empty list).
-  const activeIds = activeProjects.map((p) => p.id);
-  const [teamAssignmentsRead, assignableTeams, assignableTasks] = await Promise.all([
-    getProjectTeamAssignments(activeIds),
-    getAssignableTeams(),
-    getAssignableTasks(activeIds),
-  ]);
+  // (Read in waves B and C above.)
   const teamWork =
     teamAssignmentsRead.status === "ok"
       ? {
