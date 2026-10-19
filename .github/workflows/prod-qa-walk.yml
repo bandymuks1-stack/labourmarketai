@@ -51,6 +51,7 @@ on:
           - mcp-agents
           - project-context
           - worker-identity-split
+          - company-chain
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -108,7 +109,7 @@ jobs:
           EVENT: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context worker-identity-split)
+          ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context worker-identity-split company-chain)
           case "$EVENT" in
             workflow_dispatch) spec="$INPUT_SPEC" ;;
             push) spec=role-routes ;;
@@ -252,6 +253,7 @@ jobs:
             mcp-agents) SPEC=tests/e2e/prod-mcp-agents.spec.ts ;;
             project-context) SPEC=tests/e2e/prod-project-context.spec.ts ;;
             worker-identity-split) SPEC=tests/e2e/prod-worker-identity-split.spec.ts ;;
+            company-chain) SPEC=tests/e2e/prod-company-chain.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
