@@ -330,21 +330,6 @@ export async function runScoutingCore(
   // the text, no detectable profession) → honest unstructured state.
   if (source === null) return { kind: "not-structured", demand };
 
-  // W10 slice 3 (audit P0-3) — STAGED RETRIEVAL. The pool used to be the 200
-  // newest registrations, chosen before anyone looked at this demand: a
-  // qualified worker who registered earlier was never fetched, so the page
-  // said "no candidates" when the truth was "we did not look". Retrieval is
-  // now planned FROM `need` (skills → profession → country, all index-backed),
-  // with a deterministic id-ordered backfill so nobody who was reachable
-  // before became unreachable. The ranking below is unchanged.
-  // Test accounts are not candidates for a real organization; a synthetic
-  // organization may still scout them — that is how the company chain is
-  // proven on the real database (lib/qa/synthetic-fixture.ts).
-  const { candidates: supply, retrieval } = await buildSupplyCandidates(supabase, {
-    need,
-    excludeFixtures: !isSyntheticFixtureLabel(employer.organizationName),
-  });
-
   // Worker-initiated interest signals on THIS demand (owner-scoped read via
   // RLS; table absent pre-apply → empty, the view is simply unchanged).
   const interestByWorker: Record<string, string> = {};
@@ -365,6 +350,27 @@ export async function runScoutingCore(
   } catch {
     // owner-gated migration not applied yet → no interest signals
   }
+
+  // W10 slice 3 (audit P0-3) — STAGED RETRIEVAL. The pool used to be the 200
+  // newest registrations, chosen before anyone looked at this demand: a
+  // qualified worker who registered earlier was never fetched, so the page
+  // said "no candidates" when the truth was "we did not look". Retrieval is
+  // now planned FROM `need` (skills → profession → country, all index-backed),
+  // with a deterministic id-ordered backfill so nobody who was reachable
+  // before became unreachable. The ranking below is unchanged.
+  // Test accounts are not candidates for a real organization; a synthetic
+  // organization may still scout them — that is how the company chain is
+  // proven on the real database (lib/qa/synthetic-fixture.ts).
+  // A person who raised a hand on THIS demand is always looked at, whatever
+  // the plan searched: they asked to be contacted. Withdrawn hands are not
+  // pinned (they stay a fact for actionability, not a reason to retrieve).
+  const { candidates: supply, retrieval } = await buildSupplyCandidates(supabase, {
+    need,
+    excludeFixtures: !isSyntheticFixtureLabel(employer.organizationName),
+    alwaysInclude: Object.entries(interestByWorker)
+      .filter(([, status]) => status !== "withdrawn")
+      .map(([workerId]) => workerId),
+  });
 
   // Existing shortlist statuses + internal notes for this demand
   // (owner-scoped; the note column existed since 20260612220000 and is now
