@@ -1643,6 +1643,9 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261014090100_historical_consolidation_package_v1.sql",
       // 2026-10-14 (RED, needs-human-gate, NOT applied): brigade disband v1.
       "20261014190000_team_disband_v1.sql",
+      // 2026-10-17: ESCO cold locales archived on the VPS (decision 0026) — marker added in the same
+      // commit as the decision record and the paired rollback; RED, needs-human-gate, NOT applied.
+      "20261018100000_esco_labels_cold_locales_on_vps_v1.sql",
 ]);
   });
 

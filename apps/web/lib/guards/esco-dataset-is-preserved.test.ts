@@ -40,7 +40,11 @@ describe("the ESCO multilingual dataset is preserved", () => {
         .split("\n")
         .filter((l) => !/^\s*--/.test(l))
         .join("\n");
-      if (/\sdelete\s+from\s+(public\.)?esco_labels\s?/i.test(sql)) {
+      // Decision 0026 (2026-10-17): the ONE permitted delete is the cold-locale move, and only when the
+      // migration itself carries the archive marker and cites the decision — the rows then live on the
+      // VPS archive with a tested restore path, so no language is lost (docs/DECISIONS/0026-…).
+      const coldMove = /ARCHIVE-VERIFIED:/.test(sql) && /0026-esco-cold-locales-archived-on-vps/.test(sql);
+      if (!coldMove && /\sdelete\s+from\s+(public\.)?esco_labels\s?/i.test(sql)) {
         offenders.push(file);
       }
       if (/\struncate\s+(table\s+)?(public\.)?esco_labels\s?/i.test(sql)) {
