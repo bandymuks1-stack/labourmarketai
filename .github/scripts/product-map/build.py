@@ -109,10 +109,17 @@ def chain_features(areas, rx):
             out.append(r["id"])
     return out
 
+# Which customer-funnel stage each link of the chain moves (public: labels only; the measured
+# numbers and the current blocker per link come from the private facts file, key "impact").
+CHAIN_STAGE = {
+    "person": "Pritraukimas", "need": "Aktyvacija", "match": "Aktyvacija", "offer": "Konversija",
+    "talk": "Konversija", "deal": "Konversija", "order": "Išlaikymas", "run": "Išlaikymas",
+    "proof": "Išlaikymas", "pay": "Pajamos", "next": "Augimas",
+}
 chain = []
 for key, name, desc, areas, rx in CHAIN:
     ids = chain_features(areas, rx)
-    chain.append({"key": key, "name": name, "desc": desc, "ids": ids})
+    chain.append({"key": key, "name": name, "desc": desc, "ids": ids, "stage": CHAIN_STAGE.get(key, "")})
 
 # ── 3. Commercial model per area ────────────────────────────────────────────────────────
 COMMERCIAL = {
@@ -122,7 +129,7 @@ COMMERCIAL = {
     4: ("Įmonė neranda patikimų darbuotojų ar komandų laiku.", "Įmonė, agentūra", "Prenumerata; vėliau profilių peržiūros / LMC", "Vidutinės: paieška, vakansijų importas", "Konversija, pajamos", "Dabar"),
     5: ("Susitarimai išsibarsto telefonuose ir žinutėse.", "Įtraukta į planą", "Netiesioginė (išlaikymas)", "Mažos", "Išlaikymas", "Dabar"),
     6: ("Paslaugos, prekės ir nuoma tarp šalių neturi patikimos vietos.", "Pirkėjas / pardavėjas", "Vėliau: komisiniai ar LMC (dar nepatvirtinta)", "Vidutinės–didelės: užsakymai, ginčai, logistika", "Pritraukimas, pajamos", "Vėliau"),
-    7: ("Be veikiančio atsiskaitymo nėra pajamų.", "Įmonė", "Prenumerata €99, LMC kreditai (1 LMC = €1)", "Stripe mokesčiai; webhook, sąskaitos", "Pajamos", "Dabar (P0)"),
+    7: ("Be veikiančio atsiskaitymo nėra pajamų.", "Įmonė", "Prenumerata €99, LMC kreditai (1 LMC = €1)", "Stripe mokesčiai; webhook, sąskaitos", "Pajamos", "Atidėta (savininkas, 2026-10-19): pirma esamos Stripe integracijos ir perkėlimo auditas"),
     8: ("Darbuotojai ir įmonės kalba skirtingomis kalbomis ir yra skirtingose šalyse.", "Niekas tiesiogiai", "Netiesioginė: tarptautinis pritraukimas, SEO", "Mažos–vidutinės: vertimai", "Pritraukimas", "Dabar"),
     9: ("Pasitikėjimas, privatumas ir teisinė atitiktis (GDPR).", "Niekas tiesiogiai", "Būtina sąlyga pardavimui įmonėms", "Vidutinės: auditai, priežiūra", "Pasitikėjimas, rizikos mažinimas", "Dabar"),
     10: ("Rankinis darbas ir izoliuoti partneriai lėtina srautą.", "Įmonė, partneris (Nonstop)", "Netiesioginė; partnerių perdavimai", "AI kaina (šiuo metu išjungta), integracijų priežiūra", "Pritraukimas, efektyvumas", "Dalis dabar, AI vėliau"),
@@ -134,13 +141,18 @@ COMMERCIAL = {
 # ── 4. Facts (production, 2026-10-19, aggregates only) ──────────────────────────────────
 # Production facts are telemetry and never live in the public repository: pass them as a
 # private JSON file (a list of [label, value, note]) — output/ is gitignored.
-FACTS, FUNNEL = [], []
+FACTS, FUNNEL, IMPACT = [], [], {}
 if len(sys.argv) > 4:
     _private = json.load(open(sys.argv[4], encoding="utf8"))
     if isinstance(_private, dict):
         FACTS, FUNNEL = _private.get("facts", []), _private.get("funnel", [])
+        IMPACT = _private.get("impact", {})
     else:
         FACTS = _private
+for _link in chain:
+    _measured = IMPACT.get(_link["key"])
+    if _measured:
+        _link["metric"], _link["blocker"] = _measured[0], _measured[1]
 
 # ── 4b. First paying customer: the activation queue (dependency order) ─────────────────
 # Each step names the register rows it closes, who acts, and what it depends on.
