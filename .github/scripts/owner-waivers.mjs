@@ -937,7 +937,12 @@ export const SCOPED_OWNER_WAIVERS = [
     // REDESIGN of `/dashboard/hours` — presentation only (page title, card
     // layout, empty-state next action). Data, permissions, accounting semantics
     // and the three waived answers are unchanged; no other route is covered.
-    pullRequests: [1344, 2101, 2159, 2234],
+    // #2526 — OWNER DIRECTIVE 2026-10-19 (task directive, verbatim: "tai kas
+    // nesujungta sujungti ir sutaisyti"): the no-objects state's door opened
+    // project creation, which never creates a site, so it looped back to the
+    // same empty state; it now opens the existing sites form. Only that dead
+    // end, like #2101; the three waived answers are unchanged.
+    pullRequests: [1344, 2101, 2159, 2234, 2526],
     // Deliberately empty — the waiver lives IN the branch whose CI must
     // honour it, so pinning the head SHA would change the head SHA.
     approvedHeadShas: [],
