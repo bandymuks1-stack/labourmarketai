@@ -20,7 +20,7 @@ describe("manual hours are recorded only for this company's crew and active site
   });
   it("refuses a worker not on the crew, a site not active, and an unreadable list", () => {
     expect(fn).toMatch(/if \(crew\.kind !== "ok" \|\| objects\.kind !== "ok"\) return \{ status: "error" \};/);
-    expect(fn).toMatch(/crew\.rows\.some\(\(w\) => w\.workerId === workerId\)\)\) return \{ status: "invalid", field: "worker" \}/);
+    expect(fn).toMatch(/crew\.rows\.some\(\(w\) => w\.workerId === workerId\)\) return \{ status: "invalid", field: "worker" \}/);
     expect(fn).toMatch(/o\.id === workObjectId && o\.status === "active"/);
   });
 });
