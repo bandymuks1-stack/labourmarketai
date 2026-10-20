@@ -48,6 +48,9 @@ export function buildIdentityFacts({
   readonly professionalExperienceHours?: number | null;
 }): IdentityFact[] {
   const n0 = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+  // A journal read that hit its ceiling makes the TOTAL a lower bound too —
+  // journal hours outside the read are missing from it.
+  const totalAtLeast = truncated ? "≥ " : "";
   const historyFact: IdentityFact[] =
     organizationHistoryHours !== null && organizationHistoryHours > 0
       ? [
@@ -66,7 +69,7 @@ export function buildIdentityFacts({
     organizationHistoryHours > 0
       ? [
           {
-            value: n0.format(professionalExperienceHours),
+            value: totalAtLeast + n0.format(professionalExperienceHours),
             label: t("experienceTotal"),
             tone: "evidence",
             testid: "player-card-fact-experience-total",
