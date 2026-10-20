@@ -6872,7 +6872,8 @@
       "active": "Aktywna — zalogowani członkowie mogą znaleźć tę usługę i o nią zapytać.",
       "paused": "Wstrzymana — ukryta przed członkami. Aktywuj, aby ponownie stała się widoczna."
     },
-    "linkToRequests": "Zobacz zapytania o Twoje usługi"
+    "linkToRequests": "Zobacz zapytania o Twoje usługi",
+    "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Możesz ją wstrzymać."
   },
   "communication": {
     "origin": {
@@ -9491,7 +9492,10 @@
       "missing": "BRAK",
       "portOk": "obsługiwany (465, TLS)",
       "portUnsupported": "NIEOBSŁUGIWANY – tylko 465",
-      "note": "Jeden kanał dla całej poczty platformy: powiadomień RODO, zaproszeń i wiadomości systemowych. Pokazywane jest tylko, czy wartość istnieje, nigdy sama wartość. Brakującą wartość ustaw na VPS przez lm-env-set.sh."
+      "note": "Jeden kanał pocztowy: powiadomienia RODO są wysyłane, gdy ustawione są wszystkie wartości LM_SMTP_*; e-maile z zaproszeniami i powiadomieniami dopiero po osobnym włączeniu ich wysyłki. Pokazywane jest tylko, czy wartość istnieje, nigdy sama wartość. Brakującą wartość ustaw na VPS za pomocą lm-env-set.sh.",
+      "invites": "E-maile z zaproszeniami i powiadomieniami",
+      "invitesOn": "włączone",
+      "invitesOff": "WYŁĄCZONE – włączane osobno: INVITE_EMAIL_PROVIDER=smtp i jedna wysyłka testowa"
     }
   },
   "adminMetrics": {

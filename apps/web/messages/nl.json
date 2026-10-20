@@ -6872,7 +6872,8 @@
       "active": "Actief — ingelogde leden kunnen deze dienst vinden en aanvragen.",
       "paused": "Gepauzeerd — verborgen voor leden. Activeer om het weer vindbaar te maken."
     },
-    "linkToRequests": "Bekijk aanvragen voor jouw diensten"
+    "linkToRequests": "Bekijk aanvragen voor jouw diensten",
+    "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren."
   },
   "communication": {
     "origin": {
@@ -9491,7 +9492,10 @@
       "missing": "ONTBREEKT",
       "portOk": "ondersteund (465, TLS)",
       "portUnsupported": "NIET ONDERSTEUND – alleen 465",
-      "note": "Eén kanaal voor alle e-mail van het platform: AVG-meldingen, uitnodigingen en systeemmail. Alleen of een waarde bestaat wordt getoond, nooit de waarde zelf. Stel een ontbrekende waarde in op de VPS met lm-env-set.sh."
+      "note": "Eén mailkanaal: AVG-meldingen worden verstuurd zodra alle LM_SMTP_*-waarden zijn ingesteld; uitnodigings- en meldingsmails pas nadat het versturen ervan apart is ingeschakeld. Alleen of een waarde bestaat wordt getoond, nooit de waarde zelf. Stel een ontbrekende waarde in op de VPS met lm-env-set.sh.",
+      "invites": "Uitnodigings- en meldingsmails",
+      "invitesOn": "aan",
+      "invitesOff": "UIT – wordt apart ingeschakeld: INVITE_EMAIL_PROVIDER=smtp en één testverzending"
     }
   },
   "adminMetrics": {

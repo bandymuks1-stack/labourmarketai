@@ -106,12 +106,16 @@ export default async function ConversationDetailPage({
     // automatically once applied, with no error while it is absent.
     .select("*")
     .eq("conversation_id", conversationId)
-    .order("created_at", { ascending: true })
+    // The NEWEST 500, shown oldest-first (audit 2026-10-20): ordered oldest
+    // first with the limit, a thread past 500 messages never showed its
+    // latest ones — including the message the person had just sent.
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
     .limit(500);
   // A failed read is NOT an empty thread (FAILED ≠ EMPTY): the page says so
   // instead of rendering "no messages yet" over a conversation that exists.
   const messagesFailed = Boolean(messagesRes.error);
-  const messages: MessageRow[] = messagesFailed ? [] : ((messagesRes.data ?? []) as MessageRow[]);
+  const messages: MessageRow[] = messagesFailed ? [] : ([...(messagesRes.data ?? [])].reverse() as MessageRow[]);
   // Per-message offer labels (20261012180000): one thread per pair, so each
   // message names the offer it is about. Details only through the party gate.
   const offerLabels = await readTeamOfferMessageLabels(

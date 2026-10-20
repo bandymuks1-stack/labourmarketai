@@ -7725,7 +7725,10 @@
       "missing": "SAKNAS",
       "portOk": "stöds (465, TLS)",
       "portUnsupported": "STÖDS INTE – endast 465",
-      "note": "En kanal för all e-post från plattformen: GDPR-meddelanden, inbjudningar och systemmejl. Bara om ett värde finns visas, aldrig själva värdet. Ange ett saknat värde på VPS:en med lm-env-set.sh."
+      "note": "En e-postkanal: GDPR-meddelanden skickas när alla LM_SMTP_*-värden är satta; inbjudnings- och aviseringsmejl först när utskicket slagits på separat. Endast om ett värde finns visas, aldrig själva värdet. Sätt ett saknat värde på VPS:en med lm-env-set.sh.",
+      "invites": "Inbjudnings- och aviseringsmejl",
+      "invitesOn": "på",
+      "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp och ett testutskick"
     }
   }
 }

@@ -7725,7 +7725,10 @@
       "missing": "TRŪKST",
       "portOk": "atbalstīts (465, TLS)",
       "portUnsupported": "NETIEK ATBALSTĪTS – tikai 465",
-      "note": "Viens kanāls visiem platformas e-pastiem: VDAR paziņojumiem, ielūgumiem un sistēmas vēstulēm. Rāda tikai, vai vērtība ir, nekad pašu vērtību. Trūkstošo vērtību iestatiet VPS ar lm-env-set.sh."
+      "note": "Viens pasta kanāls: GDPR paziņojumi tiek sūtīti, kad iestatītas visas LM_SMTP_* vērtības; ielūgumu un paziņojumu e-pasti – tikai pēc to sūtīšanas atsevišķas ieslēgšanas. Tiek rādīts tikai tas, vai vērtība ir, nekad pati vērtība. Trūkstošo vērtību iestatiet VPS serverī ar lm-env-set.sh.",
+      "invites": "Ielūgumu un paziņojumu e-pasti",
+      "invitesOn": "ieslēgti",
+      "invitesOff": "IZSLĒGTI – ieslēdz atsevišķi: INVITE_EMAIL_PROVIDER=smtp un viena testa nosūtīšana"
     }
   }
 }

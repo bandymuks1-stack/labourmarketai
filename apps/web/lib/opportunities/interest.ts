@@ -254,21 +254,52 @@ export async function expressInterestCore(
   // about the FIRST worker only, and keying it on nothing would re-notify on
   // every idempotent re-express. The row comes back under the worker's own
   // RLS policy (`demand_interest_signals_worker_all`) — no widened read.
-  const { data: signalRow, error } = await asAny(supabase)
+  // A STANDING interest is not reset by saying it again (audit 2026-10-20):
+  // the chat and MCP paths re-express freely, and the unconditional upsert
+  // wrote status 'interested' and a null note over a row the company had
+  // already marked reviewed / contacted — the worker's label fell back to
+  // "sent", the company's note vanished and the person counted as waiting
+  // again. Only a missing or WITHDRAWN row is (re)opened; a standing one
+  // keeps the company's status and, unless a new note is given, the note.
+  const note = cleanInterestNote(input.note);
+  const { data: existing, error: existingError } = await asAny(supabase)
     .from("demand_interest_signals")
-    .upsert(
-      {
-        request_id: input.requestId,
-        worker_id: ctx.workerId,
-        status: "interested",
-        note: cleanInterestNote(input.note),
-        match_snapshot: snapshot,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "worker_id,request_id" },
-    )
-    .select("id")
+    .select("id, status")
+    .eq("worker_id", ctx.workerId)
+    .eq("request_id", input.requestId)
     .maybeSingle();
+  if (existingError) {
+    if (existingError.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
+    return { kind: "error", message: existingError.message };
+  }
+  const standing =
+    existing && typeof existing.status === "string" && existing.status !== "withdrawn" ? (existing as { id: string }) : null;
+  const { data: signalRow, error } = standing
+    ? await asAny(supabase)
+        .from("demand_interest_signals")
+        .update({
+          match_snapshot: snapshot,
+          ...(note ? { note } : {}),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", standing.id)
+        .select("id")
+        .maybeSingle()
+    : await asAny(supabase)
+        .from("demand_interest_signals")
+        .upsert(
+          {
+            request_id: input.requestId,
+            worker_id: ctx.workerId,
+            status: "interested",
+            note,
+            match_snapshot: snapshot,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "worker_id,request_id" },
+        )
+        .select("id")
+        .maybeSingle();
   if (error) {
     if (error.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
     return { kind: "error", message: error.message };

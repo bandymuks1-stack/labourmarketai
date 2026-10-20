@@ -6872,7 +6872,8 @@
       "active": "Aktiv — angemeldete Mitglieder können diese Dienstleistung finden und anfragen.",
       "paused": "Pausiert — für Mitglieder ausgeblendet. Aktivieren Sie sie, um sie wieder auffindbar zu machen."
     },
-    "linkToRequests": "Anfragen zu Ihren Dienstleistungen ansehen"
+    "linkToRequests": "Anfragen zu Ihren Dienstleistungen ansehen",
+    "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren."
   },
   "communication": {
     "origin": {
@@ -9491,7 +9492,10 @@
       "missing": "FEHLT",
       "portOk": "unterstützt (465, TLS)",
       "portUnsupported": "NICHT UNTERSTÜTZT – nur 465",
-      "note": "Ein Kanal für alle E-Mails der Plattform: DSGVO-Hinweise, Einladungen und Systemmails. Angezeigt wird nur, ob ein Wert vorhanden ist, nie der Wert selbst. Einen fehlenden Wert auf dem VPS mit lm-env-set.sh setzen."
+      "note": "Ein Mailkanal: DSGVO-Mitteilungen werden gesendet, sobald alle LM_SMTP_*-Werte gesetzt sind; Einladungs- und Benachrichtigungs-E-Mails erst, wenn ihr Versand separat eingeschaltet ist. Angezeigt wird nur, ob ein Wert vorhanden ist, nie der Wert selbst. Einen fehlenden Wert auf dem VPS mit lm-env-set.sh setzen.",
+      "invites": "Einladungs- und Benachrichtigungs-E-Mails",
+      "invitesOn": "an",
+      "invitesOff": "AUS – wird separat eingeschaltet: INVITE_EMAIL_PROVIDER=smtp und ein Testversand"
     }
   },
   "adminMetrics": {

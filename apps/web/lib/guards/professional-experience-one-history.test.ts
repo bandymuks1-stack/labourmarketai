@@ -95,7 +95,14 @@ describe("2 · the reading is pure, finance-free and person-scoped", () => {
   });
   it("the relationships reader reads the person's OWN rows only — never an organization's records about other people, never organization-wide hours", () => {
     expect(reader).toMatch(/\.from\("engagement_contexts"\)[\s\S]*?\.eq\("profile_id", userId\)/);
-    expect(reader).not.toMatch(/organization_evidence_records|work_hour_allocations|organization_people|evidence_import|service_role|createAdminClient/);
+    expect(reader).not.toMatch(/organization_evidence_records|work_hour_allocations|evidence_import|service_role|createAdminClient/);
+    // organization_people ONLY as the person's OWN confirmed roster row (2026-10-20):
+    // every read of it is bound to linked_profile_id = the caller, never the roster.
+    const rosterReads = reader.split('.from("organization_people")').slice(1);
+    expect(rosterReads.length).toBe(1);
+    for (const r of rosterReads) {
+      expect(r.slice(0, 300)).toMatch(/\.eq\("linked_profile_id", userId\)\s*\.eq\("link_state", "linked"\)\s*\.eq\("link_method", "worker_confirmed"\)/);
+    }
     expect(reader).toContain("readMyLedOrganizations()");
   });
   it("roles come from the membership spine and carry no hours in the reading", () => {

@@ -6872,7 +6872,8 @@
       "active": "Aktyvi — prisijungę nariai gali rasti ir užsisakyti šią paslaugą.",
       "paused": "Pristabdyta — nariams nematoma. Aktyvuok, kad vėl būtų randama."
     },
-    "linkToRequests": "Peržiūrėk užklausas dėl savo paslaugų"
+    "linkToRequests": "Peržiūrėk užklausas dėl savo paslaugų",
+    "errorHasRequests": "Šis pasiūlymas turi užklausų, todėl jo ištrinti negalima – užklausų istorija turi išlikti. Galite jį sustabdyti."
   },
   "communication": {
     "origin": {
@@ -9491,7 +9492,10 @@
       "missing": "TRŪKSTA",
       "portOk": "tinka (465, TLS)",
       "portUnsupported": "NETINKA – palaikomas tik 465",
-      "note": "Vienas kanalas visiems laiškams: GDPR pranešimams, kvietimams ir sistemos laiškams. Rodoma tik, ar reikšmė yra, niekada ne pati reikšmė. Trūkstamą reikšmę nustatykite VPS serveryje su lm-env-set.sh."
+      "note": "Vienas pašto kanalas: GDPR pranešimai siunčiami, kai nustatyti visi LM_SMTP_*; kvietimų ir pranešimų laiškai – tik atskirai įjungus jų siuntimą. Rodoma tik, ar reikšmė yra, niekada ne pati reikšmė. Trūkstamą reikšmę nustatykite VPS serveryje su lm-env-set.sh.",
+      "invites": "Kvietimų ir pranešimų laiškai",
+      "invitesOn": "įjungti",
+      "invitesOff": "IŠJUNGTI – įjungiami atskirai: INVITE_EMAIL_PROVIDER=smtp ir vienas bandomasis siuntimas"
     }
   },
   "adminMetrics": {

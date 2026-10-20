@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { demandsOfWorkspaceFilter } from "@/lib/demand/demand-org-scope";
 import { marketDirection, type MarketDirection } from "@/lib/demand/market-direction";
 
 /**
@@ -149,11 +150,13 @@ export async function listOwnCustomerRequests(
   // Stage A workspace gate: a read scoped to employer demand kinds is an
   // employer surface read — it requires a resolved company workspace
   // (fail-closed via the ONE canonical resolver; never a silent empty).
+  let workspaceOrganizationId: string | null = null;
   if (kinds && kinds.some((k) => EMPLOYER_REQUEST_KINDS.has(k))) {
     const employer = await requireEmployerCompany();
     if (!employer.ok) {
       return { kind: "error", message: `no_company_context:${employer.reason}` };
     }
+    workspaceOrganizationId = employer.organizationId;
   }
   let query = asAny(supabase)
     .from("customer_requests")
@@ -165,6 +168,14 @@ export async function listOwnCustomerRequests(
       "id, profile_id, customer_id, title, need_summary, country, location, role_or_work_type, team_size, start_period, duration, language_requirement, notes, payload, status, manual_review_note, created_at, updated_at, kind",
     )
     .eq("profile_id", user.id);
+  // THE ACTIVE WORKSPACE'S needs only (audit 2026-10-20): a person running
+  // companies A and B saw A's needs while working in B, and posted under the
+  // wrong company. The same ONE filter scouting, the usage meter and the
+  // employer capabilities use: this organization's needs, plus the caller's
+  // own needs that predate organization attribution.
+  if (workspaceOrganizationId) {
+    query = query.or(demandsOfWorkspaceFilter(user.id, workspaceOrganizationId));
+  }
   if (kinds && kinds.length > 0) query = query.in("kind", kinds);
   const { data, error } = await query
     .order("created_at", { ascending: false })
