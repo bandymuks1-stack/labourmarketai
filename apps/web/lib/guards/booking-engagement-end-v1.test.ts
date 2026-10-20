@@ -1670,6 +1670,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261020015000_demand_company_one_rule_v2.sql",
       // 2026-10-20 (RED by GRANT + RLS policies on a new table): My Space pins restored.
       "20261020020000_workspace_pins_v1.sql",
+      // 2026-10-20 (RED by SECURITY DEFINER replace; owner-approved #2558): counterparty metrics carry their order.
+      "20261020080000_counterparty_detail_metric_order_v1.sql",
 ]);
   });
 
