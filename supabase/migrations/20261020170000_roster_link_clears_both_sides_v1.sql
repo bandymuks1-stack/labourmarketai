@@ -1,3 +1,7 @@
+-- @human-gate-approved — owner approved PR #2589 with conditions (2026-10-20): erasure must
+-- work with a confirmed roster row; personal links fully severed, legitimately retained
+-- organization evidence (the roster card, D9) kept; no elevated rights. Conditions checked
+-- in a rolled-back production replay of the executor's own steps. Scope: this SQL only.
 -- ============================================================================
 -- roster_link_clears_both_sides_v1 — a roster link is either whole or gone
 -- (audit 2026-10-20, CRITICAL: GDPR erasure fails for anyone with a roster link).
