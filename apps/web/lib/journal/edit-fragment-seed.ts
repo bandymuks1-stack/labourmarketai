@@ -38,7 +38,10 @@ export function seedFragmentsFromEntry(
           time,
           activitySlug: null,
           activityLabel: a.activityLabel,
-          isUnknown: false,
+          // A worker's clarification label exists ONLY for an unknown fragment
+          // (the `unknown_phrase` row); keeping the flag is what makes the save
+          // write that row again — otherwise an edit dropped the clarification.
+          isUnknown: a.userLabel !== null,
           status: "confirmed",
           userLabel: a.userLabel ?? "",
           source: a.source,

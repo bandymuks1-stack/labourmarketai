@@ -243,7 +243,9 @@ const ROSTER_WORK_KINDS: Record<string, string> = {
   graduate: "student",
   programme_participant: "student",
   volunteer: "volunteer",
-  other: "collaborator",
+  // "other" / unset in the source stays exactly that — never a specific role
+  // the organization did not state.
+  other: "other",
 };
 
 /** The caller's own CONFIRMED roster rows — one per organization. RLS lets a

@@ -9,5 +9,6 @@
   "unemployed": "Työtön",
   "volunteer": "Vapaaehtoinen",
   "intern": "Harjoittelija",
-  "external_manager": "Ulkoinen esihenkilö (asiakas)"
+  "external_manager": "Ulkoinen esihenkilö (asiakas)",
+  "other": "Muu suhde"
 }

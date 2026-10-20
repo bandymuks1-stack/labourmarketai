@@ -95,8 +95,9 @@ describe("stated earlier periods of organizations the person worked for", () => 
     // recorded by the organization, undated, not current
     const block = src.slice(src.indexOf("const rosterOnly"), src.indexOf("return out;\n}\n\n/** Roster kinds"));
     expect(block).toMatch(/startedAt: null,\s*endedAt: null,\s*current: false,\s*source: "membership"/);
-    // a candidate is not a working relationship
+    // a candidate is not a working relationship; an unclassified kind is never re-labelled
     expect(src).not.toMatch(/candidate: "/);
+    expect(src).toMatch(/  other: "other",/);
   });
 
   it("the migration exposes names and stated periods only, to authenticated callers only", () => {
