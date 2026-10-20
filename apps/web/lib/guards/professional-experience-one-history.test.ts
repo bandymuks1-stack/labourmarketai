@@ -60,7 +60,14 @@ describe("1 · one reading, every surface", () => {
   });
   it("the profile fact strip states the same total, derived by the same function", () => {
     expect(profilePage).toContain("readOwnExperienceRelationships(supabase, user.id)");
-    expect(profilePage).toMatch(/deriveProfessionalExperience\(\{ wi: workIntelligence, relationships: experienceRelationships \}\)\.hours/);
+    // 2026-10-20: one helper for every identity surface (lib/journal/experience-figures.ts),
+    // which derives the total with deriveProfessionalExperience — the profile, the Player
+    // Card (chat + profile) and the journal page all pass the SAME figures to the strip.
+    expect(profilePage).toMatch(/experienceFiguresOf\(\s*workIntelligence,\s*experienceRelationships,?\s*\)/);
+    const helper = read("lib/journal/experience-figures.ts");
+    expect(helper).toMatch(/deriveProfessionalExperience\(\{ wi, relationships/);
+    expect(read("lib/player-card/player-card-result.ts")).toMatch(/\.\.\.experienceFiguresOf\(intel, relationships\)/);
+    expect(read("app/[locale]/dashboard/journal/page.tsx")).toMatch(/\.\.\.experienceFiguresOf\(workIntelligence, manoRelationships\)/);
     expect(identityFacts).toContain('testid: "player-card-fact-experience-total"');
     expect(identityFacts).toContain('label: t("experienceTotal")');
   });

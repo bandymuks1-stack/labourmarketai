@@ -138,6 +138,8 @@ import {
   resolveScale,
 } from "@/lib/journal/journal-calendar";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { experienceFiguresOf } from "@/lib/journal/experience-figures";
+import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -1186,9 +1188,11 @@ export default async function JournalPage({
   // reads as before: the avatar never depended on the card, and the labels and
   // the thermometer are both gated on the SAME `manoCard` non-null check — so
   // they resolve together, and neither is fetched when there is no card.
-  const [manoCard, manoAvatar] = await Promise.all([
+  const [manoCard, manoAvatar, manoRelationships] = await Promise.all([
     getWorkerPlayerCard(),
     getOwnAvatar(),
+    // For the decision-0025 total on the card's fact strip (same rule as the profile).
+    readOwnExperienceRelationships(supabase, user.id).catch(() => null),
   ]);
   const [manoCardLabels, manoThermometer] = manoCard
     ? await Promise.all([
@@ -1200,6 +1204,7 @@ export default async function JournalPage({
           // The identity stage's fact strip: the SAME model's all-time row.
           allTime: workIntelligence?.periods.find((p) => p.key === "all") ?? null,
           allTimeTruncated: workIntelligence?.coverage.truncated ?? false,
+          ...experienceFiguresOf(workIntelligence, manoRelationships),
         }),
         getOwnThermometer().then(toThermometerView),
       ])

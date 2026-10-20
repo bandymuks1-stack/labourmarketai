@@ -1,7 +1,5 @@
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { OrganizationsLeadership } from "@/components/app/organization/organizations-leadership";
-import { organizationAllTime } from "@/lib/journal/organization-all-time";
-import { deriveProfessionalExperience } from "@/lib/journal/professional-experience";
 import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -110,6 +108,7 @@ import {
   RosterLinkWithdrawals,
 } from "@/components/app/organization-evidence-section";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { experienceFiguresOf } from "@/lib/journal/experience-figures";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
@@ -520,11 +519,10 @@ export default async function ProfilePage({
       const all = workIntelligence?.periods.find((p) => p.key === "all");
       // Imported organization history counts as experience (#2169): the ONE
       // all-time rule, day + period records, no invoice consulted.
-      organizationHistoryHours = organizationAllTime(workIntelligence)?.totalHours ?? null;
-      professionalExperienceHours = workIntelligence
-        ? deriveProfessionalExperience({ wi: workIntelligence, relationships: experienceRelationships }).hours
-            ?.total ?? null
-        : null;
+      ({ organizationHistoryHours, professionalExperienceHours } = experienceFiguresOf(
+        workIntelligence,
+        experienceRelationships,
+      ));
       workAllTime = all
         ? { totals: all, truncated: workIntelligence?.coverage.truncated ?? false }
         : null;
