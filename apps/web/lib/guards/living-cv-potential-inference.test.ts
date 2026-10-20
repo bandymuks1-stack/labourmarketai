@@ -44,6 +44,15 @@ describe("Living CV keeps potential-capability discovery", () => {
     }
   });
 
+  it("reaches the Living CV itself, from evidenced tiers only, on screen and never in print", () => {
+    const cv = read("app/[locale]/cv/page.tsx");
+    expect(cv).toMatch(/derivePotentialSkills\(\s*\[\.\.\.cv\.tiers\.confirmed, \.\.\.cv\.tiers\.evidence\],\s*\[\.\.\.cv\.tiers\.confirmed, \.\.\.cv\.tiers\.evidence, \.\.\.cv\.tiers\.declared\],/);
+    const block = cv.slice(cv.indexOf('data-testid="cv-potential"') - 120, cv.indexOf('data-testid="cv-potential"') + 40);
+    expect(block).toContain("print:hidden");
+    expect(cv).toContain('data-evidence-state="potential"');
+    expect(cv).toContain('tIntel("potentialFrom"');
+  });
+
   it("is never written: no write path imports the potential map", () => {
     const writers = walk(resolve(APP, "lib")).filter((p) => {
       const s = readFileSync(p, "utf8");
