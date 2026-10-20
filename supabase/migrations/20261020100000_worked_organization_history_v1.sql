@@ -23,14 +23,16 @@
 --   1. my_worked_organization_periods_v1(p_org_ids uuid[]) — the stated
 --      periods of organizations the CALLER has or had a working relationship
 --      with: an engagement context there (any status — history counts), or a
---      linked roster row (organization_people.linked_profile_id = caller,
---      link_state = 'linked'). Returns the period's label, legal-entity label,
+--      roster row the person CONFIRMED (linked_profile_id = caller,
+--      link_state = 'linked' AND link_method = 'worker_confirmed': the
+--      integrity-door rule, since definer/service writers bypass the consent
+--      trigger, a subject-side read never trusts 'linked' alone). Returns the period's label, legal-entity label,
 --      relation, basis category, dates, continuity, source labels and
 --      supersedes link — the
 --      fields the experience model reads. NOT returned: statement,
 --      basis_reference, created_by (the organization's internal evidence).
 --   2. my_historical_organization_names_v2(p_org_ids uuid[]) — v1's rule plus
---      the linked roster row.
+--      the confirmed roster row (same predicate).
 --   Both: SECURITY DEFINER, STABLE, search_path public, at most 100 ids,
 --   EXECUTE for authenticated only. No table, policy or data is changed.
 --
@@ -69,7 +71,8 @@ as $function$
        or exists (select 1 from public.organization_people op
                    where op.organization_id = p.organization_id
                      and op.linked_profile_id = auth.uid()
-                     and op.link_state = 'linked'))
+                     and op.link_state = 'linked'
+                     and op.link_method = 'worker_confirmed'))
    order by p.created_at, p.id;
 $function$;
 
@@ -90,7 +93,8 @@ as $function$
        or exists (select 1 from public.organization_people op
                    where op.organization_id = o.id
                      and op.linked_profile_id = auth.uid()
-                     and op.link_state = 'linked'));
+                     and op.link_state = 'linked'
+                     and op.link_method = 'worker_confirmed'));
 $function$;
 
 revoke all on function public.my_worked_organization_periods_v1(uuid[]) from public, anon;
