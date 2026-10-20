@@ -138,7 +138,6 @@ const BASELINE: Record<string, number> = {
   "lib/organization-people/ingest-service.ts": 1,
   "lib/player-card/player-card.ts": 1,
   "lib/profile/trust-signals.ts": 1,
-  "lib/work-hours/allocations.ts": 4,
   "lib/worker/weekly-intelligence.ts": 1,
 };
 

@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/server";
 import { readAllPages } from "@/lib/journal/journal-list-core";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
-  ALLOCATION_READ_LIMIT,
   isAllocationMigrationMissingCode,
   isValidAllocationStatus,
   type WorkHourAllocation,
