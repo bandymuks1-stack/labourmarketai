@@ -9491,10 +9491,10 @@
       "missing": "MISSING",
       "portOk": "supported (465, TLS)",
       "portUnsupported": "NOT SUPPORTED – only 465 is supported",
-      "note": "One mail channel: GDPR notices send once every LM_SMTP_* value is set; invitation and notification e-mail only after their sending is switched on separately. Only whether a value exists is shown, never the value. Set a missing value on the VPS with lm-env-set.sh.",
+      "note": "One mail channel: GDPR notices send once every LM_SMTP_* value is set; invitation and notification e-mail only after their sending is enabled separately. Only whether a value exists is shown, never the value. Set a missing value on the VPS with lm-env-set.sh.",
       "invites": "Invitation and notification e-mail",
       "invitesOn": "on",
-      "invitesOff": "OFF – switched on separately: INVITE_EMAIL_PROVIDER=smtp and one test send"
+      "invitesOff": "OFF – enabled separately: INVITE_EMAIL_PROVIDER=smtp and one test send"
     }
   },
   "adminMetrics": {
