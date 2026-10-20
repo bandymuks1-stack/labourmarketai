@@ -23,6 +23,26 @@ type CountedOnceQueryResult = {
   error: unknown;
 };
 
+/** Reads every page of an ordered `id, correction_of` query, 1000 rows a
+ *  page (the server's answer cap: a bare `.limit(COUNTED_ONCE_READ_CAP)` was
+ *  a silent 1000, so the "reached the ceiling" check below could never fire
+ *  and a person with 1,400 entries read as 1,000 — audit 2026-10-20). Stops at
+ *  the ceiling; `countedOnceTotal` then answers UNKNOWN. */
+export async function readCountedRows(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  build: () => any,
+): Promise<CountedOnceQueryResult> {
+  const rows: CorrectionChainRow[] = [];
+  for (let from = 0; from < COUNTED_ONCE_READ_CAP; from += 1000) {
+    const res = (await build().range(from, from + 999)) as CountedOnceQueryResult;
+    if (res.error) return { data: null, error: res.error };
+    const got = res.data ?? [];
+    rows.push(...got);
+    if (got.length < 1000) return { data: rows, error: null };
+  }
+  return { data: rows, error: null };
+}
+
 export function countedOnceTotal(res: CountedOnceQueryResult): number | null {
   if (res.error || !res.data) return null;
   if (res.data.length >= COUNTED_ONCE_READ_CAP) return null;

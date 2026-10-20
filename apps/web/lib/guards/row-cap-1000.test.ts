@@ -121,13 +121,10 @@ const BASELINE: Record<string, number> = {
   "lib/admin/pilots.ts": 2,
   "lib/capabilities/marketplace-capabilities.ts": 1,
   "lib/communication/organization-scope.ts": 1,
-  "lib/documents/document-centre.ts": 1,
   // ENTRY_LIMIT (1000) + 1 sentinel and CONFIRMATION_LIMIT: the sentinel's
   // `length > ENTRY_LIMIT` check can never fire on a 1000-row answer.
   "lib/education/recognition-evidence.ts": 2,
-  "lib/evidence/confirmed-work-read.ts": 3,
   "lib/invitations/network.ts": 1,
-  "lib/journal/project-gallery.ts": 1,
   // Matching stage-1 candidate scans; truncation is checked as rows >= cap,
   // which a 1000-row answer never reaches.
   "lib/market/match-subject.ts": 4,
@@ -136,7 +133,6 @@ const BASELINE: Record<string, number> = {
     "lib/organization-evidence/history-quality-read.ts": 1,
   "lib/organization-people/ingest-service.ts": 1,
   "lib/player-card/player-card.ts": 1,
-  "lib/profile/trust-signals.ts": 1,
   "lib/worker/weekly-intelligence.ts": 1,
 };
 

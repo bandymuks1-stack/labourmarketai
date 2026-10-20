@@ -9,5 +9,6 @@
   "unemployed": "bezrobotny",
   "volunteer": "wolontariusz",
   "intern": "Praktykant",
-  "external_manager": "Kierownik zewnętrzny (zleceniodawca)"
+  "external_manager": "Kierownik zewnętrzny (zleceniodawca)",
+  "other": "Inny związek"
 }
