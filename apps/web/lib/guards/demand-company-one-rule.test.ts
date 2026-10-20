@@ -43,6 +43,12 @@ describe("one demand-company rule", () => {
     expect(sql).not.toMatch(PERSON_JOIN);
   });
 
+  it("an org-less need resolves to NO company (v2) — attribution is never invented", () => {
+    const v2 = code(readFileSync(join(MIG, "20261020015000_demand_company_one_rule_v2.sql"), "utf8"));
+    expect(v2).toMatch(/select o\.legacy_company_id from public\.organizations o where o\.id = p_organization_id/);
+    expect(v2).not.toMatch(/companies/);
+  });
+
   it("no later migration brings the person join back", () => {
     const later = readdirSync(MIG).filter((f) => f > ONE_RULE && f.endsWith(".sql"));
     for (const f of later) {

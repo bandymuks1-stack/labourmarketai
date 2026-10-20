@@ -1666,6 +1666,10 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261019220000_project_team_journal_hours_v2.sql",
       // 2026-10-20 (RED by SECURITY DEFINER replace): one demand-company rule.
       "20261020010000_demand_company_one_rule_v1.sql",
+      // 2026-10-20 (RED by helper replace): org-less need → no company (review fix).
+      "20261020015000_demand_company_one_rule_v2.sql",
+      // 2026-10-20 (RED by GRANT + RLS policies on a new table): My Space pins restored.
+      "20261020020000_workspace_pins_v1.sql",
 ]);
   });
 

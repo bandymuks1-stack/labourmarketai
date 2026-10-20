@@ -99,7 +99,14 @@ function deriveReferences(): { fks: Fk[]; identifiers: Fk[] } {
 }
 
 function registrySeed(): { fkRows: Set<string>; valueRows: Set<string> } {
-  const sql = readFileSync(join(MIGRATIONS, V3), "utf8");
+  // The seed lives in V3; a later migration that adds a person-referencing
+  // table ships its own registry row in the same file (e.g. 20261020020000
+  // workspace_pins), so every migration from V3 on is read.
+  const sql = readdirSync(MIGRATIONS)
+    .filter((f) => f.endsWith(".sql") && f >= V3)
+    .sort()
+    .map((f) => readFileSync(join(MIGRATIONS, f), "utf8"))
+    .join("\n");
   const fkRows = new Set<string>();
   const valueRows = new Set<string>();
   const registry = /insert into public\.privacy_erasure_registry_v3[\s\S]*?(?=\n(?:insert|commit|--\s*─))/gi;
