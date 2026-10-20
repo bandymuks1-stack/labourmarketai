@@ -310,15 +310,21 @@ async function runSearch(
   const { queryParam, slugParam, limit, offset } = params;
 
   const supabase = suppliedClient ?? (await createClient());
-  const { data, error } = await asAny(supabase).rpc(
-    "search_public_vacancy_previews_v1",
-    {
+  const call = () =>
+    asAny(supabase).rpc("search_public_vacancy_previews_v1", {
       p_query: queryParam,
       p_profession_slug: slugParam,
       p_limit: limit,
       p_offset: offset,
-    },
-  );
+    }) as Promise<{ data: unknown; error: { code?: string; message?: string } | null }>;
+  // ONE retry on a statement timeout (57014). Production 2026-10-20: the same
+  // free-text search takes 100–230 ms warm and 4.5 s on a cold cache, past the
+  // anonymous 3 s limit — the first visitor after a quiet spell got "jobs
+  // unavailable" (3 of 147 calls in 24 h), and the cooldown below then blanked
+  // that search for everyone after them. The retry meets a warm cache. Any
+  // other error, or a second timeout, is reported as before.
+  let { data, error } = await call();
+  if (error?.code === QUERY_CANCELED) ({ data, error } = await call());
 
   if (error) {
     if (isNotProvisioned(error.code)) {
