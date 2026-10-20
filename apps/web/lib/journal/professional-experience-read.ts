@@ -52,6 +52,56 @@ type ContextRow = {
   organizations: { display_name: string | null; legal_name: string | null } | null;
 };
 
+type WorkedPeriodRow = {
+  id: string;
+  organization_id: string;
+  period_label: string;
+  legal_entity_label: string | null;
+  legal_entity_relation: string;
+  basis: string;
+  period_start: string | null;
+  period_end: string | null;
+  source_labels: string[] | null;
+  supersedes_id: string | null;
+};
+
+/** Stated business periods of organizations the caller worked for (names and
+ *  periods only; superseded statements dropped). Empty on any failure. */
+export async function readWorkedOrganizationPeriods(
+  supabase: SupabaseClient,
+  orgIds: readonly string[],
+): Promise<Map<string, ExperienceRelationship["businessPeriods"]>> {
+  const out = new Map<string, ExperienceRelationship["businessPeriods"]>();
+  if (orgIds.length === 0) return out;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any).rpc("my_worked_organization_periods_v1", {
+      p_org_ids: orgIds.slice(0, 100),
+    });
+    if (error || !Array.isArray(data)) return out;
+    const rows = data as WorkedPeriodRow[];
+    const superseded = new Set(rows.map((r) => r.supersedes_id).filter((x): x is string => !!x));
+    for (const r of rows) {
+      if (superseded.has(r.id)) continue;
+      const list = [...(out.get(r.organization_id) ?? [])];
+      list.push({
+        id: r.id,
+        label: r.period_label,
+        from: r.period_start,
+        to: r.period_end,
+        basis: r.basis,
+        legalEntityRelation: r.legal_entity_relation,
+        legalEntityLabel: r.legal_entity_label,
+        sourceLabels: r.source_labels ?? [],
+      });
+      out.set(r.organization_id, list);
+    }
+  } catch {
+    return out;
+  }
+  return out;
+}
+
 export async function readOwnExperienceRelationships(
   supabase: SupabaseClient,
   userId: string,
@@ -88,6 +138,21 @@ export async function readOwnExperienceRelationships(
         sourceLabels: p.sourceLabels,
       })),
     );
+  }
+
+  // Organizations the person WORKED for but does not lead: their stated
+  // earlier periods (e.g. "Vivat Rex") through the worked-organization read
+  // (20261020100000) — the same statements, for every person who worked
+  // there, not only its managers. Absent function / failed read → none.
+  const workedOnly = [
+    ...new Set(
+      (contexts.data ?? [])
+        .map((r) => r.organization_id)
+        .filter((id): id is string => !!id && !periodsByOrg.has(id)),
+    ),
+  ];
+  for (const [id, periods] of await readWorkedOrganizationPeriods(supabase, workedOnly)) {
+    periodsByOrg.set(id, periods);
   }
 
   const named = await withHistoricalOrgNames(supabase, contexts.data ?? []);

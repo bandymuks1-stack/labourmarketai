@@ -115,6 +115,8 @@ export const CANONICAL_APP_RPCS = [
   "my_direct_conversations_with_workers_v1",
   "my_email_verification_v1",
   "my_historical_organization_names_v1",
+  "my_historical_organization_names_v2",
+  "my_worked_organization_periods_v1",
   "mark_invitation_delivery_v1",
   "mark_service_requests_seen",
   "mark_worker_opportunities_seen_v1",
