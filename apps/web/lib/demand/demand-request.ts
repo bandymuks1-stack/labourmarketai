@@ -151,7 +151,12 @@ export type DemandRequestResult =
         // active open needs are at its plan's ceiling (FREE 1; the
         // ORGANIZATION plan has none since 2026-10-06). `next` names the honest
         // way forward — the €99 plan. Nothing is charged.
-        | "over_open_need_limit";
+        | "over_open_need_limit"
+        // The form was opened for another organization than the one the
+        // server resolves now (the workspace was switched in another tab).
+        // Nothing is written — a need is never posted into a company the
+        // person did not see on screen.
+        | "workspace_changed";
       limit?: number;
       used?: number;
       next?: "upgrade" | "individual_plan";
@@ -207,6 +212,7 @@ type DemandRpc = {
 export async function submitDemandRequest(
   intent: DemandIntent,
   fields?: DemandFields,
+  opts: { readonly expectedOrganizationId?: string | null } = {},
 ): Promise<DemandRequestResult> {
   const supabase = await createClient();
   const {
@@ -220,6 +226,11 @@ export async function submitDemandRequest(
   // can later attribute. Refused, never silently written to the profile.
   const employer = await requireEmployerCompany();
   if (!employer.ok) return { ok: false, code: "no_company_context" };
+  // `expectedOrganizationId` never CHOOSES the target (the server-resolved
+  // workspace does); it can only make the submit REFUSE.
+  if (opts.expectedOrganizationId && opts.expectedOrganizationId !== employer.organizationId) {
+    return { ok: false, code: "workspace_changed" };
+  }
 
   const result = await submitDemandRequestCore(
     { supabase, userId: user.id },
