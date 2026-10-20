@@ -130,8 +130,9 @@ export default async function CounterpartyQueuePage({
         id: row.entryId,
         createdAt: detail.createdAt ?? detail.submittedAt ?? row.submittedAt ?? new Date(0).toISOString(),
         // ORDER IS EVIDENCE: "the latest quantity row wins" by (created_at,
-        // id). The RPC returns both and orders by them (migration
-        // 20261020080000) — the real row ordering, never an invented one.
+        // id). Both are passed through as the RPC returns them — the real row
+        // ordering, never an invented one (the RPC carrying them is the
+        // separate, owner-gated 20261020080000 migration).
         metrics: detail.metrics.map((mm) => ({
           metric_slug: mm.slug,
           value_text: mm.valueText,

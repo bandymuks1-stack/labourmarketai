@@ -76,15 +76,10 @@ describe("the counterparty review keeps the real metric order", () => {
     }));
     expect(reviewerHoursOf({ id: "e1", createdAt: "2026-10-20T08:00:00Z", metrics: rows })?.value).toBe(8);
   });
-  it("the page passes the RPC's real created_at and id; the RPC returns and orders by both", () => {
+  it("the page passes the RPC's real created_at and id, never an invented order", () => {
     const WEB = join(__dirname, "..", "..");
     const page = readFileSync(join(WEB, "app", "[locale]", "dashboard", "inbox", "counterparty", "page.tsx"), "utf8");
     expect(page).toMatch(/created_at: mm\.createdAt \?\? null,\s*id: mm\.id \?\? null,/);
     expect(page).not.toMatch(/rpc-order-/);
-    const sql = readFileSync(
-      join(WEB, "..", "..", "supabase", "migrations", "20261020080000_counterparty_detail_metric_order_v1.sql"),
-      "utf8",
-    );
-    expect(sql).toMatch(/'created_at', m\.created_at, 'id', m\.id\) order by m\.created_at, m\.id/);
   });
 });
