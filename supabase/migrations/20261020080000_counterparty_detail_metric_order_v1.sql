@@ -1,3 +1,6 @@
+-- @human-gate-approved — owner approved this exact SECURITY DEFINER body change
+-- (PR #2558, 2026-10-20) after the security assessment: diff, EXECUTE ACL before/after,
+-- search_path, authorization, organization isolation, history, rollback md5. Scope: this SQL only.
 -- ============================================================================
 -- counterparty_review_entry_detail_v1 — metrics carry their own order (v1)
 --
