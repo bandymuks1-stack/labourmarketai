@@ -72,7 +72,10 @@ let teamTestId = "";
 test("0. owner disbands earlier synthetic brigades, keeping their history", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
-  await expect(page.getByTestId("team-brigades-panel")).toBeVisible();
+  // The people page is heavy (many reads); 30 s like every other step — the
+  // 5 s default failed a run while another walk loaded production (run
+  // 39475645864) though the panel rendered.
+  await expect(page.getByTestId("team-brigades-panel")).toBeVisible({ timeout: 30_000 });
   const leftovers = page
     .locator('[data-testid^="team-brigade-"]', { hasText: "QA-SYNTHETIC Brigada" })
     .filter({ has: page.locator('[data-testid^="team-disband-"]') });
