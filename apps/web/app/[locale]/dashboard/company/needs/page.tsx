@@ -289,6 +289,7 @@ export default async function CompanyNeedsPage({
               claimCta: tClaim("claimCta"),
               claimed: tClaim("claimed"),
               error: tClaim("error"),
+              draftExists: tClaim("draftExists"),
               workersLabel: tClaim("workersLabel"),
             }}
           />

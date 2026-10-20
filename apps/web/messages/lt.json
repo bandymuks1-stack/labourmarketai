@@ -12483,7 +12483,8 @@
     "claimCta": "Tęsti kaip juodraštį",
     "claimed": "Perkelta į jūsų juodraščius",
     "error": "Nepavyko perkelti. Bandykite dar kartą.",
-    "workersLabel": "Darbuotojų"
+    "workersLabel": "Darbuotojų",
+    "draftExists": "Jau turite neužbaigtą poreikio juodraštį. Užbaikite arba atmeskite jį – tada šį poreikį galėsite tęsti."
   },
   "candidatePipeline": {
     "stage": {

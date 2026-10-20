@@ -12483,7 +12483,8 @@
     "claimCta": "Continue as my draft",
     "claimed": "Moved to your drafts",
     "error": "Could not claim it. Please try again.",
-    "workersLabel": "Workers"
+    "workersLabel": "Workers",
+    "draftExists": "You already have an unfinished need draft. Finish or discard it first, then you can continue this one."
   },
   "candidatePipeline": {
     "stage": {
