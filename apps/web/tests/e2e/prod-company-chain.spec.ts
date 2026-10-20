@@ -99,8 +99,11 @@ test("C-1. the worker raises a hand on Gama's need from the opportunities board"
     const allCards = await page.locator('li[id^="opp-"]').count();
     const companies = await page.getByTestId("opportunity-company").allInnerTexts();
     const buttons = await page.locator('[data-testid^="interest-"]').count();
+    // Counts only — never company names: the board can show real customers,
+    // and this log is a public artefact.
+    const gamaLabels = companies.filter((c) => c.includes(GAMA)).length;
     console.info(
-      `C-1 diagnostics: cards=${allCards} interest_buttons=${buttons} companies=${JSON.stringify([...new Set(companies.map((c) => c.trim()))])}`,
+      `C-1 diagnostics: cards=${allCards} interest_buttons=${buttons} gama_labels=${gamaLabels} synthetic_labels=${companies.filter((c) => c.includes("QA-SYNTHETIC")).length}`,
     );
   }
   const n = await cards.count();

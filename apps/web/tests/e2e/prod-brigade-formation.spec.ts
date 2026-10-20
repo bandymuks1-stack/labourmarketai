@@ -131,12 +131,13 @@ test("1-2. owner creates the brigade in Alfa", async ({ browser }) => {
       .then(() => true)
       .catch(() => false);
     console.info(`1-2 diagnostics: brigade shown in place=false, after reload=${shownAfterReload}`);
-    test.info().annotations.push({
-      type: "defect",
-      description: shownAfterReload
+    // A brigade that appears only after a reload is still a defect: the step
+    // FAILS, with the diagnostic saying which of the two it was.
+    throw new Error(
+      shownAfterReload
         ? "the created brigade appears only after a reload (the panel does not refresh)"
         : "the created brigade is not listed even after a reload",
-    });
+    );
   }
   await expect(card).toBeVisible({ timeout: 5_000 });
   teamTestId = (await card.getAttribute("data-testid"))!;
