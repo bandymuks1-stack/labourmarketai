@@ -37,6 +37,7 @@ import {
 } from "./confirmable";
 import type { CapabilityCaller, CapabilityDescriptor } from "./contract";
 import { demandContextRefusal } from "./employer-context-refusal";
+import { demandsOfWorkspaceFilter } from "@/lib/demand/demand-org-scope";
 
 /**
  * EMPLOYER OPERATIONS — the company side of the work graph for an authorized
@@ -133,7 +134,7 @@ const demandList: CapabilityDescriptor = {
       .select(
         "id, title, status, kind, country, location, role_or_work_type, team_size, start_period, duration, created_at",
       )
-      .or(`profile_id.eq.${caller.userId},organization_id.eq.${employer.organizationId}`)
+      .or(demandsOfWorkspaceFilter(caller.userId, employer.organizationId))
       .order("created_at", { ascending: false })
       .limit(50);
     // FAILED ≠ EMPTY (SEP-7).
@@ -225,7 +226,7 @@ async function readNeedForLifecycle(
     .from("customer_requests")
     .select("id, title, status, kind")
     .eq("id", requestId)
-    .or(`profile_id.eq.${caller.userId},organization_id.eq.${organizationId}`)
+    .or(demandsOfWorkspaceFilter(caller.userId, organizationId))
     .maybeSingle();
   return (data as { id: string; title: string | null; status: string | null; kind: string | null } | null) ?? null;
 }

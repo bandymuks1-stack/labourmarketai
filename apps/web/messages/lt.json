@@ -9482,6 +9482,16 @@
         "rate_limits": "Riboti užklausų limitai aktyvūs",
         "freshness_demotion": "Seni profiliai reitinguojami žemiau"
       }
+    },
+    "mail": {
+      "title": "Oficialus paštas (info@labourmarket.ai)",
+      "ready": "Siunčia",
+      "notReady": "Nesiunčia",
+      "present": "nustatyta",
+      "missing": "TRŪKSTA",
+      "portOk": "tinka (465, TLS)",
+      "portUnsupported": "NETINKA – palaikomas tik 465",
+      "note": "Vienas kanalas visiems laiškams: GDPR pranešimams, kvietimams ir sistemos laiškams. Rodoma tik, ar reikšmė yra, niekada ne pati reikšmė. Trūkstamą reikšmę nustatykite VPS serveryje su lm-env-set.sh."
     }
   },
   "adminMetrics": {

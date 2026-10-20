@@ -9482,6 +9482,16 @@
         "rate_limits": "Begrensde verzoeklimieten actief",
         "freshness_demotion": "Verouderde profielen lager gerangschikt"
       }
+    },
+    "mail": {
+      "title": "Officiële mailbox (info@labourmarket.ai)",
+      "ready": "Verstuurt",
+      "notReady": "Verstuurt niet",
+      "present": "ingesteld",
+      "missing": "ONTBREEKT",
+      "portOk": "ondersteund (465, TLS)",
+      "portUnsupported": "NIET ONDERSTEUND – alleen 465",
+      "note": "Eén kanaal voor alle e-mail van het platform: AVG-meldingen, uitnodigingen en systeemmail. Alleen of een waarde bestaat wordt getoond, nooit de waarde zelf. Stel een ontbrekende waarde in op de VPS met lm-env-set.sh."
     }
   },
   "adminMetrics": {

@@ -38,6 +38,7 @@ import {
 import { validateShortlistWrite } from "@/lib/scouting/shortlist-note";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { demandsOfWorkspaceFilter } from "@/lib/demand/demand-org-scope";
 
 /**
  * Company scouting (Full Cycle Sprint v1, Slice 3) — the demand→matching→
@@ -127,7 +128,7 @@ export async function listCompanyDemands(): Promise<CompanyDemand[]> {
     const { data } = await asAny(supabase)
       .from("customer_requests")
       .select("id, title, status, payload, created_at, kind, profile_id")
-      .or(`profile_id.eq.${user.id},organization_id.eq.${ctx.organizationId}`)
+      .or(demandsOfWorkspaceFilter(user.id, ctx.organizationId))
       .order("created_at", { ascending: false })
       .limit(50);
     return ((data ?? []) as {
@@ -270,7 +271,7 @@ export async function runScoutingCore(
     .eq("id", requestId);
   const { data: req, error } = await (share
     ? readRequest
-    : readRequest.or(`profile_id.eq.${user.id},organization_id.eq.${employer.organizationId}`)
+    : readRequest.or(demandsOfWorkspaceFilter(user.id, employer.organizationId))
   ).maybeSingle();
   if (error) {
     if (error.code === RELATION_NOT_FOUND || error.code === UNDEFINED_COLUMN) {
@@ -580,7 +581,7 @@ export async function setShortlistCore(
     .from("customer_requests")
     .select("id, status, profile_id")
     .eq("id", input.requestId)
-    .or(`profile_id.eq.${user.id},organization_id.eq.${employer.organizationId}`)
+    .or(demandsOfWorkspaceFilter(user.id, employer.organizationId))
     .maybeSingle();
   if (!req) return { kind: "not-owner" };
   // A colleague's need: role/capability, not membership, decides.
