@@ -9,10 +9,12 @@ import { createAndSendInvitations, resendInvitationAction } from "@/lib/invitati
 import {
   createTeamBrigade,
   disbandTeamBrigade,
+  getTeamBrigadesData,
   lookupLinkedWorkerEmail,
   type CreateTeamOutcome,
   type DisbandTeamOutcome,
   type TeamAvailabilityStatus,
+  type TeamBrigade,
 } from "./team-brigades";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -49,7 +51,7 @@ const RELATION_NOT_FOUND_CODE = "42P01";
 export async function createTeamAction(
   name: string,
   expectedWorkspaceId?: string,
-): Promise<{ outcome: CreateTeamOutcome }> {
+): Promise<{ outcome: CreateTeamOutcome; teams?: readonly TeamBrigade[] }> {
   await refuseStaleWorkspace(expectedWorkspaceId);
   const { outcome } = await createTeamBrigade(name);
   // W14 mid-funnel: a team organization was really created (the org spine
@@ -72,6 +74,13 @@ export async function createTeamAction(
       source: "teams",
       metadata: { surface: "company_teams", entity_type: "team" },
     });
+    // The new brigade is shown from THIS answer (the same read the page
+    // makes), not only after the whole people page re-renders: a slow
+    // refresh left the owner looking at a list without the brigade they had
+    // just created (walk 2026-10-20). A failed read returns no list and the
+    // refresh still follows.
+    const fresh = await getTeamBrigadesData();
+    if (fresh.applied && fresh.error === null) return { outcome, teams: fresh.teams };
   }
   return { outcome };
 }

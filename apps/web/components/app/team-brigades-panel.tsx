@@ -73,6 +73,14 @@ export function TeamBrigadesPanel({
   const [link, setLink] = useState<{ teamId: string; url: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [confirmDisband, setConfirmDisband] = useState<string | null>(null);
+  // The list the create action answered with, kept only while the page's own
+  // list is the one it replaced: the next server render (router.refresh)
+  // brings new props and takes over again.
+  const [answered, setAnswered] = useState<{
+    replaces: readonly TeamBrigade[];
+    teams: readonly TeamBrigade[];
+  } | null>(null);
+  const shownTeams = answered && answered.replaces === teams ? answered.teams : teams;
 
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
 
@@ -85,6 +93,7 @@ export function TeamBrigadesPanel({
       if (res.outcome === "created") {
         setName("");
         setMsg(t("outcome.created"));
+        if (res.teams) setAnswered({ replaces: teams, teams: res.teams });
       } else if (res.outcome === "invalid_team_name") {
         setMsg(t("outcome.invalidName"));
       } else if (res.outcome === "not_allowed") {
@@ -161,13 +170,13 @@ export function TeamBrigadesPanel({
         </p>
       </header>
 
-      {teams.length === 0 ? (
+      {shownTeams.length === 0 ? (
         <p className="text-sm text-text-muted" data-testid="team-brigades-empty">
           {t("noTeams")}
         </p>
       ) : (
         <ul className="flex flex-col gap-3">
-          {teams.map((team) => (
+          {shownTeams.map((team) => (
             <li
               key={team.id}
               className="flex flex-col gap-3 rounded-md border border-ink-600 bg-ink-800/40 p-4"
