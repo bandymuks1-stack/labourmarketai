@@ -59,16 +59,25 @@ export default async function ActivitySetupHubPage({
       .from("agencies")
       .select("id, legal_name, country, created_at")
       .eq("profile_id", user.id)
+      // A person may own several; the oldest answers "set up" (maybeSingle errored on two).
+      .order("created_at", { ascending: true })
+      .limit(1)
       .maybeSingle(),
     supabase
       .from("companies")
       .select("id, legal_name, display_name, country, created_at")
       .eq("profile_id", user.id)
+      // A person may own several; the oldest answers "set up" (maybeSingle errored on two).
+      .order("created_at", { ascending: true })
+      .limit(1)
       .maybeSingle(),
     supabase
       .from("customers")
       .select("id, contact_name, country, created_at")
       .eq("profile_id", user.id)
+      // A person may own several; the oldest answers "set up" (maybeSingle errored on two).
+      .order("created_at", { ascending: true })
+      .limit(1)
       .maybeSingle(),
   ]);
   const agency = agencyRes.data;
