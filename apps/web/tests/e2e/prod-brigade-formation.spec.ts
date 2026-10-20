@@ -117,7 +117,29 @@ test("1-2. owner creates the brigade in Alfa", async ({ browser }) => {
   await page.getByTestId("team-create-name").fill(TEAM);
   await page.getByTestId("team-create-submit").click();
   const card = page.locator('[data-testid^="team-brigade-"]', { hasText: TEAM });
-  await expect(card).toBeVisible({ timeout: 20_000 });
+  // The created brigade must appear WITHOUT a reload. If it does not, reload
+  // once to tell "the list did not refresh" (a UI defect, reported) from "the
+  // brigade is not listed at all" (the step fails).
+  const shownInPlace = await expect(card)
+    .toBeVisible({ timeout: 30_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!shownInPlace) {
+    await page.reload();
+    const shownAfterReload = await expect(card)
+      .toBeVisible({ timeout: 30_000 })
+      .then(() => true)
+      .catch(() => false);
+    console.info(`1-2 diagnostics: brigade shown in place=false, after reload=${shownAfterReload}`);
+    // A brigade that appears only after a reload is still a defect: the step
+    // FAILS, with the diagnostic saying which of the two it was.
+    throw new Error(
+      shownAfterReload
+        ? "the created brigade appears only after a reload (the panel does not refresh)"
+        : "the created brigade is not listed even after a reload",
+    );
+  }
+  await expect(card).toBeVisible({ timeout: 5_000 });
   teamTestId = (await card.getAttribute("data-testid"))!;
   await ctx.close();
 });

@@ -286,16 +286,19 @@ export function buildEuFormatCv(cv: VerifiedCvData): EuFormatCv {
     // an earlier legal entity's stated leadership, a governing membership —
     // the same stops the Living CV shows. One line per role; unknown dates
     // stay unknown (no "present" for a merely unknown end).
-    ...experienceStopsOf(cv.professionalExperience).flatMap((s) =>
-      [...new Set(s.roles.map((r) => r.relationship))].map((relationship) => ({
-        title: null,
-        organization: trimOrNull(s.name),
-        relationship,
-        startedAt: s.from,
-        endedAt: s.current ? null : s.to,
-        ongoing: s.current,
-      })),
-    ),
+    // Each line carries ITS OWN role's dates and state; an earlier entity's
+    // derived role is dated by the stated period (the stop's span).
+    ...experienceStopsOf(cv.professionalExperience).flatMap((s) => {
+      const seen = new Set<string>();
+      return s.roles.flatMap((r) => {
+        const startedAt = r.derived ? s.from : r.startedAt;
+        const endedAt = r.current ? null : r.derived ? s.to : r.endedAt;
+        const key = `${r.relationship}|${startedAt ?? ""}|${endedAt ?? ""}|${r.current}`;
+        if (seen.has(key)) return [];
+        seen.add(key);
+        return [{ title: null, organization: trimOrNull(s.name), relationship: r.relationship, startedAt, endedAt, ongoing: r.current }];
+      });
+    }),
   ];
 
   const education: EuEducationEntry[] = cv.education.map((e) => ({

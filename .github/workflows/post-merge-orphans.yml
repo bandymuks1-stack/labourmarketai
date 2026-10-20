@@ -29,6 +29,9 @@ jobs:
   orphans:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # A branch DELETION also fires `push`, with github.sha set to the default
+    # branch tip — not a pushed head. Nothing was pushed; nothing to check.
+    if: ${{ !github.event.deleted }}
     steps:
       - name: Commits pushed after the PR merged
         env:
@@ -39,9 +42,12 @@ jobs:
         run: |
           set -euo pipefail
           # The most recently merged PR whose head was this branch (if any).
-          read -r pr merged_head < <(gh pr list --repo "$REPO" --head "$BRANCH" --state merged \
+          # A failed lookup FAILS the run (set -e): an API error must never
+          # read as "no merged PR" and let the one orphaning push pass.
+          found=$(gh pr list --repo "$REPO" --head "$BRANCH" --state merged \
             --json number,headRefOid,mergedAt \
-            --jq 'sort_by(.mergedAt) | last | if . == null then "" else "\(.number) \(.headRefOid)" end') || true
+            --jq 'sort_by(.mergedAt) | last | if . == null then "" else "\(.number) \(.headRefOid)" end')
+          read -r pr merged_head <<< "$found" || true
           if [ -z "${pr:-}" ]; then
             echo "No merged PR for this branch — nothing to check."
             exit 0

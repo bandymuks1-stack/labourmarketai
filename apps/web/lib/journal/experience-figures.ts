@@ -21,7 +21,13 @@ export function experienceFiguresOf(
   if (!wi) return { organizationHistoryHours: null, professionalExperienceHours: null };
   return {
     organizationHistoryHours: organizationAllTime(wi)?.totalHours ?? null,
+    // Unreadable relationships (null) leave journal entries unattributed to
+    // their organization, so a journal hour inside an organization period
+    // would be counted twice: the total is UNKNOWN, never an inflated sum.
+    // An empty list ([]) is a real answer and still totals.
     professionalExperienceHours:
-      deriveProfessionalExperience({ wi, relationships: relationships ? [...relationships] : null }).hours?.total ?? null,
+      relationships == null
+        ? null
+        : (deriveProfessionalExperience({ wi, relationships: [...relationships] }).hours?.total ?? null),
   };
 }

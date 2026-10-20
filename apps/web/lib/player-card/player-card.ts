@@ -438,7 +438,7 @@ async function journalSkillLinkSlugs(
       asAny(supabase)
         .from("journal_entry_skills")
         // LIVE entries only: a deleted or superseded entry is no longer
-        // evidence (production 2026-10-20: 19 of 243 links pointed at one).
+        // evidence (its skill links are kept for history, not counted).
         .select("journal_entry_id, skills(slug), journal_entries!inner(deleted_at, superseded_by)")
         .eq("worker_id", workerId)
         .is("journal_entries.deleted_at", null)

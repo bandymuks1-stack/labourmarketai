@@ -766,6 +766,16 @@ describe("the Living CV gives an earlier legal entity and leadership their own e
     expect(byName("Test shell")).toBeUndefined();
   });
 
+  it("a leadership entry carries no organization work hours and is dated by its roles only", () => {
+    const nonstop = byName("UAB Nonstop Group")!;
+    // The organization's work hours are not hours performed as its manager.
+    expect(nonstop.hours).toBeNull();
+    // The membership states no dates: unknown, never a work-record span.
+    expect(nonstop.from).toBeNull();
+    expect(nonstop.to).toBeNull();
+    expect(nonstop.roles[0]).toMatchObject({ relationship: "manager", source: "membership", current: true });
+  });
+
   it("no reading, no entries", () => {
     expect(experienceStopsOf(null)).toEqual([]);
   });
