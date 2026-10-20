@@ -11,6 +11,9 @@ import { correctedOriginalIds } from "@/lib/journal/counted-once";
  * not from the links themselves, because a correction that dropped a skill has
  * no link to it. `null` = unreadable (callers degrade, never guess).
  */
+/** The server's own row cap; reaching it means "could not see them all". */
+const CORRECTIONS_READ_CAP = 1000;
+
 export async function readCorrectedOriginalIds(
   supabase: SupabaseClient,
   workerId: string,
@@ -23,8 +26,11 @@ export async function readCorrectedOriginalIds(
       .is("deleted_at", null)
       .is("superseded_by", null)
       .not("correction_of", "is", null)
-      .limit(1000);
+      .limit(CORRECTIONS_READ_CAP);
     if (error || !Array.isArray(data)) return null;
+    // At the cap the set may be incomplete: unknown, never a partial set that
+    // would leave some corrected originals counted.
+    if (data.length >= CORRECTIONS_READ_CAP) return null;
     return correctedOriginalIds(data as { id: string; correction_of: string | null }[]);
   } catch {
     return null;

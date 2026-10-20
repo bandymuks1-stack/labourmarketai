@@ -64,21 +64,53 @@ describe("no reviewer surface re-parses hours from the text", () => {
   });
 });
 
-describe("the counterparty review keeps the RPC's metric order", () => {
-  it("of two entry quantities in server order, the later one counts", () => {
+describe("the counterparty review keeps the real metric order", () => {
+  it("of two entry quantities, the later one (created_at, then id) counts", () => {
     const rows = [6, 8].map((v, i) => ({
       metric_slug: "quantity",
       value_text: null,
       value_numeric: v,
       unit_slug: "hours",
-      created_at: null,
-      id: `rpc-order-${String(i).padStart(6, "0")}`,
+      created_at: "2026-10-20T08:00:00Z",
+      id: `00000000-0000-4000-8000-00000000000${i}`,
     }));
     expect(reviewerHoursOf({ id: "e1", createdAt: "2026-10-20T08:00:00Z", metrics: rows })?.value).toBe(8);
   });
-  it("the page maps the RPC order into the canonical tie-breaker", () => {
+  it("the page passes the RPC's real created_at and id, never an invented order", () => {
     const WEB = join(__dirname, "..", "..");
     const page = readFileSync(join(WEB, "app", "[locale]", "dashboard", "inbox", "counterparty", "page.tsx"), "utf8");
-    expect(page).toMatch(/id: mm\.id \?\? `rpc-order-\$\{String\(i\)\.padStart\(6, "0"\)\}`/);
+    expect(page).toMatch(/created_at: mm\.createdAt \?\? null,\s*id: mm\.id \?\? null,/);
+    expect(page).not.toMatch(/rpc-order-/);
+  });
+});
+
+describe("RPC → parser → reviewer hours: the latest stored quantity is what the counterparty sees", () => {
+  it("several quantity rows returned oldest first (as the RPC orders them) resolve to the latest", async () => {
+    const { parseEntryDetail } = await import("./counterparty-review-model");
+    const detail = parseEntryDetail({
+      entry_id: "e1",
+      original_text: "8 h",
+      created_at: "2026-10-20T07:00:00Z",
+      metrics: [
+        { metric_slug: "quantity", value_numeric: 6, unit_slug: "hours", created_at: "2026-10-20T07:00:00Z", id: "00000000-0000-4000-8000-000000000003" },
+        { metric_slug: "quantity", value_numeric: 7, unit_slug: "hours", created_at: "2026-10-20T07:30:00Z", id: "00000000-0000-4000-8000-000000000001" },
+        { metric_slug: "quantity", value_numeric: 8, unit_slug: "hours", created_at: "2026-10-20T08:00:00Z", id: "00000000-0000-4000-8000-000000000002" },
+      ],
+    });
+    expect(detail?.metrics.map((m) => [m.createdAt, m.id])).toEqual([
+      ["2026-10-20T07:00:00Z", "00000000-0000-4000-8000-000000000003"],
+      ["2026-10-20T07:30:00Z", "00000000-0000-4000-8000-000000000001"],
+      ["2026-10-20T08:00:00Z", "00000000-0000-4000-8000-000000000002"],
+    ]);
+    // the page's mapping, verbatim in shape
+    const metrics = detail!.metrics.map((mm) => ({
+      metric_slug: mm.slug,
+      value_text: mm.valueText,
+      value_numeric: mm.valueNumeric,
+      unit_slug: mm.unitSlug,
+      created_at: mm.createdAt ?? null,
+      id: mm.id ?? null,
+    }));
+    expect(reviewerHoursOf({ id: "e1", createdAt: "2026-10-20T07:00:00Z", metrics })?.value).toBe(8);
   });
 });
