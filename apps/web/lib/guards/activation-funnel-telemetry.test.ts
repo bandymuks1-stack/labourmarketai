@@ -516,7 +516,9 @@ describe("employer funnel closure — server emitters at the real write points",
     expect(emit).toBeGreaterThan(insertFail);
     expect(send.match(/FUNNEL_EVENTS\.conversationMessageSent/g)).toHaveLength(1);
     expect(send).toMatch(/ref_type: "conversation",\s*ref_id: input\.conversationId,/);
-    const block = send.slice(emit, send.indexOf("// Bump conversation.updated_at"));
+    const end = send.indexOf("// The thread's last activity");
+    expect(end).toBeGreaterThan(emit);
+    const block = send.slice(emit, end);
     expect(block).not.toMatch(/\bbody\b|attachments|author_id|user\.id/);
   });
 
