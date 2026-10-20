@@ -1184,8 +1184,12 @@ describe("14 · ONE time scope (issue #1689, lane B): bounded reads say so, diar
     for (const [name, src] of Object.entries({ planning, timesheets })) {
       expect(src, `${name} re-implements the chain`).not.toMatch(/rows\.map\(\(r\) => r\.correction_of\)\.filter\(/);
     }
-    // the bounded workload read is deterministic: ordered before limited
-    expect(timesheets).toMatch(/\.order\("created_at", \{ ascending: false \}\)\s*\.order\("id", \{ ascending: false \}\)\s*\.limit\(WORKLOAD_READ_LIMIT\)/);
+    // the workload read is deterministic AND complete (2026-10-20): ordered,
+    // paged to the end with its metrics embedded, UNAVAILABLE past the ceiling
+    expect(timesheets).toMatch(/\.order\("created_at", \{ ascending: false \}\)\s*\.order\("id", \{ ascending: false \}\),\s*\{ pageSize: 1000, maxPages: WORKLOAD_MAX_PAGES \}/);
+    expect(timesheets).toMatch(/journal_entry_metrics\(id, metric_slug, value_text, value_numeric, unit_slug, source, created_at\)/);
+    expect(timesheets).toMatch(/if \(entriesRes\.error \|\| entriesRes\.truncated\) return \{ status: "unavailable" \};/);
+    expect(timesheets).not.toMatch(/WORKLOAD_METRIC_READ_LIMIT/);
   });
 
   it("the intake's saved-record day check adds the SAME organization ledger the section's checks add, through the one helper", () => {
