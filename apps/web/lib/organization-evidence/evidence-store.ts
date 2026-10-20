@@ -218,6 +218,32 @@ function fail<T>(error: { code?: string | null; message?: string | null }): Stor
   return { data: null, error: { code: error.code ?? null, message: error.message ?? null } };
 }
 
+/** The server answers at most 1000 rows per request: a bare `.limit(N)` above
+ *  that is a silent 1000. An import of 2,500 rows committed only its first 1000
+ *  (the rest stayed `pending`), and the duplicate check saw only 1000 of the
+ *  organization's records, so a repeated day was committed twice (audit
+ *  2026-10-20). Every list read here pages to the end on a stable order; past
+ *  its ceiling it FAILS rather than answer a partial list. */
+const STORE_PAGE = 1000;
+async function readEveryPage(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  build: () => any,
+  ceiling: number,
+): Promise<StoreResult<StoreRow[]>> {
+  const rows: StoreRow[] = [];
+  for (let from = 0; ; from += STORE_PAGE) {
+    const res = await build().range(from, from + STORE_PAGE - 1);
+    if (res.error) return fail(res.error);
+    const got = (res.data ?? []) as StoreRow[];
+    rows.push(...got);
+    if (got.length < STORE_PAGE) return { data: rows, error: null };
+    if (rows.length > ceiling) return fail({ code: "read_ceiling", message: "more rows than the read ceiling" });
+  }
+}
+
+/** The organization-wide reads (existing records, roster, objects). */
+const ORGANIZATION_READ_CEILING = 200_000;
+
 /**
  * PRODUCTION: the caller's own RLS-scoped client. Each method is the query the
  * orchestration ran inline before this port existed.
@@ -313,11 +339,10 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
     },
 
     async listStagedRows(sessionId, columns, filter) {
-      const res = await stagedQuery(sessionId, columns.join(", "), filter)
-        .order("row_index", { ascending: true })
-        .limit(MAX_ROWS_PER_SESSION);
-      if (res.error) return fail(res.error);
-      return { data: (res.data ?? []) as StoreRow[], error: null };
+      return readEveryPage(
+        () => stagedQuery(sessionId, columns.join(", "), filter).order("row_index", { ascending: true }),
+        MAX_ROWS_PER_SESSION,
+      );
     },
 
     async updateStagedRow(id, patch) {
@@ -343,13 +368,15 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
     },
 
     async readRoster(organizationId) {
-      const res = await db()
-        .from("organization_people")
-        .select("id, display_name, normalized_name, external_ref")
-        .eq("organization_id", organizationId)
-        .limit(5000);
-      if (res.error) return fail(res.error);
-      return { data: (res.data ?? []) as StoreRow[], error: null };
+      return readEveryPage(
+        () =>
+          db()
+            .from("organization_people")
+            .select("id, display_name, normalized_name, external_ref")
+            .eq("organization_id", organizationId)
+            .order("id", { ascending: true }),
+        ORGANIZATION_READ_CEILING,
+      );
     },
 
     async insertRosterPerson(row) {
@@ -359,13 +386,15 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
     },
 
     async readWorkObjects(organizationId) {
-      const res = await db()
-        .from("work_objects")
-        .select("id, name, status")
-        .eq("organization_id", organizationId)
-        .limit(2000);
-      if (res.error) return fail(res.error);
-      return { data: (res.data ?? []) as StoreRow[], error: null };
+      return readEveryPage(
+        () =>
+          db()
+            .from("work_objects")
+            .select("id, name, status")
+            .eq("organization_id", organizationId)
+            .order("id", { ascending: true }),
+        ORGANIZATION_READ_CEILING,
+      );
     },
 
     async createWorkObject(args) {
@@ -377,13 +406,15 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
     },
 
     async readRecordKeys(organizationId) {
-      const res = await db()
-        .from("organization_evidence_records")
-        .select("id, record_fingerprint, organization_person_id, activity_date, work_object_id, hours, original_text, import_row_id")
-        .eq("organization_id", organizationId)
-        .limit(MAX_ROWS_PER_SESSION);
-      if (res.error) return fail(res.error);
-      return { data: (res.data ?? []) as StoreRow[], error: null };
+      return readEveryPage(
+        () =>
+          db()
+            .from("organization_evidence_records")
+            .select("id, record_fingerprint, organization_person_id, activity_date, work_object_id, hours, original_text, import_row_id")
+            .eq("organization_id", organizationId)
+            .order("id", { ascending: true }),
+        ORGANIZATION_READ_CEILING,
+      );
     },
 
     async insertRecords(rows) {
@@ -506,24 +537,30 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
 
     async readParties(recordIds) {
       if (recordIds.length === 0) return { data: [], error: null };
-      const res = await db()
-        .from("organization_evidence_parties")
-        .select("id, record_id, organization_id, party_role, party_organization_id, party_label")
-        .in("record_id", recordIds as string[])
-        .limit(5000);
-      if (res.error) return fail(res.error);
-      return { data: (res.data ?? []) as StoreRow[], error: null };
+      return readEveryPage(
+        () =>
+          db()
+            .from("organization_evidence_parties")
+            .select("id, record_id, organization_id, party_role, party_organization_id, party_label")
+            .in("record_id", recordIds as string[])
+            .order("id", { ascending: true }),
+        ORGANIZATION_READ_CEILING,
+      );
     },
 
     async readRecordIdsNamingOrganization(partyOrganizationId) {
-      const res = await db()
-        .from("organization_evidence_parties")
-        .select("record_id")
-        .eq("party_organization_id", partyOrganizationId)
-        .limit(5000);
-      if (res.error) return fail(res.error);
+      const res = await readEveryPage(
+        () =>
+          db()
+            .from("organization_evidence_parties")
+            .select("id, record_id")
+            .eq("party_organization_id", partyOrganizationId)
+            .order("id", { ascending: true }),
+        ORGANIZATION_READ_CEILING,
+      );
+      if (res.error) return { data: null, error: res.error };
       return {
-        data: [...new Set(((res.data ?? []) as { record_id: string }[]).map((r) => r.record_id))],
+        data: [...new Set(((res.data ?? []) as unknown as { record_id: string }[]).map((r) => r.record_id))],
         error: null,
       };
     },
