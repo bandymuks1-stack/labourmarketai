@@ -42,6 +42,7 @@
 import type { CvSkillTier } from "./skill-tiers";
 import type { CvOrganizationHistoryEntry } from "./organization-history";
 import type { VerifiedCvData } from "./verified-cv";
+import { experienceStopsOf } from "@/lib/cv-export/experience-stops";
 
 /** The five top-level blocks, in the order a European reader expects them. */
 export type EuSectionId =
@@ -69,6 +70,10 @@ export interface EuDatedEntry {
   readonly relationship: string;
   readonly startedAt: string | null;
   readonly endedAt: string | null;
+  /** Explicitly ongoing. When absent, an entry without an end is ongoing (an
+   *  engagement row); a stop whose end is merely UNKNOWN sets false, so the
+   *  renderer never prints "present" for it. */
+  readonly ongoing?: boolean;
 }
 
 export interface EuEducationEntry {
@@ -192,7 +197,7 @@ export function resolveEuFormatDocument(
       r.date(e.startedAt),
       r.date(e.endedAt),
       r.present,
-      e.endedAt === null,
+      e.ongoing ?? e.endedAt === null,
     ),
     note: e.title ? r.relationship(e.relationship) : null,
   }));
@@ -263,13 +268,29 @@ const trimOrNull = (v: string | null | undefined): string | null => {
 
 /** Build the EU-format view. Pure projection of the Living CV — no new facts. */
 export function buildEuFormatCv(cv: VerifiedCvData): EuFormatCv {
-  const workExperience: EuDatedEntry[] = cv.workHistory.map((e) => ({
-    title: trimOrNull(e.title),
-    organization: trimOrNull(e.orgName),
-    relationship: e.relationship,
-    startedAt: e.startedAt,
-    endedAt: e.endedAt,
-  }));
+  const workExperience: EuDatedEntry[] = [
+    ...cv.workHistory.map((e) => ({
+      title: trimOrNull(e.title),
+      organization: trimOrNull(e.orgName),
+      relationship: e.relationship,
+      startedAt: e.startedAt,
+      endedAt: e.endedAt,
+    })),
+    // Positions the engagement list cannot carry (decision 0025, 2026-10-20):
+    // an earlier legal entity's stated leadership, a governing membership —
+    // the same stops the Living CV shows. One line per role; unknown dates
+    // stay unknown (no "present" for a merely unknown end).
+    ...experienceStopsOf(cv.professionalExperience).flatMap((s) =>
+      [...new Set(s.roles.map((r) => r.relationship))].map((relationship) => ({
+        title: null,
+        organization: trimOrNull(s.name),
+        relationship,
+        startedAt: s.from,
+        endedAt: s.current ? null : s.to,
+        ongoing: s.current,
+      })),
+    ),
+  ];
 
   const education: EuEducationEntry[] = cv.education.map((e) => ({
     institution: e.institutionName,
