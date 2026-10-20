@@ -49,6 +49,37 @@ export function smtpConfigFromEnv(env: Record<string, string | undefined> = proc
   return { host, port, user, pass, from };
 }
 
+/**
+ * WHY the mailbox is or is not usable — for the operator's status screen.
+ * Presence only, never a value (not even a length): which of the five
+ * settings exist, the port as configured, and whether `smtpConfigFromEnv`
+ * would accept them. "Not configured" used to be one opaque state, so a
+ * missing From address or port 587 looked exactly like a missing password.
+ */
+export type SmtpReadiness = {
+  readonly present: { readonly host: boolean; readonly user: boolean; readonly pass: boolean; readonly from: boolean };
+  /** The configured port (465 when unset — the default `smtpConfigFromEnv` applies). */
+  readonly port: number | null;
+  readonly portSupported: boolean;
+  readonly ready: boolean;
+};
+
+export function smtpReadiness(env: Record<string, string | undefined> = process.env): SmtpReadiness {
+  const rawPort = (env.LM_SMTP_PORT ?? "465").trim();
+  const port = /^\d{1,5}$/.test(rawPort) ? Number(rawPort) : null;
+  return {
+    present: {
+      host: (env.LM_SMTP_HOST ?? "").trim() !== "",
+      user: (env.LM_SMTP_USER ?? "").trim() !== "",
+      pass: (env.LM_SMTP_PASS ?? "") !== "",
+      from: (env.LM_SMTP_FROM ?? "").trim() !== "",
+    },
+    port,
+    portSupported: port === 465,
+    ready: smtpConfigFromEnv(env) !== null,
+  };
+}
+
 /** The bare address inside "Name <addr>" (or the value itself). */
 export function addressOf(from: string): string {
   const m = /<([^<>\s]+@[^<>\s]+)>/.exec(from);
