@@ -131,6 +131,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-20: pin label language widened to the communication set.
       "20261020025900_",
       "20261020080000_",
+      "20261020100000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

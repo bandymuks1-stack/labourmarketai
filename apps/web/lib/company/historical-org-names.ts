@@ -16,6 +16,40 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  */
 type OrgEmbed = { display_name: string | null; legal_name: string | null } | null | undefined;
 
+type OrgNames = { display_name: string | null; legal_name: string | null };
+const MISSING_FN = new Set(["42883", "PGRST202"]);
+
+/**
+ * The names of organizations the caller worked for — an engagement context
+ * (any status) or, since 20261020100000, a CLAIMED roster row. v2 first;
+ * where it is not installed yet, v1 (engagement contexts only). Names only.
+ */
+export async function readHistoricalOrgNames(
+  supabase: SupabaseClient,
+  ids: readonly string[],
+): Promise<Map<string, OrgNames>> {
+  const out = new Map<string, OrgNames>();
+  const want = [...new Set(ids)].slice(0, 100);
+  if (want.length === 0) return out;
+  for (const fn of ["my_historical_organization_names_v2", "my_historical_organization_names_v1"]) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any).rpc(fn, { p_org_ids: want });
+      if (error) {
+        if (MISSING_FN.has(error.code ?? "")) continue;
+        return out;
+      }
+      for (const r of (Array.isArray(data) ? data : []) as ({ organization_id: string } & OrgNames)[]) {
+        out.set(r.organization_id, { display_name: r.display_name, legal_name: r.legal_name });
+      }
+      return out;
+    } catch {
+      return out;
+    }
+  }
+  return out;
+}
+
 export async function withHistoricalOrgNames<
   T extends { organization_id?: string | null; organizations?: OrgEmbed },
 >(supabase: SupabaseClient, rows: T[]): Promise<T[]> {
@@ -28,15 +62,8 @@ export async function withHistoricalOrgNames<
   ];
   if (missing.length === 0) return rows;
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any).rpc("my_historical_organization_names_v1", {
-      p_org_ids: missing.slice(0, 100),
-    });
-    if (error || !Array.isArray(data)) return rows;
-    const byId = new Map<string, { display_name: string | null; legal_name: string | null }>();
-    for (const r of data as { organization_id: string; display_name: string | null; legal_name: string | null }[]) {
-      byId.set(r.organization_id, { display_name: r.display_name, legal_name: r.legal_name });
-    }
+    const byId = await readHistoricalOrgNames(supabase, missing);
+    if (byId.size === 0) return rows;
     return rows.map((r) =>
       r.organization_id && !(r.organizations?.display_name || r.organizations?.legal_name) && byId.has(r.organization_id)
         ? { ...r, organizations: { ...(r.organizations ?? {}), ...byId.get(r.organization_id)! } }
