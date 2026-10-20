@@ -435,9 +435,13 @@ async function journalSkillLinkSlugs(
   try {
     const { data, error } = await asAny(supabase)
       .from("journal_entry_skills")
-      .select("skills(slug)")
+      // LIVE entries only: a deleted or superseded entry is no longer
+      // evidence (production 2026-10-20: 19 of 243 links pointed at one).
+      .select("skills(slug), journal_entries!inner(deleted_at, superseded_by)")
       .eq("worker_id", workerId)
-      .limit(2000);
+      .is("journal_entries.deleted_at", null)
+      .is("journal_entries.superseded_by", null)
+      .limit(1000);
     if (error || !Array.isArray(data)) return [];
     return (data as { skills: { slug: string | null } | null }[]).map((r) => ({
       slug: r.skills?.slug ?? null,
