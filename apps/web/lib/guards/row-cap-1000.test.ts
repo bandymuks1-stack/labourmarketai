@@ -46,7 +46,9 @@ for (const f of all) {
   }
 }
 
-function overCapLimits(src: string): number {
+function overCapLimits(raw: string): number {
+  // Code only: a comment that QUOTES an old `.limit(5000)` is history, not a read.
+  const src = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
   const local = new Map<string, number>();
   for (const m of src.matchAll(/const ([A-Z][A-Z0-9_]*)\s*=\s*([0-9_]+)\b/g)) {
     local.set(m[1]!, Number(m[2]!.replace(/_/g, "")));
@@ -63,10 +65,6 @@ function overCapLimits(src: string): number {
 /** Frozen 2026-10-20. Lower a count when a read is paged; never raise one. */
 const BASELINE: Record<string, number> = {
   "lib/admin/ai-cost.ts": 2,
-  // #2561 pages these three (counts drop to 1 / 0 / 0 once it merges).
-  "lib/admin/conversion-funnel.ts": 2,
-  "lib/admin/pilot-metrics.ts": 1,
-  "lib/admin/ttfv-by-actor.ts": 1,
   "lib/admin/pilots.ts": 2,
   "lib/capabilities/marketplace-capabilities.ts": 1,
   "lib/communication/organization-scope.ts": 1,
@@ -82,7 +80,6 @@ const BASELINE: Record<string, number> = {
   "lib/ops/product-metrics.ts": 1,
   "lib/organization-evidence/evidence-store.ts": 6,
   "lib/organization-evidence/history-quality-read.ts": 1,
-  "lib/organization-evidence/worker-evidence-read.ts": 1,
   "lib/organization-people/ingest-service.ts": 1,
   "lib/player-card/player-card.ts": 1,
   "lib/profile/trust-signals.ts": 1,
