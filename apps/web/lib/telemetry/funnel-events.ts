@@ -87,6 +87,11 @@ export const FUNNEL_EVENTS = {
   signupCompleted: "signup_completed",
   cvUploadStarted: "cv_upload_started",
   cvUploadSucceeded: "cv_upload_succeeded",
+  //    2026-10-20: a CV read that did NOT succeed. Without it 2 of 22 people
+  //    who tried an upload left no trace at all — the funnel could not tell a
+  //    wrong format from a server failure. result = "error", error_code = the
+  //    client's closed failure code (cv-import-client.ts), never file data.
+  cvUploadFailed: "cv_upload_failed",
   bookingViewed: "booking_viewed",
   bookingAccepted: "booking_accepted",
   bookingDeclined: "booking_declined",
