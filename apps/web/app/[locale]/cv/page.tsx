@@ -810,7 +810,8 @@ export default async function VerifiedCvPage({
           current: role.current,
           source: (role.source === "membership" ? "organization" : "own") as "organization" | "own",
           level: (role.source === "membership" ? "recorded" : "declared") as JourneyLevel,
-          contextId: null,
+          // The engagement context ties journal-evidenced skills to this role.
+          contextId: role.engagementContextId,
           hours: null,
           confirmedHours: null,
         };

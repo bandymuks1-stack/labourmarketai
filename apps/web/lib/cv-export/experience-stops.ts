@@ -37,6 +37,9 @@ export type ExperienceStop = {
     readonly endedAt: string | null;
     /** `membership` = a governing membership; `engagement` = an engagement row. */
     readonly source: string;
+    /** The engagement row behind an engagement role (null for a membership) —
+     *  what ties the role to the journal work recorded in that context. */
+    readonly engagementContextId: string | null;
   }[];
   readonly from: string | null;
   readonly to: string | null;
@@ -86,6 +89,7 @@ export function experienceStopsOf(pe: ProfessionalExperience | null | undefined)
         startedAt: r.startedAt ?? null,
         endedAt: r.endedAt ?? null,
         source: r.source,
+        engagementContextId: r.engagementContextId ?? null,
       })),
       from,
       to,

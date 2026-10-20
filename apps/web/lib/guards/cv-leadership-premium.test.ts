@@ -21,6 +21,10 @@ describe("premium leadership entries", () => {
     expect(page).toMatch(/const from = monthYear\(r\.startedAt\);/);
     expect(page).toMatch(/r\.current \? tPremium\("present"\) : monthYear\(r\.endedAt\)/);
   });
+  it("an engagement role's journey station carries its context, so its journal skills connect", () => {
+    expect(page).toMatch(/contextId: role.engagementContextId,/);
+  });
+
   it("provenance follows the role: engagement = own (declared), membership = organization record", () => {
     expect(page).toMatch(/role\.source === "membership" \? tPremium\("source\.organization"\) : tPremium\("source\.own"\)/);
     expect(page).toMatch(/level: role\.source === "membership" \? "recorded" : "declared"/);
