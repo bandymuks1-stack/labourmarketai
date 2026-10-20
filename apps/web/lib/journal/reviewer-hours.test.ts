@@ -64,21 +64,27 @@ describe("no reviewer surface re-parses hours from the text", () => {
   });
 });
 
-describe("the counterparty review keeps the RPC's metric order", () => {
-  it("of two entry quantities in server order, the later one counts", () => {
+describe("the counterparty review keeps the real metric order", () => {
+  it("of two entry quantities, the later one (created_at, then id) counts", () => {
     const rows = [6, 8].map((v, i) => ({
       metric_slug: "quantity",
       value_text: null,
       value_numeric: v,
       unit_slug: "hours",
-      created_at: null,
-      id: `rpc-order-${String(i).padStart(6, "0")}`,
+      created_at: "2026-10-20T08:00:00Z",
+      id: `00000000-0000-4000-8000-00000000000${i}`,
     }));
     expect(reviewerHoursOf({ id: "e1", createdAt: "2026-10-20T08:00:00Z", metrics: rows })?.value).toBe(8);
   });
-  it("the page maps the RPC order into the canonical tie-breaker", () => {
+  it("the page passes the RPC's real created_at and id; the RPC returns and orders by both", () => {
     const WEB = join(__dirname, "..", "..");
     const page = readFileSync(join(WEB, "app", "[locale]", "dashboard", "inbox", "counterparty", "page.tsx"), "utf8");
-    expect(page).toMatch(/id: mm\.id \?\? `rpc-order-\$\{String\(i\)\.padStart\(6, "0"\)\}`/);
+    expect(page).toMatch(/created_at: mm\.createdAt \?\? null,\s*id: mm\.id \?\? null,/);
+    expect(page).not.toMatch(/rpc-order-/);
+    const sql = readFileSync(
+      join(WEB, "..", "..", "supabase", "migrations", "20261020080000_counterparty_detail_metric_order_v1.sql"),
+      "utf8",
+    );
+    expect(sql).toMatch(/'created_at', m\.created_at, 'id', m\.id\) order by m\.created_at, m\.id/);
   });
 });
