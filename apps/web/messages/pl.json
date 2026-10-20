@@ -9482,6 +9482,16 @@
         "rate_limits": "Aktywne ograniczenia liczby zapytań",
         "freshness_demotion": "Nieaktualne profile pozycjonowane niżej"
       }
+    },
+    "mail": {
+      "title": "Oficjalna skrzynka (info@labourmarket.ai)",
+      "ready": "Wysyła",
+      "notReady": "Nie wysyła",
+      "present": "ustawione",
+      "missing": "BRAK",
+      "portOk": "obsługiwany (465, TLS)",
+      "portUnsupported": "NIEOBSŁUGIWANY – tylko 465",
+      "note": "Jeden kanał dla całej poczty platformy: powiadomień RODO, zaproszeń i wiadomości systemowych. Pokazywane jest tylko, czy wartość istnieje, nigdy sama wartość. Brakującą wartość ustaw na VPS przez lm-env-set.sh."
     }
   },
   "adminMetrics": {

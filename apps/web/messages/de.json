@@ -9482,6 +9482,16 @@
         "rate_limits": "Begrenzte Anfragelimits aktiv",
         "freshness_demotion": "Veraltete Profile niedriger eingestuft"
       }
+    },
+    "mail": {
+      "title": "Offizielles Postfach (info@labourmarket.ai)",
+      "ready": "Sendet",
+      "notReady": "Sendet nicht",
+      "present": "gesetzt",
+      "missing": "FEHLT",
+      "portOk": "unterstützt (465, TLS)",
+      "portUnsupported": "NICHT UNTERSTÜTZT – nur 465",
+      "note": "Ein Kanal für alle E-Mails der Plattform: DSGVO-Hinweise, Einladungen und Systemmails. Angezeigt wird nur, ob ein Wert vorhanden ist, nie der Wert selbst. Einen fehlenden Wert auf dem VPS mit lm-env-set.sh setzen."
     }
   },
   "adminMetrics": {

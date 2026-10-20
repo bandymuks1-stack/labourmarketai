@@ -7715,5 +7715,17 @@
   },
   "workObjects": {
     "addButton": "Pievienot objektu"
+  },
+  "adminLaunchReadiness": {
+    "mail": {
+      "title": "Oficiālā pastkaste (info@labourmarket.ai)",
+      "ready": "Sūta",
+      "notReady": "Nesūta",
+      "present": "iestatīts",
+      "missing": "TRŪKST",
+      "portOk": "atbalstīts (465, TLS)",
+      "portUnsupported": "NETIEK ATBALSTĪTS – tikai 465",
+      "note": "Viens kanāls visiem platformas e-pastiem: VDAR paziņojumiem, ielūgumiem un sistēmas vēstulēm. Rāda tikai, vai vērtība ir, nekad pašu vērtību. Trūkstošo vērtību iestatiet VPS ar lm-env-set.sh."
+    }
   }
 }
