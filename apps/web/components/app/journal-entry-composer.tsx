@@ -54,6 +54,7 @@ import {
 } from "@/lib/journal/journal-recognition";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import type { JournalEditingEntry } from "@/lib/journal/edit-entry";
+import { seedFragmentsFromEntry } from "@/lib/journal/edit-fragment-seed";
 import {
   templateScaffoldText,
   type JournalTemplateOption,
@@ -181,6 +182,10 @@ type FragmentReviewState = JournalFragmentSuggestion & {
    *  is forwarded to the save action as a review-only `unknown_phrase`
    *  metric — never auto-promoted to a verified taxonomy entry. */
   userLabel: string;
+  /** Provenance of a fragment SEEDED from the saved entry (an edit): an
+   *  untouched fragment keeps the source it was saved with; a parse-derived
+   *  or relabelled fragment is the worker's own input (server default). */
+  source?: "worker_input" | "ai_extracted" | null;
 };
 
 export type { JournalEditingEntry };
@@ -408,7 +413,9 @@ export function JournalEntryComposer({
   >({});
   // Multi-fragment review state — populated when the parser splits the text
   // into more than one work fragment (the owner sentence yields 3).
-  const [fragments, setFragments] = useState<FragmentReviewState[]>([]);
+  const [fragments, setFragments] = useState<FragmentReviewState[]>(() =>
+    seedFragmentsFromEntry(editingEntry),
+  );
   // v3 — institution / topic detection cards.
   const [institutionStatus, setInstitutionStatus] = useState<SuggestionStatus>(
     editingEntry?.institutionName ? "confirmed" : "pending",
@@ -911,7 +918,7 @@ export function JournalEntryComposer({
 
   function setFragmentUserLabel(idx: number, label: string) {
     setFragments((prev) =>
-      prev.map((f, i) => (i === idx ? { ...f, userLabel: label } : f)),
+      prev.map((f, i) => (i === idx ? { ...f, userLabel: label, source: "worker_input" } : f)),
     );
   }
 
@@ -1005,6 +1012,7 @@ export function JournalEntryComposer({
           activityLabel: f.activityLabel,
           isUnknown: f.isUnknown,
           userLabel: f.userLabel.trim() || null,
+          ...(f.source ? { source: f.source } : {}),
         }));
       if (institutionStatus === "confirmed" && institutionName.trim())
         fd.set("institution_name", institutionName.trim());

@@ -87,27 +87,79 @@ const MISSING_RPC_CODES = new Set(["PGRST202", "42883"]);
  *  is treated as the SAME submission (double click / network retry). */
 const DUPLICATE_SAVE_WINDOW_MS = 30_000;
 
-/** Id of an entry this worker saved in the same engagement context with the
- *  same text moments ago, else null. A failed read is "no duplicate found"
- *  (the save then proceeds exactly as before). */
+/** The facts that make two saves DIFFERENT work even with the same words:
+ *  the day, the durations and the work times. */
+const DUPLICATE_KEY_SLUGS = new Set([
+  "work_date",
+  "quantity",
+  "fragment_time",
+  "work_start",
+  "work_end",
+  "break_minutes",
+]);
+
+type DuplicateKeyMetric = {
+  metric_slug: string;
+  value_numeric?: number | null;
+  value_text?: string | null;
+  unit_slug?: string | null;
+};
+
+/** One comparable string for the day / time facts of a metric list. */
+export function duplicateKeyOf(metrics: readonly DuplicateKeyMetric[]): string {
+  return metrics
+    .filter((m) => DUPLICATE_KEY_SLUGS.has(m.metric_slug))
+    .map((m) => [m.metric_slug, m.value_numeric ?? "", m.value_text ?? "", m.unit_slug ?? ""].join("|"))
+    .sort()
+    .join(";");
+}
+
+/** Id of a LIVE entry this worker saved moments ago that is the SAME
+ *  submission — same engagement, same words, same day and durations, same
+ *  explicit project choice — else null. A failed read is "no duplicate found"
+ *  (the save then proceeds exactly as before).
+ *
+ *  The text alone was the key before (audit 2026-10-20): backfilling
+ *  "Plytelės 8 val." for Monday and then Tuesday, or deleting an entry and
+ *  re-recording it, answered "saved" with the FIRST (or deleted) entry's id
+ *  and wrote nothing — a lost day reported as success. */
 export async function findRecentDuplicateEntry(
   supabase: ServerSupabase,
-  q: { workerId: string; engagementId: string; originalText: string },
+  q: {
+    workerId: string;
+    engagementId: string;
+    originalText: string;
+    metrics?: readonly DuplicateKeyMetric[];
+    /** Present only when the person chose explicitly (a project or none). */
+    explicitProjectId?: string | null;
+  },
 ): Promise<string | null> {
   try {
     const since = new Date(Date.now() - DUPLICATE_SAVE_WINDOW_MS).toISOString();
     const { data, error } = await supabase
       .from("journal_entries")
-      .select("id")
+      .select("id, project_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug)")
       .eq("worker_id", q.workerId)
       .eq("engagement_context_id", q.engagementId)
       .eq("original_text", q.originalText)
+      .is("deleted_at", null)
+      .is("superseded_by", null)
       .gte("created_at", since)
       .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (error) return null;
-    return (data as { id?: string } | null)?.id ?? null;
+      .limit(5);
+    if (error || !Array.isArray(data)) return null;
+    const want = duplicateKeyOf(q.metrics ?? []);
+    for (const row of data as {
+      id?: string;
+      project_id?: string | null;
+      journal_entry_metrics?: DuplicateKeyMetric[] | null;
+    }[]) {
+      if (!row.id) continue;
+      if (duplicateKeyOf(row.journal_entry_metrics ?? []) !== want) continue;
+      if (q.explicitProjectId !== undefined && (row.project_id ?? null) !== q.explicitProjectId) continue;
+      return row.id;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -896,10 +948,13 @@ export async function createJournalEntryCore(
   // second call sees the first's committed row). Limit: two requests truly
   // in flight at the same instant can both pass this read — closing that
   // needs a DB unique key (an additive migration, not part of this slice).
+  const projectParams = rpcProjectParams(projectChoice);
   const duplicateOf = await findRecentDuplicateEntry(supabase, {
     workerId: worker.id,
     engagementId,
     originalText,
+    metrics,
+    ...(projectParams.p_project_explicit ? { explicitProjectId: projectParams.p_project_id } : {}),
   });
   if (duplicateOf) {
     const dupSkills = await runSkillPipeline({
