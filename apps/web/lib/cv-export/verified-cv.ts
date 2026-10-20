@@ -18,6 +18,7 @@ import {
 import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
 import {
   isLiveJournalEntry,
+  readAllPages,
   type LiveJournalEntryFlags,
 } from "@/lib/journal/journal-list-core";
 import {
@@ -345,6 +346,35 @@ export type VerifiedCvResult =
   | { ok: true; cv: VerifiedCvData }
   | { ok: false; code: "not_authenticated" | "no_worker" };
 
+type CvEntryRow = {
+  id: string;
+  created_at: string;
+  project_id: string | null;
+  engagement_context_id: string | null;
+  deleted_at?: string | null;
+  superseded_by?: string | null;
+  correction_of?: string | null;
+};
+
+/** A read keyed by many ids, done in chunks (a 1000-id `.in()` both exceeds
+ *  the server's 1000-row answer and risks the URL limit), every chunk paged
+ *  to the end. Null when any page fails or a chunk passes the ceiling — the
+ *  caller's existing "could not read" path, never a partial answer. */
+async function readByIdChunks<T>(
+  ids: readonly string[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  build: (chunk: string[]) => any,
+): Promise<T[] | null> {
+  const out: T[] = [];
+  for (let i = 0; i < ids.length; i += 200) {
+    const chunk = ids.slice(i, i + 200);
+    const r = await readAllPages<T>(() => build(chunk));
+    if (r.error || r.truncated) return null;
+    out.push(...r.rows);
+  }
+  return out;
+}
+
 /** Unread relationships (null) leave journal hours unattributed to their
  *  organization, so an hour inside an organization period would count twice:
  *  the CV's total is UNKNOWN, never an inflated sum (experienceFiguresOf). */
@@ -396,17 +426,25 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         .select("skill_id, verified, source, skills(slug)")
         .eq("worker_id", workerId)
         .order("created_at", { ascending: true }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase as any)
-        .from("journal_entry_skills")
-        .select("journal_entry_id, skill_id")
-        .eq("worker_id", workerId),
+      readAllPages<EntrySkillLinkRow>(() =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase as any)
+          .from("journal_entry_skills")
+          .select("journal_entry_id, skill_id")
+          .eq("worker_id", workerId)
+          .order("journal_entry_id", { ascending: true })
+          .order("skill_id", { ascending: true }),
+      ).then((r) => ({ data: r.truncated ? null : r.rows, error: r.error ?? (r.truncated ? { code: "read_ceiling" } : null) })),
       listProfileSkillClaims(),
       getOwnTrustSignals(workerId),
-      supabase
-        .from("journal_entries")
-        .select("id, created_at, project_id, engagement_context_id, deleted_at, superseded_by, correction_of")
-        .eq("worker_id", workerId),
+      readAllPages<CvEntryRow>(() =>
+        supabase
+          .from("journal_entries")
+          .select("id, created_at, project_id, engagement_context_id, deleted_at, superseded_by, correction_of")
+          .eq("worker_id", workerId)
+          .order("created_at", { ascending: true })
+          .order("id", { ascending: true }),
+      ).then((r) => ({ data: r.truncated ? null : r.rows, error: r.error ?? (r.truncated ? { code: "read_ceiling" } : null) })),
       supabase
         .from("engagement_contexts")
         .select(
@@ -609,10 +647,18 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         p !== null,
     );
 
-  // Durable journal→skill links — graceful empty set if not readable.
+  // Durable journal→skill links — graceful empty set if not readable — and
+  // ONLY links of LIVE, counted-once entries (audit 2026-10-20): a skill the
+  // person removed in a correction kept its link on the superseded entry and
+  // still printed as journal-backed evidence on the Living CV and the EU CV.
+  const countedEntryIds = new Set(
+    cvLiveEntries(((entriesRes.data ?? []) as unknown) as CvEntryRow[]).map((e) => e.id),
+  );
   const durableSupported = linkRes.error
     ? new Set<string>()
-    : supportedSkillIds((linkRes.data ?? []) as EntrySkillLinkRow[]);
+    : supportedSkillIds(
+        ((linkRes.data ?? []) as EntrySkillLinkRow[]).filter((l) => countedEntryIds.has(l.journal_entry_id)),
+      );
 
   const tierInputs = (wsRes.data ?? [])
     .map((r) => {
@@ -645,18 +691,17 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
     .map((e) => e.id);
   const journalClaimLabels: string[] = [];
   if (liveEntryIds.length > 0) {
-    const { data: claimMetrics } = await tolerant<
-      Array<{
-        entry_id: string | null;
-        value_text: string | null;
-        metric_slug?: string | null;
-      }>
-    >(
+    const claimMetrics = await readByIdChunks<{
+      entry_id: string | null;
+      value_text: string | null;
+      metric_slug?: string | null;
+    }>(liveEntryIds, (ids) =>
       sb
         .from("journal_entry_metrics")
-        .select("entry_id, value_text, metric_slug")
-        .in("entry_id", liveEntryIds)
-        .in("metric_slug", ["skill_claim", "skill_claim_rejected"]),
+        .select("id, entry_id, value_text, metric_slug")
+        .in("entry_id", ids)
+        .in("metric_slug", ["skill_claim", "skill_claim_rejected"])
+        .order("id", { ascending: true }),
     );
     const profileNormalized = new Set(claims.map((c) => c.normalized_label));
     journalClaimLabels.push(
@@ -715,11 +760,19 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   const proof: VerifiedCvProofRow[] = [];
   let clientAcceptedEntries: number | null = entries.length === 0 ? 0 : null;
   if (entries.length > 0) {
-    const { data: confs } = await supabase
-      .from("journal_entry_confirmations")
-      .select("entry_id, confirmer_role, created_at, confirmation_scope")
-      .in("entry_id", entries.map((e) => e.id))
-      .order("created_at", { ascending: false });
+    const confs = await readByIdChunks<{
+      entry_id: string;
+      confirmer_role: string;
+      created_at: string;
+      confirmation_scope: string | null;
+    }>(entries.map((e) => e.id), (ids) =>
+      supabase
+        .from("journal_entry_confirmations")
+        .select("id, entry_id, confirmer_role, created_at, confirmation_scope")
+        .in("entry_id", ids)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false }),
+    ).then((rows) => rows?.sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0)) ?? null);
     clientAcceptedEntries = confs ? countClientAcceptedEntries(confs) : null;
     const projectIds = new Set<string>();
     const confirmedRows: {
