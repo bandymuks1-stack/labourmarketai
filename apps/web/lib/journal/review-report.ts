@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
+import { reviewerHoursOf } from "@/lib/journal/reviewer-hours";
+import type { WorkTimeMetricRow } from "@/lib/journal/work-time";
 import { getManagerEvidence } from "@/lib/operations/manager-evidence";
 import {
   WORKER_NAME_FIELDS,
@@ -48,6 +50,7 @@ type EntryRow = {
   original_text: string | null;
   created_at: string;
   worker_id: string | null;
+  journal_entry_metrics: WorkTimeMetricRow[] | null;
   workers: {
     display_name: string | null;
     profiles: { full_name: string | null; email: string | null } | null;
@@ -80,7 +83,7 @@ export async function getReviewReport(
     const { data: rows } = await supabase
       .from("journal_entries")
       .select(
-        `id, original_text, created_at, worker_id, workers!inner(${WORKER_NAME_FIELDS})`,
+        `id, original_text, created_at, worker_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug, source, created_at), workers!inner(${WORKER_NAME_FIELDS})`,
       )
       .in("id", reviewableIds)
       .order("created_at", { ascending: true });
@@ -88,14 +91,18 @@ export async function getReviewReport(
     for (const raw of (rows ?? []) as EntryRow[]) {
       const workerName = resolveWorkerName(raw.workers);
       const depth = recognizeEntryDepth(raw.original_text ?? "");
+      const stored = reviewerHoursOf({
+        id: raw.id,
+        createdAt: raw.created_at,
+        metrics: raw.journal_entry_metrics ?? [],
+      });
       const entry: ReviewReportEntry = {
         id: raw.id,
         date: raw.created_at,
         works: depth.works.map((w) => slugToName(w.slug)),
-        hours:
-          depth.hours && depth.hours.certain
-            ? { value: depth.hours.value, unit: unitToName(depth.hours.unit) }
-            : null,
+        // The STORED work time (one canonical rule), never a text re-parse;
+        // only a clear reading is reported (reviewer-hours.ts).
+        hours: stored && stored.certain ? { value: stored.value, unit: unitToName(stored.unit) } : null,
         certainty: depth.certainty,
         needsClarification: depth.needsClarification,
       };
