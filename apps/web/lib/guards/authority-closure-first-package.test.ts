@@ -122,6 +122,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261019220000_",
       // 2026-10-20: one demand-company rule for five functions.
       "20261020010000_",
+      // 2026-10-20: review fix — an org-less need resolves to no company.
+      "20261020015000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
