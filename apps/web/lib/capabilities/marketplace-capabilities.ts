@@ -21,6 +21,7 @@ import {
 } from "./confirmable";
 import type { CapabilityCaller, CapabilityDescriptor } from "./contract";
 import { demandContextRefusal } from "./employer-context-refusal";
+import { demandsOfWorkspaceFilter } from "@/lib/demand/demand-org-scope";
 
 /**
  * MARKETPLACE — the meeting of a need and the people who could meet it, for
@@ -215,7 +216,7 @@ async function readNeed(
     .from("customer_requests")
     .select("id, title, status, profile_id")
     .eq("id", requestId)
-    .or(`profile_id.eq.${caller.userId},organization_id.eq.${organizationId}`)
+    .or(demandsOfWorkspaceFilter(caller.userId, organizationId))
     .maybeSingle();
   return (data as { id: string; title: string | null; status: string | null; profile_id: string } | null) ?? null;
 }
