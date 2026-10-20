@@ -1674,6 +1674,10 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261020080000_counterparty_detail_metric_order_v1.sql",
       // 2026-10-20 (RED by SECURITY DEFINER + GRANT; owner-approved #2563 principle): worked-organization names + periods.
       "20261020100000_worked_organization_history_v1.sql",
+      // 2026-10-20 (RED by CREATE TRIGGER; owner-approved #2589 with conditions): a roster link is cleared whole.
+      "20261020170000_roster_link_clears_both_sides_v1.sql",
+      // 2026-10-20 (RED by SECURITY DEFINER trigger + backfill; owner-approved #2590 with conditions): thread last activity.
+      "20261020171000_conversation_last_activity_v1.sql",
 ]);
   });
 

@@ -1,3 +1,7 @@
+-- @human-gate-approved — owner approved PR #2590 with conditions (2026-10-20): a sent message
+-- moves only ITS conversation's last-activity time; no user can move another's conversation.
+-- Checked in a rolled-back production test (outsider / forged author / foreign thread refused,
+-- refused inserts move nothing, re-install safe). Scope: this SQL only.
 -- ============================================================================
 -- conversation_last_activity_v1 — a thread's last activity moves when a
 -- message is sent (audit 2026-10-20, HIGH).

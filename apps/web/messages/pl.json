@@ -12483,7 +12483,8 @@
     "claimCta": "Kontynuuj jako mój szkic",
     "claimed": "Przeniesiono do Twoich szkiców",
     "error": "Nie udało się przejąć. Spróbuj ponownie.",
-    "workersLabel": "Pracownicy"
+    "workersLabel": "Pracownicy",
+    "draftExists": "Masz już niedokończony szkic zapotrzebowania. Najpierw go dokończ lub odrzuć, a potem kontynuuj ten."
   },
   "candidatePipeline": {
     "stage": {
