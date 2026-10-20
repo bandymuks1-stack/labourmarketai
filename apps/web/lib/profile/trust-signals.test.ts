@@ -36,6 +36,9 @@ function builderFor(table: string) {
     eq: () => chain,
     in: () => chain,
     limit: () => chain,
+    // the journal read is PAGED (ordered, then .range per page)
+    order: () => chain,
+    range: () => Promise.resolve(result),
     // The journal read applies the shared live-entry rule, which chains two
     // `.is()` calls. This double is about the UNREAD-vs-ZERO semantics below,
     // so it just has to stay chainable; that the reader really asks for live
