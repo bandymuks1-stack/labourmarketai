@@ -90,8 +90,7 @@ export async function GET(
       error: providerError,
       errorCode,
     });
-    // ALREADY SIGNED IN (production 2026-10-19, 3 of 25 Google/LinkedIn
-    // sign-ins): `bad_oauth_state` arrives AFTER a successful sign-in when the
+    // ALREADY SIGNED IN: `bad_oauth_state` arrives AFTER a successful sign-in when the
     // browser replays the provider step (Back into the account chooser, a
     // restored tab) — the state was spent by the sign-in that worked. Telling
     // a signed-in person "sign-in failed" is false; they go where they were

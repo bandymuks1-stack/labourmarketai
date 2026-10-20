@@ -5,8 +5,8 @@ import { join } from "node:path";
 import { classifyAuthRedirectError, isReplayableProviderError } from "@/lib/auth/email-confirm";
 
 /**
- * "OAuth state not found or expired" AFTER a successful sign-in (production
- * 2026-10-19: 3 of 25 Google/LinkedIn sign-ins). In every case the person had
+ * "OAuth state not found or expired" AFTER a successful sign-in. In the
+ * observed cases the person had
  * already signed in seconds to minutes earlier; the browser replayed the
  * provider step and GoTrue rejected the spent state. A signed-in person is
  * sent on; without a session the error stays exactly as it was.

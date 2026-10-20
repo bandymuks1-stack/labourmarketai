@@ -420,8 +420,12 @@ export async function getAcquisitionFunnel(
   // `profile_id` (W14 item 5) is what makes internal activity classifiable at
   // all — without it the funnel cannot tell the owner from a prospect.
   // PAGED (pages of 1000, the server's own cap): a single .limit() above
-  // 1000 silently returned 1000 rows — 9,733 events in 30 days were read as
-  // ~1,000 and the truncation check (rows >= cap) never fired.
+  // 1000 silently returned 1000 rows — a busy window was read short and the
+  // truncation check (rows >= cap) never fired.
+  // Snapshot: an upper bound fixed before the first page, so events arriving
+  // between page requests cannot shift rows across pages (counted twice or
+  // skipped) — offsets then address one stable set.
+  const snapshotAt = now.toISOString();
   const paged = await readAllPages<FunnelRow>(
     () =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -430,6 +434,7 @@ export async function getAcquisitionFunnel(
         .select("event_name, metadata, created_at, profile_id")
         .in("event_name", names)
         .gte("created_at", funnelWindowStart(now))
+        .lte("created_at", snapshotAt)
         .order("created_at", { ascending: false })
         .order("id", { ascending: false }),
     { pageSize: 1000, maxPages: Math.ceil(FUNNEL_MAX_ROWS / 1000) },

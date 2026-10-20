@@ -6,9 +6,9 @@ import { describe, expect, it } from "vitest";
  * AN ORGANIZATION'S HISTORY IS READ TO THE END.
  *
  * The server answers at most 1000 rows per request, so a `.limit(5000)` is a
- * silent 1000. Production 2026-10-20: one organization holds 2,944 records,
- * and the matching signals read asked for all 43 of its people at once — two
- * thirds of the history never reached matching. The person's own records
+ * silent 1000. An organization's history can hold far more, and the matching
+ * signals read asked for a whole chunk of its people at once — the records
+ * past 1000 never reached matching. The person's own records
  * read (the ONE experience total, decision 0025) had the same ceiling.
  * Both page with `.range` through `readAllPages`.
  */

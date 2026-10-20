@@ -273,8 +273,12 @@ export async function getTimeToFirstValueByActor(
     ...new Set([...TTFV_START_EVENTS, ...TTFV_ACTOR_EVENTS, ...TTFV_ACTION_EVENTS, ...TTFV_RESULT_EVENTS]),
   ];
   // PAGED (pages of 1000, the server's own cap): a single .limit() above
-  // 1000 silently returned 1000 rows — 9,733 events in 30 days were read as
-  // ~1,000 and the truncation check (rows >= cap) never fired.
+  // 1000 silently returned 1000 rows — a busy window was read short and the
+  // truncation check (rows >= cap) never fired.
+  // Snapshot: an upper bound fixed before the first page, so events arriving
+  // between page requests cannot shift rows across pages (counted twice or
+  // skipped) — offsets then address one stable set.
+  const snapshotAt = new Date().toISOString();
   const paged = await readAllPages<TtfvRow>(
     () =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -283,6 +287,7 @@ export async function getTimeToFirstValueByActor(
         .select("event_name, profile_id, created_at, metadata")
         .in("event_name", names)
         .not("profile_id", "is", null)
+        .lte("created_at", snapshotAt)
         .order("created_at", { ascending: false })
         .order("id", { ascending: false }),
     { pageSize: 1000, maxPages: Math.ceil(WINDOW_ROWS / 1000) },
