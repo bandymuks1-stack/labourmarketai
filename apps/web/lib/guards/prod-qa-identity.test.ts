@@ -304,6 +304,8 @@ describe("the production path is a SCRIPT, never a reachable surface", () => {
     const ALLOWED = new Set([
       "lib/testing/prod-qa-guard.ts",
       "lib/guards/prod-qa-identity.test.ts",
+      // Another guard TEST (never shipped): pins the walk-token rules (#2537).
+      "lib/guards/prod-qa-token-hygiene.test.ts",
     ]);
     const offenders: string[] = [];
     for (const dir of ["app", "components", "lib"]) {
