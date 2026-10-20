@@ -23,5 +23,9 @@ describe("skill evidence counts live entries only", () => {
     expect(chain).toMatch(/journal_entries!inner\(deleted_at, superseded_by\)/);
     expect(chain).toMatch(/\.is\("journal_entries\.deleted_at", null\)/);
     expect(chain).toMatch(/\.is\("journal_entries\.superseded_by", null\)/);
+    // Counted once: an original a live correction replaces (superseded_by
+    // stays NULL on a confirmed original) is dropped too.
+    expect(src).toMatch(/readCorrectedOriginalIds\(supabase, workerId\)/);
+    expect(src).toMatch(/corrected\.has\(/);
   });
 });

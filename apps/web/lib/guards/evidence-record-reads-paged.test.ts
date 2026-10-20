@@ -37,5 +37,7 @@ describe("organization evidence record reads are paged", () => {
       expect(r).toMatch(/\.order\("id", \{ ascending: true \}\)/);
       expect(r).not.toMatch(/\.limit\(/);
     }
+    // A read stopped at its ceiling is never returned as complete.
+    expect(src).toMatch(/if \(paged\.truncated\) \{[\s\S]{0,160}return (\{ kind: "error" \}|UNAVAILABLE_FAILED);/);
   });
 });
