@@ -346,3 +346,27 @@ describe("positions the engagement list cannot carry reach the EU CV (decision 0
     expect(nonstop?.period).toBeNull();
   });
 });
+
+describe("a declared certificate keeps its declared label on the EU CV", () => {
+  it("text-declared certificates carry the note; document certificates do not", () => {
+    const eu = buildEuFormatCv({
+      ...EMPTY,
+      certificateDocs: [{ typeSlug: "a1_form", country: "LT", validUntil: null }] as never,
+      declaredCertificates: [
+        {
+          title: "Welding EN ISO 9606",
+          description: null,
+          achievedAt: "2021",
+          achievementTypeSlug: "certificate",
+          confirmedByManager: false,
+        },
+      ],
+    });
+    expect(eu.certifications.map((c) => c.declared === true)).toEqual([false, true]);
+    const doc = resolveEuFormatDocument(eu, { ...R, declaredCertificate: "Listed by the worker" });
+    const json = JSON.stringify(doc);
+    expect(json).toContain("Welding EN ISO 9606");
+    expect(json).toContain("Listed by the worker");
+    expect(json.match(/Listed by the worker/g)).toHaveLength(1);
+  });
+});

@@ -900,6 +900,9 @@ export default async function VerifiedCvPage({
                 ] ?? code.toUpperCase(),
               certificateType: (slug) =>
                 tDocTypes.has(slug) ? tDocTypes(slug) : slug,
+              // The on-screen CV labels a declared certificate; the EU CV
+              // keeps the same label instead of printing it like a document.
+              declaredCertificate: t("declaredCertHint"),
               date: (iso) => formatUtcDate(iso, locale),
               present: t("present"),
               // Organization-provided history: the SAME composition the

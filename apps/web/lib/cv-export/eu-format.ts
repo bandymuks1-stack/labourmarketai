@@ -103,6 +103,9 @@ export interface EuAdditionalEntry {
   readonly detail: string | null;
   /** ISO date or year when recorded; null when the person never dated it. */
   readonly date: string | null;
+  /** A certificate the person only DECLARED as text (no document). Printed
+   *  with the declared note — never as if a document stood behind it. */
+  readonly declared?: boolean;
 }
 
 export interface EuFormatCv {
@@ -139,6 +142,9 @@ export interface EuFormatResolvers {
   readonly profession: (slug: string) => string;
   readonly language: (code: string) => string;
   readonly certificateType: (slug: string) => string;
+  /** The note a declared certificate carries ("Listed by the worker"). Absent
+   *  in callers that print no certificates. */
+  readonly declaredCertificate?: string;
   /** ISO date → the reader's format, or null when the date is absent. */
   readonly date: (iso: string | null) => string | null;
   /** "2019 – 2022", "2019 – present", "2019" — never an invented endpoint. */
@@ -219,7 +225,7 @@ export function resolveEuFormatDocument(
       heading: r.certificateType(c.title),
       subheading: c.detail,
       period: r.date(c.date),
-      note: null,
+      note: c.declared ? (r.declaredCertificate ?? null) : null,
     })),
     ...cv.projects.map((p) => ({
       heading: p.title,
@@ -328,6 +334,7 @@ export function buildEuFormatCv(cv: VerifiedCvData): EuFormatCv {
       title: a.title,
       detail: trimOrNull(a.description),
       date: a.achievedAt,
+      declared: true,
     })),
   ];
 
