@@ -14,6 +14,7 @@ import {
   withdrawTeamOffer,
 } from "@/lib/company/team-offer";
 import {
+  answerableTerms,
   normalizeTermsInput,
   type OfferTermsInput,
   type OfferTermsVersion,
@@ -74,6 +75,13 @@ export async function loadOfferTermsAction(input: { offerId: string }): Promise<
   if (!UUID.test(input.offerId)) return { status: "error" };
   const r = await listOfferTerms(input.offerId);
   return r.status === "ok" ? { status: "ok", versions: r.rows } : { status: r.status };
+}
+
+/** The terms version the person can answer right now (the same
+ *  `answerableTerms` the offer card shows); null when there is none. */
+export async function answerableTermsVersionAction(input: { offerId: string }): Promise<number | null> {
+  const r = await loadOfferTermsAction(input);
+  return r.status === "ok" ? (answerableTerms(r.versions)?.version ?? null) : null;
 }
 
 export async function withdrawTeamOfferAction(input: { offerId: string }) {

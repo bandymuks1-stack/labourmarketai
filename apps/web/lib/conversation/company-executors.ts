@@ -22,8 +22,7 @@ import {
   type BridgeActionState,
 } from "@/lib/agency/bridge-actions";
 import { inviteCompanyWorkerAction } from "@/lib/company/actions";
-import { loadOfferTermsAction, respondToTeamOfferAction } from "@/lib/company/team-offer-actions";
-import { answerableTerms } from "@/lib/market/team-offer-model";
+import { answerableTermsVersionAction, respondToTeamOfferAction } from "@/lib/company/team-offer-actions";
 import { renameActiveOrganization } from "@/lib/company/organization-rename";
 import { createWorkTaskForChatAction, setWorkTaskStatusForChatAction } from "@/lib/tasks/task-chat-actions";
 import { updateStageStatusAction } from "@/lib/projects/stages-actions";
@@ -542,11 +541,7 @@ export const COMPANY_EXECUTORS: {
     // (the same answerable version the offer card shows) — v2 refuses when
     // another version is proposed by the time it runs.
     const accepting = input.decision === "accepted";
-    let expectedVersion: number | null = null;
-    if (accepting) {
-      const terms = await loadOfferTermsAction({ offerId: input.offerId });
-      if (terms.status === "ok") expectedVersion = answerableTerms(terms.versions)?.version ?? null;
-    }
+    const expectedVersion = accepting ? await answerableTermsVersionAction({ offerId: input.offerId }) : null;
     const r = await respondToTeamOfferAction({
       offerId: input.offerId,
       decision: accepting ? "accept" : "decline",
