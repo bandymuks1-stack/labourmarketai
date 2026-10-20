@@ -29,6 +29,8 @@ export function ClaimPublicIntakeCard({
     claimCta: string;
     claimed: string;
     error: string;
+    /** An open company draft already exists — finish or discard it first. */
+    draftExists: string;
     workersLabel: string;
   };
 }) {
@@ -36,6 +38,7 @@ export function ClaimPublicIntakeCard({
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useState<Set<string>>(new Set());
   const [failedId, setFailedId] = useState<string | null>(null);
+  const [draftBlockedId, setDraftBlockedId] = useState<string | null>(null);
   // The claim is authorised by a VERIFIED mailbox only; when the server says the
   // address is unverified the progressive proof is offered instead of a dead end.
   const [needsProof, setNeedsProof] = useState(false);
@@ -45,12 +48,15 @@ export function ClaimPublicIntakeCard({
   const onClaim = (id: string) =>
     startTransition(async () => {
       setFailedId(null);
+      setDraftBlockedId(null);
       const r = await claimPublicIntakeAction(locale, id);
       if (r.ok) {
         setDone((prev) => new Set(prev).add(id));
         router.refresh();
       } else if (r.reason === "email_unverified") {
         setNeedsProof(true);
+      } else if (r.reason === "draft_exists") {
+        setDraftBlockedId(id);
       } else {
         setFailedId(id);
       }
@@ -110,6 +116,11 @@ export function ClaimPublicIntakeCard({
               {failedId === intake.id ? (
                 <span role="alert" className="text-meta text-state-warning">
                   {labels.error}
+                </span>
+              ) : null}
+              {draftBlockedId === intake.id ? (
+                <span role="alert" className="text-meta text-state-warning" data-testid="intake-claim-draft-exists">
+                  {labels.draftExists}
                 </span>
               ) : null}
             </div>

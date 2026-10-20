@@ -9,5 +9,6 @@
   "unemployed": "Arbeitslos",
   "volunteer": "Freiwilliger",
   "intern": "Praktikant/in",
-  "external_manager": "Externer Vorgesetzter (Auftraggeber)"
+  "external_manager": "Externer Vorgesetzter (Auftraggeber)",
+  "other": "Andere Beziehung"
 }

@@ -1,3 +1,8 @@
+-- @human-gate-approved — owner approved PR #2591 with conditions (2026-10-20): an agreement
+-- holds only for the terms version shown to that person; the server checks the identity, the
+-- right to act for the organization (team_offer_party_side_v1 → v1's side rules) and the
+-- version; EXECUTE for authenticated only. Checked in a rolled-back production test (stale /
+-- missing version refused, plain brigade member / outsider / anon refused). Scope: this SQL only.
 -- ============================================================================
 -- team_offer_agree_seen_terms_v1 — "Agree to vN" agrees to vN, or to nothing
 -- (audit 2026-10-20, HIGH, B2B).

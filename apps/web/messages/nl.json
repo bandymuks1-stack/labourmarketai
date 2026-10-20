@@ -12483,7 +12483,8 @@
     "claimCta": "Doorgaan als concept",
     "claimed": "Verplaatst naar uw concepten",
     "error": "Overnemen mislukt. Probeer het opnieuw.",
-    "workersLabel": "Werknemers"
+    "workersLabel": "Werknemers",
+    "draftExists": "U hebt al een onvoltooid conceptverzoek. Rond het eerst af of verwijder het, dan kunt u dit voortzetten."
   },
   "candidatePipeline": {
     "stage": {

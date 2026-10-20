@@ -12483,7 +12483,8 @@
     "claimCta": "Als Entwurf fortführen",
     "claimed": "In Ihre Entwürfe verschoben",
     "error": "Übernahme fehlgeschlagen. Bitte erneut versuchen.",
-    "workersLabel": "Arbeitskräfte"
+    "workersLabel": "Arbeitskräfte",
+    "draftExists": "Sie haben bereits einen unfertigen Bedarfsentwurf. Schließen Sie ihn ab oder verwerfen Sie ihn – dann können Sie diesen fortführen."
   },
   "candidatePipeline": {
     "stage": {
