@@ -64,6 +64,7 @@ describe("funnel stage measurement state", () => {
       gte: fn,
       order: fn,
       limit: () => Promise.resolve({ data: null, error: { message: "boom" } }),
+      range: () => Promise.resolve({ data: null, error: { message: "boom" } }),
     });
     const supabase = { from: () => chain } as never;
     const out = await getAcquisitionFunnel(supabase);

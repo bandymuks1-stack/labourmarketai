@@ -1,4 +1,5 @@
 import "server-only";
+import { readAllPages } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -271,24 +272,23 @@ export async function getTimeToFirstValueByActor(
   const names = [
     ...new Set([...TTFV_START_EVENTS, ...TTFV_ACTOR_EVENTS, ...TTFV_ACTION_EVENTS, ...TTFV_RESULT_EVENTS]),
   ];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const fromAny = (supabase as any).from.bind(supabase) as (name: string) => {
-    select: (cols: string) => {
-      in: (col: string, vals: readonly string[]) => {
-        not: (col: string, op: string, value: null) => {
-          order: (col: string, opts: { ascending: boolean }) => {
-            limit: (n: number) => Promise<{ data: TtfvRow[] | null; error: { message?: string } | null }>;
-          };
-        };
-      };
-    };
-  };
-  const { data, error } = await fromAny("pilot_events")
-    .select("event_name, profile_id, created_at, metadata")
-    .in("event_name", names)
-    .not("profile_id", "is", null)
-    .order("created_at", { ascending: false })
-    .limit(WINDOW_ROWS);
+  // PAGED (pages of 1000, the server's own cap): a single .limit() above
+  // 1000 silently returned 1000 rows — 9,733 events in 30 days were read as
+  // ~1,000 and the truncation check (rows >= cap) never fired.
+  const paged = await readAllPages<TtfvRow>(
+    () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
+        .from("pilot_events")
+        .select("event_name, profile_id, created_at, metadata")
+        .in("event_name", names)
+        .not("profile_id", "is", null)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false }),
+    { pageSize: 1000, maxPages: Math.ceil(WINDOW_ROWS / 1000) },
+  );
+  const error = paged.error as { message?: string } | null;
+  const data = error ? null : paged.rows;
   if (error) return { available: false, byActor: [], usersWithStart: 0, excludedPreview: 0 };
   return summariseTtfv((data ?? []) as TtfvRow[]);
 }

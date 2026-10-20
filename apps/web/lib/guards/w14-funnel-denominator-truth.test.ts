@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -76,9 +78,16 @@ describe("W14 — the funnel window is real, not prose", () => {
         for (const m of ["select", "in", "gte", "order", "eq"]) {
           chain[m] = (...args: unknown[]) => {
             calls[m] = args;
+            // every order call, in sequence (the read orders by created_at, then id)
+            if (m === "order") calls.orders = [...(calls.orders ?? []), args];
             return chain;
           };
         }
+        // The funnel read is PAGED (the server answers at most 1000 rows).
+        chain.range = (...args: unknown[]) => {
+          calls.range = args;
+          return Promise.resolve({ data: [], error: null });
+        };
         chain.limit = (...args: unknown[]) => {
           calls.limit = args;
           return Promise.resolve({ data: [], error: null });
@@ -106,10 +115,16 @@ describe("W14 — the funnel window is real, not prose", () => {
     expect(typeof calls.gte?.[1]).toBe("string");
     // …deterministically ordered, so the cap keeps the MOST RECENT rows
     // instead of an arbitrary slice,
-    expect(calls.order?.[0]).toBe("created_at");
-    expect(calls.order?.[1]).toMatchObject({ ascending: false });
-    // …and still capped.
-    expect(calls.limit?.[0]).toBe(FUNNEL_MAX_ROWS);
+    const orders = calls.orders as unknown[][];
+    expect(orders[0]?.[0]).toBe("created_at");
+    expect(orders[0]?.[1]).toMatchObject({ ascending: false });
+    // …with a stable tie-breaker so no row is skipped or repeated across pages,
+    expect(orders[1]?.[0]).toBe("id");
+    // …read in pages of the server's own 1000-row cap,
+    expect(calls.range).toEqual([0, 999]);
+    // …and still capped at FUNNEL_MAX_ROWS in total.
+    const src = readFileSync(join(__dirname, "..", "admin", "conversion-funnel.ts"), "utf8");
+    expect(src).toContain("maxPages: Math.ceil(FUNNEL_MAX_ROWS / 1000)");
   });
 });
 
