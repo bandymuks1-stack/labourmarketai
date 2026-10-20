@@ -9482,6 +9482,16 @@
         "rate_limits": "Bounded request limits active",
         "freshness_demotion": "Stale profiles ranked lower"
       }
+    },
+    "mail": {
+      "title": "Official mailbox (info@labourmarket.ai)",
+      "ready": "Sending",
+      "notReady": "Not sending",
+      "present": "set",
+      "missing": "MISSING",
+      "portOk": "supported (465, TLS)",
+      "portUnsupported": "NOT SUPPORTED – only 465 is supported",
+      "note": "One channel for all platform e-mail: GDPR notices, invitations and system mail. Only whether a value exists is shown, never the value. Set a missing value on the VPS with lm-env-set.sh."
     }
   },
   "adminMetrics": {

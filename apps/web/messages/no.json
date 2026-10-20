@@ -7715,5 +7715,17 @@
   },
   "workObjects": {
     "addButton": "Legg til objekt"
+  },
+  "adminLaunchReadiness": {
+    "mail": {
+      "title": "Offisiell postkasse (info@labourmarket.ai)",
+      "ready": "Sender",
+      "notReady": "Sender ikke",
+      "present": "satt",
+      "missing": "MANGLER",
+      "portOk": "støttet (465, TLS)",
+      "portUnsupported": "IKKE STØTTET – kun 465",
+      "note": "Én kanal for all e-post fra plattformen: GDPR-varsler, invitasjoner og systemmeldinger. Bare om en verdi finnes vises, aldri selve verdien. Sett en manglende verdi på VPS-en med lm-env-set.sh."
+    }
   }
 }

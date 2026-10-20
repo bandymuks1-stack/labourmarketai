@@ -7,6 +7,7 @@ import {
   getLaunchReadiness,
 } from "@/lib/admin/launch-readiness";
 import { getWorkerAdsReadiness } from "@/lib/ads/limited-worker-ads-readiness";
+import { smtpReadiness } from "@/lib/email/smtp";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { ProductMetricsSection } from "@/components/admin/product-metrics-section";
 
@@ -32,6 +33,7 @@ export default async function AdminLaunchReadinessPage({
   const t = await getTranslations("adminLaunchReadiness");
   const result = await getLaunchReadiness();
   const workerAds = await getWorkerAdsReadiness();
+  const mail = smtpReadiness();
   if (result.kind === "not-admin") {
     // requireSuperadmin already redirected; this is unreachable belt-and-braces.
     return null;
@@ -213,6 +215,51 @@ export default async function AdminLaunchReadinessPage({
         <p className="text-meta leading-relaxed text-text-muted">
           {t("workerAds.note")}
         </p>
+      </section>
+
+      {/* THE OFFICIAL MAILBOX (LM_SMTP_*) — the one channel every platform
+          e-mail uses (GDPR notices, invitations, transactional mail).
+          Presence only, never a value: an operator sees WHICH setting stops
+          the mail instead of one opaque "not configured". */}
+      <section className="flex flex-col gap-3" data-testid="mail-readiness">
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="font-display text-lg font-semibold text-text-primary">{t("mail.title")}</h2>
+          <span
+            className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${
+              mail.ready
+                ? "border-state-success/40 bg-state-success/10 text-state-success"
+                : "border-state-amber/40 bg-state-amber/10 text-state-amber"
+            }`}
+            data-testid="mail-readiness-status"
+            data-ready={mail.ready ? "true" : "false"}
+          >
+            {mail.ready ? t("mail.ready") : t("mail.notReady")}
+          </span>
+        </div>
+        <ul className="flex flex-col gap-1.5">
+          {(["host", "user", "pass", "from"] as const).map((k) => (
+            <li
+              key={k}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-500 px-3 py-2"
+              data-testid={`mail-readiness-${k}`}
+              data-present={mail.present[k] ? "true" : "false"}
+            >
+              <span className="font-mono text-sm text-text-primary">{`LM_SMTP_${k.toUpperCase()}`}</span>
+              <span className="text-xs text-text-secondary">{mail.present[k] ? t("mail.present") : t("mail.missing")}</span>
+            </li>
+          ))}
+          <li
+            className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-500 px-3 py-2"
+            data-testid="mail-readiness-port"
+            data-supported={mail.portSupported ? "true" : "false"}
+          >
+            <span className="font-mono text-sm text-text-primary">LM_SMTP_PORT</span>
+            <span className="text-xs text-text-secondary">
+              {mail.port ?? "—"} · {mail.portSupported ? t("mail.portOk") : t("mail.portUnsupported")}
+            </span>
+          </li>
+        </ul>
+        <p className="text-meta leading-relaxed text-text-muted">{t("mail.note")}</p>
       </section>
 
       <p className="text-meta leading-relaxed text-text-muted">

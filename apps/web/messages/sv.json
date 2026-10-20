@@ -7715,5 +7715,17 @@
   },
   "workObjects": {
     "addButton": "Lägg till objekt"
+  },
+  "adminLaunchReadiness": {
+    "mail": {
+      "title": "Officiell brevlåda (info@labourmarket.ai)",
+      "ready": "Skickar",
+      "notReady": "Skickar inte",
+      "present": "angivet",
+      "missing": "SAKNAS",
+      "portOk": "stöds (465, TLS)",
+      "portUnsupported": "STÖDS INTE – endast 465",
+      "note": "En kanal för all e-post från plattformen: GDPR-meddelanden, inbjudningar och systemmejl. Bara om ett värde finns visas, aldrig själva värdet. Ange ett saknat värde på VPS:en med lm-env-set.sh."
+    }
   }
 }
