@@ -7725,7 +7725,10 @@
       "missing": "PUUDUB",
       "portOk": "toetatud (465, TLS)",
       "portUnsupported": "EI OLE TOETATUD – ainult 465",
-      "note": "Üks kanal kogu platvormi e-postile: GDPR-teated, kutsed ja süsteemikirjad. Näidatakse ainult, kas väärtus on olemas, mitte väärtust ennast. Määra puuduv väärtus VPS-is käsuga lm-env-set.sh."
+      "note": "Üks postikanal: GDPR-teated saadetakse, kui kõik LM_SMTP_* väärtused on seatud; kutse- ja teavituskirjad alles siis, kui nende saatmine on eraldi sisse lülitatud. Näidatakse ainult, kas väärtus on olemas, mitte väärtust ennast. Puuduv väärtus seadke VPS-is käsuga lm-env-set.sh.",
+      "invites": "Kutse- ja teavituskirjad",
+      "invitesOn": "sees",
+      "invitesOff": "VÄLJAS – lülitatakse eraldi sisse: INVITE_EMAIL_PROVIDER=smtp ja üks testsaatmine"
     }
   }
 }

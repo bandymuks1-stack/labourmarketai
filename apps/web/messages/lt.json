@@ -9492,7 +9492,10 @@
       "missing": "TRŪKSTA",
       "portOk": "tinka (465, TLS)",
       "portUnsupported": "NETINKA – palaikomas tik 465",
-      "note": "Vienas kanalas visiems laiškams: GDPR pranešimams, kvietimams ir sistemos laiškams. Rodoma tik, ar reikšmė yra, niekada ne pati reikšmė. Trūkstamą reikšmę nustatykite VPS serveryje su lm-env-set.sh."
+      "note": "Vienas pašto kanalas: GDPR pranešimai siunčiami, kai nustatyti visi LM_SMTP_*; kvietimų ir pranešimų laiškai – tik atskirai įjungus jų siuntimą. Rodoma tik, ar reikšmė yra, niekada ne pati reikšmė. Trūkstamą reikšmę nustatykite VPS serveryje su lm-env-set.sh.",
+      "invites": "Kvietimų ir pranešimų laiškai",
+      "invitesOn": "įjungti",
+      "invitesOff": "IŠJUNGTI – įjungiami atskirai: INVITE_EMAIL_PROVIDER=smtp ir vienas bandomasis siuntimas"
     }
   },
   "adminMetrics": {
