@@ -9,5 +9,6 @@
   "unemployed": "Unemployed",
   "volunteer": "Volunteer",
   "intern": "Intern",
-  "external_manager": "External manager (client)"
+  "external_manager": "External manager (client)",
+  "other": "Other relationship"
 }

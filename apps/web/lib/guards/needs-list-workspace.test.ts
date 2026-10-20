@@ -18,6 +18,7 @@ describe("company needs list is scoped to the active workspace", () => {
   });
   it("filters by the shared demand workspace filter", () => {
     expect(src).toContain('import { demandsOfWorkspaceFilter } from "@/lib/demand/demand-org-scope";');
-    expect(fn).toMatch(/if \(workspaceOrganizationId\) \{\s*query = query\.or\(demandsOfWorkspaceFilter\(user\.id, workspaceOrganizationId\)\);/);
+    // the workspace filter REPLACES the owner-only predicate (a colleague's needs are the company's too)
+    expect(fn).toMatch(/query = workspaceOrganizationId\s*\?\s*query\.or\(demandsOfWorkspaceFilter\(user\.id, workspaceOrganizationId\)\)\s*:\s*query\.eq\("profile_id", user\.id\);/);
   });
 });

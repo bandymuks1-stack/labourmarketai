@@ -20,6 +20,7 @@ import {
   buildMatchSnapshot,
   buildSnapshotContext,
   cleanInterestNote,
+  INTEREST_STATUSES,
   type InterestStatus,
 } from "./interest-snapshot";
 
@@ -283,7 +284,7 @@ export async function expressInterestCore(
           updated_at: new Date().toISOString(),
         })
         .eq("id", standing.id)
-        .select("id")
+        .select("id, status")
         .maybeSingle()
     : await asAny(supabase)
         .from("demand_interest_signals")
@@ -298,7 +299,7 @@ export async function expressInterestCore(
           },
           { onConflict: "worker_id,request_id" },
         )
-        .select("id")
+        .select("id, status")
         .maybeSingle();
   if (error) {
     if (error.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
@@ -369,7 +370,13 @@ export async function expressInterestCore(
     console.warn(INTEREST_UNDELIVERED, { reason: "no_signal_id" });
   }
 
-  return { kind: "ok", status: "interested" };
+  // The status the row HAS after the write — a standing reviewed / contacted
+  // answer is kept and reported as such, never as "interested" again.
+  const savedStatus = (signalRow as { status?: unknown } | null)?.status;
+  return {
+    kind: "ok",
+    status: INTEREST_STATUSES.includes(savedStatus as InterestStatus) ? (savedStatus as InterestStatus) : "interested",
+  };
 }
 
 /** Withdraw own interest (row stays — honest history, §3-friendly). */
