@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
+import { getOrgWorkObjects } from "@/lib/objects/objects";
 import {
   ALLOCATION_NOTE_MAX,
   ALLOCATION_SOURCE_MANUAL,
@@ -100,6 +102,21 @@ export async function recordAllocationAction(
 
   const ctx = await resolveEmployerCompanyContext();
   if (ctx.kind !== "ok") return { status: "not-authorized" };
+
+  // THIS company's crew and ITS active sites only — the same lists the hours
+  // page offers and the import checks (audit 2026-10-20). The insert policy
+  // checks only that the caller manages the organization, so a forged worker
+  // id put hours on an unrelated person's record (and into their CV as
+  // organization records). An unreadable list refuses.
+  const [crew, objects] = await Promise.all([
+    listActiveCompanyWorkers(ctx.companyId),
+    getOrgWorkObjects(),
+  ]);
+  if (crew.kind !== "ok" || objects.kind !== "ok") return { status: "error" };
+  if (!crew.rows.some((w) => w.workerId === workerId)) return { status: "invalid", field: "worker" };
+  if (!objects.rows.some((o) => o.id === workObjectId && o.status === "active")) {
+    return { status: "invalid", field: "object" };
+  }
 
   const supabase = await createClient();
   const {
