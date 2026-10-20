@@ -1,4 +1,4 @@
--- 20261020026000_workspace_pins_language_set_v2
+-- 20261020025900_workspace_pins_language_set_v2
 --
 -- Forward fix of 20261020025000: the pin label's original_language CHECK
 -- carried the 11 UI locales, but what a person may WRITE in is the
@@ -7,7 +7,7 @@
 -- lib/guards/journal-integrity-guards-migration.test.ts, which reads the
 -- authoritative set from the latest original_language CHECK). Widening only;
 -- the table holds 0 rows. No RLS, grant or function change.
--- Rollback: supabase/rollbacks/20261020026000_workspace_pins_language_set_v2.down.sql
+-- Rollback: supabase/rollbacks/20261020025900_workspace_pins_language_set_v2.down.sql
 
 begin;
 

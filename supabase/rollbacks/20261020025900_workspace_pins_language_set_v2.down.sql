@@ -1,4 +1,4 @@
--- ROLLBACK for 20261020026000_workspace_pins_language_set_v2.sql
+-- ROLLBACK for 20261020025900_workspace_pins_language_set_v2.sql
 -- Back to the 11-code set. Refuses while a label is stored in uk or ka.
 begin;
 do $$

@@ -48,7 +48,7 @@ async function scope(): Promise<{ userId: string; organizationId: string | null 
 }
 
 // The COMMUNICATION set (lib/i18n/config.ts communicationLocales) — what the
-// CHECK in 20261020026000 accepts.
+// CHECK in 20261020025900 accepts.
 const LABEL_LANGUAGES = new Set(["lt", "en", "pl", "de", "nl", "lv", "et", "da", "no", "sv", "ru", "uk", "ka"]);
 
 /** The request locale as an ISO 639-1 code the column accepts (en when unknown). */
