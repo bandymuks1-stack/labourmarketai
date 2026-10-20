@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/server";
 import { readAllPages } from "@/lib/journal/journal-list-core";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
-  ALLOCATION_READ_LIMIT,
   isAllocationMigrationMissingCode,
   isValidAllocationStatus,
   type WorkHourAllocation,
@@ -185,13 +184,62 @@ export async function readAllocationsForWorker(
 export async function getAllocationsForDate(
   workDate: string,
 ): Promise<AllocationsResult> {
-  return readAllocations((q) =>
+  return readAllocationsPaged((q) =>
     q
       .eq("work_date", workDate)
       .is("superseded_by", null)
       .order("created_at", { ascending: false })
-      .limit(ALLOCATION_READ_LIMIT),
+      .order("id", { ascending: false }),
   );
+}
+
+/** 20 pages of 1000: the ceiling for one organization-scoped ledger read. */
+const ORG_LEDGER_MAX_PAGES = 20;
+
+/**
+ * THE ORGANIZATION'S LEDGER READ, PAGED (audit 2026-10-20). The server
+ * answers at most 1000 rows per request; the month grid, the range report,
+ * the project's hours and the re-import duplicate check each asked for
+ * `.limit(2000)` and silently worked from the first 1000 — a project page
+ * that disagreed with the CV, and a re-imported month whose late rows passed
+ * the duplicate check and were written twice. Every page of the same ordered
+ * read is fetched; past the ceiling the read is an error (UNKNOWN), never a
+ * partial list read as complete. `build` must order by a stable key.
+ */
+async function readAllocationsPaged(
+  build: (q: ReturnType<ReturnType<typeof asAny>["from"]>) => unknown,
+): Promise<AllocationsResult> {
+  const ctx = await resolveEmployerCompanyContext();
+  if (ctx.kind !== "ok") return { kind: "no-company" };
+  const supabase = await createClient();
+  const rows: Row[] = [];
+  for (let page = 0; page < ORG_LEDGER_MAX_PAGES; page += 1) {
+    const from = page * 1000;
+    const q = asAny(supabase)
+      .from("work_hour_allocations")
+      .select(SELECT_COLUMNS)
+      .eq("organization_id", ctx.organizationId);
+    const res = (await (build(q) as { range: (a: number, b: number) => Promise<unknown> }).range(
+      from,
+      from + 999,
+    )) as { data: Row[] | null; error: { code?: string; message?: string } | null };
+    if (res.error) {
+      if (isAllocationMigrationMissingCode(res.error.code)) return { kind: "needs-migration" };
+      console.error("[work-hours] paged read failed:", res.error.code);
+      return { kind: "error" };
+    }
+    const batch = res.data ?? [];
+    rows.push(...batch);
+    if (batch.length < 1000) {
+      return {
+        kind: "ok",
+        organizationId: ctx.organizationId,
+        rows: rows.map(toAllocation).filter((a): a is WorkHourAllocation => a !== null),
+      };
+    }
+  }
+  console.error("[work-hours] organization ledger exceeds the read ceiling");
+  return { kind: "error" };
 }
 
 /**
@@ -209,13 +257,13 @@ export async function getAllocationsForMonth(
     Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 1),
   );
   const nextIso = next.toISOString().slice(0, 10);
-  return readAllocations((q) =>
+  return readAllocationsPaged((q) =>
     q
       .gte("work_date", monthStart)
       .lt("work_date", nextIso)
       .is("superseded_by", null)
       .order("work_date", { ascending: true })
-      .limit(ALLOCATION_READ_LIMIT),
+      .order("id", { ascending: true }),
   );
 }
 
@@ -229,13 +277,13 @@ export async function getAllocationsForRange(
   startIso: string,
   endIso: string,
 ): Promise<AllocationsResult> {
-  return readAllocations((q) =>
+  return readAllocationsPaged((q) =>
     q
       .gte("work_date", startIso)
       .lte("work_date", endIso)
       .is("superseded_by", null)
       .order("work_date", { ascending: true })
-      .limit(ALLOCATION_READ_LIMIT),
+      .order("id", { ascending: true }),
   );
 }
 
@@ -247,14 +295,26 @@ export async function getAllocationsForRange(
 export async function getAllocationsForObjects(
   objectIds: readonly string[],
 ): Promise<AllocationsResult> {
-  const ids = objectIds.slice(0, 100);
-  return readAllocations((q) =>
-    q
-      .in("work_object_id", ids)
-      .is("superseded_by", null)
-      .order("work_date", { ascending: true })
-      .limit(ALLOCATION_READ_LIMIT),
-  );
+  // Every object, in chunks of 100 ids (a project with more objects lost
+  // the hours of the rest to a silent slice).
+  const unique = [...new Set(objectIds)];
+  let organizationId: string | null = null;
+  const rows: WorkHourAllocation[] = [];
+  for (let i = 0; i < unique.length || i === 0; i += 100) {
+    const ids = unique.slice(i, i + 100);
+    const res = await readAllocationsPaged((q) =>
+      q
+        .in("work_object_id", ids)
+        .is("superseded_by", null)
+        .order("work_date", { ascending: true })
+        .order("id", { ascending: true }),
+    );
+    if (res.kind !== "ok") return res;
+    organizationId = res.organizationId;
+    rows.push(...res.rows);
+    if (unique.length === 0) break;
+  }
+  return { kind: "ok", organizationId: organizationId!, rows };
 }
 
 /**
