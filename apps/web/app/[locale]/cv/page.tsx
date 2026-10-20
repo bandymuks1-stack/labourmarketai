@@ -17,6 +17,7 @@ import { CareerJourneyMap, type CareerJourneyLabels } from "@/components/app/cv/
 import { HomeTrace } from "@/components/app/home/home-trace";
 import { toActiveLocale } from "@/lib/i18n/config";
 import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
+import { derivePotentialSkills } from "@/lib/skills/potential-skills";
 import { presentSkills, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
 import {
   cvSectionVisibility,
@@ -118,6 +119,7 @@ export default async function VerifiedCvPage({
   const tQuick = await getTranslations("quickNav");
   const tPremium = await getTranslations("cvExport.premium");
   const tJourney = await getTranslations("careerJourney");
+  const tIntel = await getTranslations("journal.intelligence");
   const fmtHours = (h: number) =>
     new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
   const tRole = await getTranslations("auth.signup.role");
@@ -176,6 +178,14 @@ export default async function VerifiedCvPage({
     tailoredOk?.matchedSlugs ?? new Set<string>();
 
   const tierSlugs: Record<CvSkillTier, string[]> = cv.tiers;
+  // POTENTIAL capabilities (decision 0023): what the person's EVIDENCED skills
+  // (recorded or confirmed work) point at, by the same cross-sector map the
+  // growth surfaces use. Its own evidence state — never written, never a
+  // qualification, gone once the person holds the skill in any state.
+  const potentialCapabilities = derivePotentialSkills(
+    [...cv.tiers.confirmed, ...cv.tiers.evidence],
+    [...cv.tiers.confirmed, ...cv.tiers.evidence, ...cv.tiers.declared],
+  );
 
   // ONE presentation for every skill on this document: tiers from the
   // catalogue rows, free labels folded into the skill they already are or
@@ -1546,6 +1556,33 @@ export default async function VerifiedCvPage({
           })}
           {presentation.visible === 0 ? (
             <p className={`text-text-muted ${bodyText}`}>{t("skillsEmpty")}</p>
+          ) : null}
+          {/* Possible capabilities (decision 0023) — the person's own view
+              only: a hypothesis is labelled as one and never printed onto
+              the document an employer receives. */}
+          {potentialCapabilities.length > 0 ? (
+            <div
+              className="flex flex-col gap-1.5 print:hidden"
+              data-testid="cv-potential"
+              data-evidence-state="potential"
+            >
+              <h3 className="text-meta font-medium text-text-secondary">{tIntel("potentialTitle")}</h3>
+              <p className="text-meta leading-relaxed text-text-muted">{tIntel("potentialHint")}</p>
+              <ul className="flex flex-col gap-1.5">
+                {potentialCapabilities.map((p) => (
+                  <li
+                    key={p.slug}
+                    className="flex flex-col gap-0.5 rounded-md border border-dashed border-border-subtle px-3 py-2"
+                    data-testid={`cv-potential-${p.slug}`}
+                  >
+                    <span className="text-support font-medium text-text-primary">{skillLabel(p.slug)}</span>
+                    <span className="text-meta text-text-muted">
+                      {tIntel("potentialFrom", { skills: p.fromSlugs.map(skillLabel).join(", ") })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
         </section>
 
