@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 /**
@@ -36,32 +37,83 @@ function files(dir: string): string[] {
   return out;
 }
 
-const num = (x: string) => Number(x.replace(/_/g, ""));
+/** A numeric literal as written (`20_000`), or undefined. */
+function numeric(node: ts.Node | undefined): number | undefined {
+  return node && ts.isNumericLiteral(node) ? Number(node.text.replace(/_/g, "")) : undefined;
+}
+
+/** `const NAME = <number>` declarations of a file (exported or not). */
+function numericConsts(sf: ts.SourceFile): Map<string, { value: number; exported: boolean }> {
+  const out = new Map<string, { value: number; exported: boolean }>();
+  const visit = (node: ts.Node) => {
+    if (ts.isVariableStatement(node) && node.declarationList.flags & ts.NodeFlags.Const) {
+      const exported = !!node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
+      for (const d of node.declarationList.declarations) {
+        const v = numeric(d.initializer);
+        if (ts.isIdentifier(d.name) && v !== undefined) out.set(d.name.text, { value: v, exported });
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  return out;
+}
+
+const parsed = new Map<string, ts.SourceFile>();
+const sourceOf = (f: string) => {
+  let sf = parsed.get(f);
+  if (!sf) {
+    sf = ts.createSourceFile(f, readFileSync(f, "utf8"), ts.ScriptTarget.Latest, true, f.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+    parsed.set(f, sf);
+  }
+  return sf;
+};
+
 const all = ROOTS.flatMap((r) => files(join(WEB, r)));
 const exported = new Map<string, number>();
 for (const f of all) {
-  for (const m of readFileSync(f, "utf8").matchAll(/export const ([A-Z][A-Z0-9_]*)\s*=\s*([0-9_]+)\b/g)) {
-    exported.set(m[1]!, num(m[2]!));
-  }
+  for (const [name, c] of numericConsts(sourceOf(f))) if (c.exported) exported.set(name, c.value);
 }
 
-function overCapLimits(raw: string): number {
-  // Code only: a comment that QUOTES an old `.limit(5000)` is history, not a read.
-  const src = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-  const local = new Map<string, number>();
-  for (const m of src.matchAll(/const ([A-Z][A-Z0-9_]*)\s*=\s*([0-9_]+)\b/g)) {
-    local.set(m[1]!, num(m[2]!));
-  }
+/**
+ * Over-cap `.limit(…)` CALLS in the syntax tree — a comment or a string that
+ * merely mentions `.limit(5000)` (or contains `/*`) is not a call and is not
+ * read. The argument is a literal, a constant (this file first, then any
+ * exported one), or a constant + literal sentinel (`CAP + 1`).
+ */
+function overCapLimitsIn(sf: ts.SourceFile): number {
+  const local = numericConsts(sf);
+  const valueOf = (e: ts.Expression): number | undefined => {
+    const lit = numeric(e);
+    if (lit !== undefined) return lit;
+    if (ts.isIdentifier(e)) return local.get(e.text)?.value ?? exported.get(e.text);
+    if (ts.isParenthesizedExpression(e)) return valueOf(e.expression);
+    if (ts.isBinaryExpression(e) && e.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+      const a = valueOf(e.left);
+      const b = valueOf(e.right);
+      return a !== undefined && b !== undefined ? a + b : undefined;
+    }
+    return undefined;
+  };
   let n = 0;
-  for (const m of src.matchAll(/\.limit\(\s*([A-Z][A-Z0-9_]*|[0-9_]+)\s*(?:\+\s*([0-9]+)\s*)?\)/g)) {
-    const k = m[1]!;
-    const base = /^[0-9_]+$/.test(k) ? num(k) : (local.get(k) ?? exported.get(k));
-    // A sentinel row (`CAP + 1`) is part of the request the server caps.
-    const v = base === undefined ? undefined : base + Number(m[2] ?? 0);
-    if (v !== undefined && v > 1000) n += 1;
-  }
+  const visit = (node: ts.Node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      node.expression.name.text === "limit" &&
+      node.arguments.length === 1
+    ) {
+      const v = valueOf(node.arguments[0]!);
+      if (v !== undefined && v > 1000) n += 1;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
   return n;
 }
+
+const overCapLimits = (src: string): number =>
+  overCapLimitsIn(ts.createSourceFile("x.ts", src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS));
 
 /** Exact. Paging a read lowers both; a new over-cap read fails. */
 const BASELINE: Record<string, number> = {
@@ -94,7 +146,7 @@ describe("no read asks the server for more than its 1000-row cap without paging"
   it("every file's over-cap .limit() count equals its baseline exactly", () => {
     const found = new Map<string, number>();
     for (const f of all) {
-      const n = overCapLimits(readFileSync(f, "utf8"));
+      const n = overCapLimitsIn(sourceOf(f));
       if (n > 0) found.set(relative(WEB, f).replace(/\\/g, "/"), n);
     }
     const diff: string[] = [];
@@ -105,6 +157,15 @@ describe("no read asks the server for more than its 1000-row cap without paging"
       if (n < b) diff.push(`${rel}: ${n} over-cap .limit() but baseline says ${b} — lower the baseline`);
     }
     expect(diff).toEqual([]);
+  });
+
+  it("comments and strings are not calls, even with glob-like text before a real call", () => {
+    const src = [
+      "// providers/* are listed",
+      'const G = "app/*";',
+      'q.limit(5000); /* q.limit(9000) */ const s = "q.limit(7000)";',
+    ].join("\n");
+    expect(overCapLimits(src)).toBe(1);
   });
 
   it("the resolver sees a literal, a local constant, an exported constant and a sentinel", () => {

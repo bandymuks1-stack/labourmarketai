@@ -50,3 +50,15 @@ describe("public vacancy search — one retry on a statement timeout", () => {
     expect(calls).toHaveLength(1);
   });
 });
+
+describe("an overloaded database is not retried (only an isolated timeout is)", () => {
+  it("a second search timing out right after the first goes to the cooldown without a retry", async () => {
+    const first = client([{ data: null, error: { code: "57014" } }]);
+    await searchPublicVacancyPreviews({ query: "a" }, first.c);
+    expect(first.calls).toHaveLength(2); // isolated: retried
+    const second = client([{ data: null, error: { code: "57014" } }]);
+    const r = await searchPublicVacancyPreviews({ query: "b" }, second.c);
+    expect(r.status).toBe("unavailable");
+    expect(second.calls).toHaveLength(1); // not isolated: no retry
+  });
+});

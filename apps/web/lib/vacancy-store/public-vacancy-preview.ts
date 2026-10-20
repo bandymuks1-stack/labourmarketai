@@ -66,6 +66,11 @@ const POSTGREST_UNKNOWN_RPC = "PGRST202";
  * unknown is not zero.
  */
 const QUERY_CANCELED = "57014";
+/** A timeout is retried only when no other search timed out this recently:
+ *  an ISOLATED timeout is a cold cache; several in a row are an overloaded
+ *  database, where a retry would only double the work (cooldown instead). */
+const ISOLATED_TIMEOUT_WINDOW_MS = 30_000;
+let lastTimeoutAt = 0;
 
 export const PUBLIC_VACANCY_PAGE_SIZE = 20;
 /** Mirrors the hard cap inside the SQL function. */
@@ -251,6 +256,7 @@ function remember(key: string, entry: CacheEntry): void {
 export function __resetPublicVacancyCache(): void {
   resultCache.clear();
   inFlight.clear();
+  lastTimeoutAt = 0;
 }
 
 export async function searchPublicVacancyPreviews(
@@ -320,10 +326,18 @@ async function runSearch(
   // ONE retry on a statement timeout (57014). A free-text search that is fast
   // on a warm cache can pass the anonymous statement timeout on a cold one —
   // the first visitor after a quiet spell got "jobs unavailable", and the
-  // cooldown below then blanked that search for everyone after them. The retry meets a warm cache. Any
-  // other error, or a second timeout, is reported as before.
+  // cooldown below then blanked that search for everyone after them. The
+  // retry meets a warm cache. Only an ISOLATED timeout is retried: when
+  // another search timed out within the window the database is overloaded,
+  // and the cooldown — not a second query — is the right answer. Any other
+  // error, or a second timeout, is reported as before.
   let { data, error } = await call();
-  if (error?.code === QUERY_CANCELED) ({ data, error } = await call());
+  if (error?.code === QUERY_CANCELED) {
+    const now = Date.now();
+    const isolated = now - lastTimeoutAt > ISOLATED_TIMEOUT_WINDOW_MS;
+    lastTimeoutAt = now;
+    if (isolated) ({ data, error } = await call());
+  }
 
   if (error) {
     if (isNotProvisioned(error.code)) {

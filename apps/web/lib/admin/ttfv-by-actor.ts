@@ -1,5 +1,5 @@
 import "server-only";
-import { readAllPages } from "@/lib/journal/journal-list-core";
+import { readKeysetPagesDesc } from "@/lib/admin/keyset-pages";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -274,23 +274,20 @@ export async function getTimeToFirstValueByActor(
   ];
   // PAGED (pages of 1000, the server's own cap): a single .limit() above
   // 1000 silently returned 1000 rows — a busy window was read short and the
-  // truncation check (rows >= cap) never fired.
-  // Snapshot: an upper bound fixed before the first page, so events arriving
-  // between page requests cannot shift rows across pages (counted twice or
-  // skipped) — offsets then address one stable set.
+  // truncation check (rows >= cap) never fired. KEYSET pages (created_at, id)
+  // under an upper bound fixed before the first page: inserts, erasures and
+  // late commits between requests cannot shift a row across pages.
   const snapshotAt = new Date().toISOString();
-  const paged = await readAllPages<TtfvRow>(
+  const paged = await readKeysetPagesDesc<TtfvRow & { id: string }>(
     () =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any)
         .from("pilot_events")
-        .select("event_name, profile_id, created_at, metadata")
+        .select("id, event_name, profile_id, created_at, metadata")
         .in("event_name", names)
         .not("profile_id", "is", null)
-        .lte("created_at", snapshotAt)
-        .order("created_at", { ascending: false })
-        .order("id", { ascending: false }),
-    { pageSize: 1000, maxPages: Math.ceil(WINDOW_ROWS / 1000) },
+        .lte("created_at", snapshotAt),
+    { maxRows: WINDOW_ROWS },
   );
   const error = paged.error as { message?: string } | null;
   const data = error ? null : paged.rows;

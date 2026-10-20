@@ -124,11 +124,13 @@ describe("W14 — the funnel window is real, not prose", () => {
     // mid-read cannot shift across pages),
     expect(calls.lte?.[0]).toBe("created_at");
     expect(typeof calls.lte?.[1]).toBe("string");
-    // …read in pages of the server's own 1000-row cap,
-    expect(calls.range).toEqual([0, 999]);
+    // …read in KEYSET pages of the server's own 1000-row cap (no offsets that
+    // a concurrent insert or erasure could shift),
+    expect(calls.limit?.[0]).toBe(1000);
+    expect(calls.range).toBeUndefined();
     // …and still capped at FUNNEL_MAX_ROWS in total.
     const src = readFileSync(join(__dirname, "..", "admin", "conversion-funnel.ts"), "utf8");
-    expect(src).toContain("maxPages: Math.ceil(FUNNEL_MAX_ROWS / 1000)");
+    expect(src).toContain("{ maxRows: FUNNEL_MAX_ROWS }");
   });
 });
 
