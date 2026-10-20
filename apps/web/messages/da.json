@@ -7725,7 +7725,10 @@
       "missing": "MANGLER",
       "portOk": "understøttet (465, TLS)",
       "portUnsupported": "IKKE UNDERSTØTTET – kun 465",
-      "note": "Én kanal for al e-mail fra platformen: GDPR-meddelelser, invitationer og systemmails. Kun om en værdi findes vises, aldrig selve værdien. Angiv en manglende værdi på VPS'en med lm-env-set.sh."
+      "note": "Én mailkanal: GDPR-meddelelser sendes, når alle LM_SMTP_*-værdier er sat; invitations- og notifikationsmails først når deres afsendelse er slået til separat. Kun om en værdi findes vises, aldrig selve værdien. Sæt en manglende værdi på VPS'en med lm-env-set.sh.",
+      "invites": "Invitations- og notifikationsmails",
+      "invitesOn": "til",
+      "invitesOff": "FRA – slås til separat: INVITE_EMAIL_PROVIDER=smtp og én testafsendelse"
     }
   }
 }
