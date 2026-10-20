@@ -1,3 +1,4 @@
+import { resolveWorkDay } from "@/lib/journal/work-time";
 /**
  * Pure builder that reconstructs a Work Journal entry's FULL editable state
  * from its persisted metrics + linked skills, so opening "Redaguoti įrašą"
@@ -103,6 +104,9 @@ export function buildEditingEntry(args: {
   linkedSkillSlugs?: ReadonlyArray<string> | null;
   /** The entry's own engagement/org context, preloaded so an edit re-sends it. */
   engagementContextId?: string | null;
+  /** When the entry was recorded — the day an entry WITHOUT a stated
+   *  `work_date` is counted on (resolveWorkDay). */
+  createdAt?: string | null;
 }): JournalEditingEntry {
   const metrics = args.metrics ?? [];
   const first = (slug: string): EditEntryMetricRow | null =>
@@ -125,7 +129,11 @@ export function buildEditingEntry(args: {
     id: args.id,
     originalText: args.originalText,
     engagementContextId: args.engagementContextId ?? null,
-    workDate: textOf("work_date"),
+    // An entry with no stated work date is counted on the day it was recorded
+    // (resolveWorkDay — the calendar's and the history's rule). The editor
+    // defaulted such an edit to TODAY, so fixing a typo moved an older entry
+    // to the edit day everywhere (audit 2026-10-20). It now keeps its day.
+    workDate: textOf("work_date") ?? (args.createdAt ? resolveWorkDay(metrics, args.createdAt) : null),
     time,
     quantity,
     workDirectionSlug: textOf("work_direction"),

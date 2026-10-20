@@ -821,6 +821,7 @@ export default async function JournalPage({
   const editingEntry = editingRow
     ? buildEditingEntry({
         id: editingRow.id,
+        createdAt: editingRow.created_at ?? null,
         originalText: editingRow.original_text,
         metrics: editingRow.journal_entry_metrics,
         engagementContextId: editingRow.engagement_context_id ?? null,
@@ -1872,6 +1873,7 @@ export default async function JournalPage({
                       const rowEditingEntry = canDelete
                         ? buildEditingEntry({
                             id: e.id,
+                            createdAt: e.created_at ?? null,
                             originalText: e.original_text,
                             metrics: e.journal_entry_metrics,
                             engagementContextId: e.engagement_context_id ?? null,
@@ -1963,6 +1965,7 @@ export default async function JournalPage({
                                 key="employer-correct-launcher"
                                 entry={buildEditingEntry({
                                   id: e.id,
+                                  createdAt: e.created_at ?? null,
                                   originalText: e.original_text,
                                   metrics: e.journal_entry_metrics,
                                   engagementContextId: e.engagement_context_id ?? null,
@@ -2031,6 +2034,7 @@ export default async function JournalPage({
                                         key="correct-launcher"
                                         entry={buildEditingEntry({
                                           id: e.id,
+                                          createdAt: e.created_at ?? null,
                                           originalText: e.original_text,
                                           metrics: e.journal_entry_metrics,
                                           engagementContextId:
