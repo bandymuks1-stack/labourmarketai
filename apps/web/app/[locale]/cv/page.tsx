@@ -32,6 +32,7 @@ import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
 import { CvOrganizationHistory } from "@/components/app/cv/cv-organization-history";
 import { organizationHistoryLines } from "@/components/app/cv/organization-history-lines";
 import { FORMER_NAME_RELATIONS, formerNamesOf, periodFor } from "@/lib/journal/professional-experience";
+import { experienceStopsOf, type ExperienceStop } from "@/lib/cv-export/experience-stops";
 import {
   PremiumLivingCv,
   type PremiumCvCapability,
@@ -123,6 +124,7 @@ export default async function VerifiedCvPage({
   const tDocTypes = await getTranslations("documents.types");
   const tEduTypes = await getTranslations("cvSections.educationTypes");
   const tOrgHist = await getTranslations("cvOrganizationHistory");
+  const tLead = await getTranslations("organizationsLeadership");
   const tHistCtx = await getTranslations("historyContext");
   const tEvRole = await getTranslations("evidenceImport.role");
   const tEvKind = await getTranslations("evidenceImport.sourceKind");
@@ -633,7 +635,43 @@ export default async function VerifiedCvPage({
   const PREMIUM_CAPS_SHOWN = 8;
   const monthYear = (iso: string | null) =>
     iso ? (formatUtcDate(iso, locale, { month: "short", year: "numeric" }) ?? null) : null;
+  // THE ENTRIES THE ENGAGEMENT LIST CANNOT SHOW (decision 0025, 2026-10-20):
+  // an earlier legal entity of the continuing organization, and leadership held
+  // without an employment engagement — from the ONE reading, never a second.
+  const stops = experienceStopsOf(cv.professionalExperience);
+  const roleLabel = (rel: string): string =>
+    tLead.has(`role.${rel}` as never) ? tLead(`role.${rel}` as never) : tRel.has(rel) ? tRel(rel) : rel;
+  const stopPeriod = (s: ExperienceStop): string => {
+    const from = monthYear(s.from);
+    const to = s.current ? tPremium("present") : monthYear(s.to);
+    // Dates the statements do not give stay unknown — never invented.
+    return from || to ? `${from ?? "…"} – ${to ?? "…"}` : tLead("notDocumented");
+  };
+  const stopSubtitle = (s: ExperienceStop): string | null =>
+    [
+      s.roles.length > 0 ? [...new Set(s.roles.map((r) => roleLabel(r.relationship)))].join(", ") : null,
+      s.kind === "earlier_legal_entity"
+        ? tOrgHist("legalEntityBand", { label: s.name ?? "—", org: s.administeredByName ?? "—" })
+        : null,
+    ]
+      .filter((x): x is string => !!x)
+      .join(" · ") || null;
+  const stopEntry = (s: ExperienceStop): PremiumCvExperience & { sortKey: string } => ({
+    key: s.key,
+    period: stopPeriod(s),
+    title: s.name ?? tPremium("untitled"),
+    subtitle: stopSubtitle(s),
+    detail: s.hours !== null ? tPremium("evidence.recorded", { hours: fmtNum.format(roundHours(s.hours)) }) : null,
+    source: tPremium("source.organization"),
+    level: "recorded",
+    current: s.current,
+    sortKey: s.current ? "9999-12-31" : (s.to ?? s.from ?? "0000"),
+  });
+  // The premium layout carries the leadership block of its own, so it adds the
+  // EARLIER LEGAL ENTITIES here; the classic / print layout lists every stop.
+  const earlierEntityStops = stops.filter((s) => s.kind === "earlier_legal_entity");
   const premiumExperience: (PremiumCvExperience & { sortKey: string })[] = [
+    ...earlierEntityStops.map(stopEntry),
     ...cv.workHistory.map((e, i): PremiumCvExperience & { sortKey: string } => {
       const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
       const from = monthYear(e.startedAt);
@@ -693,6 +731,22 @@ export default async function VerifiedCvPage({
   const journey = deriveCareerJourney({
     todayIso: (await viewerWorkToday()).todayIso,
     stations: [
+      ...earlierEntityStops.map((s) => {
+        journeyMeta[s.key] = [stopPeriod(s), s.hours !== null ? premiumHours(s.hours) : null].filter(Boolean).join(" · ");
+        return {
+          key: s.key,
+          title: s.name ?? tPremium("untitled"),
+          subtitle: stopSubtitle(s),
+          from: s.from,
+          to: s.to,
+          current: false,
+          source: "organization" as const,
+          level: "recorded" as JourneyLevel,
+          contextId: null,
+          hours: s.hours,
+          confirmedHours: null,
+        };
+      }),
       ...cv.workHistory.map((e, i) => {
         const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
         const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
@@ -1124,6 +1178,31 @@ export default async function VerifiedCvPage({
             <h2 className={sectionTitle}>{t("practiceHistoryTitle")}</h2>
             <ul className="flex flex-col">
               {historyItems(practiceHistory)}
+            </ul>
+          </section>
+        ) : null}
+
+        {/* ORGANIZATIONS AND LEADERSHIP (decision 0025, 2026-10-20): earlier
+            legal entities and leadership held without an employment
+            engagement — their own entries, from the one reading. The premium
+            layout shows leadership in its own block; here every stop is
+            listed. Omitted when there is none. */}
+        {stops.length > 0 ? (
+          <section
+            id="cv-organizations-roles"
+            className="flex flex-col gap-3 scroll-mt-20"
+            data-testid="cv-organizations-roles"
+          >
+            <h2 className={sectionTitle}>{tLead("eyebrow")}</h2>
+            <ul className="flex flex-col gap-2">
+              {stops.map((s) => (
+                <li key={s.key} className={bodyText} data-testid="cv-organization-role" data-kind={s.kind}>
+                  <span className="font-semibold text-text-primary">{s.name ?? "—"}</span>
+                  {stopSubtitle(s) ? <span className="text-text-secondary"> · {stopSubtitle(s)}</span> : null}
+                  <span className="text-text-muted"> · {stopPeriod(s)}</span>
+                  {s.hours !== null ? <span className="text-text-muted"> · {premiumHours(s.hours)}</span> : null}
+                </li>
+              ))}
             </ul>
           </section>
         ) : null}
