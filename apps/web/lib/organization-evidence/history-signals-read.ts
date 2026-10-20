@@ -185,6 +185,12 @@ async function signalsByKey(
       console.error("[history-signals] records read failed:", code);
       return UNAVAILABLE_FAILED;
     }
+    // A chunk stopped at its ceiling would undercount silently: the signal
+    // map is UNAVAILABLE (unknown), never a partial "ok".
+    if (paged.truncated) {
+      console.error("[history-signals] records read reached its ceiling:", RECORD_READ_LIMIT);
+      return UNAVAILABLE_FAILED;
+    }
     for (const r of paged.rows) {
       const worker = workerByPerson.get(r.organization_person_id as string);
       if (!worker) continue;

@@ -129,11 +129,17 @@ export default async function CounterpartyQueuePage({
       const stored = reviewerHoursOf({
         id: row.entryId,
         createdAt: detail.createdAt ?? detail.submittedAt ?? row.submittedAt ?? new Date(0).toISOString(),
-        metrics: detail.metrics.map((mm) => ({
+        // ORDER IS EVIDENCE: "the latest quantity row wins". The RPC returns
+        // metrics oldest first without timestamps, so its order travels as a
+        // zero-padded sequence id (the canonical tie-breaker) — never a tie
+        // that silently picks the oldest. Real created_at/id win when present.
+        metrics: detail.metrics.map((mm, i) => ({
           metric_slug: mm.slug,
           value_text: mm.valueText,
           value_numeric: mm.valueNumeric,
           unit_slug: mm.unitSlug,
+          created_at: mm.createdAt ?? null,
+          id: mm.id ?? `rpc-order-${String(i).padStart(6, "0")}`,
         })),
       });
       const hours = stored

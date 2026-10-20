@@ -1,4 +1,5 @@
 import "server-only";
+import { readCorrectedOriginalIds } from "@/lib/journal/corrected-originals-read";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -138,15 +139,22 @@ export async function getOwnCapabilities(limit = 18): Promise<OwnCapabilities> {
     .eq("worker_id", workerId);
 
   // Skills evidenced by real journal work (distinct skill ids).
-  const { data: jes } = await asAny(supabase)
-    .from("journal_entry_skills")
-    // LIVE entries only — a deleted or superseded entry evidences nothing.
-    .select("skill_id, journal_entries!inner(deleted_at, superseded_by)")
-    .eq("worker_id", workerId)
-    .is("journal_entries.deleted_at", null)
-    .is("journal_entries.superseded_by", null);
+  const [{ data: jes }, corrected] = await Promise.all([
+    asAny(supabase)
+      .from("journal_entry_skills")
+      // LIVE entries only — a deleted or superseded entry evidences nothing.
+      .select("journal_entry_id, skill_id, journal_entries!inner(deleted_at, superseded_by)")
+      .eq("worker_id", workerId)
+      .is("journal_entries.deleted_at", null)
+      .is("journal_entries.superseded_by", null),
+    readCorrectedOriginalIds(supabase, workerId),
+  ]);
+  // Counted once: an original a live correction replaced evidences nothing
+  // (a skill the correction dropped is not "evidenced" through it).
   const evidenced = new Set(
-    (Array.isArray(jes) ? jes : []).map((r: Record<string, unknown>) => String(r.skill_id)),
+    (Array.isArray(jes) ? jes : [])
+      .filter((r: Record<string, unknown>) => corrected !== null && !corrected.has(String(r.journal_entry_id)))
+      .map((r: Record<string, unknown>) => String(r.skill_id)),
   );
 
   const byId = new Map<string, CapabilitySignal>();
