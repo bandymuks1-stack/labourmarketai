@@ -122,6 +122,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261019220000_",
       // 2026-10-20: one demand-company rule for five functions.
       "20261020010000_",
+      // 2026-10-20: My Space pins table restored (reads answered 404).
+      "20261020020000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

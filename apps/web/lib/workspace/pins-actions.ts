@@ -71,6 +71,8 @@ export async function pinAction(input: { ref: string; label?: string | null; exp
   });
   if (error) {
     if (error.code === "23505") return { ok: true, outcome: "already" };
+    // The database cap (workspace_pins_cap_v1) caught a parallel pin the count above could not see.
+    if (error.code === "P0001") return { ok: false, code: "cap" };
     return { ok: false, code: MISSING.has(error.code) ? "unavailable" : "error" };
   }
   return { ok: true, outcome: "pinned" };
