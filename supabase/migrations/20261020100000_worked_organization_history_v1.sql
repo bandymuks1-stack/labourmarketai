@@ -1,3 +1,7 @@
+-- @human-gate-approved — owner approved the limited-access principle of PR #2563
+-- (2026-10-20): a person sees the name and period of an organization linked to
+-- their own work history; no other person's data and no private organization
+-- data. Access scenarios checked in a rolled-back transaction. Scope: this SQL only.
 -- ============================================================================
 -- worked_organization_history_v1 — the people who worked for an organization
 -- read its NAME and its stated earlier PERIODS (decision 0025, owner order
