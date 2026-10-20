@@ -294,3 +294,55 @@ describe("organization-provided history in the EU export", () => {
     expect(doc.organizationHistory[0].heading).toBe("Harbour Tower");
   });
 });
+
+describe("positions the engagement list cannot carry reach the EU CV (decision 0025, 2026-10-20)", () => {
+  const pe = (organizations: unknown[]) =>
+    ({ organizations, hours: null, roles: [], lines: [], projects: [] }) as unknown as NonNullable<
+      Parameters<typeof buildEuFormatCv>[0]["professionalExperience"]
+    >;
+  const earlier = {
+    key: "earlier:bp-vivat",
+    kind: "earlier_legal_entity",
+    organizationId: "org-lm",
+    organizationName: "Vivat Rex",
+    legalEntityLabel: "Vivat Rex",
+    legalEntityRelation: "not_asserted",
+    administeredBy: { organizationId: "org-lm", organizationName: "Labour market ai Sp. z o.o" },
+    roles: [{ relationship: "owner", title: null, startedAt: "2022-01-01", endedAt: null, current: false, source: "engagement", engagementContextId: null, derived: true }],
+    totalHours: 800,
+    from: "2022-01-01",
+    to: null,
+  };
+  const membership = {
+    key: "org:org-nonstop",
+    kind: "organization",
+    organizationId: "org-nonstop",
+    organizationName: "UAB Nonstop Group",
+    legalEntityLabel: null,
+    legalEntityRelation: null,
+    administeredBy: null,
+    roles: [{ relationship: "manager", title: null, startedAt: null, endedAt: null, current: true, source: "membership", engagementContextId: null }],
+    totalHours: 0,
+    from: null,
+    to: null,
+  };
+
+  it("an earlier legal entity's role and a governing membership become work-experience lines", () => {
+    const eu = buildEuFormatCv({ ...EMPTY, professionalExperience: pe([earlier, membership]) });
+    expect(eu.workExperience.map((e) => [e.organization, e.relationship])).toEqual([
+      ["UAB Nonstop Group", "manager"],
+      ["Vivat Rex", "owner"],
+    ]);
+  });
+
+  it("an UNKNOWN end never prints 'present'; a current role does", () => {
+    const doc = resolveEuFormatDocument(
+      buildEuFormatCv({ ...EMPTY, professionalExperience: pe([earlier, membership]) }),
+      R,
+    );
+    const vivat = doc.workExperience.find((e) => e.subheading === "Vivat Rex");
+    expect(vivat?.period).toBe("2022-01-01");
+    const nonstop = doc.workExperience.find((e) => e.subheading === "UAB Nonstop Group");
+    expect(nonstop?.period).toBeNull();
+  });
+});
