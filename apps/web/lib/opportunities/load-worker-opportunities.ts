@@ -1,5 +1,5 @@
 import "server-only";
-import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
+import { isSyntheticFixtureLabel, isSyntheticViewer } from "@/lib/qa/synthetic-fixture";
 
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -238,6 +238,7 @@ async function loadBoard(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "no-worker" };
+  const qaViewer = isSyntheticViewer(user);
 
   const ctx = await buildOwnWorkerContext(supabase, user.id);
   if (!ctx) return { kind: "no-worker" };
@@ -391,9 +392,12 @@ async function loadBoard(
         // DEFAULT-CLOSED: only approved supply routes (Model A) reach a worker.
         .filter(isApprovedRouteRow)
         // Synthetic QA subjects are not opportunities for a real person
-        // (lib/qa/synthetic-fixture.ts).
+        // (lib/qa/synthetic-fixture.ts). A documented QA viewer still sees
+        // them — the one rule the inbox and marketplace already apply — so
+        // the production walk can raise a hand on a synthetic need.
         .filter(
           (row) =>
+            qaViewer ||
             !isSyntheticFixtureLabel(
               row.role_text as string | null,
               row.company_name as string | null,
