@@ -566,7 +566,7 @@ export async function loadEmployerOpeningBrief(): Promise<OpeningBrief> {
       const ctx = await resolveEmployerCompanyContext();
       const unread =
         ctx.kind === "ok"
-          ? (await getUnreadConversationIdsForOrganization(ctx.companyId)).size
+          ? (await getUnreadConversationIdsForOrganization(ctx.organizationId)).size
           : 0;
       if (unread > 0) {
         lines.push(t("briefUnreadMessages", { count: unread }));
