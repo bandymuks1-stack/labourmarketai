@@ -689,11 +689,41 @@ export default async function VerifiedCvPage({
     current: s.current,
     sortKey: s.current ? "9999-12-31" : (s.to ?? s.from ?? "0000"),
   });
-  // The premium layout carries the leadership block of its own, so it adds the
-  // EARLIER LEGAL ENTITIES here; the classic / print layout lists every stop.
+  // The premium layout's own leadership block lists CURRENT governing
+  // memberships only, so the premium list adds the earlier legal entities AND
+  // every leadership stop that block cannot show (an ended or engagement-only
+  // manager / owner role); the classic / print layout lists every stop.
+  // One entry PER uncovered role, with that role's own dates and provenance:
+  // an engagement role is the person's own entry (declared), a governing
+  // membership is the organization's record. A current membership is the
+  // leadership block's and is not repeated here.
   const earlierEntityStops = stops.filter((s) => s.kind === "earlier_legal_entity");
+  const uncoveredRoles = stops
+    .filter((s) => s.kind === "organization")
+    .flatMap((s) =>
+      s.roles
+        .filter((r) => !(r.source === "membership" && r.current))
+        .map((r, i) => ({ stop: s, role: r, key: `${s.key}:${r.relationship}:${i}` })),
+    );
+  const rolePeriod = (r: ExperienceStop["roles"][number]): string => {
+    const from = monthYear(r.startedAt);
+    const to = r.current ? tPremium("present") : monthYear(r.endedAt);
+    return from || to ? `${from ?? "…"} – ${to ?? "…"}` : tLead("notDocumented");
+  };
+  const roleEntry = ({ stop, role, key }: (typeof uncoveredRoles)[number]): PremiumCvExperience & { sortKey: string } => ({
+    key,
+    period: rolePeriod(role),
+    title: stop.name ?? tPremium("untitled"),
+    subtitle: roleLabel(role.relationship),
+    detail: null,
+    source: role.source === "membership" ? tPremium("source.organization") : tPremium("source.own"),
+    level: role.source === "membership" ? "recorded" : "declared",
+    current: role.current,
+    sortKey: role.current ? "9999-12-31" : (role.endedAt ?? role.startedAt ?? "0000"),
+  });
   const premiumExperience: (PremiumCvExperience & { sortKey: string })[] = [
     ...earlierEntityStops.map(stopEntry),
+    ...uncoveredRoles.map(roleEntry),
     ...cv.workHistory.map((e, i): PremiumCvExperience & { sortKey: string } => {
       const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
       const from = monthYear(e.startedAt);
@@ -766,6 +796,23 @@ export default async function VerifiedCvPage({
           level: "recorded" as JourneyLevel,
           contextId: null,
           hours: s.hours,
+          confirmedHours: null,
+        };
+      }),
+      ...uncoveredRoles.map(({ stop, role, key }) => {
+        journeyMeta[key] = rolePeriod(role);
+        return {
+          key,
+          title: stop.name ?? tPremium("untitled"),
+          subtitle: roleLabel(role.relationship),
+          from: role.startedAt,
+          to: role.endedAt,
+          current: role.current,
+          source: (role.source === "membership" ? "organization" : "own") as "organization" | "own",
+          level: (role.source === "membership" ? "recorded" : "declared") as JourneyLevel,
+          // The engagement context ties journal-evidenced skills to this role.
+          contextId: role.engagementContextId,
+          hours: null,
           confirmedHours: null,
         };
       }),

@@ -370,3 +370,36 @@ describe("a declared certificate keeps its declared label on the EU CV", () => {
     expect(json.match(/Listed by the worker/g)).toHaveLength(1);
   });
 });
+
+describe("leadership lines on the EU CV carry their own role's dates", () => {
+  it("one line per role, each with its own dates and state — never the organization's work span", () => {
+    const eu = buildEuFormatCv({
+      ...EMPTY,
+      professionalExperience: {
+        organizations: [
+          {
+            key: "org-1",
+            kind: "organization",
+            organizationId: "o1",
+            organizationName: "Acme",
+            legalEntityLabel: null,
+            legalEntityRelation: null,
+            from: "2025-03-01",
+            to: "2025-09-30",
+            totalHours: 400,
+            administeredBy: null,
+            roles: [
+              { relationship: "manager", title: null, startedAt: "2020-01-01", endedAt: "2022-06-30", current: false, source: "engagement", engagementContextId: "e1" },
+              { relationship: "owner", title: null, startedAt: null, endedAt: null, current: true, source: "membership", engagementContextId: null },
+            ],
+          },
+        ],
+      } as never,
+    } as never);
+    const lines = eu.workExperience.filter((w) => w.organization === "Acme");
+    expect(lines.map((l) => [l.relationship, l.startedAt, l.endedAt, l.ongoing])).toEqual([
+      ["manager", "2020-01-01", "2022-06-30", false],
+      ["owner", null, null, true],
+    ]);
+  });
+});
