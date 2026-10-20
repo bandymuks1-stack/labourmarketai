@@ -61,7 +61,9 @@ describe("2. every limit is the RPC's own", () => {
 
   it("the control is offered only where those preconditions hold", () => {
     expect(CARD).toMatch(/selfDeclared\?: boolean;/);
-    expect(PAGE).toMatch(/selfDeclared: org === null && e\.is_primary !== true/);
+    // 2026-10-20: the RPC's precondition is `organization_id is null` — read the
+    // column itself; the organizations embed is empty for an ENDED relationship.
+    expect(PAGE).toMatch(/selfDeclared: e\.organization_id === null && e\.is_primary !== true/);
     expect(UI).toMatch(/c\.selfDeclared &&/);
   });
 });

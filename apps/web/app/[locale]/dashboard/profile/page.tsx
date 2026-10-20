@@ -110,6 +110,7 @@ import {
   RosterLinkWithdrawals,
 } from "@/components/app/organization-evidence-section";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
@@ -489,12 +490,22 @@ export default async function ProfilePage({
       supabase
         .from("engagement_contexts")
         .select(
-          "id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
+          "id, organization_id, relationship_slug, title, is_primary, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
         )
         .eq("profile_id", user.id)
         .in("relationship_slug", HISTORY_RELATIONSHIPS)
         .order("is_primary", { ascending: false })
-        .order("started_at", { ascending: false, nullsFirst: false }),
+        .order("started_at", { ascending: false, nullsFirst: false })
+        // An ENDED relationship's organization is outside the organizations
+        // RLS (active relationships only), so its embed is empty: the shared
+        // historical-name reader fills it inside this same parallel stage
+        // (system audit 2026-10-20: former employers showed "—").
+        .then(
+          (res): Promise<typeof res> =>
+            res.data
+              ? withHistoricalOrgNames(supabase, res.data).then((data) => ({ ...res, data }) as typeof res)
+              : Promise.resolve(res),
+        ),
       // Was awaited INSIDE the JSX (`signals={await getOwnTrustSignals(…)}`),
       // so it could not overlap anything at all.
       getOwnTrustSignals(workerId),
@@ -750,7 +761,10 @@ export default async function ProfilePage({
         title: e.title,
         isPrimary: e.is_primary,
         // Exactly the RPC's preconditions, computed from rows already read.
-        selfDeclared: org === null && e.is_primary !== true,
+        // The RPC's own precondition is `organization_id is null` — an ENDED
+        // organization relationship whose name RLS hides is NOT self-declared
+        // (it showed a Remove button the RPC then refused).
+        selfDeclared: e.organization_id === null && e.is_primary !== true,
       };
     });
 
