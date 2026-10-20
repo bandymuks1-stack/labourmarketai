@@ -74,6 +74,7 @@ const EXPECTED_EVENTS = [
   "signup_completed",
   "cv_upload_started",
   "cv_upload_succeeded",
+  "cv_upload_failed",
   "booking_viewed",
   "booking_accepted",
   "booking_declined",
@@ -545,7 +546,7 @@ describe("activation funnel — key surfaces emit their events", () => {
     //    Readiness v1). Bounded scalars only; no PII, no schema change.
     {
       file: "components/app/cv-import-upload.tsx",
-      mustContain: ["cvUploadStarted", "cvUploadSucceeded"],
+      mustContain: ["cvUploadStarted", "cvUploadSucceeded", "cvUploadFailed", "trackFunnelFailure"],
     },
     {
       file: "components/app/booking-respond-buttons.tsx",
