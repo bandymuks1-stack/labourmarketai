@@ -153,6 +153,7 @@ export const CANONICAL_APP_RPCS = [
   "respond_contact_disclosure_request_v1",
   "respond_service_offering_request",
   "respond_team_demand_offer_v1",
+  "respond_team_demand_offer_v2",
   "respond_team_enquiry_v1",
   "return_asset_v1",
   "review_journal_entries_batch",

@@ -18937,7 +18937,8 @@
       "terms_invalid": "Prüfen Sie Zahlen und Daten.",
       "terms_limit_reached": "Dieses Angebot hat bereits 50 Versionen.",
       "terms_await_other_side": "Das sind Ihre eigenen Bedingungen — die andere Seite antwortet.",
-      "organization_offer_not_a_unit": "Ein Unternehmensangebot wird nicht als Team zugewiesen; klären Sie die Personen im Gespräch."
+      "organization_offer_not_a_unit": "Ein Unternehmensangebot wird nicht als Team zugewiesen; klären Sie die Personen im Gespräch.",
+      "terms_changed": "Die andere Seite hat gerade neue Bedingungen vorgeschlagen. Prüfen Sie die neueste Version und antworten Sie dann."
     },
     "received": {
       "title": "Für diesen Bedarf angebotene Teams",

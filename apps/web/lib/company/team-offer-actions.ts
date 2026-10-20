@@ -83,8 +83,15 @@ export async function withdrawTeamOfferAction(input: { offerId: string }) {
   return result;
 }
 
-export async function respondToTeamOfferAction(input: { offerId: string; decision: "accept" | "decline" }) {
+export async function respondToTeamOfferAction(input: {
+  offerId: string;
+  decision: "accept" | "decline";
+  /** The terms version on the screen the person agreed to (null = none). */
+  expectedVersion?: number | null;
+}) {
   if (!UUID.test(input.offerId) || (input.decision !== "accept" && input.decision !== "decline")) return BAD;
+  const v = input.expectedVersion;
+  if (v !== undefined && v !== null && (!Number.isInteger(v) || v < 1)) return BAD;
   const result = await respondToTeamOffer(input);
   if (result.status === "ok") revalidatePath("/", "layout");
   return result;

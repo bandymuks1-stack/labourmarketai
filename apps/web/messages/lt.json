@@ -18937,7 +18937,8 @@
       "terms_invalid": "Patikrinkite skaičius ir datas.",
       "terms_limit_reached": "Šis pasiūlymas jau turi 50 sąlygų versijų.",
       "terms_await_other_side": "Tai jūsų pačių sąlygos — atsako kita pusė.",
-      "organization_offer_not_a_unit": "Įmonės pasiūlymas nepriskiriamas kaip komanda; žmones suderinkite pokalbyje."
+      "organization_offer_not_a_unit": "Įmonės pasiūlymas nepriskiriamas kaip komanda; žmones suderinkite pokalbyje.",
+      "terms_changed": "Kita pusė ką tik pasiūlė naujas sąlygas. Peržiūrėkite naujausią versiją ir tada atsakykite."
     },
     "received": {
       "title": "Šiam poreikiui pasiūlytos komandos",

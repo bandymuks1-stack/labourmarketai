@@ -18937,7 +18937,8 @@
       "terms_invalid": "Controleer de getallen en datums.",
       "terms_limit_reached": "Dit aanbod heeft al 50 versies van voorwaarden.",
       "terms_await_other_side": "Dit zijn uw eigen voorwaarden — de andere partij antwoordt.",
-      "organization_offer_not_a_unit": "Een bedrijfsaanbod wordt niet als ploeg toegewezen; spreek de mensen af in het gesprek."
+      "organization_offer_not_a_unit": "Een bedrijfsaanbod wordt niet als ploeg toegewezen; spreek de mensen af in het gesprek.",
+      "terms_changed": "De andere partij heeft zojuist nieuwe voorwaarden voorgesteld. Bekijk de nieuwste versie en antwoord dan."
     },
     "received": {
       "title": "Voor deze vraag aangeboden teams",

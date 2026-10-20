@@ -18937,7 +18937,8 @@
       "terms_invalid": "Check the numbers and dates.",
       "terms_limit_reached": "This offer already has 50 versions of terms.",
       "terms_await_other_side": "These are your own terms — the other side answers them.",
-      "organization_offer_not_a_unit": "A company offer is not assigned as a team; agree the people in the conversation."
+      "organization_offer_not_a_unit": "A company offer is not assigned as a team; agree the people in the conversation.",
+      "terms_changed": "The other side has just proposed new terms. Review the latest version, then answer."
     },
     "received": {
       "title": "Teams offered for this need",

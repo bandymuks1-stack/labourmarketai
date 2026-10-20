@@ -67,13 +67,20 @@ export function TeamOfferTerms({
   function agree() {
     setMsg(null);
     startTransition(async () => {
-      const r = await respondToTeamOfferAction({ offerId, decision: "accept" });
+      // Agree to the version ON THE SCREEN — a newer one refuses, and the
+      // list reloads so the person sees what changed.
+      const r = await respondToTeamOfferAction({
+        offerId,
+        decision: "accept",
+        expectedVersion: answerable?.version ?? null,
+      });
       if (r.status === "ok") {
         setMsg({ ok: true, text: t("agreed") });
         await reload();
         router.refresh();
       } else {
         setMsg({ ok: false, text: refusal(r.status) });
+        if (r.status === "terms_changed") await reload();
       }
     });
   }
