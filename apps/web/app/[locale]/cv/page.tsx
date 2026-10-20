@@ -693,11 +693,37 @@ export default async function VerifiedCvPage({
   // memberships only, so the premium list adds the earlier legal entities AND
   // every leadership stop that block cannot show (an ended or engagement-only
   // manager / owner role); the classic / print layout lists every stop.
-  const coveredByLeadershipBlock = (s: ExperienceStop) =>
-    s.kind === "organization" && s.roles.length > 0 && s.roles.every((r) => r.source === "membership" && r.current);
-  const premiumStops = stops.filter((s) => s.kind === "earlier_legal_entity" || !coveredByLeadershipBlock(s));
+  // One entry PER uncovered role, with that role's own dates and provenance:
+  // an engagement role is the person's own entry (declared), a governing
+  // membership is the organization's record. A current membership is the
+  // leadership block's and is not repeated here.
+  const earlierEntityStops = stops.filter((s) => s.kind === "earlier_legal_entity");
+  const uncoveredRoles = stops
+    .filter((s) => s.kind === "organization")
+    .flatMap((s) =>
+      s.roles
+        .filter((r) => !(r.source === "membership" && r.current))
+        .map((r, i) => ({ stop: s, role: r, key: `${s.key}:${r.relationship}:${i}` })),
+    );
+  const rolePeriod = (r: ExperienceStop["roles"][number]): string => {
+    const from = monthYear(r.startedAt);
+    const to = r.current ? tPremium("present") : monthYear(r.endedAt);
+    return from || to ? `${from ?? "…"} – ${to ?? "…"}` : tLead("notDocumented");
+  };
+  const roleEntry = ({ stop, role, key }: (typeof uncoveredRoles)[number]): PremiumCvExperience & { sortKey: string } => ({
+    key,
+    period: rolePeriod(role),
+    title: stop.name ?? tPremium("untitled"),
+    subtitle: roleLabel(role.relationship),
+    detail: null,
+    source: role.source === "membership" ? tPremium("source.organization") : tPremium("source.own"),
+    level: role.source === "membership" ? "recorded" : "declared",
+    current: role.current,
+    sortKey: role.current ? "9999-12-31" : (role.endedAt ?? role.startedAt ?? "0000"),
+  });
   const premiumExperience: (PremiumCvExperience & { sortKey: string })[] = [
-    ...premiumStops.map(stopEntry),
+    ...earlierEntityStops.map(stopEntry),
+    ...uncoveredRoles.map(roleEntry),
     ...cv.workHistory.map((e, i): PremiumCvExperience & { sortKey: string } => {
       const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
       const from = monthYear(e.startedAt);
@@ -757,7 +783,7 @@ export default async function VerifiedCvPage({
   const journey = deriveCareerJourney({
     todayIso: (await viewerWorkToday()).todayIso,
     stations: [
-      ...premiumStops.map((s) => {
+      ...earlierEntityStops.map((s) => {
         journeyMeta[s.key] = [stopPeriod(s), s.hours !== null ? premiumHours(s.hours) : null].filter(Boolean).join(" · ");
         return {
           key: s.key,
@@ -765,11 +791,27 @@ export default async function VerifiedCvPage({
           subtitle: stopSubtitle(s),
           from: s.from,
           to: s.to,
-          current: s.current,
+          current: false,
           source: "organization" as const,
           level: "recorded" as JourneyLevel,
           contextId: null,
           hours: s.hours,
+          confirmedHours: null,
+        };
+      }),
+      ...uncoveredRoles.map(({ stop, role, key }) => {
+        journeyMeta[key] = rolePeriod(role);
+        return {
+          key,
+          title: stop.name ?? tPremium("untitled"),
+          subtitle: roleLabel(role.relationship),
+          from: role.startedAt,
+          to: role.endedAt,
+          current: role.current,
+          source: (role.source === "membership" ? "organization" : "own") as "organization" | "own",
+          level: (role.source === "membership" ? "recorded" : "declared") as JourneyLevel,
+          contextId: null,
+          hours: null,
           confirmedHours: null,
         };
       }),
