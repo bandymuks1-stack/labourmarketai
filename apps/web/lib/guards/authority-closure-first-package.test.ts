@@ -132,6 +132,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261020025900_",
       "20261020080000_",
       "20261020100000_",
+      "20261020170000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
