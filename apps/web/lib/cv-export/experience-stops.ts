@@ -32,11 +32,18 @@ export type ExperienceStop = {
     readonly relationship: string;
     readonly derived: boolean;
     readonly current: boolean;
+    /** The role's OWN dates (null = not documented) — never a work span. */
+    readonly startedAt: string | null;
+    readonly endedAt: string | null;
+    /** `membership` = a governing membership; `engagement` = an engagement row. */
+    readonly source: string;
   }[];
   readonly from: string | null;
   readonly to: string | null;
   readonly current: boolean;
-  /** Counted hours of the row (journal + organization); null when none. */
+  /** Earlier-entity stops only: the counted hours of work under that entity.
+   *  Leadership stops carry none — the organization's work hours are not
+   *  hours performed in a leadership role. */
   readonly hours: number | null;
 };
 
@@ -57,22 +64,33 @@ export function experienceStopsOf(pe: ProfessionalExperience | null | undefined)
     const isEarlier = o.kind === "earlier_legal_entity";
     if (!isEarlier && roles.length === 0) continue;
     // A start comes only from starts, an end only from ends — an unknown end
-    // is never filled with a start date.
+    // is never filled with a start date. A LEADERSHIP stop is dated by its
+    // roles alone: the organization's work-record span is not when someone
+    // led it. An earlier entity keeps its stated period, roles as fallback.
     const starts = roles.map((r) => r.startedAt).filter((d): d is string => !!d).sort();
     const ends = roles.map((r) => r.endedAt).filter((d): d is string => !!d).sort();
-    const from = o.from ?? starts[0] ?? null;
-    const to = o.to ?? (roles.some((r) => r.current) ? null : (ends[ends.length - 1] ?? null));
+    const roleFrom = starts[0] ?? null;
+    const roleTo = roles.some((r) => r.current) ? null : (ends[ends.length - 1] ?? null);
+    const from = isEarlier ? (o.from ?? roleFrom) : roleFrom;
+    const to = isEarlier ? (o.to ?? roleTo) : roleTo;
     out.push({
       key: `stop:${o.key}`,
       kind: isEarlier ? "earlier_legal_entity" : "organization",
       name: o.organizationName ?? o.legalEntityLabel,
       administeredByName: isEarlier ? (o.administeredBy?.organizationName ?? null) : null,
       legalEntityRelation: o.legalEntityRelation,
-      roles: roles.map((r) => ({ relationship: r.relationship, derived: r.derived === true, current: r.current })),
+      roles: roles.map((r) => ({
+        relationship: r.relationship,
+        derived: r.derived === true,
+        current: r.current,
+        startedAt: r.startedAt ?? null,
+        endedAt: r.endedAt ?? null,
+        source: r.source,
+      })),
       from,
       to,
       current: !isEarlier && roles.some((r) => r.current),
-      hours: o.totalHours > 0 ? o.totalHours : null,
+      hours: isEarlier && o.totalHours > 0 ? o.totalHours : null,
     });
   }
   // Current first, then the most recent end; undated rows last.

@@ -689,11 +689,15 @@ export default async function VerifiedCvPage({
     current: s.current,
     sortKey: s.current ? "9999-12-31" : (s.to ?? s.from ?? "0000"),
   });
-  // The premium layout carries the leadership block of its own, so it adds the
-  // EARLIER LEGAL ENTITIES here; the classic / print layout lists every stop.
-  const earlierEntityStops = stops.filter((s) => s.kind === "earlier_legal_entity");
+  // The premium layout's own leadership block lists CURRENT governing
+  // memberships only, so the premium list adds the earlier legal entities AND
+  // every leadership stop that block cannot show (an ended or engagement-only
+  // manager / owner role); the classic / print layout lists every stop.
+  const coveredByLeadershipBlock = (s: ExperienceStop) =>
+    s.kind === "organization" && s.roles.length > 0 && s.roles.every((r) => r.source === "membership" && r.current);
+  const premiumStops = stops.filter((s) => s.kind === "earlier_legal_entity" || !coveredByLeadershipBlock(s));
   const premiumExperience: (PremiumCvExperience & { sortKey: string })[] = [
-    ...earlierEntityStops.map(stopEntry),
+    ...premiumStops.map(stopEntry),
     ...cv.workHistory.map((e, i): PremiumCvExperience & { sortKey: string } => {
       const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
       const from = monthYear(e.startedAt);
@@ -753,7 +757,7 @@ export default async function VerifiedCvPage({
   const journey = deriveCareerJourney({
     todayIso: (await viewerWorkToday()).todayIso,
     stations: [
-      ...earlierEntityStops.map((s) => {
+      ...premiumStops.map((s) => {
         journeyMeta[s.key] = [stopPeriod(s), s.hours !== null ? premiumHours(s.hours) : null].filter(Boolean).join(" · ");
         return {
           key: s.key,
@@ -761,7 +765,7 @@ export default async function VerifiedCvPage({
           subtitle: stopSubtitle(s),
           from: s.from,
           to: s.to,
-          current: false,
+          current: s.current,
           source: "organization" as const,
           level: "recorded" as JourneyLevel,
           contextId: null,
