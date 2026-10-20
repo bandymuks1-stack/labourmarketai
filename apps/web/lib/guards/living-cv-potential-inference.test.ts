@@ -46,7 +46,11 @@ describe("Living CV keeps potential-capability discovery", () => {
 
   it("reaches the Living CV itself, from evidenced tiers only, on screen and never in print", () => {
     const cv = read("app/[locale]/cv/page.tsx");
-    expect(cv).toMatch(/derivePotentialSkills\(\s*\[\.\.\.cv\.tiers\.confirmed, \.\.\.cv\.tiers\.evidence\],\s*\[\.\.\.cv\.tiers\.confirmed, \.\.\.cv\.tiers\.evidence, \.\.\.cv\.tiers\.declared\],/);
+    // Evidence = confirmed + LIVE practice (never the raw journal links);
+    // known includes declared claims' mapped slugs.
+    expect(cv).toMatch(/const livePracticeSlugs = Object\.keys\(cv\.skillPractice \?\? \{\}\)/);
+    expect(cv).toMatch(/derivePotentialSkills\(\s*\[\.\.\.cv\.tiers\.confirmed, \.\.\.livePracticeSlugs\],/);
+    expect(cv).toMatch(/cv\.declaredClaims\.flatMap\(\(c\) => c\.mappedSlugs \?\? \[\]\)/);
     const block = cv.slice(cv.indexOf('data-testid="cv-potential"') - 120, cv.indexOf('data-testid="cv-potential"') + 40);
     expect(block).toContain("print:hidden");
     expect(cv).toContain('data-evidence-state="potential"');
