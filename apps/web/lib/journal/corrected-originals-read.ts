@@ -1,7 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { correctedOriginalIds } from "@/lib/journal/counted-once";
-import { readAllPages } from "@/lib/journal/journal-list-core";
 
 /**
  * The confirmed ORIGINALS a worker's live corrections replace (counted once,
@@ -12,28 +11,38 @@ import { readAllPages } from "@/lib/journal/journal-list-core";
  * not from the links themselves, because a correction that dropped a skill has
  * no link to it.
  *
- * PAGED to the end (the server answers at most 1000 rows; ordered by id so no
- * row is skipped or repeated). `null` only for a failed read or the pager's
- * own ceiling — never for a merely long history, which would make callers
- * drop the worker's whole journal-derived capability set.
+ * KEYSET-PAGED to the end by id (the server answers at most 1000 rows): each
+ * page starts strictly after the last id read, so a correction deleted or
+ * superseded mid-read cannot shift a later row out of the read. `null` only
+ * for a failed read or the ceiling — never for a merely long history, which
+ * would make callers drop the worker's whole journal-derived capability set.
  */
+const PAGE = 1000;
+const MAX_PAGES = 20;
+
 export async function readCorrectedOriginalIds(
   supabase: SupabaseClient,
   workerId: string,
 ): Promise<ReadonlySet<string> | null> {
   try {
-    const paged = await readAllPages<{ id: string; correction_of: string | null }>(() =>
-      (supabase as unknown as { from: (t: string) => any }) // eslint-disable-line @typescript-eslint/no-explicit-any
+    const rows: { id: string; correction_of: string | null }[] = [];
+    let after: string | null = null;
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      let q = (supabase as unknown as { from: (t: string) => any }) // eslint-disable-line @typescript-eslint/no-explicit-any
         .from("journal_entries")
         .select("id, correction_of")
         .eq("worker_id", workerId)
         .is("deleted_at", null)
         .is("superseded_by", null)
-        .not("correction_of", "is", null)
-        .order("id", { ascending: true }),
-    );
-    if (paged.error || paged.truncated) return null;
-    return correctedOriginalIds(paged.rows);
+        .not("correction_of", "is", null);
+      if (after) q = q.gt("id", after);
+      const { data, error } = await q.order("id", { ascending: true }).limit(PAGE);
+      if (error || !Array.isArray(data)) return null;
+      rows.push(...(data as { id: string; correction_of: string | null }[]));
+      if (data.length < PAGE) return correctedOriginalIds(rows);
+      after = (data[data.length - 1] as { id: string }).id;
+    }
+    return null; // the ceiling: more corrections may exist — unknown, not partial
   } catch {
     return null;
   }

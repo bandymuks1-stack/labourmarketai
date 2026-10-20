@@ -4,16 +4,26 @@ vi.mock("server-only", () => ({}));
 
 import { readCorrectedOriginalIds } from "./corrected-originals-read";
 
-/** A paged fake: `.range(from, to)` slices `rows`; every page records its range. */
+/** A keyset fake: `.gt("id", x)` + `.limit(n)` over rows ordered by id. */
 function client(rows: { id: string; correction_of: string | null }[] | null, error: unknown = null) {
-  const ranges: [number, number][] = [];
-  const b: Record<string, unknown> = {};
-  for (const m of ["select", "eq", "is", "not", "order"]) b[m] = () => b;
-  b.range = (from: number, to: number) => {
-    ranges.push([from, to]);
-    return Promise.resolve({ data: rows ? rows.slice(from, to + 1) : null, error });
+  const pages: (string | null)[] = [];
+  const make = () => {
+    let after: string | null = null;
+    const b: Record<string, unknown> = {};
+    for (const m of ["select", "eq", "is", "not", "order"]) b[m] = () => b;
+    b.gt = (_c: string, v: string) => {
+      after = v;
+      return b;
+    };
+    b.limit = (n: number) => {
+      pages.push(after);
+      if (!rows) return Promise.resolve({ data: null, error });
+      const sorted = [...rows].sort((a, z) => (a.id < z.id ? -1 : 1));
+      return Promise.resolve({ data: sorted.filter((r) => !after || r.id > after).slice(0, n), error });
+    };
+    return b;
   };
-  return { ranges, c: { from: () => b } as never };
+  return { ranges: pages, c: { from: () => make() } as never };
 }
 
 describe("the corrected originals a worker's live corrections replace", () => {
@@ -23,14 +33,12 @@ describe("the corrected originals a worker's live corrections replace", () => {
   });
 
   it("a long history is read to the end, never discarded (1500 corrections → 2 pages)", async () => {
-    const rows = Array.from({ length: 1500 }, (_, i) => ({ id: `c${i}`, correction_of: `o${i}` }));
+    const rows = Array.from({ length: 1500 }, (_, i) => ({ id: `c${String(i).padStart(5, "0")}`, correction_of: `o${i}` }));
     const { c, ranges } = client(rows);
     const set = await readCorrectedOriginalIds(c, "w1");
     expect(set?.size).toBe(1500);
-    expect(ranges).toEqual([
-      [0, 999],
-      [1000, 1999],
-    ]);
+    // Two keyset pages: from the start, then strictly after the 1000th id.
+    expect(ranges).toEqual([null, "c00999"]);
   });
 
   it("is unknown (null) when the read fails", async () => {
