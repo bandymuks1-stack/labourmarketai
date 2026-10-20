@@ -56,9 +56,12 @@ export function experienceStopsOf(pe: ProfessionalExperience | null | undefined)
     const roles = o.roles.filter(outsideEngagementList);
     const isEarlier = o.kind === "earlier_legal_entity";
     if (!isEarlier && roles.length === 0) continue;
-    const roleDates = roles.flatMap((r) => [r.startedAt, r.endedAt]).filter((d): d is string => !!d).sort();
-    const from = o.from ?? roleDates[0] ?? null;
-    const to = o.to ?? (roles.some((r) => r.current) ? null : roleDates[roleDates.length - 1] ?? null);
+    // A start comes only from starts, an end only from ends — an unknown end
+    // is never filled with a start date.
+    const starts = roles.map((r) => r.startedAt).filter((d): d is string => !!d).sort();
+    const ends = roles.map((r) => r.endedAt).filter((d): d is string => !!d).sort();
+    const from = o.from ?? starts[0] ?? null;
+    const to = o.to ?? (roles.some((r) => r.current) ? null : (ends[ends.length - 1] ?? null));
     out.push({
       key: `stop:${o.key}`,
       kind: isEarlier ? "earlier_legal_entity" : "organization",
