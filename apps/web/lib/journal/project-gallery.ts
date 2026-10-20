@@ -1,6 +1,6 @@
 import "server-only";
 
-import { COUNTED_ONCE_READ_CAP, countedOnceTotal } from "@/lib/journal/counted-once-count";
+import { countedOnceTotal, readCountedRows } from "@/lib/journal/counted-once-count";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -87,15 +87,17 @@ export async function getProjectGallerySummary(
   let photoCount = 0;
   try {
     const [entriesRes, photosRes] = await Promise.all([
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase as any)
-        .from("journal_entries")
-        // id + correction_of: a corrected-and-resubmitted entry counts once.
-        .select("id, correction_of")
-        .eq("project_id", projectId)
-        .is("deleted_at", null)
-        .is("superseded_by", null)
-        .limit(COUNTED_ONCE_READ_CAP),
+      readCountedRows(() =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase as any)
+          .from("journal_entries")
+          // id + correction_of: a corrected-and-resubmitted entry counts once.
+          .select("id, correction_of")
+          .eq("project_id", projectId)
+          .is("deleted_at", null)
+          .is("superseded_by", null)
+          .order("id", { ascending: true }),
+      ),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any)
         .from("journal_entry_photos")

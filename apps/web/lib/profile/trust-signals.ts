@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { countedOnce } from "@/lib/journal/counted-once";
-import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
+import { liveJournalEntriesOnly, readAllPages } from "@/lib/journal/journal-list-core";
 import { countConfirmedEntries, type ConfirmationRow } from "@/lib/journal/review-status";
 
 /**
@@ -16,8 +16,10 @@ import { countConfirmedEntries, type ConfirmationRow } from "@/lib/journal/revie
  * is the TASK 07 living-arena trust block; these semantics stay unchanged.
  */
 
-/** Upper bound on one person's entries read here; reaching it is UNKNOWN, not a total. */
-const ENTRY_READ_CAP = 5000;
+/** One person's entries are read in full, 1000 per page (the server's answer
+ *  cap — a bare .limit(5000) was a silent 1000 and its "reached the cap"
+ *  check could never fire); past this many pages the count is UNKNOWN. */
+const ENTRY_READ_MAX_PAGES = 20;
 
 interface TrustEntryRow {
   readonly id: string;
@@ -73,14 +75,17 @@ export async function getOwnTrustSignals(
     // per correction chain. The old figure counted ROWS — rejected and
     // self-made decisions included, a corrected original and its correction
     // both — and read higher than every other "confirmed" number.
-    liveJournalEntriesOnly(
-      asAny(supabase)
-        .from("journal_entries")
-        .select(
-          "id, correction_of, journal_entry_confirmations(confirmation_scope, created_at, confirmer_id)",
-        )
-        .eq("worker_id", workerId)
-        .limit(ENTRY_READ_CAP),
+    readAllPages<TrustEntryRow>(
+      () =>
+        liveJournalEntriesOnly(
+          asAny(supabase)
+            .from("journal_entries")
+            .select(
+              "id, correction_of, journal_entry_confirmations(confirmation_scope, created_at, confirmer_id)",
+            )
+            .eq("worker_id", workerId),
+        ).order("id", { ascending: true }),
+      { pageSize: 1000, maxPages: ENTRY_READ_MAX_PAGES },
     ),
     // Whose entries these are: independence is "not the subject's own".
     asAny(supabase).from("workers").select("profile_id").eq("id", workerId).limit(1),
@@ -92,10 +97,7 @@ export async function getOwnTrustSignals(
   // hint. That is the worst possible moment to be wrong about a person: this
   // block, and the Verified CV built from the same numbers, are where they see
   // what their work has added up to.
-  const rows =
-    entriesRes.error || (entriesRes.data ?? []).length >= ENTRY_READ_CAP
-      ? null
-      : ((entriesRes.data ?? []) as TrustEntryRow[]);
+  const rows = entriesRes.error || entriesRes.truncated ? null : entriesRes.rows;
 
   // Entries are counted ONCE per correction chain (a corrected original and
   // its live correction are one day of work, not two).
