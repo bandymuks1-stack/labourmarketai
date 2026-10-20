@@ -87,6 +87,22 @@ test("C-1. the worker raises a hand on Gama's need from the opportunities board"
     .locator('li[id^="opp-"]')
     .filter({ has: page.getByTestId("opportunity-company").filter({ hasText: GAMA }) })
     .filter({ has: page.locator('[data-testid^="interest-"]') });
+  // The cards can stream in after the list container appears: wait for them
+  // instead of counting once, and on failure say WHAT the board showed, so a
+  // red run names the cause (no Gama card / no interest button / empty list).
+  const appeared = await expect
+    .poll(() => cards.count(), { timeout: 60_000 })
+    .toBeGreaterThan(0)
+    .then(() => true)
+    .catch(() => false);
+  if (!appeared) {
+    const allCards = await page.locator('li[id^="opp-"]').count();
+    const companies = await page.getByTestId("opportunity-company").allInnerTexts();
+    const buttons = await page.locator('[data-testid^="interest-"]').count();
+    console.info(
+      `C-1 diagnostics: cards=${allCards} interest_buttons=${buttons} companies=${JSON.stringify([...new Set(companies.map((c) => c.trim()))])}`,
+    );
+  }
   const n = await cards.count();
   expect(n, `the worker's board shows ${n} of Gama's needs`).toBeGreaterThan(0);
   const card = cards.first();
