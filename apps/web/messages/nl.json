@@ -6872,7 +6872,8 @@
       "active": "Actief — ingelogde leden kunnen deze dienst vinden en aanvragen.",
       "paused": "Gepauzeerd — verborgen voor leden. Activeer om het weer vindbaar te maken."
     },
-    "linkToRequests": "Bekijk aanvragen voor jouw diensten"
+    "linkToRequests": "Bekijk aanvragen voor jouw diensten",
+    "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren."
   },
   "communication": {
     "origin": {

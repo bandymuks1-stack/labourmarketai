@@ -70,6 +70,7 @@ export default async function ServicesPage({
     errorTitleRequired: t("errorTitleRequired"),
     errorCountry: t("errorCountry"),
     errorGeneric: t("errorGeneric"),
+    errorHasRequests: t("errorHasRequests"),
     remoteBadge: t("remoteBadge"),
     status: {
       draft: t("status.draft"),

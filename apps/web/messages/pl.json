@@ -6872,7 +6872,8 @@
       "active": "Aktywna — zalogowani członkowie mogą znaleźć tę usługę i o nią zapytać.",
       "paused": "Wstrzymana — ukryta przed członkami. Aktywuj, aby ponownie stała się widoczna."
     },
-    "linkToRequests": "Zobacz zapytania o Twoje usługi"
+    "linkToRequests": "Zobacz zapytania o Twoje usługi",
+    "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Możesz ją wstrzymać."
   },
   "communication": {
     "origin": {

@@ -6872,7 +6872,8 @@
       "active": "Active — signed-in members can find and request this service.",
       "paused": "Paused — hidden from members. Activate to make it findable again."
     },
-    "linkToRequests": "See requests for your services"
+    "linkToRequests": "See requests for your services",
+    "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead."
   },
   "communication": {
     "origin": {
