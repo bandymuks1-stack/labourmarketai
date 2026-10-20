@@ -537,13 +537,10 @@ export async function sendMessageCore(
     },
   });
 
-  // Bump conversation.updated_at so the thread list sorts correctly.
-  // updated_at is owner-side (RLS allows the creator to update; others
-  // get a no-op). We deliberately don't error out if this fails.
-  await asAny(supabase)
-    .from("conversations")
-    .update({ updated_at: new Date().toISOString() })
-    .eq("id", input.conversationId);
+  // The thread's last activity (conversations.updated_at) is moved by the
+  // database on every message insert (20261020171000). The client-side update
+  // that stood here always failed: `authenticated` holds no UPDATE on
+  // conversations, so every thread list sorted by creation time.
 
   // DURABLE NOTIFICATION (message_received): the message is persisted, so tell
   // the OTHER participants - coalesced per thread per window, never the
