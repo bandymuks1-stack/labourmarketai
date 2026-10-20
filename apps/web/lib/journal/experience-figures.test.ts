@@ -17,10 +17,10 @@ describe("experienceFiguresOf", () => {
   });
 });
 
-describe("a truncated journal read makes the experience total a lower bound", () => {
+describe("a truncated journal read withholds the experience total (not a reliable lower bound)", () => {
   const t = (k: string) => k;
   const allTime = { hours: 25, confirmedHours: 0, daysWorked: 3 } as never;
-  it("≥ on the total when the read was truncated", () => {
+  it("no total when the read was truncated", () => {
     const facts = buildIdentityFacts({
       allTime,
       truncated: true,
@@ -29,7 +29,7 @@ describe("a truncated journal read makes the experience total a lower bound", ()
       organizationHistoryHours: 800,
       professionalExperienceHours: 825,
     });
-    expect(facts.find((f) => f.testid === "player-card-fact-experience-total")?.value).toBe("≥ 825");
+    expect(facts.find((f) => f.testid === "player-card-fact-experience-total")).toBeUndefined();
   });
   it("an exact total when the read was complete", () => {
     const facts = buildIdentityFacts({
