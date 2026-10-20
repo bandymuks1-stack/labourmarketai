@@ -1,5 +1,5 @@
 import "server-only";
-import { readAllPages } from "@/lib/journal/journal-list-core";
+import { readKeysetPagesDesc } from "@/lib/admin/keyset-pages";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
@@ -420,19 +420,21 @@ export async function getAcquisitionFunnel(
   // `profile_id` (W14 item 5) is what makes internal activity classifiable at
   // all — without it the funnel cannot tell the owner from a prospect.
   // PAGED (pages of 1000, the server's own cap): a single .limit() above
-  // 1000 silently returned 1000 rows — 9,733 events in 30 days were read as
-  // ~1,000 and the truncation check (rows >= cap) never fired.
-  const paged = await readAllPages<FunnelRow>(
+  // 1000 silently returned 1000 rows — a busy window was read short and the
+  // truncation check (rows >= cap) never fired. KEYSET pages (created_at, id)
+  // under an upper bound fixed before the first page: inserts, erasures and
+  // late commits between requests cannot shift a row across pages.
+  const snapshotAt = now.toISOString();
+  const paged = await readKeysetPagesDesc<FunnelRow & { id: string; created_at: string }>(
     () =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any)
         .from("pilot_events")
-        .select("event_name, metadata, created_at, profile_id")
+        .select("id, event_name, metadata, created_at, profile_id")
         .in("event_name", names)
         .gte("created_at", funnelWindowStart(now))
-        .order("created_at", { ascending: false })
-        .order("id", { ascending: false }),
-    { pageSize: 1000, maxPages: Math.ceil(FUNNEL_MAX_ROWS / 1000) },
+        .lte("created_at", snapshotAt),
+    { maxRows: FUNNEL_MAX_ROWS },
   );
   const error = paged.error as { message?: string } | null;
   const data = error ? null : paged.rows;

@@ -62,6 +62,7 @@ describe("funnel stage measurement state", () => {
       select: fn,
       in: fn,
       gte: fn,
+      lte: fn,
       order: fn,
       limit: () => Promise.resolve({ data: null, error: { message: "boom" } }),
       range: () => Promise.resolve({ data: null, error: { message: "boom" } }),

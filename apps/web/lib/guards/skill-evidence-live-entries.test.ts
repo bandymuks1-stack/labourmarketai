@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
  * A DELETED OR SUPERSEDED ENTRY EVIDENCES NO SKILL.
  *
  * `journal_entry_skills` rows stay when their entry is deleted or corrected
- * (production 2026-10-20: 19 of 243 links point at one). The player card's
+ * (kept for history). The player card's
  * evidence counts and the market map's "evidenced by journal work" read the
  * links raw, so a removed entry kept strengthening a skill. Both now join the
  * entry and keep live ones only — the same rule the CV and profile apply.

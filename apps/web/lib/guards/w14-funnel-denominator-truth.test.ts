@@ -75,7 +75,7 @@ describe("W14 — the funnel window is real, not prose", () => {
         const calls: Rec = byTable.get(t) ?? {};
         byTable.set(t, calls);
         const chain: Record<string, unknown> = {};
-        for (const m of ["select", "in", "gte", "order", "eq"]) {
+        for (const m of ["select", "in", "gte", "lte", "order", "eq"]) {
           chain[m] = (...args: unknown[]) => {
             calls[m] = args;
             // every order call, in sequence (the read orders by created_at, then id)
@@ -120,11 +120,17 @@ describe("W14 — the funnel window is real, not prose", () => {
     expect(orders[0]?.[1]).toMatchObject({ ascending: false });
     // …with a stable tie-breaker so no row is skipped or repeated across pages,
     expect(orders[1]?.[0]).toBe("id");
-    // …read in pages of the server's own 1000-row cap,
-    expect(calls.range).toEqual([0, 999]);
+    // …bounded above by a snapshot taken before the first page (rows arriving
+    // mid-read cannot shift across pages),
+    expect(calls.lte?.[0]).toBe("created_at");
+    expect(typeof calls.lte?.[1]).toBe("string");
+    // …read in KEYSET pages of the server's own 1000-row cap (no offsets that
+    // a concurrent insert or erasure could shift),
+    expect(calls.limit?.[0]).toBe(1000);
+    expect(calls.range).toBeUndefined();
     // …and still capped at FUNNEL_MAX_ROWS in total.
     const src = readFileSync(join(__dirname, "..", "admin", "conversion-funnel.ts"), "utf8");
-    expect(src).toContain("maxPages: Math.ceil(FUNNEL_MAX_ROWS / 1000)");
+    expect(src).toContain("{ maxRows: FUNNEL_MAX_ROWS }");
   });
 });
 

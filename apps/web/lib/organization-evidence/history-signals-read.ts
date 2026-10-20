@@ -160,8 +160,7 @@ async function signalsByKey(
   const workerByRecord = new Map<string, string>();
   for (const chunk of chunks([...workerByPerson.keys()], PERSON_CHUNK)) {
     // PAGED: the server answers at most 1000 rows, and one chunk of people
-    // holds far more (production 2026-10-20: 43 people, 2,944 records in one
-    // read — two thirds of the history never reached matching).
+    // can hold far more — the rows past 1000 never reached matching.
     let failure: { code?: string } | null = null;
     const paged = await readAllPages<Record<string, unknown>>(
       (from, to) =>
