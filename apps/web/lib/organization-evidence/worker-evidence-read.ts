@@ -201,7 +201,12 @@ export async function readEvidenceRecordsForPeople(
     console.error("[evidence] worker records read failed:", code);
     return { kind: "error" };
   }
-  if (paged.truncated) console.warn("[evidence] worker records read reached its ceiling:", READ_LIMIT);
+  // A read stopped at its ceiling is NOT the person's history: totals over
+  // part of it would be presented as complete. Unknown, never a smaller number.
+  if (paged.truncated) {
+    console.error("[evidence] worker records read reached its ceiling:", READ_LIMIT);
+    return { kind: "error" };
+  }
   const res = { data: paged.rows };
 
   type Raw = Omit<HistoryContextInput, "workObjectName" | "projectName" | "organizationNames">;

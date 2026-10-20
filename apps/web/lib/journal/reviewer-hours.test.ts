@@ -63,3 +63,22 @@ describe("no reviewer surface re-parses hours from the text", () => {
     expect(src).not.toMatch(/depth\.hours/);
   });
 });
+
+describe("the counterparty review keeps the RPC's metric order", () => {
+  it("of two entry quantities in server order, the later one counts", () => {
+    const rows = [6, 8].map((v, i) => ({
+      metric_slug: "quantity",
+      value_text: null,
+      value_numeric: v,
+      unit_slug: "hours",
+      created_at: null,
+      id: `rpc-order-${String(i).padStart(6, "0")}`,
+    }));
+    expect(reviewerHoursOf({ id: "e1", createdAt: "2026-10-20T08:00:00Z", metrics: rows })?.value).toBe(8);
+  });
+  it("the page maps the RPC order into the canonical tie-breaker", () => {
+    const WEB = join(__dirname, "..", "..");
+    const page = readFileSync(join(WEB, "app", "[locale]", "dashboard", "inbox", "counterparty", "page.tsx"), "utf8");
+    expect(page).toMatch(/id: mm\.id \?\? `rpc-order-\$\{String\(i\)\.padStart\(6, "0"\)\}`/);
+  });
+});

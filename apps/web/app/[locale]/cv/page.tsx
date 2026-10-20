@@ -182,9 +182,21 @@ export default async function VerifiedCvPage({
   // (recorded or confirmed work) point at, by the same cross-sector map the
   // growth surfaces use. Its own evidence state — never written, never a
   // qualification, gone once the person holds the skill in any state.
+  // Evidenced = manager-confirmed skills + skills LIVE recorded work backs
+  // (the work-intelligence practice set — a deleted or superseded entry is
+  // not in it; `cv.tiers.evidence` reads the raw links). Unreadable practice
+  // → confirmed only, never the raw links. Known = every state the person
+  // already holds, declared claims' catalogue slugs included.
+  const livePracticeSlugs = Object.keys(cv.skillPractice ?? {});
   const potentialCapabilities = derivePotentialSkills(
-    [...cv.tiers.confirmed, ...cv.tiers.evidence],
-    [...cv.tiers.confirmed, ...cv.tiers.evidence, ...cv.tiers.declared],
+    [...cv.tiers.confirmed, ...livePracticeSlugs],
+    [
+      ...cv.tiers.confirmed,
+      ...cv.tiers.evidence,
+      ...cv.tiers.declared,
+      ...livePracticeSlugs,
+      ...cv.declaredClaims.flatMap((c) => c.mappedSlugs ?? []),
+    ],
   );
 
   // ONE presentation for every skill on this document: tiers from the

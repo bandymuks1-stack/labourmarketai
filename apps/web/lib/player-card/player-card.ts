@@ -1,4 +1,5 @@
 import "server-only";
+import { readCorrectedOriginalIds } from "@/lib/journal/corrected-originals-read";
 
 import { EMPLOYER_BASIS_OR_FILTER } from "@/lib/journal/review-status";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
@@ -433,19 +434,24 @@ async function journalSkillLinkSlugs(
   workerId: string,
 ): Promise<{ slug: string | null }[]> {
   try {
-    const { data, error } = await asAny(supabase)
-      .from("journal_entry_skills")
-      // LIVE entries only: a deleted or superseded entry is no longer
-      // evidence (production 2026-10-20: 19 of 243 links pointed at one).
-      .select("skills(slug), journal_entries!inner(deleted_at, superseded_by)")
-      .eq("worker_id", workerId)
-      .is("journal_entries.deleted_at", null)
-      .is("journal_entries.superseded_by", null)
-      .limit(1000);
-    if (error || !Array.isArray(data)) return [];
-    return (data as { skills: { slug: string | null } | null }[]).map((r) => ({
-      slug: r.skills?.slug ?? null,
-    }));
+    const [{ data, error }, corrected] = await Promise.all([
+      asAny(supabase)
+        .from("journal_entry_skills")
+        // LIVE entries only: a deleted or superseded entry is no longer
+        // evidence (production 2026-10-20: 19 of 243 links pointed at one).
+        .select("journal_entry_id, skills(slug), journal_entries!inner(deleted_at, superseded_by)")
+        .eq("worker_id", workerId)
+        .is("journal_entries.deleted_at", null)
+        .is("journal_entries.superseded_by", null)
+        .limit(1000),
+      readCorrectedOriginalIds(supabase, workerId),
+    ]);
+    if (error || !Array.isArray(data) || corrected === null) return [];
+    // Counted once: a confirmed original that a live correction replaces is
+    // not evidence a second time (and not for a skill the correction dropped).
+    return (data as { journal_entry_id: string; skills: { slug: string | null } | null }[])
+      .filter((r) => !corrected.has(r.journal_entry_id))
+      .map((r) => ({ slug: r.skills?.slug ?? null }));
   } catch {
     return [];
   }
