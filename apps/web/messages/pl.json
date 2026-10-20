@@ -18938,7 +18938,8 @@
       "terms_invalid": "Sprawdź liczby i daty.",
       "terms_limit_reached": "Ta oferta ma już 50 wersji warunków.",
       "terms_await_other_side": "To twoje własne warunki — odpowiada druga strona.",
-      "organization_offer_not_a_unit": "Oferta firmy nie jest przypisywana jako zespół; ludzi ustalcie w rozmowie."
+      "organization_offer_not_a_unit": "Oferta firmy nie jest przypisywana jako zespół; ludzi ustalcie w rozmowie.",
+      "terms_changed": "Druga strona właśnie zaproponowała nowe warunki. Sprawdź najnowszą wersję, a potem odpowiedz."
     },
     "received": {
       "title": "Zespoły zaproponowane do tego zapotrzebowania",
