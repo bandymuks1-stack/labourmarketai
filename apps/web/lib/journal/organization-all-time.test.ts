@@ -27,7 +27,7 @@ function fake(tables: Record<string, Table>) {
     from: (table: string) => {
       const t = tables[table] ?? { data: [] };
       const b: Record<string, unknown> = {};
-      for (const m of ["select", "in", "order", "limit", "not", "eq"]) b[m] = () => b;
+      for (const m of ["select", "in", "order", "range", "limit", "not", "eq"]) b[m] = () => b;
       b.maybeSingle = () =>
         Promise.resolve({ data: Array.isArray(t.data) ? (t.data[0] ?? null) : t.data, error: t.error ?? null });
       b.then = (resolve: (v: unknown) => unknown) => resolve({ data: t.error ? null : t.data, error: t.error ?? null });

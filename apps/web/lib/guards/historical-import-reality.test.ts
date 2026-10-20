@@ -200,7 +200,9 @@ describe("evidence reaches the ONE work model — through the linked roster row 
     expect(tile).not.toMatch(/orgPeriod\.hours \+|\+ p\.hours|periodRecords\.reduce/);
   });
   it("the read is bounded and degrades honestly", () => {
-    expect(workerRead).toMatch(/\.limit\(READ_LIMIT\)/);
+    // Paged to the end under a ceiling (the server answers at most 1000 rows).
+    expect(workerRead).toMatch(/\.range\(from, to\)/);
+    expect(workerRead).toMatch(/\{ ceiling: READ_LIMIT \}/);
     expect(workerRead).toMatch(/return \{ kind: "needs-migration" \}/);
     expect(workerRead).toMatch(/return \{ kind: "error" \}/);
   });

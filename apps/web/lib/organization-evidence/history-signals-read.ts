@@ -7,6 +7,7 @@ import {
   type RecordLifecycleEvent,
   type ReportedEvidenceState,
 } from "./evidence-state";
+import { readAllPages } from "./evidence-pagination";
 
 /**
  * HISTORY SIGNALS FOR MATCHING - what an organization's imported history
@@ -43,7 +44,8 @@ const MISSING_OBJECT_CODES = new Set(["42P01", "42883", "PGRST202", "PGRST205"])
 const WORKER_CHUNK = 100;
 const PERSON_CHUNK = 50;
 const RECORD_CHUNK = 100;
-const RECORD_READ_LIMIT = 5000;
+/** The ceiling of one chunk's PAGED records read (pages of 1000). */
+const RECORD_READ_LIMIT = 20000;
 /** The signals writer caps at 4 per record, so one chunk of 100 records can
  *  never exceed 400 rows: this limit cannot silently truncate. */
 const SIGNAL_READ_LIMIT = 500;
@@ -157,19 +159,33 @@ async function signalsByKey(
   // 2) LIVE records of those people (a withdrawn import counts nowhere).
   const workerByRecord = new Map<string, string>();
   for (const chunk of chunks([...workerByPerson.keys()], PERSON_CHUNK)) {
-    const res = await db(supabase)
-      .from("organization_evidence_records")
-      .select(
-        "id, organization_person_id, evidence_state, organization_people(linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
-      )
-      .in("organization_person_id", chunk)
-      .limit(RECORD_READ_LIMIT);
-    if (res.error) {
-      if (MISSING_OBJECT_CODES.has(res.error.code ?? "")) return UNAVAILABLE_MISSING;
-      console.error("[history-signals] records read failed:", res.error.code);
+    // PAGED: the server answers at most 1000 rows, and one chunk of people
+    // holds far more (production 2026-10-20: 43 people, 2,944 records in one
+    // read — two thirds of the history never reached matching).
+    let failure: { code?: string } | null = null;
+    const paged = await readAllPages<Record<string, unknown>>(
+      (from, to) =>
+        db(supabase)
+          .from("organization_evidence_records")
+          .select(
+            "id, organization_person_id, evidence_state, organization_people(linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at)",
+          )
+          .in("organization_person_id", chunk)
+          .order("id", { ascending: true })
+          .range(from, to)
+          .then((r: { data: Record<string, unknown>[] | null; error: { code?: string } | null }) => {
+            if (r.error) failure = r.error;
+            return r;
+          }),
+      { ceiling: RECORD_READ_LIMIT },
+    );
+    if (!paged) {
+      const code = (failure as { code?: string } | null)?.code ?? "";
+      if (MISSING_OBJECT_CODES.has(code)) return UNAVAILABLE_MISSING;
+      console.error("[history-signals] records read failed:", code);
       return UNAVAILABLE_FAILED;
     }
-    for (const r of (res.data ?? []) as Record<string, unknown>[]) {
+    for (const r of paged.rows) {
       const worker = workerByPerson.get(r.organization_person_id as string);
       if (!worker) continue;
       const events = ((r.organization_evidence_events as Record<string, unknown>[] | null) ?? []).map(
