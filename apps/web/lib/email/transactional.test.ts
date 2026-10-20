@@ -35,10 +35,6 @@ describe("transactional email adapter — offline states", () => {
     vi.stubEnv("INVITE_EMAIL_PROVIDER", "");
     vi.stubEnv("INVITE_EMAIL_API_KEY", "");
     vi.stubEnv("INVITE_EMAIL_FROM", "");
-    vi.stubEnv("LM_SMTP_HOST", "");
-    vi.stubEnv("LM_SMTP_USER", "");
-    vi.stubEnv("LM_SMTP_PASS", "");
-    vi.stubEnv("LM_SMTP_FROM", "");
     expect(isTransactionalEmailConfigured()).toBe(false);
     expect(isTransactionalEmailPathActive()).toBe(false);
     expect(await sendTransactionalEmail(MESSAGE)).toEqual({
@@ -95,7 +91,9 @@ describe("transactional email adapter — the platform mailbox (smtp)", () => {
     expect(isTransactionalEmailPathActive()).toBe(true);
   });
 
-  it("an UNSET provider uses the official mailbox once LM_SMTP_* is complete (one setting for all mail)", () => {
+  it("an UNSET provider stays OFF even with a complete mailbox (owner gate: smtp is an explicit opt-in)", () => {
+    // The mailbox may be configured only for GDPR notices; invitation and
+    // notification mail start only when the owner sets INVITE_EMAIL_PROVIDER.
     vi.stubEnv("INVITE_EMAIL_PROVIDER", "");
     vi.stubEnv("INVITE_EMAIL_API_KEY", "");
     vi.stubEnv("LM_SMTP_HOST", "smtp.example.test");
@@ -103,6 +101,6 @@ describe("transactional email adapter — the platform mailbox (smtp)", () => {
     vi.stubEnv("LM_SMTP_USER", "info@example.test");
     vi.stubEnv("LM_SMTP_PASS", "not-a-real-password");
     vi.stubEnv("LM_SMTP_FROM", "Example <info@example.test>");
-    expect(isTransactionalEmailConfigured()).toBe(true);
+    expect(isTransactionalEmailConfigured()).toBe(false);
   });
 });

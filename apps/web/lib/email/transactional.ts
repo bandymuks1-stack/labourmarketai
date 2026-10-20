@@ -46,10 +46,7 @@ function config():
   // 'smtp' = the platform's own mailbox (owner decision 2026-10-19: Hostinger,
   // info@labourmarket.ai) — the same LM_SMTP_* channel the GDPR notices use,
   // not a second integration. INVITE_EMAIL_FROM may override the sender.
-  // An UNSET provider uses that same official mailbox when it is configured:
-  // one setting (LM_SMTP_*) makes every transactional mail work, instead of
-  // invitations silently staying "not sent" because a second switch was off.
-  if (provider === "smtp" || (provider === "" && smtpConfigFromEnv() !== null)) {
+  if (provider === "smtp") {
     const smtp = smtpConfigFromEnv();
     if (!smtp) return null;
     const from = (process.env.INVITE_EMAIL_FROM ?? "").trim();
