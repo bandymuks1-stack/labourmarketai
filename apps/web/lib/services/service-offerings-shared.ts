@@ -46,6 +46,9 @@ export type ServiceOfferingMutateResult =
   | { kind: "invalid"; field: string }
   /** The caller has no such offering (not theirs, or already removed). Nothing changed. */
   | { kind: "not-found" }
+  /** The offering has requests (history a buyer relies on): it is never
+   *  deleted — pause it instead. Nothing changed. */
+  | { kind: "has-requests" }
   | { kind: "error"; message: string };
 
 export interface ServiceOfferingInput {

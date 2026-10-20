@@ -6872,7 +6872,8 @@
       "active": "Aktiv — angemeldete Mitglieder können diese Dienstleistung finden und anfragen.",
       "paused": "Pausiert — für Mitglieder ausgeblendet. Aktivieren Sie sie, um sie wieder auffindbar zu machen."
     },
-    "linkToRequests": "Anfragen zu Ihren Dienstleistungen ansehen"
+    "linkToRequests": "Anfragen zu Ihren Dienstleistungen ansehen",
+    "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren."
   },
   "communication": {
     "origin": {

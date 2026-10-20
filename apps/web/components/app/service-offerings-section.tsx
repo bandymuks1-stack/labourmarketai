@@ -55,6 +55,8 @@ export type ServiceOfferingsLabels = {
   errorTitleRequired: string;
   errorCountry: string;
   errorGeneric: string;
+  /** Delete refused: the offering has requests — pause it instead. */
+  errorHasRequests: string;
   remoteBadge: string;
   status: Record<ServiceOfferingStatus, string>;
   /** Per-status discoverability hint — explains the draft/paused → active funnel
@@ -186,6 +188,7 @@ export function ServiceOfferingsSection({
     startTransition(async () => {
       const result = await deleteServiceOffering(row.id);
       if (result.kind === "ok") router.refresh();
+      else if (result.kind === "has-requests") setError(labels.errorHasRequests);
       else setError(labels.errorGeneric);
     });
   }
