@@ -81,8 +81,22 @@ describe("stated earlier periods of organizations the person worked for", () => 
 
   it("the experience read asks only for organizations the person does not lead", () => {
     const src = readFileSync(join(__dirname, "professional-experience-read.ts"), "utf8");
-    expect(src).toMatch(/\.filter\(\(id\): id is string => !!id && !periodsByOrg\.has\(id\)\)/);
+    expect(src).toMatch(/\.filter\(\s*\(id\): id is string => !!id && !periodsByOrg\.has\(id\),?\s*\)/);
     expect(src).toMatch(/readWorkedOrganizationPeriods\(supabase, workedOnly\)/);
+  });
+
+  it("a roster row the PERSON CONFIRMED is part of their history (name + periods, no invented dates)", () => {
+    const src = readFileSync(join(__dirname, "professional-experience-read.ts"), "utf8");
+    // only their own, linked AND worker-confirmed rows — the integrity-door rule
+    expect(src).toMatch(/\.eq\("linked_profile_id", userId\)\s*\.eq\("link_state", "linked"\)\s*\.eq\("link_method", "worker_confirmed"\)/);
+    // the organizations reach the periods read and the names read
+    expect(src).toMatch(/\.\.\.roster\.map\(\(r\) => r\.organizationId\)/);
+    expect(src).toMatch(/readHistoricalOrgNames\(\s*supabase,\s*rosterOnly\.map/);
+    // recorded by the organization, undated, not current
+    const block = src.slice(src.indexOf("const rosterOnly"), src.indexOf("return out;\n}\n\n/** Roster kinds"));
+    expect(block).toMatch(/startedAt: null,\s*endedAt: null,\s*current: false,\s*source: "membership"/);
+    // a candidate is not a working relationship
+    expect(src).not.toMatch(/candidate: "/);
   });
 
   it("the migration exposes names and stated periods only, to authenticated callers only", () => {
