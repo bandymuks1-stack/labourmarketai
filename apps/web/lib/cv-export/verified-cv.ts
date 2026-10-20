@@ -345,6 +345,16 @@ export type VerifiedCvResult =
   | { ok: true; cv: VerifiedCvData }
   | { ok: false; code: "not_authenticated" | "no_worker" };
 
+/** Unread relationships (null) leave journal hours unattributed to their
+ *  organization, so an hour inside an organization period would count twice:
+ *  the CV's total is UNKNOWN, never an inflated sum (experienceFiguresOf). */
+function withUnknownTotalWhenUnattributed(
+  pe: ProfessionalExperience,
+  relationships: readonly unknown[] | null | undefined,
+): ProfessionalExperience {
+  return relationships == null ? { ...pe, hours: null } : pe;
+}
+
 export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   const supabase = await createClient();
   const {
@@ -942,13 +952,16 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         : null,
       organizationRecordedHours: organizationRecordedHoursOf(workIntelligence),
       professionalExperience: workIntelligence
-        ? deriveProfessionalExperience({
-            wi: workIntelligence,
-            relationships: experienceRelationships,
-            projectNames: new Map(
-              [...projectNameById.entries()].flatMap(([id, name]) => (name ? [[id, name] as const] : [])),
-            ),
-          })
+        ? withUnknownTotalWhenUnattributed(
+            deriveProfessionalExperience({
+              wi: workIntelligence,
+              relationships: experienceRelationships,
+              projectNames: new Map(
+                [...projectNameById.entries()].flatMap(([id, name]) => (name ? [[id, name] as const] : [])),
+              ),
+            }),
+            experienceRelationships,
+          )
         : null,
       organizationHistory: workIntelligence?.organizationContextRecords
         ? buildCvOrganizationHistory(
