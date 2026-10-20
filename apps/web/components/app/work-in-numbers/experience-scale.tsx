@@ -76,7 +76,11 @@ export async function ExperienceScale({
   const relName = (slug: string) => (tRel.has(slug as never) ? tRel(slug as never) : slug);
 
   const experience = deriveProfessionalExperience({ wi, relationships, projectNames });
-  const total = experience.hours;
+  // Unread relationships leave journal hours unattributed to their
+  // organization, so an hour inside an organization period would count twice:
+  // the total is UNKNOWN, never an inflated sum — the rule the profile and the
+  // Player Card already follow (experienceFiguresOf).
+  const total = relationships == null ? null : experience.hours;
   const hasTotal = total !== null && total.total > 0;
   const notCounted = experience.lines.filter((l) => !l.counted && l.hours > 0);
   const reasonWords = (l: ExperienceHourLine) =>

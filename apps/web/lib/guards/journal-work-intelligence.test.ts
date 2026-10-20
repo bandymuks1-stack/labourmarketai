@@ -698,7 +698,9 @@ describe("12 · the second hour ledger is bridged, not merged (owner §19, re-au
   it("the organization's records reach the model through the ONE reader and the ONE allocation read — RLS-scoped, no admin client", () => {
     expect(allocations).toMatch(/export async function readAllocationsForWorker\(/);
     // worker-scoped, live rows only, bounded — no employer context, no org filter
-    expect(allocations).toMatch(/\.eq\("worker_id", workerId\)\s*\.is\("superseded_by", null\)\s*\.order\("work_date", \{ ascending: false \}\)\s*\.limit\(ALLOCATION_READ_LIMIT\)/);
+    expect(allocations).toMatch(/\.eq\("worker_id", workerId\)\s*\.is\("superseded_by", null\)\s*\.order\("work_date", \{ ascending: false \}\)\s*\.order\("id", \{ ascending: false \}\),\s*\{ pageSize: 1000, maxPages: WORKER_LEDGER_MAX_PAGES \}/);
+    // paged to the end; a ledger past the ceiling is UNKNOWN, never a lower total
+    expect(allocations).toMatch(/if \(res\.truncated\) \{[\s\S]*?return \{ kind: "error" \};/);
     expect(allocations).not.toMatch(/service_role|createAdminClient|createServiceClient/);
     expect(reader).toContain('import { readAllocationsForWorker } from "@/lib/work-hours/allocations";');
     expect(reader).toMatch(/export async function readOrganizationRecords\(/);

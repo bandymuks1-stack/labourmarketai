@@ -51,7 +51,8 @@ describe("1 · one reading, every surface", () => {
   });
   it("the Living CV carries the reading as data (so the MCP cv.verified.get states the same history) and prints its total", () => {
     expect(cvBuilder).toContain("professionalExperience: ProfessionalExperience | null;");
-    expect(cvBuilder).toMatch(/professionalExperience: workIntelligence\s*\?\s*deriveProfessionalExperience\(\{/);
+    // the same derivation, with the total UNKNOWN when relationships are unread (one rule, 2026-10-20)
+    expect(cvBuilder).toMatch(/professionalExperience: workIntelligence\s*\?\s*withUnknownTotalWhenUnattributed\(\s*deriveProfessionalExperience\(\{/);
     expect(cvBuilder).toContain("readOwnExperienceRelationships(supabase, user.id)");
     expect(capabilities).toMatch(/read\("cv\.verified\.get"[\s\S]*?buildVerifiedCv\(\)/);
     expect(cvPage).toContain('data-testid="cv-professional-experience-total"');

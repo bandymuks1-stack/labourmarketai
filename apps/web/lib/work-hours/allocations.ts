@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { readAllPages } from "@/lib/journal/journal-list-core";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
   ALLOCATION_READ_LIMIT,
@@ -138,28 +139,42 @@ export type WorkerAllocationsResult =
   | { readonly kind: "needs-migration" }
   | { readonly kind: "error" };
 
+/** 20 pages of 1000: the ceiling for ONE person's whole ledger. */
+const WORKER_LEDGER_MAX_PAGES = 20;
+
 export async function readAllocationsForWorker(
   supabase: SupabaseClient,
   workerId: string,
 ): Promise<WorkerAllocationsResult> {
-  const res = (await asAny(supabase)
-    .from("work_hour_allocations")
-    .select(SELECT_COLUMNS)
-    .eq("worker_id", workerId)
-    .is("superseded_by", null)
-    .order("work_date", { ascending: false })
-    .limit(ALLOCATION_READ_LIMIT)) as {
-    data: Row[] | null;
-    error: { code?: string; message?: string } | null;
-  };
+  // PAGED (the server answers at most 1000 rows per request): a single
+  // .limit(2000) silently returned the newest 1000 records, and every total
+  // built on them — experience, Living CV, work in numbers — read as complete
+  // while the oldest records were missing. A person's whole ledger is read;
+  // past the ceiling the read is UNKNOWN, never a lower figure shown as all.
+  const res = await readAllPages<Row>(
+    () =>
+      asAny(supabase)
+        .from("work_hour_allocations")
+        .select(SELECT_COLUMNS)
+        .eq("worker_id", workerId)
+        .is("superseded_by", null)
+        .order("work_date", { ascending: false })
+        .order("id", { ascending: false }),
+    { pageSize: 1000, maxPages: WORKER_LEDGER_MAX_PAGES },
+  );
   if (res.error) {
-    if (isAllocationMigrationMissingCode(res.error.code)) {
+    const code = (res.error as { code?: string }).code;
+    if (isAllocationMigrationMissingCode(code)) {
       return { kind: "needs-migration" };
     }
-    console.error("[work-hours] worker read failed:", res.error.code);
+    console.error("[work-hours] worker read failed:", code);
     return { kind: "error" };
   }
-  const rows = (res.data ?? [])
+  if (res.truncated) {
+    console.error("[work-hours] worker ledger exceeds the read ceiling");
+    return { kind: "error" };
+  }
+  const rows = res.rows
     .map(toAllocation)
     .filter((a): a is WorkHourAllocation => a !== null);
   return { kind: "ok", rows };
