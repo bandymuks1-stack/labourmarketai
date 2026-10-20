@@ -11,6 +11,7 @@ import {
   sanitizePinLabel,
 } from "@/lib/workspace/pins-model";
 import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
+import { getLocale } from "next-intl/server";
 
 /**
  * MY SPACE — PIN · UNPIN · REORDER (owner contract 2026-09-04 §4C).
@@ -46,6 +47,20 @@ async function scope(): Promise<{ userId: string; organizationId: string | null 
   return { userId: user.id, organizationId };
 }
 
+// The COMMUNICATION set (lib/i18n/config.ts communicationLocales) — what the
+// CHECK in 20261020026000 accepts.
+const LABEL_LANGUAGES = new Set(["lt", "en", "pl", "de", "nl", "lv", "et", "da", "no", "sv", "ru", "uk", "ka"]);
+
+/** The request locale as an ISO 639-1 code the column accepts (en when unknown). */
+async function pinLabelLanguage(): Promise<string> {
+  try {
+    const locale = (await getLocale()).slice(0, 2).toLowerCase();
+    return LABEL_LANGUAGES.has(locale) ? locale : "en";
+  } catch {
+    return "en";
+  }
+}
+
 export async function pinAction(input: { ref: string; label?: string | null; expectedWorkspaceId?: string }): Promise<PinActionResult> {
   await refuseStaleWorkspace(input?.expectedWorkspaceId);
   const ref = typeof input?.ref === "string" ? input.ref.trim() : "";
@@ -61,12 +76,16 @@ export async function pinAction(input: { ref: string; label?: string | null; exp
   const counted = await countQ;
   if (counted.error) return { ok: false, code: MISSING.has(counted.error.code) ? "unavailable" : "error" };
   if ((counted.count ?? 0) >= PIN_CAP) return { ok: false, code: "cap" };
+  const label = sanitizePinLabel(input?.label);
   const { error } = await sb.from("workspace_pins").insert({
     profile_id: s.userId,
     organization_id: s.organizationId,
     kind,
     ref,
-    label: sanitizePinLabel(input?.label),
+    label,
+    // PLATFORM_DOCTRINE §2.3: the label is the person's own text, stored with
+    // its language (the locale they wrote it in) — 20261020025000.
+    original_language: label ? await pinLabelLanguage() : null,
     position: counted.count ?? 0,
   });
   if (error) {

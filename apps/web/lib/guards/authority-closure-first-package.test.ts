@@ -126,6 +126,10 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261020015000_",
       // 2026-10-20: My Space pins table restored (reads answered 404).
       "20261020020000_",
+      // 2026-10-20: review fix — a pin label carries its language (doctrine §2.3).
+      "20261020025000_",
+      // 2026-10-20: pin label language widened to the communication set.
+      "20261020026000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
