@@ -35,6 +35,10 @@ describe("transactional email adapter — offline states", () => {
     vi.stubEnv("INVITE_EMAIL_PROVIDER", "");
     vi.stubEnv("INVITE_EMAIL_API_KEY", "");
     vi.stubEnv("INVITE_EMAIL_FROM", "");
+    vi.stubEnv("LM_SMTP_HOST", "");
+    vi.stubEnv("LM_SMTP_USER", "");
+    vi.stubEnv("LM_SMTP_PASS", "");
+    vi.stubEnv("LM_SMTP_FROM", "");
     expect(isTransactionalEmailConfigured()).toBe(false);
     expect(isTransactionalEmailPathActive()).toBe(false);
     expect(await sendTransactionalEmail(MESSAGE)).toEqual({
@@ -89,5 +93,16 @@ describe("transactional email adapter — the platform mailbox (smtp)", () => {
     vi.stubEnv("LM_SMTP_FROM", "Example <info@example.test>");
     expect(isTransactionalEmailConfigured()).toBe(true);
     expect(isTransactionalEmailPathActive()).toBe(true);
+  });
+
+  it("an UNSET provider uses the official mailbox once LM_SMTP_* is complete (one setting for all mail)", () => {
+    vi.stubEnv("INVITE_EMAIL_PROVIDER", "");
+    vi.stubEnv("INVITE_EMAIL_API_KEY", "");
+    vi.stubEnv("LM_SMTP_HOST", "smtp.example.test");
+    vi.stubEnv("LM_SMTP_PORT", "465");
+    vi.stubEnv("LM_SMTP_USER", "info@example.test");
+    vi.stubEnv("LM_SMTP_PASS", "not-a-real-password");
+    vi.stubEnv("LM_SMTP_FROM", "Example <info@example.test>");
+    expect(isTransactionalEmailConfigured()).toBe(true);
   });
 });
