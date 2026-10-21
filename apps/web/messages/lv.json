@@ -4759,8 +4759,35 @@
       "topNote": "Pēc aktīvajiem darba sludinājumiem platformā."
     },
     "hero": {
-      "headline": "LabourMarket.ai ir dzīva darba un biznesa iespēju sistēma.",
+      "headline": "Dzīva darba un biznesa iespēju sistēma.",
       "sub": "Vienuviet parādi, ko proti, ko piedāvā vai ko meklē. Atrodi darbiniekus, darbus, darbuzņēmējus, pakalpojumus un preces — un tava pieredze un iespējas vienmēr paliek pieejamas."
+    },
+    "ways": {
+      "title": "Ko šeit vari darīt",
+      "show": {
+        "title": "Parādi, ko proti",
+        "body": "Darbs, prasmes un pieredze vienuviet. Katrs ieraksts papildina tavu profesionālo vēsturi.",
+        "cta": "Izveidot profilu"
+      },
+      "offer": {
+        "title": "Piedāvā, ko vari",
+        "body": "Pakalpojumi, preces, komandas vai brīvi cilvēki — publicē savu piedāvājumu, lai tevi atrastu tie, kam tas vajadzīgs.",
+        "cta": "Piedāvāt"
+      },
+      "find": {
+        "title": "Atrodi, ko meklē",
+        "body": "Uzraksti saviem vārdiem, kas vajadzīgs — darbinieks, darbs, darbuzņēmējs, pakalpojums vai prece.",
+        "cta": "Meklēt"
+      },
+      "discoverLead": "Atklāj",
+      "discover": {
+        "workers": "Darbinieki",
+        "jobs": "Darbi",
+        "contractors": "Darbuzņēmēji",
+        "services": "Pakalpojumi",
+        "goods": "Preces"
+      },
+      "lasting": "Tava pieredze un iespējas vienmēr paliek pieejamas — mainot darbu, projektu vai valsti."
     }
   },
   "workspace": {

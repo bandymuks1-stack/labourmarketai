@@ -15234,7 +15234,7 @@
       "noStars": "Nigdzie nie ma ocen w gwiazdkach: człowiek nigdy nie jest sprowadzany do punktacji. Każde dopasowanie jest wyjaśnione wobec konkretnego zapotrzebowania — z widocznymi liczbami."
     },
     "hero": {
-      "headline": "LabourMarket.ai to żywy system możliwości pracy i biznesu.",
+      "headline": "Żywy system możliwości pracy i biznesu.",
       "sub": "W jednym miejscu pokaż, co umiesz, co oferujesz albo czego szukasz. Odkrywaj pracowników, pracę, wykonawców, usługi i towary — a twoje doświadczenie i możliwości pozostają stale dostępne."
     },
     "entry": {
@@ -15352,6 +15352,33 @@
       "partnerLead": "Chcesz współpracować z nami jako partner?",
       "partnerLink": "Skontaktuj się",
       "moreLead": "Więcej o tym, jak to działa dla każdej ze stron:"
+    },
+    "ways": {
+      "title": "Co możesz tu zrobić",
+      "show": {
+        "title": "Pokaż, co umiesz",
+        "body": "Praca, umiejętności i doświadczenie w jednym miejscu. Każdy wpis uzupełnia twoją historię zawodową.",
+        "cta": "Utwórz profil"
+      },
+      "offer": {
+        "title": "Zaoferuj, co możesz",
+        "body": "Usługi, towary, zespoły lub dostępni ludzie — opublikuj swoją ofertę, aby znaleźli cię ci, którzy tego potrzebują.",
+        "cta": "Zaoferuj"
+      },
+      "find": {
+        "title": "Znajdź, czego szukasz",
+        "body": "Napisz własnymi słowami, czego potrzebujesz — pracownika, pracy, wykonawcy, usługi lub towaru.",
+        "cta": "Szukaj"
+      },
+      "discoverLead": "Odkrywaj",
+      "discover": {
+        "workers": "Pracownicy",
+        "jobs": "Praca",
+        "contractors": "Wykonawcy",
+        "services": "Usługi",
+        "goods": "Towary"
+      },
+      "lasting": "Twoje doświadczenie i możliwości pozostają stale dostępne — przy zmianie pracy, projektu czy kraju."
     }
   },
   "workspace": {
