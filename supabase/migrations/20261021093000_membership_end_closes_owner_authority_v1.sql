@@ -1,3 +1,5 @@
+-- @human-gate-approved — owner approved PR #2607 (2026-10-21): ending a membership removes the management / administration authority it carried (governance engagements ended, owner pointer moved); employment and historical work records are not ended; invitations follow the authority behind them.
+-- Conditions: within this defect's purpose, organization isolation kept, no unauthorized data change; verified in a rolled-back production test. Scope: this SQL only.
 -- ============================================================================
 -- 20261021093000_membership_end_closes_owner_authority_v1
 --
