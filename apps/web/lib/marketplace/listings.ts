@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { toActiveLocale } from "@/lib/i18n/config";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { hideQaMarked, isQaViewer } from "@/lib/marketplace/qa-marked";
@@ -673,7 +674,9 @@ export async function deleteMarketplaceListingAction(
  */
 export async function enquireAboutListingAction(formData: FormData): Promise<void> {
   const listingId = String(formData.get("listingId") ?? "");
-  const locale = String(formData.get("locale") ?? "lt");
+  // Clamped to the active set: a form-supplied "/evil.com" must never
+  // become the protocol-relative redirect "//evil.com/…".
+  const locale = toActiveLocale(String(formData.get("locale") ?? ""));
   const cannotOpen = `/${locale}/dashboard/communication?notice=cannot_open`;
   if (!listingId) redirect(cannotOpen);
 
