@@ -7730,5 +7730,31 @@
       "invitesOn": "på",
       "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp og én testsending"
     }
+  },
+  "historyDuplicates": {
+    "title": "Possible duplicate records",
+    "hint": "Review and decide",
+    "intro": "These are records of the same person on the same day at the same site. They may be genuinely separate work (two shifts or tasks) or the same work recorded twice. Nothing is changed automatically: if a record is a duplicate, mark it — it stops counting but stays visible and can be reinstated.",
+    "summary": "Awaiting your decision: {groups}",
+    "none": "No possible duplicate records found.",
+    "unavailable": "The review could not be shown right now.",
+    "truncated": "There are many records — the review may be incomplete.",
+    "sameHours": "Same hours",
+    "differentHours": "Different hours",
+    "sameText": "Same description",
+    "recordN": "Record {n}",
+    "hours": "{hours} h",
+    "noHours": "No hours stated",
+    "counted": "Counted",
+    "marked": "Marked as a duplicate",
+    "source": "Source: {file} · imported {date}",
+    "noSource": "not stated",
+    "mark": "Duplicate — keep record {n}",
+    "reinstate": "Reinstate",
+    "unnamedPerson": "Unnamed person",
+    "unnamedObject": "Unnamed site",
+    "error": "That didn't work. Nothing was changed.",
+    "notAllowed": "The organization's owner or a manager can do this.",
+    "notSameWork": "These records no longer match — refresh the page."
   }
 }
