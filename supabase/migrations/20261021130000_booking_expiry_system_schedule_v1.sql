@@ -1,4 +1,5 @@
--- @human-gate-approved
+-- @human-gate-approved — owner approved PR #2621 (2026-10-21, issue #2628): the system-only booking expiry function and its daily DB job, nothing else.
+-- Conditions: expired proposals handled correctly; accepted agreements and history untouched; verified in a rolled-back production test before apply. Scope: this SQL only.
 --
 -- SAFETY CLASS: RED (new SECURITY DEFINER function + REVOKE + a pg_cron job).
 -- Draft PR + needs-human-gate; apply ONLY via Supabase MCP apply_migration

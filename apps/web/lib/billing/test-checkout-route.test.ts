@@ -18,6 +18,7 @@ const supa = vi.hoisted(() => ({
   user: { id: "user-1", email: "o@example.com" } as { id: string; email: string } | null,
   roles: [{ role: "company" }],
 }));
+const trialSwitch = vi.hoisted(() => ({ on: true }));
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(async () => ({
     auth: { getUser: async () => ({ data: { user: supa.user } }) },
@@ -27,6 +28,7 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/billing/config", () => ({
   getBillingConfig: () => ({ state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" }),
   getBillingConfigFor: () => ({ state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" }),
+  billingTrialEnabled: () => trialSwitch.on,
 }));
 vi.mock("@/lib/billing/prices", () => ({ testPriceIdFor: (k: string) => (k === "company_pilot" ? "price_SERVER" : null) }));
 vi.mock("@/lib/billing/billing-subject", () => ({
@@ -158,6 +160,19 @@ describe("operation identity → Stripe idempotency key + expires_at", () => {
     expect(res.status).toBe(400);
     expect(markCheckoutOperationFailed).toHaveBeenCalledWith("op-1", "idempotency_error");
     expect(attachProviderSession).not.toHaveBeenCalled();
+  });
+
+  it("a checkout the owner's trial switch made trial-less gets its own key (no replay with other terms)", async () => {
+    trialSwitch.on = false;
+    try {
+      const { readTrialHistory } = await import("@/lib/billing/checkout-admission");
+      vi.mocked(readTrialHistory).mockResolvedValueOnce("none");
+      open.mockResolvedValue({ kind: "reused", operation: OP });
+      await post({ planKey: "company_pilot" });
+      expect(createSession.mock.calls[0][0].idempotencyKey).toBe(`${OP.idempotencyKey}_nt`);
+    } finally {
+      trialSwitch.on = true;
+    }
   });
 
   it("operations table not applied → legacy deterministic key, no expires_at (documented degrade)", async () => {

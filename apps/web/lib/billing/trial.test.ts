@@ -24,6 +24,7 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/billing/config", () => ({
   getBillingConfig: () => ({ state: "stripe_test", reason: "ok", testMode: true, paymentsEnabled: true, mode: "test" }),
   getBillingConfigFor: () => ({ state: "stripe_test", reason: "ok", testMode: true, paymentsEnabled: true, mode: "test" }),
+  billingTrialEnabled: () => true,
   requireStripeSecret: () => "sk_test_dummy",
   requireStripeWebhookSecret: () => "whsec_dummy",
 }));
@@ -72,6 +73,12 @@ describe("A. decideTrial - Organization plan, once per organization, fail closed
   });
   it("a repeat organization (any prior subscription row, even cancelled) gets none", () => {
     expect(decideTrial({ ...first, history: "has_history" })).toEqual({ trial: false, reason: "organization_has_subscription_history" });
+  });
+  it("the owner's switch (BILLING_TRIAL_ENABLED=false) makes a first subscription paid from day one", () => {
+    expect(decideTrial({ ...first, enabled: false })).toEqual({ trial: false, reason: "trial_switched_off" });
+    expect(decideTrial({ ...first, enabled: true })).toEqual({ trial: true, days: 14 });
+    // the switch never grants a trial the policy would refuse
+    expect(decideTrial({ ...first, history: "has_history", enabled: true })).toEqual({ trial: false, reason: "organization_has_subscription_history" });
   });
   it("unreadable history fails closed", () => {
     expect(decideTrial({ ...first, history: "unreadable" })).toEqual({ trial: false, reason: "history_unreadable" });
