@@ -9156,7 +9156,10 @@
       "againModeNote": "Dit heropent hetzelfde voorstel aan dezelfde werknemer met nieuwe datums — de werknemer beslist opnieuw. Er is niets geboekt totdat de werknemer accepteert.",
       "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken.",
       "rateLimited": "Limiet voor boekingsvoorstellen bereikt (10 open, 30 per dag). Probeer het later opnieuw.",
-      "alreadyAccepted": "De werknemer heeft dit voorstel al geaccepteerd — afgesproken voorwaarden worden hier niet overschreven. Spreek wijzigingen af in het gesprek."
+      "alreadyAccepted": "De werknemer heeft dit voorstel al geaccepteerd — afgesproken voorwaarden worden hier niet overschreven. Spreek wijzigingen af in het gesprek.",
+      "refusedNotReachable": "Deze persoon kan hier geen boekingsvoorstel krijgen — het profiel is niet zichtbaar voor werkgevers en er is geen werkrelatie met jou.",
+      "refusedNeedClosed": "Deze behoefte is gesloten — heropen hem voordat je een boeking voorstelt.",
+      "refusedAnswered": "De werknemer heeft dit voorstel geweigerd; zonder nieuwe toestemming wordt het niet heropend. Ga verder in het gesprek of zoek een andere werknemer."
     },
     "reason": {
       "optionalTitle": "Reden (optioneel)",
@@ -15231,8 +15234,8 @@
       "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
     },
     "hero": {
-      "headline": "Eén arbeidsmarkt voor mensen en bedrijven.",
-      "sub": "Vind werk of vind mensen, leg het werk vast dat je doet en laat het voor je spreken — je volgende kans rust op wat je echt hebt gedaan, niet op wat een cv beweert."
+      "headline": "Een levend systeem van werk- en zakelijke kansen.",
+      "sub": "Laat op één plek zien wat je kunt, wat je aanbiedt of wat je zoekt. Ontdek werknemers, banen, aannemers, diensten en goederen — en je ervaring en kansen blijven altijd bereikbaar."
     },
     "entry": {
       "label": "Schrijf wat u nodig heeft — in uw eigen woorden",
@@ -15349,6 +15352,33 @@
       "partnerLead": "Wil je als partner met ons samenwerken?",
       "partnerLink": "Neem contact op",
       "moreLead": "Meer over hoe dit voor elk werkt:"
+    },
+    "ways": {
+      "title": "Wat je hier kunt doen",
+      "show": {
+        "title": "Laat zien wat je kunt",
+        "body": "Werk, vaardigheden en ervaring op één plek. Elke vermelding vult je professionele geschiedenis aan.",
+        "cta": "Profiel maken"
+      },
+      "offer": {
+        "title": "Bied aan wat je hebt",
+        "body": "Diensten, goederen, teams of beschikbare mensen — publiceer je aanbod zodat wie het nodig heeft je vindt.",
+        "cta": "Aanbieden"
+      },
+      "find": {
+        "title": "Vind wat je zoekt",
+        "body": "Schrijf in je eigen woorden wat je nodig hebt — een werknemer, een baan, een aannemer, een dienst of goederen.",
+        "cta": "Zoeken"
+      },
+      "discoverLead": "Ontdek",
+      "discover": {
+        "workers": "Werknemers",
+        "jobs": "Banen",
+        "contractors": "Aannemers",
+        "services": "Diensten",
+        "goods": "Goederen"
+      },
+      "lasting": "Je ervaring en kansen blijven bereikbaar — als je van baan, project of land wisselt."
     }
   },
   "workspace": {

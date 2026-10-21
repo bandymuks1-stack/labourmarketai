@@ -9156,7 +9156,10 @@
       "againModeNote": "Dies öffnet denselben Vorschlag an dieselbe Arbeitskraft mit neuen Terminen erneut — die Arbeitskraft entscheidet erneut. Nichts ist gebucht, bis die Arbeitskraft annimmt.",
       "afterSent": "Die Arbeitskraft hat Ihren Vorschlag erhalten und wird ihn annehmen oder ablehnen. Die Antwort sehen Sie unter Buchungen; bis dahin können Sie den Vorschlag zurückziehen.",
       "rateLimited": "Limit für Buchungsvorschläge erreicht (10 offen, 30 pro Tag). Versuchen Sie es später erneut.",
-      "alreadyAccepted": "Die Arbeitskraft hat diesen Vorschlag bereits angenommen — vereinbarte Bedingungen werden hier nicht überschrieben. Änderungen im Gespräch abstimmen."
+      "alreadyAccepted": "Die Arbeitskraft hat diesen Vorschlag bereits angenommen — vereinbarte Bedingungen werden hier nicht überschrieben. Änderungen im Gespräch abstimmen.",
+      "refusedNotReachable": "Dieser Person kann hier keine Buchung vorgeschlagen werden — ihr Profil ist für Arbeitgeber nicht sichtbar und es besteht keine Arbeitsbeziehung mit Ihnen.",
+      "refusedNeedClosed": "Dieser Bedarf ist geschlossen — öffnen Sie ihn erneut, bevor Sie eine Buchung vorschlagen.",
+      "refusedAnswered": "Die Arbeitskraft hat diesen Vorschlag abgelehnt; ohne ihre neue Zustimmung wird er nicht wieder geöffnet. Schreiben Sie im Gespräch weiter oder finden Sie eine andere Arbeitskraft."
     },
     "reason": {
       "optionalTitle": "Grund (optional)",
@@ -15231,8 +15234,8 @@
       "noStars": "Nirgendwo Sterne: ein Mensch wird nie auf eine Zahl reduziert. Jeder Match wird gegen einen konkreten Bedarf erklärt — mit sichtbaren Zahlen."
     },
     "hero": {
-      "headline": "Ein Arbeitsmarkt für Menschen und Unternehmen.",
-      "sub": "Finden Sie Arbeit oder Menschen, halten Sie Ihre Arbeit fest und lassen Sie sie für sich sprechen — Ihre nächste Chance stützt sich auf das, was Sie wirklich getan haben, nicht auf das, was ein Lebenslauf behauptet."
+      "headline": "Ein lebendiges System für Arbeits- und Geschäftschancen.",
+      "sub": "Zeigen Sie an einem Ort, was Sie können, was Sie anbieten oder was Sie suchen. Entdecken Sie Arbeitskräfte, Jobs, Auftragnehmer, Dienstleistungen und Waren — und Ihre Erfahrung und Möglichkeiten bleiben jederzeit erreichbar."
     },
     "entry": {
       "label": "Schreiben Sie, was Sie brauchen — in Ihren eigenen Worten",
@@ -15349,6 +15352,33 @@
       "partnerLead": "Möchten Sie als Partner mit uns arbeiten?",
       "partnerLink": "Kontakt aufnehmen",
       "moreLead": "Mehr dazu, wie das für jeden funktioniert:"
+    },
+    "ways": {
+      "title": "Was Sie hier tun können",
+      "show": {
+        "title": "Zeigen Sie, was Sie können",
+        "body": "Arbeit, Fähigkeiten und Erfahrung an einem Ort. Jeder Eintrag ergänzt Ihre berufliche Geschichte.",
+        "cta": "Profil erstellen"
+      },
+      "offer": {
+        "title": "Bieten Sie an, was Sie haben",
+        "body": "Dienstleistungen, Waren, Teams oder verfügbare Personen — veröffentlichen Sie Ihr Angebot, damit die, die es brauchen, Sie finden.",
+        "cta": "Anbieten"
+      },
+      "find": {
+        "title": "Finden Sie, was Sie suchen",
+        "body": "Schreiben Sie in eigenen Worten, was Sie brauchen — eine Arbeitskraft, einen Job, einen Auftragnehmer, eine Dienstleistung oder Waren.",
+        "cta": "Suchen"
+      },
+      "discoverLead": "Entdecken",
+      "discover": {
+        "workers": "Arbeitskräfte",
+        "jobs": "Stellen",
+        "contractors": "Auftragnehmer",
+        "services": "Dienstleistungen",
+        "goods": "Waren"
+      },
+      "lasting": "Ihre Erfahrung und Möglichkeiten bleiben erreichbar — beim Wechsel von Job, Projekt oder Land."
     }
   },
   "workspace": {

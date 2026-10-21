@@ -2839,7 +2839,10 @@
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
-      "alreadyAccepted": "Arbeidstakeren har allerede akseptert dette forslaget — avtalte vilkår overskrives ikke her. Avtal endringer i samtalen."
+      "alreadyAccepted": "Arbeidstakeren har allerede akseptert dette forslaget — avtalte vilkår overskrives ikke her. Avtal endringer i samtalen.",
+      "refusedNotReachable": "Denne personen kan ikke få et bookingforslag herfra — profilen er ikke synlig for arbeidsgivere, og det finnes ingen arbeidsrelasjon med deg.",
+      "refusedNeedClosed": "Dette behovet er lukket — åpne det igjen før du foreslår en booking.",
+      "refusedAnswered": "Arbeidstakeren avslo dette forslaget, så det åpnes ikke på nytt uten ny samtykke fra arbeidstakeren. Fortsett i samtalen eller finn en annen arbeidstaker."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -4754,6 +4757,37 @@
       },
       "topTitle": "Mest etterspurte yrker akkurat nå",
       "topNote": "Rangert etter aktive stillingsannonser på plattformen."
+    },
+    "hero": {
+      "headline": "Et levende system av arbeids- og forretningsmuligheter.",
+      "sub": "Vis på ett sted hva du kan, hva du tilbyr eller hva du ser etter. Finn arbeidstakere, jobber, entreprenører, tjenester og varer — og erfaringen og mulighetene dine forblir alltid tilgjengelige."
+    },
+    "ways": {
+      "title": "Hva du kan gjøre her",
+      "show": {
+        "title": "Vis hva du kan",
+        "body": "Arbeid, ferdigheter og erfaring på ett sted. Hver oppføring legger til din faglige historie.",
+        "cta": "Lag profil"
+      },
+      "offer": {
+        "title": "Tilby det du har",
+        "body": "Tjenester, varer, team eller ledige folk — publiser tilbudet ditt slik at de som trenger det, finner deg.",
+        "cta": "Tilby"
+      },
+      "find": {
+        "title": "Finn det du ser etter",
+        "body": "Skriv med egne ord hva du trenger — en arbeidstaker, en jobb, en entreprenør, en tjeneste eller varer.",
+        "cta": "Søk"
+      },
+      "discoverLead": "Oppdag",
+      "discover": {
+        "workers": "Arbeidstakere",
+        "jobs": "Jobber",
+        "contractors": "Entreprenører",
+        "services": "Tjenester",
+        "goods": "Varer"
+      },
+      "lasting": "Erfaringen og mulighetene dine forblir tilgjengelige — når du bytter jobb, prosjekt eller land."
     }
   },
   "workspace": {

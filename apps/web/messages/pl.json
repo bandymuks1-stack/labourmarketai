@@ -9156,7 +9156,10 @@
       "againModeNote": "To ponownie otwiera tę samą propozycję dla tego samego pracownika z nowymi datami — pracownik podejmuje decyzję ponownie. Nic nie jest zarezerwowane, dopóki nie zaakceptuje.",
       "afterSent": "Pracownik otrzymał Twoją propozycję i zaakceptuje ją lub odrzuci. Odpowiedź zobaczysz w sekcji Rezerwacje, a do tego czasu możesz wycofać propozycję.",
       "rateLimited": "Osiągnięto limit propozycji rezerwacji (10 otwartych, 30 dziennie). Spróbuj ponownie później.",
-      "alreadyAccepted": "Pracownik już przyjął tę propozycję — uzgodnione warunki nie są tu nadpisywane. Zmiany ustalcie w rozmowie."
+      "alreadyAccepted": "Pracownik już przyjął tę propozycję — uzgodnione warunki nie są tu nadpisywane. Zmiany ustalcie w rozmowie.",
+      "refusedNotReachable": "Tej osobie nie można stąd zaproponować rezerwacji — nie udostępniła profilu pracodawcom i nie łączy jej z Tobą relacja zawodowa.",
+      "refusedNeedClosed": "To zapotrzebowanie jest zamknięte — otwórz je ponownie, zanim zaproponujesz rezerwację.",
+      "refusedAnswered": "Pracownik odrzucił tę propozycję, więc bez jego nowej zgody nie zostanie ona ponownie otwarta. Kontynuuj w rozmowie lub znajdź innego pracownika."
     },
     "reason": {
       "optionalTitle": "Powód (opcjonalnie)",
@@ -15231,8 +15234,8 @@
       "noStars": "Nigdzie nie ma ocen w gwiazdkach: człowiek nigdy nie jest sprowadzany do punktacji. Każde dopasowanie jest wyjaśnione wobec konkretnego zapotrzebowania — z widocznymi liczbami."
     },
     "hero": {
-      "headline": "Jeden rynek pracy dla ludzi i firm.",
-      "sub": "Znajdź pracę lub ludzi, zapisuj wykonaną pracę i pozwól jej mówić za ciebie — twoja kolejna szansa opiera się na pracy, którą naprawdę wykonujesz, a nie na deklaracjach w CV."
+      "headline": "Żywy system możliwości pracy i biznesu.",
+      "sub": "W jednym miejscu pokaż, co umiesz, co oferujesz albo czego szukasz. Odkrywaj pracowników, pracę, wykonawców, usługi i towary — a twoje doświadczenie i możliwości pozostają stale dostępne."
     },
     "entry": {
       "label": "Napisz, czego potrzebujesz — własnymi słowami",
@@ -15349,6 +15352,33 @@
       "partnerLead": "Chcesz współpracować z nami jako partner?",
       "partnerLink": "Skontaktuj się",
       "moreLead": "Więcej o tym, jak to działa dla każdej ze stron:"
+    },
+    "ways": {
+      "title": "Co możesz tu zrobić",
+      "show": {
+        "title": "Pokaż, co umiesz",
+        "body": "Praca, umiejętności i doświadczenie w jednym miejscu. Każdy wpis uzupełnia twoją historię zawodową.",
+        "cta": "Utwórz profil"
+      },
+      "offer": {
+        "title": "Zaoferuj, co możesz",
+        "body": "Usługi, towary, zespoły lub dostępni ludzie — opublikuj swoją ofertę, aby znaleźli cię ci, którzy tego potrzebują.",
+        "cta": "Zaoferuj"
+      },
+      "find": {
+        "title": "Znajdź, czego szukasz",
+        "body": "Napisz własnymi słowami, czego potrzebujesz — pracownika, pracy, wykonawcy, usługi lub towaru.",
+        "cta": "Szukaj"
+      },
+      "discoverLead": "Odkrywaj",
+      "discover": {
+        "workers": "Pracownicy",
+        "jobs": "Praca",
+        "contractors": "Wykonawcy",
+        "services": "Usługi",
+        "goods": "Towary"
+      },
+      "lasting": "Twoje doświadczenie i możliwości pozostają stale dostępne — przy zmianie pracy, projektu czy kraju."
     }
   },
   "workspace": {

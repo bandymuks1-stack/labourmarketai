@@ -186,14 +186,15 @@ export default async function BookingsPage({
                   />
                   <PlanningLink label={t("actions.planning")} />
                 </div>
-              ) : canProposeAgain(row.status) ? (
-                // Terminal declined/withdrawn (repeat actions, PR 6b): the
-                // company may RE-OPEN the same proposal with new dates — the
-                // existing propose flow pre-scoped to the same request +
-                // worker (the applied RPC upserts on that key). The worker
-                // decides again; nothing is booked until they accept.
+              ) : canProposeAgain(row.status) || row.status === "declined" ? (
+                // Withdrawn by the company itself (repeat actions, PR 6b): it
+                // may propose again with new dates — the existing propose flow
+                // pre-scoped to the same request + worker, under the same
+                // reach and open-need checks. Declined by the worker: the
+                // worker's answer stands (20261021095200); the next step is
+                // another worker.
                 <div className="flex flex-wrap items-center gap-2">
-                  {row.requestId && row.workerId ? (
+                  {canProposeAgain(row.status) && row.requestId && row.workerId ? (
                     <ProposeBookingButton
                       locale={locale}
                       requestId={row.requestId}

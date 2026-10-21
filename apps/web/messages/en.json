@@ -9156,7 +9156,10 @@
       "againModeNote": "This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
       "rateLimited": "Booking proposal limit reached (10 open, 30 per day). Try again later.",
-      "alreadyAccepted": "The worker has already accepted this proposal — agreed terms are not rewritten here. Agree any changes in the conversation."
+      "alreadyAccepted": "The worker has already accepted this proposal — agreed terms are not rewritten here. Agree any changes in the conversation.",
+      "refusedNotReachable": "This person can't be offered a booking from here — they haven't made their profile visible to employers and have no working relationship with you.",
+      "refusedNeedClosed": "This need is closed — reopen it before proposing a booking.",
+      "refusedAnswered": "The worker declined this proposal, so it is not reopened without their new consent. Continue in the conversation or find another worker."
     },
     "reason": {
       "optionalTitle": "Reason (optional)",
@@ -15231,8 +15234,8 @@
       "noStars": "No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
     },
     "hero": {
-      "headline": "One labour market for people and companies.",
-      "sub": "Find work or find people, record the work you do, and let it speak for you — your next opportunity is argued from what you actually did, not from what a CV claims."
+      "headline": "A living system of work and business opportunities.",
+      "sub": "In one place, show what you can do, what you offer or what you are looking for. Discover workers, jobs, contractors, services and goods — and your experience and opportunities stay within reach, always."
     },
     "entry": {
       "label": "Write what you need — in your own words",
@@ -15349,6 +15352,33 @@
       "partnerLead": "Want to work with us as a partner?",
       "partnerLink": "Get in touch",
       "moreLead": "More on how this works for each:"
+    },
+    "ways": {
+      "title": "What you can do here",
+      "show": {
+        "title": "Show what you can do",
+        "body": "Your work, skills and experience in one place. Every entry adds to your professional history.",
+        "cta": "Create a profile"
+      },
+      "offer": {
+        "title": "Offer what you have",
+        "body": "Services, goods, teams or available people — publish what you offer so the people who need it can find you.",
+        "cta": "Make an offer"
+      },
+      "find": {
+        "title": "Find what you need",
+        "body": "Write in your own words what you need — a worker, a job, a contractor, a service or goods.",
+        "cta": "Search"
+      },
+      "discoverLead": "Discover",
+      "discover": {
+        "workers": "Workers",
+        "jobs": "Jobs",
+        "contractors": "Contractors",
+        "services": "Services",
+        "goods": "Goods"
+      },
+      "lasting": "Your experience and opportunities stay within reach — when you change job, project or country."
     }
   },
   "workspace": {

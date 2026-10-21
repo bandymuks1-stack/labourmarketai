@@ -2839,7 +2839,10 @@
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
-      "alreadyAccepted": "Darbinieks šo piedāvājumu jau ir pieņēmis — saskaņotie nosacījumi šeit netiek pārrakstīti. Izmaiņas saskaņojiet sarunā."
+      "alreadyAccepted": "Darbinieks šo piedāvājumu jau ir pieņēmis — saskaņotie nosacījumi šeit netiek pārrakstīti. Izmaiņas saskaņojiet sarunā.",
+      "refusedNotReachable": "Šai personai no šejienes nevar piedāvāt rezervāciju — profils nav redzams darba devējiem, un jums nav darba attiecību.",
+      "refusedNeedClosed": "Šī vajadzība ir slēgta — atver to no jauna, pirms piedāvā rezervāciju.",
+      "refusedAnswered": "Darbinieks šo piedāvājumu noraidīja, tāpēc bez viņa jaunas piekrišanas tas netiek atvērts no jauna. Turpiniet sarunā vai atrodiet citu darbinieku."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -4754,6 +4757,37 @@
       },
       "topTitle": "Šobrīd pieprasītākās profesijas",
       "topNote": "Pēc aktīvajiem darba sludinājumiem platformā."
+    },
+    "hero": {
+      "headline": "Dzīva darba un biznesa iespēju sistēma.",
+      "sub": "Vienuviet parādi, ko proti, ko piedāvā vai ko meklē. Atrodi darbiniekus, darbus, darbuzņēmējus, pakalpojumus un preces — un tava pieredze un iespējas vienmēr paliek pieejamas."
+    },
+    "ways": {
+      "title": "Ko šeit vari darīt",
+      "show": {
+        "title": "Parādi, ko proti",
+        "body": "Darbs, prasmes un pieredze vienuviet. Katrs ieraksts papildina tavu profesionālo vēsturi.",
+        "cta": "Izveidot profilu"
+      },
+      "offer": {
+        "title": "Piedāvā, ko vari",
+        "body": "Pakalpojumi, preces, komandas vai brīvi cilvēki — publicē savu piedāvājumu, lai tevi atrastu tie, kam tas vajadzīgs.",
+        "cta": "Piedāvāt"
+      },
+      "find": {
+        "title": "Atrodi, ko meklē",
+        "body": "Uzraksti saviem vārdiem, kas vajadzīgs — darbinieks, darbs, darbuzņēmējs, pakalpojums vai prece.",
+        "cta": "Meklēt"
+      },
+      "discoverLead": "Atklāj",
+      "discover": {
+        "workers": "Darbinieki",
+        "jobs": "Darbi",
+        "contractors": "Darbuzņēmēji",
+        "services": "Pakalpojumi",
+        "goods": "Preces"
+      },
+      "lasting": "Tava pieredze un iespējas vienmēr paliek pieejamas — mainot darbu, projektu vai valsti."
     }
   },
   "workspace": {

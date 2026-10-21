@@ -162,19 +162,64 @@ export async function recordAllocationAction(
 /**
  * Correct an allocation without destroying what it said before.
  *
- * Writes a NEW row carrying `correction_of`, then stamps the original's
- * `superseded_by`. Both numbers survive and the link between them is a fact,
- * because a work record somebody is paid from must never change silently.
- * If the second write fails the original simply stays live alongside the
- * correction — visible and reconcilable, rather than a hole.
+ * ONE database step (correct_work_hour_allocation_v1, 20261021090000): the
+ * correction row is written and the original superseded in the same
+ * transaction, by a manager of the organization or the worker who entered
+ * the row themselves. The three separate writes this replaced could leave the
+ * original AND the correction live (a failed supersede was only logged while
+ * the action said "saved"). Until that migration is applied, the earlier
+ * two-step path runs — unchanged.
  */
 export async function recordCorrectionAction(
   _prev: AllocationActionState,
   formData: FormData,
 ): Promise<AllocationActionState> {
+  await refuseStaleWorkspace(displayedWorkspaceOf(formData));
   const originalId = field(formData, "original_id");
   if (!UUID_RX.test(originalId)) return { status: "invalid", field: "worker" };
+  const workerId = field(formData, "worker_id");
+  const workObjectId = field(formData, "work_object_id");
+  const workDate = field(formData, "work_date");
+  const note = field(formData, "note");
+  if (!UUID_RX.test(workObjectId)) return { status: "invalid", field: "object" };
+  if (!isValidWorkDate(workDate)) return { status: "invalid", field: "date" };
+  if (note.length > ALLOCATION_NOTE_MAX) return { status: "invalid", field: "note" };
+  const hours = parseHours(field(formData, "hours"));
+  if (!hours.ok) return { status: "invalid", field: "hours", problem: hours.problem };
 
+  const supabase = await createClient();
+  const { data, error } = await (supabase as never as {
+    rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: string | null; error: { code?: string; message?: string } | null }>;
+  }).rpc("correct_work_hour_allocation_v1", {
+    p_original_id: originalId,
+    p_hours: hours.hours,
+    p_work_date: workDate,
+    p_work_object_id: workObjectId,
+    p_note: note === "" ? null : note,
+  });
+  if (error && ["42883", "PGRST202"].includes(error.code ?? "")) {
+    return recordCorrectionTwoStep(formData, originalId);
+  }
+  if (error) {
+    if (error.code === "42501") return { status: "not-authorized" };
+    const msg = error.message ?? "";
+    if (msg.includes("invalid_object")) return { status: "invalid", field: "object" };
+    if (msg.includes("invalid_hours")) return { status: "invalid", field: "hours" };
+    if (msg.includes("invalid_date")) return { status: "invalid", field: "date" };
+    console.error("[work-hours] correction failed:", error.code);
+    return { status: "error" };
+  }
+  if (!data) return { status: "error" };
+  revalidate();
+  return { status: "saved", allocationId: data, workerId, workDate };
+}
+
+/** The pre-20261021090000 path: kept ONLY for the window before that
+ *  migration is applied (the database refuses in-place edits after it). */
+async function recordCorrectionTwoStep(
+  formData: FormData,
+  originalId: string,
+): Promise<AllocationActionState> {
   const created = await recordAllocationAction({ status: "idle" }, formData);
   if (created.status !== "saved") return created;
 

@@ -2839,7 +2839,10 @@
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
-      "alreadyAccepted": "Arbetstagaren har redan accepterat detta förslag — överenskomna villkor skrivs inte över här. Kom överens om ändringar i samtalet."
+      "alreadyAccepted": "Arbetstagaren har redan accepterat detta förslag — överenskomna villkor skrivs inte över här. Kom överens om ändringar i samtalet.",
+      "refusedNotReachable": "Den här personen kan inte få ett bokningsförslag härifrån — profilen är inte synlig för arbetsgivare och det finns ingen arbetsrelation med dig.",
+      "refusedNeedClosed": "Det här behovet är stängt — öppna det igen innan du föreslår en bokning.",
+      "refusedAnswered": "Arbetstagaren har avböjt förslaget, så det öppnas inte igen utan arbetstagarens nya samtycke. Fortsätt i samtalet eller hitta en annan arbetstagare."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -4754,6 +4757,37 @@
       },
       "topTitle": "Mest efterfrågade yrken just nu",
       "topNote": "Rankat efter aktiva platsannonser på plattformen."
+    },
+    "hero": {
+      "headline": "Ett levande system av arbets- och affärsmöjligheter.",
+      "sub": "Visa på ett ställe vad du kan, vad du erbjuder eller vad du söker. Hitta medarbetare, jobb, entreprenörer, tjänster och varor — och din erfarenhet och dina möjligheter förblir alltid tillgängliga."
+    },
+    "ways": {
+      "title": "Vad du kan göra här",
+      "show": {
+        "title": "Visa vad du kan",
+        "body": "Arbete, färdigheter och erfarenhet på ett ställe. Varje post bygger på din yrkeshistoria.",
+        "cta": "Skapa profil"
+      },
+      "offer": {
+        "title": "Erbjud det du har",
+        "body": "Tjänster, varor, team eller lediga personer — publicera ditt erbjudande så att de som behöver det hittar dig.",
+        "cta": "Erbjud"
+      },
+      "find": {
+        "title": "Hitta det du söker",
+        "body": "Skriv med egna ord vad du behöver — en medarbetare, ett jobb, en entreprenör, en tjänst eller varor.",
+        "cta": "Sök"
+      },
+      "discoverLead": "Upptäck",
+      "discover": {
+        "workers": "Medarbetare",
+        "jobs": "Jobb",
+        "contractors": "Entreprenörer",
+        "services": "Tjänster",
+        "goods": "Varor"
+      },
+      "lasting": "Din erfarenhet och dina möjligheter förblir tillgängliga — när du byter jobb, projekt eller land."
     }
   },
   "workspace": {

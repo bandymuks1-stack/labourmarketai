@@ -9156,7 +9156,10 @@
       "againModeNote": "Tai iš naujo atveria tą patį pasiūlymą tam pačiam darbuotojui su naujomis datomis — darbuotojas sprendžia iš naujo. Niekas nerezervuota, kol darbuotojas nepriima.",
       "afterSent": "Darbuotojas gavo tavo pasiūlymą ir jį priims arba atmes. Atsakymą matysi skiltyje „Rezervacijos“; iki tol pasiūlymą gali atšaukti.",
       "rateLimited": "Pasiektas rezervacijos pasiūlymų limitas (10 atvirų, 30 per dieną). Bandykite vėliau.",
-      "alreadyAccepted": "Darbuotojas šį pasiūlymą jau priėmė — sutartos sąlygos čia neperrašomos. Pakeitimus aptarkite pokalbyje."
+      "alreadyAccepted": "Darbuotojas šį pasiūlymą jau priėmė — sutartos sąlygos čia neperrašomos. Pakeitimus aptarkite pokalbyje.",
+      "refusedNotReachable": "Šiam žmogui rezervacijos iš čia pasiūlyti negalima — jis nėra atvėręs profilio darbdaviams ir neturi su tavimi darbo ryšio.",
+      "refusedNeedClosed": "Šis poreikis uždarytas — prieš siūlydamas rezervaciją, atidaryk jį iš naujo.",
+      "refusedAnswered": "Darbuotojas šį pasiūlymą atmetė, todėl be jo naujo sutikimo jis iš naujo neatveriamas. Tęsk pokalbyje arba rask kitą darbuotoją."
     },
     "reason": {
       "optionalTitle": "Priežastis (nebūtina)",
@@ -15231,8 +15234,8 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "Viena darbo rinka žmonėms ir įmonėms.",
-      "sub": "Raskite darbą arba žmones, užrašykite atliktą darbą ir leiskite jam kalbėti už jus — kita galimybė remiasi tuo, ką iš tikrųjų padarėte, o ne tuo, ką teigia CV."
+      "headline": "Tai gyva darbo ir verslo galimybių sistema.",
+      "sub": "Vienoje vietoje parodyk, ką moki, ką siūlai arba ko ieškai. Atrask darbuotojus, darbus, rangovus, paslaugas ir prekes, o tavo patirtis bei galimybės išlieka pasiekiamos nuolat."
     },
     "entry": {
       "label": "Parašykite, ko reikia — savais žodžiais",
@@ -15349,6 +15352,33 @@
       "partnerLead": "Norite bendradarbiauti su mumis kaip partneris?",
       "partnerLink": "Susisiekite",
       "moreLead": "Daugiau apie tai, kaip tai veikia kiekvienam:"
+    },
+    "ways": {
+      "title": "Ką čia gali padaryti",
+      "show": {
+        "title": "Parodyk, ką moki",
+        "body": "Darbai, įgūdžiai ir patirtis vienoje vietoje. Kiekvienas įrašas papildo tavo profesinę istoriją.",
+        "cta": "Kurti profilį"
+      },
+      "offer": {
+        "title": "Pasiūlyk, ką gali",
+        "body": "Paslaugos, prekės, komandos ar laisvi žmonės — paskelbk, ką siūlai, kad tave rastų tie, kam to reikia.",
+        "cta": "Pasiūlyti"
+      },
+      "find": {
+        "title": "Rask, ko ieškai",
+        "body": "Parašyk savais žodžiais, ko reikia — darbuotojo, darbo, rangovo, paslaugos ar prekės.",
+        "cta": "Ieškoti"
+      },
+      "discoverLead": "Atrask",
+      "discover": {
+        "workers": "Darbuotojai",
+        "jobs": "Darbai",
+        "contractors": "Rangovai",
+        "services": "Paslaugos",
+        "goods": "Prekės"
+      },
+      "lasting": "Tavo patirtis ir galimybės išlieka pasiekiamos nuolat — keičiant darbą, projektą ar šalį."
     }
   },
   "workspace": {
