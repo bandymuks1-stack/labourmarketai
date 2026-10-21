@@ -1,3 +1,5 @@
+-- @human-gate-approved — owner approved PR #2596 (2026-10-21): Agree locks the offer before reading the version. Minimal rights,
+-- unauthorized access and re-run safety checked in a rolled-back production test. Scope: this SQL only.
 -- ============================================================================
 -- team_offer_agree_lock_offer_v1 — "Agree" locks the OFFER before it reads the
 -- proposed version (review of #2591, 2026-10-20).

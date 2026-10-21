@@ -1680,6 +1680,9 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261020171000_conversation_last_activity_v1.sql",
       // 2026-10-20 (RED by SECURITY DEFINER + GRANT; owner-approved #2591 with conditions): Agree names the version seen.
       "20261020172000_team_offer_agree_seen_terms_v1.sql",
+      // 2026-10-21 (RED by SECURITY DEFINER replace + trigger; owner-approved #2596): server clock + offer lock.
+      "20261020173000_conversation_activity_server_clock_v1.sql",
+      "20261020174000_team_offer_agree_lock_offer_v1.sql",
 ]);
   });
 

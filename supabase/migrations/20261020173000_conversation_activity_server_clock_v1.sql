@@ -1,3 +1,5 @@
+-- @human-gate-approved — owner approved PR #2596 (2026-10-21): a message's and a thread's time follow the server clock. Minimal rights,
+-- unauthorized access and re-run safety checked in a rolled-back production test. Scope: this SQL only.
 -- ============================================================================
 -- conversation_activity_server_clock_v1 — a thread's last activity follows the
 -- SERVER clock, never a client-supplied time (review of #2590, 2026-10-20).
