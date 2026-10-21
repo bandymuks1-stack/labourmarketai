@@ -30,6 +30,8 @@ const state = vi.hoisted(() => ({
     grace: false,
     enforced: true,
     profileId: "member-2",
+    cancelAtPeriodEnd: false,
+    currentPeriodEnd: null as string | null,
   },
   subject: {
     subject: { type: "organization", id: "org-1" },
@@ -48,14 +50,16 @@ const catalog = (loc: string) =>
  *  missing key renders a VISIBLE marker so the assertions catch it. */
 function scoped(loc: string, ns: string) {
   const root = catalog(loc)[ns] as Record<string, unknown>;
-  return (key: string) => {
+  return (key: string, values?: Record<string, string>) => {
     const v = key.split(".").reduce<unknown>((o, k) => (o as Record<string, unknown>)?.[k], root);
-    return typeof v === "string" ? v : `MISSING:${ns}.${key}`;
+    if (typeof v !== "string") return `MISSING:${ns}.${key}`;
+    return v.replace(/\{(\w+)\}/g, (m, name: string) => values?.[name] ?? m);
   };
 }
 
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async (ns: string) => scoped(state.locale, ns)),
+  getLocale: vi.fn(async () => state.locale),
 }));
 vi.mock("@/lib/billing/config", () => ({
   getBillingConfig: () => state.config,
@@ -84,7 +88,15 @@ beforeEach(() => {
   state.locale = "en";
   state.trialEnabled = true;
   state.config = { state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" };
-  state.ent = { ...state.ent, source: "free", subscriptionStatus: null, effectivePlanKey: "free_organization" };
+  state.ent = {
+    ...state.ent,
+    source: "free",
+    subscriptionStatus: null,
+    effectivePlanKey: "free_organization",
+    active: false,
+    cancelAtPeriodEnd: false,
+    currentPeriodEnd: null,
+  };
   state.subject = { ...state.subject, billingAuthority: true };
 });
 
@@ -221,5 +233,47 @@ describe("refresh billing status control", () => {
       expect(html, loc).toContain(refresh.cta.replace(/&/g, "&amp;"));
       expect(html, loc).not.toContain("MISSING:");
     }
+  });
+});
+
+describe("cancelled at period end (registry 7.18, 2026-10-21)", () => {
+  const paidUntil = (end: string | null) => {
+    state.ent = {
+      ...state.ent,
+      source: "subscription",
+      subscriptionStatus: "active",
+      effectivePlanKey: "company_pilot",
+      active: true,
+      cancelAtPeriodEnd: true,
+      currentPeriodEnd: end,
+    };
+  };
+
+  it("says the plan stays active until the period end, with the date, in every active locale", async () => {
+    for (const loc of activeLocales) {
+      state.locale = loc;
+      paidUntil("2026-11-21T10:00:00Z");
+      const html = await render(null);
+      expect(html, loc).toContain('data-testid="account-billing-ends-on"');
+      expect(html, loc).toContain("2026");
+      expect(html, loc).not.toContain("{date}");
+      expect(html, loc).not.toContain("MISSING:");
+    }
+  });
+
+  it("without a reported date it still says it will not renew", async () => {
+    paidUntil(null);
+    const html = await render(null);
+    expect(html).toContain('data-testid="account-billing-ends-on"');
+    expect(html).toContain(String((catalog("en").accountBilling as Record<string, unknown>).endsAtPeriodEnd));
+  });
+
+  it("is absent for a renewing subscription and once the plan no longer entitles", async () => {
+    paidUntil("2026-11-21T10:00:00Z");
+    state.ent = { ...state.ent, cancelAtPeriodEnd: false };
+    expect(await render(null)).not.toContain('data-testid="account-billing-ends-on"');
+    paidUntil("2026-11-21T10:00:00Z");
+    state.ent = { ...state.ent, active: false, subscriptionStatus: "cancelled" };
+    expect(await render(null)).not.toContain('data-testid="account-billing-ends-on"');
   });
 });

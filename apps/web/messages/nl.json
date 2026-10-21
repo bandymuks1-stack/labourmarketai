@@ -10916,6 +10916,8 @@
       "expired": "Verlopen"
     },
     "graceNotice": "De laatste betaling is mislukt — het abonnement zit in een respijtperiode tot een nieuwe poging.",
+    "endsOn": "Opgezegd — het abonnement blijft actief tot {date} en wordt niet verlengd.",
+    "endsAtPeriodEnd": "Opgezegd — het abonnement blijft actief tot het einde van de betaalde periode en wordt niet verlengd.",
     "manage": {
       "open": "Abonnement beheren",
       "opening": "Openen…",
