@@ -266,7 +266,11 @@
       "work": "Work",
       "services": "Services",
       "goods": "Goods & resources"
-    }
+    },
+    "formPublisherLabel": "Published by",
+    "publisherSelf": "Me personally",
+    "publishedAs": "As {name}",
+    "publishedAsOrganization": "As an organization"
   },
   "quality": {
     "title": "Defects & quality",

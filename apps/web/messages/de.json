@@ -266,7 +266,11 @@
       "work": "Arbeit",
       "services": "Dienstleistungen",
       "goods": "Waren & Ressourcen"
-    }
+    },
+    "formPublisherLabel": "Veröffentlicht von",
+    "publisherSelf": "Ich persönlich",
+    "publishedAs": "Als {name}",
+    "publishedAsOrganization": "Als Organisation"
   },
   "quality": {
     "title": "Mängel & Qualität",

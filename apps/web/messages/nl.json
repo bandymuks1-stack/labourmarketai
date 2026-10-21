@@ -266,7 +266,11 @@
       "work": "Werk",
       "services": "Diensten",
       "goods": "Goederen & middelen"
-    }
+    },
+    "formPublisherLabel": "Geplaatst door",
+    "publisherSelf": "Ikzelf",
+    "publishedAs": "Als {name}",
+    "publishedAsOrganization": "Als organisatie"
   },
   "quality": {
     "title": "Gebreken & kwaliteit",
