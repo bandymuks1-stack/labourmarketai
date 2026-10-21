@@ -1,5 +1,7 @@
 import { deriveGrowthReading } from "@/lib/journal/growth-reading";
 import { readOwnConfirmedWorkTotals } from "@/lib/evidence/confirmed-work-read";
+import { withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 import { organizationAllTime } from "@/lib/journal/organization-all-time";
 import { cvLiveEntries } from "@/lib/cv-export/cv-entries";
 import "server-only";
@@ -410,6 +412,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
     entriesRes,
     ecRes,
     workIntelligence,
+    standingSkills,
   ] = await Promise.all([
       supabase
         .from("profiles")
@@ -423,7 +426,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         .order("is_primary", { ascending: false }),
       supabase
         .from("worker_skills")
-        .select("skill_id, verified, source, skills(slug)")
+        .select("skill_id, verified, verified_by, source, skills(slug)")
         .eq("worker_id", workerId)
         .order("created_at", { ascending: true }),
       readAllPages<EntrySkillLinkRow>(() =>
@@ -460,6 +463,10 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       loadWorkIntelligence({ supabase, userId: user.id }, workerId).catch(
         (): WorkIntelligence | null => null,
       ),
+      // Which recorded skill confirmations still STAND (a later rejection,
+      // correction or deletion of the confirmed work withdraws one; the
+      // person's own "confirmation" never counts). null = unknown.
+      readOwnStandingConfirmedSkillIds(workerId),
     ]);
 
   // ── Full CV System v1 sections — ALL best-effort/graceful reads. A table
@@ -660,7 +667,19 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         ((linkRes.data ?? []) as EntrySkillLinkRow[]).filter((l) => countedEntryIds.has(l.journal_entry_id)),
       );
 
-  const tierInputs = (wsRes.data ?? [])
+  // `verified` below is the STANDING confirmation, not the stored flag
+  // (lib/evidence/skill-confirmation-standing.ts). The flag itself is history
+  // and stays in the row untouched.
+  const tierInputs = withStandingConfirmation(
+    (wsRes.data ?? []) as {
+      skill_id: string | null;
+      verified: boolean | null;
+      verified_by: string | null;
+      source: string | null;
+      skills: unknown;
+    }[],
+    standingSkills,
+  )
     .map((r) => {
       const slug = (r.skills as { slug: string | null } | null)?.slug;
       return slug
