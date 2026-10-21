@@ -229,7 +229,7 @@ async function verifiedSkillBadges(
   try {
     const { data: rows, error } = await asAny(supabase)
       .from("worker_skills")
-      .select("skill_id, verified, verified_by, skills(slug)")
+      .select("skill_id, verified, verified_by, verified_at, skills(slug)")
       .eq("worker_id", workerId)
       .eq("verified", true);
     if (error) return { status: "unavailable" };
@@ -237,6 +237,7 @@ async function verifiedSkillBadges(
       skill_id: string | null;
       verified: boolean | null;
       verified_by: string | null;
+      verified_at?: string | null;
       skills: { slug: string | null } | null;
     }[];
     if (recorded.length === 0) return { status: "ok", badges: [] };

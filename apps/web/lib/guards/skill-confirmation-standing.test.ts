@@ -45,7 +45,7 @@ describe("own tier readers route through the standing rule", () => {
   it("trust-signals no longer counts the raw flag with a head count", () => {
     const src = read("lib/profile/trust-signals.ts");
     expect(src).not.toMatch(/select\("id",\s*\{\s*count:\s*"exact",\s*head:\s*true\s*\}\)\s*\.eq\("worker_id",\s*workerId\)\s*\.eq\("verified",\s*true\)/);
-    expect(src).toMatch(/standingConfirmedSkillIds\(/);
+    expect(src).toMatch(/standingConfirmedSkillApprovals\(/);
   });
 
   it("qualification evidence no longer counts the raw flag", () => {

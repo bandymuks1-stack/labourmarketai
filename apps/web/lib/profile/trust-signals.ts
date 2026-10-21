@@ -9,7 +9,7 @@ import { countConfirmedEntries, type ConfirmationRow } from "@/lib/journal/revie
 import {
   confirmationStands,
   skillConfirmationState,
-  standingConfirmedSkillIds,
+  standingConfirmedSkillApprovals,
 } from "@/lib/evidence/skill-confirmation-standing";
 
 /**
@@ -74,7 +74,7 @@ export async function getOwnTrustSignals(
     // of them still stand is decided below from the entries read beside it.
     asAny(supabase)
       .from("worker_skills")
-      .select("skill_id, verified_by")
+      .select("skill_id, verified_by, verified_at")
       .eq("worker_id", workerId)
       .eq("verified", true),
     // LIVE ONLY. This count is presented as "evidence trail length" and feeds
@@ -130,10 +130,10 @@ export async function getOwnTrustSignals(
   const standing =
     rows === null || profileId === undefined
       ? null
-      : standingConfirmedSkillIds(rows, profileId);
+      : standingConfirmedSkillApprovals(rows, profileId);
   const recorded = skillsRes.error
     ? null
-    : ((skillsRes.data ?? []) as { skill_id: string | null; verified_by: string | null }[]);
+    : ((skillsRes.data ?? []) as { skill_id: string | null; verified_by: string | null; verified_at: string | null }[]);
   const verifiedSkills =
     recorded === null || standing === null
       ? null
@@ -141,7 +141,7 @@ export async function getOwnTrustSignals(
           confirmationStands(
             skillConfirmationState(
               { ...r, verified: true },
-              { ids: standing, subjectProfileId: profileId ?? null },
+              { ids: new Set(standing.keys()), subjectProfileId: profileId ?? null, approvedAt: standing },
             ),
           ),
         ).length;

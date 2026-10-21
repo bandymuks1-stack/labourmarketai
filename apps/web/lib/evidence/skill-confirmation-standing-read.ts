@@ -6,7 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { readCorrectedOriginalIds } from "@/lib/journal/corrected-originals-read";
 import {
-  standingConfirmedSkillIds,
+  standingConfirmedSkillApprovals,
   type StandingEntryRow,
   type StandingSkillRead,
 } from "./skill-confirmation-standing";
@@ -90,8 +90,8 @@ export async function readStandingConfirmedSkillIds(
     const rows = (workerRes.data ?? []) as { profile_id: string | null }[];
     if (rows.length === 0) return null; // the worker row is not readable: unknown
     const subjectProfileId = rows[0].profile_id ?? null;
-    const ids = standingConfirmedSkillIds(entriesRes, subjectProfileId, corrected);
-    return ids === null ? null : { ids, subjectProfileId };
+    const approvedAt = standingConfirmedSkillApprovals(entriesRes, subjectProfileId, corrected);
+    return approvedAt === null ? null : { ids: new Set(approvedAt.keys()), subjectProfileId, approvedAt };
   } catch {
     return null;
   }

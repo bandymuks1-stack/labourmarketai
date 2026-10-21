@@ -75,7 +75,7 @@ export async function getOwnRecordedWorkEvidence(
     // demonstrated capability.
     asAny(supabase)
       .from("worker_skills")
-      .select("skill_id, verified, verified_by")
+      .select("skill_id, verified, verified_by, verified_at")
       .eq("worker_id", workerId)
       .eq("verified", true)
       .limit(ENTRY_READ_LIMIT),
@@ -89,7 +89,7 @@ export async function getOwnRecordedWorkEvidence(
   const verifiedSkills =
     skillsRes.error || standing === null
       ? null
-      : ((skillsRes.data ?? []) as { skill_id: string | null; verified: boolean | null; verified_by: string | null }[]).filter(
+      : ((skillsRes.data ?? []) as { skill_id: string | null; verified: boolean | null; verified_by: string | null; verified_at: string | null }[]).filter(
           (r) => confirmationStands(skillConfirmationState(r, standing)),
         ).length;
   if (entriesRes.error) {

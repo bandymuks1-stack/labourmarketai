@@ -137,11 +137,11 @@ export async function getOwnCapabilities(limit = 18): Promise<OwnCapabilities> {
   // Skills the worker has self-listed (with verification flag + skill slug).
   const { data: ws } = await asAny(supabase)
     .from("worker_skills")
-    .select("skill_id, verified, verified_by, skills(slug, category)")
+    .select("skill_id, verified, verified_by, verified_at, skills(slug, category)")
     .eq("worker_id", workerId);
   // A recorded confirmation is "confirmed" only while it STANDS
   // (lib/evidence/skill-confirmation-standing.ts).
-  const storedSkills = Array.isArray(ws) ? (ws as { skill_id: string | null; verified: boolean | null; verified_by: string | null; skills?: unknown }[]) : [];
+  const storedSkills = Array.isArray(ws) ? (ws as { skill_id: string | null; verified: boolean | null; verified_by: string | null; verified_at: string | null; skills?: unknown }[]) : [];
   const standingSkills = withStandingConfirmation(
     storedSkills,
     anyRecordedConfirmation(storedSkills) ? await readOwnStandingConfirmedSkillIds(workerId) : null,
