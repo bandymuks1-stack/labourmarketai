@@ -213,6 +213,13 @@ describe("honest invisibility before the owner applies it", () => {
     expect(c).toMatch(/42P01|PGRST205/);
   });
 
+  it("the reader names the owner: an admin never reads other workers' searches", () => {
+    // The select policy also admits is_admin(); the filter is the privacy line.
+    const c = code(read(READER));
+    expect(c).toMatch(/resolveOwnWorkerId\(supabase, user\.id\)/);
+    expect(c).toMatch(/\.from\("worker_saved_searches"\)[\s\S]{0,120}\.eq\("worker_id", workerId\)/);
+  });
+
   it("the board renders no control at all while it is unavailable", () => {
     const page = code(read("app/[locale]/dashboard/opportunities/page.tsx"));
     expect(page).toMatch(/savedSearches\.available \? \(/);
