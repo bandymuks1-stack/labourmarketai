@@ -8,6 +8,15 @@ import { readWorkerCoreRow } from "@/lib/data/worker-core";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { createClient } from "@/lib/supabase/server";
 import { readWorkerEntrySkillLinks } from "@/lib/journal/entry-skill-link-read";
+import {
+  anyRecordedConfirmation,
+  withCrossPartyStandingConfirmation,
+  withStandingConfirmation,
+} from "@/lib/evidence/skill-confirmation-standing";
+import {
+  readCrossPartyStandingStates,
+  readStandingConfirmedSkillIds,
+} from "@/lib/evidence/skill-confirmation-standing-read";
 import type { EntrySkillProvenance } from "@/lib/journal/entry-skill-source";
 import {
   listJournalEntries,
@@ -361,7 +370,7 @@ export async function loadWorkIntelligence(
     readWorkerEntrySkillLinks(caller.supabase, workerId),
     caller.supabase
       .from("worker_skills")
-      .select("skill_id, verified, source, skills(slug)")
+      .select("skill_id, verified, verified_by, source, skills(slug)")
       .eq("worker_id", workerId),
     readOrganizationRecords(caller.supabase, workerId),
     // Whose entries these are — "confirmed" excludes the subject's own
@@ -369,10 +378,19 @@ export async function loadWorkIntelligence(
     caller.supabase.from("workers").select("profile_id").eq("id", workerId).limit(1),
   ]);
   if (!entriesRead.ok || !linkRead.ok || skillsRead.error) return null;
-  const photoCountByEntry = await readPhotoCountsByEntry(
-    caller.supabase,
-    entriesRead.entries.map((e) => e.id),
-  );
+  const subjectProfileId = subjectRead.error
+    ? null
+    : (((subjectRead.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null);
+  const storedSkillRows = (skillsRead.data ?? []) as unknown as (WorkerSkillSourceRow & {
+    verified_by?: string | null;
+  })[];
+  const [photoCountByEntry, skillRows] = await Promise.all([
+    readPhotoCountsByEntry(
+      caller.supabase,
+      entriesRead.entries.map((e) => e.id),
+    ),
+    standingSkillRowsFor(caller, workerId, subjectProfileId, storedSkillRows),
+  ]);
 
   const linksByEntry = new Map<string, string[]>();
   for (const r of linkRead.rows) {
@@ -385,7 +403,7 @@ export async function loadWorkIntelligence(
     entries: entriesRead.entries,
     linksByEntry,
     provenanceByEntry: linkRead.provenanceByEntry,
-    skillRows: (skillsRead.data ?? []) as unknown as WorkerSkillSourceRow[],
+    skillRows,
     todayIso: today.todayIso,
     horizonIso: today.horizonIso,
     focus: opts.focus,
@@ -398,10 +416,37 @@ export async function loadWorkIntelligence(
     photoCountByEntry,
     organizationRecords: organizationLedger?.records ?? null,
     organizationPeriodRecords: organizationLedger?.periodRecords ?? null,
-    subjectProfileId: subjectRead.error
-      ? null
-      : (((subjectRead.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null),
+    subjectProfileId,
   });
+}
+
+/**
+ * A recorded skill confirmation reads as confirmed only while it STANDS
+ * (lib/evidence/skill-confirmation-standing.ts). ONE reader, two audiences:
+ * the person reads their own journal (the own RLS read, exact); anyone else —
+ * a manager's organization view, the team roster — cannot, so the
+ * cross-party DB door decides. Asked beside the photo read (no added stage),
+ * and only when a stored flag exists. `verified_by` is read to classify a
+ * self-confirmation and is not handed on.
+ */
+async function standingSkillRowsFor(
+  caller: DomainCaller,
+  workerId: string,
+  subjectProfileId: string | null,
+  rows: readonly (WorkerSkillSourceRow & { verified_by?: string | null })[],
+): Promise<WorkerSkillSourceRow[]> {
+  const strip = (r: WorkerSkillSourceRow & { verified_by?: string | null }): WorkerSkillSourceRow => {
+    const row = { ...r };
+    delete row.verified_by;
+    return row;
+  };
+  if (!anyRecordedConfirmation(rows)) return rows.map(strip);
+  const own = subjectProfileId !== null && subjectProfileId === caller.userId;
+  const supabase = caller.supabase as SupabaseClient;
+  const judged = own
+    ? withStandingConfirmation(rows, await readStandingConfirmedSkillIds(supabase, workerId))
+    : withCrossPartyStandingConfirmation(rows, await readCrossPartyStandingStates(supabase, [workerId]), workerId);
+  return judged.map(strip);
 }
 
 /**

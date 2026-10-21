@@ -80,7 +80,8 @@ export interface WorkerOps {
   viaTeam?: boolean;
   journalEntries: number;
   declaredSkills: number;
-  confirmedSkills: number;
+  /** Standing skill confirmations; `null` = UNKNOWN (worker-readiness.ts), never 0. */
+  confirmedSkills: number | null;
   openReviewItems: number;
   lastActivity: string | null;
   /** Ready ONLY according to the fields actually checked (see notes/readiness). */

@@ -51,7 +51,7 @@ function workerRow(w: WorkerOps): string[] {
     w.operationalStatus ?? "not_set",
     w.ready ? "ready_checked_fields" : "not_ready",
     String(w.declaredSkills),
-    String(w.confirmedSkills),
+    w.confirmedSkills === null ? "unknown" : String(w.confirmedSkills),
     String(w.journalEntries),
     String(w.openReviewItems),
     String(w.docsMissing),

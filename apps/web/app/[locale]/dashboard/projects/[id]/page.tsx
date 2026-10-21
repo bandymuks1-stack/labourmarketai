@@ -374,7 +374,7 @@ export default async function ProjectStadiumPage({
                     aria-hidden
                     className={cn(
                       "flex h-16 w-14 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-lg font-bold text-text-primary",
-                      w.confirmedSkills > 0
+                      (w.confirmedSkills ?? 0) > 0
                         ? "border-trust-accent/50"
                         : "border-ink-500",
                     )}
@@ -398,13 +398,13 @@ export default async function ProjectStadiumPage({
                   <span
                     className={cn(
                       "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-meta",
-                      w.confirmedSkills > 0
+                      (w.confirmedSkills ?? 0) > 0
                         ? "border-state-success/30 bg-state-success/10 text-state-success"
                         : "border-ink-600 bg-ink-800/40 text-text-secondary",
                     )}
                   >
                     <ShieldCheck className="h-3 w-3" aria-hidden />
-                    {w.confirmedSkills}
+                    {w.confirmedSkills ?? "—"}
                   </span>
                   {w.openReviewItems > 0 ? (
                     <span className="inline-flex items-center gap-1.5 rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-1 font-mono text-meta text-state-warning">

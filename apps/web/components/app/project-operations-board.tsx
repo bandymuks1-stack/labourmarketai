@@ -482,7 +482,7 @@ function WorkerCard({
           <span
             aria-hidden
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-ink-700 font-display text-xs font-bold text-text-primary ${
-              worker.confirmedSkills > 0 ? "border-trust-accent/50" : "border-ink-500"
+              (worker.confirmedSkills ?? 0) > 0 ? "border-trust-accent/50" : "border-ink-500"
             }`}
           >
             {initials}
@@ -538,7 +538,7 @@ function WorkerCard({
         </div>
         <div>
           <dt className="text-text-muted">{labels.confirmedSkills}</dt>
-          <dd className="font-display text-sm text-text-primary">{worker.confirmedSkills}</dd>
+          <dd className="font-display text-sm text-text-primary">{worker.confirmedSkills ?? "—"}</dd>
         </div>
         <div>
           <dt className="text-text-muted">{labels.evidence}</dt>
