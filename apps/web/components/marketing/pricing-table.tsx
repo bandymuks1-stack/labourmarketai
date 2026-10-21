@@ -3,7 +3,7 @@ import { TrackedCta } from "@/components/app/tracked-cta";
 import { WaitlistModal } from "@/components/marketing/waitlist-modal";
 import { getPlans, PLAN_SLUGS } from "@/lib/marketing/plans";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import { isStripeActive } from "@/lib/billing/config-core";
 
 /**
@@ -26,7 +26,7 @@ export async function PricingTable() {
   const locale = await getLocale();
   const rows = await getPlans(); // null if Supabase unreachable in preview
   const confirmed = PRICING_READINESS_STATE === "owner_confirmed";
-  const billingOn = isStripeActive(getBillingConfig());
+  const billingOn = isStripeActive(getBillingConfigFor(null));
   const cardClass = "flex flex-col card-border p-6";
 
   return (

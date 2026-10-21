@@ -70,6 +70,8 @@ let teamTestId = "";
  * is itself a correct product outcome, not a failure.
  */
 test("0. owner disbands earlier synthetic brigades, keeping their history", async ({ browser }) => {
+  // Up to twenty disband answers, each followed by a reload of a heavy page.
+  test.setTimeout(480_000);
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   // The people page is heavy (many reads); 30 s like every other step — the
@@ -82,7 +84,11 @@ test("0. owner disbands earlier synthetic brigades, keeping their history", asyn
   let disbanded = 0;
   let refused = 0;
   const tried = new Set<string>();
-  for (let i = 0; i < 6; i += 1) {
+  // A brigade with an accepted offer on a need its buyer closed is refused as
+  // open work (run 39573517480: the first six cards were all such brigades
+  // while eight others could be disbanded, so the owner stayed at the 20-team
+  // cap). Walk the whole list, and stop once three slots are free.
+  for (let i = 0; i < 20 && disbanded < 3; i += 1) {
     const cards = await leftovers.all();
     let card = null;
     for (const c of cards) {
@@ -232,8 +238,11 @@ test("org isolation: the owner of another company does not see Alfa's brigade", 
 test("14. persistence: a brand-new owner session still shows the brigade with both members", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
-  await expect(page.getByTestId(teamTestId)).toContainText(TEAM);
-  await expect(page.getByTestId(teamTestId).locator("li .text-state-success")).toHaveCount(2);
+  // A brand-new session renders the heavy people page cold: 30 s like every
+  // other step (run 39582274844 failed at the 5 s default though step 8-9 of
+  // the same run had shown the brigade with both members).
+  await expect(page.getByTestId(teamTestId)).toContainText(TEAM, { timeout: 30_000 });
+  await expect(page.getByTestId(teamTestId).locator("li .text-state-success")).toHaveCount(2, { timeout: 30_000 });
   await ctx.close();
 });
 
@@ -443,9 +452,29 @@ test("B2B-8. a brigade member sees the buyer's project through the team and reco
   await expect(card, "the team assignment makes the project the member's work context").toBeVisible({ timeout: 30_000 });
   await expect(card.getByTestId("worker-project-via-team")).toBeVisible();
   await page.goto("/lt/dashboard/journal");
-  await page.getByTestId("journal-quick-record-text").fill(WORK);
-  await page.getByTestId("journal-quick-record-understand").click();
-  await expect(page.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  // ONE fill, as a person types once. The button enables only when the
+  // recorder's own state holds the sentence, so a sentence typed before the
+  // page finished loading must be kept by the recorder itself (run
+  // 39570461256 lost it; quick-record.tsx now takes the field's early text).
+  const text = page.getByTestId("journal-quick-record-text");
+  const understand = page.getByTestId("journal-quick-record-understand");
+  await text.fill(WORK);
+  await expect(understand, "the recorder kept the sentence typed once").toBeEnabled({ timeout: 30_000 });
+  await understand.click();
+  const flow = page.getByTestId("worklog-flow");
+  try {
+    await expect(flow).toBeVisible({ timeout: 30_000 });
+  } catch (err) {
+    // Name the stage the recorder stopped at, so the next failure is a fact.
+    const seen: string[] = [];
+    for (const id of ["worklog-loading", "worklog-blocked", "worklog-error", "journal-quick-record-text"]) {
+      if (await page.getByTestId(id).isVisible().catch(() => false)) {
+        seen.push(`${id}: ${(await page.getByTestId(id).innerText().catch(() => "")).slice(0, 160)}`);
+      }
+    }
+    console.info(`[b2b-8] readback not shown; visible: ${seen.join(" | ") || "none"}; url ${page.url()}`);
+    throw err;
+  }
   // The buyer's project is reached THROUGH THE BRIGADE, so it is offered under
   // the brigade's own work context (addTeamProjects: team org + project org),
   // never under the member's employer Alfa — picking Alfa showed only Alfa's

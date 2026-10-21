@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import { PRE_PAYMENT_PLANS } from "@/lib/billing/plans";
 import { testPriceIdFor } from "@/lib/billing/prices";
 import { TestCheckoutButton } from "@/components/marketing/test-checkout-button";
@@ -13,7 +13,7 @@ import { TestCheckoutButton } from "@/components/marketing/test-checkout-button"
  * configured.
  */
 export async function BillingTestCheckout() {
-  const cfg = getBillingConfig();
+  const cfg = getBillingConfigFor(null);
   if (cfg.state !== "stripe_test") return null;
 
   const t = await getTranslations("billingTest");
