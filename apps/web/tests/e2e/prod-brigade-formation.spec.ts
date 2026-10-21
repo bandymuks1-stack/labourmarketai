@@ -70,6 +70,8 @@ let teamTestId = "";
  * is itself a correct product outcome, not a failure.
  */
 test("0. owner disbands earlier synthetic brigades, keeping their history", async ({ browser }) => {
+  // Up to twenty disband answers, each followed by a reload of a heavy page.
+  test.setTimeout(480_000);
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   // The people page is heavy (many reads); 30 s like every other step — the
@@ -82,7 +84,11 @@ test("0. owner disbands earlier synthetic brigades, keeping their history", asyn
   let disbanded = 0;
   let refused = 0;
   const tried = new Set<string>();
-  for (let i = 0; i < 6; i += 1) {
+  // A brigade with an accepted offer on a need its buyer closed is refused as
+  // open work (run 39573517480: the first six cards were all such brigades
+  // while eight others could be disbanded, so the owner stayed at the 20-team
+  // cap). Walk the whole list, and stop once three slots are free.
+  for (let i = 0; i < 20 && disbanded < 3; i += 1) {
     const cards = await leftovers.all();
     let card = null;
     for (const c of cards) {
@@ -443,9 +449,31 @@ test("B2B-8. a brigade member sees the buyer's project through the team and reco
   await expect(card, "the team assignment makes the project the member's work context").toBeVisible({ timeout: 30_000 });
   await expect(card.getByTestId("worker-project-via-team")).toBeVisible();
   await page.goto("/lt/dashboard/journal");
-  await page.getByTestId("journal-quick-record-text").fill(WORK);
-  await page.getByTestId("journal-quick-record-understand").click();
-  await expect(page.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  // The button enables only once the page's own state holds the sentence, so
+  // an enabled button proves the recorder is hydrated; text typed earlier is
+  // lost (run 39570461256: the page settled after the fill and the readback
+  // never opened). Type again until the recorder has it.
+  const text = page.getByTestId("journal-quick-record-text");
+  const understand = page.getByTestId("journal-quick-record-understand");
+  await expect(async () => {
+    await text.fill(WORK);
+    await expect(understand).toBeEnabled({ timeout: 3_000 });
+  }).toPass({ timeout: 30_000 });
+  await understand.click();
+  const flow = page.getByTestId("worklog-flow");
+  try {
+    await expect(flow).toBeVisible({ timeout: 30_000 });
+  } catch (err) {
+    // Name the stage the recorder stopped at, so the next failure is a fact.
+    const seen: string[] = [];
+    for (const id of ["worklog-loading", "worklog-blocked", "worklog-error", "journal-quick-record-text"]) {
+      if (await page.getByTestId(id).isVisible().catch(() => false)) {
+        seen.push(`${id}: ${(await page.getByTestId(id).innerText().catch(() => "")).slice(0, 160)}`);
+      }
+    }
+    console.info(`[b2b-8] readback not shown; visible: ${seen.join(" | ") || "none"}; url ${page.url()}`);
+    throw err;
+  }
   // The buyer's project is reached THROUGH THE BRIGADE, so it is offered under
   // the brigade's own work context (addTeamProjects: team org + project org),
   // never under the member's employer Alfa — picking Alfa showed only Alfa's
