@@ -523,7 +523,10 @@ export function SignupForm({
                 ? `/auth/login?next=${encodeURIComponent(nextPath)}`
                 : "/auth/login"
             }
-            className="text-brand-blue hover:text-brand-champagne"
+            // Underlined: inside a sentence the gold link is 1.3:1 against the
+            // muted text around it, so colour alone does not mark it as a link
+            // (WCAG 1.4.1, axe link-in-text-block, 390 px audit).
+            className="text-brand-blue underline underline-offset-2 hover:text-brand-champagne"
           >
             {t("login_link")}
           </Link>
