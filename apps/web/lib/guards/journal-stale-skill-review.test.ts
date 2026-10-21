@@ -56,7 +56,7 @@ describe("Guard: journal page computes a real per-entry chip source", () => {
     // numbers"); the assertion is that `verified` is READ, not the exact
     // column list.
     expect(page).toMatch(
-      /select\(\s*["']skill_id,\s*verified,(?:\s*verified_by,)?(?:\s*source,)?\s*skills\(slug\)["']/,
+      /select\(\s*["']skill_id,\s*verified,(?:\s*verified_by,)?(?:\s*verified_at,)?(?:\s*source,)?\s*skills\(slug\)["']/,
     );
   });
   it("recognizes skills from THIS entry's real text", () => {

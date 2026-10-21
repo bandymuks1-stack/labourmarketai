@@ -625,7 +625,7 @@ export default async function JournalPage({
       readOwnOccupationPath(supabase, worker.id),
       supabase
         .from("worker_skills")
-        .select("skill_id, verified, verified_by, source, skills(slug)")
+        .select("skill_id, verified, verified_by, verified_at, source, skills(slug)")
         .eq("worker_id", worker.id),
       readWorkerEntrySkillLinks(supabase, worker.id),
       // G4 bridge: THE canonical journal-list core (v3 select + legacy
