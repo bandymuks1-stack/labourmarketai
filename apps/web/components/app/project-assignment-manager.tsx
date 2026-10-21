@@ -363,14 +363,20 @@ export function ProjectAssignmentManager({
   const [decision, setDecision] = useState<{ for: unknown } | null>(null);
   const [deciding, startDeciding] = useTransition();
   const decided = decision !== null && decision.for === assignState;
+  // Undo / swap that did not happen must say so: the manager otherwise reads
+  // an unchanged screen as "done" while the person is still assigned.
+  const [decideFailed, setDecideFailed] = useState(false);
   const undoAssignment = () => {
     const a = assignState?.ok ? assignState.assigned : undefined;
     if (!a) return;
+    setDecideFailed(false);
     startDeciding(async () => {
       const r = await endAssignmentAction(a.projectId, a.workerProfileId);
       if (r.ok) {
         await recordAssignmentDecisionAction(a.projectId, a.workerProfileId, "undone");
         setDecision({ for: assignState });
+      } else {
+        setDecideFailed(true);
       }
     });
   };
@@ -392,9 +398,13 @@ export function ProjectAssignmentManager({
   const swapAssignment = (profileId: string) => {
     const a = assignState?.ok ? assignState.assigned : undefined;
     if (!a) return;
+    setDecideFailed(false);
     startDeciding(async () => {
       const ended = await endAssignmentAction(a.projectId, a.workerProfileId);
-      if (!ended.ok) return;
+      if (!ended.ok) {
+        setDecideFailed(true);
+        return;
+      }
       const fd = new FormData();
       fd.set("project_id", a.projectId);
       fd.set("worker_profile_id", profileId);
@@ -402,6 +412,8 @@ export function ProjectAssignmentManager({
       if (r.ok) {
         await recordAssignmentDecisionAction(a.projectId, a.workerProfileId, "swapped");
         setDecision({ for: assignState });
+      } else {
+        setDecideFailed(true);
       }
     });
   };
@@ -441,6 +453,8 @@ export function ProjectAssignmentManager({
         }
       : null;
   const [ended, setEnded] = useState<Set<string>>(new Set());
+  // The one assignment whose "end" was refused — said in its row, never silent.
+  const [endFailed, setEndFailed] = useState<string | null>(null);
   const onTeam = new Set(rosterHere.map((w) => w.profileId));
   const engagementOnly = engagementWorkers.filter((w) => !onTeam.has(w.workerProfileId));
 
@@ -454,16 +468,29 @@ export function ProjectAssignmentManager({
         </p>
         <label className="flex flex-col gap-1 text-xs">
           <span className="font-mono uppercase tracking-label text-text-muted">{labels.createNameLabel}</span>
-          <input name="title" required placeholder={labels.createNamePlaceholder} className={field} />
+          <input name="title" required placeholder={labels.createNamePlaceholder} className={field} data-testid="project-create-title" />
         </label>
         <label className="flex flex-col gap-1 text-xs">
           <span className="font-mono uppercase tracking-label text-text-muted">{labels.createCityLabel}</span>
-          <input name="city" placeholder={labels.createCityPlaceholder} className={field} />
+          <input name="city" placeholder={labels.createCityPlaceholder} className={field} data-testid="project-create-city" />
         </label>
-        <div className="flex items-center gap-3">
-          <button type="submit" disabled={creating} className={primary}>
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="submit" disabled={creating} className={primary} data-testid="project-create-inline-submit">
             {creating ? labels.sending : labels.createSubmit}
           </button>
+          {/* The project now exists: the success answer is the door into it,
+              never silence (the result carries the new id). */}
+          {createState?.ok && createState.id ? (
+            <Link
+              href={`/dashboard/projects/${createState.id}/operations`}
+              role="status"
+              data-testid="project-create-open-board"
+              data-project-id={createState.id}
+              className="text-xs font-medium text-state-success underline-offset-4 hover:underline"
+            >
+              {labels.openBoard} →
+            </Link>
+          ) : null}
           {resultError(createState, labels, labels.createNotAuthorized)}
         </div>
       </form>
@@ -491,6 +518,7 @@ export function ProjectAssignmentManager({
             <span className="font-mono uppercase tracking-label text-text-muted">{labels.projectLabel}</span>
             <select
               name="project_id"
+              data-testid="assign-project-select"
               value={selProject}
               onChange={(e) => {
                 const nextProject = e.target.value;
@@ -588,11 +616,12 @@ export function ProjectAssignmentManager({
               type="submit"
               disabled={assigning}
               className={primary}
+              data-testid="assign-worker-submit"
             >
               {assigning ? labels.sending : labels.assignSubmit}
             </button>
             {assignState?.ok && !decided && (
-              <span className="text-xs text-state-success" role="status">{labels.assigned}</span>
+              <span className="text-xs text-state-success" role="status" data-testid="assign-worker-done">{labels.assigned}</span>
             )}
             {resultError(assignState, labels)}
           </div>
@@ -612,6 +641,11 @@ export function ProjectAssignmentManager({
               reasons={labels.overrideReasons}
               keepFailed={keepFailed}
             />
+          ) : null}
+          {decideFailed && !decided ? (
+            <p className="text-xs text-state-danger" role="alert" data-testid="assign-reservation-decide-failed">
+              {labels.errorMsg}
+            </p>
           ) : null}
         </form>
       )}
@@ -639,7 +673,7 @@ export function ProjectAssignmentManager({
                 const key = `${p.id}:${a.workerProfileId}`;
                 const isEnded = ended.has(key);
                 return (
-                  <li key={key} className={`flex items-center justify-between gap-3 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 ${isEnded ? "opacity-60" : ""}`} data-testid="roster-worker-chip">
+                  <li key={key} className={`flex items-center justify-between gap-3 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 ${isEnded ? "opacity-60" : ""}`} data-testid="roster-worker-chip" data-project-id={p.id} data-worker-profile-id={a.workerProfileId} data-ended={isEnded ? "true" : undefined}>
                     {/* The SAME identity the team list and the candidate read
                         use, at row density; a photo only where the one photo
                         rule gave the viewer one. */}
@@ -653,17 +687,25 @@ export function ProjectAssignmentManager({
                       professions={[]}
                       meta={[]}
                     />
+                    {!isEnded && endFailed === key ? (
+                      <span className="text-xs text-state-danger" role="alert" data-testid="assignment-end-failed">
+                        {labels.errorMsg}
+                      </span>
+                    ) : null}
                     {!isEnded && (
                       <button
                         type="button"
                         disabled={endPending}
                         onClick={() =>
                           startEnd(async () => {
+                            setEndFailed(null);
                             const r = await endAssignmentAction(p.id, a.workerProfileId);
                             if (r.ok) setEnded((s) => new Set(s).add(key));
+                            else setEndFailed(key);
                           })
                         }
                         className="rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-orange"
+                        data-testid="assignment-end"
                       >
                         {labels.end}
                       </button>

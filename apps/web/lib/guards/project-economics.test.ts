@@ -60,6 +60,13 @@ describe("actual cost reuses the canonical ledger — no second cost ledger", ()
     expect(model).not.toMatch(/CREATE\s+TABLE/i);
     expect(migration).not.toMatch(/create table[^;]*cost_actuals/i);
   });
+  it("a FAILED ledger read is an unknown actual, never a measured €0", () => {
+    // listMyFinanceRecords answers a read error as status "ok" + records [] +
+    // error; summing that empty list reported €0 actual and a full-budget
+    // "under budget" variance. The reader must refuse the errored answer.
+    const model = read("lib/economics/economics.ts");
+    expect(model).toMatch(/finance\.status === "ok" && !finance\.error/);
+  });
   it("read model degrades honestly on a missing project_budgets relation", () => {
     const model = read("lib/economics/economics.ts");
     expect(model).toMatch(/42P01/);
