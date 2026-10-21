@@ -5413,7 +5413,9 @@
         }
       ],
       "screenshot": "Company demand flow",
-      "cta": "Start a workforce inquiry"
+      "cta": "Start a workforce inquiry",
+      "calculatorBody": "Before you post a need, size the work: labour hours, materials, equipment and travel, in your own numbers.",
+      "calculatorLink": "Estimate a project’s cost"
     },
     "agencies": {
       "eyebrow": "For agencies",

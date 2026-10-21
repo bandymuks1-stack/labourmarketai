@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { WorkLifecycleSection } from "@/components/marketing/work-lifecycle-section";
 import { BenefitCards } from "@/components/marketing/benefit-cards";
+import { Link } from "@/lib/i18n/navigation";
 
 export async function generateMetadata({
   params,
@@ -41,6 +42,19 @@ export default async function ForCompaniesPage({
       />
       <WorkLifecycleSection audience="companies" />
       <BenefitCards items={benefits} />
+      {/* The public project-cost calculator (the same estimate engine as the
+          demand wizard) — a company sizes the work before it asks for it. */}
+      <section className="mx-auto max-w-container px-6 pb-12 sm:px-12">
+        <div className="card-border flex flex-col gap-2 p-5" data-testid="companies-calculator-link">
+          <p className="text-sm leading-relaxed text-text-secondary">{t("calculatorBody")}</p>
+          <Link
+            href="/calculators/project-cost"
+            className="w-fit text-sm font-semibold text-text-primary hover:text-brand-cyan"
+          >
+            {t("calculatorLink")} →
+          </Link>
+        </div>
+      </section>
       <RoleEnrichment
         root="companies"
         previewKey="demand"

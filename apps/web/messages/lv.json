@@ -925,7 +925,9 @@
       "screenshot": "[EN] Company demand flow",
       "subcopy": "[EN] Post what you need on each project and see which available workers and agencies fit it.",
       "title": "[EN] Live demand,",
-      "titleAccent": "[EN] in context."
+      "titleAccent": "[EN] in context.",
+      "calculatorBody": "Pirms meklē darba veicējus, novērtē darbu: darba stundas, materiālus, aprīkojumu un braucienus — savos skaitļos.",
+      "calculatorLink": "Aprēķini projekta izmaksas"
     },
     "workers": {
       "benefits": [

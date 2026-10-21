@@ -925,7 +925,9 @@
       "screenshot": "[EN] Company demand flow",
       "subcopy": "[EN] Post what you need on each project and see which available workers and agencies fit it.",
       "title": "[EN] Live demand,",
-      "titleAccent": "[EN] in context."
+      "titleAccent": "[EN] in context.",
+      "calculatorBody": "Enne töö küsimist hinda see: töötunnid, materjalid, seadmed ja sõidud — sinu enda numbritega.",
+      "calculatorLink": "Arvuta projekti maksumus"
     },
     "workers": {
       "benefits": [
