@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
-import { getBillingConfigFor } from "@/lib/billing/config";
+import { billingTrialEnabled, getBillingConfigFor } from "@/lib/billing/config";
 import { getBillingProvider } from "@/lib/billing/provider";
 import { testPriceIdFor } from "@/lib/billing/prices";
 import {
@@ -185,6 +185,7 @@ export async function POST(req: Request) {
     planKey,
     subjectType: scope.type,
     history: await readTrialHistory({ scope, planKey, testMode: config.testMode }),
+    enabled: billingTrialEnabled(),
   });
 
   const result = await provider.createCheckoutSession({

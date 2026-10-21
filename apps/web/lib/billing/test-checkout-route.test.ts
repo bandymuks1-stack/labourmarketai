@@ -27,6 +27,7 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/billing/config", () => ({
   getBillingConfig: () => ({ state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" }),
   getBillingConfigFor: () => ({ state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" }),
+  billingTrialEnabled: () => true,
 }));
 vi.mock("@/lib/billing/prices", () => ({ testPriceIdFor: (k: string) => (k === "company_pilot" ? "price_SERVER" : null) }));
 vi.mock("@/lib/billing/billing-subject", () => ({
