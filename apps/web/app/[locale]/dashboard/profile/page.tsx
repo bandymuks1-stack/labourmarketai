@@ -477,7 +477,7 @@ export default async function ProfilePage({
       // ALL of the worker's saved skills (read model — never filtered down).
       supabase
         .from("worker_skills")
-        .select("skill_id, confidence_bin, verified, verified_by, source, skills(slug)")
+        .select("skill_id, confidence_bin, verified, verified_by, verified_at, source, skills(slug)")
         .eq("worker_id", workerId)
         .order("created_at", { ascending: true }),
       // DURABLE journal→skill links (v1) — graceful no-op if the migration is

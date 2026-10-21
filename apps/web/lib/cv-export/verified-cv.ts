@@ -426,7 +426,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
         .order("is_primary", { ascending: false }),
       supabase
         .from("worker_skills")
-        .select("skill_id, verified, verified_by, source, skills(slug)")
+        .select("skill_id, verified, verified_by, verified_at, source, skills(slug)")
         .eq("worker_id", workerId)
         .order("created_at", { ascending: true }),
       readAllPages<EntrySkillLinkRow>(() =>
@@ -675,6 +675,7 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       skill_id: string | null;
       verified: boolean | null;
       verified_by: string | null;
+      verified_at?: string | null;
       source: string | null;
       skills: unknown;
     }[],

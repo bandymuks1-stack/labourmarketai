@@ -26,6 +26,10 @@ const OWN_TIER_READERS = [
   "lib/profile/trust-signals.ts", // profile trust block + CV summary count
   "lib/player-card/player-card.ts", // confirmed-skill badges
   "lib/data/worker-core.ts", // THE core skill read (player-card chart, MCP living_cv.skills.get, …)
+  "lib/qualification/capability-evidence.ts", // demonstrated capability / prior-learning review
+  "lib/market-map/owner-readiness.ts", // capability readiness
+  "app/[locale]/dashboard/profile/page.tsx", // profile skill tiers
+  "app/[locale]/dashboard/journal/page.tsx", // journal confirmed-skill chips
 ] as const;
 
 describe("own tier readers route through the standing rule", () => {
@@ -41,7 +45,13 @@ describe("own tier readers route through the standing rule", () => {
   it("trust-signals no longer counts the raw flag with a head count", () => {
     const src = read("lib/profile/trust-signals.ts");
     expect(src).not.toMatch(/select\("id",\s*\{\s*count:\s*"exact",\s*head:\s*true\s*\}\)\s*\.eq\("worker_id",\s*workerId\)\s*\.eq\("verified",\s*true\)/);
-    expect(src).toMatch(/standingConfirmedSkillIds\(/);
+    expect(src).toMatch(/standingConfirmedSkillApprovals\(/);
+  });
+
+  it("qualification evidence no longer counts the raw flag", () => {
+    const src = read("lib/qualification/capability-evidence.ts");
+    expect(src).not.toMatch(/count:\s*"exact",\s*head:\s*true\s*\}\)\s*\.eq\("worker_id",\s*workerId\)\s*\.eq\("verified",\s*true\)/);
+    expect(src).toMatch(/confirmationStands\(skillConfirmationState\(/);
   });
 
   it("the core skill read never hands out the confirmer's identity", () => {

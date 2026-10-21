@@ -22,7 +22,9 @@
  *   1. the confirmation act happened: `verified === true` (the flag is the
  *      historical record of the act and stays in the row untouched, with
  *      verified_by / verified_at — history kept);
- *   2. it was not the subject's own act: `verified_by` is not the subject;
+ *   2. it is backed by someone other than the subject: an own flag
+ *      (`verified_by` = the subject) stands only through rule 3, i.e. once
+ *      an independent approval later backs the skill;
  *   3. it still STANDS: at least one LIVE, counted-once entry whose latest
  *      INDEPENDENT employer-basis decision is `approved`
  *      (`confirmedEntriesOf` — the ONE definition of a confirmed entry) either
@@ -115,18 +117,50 @@ export function standingConfirmedSkillIds(
   subjectProfileId: string | null | undefined,
   correctedOriginalIds?: ReadonlySet<string>,
 ): ReadonlySet<string> | null {
+  const approvals = standingConfirmedSkillApprovals(liveRows, subjectProfileId, correctedOriginalIds);
+  return approvals === null ? null : new Set(approvals.keys());
+}
+
+/** The later of two ISO times ("" = unknown, never later than anything). */
+function laterOf(a: string | undefined, b: string): string {
+  if (a === undefined) return b;
+  const ta = Date.parse(a);
+  const tb = Date.parse(b);
+  if (Number.isNaN(tb)) return a;
+  if (Number.isNaN(ta)) return b;
+  return tb > ta ? b : a;
+}
+
+/**
+ * The same standing set (rule 3) WITH WHEN each skill was last independently
+ * approved: skill id -> the latest independent, employer-basis approval
+ * backing it. A person's OWN flag stands only through an approval that
+ * POSTDATES it (skillConfirmationState) — an older approval of the same work
+ * is not someone else confirming what the person asserted afterwards. An
+ * approval without a readable time is "" and never postdates anything.
+ */
+export function standingConfirmedSkillApprovals(
+  liveRows: readonly StandingEntryRow[],
+  subjectProfileId: string | null | undefined,
+  correctedOriginalIds?: ReadonlySet<string>,
+): ReadonlyMap<string, string> | null {
   if (subjectProfileId === undefined) return null;
-  const out = new Set<string>();
+  const out = new Map<string, string>();
   for (const entry of confirmedEntriesOf(liveRows, subjectProfileId, correctedOriginalIds)) {
-    for (const link of entry.journal_entry_skills ?? []) {
-      if (link.skill_id) out.add(link.skill_id);
-    }
+    let entryApprovedAt = "";
+    const named: [string, string][] = [];
     for (const row of entry.journal_entry_confirmations ?? []) {
       if (isCounterpartyScopeRow(row)) continue;
       if (isSelfConfirmation(row, subjectProfileId)) continue;
       if (!rowIsApproval(row)) continue;
-      for (const id of namedSkillIds(row)) out.add(id);
+      const at = typeof row.created_at === "string" ? row.created_at : "";
+      entryApprovedAt = laterOf(entryApprovedAt, at);
+      for (const id of namedSkillIds(row)) named.push([id, at]);
     }
+    for (const link of entry.journal_entry_skills ?? []) {
+      if (link.skill_id) out.set(link.skill_id, laterOf(out.get(link.skill_id), entryApprovedAt));
+    }
+    for (const [id, at] of named) out.set(id, laterOf(out.get(id), at));
   }
   return out;
 }
@@ -136,12 +170,17 @@ export interface FlaggedSkillRow {
   readonly skill_id: string | null;
   readonly verified?: boolean | null;
   readonly verified_by?: string | null;
+  /** When the flag was set — only read to date a person's OWN flag. */
+  readonly verified_at?: string | null;
 }
 
 /** The standing read for ONE worker: the standing set + whose skills they are. */
 export interface StandingSkillRead {
   readonly ids: ReadonlySet<string>;
   readonly subjectProfileId: string | null;
+  /** skill id -> latest independent approval time (standingConfirmedSkillApprovals).
+   *  Absent: no own flag can stand (nothing proves an approval came after it). */
+  readonly approvedAt?: ReadonlyMap<string, string>;
 }
 
 export function skillConfirmationState(
@@ -150,14 +189,26 @@ export function skillConfirmationState(
 ): SkillConfirmationState {
   if (row.verified !== true) return "none";
   if (read === null) return "unknown";
-  if (
+  const backed = Boolean(row.skill_id && read.ids.has(row.skill_id));
+  const ownFlag = Boolean(
     read.subjectProfileId &&
-    typeof row.verified_by === "string" &&
-    row.verified_by === read.subjectProfileId
-  ) {
-    return "self_confirmed";
+      typeof row.verified_by === "string" &&
+      row.verified_by === read.subjectProfileId,
+  );
+  if (!ownFlag) return backed ? "standing" : "withdrawn";
+  // The person's OWN flag. verified_by is written only on the false -> true
+  // flip, so it never moves off the person — it must not be a permanent veto.
+  // It stands only when an independent approval backing the skill POSTDATES
+  // the flag: an older approval of the same work is not someone else
+  // confirming what the person asserted afterwards. Any unknown time keeps
+  // it self_confirmed (under-claiming is the safe direction).
+  const approvedAt = row.skill_id ? read.approvedAt?.get(row.skill_id) : undefined;
+  const flaggedAt = typeof row.verified_at === "string" ? Date.parse(row.verified_at) : Number.NaN;
+  const approved = approvedAt ? Date.parse(approvedAt) : Number.NaN;
+  if (backed && !Number.isNaN(flaggedAt) && !Number.isNaN(approved) && approved > flaggedAt) {
+    return "standing";
   }
-  return row.skill_id && read.ids.has(row.skill_id) ? "standing" : "withdrawn";
+  return "self_confirmed";
 }
 
 /**
