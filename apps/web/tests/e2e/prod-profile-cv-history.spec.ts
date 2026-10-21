@@ -615,24 +615,44 @@ test("P-18 (2.26). one continuous professional history: one total, every hour co
   await page.goto("/lt/dashboard/work-in-numbers");
   const experience = page.getByTestId("wi-experience");
   await expect(experience).toBeVisible({ timeout: 30_000 });
+  // Read EVERYTHING from Work in numbers before leaving it: a locator is
+  // re-evaluated on whatever page is loaded when it is next asked.
   const total = page.getByTestId("wi-experience-total");
-  if ((await total.count()) > 0) {
-    const n = async (a: string) => Number((await total.getAttribute(a)) ?? "NaN");
-    const sum = (await n("data-journal-hours")) + (await n("data-organization-hours"));
-    const whole = await n("data-hours");
-    console.info(`[history] total shown; parts add up=${Math.abs(whole - sum) < 0.01}`);
-    expect(Math.abs(whole - sum), "the total is exactly journal + organization records").toBeLessThan(0.01);
+  const num = async (l: Locator, a: string) => Number((await l.getAttribute(a)) ?? "NaN");
+  const wi =
+    (await total.count()) > 0
+      ? {
+          hours: await num(total, "data-hours"),
+          journal: await num(total, "data-journal-hours"),
+          organization: await num(total, "data-organization-hours"),
+          text: (await total.innerText()).trim(),
+        }
+      : null;
+  if (wi) {
+    const addsUp = Math.abs(wi.hours - (wi.journal + wi.organization)) < 0.01;
+    console.info(`[history] work-in-numbers total shown; parts add up=${addsUp}`);
+    expect(wi.text.length, "the total is shown as text, not only as data").toBeGreaterThan(0);
+    expect(addsUp, "the total is exactly journal + organization records").toBe(true);
   } else {
     // No organization-supplied history: the journal figure IS the history.
     await expect(page.getByTestId("wi-experience-journal")).toBeVisible();
     console.info("[history] journal-only history (no organization records to add)");
   }
+
+  // The Living CV reads the SAME history: same total, same parts, or none.
   const cv = await livingCv(page);
   const cvTotal = cv.getByTestId("cv-professional-experience-total");
-  if ((await cvTotal.count()) > 0 && (await total.count()) === 0) {
-    throw new Error("the Living CV shows a combined total that Work in numbers does not");
+  const cvShown = (await cvTotal.count()) > 0;
+  console.info(`[history] living CV total shown=${cvShown} work-in-numbers total shown=${wi !== null}`);
+  if (cvShown) {
+    expect(wi, "the Living CV shows a combined total that Work in numbers does not").not.toBeNull();
+    const same =
+      Math.abs((await num(cvTotal, "data-total-hours")) - wi!.hours) < 0.01 &&
+      Math.abs((await num(cvTotal, "data-journal-hours")) - wi!.journal) < 0.01 &&
+      Math.abs((await num(cvTotal, "data-organization-hours")) - wi!.organization) < 0.01;
+    console.info(`[history] living CV and work-in-numbers agree=${same}`);
+    expect(same, "one history: the Living CV and Work in numbers show the same total").toBe(true);
   }
-  console.info(`[history] living CV total shown=${(await cvTotal.count()) > 0}`);
   await ctx.close();
 });
 
