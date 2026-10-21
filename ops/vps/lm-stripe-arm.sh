@@ -36,6 +36,16 @@ case "$MODE" in
     printf 'Pilot organization id(s), comma-separated (owner-confirmed): ' >&2
     IFS= read -r PILOT
     case "$PILOT" in ""|ALL_ORGANIZATIONS) echo "STOP: name the pilot organization id(s); the public launch is not this script"; exit 1;; esac
+    # The publishable key is baked into the build (NEXT_PUBLIC_*): a live key in the build
+    # keeps test mode blocked, and live mode needs one. Check the release before arming.
+    BUILD=$(readlink -f /root/lm-prod/current)
+    if grep -rlq 'pk_live_' "$BUILD" 2>/dev/null; then BAKED=live; else BAKED=none-or-test; fi
+    if [ "$MODE" = test ] && [ "$BAKED" = live ]; then
+      echo "STOP: this release was built with a LIVE publishable key, so test mode cannot activate. Remove the GitHub variable NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (or set a pk_test_ key), redeploy, then run this again."; exit 1
+    fi
+    if [ "$MODE" = live ] && [ "$BAKED" != live ]; then
+      echo "STOP: this release has no LIVE publishable key. Set the GitHub variable NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_..., redeploy, then run this again."; exit 1
+    fi
     if [ "$MODE" = test ]; then PFX=sk_test_; WPFX=whsec_; else PFX=sk_live_; WPFX=whsec_; fi
     SK=$(secret "Stripe $MODE secret key ($PFX...)")
     case "$SK" in "$PFX"*|rk_live_*) ;; *) echo "STOP: not a $MODE secret key"; exit 1;; esac
