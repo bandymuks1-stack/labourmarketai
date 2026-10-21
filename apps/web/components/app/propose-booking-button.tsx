@@ -19,10 +19,10 @@ import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-wo
  * copy comes from the shared `bookings.propose` namespace, not new props.
  *
  * Repeat actions (Capability G, PR 6b): `variant="rebook"` renders the SAME
- * flow pre-scoped to the same request + worker. Since 20261021095200 the
- * propose RPC no longer re-opens a declined or withdrawn proposal (the
- * worker's answer stands), so the bookings page does not mount this variant
- * for those rows; it is kept for an owner-approved re-open rule.
+ * flow pre-scoped to the same request + worker, for a proposal the company
+ * WITHDREW itself. A DECLINED proposal is not re-opened (20261021095200,
+ * owner decision 2026-10-21: the worker's answer stands without the
+ * worker's new consent), so the page mounts this variant for withdrawn only.
  *
  * Refusals (20261021095200): a worker this company may not contact, a closed
  * need and an already-answered proposal each get their own sentence — never

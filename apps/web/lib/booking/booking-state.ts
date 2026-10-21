@@ -110,6 +110,24 @@ export function deriveBookingDisplayState(
 }
 
 /**
+ * Repeat action (Capability G, PR 6b): whether the PROPOSING company may
+ * propose this booking again with new dates. Pure and default-closed: ONLY
+ * `withdrawn` (the company took back its OWN proposal). Never `declined`
+ * (the worker said no — not re-opened without the worker's new consent,
+ * owner decision 2026-10-21, enforced by propose_booking_request
+ * 20261021095200). Never `proposed` (still open — withdraw
+ * instead), never `accepted` (a real engagement — message/plan instead), and
+ * never `expired` (unreachable, no scheduler writes it — see the lifecycle
+ * guard). The applied propose RPC upserts on (owner_id, request_id,
+ * worker_id) and re-opens such a row back to `proposed` with the new dates —
+ * so "propose again" is the EXISTING propose flow pre-scoped to the same
+ * request + worker; the worker decides again.
+ */
+export function canProposeAgain(status: BookingStatus): boolean {
+  return status === "withdrawn";
+}
+
+/**
  * Reason capture vocabularies (booking UX compat, P2-PR6) — pinned VERBATIM
  * to the owner-gated lifecycle-v2 contract (draft migration
  * 20260711290000_booking_lifecycle_v2.sql). Closed sets: the RPCs reject any

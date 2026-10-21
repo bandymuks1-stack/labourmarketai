@@ -2842,7 +2842,7 @@
       "alreadyAccepted": "Arbeidstakeren har allerede akseptert dette forslaget — avtalte vilkår overskrives ikke her. Avtal endringer i samtalen.",
       "refusedNotReachable": "Denne personen kan ikke få et bookingforslag herfra — profilen er ikke synlig for arbeidsgivere, og det finnes ingen arbeidsrelasjon med deg.",
       "refusedNeedClosed": "Dette behovet er lukket — åpne det igjen før du foreslår en booking.",
-      "refusedAnswered": "Dette forslaget er allerede besvart (avslått eller trukket tilbake) og åpnes ikke på nytt. Fortsett i samtalen, eller finn en annen arbeidstaker."
+      "refusedAnswered": "Arbeidstakeren avslo dette forslaget, så det åpnes ikke på nytt uten ny samtykke fra arbeidstakeren. Fortsett i samtalen eller finn en annen arbeidstaker."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",

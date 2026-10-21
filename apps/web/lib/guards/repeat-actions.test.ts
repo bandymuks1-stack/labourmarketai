@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { canProposeAgain, type BookingStatus } from "../booking/booking-state";
 import {
   canRequestAgain,
   REQUEST_STATUSES,
@@ -9,25 +10,54 @@ import {
 } from "../marketplace/service-requests-shared";
 
 /**
- * Repeat actions guard (Capability G, PR 6b) — "request again", and the
- * retirement of "propose again" (rebook).
+ * Repeat actions guard (Capability G, PR 6b) — "propose again" (rebook) and
+ * "request again".
  *
+ * Both affordances are pure derivations over the row's DB status,
+ * default-closed:
+ *   - rebook: ONLY withdrawn OUTGOING bookings (never declined: the worker's "no" stands, owner 2026-10-21) — never
+ *     `proposed` (still open, withdraw instead), never `accepted` (a real
+ *     engagement), never `expired` (unreachable, no scheduler writes it).
  *   - request again: ONLY concluded (declined/withdrawn) outgoing service
  *     requests — never `sent` (still open), never `accepted` (the next step
- *     is the conversation, not a duplicate request). It is the EXISTING
- *     request_service_offering action (the one-open-request unique index is
- *     partial on status='sent').
- *   - propose again: RETIRED by 20261021095200 (owner-approved fix programme
- *     2026-10-21). It relied on the propose RPC turning a declined /
- *     withdrawn row back into an open proposal — overriding the worker's "no"
- *     and escaping the 30-per-day cap (an upsert creates no row). The RPC now
- *     refuses with `booking_not_reopenable`; a button that can only be
- *     refused would be a dead control, so the page no longer offers it.
+ *     is the conversation, not a duplicate request).
+ * Neither adds a new RPC or data path: rebook is the EXISTING propose flow
+ * pre-scoped to the same request + worker (the applied propose RPC upserts on
+ * (owner_id, request_id, worker_id) and re-opens the row), and request-again
+ * is the EXISTING request_service_offering action (the one-open-request
+ * unique index is partial on status='sent').
  */
 
 const ROOT = join(__dirname, "..", "..");
-const REPO = join(ROOT, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
+
+const ALL_BOOKING_STATUSES: readonly BookingStatus[] = [
+  "proposed",
+  "accepted",
+  "declined",
+  "withdrawn",
+  "expired",
+];
+
+describe("canProposeAgain — pure, default-closed, exhaustive", () => {
+  it("is true ONLY for withdrawn (the company's own take-back)", () => {
+    const expected: Record<BookingStatus, boolean> = {
+      proposed: false, // still open — the affordance there is withdraw
+      accepted: false, // a real engagement — message/plan, never re-propose
+      declined: false, // worker said no → stands without the worker's new consent
+      withdrawn: true, // company took it back → may re-open with new dates
+      expired: false, // unreachable status — no affordance for it
+    };
+    for (const s of ALL_BOOKING_STATUSES) {
+      expect(canProposeAgain(s), `canProposeAgain(${s})`).toBe(expected[s]);
+    }
+  });
+
+  it("never derives an affordance for proposed/accepted (the goal's hard NO)", () => {
+    expect(canProposeAgain("proposed")).toBe(false);
+    expect(canProposeAgain("accepted")).toBe(false);
+  });
+});
 
 describe("canRequestAgain — pure, default-closed, exhaustive", () => {
   it("is true ONLY for concluded declined/withdrawn requests", () => {
@@ -43,37 +73,38 @@ describe("canRequestAgain — pure, default-closed, exhaustive", () => {
   });
 });
 
-describe("an answered booking proposal is not re-opened (20261021095200)", () => {
+describe("rebook wiring — existing propose flow, company side only", () => {
   const PAGE = read("app/[locale]/dashboard/bookings/page.tsx");
-  const OUTGOING = PAGE.slice(PAGE.indexOf('title={t("outgoing.title")}'));
-  const SQL = readFileSync(
-    join(REPO, "supabase", "migrations", "20261021095200_booking_propose_reachable_open_v1.sql"),
-    "utf8",
-  );
+  const INCOMING_START = PAGE.indexOf('title={t("incoming.title")}');
+  const OUTGOING_START = PAGE.indexOf('title={t("outgoing.title")}');
+  const INCOMING = PAGE.slice(INCOMING_START, OUTGOING_START);
+  const OUTGOING = PAGE.slice(OUTGOING_START);
 
-  it("the bookings page offers no propose-again on a declined or withdrawn row", () => {
-    expect(PAGE).not.toMatch(/<ProposeBookingButton|variant="rebook"|canProposeAgain/);
-    // the declined row keeps its honest next step
-    expect(OUTGOING).toMatch(/row\.status === "declined" \? \(/);
-    expect(OUTGOING).toMatch(/booking-declined-next-action/);
+  it("the affordance is gated by the pure helper, in the OUTGOING list only", () => {
+    expect(OUTGOING).toMatch(/canProposeAgain\(row\.status\)/);
+    expect(INCOMING).not.toMatch(/canProposeAgain|ProposeBookingButton/);
   });
 
-  it("the helper that derived the affordance is gone", () => {
-    expect(read("lib/booking/booking-state.ts")).not.toMatch(/canProposeAgain/);
+  it("reuses ProposeBookingButton pre-scoped to the SAME request + worker (no new RPC)", () => {
+    expect(OUTGOING).toMatch(/<ProposeBookingButton/);
+    expect(OUTGOING).toMatch(/requestId=\{row\.requestId\}/);
+    expect(OUTGOING).toMatch(/workerId=\{row\.workerId\}/);
+    expect(OUTGOING).toMatch(/variant="rebook"/);
   });
 
-  it("the RPC refuses the re-open and re-opens only an expired row", () => {
-    expect(SQL).toMatch(/if v_existing in \('declined', 'withdrawn'\) then\s*raise exception 'booking_not_reopenable'/);
-    expect(SQL).toMatch(/case when public\.booking_requests\.status = 'expired'/);
+  it("the rebook variant states that it RE-OPENS the same proposal (worker decides again)", () => {
+    const btn = read("components/app/propose-booking-button.tsx");
+    expect(btn).toMatch(/variant === "rebook" \? tPropose\("againModeNote"\) : tPropose\("modeNote"\)/);
+    // The default variant is untouched — the scouting surface keeps its copy.
+    expect(btn).toMatch(/variant = "propose"/);
   });
 
-  it("the action refuses first and names the answer", () => {
+  it("the button still runs the ONE existing propose action (entitlement-gated server-side)", () => {
+    const btn = read("components/app/propose-booking-button.tsx");
+    expect(btn).toMatch(/proposeBookingAction/);
     const actions = read("lib/booking/booking-actions.ts");
-    const fn = actions.slice(actions.indexOf("export async function proposeBookingAction("));
-    const refuse = fn.indexOf('return { kind: "refused", reason: "already-answered" }');
-    expect(refuse).toBeGreaterThan(-1);
-    expect(refuse).toBeLessThan(fn.indexOf('rpc("propose_booking_request_v3"'));
-    expect(actions).toContain("booking_not_reopenable");
+    expect(actions).toMatch(/hasFeature\("booking_requests"\)/);
+    expect(actions).toMatch(/rpc\("propose_booking_request"/);
   });
 });
 
@@ -108,7 +139,8 @@ describe("i18n — the new keys exist in every active locale", () => {
         marketplace: Record<string, unknown>;
       };
       for (const v of [
-        j.bookings.propose.refusedAnswered,
+        j.bookings.actions.proposeAgain,
+        j.bookings.propose.againModeNote,
         j.marketplace.requestAgain as string,
         j.marketplace.requestAgainNote as string,
         j.marketplace.cancel as string,

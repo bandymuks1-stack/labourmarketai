@@ -1,8 +1,12 @@
+-- @human-gate-approved — owner approved PR #2606 (2026-10-21): co-managers see interest, workers cannot forge interest, proposals reach only contactable workers on open needs; a declined proposal is not re-opened, a company-withdrawn one may be made again.
+-- Conditions: within this defect's purpose, organization isolation kept, no unauthorized data change; verified in a rolled-back production test. Scope: this SQL only.
 -- ============================================================================
 -- booking_propose_reachable_open_v1 — a booking proposal reaches only a worker
 -- this company may contact, only on an open need, and never re-opens a
--- proposal the worker declined or the company withdrew (owner-approved fix
--- programme 2026-10-21, item "booking proposals").
+-- proposal the worker declined (owner-approved fix programme 2026-10-21, item
+-- "booking proposals"; owner decision 2026-10-21: after the worker declines,
+-- no new proposal without the worker's new consent; after the company's OWN
+-- withdrawal it may propose again under the current access rules).
 --
 -- RED by rule: a SECURITY DEFINER function is replaced (g) and its grants are
 -- restated (h). Draft PR + needs-human-gate; apply only via Supabase MCP
@@ -43,20 +47,18 @@
 --      writes). Refused with 'demand_closed' (P0001).
 --   3. NOT RE-OPENED — the caller's existing row for (need, worker) is read
 --      FOR UPDATE; 'accepted' keeps its refusal ('Booking already accepted'),
---      'declined' / 'withdrawn' are refused with 'booking_not_reopenable'
---      (P0001). The ON CONFLICT branch now re-opens only an 'expired' row
---      (silence, not an answer). The lock closes the check-then-upsert race.
+--      'declined' (the worker's answer) is refused with
+--      'booking_not_reopenable' (P0001). The ON CONFLICT branch re-opens an
+--      'expired' row (silence, not an answer) and a 'withdrawn' one (the
+--      company took back its OWN proposal) — the reach and open-need checks
+--      above apply to that new proposal exactly as to a first one. The lock
+--      closes the check-then-upsert race.
 --   Everything else is byte-identical to 20260928140000: auth, ownership,
 --   date order, readiness snapshot, upsert columns, event row.
 --
--- PRODUCT NOTE (owner decision required — architecture review question B):
---   the bookings page's "propose again" (Capability G, PR 6b: rebook from a
---   declined / withdrawn outgoing booking) relied on the resurrection this
---   migration removes. The app half of this PR retires that button; the
---   declined row keeps its "find another worker" next step. If the owner
---   wants a company to re-offer after ITS OWN withdrawal, remove 'withdrawn'
---   from the refusal list below (one word) and keep the button for that
---   status only.
+-- PRODUCT (owner decision 2026-10-21): the bookings page keeps "propose
+--   again" (Capability G, PR 6b) for a WITHDRAWN outgoing booking only; a
+--   declined row offers "find another worker" instead.
 --
 -- No table, column, policy or data change.
 --
@@ -135,9 +137,10 @@ begin
   if v_existing = 'accepted' then
     raise exception 'Booking already accepted' using errcode = 'P0001';
   end if;
-  -- An answered proposal stays answered: the worker's "no" (declined) and the
-  -- company's own withdrawal are not turned back into an open proposal.
-  if v_existing in ('declined', 'withdrawn') then
+  -- The worker's "no" stands: a declined proposal is not turned back into an
+  -- open one without the worker's new consent. (A proposal the company
+  -- withdrew itself may be made again — below — under the checks above.)
+  if v_existing = 'declined' then
     raise exception 'booking_not_reopenable' using errcode = 'P0001';
   end if;
 
@@ -164,7 +167,7 @@ begin
             nullif(trim(coalesce(p_note,'')), ''), coalesce(v_snapshot, '{}'::jsonb))
   on conflict (owner_id, request_id, worker_id)
   do update set
-       status = case when public.booking_requests.status = 'expired'
+       status = case when public.booking_requests.status in ('expired', 'withdrawn')
                      then 'proposed' else public.booking_requests.status end,
        start_date = excluded.start_date,
        expected_end_date = excluded.expected_end_date,

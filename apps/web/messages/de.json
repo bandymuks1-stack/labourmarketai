@@ -9159,7 +9159,7 @@
       "alreadyAccepted": "Die Arbeitskraft hat diesen Vorschlag bereits angenommen — vereinbarte Bedingungen werden hier nicht überschrieben. Änderungen im Gespräch abstimmen.",
       "refusedNotReachable": "Dieser Person kann hier keine Buchung vorgeschlagen werden — ihr Profil ist für Arbeitgeber nicht sichtbar und es besteht keine Arbeitsbeziehung mit Ihnen.",
       "refusedNeedClosed": "Dieser Bedarf ist geschlossen — öffnen Sie ihn erneut, bevor Sie eine Buchung vorschlagen.",
-      "refusedAnswered": "Dieser Vorschlag wurde bereits beantwortet (abgelehnt oder zurückgezogen) und wird nicht wieder geöffnet. Fahren Sie im Gespräch fort oder suchen Sie eine andere Arbeitskraft."
+      "refusedAnswered": "Die Arbeitskraft hat diesen Vorschlag abgelehnt; ohne ihre neue Zustimmung wird er nicht wieder geöffnet. Schreiben Sie im Gespräch weiter oder finden Sie eine andere Arbeitskraft."
     },
     "reason": {
       "optionalTitle": "Grund (optional)",

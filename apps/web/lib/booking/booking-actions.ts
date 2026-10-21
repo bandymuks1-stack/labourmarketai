@@ -97,8 +97,8 @@ export type BookingActionResult =
    *  and are not rewritten by proposing again. */
   | { kind: "already-accepted" }
   /** The propose RPC refused (20261021095200): the worker is not one this
-   *  company may contact, the need is closed, or the proposal was already
-   *  answered (declined / withdrawn) and is not re-opened. */
+   *  company may contact, the need is closed, or the worker DECLINED this
+   *  proposal (not re-opened without the worker's new consent). */
   | { kind: "refused"; reason: ProposeRefusal }
   | { kind: "not-authed" }
   | { kind: "not-entitled" }
@@ -287,12 +287,12 @@ export async function proposeBookingAction(
   if ((existing as { status?: string } | null)?.status === "accepted") {
     return { kind: "already-accepted" };
   }
-  // An ANSWERED proposal stays answered (20261021095200): the worker's "no"
-  // and the company's own withdrawal are not turned back into an open
-  // proposal by proposing again. The RPC refuses the same; this is the clean
-  // signal before any write.
+  // The worker's "no" stands (20261021095200, owner decision 2026-10-21): a
+  // DECLINED proposal is not re-opened without the worker's new consent. The
+  // RPC refuses the same; this is the clean signal before any write. A
+  // proposal the company withdrew itself may be made again.
   const existingStatus = (existing as { status?: string } | null)?.status;
-  if (existingStatus === "declined" || existingStatus === "withdrawn") {
+  if (existingStatus === "declined") {
     return { kind: "refused", reason: "already-answered" };
   }
 

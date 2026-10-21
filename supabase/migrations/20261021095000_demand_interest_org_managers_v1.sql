@@ -1,3 +1,5 @@
+-- @human-gate-approved — owner approved PR #2606 (2026-10-21): co-managers see interest, workers cannot forge interest, proposals reach only contactable workers on open needs; a declined proposal is not re-opened, a company-withdrawn one may be made again.
+-- Conditions: within this defect's purpose, organization isolation kept, no unauthorized data change; verified in a rolled-back production test. Scope: this SQL only.
 -- ============================================================================
 -- demand_interest_org_managers_v1 — the demand managers of a need's own
 -- organization see and answer the workers who raised a hand on it

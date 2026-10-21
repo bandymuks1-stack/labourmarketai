@@ -2842,7 +2842,7 @@
       "alreadyAccepted": "Darbinieks šo piedāvājumu jau ir pieņēmis — saskaņotie nosacījumi šeit netiek pārrakstīti. Izmaiņas saskaņojiet sarunā.",
       "refusedNotReachable": "Šai personai no šejienes nevar piedāvāt rezervāciju — profils nav redzams darba devējiem, un jums nav darba attiecību.",
       "refusedNeedClosed": "Šī vajadzība ir slēgta — atver to no jauna, pirms piedāvā rezervāciju.",
-      "refusedAnswered": "Uz šo piedāvājumu jau ir atbildēts (noraidīts vai atsaukts), un tas netiek atvērts no jauna. Turpini sarunā vai atrodi citu darbinieku."
+      "refusedAnswered": "Darbinieks šo piedāvājumu noraidīja, tāpēc bez viņa jaunas piekrišanas tas netiek atvērts no jauna. Turpiniet sarunā vai atrodiet citu darbinieku."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",

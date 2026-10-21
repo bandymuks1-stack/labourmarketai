@@ -102,11 +102,17 @@ describe("3 — a booking proposal: contactable worker, open need, no re-open", 
     // reachability is checked before existence: no probe can tell hidden from absent
     expect(sql.indexOf("worker_not_reachable")).toBeLessThan(sql.indexOf("'Unknown worker'"));
   });
-  it("the need must be open and an answered proposal stays answered", () => {
+  it("the need must be open; a DECLINED proposal stays answered, a withdrawn one may be made again (owner 2026-10-21)", () => {
     expect(sql).toMatch(/if v_need_status is not distinct from 'closed' then\s*raise exception 'demand_closed'/);
     expect(sql).toMatch(/for update;/);
-    expect(sql).toMatch(/if v_existing in \('declined', 'withdrawn'\) then\s*raise exception 'booking_not_reopenable'/);
-    expect(sql).toMatch(/case when public\.booking_requests\.status = 'expired'/);
+    expect(sql).toMatch(/if v_existing = 'declined' then\s*raise exception 'booking_not_reopenable'/);
+    expect(sql).not.toMatch(/if v_existing in \('declined', 'withdrawn'\)/);
+    expect(sql).toMatch(/case when public\.booking_requests\.status in \('expired', 'withdrawn'\)/);
+    // the reach and open-need checks run BEFORE the upsert, so a proposal made
+    // again after the company's own withdrawal meets them like a first one
+    const upsert = sql.indexOf("on conflict (owner_id, request_id, worker_id)");
+    expect(sql.indexOf("raise exception 'worker_not_reachable'")).toBeLessThan(upsert);
+    expect(sql.indexOf("raise exception 'demand_closed'")).toBeLessThan(upsert);
     expect(sql).not.toMatch(/in \('withdrawn','declined','expired'\)/);
   });
   it("grants are restated: authenticated only", () => {

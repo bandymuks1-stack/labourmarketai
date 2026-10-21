@@ -2842,7 +2842,7 @@
       "alreadyAccepted": "Arbetstagaren har redan accepterat detta förslag — överenskomna villkor skrivs inte över här. Kom överens om ändringar i samtalet.",
       "refusedNotReachable": "Den här personen kan inte få ett bokningsförslag härifrån — profilen är inte synlig för arbetsgivare och det finns ingen arbetsrelation med dig.",
       "refusedNeedClosed": "Det här behovet är stängt — öppna det igen innan du föreslår en bokning.",
-      "refusedAnswered": "Det här förslaget har redan besvarats (avböjt eller återkallat) och öppnas inte igen. Fortsätt i samtalet eller hitta en annan arbetstagare."
+      "refusedAnswered": "Arbetstagaren har avböjt förslaget, så det öppnas inte igen utan arbetstagarens nya samtycke. Fortsätt i samtalet eller hitta en annan arbetstagare."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
