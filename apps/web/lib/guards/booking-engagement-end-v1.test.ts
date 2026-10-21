@@ -1683,6 +1683,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-21 (RED by SECURITY DEFINER replace + trigger; owner-approved #2596): server clock + offer lock.
       "20261020173000_conversation_activity_server_clock_v1.sql",
       "20261020174000_team_offer_agree_lock_offer_v1.sql",
+      // 2026-10-21 (owner-approved #2601): atomic hours correction + edit-only-by-correction guard.
+      "20261021090000_work_hours_corrections_atomic_v1.sql",
 ]);
   });
 

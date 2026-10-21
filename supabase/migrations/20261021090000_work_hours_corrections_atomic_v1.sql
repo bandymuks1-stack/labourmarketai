@@ -1,3 +1,5 @@
+-- @human-gate-approved — owner approved PR #2601 (2026-10-21): hours change only through an atomic correction; a correction is refused outside the organization's own sites, twice, or by someone without authority.
+-- Conditions: within this defect's purpose, organization isolation kept, no unauthorized data change; verified in a rolled-back production test. Scope: this SQL only.
 -- ============================================================================
 -- work_hours_corrections_atomic_v1 — an hour record changes only by an
 -- attributable correction, written in ONE step (audit 2026-10-20, HIGH;
