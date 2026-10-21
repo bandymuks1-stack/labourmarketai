@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSuperadmin, isSuperadminFor } from "@/lib/auth/superadmin";
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import {
   resolveEntitlements,
   entitlementAllows,
@@ -58,9 +58,12 @@ export type EntitlementCaller = {
 };
 
 export async function getEffectiveEntitlements(caller?: EntitlementCaller): Promise<EffectiveEntitlements> {
-  const config = getBillingConfig();
-  // Enforcement is on under either active adapter state (test, or owner-armed live).
-  const billingActive = config.state === "stripe_test" || config.state === "stripe_live";
+  // Enforcement is on under either active adapter state (test, or owner-armed live)
+  // — and, under a pilot list, only for a listed organization: the config is
+  // re-read for the resolved subject below. A person / signed-out reader is never
+  // in a pilot (only the organization plan is sold).
+  let config = getBillingConfigFor(null);
+  let billingActive = config.state === "stripe_test" || config.state === "stripe_live";
 
   const supabase = caller?.supabase ?? (await createClient());
   const user = caller
@@ -104,6 +107,8 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
   const subject: BillingSubject | null = caller
     ? { type: "organization", id: caller.organizationId }
     : (await resolveBillingSubject()).subject;
+  config = getBillingConfigFor(subject?.type === "organization" ? subject.id : null);
+  billingActive = config.state === "stripe_test" || config.state === "stripe_live";
 
   // THE ORGANIZATION'S CAPABILITY, NOT THE PERSON'S LEGACY ROLE ROW. An
   // organization subject was proven from the caller's own active governance

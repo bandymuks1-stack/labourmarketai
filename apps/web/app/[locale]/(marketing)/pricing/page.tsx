@@ -15,7 +15,7 @@ export async function generateMetadata({
 }
 import { PricingTable } from "@/components/marketing/pricing-table";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import { isStripeActive } from "@/lib/billing/config-core";
 import { isCheckoutCancelledReturn } from "@/lib/billing/checkout-return-core";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
@@ -47,7 +47,7 @@ export default async function PricingPage({
   const { billing } = await searchParams;
   // LIVE Stripe (owner-armed) changes the page's own words: the hero no longer
   // says prices are not final, and the pre-payment boundary is not shown.
-  const billingLive = isStripeActive(getBillingConfig());
+  const billingLive = isStripeActive(getBillingConfigFor(null));
   // The hero words and the hero CTA follow the REAL readiness state, never a
   // static sentence: (1) prices not confirmed -> "not finalised" + waitlist;
   // (2) prices confirmed but no Stripe adapter armed -> "confirmed, online

@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { BillingPortalButton } from "@/components/app/billing-portal-button";
@@ -42,7 +42,13 @@ export async function AccountBillingSection({
   billingReturn?: string | null;
 }) {
   const t = await getTranslations("accountBilling");
-  const cfg = getBillingConfig();
+  // Pilot-aware (2026-10-21): the workspace's organization decides whether
+  // billing is on for this section; outside a pilot list it reads as off.
+  // resolveBillingSubject is request-cached (the entitlement read uses it too).
+  const workspace = await resolveBillingSubject();
+  const cfg = getBillingConfigFor(
+    workspace.subject?.type === "organization" ? workspace.subject.id : null,
+  );
   const ent = await getEffectiveEntitlements();
 
   const returnKind = classifyCheckoutReturn(billingReturn);
@@ -87,7 +93,7 @@ export async function AccountBillingSection({
   // server-bound to the organization the person acts for with billing
   // authority; never from a public page, never for a person (PERSON stays
   // free). The route re-checks membership, plan and price before any session.
-  const subject = billingOn ? await resolveBillingSubject() : null;
+  const subject = billingOn ? workspace : null;
   // Billing safety v1: the order button is also withheld while the subject's
   // row sits in ANY billing state (incomplete / unpaid included) — the route
   // refuses those with `subscription_exists` regardless; this keeps the UI
