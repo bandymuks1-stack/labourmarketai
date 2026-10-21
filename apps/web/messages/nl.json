@@ -7637,7 +7637,8 @@
     "notFound": "Deze pagina bestaat niet",
     "backHome": "Terug naar home",
     "dashboardSections": "Dashboardsecties",
-    "skipToContent": "Direct naar inhoud"
+    "skipToContent": "Direct naar inhoud",
+    "loading": "Laden…"
   },
   "workerInvitations": {
     "title": "Openstaande uitnodigingen",

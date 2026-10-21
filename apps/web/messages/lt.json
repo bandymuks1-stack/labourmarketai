@@ -7637,7 +7637,8 @@
     "notFound": "Tokio puslapio nėra",
     "backHome": "Grįžti į pradžią",
     "dashboardSections": "Valdymo skydelio skiltys",
-    "skipToContent": "Pereiti į turinį"
+    "skipToContent": "Pereiti į turinį",
+    "loading": "Kraunama…"
   },
   "workerInvitations": {
     "title": "Laukiantys pakvietimai",

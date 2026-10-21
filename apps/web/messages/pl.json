@@ -7637,7 +7637,8 @@
     "notFound": "Ta strona nie istnieje",
     "backHome": "Powrót na stronę główną",
     "dashboardSections": "Sekcje panelu",
-    "skipToContent": "Przejdź do treści"
+    "skipToContent": "Przejdź do treści",
+    "loading": "Ładowanie…"
   },
   "workerInvitations": {
     "title": "Oczekujące zaproszenia",
