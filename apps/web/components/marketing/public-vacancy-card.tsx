@@ -181,7 +181,6 @@ export function PublicVacancyCard({
   return (
     <Link
       href={`/jobs/${vacancy.id}`}
-      data-testid="public-vacancy-card"
       className="block rounded-lg border p-4 transition-colors hover:bg-surface-2/60 focus-visible:outline focus-visible:outline-2"
     >
       <div className="flex items-start justify-between gap-3">
