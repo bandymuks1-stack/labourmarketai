@@ -4,7 +4,6 @@ import { resolve } from "node:path";
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
 
 import { makeDocx } from "../../lib/cv/__fixtures__/cv-fixtures";
-import { PROD_QA_WORKER_EMAIL } from "../../lib/testing/prod-qa-guard";
 
 /**
  * PRODUCTION PROFILE · LIVING CV · HISTORY — owner areas 1 / 3 / 15: the
@@ -18,7 +17,7 @@ import { PROD_QA_WORKER_EMAIL } from "../../lib/testing/prod-qa-guard";
  *   worker   qa.worker+multiw — Vytas Darbininkas, the worker with weeks of
  *            recorded and confirmed work: the Living CV and history READS
  *   owner    owns "QA-SYNTHETIC Alfa" — the company history page and report
- *   (no session) — the password-reset request, for worker2's own address
+ *   (no session) — the password-reset page, render-only (never submitted)
  *
  * WRITES. Every row this walk adds carries `QA-SYNTHETIC <run id>` and is
  * removed again in `afterAll`, which runs even after a red step; every value
@@ -129,20 +128,36 @@ async function removeOwnProfession(page: Page): Promise<void> {
 
 // ── 1.3 / 1.4 — account entry ───────────────────────────────────────────────
 
-test("P-1 (1.3). a password reset is requested and the page says, honestly, that mail was sent", async ({ browser }) => {
-  // No session: the person who forgot their password is signed out. Only the
-  // request step — the mail itself is never opened by the walk.
+test("P-1 (1.3). the password-reset form renders (render-only; delivery NOT_VERIFIED until SMTP is configured)", async ({ browser }) => {
+  // RENDER-ONLY. A submit would send a real e-mail through the auth mailer,
+  // whose hourly limit is shared with real people's sign-up confirmations —
+  // a walk must never consume it. The form is never submitted; every POST
+  // (including the auth `recover` call) is aborted as a safety net.
   const ctx = await browser.newContext({ locale: "lt-LT" });
   const page = await ctx.newPage();
+  const consoleErrors: string[] = [];
+  page.on("console", (m) => {
+    // A POST this walk aborted on purpose is not a page error.
+    if (m.type() === "error" && !/net::ERR_FAILED/.test(m.text())) consoleErrors.push(m.text().slice(0, 120));
+  });
+  page.on("pageerror", (e) => consoleErrors.push(e.message.slice(0, 120)));
+  let blocked = 0;
+  await page.route("**/*", (route) => {
+    if (route.request().method() === "POST") {
+      blocked++;
+      return route.abort();
+    }
+    return route.continue();
+  });
   await page.goto("/lt/auth/forgot-password");
-  await page.locator('input[type="email"][name="email"]').fill(PROD_QA_WORKER_EMAIL);
-  await page.locator('form button[type="submit"]').click();
-  const sent = page.getByRole("heading", { name: /Patikrink savo el\. paštą/ });
-  const failed = page.locator('p[role="alert"]');
-  await expect(sent.or(failed)).toBeVisible({ timeout: 30_000 });
-  if (!(await sent.isVisible())) throw new Error(`reset request not accepted: ${(await failed.innerText()).slice(0, 120)}`);
-  // The same screen for any address: it must not confirm the account exists.
-  await expect(page.getByText(/turi paskyrą, išsiuntėme/).first()).toBeVisible();
+  const form = page.locator("form").filter({ has: page.locator('input[type="email"][name="email"]') });
+  await expect(form.locator('input[type="email"][name="email"]')).toBeVisible({ timeout: 30_000 });
+  await expect(form.locator('button[type="submit"]')).toBeVisible();
+  await expect(form.locator('button[type="submit"]')).toBeEnabled();
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  console.info(`P-1: render-only, submit not clicked; POSTs blocked=${blocked}; console errors=${consoleErrors.length}`);
+  expect(consoleErrors, "the reset page renders without console errors").toEqual([]);
+  await page.unroute("**/*");
   await ctx.close();
 });
 
