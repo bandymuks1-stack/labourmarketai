@@ -46,7 +46,12 @@ Membership = **governance**: who may ACT FOR an organization (invite, assign
 roles, provision engagements, review journals, create projects, edit the
 company profile). It is NOT employment:
 
-- membership creates NO engagement and ends NO engagement;
+- membership creates NO engagement and ends no EMPLOYMENT engagement; ending
+  an ACTIVE governance membership (revoke / leave, 20261021093000) ends that
+  person's governance-proxy engagements (`owner` / `manager` /
+  `external_manager`) in that organization — status `ended`, rows kept — and
+  moves `organizations.owner_profile_id` to another active owner, or is
+  refused as `last_owner` (owner decision 2026-10-21, decision 0016 amendment);
 - membership creates NO project assignment and ends none;
 - membership never alters the person's identity (no `profiles` /
   `profile_roles` writes);

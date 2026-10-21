@@ -333,7 +333,33 @@ export async function resolveEmployerCompanyCore(
       if (isGovernanceRole(memberRole)) role = memberRole;
       invitationDelegate = memberRow?.manages_invitations === true;
     }
-    if (role === null && company.profile_id === caller.userId) role = "owner";
+    // The creator arm is compatibility for a creator whose governance was
+    // never ENDED. A creator whose accepted membership here was revoked (an
+    // owner removed by a co-owner, or one who pressed Leave) and who holds no
+    // active row is not an owner-equivalent any more — the same rule as
+    // owns_company() (20261021093000). Asked only on this rare path; a table
+    // that is absent (42P01) is the legacy environment, any other failure is
+    // an error, never a silent grant.
+    let governanceEnded = false;
+    if (role === null && company.profile_id === caller.userId) {
+      const endedRes = await asAny(supabase)
+        .from("company_memberships")
+        .select("accepted_at")
+        .eq("organization_id", org.id)
+        .eq("profile_id", caller.userId)
+        .eq("status", "revoked")
+        .limit(20);
+      if (endedRes.error && endedRes.error.code !== RELATION_NOT_FOUND_CODE) {
+        console.error("[employer-company-context] membership history read failed", {
+          code: endedRes.error.code,
+        });
+        return unavailable("error", organizationName || label);
+      }
+      governanceEnded = ((endedRes.data ?? []) as { accepted_at?: string | null }[]).some(
+        (r) => typeof r.accepted_at === "string" && r.accepted_at !== "",
+      );
+    }
+    if (role === null && !governanceEnded && company.profile_id === caller.userId) role = "owner";
     // A `member` opens no employer surface — a delegation does not change
     // that (it grants invitations, not the company's employer pages). A
     // delegated member manages invitations from the invite panel
