@@ -113,13 +113,16 @@ export function ProposeBookingButton({
   }
 
   if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="rounded-md border border-brand-blue/40 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10"
-        data-testid={variant === "rebook" ? "propose-again-open" : "propose-booking-open"}
-      >
+    // Two literal test ids (one per variant) so the e2e orphan guard can see
+    // both controls the walks press.
+    const openClass =
+      "rounded-md border border-brand-blue/40 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10";
+    return variant === "rebook" ? (
+      <button type="button" onClick={() => setOpen(true)} className={openClass} data-testid="propose-again-open">
+        {labels.open}
+      </button>
+    ) : (
+      <button type="button" onClick={() => setOpen(true)} className={openClass} data-testid="propose-booking-open">
         {labels.open}
       </button>
     );
@@ -140,6 +143,7 @@ export function ProposeBookingButton({
           type="date"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
+          data-testid="propose-booking-start-date"
           className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
         />
       </label>
@@ -150,6 +154,7 @@ export function ProposeBookingButton({
           maxLength={2000}
           value={note}
           onChange={(e) => setNote(e.target.value)}
+          data-testid="propose-booking-note"
           className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
         />
       </label>
@@ -158,6 +163,7 @@ export function ProposeBookingButton({
           type="button"
           disabled={pending}
           onClick={send}
+          data-testid="propose-booking-send"
           className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
         >
           {pending ? labels.sending : labels.send}
@@ -171,9 +177,13 @@ export function ProposeBookingButton({
         </button>
       </div>
       {state === "unavailable" ? (
-        <span className="text-meta text-text-muted">{labels.unavailable}</span>
+        <span className="text-meta text-text-muted" data-testid="propose-booking-unavailable">
+          {labels.unavailable}
+        </span>
       ) : state === "not_entitled" ? (
-        <span className="text-meta text-state-amber">{labels.notEntitled}</span>
+        <span className="text-meta text-state-amber" data-testid="propose-booking-not-entitled">
+          {labels.notEntitled}
+        </span>
       ) : state === "rate_limited" ? (
         // Bounded request budget reached (Wagon 1) — honest limit note.
         <span className="text-meta text-state-warning" data-testid="propose-booking-limit">
@@ -200,7 +210,9 @@ export function ProposeBookingButton({
           {tPropose("refusedAnswered")}
         </span>
       ) : state === "error" ? (
-        <span className="text-meta text-state-danger">{labels.error}</span>
+        <span className="text-meta text-state-danger" data-testid="propose-booking-error">
+          {labels.error}
+        </span>
       ) : null}
     </div>
   );

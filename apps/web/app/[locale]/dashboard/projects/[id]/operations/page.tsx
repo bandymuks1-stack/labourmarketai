@@ -519,7 +519,12 @@ export default async function ProjectOperationsPage({
       >
         <h2 className={sectionTitleClass}>{tCentre("hours.title")}</h2>
         <div className="flex flex-wrap gap-2">
-          <span className={chipClass} data-testid="ops-centre-hours-allocated">
+          <span
+            className={chipClass}
+            data-testid="ops-centre-hours-allocated"
+            data-state={projectHours.allocated.state}
+            data-hours={projectHours.allocated.state === "measured" ? projectHours.allocated.hours : undefined}
+          >
             {tCentre("hours.allocated")}:{" "}
             {projectHours.allocated.state === "measured"
               ? tCentre("hours.value", { hours: hoursFmt.format(projectHours.allocated.hours) })

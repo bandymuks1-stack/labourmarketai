@@ -266,7 +266,11 @@
       "work": "Darbas",
       "services": "Paslaugos",
       "goods": "Prekės ir ištekliai"
-    }
+    },
+    "formPublisherLabel": "Skelbia",
+    "publisherSelf": "Aš asmeniškai",
+    "publishedAs": "Kaip {name}",
+    "publishedAsOrganization": "Kaip organizacija"
   },
   "quality": {
     "title": "Defektai ir kokybė",

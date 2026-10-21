@@ -266,7 +266,11 @@
       "work": "Работа",
       "services": "Услуги",
       "goods": "Товары и ресурсы"
-    }
+    },
+    "formPublisherLabel": "Публикует",
+    "publisherSelf": "Я лично",
+    "publishedAs": "Как {name}",
+    "publishedAsOrganization": "Как организация"
   },
   "quality": {
     "title": "Дефекты и качество",

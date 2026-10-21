@@ -266,7 +266,11 @@
       "work": "Praca",
       "services": "Usługi",
       "goods": "Towary i zasoby"
-    }
+    },
+    "formPublisherLabel": "Publikuje",
+    "publisherSelf": "Ja osobiście",
+    "publishedAs": "Jako {name}",
+    "publishedAsOrganization": "Jako organizacja"
   },
   "quality": {
     "title": "Usterki i jakość",
