@@ -10916,6 +10916,8 @@
       "expired": "Pasibaigusi"
     },
     "graceNotice": "Paskutinis mokėjimas nepavyko — prenumerata veikia lengvatiniu laikotarpiu, kol mokėjimas bus pakartotas.",
+    "endsOn": "Atšaukta — planas galioja iki {date} ir nebus pratęstas.",
+    "endsAtPeriodEnd": "Atšaukta — planas galioja iki apmokėto laikotarpio pabaigos ir nebus pratęstas.",
     "manage": {
       "open": "Tvarkyti prenumeratą",
       "opening": "Atidaroma…",

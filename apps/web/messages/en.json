@@ -10916,6 +10916,8 @@
       "expired": "Expired"
     },
     "graceNotice": "The last payment failed — the subscription is in a grace period until it is retried.",
+    "endsOn": "Cancelled — the plan stays active until {date} and will not renew.",
+    "endsAtPeriodEnd": "Cancelled — the plan stays active until the end of the paid period and will not renew.",
     "manage": {
       "open": "Manage subscription",
       "opening": "Opening…",
