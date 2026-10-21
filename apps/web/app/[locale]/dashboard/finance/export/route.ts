@@ -5,6 +5,7 @@ import {
   financeCsvFilename,
 } from "@/lib/finance/finance-model";
 import { listMyFinanceRecords } from "@/lib/finance/finance";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 
 /**
  * GET — download the caller's OWN operational finance records as CSV
@@ -18,7 +19,13 @@ import { listMyFinanceRecords } from "@/lib/finance/finance";
 export const dynamic = "force-dynamic";
 
 export async function GET(): Promise<NextResponse> {
-  const result = await listMyFinanceRecords();
+  // The SAME workspace scope the page shows (decision 0024): the active
+  // company's records plus the person's own company-less ones — a person
+  // who governs two organizations never exports both in one file.
+  const employer = await resolveEmployerCompanyContext();
+  const result = await listMyFinanceRecords({
+    companyId: employer.kind === "ok" ? employer.companyId : null,
+  });
 
   if (result.status === "not-authed") {
     return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
