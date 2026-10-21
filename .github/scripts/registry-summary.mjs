@@ -69,8 +69,12 @@ export function parseRows(text) {
       areaTitle = h[2].trim();
       continue;
     }
+    if (!line.startsWith("|")) continue;
+    // Table header and separator rows are the only table lines that are not processes;
+    // anything else that starts a table row must be a well-formed process row.
+    if (/^\|\s*ID\s*\|/.test(line) || /^\|[\s|:-]+\|\s*$/.test(line)) continue;
     const m = line.match(/^\|\s*(\d+\.\d+)\s*\|(.*)\|\s*$/);
-    if (!m) continue;
+    if (!m) throw new Error(`malformed registry row: ${line.slice(0, 80)}`);
     const cells = m[2].split("|").map((c) => c.trim());
     if (cells.length !== 6) throw new Error(`row ${m[1]}: expected 6 cells after the ID, found ${cells.length}`);
     const status = (cells[1].match(/^[A-Z_]+/) ?? [""])[0];
