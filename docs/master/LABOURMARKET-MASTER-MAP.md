@@ -153,7 +153,10 @@ Public-safe summaries; evidence stays in the private annex. Newest first.
 
 1. When a capability changes state, update `apps/web/lib/product-gate/capability-register.ts` and the
    snapshot line at the top of this file in the same PR (the sync guard enforces it).
-2. When a production walk proves or breaks a feature, update the FUNCTIONAL-AUDIT row and its evidence.
+2. When a production walk proves or breaks a feature, update the FUNCTIONAL-AUDIT row and its evidence, then
+   run `node .github/scripts/registry-summary.mjs`. The FUNCTIONAL-AUDIT is the owner's one functionality
+   registry (2026-10-21): 18 owner areas, six statuses, real counts in its §1, guarded by
+   `lib/guards/functional-registry-summary.test.ts`.
 3. When the owner decides, move the item in the EXECUTION-ROADMAP and record the decision under `docs/DECISIONS/`.
 4. The owner's interactive **Product Master Map** (value chain, journeys, commercial model, priorities) is a VIEW of
    these documents, never a second source: regenerate it with
