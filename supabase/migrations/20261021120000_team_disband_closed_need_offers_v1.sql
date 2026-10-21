@@ -1,3 +1,5 @@
+-- @human-gate-approved — owner approved PR #2613 (2026-10-21): a brigade whose only accepted offer is on a CLOSED need can be disbanded; every other refusal unchanged.
+-- Conditions (owner, conditional approval): disbanding deletes no work history, hours, projects or Living CV data, leaves other organizations untouched and leaves no active rights; proven in a rolled-back production test on a brigade with real history. Scope: this SQL only.
 -- ============================================================================
 -- 20261021120000_team_disband_closed_need_offers_v1
 --
