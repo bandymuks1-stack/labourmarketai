@@ -4757,6 +4757,10 @@
       },
       "topTitle": "Šobrīd pieprasītākās profesijas",
       "topNote": "Pēc aktīvajiem darba sludinājumiem platformā."
+    },
+    "hero": {
+      "headline": "LabourMarket.ai ir dzīva darba un biznesa iespēju sistēma.",
+      "sub": "Vienuviet parādi, ko proti, ko piedāvā vai ko meklē. Atrodi darbiniekus, darbus, darbuzņēmējus, pakalpojumus un preces — un tava pieredze un iespējas vienmēr paliek pieejamas."
     }
   },
   "workspace": {

@@ -4757,6 +4757,10 @@
       },
       "topTitle": "Praegu nõutuimad ametid",
       "topNote": "Järjestatud platvormi aktiivsete töökuulutuste järgi."
+    },
+    "hero": {
+      "headline": "LabourMarket.ai on elav töö- ja ärivõimaluste süsteem.",
+      "sub": "Näita ühes kohas, mida oskad, mida pakud või mida otsid. Leia töötajaid, töid, töövõtjaid, teenuseid ja kaupu — ning sinu kogemus ja võimalused jäävad alati kättesaadavaks."
     }
   },
   "workspace": {
