@@ -19665,5 +19665,31 @@
   "roleLedger": {
     "title": "{profession}, {country}: ką jau turi ir ko trūksta",
     "anyCountry": "bet kurioje šalyje"
+  },
+  "historyDuplicates": {
+    "title": "Galimi pasikartojantys įrašai",
+    "hint": "Peržiūrėkite ir nuspręskite",
+    "intro": "Čia rodomi to paties žmogaus tos pačios dienos to paties objekto įrašai. Tai gali būti tikri skirtingi darbai (dvi pamainos ar užduotys) arba tas pats darbas, įrašytas du kartus. Niekas nekeičiama automatiškai: jei įrašas pasikartoja, pažymėkite jį — jis nebeskaičiuojamas, bet lieka matomas ir jį galima grąžinti.",
+    "summary": "Laukia jūsų sprendimo: {groups}",
+    "none": "Galimų pasikartojančių įrašų nerasta.",
+    "unavailable": "Šiuo metu peržiūros parodyti nepavyko.",
+    "truncated": "Įrašų daug — peržiūra gali būti nepilna.",
+    "sameHours": "Tos pačios valandos",
+    "differentHours": "Skirtingos valandos",
+    "sameText": "Tas pats aprašymas",
+    "recordN": "Įrašas {n}",
+    "hours": "{hours} val.",
+    "noHours": "Valandos nenurodytos",
+    "counted": "Skaičiuojamas",
+    "marked": "Pažymėtas kaip pasikartojantis",
+    "source": "Šaltinis: {file} · importuota {date}",
+    "noSource": "nenurodytas",
+    "mark": "Pasikartoja — palikti įrašą {n}",
+    "reinstate": "Grąžinti",
+    "unnamedPerson": "Žmogus be vardo",
+    "unnamedObject": "Objektas be pavadinimo",
+    "error": "Nepavyko. Niekas nepakeista.",
+    "notAllowed": "Tai gali padaryti organizacijos savininkas arba vadovas.",
+    "notSameWork": "Šie įrašai jau nebeatitinka vienas kito — atnaujinkite puslapį."
   }
 }

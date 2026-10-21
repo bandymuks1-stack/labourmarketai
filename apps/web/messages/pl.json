@@ -19665,5 +19665,31 @@
   "roleLedger": {
     "title": "{profession}, {country}: co już masz, a czego brakuje",
     "anyCountry": "dowolny kraj"
+  },
+  "historyDuplicates": {
+    "title": "Możliwe powtórzone wpisy",
+    "hint": "Przejrzyj i zdecyduj",
+    "intro": "To wpisy tej samej osoby z tego samego dnia na tym samym obiekcie. Może to być naprawdę osobna praca (dwie zmiany lub zadania) albo ta sama praca zapisana dwa razy. Nic nie zmienia się automatycznie: jeśli wpis się powtarza, oznacz go — przestaje się liczyć, ale pozostaje widoczny i można go przywrócić.",
+    "summary": "Czeka na Twoją decyzję: {groups}",
+    "none": "Nie znaleziono możliwych powtórzonych wpisów.",
+    "unavailable": "Nie udało się teraz pokazać przeglądu.",
+    "truncated": "Wpisów jest dużo — przegląd może być niepełny.",
+    "sameHours": "Te same godziny",
+    "differentHours": "Różne godziny",
+    "sameText": "Ten sam opis",
+    "recordN": "Wpis {n}",
+    "hours": "{hours} godz.",
+    "noHours": "Brak godzin",
+    "counted": "Liczony",
+    "marked": "Oznaczony jako powtórzony",
+    "source": "Źródło: {file} · zaimportowano {date}",
+    "noSource": "nie podano",
+    "mark": "Powtórzony — zostaw wpis {n}",
+    "reinstate": "Przywróć",
+    "unnamedPerson": "Osoba bez imienia",
+    "unnamedObject": "Obiekt bez nazwy",
+    "error": "Nie udało się. Nic nie zmieniono.",
+    "notAllowed": "Może to zrobić właściciel lub kierownik organizacji.",
+    "notSameWork": "Te wpisy już do siebie nie pasują — odśwież stronę."
   }
 }

@@ -257,7 +257,8 @@ describe("bell, badges and layout consume the one spine source", () => {
   // source, derived (never hardcoded) notifications, a bell that is
   // never permanently empty, both nav surfaces badged from the spine.
   it("layout streams the spine inside the auth shell (never omits it)", () => {
-    expect(LAYOUT).toMatch(/<Suspense fallback=\{null\}>\s*<SpineStream/);
+    // keyed by the workspace (2026-10-21) so a switch never waits for the badges
+    expect(LAYOUT).toMatch(/<Suspense key=\{workspace\.activeWorkspaceId\} fallback=\{null\}>\s*<SpineStream/);
     // The audit's original defect: a permanently-empty bell.
     expect(LAYOUT).not.toMatch(/notifications:\s*\[\]/);
   });

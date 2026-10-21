@@ -110,6 +110,8 @@ import {
 import { PageTitle } from "@/components/app/premium/page-title";
 import { experienceFiguresOf } from "@/lib/journal/experience-figures";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
@@ -441,6 +443,7 @@ export default async function ProfilePage({
       workIntelligence,
       playerCardRes,
       experienceRelationships,
+      standingSkills,
     ] = await Promise.all([
       getOwnAvailabilityPrefs(),
       // Learning Compass (Track C): own records + the board's match results;
@@ -474,7 +477,7 @@ export default async function ProfilePage({
       // ALL of the worker's saved skills (read model — never filtered down).
       supabase
         .from("worker_skills")
-        .select("skill_id, confidence_bin, verified, source, skills(slug)")
+        .select("skill_id, confidence_bin, verified, verified_by, verified_at, source, skills(slug)")
         .eq("worker_id", workerId)
         .order("created_at", { ascending: true }),
       // DURABLE journal→skill links (v1) — graceful no-op if the migration is
@@ -521,6 +524,10 @@ export default async function ProfilePage({
       // Every relationship to an organization (jobs, ownership, management)
       // for the one professional-experience reading (decision 0025).
       readOwnExperienceRelationships(supabase, user.id).catch(() => null),
+      // Whether each recorded skill confirmation still STANDS
+      // (lib/evidence/skill-confirmation-standing.ts) — request-cached, the
+      // player card above shares the same read.
+      readOwnStandingConfirmedSkillIds(workerId),
     ]);
 
     availabilityPrefs = prefsRes;
@@ -636,7 +643,10 @@ export default async function ProfilePage({
     for (const r of coreRes?.data ?? []) coreMap.set(r.skill_id, r.is_core);
 
     recordReadUnavailable = Boolean(wsRes.error) || Boolean(ecRes.error);
-    const rows = wsRes.data ?? [];
+    // A recorded confirmation reads as confirmed only while it STANDS
+    // (lib/evidence/skill-confirmation-standing.ts).
+    const storedRows = wsRes.data ?? [];
+    const rows = withStandingConfirmation(storedRows, anyRecordedConfirmation(storedRows) ? standingSkills : null);
     initialSkillIds = rows
       .map((r) => r.skill_id)
       .filter((id): id is string => id !== null);

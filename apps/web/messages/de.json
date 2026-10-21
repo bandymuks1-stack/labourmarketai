@@ -19665,5 +19665,31 @@
   "roleLedger": {
     "title": "{profession}, {country}: was Sie schon haben und was noch fehlt",
     "anyCountry": "jedes Land"
+  },
+  "historyDuplicates": {
+    "title": "Mögliche doppelte Einträge",
+    "hint": "Prüfen und entscheiden",
+    "intro": "Hier stehen Einträge derselben Person am selben Tag auf derselben Baustelle. Das kann wirklich getrennte Arbeit sein (zwei Schichten oder Aufgaben) oder dieselbe Arbeit, zweimal erfasst. Nichts wird automatisch geändert: Ist ein Eintrag doppelt, markieren Sie ihn — er zählt nicht mehr, bleibt aber sichtbar und kann wiederhergestellt werden.",
+    "summary": "Warten auf Ihre Entscheidung: {groups}",
+    "none": "Keine möglichen doppelten Einträge gefunden.",
+    "unavailable": "Die Prüfung kann gerade nicht angezeigt werden.",
+    "truncated": "Es gibt viele Einträge — die Prüfung ist möglicherweise unvollständig.",
+    "sameHours": "Gleiche Stunden",
+    "differentHours": "Verschiedene Stunden",
+    "sameText": "Gleiche Beschreibung",
+    "recordN": "Eintrag {n}",
+    "hours": "{hours} Std.",
+    "noHours": "Keine Stunden angegeben",
+    "counted": "Wird gezählt",
+    "marked": "Als doppelt markiert",
+    "source": "Quelle: {file} · importiert {date}",
+    "noSource": "nicht angegeben",
+    "mark": "Doppelt — Eintrag {n} behalten",
+    "reinstate": "Wiederherstellen",
+    "unnamedPerson": "Person ohne Namen",
+    "unnamedObject": "Baustelle ohne Namen",
+    "error": "Das hat nicht geklappt. Nichts wurde geändert.",
+    "notAllowed": "Das kann der Inhaber oder eine Führungskraft der Organisation tun.",
+    "notSameWork": "Diese Einträge passen nicht mehr zusammen — laden Sie die Seite neu."
   }
 }

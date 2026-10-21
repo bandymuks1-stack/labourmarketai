@@ -19665,5 +19665,31 @@
   "roleLedger": {
     "title": "{profession}, {country}: wat je al hebt en wat nog ontbreekt",
     "anyCountry": "elk land"
+  },
+  "historyDuplicates": {
+    "title": "Mogelijke dubbele regels",
+    "hint": "Bekijk en beslis",
+    "intro": "Dit zijn regels van dezelfde persoon op dezelfde dag op hetzelfde object. Het kan echt apart werk zijn (twee diensten of taken) of hetzelfde werk dat twee keer is vastgelegd. Er verandert niets automatisch: is een regel dubbel, markeer hem dan — hij telt niet meer mee, maar blijft zichtbaar en kan worden hersteld.",
+    "summary": "Wacht op uw beslissing: {groups}",
+    "none": "Geen mogelijke dubbele regels gevonden.",
+    "unavailable": "De controle kan nu niet worden getoond.",
+    "truncated": "Er zijn veel regels — de controle is mogelijk onvolledig.",
+    "sameHours": "Zelfde uren",
+    "differentHours": "Andere uren",
+    "sameText": "Zelfde omschrijving",
+    "recordN": "Regel {n}",
+    "hours": "{hours} u",
+    "noHours": "Geen uren vermeld",
+    "counted": "Telt mee",
+    "marked": "Gemarkeerd als dubbel",
+    "source": "Bron: {file} · geïmporteerd {date}",
+    "noSource": "niet vermeld",
+    "mark": "Dubbel — regel {n} behouden",
+    "reinstate": "Herstellen",
+    "unnamedPerson": "Persoon zonder naam",
+    "unnamedObject": "Object zonder naam",
+    "error": "Dat is niet gelukt. Er is niets gewijzigd.",
+    "notAllowed": "De eigenaar of een leidinggevende van de organisatie kan dit doen.",
+    "notSameWork": "Deze regels komen niet meer overeen — vernieuw de pagina."
   }
 }
