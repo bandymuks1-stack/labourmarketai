@@ -1,11 +1,13 @@
 """LabourMarket.ai PRODUCT MASTER MAP — generator.
 
-Reads the canonical register (docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md), applies the
+Reads the canonical register — the owner's PRIVATE registry (Agentai OS Internal Brain,
+docs/internal-brain/projects/labourmarket-functionality-registry-v2.md; the public
+docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md holds only the summary since 2026-10-21), applies the
 production evidence gathered since it was last written, adds the commercial model and the
 priorities, and writes ONE self-contained HTML page. Re-run it after every audit update:
 the map is a view of the canonical documents, never a second source of truth.
 
-    python build.py <audit.md> <out.html> <source-sha> [private-facts.json]
+    python build.py <private registry.md> <out.html> <source-sha> [private-facts.json]
 """
 import html
 import json
