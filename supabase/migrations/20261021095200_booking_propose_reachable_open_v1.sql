@@ -53,6 +53,12 @@
 --      company took back its OWN proposal) — the reach and open-need checks
 --      above apply to that new proposal exactly as to a first one. The lock
 --      closes the check-then-upsert race.
+--   4. BUDGET — the proposal limits the app applies (10 open, 30 a day) are
+--      enforced in the function too, so a direct call cannot skip them and a
+--      withdraw / propose-again loop on an old row cannot spam the worker:
+--      the day is counted from 'proposed' events, not row creation. Refused
+--      with P0001 'Booking proposal limit reached', which the app already
+--      reads as rate-limited (review of #2606).
 --   Everything else is byte-identical to 20260928140000: auth, ownership,
 --   date order, readiness snapshot, upsert columns, event row.
 --
@@ -142,6 +148,24 @@ begin
   -- withdrew itself may be made again — below — under the checks above.)
   if v_existing = 'declined' then
     raise exception 'booking_not_reopenable' using errcode = 'P0001';
+  end if;
+  -- The proposal budget (COMPANY_REQUEST_LIMITS: 10 open, 30 a day) is
+  -- enforced HERE, where every caller passes: the app check alone could be
+  -- skipped by calling this function directly, and a proposal made again
+  -- after the company's own withdrawal reuses the old row, so the day is
+  -- counted from PROPOSAL EVENTS, not row creation (each call writes one).
+  if v_existing is distinct from 'proposed'
+     and (select count(*) from public.booking_requests b
+           where b.owner_id = uid and b.status = 'proposed') >= 10 then
+    raise exception 'Booking proposal limit reached (open)' using errcode = 'P0001';
+  end if;
+  if (select count(*)
+        from public.booking_request_events ev
+        join public.booking_requests b on b.id = ev.booking_request_id
+       where b.owner_id = uid
+         and ev.event_type = 'proposed'
+         and ev.created_at > now() - interval '24 hours') >= 30 then
+    raise exception 'Booking proposal limit reached (day)' using errcode = 'P0001';
   end if;
 
   select jsonb_build_object(

@@ -137,3 +137,28 @@ describe("3 — a booking proposal: contactable worker, open need, no re-open", 
     }
   });
 });
+
+describe("review of #2606 — budget in the function, interest acts bound to the active workspace", () => {
+  it("the proposal budget is enforced in the function, the day counted from proposal events", () => {
+    const sql = up(M3);
+    expect(sql).toMatch(/b\.status = 'proposed'\) >= 10 then\s*raise exception 'Booking proposal limit reached \(open\)' using errcode = 'P0001'/);
+    expect(sql).toMatch(/ev\.event_type = 'proposed'\s*and ev\.created_at > now\(\) - interval '24 hours'\) >= 30 then\s*raise exception 'Booking proposal limit reached \(day\)' using errcode = 'P0001'/);
+    // both checks run before the upsert
+    const upsert = sql.indexOf("on conflict (owner_id, request_id, worker_id)");
+    expect(sql.indexOf("limit reached (day)")).toBeLessThan(upsert);
+    // the app reads the limit message as rate-limited
+    const actions = readFileSync(resolve(web, "lib/booking/booking-actions.ts"), "utf8");
+    expect(actions).toMatch(/error\.code === "P0004"/);
+  });
+  it("acknowledging and contacting go through the ONE active-workspace rule", () => {
+    const interest = readFileSync(resolve(web, "lib/opportunities/interest.ts"), "utf8");
+    expect(interest).toMatch(/export async function actingDemandForInterest\(/);
+    expect(interest).toMatch(/employer\.organizationId !== row\.organization_id/);
+    const ack = interest.slice(interest.indexOf("export async function acknowledgeInterest("));
+    expect(ack.indexOf("actingDemandForInterest(")).toBeGreaterThan(-1);
+    expect(ack.indexOf("actingDemandForInterest(")).toBeLessThan(ack.indexOf('rpc("acknowledge_demand_interest"'));
+    const contact = readFileSync(resolve(web, "lib/communication/contact-interested-worker.ts"), "utf8");
+    expect(contact).toMatch(/actingDemandForInterest\(supabase, user\.id, requestId\)/);
+    expect(contact).not.toMatch(/\.eq\("profile_id", user\.id\)/);
+  });
+});

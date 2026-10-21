@@ -517,6 +517,46 @@ export type AcknowledgeResult =
   | { kind: "error"; message: string };
 
 /**
+ * May the caller ACT on worker interest in this need — from the ACTIVE
+ * workspace? The database door (acknowledge_demand_interest,
+ * candidate_profile_for_contact_v1) admits the need's creator and any
+ * manager of the need's organization; it cannot know which workspace the
+ * person is acting in. This binds the act to the server-resolved workspace
+ * (decision 0024), exactly like the reads beside it:
+ *   - a need without an organization: its creator only;
+ *   - an organization's need: only while acting in THAT organization, as its
+ *     creator or with a role carrying `manage-demand`.
+ * A failed read is `unavailable`, never "not yours".
+ */
+export async function actingDemandForInterest(
+  supabase: SupabaseClient,
+  userId: string,
+  requestId: string,
+): Promise<
+  | { kind: "ok"; title: string | null }
+  | { kind: "not-owner" }
+  | { kind: "unavailable" }
+> {
+  const { data: req, error } = await asAny(supabase)
+    .from("customer_requests")
+    .select("id, profile_id, organization_id, title")
+    .eq("id", requestId)
+    .maybeSingle();
+  if (error) return { kind: "unavailable" };
+  if (!req) return { kind: "not-owner" };
+  const row = req as { profile_id: string | null; organization_id: string | null; title: string | null };
+  if (!row.organization_id) {
+    return row.profile_id === userId ? { kind: "ok", title: row.title ?? null } : { kind: "not-owner" };
+  }
+  const employer = await requireEmployerCompany();
+  if (!employer.ok || employer.organizationId !== row.organization_id) return { kind: "not-owner" };
+  if (row.profile_id !== userId && !hasOrganizationCapability(employer.role, "manage-demand")) {
+    return { kind: "not-owner" };
+  }
+  return { kind: "ok", title: row.title ?? null };
+}
+
+/**
  * Company acknowledgement of a worker's interest signal (PR7): sets
  * 'reviewed' or 'contacted' through the gated SECURITY DEFINER RPC
  * `acknowledge_demand_interest` (ownership + status whitelist + withdrawn
@@ -537,6 +577,12 @@ export async function acknowledgeInterest(input: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-owner" };
+
+  // Bound to the ACTIVE workspace before the database door is asked (the
+  // door alone admits a manager of the need's organization from any workspace).
+  const acting = await actingDemandForInterest(supabase, user.id, input.requestId);
+  if (acting.kind === "unavailable") return { kind: "error", message: "need unreadable" };
+  if (acting.kind !== "ok") return { kind: "not-owner" };
 
   try {
     const { data, error } = await asAny(supabase).rpc("acknowledge_demand_interest", {

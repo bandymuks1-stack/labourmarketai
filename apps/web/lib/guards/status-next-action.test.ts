@@ -30,7 +30,10 @@ const catalog = (loc: string) =>
 describe("1. contacted → conversation, in that order", () => {
   const action = read("lib/communication/contact-interested-worker.ts");
   it("the action verifies ownership + the worker's own standing interest", () => {
-    expect(action).toMatch(/eq\("profile_id", user\.id\)/);
+    // ownership = the ONE active-workspace rule (creator, or a manage-demand
+    // role in the need's organization while acting in it — review of #2606)
+    expect(action).toMatch(/actingDemandForInterest\(supabase, user\.id, requestId\)/);
+    expect(action).toMatch(/acting\.kind !== "ok"\) return \{ ok: false, reason: "not_owner" \}/);
     expect(action).toMatch(/demand_interest_signals/);
     expect(action).toMatch(/interestStatus === "withdrawn"/);
   });
