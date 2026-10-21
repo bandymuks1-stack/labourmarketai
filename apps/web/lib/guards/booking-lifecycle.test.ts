@@ -17,8 +17,8 @@ import {
  * journal link, or CTA. Accepted is a terminal dead-end." This guard pins
  * the repairs: no booking status the user can actually reach is a dead end
  * on the side that can act, the accepted→conversation step is grant-gated
- * server-side, and the unreachable `expired` status makes no promise the
- * system cannot keep (no scheduler exists).
+ * server-side, and `expired` (written only by the database's daily system
+ * expiry, 20261021130000) carries no countdown promise in the copy.
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -206,7 +206,7 @@ describe("accepted→conversation is grant-gated server-side (§8.1 twin)", () =
   });
 });
 
-describe("expired: unreachable status makes no promise (no scheduler exists)", () => {
+describe("expired: the copy makes no countdown promise; only the database expires a proposal", () => {
   it("booking copy never promises automatic expiry", () => {
     for (const loc of LOCALES) {
       const blob = JSON.stringify(bookingsNamespace(loc)).toLowerCase();
@@ -225,9 +225,11 @@ describe("expired: unreachable status makes no promise (no scheduler exists)", (
     expect(ACTION).not.toMatch(/expired/);
   });
 
-  it("no booking migration installs a cron/scheduler (the doc's claim stays true)", () => {
+  it("only the reviewed system-expiry migration schedules booking work (CAL-6, 2026-10-21)", () => {
     const dir = join(ROOT, "..", "..", "supabase", "migrations");
+    const SCHEDULER = "20261021130000_booking_expiry_system_schedule_v1.sql";
     for (const file of readdirSync(dir)) {
+      if (file === SCHEDULER) continue;
       const sql = readFileSync(join(dir, file), "utf8");
       if (!/booking/i.test(sql)) continue;
       expect(sql, file).not.toMatch(/pg_cron|cron\.schedule/i);
@@ -236,10 +238,8 @@ describe("expired: unreachable status makes no promise (no scheduler exists)", (
 
   it("the lifecycle decision is documented for the owner", () => {
     const doc = read("../../docs/launch/booking-lifecycle-v1.md");
-    expect(doc).toMatch(/no scheduler, trigger or cron exists/);
+    expect(doc).toMatch(/booking-expiry-daily/);
     expect(doc).toMatch(/allowed_accepted_booking/);
-    // The status map keeps expired marked unreachable on both sides.
-    expect(doc).toMatch(/expired \| — unreachable — \| — unreachable —/);
   });
 });
 
