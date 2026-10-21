@@ -1034,7 +1034,7 @@ export default async function CompanyScoutingPage({
                 {actsForClient ? (
                   <p className="text-meta text-text-muted" data-testid={`scout-agency-present-${c.workerId}`}>
                     {t("agencyPresent.note")}{" "}
-                    <Link href={"/dashboard/company/partners" as "/dashboard"} className="text-brand-blue hover:underline">
+                    <Link href={`/${locale}/dashboard/company/partners`} className="text-brand-blue hover:underline">
                       {t("agencyPresent.link")} →
                     </Link>
                   </p>
