@@ -148,10 +148,12 @@ test("R-3 (3.23). on/offboarding lists the organization's members, or says it is
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/company/people#lifecycle");
   await rendered(page, "people (lifecycle)");
+  // The not-installed state renders INSIDE the section, so assert the section
+  // alone (a union locator matches both and fails strict mode), then read it.
   const section = page.getByTestId("company-lifecycle");
-  const unavailable = page.getByTestId("lifecycle-unavailable");
-  await expect(section.or(unavailable)).toBeVisible({ timeout: 30_000 });
-  if (await unavailable.isVisible()) {
+  await expect(section).toBeVisible({ timeout: 30_000 });
+  const unavailable = section.getByTestId("lifecycle-unavailable");
+  if ((await unavailable.count()) > 0) {
     test.info().annotations.push({ type: "note", description: "lifecycle: not installed (honest state)" });
   } else {
     await expect(section.getByTestId("lifecycle-honest-note")).toBeVisible();
