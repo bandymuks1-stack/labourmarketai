@@ -103,10 +103,15 @@ describe("prod billing walk — test mode before any card", () => {
 
 describe("prod billing walk — hosts", () => {
   it("never the Stripe Dashboard, only the two hosted Stripe hosts", () => {
-    expect(SPEC).not.toMatch(/dashboard\.stripe\.com/i);
-    const hosts = new Set((SPEC.match(/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.stripe\.com/gi) ?? []).map((h) => h.toLowerCase()));
+    // This scans the spec's SOURCE TEXT. Every dotted name in it that ends in
+    // ".stripe.com" must be exactly one of the two hosted hosts, so the Dashboard
+    // and the API host (dashboard./api.stripe.com) can never appear. Exact-set
+    // equality, not substring or unanchored-regex checks (CodeQL alerts 139/141).
+    const src = SPEC.toLowerCase();
+    const hosts = new Set(
+      (src.match(/[a-z0-9.-]+/g) ?? []).filter((w) => w === "stripe.com" || w.endsWith(".stripe.com")),
+    );
     expect([...hosts].sort()).toEqual(["billing.stripe.com", "checkout.stripe.com"]);
-    expect(SPEC).not.toMatch(/api\.stripe\.com|stripe\.com\/(v1|test)\//);
   });
 
   it("every page.goto in the walk is relative to the production base URL", () => {
