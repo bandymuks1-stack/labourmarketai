@@ -23,7 +23,8 @@ import { parseConnectedAppsFeedback } from "@/lib/auth/connected-apps";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
 import { isStripeActive } from "@/lib/billing/config-core";
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
+import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import {
   NotificationPreferencesSection,
   type NotificationPreferenceRowView,
@@ -148,7 +149,10 @@ export default async function AccountPage({
 
   // Live billing is configured → the "payments not active yet" copy would
   // contradict the real order control below. Same gate as /pricing.
-  const billingLive = isStripeActive(getBillingConfig());
+  const billingWorkspace = (await resolveBillingSubject()).subject;
+  const billingLive = isStripeActive(
+    getBillingConfigFor(billingWorkspace?.type === "organization" ? billingWorkspace.id : null),
+  );
 
   return (
     <div className="flex flex-col gap-5">

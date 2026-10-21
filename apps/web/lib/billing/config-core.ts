@@ -33,7 +33,8 @@ export type BillingDisabledReason =
   | "live_keys_incomplete"
   | "missing_test_secret"
   | "missing_webhook_secret"
-  | "invalid_test_secret";
+  | "invalid_test_secret"
+  | "not_in_pilot";
 
 export interface BillingConfig {
   readonly state: BillingProviderState;
@@ -192,4 +193,43 @@ export function isTestSecret(v: string | undefined): boolean {
 
 export function isLiveSecret(v: string | undefined): boolean {
   return LIVE_SECRET.test(v ?? "");
+}
+
+// ── Pilot organizations (owner 2026-10-21, payments launch) ──────────────────
+// Billing can be switched on for named organizations only, so a test-mode pass
+// and the first live payment happen on production without opening checkout, the
+// order button or plan limits to every organization and every public page.
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * The pilot list from `BILLING_PILOT_ORGANIZATION_IDS`. `null` = no pilot (unset
+ * or blank: billing applies to everyone exactly as before). A set value that
+ * holds anything other than uuids admits NOBODY — a typo never widens access.
+ */
+export function parsePilotOrganizations(raw: string | undefined): ReadonlySet<string> | null {
+  if (raw === undefined || raw.trim() === "") return null;
+  const ids = raw.split(",").map((v) => v.trim()).filter((v) => v.length > 0);
+  if (ids.length === 0 || ids.some((v) => !UUID.test(v))) return new Set();
+  return new Set(ids.map((v) => v.toLowerCase()));
+}
+
+/** Whether billing applies to this organization (null = a person or a public page). */
+export function pilotAdmits(pilot: ReadonlySet<string> | null, organizationId: string | null): boolean {
+  if (pilot === null) return true;
+  return organizationId !== null && pilot.has(organizationId.toLowerCase());
+}
+
+/**
+ * The billing config as seen by one organization (or by a person / public page
+ * when `organizationId` is null): outside the pilot an active adapter reads as
+ * disabled (`not_in_pilot`), so every caller's existing "billing off" path runs.
+ */
+export function billingConfigForSubject(
+  cfg: BillingConfig,
+  pilot: ReadonlySet<string> | null,
+  organizationId: string | null,
+): BillingConfig {
+  if (!isStripeActive(cfg) || pilotAdmits(pilot, organizationId)) return cfg;
+  return { ...cfg, state: "disabled", paymentsEnabled: false, testMode: false, reason: "not_in_pilot" };
 }

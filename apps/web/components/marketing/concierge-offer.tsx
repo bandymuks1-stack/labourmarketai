@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { TrackedCta } from "@/components/app/tracked-cta";
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import { isStripeActive } from "@/lib/billing/config-core";
 
 /**
@@ -28,7 +28,7 @@ export async function ConciergeAccessBanner() {
   // With Stripe LIVE the sentence "public payments are not enabled yet" would
   // be false (prod walk b6a2e7bf, 2026-09-05). The concierge offer itself stays:
   // the live variant keeps the direct-service promise without the claim.
-  const live = isStripeActive(getBillingConfig());
+  const live = isStripeActive(getBillingConfigFor(null));
 
   return (
     <section

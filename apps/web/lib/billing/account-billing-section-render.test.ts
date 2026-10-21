@@ -56,7 +56,10 @@ function scoped(loc: string, ns: string) {
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async (ns: string) => scoped(state.locale, ns)),
 }));
-vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => state.config }));
+vi.mock("@/lib/billing/config", () => ({
+  getBillingConfig: () => state.config,
+  getBillingConfigFor: () => state.config,
+}));
 vi.mock("@/lib/billing/effective-entitlements", () => ({
   getEffectiveEntitlements: vi.fn(async () => state.ent),
 }));

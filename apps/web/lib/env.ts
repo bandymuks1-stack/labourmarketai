@@ -98,6 +98,12 @@ const schema = z.object({
   // confirmed in code (PRICING_READINESS_STATE) AND every live key is present.
   // Any other value keeps the historical hard block. See config-core.ts.
   STRIPE_LIVE_ACTIVATION: z.string().optional(),
+  // PILOT (owner 2026-10-21, payments launch): a comma-separated list of
+  // organization ids. When set, billing — checkout, the order button and plan
+  // enforcement — is on ONLY for those organizations; every other workspace and
+  // every public page behaves exactly as with billing off. Unset = no pilot.
+  // An entry that is not a uuid admits nobody (fail closed). See config-core.ts.
+  BILLING_PILOT_ORGANIZATION_IDS: z.string().optional(),
   // TEST price ids (price_…) per paid plan — owner sets these in Stripe test.
   STRIPE_PRICE_WORKER_PLUS: z.string().optional(),
   STRIPE_PRICE_COMPANY_PILOT: z.string().optional(),
@@ -212,6 +218,7 @@ const parsed = schema.safeParse({
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   STRIPE_LIVE_ACTIVATION: process.env.STRIPE_LIVE_ACTIVATION,
+  BILLING_PILOT_ORGANIZATION_IDS: process.env.BILLING_PILOT_ORGANIZATION_IDS,
   STRIPE_PRICE_WORKER_PLUS: process.env.STRIPE_PRICE_WORKER_PLUS,
   STRIPE_PRICE_COMPANY_PILOT: process.env.STRIPE_PRICE_COMPANY_PILOT,
   STRIPE_PRICE_AGENCY_PILOT: process.env.STRIPE_PRICE_AGENCY_PILOT,
