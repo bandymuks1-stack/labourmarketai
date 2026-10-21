@@ -1688,6 +1688,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-21 (owner-approved #2604): B2B hours supersede walk + team assignment names.
       "20261021091000_project_team_journal_hours_v3.sql",
       "20261021092000_team_assignment_names_v1.sql",
+      // 2026-10-21 (owner-approved #2606): interest org managers + worker interest writes + booking proposal reach/open/declined.
+      "20261021095000_demand_interest_org_managers_v1.sql",
+      "20261021095100_demand_interest_worker_writes_v1.sql",
+      "20261021095200_booking_propose_reachable_open_v1.sql",
 ]);
   });
 
