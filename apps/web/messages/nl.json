@@ -4747,10 +4747,10 @@
         "preview_workspace": "Voorbeeld",
         "comingLater": "Later beschikbaar",
         "theme": {
-          "appearance": "Appearance",
-          "help": "Theme",
-          "toDark": "Dark",
-          "toLight": "Light"
+          "appearance": "Weergave",
+          "help": "Thema",
+          "toDark": "Donker",
+          "toLight": "Licht"
         },
         "security": {
           "title": "Beveiliging & toegang",
@@ -7660,16 +7660,16 @@
     "cvBridgeLink": "Cv openen",
     "inbox": {
       "title": "Werkbeoordeling",
-      "confirmSkills": "Confirm skills",
-      "confirmSkillsHint": "Tick the skills this entry proves. Confirming verifies them.",
-      "confirmNote": "Optional note",
-      "confirmSubmit": "Confirm & verify",
-      "alreadyVerified": "Already verified",
+      "confirmSkills": "Vaardigheden bevestigen",
+      "confirmSkillsHint": "Kies de opgegeven vaardigheden die dit item aantoont — ze worden geverifieerd.",
+      "confirmNote": "Notitie (optioneel)",
+      "confirmSubmit": "Bevestigen",
+      "alreadyVerified": "Al geverifieerd",
       "noSkillsToConfirm": "Deze invoer heeft geen gekoppelde vaardigheden meer om te bevestigen. Goedkeuren bevestigt het werk zelf.",
       "result": {
-        "skillsVerified": "Verified {count} skill(s).",
-        "skillNotOwned": "That skill is not declared by this worker.",
-        "noSkillsSelected": "Select at least one skill."
+        "skillsVerified": "Bevestigd. {count} vaardigheid/vaardigheden geverifieerd.",
+        "skillNotOwned": "Die vaardigheid is niet van deze werknemer.",
+        "noSkillsSelected": "Selecteer ten minste één vaardigheid."
       }
     },
     "cv": {
@@ -7716,7 +7716,7 @@
     }
   },
   "services": {
-    "eyebrow": "Done-for-you",
+    "eyebrow": "Wij doen het voor je",
     "title": "Gestandaardiseerde aanbiedingen,",
     "titleAccent": "echte prijzen.",
     "subcopy": "Duidelijke pakketten voor AI- en automatiseringswerk, met eerlijke vanafprijzen. Kies het pakket dat het dichtst bij je behoefte ligt en we bepalen samen de exacte scope.",
