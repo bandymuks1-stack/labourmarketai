@@ -1,7 +1,6 @@
 import "server-only";
 
 import { cache } from "react";
-import { cookies } from "next/headers";
 
 import { getUnreadConversationCount } from "@/lib/communication/unread";
 import {
@@ -20,7 +19,7 @@ import { getNewMarketplaceMatchCount } from "@/lib/marketplace/worker-opportunit
 import { getBridgeSpineCounts } from "@/lib/agency/bridge-read";
 import { listCompanyDemands } from "@/lib/scouting/scouting";
 import { countOpenTeamOffersByDemand } from "@/lib/company/team-offer";
-import { ACTIVE_WORKSPACE_COOKIE } from "@/lib/company/active-organization";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { rememberBadge } from "@/lib/perf/badge-ttl-cache";
 
 /** Who is looking, in which workspace — the key the slow badges are remembered under. */
@@ -31,8 +30,11 @@ async function badgeViewerKey(): Promise<string | null> {
       data: { user },
     } = await supabase.auth.getUser(); // request-memoised: no extra round trip
     if (!user) return null;
-    const jar = await cookies();
-    return `${user.id}|${jar.get(ACTIVE_WORKSPACE_COOKIE)?.value ?? "-"}`;
+    // The RESOLVED workspace (the durable pointer outranks the cookie), not
+    // the raw cookie: with the two apart, one workspace's badges were stored
+    // under the other's key (audit 2026-10-21).
+    const ws = await getWorkspaceContext();
+    return `${user.id}|${ws.activeWorkspaceId ?? "-"}`;
   } catch {
     return null;
   }
