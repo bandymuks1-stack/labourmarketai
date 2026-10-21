@@ -8,7 +8,7 @@ import {
   type EmployerContextReason,
 } from "@/lib/company/employer-company-context";
 import { hasOrganizationCapability, type GovernanceRole } from "@/lib/company/role-capabilities";
-import { isDemandKind } from "@/lib/demand/market-direction";
+import { isLabourDemandRow } from "@/lib/demand/market-direction";
 import { parseStructuredNeed } from "@/lib/market/fit";
 import type { NeedSkillSource } from "@/lib/market/need-skills";
 import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
@@ -139,7 +139,7 @@ export async function listCompanyDemands(): Promise<CompanyDemand[]> {
       created_at: string;
       kind: string | null;
       profile_id: string | null;
-    }[]).filter((r) => isDemandKind(r.kind)).map((r) => ({
+    }[]).filter((r) => isLabourDemandRow(r)).map((r) => ({
       ownedByCaller: r.profile_id === user.id,
       id: r.id,
       // RAW stored title. The data layer does not get to pick a display
