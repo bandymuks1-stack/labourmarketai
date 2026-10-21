@@ -647,6 +647,8 @@ export const FROZEN_LANDING_FILES = [
   // pure read-only hook into the conversation router) replaces the scripted
   // hero scenario at the top of the render tree.
   "components/marketing/public-entry.tsx",
+  // Owner positioning 2026-10-21: the three ways under the promise.
+  "components/marketing/landing-three-ways.tsx",
   "lib/marketing/public-entry.ts",
   "components/marketing/product-chain-band.tsx",
   "components/marketing/market-proof-band.tsx",

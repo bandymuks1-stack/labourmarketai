@@ -4759,8 +4759,35 @@
       "topNote": "Järjestatud platvormi aktiivsete töökuulutuste järgi."
     },
     "hero": {
-      "headline": "LabourMarket.ai on elav töö- ja ärivõimaluste süsteem.",
+      "headline": "Elav töö- ja ärivõimaluste süsteem.",
       "sub": "Näita ühes kohas, mida oskad, mida pakud või mida otsid. Leia töötajaid, töid, töövõtjaid, teenuseid ja kaupu — ning sinu kogemus ja võimalused jäävad alati kättesaadavaks."
+    },
+    "ways": {
+      "title": "Mida saad siin teha",
+      "show": {
+        "title": "Näita, mida oskad",
+        "body": "Töö, oskused ja kogemus ühes kohas. Iga kirje täiendab sinu tööalast ajalugu.",
+        "cta": "Loo profiil"
+      },
+      "offer": {
+        "title": "Paku, mida saad",
+        "body": "Teenused, kaubad, meeskonnad või vabad inimesed — avalda oma pakkumine, et need, kel seda vaja, sind leiaksid.",
+        "cta": "Paku"
+      },
+      "find": {
+        "title": "Leia, mida otsid",
+        "body": "Kirjuta oma sõnadega, mida vajad — töötajat, tööd, töövõtjat, teenust või kaupa.",
+        "cta": "Otsi"
+      },
+      "discoverLead": "Avasta",
+      "discover": {
+        "workers": "Töötajad",
+        "jobs": "Tööd",
+        "contractors": "Töövõtjad",
+        "services": "Teenused",
+        "goods": "Kaubad"
+      },
+      "lasting": "Sinu kogemus ja võimalused jäävad alati kättesaadavaks — kui vahetad tööd, projekti või riiki."
     }
   },
   "workspace": {

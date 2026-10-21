@@ -15234,7 +15234,7 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "LabourMarket.ai — tai gyva darbo ir verslo galimybių sistema.",
+      "headline": "Tai gyva darbo ir verslo galimybių sistema.",
       "sub": "Vienoje vietoje parodyk, ką moki, ką siūlai arba ko ieškai. Atrask darbuotojus, darbus, rangovus, paslaugas ir prekes, o tavo patirtis bei galimybės išlieka pasiekiamos nuolat."
     },
     "entry": {
@@ -15352,6 +15352,33 @@
       "partnerLead": "Norite bendradarbiauti su mumis kaip partneris?",
       "partnerLink": "Susisiekite",
       "moreLead": "Daugiau apie tai, kaip tai veikia kiekvienam:"
+    },
+    "ways": {
+      "title": "Ką čia gali padaryti",
+      "show": {
+        "title": "Parodyk, ką moki",
+        "body": "Darbai, įgūdžiai ir patirtis vienoje vietoje. Kiekvienas įrašas papildo tavo profesinę istoriją.",
+        "cta": "Kurti profilį"
+      },
+      "offer": {
+        "title": "Pasiūlyk, ką gali",
+        "body": "Paslaugos, prekės, komandos ar laisvi žmonės — paskelbk, ką siūlai, kad tave rastų tie, kam to reikia.",
+        "cta": "Pasiūlyti"
+      },
+      "find": {
+        "title": "Rask, ko ieškai",
+        "body": "Parašyk savais žodžiais, ko reikia — darbuotojo, darbo, rangovo, paslaugos ar prekės.",
+        "cta": "Ieškoti"
+      },
+      "discoverLead": "Atrask",
+      "discover": {
+        "workers": "Darbuotojai",
+        "jobs": "Darbai",
+        "contractors": "Rangovai",
+        "services": "Paslaugos",
+        "goods": "Prekės"
+      },
+      "lasting": "Tavo patirtis ir galimybės išlieka pasiekiamos nuolat — keičiant darbą, projektą ar šalį."
     }
   },
   "workspace": {

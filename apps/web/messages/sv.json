@@ -4759,8 +4759,35 @@
       "topNote": "Rankat efter aktiva platsannonser på plattformen."
     },
     "hero": {
-      "headline": "LabourMarket.ai är ett levande system av arbets- och affärsmöjligheter.",
+      "headline": "Ett levande system av arbets- och affärsmöjligheter.",
       "sub": "Visa på ett ställe vad du kan, vad du erbjuder eller vad du söker. Hitta medarbetare, jobb, entreprenörer, tjänster och varor — och din erfarenhet och dina möjligheter förblir alltid tillgängliga."
+    },
+    "ways": {
+      "title": "Vad du kan göra här",
+      "show": {
+        "title": "Visa vad du kan",
+        "body": "Arbete, färdigheter och erfarenhet på ett ställe. Varje post bygger på din yrkeshistoria.",
+        "cta": "Skapa profil"
+      },
+      "offer": {
+        "title": "Erbjud det du har",
+        "body": "Tjänster, varor, team eller lediga personer — publicera ditt erbjudande så att de som behöver det hittar dig.",
+        "cta": "Erbjud"
+      },
+      "find": {
+        "title": "Hitta det du söker",
+        "body": "Skriv med egna ord vad du behöver — en medarbetare, ett jobb, en entreprenör, en tjänst eller varor.",
+        "cta": "Sök"
+      },
+      "discoverLead": "Upptäck",
+      "discover": {
+        "workers": "Medarbetare",
+        "jobs": "Jobb",
+        "contractors": "Entreprenörer",
+        "services": "Tjänster",
+        "goods": "Varor"
+      },
+      "lasting": "Din erfarenhet och dina möjligheter förblir tillgängliga — när du byter jobb, projekt eller land."
     }
   },
   "workspace": {

@@ -15234,7 +15234,7 @@
       "noStars": "Nirgendwo Sterne: ein Mensch wird nie auf eine Zahl reduziert. Jeder Match wird gegen einen konkreten Bedarf erklärt — mit sichtbaren Zahlen."
     },
     "hero": {
-      "headline": "LabourMarket.ai ist ein lebendiges System für Arbeits- und Geschäftschancen.",
+      "headline": "Ein lebendiges System für Arbeits- und Geschäftschancen.",
       "sub": "Zeigen Sie an einem Ort, was Sie können, was Sie anbieten oder was Sie suchen. Entdecken Sie Arbeitskräfte, Jobs, Auftragnehmer, Dienstleistungen und Waren — und Ihre Erfahrung und Möglichkeiten bleiben jederzeit erreichbar."
     },
     "entry": {
@@ -15352,6 +15352,33 @@
       "partnerLead": "Möchten Sie als Partner mit uns arbeiten?",
       "partnerLink": "Kontakt aufnehmen",
       "moreLead": "Mehr dazu, wie das für jeden funktioniert:"
+    },
+    "ways": {
+      "title": "Was Sie hier tun können",
+      "show": {
+        "title": "Zeigen Sie, was Sie können",
+        "body": "Arbeit, Fähigkeiten und Erfahrung an einem Ort. Jeder Eintrag ergänzt Ihre berufliche Geschichte.",
+        "cta": "Profil erstellen"
+      },
+      "offer": {
+        "title": "Bieten Sie an, was Sie haben",
+        "body": "Dienstleistungen, Waren, Teams oder verfügbare Personen — veröffentlichen Sie Ihr Angebot, damit die, die es brauchen, Sie finden.",
+        "cta": "Anbieten"
+      },
+      "find": {
+        "title": "Finden Sie, was Sie suchen",
+        "body": "Schreiben Sie in eigenen Worten, was Sie brauchen — eine Arbeitskraft, einen Job, einen Auftragnehmer, eine Dienstleistung oder Waren.",
+        "cta": "Suchen"
+      },
+      "discoverLead": "Entdecken",
+      "discover": {
+        "workers": "Arbeitskräfte",
+        "jobs": "Stellen",
+        "contractors": "Auftragnehmer",
+        "services": "Dienstleistungen",
+        "goods": "Waren"
+      },
+      "lasting": "Ihre Erfahrung und Möglichkeiten bleiben erreichbar — beim Wechsel von Job, Projekt oder Land."
     }
   },
   "workspace": {

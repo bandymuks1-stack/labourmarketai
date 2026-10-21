@@ -15234,7 +15234,7 @@
       "noStars": "No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
     },
     "hero": {
-      "headline": "LabourMarket.ai is a living system of work and business opportunities.",
+      "headline": "A living system of work and business opportunities.",
       "sub": "In one place, show what you can do, what you offer or what you are looking for. Discover workers, jobs, contractors, services and goods — and your experience and opportunities stay within reach, always."
     },
     "entry": {
@@ -15352,6 +15352,33 @@
       "partnerLead": "Want to work with us as a partner?",
       "partnerLink": "Get in touch",
       "moreLead": "More on how this works for each:"
+    },
+    "ways": {
+      "title": "What you can do here",
+      "show": {
+        "title": "Show what you can do",
+        "body": "Your work, skills and experience in one place. Every entry adds to your professional history.",
+        "cta": "Create a profile"
+      },
+      "offer": {
+        "title": "Offer what you have",
+        "body": "Services, goods, teams or available people — publish what you offer so the people who need it can find you.",
+        "cta": "Make an offer"
+      },
+      "find": {
+        "title": "Find what you need",
+        "body": "Write in your own words what you need — a worker, a job, a contractor, a service or goods.",
+        "cta": "Search"
+      },
+      "discoverLead": "Discover",
+      "discover": {
+        "workers": "Workers",
+        "jobs": "Jobs",
+        "contractors": "Contractors",
+        "services": "Services",
+        "goods": "Goods"
+      },
+      "lasting": "Your experience and opportunities stay within reach — when you change job, project or country."
     }
   },
   "workspace": {
