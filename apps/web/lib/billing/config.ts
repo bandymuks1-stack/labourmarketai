@@ -63,7 +63,7 @@ export function getBillingConfigFor(organizationId: string | null): BillingConfi
   );
 }
 
-/** Server-only: whether a pilot list restricts billing at all (admin readiness). */
+/** Server-only: whether billing is restricted to a pilot list (true unless ALL_ORGANIZATIONS). */
 export function billingPilotActive(): boolean {
   return parsePilotOrganizations(env.BILLING_PILOT_ORGANIZATION_IDS) !== null;
 }

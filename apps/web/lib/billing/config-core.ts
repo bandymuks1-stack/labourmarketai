@@ -203,12 +203,22 @@ export function isLiveSecret(v: string | undefined): boolean {
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
- * The pilot list from `BILLING_PILOT_ORGANIZATION_IDS`. `null` = no pilot (unset
- * or blank: billing applies to everyone exactly as before). A set value that
- * holds anything other than uuids admits NOBODY — a typo never widens access.
+ * The exact value that lifts the pilot for the public launch. It is a separate,
+ * deliberate owner act: nothing else (unset, blank, "*", "all") opens billing to
+ * every organization.
+ */
+export const PILOT_ALL_ORGANIZATIONS = "ALL_ORGANIZATIONS";
+
+/**
+ * The pilot list from `BILLING_PILOT_ORGANIZATION_IDS` — DENY BY DEFAULT (owner
+ * 2026-10-21). Unset, blank, or anything that is not a list of uuids admits
+ * NOBODY: even with every Stripe key in place, no organization, person or public
+ * page sees billing. Only the listed organizations do. `null` (no restriction)
+ * is returned for exactly `ALL_ORGANIZATIONS` — the public launch.
  */
 export function parsePilotOrganizations(raw: string | undefined): ReadonlySet<string> | null {
-  if (raw === undefined || raw.trim() === "") return null;
+  if (raw !== undefined && raw.trim() === PILOT_ALL_ORGANIZATIONS) return null;
+  if (raw === undefined || raw.trim() === "") return new Set();
   const ids = raw.split(",").map((v) => v.trim()).filter((v) => v.length > 0);
   if (ids.length === 0 || ids.some((v) => !UUID.test(v))) return new Set();
   return new Set(ids.map((v) => v.toLowerCase()));
