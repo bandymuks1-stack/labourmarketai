@@ -8,7 +8,7 @@ import { z } from "zod";
 import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
 import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
 import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
-import { isDemandKind } from "@/lib/demand/market-direction";
+import { isDemandKind, isLabourDemandRow } from "@/lib/demand/market-direction";
 import { readProjectDocumentedPeriods } from "@/lib/organization-evidence/project-documented-period";
 import { closeDemand, reopenDemand } from "@/lib/demand/demand-lifecycle";
 import { canCloseFrom, canReopenFrom } from "@/lib/demand/demand-lifecycle-model";
@@ -132,7 +132,7 @@ const demandList: CapabilityDescriptor = {
     const { data, error } = await asAny(caller.supabase)
       .from("customer_requests")
       .select(
-        "id, title, status, kind, country, location, role_or_work_type, team_size, start_period, duration, created_at",
+        "id, title, status, kind, payload, country, location, role_or_work_type, team_size, start_period, duration, created_at",
       )
       .or(demandsOfWorkspaceFilter(caller.userId, employer.organizationId))
       .order("created_at", { ascending: false })
@@ -145,6 +145,8 @@ const demandList: CapabilityDescriptor = {
       title: string | null;
       status: string | null;
       kind: string | null;
+      /** Read only to classify (help-desk / privacy rows are not needs); never returned. */
+      payload: unknown;
       country: string | null;
       location: string | null;
       role_or_work_type: string | null;
@@ -155,8 +157,9 @@ const demandList: CapabilityDescriptor = {
     };
     const rows = ((data ?? []) as Row[])
       // DIRECTION (SEP-4): classified, never guessed — an unrecognised kind
-      // is dropped, exactly as the scouting read does.
-      .filter((r) => isDemandKind(r.kind))
+      // is dropped, exactly as the scouting read does; a help-desk or privacy
+      // request to the platform is not one of the organization's needs.
+      .filter((r) => isLabourDemandRow(r))
       .filter((r) => parsed.includeClosed || r.status !== "closed");
 
     const ids = rows.map((r) => r.id);

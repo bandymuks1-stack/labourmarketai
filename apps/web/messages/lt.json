@@ -5417,7 +5417,9 @@
         }
       ],
       "screenshot": "Įmonės paklausos srautas",
-      "cta": "Pradėti darbuotojų užklausą"
+      "cta": "Pradėti darbuotojų užklausą",
+      "calculatorBody": "Prieš ieškodamas darbuotojų, įvertink darbą: darbo valandas, medžiagas, įrangą ir keliones — savo skaičiais.",
+      "calculatorLink": "Apskaičiuok projekto kainą"
     },
     "agencies": {
       "eyebrow": "Agentūroms",

@@ -342,6 +342,24 @@ audit.
   so the first spend caller can pair its failure path with compensation.
   Pinned in the `chat-visibility-rls.test.ts` caller inventory.
 
+- **2026-10-21 — `lib/lmc/wallet.ts`** (LMC Commercial Train Wagon 2 wallet
+  server layer; owner order 2026-10-21 "build and test the purchase, spend and
+  ledger flows behind the flags, and leave them OFF until the owner
+  approves"). Typed callers for `lmc_record_purchase_v1` and `lmc_spend_v1`,
+  plus `spendLmcForAction`, which pairs a spend with the existing
+  `compensateSpend` seam. Service role is genuinely required rather than
+  convenient: applied migration
+  `20261006100300_lmc_ledger_server_only_execute_v1.sql` revokes EXECUTE on
+  both RPCs from `public`, `anon` and `authenticated` and grants it to
+  `service_role` ONLY. Every entry point returns `disabled` on its
+  literal-`false` TS kill-switch before the client is constructed (pinned by
+  `lib/guards/lmc-wallet-flags-off.test.ts`); behind it the RPCs re-check
+  `lmc_settings` (fail-closed) and `lmc_spend_v1` re-checks that the actor
+  owns the debited account or is an admin. The module calls exactly two RPCs
+  directly, touches no table directly, no chat table, nothing outbound, and
+  has no product call site (Stripe top-up is Wagon 4, UI is Wagon 7).
+  Pinned in the `chat-visibility-rls.test.ts` caller inventory.
+
 - **2026-09-22 — `lib/vacancy-store/vacancy-translation-read.ts`** (reader-locale
   rendering of PUBLIC job advertisements, owner P0 2026-09-22 §9). Touches ONE
   table, `public_vacancies`, and within it only the `translations` column added

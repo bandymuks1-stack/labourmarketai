@@ -140,7 +140,7 @@ function specTestIds(src: string): { exact: Set<string>; prefix: Set<string> } {
 // and one of them was excluded from CI by name for that reason.
 const KNOWN_ORPHANS: Record<string, string[]> = {
   "ai-first-intent-coverage.spec.ts": ["msg-employer-match"],
-  "one-authenticated-shell.spec.ts": ["account-menu-profile-link", "notification-bell"],
+  "one-authenticated-shell.spec.ts": ["account-menu-profile-link"],
   "pr-i-reality-chat.spec.ts": ["msg-employer-match"],
   "pr250-company-multisector-smoke.spec.ts": [
     "my-spaces",

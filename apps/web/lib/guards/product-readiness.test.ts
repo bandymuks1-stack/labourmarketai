@@ -501,6 +501,10 @@ describe("feature-availability + config-driven dashboard", () => {
         "planning",
         "network",
         "account_roles",
+        // Registry row 6.1: the service-offer loop (publish → found in the
+        // one market → requested → accepted → conversation) is live and
+        // proven on production; the catalogue said "preparing" (stale).
+        "service_offers",
       ]),
     );
   });
