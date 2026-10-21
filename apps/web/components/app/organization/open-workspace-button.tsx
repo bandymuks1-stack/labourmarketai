@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 
 import { switchWorkspaceAction } from "@/lib/company/organization-actions";
 
@@ -22,7 +21,6 @@ export function OpenWorkspaceButton({
   readonly pendingLabel: string;
   readonly errorLabel: string;
 }) {
-  const router = useRouter();
   const [pending, start] = useTransition();
   const [failed, setFailed] = useState(false);
   return (
@@ -33,9 +31,11 @@ export function OpenWorkspaceButton({
         onClick={() =>
           start(async () => {
             setFailed(false);
+            // The action revalidates the layout and answers with the new tree;
+            // a second client refresh here rendered the whole dashboard twice
+            // inside one transition (audit 2026-10-21).
             const res = await switchWorkspaceAction(organizationId);
             if (!res.ok) setFailed(true);
-            else router.refresh();
           })
         }
         className="inline-flex min-h-11 items-center rounded-full bg-gradient-cta px-4 text-sm font-semibold text-text-on-brand disabled:opacity-50"
