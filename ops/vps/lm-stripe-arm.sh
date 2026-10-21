@@ -60,6 +60,9 @@ case "$MODE" in
     put STRIPE_PRICE_COMPANY_PILOT "$PRICE"
     SK=""; WH=""
     put BILLING_PROVIDER stripe
+    # Owner 2026-10-21: the first paying customer pays from day one (no automatic
+    # 14-day trial); test mirrors it so the charge, refund and cancellation are real.
+    put BILLING_TRIAL_ENABLED false
     put STRIPE_MODE "$MODE"
     if [ "$MODE" = live ]; then
       put STRIPE_LIVE_ACTIVATION approved-by-owner

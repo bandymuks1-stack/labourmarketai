@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { getBillingConfigFor } from "@/lib/billing/config";
+import { billingTrialEnabled, getBillingConfigFor } from "@/lib/billing/config";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { BillingPortalButton } from "@/components/app/billing-portal-button";
@@ -181,6 +181,13 @@ export async function AccountBillingSection({
                     labels={{ start: t("subscribe.cta"), starting: t("manage.opening"), error: t("manage.error") }}
                   />
                   <p className="text-meta text-text-muted">{t("subscribe.note")}</p>
+                  {/* Paid from the first day (owner 2026-10-21): said before the
+                      person leaves for Stripe, which then shows the amount due today. */}
+                  {!billingTrialEnabled() && (
+                    <p className="text-meta text-text-secondary" data-testid="billing-charged-today">
+                      {t("subscribe.chargedToday")}
+                    </p>
+                  )}
                 </div>
               ) : null}
             </>

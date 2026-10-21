@@ -2,13 +2,17 @@
 /**
  * THE ONE FUNCTIONALITY REGISTRY — summary tables (owner order 2026-10-21).
  *
- * docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md §2 is the registry: one row per
- * process, with its status, evidence, dependency, owner area (1–18) and role.
- * This script derives the §1 summary tables from those rows, so the counts can
- * never drift from the rows they count.
+ * The registry rows (one per process: status, evidence, dependency, owner area 1–18, role)
+ * live in the owner's PRIVATE registry (Agentai OS Internal Brain,
+ * docs/internal-brain/projects/labourmarket-functionality-registry-v2.md) since the owner's
+ * decision of 2026-10-21. The PUBLIC docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md carries
+ * the generated summary only. This script derives the summary from the private rows and
+ * writes it to both documents, so the counts can never drift from the rows they count.
  *
- *   node .github/scripts/registry-summary.mjs           # rewrite §1 in place
- *   node .github/scripts/registry-summary.mjs --check   # exit 1 when §1 is stale
+ *   node .github/scripts/registry-summary.mjs --registry <private file>          # write both
+ *   node .github/scripts/registry-summary.mjs --check [--registry <private file>]
+ *     CI (no private file): the public tables add up and carry no per-process rows.
+ *     With the private file: the public summary is exactly the one its rows produce.
  *
  * No network, no database. Guarded by lib/guards/functional-registry-summary.test.ts.
  */
@@ -140,7 +144,7 @@ export function renderSummary(rows) {
     "",
     ...owner.lines,
     "",
-    "### 1b. By audit section (where each row lives in §2)",
+    "### 1b. By audit section (where each row lives in the private registry)",
     "",
     ...audit.lines,
     "",
@@ -148,24 +152,83 @@ export function renderSummary(rows) {
   ].join("\n");
 }
 
-function main() {
-  const text = readFileSync(DOC, "utf8");
-  const rows = parseRows(text);
-  const summary = renderSummary(rows);
+/** Rewrite the generated block of one document. */
+function writeBlock(path, summary) {
+  const text = readFileSync(path, "utf8");
   const a = text.indexOf(START);
   const b = text.indexOf(END);
-  if (a < 0 || b < 0) throw new Error("summary markers not found in §1");
+  if (a < 0 || b < 0) throw new Error(`summary markers not found in ${path}`);
   const next = text.slice(0, a) + summary + text.slice(b + END.length);
-  if (process.argv.includes("--check")) {
-    if (next !== text) {
-      console.error("registry summary is stale: run node .github/scripts/registry-summary.mjs");
-      process.exit(1);
+  writeFileSync(path, next);
+  return next !== text;
+}
+
+/**
+ * PUBLIC CHECK (CI). The public document carries the summary only (owner 2026-10-21):
+ * its tables must add up (every row's processes = the sum of its six statuses, the
+ * total row = the column sums, the headline = the total) and it must carry no
+ * per-process rows. The rows themselves live in the private registry.
+ */
+export function checkPublicSummary(text) {
+  if (/^\|\s*\d+\.\d+\s*\|/m.test(text) || text.includes("## 2. Per-area status")) {
+    throw new Error("the public registry must not carry per-process rows (they live in the private registry)");
+  }
+  const a = text.indexOf(START);
+  const b = text.indexOf(END);
+  if (a < 0 || b < 0) throw new Error("summary markers not found");
+  const block = text.slice(a, b);
+  const tables = block.split("\n### ").slice(1);
+  if (tables.length < 2) throw new Error("expected the 18-area and the audit-section tables");
+  let headline = null;
+  const m = block.match(/\*\*(\d+) of (\d+) processes are LIVE_PROVEN\.\*\*/);
+  if (!m) throw new Error("headline missing");
+  headline = { live: Number(m[1]), total: Number(m[2]) };
+  for (const t of tables) {
+    const lines = t.split("\n").filter((l) => /^\|/.test(l) && !/^\|[\s|:-]+\|\s*$/.test(l)).slice(1);
+    const sums = new Array(STATUSES.length + 1).fill(0);
+    let total = null;
+    for (const l of lines) {
+      const c = l.split("|").slice(1, -1).map((x) => x.replace(/\*/g, "").trim());
+      const nums = c.slice(1, 1 + STATUSES.length).map(Number);
+      const n = Number(c[1 + STATUSES.length]);
+      if (nums.some((x) => !Number.isInteger(x)) || !Number.isInteger(n)) throw new Error(`bad row: ${l.slice(0, 60)}`);
+      if (nums.reduce((p, x) => p + x, 0) !== n) throw new Error(`row does not add up: ${c[0]}`);
+      if (/^Total$/.test(c[0])) { total = [...nums, n]; continue; }
+      nums.forEach((x, i) => (sums[i] += x));
+      sums[STATUSES.length] += n;
     }
-    console.log(`registry summary current: ${rows.length} rows`);
+    if (!total || total.some((x, i) => x !== sums[i])) throw new Error("the total row is not the column sums");
+    if (total[0] !== headline.live || total[STATUSES.length] !== headline.total) throw new Error("the headline is not the total");
+  }
+  return headline;
+}
+
+function main() {
+  const i = process.argv.indexOf("--registry");
+  const registry = i > 0 ? process.argv[i + 1] : process.env.LM_PRIVATE_REGISTRY;
+  if (process.argv.includes("--check")) {
+    const h = checkPublicSummary(readFileSync(DOC, "utf8"));
+    if (registry) {
+      const rows = parseRows(readFileSync(registry, "utf8"));
+      const fresh = renderSummary(rows);
+      const pub = readFileSync(DOC, "utf8");
+      if (!pub.includes(fresh)) {
+        console.error("the public summary is stale against the private registry: run with --registry <file>");
+        process.exit(1);
+      }
+    }
+    console.log(`registry summary current: ${h.live}/${h.total} LIVE_PROVEN${registry ? " (checked against the private registry)" : ""}`);
     return;
   }
-  writeFileSync(DOC, next);
-  console.log(`registry summary written: ${rows.length} rows`);
+  if (!registry) {
+    console.error("usage: node .github/scripts/registry-summary.mjs --registry <private registry file> (or LM_PRIVATE_REGISTRY)");
+    process.exit(1);
+  }
+  const rows = parseRows(readFileSync(registry, "utf8"));
+  const summary = renderSummary(rows);
+  writeBlock(registry, summary);
+  writeBlock(DOC, summary);
+  console.log(`registry summary written to the private registry and the public summary: ${rows.length} rows`);
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) main();
