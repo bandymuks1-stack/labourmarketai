@@ -293,3 +293,54 @@ export function buildSpineNotifications(
     ];
   });
 }
+
+/**
+ * WHICH ROLE A STORED EVENT BELONGS TO — the bell's cross-role CTA reads it.
+ *
+ * A stored `notification_events` row is addressed to a PERSON, not to a role:
+ * the table has no role column. The bell used to tag every stored row
+ * "worker" except two booking outcomes, so an employer working as the company
+ * was told "Switch to worker to view" on the very row that says a worker
+ * raised a hand on THEIR need — and following that CTA took them away from
+ * the scouting page the row links to.
+ *
+ * Only events whose recipient is unambiguous by type carry a role here:
+ *   - ORG_SIDE: the recipient acts for an organization (the demand owner, the
+ *     booking proposer, the document assigner). Any organization role the
+ *     person is already in (company / agency / customer) is the right one,
+ *     so the CTA appears only while they work as a worker;
+ *   - WORKER_SIDE: the recipient is the person as a worker (their bookings,
+ *     their job alerts, their journal, their history links).
+ * Everything else (messages, invitations, workflows, engagements, absences,
+ * expiring documents) can reach either side, so it follows the active role
+ * and never asks for a switch it cannot justify.
+ */
+const ORG_SIDE_EVENT_TYPES: ReadonlySet<string> = new Set([
+  "event_demand_interest_expressed",
+  "event_booking_accepted",
+  "event_booking_declined",
+  "event_document_ack_completed",
+]);
+const WORKER_SIDE_EVENT_TYPES: ReadonlySet<string> = new Set([
+  "event_booking_proposed",
+  "event_booking_withdrawn",
+  "event_demand_interest_reviewed",
+  "event_saved_search_match",
+  "event_job_alert",
+  "event_document_ack_assigned",
+  "event_history_link_offered",
+  "event_weekly_digest",
+  "event_weekly_digest_profile_completion",
+  "event_weekly_digest_journal",
+  "event_journal_review_decided",
+  "event_journal_review_decided_approved",
+  "event_journal_review_decided_rejected",
+  "event_journal_review_decided_changes_requested",
+]);
+
+export function durableNotificationRole(renderedType: string, activeRole: Role | null): Role {
+  const current: Role = activeRole ?? "worker";
+  if (WORKER_SIDE_EVENT_TYPES.has(renderedType)) return "worker";
+  if (ORG_SIDE_EVENT_TYPES.has(renderedType)) return current === "worker" ? "company" : current;
+  return current;
+}
