@@ -46,7 +46,8 @@ export async function getProjectDefects(projectId: string): Promise<ProjectDefec
     if (dRes.error.code === RELATION_NOT_FOUND || dRes.error.code === UNDEFINED_COLUMN) {
       return { applied: false };
     }
-    return { applied: true, defects: [] };
+    console.error("[quality] defects read failed:", dRes.error.code);
+    return { applied: true, defects: [], readFailed: true };
   }
 
   type DRow = { id: string; category: string; severity: string; description: string; location: string | null; status: string; due_date: string | null };
