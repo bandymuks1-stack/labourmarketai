@@ -5417,7 +5417,9 @@
         }
       ],
       "screenshot": "Ścieżka zapotrzebowania firmy",
-      "cta": "Zgłoś zapotrzebowanie na pracowników"
+      "cta": "Zgłoś zapotrzebowanie na pracowników",
+      "calculatorBody": "Zanim poprosisz o wykonawców, oszacuj pracę: godziny, materiały, sprzęt i dojazdy — na własnych liczbach.",
+      "calculatorLink": "Oblicz koszt projektu"
     },
     "agencies": {
       "eyebrow": "Dla agencji",
