@@ -57,9 +57,9 @@ describe("brigade hours on the buyer's project", () => {
 });
 
 describe("the database door is hours-only and project-bound", () => {
-  // The CURRENT body is the latest migration that replaces the function (v2).
+  // The CURRENT body is the latest migration that replaces the function (v3).
   const sql = readFileSync(
-    join(__dirname, "..", "..", "..", "..", "supabase", "migrations", "20261019220000_project_team_journal_hours_v2.sql"),
+    join(__dirname, "..", "..", "..", "..", "supabase", "migrations", "20261021091000_project_team_journal_hours_v3.sql"),
     "utf8",
   );
   it("review notes never leave: the scope is rebuilt from decision / action / authority.basis", () => {
@@ -72,11 +72,17 @@ describe("the database door is hours-only and project-bound", () => {
     expect(sql).toMatch(/with recursive up as/);
     expect(sql).toMatch(/ta\.assigned_at <= a\.anchor_at/);
   });
+  it("an edit before confirmation keeps the work's day: the walk takes the superseded row, else correction_of", () => {
+    expect(sql).toMatch(/left join public\.journal_entries pred on pred\.superseded_by = up\.node_id/);
+    expect(sql).toMatch(/join public\.journal_entries o on o\.id = coalesce\(pred\.id, up\.node_correction_of\)/);
+    expect(sql).toMatch(/where up\.depth < 32/);
+    expect(sql).toMatch(/order by je\.created_at\s+limit 1000;/);
+  });
   it("an admin gets nothing here (they already read everything through RLS)", () => {
-    expect(sql).toMatch(/or public\.is_admin\(\)/);
+    expect(sql).toMatch(/or coalesce\(public\.is_admin\(\), false\)/);
   });
   it("only a manager of THIS project gets rows", () => {
-    expect(sql).toMatch(/not public\.can_manage_project\(p_project_id\)/);
+    expect(sql).toMatch(/not coalesce\(public\.can_manage_project\(p_project_id\), false\)/);
   });
   it("only legitimately assigned team work: a team context, inside the assignment window", () => {
     expect(sql).toMatch(/organization_type = 'team'/);

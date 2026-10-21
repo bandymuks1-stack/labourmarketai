@@ -1685,6 +1685,9 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261020174000_team_offer_agree_lock_offer_v1.sql",
       // 2026-10-21 (owner-approved #2601): atomic hours correction + edit-only-by-correction guard.
       "20261021090000_work_hours_corrections_atomic_v1.sql",
+      // 2026-10-21 (owner-approved #2604): B2B hours supersede walk + team assignment names.
+      "20261021091000_project_team_journal_hours_v3.sql",
+      "20261021092000_team_assignment_names_v1.sql",
 ]);
   });
 
