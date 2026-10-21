@@ -20,6 +20,7 @@ import { activeLocales } from "@/lib/i18n/config";
 
 const state = vi.hoisted(() => ({
   locale: "en",
+  trialEnabled: true,
   config: { state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" },
   ent: {
     effectivePlanKey: "free_organization",
@@ -59,6 +60,7 @@ vi.mock("next-intl/server", () => ({
 vi.mock("@/lib/billing/config", () => ({
   getBillingConfig: () => state.config,
   getBillingConfigFor: () => state.config,
+  billingTrialEnabled: () => state.trialEnabled,
 }));
 vi.mock("@/lib/billing/effective-entitlements", () => ({
   getEffectiveEntitlements: vi.fn(async () => state.ent),
@@ -80,6 +82,7 @@ async function render(billingReturn: string | null): Promise<string> {
 
 beforeEach(() => {
   state.locale = "en";
+  state.trialEnabled = true;
   state.config = { state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" };
   state.ent = { ...state.ent, source: "free", subscriptionStatus: null, effectivePlanKey: "free_organization" };
   state.subject = { ...state.subject, billingAuthority: true };
@@ -106,6 +109,23 @@ describe("the paid return with no row yet", () => {
       expect(html, loc).toContain(expected.replace(/&/g, "&amp;").replace(/'/g, "&#x27;"));
       expect(html, loc).not.toContain("MISSING:");
     }
+  });
+});
+
+describe("paid from the first day (owner 2026-10-21)", () => {
+  it("with the trial switched off the order area says the first month is charged today, in every active locale", async () => {
+    state.trialEnabled = false;
+    for (const locale of activeLocales) {
+      state.locale = locale;
+      const html = await render(null);
+      expect(html, locale).toContain('data-testid="account-billing-order"');
+      expect(html, locale).toContain('data-testid="billing-charged-today"');
+      expect(html, locale).not.toContain("MISSING:");
+    }
+  });
+  it("with the trial on, the notice is absent", async () => {
+    const html = await render(null);
+    expect(html).not.toContain('data-testid="billing-charged-today"');
   });
 });
 

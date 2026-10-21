@@ -10927,7 +10927,8 @@
     "subscribe": {
       "title": "Plan Organizacja",
       "cta": "Aktywuj plan Organizacja",
-      "note": "Zostaniesz przekierowany/a do Stripe Checkout; subskrypcja jest przypisana do tej organizacji."
+      "note": "Zostaniesz przekierowany/a do Stripe Checkout; subskrypcja jest przypisana do tej organizacji.",
+      "chargedToday": "Bez darmowego okresu próbnego: pierwszy miesiąc jest płatny dziś w Stripe Checkout, potem co miesiąc do czasu anulowania. Przed płatnością Stripe pokaże dokładną kwotę z VAT."
     }
   },
   "accountPlan": {

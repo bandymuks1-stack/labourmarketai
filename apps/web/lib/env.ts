@@ -105,6 +105,10 @@ const schema = z.object({
   // malformed list admits nobody. Exactly ALL_ORGANIZATIONS = the public launch.
   // See config-core.ts.
   BILLING_PILOT_ORGANIZATION_IDS: z.string().optional(),
+  // TRIAL SWITCH (owner 2026-10-21): "false" = a NEW organization subscription
+  // is paid from the first day (no automatic 14-day trial). It changes only
+  // checkouts started from now on — an existing subscription keeps its terms.
+  BILLING_TRIAL_ENABLED: z.enum(["true", "false"]).default("true"),
   // TEST price ids (price_…) per paid plan — owner sets these in Stripe test.
   STRIPE_PRICE_WORKER_PLUS: z.string().optional(),
   STRIPE_PRICE_COMPANY_PILOT: z.string().optional(),
@@ -220,6 +224,7 @@ const parsed = schema.safeParse({
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   STRIPE_LIVE_ACTIVATION: process.env.STRIPE_LIVE_ACTIVATION,
   BILLING_PILOT_ORGANIZATION_IDS: process.env.BILLING_PILOT_ORGANIZATION_IDS,
+  BILLING_TRIAL_ENABLED: process.env.BILLING_TRIAL_ENABLED,
   STRIPE_PRICE_WORKER_PLUS: process.env.STRIPE_PRICE_WORKER_PLUS,
   STRIPE_PRICE_COMPANY_PILOT: process.env.STRIPE_PRICE_COMPANY_PILOT,
   STRIPE_PRICE_AGENCY_PILOT: process.env.STRIPE_PRICE_AGENCY_PILOT,
