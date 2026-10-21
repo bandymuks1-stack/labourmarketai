@@ -1,3 +1,5 @@
+-- @human-gate-approved — owner approved PR #2604 (2026-10-21): the buyer's project manager reads brigade hours through edits (supersede walk) and the hired brigade's name; names only, project managers only.
+-- Conditions: within this defect's purpose, organization isolation kept, no unauthorized data change; verified in a rolled-back production test. Scope: this SQL only.
 -- 20261021092000_team_assignment_names_v1
 --
 -- RED by SECURITY DEFINER + GRANT (a new read door). The
