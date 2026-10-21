@@ -148,6 +148,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-21 (RED, needs-human-gate): org rights — membership end closes owner authority; invitations follow org authority.
       "20261021093000_",
       "20261021094000_",
+      // 2026-10-21 (RED, owner-approved #2613): a brigade whose only offer is on a closed need can be disbanded.
+      "20261021120000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
