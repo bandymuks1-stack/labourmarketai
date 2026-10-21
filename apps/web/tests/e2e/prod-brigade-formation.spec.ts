@@ -452,16 +452,14 @@ test("B2B-8. a brigade member sees the buyer's project through the team and reco
   await expect(card, "the team assignment makes the project the member's work context").toBeVisible({ timeout: 30_000 });
   await expect(card.getByTestId("worker-project-via-team")).toBeVisible();
   await page.goto("/lt/dashboard/journal");
-  // The button enables only once the page's own state holds the sentence, so
-  // an enabled button proves the recorder is hydrated; text typed earlier is
-  // lost (run 39570461256: the page settled after the fill and the readback
-  // never opened). Type again until the recorder has it.
+  // ONE fill, as a person types once. The button enables only when the
+  // recorder's own state holds the sentence, so a sentence typed before the
+  // page finished loading must be kept by the recorder itself (run
+  // 39570461256 lost it; quick-record.tsx now takes the field's early text).
   const text = page.getByTestId("journal-quick-record-text");
   const understand = page.getByTestId("journal-quick-record-understand");
-  await expect(async () => {
-    await text.fill(WORK);
-    await expect(understand).toBeEnabled({ timeout: 3_000 });
-  }).toPass({ timeout: 30_000 });
+  await text.fill(WORK);
+  await expect(understand, "the recorder kept the sentence typed once").toBeEnabled({ timeout: 30_000 });
   await understand.click();
   const flow = page.getByTestId("worklog-flow");
   try {
