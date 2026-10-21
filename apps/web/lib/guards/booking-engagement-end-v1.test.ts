@@ -1697,6 +1697,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261021095200_booking_propose_reachable_open_v1.sql",
       // 2026-10-21 (owner-approved #2613): a brigade whose only offer is on a closed need can be disbanded
       "20261021120000_team_disband_closed_need_offers_v1.sql",
+      // 2026-10-21 (RED, needs-human-gate): stale booking proposals expire daily (system function + pg_cron).
+      "20261021130000_booking_expiry_system_schedule_v1.sql",
 ]);
   });
 

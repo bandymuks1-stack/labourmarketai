@@ -213,8 +213,10 @@ export function ContactDisclosureRequests({
 
             {/* Decision 2 (SEPARATE, shared contract): the actual contact-
                 detail disclosure grant — offered only after an accept, with
-                the exact versioned legal wording shown first. */}
-            {status === "accepted" && !isGranted && !justWithdrawn ? (
+                the exact versioned legal wording shown first. A withdrawal
+                does not end the person's choice: the same block is offered
+                again right away (it used to stay hidden until a reload). */}
+            {status === "accepted" && !isGranted ? (
               <div
                 className="flex flex-col gap-2 rounded-md border border-brand-blue/25 bg-brand-blue/5 px-3 py-2"
                 data-testid={`contact-request-grant-block-${r.id}`}

@@ -577,6 +577,9 @@ export default async function WorkerDocumentsPage({
                   <li
                     key={d.id}
                     className="card-border glow-hover rise-in flex flex-wrap items-center justify-between gap-2 p-3"
+                    data-testid="doc-centre-item"
+                    data-type={d.documentTypeSlug}
+                    data-country={d.country ?? ""}
                     data-status={d.derivedStatus}
                   >
                     <div className="flex min-w-0 flex-col gap-0.5">
