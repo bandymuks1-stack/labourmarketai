@@ -28,15 +28,20 @@ export type TrialDecision =
         | "not_trial_plan"
         | "not_organization_subject"
         | "organization_has_subscription_history"
-        | "history_unreadable";
+        | "history_unreadable"
+        | "trial_switched_off";
     };
 
 export function decideTrial(input: {
   planKey: string;
   subjectType: "organization" | "profile";
   history: TrialHistory;
+  /** BILLING_TRIAL_ENABLED (owner 2026-10-21): false = paid from the first day.
+   *  Omitted = the trial policy as before. */
+  enabled?: boolean;
 }): TrialDecision {
   if (input.planKey !== ORGANIZATION_PLAN_KEY) return { trial: false, reason: "not_trial_plan" };
+  if (input.enabled === false) return { trial: false, reason: "trial_switched_off" };
   if (input.subjectType !== "organization") {
     return { trial: false, reason: "not_organization_subject" };
   }

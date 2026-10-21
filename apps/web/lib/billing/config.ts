@@ -63,6 +63,11 @@ export function getBillingConfigFor(organizationId: string | null): BillingConfi
   );
 }
 
+/** Server-only: whether a NEW organization subscription starts with the 14-day trial. */
+export function billingTrialEnabled(): boolean {
+  return env.BILLING_TRIAL_ENABLED !== "false";
+}
+
 /** Server-only: whether billing is restricted to a pilot list (true unless ALL_ORGANIZATIONS). */
 export function billingPilotActive(): boolean {
   return parsePilotOrganizations(env.BILLING_PILOT_ORGANIZATION_IDS) !== null;
