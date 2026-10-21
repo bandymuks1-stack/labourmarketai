@@ -111,9 +111,12 @@ describe("skillConfirmationState / withStandingConfirmation — what the tier re
     expect(skillConfirmationState({ skill_id: "s1", verified: false }, read)).toBe("none");
     expect(skillConfirmationState({ skill_id: "s1", verified: true, verified_by: "m1" }, read)).toBe("standing");
     expect(skillConfirmationState({ skill_id: "s2", verified: true, verified_by: "m1" }, read)).toBe("withdrawn");
-    expect(skillConfirmationState({ skill_id: "s1", verified: true, verified_by: SUBJECT }, read)).toBe(
+    expect(skillConfirmationState({ skill_id: "s2", verified: true, verified_by: SUBJECT }, read)).toBe(
       "self_confirmed",
     );
+    // a self-flagged skill that an independent approval LATER backs stands
+    // (verified_by is never rewritten after the first flip)
+    expect(skillConfirmationState({ skill_id: "s1", verified: true, verified_by: SUBJECT }, read)).toBe("standing");
     expect(skillConfirmationState({ skill_id: "s1", verified: true, verified_by: "m1" }, null)).toBe("unknown");
     // an erased confirmer (verified_by severed to NULL) is judged by the work alone
     expect(skillConfirmationState({ skill_id: "s1", verified: true, verified_by: null }, read)).toBe("standing");
