@@ -70,3 +70,15 @@ describe("internship / apprenticeship — canonical opportunity types", () => {
     expect(migFn).toBe(downFn);
   });
 });
+
+describe("the board's discovery filter can see the declared type", () => {
+  it("the worker board loader puts the demand's declared type on the card's need", () => {
+    // `needMatchesFilters` compares `need.opportunityType`; without this line
+    // `?opportunityType=internship` dropped every first-party need.
+    const loader = read("apps/web/lib/opportunities/load-worker-opportunities.ts");
+    expect(loader).toMatch(/opportunityType: matchNeed\.opportunityType \?\? null/);
+    const at = loader.indexOf("const { need: matchNeed } = needFromDemandRow(row);");
+    expect(at).toBeGreaterThan(-1);
+    expect(at).toBeLessThan(loader.indexOf("const need: OpportunityNeed = {"));
+  });
+});

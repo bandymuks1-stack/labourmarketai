@@ -4751,10 +4751,10 @@
         "preview_workspace": "Vorschau",
         "comingLater": "Später verfügbar",
         "theme": {
-          "appearance": "Appearance",
-          "help": "Theme",
-          "toDark": "Dark",
-          "toLight": "Light"
+          "appearance": "Darstellung",
+          "help": "Design",
+          "toDark": "Dunkel",
+          "toLight": "Hell"
         },
         "security": {
           "title": "Sicherheit & Zugriff",
@@ -7667,16 +7667,16 @@
     "cvBridgeLink": "CV öffnen",
     "inbox": {
       "title": "Arbeitsprüfung",
-      "confirmSkills": "Confirm skills",
-      "confirmSkillsHint": "Tick the skills this entry proves. Confirming verifies them.",
-      "confirmNote": "Optional note",
-      "confirmSubmit": "Confirm & verify",
-      "alreadyVerified": "Already verified",
+      "confirmSkills": "Fähigkeiten bestätigen",
+      "confirmSkillsHint": "Wählen Sie die deklarierten Fähigkeiten aus, die dieser Eintrag belegt — sie werden verifiziert.",
+      "confirmNote": "Notiz (optional)",
+      "confirmSubmit": "Bestätigen",
+      "alreadyVerified": "Bereits verifiziert",
       "noSkillsToConfirm": "Dieser Eintrag hat keine verknüpften Fähigkeiten mehr zu bestätigen. Die Freigabe bestätigt die Arbeit selbst.",
       "result": {
-        "skillsVerified": "Verified {count} skill(s).",
-        "skillNotOwned": "That skill is not declared by this worker.",
-        "noSkillsSelected": "Select at least one skill."
+        "skillsVerified": "Bestätigt. {count} Fähigkeit(en) verifiziert.",
+        "skillNotOwned": "Diese Fähigkeit gehört nicht zu dieser Arbeitskraft.",
+        "noSkillsSelected": "Wählen Sie mindestens eine Fähigkeit aus."
       }
     },
     "cv": {

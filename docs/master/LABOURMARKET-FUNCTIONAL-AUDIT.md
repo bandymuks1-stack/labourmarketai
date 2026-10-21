@@ -34,22 +34,22 @@ A green CI run is **never** counted as functional proof: LIVE_PROVEN needs a pro
 | 1 Registration, sign-in, profiles | 5 | 3 | 0 | 0 | 0 | 0 | 8 | 5/8 | 0 |
 | 2 Work Journal | 2 | 3 | 1 | 0 | 1 | 2 | 9 | 2/9 | 0 |
 | 3 Living CV, skills, confirmations, recognition | 11 | 4 | 9 | 0 | 1 | 1 | 26 | 11/26 | 1 |
-| 4 Companies and organizations | 2 | 4 | 7 | 0 | 0 | 0 | 13 | 2/13 | 1 |
+| 4 Companies and organizations | 2 | 3 | 8 | 0 | 0 | 0 | 13 | 2/13 | 1 |
 | 5 Projects, objects, tasks | 1 | 6 | 5 | 0 | 0 | 0 | 12 | 1/12 | 0 |
 | 6 Brigades and B2B | 4 | 0 | 0 | 0 | 0 | 0 | 4 | 4/4 | 0 |
 | 7 Calendar, planning, hours | 4 | 0 | 6 | 0 | 1 | 0 | 11 | 4/11 | 0 |
 | 8 Job offers, needs, applications | 5 | 2 | 4 | 0 | 0 | 2 | 13 | 5/13 | 2 |
 | 9 Worker search, matching, recommendations | 6 | 7 | 3 | 0 | 0 | 1 | 17 | 6/17 | 2 |
 | 10 Conversations, invitations, notifications; chat, AI and MCP doors | 8 | 6 | 8 | 0 | 4 | 9 | 35 | 8/35 | 1 |
-| 11 Universal marketplace | 3 | 2 | 2 | 0 | 0 | 1 | 8 | 3/8 | 1 |
-| 12 Orders, bookings, execution | 0 | 1 | 4 | 0 | 3 | 0 | 8 | 0/8 | 1 |
+| 11 Universal marketplace | 3 | 1 | 3 | 0 | 0 | 1 | 8 | 3/8 | 1 |
+| 12 Orders, bookings, execution | 0 | 0 | 5 | 0 | 3 | 0 | 8 | 0/8 | 1 |
 | 13 Payments: Stripe, LMC, subscriptions, invoices | 2 | 4 | 4 | 1 | 8 | 10 | 29 | 2/29 | 1 |
-| 14 Documents, contracts, approvals | 0 | 4 | 1 | 0 | 0 | 0 | 5 | 0/5 | 0 |
+| 14 Documents, contracts, approvals | 0 | 3 | 2 | 0 | 0 | 0 | 5 | 0/5 | 0 |
 | 15 History, data value, reports | 1 | 3 | 6 | 0 | 0 | 1 | 11 | 1/11 | 0 |
 | 16 Privacy, GDPR, security | 7 | 4 | 6 | 0 | 0 | 0 | 17 | 7/17 | 0 |
 | 17 International, languages, devices | 2 | 3 | 5 | 0 | 1 | 4 | 15 | 2/15 | 0 |
 | 18 Admin, marketing, analytics, operations | 8 | 12 | 8 | 1 | 1 | 3 | 33 | 8/33 | 0 |
-| **Total** | **71** | **68** | **79** | **2** | **20** | **34** | **274** | **71/274** | 10 |
+| **Total** | **71** | **64** | **83** | **2** | **20** | **34** | **274** | **71/274** | 10 |
 
 ### 1b. By audit section (where each row lives in the private registry)
 
@@ -57,10 +57,10 @@ A green CI run is **never** counted as functional proof: LIVE_PROVEN needs a pro
 |---|---|---|---|---|---|---|---|---|---|
 | 1 Registration, login, roles, organizations, invitations | 7 | 2 | 5 | 0 | 0 | 1 | 15 | 7/15 | 0 |
 | 2 Worker profiles, Living CV, Work Journal, confirmed history | 10 | 10 | 13 | 0 | 1 | 1 | 35 | 10/35 | 0 |
-| 3 Employer workspace: projects, sites, teams/brigades, tasks, hours, planning | 8 | 13 | 11 | 0 | 1 | 0 | 33 | 8/33 | 0 |
-| 4 Job offers / demand, candidate search, matching, scouting, shortlist, consents | 12 | 8 | 4 | 0 | 1 | 1 | 26 | 12/26 | 3 |
+| 3 Employer workspace: projects, sites, teams/brigades, tasks, hours, planning | 8 | 12 | 12 | 0 | 1 | 0 | 33 | 8/33 | 0 |
+| 4 Job offers / demand, candidate search, matching, scouting, shortlist, consents | 12 | 7 | 5 | 0 | 1 | 1 | 26 | 12/26 | 3 |
 | 5 Conversations, notifications, calendar, chat-first control | 5 | 3 | 6 | 0 | 2 | 3 | 19 | 5/19 | 0 |
-| 6 Universal marketplace: services, goods, orders, bookings, cross-border, logistics | 3 | 5 | 7 | 0 | 3 | 1 | 19 | 3/19 | 3 |
+| 6 Universal marketplace: services, goods, orders, bookings, cross-border, logistics | 3 | 3 | 9 | 0 | 3 | 1 | 19 | 3/19 | 3 |
 | 7 Paid plans, free limits, VIP, LMC, payments | 2 | 4 | 4 | 1 | 7 | 10 | 28 | 2/28 | 0 |
 | 8 Multilingual, country markets, SEO, mobile web and app | 3 | 5 | 5 | 0 | 1 | 2 | 16 | 3/16 | 1 |
 | 9 Administration, security, audit, RLS, API, data protection | 5 | 9 | 7 | 0 | 0 | 3 | 24 | 5/24 | 1 |
@@ -68,7 +68,7 @@ A green CI run is **never** counted as functional proof: LIVE_PROVEN needs a pro
 | 11 Education, institutions, recognition / RPL (added area) | 6 | 0 | 2 | 0 | 1 | 1 | 10 | 6/10 | 0 |
 | 12 Map & market intelligence (added area) | 0 | 4 | 2 | 0 | 0 | 0 | 6 | 0/6 | 0 |
 | 13 Platform operations & governance (added area) | 7 | 2 | 7 | 1 | 0 | 0 | 17 | 7/17 | 0 |
-| **Total** | **71** | **68** | **79** | **2** | **20** | **34** | **274** | **71/274** | 10 |
+| **Total** | **71** | **64** | **83** | **2** | **20** | **34** | **274** | **71/274** | 10 |
 
 <!-- registry-summary:end -->
 

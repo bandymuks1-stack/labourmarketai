@@ -26,7 +26,10 @@ import {
   parseScoutFilterParams,
   type ScoutFilters,
 } from "@/lib/scouting/scout-filters";
-import { getScoutingContactRequestStates } from "@/lib/privacy/contact-disclosure-actions";
+import {
+  getScoutingContactRequestStates,
+  type ScoutingContactRequestStates,
+} from "@/lib/privacy/contact-disclosure-actions";
 import { RequestContactDetailsButton } from "@/components/app/request-contact-details-button";
 import {
   IdentityDisclosure,
@@ -189,11 +192,28 @@ export default async function CompanyScoutingPage({
     demands.find((d) => d.structured)?.id ??
     demands[0]?.id ??
     null;
-  const result = selected ? await runScouting(selected, requestedFilters) : null;
-  const autoMatchReceipt =
-    selected && result?.kind === "ok"
-      ? await readLastAutoMatchReceipt(await createSupabaseServerClient(), selected)
-      : null;
+  // READ STAGES, NOT ONE AWAIT PER READ. Every read below depends either on
+  // the selected need alone or on the scouting result, so each group runs as
+  // one batch. Before, up to nine reads ran one after another, so the
+  // employer's "who fits this need" page waited for the sum of their round
+  // trips; now it waits for the slowest read of each of two stages (three
+  // when an accepted team offer needs the project list). Guarded by
+  // lib/guards/scouting-read-stages.test.ts.
+  //
+  // Stage 1 — needs only the selected need.
+  const [result, offeredCandidates, contactRequests] = await Promise.all([
+    selected ? runScouting(selected, requestedFilters) : null,
+    // Agency-proposed candidates for THIS demand (the caller owns it; the RPC
+    // returns rows only to the request owner). Empty until the owner-gated
+    // bridge migration is applied.
+    selected ? listOfferedCandidatesForRequest(selected) : [],
+    // Contact-detail ask states for THIS demand (Wagon 1) — owner-scoped read;
+    // applied:false while the draft-gated model is not applied (honest note,
+    // no dead button).
+    selected
+      ? getScoutingContactRequestStates(selected)
+      : Promise.resolve<ScoutingContactRequestStates>({ applied: false, byWorker: {} }),
+  ]);
   // An AGENCY working on a need its client SHARED (owner decision 2026-09-28
   // B): it may read the need and see who fits, and it presents candidates from
   // its OWN roster (partners page). The client-owner actions — contact,
@@ -203,45 +223,61 @@ export default async function CompanyScoutingPage({
     result?.kind === "ok" && !demands.some((d) => d.id === result.demand.id);
   // A need that is not closed takes decisions; a closed one shows history.
   const needOpen = result?.kind === "ok" ? result.demand.status !== "closed" : true;
-  // Agency-proposed candidates for THIS demand (the caller owns it; the RPC
-  // returns rows only to the request owner). Empty until the owner-gated bridge
-  // migration is applied.
-  const offeredCandidates = selected ? await listOfferedCandidatesForRequest(selected) : [];
-  // E6 - brigades that offered THEMSELVES as one unit against this need. Team-level
-  // aggregates only (the database never returns a member), matched against the SAME
-  // need the candidates were judged against. An agency acting for a client does not
-  // answer for it, so the section is the owner's. Projects load only when an offer
-  // is accepted and waiting for its assignment.
-  const teamOffers =
-    selected && !actsForClient
-      ? await loadTeamOffersForDemand(selected, result?.kind === "ok" ? (result.need ?? null) : null)
-      : null;
+  // WHO APPLIED (owner order 2026-10-01): for a worker whose application is
+  // on THIS employer's own need, the database (applicant_identity_v1, owner of
+  // the demand + application not withdrawn) may release the name and photo.
+  // Absent function / no standing / agency acting for a client -> null and the
+  // anonymized handle stays. Nothing is guessed.
+  const applied =
+    result?.kind === "ok" && !actsForClient
+      ? result.candidates.filter((c) => {
+          const st = result.interestByWorker[c.workerId];
+          return st === "interested" || st === "reviewed" || st === "contacted";
+        })
+      : [];
+  // Stage 2 — needs the scouting result (or the stage-1 offers).
+  const [autoMatchReceipt, teamOffers, appliedIdentities, offerBookingStatus, pipelineFacts] =
+    await Promise.all([
+      selected && result?.kind === "ok"
+        ? createSupabaseServerClient().then((client) => readLastAutoMatchReceipt(client, selected))
+        : null,
+      // E6 - brigades that offered THEMSELVES as one unit against this need. Team-level
+      // aggregates only (the database never returns a member), matched against the SAME
+      // need the candidates were judged against. An agency acting for a client does not
+      // answer for it, so the section is the owner's.
+      selected && !actsForClient
+        ? loadTeamOffersForDemand(selected, result?.kind === "ok" ? (result.need ?? null) : null)
+        : null,
+      result?.kind === "ok"
+        ? Promise.all(
+            applied.map(async (c) => [c.workerId, await getApplicantIdentity(result.demand.id, c.workerId)] as const),
+          )
+        : [],
+      // The worker's own answer to each booking an accepted offer proposed.
+      readOfferBookingStatuses(
+        offeredCandidates.map((oc) => oc.bookingId).filter((id): id is string => Boolean(id)),
+      ),
+      // The two pipeline facts the scouting result does not already carry:
+      // booking status per pair + direct-conversation existence (both real,
+      // RLS-scoped reads; absent tables degrade to empty facts — see the
+      // candidate-pipeline-facts limitation note).
+      result?.kind === "ok" && result.candidates.length > 0
+        ? loadDemandPipelineFacts(
+            result.demand.id,
+            result.candidates.map((c) => c.workerId),
+          )
+        : null,
+    ]);
+  const applicantIdentity = new Map<string, ApplicantIdentity>();
+  for (const [id, who] of appliedIdentities) if (who) applicantIdentity.set(id, who);
+  // Stage 3 — projects load only when a team offer is accepted and waiting for
+  // its assignment.
   const teamOfferProjects =
     teamOffers && teamOffers.offers.some((o) => o.offer.status === "accepted")
       ? (await listManagedProjects())
           .filter((p) => p.status !== "completed")
           .map((p) => ({ id: p.id, title: p.title }))
       : [];
-  // WHO APPLIED (owner order 2026-10-01): for a worker whose application is
-  // on THIS employer's own need, the database (applicant_identity_v1, owner of
-  // the demand + application not withdrawn) may release the name and photo.
-  // Absent function / no standing / agency acting for a client -> null and the
-  // anonymized handle stays. Nothing is guessed.
-  const applicantIdentity = new Map<string, ApplicantIdentity>();
-  if (result?.kind === "ok" && !actsForClient) {
-    const applied = result.candidates.filter((c) => {
-      const st = result.interestByWorker[c.workerId];
-      return st === "interested" || st === "reviewed" || st === "contacted";
-    });
-    const found = await Promise.all(
-      applied.map(async (c) => [c.workerId, await getApplicantIdentity(result.demand.id, c.workerId)] as const),
-    );
-    for (const [id, who] of found) if (who) applicantIdentity.set(id, who);
-  }
-  // The worker's own answer to each booking an accepted offer proposed.
-  const offerBookingStatus = await readOfferBookingStatuses(
-    offeredCandidates.map((oc) => oc.bookingId).filter((id): id is string => Boolean(id)),
-  );
   // ONE source of truth for the synthetic-title labels — the same catalogue
   // node the company hub and the buyer surface already read.
   const tDemandReadback = await getTranslations("demandReadback");
@@ -250,13 +286,6 @@ export default async function CompanyScoutingPage({
     agencyPartnership: tDemandReadback("syntheticTitle.agencyPartnership"),
   };
   const tOffered = await getTranslations("scoutingAgencyOffers");
-
-  // Contact-detail ask states for THIS demand (Wagon 1) — owner-scoped read;
-  // applied:false while the draft-gated model is not applied (honest note,
-  // no dead button).
-  const contactRequests = selected
-    ? await getScoutingContactRequestStates(selected)
-    : { applied: false as const, byWorker: {} };
 
   // Shareable filter links: preserve the selected demand, toggle one facet.
   const filterHref = (next: Partial<ScoutFilters>): string => {
@@ -269,18 +298,6 @@ export default async function CompanyScoutingPage({
     if (merged.availableNow) params.set("available", "1");
     return `/${locale}/dashboard/company/scouting?${params.toString()}`;
   };
-
-  // The two pipeline facts the scouting result does not already carry:
-  // booking status per pair + direct-conversation existence (both real,
-  // RLS-scoped reads; absent tables degrade to empty facts — see the
-  // candidate-pipeline-facts limitation note).
-  const pipelineFacts =
-    result?.kind === "ok" && result.candidates.length > 0
-      ? await loadDemandPipelineFacts(
-          result.demand.id,
-          result.candidates.map((c) => c.workerId),
-        )
-      : null;
 
   // W10 slice 3: "we did not compare everyone" is true when the pool budget
   // bound OR when a Stage-1 id read was truncated. Either way the employer is
