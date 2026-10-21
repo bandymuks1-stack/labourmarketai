@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { cvSkillTier, groupCvSkillTiers } from "@/lib/cv-export/skill-tiers";
 import {
   skillConfirmationState,
+  standingConfirmedSkillApprovals,
   standingConfirmedSkillIds,
   withStandingConfirmation,
   type StandingEntryRow,
@@ -104,6 +105,44 @@ describe("standingConfirmedSkillIds — which recorded confirmations still stand
   });
 });
 
+describe("a person's OWN flag stands only through an approval that POSTDATES it", () => {
+  // verified_by is written only on the false -> true flip, so it never moves
+  // off the person: it may not be a permanent veto, nor may an OLDER approval
+  // of the same work lift what the person asserted afterwards.
+  const approvals = (day: number) =>
+    standingConfirmedSkillApprovals([entry("e1", [decision("approved", "m1", day)], ["s1"])], SUBJECT)!;
+  const readWith = (day: number) => {
+    const approvedAt = approvals(day);
+    return { ids: new Set(approvedAt.keys()), subjectProfileId: SUBJECT, approvedAt };
+  };
+  const ownFlag = { skill_id: "s1", verified: true, verified_by: SUBJECT, verified_at: at(5) };
+
+  it("an independent approval AFTER the own flag lifts it", () => {
+    expect(skillConfirmationState(ownFlag, readWith(6))).toBe("standing");
+  });
+  it("an approval BEFORE the own flag does not (the person asserted it afterwards)", () => {
+    expect(skillConfirmationState(ownFlag, readWith(4))).toBe("self_confirmed");
+  });
+  it("an own flag with no readable time never stands", () => {
+    expect(skillConfirmationState({ ...ownFlag, verified_at: null }, readWith(6))).toBe("self_confirmed");
+  });
+  it("a manager's flag is not dated: a standing approval of any time keeps it", () => {
+    expect(skillConfirmationState({ ...ownFlag, verified_by: "m1" }, readWith(4))).toBe("standing");
+  });
+  it("the approval time is the LATEST independent approval; self and client rows never date it", () => {
+    const map = standingConfirmedSkillApprovals(
+      [
+        entry("e1", [decision("approved", "m1", 2), decision("approved", SUBJECT, 9)], ["s1"]),
+        entry("e2", [decision("approved", "m2", 7, { authority: { basis: "counterparty" } })], ["s1"]),
+        entry("e3", [decision("approved", "m3", 3, { skills_confirmed: ["s2"] })]),
+      ],
+      SUBJECT,
+    )!;
+    expect(map.get("s1")).toBe(at(2));
+    expect(map.get("s2")).toBe(at(3));
+  });
+});
+
 describe("skillConfirmationState / withStandingConfirmation — what the tier readers see", () => {
   const read = { ids: new Set(["s1"]), subjectProfileId: SUBJECT };
 
@@ -111,6 +150,10 @@ describe("skillConfirmationState / withStandingConfirmation — what the tier re
     expect(skillConfirmationState({ skill_id: "s1", verified: false }, read)).toBe("none");
     expect(skillConfirmationState({ skill_id: "s1", verified: true, verified_by: "m1" }, read)).toBe("standing");
     expect(skillConfirmationState({ skill_id: "s2", verified: true, verified_by: "m1" }, read)).toBe("withdrawn");
+    expect(skillConfirmationState({ skill_id: "s2", verified: true, verified_by: SUBJECT }, read)).toBe(
+      "self_confirmed",
+    );
+    // the person's own flag with no dated approval behind it never stands
     expect(skillConfirmationState({ skill_id: "s1", verified: true, verified_by: SUBJECT }, read)).toBe(
       "self_confirmed",
     );
