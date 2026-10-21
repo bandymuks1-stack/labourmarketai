@@ -145,6 +145,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261021095000_",
       "20261021095100_",
       "20261021095200_",
+      // 2026-10-21 (RED, needs-human-gate): org rights — membership end closes owner authority; invitations follow org authority.
+      "20261021093000_",
+      "20261021094000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

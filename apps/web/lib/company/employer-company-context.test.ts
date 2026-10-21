@@ -537,6 +537,44 @@ describe("§11 governance gate — membership truth decides the role", () => {
     });
   });
 
+  it("a creator whose accepted membership was REVOKED is no owner-equivalent (20261021093000)", async () => {
+    // The stub answers both membership reads with the same rows: no active
+    // role (the row carries none), and a revoked row that had been accepted.
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: USER.id }] },
+        company_memberships: { data: [{ accepted_at: "2026-08-06T05:24:45Z" }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "unavailable",
+      reason: "company-not-owned",
+    });
+  });
+
+  it("a creator with only a DECLINED invitation (revoked, never accepted) keeps the creator arm", async () => {
+    fromMock.mockImplementation(
+      tableStub({
+        organizations: {
+          data: [
+            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
+          ],
+        },
+        companies: { data: [{ id: COMPANY_A, profile_id: USER.id }] },
+        company_memberships: { data: [{ accepted_at: null }] },
+      }),
+    );
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
+      kind: "ok",
+      role: "owner",
+    });
+  });
+
   it("a membership read FAILURE is an error, never a silent grant", async () => {
     fromMock.mockImplementation(
       tableStub({
