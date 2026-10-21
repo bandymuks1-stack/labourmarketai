@@ -268,6 +268,9 @@ test("S-1. the provider offers a service and makes it discoverable", async ({ br
   if (!/aktyv|active/i.test(await status.innerText())) {
     await page.getByTestId(`service-offering-toggle-${serviceId}`).click();
   }
+  // The discoverability line renders for draft and paused rows too: wait for
+  // the row itself to say ACTIVE before the next actor looks for it.
+  await expect(status).toHaveText(/aktyv|active/i, { timeout: 30_000 });
   await expect(page.getByTestId(`service-offering-discoverability-${serviceId}`)).toBeVisible({ timeout: 30_000 });
   await ctx.close();
 });
