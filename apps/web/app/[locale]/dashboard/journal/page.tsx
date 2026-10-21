@@ -140,6 +140,8 @@ import {
 import { PageTitle } from "@/components/app/premium/page-title";
 import { experienceFiguresOf } from "@/lib/journal/experience-figures";
 import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
+import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -623,7 +625,7 @@ export default async function JournalPage({
       readOwnOccupationPath(supabase, worker.id),
       supabase
         .from("worker_skills")
-        .select("skill_id, verified, source, skills(slug)")
+        .select("skill_id, verified, verified_by, verified_at, source, skills(slug)")
         .eq("worker_id", worker.id),
       readWorkerEntrySkillLinks(supabase, worker.id),
       // G4 bridge: THE canonical journal-list core (v3 select + legacy
@@ -713,7 +715,13 @@ export default async function JournalPage({
   const idToSlug = new Map<string, string>();
   const declaredSlugSet = new Set(availableSkillsForLinks.map((s) => s.slug));
   const verifiedSkillIds = new Set<string>();
-  for (const r of skillIdRows ?? []) {
+  // A recorded confirmation counts only while it STANDS
+  // (lib/evidence/skill-confirmation-standing.ts).
+  const standingSkillRows = withStandingConfirmation(
+    skillIdRows ?? [],
+    anyRecordedConfirmation(skillIdRows ?? []) ? await readOwnStandingConfirmedSkillIds(worker.id) : null,
+  );
+  for (const r of standingSkillRows) {
     const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
     if (r.skill_id && slug) idToSlug.set(r.skill_id as string, slug);
     if (r.skill_id && (r as { verified?: boolean }).verified) {

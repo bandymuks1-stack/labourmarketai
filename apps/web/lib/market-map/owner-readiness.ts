@@ -3,6 +3,8 @@ import { readCorrectedOriginalIds } from "@/lib/journal/corrected-originals-read
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 
 /**
  * Market Map — OWNER-SCOPED availability + capability signals.
@@ -135,8 +137,15 @@ export async function getOwnCapabilities(limit = 18): Promise<OwnCapabilities> {
   // Skills the worker has self-listed (with verification flag + skill slug).
   const { data: ws } = await asAny(supabase)
     .from("worker_skills")
-    .select("skill_id, verified, skills(slug, category)")
+    .select("skill_id, verified, verified_by, verified_at, skills(slug, category)")
     .eq("worker_id", workerId);
+  // A recorded confirmation is "confirmed" only while it STANDS
+  // (lib/evidence/skill-confirmation-standing.ts).
+  const storedSkills = Array.isArray(ws) ? (ws as { skill_id: string | null; verified: boolean | null; verified_by: string | null; verified_at: string | null; skills?: unknown }[]) : [];
+  const standingSkills = withStandingConfirmation(
+    storedSkills,
+    anyRecordedConfirmation(storedSkills) ? await readOwnStandingConfirmedSkillIds(workerId) : null,
+  );
 
   // Skills evidenced by real journal work (distinct skill ids).
   const [{ data: jes }, corrected] = await Promise.all([
@@ -158,7 +167,7 @@ export async function getOwnCapabilities(limit = 18): Promise<OwnCapabilities> {
   );
 
   const byId = new Map<string, CapabilitySignal>();
-  for (const r of Array.isArray(ws) ? ws : []) {
+  for (const r of standingSkills) {
     const id = String(r.skill_id);
     const skill = (r.skills ?? {}) as Record<string, unknown>;
     const verified = r.verified === true;

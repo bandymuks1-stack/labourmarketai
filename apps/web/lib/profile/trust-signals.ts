@@ -6,6 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import { countedOnce } from "@/lib/journal/counted-once";
 import { liveJournalEntriesOnly, readAllPages } from "@/lib/journal/journal-list-core";
 import { countConfirmedEntries, type ConfirmationRow } from "@/lib/journal/review-status";
+import {
+  confirmationStands,
+  skillConfirmationState,
+  standingConfirmedSkillApprovals,
+} from "@/lib/evidence/skill-confirmation-standing";
 
 /**
  * Workstream C — honest trust signals for the person's OWN profile.
@@ -25,6 +30,7 @@ interface TrustEntryRow {
   readonly id: string;
   readonly correction_of?: string | null;
   readonly journal_entry_confirmations?: readonly ConfirmationRow[] | null;
+  readonly journal_entry_skills?: readonly { readonly skill_id: string | null }[] | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,7 +45,14 @@ function asAny(supabase: SupabaseClient): any {
  * is none yet.
  */
 export interface OwnTrustSignals {
-  /** worker_skills rows with verified=true (manager-confirmed ladder). */
+  /**
+   * CONFIRMED SKILLS whose confirmation still STANDS
+   * (lib/evidence/skill-confirmation-standing.ts): recorded as confirmed by
+   * someone other than the person AND backed by at least one live,
+   * counted-once entry whose latest independent decision is an approval. A
+   * confirmation whose work was later rejected, corrected or deleted, or that
+   * the person made on their own skill, is not counted. null = unread.
+   */
   readonly verifiedSkills: number | null;
   /**
    * CONFIRMED ENTRIES — live, counted-once entries whose latest decision is an
@@ -57,9 +70,11 @@ export async function getOwnTrustSignals(
   const supabase = await createClient();
 
   const [skillsRes, entriesRes, workerRes] = await Promise.all([
+    // The RECORDED confirmations (the flag is history, never rewritten); which
+    // of them still stand is decided below from the entries read beside it.
     asAny(supabase)
       .from("worker_skills")
-      .select("id", { count: "exact", head: true })
+      .select("skill_id, verified_by, verified_at")
       .eq("worker_id", workerId)
       .eq("verified", true),
     // LIVE ONLY. This count is presented as "evidence trail length" and feeds
@@ -81,7 +96,7 @@ export async function getOwnTrustSignals(
           asAny(supabase)
             .from("journal_entries")
             .select(
-              "id, correction_of, journal_entry_confirmations(confirmation_scope, created_at, confirmer_id)",
+              "id, correction_of, journal_entry_confirmations(confirmation_scope, created_at, confirmer_id), journal_entry_skills(skill_id)",
             )
             .eq("worker_id", workerId),
         ).order("id", { ascending: true }),
@@ -109,8 +124,30 @@ export async function getOwnTrustSignals(
     ? undefined
     : (((workerRes.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null);
 
+  // A recorded skill confirmation counts only while it STANDS — the same
+  // entries, the same subject, the same confirmed-entry definition as the
+  // figure below. Unknown entries or subject => unknown, never the raw flag.
+  const standing =
+    rows === null || profileId === undefined
+      ? null
+      : standingConfirmedSkillApprovals(rows, profileId);
+  const recorded = skillsRes.error
+    ? null
+    : ((skillsRes.data ?? []) as { skill_id: string | null; verified_by: string | null; verified_at: string | null }[]);
+  const verifiedSkills =
+    recorded === null || standing === null
+      ? null
+      : recorded.filter((r) =>
+          confirmationStands(
+            skillConfirmationState(
+              { ...r, verified: true },
+              { ids: new Set(standing.keys()), subjectProfileId: profileId ?? null, approvedAt: standing },
+            ),
+          ),
+        ).length;
+
   return {
-    verifiedSkills: skillsRes.error ? null : (skillsRes.count ?? 0),
+    verifiedSkills,
     managerConfirmations:
       rows === null || profileId === undefined
         ? null

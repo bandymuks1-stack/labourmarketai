@@ -3,8 +3,13 @@
  *
  * Three tiers, strictly under-stated (doctrine §7 — never over-claim):
  *   - "confirmed"  ONLY when `verified === true` (a manager flipped the skill
- *     through the gated confirm RPC). Nothing else — not even
- *     `source === 'manager_confirmed'` alone — may render as confirmed.
+ *     through the gated confirm RPC) AND that confirmation still STANDS.
+ *     Readers pass the STANDING value, never the raw stored flag:
+ *     `withStandingConfirmation` (lib/evidence/skill-confirmation-standing.ts)
+ *     turns a confirmation whose work was later rejected, corrected or
+ *     deleted — or one the person made on their own skill — into `false`.
+ *     Nothing else — not even `source === 'manager_confirmed'` alone — may
+ *     render as confirmed.
  *   - "evidence"   real work-journal backing without a manager confirmation
  *     (durable journal link or work_journal provenance).
  *   - "declared"   everything else: the person's own claim, unverified.
@@ -18,6 +23,7 @@ export type CvSkillTier = "confirmed" | "evidence" | "declared";
 
 export type CvSkillTierInput = {
   slug: string;
+  /** The STANDING confirmation (withStandingConfirmation), not the stored flag. */
   verified?: boolean | null;
   source?: string | null;
   /** Durable journal→skill link (journal_entry_skills). Evidence, not proof. */
