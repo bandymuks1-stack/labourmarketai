@@ -17,9 +17,14 @@
 -- CHANGE (the 20261021094000 body verbatim plus the marked condition): an
 -- offer counts as open work only while its need (customer_requests) is not
 -- 'closed'. Every other refusal is unchanged: an ACTIVE team assignment, an
--- offer on a need in any other state, a created team enquiry. The offer rows
--- are not changed (history kept); disbanding still archives the brigade, ends
--- member engagements and revokes pending invitations exactly as before.
+-- offer on a need in any other state, a created team enquiry. Disbanding still
+-- archives the brigade, ends member engagements and revokes pending
+-- invitations exactly as before, and now also WITHDRAWS the brigade's
+-- remaining open offers (all on closed needs; status 'withdrawn', rows kept),
+-- so hand_off_team_demand_offer_v1 (it requires 'accepted') can never assign a
+-- disbanded brigade later. The open offers are locked FOR UPDATE before the
+-- check, which serialises disbanding with a concurrent hand-off (review of
+-- #2613). The audit row counts the withdrawn offers.
 --
 -- PRIVILEGES: unchanged and re-stated — authenticated-only EXECUTE, revoked
 -- from public and anon. The body reads customer_requests.status through the
@@ -48,6 +53,7 @@ declare
   v_members int := 0;
   v_invites int := 0;
   v_member_invites int := 0;
+  v_offers  int := 0;
 begin
   if uid is null then
     raise exception 'Not authenticated' using errcode = '42501';
@@ -64,6 +70,16 @@ begin
   if v_team.archived_at is not null then
     return 'already_disbanded';
   end if;
+
+  -- CHANGED (20261021120000): serialise with hand_off_team_demand_offer_v1,
+  -- which locks the offer row. The brigade's open offers are locked first, so
+  -- a concurrent hand-off either finished before this check (its active
+  -- assignment refuses below) or finds the offer withdrawn afterwards
+  -- (offer_not_accepted).
+  perform 1 from public.team_demand_offers d
+    where d.team_org_id = p_team_id and d.status in ('offered', 'accepted')
+    order by d.id
+    for update;
 
   if exists (select 1 from public.team_assignments a
               where a.team_org_id = p_team_id and a.status = 'active')
@@ -99,6 +115,15 @@ begin
       v_members := v_members + 1;
     end loop;
 
+    -- CHANGED (20261021120000): every open offer left here is on a need its
+    -- buyer CLOSED (checked above). It is withdrawn with the brigade, so no
+    -- later hand-off can assign a disbanded brigade. Rows are kept.
+    update public.team_demand_offers
+       set status = 'withdrawn'
+     where team_org_id = p_team_id
+       and status in ('offered', 'accepted');
+    get diagnostics v_offers = row_count;
+
     -- An invitation into a disbanded brigade is dead: every pending link
     -- (any invitation type addressed to this organization) and every pending
     -- governance invitation is revoked. Rows are kept as history.
@@ -127,6 +152,7 @@ begin
         'members_ended', v_members,
         'invitations_revoked', v_invites,
         'membership_invitations_revoked', v_member_invites,
+        'closed_need_offers_withdrawn', v_offers,
         'result', 'disbanded'));
   exception when sqlstate 'P0001' then
     -- Subtransaction rolled back: every membership ended above is restored.
