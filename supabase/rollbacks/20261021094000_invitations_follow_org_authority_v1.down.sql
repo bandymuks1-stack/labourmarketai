@@ -560,4 +560,27 @@ revoke all on function public.resend_invitation_v1(uuid, text) from public;
 revoke all on function public.resend_invitation_v1(uuid, text) from anon;
 grant execute on function public.resend_invitation_v1(uuid, text) to authenticated;
 
+-- review of #2607: restore invitation_org_authority_v1 exactly as before
+create or replace function public.invitation_org_authority_v1(p_organization_id uuid)
+ returns boolean
+ language sql
+ stable security definer
+ set search_path to 'public'
+as $function$
+  select p_organization_id is not null and (
+    exists (
+      select 1 from public.organizations o
+       where o.id = p_organization_id
+         and o.owner_profile_id = auth.uid()
+    )
+    or exists (
+      select 1 from public.company_memberships m
+       where m.organization_id = p_organization_id
+         and m.profile_id = auth.uid()
+         and m.status = 'active'
+         and (m.role in ('owner', 'admin') or m.manages_invitations)
+    )
+  )
+$function$;
+
 commit;

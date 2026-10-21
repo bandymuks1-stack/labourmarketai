@@ -707,3 +707,42 @@ end $$;
 revoke all on function public.resend_invitation_v1(uuid, text) from public;
 revoke all on function public.resend_invitation_v1(uuid, text) from anon;
 grant execute on function public.resend_invitation_v1(uuid, text) to authenticated;
+
+-- ── Invitation authority ends with the organization (review of #2607) ───────
+-- Disbanding revoked the pending invitations, but create_invitation_v1/v2
+-- still accepted the archived organization for its owner, so a fresh dead
+-- link could be issued right after. The shared authority helper (used by
+-- create v1/v2, resend, revoke and the delivery mark) now answers false for
+-- an archived organization. Grants unchanged.
+create or replace function public.invitation_org_authority_v1(p_organization_id uuid)
+ returns boolean
+ language sql
+ stable security definer
+ set search_path to 'public'
+as $function$
+  select p_organization_id is not null
+    -- An ARCHIVED (disbanded) organization grants no invitation authority:
+    -- no new, resent or delivery-marked invitation into it (review of #2607).
+    and not exists (
+      select 1 from public.organizations a
+       where a.id = p_organization_id and a.archived_at is not null
+    ) and (
+    exists (
+      select 1 from public.organizations o
+       where o.id = p_organization_id
+         and o.owner_profile_id = auth.uid()
+    )
+    or exists (
+      select 1 from public.company_memberships m
+       where m.organization_id = p_organization_id
+         and m.profile_id = auth.uid()
+         and m.status = 'active'
+         and (m.role in ('owner', 'admin') or m.manages_invitations)
+    )
+  )
+$function$;
+
+-- Grants exactly as in production (authenticated only), restated explicitly.
+revoke all on function public.invitation_org_authority_v1(uuid) from public;
+revoke all on function public.invitation_org_authority_v1(uuid) from anon;
+grant execute on function public.invitation_org_authority_v1(uuid) to authenticated;
