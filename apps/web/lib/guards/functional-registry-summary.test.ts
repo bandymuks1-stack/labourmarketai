@@ -4,41 +4,42 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * THE ONE FUNCTIONALITY REGISTRY STAYS TRUE (owner order 2026-10-21: one registry, real
- * numbers, "jokių išgalvotų procentų").
+ * THE PUBLIC REGISTRY SUMMARY STAYS TRUE AND SAFE (owner decisions 2026-10-21: one
+ * registry with real numbers; the public repository keeps only a safe summary).
  *
- * docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md §2 holds one row per process; its §1 counts
- * are generated from those rows by .github/scripts/registry-summary.mjs. This guard fails
- * when a row changed and the counts were not regenerated, when a row carries a status
- * outside the owner's vocabulary, or when a row has no owner area or role.
+ * The per-process rows live in the owner's private registry; the public
+ * docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md carries the counts generated from them by
+ * .github/scripts/registry-summary.mjs. CI cannot read the private file, so it checks what
+ * it can: the public tables add up, and no per-process row has come back into the public
+ * repository.
  */
 const ROOT = join(__dirname, "..", "..", "..", "..");
 const SCRIPT = join(ROOT, ".github", "scripts", "registry-summary.mjs");
+const DOC = join(ROOT, "docs", "master", "LABOURMARKET-FUNCTIONAL-AUDIT.md");
 
-describe("the functionality registry", () => {
-  it("its §1 summary is the one the rows produce, and every row is well formed", () => {
+describe("the public functionality registry summary", () => {
+  it("its tables add up and match their headline", () => {
     let out = "";
     let failed = false;
     try {
-      out = execFileSync(process.execPath, [SCRIPT, "--check"], { encoding: "utf8", stdio: "pipe" });
+      out = execFileSync(process.execPath, [SCRIPT, "--check"], {
+        encoding: "utf8",
+        stdio: "pipe",
+        env: { ...process.env, LM_PRIVATE_REGISTRY: "" },
+      });
     } catch (err) {
       failed = true;
-      const e = err as { stdout?: string; stderr?: string };
-      out = `${e.stdout ?? ""}${e.stderr ?? ""}`;
+      const e = err as { stdout?: string; stderr?: string; message?: string };
+      out = `${e.stdout ?? ""}${e.stderr ?? ""}${e.message ?? ""}`;
     }
     expect(failed, out).toBe(false);
-    expect(out).toMatch(/registry summary current: \d+ rows/);
+    expect(out).toMatch(/registry summary current: \d+\/\d+ LIVE_PROVEN/);
   });
 
-  it("a LIVE_PROVEN row names its evidence", () => {
-    const doc = readFileSync(join(ROOT, "docs", "master", "LABOURMARKET-FUNCTIONAL-AUDIT.md"), "utf8");
-    const section = doc.split("## 2. Per-area status")[1].split("\n## 3.")[0];
-    const bare = section
-      .split("\n")
-      .filter((l) => /^\|\s*\d+\.\d+\s*\|/.test(l))
-      .map((l) => l.split("|").map((c) => c.trim()))
-      .filter((c) => c[3].startsWith("LIVE_PROVEN") && !/\(.+\)|—\s*\S/.test(c[3]))
-      .map((c) => c[1]);
-    expect(bare, "LIVE_PROVEN rows without evidence").toEqual([]);
+  it("carries no per-process rows — the detail is private", () => {
+    const doc = readFileSync(DOC, "utf8");
+    expect(doc).not.toMatch(/^\|\s*\d+\.\d+\s*\|/m);
+    expect(doc).not.toContain("## 2. Per-area status");
+    expect(doc).toContain("labourmarket-functionality-registry-v2.md");
   });
 });
