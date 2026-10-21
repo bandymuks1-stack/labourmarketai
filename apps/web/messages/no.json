@@ -4757,6 +4757,10 @@
       },
       "topTitle": "Mest etterspurte yrker akkurat nå",
       "topNote": "Rangert etter aktive stillingsannonser på plattformen."
+    },
+    "hero": {
+      "headline": "LabourMarket.ai er et levende system av arbeids- og forretningsmuligheter.",
+      "sub": "Vis på ett sted hva du kan, hva du tilbyr eller hva du ser etter. Finn arbeidstakere, jobber, entreprenører, tjenester og varer — og erfaringen og mulighetene dine forblir alltid tilgjengelige."
     }
   },
   "workspace": {
