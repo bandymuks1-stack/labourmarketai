@@ -46,7 +46,7 @@ export function BottomNav({
 
   return (
     <nav
-      aria-label="Dashboard sections"
+      aria-label={t("common.dashboardSections")}
       className="fixed inset-x-0 bottom-0 z-30 border-t border-ink-600/60 bg-ink-900/90 backdrop-blur-md pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <ul className="flex items-stretch justify-around">

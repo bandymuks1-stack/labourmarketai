@@ -395,6 +395,7 @@ function Section({
                 className="card-border flex flex-col gap-3 overflow-hidden p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
                 data-testid={`booking-${row.id}`}
                 data-status={row.status}
+                data-direction={direction}
                 data-display-state={display}
               >
                 <div className="flex min-w-0 flex-col gap-0.5">
