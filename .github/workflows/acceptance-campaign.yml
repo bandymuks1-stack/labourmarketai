@@ -1,0 +1,74 @@
+name: acceptance-campaign
+
+# OWNER ACCEPTANCE CAMPAIGN 2026-10-22 .. 2026-10-25 (owner orders 2026-10-21).
+# Runs on GitHub's own scheduler, independent of any agent session or the owner's computer.
+# Every tick it dispatches AT MOST ONE production walk — the next one on the day's plan that has
+# not run yet (or, from 10-24, that last FAILED) — through prod-qa-walk.yml, WITHOUT
+# budget_override. The 24 h walk budget (PROD_QA_WALK_DAILY_BUDGET) stays the only gate: a walk
+# the budget refuses never reaches production, consumes nothing, and is simply retried by a later
+# tick. Outside the campaign window the job exits without doing anything.
+
+on:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: acceptance-campaign
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Dispatch the next walk of the day's plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          today=$(date -u +%F)
+          DAY1="role-routes journal-confirm living-cv-growth company-chain brigade-formation project-execution org-roster orders-bookings documents-approvals marketplace-goods-services jobs-search notifications-inapp"
+          DAY2="billing-test-mode mcp-agents manager-chat calendar-planning chat-continuity project-context worker-identity-split agency-chain marketplace staff-review-notice mobile-surfaces sectors-languages"
+          DAY3="learning-practice recognition-chain chat-confirm-once mcp-chain employee-beta-gate"
+          case "$today" in
+            2026-10-22) plan="$DAY1"; retry_failed=0 ;;
+            2026-10-23) plan="$DAY2"; retry_failed=0 ;;
+            2026-10-24) plan="$DAY3 $DAY1 $DAY2"; retry_failed=1 ;;
+            2026-10-25) plan="$DAY1 $DAY2 $DAY3"; retry_failed=1 ;;
+            *) echo "outside the campaign window ($today): nothing to do"; exit 0 ;;
+          esac
+
+          # One campaign walk at a time: never dispatch while a manual/scheduled prod-qa-walk run
+          # is queued or running. A push-triggered run sits in its 120-min debounce and is left
+          # out — the walk job's own concurrency group serialises the walks themselves.
+          busy=$(gh run list -R "$REPO" -w prod-qa-walk.yml --limit 20 --json status,event \
+            --jq '[.[] | select(.status != "completed" and .event != "push")] | length')
+          if [ "$busy" -gt 0 ]; then echo "a walk is in flight ($busy): wait for the next tick"; exit 0; fi
+
+          # The latest result per spec, from walk runs that REACHED a walk (their artifact is
+          # named prod-qa-<spec>-<run id>). Since the campaign start for retries, since today
+          # for the first pass.
+          since=$([ "$retry_failed" = 1 ] && echo "2026-10-22" || echo "$today")
+          declare -A last
+          for id in $(gh run list -R "$REPO" -w prod-qa-walk.yml --created ">=$since" --limit 200 \
+                        --json databaseId,conclusion --jq '.[] | select(.conclusion=="success" or .conclusion=="failure") | .databaseId' | sort -n); do
+            name=$(gh api "repos/$REPO/actions/runs/$id/artifacts" --jq '.artifacts[0].name // ""')
+            [ -n "$name" ] || continue
+            spec=${name#prod-qa-}; spec=${spec%-"$id"}
+            last[$spec]=$(gh run view "$id" -R "$REPO" --json conclusion --jq .conclusion)
+          done
+
+          next=""
+          for s in $plan; do
+            r="${last[$s]:-none}"
+            if [ "$r" = none ] || { [ "$retry_failed" = 1 ] && [ "$r" = failure ]; }; then next="$s"; break; fi
+          done
+          if [ -z "$next" ]; then echo "today's plan is complete"; exit 0; fi
+          echo "dispatching: $next (within the 24 h walk budget; no override)" | tee -a "$GITHUB_STEP_SUMMARY"
+          gh workflow run prod-qa-walk.yml -R "$REPO" --ref main -f spec="$next"
