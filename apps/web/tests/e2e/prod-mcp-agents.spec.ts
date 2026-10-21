@@ -152,9 +152,14 @@ test.afterAll(async () => {
   for (const n of (await needs(tok.manager)).filter((x) => WALK_ROW.test(x.title ?? ""))) {
     await prepareConfirm(tok.manager, "demand_close", { requestId: n.id }, { replay: false });
   }
-  // Provider: delete the offerings (their requests cascade with them).
+  // Provider: delete an offering without requests. One WITH requests is a
+  // buyer's history and is never deleted (#2582: the delete refuses) — it is
+  // paused instead, exactly as the page tells a real provider to do.
   for (const o of (await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? ""))) {
-    await prepareConfirm(tok.worker, "service_offering_delete", { offeringId: o.id }, { replay: false });
+    await prepareConfirm(tok.worker, "service_offering_delete", { offeringId: o.id }, { replay: false }).catch(() => null);
+  }
+  for (const o of (await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? "") && x.status !== "paused")) {
+    await prepareConfirm(tok.worker, "service_offering_status_set", { offeringId: o.id, status: "paused" }, { replay: false });
   }
   // Supplier: delete the proposals.
   for (const p of (await proposals(tok.agency)).filter((x) => WALK_ROW.test(x.title ?? ""))) {
@@ -166,7 +171,10 @@ test.afterAll(async () => {
     await prepareConfirm(tok.owner, "project_status_set", { projectId: p.id, toStatus: "completed" }, { replay: false });
   }
   expect((await needs(tok.manager)).filter((x) => WALK_ROW.test(x.title ?? "")), "open walk needs left behind").toHaveLength(0);
-  expect((await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? "")), "walk offerings left behind").toHaveLength(0);
+  expect(
+    (await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? "") && x.status !== "paused"),
+    "walk offerings left published (one with requests must be paused, never deleted)",
+  ).toHaveLength(0);
   expect((await proposals(tok.agency)).filter((x) => WALK_ROW.test(x.title ?? "")), "walk proposals left behind").toHaveLength(0);
   expect(
     (await projects(tok.owner)).rows.filter((x) => WALK_ROW.test(x.title ?? "") && x.status !== "completed"),
