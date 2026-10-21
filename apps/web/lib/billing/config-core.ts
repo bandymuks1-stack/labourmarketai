@@ -66,6 +66,26 @@ const WEBHOOK_SECRET = /^whsec_/;
  */
 export const LIVE_ACTIVATION_TOKEN = "approved-by-owner";
 
+/**
+ * Constant-time comparison of the env value with the recorded decision
+ * (audit 2026-10-16, B-1). The token is a recorded owner decision rather
+ * than a secret, but the comparison must not leak length or prefix through
+ * timing either — this is the one place the live arm is decided. Pure: no
+ * node:crypto, so the core stays importable everywhere config-core is.
+ */
+export function activationTokenMatches(token: string | undefined): boolean {
+  if (typeof token !== "string") return false;
+  const expected = LIVE_ACTIVATION_TOKEN;
+  const n = Math.max(token.length, expected.length);
+  let diff = token.length ^ expected.length;
+  for (let i = 0; i < n; i++) {
+    // charCodeAt past the end is NaN → 0; the loop length never depends on
+    // which string is shorter.
+    diff |= (token.charCodeAt(i) || 0) ^ (expected.charCodeAt(i) || 0);
+  }
+  return diff === 0;
+}
+
 export interface LiveActivationInput {
   /** `PRICING_READINESS_STATE === "owner_confirmed"` (code constant, gate G-7). */
   readonly pricingConfirmed: boolean;
@@ -127,7 +147,7 @@ export function resolveBillingConfig(input: BillingConfigInput): BillingConfig {
       reason,
     });
     const act = input.liveActivation;
-    if (!act || act.token !== LIVE_ACTIVATION_TOKEN) return blocked("live_blocked");
+    if (!act || !activationTokenMatches(act.token)) return blocked("live_blocked");
     if (!act.pricingConfirmed) return blocked("live_pricing_not_confirmed");
     if (!enabled) return blocked("payments_disabled");
     if (input.provider !== "stripe") return blocked("no_provider");
