@@ -285,13 +285,15 @@ export const COMPANY_EXECUTORS: {
       role: input.role ?? null,
       note: input.note ?? null,
     });
-    return r.kind === "ok"
-      ? { ok: true, data: { status: r.status ?? null } }
-      : {
-          ok: false,
-          code: mapKind(r.kind),
-          message: r.kind === "error" ? r.message : undefined,
-        };
+    if (r.kind === "ok") return { ok: true, data: { status: r.status ?? null } };
+    // The RPC's refusal (20261021095200) stays a named, honest code in chat:
+    // worker_not_reachable | need_closed | already_answered.
+    if (r.kind === "refused") return { ok: false, code: r.reason.replace(/-/g, "_") };
+    return {
+      ok: false,
+      code: mapKind(r.kind),
+      message: r.kind === "error" ? r.message : undefined,
+    };
   },
 
   "company.assign-worker": async (input) => {

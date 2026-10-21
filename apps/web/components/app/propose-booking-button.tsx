@@ -19,11 +19,14 @@ import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-wo
  * copy comes from the shared `bookings.propose` namespace, not new props.
  *
  * Repeat actions (Capability G, PR 6b): `variant="rebook"` renders the SAME
- * flow pre-scoped to the same request + worker from a terminal
- * (declined/withdrawn) outgoing booking. The applied propose RPC upserts on
- * (owner_id, request_id, worker_id) and re-opens that row back to `proposed`
- * with the new dates — no new RPC, no new data path. The mode note states
- * clearly that it re-opens the same proposal and the worker decides again.
+ * flow pre-scoped to the same request + worker. Since 20261021095200 the
+ * propose RPC no longer re-opens a declined or withdrawn proposal (the
+ * worker's answer stands), so the bookings page does not mount this variant
+ * for those rows; it is kept for an owner-approved re-open rule.
+ *
+ * Refusals (20261021095200): a worker this company may not contact, a closed
+ * need and an already-answered proposal each get their own sentence — never
+ * the generic error.
  */
 export function ProposeBookingButton({
   locale,
@@ -58,7 +61,16 @@ export function ProposeBookingButton({
   const [note, setNote] = useState("");
   const [pending, startTransition] = useTransition();
   const [state, setState] = useState<
-    "idle" | "sent" | "unavailable" | "not_entitled" | "rate_limited" | "already_accepted" | "error"
+    | "idle"
+    | "sent"
+    | "unavailable"
+    | "not_entitled"
+    | "rate_limited"
+    | "already_accepted"
+    | "refused_not_reachable"
+    | "refused_need_closed"
+    | "refused_answered"
+    | "error"
   >("idle");
 
   function send() {
@@ -77,7 +89,15 @@ export function ProposeBookingButton({
       else if (res.kind === "not-entitled") setState("not_entitled");
       else if (res.kind === "rate-limited") setState("rate_limited");
       else if (res.kind === "already-accepted") setState("already_accepted");
-      else setState("error");
+      else if (res.kind === "refused") {
+        setState(
+          res.reason === "worker-not-reachable"
+            ? "refused_not_reachable"
+            : res.reason === "need-closed"
+              ? "refused_need_closed"
+              : "refused_answered",
+        );
+      } else setState("error");
     });
   }
 
@@ -164,6 +184,20 @@ export function ProposeBookingButton({
         // rewritten by proposing again; changes are agreed in conversation.
         <span className="text-meta text-state-warning" data-testid="propose-booking-already-accepted">
           {tPropose("alreadyAccepted")}
+        </span>
+      ) : state === "refused_not_reachable" ? (
+        // The database refused: no consent to be found and no working
+        // relationship — a proposal is contact (20261021095200).
+        <span className="text-meta text-state-warning" data-testid="propose-booking-refused">
+          {tPropose("refusedNotReachable")}
+        </span>
+      ) : state === "refused_need_closed" ? (
+        <span className="text-meta text-state-warning" data-testid="propose-booking-refused">
+          {tPropose("refusedNeedClosed")}
+        </span>
+      ) : state === "refused_answered" ? (
+        <span className="text-meta text-state-warning" data-testid="propose-booking-refused">
+          {tPropose("refusedAnswered")}
         </span>
       ) : state === "error" ? (
         <span className="text-meta text-state-danger">{labels.error}</span>

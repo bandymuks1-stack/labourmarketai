@@ -9156,7 +9156,10 @@
       "againModeNote": "To ponownie otwiera tę samą propozycję dla tego samego pracownika z nowymi datami — pracownik podejmuje decyzję ponownie. Nic nie jest zarezerwowane, dopóki nie zaakceptuje.",
       "afterSent": "Pracownik otrzymał Twoją propozycję i zaakceptuje ją lub odrzuci. Odpowiedź zobaczysz w sekcji Rezerwacje, a do tego czasu możesz wycofać propozycję.",
       "rateLimited": "Osiągnięto limit propozycji rezerwacji (10 otwartych, 30 dziennie). Spróbuj ponownie później.",
-      "alreadyAccepted": "Pracownik już przyjął tę propozycję — uzgodnione warunki nie są tu nadpisywane. Zmiany ustalcie w rozmowie."
+      "alreadyAccepted": "Pracownik już przyjął tę propozycję — uzgodnione warunki nie są tu nadpisywane. Zmiany ustalcie w rozmowie.",
+      "refusedNotReachable": "Tej osobie nie można stąd zaproponować rezerwacji — nie udostępniła profilu pracodawcom i nie łączy jej z Tobą relacja zawodowa.",
+      "refusedNeedClosed": "To zapotrzebowanie jest zamknięte — otwórz je ponownie, zanim zaproponujesz rezerwację.",
+      "refusedAnswered": "Na tę propozycję już odpowiedziano (odrzucona lub wycofana) i nie jest ponownie otwierana. Kontynuuj w rozmowie lub znajdź innego pracownika."
     },
     "reason": {
       "optionalTitle": "Powód (opcjonalnie)",

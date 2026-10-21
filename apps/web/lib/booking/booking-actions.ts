@@ -96,10 +96,26 @@ export type BookingActionResult =
   /** The worker already ACCEPTED this proposal: its terms are an agreement
    *  and are not rewritten by proposing again. */
   | { kind: "already-accepted" }
+  /** The propose RPC refused (20261021095200): the worker is not one this
+   *  company may contact, the need is closed, or the proposal was already
+   *  answered (declined / withdrawn) and is not re-opened. */
+  | { kind: "refused"; reason: ProposeRefusal }
   | { kind: "not-authed" }
   | { kind: "not-entitled" }
   | { kind: "rate-limited" }
   | { kind: "error"; message: string };
+
+export type ProposeRefusal = "worker-not-reachable" | "need-closed" | "already-answered";
+
+/** The propose RPC's stable refusal words → the action's closed vocabulary.
+ *  null = not one of them (the generic classifier decides). */
+function proposeRefusal(error: { message?: string }): ProposeRefusal | null {
+  const m = error.message ?? "";
+  if (/\bworker_not_reachable\b/.test(m)) return "worker-not-reachable";
+  if (/\bdemand_closed\b/.test(m)) return "need-closed";
+  if (/\bbooking_not_reopenable\b/.test(m)) return "already-answered";
+  return null;
+}
 
 function classify(error: { code?: string; message?: string }): BookingActionResult {
   if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
@@ -271,6 +287,14 @@ export async function proposeBookingAction(
   if ((existing as { status?: string } | null)?.status === "accepted") {
     return { kind: "already-accepted" };
   }
+  // An ANSWERED proposal stays answered (20261021095200): the worker's "no"
+  // and the company's own withdrawal are not turned back into an open
+  // proposal by proposing again. The RPC refuses the same; this is the clean
+  // signal before any write.
+  const existingStatus = (existing as { status?: string } | null)?.status;
+  if (existingStatus === "declined" || existingStatus === "withdrawn") {
+    return { kind: "refused", reason: "already-answered" };
+  }
 
   // WHAT the worker is offered is the need's own role. The scouting proposal
   // sends only dates + a note, so the booking used to reach the worker as a
@@ -299,6 +323,9 @@ export async function proposeBookingAction(
     if (error.code === "P0004" || /limit reached|too many open/i.test(error.message ?? "")) {
       return { kind: "rate-limited" };
     }
+    if (/booking already accepted/i.test(error.message ?? "")) return { kind: "already-accepted" };
+    const refusal = proposeRefusal(error);
+    if (refusal) return { kind: "refused", reason: refusal };
     return classify(error);
   }
   revalidatePath(`/${input.locale}/dashboard/bookings`);

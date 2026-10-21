@@ -137,6 +137,10 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261020172000_",
       "20261020173000_",
       "20261020174000_",
+      // 2026-10-21 (RED, needs-human-gate): interest co-managers, worker interest writes, booking proposals.
+      "20261021095000_",
+      "20261021095100_",
+      "20261021095200_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
