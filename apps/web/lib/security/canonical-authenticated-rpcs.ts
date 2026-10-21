@@ -108,6 +108,7 @@ export const CANONICAL_APP_RPCS = [
   "list_open_demand_for_team_offer_v1",
   "list_open_demand_for_workers",
   "list_shared_requests_for_agency_v1",
+  "list_team_assignment_names_v1",
   "list_team_demand_offers_for_team_v1",
   "list_team_offers_for_request_v1",
   "mark_agency_can_offer",

@@ -137,6 +137,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261020172000_",
       "20261020173000_",
       "20261020174000_",
+      // 2026-10-21: B2B — an edited brigade entry keeps its hours for the buyer; the buyer reads the hired team names.
+      "20261021091000_",
+      "20261021092000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
