@@ -10980,6 +10980,7 @@
       "salaryExpectation": "Loonverwachting",
       "skillsCount": "Vaardigheden",
       "anonymousLabel": "Bedrijven zien u als",
+      "anonymousValue": "Kandidaat {token}",
       "currentCountry": "Huidig land",
       "availableFrom": "Beschikbaar vanaf",
       "contractType": "Arbeidsvorm",
@@ -12440,6 +12441,7 @@
     }
   },
   "people": {
+    "anonymousName": "Kandidaat {token}",
     "eyebrow": "Persoonsprofiel",
     "restrictedTitle": "Profiel niet beschikbaar",
     "restrictedBody": "Je kunt het profiel van deze persoon niet bekijken: er is geen actieve werkrelatie, of de persoon heeft geen toestemming gegeven om vindbaar te zijn.",

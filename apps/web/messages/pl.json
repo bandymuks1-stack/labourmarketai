@@ -10980,6 +10980,7 @@
       "salaryExpectation": "Oczekiwane wynagrodzenie",
       "skillsCount": "Umiejętności",
       "anonymousLabel": "Firmy widzą Cię jako",
+      "anonymousValue": "Kandydat {token}",
       "currentCountry": "Obecny kraj",
       "availableFrom": "Dostępny od",
       "contractType": "Forma zatrudnienia",
@@ -12440,6 +12441,7 @@
     }
   },
   "people": {
+    "anonymousName": "Kandydat {token}",
     "eyebrow": "Profil osoby",
     "restrictedTitle": "Profil niedostępny",
     "restrictedBody": "Nie możesz zobaczyć profilu tej osoby: brak aktywnej relacji zawodowej lub osoba nie wyraziła zgody na widoczność.",

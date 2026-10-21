@@ -2908,6 +2908,7 @@
     "loopReadFailed": "Sinu päringuid ei õnnestunud laadida — loend võib olla puudulik. Värskenda lehte."
   },
   "people": {
+    "anonymousName": "Kandidaat {token}",
     "eyebrow": "Isiku profiil",
     "restrictedTitle": "Profiil pole saadaval",
     "restrictedBody": "Sa ei saa selle isiku profiili vaadata: puudub aktiivne töösuhe või isik pole nõustunud olema leitav.",

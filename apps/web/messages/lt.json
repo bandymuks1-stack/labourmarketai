@@ -10980,6 +10980,7 @@
       "salaryExpectation": "Atlygio lūkestis",
       "skillsCount": "Įgūdžių",
       "anonymousLabel": "Įmonėms rodomas kaip",
+      "anonymousValue": "Kandidatas {token}",
       "currentCountry": "Dabartinė šalis",
       "availableFrom": "Gali pradėti nuo",
       "contractType": "Darbo forma",
@@ -12440,6 +12441,7 @@
     }
   },
   "people": {
+    "anonymousName": "Kandidatas {token}",
     "eyebrow": "Asmens profilis",
     "restrictedTitle": "Profilis nepasiekiamas",
     "restrictedBody": "Šio žmogaus profilio negali peržiūrėti: nėra aktyvaus darbo ryšio arba asmuo nesutiko būti matomas.",

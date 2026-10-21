@@ -33,7 +33,7 @@ import {
   WORK_PERIOD_KEYS,
   type WorkPeriodKey,
 } from "@/lib/journal/work-intelligence";
-import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
+import { anonymizedWorkerToken } from "@/lib/visibility/worker-profile-visibility";
 import { viewerHasWorkerRelation } from "@/lib/visibility/worker-identity-visibility";
 import { readDiscoverableWorkers } from "@/lib/visibility/discoverable-workers";
 import { readRecordedWorkFor } from "@/lib/player-card/work-history";
@@ -287,7 +287,7 @@ export default async function PersonPage({
   );
   const name =
     (nameVisible ? (worker.display_name as string | null)?.trim() : null) ||
-    anonymizedWorkerLabel(worker.id as string);
+    t("anonymousName", { token: anonymizedWorkerToken(worker.id as string) });
   const available =
     (worker.availability_status as string | null) === "available";
 

@@ -10980,6 +10980,7 @@
       "salaryExpectation": "Ожидаемая оплата",
       "skillsCount": "Навыков",
       "anonymousLabel": "Компании видят вас как",
+      "anonymousValue": "Кандидат {token}",
       "currentCountry": "Текущая страна",
       "availableFrom": "Доступен с",
       "contractType": "Форма работы",
@@ -12440,6 +12441,7 @@
     }
   },
   "people": {
+    "anonymousName": "Кандидат {token}",
     "eyebrow": "Профиль человека",
     "restrictedTitle": "Профиль недоступен",
     "restrictedBody": "Вы не можете просмотреть профиль этого человека: нет активных рабочих отношений, или человек не дал согласия на видимость.",
