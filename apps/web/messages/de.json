@@ -7637,7 +7637,8 @@
     "notFound": "Diese Seite existiert nicht",
     "backHome": "Zurück zur Startseite",
     "dashboardSections": "Dashboard-Bereiche",
-    "skipToContent": "Zum Inhalt springen"
+    "skipToContent": "Zum Inhalt springen",
+    "loading": "Wird geladen…"
   },
   "workerInvitations": {
     "title": "Ausstehende Einladungen",
