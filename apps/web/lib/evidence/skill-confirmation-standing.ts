@@ -22,7 +22,9 @@
  *   1. the confirmation act happened: `verified === true` (the flag is the
  *      historical record of the act and stays in the row untouched, with
  *      verified_by / verified_at — history kept);
- *   2. it was not the subject's own act: `verified_by` is not the subject;
+ *   2. it is backed by someone other than the subject: an own flag
+ *      (`verified_by` = the subject) stands only through rule 3, i.e. once
+ *      an independent approval later backs the skill;
  *   3. it still STANDS: at least one LIVE, counted-once entry whose latest
  *      INDEPENDENT employer-basis decision is `approved`
  *      (`confirmedEntriesOf` — the ONE definition of a confirmed entry) either
@@ -150,6 +152,12 @@ export function skillConfirmationState(
 ): SkillConfirmationState {
   if (row.verified !== true) return "none";
   if (read === null) return "unknown";
+  // The standing set holds ONLY independent approvals (the subject's own are
+  // excluded in standingConfirmedSkillIds), so it decides first: a skill the
+  // person once flagged themselves STANDS once someone else later confirmed
+  // the work behind it. verified_by is written only on the false -> true flip,
+  // so it never moves off the subject — it cannot be a permanent veto.
+  if (row.skill_id && read.ids.has(row.skill_id)) return "standing";
   if (
     read.subjectProfileId &&
     typeof row.verified_by === "string" &&
@@ -157,7 +165,7 @@ export function skillConfirmationState(
   ) {
     return "self_confirmed";
   }
-  return row.skill_id && read.ids.has(row.skill_id) ? "standing" : "withdrawn";
+  return "withdrawn";
 }
 
 /**

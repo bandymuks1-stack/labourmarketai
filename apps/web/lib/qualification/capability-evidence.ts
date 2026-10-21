@@ -2,6 +2,8 @@ import "server-only";
 
 import { isCounterpartyScopeRow } from "@/lib/journal/review-status";
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
+import { confirmationStands, skillConfirmationState } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -66,18 +68,30 @@ export async function getOwnRecordedWorkEvidence(
 ): Promise<RecordedWorkEvidence> {
   const supabase = await createClient();
 
-  const [skillsRes, entriesRes] = await Promise.all([
+  const [skillsRes, standing, entriesRes] = await Promise.all([
+    // The recorded confirmations; each counts only while it STANDS
+    // (lib/evidence/skill-confirmation-standing.ts) — a sticky flag whose work
+    // was rejected, corrected or deleted, or the person's own flag, is not a
+    // demonstrated capability.
     asAny(supabase)
       .from("worker_skills")
-      .select("id", { count: "exact", head: true })
+      .select("skill_id, verified, verified_by")
       .eq("worker_id", workerId)
-      .eq("verified", true),
+      .eq("verified", true)
+      .limit(ENTRY_READ_LIMIT),
+    readOwnStandingConfirmedSkillIds(workerId),
     liveJournalEntriesOnly(
       asAny(supabase).from("journal_entries").select("id").eq("worker_id", workerId),
     ).limit(ENTRY_READ_LIMIT),
   ]);
 
-  const verifiedSkills = skillsRes.error ? null : (skillsRes.count ?? 0);
+  // A failed skill OR standing read is UNKNOWN (null), never a count.
+  const verifiedSkills =
+    skillsRes.error || standing === null
+      ? null
+      : ((skillsRes.data ?? []) as { skill_id: string | null; verified: boolean | null; verified_by: string | null }[]).filter(
+          (r) => confirmationStands(skillConfirmationState(r, standing)),
+        ).length;
   if (entriesRes.error) {
     return { independentlyConfirmedEntries: null, recordedEntries: null, verifiedSkills };
   }
