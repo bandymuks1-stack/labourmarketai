@@ -1699,6 +1699,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261021120000_team_disband_closed_need_offers_v1.sql",
       // 2026-10-21 (RED, needs-human-gate): stale booking proposals expire daily (system function + pg_cron).
       "20261021130000_booking_expiry_system_schedule_v1.sql",
+      // 2026-10-21 (RED, needs-human-gate): one purchased LMC credit per payment reference (Stripe TEST top-ups).
+      "20261021150000_lmc_purchase_payment_reference_unique_v1.sql",
 ]);
   });
 

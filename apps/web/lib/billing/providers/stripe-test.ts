@@ -5,6 +5,8 @@ import Stripe from "stripe";
 import {
   getBillingConfig,
   requireStripeSecret,
+  requireStripeTestSecret,
+  requireStripeTestTopupWebhookSecret,
   requireStripeWebhookSecret,
 } from "@/lib/billing/config";
 import { trialConsentText } from "@/lib/billing/trial-core";
@@ -16,6 +18,7 @@ import type {
   CreateCustomerInput,
   CreateCustomerResult,
   ListSubscriptionsResult,
+  OneTimePaymentSessionInput,
   RetrieveRawSubscriptionResult,
   PortalSessionInput,
   PortalSessionResult,
@@ -296,4 +299,79 @@ export function createStripeProvider(): BillingProvider {
 /** Historical name (Stripe sprint PR1); the adapter is mode-aware since D3. */
 export function createStripeTestProvider(): BillingProvider {
   return createStripeProvider();
+}
+
+// ── One-time payments — TEST ONLY (reached via provider.ts) ─────────────────
+
+/** A client that can ONLY carry a test key (`requireStripeTestSecret` throws otherwise). */
+function testOnlyClient(): Stripe {
+  return new Stripe(requireStripeTestSecret(), { apiVersion: STRIPE_PINNED_API_VERSION });
+}
+
+/**
+ * One-time payment Checkout Session in TEST mode. The amount comes from the
+ * caller's server-side configuration as `price_data`; the same metadata rides
+ * on the payment intent so a later refund (`charge.refunded`) can be traced
+ * back to what it paid for. No tax lines: the VAT treatment of a credit
+ * purchase is an open owner decision, and this path is test-only.
+ */
+export async function createStripeTestPaymentSession(
+  input: OneTimePaymentSessionInput,
+): Promise<CheckoutSessionResult> {
+  if (!Number.isSafeInteger(input.unitAmountMinor) || input.unitAmountMinor <= 0) {
+    return { ok: false, reason: "invalid_amount" };
+  }
+  try {
+    const metadata: Record<string, string> = {
+      ...input.metadata,
+      environment: "test",
+      test_mode: "true",
+    };
+    const session = await testOnlyClient().checkout.sessions.create(
+      {
+        mode: "payment",
+        line_items: [
+          {
+            price_data: {
+              currency: input.currency,
+              unit_amount: input.unitAmountMinor,
+              product_data: { name: input.productName },
+            },
+            quantity: 1,
+          },
+        ],
+        client_reference_id: input.clientReferenceId,
+        customer_email: input.customerEmail ?? undefined,
+        success_url: input.successUrl,
+        cancel_url: input.cancelUrl,
+        metadata,
+        payment_intent_data: { metadata },
+      },
+      { idempotencyKey: input.idempotencyKey },
+    );
+    if (!session.url) return { ok: false, reason: "no_session_url" };
+    if (session.livemode) return { ok: false, reason: "live_session_refused" };
+    return { ok: true, url: session.url, sessionId: session.id, testMode: true };
+  } catch (e) {
+    return { ok: false, reason: reasonFrom(e) };
+  }
+}
+
+/** Verify a one-time-payment endpoint delivery with ITS OWN test secret. */
+export function constructStripeTestTopupEvent(
+  payload: string,
+  signature: string,
+): BillingWebhookEvent {
+  const event = testOnlyClient().webhooks.constructEvent(
+    payload,
+    signature,
+    requireStripeTestTopupWebhookSecret(),
+  );
+  return {
+    id: event.id,
+    type: event.type,
+    testMode: event.livemode === false,
+    created: event.created,
+    object: (event.data?.object ?? {}) as unknown as Record<string, unknown>,
+  };
 }

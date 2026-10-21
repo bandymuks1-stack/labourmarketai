@@ -50,6 +50,14 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Stripe delivers it; identity is the webhook signature, not a user.",
   },
+  "lmc/topup-webhook/route.ts": {
+    class: "public",
+    why: "Stripe delivers it (LMC top-ups, TEST only); identity is the signature of its OWN endpoint secret (STRIPE_TOPUP_WEBHOOK_SECRET), not a user. 503 while either top-up kill-switch is off, 503 outside stripe_test, 400 on a bad signature or a live event; it credits at most once per payment intent.",
+  },
+  "lmc/topup-checkout/route.ts": {
+    class: "cookie-only",
+    why: "Money surface, Stripe TEST only, flag-gated (503 while STRIPE_LMC_TOPUPS_ENABLED / LMC_PURCHASES_ENABLED are off): it starts a hosted Checkout a browser completes, takes only an owner-approved package key, and derives the ledger subject from the cookie session's workspace. Same reasoning as billing/test-checkout.",
+  },
   "client-errors/route.ts": {
     class: "public",
     why: "Browser crash reports (2026-10-18 incident): a crash can happen before or without a session. Same-origin only, 2 KB, rate-limited, sanitised; logs one line and stores nothing; no identity read at all.",

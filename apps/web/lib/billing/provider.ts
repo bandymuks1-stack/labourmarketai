@@ -156,3 +156,60 @@ export async function getBillingProvider(): Promise<BillingProvider> {
   const { noopProvider } = await import("@/lib/billing/providers/noop");
   return noopProvider();
 }
+
+// ── One-time payments (TEST ONLY) ───────────────────────────────────────────
+
+/**
+ * A one-time (payment-mode) Checkout Session. The amount is the SERVER's —
+ * the caller resolves it from an owner-approved configuration, never from a
+ * request body. This seam knows nothing about what the payment buys; the
+ * domain that sells it owns that meaning and its settlement endpoint.
+ */
+export interface OneTimePaymentSessionInput {
+  /** Short product label shown on the hosted page. */
+  readonly productName: string;
+  /** Charged amount in the currency's minor unit (cents); positive integer. */
+  readonly unitAmountMinor: number;
+  readonly currency: "eur";
+  readonly clientReferenceId: string;
+  readonly customerEmail?: string | null;
+  /** Stamped on the session AND its payment intent (refund attribution). */
+  readonly metadata: Readonly<Record<string, string>>;
+  /** Deterministic retry key — a retry replays the session, not a new one. */
+  readonly idempotencyKey: string;
+  readonly successUrl: string;
+  readonly cancelUrl: string;
+}
+
+/**
+ * Create a one-time payment Checkout Session — ONLY while the adapter is in
+ * `stripe_test`. There is deliberately no live path: under `stripe_live` (or
+ * any other state) this refuses before the adapter module is even loaded.
+ */
+export async function createTestModePaymentSession(
+  input: OneTimePaymentSessionInput,
+): Promise<CheckoutSessionResult> {
+  const cfg = getBillingConfig();
+  if (cfg.state !== "stripe_test") return { ok: false, reason: "test_mode_required" };
+  const { createStripeTestPaymentSession } = await import(
+    "@/lib/billing/providers/stripe-test"
+  );
+  return createStripeTestPaymentSession(input);
+}
+
+/**
+ * Verify + parse a delivery to the SEPARATE one-time-payment endpoint with
+ * that endpoint's own TEST signing secret. Throws on a forged/invalid
+ * signature, and throws in every adapter state but `stripe_test`.
+ */
+export async function constructTestModeTopupWebhookEvent(
+  payload: string,
+  signature: string,
+): Promise<BillingWebhookEvent> {
+  const cfg = getBillingConfig();
+  if (cfg.state !== "stripe_test") throw new Error("test_mode_required");
+  const { constructStripeTestTopupEvent } = await import(
+    "@/lib/billing/providers/stripe-test"
+  );
+  return constructStripeTestTopupEvent(payload, signature);
+}
