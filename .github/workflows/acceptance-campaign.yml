@@ -35,7 +35,7 @@ jobs:
           today=$(date -u +%F)
           DAY1="role-routes journal-confirm living-cv-growth company-chain brigade-formation project-execution org-roster orders-bookings documents-approvals marketplace-goods-services jobs-search notifications-inapp"
           DAY2="billing-test-mode mcp-agents manager-chat calendar-planning chat-continuity project-context worker-identity-split agency-chain marketplace staff-review-notice mobile-surfaces sectors-languages"
-          DAY3="learning-practice recognition-chain chat-confirm-once mcp-chain employee-beta-gate"
+          DAY3="profile-cv-history search-support-privacy public-org-locales learning-practice recognition-chain chat-confirm-once mcp-chain employee-beta-gate"
           case "$today" in
             2026-10-22) plan="$DAY1"; retry_failed=0 ;;
             2026-10-23) plan="$DAY2"; retry_failed=0 ;;
