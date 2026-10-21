@@ -54,6 +54,9 @@ on:
           - company-chain
           - project-execution
           - org-roster
+          - marketplace-goods-services
+          - orders-bookings
+          - documents-approvals
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -111,7 +114,7 @@ jobs:
           EVENT: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context worker-identity-split company-chain project-execution org-roster)
+          ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context worker-identity-split company-chain project-execution org-roster marketplace-goods-services orders-bookings documents-approvals)
           case "$EVENT" in
             workflow_dispatch) spec="$INPUT_SPEC" ;;
             push) spec=role-routes ;;
@@ -258,6 +261,9 @@ jobs:
             company-chain) SPEC=tests/e2e/prod-company-chain.spec.ts ;;
             project-execution) SPEC=tests/e2e/prod-project-execution.spec.ts ;;
             org-roster) SPEC=tests/e2e/prod-org-roster.spec.ts ;;
+            marketplace-goods-services) SPEC=tests/e2e/prod-marketplace-goods-services.spec.ts ;;
+            orders-bookings) SPEC=tests/e2e/prod-orders-bookings.spec.ts ;;
+            documents-approvals) SPEC=tests/e2e/prod-documents-approvals.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
