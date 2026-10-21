@@ -227,7 +227,9 @@ export function RequestContactDetailsButton({
         <p className="text-meta text-text-muted">{labels.unavailable}</p>
       ) : null}
       {state === "error" ? (
-        <p className="text-meta text-state-danger">{labels.error}</p>
+        <p className="text-meta text-state-danger" data-testid={`contact-request-error-${workerId}`}>
+          {labels.error}
+        </p>
       ) : null}
     </div>
   );

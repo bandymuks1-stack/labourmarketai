@@ -266,7 +266,11 @@
       "work": "Arbeit",
       "services": "Dienstleistungen",
       "goods": "Waren & Ressourcen"
-    }
+    },
+    "formPublisherLabel": "Veröffentlicht von",
+    "publisherSelf": "Ich persönlich",
+    "publishedAs": "Als {name}",
+    "publishedAsOrganization": "Als Organisation"
   },
   "quality": {
     "title": "Mängel & Qualität",
@@ -5413,7 +5417,9 @@
         }
       ],
       "screenshot": "Bedarfsablauf für Unternehmen",
-      "cta": "Personalanfrage starten"
+      "cta": "Personalanfrage starten",
+      "calculatorBody": "Bevor Sie Arbeit anfragen, schätzen Sie sie ein: Arbeitsstunden, Material, Geräte und Reisen — mit Ihren eigenen Zahlen.",
+      "calculatorLink": "Projektkosten berechnen"
     },
     "agencies": {
       "eyebrow": "Für Personalagenturen",
@@ -7637,7 +7643,8 @@
     "notFound": "Diese Seite existiert nicht",
     "backHome": "Zurück zur Startseite",
     "dashboardSections": "Dashboard-Bereiche",
-    "skipToContent": "Zum Inhalt springen"
+    "skipToContent": "Zum Inhalt springen",
+    "loading": "Wird geladen…"
   },
   "workerInvitations": {
     "title": "Ausstehende Einladungen",

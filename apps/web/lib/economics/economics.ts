@@ -97,7 +97,10 @@ export async function getProjectEconomics(
   // reads the ledger table directly (single-owner contract).
   let actualCents: number | null = 0;
   const finance = await listMyFinanceRecords();
-  if (finance.status === "ok") {
+  // A failed ledger read comes back as status "ok" with an EMPTY list and the
+  // error beside it; summing that list would report a measured €0 actual and a
+  // full-budget variance. A read that failed is unknown, never zero (SEP-7).
+  if (finance.status === "ok" && !finance.error) {
     actualCents = finance.records
       .filter(
         (r) =>

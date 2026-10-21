@@ -476,6 +476,8 @@ function WorkerCard({
     <article
       className="card-border glow-hover rise-in flex flex-col gap-3 p-4"
       data-testid="ops-worker-card"
+      data-worker-id={worker.workerId}
+      data-readiness-items={worker.readinessItems.length}
     >
       <header className="flex flex-wrap items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2.5">

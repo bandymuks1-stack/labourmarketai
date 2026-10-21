@@ -111,8 +111,13 @@ async function countOwnContactAsks(
     }
   };
   const [open, day] = await Promise.all([
+    // OPEN = created AND not yet past its 14-day expiry — the propose RPC's
+    // own rule (`status = 'created' and expires_at > now()`). The sweep that
+    // flips rows to `expired` is admin-run, so counting status alone kept an
+    // employer whose asks simply lapsed refused as `rate-limited` forever,
+    // while the database would have accepted the next ask.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    head((q) => (q as any).eq("status", "created")),
+    head((q) => (q as any).eq("status", "created").gt("expires_at", new Date().toISOString())),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     head((q) => (q as any).gt("created_at", rollingDayFloorIso())),
   ]);

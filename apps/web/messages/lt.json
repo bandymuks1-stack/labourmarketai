@@ -266,7 +266,11 @@
       "work": "Darbas",
       "services": "Paslaugos",
       "goods": "Prekės ir ištekliai"
-    }
+    },
+    "formPublisherLabel": "Skelbia",
+    "publisherSelf": "Aš asmeniškai",
+    "publishedAs": "Kaip {name}",
+    "publishedAsOrganization": "Kaip organizacija"
   },
   "quality": {
     "title": "Defektai ir kokybė",
@@ -5413,7 +5417,9 @@
         }
       ],
       "screenshot": "Įmonės paklausos srautas",
-      "cta": "Pradėti darbuotojų užklausą"
+      "cta": "Pradėti darbuotojų užklausą",
+      "calculatorBody": "Prieš ieškodamas darbuotojų, įvertink darbą: darbo valandas, medžiagas, įrangą ir keliones — savo skaičiais.",
+      "calculatorLink": "Apskaičiuok projekto kainą"
     },
     "agencies": {
       "eyebrow": "Agentūroms",
@@ -7637,7 +7643,8 @@
     "notFound": "Tokio puslapio nėra",
     "backHome": "Grįžti į pradžią",
     "dashboardSections": "Valdymo skydelio skiltys",
-    "skipToContent": "Pereiti į turinį"
+    "skipToContent": "Pereiti į turinį",
+    "loading": "Kraunama…"
   },
   "workerInvitations": {
     "title": "Laukiantys pakvietimai",

@@ -570,7 +570,9 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content"
+    "skipToContent": "[EN] Skip to content",
+    "loading": "Laster inn…",
+    "dashboardSections": "Oversiktens seksjoner"
   },
   "companies": {
     "cta": {
@@ -923,7 +925,9 @@
       "screenshot": "[EN] Company demand flow",
       "subcopy": "[EN] Post what you need on each project and see which available workers and agencies fit it.",
       "title": "[EN] Live demand,",
-      "titleAccent": "[EN] in context."
+      "titleAccent": "[EN] in context.",
+      "calculatorBody": "Før du etterspør arbeid, anslå det: arbeidstimer, materialer, utstyr og reiser — med dine egne tall.",
+      "calculatorLink": "Beregn kostnaden for et prosjekt"
     },
     "workers": {
       "benefits": [

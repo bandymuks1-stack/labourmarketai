@@ -266,7 +266,11 @@
       "work": "Werk",
       "services": "Diensten",
       "goods": "Goederen & middelen"
-    }
+    },
+    "formPublisherLabel": "Geplaatst door",
+    "publisherSelf": "Ikzelf",
+    "publishedAs": "Als {name}",
+    "publishedAsOrganization": "Als organisatie"
   },
   "quality": {
     "title": "Gebreken & kwaliteit",
@@ -5413,7 +5417,9 @@
         }
       ],
       "screenshot": "Bedrijfsvraagflow",
-      "cta": "Start een personeelsaanvraag"
+      "cta": "Start een personeelsaanvraag",
+      "calculatorBody": "Schat het werk in voordat je het uitvraagt: arbeidsuren, materialen, materieel en reizen, met je eigen cijfers.",
+      "calculatorLink": "Bereken de kosten van een project"
     },
     "agencies": {
       "eyebrow": "Voor uitzendbureaus",
@@ -7637,7 +7643,8 @@
     "notFound": "Deze pagina bestaat niet",
     "backHome": "Terug naar home",
     "dashboardSections": "Dashboardsecties",
-    "skipToContent": "Direct naar inhoud"
+    "skipToContent": "Direct naar inhoud",
+    "loading": "Laden…"
   },
   "workerInvitations": {
     "title": "Openstaande uitnodigingen",

@@ -185,6 +185,20 @@ export const FEATURES: readonly FeatureConfig[] = [
     safeToShowInPrimaryNav: false,
   },
 
+  {
+    // Service offers — publish a service, be found in the one market index,
+    // answer requests and continue in a conversation (MKT-1). Shipping and
+    // proven on production by the marketplace walk; the row said "preparing"
+    // long after the surface went live (registry row 6.1). Not a nav tab: it
+    // is reached from the market (/dashboard/listings) and the spine signals.
+    key: "service_offers",
+    availability: "active",
+    labelKey: "features.service_offers.label",
+    descriptionKey: "features.service_offers.description",
+    primaryRoute: "/dashboard/services",
+    safeToShowInPrimaryNav: false,
+  },
+
   // ── Preparing surfaces (visible as cards, no broken CTA) ───────────
   {
     key: "role_expansion",
@@ -247,14 +261,6 @@ export const FEATURES: readonly FeatureConfig[] = [
     availability: "preparing",
     labelKey: "features.work_needs.label",
     descriptionKey: "features.work_needs.description",
-    preparingReasonKey: "features.preparing_generic_reason",
-    safeToShowInPrimaryNav: false,
-  },
-  {
-    key: "service_offers",
-    availability: "preparing",
-    labelKey: "features.service_offers.label",
-    descriptionKey: "features.service_offers.description",
     preparingReasonKey: "features.preparing_generic_reason",
     safeToShowInPrimaryNav: false,
   },

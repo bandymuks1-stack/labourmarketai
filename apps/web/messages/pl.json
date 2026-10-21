@@ -266,7 +266,11 @@
       "work": "Praca",
       "services": "Usługi",
       "goods": "Towary i zasoby"
-    }
+    },
+    "formPublisherLabel": "Publikuje",
+    "publisherSelf": "Ja osobiście",
+    "publishedAs": "Jako {name}",
+    "publishedAsOrganization": "Jako organizacja"
   },
   "quality": {
     "title": "Usterki i jakość",
@@ -5413,7 +5417,9 @@
         }
       ],
       "screenshot": "Ścieżka zapotrzebowania firmy",
-      "cta": "Zgłoś zapotrzebowanie na pracowników"
+      "cta": "Zgłoś zapotrzebowanie na pracowników",
+      "calculatorBody": "Zanim poprosisz o wykonawców, oszacuj pracę: godziny, materiały, sprzęt i dojazdy — na własnych liczbach.",
+      "calculatorLink": "Oblicz koszt projektu"
     },
     "agencies": {
       "eyebrow": "Dla agencji",
@@ -7637,7 +7643,8 @@
     "notFound": "Ta strona nie istnieje",
     "backHome": "Powrót na stronę główną",
     "dashboardSections": "Sekcje panelu",
-    "skipToContent": "Przejdź do treści"
+    "skipToContent": "Przejdź do treści",
+    "loading": "Ładowanie…"
   },
   "workerInvitations": {
     "title": "Oczekujące zaproszenia",
