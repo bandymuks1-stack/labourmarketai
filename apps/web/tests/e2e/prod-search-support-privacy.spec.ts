@@ -44,8 +44,11 @@ import { bearerOf, qaApi } from "./prod-qa-api";
  * SAFETY. Every step is what a person does in the browser. The API calls read
  * each synthetic person's OWN row (and the working-relationship predicate)
  * with their own token; they write nothing. Every free-text write carries the
- * run id. `afterAll` undoes what this run did — the contact ask, the hand, the
- * draft, the supply declaration, the location row, the visibility consent —
+ * run id. RECORD AND RESTORE, NEVER ASSUME PRISTINE: each write first records
+ * the state it found; a pre-existing contact ask or supply consent is read back
+ * and never overwritten or withdrawn; `afterAll` puts back exactly what was
+ * found — the hand, the contact ask, the draft, the supply consent, the
+ * location row's visibility and active flag, the employer-visibility state —
  * even after a red step. The deletion step blocks every POST while it is on
  * the page and never presses submit; no erasure is ever filed. The export is
  * downloaded to a temporary file, measured and deleted, never read. The
@@ -100,24 +103,27 @@ async function ownWorker(slot: string): Promise<{ id: string; displayName: strin
   return { id: rows[0].id, displayName: (rows[0].display_name ?? "").trim() };
 }
 
-/** The same anonymous label the person page renders (lib/visibility/worker-profile-visibility.ts). */
+/** The anonymous name the person page renders on /lt (`people.anonymousName`, messages/lt.json). */
 function anonymousLabel(workerId: string): string {
   const token = workerId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 6).toUpperCase();
-  return token.length > 0 ? `Candidate ${token}` : "Candidate";
+  return `Kandidatas ${token}`;
 }
 
 const firstLine = (e: unknown) => ((e as Error).message ?? String(e)).split("\n")[0].slice(0, 160);
 
-// What this run changed, so `afterAll` can undo exactly that.
+// RECORD AND RESTORE, NEVER ASSUME PRISTINE. Each write records the state it
+// found first; `afterAll` puts back exactly that state (or, where the product
+// keeps an append-only ledger, the equivalent visible state) — and a state the
+// walk did not create is never withdrawn or overwritten.
 let workerId = "";
 let worker2Id = "";
 let worker2Name = "";
 let requestId = "";
 let handRaisedHere = false;
-let contactAskOpen = false;
+let contactAskCreatedHere = false;
 let draftCreated = false;
-let supplyTouched = false;
-let locationRowTouched = false;
+let supplyGrantedHere = false;
+let locationRow: { created: boolean; activeBefore: boolean; visibilityBefore: string } | null = null;
 let visibilityInitial: "granted" | "withdrawn" | "choice" | "" = "";
 let visibilityTouched = false;
 
@@ -252,6 +258,7 @@ test("P-4 (9.13). a preferred location's visibility changes, persists and is put
   const { ctx, page } = await as(browser, "worker2");
   await openCapture(page);
   let row = taggedLocationRow(page);
+  let created = false;
   if ((await row.count()) === 0) {
     // One synthetic row, reused by every later run (no delete exists; it is disabled after).
     await page.getByTestId("capture-preferred-country").selectOption("LT");
@@ -260,13 +267,11 @@ test("P-4 (9.13). a preferred location's visibility changes, persists and is put
     await expect(page.getByTestId("capture-status")).toBeVisible({ timeout: 30_000 });
     row = taggedLocationRow(page);
     await expect(row).toBeVisible({ timeout: 30_000 });
+    created = true;
   }
-  locationRowTouched = true;
-  if ((await row.getAttribute("data-active")) !== "true") {
-    await row.getByTestId("capture-preferred-toggle").click();
-    await expect(row).toHaveAttribute("data-active", "true", { timeout: 30_000 });
-  }
+  // Record what was there; only the visibility is changed (the active flag is left alone).
   const before = await row.getByTestId("capture-preferred-visibility").inputValue();
+  locationRow = { created, activeBefore: (await row.getAttribute("data-active")) === "true", visibilityBefore: before };
   const target = before === "region_visible" ? "self_only" : "region_visible";
   await setLocationVisibility(page, target);
   // Put it back, and prove that persisted too.
@@ -316,12 +321,24 @@ test("P-6 (4.28). the worker declares their own supply, sees it persist, and wit
   const choice = page.getByTestId("partner-supply-choice");
   const managed = page.getByTestId("partner-supply-managed");
   await expect(choice.or(managed).first()).toBeVisible({ timeout: 60_000 });
-  supplyTouched = true;
-  if (await choice.isVisible().catch(() => false)) {
-    await page.getByTestId("partner-supply-open").click();
-    await page.getByTestId("partner-supply-grant").click();
-    await expect(managed).toBeVisible({ timeout: 30_000 });
+  if (await managed.isVisible().catch(() => false)) {
+    // A representation consent (and maybe a declaration) already exists: it is
+    // not this walk's to overwrite or withdraw. Read it back, write nothing.
+    await expect(page.getByTestId("partner-supply-status")).toBeVisible();
+    await expect(page.getByTestId("partner-supply-no-worker")).toHaveCount(0);
+    const current = page.getByTestId("partner-supply-current");
+    if (await current.isVisible().catch(() => false)) {
+      expect((await page.getByTestId("partner-supply-current-intent").innerText()).trim().length).toBeGreaterThan(0);
+    }
+    console.info("P-6: a pre-existing representation consent — read back, nothing written");
+    await ctx.close();
+    return;
   }
+  // No consent before this run: grant it, declare, and leave it exactly as found (no consent).
+  await page.getByTestId("partner-supply-open").click();
+  await page.getByTestId("partner-supply-grant").click();
+  supplyGrantedHere = true;
+  await expect(managed).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("partner-supply-no-worker")).toHaveCount(0);
   if (!(await page.getByTestId("partner-supply-form").isVisible().catch(() => false))) {
     await page.getByTestId("partner-supply-edit").click();
@@ -352,7 +369,7 @@ test("P-6 (4.28). the worker declares their own supply, sees it persist, and wit
   await expect(choice).toBeVisible({ timeout: 30_000 });
   await page.reload();
   await expect(choice, "the withdrawal persisted").toBeVisible({ timeout: 60_000 });
-  supplyTouched = false;
+  supplyGrantedHere = false;
   await ctx.close();
 });
 
@@ -563,21 +580,32 @@ test("M-4 (4.19). Gama asks for the worker's contact details: the ask is pending
   const status = page.getByTestId(`contact-request-status-${workerId}`);
   const ask = page.getByTestId(`contact-request-open-${workerId}`);
   await expect(status.or(ask).first()).toBeVisible({ timeout: 30_000 });
-  if ((await status.getAttribute("data-status").catch(() => null)) !== "created") {
-    await ask.click();
-    await expect(
-      status.or(page.getByTestId(`contact-request-limit-${workerId}`)).or(page.getByTestId(`contact-request-error-${workerId}`)).first(),
-    ).toBeVisible({ timeout: 30_000 });
-    expect(await page.getByTestId(`contact-request-limit-${workerId}`).count(), "not rate-limited").toBe(0);
-    expect(await page.getByTestId(`contact-request-error-${workerId}`).count(), "no error").toBe(0);
+  // Record what was there. An ask this walk did not make — open or answered —
+  // is read back and left exactly as it is.
+  const found = (await ask.isVisible().catch(() => false)) ? null : await status.getAttribute("data-status").catch(() => null);
+  if (found === "created" || found === "accepted") {
+    await page.reload();
+    await expect(status, "the existing ask reads back unchanged").toHaveAttribute("data-status", found, {
+      timeout: 60_000,
+    });
+    console.info(`M-4: a pre-existing ask (${found}) — read back, nothing written`);
+    await ctx.close();
+    return;
   }
-  contactAskOpen = true;
+  await ask.click();
+  contactAskCreatedHere = true;
+  await expect(
+    status.or(page.getByTestId(`contact-request-limit-${workerId}`)).or(page.getByTestId(`contact-request-error-${workerId}`)).first(),
+  ).toBeVisible({ timeout: 30_000 });
+  expect(await page.getByTestId(`contact-request-limit-${workerId}`).count(), "not rate-limited").toBe(0);
+  expect(await page.getByTestId(`contact-request-error-${workerId}`).count(), "no error").toBe(0);
   // Persistence: a fresh load shows the ask pending (and gives the withdraw control its row id).
   await page.reload();
   await expect(status).toHaveAttribute("data-status", "created", { timeout: 60_000 });
+  // Restore: the ask this run made is taken back.
   await page.getByTestId(`contact-request-withdraw-${workerId}`).click();
   await expect(status).toHaveAttribute("data-status", "withdrawn", { timeout: 30_000 });
-  contactAskOpen = false;
+  contactAskCreatedHere = false;
   await ctx.close();
 });
 
@@ -585,6 +613,9 @@ test("M-5 (4.14). a candidate draft is created, seen after a reload, and deleted
   const { ctx, page } = await as(browser, "owner");
   await page.goto("/lt/dashboard/candidates");
   await expect(page.getByTestId("candidate-drafts-manager")).toBeVisible({ timeout: 60_000 });
+  // Record the owner's existing drafts: this run adds one, uniquely named, and
+  // removes only that one — the others must be exactly as found.
+  const draftsBefore = await page.getByTestId("candidate-draft-card").count();
   const create = page.getByTestId("candidate-draft-create");
   await create.getByTestId("draft-name-input").fill(DRAFT);
   await create.getByTestId("draft-create-submit").click();
@@ -598,6 +629,7 @@ test("M-5 (4.14). a candidate draft is created, seen after a reload, and deleted
   await page.reload();
   await expect(page.getByTestId("candidate-drafts-manager")).toBeVisible({ timeout: 60_000 });
   await expect(card, "the deletion persisted").toHaveCount(0);
+  await expect(page.getByTestId("candidate-draft-card"), "every other draft is untouched").toHaveCount(draftsBefore);
   draftCreated = false;
   await ctx.close();
 });
@@ -613,9 +645,37 @@ test("P-7 (9.10). rate limiting — not walked", async () => {
   );
 });
 
-// Last on purpose. Turning visibility back on goes through the withdrawn
-// state's own "manage" door; if that door leads nowhere, this step is red and
-// worker2 stays hidden from employers — and no step after it depends on that.
+/** Employer visibility: grant from the choice screen or from a reopened withdrawal, and prove it on a fresh load. */
+async function grantVisibility(page: Page): Promise<void> {
+  const withdrawn = page.getByTestId("discoverability-withdrawn");
+  if (await withdrawn.isVisible().catch(() => false)) {
+    await page.getByTestId("discoverability-reopen").click();
+  } else {
+    await page.getByTestId("discoverability-open").click();
+  }
+  await expect(page.getByTestId("discoverability-grant"), "the screen offers the grant").toBeVisible({
+    timeout: 30_000,
+  });
+  await page.getByTestId("discoverability-grant").click();
+  await expect(page.getByTestId("discoverability-granted")).toBeVisible({ timeout: 30_000 });
+  await page.reload();
+  await expect(page.getByTestId("discoverability-granted"), "the grant persisted").toBeVisible({ timeout: 60_000 });
+}
+
+/** Employer visibility: withdraw from the granted screen, and prove it on a fresh load. */
+async function withdrawVisibility(page: Page): Promise<void> {
+  await page.getByTestId("discoverability-manage").click();
+  await page.getByTestId("discoverability-withdraw").click();
+  await expect(page.getByTestId("discoverability-withdrawn")).toBeVisible({ timeout: 30_000 });
+  await page.reload();
+  await expect(page.getByTestId("discoverability-withdrawn"), "the withdrawal persisted").toBeVisible({
+    timeout: 60_000,
+  });
+}
+
+// Every path proves off → persists → on, and ENDS where it started: visible
+// stays visible, hidden ends hidden (a never-decided consent ends "withdrawn",
+// the same hidden state — the consent ledger is append-only by design).
 test("P-8 (2.35 / 4.17). the worker turns employer visibility off, it persists, and turns it back on", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker2");
   await page.goto("/lt/dashboard/privacy#visibility");
@@ -627,31 +687,19 @@ test("P-8 (2.35 / 4.17). the worker turns employer visibility off, it persists, 
   console.info(`P-8: starting state = ${visibilityInitial}`);
   visibilityTouched = true;
 
-  if (visibilityInitial === "choice") {
-    await page.getByTestId("discoverability-open").click();
-    await page.getByTestId("discoverability-grant").click();
-    await expect(granted).toBeVisible({ timeout: 30_000 });
-    await page.reload();
-    await expect(granted, "the grant persisted").toBeVisible({ timeout: 60_000 });
+  if (visibilityInitial === "granted") {
+    await withdrawVisibility(page);
+    await grantVisibility(page); // restored: visible
+  } else if (visibilityInitial === "withdrawn") {
+    await grantVisibility(page);
+    await withdrawVisibility(page); // restored: hidden
+  } else {
+    await grantVisibility(page);
+    await withdrawVisibility(page);
+    await grantVisibility(page); // the way back from a withdrawal
+    await withdrawVisibility(page); // restored: hidden
   }
-  if (visibilityInitial !== "withdrawn") {
-    await page.getByTestId("discoverability-manage").click();
-    await page.getByTestId("discoverability-withdraw").click();
-    await expect(withdrawn).toBeVisible({ timeout: 30_000 });
-    await page.reload();
-    await expect(withdrawn, "the withdrawal persisted").toBeVisible({ timeout: 60_000 });
-  }
-  // Turn it back on from the same screen.
-  await page.getByTestId("discoverability-reopen").click();
-  await expect(
-    page.getByTestId("discoverability-grant"),
-    "after withdrawing, the privacy screen offers the grant again",
-  ).toBeVisible({ timeout: 30_000 });
-  await page.getByTestId("discoverability-grant").click();
-  await expect(granted).toBeVisible({ timeout: 30_000 });
-  await page.reload();
-  await expect(granted, "the re-grant persisted").toBeVisible({ timeout: 60_000 });
-  if (visibilityInitial === "granted") visibilityTouched = false;
+  visibilityTouched = false;
   await ctx.close();
 });
 
@@ -664,7 +712,8 @@ test.afterAll(async ({ browser }) => {
       what: "contact ask",
       slot: "manager",
       org: GAMA,
-      when: () => contactAskOpen && requestId !== "",
+      // Only an ask THIS run made; a pre-existing one is never withdrawn.
+      when: () => contactAskCreatedHere && requestId !== "",
       run: async (page) => {
         await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
         const status = page.getByTestId(`contact-request-status-${workerId}`);
@@ -706,10 +755,11 @@ test.afterAll(async ({ browser }) => {
       },
     },
     {
-      what: "supply declaration",
+      what: "supply consent (back to none, as found)",
       slot: "worker2",
       org: null,
-      when: () => supplyTouched,
+      // Only a consent THIS run granted; a pre-existing one is never withdrawn.
+      when: () => supplyGrantedHere,
       run: async (page) => {
         await page.goto("/lt/dashboard/privacy#partner-supply");
         const withdrawConsent = page.getByTestId("partner-supply-withdraw-consent");
@@ -723,34 +773,40 @@ test.afterAll(async ({ browser }) => {
       },
     },
     {
-      what: "location row",
+      what: "location row (visibility as found; a row made here is disabled)",
       slot: "worker2",
       org: null,
-      when: () => locationRowTouched,
+      when: () => locationRow !== null,
       run: async (page) => {
+        const rec = locationRow;
+        if (!rec) return;
         await openCapture(page);
         const row = taggedLocationRow(page);
-        if ((await row.getAttribute("data-active")) === "true") {
-          await row.getByTestId("capture-preferred-toggle").click();
-          await expect(row).toHaveAttribute("data-active", "false", { timeout: 30_000 });
+        await expect(row).toBeVisible({ timeout: 30_000 });
+        const select = row.getByTestId("capture-preferred-visibility");
+        if ((await select.inputValue()) !== rec.visibilityBefore) await setLocationVisibility(page, rec.visibilityBefore);
+        // A reused row keeps the active flag it had; a row this run made ends disabled.
+        const wantActive = rec.created ? false : rec.activeBefore;
+        const active = (await taggedLocationRow(page).getAttribute("data-active")) === "true";
+        if (active !== wantActive) {
+          await taggedLocationRow(page).getByTestId("capture-preferred-toggle").click();
+          await expect(taggedLocationRow(page)).toHaveAttribute("data-active", String(wantActive), { timeout: 30_000 });
         }
       },
     },
     {
-      what: "employer visibility (back to granted)",
+      what: "employer visibility (as found)",
       slot: "worker2",
       org: null,
-      when: () => visibilityTouched && visibilityInitial === "granted",
+      when: () => visibilityTouched && visibilityInitial !== "",
       run: async (page) => {
         await page.goto("/lt/dashboard/privacy#visibility");
         const granted = page.getByTestId("discoverability-granted");
-        const withdrawn = page.getByTestId("discoverability-withdrawn");
-        await expect(granted.or(withdrawn).first()).toBeVisible({ timeout: 60_000 });
-        if (await withdrawn.isVisible()) {
-          await page.getByTestId("discoverability-reopen").click();
-          await page.getByTestId("discoverability-grant").click();
-          await expect(granted).toBeVisible({ timeout: 30_000 });
-        }
+        const hidden = page.getByTestId("discoverability-withdrawn").or(page.getByTestId("discoverability-choice"));
+        await expect(granted.or(hidden).first()).toBeVisible({ timeout: 60_000 });
+        const isGranted = await granted.isVisible();
+        if (visibilityInitial === "granted" && !isGranted) await grantVisibility(page);
+        if (visibilityInitial !== "granted" && isGranted) await withdrawVisibility(page);
       },
     },
   ];

@@ -10980,6 +10980,7 @@
       "salaryExpectation": "Pay expectation",
       "skillsCount": "Skills",
       "anonymousLabel": "Shown to companies as",
+      "anonymousValue": "Candidate {token}",
       "currentCountry": "Current country",
       "availableFrom": "Available from",
       "contractType": "Engagement form",
@@ -12440,6 +12441,7 @@
     }
   },
   "people": {
+    "anonymousName": "Candidate {token}",
     "eyebrow": "Person profile",
     "restrictedTitle": "Profile unavailable",
     "restrictedBody": "You can't view this person's profile: there is no active work relationship, or the person hasn't agreed to be discoverable.",

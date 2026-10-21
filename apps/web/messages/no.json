@@ -2908,6 +2908,7 @@
     "loopReadFailed": "Forespørslene dine kunne ikke lastes — listen kan være ufullstendig. Last inn siden på nytt."
   },
   "people": {
+    "anonymousName": "Kandidat {token}",
     "eyebrow": "Personprofil",
     "restrictedTitle": "Profil ikke tilgjengelig",
     "restrictedBody": "Du kan ikke se denne personens profil: det finnes ingen aktiv arbeidsrelasjon, eller personen har ikke samtykket til å være synlig.",

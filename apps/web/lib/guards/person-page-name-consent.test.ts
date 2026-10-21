@@ -23,7 +23,23 @@ describe("person page — name only with a working relationship", () => {
     expect(page).toContain('from "@/lib/visibility/worker-identity-visibility"');
     expect(page).toMatch(/const nameVisible = await viewerHasWorkerRelation\(/);
     expect(page).toMatch(/nameVisible \? \(worker\.display_name as string \| null\)\?\.trim\(\) : null/);
-    expect(page).toMatch(/anonymizedWorkerLabel\(worker\.id as string\)/);
+    // The anonymous name comes from the catalogue in the reader's language (never English on /lt).
+    expect(page).toMatch(/t\("anonymousName", \{ token: anonymizedWorkerToken\(worker\.id as string\) \}\)/);
+    expect(page).not.toMatch(/anonymizedWorkerLabel\(/);
+  });
+
+  it("every catalogue with a people namespace words the anonymous name itself", () => {
+    const english = JSON.parse(read("messages/en.json")).people.anonymousName as string;
+    expect(english).toBe("Candidate {token}");
+    for (const locale of ["lt", "ru", "pl", "de", "nl", "da", "et", "lv", "no", "sv"]) {
+      const value = JSON.parse(read(`messages/${locale}.json`)).people.anonymousName as string;
+      expect(value, locale).toMatch(/^\S.* \{token\}$/);
+      expect(value, `${locale} is not English copied over`).not.toBe(english);
+    }
+    for (const locale of ["lt", "en", "ru", "pl", "de", "nl"]) {
+      const consent = JSON.parse(read(`messages/${locale}.json`)).privacyConsent.preview.anonymousValue as string;
+      expect(consent, locale).toBe(JSON.parse(read(`messages/${locale}.json`)).people.anonymousName);
+    }
   });
 
   it("the relationship check uses only relationship-scoped reads, never discoverability", () => {

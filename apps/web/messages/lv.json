@@ -2908,6 +2908,7 @@
     "loopReadFailed": "Neizdevās ielādēt jūsu pieprasījumus — saraksts var būt nepilnīgs. Atsvaidziniet lapu."
   },
   "people": {
+    "anonymousName": "Kandidāts {token}",
     "eyebrow": "Personas profils",
     "restrictedTitle": "Profils nav pieejams",
     "restrictedBody": "Jūs nevarat apskatīt šīs personas profilu: nav aktīvu darba attiecību, vai persona nav piekritusi būt atrodama.",

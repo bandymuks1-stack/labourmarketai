@@ -10980,6 +10980,7 @@
       "salaryExpectation": "Gehaltsvorstellung",
       "skillsCount": "Fähigkeiten",
       "anonymousLabel": "Unternehmen sehen Sie als",
+      "anonymousValue": "Kandidat {token}",
       "currentCountry": "Aktuelles Land",
       "availableFrom": "Verfügbar ab",
       "contractType": "Beschäftigungsform",
@@ -12440,6 +12441,7 @@
     }
   },
   "people": {
+    "anonymousName": "Kandidat {token}",
     "eyebrow": "Personenprofil",
     "restrictedTitle": "Profil nicht verfügbar",
     "restrictedBody": "Sie können das Profil dieser Person nicht ansehen: Es besteht keine aktive Arbeitsbeziehung, oder die Person hat der Auffindbarkeit nicht zugestimmt.",
