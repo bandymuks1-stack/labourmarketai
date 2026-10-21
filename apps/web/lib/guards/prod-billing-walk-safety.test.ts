@@ -146,3 +146,14 @@ describe("prod billing walk — synthetic cast only", () => {
     for (const o of orgs) expect(o).toMatch(/"QA-SYNTHETIC /);
   });
 });
+
+describe("prod billing walk — VAT total before paying (owner 2026-10-21)", () => {
+  it("checks the Checkout total is €99.00 or €119.79 before the pay button, and only then submits", () => {
+    const pay = SPEC.slice(SPEC.indexOf("async function payWithTestCard"));
+    const check = pay.indexOf("await proveTestTotal(page);");
+    const submit = pay.indexOf(`await page.locator('button[type="submit"]').first().click();`);
+    expect(check).toBeGreaterThan(0);
+    expect(check).toBeLessThan(submit);
+    expect(SPEC).toContain("vat_total_unexpected");
+  });
+});

@@ -276,7 +276,27 @@ async function payWithTestCard(page: Page): Promise<void> {
   await fillIfShown(page, "#billingAddressLine1", "Gedimino pr. 1");
   await fillIfShown(page, "#billingLocality", "Vilnius");
   await fillIfShown(page, "#billingPostalCode", "01103");
+  await proveTestTotal(page);
   await page.locator('button[type="submit"]').first().click();
+}
+
+/**
+ * VAT logic (owner 2026-10-21): the €99/month Organization price is tax-exclusive
+ * and Checkout runs Stripe Tax. With the LT address filled, the total due is
+ * exactly €99.00 (no tax registration in the sandbox → 0%) or €119.79 (LT 21%).
+ * Any other total stops the walk BEFORE the pay button: nothing is submitted.
+ */
+async function proveTestTotal(page: Page): Promise<void> {
+  const allowed = [/€\s?99\.00\b/, /€\s?119\.79\b/];
+  let seen: "99.00" | "119.79" | null = null;
+  for (let i = 0; i < 15 && !seen; i += 1) {
+    const text = await page.locator("body").innerText().catch(() => "");
+    if (allowed[1].test(text)) seen = "119.79";
+    else if (allowed[0].test(text)) seen = "99.00";
+    else await page.waitForTimeout(1_000);
+  }
+  expect(seen, "vat_total_unexpected: Checkout total is neither €99.00 nor €119.79 — not paying").not.toBeNull();
+  evidence(`7.15 checkout total=EUR ${seen} (${seen === "119.79" ? "LT VAT 21% applied" : "0% VAT: no test tax registration"})`);
 }
 
 /**
