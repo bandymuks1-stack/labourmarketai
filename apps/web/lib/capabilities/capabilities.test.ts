@@ -78,6 +78,17 @@ vi.mock("@/lib/demand/demand-request", () => ({
   demandStateFingerprint: (...a: unknown[]) => demandFingerprint(...(a as [])),
 }));
 
+// Whether a recorded skill confirmation still STANDS is read from the journal
+// (lib/evidence/skill-confirmation-standing-read.ts); the table stub cannot
+// model that read, so each test states the answer it needs.
+const standingRead = vi.hoisted(() => ({
+  value: null as { ids: ReadonlySet<string>; subjectProfileId: string | null } | null,
+}));
+vi.mock("@/lib/evidence/skill-confirmation-standing-read", () => ({
+  readStandingConfirmedSkillIds: async () => standingRead.value,
+  readOwnStandingConfirmedSkillIds: async () => standingRead.value,
+}));
+
 import {
   exposedCapabilities,
   listCapabilities,
@@ -888,6 +899,7 @@ describe("profile.get", () => {
 
 describe("living_cv.skills.get", () => {
   it("returns the caller's worker_skills rows joined to catalogue slugs", async () => {
+    standingRead.value = { ids: new Set(["s-1"]), subjectProfileId: "profile-1" };
     const r = await runCapability(
       "living_cv.skills.get",
       caller({
@@ -922,6 +934,30 @@ describe("living_cv.skills.get", () => {
         ],
       },
     });
+  });
+
+  it("a recorded confirmation whose work no longer stands is NOT verified (the act is kept)", async () => {
+    standingRead.value = { ids: new Set(), subjectProfileId: "profile-1" };
+    const r = await runCapability(
+      "living_cv.skills.get",
+      caller({
+        workers: { data: { id: "worker-1" }, error: null },
+        worker_skills: {
+          data: [
+            {
+              skill_id: "s-1",
+              verified: true,
+              source: "work_journal",
+              verified_at: "2026-08-01T00:00:00Z",
+              skills: { slug: "tiling" },
+            },
+          ],
+          error: null,
+        },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({ ok: true, data: { skills: [{ skillId: "s-1", verified: false }] } });
   });
 
   it("no worker row is an honest no_worker, not an empty success", async () => {

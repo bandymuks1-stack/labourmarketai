@@ -1,5 +1,7 @@
 import "server-only";
 import { readCorrectedOriginalIds } from "@/lib/journal/corrected-originals-read";
+import { withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 
 import { EMPLOYER_BASIS_OR_FILTER } from "@/lib/journal/review-status";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
@@ -206,8 +208,15 @@ type VerifiedSkillsRead =
   | { readonly status: "ok"; readonly badges: VerifiedSkillBadge[] }
   | { readonly status: "unavailable" };
 
+/** The card shows at most this many confirmed-skill badges. */
+const VERIFIED_BADGE_LIMIT = 12;
+
 /**
- * Verified (manager-confirmed) skills + their icons. A failed SKILL read is
+ * Verified (manager-confirmed) skills + their icons — ONLY confirmations that
+ * still STAND (lib/evidence/skill-confirmation-standing.ts): a confirmation
+ * whose work was later rejected, corrected or deleted, or one the person made
+ * on their own skill, is not a badge. A standing read that failed is
+ * `unavailable`, never an empty "none confirmed yet". A failed SKILL read is
  * `unavailable` (identity truth: it used to return `[]`, and the card then
  * said "none confirmed yet" about a read that never happened). A failed
  * ICON read only drops the icons — the icon is decoration, the skill is the
@@ -220,17 +229,24 @@ async function verifiedSkillBadges(
   try {
     const { data: rows, error } = await asAny(supabase)
       .from("worker_skills")
-      .select("skill_id, skills(slug)")
+      .select("skill_id, verified, verified_by, skills(slug)")
       .eq("worker_id", workerId)
-      .eq("verified", true)
-      .limit(12);
+      .eq("verified", true);
     if (error) return { status: "unavailable" };
-    const skills = ((rows ?? []) as {
+    const recorded = (rows ?? []) as {
       skill_id: string | null;
+      verified: boolean | null;
+      verified_by: string | null;
       skills: { slug: string | null } | null;
-    }[])
+    }[];
+    if (recorded.length === 0) return { status: "ok", badges: [] };
+    const standing = await readOwnStandingConfirmedSkillIds(workerId);
+    if (standing === null) return { status: "unavailable" };
+    const skills = withStandingConfirmation(recorded, standing)
+      .filter((r) => r.verified)
       .map((r) => ({ id: r.skill_id, slug: r.skills?.slug ?? null }))
-      .filter((s): s is { id: string; slug: string } => !!s.id && !!s.slug);
+      .filter((s): s is { id: string; slug: string } => !!s.id && !!s.slug)
+      .slice(0, VERIFIED_BADGE_LIMIT);
     if (skills.length === 0) return { status: "ok", badges: [] };
 
     const { data: iconRows } = await asAny(supabase)
