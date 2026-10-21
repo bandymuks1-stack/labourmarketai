@@ -137,6 +137,14 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261020172000_",
       "20261020173000_",
       "20261020174000_",
+      "20261021090000_",
+      // 2026-10-21: B2B — an edited brigade entry keeps its hours for the buyer; the buyer reads the hired team names.
+      "20261021091000_",
+      "20261021092000_",
+      // 2026-10-21 (RED, needs-human-gate): interest co-managers, worker interest writes, booking proposals.
+      "20261021095000_",
+      "20261021095100_",
+      "20261021095200_",
       // 2026-10-21 (RED, needs-human-gate): org rights — membership end closes owner authority; invitations follow org authority.
       "20261021093000_",
       "20261021094000_",

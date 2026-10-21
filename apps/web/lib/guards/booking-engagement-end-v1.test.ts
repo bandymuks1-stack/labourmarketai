@@ -1683,9 +1683,18 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-21 (RED by SECURITY DEFINER replace + trigger; owner-approved #2596): server clock + offer lock.
       "20261020173000_conversation_activity_server_clock_v1.sql",
       "20261020174000_team_offer_agree_lock_offer_v1.sql",
+      // 2026-10-21 (owner-approved #2601): atomic hours correction + edit-only-by-correction guard.
+      "20261021090000_work_hours_corrections_atomic_v1.sql",
+      // 2026-10-21 (owner-approved #2604): B2B hours supersede walk + team assignment names.
+      "20261021091000_project_team_journal_hours_v3.sql",
+      "20261021092000_team_assignment_names_v1.sql",
       // 2026-10-21 (owner-approved #2607): membership end closes owner authority + invitations follow authority.
       "20261021093000_membership_end_closes_owner_authority_v1.sql",
       "20261021094000_invitations_follow_org_authority_v1.sql",
+      // 2026-10-21 (owner-approved #2606): interest org managers + worker interest writes + booking proposal reach/open/declined.
+      "20261021095000_demand_interest_org_managers_v1.sql",
+      "20261021095100_demand_interest_worker_writes_v1.sql",
+      "20261021095200_booking_propose_reachable_open_v1.sql",
 ]);
   });
 

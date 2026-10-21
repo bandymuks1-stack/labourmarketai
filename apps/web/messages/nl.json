@@ -9156,7 +9156,10 @@
       "againModeNote": "Dit heropent hetzelfde voorstel aan dezelfde werknemer met nieuwe datums — de werknemer beslist opnieuw. Er is niets geboekt totdat de werknemer accepteert.",
       "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken.",
       "rateLimited": "Limiet voor boekingsvoorstellen bereikt (10 open, 30 per dag). Probeer het later opnieuw.",
-      "alreadyAccepted": "De werknemer heeft dit voorstel al geaccepteerd — afgesproken voorwaarden worden hier niet overschreven. Spreek wijzigingen af in het gesprek."
+      "alreadyAccepted": "De werknemer heeft dit voorstel al geaccepteerd — afgesproken voorwaarden worden hier niet overschreven. Spreek wijzigingen af in het gesprek.",
+      "refusedNotReachable": "Deze persoon kan hier geen boekingsvoorstel krijgen — het profiel is niet zichtbaar voor werkgevers en er is geen werkrelatie met jou.",
+      "refusedNeedClosed": "Deze behoefte is gesloten — heropen hem voordat je een boeking voorstelt.",
+      "refusedAnswered": "De werknemer heeft dit voorstel geweigerd; zonder nieuwe toestemming wordt het niet heropend. Ga verder in het gesprek of zoek een andere werknemer."
     },
     "reason": {
       "optionalTitle": "Reden (optioneel)",
