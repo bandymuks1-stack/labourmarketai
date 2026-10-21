@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -57,6 +57,15 @@ export function JournalQuickRecord({
   const id = useId();
   const [text, setText] = useState("");
   const [draft, setDraft] = useState<WorkLogParse | null>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
+  // A sentence typed while the page was still loading lives only in the
+  // field: the page's state starts empty, so the button stayed disabled and
+  // the next re-render dropped the words (production walk 2026-10-21). Take
+  // whatever the field already holds once the recorder is live.
+  useEffect(() => {
+    const early = textRef.current?.value ?? "";
+    if (early) setText((current) => current || early);
+  }, []);
   const canUnderstand = text.trim().length >= 3;
   // A picked PAST day is named in the question itself ("Ką dirbai rugsėjo
   // 27 d.?") — "Ką šiandien dirbai?" over a readback for the 27th was the
@@ -85,6 +94,7 @@ export function JournalQuickRecord({
             {heading}
           </label>
           <textarea
+            ref={textRef}
             id={`${id}-text`}
             rows={3}
             value={text}
