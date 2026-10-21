@@ -232,8 +232,11 @@ test("org isolation: the owner of another company does not see Alfa's brigade", 
 test("14. persistence: a brand-new owner session still shows the brigade with both members", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
-  await expect(page.getByTestId(teamTestId)).toContainText(TEAM);
-  await expect(page.getByTestId(teamTestId).locator("li .text-state-success")).toHaveCount(2);
+  // A brand-new session renders the heavy people page cold: 30 s like every
+  // other step (run 39582274844 failed at the 5 s default though step 8-9 of
+  // the same run had shown the brigade with both members).
+  await expect(page.getByTestId(teamTestId)).toContainText(TEAM, { timeout: 30_000 });
+  await expect(page.getByTestId(teamTestId).locator("li .text-state-success")).toHaveCount(2, { timeout: 30_000 });
   await ctx.close();
 });
 
