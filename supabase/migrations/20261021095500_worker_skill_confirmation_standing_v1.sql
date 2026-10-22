@@ -1,10 +1,9 @@
+-- @human-gate-approved — owner approved PR #2608 (2026-10-22, in chat): "I approve PR #2608 migration 20261021095500_worker_skill_confirmation_standing_v1.sql, including its reviewed SECURITY DEFINER function and GRANT permissions."
+-- Scope: this SQL only.
+--
 -- SAFETY CLASS: RED (new SECURITY DEFINER function + explicit GRANT/REVOKE on
--- the trust model's read path). Draft PR + `needs-human-gate`; apply ONLY via
--- Supabase MCP `apply_migration` after explicit owner approval.
--- OWNER HAS NOT APPROVED. The human-gate acknowledgement marker line
--- is added at the top of this file ONLY after that approval; until then the
--- static gate (migration-safety) is expected to stop this file.
--- NOT APPLIED to any database.
+-- the trust model's read path). Apply ONLY via Supabase MCP `apply_migration`.
+-- The marker is the risk acknowledgement the static gate reads, not an approval.
 --
 -- 20261021095500 - A SKILL CONFIRMATION STANDS ONLY WHILE ITS WORK STANDS
 -- (owner-approved programme "skill confirmation withdrawal"; phase B).
