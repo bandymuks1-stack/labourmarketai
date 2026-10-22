@@ -496,6 +496,10 @@ export type WorkIntelligence = {
   readonly coverage: WorkIntelligenceCoverage;
   /** The section's five tabs, plus one `range` row when `focusRange` is set. */
   readonly periods: readonly WorkPeriodTotals[];
+  /** Entries whose written hours never became recorded time, with the
+   *  earliest such work day (lib/journal/unrecorded-hours.ts). Set by the
+   *  read layer; absent when the model was derived without entry text. */
+  readonly unrecordedHours?: { readonly entries: number; readonly earliestDay: string } | null;
   /** The organization's own hour records per period (owner §19) — read
    *  beside the journal, shown beside it, added to nothing. `null` when the
    *  ledger could not be read; every period at zero when it holds nothing. */

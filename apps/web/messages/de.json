@@ -1596,7 +1596,8 @@
         "no": "Noch nicht festgelegt"
       }
     },
-    "opportunitiesLink": "Passende Möglichkeiten ansehen"
+    "opportunitiesLink": "Passende Möglichkeiten ansehen",
+    "unrecordedHours": "{count, plural, one {# Eintrag nennt Stunden, die nie erfasst wurden} other {# Einträge nennen Stunden, die nie erfasst wurden}} — sie sind nicht in der Summe oben. Öffne den frühesten und trage die Stunden ein."
   },
   "profileState": {
     "readiness": {

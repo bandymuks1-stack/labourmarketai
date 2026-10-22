@@ -1596,7 +1596,8 @@
         "no": "Jeszcze nieustawiona"
       }
     },
-    "opportunitiesLink": "Przejrzyj dopasowane oferty"
+    "opportunitiesLink": "Przejrzyj dopasowane oferty",
+    "unrecordedHours": "{count, plural, one {# wpis zawiera godziny, które nie zostały zapisane} few {# wpisy zawierają godziny, które nie zostały zapisane} other {# wpisów zawiera godziny, które nie zostały zapisane}} — nie ma ich w sumie powyżej. Otwórz najwcześniejszy i wpisz godziny."
   },
   "profileState": {
     "readiness": {
