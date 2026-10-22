@@ -1597,7 +1597,7 @@
       }
     },
     "opportunitiesLink": "Review matched opportunities",
-    "unrecordedHours": "{count, plural, one {# entry mentions hours that were never recorded} other {# entries mention hours that were never recorded}} — they are not in the total above. Open the earliest one and confirm the hours."
+    "unrecordedHours": "{count, plural, one {# entry mentions hours that were never recorded} other {# entries mention hours that were never recorded}} — they are not in the total above. Open the earliest one and add the hours."
   },
   "profileState": {
     "readiness": {

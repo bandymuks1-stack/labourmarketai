@@ -1597,7 +1597,7 @@
       }
     },
     "opportunitiesLink": "Bekijk gematchte kansen",
-    "unrecordedHours": "{count, plural, one {# notitie noemt uren die nooit zijn vastgelegd} other {# notities noemen uren die nooit zijn vastgelegd}} — ze staan niet in het totaal hierboven. Open de vroegste en bevestig de uren."
+    "unrecordedHours": "{count, plural, one {# notitie noemt uren die nooit zijn vastgelegd} other {# notities noemen uren die nooit zijn vastgelegd}} — ze staan niet in het totaal hierboven. Open de vroegste en vul de uren in."
   },
   "profileState": {
     "readiness": {
