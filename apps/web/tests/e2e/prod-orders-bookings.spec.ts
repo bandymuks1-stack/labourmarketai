@@ -146,7 +146,10 @@ test("O-1 (5.13). Gama posts this run's need through the demand intake", async (
   await useWorkspace(page, GAMA);
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
   await page.getByTestId("demand-role").fill(NEED_ROLE);
-  await page.getByTestId("demand-description").fill(`${NOTE}: synthetic need for the production booking walk, 1 person.`);
+  // Name a trade: a need nothing can be recognised in is "not structured" on
+  // scouting (lib/scouting/scouting.ts runScoutingCore), which renders no
+  // candidates at all — not even the hand-raiser O-3 looks for.
+  await page.getByTestId("demand-description").fill(`${NOTE}: synthetic need for the production booking walk, 1 mūrininkas.`);
   await page.getByTestId("demand-next").click();
   const size = page.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
