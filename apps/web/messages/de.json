@@ -19733,5 +19733,24 @@
     "error": "Das hat nicht geklappt. Nichts wurde geändert.",
     "notAllowed": "Das kann der Inhaber oder eine Führungskraft der Organisation tun.",
     "notSameWork": "Diese Einträge passen nicht mehr zusammen — laden Sie die Seite neu."
+  },
+  "pilotPass": {
+    "title": "Organisationsplan — {days}-Tage-Pilot für 1 €",
+    "intro": "Zahle einmal 1 €, und deine Organisation erhält {days} Tage lang den vollen kostenpflichtigen Organisationsplan: kein festes Limit für offene Stellen, Bereitschaftsübersichten zu Kandidaten, Nachrichten, Teamauswahl und alle weiteren kostenpflichtigen Funktionen.",
+    "terms": "Einmalzahlung. Nichts verlängert sich und nichts wird erneut belastet: Nach {days} Tagen endet der Plan von selbst, und die Organisation kehrt zum kostenlosen Plan zurück. Der Plan erscheint oben, sobald Stripe die Zahlung bestätigt.",
+    "pay": "1 € bezahlen — {days}-Tage-Pilot",
+    "status": {
+      "pilot_pass_disabled": "Der Pilot wird derzeit nicht angeboten.",
+      "unauthenticated": "Melde dich an, um den Pilot zu starten.",
+      "no_organization": "Wähle zuerst den Arbeitsbereich deiner Organisation.",
+      "not_billing_authority": "Nur wer die Zahlungen dieser Organisation verwaltet, kann den Pilot starten.",
+      "billing_not_active": "Für diese Organisation sind keine Zahlungen verfügbar.",
+      "plan_active": "Deine Organisation hat bereits einen aktiven Plan.",
+      "checkout_failed": "Stripe hat keine Zahlungsseite erstellt. Es wurde nichts belastet; versuche es später erneut."
+    },
+    "result": {
+      "paid": "Stripe hat die Zahlung erhalten. Der Plan wird aktiv, sobald die Bestätigung eintrifft — lade die Seite gleich neu, falls er noch nicht angezeigt wird.",
+      "cancelled": "Zahlung abgebrochen — es wurde nichts belastet."
+    }
   }
 }

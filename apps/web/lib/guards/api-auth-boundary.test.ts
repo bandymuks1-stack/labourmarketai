@@ -70,6 +70,10 @@ const CLASSIFICATION: Record<
     class: "cookie-only",
     why: "Same reasoning as the portal, and test-mode only on top of it: it starts a Stripe Checkout a browser then completes.",
   },
+  "billing/pilot-pass/route.ts": {
+    class: "cookie-only",
+    why: "The organization pilot pass (1 EUR once -> the paid plan for the pilot period): a plain form POST from the signed-in account page, answered with a 303 to Stripe's hosted page that a BROWSER completes. No input; owner switch + pilot organization + billing authority + no active plan gate it. Money surface - a non-browser caller has no product reason to start it.",
+  },
   "billing/refresh/route.ts": {
     class: "cookie-only",
     why: "Money surface, user self-service: 'refresh my billing status' for the person's CURRENT workspace. It takes no input (workspace, customer and subscription are resolved server-side from the cookie session), only READS the provider, and answers one status word - a non-browser caller has no product reason to poke it, and billing is where a mistake is least recoverable.",

@@ -323,6 +323,8 @@ export async function upsertSubscription(u: SubscriptionUpsert): Promise<StoreRe
       heldSubId === null ||
       heldSubId === u.providerSubscriptionId ||
       heldSubId.startsWith("manual_") ||
+      // A pilot pass (pilot-pass-core) bills nothing; the plan supersedes it.
+      heldSubId.startsWith("pilotpass_") ||
       DEAD_STATUSES.has(String(held.status));
     if (!replaceable) return "conflict-live-subscription";
     // Supersede-in-place, scoped to the SAME billing subject (never a row of

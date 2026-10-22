@@ -19733,5 +19733,24 @@
     "error": "Dat is niet gelukt. Er is niets gewijzigd.",
     "notAllowed": "De eigenaar of een leidinggevende van de organisatie kan dit doen.",
     "notSameWork": "Deze regels komen niet meer overeen — vernieuw de pagina."
+  },
+  "pilotPass": {
+    "title": "Organisatieplan — pilot van {days} dagen voor 1 €",
+    "intro": "Betaal eenmalig 1 € en je organisatie krijgt {days} dagen lang het volledige betaalde Organisatieplan: geen vaste limiet op open posities, gereedheidsoverzichten van kandidaten, berichten, teamselectie en alle andere betaalde mogelijkheden.",
+    "terms": "Eenmalige betaling. Er wordt niets verlengd en niets opnieuw afgeschreven: na {days} dagen eindigt het plan vanzelf en keert de organisatie terug naar het gratis plan. Het plan verschijnt hierboven zodra Stripe de betaling bevestigt.",
+    "pay": "1 € betalen — pilot van {days} dagen",
+    "status": {
+      "pilot_pass_disabled": "De pilot wordt nu niet aangeboden.",
+      "unauthenticated": "Log in om de pilot te starten.",
+      "no_organization": "Kies eerst de werkruimte van je organisatie.",
+      "not_billing_authority": "Alleen wie de betalingen van deze organisatie beheert, kan de pilot starten.",
+      "billing_not_active": "Betalingen zijn niet beschikbaar voor deze organisatie.",
+      "plan_active": "Je organisatie heeft al een actief plan.",
+      "checkout_failed": "Stripe heeft geen betaalpagina aangemaakt. Er is niets afgeschreven; probeer het later opnieuw."
+    },
+    "result": {
+      "paid": "Stripe heeft de betaling ontvangen. Het plan wordt actief zodra de bevestiging binnenkomt — vernieuw de pagina zo als het nog niet zichtbaar is.",
+      "cancelled": "Betaling geannuleerd — er is niets afgeschreven."
+    }
   }
 }
