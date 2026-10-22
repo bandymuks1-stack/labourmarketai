@@ -1304,7 +1304,7 @@ export default async function VerifiedCvPage({
                     ? `${e.startYear ?? ""}–${e.isCurrent ? t("present") : (e.endYear ?? "")}`
                     : null;
                 return (
-                  <li key={i} className="flex flex-col border-l-2 border-ink-600 pl-3">
+                  <li key={i} className="flex flex-col border-l-2 border-ink-600 pl-3" data-testid="cv-education-row">
                     <span className={`font-semibold ${bodyText}`}>
                       {e.institutionName}
                     </span>
@@ -1381,14 +1381,18 @@ export default async function VerifiedCvPage({
                 </li>
               ) : null}
               {cv.declaredCertificates.map((c, i) => (
-                <li key={`decl-${i}`} className={`flex flex-wrap items-baseline gap-2 ${bodyText}`}>
+                <li
+                  key={`decl-${i}`}
+                  className={`flex flex-wrap items-baseline gap-2 ${bodyText}`}
+                  data-testid="cv-declared-certificate-row"
+                >
                   <span className="font-medium">{c.title}</span>
                   {c.achievedAt ? (
                     <span className="text-xs text-text-secondary">
                       {formatUtcDate(c.achievedAt, locale, { year: "numeric" })}
                     </span>
                   ) : null}
-                  <span className="text-meta uppercase tracking-wide text-text-muted">
+                  <span className="text-meta uppercase tracking-wide text-text-muted" data-testid="cv-declared-certificate-label">
                     {t("declaredCertHint")}
                   </span>
                 </li>
@@ -1673,7 +1677,12 @@ export default async function VerifiedCvPage({
             <h2 className={sectionTitle}>{t("achievementsTitle")}</h2>
             <ul className="flex flex-col gap-1.5">
               {cv.achievements.map((a, i) => (
-                <li key={i} className="flex flex-col">
+                <li
+                  key={i}
+                  className="flex flex-col"
+                  data-testid="cv-achievement-row"
+                  data-standing={a.confirmedByManager ? "confirmed" : "declared"}
+                >
                   <span className={`font-medium ${bodyText}`}>
                     {a.title}
                     {a.confirmedByManager ? (

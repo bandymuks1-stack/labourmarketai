@@ -10916,6 +10916,8 @@
       "expired": "Wygasła"
     },
     "graceNotice": "Ostatnia płatność nie powiodła się — subskrypcja jest w okresie karencji do czasu ponowienia próby.",
+    "endsOn": "Anulowano — plan pozostaje aktywny do {date} i nie zostanie odnowiony.",
+    "endsAtPeriodEnd": "Anulowano — plan pozostaje aktywny do końca opłaconego okresu i nie zostanie odnowiony.",
     "manage": {
       "open": "Zarządzaj subskrypcją",
       "opening": "Otwieranie…",
@@ -10978,6 +10980,7 @@
       "salaryExpectation": "Oczekiwane wynagrodzenie",
       "skillsCount": "Umiejętności",
       "anonymousLabel": "Firmy widzą Cię jako",
+      "anonymousValue": "Kandydat {token}",
       "currentCountry": "Obecny kraj",
       "availableFrom": "Dostępny od",
       "contractType": "Forma zatrudnienia",
@@ -12438,6 +12441,7 @@
     }
   },
   "people": {
+    "anonymousName": "Kandydat {token}",
     "eyebrow": "Profil osoby",
     "restrictedTitle": "Profil niedostępny",
     "restrictedBody": "Nie możesz zobaczyć profilu tej osoby: brak aktywnej relacji zawodowej lub osoba nie wyraziła zgody na widoczność.",
@@ -19729,5 +19733,29 @@
     "error": "Nie udało się. Nic nie zmieniono.",
     "notAllowed": "Może to zrobić właściciel lub kierownik organizacji.",
     "notSameWork": "Te wpisy już do siebie nie pasują — odśwież stronę."
+  },
+  "pilotPass": {
+    "title": "Plan dla organizacji — {days}-dniowy pilotaż za 1 €",
+    "intro": "Zapłać 1 € jednorazowo, a Twoja organizacja na {days} dni otrzyma płatny plan Organizacja. Co dodaje do planu bezpłatnego: brak limitu jednocześnie otwartych stanowisk i potrzeb kadrowych (w planie bezpłatnym – jedno). Wiadomości, podsumowania kandydatów, dobór zespołów i rezerwacje pozostają dostępne jak w planie bezpłatnym.",
+    "terms": "Płatność jednorazowa. Nic się nie odnawia i nic nie jest pobierane ponownie: po {days} dniach plan kończy się sam, a organizacja wraca do planu bezpłatnego. Plan pojawi się poniżej, gdy tylko Stripe potwierdzi płatność.",
+    "pay": "Zapłać 1 € — {days}-dniowy pilotaż",
+    "status": {
+      "pilot_pass_disabled": "Pilotaż nie jest teraz oferowany.",
+      "unauthenticated": "Zaloguj się, aby rozpocząć pilotaż.",
+      "no_organization": "Najpierw wybierz przestrzeń swojej organizacji.",
+      "not_billing_authority": "Pilotaż może rozpocząć tylko osoba zarządzająca płatnościami organizacji.",
+      "billing_not_active": "Płatności nie są dostępne dla tej organizacji.",
+      "plan_active": "Twoja organizacja ma już aktywny plan.",
+      "checkout_failed": "Stripe nie utworzył strony płatności. Nic nie pobrano; spróbuj później."
+    },
+    "result": {
+      "paid": "Stripe otrzymał płatność. Plan włączy się, gdy tylko nadejdzie potwierdzenie — jeśli go jeszcze nie widać, odśwież stronę za chwilę.",
+      "cancelled": "Płatność anulowana — nic nie pobrano."
+    },
+    "elsewhere": "Wybierz {organization} w przełączniku przestrzeni u góry strony — pilotaż uruchamia się z przestrzeni tej organizacji.",
+    "invite": {
+      "line": "Zapłać 1 € jednorazowo za {days} dni płatnego planu Organizacja. Nic się nie odnawia.",
+      "cta": "Otwórz pilotaż"
+    }
   }
 }

@@ -4751,10 +4751,10 @@
         "preview_workspace": "Vorschau",
         "comingLater": "Später verfügbar",
         "theme": {
-          "appearance": "Appearance",
-          "help": "Theme",
-          "toDark": "Dark",
-          "toLight": "Light"
+          "appearance": "Darstellung",
+          "help": "Design",
+          "toDark": "Dunkel",
+          "toLight": "Hell"
         },
         "security": {
           "title": "Sicherheit & Zugriff",
@@ -7667,16 +7667,16 @@
     "cvBridgeLink": "CV öffnen",
     "inbox": {
       "title": "Arbeitsprüfung",
-      "confirmSkills": "Confirm skills",
-      "confirmSkillsHint": "Tick the skills this entry proves. Confirming verifies them.",
-      "confirmNote": "Optional note",
-      "confirmSubmit": "Confirm & verify",
-      "alreadyVerified": "Already verified",
+      "confirmSkills": "Fähigkeiten bestätigen",
+      "confirmSkillsHint": "Wählen Sie die deklarierten Fähigkeiten aus, die dieser Eintrag belegt — sie werden verifiziert.",
+      "confirmNote": "Notiz (optional)",
+      "confirmSubmit": "Bestätigen",
+      "alreadyVerified": "Bereits verifiziert",
       "noSkillsToConfirm": "Dieser Eintrag hat keine verknüpften Fähigkeiten mehr zu bestätigen. Die Freigabe bestätigt die Arbeit selbst.",
       "result": {
-        "skillsVerified": "Verified {count} skill(s).",
-        "skillNotOwned": "That skill is not declared by this worker.",
-        "noSkillsSelected": "Select at least one skill."
+        "skillsVerified": "Bestätigt. {count} Fähigkeit(en) verifiziert.",
+        "skillNotOwned": "Diese Fähigkeit gehört nicht zu dieser Arbeitskraft.",
+        "noSkillsSelected": "Wählen Sie mindestens eine Fähigkeit aus."
       }
     },
     "cv": {
@@ -10916,6 +10916,8 @@
       "expired": "Abgelaufen"
     },
     "graceNotice": "Die letzte Zahlung ist fehlgeschlagen — das Abonnement befindet sich bis zum erneuten Versuch in einer Kulanzfrist.",
+    "endsOn": "Gekündigt — der Plan bleibt bis {date} aktiv und verlängert sich nicht.",
+    "endsAtPeriodEnd": "Gekündigt — der Plan bleibt bis zum Ende des bezahlten Zeitraums aktiv und verlängert sich nicht.",
     "manage": {
       "open": "Abonnement verwalten",
       "opening": "Wird geöffnet…",
@@ -10978,6 +10980,7 @@
       "salaryExpectation": "Gehaltsvorstellung",
       "skillsCount": "Fähigkeiten",
       "anonymousLabel": "Unternehmen sehen Sie als",
+      "anonymousValue": "Kandidat {token}",
       "currentCountry": "Aktuelles Land",
       "availableFrom": "Verfügbar ab",
       "contractType": "Beschäftigungsform",
@@ -12438,6 +12441,7 @@
     }
   },
   "people": {
+    "anonymousName": "Kandidat {token}",
     "eyebrow": "Personenprofil",
     "restrictedTitle": "Profil nicht verfügbar",
     "restrictedBody": "Sie können das Profil dieser Person nicht ansehen: Es besteht keine aktive Arbeitsbeziehung, oder die Person hat der Auffindbarkeit nicht zugestimmt.",
@@ -19729,5 +19733,29 @@
     "error": "Das hat nicht geklappt. Nichts wurde geändert.",
     "notAllowed": "Das kann der Inhaber oder eine Führungskraft der Organisation tun.",
     "notSameWork": "Diese Einträge passen nicht mehr zusammen — laden Sie die Seite neu."
+  },
+  "pilotPass": {
+    "title": "Organisationsplan — {days}-Tage-Pilot für 1 €",
+    "intro": "Zahle einmal 1 €, und deine Organisation erhält {days} Tage lang den kostenpflichtigen Organisationsplan. Was er gegenüber dem kostenlosen Plan hinzufügt: kein Limit für gleichzeitig offene Stellen und Personalbedarfe (im kostenlosen Plan eine). Nachrichten, Kandidatenübersichten, Teamauswahl und Buchungen bleiben wie im kostenlosen Plan verfügbar.",
+    "terms": "Einmalzahlung. Nichts verlängert sich und nichts wird erneut belastet: Nach {days} Tagen endet der Plan von selbst, und die Organisation kehrt zum kostenlosen Plan zurück. Der Plan erscheint unten, sobald Stripe die Zahlung bestätigt.",
+    "pay": "1 € bezahlen — {days}-Tage-Pilot",
+    "status": {
+      "pilot_pass_disabled": "Der Pilot wird derzeit nicht angeboten.",
+      "unauthenticated": "Melde dich an, um den Pilot zu starten.",
+      "no_organization": "Wähle zuerst den Arbeitsbereich deiner Organisation.",
+      "not_billing_authority": "Nur wer die Zahlungen dieser Organisation verwaltet, kann den Pilot starten.",
+      "billing_not_active": "Für diese Organisation sind keine Zahlungen verfügbar.",
+      "plan_active": "Deine Organisation hat bereits einen aktiven Plan.",
+      "checkout_failed": "Stripe hat keine Zahlungsseite erstellt. Es wurde nichts belastet; versuche es später erneut."
+    },
+    "result": {
+      "paid": "Stripe hat die Zahlung erhalten. Der Plan wird aktiv, sobald die Bestätigung eintrifft — lade die Seite gleich neu, falls er noch nicht angezeigt wird.",
+      "cancelled": "Zahlung abgebrochen — es wurde nichts belastet."
+    },
+    "elsewhere": "Wähle {organization} in der Arbeitsbereichsauswahl oben auf der Seite — der Pilot wird im Arbeitsbereich dieser Organisation gestartet.",
+    "invite": {
+      "line": "Zahle einmal 1 € für {days} Tage des kostenpflichtigen Organisationsplans. Nichts verlängert sich.",
+      "cta": "Pilot öffnen"
+    }
   }
 }

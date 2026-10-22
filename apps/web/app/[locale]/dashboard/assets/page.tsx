@@ -5,6 +5,7 @@ import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { type Role } from "@/lib/auth/actions";
 import { getAssetsOverview, getMyAssignedAssets } from "@/lib/assets/assets";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { AssetsRegistry, MyAssignedAssetsPanel } from "@/components/app/assets-panel";
 import { PageTitle } from "@/components/app/premium/page-title";
 
@@ -39,9 +40,10 @@ export default async function AssetsPage({
   const role = (profile?.active_role as Role) ?? "worker";
   const isManager = MANAGER_ROLES.has(role);
 
-  const [overview, mine] = await Promise.all([
+  const [overview, mine, workspace] = await Promise.all([
     isManager ? getAssetsOverview() : Promise.resolve(null),
     getMyAssignedAssets(),
+    isManager ? getWorkspaceContext() : Promise.resolve(null),
   ]);
 
   return (
@@ -52,7 +54,7 @@ export default async function AssetsPage({
       </header>
 
       <MyAssignedAssetsPanel data={mine} />
-      {isManager && overview ? <AssetsRegistry data={overview} /> : null}
+      {isManager && overview ? <AssetsRegistry data={overview} activeOrganizationId={workspace?.activeWorkspaceId ?? null} /> : null}
     </div>
   );
 }

@@ -242,7 +242,12 @@ export async function runBillingReconciliation(): Promise<ReconciliationReport> 
     });
     for (const s of subscriptions) {
       // Only rows of THIS mode can be looked up in this mode's Stripe account.
-      if (!s.providerSubscriptionId || s.providerSubscriptionId.startsWith("manual_") || s.testMode !== modeIsTest) continue;
+      if (
+        !s.providerSubscriptionId ||
+        s.providerSubscriptionId.startsWith("manual_") ||
+        s.providerSubscriptionId.startsWith("pilotpass_") ||
+        s.testMode !== modeIsTest
+      ) continue;
       providerLookups += 1;
       const r = await provider.retrieveSubscription(s.providerSubscriptionId);
       if (!r.ok) { providerLookupFailures += 1; continue; }

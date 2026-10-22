@@ -2908,6 +2908,7 @@
     "loopReadFailed": "Dina förfrågningar kunde inte laddas — listan kan vara ofullständig. Ladda om sidan."
   },
   "people": {
+    "anonymousName": "Kandidat {token}",
     "eyebrow": "Personprofil",
     "restrictedTitle": "Profilen är inte tillgänglig",
     "restrictedBody": "Du kan inte se den här personens profil: det finns ingen aktiv arbetsrelation, eller så har personen inte samtyckt till att vara synlig.",

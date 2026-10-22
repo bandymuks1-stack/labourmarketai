@@ -405,16 +405,16 @@ export function WorkCardEditor({
             </div>
 
             <div className="flex items-center gap-3">
-              <button type="submit" className={primaryCta} disabled={savePending}>
+              <button type="submit" className={primaryCta} disabled={savePending} data-testid="work-card-save">
                 {savePending ? labels.saving : labels.save}
               </button>
               {saveState?.ok && (
-                <span className="text-xs text-state-success" role="status">
+                <span className="text-xs text-state-success" role="status" data-testid="work-card-saved">
                   {labels.saved}
                 </span>
               )}
               {saveState && !saveState.ok && (
-                <span className="text-xs text-state-danger" role="status">
+                <span className="text-xs text-state-danger" role="status" data-testid="work-card-error">
                   {saveState.code === "needs_migration"
                     ? labels.needsMigration
                     : labels.errorMsg}

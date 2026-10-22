@@ -9,12 +9,13 @@
 
 | What appeared | Kind | Why it appeared | Why it cannot be a conversation | Permitting axiom | Declared |
 |---|---|---|---|---|---|
-| `/dashboard/company/people/[personId]` | screen | One roster person of the supplying organization as a historical Person card: who they are to this organization, ALL of the history the organization supplied (including records tied to no known project), the stated hours, the skills the history points to, and whether an account has claimed them yet. It exists whether or not the person has claimed an account. | The conversation can answer a single question about a person, but the card is where a manager stands while reading one person | A-14 | yes |
+| `/dashboard/account/live-check` | screen | — | — | — | **NO** |
 
 ## Axiom checks
 
 | Finding | Axiom | Where | Certainty | Detail |
 |---|---|---|---|---|
+| `undeclared_surface` | A-09 | `/dashboard/account/live-check` | certain | new screen with no declaration in the surface registry (origin_axiom / purpose / why_not_chat / why_not_existing_component / owner) |
 | `not_world_state_driven` | A-01 | `/create-cv` | certain | "changesWorldState" is false — AI-first, one workspace, no page switching |
 | `not_reflected_on_map` | A-01 | `/create-cv` | certain | "reflectedOnMap" is false — AI-first, one workspace, no page switching |
 | `not_ai_controlled` | A-01 | `/create-cv` | certain | "aiControlled" is false — AI-first, one workspace, no page switching |
@@ -94,6 +95,12 @@
 - `not_world_state_driven` on `/dashboard/company/settings` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `not_reflected_on_map` on `/dashboard/company/settings` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `requires_new_page` on `/dashboard/company/settings` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `/dashboard/inbox/counterparty` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `/dashboard/inbox/counterparty` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `requires_new_page` on `/dashboard/inbox/counterparty` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_world_state_driven` on `components/app/counterparty-review-card.tsx` — "changesWorldState" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `not_reflected_on_map` on `components/app/counterparty-review-card.tsx` — "reflectedOnMap" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
+- `requires_new_page` on `components/app/counterparty-review-card.tsx` — "needsNoNewPage" is false — excused by the owner-ruled distinctSurface block (decision 0015); a distinct user job may honestly need its own page
 - `world_state_cannot_control_it` on `components/app/historical-player-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `components/app/identity/person-identity-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `/dashboard/work-in-numbers` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
@@ -104,6 +111,8 @@
 - `world_state_cannot_control_it` on `/dashboard/company/education` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `/dashboard/company/history` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 - `world_state_cannot_control_it` on `/dashboard/company/settings` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `/dashboard/inbox/counterparty` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
+- `world_state_cannot_control_it` on `components/app/counterparty-review-card.tsx` — "worldStateCanControlIt" is false — excused by the owner-ruled distinctSurface block (decision 0015)
 
 ## Rules that were checked
 

@@ -45,15 +45,22 @@ async function ask(page: Page, text: string, answer: RegExp, unavailable: RegExp
   const before = (await page.locator("body").innerText()).length;
   await page.getByTestId("composer-input").fill(text);
   await page.getByTestId("composer-send").click();
-  await expect
-    .poll(
-      async () => {
-        const tail = (await page.locator("body").innerText()).slice(Math.max(0, before - 50));
-        return answer.test(tail) || unavailable.test(tail);
-      },
-      { timeout: 45_000, intervals: [1_000] },
-    )
-    .toBe(true);
+  try {
+    await expect
+      .poll(
+        async () => {
+          const tail = (await page.locator("body").innerText()).slice(Math.max(0, before - 50));
+          return answer.test(tail) || unavailable.test(tail);
+        },
+        { timeout: 45_000, intervals: [1_000] },
+      )
+      .toBe(true);
+  } catch (err) {
+    // Name what the chat said instead (run 39605716305 timed out with no trace).
+    const tail = (await page.locator("body").innerText()).slice(Math.max(0, before - 50));
+    console.info(`[manager-chat] "${text}" → no answer in 45 s; the chat showed: ${tail.slice(-500).replace(/\s+/g, " ")}`);
+    throw err;
+  }
   const tail = (await page.locator("body").innerText()).slice(Math.max(0, before - 50));
   const m = answer.exec(tail);
   const shown = m ? tail.slice(m.index, m.index + 400).replace(/\s+/g, " ") : tail.slice(-300).replace(/\s+/g, " ");

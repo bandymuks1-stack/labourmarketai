@@ -1,4 +1,7 @@
 name: prod-qa-walk
+# The spec in the run title lets acceptance-campaign.yml attribute a run that reached production
+# even when it left no artifact.
+run-name: prod-qa-walk ${{ github.event_name == 'workflow_dispatch' && inputs.spec || github.event_name }}
 
 # PRODUCTION SIGNED-IN QA, without an agent ever holding a production key
 # (owner programme 2026-10-12 §10). Before this, a signed-in production walk
@@ -54,6 +57,15 @@ on:
           - company-chain
           - project-execution
           - org-roster
+          - marketplace-goods-services
+          - orders-bookings
+          - documents-approvals
+          - jobs-search
+          - notifications-inapp
+          - billing-test-mode
+          - profile-cv-history
+          - search-support-privacy
+          - public-org-locales
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -111,7 +123,7 @@ jobs:
           EVENT: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context worker-identity-split company-chain project-execution org-roster)
+          ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context worker-identity-split company-chain project-execution org-roster marketplace-goods-services orders-bookings documents-approvals jobs-search notifications-inapp profile-cv-history search-support-privacy public-org-locales)
           case "$EVENT" in
             workflow_dispatch) spec="$INPUT_SPEC" ;;
             push) spec=role-routes ;;
@@ -258,6 +270,16 @@ jobs:
             company-chain) SPEC=tests/e2e/prod-company-chain.spec.ts ;;
             project-execution) SPEC=tests/e2e/prod-project-execution.spec.ts ;;
             org-roster) SPEC=tests/e2e/prod-org-roster.spec.ts ;;
+            marketplace-goods-services) SPEC=tests/e2e/prod-marketplace-goods-services.spec.ts ;;
+            orders-bookings) SPEC=tests/e2e/prod-orders-bookings.spec.ts ;;
+            documents-approvals) SPEC=tests/e2e/prod-documents-approvals.spec.ts ;;
+            jobs-search) SPEC=tests/e2e/prod-jobs-search.spec.ts ;;
+            notifications-inapp) SPEC=tests/e2e/prod-notifications-inapp.spec.ts ;;
+            # Stripe TEST pilot walk: dispatch only after the owner arms test mode (lm-stripe-arm.sh test); never in the rotation.
+            billing-test-mode) SPEC=tests/e2e/prod-billing-test-mode.spec.ts ;;
+            profile-cv-history) SPEC=tests/e2e/prod-profile-cv-history.spec.ts ;;
+            search-support-privacy) SPEC=tests/e2e/prod-search-support-privacy.spec.ts ;;
+            public-org-locales) SPEC=tests/e2e/prod-public-org-locales.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that

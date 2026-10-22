@@ -213,7 +213,8 @@ test("E-4 (3.5). a task on project A is created, started and completed", async (
   await page.goto(`/lt/dashboard/tasks?project=${projectA}`);
   const closed = page.getByTestId("tasks-closed-toggle");
   if (await closed.isVisible().catch(() => false)) await closed.click();
-  await expect(page.getByTestId(`task-card-${taskId}`), "the completed task persists").toBeVisible({ timeout: 30_000 });
+  // Scoped to <main> after a fresh load (hidden streaming copy, see org-roster).
+  await expect(page.getByRole("main").getByTestId(`task-card-${taskId}`), "the completed task persists").toBeVisible({ timeout: 30_000 });
   await ctx.close();
 });
 

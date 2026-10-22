@@ -10916,6 +10916,8 @@
       "expired": "Expired"
     },
     "graceNotice": "The last payment failed — the subscription is in a grace period until it is retried.",
+    "endsOn": "Cancelled — the plan stays active until {date} and will not renew.",
+    "endsAtPeriodEnd": "Cancelled — the plan stays active until the end of the paid period and will not renew.",
     "manage": {
       "open": "Manage subscription",
       "opening": "Opening…",
@@ -10978,6 +10980,7 @@
       "salaryExpectation": "Pay expectation",
       "skillsCount": "Skills",
       "anonymousLabel": "Shown to companies as",
+      "anonymousValue": "Candidate {token}",
       "currentCountry": "Current country",
       "availableFrom": "Available from",
       "contractType": "Engagement form",
@@ -12438,6 +12441,7 @@
     }
   },
   "people": {
+    "anonymousName": "Candidate {token}",
     "eyebrow": "Person profile",
     "restrictedTitle": "Profile unavailable",
     "restrictedBody": "You can't view this person's profile: there is no active work relationship, or the person hasn't agreed to be discoverable.",
@@ -19729,5 +19733,29 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "pilotPass": {
+    "title": "Organization plan — {days}-day pilot for 1 €",
+    "intro": "Pay 1 € once and your organization gets the paid Organization plan for {days} days. What it adds over the free plan: no limit on open positions and workforce needs at the same time (the free plan allows one). Messaging, candidate summaries, team selection and bookings stay available as on the free plan.",
+    "terms": "One-time payment. Nothing renews and nothing is charged again: after {days} days the plan ends by itself and the organization returns to the free plan. The plan appears below as soon as Stripe confirms the payment.",
+    "pay": "Pay 1 € — {days}-day pilot",
+    "status": {
+      "pilot_pass_disabled": "The pilot pass is not offered right now.",
+      "unauthenticated": "Sign in to start the pilot.",
+      "no_organization": "Choose your organization's workspace first.",
+      "not_billing_authority": "Only a person who manages this organization's billing can start the pilot.",
+      "billing_not_active": "Payments are not available for this organization.",
+      "plan_active": "Your organization already has an active plan.",
+      "checkout_failed": "Stripe did not create the payment page. Nothing was charged; try again later."
+    },
+    "result": {
+      "paid": "Payment received by Stripe. The plan activates as soon as the confirmation arrives — refresh in a moment if it is not shown yet.",
+      "cancelled": "Payment cancelled — nothing was charged."
+    },
+    "elsewhere": "Choose {organization} in the workspace selector at the top of the page — the pilot is started from that organization's workspace.",
+    "invite": {
+      "line": "Pay 1 € once for {days} days of the paid Organization plan. Nothing renews.",
+      "cta": "Open the pilot"
+    }
   }
 }
