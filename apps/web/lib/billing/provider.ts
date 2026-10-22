@@ -45,8 +45,8 @@ export interface CheckoutSessionInput {
 
 /**
  * A ONE-TIME Checkout Session (payment mode) for a server-fixed amount — the
- * owner's LIVE payment check (lib/billing/live-check-core.ts). Never a plan,
- * never a subscription; the client supplies none of these fields.
+ * organization pilot pass (lib/billing/pilot-pass-core.ts). Never a
+ * subscription; the client supplies none of these fields.
  */
 export interface OneTimeCheckoutInput {
   readonly amountCents: number;
@@ -54,6 +54,8 @@ export interface OneTimeCheckoutInput {
   readonly productName: string;
   readonly clientReferenceId: string;
   readonly customerEmail?: string | null;
+  /** The payer's stored customer (cus_…): the payment joins their history and portal. */
+  readonly providerCustomerId?: string | null;
   readonly metadata: Readonly<Record<string, string>>;
   readonly idempotencyKey: string;
   readonly successUrl: string;
@@ -134,7 +136,7 @@ export interface BillingProvider {
   createCheckoutSession(
     input: CheckoutSessionInput,
   ): Promise<CheckoutSessionResult>;
-  /** One-time payment session (the owner's LIVE payment check). */
+  /** One-time payment session (the organization pilot pass). */
   createOneTimeCheckoutSession?(
     input: OneTimeCheckoutInput,
   ): Promise<CheckoutSessionResult>;

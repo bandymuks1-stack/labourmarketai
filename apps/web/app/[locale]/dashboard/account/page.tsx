@@ -18,7 +18,7 @@ import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { LmcBalanceSection } from "@/components/app/lmc-balance-section";
 import { AccountBillingSection } from "@/components/app/account-billing-section";
-import { LivePaymentCheckSection } from "@/components/app/live-payment-check-section";
+import { PilotPassSection } from "@/components/app/pilot-pass-section";
 import { ConnectedAppsSection } from "@/components/app/connected-apps-section";
 import { parseConnectedAppsFeedback } from "@/lib/auth/connected-apps";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
@@ -56,7 +56,7 @@ export default async function AccountPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ billing?: string; apps?: string; live_check?: string; live_check_refused?: string }>;
+  searchParams: Promise<{ billing?: string; apps?: string; pilot_pass?: string; pilot_pass_refused?: string }>;
 }) {
   const { locale } = await params;
   // Native-nav `?billing=` return feedback (same idiom as planning's plain
@@ -64,7 +64,7 @@ export default async function AccountPage({
   // `?billing=test_success` / `portal_return`, and until now nothing read it.
   // `?apps=revoked|error` — the Connected Apps disconnect action's return
   // feedback (same idiom); anything else is ignored.
-  const { billing, apps, live_check, live_check_refused } = await searchParams;
+  const { billing, apps, pilot_pass, pilot_pass_refused } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("auth.dashboard");
   const tRoot = await getTranslations();
@@ -216,9 +216,10 @@ export default async function AccountPage({
             webhook only. */}
         <AccountBillingSection billingReturn={billing ?? null} />
 
-        {/* The owner's one-time 1 € LIVE payment check — renders nothing unless
-            the owner switched it on and billing is LIVE for this workspace. */}
-        <LivePaymentCheckSection result={live_check ?? null} refused={live_check_refused ?? null} />
+        {/* Organization pilot pass (1 € once → the paid plan for the pilot
+            period) — renders nothing unless the owner switched it on and
+            billing is active for this workspace's organization. */}
+        <PilotPassSection result={pilot_pass ?? null} refused={pilot_pass_refused ?? null} />
 
         {/* LMC — placed directly under the plan line because they answer the same
             question at two depths: what this account is entitled to, and what it

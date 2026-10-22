@@ -5,7 +5,7 @@
  * mode + idempotency around this, and persists via the service-role store.
  */
 
-import { summarizeLiveCheckSession } from "@/lib/billing/live-check-core";
+import { summarizePilotPassSession } from "@/lib/billing/pilot-pass-core";
 
 export type SubStatus =
   | "none"
@@ -411,9 +411,9 @@ export function summarizeRecordedEvent(
     const d = parseDisputeObject(obj);
     return d ? { ...d } : null;
   }
-  // The owner's LIVE payment check: the database row itself shows what was
-  // paid, by which organization, in which mode (live-check-core).
-  if (type === "checkout.session.completed") return summarizeLiveCheckSession(obj);
+  // The organization pilot pass: the database row itself shows what was paid,
+  // by which organization, in which mode, for which plan (pilot-pass-core).
+  if (type === "checkout.session.completed") return summarizePilotPassSession(obj);
   return null;
 }
 

@@ -19734,22 +19734,22 @@
     "notAllowed": "Tai gali padaryti organizacijos savininkas arba vadovas.",
     "notSameWork": "Šie įrašai jau nebeatitinka vienas kito — atnaujinkite puslapį."
   },
-  "liveCheck": {
-    "title": "LIVE mokėjimo patikra (1 €)",
-    "intro": "Vienas tikras 1 € mokėjimas, įrodantis visą LabourMarket.ai mokėjimo grandinę: platforma sukuria LIVE mokėjimą, tu jį apmoki Stripe puslapyje, o pasirašytas patvirtinimas įrašomas platformos duomenų bazėje.",
-    "notice": "Tik vienkartinis mokėjimas — ne prenumerata, ne LMC ir tik šiai organizacijai. Kitos organizacijos neapmokestinamos ir mokėjimo nemato.",
-    "pay": "Mokėti 1 € (LIVE)",
-    "ready": "Viskas paruošta. Mygtukas atidaro saugų Stripe mokėjimo puslapį tiksliai 1 € sumai.",
+  "pilotPass": {
+    "title": "Organizacijos planas — {days} dienų pilotas už 1 €",
+    "intro": "Sumokėk 1 € vieną kartą ir tavo organizacija {days} dienas gauna visą mokamą Organizacijos planą: be fiksuoto aktyvių pozicijų limito, kandidatų pasirengimo santraukas, susirašinėjimą, komandų parinkimą ir kitas mokamas galimybes.",
+    "terms": "Vienkartinis mokėjimas. Niekas neatsinaujina ir daugiau nenuskaičiuojama: po {days} dienų planas baigiasi savaime ir organizacija grįžta į nemokamą planą. Planas pasirodo aukščiau, kai tik Stripe patvirtina mokėjimą.",
+    "pay": "Mokėti 1 € — {days} dienų pilotas",
     "status": {
-      "live_check_disabled": "LIVE mokėjimo patikra išjungta.",
-      "unauthenticated": "Prisijunk, kad galėtum atlikti patikrą.",
+      "pilot_pass_disabled": "Pilotas šiuo metu nesiūlomas.",
+      "unauthenticated": "Prisijunk, kad pradėtum pilotą.",
       "no_organization": "Pirma pasirink savo organizacijos erdvę.",
-      "not_billing_authority": "Patikrą gali atlikti tik organizacijos mokėjimus valdantis asmuo.",
-      "not_live": "Šiai organizacijai LIVE mokėjimai neįjungti.",
+      "not_billing_authority": "Pilotą gali pradėti tik organizacijos mokėjimus valdantis asmuo.",
+      "billing_not_active": "Šiai organizacijai mokėjimai nepasiekiami.",
+      "plan_active": "Tavo organizacija jau turi aktyvų planą.",
       "checkout_failed": "Stripe nesukūrė mokėjimo puslapio. Niekas nenuskaičiuota; bandyk vėliau."
     },
     "result": {
-      "paid": "Stripe grąžino tave po mokėjimo. Patvirtinimas dabar tikrinamas platformos įrašuose.",
+      "paid": "Stripe gavo mokėjimą. Planas įsijungia, kai tik ateina patvirtinimas — jei dar nematai, po akimirkos atnaujink puslapį.",
       "cancelled": "Mokėjimas atšauktas — niekas nenuskaičiuota."
     }
   }

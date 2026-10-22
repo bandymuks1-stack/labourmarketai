@@ -68,9 +68,9 @@ export function billingTrialEnabled(): boolean {
   return env.BILLING_TRIAL_ENABLED !== "false";
 }
 
-/** Server-only: whether the owner's one-time 1 € LIVE payment check is switched on. */
-export function billingLiveCheckEnabled(): boolean {
-  return env.BILLING_LIVE_CHECK_ENABLED === "true";
+/** Server-only: whether the organization pilot pass (1 € → the plan for the pilot period) is on. */
+export function billingPilotPassEnabled(): boolean {
+  return env.BILLING_PILOT_PASS_ENABLED === "true";
 }
 
 /** Server-only: whether billing is restricted to a pilot list (true unless ALL_ORGANIZATIONS). */

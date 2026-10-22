@@ -18,6 +18,7 @@ import {
 } from "@/lib/billing/subscription-store";
 import {
   applyCheckoutLink,
+  applyPilotPass,
   applyRawSubscriptionObject,
 } from "@/lib/billing/apply-subscription-snapshot";
 import {
@@ -130,7 +131,15 @@ export async function POST(req: Request) {
   let funnelTrialStarted = false;
   try {
     if (event.type === "checkout.session.completed") {
-      const linked = await applyCheckoutLink(event.object, {
+      // Organization pilot pass: a paid one-time session activates the plan
+      // row right here (pilot-pass-core). Every other session is the
+      // subscription link, exactly as before.
+      const pass = await applyPilotPass(event.object, {
+        testMode: event.testMode,
+        evidence: { id: event.id, created },
+      });
+      if (pass !== null) result = pass;
+      const linked = pass !== null ? null : await applyCheckoutLink(event.object, {
         testMode: event.testMode,
         evidence: { id: event.id, created },
       });

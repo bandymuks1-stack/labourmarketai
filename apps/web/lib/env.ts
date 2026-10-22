@@ -109,9 +109,9 @@ const schema = z.object({
   // is paid from the first day (no automatic 14-day trial). It changes only
   // checkouts started from now on — an existing subscription keeps its terms.
   BILLING_TRIAL_ENABLED: z.enum(["true", "false"]).default("true"),
-  // The owner's one-time 1 € LIVE payment check (live-check-core): off unless
-  // the owner switches it on for the check, and back off after it.
-  BILLING_LIVE_CHECK_ENABLED: z.enum(["true", "false"]).default("false"),
+  // The organization pilot pass (pilot-pass-core): 1 € once → the paid
+  // Organization plan for the pilot period. Off unless the owner switches it on.
+  BILLING_PILOT_PASS_ENABLED: z.enum(["true", "false"]).default("false"),
   // TEST price ids (price_…) per paid plan — owner sets these in Stripe test.
   STRIPE_PRICE_WORKER_PLUS: z.string().optional(),
   STRIPE_PRICE_COMPANY_PILOT: z.string().optional(),
@@ -228,7 +228,7 @@ const parsed = schema.safeParse({
   STRIPE_LIVE_ACTIVATION: process.env.STRIPE_LIVE_ACTIVATION,
   BILLING_PILOT_ORGANIZATION_IDS: process.env.BILLING_PILOT_ORGANIZATION_IDS,
   BILLING_TRIAL_ENABLED: process.env.BILLING_TRIAL_ENABLED,
-  BILLING_LIVE_CHECK_ENABLED: process.env.BILLING_LIVE_CHECK_ENABLED,
+  BILLING_PILOT_PASS_ENABLED: process.env.BILLING_PILOT_PASS_ENABLED,
   STRIPE_PRICE_WORKER_PLUS: process.env.STRIPE_PRICE_WORKER_PLUS,
   STRIPE_PRICE_COMPANY_PILOT: process.env.STRIPE_PRICE_COMPANY_PILOT,
   STRIPE_PRICE_AGENCY_PILOT: process.env.STRIPE_PRICE_AGENCY_PILOT,

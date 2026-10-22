@@ -1,4 +1,5 @@
 import "server-only";
+import { effectivePilotPassStatus } from "@/lib/billing/pilot-pass-core";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -214,7 +215,9 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
     );
     if (real) {
       subscriptionPlanKey = real.plan_key ?? null;
-      subscriptionStatus = (real.status as SubStatus) ?? null;
+      // A pilot pass past its end reads `expired` (nothing renews it and no
+      // provider event will arrive to end it — pilot-pass-core).
+      subscriptionStatus = (effectivePilotPassStatus(real, new Date()) as SubStatus) ?? null;
       cancelAtPeriodEnd = real.cancel_at_period_end === true;
       currentPeriodEnd = typeof real.current_period_end === "string" ? real.current_period_end : null;
     }

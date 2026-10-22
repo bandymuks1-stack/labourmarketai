@@ -7,7 +7,7 @@
 #   sh lm-stripe-arm.sh test   # Stripe TEST keys + the pilot organization id(s)
 #   sh lm-stripe-arm.sh live   # Stripe LIVE keys + the owner token + the pilot id(s)
 #   sh lm-stripe-arm.sh off    # PAYMENTS_ENABLED=false (keys stay; billing reads off)
-#   sh lm-stripe-arm.sh live-check-off  # switch the one-time 1 EUR LIVE payment check off
+#   sh lm-stripe-arm.sh pilot-pass-off  # switch the 1 EUR organization pilot pass off (an active pass keeps its period)
 #   sh lm-stripe-arm.sh restore [FILE]  # put back the env exactly as it was before an arm/off run
 #
 # KEEP WHAT IS THERE (owner 2026-10-21): at every prompt, Enter keeps the value already in
@@ -32,7 +32,7 @@ set -eu
 umask 077
 BIN="$(cd "$(dirname "$0")" && pwd)"
 SET="$BIN/lm-env-set.sh"
-MODE="${1:?usage: lm-stripe-arm.sh test|live|off|live-check-off|restore [FILE]}"
+MODE="${1:?usage: lm-stripe-arm.sh test|live|off|pilot-pass-off|restore [FILE]}"
 [ -f "$SET" ] || { echo "STOP: $SET missing"; exit 1; }
 grep -q BILLING_PILOT_ORGANIZATION_IDS "$SET" || { echo "STOP: $SET is older than the pilot validation; update it first"; exit 1; }
 
@@ -74,8 +74,8 @@ case "$MODE" in
   off)
     put PAYMENTS_ENABLED false
     ;;
-  live-check-off)
-    put BILLING_LIVE_CHECK_ENABLED false
+  pilot-pass-off)
+    put BILLING_PILOT_PASS_ENABLED false
     ;;
   test|live)
     printf 'Pilot organization id(s), comma-separated (owner-confirmed; Enter keeps the current list): ' >&2
@@ -126,18 +126,18 @@ case "$MODE" in
     put STRIPE_MODE "$MODE"
     if [ "$MODE" = live ]; then
       put STRIPE_LIVE_ACTIVATION approved-by-owner
-      # The owner's one-time 1 EUR LIVE payment check (account page, /dashboard/account):
-      # a separate, explicit yes; switch it off afterwards with `live-check-off`.
-      printf 'Switch on the one-time 1 EUR LIVE payment check for the pilot? Type YES: ' >&2
-      IFS= read -r LC
-      if [ "$LC" = YES ]; then put BILLING_LIVE_CHECK_ENABLED true; else put BILLING_LIVE_CHECK_ENABLED false; fi
+      # The organization pilot pass (account page): 1 EUR once -> the Organization plan
+      # for 30 days, no renewal. A separate, explicit yes; `pilot-pass-off` switches it off.
+      printf 'Switch on the 1 EUR / 30-day organization pilot pass for the pilot? Type YES: ' >&2
+      IFS= read -r PP
+      if [ "$PP" = YES ]; then put BILLING_PILOT_PASS_ENABLED true; else put BILLING_PILOT_PASS_ENABLED false; fi
     else
       grep -q '^STRIPE_LIVE_ACTIVATION=' "$ENVF" && sh "$SET" STRIPE_LIVE_ACTIVATION --unset || true
-      put BILLING_LIVE_CHECK_ENABLED false
+      put BILLING_PILOT_PASS_ENABLED false
     fi
     put PAYMENTS_ENABLED true
     ;;
-  *) echo "STOP: usage: lm-stripe-arm.sh test|live|off|live-check-off|restore [FILE]"; exit 1;;
+  *) echo "STOP: usage: lm-stripe-arm.sh test|live|off|pilot-pass-off|restore [FILE]"; exit 1;;
 esac
 
 restart

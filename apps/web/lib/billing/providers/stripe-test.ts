@@ -199,7 +199,7 @@ export function createStripeProvider(): BillingProvider {
         const session = await client().checkout.sessions.create(
           {
             // One payment, a server-fixed amount: no subscription, no saved
-            // price, no tax computation (the owner's check is exactly 1 €).
+            // price, no tax computation (the pilot pass is exactly 1 €).
             mode: "payment",
             line_items: [
               {
@@ -212,7 +212,14 @@ export function createStripeProvider(): BillingProvider {
               },
             ],
             client_reference_id: input.clientReferenceId,
-            customer_email: input.customerEmail ?? undefined,
+            // The payer's stored customer, so the payment and its invoice sit
+            // in the same billing history and customer portal as a plan;
+            // otherwise Stripe creates one for this payment.
+            ...(input.providerCustomerId
+              ? { customer: input.providerCustomerId }
+              : { customer_creation: "always" as const, customer_email: input.customerEmail ?? undefined }),
+            // A real invoice/receipt for the 1 € — payment history, not just a charge.
+            invoice_creation: { enabled: true, invoice_data: { metadata } },
             success_url: input.successUrl,
             cancel_url: input.cancelUrl,
             metadata,
