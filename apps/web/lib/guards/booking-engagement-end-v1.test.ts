@@ -1695,6 +1695,10 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261021095000_demand_interest_org_managers_v1.sql",
       "20261021095100_demand_interest_worker_writes_v1.sql",
       "20261021095200_booking_propose_reachable_open_v1.sql",
+      // 2026-10-22: owner approved #2608 in chat ("I approve PR #2608 migration
+      // 20261021095500_worker_skill_confirmation_standing_v1.sql, including its
+      // reviewed SECURITY DEFINER function and GRANT permissions").
+      "20261021095500_worker_skill_confirmation_standing_v1.sql",
       // 2026-10-21 (owner-approved #2613): a brigade whose only offer is on a closed need can be disbanded
       "20261021120000_team_disband_closed_need_offers_v1.sql",
       // 2026-10-21 (RED, needs-human-gate): stale booking proposals expire daily (system function + pg_cron).

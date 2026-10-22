@@ -53,6 +53,7 @@
  * `skill-confirmation-standing-read.ts`.
  */
 
+import { deriveEvidenceTier, sourceToEvidence, type EvidenceTier } from "@/lib/evidence/evidence-tier";
 import {
   actionToDecision,
   confirmedEntriesOf,
@@ -259,4 +260,171 @@ export function withStandingConfirmation<
  *  otherwise (most people have no confirmed skill; no extra round trips). */
 export function anyRecordedConfirmation(rows: readonly FlaggedSkillRow[]): boolean {
   return rows.some((r) => r.verified === true);
+}
+
+// ── CROSS-PARTY READERS (phase B) ──────────────────────────────────────────
+//
+// A viewer who is NOT the subject — an employer that finds a person through
+// the discoverability consent, a manager's team view, an agency, matching,
+// the admin workbench — reads `worker_skills` through `can_view_worker` but
+// NOT that person's journal, so `readStandingConfirmedSkillIds` would hand
+// them an empty standing set. They ask the DB door
+// `worker_skill_confirmations_standing_v1` (migration 20261021090000), which
+// applies THIS rule server side and answers one state per recorded
+// confirmation (`readCrossPartyStandingStates`). Until the owner approves and
+// applies that migration the door is absent, and a cross-party reader keeps
+// TODAY's reading — the stored flag — so nothing regresses in between.
+
+/** What the door answers for one recorded confirmation. */
+export type DoorConfirmationState = "standing" | "withdrawn" | "self_confirmed";
+
+export function isDoorConfirmationState(v: unknown): v is DoorConfirmationState {
+  return v === "standing" || v === "withdrawn" || v === "self_confirmed";
+}
+
+/** The door is not installed (migration not applied): keep the stored flag. */
+export const STANDING_DOOR_NOT_INSTALLED = "door_not_installed" as const;
+
+/**
+ * One cross-party read: workerId -> skillId -> state; the door is not
+ * installed; or `null` = UNKNOWN (the door answered with an error) — never
+ * read as confirmed, and never read as "nothing was confirmed".
+ */
+export type CrossPartyStandingRead =
+  | ReadonlyMap<string, ReadonlyMap<string, DoorConfirmationState>>
+  | typeof STANDING_DOOR_NOT_INSTALLED
+  | null;
+
+/**
+ * The Phase A states plus `recorded_unjudged`: a recorded confirmation read
+ * before the door exists — today's stored-flag reading, kept on purpose.
+ */
+export type CrossPartyConfirmationState = SkillConfirmationState | "recorded_unjudged";
+
+export function crossPartyConfirmationState(
+  row: FlaggedSkillRow,
+  workerId: string | null | undefined,
+  read: CrossPartyStandingRead,
+): CrossPartyConfirmationState {
+  if (row.verified !== true) return "none";
+  if (read === STANDING_DOOR_NOT_INSTALLED) return "recorded_unjudged";
+  if (read === null) return "unknown";
+  if (!workerId || !row.skill_id) return "unknown";
+  // A recorded row the door did not answer for (it became verified between
+  // the two reads, or the door could not see it) is UNKNOWN, never "withdrawn".
+  return read.get(workerId)?.get(row.skill_id) ?? "unknown";
+}
+
+/** Reads as confirmed: the confirmation stands, or the door is not installed yet. */
+export function crossPartyReadsConfirmed(state: CrossPartyConfirmationState): boolean {
+  return state === "standing" || state === "recorded_unjudged";
+}
+
+/**
+ * The cross-party twin of `withStandingConfirmation`: `verified` is true only
+ * when the confirmation reads as confirmed; the stored flag is carried as
+ * `verifiedRecorded`; a confirmation that is withdrawn or the person's own
+ * loses the `manager_confirmed` source; an UNKNOWN one keeps it (under-stated,
+ * never erased — `standingSourceTier`). Rows carry `worker_id`, or every row
+ * belongs to `workerId`.
+ */
+export function withCrossPartyStandingConfirmation<
+  T extends FlaggedSkillRow & {
+    readonly worker_id?: string | null;
+    readonly source?: string | null;
+  },
+>(
+  rows: readonly T[],
+  read: CrossPartyStandingRead,
+  workerId?: string | null,
+): (T & {
+  verified: boolean;
+  verifiedRecorded: boolean;
+  confirmation: CrossPartyConfirmationState;
+})[] {
+  return rows.map((r) => {
+    const confirmation = crossPartyConfirmationState(r, r.worker_id ?? workerId ?? null, read);
+    const confirmed = crossPartyReadsConfirmed(confirmation);
+    const dropSource =
+      !confirmed &&
+      confirmation !== "unknown" &&
+      confirmation !== "none" &&
+      r.source === "manager_confirmed";
+    return {
+      ...r,
+      ...(dropSource ? { source: null } : {}),
+      verified: confirmed,
+      verifiedRecorded: r.verified === true,
+      confirmation,
+    } as T & {
+      verified: boolean;
+      verifiedRecorded: boolean;
+      confirmation: CrossPartyConfirmationState;
+    };
+  });
+}
+
+/**
+ * Count of rows reading as confirmed, or `null` when any recorded
+ * confirmation among them is UNKNOWN (a count that silently drops those would
+ * read as "not confirmed"; one that keeps them would over-state).
+ */
+export function countCrossPartyConfirmed(
+  rows: readonly { readonly verified: boolean; readonly confirmation: CrossPartyConfirmationState }[],
+): number | null {
+  if (rows.some((r) => r.confirmation === "unknown")) return null;
+  return rows.filter((r) => r.verified).length;
+}
+
+/**
+ * The workers holding at least one confirmation that reads as confirmed —
+ * for aggregate "confirmed-skill workers" counts (admin market views). A
+ * worker whose only recorded confirmations are UNKNOWN is not counted
+ * (under-stated, never over-stated).
+ */
+export function confirmedSkillWorkerIds(
+  rows: readonly (FlaggedSkillRow & { readonly worker_id: string | null })[],
+  read: CrossPartyStandingRead,
+): Set<string> {
+  const out = new Set<string>();
+  for (const r of withCrossPartyStandingConfirmation(rows, read)) {
+    if (r.verified && r.worker_id) out.add(r.worker_id);
+  }
+  return out;
+}
+
+type MappedTierRow = {
+  readonly verified: boolean | null;
+  readonly source?: string | null;
+  readonly confirmation?: CrossPartyConfirmationState;
+};
+
+/** An UNKNOWN confirmation whose source still says manager_confirmed: shown
+ *  as journal-level evidence — never confirmed, never erased to "declared"
+ *  (the same under-statement the CV makes for it, cv-export/skill-tiers.ts). */
+function unknownConfirmationTier(row: MappedTierRow): EvidenceTier | null {
+  return row.confirmation === "unknown" && row.source === "manager_confirmed"
+    ? "work_journal"
+    : null;
+}
+
+/**
+ * The evidence tier of a row ALREADY mapped by `withStandingConfirmation` /
+ * `withCrossPartyStandingConfirmation`, on the canonical ladder
+ * (`deriveEvidenceTier`: only a confirmation that reads as confirmed reaches
+ * the top rung), with an UNKNOWN confirmation under-stated, not erased.
+ */
+export function standingEvidenceTier(row: MappedTierRow): EvidenceTier {
+  return unknownConfirmationTier(row) ?? deriveEvidenceTier(row);
+}
+
+/**
+ * The same for readers that map the stored SOURCE (`sourceToEvidence`, the
+ * match subjects), which lifts a `manager_confirmed` source to the top tier on
+ * its own: an UNKNOWN confirmation (source kept) is capped at journal-level
+ * evidence. Rows that were never confirmed keep that reader's reading.
+ */
+export function standingSourceTier(row: MappedTierRow): EvidenceTier {
+  if (row.verified === true) return "manager_confirmed";
+  return unknownConfirmationTier(row) ?? sourceToEvidence(row.source);
 }

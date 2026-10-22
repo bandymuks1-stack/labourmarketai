@@ -223,6 +223,7 @@ export const CANONICAL_APP_RPCS = [
   "withdraw_service_offering_request",
   "withdraw_team_demand_offer_v1",
   "withdraw_team_enquiry_v1",
+  "worker_skill_confirmations_standing_v1",
 ]  as const;
 
 export type CanonicalAppRpc = (typeof CANONICAL_APP_RPCS)[number];

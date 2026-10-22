@@ -1,5 +1,13 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { createClient } from "@/lib/supabase/server";
+import {
+  anyRecordedConfirmation,
+  countCrossPartyConfirmed,
+  withCrossPartyStandingConfirmation,
+} from "@/lib/evidence/skill-confirmation-standing";
+import { readCrossPartyStandingStates } from "@/lib/evidence/skill-confirmation-standing-read";
 import { readReviewableJournalEntryIds } from "@/lib/journal/reviewable-count";
 
 /**
@@ -16,7 +24,13 @@ import { readReviewableJournalEntryIds } from "@/lib/journal/reviewable-count";
 export type WorkerReadiness = {
   journalEntries: number;
   declaredSkills: number;
-  confirmedSkills: number;
+  /**
+   * Skills whose recorded confirmation still STANDS
+   * (lib/evidence/skill-confirmation-standing.ts, through the cross-party DB
+   * door). `null` = UNKNOWN: the door could not say whether a recorded
+   * confirmation still stands — shown as unknown, never as 0.
+   */
+  confirmedSkills: number | null;
   openReviewItems: number;
   lastActivity: string | null;
 };
@@ -39,23 +53,43 @@ export async function getWorkerReadiness(
 
   const supabase = await createClient();
 
-  // Skills: declared (all) + confirmed (verified) per worker.
+  // Skills: declared (all) + confirmed per worker. The stored `verified` flag
+  // is sticky (never set back after the confirming work is rejected,
+  // corrected or deleted), so "confirmed" counts only confirmations that
+  // still STAND — decided by the cross-party door, beside the journal read
+  // below (no extra round trip), and only when there is a flag to judge.
   const { data: skills } = await supabase
     .from("worker_skills")
-    .select("worker_id, verified")
+    .select("worker_id, skill_id, verified")
     .in("worker_id", ids);
-  for (const r of (skills ?? []) as { worker_id: string | null; verified: boolean | null }[]) {
-    if (!r.worker_id) continue;
-    const w = out.get(r.worker_id);
-    if (!w) continue;
-    w.declaredSkills += 1;
-    if (r.verified === true) w.confirmedSkills += 1;
-  }
+  const skillRows = (skills ?? []) as {
+    worker_id: string | null;
+    skill_id: string | null;
+    verified: boolean | null;
+  }[];
 
   // Journal entries the employer can see for these workers (RLS-scoped).
-  const { data: entries } = await liveJournalEntriesOnly(
-    supabase.from("journal_entries").select("id, worker_id, created_at").in("worker_id", ids),
-  );
+  const [{ data: entries }, standing] = await Promise.all([
+    liveJournalEntriesOnly(
+      supabase.from("journal_entries").select("id, worker_id, created_at").in("worker_id", ids),
+    ),
+    anyRecordedConfirmation(skillRows)
+      ? readCrossPartyStandingStates(supabase as unknown as SupabaseClient, ids)
+      : Promise.resolve(new Map()),
+  ]);
+  const judged = withCrossPartyStandingConfirmation(skillRows, standing);
+  const judgedByWorker = new Map<string, typeof judged>();
+  for (const r of judged) {
+    if (!r.worker_id || !out.has(r.worker_id)) continue;
+    const list = judgedByWorker.get(r.worker_id) ?? [];
+    list.push(r);
+    judgedByWorker.set(r.worker_id, list);
+  }
+  for (const [wid, rows] of judgedByWorker) {
+    const w = out.get(wid)!;
+    w.declaredSkills = rows.length;
+    w.confirmedSkills = countCrossPartyConfirmed(rows);
+  }
   const entryWorker = new Map<string, string>();
   for (const r of (entries ?? []) as {
     id: string;

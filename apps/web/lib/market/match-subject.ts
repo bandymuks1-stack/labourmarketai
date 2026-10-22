@@ -8,7 +8,6 @@ import {
   readDiscoverableWorkers,
 } from "@/lib/visibility/discoverable-workers";
 import {
-  sourceToEvidence,
   type EvidenceTier,
   type MatchNeed,
   type MatchSubject,
@@ -31,11 +30,16 @@ import {
 } from "@/lib/scouting/profile-freshness";
 import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import { readSignalsForWorkers } from "@/lib/organization-evidence/history-signals-read";
+import {
+  standingSourceTier,
+  withCrossPartyStandingConfirmation,
+} from "@/lib/evidence/skill-confirmation-standing";
+import { readCrossPartyStandingStates } from "@/lib/evidence/skill-confirmation-standing-read";
 
 /**
  * Read layer for matching v1 — assembles a `MatchSubject` for each
  * employer-discoverable worker from REAL rows, so match-v1 runs on live data
- * (Full Cycle Sprint v1, Slice 3). Pure mapping (`sourceToEvidence`) is unit-
+ * (Full Cycle Sprint v1, Slice 3). Pure mapping (`standingSourceTier`) is unit-
  * tested; the I/O assembler takes the caller's RLS-scoped client.
  *
  * Visibility: reads ONLY employer-visible tables — `workers`,
@@ -410,10 +414,10 @@ export async function buildSupplyCandidates(
   // null — an honest "not stated", exactly like the gated stores above. The
   // superadmin matching workbench, which is where a human actually weighs a
   // learner's placement today, reads the real rows.
-  const [skillsRes, profsRes, prefsRes, langsRes, practiceRes, confirmedWork, historyRead] = await Promise.all([
+  const [skillsRes, profsRes, prefsRes, langsRes, practiceRes, confirmedWork, historyRead, standing] = await Promise.all([
     asAny(supabase)
       .from("worker_skills")
-      .select("worker_id, source, verified, skills ( slug, esco_uri )")
+      .select("worker_id, skill_id, source, verified, skills ( slug, esco_uri )")
       .in("worker_id", workerIds),
     asAny(supabase)
       .from("worker_professions")
@@ -470,6 +474,12 @@ export async function buildSupplyCandidates(
         reason: "read_failed",
       }),
     ),
+    // WHETHER EACH RECORDED SKILL CONFIRMATION STILL STANDS: the stored
+    // `verified` flag is sticky (never set back after the confirming work is
+    // rejected, corrected or deleted). The viewer cannot read the pool's
+    // journals, so the cross-party DB door decides, one batched read beside
+    // the others (lib/evidence/skill-confirmation-standing.ts).
+    readCrossPartyStandingStates(supabase, workerIds),
   ]);
 
   // WHY THESE TWO ARE CHECKED AND THE OTHERS ARE NOT. `prefsRes`, `langsRes`
@@ -484,16 +494,21 @@ export async function buildSupplyCandidates(
   if (skillsRes.error) unreadableFacts.push("skills");
   if (profsRes.error) unreadableFacts.push("professions");
 
-  for (const s of (skillsRes.data ?? []) as {
-    worker_id: string;
-    source: string | null;
-    verified: boolean | null;
-    skills: { slug: string | null; esco_uri: string | null } | null;
-  }[]) {
+  for (const s of withCrossPartyStandingConfirmation(
+    (skillsRes.data ?? []) as {
+      worker_id: string;
+      skill_id: string | null;
+      source: string | null;
+      verified: boolean | null;
+      skills: { slug: string | null; esco_uri: string | null } | null;
+    }[],
+    standing,
+  )) {
     const id = s.skills?.slug ?? s.skills?.esco_uri;
     if (!id) continue;
-    // verified=true is the manager-confirmed truth even if source lags.
-    const tier: EvidenceTier = s.verified ? "manager_confirmed" : sourceToEvidence(s.source);
+    // A STANDING confirmation is the manager-confirmed truth even if source
+    // lags; a withdrawn one never is, and an unknown one is under-stated.
+    const tier: EvidenceTier = standingSourceTier(s);
     const m = skillsByWorker.get(s.worker_id) ?? new Map<string, EvidenceTier>();
     const prev = m.get(id);
     if (!prev || tierRank[tier] > tierRank[prev]) m.set(id, tier);
