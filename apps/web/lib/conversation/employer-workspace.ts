@@ -4,6 +4,8 @@ import "server-only";
 
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { listCompanyDemands, runScouting } from "@/lib/scouting/scouting";
+import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
+import { getTranslations } from "next-intl/server";
 import { anonymizedToken } from "@/lib/scouting/scout-safe-view";
 import { deriveCandidatePipelineStage } from "@/lib/pipeline/candidate-pipeline";
 import { loadDemandPipelineFacts } from "@/lib/pipeline/candidate-pipeline-facts";
@@ -77,6 +79,17 @@ function gapCodes(
 }
 
 /**
+ * A need saved without naming the role stores an ENGLISH placeholder title
+ * ("Hiring workers — demand"). The needs readback shows it in the reader's
+ * language; the chat's panel printed it raw (production audit 2026-10-22).
+ * Localized HERE, on the server, so the panel stays a pure renderer.
+ */
+async function syntheticDemandTitleLabels() {
+  const t = await getTranslations("demandReadback.syntheticTitle");
+  return { hiringWorkers: t("hiringWorkers"), agencyPartnership: t("agencyPartnership") };
+}
+
+/**
  * The company's own demands, for the chat and for the panel's demand picker.
  *
  * `listCompanyDemands` returns `[]` for BOTH "no company context" and "no
@@ -90,7 +103,7 @@ export async function loadEmployerDemandsForChat(): Promise<EmployerDemandsResul
     const ctx = await resolveEmployerCompanyContext();
     if (ctx.kind !== "ok") return { kind: "no-company-context", reason: ctx.reason };
 
-    const demands = await listCompanyDemands();
+    const [demands, synthetic] = await Promise.all([listCompanyDemands(), syntheticDemandTitleLabels()]);
     if (demands.length === 0) return { kind: "empty" };
 
     return {
@@ -98,7 +111,7 @@ export async function loadEmployerDemandsForChat(): Promise<EmployerDemandsResul
       demands: demands.slice(0, EMPLOYER_DEMANDS_LIMIT).map(
         (d): EmployerDemandRow => ({
           requestId: d.id,
-          title: d.title,
+          title: resolveDemandTitle(d.title, synthetic),
           status: d.status,
           structured: d.structured,
           // Title-only derivation here — see the contract's degradation note.
@@ -147,7 +160,7 @@ export async function loadEmployerCandidatesForChat(
 
   const demand: EmployerDemandRow = {
     requestId: result.demand.id,
-    title: result.demand.title,
+    title: resolveDemandTitle(result.demand.title, await syntheticDemandTitleLabels()),
     status: result.demand.status,
     structured: result.demand.structured,
     // The AUTHORITATIVE derivation — `runScouting` ran it over the whole row.
