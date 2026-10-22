@@ -26,7 +26,7 @@ returns jsonb
 language sql
 stable
 security definer
-set search_path = public
+set search_path = ''
 set enable_seqscan = off
 as $$
   select jsonb_build_object(
