@@ -137,6 +137,34 @@ export type ProjectDetailResult =
   | { readonly kind: "no-company-context" }
   | { readonly kind: "blocked" };
 
+/**
+ * The part of a project's detail a project SCAN reads (the risk panel and the
+ * company home's project field): who is on it, its stages and the pulse
+ * numbers that are signals. A `ProjectDetail` IS one, so the panel's detail
+ * read and the batched scan (`lib/projects/project-scan.ts`) feed the same
+ * derivation; the scan reads every scanned project at once instead of one
+ * detail read per project.
+ */
+export interface ProjectScanDetail {
+  readonly projectId: string;
+  readonly title: string;
+  readonly status: ProjectStatus | null;
+  readonly assignments: readonly ProjectAssignmentRow[];
+  readonly assignmentTotal: number;
+  readonly stages: readonly ProjectStageRow[] | null;
+  readonly stageTotal: number | null;
+  readonly pulse: Pick<
+    ProjectPulse,
+    "tasksOpen" | "tasksOverdue" | "readinessChecked" | "readinessTotal" | "workersWithMissingDocs"
+  > | null;
+}
+
+export type ProjectScanDetailResult =
+  | { readonly kind: "project"; readonly project: ProjectScanDetail }
+  | { readonly kind: "not-found" }
+  | { readonly kind: "no-company-context" }
+  | { readonly kind: "blocked" };
+
 /** What a lifecycle write answers. Mirrors the RPC's tagged outcome exactly —
  *  no raw SQL text, ever. */
 export type ProjectLifecycleResult =
