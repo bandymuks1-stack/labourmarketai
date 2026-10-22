@@ -106,6 +106,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "The partner opportunity network pulls it; identity is the SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open worker API. Deliberately NOT shared: it answers with every authorised person’s projection at once, which no signed-in account has a reason to ask for, so there is no user path to conflate. The body carries the v1 projection only — opaque actorRef, trades, availability, geography, agreed markets, four authorities — and holds no name, email, phone or address to leak.",
   },
+  "internal/capability-readback/v1/route.ts": {
+    class: "public",
+    why: "Agentai OS re-verifies its LabourMarket.ai capability contract from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is aggregate integer COUNTS only (lib/api/capability-readback.ts: a fixed key list, everything else refused) — no row, name, id, email or address exists in it to leak.",
+  },
   "health/route.ts": {
     class: "public",
     why: "A liveness probe for an external uptime monitor (FINAL COMPLETION Train L1). No user identity exists or is read: it uses only the anon key every browser already holds, against two dependencies a sign-in needs, and answers booleans + latencies + the build id — nothing a person owns.",

@@ -242,6 +242,9 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
       // notification emitters can read who to notify. It creates, drops,
       // alters, triggers and writes no engine object.
       "20261012120000_service_role_notification_reads_v1",
+      // 2026-10-22 (RED, needs-human-gate): the Agentai OS capability readback COUNTS workflow_instances and
+      // onboarding_runs (count(*) only). It creates, drops, alters, triggers and writes no engine object.
+      "20261022150000_agentai_capability_readback_counts_v1",
     ];
     /**
      * 20260820070000 — chain step B on-ramp. The ONE later migration that
