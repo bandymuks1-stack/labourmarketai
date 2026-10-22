@@ -19737,7 +19737,7 @@
   "pilotPass": {
     "title": "Organisatieplan — pilot van {days} dagen voor 1 €",
     "intro": "Betaal eenmalig 1 € en je organisatie krijgt {days} dagen lang het betaalde Organisatieplan. Wat het toevoegt aan het gratis plan: geen limiet op gelijktijdig open posities en personeelsbehoeften (het gratis plan staat er één toe). Berichten, kandidaatoverzichten, teamselectie en boekingen blijven beschikbaar zoals in het gratis plan.",
-    "terms": "Eenmalige betaling. Er wordt niets verlengd en niets opnieuw afgeschreven: na {days} dagen eindigt het plan vanzelf en keert de organisatie terug naar het gratis plan. Het plan verschijnt hierboven zodra Stripe de betaling bevestigt.",
+    "terms": "Eenmalige betaling. Er wordt niets verlengd en niets opnieuw afgeschreven: na {days} dagen eindigt het plan vanzelf en keert de organisatie terug naar het gratis plan. Het plan verschijnt hieronder zodra Stripe de betaling bevestigt.",
     "pay": "1 € betalen — pilot van {days} dagen",
     "status": {
       "pilot_pass_disabled": "De pilot wordt nu niet aangeboden.",
