@@ -19751,6 +19751,11 @@
     "result": {
       "paid": "Payment received by Stripe. The plan activates as soon as the confirmation arrives — refresh in a moment if it is not shown yet.",
       "cancelled": "Payment cancelled — nothing was charged."
+    },
+    "elsewhere": "Choose {organization} in the workspace selector at the top of the page — the pilot is started from that organization's workspace.",
+    "invite": {
+      "line": "Pay 1 € once for {days} days of the paid Organization plan. Nothing renews.",
+      "cta": "Open the pilot"
     }
   }
 }

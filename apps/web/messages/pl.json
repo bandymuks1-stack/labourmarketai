@@ -19751,6 +19751,11 @@
     "result": {
       "paid": "Stripe otrzymał płatność. Plan włączy się, gdy tylko nadejdzie potwierdzenie — jeśli go jeszcze nie widać, odśwież stronę za chwilę.",
       "cancelled": "Płatność anulowana — nic nie pobrano."
+    },
+    "elsewhere": "Wybierz {organization} w przełączniku przestrzeni u góry strony — pilotaż uruchamia się z przestrzeni tej organizacji.",
+    "invite": {
+      "line": "Zapłać 1 € jednorazowo za {days} dni płatnego planu Organizacja. Nic się nie odnawia.",
+      "cta": "Otwórz pilotaż"
     }
   }
 }

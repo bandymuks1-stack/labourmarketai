@@ -19751,6 +19751,11 @@
     "result": {
       "paid": "Stripe hat die Zahlung erhalten. Der Plan wird aktiv, sobald die Bestätigung eintrifft — lade die Seite gleich neu, falls er noch nicht angezeigt wird.",
       "cancelled": "Zahlung abgebrochen — es wurde nichts belastet."
+    },
+    "elsewhere": "Wähle {organization} in der Arbeitsbereichsauswahl oben auf der Seite — der Pilot wird im Arbeitsbereich dieser Organisation gestartet.",
+    "invite": {
+      "line": "Zahle einmal 1 € für {days} Tage des kostenpflichtigen Organisationsplans. Nichts verlängert sich.",
+      "cta": "Pilot öffnen"
     }
   }
 }

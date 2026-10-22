@@ -14,6 +14,7 @@ export async function generateMetadata({
   return buildPageMetadataFor("pricing", locale, "/pricing");
 }
 import { PricingTable } from "@/components/marketing/pricing-table";
+import { PilotPassInvite } from "@/components/app/pilot-pass-invite";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
 import { getBillingConfigFor } from "@/lib/billing/config";
 import { isStripeActive } from "@/lib/billing/config-core";
@@ -90,6 +91,12 @@ export default async function PricingPage({
           </p>
         </div>
       ) : null}
+      {/* The organization pilot pass, for the signed-in owner it is offered
+          to — public billing stays off, so without this the pricing page told
+          that owner payments were not open (2026-10-22). */}
+      <div className="mx-auto max-w-container px-6 sm:px-12">
+        <PilotPassInvite />
+      </div>
       {/* Public commercial surface only: the technical billing state banner
           and the Stripe TEST checkout moved to the superadmin-gated
           /dashboard/admin/billing (launch repair Scope C). */}
