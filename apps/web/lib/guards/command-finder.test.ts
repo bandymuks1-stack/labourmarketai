@@ -351,3 +351,17 @@ describe("W10 help terms are REAL request actions (owner lock flipped)", () => {
     });
   }
 });
+
+describe("quick search: Enter opens the selected result (production audit 2026-10-22)", () => {
+  const src = readFileSync(join(__dirname, "..", "..", "components", "app", "command-finder.tsx"), "utf8");
+  it("the input handles ArrowUp/ArrowDown/Enter over the rendered order (commands, then objects)", () => {
+    expect(src).toContain("onKeyDown={onInputKeyDown}");
+    expect(src).toMatch(/e\.key === "ArrowDown" \|\| e\.key === "ArrowUp"/);
+    expect(src).toMatch(/e\.key === "Enter" && selected[\s\S]*router\.push\(selected\.href/);
+    expect(src).toContain("useEffect(() => setActiveIndex(0), [query]);");
+  });
+  it("the highlight is announced (aria-activedescendant) and visible (data-active)", () => {
+    expect(src).toContain("aria-activedescendant={selected ? optionId(selected.key) : undefined}");
+    expect(src).toContain('data-active={selected?.key === `result-${entry.id}` ? "true" : undefined}');
+  });
+});

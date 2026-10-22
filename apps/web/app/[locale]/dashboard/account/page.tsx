@@ -351,6 +351,8 @@ export default async function AccountPage({
           emailInactiveNote: tPrefs("emailInactiveNote"),
           error: tPrefs("error"),
           unavailable: tPrefs("unavailable"),
+          saving: tPrefs("saving"),
+          saved: tPrefs("saved"),
         }}
       />
 
