@@ -15,6 +15,7 @@ import type { NeedSkillSource } from "@/lib/market/need-skills";
 import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
 import { matchWorkerToNeed, compareMatches, type MatchNeed } from "@/lib/market/match-v1";
 import { buildSupplyCandidates } from "@/lib/market/match-subject";
+import { SUPPLY_POOL_BUDGET } from "@/lib/market/supply-retrieval";
 import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
 import type { SupplyRetrievalReport } from "@/lib/market/supply-retrieval";
 import {
@@ -577,13 +578,23 @@ async function readUnassessedHandRaisers(
     .map(([workerId]) => workerId);
   if (raised.length === 0) return [];
 
-  const [{ candidates: visible }, shortlist] = await Promise.all([
-    buildSupplyCandidates(supabase, {
-      workerIds: raised,
-      excludeFixtures: input.excludeFixtures,
-    }),
+  // EVERY hand-raiser, in pool-sized batches: one call takes at most
+  // SUPPLY_POOL_BUDGET ids and drops the rest, so a need with more hands than
+  // that would silently lose real applications (Codex review #2680). Each
+  // batch keeps the same visibility and fixture rules.
+  const batches: string[][] = [];
+  for (let i = 0; i < raised.length; i += SUPPLY_POOL_BUDGET) {
+    batches.push(raised.slice(i, i + SUPPLY_POOL_BUDGET));
+  }
+  const [pools, shortlist] = await Promise.all([
+    Promise.all(
+      batches.map((workerIds) =>
+        buildSupplyCandidates(supabase, { workerIds, excludeFixtures: input.excludeFixtures }),
+      ),
+    ),
     readShortlistForDemand(supabase, input.userId, input.requestId),
   ]);
+  const visible = pools.flatMap((p) => p.candidates);
 
   return visible
     .flatMap((c) => {

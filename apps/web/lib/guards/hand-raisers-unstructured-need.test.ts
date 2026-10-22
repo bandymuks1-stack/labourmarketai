@@ -54,7 +54,10 @@ describe("the scouting core looks at hand-raisers before giving up on structure"
   it("the unassessed read reuses the privacy gates and scores NOTHING", () => {
     const fn = between(CORE, "async function readUnassessedHandRaisers(", "\n}\n");
     // Same visibility read (RLS row / discovery projection), same fixture rule.
-    expect(fn).toMatch(/buildSupplyCandidates\(supabase, \{\s*workerIds: raised,\s*excludeFixtures: input\.excludeFixtures,/);
+    // Every hand-raiser, batched by the pool budget (Codex review #2680): each
+    // batch goes through the same supply read with the same fixture rule.
+    expect(fn).toMatch(/i \+= SUPPLY_POOL_BUDGET/);
+    expect(fn).toMatch(/buildSupplyCandidates\(supabase, \{ workerIds, excludeFixtures: input\.excludeFixtures \}\)/);
     // Same live-proposal verdict; withdrawn hands are not even fetched.
     expect(fn).toMatch(/candidateActionability\(/);
     expect(fn).toMatch(/mayOfferEmployerActions\(actionability\)/);

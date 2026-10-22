@@ -281,6 +281,22 @@ describe("hand-raisers on a need that names no trade (owner decision 2026-10-22)
     expect(zed.shortlistNote).toBe("call Monday");
   });
 
+  it("more hands than one pool batch: every visible one is returned (Codex review #2680)", async () => {
+    // 501 > SUPPLY_POOL_BUDGET (500): the batch boundary must not drop anyone.
+    const ids = Array.from({ length: 501 }, (_, i) =>
+      `00000000-0000-4000-8000-${String(i + 1).padStart(12, "0")}`,
+    );
+    const r = await scout(
+      client({
+        interest: ids.map((worker_id) => ({ worker_id, status: "interested" })),
+        discoverableRows: ids.map((id) => discoverable(id)),
+      }),
+    );
+    if (r.kind !== "not-structured") throw new Error(r.kind);
+    expect(r.handRaisers).toHaveLength(501);
+    expect(new Set(r.handRaisers.map((h) => h.workerId)).size).toBe(501);
+  });
+
   it("no hand-raisers → the plain not-structured state, as before", async () => {
     const c = client({ interest: [] });
     const r = await scout(c);
