@@ -8,6 +8,8 @@ import { readWorkerCoreRow } from "@/lib/data/worker-core";
 import type { DomainCaller } from "@/lib/domain/caller";
 import { createClient } from "@/lib/supabase/server";
 import { readWorkerEntrySkillLinks } from "@/lib/journal/entry-skill-link-read";
+import { summarizeUnrecordedHours } from "@/lib/journal/unrecorded-hours";
+import { resolveWorkDay } from "@/lib/journal/work-time";
 import type { EntrySkillProvenance } from "@/lib/journal/entry-skill-source";
 import {
   listJournalEntries,
@@ -129,7 +131,7 @@ export function assembleWorkIntelligence(input: {
       source: r.source ?? null,
     });
   }
-  return deriveWorkIntelligence({
+  const derived = deriveWorkIntelligence({
     entries,
     skills,
     todayIso: input.todayIso,
@@ -140,6 +142,18 @@ export function assembleWorkIntelligence(input: {
     organizationRecords: input.organizationRecords ?? null,
     organizationPeriodRecords: input.organizationPeriodRecords ?? null,
   });
+  // Entries whose written hours never became recorded time (the pre-2026-08-20
+  // composer dropped them) — counted, never summed, from the SAME entries.
+  return {
+    ...derived,
+    unrecordedHours: summarizeUnrecordedHours(
+      entries.map((e) => ({
+        originalText: e.originalText,
+        metrics: e.metrics,
+        day: resolveWorkDay(e.metrics, e.createdAt),
+      })),
+    ),
+  };
 }
 
 /**

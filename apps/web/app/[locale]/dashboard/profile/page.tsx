@@ -386,6 +386,7 @@ export default async function ProfilePage({
   // The ONE continuous professional history's total (decision 0025): every
   // work hour once over the journal and the organization history.
   let professionalExperienceHours: number | null = null;
+  let unrecordedHours: { entries: number; earliestDay: string } | null = null;
   // Self-stated languages (P2-PR3) — `worker_languages`, APPLIED in production
   // 2026-07-11 (ledger `20260711203623`; 11 real rows). The needs-migration
   // branch is kept for fresh/local databases, not because production lacks it.
@@ -533,6 +534,10 @@ export default async function ProfilePage({
     availabilityPrefs = prefsRes;
     playerCardResult = playerCardRes;
     workContexts = workIntelligence?.contexts ?? null;
+    // Entries whose written hours never became recorded time (pre-2026-08-20
+    // composer) — counted from the SAME entries the totals read, so the
+    // profile does not present an incomplete total as the whole story.
+    unrecordedHours = workIntelligence?.unrecordedHours ?? null;
     {
       const all = workIntelligence?.periods.find((p) => p.key === "all");
       // Imported organization history counts as experience (#2169): the ONE
@@ -1208,6 +1213,7 @@ export default async function ProfilePage({
         workAllTime={workAllTime}
         organizationHistoryHours={organizationHistoryHours}
         professionalExperienceHours={professionalExperienceHours}
+        unrecordedHours={unrecordedHours}
         // Identity-essential presence sourced from the ONE minimum card contract
         // (launch audit §7.3) — only data already fetched above, no new reads.
         cardSource={{
