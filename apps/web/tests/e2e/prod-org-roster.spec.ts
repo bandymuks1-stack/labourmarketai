@@ -138,8 +138,12 @@ test("R-2 (3.22). a people file is previewed, committed once, and the person is 
   expect(pid).toMatch(/^[0-9a-f-]{36}$/);
   await page.goto(`/lt/dashboard/company/people/${pid}`);
   await rendered(page, "person page");
-  await expect(page.getByTestId("company-person")).toHaveAttribute("data-state", "ready", { timeout: 30_000 });
-  await expect(page.getByTestId("company-person-name")).toContainText(IMPORTED);
+  // Scoped to <main>: the body streams in through a hidden <div id="S:n"> whose
+  // reveal is rAF-driven; in a never-painting headless tab that hidden copy can
+  // sit outside <main> beside the rendered one (calendar-journal-history.spec.ts).
+  const main = page.getByRole("main");
+  await expect(main.getByTestId("company-person")).toHaveAttribute("data-state", "ready", { timeout: 30_000 });
+  await expect(main.getByTestId("company-person-name")).toContainText(IMPORTED);
   await ctx.close();
 });
 
