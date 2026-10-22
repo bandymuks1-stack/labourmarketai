@@ -26,10 +26,6 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 const USER = "00000000-0000-4000-8000-000000000001";
 const ORG = "00000000-0000-4000-8000-0000000000a1";
 const CO = "00000000-0000-4000-8000-0000000000c1";
-const P1 = "00000000-0000-4000-8000-0000000000e1";
-const P2 = "00000000-0000-4000-8000-0000000000e2";
-const W1 = "00000000-0000-4000-8000-0000000000f1";
-const WP1 = "00000000-0000-4000-8000-0000000000f2";
 const R1 = "00000000-0000-4000-8000-0000000000d1";
 
 type Call = { kind: "from" | "rpc"; name: string; ops: string[]; single: boolean };
@@ -70,7 +66,8 @@ vi.mock("react", async (orig) => {
     },
   };
 });
-async function beginRequest(): Promise<void> {
+async function beginRequest(projects = 2): Promise<void> {
+  seedOrganization(projects);
   log.length = 0;
   for (const s of requestStores) s.clear();
   // The bell's slow badges sit behind a process-level TTL memo; every
@@ -81,10 +78,16 @@ async function beginRequest(): Promise<void> {
 }
 
 // ── The recording fake client ───────────────────────────────────────────────
-function projectRow(id: string) {
+const pid = (i: number) => `00000000-0000-4000-8000-0000000000${(0xe0 + i).toString(16)}`;
+const wid = (i: number) => `00000000-0000-4000-8000-0000000001${(0xa0 + i).toString(16)}`;
+const wpid = (i: number) => `00000000-0000-4000-8000-0000000002${(0xa0 + i).toString(16)}`;
+const P1 = pid(1);
+const P2 = pid(2);
+
+function projectRow(id: string, i: number) {
   return {
     id,
-    title: `Project ${id.slice(-2)}`,
+    title: `Project ${i}`,
     status: "live",
     city: null,
     country: null,
@@ -92,59 +95,150 @@ function projectRow(id: string) {
     end_date: null,
     organization_id: ORG,
     company_id: CO,
+    record_state: null,
     organizations: { display_name: "Org", legal_name: "Org UAB" },
   };
 }
-const workerEmbed = {
-  id: W1,
-  profile_id: WP1,
-  display_name: "Worker",
-  profiles: { full_name: "Worker", email: null },
-};
-// An organization that acts as an agency by a declared role (not by type) and
-// has two live projects, one worker on the roster and one open need — the
-// shape of the production organization the trace was taken from.
-const TABLE_ROWS: Record<string, unknown[]> = {
-  projects: [projectRow(P1), projectRow(P2)],
-  organization_roles: [{ role_slug: "workforce_provider" }, { role_slug: "employer" }],
-  company_workers: [
-    {
-      worker_id: W1,
+const workerEmbed = (i: number) => ({
+  id: wid(i),
+  profile_id: wpid(i),
+  display_name: `Worker ${i}`,
+  profiles: { full_name: `Worker ${i}`, email: null },
+});
+
+// An organization that acts as an agency by a declared role (not by type) with
+// N live projects, one open need, and per project a different situation so the
+// risk rows are worth comparing: worker i on project i (the last project has
+// nobody), a missing document on project 2, a checked one on project 3, an
+// overdue task on project 1, a done task on project 4, a blocked stage on
+// project 5 and a planned stage on project 3.
+const TABLE_ROWS: Record<string, unknown[]> = {};
+function seedOrganization(projects: number): void {
+  const ps = Array.from({ length: projects }, (_, k) => k + 1);
+  const staffed = ps.filter((i) => i < projects || projects === 1);
+  Object.assign(TABLE_ROWS, {
+    projects: ps.map((i) => projectRow(pid(i), i)),
+    organization_roles: [{ role_slug: "workforce_provider" }, { role_slug: "employer" }],
+    company_workers: staffed.map((i) => ({
+      worker_id: wid(i),
       company_id: CO,
       status: "active",
       created_at: "2026-10-01T00:00:00Z",
-      workers: { ...workerEmbed, availability_status: "available" },
-    },
-  ],
-  project_worker_assignments: [
-    {
-      worker_id: W1,
-      project_id: P1,
+      workers: { ...workerEmbed(i), availability_status: "available" },
+    })),
+    project_worker_assignments: staffed.map((i) => ({
+      id: `a${i}`,
+      worker_id: wid(i),
+      project_id: pid(i),
       status: "active",
-      assigned_at: "2026-10-01T00:00:00Z",
-      worker: workerEmbed,
-      workers: workerEmbed,
-    },
-  ],
-  workers: [{ ...workerEmbed, availability_status: "available" }],
-  customer_requests: [
-    {
-      id: R1,
-      title: "Need",
-      status: "submitted",
-      kind: "company_request",
-      payload: {},
-      organization_id: ORG,
-      profile_id: USER,
-      created_at: "2026-10-01T00:00:00Z",
-      team_size: 2,
-    },
-  ],
-};
+      assigned_at: `2026-10-0${i}T00:00:00Z`,
+      worker: workerEmbed(i),
+      workers: workerEmbed(i),
+    })),
+    workers: staffed.map((i) => ({ ...workerEmbed(i), availability_status: "available" })),
+    project_worker_readiness_items: [
+      ...(projects >= 2
+        ? [{ project_id: pid(2), worker_id: wid(2), item_key: "a1", label: "A1", status: "missing", note: null }]
+        : []),
+      ...(projects >= 3
+        ? [{ project_id: pid(3), worker_id: wid(3), item_key: "id", label: "ID", status: "checked", note: null }]
+        : []),
+    ],
+    work_tasks: [
+      {
+        id: "t1",
+        project_id: pid(1),
+        title: "Overdue",
+        description: null,
+        status: "todo",
+        priority: "normal",
+        assignee_profile_id: null,
+        created_by: USER,
+        due_at: "2026-01-01T00:00:00Z",
+        created_at: "2026-01-01T00:00:00Z",
+        resolved_at: null,
+      },
+      ...(projects >= 4
+        ? [
+            {
+              id: "t4",
+              project_id: pid(4),
+              title: "Done",
+              description: null,
+              status: "done",
+              priority: "low",
+              assignee_profile_id: null,
+              created_by: USER,
+              due_at: null,
+              created_at: "2026-01-01T00:00:00Z",
+              resolved_at: "2026-02-01T00:00:00Z",
+            },
+          ]
+        : []),
+    ],
+    project_stages: [
+      ...(projects >= 3 ? [stageRow("s3", pid(3), "planned")] : []),
+      ...(projects >= 5 ? [stageRow("s5", pid(5), "blocked")] : []),
+    ],
+    customer_requests: [
+      {
+        id: R1,
+        title: "Need",
+        status: "submitted",
+        kind: "company_request",
+        payload: {},
+        organization_id: ORG,
+        profile_id: USER,
+        created_at: "2026-10-01T00:00:00Z",
+        team_size: 2,
+      },
+    ],
+  });
+}
+function stageRow(id: string, projectId: string, status: string) {
+  return {
+    id,
+    project_id: projectId,
+    name: `Stage ${id}`,
+    stage_order: 1,
+    status,
+    planned_start: null,
+    planned_end: null,
+    actual_start: null,
+    actual_end: null,
+    blocked_reason: status === "blocked" ? "Waiting" : null,
+    completion_criteria: null,
+    created_at: "2026-01-01T00:00:00Z",
+    responsible_engagement_id: null,
+  };
+}
+
+/** Honour the simple column filters a reader applies (eq / neq / is / in on a
+ *  column the fixture row carries); anything else (or / embedded columns)
+ *  is not filtered — the fixture rows already belong to the organization. */
+function applyFilters(c: Call, rows: unknown[]): unknown[] {
+  let out = rows as Record<string, unknown>[];
+  for (const op of c.ops) {
+    const m = /^(eq|neq|is|in)\(([\s\S]*)\)$/.exec(op);
+    if (!m) continue;
+    const [col, val] = JSON.parse(m[2]) as [string, unknown];
+    if (typeof col !== "string" || col.includes(".")) continue;
+    out = out.filter((r) => {
+      if (!(col in r)) return true;
+      const v = r[col];
+      if (m[1] === "eq") return v === val;
+      if (m[1] === "neq") return v !== val;
+      if (m[1] === "is") return (v ?? null) === val;
+      return Array.isArray(val) && val.includes(v);
+    });
+  }
+  return out;
+}
 
 function fixture(c: Call): { data: unknown; error: null; count: number } {
   if (c.kind === "rpc" && c.name === "can_manage_project") return { data: true, error: null, count: 0 };
-  const rows: unknown[] =
+  const rows: unknown[] = applyFilters(
+    c,
     c.kind === "from"
       ? (TABLE_ROWS[c.name] ?? [])
       : c.name === "read_companies_private_v1"
@@ -157,16 +251,49 @@ function fixture(c: Call): { data: unknown; error: null; count: number } {
               company_type: "construction",
             },
           ]
-        : [];
-  if (c.single) {
-    if (c.kind === "from" && c.name === "projects") {
-      const idOp = c.ops.find((o) => o.startsWith('eq(["id"'));
-      const id = idOp ? (JSON.parse(idOp.slice(3, -1)) as string[])[1] : P1;
-      return { data: projectRow(id), error: null, count: 0 };
-    }
-    return { data: rows[0] ?? null, error: null, count: 0 };
-  }
+        : [],
+  );
+  if (c.single) return { data: rows[0] ?? null, error: null, count: 0 };
   return { data: rows, error: null, count: rows.length };
+}
+
+// ── Simulated sequential waves ───────────────────────────────────────────────
+// When `measureWaves` drives a run, no fake request answers on its own: the
+// driver lets the code run until every in-flight request is waiting, then
+// answers them ALL at once — one "wave". The number of waves is the length of
+// the critical path in round trips, deterministically (no timers).
+let wavesMode = false;
+const waiting: (() => void)[] = [];
+async function idle(): Promise<void> {
+  for (let i = 0; i < 20; i++) await new Promise((r) => setImmediate(r));
+}
+async function measureWaves(run: () => Promise<unknown>): Promise<number> {
+  wavesMode = true;
+  let done = false;
+  let failure: unknown = null;
+  const p = run().then(
+    () => {
+      done = true;
+    },
+    (e) => {
+      failure = e;
+      done = true;
+    },
+  );
+  let waves = 0;
+  try {
+    for (let guard = 0; !done && guard < 500; guard++) {
+      await idle();
+      if (waiting.length === 0) continue;
+      waves += 1;
+      for (const answer of waiting.splice(0)) answer();
+    }
+    await p;
+  } finally {
+    wavesMode = false;
+  }
+  if (failure) throw failure;
+  return waves;
 }
 
 function builder(c: Call): unknown {
@@ -174,7 +301,10 @@ function builder(c: Call): unknown {
     get(_t, prop) {
       if (prop === "then") {
         return (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) =>
-          Promise.resolve(fixture(c)).then(res, rej);
+          (wavesMode
+            ? new Promise((r) => waiting.push(() => r(fixture(c))))
+            : Promise.resolve(fixture(c))
+          ).then(res, rej);
       }
       return (...args: unknown[]) => {
         if (prop === "maybeSingle" || prop === "single") c.single = true;
@@ -330,8 +460,8 @@ describe("one /dashboard/company render reads each shared fact ONCE", () => {
     expect(rpcCount("read_companies_private_v1")).toBe(1);
     // The organization's declared capabilities: same four callers (was 4).
     expect(fromCount("organization_roles")).toBe(1);
-    // The gated reviewable set: decisions count + brief queue + every
-    // project's readiness pulse (was 4).
+    // The gated reviewable set: decisions count + brief queue (+ every
+    // project's readiness pulse on the panel path) (was 4).
     expect(rpcCount("reviewable_journal_entry_ids")).toBe(1);
     // Teams: the partners strip + the workforce read behind the conflicts
     // count (was 2 probes + 2 team lists).
@@ -352,17 +482,47 @@ describe("one /dashboard/company render reads each shared fact ONCE", () => {
     expect(fromCount("company_workers", "worker_id, workers(id, display_name)")).toBe(1);
   });
 
-  it("per project: the header row, the roster and the teams are read once, not twice", async () => {
+  it("the project panel's detail read: header row, roster and teams once, not twice", async () => {
+    const { loadProjectDetailForResult } = await import("@/lib/projects/project-workspace");
+    const detail = await loadProjectDetailForResult(P1);
+    expect(detail.kind).toBe("project");
+    // detail read + its operations pulse (was 2 each).
+    expect(fromCount("projects", `"id","${P1}"`)).toBe(1);
+    expect(fromCount("project_worker_assignments", `"project_id","${P1}"`)).toBe(1);
+    expect(fromCount("team_assignments", `["${P1}"]`)).toBe(1);
+  });
+
+  it("the company home reads no project source per project — one batched read each", async () => {
     await renderCompanyHomeReads();
     for (const id of [P1, P2]) {
-      // detail read + operations pulse (was 2 each).
-      expect(fromCount("projects", `"id","${id}"`), `header row ${id}`).toBe(1);
-      expect(
-        fromCount("project_worker_assignments", `"project_id","${id}"`),
-        `roster ${id}`,
-      ).toBe(1);
-      expect(fromCount("team_assignments", `["${id}"]`), `teams ${id}`).toBe(1);
+      for (const table of [
+        "project_worker_assignments",
+        "project_worker_readiness_items",
+        "work_tasks",
+        "project_stages",
+        "journal_entries",
+        "conversation_messages",
+      ]) {
+        expect(fromCount(table, `eq(["project_id","${id}"]`), `${table} ${id}`).toBe(0);
+      }
+      expect(fromCount("projects", `eq(["id","${id}"]`), `header ${id}`).toBe(0);
+      expect(rpcCount("can_manage_project")).toBe(0);
     }
+    const batched = (table: string, select = "") =>
+      count(
+        (c) =>
+          c.kind === "from" &&
+          c.name === table &&
+          c.ops.join(".").includes(`in(["project_id",["${P1}","${P2}"]]`) &&
+          c.ops.join(".").includes(select),
+      );
+    // (The workforce read behind the conflicts count reads its own, different
+    // assignment columns for every project; that is not the scan's roster.)
+    expect(batched("project_worker_assignments", "project_id, assigned_at, worker:workers")).toBe(1);
+    expect(batched("project_worker_readiness_items")).toBe(1);
+    expect(batched("work_tasks")).toBe(1);
+    expect(batched("project_stages")).toBe(1);
+    expect(fromCount("team_assignments", `["${P1}","${P2}"]`)).toBe(1);
   });
 
   it("no deduplicated read is issued twice with the same arguments", async () => {
@@ -476,3 +636,130 @@ describe("the request-scoped readers keep their meaning", () => {
     }
   });
 });
+
+describe("the company home's project scan is batched, not one detail read per project", () => {
+  it("answers exactly what the per-project panel reads answer (6 projects)", async () => {
+    await beginRequest(6);
+    const { loadProjectRiskForChat, loadProjectRiskForHome } = await import(
+      "@/lib/conversation/project-risk"
+    );
+    const perProject = await loadProjectRiskForChat();
+    await beginRequest(6);
+    const batched = await loadProjectRiskForHome();
+    expect(batched).toEqual(perProject);
+    // …and the fixture's situations are really in the answer.
+    if (batched.kind !== "ok") throw new Error(`scan: ${batched.kind}`);
+    const row = (i: number) => batched.rows.find((r) => r.projectId === pid(i))!;
+    expect(batched.rows).toHaveLength(6);
+    expect(row(1)).toMatchObject({ tasksOpen: 1, tasksOverdue: 1, people: 1, peopleNames: ["Worker 1"] });
+    expect(row(2)).toMatchObject({ workersWithMissingDocs: 1, readinessChecked: 0, readinessTotal: 1 });
+    expect(row(3)).toMatchObject({ readinessChecked: 1, readinessTotal: 1, stagesBlocked: 0, stageTotal: 1 });
+    expect(row(4)).toMatchObject({ tasksOpen: 0, tasksOverdue: 0 });
+    expect(row(5)).toMatchObject({ stagesBlocked: 1 });
+    expect(row(6)).toMatchObject({ people: 0, nobodyOnLiveProject: true });
+  });
+
+  it("an unknown source stays unknown per project — never a zero", async () => {
+    await beginRequest(6);
+    const original = requestClient.from;
+    requestClient.from = ((name: string) => {
+      if (name !== "work_tasks") return original(name);
+      log.push({ kind: "from", name, ops: [], single: false });
+      const failed = Promise.resolve({ data: null, error: { code: "57014", message: "timeout" }, count: null });
+      const chain: Record<string, unknown> = {};
+      for (const m of ["select", "in", "eq", "order", "limit"]) chain[m] = () => chain;
+      chain.then = failed.then.bind(failed);
+      return chain;
+    }) as typeof requestClient.from;
+    try {
+      const { loadProjectRiskForChat, loadProjectRiskForHome } = await import(
+        "@/lib/conversation/project-risk"
+      );
+      const batched = await loadProjectRiskForHome();
+      await beginRequest(6);
+      const perProject = await loadProjectRiskForChat();
+      expect(batched).toEqual(perProject);
+    } finally {
+      requestClient.from = original;
+    }
+  });
+
+  it("the scan's reads do not grow with the number of projects", async () => {
+    const { loadProjectRiskForChat, loadProjectRiskForHome } = await import(
+      "@/lib/conversation/project-risk"
+    );
+    const scanCalls: Record<number, number> = {};
+    const panelCalls: Record<number, number> = {};
+    for (const n of [1, 6]) {
+      await beginRequest(n);
+      await loadProjectRiskForHome();
+      scanCalls[n] = log.length;
+      await beginRequest(n);
+      await loadProjectRiskForChat();
+      panelCalls[n] = log.length;
+    }
+    // One list read + one batched read per source, whatever the count —
+    // except the team read, which stays per project (in the same wave) so
+    // each project keeps the team reader's own bounds (Codex review #2671).
+    expect(scanCalls[6]).toBe(scanCalls[1] + 5);
+    // The per-project panel path still grows by a dozen reads per project —
+    // the fan-out the company home no longer pays.
+    expect(panelCalls[6] - panelCalls[1]).toBeGreaterThanOrEqual(5 * 10);
+  });
+
+  it("a whole /dashboard/company render: calls and sequential waves, 1 vs 6 projects", async () => {
+    const measured: Record<number, { calls: number; waves: number }> = {};
+    for (const n of [1, 6]) {
+      await beginRequest(n);
+      await renderCompanyHomeReads();
+      const calls = log.length;
+      await beginRequest(n);
+      const waves = await measureWaves(renderCompanyHomeReads);
+      measured[n] = { calls, waves };
+    }
+    if (process.env.TRACE_OUT) {
+      writeFileSync(`${process.env.TRACE_OUT}.render.json`, JSON.stringify(measured));
+    }
+    // SCALING: 6 projects must not cost ~6x one project. On origin/main a render
+    // paid ~18 reads per extra project (1 → 6 projects: 125 → 215 calls), after
+    // the request dedupe ~14 (97 → 169); the batched scan reads every project
+    // in one read per source (87 → 87).
+    expect(measured[6].calls).toBeLessThan(measured[1].calls * 1.25);
+    // TOTALS and the CRITICAL PATH, same fixture, measured by this suite:
+    //   origin/main      1 project 125 calls / 19 waves, 6 projects 215 / 19
+    //   request dedupe   1 project  97 calls / 15 waves, 6 projects 169 / 15
+    //   batched scan     1 project  87 calls / 10 waves, 6 projects  87 / 10
+    expect(measured[1].calls).toBeLessThanOrEqual(BOUNDS.calls1);
+    expect(measured[6].calls).toBeLessThanOrEqual(BOUNDS.calls6);
+    expect(measured[1].waves).toBeLessThanOrEqual(BOUNDS.waves1);
+    expect(measured[6].waves).toBeLessThanOrEqual(BOUNDS.waves6);
+  });
+});
+
+describe("the commitments read runs its independent reads together", () => {
+  it("two sequential waves instead of seven, the same answer", async () => {
+    await beginRequest(6);
+    const { getEmployerWorkerCommitments } = await import("@/lib/planning/employer-committed-work");
+    const ids = [1, 2, 3, 4, 5].map(wid);
+    const plain = await getEmployerWorkerCommitments(ids);
+    await beginRequest(6);
+    let measuredResult: unknown = null;
+    const waves = await measureWaves(async () => {
+      measuredResult = await getEmployerWorkerCommitments(ids);
+    });
+    // bookings · assignments · teams · identities · plans → trips · projects
+    // (a team member read joins the second wave when teams exist). On
+    // origin/main each of the seven reads waited for the one before.
+    expect(waves).toBe(2);
+    expect(measuredResult).toEqual(plain);
+    // The fixture's projects carry no dates: each assignment is an undated
+    // commitment — reported, never invented into a band.
+    expect(plain).toMatchObject({ status: "ok" });
+    if (plain.status === "ok") expect(plain.undatedProjects).toHaveLength(5);
+  });
+});
+
+/** Upper bounds for one render on this suite's fixture (after this change). */
+// calls6 = calls1 + 5: the team read stays per project (same wave), so
+// 6 projects cost 5 calls more than 1 — and still the same 10 waves.
+const BOUNDS = { calls1: 88, calls6: 93, waves1: 10, waves6: 10 };

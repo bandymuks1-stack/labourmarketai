@@ -2,7 +2,11 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { mergeAssignedPeople, readTeamAssignedPeople } from "@/lib/projects/assigned-people";
+import {
+  mergeAssignedPeople,
+  readTeamAssignedPeople,
+  type TeamAssignedPersonRow,
+} from "@/lib/projects/assigned-people";
 import { readActiveAssignmentRows } from "@/lib/projects/operations";
 import {
   isEmployerContextFailure,
@@ -263,9 +267,26 @@ export async function listManagedProjects(
 export async function listProjectAssignedPeople(
   projectId: string,
 ): Promise<ProjectAssignment[]> {
-  const persons = await listProjectAssignments(projectId);
-  const supabase = await createClient();
-  const team = await readTeamAssignedPeople(supabase, [projectId]);
+  // The person rows and the team members are independent reads: one wave.
+  const [persons, team] = await Promise.all([
+    listProjectAssignments(projectId),
+    createClient().then((supabase) => readTeamAssignedPeople(supabase, [projectId])),
+  ]);
+  return assignedPeopleOf(projectId, persons, team);
+}
+
+/**
+ * THE merge behind `listProjectAssignedPeople`, pure — so the company home's
+ * batched project scan (`lib/projects/project-scan.ts`), which reads the person
+ * rows and team members of every scanned project at once, builds each
+ * project's list by exactly the same rule. `team` may hold other projects'
+ * members; only this project's are merged.
+ */
+export function assignedPeopleOf(
+  projectId: string,
+  persons: readonly ProjectAssignment[],
+  team: readonly TeamAssignedPersonRow[],
+): ProjectAssignment[] {
   return mergeAssignedPeople(
     persons.map((a) => ({
       ...a,
@@ -273,7 +294,7 @@ export async function listProjectAssignedPeople(
       profileId: a.workerProfileId as string | null,
       workerId: (a.workerId ?? null) as string | null,
     })),
-    team,
+    team.filter((t) => t.projectId === projectId),
   ).map((m): ProjectAssignment =>
     m.viaTeam
       ? {
@@ -311,7 +332,7 @@ export async function listProjectAssignments(
   return toProjectAssignments((res.data ?? []) as AssignmentRow[]);
 }
 
-type AssignmentRow = {
+export type AssignmentRow = {
   project_id?: string;
   assigned_at: string;
   worker: {
@@ -322,7 +343,9 @@ type AssignmentRow = {
   } | null;
 };
 
-function toProjectAssignments(rows: readonly AssignmentRow[]): ProjectAssignment[] {
+/** Raw active-assignment rows → the person roster (rows without a profile are
+ *  not a person this roster can name). Shared with the batched project scan. */
+export function toProjectAssignments(rows: readonly AssignmentRow[]): ProjectAssignment[] {
   return rows
     .map((r): ProjectAssignment | null => {
       const w = r.worker;
