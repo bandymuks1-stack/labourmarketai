@@ -17,14 +17,6 @@ export const CAPABILITY_READBACK_KEYS = [
   "company_need_public_intakes", "service_offerings", "workflow_instances", "onboarding_runs", "ai_runs",
 ] as const;
 
-/** The keys that are a plain exact count of the whole table of the same name (the route head-counts them). */
-export const CAPABILITY_READBACK_TABLE_COUNTS = [
-  "workers", "worker_skills", "profile_skill_claims", "matches", "match_actions", "vacancy_import_cursors",
-  "journal_entries", "journal_entry_skills", "journal_entry_confirmations", "projects", "project_worker_assignments",
-  "worker_absences", "booking_requests", "company_worker_engagements", "customer_requests",
-  "company_need_public_intakes", "service_offerings", "workflow_instances", "onboarding_runs", "ai_runs",
-] as const satisfies readonly (typeof CAPABILITY_READBACK_KEYS)[number][];
-
 export interface CapabilityReadbackBody {
   readonly schema: typeof CAPABILITY_READBACK_SCHEMA;
   readonly builtAtIso: string;

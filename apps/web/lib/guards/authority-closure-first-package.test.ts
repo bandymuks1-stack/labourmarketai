@@ -152,7 +152,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261021120000_",
       // 2026-10-21 (RED, needs-human-gate): stale booking proposals expire daily (system function + pg_cron).
       "20261021130000_",
-      // 2026-10-22 (GREEN, SECURITY INVOKER, no grant): aggregate counts for the Agentai OS capability readback route.
+      // 2026-10-22 (RED by SECURITY DEFINER + GRANT, needs-human-gate): aggregate counts for the Agentai OS capability readback route.
       "20261022150000_",
     ];
     const before = names.filter(
