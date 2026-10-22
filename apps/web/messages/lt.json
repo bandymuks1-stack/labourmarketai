@@ -1596,7 +1596,8 @@
         "no": "Dar nenustatyta"
       }
     },
-    "opportunitiesLink": "Peržiūrėti atitinkančias galimybes"
+    "opportunitiesLink": "Peržiūrėti atitinkančias galimybes",
+    "unrecordedHours": "{count, plural, one {# įraše paminėtos valandos neužfiksuotos} few {# įrašuose paminėtos valandos neužfiksuotos} other {# įrašų paminėtos valandos neužfiksuotos}} — jos neįskaičiuotos į sumą aukščiau. Atidaryk ankstyviausią ir patvirtink valandas."
   },
   "profileState": {
     "readiness": {
