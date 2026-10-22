@@ -8733,6 +8733,12 @@
     "teamOffersWaiting": "{count, plural, one {# komandos pasiūlymas laukia jūsų atsakymo} few {# komandų pasiūlymai laukia jūsų atsakymo} other {# komandų pasiūlymų laukia jūsų atsakymo}}",
     "unstructuredTag": "reikalavimai nepatvirtinti",
     "notStructured": "Šio poreikio reikalingi gebėjimai dar nesustruktūruoti, todėl atitiktis neskaičiuojama. Naujus poreikius peržiūri ir struktūruoja administratoriai — jums nieko daryti nereikia.",
+    "handRaisers": {
+      "title": "Žmonės, pakėlę ranką dėl šio poreikio",
+      "notAssessed": "Profesijos atitiktis nevertinta. Šis poreikis neįvardija profesijos, todėl niekas su juo nebuvo lygintas. Šie žmonės rodomi, nes patys paprašė susisiekti, o ne todėl, kad tinka; jokie gebėjimai, kvalifikacija ar tinkamumas nėra teigiami.",
+      "badge": "Profesijos atitiktis nevertinta",
+      "ownWords": "Viskas, kas rodoma apie šį žmogų, paimta iš jo paties profilio; niekas čia nebuvo lygintas su poreikiu."
+    },
     "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
     "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų. Atitikmenų atsiras darbuotojams pildant žurnalu pagrįstus gebėjimus — užsukite vėliau arba praplėskite poreikį.",
     "namePlaceholder": "Darbuotojas",
@@ -14899,6 +14905,9 @@
       "candidatesNotFound": "Toks poreikis nerastas arba jis ne tavo.",
       "candidatesNeedsMigration": "Šiuo metu nepasiekiama.",
       "candidatesNotStructured": "Iš šio poreikio kol kas nieko negalima išvesti, todėl nėra su kuo lyginti. Tai nėra tas pats, kas „niekas netinka“.",
+      "handRaisersTitle": "Žmonės, pakėlę ranką",
+      "handRaisersNotAssessed": "Profesijos atitiktis nevertinta: šis poreikis neįvardija profesijos. Ranką jie pakėlė patys; jokie gebėjimai, kvalifikacija ar tinkamumas nėra teigiami.",
+      "handRaiserBadge": "Profesijos atitiktis nevertinta",
       "candidatesRetrievalCapped": "Žmonių buvo pasiekiama daugiau, nei šįkart spėjome peržiūrėti, todėl šis sąrašas nėra visa pasiūla.",
       "candidatesEmpty": "Šiuo metu matomoje pasiūloje šiam poreikiui tinkančių žmonių nėra.",
       "candidatesCapped": "Rodoma {shown} iš {total}.",

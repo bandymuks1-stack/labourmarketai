@@ -8733,6 +8733,12 @@
     "teamOffersWaiting": "{count, plural, one {# teamaanbod wacht op je antwoord} other {# teamaanbiedingen wachten op je antwoord}}",
     "unstructuredTag": "vereisten niet bevestigd",
     "notStructured": "De vereiste vaardigheden van deze personeelsbehoefte zijn nog niet gestructureerd, dus er kan geen match worden berekend. Nieuwe personeelsbehoeften worden door de beheerders beoordeeld en gestructureerd — je hoeft niets te doen.",
+    "handRaisers": {
+      "title": "Mensen die zich voor deze behoefte hebben gemeld",
+      "notAssessed": "Beroepsmatch niet beoordeeld. Deze behoefte noemt geen beroep, dus niemand is ermee vergeleken. Deze mensen worden getoond omdat ze zelf om contact hebben gevraagd, niet omdat ze passen; er worden geen vaardigheden, kwalificaties of geschiktheid mee beweerd.",
+      "badge": "Beroepsmatch niet beoordeeld",
+      "ownWords": "Alles wat over deze persoon wordt getoond, komt uit diens eigen profiel; niets hiervan is met de behoefte vergeleken."
+    },
     "needsSetup": "Laden is niet gelukt. Probeer het opnieuw.",
     "noCandidates": "Nog geen passende werknemers voor deze personeelsbehoefte. Matches verschijnen naarmate werknemers journaal-onderbouwde vaardigheden toevoegen — kijk later terug of verbreed de behoefte.",
     "namePlaceholder": "Werknemer",
@@ -14899,6 +14905,9 @@
       "candidatesNotFound": "Die behoefte is niet gevonden, of hij is niet van jou.",
       "candidatesNeedsMigration": "Momenteel niet beschikbaar.",
       "candidatesNotStructured": "Uit deze behoefte valt nog niets af te leiden, dus er is niets om mee te vergelijken. Dat is niet hetzelfde als dat niemand past.",
+      "handRaisersTitle": "Mensen die zich hebben gemeld",
+      "handRaisersNotAssessed": "Beroepsmatch niet beoordeeld: deze behoefte noemt geen beroep. Ze hebben zich zelf gemeld; er worden geen vaardigheden, kwalificaties of match beweerd.",
+      "handRaiserBadge": "Beroepsmatch niet beoordeeld",
       "candidatesRetrievalCapped": "Er waren meer mensen bereikbaar dan we deze keer konden bekijken, dus deze lijst is niet het hele aanbod.",
       "candidatesEmpty": "Op dit moment past niemand in het zichtbare aanbod bij deze behoefte.",
       "candidatesCapped": "{shown} van {total} getoond.",

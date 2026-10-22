@@ -15,11 +15,14 @@ import type { NeedSkillSource } from "@/lib/market/need-skills";
 import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
 import { matchWorkerToNeed, compareMatches, type MatchNeed } from "@/lib/market/match-v1";
 import { buildSupplyCandidates } from "@/lib/market/match-subject";
+import { SUPPLY_POOL_BUDGET } from "@/lib/market/supply-retrieval";
 import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
 import type { SupplyRetrievalReport } from "@/lib/market/supply-retrieval";
 import {
   toScoutSafeCandidate,
+  toUnassessedHandRaiser,
   type ScoutSafeCandidate,
+  type UnassessedHandRaiser,
   type ShortlistStatus as SafeShortlistStatus,
 } from "@/lib/scouting/scout-safe-view";
 import { freshnessDemotionRank } from "@/lib/scouting/profile-freshness";
@@ -70,8 +73,8 @@ export const SHORTLIST_STATUSES: readonly ShortlistStatus[] = [
   "reviewed",
 ];
 
-/** Re-export the safe company-facing candidate shape (the ONLY one the UI gets). */
-export type { ScoutSafeCandidate } from "@/lib/scouting/scout-safe-view";
+/** Re-export the safe company-facing candidate shapes (the ONLY ones the UI gets). */
+export type { ScoutSafeCandidate, UnassessedHandRaiser } from "@/lib/scouting/scout-safe-view";
 
 export interface CompanyDemand {
   readonly id: string;
@@ -199,7 +202,15 @@ export type ScoutResult =
       need?: MatchNeed;
     }
   | { kind: "not-found" }
-  | { kind: "not-structured"; demand: CompanyDemand }
+  /**
+   * Nothing derivable from the need, so nothing was matched — AND the people
+   * who raised a hand on it anyway (owner decision 2026-10-22). They are shown
+   * NOW, through the same visibility gates and the same actionability verdict
+   * as scouted candidates, and they carry `matchAssessed: false`: no score, no
+   * band, no rank, no fit. Empty when nobody (visible, not withdrawn) raised a
+   * hand — the plain "not structured" state, exactly as before.
+   */
+  | { kind: "not-structured"; demand: CompanyDemand; handRaisers: UnassessedHandRaiser[] }
   | { kind: "needs-migration" }
   /** W8 slice 1: the caller is not acting for a company right now. Its own
    *  kind, never "not-found" — "you are in your personal space" and "that
@@ -339,12 +350,12 @@ export async function runScoutingCore(
     createdAt: req.created_at,
     ownedByCaller: req.profile_id === user.id,
   };
-  // Nothing derivable at all (no human structure, nothing recognizable in
-  // the text, no detectable profession) → honest unstructured state.
-  if (source === null) return { kind: "not-structured", demand };
-
   // Worker-initiated interest signals on THIS demand (owner-scoped read via
   // RLS; table absent pre-apply → empty, the view is simply unchanged).
+  // Read BEFORE the structure check: a hand raised on a need that names no
+  // trade is still a person waiting for this employer (owner decision
+  // 2026-10-22), and the unstructured state used to return before anyone
+  // looked — the worker saw "interested", the employer saw nobody.
   const interestByWorker: Record<string, string> = {};
   try {
     const { data: ints } = await asAny(supabase)
@@ -362,6 +373,33 @@ export async function runScoutingCore(
     }
   } catch {
     // owner-gated migration not applied yet → no interest signals
+  }
+
+  // The need's own stated start, from the canonical structured payload —
+  // the SAME field `compareStartDateV2` reads, so the two never disagree.
+  // Absent → the caller's "now", i.e. an employer who states no date is
+  // asking about today.
+  const v2Time = readStructuredDemandV2(req.payload)?.time;
+  const needStartsOn = v2Time?.start_latest ?? v2Time?.start_earliest ?? null;
+  const nowIso = new Date().toISOString();
+
+  // Nothing derivable at all (no human structure, nothing recognizable in
+  // the text, no detectable profession) → honest unstructured state, plus the
+  // people who raised a hand on it. Nothing is matched, scored or ranked.
+  if (source === null) {
+    return {
+      kind: "not-structured",
+      demand,
+      handRaisers: await readUnassessedHandRaisers(supabase, {
+        userId: user.id,
+        requestId,
+        needStatus: req.status,
+        needStartsOn,
+        nowIso,
+        interestByWorker,
+        excludeFixtures: !isSyntheticFixtureLabel(employer.organizationName),
+      }),
+    };
   }
 
   // W10 slice 3 (audit P0-3) — STAGED RETRIEVAL. The pool used to be the 200
@@ -385,26 +423,7 @@ export async function runScoutingCore(
       .map(([workerId]) => workerId),
   });
 
-  // Existing shortlist statuses + internal notes for this demand
-  // (owner-scoped; the note column existed since 20260612220000 and is now
-  // actually read — extension B).
-  const shortlist = new Map<string, { status: ShortlistStatus; note: string | null }>();
-  try {
-    const { data: sl } = await asAny(supabase)
-      .from("demand_shortlist")
-      .select("worker_id, status, note")
-      .eq("owner_id", user.id)
-      .eq("request_id", requestId);
-    for (const r of (sl ?? []) as {
-      worker_id: string;
-      status: ShortlistStatus;
-      note: string | null;
-    }[]) {
-      shortlist.set(r.worker_id, { status: r.status, note: r.note ?? null });
-    }
-  } catch {
-    // table absent (pre-apply) → no shortlist statuses yet
-  }
+  const shortlist = await readShortlistForDemand(supabase, user.id, requestId);
 
   // Facet allowlists come from the visible supply itself; the requested
   // filters are clamped to them (a probe value matching nothing is dropped)
@@ -420,13 +439,6 @@ export async function runScoutingCore(
   // each surface's own conditionals. Nothing is deleted: the shortlist row,
   // the interest row and their provenance are untouched, and the employer's
   // own recorded decisions stay readable as history.
-  const nowIso = new Date().toISOString();
-  // The need's own stated start, from the canonical structured payload —
-  // the SAME field `compareStartDateV2` reads, so the two never disagree.
-  // Absent → the caller's "now", i.e. an employer who states no date is
-  // asking about today.
-  const v2Time = readStructuredDemandV2(req.payload)?.time;
-  const needStartsOn = v2Time?.start_latest ?? v2Time?.start_earliest ?? null;
   const candidates: ScoutSafeCandidate[] = filteredSupply
     .map((c) => ({
       c,
@@ -499,6 +511,129 @@ export async function runScoutingCore(
   });
 
   return { kind: "ok", demand, candidates, interestByWorker, facets, filters, retrieval, need };
+}
+
+/** Existing shortlist statuses + internal notes for this demand
+ *  (owner-scoped; the note column existed since 20260612220000 and is now
+ *  actually read — extension B). One read for both scouting paths. */
+async function readShortlistForDemand(
+  supabase: SupabaseClient,
+  userId: string,
+  requestId: string,
+): Promise<Map<string, { status: ShortlistStatus; note: string | null }>> {
+  const shortlist = new Map<string, { status: ShortlistStatus; note: string | null }>();
+  try {
+    const { data: sl } = await asAny(supabase)
+      .from("demand_shortlist")
+      .select("worker_id, status, note")
+      .eq("owner_id", userId)
+      .eq("request_id", requestId);
+    for (const r of (sl ?? []) as {
+      worker_id: string;
+      status: ShortlistStatus;
+      note: string | null;
+    }[]) {
+      shortlist.set(r.worker_id, { status: r.status, note: r.note ?? null });
+    }
+  } catch {
+    // table absent (pre-apply) → no shortlist statuses yet
+  }
+  return shortlist;
+}
+
+/**
+ * The hand-raisers on a need that names NO trade (owner decision 2026-10-22).
+ *
+ * Every gate is the structured path's own, applied to exactly these people:
+ *   - WHO MAY BE SEEN: `buildSupplyCandidates` — the worker row under RLS for
+ *     a viewer with a working relationship, otherwise the anonymous
+ *     employer-visibility projection (`list_discoverable_worker_profiles_v1`,
+ *     which answers nothing for a worker who withheld discoverability). A
+ *     hand-raiser the caller may not view returns from neither read and
+ *     stays invisible; pinning an id reveals nobody.
+ *   - TEST ACCOUNTS: the same `excludeFixtures` rule as the planned pool.
+ *   - LIVE PROPOSAL: the same `candidateActionability` verdict — a withdrawn
+ *     hand, a closed need or the employer's own `not_fit` keeps the person
+ *     off the current list (withdrawn hands are not even fetched).
+ *   - WHAT IS SHOWN: the same Step 3A safe preview (`toUnassessedHandRaiser`).
+ *
+ * What is NOT done is the point: no `matchWorkerToNeed`, no comparator, no
+ * freshness demotion. The order is the worker id — deterministic, and
+ * deliberately meaningless, so it cannot read as a recommendation.
+ */
+async function readUnassessedHandRaisers(
+  supabase: SupabaseClient,
+  input: {
+    readonly userId: string;
+    readonly requestId: string;
+    readonly needStatus: string | null;
+    readonly needStartsOn: string | null;
+    readonly nowIso: string;
+    readonly interestByWorker: Readonly<Record<string, string>>;
+    readonly excludeFixtures: boolean;
+  },
+): Promise<UnassessedHandRaiser[]> {
+  const raised = Object.entries(input.interestByWorker)
+    .filter(([, status]) => status !== "withdrawn")
+    .map(([workerId]) => workerId);
+  if (raised.length === 0) return [];
+
+  // EVERY hand-raiser, in pool-sized batches: one call takes at most
+  // SUPPLY_POOL_BUDGET ids and drops the rest, so a need with more hands than
+  // that would silently lose real applications (Codex review #2680). Each
+  // batch keeps the same visibility and fixture rules.
+  const batches: string[][] = [];
+  for (let i = 0; i < raised.length; i += SUPPLY_POOL_BUDGET) {
+    batches.push(raised.slice(i, i + SUPPLY_POOL_BUDGET));
+  }
+  const [pools, shortlist] = await Promise.all([
+    Promise.all(
+      batches.map((workerIds) =>
+        buildSupplyCandidates(supabase, { workerIds, excludeFixtures: input.excludeFixtures }),
+      ),
+    ),
+    readShortlistForDemand(supabase, input.userId, input.requestId),
+  ]);
+  const visible = pools.flatMap((p) => p.candidates);
+
+  return visible
+    .flatMap((c) => {
+      // Only the ids asked for come back; a row without its own hand is not
+      // a hand-raiser, so it is not shown here under any label.
+      const interestStatus = input.interestByWorker[c.workerId];
+      return typeof interestStatus === "string" ? [{ c, interestStatus }] : [];
+    })
+    .map(({ c, interestStatus }) => ({
+      c,
+      interestStatus,
+      actionability: candidateActionability(
+        {
+          needStatus: input.needStatus,
+          needStartsOn: input.needStartsOn,
+          workerRecordPresent: true,
+          interestStatus,
+          shortlistStatus: shortlist.get(c.workerId)?.status ?? null,
+          availabilityStatus: c.subject.availabilityStatus ?? null,
+          availableFrom: c.subject.availableFrom ?? null,
+        },
+        input.nowIso,
+      ),
+    }))
+    .filter(({ actionability }) => mayOfferEmployerActions(actionability))
+    .map(({ c, interestStatus, actionability }) =>
+      toUnassessedHandRaiser({
+        workerId: c.workerId,
+        professionSlug: c.professionSlug,
+        subject: c.subject,
+        interestStatus,
+        shortlistStatus: shortlist.get(c.workerId)?.status ?? null,
+        shortlistNote: shortlist.get(c.workerId)?.note ?? null,
+        lastActiveBucket: c.lastActiveBucket,
+        actionability,
+        startDateSet: c.startDateSet,
+      }),
+    )
+    .sort((a, b) => a.workerId.localeCompare(b.workerId));
 }
 
 export type ShortlistWriteResult =

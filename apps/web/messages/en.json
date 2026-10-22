@@ -8733,6 +8733,12 @@
     "teamOffersWaiting": "{count, plural, one {# team offer waiting for your answer} other {# team offers waiting for your answer}}",
     "unstructuredTag": "requirements not confirmed",
     "notStructured": "This need's required skills aren't structured yet, so no match can be computed. New needs are reviewed and structured by the administrators — no action is needed from you.",
+    "handRaisers": {
+      "title": "People who raised a hand on this need",
+      "notAssessed": "Trade match not assessed. This need names no trade, so nobody was compared with it. These people are shown because they asked to be contacted, not because they fit; no skill, qualification or suitability is implied.",
+      "badge": "Trade match not assessed",
+      "ownWords": "Everything shown about this person comes from their own profile; nothing here was compared with the need."
+    },
     "needsSetup": "Couldn’t load. Please try again.",
     "noCandidates": "No matching workers yet for this need. Matches appear as workers add journal-backed skills — check back later or broaden the need.",
     "namePlaceholder": "Worker",
@@ -14899,6 +14905,9 @@
       "candidatesNotFound": "That need was not found, or it is not yours.",
       "candidatesNeedsMigration": "Not available right now.",
       "candidatesNotStructured": "Nothing can be derived from this need yet, so there is nothing to match against. That is not the same as nobody matching.",
+      "handRaisersTitle": "People who raised a hand",
+      "handRaisersNotAssessed": "Trade match not assessed: this need names no trade. They raised a hand themselves; no skill, qualification or fit is implied.",
+      "handRaiserBadge": "Trade match not assessed",
       "candidatesRetrievalCapped": "More people were reachable than we could look at this time, so this list is not the whole supply.",
       "candidatesEmpty": "Nobody in the visible supply matches this need right now.",
       "candidatesCapped": "Showing {shown} of {total}.",
