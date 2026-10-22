@@ -19,7 +19,8 @@ name: Deploy to VPS
 #     BACKWARDS: right before shipping, the deploy job reads the build production
 #     actually serves (public /api/health) and ships only a sha that is AHEAD of it.
 #     Deploys queue (cancel-in-progress: false); a newer pending deploy supersedes an
-#     older pending one, never a running one.
+#     older pending one, never a running one. The ordering applies to this automatic
+#     path only; workflow_dispatch below still rolls back or redeploys any main sha.
 #   - workflow_dispatch: manual deploy / redeploy of a sha on main (rollback path).
 # It never deploys a tree whose Quality Gates did not pass (checked below for both).
 #
@@ -197,8 +198,14 @@ jobs:
         id: order
         env:
           GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
         run: |
           set -euo pipefail
+          # Only the AUTOMATIC path is ordered. A manual dispatch is the rollback / same-sha redeploy path and ships what
+          # the owner named.
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"; echo "manual dispatch: deploying ${SHA:0:9} as requested" | tee -a "$GITHUB_STEP_SUMMARY"; exit 0
+          fi
           live=$(curl -sS --max-time 20 https://labourmarket.ai/api/health 2>/dev/null | grep -oE '"build":"[0-9a-f]{7,40}"' | cut -d'"' -f4 || true)
           if [ -z "$live" ]; then
             echo "go=true" >> "$GITHUB_OUTPUT"; echo "production build unreadable: deploying ${SHA:0:9} (Quality Gates green, on main)" | tee -a "$GITHUB_STEP_SUMMARY"; exit 0
