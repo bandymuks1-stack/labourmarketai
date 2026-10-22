@@ -20,7 +20,7 @@
 //   3. the finding's FILE is listed;
 //   4. the pull request is listed (a different PR — W5, or anything new —
 //      matches nothing, so it can never inherit the exception);
-//   5. today is on or before `expiresAt`.
+//   5. today is inside the waiver's CURRENT TERM (see "VALIDITY" below).
 // And one more, which is what makes "any extra diff re-triggers review" real:
 //   6. the run's findings must be a SUBSET of `expectedFindings`. One new
 //      violation anywhere — even on a waived file — and the gate blocks again.
@@ -31,6 +31,17 @@
 // honour it, so writing the SHA down changes the SHA. `approvedHeadShas` is
 // therefore recorded for audit and enforced only when a run supplies a SHA to
 // check (`PR_HEAD_SHA`), while the PR number is the always-on binding.
+//
+// ── VALIDITY (owner P0 2026-10-22, supersedes per-record calendar dates) ───
+// A waiver is an internal owner decision. It is valid for 12 months from
+// `approvedAt` and renews automatically, term after term, through the ONE
+// central rule `rollingInternalExpiryIso` in
+// `apps/web/lib/authority/internal-authority-validity.mjs`. Renewal extends
+// TIME only: never the PR list, the files, the codes, the axioms or the
+// expected-finding set. A waiver ends by REVOCATION (the owner removes the
+// record) or by RESOLUTION (`resolvedBy` ships and the findings disappear).
+// Only a term the OWNER set for that specific record (`ownerSetExpiresAt`,
+// inclusive ISO date) still expires by the calendar.
 //
 // THIS FILE IS THE SINGLE IMPLEMENTATION: the gate imports it, and the vitest
 // guard imports the same module. There is no second copy of the rules.
@@ -43,6 +54,8 @@
  * real yes — exactly the self-expiry the owner demanded) until the record
  * below, which is a NEW owner ruling and not a leftover.
  */
+import { rollingInternalExpiryIso } from "../../apps/web/lib/authority/internal-authority-validity.mjs";
+
 export const SCOPED_OWNER_WAIVERS = [
   /**
    * PUBLIC ACQUISITION ROUTE — `/create-cv`.
@@ -80,13 +93,13 @@ export const SCOPED_OWNER_WAIVERS = [
    * authority over the product surface, not over the constitution, so it took
    * the bounded waiver and left the amendment to the owner.
    *
-   * KNOWN PROPERTY THE OWNER SHOULD SEE. `decideWaiver` tests `expiresAt`
-   * BEFORE the unrelated-PR escape. After `expiresAt` these six findings block
-   * EVERY pull request in the repository, not just ones touching `/create-cv`,
-   * because rule 6c re-validates the whole registry on every run. That is the
-   * mechanism's designed pressure to resolve the debt rather than renew it —
-   * but it is a repo-wide deadline, not a local one, and it is written down
-   * here so nobody meets it by surprise.
+   * KNOWN PROPERTY THE OWNER SHOULD SEE. `decideWaiver` tests the expiry
+   * BEFORE the unrelated-PR escape, so an expired waiver blocks EVERY pull
+   * request in the repository (rule 6c re-validates the whole registry). Since
+   * the owner's 12-month internal validity rule (P0 2026-10-22) the term rolls
+   * automatically, so only an OWNER-SET `ownerSetExpiresAt` can now trigger
+   * that repo-wide block; the former agent-chosen `expiresAt: "2026-12-31"`
+   * was replaced by `approvedAt` + the rolling term.
    */
   {
     id: "public-acquisition-route-create-cv",
@@ -184,7 +197,9 @@ export const SCOPED_OWNER_WAIVERS = [
     reason:
       "A pre-authentication public acquisition route cannot satisfy questions that presuppose an authenticated workspace. The owner approved the surface; the honest declaration answers all six 'no'; this record excuses those six answers for this one route and nothing else.",
     resolvedBy: "gate-learns-public-acquisition-route-category (owner constitution decision)",
-    expiresAt: "2026-12-31",
+    // Was `expiresAt: "2026-12-31"` — an agent-chosen internal date, not an owner-set term;
+    // replaced by the 12-month rolling term (owner P0 2026-10-22).
+    approvedAt: "2026-08-10",
     owner:
       "Owner ruling, PUBLIC BETA TRAIN V3 §2.1 (2026-08-10) — APPROVED: dedicated public /create-cv route.",
   },
@@ -700,7 +715,9 @@ export const SCOPED_OWNER_WAIVERS = [
     reason:
       "A pre-authentication public acquisition route cannot satisfy questions that presuppose an authenticated workspace. The owner ordered the surface in the 2026-08-18 directive §5; the declarations answer all six 'no' honestly; this record excuses those six answers on these three surfaces and nothing else.",
     resolvedBy: "gate-learns-public-acquisition-route-category (owner constitution decision)",
-    expiresAt: "2026-12-31",
+    // Was `expiresAt: "2026-12-31"` — an agent-chosen internal date, not an owner-set term;
+    // replaced by the 12-month rolling term (owner P0 2026-10-22).
+    approvedAt: "2026-08-18",
     owner:
       "Owner directive 2026-08-18 §5 — 'Owner decision is final. Jobs must be publicly discoverable.' with the anonymous-field restriction it mandates.",
   },
@@ -746,7 +763,9 @@ export const SCOPED_OWNER_WAIVERS = [
       "A pre-authentication public landing cannot satisfy workspace-only questions. The owner explicitly approved and ordered this V1 to ship; the declaration answers all six no honestly; this record excuses those six findings for this one route and nothing else. Extended to #1231 on 2026-08-22: the owner approved restoring the ACTUAL previous production landing as the FOCUS arm of this same canonical route, while LIVE stays unchanged. That adds no route, no seventh finding and no new axiom — both arms answer the same six workspace questions the same honest no, and a crawler still receives exactly one indexed landing at /. The waiver is NOT broadened to anything else. Extended again to #1232 on the same day: FOCUS became the DEFAULT arm and both arms were bound to the one canonical market reader. That moves which arm an unknown visitor sees and where its numbers come from — it adds no route, no seventh finding and no new axiom, and the six answers stay the same honest no for whichever arm renders. Extended to #1380 on 2026-08-31 under the owner's explicit P0 order of that day ('Investigate this as a real production performance/reliability regression … fix root cause if reproducible … no disabling functionality'): the fresh-visit entry was function-bound and cold-start-exposed, so the DEFAULT FOCUS arm became static/CDN-cached and the explicit-LIVE choice moved to a middleware rewrite of the SAME canonical route. Rendering strategy only — no route added, no arm removed, no seventh finding, no new axiom; the six answers stay the same honest no.",
     resolvedBy:
       "gate-learns-public-acquisition-route-category (owner constitution decision)",
-    expiresAt: "2026-12-31",
+    // Was `expiresAt: "2026-12-31"` — an agent-chosen internal date, not an owner-set term;
+    // replaced by the 12-month rolling term (owner P0 2026-10-22).
+    approvedAt: "2026-08-20",
     owner: "Product owner — OWNER DECISION: SHIP THIS LANDING AS V1 (2026-08-20)",
   },
 
@@ -823,7 +842,9 @@ export const SCOPED_OWNER_WAIVERS = [
       "An education institution cannot register honestly without a way to state that it educates, and the single-value company_type field cannot carry it. The multi-role architecture behind the card is canonical and production-backed. The two failing answers are missing SECONDARY representations of a fact the card records truthfully — a map layer and a conversational entry point — and the owner ruled that their absence must not block the real organization capability workflow. Both are recorded as NO in the declaration rather than rewritten to YES.",
     resolvedBy:
       "organization-capabilities-on-map + capability-declaration-via-canonical-conversational-action-layer (the two enabling steps above; no schema change needed for either)",
-    expiresAt: "2026-11-30",
+    // Was `expiresAt: "2026-11-30"` — an agent-chosen internal date, not an owner-set term;
+    // replaced by the 12-month rolling term (owner P0 2026-10-22).
+    approvedAt: "2026-08-27",
     owner:
       "Product owner — OWNER RULING 2026-08-27 §3, PR-scoped waiver for #1299, axiom A-01, codes not_reflected_on_map + not_ai_controlled only",
   },
@@ -900,7 +921,9 @@ export const SCOPED_OWNER_WAIVERS = [
       "OAuth 2.1 and the Supabase Authorization Path contract require a consent screen at a fixed URL, outside the workspace, that no AI may operate — the last property being the security point of the screen, not a debt. The owner ordered the minimum OAuth-server configuration on 2026-08-29; this screen is that configuration's product half. All seven answers are declared honestly and excused for this one route and nothing else.",
     resolvedBy:
       "gate-learns-auth-infrastructure-category (owner constitution decision; note aiControlled must remain 'no' for this surface permanently)",
-    expiresAt: "2026-12-31",
+    // Was `expiresAt: "2026-12-31"` — an agent-chosen internal date, not an owner-set term;
+    // replaced by the 12-month rolling term (owner P0 2026-10-22).
+    approvedAt: "2026-08-29",
     owner:
       "Owner ruling 2026-08-29 execution order §4 — 'Prepare and perform the minimum configuration required for LabourMarket.ai to act as the OAuth authorization server for MCP/ChatGPT.'",
   },
@@ -966,7 +989,9 @@ export const SCOPED_OWNER_WAIVERS = [
       "The canonical row-level work-hour fact (work_hour_allocations) needs a dense per-day editing surface that cannot honestly claim map reflection or AI operability on day one. The owner reviewed package 0010 and approved both the RED migration and these three declared 'no' answers for this one route and nothing else.",
     resolvedBy:
       "hours-surface-reaches-map-and-chat (reflect allocations on the workspace map and expose an AI/chat write path, then delete this record)",
-    expiresAt: "2026-12-31",
+    // Was `expiresAt: "2026-12-31"` — an agent-chosen internal date, not an owner-set term;
+    // replaced by the 12-month rolling term (owner P0 2026-10-22).
+    approvedAt: "2026-08-31",
     owner:
       "Owner decision, 2026-08-31 closure session — 'HOURS_PRODUCT_GATE_WAIVER: APPROVE' (scope: fresh #1344 / package 0010 only).",
   },
@@ -1009,11 +1034,33 @@ export const SCOPED_OWNER_WAIVERS = [
       "An image zoom over a private journal photo is a presentation of an already-loaded fact: it fetches, signs and stores nothing, and the assistant has no task in it. The owner asked for it explicitly and approved the waiver in chat.",
     resolvedBy:
       "a shared image viewer/lightbox component that the gate recognises as a declared primitive (then delete this record and fold the declaration into it)",
-    expiresAt: "2026-12-31",
+    // Was `expiresAt: "2026-12-31"` — an agent-chosen internal date, not an owner-set term;
+    // replaced by the 12-month rolling term (owner P0 2026-10-22).
+    approvedAt: "2026-09-30",
     owner:
       "Owner decision 2026-09-30, in chat — selected 'Scoped owner waiver #2026 (Recommended)' for the Journal photo viewer modal (scope: #2026 / journal-photo-viewer.tsx only).",
   },
 ];
+
+/**
+ * The last valid day (inclusive ISO date) of a waiver as of `today`.
+ *
+ * An owner-set term (`ownerSetExpiresAt`) is kept exactly as the owner set it.
+ * Otherwise the waiver holds the 12-month rolling internal term from
+ * `approvedAt` (owner P0 2026-10-22) — the end of the CURRENT term, so it
+ * never lapses by the calendar alone. An unreadable `approvedAt` returns
+ * `null`, which the caller treats as expired (fail closed).
+ */
+export function waiverValidUntil(w, today) {
+  if (typeof w.ownerSetExpiresAt === "string" && w.ownerSetExpiresAt.length > 0) {
+    return w.ownerSetExpiresAt;
+  }
+  const approved = String(w.approvedAt ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}/.test(approved) || Number.isNaN(new Date(approved).getTime())) return null;
+  const end = rollingInternalExpiryIso(approved, new Date(`${today}T00:00:00.000Z`));
+  // The term ends at the anniversary instant; the last fully valid day is the one before.
+  return new Date(new Date(end).getTime() - 86_400_000).toISOString().slice(0, 10);
+}
 
 /** Is this ONE finding excused? Every constraint must hold. */
 export function decideWaiver(finding, ctx, waivers = SCOPED_OWNER_WAIVERS) {
@@ -1036,10 +1083,13 @@ export function decideWaiver(finding, ctx, waivers = SCOPED_OWNER_WAIVERS) {
     if (!w.files.includes(finding.what)) {
       return no("file-not-covered", `${w.id} does not cover file ${finding.what}`);
     }
-    if (ctx.today > w.expiresAt) {
+    const until = waiverValidUntil(w, ctx.today);
+    if (until === null || ctx.today > until) {
       return no(
         "expired",
-        `${w.id} expired on ${w.expiresAt} — remove it and resolve ${w.resolvedBy}`,
+        until === null
+          ? `${w.id} has no readable approvedAt — fail closed; resolve ${w.resolvedBy}`
+          : `${w.id} expired on ${until} (owner-set term) — remove it and resolve ${w.resolvedBy}`,
       );
     }
     // A run may carry this finding for exactly three reasons.
@@ -1087,7 +1137,7 @@ export function decideWaiver(finding, ctx, waivers = SCOPED_OWNER_WAIVERS) {
       waived: true,
       waiver: w,
       rejection: null,
-      detail: `${w.id} — ${w.scope}, until ${w.expiresAt}, removed by ${w.resolvedBy}`,
+      detail: `${w.id} — ${w.scope}, until ${until}, removed by ${w.resolvedBy}`,
     };
   }
   return no("no-waiver", "no candidate waiver applied");
