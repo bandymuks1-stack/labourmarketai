@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({}) }));
 
@@ -283,5 +285,17 @@ describe("crossPartyConfirmationState / withCrossPartyStandingConfirmation", () 
     );
     expect(standingSourceTier(row)).toBe("work_journal");
     expect(standingEvidenceTier(row)).toBe("work_journal");
+  });
+});
+
+describe("the person's own work intelligence dates a self-confirmation (Codex #2608)", () => {
+  const read = readFileSync(join(__dirname, "..", "journal", "work-intelligence-read.ts"), "utf8");
+  it("reads verified_at with the flag, so a later independent approval makes it standing", () => {
+    expect(read).toMatch(/\.select\("skill_id, verified, verified_by, verified_at, source, skills\(slug\)"\)/);
+  });
+  it("hands the confirmation verdict on, and the tier is the standing-aware one", () => {
+    expect(read).toContain("...(r.confirmation ? { confirmation: r.confirmation } : {})");
+    const wi = readFileSync(join(__dirname, "..", "journal", "work-intelligence.ts"), "utf8");
+    expect(wi).toContain("standingEvidenceTier({ verified: s.verified, source: s.source, confirmation: s.confirmation })");
   });
 });

@@ -12,6 +12,7 @@ import {
   anyRecordedConfirmation,
   withCrossPartyStandingConfirmation,
   withStandingConfirmation,
+  type CrossPartyConfirmationState,
 } from "@/lib/evidence/skill-confirmation-standing";
 import {
   readCrossPartyStandingStates,
@@ -83,6 +84,10 @@ export type WorkerSkillSourceRow = {
   verified?: boolean | null;
   source?: string | null;
   skills: { slug: string | null } | null;
+  /** What a recorded confirmation is worth NOW (skill-confirmation-standing),
+   *  set by the standing read; absent when nothing was flagged. Carried so an
+   *  UNKNOWN confirmation stays journal-level evidence downstream. */
+  confirmation?: CrossPartyConfirmationState;
 };
 
 export function assembleWorkIntelligence(input: {
@@ -138,6 +143,7 @@ export function assembleWorkIntelligence(input: {
       slug,
       verified: r.verified ?? null,
       source: r.source ?? null,
+      ...(r.confirmation ? { confirmation: r.confirmation } : {}),
     });
   }
   const derived = deriveWorkIntelligence({
@@ -384,7 +390,10 @@ export async function loadWorkIntelligence(
     readWorkerEntrySkillLinks(caller.supabase, workerId),
     caller.supabase
       .from("worker_skills")
-      .select("skill_id, verified, verified_by, source, skills(slug)")
+      // verified_at: a self-confirmation STANDS once an independent approval
+      // postdates the flag (skillConfirmationState) — without it the own
+      // reading said self_confirmed where every other reader said standing.
+      .select("skill_id, verified, verified_by, verified_at, source, skills(slug)")
       .eq("worker_id", workerId),
     readOrganizationRecords(caller.supabase, workerId),
     // Whose entries these are — "confirmed" excludes the subject's own
@@ -397,6 +406,7 @@ export async function loadWorkIntelligence(
     : (((subjectRead.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null);
   const storedSkillRows = (skillsRead.data ?? []) as unknown as (WorkerSkillSourceRow & {
     verified_by?: string | null;
+    verified_at?: string | null;
   })[];
   const [photoCountByEntry, skillRows] = await Promise.all([
     readPhotoCountsByEntry(
@@ -441,17 +451,21 @@ export async function loadWorkIntelligence(
  * a manager's organization view, the team roster — cannot, so the
  * cross-party DB door decides. Asked beside the photo read (no added stage),
  * and only when a stored flag exists. `verified_by` is read to classify a
- * self-confirmation and is not handed on.
+ * self-confirmation (with `verified_at`, to date it) and neither is handed
+ * on; the resulting `confirmation` is, so an UNKNOWN one keeps its tier.
  */
 async function standingSkillRowsFor(
   caller: DomainCaller,
   workerId: string,
   subjectProfileId: string | null,
-  rows: readonly (WorkerSkillSourceRow & { verified_by?: string | null })[],
+  rows: readonly (WorkerSkillSourceRow & { verified_by?: string | null; verified_at?: string | null })[],
 ): Promise<WorkerSkillSourceRow[]> {
-  const strip = (r: WorkerSkillSourceRow & { verified_by?: string | null }): WorkerSkillSourceRow => {
+  const strip = (
+    r: WorkerSkillSourceRow & { verified_by?: string | null; verified_at?: string | null },
+  ): WorkerSkillSourceRow => {
     const row = { ...r };
     delete row.verified_by;
+    delete row.verified_at;
     return row;
   };
   if (!anyRecordedConfirmation(rows)) return rows.map(strip);
