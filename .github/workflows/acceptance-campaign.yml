@@ -2,8 +2,8 @@ name: acceptance-campaign
 
 # OWNER ACCEPTANCE CAMPAIGN 2026-10-22 .. 2026-10-25 (owner orders 2026-10-21, issue #2659).
 # Runs on GitHub's own scheduler, independent of any agent session or the owner's computer.
-# A tick dispatches the next walk of the day's plan that has not reached production yet (or, from
-# 10-24, whose latest run did not pass) through prod-qa-walk.yml WITHOUT budget_override, waits
+# A tick dispatches the next walk of the day's plan that has not reached production yet (then, from
+# 10-24, one whose latest run did not pass and that has not been retried yet that day) through prod-qa-walk.yml WITHOUT budget_override, waits
 # for it, and then dispatches a FRESH tick of itself — so the plan no longer depends on how often
 # GitHub actually fires the cron (10-21/22 it fired 4 times in 12 h instead of every 30 minutes),
 # and every tick re-reads the repository variables. The cron stays as the fallback that restarts
@@ -72,7 +72,7 @@ jobs:
           # older than that title, from the artifact prod-qa-<spec>-<run id>.
           since=$([ "$retry_failed" = 1 ] && echo "2026-10-22" || echo "$today")
           from=$(date -u -d "$since -1 day" +%F)
-          declare -A last=()
+          declare -A last=() today_tried=()
           walks_today=0
           while IFS=$'\t' read -r id title conclusion; do
             [ -n "$id" ] || continue
@@ -88,6 +88,7 @@ jobs:
             esac
             [ -n "$spec" ] || continue
             [ "$conclusion" = success ] && last[$spec]=success || last[$spec]=failure
+            case "$reached_at" in "$today"*) today_tried[$spec]=1 ;; esac
           done < <(gh run list -R "$REPO" -w prod-qa-walk.yml --created ">=$from" --status completed --limit 300 \
                      --json databaseId,displayTitle,conclusion \
                      --jq '.[] | "\(.databaseId)\t\(.displayTitle)\t\(.conclusion)"' | sort -n)
@@ -99,11 +100,17 @@ jobs:
             exit 0
           fi
 
+          # Walks that have not run yet come first; only then, from 10-24, a failed walk is
+          # retried — at most once a day, so one persistent failure cannot eat the day's checks.
           next=""
           for s in $plan; do
-            r="${last[$s]:-none}"
-            if [ "$r" = none ] || { [ "$retry_failed" = 1 ] && [ "$r" = failure ]; }; then next="$s"; break; fi
+            [ "${last[$s]:-none}" = none ] && { next="$s"; break; }
           done
+          if [ -z "$next" ] && [ "$retry_failed" = 1 ]; then
+            for s in $plan; do
+              if [ "${last[$s]}" = failure ] && [ -z "${today_tried[$s]:-}" ]; then next="$s"; break; fi
+            done
+          fi
           if [ -z "$next" ]; then log "today's plan is complete"; exit 0; fi
 
           before=$(gh run list -R "$REPO" -w prod-qa-walk.yml --limit 1 --json databaseId --jq '.[0].databaseId // 0')
