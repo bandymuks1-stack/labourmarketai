@@ -113,3 +113,19 @@ export function requireStripeWebhookSecret(): string {
   }
   return env.STRIPE_WEBHOOK_SECRET ?? "";
 }
+
+/**
+ * Server-only: the signing secret of the SEPARATE one-time-payment endpoint
+ * (credit top-ups). TEST ONLY: it is handed out exclusively while the adapter
+ * is `stripe_test` — under `stripe_live`, or any other state, it throws, so no
+ * live delivery can ever be verified on that endpoint. Throws when unset.
+ */
+export function requireStripeTestTopupWebhookSecret(): string {
+  const cfg = getBillingConfig();
+  if (cfg.state !== "stripe_test") {
+    throw new Error(`Stripe test mode not active (${cfg.reason}).`);
+  }
+  const secret = env.STRIPE_TOPUP_WEBHOOK_SECRET ?? "";
+  if (!secret.startsWith("whsec_")) throw new Error("Top-up webhook secret not configured.");
+  return secret;
+}

@@ -170,7 +170,7 @@ describe("webhook rejects live events", () => {
 
 describe("no provider secret names/shapes in client code", () => {
   it('no "use client" file references a Stripe secret', () => {
-    const SECRET = /STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET|whsec_|sk_(test|live)_/;
+    const SECRET = /STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET|STRIPE_TOPUP_WEBHOOK_SECRET|whsec_|sk_(test|live)_/;
     const offenders: string[] = [];
     for (const file of prodSources()) {
       const txt = readFileSync(file, "utf8");
@@ -190,7 +190,7 @@ describe("no provider secret names/shapes in client code", () => {
     for (const file of prodSources()) {
       const r = rel(file);
       if (ALLOWED.has(r)) continue;
-      if (/STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET/.test(readFileSync(file, "utf8"))) {
+      if (/STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET|STRIPE_TOPUP_WEBHOOK_SECRET/.test(readFileSync(file, "utf8"))) {
         offenders.push(r);
       }
     }

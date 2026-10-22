@@ -92,6 +92,11 @@ const schema = z.object({
   STRIPE_MODE: z.enum(["test", "live"]).default("test"),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  // TEST-only signing secret (whsec_…) of the SEPARATE Stripe endpoint that
+  // receives one-time credit payments (/api/lmc/topup-webhook, LMC train
+  // Wagon 4). Stripe gives every endpoint its own secret, so this cannot reuse
+  // STRIPE_WEBHOOK_SECRET. Unset = the endpoint refuses every delivery.
+  STRIPE_TOPUP_WEBHOOK_SECRET: z.string().optional(),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
   // Live activation (FINAL COMPLETION D3, 2026-09-02): live mode is reachable
   // ONLY when this carries the exact owner token AND the price table is owner-
@@ -220,6 +225,7 @@ const parsed = schema.safeParse({
   STRIPE_MODE: process.env.STRIPE_MODE,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  STRIPE_TOPUP_WEBHOOK_SECRET: process.env.STRIPE_TOPUP_WEBHOOK_SECRET,
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   STRIPE_LIVE_ACTIVATION: process.env.STRIPE_LIVE_ACTIVATION,
