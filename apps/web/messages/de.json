@@ -19736,7 +19736,7 @@
   },
   "pilotPass": {
     "title": "Organisationsplan — {days}-Tage-Pilot für 1 €",
-    "intro": "Zahle einmal 1 €, und deine Organisation erhält {days} Tage lang den vollen kostenpflichtigen Organisationsplan: kein festes Limit für offene Stellen, Bereitschaftsübersichten zu Kandidaten, Nachrichten, Teamauswahl und alle weiteren kostenpflichtigen Funktionen.",
+    "intro": "Zahle einmal 1 €, und deine Organisation erhält {days} Tage lang den kostenpflichtigen Organisationsplan. Was er gegenüber dem kostenlosen Plan hinzufügt: kein Limit für gleichzeitig offene Stellen und Personalbedarfe (im kostenlosen Plan eine). Nachrichten, Kandidatenübersichten, Teamauswahl und Buchungen bleiben wie im kostenlosen Plan verfügbar.",
     "terms": "Einmalzahlung. Nichts verlängert sich und nichts wird erneut belastet: Nach {days} Tagen endet der Plan von selbst, und die Organisation kehrt zum kostenlosen Plan zurück. Der Plan erscheint oben, sobald Stripe die Zahlung bestätigt.",
     "pay": "1 € bezahlen — {days}-Tage-Pilot",
     "status": {
