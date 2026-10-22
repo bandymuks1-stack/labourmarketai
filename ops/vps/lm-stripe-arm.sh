@@ -81,7 +81,10 @@ case "$MODE" in
     # The publishable key is baked into the build (NEXT_PUBLIC_*): a live key in the build
     # keeps test mode blocked, and live mode needs one. Check the release before arming.
     BUILD=$(readlink -f /root/lm-prod/current)
-    if grep -rlq 'pk_live_' "$BUILD" 2>/dev/null; then BAKED=live; else BAKED=none-or-test; fi
+    # Match a real key (pk_live_ + its long body), never the bare prefix: the app's own
+    # validation regex /^pk_live_/ is compiled into every release, and the bare-prefix check
+    # stopped `test` on a build with no publishable key at all (2026-10-22).
+    if grep -rEq 'pk_live_[A-Za-z0-9]{20,}' "$BUILD" 2>/dev/null; then BAKED=live; else BAKED=none-or-test; fi
     if [ "$MODE" = test ] && [ "$BAKED" = live ]; then
       echo "STOP: this release was built with a LIVE publishable key, so test mode cannot activate. Remove the GitHub variable NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (or set a pk_test_ key), redeploy, then run this again."; exit 1
     fi
