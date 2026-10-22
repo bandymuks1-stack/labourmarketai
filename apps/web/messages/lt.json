@@ -19736,7 +19736,7 @@
   },
   "pilotPass": {
     "title": "Organizacijos planas — {days} dienų pilotas už 1 €",
-    "intro": "Sumokėk 1 € vieną kartą ir tavo organizacija {days} dienas gauna visą mokamą Organizacijos planą: be fiksuoto aktyvių pozicijų limito, kandidatų pasirengimo santraukas, susirašinėjimą, komandų parinkimą ir kitas mokamas galimybes.",
+    "intro": "Sumokėk 1 € vieną kartą ir tavo organizacija {days} dienas gauna mokamą Organizacijos planą. Ką jis prideda prie nemokamo plano: be ribos vienu metu atvirų pozicijų ir darbuotojų poreikių (nemokamame plane – vienas). Susirašinėjimas, kandidatų santraukos, komandų parinkimas ir rezervacijos lieka prieinami kaip ir nemokamame plane.",
     "terms": "Vienkartinis mokėjimas. Niekas neatsinaujina ir daugiau nenuskaičiuojama: po {days} dienų planas baigiasi savaime ir organizacija grįžta į nemokamą planą. Planas pasirodo aukščiau, kai tik Stripe patvirtina mokėjimą.",
     "pay": "Mokėti 1 € — {days} dienų pilotas",
     "status": {

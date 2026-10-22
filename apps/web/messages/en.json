@@ -19736,7 +19736,7 @@
   },
   "pilotPass": {
     "title": "Organization plan — {days}-day pilot for 1 €",
-    "intro": "Pay 1 € once and your organization gets the full paid Organization plan for {days} days: no fixed limit on open positions, candidate readiness summaries, messaging, team selection and every other paid capability.",
+    "intro": "Pay 1 € once and your organization gets the paid Organization plan for {days} days. What it adds over the free plan: no limit on open positions and workforce needs at the same time (the free plan allows one). Messaging, candidate summaries, team selection and bookings stay available as on the free plan.",
     "terms": "One-time payment. Nothing renews and nothing is charged again: after {days} days the plan ends by itself and the organization returns to the free plan. The plan appears above as soon as Stripe confirms the payment.",
     "pay": "Pay 1 € — {days}-day pilot",
     "status": {

@@ -19736,7 +19736,7 @@
   },
   "pilotPass": {
     "title": "Plan dla organizacji — {days}-dniowy pilotaż za 1 €",
-    "intro": "Zapłać 1 € jednorazowo, a Twoja organizacja na {days} dni otrzyma pełny płatny plan Organizacja: bez stałego limitu otwartych stanowisk, podsumowania gotowości kandydatów, wiadomości, dobór zespołów i pozostałe płatne możliwości.",
+    "intro": "Zapłać 1 € jednorazowo, a Twoja organizacja na {days} dni otrzyma płatny plan Organizacja. Co dodaje do planu bezpłatnego: brak limitu jednocześnie otwartych stanowisk i potrzeb kadrowych (w planie bezpłatnym – jedno). Wiadomości, podsumowania kandydatów, dobór zespołów i rezerwacje pozostają dostępne jak w planie bezpłatnym.",
     "terms": "Płatność jednorazowa. Nic się nie odnawia i nic nie jest pobierane ponownie: po {days} dniach plan kończy się sam, a organizacja wraca do planu bezpłatnego. Plan pojawi się powyżej, gdy tylko Stripe potwierdzi płatność.",
     "pay": "Zapłać 1 € — {days}-dniowy pilotaż",
     "status": {
