@@ -109,8 +109,15 @@ export type SupplyRetrievalInput =
        *  neither read below, so pinning an id never reveals anyone. */
       readonly alwaysInclude?: readonly string[];
     }
-  /** The caller already knows which workers it wants (admin workbench). */
-  | { readonly workerIds: readonly string[]; readonly budget?: number };
+  /** The caller already knows which workers it wants (admin workbench; the
+   *  hand-raisers on a need that names no trade). `excludeFixtures` is the
+   *  SAME fixture rule as the demand-planned pool above — one rule, read in
+   *  one place below. */
+  | {
+      readonly workerIds: readonly string[];
+      readonly budget?: number;
+      readonly excludeFixtures?: boolean;
+    };
 
 /** Read one Stage-1 id column. Never throws: a tier that fails (table absent,
  *  RLS, transport) contributes no ids, which costs PRIORITY, not reachability
@@ -672,10 +679,9 @@ export async function buildSupplyCandidates(
   // 2026-09-28: every scoutable worker was one). Filtered here, where names
   // already live, so the scouting layer never handles them; `poolSize` then
   // counts only what the viewer may see.
-  const shown =
-    "need" in input && input.excludeFixtures
-      ? candidates.filter((c) => !c.syntheticFixture)
-      : candidates;
+  const shown = input.excludeFixtures
+    ? candidates.filter((c) => !c.syntheticFixture)
+    : candidates;
   return {
     candidates: shown,
     retrieval: {

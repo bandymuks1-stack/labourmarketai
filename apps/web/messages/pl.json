@@ -8733,6 +8733,12 @@
     "teamOffersWaiting": "{count, plural, one {# oferta zespołu czeka na Twoją odpowiedź} few {# oferty zespołów czekają na Twoją odpowiedź} other {# ofert zespołów czeka na Twoją odpowiedź}}",
     "unstructuredTag": "wymagania niepotwierdzone",
     "notStructured": "Wymagane umiejętności tej potrzeby nie są jeszcze ustrukturyzowane, więc nie można obliczyć dopasowania. Nowe potrzeby są przeglądane i strukturyzowane przez administratorów — nie musisz nic robić.",
+    "handRaisers": {
+      "title": "Osoby, które zgłosiły się do tej potrzeby",
+      "notAssessed": "Dopasowanie zawodu nie zostało ocenione. Ta potrzeba nie wskazuje zawodu, więc nikogo z nią nie porównano. Te osoby są widoczne, bo same poprosiły o kontakt, a nie dlatego, że pasują; żadne umiejętności, kwalifikacje ani przydatność nie są tu stwierdzane.",
+      "badge": "Dopasowanie zawodu nieocenione",
+      "ownWords": "Wszystko, co widać o tej osobie, pochodzi z jej własnego profilu; nic tutaj nie zostało porównane z potrzebą."
+    },
     "needsSetup": "Nie udało się wczytać. Spróbuj ponownie.",
     "noCandidates": "Brak jeszcze pasujących pracowników dla tej potrzeby. Dopasowania pojawiają się, gdy pracownicy dodają umiejętności potwierdzone dziennikiem — sprawdź później lub rozszerz potrzebę.",
     "namePlaceholder": "Pracownik",
@@ -14898,6 +14904,9 @@
       "candidatesNotFound": "Ta potrzeba nie została znaleziona albo nie jest Twoja.",
       "candidatesNeedsMigration": "Chwilowo niedostępne.",
       "candidatesNotStructured": "Z tej potrzeby nie można jeszcze nic wyprowadzić, więc nie ma z czym porównać. To nie to samo, co brak dopasowań.",
+      "handRaisersTitle": "Osoby, które się zgłosiły",
+      "handRaisersNotAssessed": "Dopasowanie zawodu nieocenione: ta potrzeba nie wskazuje zawodu. Zgłosiły się same; żadne umiejętności, kwalifikacje ani dopasowanie nie są stwierdzane.",
+      "handRaiserBadge": "Dopasowanie zawodu nieocenione",
       "candidatesRetrievalCapped": "Dostępnych osób było więcej, niż mogliśmy teraz przejrzeć, więc ta lista nie obejmuje całej dostępnej puli.",
       "candidatesEmpty": "Nikt w widocznej puli nie pasuje teraz do tej potrzeby.",
       "candidatesCapped": "Pokazano {shown} z {total}.",

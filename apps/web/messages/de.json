@@ -8733,6 +8733,12 @@
     "teamOffersWaiting": "{count, plural, one {# Teamangebot wartet auf Ihre Antwort} other {# Teamangebote warten auf Ihre Antwort}}",
     "unstructuredTag": "Anforderungen nicht bestätigt",
     "notStructured": "Dieser Bedarf hat noch keine strukturierten Fähigkeiten, daher kann kein Match berechnet werden. Strukturiere zuerst die benötigten Fähigkeiten.",
+    "handRaisers": {
+      "title": "Personen, die sich für diesen Bedarf gemeldet haben",
+      "notAssessed": "Berufliche Passung nicht bewertet. Dieser Bedarf nennt keinen Beruf, daher wurde niemand damit verglichen. Diese Personen werden angezeigt, weil sie selbst um Kontakt gebeten haben, nicht weil sie passen; Fähigkeiten, Qualifikationen oder Eignung werden damit nicht behauptet.",
+      "badge": "Berufliche Passung nicht bewertet",
+      "ownWords": "Alles, was über diese Person angezeigt wird, stammt aus ihrem eigenen Profil; nichts davon wurde mit dem Bedarf verglichen."
+    },
     "needsSetup": "Scouting ist in dieser Umgebung noch nicht verfügbar.",
     "noCandidates": "Noch keine passenden Arbeitskräfte für diesen Bedarf.",
     "namePlaceholder": "Arbeitskraft",
@@ -14898,6 +14904,9 @@
       "candidatesNotFound": "Dieser Bedarf wurde nicht gefunden oder gehört nicht Ihnen.",
       "candidatesNeedsMigration": "Derzeit nicht verfügbar.",
       "candidatesNotStructured": "Aus diesem Bedarf lässt sich noch nichts ableiten, es gibt also nichts zum Abgleichen. Das ist nicht dasselbe wie „niemand passt“.",
+      "handRaisersTitle": "Personen, die sich gemeldet haben",
+      "handRaisersNotAssessed": "Berufliche Passung nicht bewertet: Dieser Bedarf nennt keinen Beruf. Sie haben sich selbst gemeldet; Fähigkeiten, Qualifikationen oder Passung werden nicht behauptet.",
+      "handRaiserBadge": "Berufliche Passung nicht bewertet",
       "candidatesRetrievalCapped": "Es waren mehr Menschen erreichbar, als wir diesmal ansehen konnten — diese Liste ist also nicht das gesamte Angebot.",
       "candidatesEmpty": "Im sichtbaren Angebot passt derzeit niemand zu diesem Bedarf.",
       "candidatesCapped": "{shown} von {total} angezeigt.",

@@ -20,6 +20,7 @@ import type {
   EmployerCandidateRow,
   EmployerCandidatesResult,
   EmployerDemandsResult,
+  EmployerHandRaiserRow,
 } from "@/lib/conversation/employer-workspace-contract";
 
 /**
@@ -342,6 +343,43 @@ function CandidateList({
         {/* NOT "no candidates": there is nothing to match against yet. */}
         <p className="text-basis text-text-secondary">{t("candidatesNotStructured")}</p>
         <DemandActions demand={view.demand} locale={locale} onDone={reload} />
+        {/* Owner decision 2026-10-22: people who raised a hand on this need
+            are shown NOW — labelled, never matched. The note says the match
+            was not assessed; each row repeats it where a match line would be. */}
+        {view.handRaisers.length > 0 && (
+          <section
+            className="flex flex-col gap-2"
+            data-testid="candidates-hand-raisers-unassessed"
+            data-match-assessed="false"
+          >
+            <p className="text-basis font-semibold text-text-primary">
+              {t("handRaisersTitle")}
+            </p>
+            <p className="text-meta text-state-amber" data-testid="candidates-hand-raisers-note">
+              {t("handRaisersNotAssessed")}
+            </p>
+            <ul className="flex flex-col divide-y divide-border/40">
+              {view.handRaisers.map((c) => (
+                <li key={c.workerId} className="py-3">
+                  <CandidateCard
+                    candidate={c}
+                    requestId={view.demand.requestId}
+                    locale={locale}
+                    onDone={reload}
+                  />
+                </li>
+              ))}
+            </ul>
+            {view.handRaisersTotal > view.handRaisers.length && (
+              <p className="text-meta text-text-muted" data-testid="candidates-hand-raisers-capped">
+                {t("candidatesCapped", {
+                  shown: view.handRaisers.length,
+                  total: view.handRaisersTotal,
+                })}
+              </p>
+            )}
+          </section>
+        )}
         <OpenFull label={t("station.scouting")} onOpenFull={() => onOpenFull(FULL_ROUTE)} />
       </div>
     );
@@ -499,7 +537,9 @@ function CandidateCard({
   locale,
   onDone,
 }: {
-  candidate: EmployerCandidateRow;
+  /** A ranked candidate, or a hand-raiser on a need that names no trade —
+   *  the latter carries NO match fields and says so instead. */
+  candidate: EmployerCandidateRow | EmployerHandRaiserRow;
   requestId: string;
   locale: string;
   onDone: () => void;
@@ -508,6 +548,7 @@ function CandidateCard({
   const tStage = useTranslations("candidatePipeline.stage");
   const [open, setOpen] = useState(false);
   const [booking, setBooking] = useState(false);
+  const matched = "matchAssessed" in candidate ? null : candidate;
 
   return (
     <div className="flex flex-col gap-2" data-testid={`candidate-${candidate.workerId}`}>
@@ -522,12 +563,21 @@ function CandidateCard({
           <span className="text-basis font-semibold text-text-primary">
             {t("candidateLabel", { token: candidate.label })}
           </span>
-          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-            {t(`candidateMatch.${candidate.matchStatus}`)}
-            {candidate.coveragePct !== null
-              ? ` · ${t("candidateCoverage", { pct: candidate.coveragePct })}`
-              : ""}
-          </span>
+          {matched ? (
+            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+              {t(`candidateMatch.${matched.matchStatus}`)}
+              {matched.coveragePct !== null
+                ? ` · ${t("candidateCoverage", { pct: matched.coveragePct })}`
+                : ""}
+            </span>
+          ) : (
+            <span
+              className="font-mono text-meta uppercase tracking-label text-text-muted"
+              data-testid={`candidate-match-not-assessed-${candidate.workerId}`}
+            >
+              {t("handRaiserBadge")}
+            </span>
+          )}
         </span>
         {/* The DERIVED pipeline stage (P4) — the honest answer to "where is
             this person in my process", including the booking state. */}
@@ -543,10 +593,12 @@ function CandidateCard({
         <div className="flex flex-col gap-2 rounded-control border border-ink-600 p-3">
           <dl className="flex flex-col gap-1 text-support">
             <Row label={t("fieldCountry")} value={candidate.country ?? t("notStated")} />
-            <Row
-              label={t("candidateConfirmedLabel")}
-              value={String(candidate.confirmedCount)}
-            />
+            {matched && (
+              <Row
+                label={t("candidateConfirmedLabel")}
+                value={String(matched.confirmedCount)}
+              />
+            )}
             {candidate.bookingStatus && (
               <Row
                 label={t("candidateBookingLabel")}
@@ -566,15 +618,15 @@ function CandidateCard({
 
           {/* A hard criterion failed. Stated as a fact, never softened into a
               lower score — a weighted total can never restore eligibility. */}
-          {!candidate.eligible && (
+          {matched && !matched.eligible && (
             <p className="text-meta text-state-amber" data-testid="candidate-not-eligible">
               {t("candidateNotEligible")}
             </p>
           )}
 
-          {candidate.gaps.length > 0 && (
+          {matched && matched.gaps.length > 0 && (
             <ul className="flex flex-col gap-0.5 text-meta text-text-muted">
-              {candidate.gaps.map((g) => (
+              {matched.gaps.map((g) => (
                 <li key={g}>— {t(`candidateGap.${g}`)}</li>
               ))}
             </ul>
