@@ -58,6 +58,7 @@ import {
 } from "@/lib/auth/dashboard-role-decision";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { CompanyModelScreen } from "@/components/app/organization/company-model-screen";
+import { PilotPassInvite } from "@/components/app/pilot-pass-invite";
 import { conversationOpeningContext } from "@/lib/today/today-route";
 import { AccessRefusalNotice } from "@/components/app/access-refusal-notice";
 import {
@@ -377,8 +378,15 @@ export default async function DashboardHomePage({
   // were stripped from the URL on first consumption, so a remount never
   // re-sends them.
   // The company workspace opens on the company model (existing doors).
+  // The pilot pass pointer leads it — the employer home is where an owner
+  // looks first, and it renders nothing unless the pass is theirs to start.
   const companyOpeningContext =
-    activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
+    activeOrgWorkspace && identity === "company" ? (
+      <>
+        <PilotPassInvite className="mb-4" />
+        <CompanyModelScreen />
+      </>
+    ) : null;
   const conversationKey = `${rootWorkspace.activeWorkspaceId}:${identity}`;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply

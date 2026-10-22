@@ -21,6 +21,7 @@ import { activeLocales } from "@/lib/i18n/config";
 const state = vi.hoisted(() => ({
   locale: "en",
   trialEnabled: true,
+  pilotPassEnabled: false,
   config: { state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" },
   ent: {
     effectivePlanKey: "free_organization",
@@ -65,6 +66,7 @@ vi.mock("@/lib/billing/config", () => ({
   getBillingConfig: () => state.config,
   getBillingConfigFor: () => state.config,
   billingTrialEnabled: () => state.trialEnabled,
+  billingPilotPassEnabled: () => state.pilotPassEnabled,
 }));
 vi.mock("@/lib/billing/effective-entitlements", () => ({
   getEffectiveEntitlements: vi.fn(async () => state.ent),
@@ -87,6 +89,7 @@ async function render(billingReturn: string | null): Promise<string> {
 beforeEach(() => {
   state.locale = "en";
   state.trialEnabled = true;
+  state.pilotPassEnabled = false;
   state.config = { state: "stripe_live", reason: "ok", testMode: false, paymentsEnabled: true, mode: "live" };
   state.ent = {
     ...state.ent,
@@ -146,6 +149,13 @@ describe("the calm baseline stays", () => {
     const html = await render(null);
     expect(html).toContain('data-testid="account-billing-order"');
     expect(html).not.toContain('data-testid="account-billing-syncing"');
+  });
+
+  it("while the 1 € pilot pass is switched on, the recurring order is withheld — the pass is the way in", async () => {
+    state.pilotPassEnabled = true;
+    const html = await render(null);
+    expect(html).not.toContain('data-testid="account-billing-order"');
+    expect(html).not.toContain("MISSING:");
   });
 
   it("a cancelled return (live or test) keeps the Order button — nothing was bought", async () => {

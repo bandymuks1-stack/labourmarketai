@@ -168,6 +168,23 @@ describe("source pins", () => {
     expect(read("effective-entitlements.ts")).toContain("effectivePilotPassStatus(real, new Date())");
     expect(read("apply-subscription-snapshot.ts")).toMatch(/status: "active",[\s\S]*cancelAtPeriodEnd: true/);
   });
+  it("the owner can find the pass: first on the account page, never inside the collapsed plan fold", () => {
+    const page = read("..", "..", "app", "[locale]", "dashboard", "account", "page.tsx");
+    const at = page.indexOf("<PilotPassSection");
+    expect(at).toBeGreaterThan(0);
+    expect(at).toBeLessThan(page.indexOf("<Fold"));
+    expect(page).toContain('testId="account-plan-fold" defaultOpen={billingLive}');
+    // "everything is free" only while billing is off
+    expect(page.indexOf('accountPlan.freePilot')).toBeGreaterThan(page.indexOf("{!billingLive && ("));
+  });
+  it("the pricing page and the employer home point to it; the €99 order is withheld while the pass runs", () => {
+    expect(read("..", "..", "app", "[locale]", "(marketing)", "pricing", "page.tsx")).toContain("<PilotPassInvite />");
+    expect(read("..", "..", "app", "[locale]", "dashboard", "page.tsx")).toContain("<PilotPassInvite ");
+    expect(read("..", "..", "components", "app", "account-billing-section.tsx")).toMatch(/canOrder =[\s\S]*!billingPilotPassEnabled\(\);/);
+    const invite = read("..", "..", "components", "app", "pilot-pass-invite.tsx");
+    expect(invite).toContain('href="/dashboard/account#pilot-pass"');
+    expect(invite).not.toContain("/api/billing/pilot-pass");
+  });
   it("a pass is never treated as a provider subscription by admission, replacement or reconciliation", () => {
     expect(read("checkout-operations-core.ts")).toContain('startsWith("pilotpass_")');
     expect(read("subscription-store.ts")).toContain('heldSubId.startsWith("pilotpass_")');

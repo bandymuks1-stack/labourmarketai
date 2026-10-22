@@ -19751,6 +19751,11 @@
     "result": {
       "paid": "Stripe gavo mokėjimą. Planas įsijungia, kai tik ateina patvirtinimas — jei dar nematai, po akimirkos atnaujink puslapį.",
       "cancelled": "Mokėjimas atšauktas — niekas nenuskaičiuota."
+    },
+    "elsewhere": "Viršuje esančiame erdvių pasirinkime pasirink {organization} — pilotas pradedamas iš tos organizacijos erdvės.",
+    "invite": {
+      "line": "Sumokėk 1 € vieną kartą ir gauk mokamą Organizacijos planą {days} dienoms. Niekas neatsinaujina.",
+      "cta": "Atidaryti pilotą"
     }
   }
 }

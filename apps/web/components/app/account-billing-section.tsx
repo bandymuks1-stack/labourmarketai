@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 
-import { billingTrialEnabled, getBillingConfigFor } from "@/lib/billing/config";
+import { billingPilotPassEnabled, billingTrialEnabled, getBillingConfigFor } from "@/lib/billing/config";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { BillingPortalButton } from "@/components/app/billing-portal-button";
@@ -103,7 +103,11 @@ export async function AccountBillingSection({
     Boolean(subject && subject.subject?.type === "organization" && subject.billingAuthority) &&
     !hasSubscription &&
     !subscriptionBlocksCheckout(status) &&
-    !syncing;
+    !syncing &&
+    // While the owner runs the 1 € pilot pass, the pass IS the way into the
+    // paid plan: a recurring €99 order beside it invites the one purchase the
+    // owner ruled out for the pilot (no automatic €99 renewal, 2026-10-22).
+    !billingPilotPassEnabled();
 
   // "Refresh billing status": a calm optional control, shown ONLY while the page
   // is waiting on the payment provider (redirect says paid but no row yet) or
