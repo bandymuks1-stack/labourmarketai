@@ -19737,7 +19737,7 @@
   "pilotPass": {
     "title": "Organization plan — {days}-day pilot for 1 €",
     "intro": "Pay 1 € once and your organization gets the paid Organization plan for {days} days. What it adds over the free plan: no limit on open positions and workforce needs at the same time (the free plan allows one). Messaging, candidate summaries, team selection and bookings stay available as on the free plan.",
-    "terms": "One-time payment. Nothing renews and nothing is charged again: after {days} days the plan ends by itself and the organization returns to the free plan. The plan appears above as soon as Stripe confirms the payment.",
+    "terms": "One-time payment. Nothing renews and nothing is charged again: after {days} days the plan ends by itself and the organization returns to the free plan. The plan appears below as soon as Stripe confirms the payment.",
     "pay": "Pay 1 € — {days}-day pilot",
     "status": {
       "pilot_pass_disabled": "The pilot pass is not offered right now.",
@@ -19751,6 +19751,11 @@
     "result": {
       "paid": "Payment received by Stripe. The plan activates as soon as the confirmation arrives — refresh in a moment if it is not shown yet.",
       "cancelled": "Payment cancelled — nothing was charged."
+    },
+    "elsewhere": "Choose {organization} in the workspace selector at the top of the page — the pilot is started from that organization's workspace.",
+    "invite": {
+      "line": "Pay 1 € once for {days} days of the paid Organization plan. Nothing renews.",
+      "cta": "Open the pilot"
     }
   }
 }

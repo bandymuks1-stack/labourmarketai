@@ -164,9 +164,18 @@ export default async function AccountPage({
         </p>
       </header>
 
+      {/* Organization pilot pass (1 € once → the paid plan for the pilot
+          period) — first on the page, never inside the collapsed plan fold
+          (owner measured 2026-10-22: the pay control could not be found
+          there). Renders nothing unless the owner switched it on and billing
+          is active for an organization this person can act for. */}
+      <PilotPassSection result={pilot_pass ?? null} refused={pilot_pass_refused ?? null} />
+
       {/* Plan, billing and balance are ONE question ("what am I on?") and
           payments are not live — one line, open on demand (owner 2026-10-10). */}
-      <Fold title={tRoot("accountPlan.title")} testId="account-plan-fold">
+      {/* Open while billing is live: the plan and its order/portal controls are
+          then real, and a closed fold hid them (owner, 2026-10-22). */}
+      <Fold title={tRoot("accountPlan.title")} testId="account-plan-fold" defaultOpen={billingLive}>
         {/* Honest payment readiness — payments are not active yet (billing
             disabled). No pay-now, no subscription-active, no paid unlock. */}
         {!billingLive && (
@@ -188,11 +197,13 @@ export default async function AccountPage({
           <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {tRoot("accountPlan.title")}
           </p>
-          <p className="mt-2 text-sm text-text-primary">
-            {tRoot("accountPlan.freePilot")}
-          </p>
           {!billingLive && (
             <>
+              {/* "Everything is free" is true only while billing is off; with
+                  live billing the plan state below is the truth. */}
+              <p className="mt-2 text-sm text-text-primary">
+                {tRoot("accountPlan.freePilot")}
+              </p>
               <p className="mt-2 text-xs leading-relaxed text-text-secondary">
                 {tRoot("accountPlan.prepared")}
               </p>
@@ -215,11 +226,6 @@ export default async function AccountPage({
             never activates anything — state syncs via the signature-verified
             webhook only. */}
         <AccountBillingSection billingReturn={billing ?? null} />
-
-        {/* Organization pilot pass (1 € once → the paid plan for the pilot
-            period) — renders nothing unless the owner switched it on and
-            billing is active for this workspace's organization. */}
-        <PilotPassSection result={pilot_pass ?? null} refused={pilot_pass_refused ?? null} />
 
         {/* LMC — placed directly under the plan line because they answer the same
             question at two depths: what this account is entitled to, and what it

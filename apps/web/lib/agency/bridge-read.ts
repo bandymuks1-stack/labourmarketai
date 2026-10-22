@@ -89,6 +89,31 @@ export async function listAgencyConnections(
  *  the connection table already scopes by `invited_email = jwt email`, so a
  *  plain select returns only the caller's invites (no email is leaked). */
 export async function listMyConnectionInvites(): Promise<ClientInvitesState> {
+  return readMyConnectionInvitesOnce();
+}
+
+/**
+ * REQUEST-SCOPED bridge reads (perf 2026-10-22). One `/dashboard/company`
+ * render asked the same argument-less bridge questions from several places —
+ * the page's partners strip, the organization doors, the chat starter
+ * context, the opening brief and the bell's bridge count — each a separate
+ * round trip with the same answer. React `cache()` deduplicates within ONE
+ * render only: every navigation reads again, and a server action (no render)
+ * reads itself, so a connection accepted or an offer made is never answered
+ * from an earlier read. Callers treat the results as read-only (none mutates
+ * them in place).
+ */
+const readMyConnectionInvitesOnce = cache(async (): Promise<ClientInvitesState> =>
+  readMyConnectionInvites(),
+);
+const readSharedRequestsForAgencyOnce = cache(async (): Promise<SharedRequestsState> =>
+  readSharedRequestsForAgency(),
+);
+const readAgencyOfferProgressOnce = cache(async (): Promise<OfferProgressState> =>
+  readAgencyOfferProgress(),
+);
+
+async function readMyConnectionInvites(): Promise<ClientInvitesState> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -217,6 +242,10 @@ export async function listMyClientBridgeConnections(
 
 /** AGENCY side: requests connected clients shared with the caller-agency. */
 export async function listSharedRequestsForAgency(): Promise<SharedRequestsState> {
+  return readSharedRequestsForAgencyOnce();
+}
+
+async function readSharedRequestsForAgency(): Promise<SharedRequestsState> {
   const supabase = await createClient();
   try {
     const { data, error } = await asAny(supabase).rpc("list_shared_requests_for_agency_v1");
@@ -323,6 +352,10 @@ export async function listSharedRequestsByClient(
 
 /** AGENCY side: the caller-agency's offers + derived client-review stage. */
 export async function listAgencyOfferProgress(): Promise<OfferProgressState> {
+  return readAgencyOfferProgressOnce();
+}
+
+async function readAgencyOfferProgress(): Promise<OfferProgressState> {
   const supabase = await createClient();
   try {
     const { data, error } = await asAny(supabase).rpc("list_agency_offer_progress_v1");

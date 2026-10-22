@@ -33,6 +33,11 @@ const AGENCY = "QA-SYNTHETIC Agentūra";
 const GAMA = "QA-SYNTHETIC Gama";
 const SITE = "QA-SYNTHETIC objektas";
 const NOTE = `QA-SYNTHETIC ${RUN}`;
+// This walk's OWN need. It used to borrow whatever Gama need another walk left
+// open; prod-mcp-agents closes every QA-SYNTHETIC need, so after it ran the
+// board had none (run 39792445120). A trade is named so scouting can
+// structure the need and list the hand-raiser.
+const NEED_ROLE = `QA-SYNTHETIC kandidatai mūrininkai ${RUN}`;
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED =
   process.env.PROD_QA_WALK === "1" &&
@@ -77,6 +82,33 @@ test("C-0. the worker's own worker id (own row, own token)", async () => {
   workerId = rows[0].id;
 });
 
+function requestIdOf(href: string | null): string {
+  return /request=([0-9a-f-]{36})/.exec(href ?? "")?.[1] ?? "";
+}
+
+test("C-0b. Gama posts this run's need through the demand intake", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
+  await page.getByTestId("demand-role").fill(NEED_ROLE);
+  await page.getByTestId("demand-description").fill(`${NOTE}: synthetic need for the production company-chain walk, 1 mūrininkas.`);
+  await page.getByTestId("demand-next").click();
+  const size = page.getByTestId("demand-team-size");
+  if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await page.getByTestId("demand-next").click();
+  await page.getByTestId("demand-create").click();
+  const done = page.getByTestId("demand-done");
+  const limit = page.getByTestId("demand-open-need-limit");
+  await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
+  expect(await limit.isVisible(), "the open-need limit refused this run's need").toBe(false);
+  await page.goto("/lt/dashboard/company/scouting");
+  const link = page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: RUN }).first();
+  await expect(link, "this run's need is listed among Gama's needs").toBeVisible({ timeout: 30_000 });
+  requestId = requestIdOf(await link.getAttribute("href"));
+  expect(requestId).toMatch(/^[0-9a-f-]{36}$/);
+  await ctx.close();
+});
+
 test("C-1. the worker raises a hand on Gama's need from the opportunities board", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   // The pristine page is the worker's PERSONAL first view (owner addendum
@@ -84,7 +116,7 @@ test("C-1. the worker raises a hand on Gama's need from the opportunities board"
   await page.goto("/lt/dashboard/opportunities?view=all");
   await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const cards = page
-    .locator('li[id^="opp-"]')
+    .locator(`li[id="opp-${requestId}"]`)
     .filter({ has: page.getByTestId("opportunity-company").filter({ hasText: GAMA }) })
     .filter({ has: page.locator('[data-testid^="interest-"]') });
   // The cards can stream in after the list container appears: wait for them
@@ -109,8 +141,6 @@ test("C-1. the worker raises a hand on Gama's need from the opportunities board"
   const n = await cards.count();
   expect(n, `the worker's board shows ${n} of Gama's needs`).toBeGreaterThan(0);
   const card = cards.first();
-  requestId = ((await card.getAttribute("id")) ?? "").replace(/^opp-/, "");
-  expect(requestId).toMatch(/^[0-9a-f-]{36}$/);
 
   // Start from "not interested", so this run proves the ACT, not a leftover row.
   const withdraw = card.getByTestId("interest-withdraw");
@@ -215,3 +245,24 @@ for (const { slot, org, label } of [
     await ctx.close();
   });
 }
+
+// The need is closed after the chain (the worker's board needs it open while
+// it runs), even after a red step; interest and contact rows stay as history.
+test.afterAll(async ({ browser }) => {
+  if (!requestId) return;
+  const { ctx, page } = await as(browser, "manager");
+  try {
+    await useWorkspace(page, GAMA);
+    await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
+    const controls = page.getByTestId("demand-lifecycle-controls");
+    await expect(controls).toBeVisible({ timeout: 30_000 });
+    if ((await controls.getAttribute("data-demand-status")) !== "closed") {
+      await controls.getByTestId("demand-close").click();
+      await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
+    }
+  } catch (e) {
+    console.info(`[company-chain] need cleanup failed: ${(e as Error).message.slice(0, 120)}`);
+  } finally {
+    await ctx.close();
+  }
+});

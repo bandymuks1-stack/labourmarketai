@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -108,6 +109,17 @@ export interface CompanyDemand {
  * see `/dashboard/company/scouting`.
  */
 export async function listCompanyDemands(): Promise<CompanyDemand[]> {
+  // A fresh array per caller over the request-shared read (callers filter it).
+  return [...(await readCompanyDemandsOnce())];
+}
+
+/** Read ONCE per server render (perf 2026-10-22): the opening brief's agency
+ *  offers line and the bell's team-offer count both listed the company's
+ *  demands in the same `/dashboard/company` render. React `cache()` is
+ *  request-scoped — every navigation and every server action reads again. */
+const readCompanyDemandsOnce = cache(async (): Promise<readonly CompanyDemand[]> => readCompanyDemands());
+
+async function readCompanyDemands(): Promise<CompanyDemand[]> {
   const supabase = await createClient();
   const {
     data: { user },
