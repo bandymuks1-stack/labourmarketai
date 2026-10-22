@@ -114,6 +114,30 @@ export const COMMAND_REGISTRY: readonly CommandEntry[] = [
     },
   },
   {
+    // Work hours — the day / week / timesheet page. It had no entry, so quick
+    // search answered "valandos" with "nothing found" while the page existed
+    // (production audit 2026-10-22).
+    id: "hours",
+    route: "/dashboard/hours",
+    audience: "public",
+    labels: {
+      en: "Work hours",
+      lt: "Darbo valandos",
+      ru: "Рабочие часы",
+      nl: "Werkuren",
+      de: "Arbeitsstunden",
+      pl: "Godziny pracy",
+    },
+    synonyms: {
+      en: ["hours", "work hours", "timesheet", "time tracking", "worked hours"],
+      lt: ["valandos", "darbo valandos", "valandų apskaita", "darbo laikas", "tabelis", "žiniaraštis"],
+      ru: ["часы", "рабочие часы", "табель", "учёт времени", "отработанные часы"],
+      nl: ["uren", "werkuren", "urenregistratie", "urenstaat", "gewerkte uren"],
+      de: ["stunden", "arbeitsstunden", "stundenzettel", "zeiterfassung", "arbeitszeit"],
+      pl: ["godziny", "godziny pracy", "ewidencja czasu", "karta czasu pracy", "przepracowane godziny"],
+    },
+  },
+  {
     id: "absences",
     route: "/dashboard/absences",
     audience: "public",
