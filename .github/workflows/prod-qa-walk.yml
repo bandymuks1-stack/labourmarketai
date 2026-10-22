@@ -1,4 +1,7 @@
 name: prod-qa-walk
+# The spec in the run title lets acceptance-campaign.yml attribute a run that reached production
+# even when it left no artifact.
+run-name: prod-qa-walk ${{ github.event_name == 'workflow_dispatch' && inputs.spec || github.event_name }}
 
 # PRODUCTION SIGNED-IN QA, without an agent ever holding a production key
 # (owner programme 2026-10-12 §10). Before this, a signed-in production walk
