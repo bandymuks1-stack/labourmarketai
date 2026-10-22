@@ -25,6 +25,7 @@
  * fabricated person.
  */
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type AssignedPersonRow = {
@@ -124,8 +125,39 @@ const TEAM_READ_LIMIT = 500;
  * Runs as the caller: a manager reads the teams of projects/teams they manage; a
  * reader without authority gets nothing. Never throws; any failure (including
  * the relation not being provisioned yet) is an empty list.
+ *
+ * Read ONCE per client + project set per server render (perf 2026-10-22): a
+ * project's detail read and its operations pulse both asked for the same
+ * project's teams in one `/dashboard/company` render — the team rows and the
+ * member RPC twice per project. Keyed by the CLIENT object too, so a read made
+ * through another client (another identity) is never served from this one.
+ * Request-scoped: every navigation and every server action reads again. Each
+ * caller gets fresh row objects.
  */
 export async function readTeamAssignedPeople(
+  supabase: Pick<SupabaseClient, "from" | "rpc">,
+  projectIds?: readonly string[],
+): Promise<TeamAssignedPersonRow[]> {
+  if (projectIds && projectIds.length === 0) return [];
+  const rows = await readTeamAssignedPeopleOnce(
+    supabase,
+    projectIds ? JSON.stringify(projectIds) : null,
+  );
+  return rows.map((r) => ({ ...r }));
+}
+
+const readTeamAssignedPeopleOnce = cache(
+  async (
+    supabase: Pick<SupabaseClient, "from" | "rpc">,
+    projectIdsKey: string | null,
+  ): Promise<readonly TeamAssignedPersonRow[]> =>
+    readTeamAssignedPeopleUncached(
+      supabase,
+      projectIdsKey === null ? undefined : (JSON.parse(projectIdsKey) as string[]),
+    ),
+);
+
+async function readTeamAssignedPeopleUncached(
   supabase: Pick<SupabaseClient, "from" | "rpc">,
   projectIds?: readonly string[],
 ): Promise<TeamAssignedPersonRow[]> {

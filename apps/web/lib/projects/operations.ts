@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkerReadiness, type WorkerReadiness } from "@/lib/company/worker-readiness";
@@ -79,27 +80,7 @@ async function readActiveAssignments(
   supabase: any,
   projectId: string,
 ): Promise<AssignmentRow[]> {
-  const res = await supabase
-    .from("project_worker_assignments")
-    // `profiles` is a LEFT join on purpose (W4 review, §3).
-    //
-    // It was `profiles!inner(full_name)`, and the only SELECT policy on
-    // `profiles` is `(id = auth.uid()) OR is_admin()` — an employer may never
-    // read another person's profile row. So the inner join dropped EVERY
-    // assignment before it reached the code below, and this screen showed
-    // "0 assigned" to every manager, always.
-    //
-    // The join exists solely to fetch an OPTIONAL display name that already has
-    // a fallback (`full_name ?? display_name ?? id-prefix`); the `!inner` made
-    // that fallback unreachable. Left-joining changes no policy and grants
-    // nothing: PostgREST still applies RLS to the embedded resource, so an
-    // unreadable profile simply arrives as `null` and the fallback runs.
-    .select(
-      "assigned_at, worker:workers!inner(id, profile_id, display_name, profiles(full_name))",
-    )
-    .eq("project_id", projectId)
-    .eq("status", "active")
-    .order("assigned_at", { ascending: false });
+  const res = await readActiveAssignmentRows(supabase, projectId);
   if (res.error) return [];
   type Row = {
     assigned_at: string;
@@ -125,6 +106,76 @@ async function readActiveAssignments(
   }
   return out;
 }
+
+/**
+ * THE active person-assignment rows of ONE project, raw — shared by this
+ * module's operations read and `listProjectAssignments`
+ * (`lib/projects/projects.ts`), which ask the identical question. Read ONCE
+ * per client + project per server render (perf 2026-10-22): the company
+ * home's project detail and its operations pulse used to read the same
+ * project's roster twice in one `/dashboard/company` render. Keyed by the
+ * CLIENT object, so a read through another client (another identity) is
+ * never served from this one. Request-scoped: every navigation and every
+ * server action (assign / end assignment) reads again. Callers map the rows
+ * into fresh objects; none mutates them.
+ */
+export const readActiveAssignmentRows = cache(
+  async (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    supabase: any,
+    projectId: string,
+  ): Promise<{ data: unknown[] | null; error: { code?: string } | null }> => {
+    const res = await supabase
+      .from("project_worker_assignments")
+      // `profiles` is a LEFT join on purpose (W4 review, §3).
+      //
+      // It was `profiles!inner(full_name)`, and the only SELECT policy on
+      // `profiles` is `(id = auth.uid()) OR is_admin()` — an employer may never
+      // read another person's profile row. So the inner join dropped EVERY
+      // assignment before it reached the code below, and this screen showed
+      // "0 assigned" to every manager, always.
+      //
+      // The join exists solely to fetch an OPTIONAL display name that already has
+      // a fallback (`full_name ?? display_name ?? id-prefix`); the `!inner` made
+      // that fallback unreachable. Left-joining changes no policy and grants
+      // nothing: PostgREST still applies RLS to the embedded resource, so an
+      // unreadable profile simply arrives as `null` and the fallback runs.
+      .select(
+        "assigned_at, worker:workers!inner(id, profile_id, display_name, profiles(full_name))",
+      )
+      .eq("project_id", projectId)
+      .eq("status", "active")
+      .order("assigned_at", { ascending: false });
+    return { data: (res.data as unknown[] | null) ?? null, error: res.error ?? null };
+  },
+);
+
+/**
+ * THE header row of ONE project (RLS: `projects_select` — not the caller's
+ * project → no row), shared by this module's operations read and the project
+ * panel's detail read (`loadProjectDetailForResult`), which asked for the same
+ * row with an overlapping column list — two `projects` round trips per project
+ * on the company home (perf 2026-10-22). The column list is the union of both;
+ * the organization name is a LEFT embed (an unreadable organization arrives as
+ * `null`, it never hides the project). Read ONCE per client + project per
+ * server render; every navigation and every server action reads again.
+ */
+export const readProjectHeaderRow = cache(
+  async (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    supabase: any,
+    projectId: string,
+  ): Promise<{ data: unknown; error: { code?: string } | null }> => {
+    const res = await supabase
+      .from("projects")
+      .select(
+        "id, title, status, city, country, start_date, end_date, organizations(display_name, legal_name)",
+      )
+      .eq("id", projectId)
+      .maybeSingle();
+    return { data: res.data ?? null, error: res.error ?? null };
+  },
+);
 
 /** Current operational status per worker_id for a project (RLS-scoped, v2). */
 async function readOperationalStatuses(
@@ -222,11 +273,7 @@ export async function getProjectOperations(
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const projRes = await asAny(supabase)
-    .from("projects")
-    .select("id, title, city, country, start_date, end_date, status")
-    .eq("id", projectId)
-    .maybeSingle();
+  const projRes = await readProjectHeaderRow(asAny(supabase), projectId);
   if (projRes.error && !migMissing(projRes.error.code)) return null;
   const p = projRes.data as
     | {

@@ -831,6 +831,17 @@ export async function getPendingIncomingBookingCount(): Promise<number> {
  * booking_requests_seen migration is not applied — both degrade to 0 "new".
  */
 export async function getBookingRequestsSeenAt(): Promise<string | null> {
+  return readBookingRequestsSeenAtOnce();
+}
+
+/** Read ONCE per server render (perf 2026-10-22): the bell's booking-response
+ *  badge and the opening brief's "workers answered" line both asked for the
+ *  same seen timestamp in one company render. Request-scoped like
+ *  `readMyBookingsOnce` above: every navigation re-reads, and a server action
+ *  (no render — e.g. `markBookingRequestsSeen`) never sees a cached value. */
+const readBookingRequestsSeenAtOnce = cache(readBookingRequestsSeenAt);
+
+async function readBookingRequestsSeenAt(): Promise<string | null> {
   const supabase = await createClient();
   const {
     data: { user },

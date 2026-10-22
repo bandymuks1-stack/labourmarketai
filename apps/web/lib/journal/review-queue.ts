@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { readReviewableJournalEntryIds } from "@/lib/journal/reviewable-count";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 import { resolveWorkDay, type WorkTimeMetricRow } from "@/lib/journal/work-time";
 import {
@@ -54,11 +55,10 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   const supabase = await createClient();
 
   // Gated reviewable set — degrades to an empty queue until applied (honest).
+  // The ONE `reviewable_journal_entry_ids` read, shared with the decisions
+  // count in the same render (request-scoped, see reviewable-count.ts).
   let reviewableIds: string[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: idRows } = await (supabase as any).rpc(
-    "reviewable_journal_entry_ids",
-  );
+  const { data: idRows } = await readReviewableJournalEntryIds();
   if (Array.isArray(idRows)) {
     reviewableIds = idRows
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

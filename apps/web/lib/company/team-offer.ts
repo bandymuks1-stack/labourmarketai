@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -106,6 +107,18 @@ export function listSentOffers(teamId: string): Promise<ReadResult<SentTeamOffer
  * Zero rows for anyone else (the database answers empty, never an error).
  */
 export async function listReceivedOffers(requestId: string): Promise<ReadResult<ReceivedTeamOffer>> {
+  return readReceivedOffersOnce(requestId);
+}
+
+/** Read ONCE per demand per server render (perf 2026-10-22): the opening
+ *  brief's offers line and the bell's open team-offer count asked the same
+ *  demand's offers in one `/dashboard/company` render. Request-scoped — every
+ *  navigation and every server action (accept / decline) reads again. */
+const readReceivedOffersOnce = cache(
+  async (requestId: string): Promise<ReadResult<ReceivedTeamOffer>> => readReceivedOffers(requestId),
+);
+
+async function readReceivedOffers(requestId: string): Promise<ReadResult<ReceivedTeamOffer>> {
   // v2 = v1 + offer_kind (20261011200000). Until it is applied, v1 answers and
   // every offer is a brigade, which is exactly what v1 could hold.
   const v2 = await readRows("list_team_offers_for_request_v2", { p_request_id: requestId }, parseReceivedOffer);
