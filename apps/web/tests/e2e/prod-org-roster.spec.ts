@@ -172,9 +172,14 @@ test("R-4 (3.30). company settings save the declared capabilities as they are, a
   await expect(page.getByTestId("company-settings")).toBeVisible({ timeout: 30_000 });
   const save = page.getByTestId("org-capabilities-save");
   if (await save.isVisible().catch(() => false)) {
-    // Re-declare exactly what is declared: proves the write, changes nothing.
-    await save.click();
-    await expect(page.getByTestId("org-capabilities-saved")).toBeVisible({ timeout: 30_000 });
+    // Declared capabilities are settled chips and the write is grant-only (no
+    // revoke), so the walk proves the control without granting anything.
+    await expect(save, "nothing picked: nothing to save").toBeDisabled();
+    const box = page.locator('[data-testid^="org-capability-checkbox-"]').first();
+    await box.check();
+    await expect(save, "a picked capability can be saved").toBeEnabled();
+    await box.uncheck();
+    await expect(save).toBeDisabled();
   } else {
     test.info().annotations.push({ type: "note", description: "capabilities card not offered to this role" });
   }
@@ -230,7 +235,13 @@ test("R-6 (3.32). an asset is issued to the worker, acknowledged by them, and re
   const row = () => owner.page.getByTestId("asset-row").filter({ hasText: ASSET }).first();
   if ((await owner.page.getByTestId("asset-row").filter({ hasText: ASSET }).count()) === 0) {
     const org = registry.getByTestId("asset-org");
-    if (await org.isVisible().catch(() => false)) await org.selectOption({ label: ALFA });
+    if (await org.isVisible().catch(() => false)) {
+      // The option is the organization's full name ("… Alfa (testinis
+      // subjektas)"); match it by text like the other walks do.
+      const value = await org.locator("option", { hasText: ALFA }).first().getAttribute("value");
+      expect(value, "Alfa is one of the organizations the owner manages").toBeTruthy();
+      await org.selectOption(value!);
+    }
     await registry.getByTestId("asset-type").selectOption({ index: 0 });
     await registry.getByTestId("asset-name").fill(ASSET);
     await registry.getByTestId("asset-create").click();
