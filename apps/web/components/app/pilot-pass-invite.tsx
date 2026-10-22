@@ -34,15 +34,16 @@ export async function PilotPassInvite({ className }: { className?: string }) {
             : t("invite.line", { days })}
         </p>
       </div>
-      {payable ? (
-        <Link
-          href="/dashboard/account#pilot-pass"
-          data-testid="pilot-pass-invite-open"
-          className={`${buttonLinkClassName("primary", "sm")} shrink-0`}
-        >
-          {t("invite.cta")}
-        </Link>
-      ) : null}
+      {/* Linked in BOTH cases: the account page carries the workspace
+          selector the "elsewhere" line points to — the public pricing nav
+          has none. */}
+      <Link
+        href="/dashboard/account#pilot-pass"
+        data-testid="pilot-pass-invite-open"
+        className={`${buttonLinkClassName("primary", "sm")} shrink-0`}
+      >
+        {t("invite.cta")}
+      </Link>
     </aside>
   );
 }
