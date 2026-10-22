@@ -71,7 +71,13 @@ export async function loadProjectScanDetails(
     // ONE wave: every source the scan shows, for every project.
     const [rosterRows, team, itemsRead, tasksRead, stagesRead] = await Promise.all([
       readActiveAssignmentRowsForProjects(supabase, ids),
-      readTeamAssignedPeople(supabase, ids),
+      // Teams stay PER PROJECT (in parallel — still this one wave): the team
+      // reader's bounds (500 assignments, member RPC pages, the 1,000-row
+      // response cap) apply to the project set it is given, so one batched
+      // call over six large teams could silently drop people and show a
+      // staffed project as unstaffed. Per project, each keeps exactly the
+      // bounds the detail read had.
+      Promise.all(ids.map((id) => readTeamAssignedPeople(supabase, [id]))).then((parts) => parts.flat()),
       // A thrown checklist / task read is an UNKNOWN pulse, not a failed scan.
       readReadinessItemsForProjects(supabase, ids).catch(() => null),
       listProjectTasksForProjects(ids).catch(() => null),

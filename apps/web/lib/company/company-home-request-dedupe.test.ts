@@ -698,8 +698,10 @@ describe("the company home's project scan is batched, not one detail read per pr
       await loadProjectRiskForChat();
       panelCalls[n] = log.length;
     }
-    // One list read + one batched read per source, whatever the count.
-    expect(scanCalls[6]).toBe(scanCalls[1]);
+    // One list read + one batched read per source, whatever the count —
+    // except the team read, which stays per project (in the same wave) so
+    // each project keeps the team reader's own bounds (Codex review #2671).
+    expect(scanCalls[6]).toBe(scanCalls[1] + 5);
     // The per-project panel path still grows by a dozen reads per project —
     // the fan-out the company home no longer pays.
     expect(panelCalls[6] - panelCalls[1]).toBeGreaterThanOrEqual(5 * 10);
@@ -758,4 +760,6 @@ describe("the commitments read runs its independent reads together", () => {
 });
 
 /** Upper bounds for one render on this suite's fixture (after this change). */
-const BOUNDS = { calls1: 87, calls6: 87, waves1: 10, waves6: 10 };
+// calls6 = calls1 + 5: the team read stays per project (same wave), so
+// 6 projects cost 5 calls more than 1 — and still the same 10 waves.
+const BOUNDS = { calls1: 88, calls6: 93, waves1: 10, waves6: 10 };
