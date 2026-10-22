@@ -12099,7 +12099,8 @@
     "empty": "No languages added yet.",
     "notEnabled": "Not available right now. Nothing was saved.",
     "error": "Saving failed. Please try again.",
-    "invalid": "Choose a language and a level."
+    "invalid": "Choose a language and a level.",
+    "added": "Language added."
   },
   "externalProfiles": {
     "title": "External profiles",
@@ -17355,7 +17356,9 @@
     "emailConsentNote": "Email is off by default — it is sent only for the types you switch on here.",
     "emailInactiveNote": "Email delivery is not active on the platform yet. Your choices are saved and take effect as soon as it is.",
     "error": "The change could not be saved and was reverted. Please try again.",
-    "unavailable": "Notification settings are not available right now."
+    "unavailable": "Notification settings are not available right now.",
+    "saving": "Saving…",
+    "saved": "Saved."
   },
   "historyContext": {
     "project": "Project",
