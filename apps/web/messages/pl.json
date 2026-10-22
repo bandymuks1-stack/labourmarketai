@@ -19733,5 +19733,24 @@
     "error": "Nie udało się. Nic nie zmieniono.",
     "notAllowed": "Może to zrobić właściciel lub kierownik organizacji.",
     "notSameWork": "Te wpisy już do siebie nie pasują — odśwież stronę."
+  },
+  "liveCheck": {
+    "title": "Kontrola płatności LIVE (1 €)",
+    "intro": "Jedna prawdziwa płatność 1 €, która potwierdza cały łańcuch płatności LabourMarket.ai: platforma tworzy płatność LIVE, płacisz na stronie Stripe, a podpisane potwierdzenie trafia do bazy danych platformy.",
+    "notice": "Tylko płatność jednorazowa — nie subskrypcja, nie LMC i tylko dla tej organizacji. Inne organizacje nie są obciążane i nie widzą płatności.",
+    "pay": "Zapłać 1 € (LIVE)",
+    "ready": "Wszystko gotowe. Przycisk otwiera bezpieczną stronę płatności Stripe na dokładnie 1 €.",
+    "status": {
+      "live_check_disabled": "Kontrola płatności LIVE jest wyłączona.",
+      "unauthenticated": "Zaloguj się, aby wykonać kontrolę.",
+      "no_organization": "Najpierw wybierz przestrzeń swojej organizacji.",
+      "not_billing_authority": "Kontrolę może wykonać tylko osoba zarządzająca rozliczeniami organizacji.",
+      "not_live": "Płatności LIVE nie są włączone dla tej organizacji.",
+      "checkout_failed": "Stripe nie utworzył strony płatności. Nic nie pobrano; spróbuj później."
+    },
+    "result": {
+      "paid": "Stripe przekierował Cię po płatności. Potwierdzenie jest teraz sprawdzane w zapisach platformy.",
+      "cancelled": "Płatność anulowana — nic nie pobrano."
+    }
   }
 }

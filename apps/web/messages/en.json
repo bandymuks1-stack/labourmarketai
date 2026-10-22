@@ -19733,5 +19733,24 @@
     "error": "That didn't work. Nothing was changed.",
     "notAllowed": "The organization's owner or a manager can do this.",
     "notSameWork": "These records no longer match — refresh the page."
+  },
+  "liveCheck": {
+    "title": "LIVE payment check (1 €)",
+    "intro": "One real 1 € payment that proves the whole LabourMarket.ai payment chain: the platform creates the LIVE payment, you pay it on Stripe's page, and the signed confirmation is recorded in the platform's database.",
+    "notice": "One-time payment only — not a subscription, not LMC, and only for this organization. Other organizations are not charged and see no payment.",
+    "pay": "Pay 1 € (LIVE)",
+    "ready": "Everything is ready. The button opens Stripe's secure payment page for exactly 1 €.",
+    "status": {
+      "live_check_disabled": "The LIVE payment check is switched off.",
+      "unauthenticated": "Sign in to run the check.",
+      "no_organization": "Choose your organization's workspace first.",
+      "not_billing_authority": "Only a person who manages this organization's billing can run the check.",
+      "not_live": "LIVE payments are not available for this organization.",
+      "checkout_failed": "Stripe did not create the payment page. Nothing was charged; try again later."
+    },
+    "result": {
+      "paid": "Stripe returned you after the payment. The confirmation is now being checked in the platform's records.",
+      "cancelled": "Payment cancelled — nothing was charged."
+    }
   }
 }

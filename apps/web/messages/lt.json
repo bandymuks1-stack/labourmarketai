@@ -19733,5 +19733,24 @@
     "error": "Nepavyko. Niekas nepakeista.",
     "notAllowed": "Tai gali padaryti organizacijos savininkas arba vadovas.",
     "notSameWork": "Šie įrašai jau nebeatitinka vienas kito — atnaujinkite puslapį."
+  },
+  "liveCheck": {
+    "title": "LIVE mokėjimo patikra (1 €)",
+    "intro": "Vienas tikras 1 € mokėjimas, įrodantis visą LabourMarket.ai mokėjimo grandinę: platforma sukuria LIVE mokėjimą, tu jį apmoki Stripe puslapyje, o pasirašytas patvirtinimas įrašomas platformos duomenų bazėje.",
+    "notice": "Tik vienkartinis mokėjimas — ne prenumerata, ne LMC ir tik šiai organizacijai. Kitos organizacijos neapmokestinamos ir mokėjimo nemato.",
+    "pay": "Mokėti 1 € (LIVE)",
+    "ready": "Viskas paruošta. Mygtukas atidaro saugų Stripe mokėjimo puslapį tiksliai 1 € sumai.",
+    "status": {
+      "live_check_disabled": "LIVE mokėjimo patikra išjungta.",
+      "unauthenticated": "Prisijunk, kad galėtum atlikti patikrą.",
+      "no_organization": "Pirma pasirink savo organizacijos erdvę.",
+      "not_billing_authority": "Patikrą gali atlikti tik organizacijos mokėjimus valdantis asmuo.",
+      "not_live": "Šiai organizacijai LIVE mokėjimai neįjungti.",
+      "checkout_failed": "Stripe nesukūrė mokėjimo puslapio. Niekas nenuskaičiuota; bandyk vėliau."
+    },
+    "result": {
+      "paid": "Stripe grąžino tave po mokėjimo. Patvirtinimas dabar tikrinamas platformos įrašuose.",
+      "cancelled": "Mokėjimas atšauktas — niekas nenuskaičiuota."
+    }
   }
 }

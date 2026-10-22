@@ -19733,5 +19733,24 @@
     "error": "Dat is niet gelukt. Er is niets gewijzigd.",
     "notAllowed": "De eigenaar of een leidinggevende van de organisatie kan dit doen.",
     "notSameWork": "Deze regels komen niet meer overeen — vernieuw de pagina."
+  },
+  "liveCheck": {
+    "title": "LIVE-betaalcontrole (1 €)",
+    "intro": "Eén echte betaling van 1 € die de hele betaalketen van LabourMarket.ai bewijst: het platform maakt de LIVE-betaling aan, jij betaalt op de pagina van Stripe en de ondertekende bevestiging wordt in de database van het platform vastgelegd.",
+    "notice": "Alleen een eenmalige betaling — geen abonnement, geen LMC en alleen voor deze organisatie. Andere organisaties worden niet belast en zien geen betaling.",
+    "pay": "1 € betalen (LIVE)",
+    "ready": "Alles is klaar. De knop opent de beveiligde betaalpagina van Stripe voor precies 1 €.",
+    "status": {
+      "live_check_disabled": "De LIVE-betaalcontrole staat uit.",
+      "unauthenticated": "Log in om de controle uit te voeren.",
+      "no_organization": "Kies eerst de werkruimte van je organisatie.",
+      "not_billing_authority": "Alleen wie de facturatie van deze organisatie beheert, kan de controle uitvoeren.",
+      "not_live": "LIVE-betalingen staan niet aan voor deze organisatie.",
+      "checkout_failed": "Stripe heeft geen betaalpagina aangemaakt. Er is niets afgeschreven; probeer het later opnieuw."
+    },
+    "result": {
+      "paid": "Stripe heeft je na de betaling teruggestuurd. De bevestiging wordt nu in de gegevens van het platform gecontroleerd.",
+      "cancelled": "Betaling geannuleerd — er is niets afgeschreven."
+    }
   }
 }

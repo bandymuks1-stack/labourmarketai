@@ -68,6 +68,11 @@ export function billingTrialEnabled(): boolean {
   return env.BILLING_TRIAL_ENABLED !== "false";
 }
 
+/** Server-only: whether the owner's one-time 1 € LIVE payment check is switched on. */
+export function billingLiveCheckEnabled(): boolean {
+  return env.BILLING_LIVE_CHECK_ENABLED === "true";
+}
+
 /** Server-only: whether billing is restricted to a pilot list (true unless ALL_ORGANIZATIONS). */
 export function billingPilotActive(): boolean {
   return parsePilotOrganizations(env.BILLING_PILOT_ORGANIZATION_IDS) !== null;

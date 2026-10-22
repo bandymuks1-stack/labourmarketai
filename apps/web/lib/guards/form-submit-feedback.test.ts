@@ -55,6 +55,10 @@ const NATIVE_NAV = new Set([
   // form → redirect to the conversation; feedback is the navigation itself
   // (failure lands on the honest ?notice=cannot_open messages state).
   "app/[locale]/dashboard/bookings/page.tsx",
+  // The owner's 1 € LIVE payment check — a native POST answered with a 303 to
+  // Stripe's hosted page, or back to the page with an honest ?refused= state
+  // rendered as a role="status" line. Feedback IS the navigation.
+  "app/[locale]/dashboard/account/live-check/page.tsx",
   // Work tasks (control room PR D) — create/status/edit forms are
   // NATIVE-NAV server actions that ALWAYS redirect back to the tasks page
   // with an honest ?notice= outcome (rendered as a role="status" banner);

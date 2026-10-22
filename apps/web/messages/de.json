@@ -19733,5 +19733,24 @@
     "error": "Das hat nicht geklappt. Nichts wurde geändert.",
     "notAllowed": "Das kann der Inhaber oder eine Führungskraft der Organisation tun.",
     "notSameWork": "Diese Einträge passen nicht mehr zusammen — laden Sie die Seite neu."
+  },
+  "liveCheck": {
+    "title": "LIVE-Zahlungsprüfung (1 €)",
+    "intro": "Eine echte Zahlung von 1 €, die die gesamte Zahlungskette von LabourMarket.ai belegt: Die Plattform erstellt die LIVE-Zahlung, du bezahlst auf der Stripe-Seite, und die signierte Bestätigung wird in der Datenbank der Plattform gespeichert.",
+    "notice": "Nur eine Einmalzahlung — kein Abonnement, kein LMC und nur für diese Organisation. Andere Organisationen werden nicht belastet und sehen keine Zahlung.",
+    "pay": "1 € bezahlen (LIVE)",
+    "ready": "Alles bereit. Die Schaltfläche öffnet die sichere Stripe-Zahlungsseite über genau 1 €.",
+    "status": {
+      "live_check_disabled": "Die LIVE-Zahlungsprüfung ist ausgeschaltet.",
+      "unauthenticated": "Melde dich an, um die Prüfung auszuführen.",
+      "no_organization": "Wähle zuerst den Arbeitsbereich deiner Organisation.",
+      "not_billing_authority": "Nur wer die Abrechnung dieser Organisation verwaltet, kann die Prüfung ausführen.",
+      "not_live": "LIVE-Zahlungen sind für diese Organisation nicht eingeschaltet.",
+      "checkout_failed": "Stripe hat keine Zahlungsseite erstellt. Es wurde nichts belastet; versuche es später erneut."
+    },
+    "result": {
+      "paid": "Stripe hat dich nach der Zahlung zurückgeleitet. Die Bestätigung wird jetzt in den Aufzeichnungen der Plattform geprüft.",
+      "cancelled": "Zahlung abgebrochen — es wurde nichts belastet."
+    }
   }
 }
