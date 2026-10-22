@@ -12105,7 +12105,8 @@
     "empty": "Kalbų dar nepridėta.",
     "notEnabled": "Šiuo metu nepasiekiama. Nieko neišsaugota.",
     "error": "Išsaugoti nepavyko. Bandyk dar kartą.",
-    "invalid": "Pasirink kalbą ir lygį."
+    "invalid": "Pasirink kalbą ir lygį.",
+    "added": "Kalba pridėta."
   },
   "externalProfiles": {
     "title": "Išoriniai profiliai",
@@ -17364,7 +17365,9 @@
     "emailConsentNote": "El. laiškai pagal numatytuosius nustatymus išjungti — siunčiami tik tų tipų, kuriuos čia įjungsi.",
     "emailInactiveNote": "El. laiškų siuntimas platformoje dar neaktyvus. Tavo pasirinkimai išsaugomi ir pradės veikti vos jį įjungus.",
     "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandyk dar kartą.",
-    "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami."
+    "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami.",
+    "saving": "Saugoma…",
+    "saved": "Išsaugota."
   },
   "historyContext": {
     "project": "Projektas",

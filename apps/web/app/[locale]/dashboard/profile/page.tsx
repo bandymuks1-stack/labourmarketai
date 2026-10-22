@@ -1521,6 +1521,7 @@ export default async function ProfilePage({
               levelNative: tLangs("levelNative"),
               add: tLangs("add"),
               adding: tLangs("adding"),
+              added: tLangs("added"),
               remove: tLangs("remove"),
               empty: tLangs("empty"),
               notEnabled: tLangs("notEnabled"),

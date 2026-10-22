@@ -43,6 +43,10 @@ export interface NotificationPreferencesLabels {
   readonly emailInactiveNote: string;
   readonly error: string;
   readonly unavailable: string;
+  /** While a change is on its way to the server. */
+  readonly saving: string;
+  /** After the server stored it — the save is otherwise invisible. */
+  readonly saved: string;
 }
 
 export function NotificationPreferencesSection({
@@ -61,7 +65,7 @@ export function NotificationPreferencesSection({
       rows.map((r) => [r.type, { inApp: r.inApp, email: r.email }]),
     ),
   );
-  const [notice, setNotice] = useState<"error" | "unavailable" | null>(null);
+  const [notice, setNotice] = useState<"error" | "unavailable" | "saved" | null>(null);
   const [pending, setPending] = useState<string | null>(null);
 
   const toggle = async (type: string, channel: NotificationChannel) => {
@@ -84,6 +88,7 @@ export function NotificationPreferencesSection({
         channel,
         enabled: next,
       });
+      if (result.kind === "ok") setNotice("saved");
       if (result.kind !== "ok") {
         setState((s) => ({
           ...s,
@@ -133,15 +138,30 @@ export function NotificationPreferencesSection({
           {labels.emailInactiveNote}
         </p>
       ) : null}
-      {notice ? (
-        <p
-          className="mt-2 rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs text-state-warning"
-          data-testid="notification-prefs-notice"
-          role="status"
-        >
-          {notice === "unavailable" ? labels.unavailable : labels.error}
-        </p>
-      ) : null}
+      {/* ONE live line for the outcome of the last change: saving → saved,
+          or the refusal. A saved toggle used to leave no trace at all
+          (production audit 2026-10-22). */}
+      <p
+        className={
+          notice === "error" || notice === "unavailable"
+            ? "mt-2 rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs text-state-warning"
+            : "mt-2 min-h-5 text-xs text-text-secondary"
+        }
+        data-testid="notification-prefs-notice"
+        data-state={pending ? "saving" : (notice ?? "idle")}
+        role="status"
+        aria-live="polite"
+      >
+        {pending
+          ? labels.saving
+          : notice === "saved"
+            ? labels.saved
+            : notice === "unavailable"
+              ? labels.unavailable
+              : notice === "error"
+                ? labels.error
+                : null}
+      </p>
 
       <div className="mt-3 overflow-x-auto">
         <table className="w-full text-sm">

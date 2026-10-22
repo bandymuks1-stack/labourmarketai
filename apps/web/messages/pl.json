@@ -12105,7 +12105,8 @@
     "empty": "Nie dodano jeszcze żadnych języków.",
     "notEnabled": "Chwilowo niedostępne. Nic nie zapisano.",
     "error": "Zapis się nie powiódł. Spróbuj ponownie.",
-    "invalid": "Wybierz język i poziom."
+    "invalid": "Wybierz język i poziom.",
+    "added": "Język dodany."
   },
   "externalProfiles": {
     "title": "Profile zewnętrzne",
@@ -17364,7 +17365,9 @@
     "emailConsentNote": "E-mail jest domyślnie wyłączony — jest wysyłany tylko dla typów, które tu włączysz.",
     "emailInactiveNote": "Dostarczanie e-maili nie jest jeszcze aktywne na platformie. Twoje wybory są zapisane i zaczną obowiązywać, gdy tylko zostanie aktywowane.",
     "error": "Nie udało się zapisać zmiany i została ona cofnięta. Spróbuj ponownie.",
-    "unavailable": "Ustawienia powiadomień są teraz niedostępne."
+    "unavailable": "Ustawienia powiadomień są teraz niedostępne.",
+    "saving": "Zapisywanie…",
+    "saved": "Zapisano."
   },
   "historyContext": {
     "project": "Projekt",

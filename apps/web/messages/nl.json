@@ -12105,7 +12105,8 @@
     "empty": "Nog geen talen toegevoegd.",
     "notEnabled": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
     "error": "Opslaan is mislukt. Probeer het opnieuw.",
-    "invalid": "Kies een taal en een niveau."
+    "invalid": "Kies een taal en een niveau.",
+    "added": "Taal toegevoegd."
   },
   "externalProfiles": {
     "title": "Externe profielen",
@@ -17364,7 +17365,9 @@
     "emailConsentNote": "E-mail staat standaard uit — er wordt alleen gemaild voor de typen die je hier inschakelt.",
     "emailInactiveNote": "E-mailbezorging is op het platform nog niet actief. Je keuzes worden opgeslagen en gelden zodra die actief is.",
     "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
-    "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar."
+    "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar.",
+    "saving": "Opslaan…",
+    "saved": "Opgeslagen."
   },
   "historyContext": {
     "project": "Werkproject",
