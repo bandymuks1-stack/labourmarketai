@@ -17,21 +17,21 @@ import {
 /**
  * The owner's one-time 1 € LIVE payment check (live-check-core). The request
  * carries NO input — amount, currency, organization and mode are all decided
- * here. A plain form POST from /dashboard/account/live-check is answered with a
- * 303 to Stripe's hosted page (or back to the page with the refusal); a JSON
+ * here. A plain form POST from the account page's live-check section is
+ * answered with a 303 to Stripe's hosted page (or back with the refusal); a JSON
  * caller gets JSON.
  */
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PAGE = `${CANONICAL_ORIGIN}/dashboard/account/live-check`;
+const PAGE = `${CANONICAL_ORIGIN}/dashboard/account`;
 
 export async function POST(req: Request) {
   const wantsJson = (req.headers.get("accept") ?? "").includes("application/json");
   const refuse = (reason: string, status: number) =>
     wantsJson
       ? NextResponse.json({ ok: false, reason }, { status })
-      : NextResponse.redirect(`${PAGE}?refused=${encodeURIComponent(reason)}`, 303);
+      : NextResponse.redirect(`${PAGE}?live_check_refused=${encodeURIComponent(reason)}`, 303);
 
   const supabase = await createClient();
   const {
@@ -69,8 +69,8 @@ export async function POST(req: Request) {
     customerEmail: user.email ?? null,
     metadata: liveCheckMetadata({ organizationId: gate.organizationId, ownerId: user.id }),
     idempotencyKey: liveCheckIdempotencyKey(gate.organizationId, new Date()),
-    successUrl: `${PAGE}?result=paid`,
-    cancelUrl: `${PAGE}?result=cancelled`,
+    successUrl: `${PAGE}?live_check=paid`,
+    cancelUrl: `${PAGE}?live_check=cancelled`,
   });
   if (!result.ok) return refuse("checkout_failed", 502);
   return wantsJson

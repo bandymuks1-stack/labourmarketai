@@ -18,6 +18,7 @@ import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { LmcBalanceSection } from "@/components/app/lmc-balance-section";
 import { AccountBillingSection } from "@/components/app/account-billing-section";
+import { LivePaymentCheckSection } from "@/components/app/live-payment-check-section";
 import { ConnectedAppsSection } from "@/components/app/connected-apps-section";
 import { parseConnectedAppsFeedback } from "@/lib/auth/connected-apps";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
@@ -55,7 +56,7 @@ export default async function AccountPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ billing?: string; apps?: string }>;
+  searchParams: Promise<{ billing?: string; apps?: string; live_check?: string; live_check_refused?: string }>;
 }) {
   const { locale } = await params;
   // Native-nav `?billing=` return feedback (same idiom as planning's plain
@@ -63,7 +64,7 @@ export default async function AccountPage({
   // `?billing=test_success` / `portal_return`, and until now nothing read it.
   // `?apps=revoked|error` — the Connected Apps disconnect action's return
   // feedback (same idiom); anything else is ignored.
-  const { billing, apps } = await searchParams;
+  const { billing, apps, live_check, live_check_refused } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("auth.dashboard");
   const tRoot = await getTranslations();
@@ -214,6 +215,10 @@ export default async function AccountPage({
             never activates anything — state syncs via the signature-verified
             webhook only. */}
         <AccountBillingSection billingReturn={billing ?? null} />
+
+        {/* The owner's one-time 1 € LIVE payment check — renders nothing unless
+            the owner switched it on and billing is LIVE for this workspace. */}
+        <LivePaymentCheckSection result={live_check ?? null} refused={live_check_refused ?? null} />
 
         {/* LMC — placed directly under the plan line because they answer the same
             question at two depths: what this account is entitled to, and what it

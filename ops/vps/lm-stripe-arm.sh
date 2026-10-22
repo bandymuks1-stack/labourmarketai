@@ -126,7 +126,7 @@ case "$MODE" in
     put STRIPE_MODE "$MODE"
     if [ "$MODE" = live ]; then
       put STRIPE_LIVE_ACTIVATION approved-by-owner
-      # The owner's one-time 1 EUR LIVE payment check (/dashboard/account/live-check):
+      # The owner's one-time 1 EUR LIVE payment check (account page, /dashboard/account):
       # a separate, explicit yes; switch it off afterwards with `live-check-off`.
       printf 'Switch on the one-time 1 EUR LIVE payment check for the pilot? Type YES: ' >&2
       IFS= read -r LC

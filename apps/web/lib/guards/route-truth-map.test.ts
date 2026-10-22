@@ -181,9 +181,6 @@ const CLASSIFICATION: Record<string, string> = {
 
   // ── GATED_PREVIEW (guard-enforced zero inbound links) ─────────────────
   "dashboard/talent": "GATED_PREVIEW",
-  // The owner's one-time 1 € LIVE payment check (live-check-core): reached only
-  // by the link the owner is given; switched off by default and after the check.
-  "dashboard/account/live-check": "GATED_PREVIEW",
   // NOTE (dashboard consolidation v1): the former GATED_PREVIEW `dashboard/hub`
   // route was REMOVED. The premium hub is now the canonical /dashboard lead
   // surface (REAL_LAUNCH_SURFACE, classified above) — there is no separate hub

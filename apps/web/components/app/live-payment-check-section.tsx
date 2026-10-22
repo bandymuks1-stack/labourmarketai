@@ -1,17 +1,19 @@
-import { setRequestLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { billingLiveCheckEnabled, getBillingConfigFor } from "@/lib/billing/config";
 import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import { evaluateLiveCheck } from "@/lib/billing/live-check-core";
-import { PageTitle } from "@/components/app/premium/page-title";
 import { Button } from "@/components/ui/Button";
 
 /**
- * The owner's one-time 1 € LIVE payment check (live-check-core). Shows the
- * honest state for the caller's workspace organization and, only when every
- * gate holds, one plain form that POSTs to /api/billing/live-check — which
- * answers with Stripe's hosted page. No client input, no client JavaScript.
+ * The owner's one-time 1 € LIVE payment check (live-check-core), as a section
+ * of the account page — billing settings already live there, so the check
+ * adds no screen. Renders NOTHING unless the owner switched the check on AND
+ * billing is LIVE for the caller's workspace organization (the deny-by-default
+ * pilot); every other account sees no trace of it. The pay control is one
+ * plain form that POSTs to /api/billing/live-check, answered with Stripe's
+ * hosted page; the outcome comes back as ?live_check= / ?live_check_refused=.
  */
 const RESULTS = new Set(["paid", "cancelled"]);
 const REFUSALS = new Set([
@@ -23,17 +25,14 @@ const REFUSALS = new Set([
   "checkout_failed",
 ]);
 
-export default async function LiveCheckPage({
-  params,
-  searchParams,
+export async function LivePaymentCheckSection({
+  result,
+  refused,
 }: {
-  params: Promise<{ locale: string }>;
-  searchParams: Promise<{ result?: string; refused?: string }>;
+  result: string | null;
+  refused: string | null;
 }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  const { result, refused } = await searchParams;
-  const t = await getTranslations("liveCheck");
+  if (!billingLiveCheckEnabled()) return null;
 
   const supabase = await createClient();
   const {
@@ -48,21 +47,25 @@ export default async function LiveCheckPage({
       billingAuthority = subject.billingAuthority;
     }
   }
+  const billingState = getBillingConfigFor(organizationId).state;
+  if (billingState !== "stripe_live") return null;
+
+  const t = await getTranslations("liveCheck");
   const gate = evaluateLiveCheck({
-    enabled: billingLiveCheckEnabled(),
+    enabled: true,
     authenticated: Boolean(user),
     organizationId,
     billingAuthority,
-    billingState: getBillingConfigFor(organizationId).state,
+    billingState,
   });
 
   return (
-    <div className="mx-auto flex w-full max-w-content flex-col gap-6" id="main-content">
-      <header className="flex flex-col gap-1">
-        <PageTitle>{t("title")}</PageTitle>
-        <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
-      </header>
-
+    <section
+      data-testid="live-payment-check"
+      className="flex flex-col gap-3 rounded-md border border-ink-500 px-4 py-4"
+    >
+      <h2 className="text-base font-semibold text-text-primary">{t("title")}</h2>
+      <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
       <p className="text-sm leading-relaxed text-text-secondary">{t("notice")}</p>
 
       {result && RESULTS.has(result) ? (
@@ -88,6 +91,6 @@ export default async function LiveCheckPage({
           {t(`status.${gate.reason}`)}
         </p>
       )}
-    </div>
+    </section>
   );
 }
