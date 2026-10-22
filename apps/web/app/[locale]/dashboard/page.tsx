@@ -378,15 +378,16 @@ export default async function DashboardHomePage({
   // were stripped from the URL on first consumption, so a remount never
   // re-sends them.
   // The company workspace opens on the company model (existing doors).
+  const companyModel =
+    activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
   // The pilot pass pointer leads it — the employer home is where an owner
   // looks first, and it renders nothing unless the pass is theirs to start.
-  const companyOpeningContext =
-    activeOrgWorkspace && identity === "company" ? (
-      <>
-        <PilotPassInvite className="mb-4" />
-        <CompanyModelScreen />
-      </>
-    ) : null;
+  const companyOpeningContext = companyModel ? (
+    <>
+      <PilotPassInvite className="mb-4" />
+      {companyModel}
+    </>
+  ) : null;
   const conversationKey = `${rootWorkspace.activeWorkspaceId}:${identity}`;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply
