@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
+// The adapter localizes placeholder need titles (#2677); the key is enough here.
+vi.mock("next-intl/server", () => ({ getTranslations: async () => (key: string) => key }));
 vi.mock("@/lib/company/employer-company-context", () => ({
   resolveEmployerCompanyContext: async () => ({ kind: "ok" }),
 }));
