@@ -418,6 +418,17 @@ audit.
   `chat-visibility-rls.test.ts` caller inventory. Full design and acceptance
   evidence: `docs/handoffs/FIRST_PARTY_SUPPLY_BRIDGE_V1.md`.
 
+- `app/api/internal/capability-readback/v1/route.ts` (2026-10-22) — the
+  Agentai OS capability readback. Behind the same `SUPPLY_FEED_BEARER_TOKEN`
+  machine secret (503 while unset, 401 on a wrong token). Service role is
+  needed because the answer is whole-table aggregate COUNTS, which no single
+  user's RLS view can give: four from
+  `agentai_capability_readback_counts_v1()` (SECURITY INVOKER, refuses every
+  caller but the service role), the rest as exact head-counts that fetch no
+  rows. The body is a fixed list of non-negative integers
+  (`lib/api/capability-readback.ts`); no row, name, id or address. Touches no
+  chat table and sends nothing.
+
 - **2026-10-06 — `lib/invitations/signup-bridge.ts`** (frictionless addressed
   invite, PR #2167). Calls ONE service_role-only SECURITY DEFINER read,
   `get_invitation_signup_context_v1` (migration `20261006100500`, RED, not
