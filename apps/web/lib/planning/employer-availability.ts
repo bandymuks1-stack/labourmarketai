@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -116,6 +117,27 @@ export async function getEmployerWorkerAvailability(
    *  privacy minimisation above is enforced by the SELECT list, and RLS still
    *  decides which workers the caller may see at all. */
   caller?: { readonly supabase: SupabaseClient; readonly userId: string },
+): Promise<EmployerAvailabilityResult> {
+  // The cookie session's read is shared within ONE render; an explicit caller
+  // (bearer / agent transport, its own client) always reads for itself.
+  return caller ? readEmployerWorkerAvailability(caller) : readSessionEmployerAvailabilityOnce();
+}
+
+/**
+ * REQUEST-SCOPED (perf 2026-10-22): one `/dashboard/company` render read the
+ * session's availability three times — the opening brief's "absent today",
+ * the planning-conflicts count and the who-is-free answer — each the same
+ * roster, absence and own-identity round trips. React `cache()` deduplicates
+ * within ONE render only: every navigation reads again, and a server action
+ * (no render) reads itself, so a leave decision is never answered from an
+ * earlier read. Callers treat the result as read-only.
+ */
+const readSessionEmployerAvailabilityOnce = cache(
+  async (): Promise<EmployerAvailabilityResult> => readEmployerWorkerAvailability(undefined),
+);
+
+async function readEmployerWorkerAvailability(
+  caller: { readonly supabase: SupabaseClient; readonly userId: string } | undefined,
 ): Promise<EmployerAvailabilityResult> {
   const supabase = caller?.supabase ?? (await createClient());
   let userId = caller?.userId ?? null;

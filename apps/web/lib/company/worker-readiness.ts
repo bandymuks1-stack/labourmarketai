@@ -1,5 +1,6 @@
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import { createClient } from "@/lib/supabase/server";
+import { readReviewableJournalEntryIds } from "@/lib/journal/reviewable-count";
 
 /**
  * Company-facing worker readiness signals (v1) — read-only, computed from
@@ -70,8 +71,9 @@ export async function getWorkerReadiness(
   }
 
   // Open review items per worker = reviewable pending entries that map to them.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: idRows } = await (supabase as any).rpc("reviewable_journal_entry_ids");
+  // The ONE `reviewable_journal_entry_ids` read, shared across every project's
+  // pulse in the same render (request-scoped, see reviewable-count.ts).
+  const { data: idRows } = await readReviewableJournalEntryIds();
   if (Array.isArray(idRows)) {
     for (const raw of idRows) {
       const eid =

@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { mergeAssignedPeople, readTeamAssignedPeople } from "@/lib/projects/assigned-people";
+import { readActiveAssignmentRows } from "@/lib/projects/operations";
 import {
   isEmployerContextFailure,
   resolveEmployerCompanyContext,
@@ -297,18 +298,12 @@ export async function listProjectAssignments(
   projectId: string,
 ): Promise<ProjectAssignment[]> {
   const supabase = await createClient();
-  const res = await asAny(supabase)
-    .from("project_worker_assignments")
-    // LEFT join on `profiles` — same reason as lib/projects/operations.ts:
-    // an employer cannot read another person's profile row, so `!inner` dropped
-    // every assignment and this list was always empty. The join only supplies
-    // an optional display name that already has a fallback below.
-    .select(
-      "assigned_at, worker:workers!inner(id, profile_id, display_name, profiles(full_name))",
-    )
-    .eq("project_id", projectId)
-    .eq("status", "active")
-    .order("assigned_at", { ascending: false });
+  // THE SAME active-assignment read the operations pulse makes (identical
+  // select — LEFT join on `profiles`: an employer cannot read another person's
+  // profile row, so `!inner` dropped every assignment; the join only supplies
+  // an optional display name that already has a fallback below). Shared per
+  // client + project within one server render: see `readActiveAssignmentRows`.
+  const res = await readActiveAssignmentRows(asAny(supabase), projectId);
   if (res.error) {
     if (migMissing(res.error.code)) return [];
     return [];
