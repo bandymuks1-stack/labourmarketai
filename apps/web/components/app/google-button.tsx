@@ -334,10 +334,12 @@ const FACEBOOK_PROVIDER: OAuthProviderConfig = {
   id: "facebook",
   logo: <FacebookLogo />,
   testId: "facebook-signin",
-  // Facebook brand button: the fixed #1877F2 surface with white label —
-  // brand-fixed and theme-independent, same rationale as above.
+  // Facebook brand button: Facebook's current brand blue #0866FF with a
+  // white label — brand-fixed and theme-independent, same rationale as above.
+  // The older #1877F2 measured 4.23:1 against white, below WCAG AA 4.5:1
+  // (axe, production login, 2026-10-22); #0866FF is 4.82:1, hover #1465D6 5.44:1.
   buttonClassName:
-    "flex min-h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-[#1877F2] px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:bg-[#1877F2]/90 disabled:cursor-not-allowed disabled:opacity-60",
+    "flex min-h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-[#0866FF] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1465D6] disabled:cursor-not-allowed disabled:opacity-60",
   markPending: () => markSignupPending("facebook"),
   logStartFailure: (e) =>
     console.error("[auth] signInWithOAuth(facebook) failed:", {
