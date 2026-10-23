@@ -17382,7 +17382,19 @@
     "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandyk dar kartą.",
     "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami.",
     "saving": "Saugoma…",
-    "saved": "Išsaugota."
+    "saved": "Išsaugota.",
+    "push": {
+      "title": "Tiesioginiai pranešimai šiame įrenginyje",
+      "intro": "Gaukite trumpą pranešimą šiame telefone ar kompiuteryje, kai atsiranda kas nors nauja. Rodoma tik pranešimo rūšis, niekada ne žinutės tekstas. Aukščiau išjungtos rūšys niekada nesiunčiamos.",
+      "turnOn": "Įjungti tiesioginius pranešimus",
+      "turnOff": "Išjungti šiame įrenginyje",
+      "working": "Vykdoma…",
+      "on": "Tiesioginiai pranešimai šiame įrenginyje įjungti.",
+      "off": "Tiesioginiai pranešimai šiame įrenginyje išjungti.",
+      "unsupported": "Ši naršyklė negali gauti tiesioginių pranešimų. „iPhone“ telefone pirmiausia pridėkite svetainę prie pradžios ekrano.",
+      "blocked": "Naršyklės nustatymuose pranešimai šiai svetainei užblokuoti. Leiskite juos ten ir grįžkite.",
+      "error": "Nepavyko. Niekas nepakeista. Bandykite dar kartą."
+    }
   },
   "historyContext": {
     "project": "Projektas",
@@ -18776,7 +18788,23 @@
       "unavailable": "Planavimas čia dar nepasiekiamas.",
       "error": "Kažkas nepavyko. Bandykite dar kartą.",
       "planned_collides": "Suplanuota, bet šis žmogus jau turi darbų kai kuriomis iš šių dienų. Sprendžiate jūs; jei plano nereikia, atšaukite jį žemiau.",
-      "planned_unknown": "Suplanuota, bet nepavyko patvirtinti, ar tos dienos laisvos. Tai nereiškia, kad laisvos."
+      "planned_unknown": "Suplanuota, bet nepavyko patvirtinti, ar tos dienos laisvos. Tai nereiškia, kad laisvos.",
+      "recurrence_invalid": "Patikrinkite kartojimą: pasirinkite bent vieną savaitės dieną arba rotaciją nuo 1 iki 28 darbo ir nuo 1 iki 28 poilsio dienų.",
+      "recurrence_empty": "Pagal šį kartojimą tarp šių datų nėra nė vienos darbo dienos. Niekas nesuplanuota.",
+      "recurrence_unavailable": "Pasikartojančios pamainos čia dar nepasiekiamos. Suplanuokite laikotarpį be kartojimo."
+    },
+    "repeat": {
+      "legend": "Kartojimas",
+      "none": "Nesikartoja",
+      "weekly": "Savaitinės pamainos",
+      "cycle": "Rotacija",
+      "weekdays": "Darbo dienos",
+      "cycleOn": "Darbo dienų iš eilės",
+      "cycleOff": "Poilsio dienų iš eilės",
+      "cycleOffset": "Kiek dienų jau dirbta pirmą dieną (0 = pradeda iš naujo)",
+      "hint": "Pamainos kartojasi tarp aukščiau nurodytų datų ir kalendoriuje rodomos kaip planas. Pamaina, sutampanti su atostogomis ar kitu darbu, išsaugoma ir pažymima, o sprendžiate jūs.",
+      "summaryWeekly": "Pamainos: {days}",
+      "summaryCycle": "Rotacija: {on} darbo, {off} poilsio"
     }
   },
   "workLifecycle": {

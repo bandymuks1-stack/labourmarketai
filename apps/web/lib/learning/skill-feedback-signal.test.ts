@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildSkillFeedbackSignal } from "./skill-feedback-signal";
 import { SKILL_FEEDBACK_REASON_MAX, normalizeFeedbackReason } from "./skill-feedback-model";
+import { activeLocales } from "@/lib/i18n/config";
 
 const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
@@ -97,7 +98,7 @@ describe("the ledger has writers now (it had none until 2026-09-19)", () => {
     expect(card).not.toMatch(/from "@\/lib\/learning\/skill-feedback-signal"/);
     expect(card).toMatch(/entry-candidate-reject-reason-/);
     expect(card).toMatch(/maxLength=\{SKILL_FEEDBACK_REASON_MAX\}/);
-    for (const locale of ["en", "lt", "ru", "nl", "de"]) {
+    for (const locale of activeLocales) {
       const j = JSON.parse(read(`messages/${locale}/journal.json`)) as Record<string, string>;
       for (const key of ["candidateRejectWhy", "candidateRejectWhySend", "candidateRejectWhyThanks"]) {
         expect(j[key], `${locale}: journal.${key}`).toBeTruthy();

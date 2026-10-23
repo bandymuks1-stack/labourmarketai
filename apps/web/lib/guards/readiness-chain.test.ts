@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Readiness chain guard (full-completion train PR 2).
@@ -81,7 +82,7 @@ describe("readiness panel makes signals actionable + is mounted", () => {
     // Every active locale must also point at documents as a separate matter,
     // so the sentence cannot drift back into a universal claim in one language
     // while staying scoped in another.
-    for (const loc of ["lt", "en", "ru", "de", "nl"] as const) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const allReady: string = m.playerCard.readinessPanel.allReady;
       expect(
@@ -93,7 +94,7 @@ describe("readiness panel makes signals actionable + is mounted", () => {
 });
 
 describe("readiness copy is honest in every active locale", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     const m = JSON.parse(read(`messages/${loc}.json`));
     it(`${loc}: readinessPanel + readinessSteps keys exist`, () => {
       const rp = m.playerCard.readinessPanel;

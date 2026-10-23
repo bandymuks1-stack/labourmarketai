@@ -17,12 +17,12 @@ import type { BrowserContext } from "@playwright/test";
  * viewer's frame and the client finds nothing to correct. Nothing the walk
  * asserts changes: the page a person sees after the refresh is the page the
  * walk now sees first.
+ *
+ * Applied to EVERY production-walk context by ONE mechanism, the walk's own
+ * `test` in `./prod-walk` (default fixtures and `browser.newContext` alike);
+ * specs never call these helpers themselves.
  */
 export const WALK_TIME_ZONE = "Europe/Vilnius";
-
-export function walkTimeZoneOptions(): { timezoneId: string } {
-  return { timezoneId: WALK_TIME_ZONE };
-}
 
 export async function seedViewerTimeZone(ctx: BrowserContext): Promise<void> {
   const url = process.env.E2E_BASE_URL ?? "https://labourmarket.ai";

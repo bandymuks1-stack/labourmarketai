@@ -102,6 +102,7 @@ import {
   maybeDispatchNotificationEmail,
   type NotificationEmailDispatchOutcome,
 } from "./email-dispatch";
+import { maybeDispatchWebPush } from "./web-push-dispatch";
 import {
   journalReviewEntityId,
   messageReceivedEntityId,
@@ -378,6 +379,13 @@ async function deliverDetailed(
   if (outcome.kind === "written") {
     email = await maybeDispatchNotificationEmail(admin, input, prefRows);
     reportEmailOutcome(input.eventType, email);
+    // COM-3 push hop: the same event, the same recipient, the same copy as
+    // the bell. Inert until the owner switches the channel on (flag + VAPID
+    // keys) AND the person opted in on a device; never fails the insert.
+    const push = await maybeDispatchWebPush(admin, input, prefRows);
+    if (push.kind === "send_failed") {
+      console.warn("[notifications/push] not delivered", { eventType: input.eventType, reason: push.reason });
+    }
   }
   return { outcome: outcome.kind, email };
 }
