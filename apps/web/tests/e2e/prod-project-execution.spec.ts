@@ -45,7 +45,7 @@ const ENABLED =
   process.env.PROD_QA_WALK === "1" &&
   SUPA !== "" &&
   ANON !== "" &&
-  ["worker", "owner", "manager"].every((s) => existsSync(state(s)));
+  ["worker", "owner", "manager", "agency"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 240_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
@@ -448,8 +448,11 @@ test("E-13 (3.13). the operations report downloads for the owner and for nobody 
     await ctx.close();
   }
   {
-    // Another organization's manager: the project is not readable to them.
-    const { ctx } = await as(browser, "manager");
+    // Another organization: the agency slot, which belongs to no Alfa
+    // workspace. NOT the manager slot — qa.manager+multiw has been an active
+    // MANAGER of Alfa since 2026-08-06 (multi-workspace cast), so its 200 was
+    // a member reading its own organization (run 39968362991), not a leak.
+    const { ctx } = await as(browser, "agency");
     const res = await ctx.request.get(url);
     expect([403, 404], `another organization is refused (got ${res.status()})`).toContain(res.status());
     await ctx.close();
