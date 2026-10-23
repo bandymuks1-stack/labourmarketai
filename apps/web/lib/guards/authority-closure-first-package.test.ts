@@ -159,7 +159,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261021095500_",
       // 2026-10-23 (RED, needs-human-gate, NOT applied): COM-3 web push channel
       // (web_push_subscriptions + register command + push opt-in channel value).
-      "20261023170000_",
+      "20261023171500_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

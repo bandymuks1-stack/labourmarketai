@@ -54,7 +54,7 @@ export interface NotificationPreferenceRow {
 }
 
 /**
- * THE PUSH OPT-IN (COM-3 push channel, migration 20261023170000): ONE row per
+ * THE PUSH OPT-IN (COM-3 push channel, migration 20261023171500): ONE row per
  * person, (notification_type '*', channel 'push'), stored WITH the other
  * preferences — no second preference store. Default OFF (consent-first, like
  * e-mail): push reaches a person only after they turned it on themselves AND

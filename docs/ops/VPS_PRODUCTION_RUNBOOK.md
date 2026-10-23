@@ -287,7 +287,7 @@ No agent grants this role.
 Push is a third hop of the existing notifications: the same event, the same
 person and the same title as the bell. It stays completely inert, and the
 opt-in in the account settings stays hidden, until **all four** settings below
-are present and the migration `20261023170000_web_push_subscriptions_v1` is
+are present and the migration `20261023171500_web_push_subscriptions_v1` is
 applied (RED, owner-approved apply via Supabase MCP only).
 
 | Setting | Kind |

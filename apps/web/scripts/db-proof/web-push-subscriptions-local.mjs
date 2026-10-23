@@ -4,8 +4,8 @@
  * =========================================
  *
  * Behavioural proof for the RED migration (COM-3 push channel)
- *   supabase/migrations/20261023170000_web_push_subscriptions_v1.sql
- *   supabase/rollbacks/20261023170000_web_push_subscriptions_v1.down.sql
+ *   supabase/migrations/20261023171500_web_push_subscriptions_v1.sql
+ *   supabase/rollbacks/20261023171500_web_push_subscriptions_v1.down.sql
  * on a THROWAWAY local PostgreSQL 16 cluster (same setup as
  * work-plan-shift-patterns-local.mjs: port 54399, trust auth). Never touches a
  * remote database. Applies 20260823160000_notification_preferences_v1.sql
@@ -30,8 +30,8 @@ const { Client } = pg;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..", "..", "..");
 const PREFS = join(ROOT, "supabase/migrations/20260823160000_notification_preferences_v1.sql");
-const UP = join(ROOT, "supabase/migrations/20261023170000_web_push_subscriptions_v1.sql");
-const DOWN = join(ROOT, "supabase/rollbacks/20261023170000_web_push_subscriptions_v1.down.sql");
+const UP = join(ROOT, "supabase/migrations/20261023171500_web_push_subscriptions_v1.sql");
+const DOWN = join(ROOT, "supabase/rollbacks/20261023171500_web_push_subscriptions_v1.down.sql");
 const LAST_RUN = join(__dirname, "web-push-subscriptions-local.last-run.txt");
 const host = process.env.LM_PROOF_PGHOST ?? "127.0.0.1";
 const port = Number(process.env.LM_PROOF_PGPORT ?? 54399);

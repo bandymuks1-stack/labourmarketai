@@ -1,5 +1,5 @@
 -- ============================================================================
--- ROLLBACK for 20261023170000_web_push_subscriptions_v1 (COM-3 push channel)
+-- ROLLBACK for 20261023171500_web_push_subscriptions_v1 (COM-3 push channel)
 --
 -- Guarded: refuses while any push subscription or any 'push' preference row
 -- exists. Those are people's own choices and device addresses; a rollback

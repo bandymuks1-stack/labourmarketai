@@ -1,5 +1,5 @@
 -- ============================================================================
--- 20261023170000 — web_push_subscriptions_v1  (COM-3: push channel)
+-- 20261023171500 — web_push_subscriptions_v1  (COM-3: push channel)
 --
 -- @human-gate-approved
 --   Acknowledged RED by route, NOT an approval to auto-merge: a new table with
@@ -41,7 +41,7 @@
 -- registered in the erasure registry so erasure v3 does not refuse the new
 -- reference (privacy-erasure-registry-coverage guard).
 --
--- ROLLBACK: supabase/rollbacks/20261023170000_web_push_subscriptions_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261023171500_web_push_subscriptions_v1.down.sql
 -- ============================================================================
 
 -- 1. The opt-in lives with the existing preferences: widen the channel CHECK
@@ -140,7 +140,7 @@ end $$;
 -- ─────────────────────────────────────────────────────────────────────────
 
 -- ROLLBACK
---   supabase/rollbacks/20261023170000_web_push_subscriptions_v1.down.sql:
+--   supabase/rollbacks/20261023171500_web_push_subscriptions_v1.down.sql:
 --   refuses while any 'push' preference row exists; otherwise
 --   delete the registry row (web_push_subscriptions.profile_id);
 --   drop function if exists public.register_web_push_subscription_v1(text, text, text);

@@ -16,7 +16,7 @@ const root = resolve(__dirname, "..", "..");
 const repo = resolve(root, "..", "..");
 const read = (rel: string) => readFileSync(resolve(root, rel), "utf8");
 const readRepo = (rel: string) => readFileSync(resolve(repo, rel), "utf8");
-const MIGRATION = "supabase/migrations/20261023170000_web_push_subscriptions_v1.sql";
+const MIGRATION = "supabase/migrations/20261023171500_web_push_subscriptions_v1.sql";
 
 describe("off by default, hidden while off", () => {
   it("the flag must be exactly 'true' and every key present", () => {
@@ -114,7 +114,7 @@ describe("safety", () => {
     expect(sql).not.toMatch(/grant[^;]*\bto\b[^;]*\b(anon|public)\b/i);
     expect(sql).not.toMatch(/using \(true\)/i);
     expect(sql).toMatch(/'web_push_subscriptions', 'profile_id', 'profiles', 'cascade', 'allow_cascade'/);
-    expect(readRepo("supabase/rollbacks/20261023170000_web_push_subscriptions_v1.down.sql")).toMatch(/rollback refused/);
+    expect(readRepo("supabase/rollbacks/20261023171500_web_push_subscriptions_v1.down.sql")).toMatch(/rollback refused/);
   });
 });
 

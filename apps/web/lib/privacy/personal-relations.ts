@@ -143,7 +143,7 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "dashboard_preferences", key: "profile_id" },
   // My Space pins (20261020020000, applied 2026-10-20): the person's own shortcuts, owner-only RLS.
   { table: "workspace_pins", key: "profile_id" },
-  // Push-notification devices (20261023170000, COM-3 push channel): the
+  // Push-notification devices (20261023171500, COM-3 push channel): the
   // person's own browser subscriptions, owner-only RLS. The endpoint and the
   // time are theirs to see; the browser's encryption key and auth secret are
   // device credentials, not information about the person, and are left out.
