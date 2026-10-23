@@ -222,7 +222,7 @@ describe("the service-role metrics section stays behind the superadmin gate", ()
    * is ~0.2-0.4 s; the READ pass is the cost — 4.2-8.6 s when the files are read
    * one by one with readFileSync (an antivirus scan on every open), 1.8 s when
    * they are read concurrently. So the walk uses dirents (no stat per entry)
-   * and the reads run in parallel. The test still reads the whole tree — a
+   * and the reads run in parallel, at most 64 open at a time. The test still reads the whole tree — a
    * narrower glob would let an importer outside it slip past — so it keeps an
    * explicit ceiling equal to the guards project's CI ceiling (vitest.config.ts):
    * it is a whole-tree structural scan like those guards, and under a full
@@ -241,8 +241,17 @@ describe("the service-role metrics section stays behind the superadmin gate", ()
       return out;
     };
     const files = ["app", "components", "lib"].flatMap((d) => walk(join(WEB, d)));
-    const imports = await Promise.all(
-      files.map(async (f) => /from "@\/components\/admin\/product-metrics-section"/.test(await readFile(f, "utf8"))),
+    // Bounded concurrency: an unbounded Promise.all opens all ~2,200 files at
+    // once and fails with EMFILE where the descriptor limit is 1,024.
+    const imports: boolean[] = new Array(files.length);
+    let next = 0;
+    await Promise.all(
+      Array.from({ length: 64 }, async () => {
+        while (next < files.length) {
+          const i = next++;
+          imports[i] = /from "@\/components\/admin\/product-metrics-section"/.test(await readFile(files[i]!, "utf8"));
+        }
+      }),
     );
     const importers = files
       .filter((_, i) => imports[i])
