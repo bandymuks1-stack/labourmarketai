@@ -69,9 +69,15 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 ## 4. Health, monitoring, logs
 
 - `https://labourmarket.ai/api/health` → `ok`, `build` (first 8 of the sha), `deployEnv:
-  production`, auth + db probes, vacancy freshness. GitHub `health-probe.yml` polls it every
-  15 min (fails loudly); `product-monitor.yml` hourly.
-- Container: `docker logs labourmarket-prod` (rotated), `docker stats`; VPS: `/proc/pressure/cpu`,
+  production`, auth + db probes, vacancy freshness. GitHub `health-probe.yml` is also the
+  external **stall monitor** (2026-10-23): every 5 min (GitHub runs it late/sparsely) one GET
+  each to `/api/health`, `/lt`, `/lt/auth/login` through Cloudflare, one summary line (status,
+  connect, first byte, total, colo), and it fails loudly on a first byte > 10 s, a 5xx or no
+  answer; `product-monitor.yml` hourly. `vps-status.yml` (manual) prints the receiver's
+  `status` — release, docker health, RestartCount — with the existing deploy key, read-only.
+- Container: `docker logs labourmarket-prod` (rotated), `docker stats`. A swap REMOVES the old
+  container and, with it, its logs; since 2026-10-23 `lm-prod-run.sh` first saves them to
+  `/root/lm-prod/logs/*.log.gz` (root-only, newest 20). VPS: `/proc/pressure/cpu`,
   Agentai OS must stay 5/5 healthy (Agentai has priority: `docker update --cpus=0.3
   labourmarket-prod` or stop it if Agentai degrades).
 - nginx: the vhost has no `access_log` directive yet (HestiaCP default is off) — proposed
@@ -89,7 +95,7 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 | NAV (Norway) ingestion | `nav-supply-cadence.yml` 02/08/14/20 UTC (GitHub, service role) | GREEN after migration | keep (GitHub) |
 | Sweden ingestion | `sweden-supply-cadence.yml` 01/09/17 UTC | GREEN | keep |
 | Freshness check | `ingestion-freshness.yml` 04/10/16/22 UTC | GREEN | keep |
-| Health probe | `health-probe.yml` */15 | fails loudly on outage | keep |
+| Health + stall probe | `health-probe.yml` */5 (was */15) | fails loudly on an outage, a 5xx or a first byte > 10 s | keep |
 | Product monitor | `product-monitor.yml` hourly | GREEN | keep |
 | Prod QA walk | `prod-qa-walk.yml` daily rotation + post-merge | GREEN on the VPS (role-routes, brigade, journal, living-cv, marketplace…) | keep; its 24 h budget was a Vercel-CPU rule — revisit |
 | Legacy LABMA backup | root crontab `0 3 * * * /root/Labma/scripts/nightly-backup.sh` | dumps a **legacy local DB** (164 KB, unchanged daily) + empty files tar to `/root/backups` | leave until a new backup mechanism is proven (owner rule) |

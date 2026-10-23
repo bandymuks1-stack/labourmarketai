@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { inviteCapGate } from "./invite-cap";
+import { seedViewerTimeZone, walkTimeZoneOptions } from "./viewer-time-zone";
 import { chooseWorkContextIfAsked } from "./worklog-context";
 import { bearerOf, qaApi } from "./prod-qa-api";
 import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
@@ -38,14 +39,22 @@ async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx
   const ctx = await browser.newContext({
     storageState: state(slot),
     locale: "lt-LT",
+    ...walkTimeZoneOptions(),
     ...(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : {}),
   });
+  // A returning browser: no first-visit time-zone refresh of every step's
+  // first page (see viewer-time-zone.ts).
+  await seedViewerTimeZone(ctx);
   return { ctx, page: await ctx.newPage() };
 }
 
-/** Make `orgName` the active workspace through the real header chip. */
-async function useWorkspace(page: Page, orgName: string): Promise<void> {
-  await page.goto("/lt/dashboard/company/people");
+const PEOPLE = "/lt/dashboard/company/people";
+
+/** Make `orgName` the active workspace through the real header chip, standing
+ *  on `path` — the page the step works on (every dashboard page carries the
+ *  chip). The heavy people page is opened only by the steps that use it. */
+async function useWorkspace(page: Page, orgName: string, path: string = PEOPLE): Promise<void> {
+  await page.goto(path);
   const chip = page.getByTestId("workspace-chip").first();
   await expect(chip).toBeVisible({ timeout: 30_000 });
   if ((await chip.innerText()).includes(orgName)) return;
@@ -53,7 +62,7 @@ async function useWorkspace(page: Page, orgName: string): Promise<void> {
   const menu = page.getByTestId("workspace-chip-menu");
   await menu.locator('[data-testid^="workspace-option-"]', { hasText: orgName }).first().click();
   await expect(chip).toContainText(orgName, { timeout: 30_000 });
-  await page.goto("/lt/dashboard/company/people");
+  await page.goto(path);
 }
 
 const links: Record<string, string> = {};
@@ -70,7 +79,8 @@ let teamTestId = "";
  * is itself a correct product outcome, not a failure.
  */
 test("0. owner disbands earlier synthetic brigades, keeping their history", async ({ browser }) => {
-  // Up to twenty disband answers, each followed by a reload of a heavy page.
+  // Up to twenty disband answers, each followed by the panel's own refresh of
+  // a heavy page.
   test.setTimeout(480_000);
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
@@ -90,31 +100,42 @@ test("0. owner disbands earlier synthetic brigades, keeping their history", asyn
   // cap). Walk the whole list, and stop once three slots are free.
   for (let i = 0; i < 20 && disbanded < 3; i += 1) {
     const cards = await leftovers.all();
-    let card = null;
+    let teamId = "";
     for (const c of cards) {
       const id = (await c.getAttribute("data-testid")) ?? "";
       if (!tried.has(id)) {
-        card = c;
+        teamId = id.replace("team-brigade-", "");
         tried.add(id);
         break;
       }
     }
-    if (!card) break;
-    const teamId = ((await card.getAttribute("data-testid")) ?? "").replace("team-brigade-", "");
+    if (!teamId) break;
+    // Addressed by its id, not by its place in a list the panel re-renders.
+    const card = page.getByTestId(`team-brigade-${teamId}`);
     await card.getByTestId(`team-disband-${teamId}`).click();
     await expect(card.getByTestId(`team-disband-explain-${teamId}`)).toBeVisible();
     await card.getByTestId(`team-disband-confirm-${teamId}`).click();
     const msg = page.getByTestId("team-brigades-msg");
     await expect(msg).toBeVisible({ timeout: 30_000 });
     const text = await msg.innerText();
-    if (/išformuota\. Jos istorija|was disbanded\. Its history/i.test(text)) disbanded += 1;
-    else if (/atvirų darbų|still has open work/i.test(text)) refused += 1;
+    if (/išformuota\. Jos istorija|was disbanded\. Its history/i.test(text)) {
+      disbanded += 1;
+      // The panel refreshes itself after the answer (router.refresh): the
+      // disbanded brigade leaves the ACTIVE list without a reload. This
+      // replaces a full page reload per disband (one heavy render each,
+      // prod-qa run 39795574869) and checks more: the list really updates.
+      await expect(card, "a disbanded brigade leaves the active list").toHaveCount(0, { timeout: 30_000 });
+    } else if (/atvirų darbų|still has open work/i.test(text)) refused += 1;
     else throw new Error(`unexpected disband answer: ${text}`);
-    await page.reload();
     await expect(page.getByTestId("team-brigades-panel")).toBeVisible();
   }
-  // History is kept: every disbanded brigade is listed as such.
-  if (disbanded > 0) await expect(page.getByTestId("team-brigades-disbanded")).toBeVisible();
+  // History is kept: every disbanded brigade is listed as such — after a
+  // reload, so the history is the server's, not the panel's memory.
+  if (disbanded > 0) {
+    await page.reload();
+    await expect(page.getByTestId("team-brigades-panel")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId("team-brigades-disbanded")).toBeVisible({ timeout: 30_000 });
+  }
   console.info(`disband step: disbanded=${disbanded} refused_open_work=${refused}`);
   await ctx.close();
 });
@@ -258,8 +279,7 @@ let offerId = "";
 
 test("B2B-1. buyer (Gama) posts a need through the company demand intake", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
-  await useWorkspace(page, GAMA);
-  await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
+  await useWorkspace(page, GAMA, "/lt/dashboard/company/needs?audience=need#demand-intake");
   await page.getByTestId("demand-role").fill(NEED_ROLE);
   await page.getByTestId("demand-description").fill(`QA-SYNTHETIC ${RUN}: synthetic need for the production brigade walk, 2 people.`);
   await page.getByTestId("demand-next").click();
@@ -306,8 +326,7 @@ async function terms(page: Page, id: string) {
 
 test("B2B-3. buyer sees the offer and writes in its thread", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
-  await useWorkspace(page, GAMA);
-  await page.goto(`/lt/dashboard/company/scouting?request=${needId}`);
+  await useWorkspace(page, GAMA, `/lt/dashboard/company/scouting?request=${needId}`);
   const received = page.locator('[data-testid^="team-offer-received-"]', { hasText: "QA-SYNTHETIC Brigada" }).first();
   await expect(received).toBeVisible({ timeout: 20_000 });
   offerId = (await received.getAttribute("data-testid"))!.replace("team-offer-received-", "");
@@ -350,8 +369,7 @@ test("B2B-4. supplier proposes terms v1 (people, rate, dates, scope)", async ({ 
 
 test("B2B-5. buyer counters with v2; it cannot accept its own counter", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
-  await useWorkspace(page, GAMA);
-  await page.goto(`/lt/dashboard/company/scouting?request=${needId}`);
+  await useWorkspace(page, GAMA, `/lt/dashboard/company/scouting?request=${needId}`);
   const box = await terms(page, offerId);
   await expect(box.getByTestId(`team-offer-terms-history-${offerId}`)).toContainText("32 EUR/h", { timeout: 20_000 });
   const form = box.getByTestId(`team-offer-terms-form-${offerId}`);
@@ -387,8 +405,12 @@ let journaledBefore = 0;
 
 /** The project's journaled hours as the operations centre shows them (the
  *  buyer's own view of work done on its project). */
-async function journaledHours(page: Page, projectId: string): Promise<number> {
-  await page.goto(`/lt/dashboard/projects/${projectId}/operations`);
+async function journaledHours(
+  page: Page,
+  projectId: string,
+  opts: { readonly navigate?: boolean } = {},
+): Promise<number> {
+  if (opts.navigate !== false) await page.goto(`/lt/dashboard/projects/${projectId}/operations`);
   const chip = page.getByTestId("ops-centre-hours-journaled");
   await expect(chip).toBeVisible({ timeout: 30_000 });
   // "Žurnale: 1 002,5 val." — the value follows the label's colon; grouping
@@ -402,8 +424,7 @@ async function journaledHours(page: Page, projectId: string): Promise<number> {
 
 test("B2B-7. buyer hands the agreed brigade into its own project as ONE team assignment", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
-  await useWorkspace(page, GAMA);
-  await page.goto("/lt/dashboard/projects");
+  await useWorkspace(page, GAMA, "/lt/dashboard/projects");
   // Self-healing: an earlier run that stopped before B2B-10 left its brigade
   // assigned, and step 0 cannot disband a brigade with open work. End those
   // leftovers here (history is kept) so brigades never pile up to the cap.
@@ -497,11 +518,16 @@ test("B2B-8. a brigade member sees the buyer's project through the team and reco
 
 test("B2B-9. the buyer sees the brigade's work on its own project", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
-  await useWorkspace(page, GAMA);
-  let after = journaledBefore;
-  for (let i = 0; i < 6 && after < journaledBefore + 6; i++) {
+  const ops = `/lt/dashboard/projects/${gamaProjectId}/operations`;
+  await useWorkspace(page, GAMA, ops);
+  // The first read is the page useWorkspace already opened; each later read
+  // reloads it after a BACKING-OFF wait (3, 6, 9, 15 s — the same ~33 s budget
+  // as six reads 5 s apart, with fewer heavy renders while the hours land).
+  let after = await journaledHours(page, gamaProjectId, { navigate: false });
+  for (const waitMs of [3_000, 6_000, 9_000, 15_000]) {
+    if (after >= journaledBefore + 6) break;
+    await page.waitForTimeout(waitMs);
     after = await journaledHours(page, gamaProjectId);
-    if (after < journaledBefore + 6) await page.waitForTimeout(5_000);
   }
   console.info(`[b2b] journaled hours on the buyer's project: ${journaledBefore} → ${after}`);
   expect(after, "the member's 6 hours reach the buyer's project").toBeGreaterThanOrEqual(journaledBefore + 6);
@@ -544,9 +570,8 @@ test("B2B-9b. the same hours by API: the buyer reads them, a third organization 
 
 test("B2B-10. the buyer ends this run's team assignment (history kept), so the next run can disband the brigade", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
-  await useWorkspace(page, GAMA);
-  await page.goto("/lt/dashboard/projects");
-  const row = page.getByTestId("project-team-row").filter({ hasText: TEAM }).first();
+  await useWorkspace(page, GAMA, "/lt/dashboard/projects");
+  const row =page.getByTestId("project-team-row").filter({ hasText: TEAM }).first();
   await expect(row, "this run's brigade is assigned on the buyer's project").toBeVisible({ timeout: 30_000 });
   await row.getByTestId("project-team-end").click();
   await expect(page.getByTestId("project-team-row").filter({ hasText: TEAM })).toHaveCount(0, { timeout: 30_000 });
