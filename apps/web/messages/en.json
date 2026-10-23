@@ -17322,7 +17322,30 @@
     "approve": "Allow",
     "deny": "Deny",
     "errorMissingId": "The authorization request is missing. Go back to the application and try again.",
-    "errorUnresolved": "The authorization request could not be resolved. It may have expired (requests stay valid for a few minutes) or was already used. Go back to the application and connect again."
+    "errorUnresolved": "The authorization request could not be resolved. It may have expired (requests stay valid for a few minutes) or was already used. Go back to the application and connect again.",
+    "scope": {
+      "readProfile": "See your profile and Living CV",
+      "writeProfile": "Change your profile, Living CV, preferences and notifications",
+      "readJournal": "See your work journal, hours, absences and evidence",
+      "writeJournal": "Add and change work journal entries, evidence and absence requests",
+      "readDemand": "See needs, jobs, candidates and shortlists",
+      "writeDemand": "Post and close needs, express interest and manage shortlists",
+      "readOrganization": "See your organization's projects, people, bookings, calendar and reports",
+      "writeOrganization": "Make changes in your organization: projects, assignments, teams, bookings and tasks",
+      "messages": "Read your conversations and send messages",
+      "marketplace": "See and manage marketplace listings, service offers, proposals and contracts",
+      "oidcOpenid": "Confirm who you are (your account identifier)",
+      "oidcEmail": "See your email address",
+      "oidcProfile": "See your name and profile picture",
+      "oidcPhone": "See your phone number",
+      "oidcOfflineAccess": "Stay connected without asking you to sign in again",
+      "billingNone": "Payments: not available. No connected app can pay, charge or move money."
+    },
+    "scopeUnknown": "Not recognised by LabourMarket.ai. It grants nothing here.",
+    "noProductScopes": "This app did not ask for specific LabourMarket.ai permissions. If you allow it, it can use every assistant action your account allows, always as you.",
+    "noProductScopesEnforced": "This app did not ask for specific LabourMarket.ai permissions, so it will not be able to read or change anything here. Ask the app to request the permissions it needs.",
+    "scopesNotEnforced": "These permissions do not limit the app yet. If you allow it, the app can use every assistant action your account allows, always as you.",
+    "importantChangesConfirm": "Important changes still wait for your confirmation."
   },
   "capabilities": {
     "interestChooseDemand": "Choose the demand you are interested in: {options}.",

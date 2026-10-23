@@ -17322,7 +17322,30 @@
     "approve": "Toestaan",
     "deny": "Weigeren",
     "errorMissingId": "Het autorisatieverzoek ontbreekt. Ga terug naar de applicatie en probeer het opnieuw.",
-    "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Het is mogelijk verlopen (verzoeken blijven enkele minuten geldig) of al gebruikt. Ga terug naar de toepassing en verbind opnieuw."
+    "errorUnresolved": "Het autorisatieverzoek kon niet worden verwerkt. Het is mogelijk verlopen (verzoeken blijven enkele minuten geldig) of al gebruikt. Ga terug naar de toepassing en verbind opnieuw.",
+    "scope": {
+      "readProfile": "Je profiel en Living CV bekijken",
+      "writeProfile": "Je profiel, Living CV, voorkeuren en meldingen wijzigen",
+      "readJournal": "Je werkjournaal, uren, afwezigheden en bewijs bekijken",
+      "writeJournal": "Werkjournaalregels, bewijs en afwezigheidsaanvragen toevoegen en wijzigen",
+      "readDemand": "Behoeften, vacatures, kandidaten en shortlists bekijken",
+      "writeDemand": "Behoeften plaatsen en sluiten, interesse tonen en shortlists beheren",
+      "readOrganization": "Projecten, mensen, boekingen, agenda en rapporten van je organisatie bekijken",
+      "writeOrganization": "Wijzigingen maken in je organisatie: projecten, toewijzingen, teams, boekingen en taken",
+      "messages": "Je gesprekken lezen en berichten versturen",
+      "marketplace": "Marktplaatsadvertenties, dienstaanbiedingen, voorstellen en contracten bekijken en beheren",
+      "oidcOpenid": "Bevestigen wie je bent (je account-ID)",
+      "oidcEmail": "Je e-mailadres bekijken",
+      "oidcProfile": "Je naam en profielfoto bekijken",
+      "oidcPhone": "Je telefoonnummer bekijken",
+      "oidcOfflineAccess": "Verbonden blijven zonder je opnieuw te laten inloggen",
+      "billingNone": "Betalingen: niet beschikbaar. Geen enkele verbonden applicatie kan betalen, afschrijven of geld overmaken."
+    },
+    "scopeUnknown": "Niet herkend door LabourMarket.ai. Het geeft hier niets.",
+    "noProductScopes": "Deze applicatie heeft niet om specifieke LabourMarket.ai-rechten gevraagd. Als je het toestaat, kan ze elke assistentactie gebruiken die je account toestaat, altijd namens jou.",
+    "noProductScopesEnforced": "Deze applicatie heeft niet om specifieke LabourMarket.ai-rechten gevraagd en kan hier daarom niets bekijken of wijzigen. Vraag de applicatie om de rechten aan te vragen die ze nodig heeft.",
+    "scopesNotEnforced": "Deze rechten beperken de applicatie nog niet. Als je het toestaat, kan de applicatie elke assistentactie gebruiken die je account toestaat, altijd namens jou.",
+    "importantChangesConfirm": "Belangrijke wijzigingen wachten nog steeds op je bevestiging."
   },
   "capabilities": {
     "interestChooseDemand": "Kies de vraag waarin je geïnteresseerd bent: {options}.",
