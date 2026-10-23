@@ -21,9 +21,10 @@ export interface JobDemandInput {
   readonly notes?: string | null;
 }
 
-/** Existing demand-intake surface (company hiring hub — reuse, never a new
- *  write path). The DemandRequestButton / DemandDraftForm live here. */
-const DEMAND_INTAKE_HREF = "/dashboard/company";
+/** Existing demand-intake surface (the company needs door since #1746 —
+ *  reuse, never a new write path). The DemandRequestButton / DemandDraftForm
+ *  live here. */
+const DEMAND_INTAKE_HREF = "/dashboard/company/needs#demand-intake";
 
 export function recognizeJobDemand(input: JobDemandInput): RecognizedJobDemand {
   const structured = structureNeed({
