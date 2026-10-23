@@ -1026,7 +1026,7 @@
       },
       {
         "q": "Kuidas arveldus toimib?",
-        "a": "Kaardimakse Stripe'i kaudu, käibemaksu lisab Stripe Tax; arved, tühistamine ja muudatused on sinu organisatsiooni kontol."
+        "a": "Kaardimakse Stripe'i kaudu. Arved, maksete ajalugu ja tühistamine on sinu organisatsiooni kontol."
       },
       {
         "q": "Kas aktiivsetel ametikohtadel on piir?",

@@ -5058,8 +5058,8 @@
           "desc": "Definieer rollen, aantal mensen en vaardigheden."
         },
         {
-          "title": "Zie wie kan passen",
-          "desc": "Bekijk werknemers en uitzendbureaus waarvan de gegevens bij je vraag kunnen passen — jij kiest, niets wordt automatisch gerangschikt of gescoord."
+          "title": "Zie wie past",
+          "desc": "Werknemers en uitzendbureaus waarvan de gegevens bij je vraag passen, worden op passendheid gerangschikt, met de redenen — een signaal, geen garantie. Jij beslist wie je benadert."
         },
         {
           "title": "Neem direct contact op",
@@ -5553,7 +5553,7 @@
       },
       {
         "q": "Hoe verloopt de facturering?",
-        "a": "Kaartbetaling via Stripe, btw via Stripe Tax; facturen, opzegging en wijzigingen in uw organisatieaccount."
+        "a": "Kaartbetaling via Stripe. Facturen, betalingsgeschiedenis en opzegging vind je in je organisatieaccount."
       },
       {
         "q": "Is er een limiet op actieve posities?",

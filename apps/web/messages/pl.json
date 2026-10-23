@@ -5058,8 +5058,8 @@
           "desc": "Określ role, liczbę osób i umiejętności."
         },
         {
-          "title": "Zobacz, kto może pasować",
-          "desc": "Przeglądaj pracowników i agencje, których zapisy mogą pasować do Twojego zapotrzebowania — wybierasz Ty, nic nie jest automatycznie ustawiane w rankingu ani oceniane."
+          "title": "Zobacz, kto pasuje",
+          "desc": "Pracownicy i agencje, których zapisy pasują do Twojego zapotrzebowania, są uszeregowani według dopasowania, z uzasadnieniem — to wskazówka, a nie gwarancja. Ty decydujesz, z kim się skontaktować."
         },
         {
           "title": "Skontaktuj się bezpośrednio",
@@ -5553,7 +5553,7 @@
       },
       {
         "q": "Jak przebiegają rozliczenia?",
-        "a": "Płatność kartą przez Stripe, z podatkiem VAT naliczanym przez Stripe Tax; faktury, rezygnacja i zmiany znajdują się na koncie Twojej organizacji."
+        "a": "Płatność kartą przez Stripe. Faktury, historia płatności i rezygnacja znajdują się na koncie Twojej organizacji."
       },
       {
         "q": "Czy jest limit aktywnych stanowisk?",

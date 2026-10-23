@@ -5058,8 +5058,8 @@
           "desc": "Definieren Sie Rollen, Personalstärke und Fähigkeiten."
         },
         {
-          "title": "Sehen, wer passen könnte",
-          "desc": "Sehen Sie Arbeitskräfte und Personalagenturen, deren Angaben zu Ihrem Bedarf passen könnten — Sie entscheiden, nichts wird automatisch bewertet oder gereiht."
+          "title": "Sehen, wer passt",
+          "desc": "Arbeitskräfte und Agenturen, deren Angaben zu Ihrem Bedarf passen, werden nach Passung mit Begründung gelistet — ein Hinweis, keine Garantie. Wen Sie kontaktieren, entscheiden Sie."
         },
         {
           "title": "Direkt Kontakt aufnehmen",
@@ -5553,7 +5553,7 @@
       },
       {
         "q": "Wie wird abgerechnet?",
-        "a": "Kartenzahlung über Stripe, Umsatzsteuer über Stripe Tax; Rechnungen, Kündigung und Änderungen im Organisationskonto."
+        "a": "Kartenzahlung über Stripe. Rechnungen, Zahlungsverlauf und Kündigung finden Sie im Organisationskonto."
       },
       {
         "q": "Gibt es eine Obergrenze für aktive Positionen?",

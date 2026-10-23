@@ -1026,7 +1026,7 @@
       },
       {
         "q": "Hur hanteras betalningen?",
-        "a": "Kortbetalning via Stripe med moms hanterad av Stripe Tax; fakturor, uppsägning och ändringar finns i ditt organisationskonto."
+        "a": "Kortbetalning via Stripe. Fakturor, betalningshistorik och uppsägning finns i ditt organisationskonto."
       },
       {
         "q": "Finns det en gräns för aktiva positioner?",
