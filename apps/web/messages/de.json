@@ -10925,6 +10925,32 @@
     "graceNotice": "Die letzte Zahlung ist fehlgeschlagen — das Abonnement befindet sich bis zum erneuten Versuch in einer Kulanzfrist.",
     "endsOn": "Gekündigt — der Plan bleibt bis {date} aktiv und verlängert sich nicht.",
     "endsAtPeriodEnd": "Gekündigt — der Plan bleibt bis zum Ende des bezahlten Zeitraums aktiv und verlängert sich nicht.",
+    "invoices": {
+      "title": "Rechnungen",
+      "billingOff": "Solange Zahlungen für diese Organisation ausgeschaltet sind, werden keine Rechnungen angezeigt.",
+      "noCustomer": "Noch keine Rechnungen: Diese Organisation hat noch nicht über den Zahlungsanbieter bezahlt.",
+      "unknown": "Die Rechnungen konnten gerade nicht vom Zahlungsanbieter gelesen werden. Das heißt nicht, dass es keine gibt — bitte später erneut versuchen.",
+      "empty": "Der Zahlungsanbieter hat für diese Organisation noch keine Rechnungen.",
+      "incomplete": "Diese Liste ist möglicherweise unvollständig: Nicht jede Rechnung konnte vom Zahlungsanbieter gelesen werden.",
+      "number": "Rechnungsnummer",
+      "noNumber": "Rechnung ohne Nummer",
+      "date": "Datum",
+      "period": "Zeitraum",
+      "oneTime": "Einmalzahlung",
+      "excludingVat": "Betrag ohne USt.",
+      "vat": "USt.",
+      "total": "Gesamt",
+      "notReported": "nicht angegeben",
+      "view": "Rechnung ansehen",
+      "pdf": "PDF herunterladen",
+      "opensStripe": "Stripe öffnet sich in einem neuen Tab",
+      "status": {
+        "paid": "Bezahlt",
+        "open": "Zahlung ausstehend",
+        "void": "Storniert",
+        "uncollectible": "Uneinbringlich"
+      }
+    },
     "manage": {
       "open": "Abonnement verwalten",
       "opening": "Wird geöffnet…",
