@@ -334,6 +334,10 @@ const MONTH_WORD = /^(men[\p{L}]*|months?|месяц[\p{L}]*|maand[\p{L}]*|monat
  *  Every other year word ("3 metų", "3 years", "3 года") is far more often
  *  EXPERIENCE than a duration, and must not turn into an end date. */
 const YEAR_DATIVE = /^metams$/u;
+/** Year words, folded — EN, RU, DE, PL, NL (read only after a preposition). */
+const YEAR_WORD = /^(years?|год|года|лет|jahre?n?|lata|lat|rok|jaar|jaren)$/u;
+/** The word that makes "N years" a duration: for / на / für / na / voor. */
+const DURATION_PREPOSITION = /^(for|на|fur|na|voor)$/u;
 /** Dative plural words that sit before "metams" WITHOUT counting it — "for
  *  the next / this / coming year". Any OTHER dative plural word there is a
  *  count this module cannot read ("dvejems", a typo), and an unread count
@@ -369,6 +373,17 @@ export function parseDurationDays(text: string): number | null {
   for (let i = 0; i < folded.length; i++) {
     if (!YEAR_DATIVE.test(folded[i])) continue;
     return yearDativeDays(i > 0 ? tokens[i - 1] : undefined);
+  }
+  // Years in the other locales only with the duration preposition right
+  // before the count — "for 2 years", "на 2 года", "für 2 Jahre", "na 2
+  // lata", "voor 2 jaar". Without it ("3 years experience", "опыт 3 года")
+  // a year count is experience, never an end date.
+  for (let i = 2; i < folded.length; i++) {
+    if (!YEAR_WORD.test(folded[i]) || !DURATION_PREPOSITION.test(folded[i - 2])) continue;
+    const candidate = tokens[i - 1];
+    const digits = /^\d{1,2}$/.test(candidate) ? Number.parseInt(candidate, 10) : null;
+    const value = digits ?? parseWordNumber(candidate);
+    if (value !== null && value >= 1 && value <= 10) return value * 365;
   }
   for (let i = 1; i < folded.length; i++) {
     const unit = WEEK_WORD.test(folded[i]) ? 7 : MONTH_WORD.test(folded[i]) ? 30 : 0;

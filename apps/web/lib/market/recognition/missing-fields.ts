@@ -14,6 +14,7 @@
  */
 import {
   countPeopleInNeed,
+  detectTeamComposition,
   structureNeed,
   type NeedStructureSuggestion,
 } from "@/lib/structuring/structure-need";
@@ -113,8 +114,12 @@ const RULES: readonly FieldRule[] = [
     // "2 mūrininkų", "reikia 3 darbuotojų", "3 mėnesiams", "2 savaitėms".
     // Only a number that counts PEOPLE — "Reikia 3 metų patirties" states
     // experience, not a three-person need.
+    // Teams of a stated size ("3 brigadų po 4 žmones") state the extent too,
+    // even though no plain headcount is derived from them.
     understood: ({ text }) =>
-      countPeopleInNeed({ description: text }) !== null || parseDurationDays(text) !== null,
+      countPeopleInNeed({ description: text }) !== null ||
+      detectTeamComposition(text) !== null ||
+      parseDurationDays(text) !== null,
     patterns: [
       /\b(installation|dismantling|renovation|finishing|assembly|maintenance|fitting)\b/,
       /\b(montav|ardym|renovacij|apdail|surinkim|priežiūr)/,

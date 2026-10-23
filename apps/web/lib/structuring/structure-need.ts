@@ -12,6 +12,7 @@
  */
 import { ALL_WORK_TYPE_SLUGS } from "@/lib/taxonomy/work-categories";
 import { isIsoCountry } from "@/lib/location/country-model";
+import { foldText } from "./normalize";
 
 export type StartPeriod = "flexible" | "this_week" | "urgent";
 export type AccommodationOffer =
@@ -251,15 +252,68 @@ const PEOPLE_COUNT_RE =
   /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i;
 
 /** Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
- *  halves of pairs whose other half was already here. */
+ *  halves of pairs whose other half was already here; DE/PL/NL the same
+ *  verbs the value-statement reader already knows. */
 const DEMAND_VERB_COUNT_RE =
-  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i;
+  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauchen|suchen|zoeken|potrzebujemy|szukamy)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i;
 
-/** What a number right after a demand verb is measuring when it is NOT a
- *  headcount: "Need 3 years experience", "Reikia 3 metų patirties",
- *  "reikia 2 mėn.", "reikia 40 val.", "reikia 15 eur". */
-const UNIT_AFTER_COUNT_RE =
-  /^\s*(?:\+\s*)?(?:years?|yrs?|metų|metu|metai|metus|metams|met\b|m\.|months?|mėn|men\b|menes|mėnes|weeks?|savait|days?|dien|d\.|hours?|h\b|val|eur|€|%|km|nok|sek|dkk|pln|usd|лет|год|месяц|недел|дн|час|евро)/i;
+/**
+ * Words that make the number before them a MEASURE, never a headcount:
+ * time (years, months, weeks, days, hours), money and percent, in every
+ * active locale. "Need 3 years experience", "Reikia 3 metų patirties",
+ * "dvejiems metams suvirintojo", "15 eur/val.", "40 val. per savaitę",
+ * "2500 eur bruto", "на 2 года", "für 6 Monate", "na 6 miesięcy", "voor 2
+ * jaar". Tested on the lowercased AND the folded token. The bare token "men"
+ * is NOT here: in English it counts people ("3 men"); the Lithuanian month
+ * abbreviation is matched in its written form "mėn".
+ */
+const COUNT_UNIT_WORD_RE =
+  /^(?:years?|yrs?|metų|metu|metai|metus|metams|met|m|months?|mėn\p{L}*|mėnes\p{L}*|menes\p{L}*|weeks?|savait\p{L}*|days?|dien\p{L}*|d|hours?|hrs?|h|val\p{L}*|eur\p{L}*|euro|€|nok|sek|dkk|pln|usd|zl|zł|лет|год\p{L}*|месяц\p{L}*|мес|недел\p{L}*|дн\p{L}*|день|час\p{L}*|евро|руб\p{L}*|jahre?n?|monate?n?|monat|wochen?|tage?n?|stunden?|std|lata?|rok\p{L}*|miesi\p{L}*|tygodn\p{L}*|dni|godzin\p{L}*|jaar|jaren|maand\p{L}*|weken|dagen|uur|uren|%|km)$/u;
+
+/** Is this one token a unit of time, money or percent (see COUNT_UNIT_WORD_RE)? */
+export function isCountUnitWord(token: string | null | undefined): boolean {
+  if (!token) return false;
+  const lower = token.toLowerCase();
+  return COUNT_UNIT_WORD_RE.test(lower) || COUNT_UNIT_WORD_RE.test(foldText(lower));
+}
+
+/** The first word of `rest` ("" when none) — what directly follows a number. */
+function firstWordOf(rest: string): string {
+  return rest.match(/^\s*(?:\+\s*)?([^\s\d.,;:!?()/]+)/u)?.[1] ?? "";
+}
+
+/**
+ * TEAMS of a stated size — "3 brigadų po 4 žmones", "3 crews of 4 people",
+ * "3 бригады по 4 человека", "3 Teams zu 4", "3 brygady po 4 osoby", "3
+ * ploegen van 4". Neither number is the headcount (that is 3 × 4), and the
+ * need models hold no team fields yet, so a reader that sees this leaves the
+ * headcount UNRESOLVED and flags it rather than reporting 3 or 4.
+ */
+export interface TeamComposition {
+  readonly teams: number;
+  readonly perTeam: number;
+}
+
+const TEAM_COMPOSITION_RES: readonly RegExp[] = [
+  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+brigad\p{L}*\s+po\s+(\d{1,3})(?!\d)/u, // lt (folded)
+  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+(?:crews?|teams?|brigades?|gangs?)\s+of\s+(\d{1,3})(?!\d)/u, // en
+  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+(?:бригад\p{L}*|команд\p{L}*)\s+по\s+(\d{1,3})(?!\d)/u, // ru
+  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+(?:teams?|kolonnen|trupps?)\s+(?:zu|mit|a|je)\s+(\d{1,3})(?!\d)/u, // de
+  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+brygad\p{L}*\s+po\s+(\d{1,3})(?!\d)/u, // pl
+  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+(?:ploegen|teams)\s+van\s+(\d{1,3})(?!\d)/u, // nl
+];
+
+export function detectTeamComposition(text: string | null | undefined): TeamComposition | null {
+  const folded = foldText(text ?? "");
+  for (const re of TEAM_COMPOSITION_RES) {
+    const m = folded.match(re);
+    if (!m) continue;
+    const teams = Number.parseInt(m[1], 10);
+    const perTeam = Number.parseInt(m[2], 10);
+    if (teams >= 1 && perTeam >= 1) return { teams, perTeam };
+  }
+  return null;
+}
 
 function adjacentOccupationCountRe(occupationNeedle: string): RegExp {
   // Immediately adjacent only (one optional space, one optional "x"), so the
@@ -291,8 +345,8 @@ function detectTeamSize(hay: string, occupationNeedle: string | null): number | 
   if (people !== null) return people;
   const verb = hay.match(DEMAND_VERB_COUNT_RE);
   if (verb && verb.index !== undefined) {
-    const rest = hay.slice(verb.index + verb[0].length);
-    const n = UNIT_AFTER_COUNT_RE.test(rest) ? null : countFrom(verb);
+    const next = firstWordOf(hay.slice(verb.index + verb[0].length));
+    const n = isCountUnitWord(next) ? null : countFrom(verb);
     if (n !== null) return n;
   }
   return occupationNeedle ? countFrom(hay.match(adjacentOccupationCountRe(occupationNeedle))) : null;
@@ -330,10 +384,24 @@ function needRoleHay(input: NeedStructureInput): string {
 /** The recognised work type and the needle that identified it. The service
  *  noun is masked first: "buhalterijos paslaugos" must not read as a care
  *  assistant because "paslaug" contains the needle "slaug". */
-function recognisedWorkType(roleHay: string): { workType: string | null; needle: string | null } {
+function recognisedWorkType(roleHay: string): {
+  workType: string | null;
+  needle: string | null;
+  /** The hay the needle was found in — the counter must read the same one. */
+  hay: string;
+} {
+  // Lowercased first (the needles carry their diacritic spellings), then
+  // FOLDED: "Schweißer" only meets the needle "schweisser" once ß is ss.
   const wtHit = firstMatchWithNeedle(WORK_TYPE_RULES, maskServiceNoun(roleHay));
-  const workType = wtHit && KNOWN_SLUGS.has(wtHit.rule.slug) ? wtHit.rule.slug : null;
-  return { workType, needle: workType ? wtHit?.needle ?? null : null };
+  if (wtHit && KNOWN_SLUGS.has(wtHit.rule.slug)) {
+    return { workType: wtHit.rule.slug, needle: wtHit.needle, hay: roleHay };
+  }
+  const foldedHay = foldText(roleHay);
+  const foldedHit = firstMatchWithNeedle(WORK_TYPE_RULES, maskServiceNoun(foldedHay));
+  if (foldedHit && KNOWN_SLUGS.has(foldedHit.rule.slug)) {
+    return { workType: foldedHit.rule.slug, needle: foldedHit.needle, hay: foldedHay };
+  }
+  return { workType: null, needle: null, hay: roleHay };
 }
 
 /**
@@ -345,7 +413,10 @@ function recognisedWorkType(roleHay: string): { workType: string | null; needle:
  */
 export function countPeopleInNeed(input: NeedStructureInput): number | null {
   const roleHay = needRoleHay(input);
-  return detectPeopleCount(roleHay, recognisedWorkType(roleHay).needle);
+  // "3 brigadų po 4 žmones" names 3 × 4 people; neither number alone is it.
+  if (detectTeamComposition(roleHay)) return null;
+  const wt = recognisedWorkType(roleHay);
+  return detectPeopleCount(wt.hay, wt.needle);
 }
 
 export function structureNeed(input: NeedStructureInput): NeedStructureSuggestion {
@@ -356,7 +427,7 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
   const roleHay = needRoleHay(input);
   const locHay = `${normNeedText(input.location)} ${roleHay}`.trim();
 
-  const { workType, needle: occupationNeedle } = recognisedWorkType(roleHay);
+  const { workType, needle: occupationNeedle, hay: workTypeHay } = recognisedWorkType(roleHay);
   if (workType) reasons.push(`work_type:${workType}`);
 
   const cc = firstMatch(COUNTRY_RULES, locHay);
@@ -365,7 +436,11 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
 
   // Only the needle of a RECOGNISED work type is handed to the counter — an
   // unrecognised occupation must not silently lend its noun to a headcount.
-  const teamSize = detectTeamSize(roleHay, occupationNeedle);
+  // Teams of a stated size ("3 brigadų po 4 žmones") leave it unresolved and
+  // flagged: the total is 3 × 4, and there is no team field to hold it.
+  const composition = detectTeamComposition(roleHay);
+  if (composition) reasons.push(`team_composition:${composition.teams}x${composition.perTeam}`);
+  const teamSize = composition ? null : detectTeamSize(workTypeHay, occupationNeedle);
   if (teamSize != null) reasons.push(`team_size:${teamSize}`);
 
   const startPeriod = detectStartPeriod(roleHay);
@@ -382,7 +457,7 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
 
   // Never guess boldly: if we couldn't even identify the work type, or nothing
   // confident matched, flag it for human review.
-  const needsReview = workType === null || confidence === "low";
+  const needsReview = workType === null || confidence === "low" || composition !== null;
 
   return {
     workType,
