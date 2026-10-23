@@ -1,23 +1,22 @@
-# Billing recovery cadence: bounded sweep that reads Stripe for subscriptions
-# awaiting provider sync (checkout completed, subscription event never landed) and
-# applies them through the SAME canonical primitive as the webhook. It never
-# creates, changes, cancels or refunds a payment.
+# Billing recovery cadence — OBSOLETE as a caller (2026-10-23). Kept only as the reviewable static gate.
 #
-# Why GitHub Actions and not vercel.json: the Vercel Hobby plan already holds the
-# maximum number of crons; the job-alerts and supply cadences do the same.
+# The recovery sweep (/api/cron/billing-recovery) reads Stripe for subscriptions awaiting provider sync
+# and applies them through the SAME canonical primitive as the webhook. It never creates, changes, cancels
+# or refunds a payment.
 #
-# INERT BY DEFAULT: no-ops until the repo variable BILLING_RECOVERY_SCHEDULE_ENABLED=true
-# and the secret CRON_SECRET are set in the GitHub console (never committed).
-# Two independent switches: this schedule variable AND the server env BILLING_RECOVERY_ENABLED=true
+# WHY THIS WORKFLOW NO LONGER CALLS THE ROUTE: since the hosting move (2026-10-17) every /api/cron/* path is
+# reachable ONLY from the VPS itself. nginx answers 404 to the public internet
+# (ops/vps/labourmarket.ai.nginx.conf: `location ^~ /api/cron/ { return 404; }`), so an HTTP call from a
+# GitHub runner could never succeed — it would only produce a red run, or, worse, be mistaken for a cadence.
+#
+# THE ONE RUNNER is the VPS: `sh /root/lm-prod/bin/lm-cron.sh billing-recovery` (ops/vps/lm-cron.sh), which
+# calls the active release on 127.0.0.1 with CRON_SECRET. Scheduling it is the cron.d line documented in
+# ops/vps/labourmarket.cron, added only with the owner's Stripe GO (lm-cron-install.sh refuses it until then).
+#
+# Two independent server switches still apply there: CRON_SECRET and BILLING_RECOVERY_ENABLED=true
 # (default OFF; a valid CRON_SECRET alone never permits recovery writes).
-# Kill switch: unset the variable. The endpoint returns 503 + a reason code while
-# billing is inactive or the billing tables are absent.
 name: billing-recovery-cadence
 
-# 2026-10-17: the half-hourly schedule was removed — production scheduling moved to the VPS
-# (ops/vps/labourmarket.cron, one owner per task). This workflow stays dispatch-only so the
-# static gate (vars.BILLING_RECOVERY_SCHEDULE_ENABLED + secrets.CRON_SECRET) remains reviewable
-# and never produces a routine green run that could be mistaken for a working cadence.
 on:
   workflow_dispatch:
 
@@ -31,7 +30,7 @@ permissions:
 jobs:
   recover:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - name: Gate
         id: gate
@@ -47,12 +46,8 @@ jobs:
           fi
       - name: Run the recovery sweep
         if: steps.gate.outputs.gated == 'false'
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          code=$(curl -sS -o body.json -w "%{http_code}" -H "Authorization: Bearer $CRON_SECRET" https://labourmarket.ai/api/cron/billing-recovery)
-          echo "status=$code"
-          cat body.json
-          # Server capability flag OFF (BILLING_RECOVERY_ENABLED unset) is a designed no-op, not a red run.
-          if [ "$code" = "503" ] && grep -q "\"recovery_disabled\"" body.json; then echo "Server recovery flag OFF (designed no-op)"; exit 0; fi
-          [ "$code" = "200" ]
+          # No HTTP call: the public host 404s every /api/cron/* path (see the header). Failing loudly is the
+          # honest answer; a green run here would claim a sweep that never happened.
+          echo "::error::billing recovery cannot run from GitHub Actions: /api/cron/* is reachable only on the VPS. Run 'sh /root/lm-prod/bin/lm-cron.sh billing-recovery' there (ops/vps/lm-cron.sh)."
+          exit 1

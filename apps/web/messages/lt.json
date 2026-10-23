@@ -1058,6 +1058,18 @@
     "carryNote": {
       "no_company": "Tavo tekstas neišsaugotas: kol neturi įmonės darbo srities, juodraštis neturi kam priklausyti. Poreikio formą atidarome tuščią — įmonę gali sukurti ten pat.",
       "failed": "Tavo teksto išsaugoti nepavyko, todėl poreikio formą atidarome tuščią. Aprašymą teks suvesti iš naujo."
+    },
+    "headcount": {
+      "total": "Darbuotojų: {count}",
+      "teams": "Darbuotojų: {total} ({teams, plural, one {# brigada} few {# brigados} other {# brigadų}} po {perTeam})"
+    },
+    "clarify": {
+      "title": "Patikslink",
+      "team_count_range": "Nurodei brigadų skaičių intervalu. Kiek brigadų tiksliai reikia ir kiek žmonių bus kiekvienoje?",
+      "per_team_range": "Kiek žmonių tiksliai bus kiekvienoje brigadoje?",
+      "team_size_missing": "Kiek žmonių bus kiekvienoje brigadoje? Kol to nežinome, darbuotojų skaičiaus neskaičiuojame.",
+      "team_count_missing": "Kiek brigadų reikia?",
+      "headcount_unclear": "Nurodei kelis darbuotojus, bet ne kiek. Kiek tiksliai žmonių reikia?"
     }
   },
   "quickNav": {
@@ -5622,7 +5634,6 @@
   },
   "legal": {
     "preparing": {
-      "body": "Teisinė informacija ruošiama. Prieš pradedant mokamas paslaugas ar sutartinius santykius ši informacija bus pateikta ir atnaujinta.",
       "contact": "Iškilus klausimams susisiekite su mumis."
     },
     "marketplaceRules": {
@@ -5635,10 +5646,9 @@
         "Vieši pasiūlymai rodomi tik po moderavimo; nepatikimi ar įtartini pasiūlymai paslepiami.",
         "Draudžiama prekiauti reguliuojamomis ar neteisėtomis prekėmis ir paslaugomis.",
         "Žemėlapyje taškas atsiranda tik su patvirtintomis koordinatėmis — jokių netikrų žymeklių.",
-        "Mokėjimai dar neaktyvūs; jokių mokėjimų per platformą šiame etape.",
+        "Mokėjimai tarp naudotojų per platformą nevyksta; per ją mokamas tik mokestis už platformos paslaugas.",
         "Apie netinkamą elgesį ar įtartiną veiklą galima pranešti — moderatoriai peržiūri."
-      ],
-      "reviewNote": "Šios taisyklės aprašo, kaip platforma iš tikrųjų veikia šiandien. Galutinis privalomųjų dokumentų teisinis tekstas dar ruošiamas ir prieš pradedant mokamas paslaugas jį peržiūrės savininkas ir teisininkas."
+      ]
     },
     "terms": {
       "title": "Naudojimo sąlygos",
@@ -5670,7 +5680,7 @@
     },
     "privacy": {
       "title": "Privatumo politika",
-      "intro": "Šis puslapis paprastais žodžiais paaiškina, kokius asmens duomenis naudoja Labour Market AI, kodėl juos naudoja ir kokias teises turite. Jis aprašo platformą tokią, kokia ji veikia šiandien, kol mokėjimai neaktyvūs.",
+      "intro": "Šis puslapis paprastais žodžiais paaiškina, kokius asmens duomenis naudoja Labour Market AI, kodėl juos naudoja ir kokias teises turite. Jis aprašo platformą tokią, kokia ji veikia šiandien.",
       "sections": [
         {
           "heading": "Kas atsako už jūsų duomenis",
@@ -5690,6 +5700,15 @@
             "Žinutės, kurias siunčiate ir gaunate platformoje.",
             "Sutikimų įrašai: kai duodate ar atšaukiate sutikimą, išsaugomas veiksmas ir jo laikas.",
             "Techniniai duomenys, reikalingi paslaugai veikti, pavyzdžiui, prisijungimo slapukai (žr. Slapukų politiką)."
+          ]
+        },
+        {
+          "heading": "Prisijungimas per „Google“, „Facebook“ arba „LinkedIn“",
+          "items": [
+            "Paskyrą susikurti ir prisijungti galite savo „Google“, „Facebook“ arba „LinkedIn“ paskyra, užuot jungęsi el. pašto adresu. Tai naudojama tik jūsų prisijungimui.",
+            "Kai pasirenkate vieną iš jų, tas paslaugų teikėjas patvirtina jūsų tapatybę ir perduoda platformai jūsų el. pašto adresą, vardą ir jūsų paskyros pas tą teikėją identifikatorių. Platforma neprašo jokių papildomų leidimų — jokios prieigos prie jūsų draugų ar kontaktų, įrašų ar puslapių — ir niekada nieko neskelbia jūsų vardu.",
+            "Jūsų el. pašto adresas tampa paskyros el. paštu. Teikėjo perduotas vardas naudojamas tik laikinam vardui, paimtam iš jūsų el. pašto adreso, pakeisti; jūsų pačių įvestas vardas niekada neperrašomas. Prisijungimo įrašą (teikėją, jūsų paskyros pas jį identifikatorių ir jo perduotus duomenis) saugo mūsų autentifikavimo paslaugų teikėjas „Supabase“, susietą su jūsų paskyra.",
+            "Norėdami ištrinti šiuos duomenis, ištrinkite savo LabourMarket.ai paskyrą — veiksmai aprašyti puslapyje „Paskyros ir duomenų ištrynimas“. LabourMarket.ai pašalinimas iš „Facebook“, „Google“ ar „LinkedIn“ nustatymų pats savaime neištrina jūsų LabourMarket.ai paskyros ir jos duomenų."
           ]
         },
         {
@@ -5717,15 +5736,26 @@
           "items": [
             "Sutikimų tikslai atskirti: profesinio profilio matomumas darbdaviams ir duomenų perdavimas konkrečiai įmonei yra du skirtingi pasirinkimai — nė vienas nesujungtas su taisyklėmis, nepažymėtas iš anksto ir nebūtinas paskyrai, CV ar darbo žurnalui naudoti.",
             "Kiekviename sutikimo ekrane rodomas tikslus versijuotas tekstas, kas taps matoma, kas liks privatu, ir abu pasirinkimai greta (įjungti / dabar neįjungti). Atsisakymas nieko nekeičia jūsų paskyroje.",
-            "Bet kurį sutikimą galite atšaukti bet kada privatumo nustatymuose vienu žingsniu. Po atšaukimo profilis iškart nustoja rodytis naujose įmonių paieškose; duomenys, kuriuos įmonė teisėtai gavo leidimo galiojimo metu, gali likti pas tą įmonę — apie tai sakome sąžiningai.",
+            "Bet kurį sutikimą galite atšaukti bet kada privatumo nustatymuose vienu žingsniu. Po atšaukimo profilis iškart nustoja rodytis naujose įmonių paieškose; duomenys, kuriuos įmonė teisėtai gavo leidimo galiojimo metu, gali likti pas tą įmonę.",
             "Sutikimų istorija yra tik pildoma: kiekvienas suteikimas ir atšaukimas — atskiras nekintamas įrašas su teksto versija, kalba, laiku ir tikslu. Niekas — įskaitant administratorius — negali jo redaguoti ar ištrinti, o administratorius negali duoti sutikimo jūsų vardu."
+          ]
+        },
+        {
+          "heading": "Paslaugų teikėjai, kurie tvarko duomenis platformai",
+          "items": [
+            "„Supabase“ — duomenų bazė, naudotojų prisijungimas ir failų saugykla.",
+            "„Cloudflare“ — tinklas prieš svetainę (domeno vardų sistema, šifravimas perdavimo metu, podėlis ir apsauga nuo atakų); per jį eina kiekviena užklausa į svetainę.",
+            "„Stripe“ — mokėjimų už mokamas platformos paslaugas apdorojimas. Kai organizacija pradeda apmokėjimą, „Stripe“ gauna mokančio naudotojo el. pašto adresą ir vidinį paskyros identifikatorių; kortelės duomenys įvedami pačios „Stripe“ mokėjimo puslapyje ir platforma jų nesaugo.",
+            "„Google“, „Facebook“ („Meta“) ir „LinkedIn“ — tik jei pasirenkate prisijungti per juos, kaip aprašyta aukščiau.",
+            "„Google“ (Gemini API) — tik taip, kaip aprašyta toliau esančiame skyriuje apie DI.",
+            "Visas infrastruktūros paslaugų teikėjų sąrašas pateiktas puslapyje „Duomenų apsauga“."
           ]
         },
         {
           "heading": "Jūsų teisės",
           "items": [
             "Galite prašyti susipažinti su apie jus saugomais duomenimis, juos ištaisyti, gauti jų kopiją, apriboti jų naudojimą arba juos ištrinti.",
-            "Sąžininga dabartinė būsena: savo duomenų kopiją JSON failu ir darbo žurnalą CSV failu galite atsisiųsti patys iš savo paskyros. Ištrynimas lieka žmogaus peržiūrimas prašymas — momentinio ištrynimo mygtuko nėra; susisiekite su mumis arba pateikite prašymą, ir jį apdoros žmogus.",
+            "Savo duomenų kopiją JSON failu ir darbo žurnalą CSV failu galite atsisiųsti patys iš savo paskyros. Paskyros ištrynimo galite paprašyti paskyros puslapyje „Privatumas“ ir patvirtinti prašymą prisijungę iš naujo; tada sistema paskyrą ištrina automatiškai ir išsiunčia patvirtinimą į paskyros el. paštą. Jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Taip pat galite susisiekti su mumis — žr. puslapį „Paskyros ir duomenų ištrynimas“.",
             "Kai tvarkymas grindžiamas sutikimu, sutikimą galite bet kada atšaukti."
           ]
         },
@@ -5733,8 +5763,7 @@
           "heading": "Kiek laiko duomenys saugomi",
           "items": [
             "Duomenys saugomi, kol jūsų paskyra aktyvi ir kol juos naudoja funkcija, kuriai jie priklauso.",
-            "Sutikimų ir audito įrašai saugomi kaip istorija: atšaukimas įrašomas, o ne ištrinamas.",
-            "Tikslūs saugojimo terminai yra dalis galutinio teisinio teksto, kuris dar ruošiamas."
+            "Sutikimų ir audito įrašai saugomi kaip istorija: atšaukimas įrašomas, o ne ištrinamas."
           ]
         },
         {
@@ -5745,11 +5774,6 @@
             "Ką DI asistento teikėjas daro su jūsų pokalbiu, nustato to teikėjo privatumo sąlygos."
           ]
         }
-      ],
-      "pendingTitle": "Dar laukia galutinio teisinio teksto:",
-      "pendingItems": [
-        "Tikslūs kiekvienos duomenų kategorijos saugojimo terminai.",
-        "Privaloma, teisininko peržiūrėta šios politikos ir įvardytų teisinių pagrindų versija."
       ]
     },
     "cookies": {
@@ -5772,11 +5796,6 @@
       "localStorageNote": "Naršyklės saugykloje (ne slapukuose) laikomi keli dalykai: jūsų šviesios ar tamsios temos pasirinkimas; kuris puslapis ar kampanija jus čia atvedė pirmą kartą — įrašoma vieną kartą, kad vėlesnę registraciją būtų galima jai priskirti; atsitiktinis kiekvienos kortelės sesijos identifikatorius, išnykstantis uždarius kortelę; ir smulkūs patogumai, pvz., paslėpti pranešimai, neseniai peržiūrėti įrašai ir kalbos įvesties kalba. Niekas iš to neperduodama trečiosioms šalims ir nenaudojama reklamai; viską bet kada galite išvalyti savo naršyklėje.",
       "noTracking": "Platformoje šiandien nėra analitikos, reklamos ar trečiųjų šalių sekimo slapukų. Jei tai kada nors keistųsi, pirmiausia bus atnaujintas šis puslapis."
     },
-    "pendingLegal": {
-      "badge": "Galutinis tekstas laukia savininko ir teisininko peržiūros",
-      "body": "Šis puslapis paprastais žodžiais paaiškina, kaip platforma veikia šiandien. Tai nėra galutinis teisinis dokumentas: privalomasis tekstas dar ruošiamas ir prieš pradedant mokamas paslaugas ar sutartinius santykius jį peržiūrės savininkas ir teisininkas."
-    },
-    "disclaimer": "Šis puslapis yra tik informacinio pobūdžio ir nėra teisinė konsultacija.",
     "requestContact": "Norėdami užduoti klausimą ar pateikti prašymą dėl savo duomenų, susisiekite su mumis — jį peržiūrės žmogus.",
     "related": "Susiję puslapiai",
     "accountSection": {
@@ -5829,7 +5848,7 @@
         {
           "heading": "Eksportas ir ištrynimas",
           "items": [
-            "Savo duomenis JSON failu ir darbo žurnalą CSV failu galite atsisiųsti iš savo paskyros. Ištrynimas tvarkomas kaip peržiūrimas prašymas: niekas neištrinama akimirksniu — susisiekite su mumis, ir prašymą apdoros žmogus."
+            "Savo duomenis JSON failu ir darbo žurnalą CSV failu galite atsisiųsti iš savo paskyros. Paskyros ištrynimo prašoma iš paskyros ir jis patvirtinamas prisijungus iš naujo; tada sistema paskyrą ištrina automatiškai. Prašymą, susijusį su duomenimis, kuriuos privaloma saugoti pagal įstatymą arba kurie susiję su kitais žmonėmis, peržiūri žmogus. Taip pat galite susisiekti su mumis, ir prašymą apdoros žmogus."
           ]
         },
         {
@@ -5840,7 +5859,7 @@
             "Cloudflare — tinklas prieš svetainę: domeno vardų sistema, šifravimas perdavimo metu, podėlis ir apsauga nuo atakų. Per jį eina kiekviena užklausa į svetainę.",
             "GitHub — programinio kodo saugykla. Naudotojų duomenys ten nesaugomi.",
             "„Google“ (Gemini API) — DI apdorojimas žinutėms ir darbo skelbimams versti ir pasiūlyti, ko prašoma pokalbyje įvestu sakiniu. Siunčiamas tik tam darbui reikalingas tekstas.",
-            "„Stripe“ — mokėjimų apdorojimas. Kliento įrašas sukuriamas tik tada, kai organizacija pradeda prenumeratos apmokėjimą; šiandien jokia prenumerata neaktyvi.",
+            "„Stripe“ — mokėjimų apdorojimas. Kliento įrašas sukuriamas tik tada, kai organizacija pradeda prenumeratos apmokėjimą.",
             "Joks kitas el. pašto, DI, vertimo ar mokėjimų paslaugų teikėjas neveikia. Jei toks būtų įjungtas, pirmiausia būtų atnaujintas šis sąrašas."
           ]
         },
@@ -5850,12 +5869,6 @@
             "Jokia sistema negali pažadėti absoliutaus saugumo. Pastebėję problemą, susisiekite su mumis — ją peržiūrės žmogus."
           ]
         }
-      ],
-      "pendingTitle": "Dar laukia galutinio teisinio teksto:",
-      "pendingItems": [
-        "Oficialus techninių ir organizacinių priemonių aprašymas.",
-        "Pasirašytos duomenų tvarkymo sutartys su aukščiau išvardytais infrastruktūros teikėjais.",
-        "Galutiniai saugojimo terminai."
       ]
     },
     "dataAccess": {
@@ -6033,7 +6046,7 @@
     "dataDeletion": {
       "title": "Paskyros ir duomenų ištrynimas",
       "description": "Kaip paprašyti ištrinti savo LabourMarket.ai paskyrą ir asmens duomenis.",
-      "intro": "Galite paprašyti LabourMarket.ai ištrinti jūsų paskyrą ir asmens duomenis. Šiuo metu ištrynimas vykdomas kaip prašymas, kurį peržiūri žmogus; momentinio paskyros ištrynimo mygtuko nėra. Jei galite prisijungti, prašymą galite pateikti ir patys: atidarykite paskyros puslapį „Privatumas“ (mobiliojoje programėlėje: Nustatymai → Privatumas) ir pasirinkite paskyros ištrynimą. Bet kuriuo atveju žmogus atsako per vieną mėnesį.",
+      "intro": "Galite paprašyti LabourMarket.ai ištrinti jūsų paskyrą ir asmens duomenis. Jei galite prisijungti, prašymą galite pateikti patys: atidarykite paskyros puslapį „Privatumas“ (mobiliojoje programėlėje: Nustatymai → Privatumas), pasirinkite paskyros ištrynimą ir patvirtinkite jį prisijungę iš naujo. Tada sistema paskyrą ištrina automatiškai ir išsiunčia patvirtinimą į paskyros el. paštą; jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Ištrynimo taip pat galite paprašyti el. paštu, kaip aprašyta toliau; žmogus atsako per vieną mėnesį.",
       "howTitle": "Kaip paprašyti ištrynimo",
       "howSteps": [
         "Parašykite el. laišką adresu {email} iš el. pašto adreso, susieto su jūsų LabourMarket.ai paskyra.",
@@ -14123,7 +14136,8 @@
           "location": "Kur (miestas ar šalis)?",
           "window": "Kada — kurią savaitę ar mėnesį?",
           "quantity": "Koks kiekis?",
-          "headcount": "Kiek žmonių reikia?"
+          "headcount": "Kiek žmonių reikia?",
+          "team_size": "Kiek brigadų ir kiek žmonių kiekvienoje?"
         },
         "unclear": "Nesu tikras, ar kažką siūlai, ar ko nors ieškai. Parašyk, ką turi arba ko reikia.",
         "goodsChannelGated": "Tai gali paskelbti skelbimų lentoje, skiltyje „Prekės“ — ten matytų lentą naršantys žmonės. Niekas neišsaugoma, kol pats nepaskelbi.",
@@ -14138,7 +14152,8 @@
         "serviceNext": "Gali paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų.",
         "chipServices": "Atidaryti paslaugas",
         "corrected": "Atnaujinau: {changes}.",
-        "changeInsteadOf": "{next} (vietoj {previous})"
+        "changeInsteadOf": "{next} (vietoj {previous})",
+        "teams": "{teams, plural, one {# brigada} few {# brigados} other {# brigadų}} po {perTeam}"
       },
       "createOrganizationHint": "Galiu kartu su tavimi sukurti organizaciją — duomenys ir patvirtinimas yra viename puslapyje.",
       "chipCreateOrganization": "Sukurti organizaciją",
@@ -18808,7 +18823,23 @@
       "unavailable": "Planavimas čia dar nepasiekiamas.",
       "error": "Kažkas nepavyko. Bandykite dar kartą.",
       "planned_collides": "Suplanuota, bet šis žmogus jau turi darbų kai kuriomis iš šių dienų. Sprendžiate jūs; jei plano nereikia, atšaukite jį žemiau.",
-      "planned_unknown": "Suplanuota, bet nepavyko patvirtinti, ar tos dienos laisvos. Tai nereiškia, kad laisvos."
+      "planned_unknown": "Suplanuota, bet nepavyko patvirtinti, ar tos dienos laisvos. Tai nereiškia, kad laisvos.",
+      "recurrence_invalid": "Patikrinkite kartojimą: pasirinkite bent vieną savaitės dieną arba rotaciją nuo 1 iki 28 darbo ir nuo 1 iki 28 poilsio dienų.",
+      "recurrence_empty": "Pagal šį kartojimą tarp šių datų nėra nė vienos darbo dienos. Niekas nesuplanuota.",
+      "recurrence_unavailable": "Pasikartojančios pamainos čia dar nepasiekiamos. Suplanuokite laikotarpį be kartojimo."
+    },
+    "repeat": {
+      "legend": "Kartojimas",
+      "none": "Nesikartoja",
+      "weekly": "Savaitinės pamainos",
+      "cycle": "Rotacija",
+      "weekdays": "Darbo dienos",
+      "cycleOn": "Darbo dienų iš eilės",
+      "cycleOff": "Poilsio dienų iš eilės",
+      "cycleOffset": "Kiek dienų jau dirbta pirmą dieną (0 = pradeda iš naujo)",
+      "hint": "Pamainos kartojasi tarp aukščiau nurodytų datų ir kalendoriuje rodomos kaip planas. Pamaina, sutampanti su atostogomis ar kitu darbu, išsaugoma ir pažymima, o sprendžiate jūs.",
+      "summaryWeekly": "Pamainos: {days}",
+      "summaryCycle": "Rotacija: {on} darbo, {off} poilsio"
     }
   },
   "workLifecycle": {

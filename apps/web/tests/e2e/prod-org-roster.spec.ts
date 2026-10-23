@@ -187,10 +187,20 @@ test("R-4 (3.30). company settings save the declared capabilities as they are, a
   } else {
     test.info().annotations.push({ type: "note", description: "capabilities card not offered to this role" });
   }
-  // The help request reaches platform staff, so the walk only proves it is offered.
-  await page.goto("/lt/dashboard/company/settings#help");
+  // The help request reaches platform staff, so the walk only proves it is
+  // offered. It lives in the folded "more tools" region (there is no #help
+  // anchor), and its form opens once a request type is picked (run
+  // 39969976834 waited for a form that is never shown before a type).
+  await page.goto("/lt/dashboard/company/settings");
+  const more = page.getByTestId("settings-more").first();
+  await expect(more).toBeVisible({ timeout: 30_000 });
+  if ((await more.getAttribute("open")) === null) await more.locator("summary").first().click();
+  const type = page.locator('[data-testid^="help-request-type-"]').first();
+  await expect(type).toBeVisible({ timeout: 30_000 });
+  await type.click();
   await expect(page.getByTestId("help-request-form")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("help-request-submit")).toBeVisible();
+  await type.click(); // unpick: nothing is sent
   await ctx.close();
 });
 

@@ -84,6 +84,21 @@ export default async function CompanyDashboardPage({
   // organization, the membership notice when there is one that does not act
   // as a company for this person — never empty technical blocks.
   const employerCtx = await resolveEmployerCompanyContext();
+  // The org context and declared capabilities below need the company row only
+  // to CONFIRM which organization it mirrors, and the employer context already
+  // names that company — so they start alongside the company read (perf
+  // 2026-10-23). Request-cached: the reads below reuse these promises.
+  const orgContextRead = getActiveOrganizationContext();
+  if (employerCtx.kind === "ok") {
+    orgContextRead
+      .then((ctx) => {
+        const id =
+          ctx.organizations.find((o) => o.legacyCompanyId === employerCtx.companyId)?.id ??
+          governedActiveOrganizationId(ctx);
+        return id ? readOrganizationCapabilities(id) : null;
+      })
+      .catch(() => null);
+  }
   const companyProfile: CompanyReadResult =
     employerCtx.kind === "ok"
       ? await getAccessibleCompanyById(employerCtx.companyId)
@@ -122,7 +137,7 @@ export default async function CompanyDashboardPage({
 
   // WHAT DOES THIS ORGANIZATION DO? — answered against the `organizations`
   // row this company mirrors; a separate axis from `companyType`.
-  const orgContext = await getActiveOrganizationContext();
+  const orgContext = await orgContextRead;
   const capabilityOrgId =
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow?.id)?.id ??
     // Only a GOVERNED active organization — never an employee-only one.

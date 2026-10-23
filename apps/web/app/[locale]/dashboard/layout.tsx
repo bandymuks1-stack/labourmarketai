@@ -25,7 +25,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { AuthProvider } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
-import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
+import { readActiveRoleRows } from "@/lib/auth/profile-roles";
 import {
   DASHBOARD_PATHNAME_HEADER,
   refusalDestination,
@@ -102,17 +102,13 @@ export default async function DashboardLayout({
   // fact "this user holds no roles". `readActiveProfileRoles` retries once and
   // then throws, so an unanswered read reaches the route error boundary
   // instead of being rendered as a confident, wrong role state.
+  //
+  // ONE `profile_roles` read per request (perf 2026-10-23): this is the
+  // request-cached reader the page gate under this layout
+  // (`requireRoleOrRedirect`) and the held-roles reads share, so the page no
+  // longer repeats the shell's query. Same throw-on-unanswered semantics.
   const rolesPromise: Promise<{ role: string }[] | null> = userPromise.then(
-    async ({ data: { user } }) =>
-      user
-        ? await readActiveProfileRoles(() =>
-            supabase
-              .from("profile_roles")
-              .select("role")
-              .eq("profile_id", user.id)
-              .eq("is_active", true),
-          )
-        : null,
+    async ({ data: { user } }) => (user ? await readActiveRoleRows(supabase, user.id) : null),
   );
   const [userRes, session, rolesRows] = await Promise.all([
     userPromise,

@@ -10,6 +10,7 @@
  * scopes to the subset that makes sense for it, so a worker never sees "legal
  * employer" and a project never sees "overtime".
  */
+import { readNeedHeadcount } from "@/lib/structuring/need-headcount";
 import { structureNeed } from "@/lib/structuring/structure-need";
 import { detectJobDemandFields } from "./missing-fields";
 import { deriveJobDemandRiskFlags } from "./risk-flags";
@@ -198,6 +199,9 @@ export function recognizeIntent(
 
   const readiness = deriveReadiness(intent, recognized, missing);
   const nextActions = buildNextActions(intent, missing);
+  // How many workers — for every intent that ASKS for people. A person
+  // looking for work ("ieškau suvirintojo darbo") is describing themself.
+  const headcount = intent === "need_work" ? null : readNeedHeadcount(text);
 
   return {
     intent,
@@ -207,6 +211,7 @@ export function recognizeIntent(
     confidence: structured.confidence,
     readiness,
     nextActions,
+    ...(headcount ? { headcount } : {}),
   };
 }
 
