@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { AGENTAI_OPS_EVIDENCE_MAX_BYTES, parseAgentaiOpsEvidence } from "@/lib/api/agentai-ops-evidence";
 import { authorizeSupplyFeedRequest } from "@/lib/api/supply-feed-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { Json } from "@/lib/supabase/types";
 
 /**
  * AGENTAI OS PRODUCTION EVIDENCE INTAKE (owner 2026-10-23: Agentai OS production must be verifiable without SSH, through
@@ -46,7 +47,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   try {
     const { data, error } = await createAdminClient().rpc("agentai_ops_evidence_insert_v1", {
-      p_snapshot: parsed.value,
+      // A validated plain-JSON object (strings, integers, nulls, arrays, objects) — Json by construction.
+      p_snapshot: parsed.value as unknown as Json,
     });
     // 23514 = the snapshot CHECK (pg_column_size ≤ 4096). jsonb is larger than its JSON text, so a body under the
     // 3800-byte transport cap can still exceed it (measured: 3.75 KB of long job ids → 4.47 KB jsonb). That is the
