@@ -720,6 +720,9 @@ async function removeRows(rows: Locator, removeControl: string): Promise<number>
 }
 
 test.afterAll(async ({ browser }) => {
+  // Own budget: the default hook timeout is 30 s, less than one row removal
+  // (company-chain run 39960149411 lost its cleanup to it).
+  test.setTimeout(600_000);
   const jobs: { what: string; run: (page: Page) => Promise<string> }[] = [
     {
       what: "history rows",
