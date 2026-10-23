@@ -81,11 +81,11 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 
 | Task | Route / job | Today | Target |
 |---|---|---|---|
-| Weekly digest | `/api/cron/weekly-digest` (Mon 07:00 UTC) | **not running** (was Vercel Cron) until `lm-cron-install.sh` is approved | VPS `cron.d/labourmarket` via `lm-cron.sh` — the ONE owner |
-| Commercial handoffs | `/api/cron/commercial-handoffs` (06:00 UTC) | **not running**; inert anyway until Nonstop tokens are paired | VPS cron.d |
+| Weekly digest | `/api/cron/weekly-digest` (Mon 07:00 UTC) | **running** on the VPS cron.d (measured 2026-10-23: weekly_digest notifications in the 07:00 UTC hour on Monday 10-19) | VPS `cron.d/labourmarket` via `lm-cron.sh` — the ONE owner |
+| Commercial handoffs | `/api/cron/commercial-handoffs` (06:00 UTC) | **running** (measured 2026-10-23: the 06:00 UTC sweep read the queue; consented hand-offs are delivered by the immediate path) | VPS cron.d |
 | Job alerts | `/api/cron/job-alerts` (06:17 UTC) | the GitHub `job-alerts-cadence.yml` no-op was **removed** (it never had `CRON_SECRET`; nginx 404s `/api/cron/*` from the internet) | VPS cron.d (line present in the bundle) |
 | Billing recovery | `/api/cron/billing-recovery` | `billing-recovery-cadence.yml` kept **dispatch-only** (schedule removed; its static gate stays reviewable). Since 2026-10-23 it makes **no HTTP call**: nginx 404s `/api/cron/*` from the internet, so a runner call could never succeed; an open gate fails loudly and points at `lm-cron.sh billing-recovery` on the VPS. `apps/web/vercel.json` keeps its `crons` block unchanged: three guards read it as the schedule declaration and the Vercel project is disabled, so the block is inert documentation | VPS cron.d line added only with the Stripe GO |
-| **DB backup** | `db-backup.yml` 03:30 UTC: `pg_dump` on the runner with the existing `SUPABASE_DB_URL` secret → **restore drill** into a throw-away postgres:17 → `age`-encrypt to the VPS public key → ship via the forced-command receiver (`backup`) → `/root/lm-prod/backups/` (700/600), 14-day rotation | **prepared, needs the deploy trio + `ops/vps/backup.age.pub`** | GitHub-side dump; VPS stores ciphertext only; no DB password typed anywhere |
+| **DB backup** | `db-backup.yml` 03:30 UTC: `pg_dump` on the runner (`public` + `auth`) through a **temporary CLI login role** minted with the owner's scoped `SUPABASE_ACCESS_TOKEN` (or the optional `SUPABASE_BACKUP_DB_URL` read role) → **restore drill** into a throw-away postgres:17 → `age`-encrypt to the VPS public key → ship via the forced-command receiver (`backup`) → `/root/lm-prod/backups/` (700/600), 14-day rotation | **never produced a backup** (drills 10-17 failed on permissions; since 10-18 no credential secret) — owner step in §9.1 | GitHub-side dump; VPS stores ciphertext only; no DB password typed anywhere |
 | NAV (Norway) ingestion | `nav-supply-cadence.yml` 02/08/14/20 UTC (GitHub, service role) | GREEN after migration | keep (GitHub) |
 | Sweden ingestion | `sweden-supply-cadence.yml` 01/09/17 UTC | GREEN | keep |
 | Freshness check | `ingestion-freshness.yml` 04/10/16/22 UTC | GREEN | keep |
@@ -100,9 +100,9 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 |---|---|---|
 | Supabase (DB, auth, Google sign-in, OAuth server for MCP clients) | **ON** | unchanged project; redirect URLs unchanged (same domain) |
 | ChatGPT MCP connector | endpoint ON (PRM, AS metadata, 229 tools public count) — **authenticated test pending owner Refresh** | same authorization server → no re-link expected |
-| E-mail invitations (`INVITE_EMAIL_PROVIDER`) | OFF (never configured in Vercel either) — invites work by link | owner supplies Resend/Postmark key (paid tiers exist; free tier possible) |
+| E-mail invitations + notifications (`INVITE_EMAIL_PROVIDER=smtp` over `LM_SMTP_*`, the info@ mailbox) | OFF until `LM_SMTP_PASS` is set — invites work by link | owner sets the mailbox password with `lm-env-set.sh` (§9.2) |
 | Supabase auth e-mails | Supabase built-in SMTP (rate-limited) | custom SMTP = owner decision |
-| AI (Gemini adapter, assistant, journal suggestions, CV structuring, market explanations) | **OFF** (`AI_PROVIDER_MODE=disabled`) | owner GO + `GEMINI_API_KEY` (exists in the owner's local env; free tier) |
+| AI (Gemini adapter, assistant, journal suggestions, CV structuring, market explanations) | **OFF** (`AI_PROVIDER_MODE=disabled`; every `ai_runs` row since 10-19 has `provider = 'disabled'`, monitor signal `ai-runtime-disabled`) | owner GO + `GEMINI_API_KEY` (§7.6, §9.3) |
 | Stripe payments | OFF (`PAYMENTS_ENABLED=false`) — pricing shows the honest off state | owner supplies live secret + new webhook secret + price id; publishable key needs a rebuild |
 | Telegram owner alerts | OFF | bot token + chat id, or the Agentai OS alert bridge |
 | Nonstop handoff + referral | OFF (no tokens on either side) | new token pair, both sides (separate approval) |
@@ -146,3 +146,138 @@ cutover (DB: last row 2026-10-15), the `chat-continuity` walk failed. Fix: `lib/
 judges the Origin against the request's public host (the MCP door's `requestPublicOrigin`); the
 Stripe portal return URL (`/api/billing/portal`) had the same `req.url` dependency and now uses the
 same helper. Guard test: `lib/http/same-origin-request.test.ts`.
+
+## 9. Restoring the baseline services — who acts, and how (2026-10-23)
+
+Every step below is the OWNER's own action unless it says otherwise. No step
+asks for a value in chat, a file or a PR. An agent may list secret NAMES
+(`gh secret list`) and read the booleans the product shows; it never reads,
+prints or sets a value.
+
+### 9.1 Database backup (`db-backup.yml`)
+
+**State:** never produced a backup. The 10-17 drills failed on permissions
+(`permission denied for schema auth`, then `… for table profiles`), and every
+night since 10-18 the job stops at *Require secrets*.
+
+Ready (verified in the repo and run logs): `ops/vps/backup.age.pub`; the deploy
+trio secrets; the forced-command receiver with its `backup` action (present in
+every committed version; the installed copy is current enough to take
+argument-style commands, because every deploy reaches `DEPLOY_OK`). The
+receiver and the other `/root/lm-prod/bin` scripts are installed BY HAND
+(`scp` + `sh lm-channel-setup.sh`); no workflow updates them.
+
+**Default path — no database password (the owner signs in with Google):**
+1. Supabase dashboard → Account → **Access Tokens**
+   (`https://supabase.com/dashboard/account/tokens`) → *Generate new token* →
+   scoped token: **only the LabourMarket project**, capability **Database:
+   read-write** (the temporary-login-role endpoint requires `database_write`;
+   the job also reads the pooler settings, `database_pooling_config_read` — if
+   the first run reports `pooler config: HTTP 403`, include that permission),
+   **expiry** set (e.g. 90 days; at most one year). The value is shown once.
+2. On the owner's own machine: `gh secret set SUPABASE_ACCESS_TOKEN --repo bandymuks1-stack/labourmarketai`
+   (hidden prompt; paste, Enter). Nothing else changes: no existing password,
+   connection string or secret is touched.
+3. The coordinator dispatches `db-backup.yml` with `restore_drill_only=true`
+   first, then one full run (ships to the VPS).
+4. Rotation: before the expiry, generate a new token and repeat step 2; then
+   delete the old token in the dashboard.
+
+What the token can do, honestly: it is a Management-API credential. With
+*Database: read-write* on this project it can run SQL as an administrator
+(that is how it mints the temporary role). Mitigations: one project only, one
+capability, an expiry, stored only as a GitHub Actions secret read by this one
+workflow (never by a pull-request job), the temporary role is deleted at the
+end of every run, and pg_dump reads inside a READ ONLY transaction. A legacy
+(account-wide) token would also work but reaches every project — do not use one.
+
+**Alternative — a dedicated read role (only if the token path is refused):**
+the owner runs this in the Supabase SQL editor, with a password the owner
+generates locally and never shares (it changes no existing credential):
+
+```sql
+create role lm_backup with login bypassrls connection limit 2 password '<owner-generated, 32+ chars>';
+grant pg_read_all_data to lm_backup;            -- SELECT on every table and sequence, every schema
+alter role lm_backup set default_transaction_read_only = on;
+```
+
+`BYPASSRLS` is required: pg_dump sets `row_security = off` and stops with an
+error for a role that cannot bypass RLS (PostgreSQL 17 pg_dump docs,
+`--enable-row-security`). Supabase's `postgres` role has `CREATEROLE` and
+`BYPASSRLS`, and since PostgreSQL 16 a role that has BYPASSRLS may create a role
+with it (PostgreSQL 17 `CREATE ROLE` docs). Then the Session-pooler URI of
+`lm_backup.<project-ref>` goes into `gh secret set SUPABASE_BACKUP_DB_URL`
+(hidden prompt). When that secret exists it wins over the token.
+
+**Accounts (auth.users) — the former gap:** the job now dumps `public` and
+`auth` together; if `auth` cannot be read it falls back to `public` only and
+says so (warning + summary line `scope=public`). The restore drill checks that
+`auth.users` restored when the scope says it is there.
+
+**Second line of defence:** on a paid Supabase plan, Dashboard → Database →
+**Backups** lists the platform's own daily backups (Pro keeps 7 days). Check
+that the list is not empty. On the Free plan the page offers none — the
+GitHub job is then the only backup.
+
+**Confirm on the VPS (prints names, sizes and hashes only):**
+`ls -l /root/lm-prod/backups/` · `age-keygen -y /root/lm-prod/backup.age.key`
+(must equal `ops/vps/backup.age.pub`) · `sha256sum /root/lm-prod/bin/lm-deploy-receive.sh`
+(equals `git show origin/main:ops/vps/lm-deploy-receive.sh | sha256sum` when the
+installed copy is current). Keep the offline copy of `backup.age.key` — without
+it no backup can be decrypted.
+
+### 9.2 Outbound e-mail
+
+| Setting | Kind | Owner action |
+|---|---|---|
+| `LM_SMTP_HOST`, `LM_SMTP_PORT` (465 only), `LM_SMTP_USER`, `LM_SMTP_FROM` | plain settings | none if already present (check below) |
+| `LM_SMTP_PASS` | **secret** (the info@ mailbox password) | `read -rs V; printf '%s' "$V" \| sh /root/lm-prod/bin/lm-env-set.sh LM_SMTP_PASS --restart; unset V` |
+| `INVITE_EMAIL_PROVIDER=smtp` | owner switch (invitation + notification mail; without it a complete mailbox sends GDPR notices only) | `printf smtp \| sh /root/lm-prod/bin/lm-env-set.sh INVITE_EMAIL_PROVIDER --restart` if absent |
+| `INVITE_EMAIL_FROM` | optional plain setting | only to override the sender |
+| Supabase Auth e-mail (sign-up confirmation, password reset) | Supabase dashboard → Authentication → SMTP | separate from the platform mailbox |
+
+Observe without reading a value: `cut -d= -f1 /root/lm-prod/env | grep -E '^(LM_SMTP_|INVITE_EMAIL_)'`
+on the VPS (names only), or `/dashboard/admin/launch-readiness` → *mail* panel
+(per-setting present/missing, port supported, invitations on/off; superadmin only).
+A notification mail is still sent only to people whose own preference turned
+e-mail on (default OFF). GDPR erasure notices also need the VPS cron (§7.1).
+
+### 9.3 AI runtime
+
+Since 10-19 every `ai_runs` row has `provider = 'disabled'`: people reach AI
+surfaces and no provider answers. The hourly monitor now raises
+`ai-runtime-disabled` (P2) for that state.
+
+| Setting | Kind |
+|---|---|
+| `GEMINI_API_KEY` | **secret** (Google AI Studio key; a project without billing = free of charge) |
+| `AI_PROVIDER_MODE=live`, `AI_PROVIDER=gemini`, `AI_GEMINI_ENABLED=true`, `AI_DAILY_RUN_BUDGET=200` | plain modes (owner GO) |
+| `AI_GEMINI_PAID_TIER_CONFIRMED=1` | owner decision, only for a billed key: lets personal-data tasks reach the vendor |
+
+Owner commands on the VPS (one `--restart` at the end):
+`read -rs V; printf '%s' "$V" | sh /root/lm-prod/bin/lm-env-set.sh GEMINI_API_KEY; unset V`, then
+`printf live | sh …/lm-env-set.sh AI_PROVIDER_MODE`, `printf gemini | sh …/lm-env-set.sh AI_PROVIDER`,
+`printf true | sh …/lm-env-set.sh AI_GEMINI_ENABLED`, `printf 200 | sh …/lm-env-set.sh AI_DAILY_RUN_BUDGET --restart`.
+Observe: the next `ai_runs` rows carry `provider = 'gemini'`; the monitor issue
+closes itself once 7 days hold no `disabled` run.
+
+### 9.4 Authorized admin testing
+
+Admin = `profiles.active_role = 'admin'` OR a `profile_roles` row with
+`role = 'admin'` (`lib/auth/superadmin.ts`). The database helper `is_admin()`
+reads the SAME two signals (migration 0024), so an admin is an admin in the
+database too: RLS admits it to admin-only rows across every organization.
+
+The walk `spec=admin-console` (`apps/web/tests/e2e/prod-admin-console.spec.ts`)
+is read-only. Its denial part (worker and company owner are refused with
+`?notice=needs_operator_access`) runs today; its admin part SKIPS until an admin
+session exists. Making it run needs an explicit owner approval of ALL of:
+1. a sixth synthetic identity (e.g. `qa.admin+walk@labourmarket.ai`) added to the
+   hard-coded allowlist in `lib/testing/prod-qa-guard.ts`, provisioned like the
+   others (`app_metadata.qa_synthetic`, no organization);
+2. that identity receiving the admin role (one `profile_roles` row, role `admin`
+   — RED class: it grants database-wide admin reads to a session minted by
+   GitHub Actions for the length of one walk);
+3. the walk minting an `admin` slot in `prod-qa-walk.yml`, with the
+   `production-qa` environment's required reviewer switched on for that spec.
+No agent grants this role.
