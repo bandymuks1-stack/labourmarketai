@@ -10945,7 +10945,9 @@
       "cta": "Plan „Organisation“ aktivieren",
       "note": "Sie werden zu Stripe Checkout weitergeleitet; das Abonnement ist an diese Organisation gebunden.",
       "chargedToday": "Keine kostenlose Testphase: Der erste Monat wird heute im Stripe Checkout berechnet, danach monatlich bis zur Kündigung. Stripe zeigt vor der Zahlung den genauen Betrag inklusive MwSt."
-    }
+    },
+    "pilotPassEndsOn": "Pilotplan gültig bis {date}. Er endet von selbst und wird nie verlängert oder erneut belastet.",
+    "pilotPassEnds": "Pilotplan gültig bis zum Ende seiner Laufzeit. Er endet von selbst und wird nie verlängert oder erneut belastet."
   },
   "accountPlan": {
     "title": "Ihr Plan",

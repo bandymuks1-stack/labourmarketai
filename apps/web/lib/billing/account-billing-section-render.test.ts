@@ -50,12 +50,18 @@ const catalog = (loc: string) =>
 /** A `getTranslations`-shaped translator over the REAL catalog subtree; a
  *  missing key renders a VISIBLE marker so the assertions catch it. */
 function scoped(loc: string, ns: string) {
-  const root = catalog(loc)[ns] as Record<string, unknown>;
-  return (key: string, values?: Record<string, string>) => {
-    const v = key.split(".").reduce<unknown>((o, k) => (o as Record<string, unknown>)?.[k], root);
+  // A dotted namespace ("planBoundary.plans") resolves like next-intl does.
+  const root = ns
+    .split(".")
+    .reduce<unknown>((o, k) => (o as Record<string, unknown>)?.[k], catalog(loc)) as Record<string, unknown>;
+  const lookup = (key: string) =>
+    key.split(".").reduce<unknown>((o, k) => (o as Record<string, unknown>)?.[k], root);
+  const t = (key: string, values?: Record<string, string>) => {
+    const v = lookup(key);
     if (typeof v !== "string") return `MISSING:${ns}.${key}`;
     return v.replace(/\{(\w+)\}/g, (m, name: string) => values?.[name] ?? m);
   };
+  return Object.assign(t, { has: (key: string) => typeof lookup(key) === "string" });
 }
 
 vi.mock("next-intl/server", () => ({
@@ -285,5 +291,28 @@ describe("cancelled at period end (registry 7.18, 2026-10-21)", () => {
     paidUntil("2026-11-21T10:00:00Z");
     state.ent = { ...state.ent, active: false, subscriptionStatus: "cancelled" };
     expect(await render(null)).not.toContain('data-testid="account-billing-ends-on"');
+  });
+});
+
+describe("a pilot pass reads as a fixed term, under the plan's name (production 2026-10-23)", () => {
+  it("names the plan and says it ends by itself — never 'cancelled'", async () => {
+    state.ent = {
+      ...state.ent,
+      source: "subscription",
+      subscriptionStatus: "active",
+      effectivePlanKey: "company_pilot",
+      active: true,
+      cancelAtPeriodEnd: true,
+      currentPeriodEnd: "2026-11-22T05:34:48.000Z",
+      pilotPass: true,
+    } as typeof state.ent;
+    const html = await render(null);
+    expect(html).toContain('data-pilot-pass="true"');
+    expect(html).not.toContain("company_pilot");
+    const cat = catalog(state.locale) as { accountBilling: Record<string, string>; planBoundary: { plans: Record<string, string> } };
+    expect(html).toContain(cat.planBoundary.plans.company_pilot);
+    expect(html).toContain(cat.accountBilling.pilotPassEndsOn.split(" {date}")[0]);
+    expect(html).not.toContain(cat.accountBilling.endsOn.split(" {date}")[0]);
+    expect(html).not.toContain("MISSING:");
   });
 });
