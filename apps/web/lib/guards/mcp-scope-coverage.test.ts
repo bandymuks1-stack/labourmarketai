@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
@@ -98,11 +98,13 @@ describe("one dispatch point", () => {
   it("only the MCP door decides scopes — no second enforcement path", () => {
     const callers: string[] = [];
     const walk = (dir: string) => {
-      for (const entry of readdirSync(dir)) {
+      // Directory entries carry their own type: no stat-then-read race (CodeQL js/file-system-race).
+      for (const dirent of readdirSync(dir, { withFileTypes: true })) {
+        const entry = dirent.name;
         if (entry === "node_modules" || entry.startsWith(".")) continue;
         const full = join(dir, entry);
-        if (statSync(full).isDirectory()) walk(full);
-        else if (/\.(ts|tsx)$/.test(entry) && !/\.test\.tsx?$/.test(entry) && /decideScope\(/.test(readFileSync(full, "utf8"))) {
+        if (dirent.isDirectory()) walk(full);
+        else if (dirent.isFile() && /\.(ts|tsx)$/.test(entry) && !/\.test\.tsx?$/.test(entry) && /decideScope\(/.test(readFileSync(full, "utf8"))) {
           callers.push(relative(APP_ROOT, full).split("\\").join("/"));
         }
       }
