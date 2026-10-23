@@ -8,6 +8,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 const APP = resolve(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf8");
@@ -30,7 +31,7 @@ describe("available-from is real, gated, localized", () => {
   });
 
   it("i18n key present in all active locales with a {date} placeholder, no [EN]", () => {
-    for (const loc of ["en", "lt", "ru"] as const) {
+    for (const loc of activeLocales) {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {
         playerCard?: { availabilityFrom?: string };
       };

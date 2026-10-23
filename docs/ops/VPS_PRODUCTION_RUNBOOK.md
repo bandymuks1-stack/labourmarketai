@@ -69,9 +69,15 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 ## 4. Health, monitoring, logs
 
 - `https://labourmarket.ai/api/health` → `ok`, `build` (first 8 of the sha), `deployEnv:
-  production`, auth + db probes, vacancy freshness. GitHub `health-probe.yml` polls it every
-  15 min (fails loudly); `product-monitor.yml` hourly.
-- Container: `docker logs labourmarket-prod` (rotated), `docker stats`; VPS: `/proc/pressure/cpu`,
+  production`, auth + db probes, vacancy freshness. GitHub `health-probe.yml` is also the
+  external **stall monitor** (2026-10-23): every 5 min (GitHub runs it late/sparsely) one GET
+  each to `/api/health`, `/lt`, `/lt/auth/login` through Cloudflare, one summary line (status,
+  connect, first byte, total, colo), and it fails loudly on a first byte > 10 s, a 5xx or no
+  answer; `product-monitor.yml` hourly. `vps-status.yml` (manual) prints the receiver's
+  `status` — release, docker health, RestartCount — with the existing deploy key, read-only.
+- Container: `docker logs labourmarket-prod` (rotated), `docker stats`. A swap REMOVES the old
+  container and, with it, its logs; since 2026-10-23 `lm-prod-run.sh` first saves them to
+  `/root/lm-prod/logs/*.log.gz` (root-only, newest 20). VPS: `/proc/pressure/cpu`,
   Agentai OS must stay 5/5 healthy (Agentai has priority: `docker update --cpus=0.3
   labourmarket-prod` or stop it if Agentai degrades).
 - nginx: the vhost has no `access_log` directive yet (HestiaCP default is off) — proposed
@@ -89,7 +95,7 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 | NAV (Norway) ingestion | `nav-supply-cadence.yml` 02/08/14/20 UTC (GitHub, service role) | GREEN after migration | keep (GitHub) |
 | Sweden ingestion | `sweden-supply-cadence.yml` 01/09/17 UTC | GREEN | keep |
 | Freshness check | `ingestion-freshness.yml` 04/10/16/22 UTC | GREEN | keep |
-| Health probe | `health-probe.yml` */15 | fails loudly on outage | keep |
+| Health + stall probe | `health-probe.yml` */5 (was */15) | fails loudly on an outage, a 5xx or a first byte > 10 s | keep |
 | Product monitor | `product-monitor.yml` hourly | GREEN | keep |
 | Prod QA walk | `prod-qa-walk.yml` daily rotation + post-merge | GREEN on the VPS (role-routes, brigade, journal, living-cv, marketplace…) | keep; its 24 h budget was a Vercel-CPU rule — revisit |
 | Legacy LABMA backup | root crontab `0 3 * * * /root/Labma/scripts/nightly-backup.sh` | dumps a **legacy local DB** (164 KB, unchanged daily) + empty files tar to `/root/backups` | leave until a new backup mechanism is proven (owner rule) |
@@ -281,3 +287,57 @@ session exists. Making it run needs an explicit owner approval of ALL of:
 3. the walk minting an `admin` slot in `prod-qa-walk.yml`, with the
    `production-qa` environment's required reviewer switched on for that spec.
 No agent grants this role.
+
+### 9.5 Web push notifications (COM-3 push channel, OFF by default)
+
+Push is a third hop of the existing notifications: the same event, the same
+person and the same title as the bell. It stays completely inert, and the
+opt-in in the account settings stays hidden, until **all four** settings below
+are present and the migration `20261023171500_web_push_subscriptions_v1` is
+applied (RED, owner-approved apply via Supabase MCP only).
+
+| Setting | Kind |
+|---|---|
+| `WEB_PUSH_VAPID_PRIVATE_KEY` | **secret**: 32-byte P-256 private key, base64url |
+| `WEB_PUSH_VAPID_PUBLIC_KEY` | plain: the matching 65-byte public key, base64url |
+| `WEB_PUSH_VAPID_SUBJECT` | plain: `mailto:` address a push service may contact (e.g. the platform mailbox) |
+| `WEB_PUSH_ENABLED=true` | owner switch; any other value or none = OFF |
+
+**1. Generate the key pair on the VPS.** It must never come from the
+repository, a chat or an agent. The private key goes straight into the env
+file and is never shown on screen:
+
+```sh
+node -e 'const c=require("crypto"),k=c.createECDH("prime256v1");k.generateKeys();require("fs").writeFileSync("/root/.vapid-priv",k.getPrivateKey().toString("base64url"),{mode:0o600});process.stdout.write(k.getPublicKey().toString("base64url")+"\n")'
+```
+
+The command prints the PUBLIC key only. It needs Node 18 or newer. If the
+host has no `node`, run the same line on your own computer, and enter the
+private key with the hidden-input variant below. Then:
+
+```sh
+sh /root/lm-prod/bin/lm-env-set.sh WEB_PUSH_VAPID_PRIVATE_KEY < /root/.vapid-priv && shred -u /root/.vapid-priv
+read -r V; printf '%s' "$V" | sh /root/lm-prod/bin/lm-env-set.sh WEB_PUSH_VAPID_PUBLIC_KEY; unset V   # paste the printed public key
+printf 'mailto:info@labourmarket.ai' | sh /root/lm-prod/bin/lm-env-set.sh WEB_PUSH_VAPID_SUBJECT
+```
+
+If you would rather type the private key yourself (for example, generated on
+your own computer), use hidden input instead of the file:
+`read -rs V; printf '%s' "$V" | sh /root/lm-prod/bin/lm-env-set.sh WEB_PUSH_VAPID_PRIVATE_KEY; unset V`.
+
+**2. Switch it on** (only after the migration is applied):
+`printf true | sh /root/lm-prod/bin/lm-env-set.sh WEB_PUSH_ENABLED --restart`.
+
+**3. Observe** without reading a value:
+`cut -d= -f1 /root/lm-prod/env | grep '^WEB_PUSH_'` (names only). In
+`/dashboard/account` → Notifications, a "Push notifications on this device"
+block appears. Turn it on in a browser, then trigger any notification for
+that account: the device shows the bell's title, and a click opens the same
+page the bell links to.
+
+**Turning it off:** unset or change `WEB_PUSH_ENABLED` and restart. The opt-in
+disappears and nothing more is sent. Stored subscriptions stay until people
+turn push off or a push service reports them gone.
+
+**Rotating the keys** invalidates every existing subscription; people must turn
+push on again. Do it only if the private key may have leaked.

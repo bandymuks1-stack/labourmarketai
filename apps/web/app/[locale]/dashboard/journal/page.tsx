@@ -70,6 +70,8 @@ import {
 import { EmptyState } from "@/components/app/empty-state";
 import { JournalJobContext } from "@/components/app/journal-job-context";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionProfile } from "@/lib/auth/session-profile";
+import { getWorkerCoreRow } from "@/lib/data/worker-core";
 import { processJournalEntrySkills } from "@/lib/journal/skill-pipeline";
 import { JOURNAL_PIPELINE_VERSION } from "@/lib/journal/journal-recognition";
 import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
@@ -278,14 +280,19 @@ export default async function JournalPage({
   // particular is called with the literal "person" and is consumed further
   // down purely to ORDER `ecRows`; ordering after the batch is identical to
   // ordering after a serial await.
+  //
+  // The worker row and the own profile row are THE request-cached session
+  // reads (perf 2026-10-23) — the shell, the player card and the bell read the
+  // same two rows in this render, so the page no longer re-queries them. A
+  // failed read is null in both, exactly as the page's own reads answered.
   const [
-    { data: worker },
-    { data: ownProfile },
+    workerRow,
+    { profile: ownProfile },
     { data: ecRows },
     workspaceForDefault,
   ] = await Promise.all([
-    supabase.from("workers").select("id").eq("profile_id", user.id).maybeSingle(),
-    supabase.from("profiles").select("full_name, email").eq("id", user.id).maybeSingle(),
+    getWorkerCoreRow(),
+    getSessionProfile(),
     supabase
       .from("engagement_contexts")
       .select(
@@ -297,6 +304,7 @@ export default async function JournalPage({
       .order("is_primary", { ascending: false }),
     getWorkspaceContext(),
   ]);
+  const worker = workerRow ? { id: workerRow.id } : null;
   const submitterName =
     ownProfile?.full_name ??
     (ownProfile?.email ? ownProfile.email.split("@")[0] : null);

@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type Page } from "@playwright/test";
+import { test, expect, type Browser, type Page } from "./prod-walk";
 
 /**
  * PRODUCTION CHAT CONTINUITY — owner programme 2026-10-12 §4: a person must

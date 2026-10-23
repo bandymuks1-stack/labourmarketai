@@ -157,6 +157,12 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-21: skill confirmation withdrawal phase B (cross-party
       // standing read door; RED, needs-human-gate, NOT applied).
       "20261021095500_",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): CAL-8 shift patterns
+      // (one nullable column on work_plan_entries + create_work_plan_entry_v2).
+      "20261023160000_",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): COM-3 web push channel
+      // (web_push_subscriptions + register command + push opt-in channel value).
+      "20261023171500_",
       // 2026-10-23 (RED, needs-human-gate, NOT applied): journal evidence integrity v1
       // (server-side hash chain + immutable evidence; renumbered from 20261016190000).
       "20261023132610_",

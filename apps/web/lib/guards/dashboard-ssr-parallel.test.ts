@@ -36,8 +36,12 @@ describe("Guard: dashboard layout parallelizes profile + profile_roles reads", (
     // getUser (so it can join the SAME batch without a serial user await);
     // the batch must still contain the session-profile reader AND that
     // roles promise — one parallel stage, no waterfall.
-    expect(layout).toMatch(
-      /const rolesPromise[\s\S]{0,400}from\(["']profile_roles["']\)/,
+    // Perf 2026-10-23: the roles read is the request-cached
+    // `readActiveRoleRows` (shared with the page gate), whose own body is the
+    // `profile_roles` select.
+    expect(layout).toMatch(/const rolesPromise[\s\S]{0,400}readActiveRoleRows\(/);
+    expect(read("lib/auth/profile-roles.ts")).toMatch(
+      /const readActiveRoleRowsOnce = cache\([\s\S]{0,300}from\(["']profile_roles["']\)/,
     );
     expect(layout).toMatch(
       /Promise\.all\(\s*\[[\s\S]{0,200}getSessionProfile\(\)[\s\S]{0,200}rolesPromise/,
