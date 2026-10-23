@@ -167,6 +167,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261023161500_",
       // 2026-10-23 (RED by GRANT, needs-human-gate, NOT applied): runtime stall sampler evidence table.
       "20261023190000_",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): journal evidence integrity v1
+      // (server-side hash chain + immutable evidence; renumbered from 20261016190000).
+      "20261023132610_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
