@@ -361,7 +361,11 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     capabilityId: "MKT-7",
     status: "RETIRED",
     structural: null,
-    note: "Stripe Tax is NOT configured and the owner refused Stripe Tax registration (2026-10-23).",
+    note:
+      "Not claimed until a live subscription has completed with a correct tax line. Owner chose Stripe Tax " +
+      "(2026-10-23), conditional on the VAT registration of the Stripe account's legal entity being confirmed " +
+      "and added in Stripe; until then Checkout keeps automatic_tax but no registration exists (0 VAT). " +
+      "See docs/billing/OWNER_DECISION_VAT_STRIPE_TAX_2026-10-23.md.",
     pages: [],
   },
   {

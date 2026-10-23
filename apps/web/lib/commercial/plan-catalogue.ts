@@ -305,6 +305,9 @@ export const PLAN_CATALOGUE: readonly PlanCatalogueEntry[] = [
       price: { source: "db", dbSlug: "business", column: "price_eur_monthly" },
       currency: { status: "decided", value: "EUR", provenance: GATE },
       interval: { status: "decided", value: "month", provenance: GATE },
+      // Re-confirmed 2026-10-23 (Stripe Tax kept; VAT is added only once the
+      // seller's registration is added in Stripe — until then 0 VAT is
+      // computed, and no tax statement is shown to customers).
       taxBasis: { status: "decided", value: "exclusive", provenance: `${GATE}; Stripe Tax adds VAT` },
       annual: annualDeferred,
       dbSlug: "business",
