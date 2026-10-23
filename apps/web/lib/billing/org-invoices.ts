@@ -1,7 +1,5 @@
 import "server-only";
 
-import { cache } from "react";
-
 import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import { getBillingConfigFor } from "@/lib/billing/config";
 import { getBillingProvider } from "@/lib/billing/provider";
@@ -32,7 +30,7 @@ import {
  *      organization (org-invoices-core) — a payer's invoices for another
  *      organization never show here.
  */
-export const readOrganizationInvoices = cache(async function readOrganizationInvoices(): Promise<OrgInvoicesResult> {
+export async function readOrganizationInvoices(): Promise<OrgInvoicesResult> {
   const workspace = await resolveBillingSubject();
   const organizationId = workspace.subject?.type === "organization" ? workspace.subject.id : null;
   const cfg = getBillingConfigFor(organizationId);
@@ -71,4 +69,4 @@ export const readOrganizationInvoices = cache(async function readOrganizationInv
     livemode: !cfg.testMode,
     reads,
   });
-});
+}

@@ -6,7 +6,6 @@
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("react", async (orig) => ({ ...(await orig<typeof import("react")>()), cache: <T,>(fn: T) => fn }));
 
 const state = vi.hoisted(() => ({
   config: { state: "stripe_live", testMode: false } as { state: string; testMode: boolean },
