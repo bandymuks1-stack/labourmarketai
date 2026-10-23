@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./prod-walk";
 
 /**
  * PRODUCTION LIVING CV GROWTH — owner programme 2026-10-12 §3F/§5 and
