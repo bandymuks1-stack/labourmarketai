@@ -5622,7 +5622,6 @@
   },
   "legal": {
     "preparing": {
-      "body": "Die rechtlichen Informationen werden vorbereitet. Bevor kostenpflichtige Dienste oder ein Vertragsverhältnis beginnen, werden sie bereitgestellt und aktualisiert.",
       "contact": "Bei Fragen kontaktieren Sie uns."
     },
     "marketplaceRules": {
@@ -5635,10 +5634,9 @@
         "Öffentliche Angebote erscheinen erst nach Moderation; nicht vertrauenswürdige oder verdächtige Angebote werden ausgeblendet.",
         "Der Handel mit regulierten oder illegalen Waren und Dienstleistungen ist verboten.",
         "Ein Kartenpunkt erscheint nur mit verifizierten Koordinaten — keine gefälschten Markierungen.",
-        "Zahlungen sind noch nicht aktiv; in dieser Phase laufen keine Zahlungen über die Plattform.",
+        "Zahlungen zwischen Nutzern laufen nicht über die Plattform; über sie werden nur Entgelte für Plattformleistungen gezahlt.",
         "Unangemessenes Verhalten oder verdächtige Aktivitäten können gemeldet werden — Moderatoren prüfen sie."
-      ],
-      "reviewNote": "Diese Regeln beschreiben, wie sich die Plattform heute tatsächlich verhält. Die endgültige rechtliche Fassung der verbindlichen Dokumente wird noch vorbereitet und vor Beginn kostenpflichtiger Dienste vom Eigentümer und einem Anwalt geprüft."
+      ]
     },
     "terms": {
       "title": "Nutzungsbedingungen",
@@ -5670,7 +5668,7 @@
     },
     "privacy": {
       "title": "Datenschutzerklärung",
-      "intro": "Diese Seite erklärt in einfacher Sprache, welche personenbezogenen Daten Labour Market AI verwendet, warum sie verwendet werden und welche Rechte Sie haben. Sie beschreibt die Plattform, wie sie heute funktioniert, bevor Zahlungen aktiv sind.",
+      "intro": "Diese Seite erklärt in einfacher Sprache, welche personenbezogenen Daten Labour Market AI verwendet, warum sie verwendet werden und welche Rechte Sie haben. Sie beschreibt die Plattform, wie sie heute funktioniert.",
       "sections": [
         {
           "heading": "Wer für Ihre Daten verantwortlich ist",
@@ -5690,6 +5688,15 @@
             "Nachrichten, die Sie auf der Plattform senden und empfangen.",
             "Einwilligungsaufzeichnungen: Wenn Sie eine Einwilligung erteilen oder widerrufen, werden die Aktion und ihr Zeitpunkt gespeichert.",
             "Technische Daten, die für den Betrieb des Dienstes nötig sind, etwa Anmelde-Cookies (siehe Cookie-Richtlinie)."
+          ]
+        },
+        {
+          "heading": "Anmeldung mit Google, Facebook oder LinkedIn",
+          "items": [
+            "Sie können ein Konto erstellen und sich mit Ihrem Google-, Facebook- oder LinkedIn-Konto anmelden, statt sich mit Ihrer E-Mail-Adresse anzumelden. Dies dient nur Ihrer Anmeldung.",
+            "Wenn Sie einen davon wählen, bestätigt dieser Anbieter Ihre Identität und übermittelt der Plattform Ihre E-Mail-Adresse, Ihren Namen und die Kennung Ihres Kontos bei diesem Anbieter. Die Plattform fordert keine zusätzlichen Berechtigungen an — keinen Zugriff auf Ihre Freunde oder Kontakte, Beiträge oder Seiten — und veröffentlicht nie etwas in Ihrem Namen.",
+            "Ihre E-Mail-Adresse wird zur E-Mail-Adresse Ihres Kontos. Der Name vom Anbieter wird nur verwendet, um einen aus Ihrer E-Mail-Adresse abgeleiteten Platzhalternamen zu ersetzen; ein selbst eingegebener Name wird nie überschrieben. Den Anmeldedatensatz (den Anbieter, Ihre Kontokennung dort und die von ihm übermittelten Angaben) speichert unser Authentifizierungsdienst Supabase, verknüpft mit Ihrem Konto.",
+            "Um diese Daten zu löschen, löschen Sie Ihr LabourMarket.ai-Konto — die Schritte stehen auf der Seite „Konto- und Datenlöschung“. Wenn Sie LabourMarket.ai in Ihren Facebook-, Google- oder LinkedIn-Einstellungen entfernen, werden Ihr LabourMarket.ai-Konto und seine Daten dadurch allein nicht gelöscht."
           ]
         },
         {
@@ -5717,15 +5724,26 @@
           "items": [
             "Einwilligungszwecke sind getrennt: die Arbeitgeber-Sichtbarkeit Ihres beruflichen Profils und eine Datenübermittlung an ein bestimmtes Unternehmen sind zwei verschiedene Entscheidungen — keine ist mit den Bedingungen gebündelt, vorangekreuzt oder für die Nutzung von Konto, Lebenslauf oder Arbeitstagebuch erforderlich.",
             "Jeder Einwilligungsbildschirm zeigt den exakten versionierten Text, was sichtbar wird, was privat bleibt, und beide Optionen nebeneinander (einschalten / jetzt nicht). Eine Ablehnung ändert nichts an Ihrem Konto.",
-            "Sie können jede Einwilligung jederzeit in den Datenschutzeinstellungen in einem Schritt widerrufen. Nach dem Widerruf erscheint Ihr Profil sofort nicht mehr in neuen Unternehmenssuchen; Daten, die ein Unternehmen rechtmäßig erhielt, solange die Erlaubnis galt, können dort verbleiben — das sagen wir ehrlich.",
+            "Sie können jede Einwilligung jederzeit in den Datenschutzeinstellungen in einem Schritt widerrufen. Nach dem Widerruf erscheint Ihr Profil sofort nicht mehr in neuen Unternehmenssuchen; Daten, die ein Unternehmen rechtmäßig erhielt, solange die Erlaubnis galt, können dort verbleiben.",
             "Der Einwilligungsverlauf ist nur-anfügend: jede Erteilung und jeder Widerruf ist ein eigener unveränderlicher Eintrag mit Textversion, Sprache, Zeitpunkt und Zweck. Niemand — auch Administratoren nicht — kann ihn bearbeiten oder löschen, und kein Administrator kann in Ihrem Namen einwilligen."
+          ]
+        },
+        {
+          "heading": "Dienstleister, die Daten für die Plattform verarbeiten",
+          "items": [
+            "Supabase — Datenbank, Nutzeranmeldung und Dateispeicher.",
+            "Cloudflare — das Netzwerk vor der Website (Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen); jede Anfrage an die Website läuft darüber.",
+            "Stripe — Zahlungsabwicklung für kostenpflichtige Plattformleistungen. Wenn eine Organisation einen Checkout beginnt, erhält Stripe die E-Mail-Adresse des zahlenden Nutzers und eine interne Kontokennung; Kartendaten werden auf Stripes eigener Zahlungsseite eingegeben und von der Plattform nicht gespeichert.",
+            "Google, Facebook (Meta) und LinkedIn — nur wenn Sie sich mit ihnen anmelden, wie oben beschrieben.",
+            "Google (Gemini-API) — nur wie unten im Abschnitt über KI beschrieben.",
+            "Die vollständige Liste der Infrastrukturanbieter steht auf der Seite „Datenschutz“."
           ]
         },
         {
           "heading": "Ihre Rechte",
           "items": [
             "Sie können verlangen, die über Sie gespeicherten Daten einzusehen, sie zu berichtigen, eine Kopie davon zu erhalten, ihre Nutzung einzuschränken oder sie löschen zu lassen.",
-            "Ehrlicher aktueller Stand: Sie können eine Kopie Ihrer eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei selbst aus Ihrem Konto herunterladen. Die Löschung ist weiterhin ein Antrag, den ein Mensch prüft — es gibt keinen Sofort-Löschen-Knopf; kontaktieren Sie uns oder stellen Sie den Antrag, und ein Mensch wird ihn bearbeiten.",
+            "Sie können eine Kopie Ihrer eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei selbst aus Ihrem Konto herunterladen. Die Löschung Ihres Kontos können Sie auf der Datenschutz-Seite Ihres Kontos beantragen und nach erneuter Anmeldung bestätigen; das System löscht das Konto dann automatisch und sendet eine Bestätigung an die E-Mail-Adresse des Kontos. Müssen Daten gesetzlich aufbewahrt werden oder betreffen sie andere Personen, wird der Antrag geprüft und Sie erhalten die Entscheidung innerhalb eines Monats. Sie können uns auch kontaktieren — siehe die Seite „Konto- und Datenlöschung“.",
             "Wo die Verarbeitung auf einer Einwilligung beruht, können Sie diese Einwilligung jederzeit widerrufen."
           ]
         },
@@ -5733,8 +5751,7 @@
           "heading": "Wie lange Daten aufbewahrt werden",
           "items": [
             "Daten werden aufbewahrt, solange Ihr Konto aktiv ist und die zugehörige Funktion sie noch verwendet.",
-            "Einwilligungs- und Prüfaufzeichnungen werden als Historie aufbewahrt: Ein Widerruf wird aufgezeichnet, statt den Eintrag zu löschen.",
-            "Genaue Aufbewahrungsfristen sind Teil der endgültigen rechtlichen Fassung, die noch vorbereitet wird."
+            "Einwilligungs- und Prüfaufzeichnungen werden als Historie aufbewahrt: Ein Widerruf wird aufgezeichnet, statt den Eintrag zu löschen."
           ]
         },
         {
@@ -5745,11 +5762,6 @@
             "Was der Anbieter eines KI-Assistenten mit Ihrem Gespräch tut, regeln dessen eigene Datenschutzbestimmungen."
           ]
         }
-      ],
-      "pendingTitle": "Noch ausstehend bis zur endgültigen rechtlichen Fassung:",
-      "pendingItems": [
-        "Genaue Aufbewahrungsfristen je Datenkategorie.",
-        "Die verbindliche, anwaltlich geprüfte Fassung dieser Erklärung und der genannten Rechtsgrundlagen."
       ]
     },
     "cookies": {
@@ -5772,11 +5784,6 @@
       "localStorageNote": "Im eigenen Speicher Ihres Browsers (keine Cookies) liegen einige Einträge: Ihre Wahl des hellen oder dunklen Designs; welche Seite oder Kampagne Sie zuerst hierher geführt hat, einmalig gespeichert, damit eine spätere Registrierung ihr zugeordnet werden kann; eine zufällige Sitzungskennung je Tab, die beim Schließen des Tabs verschwindet; und kleine Annehmlichkeiten wie ausgeblendete Hinweise, zuletzt angesehene Einträge und Ihre Spracheingabesprache. Nichts davon wird an Dritte weitergegeben oder für Werbung genutzt, und Sie können es jederzeit über Ihren Browser löschen.",
       "noTracking": "Es gibt heute keine Analyse-, Werbe- oder Drittanbieter-Tracking-Cookies auf der Plattform. Sollte sich das jemals ändern, wird zuerst diese Seite aktualisiert."
     },
-    "pendingLegal": {
-      "badge": "Endgültige Fassung: Prüfung durch Eigentümer und Anwalt ausstehend",
-      "body": "Diese Seite erklärt in einfacher Sprache, wie die Plattform heute funktioniert. Sie ist nicht das endgültige Rechtsdokument: Die verbindliche Fassung wird noch vorbereitet und vor Beginn kostenpflichtiger Dienste oder eines Vertragsverhältnisses vom Eigentümer und einem Anwalt geprüft."
-    },
-    "disclaimer": "Diese Seite dient nur der Information und stellt keine Rechtsberatung dar.",
     "requestContact": "Um eine Frage zu stellen oder einen Antrag zu Ihren Daten zu stellen, kontaktieren Sie uns — ein Mensch wird ihn prüfen.",
     "related": "Verwandte Seiten",
     "accountSection": {
@@ -5829,7 +5836,7 @@
         {
           "heading": "Export und Löschung",
           "items": [
-            "Sie können Ihre eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei aus Ihrem Konto herunterladen. Die Löschung wird als geprüfter Antrag behandelt: Nichts wird sofort gelöscht — kontaktieren Sie uns und ein Mensch wird ihn bearbeiten."
+            "Sie können Ihre eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei aus Ihrem Konto herunterladen. Die Kontolöschung wird im Konto beantragt und nach erneuter Anmeldung bestätigt; das System löscht das Konto dann automatisch. Einen Antrag, der Daten betrifft, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen, prüft ein Mensch. Sie können uns auch kontaktieren, und ein Mensch bearbeitet den Antrag."
           ]
         },
         {
@@ -5840,7 +5847,7 @@
             "Cloudflare — das Netzwerk vor der Website: Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen. Jede Anfrage an die Website läuft darüber.",
             "GitHub — Speicherung des Quellcodes. Nutzerdaten werden dort nicht gespeichert.",
             "Google (Gemini-API) — KI-Verarbeitung zum Übersetzen von Nachrichten und Stellenanzeigen und zum Vorschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den die Aufgabe braucht.",
-            "Stripe — Zahlungsabwicklung. Ein Kundendatensatz entsteht nur, wenn eine Organisation einen Abonnement-Checkout beginnt; heute ist kein Abonnement aktiv.",
+            "Stripe — Zahlungsabwicklung. Ein Kundendatensatz entsteht nur, wenn eine Organisation einen Abonnement-Checkout beginnt.",
             "Kein weiterer E-Mail-, KI-, Übersetzungs- oder Zahlungsanbieter ist aktiv. Wird einer aktiviert, wird zuerst diese Liste aktualisiert."
           ]
         },
@@ -5850,12 +5857,6 @@
             "Kein System kann absolute Sicherheit versprechen. Wenn Sie ein Problem bemerken, kontaktieren Sie uns — ein Mensch wird es prüfen."
           ]
         }
-      ],
-      "pendingTitle": "Noch ausstehend bis zur endgültigen rechtlichen Fassung:",
-      "pendingItems": [
-        "Die formale Beschreibung der technischen und organisatorischen Maßnahmen.",
-        "Unterzeichnete Auftragsverarbeitungsverträge mit den oben genannten Infrastrukturanbietern.",
-        "Endgültige Aufbewahrungsfristen."
       ]
     },
     "dataAccess": {
@@ -6033,7 +6034,7 @@
     "dataDeletion": {
       "title": "Konto- und Datenlöschung",
       "description": "So beantragen Sie die Löschung Ihres LabourMarket.ai-Kontos und Ihrer personenbezogenen Daten.",
-      "intro": "Sie können LabourMarket.ai bitten, Ihr Konto und Ihre personenbezogenen Daten zu löschen. Die Löschung wird derzeit als Antrag bearbeitet, den eine Person prüft; es gibt keine Schaltfläche zur sofortigen Kontolöschung. Wenn Sie sich anmelden können, können Sie den Antrag auch selbst stellen: Öffnen Sie die Datenschutz-Seite Ihres Kontos (in der mobilen App: Einstellungen → Datenschutz) und wählen Sie die Kontolöschung. In beiden Fällen antwortet ein Mensch innerhalb eines Monats.",
+      "intro": "Sie können LabourMarket.ai bitten, Ihr Konto und Ihre personenbezogenen Daten zu löschen. Wenn Sie sich anmelden können, können Sie den Antrag selbst stellen: Öffnen Sie die Datenschutz-Seite Ihres Kontos (in der mobilen App: Einstellungen → Datenschutz), wählen Sie die Kontolöschung und bestätigen Sie sie nach erneuter Anmeldung. Das System löscht das Konto dann automatisch und sendet eine Bestätigung an die E-Mail-Adresse des Kontos; müssen Daten gesetzlich aufbewahrt werden oder betreffen sie andere Personen, wird der Antrag geprüft und Sie erhalten die Entscheidung innerhalb eines Monats. Sie können die Löschung auch per E-Mail beantragen, wie unten beschrieben; ein Mensch antwortet innerhalb eines Monats.",
       "howTitle": "So beantragen Sie die Löschung",
       "howSteps": [
         "Schreiben Sie an {email} von der E-Mail-Adresse, die mit Ihrem LabourMarket.ai-Konto verknüpft ist.",

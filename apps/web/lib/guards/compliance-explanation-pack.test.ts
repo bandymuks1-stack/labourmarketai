@@ -9,11 +9,10 @@ import { join } from "node:path";
  *   1. Every pack page exists on disk (route-resolves under app/[locale]).
  *   2. The public sitemap lists the new public routes.
  *   3. Footer + account links reach the pack (findability chain).
- *   4. Pending-legal-wording markers stay VISIBLE wherever the binding text
- *      is still owner/lawyer-gated (train stop-rule 5) — and terms stays the
- *      honest "being prepared" stub.
- *   5. The informational-only / not-legal-advice disclaimer is rendered on
- *      every legal explanation page.
+ *   4. No drafting-state meta-text on the public legal pages: no "pending
+ *      owner/legal review" notice, no "still waiting for final wording" list,
+ *      no "being prepared" / review note, no "informational only" disclaimer
+ *      (owner order 2026-10-23 — the pages are the policy, not a draft of it).
  *   6. NO fake finalization wording can enter the legal/about copy (lt/en/ru):
  *      no lawyer-approved, no "fully compliant", no guarantees.
  *   7. i18n parity of the pack copy across the active locales (structure is
@@ -29,14 +28,13 @@ const LOCALES = ["lt", "en", "ru"] as const;
 const PACK_PAGES: ReadonlyArray<{
   rel: string;
   testId: string;
-  pendingNotice: boolean;
-  disclaimer: boolean;
+  legal: boolean;
 }> = [
-  { rel: "about/page.tsx", testId: "about-page", pendingNotice: false, disclaimer: false },
-  { rel: "legal/privacy/page.tsx", testId: "legal-privacy", pendingNotice: true, disclaimer: true },
-  { rel: "legal/data-protection/page.tsx", testId: "legal-data-protection", pendingNotice: true, disclaimer: true },
-  { rel: "legal/data-access/page.tsx", testId: "legal-data-access", pendingNotice: true, disclaimer: true },
-  { rel: "legal/cookies/page.tsx", testId: "legal-cookies", pendingNotice: true, disclaimer: true },
+  { rel: "about/page.tsx", testId: "about-page", legal: false },
+  { rel: "legal/privacy/page.tsx", testId: "legal-privacy", legal: true },
+  { rel: "legal/data-protection/page.tsx", testId: "legal-data-protection", legal: true },
+  { rel: "legal/data-access/page.tsx", testId: "legal-data-access", legal: true },
+  { rel: "legal/cookies/page.tsx", testId: "legal-cookies", legal: true },
 ];
 
 describe("1 · every pack page exists and is marked", () => {
@@ -80,31 +78,30 @@ describe("3 · findability chain: footer + account link the pack", () => {
   });
 });
 
-describe("4 · pending-legal-wording markers stay visible where owner/lawyer-gated", () => {
-  for (const page of PACK_PAGES.filter((p) => p.pendingNotice)) {
-    it(`${page.rel} renders PendingLegalNotice`, () => {
-      expect(read(`${MKT}/${page.rel}`)).toMatch(/PendingLegalNotice/);
+describe("4 · no drafting-state meta-text is rendered on the legal pages", () => {
+  const DRAFT_MARKERS = [
+    /PendingLegalNotice/,
+    /PendingLegalItems/,
+    /LegalDisclaimer/,
+    /pendingLegal/,
+    /pendingItems/,
+    /pendingTitle/,
+    /reviewNote/,
+    /preparing\.body/,
+  ];
+  const LEGAL_PAGES = [
+    ...PACK_PAGES.filter((p) => p.legal).map((p) => p.rel),
+    "legal/terms/page.tsx",
+    "legal/marketplace-rules/page.tsx",
+    "legal/data-deletion/page.tsx",
+    "legal/legal-notice/page.tsx",
+  ];
+  for (const rel of LEGAL_PAGES) {
+    it(`${rel} renders no pending / draft / disclaimer block`, () => {
+      const src = read(`${MKT}/${rel}`);
+      for (const re of DRAFT_MARKERS) expect(src, `${rel} ${re}`).not.toMatch(re);
     });
   }
-  it("privacy + data-protection list their exact pending items", () => {
-    expect(read(`${MKT}/legal/privacy/page.tsx`)).toMatch(/PendingLegalItems/);
-    expect(read(`${MKT}/legal/data-protection/page.tsx`)).toMatch(/PendingLegalItems/);
-  });
-  it("marketplace-rules carries the review note; terms stays the preparing stub", () => {
-    expect(read(`${MKT}/legal/marketplace-rules/page.tsx`)).toMatch(/reviewNote/);
-    expect(read(`${MKT}/legal/terms/page.tsx`)).toMatch(/preparing\.body/);
-  });
-});
-
-describe("5 · informational-only disclaimer is rendered on the legal pages", () => {
-  for (const page of PACK_PAGES.filter((p) => p.disclaimer)) {
-    it(`${page.rel} renders LegalDisclaimer`, () => {
-      expect(read(`${MKT}/${page.rel}`)).toMatch(/LegalDisclaimer/);
-    });
-  }
-  it("marketplace-rules renders LegalDisclaimer too (consistency pass)", () => {
-    expect(read(`${MKT}/legal/marketplace-rules/page.tsx`)).toMatch(/LegalDisclaimer/);
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -152,20 +149,12 @@ describe("7 · pack i18n keys exist and are non-empty in every active locale", (
     const json = JSON.parse(read(`messages/${loc}.json`)) as any;
     it(`${loc}: legal pack keys present`, () => {
       const legal = json.legal;
-      expect(legal.pendingLegal.badge.length).toBeGreaterThan(0);
-      expect(legal.pendingLegal.body.length).toBeGreaterThan(0);
-      expect(legal.disclaimer.length).toBeGreaterThan(0);
       expect(legal.requestContact.length).toBeGreaterThan(0);
       expect(Array.isArray(legal.privacy.sections) && legal.privacy.sections.length >= 5).toBe(true);
-      // Floor lowered 3 -> 2 (2026-07-11 legal-entity truth): the data-controller
-      // identity item was RESOLVED (UAB „Nonstop Group“ named in the policy),
-      // so it honestly left the pending list. Retention + binding version remain.
-      expect(Array.isArray(legal.privacy.pendingItems) && legal.privacy.pendingItems.length >= 2).toBe(true);
       expect(Array.isArray(legal.dataProtection.sections) && legal.dataProtection.sections.length >= 5).toBe(true);
       expect(Array.isArray(legal.dataAccess.sections) && legal.dataAccess.sections.length >= 4).toBe(true);
       expect(Array.isArray(legal.cookies.items) && legal.cookies.items.length >= 3).toBe(true);
       expect(legal.cookies.noTracking.length).toBeGreaterThan(0);
-      expect(legal.marketplaceRules.reviewNote.length).toBeGreaterThan(0);
     });
     it(`${loc}: about namespace present with the three loops`, () => {
       const about = json.about;
