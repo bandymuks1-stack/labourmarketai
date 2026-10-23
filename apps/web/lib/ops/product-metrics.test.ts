@@ -101,6 +101,32 @@ describe("computeProductMetrics", () => {
     expect(metricReal(split(2, 5, 1))).toBe(2);
   });
 
+  it("counts the runs no AI provider answered", async () => {
+    const s = await computeProductMetrics(
+      fakeClient(
+        { data: {}, error: null },
+        {
+          ai_runs: [
+            { provider: "disabled", schema_validation: "skipped", fallback_applied: false, blocked_reason: null, latency_ms: null },
+            { provider: "disabled", schema_validation: "skipped", fallback_applied: false, blocked_reason: null, latency_ms: null },
+            { provider: "gemini", schema_validation: "passed", fallback_applied: false, blocked_reason: null, latency_ms: 900 },
+            { provider: "none", schema_validation: "skipped", fallback_applied: false, blocked_reason: "cost_unpriced", latency_ms: null },
+          ],
+        },
+      ),
+      NOW,
+    );
+    const v = (k: string) => s.metrics.find((m) => m.key === k)!.value;
+    expect(v("ai_runs_7d")).toBe(4);
+    expect(v("ai_runs_runtime_disabled_7d")).toBe(2);
+    expect(v("ai_runs_blocked_7d")).toBe(1);
+  });
+
+  it("an unreadable ai_runs leaves the disabled count UNKNOWN, not 0", async () => {
+    const s = await computeProductMetrics(fakeClient({ data: {}, error: null }, { ai_runs: "error" }), NOW);
+    expect(s.metrics.find((m) => m.key === "ai_runs_runtime_disabled_7d")!.value).toBeNull();
+  });
+
   it("vacancy lag takes each provider's freshest cursor", async () => {
     const s = await computeProductMetrics(
       fakeClient(
@@ -164,6 +190,21 @@ describe("monitor signals", () => {
     expect(st("b2b-offers-unanswered")).toBe("BREACH");
     expect(st("review-queue-stale")).toBe("UNKNOWN");
     expect(st("metrics-unreadable")).toBe("OK");
+  });
+
+  it("a switched-off AI runtime is a breach, not silence (provider 'disabled' carries no blocked_reason)", () => {
+    const at = (runs: number, off: number | null) =>
+      evaluateSignals(snap({ ai_runs_7d: runs, ai_runs_runtime_disabled_7d: off, ai_runs_failed_validation_7d: 0, ai_runs_blocked_7d: 0 }), { searchMedianMs: 700 });
+    const st = (res: ReturnType<typeof evaluateSignals>, id: string) => res.find((r) => r.id === id)!;
+    // Every run unanswered: the old rule (failed validation + blocked) stays OK — the blind spot.
+    const allOff = at(40, 40);
+    expect(st(allOff, "ai-failing").state).toBe("OK");
+    expect(st(allOff, "ai-runtime-disabled").state).toBe("BREACH");
+    expect(st(allOff, "ai-runtime-disabled").observed).toBe("40 of 40 runs had no AI provider (7 d)");
+    // A single unanswered run already counts; none is OK; an unread count is UNKNOWN, never OK.
+    expect(st(at(25, 1), "ai-runtime-disabled").state).toBe("BREACH");
+    expect(st(at(25, 0), "ai-runtime-disabled").state).toBe("OK");
+    expect(st(at(25, null), "ai-runtime-disabled").state).toBe("UNKNOWN");
   });
 
   it("observed text is aggregate numbers only, and an unreadable source is itself a breach", () => {

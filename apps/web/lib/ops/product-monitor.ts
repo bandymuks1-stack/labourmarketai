@@ -54,6 +54,7 @@ export const SIGNALS: readonly SignalDefinition[] = [
   { id: "living-cv-not-refreshing", severity: "P2", condition: "journal entries in 7 days ≥ 3 AND no worker_skills row refreshed in 7 days", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "search-slow", severity: "P2", condition: "public free-text job search median of 3 > 3000 ms (or unreachable)", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "ai-failing", severity: "P2", condition: "AI runs in 7 days ≥ 10 AND (failed validation + blocked) / runs > 30 %", interval: MONITOR_INTERVAL, responder: RESPONDER },
+  { id: "ai-runtime-disabled", severity: "P2", condition: "AI runs in 7 days answered by no provider (ai_runs.provider = 'disabled') ≥ 1: people reached an AI surface while the AI runtime was switched off or had no key", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "vacancy-sync-lagging", severity: "P2", condition: "oldest successful vacancy import > 30 h", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "data-integrity", severity: "P1", condition: "any of: accepted invitation without acceptor, brigade offer on a missing need, confirmation on a deleted entry, an accepted staff or partner invitation whose acceptor has no relationship with that organization", interval: MONITOR_INTERVAL, responder: RESPONDER },
   { id: "metrics-unreadable", severity: "P2", condition: "any metric source failed to read", interval: MONITOR_INTERVAL, responder: RESPONDER },
@@ -116,6 +117,11 @@ export function evaluateSignals(s: MetricsSnapshot, p: MonitorProbes): SignalRes
     const runs = metricTotal(metric(s, "ai_runs_7d"));
     const bad = (metricTotal(metric(s, "ai_runs_failed_validation_7d")) ?? 0) + (metricTotal(metric(s, "ai_runs_blocked_7d")) ?? 0);
     set("ai-failing", runs === null ? "UNKNOWN" : runs >= 10 && bad / runs > 0.3 ? "BREACH" : "OK", `${val(runs)} runs, ${bad} failed/blocked (7 d)`);
+  }
+  {
+    const runs = metricTotal(metric(s, "ai_runs_7d"));
+    const off = metricTotal(metric(s, "ai_runs_runtime_disabled_7d"));
+    set("ai-runtime-disabled", runs === null || off === null ? "UNKNOWN" : off >= 1 ? "BREACH" : "OK", `${val(off)} of ${val(runs)} runs had no AI provider (7 d)`);
   }
   {
     const lag = metricTotal(metric(s, "vacancy_sync_lag_hours_max"));
