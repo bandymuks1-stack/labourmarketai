@@ -1,4 +1,4 @@
--- DOWN for 20261023160000_listing_purchases_v1.sql
+-- DOWN for 20261023161500_listing_purchases_v1.sql
 --
 -- GUARDED: refuses while any purchase row exists, so a rollback can never
 -- silently destroy a buyer's or a seller's record. Removing rows is a

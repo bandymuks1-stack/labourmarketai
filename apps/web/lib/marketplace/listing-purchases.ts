@@ -26,7 +26,7 @@ import {
 /**
  * Listing purchases — the goods purchase lifecycle (registry 6.13) with its
  * delivery fields (6.14), over ONE table (`listing_purchases`, migration
- * 20261023160000, RED, owner-applied).
+ * 20261023161500, RED, owner-applied).
  *
  * Reads go through the caller's RLS-scoped client (the two parties and the
  * managers of either side's organization). Writes go ONLY through the two

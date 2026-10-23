@@ -28,8 +28,8 @@ const read = (rel: string) => readFileSync(resolve(APP, rel), "utf8");
 const readRepo = (rel: string) => readFileSync(resolve(REPO, rel), "utf8");
 const strip = (s: string) => s.replace(/--[^\n]*/g, "");
 
-const MIGRATION = "supabase/migrations/20261023160000_listing_purchases_v1.sql";
-const ROLLBACK = "supabase/rollbacks/20261023160000_listing_purchases_v1.down.sql";
+const MIGRATION = "supabase/migrations/20261023161500_listing_purchases_v1.sql";
+const ROLLBACK = "supabase/rollbacks/20261023161500_listing_purchases_v1.down.sql";
 const sql = strip(readRepo(MIGRATION));
 const down = readRepo(ROLLBACK);
 

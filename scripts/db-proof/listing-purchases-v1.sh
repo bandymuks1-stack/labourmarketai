@@ -12,7 +12,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; REPO="$(cd "$HERE/../.." &
 LFD="$(mktemp -d)"
 for f in "$REPO"/supabase/migrations/20260627121713*.sql "$REPO"/supabase/migrations/20260627145318*.sql \
          "$REPO"/supabase/migrations/20260718210000*.sql "$REPO"/supabase/migrations/20261003150300*.sql \
-         "$REPO"/supabase/migrations/20261023160000*.sql "$REPO"/supabase/rollbacks/20261023160000*.sql; do
+         "$REPO"/supabase/migrations/20261023161500*.sql "$REPO"/supabase/rollbacks/20261023161500*.sql; do
   tr -d '\r' < "$f" > "$LFD/$(basename "$f")"; done
 PGPROOF_HOST=${PGPROOF_HOST:-127.0.0.1}; PGPROOF_PORT=${PGPROOF_PORT:-54300}
 case "$PGPROOF_HOST" in 127.0.0.1|localhost|/*) ;; *) echo "refusing non-local host"; exit 2;; esac
@@ -63,8 +63,8 @@ REQ() { as authenticated "$1" "select request_listing_purchase_v1($2)"; }
 
 echo "== apply"
 rebuild
-$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261023160000_listing_purchases_v1.sql" >/dev/null 2>"$LFD/err" || bad "apply" "$(cat "$LFD/err")"
-chk "idempotent re-run" "0" "$($PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261023160000_listing_purchases_v1.sql" 2>&1 | grep -ci error)"
+$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261023161500_listing_purchases_v1.sql" >/dev/null 2>"$LFD/err" || bad "apply" "$(cat "$LFD/err")"
+chk "idempotent re-run" "0" "$($PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261023161500_listing_purchases_v1.sql" 2>&1 | grep -ci error)"
 chk "existing listings untouched (7 rows)" "7" "$($PSQL -c "select count(*) from marketplace_listings")"
 chk "erasure registry rows (2, sever_sentinel, legal review)" "2|2" "$($PSQL -c "select count(*)||'|'||count(*) filter (where treatment='sever_sentinel' and legal_review) from privacy_erasure_registry_v3 where table_name='listing_purchases'")"
 
@@ -135,11 +135,11 @@ chk "listing deleted, purchase kept with snapshot" "1|Pre-existing drill|true" "
 chk "parties still read it" "1|1" "$(as authenticated $U2 "select count(*) from listing_purchases where id='$P1'")|$(as authenticated $U1 "select count(*) from listing_purchases where id='$P1'")"
 
 echo "== rollback"
-chk "rollback refused while rows exist" "1" "$($PSQL -f "$LFD/20261023160000_listing_purchases_v1.down.sql" 2>&1 | grep -c 'rollback refused')"
+chk "rollback refused while rows exist" "1" "$($PSQL -f "$LFD/20261023161500_listing_purchases_v1.down.sql" 2>&1 | grep -c 'rollback refused')"
 rebuild
-$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261023160000_listing_purchases_v1.sql" >/dev/null 2>&1
-$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261023160000_listing_purchases_v1.down.sql" >/dev/null 2>"$LFD/err" || bad "down" "$(cat "$LFD/err")"
+$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261023161500_listing_purchases_v1.sql" >/dev/null 2>&1
+$PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261023161500_listing_purchases_v1.down.sql" >/dev/null 2>"$LFD/err" || bad "down" "$(cat "$LFD/err")"
 chk "after rollback: table, functions, registry rows gone" "0|0|0" "$($PSQL -c "select (select count(*) from pg_class where relname='listing_purchases')||'|'||(select count(*) from pg_proc where proname like '%listing_purchase_v1')||'|'||(select count(*) from privacy_erasure_registry_v3 where table_name='listing_purchases')")"
 chk "after rollback: listings intact" "7" "$($PSQL -c "select count(*) from marketplace_listings")"
-if $PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261023160000_listing_purchases_v1.sql" >/dev/null 2>"$LFD/err"; then ok "re-apply after rollback"; else bad "re-apply" "$(cat "$LFD/err")"; fi
+if $PSQL -v ON_ERROR_STOP=1 -f "$LFD/20261023161500_listing_purchases_v1.sql" >/dev/null 2>"$LFD/err"; then ok "re-apply after rollback"; else bad "re-apply" "$(cat "$LFD/err")"; fi
 if [ $FAIL -eq 0 ]; then echo "ALL PASS"; else echo "FAILURES"; exit 1; fi

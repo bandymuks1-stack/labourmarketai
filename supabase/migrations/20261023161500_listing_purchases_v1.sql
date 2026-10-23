@@ -4,7 +4,7 @@
 -- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
 -- Never `db push` / `prisma migrate deploy`.
 --
--- 20261023160000 — listing purchases v1 (registry 6.13 goods purchase
+-- 20261023161500 — listing purchases v1 (registry 6.13 goods purchase
 -- lifecycle + 6.14 delivery fields). The owner calls it an "order"; in the
 -- product vocabulary it is a PURCHASE REQUEST on a goods listing (the word
 -- "order" stays out of in-app copy — lib/guards/concept-naming-drift.test.ts —
@@ -77,7 +77,7 @@
 -- trigger or row is altered. conversations and its source_type CHECK are
 -- untouched (the thread opens through a grant, without a source stamp).
 --
--- ROLLBACK: supabase/rollbacks/20261023160000_listing_purchases_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261023161500_listing_purchases_v1.down.sql
 -- (guarded: refuses while any purchase row exists).
 -- ============================================================================
 
@@ -360,6 +360,6 @@ end $$;
 
 commit;
 
--- ROLLBACK: see supabase/rollbacks/20261023160000_listing_purchases_v1.down.sql
+-- ROLLBACK: see supabase/rollbacks/20261023161500_listing_purchases_v1.down.sql
 -- (guarded: refuses while any listing_purchases row exists; drops the two
 -- functions, the table and the two registry rows).

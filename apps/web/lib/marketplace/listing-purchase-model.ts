@@ -7,7 +7,7 @@
  * for services, purchase request for goods — "order" stays out of in-app
  * copy, lib/guards/concept-naming-drift.test.ts).
  *
- * This module mirrors the SQL of migration 20261023160000_listing_purchases_v1
+ * This module mirrors the SQL of migration 20261023161500_listing_purchases_v1
  * exactly (statuses, actions, who may move what, which listings are
  * purchasable, the input bounds) so the client never offers a button the
  * database will refuse. The database stays the authority: every rule here is
