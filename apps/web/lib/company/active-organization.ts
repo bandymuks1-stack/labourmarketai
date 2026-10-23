@@ -440,6 +440,31 @@ export interface WorkspaceMembershipsRead {
 export async function readWorkspaceMemberships(
   caller: DomainCaller,
 ): Promise<WorkspaceMembershipsRead> {
+  const read = await readWorkspaceMembershipsOnce(caller.supabase, caller.userId);
+  // Each caller gets its own list; the shared answer is never handed out to
+  // be changed in place.
+  return { workspaces: [...read.workspaces], complete: read.complete };
+}
+
+/**
+ * Read ONCE per server render (perf 2026-10-23, prod-qa brigade walk): one
+ * `/dashboard/company/people` render asked for this list three times — the
+ * layout's workspace context, the employer context and the roster section's
+ * evidence context each built their own caller object — four reads each time.
+ * Keyed by the CLIENT and the user, never by the caller object: the same
+ * session client and the same person get the same list; another client (a
+ * bearer transport, another identity) reads for itself. React `cache()` is
+ * request-scoped: every navigation reads again, and a server action (no
+ * render — e.g. the workspace switch's own membership check) reads itself.
+ */
+const readWorkspaceMembershipsOnce = cache(
+  async (supabase: DomainCaller["supabase"], userId: string): Promise<WorkspaceMembershipsRead> =>
+    readWorkspaceMembershipsUncached({ supabase, userId }),
+);
+
+async function readWorkspaceMembershipsUncached(
+  caller: DomainCaller,
+): Promise<WorkspaceMembershipsRead> {
   const [owned, engagement, governance] = await Promise.all([
     readOwnedOrganizations(caller),
     readEngagementMemberships(caller.supabase, caller.userId),
@@ -519,12 +544,9 @@ export async function resolveActiveWorkspaceForCaller(
   // it starts with them instead of after them: one serial database hop less
   // on every dashboard layout (production 2026-09-28 — the workspace chain is
   // on the path to Home's first byte). Same query, same error handling below.
-  const pointerRead: Promise<{ data: unknown; error: unknown }> = Promise.resolve(
-    asAny(caller.supabase)
-      .from("profiles")
-      .select("active_organization_id")
-      .eq("id", caller.userId)
-      .maybeSingle(),
+  const pointerRead: Promise<{ data: unknown; error: unknown }> = readStoredPointerOnce(
+    caller.supabase,
+    caller.userId,
   );
   // Awaited (and so thrown, exactly as before) below; this only keeps a
   // rejection from being reported as unhandled if the memberships throw first.
@@ -580,6 +602,18 @@ export async function resolveActiveWorkspaceForCaller(
     membershipsComplete: memberships.complete,
   };
 }
+
+/** The durable pointer row, read ONCE per server render per client and user
+ *  (perf 2026-10-23: the layout and the page's own resolvers each read it).
+ *  The pointer is written only by the switch core in a server action, never
+ *  during a render, and React `cache()` is request-scoped — the render that
+ *  follows a switch reads again. */
+const readStoredPointerOnce = cache(
+  (supabase: DomainCaller["supabase"], userId: string): Promise<{ data: unknown; error: unknown }> =>
+    Promise.resolve(
+      asAny(supabase).from("profiles").select("active_organization_id").eq("id", userId).maybeSingle(),
+    ),
+);
 
 /**
  * The acting identity that decides the workspace DEFAULT, from the session

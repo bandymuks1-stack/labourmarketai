@@ -45,6 +45,29 @@ export type ProfileCoreRow = SessionProfileRow & {
 export async function readProfileRow(
   caller: DomainCaller,
 ): Promise<CoreRead<ProfileCoreRow | null>> {
+  const read = await readProfileRowOnce(caller.supabase, caller.userId);
+  return read.ok ? { ok: true, value: read.value ? { ...read.value } : null } : { ok: false };
+}
+
+/**
+ * Read ONCE per server render per client and user (perf 2026-10-23): the
+ * session profile, the employer context and the roster section's evidence
+ * context each built their own caller and read the same row in one
+ * `/dashboard/company/people` render. Keyed by the CLIENT, never the caller
+ * object: a bearer transport or another identity reads for itself. React
+ * `cache()` is request-scoped — a role switch is a server action, and the
+ * render after it reads again.
+ */
+const readProfileRowOnce = cache(
+  async (
+    supabase: DomainCaller["supabase"],
+    userId: string,
+  ): Promise<CoreRead<ProfileCoreRow | null>> => readProfileRowUncached({ supabase, userId }),
+);
+
+async function readProfileRowUncached(
+  caller: DomainCaller,
+): Promise<CoreRead<ProfileCoreRow | null>> {
   const { data, error } = await caller.supabase
     .from("profiles")
     .select(
