@@ -1068,7 +1068,8 @@
       "team_count_range": "Nurodei brigadų skaičių intervalu. Kiek brigadų tiksliai reikia ir kiek žmonių bus kiekvienoje?",
       "per_team_range": "Kiek žmonių tiksliai bus kiekvienoje brigadoje?",
       "team_size_missing": "Kiek žmonių bus kiekvienoje brigadoje? Kol to nežinome, darbuotojų skaičiaus neskaičiuojame.",
-      "team_count_missing": "Kiek brigadų reikia?"
+      "team_count_missing": "Kiek brigadų reikia?",
+      "headcount_unclear": "Nurodei kelis darbuotojus, bet ne kiek. Kiek tiksliai žmonių reikia?"
     }
   },
   "quickNav": {

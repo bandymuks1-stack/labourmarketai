@@ -242,3 +242,94 @@ describe("unclear teams: ask, never guess", () => {
     expect(card.headcount?.clarification).toBe(clarification);
   });
 });
+
+/**
+ * Review finding (PR #2700): a team noun used as CONTEXT — "to join our
+ * crew", "į mūsų brigadą", "в нашу бригаду" — is not a team request. The
+ * explicitly stated number of people stays the headcount, with no question.
+ */
+describe("a team noun as context keeps the stated headcount", () => {
+  it.each([
+    ["Need 2 welders to join our crew", 2],
+    ["Reikia 2 suvirintojų į mūsų brigadą", 2],
+    ["Нужны 2 сварщика в нашу бригаду", 2],
+    ["Wir suchen 2 Schweißer für unsere Kolonne", 2],
+    ["Szukamy 2 spawaczy do naszej brygady", 2],
+    ["We zoeken 2 lassers voor onze ploeg", 2],
+    ["Need 2 welders to join a crew", 2],
+    ["We need a welder to join our crew", 1],
+    ["Reikia suvirintojo į mūsų brigadą", 1],
+  ] as const)("%s → %d", (text, n) => {
+    expect(readTeamComposition(text)).toBeNull();
+    expect(structureValueStatement(text, TODAY).headcount).toBe(n);
+    expect(structureValueStatement(text, TODAY).teamClarification).toBeUndefined();
+    const card = recognizeIntent("need_workers", { rawText: text });
+    expect(card.headcount?.total).toBe(n);
+    expect(card.headcount?.clarification).toBeNull();
+  });
+
+  it("a team actually requested still asks for its size", () => {
+    expect(readTeamComposition("Need 2 crews")).toEqual({ status: "unclear", clarification: "team_size_missing", teams: 2 });
+    expect(readTeamComposition("Brigada reikalinga")?.status).toBe("unclear");
+    expect(readTeamComposition("Kolonne gesucht")?.status).toBe("unclear");
+  });
+
+  it("'5 crew' is five crew members, not five teams", () => {
+    expect(readTeamComposition("Need 5 crew")).toBeNull();
+    expect(readNeedHeadcount("Need 5 crew")?.total).toBe(5);
+  });
+
+  it.each([
+    ["Reikia brigados iš 4 žmonių", 4],
+    ["Нужна бригада из 4 человек", 4],
+    ["Wir suchen eine Kolonne aus 4 Personen", 4],
+    ["Szukamy brygady z 4 osób", 4],
+    ["We zoeken een ploeg uit 4 mensen", 4],
+    ["Need a crew of 4", 4],
+  ] as const)("one team of a stated size: %s → %d", (text, total) => {
+    expect(readTeamComposition(text)).toEqual({ status: "known", teams: 1, perTeam: 4, total });
+  });
+});
+
+/**
+ * Review finding (PR #2700): "a few / a couple of / a dozen / several"
+ * welders is more than one but not how many. The article is not "one": the
+ * headcount is UNRESOLVED and asked — never 1. ("dozen" is no number word
+ * here, so it is asked too.)
+ */
+describe("a vague quantity is asked, never read as one", () => {
+  it.each([
+    "We need a few welders",
+    "We need a couple of welders",
+    "We need a dozen welders",
+    "We need several welders",
+    "Reikia kelių suvirintojų",
+    "Reikia keleto suvirintojų",
+    "Нужно несколько сварщиков",
+    "Wir suchen einige Schweißer",
+    "Wir suchen ein paar Schweißer",
+    "Wir suchen mehrere Schweißer",
+    "Szukamy kilku spawaczy",
+    "We zoeken enkele lassers",
+    "We zoeken een paar lassers",
+  ])("%s", (text) => {
+    expect(readsSingularOccupation(text)).toBe(false);
+    const v = structureValueStatement(text, TODAY);
+    expect(v.headcount).toBeNull();
+    if (v.subject === "workforce") expect(v.missing).toContain("headcount");
+    expect(readNeedHeadcount(text)).toEqual({
+      total: null,
+      teams: null,
+      perTeam: null,
+      basis: null,
+      clarification: "headcount_unclear",
+    });
+    expect(recognizeIntent("need_workers", { rawText: text }).headcount?.clarification).toBe("headcount_unclear");
+    expect(structureNeed({ description: text }).teamSize).toBeNull();
+  });
+
+  it("the article before ONE occupation is still one", () => {
+    expect(readNeedHeadcount("We need a welder")?.total).toBe(1);
+    expect(readNeedHeadcount("Wir suchen einen Schweißer")?.total).toBe(1);
+  });
+});

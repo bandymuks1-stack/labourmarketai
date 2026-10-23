@@ -281,7 +281,7 @@ function escapeForRegex(s: string): string {
  */
 /** A number directly followed by a word for PEOPLE. */
 const PEOPLE_COUNT_RE =
-  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i;
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i;
 
 /** Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
  *  halves of pairs whose other half was already here; DE/PL/NL the same
@@ -347,8 +347,9 @@ const TEAM_NOUN =
 // number and a size are both stated; a bare mention never asks for a size.
 const STRICT_TEAM_NOUN =
   "(?:brigad(?!inink)\\p{L}*|crews?|brigades?|gangs?|бригад(?!ир)\\p{L}*|звен\\p{L}*|kolonnen?|trupps?|brigaden?|brygad(?!zist)\\p{L}*|ekip\\p{L}*|ploeg(?:en)?)";
-/** "po" (lt, pl), "of" (en), "по" (ru), "zu/mit/je/à" (de), "van" (nl). */
-const PER_TEAM_WORD = "(?:po|of|по|zu|mit|je|a|van)";
+/** "po" (lt, pl), "of" (en), "по" (ru), "zu/mit/je/à" (de), "van" (nl) —
+ *  and "a team OF n": "iš" (lt), "из" (ru), "aus" (de), "z" (pl), "uit" (nl). */
+const PER_TEAM_WORD = "(?:po|of|по|zu|mit|je|a|van|is|из|aus|z|uit)";
 const EDGE = "(?:^|[^\\p{L}\\p{N}])";
 const COUNT = "(\\d{1,3}|\\p{L}+)";
 const RANGE = "(\\d{1,3})\\s*[-–—]\\s*(\\d{1,3})";
@@ -356,18 +357,67 @@ const RANGE = "(\\d{1,3})\\s*[-–—]\\s*(\\d{1,3})";
 const TEAM_COUNT_RANGE_RE = new RegExp(`${EDGE}${RANGE}\\s+${TEAM_NOUN}`, "u");
 const PER_TEAM_RANGE_RE = new RegExp(`${TEAM_NOUN}\\s+${PER_TEAM_WORD}\\s+${RANGE}`, "u");
 const KNOWN_RE = new RegExp(
-  `${EDGE}${COUNT}\\s+${TEAM_NOUN}\\s+${PER_TEAM_WORD}\\s+(\\d{1,3})(?!\\d|\\s*[-–—]\\s*\\d)`,
+  `${EDGE}(?:${COUNT}\\s+)?(${TEAM_NOUN})\\s+${PER_TEAM_WORD}\\s+(\\d{1,3})(?!\\d|\\s*[-–—]\\s*\\d)`,
   "u",
 );
+/** A team noun in the SINGULAR — "brigada iš 4", "бригада из 4", "eine Kolonne
+ *  aus 4": one team of that size even with no count word before it. */
+const SINGULAR_TEAM_TOKEN = /^(?:brigada|brigados|crew|team|gang|brigade|бригада|бригаду|kolonne|trupp|brygada|brygady|brygade|ekipa|ekipy|ekipe|ploeg)$/u;
+
+const STRICT_TEAM_TOKEN = new RegExp(`^${STRICT_TEAM_NOUN}$`, "u");
+/** A verb that REQUESTS what follows it ("reikia brigados", "need a crew"). */
+const TEAM_REQUEST_VERB =
+  /^(?:reikia|reikalinga|reikalingos|reikalingi|ieskome|ieskau|need|needs|needed|hiring|seeking|require|нужна|нужны|нужен|нужно|требуется|требуются|ищем|ищу|suchen|brauchen|benotigen|szukamy|potrzebujemy|poszukujemy|zatrudnimy|zoeken|zoekt)$/u;
+/** …or one that follows the noun ("Kolonne gesucht", "ploeg gezocht"). */
+const TEAM_REQUEST_AFTER =
+  /^(?:gesucht|gezocht|wanted|needed|nodig|reikalinga|reikalingos|требуется|нужна|potrzebna|potrzebne|poszukiwana)$/u;
+/** A team noun after a possessive or determiner is CONTEXT, not a request:
+ *  "to join our crew", "į mūsų brigadą", "в нашу бригаду", "in unsere
+ *  Kolonne", "do naszej brygady", "in onze ploeg". */
+const TEAM_CONTEXT_BEFORE =
+  /^(?:our|my|your|their|the|this|musu|mano|jusu|savo|ju|sia|нашу|нашей|наша|наш|нашим|нашу|мою|свою|эту|unsere|unserem|unserer|unser|meine|ihre|die|der|den|nasza|naszej|naszą|moja|swojej|onze|ons|mijn|jullie|de|het)$/u;
 // A team LEADER is one person, not a team: "brigados vadovo", "crew leader",
 // "kierownika brygady", "руководитель бригады" never ask for a team size.
-const SIZE_MISSING_RE = new RegExp(
-  `${EDGE}(?:${COUNT}\\s+)?(?<!(?:kierownik|руководител|начальник|leader|lead|manager|vadov)\\p{L}*\\s+)${STRICT_TEAM_NOUN}(?![\\p{L}])(?!\\s+(?:vadov|leader|lead|chief|manager|foreman|kierownik))`,
-  "u",
-);
+const LEADER_AFTER = /^(?:vadov\p{L}*|leader|lead|chief|manager|foreman|kierownik\p{L}*)$/u;
+const LEADER_BEFORE = /^(?:kierownik\p{L}*|руководител\p{L}*|начальник\p{L}*|leader|lead|manager|vadov\p{L}*)$/u;
 
 /** One team, said with an article or the numeral "one". */
 const ONE_TEAM_WORD = /^(?:a|an|one|ein|eine|einen|een|jedna|jedne|jedno|одна|одну|одной|viena|vienos|vieną)$/u;
+
+/**
+ * A team REQUESTED without a size — "reikia brigados", "Need 2 crews", "Нужна
+ * бригада", "Wir suchen eine Kolonne", "Szukamy brygady", "We zoeken een
+ * ploeg". A team noun used as context ("join our crew") is not one, nor is
+ * "5 crew" (five crew members — people, not teams).
+ */
+function requestedTeamWithoutSize(folded: string): { teams: number | null } | null {
+  const tokens = folded.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  for (let i = 0; i < tokens.length; i++) {
+    if (!STRICT_TEAM_TOKEN.test(tokens[i])) continue;
+    const prev = tokens[i - 1];
+    const prev2 = tokens[i - 2];
+    const next = tokens[i + 1];
+    if ((next && LEADER_AFTER.test(next)) || (prev && LEADER_BEFORE.test(prev))) continue;
+    if (prev && TEAM_CONTEXT_BEFORE.test(prev)) continue;
+    const count = countWord(prev);
+    if (tokens[i] === "crew" && count !== null && count > 1) continue;
+    const requested =
+      count !== null ||
+      (prev !== undefined && TEAM_REQUEST_VERB.test(prev)) ||
+      (prev2 !== undefined && TEAM_REQUEST_VERB.test(prev2) && count !== null) ||
+      (next !== undefined && TEAM_REQUEST_AFTER.test(next));
+    if (requested) return { teams: count };
+  }
+  return null;
+}
+
+/** Does the sentence state a count of PEOPLE ("Need 2 welders", "reikia 3
+ *  darbuotojų")? Then that count is the headcount, whatever team it joins. */
+function statesPeopleCount(text: string): boolean {
+  const lower = text.toLowerCase();
+  const wt = recognisedWorkType(lower);
+  return detectPeopleCount(wt.hay, wt.needle) !== null;
+}
 
 /** A digit or a written number ("dvi", "trys", "three", "a") — null otherwise. */
 function countWord(token: string | undefined): number | null {
@@ -386,13 +436,21 @@ export function readTeamComposition(text: string | null | undefined): TeamCompos
   }
   const known = folded.match(KNOWN_RE);
   if (known) {
-    const teams = countWord(known[1]);
-    const perTeam = Number.parseInt(known[2], 10);
+    const perTeam = Number.parseInt(known[3], 10);
+    // No count word, but a SINGULAR team noun: "brigada iš 4" is one team.
+    const teams =
+      countWord(known[1]) ??
+      (SINGULAR_TEAM_TOKEN.test(known[2]) && !/^(?:reikalingos|reikalingi|нужны|требуются|potrzebne)$/u.test(known[1] ?? "")
+        ? 1
+        : null);
     if (teams !== null && teams >= 1 && teams <= 100 && perTeam >= 1 && perTeam <= 100) {
       return { status: "known", teams, perTeam, total: teams * perTeam };
     }
-    // "brigadų po 4": the size is stated, how many teams is not.
-    if (perTeam >= 1 && perTeam <= 100 && teams === null) {
+    // "brigadų po 4": the size is stated, how many teams is not — unless the
+    // sentence counts the people itself, OUTSIDE the team phrase (the "4
+    // žmones" of "po 4 žmones" is the size per team, not a headcount).
+    const outside = `${folded.slice(0, known.index)} ${folded.slice((known.index ?? 0) + known[0].length)}`;
+    if (perTeam >= 1 && perTeam <= 100 && teams === null && !statesPeopleCount(outside)) {
       return { status: "unclear", clarification: "team_count_missing", teams: null };
     }
   }
@@ -402,9 +460,11 @@ export function readTeamComposition(text: string | null | undefined): TeamCompos
     const before = folded.slice(0, perRange.index).trim().split(/[^\p{L}\p{N}]+/u).pop();
     return { status: "unclear", clarification: "per_team_range", teams: countWord(before) };
   }
-  const missing = folded.match(SIZE_MISSING_RE);
-  if (missing) {
-    return { status: "unclear", clarification: "team_size_missing", teams: countWord(missing[1]) };
+  // A team requested with no size asks for the size — but an explicit count
+  // of people ("Need 2 welders to join a crew") is the headcount already.
+  const missing = requestedTeamWithoutSize(folded);
+  if (missing && !statesPeopleCount(text ?? "")) {
+    return { status: "unclear", clarification: "team_size_missing", teams: missing.teams };
   }
   return null;
 }

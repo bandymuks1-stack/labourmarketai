@@ -1068,7 +1068,8 @@
       "team_count_range": "Sie haben die Zahl der Teams als Spanne angegeben. Wie viele Teams genau, und wie viele Personen pro Team?",
       "per_team_range": "Wie viele Personen genau gehören zu jedem Team?",
       "team_size_missing": "Wie viele Personen gehören zu jedem Team? Bis dahin wird die Zahl der Arbeitskräfte nicht berechnet.",
-      "team_count_missing": "Wie viele Teams brauchen Sie?"
+      "team_count_missing": "Wie viele Teams brauchen Sie?",
+      "headcount_unclear": "Sie haben mehrere Personen genannt, aber nicht wie viele. Wie viele genau?"
     }
   },
   "quickNav": {

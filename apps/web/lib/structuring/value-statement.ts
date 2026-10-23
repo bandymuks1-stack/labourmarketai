@@ -21,7 +21,7 @@
 import { detectNeedProfession } from "@/lib/market/need-skills";
 import { PROFESSION_HINTS_LT } from "./keywords";
 import { foldText } from "./normalize";
-import { readsSingularOccupation } from "./need-headcount";
+import { readsSingularOccupation, readsVagueHeadcount } from "./need-headcount";
 import { readRoleLabel } from "./role-label";
 import {
   WORK_TYPE_RULES,
@@ -382,14 +382,20 @@ export function structureValueStatement(
   const teams = readTeamComposition(raw);
   if (teams?.status === "known") reasons.push(`team_composition:${teams.teams}x${teams.perTeam}`);
   if (teams?.status === "unclear") reasons.push(`team_clarification:${teams.clarification}`);
+  // "A few / several / keli …" welders is more than one but not how many:
+  // the count is asked (`missing` → "headcount"), never the article's "one".
+  const vagueCount = readsVagueHeadcount(raw);
   const headcount = teams
     ? teams.status === "known"
       ? teams.total
       : null
     : detectHeadcount(raw, folded) ??
-      (role?.grammaticalNumber === "singular" && SEEK_RES.some((re) => re.test(folded)) ? 1 : null) ??
-      (readsSingularOccupation(raw) ? 1 : null);
+      (vagueCount
+        ? null
+        : (role?.grammaticalNumber === "singular" && SEEK_RES.some((re) => re.test(folded)) ? 1 : null) ??
+          (readsSingularOccupation(raw) ? 1 : null));
   if (headcount !== null) reasons.push(`headcount:${headcount}`);
+  else if (vagueCount) reasons.push("headcount_unclear:quantifier");
 
   // ── Subject — decided by axis + the facts, never by guessing the user ──
   let subject: ValueSubject | null = null;

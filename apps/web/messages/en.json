@@ -1068,7 +1068,8 @@
       "team_count_range": "You gave the number of teams as a range. How many teams exactly, and how many people in each?",
       "per_team_range": "How many people exactly will be in each team?",
       "team_size_missing": "How many people will be in each team? Until then the number of workers is not counted.",
-      "team_count_missing": "How many teams do you need?"
+      "team_count_missing": "How many teams do you need?",
+      "headcount_unclear": "You said more than one, but not how many. How many people exactly?"
     }
   },
   "quickNav": {

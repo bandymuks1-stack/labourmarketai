@@ -10,6 +10,18 @@ const LOCALES = ["lt", "en", "ru", "de", "pl", "nl"] as const;
 const messages = (locale: string) =>
   JSON.parse(readFileSync(join(WEB, "messages", `${locale}.json`), "utf8")) as Record<string, unknown>;
 
+/** The message files are read as plain JSON (that is the point: the copy on
+ *  disk is what is checked), so the translator is typed as a plain lookup. */
+type LooseTranslator = (key: string, values?: Record<string, string | number>) => string;
+function translator(locale: string, namespace: string): LooseTranslator {
+  const make = createTranslator as unknown as (options: {
+    locale: string;
+    messages: Record<string, unknown>;
+    namespace: string;
+  }) => LooseTranslator;
+  return make({ locale, messages: messages(locale), namespace });
+}
+
 /**
  * The recognize page shows HOW MANY workers it read — "Darbuotojų: 1" for
  * one singular occupation, "Darbuotojų: 12 (3 brigados po 4)" for teams of a
@@ -27,7 +39,7 @@ describe("recognize page headcount copy, six locales", () => {
   };
 
   it.each(LOCALES)("%s", (locale) => {
-    const t = createTranslator({ locale, messages: messages(locale), namespace: "marketRecognition" });
+    const t = translator(locale, "marketRecognition");
     expect(t("headcount.total", { count: 1 })).toBe(expected[locale].one);
     expect(t("headcount.teams", { total: 12, teams: 3, perTeam: 4 })).toBe(expected[locale].teams);
     for (const code of ["team_count_range", "per_team_range", "team_size_missing", "team_count_missing"] as const) {
@@ -35,7 +47,7 @@ describe("recognize page headcount copy, six locales", () => {
     }
     expect(t("clarify.title").length).toBeGreaterThan(3);
 
-    const chat = createTranslator({ locale, messages: messages(locale), namespace: "conversation.chat.valueIntent" });
+    const chat = translator(locale, "conversation.chat.valueIntent");
     expect(chat("teams", { teams: 3, perTeam: 4 })).toMatch(/3 .* 4$/u);
     expect(chat("ask.team_size").length).toBeGreaterThan(10);
   });

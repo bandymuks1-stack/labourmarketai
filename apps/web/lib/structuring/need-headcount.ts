@@ -33,6 +33,10 @@ import { withUnicodeBoundaries } from "./unicode-word-boundary";
 
 export type HeadcountBasis = "teams" | "count" | "singular_occupation";
 
+/** What to ask before any total is shown: teams without a size or as a range,
+ *  or a vague quantity ("a few welders", "keli suvirintojai"). */
+export type HeadcountClarification = TeamClarification | "headcount_unclear";
+
 export interface NeedHeadcount {
   /** Workers in total — null while a clarification is open. */
   readonly total: number | null;
@@ -40,9 +44,18 @@ export interface NeedHeadcount {
   readonly teams: number | null;
   readonly perTeam: number | null;
   readonly basis: HeadcountBasis | null;
-  /** What to ask before any total is shown (teams without a size, a range). */
-  readonly clarification: TeamClarification | null;
+  readonly clarification: HeadcountClarification | null;
 }
+
+/**
+ * Words that state MORE THAN ONE without a number — "a few", "a couple of",
+ * "a dozen", "several", "some", "keli / kelis / keletas", "несколько",
+ * "einige / mehrere / ein paar", "kilka / kilku", "enkele / een paar". The
+ * article in "a few welders" is not "one welder": the count is unresolved and
+ * asked, never 1 ("dozen" is no number word here, so it is asked too).
+ */
+const PLURAL_QUANTIFIER =
+  /^(?:few|couple|dozen|dozens|several|some|many|multiple|various|keli|kelis|kelios|keletas|keleta|keliu|keleto|keleriems|daug|nemazai|несколько|нескольких|пару|пара|много|einige|einigen|mehrere|mehreren|paar|viele|kilka|kilku|kilkoro|kilkunastu|paru|wielu|enkele|aantal|meerdere|verschillende|veel)$/u;
 
 type DemandLanguage = "lt" | "en" | "ru" | "de" | "pl" | "nl";
 
@@ -109,15 +122,27 @@ function isSingularToken(lang: DemandLanguage, token: string, before: readonly s
  * suchen einen Schweißer", "Szukamy spawacza", "Lasser gezocht".
  */
 export function readsSingularOccupation(text: string | null | undefined): boolean {
+  return readOccupationNumber(text) === "singular";
+}
+
+/** An occupation after a demand verb counted only by a VAGUE quantity —
+ *  "We need a few welders", "Reikia kelių suvirintojų", "Нужно несколько
+ *  сварщиков". The count is asked, never guessed. */
+export function readsVagueHeadcount(text: string | null | undefined): boolean {
+  return readOccupationNumber(text) === "vague";
+}
+
+/** How the demanded occupation is counted when no number is stated. */
+function readOccupationNumber(text: string | null | undefined): "singular" | "vague" | "other" | null {
   const folded = foldText(text ?? "");
-  if (!folded) return false;
+  if (!folded) return null;
   const verb = DEMAND_VERBS.find(({ re }) => re.test(folded));
-  if (!verb || PLURAL_VERB.test(folded)) return false;
+  if (!verb) return null;
   const tokens = folded.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   // A stated number keeps its own reading — this rule is only for none. A
   // number that MEASURES something ("2 metams", "15 eur", "40 val.", "3 metų
   // patirties") is not a count and does not stand in the way.
-  if (tokens.some((t, i) => /^\d+$/.test(t) && !isCountUnitWord(tokens[i + 1]))) return false;
+  if (tokens.some((t, i) => /^\d+$/.test(t) && !isCountUnitWord(tokens[i + 1]))) return null;
   const masked = maskServiceNoun(folded);
   for (const rule of WORK_TYPE_RULES) {
     for (const needle of rule.needles) {
@@ -125,10 +150,16 @@ export function readsSingularOccupation(text: string | null | undefined): boolea
       if (n.includes(" ") || !masked.includes(n)) continue;
       const index = tokens.findIndex((t) => t.includes(n));
       if (index === -1) continue;
-      return isSingularToken(verb.lang, tokens[index], tokens.slice(Math.max(0, index - 2), index));
+      // "a few / a couple of / a dozen / several …" before the occupation:
+      // more than one, not how many — and never the article's "one".
+      if (tokens.slice(Math.max(0, index - 3), index).some((w) => PLURAL_QUANTIFIER.test(w))) return "vague";
+      if (PLURAL_VERB.test(folded)) return "other";
+      return isSingularToken(verb.lang, tokens[index], tokens.slice(Math.max(0, index - 2), index))
+        ? "singular"
+        : "other";
     }
   }
-  return false;
+  return null;
 }
 
 /** How many workers the sentence states — see the module comment. */
@@ -142,7 +173,11 @@ export function readNeedHeadcount(text: string | null | undefined): NeedHeadcoun
   }
   const count = countPeopleInNeed({ description: text ?? "" });
   if (count !== null) return { total: count, teams: null, perTeam: null, basis: "count", clarification: null };
-  if (readsSingularOccupation(text)) {
+  const occupation = readOccupationNumber(text);
+  if (occupation === "vague") {
+    return { total: null, teams: null, perTeam: null, basis: null, clarification: "headcount_unclear" };
+  }
+  if (occupation === "singular") {
     return { total: 1, teams: null, perTeam: null, basis: "singular_occupation", clarification: null };
   }
   return null;

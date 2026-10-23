@@ -1068,7 +1068,8 @@
       "team_count_range": "Je gaf het aantal ploegen als bereik. Hoeveel ploegen precies, en hoeveel mensen per ploeg?",
       "per_team_range": "Hoeveel mensen precies zitten er in elke ploeg?",
       "team_size_missing": "Hoeveel mensen zitten er in elke ploeg? Tot dan wordt het aantal werknemers niet berekend.",
-      "team_count_missing": "Hoeveel ploegen heb je nodig?"
+      "team_count_missing": "Hoeveel ploegen heb je nodig?",
+      "headcount_unclear": "Je noemde meerdere mensen, maar niet hoeveel. Hoeveel mensen precies?"
     }
   },
   "quickNav": {

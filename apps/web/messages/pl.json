@@ -1068,7 +1068,8 @@
       "team_count_range": "Podałeś liczbę brygad jako przedział. Ile brygad dokładnie i ile osób w każdej?",
       "per_team_range": "Ile osób dokładnie będzie w każdej brygadzie?",
       "team_size_missing": "Ile osób będzie w każdej brygadzie? Do tego czasu liczba pracowników nie jest liczona.",
-      "team_count_missing": "Ile brygad potrzebujesz?"
+      "team_count_missing": "Ile brygad potrzebujesz?",
+      "headcount_unclear": "Podałeś kilka osób, ale nie ile. Ile dokładnie osób potrzeba?"
     }
   },
   "quickNav": {
