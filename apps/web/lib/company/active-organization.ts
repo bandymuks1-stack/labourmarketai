@@ -6,7 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { currentBearerCaller } from "@/lib/api/bearer-caller-scope";
-import { getSessionProfile } from "@/lib/auth/session-profile";
+import { getSessionProfile, readStoredWorkspacePointer } from "@/lib/auth/session-profile";
 import { baseIdentityForRole } from "@/lib/config/roles";
 import {
   getOwnedOrganizations,
@@ -14,7 +14,11 @@ import {
   type OwnedOrganization,
 } from "@/lib/company/owned-organizations";
 import type { DomainCaller } from "@/lib/domain/caller";
-import { withoutArchivedOrganizations } from "@/lib/company/archived-organizations";
+import {
+  isAbsentArchiveSchema,
+  isArchivedOrganizationRow,
+  withoutArchivedOrganizations,
+} from "@/lib/company/archived-organizations";
 import {
   PERSONAL_WORKSPACE_ID,
   SWITCHABLE_ENGAGEMENT_RELATIONSHIPS,
@@ -253,6 +257,28 @@ function normalizeOrgType(
  *  SELECT is open to authenticated readers). Display facts only. */
 const ORGANIZATION_EMBED =
   "organizations(display_name, legal_name, organization_type, legacy_company_id, companies!organizations_legacy_company_id_fkey(company_type))";
+/** The same embed with the archive column riding along (perf 2026-10-23): the
+ *  archive state of every member-sourced organization used to be a second,
+ *  sequential `organizations` read on every render. Same table, same RLS —
+ *  an organization the caller cannot read embeds as null and reads "not
+ *  archived", exactly what the separate read answered for it. */
+const ORGANIZATION_EMBED_WITH_ARCHIVE =
+  "organizations(display_name, legal_name, organization_type, legacy_company_id, archived_at, companies!organizations_legacy_company_id_fkey(company_type))";
+
+/**
+ * Run a membership source with the archive column embedded; where the column
+ * is absent (42703 / PGRST204 — the archive migration is unapplied) re-run it
+ * with the plain embed and say so, and the separate archive read decides.
+ */
+async function readWithArchiveEmbed<R extends { data: unknown; error: { code?: string } | null }>(
+  run: (embed: string) => PromiseLike<R>,
+): Promise<{ res: R; archiveChecked: boolean }> {
+  const res = await run(ORGANIZATION_EMBED_WITH_ARCHIVE);
+  if (res.error && isAbsentArchiveSchema(res.error.code)) {
+    return { res: await run(ORGANIZATION_EMBED), archiveChecked: false };
+  }
+  return { res, archiveChecked: true };
+}
 
 type EmbeddedOrganization = {
   display_name?: string | null;
@@ -305,30 +331,39 @@ interface SourceRead {
   readonly workspaces: readonly WorkspaceInfo[];
   /** False ONLY on a real failure — a structurally absent source is complete. */
   readonly complete: boolean;
+  /** True when archived organizations were already left out from the embedded
+   *  archive column; false when the separate archive read must decide. */
+  readonly archiveChecked: boolean;
 }
 
 async function readEngagementMemberships(
   supabase: SupabaseClient,
   profileId: string,
 ): Promise<SourceRead> {
-  const { data, error } = await asAny(supabase)
-    .from("engagement_contexts")
-    .select(`organization_id, relationship_slug, ${ORGANIZATION_EMBED}`)
-    .eq("profile_id", profileId)
-    .eq("status", "active")
-    .not("organization_id", "is", null)
-    // Only relationships the pointer trigger accepts: a listed workspace the
-    // switch can never reach (a `student` link) is a guaranteed silent refusal.
-    .in("relationship_slug", [...SWITCHABLE_ENGAGEMENT_RELATIONSHIPS])
-    .limit(50);
+  const {
+    res: { data, error },
+    archiveChecked,
+  } = await readWithArchiveEmbed((embed) =>
+    asAny(supabase)
+      .from("engagement_contexts")
+      .select(`organization_id, relationship_slug, ${embed}`)
+      .eq("profile_id", profileId)
+      .eq("status", "active")
+      .not("organization_id", "is", null)
+      // Only relationships the pointer trigger accepts: a listed workspace the
+      // switch can never reach (a `student` link) is a guaranteed silent refusal.
+      .in("relationship_slug", [...SWITCHABLE_ENGAGEMENT_RELATIONSHIPS])
+      .limit(50),
+  );
   // Absent schema is a real "nothing here"; anything else is a failure this
   // list must carry, not swallow.
-  if (error) return { workspaces: [], complete: isAbsentSchema(error.code) };
+  if (error) return { workspaces: [], complete: isAbsentSchema(error.code), archiveChecked: true };
   const byOrg = new Map<string, WorkspaceInfo>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const row of (data ?? []) as any[]) {
     const orgId = row.organization_id as string | null;
     if (!orgId || byOrg.has(orgId)) continue;
+    if (archiveChecked && isArchivedOrganizationRow(row.organizations)) continue;
     byOrg.set(orgId, {
       id: orgId,
       ...organizationDisplay(row.organizations as EmbeddedOrganization),
@@ -339,7 +374,7 @@ async function readEngagementMemberships(
       accentIndex: workspaceAccentIndex(orgId),
     });
   }
-  return { workspaces: [...byOrg.values()], complete: true };
+  return { workspaces: [...byOrg.values()], complete: true, archiveChecked };
 }
 
 /**
@@ -354,20 +389,26 @@ async function readGovernanceMemberships(
   supabase: SupabaseClient,
   profileId: string,
 ): Promise<SourceRead> {
-  const { data, error } = await asAny(supabase)
-    .from("company_memberships")
-    .select(`organization_id, role, ${ORGANIZATION_EMBED}`)
-    .eq("profile_id", profileId)
-    .eq("status", "active")
-    .limit(50);
+  const {
+    res: { data, error },
+    archiveChecked,
+  } = await readWithArchiveEmbed((embed) =>
+    asAny(supabase)
+      .from("company_memberships")
+      .select(`organization_id, role, ${embed}`)
+      .eq("profile_id", profileId)
+      .eq("status", "active")
+      .limit(50),
+  );
   // Feature detection stays: an environment without the Slice 1 table is
   // complete with nothing to add. A different error is a failure.
-  if (error) return { workspaces: [], complete: isAbsentSchema(error.code) };
+  if (error) return { workspaces: [], complete: isAbsentSchema(error.code), archiveChecked: true };
   const byOrg = new Map<string, WorkspaceInfo>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const row of (data ?? []) as any[]) {
     const orgId = row.organization_id as string | null;
     if (!orgId || byOrg.has(orgId)) continue;
+    if (archiveChecked && isArchivedOrganizationRow(row.organizations)) continue;
     const role = (row.role as string | null) ?? null;
     byOrg.set(orgId, {
       id: orgId,
@@ -386,7 +427,7 @@ async function readGovernanceMemberships(
       accentIndex: workspaceAccentIndex(orgId),
     });
   }
-  return { workspaces: [...byOrg.values()], complete: true };
+  return { workspaces: [...byOrg.values()], complete: true, archiveChecked };
 }
 
 export interface WorkspaceContext {
@@ -472,13 +513,24 @@ async function readWorkspaceMembershipsUncached(
   ]);
   // ARCHIVED organizations (owner decision 2026-09-23) keep their memberships
   // and engagements as history but are no workspace. Owned rows are already
-  // filtered by `readOwnedOrganizations`; the member-sourced rows are checked
-  // here in one bounded read. An unreadable archive state contributes nothing
-  // and marks the list incomplete — never an unchecked organization.
-  const memberSourced = await withoutArchivedOrganizations(caller.supabase, [
-    ...governance.workspaces,
-    ...engagement.workspaces,
-  ]);
+  // filtered by `readOwnedOrganizations`, and the member-sourced rows by the
+  // archive column embedded in their own read. Only a source that could not
+  // embed it (the column is absent here) is checked in the separate bounded
+  // read — skipped entirely when nothing needs it. An unreadable archive state
+  // contributes nothing and marks the list incomplete — never an unchecked
+  // organization.
+  const memberRows = [...governance.workspaces, ...engagement.workspaces];
+  const unchecked = [
+    ...(governance.archiveChecked ? [] : governance.workspaces),
+    ...(engagement.archiveChecked ? [] : engagement.workspaces),
+  ];
+  const archiveRead = await withoutArchivedOrganizations(caller.supabase, unchecked);
+  let memberSourced: { ok: true; rows: readonly WorkspaceInfo[] } | { ok: false } = { ok: false };
+  if (archiveRead.ok) {
+    const kept = new Set(archiveRead.rows);
+    const archived = new Set(unchecked.filter((w) => !kept.has(w)).map((w) => w.id));
+    memberSourced = { ok: true, rows: memberRows.filter((w) => !archived.has(w.id)) };
+  }
   const complete =
     owned.kind === "ok" && engagement.complete && governance.complete && memberSourced.ok;
 
@@ -608,12 +660,15 @@ export async function resolveActiveWorkspaceForCaller(
  *  The pointer is written only by the switch core in a server action, never
  *  during a render, and React `cache()` is request-scoped — the render that
  *  follows a switch reads again. */
-const readStoredPointerOnce = cache(
-  (supabase: DomainCaller["supabase"], userId: string): Promise<{ data: unknown; error: unknown }> =>
-    Promise.resolve(
-      asAny(supabase).from("profiles").select("active_organization_id").eq("id", userId).maybeSingle(),
-    ),
-);
+//
+// The pointer is a column of the caller's own `profiles` row, so it rides the
+// ONE request-cached profile-row read (`readStoredWorkspacePointer`, perf
+// 2026-10-23) instead of a second `profiles` query per render — same response
+// shape, same "absent column / failed read is an error" semantics.
+const readStoredPointerOnce = (
+  supabase: DomainCaller["supabase"],
+  userId: string,
+): Promise<{ data: unknown; error: unknown }> => readStoredWorkspacePointer(supabase, userId);
 
 /**
  * The acting identity that decides the workspace DEFAULT, from the session
@@ -655,6 +710,12 @@ export const getWorkspaceContext = cache(async function getWorkspaceContext(): P
     return resolveActiveWorkspaceForCaller({ supabase, userId: user.id }, null);
   }
 
+  // The membership list depends only on the client and the user — not on the
+  // identity the session profile decides — so it starts WITH the session read
+  // instead of after it (perf 2026-10-23: one sequential stage less on every
+  // dashboard render). It is request-cached, so the resolver below picks up
+  // this same read; a failure surfaces there exactly as before.
+  readWorkspaceMembershipsOnce(supabase, user.id).catch(() => {});
   const [session, sessionPointer] = await Promise.all([
     getSessionProfile(),
     readSessionWorkspacePointer(user.id),
