@@ -9378,7 +9378,7 @@
     },
     "vip": {
       "title": "Organizacijos VIP (nemokama prieiga)",
-      "help": "Savininko patvirtinta nemokama prieiga VIENAI organizacijai: Organizacijos planas be mokėjimo, ir gyvame, ir bandomajame režime. Fiksuojama (kas, kada, pastaba); galima bet kada atšaukti. Niekada neapeina darbuotojo sutikimo.",
+      "help": "Savininko patvirtinta nemokama prieiga VIENAI organizacijai: Organizacijos planas be mokėjimo, kad ir kokie mokėjimų nustatymai. Fiksuojama (kas, kada, pastaba); galima bet kada atšaukti. Niekada neapeina darbuotojo sutikimo.",
       "organizationId": "Organizacijos ID",
       "profileViews": "Profilių peržiūros",
       "profileViewsHint": "Tuščia = be fiksuoto limito",
@@ -9391,7 +9391,7 @@
         "not_admin": "Tai gali tik platformos administratorius.",
         "invalid_input": "Patikrink organizacijos ID ir peržiūrų skaičių (1–100000).",
         "unknown_organization": "Organizacijos su tokiu ID nėra.",
-        "needs_migration": "Dar neprieinama: VIP migracija nepritaikyta.",
+        "needs_migration": "Dar neįjungta: organizacijos VIP dar negalima suteikti. Niekas neišsaugota.",
         "error": "Nepavyko. Niekas nepakeista."
       }
     },

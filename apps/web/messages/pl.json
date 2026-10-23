@@ -9378,7 +9378,7 @@
     },
     "vip": {
       "title": "VIP organizacji (bezpłatny dostęp)",
-      "help": "Zatwierdzony przez właściciela bezpłatny dostęp dla JEDNEJ organizacji: plan Organizacja bez płatności, zarówno w trybie produkcyjnym, jak i testowym. Rejestrowany (kto, kiedy, notatka); można go cofnąć w każdej chwili. Nigdy nie omija zgody pracownika.",
+      "help": "Zatwierdzony przez właściciela bezpłatny dostęp dla JEDNEJ organizacji: plan Organizacja bez płatności, niezależnie od ustawień płatności. Rejestrowany (kto, kiedy, notatka); można go cofnąć w każdej chwili. Nigdy nie omija zgody pracownika.",
       "organizationId": "ID organizacji",
       "profileViews": "Wyświetlenia profili",
       "profileViewsHint": "Puste = bez stałego limitu",
@@ -9391,7 +9391,7 @@
         "not_admin": "Może to zrobić tylko administrator platformy.",
         "invalid_input": "Sprawdź ID organizacji i liczbę wyświetleń (1–100000).",
         "unknown_organization": "Brak organizacji o tym ID.",
-        "needs_migration": "Jeszcze niedostępne: migracja VIP nie została zastosowana.",
+        "needs_migration": "Jeszcze niewłączone: VIP organizacji nie można jeszcze przyznać. Nic nie zapisano.",
         "error": "Nie udało się. Nic nie zostało zmienione."
       }
     },

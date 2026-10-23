@@ -9378,7 +9378,7 @@
     },
     "vip": {
       "title": "Organisatie-VIP (gratis toegang)",
-      "help": "Door de eigenaar goedgekeurde gratis toegang voor ÉÉN organisatie: het Organisatieplan zonder betaling, in live- en testmodus. Vastgelegd (wie, wanneer, notitie); altijd in te trekken. Omzeilt nooit de toestemming van een werknemer.",
+      "help": "Door de eigenaar goedgekeurde gratis toegang voor ÉÉN organisatie: het Organisatieplan zonder betaling, ongeacht de betaalinstelling. Vastgelegd (wie, wanneer, notitie); altijd in te trekken. Omzeilt nooit de toestemming van een werknemer.",
       "organizationId": "Organisatie-id",
       "profileViews": "Profielweergaven",
       "profileViewsHint": "Leeg = geen vaste limiet",
@@ -9391,7 +9391,7 @@
         "not_admin": "Alleen een platformbeheerder kan dit.",
         "invalid_input": "Controleer de organisatie-id en het aantal weergaven (1–100000).",
         "unknown_organization": "Geen organisatie met deze id.",
-        "needs_migration": "Nog niet beschikbaar: de VIP-migratie is niet toegepast.",
+        "needs_migration": "Nog niet ingeschakeld: organisatie-VIP kan nog niet worden toegekend. Er is niets opgeslagen.",
         "error": "Mislukt. Er is niets gewijzigd."
       }
     },
