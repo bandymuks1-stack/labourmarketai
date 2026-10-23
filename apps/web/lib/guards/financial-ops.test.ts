@@ -67,8 +67,14 @@ const TRAIN_J = [INVOICE_MIGRATION, PROCUREMENT_MIGRATION, TRIPS_MIGRATION];
 
 /** Migrations that only READ the trips table (never define it). The override
  *  receipt validator verifies each claimed trip clash against its real
- *  `business_trips` row. Every occurrence must be a read position. */
-const TRIP_READERS = ["20261003150950_commitment_override_collision_validation_v1"];
+ *  `business_trips` row. Every occurrence must be a read position.
+ *  20261023160000 (CAL-8) redefines that same validator — its trip branch
+ *  verbatim, only the plan branch changes — and its rollback restores the
+ *  validator verbatim, so both files carry the identical read. */
+const TRIP_READERS = [
+  "20261003150950_commitment_override_collision_validation_v1",
+  "20261023160000_work_plan_shift_patterns_v1",
+];
 
 /**
  * CRLF IS NORMALISED AT THE READ, deliberately.
@@ -228,7 +234,7 @@ describe("1. exactly three human-gated migration pairs own the financial-ops sli
       for (const f of readdirSync(abs).filter((n) => n.endsWith(".sql"))) {
         if (TRAIN_J.some((p) => f.startsWith(p))) continue;
         const src = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
-        if (dir === "migrations" && TRIP_READERS.some((p) => f.startsWith(p))) {
+        if (TRIP_READERS.some((p) => f.startsWith(p))) {
           // A reader may name business_trips ONLY to read it: `to_regclass(...)`
           // or `from public.business_trips`. Nothing else it names may be owned.
           const code = src.replace(/\r/g, "").replace(/--.*$/gm, "");
