@@ -39,8 +39,11 @@
 --     billing_subscriptions read predicate (the paying profile + admins).
 --   NO insert/update/delete policy: the service role is the only write path.
 --   Grants: explicit — revoke the bootstrap default from public/anon/
---     authenticated, then SELECT to authenticated (RLS-scoped) and
---     SELECT/INSERT/UPDATE to service_role (no DELETE for anyone).
+--     authenticated AND service_role (where default privileges grant ALL to
+--     service_role, as on the local Supabase stack, it would otherwise keep
+--     DELETE/TRUNCATE — found on the local TEST stack 2026-10-23), then SELECT
+--     to authenticated (RLS-scoped) and SELECT/INSERT/UPDATE to service_role
+--     (no DELETE for anyone).
 --
 -- ERASURE (v3 registry): owner_id = sever_sentinel (accounting record retained,
 -- the person re-pointed to the sentinel, legal review pending — the same
@@ -123,7 +126,7 @@ create policy billing_tax_evidence_select on public.billing_tax_evidence
   using (owner_id = auth.uid() or public.is_admin());
 -- No insert/update/delete policies: writes are SERVER-only via the service role.
 
-revoke all on table public.billing_tax_evidence from public, anon, authenticated;
+revoke all on table public.billing_tax_evidence from public, anon, authenticated, service_role;
 grant select on public.billing_tax_evidence to authenticated;
 grant select, insert, update on public.billing_tax_evidence to service_role;
 

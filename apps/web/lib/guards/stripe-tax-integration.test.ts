@@ -55,7 +55,9 @@ describe("2. billing_tax_evidence keeps the billing-table posture", () => {
   });
 
   it("grants: SELECT to authenticated, SELECT/INSERT/UPDATE to service_role, nothing to anon/public, no DELETE", () => {
-    expect(code).toContain("revoke all on table public.billing_tax_evidence from public, anon, authenticated;");
+    // service_role is revoked too: where default privileges grant it ALL (the
+    // local Supabase stack), DELETE/TRUNCATE would otherwise survive.
+    expect(code).toContain("revoke all on table public.billing_tax_evidence from public, anon, authenticated, service_role;");
     expect(code).toContain("grant select on public.billing_tax_evidence to authenticated;");
     expect(code).toContain("grant select, insert, update on public.billing_tax_evidence to service_role;");
     expect(code).not.toMatch(/grant[^;]*to\s+(anon|public)\b/i);
