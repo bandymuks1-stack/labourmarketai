@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 
@@ -617,6 +617,7 @@ test.describe("signed in as the synthetic owner of Alfa", () => {
   });
 
   test.afterAll(async ({ browser }) => {
+    test.setTimeout(120_000); // the default 30 s hook timeout is shorter than one switch
     // Restore the owner's own language if the walk left it elsewhere: the
     // original when it was readable, otherwise Lithuanian (the walk's language).
     if (!localeTouched) return;

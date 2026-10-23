@@ -1058,6 +1058,18 @@
     "carryNote": {
       "no_company": "Your text was not saved: without a company workspace a draft has nothing to belong to. The demand form opens empty — you can create the company there.",
       "failed": "Your text could not be saved, so the demand form opens empty. You will need to enter the description again."
+    },
+    "headcount": {
+      "total": "Workers: {count}",
+      "teams": "Workers: {total} ({teams, plural, one {# team} other {# teams}} of {perTeam})"
+    },
+    "clarify": {
+      "title": "Please clarify",
+      "team_count_range": "You gave the number of teams as a range. How many teams exactly, and how many people in each?",
+      "per_team_range": "How many people exactly will be in each team?",
+      "team_size_missing": "How many people will be in each team? Until then the number of workers is not counted.",
+      "team_count_missing": "How many teams do you need?",
+      "headcount_unclear": "You said more than one, but not how many. How many people exactly?"
     }
   },
   "quickNav": {
@@ -5622,7 +5634,6 @@
   },
   "legal": {
     "preparing": {
-      "body": "Legal information is being prepared. Before any paid services or contractual relationship begins, it will be provided and updated.",
       "contact": "If you have questions, get in touch with us."
     },
     "marketplaceRules": {
@@ -5635,10 +5646,9 @@
         "Public offers appear only after moderation; untrusted or suspicious offers are hidden.",
         "Trading regulated or illegal goods and services is prohibited.",
         "A map point appears only with verified coordinates — no fake markers.",
-        "Payments are not active yet; no payments run through the platform at this stage.",
+        "Payments between users do not run through the platform; only fees for platform services are paid through it.",
         "Inappropriate behaviour or suspicious activity can be reported — moderators review it."
-      ],
-      "reviewNote": "These rules describe how the platform actually behaves today. The final legal wording of the binding documents is still being prepared and will be reviewed by the owner and a lawyer before any paid services begin."
+      ]
     },
     "terms": {
       "title": "Terms of Service",
@@ -5670,7 +5680,7 @@
     },
     "privacy": {
       "title": "Privacy Policy",
-      "intro": "This page explains in plain language what personal data Labour Market AI uses, why it uses it, and what rights you have. It describes the platform as it works today, before payments are active.",
+      "intro": "This page explains in plain language what personal data Labour Market AI uses, why it uses it, and what rights you have. It describes the platform as it works today.",
       "sections": [
         {
           "heading": "Who is responsible for your data",
@@ -5690,6 +5700,15 @@
             "Messages you send and receive on the platform.",
             "Consent records: when you give or revoke a consent, the action and its time are stored.",
             "Technical data needed to run the service, such as sign-in cookies (see the Cookie Policy)."
+          ]
+        },
+        {
+          "heading": "Signing in with Google, Facebook or LinkedIn",
+          "items": [
+            "You can create an account and sign in with your Google, Facebook or LinkedIn account instead of signing in with your email address. This is used only to sign you in.",
+            "When you choose one of them, that provider confirms your identity and passes the platform your email address, your name and the identifier of your account with that provider. The platform asks for no additional permissions — no access to your friends or contacts, posts or pages — and never posts anything on your behalf.",
+            "Your email address becomes your account email. The name from the provider is used only to replace a placeholder name taken from your email address; a name you entered yourself is never overwritten. The sign-in record (the provider, your account identifier with it and the details it passed) is kept by our authentication provider, Supabase, linked to your account.",
+            "To delete this data, delete your LabourMarket.ai account — the steps are on the page “Account and data deletion”. Removing LabourMarket.ai from your Facebook, Google or LinkedIn settings does not by itself delete your LabourMarket.ai account or its data."
           ]
         },
         {
@@ -5717,15 +5736,26 @@
           "items": [
             "Consent purposes are separate: employer visibility of your professional profile and a data transfer to a specific company are two different choices — neither is bundled with the Terms, pre-ticked, or required to use your account, CV or work journal.",
             "Every consent screen shows the exact versioned text, what becomes visible, what stays private, and both choices side by side (enable / not now). Declining changes nothing about your account.",
-            "You can withdraw any consent at any time in your privacy settings, in one step. After withdrawal your profile stops appearing in new company searches immediately; data a company already lawfully received while the permission was valid may still be held by that company — we say this honestly.",
+            "You can withdraw any consent at any time in your privacy settings, in one step. After withdrawal your profile stops appearing in new company searches immediately; data a company already lawfully received while the permission was valid may still be held by that company.",
             "The consent history is permanent: every grant and every withdrawal is kept as a separate unchangeable record with its text version, language, time and purpose. Nobody — including administrators — can edit or delete it, and no administrator can give consent on your behalf."
+          ]
+        },
+        {
+          "heading": "Service providers that process data for the platform",
+          "items": [
+            "Supabase — database, user sign-in and file storage.",
+            "Cloudflare — the network in front of the website (domain name service, encryption in transit, caching and protection against attacks); every request to the website passes through it.",
+            "Stripe — payment processing for paid platform services. When an organisation starts a checkout, Stripe receives the paying user's email address and an internal account identifier; card details are entered on Stripe's own payment page and are not stored by the platform.",
+            "Google, Facebook (Meta) and LinkedIn — only if you choose to sign in with them, as described above.",
+            "Google (Gemini API) — only as described in the section on AI below.",
+            "The full list of infrastructure providers is on the page “Data protection”."
           ]
         },
         {
           "heading": "Your rights",
           "items": [
             "You can ask to see the data held about you, to correct it, to receive a copy of it, to restrict how it is used, or to have it deleted.",
-            "Honest current state: you can download a copy of your own data as a JSON file and your work journal as a CSV file yourself, from your account. Deletion is still a request a person reviews — there is no instant deletion button; contact us or file the request, and a person will process it.",
+            "You can download a copy of your own data as a JSON file and your work journal as a CSV file yourself, from your account. You can request deletion of your account on your account's Privacy page and confirm it after signing in again; the system then deletes the account automatically and sends a confirmation to your account email. If data must be kept by law or concerns other people, the request is reviewed and you receive the decision within one month. You can also contact us — see the page “Account and data deletion”.",
             "Where processing is based on consent, you can withdraw that consent at any time."
           ]
         },
@@ -5733,8 +5763,7 @@
           "heading": "How long data is kept",
           "items": [
             "Data is kept while your account is active and the feature it belongs to still uses it.",
-            "Consent and audit records are kept as history: a revocation is recorded rather than the record being erased.",
-            "Exact retention periods are part of the final legal wording that is still being prepared."
+            "Consent and audit records are kept as history: a revocation is recorded rather than the record being erased."
           ]
         },
         {
@@ -5745,11 +5774,6 @@
             "What an AI assistant's provider does with your conversation is governed by that provider's own privacy terms."
           ]
         }
-      ],
-      "pendingTitle": "Still waiting for final legal wording:",
-      "pendingItems": [
-        "Exact retention periods for each data category.",
-        "The binding, lawyer-reviewed version of this policy and of the named legal bases."
       ]
     },
     "cookies": {
@@ -5772,11 +5796,6 @@
       "localStorageNote": "Your browser's own storage (not cookies) holds a few items: your light or dark theme choice; which page or campaign first brought you here, stored once so a later sign-up can be attributed to it; a random per-tab session identifier that disappears when the tab closes; and small conveniences such as dismissed notices, recently viewed items and your speech-input language. None of this is shared with any third party or used for advertising, and you can clear it at any time through your browser.",
       "noTracking": "There are no analytics, advertising or third-party tracking cookies on the platform today. If this ever changes, this page will be updated first."
     },
-    "pendingLegal": {
-      "badge": "Final wording pending owner and legal review",
-      "body": "This page explains in plain language how the platform works today. It is not the final legal document: the binding wording is still being prepared and will be reviewed by the owner and a lawyer before any paid services or contractual relationship begins."
-    },
-    "disclaimer": "This page is informational only and is not legal advice.",
     "requestContact": "To ask a question or make a request about your data, get in touch with us — a person will review it.",
     "related": "Related pages",
     "accountSection": {
@@ -5829,7 +5848,7 @@
         {
           "heading": "Export and deletion",
           "items": [
-            "You can download your own data as a JSON file and your work journal as a CSV file from your account. Deletion is handled as a reviewed request: nothing is deleted instantly — contact us and a person will process it."
+            "You can download your own data as a JSON file and your work journal as a CSV file from your account. Account deletion is requested from your account and confirmed after signing in again; the system then deletes the account automatically. A request involving data that must be kept by law or that concerns other people is reviewed by a person. You can also contact us and a person will process the request."
           ]
         },
         {
@@ -5840,7 +5859,7 @@
             "Cloudflare — the network in front of the website: domain name service, encryption in transit, caching and protection against attacks. Every request to the website passes through it.",
             "GitHub — source code hosting. No user data is stored there.",
             "Google (Gemini API) — AI processing for translating messages and job ads and for suggesting what a typed chat sentence asks for. Only the text the task needs is sent.",
-            "Stripe — payment processing. A customer record is created only when an organisation starts a subscription checkout; no subscription is active today.",
+            "Stripe — payment processing. A customer record is created only when an organisation starts a subscription checkout.",
             "No other email, AI, translation or payment provider is active. If one is activated, this list is updated first."
           ]
         },
@@ -5850,12 +5869,6 @@
             "No system can promise absolute security. If you notice a problem, contact us — a person will review it."
           ]
         }
-      ],
-      "pendingTitle": "Still waiting for final legal wording:",
-      "pendingItems": [
-        "The formal description of technical and organisational measures.",
-        "Signed data-processing agreements with the infrastructure providers listed above.",
-        "Final retention periods."
       ]
     },
     "dataAccess": {
@@ -6033,7 +6046,7 @@
     "dataDeletion": {
       "title": "Account and data deletion",
       "description": "How to request deletion of your LabourMarket.ai account and personal data.",
-      "intro": "You can ask LabourMarket.ai to delete your account and personal data. Deletion is currently handled as a request reviewed by a person; there is no instant account deletion button. If you can sign in, you can also file the request yourself: open your account's Privacy page (in the mobile app: Settings → Privacy) and choose account deletion. Either way a person answers within one month.",
+      "intro": "You can ask LabourMarket.ai to delete your account and personal data. If you can sign in, you can file the request yourself: open your account's Privacy page (in the mobile app: Settings → Privacy), choose account deletion and confirm it after signing in again. The system then deletes the account automatically and sends a confirmation to your account email; if data must be kept by law or concerns other people, the request is reviewed and you receive the decision within one month. You can also request deletion by email as described below; a person answers within one month.",
       "howTitle": "How to request deletion",
       "howSteps": [
         "Email {email} from the email address associated with your LabourMarket.ai account.",
@@ -14076,7 +14089,8 @@
           "location": "Where (city or country)?",
           "window": "When — which week or month?",
           "quantity": "How much is it?",
-          "headcount": "How many people are needed?"
+          "headcount": "How many people are needed?",
+          "team_size": "How many teams, and how many people in each?"
         },
         "unclear": "I am not sure whether you are offering something or looking for something. Tell me what you have, or what you need.",
         "goodsChannelGated": "You can list this on the marketplace board under Goods — people browsing the board would see it there. Nothing is saved until you publish it.",
@@ -14091,7 +14105,8 @@
         "serviceNext": "You can post this as a service offering so others can find it.",
         "chipServices": "Open the services board",
         "corrected": "Updated: {changes}.",
-        "changeInsteadOf": "{next} (instead of {previous})"
+        "changeInsteadOf": "{next} (instead of {previous})",
+        "teams": "{teams, plural, one {# team} other {# teams}} of {perTeam}"
       },
       "createOrganizationHint": "I can set up an organization with you — the details and the verification live on one page.",
       "chipCreateOrganization": "Create an organization",
@@ -18761,7 +18776,23 @@
       "unavailable": "Planning is not available here yet.",
       "error": "Something went wrong. Try again.",
       "planned_collides": "Planned, but this person already holds time on some of these days. You decide; cancel the plan below if it is not right.",
-      "planned_unknown": "Planned, but we could not confirm these days are free. That is not the same as free."
+      "planned_unknown": "Planned, but we could not confirm these days are free. That is not the same as free.",
+      "recurrence_invalid": "Check the repeat settings: pick at least one weekday, or a rotation of 1–28 working days and 1–28 rest days.",
+      "recurrence_empty": "This repeat pattern has no working day between those dates. Nothing was planned.",
+      "recurrence_unavailable": "Repeating shifts are not available here yet. Plan the window without repeating."
+    },
+    "repeat": {
+      "legend": "Repeat",
+      "none": "Does not repeat",
+      "weekly": "Weekly shifts",
+      "cycle": "Rotation",
+      "weekdays": "Working days",
+      "cycleOn": "Working days in a row",
+      "cycleOff": "Rest days in a row",
+      "cycleOffset": "Days already worked on the first day (0 = starts fresh)",
+      "hint": "Shifts repeat inside the dates above and show in the calendar as planned. A shift on leave or other work is saved and flagged for you to decide.",
+      "summaryWeekly": "Shifts: {days}",
+      "summaryCycle": "Rotation: {on} working, {off} rest"
     }
   },
   "workLifecycle": {

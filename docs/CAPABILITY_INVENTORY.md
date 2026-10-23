@@ -592,7 +592,7 @@ production-data-proven · `IMPL` implemented-not-proven · `PARTIAL` · `BROKEN`
 | CAL-5 | Absences / leave | `worker_absences` | IMPL (0 rows) | — | 2 | privacy-narrowed view is correct |
 | CAL-6 | Booking request → accept → engagement | `booking_requests` + 3-layer concurrency | PROD_DATA (1) | — | 1 | nothing past `accepted`; expiry RPC has no scheduler |
 | CAL-7 | **Capacity reservation** | — | **MISSING** | — | 1 | nothing decrements anything |
-| CAL-8 | **Shifts / rotas / rosters** | — | **MISSING** | — | 2 | keep in the architecture |
+| CAL-8 | **Shifts / rotas / rosters** | `work_plan_entries.recurrence` (RED draft 20261023160000, NOT applied) + `lib/planning/shift-pattern.ts` | PARTIAL (TEST_PROVEN, 2026-10-23) | — | 2 | the rule is stored, shift days are projected; overlap warns, never refuses |
 | CAL-9 | Utilisation / FTE | — | **MISSING** | — | 3 | — |
 | CAL-10 | **Planned vs actual → learned duration/capacity** | — | **MISSING** | — | 1 | the flywheel's learning loop; a forecast may never be stored where a fact is read (SEP-1) |
 

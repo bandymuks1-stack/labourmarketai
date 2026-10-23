@@ -39,6 +39,7 @@ import type { DomainCaller } from "@/lib/domain/caller";
 import {
   readStructuredDemandV2,
   sanitizeStructuredDemandV2,
+  teamCompositionFor,
   type StructuredDemandV2,
 } from "@/lib/demand/structured-demand-v2";
 
@@ -333,7 +334,14 @@ export async function submitDemandRequestCore(
   // Structured demand v2 (PR 2) — validated into the canonical closed-set
   // shape or dropped entirely. NOT worker-exposed (the worker RPC whitelist
   // does not read structured_v2 until MP-3 is owner-approved and applied).
-  const structuredV2 = sanitizeStructuredDemandV2(fields?.structuredV2);
+  const sanitizedV2 = sanitizeStructuredDemandV2(fields?.structuredV2);
+  // A team composition is kept only while it explains the number of workers
+  // stored in `team_size` (count × per_team) — server-side, whatever the
+  // client sent. Otherwise only the composition is dropped.
+  const structuredV2 =
+    sanitizedV2?.team && !teamCompositionFor(teamSize, sanitizedV2.team.count, sanitizedV2.team.per_team)
+      ? sanitizeStructuredDemandV2({ ...sanitizedV2, team: undefined })
+      : sanitizedV2;
   if (structuredV2) payload.structured_v2 = structuredV2;
 
   // Optional preliminary estimate. Only persisted when the user actually filled
