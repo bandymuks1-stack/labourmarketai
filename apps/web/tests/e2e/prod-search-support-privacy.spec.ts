@@ -501,9 +501,7 @@ test("S-6 (10.27). the map renders markers, with no external geocoding call", as
 const NEED_ROLE = `QA-SYNTHETIC atitikimas mūrininkai ${RUN}`;
 let needCreatedHere = false;
 
-test("M-0. Gama posts this run's need through the demand intake", async ({ browser }) => {
-  const { ctx, page } = await as(browser, "manager");
-  await useWorkspace(page, GAMA);
+async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
   await page.getByTestId("demand-role").fill(NEED_ROLE);
   await page.getByTestId("demand-description").fill(`${TAG}: synthetic need for the production matching walk, 1 mūrininkas.`);
@@ -515,7 +513,49 @@ test("M-0. Gama posts this run's need through the demand intake", async ({ brows
   const done = page.getByTestId("demand-done");
   const limit = page.getByTestId("demand-open-need-limit");
   await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
-  expect(await limit.isVisible(), "the open-need limit refused this run's need").toBe(false);
+  return (await limit.isVisible()) ? "limit" : "done";
+}
+
+/**
+ * Gama is on the free plan (one open need). A walk that stopped before its
+ * cleanup leaves a QA-SYNTHETIC need open and this intake is refused — the
+ * limit working (company-chain 39960149411 left one). Close the synthetic
+ * leftovers through the scouting page's own controls, never this run's need.
+ */
+async function closeSyntheticLeftovers(page: Page): Promise<number> {
+  await page.goto("/lt/dashboard/company/scouting");
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  const ids = new Set<string>();
+  for (const a of await page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: "QA-SYNTHETIC" }).all()) {
+    if ((await a.innerText().catch(() => "")).includes(RUN)) continue;
+    const id = /request=([0-9a-f-]{36})/.exec((await a.getAttribute("href")) ?? "")?.[1];
+    if (id) ids.add(id);
+  }
+  let closed = 0;
+  for (const id of [...ids].slice(0, 5)) {
+    try {
+      await page.goto(`/lt/dashboard/company/scouting?request=${id}`);
+      const controls = page.getByTestId("demand-lifecycle-controls");
+      await expect(controls).toBeVisible({ timeout: 30_000 });
+      if ((await controls.getAttribute("data-demand-status")) === "closed") continue;
+      await controls.getByTestId("demand-close").click();
+      await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
+      closed += 1;
+    } catch (e) {
+      console.info(`[M-0] leftover close failed: ${firstLine(e)}`);
+    }
+  }
+  console.info(`[M-0] synthetic leftovers seen=${ids.size} closed=${closed}`);
+  return closed;
+}
+
+test("M-0. Gama posts this run's need through the demand intake", async ({ browser }) => {
+  test.setTimeout(480_000); // room for the leftover cleanup
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  let outcome = await submitNeed(page);
+  if (outcome === "limit" && (await closeSyntheticLeftovers(page)) > 0) outcome = await submitNeed(page);
+  expect(outcome, "the open-need limit refused this run's need").toBe("done");
   await page.goto("/lt/dashboard/company/scouting");
   const link = page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: RUN }).first();
   await expect(link, "this run's need is listed among Gama's needs").toBeVisible({ timeout: 30_000 });
@@ -737,6 +777,9 @@ test("P-8 (2.35 / 4.17). the worker turns employer visibility off, it persists, 
 // a run that failed half-way must still undo what it did. Each item is undone
 // on its own and a failure is logged, never thrown over the result.
 test.afterAll(async ({ browser }) => {
+  // Own budget: the default hook timeout is 30 s, less than one job below
+  // (company-chain run 39960149411 lost its cleanup to it and left its need open).
+  test.setTimeout(600_000);
   const jobs: { what: string; slot: string; org: string | null; when: () => boolean; run: (p: Page) => Promise<void> }[] = [
     {
       what: "contact ask",
