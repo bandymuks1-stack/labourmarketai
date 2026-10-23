@@ -3,6 +3,7 @@
 import "server-only";
 
 import { runAiAgent } from "@/lib/ai/run-agent-server";
+import { aiLocaleFor } from "@/lib/ai/runtime/types";
 import { CONVERSATION_INTENT_SENTENCE_MAX } from "@/lib/ai/registry/agents/conversation-intent";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
@@ -54,7 +55,6 @@ import {
  */
 
 const RATE_LIMIT = { limit: 30, windowMs: 10 * 60 * 1000 } as const;
-const AI_LOCALES = new Set(["en", "lt", "ru"]);
 
 function isRoutedIntent(v: unknown): v is RoutedIntent {
   return (
@@ -97,7 +97,7 @@ export async function proposeUnderstandingAction(input: {
   });
   if (limited.limited) return { kind: "unsupported", reason: "rate_limited", source: "model" };
 
-  const locale = AI_LOCALES.has(input.locale) ? (input.locale as "en" | "lt" | "ru") : "en";
+  const locale = aiLocaleFor(input.locale);
   const identity = input.identity === "company" ? "company" : "person";
 
   try {

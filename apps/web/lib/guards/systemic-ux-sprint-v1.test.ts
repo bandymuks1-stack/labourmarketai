@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ROLE_BY_ID, baseIdentityForRole } from "@/lib/config/roles";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * systemic-ux-sprint-v1 — anti-regression guards for the systemic audit fixes:
@@ -39,7 +40,7 @@ describe("role switcher shows base identities, not 'Agentūra'/'Pirkėjas' as to
   });
 
   it("base-identity space labels exist in every active locale", () => {
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       expect(m.auth.roleSwitcher.personSpace, `${loc} personSpace`).toBeTruthy();
       expect(m.auth.roleSwitcher.companySpace, `${loc} companySpace`).toBeTruthy();
@@ -73,7 +74,7 @@ describe("project page is a real work object — location + communication", () =
   });
 
   it("location status copy + communication copy exist in every active locale", () => {
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const loc1 = m.projectOps.stadium.location;
       const comm = m.projectOps.stadium.communication;

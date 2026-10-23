@@ -17407,7 +17407,19 @@
     "error": "The change could not be saved and was reverted. Please try again.",
     "unavailable": "Notification settings are not available right now.",
     "saving": "Saving…",
-    "saved": "Saved."
+    "saved": "Saved.",
+    "push": {
+      "title": "Push notifications on this device",
+      "intro": "Get a short alert on this phone or computer when something new arrives. It shows only the kind of notification, never message text. Types you turned off above are never pushed.",
+      "turnOn": "Turn on push notifications",
+      "turnOff": "Turn off on this device",
+      "working": "Working…",
+      "on": "Push notifications are on for this device.",
+      "off": "Push notifications are off for this device.",
+      "unsupported": "This browser cannot receive push notifications. On iPhone, add the site to your Home Screen first.",
+      "blocked": "Notifications are blocked for this site in your browser settings. Allow them there, then come back.",
+      "error": "That did not work. Nothing was changed. Please try again."
+    }
   },
   "historyContext": {
     "project": "Project",

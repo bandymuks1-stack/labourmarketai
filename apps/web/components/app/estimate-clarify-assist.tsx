@@ -6,6 +6,7 @@ import { isAiAssistEnabled } from "@/lib/ai/provider";
 import { AI_ASSIST_FLAGS } from "@/lib/config/ai";
 import { requestEstimateClarify } from "@/lib/ai/estimate-clarify-actions";
 import { isAiDisabled, type AiLocale, type EstimateClarifyResult } from "@/lib/ai/types";
+import { isActiveLocale } from "@/lib/i18n/config";
 
 /**
  * Estimate-clarify assist surface (Step 1/6) — INERT by default.
@@ -29,8 +30,7 @@ export function EstimateClarifyAssist({
 }) {
   const t = useTranslations("auth.dashboard.wow.demand.estimate.clarify");
   const rawLocale = useLocale();
-  const locale: AiLocale =
-    rawLocale === "lt" || rawLocale === "ru" ? rawLocale : "en";
+  const locale: AiLocale = isActiveLocale(rawLocale) ? rawLocale : "en";
 
   const [state, setState] = useState<"idle" | "loading" | "disabled" | "ok">("idle");
   const [result, setResult] = useState<EstimateClarifyResult | null>(null);

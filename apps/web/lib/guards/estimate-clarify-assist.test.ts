@@ -11,6 +11,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseAiSuggestion, FORBIDDEN_AI_OUTPUT_FIELDS } from "../ai/legacy-assist-schemas";
 import { AI_ASSIST_ENABLED, AI_ASSIST_FLAGS } from "../config/ai";
+import { activeLocales } from "@/lib/i18n/config";
 
 const webRoot = resolve(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(resolve(webRoot, rel), "utf-8");
@@ -96,7 +97,7 @@ describe("the estimate engine stays AI-free", () => {
 describe("no active-AI claim + localized en/lt/ru", () => {
   const activeAi =
     /\bAI\b[^.]*\b(analy|writ|generat|creat|match|verif)/i;
-  for (const locale of ["en", "lt", "ru"] as const) {
+  for (const locale of activeLocales) {
     it(`${locale}: clarify keys exist and make no active-AI claim`, () => {
       const j = JSON.parse(read(`messages/${locale}.json`));
       const c = j.auth.dashboard.wow.demand.estimate.clarify;

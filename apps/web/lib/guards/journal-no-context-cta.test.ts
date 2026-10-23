@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Worker first-session dead-end guards (findings F-W2 / F-W4 of the
@@ -37,7 +38,7 @@ describe("journal no-context states never dead-end", () => {
   });
 
   it("message keys exist in en/lt/ru", () => {
-    for (const locale of ["en", "lt", "ru"]) {
+    for (const locale of activeLocales) {
       const msgs = JSON.parse(read(`messages/${locale}/journal.json`));
       expect(
         msgs.noContextProfileCta,
@@ -57,7 +58,7 @@ describe("skill-claim apply failure shows a real error", () => {
   });
 
   it("applyErrorLabel exists under skills.textFirst in en/lt/ru", () => {
-    for (const locale of ["en", "lt", "ru"]) {
+    for (const locale of activeLocales) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));
       expect(
         msgs.skills?.textFirst?.applyErrorLabel,

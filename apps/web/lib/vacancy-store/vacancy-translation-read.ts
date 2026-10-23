@@ -3,6 +3,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/types";
 import { runAiAgent } from "@/lib/ai/run-agent-server";
+import { aiLocaleFor } from "@/lib/ai/runtime/types";
 import { aiTaskServableNow } from "@/lib/ai/egress-precheck-server";
 import { rateLimit } from "@/lib/security/rate-limit";
 
@@ -88,8 +89,6 @@ import {
  *  allowance (or a provider's rate budget) in one second. */
 const RATE = { limit: 20, windowMs: 60 * 60 * 1000 } as const;
 
-const AI_LOCALES = new Set(["en", "lt", "ru"]);
-
 /** A stored rendering that is still valid for this row and locale. */
 export function storedTranslationFor(
   v: Pick<StoredPublicVacancyV1, "translations" | "contentHash">,
@@ -172,7 +171,7 @@ async function translateOne(
       "vacancy_translation",
       { sourceLocale, targetLocale, items: [item] },
       {
-        locale: AI_LOCALES.has(targetLocale) ? (targetLocale as "en" | "lt" | "ru") : "en",
+        locale: aiLocaleFor(targetLocale),
         language: sourceLocale,
         // A LABEL for the audit row — never the text.
         inputSource: "public_vacancy",

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Market Map UI wiring v1 guard.
@@ -14,7 +15,7 @@ const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 const SHELL = read("components/app/market-map-shell.tsx");
 const MY = read("components/app/market-map-my-signals.tsx");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 
 describe("owner view uses the #459 read layer", () => {
   it("shell fetches getOwnMarketSignals and renders MarketMapMySignals", () => {

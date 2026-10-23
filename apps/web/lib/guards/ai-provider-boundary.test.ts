@@ -12,6 +12,7 @@ import { getAiProvider, isAiAssistEnabled } from "../ai/provider";
 import { noopAiProvider } from "../ai/noop-provider";
 import { parseAiSuggestion, FORBIDDEN_AI_OUTPUT_FIELDS } from "../ai/legacy-assist-schemas";
 import { AI_ASSIST_ENABLED, AI_ASSIST_FLAGS } from "../config/ai";
+import { activeLocales } from "@/lib/i18n/config";
 
 const webRoot = resolve(__dirname, "..", "..");
 const repoRoot = resolve(webRoot, "..", "..");
@@ -138,7 +139,7 @@ describe("docs + no active-AI public copy", () => {
   it("no active-AI claim in public copy while AI is disabled", () => {
     const banned =
       /\bAI[- ]?(powered|generated|writes|matches|verifies|drafts your)\b|powered by AI|dirbtinis intelektas (rašo|sukuria|tikrina)|искусственный интеллект (пишет|создаёт|проверяет)/i;
-    for (const l of ["en", "lt", "ru"]) {
+    for (const l of activeLocales) {
       const src = read(resolve(webRoot, "messages", `${l}.json`));
       expect(banned.test(src), `${l}.json active-AI claim`).toBe(false);
     }

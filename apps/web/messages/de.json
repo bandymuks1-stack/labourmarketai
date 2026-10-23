@@ -3404,16 +3404,16 @@
         "gapsTitle": "Länderlücken (Nachfrage vs. Angebot)",
         "gapsEmpty": "Noch keine Nachfrage erfasst.",
         "gapLine": "{demand} Anfragen / {supply} Personen",
-        "thermoTitle": "Thermometer (nur wo beide Komponenten existieren)",
-        "thermoEmpty": "Noch keine Thermometerwerte — sie erscheinen, sobald ein belegter Marktdurchschnitt eingetragen ist UND eine Zelle eine Stichprobe von mindestens 2 erklärten Erwartungen hat.",
+        "thermoTitle": "Marktsignale (nur wo beide Komponenten existieren)",
+        "thermoEmpty": "Noch keine Marktsignalwerte — sie erscheinen, sobald ein belegter Marktdurchschnitt eingetragen ist UND eine Zelle eine Stichprobe von mindestens 2 erklärten Erwartungen hat.",
         "smallSample": "n<{n}"
       }
     },
     "league": {
       "eyebrow": "Arbeitsmarkt nach Land",
       "title": "Arbeitsmarkt nach Land",
-      "subtitle": "Berufstabellen pro Land — echte Teams, Verfügbarkeit und das Markt-Thermometer.",
-      "methodNote": "Ein Thermometerwert erscheint NUR dort, wo ein Admin einen belegten Marktdurchschnitt eingetragen hat UND die Stichprobe der erklärten Erwartungen mindestens 2 Personen umfasst. Überall sonst sagt die Zelle „unzureichende Marktdaten“ — die Tabelle bewertet niemals einen Menschen.",
+      "subtitle": "Berufstabellen pro Land — echte Teams, Verfügbarkeit und das Marktsignal.",
+      "methodNote": "Ein Marktsignalwert erscheint NUR dort, wo ein Admin einen belegten Marktdurchschnitt eingetragen hat UND die Stichprobe der erklärten Erwartungen mindestens 2 Personen umfasst. Überall sonst sagt die Zelle „unzureichende Marktdaten“ — die Tabelle bewertet niemals einen Menschen.",
       "back": "Zurück zum Admin-Hub",
       "empty": "Noch keine Daten — Tabellen erscheinen von selbst, sobald Arbeitskräfte ihre Berufe angeben.",
       "unknownCountry": "Land nicht angegeben",
@@ -17407,7 +17407,19 @@
     "error": "Die Änderung konnte nicht gespeichert werden und wurde zurückgesetzt. Bitte versuchen Sie es erneut.",
     "unavailable": "Benachrichtigungseinstellungen sind derzeit nicht verfügbar.",
     "saving": "Wird gespeichert…",
-    "saved": "Gespeichert."
+    "saved": "Gespeichert.",
+    "push": {
+      "title": "Push-Benachrichtigungen auf diesem Gerät",
+      "intro": "Erhalten Sie einen kurzen Hinweis auf diesem Telefon oder Computer, wenn etwas Neues eintrifft. Angezeigt wird nur die Art der Benachrichtigung, nie der Nachrichtentext. Oben abgeschaltete Arten werden nie gesendet.",
+      "turnOn": "Push-Benachrichtigungen einschalten",
+      "turnOff": "Auf diesem Gerät ausschalten",
+      "working": "Wird ausgeführt…",
+      "on": "Push-Benachrichtigungen sind auf diesem Gerät eingeschaltet.",
+      "off": "Push-Benachrichtigungen sind auf diesem Gerät ausgeschaltet.",
+      "unsupported": "Dieser Browser kann keine Push-Benachrichtigungen empfangen. Auf dem iPhone fügen Sie die Seite zuerst zum Home-Bildschirm hinzu.",
+      "blocked": "Benachrichtigungen sind für diese Seite in den Browser-Einstellungen blockiert. Erlauben Sie sie dort und kommen Sie zurück.",
+      "error": "Das hat nicht geklappt. Es wurde nichts geändert. Bitte versuchen Sie es erneut."
+    }
   },
   "historyContext": {
     "project": "Projekt",
