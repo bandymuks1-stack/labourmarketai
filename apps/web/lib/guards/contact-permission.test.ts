@@ -6,6 +6,7 @@ import {
   evaluateContactPermission,
 } from "@/lib/communication/communication-eligibility";
 import { describeConversationCard } from "@/lib/communication/conversation-display";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * CONTACT PERMISSION + COUNTERPART IDENTITY — permanent CI guard
@@ -276,7 +277,7 @@ describe("counterpart identity — shown only when permitted, never invented", (
   });
 
   it("permitted-counterpart copy exists in every active locale (lt/en/ru)", () => {
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {
         communication?: { counterparty?: Record<string, string> };
       };

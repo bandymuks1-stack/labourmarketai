@@ -7,15 +7,32 @@
  * the agent layer, PR3 — never trusted here). No method may persist, verify,
  * price, or send anything.
  *
- * Pure types. No IO, no SDK import.
+ * Pure types plus one pure locale clamp (`aiLocaleFor`). No IO, no SDK import.
  */
 import type {
   AiProviderKind,
   AiSecondaryProviderKind,
   AiDisabledReason,
 } from "./config-core";
+import { isActiveLocale, type ActiveLocale } from "@/lib/i18n/config";
 
-export type AiLocale = "en" | "lt" | "ru";
+/**
+ * The language an AI request is answered in: EVERY routed UI locale.
+ *
+ * It used to be the closed union `"en" | "lt" | "ru"`, and every caller
+ * clamped to it with a hand-written subset — so a Dutch, German or Polish
+ * reader on a fully translated, routed UI got English AI output. The prompt
+ * layer was never the limit (providers receive `Locale: <code>` and the
+ * prompts are language-neutral); the type was. Derived from `activeLocales`,
+ * so activating a locale needs no edit here.
+ */
+export type AiLocale = ActiveLocale;
+
+/** Clamp a UI locale to an AI locale: the locale itself when routed, English
+ *  otherwise (an unrouted code has no UI to answer into). Pure. */
+export function aiLocaleFor(value: string | null | undefined): AiLocale {
+  return isActiveLocale(value) ? value : "en";
+}
 
 /** Tier alias vocabulary mirrored from task-routing (kept literal here so this
  *  low-level module stays import-light). */

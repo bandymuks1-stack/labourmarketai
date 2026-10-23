@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Market Map owner-signal + reachability guard.
@@ -21,7 +22,7 @@ import { VISIBLE_PRIMARY_NAV_ITEMS } from "../config/navigation";
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
-const ACTIVE_LOCALES = ["lt", "en", "ru"] as const;
+const ACTIVE_LOCALES = activeLocales;
 
 describe("market map is the primary 'Žemėlapis' nav surface", () => {
   it("market_map is a visible primary nav item → /dashboard/market-map", () => {

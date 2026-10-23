@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * CAL-9 — utilisation without a fabricated denominator.
@@ -90,7 +91,7 @@ describe("the denominator is measured, never assumed", () => {
     const c = code(read(PAGE));
     expect(c).toMatch(/utilisation\.denominatorNote/);
     expect(c).toMatch(/utilisation\.committedDays/);
-    for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+    for (const loc of activeLocales) {
       const u = JSON.parse(read(`messages/${loc}.json`)).workforcePlanning?.utilisation;
       expect(u?.committedDays, `${loc}.committedDays`).toBeTruthy();
       // Both halves of the fraction, always — never a bare percentage.

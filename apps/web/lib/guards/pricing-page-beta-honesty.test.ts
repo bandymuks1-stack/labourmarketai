@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import { placeholders } from "@/content/placeholders";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Guard: the public /pricing page stays honest for the closed beta.
@@ -104,7 +105,7 @@ describe("M6 — the price slot never renders a fabricated price", () => {
   });
 
   it("every locale's priceState copy states a price is not yet sayable", () => {
-    for (const loc of ["en", "lt", "ru", "de", "nl"] as const) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(read(`messages/${loc}.json`)) as {
         pricing?: { priceState?: Record<string, string> };
       };

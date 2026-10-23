@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Funnel-reporting reproducibility guards (findings F-T2/F-T3 of the
@@ -69,7 +70,7 @@ describe("admin telemetry exclude-admins toggle (F-T3)", () => {
 
   it("reports the hidden count and keys exist in en/lt/ru", () => {
     expect(page).toMatch(/hiddenNote/);
-    for (const locale of ["en", "lt", "ru"]) {
+    for (const locale of activeLocales) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));
       expect(msgs.telemetry.filter.excludeAdmins, locale).toBeTruthy();
       expect(msgs.telemetry.filter.hiddenNote, locale).toBeTruthy();

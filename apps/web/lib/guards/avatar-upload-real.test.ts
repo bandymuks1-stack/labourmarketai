@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Profile avatar upload — real, owner-scoped, compression-reusing, honest.
@@ -63,7 +64,7 @@ describe("honest fallback + no fake identity claim", () => {
   it("no fake verified/identity wording in the avatar UI or copy", () => {
     const code = (ctrl + disp).replace(/\/\*[\s\S]*?\*\//g, " ");
     expect(code).not.toMatch(/verified|patvirtint|подтвержд|guaranteed/i);
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const pa = JSON.parse(read(`messages/${loc}.json`)).profileAvatar;
       const all = JSON.stringify(pa);
       expect(all).not.toMatch(/verified|patvirtint|подтвержд|guaranteed/i);
@@ -72,7 +73,7 @@ describe("honest fallback + no fake identity claim", () => {
 });
 
 describe("avatar copy present in active locales (lt/en/ru)", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: profileAvatar has upload/change/remove/preparing/uploaded/hint`, () => {
       const pa = JSON.parse(read(`messages/${loc}.json`)).profileAvatar;
       for (const k of ["upload", "change", "remove", "preparing", "uploading", "uploaded", "uploadFailed", "invalidFile", "notReady", "alt", "hint"]) {

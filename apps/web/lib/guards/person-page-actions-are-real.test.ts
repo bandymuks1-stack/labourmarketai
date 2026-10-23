@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * THE ACTIONS ON A PERSON'S PAGE LEAD SOMEWHERE.
@@ -54,7 +55,7 @@ describe("1. the request action is the canonical one", () => {
     ]) {
       expect(page, `label ${key}`).toContain(`tMarket("${key}")`);
       // …and the key really exists in the catalogue, in every routed locale.
-      for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+      for (const loc of activeLocales) {
         const cat = JSON.parse(read("messages", `${loc}.json`)) as {
           marketplace?: Record<string, unknown>;
         };

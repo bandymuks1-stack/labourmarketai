@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { getModuleRoute } from "@/lib/dashboard/dashboard-module-registry";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * WAGON 8 guard (CR train areas 14/15/16) — journal entry modes + project
@@ -192,7 +193,7 @@ describe("photo report discoverability (owner smoke finding)", () => {
 });
 
 describe("i18n copy present (lt/en/ru)", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: journal.modes preset keys exist`, () => {
       const modes = JSON.parse(read(`messages/${loc}/journal.json`)).modes;
       for (const k of [

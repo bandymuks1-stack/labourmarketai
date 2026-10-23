@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Guard: the candidate-suggestion tier is honest and DB-free
@@ -25,7 +26,7 @@ const NEW_KEYS = [
 ];
 
 describe("candidate tier i18n is present + neutral in every active locale", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: similar-skills + manual-fallback keys exist and avoid cert wording`, () => {
       const j = JSON.parse(read(`messages/${loc}/journal.json`)) as Record<string, string>;
       for (const key of NEW_KEYS) {

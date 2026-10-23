@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Company demand first-action guards (findings F-D1/F-D2/F-D3/F-D5 of the
@@ -145,7 +146,7 @@ describe("the projects board is an organization door (F-D5, IA 2026-09-16)", () 
 
 describe("keys exist in en/lt/ru", () => {
   it("all new keys present", () => {
-    for (const locale of ["en", "lt", "ru"]) {
+    for (const locale of activeLocales) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));
       expect(msgs.scouting.noDemandsCta, `noDemandsCta ${locale}`).toBeTruthy();
       expect(

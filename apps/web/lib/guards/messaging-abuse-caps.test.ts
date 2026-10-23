@@ -7,6 +7,7 @@ import {
   MESSAGE_RATE_CAP,
   evaluateRateCap,
 } from "@/lib/communication/rate-caps";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * §8.2 messaging minimum guard (product-tree branch 20) — abuse/spam rate
@@ -322,7 +323,7 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
   });
 
   it("demand-context copy exists and is non-empty in en/lt/ru", () => {
-    for (const loc of ["en", "lt", "ru"] as const) {
+    for (const loc of activeLocales) {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {
         communication?: { scope?: Record<string, string> };
       };

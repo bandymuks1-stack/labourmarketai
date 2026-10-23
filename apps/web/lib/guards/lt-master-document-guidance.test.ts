@@ -7,6 +7,7 @@ import {
   PRE_APPROVAL_STATUSES,
   guidanceStatusCounts,
 } from "@/lib/documents/lt-master-guidance";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * WAGON 9 guard (CR train area 17, owner correction 2026-07-05) — the
@@ -139,7 +140,7 @@ describe("information-only, no duplicate system, no payments", () => {
     expect(surface).not.toMatch(/country_document_requirements/);
   });
   it("i18n chrome keys present with parity (lt/en/ru)", () => {
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const g = JSON.parse(read(`messages/${loc}.json`)).documents.guidance;
       for (const k of [
         "title",
