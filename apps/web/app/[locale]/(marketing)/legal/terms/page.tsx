@@ -50,7 +50,7 @@ export default async function LegalPage({
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-16 sm:px-12" data-testid="legal-terms">
-      <h1 className="font-display text-4xl font-bold tracking-tightest text-text-primary">
+      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary break-words hyphens-auto sm:text-4xl">
         {t("terms.title")}
       </h1>
 

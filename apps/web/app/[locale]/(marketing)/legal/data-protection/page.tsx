@@ -44,7 +44,7 @@ export default async function LegalPage({
       className="mx-auto max-w-3xl px-6 py-16 sm:px-12"
       data-testid="legal-data-protection"
     >
-      <h1 className="font-display text-4xl font-bold tracking-tightest text-text-primary">
+      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary break-words hyphens-auto sm:text-4xl">
         {t("dataProtection.title")}
       </h1>
       <p className="mt-6 text-sm leading-relaxed text-text-secondary">
