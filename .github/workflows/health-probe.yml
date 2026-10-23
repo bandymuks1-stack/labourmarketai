@@ -17,7 +17,9 @@ name: health-probe
 #     anonymous GETs per run, so the probe is never a load source;
 #   - one compact line per run in the job summary (status, connect, first byte,
 #     total, Cloudflare colo + cache status — no body, no cookie, no identity);
-#   - the run FAILS (= owner alert) when any first byte takes > 10 s, any answer
+#   - the run FAILS (= owner alert) when any first byte takes > 10 s, a body does
+#     not finish within 30 s (curl's exit code is kept: fast 200 headers with a
+#     body held open is exactly the stall class seen), a 200 is empty, any answer
 #     is 5xx, or a request gets no answer at all (000). A failing health check is
 #     re-asked twice, 20 s apart, so the summary says whether it recovered — the
 #     run still fails: a stall that heals by itself is still a stall a person met.
@@ -43,40 +45,54 @@ jobs:
         shell: bash
         run: |
           set -u
+          set +e   # a failed request is a measurement, not a reason to stop measuring
           BASE="https://labourmarket.ai"
           LIMIT_TTFB=10
           fail=0
           line="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           probe() {
-            # prints: <http_code> <connect_s> <ttfb_s> <total_s> <colo> <cache>
-            local url="$1" out code tc tt tot colo cache
+            # prints: <http_code> <connect_s> <ttfb_s> <total_s> <bytes> <curl_rc> <colo> <cache>
+            # curl's exit code is KEPT: a page whose 200 headers arrive fast but whose body never
+            # finishes (the 2026-10-23 held-open document) ends in a timeout (rc 28) with a 200 and a
+            # low first byte — only rc and the byte count show that stall.
+            local url="$1" out rc code tc tt tot size colo cache
             out=$(curl -sS -o /dev/null -D hdr.txt --max-time 30 \
               -H 'User-Agent: labourmarket-stall-monitor/1 (+github-actions)' \
-              -w '%{http_code} %{time_connect} %{time_starttransfer} %{time_total}' "$url" 2>/dev/null) || true
-            [ -n "$out" ] || out="000 0 0 30"
-            read -r code tc tt tot <<<"$out"
+              -w '%{http_code} %{time_connect} %{time_starttransfer} %{time_total} %{size_download}' "$url" 2>/dev/null)
+            rc=$?
+            [ -n "$out" ] || out="000 0 0 30 0"
+            read -r code tc tt tot size <<<"$out"
             colo=$(grep -i '^cf-ray:' hdr.txt 2>/dev/null | tr -d '\r' | sed -E 's/.*-([A-Z]{3}).*/\1/' | head -1)
             cache=$(grep -i '^cf-cache-status:' hdr.txt 2>/dev/null | tr -d '\r' | awk '{print $2}' | head -1)
             rm -f hdr.txt
-            echo "$code $tc $tt $tot ${colo:--} ${cache:--}"
+            echo "$code $tc $tt $tot ${size:-0} $rc ${colo:--} ${cache:--}"
+          }
+          # FAIL when: no answer / 5xx; first byte > limit; curl did not complete the transfer
+          # (rc != 0, e.g. 28 = body still open at 30 s); a 200 with an empty body.
+          judge() {
+            local code="$1" tt="$2" size="$3" rc="$4"
+            if [ "$code" = "000" ] || [ "$code" -ge 500 ] 2>/dev/null; then echo FAIL_STATUS; return; fi
+            if awk -v t="$tt" -v l="$LIMIT_TTFB" 'BEGIN{exit !(t>l)}'; then echo FAIL_STALL; return; fi
+            if [ "$rc" != 0 ]; then echo "FAIL_INCOMPLETE(curl=$rc)"; return; fi
+            if [ "$code" = 200 ] && [ "$size" = 0 ]; then echo FAIL_EMPTY; return; fi
+            echo ok
           }
           for path in /api/health /lt /lt/auth/login; do
-            read -r code tc tt tot colo cache <<<"$(probe "$BASE$path")"
-            verdict=ok
-            if [ "$code" = "000" ] || [ "$code" -ge 500 ] 2>/dev/null; then verdict=FAIL_STATUS; fail=1; fi
-            if awk -v t="$tt" -v l="$LIMIT_TTFB" 'BEGIN{exit !(t>l)}'; then verdict=FAIL_STALL; fail=1; fi
-            line="$line | $path $code connect=${tc}s ttfb=${tt}s total=${tot}s colo=$colo cache=$cache $verdict"
+            read -r code tc tt tot size rc colo cache <<<"$(probe "$BASE$path")"
+            verdict=$(judge "$code" "$tt" "$size" "$rc")
+            [ "$verdict" = ok ] || fail=1
+            line="$line | $path $code connect=${tc}s ttfb=${tt}s total=${tot}s bytes=$size colo=$colo cache=$cache $verdict"
             if [ "$path" = "/api/health" ] && [ "$verdict" != "ok" ]; then
               for retry in 1 2; do
                 sleep 20
-                read -r rcode _ rtt _ _ _ <<<"$(probe "$BASE$path")"
-                line="$line (retry$retry $rcode ttfb=${rtt}s)"
+                read -r rcode _ rtt rtot rsize rrc _ _ <<<"$(probe "$BASE$path")"
+                line="$line (retry$retry $rcode ttfb=${rtt}s total=${rtot}s $(judge "$rcode" "$rtt" "$rsize" "$rrc"))"
               done
             fi
           done
           echo "$line"
           echo "$line" >> "$GITHUB_STEP_SUMMARY"
           if [ "$fail" = 1 ]; then
-            echo "::error::production stall or 5xx seen from outside (first byte > ${LIMIT_TTFB} s, 5xx or no answer): $line"
+            echo "::error::production stall or 5xx seen from outside (first byte > ${LIMIT_TTFB} s, body not completed in 30 s, empty 200, 5xx or no answer): $line"
             exit 1
           fi
