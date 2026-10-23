@@ -204,9 +204,19 @@ const CARD_FIELDS = {
 } as const;
 
 async function openWorkCard(page: Page): Promise<Locator> {
-  const main = await profileAt(page, "cv-availability");
+  // The persistence check needs a FRESH document. Going to the same URL and
+  // hash again is a same-document fragment navigation: nothing reloads, the
+  // editor stays open, and the toggle then CLOSED it (run 39970719710).
+  const again = page.url().includes("/dashboard/profile#cv-availability");
+  let main = await profileAt(page, "cv-availability");
+  if (again) {
+    await page.reload();
+    main = page.locator("main");
+    await expect(main.locator("#cv-availability").first()).toBeVisible({ timeout: 30_000 });
+  }
   await expect(main.getByTestId("profile-work-card-editor")).toBeVisible({ timeout: 30_000 });
-  await main.getByTestId("work-card-editor-toggle").click();
+  const toggle = main.getByTestId("work-card-editor-toggle");
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const form = main.getByTestId("work-card-editor");
   await expect(form).toBeVisible({ timeout: 30_000 });
   return form;
