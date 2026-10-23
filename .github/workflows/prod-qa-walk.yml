@@ -181,11 +181,12 @@ jobs:
     #                budget_override does NOT lift it. Re-checked in the walk job before the session mint.
     #   (f) budget   PROD_QA_WALK_DAILY_BUDGET walks that reached production in 24 h (below).
     env:
-      # Owner decision 2026-10-23 (#2659): 12 -> 200 for the acceptance campaign. Measured load per walk:
-      # ~2-8k Supabase requests in 2-6 min (~15-21 req/s at peak), 0 x 429 and 4 x 5xx in ~28k requests on
-      # 2026-10-22; walks stay serial (concurrency group prod-qa-walk), so the hourly load does not grow --
-      # only the hours with walks do (~10 walks/h at most).
-      PROD_QA_WALK_DAILY_BUDGET: "200"
+      # Owner allowed up to 200 (2026-10-23, #2659) once a controlled measurement proves it safe.
+      # Measured after the fan-out fix (#2705): the heaviest walk (brigade-formation, run 39985839991)
+      # = ~5.7k Supabase requests in ~3.5 min, 0 x 5xx, 0 x 429 (before: 8.1k in 6.5 min). Set to 48 —
+      # not 200 — because an origin stall on 2026-10-23 13:50 happened while /api/health still passed, so
+      # the health brake cannot catch that kind of stall until its cause is fixed. Raise after that.
+      PROD_QA_WALK_DAILY_BUDGET: "48"
     steps:
       - uses: actions/checkout@v4
         with:

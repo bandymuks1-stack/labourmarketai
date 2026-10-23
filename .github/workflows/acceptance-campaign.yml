@@ -41,7 +41,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           LOCAL_CHECKS: ${{ vars.ACCEPTANCE_LOCAL_CHECKS }}
-          DAILY_CHECKS: "200"   # owner decision 2026-10-23: 12 -> 200 (same as PROD_QA_WALK_DAILY_BUDGET)
+          DAILY_CHECKS: "48"   # same as PROD_QA_WALK_DAILY_BUDGET (see prod-qa-walk.yml: measured, 48 until the origin stall is fixed)
         run: |
           set -euo pipefail
           DAY1="role-routes journal-confirm living-cv-growth company-chain brigade-formation project-execution org-roster orders-bookings documents-approvals marketplace-goods-services jobs-search notifications-inapp"
