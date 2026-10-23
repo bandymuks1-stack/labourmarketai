@@ -5634,7 +5634,6 @@
   },
   "legal": {
     "preparing": {
-      "body": "Informacje prawne są przygotowywane. Zostaną udostępnione i zaktualizowane przed rozpoczęciem jakichkolwiek usług płatnych lub stosunku umownego.",
       "contact": "Jeśli masz pytania, skontaktuj się z nami."
     },
     "marketplaceRules": {
@@ -5647,10 +5646,9 @@
         "Publiczne oferty pojawiają się dopiero po moderacji; oferty niewiarygodne lub podejrzane są ukrywane.",
         "Handel towarami i usługami regulowanymi lub nielegalnymi jest zabroniony.",
         "Punkt na mapie pojawia się wyłącznie przy zweryfikowanych współrzędnych — żadnych fałszywych znaczników.",
-        "Płatności nie są jeszcze aktywne; na tym etapie żadne płatności nie przechodzą przez platformę.",
+        "Płatności między użytkownikami nie przechodzą przez platformę; przez nią opłacane są wyłącznie usługi platformy.",
         "Niewłaściwe zachowanie lub podejrzaną aktywność można zgłosić — moderatorzy to sprawdzają."
-      ],
-      "reviewNote": "Te zasady opisują, jak platforma faktycznie działa dzisiaj. Ostateczne brzmienie prawne wiążących dokumentów jest jeszcze przygotowywane i zostanie sprawdzone przez właściciela oraz prawnika przed rozpoczęciem jakichkolwiek usług płatnych."
+      ]
     },
     "terms": {
       "title": "Regulamin",
@@ -5682,7 +5680,7 @@
     },
     "privacy": {
       "title": "Polityka prywatności",
-      "intro": "Ta strona wyjaśnia prostym językiem, jakich danych osobowych używa Labour Market AI, w jakim celu i jakie masz prawa. Opisuje platformę taką, jaka działa dzisiaj, przed uruchomieniem płatności.",
+      "intro": "Ta strona wyjaśnia prostym językiem, jakich danych osobowych używa Labour Market AI, w jakim celu i jakie masz prawa. Opisuje platformę taką, jaka działa dzisiaj.",
       "sections": [
         {
           "heading": "Kto odpowiada za Twoje dane",
@@ -5702,6 +5700,15 @@
             "Wiadomości, które wysyłasz i otrzymujesz na platformie.",
             "Zapisy zgód: gdy udzielasz lub wycofujesz zgodę, zapisywane są czynność i jej czas.",
             "Dane techniczne potrzebne do działania usługi, takie jak pliki cookie logowania (zobacz Politykę plików cookie)."
+          ]
+        },
+        {
+          "heading": "Logowanie przez Google, Facebook lub LinkedIn",
+          "items": [
+            "Możesz założyć konto i logować się za pomocą swojego konta Google, Facebook lub LinkedIn zamiast adresu e-mail. Służy to wyłącznie do logowania.",
+            "Gdy wybierzesz jednego z nich, ten dostawca potwierdza Twoją tożsamość i przekazuje platformie Twój adres e-mail, imię i nazwisko oraz identyfikator Twojego konta u tego dostawcy. Platforma nie prosi o żadne dodatkowe uprawnienia — o dostęp do Twoich znajomych ani kontaktów, postów ani stron — i nigdy niczego nie publikuje w Twoim imieniu.",
+            "Twój adres e-mail staje się adresem e-mail konta. Imię i nazwisko od dostawcy służą wyłącznie do zastąpienia tymczasowej nazwy utworzonej z adresu e-mail; nazwa wpisana przez Ciebie nigdy nie jest nadpisywana. Zapis logowania (dostawcę, identyfikator Twojego konta u niego i przekazane przez niego dane) przechowuje nasz dostawca uwierzytelniania, Supabase, w powiązaniu z Twoim kontem.",
+            "Aby usunąć te dane, usuń swoje konto LabourMarket.ai — kroki opisano na stronie „Usunięcie konta i danych”. Usunięcie LabourMarket.ai z ustawień Facebooka, Google lub LinkedIn samo w sobie nie usuwa Twojego konta LabourMarket.ai ani jego danych."
           ]
         },
         {
@@ -5729,15 +5736,26 @@
           "items": [
             "Cele zgód są rozdzielone: widoczność Twojego profilu zawodowego dla pracodawców oraz przekazanie danych konkretnej firmie to dwie różne decyzje — żadna z nich nie jest połączona z Warunkami, zaznaczona z góry ani wymagana do korzystania z Twojego konta, CV czy dziennika pracy.",
             "Każdy ekran zgody pokazuje dokładny tekst z numerem wersji, to, co staje się widoczne, to, co pozostaje prywatne, oraz obie możliwości obok siebie (włącz / nie teraz). Odmowa niczego nie zmienia w Twoim koncie.",
-            "Możesz wycofać każdą zgodę w dowolnym momencie w swoich ustawieniach prywatności, w jednym kroku. Po wycofaniu Twój profil natychmiast przestaje pojawiać się w nowych wyszukiwaniach firm; dane, które firma już zgodnie z prawem otrzymała w czasie obowiązywania zezwolenia, mogą nadal pozostawać w jej posiadaniu — mówimy o tym uczciwie.",
+            "Możesz wycofać każdą zgodę w dowolnym momencie w swoich ustawieniach prywatności, w jednym kroku. Po wycofaniu Twój profil natychmiast przestaje pojawiać się w nowych wyszukiwaniach firm; dane, które firma już zgodnie z prawem otrzymała w czasie obowiązywania zezwolenia, mogą nadal pozostawać w jej posiadaniu.",
             "Historia zgód jest trwała: każde udzielenie i każde wycofanie jest przechowywane jako osobny, niezmienialny zapis z wersją tekstu, językiem, czasem i celem. Nikt — również administratorzy — nie może go edytować ani usunąć, a żaden administrator nie może udzielić zgody w Twoim imieniu."
+          ]
+        },
+        {
+          "heading": "Dostawcy usług przetwarzający dane na potrzeby platformy",
+          "items": [
+            "Supabase — baza danych, logowanie użytkowników i przechowywanie plików.",
+            "Cloudflare — sieć przed stroną (usługa nazw domen, szyfrowanie podczas przesyłania, pamięć podręczna i ochrona przed atakami); przez nią przechodzi każde żądanie do strony.",
+            "Stripe — obsługa płatności za płatne usługi platformy. Gdy organizacja rozpoczyna płatność, Stripe otrzymuje adres e-mail płacącego użytkownika i wewnętrzny identyfikator konta; dane karty są wprowadzane na własnej stronie płatności Stripe i nie są przechowywane przez platformę.",
+            "Google, Facebook (Meta) i LinkedIn — tylko jeśli zdecydujesz się logować przez nich, jak opisano powyżej.",
+            "Google (Gemini API) — tylko w sposób opisany poniżej w części o AI.",
+            "Pełna lista dostawców infrastruktury znajduje się na stronie „Ochrona danych”."
           ]
         },
         {
           "heading": "Twoje prawa",
           "items": [
             "Możesz poprosić o wgląd w dane, które Cię dotyczą, o ich poprawienie, o otrzymanie ich kopii, o ograniczenie ich wykorzystania lub o ich usunięcie.",
-            "Uczciwy stan obecny: kopię swoich danych w pliku JSON oraz dziennik pracy w pliku CSV możesz pobrać samodzielnie ze swojego konta. Usunięcie nadal jest wnioskiem rozpatrywanym przez człowieka — nie ma przycisku natychmiastowego usunięcia; skontaktuj się z nami lub złóż wniosek, a rozpatrzy go człowiek.",
+            "Kopię swoich danych w pliku JSON oraz dziennik pracy w pliku CSV możesz pobrać samodzielnie ze swojego konta. O usunięcie konta możesz poprosić na stronie Prywatność na swoim koncie i potwierdzić wniosek po ponownym zalogowaniu; system usuwa wtedy konto automatycznie i wysyła potwierdzenie na adres e-mail konta. Jeśli dane muszą być przechowywane na mocy prawa lub dotyczą innych osób, wniosek jest rozpatrywany, a decyzję otrzymujesz w ciągu jednego miesiąca. Możesz też skontaktować się z nami — zob. stronę „Usunięcie konta i danych”.",
             "Gdy przetwarzanie opiera się na zgodzie, możesz tę zgodę wycofać w dowolnym momencie."
           ]
         },
@@ -5745,8 +5763,7 @@
           "heading": "Jak długo przechowywane są dane",
           "items": [
             "Dane są przechowywane, dopóki Twoje konto jest aktywne, a funkcja, do której należą, nadal z nich korzysta.",
-            "Zapisy zgód i audytu są przechowywane jako historia: wycofanie jest odnotowywane, zamiast usuwania zapisu.",
-            "Dokładne okresy przechowywania są częścią ostatecznego brzmienia prawnego, które jest wciąż przygotowywane."
+            "Zapisy zgód i audytu są przechowywane jako historia: wycofanie jest odnotowywane, zamiast usuwania zapisu."
           ]
         },
         {
@@ -5757,11 +5774,6 @@
             "To, co dostawca asystenta AI robi z Twoją rozmową, określają jego własne zasady prywatności."
           ]
         }
-      ],
-      "pendingTitle": "Wciąż czeka na ostateczne brzmienie prawne:",
-      "pendingItems": [
-        "Dokładne okresy przechowywania dla każdej kategorii danych.",
-        "Wiążąca, sprawdzona przez prawnika wersja tej polityki oraz wskazanych podstaw prawnych."
       ]
     },
     "cookies": {
@@ -5784,11 +5796,6 @@
       "localStorageNote": "W pamięci przeglądarki (nie w plikach cookie) przechowywanych jest kilka elementów: Twój wybór jasnego lub ciemnego motywu; która strona lub kampania po raz pierwszy Cię tu sprowadziła — zapisane jednorazowo, aby późniejszą rejestrację można było do niej przypisać; losowy identyfikator sesji dla każdej karty, znikający po jej zamknięciu; oraz drobne udogodnienia, takie jak zamknięte powiadomienia, ostatnio oglądane elementy i język wprowadzania mową. Nic z tego nie jest udostępniane stronom trzecim ani wykorzystywane do reklam, a wszystko możesz w każdej chwili wyczyścić w przeglądarce.",
       "noTracking": "Na platformie nie ma dziś żadnych plików cookie analitycznych, reklamowych ani śledzących innych firm. Jeśli kiedykolwiek się to zmieni, ta strona zostanie zaktualizowana jako pierwsza."
     },
-    "pendingLegal": {
-      "badge": "Ostateczne brzmienie czeka na przegląd właściciela i prawnika",
-      "body": "Ta strona wyjaśnia prostym językiem, jak platforma działa dzisiaj. Nie jest to ostateczny dokument prawny: wiążące brzmienie jest jeszcze przygotowywane i zostanie sprawdzone przez właściciela oraz prawnika przed rozpoczęciem jakichkolwiek usług płatnych lub stosunku umownego."
-    },
-    "disclaimer": "Ta strona ma charakter wyłącznie informacyjny i nie stanowi porady prawnej.",
     "requestContact": "Aby zadać pytanie lub zgłosić żądanie dotyczące swoich danych, skontaktuj się z nami — sprawę rozpatrzy człowiek.",
     "related": "Powiązane strony",
     "accountSection": {
@@ -5841,7 +5848,7 @@
         {
           "heading": "Eksport i usuwanie",
           "items": [
-            "Swoje dane możesz pobrać ze swojego konta w pliku JSON, a dziennik pracy w pliku CSV. Usunięcie jest obsługiwane jako rozpatrywany wniosek: nic nie jest usuwane natychmiast — skontaktuj się z nami, a rozpatrzy je człowiek."
+            "Swoje dane możesz pobrać ze swojego konta w pliku JSON, a dziennik pracy w pliku CSV. O usunięcie konta prosi się na koncie i potwierdza je po ponownym zalogowaniu; system usuwa wtedy konto automatycznie. Wniosek dotyczący danych, które muszą być przechowywane na mocy prawa lub dotyczą innych osób, rozpatruje człowiek. Możesz też skontaktować się z nami, a wniosek rozpatrzy człowiek."
           ]
         },
         {
@@ -5852,7 +5859,7 @@
             "Cloudflare — sieć przed stroną: usługa nazw domen, szyfrowanie podczas przesyłania, pamięć podręczna i ochrona przed atakami. Przez nią przechodzi każde żądanie do strony.",
             "GitHub — hosting kodu źródłowego. Nie są tam przechowywane żadne dane użytkowników.",
             "Google (Gemini API) — przetwarzanie AI do tłumaczenia wiadomości i ogłoszeń o pracy oraz do podpowiadania, o co prosi zdanie wpisane na czacie. Wysyłany jest tylko tekst potrzebny do zadania.",
-            "Stripe — obsługa płatności. Rekord klienta powstaje tylko wtedy, gdy organizacja rozpoczyna płatność za subskrypcję; dziś żadna subskrypcja nie jest aktywna.",
+            "Stripe — obsługa płatności. Rekord klienta powstaje tylko wtedy, gdy organizacja rozpoczyna płatność za subskrypcję.",
             "Żaden inny dostawca poczty e-mail, AI, tłumaczeń ani płatności nie jest aktywny. Jeśli któryś zostanie uruchomiony, ta lista zostanie wcześniej zaktualizowana."
           ]
         },
@@ -5862,12 +5869,6 @@
             "Żaden system nie może obiecać absolutnego bezpieczeństwa. Jeśli zauważysz problem, skontaktuj się z nami — człowiek to sprawdzi."
           ]
         }
-      ],
-      "pendingTitle": "Wciąż czeka na ostateczne brzmienie prawne:",
-      "pendingItems": [
-        "Formalny opis środków technicznych i organizacyjnych.",
-        "Podpisane umowy powierzenia przetwarzania danych z wymienionymi wyżej dostawcami infrastruktury.",
-        "Ostateczne okresy przechowywania."
       ]
     },
     "dataAccess": {
@@ -6045,7 +6046,7 @@
     "dataDeletion": {
       "title": "Usunięcie konta i danych",
       "description": "Jak poprosić o usunięcie konta LabourMarket.ai i danych osobowych.",
-      "intro": "Możesz poprosić LabourMarket.ai o usunięcie konta i danych osobowych. Usunięcie jest obecnie realizowane jako wniosek rozpatrywany przez człowieka; nie ma przycisku natychmiastowego usunięcia konta. Jeśli możesz się zalogować, możesz też złożyć prośbę samodzielnie: otwórz stronę Prywatność na swoim koncie (w aplikacji mobilnej: Ustawienia → Prywatność) i wybierz usunięcie konta. W obu przypadkach człowiek odpowiada w ciągu jednego miesiąca.",
+      "intro": "Możesz poprosić LabourMarket.ai o usunięcie konta i danych osobowych. Jeśli możesz się zalogować, możesz złożyć wniosek samodzielnie: otwórz stronę Prywatność na swoim koncie (w aplikacji mobilnej: Ustawienia → Prywatność), wybierz usunięcie konta i potwierdź je po ponownym zalogowaniu. System usuwa wtedy konto automatycznie i wysyła potwierdzenie na adres e-mail konta; jeśli dane muszą być przechowywane na mocy prawa lub dotyczą innych osób, wniosek jest rozpatrywany, a decyzję otrzymujesz w ciągu jednego miesiąca. O usunięcie możesz też poprosić e-mailem, jak opisano poniżej; człowiek odpowiada w ciągu jednego miesiąca.",
       "howTitle": "Jak poprosić o usunięcie",
       "howSteps": [
         "Napisz na {email} z adresu e-mail powiązanego z Twoim kontem LabourMarket.ai.",
