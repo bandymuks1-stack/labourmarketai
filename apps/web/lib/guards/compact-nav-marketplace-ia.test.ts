@@ -8,6 +8,7 @@ import {
   ADMIN_NAV_ITEM,
 } from "../config/navigation";
 import { getFeatureConfig } from "../config/feature-availability";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Compact, MAP-FIRST navigation IA guard.
@@ -28,7 +29,7 @@ import { getFeatureConfig } from "../config/feature-availability";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
-const ACTIVE_LOCALES = ["lt", "en", "ru"] as const;
+const ACTIVE_LOCALES = activeLocales;
 const MAP = "app/[locale]/dashboard/market-map/page.tsx";
 
 

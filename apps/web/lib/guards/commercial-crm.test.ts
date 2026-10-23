@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Wagon 10 — Commercial CRM guard. Owner-scoped proposals + contracts; invoices
@@ -72,7 +73,7 @@ describe("commercial code: honest degradation, no finance duplication", () => {
 });
 
 describe("commercial strings exist in every active-parity locale", () => {
-  for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+  for (const loc of activeLocales) {
     it(`${loc} has commercial with proposal + contract statuses`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`));
       expect(msgs.commercial?.pageTitle, loc).toBeTruthy();

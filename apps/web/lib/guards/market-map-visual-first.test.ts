@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Market-map visual-first guard (admin-control-room-map-visual-v1), restated
@@ -56,7 +57,7 @@ describe("market map — no lead paragraph, no documentation copy", () => {
     expect(page).toMatch(/tMap\("pageTitle"\)/);
     expect(page).not.toMatch(/pageLead/);
   });
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: the removed explanatory copy is gone from the catalogue`, () => {
       const m = JSON.parse(read(`messages/${loc}.json`)) as {
         marketMap: { pageLead?: unknown; entities?: unknown; world: Record<string, unknown> };

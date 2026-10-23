@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isCanonicallyRedirected } from "./canonical-redirects";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Mobile map workspace + active-identity marker guard (rewritten for the ONE
@@ -18,7 +19,7 @@ import { join } from "node:path";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
-const ACTIVE_LOCALES = ["lt", "en", "ru"] as const;
+const ACTIVE_LOCALES = activeLocales;
 const PAGE = "app/[locale]/dashboard/market-map/page.tsx";
 const LAYER = "components/app/market-map/own-location-layer.ts";
 const MODEL = "components/app/market-map/market-map-model.ts";

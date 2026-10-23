@@ -17,6 +17,7 @@ import {
   findCountryProvenanceProblems,
 } from "../labour-market/country-evidence";
 import { LABOUR_MARKET_SOURCES } from "../labour-market/sources";
+import { activeLocales } from "@/lib/i18n/config";
 
 const webRoot = resolve(__dirname, "..", "..");
 const loadLM = (locale: string) =>
@@ -41,7 +42,7 @@ describe("country evidence provenance", () => {
 });
 
 describe("country content is localized en/lt/ru", () => {
-  for (const locale of ["en", "lt", "ru"] as const) {
+  for (const locale of activeLocales) {
     it(`${locale}: every signal has a localized title + summary, + chrome/names`, () => {
       const j = loadLM(locale);
       for (const c of SUPPORTED_COUNTRIES) {

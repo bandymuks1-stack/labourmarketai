@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * P0 Real-Use Hardening — discover reflects "already requested" (PR #535).
@@ -42,7 +43,7 @@ describe("discover marks offerings the buyer already has an open request for", (
 });
 
 describe("'requested' copy exists across active locales", () => {
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: marketplace.requested present + non-empty`, () => {
       const m = (JSON.parse(read(`messages/${loc}.json`)) as { marketplace?: Record<string, unknown> }).marketplace ?? {};
       expect(typeof m.requested, `${loc}.requested`).toBe("string");

@@ -12,6 +12,7 @@ import {
   normalizeDiscoveryCategory,
   normalizeDiscoveryCountry,
 } from "@/lib/marketplace/service-requests-shared";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Window 6, lane G — one identity, many contexts; the services loop.
@@ -74,7 +75,7 @@ describe("G-H1 — an e-mail address is never a planning label", () => {
     expect(src).toMatch(/tAll\(d\.statusKey\)/);
   });
 
-  for (const loc of ["lt", "en", "ru", "de", "nl"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: planning.fallback.invitation exists for the panel to use`, () => {
       const m = JSON.parse(read(`messages/${loc}.json`)) as {
         planning?: { fallback?: Record<string, string> };
@@ -185,7 +186,7 @@ describe("honest empty states — every empty list says why and the next real st
     "responseNoteLabel",
     "responseNotePlaceholder",
   ] as const;
-  for (const loc of ["lt", "en", "ru", "de", "nl"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: every new marketplace key is present and non-empty (parity with the locales that carry the namespace)`, () => {
       const m = (JSON.parse(read(`messages/${loc}.json`)) as { marketplace: Record<string, string> }).marketplace;
       for (const k of KEYS) expect(m[k]?.trim(), `${loc}.marketplace.${k}`).toBeTruthy();

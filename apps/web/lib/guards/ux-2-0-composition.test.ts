@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * UX 2.0 — conversation composition.
@@ -187,7 +188,7 @@ describe("assistive tech can follow the conversation", () => {
     expect(messages).toMatch(/h\.speakers\.user/);
     const chat = read("components/app/conversation/chat/conversation-chat.tsx");
     expect(chat).toMatch(/speakers: \{ assistant: labels\.assistantName, user: labels\.speakerYou \}/);
-    for (const locale of ["lt", "en", "ru"]) {
+    for (const locale of activeLocales) {
       const doc = JSON.parse(read(`messages/${locale}.json`)) as {
         conversation: { chat: { speakerYou?: string } };
       };

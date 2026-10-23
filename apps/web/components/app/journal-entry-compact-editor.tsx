@@ -33,7 +33,7 @@ import {
   LT_HOUR_FORMS,
   LT_MINUTE_FORMS,
 } from "@/lib/i18n/lt-plural";
-import { formatDuration } from "@/lib/journal/format-duration";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { PLATFORM_OUTPUT_UNIT_SLUGS } from "@/lib/journal/work-time";
 import { recordEvent } from "@/lib/telemetry/task";
 import { cn } from "@/lib/utils";
@@ -445,9 +445,9 @@ export function JournalEntryCompactEditor({
         : formatDuration(
             total.value,
             total.unitSlug,
-            // formatDuration supports lt/en/ru; other active locales (de/nl/pl)
-            // use neutral international "h/min" rather than LT abbreviations.
-            locale === "ru" ? "ru" : "en",
+            // Any locale: RU keeps its abbreviations, every other locale reads
+            // the international "h/min" with its own decimal separator.
+            durationLocale(locale),
           );
 
   return (

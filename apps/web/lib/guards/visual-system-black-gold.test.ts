@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * BLACK + METALLIC GOLD — the visual-system contract.
@@ -149,7 +150,7 @@ describe("the switch is discoverable", () => {
   it("it reuses existing localized copy — no new i18n keys for a toggle", () => {
     const header = read("components/app/account-menu.tsx");
     expect(header).toMatch(/account\.theme/);
-    for (const locale of ["lt", "en", "ru"]) {
+    for (const locale of activeLocales) {
       const msgs = JSON.parse(read(`messages/${locale}.json`)) as Record<string, never>;
       const theme = (
         msgs as unknown as {

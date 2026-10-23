@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Provider offering → active publishing funnel (clarity slice).
@@ -48,7 +49,7 @@ describe("the services page threads the discoverability labels", () => {
 });
 
 describe("funnel copy is honest + present across active locales", () => {
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     const so = (JSON.parse(read(`messages/${loc}.json`)) as {
       serviceOfferings?: { discoverability?: Record<string, unknown>; intro?: unknown };
     }).serviceOfferings ?? {};

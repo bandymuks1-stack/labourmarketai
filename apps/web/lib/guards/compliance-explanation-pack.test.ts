@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Compliance / explanation pack guard (CR train WAGON 2, audit areas 1–4).
@@ -22,7 +23,7 @@ import { join } from "node:path";
 const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const MKT = "app/[locale]/(marketing)";
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 
 /** Pack pages: route dir (relative to the marketing tree) → required marks. */
 const PACK_PAGES: ReadonlyArray<{
