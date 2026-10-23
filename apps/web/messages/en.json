@@ -9472,7 +9472,7 @@
         "body": "A fixed success fee applies per hired worker, crew or company placement. A separate coordination fee applies only when document or onboarding coordination is actually delivered. The final price is confirmed before paid work starts."
       }
     ],
-    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — one active position at no cost. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. Offering or assigning a whole crew as one unit is not built yet — today a crew is matched person by person.",
+    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — one active position at no cost. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. A whole crew can already offer itself against your inquiry as one unit and, once both sides agree, join your project as one team; the automatic shortlist does not yet propose whole crews — it ranks people one by one.",
     "ctaLabel": "Submit a workforce inquiry →"
   },
   "adminLaunchReadiness": {

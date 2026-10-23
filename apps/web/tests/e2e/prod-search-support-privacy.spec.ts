@@ -493,18 +493,48 @@ test("S-6 (10.27). the map renders markers, with no external geocoding call", as
 
 // ──────────────────────────────────────────────────────────── matching (M)
 
+// This walk's OWN need. M-1 used to borrow whichever Gama need another walk
+// left open, and prod-mcp-agents closes every QA-SYNTHETIC need — the same
+// cause that turned company-chain red on 2026-10-22 (run 39792445120: 0 Gama
+// needs on the board). A trade is named so scouting structures the need and
+// can list candidates, supply and the auto-match receipt. Closed in afterAll.
+const NEED_ROLE = `QA-SYNTHETIC atitikimas mūrininkai ${RUN}`;
+let needCreatedHere = false;
+
+test("M-0. Gama posts this run's need through the demand intake", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
+  await page.getByTestId("demand-role").fill(NEED_ROLE);
+  await page.getByTestId("demand-description").fill(`${TAG}: synthetic need for the production matching walk, 1 mūrininkas.`);
+  await page.getByTestId("demand-next").click();
+  const size = page.getByTestId("demand-team-size");
+  if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await page.getByTestId("demand-next").click();
+  await page.getByTestId("demand-create").click();
+  const done = page.getByTestId("demand-done");
+  const limit = page.getByTestId("demand-open-need-limit");
+  await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
+  expect(await limit.isVisible(), "the open-need limit refused this run's need").toBe(false);
+  await page.goto("/lt/dashboard/company/scouting");
+  const link = page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: RUN }).first();
+  await expect(link, "this run's need is listed among Gama's needs").toBeVisible({ timeout: 30_000 });
+  requestId = /request=([0-9a-f-]{36})/.exec((await link.getAttribute("href")) ?? "")?.[1] ?? "";
+  expect(requestId).toMatch(/^[0-9a-f-]{36}$/);
+  needCreatedHere = true;
+  await ctx.close();
+});
+
 test("M-1 (4.5). the worker sees why Gama's need fits them", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/opportunities?view=all");
   await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const cards = page
-    .locator('li[id^="opp-"]')
+    .locator(`li[id="opp-${requestId}"]`)
     .filter({ has: page.getByTestId("opportunity-company").filter({ hasText: GAMA }) })
     .filter({ has: page.locator('[data-testid^="interest-"]') });
   await expect.poll(() => cards.count(), { timeout: 60_000 }).toBeGreaterThan(0);
   const card = cards.first();
-  requestId = ((await card.getAttribute("id")) ?? "").replace(/^opp-/, "");
-  expect(requestId).toMatch(/^[0-9a-f-]{36}$/);
 
   const why = card.getByTestId("opportunity-why");
   await expect(why).toBeVisible();
@@ -807,6 +837,22 @@ test.afterAll(async ({ browser }) => {
         const isGranted = await granted.isVisible();
         if (visibilityInitial === "granted" && !isGranted) await grantVisibility(page);
         if (visibilityInitial !== "granted" && isGranted) await withdrawVisibility(page);
+      },
+    },
+    {
+      // Last: the hand and the contact ask above are undone on the open need first.
+      what: "this run's need (closed; interest and asks stay as history)",
+      slot: "manager",
+      org: GAMA,
+      when: () => needCreatedHere && requestId !== "",
+      run: async (page) => {
+        await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
+        const controls = page.getByTestId("demand-lifecycle-controls");
+        await expect(controls).toBeVisible({ timeout: 30_000 });
+        if ((await controls.getAttribute("data-demand-status")) !== "closed") {
+          await controls.getByTestId("demand-close").click();
+          await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
+        }
       },
     },
   ];

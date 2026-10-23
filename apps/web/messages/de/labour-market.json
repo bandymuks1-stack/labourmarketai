@@ -26,17 +26,17 @@
   "employerPathTitle": "Describe a real need — stop guessing",
   "employerPathBody": "Tell us the work you need done and compare candidates by declared skills, evidence level, availability, language and country before you reach out.",
   "employerPathCta": "For companies & agencies",
-  "evidenceEyebrow": "Grounded in real labour-market evidence",
-  "evidenceTitle": "The market is changing faster than a CV",
-  "evidenceSubcopy": "Public statistics from official EU sources on why visible skills, proof and mobility matter. Every card links to its source with a figure date and region.",
-  "fieldSource": "Source",
-  "fieldFigureDate": "Figure date",
-  "fieldLastChecked": "Last checked",
-  "claimStatistic": "Statistic",
+  "evidenceEyebrow": "Gestützt auf echte Arbeitsmarktdaten",
+  "evidenceTitle": "Der Markt verändert sich schneller als ein Lebenslauf",
+  "evidenceSubcopy": "Öffentliche Statistiken aus offiziellen EU-Quellen dazu, warum sichtbare Fähigkeiten, Nachweise und Mobilität zählen. Jede Karte verlinkt auf ihre Quelle, mit Stichtag und Region.",
+  "fieldSource": "Quelle",
+  "fieldFigureDate": "Stichtag",
+  "fieldLastChecked": "Zuletzt geprüft",
+  "claimStatistic": "Statistik",
   "claimTrend": "Trend",
-  "claimForecast": "Forecast",
-  "claimShortage": "Shortage signal",
-  "claimSkills": "Skills signal",
+  "claimForecast": "Prognose",
+  "claimShortage": "Engpasssignal",
+  "claimSkills": "Fähigkeitensignal",
   "illustrativeSample": "Illustrative sample — concept data, not live platform figures yet.",
   "evidenceDisclaimer": "Jede Aussage verlinkt auf ihre offizielle öffentliche Quelle mit Datum und Region der Zahl. Die Zahlen sind aus veröffentlichten Berichten übertragen (zuletzt geprüft am auf jeder Karte angezeigten Datum), kein Live-Datenfeed — prüfen Sie für die verbindliche, aktuellste Zahl immer die verlinkte Quelle.",
   "sourceLabel": {
@@ -75,7 +75,7 @@
     "digital-skills-demand": {
       "title": "Die in Jobs geforderten Fähigkeiten verschieben sich ins Digitale",
       "summary": "Die Analyse von Cedefop zeigt, dass fast 9 von 10 Jobs digitale Fähigkeiten erfordern, während nur etwa 55,6 % der Erwachsenen in der EU mindestens grundlegende digitale Fähigkeiten haben. Das Fähigkeitsprofil vieler Jobs ändert sich schneller, als ein statischer Lebenslauf zeigen kann.",
-      "figureDate": "Cedefop Skills Forecast / Analyse digitaler Fähigkeiten (2024)",
+      "figureDate": "Cedefop-Qualifikationsprognose / Analyse digitaler Fähigkeiten (2024)",
       "region": "EU",
       "unit": "% der Erwachsenen in der EU mit grundlegenden digitalen Fähigkeiten",
       "methodNote": "Cedefop, 'Digital skills ambitions in action' / Skills Forecast (2024): ~9/10 Jobs werden digitale Fähigkeiten erfordern; ~55,6 % der Erwachsenen in der EU haben mindestens grundlegende digitale Fähigkeiten."
@@ -116,46 +116,46 @@
     "CH": "Schweiz",
     "US": "Vereinigte Staaten"
   },
-  "countryIndexEyebrow": "Labour markets by country",
-  "countryIndexTitle": "Source-backed evidence for the markets we serve",
+  "countryIndexEyebrow": "Arbeitsmärkte nach Land",
+  "countryIndexTitle": "Quellenbasierte Daten für die Märkte, in denen wir tätig sind",
   "countryIndexSubcopy": "Arbeitsmärkte im Baltikum und in Nordeuropa. Live-Seiten beginnen mit dem baltischen Kern; jede Zahl verlinkt auf ihre offizielle Quelle. Die geöffneten Märkte wurden um Georgien, Belgien, Frankreich, Spanien, Österreich und die Schweiz erweitert.",
-  "countryComingSoon": "Coming soon",
-  "countryView": "View",
-  "countryBackToIndex": "All countries",
-  "countryWorkerFraming": "For workers: visible, evidenced skills and mobility matter more where demand is tight.",
-  "countryEmployerFraming": "For employers: describe the real need and compare people by evidence — not a weak CV.",
+  "countryComingSoon": "Demnächst",
+  "countryView": "Ansehen",
+  "countryBackToIndex": "Alle Länder",
+  "countryWorkerFraming": "Für Arbeitskräfte: Sichtbare, belegte Fähigkeiten und Mobilität zählen dort mehr, wo die Nachfrage knapp ist.",
+  "countryEmployerFraming": "Für Arbeitgeber: Beschreiben Sie den tatsächlichen Bedarf und vergleichen Sie Menschen anhand von Nachweisen — nicht anhand eines schwachen Lebenslaufs.",
   "countryEvidence": {
     "LT": {
-      "intro": "Lithuania — the home market. Source-backed signals for workers and employers.",
+      "intro": "Litauen — der Heimatmarkt. Quellenbasierte Signale für Arbeitskräfte und Arbeitgeber.",
       "shortages": {
-        "title": "Shortages concentrated in trades and operators",
-        "summary": "EURES reporting places Lithuania's shortage occupations in stationary plant & machine operators, building and related trades, and food-processing, woodworking and craft trades — alongside the EU-wide gaps in healthcare, IT and transport."
+        "title": "Engpässe vor allem in Handwerk und Maschinenbedienung",
+        "summary": "Die EURES-Berichterstattung verortet Litauens Engpassberufe bei Bedienern stationärer Anlagen und Maschinen, im Bau- und Ausbaugewerbe sowie in der Lebensmittelverarbeitung, Holzbearbeitung und im Handwerk — neben den EU-weiten Lücken in Gesundheitswesen, IT und Verkehr."
       },
       "digital-skills": {
-        "title": "Digital skills demand is rising",
-        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Lithuania."
+        "title": "Die Nachfrage nach digitalen Fähigkeiten steigt",
+        "summary": "Die Skills Forecast von Cedefop weist auf eine wachsende Nachfrage nach digitalen und höherqualifizierten Fähigkeiten in allen Berufen hin, auch in Litauen."
       }
     },
     "LV": {
-      "intro": "Latvia — source-backed signals for workers and employers.",
+      "intro": "Lettland — quellenbasierte Signale für Arbeitskräfte und Arbeitgeber.",
       "surplus": {
-        "title": "A more surplus-leaning market",
-        "summary": "In the EURES 2024 reporting Latvia stands out among the Baltics with notable worker surpluses in several occupations — a different dynamic from Lithuania and Estonia."
+        "title": "Ein eher von Überschüssen geprägter Markt",
+        "summary": "In der EURES-Berichterstattung 2024 fällt Lettland unter den baltischen Staaten mit deutlichen Arbeitskräfteüberschüssen in mehreren Berufen auf — eine andere Dynamik als in Litauen und Estland."
       },
       "digital-skills": {
-        "title": "Digital skills demand is rising",
-        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Latvia."
+        "title": "Die Nachfrage nach digitalen Fähigkeiten steigt",
+        "summary": "Die Skills Forecast von Cedefop weist auf eine wachsende Nachfrage nach digitalen und höherqualifizierten Fähigkeiten in allen Berufen hin, auch in Lettland."
       }
     },
     "EE": {
-      "intro": "Estonia — source-backed signals for workers and employers.",
+      "intro": "Estland — quellenbasierte Signale für Arbeitskräfte und Arbeitgeber.",
       "balanced": {
-        "title": "A relatively balanced market",
-        "summary": "EURES 2024 reporting describes Estonia's labour market as relatively more balanced than many EURES countries, with the EU-wide pressures in healthcare, IT and transport still present."
+        "title": "Ein vergleichsweise ausgeglichener Markt",
+        "summary": "Die EURES-Berichterstattung 2024 beschreibt Estlands Arbeitsmarkt als vergleichsweise ausgeglichener als den vieler EURES-Länder; der EU-weite Druck in Gesundheitswesen, IT und Verkehr besteht aber weiterhin."
       },
       "digital-skills": {
-        "title": "Digital skills demand is rising",
-        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Estonia."
+        "title": "Die Nachfrage nach digitalen Fähigkeiten steigt",
+        "summary": "Die Skills Forecast von Cedefop weist auf eine wachsende Nachfrage nach digitalen und höherqualifizierten Fähigkeiten in allen Berufen hin, auch in Estland."
       }
     },
     "PL": {
