@@ -45,7 +45,11 @@ jobs:
         run: |
           set -euo pipefail
           DAY1="role-routes journal-confirm living-cv-growth company-chain brigade-formation project-execution org-roster orders-bookings documents-approvals marketplace-goods-services jobs-search notifications-inapp"
-          DAY2="billing-test-mode mcp-agents manager-chat calendar-planning chat-continuity project-context worker-identity-split agency-chain marketplace staff-review-notice mobile-surfaces sectors-languages"
+          DAY2="mcp-agents manager-chat calendar-planning chat-continuity project-context worker-identity-split agency-chain marketplace staff-review-notice mobile-surfaces sectors-languages"
+          # 2026-10-23 owner order (#2659 report 11): spend the 12 checks on the walks that prove the most
+          # NOT_VERIFIED rows of the 275-row matrix first. billing-test-mode is left out while production is
+          # armed LIVE (it cannot pass there; Stripe TEST runs need a TEST deployment).
+          UNVERIFIED_FIRST="company-chain search-support-privacy project-execution org-roster profile-cv-history public-org-locales orders-bookings role-routes manager-chat documents-approvals jobs-search notifications-inapp marketplace-goods-services"
           DAY3="profile-cv-history search-support-privacy public-org-locales learning-practice recognition-chain chat-confirm-once mcp-chain employee-beta-gate"
           log() { echo "$(date -u +%H:%M) $*" | tee -a "$GITHUB_STEP_SUMMARY"; }
           handover() { gh workflow run acceptance-campaign.yml -R "$REPO" --ref main; log "handed over to a fresh tick"; }
@@ -53,7 +57,7 @@ jobs:
           today=$(date -u +%F)
           case "$today" in
             2026-10-22) plan="$DAY1"; retry_failed=0 ;;
-            2026-10-23) plan="$DAY2"; retry_failed=0 ;;
+            2026-10-23) plan="$UNVERIFIED_FIRST"; retry_failed=0 ;;
             2026-10-24) plan="$DAY3 $DAY1 $DAY2"; retry_failed=1 ;;
             2026-10-25) plan="$DAY1 $DAY2 $DAY3"; retry_failed=1 ;;
             *) log "outside the campaign window ($today): nothing to do"; exit 0 ;;
