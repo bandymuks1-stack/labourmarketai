@@ -26,17 +26,17 @@
   "employerPathTitle": "Describe a real need — stop guessing",
   "employerPathBody": "Tell us the work you need done and compare candidates by declared skills, evidence level, availability, language and country before you reach out.",
   "employerPathCta": "For companies & agencies",
-  "evidenceEyebrow": "Grounded in real labour-market evidence",
-  "evidenceTitle": "The market is changing faster than a CV",
-  "evidenceSubcopy": "Public statistics from official EU sources on why visible skills, proof and mobility matter. Every card links to its source with a figure date and region.",
-  "fieldSource": "Source",
-  "fieldFigureDate": "Figure date",
-  "fieldLastChecked": "Last checked",
-  "claimStatistic": "Statistic",
+  "evidenceEyebrow": "Gebaseerd op echte arbeidsmarktgegevens",
+  "evidenceTitle": "De markt verandert sneller dan een cv",
+  "evidenceSubcopy": "Openbare statistieken uit officiële EU-bronnen over waarom zichtbare vaardigheden, bewijs en mobiliteit ertoe doen. Elke kaart linkt naar de bron, met peildatum en regio.",
+  "fieldSource": "Bron",
+  "fieldFigureDate": "Peildatum",
+  "fieldLastChecked": "Laatst gecontroleerd",
+  "claimStatistic": "Statistiek",
   "claimTrend": "Trend",
-  "claimForecast": "Forecast",
-  "claimShortage": "Shortage signal",
-  "claimSkills": "Skills signal",
+  "claimForecast": "Prognose",
+  "claimShortage": "Tekortsignaal",
+  "claimSkills": "Vaardighedensignaal",
   "illustrativeSample": "Illustrative sample — concept data, not live platform figures yet.",
   "evidenceDisclaimer": "Elke claim linkt naar de officiële openbare bron met de datum en regio van het cijfer. Cijfers zijn overgenomen uit gepubliceerde rapporten (laatst geverifieerd op de datum op elke kaart), niet uit een live datafeed — controleer altijd de gelinkte bron voor het gezaghebbende, meest recente cijfer.",
   "sourceLabel": {
@@ -75,7 +75,7 @@
     "digital-skills-demand": {
       "title": "De vaardigheden die banen vereisen verschuiven naar digitaal",
       "summary": "De analyse van Cedefop wijst erop dat bijna 9 op de 10 banen digitale vaardigheden vereisen, terwijl slechts ongeveer 55,6% van de volwassenen in de EU ten minste digitale basisvaardigheden heeft. Het vaardigheidsprofiel van veel banen verandert sneller dan een statisch CV kan laten zien.",
-      "figureDate": "Cedefop Skills Forecast / analyse digitale vaardigheden (2024)",
+      "figureDate": "Cedefop-vaardighedenprognose / analyse digitale vaardigheden (2024)",
       "region": "EU",
       "unit": "% volwassenen in de EU met digitale basisvaardigheden",
       "methodNote": "Cedefop, 'Digital skills ambitions in action' / Skills Forecast (2024): ~9/10 banen zullen digitale vaardigheden vereisen; ~55,6% van de volwassenen in de EU heeft ten minste digitale basisvaardigheden."
@@ -116,46 +116,46 @@
     "CH": "Zwitserland",
     "US": "Verenigde Staten"
   },
-  "countryIndexEyebrow": "Labour markets by country",
-  "countryIndexTitle": "Source-backed evidence for the markets we serve",
+  "countryIndexEyebrow": "Arbeidsmarkten per land",
+  "countryIndexTitle": "Brongebaseerde gegevens voor de markten waarin we actief zijn",
   "countryIndexSubcopy": "Arbeidsmarkten in de Baltische staten en Noord-Europa. Live pagina's beginnen met de Baltische kern; elk cijfer linkt naar zijn officiële bron. De geopende markten zijn uitgebreid met Georgië, België, Frankrijk, Spanje, Oostenrijk en Zwitserland.",
-  "countryComingSoon": "Coming soon",
-  "countryView": "View",
-  "countryBackToIndex": "All countries",
-  "countryWorkerFraming": "For workers: visible, evidenced skills and mobility matter more where demand is tight.",
-  "countryEmployerFraming": "For employers: describe the real need and compare people by evidence — not a weak CV.",
+  "countryComingSoon": "Binnenkort",
+  "countryView": "Bekijken",
+  "countryBackToIndex": "Alle landen",
+  "countryWorkerFraming": "Voor werknemers: zichtbare, onderbouwde vaardigheden en mobiliteit tellen zwaarder waar de vraag krap is.",
+  "countryEmployerFraming": "Voor werkgevers: beschrijf de echte behoefte en vergelijk mensen op bewijs — niet op een zwak cv.",
   "countryEvidence": {
     "LT": {
-      "intro": "Lithuania — the home market. Source-backed signals for workers and employers.",
+      "intro": "Litouwen — de thuismarkt. Brongebaseerde signalen voor werknemers en werkgevers.",
       "shortages": {
-        "title": "Shortages concentrated in trades and operators",
-        "summary": "EURES reporting places Lithuania's shortage occupations in stationary plant & machine operators, building and related trades, and food-processing, woodworking and craft trades — alongside the EU-wide gaps in healthcare, IT and transport."
+        "title": "Tekorten vooral in ambachten en bij machinebedieners",
+        "summary": "EURES-rapportages plaatsen de tekortberoepen van Litouwen bij bedieners van stationaire installaties en machines, in de bouw en aanverwante vakken, en in de voedingsmiddelenverwerking, houtbewerking en ambachten — naast de EU-brede tekorten in de zorg, IT en het vervoer."
       },
       "digital-skills": {
-        "title": "Digital skills demand is rising",
-        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Lithuania."
+        "title": "De vraag naar digitale vaardigheden stijgt",
+        "summary": "De Skills Forecast van Cedefop wijst op een groeiende vraag naar digitale en hoger gekwalificeerde vaardigheden in alle beroepen, ook in Litouwen."
       }
     },
     "LV": {
-      "intro": "Latvia — source-backed signals for workers and employers.",
+      "intro": "Letland — brongebaseerde signalen voor werknemers en werkgevers.",
       "surplus": {
-        "title": "A more surplus-leaning market",
-        "summary": "In the EURES 2024 reporting Latvia stands out among the Baltics with notable worker surpluses in several occupations — a different dynamic from Lithuania and Estonia."
+        "title": "Een markt met eerder overschotten",
+        "summary": "In de EURES-rapportage van 2024 springt Letland er binnen de Baltische staten uit met duidelijke overschotten aan werknemers in meerdere beroepen — een andere dynamiek dan in Litouwen en Estland."
       },
       "digital-skills": {
-        "title": "Digital skills demand is rising",
-        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Latvia."
+        "title": "De vraag naar digitale vaardigheden stijgt",
+        "summary": "De Skills Forecast van Cedefop wijst op een groeiende vraag naar digitale en hoger gekwalificeerde vaardigheden in alle beroepen, ook in Letland."
       }
     },
     "EE": {
-      "intro": "Estonia — source-backed signals for workers and employers.",
+      "intro": "Estland — brongebaseerde signalen voor werknemers en werkgevers.",
       "balanced": {
-        "title": "A relatively balanced market",
-        "summary": "EURES 2024 reporting describes Estonia's labour market as relatively more balanced than many EURES countries, with the EU-wide pressures in healthcare, IT and transport still present."
+        "title": "Een relatief evenwichtige markt",
+        "summary": "De EURES-rapportage van 2024 beschrijft de Estse arbeidsmarkt als relatief evenwichtiger dan die van veel EURES-landen, al blijft de EU-brede druk in de zorg, IT en het vervoer bestaan."
       },
       "digital-skills": {
-        "title": "Digital skills demand is rising",
-        "summary": "Cedefop's Skills Forecast points to growing demand for digital and higher-level skills across occupations, including in Estonia."
+        "title": "De vraag naar digitale vaardigheden stijgt",
+        "summary": "De Skills Forecast van Cedefop wijst op een groeiende vraag naar digitale en hoger gekwalificeerde vaardigheden in alle beroepen, ook in Estland."
       }
     },
     "PL": {
