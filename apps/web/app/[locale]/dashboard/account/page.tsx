@@ -35,7 +35,10 @@ import { NOTIFICATION_EMAIL_INCAPABLE_TYPES } from "@/lib/notifications/email-di
 import {
   readNotificationPreferencesFor,
   resolveEffectivePreferences,
+  resolvePushOptIn,
 } from "@/lib/notifications/notification-preferences";
+import { webPushClientConfig } from "@/lib/notifications/web-push-config";
+import { WebPushOptIn } from "@/components/app/web-push-opt-in";
 import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
@@ -112,6 +115,10 @@ export default async function AccountPage({
   );
   const tNotifTypes = await getTranslations("auth.notifications.types");
   const tPrefs = await getTranslations("notificationPrefs");
+  // COM-3 push channel: OFF unless the owner switched it on (flag + VAPID
+  // keys). While off, the opt-in below is not rendered at all.
+  const push = webPushClientConfig();
+  const pushOptedIn = prefsRead.kind === "ok" && resolvePushOptIn(prefsRead.rows);
   const prefRows: NotificationPreferenceRowView[] = effectivePrefs.map((p) => ({
     type: p.notificationType,
     label: tNotifTypes.has(`event_${p.notificationType}` as never)
@@ -355,6 +362,24 @@ export default async function AccountPage({
           saved: tPrefs("saved"),
         }}
       />
+      {push.active && push.publicKey ? (
+        <WebPushOptIn
+          publicKey={push.publicKey}
+          optedIn={pushOptedIn}
+          labels={{
+            title: tPrefs("push.title"),
+            intro: tPrefs("push.intro"),
+            turnOn: tPrefs("push.turnOn"),
+            turnOff: tPrefs("push.turnOff"),
+            working: tPrefs("push.working"),
+            on: tPrefs("push.on"),
+            off: tPrefs("push.off"),
+            unsupported: tPrefs("push.unsupported"),
+            blocked: tPrefs("push.blocked"),
+            error: tPrefs("push.error"),
+          }}
+        />
+      ) : null}
 
       {/* Identity is edited on the Profilis surface; a single settings link
           (not a launcher grid) keeps account = settings while the profile-cv

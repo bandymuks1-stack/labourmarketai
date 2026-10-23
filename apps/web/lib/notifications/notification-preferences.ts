@@ -44,11 +44,28 @@ export const NOTIFICATION_CHANNEL_DEFAULTS: Readonly<
   email: false,
 };
 
-/** One stored preference fact (the caller's own row; profile_id is implicit). */
+/** One stored preference fact (the caller's own row; profile_id is implicit).
+ *  `push` rows exist only as the per-person push opt-in (`PUSH_OPT_IN_TYPE`);
+ *  push has no per-type matrix — it mirrors the bell. */
 export interface NotificationPreferenceRow {
   readonly notificationType: string;
-  readonly channel: NotificationChannel;
+  readonly channel: NotificationChannel | "push";
   readonly enabled: boolean;
+}
+
+/**
+ * THE PUSH OPT-IN (COM-3 push channel, migration 20261023170000): ONE row per
+ * person, (notification_type '*', channel 'push'), stored WITH the other
+ * preferences — no second preference store. Default OFF (consent-first, like
+ * e-mail): push reaches a person only after they turned it on themselves AND
+ * subscribed a device. A type they silenced in the bell is never pushed,
+ * because the push hop runs only after the bell row was written.
+ */
+export const PUSH_OPT_IN_TYPE = "*";
+
+export function resolvePushOptIn(rows: readonly NotificationPreferenceRow[]): boolean {
+  const row = rows.find((r) => r.channel === "push" && r.notificationType === PUSH_OPT_IN_TYPE);
+  return row?.enabled === true;
 }
 
 /**
@@ -134,7 +151,7 @@ export async function readNotificationPreferencesFor(
       .map((row) => {
         const r = row as Record<string, unknown>;
         const channel = String(r.channel);
-        if (channel !== "in_app" && channel !== "email") return null;
+        if (channel !== "in_app" && channel !== "email" && channel !== "push") return null;
         return {
           notificationType: String(r.notification_type),
           channel,
@@ -187,6 +204,37 @@ export async function setNotificationPreference(
         },
         { onConflict: "profile_id,notification_type,channel" },
       );
+    if (error) {
+      if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
+        return { kind: "feature_unavailable" };
+      }
+      return { kind: "unexpected_error", code: error.code ?? "unknown" };
+    }
+    return { kind: "ok" };
+  } catch {
+    return { kind: "feature_unavailable" };
+  }
+}
+
+/**
+ * Store the caller's push opt-in (the single `*`/`push` row). Same own-row
+ * RLS as every other preference; idempotent on the primary key.
+ */
+export async function setPushOptIn(
+  client: DbClient,
+  input: { readonly profileId: string; readonly enabled: boolean },
+): Promise<PreferenceWriteResult> {
+  try {
+    const { error } = await client.from("notification_preferences").upsert(
+      {
+        profile_id: input.profileId,
+        notification_type: PUSH_OPT_IN_TYPE,
+        channel: "push",
+        enabled: input.enabled,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "profile_id,notification_type,channel" },
+    );
     if (error) {
       if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
         return { kind: "feature_unavailable" };

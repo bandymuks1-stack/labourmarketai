@@ -17382,7 +17382,19 @@
     "error": "Nie udało się zapisać zmiany i została ona cofnięta. Spróbuj ponownie.",
     "unavailable": "Ustawienia powiadomień są teraz niedostępne.",
     "saving": "Zapisywanie…",
-    "saved": "Zapisano."
+    "saved": "Zapisano.",
+    "push": {
+      "title": "Powiadomienia push na tym urządzeniu",
+      "intro": "Otrzymuj krótki alert na tym telefonie lub komputerze, gdy pojawi się coś nowego. Widać tylko rodzaj powiadomienia, nigdy treść wiadomości. Rodzaje wyłączone powyżej nigdy nie są wysyłane.",
+      "turnOn": "Włącz powiadomienia push",
+      "turnOff": "Wyłącz na tym urządzeniu",
+      "working": "Trwa…",
+      "on": "Powiadomienia push są włączone na tym urządzeniu.",
+      "off": "Powiadomienia push są wyłączone na tym urządzeniu.",
+      "unsupported": "Ta przeglądarka nie może odbierać powiadomień push. Na iPhonie najpierw dodaj stronę do ekranu początkowego.",
+      "blocked": "Powiadomienia dla tej strony są zablokowane w ustawieniach przeglądarki. Zezwól na nie tam i wróć.",
+      "error": "Nie udało się. Nic nie zmieniono. Spróbuj ponownie."
+    }
   },
   "historyContext": {
     "project": "Projekt",
