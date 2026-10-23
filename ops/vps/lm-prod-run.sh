@@ -25,9 +25,20 @@ for k in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_SERVICE
   grep -q "^$k=." "$D/env" || { echo "env lacks $k"; exit 1; }
 done
 
+# Keep a container's logs before it is removed: `docker rm` deletes its json log, and with it the only
+# record of what the app printed ([perf] lines, request_error, client-error). 2026-10-23: the logs of both
+# incident windows were destroyed by the next deploys' swaps. Root-only, gzip, newest 20 kept.
+keep_logs() {
+  docker inspect "$1" >/dev/null 2>&1 || return 0
+  ( umask 077; mkdir -p "$D/logs"
+    docker logs --timestamps "$1" 2>&1 | gzip -c > "$D/logs/$1-$(date -u +%Y%m%dT%H%M%SZ)-$2.log.gz" ) || true
+  ls -1t "$D/logs"/*.log.gz 2>/dev/null | tail -n +21 | while read -r f; do rm -f "$f"; done
+}
+
 CUR_PORT=$(cat "$D/active-port" 2>/dev/null || echo 3200)
 case "$CUR_PORT" in 3200) NEW_PORT=3201;; 3201) NEW_PORT=3200;; *) CUR_PORT=3200; NEW_PORT=3201;; esac
 
+keep_logs labourmarket-prod-next leftover
 docker rm -f labourmarket-prod-next >/dev/null 2>&1 || true
 docker run -d --name labourmarket-prod-next \
   --memory=768m --memory-swap=768m --cpus=0.5 --pids-limit=256 \
@@ -53,6 +64,7 @@ while [ $i -lt 36 ]; do
 done
 if [ "$ok" != 1 ]; then
   echo "new release $SHA did not become healthy on $NEW_PORT; the current one keeps serving"
+  keep_logs labourmarket-prod-next unhealthy
   docker rm -f labourmarket-prod-next >/dev/null 2>&1 || true
   exit 1
 fi
@@ -78,6 +90,7 @@ while [ $w -lt 125 ] && [ "$(ss -Htn state established "( dport = :$CUR_PORT )" 
 done
 echo "old port $CUR_PORT drained after ${w}s"
 docker stop -t 10 labourmarket-prod >/dev/null 2>&1 || true
+keep_logs labourmarket-prod "retired-port$CUR_PORT"
 docker rm -f labourmarket-prod >/dev/null 2>&1 || true
 docker rename labourmarket-prod-next labourmarket-prod
 echo "started labourmarket-prod @ $SHA on 127.0.0.1:$NEW_PORT (previous port $CUR_PORT retired)"
