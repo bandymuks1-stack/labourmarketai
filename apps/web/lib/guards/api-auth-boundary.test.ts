@@ -110,6 +110,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Agentai OS re-verifies its LabourMarket.ai capability contract from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is aggregate integer COUNTS only (lib/api/capability-readback.ts: a fixed key list, everything else refused) — no row, name, id, email or address exists in it to leak.",
   },
+  "public/claims/v1/route.ts": {
+    class: "public",
+    why: "The public claims contract (lm-public-claims/v1) Agentai OS re-verifies marketing claims against. No identity exists or is read; the body is marketing copy already on public pages, resolved from the bundled message catalogs by lib/public-claims/registry.ts — no database, no network, nothing a person owns.",
+  },
   "health/route.ts": {
     class: "public",
     why: "A liveness probe for an external uptime monitor (FINAL COMPLETION Train L1). No user identity exists or is read: it uses only the anon key every browser already holds, against two dependencies a sign-in needs, and answers booleans + latencies + the build id — nothing a person owns.",
