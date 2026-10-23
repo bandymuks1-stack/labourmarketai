@@ -12,6 +12,11 @@
  * vs missing — it returns closed-set field keys + reason codes, never free text.
  * Same input → same output. No DB, no AI, no fabrication.
  */
+import {
+  structureNeed,
+  type NeedStructureSuggestion,
+} from "@/lib/structuring/structure-need";
+import { mentionsStartTime, parseDurationDays } from "@/lib/structuring/time-window";
 import type {
   JobDemandFieldKey,
   FieldSeverity,
@@ -19,11 +24,27 @@ import type {
   MissingField,
 } from "./types";
 
+/** What the canonical readers already understood about the same text. */
+interface CanonicalReading {
+  readonly text: string;
+  readonly structured: NeedStructureSuggestion;
+}
+
 interface FieldRule {
   readonly key: JobDemandFieldKey;
   readonly severity: FieldSeverity;
   /** Present when ANY pattern matches the lowercased text. */
   readonly patterns: readonly RegExp[];
+  /**
+   * Also present when the CANONICAL reader for this fact understood it. The
+   * patterns alone are lists of base forms — "Norway", "start date" — and
+   * Lithuanian inflects: production 2026-10-23, "Reikia 2 mūrininkų Vilniuje
+   * nuo lapkričio, 3 mėnesiams" listed place, start and scope as MISSING
+   * although the engines this module sits beside (structureNeed's city and
+   * country needles, its headcount; time-window's start date and duration)
+   * read every one of them. Reuse them; never a second parser.
+   */
+  readonly understood?: (reading: CanonicalReading) => boolean;
   /** Short reason code emitted when recognized. */
   readonly reason: string;
 }
@@ -36,6 +57,8 @@ const RULES: readonly FieldRule[] = [
     key: "role",
     severity: "important",
     reason: "role_mentioned",
+    // Every occupation the taxonomy knows, in every language it knows it.
+    understood: ({ structured }) => structured.workType !== null,
     patterns: [
       /\b(carpenter|welder|electrician|plumber|mason|painter|tiler|roofer|driver|cleaner|cook|welding|operator|fitter|labou?rer|helper)\b/,
       /\b(stalius|suvirintoj|elektrik|santechnik|mūrinink|dažytoj|vairuotoj|valytoj|virėj|montuotoj|operatori|pagalbinis)/,
@@ -46,6 +69,9 @@ const RULES: readonly FieldRule[] = [
     key: "location",
     severity: "important",
     reason: "location_mentioned",
+    // Countries AND cities, as stems, so the Lithuanian locative ("Vilniuje",
+    // "Klaipėdoje", "Osle") resolves like the nominative.
+    understood: ({ structured }) => structured.country !== null,
     patterns: [
       /\b(norway|sweden|denmark|finland|germany|netherlands|poland|lithuania|latvia|estonia)\b/,
       /\b(norveg|švedij|svedij|danij|suomi|vokietij|niderland|lenkij|lietuv|latvij|eston)/,
@@ -75,13 +101,17 @@ const RULES: readonly FieldRule[] = [
     reason: "experience_mentioned",
     patterns: [
       /\b\d+\s*(\+\s*)?(years?|yrs?|metų|metai|met\b|лет|год)/,
-      /\b(experience|patirt|опыт)/,
+      /\b(experience|patirt|опыт|erfahrung|doświadcz|doswiadcz|ervaring)/,
     ],
   },
   {
     key: "scope",
     severity: "recommended",
     reason: "scope_mentioned",
+    // The extent of the work is also HOW MANY people and FOR HOW LONG:
+    // "2 mūrininkų", "reikia 3 darbuotojų", "3 mėnesiams", "2 savaitėms".
+    understood: ({ text, structured }) =>
+      structured.teamSize !== null || parseDurationDays(text) !== null,
     patterns: [
       /\b(installation|dismantling|renovation|finishing|assembly|maintenance|fitting)\b/,
       /\b(montav|ardym|renovacij|apdail|surinkim|priežiūr)/,
@@ -226,6 +256,9 @@ const RULES: readonly FieldRule[] = [
     key: "startDate",
     severity: "recommended",
     reason: "startdate_mentioned",
+    // "nuo lapkričio", "nuo lapkričio 1 d.", "lapkričio mėn.", "nuo 11-01",
+    // "from November", "с ноября", "ab November", "od listopada" …
+    understood: ({ text }) => mentionsStartTime(text),
     patterns: [
       /\b\d{4}-\d{2}-\d{2}\b/,
       /\b\d{1,2}\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i,
@@ -251,12 +284,15 @@ export interface JobDemandFieldScan {
  * Returns ONLY closed-set field keys + reason codes (no free text echoed back).
  */
 export function detectJobDemandFields(rawText: string): JobDemandFieldScan {
-  const hay = (rawText ?? "").toLowerCase();
+  const text = rawText ?? "";
+  const hay = text.toLowerCase();
+  const reading: CanonicalReading = { text, structured: structureNeed({ description: text }) };
   const recognized: RecognizedField[] = [];
   const missing: MissingField[] = [];
 
   for (const rule of RULES) {
-    const present = rule.patterns.some((re) => re.test(hay));
+    const present =
+      rule.patterns.some((re) => re.test(hay)) || (rule.understood?.(reading) ?? false);
     if (present) recognized.push({ key: rule.key, reason: rule.reason });
     else missing.push({ key: rule.key, severity: rule.severity });
   }
