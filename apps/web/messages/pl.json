@@ -1058,6 +1058,17 @@
     "carryNote": {
       "no_company": "Twój tekst nie został zapisany: bez przestrzeni roboczej firmy szkic nie ma do czego należeć. Formularz zapotrzebowania otwiera się pusty — możesz tam utworzyć firmę.",
       "failed": "Nie udało się zapisać Twojego tekstu, więc formularz zapotrzebowania otwiera się pusty. Będzie trzeba wpisać opis ponownie."
+    },
+    "headcount": {
+      "total": "Pracowników: {count}",
+      "teams": "Pracowników: {total} ({teams, plural, one {# brygada} few {# brygady} many {# brygad} other {# brygady}} po {perTeam})"
+    },
+    "clarify": {
+      "title": "Doprecyzuj",
+      "team_count_range": "Podałeś liczbę brygad jako przedział. Ile brygad dokładnie i ile osób w każdej?",
+      "per_team_range": "Ile osób dokładnie będzie w każdej brygadzie?",
+      "team_size_missing": "Ile osób będzie w każdej brygadzie? Do tego czasu liczba pracowników nie jest liczona.",
+      "team_count_missing": "Ile brygad potrzebujesz?"
     }
   },
   "quickNav": {
@@ -14076,7 +14087,8 @@
           "location": "Gdzie (miasto lub kraj)?",
           "window": "Kiedy — który tydzień lub miesiąc?",
           "quantity": "Ile to wynosi?",
-          "headcount": "Ile osób jest potrzebnych?"
+          "headcount": "Ile osób jest potrzebnych?",
+          "team_size": "Ile brygad i ile osób w każdej?"
         },
         "unclear": "Nie jestem pewien, czy coś oferujesz, czy czegoś szukasz. Powiedz, co masz, albo czego potrzebujesz.",
         "goodsChannelGated": "Możesz wystawić to na tablicy ogłoszeń w dziale „Towary” — zobaczą to osoby przeglądające tablicę. Nic nie jest zapisywane, dopóki sam/a nie opublikujesz.",
@@ -14091,7 +14103,8 @@
         "serviceNext": "Możesz dodać to jako ofertę usługi, aby inni mogli ją znaleźć.",
         "chipServices": "Otwórz tablicę usług",
         "corrected": "Zaktualizowano: {changes}.",
-        "changeInsteadOf": "{next} (zamiast {previous})"
+        "changeInsteadOf": "{next} (zamiast {previous})",
+        "teams": "{teams, plural, one {# brygada} few {# brygady} many {# brygad} other {# brygady}} po {perTeam}"
       },
       "createOrganizationHint": "Mogę razem z Tobą utworzyć organizację — dane i weryfikacja są na jednej stronie.",
       "chipCreateOrganization": "Utwórz organizację",

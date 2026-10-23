@@ -21,11 +21,13 @@
 import { detectNeedProfession } from "@/lib/market/need-skills";
 import { PROFESSION_HINTS_LT } from "./keywords";
 import { foldText } from "./normalize";
+import { readsSingularOccupation } from "./need-headcount";
 import { readRoleLabel } from "./role-label";
 import {
   WORK_TYPE_RULES,
-  detectTeamComposition,
   isCountUnitWord,
+  readTeamComposition,
+  type TeamClarification,
   maskServiceNoun,
   resolveCountryAndCity,
 } from "./structure-need";
@@ -57,7 +59,13 @@ export interface ValueStatement {
   readonly quantity: ValueQuantity | null;
   /** goods only — null for every other subject. */
   readonly offerMode: ValueOfferMode | null;
+  /** How many people — for teams of a stated size, the TOTAL (3 × 4 = 12). */
   readonly headcount: number | null;
+  /** Teams of a stated size (present only when the sentence states teams). */
+  readonly teamCount?: number | null;
+  readonly perTeamSize?: number | null;
+  /** Teams named without a size or as a range — asked, never guessed. */
+  readonly teamClarification?: TeamClarification;
   /** work-categories slug via the shared WORK_TYPE_RULES. */
   readonly workType: string | null;
   /** Canonical PROFESSION (the 49-row lexicon matching and the profile
@@ -364,16 +372,23 @@ export function structureValueStatement(
   // virėjo", "reikia buhalterio") is a need for ONE person — the number the
   // grammar states, offered in the editable headcount field. A plural with
   // no number ("reikia suvirintojų") stays open: the count is not stated.
+  // The same singular rule in the other five locales ("We need a welder",
+  // "Нужен сварщик", "Wir suchen einen Schweißer", "Szukamy spawacza",
+  // "Lasser gezocht") comes from the shared need-headcount reader.
   // Teams of a stated size ("3 brigadų po 4 žmones", "3 crews of 4 people")
-  // are 3 × 4 people. The statement holds no team fields, so the headcount
-  // stays UNRESOLVED (asked for in `missing`) and the composition is flagged
-  // in the reasons — never 3 or 4 as if it were the plain count.
-  const composition = detectTeamComposition(raw);
-  if (composition) reasons.push(`team_composition:${composition.teams}x${composition.perTeam}`);
-  const headcount = composition
-    ? null
+  // are 3 teams AND 12 workers: the headcount is the total, the composition
+  // rides beside it. Teams with no size or a range ("3–4 brigados") leave
+  // the headcount null and ask (`missing` → "team_size") — never 3 or 4.
+  const teams = readTeamComposition(raw);
+  if (teams?.status === "known") reasons.push(`team_composition:${teams.teams}x${teams.perTeam}`);
+  if (teams?.status === "unclear") reasons.push(`team_clarification:${teams.clarification}`);
+  const headcount = teams
+    ? teams.status === "known"
+      ? teams.total
+      : null
     : detectHeadcount(raw, folded) ??
-      (role?.grammaticalNumber === "singular" && SEEK_RES.some((re) => re.test(folded)) ? 1 : null);
+      (role?.grammaticalNumber === "singular" && SEEK_RES.some((re) => re.test(folded)) ? 1 : null) ??
+      (readsSingularOccupation(raw) ? 1 : null);
   if (headcount !== null) reasons.push(`headcount:${headcount}`);
 
   // ── Subject — decided by axis + the facts, never by guessing the user ──
@@ -440,7 +455,7 @@ export function structureValueStatement(
   } else if (axis === "seek") {
     // A named occupation — closed-set or the person's own word — is a
     // workforce need even before the count is known.
-    if (workType || professionSlug || roleLabel || headcount !== null || composition) subject = "workforce";
+    if (workType || professionSlug || roleLabel || headcount !== null || teams) subject = "workforce";
   }
   if (subject) reasons.push(`subject:${subject}`);
   if (quantity) reasons.push(`quantity:${quantity.raw}`);
@@ -473,7 +488,11 @@ export function structureValueStatement(
     ) {
       missing.push("quantity");
     }
-    if (subject === "workforce" && headcount === null) missing.push("headcount");
+    // Teams named without a size (or as a range) ask about the TEAMS —
+    // "how many teams, how many people in each?" — not a bare headcount.
+    if (subject === "workforce" && headcount === null) {
+      missing.push(teams?.status === "unclear" ? "team_size" : "headcount");
+    }
   }
 
   const identifying =
@@ -497,6 +516,12 @@ export function structureValueStatement(
     quantity: quantity ?? quantities[0] ?? null,
     offerMode,
     headcount,
+    // Present only when teams were stated — every existing reader and exact-
+    // shape assertion keeps seeing the same object otherwise.
+    ...(teams?.status === "known" ? { teamCount: teams.teams, perTeamSize: teams.perTeam } : {}),
+    ...(teams?.status === "unclear"
+      ? { teamCount: teams.teams, perTeamSize: null, teamClarification: teams.clarification }
+      : {}),
     workType,
     professionSlug,
     roleLabel,

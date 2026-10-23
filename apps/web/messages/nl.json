@@ -1058,6 +1058,17 @@
     "carryNote": {
       "no_company": "Je tekst is niet opgeslagen: zonder bedrijfswerkruimte hoort een concept nergens bij. Het behoefteformulier opent leeg — je kunt het bedrijf daar aanmaken.",
       "failed": "Je tekst kon niet worden opgeslagen, dus het behoefteformulier opent leeg. Je moet de omschrijving opnieuw invoeren."
+    },
+    "headcount": {
+      "total": "Werknemers: {count}",
+      "teams": "Werknemers: {total} ({teams, plural, one {# ploeg} other {# ploegen}} van {perTeam})"
+    },
+    "clarify": {
+      "title": "Graag verduidelijken",
+      "team_count_range": "Je gaf het aantal ploegen als bereik. Hoeveel ploegen precies, en hoeveel mensen per ploeg?",
+      "per_team_range": "Hoeveel mensen precies zitten er in elke ploeg?",
+      "team_size_missing": "Hoeveel mensen zitten er in elke ploeg? Tot dan wordt het aantal werknemers niet berekend.",
+      "team_count_missing": "Hoeveel ploegen heb je nodig?"
     }
   },
   "quickNav": {
@@ -14076,7 +14087,8 @@
           "location": "Waar (stad of land)?",
           "window": "Wanneer — welke week of maand?",
           "quantity": "Hoeveel is het?",
-          "headcount": "Hoeveel mensen zijn er nodig?"
+          "headcount": "Hoeveel mensen zijn er nodig?",
+          "team_size": "Hoeveel ploegen en hoeveel mensen per ploeg?"
         },
         "unclear": "Ik weet niet zeker of je iets aanbiedt of iets zoekt. Schrijf wat je hebt of wat je nodig hebt.",
         "goodsChannelGated": "Je kunt dit op het advertentiebord plaatsen onder Goederen — mensen die het bord bekijken zien het daar. Er wordt niets opgeslagen tot je het publiceert.",
@@ -14091,7 +14103,8 @@
         "serviceNext": "Je kunt dit als dienstenaanbod plaatsen zodat anderen het vinden.",
         "chipServices": "Diensten openen",
         "corrected": "Bijgewerkt: {changes}.",
-        "changeInsteadOf": "{next} (in plaats van {previous})"
+        "changeInsteadOf": "{next} (in plaats van {previous})",
+        "teams": "{teams, plural, one {# ploeg} other {# ploegen}} van {perTeam}"
       },
       "createOrganizationHint": "Ik kan samen met jou een organisatie aanmaken — de gegevens en de verificatie staan op één pagina.",
       "chipCreateOrganization": "Organisatie aanmaken",

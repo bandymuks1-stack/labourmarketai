@@ -195,6 +195,13 @@ export const COMPANY_EXECUTORS: {
         return { ok: false, code: "save_failed" };
       }
     }
+    // Teams of a stated size ride along; the canonical submit keeps them only
+    // while they still explain the number of workers the person confirmed
+    // (3 × 4 = 12) — an edited count drops them, server-side.
+    const team =
+      input.teamCount != null && input.perTeamSize != null
+        ? { count: input.teamCount, per_team: input.perTeamSize }
+        : null;
     const r = await submitDemandRequestAction(input.intent, {
       description: input.description,
       role: input.role ?? undefined,
@@ -211,9 +218,10 @@ export const COMPANY_EXECUTORS: {
       // and the Learning Compass read (`payload.structured_v2`). Absent when
       // the employer stated none — nothing is inferred.
       structuredV2:
-        input.opportunityType || input.startDate || input.endDate
+        input.opportunityType || input.startDate || input.endDate || team
           ? {
               ...(input.opportunityType ? { opportunity_type: input.opportunityType } : {}),
+              ...(team ? { team } : {}),
               ...(input.startDate || input.endDate
                 ? {
                     time: {

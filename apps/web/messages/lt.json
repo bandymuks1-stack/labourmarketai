@@ -1058,6 +1058,17 @@
     "carryNote": {
       "no_company": "Tavo tekstas neišsaugotas: kol neturi įmonės darbo srities, juodraštis neturi kam priklausyti. Poreikio formą atidarome tuščią — įmonę gali sukurti ten pat.",
       "failed": "Tavo teksto išsaugoti nepavyko, todėl poreikio formą atidarome tuščią. Aprašymą teks suvesti iš naujo."
+    },
+    "headcount": {
+      "total": "Darbuotojų: {count}",
+      "teams": "Darbuotojų: {total} ({teams, plural, one {# brigada} few {# brigados} other {# brigadų}} po {perTeam})"
+    },
+    "clarify": {
+      "title": "Patikslink",
+      "team_count_range": "Nurodei brigadų skaičių intervalu. Kiek brigadų tiksliai reikia ir kiek žmonių bus kiekvienoje?",
+      "per_team_range": "Kiek žmonių tiksliai bus kiekvienoje brigadoje?",
+      "team_size_missing": "Kiek žmonių bus kiekvienoje brigadoje? Kol to nežinome, darbuotojų skaičiaus neskaičiuojame.",
+      "team_count_missing": "Kiek brigadų reikia?"
     }
   },
   "quickNav": {
@@ -14076,7 +14087,8 @@
           "location": "Kur (miestas ar šalis)?",
           "window": "Kada — kurią savaitę ar mėnesį?",
           "quantity": "Koks kiekis?",
-          "headcount": "Kiek žmonių reikia?"
+          "headcount": "Kiek žmonių reikia?",
+          "team_size": "Kiek brigadų ir kiek žmonių kiekvienoje?"
         },
         "unclear": "Nesu tikras, ar kažką siūlai, ar ko nors ieškai. Parašyk, ką turi arba ko reikia.",
         "goodsChannelGated": "Tai gali paskelbti skelbimų lentoje, skiltyje „Prekės“ — ten matytų lentą naršantys žmonės. Niekas neišsaugoma, kol pats nepaskelbi.",
@@ -14091,7 +14103,8 @@
         "serviceNext": "Gali paskelbti tai kaip paslaugos pasiūlymą, kad kiti jį rastų.",
         "chipServices": "Atidaryti paslaugas",
         "corrected": "Atnaujinau: {changes}.",
-        "changeInsteadOf": "{next} (vietoj {previous})"
+        "changeInsteadOf": "{next} (vietoj {previous})",
+        "teams": "{teams, plural, one {# brigada} few {# brigados} other {# brigadų}} po {perTeam}"
       },
       "createOrganizationHint": "Galiu kartu su tavimi sukurti organizaciją — duomenys ir patvirtinimas yra viename puslapyje.",
       "chipCreateOrganization": "Sukurti organizaciją",

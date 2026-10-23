@@ -329,7 +329,9 @@ function validIsoDate(y: string, m: string, d: string): string | null {
 /** Duration units, folded stems: weeks / months across the locales. */
 // `\w` is ASCII-only in JS — Cyrillic and Lithuanian endings need `\p{L}`.
 const WEEK_WORD = /^(savait[\p{L}]*|weeks?|недел[\p{L}]*|weken|week|wochen?|tygodn[\p{L}]*)$/u;
-const MONTH_WORD = /^(men[\p{L}]*|months?|месяц[\p{L}]*|maand[\p{L}]*|monat[\p{L}]*|miesi[\p{L}]*)$/u;
+// LT month forms only — "mėn.", "mėnuo", "mėnesį", "mėnesiams" (folded) —
+// never a bare "men…" stem: Dutch "4 mensen" (people) read as four months.
+const MONTH_WORD = /^(men|menuo|menes[\p{L}]*|months?|месяц[\p{L}]*|maand[\p{L}]*|monat[\p{L}]*|miesi[\p{L}]*)$/u;
 /** Years: ONLY the Lithuanian dative "metams" ("for a year", "2 metams").
  *  Every other year word ("3 metų", "3 years", "3 года") is far more often
  *  EXPERIENCE than a duration, and must not turn into an end date. */

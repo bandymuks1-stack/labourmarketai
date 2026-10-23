@@ -1058,6 +1058,17 @@
     "carryNote": {
       "no_company": "Ihr Text wurde nicht gespeichert: ohne Unternehmens-Arbeitsbereich hat ein Entwurf keine Zugehörigkeit. Das Bedarfsformular öffnet leer — das Unternehmen können Sie dort anlegen.",
       "failed": "Ihr Text konnte nicht gespeichert werden, daher öffnet das Bedarfsformular leer. Die Beschreibung müssen Sie erneut eingeben."
+    },
+    "headcount": {
+      "total": "Arbeitskräfte: {count}",
+      "teams": "Arbeitskräfte: {total} ({teams, plural, one {# Team} other {# Teams}} à {perTeam})"
+    },
+    "clarify": {
+      "title": "Bitte präzisieren",
+      "team_count_range": "Sie haben die Zahl der Teams als Spanne angegeben. Wie viele Teams genau, und wie viele Personen pro Team?",
+      "per_team_range": "Wie viele Personen genau gehören zu jedem Team?",
+      "team_size_missing": "Wie viele Personen gehören zu jedem Team? Bis dahin wird die Zahl der Arbeitskräfte nicht berechnet.",
+      "team_count_missing": "Wie viele Teams brauchen Sie?"
     }
   },
   "quickNav": {
@@ -14076,7 +14087,8 @@
           "location": "Wo (Stadt oder Land)?",
           "window": "Wann — welche Woche oder welcher Monat?",
           "quantity": "Welche Menge?",
-          "headcount": "Wie viele Personen werden benötigt?"
+          "headcount": "Wie viele Personen werden benötigt?",
+          "team_size": "Wie viele Teams und wie viele Personen pro Team?"
         },
         "unclear": "Ich bin nicht sicher, ob Sie etwas anbieten oder etwas suchen. Schreiben Sie, was Sie haben oder was Sie brauchen.",
         "goodsChannelGated": "Sie können dies am Anzeigenbrett unter „Waren“ einstellen — dort sehen es die Personen, die das Brett durchsehen. Nichts wird gespeichert, bis Sie es veröffentlichen.",
@@ -14091,7 +14103,8 @@
         "serviceNext": "Sie können dies als Dienstleistungsangebot veröffentlichen, damit andere es finden.",
         "chipServices": "Dienstleistungen öffnen",
         "corrected": "Aktualisiert: {changes}.",
-        "changeInsteadOf": "{next} (statt {previous})"
+        "changeInsteadOf": "{next} (statt {previous})",
+        "teams": "{teams, plural, one {# Team} other {# Teams}} à {perTeam}"
       },
       "createOrganizationHint": "Ich kann mit Ihnen eine Organisation anlegen — die Angaben und die Verifizierung stehen auf einer Seite.",
       "chipCreateOrganization": "Organisation anlegen",
