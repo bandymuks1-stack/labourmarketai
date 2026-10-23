@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { landingTreeSource } from "./landing-composition";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * PUBLIC MARKET ENTRY / SALES FUNNEL — LAUNCH GUARDS (PR13).
@@ -170,7 +171,7 @@ describe("plan boundary carries no dead pseudo-buttons", () => {
   });
 
   it("inert plan labels are statements, not imperative dead CTAs", () => {
-    for (const loc of ["en", "lt", "ru"]) {
+    for (const loc of activeLocales) {
       const cta = get(catalog(loc), ["planBoundary", "cta"]) as Record<
         string,
         string

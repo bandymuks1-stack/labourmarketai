@@ -33,7 +33,11 @@ export async function PricingTable() {
     <section className="mx-auto grid max-w-container gap-6 px-6 pb-16 sm:px-12 lg:grid-cols-3">
       {PLAN_SLUGS.map((slug) => {
         const row = rows?.find((r) => r.slug === slug);
-        const dbName = locale === "lt" ? row?.name_lt : row?.name_en;
+        // The plans table carries a name in LT and EN only. Every other locale
+        // reads its own catalog name — a German reader was shown the English
+        // DB name although `pricing.plans.<slug>.name` exists in German.
+        const dbName =
+          locale === "lt" ? row?.name_lt : locale === "en" ? row?.name_en : undefined;
         const name = dbName ?? t(`plans.${slug}.name`);
         const features = t.raw(`plans.${slug}.features`) as string[];
         const price = confirmed && typeof row?.price_eur_monthly === "number" ? row.price_eur_monthly : null;

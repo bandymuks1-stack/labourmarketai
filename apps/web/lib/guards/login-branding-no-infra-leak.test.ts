@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Login-branding guard (Core Product Sprint Train v2, Wagon 3 — login branding).
@@ -28,7 +29,7 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
 /** Product locales whose auth copy a real user can see while signing in. */
-const LOCALES = ["lt", "en", "ru"];
+const LOCALES = activeLocales;
 
 /** Backend / hosting / infra vendor + service names that must never appear in
  *  user-facing sign-in copy. Word-boundary matched, case-insensitive. "Google"

@@ -17382,7 +17382,19 @@
     "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
     "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar.",
     "saving": "Opslaan…",
-    "saved": "Opgeslagen."
+    "saved": "Opgeslagen.",
+    "push": {
+      "title": "Pushmeldingen op dit apparaat",
+      "intro": "Krijg een korte melding op deze telefoon of computer als er iets nieuws binnenkomt. Alleen het soort melding wordt getoond, nooit de tekst van een bericht. Soorten die u hierboven uitzette, worden nooit gepusht.",
+      "turnOn": "Pushmeldingen aanzetten",
+      "turnOff": "Uitzetten op dit apparaat",
+      "working": "Bezig…",
+      "on": "Pushmeldingen staan aan op dit apparaat.",
+      "off": "Pushmeldingen staan uit op dit apparaat.",
+      "unsupported": "Deze browser kan geen pushmeldingen ontvangen. Voeg op een iPhone de site eerst toe aan het beginscherm.",
+      "blocked": "Meldingen voor deze site zijn geblokkeerd in uw browserinstellingen. Sta ze daar toe en kom terug.",
+      "error": "Dat lukte niet. Er is niets gewijzigd. Probeer het opnieuw."
+    }
   },
   "historyContext": {
     "project": "Werkproject",

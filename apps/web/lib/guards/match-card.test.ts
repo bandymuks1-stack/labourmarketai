@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Match Card guard (full-completion train PR 3).
@@ -46,7 +47,7 @@ describe("Match Card breakdown is reusable + mounted on opportunities", () => {
 });
 
 describe("match dimension/state copy exists in every active locale", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: opportunities.matchDim + matchState present`, () => {
       const o = JSON.parse(read(`messages/${loc}.json`)).opportunities;
       expect(o.matchTitle).toBeTruthy();

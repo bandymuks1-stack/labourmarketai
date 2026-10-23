@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Operator launch-readiness guard (launch repair Scope E).
@@ -97,7 +98,7 @@ describe("supporting truth artifacts exist", () => {
   });
 
   it("readiness copy exists in every active locale", () => {
-    for (const locale of ["en", "lt", "ru", "nl", "de"]) {
+    for (const locale of activeLocales) {
       const catalog = JSON.parse(read(`messages/${locale}.json`)) as {
         adminLaunchReadiness?: { supply?: { total?: string } };
       };

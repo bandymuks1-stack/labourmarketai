@@ -13,6 +13,7 @@ import {
 } from "./participation";
 import { buildWeeklyPublicDigest } from "./weekly-digest";
 import type { MatchNeed } from "@/lib/market/match-v1";
+import { activeLocales } from "@/lib/i18n/config";
 
 // The exact pasted job post from the owner goal acceptance example.
 const SHIP_CARPENTER =
@@ -285,7 +286,7 @@ describe("copy: the recognition namespace leaks no forbidden public terms", () =
   // The owner goal additionally bans these user-facing words for this surface.
   const BANNED =
     /\b(demo|trial|beta|coming soon|owner review|manual approval|garantuoj|guarantee)\b/i;
-  for (const loc of ["lt", "en", "ru"]) {
+  for (const loc of activeLocales) {
     it(`${loc}: marketRecognition copy is clean`, () => {
       const json = JSON.parse(
         readFileSync(join(messagesDir, `${loc}.json`), "utf8"),
