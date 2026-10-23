@@ -110,6 +110,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Agentai OS re-verifies its LabourMarket.ai capability contract from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is aggregate integer COUNTS only (lib/api/capability-readback.ts: a fixed key list, everything else refused) — no row, name, id, email or address exists in it to leak.",
   },
+  "internal/agentai-ops-evidence/v1/route.ts": {
+    class: "public",
+    why: "Agentai OS pushes its read-only production snapshot (job outcomes, aggregate commercial counts, listener heartbeat) here so the owner can verify production without SSH; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while unset, 401 on a wrong token, checked before the body is read. The body is a strict fixed contract (lib/api/agentai-ops-evidence.ts: exact keys, regex-bound ids and outcomes, integer counts, any '@' refused) holding no name, email, address or correspondence; the row lands in public.agentai_ops_evidence through agentai_ops_evidence_insert_v1, the table's only writer (RLS on, zero policies, EXECUTE for service_role only).",
+  },
   "public/claims/v1/route.ts": {
     class: "public",
     why: "The public claims contract (lm-public-claims/v1) Agentai OS re-verifies marketing claims against. No identity exists or is read; the body is marketing copy already on public pages, resolved from the bundled message catalogs by lib/public-claims/registry.ts, plus the public plan price /pricing itself reads (getPlans → the anon-safe public_plans_v1 RPC) — nothing a person owns.",

@@ -427,6 +427,15 @@ audit.
   only — the service role is not granted SELECT on most counted tables). The body is a fixed list of non-negative integers
   (`lib/api/capability-readback.ts`); no row, name, id or address. Touches no
   chat table and sends nothing.
+- `app/api/internal/agentai-ops-evidence/v1/route.ts` (2026-10-23) — the
+  Agentai OS production evidence intake. Behind the same
+  `SUPPLY_FEED_BEARER_TOKEN` machine secret (503 while unset, 401 on a wrong
+  token, checked before the body is read). Service role is needed for exactly
+  one call, `agentai_ops_evidence_insert_v1(jsonb)` (SECURITY DEFINER, EXECUTE
+  for service_role only), the sole writer of `agentai_ops_evidence` (RLS on,
+  zero policies). It reads nothing. The body is a strict fixed contract
+  (`lib/api/agentai-ops-evidence.ts`, any '@' refused); no name, email,
+  address or correspondence. Touches no chat table and sends nothing.
 
 - **2026-10-06 — `lib/invitations/signup-bridge.ts`** (frictionless addressed
   invite, PR #2167). Calls ONE service_role-only SECURITY DEFINER read,
