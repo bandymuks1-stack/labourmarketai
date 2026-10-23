@@ -1705,6 +1705,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261021130000_booking_expiry_system_schedule_v1.sql",
       // 2026-10-22 (RED, needs-human-gate): aggregate counts for the Agentai OS capability readback (SECURITY DEFINER + GRANT).
       "20261022150000_agentai_capability_readback_counts_v1.sql",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): goods purchase lifecycle (SECURITY DEFINER + GRANT).
+      "20261023160000_listing_purchases_v1.sql",
 ]);
   });
 

@@ -136,6 +136,9 @@ export interface MarketplaceDiscoveryRow {
   readonly contactAction: "enquire" | "request_service" | "open_source";
   /** True when the caller owns this row (so the UI hides "enquire"). */
   readonly isMine: boolean;
+  /** A goods SALE someone else may request to buy (registry 6.13; mirrors the
+   *  request RPC via `isPurchasableListing`). Absent/false for every other row. */
+  readonly purchasable?: boolean;
   readonly visibility: MarketVisibility;
   readonly provenance: MarketProvenance;
   /** Only a name the gated source reader already disclosed (verified company). */
