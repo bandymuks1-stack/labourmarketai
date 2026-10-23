@@ -24,7 +24,12 @@ import {
 
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
-import { gateWorkerProfileView } from "@/lib/billing/profile-view-gate";
+import {
+  billingStatePurchasable,
+  gateWorkerProfileView,
+  personPageViewGate,
+} from "@/lib/billing/profile-view-gate";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import { Link } from "@/lib/i18n/navigation";
 import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
@@ -179,11 +184,23 @@ export default async function PersonPage({
   // PLAN LIMIT (owner directive 2026-10-18): opening a FOUND worker's anonymized profile counts once
   // per organization; the free plan opens 3 unique profiles. The database decides; a related viewer
   // is never gated; a found worker's view must be counted for an organization the viewer manages.
+  // The start date is a DETAIL-tier field of the discovery projection: it is released only once
+  // this organization's view is counted, so a first open re-reads it after the gate below.
+  let availableFrom = (worker.available_from as string | null) ?? null;
   if (!nameVisible) {
     const activeOrganizationId = await getActiveOrganizationContext()
       .then((c) => c.activeOrganizationId)
       .catch(() => null);
-    const viewGate = await gateWorkerProfileView(supabase, activeOrganizationId, worker.id as string);
+    // Never blocked without a way to pay: the limit state shows only where this organization can
+    // buy the plan (owner deferral 2026-10-19).
+    const viewGate = personPageViewGate(
+      await gateWorkerProfileView(supabase, activeOrganizationId, worker.id as string),
+      billingStatePurchasable(getBillingConfigFor(activeOrganizationId).state),
+    );
+    if (viewGate.kind === "open" && viewGate.counted && discovered) {
+      const fresh = (await readDiscoverableWorkers(supabase, [workerId])).get(workerId);
+      if (fresh) availableFrom = fresh.available_from;
+    }
     if (viewGate.kind === "limit") {
       return <ViewLimitState t={t} used={viewGate.used} limit={viewGate.limit} />;
     }
@@ -419,7 +436,7 @@ export default async function PersonPage({
               ) : null}
         </IdentityStage>
         <div className="flex flex-wrap gap-2">
-          {worker.available_from ? (
+          {availableFrom ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <CalendarDays className="h-3 w-3" aria-hidden />
               {/* A stored `date` column arrives as "2026-07-31" and was
@@ -429,7 +446,7 @@ export default async function PersonPage({
                   "Invalid Date". */}
               {t("availableFrom", {
                 date: availabilityDateLabel(
-                  worker.available_from as string,
+                  availableFrom,
                   format,
                 ),
               })}

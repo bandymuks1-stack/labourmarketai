@@ -9376,6 +9376,25 @@
       "done": "Saved",
       "error": "Failed"
     },
+    "vip": {
+      "title": "Organization VIP (free access)",
+      "help": "Owner-approved free access for ONE organization: the Organization plan without payment, in live and test mode alike. Audited (who, when, note); revoke at any time. Never bypasses a worker's consent.",
+      "organizationId": "Organization id",
+      "profileViews": "Profile views",
+      "profileViewsHint": "Empty = no fixed limit",
+      "note": "Note (why)",
+      "grant": "Grant VIP",
+      "revoke": "Revoke VIP",
+      "saving": "Saving…",
+      "done": "Saved",
+      "errors": {
+        "not_admin": "Only a platform admin can do this.",
+        "invalid_input": "Check the organization id and the number of views (1–100000).",
+        "unknown_organization": "No organization with this id.",
+        "needs_migration": "Not available yet: the VIP migration is not applied.",
+        "error": "Failed. Nothing was changed."
+      }
+    },
     "events": {
       "title": "Recent webhook events",
       "empty": "No webhook events yet."

@@ -1,4 +1,4 @@
--- ROLLBACK of 20261018150000_employer_profile_views_v1
+-- ROLLBACK of 20261023170000_employer_profile_views_v1
 -- Drops only what the migration created. employer_profile_views / organization_access_grants rows are
 -- lost on rollback; export them first if the owner wants to keep the counts or VIP history.
 -- The discovery projection goes back to the single-tier version of 20261018160000 (which stays).
@@ -27,7 +27,7 @@ returns table (
   is_synthetic_fixture boolean,
   -- card tier: whether a start date is SET (the communication rule needs only that, never the date)
   has_available_from boolean,
-  -- false when detail fields were withheld (20261018150000 plan limit), so null never reads as "not entered"
+  -- false when detail fields were withheld (20261023170000 plan limit), so null never reads as "not entered"
   detail_unlocked boolean
 )
 language plpgsql

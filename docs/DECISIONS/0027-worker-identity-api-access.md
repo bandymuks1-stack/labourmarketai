@@ -56,12 +56,12 @@ The relationship predicate also admits a delegated manager of the organization b
 agency roster, and an accepted booking of the organization — contexts the old predicate only reached
 through the discoverability branch for discoverable workers.
 
-## Plan limit (with 20261018150000)
-The discovery projection is two-tier once 20261018150000 is applied: the card tier (experience,
+## Plan limit (with 20261023170000)
+The discovery projection is two-tier once 20261023170000 is applied: the card tier (experience,
 countries, availability, activity week) for search; the detail tier (pay, start date, engagement form,
 work conditions) only after a counted view, or for an organization without a fixed limit. Profession,
 skills and languages stay search data (`can_view_worker`). Apply order: 20261018160000, then
-20261018150000 (it refuses to run first); roll back in reverse.
+20261023170000 (it refuses to run first); roll back in reverse.
 
 ## Read sites (162 in apps/web, classified 2026-10-18)
 OWNER 79 · ORG-LEGIT 47 · DISCOVERY 12 · WORK-JOURNAL 10 · ADMIN 10 · INTERNAL 4 · PUBLIC 0.

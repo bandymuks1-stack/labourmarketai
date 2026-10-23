@@ -1,8 +1,13 @@
--- 20261018150000_employer_profile_views_v1
--- @human-gate-approved
+-- 20261023170000_employer_profile_views_v1
 --
--- RED (needs-human-gate): new tables, SECURITY DEFINER functions, GRANT. Apply ONLY via Supabase MCP
--- `apply_migration` after the owner's explicit approval (pricing numbers included). Never `db push`.
+-- RED (needs-human-gate): new tables, RLS policies, SECURITY DEFINER functions, GRANT/REVOKE.
+-- NO OWNER APPROVAL EXISTS YET. Apply ONLY via Supabase MCP `apply_migration` after the owner's
+-- explicit approval (the free-view figure and the VIP rules included). Never `db push`.
+-- The human-gate approval marker is added only together with that recorded approval.
+--
+-- Version history: first drafted as 20261018150000 (never applied); renumbered 2026-10-23 so it
+-- sorts after everything applied since (#2477 identity split, #2442 erasure executor v3, #2666
+-- pilot pass) and never reuses a version.
 --
 -- OWNER DIRECTIVE 2026-10-18 (employer accounts and pricing):
 --   - Free employer plan: up to 3 UNIQUE anonymized worker profile views per ORGANIZATION; re-opening
@@ -10,15 +15,24 @@
 --   - Paid plans: larger limits per the approved pricing. Current owner pricing (2026-09-05 / 10-06)
 --     has ONE paid organization plan, `company_pilot`, with no fixed cap on positions and no
 --     profile-view figure yet, so a paid organization is treated as NO FIXED LIMIT until the owner
---     sets a number (change `v_paid_limit` below).
+--     sets a number (change `v_paid_limit` below). The 1 EUR pilot pass (#2666, `pilotpass_` rows)
+--     is that plan for its period; past `current_period_end` it no longer counts (same rule as
+--     lib/billing/pilot-pass-core.ts effectivePilotPassStatus).
 --   - VIP: only the owner may grant a free VIP status to a specific organization; never automatic;
---     scope managed and audited.
+--     scope managed and audited. A VIP grant is ORGANIZATION-scoped and does not depend on the
+--     Stripe mode (it is not a payment), so a live organization workspace sees it. The web
+--     entitlement read (lib/billing/effective-entitlements.ts) treats an active grant as the
+--     organization plan for free (owner decision 2026-10-23: "complete the #2474 VIP grant").
 --   - No plan, paid or VIP, ever bypasses the worker's consent: this gate only COUNTS views of the
 --     anonymized professional profile; identity still needs the worker's own disclosure.
 --
+-- OWNER DEFERRAL 2026-10-19: "until the payment chain works" — a free organization must not be
+-- blocked without a way to move to a paid plan. The person page shows the limit state only where
+-- the organization can buy the plan (billing active for it); see lib/billing/profile-view-gate.ts.
+--
 -- Reuses, does not duplicate: plans/entitlements stay in `billing_subscriptions` + lib/billing;
 -- the VIP table mirrors the existing `platform_capability_grants` audit shape.
--- Rollback: supabase/rollbacks/20261018150000_employer_profile_views_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261023170000_employer_profile_views_v1.down.sql
 
 begin;
 
@@ -224,9 +238,13 @@ begin
     select 1 from public.billing_subscriptions s
      where s.organization_id = p_organization_id
        and s.plan_key = 'company_pilot'
-       and s.status in ('active', 'trialing')
+       -- past_due is the same grace the web entitlement read gives (entitlements-v1)
+       and s.status in ('active', 'trialing', 'past_due')
        and s.test_mode = false
        and coalesce(s.provider_subscription_id, '') not like 'manual\_%'
+       -- a pilot pass ends at its period end: nothing renews it and no provider event ends it
+       and not (coalesce(s.provider_subscription_id, '') like 'pilotpass\_%'
+                and (s.current_period_end is null or s.current_period_end <= now()))
   ) then
     return query select 'paid'::text, v_paid_limit;
   else
@@ -322,7 +340,7 @@ returns table (
   is_synthetic_fixture boolean,
   -- card tier: whether a start date is SET (the communication rule needs only that, never the date)
   has_available_from boolean,
-  -- false when detail fields were withheld (20261018150000 plan limit), so null never reads as "not entered"
+  -- false when detail fields were withheld (20261023170000 plan limit), so null never reads as "not entered"
   detail_unlocked boolean
 )
 language plpgsql
@@ -399,7 +417,7 @@ revoke all on function public.record_worker_profile_view_v1(uuid, uuid) from pub
 revoke all on function public.record_worker_profile_view_v1(uuid, uuid) from anon;
 grant execute on function public.record_worker_profile_view_v1(uuid, uuid) to authenticated;
 
--- 4. GDPR erasure decisions for the four person references above (executor v3,
+-- 6. GDPR erasure decisions for the four person references above (executor v3,
 --    20261019140000, is applied before this file in production; on a database
 --    without it the block is skipped and the plan refuses these FKs by name).
 do $$

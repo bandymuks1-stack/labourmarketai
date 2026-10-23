@@ -9376,6 +9376,25 @@
       "done": "Išsaugota",
       "error": "Nepavyko"
     },
+    "vip": {
+      "title": "Organizacijos VIP (nemokama prieiga)",
+      "help": "Savininko patvirtinta nemokama prieiga VIENAI organizacijai: Organizacijos planas be mokėjimo, ir gyvame, ir bandomajame režime. Fiksuojama (kas, kada, pastaba); galima bet kada atšaukti. Niekada neapeina darbuotojo sutikimo.",
+      "organizationId": "Organizacijos ID",
+      "profileViews": "Profilių peržiūros",
+      "profileViewsHint": "Tuščia = be fiksuoto limito",
+      "note": "Pastaba (kodėl)",
+      "grant": "Suteikti VIP",
+      "revoke": "Atšaukti VIP",
+      "saving": "Saugoma…",
+      "done": "Išsaugota",
+      "errors": {
+        "not_admin": "Tai gali tik platformos administratorius.",
+        "invalid_input": "Patikrink organizacijos ID ir peržiūrų skaičių (1–100000).",
+        "unknown_organization": "Organizacijos su tokiu ID nėra.",
+        "needs_migration": "Dar neprieinama: VIP migracija nepritaikyta.",
+        "error": "Nepavyko. Niekas nepakeista."
+      }
+    },
     "events": {
       "title": "Naujausi webhook įvykiai",
       "empty": "Webhook įvykių dar nėra."

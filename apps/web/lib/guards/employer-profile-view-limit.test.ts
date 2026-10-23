@@ -7,17 +7,17 @@ import { join } from "node:path";
  * profiles per ORGANIZATION; re-opening one of them never counts again; the limit is enforced on
  * the server; paid and owner-granted VIP access keep larger limits; no plan bypasses consent.
  *
- * This pins the rules of 20261018150000_employer_profile_views_v1 so a later edit cannot quietly
+ * This pins the rules of 20261023170000_employer_profile_views_v1 so a later edit cannot quietly
  * move the limit into the client, count per person instead of per organization, charge a working
  * relationship, or let VIP be self-granted.
  */
 const ROOT = join(__dirname, "..", "..", "..", "..");
 const sql = readFileSync(
-  join(ROOT, "supabase", "migrations", "20261018150000_employer_profile_views_v1.sql"),
+  join(ROOT, "supabase", "migrations", "20261023170000_employer_profile_views_v1.sql"),
   "utf8",
 );
 const rollback = readFileSync(
-  join(ROOT, "supabase", "rollbacks", "20261018150000_employer_profile_views_v1.down.sql"),
+  join(ROOT, "supabase", "rollbacks", "20261023170000_employer_profile_views_v1.down.sql"),
   "utf8",
 );
 const code = sql.replace(/--[^\n]*/g, "");
@@ -58,9 +58,53 @@ describe("employer profile view limit (free 3 unique per organization)", () => {
   });
 
   it("only a live paid subscription lifts the free limit (no test-mode or manual rows)", () => {
-    expect(planBody).toMatch(/s\.status in \('active', 'trialing'\)/);
+    expect(planBody).toMatch(/s\.status in \('active', 'trialing', 'past_due'\)/);
     expect(planBody).toMatch(/s\.test_mode = false/);
     expect(planBody).toMatch(/not like 'manual\\_%'/);
+  });
+
+  it("an ended pilot pass no longer counts as paid (the same rule as effectivePilotPassStatus)", () => {
+    expect(planBody).toMatch(
+      /and not \(coalesce\(s\.provider_subscription_id, ''\) like 'pilotpass\\_%'\s+and \(s\.current_period_end is null or s\.current_period_end <= now\(\)\)\)/,
+    );
+  });
+
+  it("an owner-granted VIP is ORGANIZATION-scoped and mode-independent, in SQL and in the web entitlement read (7.27)", () => {
+    // SQL: the grant is looked up by the organization only — no billing mode, no person.
+    const vip = planBody.slice(planBody.indexOf("from public.organization_access_grants g"), planBody.indexOf("if v_vip"));
+    expect(vip).toMatch(/g\.organization_id = p_organization_id and g\.grant_kind = 'vip' and g\.revoked_at is null/);
+    expect(vip).not.toMatch(/test_mode|owner_id|auth\.uid/);
+    // Web: the organization subject reads the grant with the same server-resolved id, no mode filter.
+    const web = join(ROOT, "apps", "web");
+    const ent = readFileSync(join(web, "lib", "billing", "effective-entitlements.ts"), "utf8");
+    const read = ent.slice(ent.indexOf('.from("organization_access_grants")'), ent.indexOf("vipGrant = activeVipGrant("));
+    expect(read).toMatch(/\.eq\("organization_id", subject\.id\)/);
+    expect(read).toMatch(/\.eq\("grant_kind", "vip"\)/);
+    expect(read).toMatch(/\.is\("revoked_at", null\)/);
+    expect(read).not.toMatch(/test_mode|owner_id/);
+    expect(ent).toMatch(/manualOverridePlanKey = manualOverridePlanKey \?\? vipOverridePlanKey\(vipGrant\)/);
+    // Admin door: the grant is written only through the audited admin RPCs, in the admin's own session.
+    const actions = readFileSync(join(web, "lib", "admin", "billing-actions.ts"), "utf8");
+    const door = actions.slice(actions.indexOf("export async function grantOrganizationVipAction"));
+    expect(door).toMatch(/if \(!\(await isSuperadmin\(\)\)\) return \{ ok: false, reason: "not_admin" \}/);
+    expect(door).toMatch(/\.rpc\("set_organization_vip_v1"/);
+    expect(door).toMatch(/\.rpc\("revoke_organization_vip_v1"/);
+    expect(door).not.toMatch(/createAdminClient|organization_access_grants/);
+  });
+
+  it("a free organization is never blocked without a way to pay (owner deferral 2026-10-19)", () => {
+    const web = join(ROOT, "apps", "web");
+    const page = readFileSync(
+      join(web, "app", "[locale]", "dashboard", "people", "[workerId]", "page.tsx"),
+      "utf8",
+    );
+    expect(page).toMatch(
+      /personPageViewGate\(\s*await gateWorkerProfileView\(supabase, activeOrganizationId, worker\.id as string\),\s*billingStatePurchasable\(getBillingConfigFor\(activeOrganizationId\)\.state\),\s*\)/,
+    );
+    const gate = readFileSync(join(web, "lib", "billing", "profile-view-gate.ts"), "utf8");
+    expect(gate).toMatch(/if \(gate\.kind === "limit" && !purchasable\) return \{ kind: "open", counted: false \}/);
+    // The limit state offers the way to pay.
+    expect(page).toMatch(/<Link href="\/pricing"/);
   });
 
   it("VIP is read-only to the API and written only by a platform admin, with who and when", () => {
@@ -129,8 +173,12 @@ describe("employer profile view limit (free 3 unique per organization)", () => {
     expect(page).toMatch(/viewGate\.kind === "needs-organization"/);
   });
 
-  it("is a RED, gated, reversible migration", () => {
-    expect(sql).toMatch(/@human-gate-approved/);
+  it("is a RED, gated, reversible migration — and NOT yet acknowledged as approved", () => {
+    expect(sql).toMatch(/^-- RED \(needs-human-gate\)/m);
+    expect(sql).toMatch(/NO OWNER APPROVAL EXISTS YET/);
+    // The approval marker is added only with the owner's recorded approval (never by an agent).
+    expect(sql).not.toMatch(/(^|\r?\n)[ \t]*--[ \t]*@human-gate-approved\b/i);
+    expect(sql).toMatch(/^-- ROLLBACK: supabase\/rollbacks\/20261023170000_employer_profile_views_v1\.down\.sql$/m);
     expect(code).toMatch(/revoke all on function public\.record_worker_profile_view_v1\(uuid, uuid\) from anon;/);
     for (const obj of [
       "function if exists public.record_worker_profile_view_v1",

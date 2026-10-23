@@ -9376,6 +9376,25 @@
       "done": "Gespeichert",
       "error": "Fehlgeschlagen"
     },
+    "vip": {
+      "title": "Organisations-VIP (kostenloser Zugang)",
+      "help": "Vom Inhaber freigegebener kostenloser Zugang für EINE Organisation: der Organisationsplan ohne Zahlung, im Live- wie im Testmodus. Protokolliert (wer, wann, Notiz); jederzeit widerrufbar. Umgeht nie die Zustimmung einer Person.",
+      "organizationId": "Organisations-ID",
+      "profileViews": "Profilaufrufe",
+      "profileViewsHint": "Leer = kein festes Limit",
+      "note": "Notiz (warum)",
+      "grant": "VIP gewähren",
+      "revoke": "VIP widerrufen",
+      "saving": "Wird gespeichert…",
+      "done": "Gespeichert",
+      "errors": {
+        "not_admin": "Das kann nur ein Plattform-Admin.",
+        "invalid_input": "Prüfe die Organisations-ID und die Zahl der Aufrufe (1–100000).",
+        "unknown_organization": "Keine Organisation mit dieser ID.",
+        "needs_migration": "Noch nicht verfügbar: Die VIP-Migration ist nicht angewendet.",
+        "error": "Fehlgeschlagen. Nichts wurde geändert."
+      }
+    },
     "events": {
       "title": "Aktuelle Webhook-Ereignisse",
       "empty": "Noch keine Webhook-Ereignisse."

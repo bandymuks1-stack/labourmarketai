@@ -102,8 +102,6 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261018160000_",
       // 2026-10-19 (RED, needs-human-gate): an open account deletion request pauses discoverability.
       "20261019070000_",
-      // 2026-10-18 (RED, needs-human-gate): employer profile view limit + VIP grants.
-      "20261018150000_",
       // 2026-10-19 (RED, needs-human-gate): automated GDPR account erasure (executor v3).
       "20261019140000_",
       // 2026-10-19: two NOT NULL author columns of the erasure registry are severed, not nulled.
@@ -156,6 +154,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261021130000_",
       // 2026-10-22 (RED by SECURITY DEFINER + GRANT, needs-human-gate): aggregate counts for the Agentai OS capability readback route.
       "20261022150000_",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): employer profile view limit + organization VIP grants (#2474).
+      "20261023170000_",
       // 2026-10-21: skill confirmation withdrawal phase B (cross-party
       // standing read door; RED, needs-human-gate, NOT applied).
       "20261021095500_",

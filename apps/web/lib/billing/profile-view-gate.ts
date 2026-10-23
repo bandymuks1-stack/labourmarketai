@@ -3,7 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
- * EMPLOYER PROFILE-VIEW LIMIT (owner directive 2026-10-18, migration 20261018150000).
+ * EMPLOYER PROFILE-VIEW LIMIT (owner directive 2026-10-18, migration 20261023170000).
  *
  * The free employer plan opens up to 3 UNIQUE anonymized worker profiles per organization;
  * re-opening one of them is free; a working relationship never counts; paid plans and an
@@ -21,7 +21,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * exactly as today.
  */
 export type ProfileViewGate =
-  | { readonly kind: "open" }
+  /** `counted`: THIS open recorded the organization's view now (a first open), so the detail tier
+   *  of the discovery projection is released only from this moment — a page that read the
+   *  projection before the gate re-reads it. */
+  | { readonly kind: "open"; readonly counted?: boolean }
   | { readonly kind: "limit"; readonly used: number; readonly limit: number; readonly plan: string }
   | { readonly kind: "needs-organization" }
   | { readonly kind: "unavailable" };
@@ -48,7 +51,14 @@ export async function gateWorkerProfileView(
       return { kind: "unavailable" };
     }
     if (!data || typeof data !== "object") return { kind: "unavailable" };
-    const r = data as { allowed?: unknown; reason?: unknown; used?: unknown; limit?: unknown; plan?: unknown };
+    const r = data as {
+      allowed?: unknown;
+      counted?: unknown;
+      reason?: unknown;
+      used?: unknown;
+      limit?: unknown;
+      plan?: unknown;
+    };
     if (r.allowed === false && r.reason === "limit_reached") {
       return {
         kind: "limit",
@@ -57,8 +67,29 @@ export async function gateWorkerProfileView(
         plan: typeof r.plan === "string" ? r.plan : "free",
       };
     }
-    return r.allowed === true ? { kind: "open" } : { kind: "unavailable" };
+    return r.allowed === true ? { kind: "open", counted: r.counted === true } : { kind: "unavailable" };
   } catch {
     return { kind: "unavailable" };
   }
+}
+
+/**
+ * NEVER BLOCKED WITHOUT A WAY TO PAY (owner deferral of #2474, 2026-10-19: a free organization must
+ * not be blocked at 3 profile views without a way to move to a paid plan).
+ *
+ * The limit state closes the page only where the organization can actually buy the plan — billing
+ * resolves to an active Stripe state for THAT organization (`getBillingConfigFor`, the same
+ * deny-by-default pilot list the pricing page, the pilot pass and checkout use). Outside it the
+ * page stays open on the card tier: the database still refuses to count a view past the limit and
+ * still withholds the detail fields, so the limit holds on the data, but nobody is shut out of a
+ * profile with no purchase offered. Every other gate answer passes through unchanged.
+ */
+export function personPageViewGate(gate: ProfileViewGate, purchasable: boolean): ProfileViewGate {
+  if (gate.kind === "limit" && !purchasable) return { kind: "open", counted: false };
+  return gate;
+}
+
+/** Whether a billing state lets an organization buy the plan (stripe_test or stripe_live). */
+export function billingStatePurchasable(state: string | null | undefined): boolean {
+  return state === "stripe_live" || state === "stripe_test";
 }
