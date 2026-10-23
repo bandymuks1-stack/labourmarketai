@@ -4,7 +4,7 @@
  *   WEB_PUSH_ENABLED            "true" turns the channel on. ANY other value,
  *                               or no value, is OFF — the default.
  *   WEB_PUSH_VAPID_PUBLIC_KEY   base64url, 65-byte uncompressed P-256 point.
- *   WEB_PUSH_VAPID_PRIVATE_KEY  base64url, 32 bytes. SECRET: entered by the
+ *   WEB_PUSH_VAPID_PRIVATE_KEY  base64url, 32 bytes (a dropped leading zero is padded back; it must derive the public key). SECRET: entered by the
  *                               owner on the server with hidden input
  *                               (docs/ops/VPS_PRODUCTION_RUNBOOK.md §9.5);
  *                               never generated into, logged by or committed
@@ -20,7 +20,7 @@
  * server takes effect after the restart that `lm-env-set.sh --restart` does,
  * with no rebuild.
  */
-import { base64UrlToBuffer, isP256PublicKey } from "./web-push-protocol";
+import { base64UrlToBuffer, isP256PublicKey, isVapidKeyPair } from "./web-push-protocol";
 
 export type WebPushMissing =
   | "WEB_PUSH_ENABLED"
@@ -51,7 +51,7 @@ export function webPushStatus(env: Record<string, string | undefined> = process.
     missing.push("WEB_PUSH_VAPID_PUBLIC_KEY");
   }
   const privateKey = clean(env.WEB_PUSH_VAPID_PRIVATE_KEY);
-  if (!B64URL.test(privateKey) || base64UrlToBuffer(privateKey).length !== 32) {
+  if (!B64URL.test(privateKey) || !isVapidKeyPair(publicKey, privateKey)) {
     missing.push("WEB_PUSH_VAPID_PRIVATE_KEY");
   }
   const subject = clean(env.WEB_PUSH_VAPID_SUBJECT);
