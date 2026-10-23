@@ -365,3 +365,11 @@ describe("quick search: Enter opens the selected result (production audit 2026-1
     expect(src).toContain('data-active={selected?.key === `result-${entry.id}` ? "true" : undefined}');
   });
 });
+
+describe("the header search overlay closes once a result navigates (production audit 2026-10-23)", () => {
+  const src = readFileSync(join(__dirname, "..", "..", "components", "app", "header-search.tsx"), "utf8");
+  it("a pathname change closes it — Enter, click or any other navigation", () => {
+    expect(src).toContain("const pathname = usePathname();");
+    expect(src).toMatch(/useEffect\(\(\) => \{\s*setOpen\(false\);\s*\}, \[pathname\]\);/);
+  });
+});
