@@ -112,6 +112,12 @@ const schema = z.object({
   // The organization pilot pass (pilot-pass-core): 1 € once → the paid
   // Organization plan for the pilot period. Off unless the owner switches it on.
   BILLING_PILOT_PASS_ENABLED: z.enum(["true", "false"]).default("false"),
+  // STRIPE TAX SWITCH (owner order 2026-10-23): "true" = the pilot-pass
+  // Checkout asks Stripe Tax for VAT (tax-exclusive), and the webhook stores the
+  // tax evidence + review flags (billing_tax_evidence). OFF by default: until the
+  // owner finishes the Stripe Tax setup (docs/billing/stripe-tax-rollout.md) every
+  // Checkout Session is exactly what it was before this switch existed.
+  BILLING_STRIPE_TAX_ENABLED: z.enum(["true", "false"]).default("false"),
   // TEST price ids (price_…) per paid plan — owner sets these in Stripe test.
   STRIPE_PRICE_WORKER_PLUS: z.string().optional(),
   STRIPE_PRICE_COMPANY_PILOT: z.string().optional(),
@@ -229,6 +235,7 @@ const parsed = schema.safeParse({
   BILLING_PILOT_ORGANIZATION_IDS: process.env.BILLING_PILOT_ORGANIZATION_IDS,
   BILLING_TRIAL_ENABLED: process.env.BILLING_TRIAL_ENABLED,
   BILLING_PILOT_PASS_ENABLED: process.env.BILLING_PILOT_PASS_ENABLED,
+  BILLING_STRIPE_TAX_ENABLED: process.env.BILLING_STRIPE_TAX_ENABLED,
   STRIPE_PRICE_WORKER_PLUS: process.env.STRIPE_PRICE_WORKER_PLUS,
   STRIPE_PRICE_COMPANY_PILOT: process.env.STRIPE_PRICE_COMPANY_PILOT,
   STRIPE_PRICE_AGENCY_PILOT: process.env.STRIPE_PRICE_AGENCY_PILOT,

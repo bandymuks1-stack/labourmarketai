@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const cfg = vi.hoisted(() => ({ state: "stripe_live" as string }));
-vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => cfg }));
+vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => cfg, billingStripeTaxEnabled: () => false }));
 vi.mock("@/lib/billing/provider", () => ({ getBillingProvider: vi.fn() }));
 vi.mock("@/lib/billing/subscription-store", () => ({
   recordWebhookEvent: vi.fn(),

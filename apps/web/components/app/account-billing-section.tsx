@@ -1,6 +1,13 @@
 import { getLocale, getTranslations } from "next-intl/server";
 
-import { billingPilotPassEnabled, billingTrialEnabled, getBillingConfigFor } from "@/lib/billing/config";
+import {
+  billingPilotPassEnabled,
+  billingStripeTaxEnabled,
+  billingTrialEnabled,
+  getBillingConfigFor,
+} from "@/lib/billing/config";
+import { readLatestTaxEvidence } from "@/lib/billing/tax-evidence-read";
+import { createClient } from "@/lib/supabase/server";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { BillingPortalButton } from "@/components/app/billing-portal-button";
@@ -14,6 +21,7 @@ import {
   classifyCheckoutReturn,
 } from "@/lib/billing/checkout-return-core";
 import { Card } from "@/components/ui/Card";
+import { AccountBillingTaxLine } from "@/components/app/account-billing-tax-line";
 
 /**
  * Account → billing/subscription state (commercial safe-prep v1; harvested
@@ -65,7 +73,8 @@ export async function AccountBillingSection({
           : null;
 
   const status = ent.subscriptionStatus ?? "none";
-  const endsOnDate = formatPeriodEnd(ent.currentPeriodEnd, await getLocale());
+  const locale = await getLocale();
+  const endsOnDate = formatPeriodEnd(ent.currentPeriodEnd, locale);
   const hasSubscription = ent.source === "subscription";
   // D3: the section is live for BOTH adapter states; the TEST badge only in test.
   const billingOn = cfg.state === "stripe_test" || cfg.state === "stripe_live";
@@ -81,6 +90,18 @@ export async function AccountBillingSection({
     billingReturn,
     subscriptionStatus: ent.subscriptionStatus,
   });
+
+  // Stripe Tax (owner order 2026-10-23): the last payment's VAT, read ONLY
+  // while the switch is on, under the person's own RLS, for this workspace's
+  // organization and adapter mode. Off → no read at all.
+  const taxOrganizationId = workspace.subject?.type === "organization" ? workspace.subject.id : null;
+  const taxEvidence =
+    billingOn && taxOrganizationId && billingStripeTaxEnabled()
+      ? await readLatestTaxEvidence(await createClient(), {
+          organizationId: taxOrganizationId,
+          testMode: cfg.testMode,
+        })
+      : null;
 
   // The portal opens ONLY for a stored billing customer — never offered
   // while payments are disabled, and never a dead button.
@@ -204,6 +225,27 @@ export async function AccountBillingSection({
               ) : null}
             </>
           )}
+
+          {/* Stripe Tax: VAT of the last payment — renders nothing unless the
+              owner switched Stripe Tax on and Stripe recorded tax evidence. */}
+          <AccountBillingTaxLine
+            row={taxEvidence}
+            locale={locale}
+            labels={{
+              lastPayment: t("tax.lastPayment"),
+              total: t("tax.total"),
+              reverseCharge: t("tax.reverseCharge"),
+              vatId: t("tax.vatId"),
+              invoice: t("tax.invoice"),
+              vatIdStatus: {
+                pending: t("tax.vatIdStatus.pending"),
+                verified: t("tax.vatIdStatus.verified"),
+                unverified: t("tax.vatIdStatus.unverified"),
+                unavailable: t("tax.vatIdStatus.unavailable"),
+                unknown: t("tax.vatIdStatus.unknown"),
+              },
+            }}
+          />
 
           {showRefresh ? (
             <>

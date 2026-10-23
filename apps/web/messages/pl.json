@@ -9411,6 +9411,39 @@
         "blocked_by_design": "Zablokowane z założenia"
       },
       "proofLabel": "dowód"
+    },
+    "tax": {
+      "title": "Przegląd Stripe Tax",
+      "switchOn": "Stripe Tax jest WŁĄCZONY: webhook zapisuje podstawę opodatkowania każdej płatności i oznacza niejasne przypadki.",
+      "switchOff": "Stripe Tax jest WYŁĄCZONY (BILLING_STRIPE_TAX_ENABLED): dowody podatkowe nie są zapisywane. Wiersze z wcześniejszego testu pozostają na liście.",
+      "unavailable": "Dowodów podatkowych nie można jeszcze pokazać: magazyn nie jest skonfigurowany.",
+      "error": "Nie udało się teraz odczytać listy przeglądu.",
+      "empty": "Nic nie czeka na przegląd podatkowy.",
+      "org": "Organizacja",
+      "country": "Kraj",
+      "vatId": "Numer VAT",
+      "vatIdCheck": "Sprawdzenie numeru VAT",
+      "automaticTax": "Podatek automatyczny",
+      "reverseCharge": "odwrotne obciążenie",
+      "subtotal": "Suma netto",
+      "vat": "Podatek VAT",
+      "total": "Razem",
+      "invoice": "Faktura",
+      "markReviewed": "Oznacz jako sprawdzone",
+      "saving": "Zapisywanie…",
+      "markError": "Nie zapisano",
+      "reason": {
+        "automaticTax": "Automatyczny podatek Stripe nieukończony ({status})",
+        "notRequested": "Dla tej płatności nie zażądano automatycznego podatku",
+        "amountMissing": "Brak kwoty",
+        "countryMissing": "Brak kraju rozliczeniowego",
+        "taxMissing": "Brak kwoty podatku",
+        "noBreakdown": "Brak rozbicia podatku od Stripe",
+        "ltZero": "Klient z Litwy z 0 VAT (oczekiwano 21%)",
+        "foreignVatId": "Zagraniczne B2B z 0 VAT, sprawdzenie numeru VAT: {status}",
+        "foreignNoVatId": "Klient zagraniczny z 0 VAT bez numeru VAT",
+        "other": "Inne: {code}"
+      }
     }
   },
   "conciergeOffer": {
@@ -10945,6 +10978,20 @@
       "cta": "Aktywuj plan Organizacja",
       "note": "Zostaniesz przekierowany/a do Stripe Checkout; subskrypcja jest przypisana do tej organizacji.",
       "chargedToday": "Bez darmowego okresu próbnego: pierwszy miesiąc jest płatny dziś w Stripe Checkout, potem co miesiąc do czasu anulowania. Przed płatnością Stripe pokaże dokładną kwotę z VAT."
+    },
+    "tax": {
+      "lastPayment": "VAT w ostatniej płatności",
+      "total": "razem",
+      "reverseCharge": "Bez VAT: Stripe Tax zastosował odwrotne obciążenie dla Twojego numeru VAT.",
+      "vatId": "Numer VAT",
+      "vatIdStatus": {
+        "pending": "sprawdzanie w toku",
+        "verified": "ważny według sprawdzenia w rejestrze UE/UK",
+        "unverified": "nieważny według sprawdzenia w rejestrze",
+        "unavailable": "sprawdzenie w rejestrze niedostępne",
+        "unknown": "brak wyniku sprawdzenia"
+      },
+      "invoice": "Otwórz fakturę"
     }
   },
   "accountPlan": {

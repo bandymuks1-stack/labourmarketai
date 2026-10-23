@@ -9411,6 +9411,39 @@
         "blocked_by_design": "Blocked by design"
       },
       "proofLabel": "proof"
+    },
+    "tax": {
+      "title": "Stripe Tax review",
+      "switchOn": "Stripe Tax is ON: the webhook records the tax basis of every payment and flags the ones whose taxation is unclear.",
+      "switchOff": "Stripe Tax is OFF (BILLING_STRIPE_TAX_ENABLED): no tax evidence is recorded. Rows from an earlier test run stay listed.",
+      "unavailable": "Tax evidence cannot be shown yet: its storage is not set up.",
+      "error": "The review list could not be read right now.",
+      "empty": "Nothing awaits tax review.",
+      "org": "Organization",
+      "country": "Country",
+      "vatId": "VAT number",
+      "vatIdCheck": "VAT number check",
+      "automaticTax": "Automatic tax",
+      "reverseCharge": "reverse charge",
+      "subtotal": "Subtotal",
+      "vat": "VAT",
+      "total": "Total",
+      "invoice": "Invoice",
+      "markReviewed": "Mark reviewed",
+      "saving": "Saving…",
+      "markError": "Not saved",
+      "reason": {
+        "automaticTax": "Stripe automatic tax not complete ({status})",
+        "notRequested": "Automatic tax was not requested for this payment",
+        "amountMissing": "No amount reported",
+        "countryMissing": "No billing country",
+        "taxMissing": "No tax amount reported",
+        "noBreakdown": "No tax breakdown from Stripe",
+        "ltZero": "Lithuanian customer charged 0 VAT (21% expected)",
+        "foreignVatId": "Foreign B2B at 0 VAT, VAT number check: {status}",
+        "foreignNoVatId": "Foreign customer at 0 VAT without a VAT number",
+        "other": "Other: {code}"
+      }
     }
   },
   "conciergeOffer": {
@@ -10945,6 +10978,20 @@
       "cta": "Activate the Organization plan",
       "note": "You will be taken to Stripe Checkout; the subscription is bound to this organization.",
       "chargedToday": "No free trial: the first month is charged at Stripe Checkout today, then monthly until you cancel. Stripe shows the exact amount with VAT before you pay."
+    },
+    "tax": {
+      "lastPayment": "VAT on the last payment",
+      "total": "total",
+      "reverseCharge": "No VAT charged: reverse charge applied by Stripe Tax for your VAT number.",
+      "vatId": "VAT number",
+      "vatIdStatus": {
+        "pending": "check pending",
+        "verified": "valid according to the EU/UK registry check",
+        "unverified": "not valid according to the registry check",
+        "unavailable": "registry check unavailable",
+        "unknown": "check result not received"
+      },
+      "invoice": "Open invoice"
     }
   },
   "accountPlan": {

@@ -8,6 +8,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isSuperadmin } from "@/lib/auth/superadmin";
 import { revalidatePath } from "next/cache";
 import { PRE_PAYMENT_PLANS } from "@/lib/billing/plans";
+import { createClient } from "@/lib/supabase/server";
+import { markTaxEvidenceReviewed } from "@/lib/billing/tax-evidence-store";
 
 /**
  * Admin manual pilot-access override (Stripe sprint PR6). An admin can grant /
@@ -117,5 +119,33 @@ export async function revokePilotAccessAction(input: {
     return { ok: false, reason: "error" };
   }
   revalidatePath(`/${input.locale}/dashboard/admin/billing`);
+  return { ok: true };
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Stripe Tax review (owner order 2026-10-23): a platform admin marks one tax
+ * evidence row reviewed. Records who and when; never changes an amount, a tax
+ * line or the reason the row was flagged. Superadmin-only (re-checked in the
+ * store as well).
+ */
+export async function markTaxEvidenceReviewedAction(input: {
+  locale: string;
+  evidenceId: string;
+}): Promise<
+  { ok: true } | { ok: false; reason: "not_admin" | "invalid" | "not_found" | "needs_migration" | "error" }
+> {
+  if (!(await isSuperadmin())) return { ok: false, reason: "not_admin" };
+  if (!UUID.test(input.evidenceId)) return { ok: false, reason: "invalid" };
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  const reviewer = data.user?.id;
+  if (!reviewer) return { ok: false, reason: "not_admin" };
+  const res = await markTaxEvidenceReviewed({ id: input.evidenceId, reviewerProfileId: reviewer });
+  if (res !== "ok") {
+    return { ok: false, reason: res === "needs-migration" ? "needs_migration" : res };
+  }
+  if (/^[a-z]{2}$/.test(input.locale)) revalidatePath(`/${input.locale}/dashboard/admin/billing`);
   return { ok: true };
 }

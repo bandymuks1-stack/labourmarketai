@@ -9411,6 +9411,39 @@
         "blocked_by_design": "Konzeptbedingt blockiert"
       },
       "proofLabel": "Nachweis"
+    },
+    "tax": {
+      "title": "Stripe-Tax-Prüfung",
+      "switchOn": "Stripe Tax ist AN: Der Webhook speichert die Steuergrundlage jeder Zahlung und markiert unklare Fälle.",
+      "switchOff": "Stripe Tax ist AUS (BILLING_STRIPE_TAX_ENABLED): Es werden keine Steuernachweise gespeichert. Zeilen aus einem früheren Testlauf bleiben sichtbar.",
+      "unavailable": "Steuernachweise können noch nicht angezeigt werden: der Speicher ist nicht eingerichtet.",
+      "error": "Die Prüfliste konnte gerade nicht gelesen werden.",
+      "empty": "Nichts wartet auf eine Steuerprüfung.",
+      "org": "Organisation",
+      "country": "Land",
+      "vatId": "USt-IdNr.",
+      "vatIdCheck": "USt-IdNr.-Prüfung",
+      "automaticTax": "Automatische Steuer",
+      "reverseCharge": "Reverse Charge",
+      "subtotal": "Zwischensumme",
+      "vat": "USt.",
+      "total": "Gesamt",
+      "invoice": "Rechnung",
+      "markReviewed": "Als geprüft markieren",
+      "saving": "Speichern…",
+      "markError": "Nicht gespeichert",
+      "reason": {
+        "automaticTax": "Automatische Steuer von Stripe nicht abgeschlossen ({status})",
+        "notRequested": "Für diese Zahlung wurde keine automatische Steuer angefordert",
+        "amountMissing": "Kein Betrag gemeldet",
+        "countryMissing": "Kein Rechnungsland",
+        "taxMissing": "Kein Steuerbetrag gemeldet",
+        "noBreakdown": "Keine Steueraufschlüsselung von Stripe",
+        "ltZero": "Litauischer Kunde mit 0 USt. (21 % erwartet)",
+        "foreignVatId": "Ausländisches B2B mit 0 USt., USt-IdNr.-Prüfung: {status}",
+        "foreignNoVatId": "Ausländischer Kunde mit 0 USt. ohne USt-IdNr.",
+        "other": "Sonstiges: {code}"
+      }
     }
   },
   "conciergeOffer": {
@@ -10945,6 +10978,20 @@
       "cta": "Plan „Organisation“ aktivieren",
       "note": "Sie werden zu Stripe Checkout weitergeleitet; das Abonnement ist an diese Organisation gebunden.",
       "chargedToday": "Keine kostenlose Testphase: Der erste Monat wird heute im Stripe Checkout berechnet, danach monatlich bis zur Kündigung. Stripe zeigt vor der Zahlung den genauen Betrag inklusive MwSt."
+    },
+    "tax": {
+      "lastPayment": "USt. der letzten Zahlung",
+      "total": "gesamt",
+      "reverseCharge": "Keine USt. berechnet: Stripe Tax hat für Ihre USt-IdNr. Reverse Charge angewendet.",
+      "vatId": "USt-IdNr.",
+      "vatIdStatus": {
+        "pending": "Prüfung läuft",
+        "verified": "laut EU/UK-Registerprüfung gültig",
+        "unverified": "laut Registerprüfung nicht gültig",
+        "unavailable": "Registerprüfung nicht erreichbar",
+        "unknown": "Prüfergebnis nicht erhalten"
+      },
+      "invoice": "Rechnung öffnen"
     }
   },
   "accountPlan": {

@@ -67,6 +67,8 @@ vi.mock("@/lib/billing/config", () => ({
   getBillingConfigFor: () => state.config,
   billingTrialEnabled: () => state.trialEnabled,
   billingPilotPassEnabled: () => state.pilotPassEnabled,
+  // Stripe Tax switch OFF (the default): the section reads no tax evidence.
+  billingStripeTaxEnabled: () => false,
 }));
 vi.mock("@/lib/billing/effective-entitlements", () => ({
   getEffectiveEntitlements: vi.fn(async () => state.ent),

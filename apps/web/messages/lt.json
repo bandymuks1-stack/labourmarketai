@@ -9411,6 +9411,39 @@
         "blocked_by_design": "Užblokuota pagal dizainą"
       },
       "proofLabel": "įrodymas"
+    },
+    "tax": {
+      "title": "Stripe Tax peržiūra",
+      "switchOn": "Stripe Tax ĮJUNGTAS: webhook išsaugo kiekvieno mokėjimo mokesčio pagrindą ir pažymi tuos, kurių apmokestinimas neaiškus.",
+      "switchOff": "Stripe Tax IŠJUNGTAS (BILLING_STRIPE_TAX_ENABLED): mokesčių įrodymai nesaugomi. Ankstesnio bandymo eilutės lieka sąraše.",
+      "unavailable": "Mokesčių įrodymų dar negalima parodyti: saugykla neparuošta.",
+      "error": "Peržiūros sąrašo dabar nepavyko perskaityti.",
+      "empty": "Nieko nereikia peržiūrėti.",
+      "org": "Organizacija",
+      "country": "Šalis",
+      "vatId": "PVM kodas",
+      "vatIdCheck": "PVM kodo patikra",
+      "automaticTax": "Automatinis mokestis",
+      "reverseCharge": "atvirkštinis apmokestinimas",
+      "subtotal": "Suma be PVM",
+      "vat": "PVM",
+      "total": "Iš viso",
+      "invoice": "Sąskaita",
+      "markReviewed": "Pažymėti peržiūrėta",
+      "saving": "Saugoma…",
+      "markError": "Neišsaugota",
+      "reason": {
+        "automaticTax": "Stripe automatinis mokestis neužbaigtas ({status})",
+        "notRequested": "Šiam mokėjimui automatinis mokestis nebuvo prašytas",
+        "amountMissing": "Suma nepateikta",
+        "countryMissing": "Nėra mokėtojo šalies",
+        "taxMissing": "Mokesčio suma nepateikta",
+        "noBreakdown": "Stripe nepateikė mokesčio išskaidymo",
+        "ltZero": "Lietuvos klientui taikytas 0 PVM (tikėtina 21%)",
+        "foreignVatId": "Užsienio B2B su 0 PVM, PVM kodo patikra: {status}",
+        "foreignNoVatId": "Užsienio klientas su 0 PVM be PVM kodo",
+        "other": "Kita: {code}"
+      }
     }
   },
   "conciergeOffer": {
@@ -10945,6 +10978,20 @@
       "cta": "Aktyvuoti planą „Organizacija“",
       "note": "Būsite nukreipti į Stripe Checkout; prenumerata susiejama su šia organizacija.",
       "chargedToday": "Be nemokamo bandomojo laikotarpio: pirmas mėnuo apmokamas šiandien per Stripe Checkout, vėliau kas mėnesį, kol atšauksite. Prieš mokėdami Stripe parodys tikslią sumą su PVM."
+    },
+    "tax": {
+      "lastPayment": "PVM paskutiniame mokėjime",
+      "total": "iš viso",
+      "reverseCharge": "PVM neskaičiuotas: Stripe Tax pagal jūsų PVM kodą taikė atvirkštinį apmokestinimą.",
+      "vatId": "PVM kodas",
+      "vatIdStatus": {
+        "pending": "patikra vyksta",
+        "verified": "galioja pagal ES / JK registro patikrą",
+        "unverified": "negalioja pagal registro patikrą",
+        "unavailable": "registro patikra nepasiekiama",
+        "unknown": "patikros rezultatas negautas"
+      },
+      "invoice": "Atidaryti sąskaitą"
     }
   },
   "accountPlan": {
