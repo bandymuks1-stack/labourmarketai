@@ -1,8 +1,10 @@
--- ── HUMAN GATE (PENDING) ───────────────────────────────────────────────────
+-- @human-gate-approved
+--
+-- ── HUMAN GATE ─────────────────────────────────────────────────────────────
 -- SAFETY CLASS: RED because of the GRANT/REVOKE lines (a privilege surface
--- change, doctrine-guard §4). NOT owner-approved yet: no approval marker until
--- the owner records the decision. Draft PR + `needs-human-gate`; apply ONLY via
--- Supabase MCP `apply_migration`, never `supabase db push`.
+-- change, doctrine-guard §4). Owner approved applying this migration and
+-- merging #2719 in chat on 2026-10-23. Apply ONLY via Supabase MCP
+-- `apply_migration` (before the code deploys), never `supabase db push`.
 --
 -- 20261023190000 — ops_runtime_samples v1: in-process runtime evidence for the
 -- P0 origin stalls of 2026-10-23 (Cloudflare 522 / ~20 s no first byte while
