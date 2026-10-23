@@ -1710,6 +1710,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // CAL-8 shift patterns — one nullable column on work_plan_entries,
       // create_work_plan_entry_v2, plan branch of the override validator.
       "20261023160000_work_plan_shift_patterns_v1.sql",
+      // 2026-10-23: owner approved #2712 in chat (same approval as #2709; WEB_PUSH_ENABLED stays
+      // false until keys + a real delivery test). COM-3 web push channel — device
+      // subscriptions table, register command, 'push' value on the preferences channel CHECK.
+      "20261023171500_web_push_subscriptions_v1.sql",
 ]);
   });
 

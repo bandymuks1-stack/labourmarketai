@@ -17382,7 +17382,19 @@
     "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandyk dar kartą.",
     "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami.",
     "saving": "Saugoma…",
-    "saved": "Išsaugota."
+    "saved": "Išsaugota.",
+    "push": {
+      "title": "Tiesioginiai pranešimai šiame įrenginyje",
+      "intro": "Gaukite trumpą pranešimą šiame telefone ar kompiuteryje, kai atsiranda kas nors nauja. Rodoma tik pranešimo rūšis, niekada ne žinutės tekstas. Aukščiau išjungtos rūšys niekada nesiunčiamos.",
+      "turnOn": "Įjungti tiesioginius pranešimus",
+      "turnOff": "Išjungti šiame įrenginyje",
+      "working": "Vykdoma…",
+      "on": "Tiesioginiai pranešimai šiame įrenginyje įjungti.",
+      "off": "Tiesioginiai pranešimai šiame įrenginyje išjungti.",
+      "unsupported": "Ši naršyklė negali gauti tiesioginių pranešimų. „iPhone“ telefone pirmiausia pridėkite svetainę prie pradžios ekrano.",
+      "blocked": "Naršyklės nustatymuose pranešimai šiai svetainei užblokuoti. Leiskite juos ten ir grįžkite.",
+      "error": "Nepavyko. Niekas nepakeista. Bandykite dar kartą."
+    }
   },
   "historyContext": {
     "project": "Projektas",
