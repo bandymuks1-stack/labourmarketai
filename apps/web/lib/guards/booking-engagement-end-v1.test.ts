@@ -1713,6 +1713,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // false until keys + a real delivery test). COM-3 web push channel — device
       // subscriptions table, register command, 'push' value on the preferences channel CHECK.
       "20261023171500_web_push_subscriptions_v1.sql",
+      // 2026-10-23: owner approved #2719 in chat (apply before deploy, then merge). Runtime
+      // stall sampler evidence table — numbers only, service_role only, 14-day retention.
+      "20261023190000_ops_runtime_samples_v1.sql",
 ]);
   });
 

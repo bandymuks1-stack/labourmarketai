@@ -78,5 +78,23 @@ export async function onRequestError(
 }
 
 export async function register(): Promise<void> {
-  // Nothing to initialise: no vendor SDK. The hook above is the instrumentation.
+  // No vendor SDK. The one thing started here is the runtime stall sampler
+  // (P0 origin stalls 2026-10-23): numbers-only process / cgroup / host
+  // samples every 15 s, one insert per minute into ops_runtime_samples. Node
+  // runtime only — the edge bundle never sees the import. It decides for
+  // itself whether to run (never in build or tests; LM_RUNTIME_SAMPLER=off
+  // disables it) and it can never throw or keep the process alive.
+  //
+  // The `=== "nodejs"` block form is load-bearing: Next inlines NEXT_RUNTIME
+  // per bundle, so in the edge bundle this becomes `if ("edge" === "nodejs")`
+  // and the node:* imports behind it are eliminated. An early `return` does
+  // not get the same treatment (the edge build then fails on `node:crypto`).
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    try {
+      const { startRuntimeSampler } = await import("./lib/ops/runtime-sampler-node");
+      startRuntimeSampler();
+    } catch {
+      // Evidence collection must never take the server down.
+    }
+  }
 }
