@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
 
 /**
  * PRODUCTION UNIVERSAL MARKETPLACE — GOODS, RENTALS, NEEDS AND SERVICES ACROSS
