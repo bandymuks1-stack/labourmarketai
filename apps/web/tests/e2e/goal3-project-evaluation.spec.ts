@@ -3,6 +3,8 @@ import { mkdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 
+import { LOCAL_DB_CONTAINER } from "./local-db-container";
+
 /**
  * GOAL 3 — EVALUATE THE DEMAND BEHIND A PLACE, proven in an authenticated
  * browser.
@@ -458,7 +460,7 @@ test("mobile — the drill-down does not overflow horizontally", async ({ page }
  * testing anything. A negative control has to be aimed at the read that
  * actually exists, so it follows the read.
  *
- * LOCAL ONLY, AND REVERSIBLE. The container name below exists only on a local
+ * LOCAL ONLY, AND REVERSIBLE. The container (LOCAL_DB_CONTAINER, E2E_DB_CONTAINER) exists only on a local
  * Supabase stack, the base URL is asserted to be loopback first, and the grant
  * is restored in `finally` and re-verified afterwards. Nothing production-shaped
  * is touched.
@@ -466,7 +468,7 @@ test("mobile — the drill-down does not overflow horizontally", async ({ page }
 function psql(sql: string): string {
   const res = spawnSync(
     "docker",
-    ["exec", "-i", "supabase_db_labourmarketai", "psql", "-U", "postgres", "-d", "postgres", "-qtA", "-c", sql],
+    ["exec", "-i", LOCAL_DB_CONTAINER, "psql", "-U", "postgres", "-d", "postgres", "-qtA", "-c", sql],
     { encoding: "utf8" },
   );
   if (res.status !== 0) throw new Error(`psql failed: ${res.stderr}`);

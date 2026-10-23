@@ -23,7 +23,11 @@ const HAS = HAS_LOCAL_STACK && !!process.env.SUPABASE_TEST_URL;
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 const BASE = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3100";
 const PASSWORD = "Pw-fixes-qa-1!";
-const TAG = process.env.FIX_TAG ?? randomBytes(3).toString("hex");
+/** The run tag lives in DATA, never in a test title: Playwright re-imports this file in every worker and finds
+ *  tests by title, so a title carrying a fresh random tag is "not found in the worker". Writing the tag back to
+ *  process.env also hands the collecting process's tag to the workers it forks (CLI runs collect in-process),
+ *  so all steps share one run. */
+const TAG = (process.env.FIX_TAG ??= randomBytes(3).toString("hex"));
 const TMP = resolve(process.cwd(), "../../.tmp");
 const SHOTS = resolve(TMP, "shots");
 const STATE_FILE = resolve(TMP, `fixes-${TAG}.json`);
@@ -233,9 +237,10 @@ const bodyText = async (page: Page) => (await page.locator("body").innerText()).
 
 test.describe.configure({ mode: "serial", timeout: 900_000 });
 
-test.describe(`INTEGRATED FIXES (tag ${TAG})`, () => {
+test.describe("INTEGRATED FIXES", () => {
   test.skip(!HAS, "local Supabase env absent - run with the local stack env (see header)");
   test.beforeAll(() => {
+    console.log(`[integrated fixes] run tag ${TAG} (re-run one step with FIX_TAG=${TAG})`);
     loadState();
   });
   test.afterAll(async () => {
@@ -441,14 +446,20 @@ test.describe(`INTEGRATED FIXES (tag ${TAG})`, () => {
   // =========================================================================
   // B4 - CHAT/MCP KEEP + TEAM TOOLS (#2146 / #2149) through /api/mcp with real JWTs
   // =========================================================================
-  test("B4a. tools/list: 76 tools, version 0.1.0+t76.be37fbb5, the team/keep tools are published", async () => {
+  test("B4a. tools/list: the published version names its own tool count, the team/keep tools are published", async () => {
     const jwt = await acctJwt("bo");
     const init = await mcp(jwt, "initialize", { protocolVersion: "2025-03-26", capabilities: {}, clientInfo: { name: "qf", version: "1" } });
-    expect(init.text).toContain("0.1.0+t76.be37fbb5");
+    // The catalogue grew from the 76 tools pinned here (t76.be37fbb5) to 229 by
+    // #2336, and grows again with every tool. The invariant is the version's
+    // own contract (lib/mcp/toolset.ts: `0.1.0+t<count>.<schema hash>`): the
+    // count it announces is the count tools/list publishes.
+    const version = /"version":"(0\.1\.0\+t(\d+)\.[0-9a-f]{8})"/.exec(init.text);
+    expect(version, init.text.slice(0, 400)).not.toBeNull();
     const list = await mcp(jwt, "tools/list", {});
     const parsed = JSON.parse(list.text.replace(/^data: /m, "").trim().split("\n").find((l) => l.startsWith("{"))!);
     const names: string[] = parsed.result.tools.map((t: { name: string }) => t.name);
-    expect(names).toHaveLength(76);
+    expect(names).toHaveLength(Number(version![2]));
+    expect(new Set(names).size, "no tool is published twice").toBe(names.length);
     for (const t of ["team_assignment_create_draft", "team_assignment_create_confirm", "team_assignment_replace_draft", "team_assignment_replace_confirm", "team_assignment_end_draft", "team_assignment_end_confirm", "assignment_keep_draft", "assignment_keep_confirm"]) expect(names.includes(t), t).toBe(true);
   });
 
