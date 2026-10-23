@@ -36,7 +36,9 @@ export default async function ServicesPage({
 
   const t = await getTranslations("serviceOfferings");
   const result = await listOwnServiceOfferings();
-  const needsMigration = result.kind === "needs-migration";
+  // A failed read degrades to the same calm "not available" state as an
+  // unapplied migration — never to "you have no offerings" (audit 2026-10-16).
+  const needsMigration = result.kind === "needs-migration" || result.kind === "unavailable";
   const rows = result.kind === "ok" ? result.rows : [];
 
   const labels: ServiceOfferingsLabels = {
@@ -68,6 +70,7 @@ export default async function ServicesPage({
     errorTitleRequired: t("errorTitleRequired"),
     errorCountry: t("errorCountry"),
     errorGeneric: t("errorGeneric"),
+    errorHasRequests: t("errorHasRequests"),
     remoteBadge: t("remoteBadge"),
     status: {
       draft: t("status.draft"),

@@ -986,6 +986,24 @@ const RULES: IntentRule[] = [
       // Deliberately NO Lithuanian "kas laukia" here: it usually means "what
       // awaits (me)" — a day question, not a hiring one.
       p("(who\\s+is\\s+waiting|wer\\s+wartet|wie\\s+wacht|кто\\s+(ждет|ожидает)|kto\\s+czeka)", 4),
+      // A QUESTION ABOUT THE NEEDS WE ALREADY HAVE. "Kiek darbuotojų
+      // poreikių šiuo metu turime atvirų?" scored need-workers (darbuotoj 4 +
+      // poreik 2) and opened the CREATION form — a count question answered
+      // with "write a new one" (production audit 2026-10-22). Asking how many
+      // / which needs, or naming our open ones in the plural, is the review
+      // of existing demands this panel lists; weight 8 outranks the 6 a
+      // statement scores. "reikia 3 mūrininkų" / "darbuotojų poreikis: 5
+      // suvirintojai" (a new need) stay need-workers.
+      p("(kiek|kokie|kokius|kokiu|kokių)\\s+(?:[^\\s]+\\s+){0,3}?poreik", 8),
+      // Nominative/accusative plural only: the pattern source is FOLDED, so a
+      // genitive "poreikių" would become "poreikiu" — also the SINGULAR
+      // instrumental of "Kas susidomėjo mano poreikiu?" (interest-inbox).
+      p("(musu|mūsų|mano|atvir|aktyv|esam)\\w*\\s+(?:[^\\s]+\\s+){0,2}?poreik(iai|ius)", 8),
+      p("(how\\s+many|which|our|open|active)\\s+(?:[^\\s]+\\s+){0,2}?(needs|requests|demands)\\b", 8),
+      p("(сколько|какие|наши|открыт)[^?.!]{0,30}(потребност|заяв)", 8), // "заявок" carries no "заявк"
+      p("(wie\\s+viele|welche|unsere|offenen?)\\s+(?:[^\\s]+\\s+){0,2}?(bedarfe|anfragen)\\b", 8),
+      p("(hoeveel|welke|onze|openstaande)\\s+(?:[^\\s]+\\s+){0,2}?(aanvragen|behoeften)\\b", 8),
+      p("(ile|jakie|nasze|otwarte)\\s+(?:[^\\s]+\\s+){0,2}?(zapotrzebowa|zlece)", 8),
     ],
   },
   {

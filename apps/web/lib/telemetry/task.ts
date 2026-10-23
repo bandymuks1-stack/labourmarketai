@@ -225,6 +225,19 @@ export function trackFunnel(
   fire(eventName, "info", { metadata: enriched });
 }
 
+/** A funnel step that FAILED: result "error" with a bounded failure code
+ *  (a closed client code such as "unsupported" / "too-large" — never a raw
+ *  message, filename or user input). Same metadata allowlist as trackFunnel. */
+export function trackFunnelFailure(
+  eventName: FunnelEventName,
+  errorCode: string,
+  metadata?: FunnelMetadata,
+): void {
+  const enriched: Record<string, unknown> = { ...(metadata ?? {}) };
+  if (isNonProductionHost()) enriched.preview_host = true;
+  fire(eventName, "error", { errorCode: errorCode.slice(0, 64), metadata: enriched });
+}
+
 // ── Signup-completion pending flag (Worker Launch Readiness v1) ──────────────
 // A brand-new signup and a returning login both land on an authenticated
 // surface, so `login_succeeded` alone cannot tell them apart. The signup

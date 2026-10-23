@@ -24,7 +24,12 @@ import {
 
 import { createClient } from "@/lib/supabase/server";
 import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
-import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
+import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
+import {
+  standingEvidenceTier,
+  withCrossPartyStandingConfirmation,
+} from "@/lib/evidence/skill-confirmation-standing";
+import { readCrossPartyStandingStates } from "@/lib/evidence/skill-confirmation-standing-read";
 import { Card } from "@/components/ui/Card";
 import { MessageButton } from "@/components/app/message-button";
 import { JournalWorkIntelligence } from "@/components/app/journal-work-intelligence";
@@ -33,7 +38,9 @@ import {
   WORK_PERIOD_KEYS,
   type WorkPeriodKey,
 } from "@/lib/journal/work-intelligence";
-import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
+import { anonymizedWorkerToken } from "@/lib/visibility/worker-profile-visibility";
+import { viewerHasWorkerRelation } from "@/lib/visibility/worker-identity-visibility";
+import { readDiscoverableWorkers } from "@/lib/visibility/discoverable-workers";
 import { readRecordedWorkFor } from "@/lib/player-card/work-history";
 import { readWorkPhotosFor } from "@/lib/journal/personal-gallery";
 import { listActiveOfferingsByProvider } from "@/lib/services/service-offerings";
@@ -111,17 +118,41 @@ export default async function PersonPage({
     return <RestrictedState t={t} />;
   }
 
-  // RLS does the permission work: no relation / no consent → zero rows.
-  const { data: worker } = await supabase
+  // RLS does the permission work. The raw row (name, free text) comes back only with a working
+  // relationship; a worker found through the employer-visibility consent comes back through the
+  // anonymous projection instead (no name, no headline). Neither → restricted.
+  const { data: relatedWorker } = await supabase
     .from("workers")
     .select(
       // `preferred_countries` is the same already-authorised row, and it is
       // already in PROFILE_SAFE_PREVIEW_FIELDS — it was simply never
       // rendered here, so the page could not answer WHERE CAN THEY WORK.
-      "id, profile_id, display_name, headline, experience_years, current_location_country, preferred_countries, availability_status, available_from",
+      "id, profile_id, display_name, headline, bio, experience_years, current_location_country, preferred_countries, availability_status, available_from",
     )
     .eq("id", workerId)
     .maybeSingle();
+  const discovered = relatedWorker
+    ? null
+    : ((await readDiscoverableWorkers(supabase, [workerId])).get(workerId) ?? null);
+  const worker = relatedWorker
+    ? relatedWorker
+    : discovered
+      ? {
+          id: discovered.id,
+          // No profile id for a found worker (it could join to public business records).
+          profile_id: null,
+          display_name: null,
+          headline: null,
+          bio: null,
+          experience_years: discovered.experience_years,
+          current_location_country: discovered.current_location_country,
+          preferred_countries: discovered.preferred_countries
+            ? [...discovered.preferred_countries]
+            : null,
+          availability_status: discovered.availability_status,
+          available_from: discovered.available_from,
+        }
+      : null;
 
   if (!worker) {
     return <RestrictedState t={t} />;
@@ -139,10 +170,18 @@ export default async function PersonPage({
   // (which silently rendered ZERO skills for every worker here until W4).
   // The error is therefore CHECKED: a failed read is a read failure, not an
   // empty skill set.
-  const { data: skillRows, error: skillsError } = await supabase
-    .from("worker_skills")
-    .select("skill_id, verified, source, skills ( slug )")
-    .eq("worker_id", workerId);
+  //
+  // A recorded confirmation reads as confirmed only while it STANDS
+  // (lib/evidence/skill-confirmation-standing.ts). This viewer is not the
+  // person and cannot read their journal, so the cross-party DB door decides —
+  // asked beside the skills read, not after it (no added stage).
+  const [{ data: skillRows, error: skillsError }, standing] = await Promise.all([
+    supabase
+      .from("worker_skills")
+      .select("skill_id, verified, source, skills ( slug )")
+      .eq("worker_id", workerId),
+    readCrossPartyStandingStates(supabase, [workerId]),
+  ]);
 
   type SkillRow = {
     skill_id: string;
@@ -150,12 +189,18 @@ export default async function PersonPage({
     source: string | null;
     skills: { slug: string | null } | null;
   };
-  const skills = ((skillRows ?? []) as unknown as SkillRow[]).map((r) => {
+  const judgedSkillRows = withCrossPartyStandingConfirmation(
+    (skillRows ?? []) as unknown as SkillRow[],
+    standing,
+    workerId,
+  );
+  const skills = judgedSkillRows.map((r) => {
     const slug = r.skills?.slug ?? null;
     const label =
       slug && tSkillNames.has(slug) ? tSkillNames(slug) : (slug ?? null);
-    // W6 slice 1: chip token derived from the ONE canonical tier.
-    const tier = deriveEvidenceTier(r);
+    // W6 slice 1: chip token derived from the ONE canonical tier — over the
+    // STANDING confirmation, an unknown one under-stated, never erased.
+    const tier: EvidenceTier = standingEvidenceTier(r);
     const state: "verified" | "work" | "declared" =
       tier === "manager_confirmed"
         ? "verified"
@@ -251,9 +296,17 @@ export default async function PersonPage({
     }
   }
 
+  // The row is readable through the employer-visibility consent too; the NAME
+  // is shown only to a viewer with a real working relationship (owner
+  // directive 2026-10-18 — anonymous by default, identity by permission).
+  const nameVisible = await viewerHasWorkerRelation(
+    supabase,
+    worker.id as string,
+    (worker.profile_id as string | null) ?? null,
+  );
   const name =
-    (worker.display_name as string | null)?.trim() ||
-    anonymizedWorkerLabel(worker.id as string);
+    (nameVisible ? (worker.display_name as string | null)?.trim() : null) ||
+    t("anonymousName", { token: anonymizedWorkerToken(worker.id as string) });
   const available =
     (worker.availability_status as string | null) === "available";
 
@@ -330,6 +383,13 @@ export default async function PersonPage({
               {worker.headline ? (
                 <p className="text-sm text-text-secondary">
                   {worker.headline as string}
+                </p>
+              ) : null}
+              {/* PER-2: the person's own summary for the organisations they work with
+                  (the row is readable only under caller_has_worker_relation_v1). */}
+              {worker.bio ? (
+                <p className="max-w-prose whitespace-pre-line text-sm leading-relaxed text-text-secondary" data-testid="person-public-bio">
+                  {worker.bio as string}
                 </p>
               ) : null}
         </IdentityStage>

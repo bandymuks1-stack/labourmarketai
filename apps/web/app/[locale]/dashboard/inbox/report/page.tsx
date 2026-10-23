@@ -22,6 +22,7 @@ export default async function ReviewReportPage({
   const t = await getTranslations("reviewReport");
   const tSkill = await getTranslations("skillNames");
   const tUnit = await getTranslations("productivityUnits");
+  const tJournal = await getTranslations("journal");
   const displayLocale = await getLocale();
 
   const supabase = await createClient();
@@ -52,12 +53,12 @@ export default async function ReviewReportPage({
           <span>
             {t("totals.pending")}:{" "}
             <span className="font-semibold text-text-primary">
-              {report.totals.pendingEntries}
+              {report.loadFailed ? "—" : report.totals.pendingEntries}
             </span>
           </span>
           <span>
             {t("totals.workers")}:{" "}
-            <span className="font-semibold text-text-primary">{report.totals.workers}</span>
+            <span className="font-semibold text-text-primary">{report.loadFailed ? "—" : report.totals.workers}</span>
           </span>
           <span>
             {t("totals.confirmations")}:{" "}
@@ -77,12 +78,18 @@ export default async function ReviewReportPage({
         </p>
       </header>
 
-      {report.workers.length === 0 ? (
+      {report.loadFailed ? (
+        // A read that did not answer is UNKNOWN, never "nothing to review" —
+        // the same line, and the same rule, as the inbox this report summarises.
+        <p role="status" className="text-sm text-state-warning" data-testid="review-report-load-failed">
+          {tJournal("inbox.loadFailed")}
+        </p>
+      ) : report.workers.length === 0 ? (
         <p className="text-sm text-text-secondary">{t("empty")}</p>
       ) : (
         <div className="flex flex-col gap-5">
           {report.workers.map((w) => (
-            <section key={w.workerName} className="card-border flex flex-col gap-3 p-4">
+            <section key={w.workerKey} className="card-border flex flex-col gap-3 p-4">
               <h2 className="break-words font-display text-base font-semibold text-text-primary">
                 {w.workerName}
               </h2>

@@ -18,12 +18,14 @@ import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { LmcBalanceSection } from "@/components/app/lmc-balance-section";
 import { AccountBillingSection } from "@/components/app/account-billing-section";
+import { PilotPassSection } from "@/components/app/pilot-pass-section";
 import { ConnectedAppsSection } from "@/components/app/connected-apps-section";
 import { parseConnectedAppsFeedback } from "@/lib/auth/connected-apps";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
 import { isStripeActive } from "@/lib/billing/config-core";
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
+import { resolveBillingSubject } from "@/lib/billing/billing-subject";
 import {
   NotificationPreferencesSection,
   type NotificationPreferenceRowView,
@@ -54,7 +56,7 @@ export default async function AccountPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ billing?: string; apps?: string }>;
+  searchParams: Promise<{ billing?: string; apps?: string; pilot_pass?: string; pilot_pass_refused?: string }>;
 }) {
   const { locale } = await params;
   // Native-nav `?billing=` return feedback (same idiom as planning's plain
@@ -62,7 +64,7 @@ export default async function AccountPage({
   // `?billing=test_success` / `portal_return`, and until now nothing read it.
   // `?apps=revoked|error` — the Connected Apps disconnect action's return
   // feedback (same idiom); anything else is ignored.
-  const { billing, apps } = await searchParams;
+  const { billing, apps, pilot_pass, pilot_pass_refused } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("auth.dashboard");
   const tRoot = await getTranslations();
@@ -148,7 +150,10 @@ export default async function AccountPage({
 
   // Live billing is configured → the "payments not active yet" copy would
   // contradict the real order control below. Same gate as /pricing.
-  const billingLive = isStripeActive(getBillingConfig());
+  const billingWorkspace = (await resolveBillingSubject()).subject;
+  const billingLive = isStripeActive(
+    getBillingConfigFor(billingWorkspace?.type === "organization" ? billingWorkspace.id : null),
+  );
 
   return (
     <div className="flex flex-col gap-5">
@@ -159,9 +164,18 @@ export default async function AccountPage({
         </p>
       </header>
 
+      {/* Organization pilot pass (1 € once → the paid plan for the pilot
+          period) — first on the page, never inside the collapsed plan fold
+          (owner measured 2026-10-22: the pay control could not be found
+          there). Renders nothing unless the owner switched it on and billing
+          is active for an organization this person can act for. */}
+      <PilotPassSection result={pilot_pass ?? null} refused={pilot_pass_refused ?? null} />
+
       {/* Plan, billing and balance are ONE question ("what am I on?") and
           payments are not live — one line, open on demand (owner 2026-10-10). */}
-      <Fold title={tRoot("accountPlan.title")} testId="account-plan-fold">
+      {/* Open while billing is live: the plan and its order/portal controls are
+          then real, and a closed fold hid them (owner, 2026-10-22). */}
+      <Fold title={tRoot("accountPlan.title")} testId="account-plan-fold" defaultOpen={billingLive}>
         {/* Honest payment readiness — payments are not active yet (billing
             disabled). No pay-now, no subscription-active, no paid unlock. */}
         {!billingLive && (
@@ -183,11 +197,13 @@ export default async function AccountPage({
           <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {tRoot("accountPlan.title")}
           </p>
-          <p className="mt-2 text-sm text-text-primary">
-            {tRoot("accountPlan.freePilot")}
-          </p>
           {!billingLive && (
             <>
+              {/* "Everything is free" is true only while billing is off; with
+                  live billing the plan state below is the truth. */}
+              <p className="mt-2 text-sm text-text-primary">
+                {tRoot("accountPlan.freePilot")}
+              </p>
               <p className="mt-2 text-xs leading-relaxed text-text-secondary">
                 {tRoot("accountPlan.prepared")}
               </p>
@@ -335,6 +351,8 @@ export default async function AccountPage({
           emailInactiveNote: tPrefs("emailInactiveNote"),
           error: tPrefs("error"),
           unavailable: tPrefs("unavailable"),
+          saving: tPrefs("saving"),
+          saved: tPrefs("saved"),
         }}
       />
 

@@ -326,6 +326,19 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    chat table, sends nothing outbound. No product call site yet (no
     //    spend caller exists); it is the prepared seam for spend-failure
     //    compensation.
+    //  - lib/lmc/wallet.ts — LMC Wagon 2 wallet server layer (owner order
+    //    2026-10-21: build purchase/spend behind the flags, leave them OFF).
+    //    Typed callers for lmc_record_purchase_v1 and lmc_spend_v1. Service
+    //    role is genuinely required, not convenient: applied migration
+    //    20261006100300 revokes EXECUTE on both from public/anon/authenticated
+    //    and grants service_role ONLY. Every entry point returns `disabled`
+    //    on its literal-false TS kill-switch BEFORE the client is built
+    //    (pinned by lib/guards/lmc-wallet-flags-off.test.ts); behind it the
+    //    RPCs re-check lmc_settings, and lmc_spend_v1 re-checks that the actor
+    //    owns the debited account or is an admin. Calls exactly two RPCs
+    //    (+ compensation via lib/lmc/compensation.ts), reads/writes no table
+    //    directly, touches no chat table, sends nothing outbound, and has no
+    //    product call site.
     //  - lib/ai/runtime/audit-store.ts — AI Router v1 append-only run audit.
     //    Best-effort INSERT of one ai_runs row per LIVE AI run + a head-only
     //    COUNT for the daily-run budget. ai_runs by design carries NO
@@ -492,6 +505,13 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       callers.sort(),
       `unexpected service-role caller(s) — update docs/audits/CHAT_VISIBILITY_AUDIT.md and justify: ${callers.join(", ")}`,
     ).toEqual([
+      // 2026-10-19: the automated GDPR erasure sweep. It calls ONLY the
+      // service-role-granted privacy_erasure_* / erase_user_account_v3 RPCs and
+      // the Storage API for the listed files of the person being erased; it
+      // reads no chat table itself (the executor severs message authorship
+      // inside the database, by the reviewed registry).
+      "app/api/cron/privacy-erasure/route.ts",
+      "app/api/internal/capability-readback/v1/route.ts",
       "components/admin/product-metrics-section.tsx",
       "components/admin/vacancy-sources-section.tsx",
       "lib/admin/billing-actions.ts",
@@ -511,6 +531,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/invitations/public-preview.ts",
       "lib/invitations/signup-bridge.ts",
       "lib/lmc/compensation.ts",
+      "lib/lmc/wallet.ts",
       "lib/notifications/event-emitters.ts",
       "lib/profile/avatar.ts",
       "lib/sales/lead-intake.ts",

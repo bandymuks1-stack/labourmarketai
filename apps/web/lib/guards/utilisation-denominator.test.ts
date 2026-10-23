@@ -61,6 +61,8 @@ describe("the denominator is measured, never assumed", () => {
     const DEMAND_SIDE_ONLY = [
       "20260711330000_worker_demand_structured_v2_exposure.sql",
       "20260903130000_opportunity_type_internship_apprenticeship_v1.sql",
+      // the same demand projection, re-issued only to add 'uk' to its two language lists
+      "20261019170000_worker_language_uk_v1.sql",
     ];
     const migrations = join(webRoot, "..", "..", "supabase", "migrations");
     const found = readdirSync(migrations)

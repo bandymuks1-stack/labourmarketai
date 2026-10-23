@@ -100,3 +100,16 @@ describe("only an open ask can be taken back", () => {
     );
   });
 });
+
+describe("the app's open-ask budget counts what the database counts", () => {
+  it("an OPEN ask is created AND not past its expiry, as in propose_contact_disclosure_request_v1", () => {
+    // Counting status alone kept an employer whose asks lapsed refused forever:
+    // nothing in the app runs the admin expiry sweep.
+    expect(actions).toMatch(/\.eq\("status", "created"\)\.gt\("expires_at", new Date\(\)\.toISOString\(\)\)/);
+    const mig = readFileSync(
+      join(WEB, "..", "..", "supabase", "migrations", "20260716120000_contact_disclosure_requests_v1.sql"),
+      "utf8",
+    );
+    expect(mig).toMatch(/status = 'created' and expires_at > now\(\)/);
+  });
+});

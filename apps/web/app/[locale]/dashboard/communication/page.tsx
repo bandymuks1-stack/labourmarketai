@@ -13,6 +13,7 @@ import { readCounterpartIdentities } from "@/lib/communication/contact-permissio
 import { readConversationSourceContexts } from "@/lib/communication/conversation-source";
 import { getUnreadConversationIds } from "@/lib/communication/unread";
 import { getConversationPreviews } from "@/lib/communication/inbox-preview";
+import { isSyntheticFixtureLabel, isSyntheticViewer } from "@/lib/qa/synthetic-fixture";
 import {
   deriveInboxPriority,
   sortByInboxPriority,
@@ -69,9 +70,15 @@ export default async function CommunicationListPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/communication`);
 
+  // A PERSONAL inbox (2026-10-18): only threads the viewer actively takes part
+  // in. `conversations_select` also admits `is_admin()`, so a platform admin's
+  // inbox listed every other person's private threads (and every QA walk's
+  // synthetic thread). Admin oversight belongs on admin surfaces, never here.
   const conversationsRes = await asAny(supabase)
     .from("conversations")
-    .select("id, subject, kind, created_by, updated_at")
+    .select("id, subject, kind, created_by, updated_at, conversation_participants!inner(profile_id)")
+    .eq("conversation_participants.profile_id", user.id)
+    .is("conversation_participants.revoked_at", null)
     .order("updated_at", { ascending: false })
     .limit(100);
   // FAILED ≠ EMPTY: a read that errored must not render as "no conversations
@@ -92,15 +99,19 @@ export default async function CommunicationListPage({
   // recently-bumped read threads. Owner UX recovery v1: the two groups now
   // render as LABELLED sections (unread / earlier) so prioritisation is
   // visible structure, not just an invisible sort.
-  const unreadConversations = fetched.filter((c) => unreadIds.has(c.id));
-  const readConversations = fetched.filter((c) => !unreadIds.has(c.id));
-
   // Newest-message preview per thread (sender + first line) — WHAT is new,
   // visible without opening every thread.
   const previews = await getConversationPreviews(
     fetched.map((c) => c.id),
     user.id,
   );
+  // Synthetic QA threads never reach a real person's inbox (the one rule in
+  // lib/qa/synthetic-fixture.ts); a documented QA identity still sees them.
+  const listed = isSyntheticViewer(user)
+    ? fetched
+    : fetched.filter((c) => !isSyntheticFixtureLabel(c.subject, previews.get(c.id)?.text));
+  const unreadConversations = listed.filter((c) => unreadIds.has(c.id));
+  const readConversations = listed.filter((c) => !unreadIds.has(c.id));
 
   // §8.1 PRIORITY — derived from real thread state (who wrote last, is it
   // unread, how long has it waited). No priority column is invented: the

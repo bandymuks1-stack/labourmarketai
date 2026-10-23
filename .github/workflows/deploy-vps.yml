@@ -1,0 +1,247 @@
+name: Deploy to VPS
+
+# Production deploy WITHOUT Vercel (owner decision 2026-10-17, option D: the
+# existing Agentai VPS, Cloudflare Free in front, Supabase unchanged).
+#
+# What it does: builds the Next.js standalone artefact on a Linux runner (the
+# VPS has 3.9 GB RAM and cannot build; the build peaks at ~6 GB), packages it
+# with scripts/package-standalone.mjs, ships the tarball over SSH to the VPS
+# forced-command receiver (ops/vps/lm-deploy-receive.sh), which extracts it into
+# /root/lm-prod/releases/<sha>/, starts the isolated container with
+# ops/vps/lm-prod-run.sh, waits for /api/health and ROLLS BACK to the previous
+# release if health never comes.
+#
+# Triggers (owner decision 2026-10-18 "remove Vercel completely": GitHub Actions
+# deploys verified main to the VPS automatically):
+#   - workflow_run: every Quality Gates run that SUCCEEDS on a push to main deploys
+#     that exact sha, even when main has moved on since: waiting for "the head's own
+#     run" starved production during merge bursts (2026-10-22). It never deploys
+#     BACKWARDS: right before shipping, the deploy job reads the build production
+#     actually serves (public /api/health) and ships only a sha that is AHEAD of it.
+#     Deploys queue (cancel-in-progress: false); a newer pending deploy supersedes an
+#     older pending one, never a running one. The ordering applies to this automatic
+#     path only; workflow_dispatch below still rolls back or redeploys any main sha.
+#   - workflow_dispatch: manual deploy / redeploy of a sha on main (rollback path).
+# It never deploys a tree whose Quality Gates did not pass (checked below for both).
+#
+# Secrets (owner-created, names only):
+#   VPS_DEPLOY_SSH_KEY     private key whose public half is in the VPS
+#                          authorized_keys with a forced command (see
+#                          ops/vps/lm-deploy-receive.sh header). Nothing else
+#                          can be run with it.
+#   VPS_DEPLOY_HOST        the production host address (kept in the secret, never in this file)
+#   VPS_DEPLOY_KNOWN_HOSTS the VPS host key line (ssh-keyscan output)
+# Existing: secrets.NEXT_PUBLIC_SUPABASE_URL, vars.PROD_QA_ANON_KEY (public
+# values baked into the client bundle at build time).
+#
+# Without the three VPS_DEPLOY_* secrets the workflow FAILS loudly (no false
+# green): a deploy that did not happen must never look like one that did.
+
+on:
+  workflow_run:
+    workflows: ["Quality Gates"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Commit on main to deploy (full sha; default = main head)"
+        required: false
+        default: ""
+      skip_quality_check:
+        description: "Owner only: deploy even if no successful Quality Gates run exists for the sha"
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    # Automatic path: only a SUCCESSFUL Quality Gates run that came from a push to main.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    outputs:
+      skip: ${{ steps.resolve.outputs.skip }}
+      sha: ${{ steps.resolve.outputs.sha }}
+      sha256: ${{ steps.pack.outputs.sha256 }}
+    steps:
+      - name: Resolve sha
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_SHA: ${{ inputs.sha }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          head=$(gh api repos/${GITHUB_REPOSITORY}/branches/main --jq .commit.sha)
+          if [ "$EVENT" = "workflow_run" ]; then
+            # Deployed even if main moved on (the deploy job refuses to go backwards).
+            sha="$RUN_SHA"
+          else
+            sha="${INPUT_SHA:-$head}"
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::sha must be a full 40-hex commit"; exit 1; }
+          gh api "repos/${GITHUB_REPOSITORY}/compare/main...${sha}" --jq '.status' | grep -qE '^(identical|behind)$' \
+            || { echo "::error::${sha} is not on main (only main is deployed to production)"; exit 1; }
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+      - name: Require a successful Quality Gates run for this sha
+        if: ${{ steps.resolve.outputs.skip != 'true' && !inputs.skip_quality_check }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.resolve.outputs.sha }}
+          EVENT: ${{ github.event_name }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          # Automatic path: the triggering Quality Gates run is read BY ID — an
+          # exact lookup. The head_sha/status listing below is a search index
+          # that lagged for 20+ minutes on 2026-10-22 (#2666's deploy refused
+          # three times while its Quality Gates run had succeeded).
+          if [ "$EVENT" = "workflow_run" ] && [ -n "$RUN_ID" ]; then
+            got=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '[.path, .head_sha, .conclusion] | join(" ")')
+            [ "$got" = ".github/workflows/quality.yml ${SHA} success" ] && { echo "quality: run ${RUN_ID} succeeded for ${SHA:0:9}"; exit 0; }
+          fi
+          # Manual path (or an unexpected trigger): list this sha's runs and
+          # filter here, asking again for up to 3 minutes.
+          ok=0
+          for attempt in 1 2 3 4 5 6 7; do
+            ok=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/quality.yml/runs?head_sha=${SHA}&per_page=20" --jq '[.workflow_runs[] | select(.conclusion == "success")] | length')
+            [ "$ok" -ge 1 ] && break
+            [ "$attempt" -lt 7 ] && sleep 30
+          done
+          [ "$ok" -ge 1 ] || { echo "::error::no successful Quality Gates run for ${SHA}; wait for CI or (owner) set skip_quality_check"; exit 1; }
+      - uses: actions/checkout@v4
+        if: steps.resolve.outputs.skip != 'true'
+        with:
+          ref: ${{ steps.resolve.outputs.sha }}
+      - uses: pnpm/action-setup@v4
+        if: steps.resolve.outputs.skip != 'true'
+      - uses: actions/setup-node@v4
+        if: steps.resolve.outputs.skip != 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        if: steps.resolve.outputs.skip != 'true'
+      - name: Build (standalone; public values baked in, no secrets)
+        if: steps.resolve.outputs.skip != 'true'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
+          NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS: "true"
+          # The Stripe PUBLISHABLE key (public by design, pk_…). The Vercel build
+          # carried it; the 2026-10-17 move to this pipeline dropped it, so the
+          # payments UI could never load even with the server keys restored.
+          # Empty while the repository variable is unset — the same as today.
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_TELEMETRY_DISABLED: "1"
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: |
+          set -euo pipefail
+          [ -n "$NEXT_PUBLIC_SUPABASE_URL" ] && [ -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ] || { echo "::error::public Supabase URL/anon key not configured (secrets.NEXT_PUBLIC_SUPABASE_URL / vars.PROD_QA_ANON_KEY)"; exit 1; }
+          pnpm -F web build
+      - name: Package + secret scan
+        if: steps.resolve.outputs.skip != 'true'
+        id: pack
+        env:
+          SHA: ${{ steps.resolve.outputs.sha }}
+        run: |
+          set -euo pipefail
+          node scripts/package-standalone.mjs .standalone-dist
+          # No server secret may be baked into the artefact: only the public anon JWT (role anon) is allowed.
+          # Key-SHAPED values only: the app's own guards mention the prefixes (`/^sk_test_/`, `/^whsec_/`) as
+          # bare literals in the compiled bundle, which is not a key. A real key carries its random body.
+          if grep -rIlE '(sk|rk)_(live|test)_[A-Za-z0-9]{16,}|whsec_[A-Za-z0-9]{16,}|sb_secret_[A-Za-z0-9_-]{16,}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' .standalone-dist >/dev/null; then echo "::error::secret-shaped string found in the artefact"; exit 1; fi
+          if grep -rIl '"role":"service_role"' .standalone-dist >/dev/null || grep -rIlE 'eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]*c2VydmljZV9yb2xl' .standalone-dist >/dev/null; then echo "::error::service-role token found in the artefact"; exit 1; fi
+          tar -C .standalone-dist -czf "labourmarket-web-standalone-${SHA}.tgz" .
+          sha256=$(sha256sum "labourmarket-web-standalone-${SHA}.tgz" | cut -d' ' -f1)
+          echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
+          ls -la "labourmarket-web-standalone-${SHA}.tgz"; echo "sha256 $sha256" | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: steps.resolve.outputs.skip != 'true'
+        with:
+          name: standalone-${{ steps.resolve.outputs.sha }}
+          path: labourmarket-web-standalone-${{ steps.resolve.outputs.sha }}.tgz
+          retention-days: 14
+          if-no-files-found: error
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production-vps
+    env:
+      SHA: ${{ needs.build.outputs.sha }}
+      SHA256: ${{ needs.build.outputs.sha256 }}
+    steps:
+      - name: Require deploy secrets (no silent no-op)
+        env:
+          HAS_KEY: ${{ secrets.VPS_DEPLOY_SSH_KEY != '' }}
+          HAS_HOST: ${{ secrets.VPS_DEPLOY_HOST != '' }}
+          HAS_KH: ${{ secrets.VPS_DEPLOY_KNOWN_HOSTS != '' }}
+        run: |
+          [ "$HAS_KEY" = "true" ] && [ "$HAS_HOST" = "true" ] && [ "$HAS_KH" = "true" ] \
+            || { echo "::error::VPS_DEPLOY_SSH_KEY / VPS_DEPLOY_HOST / VPS_DEPLOY_KNOWN_HOSTS are not all configured — nothing deployed"; exit 1; }
+      - name: Never deploy backwards (compare with the build production serves)
+        id: order
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          # Only the AUTOMATIC path is ordered. A manual dispatch is the rollback / same-sha redeploy path and ships what
+          # the owner named.
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"; echo "manual dispatch: deploying ${SHA:0:9} as requested" | tee -a "$GITHUB_STEP_SUMMARY"; exit 0
+          fi
+          live=$(curl -sS --max-time 20 https://labourmarket.ai/api/health 2>/dev/null | grep -oE '"build":"[0-9a-f]{7,40}"' | cut -d'"' -f4 || true)
+          if [ -z "$live" ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"; echo "production build unreadable: deploying ${SHA:0:9} (Quality Gates green, on main)" | tee -a "$GITHUB_STEP_SUMMARY"; exit 0
+          fi
+          rel=$(gh api "repos/${GITHUB_REPOSITORY}/compare/${live}...${SHA}" --jq '.status' 2>/dev/null || echo unknown)
+          case "$rel" in
+            ahead|unknown) echo "go=true" >> "$GITHUB_OUTPUT"; echo "deploying ${SHA:0:9}: ${rel} of live ${live}" | tee -a "$GITHUB_STEP_SUMMARY" ;;
+            *) echo "go=false" >> "$GITHUB_OUTPUT"; echo "skip: ${SHA:0:9} is ${rel} relative to live ${live}; production already serves it or newer" | tee -a "$GITHUB_STEP_SUMMARY" ;;
+          esac
+      - uses: actions/download-artifact@v4
+        if: steps.order.outputs.go == 'true'
+        with:
+          name: standalone-${{ env.SHA }}
+      - name: Ship + activate on the VPS (forced-command receiver)
+        if: steps.order.outputs.go == 'true'
+        env:
+          SSH_KEY: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
+          HOST: ${{ secrets.VPS_DEPLOY_HOST }}
+          KNOWN_HOSTS: ${{ secrets.VPS_DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          umask 077; mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key; printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          f="labourmarket-web-standalone-${SHA}.tgz"
+          echo "${SHA256}  ${f}" | sha256sum -c -
+          # The receiver reads the tarball from stdin and prints only names, sizes, http codes and the outcome.
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes "lmdeploy@${HOST}" "deploy ${SHA} ${SHA256}" < "$f" | tee deploy.log
+          grep -q '^DEPLOY_OK ' deploy.log || { echo "::error::receiver did not report DEPLOY_OK (see log; it rolls back by itself)"; exit 1; }
+          rm -f ~/.ssh/deploy_key
+      - name: Public verification through Cloudflare
+        if: steps.order.outputs.go == 'true'
+        run: |
+          set -euo pipefail
+          for i in 1 2 3 4 5 6; do
+            body=$(curl -sS --max-time 20 https://labourmarket.ai/api/health || true)
+            echo "$body" | grep -q "\"build\":\"${SHA:0:8}\"" && echo "$body" | grep -q '"ok":true' && { echo "public health serves build ${SHA:0:8}" | tee -a "$GITHUB_STEP_SUMMARY"; exit 0; }
+            sleep 10
+          done
+          echo "::error::public /api/health does not serve build ${SHA:0:8} yet"; exit 1

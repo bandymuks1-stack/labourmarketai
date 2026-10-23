@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { getCountryMeta } from "@/lib/location/country-model";
 import {
   createMarketplaceListingAction,
   updateMarketplaceListingAction,
@@ -80,6 +81,8 @@ type Draft = {
   quantity: string;
   unit: string;
   expiresOn: string;
+  /** Publish as the governed active organization (create only; see `publisher`). */
+  asOrganization: boolean;
 };
 
 const EMPTY_DRAFT: Draft = {
@@ -100,6 +103,7 @@ const EMPTY_DRAFT: Draft = {
   quantity: "",
   unit: "",
   expiresOn: "",
+  asOrganization: true,
 };
 
 function toNumber(v: string): number | null {
@@ -128,17 +132,24 @@ export function MarketplaceListingsSection({
   myRows,
   discoveryRows,
   needsMigration,
+  readUnavailable = false,
   extended,
   unavailable = [],
+  publisher = null,
   locale,
 }: {
   myRows: MarketplaceListingRow[];
   discoveryRows: MarketplaceDiscoveryRow[];
   needsMigration: boolean;
+  /** The platform's own listings read failed (audit 2026-10-16, M-2). */
+  readUnavailable?: boolean;
   /** The universal-marketplace migration is applied. */
   extended: boolean;
   /** Federated sources that could not be read (never rendered as empty). */
   unavailable?: readonly ("vacancies" | "workforce" | "demand")[];
+  /** The organization the person governs in the active workspace — offered as
+   *  the publisher of a NEW listing (owner or manager only; the RPC re-checks). */
+  publisher?: { id: string; name: string } | null;
   locale: string;
 }) {
   const t = useTranslations("marketplaceListings");
@@ -204,6 +215,7 @@ export function MarketplaceListingsSection({
       quantity: row.quantity != null ? String(row.quantity) : "",
       unit: row.unit ?? "",
       expiresOn: row.expiresAt ? row.expiresAt.slice(0, 10) : "",
+      asOrganization: row.organizationId !== null,
     });
     setMode({ kind: "edit", id: row.id });
   }
@@ -268,6 +280,10 @@ export function MarketplaceListingsSection({
           extended && draft.expiresOn
             ? new Date(`${draft.expiresOn}T23:59:59`).toISOString()
             : null,
+        // The publisher is chosen once, at creation; an edit never moves a
+        // listing between a person and an organization.
+        organizationId:
+          mode.kind === "create" && publisher && draft.asOrganization ? publisher.id : null,
       };
       const res =
         mode.kind === "edit"
@@ -307,13 +323,16 @@ export function MarketplaceListingsSection({
     });
   }
 
-  if (needsMigration) {
+  if (needsMigration || readUnavailable) {
     return (
       <section className="card-border p-4">
         <h2 className="font-display text-lg font-semibold text-text-primary">{t("title")}</h2>
         <p className="mt-2 text-sm text-text-secondary">{t("intro")}</p>
-        <p className="mt-3 rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted">
-          {t("notAvailable")}
+        <p
+          className="mt-3 rounded-md border border-ink-500 bg-ink-800/40 p-3 text-sm text-text-muted"
+          data-testid={readUnavailable ? "listings-read-unavailable" : undefined}
+        >
+          {readUnavailable ? t("readUnavailable") : t("notAvailable")}
         </p>
       </section>
     );
@@ -666,6 +685,20 @@ export function MarketplaceListingsSection({
             {draft.domain === "service_need" && (
               <p className="text-xs text-text-muted">{t("serviceNeedHint")}</p>
             )}
+            {mode.kind === "create" && publisher && (
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-text-secondary">{t("formPublisherLabel")}</span>
+                <select
+                  className={inputCls}
+                  value={draft.asOrganization ? "organization" : "self"}
+                  data-testid="listing-form-publisher"
+                  onChange={(e) => setDraft({ ...draft, asOrganization: e.target.value === "organization" })}
+                >
+                  <option value="organization">{publisher.name}</option>
+                  <option value="self">{t("publisherSelf")}</option>
+                </select>
+              </label>
+            )}
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-text-secondary">{t("formTitleLabel")}</span>
               <input
@@ -698,7 +731,16 @@ export function MarketplaceListingsSection({
                   data-testid="listing-form-country"
                   maxLength={2}
                   placeholder={t("formCountryPlaceholder")}
-                  onChange={(e) => setDraft({ ...draft, locationCountry: e.target.value.toUpperCase() })}
+                  onChange={(e) => {
+                    const code = e.target.value.toUpperCase();
+                    // The price currency follows the country while the person
+                    // has not chosen one themselves (audit 2026-10-16, M-4):
+                    // a Norwegian seller no longer publishes an EUR price by
+                    // inertia. A deliberate choice is never overwritten.
+                    const inherited = draft.currency === "" || draft.currency === EMPTY_DRAFT.currency;
+                    const next = inherited ? (getCountryMeta(code)?.currency ?? EMPTY_DRAFT.currency) : draft.currency;
+                    setDraft({ ...draft, locationCountry: code, currency: next });
+                  }}
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
@@ -842,6 +884,16 @@ export function MarketplaceListingsSection({
                           {t("expired")}
                         </span>
                       )}
+                      {row.organizationId && (
+                        <span
+                          data-testid="my-listing-publisher"
+                          className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted"
+                        >
+                          {row.organizationId === publisher?.id
+                            ? t("publishedAs", { name: publisher.name })
+                            : t("publishedAsOrganization")}
+                        </span>
+                      )}
                     </div>
                     <p className="mt-0.5 text-xs text-text-muted">
                       {t(`kinds.${row.listingKind}`)} · {subjectLabel(row.category, "other")}
@@ -877,6 +929,7 @@ export function MarketplaceListingsSection({
                             title={t("pause")}
                             aria-label={t("pause")}
                             onClick={() => changeStatus(row.id, "paused")}
+                            data-testid={`listing-pause-${row.id}`}
                             disabled={pending}
                             className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
                           >
@@ -888,6 +941,7 @@ export function MarketplaceListingsSection({
                           title={t("close")}
                           aria-label={t("close")}
                           onClick={() => changeStatus(row.id, "closed")}
+                          data-testid={`listing-close-${row.id}`}
                           disabled={pending}
                           className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-warning hover:border-state-warning sm:h-8 sm:w-8"
                         >

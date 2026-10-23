@@ -21,13 +21,25 @@ import { NOTIFICATION_EMAIL_INCAPABLE_TYPES } from "@/lib/notifications/email-di
  *     bell's own type vocabulary;
  *  3. the per-row read persist is wired from the client context;
  *  4. the activity page renders the durable feed beside the derived spine;
- *  5. the weekly-digest cron exists in vercel.json AND refuses without
+ *  5. the weekly-digest cron exists in the VPS cron AND refuses without
  *     CRON_SECRET (never an open trigger);
  *  6. every new copy key resolves in every ACTIVE locale.
  */
 
 const WEB = join(__dirname, "..", "..");
 const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
+// The VPS cron file is the ONE owner of scheduled routes since the 2026-10-17 move off
+// Vercel (vercel.json and its crons were removed 2026-10-18). Active lines only.
+const vpsCron = (text: string) =>
+  text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#") && !l.startsWith("SHELL="))
+    .map((l) => {
+      const m = l.match(/^(\S+ \S+ \S+ \S+ \S+) root sh \/root\/lm-prod\/bin\/lm-cron\.sh (\S+)$/);
+      return m ? { schedule: m[1], path: `/api/cron/${m[2]}` } : { schedule: "", path: l };
+    });
+
 
 describe("1. preference enforcement in the emitters", () => {
   const emitters = read("lib", "notifications", "event-emitters.ts");
@@ -113,19 +125,11 @@ describe("4. the activity page shows the durable feed", () => {
 });
 
 describe("5. weekly-digest cron", () => {
-  it("vercel.json schedules the sweep and keeps its existing keys", () => {
-    const vercel = JSON.parse(read("vercel.json")) as {
-      installCommand?: string;
-      regions?: string[];
-      crons?: { path: string; schedule: string }[];
-    };
-    expect(vercel.installCommand).toBeTruthy();
-    expect(vercel.regions).toContain("dub1");
-    const cron = (vercel.crons ?? []).find(
-      (c) => c.path === "/api/cron/weekly-digest",
-    );
-    expect(cron).toBeTruthy();
-    expect(cron!.schedule.trim().length).toBeGreaterThan(0);
+  it("the VPS cron schedules the weekly sweep exactly once (Mondays 07:00 UTC)", () => {
+    const cron = vpsCron(read("..", "..", "ops", "vps", "labourmarket.cron"));
+    const digest = cron.filter((c) => c.path === "/api/cron/weekly-digest");
+    expect(digest).toHaveLength(1);
+    expect(digest[0].schedule).toBe("0 7 * * 1");
   });
 
   it("the route refuses 401 while CRON_SECRET is unset — never an open trigger", () => {
@@ -190,4 +194,21 @@ describe("6. new copy resolves in every ACTIVE locale", () => {
       }
     });
   }
+});
+
+describe("a saved notification preference says so (production audit 2026-10-22)", () => {
+  const src = readFileSync(join(__dirname, "..", "..", "components", "app", "notification-preferences-section.tsx"), "utf8");
+  it("one live status line: saving while pending, saved after ok, the refusal otherwise", () => {
+    expect(src).toContain('if (result.kind === "ok") setNotice("saved");');
+    expect(src).toContain('data-state={pending ? "saving" : (notice ?? "idle")}');
+    expect(src).toMatch(/pending\s*\?\s*labels\.saving\s*:\s*notice === "saved"\s*\?\s*labels\.saved/);
+  });
+});
+
+describe("a profile language change says it is saving and that it landed (production audit 2026-10-22)", () => {
+  const src = readFileSync(join(__dirname, "..", "..", "components", "app", "worker-languages-section.tsx"), "utf8");
+  it("a live status line beside the add button", () => {
+    expect(src).toContain('data-testid="worker-languages-status"');
+    expect(src).toContain("{addPending ? labels.adding : addState?.ok ? labels.added : null}");
+  });
 });

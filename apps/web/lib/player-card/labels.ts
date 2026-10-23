@@ -37,6 +37,10 @@ export async function buildPlayerCardLabels(
      */
     readonly allTime?: WorkPeriodTotals | null;
     readonly allTimeTruncated?: boolean;
+    /** The decision-0025 figures (`experienceFiguresOf`) — the same the
+     *  profile hub passes; absent → the strip shows the journal only. */
+    readonly organizationHistoryHours?: number | null;
+    readonly professionalExperienceHours?: number | null;
   } = {},
 ): Promise<PlayerCardLabels> {
   const locale = await getLocale();
@@ -134,6 +138,8 @@ export async function buildPlayerCardLabels(
     truncated: opts.allTimeTruncated ?? false,
     locale,
     t: (key, values) => tIdentity(key, values),
+    organizationHistoryHours: opts.organizationHistoryHours ?? null,
+    professionalExperienceHours: opts.professionalExperienceHours ?? null,
   });
 
   return {

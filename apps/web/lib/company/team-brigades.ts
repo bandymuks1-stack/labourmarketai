@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -346,8 +347,21 @@ async function readTeamEnquiries(
  * engagement_contexts read), the read-only capability summary, plus the
  * Trust Connect layers: invitation provenance, team details and the enquiry
  * inbox — each with its own honest applied flag.
+ *
+ * Read ONCE per server render (perf 2026-10-22): the company page's partners
+ * strip and the workforce read behind the planning-conflicts count both asked
+ * for it in the same `/dashboard/company` render — the readiness probe, the
+ * team rows, the members and the ledgers twice. React `cache()` is
+ * request-scoped: every navigation reads again, and a server action (no
+ * render — e.g. the re-read after a brigade write) runs the read itself.
  */
 export async function getTeamBrigadesData(): Promise<TeamBrigadesData> {
+  return readTeamBrigadesDataOnce();
+}
+
+const readTeamBrigadesDataOnce = cache(async (): Promise<TeamBrigadesData> => readTeamBrigadesData());
+
+async function readTeamBrigadesData(): Promise<TeamBrigadesData> {
   const supabase = await createClient();
   const {
     data: { user },

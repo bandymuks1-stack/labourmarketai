@@ -34,6 +34,7 @@
  * Pure module: no IO, no server-only, safe for client + server + tests.
  */
 import { z } from "zod";
+import { WORKER_LANGUAGE_NATIVE_NAMES } from "@/lib/worker/worker-languages-model";
 import {
   ACCOMMODATION_AMENITIES,
   ACCOMMODATION_PAYERS,
@@ -492,19 +493,7 @@ export function formatPublicIsoDate(iso: string, locale: string): string {
 /** Language display names in their own language — locale-independent by
  *  design (same convention as the capture form's picker), so the closed
  *  REQUIREMENT_LANGUAGES set needs no 11-locale key fan-out. */
-export const PUBLIC_LANGUAGE_NAMES: Record<string, string> = {
-  en: "English",
-  lt: "Lietuvių",
-  lv: "Latviešu",
-  et: "Eesti",
-  nl: "Nederlands",
-  de: "Deutsch",
-  da: "Dansk",
-  no: "Norsk",
-  sv: "Svenska",
-  pl: "Polski",
-  ru: "Русский",
-};
+export const PUBLIC_LANGUAGE_NAMES: Record<string, string> = WORKER_LANGUAGE_NATIVE_NAMES;
 
 export function publicLanguageName(code: string): string {
   return PUBLIC_LANGUAGE_NAMES[code] ?? code.toUpperCase();

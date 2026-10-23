@@ -131,6 +131,7 @@
     "myTitle": "My listings",
     "intro": "List what you offer or need. Only active listings that have not expired are visible to others.",
     "notAvailable": "Not available right now.",
+    "readUnavailable": "Listings could not be read right now. That does not mean there are none — try again in a moment.",
     "empty": "No listings yet. Add your first work resource.",
     "addButton": "Add listing",
     "browseTitle": "Browse active listings",
@@ -265,7 +266,11 @@
       "work": "Work",
       "services": "Services",
       "goods": "Goods & resources"
-    }
+    },
+    "formPublisherLabel": "Published by",
+    "publisherSelf": "Me personally",
+    "publishedAs": "As {name}",
+    "publishedAsOrganization": "As an organization"
   },
   "quality": {
     "title": "Defects & quality",
@@ -1591,7 +1596,8 @@
         "no": "Not set yet"
       }
     },
-    "opportunitiesLink": "Review matched opportunities"
+    "opportunitiesLink": "Review matched opportunities",
+    "unrecordedHours": "{count, plural, one {# entry mentions hours that were never recorded} other {# entries mention hours that were never recorded}} — they are not in the total above. Open the earliest one and add the hours."
   },
   "profileState": {
     "readiness": {
@@ -3451,6 +3457,8 @@
       "empty": "No privacy requests.",
       "needsMigration": "The privacy request intake is not enabled in this environment.",
       "unavailable": "Privacy requests cannot be read right now.",
+      "due": "Reply due by {date}",
+      "overdue": "Overdue — reply was due by {date}",
       "manualNote": "Processing is manual: a person reviews and completes each request. Nothing on this list acts automatically.",
       "type": {
         "dataExport": "Data export",
@@ -5050,8 +5058,8 @@
           "desc": "Define roles, headcount and skills."
         },
         {
-          "title": "See who may fit",
-          "desc": "Browse workers and agencies whose records may fit your demand — you choose, nothing is ranked or scored automatically."
+          "title": "See who fits",
+          "desc": "Workers and agencies whose records fit your need are listed by fit, with the reasons — a signal, not a guarantee. You decide whom to contact."
         },
         {
           "title": "Reach out directly",
@@ -5410,7 +5418,9 @@
         }
       ],
       "screenshot": "Company demand flow",
-      "cta": "Start a workforce inquiry"
+      "cta": "Start a workforce inquiry",
+      "calculatorBody": "Before you post a need, size the work: labour hours, materials, equipment and travel, in your own numbers.",
+      "calculatorLink": "Estimate a project’s cost"
     },
     "agencies": {
       "eyebrow": "For agencies",
@@ -5543,7 +5553,7 @@
       },
       {
         "q": "How is billing handled?",
-        "a": "Card payment through Stripe with VAT applied by Stripe Tax; invoices, cancellation and changes live in your organization account."
+        "a": "Card payment through Stripe. Invoices, payment history and cancellation live in your organization account."
       },
       {
         "q": "Is there a limit on active positions?",
@@ -5579,15 +5589,22 @@
     },
     "deletion": {
       "title": "Account deletion request",
-      "body": "This is a request a person reviews — this page deletes nothing immediately. After review you will be contacted at your account email.",
-      "confirmLabel": "I understand I am filing an account-deletion request and a person will review it.",
+      "body": "The system deletes the account itself: file the request, then confirm it after signing in again. The system checks whether anything must be kept by law or because it concerns other people, deletes the account and sends a confirmation to your account email. If something needs review, you will be told.",
+      "confirmLabel": "I understand that once confirmed, the account and its data are deleted irreversibly.",
       "noteLabel": "Note (optional)",
       "submit": "File deletion request",
       "submitted": "Request filed",
-      "submittedBody": "A person will review it and contact you at your account email.",
+      "submittedBody": "One step left — confirm the request below.",
       "unavailable": "Not available right now.",
       "tooManyOpen": "You have too many open requests — wait until they are reviewed.",
-      "error": "Something went wrong. Try again."
+      "error": "Something went wrong. Try again.",
+      "confirmStepBody": "Your account deletion request is filed. Confirm it — the system deletes the account automatically and emails you a confirmation. This cannot be undone.",
+      "confirmStep": "Confirm account deletion",
+      "reauthBody": "For your security, confirming is possible only right after signing in (within the last 15 minutes). Sign in again — you will come back to this page.",
+      "reauth": "Sign in again",
+      "confirmedTitle": "Deletion confirmed",
+      "confirmedBody": "The system will delete the account within the next few minutes and send a confirmation to your account email. If anything needs review, we will tell you.",
+      "inReview": "Automatic deletion is paused for review: the account holds data that may have to be kept by law or that concerns other people. You will receive the decision and its reasons by email within one month. Meanwhile your profile is not shown in search."
     },
     "requests": {
       "title": "Your filed requests",
@@ -5723,7 +5740,7 @@
         {
           "heading": "AI and connected AI assistants",
           "items": [
-            "Some features use an AI model from Google (the Gemini API): translating messages and job ads between languages, and suggesting what a sentence you type in the chat is asking for. Only the text that task needs is sent. The result is a suggestion — nothing is saved as a fact about you until you confirm it.",
+            "Some features use an AI model from Google (the Gemini API). Today it receives only public market statistics — for example how many open positions a profession has — to phrase a short explanation. Translating messages and job ads, and interpreting a sentence you type in the chat, are prepared but not in use: no message text and no personal data is sent for them. If one of them is put into use, this notice will say so, and only the text that task needs would be sent. Every result is a suggestion — nothing is saved as a fact about you until you confirm it.",
             "You can connect LabourMarket.ai to an AI assistant such as ChatGPT or Claude. You approve each connection yourself on a consent screen; the assistant then acts only with your own permissions, and actions with consequences need a separate confirmation. You can see and disconnect connected apps in your account settings at any time.",
             "What an AI assistant's provider does with your conversation is governed by that provider's own privacy terms."
           ]
@@ -5752,7 +5769,7 @@
           "purpose": "Used only on administrator accounts. Remembers whether administrator controls are hidden and changes nothing about permissions."
         }
       ],
-      "localStorageNote": "Your light or dark theme choice is stored in your browser's local storage, not in a cookie.",
+      "localStorageNote": "Your browser's own storage (not cookies) holds a few items: your light or dark theme choice; which page or campaign first brought you here, stored once so a later sign-up can be attributed to it; a random per-tab session identifier that disappears when the tab closes; and small conveniences such as dismissed notices, recently viewed items and your speech-input language. None of this is shared with any third party or used for advertising, and you can clear it at any time through your browser.",
       "noTracking": "There are no analytics, advertising or third-party tracking cookies on the platform today. If this ever changes, this page will be updated first."
     },
     "pendingLegal": {
@@ -5819,7 +5836,8 @@
           "heading": "Infrastructure providers (subprocessors)",
           "items": [
             "Supabase — database, user sign-in and file storage. Data is hosted in the European Union (eu-west-1 region).",
-            "Vercel — application hosting and content delivery.",
+            "Hostinger — the virtual private server (VPS) that runs the application.",
+            "Cloudflare — the network in front of the website: domain name service, encryption in transit, caching and protection against attacks. Every request to the website passes through it.",
             "GitHub — source code hosting. No user data is stored there.",
             "Google (Gemini API) — AI processing for translating messages and job ads and for suggesting what a typed chat sentence asks for. Only the text the task needs is sent.",
             "Stripe — payment processing. A customer record is created only when an organisation starts a subscription checkout; no subscription is active today.",
@@ -6861,7 +6879,8 @@
       "active": "Active — signed-in members can find and request this service.",
       "paused": "Paused — hidden from members. Activate to make it findable again."
     },
-    "linkToRequests": "See requests for your services"
+    "linkToRequests": "See requests for your services",
+    "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead."
   },
   "communication": {
     "origin": {
@@ -7625,7 +7644,8 @@
     "notFound": "This page does not exist",
     "backHome": "Back to home",
     "dashboardSections": "Dashboard sections",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "loading": "Loading…"
   },
   "workerInvitations": {
     "title": "Pending invitations",
@@ -7906,6 +7926,7 @@
       "recorded": "h recorded",
       "confirmed": "h with a manager's record",
       "organizationHistory": "h in organization history",
+      "experienceTotal": "h of professional experience in total",
       "days": "{count, plural, one {day worked} other {days worked}}",
       "modes": {
         "label": "Card sections",
@@ -8476,12 +8497,15 @@
     "recordedHoursScopeTruncated": "From the last {count} entries; older entries are not in these figures.",
     "organizationRecordedHours": "Organization records: {hours} h on {days, plural, one {# day} other {# days}} in timesheets or imported documents ({imported} h imported, {approved} h approved) — kept apart from the journal figure and attributed to no skill.",
     "organizationRecordedHoursWithPeriods": "Organization records: {total} h in total — {hours} h on {days, plural, one {# day} other {# days}} and {periodHours} h stated as period totals ({from} – {to}) in timesheets or imported documents ({approved} h approved). Kept apart from the journal figure and attributed to no skill.",
+    "professionalExperienceTotal": "Professional experience in total: {total} h — {journal} h in the work journal and {organization} h in organisation history. Every piece of work counted once; sources shown separately.",
+    "professionalExperienceNotCounted": "A further {hours} h is shown but not added, because the same work is already counted.",
     "premium": {
       "eyebrowFallback": "Living CV",
       "facts": {
         "recorded": "recorded in your work journal",
         "confirmed": "with a manager's record",
         "organization": "in organisation records",
+        "experienceTotal": "professional experience in total",
         "languages": "languages"
       },
       "capEyebrow": "Capabilities",
@@ -8709,6 +8733,12 @@
     "teamOffersWaiting": "{count, plural, one {# team offer waiting for your answer} other {# team offers waiting for your answer}}",
     "unstructuredTag": "requirements not confirmed",
     "notStructured": "This need's required skills aren't structured yet, so no match can be computed. New needs are reviewed and structured by the administrators — no action is needed from you.",
+    "handRaisers": {
+      "title": "People who raised a hand on this need",
+      "notAssessed": "Trade match not assessed. This need names no trade, so nobody was compared with it. These people are shown because they asked to be contacted, not because they fit; no skill, qualification or suitability is implied.",
+      "badge": "Trade match not assessed",
+      "ownWords": "Everything shown about this person comes from their own profile; nothing here was compared with the need."
+    },
     "needsSetup": "Couldn’t load. Please try again.",
     "noCandidates": "No matching workers yet for this need. Matches appear as workers add journal-backed skills — check back later or broaden the need.",
     "namePlaceholder": "Worker",
@@ -8744,7 +8774,7 @@
       "pay_within_offer": "Pay within offer",
       "accommodation_ok": "Accommodation works",
       "city_match": "Same city",
-      "location_within_radius": "Within the work radius",
+      "location_within_radius": "Within the work radius (straight-line distance)",
       "profession_related": "Related profession (shared skills)",
       "skills_history_reported": "Skills named in organization history (not verified)"
     },
@@ -8755,7 +8785,7 @@
       "pay_above_offer": "Pay expectation above offer",
       "accommodation_needed_not_provided": "Needs accommodation, not provided",
       "profession_mismatch": "Different profession",
-      "location_outside_radius": "Outside the work radius"
+      "location_outside_radius": "Outside the work radius (straight-line distance)"
     },
     "candidate": "Candidate",
     "privacy": {
@@ -9140,7 +9170,10 @@
       "againModeNote": "This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
       "rateLimited": "Booking proposal limit reached (10 open, 30 per day). Try again later.",
-      "alreadyAccepted": "The worker has already accepted this proposal — agreed terms are not rewritten here. Agree any changes in the conversation."
+      "alreadyAccepted": "The worker has already accepted this proposal — agreed terms are not rewritten here. Agree any changes in the conversation.",
+      "refusedNotReachable": "This person can't be offered a booking from here — they haven't made their profile visible to employers and have no working relationship with you.",
+      "refusedNeedClosed": "This need is closed — reopen it before proposing a booking.",
+      "refusedAnswered": "The worker declined this proposal, so it is not reopened without their new consent. Continue in the conversation or find another worker."
     },
     "reason": {
       "optionalTitle": "Reason (optional)",
@@ -9406,7 +9439,7 @@
         "body": "A fixed success fee applies per hired worker, crew or company placement. A separate coordination fee applies only when document or onboarding coordination is actually delivered. The final price is confirmed before paid work starts."
       }
     ],
-    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — one active position at no cost. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. Offering or assigning a whole crew as one unit is not built yet — today a crew is matched person by person.",
+    "note": "Two things run side by side, and this page describes the second. The platform itself is automatic: the job board is public, the match preview is open without an account, and a stated need produces a ranked shortlist that explains why each person fits — one active position at no cost. The paid service above is the human one: an operator reads your inquiry, contacts you, and checks the shortlist by hand before anyone is proposed to you. A whole crew can already offer itself against your inquiry as one unit and, once both sides agree, join your project as one team; the automatic shortlist does not yet propose whole crews — it ranks people one by one.",
     "ctaLabel": "Submit a workforce inquiry →"
   },
   "adminLaunchReadiness": {
@@ -9467,6 +9500,19 @@
         "rate_limits": "Bounded request limits active",
         "freshness_demotion": "Stale profiles ranked lower"
       }
+    },
+    "mail": {
+      "title": "Official mailbox (info@labourmarket.ai)",
+      "ready": "Sending",
+      "notReady": "Not sending",
+      "present": "set",
+      "missing": "MISSING",
+      "portOk": "supported (465, TLS)",
+      "portUnsupported": "NOT SUPPORTED – only 465 is supported",
+      "note": "One mail channel: GDPR notices send once every LM_SMTP_* value is set; invitation and notification e-mail only after their sending is enabled separately. Only whether a value exists is shown, never the value. Set a missing value on the VPS with lm-env-set.sh.",
+      "invites": "Invitation and notification e-mail",
+      "invitesOn": "on",
+      "invitesOff": "OFF – enabled separately: INVITE_EMAIL_PROVIDER=smtp and one test send"
     }
   },
   "adminMetrics": {
@@ -10109,6 +10155,7 @@
     "subtitle": "Tell us your trade and availability. We turn it into a draft profile you review — nothing is published automatically.",
     "fullName": "Full name",
     "profession": "Sector & work type",
+    "professionPlaceholder": "Choose your sector and work type",
     "targetCountries": "Countries you want to work in",
     "targetCountriesHelp": "The countries where you want to work, separated by commas (for example: Netherlands, Germany).",
     "availableFrom": "Available from",
@@ -10614,7 +10661,7 @@
     "navLabel": "About LabourMarket.ai",
     "eyebrow": "About the platform",
     "title": "What is LabourMarket.ai",
-    "lede": "LabourMarket.ai is a labour-market operating platform. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — not just a job search.",
+    "lede": "LabourMarket.ai is a labour-market operating platform. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — from the first conversation to the next opportunity.",
     "hero": {
       "lead": "A person's professional value should not disappear every time they change employer. Real work can become lasting professional history: what the person did, where, when, for how long, in what role, with which skills, and what evidence and confirmation supports it.",
       "leadOrg": "For organisations, the same real work builds the record of what the company has actually done: projects, teams, work performed, hours, competencies and evidence.",
@@ -10876,6 +10923,8 @@
       "expired": "Expired"
     },
     "graceNotice": "The last payment failed — the subscription is in a grace period until it is retried.",
+    "endsOn": "Cancelled — the plan stays active until {date} and will not renew.",
+    "endsAtPeriodEnd": "Cancelled — the plan stays active until the end of the paid period and will not renew.",
     "manage": {
       "open": "Manage subscription",
       "opening": "Opening…",
@@ -10894,7 +10943,8 @@
     "subscribe": {
       "title": "Organization plan",
       "cta": "Activate the Organization plan",
-      "note": "You will be taken to Stripe Checkout; the subscription is bound to this organization."
+      "note": "You will be taken to Stripe Checkout; the subscription is bound to this organization.",
+      "chargedToday": "No free trial: the first month is charged at Stripe Checkout today, then monthly until you cancel. Stripe shows the exact amount with VAT before you pay."
     }
   },
   "accountPlan": {
@@ -10935,7 +10985,21 @@
       "preferredCountries": "Preferred region",
       "availability": "Availability",
       "salaryExpectation": "Pay expectation",
-      "skillsCount": "Skills"
+      "skillsCount": "Skills",
+      "anonymousLabel": "Shown to companies as",
+      "anonymousValue": "Candidate {token}",
+      "currentCountry": "Current country",
+      "availableFrom": "Available from",
+      "contractType": "Engagement form",
+      "payBasis": "Pay basis",
+      "nightShifts": "Night shifts",
+      "weekendShifts": "Weekends",
+      "overtime": "Overtime",
+      "drivingLicence": "Driving licence",
+      "ownVehicle": "Own vehicle",
+      "ownTools": "Own tools",
+      "yes": "Yes",
+      "no": "No"
     },
     "labels": {
       "decidedAt": "Chosen",
@@ -12041,7 +12105,8 @@
     "empty": "No languages added yet.",
     "notEnabled": "Not available right now. Nothing was saved.",
     "error": "Saving failed. Please try again.",
-    "invalid": "Choose a language and a level."
+    "invalid": "Choose a language and a level.",
+    "added": "Language added."
   },
   "externalProfiles": {
     "title": "External profiles",
@@ -12384,6 +12449,7 @@
     }
   },
   "people": {
+    "anonymousName": "Candidate {token}",
     "eyebrow": "Person profile",
     "restrictedTitle": "Profile unavailable",
     "restrictedBody": "You can't view this person's profile: there is no active work relationship, or the person hasn't agreed to be discoverable.",
@@ -12440,7 +12506,8 @@
     "claimCta": "Continue as my draft",
     "claimed": "Moved to your drafts",
     "error": "Could not claim it. Please try again.",
-    "workersLabel": "Workers"
+    "workersLabel": "Workers",
+    "draftExists": "You already have an unfinished need draft. Finish or discard it first, then you can continue this one."
   },
   "candidatePipeline": {
     "stage": {
@@ -14012,14 +14079,15 @@
           "headcount": "How many people are needed?"
         },
         "unclear": "I am not sure whether you are offering something or looking for something. Tell me what you have, or what you need.",
-        "goodsChannelGated": "There is no buyer channel for goods on the platform yet, so nobody here would see this for sale. Nothing you wrote has been saved anywhere.",
+        "goodsChannelGated": "You can list this on the marketplace board under Goods — people browsing the board would see it there. Nothing is saved until you publish it.",
         "chipListings": "Open the listings",
         "capacityNext": "I can record your availability on your work card, or search for work right away — the results are the currently open inquiries.",
         "unsupported": "This cannot be offered through the platform. No route is available for it.",
-        "legalCheckFood": "Selling food or home-grown produce falls under food sale, hygiene and marketing rules that would have to be checked first — the platform has no approved channel for produce.",
+        "legalCheckFood": "Selling food or home-grown produce falls under food sale, hygiene and marketing rules. You can prepare the listing as a draft; publishing asks you to confirm you have checked the rules that apply to you.",
         "goodsListable": "This looks like a work-related resource — you can post it as a listing on the listings board.",
+        "goodsListableGoods": "This can be listed under Goods on the marketplace board — people browsing the board would see it there. Nothing is saved until you publish it.",
         "goodsListableRental": "This looks like available work equipment — you can post it as a rental listing on the listings board.",
-        "goodsCategoryUnsupported": "This category is not supported on the platform's work-bounded listings board today. Nothing you wrote has been saved.",
+        "goodsCategoryUnsupported": "This cannot be listed on the marketplace board. Nothing you wrote has been saved.",
         "serviceNext": "You can post this as a service offering so others can find it.",
         "chipServices": "Open the services board",
         "corrected": "Updated: {changes}.",
@@ -14837,6 +14905,9 @@
       "candidatesNotFound": "That need was not found, or it is not yours.",
       "candidatesNeedsMigration": "Not available right now.",
       "candidatesNotStructured": "Nothing can be derived from this need yet, so there is nothing to match against. That is not the same as nobody matching.",
+      "handRaisersTitle": "People who raised a hand",
+      "handRaisersNotAssessed": "Trade match not assessed: this need names no trade. They raised a hand themselves; no skill, qualification or fit is implied.",
+      "handRaiserBadge": "Trade match not assessed",
       "candidatesRetrievalCapped": "More people were reachable than we could look at this time, so this list is not the whole supply.",
       "candidatesEmpty": "Nobody in the visible supply matches this need right now.",
       "candidatesCapped": "Showing {shown} of {total}.",
@@ -15186,8 +15257,8 @@
       "noStars": "No star ratings anywhere: people are never reduced to a score. Every match is explained against a concrete need — with its numbers visible."
     },
     "hero": {
-      "headline": "One labour market for people and companies.",
-      "sub": "Find work or find people, record the work you do, and let it speak for you — your next opportunity is argued from what you actually did, not from what a CV claims."
+      "headline": "A living system of work and business opportunities.",
+      "sub": "In one place, show what you can do, what you offer or what you are looking for. Discover workers, jobs, contractors, services and goods — and your experience and opportunities stay within reach, always."
     },
     "entry": {
       "label": "Write what you need — in your own words",
@@ -15304,6 +15375,33 @@
       "partnerLead": "Want to work with us as a partner?",
       "partnerLink": "Get in touch",
       "moreLead": "More on how this works for each:"
+    },
+    "ways": {
+      "title": "What you can do here",
+      "show": {
+        "title": "Show what you can do",
+        "body": "Your work, skills and experience in one place. Every entry adds to your professional history.",
+        "cta": "Create a profile"
+      },
+      "offer": {
+        "title": "Offer what you have",
+        "body": "Services, goods, teams or available people — publish what you offer so the people who need it can find you.",
+        "cta": "Make an offer"
+      },
+      "find": {
+        "title": "Find what you need",
+        "body": "Write in your own words what you need — a worker, a job, a contractor, a service or goods.",
+        "cta": "Search"
+      },
+      "discoverLead": "Discover",
+      "discover": {
+        "workers": "Workers",
+        "jobs": "Jobs",
+        "contractors": "Contractors",
+        "services": "Services",
+        "goods": "Goods"
+      },
+      "lasting": "Your experience and opportunities stay within reach — when you change job, project or country."
     }
   },
   "workspace": {
@@ -17267,7 +17365,9 @@
     "emailConsentNote": "Email is off by default — it is sent only for the types you switch on here.",
     "emailInactiveNote": "Email delivery is not active on the platform yet. Your choices are saved and take effect as soon as it is.",
     "error": "The change could not be saved and was reverted. Please try again.",
-    "unavailable": "Notification settings are not available right now."
+    "unavailable": "Notification settings are not available right now.",
+    "saving": "Saving…",
+    "saved": "Saved."
   },
   "historyContext": {
     "project": "Project",
@@ -18893,7 +18993,8 @@
       "terms_invalid": "Check the numbers and dates.",
       "terms_limit_reached": "This offer already has 50 versions of terms.",
       "terms_await_other_side": "These are your own terms — the other side answers them.",
-      "organization_offer_not_a_unit": "A company offer is not assigned as a team; agree the people in the conversation."
+      "organization_offer_not_a_unit": "A company offer is not assigned as a team; agree the people in the conversation.",
+      "terms_changed": "The other side has just proposed new terms. Review the latest version, then answer."
     },
     "received": {
       "title": "Teams offered for this need",
@@ -19059,7 +19160,10 @@
     "hoursRecorded": "{hours} h recorded in {count, plural, one {# record} other {# records}}",
     "hoursPeriod": "{hours} h stated for a period, in {count, plural, one {# record} other {# records}}",
     "contested": "Contested by someone with standing",
-    "more": "{count, plural, one {# more entry} other {# more entries}} not shown"
+    "more": "{count, plural, one {# more entry} other {# more entries}} not shown",
+    "periodBand": "Period: {label}",
+    "formerly": "formerly {names}",
+    "legalEntityBand": "Legal entity at the time: {label} · records administered by {org}"
   },
   "companyPerson": {
     "eyebrow": "Historical person card",
@@ -19299,7 +19403,8 @@
       "stated": "legal relationship stated"
     },
     "openHistory": "Open the business history",
-    "note": "Leading an organisation is shown apart from your own work: the organisation's hours are never counted as yours."
+    "note": "Leading an organisation is shown apart from your own work: the organisation's hours are never counted as yours.",
+    "formerly": "formerly {names}"
   },
   "historyQuality": {
     "back": "Back to history",
@@ -19599,5 +19704,71 @@
     "tasks": "No tasks are due this week. Create a task – it becomes this week's goal.",
     "addStages": "Add stages",
     "addTask": "Create a task"
+  },
+  "workerPublicSummary": {
+    "title": "Professional summary for employers",
+    "audience": "Only companies and agencies you have a working relationship with see this (you work for them, are in their team or accepted their offer). It is not shown in open search. Your personal description above stays visible to you only.",
+    "headline": "Headline (up to 120 characters)",
+    "headlinePlaceholder": "e.g. Tiler, 8 years, working in LT and NO",
+    "bio": "Short summary (up to 1000 characters)",
+    "bioPlaceholder": "What you do best, what work you have done, what you are looking for.",
+    "save": "Save",
+    "saved": "Saved",
+    "tooLong": "The text is too long.",
+    "error": "Could not save. Try again."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: what you have and what is missing",
+    "anyCountry": "any country"
+  },
+  "historyDuplicates": {
+    "title": "Possible duplicate records",
+    "hint": "Review and decide",
+    "intro": "These are records of the same person on the same day at the same site. They may be genuinely separate work (two shifts or tasks) or the same work recorded twice. Nothing is changed automatically: if a record is a duplicate, mark it — it stops counting but stays visible and can be reinstated.",
+    "summary": "Awaiting your decision: {groups}",
+    "none": "No possible duplicate records found.",
+    "unavailable": "The review could not be shown right now.",
+    "truncated": "There are many records — the review may be incomplete.",
+    "sameHours": "Same hours",
+    "differentHours": "Different hours",
+    "sameText": "Same description",
+    "recordN": "Record {n}",
+    "hours": "{hours} h",
+    "noHours": "No hours stated",
+    "counted": "Counted",
+    "marked": "Marked as a duplicate",
+    "source": "Source: {file} · imported {date}",
+    "noSource": "not stated",
+    "mark": "Duplicate — keep record {n}",
+    "reinstate": "Reinstate",
+    "unnamedPerson": "Unnamed person",
+    "unnamedObject": "Unnamed site",
+    "error": "That didn't work. Nothing was changed.",
+    "notAllowed": "The organization's owner or a manager can do this.",
+    "notSameWork": "These records no longer match — refresh the page."
+  },
+  "pilotPass": {
+    "title": "Organization plan — {days}-day pilot for 1 €",
+    "intro": "Pay 1 € once and your organization gets the paid Organization plan for {days} days. What it adds over the free plan: no limit on open positions and workforce needs at the same time (the free plan allows one). Messaging, candidate summaries, team selection and bookings stay available as on the free plan.",
+    "terms": "One-time payment. Nothing renews and nothing is charged again: after {days} days the plan ends by itself and the organization returns to the free plan. The plan appears below as soon as Stripe confirms the payment.",
+    "pay": "Pay 1 € — {days}-day pilot",
+    "status": {
+      "pilot_pass_disabled": "The pilot pass is not offered right now.",
+      "unauthenticated": "Sign in to start the pilot.",
+      "no_organization": "Choose your organization's workspace first.",
+      "not_billing_authority": "Only a person who manages this organization's billing can start the pilot.",
+      "billing_not_active": "Payments are not available for this organization.",
+      "plan_active": "Your organization already has an active plan.",
+      "checkout_failed": "Stripe did not create the payment page. Nothing was charged; try again later."
+    },
+    "result": {
+      "paid": "Payment received by Stripe. The plan activates as soon as the confirmation arrives — refresh in a moment if it is not shown yet.",
+      "cancelled": "Payment cancelled — nothing was charged."
+    },
+    "elsewhere": "Choose {organization} in the workspace selector at the top of the page — the pilot is started from that organization's workspace.",
+    "invite": {
+      "line": "Pay 1 € once for {days} days of the paid Organization plan. Nothing renews.",
+      "cta": "Open the pilot"
+    }
   }
 }

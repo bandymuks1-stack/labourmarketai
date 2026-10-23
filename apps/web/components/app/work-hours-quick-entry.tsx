@@ -11,6 +11,7 @@ import {
   recordCorrectionAction,
 } from "@/lib/work-hours/allocations-actions";
 import type { AllocationActionState } from "@/lib/work-hours/allocations-actions";
+import { duplicateSavePress } from "@/lib/work-hours/allocations-model";
 import type {
   HoursPageEntry,
   HoursPageObject,
@@ -298,11 +299,14 @@ export function WorkHoursQuickEntry({
           <button
             type="submit"
             disabled={pending}
-            onClick={() => {
+            onClick={(e) => {
               // A repeat of the exact last save arms the warning instead of
               // writing. The SECOND press goes through — the operator, not the
               // form, decides whether it is a mistake or a second shift.
-              if (wouldRepeatLastSave && !duplicateArmed) setDuplicateArmed(true);
+              if (duplicateSavePress(wouldRepeatLastSave, duplicateArmed) === "arm") {
+                e.preventDefault();
+                setDuplicateArmed(true);
+              }
             }}
             className="min-h-12 rounded-md bg-brand-blue px-4 text-base font-semibold text-text-on-brand disabled:opacity-60"
             data-testid="hours-save"

@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { toActiveLocale } from "@/lib/i18n/config";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { hideQaMarked, isQaViewer } from "@/lib/marketplace/qa-marked";
@@ -164,7 +165,9 @@ export async function listMyMarketplaceListings(): Promise<MarketplaceListingLis
   }
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
-    return { kind: "ok", rows: [], extended };
+    // A 42501 / 57014 / RLS refusal used to render as "no listings" — an
+    // UNKNOWN shown as ZERO (audit 2026-10-16, M-2).
+    return { kind: "unavailable" };
   }
   return {
     kind: "ok",
@@ -328,7 +331,7 @@ async function discoverIndexRows(filters?: {
       extended: true,
     };
   }
-  if (!isAbsent(error)) return { kind: "ok", rows: [], extended: true };
+  if (!isAbsent(error)) return { kind: "unavailable" };
 
   // Legacy fallback (index view not applied yet): work resources only.
   if (domainFilter && domainFilter !== "work_resource") {
@@ -349,7 +352,7 @@ async function discoverIndexRows(filters?: {
   const legacy = await lq;
   if (legacy.error) {
     if (isAbsent(legacy.error)) return { kind: "needs-migration" };
-    return { kind: "ok", rows: [], extended: false };
+    return { kind: "unavailable" };
   }
   const rows: MarketplaceDiscoveryRow[] = (legacy.data ?? []).map(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -671,7 +674,9 @@ export async function deleteMarketplaceListingAction(
  */
 export async function enquireAboutListingAction(formData: FormData): Promise<void> {
   const listingId = String(formData.get("listingId") ?? "");
-  const locale = String(formData.get("locale") ?? "lt");
+  // Clamped to the active set: a form-supplied "/evil.com" must never
+  // become the protocol-relative redirect "//evil.com/…".
+  const locale = toActiveLocale(String(formData.get("locale") ?? ""));
   const cannotOpen = `/${locale}/dashboard/communication?notice=cannot_open`;
   if (!listingId) redirect(cannotOpen);
 

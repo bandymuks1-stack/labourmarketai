@@ -26,7 +26,7 @@ import type { DiscoverabilityPreviewField } from "@/lib/privacy/discoverability-
  */
 
 /** A translator over the `privacyConsent` namespace. */
-type ConsentTranslator = (key: string) => string;
+type ConsentTranslator = (key: string, values?: Record<string, string>) => string;
 
 /** 2026-09-20: PL is an active UI locale; a locale WITHOUT its own consent
  *  blocks falls back to English — never Lithuanian (lib/i18n/unsupported-language.ts). */
@@ -67,5 +67,16 @@ export function discoverabilityPreviewFields(
   preview: readonly DiscoverabilityPreviewField[],
   tc: ConsentTranslator,
 ): PreviewField[] {
-  return preview.map((f) => ({ label: tc(`preview.${f.key}`), value: f.value }));
+  return preview.map((f) => ({
+    label: tc(`preview.${f.key}`),
+    value:
+      f.value === "__yes"
+        ? tc("preview.yes")
+        : f.value === "__no"
+          ? tc("preview.no")
+          : f.key === "anonymousLabel"
+            ? // The anonymous name in the reader's own language, never English.
+              tc("preview.anonymousValue", { token: f.value })
+            : f.value,
+  }));
 }

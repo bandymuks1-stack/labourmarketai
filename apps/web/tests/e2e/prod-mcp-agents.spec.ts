@@ -1,7 +1,9 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect } from "@playwright/test";
+
+import { bearerOf, qaMcp } from "./prod-qa-api";
 
 /**
  * PRODUCTION MCP — AI-AGENT SCENARIOS, driven exactly as an external assistant
@@ -31,7 +33,6 @@ import { test, expect } from "@playwright/test";
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const TAG = `QA-SYNTHETIC ${RUN} agents`;
-const ORIGIN = process.env.PLAYWRIGHT_BASE_URL ?? "https://labourmarket.ai";
 const SLOTS = ["owner", "manager", "worker", "worker2", "agency"] as const;
 type Slot = (typeof SLOTS)[number];
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
@@ -40,17 +41,6 @@ test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted 
 // 9 tests × 60 s + afterAll 60 s = 10 min ceiling.
 test.describe.configure({ mode: "serial", timeout: 60_000, retries: 0 });
 
-/** The access token out of a minted @supabase/ssr storage state. */
-function bearerOf(slot: string): string {
-  const s = JSON.parse(readFileSync(state(slot), "utf8")) as { cookies: { name: string; value: string }[] };
-  const parts = s.cookies
-    .filter((c) => /^sb-.*-auth-token(\.\d+)?$/.test(c.name))
-    .sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }));
-  const raw = parts.map((c) => c.value).join("");
-  const b64 = raw.startsWith("base64-") ? raw.slice(7) : raw;
-  const json = JSON.parse(Buffer.from(b64.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
-  return json.access_token as string;
-}
 /** The caller's own profile id (the JWT `sub`) — what recipientProfileId names. */
 function profileIdOf(token: string): string {
   const payload = token.split(".")[1] ?? "";
@@ -61,15 +51,7 @@ type ToolResult = { ok: boolean; code?: string; data?: Record<string, unknown>; 
 type CatalogTool = { name: string };
 let rpcId = 0;
 async function rpc(token: string | null, method: string, params: Record<string, unknown> = {}) {
-  const res = await fetch(`${ORIGIN}/api/mcp`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      accept: "application/json, text/event-stream",
-      ...(token ? { authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ jsonrpc: "2.0", id: ++rpcId, method, params }),
-  });
+  const res = await qaMcp(token, { jsonrpc: "2.0", id: ++rpcId, method, params });
   const text = await res.text();
   let body: { result?: { structuredContent?: ToolResult; tools?: CatalogTool[] }; error?: unknown } | null = null;
   try {
@@ -170,9 +152,14 @@ test.afterAll(async () => {
   for (const n of (await needs(tok.manager)).filter((x) => WALK_ROW.test(x.title ?? ""))) {
     await prepareConfirm(tok.manager, "demand_close", { requestId: n.id }, { replay: false });
   }
-  // Provider: delete the offerings (their requests cascade with them).
+  // Provider: delete an offering without requests. One WITH requests is a
+  // buyer's history and is never deleted (#2582: the delete refuses) — it is
+  // paused instead, exactly as the page tells a real provider to do.
   for (const o of (await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? ""))) {
-    await prepareConfirm(tok.worker, "service_offering_delete", { offeringId: o.id }, { replay: false });
+    await prepareConfirm(tok.worker, "service_offering_delete", { offeringId: o.id }, { replay: false }).catch(() => null);
+  }
+  for (const o of (await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? "") && x.status !== "paused")) {
+    await prepareConfirm(tok.worker, "service_offering_status_set", { offeringId: o.id, status: "paused" }, { replay: false });
   }
   // Supplier: delete the proposals.
   for (const p of (await proposals(tok.agency)).filter((x) => WALK_ROW.test(x.title ?? ""))) {
@@ -184,7 +171,10 @@ test.afterAll(async () => {
     await prepareConfirm(tok.owner, "project_status_set", { projectId: p.id, toStatus: "completed" }, { replay: false });
   }
   expect((await needs(tok.manager)).filter((x) => WALK_ROW.test(x.title ?? "")), "open walk needs left behind").toHaveLength(0);
-  expect((await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? "")), "walk offerings left behind").toHaveLength(0);
+  expect(
+    (await ownOfferings(tok.worker)).filter((x) => WALK_ROW.test(x.title ?? "") && x.status !== "paused"),
+    "walk offerings left published (one with requests must be paused, never deleted)",
+  ).toHaveLength(0);
   expect((await proposals(tok.agency)).filter((x) => WALK_ROW.test(x.title ?? "")), "walk proposals left behind").toHaveLength(0);
   expect(
     (await projects(tok.owner)).rows.filter((x) => WALK_ROW.test(x.title ?? "") && x.status !== "completed"),

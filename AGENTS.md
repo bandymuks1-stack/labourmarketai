@@ -128,6 +128,26 @@ verification, provenance calculation, trust, market-signal generation, AI
 orchestration and commercial prioritization are not public material — in copy,
 in docs, or in this repository.
 
+### Public claims registry — public copy is a contract (binding, 2026-10-23)
+
+What the public pages promise is served as data at `GET /api/public/claims/v1`
+(contract `lm-public-claims/v1`; Agentai OS re-verifies every claim it cites in
+outreach against the live page). The claims live in
+`apps/web/lib/public-claims/registry.ts` as **message keys, not sentences**, so
+a reworded key updates the claim automatically.
+
+- **Changing, moving or removing a message key that a public claim uses — or
+  removing the element that renders it from its page — requires updating
+  `lib/public-claims/registry.ts` in the same PR.** When the page stops saying
+  a claim, or it stops being true, mark it `RETIRED` (never delete it — the
+  consumer must be told to stop citing it).
+- Every LIVE claim names the capability (`lib/product-gate/capability-register.ts`)
+  that makes it true; a claim never rests on an unbuilt or withdrawn capability.
+- `apps/web/lib/guards/public-claims-registry.test.ts` enforces it: keys exist
+  in every listed locale, each key is rendered by its page's component tree,
+  capability ids are real and usable, ids are unique and append-only, RETIRED
+  claims carry no pages. Never change the contract's field names.
+
 ---
 
 ## Universal Engineering Graph Protocol v1
@@ -387,7 +407,7 @@ auto-merge is inert and Claude Code falls back to waiting for CI then merging.
 
 ## Branch strategy
 
-- `main` — production branch, auto-deployed by Vercel
+- `main` — production branch, deployed to the VPS by `.github/workflows/deploy-vps.yml` after Quality Gates passes on `main`
 - Small fixes (≤3 files OR ≤200 LOC): commit directly to `main` is OK
 - Larger features (>3 files OR new module): use feature branch
   - Claude Code: `feat/cc/<short-name>` or `fix/cc/<short-name>`

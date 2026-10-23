@@ -135,7 +135,10 @@ export function ProjectDefectsPanel({ projectId, data }: { projectId: string; da
         <p className="text-sm text-text-muted" data-testid="defects-preapply">{t("preApply")}</p>
       ) : (
         <>
-          {data.defects.length === 0 ? (
+          {data.readFailed ? (
+            // The list could not be read: say so, never "no defects" (SEP-7).
+            <p className="text-sm text-text-secondary" role="status" data-testid="defects-read-failed">{t("outcome.error")}</p>
+          ) : data.defects.length === 0 ? (
             <p className="text-sm text-text-secondary" data-testid="defects-empty">{t("empty")}</p>
           ) : (
             <ul className="flex flex-col gap-2" data-testid="defects-list">

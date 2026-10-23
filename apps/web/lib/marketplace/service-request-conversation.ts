@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { toActiveLocale } from "@/lib/i18n/config";
 import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,7 +32,9 @@ export async function openServiceRequestConversationAction(
   formData: FormData,
 ): Promise<void> {
   const requestId = String(formData.get("requestId") ?? "");
-  const locale = String(formData.get("locale") ?? "lt");
+  // Clamped to the active set: a form-supplied "/evil.com" must never
+  // become the protocol-relative redirect "//evil.com/…".
+  const locale = toActiveLocale(String(formData.get("locale") ?? ""));
   const cannotOpen = `/${locale}/dashboard/communication?notice=cannot_open`;
 
   if (!requestId) redirect(cannotOpen);

@@ -362,6 +362,7 @@ export function CapabilityProfileSection({
                 key={c.key}
                 className="flex min-h-11 items-center gap-2 rounded-md border border-dashed border-ink-500 px-2 text-sm text-text-primary"
                 data-variants={c.variants.length}
+                data-testid="capability-profile-claim"
               >
                 <span>{c.label}</span>
                 {c.variants.length > 1 ? (
@@ -379,6 +380,7 @@ export function CapabilityProfileSection({
                   disabled={isDeleting}
                   className="flex items-center self-stretch px-2 text-xs text-text-muted hover:text-state-danger"
                   aria-label={t("removeLabel")}
+                  data-testid="capability-profile-claim-remove"
                 >
                   ×
                 </button>
@@ -411,7 +413,7 @@ export function CapabilityProfileSection({
               const start = fmt(c.startedAt);
               const end = c.endedAt ? fmt(c.endedAt) : tEng("present");
               return (
-                <li key={c.id} className="card-border p-4">
+                <li key={c.id} className="card-border p-4" data-testid="capability-experience-row">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-display text-sm font-semibold text-text-primary">
@@ -588,7 +590,10 @@ export function CapabilityProfileSection({
           CV file can still record a job with a month/year period. Writes via
           the same canonical RPC as the CV import (no migration). */}
       <details className="flex flex-col gap-3 rounded-md border border-border-subtle bg-surface-1/40">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 py-2 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+        <summary
+          className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 py-2 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary"
+          data-testid="add-experience-open"
+        >
           <span aria-hidden>+</span>
           {t("addExperienceTitle")}
         </summary>
@@ -629,6 +634,7 @@ export function CapabilityProfileSection({
                   onChange={(e) => setExpStartYear(e.target.value)}
                   placeholder={t("expYearPlaceholder")}
                   aria-label={t("expStartLabel")}
+                  data-testid="add-experience-start-year"
                   className="min-h-11 w-24 rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue"
                 />
               </div>
@@ -674,7 +680,7 @@ export function CapabilityProfileSection({
             {t("expOngoing")}
           </label>
           {expError && (
-            <p role="alert" className="text-xs text-state-danger">
+            <p role="alert" className="text-xs text-state-danger" data-testid="add-experience-error">
               {expError}
             </p>
           )}

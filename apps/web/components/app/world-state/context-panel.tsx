@@ -82,6 +82,7 @@ export function ContextPanel({
   wide = false,
   full = false,
   chipsPostedAt = null,
+  briefChipsPostedAt = null,
   onCloseResult,
   onOpenFull,
   onExpand,
@@ -142,6 +143,10 @@ export function ContextPanel({
   /** When the thread last posted a question with chips (see the chat). On a
    *  phone the sheet yields to it when it still shows the same thing. */
   chipsPostedAt?: number | null;
+  /** When the OPENING BRIEF posted its chips. It closes only a sheet nobody
+   *  asked for (an auto-opened invitation), never a requested result or
+   *  selection. */
+  briefChipsPostedAt?: number | null;
   onCloseResult?: () => void;
   /** A NAMED STATION DOOR — the result's own button to its station
    *  (`/dashboard/profile`, `/dashboard/planning`, …), labelled with the
@@ -274,8 +279,22 @@ export function ContextPanel({
   // on screen the invitation waits in the collapsed sheet (its header and
   // the bell still announce it); before any chips it opens as it always did.
   useEffect(() => {
-    if (work?.invitations && !chipsPostedAt) setExpanded(true);
-  }, [work, chipsPostedAt]);
+    if (work?.invitations && !chipsPostedAt && !briefChipsPostedAt) setExpanded(true);
+  }, [work, chipsPostedAt, briefChipsPostedAt]);
+
+  // THE BRIEF YIELDS ONLY A SHEET NOBODY ASKED FOR (QA 2026-10-16). The
+  // opening brief's chips still win over an auto-opened invitation sheet
+  // (§20, either arrival order). A result or a selection, though, is on screen
+  // because the person asked for it — the account menu's "player card", a
+  // project link — and the brief used to shut it on arrival, so on a phone the
+  // requested result never appeared. Answers posted later still yield through
+  // the same-key rule below.
+  useEffect(() => {
+    if (briefChipsPostedAt && !showsResult && panel.mode !== "entity") setExpanded(false);
+    // Only a NEW brief stamp decides this; a later change of what the panel
+    // shows is handled by the opening rule above, not re-collapsed here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [briefChipsPostedAt]);
 
   // Prod walk 2026-09-04 (phone): after "Priskirti darbuotoją" the question
   // "Kas turėtų jame dirbti?" and its chips landed in the thread UNDER the

@@ -32,7 +32,7 @@ export default async function WorkHoursPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("workHours");
-  const tHome = await getTranslations("companyHome");
+  const tSites = await getTranslations("workObjects");
 
   const sp = await searchParams;
   const requested = typeof sp.d === "string" ? sp.d : "";
@@ -82,15 +82,18 @@ export default async function WorkHoursPage({
               {t("states.noCompanyJournalLink")} →
             </Link>
           ) : null}
-          {/* No sites yet: say what to do next, one tap — a project is where
-              hours are recorded against. */}
+          {/* No sites yet: one tap to the place a site is ADDED. Hours are
+              recorded against a site (work_objects), not a project — the old
+              "create first project" door made a project and came back to this
+              same empty state (3 of 5 organizations with projects had no site,
+              2026-10-19). The sites form lives in the projects page fold. */}
           {data.kind === "no-objects" ? (
             <Link
-              href="/dashboard/company/projects/new"
-              data-testid="hours-no-objects-new-project"
+              href="/dashboard/projects#company-locations"
+              data-testid="hours-no-objects-add-site"
               className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue"
             >
-              {tHome("projects.emptyCta")} →
+              {tSites("addButton")} →
             </Link>
           ) : null}
         </div>

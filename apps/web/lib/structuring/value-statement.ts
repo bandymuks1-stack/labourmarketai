@@ -24,6 +24,8 @@ import { foldText } from "./normalize";
 import { readRoleLabel } from "./role-label";
 import {
   WORK_TYPE_RULES,
+  detectTeamComposition,
+  isCountUnitWord,
   maskServiceNoun,
   resolveCountryAndCity,
 } from "./structure-need";
@@ -262,16 +264,20 @@ function detectHeadcount(text: string, folded: string): number | null {
     const value = numberAt(i);
     if (value === null) continue;
     // The counted noun sits within the next two tokens ("keturių suvirintojų",
-    // "4 patyrusių suvirintojų").
+    // "4 patyrusių suvirintojų") — but a UNIT between them ends the search:
+    // "dvejiems metams suvirintojo" is a welder for two years, "3 metų
+    // patirties suvirintojo" three years of experience — neither is a count.
     for (let ahead = 1; ahead <= 2 && i + ahead < foldedTokens.length; ahead++) {
+      if (isCountUnitWord(tokens[i + ahead])) break;
       if (isPersonish(foldedTokens[i + ahead])) return value;
     }
   }
-  // "reikia 4" / "need 4" with the occupation elsewhere in the sentence.
+  // "reikia 4" / "need 4" with the occupation elsewhere in the sentence —
+  // unless a unit follows the number ("reikia 3 metų patirties").
   const m = folded.match(
-    /(?:reikia|truks(?:ta)?|need|нужн[\p{L}]*|требуется|ищем|brauchen|suchen|zoeken|potrzebujemy|szukamy)\s+(\d{1,4})\b/u,
+    /(?:reikia|truks(?:ta)?|need|нужн[\p{L}]*|требуется|ищем|brauchen|suchen|zoeken|potrzebujemy|szukamy)\s+(\d{1,4})(?!\p{N})\s*([^\s\d.,;:!?()/]*)/u,
   );
-  if (m) {
+  if (m && !isCountUnitWord(m[2])) {
     const n = Number.parseInt(m[1], 10);
     if (n >= 1 && n <= 1000) return n;
   }
@@ -358,9 +364,16 @@ export function structureValueStatement(
   // virėjo", "reikia buhalterio") is a need for ONE person — the number the
   // grammar states, offered in the editable headcount field. A plural with
   // no number ("reikia suvirintojų") stays open: the count is not stated.
-  const headcount =
-    detectHeadcount(raw, folded) ??
-    (role?.grammaticalNumber === "singular" && SEEK_RES.some((re) => re.test(folded)) ? 1 : null);
+  // Teams of a stated size ("3 brigadų po 4 žmones", "3 crews of 4 people")
+  // are 3 × 4 people. The statement holds no team fields, so the headcount
+  // stays UNRESOLVED (asked for in `missing`) and the composition is flagged
+  // in the reasons — never 3 or 4 as if it were the plain count.
+  const composition = detectTeamComposition(raw);
+  if (composition) reasons.push(`team_composition:${composition.teams}x${composition.perTeam}`);
+  const headcount = composition
+    ? null
+    : detectHeadcount(raw, folded) ??
+      (role?.grammaticalNumber === "singular" && SEEK_RES.some((re) => re.test(folded)) ? 1 : null);
   if (headcount !== null) reasons.push(`headcount:${headcount}`);
 
   // ── Subject — decided by axis + the facts, never by guessing the user ──
@@ -427,7 +440,7 @@ export function structureValueStatement(
   } else if (axis === "seek") {
     // A named occupation — closed-set or the person's own word — is a
     // workforce need even before the count is known.
-    if (workType || professionSlug || roleLabel || headcount !== null) subject = "workforce";
+    if (workType || professionSlug || roleLabel || headcount !== null || composition) subject = "workforce";
   }
   if (subject) reasons.push(`subject:${subject}`);
   if (quantity) reasons.push(`quantity:${quantity.raw}`);

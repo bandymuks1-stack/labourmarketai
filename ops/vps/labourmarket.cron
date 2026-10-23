@@ -1,0 +1,10 @@
+# /etc/cron.d/labourmarket — the ONE owner of LabourMarket.ai scheduled routes (installed by ops/vps/lm-cron-install.sh).
+# Schedules: the former Vercel Cron (weekly-digest, commercial-handoffs) + the former GitHub cadence (job-alerts).
+# billing-recovery is deliberately absent while payments are OFF (add `*/30 * * * * root sh /root/lm-prod/bin/lm-cron.sh billing-recovery` with the Stripe GO).
+# VPS timezone is Etc/UTC (checked 2026-10-17), so these times equal Vercel Cron UTC.
+SHELL=/bin/sh
+0 7 * * 1 root sh /root/lm-prod/bin/lm-cron.sh weekly-digest
+0 6 * * * root sh /root/lm-prod/bin/lm-cron.sh commercial-handoffs
+17 6 * * * root sh /root/lm-prod/bin/lm-cron.sh job-alerts
+# Automated GDPR account erasure (owner decision 2026-10-19): confirmed requests only; notices via the Hostinger mailbox.
+*/10 * * * * root sh /root/lm-prod/bin/lm-cron.sh privacy-erasure

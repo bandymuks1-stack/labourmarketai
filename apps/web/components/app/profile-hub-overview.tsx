@@ -131,6 +131,8 @@ export async function ProfileHubOverview({
   workContexts = null,
   workAllTime = null,
   organizationHistoryHours = null,
+  professionalExperienceHours = null,
+  unrecordedHours = null,
 }: {
   cvProvided: boolean;
   selfDeclaredCount: number;
@@ -165,6 +167,11 @@ export async function ProfileHubOverview({
   workAllTime?: { readonly totals: WorkPeriodTotals; readonly truncated: boolean } | null;
   /** All-time hours organizations recorded (day + period records), #2169. */
   organizationHistoryHours?: number | null;
+  /** The one continuous professional history's total (decision 0025). */
+  professionalExperienceHours?: number | null;
+  /** Entries whose written hours were never recorded as time, and the
+   *  earliest such work day (lib/journal/unrecorded-hours.ts). */
+  unrecordedHours?: { readonly entries: number; readonly earliestDay: string } | null;
 }) {
   /**
    * W7-S3: seven namespaces and the locale in ONE stage. They were eight
@@ -450,11 +457,25 @@ export async function ProfileHubOverview({
           allTime: workAllTime?.totals,
           truncated: workAllTime?.truncated ?? false,
           organizationHistoryHours,
+          professionalExperienceHours,
           locale,
           t: (key, values) => tIdentity(key, values),
         })}
       >
         <div className="flex min-w-0 flex-col gap-0.5">
+            {/* The hours above are what was RECORDED. Older entries whose
+                written hours were dropped before 2026-08-20 are named here,
+                with the way to their day — never added to the total. */}
+            {unrecordedHours ? (
+              <Link
+                href={`/dashboard/journal?date=${unrecordedHours.earliestDay}`}
+                className="text-meta leading-relaxed text-state-warning underline underline-offset-2"
+                data-testid="profile-hub-unrecorded-hours"
+                data-entries={unrecordedHours.entries}
+              >
+                {t("unrecordedHours", { count: unrecordedHours.entries })}
+              </Link>
+            ) : null}
             {readiness ? (
               <p
                 className="text-sm text-text-secondary"

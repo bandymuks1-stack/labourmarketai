@@ -107,8 +107,9 @@ export async function listOwnServiceOfferings(): Promise<ServiceOfferingListResu
     .order("created_at", { ascending: false });
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
-    // Any other read failure degrades to an empty list — never a fake row.
-    return { kind: "ok", rows: [] };
+    // Any other read failure is UNAVAILABLE — never an empty list that reads
+    // as "you have no offerings" (SEP-7, audit 2026-10-16).
+    return { kind: "unavailable" };
   }
   const rows: ServiceOfferingRow[] = (
     (data ?? []) as Record<string, unknown>[]
@@ -311,6 +312,21 @@ export async function deleteServiceOffering(
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
   if (!id) return { kind: "invalid", field: "id" };
+
+  // AN OFFERING WITH REQUESTS IS HISTORY, NOT A DRAFT (audit 2026-10-20):
+  // the request rows cascade on delete, so removing the offering erased every
+  // buyer's request on it — accepted ones included — and left their threads
+  // and experience records pointing at nothing. Such an offering is paused,
+  // never deleted. A count that cannot be read refuses (fail closed).
+  const { count, error: countError } = await asAny(supabase)
+    .from("service_offering_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("offering_id", id);
+  if (countError) {
+    if (isAbsent(countError)) return { kind: "needs-migration" };
+    return { kind: "error", message: countError.message ?? "unknown" };
+  }
+  if ((count ?? 0) > 0) return { kind: "has-requests" };
 
   const { data: touched, error } = await asAny(supabase)
     .from("service_offerings")

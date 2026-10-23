@@ -35,7 +35,7 @@
  * by an innocent-looking edit.
  */
 import { join } from "node:path";
-import { writeFileSync } from "node:fs";
+import { chmodSync, writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 
 import { CANONICAL_HOST } from "../lib/domain/canonical";
@@ -184,7 +184,9 @@ async function main(): Promise<void> {
         }));
 
   // Proven contained and ignored in step 3, before the session existed.
-  writeFileSync(out.path, JSON.stringify({ cookies, origins: [] }, null, 2));
+  // Owner-only (0600): the file holds a live session.
+  writeFileSync(out.path, JSON.stringify({ cookies, origins: [] }, null, 2), { mode: 0o600 });
+  chmodSync(out.path, 0o600);
 
   // Metadata only — never the token.
   const user = sess.session.user;

@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
-import { callerCompanyId, listManagedProjects } from "@/lib/projects/projects";
+import { listManagedProjects } from "@/lib/projects/projects";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import {
   createFinanceRecordAction,
   setFinanceRecordStatusAction,
@@ -22,6 +23,7 @@ import {
   FINANCE_RECORD_TYPES,
   FINANCE_TITLE_MAX,
   FINANCE_TITLE_MIN,
+  canLinkFinanceToCompany,
   deriveFinanceSummary,
   formatCentsAsEur,
   isOverdueRecord,
@@ -227,7 +229,12 @@ export default async function FinancePage({
 
   const t = await getTranslations("finance");
 
-  const result = await listMyFinanceRecords();
+  // ONE workspace (decision 0024): the active company's records plus the
+  // person's own company-less ones — the same scope the CSV export uses.
+  const employer = await resolveEmployerCompanyContext();
+  const workspaceCompanyId = employer.kind === "ok" ? employer.companyId : null;
+  const activeOrganizationId = employer.kind === "ok" ? employer.organizationId : null;
+  const result = await listMyFinanceRecords({ companyId: workspaceCompanyId });
 
   const header = (
     <header className="flex flex-col gap-1">
@@ -280,16 +287,25 @@ export default async function FinancePage({
           locale={locale}
           notice={procNotice}
           financeRecords={[]}
+          activeOrganizationId={activeOrganizationId}
         />
-        <TripsSection locale={locale} notice={tripNotice} financeRecords={[]} />
+        <TripsSection
+          locale={locale}
+          notice={tripNotice}
+          financeRecords={[]}
+          activeOrganizationId={activeOrganizationId}
+        />
       </div>
     );
   }
 
-  const [managedProjects, companyId] = await Promise.all([
-    listManagedProjects(),
-    callerCompanyId(),
-  ]);
+  const managedProjects = await listManagedProjects();
+  // The company link is offered only when the database would accept it
+  // (finance_company_authority_v1: owner / admin / creator, never a
+  // manager) — a manager used to get a pre-ticked box whose save could only
+  // answer "not allowed".
+  const companyId =
+    employer.kind === "ok" && canLinkFinanceToCompany(employer) ? employer.companyId : null;
 
   const now = new Date();
   const records = result.records;
@@ -356,6 +372,8 @@ export default async function FinancePage({
       <li
         className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/30 p-3"
         data-testid={`finance-record-${record.id}`}
+        data-status={record.status}
+        data-company-linked={record.companyId ? "true" : "false"}
       >
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
@@ -872,11 +890,13 @@ export default async function FinancePage({
         locale={locale}
         notice={procNotice}
         financeRecords={records}
+        activeOrganizationId={activeOrganizationId}
       />
       <TripsSection
         locale={locale}
         notice={tripNotice}
         financeRecords={records}
+        activeOrganizationId={activeOrganizationId}
       />
     </div>
   );

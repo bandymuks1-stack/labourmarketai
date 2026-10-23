@@ -35,6 +35,8 @@ export interface ServiceOfferingRow {
 export type ServiceOfferingListResult =
   | { kind: "ok"; rows: ServiceOfferingRow[] }
   | { kind: "needs-migration" }
+  /** The read failed — never shown as "no offerings" (SEP-7, audit 2026-10-16). */
+  | { kind: "unavailable" }
   | { kind: "not-authed" };
 
 export type ServiceOfferingMutateResult =
@@ -44,6 +46,9 @@ export type ServiceOfferingMutateResult =
   | { kind: "invalid"; field: string }
   /** The caller has no such offering (not theirs, or already removed). Nothing changed. */
   | { kind: "not-found" }
+  /** The offering has requests (history a buyer relies on): it is never
+   *  deleted — pause it instead. Nothing changed. */
+  | { kind: "has-requests" }
   | { kind: "error"; message: string };
 
 export interface ServiceOfferingInput {

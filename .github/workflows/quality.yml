@@ -1,16 +1,16 @@
 name: Quality Gates
 
-# First CI workflow for this repo. Until now CI was Vercel build/deploy +
-# Supabase preview only; there was no GitHub Actions quality pipeline.
+# The repo's quality pipeline. A successful run on a push to main is what
+# triggers the production deploy (.github/workflows/deploy-vps.yml).
 #
 # This runs the existing static quality gates — including the primary-route
 # smoke / dead-UI guard added in PR #136 — on every push to main and every PR,
 # so a dead link / placeholder leak / broken primary route is caught BEFORE it
-# reaches the Vercel production deploy.
+# reaches the production deploy.
 #
 # Deliberately secret-free: no env/secrets, no DB, no deploy. `next build` is
 # included because it is env-independent in this repo (it builds with no
-# secrets). Vercel remains the authoritative build + deploy.
+# secrets). The deploy workflow builds the production artefact itself.
 
 on:
   push:
@@ -22,7 +22,10 @@ permissions:
 
 concurrency:
   group: quality-${{ github.ref }}
-  cancel-in-progress: true
+  # A PR's older run is superseded by its newer push. A push to MAIN is never cancelled: its result is what
+  # deploy-vps.yml waits for, and cancelling it on every merge starved production of deploys (2026-10-22: three
+  # merges in ten minutes cancelled three main runs, and the merged API never reached the VPS).
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   quality:
@@ -201,5 +204,5 @@ jobs:
           fi
           pnpm check:migration-parity
 
-      - name: Build (env-independent; Vercel remains deploy authority)
+      - name: Build (env-independent)
         run: pnpm -F web build

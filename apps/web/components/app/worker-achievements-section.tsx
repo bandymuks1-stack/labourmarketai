@@ -152,6 +152,7 @@ export function WorkerAchievementsSection({
                 <li
                   key={entry.id}
                   className="flex items-start justify-between gap-3 rounded-md border border-ink-600 px-3 py-2"
+                  data-testid="worker-achievements-row"
                 >
                   <div className="flex min-w-0 flex-col gap-0.5">
                     <span className="truncate text-sm font-medium text-text-primary">
@@ -161,7 +162,10 @@ export function WorkerAchievementsSection({
                       {tType(entry.achievementTypeSlug)}
                       {entry.achievedAt ? ` · ${entry.achievedAt.slice(0, 10)}` : ""}
                     </span>
-                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted"
+                      data-testid="worker-achievements-standing"
+                      data-standing={entry.confirmedByManager ? "confirmed" : "declared"}
+                    >
                       {entry.confirmedByManager
                         ? t("confirmedBadge")
                         : t("declaredBadge")}

@@ -1,7 +1,10 @@
 import "server-only";
+import { readCorrectedOriginalIds } from "@/lib/journal/corrected-originals-read";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 
 /**
  * Market Map — OWNER-SCOPED availability + capability signals.
@@ -134,20 +137,37 @@ export async function getOwnCapabilities(limit = 18): Promise<OwnCapabilities> {
   // Skills the worker has self-listed (with verification flag + skill slug).
   const { data: ws } = await asAny(supabase)
     .from("worker_skills")
-    .select("skill_id, verified, skills(slug, category)")
+    .select("skill_id, verified, verified_by, verified_at, skills(slug, category)")
     .eq("worker_id", workerId);
+  // A recorded confirmation is "confirmed" only while it STANDS
+  // (lib/evidence/skill-confirmation-standing.ts).
+  const storedSkills = Array.isArray(ws) ? (ws as { skill_id: string | null; verified: boolean | null; verified_by: string | null; verified_at: string | null; skills?: unknown }[]) : [];
+  const standingSkills = withStandingConfirmation(
+    storedSkills,
+    anyRecordedConfirmation(storedSkills) ? await readOwnStandingConfirmedSkillIds(workerId) : null,
+  );
 
   // Skills evidenced by real journal work (distinct skill ids).
-  const { data: jes } = await asAny(supabase)
-    .from("journal_entry_skills")
-    .select("skill_id")
-    .eq("worker_id", workerId);
+  const [{ data: jes }, corrected] = await Promise.all([
+    asAny(supabase)
+      .from("journal_entry_skills")
+      // LIVE entries only — a deleted or superseded entry evidences nothing.
+      .select("journal_entry_id, skill_id, journal_entries!inner(deleted_at, superseded_by)")
+      .eq("worker_id", workerId)
+      .is("journal_entries.deleted_at", null)
+      .is("journal_entries.superseded_by", null),
+    readCorrectedOriginalIds(supabase, workerId),
+  ]);
+  // Counted once: an original a live correction replaced evidences nothing
+  // (a skill the correction dropped is not "evidenced" through it).
   const evidenced = new Set(
-    (Array.isArray(jes) ? jes : []).map((r: Record<string, unknown>) => String(r.skill_id)),
+    (Array.isArray(jes) ? jes : [])
+      .filter((r: Record<string, unknown>) => corrected !== null && !corrected.has(String(r.journal_entry_id)))
+      .map((r: Record<string, unknown>) => String(r.skill_id)),
   );
 
   const byId = new Map<string, CapabilitySignal>();
-  for (const r of Array.isArray(ws) ? ws : []) {
+  for (const r of standingSkills) {
     const id = String(r.skill_id);
     const skill = (r.skills ?? {}) as Record<string, unknown>;
     const verified = r.verified === true;

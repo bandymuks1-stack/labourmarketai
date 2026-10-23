@@ -84,8 +84,8 @@ describe("C3 - the verified CV reads only live, counted-once entries", () => {
     const src = web("lib/cv-export/verified-cv.ts");
     expect(src).toContain("cvLiveEntries(");
     expect(src).toMatch(/correction_of/);
-    // the confirmations are read for exactly those entry ids
-    expect(src).toMatch(/\.in\("entry_id", entries\.map\(\(e\) => e\.id\)\)/);
+    // the confirmations are read for exactly those entry ids (in paged chunks, 2026-10-20)
+    expect(src).toMatch(/readByIdChunks<[\s\S]*?>\(entries\.map\(\(e\) => e\.id\), \(ids\) =>\s*supabase\s*\.from\("journal_entry_confirmations"\)/);
   });
 });
 

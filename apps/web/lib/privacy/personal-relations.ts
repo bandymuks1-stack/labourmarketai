@@ -141,6 +141,8 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "profile_roles", key: "profile_id" },
   { table: "notification_preferences", key: "profile_id" },
   { table: "dashboard_preferences", key: "profile_id" },
+  // My Space pins (20261020020000, applied 2026-10-20): the person's own shortcuts, owner-only RLS.
+  { table: "workspace_pins", key: "profile_id" },
   { table: "preferred_locations", key: "profile_id" },
   { table: "consented_login_location_signals", key: "profile_id" },
   // How the platform classifies the account for reporting (real / test /
@@ -560,6 +562,21 @@ export type WithheldRelation = {
  * still withheld, because handing it over would hand over someone else too.
  */
 export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
+  {
+    table: "privacy_erasure_confirmations_v1",
+    reason:
+      "your confirmation of an account-deletion request (how and when you confirmed it) — held server-side as evidence that the deletion was yours to ask for; the request and its status are shown to you on the privacy page",
+  },
+  {
+    table: "privacy_erasure_authorizations_v3",
+    reason:
+      "single-use technical authorizations of an account deletion (a digest, the plan fingerprint and timestamps; never the token) — security state with no read path for your own session",
+  },
+  {
+    table: "privacy_erasure_receipts_v3",
+    reason:
+      "the receipt of an executed account deletion (what was deleted, retained and why) — written after your account no longer exists; it names no identifier of you and is available on request through the data-protection channel",
+  },
   {
     table: "email_verifications_v1",
     reason:

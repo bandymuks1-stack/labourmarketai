@@ -3,8 +3,9 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { candidateProfileForContact } from "@/lib/visibility/discoverable-workers";
 import { getOrCreateDirectConversation } from "@/lib/communication/direct-conversation";
-import { acknowledgeInterest } from "@/lib/opportunities/interest";
+import { acknowledgeInterest, actingDemandForInterest } from "@/lib/opportunities/interest";
 import { revalidatePath } from "next/cache";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -65,14 +66,16 @@ export async function contactInterestedWorkerAction(input: {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, reason: "not_authenticated" };
 
-  // 1) Own demand (RLS also enforces profile_id = auth.uid()).
-  const { data: demand } = await asAny(supabase)
-    .from("customer_requests")
-    .select("id, title")
-    .eq("id", requestId)
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  if (!demand) return { ok: false, reason: "not_owner" };
+  // 1) A need the caller may act on FROM THE ACTIVE WORKSPACE: their own, or
+  //    their organization's while acting in it with `manage-demand` — the
+  //    same rule the interest list and the acknowledgement use (review of
+  //    #2606: a co-manager could mark interest reviewed but not contact).
+  //    The database identity read below (candidate_profile_for_contact_v1)
+  //    admits the same creator-or-organization-manager pair.
+  const acting = await actingDemandForInterest(supabase, user.id, requestId);
+  if (acting.kind === "unavailable") return { ok: false, reason: "error" };
+  if (acting.kind !== "ok") return { ok: false, reason: "not_owner" };
+  const demand = { title: acting.title };
 
   // 2) The worker's own, still-standing interest signal on THIS demand.
   let interestStatus: string | null = null;
@@ -94,12 +97,7 @@ export async function contactInterestedWorkerAction(input: {
   }
 
   // 3) Messaging identity resolved server-side only.
-  const { data: worker } = await asAny(supabase)
-    .from("workers")
-    .select("profile_id")
-    .eq("id", workerId)
-    .maybeSingle();
-  const workerProfileId = (worker?.profile_id as string | null) ?? null;
+  const workerProfileId = await candidateProfileForContact(supabase, workerId, requestId);
   if (!workerProfileId) return { ok: false, reason: "worker_unavailable" };
 
   // 4) Open/reopen the in-app thread with the just-verified grant.

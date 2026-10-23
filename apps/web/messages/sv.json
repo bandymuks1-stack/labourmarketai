@@ -570,7 +570,9 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content"
+    "skipToContent": "[EN] Skip to content",
+    "loading": "Laddar…",
+    "dashboardSections": "Översiktens avsnitt"
   },
   "companies": {
     "cta": {
@@ -923,7 +925,9 @@
       "screenshot": "[EN] Company demand flow",
       "subcopy": "[EN] Post what you need on each project and see which available workers and agencies fit it.",
       "title": "[EN] Live demand,",
-      "titleAccent": "[EN] in context."
+      "titleAccent": "[EN] in context.",
+      "calculatorBody": "Innan du efterfrågar arbete, uppskatta det: arbetstimmar, material, utrustning och resor — med dina egna siffror.",
+      "calculatorLink": "Beräkna ett projekts kostnad"
     },
     "workers": {
       "benefits": [
@@ -1022,7 +1026,7 @@
       },
       {
         "q": "Hur hanteras betalningen?",
-        "a": "Kortbetalning via Stripe med moms hanterad av Stripe Tax; fakturor, uppsägning och ändringar finns i ditt organisationskonto."
+        "a": "Kortbetalning via Stripe. Fakturor, betalningshistorik och uppsägning finns i ditt organisationskonto."
       },
       {
         "q": "Finns det en gräns för aktiva positioner?",
@@ -2839,7 +2843,10 @@
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
-      "alreadyAccepted": "Arbetstagaren har redan accepterat detta förslag — överenskomna villkor skrivs inte över här. Kom överens om ändringar i samtalet."
+      "alreadyAccepted": "Arbetstagaren har redan accepterat detta förslag — överenskomna villkor skrivs inte över här. Kom överens om ändringar i samtalet.",
+      "refusedNotReachable": "Den här personen kan inte få ett bokningsförslag härifrån — profilen är inte synlig för arbetsgivare och det finns ingen arbetsrelation med dig.",
+      "refusedNeedClosed": "Det här behovet är stängt — öppna det igen innan du föreslår en bokning.",
+      "refusedAnswered": "Arbetstagaren har avböjt förslaget, så det öppnas inte igen utan arbetstagarens nya samtycke. Fortsätt i samtalet eller hitta en annan arbetstagare."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -2901,6 +2908,7 @@
     "loopReadFailed": "Dina förfrågningar kunde inte laddas — listan kan vara ofullständig. Ladda om sidan."
   },
   "people": {
+    "anonymousName": "Kandidat {token}",
     "eyebrow": "Personprofil",
     "restrictedTitle": "Profilen är inte tillgänglig",
     "restrictedBody": "Du kan inte se den här personens profil: det finns ingen aktiv arbetsrelation, eller så har personen inte samtyckt till att vara synlig.",
@@ -4754,6 +4762,37 @@
       },
       "topTitle": "Mest efterfrågade yrken just nu",
       "topNote": "Rankat efter aktiva platsannonser på plattformen."
+    },
+    "hero": {
+      "headline": "Ett levande system av arbets- och affärsmöjligheter.",
+      "sub": "Visa på ett ställe vad du kan, vad du erbjuder eller vad du söker. Hitta medarbetare, jobb, entreprenörer, tjänster och varor — och din erfarenhet och dina möjligheter förblir alltid tillgängliga."
+    },
+    "ways": {
+      "title": "Vad du kan göra här",
+      "show": {
+        "title": "Visa vad du kan",
+        "body": "Arbete, färdigheter och erfarenhet på ett ställe. Varje post bygger på din yrkeshistoria.",
+        "cta": "Skapa profil"
+      },
+      "offer": {
+        "title": "Erbjud det du har",
+        "body": "Tjänster, varor, team eller lediga personer — publicera ditt erbjudande så att de som behöver det hittar dig.",
+        "cta": "Erbjud"
+      },
+      "find": {
+        "title": "Hitta det du söker",
+        "body": "Skriv med egna ord vad du behöver — en medarbetare, ett jobb, en entreprenör, en tjänst eller varor.",
+        "cta": "Sök"
+      },
+      "discoverLead": "Upptäck",
+      "discover": {
+        "workers": "Medarbetare",
+        "jobs": "Jobb",
+        "contractors": "Entreprenörer",
+        "services": "Tjänster",
+        "goods": "Varor"
+      },
+      "lasting": "Din erfarenhet och dina möjligheter förblir tillgängliga — när du byter jobb, projekt eller land."
     }
   },
   "workspace": {
@@ -7696,5 +7735,65 @@
     "tasks": "Inga uppgifter har deadline den här veckan. Skapa en uppgift – den blir veckans mål.",
     "addStages": "Lägg till etapper",
     "addTask": "Skapa en uppgift"
+  },
+  "workerPublicSummary": {
+    "title": "Professionell presentation för arbetsgivare",
+    "audience": "Bara företag och bemanningsföretag som du har en arbetsrelation med ser den här texten (du arbetar för dem, är i deras team eller har tackat ja till deras erbjudande). Den visas inte i öppen sökning. Din personliga beskrivning ovan är bara synlig för dig.",
+    "headline": "Rubrik (upp till 120 tecken)",
+    "headlinePlaceholder": "t.ex. Plattsättare, 8 år, arbetar i LT och NO",
+    "bio": "Kort beskrivning (upp till 1000 tecken)",
+    "bioPlaceholder": "Vad du är bäst på, vilket arbete du har gjort, vad du söker.",
+    "save": "Spara",
+    "saved": "Sparat",
+    "tooLong": "Texten är för lång.",
+    "error": "Det gick inte att spara. Försök igen."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: vad du har och vad som saknas",
+    "anyCountry": "vilket land som helst"
+  },
+  "workObjects": {
+    "addButton": "Lägg till objekt"
+  },
+  "adminLaunchReadiness": {
+    "mail": {
+      "title": "Officiell brevlåda (info@labourmarket.ai)",
+      "ready": "Skickar",
+      "notReady": "Skickar inte",
+      "present": "angivet",
+      "missing": "SAKNAS",
+      "portOk": "stöds (465, TLS)",
+      "portUnsupported": "STÖDS INTE – endast 465",
+      "note": "En e-postkanal: GDPR-meddelanden skickas när alla LM_SMTP_*-värden är satta; inbjudnings- och aviseringsmejl först när utskicket slagits på separat. Endast om ett värde finns visas, aldrig själva värdet. Sätt ett saknat värde på VPS:en med lm-env-set.sh.",
+      "invites": "Inbjudnings- och aviseringsmejl",
+      "invitesOn": "på",
+      "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp och ett testutskick"
+    }
+  },
+  "historyDuplicates": {
+    "title": "Possible duplicate records",
+    "hint": "Review and decide",
+    "intro": "These are records of the same person on the same day at the same site. They may be genuinely separate work (two shifts or tasks) or the same work recorded twice. Nothing is changed automatically: if a record is a duplicate, mark it — it stops counting but stays visible and can be reinstated.",
+    "summary": "Awaiting your decision: {groups}",
+    "none": "No possible duplicate records found.",
+    "unavailable": "The review could not be shown right now.",
+    "truncated": "There are many records — the review may be incomplete.",
+    "sameHours": "Same hours",
+    "differentHours": "Different hours",
+    "sameText": "Same description",
+    "recordN": "Record {n}",
+    "hours": "{hours} h",
+    "noHours": "No hours stated",
+    "counted": "Counted",
+    "marked": "Marked as a duplicate",
+    "source": "Source: {file} · imported {date}",
+    "noSource": "not stated",
+    "mark": "Duplicate — keep record {n}",
+    "reinstate": "Reinstate",
+    "unnamedPerson": "Unnamed person",
+    "unnamedObject": "Unnamed site",
+    "error": "That didn't work. Nothing was changed.",
+    "notAllowed": "The organization's owner or a manager can do this.",
+    "notSameWork": "These records no longer match — refresh the page."
   }
 }

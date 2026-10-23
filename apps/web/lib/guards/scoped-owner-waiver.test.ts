@@ -7,6 +7,7 @@ import {
   decideWaiver,
   evaluateFindings,
   waiverContextFromEnv,
+  waiverValidUntil,
   // The gate imports this EXACT module — there is no second copy of the rules
   // to drift, so what these tests prove is what CI enforces.
 } from "../../../../.github/scripts/owner-waivers.mjs";
@@ -54,7 +55,10 @@ const FIXTURE_WAIVER = {
   reason:
     "Synthetic copy of the retired W3/W4 record, kept so every constraint of the mechanism stays executable and provably enforced.",
   resolvedBy: "W6-map-slice",
-  expiresAt: "2026-10-31",
+  approvedAt: "2026-07-29",
+  // OWNER-SET term on the fixture, so the calendar-expiry path stays proven:
+  // since owner P0 2026-10-22 only an owner-set term expires by date.
+  ownerSetExpiresAt: "2026-10-31",
   owner: "Owner ruling 2026-07-29 — scoped transitional waiver (fixture copy).",
 };
 const FIXTURES = [FIXTURE_WAIVER];
@@ -110,7 +114,7 @@ describe("scoped waiver — the approved cases pass", () => {
     const w = d.waiver!;
     expect(w.owner).toMatch(/Owner ruling/);
     expect(w.scope).toMatch(/W3.*W4/);
-    expect(w.expiresAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(waiverValidUntil(w, "2026-07-29")).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(w.resolvedBy).toBe("W6-map-slice");
     expect(w.reason.length).toBeGreaterThan(80);
   });
@@ -319,7 +323,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // one route (plus its page path for diff matching), one PR, A-01 only.
     const hours = SCOPED_OWNER_WAIVERS[5];
     expect(hours.axioms).toEqual(["A-01"]);
-    expect(hours.pullRequests).toEqual([1344, 2101, 2159, 2234]);
+    expect(hours.pullRequests).toEqual([1344, 2101, 2159, 2234, 2526]);
     expect(hours.files).toEqual([
       "/dashboard/hours",
       "apps/web/app/[locale]/dashboard/hours/page.tsx",
@@ -390,8 +394,10 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // mechanism actually reads them, so the debt names its own removal.
     expect(cap.resolvedBy).toMatch(/map/i);
     expect(cap.resolvedBy).toMatch(/conversational/i);
-    // Tighter than the three public-route records, on purpose.
-    expect(cap.expiresAt < "2026-12-31").toBe(true);
+    // The former agent-chosen 2026-11-30 date is gone: the record holds the
+    // 12-month rolling internal term from the owner's ruling (P0 2026-10-22).
+    expect(cap.approvedAt).toBe("2026-08-27");
+    expect(cap.ownerSetExpiresAt).toBeUndefined();
     const w = SCOPED_OWNER_WAIVERS[0];
     expect(w.id).toBe("public-acquisition-route-create-cv");
     expect(w.axioms).toEqual(["A-01"]);
@@ -425,7 +431,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // A waiver with no named resolution is a permanent exception wearing a
     // deadline. This one names the constitution decision that deletes it.
     expect(w.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
-    expect(w.expiresAt).toBe("2026-12-31");
+    expect(w.approvedAt).toBe("2026-08-10");
   });
 
   it("the live record excuses SIX findings and no seventh", () => {
@@ -601,8 +607,15 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // the job-page hreflang fix." Bounded — not general authority.
     expect(jobs.pullRequests).toEqual([
       1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838, 1837, 1890,
-      1892, 1991, 1993, 2045, 2101, 2211, 2253, 2388,
+      1892, 1991, 1993, 2045, 2101, 2211, 2253, 2388, 2467,
     ]);
+    // #2467 (2026-10-18) on the owner's verbatim scoped approval: "Patvirtinu
+    //   PR #2467 įtraukimą į siaurą `/jobs` produkto vartų išimtį, skirtą tik
+    //   tuščios reikšmės „—“ kortelėje ir mobiliosios paieškos išdėstymo
+    //   taisymams. Tai nėra bendras leidimas apeiti produkto kokybės, saugumo
+    //   ar migracijų patikras."
+    // Only the card's last heading fallback (the page's own GENERIC_TITLE
+    // instead of a bare "—") and the phone layout of the search form.
     // #2388 (2026-10-15) on the owner's verbatim scoped approval: anonymous-safe
     // JSON-LD only (CollectionPage/ItemList, WebPage/Occupation), no JobPosting,
     // no employer, location or other non-public field; rules unchanged.
@@ -621,7 +634,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // surfaces, expiry and subset rule byte-unchanged.
     expect(jobs.owner).toMatch(/2026-08-18/);
     expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
-    expect(jobs.expiresAt).toBe("2026-12-31");
+    expect(jobs.approvedAt).toBe("2026-08-18");
 
     expect([...new Set(jobs.expectedFindings.map((f) => f.code))].sort()).toEqual([
       "not_ai_controlled",
@@ -722,24 +735,59 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     expect(allowed.pass).toBe(true);
   });
 
-  it("the live record expires, and expiry blocks EVERY pull request", () => {
-    // Deliberate and documented: `decideWaiver` tests `expiresAt` BEFORE the
-    // unrelated-PR escape, and rule 6c re-validates the whole registry on every
-    // run — so past the date these findings block the repository, not just this
-    // route. That is the mechanism's pressure to RESOLVE the debt rather than
-    // renew it, and this test is where that consequence is written down.
+  it("a live record holds the 12-month ROLLING term — it never lapses by the calendar (owner P0 2026-10-22)", () => {
+    // Before the owner's internal validity rule every record carried an
+    // agent-chosen `expiresAt` (2026-11-30 / 2026-12-31) after which these
+    // findings blocked EVERY pull request in the repository. Now no live record
+    // carries a date of its own: each holds approval + 12 months, renewed term
+    // after term, and ends only by revocation (record removed) or resolution.
     const w = SCOPED_OWNER_WAIVERS[0];
     const findings = w.expectedFindings.map((f) => ({
       code: f.code,
       axiom: "A-01",
       what: f.file,
     }));
-    const v = evaluateFindings(
+    for (const today of ["2027-01-01", "2027-08-10", "2031-06-30"]) {
+      const v = evaluateFindings(
+        findings,
+        // An unrelated PR: different number, and a diff that never opens the page.
+        { changedFiles: ["apps/web/lib/unrelated.ts"], pullRequest: 4242, headSha: null, today },
+        SCOPED_OWNER_WAIVERS,
+      );
+      expect(v.pass).toBe(true);
+      expect((waiverValidUntil(w, today) ?? "") >= today).toBe(true);
+    }
+    // Every live record: approvedAt present, no self-set calendar date.
+    for (const rec of SCOPED_OWNER_WAIVERS) {
+      expect(rec.approvedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(rec.ownerSetExpiresAt).toBeUndefined();
+      expect((rec as unknown as Record<string, unknown>).expiresAt).toBeUndefined();
+    }
+    // Renewal is TIME only: the rolling term never widens the PR list.
+    const listed = evaluateFindings(
       findings,
-      // An unrelated PR: different number, and a diff that never opens the page.
-      { changedFiles: ["apps/web/lib/unrelated.ts"], pullRequest: 4242, headSha: null, today: "2027-01-01" },
+      { changedFiles: [w.files[1]], pullRequest: 4242, headSha: null, today: "2030-01-01" },
       SCOPED_OWNER_WAIVERS,
     );
+    expect(listed.pass).toBe(false);
+    expect(listed.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+  });
+
+  it("an OWNER-SET term still expires, and then blocks EVERY pull request", () => {
+    const w = { ...SCOPED_OWNER_WAIVERS[0], ownerSetExpiresAt: "2026-12-31" };
+    const findings = w.expectedFindings.map((f) => ({ code: f.code, axiom: "A-01", what: f.file }));
+    const v = evaluateFindings(
+      findings,
+      { changedFiles: ["apps/web/lib/unrelated.ts"], pullRequest: 4242, headSha: null, today: "2027-01-01" },
+      [w],
+    );
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("expired");
+  });
+
+  it("an unreadable approvedAt fails closed", () => {
+    const w = { ...FIXTURE_WAIVER, ownerSetExpiresAt: undefined, approvedAt: "garbage" };
+    const v = evaluateFindings(BOTH, ok(), [w]);
     expect(v.pass).toBe(false);
     expect(v.blockingFindings[0].decision.rejection).toBe("expired");
   });
@@ -778,7 +826,7 @@ describe("scoped waiver — the axiom and its diagnostic survive", () => {
 
   it("the waived run reports owner, scope, expiry and the removal step", () => {
     const gate = readFileSync(GATE, "utf8");
-    for (const line of ["waiver      ", "owner       ", "scope       ", "expires     ", "removed by  "]) {
+    for (const line of ["waiver      ", "owner       ", "scope       ", "valid until ", "removed by  "]) {
       expect(gate).toContain(line);
     }
   });

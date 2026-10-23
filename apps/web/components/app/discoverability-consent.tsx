@@ -8,6 +8,7 @@ import {
   type DiscoverabilityState,
 } from "@/lib/privacy/discoverability-actions";
 import type { DiscoverabilityConsentSource } from "@/lib/privacy/employer-visibility";
+import { discoverabilityScreen, type DiscoverabilityPhase } from "@/lib/privacy/discoverability-screen";
 
 /**
  * Profile-discoverability consent control (GDPR Art. 7; EDPB 05/2020).
@@ -86,10 +87,10 @@ export function DiscoverabilityConsent({
   /** Where this copy of the consent is rendered — recorded with the decision. */
   source?: DiscoverabilityConsentSource;
 }) {
-  const [phase, setPhase] = useState<
-    "idle" | "expanded" | "declined" | "done" | "withdrawn" | "needs-migration" | "error"
-  >("idle");
+  const [phase, setPhase] = useState<DiscoverabilityPhase>("idle");
   const [managing, setManaging] = useState(false);
+  // The withdrawn screen's "manage" button: the person asked to decide again.
+  const [reopened, setReopened] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const status = state.status;
@@ -97,8 +98,10 @@ export function DiscoverabilityConsent({
   function onGrant() {
     startTransition(async () => {
       const res = await grantProfileDiscoverability({ locale, source });
-      if (res.kind === "ok") setPhase("done");
-      else if (res.kind === "needs-migration") setPhase("needs-migration");
+      if (res.kind === "ok") {
+        setReopened(false);
+        setPhase("done");
+      } else if (res.kind === "needs-migration") setPhase("needs-migration");
       else setPhase("error");
     });
   }
@@ -106,7 +109,11 @@ export function DiscoverabilityConsent({
   function onWithdraw() {
     startTransition(async () => {
       const res = await withdrawProfileDiscoverability({ source });
-      if (res.kind === "ok") setPhase("withdrawn");
+      if (res.kind === "ok") {
+        setManaging(false);
+        setReopened(false);
+        setPhase("withdrawn");
+      }
       else if (res.kind === "needs-migration") setPhase("needs-migration");
       else setPhase("error");
     });
@@ -172,8 +179,10 @@ export function DiscoverabilityConsent({
     );
   }
 
+  const screen = discoverabilityScreen({ status, phase, reopened });
+
   // GRANTED (fresh grant in this session, or already granted)
-  if (phase === "done" || (status === "granted" && phase !== "withdrawn")) {
+  if (screen === "granted") {
     return (
       <div data-testid="discoverability-granted">
         <p className="text-sm font-medium text-text-primary">{labels.statusVisible}</p>
@@ -214,31 +223,34 @@ export function DiscoverabilityConsent({
   }
 
   // WITHDRAWN
-  if (phase === "withdrawn" || status === "withdrawn") {
+  // "Manage" reopens the decision: the choice screen below, already expanded,
+  // with the grant button — the way back is as short as the way out was.
+  if (screen === "withdrawn") {
     return (
       <div data-testid="discoverability-withdrawn">
         <p className="text-sm font-medium text-text-primary">{labels.statusWithdrawn}</p>
         <p className="mt-1 text-sm text-text-secondary">{labels.statusHiddenBody}</p>
-        {phase !== "expanded" ? (
-          <button
-            type="button"
-            onClick={() => setPhase("expanded")}
-            className="mt-3 inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue"
-            data-testid="discoverability-reopen"
-          >
-            {labels.manage}
-          </button>
-        ) : null}
+        <button
+          type="button"
+          onClick={() => {
+            setReopened(true);
+            setPhase("expanded");
+          }}
+          className="mt-3 inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue"
+          data-testid="discoverability-reopen"
+        >
+          {labels.manage}
+        </button>
       </div>
     );
   }
 
-  // NOT SET (default) or STALE VERSION — the choice screen.
+  // NOT SET (default), STALE VERSION, or a withdrawn decision reopened — the choice screen.
   const stale = status === "granted_stale_version";
   return (
     <div data-testid="discoverability-choice">
       <p className="text-sm font-medium text-text-primary">
-        {stale ? labels.statusStale : labels.statusHidden}
+        {stale ? labels.statusStale : reopened ? labels.statusWithdrawn : labels.statusHidden}
       </p>
       <p className="mt-1 text-sm text-text-secondary">{labels.statusHiddenBody}</p>
 

@@ -1,7 +1,9 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect } from "@playwright/test";
+
+import { bearerOf, qaMcp } from "./prod-qa-api";
 
 /**
  * PRODUCTION MCP — the universal LLM integration (#2336) driven exactly as an
@@ -21,23 +23,11 @@ import { test, expect } from "@playwright/test";
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const TAG = `QA-SYNTHETIC ${RUN} mcp`;
-const ORIGIN = process.env.PLAYWRIGHT_BASE_URL ?? "https://labourmarket.ai";
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && existsSync(state("worker")) && existsSync(state("agency"));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
 test.describe.configure({ mode: "serial", timeout: 180_000, retries: 0 });
 
-/** The access token out of a minted @supabase/ssr storage state. */
-function bearerOf(slot: string): string {
-  const s = JSON.parse(readFileSync(state(slot), "utf8")) as { cookies: { name: string; value: string }[] };
-  const parts = s.cookies
-    .filter((c) => /^sb-.*-auth-token(\.\d+)?$/.test(c.name))
-    .sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }));
-  const raw = parts.map((c) => c.value).join("");
-  const b64 = raw.startsWith("base64-") ? raw.slice(7) : raw;
-  const json = JSON.parse(Buffer.from(b64.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
-  return json.access_token as string;
-}
 
 type ToolResult = { ok: boolean; code?: string; data?: Record<string, unknown>; message?: string };
 type JsonSchema = {
@@ -55,15 +45,7 @@ type JsonSchema = {
 type CatalogTool = { name: string; inputSchema: JsonSchema; annotations?: { readOnlyHint?: boolean } };
 let rpcId = 0;
 async function rpc(token: string | null, method: string, params: Record<string, unknown> = {}) {
-  const res = await fetch(`${ORIGIN}/api/mcp`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      accept: "application/json, text/event-stream",
-      ...(token ? { authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ jsonrpc: "2.0", id: ++rpcId, method, params }),
-  });
+  const res = await qaMcp(token, { jsonrpc: "2.0", id: ++rpcId, method, params });
   const text = await res.text();
   let body: { result?: { structuredContent?: ToolResult; tools?: CatalogTool[] }; error?: unknown } | null = null;
   try {

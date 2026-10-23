@@ -87,8 +87,13 @@ export function DemandRequestButton({
   stepTitles,
   repeatRequestId = null,
   usage = null,
+  organizationId = null,
 }: {
   intent: "hire_workers" | "partner";
+  /** The organization this page was rendered for. Sent with the submit so a
+   *  workspace switched meanwhile (another tab) REFUSES instead of posting
+   *  the need into a company the person did not see. */
+  organizationId?: string | null;
   /** Pre-submit open-needs usage for the acting workspace: the ONE gate's
    *  verdict reshaped (lib/billing/open-needs-usage.ts). Null / not visible
    *  while billing is not enforced: nothing is shown. */
@@ -101,6 +106,7 @@ export function DemandRequestButton({
   repeatRequestId?: string | null;
 }) {
   const t = useTranslations("auth.dashboard.wow.demand");
+  const tStale = useTranslations("conversation.forms.ui");
   const router = useRouter();
   // Structured field labels reuse the existing 3-locale catalogues (no new
   // 11-locale keys): companyNeed for the field labels + accommodation options,
@@ -170,7 +176,7 @@ export function DemandRequestButton({
   const [estimate, setEstimate] = useState<EstimateInputs>(EMPTY_ESTIMATE_INPUTS);
   const [showDescError, setShowDescError] = useState(false);
   const [autoSuggested, setAutoSuggested] = useState(false);
-  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual">(
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual" | "workspaceChanged">(
     "idle",
   );
   // Advanced structured clusters (structured_v2, PR 2) — optional; empty
@@ -369,10 +375,12 @@ export function DemandRequestButton({
         requiredTools: requiredTools.length > 0 ? requiredTools : undefined,
         estimate: estimateEngaged ? estimate : undefined,
         structuredV2: advWire,
-      });
+      }, { expectedOrganizationId: organizationId });
       setState(
         res.ok
           ? "done"
+          : res.code === "workspace_changed"
+            ? "workspaceChanged"
           : res.code === "needs_migration"
             ? "needsMigration"
             : res.code === "over_open_need_limit"
@@ -1011,6 +1019,11 @@ export function DemandRequestButton({
       {(state === "limitUpgrade" || state === "limitIndividual") && (
         <p className="text-xs text-state-warning" role="alert" data-testid="demand-open-need-limit" data-next={state === "limitIndividual" ? "individual_plan" : "upgrade"}>
           {state === "limitIndividual" ? t("errorOpenNeedLimitIndividual") : t("errorOpenNeedLimitUpgrade")}
+        </p>
+      )}
+      {state === "workspaceChanged" && (
+        <p className="text-xs text-state-warning" role="alert" data-testid="demand-workspace-changed">
+          {tStale("errorStale")}
         </p>
       )}
       {state === "needsMigration" && (

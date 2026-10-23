@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { withoutErasureRegistrySeed } from "./erasure-registry-seed";
 
 /**
  * PUBLIC INTAKE OWNER QUEUE v1 — SAFETY GUARDS.
@@ -124,7 +125,7 @@ describe("the feature sends nothing outbound and adds no DB weakening", () => {
   it("adds no migration and no RLS policy / anon grant for the table", () => {
     const migDir = join(REPO_ROOT, "supabase", "migrations");
     const touching = readdirSync(migDir).filter((f) =>
-      readFileSync(join(migDir, f), "utf8").includes(TABLE),
+      withoutErasureRegistrySeed(readFileSync(join(migDir, f), "utf8")).includes(TABLE),
     );
     // The original PR #678 migration + the canonical-journey P3 defect fix
     // (service-role-ONLY grants — the table was created with no grant at
@@ -150,6 +151,9 @@ describe("the feature sends nothing outbound and adds no DB weakening", () => {
       // 2026-10-12 (owner-approved): UPDATE (status) to service_role only —
       // production service_role could not mark a claimed intake converted.
       "20261012120000_service_role_notification_reads_v1.sql",
+      // 2026-10-22 (RED, needs-human-gate): a whole-table COUNT for the Agentai OS capability readback. Reads only;
+      // grants nothing on the table and adds no policy.
+      "20261022150000_agentai_capability_readback_counts_v1.sql",
     ]);
     const grants = readFileSync(
       join(migDir, "20260713190000_company_need_intake_service_grants.sql"),

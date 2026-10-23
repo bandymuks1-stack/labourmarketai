@@ -36,6 +36,8 @@ import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getSessionProfile } from "@/lib/auth/session-profile";
+import { StaleBuildRecovery } from "@/components/app/stale-build-recovery";
+import DashboardSectionLoading from "./loading";
 import { createClient } from "@/lib/supabase/server";
 
 const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
@@ -397,10 +399,19 @@ export default async function DashboardLayout({
         {/* Streamed notification spine: same single source, off the TTFB
           critical path. Hydrates the bell + nav badges via the auth context as
           soon as the derived signals resolve. Shared by every chrome mode. */}
-        <Suspense fallback={null}>
+        {/* KEYED BY THE WORKSPACE (audit 2026-10-21): a workspace switch runs
+            in a transition, and React keeps an already-shown boundary's old
+            content until the new one resolves — so the switch (chip, page)
+            waited for the slowest badge read, up to tens of seconds on a
+            cache miss, showing "Switching…". A NEW boundary may show its
+            fallback, so the switch commits at once and the bell fills in. */}
+        <Suspense key={workspace.activeWorkspaceId} fallback={null}>
           <SpineStream activeRole={activeRole} />
         </Suspense>
         <SessionTelemetry />
+        {/* A page from the build before a deploy reloads once instead of
+            failing its next action ("Failed to find Server Action"). */}
+        <StaleBuildRecovery />
         <AmbientGlow />
         <DashboardChrome
           nav={nav}
@@ -409,7 +420,12 @@ export default async function DashboardLayout({
           fullBottomNav={<BottomNav />}
           rexora={rexora}
         >
-          {children}
+          {/* Same reason: after a switch the shell and the chip commit as soon
+              as the layout's own reads finish; the page streams in under the
+              section skeleton. Same workspace = same key = navigation as before. */}
+          <Suspense key={workspace.activeWorkspaceId} fallback={<DashboardSectionLoading />}>
+            {children}
+          </Suspense>
         </DashboardChrome>
         {/* v1 tester language-feedback widget — authenticated sessions only. */}
         <LanguageFeedbackWidget />

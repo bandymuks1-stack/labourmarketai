@@ -9,10 +9,12 @@ import { createAndSendInvitations, resendInvitationAction } from "@/lib/invitati
 import {
   createTeamBrigade,
   disbandTeamBrigade,
+  getTeamBrigadesData,
   lookupLinkedWorkerEmail,
   type CreateTeamOutcome,
   type DisbandTeamOutcome,
   type TeamAvailabilityStatus,
+  type TeamBrigade,
 } from "./team-brigades";
 import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -33,8 +35,9 @@ import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
  *
  * Privacy: the invitee's email is looked up server-side from the already
  * RLS-visible company_workers link and handed to the canonical invitation
- * action; neither the email nor the invite link is ever returned to the
- * client from here.
+ * action; the email is never returned to the client. The invite LINK is
+ * returned (by design since the 2026-10-11 walk) so the manager can hand it
+ * over on a channel the platform does not deliver on.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,7 +51,7 @@ const RELATION_NOT_FOUND_CODE = "42P01";
 export async function createTeamAction(
   name: string,
   expectedWorkspaceId?: string,
-): Promise<{ outcome: CreateTeamOutcome }> {
+): Promise<{ outcome: CreateTeamOutcome; teams?: readonly TeamBrigade[] }> {
   await refuseStaleWorkspace(expectedWorkspaceId);
   const { outcome } = await createTeamBrigade(name);
   // W14 mid-funnel: a team organization was really created (the org spine
@@ -71,6 +74,13 @@ export async function createTeamAction(
       source: "teams",
       metadata: { surface: "company_teams", entity_type: "team" },
     });
+    // The new brigade is shown from THIS answer (the same read the page
+    // makes), not only after the whole people page re-renders: a slow
+    // refresh left the owner looking at a list without the brigade they had
+    // just created (walk 2026-10-20). A failed read returns no list and the
+    // refresh still follows.
+    const fresh = await getTeamBrigadesData();
+    if (fresh.applied && fresh.error === null) return { outcome, teams: fresh.teams };
   }
   return { outcome };
 }

@@ -1,22 +1,21 @@
 import { NextResponse } from "next/server";
 
 import { requireSupabaseClientEnv } from "@/lib/env";
+import { protectedResourceMetadata } from "@/lib/mcp/protected-resource-metadata";
+import { requestPublicOrigin } from "@/lib/mcp/public-origin";
 
 export const runtime = "nodejs";
 
 /**
- * RFC 9728 — OAuth 2.0 Protected Resource Metadata.
+ * RFC 9728 — OAuth 2.0 Protected Resource Metadata, root location.
  *
  * How an OAuth-capable MCP client (ChatGPT's connector flow, verified
- * 2026-08-29) discovers WHO issues tokens for this API: it reads this
- * document, finds the authorization server, and runs OAuth 2.1 + PKCE
- * against it. The authorization server is the platform's OWN Supabase Auth
- * — the same identity every other client resolves to. One user, one
- * identity, multiple clients; no second credential system.
- *
- * PUBLIC BY DESIGN: everything here is already public client configuration
- * (the Supabase project URL ships in every browser bundle). No key, no
- * secret, no user data.
+ * 2026-08-29; Claude's, per its documentation read 2026-10-17) discovers WHO
+ * issues tokens for this API: it reads this document, finds the authorization
+ * server, and runs OAuth 2.1 + PKCE against it. The document itself —
+ * including why `resource` is the MCP URL and not the bare origin — lives in
+ * `lib/mcp/protected-resource-metadata.ts`; the path-suffixed sibling route
+ * (`./api/mcp/route.ts`) serves the identical document.
  *
  * NOTE (owner gate): the Supabase OAuth 2.1 authorization server is a
  * project-level feature the OWNER must enable in the Supabase dashboard
@@ -26,23 +25,10 @@ export const runtime = "nodejs";
  */
 export async function GET(req: Request) {
   const { url } = requireSupabaseClientEnv();
-  const origin = new URL(req.url).origin;
-  return NextResponse.json(
-    {
-      resource: origin,
-      // The AS identifier is the auth service path, not the bare project
-      // origin: Supabase serves RFC 8414 discovery at
-      // /.well-known/oauth-authorization-server/auth/v1, which clients derive
-      // FROM this identifier (verified against the Supabase OAuth-server docs
-      // 2026-08-29 — a bare origin would send them to a 404).
-      authorization_servers: [`${url.replace(/\/$/, "")}/auth/v1`],
-      bearer_methods_supported: ["header"],
-      resource_name: "LabourMarket.ai",
+  const origin = requestPublicOrigin(req);
+  return NextResponse.json(protectedResourceMetadata(origin, url), {
+    headers: {
+      "Cache-Control": "public, max-age=3600",
     },
-    {
-      headers: {
-        "Cache-Control": "public, max-age=3600",
-      },
-    },
-  );
+  });
 }

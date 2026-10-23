@@ -3,6 +3,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { confirmedSkillWorkerIds } from "@/lib/evidence/skill-confirmation-standing";
+import { readCrossPartyStandingStates } from "@/lib/evidence/skill-confirmation-standing-read";
 import {
   computeThermometer,
   averageMidpoint,
@@ -71,17 +73,25 @@ export async function getLeague(): Promise<LeagueData> {
       .select(
         "worker_id, professions(slug), workers(id, current_location_country, availability_status, salary_min_eur, salary_max_eur)",
       ),
-    asAny(supabase).from("worker_skills").select("worker_id").eq("verified", true),
+    // The RECORDED confirmations; which still STAND is decided below.
+    asAny(supabase).from("worker_skills").select("worker_id, skill_id, verified").eq("verified", true),
     asAny(supabase)
       .from("market_rate_averages")
       .select("country, avg_rate_eur, professions(slug)")
       .eq("is_active", true),
   ]);
 
-  const confirmedWorkers = new Set(
-    ((confirmedRes.data ?? []) as { worker_id: string | null }[])
-      .map((r) => r.worker_id)
-      .filter((v): v is string => !!v),
+  // A confirmed-skill worker holds at least one confirmation that still
+  // STANDS (lib/evidence/skill-confirmation-standing.ts) — the stored flag is
+  // sticky after the confirming work is rejected, corrected or deleted.
+  const recorded = (confirmedRes.data ?? []) as {
+    worker_id: string | null;
+    skill_id: string | null;
+    verified: boolean | null;
+  }[];
+  const confirmedWorkers = confirmedSkillWorkerIds(
+    recorded,
+    await readCrossPartyStandingStates(supabase, recorded.map((r) => r.worker_id)),
   );
 
   // Admin market averages per profession × country (component 2).

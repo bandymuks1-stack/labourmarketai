@@ -12,6 +12,7 @@ import {
   readHistoryLookups,
 } from "./history-context-read";
 import type { HistoryContext, HistoryContextInput } from "./professional-history-context";
+import { readAllPages } from "./evidence-pagination";
 import {
   deriveEvidenceStanding,
   anyStandingDispute,
@@ -56,8 +57,8 @@ import {
  */
 
 const MISSING_OBJECT_CODES = new Set(["42P01", "42883", "PGRST202", "PGRST205"]);
-/** The same ceiling `work_hour_allocations` reads under. */
-const READ_LIMIT = 5000;
+/** The ceiling the paged read stops at (pages of 1000 — the server's own cap). */
+const READ_LIMIT = 20000;
 const MAX_LINKED_PEOPLE = 50;
 
 export interface WorkerEvidenceRecordRow {
@@ -172,19 +173,41 @@ export async function readEvidenceRecordsForPeople(
   // Dated AND period records in ONE bounded read: a period row has no
   // activity_date, so the old "activity_date is not null" filter was
   // exactly what made imported history invisible on the person's timeline.
-  const res = await db(supabase)
-    .from("organization_evidence_records")
-    .select(
-      "id, organization_id, organization_person_id, activity_date, period_start, period_end, hours, evidence_state, derived, activity_kind, context_label, work_object_id, project_id, supplied_by_organization_id, supplier_role, source_kind, row_origin, imported_at, organization_people(relationship_kind, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
-    )
-    .in("organization_person_id", personIds)
-    .order("activity_date", { ascending: false, nullsFirst: false })
-    .limit(READ_LIMIT);
-  if (res.error) {
-    if (MISSING_OBJECT_CODES.has(res.error.code ?? "")) return { kind: "needs-migration" };
-    console.error("[evidence] worker records read failed:", res.error.code);
+  // PAGED to the end: the server answers at most 1000 rows per request, so
+  // the former `.limit(5000)` silently became 1000 — and every hour past it
+  // vanished from the ONE experience total (decision 0025). `id` breaks ties
+  // so no row is skipped or repeated across pages.
+  let failure: { code?: string } | null = null;
+  const paged = await readAllPages<Record<string, unknown>>(
+    (from, to) =>
+      db(supabase)
+        .from("organization_evidence_records")
+        .select(
+          "id, organization_id, organization_person_id, activity_date, period_start, period_end, hours, evidence_state, derived, activity_kind, context_label, work_object_id, project_id, supplied_by_organization_id, supplier_role, source_kind, row_origin, imported_at, source_sheet:source_fact->>source_sheet, organization_people(relationship_kind, linked_profile_id), organization_evidence_events!organization_evidence_events_record_fk(event_type, actor_role, actor_profile_id, created_at), organization_evidence_parties!organization_evidence_parties_record_fk(party_role, party_organization_id, party_label)",
+        )
+        .in("organization_person_id", personIds)
+        .order("activity_date", { ascending: false, nullsFirst: false })
+        .order("id", { ascending: true })
+        .range(from, to)
+        .then((r: { data: Record<string, unknown>[] | null; error: { code?: string } | null }) => {
+          if (r.error) failure = r.error;
+          return r;
+        }),
+    { ceiling: READ_LIMIT },
+  );
+  if (!paged) {
+    const code = (failure as { code?: string } | null)?.code ?? "";
+    if (MISSING_OBJECT_CODES.has(code)) return { kind: "needs-migration" };
+    console.error("[evidence] worker records read failed:", code);
     return { kind: "error" };
   }
+  // A read stopped at its ceiling is NOT the person's history: totals over
+  // part of it would be presented as complete. Unknown, never a smaller number.
+  if (paged.truncated) {
+    console.error("[evidence] worker records read reached its ceiling:", READ_LIMIT);
+    return { kind: "error" };
+  }
+  const res = { data: paged.rows };
 
   type Raw = Omit<HistoryContextInput, "workObjectName" | "projectName" | "organizationNames">;
   const rows: (Omit<WorkerEvidenceRecordRow, "context"> & { raw: Raw })[] = [];
@@ -244,6 +267,9 @@ export async function readEvidenceRecordsForPeople(
       supplierOrganizationId: (r.supplied_by_organization_id as string | null) ?? null,
       sourceKind: (r.source_kind as string | null) ?? null,
       rowOrigin: (r.row_origin as string | null) ?? null,
+      // The entity-at-the-time label the source gave the row (its sheet name) —
+      // what places the record in a stated business period on read.
+      sourceLabel: (r.source_sheet as string | null) ?? null,
       reportedState: (r.evidence_state as string | null) ?? null,
       attestation: standing.attestation
         ? { role: standing.attestation.role, self: standing.attestation.self }

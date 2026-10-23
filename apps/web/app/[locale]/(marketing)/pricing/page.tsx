@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
 import { PageHero } from "@/components/marketing/page-hero";
+import { TelemetryView } from "@/components/app/telemetry-view";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
 export async function generateMetadata({
   params,
@@ -12,8 +14,9 @@ export async function generateMetadata({
   return buildPageMetadataFor("pricing", locale, "/pricing");
 }
 import { PricingTable } from "@/components/marketing/pricing-table";
+import { PilotPassInvite } from "@/components/app/pilot-pass-invite";
 import { PrePaymentPlanBoundary } from "@/components/marketing/pre-payment-plan-boundary";
-import { getBillingConfig } from "@/lib/billing/config";
+import { getBillingConfigFor } from "@/lib/billing/config";
 import { isStripeActive } from "@/lib/billing/config-core";
 import { isCheckoutCancelledReturn } from "@/lib/billing/checkout-return-core";
 import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
@@ -45,7 +48,7 @@ export default async function PricingPage({
   const { billing } = await searchParams;
   // LIVE Stripe (owner-armed) changes the page's own words: the hero no longer
   // says prices are not final, and the pre-payment boundary is not shown.
-  const billingLive = isStripeActive(getBillingConfig());
+  const billingLive = isStripeActive(getBillingConfigFor(null));
   // The hero words and the hero CTA follow the REAL readiness state, never a
   // static sentence: (1) prices not confirmed -> "not finalised" + waitlist;
   // (2) prices confirmed but no Stripe adapter armed -> "confirmed, online
@@ -59,6 +62,8 @@ export default async function PricingPage({
 
   return (
     <>
+      {/* Revenue funnel (2026-10-19): who saw the price. Once per tab session. */}
+      <TelemetryView event={FUNNEL_EVENTS.pricingViewed} metadata={{ surface: "pricing" }} />
       <PageHero
         eyebrow={t("eyebrow")}
         title={t("title")}
@@ -86,6 +91,12 @@ export default async function PricingPage({
           </p>
         </div>
       ) : null}
+      {/* The organization pilot pass, for the signed-in owner it is offered
+          to — public billing stays off, so without this the pricing page told
+          that owner payments were not open (2026-10-22). */}
+      <div className="mx-auto max-w-container px-6 sm:px-12">
+        <PilotPassInvite />
+      </div>
       {/* Public commercial surface only: the technical billing state banner
           and the Stripe TEST checkout moved to the superadmin-gated
           /dashboard/admin/billing (launch repair Scope C). */}

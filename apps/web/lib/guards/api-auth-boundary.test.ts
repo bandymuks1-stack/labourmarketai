@@ -50,6 +50,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Stripe delivers it; identity is the webhook signature, not a user.",
   },
+  "client-errors/route.ts": {
+    class: "public",
+    why: "Browser crash reports (2026-10-18 incident): a crash can happen before or without a session. Same-origin only, 2 KB, rate-limited, sanitised; logs one line and stores nothing; no identity read at all.",
+  },
   "waitlist/route.ts": {
     class: "public",
     why: "The pre-auth funnel. Anonymous by design, rate-limited, its own client.",
@@ -66,6 +70,10 @@ const CLASSIFICATION: Record<
     class: "cookie-only",
     why: "Same reasoning as the portal, and test-mode only on top of it: it starts a Stripe Checkout a browser then completes.",
   },
+  "billing/pilot-pass/route.ts": {
+    class: "cookie-only",
+    why: "The organization pilot pass (1 EUR once -> the paid plan for the pilot period): a plain form POST from the signed-in account page, answered with a 303 to Stripe's hosted page that a BROWSER completes. No input; owner switch + pilot organization + billing authority + no active plan gate it. Money surface - a non-browser caller has no product reason to start it.",
+  },
   "billing/refresh/route.ts": {
     class: "cookie-only",
     why: "Money surface, user self-service: 'refresh my billing status' for the person's CURRENT workspace. It takes no input (workspace, customer and subscription are resolved server-side from the cookie session), only READS the provider, and answers one status word - a non-browser caller has no product reason to poke it, and billing is where a mistake is least recoverable.",
@@ -76,23 +84,35 @@ const CLASSIFICATION: Record<
   },
   "cron/billing-recovery/route.ts": {
     class: "public",
-    why: "Triggered by the billing-recovery-cadence GitHub Actions workflow (inert until the owner enables it); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset, so never an open trigger. It only READS Stripe and applies through the canonical subscription-apply primitive; it never creates, changes, cancels or refunds a payment. Answers counts and a reason code only, no ids.",
+    why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron) once payments are on — absent from it while they are off; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset, so never an open trigger. It only READS Stripe and applies through the canonical subscription-apply primitive; it never creates, changes, cancels or refunds a payment. Answers counts and a reason code only, no ids.",
   },
   "cron/commercial-handoffs/route.ts": {
     class: "public",
-    why: "Vercel cron delivers it (once the owner schedules it); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. Inert a second time while NONSTOP_HANDOFF_ENDPOINT / NONSTOP_HANDOFF_TOKEN are unset (answers not_configured, calls nothing). Its only outbound target is the configured partner door; the body it returns is counts only.",
+    why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. Inert a second time while NONSTOP_HANDOFF_ENDPOINT / NONSTOP_HANDOFF_TOKEN are unset (answers not_configured, calls nothing). Its only outbound target is the configured partner door; the body it returns is counts only.",
+  },
+  "cron/privacy-erasure/route.ts": {
+    class: "public",
+    why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it every 10 minutes; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. It acts only on account-deletion requests the holder confirmed with a fresh sign-in (or the owner approved in writing), and every decision is the database's own plan (privacy_erasure_executor_v3). Answers counts only — no ids, no addresses.",
   },
   "cron/job-alerts/route.ts": {
     class: "public",
-    why: "Triggered by the job-alerts-cadence GitHub Actions workflow; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. Answers counts and a reason code only.",
+    why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. Answers counts and a reason code only.",
   },
   "cron/weekly-digest/route.ts": {
     class: "public",
-    why: "Vercel cron delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",
+    why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open trigger.",
   },
   "internal/supply-feed/first-party-v1/route.ts": {
     class: "public",
     why: "The partner opportunity network pulls it; identity is the SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open worker API. Deliberately NOT shared: it answers with every authorised person’s projection at once, which no signed-in account has a reason to ask for, so there is no user path to conflate. The body carries the v1 projection only — opaque actorRef, trades, availability, geography, agreed markets, four authorities — and holds no name, email, phone or address to leak.",
+  },
+  "internal/capability-readback/v1/route.ts": {
+    class: "public",
+    why: "Agentai OS re-verifies its LabourMarket.ai capability contract from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is aggregate integer COUNTS only (lib/api/capability-readback.ts: a fixed key list, everything else refused) — no row, name, id, email or address exists in it to leak.",
+  },
+  "public/claims/v1/route.ts": {
+    class: "public",
+    why: "The public claims contract (lm-public-claims/v1) Agentai OS re-verifies marketing claims against. No identity exists or is read; the body is marketing copy already on public pages, resolved from the bundled message catalogs by lib/public-claims/registry.ts, plus the public plan price /pricing itself reads (getPlans → the anon-safe public_plans_v1 RPC) — nothing a person owns.",
   },
   "health/route.ts": {
     class: "public",

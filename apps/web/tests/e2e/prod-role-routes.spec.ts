@@ -12,13 +12,18 @@ import { test, expect, type Page } from "@playwright/test";
  * Each route is a SOFT check, so one run reports every broken surface instead
  * of stopping at the first.
  *
- * A route FAILS when: the response is 5xx, the person is bounced to sign-in,
- * the error boundary renders, or the page shows no main content.
+ * A route FAILS when: the response is 4xx/5xx, the branded not-found page renders
+ * (it has a <main> with text, so the content checks alone passed a missing page —
+ * audit 2026-10-18), the person is bounced to sign-in, the error boundary
+ * renders, or the page shows no main content.
  */
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1";
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
-test.describe.configure({ timeout: 300_000, retries: 0 });
+// The budget scales with the routes an actor opens: a healthy owner pass was
+// ~250 s for 28 routes (2026-10-22), so a flat 300 s cut the 27th route of a
+// merely slow run. Slow surfaces stay visible by name (SLOW in the log).
+test.describe.configure({ retries: 0 });
 
 const COMMON = [
   "/lt/dashboard",
@@ -30,7 +35,7 @@ const COMMON = [
   "/lt/dashboard/activity",
   "/lt/dashboard/learning",
   "/lt/dashboard/services",
-  "/lt/dashboard/market",
+  "/lt/dashboard/market-map",
   "/lt/dashboard/opportunities",
   "/lt/dashboard/work-in-numbers",
   "/lt/dashboard/documents",
@@ -41,7 +46,7 @@ const EMPLOYER = [
   "/lt/dashboard/company",
   "/lt/dashboard/company/people",
   "/lt/dashboard/company/needs",
-  "/lt/dashboard/company/projects",
+  "/lt/dashboard/company/projects/new",
   "/lt/dashboard/company/planning",
   "/lt/dashboard/company/scouting",
   "/lt/dashboard/company/partners",
@@ -75,11 +80,12 @@ async function check(page: Page, route: string): Promise<string | null> {
   if (res instanceof Error) return `navigation failed: ${res.message.split("\n")[0]}`;
   const timing = res?.request().timing();
   if (timing && timing.responseStart > 0) lastTiming.ttfb = Math.round(timing.responseStart);
-  if (res && res.status() >= 500) return `HTTP ${res.status()}`;
+  if (res && res.status() >= 400) return `HTTP ${res.status()}`;
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   if (/\/auth\/(login|sign-?in)/.test(page.url())) return `bounced to sign-in (${new URL(page.url()).pathname})`;
   if (await page.getByTestId("error-boundary-message").isVisible().catch(() => false)) return "error boundary rendered";
   if (await page.getByTestId("global-error-message").isVisible().catch(() => false)) return "global error rendered";
+  if (await page.getByTestId("branded-not-found").isVisible().catch(() => false)) return "not found (404 page)";
   // The home IS the chat: its proof is the composer, not a <main> text block.
   // A role redirect lands there too, with a ?notice= that explains why.
   if (new URL(page.url()).pathname.replace(/\/$/, "") === "/lt/dashboard") {
@@ -94,6 +100,7 @@ async function check(page: Page, route: string): Promise<string | null> {
 
 for (const actor of CAST) {
   test(`${actor.role}: every working surface opens`, async ({ browser }) => {
+    test.setTimeout(actor.routes.length * 20_000); // 28 routes -> 560 s, 15 -> 300 s
     test.skip(!existsSync(state(actor.slot)), `no session for ${actor.slot}`);
     const ctx = await browser.newContext({ storageState: state(actor.slot), locale: "lt-LT" });
     const page = await ctx.newPage();
@@ -104,7 +111,7 @@ for (const actor of CAST) {
       // failure — it is recorded so the report shows where each role lands.
       const landed = new URL(page.url()).pathname + new URL(page.url()).search;
       console.info(
-        `[role-routes] ${actor.slot} ${route} -> ${landed} ttfb_ms=${lastTiming.ttfb ?? "?"} nav_ms=${lastTiming.total} ${problem ? "FAIL " + problem : "ok"}`,
+        `[role-routes] ${actor.slot} ${route} -> ${landed} ttfb_ms=${lastTiming.ttfb ?? "?"} nav_ms=${lastTiming.total}${lastTiming.total > 20_000 ? " SLOW" : ""} ${problem ? "FAIL " + problem : "ok"}`,
       );
       if (problem) failures.push(`${route}: ${problem}`);
       expect.soft(problem, `${actor.role} ${route}`).toBeNull();

@@ -31,6 +31,29 @@ import {
 } from "@/lib/journal/project-attribution";
 import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
 import { checkWorkDate } from "@/lib/journal/work-date";
+import { isCommunicationLocale } from "@/lib/i18n/config";
+
+/**
+ * The language code stored on the entry (`original_language`). The form field
+ * carries the UI locale the person wrote in; it is validated against the
+ * communication-locale set the DB CHECK admits, so a tampered or stale value
+ * can never surface as a raw `entry_insert_failed`. An unknown value falls
+ * back to the platform default. Audit 2026-10-16 (J-3).
+ */
+export function resolveEntryLanguage(raw: FormDataEntryValue | null): string {
+  const code = String(raw ?? "").trim().toLowerCase().slice(0, 2);
+  return isCommunicationLocale(code) ? code : "lt";
+}
+
+/** `HH:MM` on a 24-hour clock, or null. Pure. */
+export function parseClockTime(raw: string): string | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(raw.trim());
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h < 0 || h > 23 || min < 0 || min > 59) return null;
+  return `${String(h).padStart(2, "0")}:${m[2]}`;
+}
 
 /**
  * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
@@ -64,27 +87,79 @@ const MISSING_RPC_CODES = new Set(["PGRST202", "42883"]);
  *  is treated as the SAME submission (double click / network retry). */
 const DUPLICATE_SAVE_WINDOW_MS = 30_000;
 
-/** Id of an entry this worker saved in the same engagement context with the
- *  same text moments ago, else null. A failed read is "no duplicate found"
- *  (the save then proceeds exactly as before). */
+/** The facts that make two saves DIFFERENT work even with the same words:
+ *  the day, the durations and the work times. */
+const DUPLICATE_KEY_SLUGS = new Set([
+  "work_date",
+  "quantity",
+  "fragment_time",
+  "work_start",
+  "work_end",
+  "break_minutes",
+]);
+
+type DuplicateKeyMetric = {
+  metric_slug: string;
+  value_numeric?: number | null;
+  value_text?: string | null;
+  unit_slug?: string | null;
+};
+
+/** One comparable string for the day / time facts of a metric list. */
+export function duplicateKeyOf(metrics: readonly DuplicateKeyMetric[]): string {
+  return metrics
+    .filter((m) => DUPLICATE_KEY_SLUGS.has(m.metric_slug))
+    .map((m) => [m.metric_slug, m.value_numeric ?? "", m.value_text ?? "", m.unit_slug ?? ""].join("|"))
+    .sort()
+    .join(";");
+}
+
+/** Id of a LIVE entry this worker saved moments ago that is the SAME
+ *  submission — same engagement, same words, same day and durations, same
+ *  explicit project choice — else null. A failed read is "no duplicate found"
+ *  (the save then proceeds exactly as before).
+ *
+ *  The text alone was the key before (audit 2026-10-20): backfilling
+ *  "Plytelės 8 val." for Monday and then Tuesday, or deleting an entry and
+ *  re-recording it, answered "saved" with the FIRST (or deleted) entry's id
+ *  and wrote nothing — a lost day reported as success. */
 export async function findRecentDuplicateEntry(
   supabase: ServerSupabase,
-  q: { workerId: string; engagementId: string; originalText: string },
+  q: {
+    workerId: string;
+    engagementId: string;
+    originalText: string;
+    metrics?: readonly DuplicateKeyMetric[];
+    /** Present only when the person chose explicitly (a project or none). */
+    explicitProjectId?: string | null;
+  },
 ): Promise<string | null> {
   try {
     const since = new Date(Date.now() - DUPLICATE_SAVE_WINDOW_MS).toISOString();
     const { data, error } = await supabase
       .from("journal_entries")
-      .select("id")
+      .select("id, project_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug)")
       .eq("worker_id", q.workerId)
       .eq("engagement_context_id", q.engagementId)
       .eq("original_text", q.originalText)
+      .is("deleted_at", null)
+      .is("superseded_by", null)
       .gte("created_at", since)
       .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (error) return null;
-    return (data as { id?: string } | null)?.id ?? null;
+      .limit(5);
+    if (error || !Array.isArray(data)) return null;
+    const want = duplicateKeyOf(q.metrics ?? []);
+    for (const row of data as {
+      id?: string;
+      project_id?: string | null;
+      journal_entry_metrics?: DuplicateKeyMetric[] | null;
+    }[]) {
+      if (!row.id) continue;
+      if (duplicateKeyOf(row.journal_entry_metrics ?? []) !== want) continue;
+      if (q.explicitProjectId !== undefined && (row.project_id ?? null) !== q.explicitProjectId) continue;
+      return row.id;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -441,8 +516,19 @@ export async function legacyTwoStepSave(
     .insert(rows);
   if (mErr) {
     // Best-effort compensation — append-only doctrine blocks DELETE by
-    // default, so the entry likely leaks. Surface that honestly.
-    await supabase.from("journal_entries").delete().eq("id", entry.id);
+    // default, so the entry likely leaks. The result used to be discarded;
+    // it is now read, so a ghost entry is named in the log instead of being
+    // implied by silence (audit 2026-10-16, J-5).
+    const { error: delErr } = await supabase
+      .from("journal_entries")
+      .delete()
+      .eq("id", entry.id);
+    if (delErr) {
+      console.warn(
+        "[journal] legacy save: metrics failed and the entry could not be removed (append-only) — entry kept without metrics",
+        { entryId: entry.id, code: delErr.code ?? "unknown" },
+      );
+    }
     return {
       ok: false,
       code: "metrics_insert_failed",
@@ -505,7 +591,7 @@ export async function createJournalEntryCore(
     };
   }
 
-  const locale = String(formData.get("locale") ?? "lt");
+  const locale = resolveEntryLanguage(formData.get("locale"));
   const engagementId = String(formData.get("engagement_context_id") ?? "").trim();
   const siteName = String(formData.get("site_name") ?? "").trim();
   const workDirection = String(formData.get("work_direction") ?? "").trim();
@@ -520,6 +606,22 @@ export async function createJournalEntryCore(
       : "worker_input";
   const notes = String(formData.get("notes") ?? "").trim();
   const workDate = String(formData.get("work_date") ?? "").trim();
+  // Time of day the shift ran (audit 2026-10-16, J-4). The chat and MCP
+  // intake parse "nuo 8 iki 17, 30 min pertrauka" deterministically; before
+  // this the start/end/break were a parse PREVIEW only and never reached the
+  // record, so no later reader could place the work inside the day. They are
+  // optional, validated, and carry the same provenance rule as `quantity`.
+  const workStart = parseClockTime(String(formData.get("work_start") ?? ""));
+  const workEnd = parseClockTime(String(formData.get("work_end") ?? ""));
+  const breakMinutesRaw = String(formData.get("break_minutes") ?? "").trim();
+  const breakMinutes =
+    breakMinutesRaw !== "" && /^\d{1,4}$/.test(breakMinutesRaw)
+      ? Number(breakMinutesRaw)
+      : null;
+  const workTimeSource: RpcMetricRow["source"] =
+    String(formData.get("work_time_source") ?? "") === "ai_extracted"
+      ? "ai_extracted"
+      : "worker_input";
   // v3 — free-text review-only metadata. Capped lengths so a runaway paste
   // can't blow up a single metric row.
   const institutionName = String(formData.get("institution_name") ?? "")
@@ -569,9 +671,14 @@ export async function createJournalEntryCore(
       message: t("quantityInvalid"),
     };
   }
+  // A journal entry is a FACT about work that happened (SEP-1, FACT ≠
+  // FORECAST). Until audit 2026-10-16 only document-drafted entries refused a
+  // future day; the composer, the chat and the MCP door accepted one, and it
+  // then landed in calendar cells the product itself marks "never offered".
+  // Every path now refuses it, keeping the +24 h timezone tolerance.
   const workDateCheck = checkWorkDate(workDate, {
     requireDate: sourceDocumentFileId !== "",
-    rejectFuture: sourceDocumentFileId !== "",
+    rejectFuture: true,
   });
   if (workDateCheck) {
     return {
@@ -743,6 +850,22 @@ export async function createJournalEntryCore(
           },
         ]
       : []),
+    ...(workStart
+      ? [{ metric_slug: "work_start", value_text: workStart, source: workTimeSource }]
+      : []),
+    ...(workEnd
+      ? [{ metric_slug: "work_end", value_text: workEnd, source: workTimeSource }]
+      : []),
+    ...(breakMinutes !== null
+      ? [
+          {
+            metric_slug: "break_minutes",
+            value_numeric: breakMinutes,
+            unit_slug: "minutes",
+            source: workTimeSource,
+          },
+        ]
+      : []),
     ...(institutionName
       ? [
           {
@@ -825,10 +948,13 @@ export async function createJournalEntryCore(
   // second call sees the first's committed row). Limit: two requests truly
   // in flight at the same instant can both pass this read — closing that
   // needs a DB unique key (an additive migration, not part of this slice).
+  const projectParams = rpcProjectParams(projectChoice);
   const duplicateOf = await findRecentDuplicateEntry(supabase, {
     workerId: worker.id,
     engagementId,
     originalText,
+    metrics,
+    ...(projectParams.p_project_explicit ? { explicitProjectId: projectParams.p_project_id } : {}),
   });
   if (duplicateOf) {
     const dupSkills = await runSkillPipeline({

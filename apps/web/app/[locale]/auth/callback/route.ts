@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
+import { requestPublicOrigin } from "@/lib/mcp/public-origin";
 import {
   LOCALE_COOKIE_NAME,
   resolvePostLoginLocale,
@@ -10,6 +11,7 @@ import { readOauthTraceId } from "@/lib/auth/oauth-trace";
 import { decideOauthDisplayNameRepair } from "@/lib/auth/oauth-display-name";
 import {
   classifyAuthRedirectError,
+  isReplayableProviderError,
   classifyExchangeFailure,
   isEmailConfirmFlow,
   parseEmailVerification,
@@ -46,12 +48,19 @@ export async function GET(
 ) {
   const { locale: urlLocale } = await params;
   const url = new URL(request.url);
+  // THE PUBLIC ORIGIN, never the request URL's own origin (2026-10-18
+  // incident): behind the VPS proxy `request.url` carries the BIND host
+  // (`0.0.0.0:3000`), so every redirect built from it sent a person who had
+  // just confirmed their e-mail or finished Google sign-in to an unreachable
+  // address — and the e-mail link's `rt` hint (locale + invitation `next`)
+  // was rejected as foreign.
+  const origin = requestPublicOrigin(request);
   const code = url.searchParams.get("code");
   // A `token_hash` template passes the original `emailRedirectTo` along as
   // `rt`; it is a HINT (locale + next) validated below, never a target.
   const hint = parseRedirectToHint(
     url.searchParams.get("rt"),
-    url.origin,
+    origin,
     routing.locales as readonly string[],
   );
   const locale = hint.locale ?? urlLocale;
@@ -61,7 +70,7 @@ export async function GET(
   // v1 OAuth trace id (see lib/auth/oauth-trace.ts). NOT a secret; safe to
   // log and to forward to /login on failure so the user can quote it back.
   const traceId = readOauthTraceId(url);
-  const loginUrl = new URL(`/${locale}/auth/login`, url.origin);
+  const loginUrl = new URL(`/${locale}/auth/login`, origin);
   if (nextParam) loginUrl.searchParams.set("next", nextParam);
   if (traceId) loginUrl.searchParams.set("trace", traceId);
 
@@ -81,6 +90,24 @@ export async function GET(
       error: providerError,
       errorCode,
     });
+    // ALREADY SIGNED IN: `bad_oauth_state` arrives AFTER a successful sign-in when the
+    // browser replays the provider step (Back into the account chooser, a
+    // restored tab) — the state was spent by the sign-in that worked. Telling
+    // a signed-in person "sign-in failed" is false; they go where they were
+    // going. Without a session nothing changes: the error is shown as before.
+    if (isReplayableProviderError(errorCode)) {
+      try {
+        const supabase = await createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          return NextResponse.redirect(new URL(getSafeReturnPath(nextParam, locale), origin));
+        }
+      } catch {
+        // No readable session: fall through to the honest error below.
+      }
+    }
     // `access_denied` + `otp_expired` is a dead e-mail link, not a cancel —
     // the classifier keeps the two apart (lib/auth/email-confirm.ts).
     loginUrl.searchParams.set(
@@ -280,7 +307,7 @@ export async function GET(
     // We attach the `next` query so onboarding completion can fall
     // back to it (when that hook is wired in a future PR).
     if (!profile?.onboarded_at) {
-      const onboarding = new URL(`/${landingLocale}/onboarding`, url.origin);
+      const onboarding = new URL(`/${landingLocale}/onboarding`, origin);
       if (nextParam) onboarding.searchParams.set("next", nextParam);
       return withLocaleCookie(NextResponse.redirect(onboarding));
     }
@@ -293,7 +320,7 @@ export async function GET(
       trace: traceId,
       onboarded: !!profile?.onboarded_at,
     });
-    const destination = new URL(safeNext, url.origin);
+    const destination = new URL(safeNext, origin);
     if (verifyResult) destination.searchParams.set(VERIFY_RESULT_PARAM, verifyResult);
     return withLocaleCookie(NextResponse.redirect(destination));
   } catch (e) {

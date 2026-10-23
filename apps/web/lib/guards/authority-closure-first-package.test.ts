@@ -98,6 +98,65 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261012120000_",
       // 2026-10-11 (RED by SECURITY DEFINER replace, needs-human-gate): free-text job search without the per-row ICU ilike.
       "20261011090000_",
+      // 2026-10-18 (RED, needs-human-gate): worker identity split.
+      "20261018160000_",
+      // 2026-10-19 (RED, needs-human-gate): an open account deletion request pauses discoverability.
+      "20261019070000_",
+      // 2026-10-19 (RED, needs-human-gate): automated GDPR account erasure (executor v3).
+      "20261019140000_",
+      // 2026-10-19: two NOT NULL author columns of the erasure registry are severed, not nulled.
+      "20261019150000_",
+      // 2026-10-19 (RED): the person writes their own employer-facing summary (PER-2).
+      "20261019160000_",
+      // 2026-10-19: Ukrainian as a worker and requirement language.
+      "20261019170000_",
+      // 2026-10-19: forward fix — the language save RPC accepts uk.
+      "20261019180000_",
+      // 2026-10-19 incident fix: the erasure sentinel is banned until a finite date.
+      "20261019190000_",
+      // 2026-10-19: the worker board finds a need's company through its organization.
+      "20261019200000_",
+      // 2026-10-19: B2B-9 — the project manager reads the brigade's hours on the project.
+      "20261019210000_",
+      // 2026-10-19: B2B-9 review fixes (notes, late corrections, admins).
+      "20261019220000_",
+      // 2026-10-20: one demand-company rule for five functions.
+      "20261020010000_",
+      // 2026-10-20: review fix — an org-less need resolves to no company.
+      "20261020015000_",
+      // 2026-10-20: My Space pins table restored (reads answered 404).
+      "20261020020000_",
+      // 2026-10-20: review fix — a pin label carries its language (doctrine §2.3).
+      "20261020025000_",
+      // 2026-10-20: pin label language widened to the communication set.
+      "20261020025900_",
+      "20261020080000_",
+      "20261020100000_",
+      "20261020170000_",
+      "20261020171000_",
+      "20261020172000_",
+      "20261020173000_",
+      "20261020174000_",
+      "20261021090000_",
+      // 2026-10-21: B2B — an edited brigade entry keeps its hours for the buyer; the buyer reads the hired team names.
+      "20261021091000_",
+      "20261021092000_",
+      // 2026-10-21 (RED, needs-human-gate): interest co-managers, worker interest writes, booking proposals.
+      "20261021095000_",
+      "20261021095100_",
+      "20261021095200_",
+      // 2026-10-21 (RED, needs-human-gate): org rights — membership end closes owner authority; invitations follow org authority.
+      "20261021093000_",
+      "20261021094000_",
+      // 2026-10-21 (RED, owner-approved #2613): a brigade whose only offer is on a closed need can be disbanded.
+      "20261021120000_",
+      // 2026-10-21 (RED, needs-human-gate): stale booking proposals expire daily (system function + pg_cron).
+      "20261021130000_",
+      // 2026-10-22 (RED by SECURITY DEFINER + GRANT, needs-human-gate): aggregate counts for the Agentai OS capability readback route.
+      "20261022150000_",
+      // 2026-10-21: skill confirmation withdrawal phase B (cross-party
+      // standing read door; RED, needs-human-gate, NOT applied).
+      "20261021095500_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
@@ -268,8 +327,9 @@ describe("F-8 - lmc_* money functions: server-only; flags are a kill switch, not
     }
   });
 
-  it("the two authenticated-callable money functions are exactly the ones the app calls, and the app calls no other lmc_ RPC", () => {
+  it("the app calls exactly the allowlisted lmc_ RPCs: the authenticated admin grant + three service-role callers in lib/lmc", () => {
     const callers = new Set<string>();
+    const callerFiles = new Map<string, Set<string>>(); // rpc -> files
     const walk = (dir: string) => {
       for (const e of readdirSync(dir, { withFileTypes: true })) {
         const p = resolve(dir, e.name);
@@ -277,15 +337,45 @@ describe("F-8 - lmc_* money functions: server-only; flags are a kill switch, not
           if (["node_modules", ".next", "tests", ".evidence", "guards"].includes(e.name)) continue;
           walk(p);
         } else if (/\.(ts|tsx)$/.test(e.name) && !/\.test\./.test(e.name) && !p.endsWith("types.ts")) {
-          for (const m of readFileSync(p, "utf8").matchAll(/\.rpc\(\s*["'](lmc_\w+)["']/g)) callers.add(m[1]);
+          for (const m of readFileSync(p, "utf8").matchAll(/\.rpc\(\s*["'](lmc_\w+)["']/g)) {
+            callers.add(m[1]);
+            const files = callerFiles.get(m[1]) ?? new Set<string>();
+            files.add(p.slice(APP.length + 1).replace(/\\/g, "/"));
+            callerFiles.set(m[1], files);
+          }
         }
       }
     };
     walk(resolve(APP, "lib"));
     walk(resolve(APP, "app"));
     walk(resolve(APP, "components"));
-    // admin grant = authenticated admin (in-body is_admin); compensate = service client
-    expect([...callers].sort()).toEqual(["lmc_admin_grant_v1", "lmc_compensate_spend_v1"]);
+    // admin grant = authenticated admin (in-body is_admin); compensate = service client.
+    // 2026-10-21 (LMC Wagon 2, owner order "build and test the purchase, spend
+    // and ledger flows behind the flags, leave them OFF"): lib/lmc/wallet.ts
+    // wraps lmc_record_purchase_v1 + lmc_spend_v1 on the service client, each
+    // behind its TS kill-switch (lib/guards/lmc-wallet-flags-off.test.ts).
+    expect([...callers].sort()).toEqual([
+      "lmc_admin_grant_v1",
+      "lmc_compensate_spend_v1",
+      "lmc_record_purchase_v1",
+      "lmc_spend_v1",
+    ]);
+    // The three server-only money RPCs are reached from exactly one module
+    // each, inside lib/lmc, and that module holds the service-role client —
+    // they are revoked from authenticated, so a user-session caller would be
+    // a dead path or (worse) a sign the revoke was undone.
+    const SERVICE_ROLE_CALLERS: Record<string, string> = {
+      lmc_compensate_spend_v1: "lib/lmc/compensation.ts",
+      lmc_record_purchase_v1: "lib/lmc/wallet.ts",
+      lmc_spend_v1: "lib/lmc/wallet.ts",
+    };
+    for (const [fn, file] of Object.entries(SERVICE_ROLE_CALLERS)) {
+      expect(SERVER_ONLY).toContain(fn);
+      expect([...(callerFiles.get(fn) ?? [])], fn).toEqual([file]);
+      const src = readFileSync(resolve(APP, file), "utf8");
+      expect(src.trimStart().startsWith('import "server-only";'), file).toBe(true);
+      expect(src, file).toMatch(/createAdminClient\(\)/);
+    }
   });
 
   it("FUTURE-PROOF: every lmc_* function defined anywhere is server-only, an allowlisted authenticated function, or a trigger", () => {

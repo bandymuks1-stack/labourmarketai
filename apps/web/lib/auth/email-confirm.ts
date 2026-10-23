@@ -132,6 +132,19 @@ export type AuthRedirectOutcome =
  * person produces by pressing Cancel at Google. The `error_code` is what
  * tells them apart; without this a dead link read as "you cancelled".
  */
+/**
+ * Provider-round-trip errors that a REPLAY of an already-completed sign-in
+ * produces: the OAuth state was spent by the sign-in that worked (GoTrue
+ * `bad_oauth_state` — "OAuth state not found or expired"; flow_state_* for an
+ * expired flow). When the browser already holds a valid session, the callback
+ * sends the person on instead of reporting a failure. Any other error (a
+ * cancel, a dead e-mail link) keeps its message whatever the session.
+ */
+export function isReplayableProviderError(errorCode: string | null): boolean {
+  const code = (errorCode ?? "").toLowerCase();
+  return code === "bad_oauth_state" || code === "flow_state_not_found" || code === "flow_state_expired";
+}
+
 export function classifyAuthRedirectError(input: {
   error: string | null;
   errorCode: string | null;

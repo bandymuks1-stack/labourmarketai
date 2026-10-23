@@ -159,6 +159,7 @@ export function WorkerEducationSection({
                 <li
                   key={entry.id}
                   className="flex items-start justify-between gap-3 rounded-md border border-ink-600 px-3 py-2"
+                  data-testid="worker-education-row"
                 >
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate text-sm font-medium text-text-primary">
