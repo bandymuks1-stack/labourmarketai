@@ -1026,7 +1026,7 @@
       },
       {
         "q": "Hvordan håndteres betaling?",
-        "a": "Kortbetaling via Stripe, hvor Stripe Tax påfører moms; fakturaer, opsigelse og ændringer findes i din organisationskonto."
+        "a": "Kortbetaling via Stripe. Fakturaer, betalingshistorik og opsigelse findes i din organisationskonto."
       },
       {
         "q": "Er der en grænse for aktive stillinger?",

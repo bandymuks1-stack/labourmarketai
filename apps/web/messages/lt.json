@@ -5058,8 +5058,8 @@
           "desc": "Apibrėžkite pareigybes, skaičių ir įgūdžius."
         },
         {
-          "title": "Pamatykite, kas gali tikti",
-          "desc": "Naršykite darbuotojus ir agentūras, kurių įrašai gali atitikti jūsų poreikį — renkatės jūs, niekas automatiškai nereitinguojama ir nevertinama."
+          "title": "Pamatykite, kas tinka",
+          "desc": "Darbuotojai ir agentūros, kurių įrašai atitinka jūsų poreikį, išrikiuojami pagal atitiktį su priežastimis — tai signalas, ne garantija. Su kuo susisiekti, sprendžiate jūs."
         },
         {
           "title": "Susisiekite tiesiogiai",
@@ -5553,7 +5553,7 @@
       },
       {
         "q": "Kaip vyks atsiskaitymai?",
-        "a": "Mokėjimas kortele per Stripe, PVM taiko Stripe Tax; sąskaitos, atšaukimas ir keitimai — organizacijos paskyroje."
+        "a": "Mokėjimas kortele per Stripe. Sąskaitos, mokėjimų istorija ir atšaukimas — organizacijos paskyroje."
       },
       {
         "q": "Ar yra aktyvių pozicijų limitas?",

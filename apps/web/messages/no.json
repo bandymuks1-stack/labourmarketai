@@ -1026,7 +1026,7 @@
       },
       {
         "q": "Hvordan håndteres betaling?",
-        "a": "Kortbetaling via Stripe med mva. håndtert av Stripe Tax; fakturaer, oppsigelse og endringer finnes i organisasjonskontoen din."
+        "a": "Kortbetaling via Stripe. Fakturaer, betalingshistorikk og oppsigelse finnes i organisasjonskontoen din."
       },
       {
         "q": "Finnes det en grense for aktive stillinger?",

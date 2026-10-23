@@ -1026,7 +1026,7 @@
       },
       {
         "q": "Kā tiek apstrādāti maksājumi?",
-        "a": "Maksājums ar karti caur Stripe, PVN piemēro Stripe Tax; rēķini, atcelšana un izmaiņas ir pieejamas jūsu organizācijas kontā."
+        "a": "Maksājums ar karti caur Stripe. Rēķini, maksājumu vēsture un atcelšana ir pieejama jūsu organizācijas kontā."
       },
       {
         "q": "Vai aktīvajām pozīcijām ir ierobežojums?",
