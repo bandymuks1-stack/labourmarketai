@@ -570,7 +570,9 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content"
+    "skipToContent": "[EN] Skip to content",
+    "loading": "Laadimine…",
+    "dashboardSections": "Töölaua jaotised"
   },
   "companies": {
     "cta": {
@@ -923,7 +925,9 @@
       "screenshot": "[EN] Company demand flow",
       "subcopy": "[EN] Post what you need on each project and see which available workers and agencies fit it.",
       "title": "[EN] Live demand,",
-      "titleAccent": "[EN] in context."
+      "titleAccent": "[EN] in context.",
+      "calculatorBody": "Enne töö küsimist hinda see: töötunnid, materjalid, seadmed ja sõidud — sinu enda numbritega.",
+      "calculatorLink": "Arvuta projekti maksumus"
     },
     "workers": {
       "benefits": [
@@ -1022,7 +1026,7 @@
       },
       {
         "q": "Kuidas arveldus toimib?",
-        "a": "Kaardimakse Stripe'i kaudu, käibemaksu lisab Stripe Tax; arved, tühistamine ja muudatused on sinu organisatsiooni kontol."
+        "a": "Kaardimakse Stripe'i kaudu. Arved, maksete ajalugu ja tühistamine on sinu organisatsiooni kontol."
       },
       {
         "q": "Kas aktiivsetel ametikohtadel on piir?",
@@ -2839,7 +2843,10 @@
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
-      "alreadyAccepted": "Töötaja on selle pakkumise juba vastu võtnud — kokkulepitud tingimusi siin üle ei kirjutata. Leppige muudatustes kokku vestluses."
+      "alreadyAccepted": "Töötaja on selle pakkumise juba vastu võtnud — kokkulepitud tingimusi siin üle ei kirjutata. Leppige muudatustes kokku vestluses.",
+      "refusedNotReachable": "Sellele inimesele ei saa siit broneeringut pakkuda — profiil ei ole tööandjatele nähtav ja teil puudub tööalane suhe.",
+      "refusedNeedClosed": "See vajadus on suletud — ava see uuesti enne broneeringu pakkumist.",
+      "refusedAnswered": "Töötaja lükkas selle pakkumise tagasi, seega ilma tema uue nõusolekuta seda uuesti ei avata. Jätka vestluses või leia teine töötaja."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -2901,6 +2908,7 @@
     "loopReadFailed": "Sinu päringuid ei õnnestunud laadida — loend võib olla puudulik. Värskenda lehte."
   },
   "people": {
+    "anonymousName": "Kandidaat {token}",
     "eyebrow": "Isiku profiil",
     "restrictedTitle": "Profiil pole saadaval",
     "restrictedBody": "Sa ei saa selle isiku profiili vaadata: puudub aktiivne töösuhe või isik pole nõustunud olema leitav.",
@@ -4754,6 +4762,37 @@
       },
       "topTitle": "Praegu nõutuimad ametid",
       "topNote": "Järjestatud platvormi aktiivsete töökuulutuste järgi."
+    },
+    "hero": {
+      "headline": "Elav töö- ja ärivõimaluste süsteem.",
+      "sub": "Näita ühes kohas, mida oskad, mida pakud või mida otsid. Leia töötajaid, töid, töövõtjaid, teenuseid ja kaupu — ning sinu kogemus ja võimalused jäävad alati kättesaadavaks."
+    },
+    "ways": {
+      "title": "Mida saad siin teha",
+      "show": {
+        "title": "Näita, mida oskad",
+        "body": "Töö, oskused ja kogemus ühes kohas. Iga kirje täiendab sinu tööalast ajalugu.",
+        "cta": "Loo profiil"
+      },
+      "offer": {
+        "title": "Paku, mida saad",
+        "body": "Teenused, kaubad, meeskonnad või vabad inimesed — avalda oma pakkumine, et need, kel seda vaja, sind leiaksid.",
+        "cta": "Paku"
+      },
+      "find": {
+        "title": "Leia, mida otsid",
+        "body": "Kirjuta oma sõnadega, mida vajad — töötajat, tööd, töövõtjat, teenust või kaupa.",
+        "cta": "Otsi"
+      },
+      "discoverLead": "Avasta",
+      "discover": {
+        "workers": "Töötajad",
+        "jobs": "Tööd",
+        "contractors": "Töövõtjad",
+        "services": "Teenused",
+        "goods": "Kaubad"
+      },
+      "lasting": "Sinu kogemus ja võimalused jäävad alati kättesaadavaks — kui vahetad tööd, projekti või riiki."
     }
   },
   "workspace": {
@@ -7696,5 +7735,65 @@
     "tasks": "Sel nädalal pole tähtajaga ülesandeid. Loo ülesanne – sellest saab nädala eesmärk.",
     "addStages": "Lisa etapid",
     "addTask": "Loo ülesanne"
+  },
+  "workerPublicSummary": {
+    "title": "Professionaalne tutvustus tööandjatele",
+    "audience": "Seda teksti näevad ainult ettevõtted ja agentuurid, kellega sul on tööalane suhe (töötad nende heaks, oled nende meeskonnas või võtsid vastu nende pakkumise). Avatud otsingus seda ei näidata. Sinu isiklik kirjeldus ülal on nähtav ainult sulle.",
+    "headline": "Pealkiri (kuni 120 tähemärki)",
+    "headlinePlaceholder": "nt Plaatija, 8 aastat, töötan LT-s ja NO-s",
+    "bio": "Lühikirjeldus (kuni 1000 tähemärki)",
+    "bioPlaceholder": "Milles oled parim, milliseid töid oled teinud, mida otsid.",
+    "save": "Salvesta",
+    "saved": "Salvestatud",
+    "tooLong": "Tekst on liiga pikk.",
+    "error": "Salvestamine ebaõnnestus. Proovi uuesti."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: mis sul on ja mis puudub",
+    "anyCountry": "iga riik"
+  },
+  "workObjects": {
+    "addButton": "Lisa objekt"
+  },
+  "adminLaunchReadiness": {
+    "mail": {
+      "title": "Ametlik postkast (info@labourmarket.ai)",
+      "ready": "Saadab",
+      "notReady": "Ei saada",
+      "present": "määratud",
+      "missing": "PUUDUB",
+      "portOk": "toetatud (465, TLS)",
+      "portUnsupported": "EI OLE TOETATUD – ainult 465",
+      "note": "Üks postikanal: GDPR-teated saadetakse, kui kõik LM_SMTP_* väärtused on seatud; kutse- ja teavituskirjad alles siis, kui nende saatmine on eraldi sisse lülitatud. Näidatakse ainult, kas väärtus on olemas, mitte väärtust ennast. Puuduv väärtus seadke VPS-is käsuga lm-env-set.sh.",
+      "invites": "Kutse- ja teavituskirjad",
+      "invitesOn": "sees",
+      "invitesOff": "VÄLJAS – lülitatakse eraldi sisse: INVITE_EMAIL_PROVIDER=smtp ja üks testsaatmine"
+    }
+  },
+  "historyDuplicates": {
+    "title": "Possible duplicate records",
+    "hint": "Review and decide",
+    "intro": "These are records of the same person on the same day at the same site. They may be genuinely separate work (two shifts or tasks) or the same work recorded twice. Nothing is changed automatically: if a record is a duplicate, mark it — it stops counting but stays visible and can be reinstated.",
+    "summary": "Awaiting your decision: {groups}",
+    "none": "No possible duplicate records found.",
+    "unavailable": "The review could not be shown right now.",
+    "truncated": "There are many records — the review may be incomplete.",
+    "sameHours": "Same hours",
+    "differentHours": "Different hours",
+    "sameText": "Same description",
+    "recordN": "Record {n}",
+    "hours": "{hours} h",
+    "noHours": "No hours stated",
+    "counted": "Counted",
+    "marked": "Marked as a duplicate",
+    "source": "Source: {file} · imported {date}",
+    "noSource": "not stated",
+    "mark": "Duplicate — keep record {n}",
+    "reinstate": "Reinstate",
+    "unnamedPerson": "Unnamed person",
+    "unnamedObject": "Unnamed site",
+    "error": "That didn't work. Nothing was changed.",
+    "notAllowed": "The organization's owner or a manager can do this.",
+    "notSameWork": "These records no longer match — refresh the page."
   }
 }

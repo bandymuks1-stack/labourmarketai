@@ -105,6 +105,16 @@ describe("buildOperationsCsv — real data only", () => {
     expect(csv).toContain('"Doe, John"');
   });
 
+  it("a worker name that starts like a formula is shown as text, never evaluated", () => {
+    for (const name of ['=HYPERLINK("x")', "+1", "-2", "@SUM(A1)"]) {
+      const row = buildOperationsCsv(ops([worker({ name })])).trimEnd().split("\r\n")[1];
+      expect(row.startsWith("'") || row.startsWith(`"'`), `${name} is neutralised`).toBe(true);
+    }
+    // An ordinary name is untouched.
+    const plain = buildOperationsCsv(ops([worker({ name: "Ona" })])).trimEnd().split("\r\n")[1];
+    expect(plain.startsWith("Ona,")).toBe(true);
+  });
+
   it("includes v2 operational status + checklist columns from real data", () => {
     expect(OPS_CSV_HEADER).toContain("operational_status");
     expect(OPS_CSV_HEADER).toContain("docs_missing");
@@ -126,5 +136,12 @@ describe("buildOperationsCsv — real data only", () => {
 
   it("filename is scoped to the project and filesystem-safe", () => {
     expect(operationsCsvFilename(ops([]))).toBe("operations-vilnius-site.csv");
+  });
+
+  it("filename keeps the letters of a name with diacritics", () => {
+    const o = ops([]);
+    expect(operationsCsvFilename({ ...o, project: { ...o.project, title: "Šiaulių objektas" } })).toBe(
+      "operations-siauliu-objektas.csv",
+    );
   });
 });

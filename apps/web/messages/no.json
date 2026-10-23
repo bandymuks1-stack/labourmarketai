@@ -570,7 +570,9 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content"
+    "skipToContent": "[EN] Skip to content",
+    "loading": "Laster inn…",
+    "dashboardSections": "Oversiktens seksjoner"
   },
   "companies": {
     "cta": {
@@ -923,7 +925,9 @@
       "screenshot": "[EN] Company demand flow",
       "subcopy": "[EN] Post what you need on each project and see which available workers and agencies fit it.",
       "title": "[EN] Live demand,",
-      "titleAccent": "[EN] in context."
+      "titleAccent": "[EN] in context.",
+      "calculatorBody": "Før du etterspør arbeid, anslå det: arbeidstimer, materialer, utstyr og reiser — med dine egne tall.",
+      "calculatorLink": "Beregn kostnaden for et prosjekt"
     },
     "workers": {
       "benefits": [
@@ -1022,7 +1026,7 @@
       },
       {
         "q": "Hvordan håndteres betaling?",
-        "a": "Kortbetaling via Stripe med mva. håndtert av Stripe Tax; fakturaer, oppsigelse og endringer finnes i organisasjonskontoen din."
+        "a": "Kortbetaling via Stripe. Fakturaer, betalingshistorikk og oppsigelse finnes i organisasjonskontoen din."
       },
       {
         "q": "Finnes det en grense for aktive stillinger?",
@@ -2839,7 +2843,10 @@
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
-      "alreadyAccepted": "Arbeidstakeren har allerede akseptert dette forslaget — avtalte vilkår overskrives ikke her. Avtal endringer i samtalen."
+      "alreadyAccepted": "Arbeidstakeren har allerede akseptert dette forslaget — avtalte vilkår overskrives ikke her. Avtal endringer i samtalen.",
+      "refusedNotReachable": "Denne personen kan ikke få et bookingforslag herfra — profilen er ikke synlig for arbeidsgivere, og det finnes ingen arbeidsrelasjon med deg.",
+      "refusedNeedClosed": "Dette behovet er lukket — åpne det igjen før du foreslår en booking.",
+      "refusedAnswered": "Arbeidstakeren avslo dette forslaget, så det åpnes ikke på nytt uten ny samtykke fra arbeidstakeren. Fortsett i samtalen eller finn en annen arbeidstaker."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -2901,6 +2908,7 @@
     "loopReadFailed": "Forespørslene dine kunne ikke lastes — listen kan være ufullstendig. Last inn siden på nytt."
   },
   "people": {
+    "anonymousName": "Kandidat {token}",
     "eyebrow": "Personprofil",
     "restrictedTitle": "Profil ikke tilgjengelig",
     "restrictedBody": "Du kan ikke se denne personens profil: det finnes ingen aktiv arbeidsrelasjon, eller personen har ikke samtykket til å være synlig.",
@@ -4754,6 +4762,37 @@
       },
       "topTitle": "Mest etterspurte yrker akkurat nå",
       "topNote": "Rangert etter aktive stillingsannonser på plattformen."
+    },
+    "hero": {
+      "headline": "Et levende system av arbeids- og forretningsmuligheter.",
+      "sub": "Vis på ett sted hva du kan, hva du tilbyr eller hva du ser etter. Finn arbeidstakere, jobber, entreprenører, tjenester og varer — og erfaringen og mulighetene dine forblir alltid tilgjengelige."
+    },
+    "ways": {
+      "title": "Hva du kan gjøre her",
+      "show": {
+        "title": "Vis hva du kan",
+        "body": "Arbeid, ferdigheter og erfaring på ett sted. Hver oppføring legger til din faglige historie.",
+        "cta": "Lag profil"
+      },
+      "offer": {
+        "title": "Tilby det du har",
+        "body": "Tjenester, varer, team eller ledige folk — publiser tilbudet ditt slik at de som trenger det, finner deg.",
+        "cta": "Tilby"
+      },
+      "find": {
+        "title": "Finn det du ser etter",
+        "body": "Skriv med egne ord hva du trenger — en arbeidstaker, en jobb, en entreprenør, en tjeneste eller varer.",
+        "cta": "Søk"
+      },
+      "discoverLead": "Oppdag",
+      "discover": {
+        "workers": "Arbeidstakere",
+        "jobs": "Jobber",
+        "contractors": "Entreprenører",
+        "services": "Tjenester",
+        "goods": "Varer"
+      },
+      "lasting": "Erfaringen og mulighetene dine forblir tilgjengelige — når du bytter jobb, prosjekt eller land."
     }
   },
   "workspace": {
@@ -7696,5 +7735,65 @@
     "tasks": "Ingen oppgaver har frist denne uken. Opprett en oppgave – den blir ukens mål.",
     "addStages": "Legg til etapper",
     "addTask": "Opprett en oppgave"
+  },
+  "workerPublicSummary": {
+    "title": "Profesjonell presentasjon for arbeidsgivere",
+    "audience": "Bare bedrifter og byråer du har et arbeidsforhold til, ser denne teksten (du jobber for dem, er i teamet deres eller har akseptert tilbudet deres). Den vises ikke i åpent søk. Din personlige beskrivelse over er bare synlig for deg.",
+    "headline": "Overskrift (opptil 120 tegn)",
+    "headlinePlaceholder": "f.eks. Flislegger, 8 år, jobber i LT og NO",
+    "bio": "Kort beskrivelse (opptil 1000 tegn)",
+    "bioPlaceholder": "Hva du er best på, hvilket arbeid du har gjort, hva du ser etter.",
+    "save": "Lagre",
+    "saved": "Lagret",
+    "tooLong": "Teksten er for lang.",
+    "error": "Kunne ikke lagre. Prøv igjen."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: hva du har, og hva som mangler",
+    "anyCountry": "hvilket som helst land"
+  },
+  "workObjects": {
+    "addButton": "Legg til objekt"
+  },
+  "adminLaunchReadiness": {
+    "mail": {
+      "title": "Offisiell postkasse (info@labourmarket.ai)",
+      "ready": "Sender",
+      "notReady": "Sender ikke",
+      "present": "satt",
+      "missing": "MANGLER",
+      "portOk": "støttet (465, TLS)",
+      "portUnsupported": "IKKE STØTTET – kun 465",
+      "note": "Én e-postkanal: GDPR-varsler sendes når alle LM_SMTP_*-verdier er satt; invitasjons- og varslings-e-post først når sendingen er slått på separat. Bare om en verdi finnes vises, aldri selve verdien. Sett en manglende verdi på VPS-en med lm-env-set.sh.",
+      "invites": "Invitasjons- og varslings-e-post",
+      "invitesOn": "på",
+      "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp og én testsending"
+    }
+  },
+  "historyDuplicates": {
+    "title": "Possible duplicate records",
+    "hint": "Review and decide",
+    "intro": "These are records of the same person on the same day at the same site. They may be genuinely separate work (two shifts or tasks) or the same work recorded twice. Nothing is changed automatically: if a record is a duplicate, mark it — it stops counting but stays visible and can be reinstated.",
+    "summary": "Awaiting your decision: {groups}",
+    "none": "No possible duplicate records found.",
+    "unavailable": "The review could not be shown right now.",
+    "truncated": "There are many records — the review may be incomplete.",
+    "sameHours": "Same hours",
+    "differentHours": "Different hours",
+    "sameText": "Same description",
+    "recordN": "Record {n}",
+    "hours": "{hours} h",
+    "noHours": "No hours stated",
+    "counted": "Counted",
+    "marked": "Marked as a duplicate",
+    "source": "Source: {file} · imported {date}",
+    "noSource": "not stated",
+    "mark": "Duplicate — keep record {n}",
+    "reinstate": "Reinstate",
+    "unnamedPerson": "Unnamed person",
+    "unnamedObject": "Unnamed site",
+    "error": "That didn't work. Nothing was changed.",
+    "notAllowed": "The organization's owner or a manager can do this.",
+    "notSameWork": "These records no longer match — refresh the page."
   }
 }

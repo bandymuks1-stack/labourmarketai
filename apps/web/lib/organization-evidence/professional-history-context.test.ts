@@ -226,7 +226,7 @@ function fakeClient(tables: Record<string, Table>) {
   const builder = (table: string) => {
     const t = tables[table] ?? { data: [] };
     const b: Record<string, unknown> = {};
-    for (const m of ["select", "eq", "in", "order", "limit"]) b[m] = () => b;
+    for (const m of ["select", "eq", "in", "order", "range", "limit"]) b[m] = () => b;
     b.then = (resolve: (v: unknown) => unknown) =>
       resolve({ data: t.error ? null : t.data, error: t.error ?? null });
     return b;

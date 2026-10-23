@@ -10,7 +10,9 @@ name: integration-probe
 #   3. the Nonstop handoff door is reachable and paired on Nonstop's side (401, not 503 CONFIGURATION_REQUIRED);
 #   4. Nonstop's lead store is READY (a lead is a row before it is a mail);
 #   5. the MCP OAuth resource names the public origin;
-#   6. the old-browser regex shim is the first inline <head> script, and the crash-report door answers 204.
+#   6. the old-browser regex shim is the first inline <head> script, and the crash-report door answers 204;
+#   7. the Agentai capability-readback door is CONFIGURED (a credential-free GET is `unauthorized`, not
+#      `not_configured`): without its secret Agentai OS cannot re-measure its capability contract (2026-10-22).
 #
 # Secret-free: every request carries no credential and changes nothing. A failed scheduled run e-mails the
 # repository owner (GitHub's default for scheduled workflows), like health-probe. Values are never printed.
@@ -19,6 +21,9 @@ on:
   schedule:
     - cron: "41 * * * *"
   workflow_dispatch:
+  # A change to the probe itself runs it once, so a new check proves itself against production before it merges.
+  pull_request:
+    paths: [".github/workflows/integration-probe.yml"]
 
 concurrency:
   group: integration-probe
@@ -70,5 +75,11 @@ jobs:
           # An empty report is dropped by the sanitiser (nothing logged) and still answers 204.
           code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 -X POST -H "origin: $LM" -H 'sec-fetch-site: same-origin' -H 'content-type: application/json' -d '{}' "$LM/api/client-errors" || echo 000)
           [ "$code" = "204" ] && ok "crash-report door answers 204" || bad "crash-report door HTTP $code"
+
+          # 7. Agentai capability-readback door configured
+          cr=$(curl -sS -o cr.json -w '%{http_code}' --max-time 30 "$LM/api/internal/capability-readback/v1" || echo 000)
+          cr_reason=$(jq -r '.reason // empty' cr.json 2>/dev/null || true)
+          [ "$cr" = "401" ] && [ "$cr_reason" = "unauthorized" ] && ok "capability-readback door configured" \
+            || bad "capability-readback door HTTP $cr reason '$cr_reason' (expected 401 unauthorized; not_configured = SUPPLY_FEED_BEARER_TOKEN missing or shorter than 32 chars in /root/lm-prod/env)"
 
           exit $fail

@@ -20,7 +20,10 @@ import { test, expect, type Page } from "@playwright/test";
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1";
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
-test.describe.configure({ timeout: 300_000, retries: 0 });
+// The budget scales with the routes an actor opens: a healthy owner pass was
+// ~250 s for 28 routes (2026-10-22), so a flat 300 s cut the 27th route of a
+// merely slow run. Slow surfaces stay visible by name (SLOW in the log).
+test.describe.configure({ retries: 0 });
 
 const COMMON = [
   "/lt/dashboard",
@@ -97,6 +100,7 @@ async function check(page: Page, route: string): Promise<string | null> {
 
 for (const actor of CAST) {
   test(`${actor.role}: every working surface opens`, async ({ browser }) => {
+    test.setTimeout(actor.routes.length * 20_000); // 28 routes -> 560 s, 15 -> 300 s
     test.skip(!existsSync(state(actor.slot)), `no session for ${actor.slot}`);
     const ctx = await browser.newContext({ storageState: state(actor.slot), locale: "lt-LT" });
     const page = await ctx.newPage();
@@ -107,7 +111,7 @@ for (const actor of CAST) {
       // failure — it is recorded so the report shows where each role lands.
       const landed = new URL(page.url()).pathname + new URL(page.url()).search;
       console.info(
-        `[role-routes] ${actor.slot} ${route} -> ${landed} ttfb_ms=${lastTiming.ttfb ?? "?"} nav_ms=${lastTiming.total} ${problem ? "FAIL " + problem : "ok"}`,
+        `[role-routes] ${actor.slot} ${route} -> ${landed} ttfb_ms=${lastTiming.ttfb ?? "?"} nav_ms=${lastTiming.total}${lastTiming.total > 20_000 ? " SLOW" : ""} ${problem ? "FAIL " + problem : "ok"}`,
       );
       if (problem) failures.push(`${route}: ${problem}`);
       expect.soft(problem, `${actor.role} ${route}`).toBeNull();

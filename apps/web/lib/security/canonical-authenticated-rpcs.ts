@@ -108,6 +108,7 @@ export const CANONICAL_APP_RPCS = [
   "list_open_demand_for_team_offer_v1",
   "list_open_demand_for_workers",
   "list_shared_requests_for_agency_v1",
+  "list_team_assignment_names_v1",
   "list_team_demand_offers_for_team_v1",
   "list_team_offers_for_request_v1",
   "mark_agency_can_offer",
@@ -115,6 +116,8 @@ export const CANONICAL_APP_RPCS = [
   "my_direct_conversations_with_workers_v1",
   "my_email_verification_v1",
   "my_historical_organization_names_v1",
+  "my_historical_organization_names_v2",
+  "my_worked_organization_periods_v1",
   "mark_invitation_delivery_v1",
   "mark_service_requests_seen",
   "mark_worker_opportunities_seen_v1",
@@ -152,6 +155,8 @@ export const CANONICAL_APP_RPCS = [
   "respond_contact_disclosure_request_v1",
   "respond_service_offering_request",
   "respond_team_demand_offer_v1",
+  "respond_team_demand_offer_v2",
+  "correct_work_hour_allocation_v1",
   "respond_team_enquiry_v1",
   "return_asset_v1",
   "review_journal_entries_batch",
@@ -219,6 +224,7 @@ export const CANONICAL_APP_RPCS = [
   "withdraw_service_offering_request",
   "withdraw_team_demand_offer_v1",
   "withdraw_team_enquiry_v1",
+  "worker_skill_confirmations_standing_v1",
 ]  as const;
 
 export type CanonicalAppRpc = (typeof CANONICAL_APP_RPCS)[number];

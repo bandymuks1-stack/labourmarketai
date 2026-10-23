@@ -14,8 +14,13 @@ name: Deploy to VPS
 # Triggers (owner decision 2026-10-18 "remove Vercel completely": GitHub Actions
 # deploys verified main to the VPS automatically):
 #   - workflow_run: every Quality Gates run that SUCCEEDS on a push to main deploys
-#     that exact head sha. A run whose sha is no longer main's head is skipped (the
-#     newer commit's own run deploys it), so a merge burst never deploys backwards.
+#     that exact sha, even when main has moved on since: waiting for "the head's own
+#     run" starved production during merge bursts (2026-10-22). It never deploys
+#     BACKWARDS: right before shipping, the deploy job reads the build production
+#     actually serves (public /api/health) and ships only a sha that is AHEAD of it.
+#     Deploys queue (cancel-in-progress: false); a newer pending deploy supersedes an
+#     older pending one, never a running one. The ordering applies to this automatic
+#     path only; workflow_dispatch below still rolls back or redeploys any main sha.
 #   - workflow_dispatch: manual deploy / redeploy of a sha on main (rollback path).
 # It never deploys a tree whose Quality Gates did not pass (checked below for both).
 #
@@ -80,11 +85,8 @@ jobs:
           set -euo pipefail
           head=$(gh api repos/${GITHUB_REPOSITORY}/branches/main --jq .commit.sha)
           if [ "$EVENT" = "workflow_run" ]; then
+            # Deployed even if main moved on (the deploy job refuses to go backwards).
             sha="$RUN_SHA"
-            if [ "$sha" != "$head" ]; then
-              echo "skip: ${sha:0:9} is no longer main's head (${head:0:9}); that commit's own Quality Gates run deploys it" | tee -a "$GITHUB_STEP_SUMMARY"
-              echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
-            fi
           else
             sha="${INPUT_SHA:-$head}"
           fi
@@ -98,9 +100,26 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           SHA: ${{ steps.resolve.outputs.sha }}
+          EVENT: ${{ github.event_name }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           set -euo pipefail
-          ok=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/quality.yml/runs?head_sha=${SHA}&status=success&per_page=1" --jq '.total_count')
+          # Automatic path: the triggering Quality Gates run is read BY ID — an
+          # exact lookup. The head_sha/status listing below is a search index
+          # that lagged for 20+ minutes on 2026-10-22 (#2666's deploy refused
+          # three times while its Quality Gates run had succeeded).
+          if [ "$EVENT" = "workflow_run" ] && [ -n "$RUN_ID" ]; then
+            got=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '[.path, .head_sha, .conclusion] | join(" ")')
+            [ "$got" = ".github/workflows/quality.yml ${SHA} success" ] && { echo "quality: run ${RUN_ID} succeeded for ${SHA:0:9}"; exit 0; }
+          fi
+          # Manual path (or an unexpected trigger): list this sha's runs and
+          # filter here, asking again for up to 3 minutes.
+          ok=0
+          for attempt in 1 2 3 4 5 6 7; do
+            ok=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/quality.yml/runs?head_sha=${SHA}&per_page=20" --jq '[.workflow_runs[] | select(.conclusion == "success")] | length')
+            [ "$ok" -ge 1 ] && break
+            [ "$attempt" -lt 7 ] && sleep 30
+          done
           [ "$ok" -ge 1 ] || { echo "::error::no successful Quality Gates run for ${SHA}; wait for CI or (owner) set skip_quality_check"; exit 1; }
       - uses: actions/checkout@v4
         if: steps.resolve.outputs.skip != 'true'
@@ -121,6 +140,11 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
           NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS: "true"
+          # The Stripe PUBLISHABLE key (public by design, pk_…). The Vercel build
+          # carried it; the 2026-10-17 move to this pipeline dropped it, so the
+          # payments UI could never load even with the server keys restored.
+          # Empty while the repository variable is unset — the same as today.
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
           NEXT_TELEMETRY_DISABLED: "1"
           NODE_OPTIONS: --max-old-space-size=6144
         run: |
@@ -170,10 +194,33 @@ jobs:
         run: |
           [ "$HAS_KEY" = "true" ] && [ "$HAS_HOST" = "true" ] && [ "$HAS_KH" = "true" ] \
             || { echo "::error::VPS_DEPLOY_SSH_KEY / VPS_DEPLOY_HOST / VPS_DEPLOY_KNOWN_HOSTS are not all configured — nothing deployed"; exit 1; }
+      - name: Never deploy backwards (compare with the build production serves)
+        id: order
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          # Only the AUTOMATIC path is ordered. A manual dispatch is the rollback / same-sha redeploy path and ships what
+          # the owner named.
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"; echo "manual dispatch: deploying ${SHA:0:9} as requested" | tee -a "$GITHUB_STEP_SUMMARY"; exit 0
+          fi
+          live=$(curl -sS --max-time 20 https://labourmarket.ai/api/health 2>/dev/null | grep -oE '"build":"[0-9a-f]{7,40}"' | cut -d'"' -f4 || true)
+          if [ -z "$live" ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"; echo "production build unreadable: deploying ${SHA:0:9} (Quality Gates green, on main)" | tee -a "$GITHUB_STEP_SUMMARY"; exit 0
+          fi
+          rel=$(gh api "repos/${GITHUB_REPOSITORY}/compare/${live}...${SHA}" --jq '.status' 2>/dev/null || echo unknown)
+          case "$rel" in
+            ahead|unknown) echo "go=true" >> "$GITHUB_OUTPUT"; echo "deploying ${SHA:0:9}: ${rel} of live ${live}" | tee -a "$GITHUB_STEP_SUMMARY" ;;
+            *) echo "go=false" >> "$GITHUB_OUTPUT"; echo "skip: ${SHA:0:9} is ${rel} relative to live ${live}; production already serves it or newer" | tee -a "$GITHUB_STEP_SUMMARY" ;;
+          esac
       - uses: actions/download-artifact@v4
+        if: steps.order.outputs.go == 'true'
         with:
           name: standalone-${{ env.SHA }}
       - name: Ship + activate on the VPS (forced-command receiver)
+        if: steps.order.outputs.go == 'true'
         env:
           SSH_KEY: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
           HOST: ${{ secrets.VPS_DEPLOY_HOST }}
@@ -189,6 +236,7 @@ jobs:
           grep -q '^DEPLOY_OK ' deploy.log || { echo "::error::receiver did not report DEPLOY_OK (see log; it rolls back by itself)"; exit 1; }
           rm -f ~/.ssh/deploy_key
       - name: Public verification through Cloudflare
+        if: steps.order.outputs.go == 'true'
         run: |
           set -euo pipefail
           for i in 1 2 3 4 5 6; do

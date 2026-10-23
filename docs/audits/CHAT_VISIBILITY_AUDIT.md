@@ -342,6 +342,24 @@ audit.
   so the first spend caller can pair its failure path with compensation.
   Pinned in the `chat-visibility-rls.test.ts` caller inventory.
 
+- **2026-10-21 — `lib/lmc/wallet.ts`** (LMC Commercial Train Wagon 2 wallet
+  server layer; owner order 2026-10-21 "build and test the purchase, spend and
+  ledger flows behind the flags, and leave them OFF until the owner
+  approves"). Typed callers for `lmc_record_purchase_v1` and `lmc_spend_v1`,
+  plus `spendLmcForAction`, which pairs a spend with the existing
+  `compensateSpend` seam. Service role is genuinely required rather than
+  convenient: applied migration
+  `20261006100300_lmc_ledger_server_only_execute_v1.sql` revokes EXECUTE on
+  both RPCs from `public`, `anon` and `authenticated` and grants it to
+  `service_role` ONLY. Every entry point returns `disabled` on its
+  literal-`false` TS kill-switch before the client is constructed (pinned by
+  `lib/guards/lmc-wallet-flags-off.test.ts`); behind it the RPCs re-check
+  `lmc_settings` (fail-closed) and `lmc_spend_v1` re-checks that the actor
+  owns the debited account or is an admin. The module calls exactly two RPCs
+  directly, touches no table directly, no chat table, nothing outbound, and
+  has no product call site (Stripe top-up is Wagon 4, UI is Wagon 7).
+  Pinned in the `chat-visibility-rls.test.ts` caller inventory.
+
 - **2026-09-22 — `lib/vacancy-store/vacancy-translation-read.ts`** (reader-locale
   rendering of PUBLIC job advertisements, owner P0 2026-09-22 §9). Touches ONE
   table, `public_vacancies`, and within it only the `translations` column added
@@ -399,6 +417,16 @@ audit.
   `SUPPLY_FEED_BEARER_TOKEN` is unset. Pinned in the
   `chat-visibility-rls.test.ts` caller inventory. Full design and acceptance
   evidence: `docs/handoffs/FIRST_PARTY_SUPPLY_BRIDGE_V1.md`.
+
+- `app/api/internal/capability-readback/v1/route.ts` (2026-10-22) — the
+  Agentai OS capability readback. Behind the same `SUPPLY_FEED_BEARER_TOKEN`
+  machine secret (503 while unset, 401 on a wrong token). Service role is
+  needed because the answer is whole-table aggregate COUNTS, which no single
+  user's RLS view can give; all from `agentai_capability_readback_counts_v1()`
+  (SECURITY DEFINER like `ops_product_metrics_v1`, EXECUTE for service_role
+  only — the service role is not granted SELECT on most counted tables). The body is a fixed list of non-negative integers
+  (`lib/api/capability-readback.ts`); no row, name, id or address. Touches no
+  chat table and sends nothing.
 
 - **2026-10-06 — `lib/invitations/signup-bridge.ts`** (frictionless addressed
   invite, PR #2167). Calls ONE service_role-only SECURITY DEFINER read,

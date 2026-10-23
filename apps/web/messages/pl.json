@@ -266,7 +266,11 @@
       "work": "Praca",
       "services": "Usługi",
       "goods": "Towary i zasoby"
-    }
+    },
+    "formPublisherLabel": "Publikuje",
+    "publisherSelf": "Ja osobiście",
+    "publishedAs": "Jako {name}",
+    "publishedAsOrganization": "Jako organizacja"
   },
   "quality": {
     "title": "Usterki i jakość",
@@ -1592,7 +1596,8 @@
         "no": "Jeszcze nieustawiona"
       }
     },
-    "opportunitiesLink": "Przejrzyj dopasowane oferty"
+    "opportunitiesLink": "Przejrzyj dopasowane oferty",
+    "unrecordedHours": "{count, plural, one {# wpis zawiera godziny, które nie zostały zapisane} few {# wpisy zawierają godziny, które nie zostały zapisane} other {# wpisów zawiera godziny, które nie zostały zapisane}} — nie ma ich w sumie powyżej. Otwórz najwcześniejszy i wpisz godziny."
   },
   "profileState": {
     "readiness": {
@@ -5053,8 +5058,8 @@
           "desc": "Określ role, liczbę osób i umiejętności."
         },
         {
-          "title": "Zobacz, kto może pasować",
-          "desc": "Przeglądaj pracowników i agencje, których zapisy mogą pasować do Twojego zapotrzebowania — wybierasz Ty, nic nie jest automatycznie ustawiane w rankingu ani oceniane."
+          "title": "Zobacz, kto pasuje",
+          "desc": "Pracownicy i agencje, których zapisy pasują do Twojego zapotrzebowania, są uszeregowani według dopasowania, z uzasadnieniem — to wskazówka, a nie gwarancja. Ty decydujesz, z kim się skontaktować."
         },
         {
           "title": "Skontaktuj się bezpośrednio",
@@ -5413,7 +5418,9 @@
         }
       ],
       "screenshot": "Ścieżka zapotrzebowania firmy",
-      "cta": "Zgłoś zapotrzebowanie na pracowników"
+      "cta": "Zgłoś zapotrzebowanie na pracowników",
+      "calculatorBody": "Zanim poprosisz o wykonawców, oszacuj pracę: godziny, materiały, sprzęt i dojazdy — na własnych liczbach.",
+      "calculatorLink": "Oblicz koszt projektu"
     },
     "agencies": {
       "eyebrow": "Dla agencji",
@@ -5546,7 +5553,7 @@
       },
       {
         "q": "Jak przebiegają rozliczenia?",
-        "a": "Płatność kartą przez Stripe, z podatkiem VAT naliczanym przez Stripe Tax; faktury, rezygnacja i zmiany znajdują się na koncie Twojej organizacji."
+        "a": "Płatność kartą przez Stripe. Faktury, historia płatności i rezygnacja znajdują się na koncie Twojej organizacji."
       },
       {
         "q": "Czy jest limit aktywnych stanowisk?",
@@ -6872,7 +6879,8 @@
       "active": "Aktywna — zalogowani członkowie mogą znaleźć tę usługę i o nią zapytać.",
       "paused": "Wstrzymana — ukryta przed członkami. Aktywuj, aby ponownie stała się widoczna."
     },
-    "linkToRequests": "Zobacz zapytania o Twoje usługi"
+    "linkToRequests": "Zobacz zapytania o Twoje usługi",
+    "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Możesz ją wstrzymać."
   },
   "communication": {
     "origin": {
@@ -7636,7 +7644,8 @@
     "notFound": "Ta strona nie istnieje",
     "backHome": "Powrót na stronę główną",
     "dashboardSections": "Sekcje panelu",
-    "skipToContent": "Przejdź do treści"
+    "skipToContent": "Przejdź do treści",
+    "loading": "Ładowanie…"
   },
   "workerInvitations": {
     "title": "Oczekujące zaproszenia",
@@ -8724,6 +8733,12 @@
     "teamOffersWaiting": "{count, plural, one {# oferta zespołu czeka na Twoją odpowiedź} few {# oferty zespołów czekają na Twoją odpowiedź} other {# ofert zespołów czeka na Twoją odpowiedź}}",
     "unstructuredTag": "wymagania niepotwierdzone",
     "notStructured": "Wymagane umiejętności tej potrzeby nie są jeszcze ustrukturyzowane, więc nie można obliczyć dopasowania. Nowe potrzeby są przeglądane i strukturyzowane przez administratorów — nie musisz nic robić.",
+    "handRaisers": {
+      "title": "Osoby, które zgłosiły się do tej potrzeby",
+      "notAssessed": "Dopasowanie zawodu nie zostało ocenione. Ta potrzeba nie wskazuje zawodu, więc nikogo z nią nie porównano. Te osoby są widoczne, bo same poprosiły o kontakt, a nie dlatego, że pasują; żadne umiejętności, kwalifikacje ani przydatność nie są tu stwierdzane.",
+      "badge": "Dopasowanie zawodu nieocenione",
+      "ownWords": "Wszystko, co widać o tej osobie, pochodzi z jej własnego profilu; nic tutaj nie zostało porównane z potrzebą."
+    },
     "needsSetup": "Nie udało się wczytać. Spróbuj ponownie.",
     "noCandidates": "Brak jeszcze pasujących pracowników dla tej potrzeby. Dopasowania pojawiają się, gdy pracownicy dodają umiejętności potwierdzone dziennikiem — sprawdź później lub rozszerz potrzebę.",
     "namePlaceholder": "Pracownik",
@@ -9155,7 +9170,10 @@
       "againModeNote": "To ponownie otwiera tę samą propozycję dla tego samego pracownika z nowymi datami — pracownik podejmuje decyzję ponownie. Nic nie jest zarezerwowane, dopóki nie zaakceptuje.",
       "afterSent": "Pracownik otrzymał Twoją propozycję i zaakceptuje ją lub odrzuci. Odpowiedź zobaczysz w sekcji Rezerwacje, a do tego czasu możesz wycofać propozycję.",
       "rateLimited": "Osiągnięto limit propozycji rezerwacji (10 otwartych, 30 dziennie). Spróbuj ponownie później.",
-      "alreadyAccepted": "Pracownik już przyjął tę propozycję — uzgodnione warunki nie są tu nadpisywane. Zmiany ustalcie w rozmowie."
+      "alreadyAccepted": "Pracownik już przyjął tę propozycję — uzgodnione warunki nie są tu nadpisywane. Zmiany ustalcie w rozmowie.",
+      "refusedNotReachable": "Tej osobie nie można stąd zaproponować rezerwacji — nie udostępniła profilu pracodawcom i nie łączy jej z Tobą relacja zawodowa.",
+      "refusedNeedClosed": "To zapotrzebowanie jest zamknięte — otwórz je ponownie, zanim zaproponujesz rezerwację.",
+      "refusedAnswered": "Pracownik odrzucił tę propozycję, więc bez jego nowej zgody nie zostanie ona ponownie otwarta. Kontynuuj w rozmowie lub znajdź innego pracownika."
     },
     "reason": {
       "optionalTitle": "Powód (opcjonalnie)",
@@ -9421,7 +9439,7 @@
         "body": "Stała opłata za sukces obowiązuje za każdego zatrudnionego pracownika, brygadę lub skierowaną firmę. Osobna opłata koordynacyjna obowiązuje wyłącznie wtedy, gdy koordynacja dokumentów lub wdrożenia zostanie faktycznie zrealizowana. Ostateczna cena jest potwierdzana przed rozpoczęciem płatnych prac."
       }
     ],
-    "note": "Dwie rzeczy działają równolegle, a ta strona opisuje drugą z nich. Sama platforma jest automatyczna: tablica ofert pracy jest publiczna, podgląd dopasowania jest otwarty bez konta, a podane zapytanie tworzy uporządkowaną krótką listę, która wyjaśnia, dlaczego każda osoba pasuje — jedno aktywne stanowisko bezpłatnie. Powyższa płatna usługa jest usługą ludzką: operator czyta Twoje zapytanie, kontaktuje się z Tobą i ręcznie sprawdza krótką listę, zanim ktokolwiek zostanie Ci zaproponowany. Oferowanie lub przypisywanie całej ekipy jako jednej jednostki nie jest jeszcze zbudowane — dziś ekipa jest dopasowywana osoba po osobie.",
+    "note": "Dwie rzeczy działają równolegle, a ta strona opisuje drugą z nich. Sama platforma jest automatyczna: tablica ofert pracy jest publiczna, podgląd dopasowania jest otwarty bez konta, a podane zapytanie tworzy uporządkowaną krótką listę, która wyjaśnia, dlaczego każda osoba pasuje — jedno aktywne stanowisko bezpłatnie. Powyższa płatna usługa jest usługą ludzką: operator czyta Twoje zapytanie, kontaktuje się z Tobą i ręcznie sprawdza krótką listę, zanim ktokolwiek zostanie Ci zaproponowany. Cała ekipa może już zaoferować się na Twoje zapytanie jako jedna jednostka i, gdy obie strony się porozumieją, dołączyć do Twojego projektu jako jeden zespół; automatyczna krótka lista nie proponuje jeszcze całych ekip — porządkuje osoby pojedynczo.",
     "ctaLabel": "Złóż zapytanie o siłę roboczą →"
   },
   "adminLaunchReadiness": {
@@ -9482,6 +9500,19 @@
         "rate_limits": "Aktywne ograniczenia liczby zapytań",
         "freshness_demotion": "Nieaktualne profile pozycjonowane niżej"
       }
+    },
+    "mail": {
+      "title": "Oficjalna skrzynka (info@labourmarket.ai)",
+      "ready": "Wysyła",
+      "notReady": "Nie wysyła",
+      "present": "ustawione",
+      "missing": "BRAK",
+      "portOk": "obsługiwany (465, TLS)",
+      "portUnsupported": "NIEOBSŁUGIWANY – tylko 465",
+      "note": "Jeden kanał pocztowy: powiadomienia RODO są wysyłane, gdy ustawione są wszystkie wartości LM_SMTP_*; e-maile z zaproszeniami i powiadomieniami dopiero po osobnym włączeniu ich wysyłki. Pokazywane jest tylko, czy wartość istnieje, nigdy sama wartość. Brakującą wartość ustaw na VPS za pomocą lm-env-set.sh.",
+      "invites": "E-maile z zaproszeniami i powiadomieniami",
+      "invitesOn": "włączone",
+      "invitesOff": "WYŁĄCZONE – włączane osobno: INVITE_EMAIL_PROVIDER=smtp i jedna wysyłka testowa"
     }
   },
   "adminMetrics": {
@@ -10892,6 +10923,8 @@
       "expired": "Wygasła"
     },
     "graceNotice": "Ostatnia płatność nie powiodła się — subskrypcja jest w okresie karencji do czasu ponowienia próby.",
+    "endsOn": "Anulowano — plan pozostaje aktywny do {date} i nie zostanie odnowiony.",
+    "endsAtPeriodEnd": "Anulowano — plan pozostaje aktywny do końca opłaconego okresu i nie zostanie odnowiony.",
     "manage": {
       "open": "Zarządzaj subskrypcją",
       "opening": "Otwieranie…",
@@ -10910,7 +10943,8 @@
     "subscribe": {
       "title": "Plan Organizacja",
       "cta": "Aktywuj plan Organizacja",
-      "note": "Zostaniesz przekierowany/a do Stripe Checkout; subskrypcja jest przypisana do tej organizacji."
+      "note": "Zostaniesz przekierowany/a do Stripe Checkout; subskrypcja jest przypisana do tej organizacji.",
+      "chargedToday": "Bez darmowego okresu próbnego: pierwszy miesiąc jest płatny dziś w Stripe Checkout, potem co miesiąc do czasu anulowania. Przed płatnością Stripe pokaże dokładną kwotę z VAT."
     }
   },
   "accountPlan": {
@@ -10953,6 +10987,7 @@
       "salaryExpectation": "Oczekiwane wynagrodzenie",
       "skillsCount": "Umiejętności",
       "anonymousLabel": "Firmy widzą Cię jako",
+      "anonymousValue": "Kandydat {token}",
       "currentCountry": "Obecny kraj",
       "availableFrom": "Dostępny od",
       "contractType": "Forma zatrudnienia",
@@ -12070,7 +12105,8 @@
     "empty": "Nie dodano jeszcze żadnych języków.",
     "notEnabled": "Chwilowo niedostępne. Nic nie zapisano.",
     "error": "Zapis się nie powiódł. Spróbuj ponownie.",
-    "invalid": "Wybierz język i poziom."
+    "invalid": "Wybierz język i poziom.",
+    "added": "Język dodany."
   },
   "externalProfiles": {
     "title": "Profile zewnętrzne",
@@ -12413,6 +12449,7 @@
     }
   },
   "people": {
+    "anonymousName": "Kandydat {token}",
     "eyebrow": "Profil osoby",
     "restrictedTitle": "Profil niedostępny",
     "restrictedBody": "Nie możesz zobaczyć profilu tej osoby: brak aktywnej relacji zawodowej lub osoba nie wyraziła zgody na widoczność.",
@@ -12475,7 +12512,8 @@
     "claimCta": "Kontynuuj jako mój szkic",
     "claimed": "Przeniesiono do Twoich szkiców",
     "error": "Nie udało się przejąć. Spróbuj ponownie.",
-    "workersLabel": "Pracownicy"
+    "workersLabel": "Pracownicy",
+    "draftExists": "Masz już niedokończony szkic zapotrzebowania. Najpierw go dokończ lub odrzuć, a potem kontynuuj ten."
   },
   "candidatePipeline": {
     "stage": {
@@ -14873,6 +14911,9 @@
       "candidatesNotFound": "Ta potrzeba nie została znaleziona albo nie jest Twoja.",
       "candidatesNeedsMigration": "Chwilowo niedostępne.",
       "candidatesNotStructured": "Z tej potrzeby nie można jeszcze nic wyprowadzić, więc nie ma z czym porównać. To nie to samo, co brak dopasowań.",
+      "handRaisersTitle": "Osoby, które się zgłosiły",
+      "handRaisersNotAssessed": "Dopasowanie zawodu nieocenione: ta potrzeba nie wskazuje zawodu. Zgłosiły się same; żadne umiejętności, kwalifikacje ani dopasowanie nie są stwierdzane.",
+      "handRaiserBadge": "Dopasowanie zawodu nieocenione",
       "candidatesRetrievalCapped": "Dostępnych osób było więcej, niż mogliśmy teraz przejrzeć, więc ta lista nie obejmuje całej dostępnej puli.",
       "candidatesEmpty": "Nikt w widocznej puli nie pasuje teraz do tej potrzeby.",
       "candidatesCapped": "Pokazano {shown} z {total}.",
@@ -15222,8 +15263,8 @@
       "noStars": "Nigdzie nie ma ocen w gwiazdkach: człowiek nigdy nie jest sprowadzany do punktacji. Każde dopasowanie jest wyjaśnione wobec konkretnego zapotrzebowania — z widocznymi liczbami."
     },
     "hero": {
-      "headline": "Jeden rynek pracy dla ludzi i firm.",
-      "sub": "Znajdź pracę lub ludzi, zapisuj wykonaną pracę i pozwól jej mówić za ciebie — twoja kolejna szansa opiera się na pracy, którą naprawdę wykonujesz, a nie na deklaracjach w CV."
+      "headline": "Żywy system możliwości pracy i biznesu.",
+      "sub": "W jednym miejscu pokaż, co umiesz, co oferujesz albo czego szukasz. Odkrywaj pracowników, pracę, wykonawców, usługi i towary — a twoje doświadczenie i możliwości pozostają stale dostępne."
     },
     "entry": {
       "label": "Napisz, czego potrzebujesz — własnymi słowami",
@@ -15340,6 +15381,33 @@
       "partnerLead": "Chcesz współpracować z nami jako partner?",
       "partnerLink": "Skontaktuj się",
       "moreLead": "Więcej o tym, jak to działa dla każdej ze stron:"
+    },
+    "ways": {
+      "title": "Co możesz tu zrobić",
+      "show": {
+        "title": "Pokaż, co umiesz",
+        "body": "Praca, umiejętności i doświadczenie w jednym miejscu. Każdy wpis uzupełnia twoją historię zawodową.",
+        "cta": "Utwórz profil"
+      },
+      "offer": {
+        "title": "Zaoferuj, co możesz",
+        "body": "Usługi, towary, zespoły lub dostępni ludzie — opublikuj swoją ofertę, aby znaleźli cię ci, którzy tego potrzebują.",
+        "cta": "Zaoferuj"
+      },
+      "find": {
+        "title": "Znajdź, czego szukasz",
+        "body": "Napisz własnymi słowami, czego potrzebujesz — pracownika, pracy, wykonawcy, usługi lub towaru.",
+        "cta": "Szukaj"
+      },
+      "discoverLead": "Odkrywaj",
+      "discover": {
+        "workers": "Pracownicy",
+        "jobs": "Praca",
+        "contractors": "Wykonawcy",
+        "services": "Usługi",
+        "goods": "Towary"
+      },
+      "lasting": "Twoje doświadczenie i możliwości pozostają stale dostępne — przy zmianie pracy, projektu czy kraju."
     }
   },
   "workspace": {
@@ -17303,7 +17371,9 @@
     "emailConsentNote": "E-mail jest domyślnie wyłączony — jest wysyłany tylko dla typów, które tu włączysz.",
     "emailInactiveNote": "Dostarczanie e-maili nie jest jeszcze aktywne na platformie. Twoje wybory są zapisane i zaczną obowiązywać, gdy tylko zostanie aktywowane.",
     "error": "Nie udało się zapisać zmiany i została ona cofnięta. Spróbuj ponownie.",
-    "unavailable": "Ustawienia powiadomień są teraz niedostępne."
+    "unavailable": "Ustawienia powiadomień są teraz niedostępne.",
+    "saving": "Zapisywanie…",
+    "saved": "Zapisano."
   },
   "historyContext": {
     "project": "Projekt",
@@ -18929,7 +18999,8 @@
       "terms_invalid": "Sprawdź liczby i daty.",
       "terms_limit_reached": "Ta oferta ma już 50 wersji warunków.",
       "terms_await_other_side": "To twoje własne warunki — odpowiada druga strona.",
-      "organization_offer_not_a_unit": "Oferta firmy nie jest przypisywana jako zespół; ludzi ustalcie w rozmowie."
+      "organization_offer_not_a_unit": "Oferta firmy nie jest przypisywana jako zespół; ludzi ustalcie w rozmowie.",
+      "terms_changed": "Druga strona właśnie zaproponowała nowe warunki. Sprawdź najnowszą wersję, a potem odpowiedz."
     },
     "received": {
       "title": "Zespoły zaproponowane do tego zapotrzebowania",
@@ -19651,5 +19722,59 @@
     "saved": "Zapisano",
     "tooLong": "Tekst jest za długi.",
     "error": "Nie udało się zapisać. Spróbuj ponownie."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: co już masz, a czego brakuje",
+    "anyCountry": "dowolny kraj"
+  },
+  "historyDuplicates": {
+    "title": "Możliwe powtórzone wpisy",
+    "hint": "Przejrzyj i zdecyduj",
+    "intro": "To wpisy tej samej osoby z tego samego dnia na tym samym obiekcie. Może to być naprawdę osobna praca (dwie zmiany lub zadania) albo ta sama praca zapisana dwa razy. Nic nie zmienia się automatycznie: jeśli wpis się powtarza, oznacz go — przestaje się liczyć, ale pozostaje widoczny i można go przywrócić.",
+    "summary": "Czeka na Twoją decyzję: {groups}",
+    "none": "Nie znaleziono możliwych powtórzonych wpisów.",
+    "unavailable": "Nie udało się teraz pokazać przeglądu.",
+    "truncated": "Wpisów jest dużo — przegląd może być niepełny.",
+    "sameHours": "Te same godziny",
+    "differentHours": "Różne godziny",
+    "sameText": "Ten sam opis",
+    "recordN": "Wpis {n}",
+    "hours": "{hours} godz.",
+    "noHours": "Brak godzin",
+    "counted": "Liczony",
+    "marked": "Oznaczony jako powtórzony",
+    "source": "Źródło: {file} · zaimportowano {date}",
+    "noSource": "nie podano",
+    "mark": "Powtórzony — zostaw wpis {n}",
+    "reinstate": "Przywróć",
+    "unnamedPerson": "Osoba bez imienia",
+    "unnamedObject": "Obiekt bez nazwy",
+    "error": "Nie udało się. Nic nie zmieniono.",
+    "notAllowed": "Może to zrobić właściciel lub kierownik organizacji.",
+    "notSameWork": "Te wpisy już do siebie nie pasują — odśwież stronę."
+  },
+  "pilotPass": {
+    "title": "Plan dla organizacji — {days}-dniowy pilotaż za 1 €",
+    "intro": "Zapłać 1 € jednorazowo, a Twoja organizacja na {days} dni otrzyma płatny plan Organizacja. Co dodaje do planu bezpłatnego: brak limitu jednocześnie otwartych stanowisk i potrzeb kadrowych (w planie bezpłatnym – jedno). Wiadomości, podsumowania kandydatów, dobór zespołów i rezerwacje pozostają dostępne jak w planie bezpłatnym.",
+    "terms": "Płatność jednorazowa. Nic się nie odnawia i nic nie jest pobierane ponownie: po {days} dniach plan kończy się sam, a organizacja wraca do planu bezpłatnego. Plan pojawi się poniżej, gdy tylko Stripe potwierdzi płatność.",
+    "pay": "Zapłać 1 € — {days}-dniowy pilotaż",
+    "status": {
+      "pilot_pass_disabled": "Pilotaż nie jest teraz oferowany.",
+      "unauthenticated": "Zaloguj się, aby rozpocząć pilotaż.",
+      "no_organization": "Najpierw wybierz przestrzeń swojej organizacji.",
+      "not_billing_authority": "Pilotaż może rozpocząć tylko osoba zarządzająca płatnościami organizacji.",
+      "billing_not_active": "Płatności nie są dostępne dla tej organizacji.",
+      "plan_active": "Twoja organizacja ma już aktywny plan.",
+      "checkout_failed": "Stripe nie utworzył strony płatności. Nic nie pobrano; spróbuj później."
+    },
+    "result": {
+      "paid": "Stripe otrzymał płatność. Plan włączy się, gdy tylko nadejdzie potwierdzenie — jeśli go jeszcze nie widać, odśwież stronę za chwilę.",
+      "cancelled": "Płatność anulowana — nic nie pobrano."
+    },
+    "elsewhere": "Wybierz {organization} w przełączniku przestrzeni u góry strony — pilotaż uruchamia się z przestrzeni tej organizacji.",
+    "invite": {
+      "line": "Zapłać 1 € jednorazowo za {days} dni płatnego planu Organizacja. Nic się nie odnawia.",
+      "cta": "Otwórz pilotaż"
+    }
   }
 }

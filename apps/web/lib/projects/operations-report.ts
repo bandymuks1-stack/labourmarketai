@@ -51,7 +51,7 @@ function workerRow(w: WorkerOps): string[] {
     w.operationalStatus ?? "not_set",
     w.ready ? "ready_checked_fields" : "not_ready",
     String(w.declaredSkills),
-    String(w.confirmedSkills),
+    w.confirmedSkills === null ? "unknown" : String(w.confirmedSkills),
     String(w.journalEntries),
     String(w.openReviewItems),
     String(w.docsMissing),
@@ -89,13 +89,23 @@ export const OPS_CSV_HEADER = [
 export function buildOperationsCsv(ops: ProjectOperations): string {
   const lines: string[] = [];
   lines.push(csvRow([...OPS_CSV_HEADER]));
-  for (const w of ops.workers) lines.push(csvRow(workerRow(w)));
+  // The worker's name is the one cell a PERSON typed (their own profile) and
+  // another person opens in a spreadsheet, so it is formula-guarded; every
+  // other cell is a value this codebase generated (codes, counts, dates).
+  for (const w of ops.workers) {
+    const [name, ...rest] = workerRow(w);
+    lines.push([csvSafeCell(name), ...rest.map(csvCell)].join(","));
+  }
   return lines.join("\r\n") + "\r\n";
 }
 
 /** A filesystem-safe filename for the export, scoped to the project. */
 export function operationsCsvFilename(ops: ProjectOperations): string {
   const base = (ops.project.title ?? ops.project.id)
+    // Fold diacritics first ("Šiauliai" → "siauliai"), so a Lithuanian or
+    // Polish name keeps its letters instead of losing them to the ASCII filter.
+    .normalize("NFD")
+    .replace(/\p{M}+/gu, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")

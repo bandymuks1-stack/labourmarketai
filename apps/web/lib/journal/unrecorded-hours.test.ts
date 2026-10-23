@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   detectUnrecordedHours,
   findHourMentions,
+  summarizeUnrecordedHours,
   hasRecordedTime,
 } from "./unrecorded-hours";
 
@@ -115,5 +116,20 @@ describe("what it returns is evidence for a human, not a value to submit", () =>
   it("an entry with neither hours nor metrics is silent", () => {
     expect(detectUnrecordedHours("vedžiojau šunį", []).hasUnrecordedHours).toBe(false);
     expect(detectUnrecordedHours(null, null).hasUnrecordedHours).toBe(false);
+  });
+});
+
+describe("summarizeUnrecordedHours — what the profile names beside its total", () => {
+  it("counts the entries (never sums matched hours) and names the earliest day", () => {
+    const s = summarizeUnrecordedHours([
+      { originalText: "Montavau langa 2h", metrics: [], day: "2026-06-14" },
+      { originalText: "Kasiau smėli 9h", metrics: [], day: "2026-05-27" },
+      { originalText: "Klojinių montavimas, 8 val", metrics: [{ metric_slug: "fragment_time", value_numeric: 8, unit_slug: "hours" }], day: "2026-09-21" },
+      { originalText: "be valandų", metrics: [], day: "2026-01-01" },
+    ]);
+    expect(s).toEqual({ entries: 2, earliestDay: "2026-05-27" });
+  });
+  it("is null when every stated hour was recorded", () => {
+    expect(summarizeUnrecordedHours([{ originalText: "8 val", metrics: [{ metric_slug: "quantity", value_numeric: 8, unit_slug: "hours" }], day: "2026-09-21" }])).toBeNull();
   });
 });

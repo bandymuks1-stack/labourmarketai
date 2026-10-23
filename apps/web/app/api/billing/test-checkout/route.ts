@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
-import { getBillingConfig } from "@/lib/billing/config";
+import { billingTrialEnabled, getBillingConfigFor } from "@/lib/billing/config";
 import { getBillingProvider } from "@/lib/billing/provider";
 import { testPriceIdFor } from "@/lib/billing/prices";
 import {
@@ -93,18 +93,22 @@ export async function POST(req: Request) {
   // id, no price, no subject can be supplied.
   let orgBinding: OrgBindingResult = "not_required";
   let organizationId: string | null = null;
+  // The workspace organization, authority or not — the pilot list is checked
+  // against it so a non-pilot organization reads billing as off.
+  let workspaceOrganizationId: string | null = null;
   const planAudience = getPlan(planKey)?.audience;
   if (user && planAudience && planRequiresOrganization(planAudience)) {
     const subject = await resolveBillingSubject();
     if (subject.subject?.type === "organization") {
       orgBinding = subject.billingAuthority ? "verified" : "not_member";
+      workspaceOrganizationId = subject.subject.id;
       organizationId = subject.billingAuthority ? subject.subject.id : null;
     } else {
       orgBinding = "missing";
     }
   }
 
-  const config = getBillingConfig();
+  const config = getBillingConfigFor(workspaceOrganizationId);
   const gate = evaluateCheckoutRequest({
     config,
     authenticated: Boolean(user),
@@ -170,7 +174,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, reason: "checkout_unavailable", testMode: config.testMode }, { status: 503 });
   }
   const operation = opened.kind === "needs-migration" ? null : opened.operation;
-  const idempotencyKey = operation
+  const operationKey = operation
     ? operation.idempotencyKey
     : checkoutIdempotencyKey({ ownerId: user.id, planKey, organizationId });
 
@@ -181,7 +185,15 @@ export async function POST(req: Request) {
     planKey,
     subjectType: scope.type,
     history: await readTrialHistory({ scope, planKey, testMode: config.testMode }),
+    enabled: billingTrialEnabled(),
   });
+  // The Stripe key carries the trial terms: an open operation reused after the
+  // owner's trial switch changed must not replay its key with different
+  // parameters (Stripe answers an idempotency error). A trial checkout keeps
+  // the operation's key unchanged; a checkout the switch made trial-less gets
+  // its own (every other no-trial checkout keeps its key as before).
+  const idempotencyKey =
+    !trial.trial && trial.reason === "trial_switched_off" ? `${operationKey}_nt` : operationKey;
 
   const result = await provider.createCheckoutSession({
     planKey,

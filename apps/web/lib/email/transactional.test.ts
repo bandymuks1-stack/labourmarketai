@@ -90,4 +90,17 @@ describe("transactional email adapter — the platform mailbox (smtp)", () => {
     expect(isTransactionalEmailConfigured()).toBe(true);
     expect(isTransactionalEmailPathActive()).toBe(true);
   });
+
+  it("an UNSET provider stays OFF even with a complete mailbox (owner gate: smtp is an explicit opt-in)", () => {
+    // The mailbox may be configured only for GDPR notices; invitation and
+    // notification mail start only when the owner sets INVITE_EMAIL_PROVIDER.
+    vi.stubEnv("INVITE_EMAIL_PROVIDER", "");
+    vi.stubEnv("INVITE_EMAIL_API_KEY", "");
+    vi.stubEnv("LM_SMTP_HOST", "smtp.example.test");
+    vi.stubEnv("LM_SMTP_PORT", "465");
+    vi.stubEnv("LM_SMTP_USER", "info@example.test");
+    vi.stubEnv("LM_SMTP_PASS", "not-a-real-password");
+    vi.stubEnv("LM_SMTP_FROM", "Example <info@example.test>");
+    expect(isTransactionalEmailConfigured()).toBe(false);
+  });
 });

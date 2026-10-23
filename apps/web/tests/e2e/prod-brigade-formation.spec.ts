@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import { inviteCapGate } from "./invite-cap";
 import { chooseWorkContextIfAsked } from "./worklog-context";
+import { bearerOf, qaApi } from "./prod-qa-api";
 import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
 
 /**
@@ -69,16 +70,25 @@ let teamTestId = "";
  * is itself a correct product outcome, not a failure.
  */
 test("0. owner disbands earlier synthetic brigades, keeping their history", async ({ browser }) => {
+  // Up to twenty disband answers, each followed by a reload of a heavy page.
+  test.setTimeout(480_000);
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
-  await expect(page.getByTestId("team-brigades-panel")).toBeVisible();
+  // The people page is heavy (many reads); 30 s like every other step — the
+  // 5 s default failed a run while another walk loaded production (run
+  // 39475645864) though the panel rendered.
+  await expect(page.getByTestId("team-brigades-panel")).toBeVisible({ timeout: 30_000 });
   const leftovers = page
     .locator('[data-testid^="team-brigade-"]', { hasText: "QA-SYNTHETIC Brigada" })
     .filter({ has: page.locator('[data-testid^="team-disband-"]') });
   let disbanded = 0;
   let refused = 0;
   const tried = new Set<string>();
-  for (let i = 0; i < 6; i += 1) {
+  // A brigade with an accepted offer on a need its buyer closed is refused as
+  // open work (run 39573517480: the first six cards were all such brigades
+  // while eight others could be disbanded, so the owner stayed at the 20-team
+  // cap). Walk the whole list, and stop once three slots are free.
+  for (let i = 0; i < 20 && disbanded < 3; i += 1) {
     const cards = await leftovers.all();
     let card = null;
     for (const c of cards) {
@@ -116,7 +126,29 @@ test("1-2. owner creates the brigade in Alfa", async ({ browser }) => {
   await page.getByTestId("team-create-name").fill(TEAM);
   await page.getByTestId("team-create-submit").click();
   const card = page.locator('[data-testid^="team-brigade-"]', { hasText: TEAM });
-  await expect(card).toBeVisible({ timeout: 20_000 });
+  // The created brigade must appear WITHOUT a reload. If it does not, reload
+  // once to tell "the list did not refresh" (a UI defect, reported) from "the
+  // brigade is not listed at all" (the step fails).
+  const shownInPlace = await expect(card)
+    .toBeVisible({ timeout: 30_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!shownInPlace) {
+    await page.reload();
+    const shownAfterReload = await expect(card)
+      .toBeVisible({ timeout: 30_000 })
+      .then(() => true)
+      .catch(() => false);
+    console.info(`1-2 diagnostics: brigade shown in place=false, after reload=${shownAfterReload}`);
+    // A brigade that appears only after a reload is still a defect: the step
+    // FAILS, with the diagnostic saying which of the two it was.
+    throw new Error(
+      shownAfterReload
+        ? "the created brigade appears only after a reload (the panel does not refresh)"
+        : "the created brigade is not listed even after a reload",
+    );
+  }
+  await expect(card).toBeVisible({ timeout: 5_000 });
   teamTestId = (await card.getAttribute("data-testid"))!;
   await ctx.close();
 });
@@ -206,8 +238,11 @@ test("org isolation: the owner of another company does not see Alfa's brigade", 
 test("14. persistence: a brand-new owner session still shows the brigade with both members", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
-  await expect(page.getByTestId(teamTestId)).toContainText(TEAM);
-  await expect(page.getByTestId(teamTestId).locator("li .text-state-success")).toHaveCount(2);
+  // A brand-new session renders the heavy people page cold: 30 s like every
+  // other step (run 39582274844 failed at the 5 s default though step 8-9 of
+  // the same run had shown the brigade with both members).
+  await expect(page.getByTestId(teamTestId)).toContainText(TEAM, { timeout: 30_000 });
+  await expect(page.getByTestId(teamTestId).locator("li .text-state-success")).toHaveCount(2, { timeout: 30_000 });
   await ctx.close();
 });
 
@@ -417,10 +452,34 @@ test("B2B-8. a brigade member sees the buyer's project through the team and reco
   await expect(card, "the team assignment makes the project the member's work context").toBeVisible({ timeout: 30_000 });
   await expect(card.getByTestId("worker-project-via-team")).toBeVisible();
   await page.goto("/lt/dashboard/journal");
-  await page.getByTestId("journal-quick-record-text").fill(WORK);
-  await page.getByTestId("journal-quick-record-understand").click();
-  await expect(page.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
-  await chooseWorkContextIfAsked(page, /QA-SYNTHETIC Alfa/);
+  // ONE fill, as a person types once. The button enables only when the
+  // recorder's own state holds the sentence, so a sentence typed before the
+  // page finished loading must be kept by the recorder itself (run
+  // 39570461256 lost it; quick-record.tsx now takes the field's early text).
+  const text = page.getByTestId("journal-quick-record-text");
+  const understand = page.getByTestId("journal-quick-record-understand");
+  await text.fill(WORK);
+  await expect(understand, "the recorder kept the sentence typed once").toBeEnabled({ timeout: 30_000 });
+  await understand.click();
+  const flow = page.getByTestId("worklog-flow");
+  try {
+    await expect(flow).toBeVisible({ timeout: 30_000 });
+  } catch (err) {
+    // Name the stage the recorder stopped at, so the next failure is a fact.
+    const seen: string[] = [];
+    for (const id of ["worklog-loading", "worklog-blocked", "worklog-error", "journal-quick-record-text"]) {
+      if (await page.getByTestId(id).isVisible().catch(() => false)) {
+        seen.push(`${id}: ${(await page.getByTestId(id).innerText().catch(() => "")).slice(0, 160)}`);
+      }
+    }
+    console.info(`[b2b-8] readback not shown; visible: ${seen.join(" | ") || "none"}; url ${page.url()}`);
+    throw err;
+  }
+  // The buyer's project is reached THROUGH THE BRIGADE, so it is offered under
+  // the brigade's own work context (addTeamProjects: team org + project org),
+  // never under the member's employer Alfa — picking Alfa showed only Alfa's
+  // own project (run 39301125551).
+  await chooseWorkContextIfAsked(page, new RegExp(TEAM));
   const project = page.getByTestId("worklog-project");
   if (await project.isVisible().catch(() => false)) {
     await project.selectOption(gamaProjectId);
@@ -447,6 +506,40 @@ test("B2B-9. the buyer sees the brigade's work on its own project", async ({ bro
   console.info(`[b2b] journaled hours on the buyer's project: ${journaledBefore} → ${after}`);
   expect(after, "the member's 6 hours reach the buyer's project").toBeGreaterThanOrEqual(journaledBefore + 6);
   await ctx.close();
+});
+
+/** Hours the hours-only door returns to `token` for the buyer's project (counts only, never a field). */
+async function teamDoor(token: string | null): Promise<{ status: number; rows: number; hours: number; textFields: number }> {
+  const res = await qaApi("/rest/v1/rpc/project_team_journal_hour_rows_v1", token, {
+    method: "POST",
+    body: { p_project_id: gamaProjectId },
+  });
+  const data = res.ok ? ((await res.json()) as { metrics: { metric_slug: string; value_numeric: number | null; unit_slug: string | null; value_text: string | null }[] }[]) : [];
+  let hours = 0;
+  let textFields = 0;
+  for (const r of data) {
+    for (const m of r.metrics ?? []) {
+      if (m.metric_slug === "fragment_time" && m.unit_slug === "hours") hours += Number(m.value_numeric ?? 0);
+      if (m.value_text !== null && m.metric_slug !== "work_date" && m.metric_slug !== "fragment_time") textFields += 1;
+    }
+    for (const k of Object.keys(r)) if (!["entry_key", "correction_of_key", "created_at", "context_key", "metrics", "confirmations"].includes(k)) textFields += 1;
+  }
+  return { status: res.status, rows: data.length, hours, textFields };
+}
+
+test("B2B-9b. the same hours by API: the buyer reads them, a third organization and an anonymous caller read nothing", async () => {
+  test.skip(!existsSync(state("agency")) || !process.env.PROD_QA_SUPABASE_URL, "needs the agency session and the API url");
+  const buyer = await teamDoor(bearerOf("manager"));
+  expect(buyer.status, "the buyer's API call answers").toBe(200);
+  expect(buyer.hours, "the buyer reads the brigade's hours on its own project").toBeGreaterThanOrEqual(6);
+  expect(buyer.textFields, "no free text and no extra field leaves the door").toBe(0);
+  const third = await teamDoor(bearerOf("agency"));
+  expect(third.status, "an unrelated organization is answered").toBe(200);
+  expect(third.rows, "an unrelated organization gets no rows").toBe(0);
+  const anon = await teamDoor(null);
+  expect(anon.rows, "an anonymous caller gets no rows").toBe(0);
+  expect(anon.status, "an anonymous caller is refused").not.toBe(200);
+  console.info(`[b2b] API door: buyer ${buyer.rows} row(s) ${buyer.hours} h; third org ${third.rows}; anon ${anon.status}`);
 });
 
 test("B2B-10. the buyer ends this run's team assignment (history kept), so the next run can disband the brigade", async ({ browser }) => {

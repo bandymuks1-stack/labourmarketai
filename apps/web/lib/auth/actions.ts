@@ -4,6 +4,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { activeLocales } from "@/lib/i18n/config";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import {
@@ -215,6 +216,22 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
       hint: error.hint,
     });
     throw new Error(`complete_onboarding RPC failed: ${error.message}`);
+  }
+
+  // THE ACCOUNT LANGUAGE IS THE ONE THE PERSON ONBOARDED IN (audit 2026-10-20).
+  // The shell upsert above never overwrites (ignoreDuplicates), the signup
+  // trigger defaults to 'lt' when OAuth carries no locale, and
+  // complete_onboarding does not write it — so a Google/LinkedIn/Facebook
+  // person who onboarded on /en was later redirected to /lt and pinned there
+  // by the account-preference rule (lib/auth/locale-preference.ts). Only an
+  // ACTIVE locale from the form is written; the person's own row (RLS).
+  const onboardedLocale = String(formData.get("locale") ?? "");
+  if ((activeLocales as readonly string[]).includes(onboardedLocale)) {
+    const { error: localeErr } = await supabase
+      .from("profiles")
+      .update({ locale: onboardedLocale })
+      .eq("id", user.id);
+    if (localeErr) console.error("[completeOnboarding] account language write failed", { code: localeErr.code });
   }
 
   // THE FURTHER PROFESSIONS the person named. The RPC wrote the primary; these

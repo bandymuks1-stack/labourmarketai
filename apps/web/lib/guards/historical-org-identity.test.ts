@@ -34,7 +34,10 @@ describe("historical organization identity — names only, own history only", ()
     ]) {
       expect(read(rel), rel).toMatch(/withHistoricalOrgNames\(/);
     }
-    expect(read("lib/company/historical-org-names.ts")).toMatch(/rpc\("my_historical_organization_names_v1"/);
+    // v2 (claimed roster rows too, 20261020100000) first, v1 while v2 is absent.
+    const helper = read("lib/company/historical-org-names.ts");
+    expect(helper).toContain('"my_historical_organization_names_v2", "my_historical_organization_names_v1"');
+    expect(helper).toContain("(supabase as any).rpc(fn, { p_org_ids: want })");
   });
 
   it("an ended relationship is labelled as ended, not as current", () => {

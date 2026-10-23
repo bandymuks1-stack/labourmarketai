@@ -51,7 +51,8 @@ describe("1 · one reading, every surface", () => {
   });
   it("the Living CV carries the reading as data (so the MCP cv.verified.get states the same history) and prints its total", () => {
     expect(cvBuilder).toContain("professionalExperience: ProfessionalExperience | null;");
-    expect(cvBuilder).toMatch(/professionalExperience: workIntelligence\s*\?\s*deriveProfessionalExperience\(\{/);
+    // the same derivation, with the total UNKNOWN when relationships are unread (one rule, 2026-10-20)
+    expect(cvBuilder).toMatch(/professionalExperience: workIntelligence\s*\?\s*withUnknownTotalWhenUnattributed\(\s*deriveProfessionalExperience\(\{/);
     expect(cvBuilder).toContain("readOwnExperienceRelationships(supabase, user.id)");
     expect(capabilities).toMatch(/read\("cv\.verified\.get"[\s\S]*?buildVerifiedCv\(\)/);
     expect(cvPage).toContain('data-testid="cv-professional-experience-total"');
@@ -60,7 +61,14 @@ describe("1 · one reading, every surface", () => {
   });
   it("the profile fact strip states the same total, derived by the same function", () => {
     expect(profilePage).toContain("readOwnExperienceRelationships(supabase, user.id)");
-    expect(profilePage).toMatch(/deriveProfessionalExperience\(\{ wi: workIntelligence, relationships: experienceRelationships \}\)\.hours/);
+    // 2026-10-20: one helper for every identity surface (lib/journal/experience-figures.ts),
+    // which derives the total with deriveProfessionalExperience — the profile, the Player
+    // Card (chat + profile) and the journal page all pass the SAME figures to the strip.
+    expect(profilePage).toMatch(/experienceFiguresOf\(\s*workIntelligence,\s*experienceRelationships,?\s*\)/);
+    const helper = read("lib/journal/experience-figures.ts");
+    expect(helper).toMatch(/deriveProfessionalExperience\(\{ wi, relationships/);
+    expect(read("lib/player-card/player-card-result.ts")).toMatch(/\.\.\.experienceFiguresOf\(intel, relationships\)/);
+    expect(read("app/[locale]/dashboard/journal/page.tsx")).toMatch(/\.\.\.experienceFiguresOf\(workIntelligence, manoRelationships\)/);
     expect(identityFacts).toContain('testid: "player-card-fact-experience-total"');
     expect(identityFacts).toContain('label: t("experienceTotal")');
   });
@@ -87,7 +95,14 @@ describe("2 · the reading is pure, finance-free and person-scoped", () => {
   });
   it("the relationships reader reads the person's OWN rows only — never an organization's records about other people, never organization-wide hours", () => {
     expect(reader).toMatch(/\.from\("engagement_contexts"\)[\s\S]*?\.eq\("profile_id", userId\)/);
-    expect(reader).not.toMatch(/organization_evidence_records|work_hour_allocations|organization_people|evidence_import|service_role|createAdminClient/);
+    expect(reader).not.toMatch(/organization_evidence_records|work_hour_allocations|evidence_import|service_role|createAdminClient/);
+    // organization_people ONLY as the person's OWN confirmed roster row (2026-10-20):
+    // every read of it is bound to linked_profile_id = the caller, never the roster.
+    const rosterReads = reader.split('.from("organization_people")').slice(1);
+    expect(rosterReads.length).toBe(1);
+    for (const r of rosterReads) {
+      expect(r.slice(0, 300)).toMatch(/\.eq\("linked_profile_id", userId\)\s*\.eq\("link_state", "linked"\)\s*\.eq\("link_method", "worker_confirmed"\)/);
+    }
     expect(reader).toContain("readMyLedOrganizations()");
   });
   it("roles come from the membership spine and carry no hours in the reading", () => {

@@ -10,6 +10,6 @@ D=$(mktemp -d /root/lm-prod/.cron.XXXXXX)
 trap 'rm -rf "$D"' EXIT INT TERM
 printf 'Authorization: Bearer %s\n' "$(sed -n 's/^CRON_SECRET=//p' /root/lm-prod/env)" > "$D/h"
 CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 300 -H @"$D/h" \
-  -H 'Host: labourmarket.ai' -H 'X-Forwarded-Proto: https' "http://127.0.0.1:3200/api/cron/$1")
+  -H 'Host: labourmarket.ai' -H 'X-Forwarded-Proto: https' "http://127.0.0.1:$(cat /root/lm-prod/active-port 2>/dev/null || echo 3200)/api/cron/$1")
 echo "$(date -u +%FT%TZ) $1 http=$CODE" >> /root/lm-prod/cron.log
 [ "$CODE" = "200" ]

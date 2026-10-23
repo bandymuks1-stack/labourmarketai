@@ -16,6 +16,9 @@ activate)
   echo "agentai healthy before: $(agentai_ok)"
   mkdir -p "$BK"; [ -f "$OLD" ] && mv "$OLD" "$BK/labma.conf.nginx.$(date -u +%Y%m%dT%H%M%SZ)" && echo "labma.conf moved to $BK"
   install -m 644 "$SRC" "$NEW"
+  # the vhost includes the one-line upstream that lm-prod-run.sh rewrites; provision it on a fresh host
+  INC=/etc/nginx/conf.d/domains/labourmarket-upstream.inc
+  [ -f "$INC" ] || printf 'proxy_pass http://127.0.0.1:%s;\n' "$(cat /root/lm-prod/active-port 2>/dev/null || echo 3200)" > "$INC"
   if nginx -t 2>&1 | sed 's/^/   /' && nginx -t >/dev/null 2>&1; then systemctl reload nginx; echo "nginx reloaded"; else
     echo "nginx -t FAILED: restoring"; rm -f "$NEW"; mv "$(ls -t "$BK"/labma.conf.nginx.* | head -1)" "$OLD"; nginx -t && systemctl reload nginx; exit 1; fi
   sleep 2

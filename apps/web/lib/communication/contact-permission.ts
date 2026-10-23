@@ -101,16 +101,19 @@ async function callerCompanyEmploysProfile(
   callerId: string,
   otherProfileId: string,
 ): Promise<boolean> {
-  const { data: company } = await supabase
+  // EVERY company the caller owns (a person may own several since
+  // 20260805170000): `.maybeSingle()` errored on two rows and answered "no".
+  const { data: companies } = await supabase
     .from("companies")
     .select("id")
     .eq("profile_id", callerId)
-    .maybeSingle();
-  if (!company?.id) return false;
+    .limit(50);
+  const companyIds = ((companies ?? []) as { id: string }[]).map((c) => c.id);
+  if (companyIds.length === 0) return false;
   const { data, error } = await asAny(supabase)
     .from("company_workers")
     .select("worker_id, workers!inner(profile_id)")
-    .eq("company_id", company.id)
+    .in("company_id", companyIds)
     .eq("workers.profile_id", otherProfileId)
     .limit(1);
   if (error) {

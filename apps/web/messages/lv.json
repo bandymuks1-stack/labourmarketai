@@ -570,7 +570,9 @@
     "localeSwitch": "[EN] Language",
     "lt": "[EN] Lietuvių",
     "notFound": "[EN] This page does not exist",
-    "skipToContent": "[EN] Skip to content"
+    "skipToContent": "[EN] Skip to content",
+    "loading": "Ielādē…",
+    "dashboardSections": "Paneļa sadaļas"
   },
   "companies": {
     "cta": {
@@ -923,7 +925,9 @@
       "screenshot": "[EN] Company demand flow",
       "subcopy": "[EN] Post what you need on each project and see which available workers and agencies fit it.",
       "title": "[EN] Live demand,",
-      "titleAccent": "[EN] in context."
+      "titleAccent": "[EN] in context.",
+      "calculatorBody": "Pirms meklē darba veicējus, novērtē darbu: darba stundas, materiālus, aprīkojumu un braucienus — savos skaitļos.",
+      "calculatorLink": "Aprēķini projekta izmaksas"
     },
     "workers": {
       "benefits": [
@@ -1022,7 +1026,7 @@
       },
       {
         "q": "Kā tiek apstrādāti maksājumi?",
-        "a": "Maksājums ar karti caur Stripe, PVN piemēro Stripe Tax; rēķini, atcelšana un izmaiņas ir pieejamas jūsu organizācijas kontā."
+        "a": "Maksājums ar karti caur Stripe. Rēķini, maksājumu vēsture un atcelšana ir pieejama jūsu organizācijas kontā."
       },
       {
         "q": "Vai aktīvajām pozīcijām ir ierobežojums?",
@@ -2839,7 +2843,10 @@
       "modeNote": "[EN] This is a booking proposal with dates — the worker confirms or declines it. Nothing is booked until the worker accepts.",
       "againModeNote": "[EN] This re-opens the same proposal to the same worker with new dates — the worker decides again. Nothing is booked until the worker accepts.",
       "afterSent": "[EN] The worker received your proposal and will accept or decline it. You'll see the answer under Bookings, and you can withdraw the proposal until then.",
-      "alreadyAccepted": "Darbinieks šo piedāvājumu jau ir pieņēmis — saskaņotie nosacījumi šeit netiek pārrakstīti. Izmaiņas saskaņojiet sarunā."
+      "alreadyAccepted": "Darbinieks šo piedāvājumu jau ir pieņēmis — saskaņotie nosacījumi šeit netiek pārrakstīti. Izmaiņas saskaņojiet sarunā.",
+      "refusedNotReachable": "Šai personai no šejienes nevar piedāvāt rezervāciju — profils nav redzams darba devējiem, un jums nav darba attiecību.",
+      "refusedNeedClosed": "Šī vajadzība ir slēgta — atver to no jauna, pirms piedāvā rezervāciju.",
+      "refusedAnswered": "Darbinieks šo piedāvājumu noraidīja, tāpēc bez viņa jaunas piekrišanas tas netiek atvērts no jauna. Turpiniet sarunā vai atrodiet citu darbinieku."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -2901,6 +2908,7 @@
     "loopReadFailed": "Neizdevās ielādēt jūsu pieprasījumus — saraksts var būt nepilnīgs. Atsvaidziniet lapu."
   },
   "people": {
+    "anonymousName": "Kandidāts {token}",
     "eyebrow": "Personas profils",
     "restrictedTitle": "Profils nav pieejams",
     "restrictedBody": "Jūs nevarat apskatīt šīs personas profilu: nav aktīvu darba attiecību, vai persona nav piekritusi būt atrodama.",
@@ -4754,6 +4762,37 @@
       },
       "topTitle": "Šobrīd pieprasītākās profesijas",
       "topNote": "Pēc aktīvajiem darba sludinājumiem platformā."
+    },
+    "hero": {
+      "headline": "Dzīva darba un biznesa iespēju sistēma.",
+      "sub": "Vienuviet parādi, ko proti, ko piedāvā vai ko meklē. Atrodi darbiniekus, darbus, darbuzņēmējus, pakalpojumus un preces — un tava pieredze un iespējas vienmēr paliek pieejamas."
+    },
+    "ways": {
+      "title": "Ko šeit vari darīt",
+      "show": {
+        "title": "Parādi, ko proti",
+        "body": "Darbs, prasmes un pieredze vienuviet. Katrs ieraksts papildina tavu profesionālo vēsturi.",
+        "cta": "Izveidot profilu"
+      },
+      "offer": {
+        "title": "Piedāvā, ko vari",
+        "body": "Pakalpojumi, preces, komandas vai brīvi cilvēki — publicē savu piedāvājumu, lai tevi atrastu tie, kam tas vajadzīgs.",
+        "cta": "Piedāvāt"
+      },
+      "find": {
+        "title": "Atrodi, ko meklē",
+        "body": "Uzraksti saviem vārdiem, kas vajadzīgs — darbinieks, darbs, darbuzņēmējs, pakalpojums vai prece.",
+        "cta": "Meklēt"
+      },
+      "discoverLead": "Atklāj",
+      "discover": {
+        "workers": "Darbinieki",
+        "jobs": "Darbi",
+        "contractors": "Darbuzņēmēji",
+        "services": "Pakalpojumi",
+        "goods": "Preces"
+      },
+      "lasting": "Tava pieredze un iespējas vienmēr paliek pieejamas — mainot darbu, projektu vai valsti."
     }
   },
   "workspace": {
@@ -7696,5 +7735,65 @@
     "tasks": "Šonedēļ nav uzdevumu ar termiņu. Izveido uzdevumu – tas kļūs par nedēļas mērķi.",
     "addStages": "Pievienot posmus",
     "addTask": "Izveidot uzdevumu"
+  },
+  "workerPublicSummary": {
+    "title": "Profesionāls prezentējums darba devējiem",
+    "audience": "Šo tekstu redz tikai uzņēmumi un aģentūras, ar kurām tev ir darba attiecības (tu strādā viņiem, esi viņu komandā vai pieņēmi viņu piedāvājumu). Atvērtajā meklēšanā tas netiek rādīts. Tavs personīgais apraksts augstāk ir redzams tikai tev.",
+    "headline": "Virsraksts (līdz 120 rakstzīmēm)",
+    "headlinePlaceholder": "piem. Flīzētājs, 8 gadi, strādāju LT un NO",
+    "bio": "Īss apraksts (līdz 1000 rakstzīmēm)",
+    "bioPlaceholder": "Kas tev padodas vislabāk, kādus darbus esi veicis, ko meklē.",
+    "save": "Saglabāt",
+    "saved": "Saglabāts",
+    "tooLong": "Teksts ir pārāk garš.",
+    "error": "Neizdevās saglabāt. Mēģini vēlreiz."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: kas tev jau ir un kā trūkst",
+    "anyCountry": "jebkura valsts"
+  },
+  "workObjects": {
+    "addButton": "Pievienot objektu"
+  },
+  "adminLaunchReadiness": {
+    "mail": {
+      "title": "Oficiālā pastkaste (info@labourmarket.ai)",
+      "ready": "Sūta",
+      "notReady": "Nesūta",
+      "present": "iestatīts",
+      "missing": "TRŪKST",
+      "portOk": "atbalstīts (465, TLS)",
+      "portUnsupported": "NETIEK ATBALSTĪTS – tikai 465",
+      "note": "Viens pasta kanāls: GDPR paziņojumi tiek sūtīti, kad iestatītas visas LM_SMTP_* vērtības; ielūgumu un paziņojumu e-pasti – tikai pēc to sūtīšanas atsevišķas ieslēgšanas. Tiek rādīts tikai tas, vai vērtība ir, nekad pati vērtība. Trūkstošo vērtību iestatiet VPS serverī ar lm-env-set.sh.",
+      "invites": "Ielūgumu un paziņojumu e-pasti",
+      "invitesOn": "ieslēgti",
+      "invitesOff": "IZSLĒGTI – ieslēdz atsevišķi: INVITE_EMAIL_PROVIDER=smtp un viena testa nosūtīšana"
+    }
+  },
+  "historyDuplicates": {
+    "title": "Possible duplicate records",
+    "hint": "Review and decide",
+    "intro": "These are records of the same person on the same day at the same site. They may be genuinely separate work (two shifts or tasks) or the same work recorded twice. Nothing is changed automatically: if a record is a duplicate, mark it — it stops counting but stays visible and can be reinstated.",
+    "summary": "Awaiting your decision: {groups}",
+    "none": "No possible duplicate records found.",
+    "unavailable": "The review could not be shown right now.",
+    "truncated": "There are many records — the review may be incomplete.",
+    "sameHours": "Same hours",
+    "differentHours": "Different hours",
+    "sameText": "Same description",
+    "recordN": "Record {n}",
+    "hours": "{hours} h",
+    "noHours": "No hours stated",
+    "counted": "Counted",
+    "marked": "Marked as a duplicate",
+    "source": "Source: {file} · imported {date}",
+    "noSource": "not stated",
+    "mark": "Duplicate — keep record {n}",
+    "reinstate": "Reinstate",
+    "unnamedPerson": "Unnamed person",
+    "unnamedObject": "Unnamed site",
+    "error": "That didn't work. Nothing was changed.",
+    "notAllowed": "The organization's owner or a manager can do this.",
+    "notSameWork": "These records no longer match — refresh the page."
   }
 }

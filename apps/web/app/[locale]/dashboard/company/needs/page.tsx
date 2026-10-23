@@ -222,6 +222,7 @@ export default async function CompanyNeedsPage({
             stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
             repeatRequestId={repeatRequestId}
             usage={openNeedsUsage}
+            organizationId={employerCtx.kind === "ok" ? employerCtx.organizationId : null}
           />
           {/* HONEST VISIBILITY (2026-09-22): `list_open_demand_for_workers`
               shows a need to workers ONLY when companies.verification_status
@@ -288,6 +289,7 @@ export default async function CompanyNeedsPage({
               claimCta: tClaim("claimCta"),
               claimed: tClaim("claimed"),
               error: tClaim("error"),
+              draftExists: tClaim("draftExists"),
               workersLabel: tClaim("workersLabel"),
             }}
           />

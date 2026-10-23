@@ -1,11 +1,13 @@
 """LabourMarket.ai PRODUCT MASTER MAP — generator.
 
-Reads the canonical register (docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md), applies the
+Reads the canonical register — the owner's PRIVATE registry (Agentai OS Internal Brain,
+docs/internal-brain/projects/labourmarket-functionality-registry-v2.md; the public
+docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md holds only the summary since 2026-10-21), applies the
 production evidence gathered since it was last written, adds the commercial model and the
 priorities, and writes ONE self-contained HTML page. Re-run it after every audit update:
 the map is a view of the canonical documents, never a second source of truth.
 
-    python build.py <audit.md> <out.html> <source-sha> [private-facts.json]
+    python build.py <private registry.md> <out.html> <source-sha> [private-facts.json]
 """
 import html
 import json
@@ -51,20 +53,18 @@ for line in src.split("## 2. Per-area status", 1)[1].split("## 3.", 1)[0].splitl
         "action": action if action != "—" else "",
     })
 
-# Production evidence after the audit snapshot (2026-10-18/19, real production; see report).
-EVIDENCE = {
-    "1.2": ("LIVE_PROVEN", "Savininkas prisijungė per Google produkcijoje 2026-10-18 ir 10-19; #2482, #2488"),
-    "1.12": ("CODE_READY", "Nonstop slaptas raktas atkurtas abiejose pusėse 2026-10-18; laukiantis lead perdavimas – savininko veiksmas"),
-    "4.29": ("LIVE_PROVEN", "Perdavimo užduotis produkcijoje: HTTP 200, authFailed 0, sutikimo neturintis įrašas sulaikytas"),
-    "6.16": ("LIVE_PROVEN", "Komercinis perdavimas Nonstop atkurtas ir paleistas produkcijoje 2026-10-18"),
-    "9.16": ("CODE_READY", "Durys sukonfigūruotos (atsako unauthorized); pilnas siuntimas dar neįvykdytas"),
-    "10.22": ("CODE_READY", "Abi kryptys suporuotos; perdavimas veikia, referalo siuntimas laukia savininko"),
-    "13.16": ("LIVE_PROVEN", "Naršyklės klaidų pranešimai įdiegti, durys atsako 204 (#2484)"),
-}
+# The 2026-10-18/19 production evidence that used to be overlaid here is now in the
+# registry rows themselves (owner registry rebuild 2026-10-21), so the map reads one truth.
+# Rows kept only for traceability (DUPLICATE / RETIRED) are not processes: skip them.
+# A DUPLICATE row names the canonical row it is counted in ("counted in 5.13"); a journey
+# that still references the duplicate id reads the canonical row instead.
+ALIAS = {}
 for r in rows:
-    if r["id"] in EVIDENCE:
-        r["raw"], note = EVIDENCE[r["id"]]
-        r["evidence"] = note
+    if r["raw"] == "DUPLICATE":
+        m = re.search(r"counted in (\d+\.\d+)", r["evidence"])
+        if m:
+            ALIAS[r["id"]] = m.group(1)
+rows = [r for r in rows if r["raw"] not in ("DUPLICATE", "RETIRED")]
 
 def bucket(r):
     raw = r["raw"]
@@ -72,9 +72,9 @@ def bucket(r):
         return "LIVE_PROVEN"
     if raw == "BROKEN":
         return "BROKEN"
-    if raw == "PLANNED":
+    if raw in ("PLANNED", "NOT_BUILT"):
         return "PLANNED"
-    if raw == "DORMANT":
+    if raw in ("DORMANT", "BLOCKED"):
         return "BLOCKED"
     if raw == "PARTIAL":
         b = (r["blocker"] + " " + r["evidence"]).lower()
@@ -270,6 +270,9 @@ JOURNEYS = [
 ]
 
 byid = {r["id"]: r for r in rows}
+for dup, canonical in ALIAS.items():
+    if canonical in byid:
+        byid[dup] = byid[canonical]
 journeys = []
 for name, steps in JOURNEYS:
     journeys.append({"name": name, "steps": [{"label": l, "id": i, "s": byid[i]["s"] if i in byid else "PLANNED", "feature": byid[i]["feature"] if i in byid else "—"} for l, i in steps]})

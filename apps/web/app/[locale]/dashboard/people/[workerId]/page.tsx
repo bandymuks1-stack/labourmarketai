@@ -27,7 +27,12 @@ import { getActiveOrganizationContext } from "@/lib/company/active-organization"
 import { gateWorkerProfileView } from "@/lib/billing/profile-view-gate";
 import { Link } from "@/lib/i18n/navigation";
 import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
-import { deriveEvidenceTier } from "@/lib/evidence/evidence-tier";
+import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
+import {
+  standingEvidenceTier,
+  withCrossPartyStandingConfirmation,
+} from "@/lib/evidence/skill-confirmation-standing";
+import { readCrossPartyStandingStates } from "@/lib/evidence/skill-confirmation-standing-read";
 import { Card } from "@/components/ui/Card";
 import { MessageButton } from "@/components/app/message-button";
 import { JournalWorkIntelligence } from "@/components/app/journal-work-intelligence";
@@ -36,7 +41,7 @@ import {
   WORK_PERIOD_KEYS,
   type WorkPeriodKey,
 } from "@/lib/journal/work-intelligence";
-import { anonymizedWorkerLabel } from "@/lib/visibility/worker-profile-visibility";
+import { anonymizedWorkerToken } from "@/lib/visibility/worker-profile-visibility";
 import { viewerHasWorkerRelation } from "@/lib/visibility/worker-identity-visibility";
 import { readDiscoverableWorkers } from "@/lib/visibility/discoverable-workers";
 import { readRecordedWorkFor } from "@/lib/player-card/work-history";
@@ -195,10 +200,18 @@ export default async function PersonPage({
   // (which silently rendered ZERO skills for every worker here until W4).
   // The error is therefore CHECKED: a failed read is a read failure, not an
   // empty skill set.
-  const { data: skillRows, error: skillsError } = await supabase
-    .from("worker_skills")
-    .select("skill_id, verified, source, skills ( slug )")
-    .eq("worker_id", workerId);
+  //
+  // A recorded confirmation reads as confirmed only while it STANDS
+  // (lib/evidence/skill-confirmation-standing.ts). This viewer is not the
+  // person and cannot read their journal, so the cross-party DB door decides —
+  // asked beside the skills read, not after it (no added stage).
+  const [{ data: skillRows, error: skillsError }, standing] = await Promise.all([
+    supabase
+      .from("worker_skills")
+      .select("skill_id, verified, source, skills ( slug )")
+      .eq("worker_id", workerId),
+    readCrossPartyStandingStates(supabase, [workerId]),
+  ]);
 
   type SkillRow = {
     skill_id: string;
@@ -206,12 +219,18 @@ export default async function PersonPage({
     source: string | null;
     skills: { slug: string | null } | null;
   };
-  const skills = ((skillRows ?? []) as unknown as SkillRow[]).map((r) => {
+  const judgedSkillRows = withCrossPartyStandingConfirmation(
+    (skillRows ?? []) as unknown as SkillRow[],
+    standing,
+    workerId,
+  );
+  const skills = judgedSkillRows.map((r) => {
     const slug = r.skills?.slug ?? null;
     const label =
       slug && tSkillNames.has(slug) ? tSkillNames(slug) : (slug ?? null);
-    // W6 slice 1: chip token derived from the ONE canonical tier.
-    const tier = deriveEvidenceTier(r);
+    // W6 slice 1: chip token derived from the ONE canonical tier — over the
+    // STANDING confirmation, an unknown one under-stated, never erased.
+    const tier: EvidenceTier = standingEvidenceTier(r);
     const state: "verified" | "work" | "declared" =
       tier === "manager_confirmed"
         ? "verified"
@@ -312,7 +331,7 @@ export default async function PersonPage({
   // directive 2026-10-18 — anonymous by default, identity by permission).
   const name =
     (nameVisible ? (worker.display_name as string | null)?.trim() : null) ||
-    anonymizedWorkerLabel(worker.id as string);
+    t("anonymousName", { token: anonymizedWorkerToken(worker.id as string) });
   const available =
     (worker.availability_status as string | null) === "available";
 

@@ -1,4 +1,7 @@
 name: prod-qa-walk
+# The spec in the run title lets acceptance-campaign.yml attribute a run that reached production
+# even when it left no artifact.
+run-name: prod-qa-walk ${{ github.event_name == 'workflow_dispatch' && inputs.spec || github.event_name }}
 
 # PRODUCTION SIGNED-IN QA, without an agent ever holding a production key
 # (owner programme 2026-10-12 §10). Before this, a signed-in production walk
@@ -51,6 +54,18 @@ on:
           - mcp-agents
           - project-context
           - worker-identity-split
+          - company-chain
+          - project-execution
+          - org-roster
+          - marketplace-goods-services
+          - orders-bookings
+          - documents-approvals
+          - jobs-search
+          - notifications-inapp
+          - billing-test-mode
+          - profile-cv-history
+          - search-support-privacy
+          - public-org-locales
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -108,7 +123,7 @@ jobs:
           EVENT: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context worker-identity-split)
+          ROTATION=(brigade-formation employee-beta-gate role-routes chat-continuity journal-confirm calendar-planning marketplace agency-chain learning-practice sectors-languages chat-confirm-once living-cv-growth staff-review-notice manager-chat mobile-surfaces recognition-chain mcp-chain mcp-agents project-context worker-identity-split company-chain project-execution org-roster marketplace-goods-services orders-bookings documents-approvals jobs-search notifications-inapp profile-cv-history search-support-privacy public-org-locales)
           case "$EVENT" in
             workflow_dispatch) spec="$INPUT_SPEC" ;;
             push) spec=role-routes ;;
@@ -220,7 +235,7 @@ jobs:
           mint "qa.worker+goal3@labourmarket.ai"   worker2
           mint "qa.agency+multiw@labourmarket.ai"  agency
           # employee-beta-gate.spec.ts reads the original single-worker file.
-          cp tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
+          install -m 600 tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
 
       - name: Walk
         shell: bash
@@ -252,6 +267,19 @@ jobs:
             mcp-agents) SPEC=tests/e2e/prod-mcp-agents.spec.ts ;;
             project-context) SPEC=tests/e2e/prod-project-context.spec.ts ;;
             worker-identity-split) SPEC=tests/e2e/prod-worker-identity-split.spec.ts ;;
+            company-chain) SPEC=tests/e2e/prod-company-chain.spec.ts ;;
+            project-execution) SPEC=tests/e2e/prod-project-execution.spec.ts ;;
+            org-roster) SPEC=tests/e2e/prod-org-roster.spec.ts ;;
+            marketplace-goods-services) SPEC=tests/e2e/prod-marketplace-goods-services.spec.ts ;;
+            orders-bookings) SPEC=tests/e2e/prod-orders-bookings.spec.ts ;;
+            documents-approvals) SPEC=tests/e2e/prod-documents-approvals.spec.ts ;;
+            jobs-search) SPEC=tests/e2e/prod-jobs-search.spec.ts ;;
+            notifications-inapp) SPEC=tests/e2e/prod-notifications-inapp.spec.ts ;;
+            # Stripe TEST pilot walk: dispatch only after the owner arms test mode (lm-stripe-arm.sh test); never in the rotation.
+            billing-test-mode) SPEC=tests/e2e/prod-billing-test-mode.spec.ts ;;
+            profile-cv-history) SPEC=tests/e2e/prod-profile-cv-history.spec.ts ;;
+            search-support-privacy) SPEC=tests/e2e/prod-search-support-privacy.spec.ts ;;
+            public-org-locales) SPEC=tests/e2e/prod-public-org-locales.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
@@ -294,6 +322,17 @@ jobs:
       # assertion message names the testid and the expected text, nothing more.
       # `prod-qa-walk.log` is the list reporter's text — exactly what used to be
       # glued to the front of prod-qa-result.json, now in its own file.
+      # Sessions never outlive the walk: every minted session's refresh token is
+      # revoked at Supabase and every session file deleted, pass or fail
+      # (scripts/prod-qa-revoke-sessions.ts prints counts only).
+      - name: Revoke and delete the synthetic sessions
+        if: always()
+        shell: bash
+        run: |
+          cd apps/web
+          pnpm exec tsx scripts/prod-qa-revoke-sessions.ts
+          ls tests/e2e/.storage-state.prod-qa*.json 2>/dev/null && { echo "::error::a session file survived cleanup"; exit 1; } || echo "no session file left"
+
       - name: Upload result (no screenshots, no traces, no sessions)
         if: always()
         uses: actions/upload-artifact@v4

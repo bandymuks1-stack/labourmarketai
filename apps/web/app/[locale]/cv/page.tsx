@@ -17,6 +17,7 @@ import { CareerJourneyMap, type CareerJourneyLabels } from "@/components/app/cv/
 import { HomeTrace } from "@/components/app/home/home-trace";
 import { toActiveLocale } from "@/lib/i18n/config";
 import type { CvSkillTier } from "@/lib/cv-export/skill-tiers";
+import { derivePotentialSkills } from "@/lib/skills/potential-skills";
 import { presentSkills, type SkillMagnitude } from "@/lib/cv-export/skill-presentation";
 import {
   cvSectionVisibility,
@@ -32,6 +33,7 @@ import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
 import { CvOrganizationHistory } from "@/components/app/cv/cv-organization-history";
 import { organizationHistoryLines } from "@/components/app/cv/organization-history-lines";
 import { FORMER_NAME_RELATIONS, formerNamesOf, periodFor } from "@/lib/journal/professional-experience";
+import { experienceStopsOf, type ExperienceStop } from "@/lib/cv-export/experience-stops";
 import {
   PremiumLivingCv,
   type PremiumCvCapability,
@@ -117,12 +119,14 @@ export default async function VerifiedCvPage({
   const tQuick = await getTranslations("quickNav");
   const tPremium = await getTranslations("cvExport.premium");
   const tJourney = await getTranslations("careerJourney");
+  const tIntel = await getTranslations("journal.intelligence");
   const fmtHours = (h: number) =>
     new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
   const tRole = await getTranslations("auth.signup.role");
   const tDocTypes = await getTranslations("documents.types");
   const tEduTypes = await getTranslations("cvSections.educationTypes");
   const tOrgHist = await getTranslations("cvOrganizationHistory");
+  const tLead = await getTranslations("organizationsLeadership");
   const tHistCtx = await getTranslations("historyContext");
   const tEvRole = await getTranslations("evidenceImport.role");
   const tEvKind = await getTranslations("evidenceImport.sourceKind");
@@ -174,6 +178,26 @@ export default async function VerifiedCvPage({
     tailoredOk?.matchedSlugs ?? new Set<string>();
 
   const tierSlugs: Record<CvSkillTier, string[]> = cv.tiers;
+  // POTENTIAL capabilities (decision 0023): what the person's EVIDENCED skills
+  // (recorded or confirmed work) point at, by the same cross-sector map the
+  // growth surfaces use. Its own evidence state — never written, never a
+  // qualification, gone once the person holds the skill in any state.
+  // Evidenced = manager-confirmed skills + skills LIVE recorded work backs
+  // (the work-intelligence practice set — a deleted or superseded entry is
+  // not in it; `cv.tiers.evidence` reads the raw links). Unreadable practice
+  // → confirmed only, never the raw links. Known = every state the person
+  // already holds, declared claims' catalogue slugs included.
+  const livePracticeSlugs = Object.keys(cv.skillPractice ?? {});
+  const potentialCapabilities = derivePotentialSkills(
+    [...cv.tiers.confirmed, ...livePracticeSlugs],
+    [
+      ...cv.tiers.confirmed,
+      ...cv.tiers.evidence,
+      ...cv.tiers.declared,
+      ...livePracticeSlugs,
+      ...cv.declaredClaims.flatMap((c) => c.mappedSlugs ?? []),
+    ],
+  );
 
   // ONE presentation for every skill on this document: tiers from the
   // catalogue rows, free labels folded into the skill they already are or
@@ -633,7 +657,73 @@ export default async function VerifiedCvPage({
   const PREMIUM_CAPS_SHOWN = 8;
   const monthYear = (iso: string | null) =>
     iso ? (formatUtcDate(iso, locale, { month: "short", year: "numeric" }) ?? null) : null;
+  // THE ENTRIES THE ENGAGEMENT LIST CANNOT SHOW (decision 0025, 2026-10-20):
+  // an earlier legal entity of the continuing organization, and leadership held
+  // without an employment engagement — from the ONE reading, never a second.
+  const stops = experienceStopsOf(cv.professionalExperience);
+  const roleLabel = (rel: string): string =>
+    tLead.has(`role.${rel}` as never) ? tLead(`role.${rel}` as never) : tRel.has(rel) ? tRel(rel) : rel;
+  const stopPeriod = (s: ExperienceStop): string => {
+    const from = monthYear(s.from);
+    const to = s.current ? tPremium("present") : monthYear(s.to);
+    // Dates the statements do not give stay unknown — never invented.
+    return from || to ? `${from ?? "…"} – ${to ?? "…"}` : tLead("notDocumented");
+  };
+  const stopSubtitle = (s: ExperienceStop): string | null =>
+    [
+      s.roles.length > 0 ? [...new Set(s.roles.map((r) => roleLabel(r.relationship)))].join(", ") : null,
+      s.kind === "earlier_legal_entity"
+        ? tOrgHist("legalEntityBand", { label: s.name ?? "—", org: s.administeredByName ?? "—" })
+        : null,
+    ]
+      .filter((x): x is string => !!x)
+      .join(" · ") || null;
+  const stopEntry = (s: ExperienceStop): PremiumCvExperience & { sortKey: string } => ({
+    key: s.key,
+    period: stopPeriod(s),
+    title: s.name ?? tPremium("untitled"),
+    subtitle: stopSubtitle(s),
+    detail: s.hours !== null ? tPremium("evidence.recorded", { hours: fmtNum.format(roundHours(s.hours)) }) : null,
+    source: tPremium("source.organization"),
+    level: "recorded",
+    current: s.current,
+    sortKey: s.current ? "9999-12-31" : (s.to ?? s.from ?? "0000"),
+  });
+  // The premium layout's own leadership block lists CURRENT governing
+  // memberships only, so the premium list adds the earlier legal entities AND
+  // every leadership stop that block cannot show (an ended or engagement-only
+  // manager / owner role); the classic / print layout lists every stop.
+  // One entry PER uncovered role, with that role's own dates and provenance:
+  // an engagement role is the person's own entry (declared), a governing
+  // membership is the organization's record. A current membership is the
+  // leadership block's and is not repeated here.
+  const earlierEntityStops = stops.filter((s) => s.kind === "earlier_legal_entity");
+  const uncoveredRoles = stops
+    .filter((s) => s.kind === "organization")
+    .flatMap((s) =>
+      s.roles
+        .filter((r) => !(r.source === "membership" && r.current))
+        .map((r, i) => ({ stop: s, role: r, key: `${s.key}:${r.relationship}:${i}` })),
+    );
+  const rolePeriod = (r: ExperienceStop["roles"][number]): string => {
+    const from = monthYear(r.startedAt);
+    const to = r.current ? tPremium("present") : monthYear(r.endedAt);
+    return from || to ? `${from ?? "…"} – ${to ?? "…"}` : tLead("notDocumented");
+  };
+  const roleEntry = ({ stop, role, key }: (typeof uncoveredRoles)[number]): PremiumCvExperience & { sortKey: string } => ({
+    key,
+    period: rolePeriod(role),
+    title: stop.name ?? tPremium("untitled"),
+    subtitle: roleLabel(role.relationship),
+    detail: null,
+    source: role.source === "membership" ? tPremium("source.organization") : tPremium("source.own"),
+    level: role.source === "membership" ? "recorded" : "declared",
+    current: role.current,
+    sortKey: role.current ? "9999-12-31" : (role.endedAt ?? role.startedAt ?? "0000"),
+  });
   const premiumExperience: (PremiumCvExperience & { sortKey: string })[] = [
+    ...earlierEntityStops.map(stopEntry),
+    ...uncoveredRoles.map(roleEntry),
     ...cv.workHistory.map((e, i): PremiumCvExperience & { sortKey: string } => {
       const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
       const from = monthYear(e.startedAt);
@@ -693,6 +783,39 @@ export default async function VerifiedCvPage({
   const journey = deriveCareerJourney({
     todayIso: (await viewerWorkToday()).todayIso,
     stations: [
+      ...earlierEntityStops.map((s) => {
+        journeyMeta[s.key] = [stopPeriod(s), s.hours !== null ? premiumHours(s.hours) : null].filter(Boolean).join(" · ");
+        return {
+          key: s.key,
+          title: s.name ?? tPremium("untitled"),
+          subtitle: stopSubtitle(s),
+          from: s.from,
+          to: s.to,
+          current: false,
+          source: "organization" as const,
+          level: "recorded" as JourneyLevel,
+          contextId: null,
+          hours: s.hours,
+          confirmedHours: null,
+        };
+      }),
+      ...uncoveredRoles.map(({ stop, role, key }) => {
+        journeyMeta[key] = rolePeriod(role);
+        return {
+          key,
+          title: stop.name ?? tPremium("untitled"),
+          subtitle: roleLabel(role.relationship),
+          from: role.startedAt,
+          to: role.endedAt,
+          current: role.current,
+          source: (role.source === "membership" ? "organization" : "own") as "organization" | "own",
+          level: (role.source === "membership" ? "recorded" : "declared") as JourneyLevel,
+          // The engagement context ties journal-evidenced skills to this role.
+          contextId: role.engagementContextId,
+          hours: null,
+          confirmedHours: null,
+        };
+      }),
       ...cv.workHistory.map((e, i) => {
         const org = e.orgName ?? (tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship);
         const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
@@ -846,6 +969,9 @@ export default async function VerifiedCvPage({
                 ] ?? code.toUpperCase(),
               certificateType: (slug) =>
                 tDocTypes.has(slug) ? tDocTypes(slug) : slug,
+              // The on-screen CV labels a declared certificate; the EU CV
+              // keeps the same label instead of printing it like a document.
+              declaredCertificate: t("declaredCertHint"),
               date: (iso) => formatUtcDate(iso, locale),
               present: t("present"),
               // Organization-provided history: the SAME composition the
@@ -1128,6 +1254,31 @@ export default async function VerifiedCvPage({
           </section>
         ) : null}
 
+        {/* ORGANIZATIONS AND LEADERSHIP (decision 0025, 2026-10-20): earlier
+            legal entities and leadership held without an employment
+            engagement — their own entries, from the one reading. The premium
+            layout shows leadership in its own block; here every stop is
+            listed. Omitted when there is none. */}
+        {stops.length > 0 ? (
+          <section
+            id="cv-organizations-roles"
+            className="flex flex-col gap-3 scroll-mt-20"
+            data-testid="cv-organizations-roles"
+          >
+            <h2 className={sectionTitle}>{tLead("eyebrow")}</h2>
+            <ul className="flex flex-col gap-2">
+              {stops.map((s) => (
+                <li key={s.key} className={bodyText} data-testid="cv-organization-role" data-kind={s.kind}>
+                  <span className="font-semibold text-text-primary">{s.name ?? "—"}</span>
+                  {stopSubtitle(s) ? <span className="text-text-secondary"> · {stopSubtitle(s)}</span> : null}
+                  <span className="text-text-muted"> · {stopPeriod(s)}</span>
+                  {s.hours !== null ? <span className="text-text-muted"> · {premiumHours(s.hours)}</span> : null}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         {/* Work history SUPPLIED BY ORGANIZATIONS - imported records with the
             work behind the hours (project, client, capacity, source, proof
             facts). Its own group, apart from the person's own history: not
@@ -1153,7 +1304,7 @@ export default async function VerifiedCvPage({
                     ? `${e.startYear ?? ""}–${e.isCurrent ? t("present") : (e.endYear ?? "")}`
                     : null;
                 return (
-                  <li key={i} className="flex flex-col border-l-2 border-ink-600 pl-3">
+                  <li key={i} className="flex flex-col border-l-2 border-ink-600 pl-3" data-testid="cv-education-row">
                     <span className={`font-semibold ${bodyText}`}>
                       {e.institutionName}
                     </span>
@@ -1230,14 +1381,18 @@ export default async function VerifiedCvPage({
                 </li>
               ) : null}
               {cv.declaredCertificates.map((c, i) => (
-                <li key={`decl-${i}`} className={`flex flex-wrap items-baseline gap-2 ${bodyText}`}>
+                <li
+                  key={`decl-${i}`}
+                  className={`flex flex-wrap items-baseline gap-2 ${bodyText}`}
+                  data-testid="cv-declared-certificate-row"
+                >
                   <span className="font-medium">{c.title}</span>
                   {c.achievedAt ? (
                     <span className="text-xs text-text-secondary">
                       {formatUtcDate(c.achievedAt, locale, { year: "numeric" })}
                     </span>
                   ) : null}
-                  <span className="text-meta uppercase tracking-wide text-text-muted">
+                  <span className="text-meta uppercase tracking-wide text-text-muted" data-testid="cv-declared-certificate-label">
                     {t("declaredCertHint")}
                   </span>
                 </li>
@@ -1468,6 +1623,33 @@ export default async function VerifiedCvPage({
           {presentation.visible === 0 ? (
             <p className={`text-text-muted ${bodyText}`}>{t("skillsEmpty")}</p>
           ) : null}
+          {/* Possible capabilities (decision 0023) — the person's own view
+              only: a hypothesis is labelled as one and never printed onto
+              the document an employer receives. */}
+          {potentialCapabilities.length > 0 ? (
+            <div
+              className="flex flex-col gap-1.5 print:hidden"
+              data-testid="cv-potential"
+              data-evidence-state="potential"
+            >
+              <h3 className="text-meta font-medium text-text-secondary">{tIntel("potentialTitle")}</h3>
+              <p className="text-meta leading-relaxed text-text-muted">{tIntel("potentialHint")}</p>
+              <ul className="flex flex-col gap-1.5">
+                {potentialCapabilities.map((p) => (
+                  <li
+                    key={p.slug}
+                    className="flex flex-col gap-0.5 rounded-md border border-dashed border-border-subtle px-3 py-2"
+                    data-testid={`cv-potential-${p.slug}`}
+                  >
+                    <span className="text-support font-medium text-text-primary">{skillLabel(p.slug)}</span>
+                    <span className="text-meta text-text-muted">
+                      {tIntel("potentialFrom", { skills: p.fromSlugs.map(skillLabel).join(", ") })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </section>
 
         {/* Projects — DERIVED from confirmed proof (single truth source). */}
@@ -1495,7 +1677,12 @@ export default async function VerifiedCvPage({
             <h2 className={sectionTitle}>{t("achievementsTitle")}</h2>
             <ul className="flex flex-col gap-1.5">
               {cv.achievements.map((a, i) => (
-                <li key={i} className="flex flex-col">
+                <li
+                  key={i}
+                  className="flex flex-col"
+                  data-testid="cv-achievement-row"
+                  data-standing={a.confirmedByManager ? "confirmed" : "declared"}
+                >
                   <span className={`font-medium ${bodyText}`}>
                     {a.title}
                     {a.confirmedByManager ? (

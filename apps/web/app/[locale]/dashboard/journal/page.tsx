@@ -138,6 +138,10 @@ import {
   resolveScale,
 } from "@/lib/journal/journal-calendar";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { experienceFiguresOf } from "@/lib/journal/experience-figures";
+import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
+import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -621,7 +625,7 @@ export default async function JournalPage({
       readOwnOccupationPath(supabase, worker.id),
       supabase
         .from("worker_skills")
-        .select("skill_id, verified, source, skills(slug)")
+        .select("skill_id, verified, verified_by, verified_at, source, skills(slug)")
         .eq("worker_id", worker.id),
       readWorkerEntrySkillLinks(supabase, worker.id),
       // G4 bridge: THE canonical journal-list core (v3 select + legacy
@@ -711,7 +715,13 @@ export default async function JournalPage({
   const idToSlug = new Map<string, string>();
   const declaredSlugSet = new Set(availableSkillsForLinks.map((s) => s.slug));
   const verifiedSkillIds = new Set<string>();
-  for (const r of skillIdRows ?? []) {
+  // A recorded confirmation counts only while it STANDS
+  // (lib/evidence/skill-confirmation-standing.ts).
+  const standingSkillRows = withStandingConfirmation(
+    skillIdRows ?? [],
+    anyRecordedConfirmation(skillIdRows ?? []) ? await readOwnStandingConfirmedSkillIds(worker.id) : null,
+  );
+  for (const r of standingSkillRows) {
     const slug = (r.skills as { slug: string | null } | null)?.slug ?? null;
     if (r.skill_id && slug) idToSlug.set(r.skill_id as string, slug);
     if (r.skill_id && (r as { verified?: boolean }).verified) {
@@ -819,6 +829,7 @@ export default async function JournalPage({
   const editingEntry = editingRow
     ? buildEditingEntry({
         id: editingRow.id,
+        createdAt: editingRow.created_at ?? null,
         originalText: editingRow.original_text,
         metrics: editingRow.journal_entry_metrics,
         engagementContextId: editingRow.engagement_context_id ?? null,
@@ -1186,9 +1197,11 @@ export default async function JournalPage({
   // reads as before: the avatar never depended on the card, and the labels and
   // the thermometer are both gated on the SAME `manoCard` non-null check — so
   // they resolve together, and neither is fetched when there is no card.
-  const [manoCard, manoAvatar] = await Promise.all([
+  const [manoCard, manoAvatar, manoRelationships] = await Promise.all([
     getWorkerPlayerCard(),
     getOwnAvatar(),
+    // For the decision-0025 total on the card's fact strip (same rule as the profile).
+    readOwnExperienceRelationships(supabase, user.id).catch(() => null),
   ]);
   const [manoCardLabels, manoThermometer] = manoCard
     ? await Promise.all([
@@ -1200,6 +1213,7 @@ export default async function JournalPage({
           // The identity stage's fact strip: the SAME model's all-time row.
           allTime: workIntelligence?.periods.find((p) => p.key === "all") ?? null,
           allTimeTruncated: workIntelligence?.coverage.truncated ?? false,
+          ...experienceFiguresOf(workIntelligence, manoRelationships),
         }),
         getOwnThermometer().then(toThermometerView),
       ])
@@ -1867,6 +1881,7 @@ export default async function JournalPage({
                       const rowEditingEntry = canDelete
                         ? buildEditingEntry({
                             id: e.id,
+                            createdAt: e.created_at ?? null,
                             originalText: e.original_text,
                             metrics: e.journal_entry_metrics,
                             engagementContextId: e.engagement_context_id ?? null,
@@ -1958,6 +1973,7 @@ export default async function JournalPage({
                                 key="employer-correct-launcher"
                                 entry={buildEditingEntry({
                                   id: e.id,
+                                  createdAt: e.created_at ?? null,
                                   originalText: e.original_text,
                                   metrics: e.journal_entry_metrics,
                                   engagementContextId: e.engagement_context_id ?? null,
@@ -2026,6 +2042,7 @@ export default async function JournalPage({
                                         key="correct-launcher"
                                         entry={buildEditingEntry({
                                           id: e.id,
+                                          createdAt: e.created_at ?? null,
                                           originalText: e.original_text,
                                           metrics: e.journal_entry_metrics,
                                           engagementContextId:

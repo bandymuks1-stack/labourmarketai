@@ -1,5 +1,5 @@
 import "server-only";
-import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
+import { isSyntheticFixtureLabel, isSyntheticViewer } from "@/lib/qa/synthetic-fixture";
 
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -238,6 +238,7 @@ async function loadBoard(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "no-worker" };
+  const qaViewer = isSyntheticViewer(user);
 
   const ctx = await buildOwnWorkerContext(supabase, user.id);
   if (!ctx) return { kind: "no-worker" };
@@ -391,15 +392,24 @@ async function loadBoard(
         // DEFAULT-CLOSED: only approved supply routes (Model A) reach a worker.
         .filter(isApprovedRouteRow)
         // Synthetic QA subjects are not opportunities for a real person
-        // (lib/qa/synthetic-fixture.ts).
+        // (lib/qa/synthetic-fixture.ts). A documented QA viewer still sees
+        // them — the one rule the inbox and marketplace already apply — so
+        // the production walk can raise a hand on a synthetic need.
         .filter(
           (row) =>
+            qaViewer ||
             !isSyntheticFixtureLabel(
               row.role_text as string | null,
               row.company_name as string | null,
             ),
         )
         .map((row) => {
+          // W10 P0-1: derived from the ROW, so the match is computed against
+          // the same structured demand this card renders below (`structured:`).
+          // It used to be built from `role_text` alone — the card showed the
+          // employer's engagement form, pay, licence and shifts, and the match
+          // beside them had evaluated none of them.
+          const { need: matchNeed } = needFromDemandRow(row);
           const need: OpportunityNeed = {
             id: String(row.id),
             roleText: (row.role_text as string | null) ?? null,
@@ -424,14 +434,14 @@ async function loadBoard(
             routeStatus: (row.route_status as string | null) ?? null,
             // Whitelisted RPC column — powers the "newest" sort only.
             createdAt: (row.created_at as string | null) ?? null,
+            // The DECLARED type the `opportunityType` discovery filter (and a
+            // saved search holding it) compares against. It was never set on
+            // this object, so `?opportunityType=internship` dropped every
+            // first-party need — internships included. Same source as the
+            // match need: the demand's own structured cluster, never inferred.
+            opportunityType: matchNeed.opportunityType ?? null,
           };
           const fit = computeOpportunityFit(readiness, need);
-          // W10 P0-1: derived from the ROW, so the match is computed against
-          // the same structured demand this card renders below (`structured:`).
-          // It used to be built from `role_text` alone — the card showed the
-          // employer's engagement form, pay, licence and shifts, and the match
-          // beside them had evaluated none of them.
-          const { need: matchNeed } = needFromDemandRow(row);
           const match = matchWorkerToNeed(matchNeed, ctx.subject);
           const nextAction = workerOpportunityNextAction({
             profileFitStatus: fit.status,

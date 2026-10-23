@@ -336,7 +336,7 @@ export default async function BuyerDashboardPage({
         >
           <header className="flex items-center gap-2">
             <span className="rounded bg-state-warning/20 px-2 py-0.5 text-xs text-state-warning">
-              blokuota
+              {tSetup("blockedBadge")}
             </span>
             <h2 className="font-display text-lg font-semibold text-text-primary">
               {tSetup("migrationBlockerHeading")}

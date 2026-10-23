@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/server";
 import { readCounterpartyQueue } from "@/lib/journal/counterparty-review";
 import { queueBucket } from "@/lib/journal/counterparty-review-model";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
+import { reviewerHoursOf } from "@/lib/journal/reviewer-hours";
 import {
   WORKER_NAME_FIELDS,
   resolveWorkerName,
@@ -93,7 +94,7 @@ export default async function InboxPage({
     const { data: rows, error: rowsError } = await supabase
       .from("journal_entries")
       .select(
-        `id, original_text, created_at, worker_id, engagement_contexts(organization_id), journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug), workers(${WORKER_NAME_FIELDS})`,
+        `id, original_text, created_at, worker_id, engagement_contexts(organization_id), journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug, source, created_at), workers(${WORKER_NAME_FIELDS})`,
       )
       .in("id", reviewableIds)
       .order("created_at", { ascending: true });
@@ -194,12 +195,15 @@ export default async function InboxPage({
         name: tSkill(w.slug),
         evidence: w.evidence,
       }));
-      const hours = depth.hours
-        ? {
-            value: depth.hours.value,
-            unit: tUnit(depth.hours.unit),
-            certain: depth.hours.certain,
-          }
+      // The STORED work time by the one canonical rule — what the timesheet
+      // and calendar count — never a re-parse of the text (reviewer-hours.ts).
+      const stored = reviewerHoursOf({
+        id: r.id,
+        createdAt: r.created_at,
+        metrics: r.journal_entry_metrics ?? [],
+      });
+      const hours = stored
+        ? { value: stored.value, unit: tUnit(stored.unit), certain: stored.certain }
         : null;
       return {
         id: r.id,

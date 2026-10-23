@@ -2,7 +2,12 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { mergeAssignedPeople, readTeamAssignedPeople } from "@/lib/projects/assigned-people";
+import {
+  mergeAssignedPeople,
+  readTeamAssignedPeople,
+  type TeamAssignedPersonRow,
+} from "@/lib/projects/assigned-people";
+import { readActiveAssignmentRows } from "@/lib/projects/operations";
 import {
   isEmployerContextFailure,
   resolveEmployerCompanyContext,
@@ -262,9 +267,26 @@ export async function listManagedProjects(
 export async function listProjectAssignedPeople(
   projectId: string,
 ): Promise<ProjectAssignment[]> {
-  const persons = await listProjectAssignments(projectId);
-  const supabase = await createClient();
-  const team = await readTeamAssignedPeople(supabase, [projectId]);
+  // The person rows and the team members are independent reads: one wave.
+  const [persons, team] = await Promise.all([
+    listProjectAssignments(projectId),
+    createClient().then((supabase) => readTeamAssignedPeople(supabase, [projectId])),
+  ]);
+  return assignedPeopleOf(projectId, persons, team);
+}
+
+/**
+ * THE merge behind `listProjectAssignedPeople`, pure — so the company home's
+ * batched project scan (`lib/projects/project-scan.ts`), which reads the person
+ * rows and team members of every scanned project at once, builds each
+ * project's list by exactly the same rule. `team` may hold other projects'
+ * members; only this project's are merged.
+ */
+export function assignedPeopleOf(
+  projectId: string,
+  persons: readonly ProjectAssignment[],
+  team: readonly TeamAssignedPersonRow[],
+): ProjectAssignment[] {
   return mergeAssignedPeople(
     persons.map((a) => ({
       ...a,
@@ -272,7 +294,7 @@ export async function listProjectAssignedPeople(
       profileId: a.workerProfileId as string | null,
       workerId: (a.workerId ?? null) as string | null,
     })),
-    team,
+    team.filter((t) => t.projectId === projectId),
   ).map((m): ProjectAssignment =>
     m.viaTeam
       ? {
@@ -297,18 +319,12 @@ export async function listProjectAssignments(
   projectId: string,
 ): Promise<ProjectAssignment[]> {
   const supabase = await createClient();
-  const res = await asAny(supabase)
-    .from("project_worker_assignments")
-    // LEFT join on `profiles` — same reason as lib/projects/operations.ts:
-    // an employer cannot read another person's profile row, so `!inner` dropped
-    // every assignment and this list was always empty. The join only supplies
-    // an optional display name that already has a fallback below.
-    .select(
-      "assigned_at, worker:workers!inner(id, profile_id, display_name, profiles(full_name))",
-    )
-    .eq("project_id", projectId)
-    .eq("status", "active")
-    .order("assigned_at", { ascending: false });
+  // THE SAME active-assignment read the operations pulse makes (identical
+  // select — LEFT join on `profiles`: an employer cannot read another person's
+  // profile row, so `!inner` dropped every assignment; the join only supplies
+  // an optional display name that already has a fallback below). Shared per
+  // client + project within one server render: see `readActiveAssignmentRows`.
+  const res = await readActiveAssignmentRows(asAny(supabase), projectId);
   if (res.error) {
     if (migMissing(res.error.code)) return [];
     return [];
@@ -316,7 +332,7 @@ export async function listProjectAssignments(
   return toProjectAssignments((res.data ?? []) as AssignmentRow[]);
 }
 
-type AssignmentRow = {
+export type AssignmentRow = {
   project_id?: string;
   assigned_at: string;
   worker: {
@@ -327,7 +343,9 @@ type AssignmentRow = {
   } | null;
 };
 
-function toProjectAssignments(rows: readonly AssignmentRow[]): ProjectAssignment[] {
+/** Raw active-assignment rows → the person roster (rows without a profile are
+ *  not a person this roster can name). Shared with the batched project scan. */
+export function toProjectAssignments(rows: readonly AssignmentRow[]): ProjectAssignment[] {
   return rows
     .map((r): ProjectAssignment | null => {
       const w = r.worker;

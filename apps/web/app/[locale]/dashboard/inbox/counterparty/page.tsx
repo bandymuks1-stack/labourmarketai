@@ -18,7 +18,7 @@ import {
   type QueueBucket,
   type QueueRow,
 } from "@/lib/journal/counterparty-review-model";
-import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
+import { reviewerHoursOf } from "@/lib/journal/reviewer-hours";
 import { PageTitle } from "@/components/app/premium/page-title";
 
 export const dynamic = "force-dynamic";
@@ -124,11 +124,26 @@ export default async function CounterpartyQueuePage({
         }
         return [];
       });
-      const depth = recognizeEntryDepth(detail.originalText);
-      const hours = depth.hours
-        ? `${depth.hours.value} ${tUnit(depth.hours.unit)}${
-            depth.hours.certain ? "" : ` (${t("card.hoursUnclear")})`
-          }`
+      // The STORED work time by the one canonical rule, never a re-parse of
+      // the text (reviewer-hours.ts). The RPC returns metrics oldest first.
+      const stored = reviewerHoursOf({
+        id: row.entryId,
+        createdAt: detail.createdAt ?? detail.submittedAt ?? row.submittedAt ?? new Date(0).toISOString(),
+        // ORDER IS EVIDENCE: "the latest quantity row wins" by (created_at,
+        // id). Both are passed through as the RPC returns them (migration
+        // 20261020080000, owner-approved #2558) — the real row ordering,
+        // never an invented one.
+        metrics: detail.metrics.map((mm) => ({
+          metric_slug: mm.slug,
+          value_text: mm.valueText,
+          value_numeric: mm.valueNumeric,
+          unit_slug: mm.unitSlug,
+          created_at: mm.createdAt ?? null,
+          id: mm.id ?? null,
+        })),
+      });
+      const hours = stored
+        ? `${stored.value} ${tUnit(stored.unit)}${stored.certain ? "" : ` (${t("card.hoursUnclear")})`}`
         : null;
       views.set(row.entryId, {
         entryId: row.entryId,

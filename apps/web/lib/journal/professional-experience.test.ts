@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { experienceStopsOf } from "@/lib/cv-export/experience-stops";
 
 import { deriveIndependentReviewResult } from "@/lib/journal/review-status";
 import { organizationAllTime, organizationHoursBeyondJournal } from "@/lib/journal/organization-all-time";
@@ -726,5 +727,56 @@ describe("separate legal entities, one person history (owner final statement 202
       { periodLabel: null, hours: 806, records: 2 },
       { periodLabel: "Vivat Rex", hours: 15, records: 2 },
     ]);
+  });
+});
+
+describe("the Living CV gives an earlier legal entity and leadership their own entry (2026-10-20)", () => {
+  // The same production-shaped history the owner suites use: Labour Market AI
+  // (owner engagement) continuing the sold Vivat Rex business (period stated,
+  // dates unknown, the 800 h period record under it), and a manager MEMBERSHIP
+  // in Nonstop with no engagement row.
+  const wi = model({ entries: entriesOf(PRODUCTION_ENTRIES), periodRecords: [PRODUCTION_PERIOD] });
+  const exp = deriveProfessionalExperience({ wi, relationships: OWNER_RELATIONSHIPS });
+  const stops = experienceStopsOf(exp);
+  const byName = (n: string) => stops.find((s) => s.name === n);
+
+  it("the earlier legal entity is its own entry, administered by the continuing organization", () => {
+    const vivat = stops.find((s) => s.kind === "earlier_legal_entity");
+    expect(vivat, "Vivat Rex has no entry of its own").toBeTruthy();
+    expect(vivat!.name).toBe("Vivat Rex");
+    expect(vivat!.administeredByName).toBe("Labour market ai Sp. z o.o");
+    // Dates the statement does not give stay unknown — never invented.
+    expect(vivat!.from).toBeNull();
+    expect(vivat!.to).toBeNull();
+    expect(vivat!.current).toBe(false);
+  });
+
+  it("leadership without an engagement row (a manager membership) is its own entry", () => {
+    const nonstop = byName("UAB Nonstop Group");
+    expect(nonstop, "the Nonstop management role has no entry").toBeTruthy();
+    expect(nonstop!.roles.map((r) => r.relationship)).toEqual(["manager"]);
+    expect(nonstop!.current).toBe(true);
+  });
+
+  it("an owner ENGAGEMENT is already an engagement entry (WORKER_RELATIONSHIPS), so it is not repeated", () => {
+    expect(byName("Labour market ai Sp. z o.o")).toBeUndefined();
+  });
+
+  it("an employment-only relationship stays where it is (no duplicate entry)", () => {
+    expect(byName("Test shell")).toBeUndefined();
+  });
+
+  it("a leadership entry carries no organization work hours and is dated by its roles only", () => {
+    const nonstop = byName("UAB Nonstop Group")!;
+    // The organization's work hours are not hours performed as its manager.
+    expect(nonstop.hours).toBeNull();
+    // The membership states no dates: unknown, never a work-record span.
+    expect(nonstop.from).toBeNull();
+    expect(nonstop.to).toBeNull();
+    expect(nonstop.roles[0]).toMatchObject({ relationship: "manager", source: "membership", current: true });
+  });
+
+  it("no reading, no entries", () => {
+    expect(experienceStopsOf(null)).toEqual([]);
   });
 });

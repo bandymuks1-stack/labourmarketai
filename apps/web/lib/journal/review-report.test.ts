@@ -21,8 +21,9 @@ describe("review report helper — read-only, reuses existing data", () => {
     expect(src).toMatch(/recognizeEntryDepth/);
     expect(src).toMatch(/getManagerEvidence/);
   });
-  it("only surfaces hours when explicit AND unambiguous (no fake totals)", () => {
-    expect(src).toMatch(/depth\.hours && depth\.hours\.certain/);
+  it("only surfaces hours when STORED AND unambiguous (no fake totals, no text re-parse)", () => {
+    expect(src).toMatch(/stored && stored\.certain/);
+    expect(src).not.toMatch(/depth\.hours/);
   });
   it("does not write or mutate (no insert/update/upsert/rpc-mutation)", () => {
     expect(src).not.toMatch(/\.insert\(|\.update\(|\.upsert\(|\.delete\(/);

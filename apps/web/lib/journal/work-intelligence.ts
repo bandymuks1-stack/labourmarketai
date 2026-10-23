@@ -131,13 +131,13 @@ import {
   type EntryWorkTime,
   type WorkTimeMetricRow,
 } from "@/lib/journal/work-time";
-import {
-  deriveEvidenceTier,
-  EVIDENCE_TIER_RANK,
-  type EvidenceTier,
-} from "@/lib/evidence/evidence-tier";
+import { EVIDENCE_TIER_RANK, type EvidenceTier } from "@/lib/evidence/evidence-tier";
 import type { EntrySkillProvenance } from "@/lib/journal/entry-skill-source";
 import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
+import {
+  standingEvidenceTier,
+  type CrossPartyConfirmationState,
+} from "@/lib/evidence/skill-confirmation-standing";
 import { fragmentSkillsByIndex } from "@/lib/journal/fragment-skill-evidence";
 import {
   deriveWorkTimeChecks,
@@ -178,6 +178,10 @@ export type WorkIntelligenceSkillRow = {
   readonly slug: string;
   readonly verified: boolean | null;
   readonly source: string | null;
+  /** The standing read's verdict on a recorded confirmation (absent when
+   *  none was flagged) — an UNKNOWN one is journal-level evidence, never
+   *  erased to self-declared (standingEvidenceTier). */
+  readonly confirmation?: CrossPartyConfirmationState;
 };
 
 /** One live organization hour record (`work_hour_allocations`, not
@@ -496,6 +500,10 @@ export type WorkIntelligence = {
   readonly coverage: WorkIntelligenceCoverage;
   /** The section's five tabs, plus one `range` row when `focusRange` is set. */
   readonly periods: readonly WorkPeriodTotals[];
+  /** Entries whose written hours never became recorded time, with the
+   *  earliest such work day (lib/journal/unrecorded-hours.ts). Set by the
+   *  read layer; absent when the model was derived without entry text. */
+  readonly unrecordedHours?: { readonly entries: number; readonly earliestDay: string } | null;
   /** The organization's own hour records per period (owner §19) — read
    *  beside the journal, shown beside it, added to nothing. `null` when the
    *  ledger could not be read; every period at zero when it holds nothing. */
@@ -796,7 +804,7 @@ export function deriveWorkIntelligence(
   for (const s of [...input.skills].sort((a, b) => a.skillId.localeCompare(b.skillId))) {
     const slug = (s.slug ?? "").trim();
     if (!slug || !s.skillId) continue;
-    const tier = deriveEvidenceTier({ verified: s.verified, source: s.source });
+    const tier = standingEvidenceTier({ verified: s.verified, source: s.source, confirmation: s.confirmation });
     const canonical = canonicalIdBySlug.get(slug) ?? s.skillId;
     canonicalIdBySlug.set(slug, canonical);
     canonicalIdByAlias.set(s.skillId, canonical);

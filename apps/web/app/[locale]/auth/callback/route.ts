@@ -11,6 +11,7 @@ import { readOauthTraceId } from "@/lib/auth/oauth-trace";
 import { decideOauthDisplayNameRepair } from "@/lib/auth/oauth-display-name";
 import {
   classifyAuthRedirectError,
+  isReplayableProviderError,
   classifyExchangeFailure,
   isEmailConfirmFlow,
   parseEmailVerification,
@@ -89,6 +90,24 @@ export async function GET(
       error: providerError,
       errorCode,
     });
+    // ALREADY SIGNED IN: `bad_oauth_state` arrives AFTER a successful sign-in when the
+    // browser replays the provider step (Back into the account chooser, a
+    // restored tab) — the state was spent by the sign-in that worked. Telling
+    // a signed-in person "sign-in failed" is false; they go where they were
+    // going. Without a session nothing changes: the error is shown as before.
+    if (isReplayableProviderError(errorCode)) {
+      try {
+        const supabase = await createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          return NextResponse.redirect(new URL(getSafeReturnPath(nextParam, locale), origin));
+        }
+      } catch {
+        // No readable session: fall through to the honest error below.
+      }
+    }
     // `access_denied` + `otp_expired` is a dead e-mail link, not a cancel —
     // the classifier keeps the two apart (lib/auth/email-confirm.ts).
     loginUrl.searchParams.set(

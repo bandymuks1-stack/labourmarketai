@@ -41,7 +41,7 @@ case "$ACTION" in
     rm -rf "$REL/$SHA"; mv "$REL/$SHA.new" "$REL/$SHA"
     echo "extracted files=$(find "$REL/$SHA" -type f | wc -l)"
     if sh "$BIN/lm-prod-run.sh" "$SHA" && wait_healthy; then
-      code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' -H 'Host: labourmarket.ai' -H 'X-Forwarded-Proto: https' http://127.0.0.1:3200/api/health)
+      code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' -H 'Host: labourmarket.ai' -H 'X-Forwarded-Proto: https' http://127.0.0.1:$(cat /root/lm-prod/active-port 2>/dev/null || echo 3200)/api/health)
       echo "health=$(health) http=$code"
       if [ "$code" = "200" ]; then
         # keep the newest $KEEP releases (never the one just started, never the previous one)

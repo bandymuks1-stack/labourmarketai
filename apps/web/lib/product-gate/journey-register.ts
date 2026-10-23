@@ -369,9 +369,9 @@ export const JOURNEY_REGISTER: readonly Journey[] = [
       {
         step: "The authorized actor decides, and an explicit override is recorded with a receipt",
         capabilities: ["CAL-7"],
-        link: "BROKEN",
-        because:
-          "Corrected 2026-09-14, and only half of it. CAL-7 went PARTIAL in the approved wave: a manager assigning someone now sees, at the moment of commitment, what that person is already committed to, and the warning cannot block — so DETECT → WARN → DECIDE is real, and the decision is the actor\u2019s. What still does not exist is the RECEIPT: no override object, no audit row, nothing that records afterwards that a known clash was accepted deliberately. Claiming DECIDE → OVERRIDE → AUDIT would still be false.",
+        link: "LIVE",
+        proof:
+          "TEST_PROVEN — THIS ENTRY WAS STALE, IN THE UNDERCLAIMING DIRECTION. Its reason said no override object and no audit row exist. Both do: `commitment_override_receipts` (20261003150100) is an immutable, privacy-minimal receipt written only by `record_commitment_override_v1`, which re-checks authority (`can_manage_project`) and is idempotent per assignment and clash fingerprint; the one keep core `lib/projects/override-keep-core.ts` recomputes the collisions server-side at the moment of the decision, writes the receipt FAIL-LOUD (the projects page, the chat `company.keep-assignment` and the MCP keep tools all report \"kept\" only when the receipt exists) and then appends the existing decision audit. The reason is a closed code, never free text; the team door reuses the same core. Guards: lib/guards/commitment-override-receipt-v1.test.ts and lib/capabilities/assignment-keep-override.test.ts. Production proof: tests/e2e/prod-project-execution.spec.ts step E-6 assigns a worker to two overlapping projects, keeps the clash with a reason and reads the receipt back with the owner's own token.",
       },
       {
         step: "The actual result is captured against the plan",

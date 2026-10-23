@@ -266,7 +266,11 @@
       "work": "Darbas",
       "services": "Paslaugos",
       "goods": "Prekės ir ištekliai"
-    }
+    },
+    "formPublisherLabel": "Skelbia",
+    "publisherSelf": "Aš asmeniškai",
+    "publishedAs": "Kaip {name}",
+    "publishedAsOrganization": "Kaip organizacija"
   },
   "quality": {
     "title": "Defektai ir kokybė",
@@ -1592,7 +1596,8 @@
         "no": "Dar nenustatyta"
       }
     },
-    "opportunitiesLink": "Peržiūrėti atitinkančias galimybes"
+    "opportunitiesLink": "Peržiūrėti atitinkančias galimybes",
+    "unrecordedHours": "{count, plural, one {# įraše paminėtos valandos neužfiksuotos} few {# įrašuose paminėtos valandos neužfiksuotos} other {# įrašų paminėtos valandos neužfiksuotos}} — jos neįskaičiuotos į sumą aukščiau. Atidaryk ankstyviausią ir įrašyk valandas."
   },
   "profileState": {
     "readiness": {
@@ -5053,8 +5058,8 @@
           "desc": "Apibrėžkite pareigybes, skaičių ir įgūdžius."
         },
         {
-          "title": "Pamatykite, kas gali tikti",
-          "desc": "Naršykite darbuotojus ir agentūras, kurių įrašai gali atitikti jūsų poreikį — renkatės jūs, niekas automatiškai nereitinguojama ir nevertinama."
+          "title": "Pamatykite, kas tinka",
+          "desc": "Darbuotojai ir agentūros, kurių įrašai atitinka jūsų poreikį, išrikiuojami pagal atitiktį su priežastimis — tai signalas, ne garantija. Su kuo susisiekti, sprendžiate jūs."
         },
         {
           "title": "Susisiekite tiesiogiai",
@@ -5413,7 +5418,9 @@
         }
       ],
       "screenshot": "Įmonės paklausos srautas",
-      "cta": "Pradėti darbuotojų užklausą"
+      "cta": "Pradėti darbuotojų užklausą",
+      "calculatorBody": "Prieš ieškodamas darbuotojų, įvertink darbą: darbo valandas, medžiagas, įrangą ir keliones — savo skaičiais.",
+      "calculatorLink": "Apskaičiuok projekto kainą"
     },
     "agencies": {
       "eyebrow": "Agentūroms",
@@ -5546,7 +5553,7 @@
       },
       {
         "q": "Kaip vyks atsiskaitymai?",
-        "a": "Mokėjimas kortele per Stripe, PVM taiko Stripe Tax; sąskaitos, atšaukimas ir keitimai — organizacijos paskyroje."
+        "a": "Mokėjimas kortele per Stripe. Sąskaitos, mokėjimų istorija ir atšaukimas — organizacijos paskyroje."
       },
       {
         "q": "Ar yra aktyvių pozicijų limitas?",
@@ -6872,7 +6879,8 @@
       "active": "Aktyvi — prisijungę nariai gali rasti ir užsisakyti šią paslaugą.",
       "paused": "Pristabdyta — nariams nematoma. Aktyvuok, kad vėl būtų randama."
     },
-    "linkToRequests": "Peržiūrėk užklausas dėl savo paslaugų"
+    "linkToRequests": "Peržiūrėk užklausas dėl savo paslaugų",
+    "errorHasRequests": "Šis pasiūlymas turi užklausų, todėl jo ištrinti negalima – užklausų istorija turi išlikti. Galite jį sustabdyti."
   },
   "communication": {
     "origin": {
@@ -7636,7 +7644,8 @@
     "notFound": "Tokio puslapio nėra",
     "backHome": "Grįžti į pradžią",
     "dashboardSections": "Valdymo skydelio skiltys",
-    "skipToContent": "Pereiti į turinį"
+    "skipToContent": "Pereiti į turinį",
+    "loading": "Kraunama…"
   },
   "workerInvitations": {
     "title": "Laukiantys pakvietimai",
@@ -8724,6 +8733,12 @@
     "teamOffersWaiting": "{count, plural, one {# komandos pasiūlymas laukia jūsų atsakymo} few {# komandų pasiūlymai laukia jūsų atsakymo} other {# komandų pasiūlymų laukia jūsų atsakymo}}",
     "unstructuredTag": "reikalavimai nepatvirtinti",
     "notStructured": "Šio poreikio reikalingi gebėjimai dar nesustruktūruoti, todėl atitiktis neskaičiuojama. Naujus poreikius peržiūri ir struktūruoja administratoriai — jums nieko daryti nereikia.",
+    "handRaisers": {
+      "title": "Žmonės, pakėlę ranką dėl šio poreikio",
+      "notAssessed": "Profesijos atitiktis nevertinta. Šis poreikis neįvardija profesijos, todėl niekas su juo nebuvo lygintas. Šie žmonės rodomi, nes patys paprašė susisiekti, o ne todėl, kad tinka; jokie gebėjimai, kvalifikacija ar tinkamumas nėra teigiami.",
+      "badge": "Profesijos atitiktis nevertinta",
+      "ownWords": "Viskas, kas rodoma apie šį žmogų, paimta iš jo paties profilio; niekas čia nebuvo lygintas su poreikiu."
+    },
     "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
     "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų. Atitikmenų atsiras darbuotojams pildant žurnalu pagrįstus gebėjimus — užsukite vėliau arba praplėskite poreikį.",
     "namePlaceholder": "Darbuotojas",
@@ -9155,7 +9170,10 @@
       "againModeNote": "Tai iš naujo atveria tą patį pasiūlymą tam pačiam darbuotojui su naujomis datomis — darbuotojas sprendžia iš naujo. Niekas nerezervuota, kol darbuotojas nepriima.",
       "afterSent": "Darbuotojas gavo tavo pasiūlymą ir jį priims arba atmes. Atsakymą matysi skiltyje „Rezervacijos“; iki tol pasiūlymą gali atšaukti.",
       "rateLimited": "Pasiektas rezervacijos pasiūlymų limitas (10 atvirų, 30 per dieną). Bandykite vėliau.",
-      "alreadyAccepted": "Darbuotojas šį pasiūlymą jau priėmė — sutartos sąlygos čia neperrašomos. Pakeitimus aptarkite pokalbyje."
+      "alreadyAccepted": "Darbuotojas šį pasiūlymą jau priėmė — sutartos sąlygos čia neperrašomos. Pakeitimus aptarkite pokalbyje.",
+      "refusedNotReachable": "Šiam žmogui rezervacijos iš čia pasiūlyti negalima — jis nėra atvėręs profilio darbdaviams ir neturi su tavimi darbo ryšio.",
+      "refusedNeedClosed": "Šis poreikis uždarytas — prieš siūlydamas rezervaciją, atidaryk jį iš naujo.",
+      "refusedAnswered": "Darbuotojas šį pasiūlymą atmetė, todėl be jo naujo sutikimo jis iš naujo neatveriamas. Tęsk pokalbyje arba rask kitą darbuotoją."
     },
     "reason": {
       "optionalTitle": "Priežastis (nebūtina)",
@@ -9421,7 +9439,7 @@
         "body": "Fiksuotas sėkmės mokestis taikomas už įdarbintą darbuotoją, brigadą ar įmonę. Atskiras koordinavimo mokestis taikomas tik tada, kai realiai atliekamas dokumentų ar įvedimo koordinavimas. Galutinė kaina patvirtinama prieš pradedant mokamą darbą."
       }
     ],
-    "note": "Kartu veikia du dalykai, o šiame puslapyje aprašytas antrasis. Pati platforma veikia automatiškai: darbo skelbimai yra vieši, atitikimo peržiūra atidaryta be paskyros, o įvardyta užklausa sugeneruoja surikiuotą kandidatų sąrašą su paaiškinimu, kodėl kiekvienas žmogus tinka — viena aktyvi pozicija be mokesčio. Mokama paslauga aukščiau yra žmogaus darbas: operatorius perskaito jūsų užklausą, susisiekia su jumis ir sąrašą patikrina rankomis, prieš pasiūlydamas bet kurį kandidatą. Visos brigados pasiūlymas ar priskyrimas kaip vieno vieneto dar nėra sukurtas — šiandien brigada atrenkama žmogus po žmogaus.",
+    "note": "Kartu veikia du dalykai, o šiame puslapyje aprašytas antrasis. Pati platforma veikia automatiškai: darbo skelbimai yra vieši, atitikimo peržiūra atidaryta be paskyros, o įvardyta užklausa sugeneruoja surikiuotą kandidatų sąrašą su paaiškinimu, kodėl kiekvienas žmogus tinka — viena aktyvi pozicija be mokesčio. Mokama paslauga aukščiau yra žmogaus darbas: operatorius perskaito jūsų užklausą, susisiekia su jumis ir sąrašą patikrina rankomis, prieš pasiūlydamas bet kurį kandidatą. Visa brigada jau gali pasiūlyti save jūsų užklausai kaip vienas vienetas ir, abiem pusėms susitarus, prisijungti prie jūsų projekto kaip viena komanda; automatinio visų brigadų siūlymo sąraše dar nėra — sąrašas rikiuoja žmones po vieną.",
     "ctaLabel": "Pateikti darbuotojų užklausą →"
   },
   "adminLaunchReadiness": {
@@ -9482,6 +9500,19 @@
         "rate_limits": "Riboti užklausų limitai aktyvūs",
         "freshness_demotion": "Seni profiliai reitinguojami žemiau"
       }
+    },
+    "mail": {
+      "title": "Oficialus paštas (info@labourmarket.ai)",
+      "ready": "Siunčia",
+      "notReady": "Nesiunčia",
+      "present": "nustatyta",
+      "missing": "TRŪKSTA",
+      "portOk": "tinka (465, TLS)",
+      "portUnsupported": "NETINKA – palaikomas tik 465",
+      "note": "Vienas pašto kanalas: GDPR pranešimai siunčiami, kai nustatyti visi LM_SMTP_*; kvietimų ir pranešimų laiškai – tik atskirai įjungus jų siuntimą. Rodoma tik, ar reikšmė yra, niekada ne pati reikšmė. Trūkstamą reikšmę nustatykite VPS serveryje su lm-env-set.sh.",
+      "invites": "Kvietimų ir pranešimų laiškai",
+      "invitesOn": "įjungti",
+      "invitesOff": "IŠJUNGTI – įjungiami atskirai: INVITE_EMAIL_PROVIDER=smtp ir vienas bandomasis siuntimas"
     }
   },
   "adminMetrics": {
@@ -10892,6 +10923,8 @@
       "expired": "Pasibaigusi"
     },
     "graceNotice": "Paskutinis mokėjimas nepavyko — prenumerata veikia lengvatiniu laikotarpiu, kol mokėjimas bus pakartotas.",
+    "endsOn": "Atšaukta — planas galioja iki {date} ir nebus pratęstas.",
+    "endsAtPeriodEnd": "Atšaukta — planas galioja iki apmokėto laikotarpio pabaigos ir nebus pratęstas.",
     "manage": {
       "open": "Tvarkyti prenumeratą",
       "opening": "Atidaroma…",
@@ -10910,7 +10943,8 @@
     "subscribe": {
       "title": "Planas „Organizacija“",
       "cta": "Aktyvuoti planą „Organizacija“",
-      "note": "Būsite nukreipti į Stripe Checkout; prenumerata susiejama su šia organizacija."
+      "note": "Būsite nukreipti į Stripe Checkout; prenumerata susiejama su šia organizacija.",
+      "chargedToday": "Be nemokamo bandomojo laikotarpio: pirmas mėnuo apmokamas šiandien per Stripe Checkout, vėliau kas mėnesį, kol atšauksite. Prieš mokėdami Stripe parodys tikslią sumą su PVM."
     }
   },
   "accountPlan": {
@@ -10953,6 +10987,7 @@
       "salaryExpectation": "Atlygio lūkestis",
       "skillsCount": "Įgūdžių",
       "anonymousLabel": "Įmonėms rodomas kaip",
+      "anonymousValue": "Kandidatas {token}",
       "currentCountry": "Dabartinė šalis",
       "availableFrom": "Gali pradėti nuo",
       "contractType": "Darbo forma",
@@ -12070,7 +12105,8 @@
     "empty": "Kalbų dar nepridėta.",
     "notEnabled": "Šiuo metu nepasiekiama. Nieko neišsaugota.",
     "error": "Išsaugoti nepavyko. Bandyk dar kartą.",
-    "invalid": "Pasirink kalbą ir lygį."
+    "invalid": "Pasirink kalbą ir lygį.",
+    "added": "Kalba pridėta."
   },
   "externalProfiles": {
     "title": "Išoriniai profiliai",
@@ -12413,6 +12449,7 @@
     }
   },
   "people": {
+    "anonymousName": "Kandidatas {token}",
     "eyebrow": "Asmens profilis",
     "restrictedTitle": "Profilis nepasiekiamas",
     "restrictedBody": "Šio žmogaus profilio negali peržiūrėti: nėra aktyvaus darbo ryšio arba asmuo nesutiko būti matomas.",
@@ -12475,7 +12512,8 @@
     "claimCta": "Tęsti kaip juodraštį",
     "claimed": "Perkelta į jūsų juodraščius",
     "error": "Nepavyko perkelti. Bandykite dar kartą.",
-    "workersLabel": "Darbuotojų"
+    "workersLabel": "Darbuotojų",
+    "draftExists": "Jau turite neužbaigtą poreikio juodraštį. Užbaikite arba atmeskite jį – tada šį poreikį galėsite tęsti."
   },
   "candidatePipeline": {
     "stage": {
@@ -14873,6 +14911,9 @@
       "candidatesNotFound": "Toks poreikis nerastas arba jis ne tavo.",
       "candidatesNeedsMigration": "Šiuo metu nepasiekiama.",
       "candidatesNotStructured": "Iš šio poreikio kol kas nieko negalima išvesti, todėl nėra su kuo lyginti. Tai nėra tas pats, kas „niekas netinka“.",
+      "handRaisersTitle": "Žmonės, pakėlę ranką",
+      "handRaisersNotAssessed": "Profesijos atitiktis nevertinta: šis poreikis neįvardija profesijos. Ranką jie pakėlė patys; jokie gebėjimai, kvalifikacija ar tinkamumas nėra teigiami.",
+      "handRaiserBadge": "Profesijos atitiktis nevertinta",
       "candidatesRetrievalCapped": "Žmonių buvo pasiekiama daugiau, nei šįkart spėjome peržiūrėti, todėl šis sąrašas nėra visa pasiūla.",
       "candidatesEmpty": "Šiuo metu matomoje pasiūloje šiam poreikiui tinkančių žmonių nėra.",
       "candidatesCapped": "Rodoma {shown} iš {total}.",
@@ -15222,8 +15263,8 @@
       "noStars": "Jokių žvaigždučių: žmogus niekada nepaverčiamas balu. Kiekvienas atitikimas paaiškinamas konkretaus poreikio kontekste — su matomais skaičiais."
     },
     "hero": {
-      "headline": "Viena darbo rinka žmonėms ir įmonėms.",
-      "sub": "Raskite darbą arba žmones, užrašykite atliktą darbą ir leiskite jam kalbėti už jus — kita galimybė remiasi tuo, ką iš tikrųjų padarėte, o ne tuo, ką teigia CV."
+      "headline": "Tai gyva darbo ir verslo galimybių sistema.",
+      "sub": "Vienoje vietoje parodyk, ką moki, ką siūlai arba ko ieškai. Atrask darbuotojus, darbus, rangovus, paslaugas ir prekes, o tavo patirtis bei galimybės išlieka pasiekiamos nuolat."
     },
     "entry": {
       "label": "Parašykite, ko reikia — savais žodžiais",
@@ -15340,6 +15381,33 @@
       "partnerLead": "Norite bendradarbiauti su mumis kaip partneris?",
       "partnerLink": "Susisiekite",
       "moreLead": "Daugiau apie tai, kaip tai veikia kiekvienam:"
+    },
+    "ways": {
+      "title": "Ką čia gali padaryti",
+      "show": {
+        "title": "Parodyk, ką moki",
+        "body": "Darbai, įgūdžiai ir patirtis vienoje vietoje. Kiekvienas įrašas papildo tavo profesinę istoriją.",
+        "cta": "Kurti profilį"
+      },
+      "offer": {
+        "title": "Pasiūlyk, ką gali",
+        "body": "Paslaugos, prekės, komandos ar laisvi žmonės — paskelbk, ką siūlai, kad tave rastų tie, kam to reikia.",
+        "cta": "Pasiūlyti"
+      },
+      "find": {
+        "title": "Rask, ko ieškai",
+        "body": "Parašyk savais žodžiais, ko reikia — darbuotojo, darbo, rangovo, paslaugos ar prekės.",
+        "cta": "Ieškoti"
+      },
+      "discoverLead": "Atrask",
+      "discover": {
+        "workers": "Darbuotojai",
+        "jobs": "Darbai",
+        "contractors": "Rangovai",
+        "services": "Paslaugos",
+        "goods": "Prekės"
+      },
+      "lasting": "Tavo patirtis ir galimybės išlieka pasiekiamos nuolat — keičiant darbą, projektą ar šalį."
     }
   },
   "workspace": {
@@ -17303,7 +17371,9 @@
     "emailConsentNote": "El. laiškai pagal numatytuosius nustatymus išjungti — siunčiami tik tų tipų, kuriuos čia įjungsi.",
     "emailInactiveNote": "El. laiškų siuntimas platformoje dar neaktyvus. Tavo pasirinkimai išsaugomi ir pradės veikti vos jį įjungus.",
     "error": "Pakeitimo išsaugoti nepavyko, jis atšauktas. Bandyk dar kartą.",
-    "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami."
+    "unavailable": "Pranešimų nustatymai šiuo metu nepasiekiami.",
+    "saving": "Saugoma…",
+    "saved": "Išsaugota."
   },
   "historyContext": {
     "project": "Projektas",
@@ -18929,7 +18999,8 @@
       "terms_invalid": "Patikrinkite skaičius ir datas.",
       "terms_limit_reached": "Šis pasiūlymas jau turi 50 sąlygų versijų.",
       "terms_await_other_side": "Tai jūsų pačių sąlygos — atsako kita pusė.",
-      "organization_offer_not_a_unit": "Įmonės pasiūlymas nepriskiriamas kaip komanda; žmones suderinkite pokalbyje."
+      "organization_offer_not_a_unit": "Įmonės pasiūlymas nepriskiriamas kaip komanda; žmones suderinkite pokalbyje.",
+      "terms_changed": "Kita pusė ką tik pasiūlė naujas sąlygas. Peržiūrėkite naujausią versiją ir tada atsakykite."
     },
     "received": {
       "title": "Šiam poreikiui pasiūlytos komandos",
@@ -19651,5 +19722,59 @@
     "saved": "Išsaugota",
     "tooLong": "Per ilgas tekstas.",
     "error": "Nepavyko išsaugoti. Pabandyk dar kartą."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: ką jau turi ir ko trūksta",
+    "anyCountry": "bet kurioje šalyje"
+  },
+  "historyDuplicates": {
+    "title": "Galimi pasikartojantys įrašai",
+    "hint": "Peržiūrėkite ir nuspręskite",
+    "intro": "Čia rodomi to paties žmogaus tos pačios dienos to paties objekto įrašai. Tai gali būti tikri skirtingi darbai (dvi pamainos ar užduotys) arba tas pats darbas, įrašytas du kartus. Niekas nekeičiama automatiškai: jei įrašas pasikartoja, pažymėkite jį — jis nebeskaičiuojamas, bet lieka matomas ir jį galima grąžinti.",
+    "summary": "Laukia jūsų sprendimo: {groups}",
+    "none": "Galimų pasikartojančių įrašų nerasta.",
+    "unavailable": "Šiuo metu peržiūros parodyti nepavyko.",
+    "truncated": "Įrašų daug — peržiūra gali būti nepilna.",
+    "sameHours": "Tos pačios valandos",
+    "differentHours": "Skirtingos valandos",
+    "sameText": "Tas pats aprašymas",
+    "recordN": "Įrašas {n}",
+    "hours": "{hours} val.",
+    "noHours": "Valandos nenurodytos",
+    "counted": "Skaičiuojamas",
+    "marked": "Pažymėtas kaip pasikartojantis",
+    "source": "Šaltinis: {file} · importuota {date}",
+    "noSource": "nenurodytas",
+    "mark": "Pasikartoja — palikti įrašą {n}",
+    "reinstate": "Grąžinti",
+    "unnamedPerson": "Žmogus be vardo",
+    "unnamedObject": "Objektas be pavadinimo",
+    "error": "Nepavyko. Niekas nepakeista.",
+    "notAllowed": "Tai gali padaryti organizacijos savininkas arba vadovas.",
+    "notSameWork": "Šie įrašai jau nebeatitinka vienas kito — atnaujinkite puslapį."
+  },
+  "pilotPass": {
+    "title": "Organizacijos planas — {days} dienų pilotas už 1 €",
+    "intro": "Sumokėk 1 € vieną kartą ir tavo organizacija {days} dienas gauna mokamą Organizacijos planą. Ką jis prideda prie nemokamo plano: be ribos vienu metu atvirų pozicijų ir darbuotojų poreikių (nemokamame plane – vienas). Susirašinėjimas, kandidatų santraukos, komandų parinkimas ir rezervacijos lieka prieinami kaip ir nemokamame plane.",
+    "terms": "Vienkartinis mokėjimas. Niekas neatsinaujina ir daugiau nenuskaičiuojama: po {days} dienų planas baigiasi savaime ir organizacija grįžta į nemokamą planą. Planas pasirodo žemiau, kai tik Stripe patvirtina mokėjimą.",
+    "pay": "Mokėti 1 € — {days} dienų pilotas",
+    "status": {
+      "pilot_pass_disabled": "Pilotas šiuo metu nesiūlomas.",
+      "unauthenticated": "Prisijunk, kad pradėtum pilotą.",
+      "no_organization": "Pirma pasirink savo organizacijos erdvę.",
+      "not_billing_authority": "Pilotą gali pradėti tik organizacijos mokėjimus valdantis asmuo.",
+      "billing_not_active": "Šiai organizacijai mokėjimai nepasiekiami.",
+      "plan_active": "Tavo organizacija jau turi aktyvų planą.",
+      "checkout_failed": "Stripe nesukūrė mokėjimo puslapio. Niekas nenuskaičiuota; bandyk vėliau."
+    },
+    "result": {
+      "paid": "Stripe gavo mokėjimą. Planas įsijungia, kai tik ateina patvirtinimas — jei dar nematai, po akimirkos atnaujink puslapį.",
+      "cancelled": "Mokėjimas atšauktas — niekas nenuskaičiuota."
+    },
+    "elsewhere": "Viršuje esančiame erdvių pasirinkime pasirink {organization} — pilotas pradedamas iš tos organizacijos erdvės.",
+    "invite": {
+      "line": "Sumokėk 1 € vieną kartą ir gauk mokamą Organizacijos planą {days} dienoms. Niekas neatsinaujina.",
+      "cta": "Atidaryti pilotą"
+    }
   }
 }

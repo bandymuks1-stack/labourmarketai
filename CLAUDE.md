@@ -241,6 +241,24 @@ invented days, provenance and confirmation state visible inside it, roles withou
 zero. Never attribute an organization's records about other people to a leader. See
 `docs/DECISIONS/0025-one-person-one-continuous-professional-history.md`.
 
+## Internal validity rule (binding, owner P0 2026-10-22, all projects)
+
+An INTERNAL approval, owner decision, internal contract or temporary internal permission is valid
+for **12 months** and renews automatically in 12-month terms, without the owner, unless the owner set
+another term for that specific item. No 24 h / 72 h / 7-day / 30-day internal expiry otherwise.
+Renewal is TIME only — never scope, rate, source or authority, and never past a revocation.
+New code takes the term from the ONE central module
+`apps/web/lib/authority/internal-authority-validity.mjs` (`rollingInternalExpiryIso`,
+`INTERNAL_AUTHORITY_TERM_*`; plain ESM so the CI gate on Node 20 can import it, typed by its
+`.d.mts`) — never a new hard-coded date or short TTL, never a second copy. First consumer: the
+product gate's scoped owner waivers (`.github/scripts/owner-waivers.mjs`: `approvedAt` + rolling
+term; only an owner-set `ownerSetExpiresAt` expires by date).
+It NEVER re-dates: fact freshness (advert / vacancy recency, verification age, measured data),
+external legal permits, certificates and credential validity, OAuth / API / session tokens and keys,
+signed URLs, invitation / magic / password-reset links, one-shot security codes, confirmation tokens,
+anti-replay windows, payment / billing items and value grants, or anything user-facing security.
+When unsure whether something is internal authority or security / fact freshness: leave it.
+
 ## Policy overrides
 
 DI's explicit prompt instruction always wins. If a prompt says "do not commit" 

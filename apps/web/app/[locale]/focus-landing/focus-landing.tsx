@@ -27,6 +27,8 @@ import { readLiveMarketLandingSnapshot } from "@/lib/market/live-market-landing"
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { buildLivingWorkerHero } from "@/lib/marketing/living-worker-hero";
 import { LivingWorkerHero } from "@/components/marketing/living-worker-hero";
+import { LandingThreeWays } from "@/components/marketing/landing-three-ways";
+import { BRAND_NAME } from "@/lib/seo/metadata";
 
 /**
  * FOCUS — the previous production landing, RESTORED.
@@ -99,7 +101,10 @@ export async function FocusLanding({
   // rendered at body size. A real display scale now.
   const promise = (
     <>
-      <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tightest text-text-primary sm:text-5xl lg:text-6xl">
+      <p className="font-mono text-meta uppercase tracking-label text-brand-blue" data-testid="landing-hero-eyebrow">
+        {BRAND_NAME}
+      </p>
+      <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tightest text-text-primary sm:text-5xl lg:text-6xl mt-2">
         {tHero("headline")}
       </h1>
       <p className="mt-3 text-lead text-text-secondary">{tHero("sub")}</p>
@@ -158,8 +163,15 @@ export async function FocusLanding({
                 stand-in. */}
             {livingHero ? (
               <>
-                <LivingWorkerHero data={livingHero}>{promise}</LivingWorkerHero>
-                <section className="mt-8">
+                {/* THE MESSAGE IN SECONDS (owner positioning 2026-10-21): the
+                    three ways right under the promise — inside it on a phone
+                    (above the photograph), under the hero on a wide screen. */}
+                <LivingWorkerHero data={livingHero}>
+                  {promise}
+                  <LandingThreeWays placement="phone" />
+                </LivingWorkerHero>
+                <LandingThreeWays placement="wide" />
+                <section className="mt-8 scroll-mt-24" id="find">
               <PublicEntry
                   supply={
                     market.activeVacancies !== null && market.distinctEmployers !== null
@@ -177,8 +189,9 @@ export async function FocusLanding({
               <section className="grid gap-8 lg:items-start">
                 <div className="order-1 max-w-3xl lg:col-start-1 lg:row-start-1 lg:self-center">
                   {promise}
+                  <LandingThreeWays />
                 </div>
-                <div>
+                <div className="scroll-mt-24" id="find">
                 <PublicEntry
                   supply={
                     market.activeVacancies !== null && market.distinctEmployers !== null

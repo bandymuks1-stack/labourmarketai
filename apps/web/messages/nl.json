@@ -266,7 +266,11 @@
       "work": "Werk",
       "services": "Diensten",
       "goods": "Goederen & middelen"
-    }
+    },
+    "formPublisherLabel": "Geplaatst door",
+    "publisherSelf": "Ikzelf",
+    "publishedAs": "Als {name}",
+    "publishedAsOrganization": "Als organisatie"
   },
   "quality": {
     "title": "Gebreken & kwaliteit",
@@ -1592,7 +1596,8 @@
         "no": "Nog niet ingesteld"
       }
     },
-    "opportunitiesLink": "Bekijk gematchte kansen"
+    "opportunitiesLink": "Bekijk gematchte kansen",
+    "unrecordedHours": "{count, plural, one {# notitie noemt uren die nooit zijn vastgelegd} other {# notities noemen uren die nooit zijn vastgelegd}} — ze staan niet in het totaal hierboven. Open de vroegste en vul de uren in."
   },
   "profileState": {
     "readiness": {
@@ -4747,10 +4752,10 @@
         "preview_workspace": "Voorbeeld",
         "comingLater": "Later beschikbaar",
         "theme": {
-          "appearance": "Appearance",
-          "help": "Theme",
-          "toDark": "Dark",
-          "toLight": "Light"
+          "appearance": "Weergave",
+          "help": "Thema",
+          "toDark": "Donker",
+          "toLight": "Licht"
         },
         "security": {
           "title": "Beveiliging & toegang",
@@ -5053,8 +5058,8 @@
           "desc": "Definieer rollen, aantal mensen en vaardigheden."
         },
         {
-          "title": "Zie wie kan passen",
-          "desc": "Bekijk werknemers en uitzendbureaus waarvan de gegevens bij je vraag kunnen passen — jij kiest, niets wordt automatisch gerangschikt of gescoord."
+          "title": "Zie wie past",
+          "desc": "Werknemers en uitzendbureaus waarvan de gegevens bij je vraag passen, worden op passendheid gerangschikt, met de redenen — een signaal, geen garantie. Jij beslist wie je benadert."
         },
         {
           "title": "Neem direct contact op",
@@ -5413,7 +5418,9 @@
         }
       ],
       "screenshot": "Bedrijfsvraagflow",
-      "cta": "Start een personeelsaanvraag"
+      "cta": "Start een personeelsaanvraag",
+      "calculatorBody": "Schat het werk in voordat je het uitvraagt: arbeidsuren, materialen, materieel en reizen, met je eigen cijfers.",
+      "calculatorLink": "Bereken de kosten van een project"
     },
     "agencies": {
       "eyebrow": "Voor uitzendbureaus",
@@ -5546,7 +5553,7 @@
       },
       {
         "q": "Hoe verloopt de facturering?",
-        "a": "Kaartbetaling via Stripe, btw via Stripe Tax; facturen, opzegging en wijzigingen in uw organisatieaccount."
+        "a": "Kaartbetaling via Stripe. Facturen, betalingsgeschiedenis en opzegging vind je in je organisatieaccount."
       },
       {
         "q": "Is er een limiet op actieve posities?",
@@ -6872,7 +6879,8 @@
       "active": "Actief — ingelogde leden kunnen deze dienst vinden en aanvragen.",
       "paused": "Gepauzeerd — verborgen voor leden. Activeer om het weer vindbaar te maken."
     },
-    "linkToRequests": "Bekijk aanvragen voor jouw diensten"
+    "linkToRequests": "Bekijk aanvragen voor jouw diensten",
+    "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren."
   },
   "communication": {
     "origin": {
@@ -7636,7 +7644,8 @@
     "notFound": "Deze pagina bestaat niet",
     "backHome": "Terug naar home",
     "dashboardSections": "Dashboardsecties",
-    "skipToContent": "Direct naar inhoud"
+    "skipToContent": "Direct naar inhoud",
+    "loading": "Laden…"
   },
   "workerInvitations": {
     "title": "Openstaande uitnodigingen",
@@ -7659,16 +7668,16 @@
     "cvBridgeLink": "Cv openen",
     "inbox": {
       "title": "Werkbeoordeling",
-      "confirmSkills": "Confirm skills",
-      "confirmSkillsHint": "Tick the skills this entry proves. Confirming verifies them.",
-      "confirmNote": "Optional note",
-      "confirmSubmit": "Confirm & verify",
-      "alreadyVerified": "Already verified",
+      "confirmSkills": "Vaardigheden bevestigen",
+      "confirmSkillsHint": "Kies de opgegeven vaardigheden die dit item aantoont — ze worden geverifieerd.",
+      "confirmNote": "Notitie (optioneel)",
+      "confirmSubmit": "Bevestigen",
+      "alreadyVerified": "Al geverifieerd",
       "noSkillsToConfirm": "Deze invoer heeft geen gekoppelde vaardigheden meer om te bevestigen. Goedkeuren bevestigt het werk zelf.",
       "result": {
-        "skillsVerified": "Verified {count} skill(s).",
-        "skillNotOwned": "That skill is not declared by this worker.",
-        "noSkillsSelected": "Select at least one skill."
+        "skillsVerified": "Bevestigd. {count} vaardigheid/vaardigheden geverifieerd.",
+        "skillNotOwned": "Die vaardigheid is niet van deze werknemer.",
+        "noSkillsSelected": "Selecteer ten minste één vaardigheid."
       }
     },
     "cv": {
@@ -7715,7 +7724,7 @@
     }
   },
   "services": {
-    "eyebrow": "Done-for-you",
+    "eyebrow": "Wij doen het voor je",
     "title": "Gestandaardiseerde aanbiedingen,",
     "titleAccent": "echte prijzen.",
     "subcopy": "Duidelijke pakketten voor AI- en automatiseringswerk, met eerlijke vanafprijzen. Kies het pakket dat het dichtst bij je behoefte ligt en we bepalen samen de exacte scope.",
@@ -8724,6 +8733,12 @@
     "teamOffersWaiting": "{count, plural, one {# teamaanbod wacht op je antwoord} other {# teamaanbiedingen wachten op je antwoord}}",
     "unstructuredTag": "vereisten niet bevestigd",
     "notStructured": "De vereiste vaardigheden van deze personeelsbehoefte zijn nog niet gestructureerd, dus er kan geen match worden berekend. Nieuwe personeelsbehoeften worden door de beheerders beoordeeld en gestructureerd — je hoeft niets te doen.",
+    "handRaisers": {
+      "title": "Mensen die zich voor deze behoefte hebben gemeld",
+      "notAssessed": "Beroepsmatch niet beoordeeld. Deze behoefte noemt geen beroep, dus niemand is ermee vergeleken. Deze mensen worden getoond omdat ze zelf om contact hebben gevraagd, niet omdat ze passen; er worden geen vaardigheden, kwalificaties of geschiktheid mee beweerd.",
+      "badge": "Beroepsmatch niet beoordeeld",
+      "ownWords": "Alles wat over deze persoon wordt getoond, komt uit diens eigen profiel; niets hiervan is met de behoefte vergeleken."
+    },
     "needsSetup": "Laden is niet gelukt. Probeer het opnieuw.",
     "noCandidates": "Nog geen passende werknemers voor deze personeelsbehoefte. Matches verschijnen naarmate werknemers journaal-onderbouwde vaardigheden toevoegen — kijk later terug of verbreed de behoefte.",
     "namePlaceholder": "Werknemer",
@@ -9155,7 +9170,10 @@
       "againModeNote": "Dit heropent hetzelfde voorstel aan dezelfde werknemer met nieuwe datums — de werknemer beslist opnieuw. Er is niets geboekt totdat de werknemer accepteert.",
       "afterSent": "De werknemer heeft je voorstel ontvangen en zal het accepteren of weigeren. Je ziet het antwoord onder Boekingen; tot die tijd kun je het voorstel intrekken.",
       "rateLimited": "Limiet voor boekingsvoorstellen bereikt (10 open, 30 per dag). Probeer het later opnieuw.",
-      "alreadyAccepted": "De werknemer heeft dit voorstel al geaccepteerd — afgesproken voorwaarden worden hier niet overschreven. Spreek wijzigingen af in het gesprek."
+      "alreadyAccepted": "De werknemer heeft dit voorstel al geaccepteerd — afgesproken voorwaarden worden hier niet overschreven. Spreek wijzigingen af in het gesprek.",
+      "refusedNotReachable": "Deze persoon kan hier geen boekingsvoorstel krijgen — het profiel is niet zichtbaar voor werkgevers en er is geen werkrelatie met jou.",
+      "refusedNeedClosed": "Deze behoefte is gesloten — heropen hem voordat je een boeking voorstelt.",
+      "refusedAnswered": "De werknemer heeft dit voorstel geweigerd; zonder nieuwe toestemming wordt het niet heropend. Ga verder in het gesprek of zoek een andere werknemer."
     },
     "reason": {
       "optionalTitle": "Reden (optioneel)",
@@ -9421,7 +9439,7 @@
         "body": "Per aangenomen werknemer, ploeg of bedrijfsplaatsing geldt een vaste succesfee. Een aparte coördinatievergoeding geldt alleen wanneer document- of onboardingcoördinatie daadwerkelijk wordt geleverd. De definitieve prijs wordt bevestigd voordat betaald werk begint."
       }
     ],
-    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — één actieve positie kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest uw aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg als één geheel aanbieden of inzetten is nog niet gebouwd — vandaag wordt een ploeg persoon per persoon gematcht.",
+    "note": "Er lopen twee dingen naast elkaar, en deze pagina beschrijft het tweede. Het platform zelf werkt automatisch: het vacatureoverzicht is openbaar, de match-preview is open zonder account, en een ingediende aanvraag levert een gerangschikte kandidatenlijst met uitleg waarom iemand past — één actieve positie kosteloos. De betaalde dienst hierboven is het menselijke deel: een medewerker leest uw aanvraag, neemt contact op en controleert de lijst met de hand voordat iemand wordt voorgesteld. Een hele ploeg kan zich al als één geheel op uw aanvraag aanbieden en, zodra beide kanten akkoord zijn, als één team in uw project instappen; de automatische kandidatenlijst stelt nog niet hele ploegen voor — ze rangschikt mensen één voor één.",
     "ctaLabel": "Dien een personeelsaanvraag in →"
   },
   "adminLaunchReadiness": {
@@ -9482,6 +9500,19 @@
         "rate_limits": "Begrensde verzoeklimieten actief",
         "freshness_demotion": "Verouderde profielen lager gerangschikt"
       }
+    },
+    "mail": {
+      "title": "Officiële mailbox (info@labourmarket.ai)",
+      "ready": "Verstuurt",
+      "notReady": "Verstuurt niet",
+      "present": "ingesteld",
+      "missing": "ONTBREEKT",
+      "portOk": "ondersteund (465, TLS)",
+      "portUnsupported": "NIET ONDERSTEUND – alleen 465",
+      "note": "Eén mailkanaal: AVG-meldingen worden verstuurd zodra alle LM_SMTP_*-waarden zijn ingesteld; uitnodigings- en meldingsmails pas nadat het versturen ervan apart is ingeschakeld. Alleen of een waarde bestaat wordt getoond, nooit de waarde zelf. Stel een ontbrekende waarde in op de VPS met lm-env-set.sh.",
+      "invites": "Uitnodigings- en meldingsmails",
+      "invitesOn": "aan",
+      "invitesOff": "UIT – wordt apart ingeschakeld: INVITE_EMAIL_PROVIDER=smtp en één testverzending"
     }
   },
   "adminMetrics": {
@@ -10892,6 +10923,8 @@
       "expired": "Verlopen"
     },
     "graceNotice": "De laatste betaling is mislukt — het abonnement zit in een respijtperiode tot een nieuwe poging.",
+    "endsOn": "Opgezegd — het abonnement blijft actief tot {date} en wordt niet verlengd.",
+    "endsAtPeriodEnd": "Opgezegd — het abonnement blijft actief tot het einde van de betaalde periode en wordt niet verlengd.",
     "manage": {
       "open": "Abonnement beheren",
       "opening": "Openen…",
@@ -10910,7 +10943,8 @@
     "subscribe": {
       "title": "Plan Organisatie",
       "cta": "Plan Organisatie activeren",
-      "note": "U gaat naar Stripe Checkout; het abonnement is gekoppeld aan deze organisatie."
+      "note": "U gaat naar Stripe Checkout; het abonnement is gekoppeld aan deze organisatie.",
+      "chargedToday": "Geen gratis proefperiode: de eerste maand wordt vandaag bij Stripe Checkout afgerekend, daarna maandelijks tot je opzegt. Stripe toont vóór betaling het exacte bedrag met btw."
     }
   },
   "accountPlan": {
@@ -10953,6 +10987,7 @@
       "salaryExpectation": "Loonverwachting",
       "skillsCount": "Vaardigheden",
       "anonymousLabel": "Bedrijven zien u als",
+      "anonymousValue": "Kandidaat {token}",
       "currentCountry": "Huidig land",
       "availableFrom": "Beschikbaar vanaf",
       "contractType": "Arbeidsvorm",
@@ -12070,7 +12105,8 @@
     "empty": "Nog geen talen toegevoegd.",
     "notEnabled": "Momenteel niet beschikbaar. Er is niets opgeslagen.",
     "error": "Opslaan is mislukt. Probeer het opnieuw.",
-    "invalid": "Kies een taal en een niveau."
+    "invalid": "Kies een taal en een niveau.",
+    "added": "Taal toegevoegd."
   },
   "externalProfiles": {
     "title": "Externe profielen",
@@ -12413,6 +12449,7 @@
     }
   },
   "people": {
+    "anonymousName": "Kandidaat {token}",
     "eyebrow": "Persoonsprofiel",
     "restrictedTitle": "Profiel niet beschikbaar",
     "restrictedBody": "Je kunt het profiel van deze persoon niet bekijken: er is geen actieve werkrelatie, of de persoon heeft geen toestemming gegeven om vindbaar te zijn.",
@@ -12475,7 +12512,8 @@
     "claimCta": "Doorgaan als concept",
     "claimed": "Verplaatst naar uw concepten",
     "error": "Overnemen mislukt. Probeer het opnieuw.",
-    "workersLabel": "Werknemers"
+    "workersLabel": "Werknemers",
+    "draftExists": "U hebt al een onvoltooid conceptverzoek. Rond het eerst af of verwijder het, dan kunt u dit voortzetten."
   },
   "candidatePipeline": {
     "stage": {
@@ -14873,6 +14911,9 @@
       "candidatesNotFound": "Die behoefte is niet gevonden, of hij is niet van jou.",
       "candidatesNeedsMigration": "Momenteel niet beschikbaar.",
       "candidatesNotStructured": "Uit deze behoefte valt nog niets af te leiden, dus er is niets om mee te vergelijken. Dat is niet hetzelfde als dat niemand past.",
+      "handRaisersTitle": "Mensen die zich hebben gemeld",
+      "handRaisersNotAssessed": "Beroepsmatch niet beoordeeld: deze behoefte noemt geen beroep. Ze hebben zich zelf gemeld; er worden geen vaardigheden, kwalificaties of match beweerd.",
+      "handRaiserBadge": "Beroepsmatch niet beoordeeld",
       "candidatesRetrievalCapped": "Er waren meer mensen bereikbaar dan we deze keer konden bekijken, dus deze lijst is niet het hele aanbod.",
       "candidatesEmpty": "Op dit moment past niemand in het zichtbare aanbod bij deze behoefte.",
       "candidatesCapped": "{shown} van {total} getoond.",
@@ -15222,8 +15263,8 @@
       "noStars": "Nergens sterren: een mens wordt nooit tot een score gereduceerd. Elke match wordt uitgelegd tegen een concrete behoefte — met zichtbare cijfers."
     },
     "hero": {
-      "headline": "Eén arbeidsmarkt voor mensen en bedrijven.",
-      "sub": "Vind werk of vind mensen, leg het werk vast dat je doet en laat het voor je spreken — je volgende kans rust op wat je echt hebt gedaan, niet op wat een cv beweert."
+      "headline": "Een levend systeem van werk- en zakelijke kansen.",
+      "sub": "Laat op één plek zien wat je kunt, wat je aanbiedt of wat je zoekt. Ontdek werknemers, banen, aannemers, diensten en goederen — en je ervaring en kansen blijven altijd bereikbaar."
     },
     "entry": {
       "label": "Schrijf wat u nodig heeft — in uw eigen woorden",
@@ -15340,6 +15381,33 @@
       "partnerLead": "Wil je als partner met ons samenwerken?",
       "partnerLink": "Neem contact op",
       "moreLead": "Meer over hoe dit voor elk werkt:"
+    },
+    "ways": {
+      "title": "Wat je hier kunt doen",
+      "show": {
+        "title": "Laat zien wat je kunt",
+        "body": "Werk, vaardigheden en ervaring op één plek. Elke vermelding vult je professionele geschiedenis aan.",
+        "cta": "Profiel maken"
+      },
+      "offer": {
+        "title": "Bied aan wat je hebt",
+        "body": "Diensten, goederen, teams of beschikbare mensen — publiceer je aanbod zodat wie het nodig heeft je vindt.",
+        "cta": "Aanbieden"
+      },
+      "find": {
+        "title": "Vind wat je zoekt",
+        "body": "Schrijf in je eigen woorden wat je nodig hebt — een werknemer, een baan, een aannemer, een dienst of goederen.",
+        "cta": "Zoeken"
+      },
+      "discoverLead": "Ontdek",
+      "discover": {
+        "workers": "Werknemers",
+        "jobs": "Banen",
+        "contractors": "Aannemers",
+        "services": "Diensten",
+        "goods": "Goederen"
+      },
+      "lasting": "Je ervaring en kansen blijven bereikbaar — als je van baan, project of land wisselt."
     }
   },
   "workspace": {
@@ -17303,7 +17371,9 @@
     "emailConsentNote": "E-mail staat standaard uit — er wordt alleen gemaild voor de typen die je hier inschakelt.",
     "emailInactiveNote": "E-mailbezorging is op het platform nog niet actief. Je keuzes worden opgeslagen en gelden zodra die actief is.",
     "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
-    "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar."
+    "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar.",
+    "saving": "Opslaan…",
+    "saved": "Opgeslagen."
   },
   "historyContext": {
     "project": "Werkproject",
@@ -18929,7 +18999,8 @@
       "terms_invalid": "Controleer de getallen en datums.",
       "terms_limit_reached": "Dit aanbod heeft al 50 versies van voorwaarden.",
       "terms_await_other_side": "Dit zijn uw eigen voorwaarden — de andere partij antwoordt.",
-      "organization_offer_not_a_unit": "Een bedrijfsaanbod wordt niet als ploeg toegewezen; spreek de mensen af in het gesprek."
+      "organization_offer_not_a_unit": "Een bedrijfsaanbod wordt niet als ploeg toegewezen; spreek de mensen af in het gesprek.",
+      "terms_changed": "De andere partij heeft zojuist nieuwe voorwaarden voorgesteld. Bekijk de nieuwste versie en antwoord dan."
     },
     "received": {
       "title": "Voor deze vraag aangeboden teams",
@@ -19651,5 +19722,59 @@
     "saved": "Opgeslagen",
     "tooLong": "De tekst is te lang.",
     "error": "Opslaan mislukt. Probeer het opnieuw."
+  },
+  "roleLedger": {
+    "title": "{profession}, {country}: wat je al hebt en wat nog ontbreekt",
+    "anyCountry": "elk land"
+  },
+  "historyDuplicates": {
+    "title": "Mogelijke dubbele regels",
+    "hint": "Bekijk en beslis",
+    "intro": "Dit zijn regels van dezelfde persoon op dezelfde dag op hetzelfde object. Het kan echt apart werk zijn (twee diensten of taken) of hetzelfde werk dat twee keer is vastgelegd. Er verandert niets automatisch: is een regel dubbel, markeer hem dan — hij telt niet meer mee, maar blijft zichtbaar en kan worden hersteld.",
+    "summary": "Wacht op uw beslissing: {groups}",
+    "none": "Geen mogelijke dubbele regels gevonden.",
+    "unavailable": "De controle kan nu niet worden getoond.",
+    "truncated": "Er zijn veel regels — de controle is mogelijk onvolledig.",
+    "sameHours": "Zelfde uren",
+    "differentHours": "Andere uren",
+    "sameText": "Zelfde omschrijving",
+    "recordN": "Regel {n}",
+    "hours": "{hours} u",
+    "noHours": "Geen uren vermeld",
+    "counted": "Telt mee",
+    "marked": "Gemarkeerd als dubbel",
+    "source": "Bron: {file} · geïmporteerd {date}",
+    "noSource": "niet vermeld",
+    "mark": "Dubbel — regel {n} behouden",
+    "reinstate": "Herstellen",
+    "unnamedPerson": "Persoon zonder naam",
+    "unnamedObject": "Object zonder naam",
+    "error": "Dat is niet gelukt. Er is niets gewijzigd.",
+    "notAllowed": "De eigenaar of een leidinggevende van de organisatie kan dit doen.",
+    "notSameWork": "Deze regels komen niet meer overeen — vernieuw de pagina."
+  },
+  "pilotPass": {
+    "title": "Organisatieplan — pilot van {days} dagen voor 1 €",
+    "intro": "Betaal eenmalig 1 € en je organisatie krijgt {days} dagen lang het betaalde Organisatieplan. Wat het toevoegt aan het gratis plan: geen limiet op gelijktijdig open posities en personeelsbehoeften (het gratis plan staat er één toe). Berichten, kandidaatoverzichten, teamselectie en boekingen blijven beschikbaar zoals in het gratis plan.",
+    "terms": "Eenmalige betaling. Er wordt niets verlengd en niets opnieuw afgeschreven: na {days} dagen eindigt het plan vanzelf en keert de organisatie terug naar het gratis plan. Het plan verschijnt hieronder zodra Stripe de betaling bevestigt.",
+    "pay": "1 € betalen — pilot van {days} dagen",
+    "status": {
+      "pilot_pass_disabled": "De pilot wordt nu niet aangeboden.",
+      "unauthenticated": "Log in om de pilot te starten.",
+      "no_organization": "Kies eerst de werkruimte van je organisatie.",
+      "not_billing_authority": "Alleen wie de betalingen van deze organisatie beheert, kan de pilot starten.",
+      "billing_not_active": "Betalingen zijn niet beschikbaar voor deze organisatie.",
+      "plan_active": "Je organisatie heeft al een actief plan.",
+      "checkout_failed": "Stripe heeft geen betaalpagina aangemaakt. Er is niets afgeschreven; probeer het later opnieuw."
+    },
+    "result": {
+      "paid": "Stripe heeft de betaling ontvangen. Het plan wordt actief zodra de bevestiging binnenkomt — vernieuw de pagina zo als het nog niet zichtbaar is.",
+      "cancelled": "Betaling geannuleerd — er is niets afgeschreven."
+    },
+    "elsewhere": "Kies {organization} in de werkruimtekiezer bovenaan de pagina — de pilot start je vanuit de werkruimte van die organisatie.",
+    "invite": {
+      "line": "Betaal eenmalig 1 € voor {days} dagen van het betaalde Organisatieplan. Er wordt niets verlengd.",
+      "cta": "Pilot openen"
+    }
   }
 }
