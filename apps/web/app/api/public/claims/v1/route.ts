@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 
+import { PRICING_READINESS_STATE } from "@/lib/billing/readiness";
 import type { ActiveLocale } from "@/lib/i18n/config";
+import { getPlans } from "@/lib/marketing/plans";
 import {
+  PUBLIC_CLAIMS,
   buildPublicClaimsPayload,
   type MessageTree,
+  type PageData,
 } from "@/lib/public-claims/registry";
 
 /**
@@ -17,8 +21,9 @@ import {
  * consumer stops citing it.
  *
  * Public on purpose: no identity is read and nothing a person owns is in it —
- * only marketing copy that is already on public pages. No database, no
- * network: the payload is built from the bundled message catalogs.
+ * only marketing copy that is already on public pages, built from the bundled
+ * message catalogs plus the public plan price `/pricing` itself reads
+ * (`public_plans_v1`, the anon-safe catalogue RPC).
  * `Cache-Control: public, s-maxage=300` — the copy changes only on deploy.
  */
 export const dynamic = "force-dynamic";
@@ -33,8 +38,27 @@ async function loadMessages(locale: ActiveLocale): Promise<MessageTree> {
   return mod.default;
 }
 
+/**
+ * The values `/pricing` renders from data, read the way `PricingTable` reads
+ * them: `plans.price_eur_monthly` via `getPlans()`, shown only while the plan
+ * table is owner-confirmed. A failed read or an unconfirmed table means the
+ * page shows no price, so the claim cites none either.
+ */
+async function loadPageData(): Promise<PageData> {
+  if (PRICING_READINESS_STATE !== "owner_confirmed") return { businessPlanPriceEur: null };
+  const rows = await getPlans();
+  const price = rows?.find((r) => r.slug === "business")?.price_eur_monthly;
+  // A €0 card renders `priceFree`, not `pricePerMonth` — not this fragment.
+  return { businessPlanPriceEur: typeof price === "number" && price > 0 ? price : null };
+}
+
 export async function GET(): Promise<NextResponse> {
-  const payload = await buildPublicClaimsPayload(loadMessages);
+  const payload = await buildPublicClaimsPayload(
+    loadMessages,
+    new Date(),
+    PUBLIC_CLAIMS,
+    await loadPageData(),
+  );
   return NextResponse.json(payload, {
     headers: { "Cache-Control": "public, s-maxage=300" },
   });

@@ -1,4 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const plans = vi.hoisted(() => ({
+  rows: [{ slug: "business", name_en: "Organization", name_lt: null, price_eur_monthly: 99 }] as
+    | { slug: string; name_en: string | null; name_lt: string | null; price_eur_monthly: number | null }[]
+    | null,
+}));
+vi.mock("@/lib/marketing/plans", () => ({ getPlans: async () => plans.rows }));
 
 import { GET } from "@/app/api/public/claims/v1/route";
 import { activeLocales } from "@/lib/i18n/config";
@@ -24,6 +31,10 @@ async function served(): Promise<{ res: Response; body: PublicClaimsPayload }> {
 }
 
 describe("GET /api/public/claims/v1", () => {
+  beforeEach(() => {
+    plans.rows = [{ slug: "business", name_en: "Organization", name_lt: null, price_eur_monthly: 99 }];
+  });
+
   it("answers 200 JSON, publicly cacheable for 300 s", async () => {
     const { res } = await served();
     expect(res.status).toBe(200);
@@ -96,6 +107,21 @@ describe("GET /api/public/claims/v1", () => {
       "€99/month",
       enMessages.pricing.plans.business.features[0],
     ]);
+  });
+
+  it("the price fragment follows plans.price_eur_monthly, and is omitted when the page shows no price", async () => {
+    plans.rows = [{ slug: "business", name_en: "Organization", name_lt: null, price_eur_monthly: 129 }];
+    let plan = (await served()).body.claims.find((c) => c.claimId === "employer.organization-plan-99-per-month")!;
+    expect(plan.pages[0].fragments).toContain("€129/month");
+
+    plans.rows = null; // the plans read failed — PricingTable renders no price
+    plan = (await served()).body.claims.find((c) => c.claimId === "employer.organization-plan-99-per-month")!;
+    expect(plan.pages[0].fragments).toEqual([
+      enMessages.pricing.plans.business.name,
+      enMessages.pricing.plans.business.tagline,
+      enMessages.pricing.plans.business.features[0],
+    ]);
+    expect(plan.pages[0].fragments.some((f) => f.includes("€"))).toBe(false);
   });
 
   it("the per-locale headline claims cite only their own locale root", async () => {

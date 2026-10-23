@@ -12,7 +12,11 @@ import {
   renderFragment,
   messageAt,
   type MessageTree,
+  type PageData,
 } from "@/lib/public-claims/registry";
+
+/** A probe value so data-backed fragments (the price) resolve in the shape check. */
+const PROBE_PAGE_DATA: PageData = { businessPlanPriceEur: 1 };
 
 /**
  * PUBLIC CLAIMS ↔ PRODUCT TRUTH — the permanent dev/QA rule.
@@ -303,7 +307,7 @@ describe("public claims registry — message keys", () => {
               problems.push(`${c.claimId} ${locale}: ${f.key} is an untranslated [EN] placeholder`);
             }
             try {
-              const text = renderFragment(messages, f);
+              const text = renderFragment(messages, f, PROBE_PAGE_DATA);
               if (seen.has(text)) problems.push(`${c.claimId} ${locale}: duplicate fragment from ${f.key}`);
               seen.add(text);
             } catch (e) {
@@ -345,5 +349,16 @@ describe("public claims registry — values a page supplies", () => {
   it("a price fragment is claimed only while the plan table is owner-confirmed", () => {
     const priced = pageClaims.filter((c) => c.pages.some((p) => p.fragments.some((f) => f.key === "pricing.pricePerMonth")));
     if (priced.length > 0) expect(PRICING_READINESS_STATE).toBe("owner_confirmed");
+  });
+
+  it("a page-supplied value is never a fixed number in the registry", () => {
+    const fixed = pageClaims.flatMap((c) =>
+      c.pages.flatMap((p) =>
+        p.fragments
+          .filter((f) => f.key === "pricing.pricePerMonth" && (f.values !== undefined || !f.valuesFrom?.price))
+          .map(() => c.claimId),
+      ),
+    );
+    expect(fixed).toEqual([]);
   });
 });

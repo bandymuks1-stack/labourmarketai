@@ -48,7 +48,27 @@ export interface FragmentSpec {
    * `{name}` arguments only; anything richer fails the guard.
    */
   readonly values?: Readonly<Record<string, string | number>>;
+  /**
+   * ICU arguments whose value the PAGE reads at request time (e.g. the price
+   * figure from `plans.price_eur_monthly`), named by the `PageData` field that
+   * carries it. Never a fixed number in this file: when the page's own source
+   * has no value, the page omits the element and the claim omits the fragment.
+   */
+  readonly valuesFrom?: Readonly<Record<string, keyof PageData>>;
 }
+
+/**
+ * Request-time values the public pages render from data rather than from the
+ * message catalogs, read from the SAME source and rule as the page (the route
+ * builds it; `null` = the page shows no such element right now).
+ */
+export interface PageData {
+  /** `/pricing` business card price: `plans.price_eur_monthly`, shown only when owner-confirmed. */
+  readonly businessPlanPriceEur: number | null;
+}
+
+/** No request-time data: every data-backed fragment is omitted. */
+export const NO_PAGE_DATA: PageData = { businessPlanPriceEur: null };
 
 export interface ClaimPageSpec {
   /** Locale-less path: `""` is the locale root, else `/for-companies` etc. */
@@ -258,7 +278,7 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     status: "LIVE",
     structural: null,
     note:
-      "English only, on purpose: the plan card's NAME is read from plans.name_en / name_lt (the i18n key is the fallback), so only `en` is known to render this key's text; non-lt locales show name_en. The price figure is plans.price_eur_monthly (99) formatted by pricing.pricePerMonth. A monthly subscription, VAT on top — never a one-time fee.",
+      "English only, on purpose: the plan card's NAME is read from plans.name_en / name_lt (the i18n key is the fallback), so only `en` is known to render this key's text; non-lt locales show name_en. The price figure is read per request from plans.price_eur_monthly by the same rule as PricingTable (owner-confirmed only) and formatted by pricing.pricePerMonth; when the page shows no price, the fragment is omitted. A monthly subscription, VAT on top — never a one-time fee.",
     pages: [
       {
         path: P.pricing,
@@ -266,7 +286,7 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
         fragments: [
           k("pricing.plans.business.name"),
           k("pricing.plans.business.tagline"),
-          k("pricing.pricePerMonth", { price: 99 }),
+          { key: "pricing.pricePerMonth", valuesFrom: { price: "businessPlanPriceEur" } },
           k("pricing.plans.business.features[0]"),
         ],
       },
@@ -389,7 +409,16 @@ const collapse = (s: string) => s.replace(/\s+/g, " ").trim();
  * fragment. Anything else (plural/select, rich-text tags, quoted braces)
  * throws — the guard turns that into a CI failure instead of a wrong claim.
  */
-export function renderFragment(messages: MessageTree, spec: FragmentSpec): string {
+export function renderFragment(
+  messages: MessageTree,
+  spec: FragmentSpec,
+  data: PageData = NO_PAGE_DATA,
+): string {
+  const values: Record<string, string | number> = { ...spec.values };
+  for (const [name, field] of Object.entries(spec.valuesFrom ?? {})) {
+    const v = data[field];
+    if (v !== null && v !== undefined) values[name] = v;
+  }
   const raw = messageAt(messages, spec.key);
   if (raw === undefined) throw new Error(`public-claims: message key "${spec.key}" is missing`);
   if (/'[{}#|]/.test(raw)) {
@@ -400,7 +429,7 @@ export function renderFragment(messages: MessageTree, spec: FragmentSpec): strin
   }
   const text = raw
     .replace(/\{\s*([A-Za-z_][\w]*)\s*\}/g, (whole, name: string) => {
-      const v = spec.values?.[name];
+      const v = values[name];
       if (v === undefined) {
         throw new Error(`public-claims: "${spec.key}" needs a value for {${name}}`);
       }
@@ -413,6 +442,11 @@ export function renderFragment(messages: MessageTree, spec: FragmentSpec): strin
   const out = collapse(text);
   if (!out) throw new Error(`public-claims: message key "${spec.key}" is empty`);
   return out;
+}
+
+/** Whether the page renders this fragment right now (its data-backed values exist). */
+export function fragmentShown(spec: FragmentSpec, data: PageData): boolean {
+  return Object.values(spec.valuesFrom ?? {}).every((field) => data[field] !== null && data[field] !== undefined);
 }
 
 /** The locales a page spec expands to — `en` first, then the active order. */
@@ -459,6 +493,7 @@ export async function buildPublicClaimsPayload(
   load: MessageLoader,
   now: Date = new Date(),
   claims: readonly ClaimSpec[] = PUBLIC_CLAIMS,
+  data: PageData = NO_PAGE_DATA,
 ): Promise<PublicClaimsPayload> {
   const cache = new Map<ActiveLocale, Promise<MessageTree>>();
   const catalog = (locale: ActiveLocale) => {
@@ -477,11 +512,11 @@ export async function buildPublicClaimsPayload(
       for (const page of claim.pages) {
         for (const locale of pageLocales(page)) {
           const messages = await catalog(locale);
-          pages.push({
-            locale,
-            path: localePath(locale, page.path),
-            fragments: page.fragments.map((f) => renderFragment(messages, f)),
-          });
+          const fragments = page.fragments
+            .filter((f) => fragmentShown(f, data))
+            .map((f) => renderFragment(messages, f, data));
+          if (fragments.length === 0) continue;
+          pages.push({ locale, path: localePath(locale, page.path), fragments });
         }
       }
     }

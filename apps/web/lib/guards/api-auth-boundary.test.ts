@@ -112,7 +112,7 @@ const CLASSIFICATION: Record<
   },
   "public/claims/v1/route.ts": {
     class: "public",
-    why: "The public claims contract (lm-public-claims/v1) Agentai OS re-verifies marketing claims against. No identity exists or is read; the body is marketing copy already on public pages, resolved from the bundled message catalogs by lib/public-claims/registry.ts — no database, no network, nothing a person owns.",
+    why: "The public claims contract (lm-public-claims/v1) Agentai OS re-verifies marketing claims against. No identity exists or is read; the body is marketing copy already on public pages, resolved from the bundled message catalogs by lib/public-claims/registry.ts, plus the public plan price /pricing itself reads (getPlans → the anon-safe public_plans_v1 RPC) — nothing a person owns.",
   },
   "health/route.ts": {
     class: "public",
