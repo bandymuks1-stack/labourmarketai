@@ -213,7 +213,14 @@ describe("the authenticated shell reads roles the same honest way", () => {
   );
 
   it("routes its profile_roles read through the shared reader", () => {
-    expect(layout).toMatch(/readActiveProfileRoles\(/);
+    // Perf 2026-10-23: the shell reads through the request-cached
+    // `readActiveRoleRows`, which is `readActiveProfileRoles` underneath —
+    // the same retry-then-throw semantics, shared with the page gate.
+    expect(layout).toMatch(/readActiveRoleRows\(/);
+    const reader = readFileSync(join(__dirname, "profile-roles.ts"), "utf8");
+    expect(reader).toMatch(
+      /const readActiveRoleRowsOnce = cache\([\s\S]{0,200}readActiveProfileRoles<RoleRow>\(/,
+    );
   });
 
   it("never destructures the roles read down to `data` alone", () => {

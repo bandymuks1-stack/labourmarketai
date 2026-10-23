@@ -45,9 +45,43 @@ export type ProfileCoreRow = SessionProfileRow & {
 export async function readProfileRow(
   caller: DomainCaller,
 ): Promise<CoreRead<ProfileCoreRow | null>> {
-  const read = await readProfileRowOnce(caller.supabase, caller.userId);
+  const { row: read } = await readProfileRowOnce(caller.supabase, caller.userId);
   return read.ok ? { ok: true, value: read.value ? { ...read.value } : null } : { ok: false };
 }
+
+/**
+ * The durable workspace pointer (`profiles.active_organization_id`, written
+ * only by the membership-validated switch core) in the PostgREST response
+ * shape its resolver reads: `error` when the column is absent (the migration
+ * is unapplied) or the row did not answer, `data: null` when there is no row.
+ *
+ * It is a column of the SAME row as the profile above, so it rides the same
+ * request-cached read (perf 2026-10-23) instead of a second `profiles` query
+ * on every dashboard render. Never part of `readProfileRow`'s value — that
+ * row is what the transports hand out (`profile.get`), and the pointer is not.
+ */
+export async function readStoredWorkspacePointer(
+  supabase: DomainCaller["supabase"],
+  userId: string,
+): Promise<StoredPointerRead> {
+  return (await readProfileRowOnce(supabase, userId)).pointer;
+}
+
+export type StoredPointerRead = {
+  readonly data: { readonly active_organization_id: string | null } | null;
+  readonly error: { readonly code?: string } | null;
+};
+
+type ProfileRowRead = {
+  readonly row: CoreRead<ProfileCoreRow | null>;
+  readonly pointer: StoredPointerRead;
+};
+
+/** The pointer column's own name; the profile row never carries it. */
+const POINTER_COLUMN = "active_organization_id";
+/** PostgREST: the selected column does not exist here (migration unapplied). */
+const ABSENT_COLUMN_CODES = new Set(["42703", "PGRST204"]);
+const PROFILE_COLUMNS = "id, full_name, email, locale, country, onboarded, onboarded_at, active_role";
 
 /**
  * Read ONCE per server render per client and user (perf 2026-10-23): the
@@ -59,24 +93,37 @@ export async function readProfileRow(
  * render after it reads again.
  */
 const readProfileRowOnce = cache(
-  async (
-    supabase: DomainCaller["supabase"],
-    userId: string,
-  ): Promise<CoreRead<ProfileCoreRow | null>> => readProfileRowUncached({ supabase, userId }),
+  async (supabase: DomainCaller["supabase"], userId: string): Promise<ProfileRowRead> =>
+    readProfileRowUncached({ supabase, userId }),
 );
 
-async function readProfileRowUncached(
-  caller: DomainCaller,
-): Promise<CoreRead<ProfileCoreRow | null>> {
-  const { data, error } = await caller.supabase
-    .from("profiles")
-    .select(
-      "id, full_name, email, locale, country, onboarded, onboarded_at, active_role",
-    )
-    .eq("id", caller.userId)
-    .maybeSingle();
-  if (error) return { ok: false };
-  return { ok: true, value: (data as ProfileCoreRow | null) ?? null };
+async function readProfileRowUncached(caller: DomainCaller): Promise<ProfileRowRead> {
+  const read = (columns: string) =>
+    caller.supabase.from("profiles").select(columns).eq("id", caller.userId).maybeSingle();
+  const withPointer = await read(`${PROFILE_COLUMNS}, ${POINTER_COLUMN}`);
+  if (withPointer.error && ABSENT_COLUMN_CODES.has(withPointer.error.code ?? "")) {
+    // The pointer column is absent here: the profile row is re-read without
+    // it, and the pointer reports the absence exactly as its own read did.
+    const plain = await read(PROFILE_COLUMNS);
+    if (plain.error) return { row: { ok: false }, pointer: { data: null, error: plain.error } };
+    return {
+      row: { ok: true, value: (plain.data as unknown as ProfileCoreRow | null) ?? null },
+      pointer: { data: null, error: withPointer.error },
+    };
+  }
+  // A failed row read is unknown for both — never "no pointer".
+  if (withPointer.error) {
+    return { row: { ok: false }, pointer: { data: null, error: withPointer.error } };
+  }
+  const data = withPointer.data as unknown as
+    | (ProfileCoreRow & { active_organization_id?: string | null })
+    | null;
+  if (!data) return { row: { ok: true, value: null }, pointer: { data: null, error: null } };
+  const { active_organization_id: pointer, ...row } = data;
+  return {
+    row: { ok: true, value: row },
+    pointer: { data: { active_organization_id: pointer ?? null }, error: null },
+  };
 }
 
 /**
