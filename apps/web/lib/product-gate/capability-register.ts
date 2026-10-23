@@ -1414,15 +1414,19 @@ const COMMUNICATION: readonly CapabilityRow[] = [
     domain: "communication",
     title: "Voice as an equal door to the canonical action spine",
     worldElement: "ai_conversation",
-    status: "MISSING",
-    strongestEvidence: "NONE",
-    anchors: [],
-    coreModule: null,
-    surfaces: [],
+    status: "PARTIAL",
+    strongestEvidence: "CODE_PROVEN",
+    anchors: [
+      "components/app/voice/voice-capture-panel.tsx",
+      "lib/conversation/voice-turn-policy.ts",
+      "lib/voice/capture-model.ts",
+    ],
+    coreModule: "lib/conversation/voice-turn-policy.ts",
+    surfaces: ["components/app/conversation/chat/conversation-chat.tsx"],
     ownerDecision:
-      "Whether and when to build it (frozen design doctrine, a design target not an implementation plan); it must reuse the one intent, authorization and canonical-action spine and never become a second architecture.",
+      "The production transcription host (VOICE_TRANSCRIBE_URL) and its cost, and whether the first mobile release carries voice; it must keep reusing the one intent, authorization and canonical-action spine and never become a second architecture.",
     note:
-      "FROZEN DESIGN DOCTRINE (docs/design/final/00-GALUTINE-DIZAINO-SISTEMA.md section A.2): two equal doors, visual and linguistic (sentence, voice), over the SAME spine - 'no capability exists in only one path'; mobile 'Ask (Conversation, voice)' tab and voice into the composer or journal. NOT IMPLEMENTED at any layer: no chat-composer microphone, no voice API route, no MCP voice tool, no spoken-command or intent adapter, no voice in apps/mobile. The only voice-to-action chain today is COM-6 (journal text). The label 'voice-first' appears nowhere in the repository history.",
+      "Corrected 2026-10-23 (the earlier 'NOT IMPLEMENTED at any layer' note was false): a generic voice door over the typed chat spine exists (docs/VOICE_DOOR_ADAPTER_V1.md) - VoiceCapturePanel mounted in the conversation chat, the voice-turn policy that hands a transcript to the same typed spine, a signed single-use upload to the self-hosted STT service (services/transcribe/), boundary guard lib/guards/voice-door-adapter-boundary.test.ts; COM-6 is the voice journal. PARTIAL and CODE_PROVEN only: the production recognition service is unverified (VOICE_FIRST = NOT_GREEN), there is no real-device proof, and there is no voice in apps/mobile or the MCP door yet. FROZEN DESIGN DOCTRINE (docs/design/final/00-GALUTINE-DIZAINO-SISTEMA.md section A.2): two equal doors, visual and linguistic, over the SAME spine.",
   },
 ];
 

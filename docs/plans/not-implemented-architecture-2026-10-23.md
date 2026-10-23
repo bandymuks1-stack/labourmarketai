@@ -238,44 +238,18 @@ credit spendable; a price shown before the owner approved it.
 ## E. 10.15 — Agents OS runtime (autonomous internal agents)
 
 **What it is.** Internal agents that run platform work on a schedule or a
-trigger (monitoring, triage, data hygiene) without a person pressing a button —
-distinct from the chat (a person's turn) and from MCP (an external agent acting
-for a person).
+trigger, without a person pressing a button — distinct from the chat (a
+person's turn) and from MCP (an external agent acting for a person).
 
-**Reused.** The AI runtime (GEO-4: `lib/ai/runtime/run-core.ts`, the model
-registry, provider chain, cost ceilings, egress pre-check, `ai_runs` audit with
-retention classes), the agent registry of thirteen agents (six with no call
-site — see GEO-4), the workflow engine (`workflow_instances`), the existing
-GitHub Actions schedules (walks, ingestion, backups) as the only scheduler, the
-Agentai OS capability readback (aggregate counts, RED draft) as the external
-supervisor surface.
+**Outcome required.** Such work proposes and never writes a fact on its own
+(SEP-1, SEP-3); it reuses the one existing AI runtime with its cost ceilings and
+audit, never a second runtime; and it is off until the owner chooses which jobs
+may run. The implementation design is internal and lives in the Agentai OS
+Internal Brain, not in this public repository (AGENTS.md, information boundary).
 
-**Minimal implementation.** One runner, not a framework:
-1. An `agent_jobs` concept is **not** a new table — a job is a
-   `workflow_instances` row of a registered kind, so history, status and audit
-   already exist.
-2. One scheduled GitHub Action calls one authenticated internal route that
-   dispatches a named, registered job through `run-core` (so cost ceilings,
-   egress and `ai_runs` audit apply).
-3. Every job is READ or DRAFT only (it proposes; a human confirms through the
-   existing confirmation spine). No job writes a fact.
-4. First job: the six zero-call-site agents get **no** call site until the owner
-   picks which, if any, are worth a second, model-based answer (GEO-4 note).
-
-**Dependencies.** A service identity for the runner (owner: secret on the
-VPS / Actions), the workflow engine's kind registry.
-
-**Tests.** A job without a registry entry is refused; a job cannot reach a
-write action (boundary guard, same pattern as the voice adapter guard); cost
-ceiling hit → job stops and records why; no job runs when its flag is off.
-
-**Owner decisions.**
-1. *"Which internal jobs should run autonomously first, and may any of them
-   write without a human confirmation?"* (recommended: none write)
-2. *"Which identity runs them, and where does its secret live?"*
-
-**Risk if done wrong.** A second AI runtime beside `run-core` with no cost cap
-or audit; an agent that writes facts (SEP-1, SEP-3); silent spend.
+**Owner decisions.** Which internal jobs may run autonomously first, under which
+identity, and whether any of them may ever write without a human confirmation
+(recommended: none).
 
 ## F. 10.16 — AI agents as labour-market participants (provider mode)
 
@@ -321,8 +295,8 @@ journal (COM-6), a signed single-use upload to a self-hosted STT service
 (`lib/guards/voice-door-adapter-boundary.test.ts`). Its own status is
 `VOICE_FIRST = NOT_GREEN`: the production recognition service
 (`VOICE_TRANSCRIBE_URL`) is unverified and there is no real-device proof. The
-register's "NOT IMPLEMENTED at any layer" wording should be reconciled with
-that document in a separate change.
+capability register's COM-8 entry is corrected in this same change (PARTIAL,
+CODE_PROVEN, production limits stated).
 
 **Minimal implementation (what is actually missing).**
 1. Production STT host verified (COM-6 open decision) — without it every voice
