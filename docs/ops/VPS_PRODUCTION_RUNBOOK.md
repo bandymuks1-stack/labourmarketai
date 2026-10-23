@@ -287,3 +287,57 @@ session exists. Making it run needs an explicit owner approval of ALL of:
 3. the walk minting an `admin` slot in `prod-qa-walk.yml`, with the
    `production-qa` environment's required reviewer switched on for that spec.
 No agent grants this role.
+
+### 9.5 Web push notifications (COM-3 push channel, OFF by default)
+
+Push is a third hop of the existing notifications: the same event, the same
+person and the same title as the bell. It stays completely inert, and the
+opt-in in the account settings stays hidden, until **all four** settings below
+are present and the migration `20261023171500_web_push_subscriptions_v1` is
+applied (RED, owner-approved apply via Supabase MCP only).
+
+| Setting | Kind |
+|---|---|
+| `WEB_PUSH_VAPID_PRIVATE_KEY` | **secret**: 32-byte P-256 private key, base64url |
+| `WEB_PUSH_VAPID_PUBLIC_KEY` | plain: the matching 65-byte public key, base64url |
+| `WEB_PUSH_VAPID_SUBJECT` | plain: `mailto:` address a push service may contact (e.g. the platform mailbox) |
+| `WEB_PUSH_ENABLED=true` | owner switch; any other value or none = OFF |
+
+**1. Generate the key pair on the VPS.** It must never come from the
+repository, a chat or an agent. The private key goes straight into the env
+file and is never shown on screen:
+
+```sh
+node -e 'const c=require("crypto"),k=c.createECDH("prime256v1");k.generateKeys();require("fs").writeFileSync("/root/.vapid-priv",k.getPrivateKey().toString("base64url"),{mode:0o600});process.stdout.write(k.getPublicKey().toString("base64url")+"\n")'
+```
+
+The command prints the PUBLIC key only. It needs Node 18 or newer. If the
+host has no `node`, run the same line on your own computer, and enter the
+private key with the hidden-input variant below. Then:
+
+```sh
+sh /root/lm-prod/bin/lm-env-set.sh WEB_PUSH_VAPID_PRIVATE_KEY < /root/.vapid-priv && shred -u /root/.vapid-priv
+read -r V; printf '%s' "$V" | sh /root/lm-prod/bin/lm-env-set.sh WEB_PUSH_VAPID_PUBLIC_KEY; unset V   # paste the printed public key
+printf 'mailto:info@labourmarket.ai' | sh /root/lm-prod/bin/lm-env-set.sh WEB_PUSH_VAPID_SUBJECT
+```
+
+If you would rather type the private key yourself (for example, generated on
+your own computer), use hidden input instead of the file:
+`read -rs V; printf '%s' "$V" | sh /root/lm-prod/bin/lm-env-set.sh WEB_PUSH_VAPID_PRIVATE_KEY; unset V`.
+
+**2. Switch it on** (only after the migration is applied):
+`printf true | sh /root/lm-prod/bin/lm-env-set.sh WEB_PUSH_ENABLED --restart`.
+
+**3. Observe** without reading a value:
+`cut -d= -f1 /root/lm-prod/env | grep '^WEB_PUSH_'` (names only). In
+`/dashboard/account` → Notifications, a "Push notifications on this device"
+block appears. Turn it on in a browser, then trigger any notification for
+that account: the device shows the bell's title, and a click opens the same
+page the bell links to.
+
+**Turning it off:** unset or change `WEB_PUSH_ENABLED` and restart. The opt-in
+disappears and nothing more is sent. Stored subscriptions stay until people
+turn push off or a push service reports them gone.
+
+**Rotating the keys** invalidates every existing subscription; people must turn
+push on again. Do it only if the private key may have leaked.
