@@ -100,11 +100,28 @@ function bookingRow(page: Page, direction: "incoming" | "outgoing"): Locator {
 /** Close one need through the scouting page's own lifecycle control. */
 async function closeNeed(page: Page, requestId: string): Promise<"closed" | "already-closed"> {
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  const controls = page.getByTestId("demand-lifecycle-controls");
-  await expect(controls).toBeVisible({ timeout: 30_000 });
-  if ((await controls.getAttribute("data-demand-status")) === "closed") return "already-closed";
-  await controls.getByTestId("demand-close").click();
-  await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
+  const controls = page.getByTestId("demand-lifecycle-controls").first();
+  const unstructured = page.getByTestId("scouting-not-structured").first();
+  await expect(controls.or(unstructured).first()).toBeVisible({ timeout: 30_000 });
+  if (await controls.isVisible()) {
+    if ((await controls.getAttribute("data-demand-status")) === "closed") return "already-closed";
+    await controls.getByTestId("demand-close").click();
+    await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
+    return "closed";
+  }
+  // A need that names no trade: the scouting page draws its lifecycle controls
+  // only for a structured need, so it is closed where the product offers that
+  // for every submitted need — the chat workspace's candidates result
+  // (`?result=candidates&demand=`, `company.close-demand`).
+  await page.goto(`/lt/dashboard?result=candidates&demand=${requestId}`);
+  const close = page.getByTestId("candidates-close-demand").filter({ visible: true }).first();
+  const reopen = page.getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
+  await expect(close.or(reopen).first(), "the need's own close/reopen action").toBeVisible({ timeout: 60_000 });
+  if (await reopen.isVisible()) return "already-closed";
+  await close.click();
+  const error = page.getByTestId("candidates-close-demand-error").first();
+  await expect(reopen.or(error).first()).toBeVisible({ timeout: 30_000 });
+  if (await error.isVisible()) throw new Error(`close refused: ${(await error.innerText()).slice(0, 120)}`);
   return "closed";
 }
 
