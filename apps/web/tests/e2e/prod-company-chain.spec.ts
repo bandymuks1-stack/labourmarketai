@@ -93,7 +93,7 @@ function requestIdOf(href: string | null): string {
  * return its id, found on the scouting list by `marker` (a run-unique part of
  * the role the list shows).
  */
-async function postNeed(page: Page, role: string, description: string, marker: string): Promise<string> {
+async function submitNeed(page: Page, role: string, description: string): Promise<"done" | "limit"> {
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
   await page.getByTestId("demand-role").fill(role);
   await page.getByTestId("demand-description").fill(description);
@@ -105,7 +105,41 @@ async function postNeed(page: Page, role: string, description: string, marker: s
   const done = page.getByTestId("demand-done");
   const limit = page.getByTestId("demand-open-need-limit");
   await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
-  expect(await limit.isVisible(), "the open-need limit refused this run's need").toBe(false);
+  return (await limit.isVisible()) ? "limit" : "done";
+}
+
+/**
+ * Gama is on the free plan (one open need). A walk that stopped before its
+ * cleanup leaves a QA-SYNTHETIC need open and the next walk's intake is refused
+ * (company-chain 39960149411 left one; the limit is the product working). Close
+ * the synthetic leftovers through the scouting page's own controls, never this
+ * run's need.
+ */
+async function closeSyntheticLeftovers(page: Page): Promise<number> {
+  await page.goto("/lt/dashboard/company/scouting");
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  const ids = new Set<string>();
+  for (const a of await page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: "QA-SYNTHETIC" }).all()) {
+    if ((await a.innerText().catch(() => "")).includes(RUN)) continue;
+    const id = requestIdOf(await a.getAttribute("href"));
+    if (id) ids.add(id);
+  }
+  let closed = 0;
+  // Fails loudly: a leftover that cannot be closed is the reason this run's
+  // need is refused, and the error names it.
+  for (const id of [...ids].slice(0, 5)) {
+    if ((await closeNeed(page, id)) === "closed") closed += 1;
+  }
+  console.info(`[company-chain] synthetic leftovers seen=${ids.size} closed=${closed}`);
+  return closed;
+}
+
+async function postNeed(page: Page, role: string, description: string, marker: string): Promise<string> {
+  let outcome = await submitNeed(page, role, description);
+  if (outcome === "limit" && (await closeSyntheticLeftovers(page)) > 0) {
+    outcome = await submitNeed(page, role, description);
+  }
+  expect(outcome, "the open-need limit refused this run's need").toBe("done");
   await page.goto("/lt/dashboard/company/scouting");
   const link = page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: marker }).first();
   await expect(link, "this run's need is listed among Gama's needs").toBeVisible({ timeout: 30_000 });
@@ -115,15 +149,37 @@ async function postNeed(page: Page, role: string, description: string, marker: s
 }
 
 /** Close one need through its own lifecycle controls (Gama is the active workspace). */
-async function closeNeed(page: Page, id: string): Promise<void> {
+async function closeNeed(page: Page, id: string): Promise<"closed" | "already-closed"> {
   await page.goto(`/lt/dashboard/company/scouting?request=${id}`);
-  const controls = page.getByTestId("demand-lifecycle-controls");
-  await expect(controls).toBeVisible({ timeout: 30_000 });
-  if ((await controls.getAttribute("data-demand-status")) !== "closed") {
+  const controls = page.getByTestId("demand-lifecycle-controls").first();
+  const unstructured = page.getByTestId("scouting-not-structured").first();
+  await expect(controls.or(unstructured).first()).toBeVisible({ timeout: 30_000 });
+  if (await controls.isVisible()) {
+    if ((await controls.getAttribute("data-demand-status")) === "closed") return "already-closed";
     await controls.getByTestId("demand-close").click();
     await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
+    closedHere.add(id);
+    return "closed";
   }
+  // A need that names no trade: the scouting page draws its lifecycle controls
+  // only for a structured need, so it is closed where the product offers that
+  // for every submitted need — the chat workspace's candidates result
+  // (`?result=candidates&demand=`, `company.close-demand`).
+  await page.goto(`/lt/dashboard?result=candidates&demand=${id}`);
+  const close = page.getByTestId("candidates-close-demand").filter({ visible: true }).first();
+  const reopen = page.getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
+  await expect(close.or(reopen).first(), "the need's own close/reopen action").toBeVisible({ timeout: 60_000 });
+  if (await reopen.isVisible()) return "already-closed";
+  await close.click();
+  const error = page.getByTestId("candidates-close-demand-error").first();
+  await expect(reopen.or(error).first()).toBeVisible({ timeout: 30_000 });
+  if (await error.isVisible()) throw new Error(`close refused: ${(await error.innerText()).slice(0, 120)}`);
+  closedHere.add(id);
+  return "closed";
 }
+
+/** Needs this run already closed — afterAll never revisits them. */
+const closedHere = new Set<string>();
 
 /** The worker raises a hand on need `id` from the full opportunities board (from "not interested"). */
 async function raiseHand(page: Page, id: string): Promise<void> {
@@ -145,6 +201,7 @@ async function raiseHand(page: Page, id: string): Promise<void> {
 }
 
 test("C-0b. Gama posts this run's need through the demand intake", async ({ browser }) => {
+  test.setTimeout(480_000); // room for the leftover cleanup
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   requestId = await postNeed(
@@ -346,9 +403,13 @@ test("U-3 (#2680). Gama sees the hand-raiser, labelled not assessed, with the co
 
 // This run's needs are closed after the chain (the worker's board needs them
 // open while it runs), even after a red step; interest and contact rows stay
-// as history.
+// as history. The hook has its own budget: the default 30 s hook timeout ran
+// out on the first need (already closed by U-1) and left the untraded need
+// open, which then refused the next walk's need (run 39960149411). Still-open
+// needs go first, the newest first.
 test.afterAll(async ({ browser }) => {
-  const ids = [requestId, untradedId].filter((id) => id !== "");
+  test.setTimeout(180_000);
+  const ids = [untradedId, requestId].filter((id) => id !== "" && !closedHere.has(id));
   if (ids.length === 0) return;
   const { ctx, page } = await as(browser, "manager");
   try {

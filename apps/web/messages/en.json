@@ -1058,6 +1058,18 @@
     "carryNote": {
       "no_company": "Your text was not saved: without a company workspace a draft has nothing to belong to. The demand form opens empty — you can create the company there.",
       "failed": "Your text could not be saved, so the demand form opens empty. You will need to enter the description again."
+    },
+    "headcount": {
+      "total": "Workers: {count}",
+      "teams": "Workers: {total} ({teams, plural, one {# team} other {# teams}} of {perTeam})"
+    },
+    "clarify": {
+      "title": "Please clarify",
+      "team_count_range": "You gave the number of teams as a range. How many teams exactly, and how many people in each?",
+      "per_team_range": "How many people exactly will be in each team?",
+      "team_size_missing": "How many people will be in each team? Until then the number of workers is not counted.",
+      "team_count_missing": "How many teams do you need?",
+      "headcount_unclear": "You said more than one, but not how many. How many people exactly?"
     }
   },
   "quickNav": {
@@ -14076,7 +14088,8 @@
           "location": "Where (city or country)?",
           "window": "When — which week or month?",
           "quantity": "How much is it?",
-          "headcount": "How many people are needed?"
+          "headcount": "How many people are needed?",
+          "team_size": "How many teams, and how many people in each?"
         },
         "unclear": "I am not sure whether you are offering something or looking for something. Tell me what you have, or what you need.",
         "goodsChannelGated": "You can list this on the marketplace board under Goods — people browsing the board would see it there. Nothing is saved until you publish it.",
@@ -14091,7 +14104,8 @@
         "serviceNext": "You can post this as a service offering so others can find it.",
         "chipServices": "Open the services board",
         "corrected": "Updated: {changes}.",
-        "changeInsteadOf": "{next} (instead of {previous})"
+        "changeInsteadOf": "{next} (instead of {previous})",
+        "teams": "{teams, plural, one {# team} other {# teams}} of {perTeam}"
       },
       "createOrganizationHint": "I can set up an organization with you — the details and the verification live on one page.",
       "chipCreateOrganization": "Create an organization",

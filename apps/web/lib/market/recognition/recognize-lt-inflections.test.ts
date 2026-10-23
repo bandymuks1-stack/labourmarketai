@@ -200,13 +200,44 @@ describe("the same sentence in the other active locales does not regress", () =>
     ["de", "Wir brauchen 2 Maurer in Vilnius ab November für 3 Monate, Erfahrung mit Blöcken"],
     ["pl", "Potrzebujemy 2 murarzy w Wilnie od listopada na 3 miesiące, doświadczenie z bloczkami"],
     ["nl", "We zoeken 2 metselaars in Vilnius vanaf november voor 3 maanden, ervaring met blokken"],
-  ])("%s", (locale, text) => {
+  ])("%s", (_locale, text) => {
     const keys = recognizeIntent("need_workers", { rawText: text }).recognized.map((r) => r.key);
-    for (const key of ["role", "location", "startDate", "scope"] as const) {
+    for (const key of ["role", "location", "startDate", "scope", "experience"] as const) {
       expect(keys, key).toContain(key);
     }
-    // The RU experience word sits behind an ASCII-only `\b` in the pattern
-    // table (a separate, pre-existing gap for every Cyrillic pattern there).
-    if (locale !== "ru") expect(keys).toContain("experience");
+  });
+});
+
+/**
+ * The Cyrillic patterns in the field table sat behind JS `\b`, which is
+ * ASCII-only: a space followed by a Cyrillic letter is no boundary, so every
+ * Russian pattern there ("опыт", "зарплат", "часов в недел", "документ" …)
+ * never matched. They are compiled with Unicode boundaries now.
+ */
+describe("Russian field patterns match", () => {
+  it.each([
+    ["Нужен сварщик, опыт работы 5 лет", "experience"],
+    ["Нужен сварщик, зарплата 2000 евро", "salary"],
+    ["Нужен сварщик, зарплата 2000 евро", "currency"],
+    ["Нужен сварщик, 40 часов в неделю", "weeklyHours"],
+    ["Нужен сварщик, нужны документы и паспорт", "requiredDocuments"],
+    ["Нужен сварщик, жильё: общежитие", "accommodationType"],
+    ["Нужен сварщик, договор на 6 месяцев", "contractType"],
+    ["Нужен сварщик, английский язык", "language"],
+  ])("%s → %s", (text, key) => {
+    expect(detectJobDemandFields(text).recognized.map((r) => r.key)).toContain(key);
+  });
+
+  it("a Cyrillic stem in the middle of another word is still no match", () => {
+    // "опыт" (experience) inside "неопытный" (inexperienced): the boundary
+    // before the stem is real, not dropped.
+    expect(detectJobDemandFields("Нужен сварщик, можно неопытный").recognized.map((r) => r.key)).not.toContain("experience");
+  });
+
+  it("a year count after a duration preposition is the duration, not experience", () => {
+    for (const text of ["Нужен сварщик на 2 года", "We need a welder for 2 years", "Szukamy spawacza na 2 lata"]) {
+      expect(detectJobDemandFields(text).recognized.map((r) => r.key), text).not.toContain("experience");
+    }
+    expect(detectJobDemandFields("Нужен сварщик, опыт 3 года").recognized.map((r) => r.key)).toContain("experience");
   });
 });
