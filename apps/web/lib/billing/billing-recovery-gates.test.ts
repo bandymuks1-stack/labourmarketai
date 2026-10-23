@@ -129,11 +129,24 @@ describe("GATE 1 - schedule switch (workflow layer, static)", () => {
     expect(wf).toMatch(/if \[ "\$ENABLED" != "true" \] \|\| \[ "\$HAS_SECRET" != "true" \]; then[\s\S]*?gated=true/);
   });
 
-  it("the ONLY step that can call the endpoint is conditional on the gate; the variable is not defaulted on", () => {
+  it("the workflow never calls the route over HTTP: the public host 404s /api/cron/*, the VPS runner is the one path", () => {
+    // nginx refuses /api/cron/* from the internet; only lm-cron.sh on the VPS (loopback) can reach it.
+    const nginx = readFileSync(join(REPO, "ops/vps/labourmarket.ai.nginx.conf"), "utf8");
+    expect(nginx).toMatch(/location \^~ \/api\/cron\/ \{ return 404; \}/);
+    expect(wf).not.toMatch(/\bcurl\b|\bwget\b/);
+    expect(wf).not.toMatch(/https?:\/\/[^\s"']*\/api\/cron\//);
+    expect(wf).toMatch(/lm-cron\.sh billing-recovery/);
+    const runner = readFileSync(join(REPO, "ops/vps/lm-cron.sh"), "utf8");
+    expect(runner).toMatch(/billing-recovery/);
+  });
+
+  it("an open gate fails loudly instead of claiming a sweep; the variable is not defaulted on", () => {
     expect(wf).toMatch(/- name: Run the recovery sweep\s+if: steps\.gate\.outputs\.gated == 'false'/);
-    expect(wf.match(/curl /g)?.length).toBe(1);
-    expect(wf.indexOf("curl ")).toBeGreaterThan(wf.indexOf("if: steps.gate.outputs.gated == 'false'"));
+    const step = wf.slice(wf.indexOf("- name: Run the recovery sweep"));
+    expect(step).toMatch(/exit 1/);
+    expect(step).not.toMatch(/exit 0/);
     expect(wf).not.toMatch(/BILLING_RECOVERY_SCHEDULE_ENABLED:\s*["']?true/);
+    expect(wf).not.toMatch(/^\s*schedule:/m);
     expect(wf).toMatch(/workflow_dispatch/); // manual run still passes the same gate step
   });
 

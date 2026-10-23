@@ -66,6 +66,9 @@ on:
           - profile-cv-history
           - search-support-privacy
           - public-org-locales
+          # Read-only admin console walk: the non-admin denial runs now; the admin part skips
+          # (NOT VERIFIED) until an owner-approved admin QA session exists. Dispatch only.
+          - admin-console
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -284,6 +287,7 @@ jobs:
             profile-cv-history) SPEC=tests/e2e/prod-profile-cv-history.spec.ts ;;
             search-support-privacy) SPEC=tests/e2e/prod-search-support-privacy.spec.ts ;;
             public-org-locales) SPEC=tests/e2e/prod-public-org-locales.spec.ts ;;
+            admin-console) SPEC=tests/e2e/prod-admin-console.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
