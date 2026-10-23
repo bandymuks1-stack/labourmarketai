@@ -6154,7 +6154,13 @@ export function ConversationChat({
       else if (v.workType) parts.push(workTypeLabels[v.workType] ?? v.workType);
       if (v.subject === "goods" && v.quantity) parts.push(v.quantity.raw);
       if (v.headcount !== null) {
-        parts.push(t("valueIntent.people", { count: v.headcount }));
+        // Teams of a stated size read back as both: "12 žmonių (3 brigados po 4)".
+        const people = t("valueIntent.people", { count: v.headcount });
+        parts.push(
+          v.teamCount != null && v.perTeamSize != null
+            ? `${people} (${t("valueIntent.teams", { teams: v.teamCount, perTeam: v.perTeamSize })})`
+            : people,
+        );
       }
       if (v.window) {
         if (v.window.kind === "days_count") {
@@ -6217,6 +6223,13 @@ export function ConversationChat({
       if (v.workType) out.workType = v.workType;
       if (v.country) out.country = v.country;
       if (v.headcount !== null) out.teamSize = String(v.headcount);
+      // Teams of a stated size ride the form state unrendered, like the work
+      // type: the executor stores them in `structured_v2.team` only while the
+      // number of workers still equals teams × size.
+      if (v.teamCount != null && v.perTeamSize != null) {
+        out.teamCount = String(v.teamCount);
+        out.perTeamSize = String(v.perTeamSize);
+      }
       if (v.window) {
         if (v.window.kind === "from_date" && v.window.startIso) {
           out.startDate = v.window.startIso;
@@ -6258,11 +6271,13 @@ export function ConversationChat({
         : null;
       const questions = v.missing
         .filter(
-          (m): m is "location" | "window" | "quantity" | "headcount" =>
+          (m): m is "location" | "window" | "quantity" | "headcount" | "team_size" =>
             m === "location" ||
             m === "window" ||
             m === "quantity" ||
-            m === "headcount",
+            m === "headcount" ||
+            // Teams named without a size or as a range: ask about the teams.
+            m === "team_size",
         )
         .map((m) => t(`valueIntent.ask.${m}` as Parameters<typeof t>[0]));
 

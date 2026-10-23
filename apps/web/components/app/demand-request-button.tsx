@@ -31,6 +31,7 @@ import {
   deriveCompensationHonestyFlags,
   requiresTalentPoolDisclosure,
   sanitizeStructuredDemandV2,
+  teamCompositionFor,
 } from "@/lib/demand/structured-demand-v2";
 import {
   buildWorkCategoryOptions,
@@ -132,6 +133,9 @@ export function DemandRequestButton({
   const [workType, setWorkType] = useState("");
   const [country, setCountry] = useState("");
   const [teamSize, setTeamSize] = useState("");
+  // Teams of a stated size read from the description ("3 brigados po 4") —
+  // kept beside the total only while the count still equals teams × size.
+  const [teamComposition, setTeamComposition] = useState<{ teams: number; perTeam: number } | null>(null);
   const [accommodation, setAccommodation] = useState("");
   const accommodationOptions: { value: string; label: string }[] = [
     { value: "provided_free", label: tc("accFree") },
@@ -312,6 +316,16 @@ export function DemandRequestButton({
   // server uses, so the preview never disagrees with what will be stored.
   const advWire = buildStructuredV2Input(adv);
   const advV2 = sanitizeStructuredDemandV2(advWire);
+  /** The structured cluster to send, with the team composition added while
+   *  it still explains the number of workers (the server re-checks). */
+  function withTeam(wire: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+    const team = teamCompositionFor(
+      teamSize.trim() ? Number(teamSize) : null,
+      teamComposition?.teams,
+      teamComposition?.perTeam,
+    );
+    return team ? { ...(wire ?? {}), team } : wire;
+  }
   const honestyFlags = deriveCompensationHonestyFlags(advV2);
   const talentPoolDisclosure = requiresTalentPoolDisclosure(advV2);
 
@@ -341,6 +355,9 @@ export function DemandRequestButton({
       if (s.workType && !workType) setWorkType(s.workType);
       if (s.country && !country) setCountry(s.country);
       if (s.teamSize != null && !teamSize.trim()) setTeamSize(String(s.teamSize));
+      setTeamComposition(
+        s.teamCount != null && s.perTeamSize != null ? { teams: s.teamCount, perTeam: s.perTeamSize } : null,
+      );
       if (s.startPeriod) setUrgency(s.startPeriod);
       if (s.accommodation && !accommodation) setAccommodation(s.accommodation);
       setAutoSuggested(s.reasons.length > 0);
@@ -374,7 +391,7 @@ export function DemandRequestButton({
         transport: transport || undefined,
         requiredTools: requiredTools.length > 0 ? requiredTools : undefined,
         estimate: estimateEngaged ? estimate : undefined,
-        structuredV2: advWire,
+        structuredV2: withTeam(advWire),
       }, { expectedOrganizationId: organizationId });
       setState(
         res.ok
