@@ -39,6 +39,7 @@ import {
 import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 
 /**
  * Account — SETTINGS ONLY (marketplace IA cleanup 2026-06-25).
@@ -175,7 +176,15 @@ export default async function AccountPage({
           payments are not live — one line, open on demand (owner 2026-10-10). */}
       {/* Open while billing is live: the plan and its order/portal controls are
           then real, and a closed fold hid them (owner, 2026-10-22). */}
-      <Fold title={tRoot("accountPlan.title")} testId="account-plan-fold" defaultOpen={billingLive}>
+      {/* `#lmc` lives INSIDE this fold. The chat's "Kiek turiu LMC?" chip and
+          the command finder link `/dashboard/account#lmc`; a client-side
+          navigation never expands a closed <details> (only a full page load
+          does, and only in some browsers), so without the opener the person
+          lands on a shut bar with the balance hidden — measured 2026-10-23 on
+          the local stack with billing off, which is every worker outside the
+          billing pilot. */}
+      <DetailsHashOpener targetId="account-plan" />
+      <Fold id="account-plan" title={tRoot("accountPlan.title")} testId="account-plan-fold" defaultOpen={billingLive}>
         {/* Honest payment readiness — payments are not active yet (billing
             disabled). No pay-now, no subscription-active, no paid unlock. */}
         {!billingLive && (
