@@ -364,6 +364,9 @@ async function pauseService(page: Page, l: string, id: string): Promise<void> {
 }
 
 test.afterAll(async ({ browser }) => {
+  // Own budget: the default hook timeout is 30 s, less than one listing close
+  // (company-chain run 39960149411 lost its cleanup to it).
+  test.setTimeout(300_000);
   const jobs: { what: string; slot: string; org: string | null; id: string; run: (p: Page, l: string, id: string) => Promise<void> }[] = [
     { what: "sale listing", slot: "worker", org: null, id: saleId, run: closeListing },
     { what: "rental listing", slot: "owner", org: ALFA, id: rentalId, run: closeListing },

@@ -436,7 +436,7 @@ export async function submitFinanceApprovalAction(
           p_instance_id: instanceId,
           p_reason: "finance approval submit failed",
         })
-        .catch(() => undefined);
+        .then(() => undefined, () => undefined);
     }
     if (submitRes.error) finish(ctx, noticeForRpcError(submitRes.error));
     finish(ctx, "error");

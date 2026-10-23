@@ -13,6 +13,7 @@
 import { ALL_WORK_TYPE_SLUGS } from "@/lib/taxonomy/work-categories";
 import { isIsoCountry } from "@/lib/location/country-model";
 import { foldText } from "./normalize";
+import { parseWordNumber } from "./word-numbers";
 
 export type StartPeriod = "flexible" | "this_week" | "urgent";
 export type AccommodationOffer =
@@ -31,7 +32,16 @@ export interface NeedStructureInput {
 export interface NeedStructureSuggestion {
   readonly workType: string | null;
   readonly country: string | null;
+  /** How many workers — for teams of a stated size, the TOTAL (3 × 4 = 12). */
   readonly teamSize: number | null;
+  /** Teams of a stated size: how many teams ("3 brigados po 4" → 3). Present
+   *  only when the sentence states teams; absent for an ordinary count. */
+  readonly teamCount?: number | null;
+  /** …and how many people in each (→ 4). Present only with `teamCount`. */
+  readonly perTeamSize?: number | null;
+  /** Teams the sentence names but does not size, or sizes as a range — the
+   *  headcount stays null and the person is ASKED, never guessed. */
+  readonly teamClarification?: TeamClarification;
   readonly startPeriod: StartPeriod | null;
   readonly accommodation: AccommodationOffer | null;
   readonly confidence: "high" | "medium" | "low";
@@ -52,12 +62,14 @@ export const WORK_TYPE_RULES: { slug: string; needles: string[] }[] = [
   { slug: "plasterer", needles: ["plasterer", "tinkuotoj", "штукатур", "stuckateur", "stukadoor", "tynkarz"] },
   { slug: "steel_fixer", needles: ["steel fixer", "rebar", "armaturinink", "арматурщик", "eisenflechter", "betonstaalvlechter", "zbrojarz"] },
   { slug: "insulation_worker", needles: ["insulation worker", "insulator", "izoliuotoj", "изолировщик", "isolierer", "isolatiemonteur"] },
-  { slug: "welder", needles: ["welder", "weld", "suvirin", "сварщик", "сварк", "lassers", "schweisser", "spawacz"] },
+  // NL needles are SINGULAR stems ("lasser" also reads "lassers"): a plural-
+  // only needle left "Lasser gezocht" with no occupation at all.
+  { slug: "welder", needles: ["welder", "weld", "suvirin", "сварщик", "сварк", "lasser", "schweisser", "spawacz"] },
   { slug: "electrician", needles: ["electrician", "elektrik", "электрик", "elektricien", "elektryk"] },
   { slug: "plumber", needles: ["plumber", "santechnik", "сантехник", "loodgieter", "klempner", "hydraulik"] },
   { slug: "carpenter", needles: ["carpenter", "stalius", "столяр", "плотник", "timmerman", "timmerlieden", "timmerlui", "zimmerer", "zimmermann", "tischler", "schreiner", "stolarz", "ciesl"] },
   { slug: "mason", needles: ["mason", "bricklayer", "mūrinink", "murinink", "каменщик", "metselaar", "maurer", "murarz", "murarzy"] },
-  { slug: "painter", needles: ["painter", "dažytoj", "dazytoj", "маляр", "schilders", "malarz", "malarzy"] },
+  { slug: "painter", needles: ["painter", "dažytoj", "dazytoj", "маляр", "schilder", "malarz", "malarzy"] },
   { slug: "tiler", needles: ["tiler", "plytel", "плиточник", "tegelzetter", "fliesenleger", "glazurnik", "plytkarz"] },
   { slug: "roofer", needles: ["roofer", "stogden", "кровельщик", "dakdekker", "dachdecker", "dekarz", "dekarzy"] },
   { slug: "crane_operator", needles: ["crane operator", "crane", "krano operat", "крановщик", "kraanmachinist", "kranfuhrer", "operator zurawia"] },
@@ -107,7 +119,10 @@ export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   // prefix of ordinary words ("alyt" in "analytic", "uten" = Norwegian
   // "without"), the needles are the inflected forms themselves.
   { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilni", "вильн", "wiln", "kaun", "klaipėd", "klaiped", "šiaul", "siaul", "panevėž", "panevez", "alytuj", "alytus", "alytaus", "marijampol", "utenoj", "utena", "utenos"] },
-  { code: "LV", needles: ["latvia", "latvij", "латв", "riga", "ryga"] },
+  // "^riga" / "^ryg": a word START — "riga" is inside "brigada" / "brigade",
+  // "ryga" inside the Polish "brygada". "^ryg" also reads the Lithuanian
+  // locative "Rygoje", which the old nominative needle "ryga" never did.
+  { code: "LV", needles: ["latvia", "latvij", "латв", "^riga", "^ryg"] },
   { code: "EE", needles: ["estonia", "eston", "estij", "эстон", "tallinn", "talin"] },
   { code: "PL", needles: ["poland", "lenkij", "polska", "польш", "warsaw", "warszaw", "varsuv", "krak", "wroc", "vroclav", "gdansk", "gdańsk"] },
   { code: "DE", needles: ["germany", "vokietij", "deutschland", "герман", "berlin", "berlyn", "hamburg", "munich", "münchen", "munchen", "miunchen", "frankfurt", "cologne", "köln", "koln", "keln", "stuttgart", "stutgart"] },
@@ -144,7 +159,7 @@ export const CITY_LABELS: Readonly<Record<string, string>> = Object.freeze({
   "šiaul": "Šiauliai", siaul: "Šiauliai", "panevėž": "Panevėžys", panevez: "Panevėžys",
   alytuj: "Alytus", alytus: "Alytus", alytaus: "Alytus", marijampol: "Marijampolė",
   utenoj: "Utena", utena: "Utena", utenos: "Utena",
-  riga: "Riga", ryga: "Riga", tallinn: "Tallinn", talin: "Tallinn",
+  "^riga": "Riga", "^ryg": "Riga", tallinn: "Tallinn", talin: "Tallinn",
   warsaw: "Warszawa", warszaw: "Warszawa", varsuv: "Warszawa", krak: "Kraków", wroc: "Wrocław", vroclav: "Wrocław", gdansk: "Gdańsk", "gdańsk": "Gdańsk",
   berlin: "Berlin", berlyn: "Berlin", hamburg: "Hamburg", munich: "München", "münchen": "München", munchen: "München", miunchen: "München", frankfurt: "Frankfurt", cologne: "Köln", "köln": "Köln", koln: "Köln", keln: "Köln", stuttgart: "Stuttgart", stutgart: "Stuttgart",
   amsterdam: "Amsterdam", rotterdam: "Rotterdam", roterdam: "Rotterdam", "роттердам": "Rotterdam", hague: "Den Haag", haag: "Den Haag", haga: "Den Haag", eindhoven: "Eindhoven", utrecht: "Utrecht",
@@ -195,13 +210,30 @@ export function maskServiceNoun(hay: string): string {
   return hay.replace(SERVICE_NOUN_RE, " ");
 }
 
+/**
+ * Does the hay contain this needle? Needles are substrings ("lietuv" reads
+ * "Lietuvoje"). A needle written "^riga" must START a word: "riga" sits
+ * inside "brigada" / "brigade", so every brigade sentence used to resolve to
+ * Latvia.
+ */
+const WORD_START_NEEDLES = new Map<string, RegExp>();
+export function hayHasNeedle(hay: string, needle: string): boolean {
+  if (!needle.startsWith("^")) return hay.includes(needle);
+  let re = WORD_START_NEEDLES.get(needle);
+  if (!re) {
+    re = new RegExp(`(?:^|[^\\p{L}\\p{N}])${escapeForRegex(needle.slice(1))}`, "u");
+    WORD_START_NEEDLES.set(needle, re);
+  }
+  return re.test(hay);
+}
+
 function firstMatchWithNeedle<T extends { needles: string[] }>(
   rules: T[],
   hay: string,
 ): { rule: T; needle: string } | null {
   for (const r of rules) {
     for (const n of r.needles) {
-      if (hay.includes(n)) return { rule: r, needle: n };
+      if (hayHasNeedle(hay, n)) return { rule: r, needle: n };
     }
   }
   return null;
@@ -249,7 +281,7 @@ function escapeForRegex(s: string): string {
  */
 /** A number directly followed by a word for PEOPLE. */
 const PEOPLE_COUNT_RE =
-  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i;
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i;
 
 /** Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
  *  halves of pairs whose other half was already here; DE/PL/NL the same
@@ -285,34 +317,162 @@ function firstWordOf(rest: string): string {
 /**
  * TEAMS of a stated size — "3 brigadų po 4 žmones", "3 crews of 4 people",
  * "3 бригады по 4 человека", "3 Teams zu 4", "3 brygady po 4 osoby", "3
- * ploegen van 4". Neither number is the headcount (that is 3 × 4), and the
- * need models hold no team fields yet, so a reader that sees this leaves the
- * headcount UNRESOLVED and flags it rather than reporting 3 or 4.
+ * ploegen van 4". The need is 3 teams AND 3 × 4 = 12 workers: the total is
+ * the headcount (`teamSize`), and the composition rides beside it
+ * (`teamCount`, `perTeamSize`). Neither number alone is ever the headcount.
  */
 export interface TeamComposition {
   readonly teams: number;
   readonly perTeam: number;
 }
 
-const TEAM_COMPOSITION_RES: readonly RegExp[] = [
-  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+brigad\p{L}*\s+po\s+(\d{1,3})(?!\d)/u, // lt (folded)
-  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+(?:crews?|teams?|brigades?|gangs?)\s+of\s+(\d{1,3})(?!\d)/u, // en
-  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+(?:бригад\p{L}*|команд\p{L}*)\s+по\s+(\d{1,3})(?!\d)/u, // ru
-  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+(?:teams?|kolonnen|trupps?)\s+(?:zu|mit|a|je)\s+(\d{1,3})(?!\d)/u, // de
-  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+brygad\p{L}*\s+po\s+(\d{1,3})(?!\d)/u, // pl
-  /(?:^|[^\p{L}\p{N}])(\d{1,3})\s+(?:ploegen|teams)\s+van\s+(\d{1,3})(?!\d)/u, // nl
-];
+/** Why a team statement cannot be turned into a headcount without asking:
+ *  a RANGE of teams ("3–4 brigados"), a range of people per team ("po 3–4"),
+ *  or teams with no size at all ("reikia brigados", "2 crews"). */
+export type TeamClarification =
+  | "team_count_range"
+  | "per_team_range"
+  | "team_size_missing"
+  | "team_count_missing";
 
-export function detectTeamComposition(text: string | null | undefined): TeamComposition | null {
-  const folded = foldText(text ?? "");
-  for (const re of TEAM_COMPOSITION_RES) {
-    const m = folded.match(re);
-    if (!m) continue;
-    const teams = Number.parseInt(m[1], 10);
-    const perTeam = Number.parseInt(m[2], 10);
-    if (teams >= 1 && perTeam >= 1) return { teams, perTeam };
+export type TeamCompositionReading =
+  | { readonly status: "known"; readonly teams: number; readonly perTeam: number; readonly total: number }
+  | { readonly status: "unclear"; readonly clarification: TeamClarification; readonly teams: number | null };
+
+// Team nouns, folded, all six locales. The foreman ("brigadininkas",
+// "бригадир", "brygadzista") is a PERSON, not a team, and is excluded.
+const TEAM_NOUN =
+  "(?:brigad(?!inink)\\p{L}*|crews?|brigades?|gangs?|teams?|бригад(?!ир)\\p{L}*|звен\\p{L}*|команд\\p{L}*|kolonnen?|trupps?|brigaden?|brygad(?!zist)\\p{L}*|ekip\\p{L}*|ploeg(?:en)?)";
+// The generic "team"/"команда" ("our team", "the command") only counts when a
+// number and a size are both stated; a bare mention never asks for a size.
+const STRICT_TEAM_NOUN =
+  "(?:brigad(?!inink)\\p{L}*|crews?|brigades?|gangs?|бригад(?!ир)\\p{L}*|звен\\p{L}*|kolonnen?|trupps?|brigaden?|brygad(?!zist)\\p{L}*|ekip\\p{L}*|ploeg(?:en)?)";
+/** "po" (lt, pl), "of" (en), "по" (ru), "zu/mit/je/à" (de), "van" (nl) —
+ *  and "a team OF n": "iš" (lt), "из" (ru), "aus" (de), "z" (pl), "uit" (nl). */
+const PER_TEAM_WORD = "(?:po|of|по|zu|mit|je|a|van|is|из|aus|z|uit)";
+const EDGE = "(?:^|[^\\p{L}\\p{N}])";
+const COUNT = "(\\d{1,3}|\\p{L}+)";
+const RANGE = "(\\d{1,3})\\s*[-–—]\\s*(\\d{1,3})";
+
+const TEAM_COUNT_RANGE_RE = new RegExp(`${EDGE}${RANGE}\\s+${TEAM_NOUN}`, "u");
+const PER_TEAM_RANGE_RE = new RegExp(`${TEAM_NOUN}\\s+${PER_TEAM_WORD}\\s+${RANGE}`, "u");
+const KNOWN_RE = new RegExp(
+  `${EDGE}(?:${COUNT}\\s+)?(${TEAM_NOUN})\\s+${PER_TEAM_WORD}\\s+(\\d{1,3})(?!\\d|\\s*[-–—]\\s*\\d)`,
+  "u",
+);
+/** A team noun in the SINGULAR — "brigada iš 4", "бригада из 4", "eine Kolonne
+ *  aus 4": one team of that size even with no count word before it. */
+const SINGULAR_TEAM_TOKEN = /^(?:brigada|brigados|crew|team|gang|brigade|бригада|бригаду|kolonne|trupp|brygada|brygady|brygade|ekipa|ekipy|ekipe|ploeg)$/u;
+
+const STRICT_TEAM_TOKEN = new RegExp(`^${STRICT_TEAM_NOUN}$`, "u");
+/** A verb that REQUESTS what follows it ("reikia brigados", "need a crew"). */
+const TEAM_REQUEST_VERB =
+  /^(?:reikia|reikalinga|reikalingos|reikalingi|ieskome|ieskau|need|needs|needed|hiring|seeking|require|нужна|нужны|нужен|нужно|требуется|требуются|ищем|ищу|suchen|brauchen|benotigen|szukamy|potrzebujemy|poszukujemy|zatrudnimy|zoeken|zoekt)$/u;
+/** …or one that follows the noun ("Kolonne gesucht", "ploeg gezocht"). */
+const TEAM_REQUEST_AFTER =
+  /^(?:gesucht|gezocht|wanted|needed|nodig|reikalinga|reikalingos|требуется|нужна|potrzebna|potrzebne|poszukiwana)$/u;
+/** A team noun after a possessive or determiner is CONTEXT, not a request:
+ *  "to join our crew", "į mūsų brigadą", "в нашу бригаду", "in unsere
+ *  Kolonne", "do naszej brygady", "in onze ploeg". */
+const TEAM_CONTEXT_BEFORE =
+  /^(?:our|my|your|their|the|this|musu|mano|jusu|savo|ju|sia|нашу|нашей|наша|наш|нашим|нашу|мою|свою|эту|unsere|unserem|unserer|unser|meine|ihre|die|der|den|nasza|naszej|naszą|moja|swojej|onze|ons|mijn|jullie|de|het)$/u;
+// A team LEADER is one person, not a team: "brigados vadovo", "crew leader",
+// "kierownika brygady", "руководитель бригады" never ask for a team size.
+const LEADER_AFTER = /^(?:vadov\p{L}*|leader|lead|chief|manager|foreman|kierownik\p{L}*)$/u;
+const LEADER_BEFORE = /^(?:kierownik\p{L}*|руководител\p{L}*|начальник\p{L}*|leader|lead|manager|vadov\p{L}*)$/u;
+
+/** One team, said with an article or the numeral "one". */
+const ONE_TEAM_WORD = /^(?:a|an|one|ein|eine|einen|een|jedna|jedne|jedno|одна|одну|одной|viena|vienos|vieną)$/u;
+
+/**
+ * A team REQUESTED without a size — "reikia brigados", "Need 2 crews", "Нужна
+ * бригада", "Wir suchen eine Kolonne", "Szukamy brygady", "We zoeken een
+ * ploeg". A team noun used as context ("join our crew") is not one, nor is
+ * "5 crew" (five crew members — people, not teams).
+ */
+function requestedTeamWithoutSize(folded: string): { teams: number | null } | null {
+  const tokens = folded.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  for (let i = 0; i < tokens.length; i++) {
+    if (!STRICT_TEAM_TOKEN.test(tokens[i])) continue;
+    const prev = tokens[i - 1];
+    const prev2 = tokens[i - 2];
+    const next = tokens[i + 1];
+    if ((next && LEADER_AFTER.test(next)) || (prev && LEADER_BEFORE.test(prev))) continue;
+    if (prev && TEAM_CONTEXT_BEFORE.test(prev)) continue;
+    const count = countWord(prev);
+    if (tokens[i] === "crew" && count !== null && count > 1) continue;
+    const requested =
+      count !== null ||
+      (prev !== undefined && TEAM_REQUEST_VERB.test(prev)) ||
+      (prev2 !== undefined && TEAM_REQUEST_VERB.test(prev2) && count !== null) ||
+      (next !== undefined && TEAM_REQUEST_AFTER.test(next));
+    if (requested) return { teams: count };
   }
   return null;
+}
+
+/** Does the sentence state a count of PEOPLE ("Need 2 welders", "reikia 3
+ *  darbuotojų")? Then that count is the headcount, whatever team it joins. */
+function statesPeopleCount(text: string): boolean {
+  const lower = text.toLowerCase();
+  const wt = recognisedWorkType(lower);
+  return detectPeopleCount(wt.hay, wt.needle) !== null;
+}
+
+/** A digit or a written number ("dvi", "trys", "three", "a") — null otherwise. */
+function countWord(token: string | undefined): number | null {
+  if (!token) return null;
+  if (/^\d{1,3}$/.test(token)) return Number.parseInt(token, 10);
+  if (ONE_TEAM_WORD.test(token)) return 1;
+  return parseWordNumber(token);
+}
+
+/** Teams stated in the sentence — known (teams × size) or needing a question. */
+export function readTeamComposition(text: string | null | undefined): TeamCompositionReading | null {
+  const folded = foldText(text ?? "");
+  if (!folded) return null;
+  if (TEAM_COUNT_RANGE_RE.test(folded)) {
+    return { status: "unclear", clarification: "team_count_range", teams: null };
+  }
+  const known = folded.match(KNOWN_RE);
+  if (known) {
+    const perTeam = Number.parseInt(known[3], 10);
+    // No count word, but a SINGULAR team noun: "brigada iš 4" is one team.
+    const teams =
+      countWord(known[1]) ??
+      (SINGULAR_TEAM_TOKEN.test(known[2]) && !/^(?:reikalingos|reikalingi|нужны|требуются|potrzebne)$/u.test(known[1] ?? "")
+        ? 1
+        : null);
+    if (teams !== null && teams >= 1 && teams <= 100 && perTeam >= 1 && perTeam <= 100) {
+      return { status: "known", teams, perTeam, total: teams * perTeam };
+    }
+    // "brigadų po 4": the size is stated, how many teams is not — unless the
+    // sentence counts the people itself, OUTSIDE the team phrase (the "4
+    // žmones" of "po 4 žmones" is the size per team, not a headcount).
+    const outside = `${folded.slice(0, known.index)} ${folded.slice((known.index ?? 0) + known[0].length)}`;
+    if (perTeam >= 1 && perTeam <= 100 && teams === null && !statesPeopleCount(outside)) {
+      return { status: "unclear", clarification: "team_count_missing", teams: null };
+    }
+  }
+  const perRange = folded.match(PER_TEAM_RANGE_RE);
+  if (perRange) {
+    // "3 brigados po 3–4": the teams are known, the size per team is not.
+    const before = folded.slice(0, perRange.index).trim().split(/[^\p{L}\p{N}]+/u).pop();
+    return { status: "unclear", clarification: "per_team_range", teams: countWord(before) };
+  }
+  // A team requested with no size asks for the size — but an explicit count
+  // of people ("Need 2 welders to join a crew") is the headcount already.
+  const missing = requestedTeamWithoutSize(folded);
+  if (missing && !statesPeopleCount(text ?? "")) {
+    return { status: "unclear", clarification: "team_size_missing", teams: missing.teams };
+  }
+  return null;
+}
+
+/** The KNOWN composition only (teams × size), or null. */
+export function detectTeamComposition(text: string | null | undefined): TeamComposition | null {
+  const r = readTeamComposition(text);
+  return r?.status === "known" ? { teams: r.teams, perTeam: r.perTeam } : null;
 }
 
 function adjacentOccupationCountRe(occupationNeedle: string): RegExp {
@@ -413,8 +573,10 @@ function recognisedWorkType(roleHay: string): {
  */
 export function countPeopleInNeed(input: NeedStructureInput): number | null {
   const roleHay = needRoleHay(input);
-  // "3 brigadų po 4 žmones" names 3 × 4 people; neither number alone is it.
-  if (detectTeamComposition(roleHay)) return null;
+  // "3 brigadų po 4 žmones" is 3 × 4 = 12 people — never 3 or 4. Teams the
+  // sentence does not size leave the count unknown.
+  const teams = readTeamComposition(roleHay);
+  if (teams) return teams.status === "known" ? teams.total : null;
   const wt = recognisedWorkType(roleHay);
   return detectPeopleCount(wt.hay, wt.needle);
 }
@@ -436,11 +598,17 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
 
   // Only the needle of a RECOGNISED work type is handed to the counter — an
   // unrecognised occupation must not silently lend its noun to a headcount.
-  // Teams of a stated size ("3 brigadų po 4 žmones") leave it unresolved and
-  // flagged: the total is 3 × 4, and there is no team field to hold it.
-  const composition = detectTeamComposition(roleHay);
-  if (composition) reasons.push(`team_composition:${composition.teams}x${composition.perTeam}`);
-  const teamSize = composition ? null : detectTeamSize(workTypeHay, occupationNeedle);
+  // Teams of a stated size ("3 brigadų po 4 žmones") are 3 teams AND 12
+  // workers: the total is the team size, the composition rides beside it.
+  // Teams with no size, or a range, leave the count null and ASK.
+  const teams = readTeamComposition(roleHay);
+  if (teams?.status === "known") reasons.push(`team_composition:${teams.teams}x${teams.perTeam}`);
+  if (teams?.status === "unclear") reasons.push(`team_clarification:${teams.clarification}`);
+  const teamSize = teams
+    ? teams.status === "known"
+      ? teams.total
+      : null
+    : detectTeamSize(workTypeHay, occupationNeedle);
   if (teamSize != null) reasons.push(`team_size:${teamSize}`);
 
   const startPeriod = detectStartPeriod(roleHay);
@@ -457,12 +625,18 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
 
   // Never guess boldly: if we couldn't even identify the work type, or nothing
   // confident matched, flag it for human review.
-  const needsReview = workType === null || confidence === "low" || composition !== null;
+  const needsReview = workType === null || confidence === "low" || teams?.status === "unclear";
 
   return {
     workType,
     country,
     teamSize,
+    // Optional keys are only PRESENT when teams were stated, so every
+    // existing reader (and every exact-shape assertion) sees the same object.
+    ...(teams?.status === "known" ? { teamCount: teams.teams, perTeamSize: teams.perTeam } : {}),
+    ...(teams?.status === "unclear"
+      ? { teamCount: teams.teams, perTeamSize: null, teamClarification: teams.clarification }
+      : {}),
     startPeriod,
     accommodation,
     confidence,

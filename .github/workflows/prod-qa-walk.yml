@@ -66,6 +66,9 @@ on:
           - profile-cv-history
           - search-support-privacy
           - public-org-locales
+          # Read-only admin console walk: the non-admin denial runs now; the admin part skips
+          # (NOT VERIFIED) until an owner-approved admin QA session exists. Dispatch only.
+          - admin-console
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -148,12 +151,68 @@ jobs:
     # After the debounce, so a cancelled merge-burst run never counts or spends the budget.
     needs: debounce
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 8
     permissions:
       actions: read
+      contents: read
+    # AUTOMATIC BRAKES (owner order 2026-10-23, after one brigade walk made ~8,100 Supabase requests in
+    # 6.5 min — run 39795574869). A walk starts only when ALL of these hold; each refusal prints `::error::`
+    # with its reason, before any install, session mint or production request. Thresholds live in ONE place,
+    # `.github/scripts/walk-brakes.mjs` THRESHOLDS (unit-tested in apps/web/lib/guards/walk-brakes.test.ts):
+    #   (a) health   3 x GET https://labourmarket.ai/api/health, 5 s apart: EVERY sample must be HTTP 200
+    #                with ok=true, checks.db.ms <= 1500, checks.auth.ms <= 1500 and vacancyFreshness
+    #                answered (ok=true). budget_override does NOT lift it. Re-checked in the walk job right
+    #                before the session mint (the walk may have queued behind another one).
+    #   (b) errors   the last 2 walks that reached production both failed in their FIRST step, or with
+    #                infrastructure / 5xx errors (mint failure, no result file, 5xx / net::ERR / timeout
+    #                markers), and the latest ended < 60 min ago -> refuse. After the 60 min cool-down one
+    #                probe walk may run (circuit breaker; it never locks out for good). A product assertion
+    #                failing later in a walk is not an infrastructure signal. budget_override lifts it.
+    #   (c) supabase OPTIONAL, only with secret SUPABASE_ACCESS_TOKEN: Supabase edge answers in the last
+    #                15 min above 25 x 5xx or 10 x 429 -> refuse. No token / unreadable logs: skipped with a
+    #                notice. budget_override lifts it.
+    #   (d) gap      >= 180 s between the end of the previous walk and the session mint of the next one,
+    #                enforced in the WALK job after its concurrency wait (the only place it can hold): it
+    #                waits out the remainder instead of refusing, because a refusal there would stop the
+    #                acceptance campaign's chain. budget_override does NOT lift it.
+    #   (e) deploy   no deploy-vps.yml run in progress or queued, and none ended < 5 min ago: the
+    #                blue/green switch runs two Next servers on one origin, so a walk then measures the
+    #                deploy (run 39978076973: Cloudflare 522, 45 s timeouts, while Supabase was clean).
+    #                budget_override does NOT lift it. Re-checked in the walk job before the session mint.
+    #   (f) budget   PROD_QA_WALK_DAILY_BUDGET walks that reached production in 24 h (below).
     env:
-      PROD_QA_WALK_DAILY_BUDGET: "12"
+      # Owner allowed up to 200 (2026-10-23, #2659) once a controlled measurement proves it safe.
+      # Measured after the fan-out fix (#2705): the heaviest walk (brigade-formation, run 39985839991)
+      # = ~5.7k Supabase requests in ~3.5 min, 0 x 5xx, 0 x 429 (before: 8.1k in 6.5 min). Set to 48 —
+      # not 200 — because an origin stall on 2026-10-23 13:50 happened while /api/health still passed, so
+      # the health brake cannot catch that kind of stall until its cause is fixed. Raise after that.
+      PROD_QA_WALK_DAILY_BUDGET: "48"
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: "Brake (a): production health (the override does not lift it)"
+        run: node .github/scripts/walk-brakes.mjs health
+
+      - name: "Brake (e): no production deploy running or just finished (the override does not lift it)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/walk-brakes.mjs deploy
+
+      - name: "Brake (b): the last walks did not fail for infrastructure"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OVERRIDE: ${{ inputs.budget_override }}
+        run: node .github/scripts/walk-brakes.mjs errors
+
+      - name: "Brake (c): Supabase edge 5xx / 429 (optional, needs SUPABASE_ACCESS_TOKEN)"
+        env:
+          OVERRIDE: ${{ inputs.budget_override }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+        run: node .github/scripts/walk-brakes.mjs supabase
+
       - name: Count production walks in the last 24 h
         shell: bash
         env:
@@ -162,25 +221,18 @@ jobs:
         run: |
           set -euo pipefail
           since=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
-          # A run CONSUMES the budget only when it reached production: its
-          # `walk` job's first production step (provision + mint) started.
-          # Runs this job refused, runs cancelled before the walk (a superseded
-          # pending run, a debounced merge burst) and runs still waiting for
-          # the environment never touched production. Counting them (the first
-          # version counted every created run) made each refused re-dispatch
-          # extend the very lock-out it was refused by: dispatching once an hour
-          # while over budget would never get a walk through again.
-          runs=$(gh api --paginate \
-            "repos/${GITHUB_REPOSITORY}/actions/workflows/prod-qa-walk.yml/runs?created=%3E%3D${since}&per_page=100" \
-            --jq ".workflow_runs[] | select(.id != ${GITHUB_RUN_ID}) | .id")
-          used=0
-          for id in ${runs}; do
-            reached=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${id}/jobs?filter=all&per_page=100" \
-              --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
-            if [ "${reached}" -gt 0 ]; then
-              used=$((used + 1))
-            fi
-          done
+          # A run CONSUMES the budget only when it reached production. Runs this
+          # job refused, runs cancelled before the walk (a superseded pending
+          # run, a debounced merge burst) and runs still waiting for the
+          # environment never touched production and do not count (counting
+          # them made each refused re-dispatch extend its own lock-out).
+          # At 200 walks a day the former count (one jobs API call per run in
+          # 24 h, ~200 calls per check) would pass the GITHUB_TOKEN rate limit;
+          # walk-brakes.mjs counts finished walks from their artifacts
+          # (prod-qa-<spec>-<run id>, uploaded by every walk job) in a few calls
+          # and reads only the runs still in flight one by one.
+          used=$(node .github/scripts/walk-brakes.mjs count | sed -n 's/^used=//p')
+          [ -n "${used}" ] || { echo "::error::could not count the production walks of the last 24 h"; exit 1; }
           echo "production walks that reached production since ${since}: ${used} (budget ${PROD_QA_WALK_DAILY_BUDGET})" | tee -a "$GITHUB_STEP_SUMMARY"
           if [ "${used}" -ge "${PROD_QA_WALK_DAILY_BUDGET}" ]; then
             if [ "${OVERRIDE}" = "true" ]; then
@@ -200,6 +252,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production-qa
+    permissions:
+      contents: read
+      actions: read # the gap brake reads the previous walk's end time
     env:
       PROD_QA_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -209,6 +264,16 @@ jobs:
       PROD_QA_WALK: "1"
     steps:
       - uses: actions/checkout@v4
+
+      # The brakes again, AFTER the concurrency wait and BEFORE anything touches
+      # production: the budget job's answers may be minutes old by now. The gap
+      # waits first; the deploy and health checks run last, right before the
+      # session mint. None is lifted by budget_override.
+      - name: "Brake (d): minimum gap after the previous walk (waits)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/walk-brakes.mjs gap
+
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -216,6 +281,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm -C apps/web exec playwright install --with-deps chromium
+
+      - name: "Brake (e): no production deploy running or just finished"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/walk-brakes.mjs deploy
+
+      - name: "Brake (a): production health, right before the walk"
+        run: node .github/scripts/walk-brakes.mjs health
 
       - name: Provision + mint the synthetic cast (allowlist only)
         shell: bash
@@ -280,6 +353,7 @@ jobs:
             profile-cv-history) SPEC=tests/e2e/prod-profile-cv-history.spec.ts ;;
             search-support-privacy) SPEC=tests/e2e/prod-search-support-privacy.spec.ts ;;
             public-org-locales) SPEC=tests/e2e/prod-public-org-locales.spec.ts ;;
+            admin-console) SPEC=tests/e2e/prod-admin-console.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
