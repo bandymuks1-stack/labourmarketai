@@ -165,6 +165,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261023171500_",
       // 2026-10-23 (RED by SECURITY DEFINER + GRANT, needs-human-gate): goods purchase lifecycle (6.13 + 6.14).
       "20261023161500_",
+      // 2026-10-23 (RED by GRANT, needs-human-gate, NOT applied): runtime stall sampler evidence table.
+      "20261023190000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
