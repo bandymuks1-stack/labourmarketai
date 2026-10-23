@@ -40,6 +40,8 @@ on:
           - chat-continuity
           - journal-confirm
           - calendar-planning
+          # CAL-8 rota / shift-pattern walk (weekly + N-on/M-off, collision warns, UI cancel). Dispatch only.
+          - rota-repeat
           - marketplace
           - agency-chain
           - learning-practice
@@ -326,6 +328,7 @@ jobs:
             chat-continuity) SPEC=tests/e2e/prod-chat-continuity.spec.ts ;;
             journal-confirm) SPEC=tests/e2e/prod-journal-confirm.spec.ts ;;
             calendar-planning) SPEC=tests/e2e/prod-calendar-planning.spec.ts ;;
+            rota-repeat) SPEC=tests/e2e/prod-rota-repeat.spec.ts ;;
             marketplace) SPEC=tests/e2e/prod-marketplace.spec.ts ;;
             agency-chain) SPEC=tests/e2e/prod-agency-chain.spec.ts ;;
             learning-practice) SPEC=tests/e2e/prod-learning-practice.spec.ts ;;
