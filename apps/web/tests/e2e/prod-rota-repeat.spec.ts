@@ -85,6 +85,11 @@ const CYCLE_SUMMARY = LT.workPlan.repeat.summaryCycle.replace("{on}", "2").repla
 
 /** Plan ids this run created and has not yet cancelled. */
 const created = new Map<string, string>(); // note → entry id
+/** Set BEFORE the first submit click: from then on a plan carrying TAG may
+ *  exist in production even if no id was captured, so the afterAll sweep by
+ *  TAG must run unless step 5 already swept and verified. */
+let submitted = false;
+let sweptByTag = false;
 
 async function as(browser: Browser, slot: string): Promise<{ page: Page; close: () => Promise<void> }> {
   const ctx = await browser.newContext({ storageState: state(slot), locale: "lt-LT" });
@@ -115,11 +120,25 @@ async function cancelAll(page: Page, note: string | RegExp): Promise<void> {
   for (let i = 0; i < 12 && (await entryFor(page, note).count()) > 0; i += 1) {
     const entry = entryFor(page, note).first();
     const id = ((await entry.getAttribute("id")) ?? "").replace(/^work-plan-/, "");
+    expect(id, "a listed plan has an id").toMatch(/^[0-9a-f-]{36}$/i);
     await entry.getByTestId("work-plan-cancel").click();
-    await expect(page.getByTestId("work-plan-notice")).toHaveAttribute("data-outcome", "cancelled", { timeout: 30_000 });
+    // Wait for THIS entry to leave the list: an earlier cancel's "cancelled"
+    // notice is still on screen, so the notice alone cannot prove this one.
+    await expect(page.locator(`[id="work-plan-${id}"]`)).toHaveCount(0, { timeout: 30_000 });
+    await expect(page.getByTestId("work-plan-notice")).toHaveAttribute("data-outcome", "cancelled");
     for (const [k, v] of created) if (v === id) created.delete(k);
   }
   await expect(entryFor(page, note)).toHaveCount(0);
+}
+
+/** A plan page with no outcome notice on it (no `?plan=` in the URL), so the
+ *  next notice can only be the next submission's. */
+async function freshPlanPage(page: Page): Promise<void> {
+  if ((await page.getByTestId("work-plan-notice").count()) > 0) {
+    await page.goto("/lt/dashboard/company/planning#work-plan");
+  }
+  await expect(page.getByTestId("work-plan-section")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("work-plan-notice")).toHaveCount(0);
 }
 
 /**
@@ -169,11 +188,16 @@ async function fillPlan(
   await expect(page.getByTestId(`work-plan-repeat-${opts.mode}`)).toBeChecked();
 }
 
-/** Submit, read the outcome notice, and capture the new entry's id. */
+/** Submit and read THIS submission's outcome notice. The page must carry no
+ *  notice before the click (see `freshPlanPage`), so the notice that appears
+ *  can only be the one the create action redirected back with. */
 async function submitPlan(page: Page, note: string): Promise<string> {
-  await page.getByTestId("work-plan-submit").click();
   const notice = page.getByTestId("work-plan-notice");
+  await expect(notice, "no earlier outcome notice is on the page before submitting").toHaveCount(0);
+  submitted = true;
+  await page.getByTestId("work-plan-submit").click();
   await expect(notice).toBeVisible({ timeout: 30_000 });
+  await expect(page).toHaveURL(/[?&]plan=/);
   const outcome = (await notice.getAttribute("data-outcome")) ?? "";
   console.info(`[rota] ${note}: outcome=${outcome} notice="${(await notice.innerText()).trim()}"`);
   return outcome;
@@ -189,13 +213,18 @@ async function captureEntry(page: Page, note: string): Promise<string> {
 }
 
 test.afterAll(async ({ browser }) => {
-  // Safety net only: the last step cancels through the UI and empties `created`.
-  if (!ENABLED || created.size === 0) return;
+  // Safety net: whenever a submit may have reached production and step 5 did
+  // not finish its sweep, cancel by this run's TAG — independent of whether
+  // any id was captured — and verify by TAG that nothing of this run is left.
+  if (!ENABLED || !submitted || sweptByTag) return;
   const { page, close } = await as(browser, "owner");
   try {
     await openPlanning(page);
     await cancelAll(page, TAG);
-    console.info(`[rota] afterAll cleanup ran; left uncancelled: ${created.size}`);
+    await page.goto("/lt/dashboard/company/planning#work-plan");
+    await expect(page.getByTestId("work-plan-section")).toBeVisible({ timeout: 30_000 });
+    await expect(entryFor(page, TAG), "no plan of this run is left after the sweep").toHaveCount(0);
+    console.info("[rota] afterAll sweep by run tag ran; nothing of this run left listed");
   } finally {
     await close();
   }
@@ -208,6 +237,7 @@ test("1. the employer plans a weekly Mon/Wed/Fri rota for two weeks", async ({ b
     // A rota-walk plan left behind by an interrupted earlier run is cancelled
     // first, through the same control, so it cannot pose as this run's rows.
     await cancelAll(page, ANY_ROTA_WALK);
+    await freshPlanPage(page);
 
     await fillPlan(page, { start: M, end: WEEKLY_END, note: NOTE_WEEKLY, mode: "weekly" });
     const outcome = await submitPlan(page, NOTE_WEEKLY);
@@ -228,6 +258,7 @@ test("2. a 2-on/1-off rotation on the same worker collides — the product warns
   const { page, close } = await as(browser, "owner");
   try {
     await openPlanning(page);
+    await freshPlanPage(page);
     await fillPlan(page, { start: M, end: CYCLE_END, note: NOTE_CYCLE, mode: "cycle" });
     const outcome = await submitPlan(page, NOTE_CYCLE);
     const notice = page.getByTestId("work-plan-notice");
@@ -318,6 +349,11 @@ test("5. the employer cancels both rotas and the worker's calendar is clear of t
     await openPlanning(owner.page);
     await cancelAll(owner.page, TAG);
     expect(created.size, "every plan this run created is cancelled").toBe(0);
+    // Verified by TAG on a fresh load, not only by the ids this run captured.
+    await owner.page.goto("/lt/dashboard/company/planning#work-plan");
+    await expect(owner.page.getByTestId("work-plan-section")).toBeVisible({ timeout: 30_000 });
+    await expect(entryFor(owner.page, TAG)).toHaveCount(0);
+    sweptByTag = true;
   } finally {
     await owner.close();
   }
