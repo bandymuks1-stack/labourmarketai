@@ -100,15 +100,20 @@ export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   // locative — an employer writes "Vilniuje", never "Vilnius". So the one
   // country whose own language this product leads in was the one country a bare
   // city name failed to resolve. `lietuv` already caught "Lietuvoje"; the cities
-  // now behave the same way.
-  { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilni", "kaun", "klaipėd", "klaiped"] },
+  // now behave the same way. The other county seats and the RU/PL names of
+  // Vilnius were absent, so "Šiauliuose", "Panevėžyje" or "в Вильнюсе" still
+  // left the location empty (production 2026-10-23). Where a short stem is a
+  // prefix of ordinary words ("alyt" in "analytic", "uten" = Norwegian
+  // "without"), the needles are the inflected forms themselves.
+  { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilni", "вильн", "wiln", "kaun", "klaipėd", "klaiped", "šiaul", "siaul", "panevėž", "panevez", "alytuj", "alytus", "alytaus", "marijampol", "utenoj", "utena", "utenos"] },
   { code: "LV", needles: ["latvia", "latvij", "латв", "riga", "ryga"] },
   { code: "EE", needles: ["estonia", "eston", "estij", "эстон", "tallinn", "talin"] },
   { code: "PL", needles: ["poland", "lenkij", "polska", "польш", "warsaw", "warszaw", "varsuv", "krak", "wroc", "vroclav", "gdansk", "gdańsk"] },
   { code: "DE", needles: ["germany", "vokietij", "deutschland", "герман", "berlin", "berlyn", "hamburg", "munich", "münchen", "munchen", "miunchen", "frankfurt", "cologne", "köln", "koln", "keln", "stuttgart", "stutgart"] },
   { code: "NL", needles: ["netherlands", "holland", "nyderland", "niderland", "нидерланд", "голланд", "amsterdam", "rotterdam", "roterdam", "роттердам", "hague", "haag", "haga", "eindhoven", "utrecht"] },
   { code: "DK", needles: ["denmark", "danij", "дани", "copenhagen", "kopenhag", "копенгаг", "aarhus"] },
-  { code: "NO", needles: ["norway", "norveg", "норвег", "oslo", "осло", "bergen", "берген", "trondheim"] },
+  // "osle" is the Lithuanian locative ("Osle" = in Oslo).
+  { code: "NO", needles: ["norway", "norveg", "норвег", "oslo", "osle", "осло", "bergen", "берген", "trondheim"] },
   { code: "SE", needles: ["sweden", "švedij", "svedij", "sverige", "швец", "stockholm", "stokholm", "gothenburg", "göteborg", "goteborg", "gioteborg", "malmö", "malmo", "malme"] },
   { code: "FI", needles: ["finland", "suomi", "suomij", "финлянд", "helsinki", "helsink", "espoo", "tampere"] },
   // Open-markets update 2026-07-17 — the six newly opened markets.
@@ -134,13 +139,16 @@ export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
  * Display form = the city's own name; the person may edit it in the form.
  */
 export const CITY_LABELS: Readonly<Record<string, string>> = Object.freeze({
-  vilni: "Vilnius", kaun: "Kaunas", "klaipėd": "Klaipėda", klaiped: "Klaipėda",
+  vilni: "Vilnius", "вильн": "Vilnius", wiln: "Vilnius", kaun: "Kaunas", "klaipėd": "Klaipėda", klaiped: "Klaipėda",
+  "šiaul": "Šiauliai", siaul: "Šiauliai", "panevėž": "Panevėžys", panevez: "Panevėžys",
+  alytuj: "Alytus", alytus: "Alytus", alytaus: "Alytus", marijampol: "Marijampolė",
+  utenoj: "Utena", utena: "Utena", utenos: "Utena",
   riga: "Riga", ryga: "Riga", tallinn: "Tallinn", talin: "Tallinn",
   warsaw: "Warszawa", warszaw: "Warszawa", varsuv: "Warszawa", krak: "Kraków", wroc: "Wrocław", vroclav: "Wrocław", gdansk: "Gdańsk", "gdańsk": "Gdańsk",
   berlin: "Berlin", berlyn: "Berlin", hamburg: "Hamburg", munich: "München", "münchen": "München", munchen: "München", miunchen: "München", frankfurt: "Frankfurt", cologne: "Köln", "köln": "Köln", koln: "Köln", keln: "Köln", stuttgart: "Stuttgart", stutgart: "Stuttgart",
   amsterdam: "Amsterdam", rotterdam: "Rotterdam", roterdam: "Rotterdam", "роттердам": "Rotterdam", hague: "Den Haag", haag: "Den Haag", haga: "Den Haag", eindhoven: "Eindhoven", utrecht: "Utrecht",
   copenhagen: "København", kopenhag: "København", "копенгаг": "København", aarhus: "Aarhus",
-  oslo: "Oslo", bergen: "Bergen", trondheim: "Trondheim",
+  oslo: "Oslo", osle: "Oslo", bergen: "Bergen", trondheim: "Trondheim",
   stockholm: "Stockholm", stokholm: "Stockholm", gothenburg: "Göteborg", "göteborg": "Göteborg", goteborg: "Göteborg", gioteborg: "Göteborg", "malmö": "Malmö", malmo: "Malmö", malme: "Malmö",
   helsinki: "Helsinki", helsink: "Helsinki", espoo: "Espoo", tampere: "Tampere",
   tbilisi: "Tbilisi", tbilis: "Tbilisi", batumi: "Batumi", kutaisi: "Kutaisi", rustavi: "Rustavi",
