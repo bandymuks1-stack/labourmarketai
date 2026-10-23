@@ -18,6 +18,7 @@
  *  - Aggregates only. No id, e-mail, name or free text leaves this module.
  */
 
+import { summarizeAiRuns, type AiRunOutcome } from "@/lib/ops/ai-run-outcome";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type Population = "REAL" | "TEST" | "INTERNAL";
@@ -157,6 +158,18 @@ function percentile(values: number[], p: number): number | null {
   return s[Math.min(s.length - 1, Math.floor((p / 100) * s.length))]!;
 }
 
+const AI_OUTCOME_RULES: Record<AiRunOutcome, string> = {
+  served: "the answer passed its schema",
+  privacy_blocked: "INTENTIONAL: personal data may not leave to an ungranted provider (#2399) — not a fault",
+  price_missing: "the routed model has no owner-reviewed price (cost_unpriced)",
+  budget_blocked: "refused by a cost / daily / organization budget",
+  quota: "provider quota or rate limit (e.g. HTTP 429)",
+  timeout: "provider exceeded the latency ceiling",
+  provider_unavailable: "provider 5xx / network",
+  invalid_output: "the answer failed its schema",
+  other_failure: "any other failure",
+};
+
 const DAY = 86_400_000;
 
 export async function computeProductMetrics(client: SupabaseClient, now: number = Date.now()): Promise<MetricsSnapshot> {
@@ -179,7 +192,7 @@ export async function computeProductMetrics(client: SupabaseClient, now: number 
   const since = new Date(now - 7 * DAY).toISOString();
   const ai = await client
     .from("ai_runs")
-    .select("latency_ms, schema_validation, fallback_applied, blocked_reason, actual_cost_usd, estimated_cost_usd")
+    .select("latency_ms, schema_validation, fallback_applied, blocked_reason, route_reason, actual_cost_usd, estimated_cost_usd")
     .gte("created_at", since)
     .limit(20_000);
   if (ai.error) unknown.push({ source: "ai_runs", reason: ai.error.code ?? "read_failed" });
@@ -194,6 +207,21 @@ export async function computeProductMetrics(client: SupabaseClient, now: number 
   tech("ai_runs_failed_validation_7d", runs.filter((a) => a.schema_validation === "failed" || a.schema_validation === "invalid").length, "ai_runs.schema_validation", "output failed its schema");
   tech("ai_runs_fallback_7d", runs.filter((a) => a.fallback_applied === true).length, "ai_runs.fallback_applied", "fell back to another model or a deterministic answer");
   tech("ai_runs_blocked_7d", runs.filter((a) => !!a.blocked_reason).length, "ai_runs.blocked_reason", "refused before the call");
+  // One name per outcome (lib/ops/ai-run-outcome.ts): the INTENTIONAL privacy
+  // refusal (#2399) is never counted as a fault, and quota / timeout / missing
+  // price — which `blocked_reason` alone never showed — are visible.
+  const outcomes = summarizeAiRuns(runs);
+  for (const [k, n] of Object.entries(outcomes.byOutcome)) {
+    tech(`ai_outcome_${k}_7d`, n, "ai_runs (classifyAiRun)", AI_OUTCOME_RULES[k as keyof typeof AI_OUTCOME_RULES]);
+  }
+  tech("ai_runs_attempted_7d", outcomes.attempted, "ai_runs (classifyAiRun)", "all runs minus intentional privacy refusals");
+  tech("ai_technical_failures_7d", outcomes.technicalFailures, "ai_runs (classifyAiRun)", "missing price + quota + timeout + provider unavailable + invalid output + other");
+  tech(
+    "ai_technical_failure_rate_pct_7d",
+    outcomes.technicalFailureRate === null ? null : Math.round(1000 * outcomes.technicalFailureRate) / 10,
+    "ai_runs (classifyAiRun)",
+    "technical failures / attempted runs (privacy refusals excluded), %",
+  );
   tech("ai_cost_usd_7d", Math.round(100 * runs.reduce((s, a) => s + Number(a.actual_cost_usd ?? a.estimated_cost_usd ?? 0), 0)) / 100, "ai_runs.actual_cost_usd (else estimated)", "sum");
 
   const cur = await client.from("vacancy_import_cursors").select("provider_key, last_success_at");
