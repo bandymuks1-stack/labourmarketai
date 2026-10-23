@@ -56,7 +56,12 @@ describe("Guard: requireRoleOrRedirect helper is correct", () => {
     const codeOnly = src
       .replace(/\/\*[\s\S]*?\*\//g, "")
       .replace(/\/\/[^\n]*\n/g, "");
-    expect(codeOnly).toMatch(/\.from\(["']profile_roles["']\)/);
+    // Through the request-cached `readActiveRoleRows` (perf 2026-10-23),
+    // whose body is the `profile_roles` select.
+    expect(codeOnly).toMatch(/readActiveRoleRows\(/);
+    expect(
+      read("lib/auth/profile-roles.ts"),
+    ).toMatch(/const readActiveRoleRowsOnce = cache\([\s\S]{0,300}\.from\(["']profile_roles["']\)/);
     expect(codeOnly).not.toMatch(/active_role/);
   });
 });

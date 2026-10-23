@@ -1705,6 +1705,11 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261021130000_booking_expiry_system_schedule_v1.sql",
       // 2026-10-22 (RED, needs-human-gate): aggregate counts for the Agentai OS capability readback (SECURITY DEFINER + GRANT).
       "20261022150000_agentai_capability_readback_counts_v1.sql",
+      // 2026-10-23: owner approved #2709 in chat ("I APPROVE deploying the features of
+      // #2709, #2439 and #2712 and their required migrations"; conflicts warn, never block).
+      // CAL-8 shift patterns — one nullable column on work_plan_entries,
+      // create_work_plan_entry_v2, plan branch of the override validator.
+      "20261023160000_work_plan_shift_patterns_v1.sql",
       // 2026-10-23 (RED, needs-human-gate, NOT applied): goods purchase lifecycle (SECURITY DEFINER + GRANT).
       "20261023161500_listing_purchases_v1.sql",
 ]);

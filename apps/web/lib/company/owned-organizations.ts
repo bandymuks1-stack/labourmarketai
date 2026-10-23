@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -84,8 +86,29 @@ export async function getOwnedOrganizations(): Promise<OwnedOrganizationsResult>
 }
 
 /** THE owned-organizations read as an explicit caller (G4 bridge) — the
- *  transport-neutral core under `getOwnedOrganizations`. */
+ *  transport-neutral core under `getOwnedOrganizations`.
+ *
+ *  Read ONCE per server render per client and user (perf 2026-10-23): the
+ *  workspace memberships and `getActiveOrganizationContext` each asked it in
+ *  one render. Keyed by the CLIENT, never the caller object — another client
+ *  (a bearer transport, another identity) reads for itself; request-scoped, so
+ *  an organization created by a server action shows on the next render. Each
+ *  caller gets its own copy of the list. */
 export async function readOwnedOrganizations(
+  caller: DomainCaller,
+): Promise<OwnedOrganizationsResult> {
+  const read = await readOwnedOrganizationsOnce(caller.supabase, caller.userId);
+  return read.kind === "ok"
+    ? { kind: "ok", organizations: read.organizations.map((o) => ({ ...o })) }
+    : read;
+}
+
+const readOwnedOrganizationsOnce = cache(
+  (supabase: DomainCaller["supabase"], userId: string): Promise<OwnedOrganizationsResult> =>
+    readOwnedOrganizationsUncached({ supabase, userId }),
+);
+
+async function readOwnedOrganizationsUncached(
   caller: DomainCaller,
 ): Promise<OwnedOrganizationsResult> {
   // ARCHIVED organizations (owner decision 2026-09-23) are not workspaces: the

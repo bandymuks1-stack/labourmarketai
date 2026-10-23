@@ -18866,7 +18866,23 @@
       "unavailable": "Planung ist hier noch nicht verfügbar.",
       "error": "Etwas ist schiefgelaufen. Versuch es erneut.",
       "planned_collides": "Geplant, aber diese Person ist an einigen dieser Tage bereits eingeplant. Sie entscheiden; stornieren Sie den Plan unten, falls er nicht passt.",
-      "planned_unknown": "Geplant, aber wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei."
+      "planned_unknown": "Geplant, aber wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
+      "recurrence_invalid": "Prüfen Sie die Wiederholung: Wählen Sie mindestens einen Wochentag oder eine Rotation mit 1–28 Arbeits- und 1–28 Ruhetagen.",
+      "recurrence_empty": "Dieses Muster hat zwischen diesen Daten keinen Arbeitstag. Es wurde nichts geplant.",
+      "recurrence_unavailable": "Wiederkehrende Schichten sind hier noch nicht verfügbar. Planen Sie den Zeitraum ohne Wiederholung."
+    },
+    "repeat": {
+      "legend": "Wiederholung",
+      "none": "Keine Wiederholung",
+      "weekly": "Wöchentliche Schichten",
+      "cycle": "Rotationsplan",
+      "weekdays": "Arbeitstage",
+      "cycleOn": "Arbeitstage am Stück",
+      "cycleOff": "Ruhetage am Stück",
+      "cycleOffset": "Bereits gearbeitete Tage am ersten Tag (0 = beginnt neu)",
+      "hint": "Die Schichten wiederholen sich innerhalb der Daten oben und erscheinen im Kalender als Plan. Eine Schicht, die auf Urlaub oder andere Arbeit fällt, wird gespeichert und markiert – Sie entscheiden.",
+      "summaryWeekly": "Schichten: {days}",
+      "summaryCycle": "Rotation: {on} Arbeit, {off} Ruhe"
     }
   },
   "workLifecycle": {

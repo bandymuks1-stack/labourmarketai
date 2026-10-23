@@ -209,7 +209,9 @@ describe("Guard: the layout refuses BEFORE it can stream", () => {
   it("decides from the reads the shell ALREADY performs — no second role read", () => {
     // One `profile_roles` read per request. A second one here would be the
     // duplicate authorization this change exists to remove.
-    const reads = code(layout).match(/readActiveProfileRoles\(/g) ?? [];
+    // (Through the request-cached `readActiveRoleRows` since 2026-10-23 —
+    // the page gate under the layout shares that one read.)
+    const reads = code(layout).match(/readActiveProfileRoles\(|readActiveRoleRows\(/g) ?? [];
     expect(reads.length).toBe(1);
     // The layout must not CALL the page gate (that would be the second read);
     // its comments are free to name it.

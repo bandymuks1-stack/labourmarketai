@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./prod-walk";
 
 import { chooseWorkContextIfAsked } from "./worklog-context";
 

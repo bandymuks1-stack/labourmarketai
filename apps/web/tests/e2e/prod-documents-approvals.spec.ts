@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 
@@ -354,6 +354,22 @@ async function closeNeed(page: Page, id: string): Promise<"closed" | "already-cl
   return "closed";
 }
 
+/** Fill Gama's demand intake for this run's need; "limit" when the open-need limit answers. */
+async function submitNeed(page: Page): Promise<"done" | "limit"> {
+  await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
+  await page.getByTestId("demand-role").fill(NEED_ROLE);
+  await page.getByTestId("demand-description").fill(`${NOTE}: synthetic need for the production disclosure walk.`);
+  await page.getByTestId("demand-next").click();
+  const size = page.getByTestId("demand-team-size");
+  if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await page.getByTestId("demand-next").click();
+  await page.getByTestId("demand-create").click();
+  const done = page.getByTestId("demand-done");
+  const limit = page.getByTestId("demand-open-need-limit");
+  await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
+  return (await limit.isVisible()) ? "limit" : "done";
+}
+
 test("G-0. Gama closes the needs earlier runs of this walk left open", async ({ browser }) => {
   test.setTimeout(360_000);
   const { ctx, page } = await as(browser, "manager");
@@ -372,6 +388,7 @@ test("G-0. Gama closes the needs earlier runs of this walk left open", async ({ 
 });
 
 test("G-1 (4.18). the worker's own worker id; Gama posts this run's need; the worker raises a hand", async ({ browser }) => {
+  test.setTimeout(480_000); // room for the leftover cleanup
   const token = bearerOf("worker");
   const sub = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8")).sub as string;
   const res = await qaApi(`/rest/v1/workers?select=id&profile_id=eq.${encodeURIComponent(sub)}`, token);
@@ -382,17 +399,27 @@ test("G-1 (4.18). the worker's own worker id; Gama posts this run's need; the wo
 
   const gama = await as(browser, "manager");
   await useWorkspace(gama.page, GAMA);
-  await gama.page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
-  await gama.page.getByTestId("demand-role").fill(NEED_ROLE);
-  await gama.page.getByTestId("demand-description").fill(`${NOTE}: synthetic need for the production disclosure walk.`);
-  await gama.page.getByTestId("demand-next").click();
-  const size = gama.page.getByTestId("demand-team-size");
-  if (await size.isVisible().catch(() => false)) await size.fill("1");
-  await gama.page.getByTestId("demand-next").click();
-  await gama.page.getByTestId("demand-create").click();
-  await expect(gama.page.getByTestId("demand-done").or(gama.page.getByTestId("demand-open-need-limit"))).toBeVisible({
-    timeout: 30_000,
-  });
+  let outcome = await submitNeed(gama.page);
+  // Gama is on the free plan (one open need). Another walk may have left its
+  // synthetic need open (brigade-formation keeps its B2B need open by design,
+  // run 39985839991), so the limit refuses this one — the product working.
+  // Close the QA-SYNTHETIC leftovers through the product's own controls
+  // (never this run's need) and try once more.
+  if (outcome === "limit") {
+    await gama.page.goto("/lt/dashboard/company/scouting");
+    await gama.page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+    const ids = new Set<string>();
+    for (const a of await needLinks(gama.page, "QA-SYNTHETIC").all()) {
+      if ((await a.innerText().catch(() => "")).includes(RUN)) continue;
+      const id = requestIdOf(await a.getAttribute("href"));
+      if (id) ids.add(id);
+    }
+    let closed = 0;
+    for (const id of [...ids].slice(0, 5)) if ((await closeNeed(gama.page, id)) === "closed") closed += 1;
+    console.info(`[disclosure] open-need limit: synthetic leftovers seen=${ids.size} closed=${closed}`);
+    if (closed > 0) outcome = await submitNeed(gama.page);
+  }
+  expect(outcome, "the open-need limit refused this run's need").toBe("done");
   await gama.page.goto("/lt/dashboard/company/scouting");
   const link = needLinks(gama.page, RUN).first();
   await expect(link, "this run's need is listed").toBeVisible({ timeout: 30_000 });

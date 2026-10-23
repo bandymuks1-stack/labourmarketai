@@ -2,10 +2,9 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { inviteCapGate } from "./invite-cap";
-import { seedViewerTimeZone, walkTimeZoneOptions } from "./viewer-time-zone";
 import { chooseWorkContextIfAsked } from "./worklog-context";
 import { bearerOf, qaApi } from "./prod-qa-api";
-import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
 
 /**
  * PRODUCTION BRIGADE FORMATION — owner programme 2026-10-12, P0 §3.
@@ -39,12 +38,9 @@ async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx
   const ctx = await browser.newContext({
     storageState: state(slot),
     locale: "lt-LT",
-    ...walkTimeZoneOptions(),
     ...(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : {}),
   });
-  // A returning browser: no first-visit time-zone refresh of every step's
-  // first page (see viewer-time-zone.ts).
-  await seedViewerTimeZone(ctx);
+  // A returning browser (time zone + lm_tz cookie) comes from ./prod-walk.
   return { ctx, page: await ctx.newPage() };
 }
 
