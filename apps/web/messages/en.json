@@ -5058,8 +5058,8 @@
           "desc": "Define roles, headcount and skills."
         },
         {
-          "title": "See who may fit",
-          "desc": "Browse workers and agencies whose records may fit your demand — you choose, nothing is ranked or scored automatically."
+          "title": "See who fits",
+          "desc": "Workers and agencies whose records fit your need are listed by fit, with the reasons — a signal, not a guarantee. You decide whom to contact."
         },
         {
           "title": "Reach out directly",
@@ -5553,7 +5553,7 @@
       },
       {
         "q": "How is billing handled?",
-        "a": "Card payment through Stripe with VAT applied by Stripe Tax; invoices, cancellation and changes live in your organization account."
+        "a": "Card payment through Stripe. Invoices, payment history and cancellation live in your organization account."
       },
       {
         "q": "Is there a limit on active positions?",
