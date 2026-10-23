@@ -334,23 +334,41 @@ const MONTH_WORD = /^(men[\p{L}]*|months?|месяц[\p{L}]*|maand[\p{L}]*|monat
  *  Every other year word ("3 metų", "3 years", "3 года") is far more often
  *  EXPERIENCE than a duration, and must not turn into an end date. */
 const YEAR_DATIVE = /^metams$/u;
+/** Dative plural words that sit before "metams" WITHOUT counting it — "for
+ *  the next / this / coming year". Any OTHER dative plural word there is a
+ *  count this module cannot read ("dvejems", a typo), and an unread count
+ *  must stay unresolved: a silent "1 year" would invent an end date. */
+const YEAR_DETERMINERS = new Set(["kitiems", "siems", "tiems", "sitiems", "ateinantiems", "artimiausiems"]);
+const DATIVE_PLURAL_WORD = /^\p{L}+(?:iems|ioms|ems|oms)$/u;
+
+/** Days in a "metams" duration whose preceding token is `prev`; `null` when
+ *  that token is a count this module cannot read. */
+function yearDativeDays(prev: string | undefined): number | null {
+  if (prev === undefined) return 365; // a bare "metams" opens the text: one year
+  if (/^\d+$/.test(prev)) {
+    const n = Number.parseInt(prev, 10);
+    return n >= 1 && n <= 10 ? n * 365 : null;
+  }
+  const word = parseWordNumber(prev);
+  if (word !== null) return word >= 1 && word <= 10 ? word * 365 : null;
+  const folded = foldText(prev);
+  if (YEAR_DETERMINERS.has(folded)) return 365;
+  if (DATIVE_PLURAL_WORD.test(folded)) return null;
+  return 365; // a bare "metams" after an ordinary word: one year
+}
 
 /**
  * A stated DURATION ("3 savaitėms", "for 3 weeks", "на 3 недели", "3 weken",
  * "3 Wochen", "na 3 tygodnie", "2 mėnesiams", "for two months", "metams",
- * "2 metams") → the number of days it spans, or `null`. Word-numbers count too.
+ * "2 metams", "dvejiems metams") → the number of days it spans, or `null`.
+ * Word-numbers count too.
  */
 export function parseDurationDays(text: string): number | null {
   const tokens = (text ?? "").split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   const folded = tokens.map(foldText);
   for (let i = 0; i < folded.length; i++) {
     if (!YEAR_DATIVE.test(folded[i])) continue;
-    const candidate = i > 0 ? tokens[i - 1] : "";
-    const digits = /^\d{1,2}$/.test(candidate) ? Number.parseInt(candidate, 10) : null;
-    const value = digits ?? (candidate ? parseWordNumber(candidate) : null);
-    // A bare "metams" is one year; a stated count up to five years is read.
-    if (value === null) return 365;
-    if (value >= 1 && value <= 5) return value * 365;
+    return yearDativeDays(i > 0 ? tokens[i - 1] : undefined);
   }
   for (let i = 1; i < folded.length; i++) {
     const unit = WEEK_WORD.test(folded[i]) ? 7 : MONTH_WORD.test(folded[i]) ? 30 : 0;

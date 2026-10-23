@@ -246,30 +246,56 @@ function escapeForRegex(s: string): string {
  * employer reviews, and the form only ever pre-fills a field the employer left
  * empty.
  */
+/** A number directly followed by a word for PEOPLE. */
+const PEOPLE_COUNT_RE =
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i;
+
+/** Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
+ *  halves of pairs whose other half was already here. */
+const DEMAND_VERB_COUNT_RE =
+  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i;
+
+/** What a number right after a demand verb is measuring when it is NOT a
+ *  headcount: "Need 3 years experience", "Reikia 3 metų patirties",
+ *  "reikia 2 mėn.", "reikia 40 val.", "reikia 15 eur". */
+const UNIT_AFTER_COUNT_RE =
+  /^\s*(?:\+\s*)?(?:years?|yrs?|metų|metu|metai|metus|metams|met\b|m\.|months?|mėn|men\b|menes|mėnes|weeks?|savait|days?|dien|d\.|hours?|h\b|val|eur|€|%|km|nok|sek|dkk|pln|usd|лет|год|месяц|недел|дн|час|евро)/i;
+
+function adjacentOccupationCountRe(occupationNeedle: string): RegExp {
+  // Immediately adjacent only (one optional space, one optional "x"), so the
+  // number has to be counting THIS occupation rather than merely appearing
+  // somewhere in the same sentence as it.
+  return new RegExp(`\\b(\\d{1,4})\\s*(?:x\\s*)?${escapeForRegex(occupationNeedle)}`, "i");
+}
+
+function countFrom(m: RegExpMatchArray | null): number | null {
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  return Number.isFinite(n) && n >= 1 && n <= 1000 ? n : null;
+}
+
+/** A number that provably counts PEOPLE: followed by a person word or by the
+ *  recognised occupation's own noun ("2 mūrininkų", "3 darbuotojų"). */
+function detectPeopleCount(hay: string, occupationNeedle: string | null): number | null {
+  return (
+    countFrom(hay.match(PEOPLE_COUNT_RE)) ??
+    (occupationNeedle ? countFrom(hay.match(adjacentOccupationCountRe(occupationNeedle))) : null)
+  );
+}
+
 function detectTeamSize(hay: string, occupationNeedle: string | null): number | null {
-  // A number directly tied to people/workers, OR right after a "need" verb.
-  const patterns = [
-    /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i,
-    // Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
-    // halves of pairs whose other half was already here.
-    /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i,
-  ];
-  if (occupationNeedle) {
-    // Immediately adjacent only (one optional space, one optional "x"), so the
-    // number has to be counting THIS occupation rather than merely appearing
-    // somewhere in the same sentence as it.
-    patterns.push(
-      new RegExp(`\\b(\\d{1,4})\\s*(?:x\\s*)?${escapeForRegex(occupationNeedle)}`, "i"),
-    );
+  // A number directly tied to people/workers, OR right after a "need" verb —
+  // unless what follows it is a unit (years, months, hours, money): "Need 3
+  // years experience" is not three people.
+  const people = countFrom(hay.match(PEOPLE_COUNT_RE));
+  if (people !== null) return people;
+  const verb = hay.match(DEMAND_VERB_COUNT_RE);
+  if (verb && verb.index !== undefined) {
+    const rest = hay.slice(verb.index + verb[0].length);
+    const n = UNIT_AFTER_COUNT_RE.test(rest) ? null : countFrom(verb);
+    if (n !== null) return n;
   }
-  for (const re of patterns) {
-    const m = hay.match(re);
-    if (m) {
-      const n = parseInt(m[1], 10);
-      if (Number.isFinite(n) && n >= 1 && n <= 1000) return n;
-    }
-  }
-  return null;
+  return occupationNeedle ? countFrom(hay.match(adjacentOccupationCountRe(occupationNeedle))) : null;
 }
 
 function detectStartPeriod(hay: string): StartPeriod | null {
@@ -293,19 +319,44 @@ function detectAccommodation(hay: string): AccommodationOffer | null {
   return "provided_free";
 }
 
+const normNeedText = (s: string | null | undefined) => (s ?? "").toLowerCase();
+
+/** Role + description + notes, lowercased — the hay the work type and the
+ *  counts are read from. */
+function needRoleHay(input: NeedStructureInput): string {
+  return `${normNeedText(input.role)} ${normNeedText(input.description)} ${normNeedText(input.notes)}`.trim();
+}
+
+/** The recognised work type and the needle that identified it. The service
+ *  noun is masked first: "buhalterijos paslaugos" must not read as a care
+ *  assistant because "paslaug" contains the needle "slaug". */
+function recognisedWorkType(roleHay: string): { workType: string | null; needle: string | null } {
+  const wtHit = firstMatchWithNeedle(WORK_TYPE_RULES, maskServiceNoun(roleHay));
+  const workType = wtHit && KNOWN_SLUGS.has(wtHit.rule.slug) ? wtHit.rule.slug : null;
+  return { workType, needle: workType ? wtHit?.needle ?? null : null };
+}
+
+/**
+ * How many PEOPLE the need provably counts — a number followed by a person
+ * word or by the recognised occupation's noun ("2 mūrininkų", "reikia 3
+ * darbuotojų", "4 welders"). Stricter than `teamSize`, which also accepts a
+ * bare number after a demand verb ("reikia 3, ..."): a reader that turns the
+ * count into a claim (the recognizer's "scope" field) needs the noun.
+ */
+export function countPeopleInNeed(input: NeedStructureInput): number | null {
+  const roleHay = needRoleHay(input);
+  return detectPeopleCount(roleHay, recognisedWorkType(roleHay).needle);
+}
+
 export function structureNeed(input: NeedStructureInput): NeedStructureSuggestion {
   const reasons: string[] = [];
-  const norm = (s: string | null | undefined) => (s ?? "").toLowerCase();
   // Role + description + notes drive the work type; location is weighted first
   // for the country. Free text is read here ONLY to derive closed-set values —
   // none of it is ever returned.
-  const roleHay = `${norm(input.role)} ${norm(input.description)} ${norm(input.notes)}`.trim();
-  const locHay = `${norm(input.location)} ${roleHay}`.trim();
+  const roleHay = needRoleHay(input);
+  const locHay = `${normNeedText(input.location)} ${roleHay}`.trim();
 
-  // The service noun is masked first: "buhalterijos paslaugos" must not read
-  // as a care assistant because "paslaug" contains the needle "slaug".
-  const wtHit = firstMatchWithNeedle(WORK_TYPE_RULES, maskServiceNoun(roleHay));
-  const workType = wtHit && KNOWN_SLUGS.has(wtHit.rule.slug) ? wtHit.rule.slug : null;
+  const { workType, needle: occupationNeedle } = recognisedWorkType(roleHay);
   if (workType) reasons.push(`work_type:${workType}`);
 
   const cc = firstMatch(COUNTRY_RULES, locHay);
@@ -314,7 +365,7 @@ export function structureNeed(input: NeedStructureInput): NeedStructureSuggestio
 
   // Only the needle of a RECOGNISED work type is handed to the counter — an
   // unrecognised occupation must not silently lend its noun to a headcount.
-  const teamSize = detectTeamSize(roleHay, workType ? wtHit?.needle ?? null : null);
+  const teamSize = detectTeamSize(roleHay, occupationNeedle);
   if (teamSize != null) reasons.push(`team_size:${teamSize}`);
 
   const startPeriod = detectStartPeriod(roleHay);

@@ -13,6 +13,7 @@
  * Same input → same output. No DB, no AI, no fabrication.
  */
 import {
+  countPeopleInNeed,
   structureNeed,
   type NeedStructureSuggestion,
 } from "@/lib/structuring/structure-need";
@@ -110,8 +111,10 @@ const RULES: readonly FieldRule[] = [
     reason: "scope_mentioned",
     // The extent of the work is also HOW MANY people and FOR HOW LONG:
     // "2 mūrininkų", "reikia 3 darbuotojų", "3 mėnesiams", "2 savaitėms".
-    understood: ({ text, structured }) =>
-      structured.teamSize !== null || parseDurationDays(text) !== null,
+    // Only a number that counts PEOPLE — "Reikia 3 metų patirties" states
+    // experience, not a three-person need.
+    understood: ({ text }) =>
+      countPeopleInNeed({ description: text }) !== null || parseDurationDays(text) !== null,
     patterns: [
       /\b(installation|dismantling|renovation|finishing|assembly|maintenance|fitting)\b/,
       /\b(montav|ardym|renovacij|apdail|surinkim|priežiūr)/,

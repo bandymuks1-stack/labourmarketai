@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import { detectJobDemandFields, recognizeIntent } from "./index";
-import { mentionsStartTime, parseDurationDays, parseStartDate } from "@/lib/structuring/time-window";
-import { resolveCountryAndCity, structureNeed } from "@/lib/structuring/structure-need";
+import {
+  mentionsStartTime,
+  parseDurationDays,
+  parseStartDate,
+  parseTimeWindow,
+} from "@/lib/structuring/time-window";
+import {
+  countPeopleInNeed,
+  resolveCountryAndCity,
+  structureNeed,
+} from "@/lib/structuring/structure-need";
 import { foldText } from "@/lib/structuring/normalize";
 
 /**
@@ -100,9 +109,35 @@ describe("durations and headcount as the scope of the work", () => {
     ["2 savaitėms", 14],
     ["metams", 365],
     ["2 metams", 730],
+    ["vieneriems metams", 365],
+    ["dvejiems metams", 730],
+    ["trejiems metams", 1095],
+    ["ketveriems metams", 1460],
+    ["penkeriems metams", 1825],
+    ["kitiems metams", 365],
   ])("%s → %d days", (phrase, days) => {
     expect(parseDurationDays(`Reikia mūrininko ${phrase}`)).toBe(days);
     expect(recognizedKeys(`Reikia mūrininko ${phrase}`)).toContain("scope");
+  });
+
+  it("a bare 'metams' at the start of the text is one year", () => {
+    expect(parseDurationDays("metams, Vilniuje")).toBe(365);
+  });
+
+  // Review finding (PR #2690): an unread count before "metams" stays
+  // unresolved — never a silent one year, never an invented end date.
+  it.each(["dvejems metams", "trejems metams", "50 metams"])("%s → unresolved", (phrase) => {
+    expect(parseDurationDays(`Reikia mūrininko ${phrase}`)).toBeNull();
+    const w = parseTimeWindow(`Reikia mūrininko ${phrase}, nuo lapkričio`, "2026-10-23");
+    expect(w.startIso).toBe("2026-11-01");
+    expect(w.endIso).toBeUndefined();
+  });
+
+  it("dvejiems metams from 1 November spans 730 days, not 365", () => {
+    const w = parseTimeWindow("Reikia mūrininko nuo lapkričio dvejiems metams", "2026-10-23");
+    expect(w.startIso).toBe("2026-11-01");
+    // 730 calendar days counted inclusively (2028 is a leap year).
+    expect(w.endIso).toBe("2028-10-30");
   });
 
   it.each([
@@ -122,6 +157,33 @@ describe("durations and headcount as the scope of the work", () => {
     expect(structureNeed({ description: text }).teamSize).toBeNull();
     expect(parseDurationDays(text)).toBeNull();
     expect(recognizedKeys(text)).not.toContain("scope");
+  });
+
+  // Review finding (PR #2690): a number after a demand verb is not a
+  // headcount when a unit follows it.
+  it.each([
+    "Need 3 years experience",
+    "Reikia 3 metų patirties",
+    "Reikia 3 m. patirties",
+    "Reikia 2 mėn. darbo",
+    "Need 40 hours per week",
+    "Reikia 15 eur per valandą",
+  ])("%s → no headcount, no people-count scope", (text) => {
+    expect(structureNeed({ description: text }).teamSize).toBeNull();
+    expect(countPeopleInNeed({ description: text })).toBeNull();
+  });
+
+  it.each(["Need 3 years experience", "Reikia 3 metų patirties"])(
+    "%s does not mark the scope recognised",
+    (text) => {
+      expect(recognizedKeys(text)).not.toContain("scope");
+      expect(recognizedKeys(text)).toContain("experience");
+    },
+  );
+
+  it("a bare number after a demand verb is still a team size, but not a people count", () => {
+    expect(structureNeed({ description: "reikia 3, pradžia rytoj" }).teamSize).toBe(3);
+    expect(countPeopleInNeed({ description: "reikia 3, pradžia rytoj" })).toBeNull();
   });
 
   it("'3 metų patirtis' stays experience, never a duration", () => {
