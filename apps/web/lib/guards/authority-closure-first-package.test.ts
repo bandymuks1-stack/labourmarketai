@@ -157,6 +157,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-21: skill confirmation withdrawal phase B (cross-party
       // standing read door; RED, needs-human-gate, NOT applied).
       "20261021095500_",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): journal evidence integrity v1
+      // (server-side hash chain + immutable evidence; renumbered from 20261016190000).
+      "20261023132610_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

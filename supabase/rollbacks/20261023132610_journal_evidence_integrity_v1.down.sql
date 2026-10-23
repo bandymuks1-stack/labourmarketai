@@ -1,7 +1,8 @@
--- ROLLBACK of 20261016190000_journal_evidence_integrity_v1
+-- ROLLBACK of 20261023132610_journal_evidence_integrity_v1
 --
--- Reverses the triggers, the verifier, the audit_logs guard and the storage
--- policy change, and drops the `hash_version` column. Rows written while the
+-- Reverses the triggers, the verifier, the two bypass predicates, the
+-- audit_logs guard and the storage policy change, and drops the
+-- `hash_version` column. Rows written while the
 -- forward migration was live keep their server-computed hashes (they are
 -- valid sha256 strings like any other); only the version marker is lost,
 -- which is why this down script warns rather than refuses.
@@ -39,5 +40,6 @@ drop trigger if exists journal_entries_chain_v1 on public.journal_entries;
 drop function if exists public.journal_entries_chain_v1();
 
 drop function if exists public.journal_evidence_guard_bypassed_v1();
+drop function if exists public.journal_evidence_erasure_executing_v1();
 
 alter table public.journal_entries drop column if exists hash_version;

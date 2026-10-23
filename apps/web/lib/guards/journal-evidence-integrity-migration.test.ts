@@ -7,21 +7,22 @@ import { describe, expect, it } from "vitest";
  *
  * Static pins over the migration pair. The behavioural proof (forged client
  * hashes overwritten, mutation and deletion refused, chain verified, bypass
- * only for service_role inside an erasure transaction) runs on a throwaway
+ * only for service_role inside an erasure transaction or inside the erasure
+ * executor v3's own transaction) runs on a throwaway
  * local PostgreSQL cluster: apps/web/scripts/db-proof/journal-evidence-integrity-local.mjs.
  * These pins keep the file's shape from drifting away from what was proven.
  */
 const ROOT = join(__dirname, "../../../..");
-const UP = join(ROOT, "supabase/migrations/20261016190000_journal_evidence_integrity_v1.sql");
-const DOWN = join(ROOT, "supabase/rollbacks/20261016190000_journal_evidence_integrity_v1.down.sql");
+const UP = join(ROOT, "supabase/migrations/20261023132610_journal_evidence_integrity_v1.sql");
+const DOWN = join(ROOT, "supabase/rollbacks/20261023132610_journal_evidence_integrity_v1.down.sql");
 
-describe("20261016190000_journal_evidence_integrity_v1", () => {
+describe("20261023132610_journal_evidence_integrity_v1", () => {
   const up = readFileSync(UP, "utf8");
 
   it("is RED-acknowledged and ships a paired rollback", () => {
     expect(up.startsWith("-- @human-gate-approved")).toBe(true);
     expect(existsSync(DOWN)).toBe(true);
-    expect(up).toMatch(/^-- ROLLBACK: supabase\/rollbacks\/20261016190000_journal_evidence_integrity_v1\.down\.sql/m);
+    expect(up).toMatch(/^-- ROLLBACK: supabase\/rollbacks\/20261023132610_journal_evidence_integrity_v1\.down\.sql/m);
   });
 
   it("the chain is computed server-side on INSERT and client values are overwritten", () => {
@@ -56,12 +57,34 @@ describe("20261016190000_journal_evidence_integrity_v1", () => {
     expect(up).toMatch(/raise exception 'journal_entry_immutable: delete is never permitted/);
   });
 
-  it("the ONE bypass is service_role inside an erasure transaction, nothing weaker", () => {
-    expect(up).toContain("select current_user = 'service_role'");
-    expect(up).toContain("coalesce(current_setting('lm.evidence_guard_bypass', true), '') = 'erasure'");
+  it("the bypass is service_role inside an erasure transaction, or the erasure executor's own transaction — nothing weaker", () => {
+    expect(up).toContain("select (current_user = 'service_role'");
+    expect(up).toContain("coalesce(current_setting('lm.evidence_guard_bypass', true), '') = 'erasure')");
+    expect(up).toContain("or public.journal_evidence_erasure_executing_v1();");
     expect(up).toMatch(/revoke all on function public\.journal_evidence_guard_bypassed_v1\(\) from public, anon, authenticated;/);
     // proof F1: the SECURITY INVOKER guards evaluate the predicate as the caller
     expect(up).toContain("grant execute on function public.journal_evidence_guard_bypassed_v1() to service_role;");
+  });
+
+  it("erasure executor v3 (20261019140000) keeps working: the bypass holds only inside the transaction that consumed an authorization", () => {
+    const fn = /create or replace function public\.journal_evidence_erasure_executing_v1\(\)[\s\S]*?\$\$;/.exec(up)?.[0] ?? "";
+    expect(fn).not.toBe("");
+    expect(fn).toMatch(/security definer/);
+    expect(fn).toMatch(/stable/);
+    expect(fn).toContain("from public.privacy_erasure_authorizations_v3 a");
+    expect(fn).toContain("where a.consumed_at = now()");
+    expect(fn).toContain("and a.outcome is null");
+    expect(fn).toContain("and a.receipt_id is null");
+    // read-only: no write, no GUC, no dynamic SQL
+    expect(fn).not.toMatch(/\b(insert|update|delete)\b\s+(into|from|public\.)|set_config|execute\s+format/i);
+    expect(up).toMatch(/revoke all on function public\.journal_evidence_erasure_executing_v1\(\) from public, anon, authenticated;/);
+    expect(up).toContain("grant execute on function public.journal_evidence_erasure_executing_v1() to service_role;");
+    // the predicate it feeds is defined AFTER it (SQL bodies are validated at create time)
+    expect(up.indexOf("create or replace function public.journal_evidence_erasure_executing_v1()"))
+      .toBeLessThan(up.indexOf("create or replace function public.journal_evidence_guard_bypassed_v1()"));
+    // the executor itself, its registry and its plan digest are not touched
+    expect(up).not.toMatch(/create or replace function public\.erase_user_account_v3/);
+    expect(up).not.toMatch(/(update|insert into)\s+public\.privacy_erasure_(registry|value_rules|authorizations)_v3/);
   });
 
   it("the verifier runs as the caller (RLS decides) and reports per entry, never a summary", () => {
@@ -80,7 +103,7 @@ describe("20261016190000_journal_evidence_integrity_v1", () => {
 
   it("every function pins search_path and no RPC signature or RLS policy on the tables changes", () => {
     const fns = up.match(/create or replace function [\s\S]*?\$\$;/g) ?? [];
-    expect(fns.length).toBeGreaterThanOrEqual(6);
+    expect(fns.length).toBeGreaterThanOrEqual(7);
     for (const f of fns) expect(f).toMatch(/set search_path = public, pg_temp/);
     expect(up).not.toMatch(/create or replace function public\.create_journal_entry_full/);
     expect(up).not.toMatch(/create policy journal_entries_/);
@@ -97,6 +120,7 @@ describe("20261016190000_journal_evidence_integrity_v1", () => {
       "drop trigger if exists audit_logs_truncate_guard_v1",
       "drop function if exists public.verify_journal_chain_v1(uuid)",
       "drop function if exists public.journal_evidence_guard_bypassed_v1()",
+      "drop function if exists public.journal_evidence_erasure_executing_v1()",
       "alter table public.journal_entries drop column if exists hash_version",
       'create policy "journal-entry-photos owner delete" on storage.objects',
     ]) {

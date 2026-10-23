@@ -3,7 +3,7 @@
 -- NOT applied; the owner applies via Supabase MCP after approval.
 -- Owner decision N-9, docs/audits/MASTER_AUDIT_2026-10-16.md §6 / §9.)
 --
--- 20261016190000_journal_evidence_integrity_v1 — SERVER-AUTHORITATIVE
+-- 20261023132610_journal_evidence_integrity_v1 — SERVER-AUTHORITATIVE
 -- JOURNAL HASH CHAIN + IMMUTABLE EVIDENCE (audit 2026-10-16, SEC-3/5/6/7).
 --
 -- ── WHAT WAS WRONG ─────────────────────────────────────────────────────────
@@ -52,12 +52,12 @@
 --    created_at, correction_of) are immutable; only the lifecycle columns the
 --    live RPCs change (deleted_at, superseded_by, updated_at, project_id,
 --    visibility_scope) may change. DELETE and TRUNCATE are refused.
---    The ONE bypass is for the GDPR erasure executor: `current_user =
+--    The first bypass is for a service-role erasure session: `current_user =
 --    'service_role'` AND `current_setting('lm.evidence_guard_bypass', true)
---    = 'erasure'` inside the executor's own transaction. No API role can set
+--    = 'erasure'` inside one transaction. No API role can set
 --    that: `set_config` is not an exposed RPC, and the GUC is transaction-
---    local. The erasure design (v3) uses it to SEVER a row from a person, not
---    to delete working-time evidence.
+--    local. The second (and last) door is the erasure executor v3's own
+--    transaction — see G.
 -- D. `verify_journal_chain_v1(p_worker_id)` — SECURITY INVOKER (the caller's
 --    own RLS decides what it may read): recomputes every version-2 hash and
 --    checks every link; reports `ok` / `legacy` / `prev_mismatch` /
@@ -67,6 +67,29 @@
 --    references (the upload compensation path), never the evidence behind a
 --    record.
 -- F. `audit_logs`: BEFORE UPDATE / DELETE / TRUNCATE refuse (same bypass).
+-- G. Erasure executor v3 compatibility (renumbered 2026-10-23 from
+--    20261016190000, after main added 20261019140000_privacy_erasure_executor_v3,
+--    which runs in production). `erase_user_account_v3` is SECURITY DEFINER:
+--    inside it `current_user` is the function owner, never 'service_role', and
+--    it never sets `lm.evidence_guard_bypass`. It DELETEs the person's own
+--    journal entries (registry treatment `delete_rows`, owner decision L-1
+--    2026-10-19), sets `audit_logs.actor_id` to NULL and pseudonymises
+--    mentions inside `audit_logs.payload` — the last one in its value-rule
+--    step, which disables no trigger. With only the service_role + GUC
+--    bypass, every erasure of a person with a journal entry or an audit
+--    mention would fail and roll back (fail closed, but a regression of a
+--    working path). The bypass therefore ALSO holds inside the one transaction
+--    that consumed a single-use erasure authorization and has not yet recorded
+--    an outcome: `journal_evidence_erasure_executing_v1()` (SECURITY DEFINER,
+--    read-only) looks for a `privacy_erasure_authorizations_v3` row with
+--    `consumed_at = now()` (= this transaction's start, which the executor
+--    writes in its step 9.1), `outcome IS NULL` and `receipt_id IS NULL`.
+--    Only `erase_user_account_v3` writes `consumed_at`; the table is closed
+--    to every API role; every committed consumption carries an outcome (the
+--    executor sets it on every path, or the whole transaction rolls back).
+--    The window therefore covers exactly the executor's own registry-decided
+--    statements and nothing after them. No executor body, registry row, plan
+--    digest or issued token changes.
 --
 -- ── WHAT IT DOES NOT DO ────────────────────────────────────────────────────
 -- - It does not rewrite history: no legacy hash is recomputed or replaced.
@@ -76,7 +99,7 @@
 --   whatever the owner/legal decide runs through the named bypass, in a
 --   service-role transaction, and nowhere else.
 --
--- ROLLBACK: supabase/rollbacks/20261016190000_journal_evidence_integrity_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261023132610_journal_evidence_integrity_v1.down.sql
 -- (drops the triggers/functions, restores the previous photo delete policy,
 -- drops the column; legacy rows are untouched either way).
 
@@ -87,6 +110,32 @@ alter table public.journal_entries
 comment on column public.journal_entries.hash_version is
   '1 = legacy app-computed hash (not recomputable); 2 = server-computed by journal_entries_chain_v1 over stored columns.';
 
+-- ── G. the erasure executor's own transaction (v3, 20261019140000) ────────
+-- SECURITY DEFINER so the check reads the closed authorization table whatever
+-- role fires the guard; it returns one boolean and reads nothing else.
+create or replace function public.journal_evidence_erasure_executing_v1()
+returns boolean
+language plpgsql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if to_regclass('public.privacy_erasure_authorizations_v3') is null then
+    return false;
+  end if;
+  return exists (
+    select 1
+      from public.privacy_erasure_authorizations_v3 a
+     where a.consumed_at = now()      -- consumed in THIS transaction (now() = transaction start)
+       and a.outcome is null          -- the executor has not finished or refused
+       and a.receipt_id is null
+  );
+end;
+$$;
+revoke all on function public.journal_evidence_erasure_executing_v1() from public, anon, authenticated;
+grant execute on function public.journal_evidence_erasure_executing_v1() to service_role;
+
 -- ── bypass predicate (one definition, both guards) ────────────────────────
 create or replace function public.journal_evidence_guard_bypassed_v1()
 returns boolean
@@ -94,8 +143,9 @@ language sql
 stable
 set search_path = public, pg_temp
 as $$
-  select current_user = 'service_role'
-     and coalesce(current_setting('lm.evidence_guard_bypass', true), '') = 'erasure';
+  select (current_user = 'service_role'
+          and coalesce(current_setting('lm.evidence_guard_bypass', true), '') = 'erasure')
+      or public.journal_evidence_erasure_executing_v1();
 $$;
 revoke all on function public.journal_evidence_guard_bypassed_v1() from public, anon, authenticated;
 -- The guard trigger functions are SECURITY INVOKER, so this nested call is

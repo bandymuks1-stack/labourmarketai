@@ -4,8 +4,8 @@
  * =============================================
  *
  * ADVERSARIAL behavioural proof for the RED migration
- *   supabase/migrations/20261016190000_journal_evidence_integrity_v1.sql
- *   supabase/rollbacks/20261016190000_journal_evidence_integrity_v1.down.sql
+ *   supabase/migrations/20261023132610_journal_evidence_integrity_v1.sql
+ *   supabase/rollbacks/20261023132610_journal_evidence_integrity_v1.down.sql
  * on a THROWAWAY local PostgreSQL 16 cluster. It never touches a remote
  * database, never needs Supabase credentials, never uses Docker.
  *
@@ -22,10 +22,12 @@
  *      (20260612091000), a `storage.objects` + `storage.foldername()` stub
  *      with the 20260612091000 owner policies, `audit_logs` (0001), and a stub
  *      `journal_entries_attribution_guard_v1` trigger (20261003151300) that
- *      records which hash_self it saw so trigger ORDER can be proven.
+ *      records which hash_self it saw so trigger ORDER can be proven, and
+ *      `privacy_erasure_authorizations_v3` (20261019140000) with a SECURITY
+ *      DEFINER stub of erase_user_account_v3's writes to the guarded tables.
  *   3. Inserts a LEGACY row (pre-migration shape) for a second worker.
  *   4. Applies the migration VERBATIM (the file is read and executed as-is).
- *   5. Runs tests T1..T10 (see the task list in the header of each test)
+ *   5. Runs tests T1..T11 (see the task list in the header of each test)
  *      plus the function-attribute assertions (SECURITY INVOKER verifier,
  *      `search_path=public, pg_temp` on every new function).
  *   6. Applies the rollback, asserts the objects are gone and the rows
@@ -74,8 +76,8 @@ const { Client } = pg;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..", "..", "..");
-const UP_PATH = join(ROOT, "supabase/migrations/20261016190000_journal_evidence_integrity_v1.sql");
-const DOWN_PATH = join(ROOT, "supabase/rollbacks/20261016190000_journal_evidence_integrity_v1.down.sql");
+const UP_PATH = join(ROOT, "supabase/migrations/20261023132610_journal_evidence_integrity_v1.sql");
+const DOWN_PATH = join(ROOT, "supabase/rollbacks/20261023132610_journal_evidence_integrity_v1.down.sql");
 
 const HOST = process.env.LM_PROOF_PGHOST ?? "127.0.0.1";
 const PORT = Number(process.env.LM_PROOF_PGPORT ?? "54399");
@@ -471,6 +473,59 @@ create policy audit_logs_insert on public.audit_logs for insert with check (publ
 grant select, insert on public.audit_logs to authenticated;
 grant all on public.audit_logs to service_role;
 
+-- 20261019140000 privacy_erasure_authorizations_v3 (the columns the predicate
+-- reads) + a STUB of erase_user_account_v3's writes to the guarded tables.
+-- Like the real executor it is SECURITY DEFINER owned by the superuser, so
+-- inside it current_user is the owner (never service_role) and it sets no GUC:
+-- consume (9.1, consumed_at = now()) -> delete_rows journal_entries (L-1) ->
+-- set_null audit_logs.actor_id -> pseudonymise_mentions audit_logs.payload ->
+-- outcome. p_close_first records the outcome BEFORE the writes (window closed).
+create table public.privacy_erasure_authorizations_v3 (
+  id          uuid primary key default gen_random_uuid(),
+  request_id  uuid not null default gen_random_uuid(),
+  expires_at  timestamptz not null default now() + interval '15 minutes',
+  consumed_at timestamptz,
+  outcome     text,
+  receipt_id  uuid
+);
+alter table public.privacy_erasure_authorizations_v3 enable row level security;
+revoke all on public.privacy_erasure_authorizations_v3 from public, anon, authenticated;
+create or replace function public.proof_erase_stub_v3(p_auth uuid, p_entry uuid, p_actor uuid, p_close_first boolean default false)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_id uuid;
+  v_del int;
+  v_actor int;
+  v_payload int;
+begin
+  if p_auth is not null then
+    update public.privacy_erasure_authorizations_v3 set consumed_at = now()
+     where id = p_auth and consumed_at is null and expires_at > now()
+    returning id into v_id;
+    if p_close_first then
+      update public.privacy_erasure_authorizations_v3 set outcome = 'refused: proof' where id = p_auth;
+    end if;
+  end if;
+  delete from public.journal_entries where id = p_entry;
+  get diagnostics v_del = row_count;
+  update public.audit_logs set actor_id = null where actor_id = p_actor;
+  get diagnostics v_actor = row_count;
+  update public.audit_logs set payload = coalesce(payload, '{}'::jsonb) || '{"pseudonymised": true}'::jsonb
+   where action = 'proof.seed';
+  get diagnostics v_payload = row_count;
+  if v_id is not null and not p_close_first then
+    update public.privacy_erasure_authorizations_v3 set outcome = 'erased' where id = p_auth;
+  end if;
+  return jsonb_build_object('consumed', v_id is not null, 'deleted', v_del, 'actor_nulled', v_actor, 'payload_scrubbed', v_payload);
+end;
+$$;
+revoke all on function public.proof_erase_stub_v3(uuid, uuid, uuid, boolean) from public;
+grant execute on function public.proof_erase_stub_v3(uuid, uuid, uuid, boolean) to service_role;
+
 -- fixtures
 insert into public.profiles (id) values ('${P1}'), ('${P2}'), ('${P3}');
 insert into public.projects (id) values ('${PROJ1}');
@@ -766,12 +821,18 @@ async function main() {
          from pg_proc p join pg_namespace n on n.oid = p.pronamespace
         where n.nspname = 'public' and p.proname in (
           'journal_evidence_guard_bypassed_v1','journal_entries_chain_v1','journal_entries_evidence_guard_v1',
-          'journal_entries_truncate_guard_v1','verify_journal_chain_v1','audit_logs_immutable_guard_v1')
+          'journal_entries_truncate_guard_v1','verify_journal_chain_v1','audit_logs_immutable_guard_v1',
+          'journal_evidence_erasure_executing_v1')
         order by p.proname`,
     );
-    assert(rows.length === 6, `found ${rows.length} functions`);
+    assert(rows.length === 7, `found ${rows.length} functions`);
     const verifier = rows.find((r) => r.proname === "verify_journal_chain_v1");
     assert(verifier.prosecdef === false, "verify_journal_chain_v1 is SECURITY DEFINER");
+    const executing = rows.find((r) => r.proname === "journal_evidence_erasure_executing_v1");
+    assert(executing.prosecdef === true, "journal_evidence_erasure_executing_v1 must be SECURITY DEFINER (reads the closed authorization table)");
+    for (const r of rows.filter((x) => x.proname !== "journal_evidence_erasure_executing_v1")) {
+      assert(r.prosecdef === false, `${r.proname} is SECURITY DEFINER`);
+    }
     for (const r of rows) {
       assert((r.proconfig ?? []).some((c) => c === "search_path=public, pg_temp"), `${r.proname} proconfig=${JSON.stringify(r.proconfig)}`);
     }
@@ -779,10 +840,52 @@ async function main() {
     const { rows: g } = await su.query(
       `select has_function_privilege('authenticated', 'public.verify_journal_chain_v1(uuid)', 'execute') as auth_verify,
               has_function_privilege('anon', 'public.verify_journal_chain_v1(uuid)', 'execute') as anon_verify,
-              has_function_privilege('authenticated', 'public.journal_evidence_guard_bypassed_v1()', 'execute') as auth_bypass`,
+              has_function_privilege('authenticated', 'public.journal_evidence_guard_bypassed_v1()', 'execute') as auth_bypass,
+              has_function_privilege('authenticated', 'public.journal_evidence_erasure_executing_v1()', 'execute') as auth_executing,
+              has_function_privilege('anon', 'public.journal_evidence_erasure_executing_v1()', 'execute') as anon_executing,
+              has_function_privilege('service_role', 'public.journal_evidence_erasure_executing_v1()', 'execute') as svc_executing`,
     );
-    assert(g[0].auth_verify === true && g[0].anon_verify === false && g[0].auth_bypass === false, JSON.stringify(g[0]));
-    return `6 functions; prosecdef=false on verifier; search_path pinned on all; execute: authenticated=yes anon=no; bypass predicate not executable by authenticated`;
+    assert(
+      g[0].auth_verify === true && g[0].anon_verify === false && g[0].auth_bypass === false &&
+        g[0].auth_executing === false && g[0].anon_executing === false && g[0].svc_executing === true,
+      JSON.stringify(g[0]),
+    );
+    return `7 functions; only journal_evidence_erasure_executing_v1 is SECURITY DEFINER; verifier invoker; search_path pinned on all; execute: verifier authenticated=yes anon=no; bypass + executing predicates not executable by authenticated/anon, executing by service_role`;
+  });
+
+  await test("T11 erasure executor v3: the bypass holds only inside the transaction that consumed an authorization", async () => {
+    const out = [];
+    const svc = await session("service_role", null);
+    // (a) the definer executor WITHOUT a consumed authorization: refused
+    out.push(await expectSqlstate(svc, "select public.proof_erase_stub_v3(null, $1, $2)", [firstId, P1], "definer executor, no authorization"));
+    // (b) a COMMITTED consumption from an earlier transaction (outcome NULL, impossible in v3 but adversarial) does not open the window
+    await su.query("insert into public.privacy_erasure_authorizations_v3 (consumed_at) values (now() - interval '1 hour')");
+    out.push(await expectSqlstate(svc, "select public.proof_erase_stub_v3(null, $1, $2)", [firstId, P1], "definer executor, stale committed consumption"));
+    // (c) consumed, but the outcome is recorded before the writes: window closed
+    const { rows: a1 } = await su.query("insert into public.privacy_erasure_authorizations_v3 default values returning id");
+    const auth1 = a1[0].id;
+    out.push(await expectSqlstate(svc, "select public.proof_erase_stub_v3($1, $2, $3, true)", [auth1, firstId, P1], "definer executor, outcome already recorded"));
+    // (d) the real shape: consume -> delete the entry -> null actor -> scrub payload -> outcome; then the window is shut
+    await svc.query("begin");
+    const { rows: e } = await svc.query(
+      `insert into public.journal_entries (worker_id, engagement_context_id, entry_type_slug, original_text, original_language, hash_self)
+       values ($1, $2, 'freeform', 'own entry to be erased (L-1)', 'lt', 'client') returning id`,
+      [W3, EC3],
+    );
+    const { rows: res } = await svc.query("select public.proof_erase_stub_v3($1, $2, $3) as r", [auth1, e[0].id, P1]);
+    const r = res[0].r;
+    assert(r.consumed === true && r.deleted === 1 && r.actor_nulled === 1 && r.payload_scrubbed === 1, `executor result ${JSON.stringify(r)}`);
+    await svc.query("savepoint after_executor");
+    out.push(await expectSqlstate(svc, "update public.audit_logs set action = 'rewritten'", [], "same transaction AFTER the executor recorded its outcome"));
+    await svc.query("rollback to savepoint after_executor");
+    await svc.query("rollback");
+    await svc.end();
+    const { rows: chk } = await su.query(
+      "select (select count(*)::int from public.audit_logs where actor_id = $1) as actor_rows, (select consumed_at is null from public.privacy_erasure_authorizations_v3 where id = $2) as unconsumed",
+      [P1, auth1],
+    );
+    assert(chk[0].actor_rows === 1 && chk[0].unconsumed === true, `state after rollback ${JSON.stringify(chk[0])}`);
+    return "\n        " + out.join("\n        ") + `\n        consumed in-transaction: ${JSON.stringify(r)} (rolled back, fixtures kept)`;
   });
 
   await test("T10 rollback then re-apply (idempotent)", async () => {
@@ -794,7 +897,7 @@ async function main() {
     );
     assert(trg.length === 0, `triggers remain ${trg.map((r) => r.tgname)}`);
     const { rows: fns } = await su.query(
-      "select proname from pg_proc where proname in ('journal_evidence_guard_bypassed_v1','journal_entries_chain_v1','journal_entries_evidence_guard_v1','journal_entries_truncate_guard_v1','verify_journal_chain_v1','audit_logs_immutable_guard_v1')",
+      "select proname from pg_proc where proname in ('journal_evidence_guard_bypassed_v1','journal_evidence_erasure_executing_v1','journal_entries_chain_v1','journal_entries_evidence_guard_v1','journal_entries_truncate_guard_v1','verify_journal_chain_v1','audit_logs_immutable_guard_v1')",
     );
     assert(fns.length === 0, `functions remain ${fns.map((r) => r.proname)}`);
     assert(!(await hasHashVersion(su)), "hash_version column remains");
