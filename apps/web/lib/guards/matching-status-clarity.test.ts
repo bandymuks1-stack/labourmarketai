@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Matching status clarity (audit P1): the scouting surface honestly states what
@@ -33,7 +34,7 @@ describe("matching copy is honest (lt/en/ru), no over-claim", () => {
     /akimirksniu\b/i,
     /гарантируем\s+(?:соответств|трудоустрой)/i,
   ];
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     const scouting = JSON.parse(read(`messages/${loc}.json`)).scouting;
     it(`${loc}: statusNote has all 5 keys, non-empty`, () => {
       for (const k of ["title", "signals", "stream", "fill", "disclaimer"]) {

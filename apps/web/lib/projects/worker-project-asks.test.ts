@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_READINESS_ITEM_KEYS, READINESS_ITEM_DOCUMENT_TYPES, documentTypesForReadinessItem } from "@/lib/projects/readiness-items";
 
 import { deriveWorkerProjectAsks, firstRecordableAsk, WORKER_PROJECT_ASK_LIMIT } from "@/lib/projects/worker-project-asks";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * The checklist ↔ document bridge, on the PERSON's side (owner contract §11
@@ -165,7 +166,7 @@ describe("the read and the chat — existing canonical paths only (source pins)"
     const COMP = read("components/app/instruction-project-asks.tsx");
     expect(COMP).toMatch(/href="\/dashboard\/documents"/);
     expect(COMP).not.toMatch(/\.from\(|\.rpc\(|"use server"|Action\(/);
-    for (const locale of ["lt", "en", "de", "nl", "ru"]) {
+    for (const locale of activeLocales) {
       const card = JSON.parse(read(`messages/${locale}.json`)).instructions.card as Record<string, string>;
       for (const k of ["asksTitle", "ownReady", "ownExpiring", "ownNone", "blocked", "record"]) expect(card[k], `${locale}.${k}`).toBeTypeOf("string");
     }

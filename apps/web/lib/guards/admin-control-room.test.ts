@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Admin Owner/Operations Control Room guard (admin-control-room-map-visual-v1).
@@ -119,7 +120,7 @@ describe("admin-visible operational copy carries no internal sprint/build jargon
     /миграц/i,
   ];
 
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     const msg = JSON.parse(read(`messages/${loc}.json`));
     for (const ns of OPERATIONAL_NS) {
       if (!msg[ns]) continue;

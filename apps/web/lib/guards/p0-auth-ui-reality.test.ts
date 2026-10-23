@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { placeholders } from "@/content/placeholders";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Guard: P0 authenticated UI reality audit (2026-06-16).
@@ -19,7 +20,7 @@ import { placeholders } from "@/content/placeholders";
  */
 
 const APP_ROOT = join(__dirname, "..", "..");
-const ACTIVE_LOCALES = ["lt", "en", "ru"] as const;
+const ACTIVE_LOCALES = activeLocales;
 
 function read(rel: string): string {
   return readFileSync(join(APP_ROOT, rel), "utf8");

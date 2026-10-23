@@ -278,7 +278,7 @@ export const PUBLIC_CLAIMS: readonly ClaimSpec[] = [
     status: "LIVE",
     structural: null,
     note:
-      "English only, on purpose: the plan card's NAME is read from plans.name_en / name_lt (the i18n key is the fallback), so only `en` is known to render this key's text; non-lt locales show name_en. The price figure is read per request from plans.price_eur_monthly by the same rule as PricingTable (owner-confirmed only) and formatted by pricing.pricePerMonth; when the page shows no price, the fragment is omitted. A monthly subscription, VAT on top — never a one-time fee.",
+      "English only, on purpose: the plan card's NAME is read from plans.name_en / name_lt in en / lt (every other locale reads its own catalog name, and the i18n key is the fallback everywhere), so only `en` is known to render this key's text from the DB-or-catalog pair checked here. The price figure is read per request from plans.price_eur_monthly by the same rule as PricingTable (owner-confirmed only) and formatted by pricing.pricePerMonth; when the page shows no price, the fragment is omitted. A monthly subscription, VAT on top — never a one-time fee.",
     pages: [
       {
         path: P.pricing,

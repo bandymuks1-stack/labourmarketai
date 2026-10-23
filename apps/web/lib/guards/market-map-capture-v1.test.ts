@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Market Map capture v1 guard — owner-scoped entry/management flows.
@@ -17,7 +18,7 @@ const HELPER = read("lib/market-map/capture.ts");
 const ACTIONS = read("lib/market-map/capture-actions.ts");
 const UI = read("components/app/market-map-capture.tsx");
 const PAGE = read("app/[locale]/dashboard/market-map/page.tsx");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 
 describe("owner-scoped, RLS-only writes", () => {
   it("uses the RLS server client + auth.getUser, never service_role/definer/rpc", () => {

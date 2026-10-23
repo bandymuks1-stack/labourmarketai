@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { ESTIMATE_VERSION } from "@/lib/estimate/estimate";
 import { PAGE_SEO } from "@/lib/seo/metadata";
 import { parseCompanyNeedPrefill } from "@/lib/staffing/company-need-prefill";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * European Work & Project Calculator v1 — integration + honesty guard.
@@ -108,7 +109,7 @@ describe("CSV export — formula-injection safe", () => {
 describe("cross-sector positioning — no construction-first product frame", () => {
   const CONSTRUCTION_FIRST = /statyb|construction|бетон|строит|\bbau(?![a-z])|bouw(?!en)/i;
   it("page h1/title copy is not construction-framed in any active locale", () => {
-    for (const locale of ["en", "lt", "ru", "nl", "de"] as const) {
+    for (const locale of activeLocales) {
       const messages = JSON.parse(read(`messages/${locale}.json`));
       const pc = messages.calculators?.projectCost;
       expect(pc, `${locale}: calculators.projectCost missing`).toBeTruthy();

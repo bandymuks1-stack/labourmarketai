@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * systemic-ux-terms-v1 — internal / technical jargon must never leak into the
@@ -15,7 +16,7 @@ import { join } from "node:path";
  */
 
 const APP_ROOT = join(__dirname, "..", "..");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 
 /** Top-level namespaces rendered ONLY under /dashboard/admin/* (admin-gated). */
 const ADMIN_ONLY_NAMESPACES = new Set([

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * P0 GUARDS — admin company-verification review feedback (2026-08-06,
@@ -67,7 +68,7 @@ describe("company-verification review — P0 feedback guards", () => {
   });
 
   it("all admin-page locales carry the saving label", () => {
-    for (const loc of ["lt", "en", "de", "nl", "ru"]) {
+    for (const loc of activeLocales) {
       const messages = JSON.parse(
         readFileSync(join(WEB, "messages", `${loc}.json`), "utf8"),
       ) as {
