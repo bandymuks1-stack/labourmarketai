@@ -189,16 +189,86 @@ const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 const POOL_READ_LIMIT = 50;
 
 /**
+ * A clean probe answer that the team model IS applied, remembered for the
+ * life of the server process (perf 2026-10-23: the probe ran on every read of
+ * the panel — once per people-page render, 37 times in one production walk).
+ * Only a POSITIVE answer is kept: an applied migration is not un-applied under
+ * a running process (a deploy restarts it). "Not applied" and a probe that
+ * failed for another reason are never remembered, so applying the migration
+ * takes effect on the next read without a restart.
+ */
+let teamModelKnownApplied = false;
+
+/** Test seam: forget the remembered positive answer. */
+export function resetTeamModelProbeForTests(): void {
+  teamModelKnownApplied = false;
+}
+
+/**
  * Readiness probe: the capability RPC only exists once the owner applied
  * 20260705220000. A nil-uuid call is a cheap no-op that returns an empty set
  * when applied and 42883 when not.
  */
 async function isTeamModelApplied(supabase: DB): Promise<boolean> {
+  if (teamModelKnownApplied) return true;
   const { error } = await rpc(supabase, "get_team_capability_summary_v1", {
     p_org_id: NIL_UUID,
   });
-  if (!error) return true;
+  if (!error) {
+    teamModelKnownApplied = true;
+    return true;
+  }
+  // Any other failure keeps the earlier answer (the surface renders and each
+  // read degrades on its own) but is NOT remembered: the next read asks again.
   return error.code !== RPC_NOT_FOUND_CODE;
+}
+
+/** How many capability reads run at once. The panel lists at most 20 brigades
+ *  (create_team_v1's cap): 20 sequential round trips become 4 waves, without
+ *  one burst of 20 against the connection pool. */
+export const TEAM_CAPABILITY_READ_CONCURRENCY = 5;
+
+/** Map with at most `limit` calls in flight; results keep the input order. */
+async function mapBounded<T, R>(
+  items: readonly T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const out: R[] = new Array<R>(items.length);
+  let cursor = 0;
+  const lane = async (): Promise<void> => {
+    while (cursor < items.length) {
+      const i = cursor;
+      cursor += 1;
+      out[i] = await fn(items[i] as T);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => lane()));
+  return out;
+}
+
+/** One brigade's capability summary: the read-only gated RPC over its members'
+ *  existing worker_skills. A failed read is null — never a fabricated summary
+ *  and never an empty one. */
+async function readTeamCapability(
+  supabase: DB,
+  teamId: string,
+): Promise<TeamCapabilitySkill[] | null> {
+  const { data, error } = await rpc(supabase, "get_team_capability_summary_v1", {
+    p_org_id: teamId,
+  });
+  if (error || !Array.isArray(data)) return null;
+  return (data as {
+    skill_slug: string | null;
+    members_declared: number | null;
+    members_confirmed: number | null;
+  }[])
+    .filter((r) => typeof r.skill_slug === "string" && r.skill_slug.length > 0)
+    .map((r) => ({
+      slug: r.skill_slug as string,
+      membersDeclared: r.members_declared ?? 0,
+      membersConfirmed: r.members_confirmed ?? 0,
+    }));
 }
 
 type InvitationLedger = {
@@ -562,32 +632,19 @@ async function readTeamBrigadesData(): Promise<TeamBrigadesData> {
     }
   }
 
+  // Capability summaries: one gated read per brigade (the RPC takes one org),
+  // run TOGETHER under a bound instead of one after another (perf 2026-10-23:
+  // 14–17 brigades were 14–17 sequential round trips on every render). Each
+  // failed read stays null for its own brigade.
+  const capabilities = await mapBounded(teamRows, TEAM_CAPABILITY_READ_CONCURRENCY, (t) =>
+    readTeamCapability(supabase, t.id),
+  );
+
   const teams: TeamBrigade[] = [];
-  for (const t of teamRows) {
+  for (const [index, t] of teamRows.entries()) {
     const members = membersByTeam.get(t.id) ?? [];
     const memberProfileIds = new Set(members.map((m) => m.profileId));
-
-    // Capability summary: read-only gated RPC over members' existing
-    // worker_skills. Errors → null (never a fabricated summary).
-    let capability: TeamCapabilitySkill[] | null = null;
-    const { data: capRows, error: capError } = await rpc(
-      supabase,
-      "get_team_capability_summary_v1",
-      { p_org_id: t.id },
-    );
-    if (!capError && Array.isArray(capRows)) {
-      capability = (capRows as {
-        skill_slug: string | null;
-        members_declared: number | null;
-        members_confirmed: number | null;
-      }[])
-        .filter((r) => typeof r.skill_slug === "string" && r.skill_slug.length > 0)
-        .map((r) => ({
-          slug: r.skill_slug as string,
-          membersDeclared: r.members_declared ?? 0,
-          membersConfirmed: r.members_confirmed ?? 0,
-        }));
-    }
+    const capability = capabilities[index] ?? null;
 
     const pendingEmails = ledger.pendingEmailsByTeam.get(t.id);
     teams.push({

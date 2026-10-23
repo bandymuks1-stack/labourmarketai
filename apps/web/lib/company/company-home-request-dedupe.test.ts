@@ -75,6 +75,10 @@ async function beginRequest(projects = 2): Promise<void> {
   // bell's bridge and team-offer reads run too.
   const { clearBadgeCache } = await import("@/lib/perf/badge-ttl-cache");
   clearBadgeCache();
+  // The team-model readiness probe remembers a positive answer per process;
+  // every simulated render here is the cold worst case (probe included).
+  const { resetTeamModelProbeForTests } = await import("@/lib/company/team-brigades");
+  resetTeamModelProbeForTests();
 }
 
 // ── The recording fake client ───────────────────────────────────────────────
