@@ -1,8 +1,9 @@
 export declare const THRESHOLDS: Readonly<{
   healthDbMs: number;
   healthAuthMs: number;
-  healthAttempts: number;
-  healthRetryDelayMs: number;
+  healthSamples: number;
+  healthSampleGapMs: number;
+  deployQuietMinutes: number;
   errorLookback: number;
   errorCooldownMinutes: number;
   supabaseWindowMinutes: number;
@@ -15,6 +16,17 @@ export declare function judgeHealth(
   report: unknown,
   t?: typeof THRESHOLDS,
 ): { ok: boolean; reasons: string[]; summary: string };
+
+export declare function judgeHealthSamples(
+  samples: readonly { status: number; report: unknown }[],
+  t?: typeof THRESHOLDS,
+): { ok: boolean; reasons: string[] };
+
+export declare function judgeDeployBrake(
+  runs: readonly { id: number; status: string; updated_at: string | null }[],
+  now?: Date,
+  t?: typeof THRESHOLDS,
+): { refuse: boolean; reason: string };
 
 export declare function judgeWalkRun(input: {
   walkConclusion: string | null;

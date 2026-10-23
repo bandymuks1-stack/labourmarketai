@@ -12,8 +12,13 @@
 // Subcommands (each prints one summary line; a refusal prints `::error::` and
 // exits 1; a skipped optional signal prints `::notice::` and exits 0):
 //
-//   health    GET /api/health: refuse unless ok, db.ms and auth.ms <= 1500,
-//             and vacancyFreshness answered. NOT bypassable by budget_override.
+//   health    3 x GET /api/health, 5 s apart: refuse if ANY sample is not
+//             HTTP 200, not ok, has db.ms or auth.ms > 1500, or no
+//             vacancyFreshness answer. NOT bypassable by budget_override.
+//   deploy    refuse while a deploy-vps.yml run is in progress or queued, or
+//             within 5 min of the last one ending (the blue/green switch runs
+//             two servers on one origin: run 39978076973 got Cloudflare 522s
+//             and 45 s timeouts during deploys). NOT bypassable.
 //   errors    refuse when the last 2 walks that reached production both failed
 //             in their FIRST step or with infrastructure / 5xx errors, and the
 //             latest of them ended < 60 min ago (circuit breaker: after the
@@ -47,9 +52,14 @@ export const THRESHOLDS = Object.freeze({
   healthDbMs: 1500,
   /** /api/health auth probe latency above this refuses. */
   healthAuthMs: 1500,
-  /** Health is sampled up to this many times, 15 s apart; one good sample passes. */
-  healthAttempts: 2,
-  healthRetryDelayMs: 15_000,
+  /** Health is sampled this many times, this far apart; EVERY sample must be
+   *  HTTP 200 and within the latency thresholds (coordinator 2026-10-23). */
+  healthSamples: 3,
+  healthSampleGapMs: 5_000,
+  /** No walk while a deploy runs or is queued, nor this soon after one ended
+   *  (blue/green switch: two Next servers on one origin; run 39978076973 got
+   *  Cloudflare 522s and 45 s timeouts during deploys). */
+  deployQuietMinutes: 5,
   /** The error brake looks at this many latest walks that reached production. */
   errorLookback: 2,
   /** …and trips only while the latest of them ended less than this long ago. */
@@ -86,6 +96,56 @@ export function judgeHealth(report, t = THRESHOLDS) {
   if (fresh.ok !== true) reasons.push(`vacancyFreshness not ok${fresh.reason ? ` (${fresh.reason})` : ""}`);
   const summary = `health: ok=${report.ok} db=${db.ms ?? "?"}ms auth=${auth.ms ?? "?"}ms vacancyFreshness=${fresh.ok === true ? fresh.state ?? "ok" : "not ok"} build=${report.build ?? "?"}`;
   return { ok: reasons.length === 0, reasons, summary };
+}
+
+/**
+ * All health samples together: EVERY sample must be an HTTP 200 whose report
+ * passes `judgeHealth`. `samples` = [{ status, report }] (status 0 = no answer).
+ * @returns {{ ok: boolean, reasons: string[] }}
+ */
+export function judgeHealthSamples(samples, t = THRESHOLDS) {
+  const reasons = [];
+  if (samples.length < t.healthSamples) reasons.push(`only ${samples.length} of ${t.healthSamples} samples taken`);
+  samples.forEach((s, i) => {
+    if (s.status !== 200) reasons.push(`sample ${i + 1}: HTTP ${s.status || "no answer"}`);
+    const v = judgeHealth(s.report, t);
+    if (!v.ok) reasons.push(`sample ${i + 1}: ${v.reasons.join(", ")}`);
+  });
+  return { ok: reasons.length === 0, reasons };
+}
+
+const DEPLOY_ACTIVE = new Set(["in_progress", "queued", "waiting", "requested", "pending"]);
+
+/**
+ * The deploy brake: `runs` = the latest deploy-vps.yml runs ({ id, status,
+ * updated_at }). Refuse while one is running or queued, or within
+ * `deployQuietMinutes` of the latest one ending.
+ * @returns {{ refuse: boolean, reason: string }}
+ */
+export function judgeDeployBrake(runs, now = new Date(), t = THRESHOLDS) {
+  const active = runs.filter((r) => DEPLOY_ACTIVE.has(r.status));
+  if (active.length > 0) {
+    return {
+      refuse: true,
+      reason: `a production deploy is ${active.map((r) => `${r.status} (run ${r.id})`).join(", ")}: the blue/green switch runs two servers on one origin, so a walk now measures the deploy, not the product. Re-dispatch ${t.deployQuietMinutes} min after it ends.`,
+    };
+  }
+  const ended = runs
+    .filter((r) => r.status === "completed")
+    .map((r) => Date.parse(r.updated_at ?? ""))
+    .filter(Number.isFinite)
+    .sort((a, b) => b - a)[0];
+  if (ended !== undefined) {
+    const ageMin = (now.getTime() - ended) / 60_000;
+    if (ageMin < t.deployQuietMinutes) {
+      return {
+        refuse: true,
+        reason: `the last production deploy ended ${Math.max(0, Math.round(ageMin * 10) / 10)} min ago (quiet period ${t.deployQuietMinutes} min). Re-dispatch after ${new Date(ended + t.deployQuietMinutes * 60_000).toISOString()}.`,
+      };
+    }
+    return { refuse: false, reason: `no deploy running; the last ended ${Math.round(ageMin)} min ago` };
+  }
+  return { refuse: false, reason: "no deploy run found" };
 }
 
 /**
@@ -217,22 +277,35 @@ function recentRuns(perPage = 30) {
 
 async function cmdHealth() {
   const url = process.env.HEALTH_URL ?? "https://labourmarket.ai/api/health";
-  let last = null;
-  for (let attempt = 1; attempt <= THRESHOLDS.healthAttempts; attempt++) {
+  const samples = [];
+  for (let n = 1; n <= THRESHOLDS.healthSamples; n++) {
+    let status = 0;
     let report = null;
     try {
       const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(20_000) });
+      status = res.status;
       report = await res.json().catch(() => null);
     } catch (e) {
-      report = null;
-      last = { ok: false, reasons: [`no answer (${e?.name ?? "error"})`], summary: "health: no answer" };
+      say(`health sample ${n}: no answer (${e?.name ?? "error"})`);
     }
-    if (report) last = judgeHealth(report);
-    say(`${last.summary} (attempt ${attempt}/${THRESHOLDS.healthAttempts})`);
-    if (last.ok) return;
-    if (attempt < THRESHOLDS.healthAttempts) await sleep(THRESHOLDS.healthRetryDelayMs);
+    samples.push({ status, report });
+    if (report) say(`${judgeHealth(report).summary} http=${status} (sample ${n}/${THRESHOLDS.healthSamples})`);
+    if (n < THRESHOLDS.healthSamples) await sleep(THRESHOLDS.healthSampleGapMs);
   }
-  refuse(`production is not healthy enough for a walk: ${last.reasons.join(", ")}. Thresholds: db.ms and auth.ms <= ${THRESHOLDS.healthDbMs} ms, ok=true, vacancyFreshness answered.`);
+  const verdict = judgeHealthSamples(samples);
+  if (!verdict.ok) {
+    refuse(`production is not healthy enough for a walk: ${verdict.reasons.join("; ")}. Every one of ${THRESHOLDS.healthSamples} samples must be HTTP 200 with ok=true, db.ms and auth.ms <= ${THRESHOLDS.healthDbMs} ms and vacancyFreshness answered.`);
+  }
+  say(`health brake: clear (${THRESHOLDS.healthSamples}/${THRESHOLDS.healthSamples} samples within thresholds)`);
+}
+
+async function cmdDeploy() {
+  const runs = (ghJson(`repos/${REPO}/actions/workflows/deploy-vps.yml/runs?per_page=10`).workflow_runs ?? []).map(
+    (r) => ({ id: r.id, status: r.status, updated_at: r.updated_at }),
+  );
+  const verdict = judgeDeployBrake(runs);
+  if (verdict.refuse) refuse(verdict.reason);
+  say(`deploy brake: clear (${verdict.reason})`);
 }
 
 async function cmdErrors() {
@@ -390,7 +463,14 @@ async function cmdCount() {
   console.log(`used=${runIds.size}`);
 }
 
-const COMMANDS = { health: cmdHealth, errors: cmdErrors, supabase: cmdSupabase, gap: cmdGap, count: cmdCount };
+const COMMANDS = {
+  health: cmdHealth,
+  deploy: cmdDeploy,
+  errors: cmdErrors,
+  supabase: cmdSupabase,
+  gap: cmdGap,
+  count: cmdCount,
+};
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const cmd = COMMANDS[process.argv[2] ?? ""];

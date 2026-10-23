@@ -5,8 +5,10 @@ import { describe, expect, it } from "vitest";
 import {
   THRESHOLDS,
   gapRemainingSeconds,
+  judgeDeployBrake,
   judgeErrorBrake,
   judgeHealth,
+  judgeHealthSamples,
   judgeSupabaseEdge,
   judgeWalkRun,
 } from "../../../../.github/scripts/walk-brakes.mjs";
@@ -47,7 +49,40 @@ describe("health brake", () => {
   it("the thresholds are the documented ones", () => {
     expect(THRESHOLDS.healthDbMs).toBe(1500);
     expect(THRESHOLDS.healthAuthMs).toBe(1500);
+    expect(THRESHOLDS.healthSamples).toBe(3);
+    expect(THRESHOLDS.healthSampleGapMs).toBe(5_000);
+    expect(THRESHOLDS.deployQuietMinutes).toBe(5);
     expect(THRESHOLDS.minGapSeconds).toBe(180);
+  });
+
+  it("every one of the samples must pass: one slow or non-200 sample refuses", () => {
+    const good = { status: 200, report: healthy };
+    expect(judgeHealthSamples([good, good, good]).ok).toBe(true);
+    const slow = { status: 200, report: { ...healthy, checks: { ...healthy.checks, db: { ok: true, ms: 1805 } } } };
+    expect(judgeHealthSamples([slow, good, good]).ok).toBe(false);
+    expect(judgeHealthSamples([good, { status: 503, report: { ...healthy, ok: false } }, good]).ok).toBe(false);
+    expect(judgeHealthSamples([good, good, { status: 0, report: null }]).ok).toBe(false);
+    expect(judgeHealthSamples([good, good]).ok).toBe(false);
+  });
+});
+
+describe("deploy brake", () => {
+  const now = new Date("2026-10-23T16:00:00Z");
+  const done = (minAgo: number, id = 1) => ({
+    id,
+    status: "completed",
+    updated_at: new Date(now.getTime() - minAgo * 60_000).toISOString(),
+  });
+  it.each(["in_progress", "queued", "waiting", "requested", "pending"])("refuses while a deploy is %s", (status) => {
+    expect(judgeDeployBrake([{ id: 9, status, updated_at: now.toISOString() }, done(60)], now).refuse).toBe(true);
+  });
+  it("refuses within the quiet period after a deploy, allows after it", () => {
+    expect(judgeDeployBrake([done(2), done(60, 2)], now).refuse).toBe(true);
+    expect(judgeDeployBrake([done(THRESHOLDS.deployQuietMinutes + 1)], now).refuse).toBe(false);
+    expect(judgeDeployBrake([], now).refuse).toBe(false);
+  });
+  it("judges by the most recent end, whatever the list order", () => {
+    expect(judgeDeployBrake([done(60), done(1, 2)], now).refuse).toBe(true);
   });
 });
 
@@ -143,7 +178,7 @@ describe("workflow wiring", () => {
   const walk = yml.slice(yml.indexOf("\n  walk:"));
 
   it("the budget job runs the health, error and Supabase brakes and the cheap count", () => {
-    for (const cmd of ["health", "errors", "supabase", "count"]) {
+    for (const cmd of ["health", "deploy", "errors", "supabase", "count"]) {
       expect(budget).toContain(`walk-brakes.mjs ${cmd}`);
     }
   });
@@ -156,12 +191,16 @@ describe("workflow wiring", () => {
     expect(step(budget, "health")).not.toMatch(/OVERRIDE|budget_override/);
     expect(step(walk, "health")).not.toMatch(/OVERRIDE|budget_override/);
     expect(step(walk, "gap")).not.toMatch(/OVERRIDE|budget_override/);
+    expect(step(budget, "deploy")).not.toMatch(/OVERRIDE|budget_override/);
+    expect(step(walk, "deploy")).not.toMatch(/OVERRIDE|budget_override/);
     // …while the error and Supabase brakes are the ones it may lift.
     expect(step(budget, "errors")).toMatch(/OVERRIDE/);
   });
 
-  it("the walk job re-checks health and the gap after its concurrency wait, before any production step", () => {
+  it("the walk job re-checks health, deploys and the gap after its concurrency wait, before any production step", () => {
     const provision = walk.indexOf("Provision + mint");
+    expect(walk.indexOf("walk-brakes.mjs deploy")).toBeGreaterThan(walk.indexOf("walk-brakes.mjs gap"));
+    expect(walk.indexOf("walk-brakes.mjs deploy")).toBeLessThan(provision);
     expect(walk.indexOf("walk-brakes.mjs health")).toBeGreaterThan(-1);
     expect(walk.indexOf("walk-brakes.mjs health")).toBeLessThan(provision);
     expect(walk.indexOf("walk-brakes.mjs gap")).toBeGreaterThan(-1);

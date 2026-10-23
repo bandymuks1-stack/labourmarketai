@@ -159,10 +159,10 @@ jobs:
     # 6.5 min — run 39795574869). A walk starts only when ALL of these hold; each refusal prints `::error::`
     # with its reason, before any install, session mint or production request. Thresholds live in ONE place,
     # `.github/scripts/walk-brakes.mjs` THRESHOLDS (unit-tested in apps/web/lib/guards/walk-brakes.test.ts):
-    #   (a) health   GET https://labourmarket.ai/api/health: ok=true, checks.db.ms <= 1500 and
-    #                checks.auth.ms <= 1500, vacancyFreshness answered (ok=true). Two samples 15 s apart;
-    #                one good sample passes. budget_override does NOT lift it. Re-checked in the walk job
-    #                right before the session mint (the walk may have queued behind another one).
+    #   (a) health   3 x GET https://labourmarket.ai/api/health, 5 s apart: EVERY sample must be HTTP 200
+    #                with ok=true, checks.db.ms <= 1500, checks.auth.ms <= 1500 and vacancyFreshness
+    #                answered (ok=true). budget_override does NOT lift it. Re-checked in the walk job right
+    #                before the session mint (the walk may have queued behind another one).
     #   (b) errors   the last 2 walks that reached production both failed in their FIRST step, or with
     #                infrastructure / 5xx errors (mint failure, no result file, 5xx / net::ERR / timeout
     #                markers), and the latest ended < 60 min ago -> refuse. After the 60 min cool-down one
@@ -175,7 +175,11 @@ jobs:
     #                enforced in the WALK job after its concurrency wait (the only place it can hold): it
     #                waits out the remainder instead of refusing, because a refusal there would stop the
     #                acceptance campaign's chain. budget_override does NOT lift it.
-    #   (e) budget   PROD_QA_WALK_DAILY_BUDGET walks that reached production in 24 h (below).
+    #   (e) deploy   no deploy-vps.yml run in progress or queued, and none ended < 5 min ago: the
+    #                blue/green switch runs two Next servers on one origin, so a walk then measures the
+    #                deploy (run 39978076973: Cloudflare 522, 45 s timeouts, while Supabase was clean).
+    #                budget_override does NOT lift it. Re-checked in the walk job before the session mint.
+    #   (f) budget   PROD_QA_WALK_DAILY_BUDGET walks that reached production in 24 h (below).
     env:
       # Owner decision 2026-10-23 (#2659): 12 -> 200 for the acceptance campaign. Measured load per walk:
       # ~2-8k Supabase requests in 2-6 min (~15-21 req/s at peak), 0 x 429 and 4 x 5xx in ~28k requests on
@@ -189,6 +193,11 @@ jobs:
 
       - name: "Brake (a): production health (the override does not lift it)"
         run: node .github/scripts/walk-brakes.mjs health
+
+      - name: "Brake (e): no production deploy running or just finished (the override does not lift it)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/walk-brakes.mjs deploy
 
       - name: "Brake (b): the last walks did not fail for infrastructure"
         env:
@@ -256,11 +265,9 @@ jobs:
       - uses: actions/checkout@v4
 
       # The brakes again, AFTER the concurrency wait and BEFORE anything touches
-      # production: the budget job's health answer may be minutes old by now.
-      # Neither is lifted by budget_override.
-      - name: "Brake (a): production health, right before the walk"
-        run: node .github/scripts/walk-brakes.mjs health
-
+      # production: the budget job's answers may be minutes old by now. The gap
+      # waits first; the deploy and health checks run last, right before the
+      # session mint. None is lifted by budget_override.
       - name: "Brake (d): minimum gap after the previous walk (waits)"
         env:
           GH_TOKEN: ${{ github.token }}
@@ -273,6 +280,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm -C apps/web exec playwright install --with-deps chromium
+
+      - name: "Brake (e): no production deploy running or just finished"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/walk-brakes.mjs deploy
+
+      - name: "Brake (a): production health, right before the walk"
+        run: node .github/scripts/walk-brakes.mjs health
 
       - name: Provision + mint the synthetic cast (allowlist only)
         shell: bash
