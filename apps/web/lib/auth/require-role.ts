@@ -1,7 +1,7 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
+import { readActiveRoleRows } from "@/lib/auth/profile-roles";
 import { type Role } from "@/lib/auth/actions";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
@@ -69,14 +69,9 @@ export async function requireRoleOrRedirect(
 
   // Throws RoleSignalUnavailableError when the read never answered — NOT
   // caught here on purpose: an unknown role state must never be narrowed into
-  // "you do not hold this role".
-  const rolesRows = await readActiveProfileRoles(() =>
-    supabase
-      .from("profile_roles")
-      .select("role")
-      .eq("profile_id", user.id)
-      .eq("is_active", true),
-  );
+  // "you do not hold this role". The SAME request-cached read the dashboard
+  // shell above this page already issued (one `profile_roles` query a render).
+  const rolesRows = await readActiveRoleRows(supabase, user.id);
 
   const heldRoles = new Set(rolesRows.map((r) => r.role as string));
   if (!heldRoles.has(expectedRole)) {

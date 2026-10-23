@@ -112,8 +112,12 @@ describe("Guard: CAL-8 — planned work is a forecast on the one calendar, throu
     const committed = read("lib/planning/employer-committed-work.ts");
     expect(committed).toMatch(/\.from\("work_plan_entries"\)/);
     expect(committed).toMatch(/kind: "plan"/);
-    // The note is free text and is never read for a capacity answer.
-    expect(committed).toMatch(/select\("id, worker_id, start_date, end_date"\)/);
+    // The note is free text and is never read for a capacity answer. CAL-8
+    // adds the shift pattern (the days the window holds) and nothing else,
+    // with a retry without it while that column is not provisioned.
+    expect(committed).toMatch(/planQuery\("id, worker_id, start_date, end_date, recurrence"\)/);
+    expect(committed).toMatch(/planQuery\("id, worker_id, start_date, end_date"\)/);
+    expect(committed).not.toMatch(/planQuery\("[^"]*\bnote\b/);
     expect(read("lib/workforce/commitment-reservation.ts")).toMatch(/"trip", "plan", "absence"/);
     expect(read("lib/planning/worker-reservation.ts")).toMatch(/"trip", "plan"\]/);
   });
@@ -176,7 +180,8 @@ describe("Guard: the writes", () => {
   it("go through the two RPCs only, after pure validation", () => {
     expect(actions).toMatch(/^"use server";/m);
     expect(actions).toMatch(/validateWorkPlanInput\(/);
-    expect(actions).toMatch(/rpc\("create_work_plan_entry_v1"/);
+    // A one-off window keeps v1; only a shift pattern (CAL-8) uses v2.
+    expect(actions).toMatch(/pattern \? "create_work_plan_entry_v2" : "create_work_plan_entry_v1"/);
     expect(actions).toMatch(/rpc\("cancel_work_plan_entry_v1"/);
     expect(actions).not.toMatch(/\.from\("work_plan_entries"\)/);
   });

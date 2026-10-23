@@ -55,14 +55,36 @@ const COMPANY_B = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 
 type TableAnswer = { data?: unknown[] | null; error?: { code?: string } | null };
 
-/** Minimal PostgREST-shaped builder: `.select().eq().limit()` resolves. */
+/** Minimal PostgREST-shaped builder: `.select().eq().limit()` resolves.
+ *
+ *  The organization read embeds its bound company through the legacy-binding
+ *  foreign key (perf 2026-10-23): like PostgREST, an `organizations` row read
+ *  with `companies!organizations_legacy_company_id_fkey(...)` carries the ONE
+ *  `companies` row whose primary key is its `legacy_company_id` (or null). */
+const COMPANY_EMBED = "companies!organizations_legacy_company_id_fkey";
 function tableStub(answers: Record<string, TableAnswer>) {
   return (table: string) => {
     const answer = answers[table] ?? { data: [], error: null };
+    let select = "";
     const chain = {
-      select: () => chain,
+      select: (cols: string) => {
+        select = cols;
+        return chain;
+      },
       eq: () => chain,
-      limit: async () => ({ data: answer.data ?? null, error: answer.error ?? null }),
+      limit: async () => {
+        if (table === "organizations" && select.includes(COMPANY_EMBED) && answer.data) {
+          const companies = (answers.companies?.data ?? []) as { id: string }[];
+          return {
+            data: (answer.data as { legacy_company_id?: string | null }[]).map((row) => ({
+              ...row,
+              companies: companies.find((c) => c.id === row.legacy_company_id) ?? null,
+            })),
+            error: answer.error ?? null,
+          };
+        }
+        return { data: answer.data ?? null, error: answer.error ?? null };
+      },
     };
     return chain;
   };
@@ -260,25 +282,24 @@ describe("ambiguity and failure are never 'no data'", () => {
     expect(isEmployerContextFailure("ambiguous-binding")).toBe(true);
   });
 
-  it("a multi-row company answer is ambiguous, not silently reduced", async () => {
-    fromMock.mockImplementation(
-      tableStub({
-        organizations: {
-          data: [
-            { id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A },
-          ],
-        },
-        companies: {
-          data: [
-            { id: COMPANY_A, profile_id: USER.id },
-            { id: COMPANY_A, profile_id: USER.id },
-          ],
-        },
-      }),
-    );
-    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({
-      reason: "ambiguous-binding",
+  it("the bound company rides the organization read — one row by its primary key, no second query", async () => {
+    // Perf 2026-10-23: the company used to be a separate `companies` read with
+    // its own "two rows = ambiguous" check. Through the foreign key the binding
+    // names exactly ONE row (its primary key), so that ambiguity cannot arise;
+    // the org row's own duplicate check above still stands.
+    const tables: string[] = [];
+    const stub = tableStub({
+      organizations: {
+        data: [{ id: ORG_A, display_name: "Alpha", legal_name: null, legacy_company_id: COMPANY_A }],
+      },
+      companies: { data: [{ id: COMPANY_A, profile_id: USER.id }] },
     });
+    fromMock.mockImplementation((t: string) => {
+      tables.push(t);
+      return stub(t);
+    });
+    await expect(resolveEmployerCompanyContext()).resolves.toMatchObject({ kind: "ok" });
+    expect(tables).not.toContain("companies");
   });
 
   it("a DB error is reported as a failure, never as an empty employer state", async () => {
@@ -351,23 +372,14 @@ describe("two organizations, two answers", () => {
 
     const forActive = (activeId: string) => {
       workspaceContextMock.mockResolvedValue(workspace([ORG_A, ORG_B], activeId));
-      fromMock.mockImplementation((table: string) => {
-        const answer =
-          table === "organizations"
-            ? [orgs[activeId as keyof typeof orgs]]
-            : [
-                {
-                  id: orgs[activeId as keyof typeof orgs].legacy_company_id,
-                  profile_id: USER.id,
-                },
-              ];
-        const chain = {
-          select: () => chain,
-          eq: () => chain,
-          limit: async () => ({ data: answer, error: null }),
-        };
-        return chain;
-      });
+      fromMock.mockImplementation(
+        tableStub({
+          organizations: { data: [orgs[activeId as keyof typeof orgs]] },
+          companies: {
+            data: [{ id: orgs[activeId as keyof typeof orgs].legacy_company_id, profile_id: USER.id }],
+          },
+        }),
+      );
     };
 
     forActive(ORG_A);

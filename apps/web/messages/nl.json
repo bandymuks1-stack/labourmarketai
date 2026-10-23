@@ -18788,7 +18788,23 @@
       "unavailable": "Plannen is hier nog niet beschikbaar.",
       "error": "Er ging iets mis. Probeer opnieuw.",
       "planned_collides": "Gepland, maar deze persoon heeft op sommige van deze dagen al iets. U beslist; annuleer het plan hieronder als het niet klopt.",
-      "planned_unknown": "Gepland, maar we konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij."
+      "planned_unknown": "Gepland, maar we konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
+      "recurrence_invalid": "Controleer de herhaling: kies minstens één weekdag, of een rotatie van 1–28 werkdagen en 1–28 rustdagen.",
+      "recurrence_empty": "Dit patroon heeft tussen deze data geen enkele werkdag. Er is niets gepland.",
+      "recurrence_unavailable": "Terugkerende diensten zijn hier nog niet beschikbaar. Plan de periode zonder herhaling."
+    },
+    "repeat": {
+      "legend": "Herhaling",
+      "none": "Herhaalt niet",
+      "weekly": "Wekelijkse diensten",
+      "cycle": "Rotatie",
+      "weekdays": "Werkdagen",
+      "cycleOn": "Werkdagen achter elkaar",
+      "cycleOff": "Rustdagen achter elkaar",
+      "cycleOffset": "Al gewerkte dagen op de eerste dag (0 = begint opnieuw)",
+      "hint": "Diensten herhalen zich binnen de data hierboven en staan in de agenda als planning. Een dienst die op verlof of ander werk valt, wordt opgeslagen en gemarkeerd; u beslist.",
+      "summaryWeekly": "Diensten: {days}",
+      "summaryCycle": "Rotatie: {on} werk, {off} rust"
     }
   },
   "workLifecycle": {

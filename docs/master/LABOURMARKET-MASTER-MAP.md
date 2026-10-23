@@ -10,7 +10,7 @@ the owner's private registry, never here. **Living document:** it is rewritten w
 state, and `apps/web/lib/guards/master-map-register-sync.test.ts` fails CI when the register snapshot
 below no longer matches the capability register.
 
-> Register snapshot: 111 capabilities — BUILT_AND_USABLE 34 · PARTIAL 69 · BUILT_NOT_CONNECTED 1 · BLOCKED 2 · ARCHITECTURE_ONLY 2 · MISSING 2 · RETIRED 1
+> Register snapshot: 111 capabilities — BUILT_AND_USABLE 34 · PARTIAL 71 · BUILT_NOT_CONNECTED 1 · BLOCKED 2 · ARCHITECTURE_ONLY 2 · MISSING 0 · RETIRED 1
 
 Last full audit: 2026-10-18 (main `fb741339a`).
 

@@ -116,29 +116,17 @@ export async function getLifecycleOverview(
   } = await supabase.auth.getUser();
   if (!user) return { status: "not-authed" };
 
-  // One probe read decides applied-vs-not (established feature-detect shape).
-  const probe = await asAny(supabase)
-    .from("engagement_contexts")
-    .select("id, lifecycle_stage")
-    .eq("organization_id", orgId)
-    .limit(1);
-  if (probe.error && isLifecycleMigrationMissingCode(errCode(probe.error))) {
-    return { status: "needs-migration" };
-  }
-
-  // Registered owner (last-owner protection mirror in the UI — the RPC is
-  // the enforcing truth). RLS-scoped read; null when not visible.
-  const orgRes = await asAny(supabase)
-    .from("organizations")
-    .select("owner_profile_id")
-    .eq("id", orgId)
-    .maybeSingle();
-  const ownerProfileId: string | null =
-    (orgRes.data?.owner_profile_id as string | null) ?? null;
-
+  // ONE STAGE (perf 2026-10-23). Applied-vs-not is decided by the engagement
+  // read itself: it selects `lifecycle_stage` from the same table, for the
+  // same organization, that the separate one-row probe used to read first —
+  // an unapplied migration answers it with the same code, and the loop below
+  // returns "needs-migration" exactly as the probe did. The registered owner
+  // (last-owner protection mirror in the UI — the RPC is the enforcing truth;
+  // RLS-scoped, null when not visible) rides the same stage.
   let loadError = false;
 
-  const [ecRes, tplRes, onbRes, offRes] = await Promise.all([
+  const [orgRes, ecRes, tplRes, onbRes, offRes] = await Promise.all([
+    asAny(supabase).from("organizations").select("owner_profile_id").eq("id", orgId).maybeSingle(),
     asAny(supabase)
       .from("engagement_contexts")
       .select(
@@ -182,6 +170,9 @@ export async function getLifecycleOverview(
           .order("created_at", { ascending: false })
           .limit(25)
       : { data: [], error: null };
+
+  const ownerProfileId: string | null =
+    (orgRes.data?.owner_profile_id as string | null) ?? null;
 
   for (const res of [ecRes, tplRes, onbRes, offRes, evRes]) {
     if (res.error) {

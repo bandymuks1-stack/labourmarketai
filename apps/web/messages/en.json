@@ -18788,7 +18788,23 @@
       "unavailable": "Planning is not available here yet.",
       "error": "Something went wrong. Try again.",
       "planned_collides": "Planned, but this person already holds time on some of these days. You decide; cancel the plan below if it is not right.",
-      "planned_unknown": "Planned, but we could not confirm these days are free. That is not the same as free."
+      "planned_unknown": "Planned, but we could not confirm these days are free. That is not the same as free.",
+      "recurrence_invalid": "Check the repeat settings: pick at least one weekday, or a rotation of 1–28 working days and 1–28 rest days.",
+      "recurrence_empty": "This repeat pattern has no working day between those dates. Nothing was planned.",
+      "recurrence_unavailable": "Repeating shifts are not available here yet. Plan the window without repeating."
+    },
+    "repeat": {
+      "legend": "Repeat",
+      "none": "Does not repeat",
+      "weekly": "Weekly shifts",
+      "cycle": "Rotation",
+      "weekdays": "Working days",
+      "cycleOn": "Working days in a row",
+      "cycleOff": "Rest days in a row",
+      "cycleOffset": "Days already worked on the first day (0 = starts fresh)",
+      "hint": "Shifts repeat inside the dates above and show in the calendar as planned. A shift on leave or other work is saved and flagged for you to decide.",
+      "summaryWeekly": "Shifts: {days}",
+      "summaryCycle": "Rotation: {on} working, {off} rest"
     }
   },
   "workLifecycle": {
