@@ -41,7 +41,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           LOCAL_CHECKS: ${{ vars.ACCEPTANCE_LOCAL_CHECKS }}
-          DAILY_CHECKS: "12"
+          DAILY_CHECKS: "200"   # owner decision 2026-10-23: 12 -> 200 (same as PROD_QA_WALK_DAILY_BUDGET)
         run: |
           set -euo pipefail
           DAY1="role-routes journal-confirm living-cv-growth company-chain brigade-formation project-execution org-roster orders-bookings documents-approvals marketplace-goods-services jobs-search notifications-inapp"
@@ -57,7 +57,7 @@ jobs:
           today=$(date -u +%F)
           case "$today" in
             2026-10-22) plan="$DAY1"; retry_failed=0 ;;
-            2026-10-23) plan="$UNVERIFIED_FIRST"; retry_failed=0 ;;
+            2026-10-23) plan="$UNVERIFIED_FIRST $DAY2 $DAY3 $DAY1"; retry_failed=1 ;;
             2026-10-24) plan="$DAY3 $DAY1 $DAY2"; retry_failed=1 ;;
             2026-10-25) plan="$DAY1 $DAY2 $DAY3"; retry_failed=1 ;;
             *) log "outside the campaign window ($today): nothing to do"; exit 0 ;;

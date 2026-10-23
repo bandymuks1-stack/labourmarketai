@@ -152,7 +152,11 @@ jobs:
     permissions:
       actions: read
     env:
-      PROD_QA_WALK_DAILY_BUDGET: "12"
+      # Owner decision 2026-10-23 (#2659): 12 -> 200 for the acceptance campaign. Measured load per walk:
+      # ~2-8k Supabase requests in 2-6 min (~15-21 req/s at peak), 0 x 429 and 4 x 5xx in ~28k requests on
+      # 2026-10-22; walks stay serial (concurrency group prod-qa-walk), so the hourly load does not grow --
+      # only the hours with walks do (~10 walks/h at most).
+      PROD_QA_WALK_DAILY_BUDGET: "200"
     steps:
       - name: Count production walks in the last 24 h
         shell: bash
