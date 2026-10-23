@@ -15,11 +15,15 @@ import { CountUp } from "@/components/app/today/count-up";
  * (DESIGN_SOUL §2 — Kito žingsnio + Ramybės testai).
  */
 export async function ConfirmPulse() {
-  const pending = await countReviewablePendingEntries();
   // A DIFFERENT job (decision 0018): entries submitted to the caller as a
-  // client. Its own line and label - never added to the employer count.
-  const clientToDecide = await countCounterpartyToDecide();
-  const t = await getTranslations("projects.pulse");
+  // client. Its own line and label - never added to the employer count. The
+  // two queues are independent reads, so they are asked together (perf
+  // 2026-10-23), each keeping its own unknown-is-not-zero answer.
+  const [pending, clientToDecide, t] = await Promise.all([
+    countReviewablePendingEntries(),
+    countCounterpartyToDecide(),
+    getTranslations("projects.pulse"),
+  ]);
 
   return (
     <section

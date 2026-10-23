@@ -170,9 +170,8 @@ describe("privacy policy controller identity", () => {
     expect(first).toContain("302676973");
     expect(first).toContain("info@labourmarket.ai");
     expect(first).toContain("Labour Market AI Sp. z o.o.");
-    // Controller identity must NOT be in pendingItems anymore:
-    expect(JSON.stringify(priv.pendingItems).toLowerCase()).not.toContain("controller");
-    expect(JSON.stringify(priv.pendingItems)).not.toContain("valdytoj");
+    // No "still waiting for final wording" list at all (owner order 2026-10-23).
+    expect(priv.pendingItems).toBeUndefined();
   });
 });
 

@@ -1058,6 +1058,18 @@
     "carryNote": {
       "no_company": "Je tekst is niet opgeslagen: zonder bedrijfswerkruimte hoort een concept nergens bij. Het behoefteformulier opent leeg — je kunt het bedrijf daar aanmaken.",
       "failed": "Je tekst kon niet worden opgeslagen, dus het behoefteformulier opent leeg. Je moet de omschrijving opnieuw invoeren."
+    },
+    "headcount": {
+      "total": "Werknemers: {count}",
+      "teams": "Werknemers: {total} ({teams, plural, one {# ploeg} other {# ploegen}} van {perTeam})"
+    },
+    "clarify": {
+      "title": "Graag verduidelijken",
+      "team_count_range": "Je gaf het aantal ploegen als bereik. Hoeveel ploegen precies, en hoeveel mensen per ploeg?",
+      "per_team_range": "Hoeveel mensen precies zitten er in elke ploeg?",
+      "team_size_missing": "Hoeveel mensen zitten er in elke ploeg? Tot dan wordt het aantal werknemers niet berekend.",
+      "team_count_missing": "Hoeveel ploegen heb je nodig?",
+      "headcount_unclear": "Je noemde meerdere mensen, maar niet hoeveel. Hoeveel mensen precies?"
     }
   },
   "quickNav": {
@@ -5622,7 +5634,6 @@
   },
   "legal": {
     "preparing": {
-      "body": "De juridische informatie wordt voorbereid. Voordat betaalde diensten of een contractuele relatie beginnen, wordt deze verstrekt en bijgewerkt.",
       "contact": "Neem contact met ons op als je vragen hebt."
     },
     "marketplaceRules": {
@@ -5635,10 +5646,9 @@
         "Openbare aanbiedingen verschijnen pas na moderatie; niet-vertrouwde of verdachte aanbiedingen worden verborgen.",
         "Handel in gereguleerde of illegale goederen en diensten is verboden.",
         "Een kaartpunt verschijnt alleen met geverifieerde coördinaten — geen valse markeringen.",
-        "Betalingen zijn nog niet actief; in deze fase lopen er geen betalingen via het platform.",
+        "Betalingen tussen gebruikers lopen niet via het platform; via het platform worden alleen vergoedingen voor platformdiensten betaald.",
         "Ongepast gedrag of verdachte activiteit kan worden gemeld — moderators beoordelen het."
-      ],
-      "reviewNote": "Deze regels beschrijven hoe het platform zich vandaag daadwerkelijk gedraagt. De definitieve juridische verwoording van de bindende documenten wordt nog voorbereid en wordt door de eigenaar en een advocaat beoordeeld voordat betaalde diensten beginnen."
+      ]
     },
     "terms": {
       "title": "Gebruiksvoorwaarden",
@@ -5670,7 +5680,7 @@
     },
     "privacy": {
       "title": "Privacybeleid",
-      "intro": "Deze pagina legt in gewone taal uit welke persoonsgegevens Labour Market AI gebruikt, waarom, en welke rechten je hebt. De pagina beschrijft het platform zoals het vandaag werkt, voordat betalingen actief zijn.",
+      "intro": "Deze pagina legt in gewone taal uit welke persoonsgegevens Labour Market AI gebruikt, waarom, en welke rechten je hebt. De pagina beschrijft het platform zoals het vandaag werkt.",
       "sections": [
         {
           "heading": "Wie verantwoordelijk is voor uw gegevens",
@@ -5690,6 +5700,15 @@
             "Berichten die je op het platform verstuurt en ontvangt.",
             "Toestemmingsrecords: wanneer je een toestemming geeft of intrekt, worden de actie en het tijdstip opgeslagen.",
             "Technische gegevens die nodig zijn om de dienst te laten draaien, zoals inlogcookies (zie het cookiebeleid)."
+          ]
+        },
+        {
+          "heading": "Inloggen met Google, Facebook of LinkedIn",
+          "items": [
+            "Je kunt een account aanmaken en inloggen met je Google-, Facebook- of LinkedIn-account in plaats van met je e-mailadres. Dit wordt alleen gebruikt om je in te loggen.",
+            "Als je er een kiest, bevestigt die aanbieder je identiteit en geeft hij het platform je e-mailadres, je naam en de identificatie van je account bij die aanbieder door. Het platform vraagt geen extra machtigingen — geen toegang tot je vrienden of contacten, berichten of pagina's — en plaatst nooit iets namens jou.",
+            "Je e-mailadres wordt het e-mailadres van je account. De naam van de aanbieder wordt alleen gebruikt om een tijdelijke naam te vervangen die uit je e-mailadres is afgeleid; een naam die je zelf hebt ingevoerd, wordt nooit overschreven. Het inlogrecord (de aanbieder, je accountidentificatie daar en de gegevens die hij doorgaf) wordt bewaard door onze authenticatiedienst Supabase, gekoppeld aan je account.",
+            "Om deze gegevens te verwijderen, verwijder je je LabourMarket.ai-account — de stappen staan op de pagina „Account en gegevens verwijderen”. LabourMarket.ai verwijderen uit je Facebook-, Google- of LinkedIn-instellingen verwijdert op zichzelf je LabourMarket.ai-account en de gegevens ervan niet."
           ]
         },
         {
@@ -5717,15 +5736,26 @@
           "items": [
             "Toestemmingsdoelen zijn gescheiden: werkgeverszichtbaarheid van uw professionele profiel en een gegevensoverdracht aan een specifiek bedrijf zijn twee verschillende keuzes — geen van beide is gebundeld met de voorwaarden, vooraf aangevinkt of vereist om uw account, cv of werkdagboek te gebruiken.",
             "Elk toestemmingsscherm toont de exacte geversioneerde tekst, wat zichtbaar wordt, wat privé blijft, en beide keuzes naast elkaar (inschakelen / niet nu). Weigeren verandert niets aan uw account.",
-            "U kunt elke toestemming op elk moment in één stap intrekken in uw privacy-instellingen. Na intrekking verschijnt uw profiel direct niet meer in nieuwe bedrijfszoekopdrachten; gegevens die een bedrijf rechtmatig ontving terwijl de toestemming geldig was, kunnen bij dat bedrijf blijven — dat zeggen wij eerlijk.",
+            "U kunt elke toestemming op elk moment in één stap intrekken in uw privacy-instellingen. Na intrekking verschijnt uw profiel direct niet meer in nieuwe bedrijfszoekopdrachten; gegevens die een bedrijf rechtmatig ontving terwijl de toestemming geldig was, kunnen bij dat bedrijf blijven.",
             "De toestemmingsgeschiedenis is alleen-toevoegen: elke verlening en elke intrekking is een afzonderlijke permanente registratie met tekstversie, taal, tijd en doel. Niemand — ook beheerders niet — kan haar bewerken of verwijderen, en een beheerder kan geen toestemming namens u geven."
+          ]
+        },
+        {
+          "heading": "Dienstverleners die gegevens voor het platform verwerken",
+          "items": [
+            "Supabase — database, gebruikersaanmelding en bestandsopslag.",
+            "Cloudflare — het netwerk vóór de website (domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen); elk verzoek aan de website loopt erdoorheen.",
+            "Stripe — betalingsverwerking voor betaalde platformdiensten. Wanneer een organisatie een betaling start, ontvangt Stripe het e-mailadres van de betalende gebruiker en een interne accountidentificatie; kaartgegevens worden ingevoerd op de eigen betaalpagina van Stripe en niet door het platform opgeslagen.",
+            "Google, Facebook (Meta) en LinkedIn — alleen als je ervoor kiest met hen in te loggen, zoals hierboven beschreven.",
+            "Google (Gemini API) — alleen zoals hieronder beschreven in het onderdeel over AI.",
+            "De volledige lijst van infrastructuurleveranciers staat op de pagina „Gegevensbescherming”."
           ]
         },
         {
           "heading": "Je rechten",
           "items": [
             "Je kunt vragen om de gegevens die over je worden bewaard in te zien, te corrigeren, er een kopie van te ontvangen, het gebruik ervan te beperken of ze te laten verwijderen.",
-            "Eerlijke huidige stand: je kunt zelf vanuit je account een kopie van je eigen gegevens downloaden als JSON-bestand en je werkjournaal als CSV-bestand. Verwijdering is nog steeds een verzoek dat door een persoon wordt beoordeeld — er is geen knop voor directe verwijdering; neem contact met ons op of dien het verzoek in, en een persoon handelt het af.",
+            "Je kunt zelf vanuit je account een kopie van je eigen gegevens downloaden als JSON-bestand en je werkjournaal als CSV-bestand. Je kunt verwijdering van je account aanvragen op de privacypagina van je account en het verzoek bevestigen nadat je opnieuw bent ingelogd; het systeem verwijdert het account dan automatisch en stuurt een bevestiging naar het e-mailadres van het account. Als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Je kunt ook contact met ons opnemen — zie de pagina „Account en gegevens verwijderen”.",
             "Waar verwerking op toestemming is gebaseerd, kun je die toestemming op elk moment intrekken."
           ]
         },
@@ -5733,8 +5763,7 @@
           "heading": "Hoe lang gegevens worden bewaard",
           "items": [
             "Gegevens worden bewaard zolang je account actief is en de functie waar ze bij horen ze nog gebruikt.",
-            "Toestemmings- en auditrecords worden als geschiedenis bewaard: een intrekking wordt vastgelegd in plaats van dat het record wordt gewist.",
-            "Exacte bewaartermijnen maken deel uit van de definitieve juridische verwoording die nog wordt voorbereid."
+            "Toestemmings- en auditrecords worden als geschiedenis bewaard: een intrekking wordt vastgelegd in plaats van dat het record wordt gewist."
           ]
         },
         {
@@ -5745,11 +5774,6 @@
             "Wat de aanbieder van een AI-assistent met je gesprek doet, valt onder de eigen privacyvoorwaarden van die aanbieder."
           ]
         }
-      ],
-      "pendingTitle": "Wacht nog op de definitieve juridische verwoording:",
-      "pendingItems": [
-        "Exacte bewaartermijnen per gegevenscategorie.",
-        "De bindende, door een jurist beoordeelde versie van dit beleid en van de genoemde rechtsgrondslagen."
       ]
     },
     "cookies": {
@@ -5772,11 +5796,6 @@
       "localStorageNote": "In de eigen opslag van je browser (geen cookies) staan enkele zaken: je keuze voor een licht of donker thema; welke pagina of campagne je hier voor het eerst bracht, eenmalig opgeslagen zodat een latere registratie eraan kan worden toegeschreven; een willekeurige sessie-identificatie per tabblad die verdwijnt als het tabblad sluit; en kleine gemakken zoals weggeklikte meldingen, recent bekeken items en je spraakinvoertaal. Niets hiervan wordt met derden gedeeld of voor advertenties gebruikt, en je kunt het op elk moment via je browser wissen.",
       "noTracking": "Er zijn vandaag geen analyse-, advertentie- of trackingcookies van derden op het platform. Als dit ooit verandert, wordt deze pagina als eerste bijgewerkt."
     },
-    "pendingLegal": {
-      "badge": "Definitieve verwoording in afwachting van beoordeling door eigenaar en jurist",
-      "body": "Deze pagina legt in gewone taal uit hoe het platform vandaag werkt. Het is niet het definitieve juridische document: de bindende verwoording wordt nog voorbereid en wordt door de eigenaar en een advocaat beoordeeld voordat betaalde diensten of een contractuele relatie beginnen."
-    },
-    "disclaimer": "Deze pagina is alleen informatief en is geen juridisch advies.",
     "requestContact": "Neem contact met ons op om een vraag te stellen of een verzoek over je gegevens in te dienen — een persoon zal het beoordelen.",
     "related": "Gerelateerde pagina's",
     "accountSection": {
@@ -5829,7 +5848,7 @@
         {
           "heading": "Export en verwijdering",
           "items": [
-            "Je kunt je eigen gegevens als JSON-bestand en je werkjournaal als CSV-bestand downloaden vanuit je account. Verwijdering wordt behandeld als een beoordeeld verzoek: niets wordt direct verwijderd — neem contact met ons op en een persoon zal het verwerken."
+            "Je kunt je eigen gegevens als JSON-bestand en je werkjournaal als CSV-bestand downloaden vanuit je account. Verwijdering van een account wordt in het account aangevraagd en bevestigd na opnieuw inloggen; het systeem verwijdert het account dan automatisch. Een verzoek over gegevens die wettelijk bewaard moeten worden of andere mensen betreffen, wordt door een persoon beoordeeld. Je kunt ook contact met ons opnemen en een persoon zal het verzoek verwerken."
           ]
         },
         {
@@ -5840,7 +5859,7 @@
             "Cloudflare — het netwerk vóór de website: domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen. Elk verzoek aan de website loopt erdoorheen.",
             "GitHub — opslag van de broncode. Er worden daar geen gebruikersgegevens bewaard.",
             "Google (Gemini API) — AI-verwerking voor het vertalen van berichten en vacatures en voor het voorstellen waar een getypte chatzin om vraagt. Alleen de tekst die de taak nodig heeft, wordt verstuurd.",
-            "Stripe — betalingsverwerking. Een klantrecord ontstaat alleen wanneer een organisatie een abonnementsbetaling start; vandaag is geen abonnement actief.",
+            "Stripe — betalingsverwerking. Een klantrecord ontstaat alleen wanneer een organisatie een abonnementsbetaling start.",
             "Geen andere e-mail-, AI-, vertaal- of betalingsleverancier is actief. Wordt er een geactiveerd, dan wordt eerst deze lijst bijgewerkt."
           ]
         },
@@ -5850,12 +5869,6 @@
             "Geen enkel systeem kan absolute veiligheid beloven. Als je een probleem opmerkt, neem dan contact met ons op — een persoon zal het beoordelen."
           ]
         }
-      ],
-      "pendingTitle": "Wacht nog op de definitieve juridische verwoording:",
-      "pendingItems": [
-        "De formele beschrijving van technische en organisatorische maatregelen.",
-        "Ondertekende verwerkersovereenkomsten met de hierboven genoemde infrastructuurleveranciers.",
-        "Definitieve bewaartermijnen."
       ]
     },
     "dataAccess": {
@@ -6033,7 +6046,7 @@
     "dataDeletion": {
       "title": "Account en gegevens verwijderen",
       "description": "Hoe u verwijdering van uw LabourMarket.ai-account en persoonsgegevens aanvraagt.",
-      "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Verwijdering wordt momenteel afgehandeld als een verzoek dat door een persoon wordt beoordeeld; er is geen knop om een account direct te verwijderen. Als je kunt inloggen, kun je het verzoek ook zelf indienen: open de privacypagina van je account (in de mobiele app: Instellingen → Privacy) en kies voor het verwijderen van je account. In beide gevallen antwoordt een mens binnen één maand.",
+      "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Als je kunt inloggen, kun je het verzoek zelf indienen: open de privacypagina van je account (in de mobiele app: Instellingen → Privacy), kies voor het verwijderen van je account en bevestig dit nadat je opnieuw bent ingelogd. Het systeem verwijdert het account dan automatisch en stuurt een bevestiging naar het e-mailadres van het account; als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Je kunt verwijdering ook per e-mail aanvragen zoals hieronder beschreven; een mens antwoordt binnen één maand.",
       "howTitle": "Hoe u verwijdering aanvraagt",
       "howSteps": [
         "Stuur een e-mail naar {email} vanaf het e-mailadres dat aan uw LabourMarket.ai-account is gekoppeld.",
@@ -14101,7 +14114,8 @@
           "location": "Waar (stad of land)?",
           "window": "Wanneer — welke week of maand?",
           "quantity": "Hoeveel is het?",
-          "headcount": "Hoeveel mensen zijn er nodig?"
+          "headcount": "Hoeveel mensen zijn er nodig?",
+          "team_size": "Hoeveel ploegen en hoeveel mensen per ploeg?"
         },
         "unclear": "Ik weet niet zeker of je iets aanbiedt of iets zoekt. Schrijf wat je hebt of wat je nodig hebt.",
         "goodsChannelGated": "Je kunt dit op het advertentiebord plaatsen onder Goederen — mensen die het bord bekijken zien het daar. Er wordt niets opgeslagen tot je het publiceert.",
@@ -14116,7 +14130,8 @@
         "serviceNext": "Je kunt dit als dienstenaanbod plaatsen zodat anderen het vinden.",
         "chipServices": "Diensten openen",
         "corrected": "Bijgewerkt: {changes}.",
-        "changeInsteadOf": "{next} (in plaats van {previous})"
+        "changeInsteadOf": "{next} (in plaats van {previous})",
+        "teams": "{teams, plural, one {# ploeg} other {# ploegen}} van {perTeam}"
       },
       "createOrganizationHint": "Ik kan samen met jou een organisatie aanmaken — de gegevens en de verificatie staan op één pagina.",
       "chipCreateOrganization": "Organisatie aanmaken",
@@ -18786,7 +18801,23 @@
       "unavailable": "Plannen is hier nog niet beschikbaar.",
       "error": "Er ging iets mis. Probeer opnieuw.",
       "planned_collides": "Gepland, maar deze persoon heeft op sommige van deze dagen al iets. U beslist; annuleer het plan hieronder als het niet klopt.",
-      "planned_unknown": "Gepland, maar we konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij."
+      "planned_unknown": "Gepland, maar we konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
+      "recurrence_invalid": "Controleer de herhaling: kies minstens één weekdag, of een rotatie van 1–28 werkdagen en 1–28 rustdagen.",
+      "recurrence_empty": "Dit patroon heeft tussen deze data geen enkele werkdag. Er is niets gepland.",
+      "recurrence_unavailable": "Terugkerende diensten zijn hier nog niet beschikbaar. Plan de periode zonder herhaling."
+    },
+    "repeat": {
+      "legend": "Herhaling",
+      "none": "Herhaalt niet",
+      "weekly": "Wekelijkse diensten",
+      "cycle": "Rotatie",
+      "weekdays": "Werkdagen",
+      "cycleOn": "Werkdagen achter elkaar",
+      "cycleOff": "Rustdagen achter elkaar",
+      "cycleOffset": "Al gewerkte dagen op de eerste dag (0 = begint opnieuw)",
+      "hint": "Diensten herhalen zich binnen de data hierboven en staan in de agenda als planning. Een dienst die op verlof of ander werk valt, wordt opgeslagen en gemarkeerd; u beslist.",
+      "summaryWeekly": "Diensten: {days}",
+      "summaryCycle": "Rotatie: {on} werk, {off} rust"
     }
   },
   "workLifecycle": {
