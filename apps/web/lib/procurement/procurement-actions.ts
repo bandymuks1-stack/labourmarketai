@@ -425,7 +425,7 @@ export async function submitProcurementApprovalAction(
           p_instance_id: instanceId,
           p_reason: "procurement approval submit failed",
         })
-        .catch(() => undefined);
+        .then(() => undefined, () => undefined);
     }
     if (submitRes.error) finish(ctx, noticeForRpcError(submitRes.error));
     finish(ctx, "error");
