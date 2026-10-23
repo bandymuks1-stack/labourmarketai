@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Non-landing public copy honesty guard (launch repair Scope B + G).
@@ -62,7 +63,7 @@ const flatten = (
 };
 
 describe("public marketing i18n copy makes no false capability claims", () => {
-  for (const locale of ["en", "lt", "ru"] as const) {
+  for (const locale of activeLocales) {
     it(`${locale}.json public namespaces are clean`, () => {
       const catalog = JSON.parse(read(`messages/${locale}.json`)) as Record<
         string,
@@ -90,7 +91,7 @@ describe("public marketing i18n copy makes no false capability claims", () => {
  */
 describe("/about names the product LabourMarket.ai, not the spaced legal form", () => {
   const SPACED_PRODUCT = /Labour Market AI(?! Sp\. z o\.o)/;
-  for (const locale of ["en", "lt", "ru", "nl", "de"] as const) {
+  for (const locale of activeLocales) {
     it(`${locale}.json about.* uses the brand form`, () => {
       const catalog = JSON.parse(read(`messages/${locale}.json`)) as Record<string, unknown>;
       const leaves = flatten(catalog.about as Record<string, unknown>, "about", {});
@@ -179,7 +180,7 @@ describe("demo previews on /for-* pages carry the always-visible Example frame",
   });
 
   it("conceptNote exists in every active locale", () => {
-    for (const locale of ["en", "lt", "ru"]) {
+    for (const locale of activeLocales) {
       const catalog = JSON.parse(read(`messages/${locale}.json`)) as {
         shared?: { preview?: { conceptNote?: string } };
       };

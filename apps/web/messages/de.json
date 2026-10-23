@@ -3404,16 +3404,16 @@
         "gapsTitle": "Länderlücken (Nachfrage vs. Angebot)",
         "gapsEmpty": "Noch keine Nachfrage erfasst.",
         "gapLine": "{demand} Anfragen / {supply} Personen",
-        "thermoTitle": "Thermometer (nur wo beide Komponenten existieren)",
-        "thermoEmpty": "Noch keine Thermometerwerte — sie erscheinen, sobald ein belegter Marktdurchschnitt eingetragen ist UND eine Zelle eine Stichprobe von mindestens 2 erklärten Erwartungen hat.",
+        "thermoTitle": "Marktsignale (nur wo beide Komponenten existieren)",
+        "thermoEmpty": "Noch keine Marktsignalwerte — sie erscheinen, sobald ein belegter Marktdurchschnitt eingetragen ist UND eine Zelle eine Stichprobe von mindestens 2 erklärten Erwartungen hat.",
         "smallSample": "n<{n}"
       }
     },
     "league": {
       "eyebrow": "Arbeitsmarkt nach Land",
       "title": "Arbeitsmarkt nach Land",
-      "subtitle": "Berufstabellen pro Land — echte Teams, Verfügbarkeit und das Markt-Thermometer.",
-      "methodNote": "Ein Thermometerwert erscheint NUR dort, wo ein Admin einen belegten Marktdurchschnitt eingetragen hat UND die Stichprobe der erklärten Erwartungen mindestens 2 Personen umfasst. Überall sonst sagt die Zelle „unzureichende Marktdaten“ — die Tabelle bewertet niemals einen Menschen.",
+      "subtitle": "Berufstabellen pro Land — echte Teams, Verfügbarkeit und das Marktsignal.",
+      "methodNote": "Ein Marktsignalwert erscheint NUR dort, wo ein Admin einen belegten Marktdurchschnitt eingetragen hat UND die Stichprobe der erklärten Erwartungen mindestens 2 Personen umfasst. Überall sonst sagt die Zelle „unzureichende Marktdaten“ — die Tabelle bewertet niemals einen Menschen.",
       "back": "Zurück zum Admin-Hub",
       "empty": "Noch keine Daten — Tabellen erscheinen von selbst, sobald Arbeitskräfte ihre Berufe angeben.",
       "unknownCountry": "Land nicht angegeben",

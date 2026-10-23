@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Conversation context honesty guard (quality-train PR E; updated for the
@@ -23,7 +24,7 @@ const ROOT = join(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 
 describe("scope copy claims only what the schema can prove", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: scope.demand is source-neutral (no 'request title' overclaim)`, () => {
       const msgs = JSON.parse(read(`messages/${loc}.json`)) as {
         communication: { scope: Record<string, string> };

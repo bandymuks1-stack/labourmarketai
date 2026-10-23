@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * DOCUMENT & EVIDENCE ENGINE v1 guards — the TS↔SQL contract of the
@@ -420,7 +421,7 @@ describe("9. i18n — full catalogue in every locale (11), placeholders intact",
   }
 
   it("count placeholders survive in every ACTIVE locale", () => {
-    for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+    for (const loc of activeLocales) {
       const msgs = JSON.parse(read("messages", `${loc}.json`)) as {
         documentFiles: { currentVersion: string };
         orgDocuments: { ackProgress: string };
@@ -432,7 +433,7 @@ describe("9. i18n — full catalogue in every locale (11), placeholders intact",
   });
 
   it("the copy never claims verification/legal force it does not have", () => {
-    for (const loc of ["en", "lt", "ru", "nl", "de"]) {
+    for (const loc of activeLocales) {
       const blob = JSON.stringify(
         JSON.parse(read("messages", `${loc}.json`)).documentFiles,
       ).toLowerCase();

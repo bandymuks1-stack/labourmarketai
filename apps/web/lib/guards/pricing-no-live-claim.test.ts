@@ -8,6 +8,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { activeLocales } from "@/lib/i18n/config";
 
 const here = resolve(fileURLToPath(import.meta.url), "..");
 const webRoot = resolve(here, "..", "..");
@@ -49,7 +50,7 @@ function componentFiles(dir: string, acc: string[] = []): string[] {
 describe("pricing/billing make no live-payment claim", () => {
   it("billing i18n (en/lt/ru) never claims live payments", () => {
     const hits: string[] = [];
-    for (const loc of ["en", "lt", "ru"]) {
+    for (const loc of activeLocales) {
       const m = JSON.parse(readFileSync(join(webRoot, "messages", `${loc}.json`), "utf8"));
       for (const ns of BILLING_NAMESPACES) {
         for (const s of flatten(m[ns])) {

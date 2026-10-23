@@ -9,6 +9,7 @@ import {
   type BookingActor,
   type BookingStatus,
 } from "../booking/booking-state";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Booking lifecycle guard (quality-train PR C).
@@ -36,7 +37,7 @@ const ALL_STATUSES: readonly BookingStatus[] = [
   "expired",
 ];
 const ALL_ACTORS: readonly BookingActor[] = ["company", "worker", "system"];
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 
 const bookingsNamespace = (loc: string): Record<string, unknown> =>
   (JSON.parse(read(`messages/${loc}.json`)) as { bookings: Record<string, unknown> })
