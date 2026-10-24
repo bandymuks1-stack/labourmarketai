@@ -15,6 +15,7 @@ import type {
   CheckoutSessionResult,
   CreateCustomerInput,
   CreateCustomerResult,
+  ListCustomerInvoicesResult,
   ListSubscriptionsResult,
   OneTimeCheckoutInput,
   RetrieveRawSubscriptionResult,
@@ -263,6 +264,30 @@ export function createStripeProvider(): BillingProvider {
         if (!session.url) return { ok: false, reason: "no_session_url" };
         return { ok: true, url: session.url };
       } catch (e) {
+        return { ok: false, reason: reasonFrom(e) };
+      }
+    },
+
+    // READ-ONLY (registry 7.20): the invoices the account billing section
+    // lists for an organization's billing managers. Bounded (one page, a
+    // short timeout, one retry) because it runs while the account page
+    // renders; a failure is reported, never turned into an empty list.
+    async listCustomerInvoices(
+      providerCustomerId: string,
+    ): Promise<ListCustomerInvoicesResult> {
+      try {
+        const page = await client().invoices.list(
+          { customer: providerCustomerId, limit: 100 },
+          { timeout: 8000, maxNetworkRetries: 1 },
+        );
+        return {
+          ok: true,
+          invoices: page.data.map((inv) => inv as unknown as Record<string, unknown>),
+          hasMore: page.has_more === true,
+        };
+      } catch (e) {
+        // A customer Stripe does not know has no invoices — an answer.
+        if (isResourceMissing(e)) return { ok: true, invoices: [], hasMore: false };
         return { ok: false, reason: reasonFrom(e) };
       }
     },

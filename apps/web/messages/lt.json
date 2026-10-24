@@ -10940,6 +10940,32 @@
     "graceNotice": "Paskutinis mokėjimas nepavyko — prenumerata veikia lengvatiniu laikotarpiu, kol mokėjimas bus pakartotas.",
     "endsOn": "Atšaukta — planas galioja iki {date} ir nebus pratęstas.",
     "endsAtPeriodEnd": "Atšaukta — planas galioja iki apmokėto laikotarpio pabaigos ir nebus pratęstas.",
+    "invoices": {
+      "title": "Sąskaitos faktūros",
+      "billingOff": "Kol šiai organizacijai mokėjimai išjungti, sąskaitos faktūros nerodomos.",
+      "noCustomer": "Sąskaitų faktūrų dar nėra: ši organizacija per mokėjimų teikėją dar nemokėjo.",
+      "unknown": "Šiuo metu nepavyko nuskaityti sąskaitų faktūrų iš mokėjimų teikėjo. Tai nereiškia, kad jų nėra — bandykite dar kartą vėliau.",
+      "empty": "Mokėjimų teikėjas šiai organizacijai sąskaitų faktūrų dar neturi.",
+      "incomplete": "Sąrašas gali būti nepilnas: ne visas sąskaitas faktūras pavyko nuskaityti iš mokėjimų teikėjo.",
+      "number": "Sąskaitos faktūros numeris",
+      "noNumber": "Sąskaita faktūra be numerio",
+      "date": "Data",
+      "period": "Laikotarpis",
+      "oneTime": "Vienkartinis mokėjimas",
+      "excludingVat": "Suma be PVM",
+      "vat": "PVM",
+      "total": "Iš viso",
+      "notReported": "nenurodyta",
+      "view": "Peržiūrėti sąskaitą faktūrą",
+      "pdf": "Atsisiųsti PDF",
+      "opensStripe": "Stripe atsidaro naujame skirtuke",
+      "status": {
+        "paid": "Apmokėta",
+        "open": "Laukiama apmokėjimo",
+        "void": "Anuliuota",
+        "uncollectible": "Neišieškotina"
+      }
+    },
     "manage": {
       "open": "Tvarkyti prenumeratą",
       "opening": "Atidaroma…",
