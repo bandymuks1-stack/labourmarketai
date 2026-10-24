@@ -172,9 +172,34 @@ describe("forecast engine — sparse evidence stays sparse, unknown stays unknow
     const f = computeProjectForecast({ ...facts, hours: { ...facts.hours!, confirmedHours: 70 } });
     expect(f.assumptions).toContainEqual({ key: "hours_partly_unconfirmed", value: 0.25 });
     expect(f.confidence).toBe("high"); // 2 (done) + 1 (steady) + 1 (complete) + 0 (confirmed share) = 4
-    const g = computeProjectForecast({ ...facts, hours: { ...facts.hours!, confirmedHours: 70, complete: false } });
-    expect(g.confidence).toBe("medium");
+  });
+
+  it("a TRUNCATED hours read is UNKNOWN: no hour-based figure, never a confident date from a partial sample", () => {
+    const facts = baseFacts();
+    // Only 28 h of a longer history made it into the read.
+    const g = computeProjectForecast({
+      ...facts,
+      hours: { ...facts.hours!, byDay: facts.hours!.byDay.slice(0, 3), totalHours: 28, confirmedHours: 28, complete: false },
+    });
     expect(g.assumptions.map((a) => a.key)).toContain("hours_read_truncated");
+    expect(g.productivity.hoursPerUnit).toBeNull();
+    expect(g.productivity.dailyHours).toBeNull();
+    expect(g.productivity.activeDaysInWindow).toBeNull();
+    expect(g.requiredHours).toBeNull();
+    expect(g.workforce.workersNeeded).toBeNull();
+    expect(g.cost.costPerHourCents).toBeNull();
+    expect(g.actions.map((a) => a.key)).not.toContain("record_hours");
+    // The date can only come from finished tasks (throughput), with low confidence.
+    expect(g.completion.method).toBe("throughput");
+    expect(g.confidence).toBe("low");
+    // With no finished tasks in the window there is no date at all.
+    const h = computeProjectForecast({
+      ...facts,
+      tasks: { total: 28, done: 14, blocked: 0, completedOn: [] },
+      hours: { ...facts.hours!, complete: false },
+    });
+    expect(h.completion.date).toBeNull();
+    expect(h.status).toBe("insufficient_data");
   });
 });
 

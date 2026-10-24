@@ -20,7 +20,7 @@ import { isForecastMode, recomputeDecision, type ForecastMode } from "./forecast
  *      storage) — and consumes the signals it has seen.
  * Stops early at `timeBudgetMs`. One project failing never stops the pass.
  *
- * Pure orchestration: the store is injected, the clock is passed in.
+ * Pure orchestration: the store is injected; `nowIso` is passed in.
  */
 
 export interface ForecastCandidate {
@@ -34,6 +34,10 @@ export interface ForecastCandidate {
   readonly lastSignalAt: string | null;
   readonly maxSignalId: number | null;
   readonly lastForecast: ProjectForecast | null;
+  /** projects.status. A project that became `completed` since its last
+   *  forecast gets ONE final recompute, whatever the cadence, so the stored
+   *  history ends with the actual (error measurement). */
+  readonly projectStatus?: string | null;
 }
 
 export interface ForecastRecord {
@@ -77,13 +81,37 @@ function statement(f: ProjectForecast | null): string {
   return JSON.stringify({ ...f, asOf: null });
 }
 
-/** The day the last finished unit (task, else stage) was finished — the
- *  ACTUAL completion day once nothing remains. */
-function lastCompletedOn(facts: ReturnType<typeof buildForecastFacts>): string | null {
-  const unit = facts.tasks && facts.tasks.total > 0 ? facts.tasks : facts.stages;
-  if (!unit || unit.completedOn.length === 0) return null;
-  const sorted = [...unit.completedOn].sort();
-  return sorted[sorted.length - 1] ?? null;
+type Facts = ReturnType<typeof buildForecastFacts>;
+
+/** The unit the engine counts (leaf tasks, else stages; UNKNOWN tasks = no
+ *  unit) — read from the FACTS, so the summary exists even when the forecast
+ *  itself is not applicable (a completed project). */
+function unitOf(facts: Facts) {
+  if (facts.tasks && facts.tasks.total > 0) return facts.tasks;
+  if (facts.tasks === null) return null;
+  return facts.stages && facts.stages.total > 0 ? facts.stages : null;
+}
+
+/** Numbers-only snapshot stored with each version: what the error
+ *  measurement needs once the actual is known. */
+export function factsSummaryOf(facts: Facts): Record<string, unknown> {
+  const unit = unitOf(facts);
+  const done = unit ? Math.min(unit.done, unit.total) : null;
+  const sorted = unit ? [...unit.completedOn].sort() : [];
+  return {
+    projectStatus: facts.project.status,
+    hoursBasis: facts.hours?.basis ?? null,
+    totalHours: facts.hours && facts.hours.complete ? facts.hours.totalHours : null,
+    confirmedHours: facts.hours && facts.hours.complete ? facts.hours.confirmedHours : null,
+    unitsDone: done,
+    unitsTotal: unit ? unit.total : null,
+    unitsRemaining: unit && done !== null ? unit.total - done : null,
+    // The day the last finished unit was finished — the ACTUAL completion
+    // day once nothing remains.
+    lastUnitCompletedOn: sorted.length ? sorted[sorted.length - 1] : null,
+    activePeople: facts.team?.activePeople ?? null,
+    actualCostCents: facts.economics?.actualCostCents ?? null,
+  };
 }
 
 export async function runRecomputePass(
@@ -92,7 +120,9 @@ export async function runRecomputePass(
 ): Promise<RecomputePassResult | null> {
   const limit = opts.limit ?? RECOMPUTE_PASS_LIMIT;
   const budget = opts.timeBudgetMs ?? RECOMPUTE_PASS_BUDGET_MS;
-  const clock = opts.clockMs ?? (() => Date.parse(opts.nowIso));
+  // An ADVANCING monotonic clock: the budget must really bound the pass
+  // (`nowIso` is the forecast's "as of" instant, not a stopwatch).
+  const clock = opts.clockMs ?? (() => performance.now());
   const started = clock();
   const today = opts.nowIso.slice(0, 10);
 
@@ -112,10 +142,13 @@ export async function runRecomputePass(
       break;
     }
     const mode: ForecastMode = isForecastMode(c.mode) ? c.mode : "weekly";
-    const decision = recomputeDecision(
-      { mode, enabled: c.enabled, lastComputedAt: c.lastComputedAt, firstSignalAt: c.firstSignalAt, lastSignalAt: c.lastSignalAt },
-      opts.nowIso,
-    );
+    const finalRun = c.enabled && c.projectStatus === "completed";
+    const decision = finalRun
+      ? ({ due: true, reason: "final" } as const)
+      : recomputeDecision(
+          { mode, enabled: c.enabled, lastComputedAt: c.lastComputedAt, firstSignalAt: c.firstSignalAt, lastSignalAt: c.lastSignalAt },
+          opts.nowIso,
+        );
     if (!decision.due) {
       notDue++;
       continue;
@@ -144,17 +177,7 @@ export async function runRecomputePass(
         inputsHash,
         forecast,
         comparison,
-        factsSummary: {
-          hoursBasis: facts.hours?.basis ?? null,
-          totalHours: facts.hours?.totalHours ?? null,
-          confirmedHours: facts.hours?.confirmedHours ?? null,
-          unitsDone: forecast.remaining.done,
-          unitsTotal: forecast.remaining.total,
-          unitsRemaining: forecast.remaining.remaining,
-          lastUnitCompletedOn: lastCompletedOn(facts),
-          activePeople: facts.team?.activePeople ?? null,
-          actualCostCents: facts.economics?.actualCostCents ?? null,
-        },
+        factsSummary: factsSummaryOf(facts),
         storeVersion: changed,
         consumedSignalId: c.maxSignalId,
       });

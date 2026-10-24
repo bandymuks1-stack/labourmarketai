@@ -342,9 +342,14 @@ export function computeProjectForecast(facts: ForecastFacts): ProjectForecast {
   let totalHours: number | null = null;
   let windowHours = 0;
   let activeDays = 0;
-  if (hours && hours.basis !== "none") {
+  // A TRUNCATED ledger read is UNKNOWN, not a smaller sample: partial totals
+  // would drive every hour-based figure (rate, required hours, date, people,
+  // cost) as if they were complete. Nothing hour-based is read from it.
+  const hoursTruncated = hours !== null && !hours.complete;
+  if (hoursTruncated) {
+    assumptions.push({ key: "hours_read_truncated" });
+  } else if (hours && hours.basis !== "none") {
     assumptions.push({ key: "single_hours_ledger", value: hours.basis });
-    if (!hours.complete) assumptions.push({ key: "hours_read_truncated" });
     totalHours = round2(nonNeg(hours.totalHours));
     const byDay = new Map<string, number>();
     for (const d of hours.byDay) {
@@ -498,7 +503,7 @@ export function computeProjectForecast(facts: ForecastFacts): ProjectForecast {
   if (facts.tasks && facts.tasks.blocked > 0) actions.push({ key: "unblock_tasks", value: facts.tasks.blocked });
   if (quality.seriousOpen !== null && quality.seriousOpen > 0) actions.push({ key: "close_serious_defects", value: quality.seriousOpen });
   if (facts.readiness && facts.readiness.workersWithMissingItems > 0) actions.push({ key: "complete_readiness", value: facts.readiness.workersWithMissingItems });
-  if (hours && hours.basis === "none" && workLeft) actions.push({ key: "record_hours" });
+  if (hours && hours.basis === "none" && !hoursTruncated && workLeft) actions.push({ key: "record_hours" });
   if (!plannedEnd && workLeft) actions.push({ key: "set_planned_end" });
   if (picked === null && facts.tasks !== null) actions.push({ key: "break_down_scope" });
   if (possibleExtraCostCents !== null && possibleExtraCostCents > 0) actions.push({ key: "review_budget", value: possibleExtraCostCents });
@@ -524,6 +529,7 @@ export function computeProjectForecast(facts: ForecastFacts): ProjectForecast {
       if (confirmedShare >= 0.5) score += 1;
     }
     if (facts.tasks === null || facts.team === null) score -= 1;
+    if (hoursTruncated) score -= 1;
     confidence = method === "done" ? "high" : score >= 4 ? "high" : score >= 2 ? "medium" : "low";
   }
 
@@ -539,7 +545,7 @@ export function computeProjectForecast(facts: ForecastFacts): ProjectForecast {
       trend,
       dailyHours,
       unitsPerDay,
-      activeDaysInWindow: hours && hours.basis !== "none" ? activeDays : null,
+      activeDaysInWindow: hours && hours.basis !== "none" && !hoursTruncated ? activeDays : null,
     },
     requiredHours,
     completion: { date: completionDate, method, daysFromToday, beyondHorizon },
