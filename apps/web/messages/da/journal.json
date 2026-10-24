@@ -148,7 +148,7 @@
     "pageTitle": "Stemmeindtastning",
     "pageIntro": "Fortæl om din arbejdsdag — du gennemgår og retter teksten, før noget gemmes.",
     "backToJournal": "Tilbage til dagbogen",
-    "unavailable": "Stemmetranskription er ikke konfigureret endnu. Transkriptionsserveren er endnu ikke tilsluttet af platformens ejer — optagelse er deaktiveret indtil da. Du kan altid skrive dit indlæg som tekst.",
+    "unavailable": "Stemmetranskription er ikke tilgængelig endnu — optagelse er slået fra indtil videre. Du kan altid skrive dit indlæg som tekst.",
     "disclosureTitle": "Før du optager",
     "disclosureProcessing": "Din optagelse sendes til en behandlingsserver kontrolleret af LabourMarket.ai for at blive omdannet til tekst. Der bruges ingen tredjeparts taletjeneste.",
     "disclosureWhy": "Den bruges kun til at lave teksten nedenfor — intet andet.",
