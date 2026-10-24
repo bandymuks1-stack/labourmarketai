@@ -170,26 +170,24 @@ export async function listOwnCustomerRequests(
   // its migration is unapplied the read falls back without it.
   const COLUMNS =
     "id, profile_id, customer_id, title, need_summary, country, location, role_or_work_type, team_size, start_period, duration, language_requirement, notes, payload, status, manual_review_note, created_at, updated_at, kind";
-  const { data, error } = await ownRequestsQuery(`${COLUMNS}, closed_outcome`).then((r: { error?: { code?: string } | null }) =>
-    r.error?.code === "42703" ? ownRequestsQuery(COLUMNS) : r,
-  );
-  function ownRequestsQuery(columns: string) {
-    let query = asAny(supabase)
-      .from("customer_requests")
-      .select(columns)
-  // THE ACTIVE WORKSPACE'S needs (audit 2026-10-20): a person running
-  // companies A and B saw A's needs while working in B, and posted under the
-  // wrong company. The same ONE filter scouting, the usage meter and the
-  // employer capabilities use — this organization's needs (a colleague's
-  // included: customer_requests_select admits has_org_demand_access), plus
-  // the caller's own needs that predate organization attribution. The buyer
-  // room keeps the caller's own rows only.
+  const ownRequestsQuery = (columns: string) => {
+    let query = asAny(supabase).from("customer_requests").select(columns);
+    // THE ACTIVE WORKSPACE'S needs (audit 2026-10-20): a person running
+    // companies A and B saw A's needs while working in B, and posted under the
+    // wrong company. The same ONE filter scouting, the usage meter and the
+    // employer capabilities use — this organization's needs (a colleague's
+    // included: customer_requests_select admits has_org_demand_access), plus
+    // the caller's own needs that predate organization attribution. The buyer
+    // room keeps the caller's own rows only.
     query = workspaceOrganizationId
-      ? query.or(demandsOfWorkspaceFilter(user!.id, workspaceOrganizationId))
-      : query.eq("profile_id", user!.id);
+      ? query.or(demandsOfWorkspaceFilter(user.id, workspaceOrganizationId))
+      : query.eq("profile_id", user.id);
     if (kinds && kinds.length > 0) query = query.in("kind", kinds);
     return query.order("created_at", { ascending: false }).limit(50);
-  }
+  };
+  let res = await ownRequestsQuery(`${COLUMNS}, closed_outcome`);
+  if (res.error?.code === "42703") res = await ownRequestsQuery(COLUMNS);
+  const { data, error } = res;
   if (error) {
     if (error.code === RELATION_NOT_FOUND_CODE) return { kind: "needs-migration" };
     return { kind: "error", message: error.message };

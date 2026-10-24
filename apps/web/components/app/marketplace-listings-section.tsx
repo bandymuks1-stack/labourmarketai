@@ -5,10 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Plus,
-  Pencil,
-  Play,
-  Pause,
-  Archive,
   MessageSquare,
   ArrowRight,
 } from "lucide-react";
@@ -66,13 +62,13 @@ import { assessPublish } from "@/lib/marketplace/publish-policy";
  */
 
 /** Test ids the walk specs already use, one per contract action. */
-const LISTING_TEST_ID: Record<EntryAction, string> = {
-  publish: "listing-activate",
-  resume: "listing-activate",
-  pause: "listing-pause",
-  complete: "listing-close",
-  withdraw: "listing-withdraw",
-  edit: "listing-edit",
+const LISTING_TEST_ID: Record<EntryAction, (id: string) => string> = {
+  publish: (id) => `listing-activate-${id}`,
+  resume: (id) => `listing-activate-${id}`,
+  pause: (id) => `listing-pause-${id}`,
+  complete: (id) => `listing-close-${id}`,
+  withdraw: (id) => `listing-withdraw-${id}`,
+  edit: (id) => `listing-edit-${id}`,
 };
 
 type Draft = {
@@ -961,7 +957,7 @@ export function MarketplaceListingsSection({
                       facts={adapter.facts(row)}
                       onAction={(action) => runAction(row, action)}
                       pending={pending}
-                      testIdFor={(action) => `${LISTING_TEST_ID[action]}-${row.id}`}
+                      testIdFor={(action) => LISTING_TEST_ID[action](row.id)}
                       erase={{ onConfirm: () => remove(row.id), testId: `listing-remove-${row.id}` }}
                     />
                   </div>

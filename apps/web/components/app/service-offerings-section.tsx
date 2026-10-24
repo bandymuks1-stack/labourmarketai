@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Eye, Pause, Play } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   MarketEntryActions,
   MarketEntryChip,
@@ -17,10 +17,7 @@ import {
   deleteServiceOffering,
 } from "@/lib/services/service-offerings";
 import { PARTNERSHIP_CATEGORY } from "@/lib/services/service-offerings-shared";
-import type {
-  ServiceOfferingRow,
-  ServiceOfferingStatus,
-} from "@/lib/services/service-offerings-shared";
+import type { ServiceOfferingRow } from "@/lib/services/service-offerings-shared";
 
 /**
  * Provider-owned service offerings manager (W8 Phase 1). Real data only — every
@@ -84,13 +81,13 @@ const EMPTY_DRAFT: Draft = {
 
 /** Test ids the walk specs already use, one per contract action. Publish,
  *  pause and resume never appear together, so they share the toggle id. */
-const SERVICE_TEST_ID: Record<EntryAction, string> = {
-  publish: "service-offering-toggle",
-  pause: "service-offering-toggle",
-  resume: "service-offering-toggle",
-  complete: "service-offering-close",
-  withdraw: "service-offering-withdraw",
-  edit: "service-offering-edit",
+const SERVICE_TEST_ID: Record<EntryAction, (id: string) => string> = {
+  publish: (id) => `service-offering-toggle-${id}`,
+  pause: (id) => `service-offering-toggle-${id}`,
+  resume: (id) => `service-offering-toggle-${id}`,
+  complete: (id) => `service-offering-close-${id}`,
+  withdraw: (id) => `service-offering-withdraw-${id}`,
+  edit: (id) => `service-offering-edit-${id}`,
 };
 
 export function ServiceOfferingsSection({
@@ -397,7 +394,7 @@ export function ServiceOfferingsSection({
                     facts={adapter.facts(row)}
                     onAction={(action) => runAction(row, action)}
                     pending={pending}
-                    testIdFor={(action) => `${SERVICE_TEST_ID[action]}-${row.id}`}
+                    testIdFor={(action) => SERVICE_TEST_ID[action](row.id)}
                     erase={{ onConfirm: () => remove(row), testId: `service-offering-delete-${row.id}` }}
                   />
                 </li>
