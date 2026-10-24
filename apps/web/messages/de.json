@@ -17346,7 +17346,30 @@
     "approve": "Erlauben",
     "deny": "Ablehnen",
     "errorMissingId": "Die Autorisierungsanfrage fehlt. Kehren Sie zur Anwendung zurück und versuchen Sie es erneut.",
-    "errorUnresolved": "Die Autorisierungsanfrage konnte nicht aufgelöst werden. Sie ist möglicherweise abgelaufen (Anfragen gelten einige Minuten) oder wurde bereits verwendet. Gehen Sie zurück zur Anwendung und verbinden Sie sich erneut."
+    "errorUnresolved": "Die Autorisierungsanfrage konnte nicht aufgelöst werden. Sie ist möglicherweise abgelaufen (Anfragen gelten einige Minuten) oder wurde bereits verwendet. Gehen Sie zurück zur Anwendung und verbinden Sie sich erneut.",
+    "scope": {
+      "readProfile": "Ihr Profil und Ihren Living CV sehen",
+      "writeProfile": "Ihr Profil, Ihren Living CV, Ihre Einstellungen und Benachrichtigungen ändern",
+      "readJournal": "Ihr Arbeitsjournal, Stunden, Abwesenheiten und Nachweise sehen",
+      "writeJournal": "Einträge im Arbeitsjournal, Nachweise und Abwesenheitsanträge hinzufügen und ändern",
+      "readDemand": "Bedarfe, Stellen, Kandidaten und Auswahllisten sehen",
+      "writeDemand": "Bedarfe veröffentlichen und schließen, Interesse bekunden und Auswahllisten verwalten",
+      "readOrganization": "Projekte, Personen, Buchungen, Kalender und Berichte Ihrer Organisation sehen",
+      "writeOrganization": "Änderungen in Ihrer Organisation vornehmen: Projekte, Zuweisungen, Teams, Buchungen und Aufgaben",
+      "messages": "Ihre Unterhaltungen lesen und Nachrichten senden",
+      "marketplace": "Marktplatz-Einträge, Dienstleistungsangebote, Angebote und Verträge sehen und verwalten",
+      "oidcOpenid": "Bestätigen, wer Sie sind (Ihre Kontokennung)",
+      "oidcEmail": "Ihre E-Mail-Adresse sehen",
+      "oidcProfile": "Ihren Namen und Ihr Profilbild sehen",
+      "oidcPhone": "Ihre Telefonnummer sehen",
+      "oidcOfflineAccess": "Verbunden bleiben, ohne Sie erneut zur Anmeldung aufzufordern",
+      "billingNone": "Zahlungen: nicht verfügbar. Keine verbundene Anwendung kann bezahlen, abbuchen oder Geld bewegen."
+    },
+    "scopeUnknown": "Von LabourMarket.ai nicht erkannt. Hier gewährt es nichts.",
+    "noProductScopes": "Diese Anwendung hat keine bestimmten LabourMarket.ai-Berechtigungen angefordert. Wenn Sie zustimmen, kann sie jede Assistentenaktion nutzen, die Ihr Konto erlaubt, immer in Ihrem Namen.",
+    "noProductScopesEnforced": "Diese Anwendung hat keine bestimmten LabourMarket.ai-Berechtigungen angefordert und kann hier daher nichts sehen oder ändern. Bitten Sie die Anwendung, die benötigten Berechtigungen anzufordern.",
+    "scopesNotEnforced": "Diese Berechtigungen schränken die Anwendung noch nicht ein. Wenn Sie zustimmen, kann die Anwendung jede Assistentenaktion nutzen, die Ihr Konto erlaubt, immer in Ihrem Namen.",
+    "importantChangesConfirm": "Wichtige Änderungen warten weiterhin auf Ihre Bestätigung."
   },
   "capabilities": {
     "interestChooseDemand": "Wählen Sie den Bedarf, der Sie interessiert: {options}.",

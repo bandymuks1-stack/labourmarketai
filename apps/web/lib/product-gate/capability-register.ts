@@ -1604,7 +1604,7 @@ const PLATFORM: readonly CapabilityRow[] = [
     anchors: ["lib/capabilities/registry.ts", "lib/mcp", "app/api/mcp"],
     coreModule: "lib/capabilities/registry.ts",
     surfaces: ["app/api/mcp"],
-    note: "Proven read+write through ChatGPT; no MCP end-to-end spec, and the OAuth authorization server is not enabled by the owner.",
+    note: "Proven read+write through ChatGPT; no MCP end-to-end spec, and the OAuth authorization server is not enabled by the owner. UPDATE 2026-10-23: OAuth permission scopes (lib/mcp/scopes.ts: ten product scopes derived from each tool's domain and kind, checked at the one dispatch point in app/api/mcp, refusal receipt, plain-language consent in six locales) are BUILT behind MCP_SCOPE_ENFORCEMENT, default off - NOT enforced in production. Enforcement also needs the authorization server to issue the scopes (Supabase Auth issues OIDC scopes only); TEST_PROVEN only.",
   },
   {
     id: "AI-2",

@@ -5,6 +5,7 @@ const mockEnv = vi.hoisted(() => ({
   CONVERSATION_TOKEN_SECRET: "unit-test-secret-with-enough-length",
   SUPABASE_SERVICE_ROLE_KEY: undefined as string | undefined,
   PUBLIC_ORIGIN: undefined as string | undefined,
+  MCP_PRM_ADVERTISE_SCOPES: undefined as string | undefined,
 }));
 vi.mock("@/lib/env", () => ({
   env: mockEnv,
@@ -98,11 +99,34 @@ describe("protected resource metadata (RFC 9728) — what Claude and ChatGPT rea
     const doc = protectedResourceMetadata(ORIGIN, "https://abcdefghijklmnopqrst.supabase.co/");
     expect(doc.authorization_servers).toEqual(["https://abcdefghijklmnopqrst.supabase.co/auth/v1"]);
     expect(doc.bearer_methods_supported).toEqual(["header"]);
-    // No scopes are advertised: the platform has no product-level scope model
-    // (RLS decides), and Claude would otherwise request whatever is listed.
+    // No scopes are advertised BY DEFAULT: Claude requests whatever is listed,
+    // and the authorization server cannot issue the product scopes of
+    // lib/mcp/scopes.ts yet (Supabase Auth: OIDC scopes only). Listing them
+    // is the owner's MCP_PRM_ADVERTISE_SCOPES=on, pinned below.
     expect("scopes_supported" in doc).toBe(false);
     // Never a token in the query string (MCP authorization spec, token requirements).
     expect(JSON.stringify(doc)).not.toMatch(/query|body/);
+  });
+
+  it("MCP_PRM_ADVERTISE_SCOPES=on lists exactly the product scopes, on both locations, and nothing else changes", async () => {
+    const { PRODUCT_SCOPES } = await import("@/lib/mcp/scopes");
+    const before = await (await prmRoot(new Request(`${ORIGIN}/.well-known/oauth-protected-resource`))).json();
+    mockEnv.MCP_PRM_ADVERTISE_SCOPES = "on";
+    try {
+      const root = await (await prmRoot(new Request(`${ORIGIN}/.well-known/oauth-protected-resource`))).json();
+      const suffixed = await (
+        await prmPathSuffixed(new Request(`${ORIGIN}/.well-known/oauth-protected-resource/api/mcp`))
+      ).json();
+      expect(suffixed).toEqual(root);
+      expect(root.scopes_supported).toEqual([...PRODUCT_SCOPES]);
+      // No billing scope can ever be requested.
+      expect((root.scopes_supported as string[]).some((s) => /billing|payment/.test(s))).toBe(false);
+      const rest = { ...root };
+      delete rest.scopes_supported;
+      expect(rest).toEqual(before);
+    } finally {
+      mockEnv.MCP_PRM_ADVERTISE_SCOPES = undefined;
+    }
   });
 
   it("a local host advertises itself; a foreign or forged host yields the canonical origin", async () => {
