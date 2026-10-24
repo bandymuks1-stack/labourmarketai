@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 import {
@@ -122,6 +122,16 @@ export function DiscoverabilityConsent({
   // compact only: the person asked to read the terms before deciding.
   const [opened, setOpened] = useState(false);
   const [pending, startTransition] = useTransition();
+  // The result note of a grant / withdrawal. Granting collapses the terms
+  // above the person's scroll position (compact) and the server re-render
+  // can move the block, so the note is brought into view: the result is SEEN,
+  // not left above the fold (local walk 2026-10-24, 1280 px).
+  const resultRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (phase === "done" || phase === "withdrawn") {
+      resultRef.current?.scrollIntoView({ block: "nearest" });
+    }
+  }, [phase]);
 
   const status = state.status;
 
@@ -250,6 +260,7 @@ export function DiscoverabilityConsent({
         {privateLine}
         {phase === "done" && (
           <p
+            ref={resultRef}
             role="status"
             className="mt-2 text-sm font-medium text-state-success"
             data-testid="discoverability-granted-note"
@@ -310,6 +321,7 @@ export function DiscoverabilityConsent({
       {privateLine}
       {phase === "withdrawn" && (
         <p
+          ref={resultRef}
           role="status"
           className="mt-2 text-sm font-medium text-text-primary"
           data-testid="discoverability-withdrawn-note"
