@@ -327,6 +327,14 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   ];
   await page.goto("/lt/dashboard");
   await say(page, "Įkelk mano CV");
+  // "my CV" + a file verb is a FILE intent (#1684, `handleFileIntent` →
+  // `fileSelfCv`): the chat names the door as ONE `cv` chip and the import
+  // opens only when the person takes it (run 40049229470 waited 60 s for a
+  // flow that is never opened by the sentence alone). The newest chip answers
+  // this request; a starter row may carry an older one. Visible nodes only:
+  // the dashboard streams through a hidden `<div id="S:n">` copy at the end
+  // of <body>, so a bare `.last()` can land on the hidden starter row.
+  await page.getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
   await expect(page.getByTestId("conversation-cv-flow").last()).toBeVisible({ timeout: 60_000 });
   const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
   await input.waitFor({ state: "attached", timeout: 30_000 });

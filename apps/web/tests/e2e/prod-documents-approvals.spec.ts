@@ -172,6 +172,12 @@ test("A-1 (3.24). Alfa keeps a published approval template", async ({ browser })
     expect(value, "Alfa is one of the organizations the owner governs").toBeTruthy();
     await org.selectOption(value!);
     await create.locator('input[name="name"]').fill(TEMPLATE);
+    // A template needs at least one approval step: step 1's name is a
+    // `required` field (since #1170), so without it the browser's own
+    // validation keeps the form from submitting and no `?wf=` ever arrives
+    // (run 40053712526 A-1: the first time this create branch ran in
+    // production). The step keeps the defaults: single approver, owner/admin.
+    await create.locator('input[name="step1Name"]').fill("QA-SYNTHETIC vadovo patvirtinimas");
     await act(page, page.getByTestId("approvals-create-template-submit"), "wf");
     await page.goto("/lt/dashboard/network?area=approvals");
     template = page.locator('[data-testid^="approvals-template-"]', { hasText: TEMPLATE }).first();

@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect } from "./prod-walk";
 
-import { chooseWorkContextIfAsked } from "./worklog-context";
+import { answerNoProjectIfAsked, chooseWorkContextIfAsked } from "./worklog-context";
 
 /**
  * PRODUCTION SECTORS × LANGUAGES — owner programme 2026-10-12 §3E: the same
@@ -44,6 +44,7 @@ for (const day of DAYS) {
     await page.getByTestId("journal-quick-record-understand").click();
     await expect(page.getByTestId("worklog-flow")).toBeVisible({ timeout: 45_000 });
     await chooseWorkContextIfAsked(page, /QA-SYNTHETIC Alfa/);
+    await answerNoProjectIfAsked(page);
     await page.getByTestId("worklog-save").click();
     await page.getByTestId("worklog-confirm").click();
     const done = page.getByTestId("worklog-done");

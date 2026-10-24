@@ -201,8 +201,18 @@ test("E-4 (3.5). a task on project A is created, started and completed", async (
   await page.getByTestId("tasks-create-submit").click();
   await expect(page.getByTestId("tasks-notice-created")).toBeVisible({ timeout: 30_000 });
 
-  const card = page.locator('[data-testid^="task-card-"]', { hasText: TASK }).first();
-  await expect(card).toBeVisible({ timeout: 30_000 });
+  // THIS run's card, by its own title line. A card's text also holds the
+  // "parent task" picker, whose <option>s list every other task of the
+  // project — so `hasText: TASK` matched the OLDEST card that offers this
+  // task as a parent (10-23 run 39968362991 started and completed the 10-22
+  // task instead of its own; run 40051762490 then met that task done, with no
+  // start control). Scoped to <main> (hidden streaming copy) and exactly one.
+  const card = page
+    .getByRole("main")
+    .locator('[data-testid^="task-card-"]')
+    .filter({ has: page.locator("p", { hasText: TASK }) });
+  await expect(card).toHaveCount(1, { timeout: 30_000 });
+  await expect(card).toBeVisible();
   const taskId = ((await card.getAttribute("data-testid")) ?? "").replace(/^task-card-/, "");
   expect(taskId).toMatch(/^[0-9a-f-]{36}$/);
   for (const action of ["start", "complete"]) {
@@ -465,17 +475,28 @@ test("E-13 (3.13). the operations report downloads for the owner and for nobody 
   }
 });
 
-test("E-14. cleanup: the stage goes, the task stays closed, both assignments end", async ({ browser }) => {
-  const { ctx, page } = await as(browser, "owner");
+/**
+ * The run's own leftovers, through the owner's real controls: this run's stage
+ * on project A, and the worker's assignments on both walk projects. Shared by
+ * E-14 (which asserts it) and `afterAll` (which runs it when a red step
+ * stopped the serial walk before E-14). Run 39968362991 stopped at E-13 and
+ * left the worker on A and B; with three active projects every journal walk
+ * of that worker is then asked "which project?" (`projectPromptFor` → ask),
+ * which is how sectors-languages 40048799023 and journal-confirm 40069162731
+ * went red on a question they did not answer.
+ */
+async function cleanUp(page: Page): Promise<void> {
   await useWorkspace(page, ALFA);
-  await page.goto(ops(projectA));
-  const stage = page.getByTestId("project-stage-row").filter({ hasText: STAGE });
-  if ((await stage.count()) > 0) {
-    await stage.getByTestId("project-stage-delete").click();
-    await page.waitForTimeout(2_000);
+  if (projectA) {
     await page.goto(ops(projectA));
+    const stage = page.getByTestId("project-stage-row").filter({ hasText: STAGE });
+    if ((await stage.count()) > 0) {
+      await stage.getByTestId("project-stage-delete").click();
+      await page.waitForTimeout(2_000);
+      await page.goto(ops(projectA));
+    }
+    await expect(page.getByTestId("project-stage-row").filter({ hasText: STAGE })).toHaveCount(0, { timeout: 30_000 });
   }
-  await expect(page.getByTestId("project-stage-row").filter({ hasText: STAGE })).toHaveCount(0, { timeout: 30_000 });
 
   for (const title of [PROJECT_B, PROJECT_A]) {
     await page.goto("/lt/dashboard/projects");
@@ -490,5 +511,31 @@ test("E-14. cleanup: the stage goes, the task stays closed, both assignments end
       timeout: 30_000,
     });
   }
+}
+
+let cleanedUp = false;
+
+test("E-14. cleanup: the stage goes, the task stays closed, both assignments end", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await cleanUp(page);
+  cleanedUp = true;
   await ctx.close();
+});
+
+// A red step stops a serial walk before E-14; the leftovers must still go
+// (company-chain #2699 pattern). Own budget: the default 30 s hook timeout is
+// less than one page round trip on a cold origin. Logged, never thrown over
+// the result.
+test.afterAll(async ({ browser }) => {
+  if (cleanedUp || !ENABLED) return;
+  test.setTimeout(180_000);
+  const { ctx, page } = await as(browser, "owner");
+  try {
+    await cleanUp(page);
+    console.info("[cleanup] stage and assignments: removed after a red step");
+  } catch (e) {
+    console.info(`[cleanup] stage and assignments: NOT removed (${(e as Error).message.split("\n")[0].slice(0, 160)})`);
+  } finally {
+    await ctx.close();
+  }
 });

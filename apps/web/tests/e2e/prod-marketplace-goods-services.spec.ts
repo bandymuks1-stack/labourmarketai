@@ -80,26 +80,28 @@ async function publishListing(
   f: { domain: string; kind: string; category: string; title: string; asOrganization?: boolean },
 ): Promise<string> {
   await page.goto(`/${l}/dashboard/listings`);
-  await expect(page.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
-  await page.getByTestId("listing-add").click();
-  await page.getByTestId("listing-form-domain").selectOption(f.domain);
-  await page.getByTestId("listing-form-kind").selectOption(f.kind);
-  await page.getByTestId("listing-form-category").selectOption(f.category);
+  // Scoped to <main>: see `findInMarket`.
+  const main = page.getByRole("main");
+  await expect(main.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
+  await main.getByTestId("listing-add").click();
+  await main.getByTestId("listing-form-domain").selectOption(f.domain);
+  await main.getByTestId("listing-form-kind").selectOption(f.kind);
+  await main.getByTestId("listing-form-category").selectOption(f.category);
   if (f.asOrganization) {
     // The company publishes as ITSELF — the form must offer it.
-    const publisher = page.getByTestId("listing-form-publisher");
+    const publisher = main.getByTestId("listing-form-publisher");
     await expect(publisher, "the form offers the company as publisher").toBeVisible({ timeout: 30_000 });
     await publisher.selectOption("organization");
   }
-  await page.getByTestId("listing-form-title").fill(f.title);
-  await page.getByTestId("listing-form-description").fill(`${say("aprašymas")}. Kaunas.`);
-  await page.getByTestId("listing-form-country").fill("LT");
-  await page.getByTestId("listing-form-save").click();
-  const row = page.getByTestId("my-listing-row").filter({ hasText: f.title }).first();
+  await main.getByTestId("listing-form-title").fill(f.title);
+  await main.getByTestId("listing-form-description").fill(`${say("aprašymas")}. Kaunas.`);
+  await main.getByTestId("listing-form-country").fill("LT");
+  await main.getByTestId("listing-form-save").click();
+  const row = main.getByTestId("my-listing-row").filter({ hasText: f.title }).first();
   await expect(row).toBeVisible({ timeout: 30_000 });
   const id = (await row.getAttribute("id"))!.replace("listing-", "");
-  await page.getByTestId(`listing-activate-${id}`).click();
-  await expect(page.getByTestId(`listing-activate-${id}`)).toHaveCount(0, { timeout: 30_000 });
+  await main.getByTestId(`listing-activate-${id}`).click();
+  await expect(main.getByTestId(`listing-activate-${id}`)).toHaveCount(0, { timeout: 30_000 });
   if (f.asOrganization) {
     await expect(row.getByTestId("my-listing-publisher"), "the row says it was published by the company").toBeVisible();
   }
@@ -142,9 +144,16 @@ async function receive(page: Page, l: string, threadPath: string, text: string):
 /** Find `title` in the one market under `group`; return its card. */
 async function findInMarket(page: Page, l: string, group: string, title: string) {
   await page.goto(`/${l}/dashboard/listings`);
-  await expect(page.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
-  await page.getByTestId(`market-group-${group}`).click().catch(() => undefined);
-  const card = page.getByTestId("market-browse-row").filter({ hasText: title }).first();
+  // Scoped to <main>: the page streams in through a hidden `<div id="S:n">`
+  // whose reveal is rAF-driven; in a never-painting headless tab that hidden
+  // copy sits outside <main> beside the rendered one, and an unscoped testid
+  // fails strict mode at once (run 40054092916 G-4: `listings-page` in <main>
+  // plus `.nth(1)` outside it; calendar-journal-history.spec.ts). Strict
+  // inside <main> still fails if the page itself renders twice.
+  const main = page.getByRole("main");
+  await expect(main.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
+  await main.getByTestId(`market-group-${group}`).click().catch(() => undefined);
+  const card = main.getByTestId("market-browse-row").filter({ hasText: title }).first();
   await expect(card, `"${group}" shows the row`).toBeVisible({ timeout: 30_000 });
   return card;
 }
@@ -345,12 +354,40 @@ test("S-5. the provider receives it and answers; the requester receives the answ
 
 async function closeListing(page: Page, l: string, id: string): Promise<void> {
   await page.goto(`/${l}/dashboard/listings`);
-  await expect(page.locator(`[data-testid="my-listing-row"][id="listing-${id}"]`)).toBeVisible({ timeout: 30_000 });
-  const close = page.getByTestId(`listing-close-${id}`);
+  // Scoped to <main> (hidden streaming copy, see `findInMarket`; run
+  // 40054092916 left the rental listing open on exactly this line).
+  const main = page.getByRole("main");
+  await expect(main.locator(`[data-testid="my-listing-row"][id="listing-${id}"]`)).toBeVisible({ timeout: 30_000 });
+  const close = main.getByTestId(`listing-close-${id}`);
   if (await close.isVisible().catch(() => false)) {
     await close.click();
     await expect(close).toHaveCount(0, { timeout: 30_000 });
   }
+}
+
+/**
+ * Close what EARLIER runs of a synthetic walk left published on this slot's own
+ * listings page: a run that went red before its cleanup reached a row (run
+ * 40054092916 left Alfa's rental open). Only the slot's own rows, only titles
+ * that carry the synthetic marker and a run id, only through the page's own
+ * close control. Returns how many it closed.
+ */
+async function closeEarlierListings(page: Page, l: string): Promise<number> {
+  await page.goto(`/${l}/dashboard/listings`);
+  const main = page.getByRole("main");
+  await expect(main.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
+  const open = main
+    .getByTestId("my-listing-row")
+    .filter({ hasText: /QA-SYNTHETIC \d+ / })
+    .filter({ has: page.locator('[data-testid^="listing-close-"]') });
+  let closed = 0;
+  for (let i = 0; i < 10 && (await open.count()) > 0; i++) {
+    const before = await open.count();
+    await open.first().locator('[data-testid^="listing-close-"]').first().click();
+    await expect(open).toHaveCount(before - 1, { timeout: 30_000 });
+    closed++;
+  }
+  return closed;
 }
 
 async function pauseService(page: Page, l: string, id: string): Promise<void> {
@@ -380,6 +417,10 @@ test.afterAll(async ({ browser }) => {
       if (job.org) await useWorkspace(page, l, job.org);
       await job.run(page, l, job.id);
       console.info(`[cleanup] ${job.what}: closed`);
+      if (job.run === closeListing) {
+        const earlier = await closeEarlierListings(page, l);
+        if (earlier > 0) console.info(`[cleanup] ${job.what}: closed ${earlier} left open by earlier runs`);
+      }
     } catch (e) {
       const first = (e as Error).message.split("\n")[0].slice(0, 160);
       console.info(`[cleanup] ${job.what}: NOT closed (${first})`);

@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect } from "./prod-walk";
 
-import { chooseWorkContextIfAsked } from "./worklog-context";
+import { answerNoProjectIfAsked, chooseWorkContextIfAsked } from "./worklog-context";
 
 /**
  * PRODUCTION CHAT FIRST — ONE CONFIRMATION, ONE FACT (owner programme
@@ -41,6 +41,7 @@ test("C-1. the day told to the chat is confirmed once and lands in the journal o
   const flow = page.getByTestId("worklog-flow").last();
   await expect(flow, "the chat recognises a work day and offers to record it").toBeVisible({ timeout: 45_000 });
   await chooseWorkContextIfAsked(page, /QA-SYNTHETIC Alfa/);
+  await answerNoProjectIfAsked(page);
   await flow.getByTestId("worklog-save").click();
   // Double-click the confirmation: a consent gate must be single-use.
   await flow.getByTestId("worklog-confirm").dblclick();
