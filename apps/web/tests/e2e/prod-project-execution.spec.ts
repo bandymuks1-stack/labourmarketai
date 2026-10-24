@@ -61,6 +61,17 @@ async function as(browser: Browser, slot: string): Promise<{ ctx: BrowserContext
   return { ctx, page: await ctx.newPage() };
 }
 
+/**
+ * The page content, never the streaming holder. Dashboard pages stream through
+ * a hidden `<div id="S:n">` whose reveal is rAF-driven; in a never-painting
+ * headless tab that hidden copy sits outside <main> beside the rendered one,
+ * so a bare testid fails strict mode at once and a count reads double
+ * (project-execution 40081437313 E-11 `hours-worker-select`, and its cleanup
+ * `toHaveCount(0)`; calendar-journal-history.spec.ts). Strict inside <main>
+ * still fails if a page really renders something twice.
+ */
+const inMain = (page: Page): Locator => page.getByRole("main");
+
 /** Make `orgName` the active workspace through the real header chip. */
 async function useWorkspace(page: Page, orgName: string): Promise<void> {
   await page.goto("/lt/dashboard/company/people");
@@ -128,10 +139,10 @@ test("E-1 (3.2). Alfa has its two walk projects — created through the project 
   for (const title of [PROJECT_A, PROJECT_B]) {
     if (await projectIdByTitle(title)) continue;
     await page.goto("/lt/dashboard/company/projects/new");
-    await page.getByTestId("project-name-input").fill(title);
-    await page.getByTestId("project-create-submit").click();
-    const ok = page.getByTestId("project-context-created");
-    const err = page.getByTestId("project-create-error");
+    await inMain(page).getByTestId("project-name-input").fill(title);
+    await inMain(page).getByTestId("project-create-submit").click();
+    const ok = inMain(page).getByTestId("project-context-created");
+    const err = inMain(page).getByTestId("project-create-error");
     await expect(ok.or(err)).toBeVisible({ timeout: 30_000 });
     if (await err.isVisible()) throw new Error(`project not created: ${await err.getAttribute("data-code")}`);
   }
@@ -148,14 +159,14 @@ test("E-2 (3.13). both projects get the same dates on their operations board", a
   for (const id of [projectA, projectB]) {
     await page.goto(ops(id));
     await rendered(page, "operations");
-    const form = page.getByTestId("ops-manage-facts-form");
+    const form = inMain(page).getByTestId("ops-manage-facts-form");
     await expect(form, "facts form (a completed project is read-only)").toBeVisible({ timeout: 30_000 });
     await form.getByTestId("ops-manage-facts-start").fill(START);
     await form.getByTestId("ops-manage-facts-end").fill(END);
     await form.getByTestId("ops-manage-facts-save").click();
-    await expect(page.getByTestId("ops-notice-updated")).toBeVisible({ timeout: 30_000 });
+    await expect(inMain(page).getByTestId("ops-notice-updated")).toBeVisible({ timeout: 30_000 });
     await page.goto(ops(id));
-    await expect(page.getByTestId("ops-centre-dates")).toContainText(START.slice(0, 4), { timeout: 30_000 });
+    await expect(inMain(page).getByTestId("ops-centre-dates")).toContainText(START.slice(0, 4), { timeout: 30_000 });
   }
   await ctx.close();
 });
@@ -166,9 +177,9 @@ test("E-3 (3.4). a stage is added to project A and its status persists", async (
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto(ops(projectA));
-  const panel = page.getByTestId("project-stages-panel");
+  const panel = inMain(page).getByTestId("project-stages-panel");
   await expect(panel).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("project-stages-preapply")).toHaveCount(0);
+  await expect(inMain(page).getByTestId("project-stages-preapply")).toHaveCount(0);
   await panel.getByTestId("project-stage-name").fill(STAGE);
   await panel.getByTestId("project-stage-planned-start").fill(START);
   await panel.getByTestId("project-stage-planned-end").fill(END);
@@ -176,13 +187,13 @@ test("E-3 (3.4). a stage is added to project A and its status persists", async (
   await expect(panel.getByTestId("project-stages-msg")).toBeVisible({ timeout: 30_000 });
 
   await page.goto(ops(projectA));
-  const row = page.getByTestId("project-stage-row").filter({ hasText: STAGE });
+  const row = inMain(page).getByTestId("project-stage-row").filter({ hasText: STAGE });
   await expect(row, "the stage persists").toHaveCount(1, { timeout: 30_000 });
   await row.getByTestId("project-stage-status-select").selectOption("in_progress");
-  await expect(page.getByTestId("project-stages-msg")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("project-stages-msg")).toBeVisible({ timeout: 30_000 });
   await page.goto(ops(projectA));
   await expect(
-    page.getByTestId("project-stage-row").filter({ hasText: STAGE }).getByTestId("project-stage-status-select"),
+    inMain(page).getByTestId("project-stage-row").filter({ hasText: STAGE }).getByTestId("project-stage-status-select"),
     "the status change persists",
   ).toHaveValue("in_progress", { timeout: 30_000 });
   await ctx.close();
@@ -194,12 +205,12 @@ test("E-4 (3.5). a task on project A is created, started and completed", async (
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto(`/lt/dashboard/tasks?project=${projectA}&create=1`);
-  await expect(page.getByTestId("tasks-unavailable")).toHaveCount(0);
-  const form = page.getByTestId("tasks-create");
+  await expect(inMain(page).getByTestId("tasks-unavailable")).toHaveCount(0);
+  const form = inMain(page).getByTestId("tasks-create");
   await expect(form).toBeVisible({ timeout: 30_000 });
   await form.locator('input[name="title"]').fill(TASK);
-  await page.getByTestId("tasks-create-submit").click();
-  await expect(page.getByTestId("tasks-notice-created")).toBeVisible({ timeout: 30_000 });
+  await inMain(page).getByTestId("tasks-create-submit").click();
+  await expect(inMain(page).getByTestId("tasks-notice-created")).toBeVisible({ timeout: 30_000 });
 
   // THIS run's card, by its own title line. A card's text also holds the
   // "parent task" picker, whose <option>s list every other task of the
@@ -216,12 +227,12 @@ test("E-4 (3.5). a task on project A is created, started and completed", async (
   const taskId = ((await card.getAttribute("data-testid")) ?? "").replace(/^task-card-/, "");
   expect(taskId).toMatch(/^[0-9a-f-]{36}$/);
   for (const action of ["start", "complete"]) {
-    await page.getByTestId(`task-action-${action}-${taskId}`).click();
-    await expect(page.getByTestId("tasks-notice-updated")).toBeVisible({ timeout: 30_000 });
+    await inMain(page).getByTestId(`task-action-${action}-${taskId}`).click();
+    await expect(inMain(page).getByTestId("tasks-notice-updated")).toBeVisible({ timeout: 30_000 });
   }
   // Done work leaves the open list; it is still there behind "closed".
   await page.goto(`/lt/dashboard/tasks?project=${projectA}`);
-  const closed = page.getByTestId("tasks-closed-toggle");
+  const closed = inMain(page).getByTestId("tasks-closed-toggle");
   if (await closed.isVisible().catch(() => false)) await closed.click();
   // Scoped to <main> after a fresh load (hidden streaming copy, see org-roster).
   await expect(page.getByRole("main").getByTestId(`task-card-${taskId}`), "the completed task persists").toBeVisible({ timeout: 30_000 });
@@ -230,7 +241,7 @@ test("E-4 (3.5). a task on project A is created, started and completed", async (
 
 async function assign(page: Page, projectId: string): Promise<void> {
   await page.goto("/lt/dashboard/projects");
-  const form = page.getByTestId("project-assign");
+  const form = inMain(page).getByTestId("project-assign");
   await expect(form, "the assign form (owner sees the roster)").toBeVisible({ timeout: 30_000 });
   await form.locator('select[name="project_id"]').selectOption(projectId);
   await form.getByTestId("assign-worker-select").selectOption(workerProfileId);
@@ -254,22 +265,22 @@ test("E-6 (3.17). on project B the clash with A is shown, kept knowingly, and le
   // The pre-save check renders the SAME notice above the button (advisory, no
   // reason picker); the post-save notice is the one with the reason picker, so
   // that is the signal the assignment was written and the clash measured.
-  const reason = page.getByTestId("assign-reservation-reason");
+  const reason = inMain(page).getByTestId("assign-reservation-reason");
   const shown = await reason
     .waitFor({ state: "visible", timeout: 30_000 })
     .then(() => true)
     .catch(() => false);
   if (!shown) {
-    const collides = await page.getByTestId("assign-reservation-collides").count();
-    const unknown = await page.getByTestId("assign-reservation-unknown").count();
-    const done = await page.getByTestId("assign-worker-done").count();
+    const collides = await inMain(page).getByTestId("assign-reservation-collides").count();
+    const unknown = await inMain(page).getByTestId("assign-reservation-unknown").count();
+    const done = await inMain(page).getByTestId("assign-worker-done").count();
     throw new Error(`no post-save clash notice on B (collides=${collides} unknown=${unknown} done=${done})`);
   }
-  await expect(page.getByTestId("assign-reservation-collides").last()).toBeVisible();
+  await expect(inMain(page).getByTestId("assign-reservation-collides").last()).toBeVisible();
   await reason.selectOption("agreed_with_worker");
-  await page.getByTestId("assign-reservation-keep").last().click();
-  const decided = page.getByTestId("assign-reservation-decided");
-  const failed = page.getByTestId("assign-reservation-keep-failed");
+  await inMain(page).getByTestId("assign-reservation-keep").last().click();
+  const decided = inMain(page).getByTestId("assign-reservation-decided");
+  const failed = inMain(page).getByTestId("assign-reservation-keep-failed");
   await expect(decided.or(failed)).toBeVisible({ timeout: 30_000 });
   expect(await failed.isVisible(), "the keep decision was recorded").toBe(false);
 
@@ -288,7 +299,7 @@ test("E-7 (3.9). the worker's readiness checklist on project A exists and persis
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto(ops(projectA));
-  const card = page.getByTestId("ops-worker-card").filter({ hasText: WORKER_NAME }).first();
+  const card = inMain(page).getByTestId("ops-worker-card").filter({ hasText: WORKER_NAME }).first();
   await expect(card, "Vytas has a card on the board").toBeVisible({ timeout: 30_000 });
   const seed = card.getByTestId("ops-checklist-seed");
   if (await seed.isVisible().catch(() => false)) {
@@ -302,7 +313,7 @@ test("E-7 (3.9). the worker's readiness checklist on project A exists and persis
     .first()
     .getByTestId("ops-item-status-select");
   await expect.poll(() => items.count(), { timeout: 30_000 }).toBeGreaterThan(0);
-  await expect(page.getByTestId("ops-centre-readiness")).toBeVisible();
+  await expect(inMain(page).getByTestId("ops-centre-readiness")).toBeVisible();
   await ctx.close();
 });
 
@@ -312,7 +323,7 @@ test("E-8 (3.10). a defect is reported, acknowledged, and then removed", async (
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto(ops(projectA));
-  const panel = page.getByTestId("project-defects-panel");
+  const panel = inMain(page).getByTestId("project-defects-panel");
   await expect(panel).toBeVisible({ timeout: 30_000 });
   await expect(panel.getByTestId("defects-preapply")).toHaveCount(0);
   await panel.getByTestId("defect-description").fill(DEFECT);
@@ -320,20 +331,20 @@ test("E-8 (3.10). a defect is reported, acknowledged, and then removed", async (
   await expect(panel.getByTestId("defects-msg")).toBeVisible({ timeout: 30_000 });
 
   await page.goto(ops(projectA));
-  const row = page.getByTestId("defect-row").filter({ hasText: DEFECT });
+  const row = inMain(page).getByTestId("defect-row").filter({ hasText: DEFECT });
   await expect(row, "the defect persists").toHaveCount(1, { timeout: 30_000 });
   await row.getByTestId("defect-status").selectOption("acknowledged");
-  await expect(page.getByTestId("defects-msg")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("defects-msg")).toBeVisible({ timeout: 30_000 });
   await page.goto(ops(projectA));
-  await expect(page.getByTestId("defect-row").filter({ hasText: DEFECT }).getByTestId("defect-status")).toHaveValue(
+  await expect(inMain(page).getByTestId("defect-row").filter({ hasText: DEFECT }).getByTestId("defect-status")).toHaveValue(
     "acknowledged",
     { timeout: 30_000 },
   );
   // Cleanup: the walk's own defect leaves the project.
-  await page.getByTestId("defect-row").filter({ hasText: DEFECT }).getByTestId("defect-delete").click();
+  await inMain(page).getByTestId("defect-row").filter({ hasText: DEFECT }).getByTestId("defect-delete").click();
   await page.waitForTimeout(2_000);
   await page.goto(ops(projectA));
-  await expect(page.getByTestId("defect-row").filter({ hasText: DEFECT })).toHaveCount(0, { timeout: 30_000 });
+  await expect(inMain(page).getByTestId("defect-row").filter({ hasText: DEFECT })).toHaveCount(0, { timeout: 30_000 });
   await ctx.close();
 });
 
@@ -341,7 +352,7 @@ test("E-9 (3.11). a handover note is recorded on the passport and persists", asy
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto(ops(projectA));
-  const panel = page.getByTestId("handover-passport-panel");
+  const panel = inMain(page).getByTestId("handover-passport-panel");
   await expect(panel).toBeVisible({ timeout: 30_000 });
   await expect(panel.getByTestId("handover-passport-preapply")).toHaveCount(0);
   const type = panel.getByTestId("handover-entry-type");
@@ -350,7 +361,7 @@ test("E-9 (3.11). a handover note is recorded on the passport and persists", asy
   await panel.getByTestId("handover-entry-submit").click();
   await expect(panel.getByTestId("handover-passport-msg")).toBeVisible({ timeout: 30_000 });
   await page.goto(ops(projectA));
-  await expect(page.getByTestId("handover-entries")).toContainText(MARK, { timeout: 30_000 });
+  await expect(inMain(page).getByTestId("handover-entries")).toContainText(MARK, { timeout: 30_000 });
   await ctx.close();
 });
 
@@ -358,7 +369,7 @@ test("E-10 (3.12). a budget line gives the project a baseline, and is removed ag
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto(ops(projectA));
-  const panel = page.getByTestId("project-economics-panel");
+  const panel = inMain(page).getByTestId("project-economics-panel");
   await expect(panel).toBeVisible({ timeout: 30_000 });
   await expect(panel.getByTestId("economics-preapply")).toHaveCount(0);
   await panel.getByTestId("economics-category").selectOption("materials");
@@ -366,18 +377,18 @@ test("E-10 (3.12). a budget line gives the project a baseline, and is removed ag
   await panel.getByTestId("economics-save").click();
   await expect(panel.getByTestId("economics-msg")).toBeVisible({ timeout: 30_000 });
   await page.goto(ops(projectA));
-  await expect(page.getByTestId("economics-line").first(), "the line persists").toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("economics-baseline")).toBeVisible();
+  await expect(inMain(page).getByTestId("economics-line").first(), "the line persists").toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("economics-baseline")).toBeVisible();
   // The actual is the viewer-scoped ledger figure or says it is unknown — both
   // are honest; it must render.
-  await expect(page.getByTestId("economics-actual")).toBeVisible();
+  await expect(inMain(page).getByTestId("economics-actual")).toBeVisible();
   // Cleanup: every line on this synthetic project goes.
-  for (let i = 0; i < 10 && (await page.getByTestId("economics-delete").count()) > 0; i++) {
-    await page.getByTestId("economics-delete").first().click();
+  for (let i = 0; i < 10 && (await inMain(page).getByTestId("economics-delete").count()) > 0; i++) {
+    await inMain(page).getByTestId("economics-delete").first().click();
     await page.waitForTimeout(2_000);
     await page.goto(ops(projectA));
   }
-  await expect(page.getByTestId("economics-line")).toHaveCount(0, { timeout: 30_000 });
+  await expect(inMain(page).getByTestId("economics-line")).toHaveCount(0, { timeout: 30_000 });
   await ctx.close();
 });
 
@@ -387,40 +398,40 @@ test("E-11 (3.3 / 2.23). a site of project A records the worker's hours, and the
 
   // The site, linked to project A (reused across runs).
   await page.goto("/lt/dashboard/projects#company-locations");
-  const rowA = page.getByTestId("work-object-row").filter({ hasText: SITE_A });
-  const form = page.getByTestId("work-object-add-form");
+  const rowA = inMain(page).getByTestId("work-object-row").filter({ hasText: SITE_A });
+  const form = inMain(page).getByTestId("work-object-add-form");
   await expect(form).toBeVisible({ timeout: 30_000 });
   if ((await rowA.count()) === 0) {
     await form.locator('input[name="name"]').fill(SITE_A);
     await form.locator('select[name="projectId"]').selectOption(projectA);
     await form.getByTestId("work-object-add-submit").click();
-    await expect(page.getByTestId("work-object-row").filter({ hasText: SITE_A }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(inMain(page).getByTestId("work-object-row").filter({ hasText: SITE_A }).first()).toBeVisible({ timeout: 30_000 });
   }
   await expect(
-    page.getByTestId("work-object-row").filter({ hasText: SITE_A }).first(),
+    inMain(page).getByTestId("work-object-row").filter({ hasText: SITE_A }).first(),
     "the site names its project",
   ).toContainText(PROJECT_A);
 
   await page.goto(ops(projectA));
-  const chip = page.getByTestId("ops-centre-hours-allocated");
+  const chip = inMain(page).getByTestId("ops-centre-hours-allocated");
   await expect(chip).toBeVisible({ timeout: 30_000 });
   const before = hoursIn(await chip.innerText());
   expect(Number.isFinite(before), "the board measured the organization's hours (not unavailable)").toBe(true);
 
   await page.goto("/lt/dashboard/hours");
-  await page.getByTestId("hours-worker-select").selectOption(workerId);
-  await page.getByTestId("hours-object-picker").locator('[data-testid^="hours-object-"]', { hasText: SITE_A }).first().click();
-  await page.getByTestId("hours-input").fill("0.5");
-  await page.getByTestId("hours-note").fill(`${MARK} projektas`);
-  await page.getByTestId("hours-save").click();
-  const saved = page.getByTestId("hours-saved");
-  const error = page.getByTestId("hours-error");
+  await inMain(page).getByTestId("hours-worker-select").selectOption(workerId);
+  await inMain(page).getByTestId("hours-object-picker").locator('[data-testid^="hours-object-"]', { hasText: SITE_A }).first().click();
+  await inMain(page).getByTestId("hours-input").fill("0.5");
+  await inMain(page).getByTestId("hours-note").fill(`${MARK} projektas`);
+  await inMain(page).getByTestId("hours-save").click();
+  const saved = inMain(page).getByTestId("hours-saved");
+  const error = inMain(page).getByTestId("hours-error");
   await expect(saved.or(error)).toBeVisible({ timeout: 30_000 });
   if (await error.isVisible()) throw new Error(`hours not saved: ${await error.innerText()}`);
 
   await page.goto(ops(projectA));
   await expect
-    .poll(async () => hoursIn(await page.getByTestId("ops-centre-hours-allocated").innerText()), { timeout: 30_000 })
+    .poll(async () => hoursIn(await inMain(page).getByTestId("ops-centre-hours-allocated").innerText()), { timeout: 30_000 })
     .toBeCloseTo(before + 0.5, 2);
   await ctx.close();
 });
@@ -447,7 +458,7 @@ test("E-13 (3.13). the operations report downloads for the owner and for nobody 
     const { ctx, page } = await as(browser, "owner");
     await useWorkspace(page, ALFA);
     await page.goto(ops(projectA));
-    await expect(page.getByTestId("ops-csv-link")).toBeVisible({ timeout: 30_000 });
+    await expect(inMain(page).getByTestId("ops-csv-link")).toBeVisible({ timeout: 30_000 });
     const res = await ctx.request.get(url);
     expect(res.status(), "owner gets the report").toBe(200);
     expect(res.headers()["content-type"] ?? "").toMatch(/text\/csv/);
@@ -489,13 +500,13 @@ async function cleanUp(page: Page): Promise<void> {
   await useWorkspace(page, ALFA);
   if (projectA) {
     await page.goto(ops(projectA));
-    const stage = page.getByTestId("project-stage-row").filter({ hasText: STAGE });
+    const stage = inMain(page).getByTestId("project-stage-row").filter({ hasText: STAGE });
     if ((await stage.count()) > 0) {
       await stage.getByTestId("project-stage-delete").click();
       await page.waitForTimeout(2_000);
       await page.goto(ops(projectA));
     }
-    await expect(page.getByTestId("project-stage-row").filter({ hasText: STAGE })).toHaveCount(0, { timeout: 30_000 });
+    await expect(inMain(page).getByTestId("project-stage-row").filter({ hasText: STAGE })).toHaveCount(0, { timeout: 30_000 });
   }
 
   for (const title of [PROJECT_B, PROJECT_A]) {

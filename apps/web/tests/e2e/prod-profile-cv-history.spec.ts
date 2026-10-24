@@ -53,6 +53,17 @@ async function as(browser: Browser, slot: string): Promise<{ ctx: BrowserContext
   return { ctx, page: await ctx.newPage() };
 }
 
+/**
+ * The page content, never the streaming holder. Dashboard pages stream through
+ * a hidden `<div id="S:n">` whose reveal is rAF-driven; in a never-painting
+ * headless tab that hidden copy sits outside <main> beside the rendered one,
+ * so a bare testid fails strict mode at once and a count reads double
+ * (project-execution 40081437313 E-11 `hours-worker-select`, and its cleanup
+ * `toHaveCount(0)`; calendar-journal-history.spec.ts). Strict inside <main>
+ * still fails if a page really renders something twice.
+ */
+const inMain = (page: Page): Locator => page.getByRole("main");
+
 /** Make `orgName` the active workspace through the real header chip. */
 async function useWorkspace(page: Page, orgName: string): Promise<void> {
   await page.goto("/lt/dashboard/company/people");
@@ -89,11 +100,11 @@ async function livingCv(page: Page): Promise<Locator> {
 
 /** Ask the conversation something and wait for the composer to take it. */
 async function say(page: Page, text: string): Promise<void> {
-  const composer = page.getByTestId("composer-input");
+  const composer = inMain(page).getByTestId("composer-input");
   await expect(composer).toBeVisible({ timeout: 60_000 });
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   await composer.fill(text);
-  await page.getByTestId("composer-send").click();
+  await inMain(page).getByTestId("composer-send").click();
 }
 
 const short = (e: unknown) => (e as Error).message.split("\n")[0].slice(0, 160);
@@ -166,10 +177,10 @@ test("P-2 (1.4). an onboarded person is not sent back into onboarding, and the s
   await page.goto("/lt/onboarding");
   await expect(page).toHaveURL(/\/lt\/dashboard/, { timeout: 30_000 });
   await page.goto("/lt/dashboard/start");
-  await expect(page.getByTestId("activity-setup-hub")).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("activity-setup-lane-grid")).toBeVisible();
-  await expect(page.getByTestId("activity-setup-lane-company")).toBeVisible();
-  await expect(page.getByTestId("activity-setup-lane-buyer-start")).toBeVisible();
+  await expect(inMain(page).getByTestId("activity-setup-hub")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("activity-setup-lane-grid")).toBeVisible();
+  await expect(inMain(page).getByTestId("activity-setup-lane-company")).toBeVisible();
+  await expect(inMain(page).getByTestId("activity-setup-lane-buyer-start")).toBeVisible();
   await ctx.close();
 });
 
@@ -334,8 +345,8 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   // this request; a starter row may carry an older one. Visible nodes only:
   // the dashboard streams through a hidden `<div id="S:n">` copy at the end
   // of <body>, so a bare `.last()` can land on the hidden starter row.
-  await page.getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
-  await expect(page.getByTestId("conversation-cv-flow").last()).toBeVisible({ timeout: 60_000 });
+  await inMain(page).getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("conversation-cv-flow").last()).toBeVisible({ timeout: 60_000 });
   const input = page.locator('[data-testid="cv-import-upload"] input[type="file"]').last();
   await input.waitFor({ state: "attached", timeout: 30_000 });
   await input.setInputFiles({
@@ -343,13 +354,13 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     buffer: Buffer.from(makeDocx(lines.join("\n"))),
   });
-  const review = page.getByTestId("cv-import-section-review").last();
-  const empty = page.getByTestId("conversation-cv-empty").last();
-  const error = page.getByTestId("cv-import-error").last();
+  const review = inMain(page).getByTestId("cv-import-section-review").last();
+  const empty = inMain(page).getByTestId("conversation-cv-empty").last();
+  const error = inMain(page).getByTestId("cv-import-error").last();
   await expect(review.or(empty).or(error)).toBeVisible({ timeout: 60_000 });
   if (await error.isVisible()) throw new Error(`CV not read: ${(await error.innerText()).slice(0, 120)}`);
   await expect(review, "the generated CV yields a proposal").toBeVisible();
-  const job = page.getByTestId("cv-import-item-wh-0").last();
+  const job = inMain(page).getByTestId("cv-import-item-wh-0").last();
   await expect(job).toContainText(company, { timeout: 30_000 });
   const items = await page.locator('[data-testid^="cv-import-item-"]').count();
   console.info(`[cv-import] proposal items=${items}`);
@@ -388,9 +399,9 @@ test("P-8 (2.6). a volunteering period told through the chat form lands under pr
   const { ctx, page } = await as(browser, "worker2");
   await page.goto("/lt/dashboard");
   await say(page, "Ką dar turiu padaryti?");
-  await expect(page.getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 45_000 });
-  await page.getByTestId("chat-chip-f:worker.add-work-history").last().click();
-  const form = page.getByTestId("inline-action-form-worker.add-work-history").last();
+  await expect(inMain(page).getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 45_000 });
+  await inMain(page).getByTestId("chat-chip-f:worker.add-work-history").last().click();
+  const form = inMain(page).getByTestId("inline-action-form-worker.add-work-history").last();
   await expect(form).toBeVisible({ timeout: 30_000 });
   await form.getByTestId("field-title").fill(PRACTICE);
   await form.getByTestId("field-relationship").selectOption("volunteer");
@@ -400,8 +411,8 @@ test("P-8 (2.6). a volunteering period told through the chat form lands under pr
   await expect(form.getByTestId("inline-action-review")).toBeVisible({ timeout: 30_000 });
   addedHistory.push(PRACTICE);
   await form.getByTestId("inline-action-save").click();
-  const done = page.getByTestId("inline-action-done").last();
-  const failed = page.getByTestId("inline-action-error").last();
+  const done = inMain(page).getByTestId("inline-action-done").last();
+  const failed = inMain(page).getByTestId("inline-action-error").last();
   await expect(done.or(failed)).toBeVisible({ timeout: 30_000 });
   if (!(await done.isVisible())) throw new Error(`practice not saved: ${(await failed.innerText()).slice(0, 120)}`);
 
@@ -571,9 +582,9 @@ test("P-15 (2.24). the experience records about the worker open, with the right 
   // Read-only on purpose: a reply has no withdraw path and goes to moderation.
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard?result=experiences");
-  const result = page.getByTestId("experiences-result");
-  const unavailable = page.getByTestId("experiences-result-unavailable").first();
-  const error = page.getByTestId("experiences-result-error");
+  const result = inMain(page).getByTestId("experiences-result");
+  const unavailable = inMain(page).getByTestId("experiences-result-unavailable").first();
+  const error = inMain(page).getByTestId("experiences-result-error");
   await expect(result.or(unavailable).or(error).first()).toBeVisible({ timeout: 45_000 });
   if (await error.isVisible()) throw new Error("experience records did not load");
   if (!(await result.isVisible())) throw new Error("experience records report themselves unavailable");
@@ -607,8 +618,8 @@ test("P-16 (2.32). the counterparty's review is readable on both sides (read-onl
   const o = await as(browser, "owner");
   await useWorkspace(o.page, ALFA);
   await o.page.goto("/lt/dashboard/inbox/counterparty");
-  await expect(o.page.getByTestId("counterparty-queue")).toBeVisible({ timeout: 30_000 });
-  await expect(o.page.getByTestId("counterparty-queue-load-failed")).toHaveCount(0);
+  await expect(inMain(o.page).getByTestId("counterparty-queue")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(o.page).getByTestId("counterparty-queue-load-failed")).toHaveCount(0);
   console.info(`[review] counterparty queue cards=${await o.page.locator('[data-testid^="counterparty-card-"]').count()}`);
   await o.ctx.close();
 });
@@ -618,24 +629,24 @@ test("P-16 (2.32). the counterparty's review is readable on both sides (read-onl
 test("P-17 (2.25). Work in numbers answers from the worker's own recorded work", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/work-in-numbers");
-  const wi = page.getByTestId("work-in-numbers");
+  const wi = inMain(page).getByTestId("work-in-numbers");
   await expect(wi).toBeVisible({ timeout: 30_000 });
   const kind = await wi.getAttribute("data-state");
   const skills = await page.locator('[data-testid^="wi-skill-name-"]').count();
   console.info(`[work-in-numbers] state=${kind} skills=${skills}`);
   expect(kind, "a worker with weeks of recorded work is not an empty reading").not.toBe("no_entries");
-  await expect(page.getByTestId("wi-period-nav")).toBeVisible();
+  await expect(inMain(page).getByTestId("wi-period-nav")).toBeVisible();
   await ctx.close();
 });
 
 test("P-18 (2.26). one continuous professional history: one total, every hour counted once", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/work-in-numbers");
-  const experience = page.getByTestId("wi-experience");
+  const experience = inMain(page).getByTestId("wi-experience");
   await expect(experience).toBeVisible({ timeout: 30_000 });
   // Read EVERYTHING from Work in numbers before leaving it: a locator is
   // re-evaluated on whatever page is loaded when it is next asked.
-  const total = page.getByTestId("wi-experience-total");
+  const total = inMain(page).getByTestId("wi-experience-total");
   const num = async (l: Locator, a: string) => Number((await l.getAttribute(a)) ?? "NaN");
   const wi =
     (await total.count()) > 0
@@ -653,7 +664,7 @@ test("P-18 (2.26). one continuous professional history: one total, every hour co
     expect(addsUp, "the total is exactly journal + organization records").toBe(true);
   } else {
     // No organization-supplied history: the journal figure IS the history.
-    await expect(page.getByTestId("wi-experience-journal")).toBeVisible();
+    await expect(inMain(page).getByTestId("wi-experience-journal")).toBeVisible();
     console.info("[history] journal-only history (no organization records to add)");
   }
 
@@ -677,11 +688,11 @@ test("P-18 (2.26). one continuous professional history: one total, every hour co
 test("P-19 (12.3). the intelligence page reads the worker's market, with its method and sources", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/intelligence");
-  await expect(page.getByTestId("intelligence-page")).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("intelligence-not-available")).toHaveCount(0);
-  await expect(page.getByTestId("intelligence-methodology")).toBeVisible();
+  await expect(inMain(page).getByTestId("intelligence-page")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("intelligence-not-available")).toHaveCount(0);
+  await expect(inMain(page).getByTestId("intelligence-methodology")).toBeVisible();
   const cards = await page.locator('[data-testid^="intelligence-card-"]').count();
-  const missing = (await page.getByTestId("intelligence-missing").count()) > 0;
+  const missing = (await inMain(page).getByTestId("intelligence-missing").count()) > 0;
   console.info(`[intelligence] cards=${cards} salary_basis_missing=${missing}`);
   await ctx.close();
 });
@@ -692,11 +703,11 @@ test("P-20 (3.27). the company's history page opens in Alfa's workspace", async 
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/company/history");
-  await expect(page.getByTestId("company-history")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("company-history")).toBeVisible({ timeout: 30_000 });
   const history = page.locator('[data-testid="company-work-history"], [data-testid="company-work-history-unavailable"]');
   await expect(history.first()).toBeVisible({ timeout: 30_000 });
-  console.info(`[company-history] state=${await page.getByTestId("company-work-history").first().getAttribute("data-state").catch(() => "n/a")}`);
-  await expect(page.getByTestId("company-history-hours-door")).toBeVisible();
+  console.info(`[company-history] state=${await inMain(page).getByTestId("company-work-history").first().getAttribute("data-state").catch(() => "n/a")}`);
+  await expect(inMain(page).getByTestId("company-history-hours-door")).toBeVisible();
   await ctx.close();
 });
 
@@ -704,9 +715,9 @@ test("P-21 (3.31). the company report opens and its export downloads as a file",
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/reports");
-  await expect(page.getByTestId("reports-hub")).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId("reports-org-journal")).toBeVisible({ timeout: 30_000 });
-  const exportLink = page.getByTestId("reports-export-finance-csv");
+  await expect(inMain(page).getByTestId("reports-hub")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("reports-org-journal")).toBeVisible({ timeout: 30_000 });
+  const exportLink = inMain(page).getByTestId("reports-export-finance-csv");
   if ((await exportLink.count()) === 0) {
     console.info("[report] finance export not offered (finance read unavailable for this workspace)");
   } else {

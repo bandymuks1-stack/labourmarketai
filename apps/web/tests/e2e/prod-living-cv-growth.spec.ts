@@ -36,7 +36,7 @@ for (const locale of ["lt", "en", "ru"] as const) {
     console.info(`[cv-growth] ${locale} potential shown=${hasPotential} items=${items.length}: ${items.slice(0, 6).join(" | ").replace(/\s+/g, " ")}`);
 
     await page.goto(`/${locale}/cv`);
-    // /cv has no <main> landmark: strict over the VISIBLE nodes instead (#2721).
+    // Strict over the VISIBLE nodes (#2721): the hidden holder is never visible.
     const confirmed = page.getByTestId("cv-confirmed-work").filter({ visible: true });
     await expect(confirmed).toBeVisible({ timeout: 30_000 });
     const entries = Number(await confirmed.getAttribute("data-entries"));
