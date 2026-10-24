@@ -194,7 +194,7 @@ describe("SEP-7 — a failed read is said as unknown, never as off or empty", ()
     expect(CONSENT.slice(readFailed)).toContain('data-testid="discoverability-read-failed"');
     expect(CONSENT.slice(readFailed)).toContain("{labels.readFailed}");
     // The read-failed branch sits BEFORE the granted / hidden branches.
-    const screenChoice = CONSENT.indexOf("discoverabilityScreen({ status, phase })");
+    const screenChoice = CONSENT.indexOf("discoverabilityScreen({ status, confirmed })");
     expect(screenChoice).toBeGreaterThan(0);
     expect(readFailed).toBeLessThan(screenChoice);
   });

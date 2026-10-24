@@ -9,7 +9,11 @@ import {
   type DiscoverabilityState,
 } from "@/lib/privacy/discoverability-actions";
 import type { DiscoverabilityConsentSource } from "@/lib/privacy/employer-visibility";
-import { discoverabilityScreen, type DiscoverabilityPhase } from "@/lib/privacy/discoverability-screen";
+import {
+  discoverabilityScreen,
+  type ConfirmedVisibility,
+  type DiscoverabilityPhase,
+} from "@/lib/privacy/discoverability-screen";
 
 /**
  * Profile-discoverability consent control (GDPR Art. 7; EDPB 05/2020) — and
@@ -118,7 +122,14 @@ export function DiscoverabilityConsent({
   /** The status line + one action only (the worker home). */
   compact?: boolean;
 }) {
+  // The REQUEST state (declined / error / needs-migration) — never the
+  // visibility itself. A failed request leaves `confirmed` exactly as it was.
   const [phase, setPhase] = useState<DiscoverabilityPhase>("idle");
+  // The outcome of the last SUCCESSFUL grant / withdrawal in this session.
+  // Wins over the server read, which some doors never refresh (#2730 review).
+  const [confirmed, setConfirmed] = useState<ConfirmedVisibility>(null);
+  // Which result note to show — set only by a success, cleared by a new try.
+  const [note, setNote] = useState<"granted" | "withdrawn" | null>(null);
   // compact only: the person asked to read the terms before deciding.
   const [opened, setOpened] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -128,30 +139,36 @@ export function DiscoverabilityConsent({
   // not left above the fold (local walk 2026-10-24, 1280 px).
   const resultRef = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
-    if (phase === "done" || phase === "withdrawn") {
-      resultRef.current?.scrollIntoView({ block: "nearest" });
-    }
-  }, [phase]);
+    if (note) resultRef.current?.scrollIntoView({ block: "nearest" });
+  }, [note]);
 
   const status = state.status;
 
   function onGrant() {
+    setNote(null);
     startTransition(async () => {
       const res = await grantProfileDiscoverability({ locale, source });
       if (res.kind === "ok") {
         setOpened(false);
-        setPhase("done");
+        setConfirmed("on");
+        setNote("granted");
+        setPhase("idle");
       } else if (res.kind === "needs-migration") setPhase("needs-migration");
+      // A failure changes NOTHING about the visibility shown: the screen stays
+      // the last confirmed one, with its button for a retry.
       else setPhase("error");
     });
   }
 
   function onWithdraw() {
+    setNote(null);
     startTransition(async () => {
       const res = await withdrawProfileDiscoverability({ source });
       if (res.kind === "ok") {
         setOpened(false);
-        setPhase("withdrawn");
+        setConfirmed("off");
+        setNote("withdrawn");
+        setPhase("idle");
       } else if (res.kind === "needs-migration") setPhase("needs-migration");
       else setPhase("error");
     });
@@ -249,7 +266,7 @@ export function DiscoverabilityConsent({
     );
   }
 
-  const screen = discoverabilityScreen({ status, phase });
+  const screen = discoverabilityScreen({ status, confirmed });
 
   // ON — the switch-off is ONE tap, right under the status.
   if (screen === "granted") {
@@ -258,7 +275,7 @@ export function DiscoverabilityConsent({
         {statusLine(true)}
         <p className="mt-1 text-sm text-text-secondary">{labels.statusVisibleBody}</p>
         {privateLine}
-        {phase === "done" && (
+        {note === "granted" && (
           <p
             ref={resultRef}
             role="status"
@@ -285,7 +302,7 @@ export function DiscoverabilityConsent({
                 ›
               </span>
             </summary>
-            {state.decidedAt && phase !== "done" && (
+            {state.decidedAt && confirmed === null && (
               <p className="mt-1 text-xs text-text-muted">
                 {labels.decidedAtLabel}: {state.decidedAt.slice(0, 10)}
                 {state.version ? ` · ${labels.versionLabel}: ${state.version}` : null}
@@ -303,10 +320,10 @@ export function DiscoverabilityConsent({
   }
 
   // OFF — never decided, withdrawn, or granted under a superseded text.
-  const stale = status === "granted_stale_version" && phase !== "withdrawn";
+  const stale = status === "granted_stale_version" && confirmed === null;
   const why = stale
     ? labels.statusStale
-    : status === "withdrawn" || phase === "withdrawn"
+    : status === "withdrawn" || confirmed === "off"
       ? labels.statusWithdrawn
       : labels.statusHidden;
   // compact shows the terms only once the person asks to read them.
@@ -319,7 +336,7 @@ export function DiscoverabilityConsent({
         {labels.statusHiddenBody}
       </p>
       {privateLine}
-      {phase === "withdrawn" && (
+      {note === "withdrawn" && (
         <p
           ref={resultRef}
           role="status"

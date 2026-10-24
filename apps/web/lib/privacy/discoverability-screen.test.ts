@@ -3,7 +3,11 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { discoverabilityScreen, type DiscoverabilityPhase } from "./discoverability-screen";
+import {
+  discoverabilityScreen,
+  type ConfirmedVisibility,
+  type DiscoverabilityPhase,
+} from "./discoverability-screen";
 import type { DiscoverabilityStatus } from "./discoverability-actions";
 
 /**
@@ -16,21 +20,22 @@ import type { DiscoverabilityStatus } from "./discoverability-actions";
  * withdrawn screen's "manage", then the grant — and before #2656 the grant
  * never appeared at all, found by the production walk P-8).
  *
- * Now: ON shows the switch-off button; OFF — never decided, withdrawn, or a
- * grant under a superseded text — shows the choice with the text and the grant
- * already on screen.
+ * The component's state is modelled here exactly as it holds it: the server
+ * read (`status`, which some doors never refresh), the REQUEST phase, and the
+ * last CONFIRMED write. A failed request must never move the screen.
  */
-type Ui = { status: DiscoverabilityStatus; phase: DiscoverabilityPhase };
-const screen = (ui: Ui) => discoverabilityScreen(ui);
+type Ui = { status: DiscoverabilityStatus; phase: DiscoverabilityPhase; confirmed: ConfirmedVisibility };
+const screen = (ui: Ui) => discoverabilityScreen({ status: ui.status, confirmed: ui.confirmed });
 
 // The component's own transitions (components/app/discoverability-consent.tsx).
-const withdrawOk = (ui: Ui): Ui => ({ ...ui, phase: "withdrawn" });
-const grantOk = (ui: Ui): Ui => ({ ...ui, phase: "done" });
-const reload = (status: DiscoverabilityStatus): Ui => ({ status, phase: "idle" });
+const grantOk = (ui: Ui): Ui => ({ ...ui, phase: "idle", confirmed: "on" });
+const withdrawOk = (ui: Ui): Ui => ({ ...ui, phase: "idle", confirmed: "off" });
+const requestFailed = (ui: Ui): Ui => ({ ...ui, phase: "error" }); // confirmed untouched
+const load = (status: DiscoverabilityStatus): Ui => ({ status, phase: "idle", confirmed: null });
 
 describe("discoverabilityScreen — off and on again, one screen each", () => {
   it("granted → withdraw → the choice screen (with grant) → granted", () => {
-    let ui: Ui = { status: "granted", phase: "idle" };
+    let ui = load("granted");
     expect(screen(ui)).toBe("granted");
     ui = withdrawOk(ui);
     expect(screen(ui), "a fresh withdrawal wins over the not-yet-refreshed stored grant").toBe("choice");
@@ -38,22 +43,45 @@ describe("discoverabilityScreen — off and on again, one screen each", () => {
     expect(screen(ui)).toBe("granted");
   });
 
-  it("works the same after a reload, when the STORED status is withdrawn", () => {
-    let ui = reload("withdrawn");
+  it("works the same when the STORED status is withdrawn", () => {
+    let ui = load("withdrawn");
     expect(screen(ui), "withdrawn is the choice screen directly — no extra 'manage' tap").toBe("choice");
     ui = grantOk(ui);
     expect(screen(ui), "a fresh grant wins over the not-yet-refreshed stored status").toBe("granted");
-    ui = withdrawOk({ ...ui, status: "granted" });
+    ui = withdrawOk(ui);
     expect(screen(ui)).toBe("choice");
   });
 
   it("only a CURRENT-version grant is ON (same rule as the RLS predicate)", () => {
-    expect(screen({ status: "not_set", phase: "idle" })).toBe("choice");
-    expect(screen({ status: "granted_stale_version", phase: "idle" })).toBe("choice");
-    expect(screen({ status: "not_set", phase: "declined" })).toBe("choice");
-    expect(screen({ status: "granted", phase: "error" })).toBe("granted");
-    expect(screen({ status: "not_set", phase: "done" })).toBe("granted");
-    expect(screen({ status: "withdrawn", phase: "idle" })).toBe("choice");
+    expect(screen(load("not_set"))).toBe("choice");
+    expect(screen(load("granted_stale_version"))).toBe("choice");
+    expect(screen({ ...load("not_set"), phase: "declined" })).toBe("choice");
+    expect(screen(load("withdrawn"))).toBe("choice");
+  });
+});
+
+describe("a FAILED request never changes the visibility shown (#2730 review)", () => {
+  it("granted → withdraw OK → grant FAILS: still OFF, the grant button stays for a retry", () => {
+    // The conversation embed keeps its first props: status stays "granted".
+    let ui = load("granted");
+    ui = withdrawOk(ui);
+    ui = requestFailed(ui);
+    expect(ui.status, "the stale read the embed still holds").toBe("granted");
+    expect(screen(ui), "the profile IS hidden — never claim it is visible").toBe("choice");
+    ui = grantOk(ui); // the retry succeeds
+    expect(screen(ui)).toBe("granted");
+  });
+
+  it("not_set → grant OK → withdraw FAILS: still ON, the withdraw button stays", () => {
+    let ui = load("not_set");
+    ui = grantOk(ui);
+    ui = requestFailed(ui);
+    expect(screen(ui), "the profile IS visible — never claim it is hidden").toBe("granted");
+  });
+
+  it("a failure before any success shows the server read", () => {
+    expect(screen(requestFailed(load("granted")))).toBe("granted");
+    expect(screen(requestFailed(load("not_set")))).toBe("choice");
   });
 });
 
@@ -64,9 +92,20 @@ describe("the component — one action each way, the result said", () => {
     src.indexOf('data-testid="discoverability-granted"'),
     src.indexOf('data-testid="discoverability-choice"'),
   );
+  const handler = (name: string) => src.slice(src.indexOf(`function ${name}()`), src.indexOf("}\n", src.indexOf(`function ${name}()`) + 400) + 400);
 
-  it("decides the screen from the pure helper", () => {
-    expect(src).toContain("discoverabilityScreen({ status, phase })");
+  it("decides the screen from the server read and the last CONFIRMED write only", () => {
+    expect(src).toContain("discoverabilityScreen({ status, confirmed })");
+  });
+
+  it("a failed grant / withdrawal sets only the request phase, never `confirmed`", () => {
+    for (const name of ["onGrant", "onWithdraw"]) {
+      const body = handler(name).replace(/\r\n/g, "\n");
+      const okBranch = body.slice(body.indexOf('if (res.kind === "ok")'), body.indexOf('} else if (res.kind === "needs-migration")'));
+      const failBranch = body.slice(body.indexOf('} else if (res.kind === "needs-migration")'));
+      expect(okBranch, name).toMatch(/setConfirmed\("(on|off)"\)/);
+      expect(failBranch.slice(0, failBranch.indexOf("});")), name).not.toContain("setConfirmed");
+    }
   });
 
   it("ON: the withdraw button is rendered directly, not behind a 'manage' step", () => {
