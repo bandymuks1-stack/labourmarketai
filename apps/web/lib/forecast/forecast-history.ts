@@ -160,7 +160,7 @@ export function measureForecastError(
 
 /**
  * The ACTUAL, once it is known: the first stored version whose facts show
- * nothing remaining carries the day the last unit was finished and the hours
+ * nothing remaining (or the project marked completed) carries the day the last unit was finished and the hours
  * spent. Null while work remains — an unfinished project has no actual yet.
  */
 export function actualFromVersions(
@@ -169,7 +169,8 @@ export function actualFromVersions(
   const sorted = [...versions].sort((a, b) => a.version - b.version);
   for (const v of sorted) {
     const s = v.factsSummary;
-    if (s.unitsRemaining === 0 && typeof s.lastUnitCompletedOn === "string" && isIsoDay(s.lastUnitCompletedOn)) {
+    const finished = s.unitsRemaining === 0 || s.projectStatus === "completed";
+    if (finished && typeof s.lastUnitCompletedOn === "string" && isIsoDay(s.lastUnitCompletedOn)) {
       return {
         completedOn: s.lastUnitCompletedOn,
         totalHours: typeof s.totalHours === "number" ? s.totalHours : null,

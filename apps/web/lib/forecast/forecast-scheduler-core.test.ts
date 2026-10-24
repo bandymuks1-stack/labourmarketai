@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ForecastFactRows } from "./forecast-facts";
+import { actualFromVersions } from "./forecast-history";
 import { runRecomputePass, type ForecastCandidate, type ForecastRecord, type ForecastStore } from "./forecast-scheduler-core";
 
 const ROWS: ForecastFactRows = {
@@ -112,6 +113,43 @@ describe("the recompute pass", () => {
 
     const broken = fakeStore([candidate({ projectId: "x" })], null);
     expect(await runRecomputePass(broken.store, { nowIso: NOW })).toMatchObject({ computed: 0, failed: 1 });
+  });
+
+  it("the DEFAULT clock really advances: a 1 ms budget stops a pass whose reads take 20 ms", async () => {
+    const records: ForecastRecord[] = [];
+    const slow: ForecastStore = {
+      dueCandidates: async () => [candidate({ projectId: "a" }), candidate({ projectId: "b" })],
+      factRows: async () => {
+        await new Promise((r) => setTimeout(r, 20));
+        return ROWS;
+      },
+      record: async (r) => {
+        records.push(r);
+        return 1;
+      },
+    };
+    const r = await runRecomputePass(slow, { nowIso: NOW, timeBudgetMs: 1 });
+    expect(r?.stoppedEarly).toBe(true);
+    expect(records).toHaveLength(1);
+  });
+
+  it("a project completed since its last forecast gets one final run that keeps the actual", async () => {
+    const completed: ForecastFactRows = {
+      ...ROWS,
+      project: { ...ROWS.project, status: "completed" },
+      tasks: { rows: [{ key: "a", parent_key: null, status: "done", resolved_at: "2026-10-20T15:00:00Z" }], truncated: false },
+    };
+    // A weekly project on a Wednesday: the cadence alone would wait for Sunday.
+    const { store, records } = fakeStore(
+      [candidate({ mode: "weekly", projectStatus: "completed", lastComputedAt: "2026-10-18T00:05:00.000Z", lastVersion: 3, lastInputsHash: "0".repeat(16) })],
+      completed,
+    );
+    expect(await runRecomputePass(store, { nowIso: NOW })).toMatchObject({ computed: 1 });
+    expect(records[0].reason).toBe("final");
+    // The forecast is not applicable any more, but the facts summary still says what happened.
+    expect(records[0].forecast.status).toBe("not_applicable");
+    expect(records[0].factsSummary).toMatchObject({ projectStatus: "completed", unitsRemaining: 0, lastUnitCompletedOn: "2026-10-20" });
+    expect(actualFromVersions([{ version: 4, factsSummary: records[0].factsSummary }])).toEqual({ completedOn: "2026-10-20", totalHours: 0 });
   });
 
   it("an unreadable candidate list is UNKNOWN (null), never 'nothing due'", async () => {
