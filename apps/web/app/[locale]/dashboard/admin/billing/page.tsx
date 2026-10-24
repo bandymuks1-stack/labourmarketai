@@ -10,6 +10,7 @@ import {
   type BillingReadinessStatus,
 } from "@/lib/billing/readiness";
 import { AdminPilotGrantForm } from "@/components/app/admin-pilot-grant-form";
+import { AdminOrganizationVipForm } from "@/components/app/admin-organization-vip-form";
 import { AdminLmcPanel } from "@/components/app/admin-lmc-panel";
 import { BillingTestCheckout } from "@/components/marketing/billing-test-checkout";
 import { PageTitle } from "@/components/app/premium/page-title";
@@ -199,6 +200,34 @@ export default async function AdminBillingPage({
             granting: t("override.granting"),
             done: t("override.done"),
             error: t("override.error"),
+          }}
+        />
+      </section>
+
+      {/* Owner-granted organization VIP (#2474, matrix 7.27): keyed by the
+          organization and mode-independent, so a LIVE organization workspace
+          resolves it — unlike the org-less test-mode override above. */}
+      <section className="flex flex-col gap-2">
+        <h2 className="font-display text-lg font-semibold text-text-primary">{t("vip.title")}</h2>
+        <p className="text-xs text-text-secondary">{t("vip.help")}</p>
+        <AdminOrganizationVipForm
+          locale={locale}
+          labels={{
+            organizationId: t("vip.organizationId"),
+            profileViews: t("vip.profileViews"),
+            profileViewsHint: t("vip.profileViewsHint"),
+            note: t("vip.note"),
+            grant: t("vip.grant"),
+            revoke: t("vip.revoke"),
+            saving: t("vip.saving"),
+            done: t("vip.done"),
+            errors: {
+              not_admin: t("vip.errors.not_admin"),
+              invalid_input: t("vip.errors.invalid_input"),
+              unknown_organization: t("vip.errors.unknown_organization"),
+              needs_migration: t("vip.errors.needs_migration"),
+              error: t("vip.errors.error"),
+            },
           }}
         />
       </section>

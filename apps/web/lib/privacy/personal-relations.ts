@@ -696,6 +696,12 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
     table: "project_clients",
     reason:
       "an organization's own client record on a project, which may carry a contact e-mail — the organization's business record, not yours",
+  },  // 2026-10-18 (RED migration 20261023170000, UNAPPLIED until approved): an organization's count
+  // of the anonymized profiles it opened under its plan limit.
+  {
+    table: "employer_profile_views",
+    reason:
+      "a record that an organization opened your anonymized professional profile — it is that organization's plan usage and names the person in it who opened it, so it is not put in this bundle; ask us through the data-protection channel and we will tell you which organizations opened your profile and when",
   },
 ];
 
@@ -717,6 +723,9 @@ export const ACTOR_ONLY_RELATIONS: readonly string[] = [
   // decided or undid a merge of PROJECT rows; the subject is a project, never
   // the person (20261014090000).
   "historical_consolidation_decisions",
+  // Owner-granted VIP access: `granted_by` / `revoked_by` are the platform
+  // admin who decided; the subject is an ORGANIZATION (20261023170000).
+  "organization_access_grants",
   // Discovered-organization provenance: the person is only the recorder of a
   // fact or identifier about a COMPANY, never its subject.
   "organization_facts",

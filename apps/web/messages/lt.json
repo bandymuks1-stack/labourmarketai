@@ -9400,6 +9400,25 @@
       "done": "Išsaugota",
       "error": "Nepavyko"
     },
+    "vip": {
+      "title": "Organizacijos VIP (nemokama prieiga)",
+      "help": "Savininko patvirtinta nemokama prieiga VIENAI organizacijai: Organizacijos planas be mokėjimo, kad ir kokie mokėjimų nustatymai. Fiksuojama (kas, kada, pastaba); galima bet kada atšaukti. Niekada neapeina darbuotojo sutikimo.",
+      "organizationId": "Organizacijos ID",
+      "profileViews": "Profilių peržiūros",
+      "profileViewsHint": "Tuščia = be fiksuoto limito",
+      "note": "Pastaba (kodėl)",
+      "grant": "Suteikti VIP",
+      "revoke": "Atšaukti VIP",
+      "saving": "Saugoma…",
+      "done": "Išsaugota",
+      "errors": {
+        "not_admin": "Tai gali tik platformos administratorius.",
+        "invalid_input": "Patikrink organizacijos ID ir peržiūrų skaičių (1–100000).",
+        "unknown_organization": "Organizacijos su tokiu ID nėra.",
+        "needs_migration": "Dar neįjungta: organizacijos VIP dar negalima suteikti. Niekas neišsaugota.",
+        "error": "Nepavyko. Niekas nepakeista."
+      }
+    },
     "events": {
       "title": "Naujausi webhook įvykiai",
       "empty": "Webhook įvykių dar nėra."
@@ -12506,7 +12525,13 @@
     "photoAlt": "Atlikto darbo nuotrauka",
     "historyTitle": "Įkelta istorija",
     "historyUnavailable": "Įkeltos istorijos nepavyko perskaityti",
-    "currentWork": "Dirba dabar"
+    "currentWork": "Dirba dabar",
+    "viewLimitTitle": "Peržiūrų riba pasiekta",
+    "viewLimitBody": "Nemokamas planas leidžia atverti {limit} skirtingas anonimines anketas organizacijai. Jau atverta: {used}.",
+    "viewLimitReopen": "Jau atvertas anketas gali žiūrėti toliau. Žmonės, su kuriais dirbate, į ribą neįskaičiuojami.",
+    "viewLimitPlans": "Peržiūrėti planus",
+    "viewNeedsOrgTitle": "Pasirink organizaciją",
+    "viewNeedsOrgBody": "Rastų žmonių anketas atveri savo organizacijos vardu. Darbo erdvėje pasirink organizaciją, kurią valdai, ir atverk anketą dar kartą."
   },
   "companyGallery": {
     "title": "Galerija",

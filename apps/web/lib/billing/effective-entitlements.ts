@@ -14,6 +14,7 @@ import {
 import type { FeatureKey, PlanAudience } from "@/lib/billing/plans";
 import type { SubStatus } from "@/lib/billing/webhook-core";
 import { resolveBillingSubject, type BillingSubject } from "@/lib/billing/billing-subject";
+import { activeVipGrant, vipOverridePlanKey, type ActiveVipGrant } from "@/lib/billing/organization-vip";
 
 /**
  * Effective entitlements (Stripe sprint PR5) — the server read path. Joins the
@@ -134,6 +135,8 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
   let cancelAtPeriodEnd = false;
   let currentPeriodEnd: string | null = null;
   let manualOverridePlanKey: string | null = null;
+  // Owner-granted organization VIP (#2474) — read only for an organization subject.
+  let vipGrant: ActiveVipGrant | null = null;
   // MODE SCOPE (production defect measured 2026-09-22): admission
   // (`findScopedSubscription`) and the customer lookup filter by the
   // adapter's mode, this read did not — a TEST-mode row (test_mode=true,
@@ -182,6 +185,24 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
       // multi-subject schema unapplied — an org subject has no rows yet
       subsQueryResult = { data: [], error: null };
     }
+    // OWNER-GRANTED VIP (#2474, matrix 7.27). The admin pilot override above is
+    // an org-less TEST-mode row, so a LIVE organization workspace never saw it.
+    // A VIP grant is keyed by THIS organization and is not a payment: it carries
+    // no Stripe mode, so it is read without the test_mode filter, scoped by the
+    // same server-resolved subject, through the same reader. Absent table
+    // (migration 20261023170000 not applied) or any error → no grant, never a
+    // throw into a page.
+    try {
+      const grantRead = await asAny(reader)
+        .from("organization_access_grants")
+        .select("organization_id, grant_kind, scope, revoked_at")
+        .eq("organization_id", subject.id)
+        .eq("grant_kind", "vip")
+        .is("revoked_at", null);
+      if (grantRead && !grantRead.error) vipGrant = activeVipGrant(grantRead.data, subject.id);
+    } catch {
+      vipGrant = null;
+    }
   } else {
     subsQueryResult = await asAny(supabase)
       .from("billing_subscriptions")
@@ -224,6 +245,11 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
   } else if (error.code !== RELATION_ABSENT) {
     // a non-absent error → stay free/permissive, never throw into a page
   }
+
+  // A VIP grant is the organization plan for free, as an explicit override: a
+  // real subscription still wins (resolveEntitlements), and the source stays
+  // `manual_override` — nothing was paid.
+  manualOverridePlanKey = manualOverridePlanKey ?? vipOverridePlanKey(vipGrant);
 
   const ctx = resolveEntitlements({
     billingActive,

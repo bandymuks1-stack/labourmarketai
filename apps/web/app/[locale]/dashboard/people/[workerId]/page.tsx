@@ -23,6 +23,14 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { getActiveOrganizationContext } from "@/lib/company/active-organization";
+import {
+  billingStatePurchasable,
+  gateWorkerProfileView,
+  personPageViewGate,
+} from "@/lib/billing/profile-view-gate";
+import { getBillingConfigFor } from "@/lib/billing/config";
+import { Link } from "@/lib/i18n/navigation";
 import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import type { EvidenceTier } from "@/lib/evidence/evidence-tier";
 import {
@@ -165,6 +173,45 @@ export default async function PersonPage({
     redirect(`/${locale}/dashboard/profile`);
   }
 
+  // A WORKING RELATIONSHIP decides two things at once: the name (owner directive 2026-10-18 —
+  // anonymous by default, identity by permission) and whether this view is a counted plan view.
+  const nameVisible = await viewerHasWorkerRelation(
+    supabase,
+    worker.id as string,
+    (worker.profile_id as string | null) ?? null,
+  );
+
+  // PLAN LIMIT (owner directive 2026-10-18): opening a FOUND worker's anonymized profile counts once
+  // per organization; the free plan opens 3 unique profiles. The database decides; a related viewer
+  // is never gated; a found worker's view must be counted for an organization the viewer manages.
+  // The start date is a DETAIL-tier field of the discovery projection: it is released only once
+  // this organization's view is counted, so a first open re-reads it after the gate below.
+  let availableFrom = (worker.available_from as string | null) ?? null;
+  if (!nameVisible) {
+    const activeOrganizationId = await getActiveOrganizationContext()
+      .then((c) => c.activeOrganizationId)
+      .catch(() => null);
+    // Never blocked without a way to pay: the limit state shows only where this organization can
+    // buy the plan (owner deferral 2026-10-19).
+    const viewGate = personPageViewGate(
+      await gateWorkerProfileView(supabase, activeOrganizationId, worker.id as string),
+      billingStatePurchasable(getBillingConfigFor(activeOrganizationId).state),
+    );
+    if (viewGate.kind === "open" && viewGate.counted && discovered) {
+      const fresh = (await readDiscoverableWorkers(supabase, [workerId])).get(workerId);
+      if (fresh) availableFrom = fresh.available_from;
+    }
+    if (viewGate.kind === "limit") {
+      return <ViewLimitState t={t} used={viewGate.used} limit={viewGate.limit} />;
+    }
+    if (viewGate.kind === "needs-organization") {
+      return <ViewNeedsOrganizationState t={t} />;
+    }
+    if (viewGate.kind === "unavailable") {
+      return <RestrictedState t={t} />;
+    }
+  }
+
   // Catalogue slug is the ONLY name source — the legacy name_lt/name_en
   // columns were dropped in 0012 and selecting them 400s the whole read
   // (which silently rendered ZERO skills for every worker here until W4).
@@ -299,11 +346,6 @@ export default async function PersonPage({
   // The row is readable through the employer-visibility consent too; the NAME
   // is shown only to a viewer with a real working relationship (owner
   // directive 2026-10-18 — anonymous by default, identity by permission).
-  const nameVisible = await viewerHasWorkerRelation(
-    supabase,
-    worker.id as string,
-    (worker.profile_id as string | null) ?? null,
-  );
   const name =
     (nameVisible ? (worker.display_name as string | null)?.trim() : null) ||
     t("anonymousName", { token: anonymizedWorkerToken(worker.id as string) });
@@ -394,7 +436,7 @@ export default async function PersonPage({
               ) : null}
         </IdentityStage>
         <div className="flex flex-wrap gap-2">
-          {worker.available_from ? (
+          {availableFrom ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
               <CalendarDays className="h-3 w-3" aria-hidden />
               {/* A stored `date` column arrives as "2026-07-31" and was
@@ -404,7 +446,7 @@ export default async function PersonPage({
                   "Invalid Date". */}
               {t("availableFrom", {
                 date: availabilityDateLabel(
-                  worker.available_from as string,
+                  availableFrom,
                   format,
                 ),
               })}
@@ -707,6 +749,50 @@ export default async function PersonPage({
           the person's LINKED roster row, rendered with the shared evidence
           primitives. Nothing when there is none; said when it cannot be read. */}
       <PersonImportedHistory workerId={worker.id as string} locale={locale} />
+    </div>
+  );
+}
+
+function ViewNeedsOrganizationState({
+  t,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations<"people">>>;
+}) {
+  return (
+    <div
+      className="mx-auto flex w-full max-w-content flex-col gap-4"
+      data-testid="person-view-needs-organization"
+    >
+      <PageTitle>{t("viewNeedsOrgTitle")}</PageTitle>
+      <Card compact className="text-sm leading-relaxed text-text-secondary">
+        <p>{t("viewNeedsOrgBody")}</p>
+      </Card>
+    </div>
+  );
+}
+
+function ViewLimitState({
+  t,
+  used,
+  limit,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations<"people">>>;
+  used: number;
+  limit: number;
+}) {
+  return (
+    <div
+      className="mx-auto flex w-full max-w-content flex-col gap-4"
+      data-testid="person-view-limit"
+    >
+      <PageTitle>{t("viewLimitTitle")}</PageTitle>
+      <Card compact className="flex flex-col gap-3 text-sm leading-relaxed text-text-secondary">
+        <p>{t("viewLimitBody", { used, limit })}</p>
+        <p className="text-text-muted">{t("viewLimitReopen")}</p>
+        <Link href="/pricing" className="w-fit text-brand-blue underline-offset-2 hover:underline">
+          {t("viewLimitPlans")}
+        </Link>
+      </Card>
     </div>
   );
 }
