@@ -7,6 +7,9 @@ import type { CompanyRow, CompanyVerificationStatus } from "@/lib/company/compan
 import { runCompanyChecks, type CompanyCheckKey } from "@/lib/company/company-checks";
 import type { EmployerContextReason } from "@/lib/company/employer-company-context";
 import { EmployerContextNotice } from "@/components/app/employer-context-notice";
+import { OpenWorkspaceButton } from "@/components/app/organization/open-workspace-button";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import type { WorkspaceInfo } from "@/lib/company/organization-switch";
 
 /**
  * Company honest STATUS header (automatic-first).
@@ -195,6 +198,54 @@ export async function CompanyNoProfileGuide({
   activeWorkspaceName?: string | null;
 } = {}) {
   const t = await getTranslations("roleDashboards.company.nextActions");
+  // THE PERSONAL SPACE IS NOT "NO COMPANY" (local UX review 2026-10-24, rows
+  // 1.5/1.10). An owner who switched to their personal space was told "You
+  // have no company profile yet — create one", inviting a DUPLICATE of the
+  // organization they own. When the person has organization workspaces, name
+  // them and offer the membership-checked switch into each instead; the
+  // setup guide stays only for someone with no organization at all.
+  if (reason === "personal-workspace") {
+    let organizations: readonly WorkspaceInfo[] = [];
+    try {
+      organizations = (await getWorkspaceContext()).workspaces.filter(
+        (w) => w.kind === "organization",
+      );
+    } catch {
+      organizations = [];
+    }
+    if (organizations.length > 0) {
+      const tChat = await getTranslations("conversation.chat");
+      const tOpen = await getTranslations("companyWorkHistory.business.workspace");
+      return (
+        <section
+          className="card-border flex flex-col gap-3 p-6"
+          data-testid="company-personal-space-guide"
+        >
+          <h2 className="font-display text-xl font-semibold text-text-primary">
+            {t("personalSpace.title")}
+          </h2>
+          <p className="max-w-prose text-sm leading-relaxed text-text-secondary">
+            {t("personalSpace.body")}
+          </p>
+          <ul className="flex flex-col gap-2">
+            {organizations.map((o) => {
+              const name = o.name.trim() || tChat("workspaceUnnamed");
+              return (
+                <li key={o.id} data-testid="company-personal-space-org">
+                  <OpenWorkspaceButton
+                    organizationId={o.id}
+                    label={tOpen("open", { name })}
+                    pendingLabel={tOpen("opening")}
+                    errorLabel={tOpen("error")}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      );
+    }
+  }
   if (reason && isMembershipEntryRefusal(reason)) {
     const tEntry = await getTranslations("organizationMembers.entry");
     return (

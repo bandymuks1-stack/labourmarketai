@@ -20,6 +20,16 @@ vi.mock("@/lib/company/membership-actions", () => ({
   revokeMembershipAction: async () => ({}),
   setMembershipInvitationManagerAction: async () => ({}),
 }));
+// The section links the no-account refusal to the invite panel through the
+// locale-aware Link; next-intl's client navigation needs the Next runtime, so
+// the static render uses a plain anchor with the same href.
+vi.mock("@/lib/i18n/navigation", async () => {
+  const { createElement: h } = await import("react");
+  return {
+    Link: ({ href, children, ...rest }: { href: string; children?: unknown } & Record<string, unknown>) =>
+      h("a", { href, ...rest }, children as never),
+  };
+});
 vi.mock("react", async (orig) => {
   const actual = await orig<typeof import("react")>();
   return { ...actual, useActionState: () => [null, () => {}, false] };

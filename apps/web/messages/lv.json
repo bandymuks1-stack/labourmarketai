@@ -6940,7 +6940,9 @@
       "managesInvitations": "Pārvalda ielūgumus",
       "grantInvitations": "Atļaut pārvaldīt ielūgumus",
       "withdrawInvitations": "Atsaukt ielūgumu pārvaldību",
-      "unavailable": "Dalībnieku sarakstu šobrīd neizdevās nolasīt. Tas nenozīmē, ka organizācijai nav dalībnieku."
+      "unavailable": "Dalībnieku sarakstu šobrīd neizdevās nolasīt. Tas nenozīmē, ka organizācijai nav dalībnieku.",
+      "noAccountHint": "Dalībnieka lomu var piešķirt tikai tam, kam jau ir konts. Personu bez konta uzaicini ar uzaicinājuma saiti — kad tā reģistrēsies un pievienosies organizācijai, šeit varēsi piešķirt lomu.",
+      "noAccountCta": "Izveidot uzaicinājuma saiti"
     },
     "start": {
       "membersMoved": "Organizācijas {workspace} dalībnieki un uzaicinājumi tiek pārvaldīti tās Iestatījumos.",
