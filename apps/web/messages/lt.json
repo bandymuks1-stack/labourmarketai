@@ -8017,7 +8017,7 @@
       "journalNote": "Atsisiųsk kaip CSV (atsidaro su Excel)",
       "formatStatus": "PDF: galima · CSV: galima · Excel / Word: ruošiama"
     },
-    "disclaimer": "Statusai pagrįsti viešai skelbiamais reikalavimais ir tavo paties įvestimi. Galutinį atitikimą tikrina institucijos — tai nėra teisinė garantija.",
+    "disclaimer": "Statusai pagrįsti viešai skelbiamais reikalavimais ir tavo paties įvestimi. Galutinį atitikimą tikrina institucijos arba teisininkas — tai nėra teisinė garantija.",
     "needsMigration": "Šiuo metu nepasiekiama.",
     "guidance": {
       "title": "Dokumentų gairės pagal šalį",
