@@ -268,7 +268,18 @@
     "formPublisherLabel": "Publikuje",
     "publisherSelf": "Ja osobiście",
     "publishedAs": "Jako {name}",
-    "publishedAsOrganization": "Jako organizacja"
+    "publishedAsOrganization": "Jako organizacja",
+    "republish": "Opublikuj ponownie",
+    "removeForever": "Usuń na zawsze",
+    "removeQuestion": "Usunąć na zawsze? Tego nie da się cofnąć. Aby tylko ukryć ogłoszenie w wyszukiwaniu, wstrzymaj je lub zakończ.",
+    "removeYes": "Tak, usuń",
+    "searchState": {
+      "draft": "Szkic — inni jeszcze go nie widzą. Opublikuj, gdy będzie gotowe.",
+      "active": "Widoczne w wyszukiwaniu — inni mogą je znaleźć i do ciebie napisać.",
+      "paused": "Wstrzymane — ukryte w wyszukiwaniu. Opublikuj ponownie, gdy znów będzie aktualne.",
+      "closed": "Zakończone — ukryte w wyszukiwaniu; rozmowy i historia zostają zachowane.",
+      "expired": "Wygasło — ukryte w wyszukiwaniu. Zmień datę ważności i opublikuj ponownie."
+    }
   },
   "quality": {
     "title": "Usterki i jakość",
@@ -6891,7 +6902,9 @@
       "paused": "Wstrzymana — ukryta przed członkami. Aktywuj, aby ponownie stała się widoczna."
     },
     "linkToRequests": "Zobacz zapytania o Twoje usługi",
-    "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Możesz ją wstrzymać."
+    "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Możesz ją wstrzymać.",
+    "removeQuestion": "Usunąć tę usługę na zawsze? Tego nie da się cofnąć. Aby tylko ukryć ją w wyszukiwaniu, wstrzymaj ją.",
+    "removeYes": "Tak, usuń"
   },
   "communication": {
     "origin": {
@@ -11166,6 +11179,13 @@
         "unknown": "Nie udało się sprawdzić, czy firmy widzą Twój profil. To nie znaczy, że widoczność jest wyłączona — otwórz ustawienia prywatności.",
         "noWorker": "Widoczność dla pracodawców dotyczy profilu pracownika, a to konto jeszcze go nie ma."
       }
+    },
+    "switch": {
+      "privateLine": "To ustawienie nigdy nie pokazuje: Twojego imienia i nazwiska, numeru telefonu, e-maila, wpisów w Dzienniku pracy ani linków do profili zewnętrznych.",
+      "turnOn": "Przeczytaj warunki i włącz",
+      "details": "Co widzą firmy i pełne warunki",
+      "grantedNote": "Gotowe — firmy mogą teraz znaleźć Twój profil zawodowy pod anonimowym oznaczeniem.",
+      "withdrawnNote": "Gotowe — Twój profil nie pojawia się już w nowych wyszukiwaniach firm."
     }
   },
   "planning": {

@@ -268,7 +268,18 @@
     "formPublisherLabel": "Published by",
     "publisherSelf": "Me personally",
     "publishedAs": "As {name}",
-    "publishedAsOrganization": "As an organization"
+    "publishedAsOrganization": "As an organization",
+    "republish": "Publish again",
+    "removeForever": "Delete permanently",
+    "removeQuestion": "Delete permanently? This cannot be undone. To only hide it from search, pause or complete it instead.",
+    "removeYes": "Yes, delete",
+    "searchState": {
+      "draft": "Draft — not visible to others yet. Publish it when it is ready.",
+      "active": "Visible in search — others can find it and message you.",
+      "paused": "Paused — hidden from search. Publish it again when it is relevant.",
+      "closed": "Completed — hidden from search; conversations and history are kept.",
+      "expired": "Expired — hidden from search. Change the expiry date and publish it again."
+    }
   },
   "quality": {
     "title": "Defects & quality",
@@ -6891,7 +6902,9 @@
       "paused": "Paused — hidden from members. Activate to make it findable again."
     },
     "linkToRequests": "See requests for your services",
-    "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead."
+    "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead.",
+    "removeQuestion": "Delete this service permanently? This cannot be undone. To only hide it from search, pause it instead.",
+    "removeYes": "Yes, delete"
   },
   "communication": {
     "origin": {
@@ -11166,6 +11179,13 @@
         "unknown": "Could not check whether companies can see your profile. That does not mean visibility is off — open your privacy settings.",
         "noWorker": "Visibility to employers applies to a worker profile, and this account does not have one yet."
       }
+    },
+    "switch": {
+      "privateLine": "Never shown by this setting: your name, phone number, email, Work Journal entries and external profile links.",
+      "turnOn": "Read the terms and turn on",
+      "details": "What companies see and the full terms",
+      "grantedNote": "Done — companies can now find your professional profile, under an anonymous label.",
+      "withdrawnNote": "Done — your profile no longer appears in new company searches."
     }
   },
   "planning": {

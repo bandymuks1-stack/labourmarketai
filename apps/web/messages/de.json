@@ -268,7 +268,18 @@
     "formPublisherLabel": "Veröffentlicht von",
     "publisherSelf": "Ich persönlich",
     "publishedAs": "Als {name}",
-    "publishedAsOrganization": "Als Organisation"
+    "publishedAsOrganization": "Als Organisation",
+    "republish": "Erneut veröffentlichen",
+    "removeForever": "Endgültig löschen",
+    "removeQuestion": "Endgültig löschen? Das lässt sich nicht rückgängig machen. Um das Inserat nur aus der Suche zu nehmen, pausiere es oder schließe es ab.",
+    "removeYes": "Ja, löschen",
+    "searchState": {
+      "draft": "Entwurf — für andere noch nicht sichtbar. Veröffentliche das Inserat, wenn es fertig ist.",
+      "active": "In der Suche sichtbar — andere können es finden und dir schreiben.",
+      "paused": "Pausiert — aus der Suche ausgeblendet. Veröffentliche es erneut, wenn es wieder aktuell ist.",
+      "closed": "Abgeschlossen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
+      "expired": "Abgelaufen — aus der Suche ausgeblendet. Ändere das Ablaufdatum und veröffentliche es erneut."
+    }
   },
   "quality": {
     "title": "Mängel & Qualität",
@@ -6891,7 +6902,9 @@
       "paused": "Pausiert — für Mitglieder ausgeblendet. Aktivieren Sie sie, um sie wieder auffindbar zu machen."
     },
     "linkToRequests": "Anfragen zu Ihren Dienstleistungen ansehen",
-    "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren."
+    "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren.",
+    "removeQuestion": "Diese Leistung endgültig löschen? Das lässt sich nicht rückgängig machen. Um sie nur aus der Suche zu nehmen, pausiere sie.",
+    "removeYes": "Ja, löschen"
   },
   "communication": {
     "origin": {
@@ -11166,6 +11179,13 @@
         "unknown": "Es konnte nicht geprüft werden, ob Unternehmen Ihr Profil sehen können. Das heißt nicht, dass die Sichtbarkeit aus ist — öffnen Sie Ihre Datenschutzeinstellungen.",
         "noWorker": "Die Sichtbarkeit für Arbeitgeber gilt für ein Arbeitnehmerprofil, und dieses Konto hat noch keines."
       }
+    },
+    "switch": {
+      "privateLine": "Diese Einstellung zeigt niemals: Ihren Namen, Ihre Telefonnummer, Ihre E-Mail-Adresse, Ihre Arbeitsjournal-Einträge und Links zu externen Profilen.",
+      "turnOn": "Bedingungen lesen und einschalten",
+      "details": "Was Unternehmen sehen und die vollständigen Bedingungen",
+      "grantedNote": "Erledigt — Unternehmen können Ihr berufliches Profil jetzt finden, unter einer anonymen Kennung.",
+      "withdrawnNote": "Erledigt — Ihr Profil erscheint nicht mehr in neuen Suchen von Unternehmen."
     }
   },
   "planning": {

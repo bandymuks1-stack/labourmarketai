@@ -268,7 +268,18 @@
     "formPublisherLabel": "Skelbia",
     "publisherSelf": "Aš asmeniškai",
     "publishedAs": "Kaip {name}",
-    "publishedAsOrganization": "Kaip organizacija"
+    "publishedAsOrganization": "Kaip organizacija",
+    "republish": "Paskelbti iš naujo",
+    "removeForever": "Ištrinti visam laikui",
+    "removeQuestion": "Ištrinti visam laikui? Atkurti nebus galima. Jei nori tik paslėpti iš paieškos, pristabdyk arba užbaik.",
+    "removeYes": "Taip, ištrinti",
+    "searchState": {
+      "draft": "Juodraštis — kiti dar nemato. Paskelbk, kai bus paruoštas.",
+      "active": "Matomas paieškoje — kiti gali rasti ir tau parašyti.",
+      "paused": "Pristabdytas — paslėptas iš paieškos. Paskelbk iš naujo, kai vėl bus aktualu.",
+      "closed": "Užbaigtas — paslėptas iš paieškos, pokalbiai ir istorija išsaugoti.",
+      "expired": "Pasibaigęs — paslėptas iš paieškos. Pakeisk galiojimo datą ir paskelbk iš naujo."
+    }
   },
   "quality": {
     "title": "Defektai ir kokybė",
@@ -6891,7 +6902,9 @@
       "paused": "Pristabdyta — nariams nematoma. Aktyvuok, kad vėl būtų randama."
     },
     "linkToRequests": "Peržiūrėk užklausas dėl savo paslaugų",
-    "errorHasRequests": "Šis pasiūlymas turi užklausų, todėl jo ištrinti negalima – užklausų istorija turi išlikti. Galite jį sustabdyti."
+    "errorHasRequests": "Šis pasiūlymas turi užklausų, todėl jo ištrinti negalima – užklausų istorija turi išlikti. Galite jį sustabdyti.",
+    "removeQuestion": "Ištrinti paslaugą visam laikui? Atkurti nebus galima. Jei nori tik paslėpti iš paieškos, pristabdyk.",
+    "removeYes": "Taip, ištrinti"
   },
   "communication": {
     "origin": {
@@ -11166,6 +11179,13 @@
         "unknown": "Nepavyko patikrinti, ar įmonės mato tavo profilį. Tai nereiškia, kad matomumas išjungtas — atidaryk privatumo nustatymus.",
         "noWorker": "Matomumas darbdaviams taikomas darbuotojo profiliui, o šioje paskyroje jo dar nėra."
       }
+    },
+    "switch": {
+      "privateLine": "Šis nustatymas niekada nerodo: tavo vardo, telefono numerio, el. pašto, Darbo žurnalo įrašų ir išorinių profilių nuorodų.",
+      "turnOn": "Perskaityti sąlygas ir įjungti",
+      "details": "Ką mato įmonės ir visos sąlygos",
+      "grantedNote": "Atlikta — įmonės dabar gali rasti tavo profesinį profilį su anonimine žyma.",
+      "withdrawnNote": "Atlikta — tavo profilis nebebus rodomas naujose įmonių paieškose."
     }
   },
   "planning": {
