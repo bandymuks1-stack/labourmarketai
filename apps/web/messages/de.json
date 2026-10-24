@@ -268,18 +268,7 @@
     "formPublisherLabel": "Veröffentlicht von",
     "publisherSelf": "Ich persönlich",
     "publishedAs": "Als {name}",
-    "publishedAsOrganization": "Als Organisation",
-    "republish": "Erneut veröffentlichen",
-    "removeForever": "Endgültig löschen",
-    "removeQuestion": "Endgültig löschen? Das lässt sich nicht rückgängig machen. Um das Inserat nur aus der Suche zu nehmen, pausiere es oder schließe es ab.",
-    "removeYes": "Ja, löschen",
-    "searchState": {
-      "draft": "Entwurf — für andere noch nicht sichtbar. Veröffentliche das Inserat, wenn es fertig ist.",
-      "active": "In der Suche sichtbar — andere können es finden und dir schreiben.",
-      "paused": "Pausiert — aus der Suche ausgeblendet. Veröffentliche es erneut, wenn es wieder aktuell ist.",
-      "closed": "Abgeschlossen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
-      "expired": "Abgelaufen — aus der Suche ausgeblendet. Ändere das Ablaufdatum und veröffentliche es erneut."
-    }
+    "publishedAsOrganization": "Als Organisation"
   },
   "quality": {
     "title": "Mängel & Qualität",
@@ -1917,7 +1906,7 @@
     "workerVisibilityNote": "Ehrlicher Status: Anfragen verifizierter Unternehmen werden Arbeitskräften auf ihrem Chancen-Board angezeigt. Die Verifizierung ist eine manuelle Prüfung — bis Ihr Unternehmen verifiziert ist, bleiben Ihre Anfragen privat für Sie und das Prüfteam.",
     "empty": "Noch keine Anfragen eingereicht. Reichen Sie Ihre Anfrage oben ein — sie erscheint hier mit ihrem Status.",
     "created": "Erstellt",
-    "manageHelp": "Entwürfe können gelöscht werden. Das Schließen oder Wiedereröffnen einer eingereichten Anfrage — und das Bestätigen ihrer erkannten Fähigkeiten — erfolgt über ihre Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
+    "manageHelp": "Schließe einen Bedarf ab, nimm ihn vom Markt oder veröffentliche ihn erneut direkt in dieser Liste; einen Entwurf kannst du fortsetzen oder verwerfen. Das Bestätigen der erkannten Fähigkeiten erfolgt über die Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
     "detailsLabel": "Eingereichte Angaben",
     "fields": {
       "description": "Beschreibung",
@@ -6902,9 +6891,7 @@
       "paused": "Pausiert — für Mitglieder ausgeblendet. Aktivieren Sie sie, um sie wieder auffindbar zu machen."
     },
     "linkToRequests": "Anfragen zu Ihren Dienstleistungen ansehen",
-    "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren.",
-    "removeQuestion": "Diese Leistung endgültig löschen? Das lässt sich nicht rückgängig machen. Um sie nur aus der Suche zu nehmen, pausiere sie.",
-    "removeYes": "Ja, löschen"
+    "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren."
   },
   "communication": {
     "origin": {
@@ -19824,5 +19811,45 @@
       "line": "Zahle einmal 1 € für {days} Tage des kostenpflichtigen Organisationsplans. Nichts verlängert sich.",
       "cta": "Pilot öffnen"
     }
+  },
+  "marketLifecycle": {
+    "actions": {
+      "publish": "Veröffentlichen",
+      "edit": "Bearbeiten",
+      "pause": "Pausieren",
+      "resume": "Fortsetzen",
+      "publishAgain": "Erneut veröffentlichen",
+      "complete": "Abschließen",
+      "withdraw": "Vom Markt nehmen",
+      "discard": "Entwurf verwerfen"
+    },
+    "states": {
+      "draft": "Entwurf",
+      "active": "Aktiv",
+      "paused": "Pausiert",
+      "completed": "Abgeschlossen",
+      "withdrawn": "Vom Markt genommen",
+      "discarded": "Verworfener Entwurf",
+      "closed": "Geschlossen",
+      "locked": "In Prüfung"
+    },
+    "visibility": {
+      "visible": "In der Suche sichtbar — andere können es finden und dir schreiben.",
+      "draft": "Entwurf — für andere noch nicht sichtbar. Veröffentliche es, wenn es fertig ist.",
+      "paused": "Pausiert — aus der Suche ausgeblendet, keine neuen Anfragen. Setze es fort, wenn es wieder aktuell ist.",
+      "completed": "Abgeschlossen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
+      "withdrawn": "Vom Markt genommen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
+      "discarded": "Verworfener Entwurf — er wurde nie veröffentlicht.",
+      "closed": "Geschlossen — aus der Suche ausgeblendet; der Verlauf bleibt erhalten.",
+      "expired": "Abgelaufen — aus der Suche ausgeblendet. Ändere das Ablaufdatum und veröffentliche es erneut.",
+      "gated": "Noch nicht sichtbar — es erscheint in der Suche, sobald die Organisation bestätigt ist.",
+      "locked": "In Prüfung — während der Prüfung lässt es sich nicht ändern."
+    },
+    "deleteForever": "Endgültig löschen",
+    "deleteQuestion": "Endgültig löschen? Das lässt sich nicht rückgängig machen. Um es nur aus der Suche zu nehmen, pausiere es, schließe es ab oder nimm es vom Markt.",
+    "deleteYes": "Ja, löschen",
+    "cancel": "Abbrechen",
+    "error": "Das hat nicht geklappt. Versuche es erneut.",
+    "notAllowed": "In diesem Zustand ist diese Aktion nicht möglich."
   }
 }

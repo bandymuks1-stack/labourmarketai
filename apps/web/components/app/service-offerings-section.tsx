@@ -3,12 +3,17 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Eye, Pause, Play } from "lucide-react";
-import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
-import { InlineConfirm } from "@/components/ui/InlineConfirm";
+import {
+  MarketEntryActions,
+  MarketEntryChip,
+  MarketEntryVisibility,
+} from "@/components/app/market-entry-lifecycle";
+import { serviceAdapter } from "@/lib/market-lifecycle/adapters";
+import type { EntryAction } from "@/lib/market-lifecycle/contract";
 import {
   createServiceOffering,
   updateServiceOffering,
-  setServiceOfferingStatus,
+  applyServiceOfferingAction,
   deleteServiceOffering,
 } from "@/lib/services/service-offerings";
 import { PARTNERSHIP_CATEGORY } from "@/lib/services/service-offerings-shared";
@@ -51,22 +56,12 @@ export type ServiceOfferingsLabels = {
   saving: string;
   cancel: string;
   edit: string;
-  remove: string;
-  /** Asked before the permanent delete; names pause as the reversible way. */
-  removeQuestion: string;
-  removeYes: string;
-  activate: string;
-  pause: string;
   errorTitleRequired: string;
   errorCountry: string;
   errorGeneric: string;
   /** Delete refused: the offering has requests — pause it instead. */
   errorHasRequests: string;
   remoteBadge: string;
-  status: Record<ServiceOfferingStatus, string>;
-  /** Per-status discoverability hint — explains the draft/paused → active funnel
-   *  (only an active offering is findable by signed-in members). */
-  discoverability: Record<ServiceOfferingStatus, string>;
 };
 
 type Draft = {
@@ -87,22 +82,31 @@ const EMPTY_DRAFT: Draft = {
   rateText: "",
 };
 
-/** Only an active offering is a positive fact for the provider; the rest are quiet. */
-const STATUS_VARIANT: Record<ServiceOfferingStatus, StatusChipVariant> = {
-  draft: "neutral",
-  active: "success",
-  paused: "neutral",
+/** Test ids the walk specs already use, one per contract action. Publish,
+ *  pause and resume never appear together, so they share the toggle id. */
+const SERVICE_TEST_ID: Record<EntryAction, string> = {
+  publish: "service-offering-toggle",
+  pause: "service-offering-toggle",
+  resume: "service-offering-toggle",
+  complete: "service-offering-close",
+  withdraw: "service-offering-withdraw",
+  edit: "service-offering-edit",
 };
 
 export function ServiceOfferingsSection({
   initialRows,
   needsMigration,
+  closedSupported = false,
   labels,
 }: {
   initialRows: ServiceOfferingRow[];
   needsMigration: boolean;
+  /** The closed state is stored (lifecycle migration applied). */
+  closedSupported?: boolean;
   labels: ServiceOfferingsLabels;
 }) {
+  // The ONE lifecycle contract's view of an offering (lib/market-lifecycle).
+  const adapter = serviceAdapter({ closedSupported });
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [mode, setMode] = useState<
@@ -181,10 +185,14 @@ export function ServiceOfferingsSection({
     });
   }
 
-  function toggleStatus(row: ServiceOfferingRow) {
-    const next: ServiceOfferingStatus = row.status === "active" ? "paused" : "active";
+  /** A lifecycle contract action from the row (`MarketEntryActions`). */
+  function runAction(row: ServiceOfferingRow, action: EntryAction) {
+    if (action === "edit") {
+      openEdit(row);
+      return;
+    }
     startTransition(async () => {
-      const result = await setServiceOfferingStatus(row.id, next);
+      const result = await applyServiceOfferingAction(row.id, action);
       if (result.kind === "ok") router.refresh();
       else setError(labels.errorGeneric);
     });
@@ -359,13 +367,12 @@ export function ServiceOfferingsSection({
                     <span className="break-words text-sm font-medium text-text-primary">
                       {row.title}
                     </span>
-                    <StatusChip
-                      variant={STATUS_VARIANT[row.status]}
-                      testid={`service-offering-status-${row.id}`}
-                      className="shrink-0 px-2 py-0.5 text-meta"
-                    >
-                      {labels.status[row.status]}
-                    </StatusChip>
+                    <span className="shrink-0">
+                      <MarketEntryChip
+                        facts={adapter.facts(row)}
+                        testId={`service-offering-status-${row.id}`}
+                      />
+                    </span>
                   </div>
                   {row.description && (
                     <p className="text-xs leading-relaxed text-text-secondary">{row.description}</p>
@@ -376,68 +383,23 @@ export function ServiceOfferingsSection({
                     {row.remote && <span>{labels.remoteBadge}</span>}
                     {row.rateText && <span>{row.rateText}</span>}
                   </div>
-                  {/* Discoverability funnel hint — only an ACTIVE offering is
-                      findable by signed-in members; draft/paused stay private. */}
-                  <p
-                    data-testid={`service-offering-discoverability-${row.id}`}
-                    className={`text-meta leading-relaxed ${
-                      row.status === "active" ? "text-state-success" : "text-text-muted"
-                    }`}
-                  >
-                    {labels.discoverability[row.status]}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => toggleStatus(row)}
-                      disabled={pending}
-                      data-testid={`service-offering-toggle-${row.id}`}
-                      className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium disabled:opacity-60 ${
-                        row.status === "active"
-                          ? "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
-                          : "border-brand-blue/50 text-brand-blue hover:bg-brand-blue/10"
-                      }`}
-                    >
-                      {row.status === "active" ? (
-                        <>
-                          <Pause className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                          {labels.pause}
-                        </>
-                      ) : (
-                        <>
-                          {row.status === "paused" ? (
-                            <Play className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                          ) : (
-                            <Eye className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                          )}
-                          {labels.activate}
-                        </>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openEdit(row)}
-                      className="inline-flex items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-secondary hover:border-brand-blue hover:text-text-primary"
-                      data-testid={`service-offering-edit-${row.id}`}
-                    >
-                      <Pencil className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                      {labels.edit}
-                    </button>
-                    {/* Permanent, so it asks first and says that pausing is the
-                        reversible way to leave search — never one click beside
-                        Pause. */}
-                    <InlineConfirm
-                      label={labels.remove}
-                      question={labels.removeQuestion}
-                      confirmLabel={labels.removeYes}
-                      cancelLabel={labels.cancel}
-                      tier="strong_irreversible"
-                      onConfirm={() => remove(row)}
-                      disabled={pending}
-                      className="inline-flex items-center gap-1 rounded-md border border-transparent px-2.5 py-1 text-xs font-medium text-state-danger hover:border-state-danger disabled:opacity-60"
-                      testId={`service-offering-delete-${row.id}`}
-                    />
-                  </div>
+                  {/* Whether others can find it now — the ONE lifecycle
+                      contract's line; only an ACTIVE offering is findable. */}
+                  <MarketEntryVisibility
+                    facts={adapter.facts(row)}
+                    testId={`service-offering-discoverability-${row.id}`}
+                  />
+                  {/* The contract's actions in words; permanent deletion is
+                      data erasure, apart, behind the strong-tier confirmation
+                      (refused for an offering that has requests). */}
+                  <MarketEntryActions
+                    support={adapter.support}
+                    facts={adapter.facts(row)}
+                    onAction={(action) => runAction(row, action)}
+                    pending={pending}
+                    testIdFor={(action) => `${SERVICE_TEST_ID[action]}-${row.id}`}
+                    erase={{ onConfirm: () => remove(row), testId: `service-offering-delete-${row.id}` }}
+                  />
                 </li>
               ))}
             </ul>

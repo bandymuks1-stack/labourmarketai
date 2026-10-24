@@ -268,18 +268,7 @@
     "formPublisherLabel": "Geplaatst door",
     "publisherSelf": "Ikzelf",
     "publishedAs": "Als {name}",
-    "publishedAsOrganization": "Als organisatie",
-    "republish": "Opnieuw publiceren",
-    "removeForever": "Definitief verwijderen",
-    "removeQuestion": "Definitief verwijderen? Dit kan niet ongedaan worden gemaakt. Wil je de advertentie alleen uit de zoekresultaten halen, pauzeer of rond haar dan af.",
-    "removeYes": "Ja, verwijderen",
-    "searchState": {
-      "draft": "Concept — nog niet zichtbaar voor anderen. Publiceer het wanneer het klaar is.",
-      "active": "Zichtbaar in de zoekresultaten — anderen kunnen het vinden en je een bericht sturen.",
-      "paused": "Gepauzeerd — verborgen in de zoekresultaten. Publiceer het opnieuw wanneer het weer actueel is.",
-      "closed": "Afgerond — verborgen in de zoekresultaten; gesprekken en geschiedenis blijven bewaard.",
-      "expired": "Verlopen — verborgen in de zoekresultaten. Wijzig de vervaldatum en publiceer het opnieuw."
-    }
+    "publishedAsOrganization": "Als organisatie"
   },
   "quality": {
     "title": "Gebreken & kwaliteit",
@@ -1917,7 +1906,7 @@
     "workerVisibilityNote": "Eerlijke status: personeelsaanvragen van geverifieerde bedrijven worden aan werknemers getoond op hun kansenbord. Verificatie is een handmatige beoordeling — totdat je bedrijf geverifieerd is, blijven je aanvragen privé voor jou en het beoordelingsteam.",
     "empty": "Nog geen aanvragen ingediend. Dien je aanvraag hierboven in en die verschijnt hier met de status.",
     "created": "Aangemaakt",
-    "manageHelp": "Concepten kunnen worden verwijderd. Het sluiten of heropenen van een ingediende aanvraag — en het bevestigen van de herkende vaardigheden — doe je vanuit de scoutingweergave. Ingediende tekst bewerken is nog niet mogelijk.",
+    "manageHelp": "Rond een behoefte af, haal haar van de markt of publiceer haar opnieuw, direct in deze lijst; een concept kun je voortzetten of verwerpen. Het bevestigen van de herkende vaardigheden doe je vanuit de scoutingweergave. Ingediende tekst bewerken is nog niet mogelijk.",
     "detailsLabel": "Ingediende gegevens",
     "fields": {
       "description": "Beschrijving",
@@ -6902,9 +6891,7 @@
       "paused": "Gepauzeerd — verborgen voor leden. Activeer om het weer vindbaar te maken."
     },
     "linkToRequests": "Bekijk aanvragen voor jouw diensten",
-    "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren.",
-    "removeQuestion": "Deze dienst definitief verwijderen? Dit kan niet ongedaan worden gemaakt. Wil je hem alleen uit de zoekresultaten halen, pauzeer hem dan.",
-    "removeYes": "Ja, verwijderen"
+    "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren."
   },
   "communication": {
     "origin": {
@@ -19824,5 +19811,45 @@
       "line": "Betaal eenmalig 1 € voor {days} dagen van het betaalde Organisatieplan. Er wordt niets verlengd.",
       "cta": "Pilot openen"
     }
+  },
+  "marketLifecycle": {
+    "actions": {
+      "publish": "Publiceren",
+      "edit": "Bewerken",
+      "pause": "Pauzeren",
+      "resume": "Hervatten",
+      "publishAgain": "Opnieuw publiceren",
+      "complete": "Afronden",
+      "withdraw": "Van de markt halen",
+      "discard": "Concept verwerpen"
+    },
+    "states": {
+      "draft": "Concept",
+      "active": "Actief",
+      "paused": "Gepauzeerd",
+      "completed": "Afgerond",
+      "withdrawn": "Van de markt gehaald",
+      "discarded": "Verworpen concept",
+      "closed": "Gesloten",
+      "locked": "In beoordeling"
+    },
+    "visibility": {
+      "visible": "Zichtbaar in de zoekresultaten — anderen kunnen het vinden en je een bericht sturen.",
+      "draft": "Concept — nog niet zichtbaar voor anderen. Publiceer het wanneer het klaar is.",
+      "paused": "Gepauzeerd — verborgen in de zoekresultaten, geen nieuwe aanvragen. Hervat het wanneer het weer actueel is.",
+      "completed": "Afgerond — verborgen in de zoekresultaten; gesprekken en geschiedenis blijven bewaard.",
+      "withdrawn": "Van de markt gehaald — verborgen in de zoekresultaten; gesprekken en geschiedenis blijven bewaard.",
+      "discarded": "Verworpen concept — het is nooit gepubliceerd.",
+      "closed": "Gesloten — verborgen in de zoekresultaten; de geschiedenis blijft bewaard.",
+      "expired": "Verlopen — verborgen in de zoekresultaten. Wijzig de vervaldatum en publiceer het opnieuw.",
+      "gated": "Nog niet zichtbaar — het verschijnt in de zoekresultaten zodra de organisatie is bevestigd.",
+      "locked": "In beoordeling — tijdens de beoordeling kan het niet worden gewijzigd."
+    },
+    "deleteForever": "Definitief verwijderen",
+    "deleteQuestion": "Definitief verwijderen? Dit kan niet ongedaan worden gemaakt. Wil je het alleen uit de zoekresultaten halen, pauzeer het, rond het af of haal het van de markt.",
+    "deleteYes": "Ja, verwijderen",
+    "cancel": "Annuleren",
+    "error": "Dat is niet gelukt. Probeer het opnieuw.",
+    "notAllowed": "In deze status is deze actie niet beschikbaar."
   }
 }

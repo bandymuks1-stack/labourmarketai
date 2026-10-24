@@ -268,18 +268,7 @@
     "formPublisherLabel": "Skelbia",
     "publisherSelf": "Aš asmeniškai",
     "publishedAs": "Kaip {name}",
-    "publishedAsOrganization": "Kaip organizacija",
-    "republish": "Paskelbti iš naujo",
-    "removeForever": "Ištrinti visam laikui",
-    "removeQuestion": "Ištrinti visam laikui? Atkurti nebus galima. Jei nori tik paslėpti iš paieškos, pristabdyk arba užbaik.",
-    "removeYes": "Taip, ištrinti",
-    "searchState": {
-      "draft": "Juodraštis — kiti dar nemato. Paskelbk, kai bus paruoštas.",
-      "active": "Matomas paieškoje — kiti gali rasti ir tau parašyti.",
-      "paused": "Pristabdytas — paslėptas iš paieškos. Paskelbk iš naujo, kai vėl bus aktualu.",
-      "closed": "Užbaigtas — paslėptas iš paieškos, pokalbiai ir istorija išsaugoti.",
-      "expired": "Pasibaigęs — paslėptas iš paieškos. Pakeisk galiojimo datą ir paskelbk iš naujo."
-    }
+    "publishedAsOrganization": "Kaip organizacija"
   },
   "quality": {
     "title": "Defektai ir kokybė",
@@ -1917,7 +1906,7 @@
     "workerVisibilityNote": "Sąžininga būsena: patvirtintų (verifikuotų) įmonių užklausas darbuotojai mato savo galimybių lentoje. Verifikacija — rankinė peržiūra; kol jūsų įmonė neverifikuota, užklausos matomos tik jums ir peržiūros komandai.",
     "empty": "Dar nepateikėte nė vienos užklausos. Pateikite užklausą viršuje ir ji atsiras čia su savo būsena.",
     "created": "Sukurta",
-    "manageHelp": "Juodraščius galima ištrinti. Pateiktos užklausos uždarymas ar atidarymas iš naujo — ir atpažintų įgūdžių patvirtinimas — atliekami jos kandidatų atrankos vaizde. Pateikto teksto redagavimas dar negalimas.",
+    "manageHelp": "Užbaik poreikį, pašalink jį iš rinkos arba paskelbk iš naujo tiesiai šiame sąraše; juodraštį gali tęsti arba atmesti. Atpažintų įgūdžių patvirtinimas atliekamas jo kandidatų atrankos vaizde. Pateikto teksto redagavimas dar negalimas.",
     "detailsLabel": "Pateikti duomenys",
     "fields": {
       "description": "Aprašymas",
@@ -6902,9 +6891,7 @@
       "paused": "Pristabdyta — nariams nematoma. Aktyvuok, kad vėl būtų randama."
     },
     "linkToRequests": "Peržiūrėk užklausas dėl savo paslaugų",
-    "errorHasRequests": "Šis pasiūlymas turi užklausų, todėl jo ištrinti negalima – užklausų istorija turi išlikti. Galite jį sustabdyti.",
-    "removeQuestion": "Ištrinti paslaugą visam laikui? Atkurti nebus galima. Jei nori tik paslėpti iš paieškos, pristabdyk.",
-    "removeYes": "Taip, ištrinti"
+    "errorHasRequests": "Šis pasiūlymas turi užklausų, todėl jo ištrinti negalima – užklausų istorija turi išlikti. Galite jį sustabdyti."
   },
   "communication": {
     "origin": {
@@ -19824,5 +19811,45 @@
       "line": "Sumokėk 1 € vieną kartą ir gauk mokamą Organizacijos planą {days} dienoms. Niekas neatsinaujina.",
       "cta": "Atidaryti pilotą"
     }
+  },
+  "marketLifecycle": {
+    "actions": {
+      "publish": "Paskelbti",
+      "edit": "Redaguoti",
+      "pause": "Pristabdyti",
+      "resume": "Atnaujinti",
+      "publishAgain": "Paskelbti iš naujo",
+      "complete": "Užbaigti",
+      "withdraw": "Pašalinti iš rinkos",
+      "discard": "Atmesti juodraštį"
+    },
+    "states": {
+      "draft": "Juodraštis",
+      "active": "Aktyvus",
+      "paused": "Pristabdytas",
+      "completed": "Užbaigtas",
+      "withdrawn": "Pašalintas iš rinkos",
+      "discarded": "Atmestas juodraštis",
+      "closed": "Uždarytas",
+      "locked": "Peržiūrimas"
+    },
+    "visibility": {
+      "visible": "Matomas paieškoje — kiti gali rasti ir tau parašyti.",
+      "draft": "Juodraštis — kiti dar nemato. Paskelbk, kai bus paruoštas.",
+      "paused": "Pristabdytas — paslėptas iš paieškos, naujų užklausų negausi. Atnaujink, kai vėl bus aktualu.",
+      "completed": "Užbaigtas — paslėptas iš paieškos; pokalbiai ir istorija išsaugoti.",
+      "withdrawn": "Pašalintas iš rinkos — paslėptas iš paieškos; pokalbiai ir istorija išsaugoti.",
+      "discarded": "Atmestas juodraštis — niekada nebuvo paskelbtas.",
+      "closed": "Uždarytas — paslėptas iš paieškos; istorija išsaugota.",
+      "expired": "Pasibaigęs — paslėptas iš paieškos. Pakeisk galiojimo datą ir paskelbk iš naujo.",
+      "gated": "Dar nematomas — paieškoje pasirodys, kai organizacija bus patvirtinta.",
+      "locked": "Peržiūrimas — kol vyksta peržiūra, keisti negalima."
+    },
+    "deleteForever": "Ištrinti visam laikui",
+    "deleteQuestion": "Ištrinti visam laikui? Atkurti nebus galima. Jei nori tik paslėpti iš paieškos, pristabdyk, užbaik arba pašalink iš rinkos.",
+    "deleteYes": "Taip, ištrinti",
+    "cancel": "Atšaukti",
+    "error": "Nepavyko. Bandyk dar kartą.",
+    "notAllowed": "Šioje būsenoje šis veiksmas negalimas."
   }
 }

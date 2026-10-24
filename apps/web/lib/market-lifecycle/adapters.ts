@@ -1,5 +1,7 @@
 import {
+  allowedActions,
   isClosedOutcome,
+  transition,
   type ClosedOutcome,
   type DomainSupport,
   type EntryAction,
@@ -117,4 +119,37 @@ export function listingAdapter(opts: { pauseSupported: boolean; closedOutcomeSto
 /** Status-changing actions (edit changes content, not state). */
 export function changesState(action: EntryAction): boolean {
   return action !== "edit";
+}
+
+/**
+ * The contract action a STATUS request stands for — the shape older callers
+ * (and MCP `*_status_set` tools) send. Going to a closed status reads as
+ * `complete` unless the caller names the outcome. `null` = no contract
+ * action produces that status from here, i.e. the request is refused.
+ */
+export function actionForStatus(
+  adapter: MarketAdapter,
+  facts: EntryFacts,
+  toStatus: string,
+  closedOutcome: "completed" | "withdrawn" = "completed",
+): EntryAction | null {
+  const allowed = allowedActions(adapter.support, facts);
+  for (const action of allowed) {
+    if (!changesState(action)) continue;
+    const target = transition(adapter.support, facts, action);
+    if (!target) continue;
+    let status: string;
+    try {
+      status = adapter.statusFor(target.state);
+    } catch {
+      continue;
+    }
+    if (status !== toStatus) continue;
+    if (target.state === "closed" && facts.state !== "draft") {
+      if (action === (closedOutcome === "withdrawn" ? "withdraw" : "complete")) return action;
+      continue;
+    }
+    return action;
+  }
+  return null;
 }

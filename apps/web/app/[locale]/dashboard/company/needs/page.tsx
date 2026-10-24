@@ -269,6 +269,7 @@ export default async function CompanyNeedsPage({
         labels={readbackLabels}
         locale={locale}
         pendingInterest={pendingInterest}
+        workersSeeNeeds={companyRow.verificationStatus === "verified"}
       />
 
       {/* Canonical-journey P3 — claim bridge: the caller's own PUBLIC

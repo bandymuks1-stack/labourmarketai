@@ -11,6 +11,13 @@ import { parseStoredEstimate } from "@/lib/estimate/estimate-payload";
 import { EstimateSummary } from "@/components/app/estimate-summary";
 import { DemandLocationCapture } from "@/components/app/demand-location-capture";
 import { Card } from "@/components/ui/Card";
+import { MarketEntryChip } from "@/components/app/market-entry-lifecycle";
+import { DemandEntryLifecycle } from "@/components/app/demand-entry-lifecycle";
+import { demandAdapter } from "@/lib/market-lifecycle/adapters";
+
+/** The statuses the owner moves (lifecycle contract); the rest are the admin
+ *  review pipeline and keep their own honest label. */
+const OWNER_LIFECYCLE_STATUSES: ReadonlySet<string> = new Set(["draft", "submitted", "closed"]);
 
 /**
  * Demand read-back (Slice 1 — demand → matching readiness).
@@ -119,11 +126,14 @@ function RequestRow({
   locale,
   pendingInterest,
   scoutable,
+  gateMet,
 }: {
   r: CustomerRequestRow;
   labels: DemandRequestsReadbackLabels;
   locale: string;
   pendingInterest?: ReadonlyMap<string, { count: number; label: string }>;
+  /** Workers see this organisation's needs (verified company). */
+  gateMet: boolean;
   /** Scouting answers "who could fill this need". That question is meaningless
    *  over an OFFER, so the supply section renders no link rather than sending
    *  the person into a view that cannot describe their row. */
@@ -175,10 +185,36 @@ function RequestRow({
             {labels.created}: {r.createdAt.slice(0, 10)}
           </span>
         </div>
-        <span className="shrink-0 rounded-sm border border-brand-blue/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
-          {labels.status[r.status] ?? labels.statusOther}
-        </span>
+        {OWNER_LIFECYCLE_STATUSES.has(r.status) ? (
+          <span className="shrink-0">
+            <MarketEntryChip
+              facts={demandAdapter({ closedOutcomeStored: false }).facts({
+                status: r.status,
+                closedOutcome: r.closedOutcome ?? null,
+              })}
+              visibility={{ accessGateMet: r.direction === "demand" ? gateMet : false }}
+              testId={`demand-status-${r.id}`}
+            />
+          </span>
+        ) : (
+          <span className="shrink-0 rounded-sm border border-brand-blue/40 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-brand-blue">
+            {labels.status[r.status] ?? labels.statusOther}
+          </span>
+        )}
       </div>
+      {/* THE ONE LIFECYCLE CONTRACT on the row itself: whether workers can
+          find it, and complete / remove from market / publish again /
+          discard — the same words as every other own need or offer. */}
+      {OWNER_LIFECYCLE_STATUSES.has(r.status) ? (
+        <DemandEntryLifecycle
+          locale={locale}
+          requestId={r.id}
+          status={r.status}
+          closedOutcome={r.closedOutcome ?? null}
+          showVisibility={r.direction === "demand"}
+          gateMet={gateMet}
+        />
+      ) : null}
       {/* The need as capacity (work-world CapacityBand): how many positions,
           how many have raised their hand. A demand is people × a shape, not a
           headline — and only when the need declares a size, because inventing
@@ -273,9 +309,13 @@ export function DemandRequestsReadback({
   labels,
   pendingInterest,
   locale,
+  workersSeeNeeds = false,
 }: {
   result: CustomerRequestsListResult;
   labels: DemandRequestsReadbackLabels;
+  /** The company is verified, so a published need reaches the worker board.
+   *  Default false: a row never claims a visibility it cannot prove. */
+  workersSeeNeeds?: boolean;
   /** requestId → how many people are still waiting, with the localized line.
    *  Absent entry = nobody waiting; the row renders exactly as before. */
   pendingInterest?: ReadonlyMap<string, { count: number; label: string }>;
@@ -338,6 +378,7 @@ export function DemandRequestsReadback({
                 locale={locale}
                 pendingInterest={pendingInterest}
                 scoutable
+                gateMet={workersSeeNeeds}
               />
             ))}
           </ul>
@@ -379,6 +420,7 @@ export function DemandRequestsReadback({
                 labels={labels}
                 locale={locale}
                 scoutable={false}
+                gateMet={false}
               />
             ))}
           </ul>

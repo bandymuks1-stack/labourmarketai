@@ -13,14 +13,21 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
-import { InlineConfirm } from "@/components/ui/InlineConfirm";
+import { StatusChip } from "@/components/app/status-chip";
+import {
+  MarketEntryActions,
+  MarketEntryChip,
+  MarketEntryVisibility,
+} from "@/components/app/market-entry-lifecycle";
+import { listingAdapter } from "@/lib/market-lifecycle/adapters";
+import type { EntryAction } from "@/lib/market-lifecycle/contract";
 import { Link } from "@/lib/i18n/navigation";
 import { getCountryMeta } from "@/lib/location/country-model";
 import {
   createMarketplaceListingAction,
   updateMarketplaceListingAction,
   setMarketplaceListingStatusAction,
+  applyMarketplaceListingAction,
   deleteMarketplaceListingAction,
   enquireAboutListingAction,
 } from "@/lib/marketplace/listings";
@@ -58,17 +65,15 @@ import { assessPublish } from "@/lib/marketplace/publish-policy";
  * messaging).
  */
 
-/** Only an active row is a positive fact for the owner; the rest are quiet. */
-const STATUS_VARIANT: Record<ListingStatus, StatusChipVariant> = {
-  draft: "neutral",
-  active: "success",
-  paused: "neutral",
-  closed: "neutral",
+/** Test ids the walk specs already use, one per contract action. */
+const LISTING_TEST_ID: Record<EntryAction, string> = {
+  publish: "listing-activate",
+  resume: "listing-activate",
+  pause: "listing-pause",
+  complete: "listing-close",
+  withdraw: "listing-withdraw",
+  edit: "listing-edit",
 };
-
-/** One row action: icon + words, a 44 px target on touch. */
-const ACTION =
-  "inline-flex min-h-11 items-center gap-1.5 rounded border px-2.5 text-xs font-medium disabled:opacity-60 sm:min-h-8";
 
 type Draft = {
   domain: ListingDomain;
@@ -160,6 +165,8 @@ export function MarketplaceListingsSection({
   const t = useTranslations("marketplaceListings");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  // The ONE lifecycle contract's view of a listing (lib/market-lifecycle).
+  const adapter = listingAdapter({ pauseSupported: extended, closedOutcomeStored: false });
   const [mode, setMode] = useState<
     { kind: "idle" } | { kind: "create" } | { kind: "edit"; id: string }
   >({ kind: "idle" });
@@ -296,6 +303,27 @@ export function MarketplaceListingsSection({
       if (res.kind === "ok") {
         close();
         router.refresh();
+      } else {
+        setError(errorFor(res));
+      }
+    });
+  }
+
+  /** A lifecycle contract action from the row (`MarketEntryActions`). */
+  function runAction(row: MarketplaceListingRow, action: EntryAction) {
+    if (action === "edit") {
+      openEdit(row);
+      return;
+    }
+    startTransition(async () => {
+      const res = await applyMarketplaceListingAction(row.id, action, row.status);
+      if (res.kind === "ok") {
+        setAckFor(null);
+        setLegalAck(false);
+        router.refresh();
+      } else if (res.kind === "legal-check-required") {
+        setError(null);
+        setAckFor(row.id);
       } else {
         setError(errorFor(res));
       }
@@ -879,13 +907,11 @@ export function MarketplaceListingsSection({
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium text-text-primary">{row.title}</span>
-                      <StatusChip
-                        variant={STATUS_VARIANT[row.status]}
-                        testid={`listing-status-${row.id}`}
-                        className="px-2 py-0.5 text-meta"
-                      >
-                        {t(`status.${row.status}`)}
-                      </StatusChip>
+                      <MarketEntryChip
+                        facts={adapter.facts(row)}
+                        visibility={{ expired: isExpired(row.expiresAt) }}
+                        testId={`listing-status-${row.id}`}
+                      />
                       {isExpired(row.expiresAt) && (
                         <StatusChip variant="attention" className="px-2 py-0.5 text-meta">
                           {t("expired")}
@@ -914,81 +940,29 @@ export function MarketplaceListingsSection({
                       {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
                       {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
                     </p>
-                    {/* Whether OTHERS can find it right now, in words — the chip
-                        alone said "Paused" without saying what that means. */}
-                    <p
-                      data-testid={`listing-visibility-${row.id}`}
-                      className={`mt-1 text-meta leading-relaxed ${
-                        row.status === "active" && !isExpired(row.expiresAt)
-                          ? "text-state-success"
-                          : "text-text-muted"
-                      }`}
-                    >
-                      {t(`searchState.${isExpired(row.expiresAt) ? "expired" : row.status}`)}
-                    </p>
+                    {/* Whether OTHERS can find it right now, in words — the
+                        ONE lifecycle contract's line, the same on every row. */}
+                    <div className="mt-1">
+                      <MarketEntryVisibility
+                        facts={adapter.facts(row)}
+                        visibility={{ expired: isExpired(row.expiresAt) }}
+                        testId={`listing-visibility-${row.id}`}
+                      />
+                    </div>
                   </div>
-                  {/* Labelled actions, one per state change: a first-time
-                      visitor reads what each does. Hiding from search (pause,
-                      complete) is reversible and sits apart from the one
-                      irreversible act, which confirms first. */}
-                  <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-                    {row.status !== "active" ? (
-                      <button
-                        type="button"
-                        onClick={() => changeStatus(row.id, "active")}
-                        data-testid={`listing-activate-${row.id}`}
-                        disabled={pending}
-                        className={`${ACTION} border-state-success/50 text-state-success hover:border-state-success`}
-                      >
-                        <Play aria-hidden className="h-3.5 w-3.5" />
-                        {row.status === "draft" ? t("activate") : t("republish")}
-                      </button>
-                    ) : (
-                      <>
-                        {extended && (
-                          <button
-                            type="button"
-                            onClick={() => changeStatus(row.id, "paused")}
-                            data-testid={`listing-pause-${row.id}`}
-                            disabled={pending}
-                            className={`${ACTION} border-ink-500 text-text-secondary hover:border-brand-blue`}
-                          >
-                            <Pause aria-hidden className="h-3.5 w-3.5" />
-                            {t("pause")}
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => changeStatus(row.id, "closed")}
-                          data-testid={`listing-close-${row.id}`}
-                          disabled={pending}
-                          className={`${ACTION} border-ink-500 text-text-secondary hover:border-state-warning`}
-                        >
-                          <Archive aria-hidden className="h-3.5 w-3.5" />
-                          {t("close")}
-                        </button>
-                      </>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => openEdit(row)}
-                      data-testid={`listing-edit-${row.id}`}
-                      disabled={pending}
-                      className={`${ACTION} border-ink-500 text-text-secondary hover:border-brand-blue`}
-                    >
-                      <Pencil aria-hidden className="h-3.5 w-3.5" />
-                      {t("edit")}
-                    </button>
-                    <InlineConfirm
-                      label={t("removeForever")}
-                      question={t("removeQuestion")}
-                      confirmLabel={t("removeYes")}
-                      cancelLabel={t("cancel")}
-                      tier="strong_irreversible"
-                      onConfirm={() => remove(row.id)}
-                      disabled={pending}
-                      testId={`listing-remove-${row.id}`}
-                      className={`${ACTION} border-transparent text-state-danger hover:border-state-danger`}
+                  {/* The contract's actions, in words; hiding (pause /
+                      complete / remove from market) is one reversible click,
+                      apart from permanent deletion, which confirms first. */}
+                  {/* min-w-0, not shrink-0: an armed delete confirmation must
+                      wrap inside the row, never push past the card. */}
+                  <div className="min-w-0">
+                    <MarketEntryActions
+                      support={adapter.support}
+                      facts={adapter.facts(row)}
+                      onAction={(action) => runAction(row, action)}
+                      pending={pending}
+                      testIdFor={(action) => `${LISTING_TEST_ID[action]}-${row.id}`}
+                      erase={{ onConfirm: () => remove(row.id), testId: `listing-remove-${row.id}` }}
                     />
                   </div>
                 </div>
