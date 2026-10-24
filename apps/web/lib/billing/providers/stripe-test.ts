@@ -3,10 +3,12 @@ import "server-only";
 import Stripe from "stripe";
 
 import {
+  billingStripeTaxEnabled,
   getBillingConfig,
   requireStripeSecret,
   requireStripeWebhookSecret,
 } from "@/lib/billing/config";
+import { checkoutTaxParams, oneTimePriceTaxBehavior } from "@/lib/billing/stripe-tax-core";
 import { trialConsentText } from "@/lib/billing/trial-core";
 import type {
   BillingProvider,
@@ -22,6 +24,7 @@ import type {
   PortalSessionResult,
   ProviderSubscriptionView,
   RetrieveSubscriptionResult,
+  TaxEvidenceSourcesResult,
 } from "@/lib/billing/provider";
 
 /**
@@ -196,10 +199,15 @@ export function createStripeProvider(): BillingProvider {
     ): Promise<CheckoutSessionResult> {
       try {
         const metadata: Record<string, string> = { ...input.metadata, ...environmentStamp };
+        // Stripe Tax switch (owner order 2026-10-23, default OFF): both helpers
+        // return {} while it is off, so the session below is exactly the one
+        // sent before the switch existed (pinned in stripe-tax-core.test.ts).
+        const taxOn = billingStripeTaxEnabled();
         const session = await client().checkout.sessions.create(
           {
             // One payment, a server-fixed amount: no subscription, no saved
-            // price, no tax computation (the pilot pass is exactly 1 €).
+            // price. No tax computation unless the Stripe Tax switch is on —
+            // then the amount is tax-EXCLUSIVE and Stripe Tax adds VAT.
             mode: "payment",
             line_items: [
               {
@@ -208,6 +216,7 @@ export function createStripeProvider(): BillingProvider {
                   currency: input.currency,
                   unit_amount: input.amountCents,
                   product_data: { name: input.productName },
+                  ...oneTimePriceTaxBehavior(taxOn),
                 },
               },
             ],
@@ -224,6 +233,7 @@ export function createStripeProvider(): BillingProvider {
             cancel_url: input.cancelUrl,
             metadata,
             payment_intent_data: { metadata },
+            ...checkoutTaxParams({ enabled: taxOn, hasCustomer: Boolean(input.providerCustomerId) }),
           },
           { idempotencyKey: input.idempotencyKey },
         );
@@ -331,6 +341,37 @@ export function createStripeProvider(): BillingProvider {
         return { ok: true, subscriptions: page.data.map(viewOf) };
       } catch (e) {
         if (isResourceMissing(e)) return { ok: true, subscriptions: [] };
+        return { ok: false, reason: reasonFrom(e) };
+      }
+    },
+
+    // READ-ONLY (Stripe Tax evidence): a webhook payload never carries the
+    // expand-only `total_details.breakdown`, nor the VAT id's verification —
+    // both are read here. Never creates, updates or charges anything.
+    async retrieveTaxEvidenceSources(input): Promise<TaxEvidenceSourcesResult> {
+      try {
+        let session: Record<string, unknown> | null = null;
+        if (input.sessionId) {
+          try {
+            const s = await client().checkout.sessions.retrieve(input.sessionId, {
+              expand: ["total_details.breakdown", "invoice"],
+            });
+            session = s as unknown as Record<string, unknown>;
+          } catch (e) {
+            if (!isResourceMissing(e)) throw e;
+          }
+        }
+        let taxIds: Record<string, unknown>[] | null = null;
+        if (input.customerId) {
+          try {
+            const page = await client().customers.listTaxIds(input.customerId, { limit: 100 });
+            taxIds = page.data as unknown as Record<string, unknown>[];
+          } catch (e) {
+            if (!isResourceMissing(e)) throw e;
+          }
+        }
+        return { ok: true, session, taxIds };
+      } catch (e) {
         return { ok: false, reason: reasonFrom(e) };
       }
     },

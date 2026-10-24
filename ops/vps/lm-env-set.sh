@@ -25,6 +25,7 @@ if [ "$MODE" != unset ]; then case "$NAME" in
   BILLING_PROVIDER) enum "$NAME" "stripe none";;
   BILLING_TRIAL_ENABLED) enum "$NAME" "true false";;
   BILLING_PILOT_PASS_ENABLED) enum "$NAME" "true false";;
+  BILLING_STRIPE_TAX_ENABLED) enum "$NAME" "true false";;
   STRIPE_MODE) enum "$NAME" "test live";;
   AI_PROVIDER_MODE) enum "$NAME" "disabled mock live";;
   AI_PROVIDER) enum "$NAME" "local anthropic openai gemini xai";;

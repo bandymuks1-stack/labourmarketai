@@ -23,7 +23,7 @@ vi.mock("@/lib/billing/provider", () => ({ getBillingProvider: vi.fn() }));
 // D3: the route reads the adapter STATE to match the event's mode. Every test
 // that predates D3 runs under `stripe_test` (the historical behaviour).
 const billingCfg = vi.hoisted(() => ({ state: "stripe_test" as string, testMode: true }));
-vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => billingCfg }));
+vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => billingCfg, billingStripeTaxEnabled: () => false }));
 vi.mock("@/lib/billing/subscription-store", () => ({
   recordWebhookEvent: vi.fn(),
   markWebhookProcessed: vi.fn(),

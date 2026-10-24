@@ -147,12 +147,17 @@ describe("source pins", () => {
   const read = (...p: string[]) => readFileSync(join(__dirname, ...p), "utf8");
   const adapter = read("providers", "stripe-test.ts");
   const block = adapter.slice(adapter.indexOf("async createOneTimeCheckoutSession("), adapter.indexOf("async createCustomer("));
-  it("the session is payment mode with inline price data and an invoice — no subscription, no saved price, no tax", () => {
+  it("the session is payment mode with inline price data and an invoice — no subscription, no saved price, no tax unless the Stripe Tax switch is on", () => {
     expect(block).toContain('mode: "payment"');
     expect(block).toContain("unit_amount: input.amountCents");
     expect(block).toContain("invoice_creation: { enabled: true");
     expect(block).not.toContain("subscription_data");
+    // No literal tax field: tax arrives ONLY through the switch-gated helpers
+    // (stripe-tax-core returns {} while BILLING_STRIPE_TAX_ENABLED is off).
     expect(block).not.toContain("automatic_tax");
+    expect(block).toContain("...oneTimePriceTaxBehavior(taxOn)");
+    expect(block).toContain("...checkoutTaxParams({ enabled: taxOn,");
+    expect(block).toContain("const taxOn = billingStripeTaxEnabled();");
     expect(block).toContain("idempotencyKey: input.idempotencyKey");
   });
   it("the route reads no request body and refuses an organization that already has a plan", () => {

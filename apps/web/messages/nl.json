@@ -9435,6 +9435,39 @@
         "blocked_by_design": "Bewust geblokkeerd"
       },
       "proofLabel": "bewijs"
+    },
+    "tax": {
+      "title": "Stripe Tax-controle",
+      "switchOn": "Stripe Tax staat AAN: de webhook bewaart de belastinggrondslag van elke betaling en markeert onduidelijke gevallen.",
+      "switchOff": "Stripe Tax staat UIT (BILLING_STRIPE_TAX_ENABLED): er wordt geen belastingbewijs opgeslagen. Rijen uit een eerdere testronde blijven zichtbaar.",
+      "unavailable": "Belastingbewijs kan nog niet worden getoond: de opslag is niet ingericht.",
+      "error": "De controlelijst kon nu niet worden gelezen.",
+      "empty": "Niets wacht op belastingcontrole.",
+      "org": "Organisatie",
+      "country": "Land",
+      "vatId": "Btw-nummer",
+      "vatIdCheck": "Btw-nummercontrole",
+      "automaticTax": "Automatische belasting",
+      "reverseCharge": "btw verlegd",
+      "subtotal": "Subtotaal",
+      "vat": "Btw",
+      "total": "Totaal",
+      "invoice": "Factuur",
+      "markReviewed": "Markeren als gecontroleerd",
+      "saving": "Opslaan…",
+      "markError": "Niet opgeslagen",
+      "reason": {
+        "automaticTax": "Automatische belasting van Stripe niet voltooid ({status})",
+        "notRequested": "Voor deze betaling is geen automatische belasting gevraagd",
+        "amountMissing": "Geen bedrag gemeld",
+        "countryMissing": "Geen factuurland",
+        "taxMissing": "Geen belastingbedrag gemeld",
+        "noBreakdown": "Geen belastingspecificatie van Stripe",
+        "ltZero": "Litouwse klant met 0 btw (21% verwacht)",
+        "foreignVatId": "Buitenlandse B2B met 0 btw, btw-nummercontrole: {status}",
+        "foreignNoVatId": "Buitenlandse klant met 0 btw zonder btw-nummer",
+        "other": "Overig: {code}"
+      }
     }
   },
   "conciergeOffer": {
@@ -10969,6 +11002,20 @@
       "cta": "Plan Organisatie activeren",
       "note": "U gaat naar Stripe Checkout; het abonnement is gekoppeld aan deze organisatie.",
       "chargedToday": "Geen gratis proefperiode: de eerste maand wordt vandaag bij Stripe Checkout afgerekend, daarna maandelijks tot je opzegt. Stripe toont vóór betaling het exacte bedrag met btw."
+    },
+    "tax": {
+      "lastPayment": "Btw op de laatste betaling",
+      "total": "totaal",
+      "reverseCharge": "Geen btw berekend: Stripe Tax heeft voor uw btw-nummer de btw verlegd.",
+      "vatId": "Btw-nummer",
+      "vatIdStatus": {
+        "pending": "controle loopt",
+        "verified": "geldig volgens de EU/VK-registercontrole",
+        "unverified": "niet geldig volgens de registercontrole",
+        "unavailable": "registercontrole niet bereikbaar",
+        "unknown": "controleresultaat niet ontvangen"
+      },
+      "invoice": "Factuur openen"
     }
   },
   "accountPlan": {
