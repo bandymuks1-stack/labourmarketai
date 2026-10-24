@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LM living world — target 390</title>
+<style>
+  * { margin: 0; } html, body { height: 100%; background: #1d2f38; overflow: hidden; }
+  svg { display: block; width: 100vw; height: 100vh; }
+  .wm { position: fixed; top: 14px; left: 16px; font: 650 14px "Segoe UI", system-ui, sans-serif; color: #3a5462; }
+  .wm i { font-style: normal; color: #d9782e; }
+</style>
+</head>
+<body>
+<div class="wm">LabourMarket<i>.ai</i></div>
+<svg id="s" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice"></svg>
+<script src="lmworld.js"></script>
+<script>
+(function () {
+  var L = window.LM, g = L.g, P = L.P;
+  var W = 390, o = [];
+
+  function edgePath(pts) {
+    var d = "M" + pts[0][0] + " " + pts[0][1];
+    for (var i = 1; i < pts.length; i++) {
+      var a = pts[i - 1], b = pts[i], mx = (a[0] + b[0]) / 2;
+      d += " Q" + mx + " " + a[1] + " " + ((mx + b[0]) / 2) + " " + ((a[1] + b[1]) / 2) +
+           " T" + b[0] + " " + b[1];
+    }
+    return d;
+  }
+  function terrace(pts, col, rim) {
+    var e = edgePath(pts);
+    return '<path d="' + e + ' L' + W + ' 844 L0 844 Z" transform="translate(0 -6)" fill="#263d49" opacity="0.24" filter="url(#soft2)"/>' +
+      '<path d="' + e + ' L' + W + ' 844 L0 844 Z" fill="' + col + '"/>' +
+      '<path d="' + e + '" stroke="' + (rim || L.lighten(col, 0.3)) + '" stroke-width="2" fill="none" opacity="0.85"/>';
+  }
+
+  /* sky + far coast */
+  o.push('<rect width="390" height="260" fill="url(#sky)"/>');
+  o.push('<circle cx="95" cy="88" r="150" fill="url(#sunGlow)"/>');
+  o.push('<path d="M0 96 Q95 76 190 90 T390 84 L390 130 L0 130 Z" fill="' + P.farLand + '" filter="url(#soft1)"/>');
+  for (var i = 0; i < 10; i++)
+    o.push('<circle cx="' + ((i * 47 + 21) % 390) + '" cy="' + (92 + (i * 29) % 26) + '" r="1.1" fill="' + P.farLight + '" opacity="0.7"/>');
+
+  /* sea */
+  o.push('<path d="M0 118 L390 114 L390 260 L0 260 Z" fill="url(#sea)"/>');
+  o.push(g(120, 168, 0.55, L.ship()));
+  o.push('<path d="M40 148 Q110 140 175 152 Q120 160 62 158 Z" fill="' + P.glint + '" opacity="0.32" filter="url(#soft2)"/>');
+
+  /* T1 port */
+  o.push(terrace([[0, 208], [130, 200], [260, 210], [390, 202]], P.quay2));
+  o.push(g(238, 204, 0.6, L.ship()));
+  o.push(g(14, 262, 0.85, L.shadowBlob(36, 5, 34) + L.box(56, 26, 12, P.brick) + L.windows(56, 26, 4, 2, 0.8, 2.4, true)));
+  o.push(g(94, 230, 0.8, L.containerRow(4)));
+  o.push(g(130, 258, 1.0, L.portCrane()));
+  o.push(g(196, 252, 0.85, L.portCrane()));
+  o.push(g(96, 276, 0.65, L.truck(P.box2)));
+  o.push('<path d="M282 208 Q330 194 390 202 L390 260 Q330 258 282 262 Z" fill="#79a273"/>');
+  o.push(g(316, 216, 0.6, L.turbine(24)));
+  o.push(g(352, 210, 0.7, L.turbine(-40)));
+
+  /* T2 town */
+  o.push(terrace([[0, 322], [140, 314], [280, 324], [390, 316]], P.grass));
+  var hcols = [P.terra, P.cream, P.brick, P.cream, P.rust];
+  var row = [];
+  for (var h = 0; h < 5; h++)
+    row.push(g(h * 34, (h % 2) * 4, 1, L.gable(29, 24 + (h % 3) * 5, 12, hcols[h % 5], P.slate) + L.windows(29, 22, 2, 2, 0.78, 2.4, true)));
+  o.push(g(38, 384, 1.0, L.shadowBlob(90, 6, 92) + row.join("")));
+  o.push(g(232, 378, 1.0, '<rect x="0" y="-34" width="11" height="34" fill="' + P.cream + '"/>' +
+    '<path d="M-1 -34 L5.5 -52 L12 -34 Z" fill="' + P.slate2 + '"/>' +
+    '<rect x="3.8" y="-28" width="3.6" height="6" fill="' + P.win + '"/>'));
+  o.push(g(268, 366, 0.95, L.shadowBlob(30, 5, 26) + L.box(36, 30, 9, P.slate) + L.windows(36, 30, 3, 2, 0.9, 2.4)));
+  o.push(g(318, 372, 0.95, L.shadowBlob(24, 4, 20) + L.box(28, 24, 8, P.cream) + L.windows(28, 24, 2, 2, 0.85, 2.4)));
+  o.push(g(120, 396, 0.85, L.person("walk", 0, 1) + g(18, 1, 1, L.person("stand", 4, 2))));
+  o.push(g(180, 392, 0.9, L.tree("#7fae6d")));
+  o.push(g(356, 392, 0.9, L.tree(P.grass2)));
+
+  /* T3 fields + road */
+  o.push(terrace([[0, 442], [150, 434], [300, 444], [390, 436]], "#8fb87b"));
+  o.push(g(18, 470, 0.95, L.fieldRows(110, 30, P.field)));
+  o.push(g(255, 470, 0.95, L.fieldRows(115, 30, "#b9cf8e")));
+  o.push(g(150, 496, 1.0, L.shadowBlob(24, 4, 22) + L.greenhouse()));
+  o.push(g(210, 508, 0.85, L.person("carry", 3, 2)));
+  for (var c = 0; c < 4; c++) o.push(g(258 + c * 26, 516, 0.75, L.tree(c % 2 ? "#6d9a68" : "#87b573")));
+  o.push('<path d="M0 542 Q195 530 390 542" stroke="' + P.road + '" stroke-width="18" fill="none"/>');
+  o.push('<path d="M0 542 Q195 530 390 542" stroke="' + P.roadLine + '" stroke-width="1.6" stroke-dasharray="8 10" fill="none" opacity="0.9"/>');
+  o.push(g(80, 549, 0.9, L.truck(P.box1)));
+  o.push(g(290, 548, 0.9, L.truck(P.box2)));
+
+  /* T4 human quay */
+  o.push(terrace([[0, 592], [140, 584], [290, 594], [390, 586]], P.quay, L.lighten(P.quay, 0.26)));
+  o.push('<path d="M0 592 L240 582 L130 844 L0 844 Z" fill="' + P.glint + '" opacity="0.12"/>');
+
+  /* terminal with lit gate */
+  o.push(g(6, 806, 1.25, L.shadowBlob(80, 7, 84)));
+  o.push(g(6, 692, 1.25, L.box(104, 66, 16, P.brick)));
+  o.push(g(6, 692, 1.25, L.windows(104, 26, 5, 1, 0.85, 3.6)));
+  o.push(g(6 + 1.25 * 66, 692 + 1.25 * 66, 1.25,
+    '<rect x="0" y="-38" width="30" height="38" rx="1.6" fill="' + L.darken(P.brick, 0.32) + '"/>' +
+    '<rect x="2.4" y="-35.6" width="25.2" height="35.6" rx="1.2" fill="' + P.door + '"/>' +
+    '<rect x="4.8" y="-33" width="20.4" height="33" rx="1" fill="' + L.lighten(P.door, 0.3) + '"/>' +
+    L.spill(30, 34)));
+  o.push(g(46, 800, 1.35, L.forklift()));
+  o.push(g(110, 802, 1.4, L.workerVest("carry", 1)));
+
+  /* the meeting */
+  o.push(g(230, 726, 1.05, L.shadowBlob(40, 5, 38) + L.box(58, 34, 11, P.cream) +
+    L.windows(58, 24, 4, 1, 0.9, 3.2) +
+    '<rect x="24" y="13" width="12" height="21" rx="1.2" fill="' + P.door + '"/>'));
+  o.push(g(280, 706, 1, L.spill(13, 20)));
+  o.push(g(238, 800, 1.7, L.shadowBlob(14, 3, 11) + L.handshake(0, 4)));
+  o.push(g(186, 796, 1.5, L.person("walk", 3, 2)));
+  o.push(g(310, 794, 1.5, L.person("wave", 2, 1)));
+  o.push(g(160, 764, 1.25, L.lamp()));
+
+  /* construction, bottom right */
+  o.push(g(296, 836, 1.1, L.shadowBlob(36, 5, 36) + L.siteFrame()));
+  o.push(g(366, 838, 1.05, L.craneTower(10)));
+
+  /* thread: handshake → terminal gate */
+  o.push('<path d="M240 764 Q200 700 150 640 Q120 610 104 588" stroke="url(#thread)" stroke-width="3.6" fill="none" filter="url(#glowF)"/>');
+  o.push('<circle cx="240" cy="764" r="4.6" fill="' + P.thread + '" filter="url(#glowF)"/>');
+  o.push('<circle cx="105" cy="590" r="5" fill="' + P.thread + '" opacity="0.85" filter="url(#glowF)"/>');
+
+  /* atmosphere */
+  o.push('<rect x="0" y="112" width="390" height="150" fill="#c4d6dc" opacity="0.16"/>');
+  o.push('<rect width="390" height="844" fill="url(#vign)"/>');
+
+  document.getElementById("s").innerHTML = L.defs() + o.join("");
+})();
+</script>
+</body>
+</html>
