@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type Page } from "./prod-walk";
 
-import { chooseWorkContextIfAsked } from "./worklog-context";
+import { answerNoProjectIfAsked, chooseWorkContextIfAsked } from "./worklog-context";
 
 /**
  * PRODUCTION WORK → CONFIRMATION → LIVING CV — owner programme 2026-10-12:
@@ -45,6 +45,7 @@ test("1. the worker records the day's work in the journal", async ({ browser }) 
   await page.getByTestId("journal-quick-record-understand").click();
   await expect(page.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
   await chooseWorkContextIfAsked(page, /QA-SYNTHETIC Alfa/);
+  await answerNoProjectIfAsked(page);
   await page.getByTestId("worklog-save").click();
   await page.getByTestId("worklog-confirm").click();
   const done = page.getByTestId("worklog-done");

@@ -296,12 +296,19 @@ test("C-4 (4.16). the worker sees they were contacted, on the phone", async ({ b
 async function siteReady(page: Page, org: string): Promise<void> {
   await useWorkspace(page, org);
   await page.goto("/lt/dashboard/hours");
-  const noSites = page.getByTestId("hours-state-no-objects");
-  const picker = page.getByTestId("hours-object-picker");
+  // Scoped to <main>: the page streams in through a hidden `<div id="S:n">`
+  // whose reveal is rAF-driven; in a never-painting headless tab that hidden
+  // copy sits outside <main> beside the rendered one, and an unscoped testid
+  // fails strict mode at once (run 40050881788 H-1: `hours-object-picker` in
+  // <main> plus `.nth(1)` outside it; calendar-journal-history.spec.ts). The
+  // claim is unchanged: exactly one picker or one no-sites door in <main>.
+  const main = page.getByRole("main");
+  const noSites = main.getByTestId("hours-state-no-objects");
+  const picker = main.getByTestId("hours-object-picker");
   await expect(noSites.or(picker)).toBeVisible({ timeout: 60_000 });
   if (await noSites.isVisible()) {
     console.info(`[hours] ${org}: no site yet, following the page's own door`);
-    await page.getByTestId("hours-no-objects-add-site").click();
+    await main.getByTestId("hours-no-objects-add-site").click();
     await page.waitForURL(/\/dashboard\/projects/, { timeout: 60_000 });
     const form = page.getByTestId("work-object-add-form");
     await expect(form).toBeVisible({ timeout: 30_000 });
@@ -318,19 +325,21 @@ async function siteReady(page: Page, org: string): Promise<void> {
 async function recordHours(page: Page, org: string, note: string): Promise<void> {
   await useWorkspace(page, org);
   await page.goto("/lt/dashboard/hours");
-  await page.getByTestId("hours-worker-select").selectOption(workerId);
-  await page.getByTestId("hours-object-picker").locator('[data-testid^="hours-object-"]').first().click();
-  await page.getByTestId("hours-input").fill("1.5");
-  await page.getByTestId("hours-note").fill(note);
-  await page.getByTestId("hours-save").click();
-  const saved = page.getByTestId("hours-saved");
-  const error = page.getByTestId("hours-error");
+  // Scoped to <main> for the same hidden streaming copy as `siteReady`.
+  const main = page.getByRole("main");
+  await main.getByTestId("hours-worker-select").selectOption(workerId);
+  await main.getByTestId("hours-object-picker").locator('[data-testid^="hours-object-"]').first().click();
+  await main.getByTestId("hours-input").fill("1.5");
+  await main.getByTestId("hours-note").fill(note);
+  await main.getByTestId("hours-save").click();
+  const saved = main.getByTestId("hours-saved");
+  const error = main.getByTestId("hours-error");
   await expect(saved.or(error)).toBeVisible({ timeout: 30_000 });
   if (await error.isVisible()) throw new Error(`hours not saved in ${org}: ${await error.innerText()}`);
-  // Persistence: a fresh load of the day lists the entry.
+  // Persistence: a fresh load of the day lists the entry, exactly once.
   await page.goto("/lt/dashboard/hours");
-  await expect(page.getByTestId("hours-entry").filter({ hasText: note })).toHaveCount(1, { timeout: 30_000 });
-  await expect(page.getByTestId("hours-day-total")).toBeVisible();
+  await expect(main.getByTestId("hours-entry").filter({ hasText: note })).toHaveCount(1, { timeout: 30_000 });
+  await expect(main.getByTestId("hours-day-total")).toBeVisible();
 }
 
 for (const { slot, org, label } of [
