@@ -54,6 +54,7 @@ on:
           - recognition-chain
           - mcp-chain
           - mcp-agents
+          - mcp-oauth-client
           - project-context
           - worker-identity-split
           - company-chain
@@ -341,6 +342,9 @@ jobs:
             recognition-chain) SPEC=tests/e2e/prod-recognition-chain.spec.ts ;;
             mcp-chain) SPEC=tests/e2e/prod-mcp-chain.spec.ts ;;
             mcp-agents) SPEC=tests/e2e/prod-mcp-agents.spec.ts ;;
+            # External-client OAuth conformance (DCR -> PKCE -> consent -> token -> use -> refresh -> revoke).
+            # Dispatch-only until its first green run; then it may join the rotation.
+            mcp-oauth-client) SPEC=tests/e2e/mcp-oauth-client.spec.ts ;;
             project-context) SPEC=tests/e2e/prod-project-context.spec.ts ;;
             worker-identity-split) SPEC=tests/e2e/prod-worker-identity-split.spec.ts ;;
             company-chain) SPEC=tests/e2e/prod-company-chain.spec.ts ;;
