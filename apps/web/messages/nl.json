@@ -11168,6 +11168,13 @@
         "unknown": "Kon niet controleren of bedrijven je profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — open je privacyinstellingen.",
         "noWorker": "Zichtbaarheid voor werkgevers geldt voor een werknemersprofiel, en dit account heeft er nog geen."
       }
+    },
+    "switch": {
+      "privateLine": "Deze instelling toont nooit: je naam, telefoonnummer, e-mailadres, je Werklogboek-items en links naar externe profielen.",
+      "turnOn": "Voorwaarden lezen en inschakelen",
+      "details": "Wat bedrijven zien en de volledige voorwaarden",
+      "grantedNote": "Klaar — bedrijven kunnen je beroepsprofiel nu vinden, onder een anoniem label.",
+      "withdrawnNote": "Klaar — je profiel verschijnt niet meer in nieuwe zoekopdrachten van bedrijven."
     }
   },
   "planning": {

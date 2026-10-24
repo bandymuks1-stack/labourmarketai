@@ -11168,6 +11168,13 @@
         "unknown": "Es konnte nicht geprüft werden, ob Unternehmen Ihr Profil sehen können. Das heißt nicht, dass die Sichtbarkeit aus ist — öffnen Sie Ihre Datenschutzeinstellungen.",
         "noWorker": "Die Sichtbarkeit für Arbeitgeber gilt für ein Arbeitnehmerprofil, und dieses Konto hat noch keines."
       }
+    },
+    "switch": {
+      "privateLine": "Diese Einstellung zeigt niemals: Ihren Namen, Ihre Telefonnummer, Ihre E-Mail-Adresse, Ihre Arbeitsjournal-Einträge und Links zu externen Profilen.",
+      "turnOn": "Bedingungen lesen und einschalten",
+      "details": "Was Unternehmen sehen und die vollständigen Bedingungen",
+      "grantedNote": "Erledigt — Unternehmen können Ihr berufliches Profil jetzt finden, unter einer anonymen Kennung.",
+      "withdrawnNote": "Erledigt — Ihr Profil erscheint nicht mehr in neuen Suchen von Unternehmen."
     }
   },
   "planning": {

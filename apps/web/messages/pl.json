@@ -11168,6 +11168,13 @@
         "unknown": "Nie udało się sprawdzić, czy firmy widzą Twój profil. To nie znaczy, że widoczność jest wyłączona — otwórz ustawienia prywatności.",
         "noWorker": "Widoczność dla pracodawców dotyczy profilu pracownika, a to konto jeszcze go nie ma."
       }
+    },
+    "switch": {
+      "privateLine": "To ustawienie nigdy nie pokazuje: Twojego imienia i nazwiska, numeru telefonu, e-maila, wpisów w Dzienniku pracy ani linków do profili zewnętrznych.",
+      "turnOn": "Przeczytaj warunki i włącz",
+      "details": "Co widzą firmy i pełne warunki",
+      "grantedNote": "Gotowe — firmy mogą teraz znaleźć Twój profil zawodowy pod anonimowym oznaczeniem.",
+      "withdrawnNote": "Gotowe — Twój profil nie pojawia się już w nowych wyszukiwaniach firm."
     }
   },
   "planning": {

@@ -11168,6 +11168,13 @@
         "unknown": "Could not check whether companies can see your profile. That does not mean visibility is off — open your privacy settings.",
         "noWorker": "Visibility to employers applies to a worker profile, and this account does not have one yet."
       }
+    },
+    "switch": {
+      "privateLine": "Never shown by this setting: your name, phone number, email, Work Journal entries and external profile links.",
+      "turnOn": "Read the terms and turn on",
+      "details": "What companies see and the full terms",
+      "grantedNote": "Done — companies can now find your professional profile, under an anonymous label.",
+      "withdrawnNote": "Done — your profile no longer appears in new company searches."
     }
   },
   "planning": {

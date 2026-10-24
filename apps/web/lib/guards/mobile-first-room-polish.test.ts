@@ -71,7 +71,7 @@ describe("ŠIANDIEN reads as one clear page on a phone (IA 2026-09-13 §5)", () 
     const screen = read("components/app/today/today-screen.tsx");
     const header = screen.indexOf('data-testid="today-header"');
     const waiting = screen.indexOf("<HomeWaiting");
-    const others = ["<EmployerVisibilityAsk", "<HomeRunning", "<HomeBecause", "<HomeOutside"].map((m) =>
+    const others = ["<HomeEmployerVisibility", "<HomeRunning", "<HomeBecause", "<HomeOutside"].map((m) =>
       screen.indexOf(m),
     );
     expect(waiting).toBeGreaterThan(header);
