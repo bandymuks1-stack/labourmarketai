@@ -82,6 +82,13 @@ export function isShortlistedForContact(status: string | null | undefined): bool
  *     booking_request whose status is `accepted` (verified server-side by
  *     the booking action, passed as a grant — booking lifecycle v1:
  *     an accepted booking must open the conversation, never dead-end).
+ *   - allowed_listing_purchase — the goods purchase thread (registry 6.13,
+ *     2026-10-23): a `listing_purchases` row the caller can read under their
+ *     own RLS (buyer, seller, or a manager of either side's organization),
+ *     still requested / accepted / fulfilled. The counterpart is the other
+ *     side's person. Verified server-side by
+ *     lib/marketplace/listing-purchase-conversation.ts and passed as a grant;
+ *     never resolved from generic facts here.
  *   - allowed_agency_connection — the agency ↔ client bridge's one mutual
  *     consent (2026-09-24): the caller's ACTIVE workspace company and the
  *     counterpart's share an `agency_client_connections` row whose status
@@ -125,6 +132,7 @@ export type ContactPermissionState =
   | "allowed_demand_interest"
   | "allowed_accepted_booking"
   | "allowed_marketplace_enquiry"
+  | "allowed_listing_purchase"
   | "allowed_agency_connection"
   | "allowed_team_demand_offer"
   | "allowed_team"
@@ -140,6 +148,7 @@ export const CONTACT_PERMISSION_STATES: readonly ContactPermissionState[] = [
   "allowed_demand_interest",
   "allowed_accepted_booking",
   "allowed_marketplace_enquiry",
+  "allowed_listing_purchase",
   "allowed_agency_connection",
   "allowed_team_demand_offer",
   "allowed_team",

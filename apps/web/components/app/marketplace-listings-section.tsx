@@ -42,6 +42,7 @@ import {
   type ListingDomain,
 } from "@/lib/marketplace/market-model";
 import { assessPublish } from "@/lib/marketplace/publish-policy";
+import { ListingPurchaseForm } from "@/components/app/listing-purchase-form";
 
 /**
  * Universal marketplace listings — work resources, goods, service needs,
@@ -141,6 +142,7 @@ export function MarketplaceListingsSection({
   extended,
   unavailable = [],
   publisher = null,
+  purchasesAvailable = false,
   locale,
 }: {
   myRows: MarketplaceListingRow[];
@@ -155,6 +157,9 @@ export function MarketplaceListingsSection({
   /** The organization the person governs in the active workspace — offered as
    *  the publisher of a NEW listing (owner or manager only; the RPC re-checks). */
   publisher?: { id: string; name: string } | null;
+  /** The goods purchase lifecycle (registry 6.13) exists on this database —
+   *  only then is "Request to buy" offered on a purchasable row. */
+  purchasesAvailable?: boolean;
   locale: string;
 }) {
   const t = useTranslations("marketplaceListings");
@@ -586,6 +591,15 @@ export function MarketplaceListingsSection({
                     {row.contactAction === "open_source" ? t("openInSource") : t("openInServices")}
                     <ArrowRight aria-hidden className="h-4 w-4" />
                   </Link>
+                )}
+                {purchasesAvailable && row.purchasable && !row.isMine && (
+                  <ListingPurchaseForm
+                    listingId={row.id}
+                    title={row.title || t("titleNotStated")}
+                    stock={row.quantity}
+                    unit={row.unit}
+                    buyerOrganization={publisher}
+                  />
                 )}
               </li>
             ))}

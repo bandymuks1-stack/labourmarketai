@@ -58,6 +58,10 @@ describe("§8.1 permission states — enumerated, no silent drift", () => {
     // allowed_agency_connection added 2026-09-24 (an ACTIVE agency ↔ client
     // connection opens the conversation between the two consenting
     // companies' people) — deliberate, reviewed extensions, each verified
+    // allowed_listing_purchase added 2026-10-23 (the goods purchase thread,
+    // registry 6.13: a listing_purchases row read under the caller's own RLS,
+    // side resolved from it, status live or done — in
+    // lib/marketplace/listing-purchase-conversation.ts).
     // allowed_team_demand_offer added 2026-10-11 (the B2B negotiation thread
     // of a LIVE brigade offer, both sides proven by their own authorized read
     // in lib/company/team-offer-conversation.ts).
@@ -77,6 +81,7 @@ describe("§8.1 permission states — enumerated, no silent drift", () => {
         "allowed_demand_interest",
         "allowed_accepted_booking",
         "allowed_marketplace_enquiry",
+        "allowed_listing_purchase",
         "allowed_agency_connection",
         "allowed_team_demand_offer",
         "allowed_team",
@@ -209,6 +214,10 @@ describe("no contact without permission — the create path is gated", () => {
       // Brigade offer negotiation (2026-10-11) — team-demand-offer grant (the
       // caller's side proven by their own authorized read, offer live).
       "lib/company/team-offer-conversation.ts",
+      // Goods purchase thread (2026-10-23) — listing-purchase grant (the
+      // purchase row read under the caller's own RLS, side resolved from it,
+      // status live or done) before the conversation opens.
+      "lib/marketplace/listing-purchase-conversation.ts",
       // W13 Marketplace — marketplace-enquiry grant, verified server-side
       // (listing exists, is active, caller is not the owner) before the
       // conversation opens.

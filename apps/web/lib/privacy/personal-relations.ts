@@ -351,6 +351,15 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
     as: "service_offering_requests_received",
   },
   { table: "marketplace_listings", key: "profile_id", column: "owner_id" },
+  // Goods purchase requests (migration 20261023161500, RED, owner-applied):
+  // what the person asked to buy, and what others asked to buy from them.
+  { table: "listing_purchases", key: "profile_id", column: "buyer_id" },
+  {
+    table: "listing_purchases",
+    key: "profile_id",
+    column: "seller_id",
+    as: "listing_purchases_received",
+  },
   { table: "proposals", key: "profile_id", column: "owner_id" },
   { table: "contracts", key: "profile_id", column: "owner_id" },
   { table: "team_enquiries", key: "profile_id", column: "owner_id" },
