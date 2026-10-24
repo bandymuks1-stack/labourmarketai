@@ -157,17 +157,15 @@
     "cancel": "Anuluj",
     "edit": "Edytuj",
     "remove": "Usuń",
-    "removeConfirm": "Usunąć to ogłoszenie na stałe?",
     "activate": "Opublikuj",
-    "close": "Zamknij",
-    "reopen": "Wznów jako szkic",
+    "close": "Zakończ",
     "errorTitleRequired": "Wymagany jest tytuł o długości co najmniej 3 znaków.",
     "errorCountry": "Użyj dwuliterowego kodu kraju (np. DE).",
     "errorGeneric": "Coś poszło nie tak. Spróbuj ponownie.",
     "status": {
       "draft": "Szkic",
       "active": "Aktywne",
-      "closed": "Zamknięte",
+      "closed": "Zakończone",
       "paused": "Wstrzymane"
     },
     "kinds": {
@@ -270,7 +268,18 @@
     "formPublisherLabel": "Publikuje",
     "publisherSelf": "Ja osobiście",
     "publishedAs": "Jako {name}",
-    "publishedAsOrganization": "Jako organizacja"
+    "publishedAsOrganization": "Jako organizacja",
+    "republish": "Opublikuj ponownie",
+    "removeForever": "Usuń na zawsze",
+    "removeQuestion": "Usunąć na zawsze? Tego nie da się cofnąć. Aby tylko ukryć ogłoszenie w wyszukiwaniu, wstrzymaj je lub zakończ.",
+    "removeYes": "Tak, usuń",
+    "searchState": {
+      "draft": "Szkic — inni jeszcze go nie widzą. Opublikuj, gdy będzie gotowe.",
+      "active": "Widoczne w wyszukiwaniu — inni mogą je znaleźć i do ciebie napisać.",
+      "paused": "Wstrzymane — ukryte w wyszukiwaniu. Opublikuj ponownie, gdy znów będzie aktualne.",
+      "closed": "Zakończone — ukryte w wyszukiwaniu; rozmowy i historia zostają zachowane.",
+      "expired": "Wygasło — ukryte w wyszukiwaniu. Zmień datę ważności i opublikuj ponownie."
+    }
   },
   "quality": {
     "title": "Usterki i jakość",
@@ -6875,7 +6884,7 @@
     "saving": "Zapisywanie…",
     "cancel": "Anuluj",
     "edit": "Edytuj",
-    "remove": "Usuń",
+    "remove": "Usuń na zawsze",
     "activate": "Aktywuj",
     "pause": "Wstrzymaj",
     "errorTitleRequired": "Podaj nazwę usługi.",
@@ -6893,7 +6902,9 @@
       "paused": "Wstrzymana — ukryta przed członkami. Aktywuj, aby ponownie stała się widoczna."
     },
     "linkToRequests": "Zobacz zapytania o Twoje usługi",
-    "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Możesz ją wstrzymać."
+    "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Możesz ją wstrzymać.",
+    "removeQuestion": "Usunąć tę usługę na zawsze? Tego nie da się cofnąć. Aby tylko ukryć ją w wyszukiwaniu, wstrzymaj ją.",
+    "removeYes": "Tak, usuń"
   },
   "communication": {
     "origin": {
