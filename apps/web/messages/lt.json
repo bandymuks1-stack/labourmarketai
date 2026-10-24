@@ -11179,6 +11179,13 @@
         "unknown": "Nepavyko patikrinti, ar įmonės mato tavo profilį. Tai nereiškia, kad matomumas išjungtas — atidaryk privatumo nustatymus.",
         "noWorker": "Matomumas darbdaviams taikomas darbuotojo profiliui, o šioje paskyroje jo dar nėra."
       }
+    },
+    "switch": {
+      "privateLine": "Šis nustatymas niekada nerodo: tavo vardo, telefono numerio, el. pašto, Darbo žurnalo įrašų ir išorinių profilių nuorodų.",
+      "turnOn": "Perskaityti sąlygas ir įjungti",
+      "details": "Ką mato įmonės ir visos sąlygos",
+      "grantedNote": "Atlikta — įmonės dabar gali rasti tavo profesinį profilį su anonimine žyma.",
+      "withdrawnNote": "Atlikta — tavo profilis nebebus rodomas naujose įmonių paieškose."
     }
   },
   "planning": {
