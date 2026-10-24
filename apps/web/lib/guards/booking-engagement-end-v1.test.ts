@@ -1721,6 +1721,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-23: owner approved #2719 in chat (apply before deploy, then merge). Runtime
       // stall sampler evidence table — numbers only, service_role only, 14-day retention.
       "20261023190000_ops_runtime_samples_v1.sql",
+      // 2026-10-24: owner integrated-architecture order (Stage 7). Forecast versions, mode
+      // settings and the significant-change signal; RED draft, applied via MCP after review.
+      "20261024130000_project_forecasts_v1.sql",
 ]);
   });
 

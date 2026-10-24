@@ -47,6 +47,7 @@ import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
 import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES } from "./conversation-action-bridge";
 import { WORKSPACE_READ_CAPABILITIES } from "./workspace-read-capabilities";
 import { DOMAIN_ACTION_CAPABILITIES } from "./domain-action-capabilities";
+import { FORECAST_CAPABILITIES } from "./forecast-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -1797,6 +1798,11 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // organization legal data, marketplace, commercial, bookings, notifications,
   // leave, hours review and reports. See domain-action-capabilities.ts.
   ...DOMAIN_ACTION_CAPABILITIES,
+  // Project FORECASTS (Stage 7, owner order 2026-10-24): the latest forecast
+  // and its history for a managed project, and the organization's recompute
+  // cadence (draft → confirm, administrators only, audited). See
+  // forecast-capabilities.ts.
+  ...FORECAST_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

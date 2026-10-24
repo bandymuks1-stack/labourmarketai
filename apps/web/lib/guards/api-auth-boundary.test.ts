@@ -94,6 +94,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it every 10 minutes; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. It acts only on account-deletion requests the holder confirmed with a fresh sign-in (or the owner approved in writing), and every decision is the database's own plan (privacy_erasure_executor_v3). Answers counts only — no ids, no addresses.",
   },
+  "cron/forecast-recompute/route.ts": {
+    class: "public",
+    why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it every 5 minutes; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. It recomputes FORECASTS only (derived readings, SEP-1) through three service-only database doors, bounded to 25 projects / 60 s per pass, and never writes a fact. Answers counts only — no ids, no names, no project numbers.",
+  },
   "cron/job-alerts/route.ts": {
     class: "public",
     why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron); identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset, so never an open trigger. Answers counts and a reason code only.",
