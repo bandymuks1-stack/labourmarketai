@@ -281,6 +281,17 @@ const SAVED_EMPTY: L = {
   pl: "Nie masz jeszcze zapisanej żadnej oferty pracy. Otwórz ofertę i użyj „Zapisz”.",
 };
 
+/** Every bookmark the worker holds points at an ad that has closed since — a
+ *  different fact from "you saved nothing", so it gets its own line. */
+const SAVED_ALL_CLOSED: L = {
+  en: "The jobs you saved are no longer open. Open a current job and use Save to keep it here.",
+  lt: "Tavo išsaugotos darbo vietos jau nebėra laisvos. Atidaryk dabartinį skelbimą ir paspausk „Išsaugoti“.",
+  ru: "Сохранённые вами вакансии больше не открыты. Откройте актуальную вакансию и нажмите «Сохранить».",
+  nl: "De vacatures die je bewaarde zijn niet meer open. Open een actuele vacature en gebruik Bewaren.",
+  de: "Die gemerkten Stellen sind nicht mehr offen. Öffnen Sie eine aktuelle Stelle und nutzen Sie Merken.",
+  pl: "Zapisane oferty nie są już aktualne. Otwórz bieżącą ofertę i użyj „Zapisz”.",
+};
+
 const SAVED_BADGE: L = {
   en: "Saved",
   lt: "Išsaugota",
@@ -397,6 +408,9 @@ export default async function JobsPage({
   // read path under their OWN client. Expired/withdrawn bookmarks drop out
   // there, so this list can never show a job the board itself refuses to show.
   let savedPreviews: readonly PublicVacancyPreview[] = [];
+  // A failed resolve is NOT "you saved nothing": it renders the board's own
+  // "did not answer" line instead of the empty-state copy.
+  let savedReadFailed = false;
   const showSaved = wantsSaved && mySaved.available;
   if (showSaved && supabase) {
     const r = await listPublicVacancyPreviewsByIds(
@@ -405,7 +419,14 @@ export default async function JobsPage({
       new Date().toISOString(),
     );
     if (r.status === "ok") savedPreviews = r.previews;
+    else savedReadFailed = true;
   }
+  // The tab counts what the saved view can actually show. Off that view the
+  // raw bookmark count stands (resolving every bookmark on each board render
+  // would add a query for every visitor); on it, closed ads drop out of the
+  // number exactly as they drop out of the list.
+  const savedTabCount =
+    showSaved && !savedReadFailed ? savedPreviews.length : mySaved.vacancyIds.size;
 
   const result = showSaved
     ? { status: "ok" as const, vacancies: [], totalCount: 0, hasMore: false }
@@ -483,7 +504,7 @@ export default async function JobsPage({
           surface and the first thing a worker with a poor connection loads;
           every filter state is therefore a real URL that can be linked,
           shared and indexed. */}
-      <form action={`/${active}/jobs`} method="get" className="mt-6 flex flex-wrap gap-2">
+      <form action={`/${active}/jobs`} method="get" data-testid="public-jobs-search" className="mt-6 flex flex-wrap gap-2">
         <label htmlFor="q" className="sr-only">
           {SEARCH_LABEL[active]}
         </label>
@@ -525,7 +546,7 @@ export default async function JobsPage({
           succeeded. Anonymous visitors and non-workers see no tab at all —
           honest invisibility rather than a control that leads nowhere. */}
       {mySaved.available && (
-        <nav className="mt-6 flex flex-wrap gap-2 text-sm">
+        <nav data-testid="public-jobs-tabs" className="mt-6 flex flex-wrap gap-2 text-sm">
           <Link
             href="/jobs"
             aria-current={showSaved ? undefined : "page"}
@@ -546,7 +567,7 @@ export default async function JobsPage({
                 : "rounded-full border px-3 py-1 text-text-muted"
             }
           >
-            {SAVED_TAB[active]} ({mySaved.vacancyIds.size})
+            {SAVED_TAB[active]} ({savedTabCount})
           </Link>
         </nav>
       )}
@@ -556,12 +577,23 @@ export default async function JobsPage({
           <p className="mt-6 text-sm text-text-muted">
             {SAVED_NOTE[active]}
           </p>
-          {savedPreviews.length === 0 ? (
-            <p className="mt-8 rounded-md border border-dashed p-6 text-sm text-text-muted">
-              {SAVED_EMPTY[active]}
+          {savedReadFailed ? (
+            <p
+              role="status"
+              data-testid="public-jobs-saved-unavailable"
+              className="mt-8 rounded-md border border-dashed p-6 text-sm text-text-muted"
+            >
+              {UNAVAILABLE[active]}
+            </p>
+          ) : savedPreviews.length === 0 ? (
+            <p
+              data-testid="public-jobs-saved-empty"
+              className="mt-8 rounded-md border border-dashed p-6 text-sm text-text-muted"
+            >
+              {mySaved.vacancyIds.size > 0 ? SAVED_ALL_CLOSED[active] : SAVED_EMPTY[active]}
             </p>
           ) : (
-            <ul className="mt-6 space-y-3">
+            <ul data-testid="public-jobs-saved-list" className="mt-6 space-y-3">
               {savedPreviews.map((v) => (
                 <li key={v.id}>
                   <PublicVacancyCard
@@ -595,12 +627,12 @@ export default async function JobsPage({
         <>
           {/* role="status": a search is a full navigation, so the result count
               is the one thing a screen reader must hear after it lands. */}
-          <p role="status" className="mt-6 text-sm text-text-muted">
+          <p role="status" data-testid="public-jobs-count" className="mt-6 text-sm text-text-muted">
             {new Intl.NumberFormat(active).format(result.totalCount)} {RESULTS[active]}
           </p>
 
           {result.vacancies.length === 0 ? (
-            <div className="mt-8 rounded-md border border-dashed p-6 text-sm text-text-muted">
+            <div data-testid="public-jobs-empty" className="mt-8 rounded-md border border-dashed p-6 text-sm text-text-muted">
               {/* A zero result NAMES the filter that produced it. Ten catalogue
                   professions have no live ad today, and "nothing found" without
                   saying what was asked reads as "the board is broken". */}
@@ -624,7 +656,7 @@ export default async function JobsPage({
               )}
             </div>
           ) : (
-            <ul className="mt-6 space-y-3">
+            <ul data-testid="public-jobs-list" className="mt-6 space-y-3">
               {result.vacancies.map((v) => (
                 <li key={v.id}>
                   <PublicVacancyCard
@@ -647,7 +679,7 @@ export default async function JobsPage({
           )}
 
           {(page > 1 || result.hasMore) && (
-            <nav className="mt-8 flex items-center justify-between gap-3">
+            <nav data-testid="public-jobs-pager" className="mt-8 flex items-center justify-between gap-3">
               {page > 1 ? (
                 <Link
                   href={pageHref(page - 1)}
