@@ -257,3 +257,43 @@ a joint "Nonstop-Vivat Rex PL" dataset 2024-10-14..11-16; 2022–2023 workbooks 
 Only the owner can state the bounds. The RED follow-up from Addendum A (a worker-readable period
 statement, so that Vivat Rex's historical workers see the entity of the time on their own CV once
 they claim their roster row) stands.
+
+## Addendum C (owner integrated-architecture order, 2026-10-24) — ONE hours ledger
+
+Every person has ONE total of accumulated work hours, broken down by organization (the performer
+at the time), project, role/activity, state and skill. The total is the ledger's total
+(`apps/web/lib/journal/hours-ledger.ts`, version `hours-ledger/2026-10-24.v1`), read over the SAME
+lines as this decision's reading — never a second ledger, never stored.
+
+- **States, two facts kept apart.** BASIS: `actual` (journal entries, organization day records),
+  `estimated` (a stated estimate — `derived.hoursBasis`, written by the insert-only correction path),
+  `reported` (an organization's figure over a span whose method the source did not state — claimed
+  neither actual nor estimated). CONFIRMATION: `unconfirmed` · `self_attested` · `confirmed`. A
+  person's own attestation never upgrades the state; only someone else's confirmation does.
+- **Confidence** is a versioned deterministic table with reasons per line — never a score of the person.
+- **Overlap capacity.** Overlapping counted lines may not exceed 16 h per calendar day across every
+  organization. The excess is taken from estimated / reported lines only (actual beats estimate);
+  actual records that alone exceed it are flagged, never edited. `hours.capacityExcess` says how much.
+- **Estimation** for periods without timesheets: H = D × h × K − A (working days by the calendar
+  minus known non-working days × standard daily hours × workload coefficient, minus the actual hours
+  already recorded in the span); date precision gives a low–high range; a missing h or K gives no
+  figure. A source's own monthly rate (months × h per month) is read as such. Hours are never
+  invented to fill a history.
+- **Skill split** H_skill = Σ H_i × P_ij per evidence state (decision 0023): supporting hours, never
+  added to the total; a (line, skill) pair counts once.
+- **Who the hours belong to.** Only the person's own lines; roles carry no hours; a manager's
+  personal hours are separate from the hours of the people they manage; an AI agent's autonomous
+  work is project history (`projectHistoryOnly`), never a person's hours.
+- **Performer at the time, by date.** A record no source label places is placed in a stated EARLIER
+  LEGAL ENTITY (sold / succeeded — never a former name) when its whole span lies certainly inside
+  that entity's DATED period; the bounds' precision (migration `20261024100000`: day / month / year,
+  a per-bound basis, the earlier entity's register identifier) is respected. Undated = nothing is
+  placed by date. The successor keeps its own work and names the entity it continues; inherited
+  experience serves competence analysis and planning, current capacity counts only who is there today.
+- **Access is not a professional role.** A `manager` MEMBERSHIP is not printed as "manager" where the
+  person's own engagement with that organization states what they are (e.g. `consultant`); an owner
+  membership is never dropped. Nothing is written; the access is unchanged.
+- **Documents are optional evidence** (decision 0021): a register extract strengthens a bound's
+  basis; its absence never erases experience proven by other sources.
+
+Pinned by `lib/journal/hours-ledger.test.ts` and `lib/journal/professional-experience-ledger.test.ts`.
