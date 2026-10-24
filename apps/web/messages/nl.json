@@ -3560,7 +3560,7 @@
     "opportunities": "Kansen: zie werk dat bij je past. Zichtbaarheid hangt af van de netwerkgrootte en je gereedheid.",
     "marketplaceMap": "Marktkaart: arbeidsmarktsignalen per land en regio. Een nauwkeuriger punt verschijnt zodra een locatie is ingesteld.",
     "adminReview": "Systeemonderhoud: alleen voor de beheerder. Gewone gebruikers zien deze schermen nooit.",
-    "paymentReadiness": "Betalingen worden voorbereid: betaalde toegang is nog niet actief. Voorlopig worden de eerste gebruikers handmatig / via eigenaarsbeoordeling onboard gebracht. Stripe wordt in de volgende fase aangesloten.",
+    "paymentReadiness": "Betalingen worden voorbereid: betaalde toegang is nog niet actief.",
     "identityModel": "Twee basisidentiteiten: een persoon en een bedrijf. Kopen, verkopen, aannemen en uitzendactiviteit zijn handelingen, geen aparte identiteiten."
   },
   "profileIdentityNotice": {
@@ -8006,22 +8006,13 @@
       "journalNote": "Downloaden als CSV (opent in Excel)",
       "formatStatus": "PDF: beschikbaar · CSV: beschikbaar · Excel / Word: in voorbereiding"
     },
-    "disclaimer": "Statussen zijn gebaseerd op openbaar vermelde vereisten en je eigen invoer. De uiteindelijke conformiteit wordt gecontroleerd door de autoriteiten of een advocaat — dit is geen juridische garantie.",
+    "disclaimer": "Statussen zijn gebaseerd op openbaar vermelde vereisten en je eigen invoer. De uiteindelijke conformiteit wordt gecontroleerd door de autoriteiten — dit is geen juridische garantie.",
     "needsMigration": "Momenteel niet beschikbaar.",
     "guidance": {
-      "title": "Documentrichtlijnen per land (concept)",
+      "title": "Documentrichtlijnen per land",
       "intro": "Informatieve richtlijnen over documenten die nodig kunnen zijn. Geen juridisch advies.",
-      "pendingNotice": "Juridische/documentrichtlijnen worden voorbereid op basis van de Litouwse masterversie.",
-      "draftDisclaimer": "CONCEPT: alleen informatief, in afwachting van beoordeling door eigenaar en jurist. Controleer altijd officiële bronnen.",
-      "statusSummary": "Items: {total} · wacht op juridische beoordeling: {awaiting}",
-      "status": {
-        "LT_DRAFT_READY": "LT-concept klaar",
-        "OWNER_EDITING": "Eigenaar bewerkt",
-        "OWNER_APPROVED_LT": "LT goedgekeurd door eigenaar",
-        "TRANSLATION_READY": "Klaar voor vertaling",
-        "TRANSLATED": "Vertaald"
-      },
-      "needsLegalReview": "Wacht op juridische beoordeling",
+      "pendingNotice": "Documentrichtlijnen per land zijn voorlopig alleen in het Litouws beschikbaar.",
+      "officialSources": "Controleer altijd officiële bronnen.",
       "whoProvides": "Wie het meestal regelt",
       "groupAll": "Algemeen (alle landen)",
       "helpInfoNote": "Dit is informatieve begeleiding. Een verzoek om hulp bij documenten, boekhouding of juridische zaken kan vanuit de bedrijfsomgeving worden ingediend.",
@@ -8098,7 +8089,7 @@
       "ready_for_country": "Gereed voor dit land",
       "availabilityHint": "Stel je beschikbaarheid in om je gereedheid compleet te maken."
     },
-    "needsLegalReview": "juridische beoordeling nodig",
+    "needsLegalReview": "bron niet bevestigd",
     "sourceLink": "bron",
     "scopeNote": "Gebaseerd op officiële EU-bronnen over gedetacheerde werknemers — controleer de nationale details bij de bevoegde autoriteit. Dit is informatie, geen juridisch advies.",
     "editor": {
@@ -9056,8 +9047,8 @@
       "contact": "Individueel geregeld"
     },
     "readiness": {
-      "draft_pricing": "Plannen zijn voorbereid, niet koopbaar. De prijzen zijn nog een concept van de eigenaar — geen enkele prijs hier is definitief en er kan niets worden gekocht.",
-      "owner_confirmed": "De prijzen zijn door de eigenaar bevestigd, maar de plannen blijven alleen voorbereid — er kan niets worden gekocht totdat betalingen zijn ingeschakeld."
+      "draft_pricing": "Plannen zijn voorbereid, niet koopbaar. Geen enkele prijs hier is definitief en er kan niets worden gekocht.",
+      "owner_confirmed": "De plannen zijn alleen voorbereid — er kan niets worden gekocht totdat betalingen zijn ingeschakeld."
     },
     "featuresLabel": "Inbegrepen in deze afbakening",
     "limitValue": "tot {count}",
@@ -11409,9 +11400,9 @@
       "coveredShort": "{count} gedekt"
     },
     "notes": {
-      "assignmentsPending": "Toewijzingsgegevens zijn voorbereid en verschijnen in dit beeld na activering door de eigenaar.",
-      "languagesPending": "Taaldekking is voorbereid en verschijnt in dit beeld na activering door de eigenaar.",
-      "brigadesPending": "Ploegdekking is voorbereid en verschijnt in dit beeld na activering door de eigenaar.",
+      "assignmentsPending": "Toewijzingsgegevens worden in dit beeld nog niet getoond.",
+      "languagesPending": "Taaldekking wordt in dit beeld nog niet getoond.",
+      "brigadesPending": "Ploegdekking wordt in dit beeld nog niet getoond.",
       "demandError": "Werkbehoeften konden nu niet worden gelezen.",
       "projectError": "Projecten konden nu niet worden gelezen.",
       "capacityError": "Een deel van de capaciteitsgegevens kon nu niet worden gelezen."
@@ -12828,7 +12819,7 @@
     },
     "stateNote": {
       "insufficientData": "Er zijn nog niet genoeg echte gegevens voor dit signaal — een eerlijke leemte wordt getoond in plaats van een verzonnen getal.",
-      "needsMigration": "De gegevensopslag achter dit signaal is voorbereid en sluit aan na activering door de eigenaar. Tot die tijd wordt niets geschat.",
+      "needsMigration": "Dit signaal is nog niet ingeschakeld. Tot die tijd wordt niets geschat.",
       "stale": "Het bewijs achter dit signaal is ouder dan het actualiteitsvenster — beschouw het als verouderd."
     },
     "valueClass": {
@@ -12880,7 +12871,7 @@
         "agencyAggregate": "Aggregaat over klanten"
       },
       "state": {
-        "needsMigration": "Dit signaal is voorbereid en wacht op activering door de eigenaar."
+        "needsMigration": "Dit signaal is nog niet ingeschakeld."
       },
       "salary": {
         "noBenchmark": "Voor je beroep en land is nog geen salarisreferentie beschikbaar.",
@@ -12915,7 +12906,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Door de eigenaar geactiveerde gegevensopslag (nog niet ingeschakeld)",
+      "gatedMigration": "Gegevensopslag nog niet ingeschakeld",
       "marketRateAverages": "Door de beheerder gecureerde markttariefgemiddelden",
       "journalEvidence": "Je eigen werkdagboekbewijs",
       "fillTimeMeasurementsMissing": "Invultijdmetingen (nog niet verzameld)",
@@ -12973,14 +12964,14 @@
       },
       "terms": {
         "internal": "Interne afleiding uit canonieke platformtabellen; het cohortbeleid beschermt individuen.",
-        "adminCurated": "Door de eigenaar ingevoerde gemiddelden met een bronnotitie in plaats van een steekproefomvang.",
-        "statGovLt": "Officiële statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
-        "eurostat": "Officiële EU-statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
+        "adminCurated": "Gecureerde gemiddelden met een bronnotitie in plaats van een steekproefomvang.",
+        "statGovLt": "Officiële statistiek; bronvermelding vereist. Nog niet in gebruik.",
+        "eurostat": "Actieve bron. Officiële EU-statistiek; bronvermelding vereist.",
         "arbetsformedlingen": "Actieve bron. Gebruiksvoorwaarden bevestigd: een gratis openbare gegevensbron (CC0). Bij elke advertentie wordt de bron vermeld en elke advertentie linkt terug naar de oorspronkelijke publicatie.",
         "nav": "Actieve bron. De API-voorwaarden van NAV zijn geaccepteerd en toegang is verleend. De doorlopende verplichtingen worden nageleefd: een ingetrokken vacature wordt direct verwijderd, een gewijzigde snel bijgewerkt, en solliciteren leidt naar de oorspronkelijke vacature.",
-        "cvbankas": "Alleen een voorstel — gebruikstoestemming onbevestigd; wordt nooit met interne cijfers gemengd.",
-        "eures": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald.",
-        "uztLt": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald."
+        "cvbankas": "Voorgestelde bron — niet in gebruik; wordt nooit met interne cijfers gemengd.",
+        "eures": "Voorgestelde bron. Niet in gebruik — er wordt vandaag niets opgehaald.",
+        "uztLt": "Voorgestelde bron. Niet in gebruik — er wordt vandaag niets opgehaald."
       },
       "status": {
         "active": "Actief (intern)",
@@ -12992,7 +12983,7 @@
     "methodology": {
       "title": "Methodiek",
       "deterministic": "Alle waarden zijn deterministisch en berekend uit records met bronnen — niets wordt door AI geschat en geen enkel getal wordt ooit verzonnen.",
-      "externalOff": "Externe bronnen staan uit: elke externe referentie is een voorstel dat wacht op de juridische bevestiging van de eigenaar. Interne en externe cijfers worden nooit gemengd.",
+      "externalOff": "Externe bronnen staan uit. Interne en externe cijfers worden nooit gemengd.",
       "cohort": "Kleine cohorten worden gebundeld of onderdrukt om individuen te beschermen."
     },
     "contextual": {
@@ -13111,7 +13102,7 @@
       },
       "unavailable": {
         "requirementTitle": "Wat er nodig is",
-        "sourcesTitle": "Bronnen in afwachting van goedkeuring door de eigenaar"
+        "sourcesTitle": "Bronnen die nog niet in gebruik zijn"
       },
       "reason": {
         "salaryNoBenchmark": "Hier staat geen salariscijfer omdat er nog geen gecureerde markttarief bestaat voor je beroep en land, en geen externe salarisbron is goedgekeurd voor gebruik.",
@@ -13125,15 +13116,15 @@
         "eurostatNeedsActivation": "Officiële Eurostat-context is voorbereid; de eerste officiële import is nog niet uitgevoerd, dus er is geen cijfer beschikbaar."
       },
       "requirement": {
-        "ownerEnableStore": "De platformeigenaar moet de observatie-opslag inschakelen en ten minste één gegevensbron goedkeuren.",
-        "salaryBenchmark": "Een beheerder moet een gecureerd markttarief invoeren voor je beroep en land, of de platformeigenaar moet een externe salarisbron goedkeuren.",
+        "ownerEnableStore": "De observatie-opslag moet worden ingeschakeld en ten minste één gegevensbron goedgekeurd.",
+        "salaryBenchmark": "Er moet een gecureerd markttarief voor je beroep en land worden ingevoerd, of een externe salarisbron goedgekeurd.",
         "demandOwnRows": "Voeg werkaanvragen toe — deze kaart vult zich met de gegevens van je eigen organisatie zodra er registraties bestaan.",
         "salaryBasis": "De salarisbasis (bruto of netto) moet zijn vastgelegd voor zowel je verwachte salaris als het gecureerde markttarief voordat een eerlijke vergelijking kan worden getoond.",
         "salaryInputs": "Voer je verwachte salaris in je werknemersprofiel in — de vergelijking verschijnt zodra het er is.",
         "eurostatActivation": "Een begrensde officiële Eurostat-import wordt uitgevoerd."
       },
       "after": {
-        "activation": "Nadat de eigenaar een gegevensbron heeft goedgekeurd en geactiveerd, vult deze kaart zich met onderbouwde, gedateerde cijfers — elk met betrouwbaarheid, versheid, bron en stapsgewijze herkomst."
+        "activation": "Zodra een gegevensbron is ingeschakeld, vult deze kaart zich met onderbouwde, gedateerde cijfers — elk met betrouwbaarheid, versheid, bron en stapsgewijze herkomst."
       }
     },
     "drawer": {
@@ -13281,7 +13272,7 @@
         "labourCostIndex": "Geen salarisaanbod en nooit een basis om het loon van een individu af te leiden."
       },
       "sectionTitle": "Europese arbeidsmarktcontext",
-      "sectionIntro": "Officiële Eurostat-aggregaten voor de EU en geselecteerde Europese markten. Voorbereid, wacht op activering door de eigenaar.",
+      "sectionIntro": "Officiële Eurostat-aggregaten voor de EU en geselecteerde Europese markten.",
       "asOf": "Eurostat-publicatie van {date} — deze cijfers worden hier niet vanzelf ververst.",
       "dataBasis": "Officieel Eurostat-aggregaat (bron: Eurostat)",
       "whyVisible": "Getoond als officiële Europese arbeidsmarktcontext.",

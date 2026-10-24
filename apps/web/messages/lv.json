@@ -1695,7 +1695,7 @@
     "title": "[EN] My documents",
     "subtitle": "[EN] What you have, what is missing, and the next step — per country.",
     "preparing": "Pašlaik nav pieejams.",
-    "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
+    "disclaimer": "[EN] Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities — this is not a legal guarantee.",
     "needsMigration": "Pašlaik nav pieejams.",
     "noWorker": "[EN] Create your worker profile first — documents attach to it.",
     "error": "[EN] Could not load your documents.",
@@ -3020,9 +3020,9 @@
       "coveredShort": "[EN] {count} covered"
     },
     "notes": {
-      "assignmentsPending": "[EN] Assignment data is prepared and joins this view after owner activation.",
-      "languagesPending": "[EN] Language coverage is prepared and joins this view after owner activation.",
-      "brigadesPending": "[EN] Brigade coverage is prepared and joins this view after owner activation.",
+      "assignmentsPending": "[EN] Assignment data is not shown in this view yet.",
+      "languagesPending": "[EN] Language coverage is not shown in this view yet.",
+      "brigadesPending": "[EN] Brigade coverage is not shown in this view yet.",
       "demandError": "[EN] Work needs could not be read right now.",
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
@@ -3056,7 +3056,7 @@
     },
     "stateNote": {
       "insufficientData": "Šim signālam vēl nepietiek īstu datu — godīga sprauga tiek rādīta izdomāta skaitļa vietā.",
-      "needsMigration": "Šī signāla datu krātuve ir sagatavota un tiks pieslēgta pēc īpašnieka aktivizēšanas. Līdz tam nekas netiek lēsts.",
+      "needsMigration": "Šis signāls vēl nav ieslēgts. Līdz tam nekas netiek lēsts.",
       "stale": "Šī signāla pierādījumi ir vecāki par svaiguma logu — uzskatiet tos par novecojušiem."
     },
     "valueClass": {
@@ -3108,7 +3108,7 @@
         "agencyAggregate": "Kopsavilkums starp klientiem"
       },
       "state": {
-        "needsMigration": "Šis signāls ir sagatavots un gaida īpašnieka aktivizēšanu."
+        "needsMigration": "Šis signāls vēl nav ieslēgts."
       },
       "salary": {
         "noBenchmark": "Jūsu profesijai un valstij atsauces vērtība vēl nav pieejama.",
@@ -3143,7 +3143,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Īpašnieka aktivizējama datu krātuve (vēl nav ieslēgta)",
+      "gatedMigration": "Datu krātuve vēl nav ieslēgta",
       "marketRateAverages": "Administratora kūrētie tirgus likmju vidējie rādītāji",
       "journalEvidence": "Jūsu paša darba žurnāla pierādījumi",
       "fillTimeMeasurementsMissing": "Aizpildīšanas laika mērījumi (vēl netiek vākti)",
@@ -3201,14 +3201,14 @@
       },
       "terms": {
         "internal": "Iekšējs aprēķins no kanoniskajām platformas tabulām; kohortu politika aizsargā personas.",
-        "adminCurated": "Īpašnieka ievadītie vidējie rādītāji ar avota piezīmi izlases lieluma vietā.",
-        "statGovLt": "Oficiālā statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
-        "eurostat": "Oficiālā ES statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
+        "adminCurated": "Kurēti vidējie rādītāji ar avota piezīmi izlases lieluma vietā.",
+        "statGovLt": "Oficiālā statistika; nepieciešama avota norāde. Pagaidām netiek izmantota.",
+        "eurostat": "Aktīvs avots. Oficiālā ES statistika; nepieciešama avota norāde.",
         "arbetsformedlingen": "Aktīvs avots. Lietošanas noteikumi apstiprināti: bezmaksas publisks datu avots (CC0). Pie katra sludinājuma tiek norādīts avots, un katrs sludinājums ved uz oriģinālo publikāciju.",
         "nav": "Aktīvs avots. NAV API noteikumi ir pieņemti un piekļuve piešķirta. Pastāvīgie pienākumi tiek pildīti: atsaukts sludinājums tiek nekavējoties noņemts, atjaunināts – ātri atjaunināts, un pieteikšanās saite ved uz oriģinālo sludinājumu.",
-        "cvbankas": "Tikai priekšlikums — lietošanas atļauja nav apstiprināta; nekad netiek jaukts ar iekšējiem skaitļiem.",
-        "eures": "Ierosināts avots. Lietošanas noteikumi vēl nav izskatīti — aktivizēšanai nepieciešams īpašnieka apstiprinājums. Šodien nekas netiek ielādēts.",
-        "uztLt": "Ierosināts avots. Lietošanas noteikumi vēl nav izskatīti — aktivizēšanai nepieciešams īpašnieka apstiprinājums. Šodien nekas netiek ielādēts."
+        "cvbankas": "Ierosināts avots — netiek izmantots; nekad netiek jaukts ar iekšējiem skaitļiem.",
+        "eures": "Ierosināts avots. Netiek izmantots — šodien nekas netiek ielādēts.",
+        "uztLt": "Ierosināts avots. Netiek izmantots — šodien nekas netiek ielādēts."
       },
       "status": {
         "active": "Aktīvs (iekšējs)",
@@ -3220,7 +3220,7 @@
     "methodology": {
       "title": "Metodika",
       "deterministic": "Visas vērtības ir deterministiskas un aprēķinātas no ierakstiem ar avotiem — neko nelēš MI, un neviens skaitlis nekad netiek izdomāts.",
-      "externalOff": "Ārējie avoti ir izslēgti: katra ārējā atsauce ir priekšlikums, kas gaida īpašnieka juridisko apstiprinājumu. Iekšējie un ārējie skaitļi nekad netiek jaukti.",
+      "externalOff": "Ārējie avoti ir izslēgti. Iekšējie un ārējie skaitļi nekad netiek jaukti.",
       "cohort": "Mazas kohortas tiek grupētas vai slēptas, lai aizsargātu personas."
     },
     "contextual": {
@@ -3335,7 +3335,7 @@
       },
       "unavailable": {
         "requirementTitle": "Kas ir vajadzīgs",
-        "sourcesTitle": "Avoti, kas gaida īpašnieka apstiprinājumu"
+        "sourcesTitle": "Avoti, kas vēl netiek izmantoti"
       },
       "reason": {
         "salaryNoBenchmark": "Šeit nav algas skaitļa, jo jūsu profesijai un valstij vēl nav ievadīts kurēts tirgus atskaites punkts, un neviens ārējais algu avots nav apstiprināts lietošanai.",
@@ -3348,14 +3348,14 @@
         "salaryInputsMissing": "Šeit nav algas skaitļa, jo kurēts tirgus atskaites punkts ir ievadīts, taču trūkst jūsu norādītās vēlamās algas, tāpēc nav ko salīdzināt."
       },
       "requirement": {
-        "ownerEnableStore": "Platformas īpašniekam jāieslēdz novērojumu krātuve un jāapstiprina vismaz viens datu avots.",
-        "salaryBenchmark": "Administratoram jāievada kurēts tirgus atskaites punkts jūsu profesijai un valstij, vai platformas īpašniekam jāapstiprina ārējais algu avots.",
+        "ownerEnableStore": "Jāieslēdz novērojumu krātuve un jāapstiprina vismaz viens datu avots.",
+        "salaryBenchmark": "Jāievada kurēts tirgus atskaites punkts jūsu profesijai un valstij vai jāapstiprina ārējais algu avots.",
         "demandOwnRows": "Pievienojiet darba pieprasījumus — kartīte piepildīsies ar jūsu organizācijas datiem, tiklīdz būs ieraksti.",
         "salaryBasis": "Pirms godīga salīdzinājuma parādīšanas jābūt fiksētam, vai jūsu vēlamā alga un kurētais tirgus atskaites punkts ir norādīti bruto vai neto.",
         "salaryInputs": "Ievadiet vēlamo algu savā darbinieka profilā — salīdzinājums parādīsies, tiklīdz tā būs ievadīta."
       },
       "after": {
-        "activation": "Kad īpašnieks apstiprinās un aktivizēs datu avotu, šī kartīte piepildīsies ar pamatotiem, datētiem skaitļiem — katram būs uzticamība, svaigums, avots un soli pa solim izsekojama izcelsme."
+        "activation": "Kad datu avots tiks ieslēgts, šī kartīte piepildīsies ar pamatotiem, datētiem skaitļiem — katram būs uzticamība, svaigums, avots un soli pa solim izsekojama izcelsme."
       }
     },
     "drawer": {
