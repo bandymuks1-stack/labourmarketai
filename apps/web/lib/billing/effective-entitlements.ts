@@ -1,5 +1,5 @@
 import "server-only";
-import { effectivePilotPassStatus } from "@/lib/billing/pilot-pass-core";
+import { effectivePilotPassStatus, isPilotPassSubscriptionId } from "@/lib/billing/pilot-pass-core";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -44,6 +44,9 @@ export interface EffectiveEntitlements extends EntitlementContext {
   readonly cancelAtPeriodEnd: boolean;
   /** End of the current paid period (ISO), as the provider reported it; null when unknown. */
   readonly currentPeriodEnd: string | null;
+  /** The plan row is a one-time pilot pass (pilot-pass-core): a fixed term
+   *  that ends by itself — never a cancelled subscription. Absent = false. */
+  readonly pilotPass?: boolean;
 }
 
 /**
@@ -133,6 +136,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
   let subscriptionStatus: SubStatus | null = null;
   let cancelAtPeriodEnd = false;
   let currentPeriodEnd: string | null = null;
+  let pilotPass = false;
   let manualOverridePlanKey: string | null = null;
   // MODE SCOPE (production defect measured 2026-09-22): admission
   // (`findScopedSubscription`) and the customer lookup filter by the
@@ -220,6 +224,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
       subscriptionStatus = (effectivePilotPassStatus(real, new Date()) as SubStatus) ?? null;
       cancelAtPeriodEnd = real.cancel_at_period_end === true;
       currentPeriodEnd = typeof real.current_period_end === "string" ? real.current_period_end : null;
+      pilotPass = isPilotPassSubscriptionId(String(real.provider_subscription_id ?? ""));
     }
   } else if (error.code !== RELATION_ABSENT) {
     // a non-absent error → stay free/permissive, never throw into a page
@@ -233,7 +238,7 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
     subscriptionStatus,
     manualOverridePlanKey,
   });
-  return { ...ctx, profileId: user.id, cancelAtPeriodEnd, currentPeriodEnd };
+  return { ...ctx, profileId: user.id, cancelAtPeriodEnd, currentPeriodEnd, pilotPass };
 }
 
 /** Server enforcement helper for routes/actions (not just UI hiding). */
