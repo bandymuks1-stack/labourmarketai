@@ -154,6 +154,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261021130000_",
       // 2026-10-22 (RED by SECURITY DEFINER + GRANT, needs-human-gate): aggregate counts for the Agentai OS capability readback route.
       "20261022150000_",
+      // 2026-10-23 (RED by GRANT, needs-human-gate): vacancy retention reads protected ids; sentinel search_path pin.
+      "20261023140000_",
+      "20261023141000_",
       // 2026-10-21: skill confirmation withdrawal phase B (cross-party
       // standing read door; RED, needs-human-gate, NOT applied).
       "20261021095500_",
