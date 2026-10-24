@@ -931,7 +931,9 @@ export function MarketplaceListingsSection({
                       visitor reads what each does. Hiding from search (pause,
                       complete) is reversible and sits apart from the one
                       irreversible act, which confirms first. */}
-                  <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+                  {/* min-w-0, not shrink-0: an armed delete confirmation must
+                      wrap inside the row, never push past the card. */}
+                  <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     {row.status !== "active" ? (
                       <button
                         type="button"
