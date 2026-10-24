@@ -2,7 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, Eye, Pause, Play } from "lucide-react";
+import { Plus, Pencil, Eye, Pause, Play } from "lucide-react";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
+import { InlineConfirm } from "@/components/ui/InlineConfirm";
 import {
   createServiceOffering,
   updateServiceOffering,
@@ -50,6 +52,9 @@ export type ServiceOfferingsLabels = {
   cancel: string;
   edit: string;
   remove: string;
+  /** Asked before the permanent delete; names pause as the reversible way. */
+  removeQuestion: string;
+  removeYes: string;
   activate: string;
   pause: string;
   errorTitleRequired: string;
@@ -82,10 +87,11 @@ const EMPTY_DRAFT: Draft = {
   rateText: "",
 };
 
-const STATUS_RING: Record<ServiceOfferingStatus, string> = {
-  draft: "border-ink-500 bg-ink-800/40 text-text-muted",
-  active: "border-state-success/40 bg-state-success/5 text-state-success",
-  paused: "border-state-warning/40 bg-state-warning/5 text-state-warning",
+/** Only an active offering is a positive fact for the provider; the rest are quiet. */
+const STATUS_VARIANT: Record<ServiceOfferingStatus, StatusChipVariant> = {
+  draft: "neutral",
+  active: "success",
+  paused: "neutral",
 };
 
 export function ServiceOfferingsSection({
@@ -353,12 +359,13 @@ export function ServiceOfferingsSection({
                     <span className="break-words text-sm font-medium text-text-primary">
                       {row.title}
                     </span>
-                    <span
-                      className={`shrink-0 rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_RING[row.status]}`}
-                      data-testid={`service-offering-status-${row.id}`}
+                    <StatusChip
+                      variant={STATUS_VARIANT[row.status]}
+                      testid={`service-offering-status-${row.id}`}
+                      className="shrink-0 px-2 py-0.5 text-meta"
                     >
                       {labels.status[row.status]}
-                    </span>
+                    </StatusChip>
                   </div>
                   {row.description && (
                     <p className="text-xs leading-relaxed text-text-secondary">{row.description}</p>
@@ -416,16 +423,20 @@ export function ServiceOfferingsSection({
                       <Pencil className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
                       {labels.edit}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => remove(row)}
+                    {/* Permanent, so it asks first and says that pausing is the
+                        reversible way to leave search — never one click beside
+                        Pause. */}
+                    <InlineConfirm
+                      label={labels.remove}
+                      question={labels.removeQuestion}
+                      confirmLabel={labels.removeYes}
+                      cancelLabel={labels.cancel}
+                      tier="strong_irreversible"
+                      onConfirm={() => remove(row)}
                       disabled={pending}
-                      className="inline-flex items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-medium text-text-muted hover:border-state-danger hover:text-state-danger disabled:opacity-60"
-                      data-testid={`service-offering-delete-${row.id}`}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                      {labels.remove}
-                    </button>
+                      className="inline-flex items-center gap-1 rounded-md border border-transparent px-2.5 py-1 text-xs font-medium text-state-danger hover:border-state-danger disabled:opacity-60"
+                      testId={`service-offering-delete-${row.id}`}
+                    />
                   </div>
                 </li>
               ))}

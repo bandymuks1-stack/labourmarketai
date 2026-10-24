@@ -26,18 +26,21 @@ for (const locale of ["lt", "en", "ru"] as const) {
     const page = await ctx.newPage();
 
     await page.goto(`/${locale}/dashboard/work-in-numbers`);
-    const wi = page.getByTestId("work-in-numbers");
+    // Scoped to <main> (hidden streaming holder, prod-journal-confirm.spec.ts).
+    const main = page.getByRole("main");
+    const wi = main.getByTestId("work-in-numbers");
     await expect(wi).toBeVisible({ timeout: 30_000 });
-    const potential = page.getByTestId("wi-potential");
+    const potential = main.getByTestId("wi-potential");
     const hasPotential = await potential.isVisible().catch(() => false);
-    const items = await page.locator('[data-testid^="wi-potential-"]').allInnerTexts();
+    const items = await main.locator('[data-testid^="wi-potential-"]').allInnerTexts();
     console.info(`[cv-growth] ${locale} potential shown=${hasPotential} items=${items.length}: ${items.slice(0, 6).join(" | ").replace(/\s+/g, " ")}`);
 
     await page.goto(`/${locale}/cv`);
-    const confirmed = page.getByTestId("cv-confirmed-work");
+    // /cv has no <main> landmark: strict over the VISIBLE nodes instead (#2721).
+    const confirmed = page.getByTestId("cv-confirmed-work").filter({ visible: true });
     await expect(confirmed).toBeVisible({ timeout: 30_000 });
     const entries = Number(await confirmed.getAttribute("data-entries"));
-    const recorded = await page.getByTestId("cv-recorded-hours").innerText().catch(() => "(no recorded-hours block)");
+    const recorded = await page.getByTestId("cv-recorded-hours").filter({ visible: true }).innerText().catch(() => "(no recorded-hours block)");
     console.info(`[cv-growth] ${locale} confirmed entries=${entries}; recorded: ${recorded.replace(/\s+/g, " ").slice(0, 200)}`);
     expect(entries, "confirmed work accumulates on the Living CV").toBeGreaterThan(0);
     // Decision 0023: a worker with evidenced work across sectors is shown

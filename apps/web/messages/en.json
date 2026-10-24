@@ -157,17 +157,15 @@
     "cancel": "Cancel",
     "edit": "Edit",
     "remove": "Delete",
-    "removeConfirm": "Delete this listing permanently?",
     "activate": "Publish",
-    "close": "Close",
-    "reopen": "Reopen as draft",
+    "close": "Complete",
     "errorTitleRequired": "A title of at least 3 characters is required.",
     "errorCountry": "Use a 2-letter country code (e.g. DE).",
     "errorGeneric": "Something went wrong. Please try again.",
     "status": {
       "draft": "Draft",
       "active": "Active",
-      "closed": "Closed",
+      "closed": "Completed",
       "paused": "Paused"
     },
     "kinds": {
@@ -270,7 +268,18 @@
     "formPublisherLabel": "Published by",
     "publisherSelf": "Me personally",
     "publishedAs": "As {name}",
-    "publishedAsOrganization": "As an organization"
+    "publishedAsOrganization": "As an organization",
+    "republish": "Publish again",
+    "removeForever": "Delete permanently",
+    "removeQuestion": "Delete permanently? This cannot be undone. To only hide it from search, pause or complete it instead.",
+    "removeYes": "Yes, delete",
+    "searchState": {
+      "draft": "Draft — not visible to others yet. Publish it when it is ready.",
+      "active": "Visible in search — others can find it and message you.",
+      "paused": "Paused — hidden from search. Publish it again when it is relevant.",
+      "closed": "Completed — hidden from search; conversations and history are kept.",
+      "expired": "Expired — hidden from search. Change the expiry date and publish it again."
+    }
   },
   "quality": {
     "title": "Defects & quality",
@@ -6875,7 +6884,7 @@
     "saving": "Saving...",
     "cancel": "Cancel",
     "edit": "Edit",
-    "remove": "Remove",
+    "remove": "Delete permanently",
     "activate": "Activate",
     "pause": "Pause",
     "errorTitleRequired": "Add a service title.",
@@ -6893,7 +6902,9 @@
       "paused": "Paused — hidden from members. Activate to make it findable again."
     },
     "linkToRequests": "See requests for your services",
-    "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead."
+    "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead.",
+    "removeQuestion": "Delete this service permanently? This cannot be undone. To only hide it from search, pause it instead.",
+    "removeYes": "Yes, delete"
   },
   "communication": {
     "origin": {
