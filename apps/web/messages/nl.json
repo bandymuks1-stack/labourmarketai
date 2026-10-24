@@ -157,17 +157,15 @@
     "cancel": "Annuleren",
     "edit": "Bewerken",
     "remove": "Verwijderen",
-    "removeConfirm": "Deze advertentie definitief verwijderen?",
     "activate": "Publiceren",
-    "close": "Sluiten",
-    "reopen": "Heropenen als concept",
+    "close": "Afronden",
     "errorTitleRequired": "Een titel van minstens 3 tekens is vereist.",
     "errorCountry": "Gebruik een landcode van 2 letters (bijv. DE).",
     "errorGeneric": "Er ging iets mis. Probeer het opnieuw.",
     "status": {
       "draft": "Concept",
       "active": "Actief",
-      "closed": "Gesloten",
+      "closed": "Afgerond",
       "paused": "Gepauzeerd"
     },
     "kinds": {
@@ -270,7 +268,18 @@
     "formPublisherLabel": "Geplaatst door",
     "publisherSelf": "Ikzelf",
     "publishedAs": "Als {name}",
-    "publishedAsOrganization": "Als organisatie"
+    "publishedAsOrganization": "Als organisatie",
+    "republish": "Opnieuw publiceren",
+    "removeForever": "Definitief verwijderen",
+    "removeQuestion": "Definitief verwijderen? Dit kan niet ongedaan worden gemaakt. Wil je de advertentie alleen uit de zoekresultaten halen, pauzeer of rond haar dan af.",
+    "removeYes": "Ja, verwijderen",
+    "searchState": {
+      "draft": "Concept — nog niet zichtbaar voor anderen. Publiceer het wanneer het klaar is.",
+      "active": "Zichtbaar in de zoekresultaten — anderen kunnen het vinden en je een bericht sturen.",
+      "paused": "Gepauzeerd — verborgen in de zoekresultaten. Publiceer het opnieuw wanneer het weer actueel is.",
+      "closed": "Afgerond — verborgen in de zoekresultaten; gesprekken en geschiedenis blijven bewaard.",
+      "expired": "Verlopen — verborgen in de zoekresultaten. Wijzig de vervaldatum en publiceer het opnieuw."
+    }
   },
   "quality": {
     "title": "Gebreken & kwaliteit",
@@ -6875,7 +6884,7 @@
     "saving": "Opslaan...",
     "cancel": "Annuleren",
     "edit": "Bewerken",
-    "remove": "Verwijderen",
+    "remove": "Definitief verwijderen",
     "activate": "Activeren",
     "pause": "Pauzeren",
     "errorTitleRequired": "Voeg een diensttitel toe.",
@@ -6893,7 +6902,9 @@
       "paused": "Gepauzeerd — verborgen voor leden. Activeer om het weer vindbaar te maken."
     },
     "linkToRequests": "Bekijk aanvragen voor jouw diensten",
-    "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren."
+    "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren.",
+    "removeQuestion": "Deze dienst definitief verwijderen? Dit kan niet ongedaan worden gemaakt. Wil je hem alleen uit de zoekresultaten halen, pauzeer hem dan.",
+    "removeYes": "Ja, verwijderen"
   },
   "communication": {
     "origin": {

@@ -157,17 +157,15 @@
     "cancel": "Abbrechen",
     "edit": "Bearbeiten",
     "remove": "Löschen",
-    "removeConfirm": "Diese Anzeige endgültig löschen?",
     "activate": "Veröffentlichen",
-    "close": "Schließen",
-    "reopen": "Als Entwurf wieder öffnen",
+    "close": "Abschließen",
     "errorTitleRequired": "Ein Titel mit mindestens 3 Zeichen ist erforderlich.",
     "errorCountry": "Verwenden Sie einen 2-Buchstaben-Ländercode (z. B. DE).",
     "errorGeneric": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
     "status": {
       "draft": "Entwurf",
       "active": "Aktiv",
-      "closed": "Geschlossen",
+      "closed": "Abgeschlossen",
       "paused": "Pausiert"
     },
     "kinds": {
@@ -270,7 +268,18 @@
     "formPublisherLabel": "Veröffentlicht von",
     "publisherSelf": "Ich persönlich",
     "publishedAs": "Als {name}",
-    "publishedAsOrganization": "Als Organisation"
+    "publishedAsOrganization": "Als Organisation",
+    "republish": "Erneut veröffentlichen",
+    "removeForever": "Endgültig löschen",
+    "removeQuestion": "Endgültig löschen? Das lässt sich nicht rückgängig machen. Um das Inserat nur aus der Suche zu nehmen, pausiere es oder schließe es ab.",
+    "removeYes": "Ja, löschen",
+    "searchState": {
+      "draft": "Entwurf — für andere noch nicht sichtbar. Veröffentliche das Inserat, wenn es fertig ist.",
+      "active": "In der Suche sichtbar — andere können es finden und dir schreiben.",
+      "paused": "Pausiert — aus der Suche ausgeblendet. Veröffentliche es erneut, wenn es wieder aktuell ist.",
+      "closed": "Abgeschlossen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
+      "expired": "Abgelaufen — aus der Suche ausgeblendet. Ändere das Ablaufdatum und veröffentliche es erneut."
+    }
   },
   "quality": {
     "title": "Mängel & Qualität",
@@ -6875,7 +6884,7 @@
     "saving": "Wird gespeichert...",
     "cancel": "Abbrechen",
     "edit": "Bearbeiten",
-    "remove": "Entfernen",
+    "remove": "Endgültig löschen",
     "activate": "Aktivieren",
     "pause": "Pausieren",
     "errorTitleRequired": "Fügen Sie einen Titel für die Dienstleistung hinzu.",
@@ -6893,7 +6902,9 @@
       "paused": "Pausiert — für Mitglieder ausgeblendet. Aktivieren Sie sie, um sie wieder auffindbar zu machen."
     },
     "linkToRequests": "Anfragen zu Ihren Dienstleistungen ansehen",
-    "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren."
+    "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren.",
+    "removeQuestion": "Diese Leistung endgültig löschen? Das lässt sich nicht rückgängig machen. Um sie nur aus der Suche zu nehmen, pausiere sie.",
+    "removeYes": "Ja, löschen"
   },
   "communication": {
     "origin": {
