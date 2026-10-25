@@ -507,14 +507,14 @@ function Scene({ field, isSel, toggle }: { field: ProjectField; isSel: (s: Selec
         {field.people.length === 0 ? (
           <p className="text-sm text-text-muted" data-testid="project-field-people-empty">{t("peopleEmpty")}</p>
         ) : (
-          <ul className="grid gap-2 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {field.people.map((p) => (
-              <li key={p.workerId}>
+              <li className="min-w-0" key={p.workerId}>
                 <TokenButton token={p} pressed={isSel({ kind: "token", workerId: p.workerId })} onClick={() => toggle({ kind: "token", workerId: p.workerId })} />
               </li>
             ))}
             {field.peopleTotal > field.people.length ? (
-              <li className="flex min-h-11 items-center rounded-md border border-dashed border-ink-500 px-3 text-sm text-text-secondary" data-testid="project-field-people-cluster">
+              <li className="flex min-h-11 min-w-0 items-center rounded-md border border-dashed border-ink-500 px-3 text-sm text-text-secondary" data-testid="project-field-people-cluster">
                 {t("moreInList", { n: field.peopleTotal - field.people.length })}
               </li>
             ) : null}
@@ -527,9 +527,9 @@ function Scene({ field, isSel, toggle }: { field: ProjectField; isSel: (s: Selec
           <h3 className={META}>
             {t("slotsTitle")} · {field.slotsTotal}
           </h3>
-          <ul className="grid gap-2 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {field.slots.map((s) => (
-              <li key={s.id}>
+              <li className="min-w-0" key={s.id}>
                 <SlotButton slot={s} pressed={isSel({ kind: "slot", id: s.id })} onClick={() => toggle({ kind: "slot", id: s.id })} />
               </li>
             ))}
@@ -553,9 +553,9 @@ function Scene({ field, isSel, toggle }: { field: ProjectField; isSel: (s: Selec
         {field.ready.rows.length === 0 ? (
           <ReadyEmpty field={field} />
         ) : (
-          <ul className="grid gap-2 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {field.ready.rows.map((r) => (
-              <li key={r.workerId}>
+              <li className="min-w-0" key={r.workerId}>
                 <ReadyButton row={r} pressed={isSel({ kind: "ready", workerId: r.workerId })} onClick={() => toggle({ kind: "ready", workerId: r.workerId })} />
               </li>
             ))}
@@ -607,7 +607,7 @@ function ListEquivalent({ field, isSel, toggle }: { field: ProjectField; isSel: 
         ) : (
           <ul className="flex flex-col gap-2">
             {field.people.map((p) => (
-              <li key={p.workerId}>
+              <li className="min-w-0" key={p.workerId}>
                 <TokenButton token={p} pressed={isSel({ kind: "token", workerId: p.workerId })} onClick={() => toggle({ kind: "token", workerId: p.workerId })} />
               </li>
             ))}
@@ -629,7 +629,7 @@ function ListEquivalent({ field, isSel, toggle }: { field: ProjectField; isSel: 
         ) : (
           <ul className="flex flex-col gap-2">
             {field.slots.map((s) => (
-              <li key={s.id}>
+              <li className="min-w-0" key={s.id}>
                 <SlotButton slot={s} pressed={isSel({ kind: "slot", id: s.id })} onClick={() => toggle({ kind: "slot", id: s.id })} />
               </li>
             ))}
@@ -645,7 +645,7 @@ function ListEquivalent({ field, isSel, toggle }: { field: ProjectField; isSel: 
         ) : (
           <ul className="flex flex-col gap-2">
             {field.ready.rows.map((r) => (
-              <li key={r.workerId}>
+              <li className="min-w-0" key={r.workerId}>
                 <ReadyButton row={r} pressed={isSel({ kind: "ready", workerId: r.workerId })} onClick={() => toggle({ kind: "ready", workerId: r.workerId })} />
               </li>
             ))}
