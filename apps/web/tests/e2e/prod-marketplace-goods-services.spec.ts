@@ -315,13 +315,27 @@ test("S-3. the provider sees the request with its message and accepts with a not
   await page.goto(`/${l}/dashboard/service-requests`);
   const incoming = inMain(page).getByTestId("marketplace-incoming-row").filter({ hasText: say("Gama: biuras 40 m²") }).first();
   await expect(incoming).toBeVisible({ timeout: 30_000 });
+  // The note is a controlled field and accept is an onClick server action:
+  // both need the hydrated page (a fill before hydration is reset, a click is
+  // a no-op).
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   await incoming.getByTestId("marketplace-incoming-note").fill(say("tiekėjas: tinka, atvyksiu apžiūrėti"));
   await incoming.getByTestId("marketplace-incoming-accept").click();
+  // Wait for the action's OWN answer before any reload. It runs in a
+  // transition and refreshes the page itself; the old poll reloaded at once
+  // and aborted it in flight. Runs 40041885923 and 40153053041 never reached
+  // `respond_service_offering_request` (Supabase edge logs), and the request
+  // stayed `sent`. A refusal surfaces as the section's alert.
+  const answeredCta = incoming.getByTestId("marketplace-incoming-message-cta");
+  const refused = inMain(page).getByTestId("marketplace-loop-error");
+  await expect(answeredCta.or(refused).first(), "the accept answered").toBeVisible({ timeout: 30_000 });
+  if (await refused.isVisible()) throw new Error(`accept refused: ${await refused.innerText()}`);
+  // Persistence: a fresh load still shows the accepted request's message door.
   await expect
     .poll(
       async () => {
         await page.reload();
-        return page
+        return inMain(page)
           .getByTestId("marketplace-incoming-row")
           .filter({ hasText: say("Gama: biuras 40 m²") })
           .getByTestId("marketplace-incoming-message-cta")
