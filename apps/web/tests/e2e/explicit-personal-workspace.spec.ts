@@ -37,13 +37,24 @@ async function login(page: Page): Promise<void> {
   await page.waitForURL(/\/dashboard/, { timeout: 60_000 });
 }
 
+/** THE chip a person sees. The SAME `WorkspaceChip` is mounted in the full
+ *  dashboard chrome (W8 slice 1) and in the conversation header, and only one
+ *  of them is visible on a given surface — a bare testid locator matches both
+ *  and trips Playwright's strict mode. Still strict over the VISIBLE ones. */
+const visibleChip = (page: Page) =>
+  page.locator('[data-testid="workspace-chip"]').filter({ visible: true });
+
 /** Open the workspace chip menu and return the option ids it offers. */
 async function openChip(page: Page): Promise<string[]> {
-  const chip = page.locator('[data-testid="workspace-chip"]');
+  const chip = visibleChip(page);
   await expect(chip).toBeVisible({ timeout: 30_000 });
-  await chip.locator("button").first().click();
   const menu = page.locator('[data-testid="workspace-chip-menu"]');
-  await expect(menu).toBeVisible({ timeout: 15_000 });
+  // A click before hydration is a silent no-op (the same race
+  // workspace-switch-no-reload.spec.ts retries): click until the menu opens.
+  await expect(async () => {
+    if (!(await menu.isVisible())) await chip.locator("button").first().click();
+    await expect(menu).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 30_000 });
   return (
     await menu.locator("[data-testid^='workspace-option-']").evaluateAll((els) =>
       els.map((e) => (e.getAttribute("data-testid") ?? "").replace("workspace-option-", "")),

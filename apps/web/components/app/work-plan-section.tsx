@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { WorkPlanCancelButton, WorkPlanForm } from "@/components/app/work-plan-form";
+import { RevealOnMount } from "@/components/app/hash-scroll-on-load";
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { listManagedProjects } from "@/lib/projects/projects";
 import { getEmployerWorkerAvailability, unavailabilityOverlaps } from "@/lib/planning/employer-availability";
@@ -113,6 +114,7 @@ export async function WorkPlanSection({
                 ? "status"
                 : "alert"
             }
+            id="work-plan-notice"
             className={`mt-3 rounded-md border px-3 py-2 text-xs ${noticeTone}`}
             data-testid="work-plan-notice"
             data-outcome={notice}
@@ -120,6 +122,11 @@ export async function WorkPlanSection({
             {t(`outcome.${notice}`)}
           </p>
         )}
+        {/* The outcome is brought to the person: a server-action redirect left
+            a phone at the top of a ~3,000px page with this notice far below
+            (UX review 2026-10-24). A per-render key remounts it on EVERY
+            submission, including a repeat that lands on the same URL. */}
+        {notice && <RevealOnMount key={crypto.randomUUID()} targetId="work-plan-notice" />}
 
         {!organizationId || entries === null || !entries.applied ? (
           <p className="mt-4 text-sm text-text-secondary" data-testid="work-plan-unavailable">

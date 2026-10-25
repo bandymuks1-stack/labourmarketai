@@ -94,6 +94,9 @@ export const CLIENT_MESSAGE_ROOTS = [
   "languageFeedback",
   "live",
   "map",
+  /** The ONE lifecycle contract's words (lib/market-lifecycle): the same
+   *  actions, states and visibility lines on every own need / offer row. */
+  "marketLifecycle",
   "marketMap",
   "marketMapBase",
   "marketPulse",

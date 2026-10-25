@@ -244,10 +244,14 @@ test.describe("Conversation UI — authenticated /dashboard (desktop)", () => {
     // screen. It is the reachability half of the same rot: the id resolves in
     // source, the control is simply not there.
     //
-    // The canonical way in is the composer, and it is the SAME code path —
-    // the typed `cv` intent dispatches `handleChip({ id: "cv" })` verbatim
-    // (`intent-router.ts` classifies "Parodyk mano CV" as `cv`).
-    await say(page, "Parodyk mano CV.");
+    // The canonical way in is the composer. "Parodyk mano CV" no longer
+    // reaches the import: since #1606 a person asking to SEE their CV is shown
+    // what the product holds (`cv-view`), never told to upload one. An
+    // explicit upload sentence ("Įkelk mano CV") is a FILE intent (#1684,
+    // `fileSelfCv`): the chat names the door as ONE `cv` chip, and taking it
+    // dispatches the same `handleChip({ id: "cv" })` the starter row did.
+    await say(page, "Įkelk mano CV.");
+    await page.getByTestId("chat-chip-cv").last().click({ timeout: 20_000 });
 
     // The real CV flow (upload → deterministic parse → canonical confirm), in
     // the conversation — not a link out to another screen.

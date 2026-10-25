@@ -8,8 +8,10 @@ import {
   isAllowedPushEndpoint,
   isValidSubscription,
   vapidAuthorization,
+  vapidPrivateKeyBytes,
   VAPID_TOKEN_SECONDS,
 } from "./web-push-protocol";
+import { webPushStatus } from "./web-push-config";
 
 // RFC 8291 Appendix A — the published end-to-end example.
 const RFC = {
@@ -127,5 +129,40 @@ describe("only real push services are ever called (no SSRF)", () => {
     expect(isValidSubscription({ endpoint: "https://fcm.googleapis.com/x", p256dh: RFC.auth, auth: RFC.auth })).toBe(false);
     expect(isValidSubscription({ endpoint: "https://fcm.googleapis.com/x", p256dh: RFC.uaPublic, auth: "a+b/" })).toBe(false);
     expect(isValidSubscription({ endpoint: 42, p256dh: RFC.uaPublic, auth: RFC.auth })).toBe(false);
+  });
+});
+
+describe("a VAPID private key with a leading zero byte is the same key", () => {
+  // Node's createECDH().getPrivateKey() drops a leading 0x00 (~1 key in 256),
+  // which made CI flaky and would have left a valid owner key silently OFF.
+  const padded = Buffer.concat([Buffer.from([0]), Buffer.alloc(31, 7)]);
+  const keys = createECDH("prime256v1");
+  keys.setPrivateKey(padded);
+  const publicKey = keys.getPublicKey().toString("base64url");
+  const unpadded = padded.subarray(1).toString("base64url");
+
+  it("left-pads 31 bytes to the same 32-byte scalar; rejects empty and over-long", () => {
+    expect(vapidPrivateKeyBytes(unpadded)?.equals(padded)).toBe(true);
+    expect(vapidPrivateKeyBytes(padded.toString("base64url"))?.equals(padded)).toBe(true);
+    expect(vapidPrivateKeyBytes("")).toBeNull();
+    expect(vapidPrivateKeyBytes(Buffer.alloc(33, 1).toString("base64url"))).toBeNull();
+  });
+
+  it("signs with the unpadded form and the config treats it as present", () => {
+    const header = vapidAuthorization({
+      endpoint: "https://fcm.googleapis.com/fcm/send/abc123",
+      subject: "mailto:ops@example.com",
+      publicKey,
+      privateKey: unpadded,
+      nowSeconds: 1_000_000,
+    });
+    expect(header).toMatch(/^vapid t=[\w-]+\.[\w-]+\.[\w-]+, k=[\w-]+$/);
+    const status = webPushStatus({
+      WEB_PUSH_ENABLED: "true",
+      WEB_PUSH_VAPID_PUBLIC_KEY: publicKey,
+      WEB_PUSH_VAPID_PRIVATE_KEY: unpadded,
+      WEB_PUSH_VAPID_SUBJECT: "mailto:ops@example.com",
+    });
+    expect(status.active).toBe(true);
   });
 });

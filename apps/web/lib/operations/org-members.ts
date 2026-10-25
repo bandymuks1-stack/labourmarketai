@@ -1,6 +1,7 @@
 import "server-only";
 import { countedOnce, type CorrectionChainRow } from "@/lib/journal/counted-once";
 import { createClient } from "@/lib/supabase/server";
+import { workerDisplayNamesByProfile } from "@/lib/operations/member-display-names";
 
 /**
  * Read model for the owner's canonical org-members panel (Phase 2). All reads
@@ -192,17 +193,7 @@ export async function getOrgMembersData(
   const unnamed = (ecRows ?? [])
     .filter((r) => profName(r.profiles) === "—" && r.profile_id)
     .map((r) => r.profile_id as string);
-  const displayByProfile = new Map<string, string>();
-  if (unnamed.length > 0) {
-    const { data: wRows } = await supabase
-      .from("workers")
-      .select("profile_id, display_name")
-      .in("profile_id", unnamed);
-    for (const w of (wRows ?? []) as { profile_id: string | null; display_name: string | null }[]) {
-      const d = w.display_name?.trim();
-      if (w.profile_id && d) displayByProfile.set(w.profile_id, d);
-    }
-  }
+  const displayByProfile = await workerDisplayNamesByProfile(supabase, unnamed);
   const reviewableSlugs = new Set<string>(
     rtError || !rtRows ? ["employee"] : (rtRows as { slug: string }[]).map((r) => r.slug),
   );

@@ -95,6 +95,13 @@ const PROJECT_NAME_STOPWORDS = new Set([
   "projektas", "projekto", "projekte", "objektas", "objekto", "objekte",
   "project", "projekt", "site", "uab", "the", "and", "ir",
   "statyba", "statybos", "darbai", "works",
+  // The same generic place / work words in the other active languages (UX
+  // review 2026-10-24, row 8.2): "auf der Baustelle gemauert" must not
+  // preselect a project titled "Baustelle Mitte".
+  "baustelle", "baustellen", "bouwplaats", "locatie", "budowa", "budowie", "budowy",
+  "obiekt", "obiekcie", "объект", "объекте", "объекта", "стройка", "стройке",
+  "проект", "проекте", "projekte", "projektu", "werk", "arbeit", "arbeiten",
+  "der", "die", "das", "het", "een", "for", "with",
 ]);
 
 function nameWords(s: string): string[] {

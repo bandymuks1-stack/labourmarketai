@@ -145,9 +145,12 @@ export default async function OnboardingPage({
   const metaFullName =
     typeof meta.full_name === "string" ? meta.full_name : "";
   const metaName = typeof meta.name === "string" ? meta.name : "";
-  const emailLocal = user.email ? user.email.split("@")[0] : "";
+  // Never the e-mail handle: "uxv-d1-w-m" is not a name, and a prefilled
+  // field gets accepted as-is (UX review 2026-10-24, 1.4). Only a name the
+  // person or their identity provider actually gave is offered; otherwise
+  // the field starts empty and the person types it.
   const defaultName =
-    [profile?.full_name, metaFullName, metaName, emailLocal]
+    [profile?.full_name, metaFullName, metaName]
       .map((v) => (v ?? "").trim())
       .find((v) => v.length > 0) ?? "";
 

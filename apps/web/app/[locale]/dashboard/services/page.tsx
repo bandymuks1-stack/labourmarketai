@@ -40,6 +40,7 @@ export default async function ServicesPage({
   // unapplied migration — never to "you have no offerings" (audit 2026-10-16).
   const needsMigration = result.kind === "needs-migration" || result.kind === "unavailable";
   const rows = result.kind === "ok" ? result.rows : [];
+  const closedSupported = result.kind === "ok" && result.closedSupported === true;
 
   const labels: ServiceOfferingsLabels = {
     title: t("title"),
@@ -64,24 +65,11 @@ export default async function ServicesPage({
     saving: t("saving"),
     cancel: t("cancel"),
     edit: t("edit"),
-    remove: t("remove"),
-    activate: t("activate"),
-    pause: t("pause"),
     errorTitleRequired: t("errorTitleRequired"),
     errorCountry: t("errorCountry"),
     errorGeneric: t("errorGeneric"),
     errorHasRequests: t("errorHasRequests"),
     remoteBadge: t("remoteBadge"),
-    status: {
-      draft: t("status.draft"),
-      active: t("status.active"),
-      paused: t("status.paused"),
-    },
-    discoverability: {
-      draft: t("discoverability.draft"),
-      active: t("discoverability.active"),
-      paused: t("discoverability.paused"),
-    },
   };
 
   return (
@@ -93,6 +81,7 @@ export default async function ServicesPage({
       <ServiceOfferingsSection
         initialRows={rows}
         needsMigration={needsMigration}
+        closedSupported={closedSupported}
         labels={labels}
       />
       {/* Cross-link to the other half of the loop — where requests for these

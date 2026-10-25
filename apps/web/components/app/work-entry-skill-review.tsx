@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { quoteText } from "@/lib/i18n/quote";
 import { Check, X, ArrowRight, ShieldCheck, Activity } from "lucide-react";
 import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
 import {
@@ -35,6 +36,7 @@ export function WorkEntrySkillReview({
   existingSkills: readonly ExistingSkillRef[];
 }) {
   const t = useTranslations("workEntryReview");
+  const locale = useLocale();
   const review = useMemo(
     () => buildEntrySkillReview(text, existingSkills),
     [text, existingSkills],
@@ -226,7 +228,7 @@ export function WorkEntrySkillReview({
             {review.unmapped.map((u, i) => (
               <li key={i} className="flex items-center gap-2 text-xs text-text-secondary">
                 <ArrowRight className="h-3.5 w-3.5 shrink-0 text-text-muted" strokeWidth={1.75} aria-hidden />
-                „{u.phrase}&quot;
+                {quoteText(locale, u.phrase)}
               </li>
             ))}
           </ul>

@@ -157,17 +157,15 @@
     "cancel": "Cancel",
     "edit": "Edit",
     "remove": "Delete",
-    "removeConfirm": "Delete this listing permanently?",
     "activate": "Publish",
-    "close": "Close",
-    "reopen": "Reopen as draft",
+    "close": "Complete",
     "errorTitleRequired": "A title of at least 3 characters is required.",
     "errorCountry": "Use a 2-letter country code (e.g. DE).",
     "errorGeneric": "Something went wrong. Please try again.",
     "status": {
       "draft": "Draft",
       "active": "Active",
-      "closed": "Closed",
+      "closed": "Completed",
       "paused": "Paused"
     },
     "kinds": {
@@ -270,7 +268,18 @@
     "formPublisherLabel": "Published by",
     "publisherSelf": "Me personally",
     "publishedAs": "As {name}",
-    "publishedAsOrganization": "As an organization"
+    "publishedAsOrganization": "As an organization",
+    "republish": "Publish again",
+    "removeForever": "Delete permanently",
+    "removeQuestion": "Delete permanently? This cannot be undone. To only hide it from search, pause or complete it instead.",
+    "removeYes": "Yes, delete",
+    "searchState": {
+      "draft": "Draft — not visible to others yet. Publish it when it is ready.",
+      "active": "Visible in search — others can find it and message you.",
+      "paused": "Paused — hidden from search. Publish it again when it is relevant.",
+      "closed": "Completed — hidden from search; conversations and history are kept.",
+      "expired": "Expired — hidden from search. Change the expiry date and publish it again."
+    }
   },
   "quality": {
     "title": "Defects & quality",
@@ -1908,7 +1917,7 @@
     "workerVisibilityNote": "Honest status: inquiries from verified companies are shown to workers on their opportunities board. Verification is a manual review — until your company is verified, your inquiries stay private to you and the review team.",
     "empty": "No inquiries submitted yet. Submit your inquiry above and it will appear here with its status.",
     "created": "Created",
-    "manageHelp": "Drafts can be deleted. Closing or reopening a submitted inquiry — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "manageHelp": "Complete an inquiry, remove it from the market or publish it again right here in the list; a draft can be continued or discarded. Confirming its recognized skills is done from its scouting view. Editing submitted text is not available yet.",
     "detailsLabel": "Submitted details",
     "fields": {
       "description": "Description",
@@ -2129,6 +2138,10 @@
           "title": "Start your company profile",
           "body": "You don't have a company profile yet. Create one — it's active and usable straight away, no waiting for approval.",
           "cta": "Start company setup"
+        },
+        "personalSpace": {
+          "title": "You are in your personal space",
+          "body": "Company tools open in that organisation's workspace — there is no need to create a second organisation. Open yours:"
         }
       },
       "typeNotes": {
@@ -3560,7 +3573,7 @@
     "opportunities": "Opportunities: see work that fits you. Visibility depends on network size and your readiness.",
     "marketplaceMap": "Market map: labour-market signals by country and region. A more precise point appears once a location is set.",
     "adminReview": "System maintenance: for the administrator only. Normal users never see these screens.",
-    "paymentReadiness": "Payments are being prepared: paid access is not active yet. For now the first users are onboarded manually / via owner review. Stripe is connected in the next stage.",
+    "paymentReadiness": "Payments are being prepared: paid access is not active yet.",
     "identityModel": "Two base identities: a person and a company. Buying, selling, hiring and agency activity are actions, not separate identities."
   },
   "profileIdentityNotice": {
@@ -3932,7 +3945,7 @@
       "evidenceRecs": "References — help back up your reliability.",
       "evidenceLegal": "ID or legal documents — used only when needed for hiring or a legal process.",
       "privacyNote": "Your documents stay private. They are not shown to an employer or client without a clear basis.",
-      "uploadCostNote": "Uploading a CV is free — no LMC is charged. The system handles the file size itself."
+      "uploadCostNote": "Uploading a CV is free — no platform credits (LMC) are charged. The system handles the file size itself."
     }
   },
   "live": {
@@ -6250,6 +6263,11 @@
           "trip": "Business trip",
           "absence": "Unavailable",
           "plan": "Planned work"
+        },
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
     },
@@ -6399,7 +6417,7 @@
       "totalAssigned": "Assigned",
       "viaTeam": "Via team",
       "ready": "Ready",
-      "readyBasis": "Based only on the fields checked here.",
+      "readyBasis": "Based only on the checked fields: skills and work evidence. Documents never lower readiness.",
       "needsDeclaredSkills": "No declared skills",
       "needsEvidence": "No work evidence",
       "needsFollowUp": "Needs follow-up",
@@ -6418,7 +6436,7 @@
     "workersTitle": "Workers on this project",
     "noWorkers": "No workers are assigned to this project yet. Assign workers from your team to start operations.",
     "worker": {
-      "readyChip": "Ready (checked fields)",
+      "readyChip": "Ready: skills and work evidence",
       "notReadyChip": "Not ready yet",
       "declaredSkills": "Declared skills",
       "confirmedSkills": "Confirmed skills",
@@ -6438,8 +6456,8 @@
     },
     "notesTitle": "What these numbers mean",
     "notes": {
-      "readiness": "\"Ready\" means only that the fields checked here are present (name, at least one declared skill, at least one work-evidence entry). It is not a verification, a document approval, or an AI judgement.",
-      "documents": "Documents are not tracked yet — no document is shown as approved or verified anywhere on this board.",
+      "readiness": "\"Ready\" means the person has a name, at least one declared skill and at least one work-evidence entry. Documents are not part of readiness and never lower it — what needs checking for this job is agreed before the final agreement. It is not a verification or an AI judgement.",
+      "documents": "Documents are not tracked as a requirement — no upload is needed, and nothing on this board shows a document as received or checked unless a manager marks it so.",
       "candidateSkill": "Candidate skill clarifications are private to each worker; they are shown on the worker's own professional profile, not here."
     },
     "report": {
@@ -6464,20 +6482,21 @@
       "rejected": "Rejected"
     },
     "checklist": {
-      "title": "Readiness / documents",
-      "empty": "Not tracked yet. Add the standard checklist or your own items.",
-      "seed": "Add standard checklist",
+      "title": "To agree before the agreement",
+      "empty": "Nothing tracked — no documents need to be uploaded. If something is worth checking for this job, add the suggestions or your own item.",
+      "seed": "Add suggestions for this job",
       "addItem": "Add item",
       "addPlaceholder": "New item label",
-      "missing": "Missing",
+      "missing": "Marked missing",
       "received": "Received",
       "checked": "Checked",
       "blocked": "Rejected / expired",
-      "helper": "\"Checked\" means a manager marked it checked here — not a legal verification. A document is only \"received\" or \"checked\" when a manager sets it; nothing is approved automatically."
+      "helper": "\"Checked\" means a manager marked it checked here — not a legal verification. A document is only \"received\" or \"checked\" when a manager sets it; nothing is approved automatically.",
+      "toAgree": "To agree"
     },
     "readinessStatuses": {
       "not_required": "Not required",
-      "needed": "Needed",
+      "needed": "To agree before the agreement",
       "missing": "Missing",
       "received": "Received",
       "checked": "Checked",
@@ -6498,8 +6517,8 @@
       "all": "All",
       "byStatus": "Status",
       "anyStatus": "Any status",
-      "missingDocs": "Missing docs/info",
-      "ready": "Ready (checked fields)",
+      "missingDocs": "Marked missing",
+      "ready": "Ready: skills and work evidence",
       "needsSkillInfo": "Needs skill info",
       "needsEvidence": "No work evidence",
       "docsChecked": "Docs checked",
@@ -6507,7 +6526,7 @@
       "none": "No workers match this filter.",
       "showAll": "Show all",
       "empty": {
-        "missingDocs": "No assigned worker is currently missing documents or info.",
+        "missingDocs": "No manager has marked anything missing for any worker.",
         "ready": "No worker meets all the fields checked here yet. Choose \"All\" to see what each one is missing.",
         "needsSkillInfo": "Every assigned worker has declared their skills.",
         "needsEvidence": "Every assigned worker has at least one piece of work evidence.",
@@ -6516,7 +6535,7 @@
       }
     },
     "counters2": {
-      "withMissingDocs": "Missing docs/info",
+      "withMissingDocs": "Marked missing",
       "docsReceived": "Docs received",
       "docsChecked": "Docs checked",
       "docsBlocked": "Rejected/expired"
@@ -6875,7 +6894,7 @@
     "saving": "Saving...",
     "cancel": "Cancel",
     "edit": "Edit",
-    "remove": "Remove",
+    "remove": "Delete permanently",
     "activate": "Activate",
     "pause": "Pause",
     "errorTitleRequired": "Add a service title.",
@@ -6893,7 +6912,9 @@
       "paused": "Paused — hidden from members. Activate to make it findable again."
     },
     "linkToRequests": "See requests for your services",
-    "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead."
+    "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead.",
+    "removeQuestion": "Delete this service permanently? This cannot be undone. To only hide it from search, pause it instead.",
+    "removeYes": "Yes, delete"
   },
   "communication": {
     "origin": {
@@ -7010,7 +7031,7 @@
       "send": "Send",
       "sent": "Reply sent."
     },
-    "translatedFrom": "Translated from {lang}",
+    "translatedFrom": "Machine translation from {lang}",
     "showOriginal": "Original ({lang})",
     "translationUnavailable": "Original ({lang}) — no translation available",
     "loadError": "Could not load messages right now. What you see is not the full picture — try again."
@@ -7829,8 +7850,8 @@
     "readinessPanel": {
       "title": "How to improve your readiness",
       "intro": "Here is what to complete next to make your card stronger.",
-      "allReady": "Your profile card is complete. Documents for working in a particular country are counted separately — see below.",
-      "countryFit": "Working in another country needs the right documents. Without them you are not shown as ready to work abroad — you only see legal routes (company handles paperwork, document support). The system never promises the right to work without documents."
+      "allReady": "Your profile card is complete. Documents are not part of readiness — for work in a particular country they are agreed with the employer before the agreement.",
+      "countryFit": "Working in another country, its laws may require certain documents (for example A1 when posted, or a work permit for non-EU / EEA citizens). You don't need to upload them here and not having them never lowers your readiness: both parties check the specific documents before the final agreement. The system never promises the right to work where the law requires a permit."
     },
     "readinessSteps": {
       "pillar": {
@@ -8009,19 +8030,10 @@
     "disclaimer": "Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "Not available right now.",
     "guidance": {
-      "title": "Document guidance by country (draft)",
+      "title": "Document guidance by country",
       "intro": "Informational guidance about documents that may be needed. Not legal advice.",
-      "pendingNotice": "Legal/document guidance is being prepared from the Lithuanian master version.",
-      "draftDisclaimer": "DRAFT: informational only, awaiting owner and legal review. Always check official sources.",
-      "statusSummary": "Items: {total} · awaiting legal review: {awaiting}",
-      "status": {
-        "LT_DRAFT_READY": "LT draft ready",
-        "OWNER_EDITING": "Owner editing",
-        "OWNER_APPROVED_LT": "LT approved by owner",
-        "TRANSLATION_READY": "Ready for translation",
-        "TRANSLATED": "Translated"
-      },
-      "needsLegalReview": "Awaiting legal review",
+      "pendingNotice": "Document guidance by country is available in Lithuanian only for now.",
+      "officialSources": "Always check official sources.",
       "whoProvides": "Who usually arranges it",
       "groupAll": "General (all countries)",
       "helpInfoNote": "This is informational guidance. Requests for document, accounting or legal help can be submitted from the company workspace.",
@@ -8053,7 +8065,7 @@
       "help": "Pick a destination country to see which documents it asks for.",
       "mine": "Your preferred countries come first.",
       "unknown": "The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "Next step: take care of — {doc}.",
+      "next": "If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "All curated requirements for {country} are covered."
     },
     "types": {
@@ -8092,13 +8104,13 @@
     },
     "overall": {
       "not_enough_information": "Not enough information yet",
-      "missing_documents": "Missing documents",
+      "missing_documents": "Not every document in this country's rules is recorded",
       "needs_verification": "Ready after verification",
       "almost_ready": "Almost ready",
       "ready_for_country": "Ready for this country",
       "availabilityHint": "Set your availability to complete readiness."
     },
-    "needsLegalReview": "needs legal review",
+    "needsLegalReview": "source not confirmed",
     "sourceLink": "source",
     "scopeNote": "Based on official EU posted-worker sources — confirm the national specifics with the competent authority. This is information, not legal advice.",
     "editor": {
@@ -8803,7 +8815,7 @@
     "candidate": "Candidate",
     "privacy": {
       "contactsHidden": "Contacts stay hidden — no phone, email, or name.",
-      "profileSafe": "You see only profile-safe signals: skill evidence, location, availability and rate. Reaching out happens later, through an explicit step."
+      "profileSafe": "You see only profile-safe signals: skill evidence, location, availability and rate. Name and contact details appear only when the person allows it."
     },
     "fields": {
       "location": "Location",
@@ -8821,9 +8833,10 @@
     "rateFrom": "from €{min}/mo",
     "noRate": "Not stated",
     "comms": {
-      "eligible": "This worker has open availability — messaging opens in a later step.",
+      "eligible": "This worker has open availability — you can reach them in the platform.",
       "inConversation": "You are already in a conversation with this worker — continue it in Messages.",
-      "blocked": "Communication becomes available when the worker has open availability or an available-from date."
+      "blocked": "Communication becomes available when the worker has open availability or an available-from date.",
+      "interestDoor": "This person raised their hand for this need — you can write to them now with “Contact in the platform”."
     },
     "request": {
       "button": "Request to communicate",
@@ -9056,8 +9069,8 @@
       "contact": "Arranged individually"
     },
     "readiness": {
-      "draft_pricing": "Plans are prepared, not purchasable. Pricing is still an owner draft — no price here is final and nothing can be bought.",
-      "owner_confirmed": "Prices are owner-confirmed, but plans remain prepared only — nothing can be bought until payments are enabled."
+      "draft_pricing": "Plans are prepared, not purchasable. No price here is final and nothing can be bought.",
+      "owner_confirmed": "Plans are prepared only — nothing can be bought until payments are enabled."
     },
     "featuresLabel": "Included in this boundary",
     "limitValue": "up to {count}",
@@ -9110,6 +9123,7 @@
     "intro": "Proposed engagements. A booking is confirmed only when the worker accepts.",
     "notAuthed": "Please sign in to see your bookings.",
     "unavailable": "Couldn’t complete the action. Please try again.",
+    "readFailed": "Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "noDate": "No start date set",
     "noRole": "Work engagement",
     "startsOn": "Starts {date}",
@@ -9186,7 +9200,8 @@
       "alreadyAccepted": "The worker has already accepted this proposal — agreed terms are not rewritten here. Agree any changes in the conversation.",
       "refusedNotReachable": "This person can't be offered a booking from here — they haven't made their profile visible to employers and have no working relationship with you.",
       "refusedNeedClosed": "This need is closed — reopen it before proposing a booking.",
-      "refusedAnswered": "The worker declined this proposal, so it is not reopened without their new consent. Continue in the conversation or find another worker."
+      "refusedAnswered": "The worker declined this proposal, so it is not reopened without their new consent. Continue in the conversation or find another worker.",
+      "unconfirmed": "No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "Reason (optional)",
@@ -11168,6 +11183,13 @@
         "unknown": "Could not check whether companies can see your profile. That does not mean visibility is off — open your privacy settings.",
         "noWorker": "Visibility to employers applies to a worker profile, and this account does not have one yet."
       }
+    },
+    "switch": {
+      "privateLine": "Never shown by this setting: your name, phone number, email, Work Journal entries and external profile links.",
+      "turnOn": "Read the terms and turn on",
+      "details": "What companies see and the full terms",
+      "grantedNote": "Done — companies can now find your professional profile, under an anonymous label.",
+      "withdrawnNote": "Done — your profile no longer appears in new company searches."
     }
   },
   "planning": {
@@ -11409,9 +11431,9 @@
       "coveredShort": "{count} covered"
     },
     "notes": {
-      "assignmentsPending": "Assignment data is prepared and joins this view after owner activation.",
-      "languagesPending": "Language coverage is prepared and joins this view after owner activation.",
-      "brigadesPending": "Brigade coverage is prepared and joins this view after owner activation.",
+      "assignmentsPending": "Assignment data is not shown in this view yet.",
+      "languagesPending": "Language coverage is not shown in this view yet.",
+      "brigadesPending": "Brigade coverage is not shown in this view yet.",
       "demandError": "Work needs could not be read right now.",
       "projectError": "Projects could not be read right now.",
       "capacityError": "Part of the capacity data could not be read right now."
@@ -11695,7 +11717,10 @@
       "docExpiring": "Documents expiring within 30 days",
       "docMissing": "Documents missing or expired",
       "docReview": "Documents in review or returned",
-      "financeOverdue": "Overdue finance records"
+      "financeOverdue": "Overdue finance records",
+      "journalReviews": "Work entries waiting for your approval",
+      "journalClientDecide": "Work entries waiting for your decision as the client",
+      "partial": "The work-entry review queue could not be read just now. That does not mean nothing is waiting."
     },
     "sources": {
       "label": "Sources",
@@ -11706,7 +11731,8 @@
       "workJournal": "Your work journal",
       "managerConfirmations": "Manager confirmations",
       "projects": "Your projects",
-      "assignments": "Active worker assignments"
+      "assignments": "Active worker assignments",
+      "journalReviewQueue": "Work-entry review queue"
     },
     "summaries": {
       "title": "Summaries from your data",
@@ -12828,7 +12854,7 @@
     },
     "stateNote": {
       "insufficientData": "There is not enough real data for this signal yet — an honest gap is shown instead of an invented number.",
-      "needsMigration": "The data store behind this signal is prepared and joins the view after owner activation. Nothing is estimated in the meantime.",
+      "needsMigration": "This signal is not switched on yet. Nothing is estimated in the meantime.",
       "stale": "The evidence behind this signal is older than the freshness window — treat it as out of date."
     },
     "valueClass": {
@@ -12880,7 +12906,7 @@
         "agencyAggregate": "Cross-client aggregate"
       },
       "state": {
-        "needsMigration": "This signal is prepared and awaits owner activation."
+        "needsMigration": "This signal is not switched on yet."
       },
       "salary": {
         "noBenchmark": "No salary benchmark is available for your profession and country yet.",
@@ -12915,7 +12941,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Owner-gated data store (not yet activated)",
+      "gatedMigration": "Data store not switched on yet",
       "marketRateAverages": "Admin-curated market rate averages",
       "journalEvidence": "Your own work-journal evidence",
       "fillTimeMeasurementsMissing": "Fill-time measurements (not collected yet)",
@@ -12973,14 +12999,14 @@
       },
       "terms": {
         "internal": "Internal derivation from canonical platform tables; the cohort policy protects individuals.",
-        "adminCurated": "Owner-entered averages with a source note instead of a sample size.",
-        "statGovLt": "Official statistics; attribution required; activation awaits owner confirmation.",
-        "eurostat": "Official EU statistics; attribution required; activation awaits owner confirmation.",
+        "adminCurated": "Curated averages with a source note instead of a sample size.",
+        "statGovLt": "Official statistics; attribution required. Not in use yet.",
+        "eurostat": "Active source. Official EU statistics; attribution required.",
         "arbetsformedlingen": "Active source. Usage terms confirmed: a free public data source (CC0). Attribution is shown with every advertisement, and each advertisement links back to the original posting.",
         "nav": "Active source. NAV's API terms are accepted and production access is granted. Ongoing duties are applied: a withdrawn advertisement is removed immediately, an updated one is refreshed promptly, and the apply link leads to the original posting.",
-        "cvbankas": "Proposal only — usage permission unconfirmed; never blended with internal figures.",
-        "eures": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
-        "uztLt": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today."
+        "cvbankas": "Proposed source — not in use; never blended with internal figures.",
+        "eures": "Proposed source. Not in use — nothing is fetched today.",
+        "uztLt": "Proposed source. Not in use — nothing is fetched today."
       },
       "status": {
         "active": "Active (internal)",
@@ -12992,7 +13018,7 @@
     "methodology": {
       "title": "Methodology",
       "deterministic": "All values are deterministic and computed from sourced records — nothing is estimated by AI and no number is ever invented.",
-      "externalOff": "External sources are off: every external benchmark is a proposal awaiting the owner's legal confirmation. Internal and external figures are never blended.",
+      "externalOff": "External sources are off. Internal and external figures are never blended.",
       "cohort": "Small cohorts are banded or suppressed to protect individuals."
     },
     "contextual": {
@@ -13111,7 +13137,7 @@
       },
       "unavailable": {
         "requirementTitle": "What is needed",
-        "sourcesTitle": "Sources awaiting owner approval"
+        "sourcesTitle": "Sources not in use yet"
       },
       "reason": {
         "salaryNoBenchmark": "There is no salary figure here because no curated market rate exists yet for your profession and country, and no external salary source is approved for use.",
@@ -13125,15 +13151,15 @@
         "eurostatNeedsActivation": "Official Eurostat context is prepared; the first official import has not run yet, so no figure is available."
       },
       "requirement": {
-        "ownerEnableStore": "The platform owner must switch on the observations data store and approve at least one data source.",
-        "salaryBenchmark": "An administrator must enter a curated market rate for your profession and country, or the platform owner must approve an external salary source.",
+        "ownerEnableStore": "The observations data store must be switched on and at least one data source approved.",
+        "salaryBenchmark": "A curated market rate for your profession and country must be entered, or an external salary source approved.",
         "demandOwnRows": "Add work requests — this card fills from your organisation's own data as soon as entries exist.",
         "salaryBasis": "The pay basis (gross or net) must be recorded for both your expected salary and the curated market rate before an honest comparison can be shown.",
         "salaryInputs": "Enter your expected salary in your worker profile — the comparison appears as soon as it exists.",
         "eurostatActivation": "A bounded official Eurostat import runs."
       },
       "after": {
-        "activation": "After the owner approves and activates an input, this card fills with sourced, dated figures — each carrying its confidence, freshness, source and step-by-step derivation."
+        "activation": "Once an input is switched on, this card fills with sourced, dated figures — each carrying its confidence, freshness, source and step-by-step derivation."
       }
     },
     "drawer": {
@@ -13281,7 +13307,7 @@
         "labourCostIndex": "Not a salary offer and never a basis to infer an individual's pay."
       },
       "sectionTitle": "European labour-market context",
-      "sectionIntro": "Official Eurostat aggregates for the EU and selected European markets. Prepared, pending owner activation.",
+      "sectionIntro": "Official Eurostat aggregates for the EU and selected European markets.",
       "asOf": "Eurostat publication of {date} — these figures do not refresh here on their own.",
       "dataBasis": "Official Eurostat aggregate (source: Eurostat)",
       "whyVisible": "Shown as official European labour-market context.",
@@ -13662,8 +13688,8 @@
           "description": "A project worker's checklist row is marked with a real status — needed, received, checked."
         },
         "seedReadinessChecklist": {
-          "label": "Start the document checklist",
-          "description": "The standard readiness / document checklist is started for everyone on the project."
+          "label": "Add suggestions to agree",
+          "description": "Suggested items to agree before the agreement are added for everyone on the project. It is not a mandatory list and not a readiness score."
         },
         "requestReadiness": {
           "label": "Ask for what is missing",
@@ -14021,7 +14047,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# client has} other {# clients have}} not confirmed the connection yet.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# learner invitation is} other {# learner invitations are}} still unaccepted.",
       "briefDocumentsExpiring": "{count, plural, one {# document is expiring} other {# documents are expiring}}.",
-      "briefDocumentsMissing": "{count, plural, one {Your stated countries still need # document} other {Your stated countries still need # documents}}: {list}.",
+      "briefDocumentsMissing": "{count, plural, one {The rules of your stated countries may require # document} other {The rules of your stated countries may require # documents}}: {list}. Nothing needs to be uploaded — you agree them with the employer before an agreement.",
       "briefEmployerInterestWaiting": "{count, plural, one {# candidate is waiting for your answer} other {# candidates are waiting for your answer}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# agency offer is waiting for your decision} other {# agency offers are waiting for your decision}}.",
       "briefInterestContacted": "{count, plural, one {# company wants to get in touch about your interest} other {# companies want to get in touch about your interest}}.",
@@ -14512,8 +14538,8 @@
       "missingDeclaredSkills": "declared skills",
       "missingEvidence": "work evidence",
       "blockedSuffix": "(rejected / expired)",
-      "readinessSeedChip": "Start the document checklist ({count} people)",
-      "readinessSeeded": "Checklist started: {count} people × {items} items — all “needed”.",
+      "readinessSeedChip": "Add suggestions to agree ({count} people)",
+      "readinessSeeded": "Suggestions added: {count} people × {items} items — all “to agree before the agreement”.",
       "readinessGotChip": "Received: {label} ({name})",
       "readinessGotDone": "Marked received: {label} ({name}).",
       "readinessCheckedChip": "Checked: {label} ({name})",
@@ -14556,7 +14582,7 @@
       "moveAskProject": "Where to move {name}? Pick:",
       "moveWhatIfTitle": "If {name} moved from “{from}” to “{to}”:",
       "moveFromLine": "• “{from}”: people {before} → {after}; {tasks} of their open work packages stay there; readiness checklist there: {checked}/{total}.",
-      "moveToLine": "• “{to}”: people {before} → {after}; the readiness checklist there starts at 0/{total}.",
+      "moveToLine": "• “{to}”: people {before} → {after}; what to agree there is not chosen yet (up to {total} items suggested).",
       "moveCountryLine": "• The country changes: {from} → {to} — document requirements differ.",
       "moveNoDatesLine": "• “{to}” has no dates — absences cannot be checked.",
       "moveAvailabilityUnknownLine": "• Absences unknown.",
@@ -15488,7 +15514,7 @@
       "suggestOverdue": "{count, plural, one {# task is past its due day} other {# tasks are past their due day}}.",
       "suggestLogToday": "You are working today and nothing is logged yet.",
       "suggestReserve": "A deadline lands tomorrow, and tomorrow is nearly free.",
-      "suggestReserveNamed": "„{label}“ is due tomorrow, and tomorrow is nearly free.",
+      "suggestReserveNamed": "“{label}” is due tomorrow, and tomorrow is nearly free.",
       "suggestBasis": "From your own calendar and tasks."
     },
     "ai": {
@@ -18319,7 +18345,9 @@
       "managesInvitations": "Manages invitations",
       "grantInvitations": "Allow to manage invitations",
       "withdrawInvitations": "Withdraw invitation management",
-      "unavailable": "The member directory could not be read right now. This is not a claim that the organization has no members."
+      "unavailable": "The member directory could not be read right now. This is not a claim that the organization has no members.",
+      "noAccountHint": "A membership role can only be given to someone who already has an account. Invite a person without an account with an invitation link — once they sign up and join the organisation, you can give them a role here.",
+      "noAccountCta": "Create an invitation link"
     },
     "start": {
       "membersMoved": "Members and invitations of {workspace} are managed in the organization's Settings.",
@@ -19812,6 +19840,70 @@
     "invite": {
       "line": "Pay 1 € once for {days} days of the paid Organization plan. Nothing renews.",
       "cta": "Open the pilot"
+    }
+  },
+  "marketLifecycle": {
+    "actions": {
+      "publish": "Publish",
+      "edit": "Edit",
+      "pause": "Pause",
+      "resume": "Resume",
+      "publishAgain": "Publish again",
+      "complete": "Complete",
+      "withdraw": "Remove from market",
+      "discard": "Discard draft"
+    },
+    "states": {
+      "draft": "Draft",
+      "active": "Active",
+      "paused": "Paused",
+      "completed": "Completed",
+      "withdrawn": "Removed from market",
+      "discarded": "Discarded draft",
+      "closed": "Closed",
+      "locked": "Under review"
+    },
+    "visibility": {
+      "visible": "Visible in search — others can find it and message you.",
+      "draft": "Draft — not visible to others yet. Publish it when it is ready.",
+      "paused": "Paused — hidden from search, no new requests. Resume it when it is relevant again.",
+      "completed": "Completed — hidden from search; conversations and history are kept.",
+      "withdrawn": "Removed from market — hidden from search; conversations and history are kept.",
+      "discarded": "Discarded draft — it was never published.",
+      "closed": "Closed — hidden from search; history is kept.",
+      "expired": "Expired — hidden from search. Change the expiry date and publish it again.",
+      "gated": "Not visible yet — it appears in search once the organization is verified.",
+      "locked": "Under review — it cannot be changed while the review runs."
+    },
+    "deleteForever": "Delete permanently",
+    "deleteQuestion": "Delete permanently? This cannot be undone. To only hide it from search, pause it, complete it or remove it from the market.",
+    "deleteYes": "Yes, delete",
+    "cancel": "Cancel",
+    "error": "That did not work. Try again.",
+    "notAllowed": "This action is not available in this state."
+  },
+  "collaborationChecks": {
+    "title": "Before the final agreement",
+    "lead": "Before you make the final agreement, we recommend that both parties check the documents, qualifications, permits and terms of cooperation that matter for this job or deal.",
+    "context": "What matters depends on the work, the profession, the country and the project — there is no single mandatory list for everyone.",
+    "countryRules": "The rules depend on the country where the work happens: {country}.",
+    "privacy": "You never need to upload documents to LabourMarket.ai. If you share them, you do it yourselves — the platform does not pass them on automatically and does not claim they are checked.",
+    "basis": {
+      "law": "Required by law",
+      "law_if": "Required by law in some cases",
+      "agreement": "For the parties to agree"
+    },
+    "topic": {
+      "terms": "Scope of work, dates, pay, working hours and how payment is settled.",
+      "identity_right_to_work": "Identity and the right to work — when someone is employed, the rules of the country of work often require this check.",
+      "posting_a1": "When a worker is posted to another EU / EEA country, the law requires an A1 certificate and a posting declaration.",
+      "work_permit": "A work or residence permit — required by law if the person has no right to work in that country through citizenship or free movement (e.g. EU / EEA).",
+      "site_safety": "Occupational-safety instruction and site rules — before work starts, this is the employer's legal duty.",
+      "driving_licence": "A valid driving licence of the right category — required by law to drive for work.",
+      "professional_qualification": "A qualification or professional certificate relevant to this work — some countries require it by law for some professions.",
+      "business_details": "Company or business registration and invoicing details.",
+      "insurance": "Liability or other insurance, if this work needs it.",
+      "client_requirements": "Any specific requirements of the client or the site."
     }
   }
 }
