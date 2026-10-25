@@ -288,7 +288,14 @@
       "changes_requested": "Changes requested",
       "rejected": "Rejected",
       "reasonLabel": "Reason",
-      "notEnabled": "Recorded — your manager has not switched on confirmation, so nobody is reviewing this entry; until then it stays what you stated"
+      "notEnabled": "Recorded — your manager has not switched on confirmation, so nobody is reviewing this entry; until then it stays what you stated",
+      "correctedFrom": {
+        "changes_requested": "Corrected after it was returned",
+        "rejected": "Corrected after it was rejected",
+        "approved": "Corrected after review",
+        "earlierVersion": "The earlier version stays in your history with this decision; its hours count once — through this correction."
+      },
+      "quotedNote": "“{note}”"
     },
     "delete": "Delete entry",
     "deleting": "Deleting...",

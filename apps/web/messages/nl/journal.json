@@ -288,7 +288,14 @@
       "changes_requested": "Wijzigingen gevraagd",
       "rejected": "Afgewezen",
       "reasonLabel": "Reden",
-      "notEnabled": "Vastgelegd — je leidinggevende heeft bevestiging nog niet ingeschakeld, dus niemand beoordeelt deze registratie; tot dan blijft het jouw eigen opgave"
+      "notEnabled": "Vastgelegd — je leidinggevende heeft bevestiging nog niet ingeschakeld, dus niemand beoordeelt deze registratie; tot dan blijft het jouw eigen opgave",
+      "correctedFrom": {
+        "changes_requested": "Gecorrigeerd nadat het was teruggestuurd",
+        "rejected": "Gecorrigeerd na afwijzing",
+        "approved": "Gecorrigeerd na beoordeling",
+        "earlierVersion": "De eerdere versie blijft met dit besluit in je geschiedenis; de uren tellen één keer — via deze correctie."
+      },
+      "quotedNote": "‘{note}’"
     },
     "delete": "Item verwijderen",
     "deleting": "Verwijderen...",

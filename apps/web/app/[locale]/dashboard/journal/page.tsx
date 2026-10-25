@@ -61,7 +61,10 @@ import {
   deriveReviewTimeline,
   isSelfConfirmedOnly,
 } from "@/lib/journal/review-status";
-import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
+import {
+  CorrectionProvenanceLine,
+  EvidenceDecisionTimeline,
+} from "@/components/app/evidence-decision-timeline";
 import { EntryReviewPanel } from "@/components/app/entry-review-panel";
 import { readEntryReviewStates } from "@/lib/journal/counterparty-review";
 import {
@@ -760,6 +763,13 @@ export default async function JournalPage({
   const entries: JournalEntryRow[] | null = entriesRead.ok
     ? entriesRead.entries
     : null;
+  // What each listed correction ANSWERED (walk work-verification 2026-10-25):
+  // the decided original is not a card (counted once), so its decision and
+  // note reach the worker only through its correction's card. Provenance
+  // from the same read — no second query, no second count.
+  const correctionProvenance = entriesRead.ok
+    ? entriesRead.correctionProvenance
+    : {};
 
   // ── Client review state (EVID-2 slice 2) ─────────────────────────────────
   // Per entry: submitted? accepted / correction requested / disputed? and which
@@ -1899,7 +1909,11 @@ export default async function JournalPage({
                       // no correction. The correction is a NEW entry
                       // (`correction_of`); the rejected one stays as history
                       // with its decision (journal_entry_supersede_v2 keeps a
-                      // decided original untouched).
+                      // decided original untouched). The original is then no
+                      // card of its own (counted once); its decision and note
+                      // are read on the correction's card
+                      // (`correctionProvenance` → CorrectionProvenanceLine and
+                      // the timeline's "corrected-from" step).
                       const latestEmployerDecision = timeline.at(-1)?.result;
                       const employerAskedChanges =
                         (latestEmployerDecision === "changes_requested" ||
@@ -1979,6 +1993,15 @@ export default async function JournalPage({
                             verification.state,
                           )}
                           standingSolid={spineNodeSolid(verification.state)}
+                          provenanceSlot={
+                            correctionProvenance[e.id] ? (
+                              <CorrectionProvenanceLine
+                                key="corrected-from"
+                                entryId={e.id}
+                                steps={correctionProvenance[e.id]}
+                              />
+                            ) : undefined
+                          }
                           needsAttention={
                             employerAskedChanges ||
                             (!!reviewState && reviewPhase !== "none")
@@ -2050,6 +2073,7 @@ export default async function JournalPage({
                               <EvidenceDecisionTimeline
                                 createdAt={e.created_at}
                                 events={timeline}
+                                correctedFrom={correctionProvenance[e.id]}
                                 awaiting={
                                   verification.state !== "verifier_available" &&
                                   verification.state !== "verifier_not_identified"
