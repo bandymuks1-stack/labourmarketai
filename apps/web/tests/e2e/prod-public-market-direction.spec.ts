@@ -33,7 +33,6 @@ test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml");
 test.describe.configure({ timeout: 300_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
 
-type Locale = "lt" | "en" | "ru";
 type Direction = "demand" | "supply" | "individual";
 
 const DIRECTION_INTENTS: Record<Direction, readonly string[]> = {
@@ -42,8 +41,15 @@ const DIRECTION_INTENTS: Record<Direction, readonly string[]> = {
   individual: ["find-work"],
 };
 
-/** Pinned by lib/guards/a-brigade-can-offer-itself.test.ts (sections 1–3). */
-const SENTENCES: Record<Locale, readonly { sentence: string; direction: Direction }[]> = {
+/**
+ * Pinned by lib/guards/a-brigade-can-offer-itself.test.ts (sections 1–3).
+ *
+ * The locales walked are the ones whose sentences the unit guard pins — per-
+ * locale VOCABULARY, so the list is this table's keys, never a hand-written
+ * locale subset (lib/guards/locale-subset-hardcode.test.ts). A locale gets
+ * walked here once its pinned sentences are added.
+ */
+const SENTENCES = {
   lt: [
     { sentence: "Ieskau brigados objektui", direction: "demand" },
     { sentence: "Ieskome darbo musu brigadai.", direction: "supply" },
@@ -58,7 +64,9 @@ const SENTENCES: Record<Locale, readonly { sentence: string; direction: Directio
     { sentence: "Нужна бригада из 6 сварщиков.", direction: "demand" },
     { sentence: "Ищем проект для нашей бригады.", direction: "supply" },
   ],
-};
+} satisfies Record<string, readonly { sentence: string; direction: Direction }[]>;
+type Locale = keyof typeof SENTENCES;
+const LOCALES = Object.keys(SENTENCES) as Locale[];
 
 const BCP: Record<Locale, string> = { lt: "lt-LT", en: "en-GB", ru: "ru-RU" };
 const WIDTHS = [
@@ -99,7 +107,7 @@ async function readSentence(page: Page, sentence: string): Promise<{ intent: str
   };
 }
 
-for (const locale of ["lt", "en", "ru"] as const) {
+for (const locale of LOCALES) {
   test(`D-${locale} (4.2). ${locale}: demand, supply and a job search are read as separate directions, at 390 and 1280 px`, async ({
     browser,
   }) => {
