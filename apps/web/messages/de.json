@@ -9112,6 +9112,7 @@
     "intro": "Vorgeschlagene Einsätze. Eine Buchung ist erst bestätigt, wenn die Arbeitskraft annimmt.",
     "notAuthed": "Bitte melden Sie sich an, um Ihre Buchungen zu sehen.",
     "unavailable": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+    "readFailed": "Ihre Buchungen konnten gerade nicht geladen werden — das heißt nicht, dass Sie keine haben. Versuchen Sie es erneut.",
     "noDate": "Kein Startdatum festgelegt",
     "noRole": "Arbeitsvereinbarung",
     "startsOn": "Beginnt am {date}",

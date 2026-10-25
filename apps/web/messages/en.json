@@ -9112,6 +9112,7 @@
     "intro": "Proposed engagements. A booking is confirmed only when the worker accepts.",
     "notAuthed": "Please sign in to see your bookings.",
     "unavailable": "Couldn’t complete the action. Please try again.",
+    "readFailed": "Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "noDate": "No start date set",
     "noRole": "Work engagement",
     "startsOn": "Starts {date}",

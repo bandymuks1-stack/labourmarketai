@@ -9112,6 +9112,7 @@
     "intro": "Voorgestelde opdrachten. Een boeking is pas bevestigd wanneer de werknemer accepteert.",
     "notAuthed": "Log in om je boekingen te zien.",
     "unavailable": "Kon de actie niet voltooien. Probeer het opnieuw.",
+    "readFailed": "Je boekingen konden nu niet worden geladen — dat betekent niet dat je er geen hebt. Probeer het opnieuw.",
     "noDate": "Geen startdatum ingesteld",
     "noRole": "Werkafspraak",
     "startsOn": "Start {date}",
