@@ -6,15 +6,15 @@ import { useTranslations } from "next-intl";
 import {
   Plus,
   Pencil,
-  Trash2,
   Play,
   Pause,
   Archive,
-  RotateCcw,
   MessageSquare,
   ArrowRight,
 } from "lucide-react";
 
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
+import { InlineConfirm } from "@/components/ui/InlineConfirm";
 import { Link } from "@/lib/i18n/navigation";
 import { getCountryMeta } from "@/lib/location/country-model";
 import {
@@ -58,12 +58,17 @@ import { assessPublish } from "@/lib/marketplace/publish-policy";
  * messaging).
  */
 
-const STATUS_RING: Record<ListingStatus, string> = {
-  draft: "border-ink-500 bg-ink-800/40 text-text-muted",
-  active: "border-state-success/40 bg-state-success/5 text-state-success",
-  paused: "border-ink-500 bg-ink-800/40 text-text-secondary",
-  closed: "border-state-warning/40 bg-state-warning/5 text-state-warning",
+/** Only an active row is a positive fact for the owner; the rest are quiet. */
+const STATUS_VARIANT: Record<ListingStatus, StatusChipVariant> = {
+  draft: "neutral",
+  active: "success",
+  paused: "neutral",
+  closed: "neutral",
 };
+
+/** One row action: icon + words, a 44 px target on touch. */
+const ACTION =
+  "inline-flex min-h-11 items-center gap-1.5 rounded border px-2.5 text-xs font-medium disabled:opacity-60 sm:min-h-8";
 
 type Draft = {
   domain: ListingDomain;
@@ -176,7 +181,6 @@ export function MarketplaceListingsSection({
   const focusCls = (id: string) => (focusId === id ? " ring-2 ring-brand-blue" : "");
   // Two-step delete (G-12b): the trash icon only ARMS the row; the permanent
   // delete needs the explicit second press.
-  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const inputCls =
     "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
@@ -315,7 +319,6 @@ export function MarketplaceListingsSection({
   }
 
   function remove(id: string) {
-    setConfirmingId(null);
     startTransition(async () => {
       const res = await deleteMarketplaceListingAction(id);
       if (res.kind === "ok") router.refresh();
@@ -876,13 +879,17 @@ export function MarketplaceListingsSection({
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium text-text-primary">{row.title}</span>
-                      <span className={`rounded-full border px-2 py-0.5 text-meta ${STATUS_RING[row.status]}`}>
+                      <StatusChip
+                        variant={STATUS_VARIANT[row.status]}
+                        testid={`listing-status-${row.id}`}
+                        className="px-2 py-0.5 text-meta"
+                      >
                         {t(`status.${row.status}`)}
-                      </span>
+                      </StatusChip>
                       {isExpired(row.expiresAt) && (
-                        <span className="rounded-full border border-state-warning/40 bg-state-warning/5 px-2 py-0.5 text-meta text-state-warning">
+                        <StatusChip variant="attention" className="px-2 py-0.5 text-meta">
                           {t("expired")}
-                        </span>
+                        </StatusChip>
                       )}
                       {row.organizationId && (
                         <span
@@ -907,106 +914,82 @@ export function MarketplaceListingsSection({
                       {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
                       {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
                     </p>
+                    {/* Whether OTHERS can find it right now, in words — the chip
+                        alone said "Paused" without saying what that means. */}
+                    <p
+                      data-testid={`listing-visibility-${row.id}`}
+                      className={`mt-1 text-meta leading-relaxed ${
+                        row.status === "active" && !isExpired(row.expiresAt)
+                          ? "text-state-success"
+                          : "text-text-muted"
+                      }`}
+                    >
+                      {t(`searchState.${isExpired(row.expiresAt) ? "expired" : row.status}`)}
+                    </p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
+                  {/* Labelled actions, one per state change: a first-time
+                      visitor reads what each does. Hiding from search (pause,
+                      complete) is reversible and sits apart from the one
+                      irreversible act, which confirms first. */}
+                  <div className="flex shrink-0 flex-wrap items-center gap-1.5">
                     {row.status !== "active" ? (
                       <button
                         type="button"
-                        title={t("activate")}
-                        aria-label={t("activate")}
                         onClick={() => changeStatus(row.id, "active")}
                         data-testid={`listing-activate-${row.id}`}
                         disabled={pending}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-success hover:border-state-success sm:h-8 sm:w-8"
+                        className={`${ACTION} border-state-success/50 text-state-success hover:border-state-success`}
                       >
-                        <Play aria-hidden className="h-4 w-4" />
+                        <Play aria-hidden className="h-3.5 w-3.5" />
+                        {row.status === "draft" ? t("activate") : t("republish")}
                       </button>
                     ) : (
                       <>
                         {extended && (
                           <button
                             type="button"
-                            title={t("pause")}
-                            aria-label={t("pause")}
                             onClick={() => changeStatus(row.id, "paused")}
                             data-testid={`listing-pause-${row.id}`}
                             disabled={pending}
-                            className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
+                            className={`${ACTION} border-ink-500 text-text-secondary hover:border-brand-blue`}
                           >
-                            <Pause aria-hidden className="h-4 w-4" />
+                            <Pause aria-hidden className="h-3.5 w-3.5" />
+                            {t("pause")}
                           </button>
                         )}
                         <button
                           type="button"
-                          title={t("close")}
-                          aria-label={t("close")}
                           onClick={() => changeStatus(row.id, "closed")}
                           data-testid={`listing-close-${row.id}`}
                           disabled={pending}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-warning hover:border-state-warning sm:h-8 sm:w-8"
+                          className={`${ACTION} border-ink-500 text-text-secondary hover:border-state-warning`}
                         >
-                          <Archive aria-hidden className="h-4 w-4" />
+                          <Archive aria-hidden className="h-3.5 w-3.5" />
+                          {t("close")}
                         </button>
                       </>
                     )}
-                    {row.status === "closed" && (
-                      <button
-                        type="button"
-                        title={t("reopen")}
-                        aria-label={t("reopen")}
-                        onClick={() => changeStatus(row.id, "draft")}
-                        disabled={pending}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
-                      >
-                        <RotateCcw aria-hidden className="h-4 w-4" />
-                      </button>
-                    )}
                     <button
                       type="button"
-                      title={t("edit")}
-                      aria-label={t("edit")}
                       onClick={() => openEdit(row)}
+                      data-testid={`listing-edit-${row.id}`}
                       disabled={pending}
-                      className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-text-secondary hover:border-brand-blue sm:h-8 sm:w-8"
+                      className={`${ACTION} border-ink-500 text-text-secondary hover:border-brand-blue`}
                     >
-                      <Pencil aria-hidden className="h-4 w-4" />
+                      <Pencil aria-hidden className="h-3.5 w-3.5" />
+                      {t("edit")}
                     </button>
-                    {confirmingId === row.id ? (
-                      <span
-                        role="alertdialog"
-                        aria-label={t("removeConfirm")}
-                        className="inline-flex items-center gap-2 text-xs text-text-secondary"
-                      >
-                        {t("removeConfirm")}
-                        <button
-                          type="button"
-                          onClick={() => remove(row.id)}
-                          disabled={pending}
-                          data-testid={`listing-remove-confirm-${row.id}`}
-                          className="inline-flex min-h-11 items-center rounded border border-state-danger px-2 py-1 text-state-danger sm:min-h-8"
-                        >
-                          {t("remove")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmingId(null)}
-                          className="inline-flex min-h-11 items-center rounded border border-ink-500 px-2 py-1 sm:min-h-8"
-                        >
-                          {t("cancel")}
-                        </button>
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        title={t("remove")}
-                        aria-label={t("remove")}
-                        onClick={() => setConfirmingId(row.id)}
-                        disabled={pending}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded border border-ink-500 text-state-danger hover:border-state-danger sm:h-8 sm:w-8"
-                      >
-                        <Trash2 aria-hidden className="h-4 w-4" />
-                      </button>
-                    )}
+                    <InlineConfirm
+                      label={t("removeForever")}
+                      question={t("removeQuestion")}
+                      confirmLabel={t("removeYes")}
+                      cancelLabel={t("cancel")}
+                      tier="strong_irreversible"
+                      onConfirm={() => remove(row.id)}
+                      disabled={pending}
+                      testId={`listing-remove-${row.id}`}
+                      className={`${ACTION} border-transparent text-state-danger hover:border-state-danger`}
+                    />
                   </div>
                 </div>
                 {ackFor === row.id && (

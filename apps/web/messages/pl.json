@@ -157,17 +157,15 @@
     "cancel": "Anuluj",
     "edit": "Edytuj",
     "remove": "Usuń",
-    "removeConfirm": "Usunąć to ogłoszenie na stałe?",
     "activate": "Opublikuj",
-    "close": "Zamknij",
-    "reopen": "Wznów jako szkic",
+    "close": "Zakończ",
     "errorTitleRequired": "Wymagany jest tytuł o długości co najmniej 3 znaków.",
     "errorCountry": "Użyj dwuliterowego kodu kraju (np. DE).",
     "errorGeneric": "Coś poszło nie tak. Spróbuj ponownie.",
     "status": {
       "draft": "Szkic",
       "active": "Aktywne",
-      "closed": "Zamknięte",
+      "closed": "Zakończone",
       "paused": "Wstrzymane"
     },
     "kinds": {
@@ -270,7 +268,18 @@
     "formPublisherLabel": "Publikuje",
     "publisherSelf": "Ja osobiście",
     "publishedAs": "Jako {name}",
-    "publishedAsOrganization": "Jako organizacja"
+    "publishedAsOrganization": "Jako organizacja",
+    "republish": "Opublikuj ponownie",
+    "removeForever": "Usuń na zawsze",
+    "removeQuestion": "Usunąć na zawsze? Tego nie da się cofnąć. Aby tylko ukryć ogłoszenie w wyszukiwaniu, wstrzymaj je lub zakończ.",
+    "removeYes": "Tak, usuń",
+    "searchState": {
+      "draft": "Szkic — inni jeszcze go nie widzą. Opublikuj, gdy będzie gotowe.",
+      "active": "Widoczne w wyszukiwaniu — inni mogą je znaleźć i do ciebie napisać.",
+      "paused": "Wstrzymane — ukryte w wyszukiwaniu. Opublikuj ponownie, gdy znów będzie aktualne.",
+      "closed": "Zakończone — ukryte w wyszukiwaniu; rozmowy i historia zostają zachowane.",
+      "expired": "Wygasło — ukryte w wyszukiwaniu. Zmień datę ważności i opublikuj ponownie."
+    }
   },
   "quality": {
     "title": "Usterki i jakość",
@@ -3560,7 +3569,7 @@
     "opportunities": "Możliwości: zobacz pracę, która Ci odpowiada. Widoczność zależy od wielkości sieci kontaktów i Twojej gotowości.",
     "marketplaceMap": "Mapa rynku: sygnały rynku pracy według kraju i regionu. Dokładniejszy punkt pojawia się po ustawieniu lokalizacji.",
     "adminReview": "Utrzymanie systemu: tylko dla administratora. Zwykli użytkownicy nigdy nie widzą tych ekranów.",
-    "paymentReadiness": "Płatności są przygotowywane: płatny dostęp nie jest jeszcze aktywny. Na razie pierwsi użytkownicy są wdrażani ręcznie / poprzez przegląd właściciela. Stripe zostanie podłączony w kolejnym etapie.",
+    "paymentReadiness": "Płatności są przygotowywane: płatny dostęp nie jest jeszcze aktywny.",
     "identityModel": "Dwie podstawowe tożsamości: osoba i firma. Kupowanie, sprzedawanie, zatrudnianie i działalność agencyjna to czynności, a nie osobne tożsamości."
   },
   "profileIdentityNotice": {
@@ -6875,7 +6884,7 @@
     "saving": "Zapisywanie…",
     "cancel": "Anuluj",
     "edit": "Edytuj",
-    "remove": "Usuń",
+    "remove": "Usuń na zawsze",
     "activate": "Aktywuj",
     "pause": "Wstrzymaj",
     "errorTitleRequired": "Podaj nazwę usługi.",
@@ -6893,7 +6902,9 @@
       "paused": "Wstrzymana — ukryta przed członkami. Aktywuj, aby ponownie stała się widoczna."
     },
     "linkToRequests": "Zobacz zapytania o Twoje usługi",
-    "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Możesz ją wstrzymać."
+    "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Możesz ją wstrzymać.",
+    "removeQuestion": "Usunąć tę usługę na zawsze? Tego nie da się cofnąć. Aby tylko ukryć ją w wyszukiwaniu, wstrzymaj ją.",
+    "removeYes": "Tak, usuń"
   },
   "communication": {
     "origin": {
@@ -8009,19 +8020,10 @@
     "disclaimer": "Statusy opierają się na publicznie podanych wymaganiach i Twoich własnych danych. Ostateczną zgodność sprawdzają władze lub prawnik — to nie jest gwarancja prawna.",
     "needsMigration": "Chwilowo niedostępne.",
     "guidance": {
-      "title": "Wskazówki dotyczące dokumentów według kraju (szkic)",
+      "title": "Wskazówki dotyczące dokumentów według kraju",
       "intro": "Informacyjne wskazówki dotyczące dokumentów, które mogą być potrzebne. To nie jest porada prawna.",
-      "pendingNotice": "Wskazówki prawne/dokumentowe są przygotowywane na podstawie litewskiej wersji wzorcowej.",
-      "draftDisclaimer": "SZKIC: wyłącznie informacyjny, oczekuje na przegląd właściciela i prawny. Zawsze sprawdzaj oficjalne źródła.",
-      "statusSummary": "Pozycje: {total} · oczekujące na przegląd prawny: {awaiting}",
-      "status": {
-        "LT_DRAFT_READY": "Szkic LT gotowy",
-        "OWNER_EDITING": "Edycja właściciela",
-        "OWNER_APPROVED_LT": "LT zatwierdzone przez właściciela",
-        "TRANSLATION_READY": "Gotowe do tłumaczenia",
-        "TRANSLATED": "Przetłumaczone"
-      },
-      "needsLegalReview": "Oczekuje na przegląd prawny",
+      "pendingNotice": "Wskazówki dotyczące dokumentów według kraju są na razie dostępne tylko po litewsku.",
+      "officialSources": "Zawsze sprawdzaj oficjalne źródła.",
       "whoProvides": "Kto zwykle to załatwia",
       "groupAll": "Ogólne (wszystkie kraje)",
       "helpInfoNote": "To informacyjne wskazówki. Wnioski o pomoc dokumentową, księgową lub prawną można składać z przestrzeni roboczej firmy.",
@@ -8098,7 +8100,7 @@
       "ready_for_country": "Gotowe dla tego kraju",
       "availabilityHint": "Ustaw swoją dostępność, aby uzupełnić gotowość."
     },
-    "needsLegalReview": "wymaga przeglądu prawnego",
+    "needsLegalReview": "źródło niepotwierdzone",
     "sourceLink": "źródło",
     "scopeNote": "Na podstawie oficjalnych źródeł UE dotyczących pracowników delegowanych — szczegóły krajowe potwierdź u właściwego organu. To informacja, a nie porada prawna.",
     "editor": {
@@ -9057,8 +9059,8 @@
       "contact": "Ustalane indywidualnie"
     },
     "readiness": {
-      "draft_pricing": "Plany są przygotowane, ale niedostępne do zakupu. Cennik jest wciąż roboczą wersją właściciela — żadna cena tutaj nie jest ostateczna i niczego nie można kupić.",
-      "owner_confirmed": "Ceny są potwierdzone przez właściciela, ale plany pozostają tylko przygotowane — nic nie można kupić, dopóki płatności nie zostaną włączone."
+      "draft_pricing": "Plany są przygotowane, ale niedostępne do zakupu. Żadna cena tutaj nie jest ostateczna i niczego nie można kupić.",
+      "owner_confirmed": "Plany są tylko przygotowane — nic nie można kupić, dopóki płatności nie zostaną włączone."
     },
     "featuresLabel": "W zakresie tego planu",
     "limitValue": "do {count}",
@@ -9187,7 +9189,8 @@
       "alreadyAccepted": "Pracownik już przyjął tę propozycję — uzgodnione warunki nie są tu nadpisywane. Zmiany ustalcie w rozmowie.",
       "refusedNotReachable": "Tej osobie nie można stąd zaproponować rezerwacji — nie udostępniła profilu pracodawcom i nie łączy jej z Tobą relacja zawodowa.",
       "refusedNeedClosed": "To zapotrzebowanie jest zamknięte — otwórz je ponownie, zanim zaproponujesz rezerwację.",
-      "refusedAnswered": "Pracownik odrzucił tę propozycję, więc bez jego nowej zgody nie zostanie ona ponownie otwarta. Kontynuuj w rozmowie lub znajdź innego pracownika."
+      "refusedAnswered": "Pracownik odrzucił tę propozycję, więc bez jego nowej zgody nie zostanie ona ponownie otwarta. Kontynuuj w rozmowie lub znajdź innego pracownika.",
+      "unconfirmed": "Serwer jeszcze nie odpowiedział. Propozycja mogła już zostać wysłana — sprawdź sekcję Rezerwacje albo wyślij ją ponownie (ta sama propozycja nigdy nie jest dublowana)."
     },
     "reason": {
       "optionalTitle": "Powód (opcjonalnie)",
@@ -11169,6 +11172,13 @@
         "unknown": "Nie udało się sprawdzić, czy firmy widzą Twój profil. To nie znaczy, że widoczność jest wyłączona — otwórz ustawienia prywatności.",
         "noWorker": "Widoczność dla pracodawców dotyczy profilu pracownika, a to konto jeszcze go nie ma."
       }
+    },
+    "switch": {
+      "privateLine": "To ustawienie nigdy nie pokazuje: Twojego imienia i nazwiska, numeru telefonu, e-maila, wpisów w Dzienniku pracy ani linków do profili zewnętrznych.",
+      "turnOn": "Przeczytaj warunki i włącz",
+      "details": "Co widzą firmy i pełne warunki",
+      "grantedNote": "Gotowe — firmy mogą teraz znaleźć Twój profil zawodowy pod anonimowym oznaczeniem.",
+      "withdrawnNote": "Gotowe — Twój profil nie pojawia się już w nowych wyszukiwaniach firm."
     }
   },
   "planning": {
@@ -11410,9 +11420,9 @@
       "coveredShort": "pokryto {count}"
     },
     "notes": {
-      "assignmentsPending": "Dane o przydziałach są przygotowane i dołączą do tego widoku po aktywacji przez właściciela.",
-      "languagesPending": "Pokrycie językowe jest przygotowane i dołączy do tego widoku po aktywacji przez właściciela.",
-      "brigadesPending": "Pokrycie brygad jest przygotowane i dołączy do tego widoku po aktywacji przez właściciela.",
+      "assignmentsPending": "Dane o przydziałach nie są jeszcze pokazywane w tym widoku.",
+      "languagesPending": "Pokrycie językowe nie jest jeszcze pokazywane w tym widoku.",
+      "brigadesPending": "Pokrycie brygad nie jest jeszcze pokazywane w tym widoku.",
       "demandError": "Nie udało się teraz odczytać zapotrzebowań na pracowników.",
       "projectError": "Nie udało się teraz odczytać projektów.",
       "capacityError": "Nie udało się teraz odczytać części danych o wydajności."
@@ -12829,7 +12839,7 @@
     },
     "stateNote": {
       "insufficientData": "Dla tego sygnału nie ma jeszcze wystarczających prawdziwych danych — zamiast wymyślonej liczby pokazujemy uczciwą lukę.",
-      "needsMigration": "Magazyn danych tego sygnału jest przygotowany i zostanie podłączony po aktywacji przez właściciela. Do tego czasu niczego nie szacujemy.",
+      "needsMigration": "Ten sygnał nie jest jeszcze włączony. Do tego czasu niczego nie szacujemy.",
       "stale": "Dowody stojące za tym sygnałem są starsze niż okno świeżości — traktuj je jako nieaktualne."
     },
     "valueClass": {
@@ -12881,7 +12891,7 @@
         "agencyAggregate": "Agregat między klientami"
       },
       "state": {
-        "needsMigration": "Ten sygnał jest przygotowany i czeka na aktywację przez właściciela."
+        "needsMigration": "Ten sygnał nie jest jeszcze włączony."
       },
       "salary": {
         "noBenchmark": "Dla Twojego zawodu i kraju nie ma jeszcze wartości odniesienia.",
@@ -12916,7 +12926,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Magazyn danych aktywowany przez właściciela (jeszcze niewłączony)",
+      "gatedMigration": "Magazyn danych jeszcze niewłączony",
       "marketRateAverages": "Kuratorowane przez administratora średnie stawki rynkowe",
       "journalEvidence": "Twoje własne dowody z dziennika pracy",
       "fillTimeMeasurementsMissing": "Pomiary czasu obsadzenia (jeszcze niezbierane)",
@@ -12974,14 +12984,14 @@
       },
       "terms": {
         "internal": "Wewnętrzne wyliczenie z kanonicznych tabel platformy; polityka kohort chroni osoby.",
-        "adminCurated": "Średnie wprowadzone przez właściciela z notą o źródle zamiast wielkości próby.",
-        "statGovLt": "Statystyka urzędowa; wymagane wskazanie źródła; aktywacja czeka na potwierdzenie właściciela.",
-        "eurostat": "Urzędowa statystyka UE; wymagane wskazanie źródła; aktywacja czeka na potwierdzenie właściciela.",
+        "adminCurated": "Kuratorowane średnie z notą o źródle zamiast wielkości próby.",
+        "statGovLt": "Statystyka urzędowa; wymagane wskazanie źródła. Jeszcze nieużywana.",
+        "eurostat": "Aktywne źródło. Urzędowa statystyka UE; wymagane wskazanie źródła.",
         "arbetsformedlingen": "Aktywne źródło. Warunki użytkowania potwierdzone: bezpłatne publiczne źródło danych (CC0). Przy każdym ogłoszeniu podawane jest źródło, a ogłoszenie prowadzi do oryginalnej publikacji.",
         "nav": "Aktywne źródło. Warunki API NAV zostały zaakceptowane, dostęp przyznano. Stałe obowiązki są realizowane: wycofane ogłoszenie jest natychmiast usuwane, zmienione – szybko aktualizowane, a aplikowanie prowadzi do oryginalnego ogłoszenia.",
-        "cvbankas": "Tylko propozycja — zgoda na użycie niepotwierdzona; nigdy nie mieszane z liczbami wewnętrznymi.",
-        "eures": "Źródło zaproponowane. Warunki użytkowania nie zostały jeszcze sprawdzone — aktywacja wymaga potwierdzenia właściciela. Dziś nic nie jest pobierane.",
-        "uztLt": "Źródło zaproponowane. Warunki użytkowania nie zostały jeszcze sprawdzone — aktywacja wymaga potwierdzenia właściciela. Dziś nic nie jest pobierane."
+        "cvbankas": "Źródło zaproponowane — nieużywane; nigdy nie mieszane z liczbami wewnętrznymi.",
+        "eures": "Źródło zaproponowane. Nieużywane — dziś nic nie jest pobierane.",
+        "uztLt": "Źródło zaproponowane. Nieużywane — dziś nic nie jest pobierane."
       },
       "status": {
         "active": "Aktywne (wewnętrzne)",
@@ -12993,7 +13003,7 @@
     "methodology": {
       "title": "Metodyka",
       "deterministic": "Wszystkie wartości są deterministyczne i obliczone z rekordów ze źródłami — niczego nie szacuje AI i żadna liczba nigdy nie jest wymyślana.",
-      "externalOff": "Źródła zewnętrzne są wyłączone: każde zewnętrzne odniesienie to propozycja czekająca na prawne potwierdzenie właściciela. Liczby wewnętrzne i zewnętrzne nigdy nie są mieszane.",
+      "externalOff": "Źródła zewnętrzne są wyłączone. Liczby wewnętrzne i zewnętrzne nigdy nie są mieszane.",
       "cohort": "Małe kohorty są grupowane lub ukrywane, aby chronić osoby."
     },
     "contextual": {
@@ -13112,7 +13122,7 @@
       },
       "unavailable": {
         "requirementTitle": "Co jest potrzebne",
-        "sourcesTitle": "Źródła oczekujące na zatwierdzenie właściciela"
+        "sourcesTitle": "Źródła jeszcze nieużywane"
       },
       "reason": {
         "salaryNoBenchmark": "Nie ma tu kwoty wynagrodzenia, ponieważ dla Twojego zawodu i kraju nie wprowadzono jeszcze kuratorowanego punktu odniesienia, a żadne zewnętrzne źródło wynagrodzeń nie zostało zatwierdzone.",
@@ -13126,15 +13136,15 @@
         "eurostatNeedsActivation": "Oficjalny kontekst Eurostatu jest przygotowany; pierwszy oficjalny import jeszcze się nie odbył, więc żadna liczba nie jest dostępna."
       },
       "requirement": {
-        "ownerEnableStore": "Właściciel platformy musi włączyć magazyn obserwacji i zatwierdzić co najmniej jedno źródło danych.",
-        "salaryBenchmark": "Administrator musi wprowadzić kuratorowany punkt odniesienia dla Twojego zawodu i kraju albo właściciel platformy musi zatwierdzić zewnętrzne źródło wynagrodzeń.",
+        "ownerEnableStore": "Magazyn obserwacji musi zostać włączony, a co najmniej jedno źródło danych zatwierdzone.",
+        "salaryBenchmark": "Musi zostać wprowadzony kuratorowany punkt odniesienia dla Twojego zawodu i kraju albo zatwierdzone zewnętrzne źródło wynagrodzeń.",
         "demandOwnRows": "Dodaj zapytania o pracę — ta karta wypełni się danymi Twojej organizacji, gdy tylko pojawią się wpisy.",
         "salaryBasis": "Podstawa wynagrodzenia (brutto lub netto) musi być zapisana zarówno dla Twojego oczekiwanego wynagrodzenia, jak i dla kuratorowanego punktu odniesienia, zanim będzie można pokazać uczciwe porównanie.",
         "salaryInputs": "Wpisz oczekiwane wynagrodzenie w swoim profilu pracownika — porównanie pojawi się, gdy tylko będzie dostępne.",
         "eurostatActivation": "Uruchamia się ograniczony oficjalny import danych Eurostatu."
       },
       "after": {
-        "activation": "Gdy właściciel zatwierdzi i włączy źródło danych, ta karta wypełni się udokumentowanymi, datowanymi liczbami — każda z wiarygodnością, świeżością, źródłem i pochodzeniem krok po kroku."
+        "activation": "Gdy źródło danych zostanie włączone, ta karta wypełni się udokumentowanymi, datowanymi liczbami — każda z wiarygodnością, świeżością, źródłem i pochodzeniem krok po kroku."
       }
     },
     "drawer": {
@@ -13282,7 +13292,7 @@
         "labourCostIndex": "To nie jest oferta wynagrodzenia i nigdy nie może służyć do wnioskowania o zarobkach konkretnej osoby."
       },
       "sectionTitle": "Europejski kontekst rynku pracy",
-      "sectionIntro": "Oficjalne zbiorcze dane Eurostatu dla UE i wybranych rynków europejskich. Przygotowane, oczekuje na aktywację przez właściciela.",
+      "sectionIntro": "Oficjalne zbiorcze dane Eurostatu dla UE i wybranych rynków europejskich.",
       "asOf": "Publikacja Eurostatu z {date} — te dane nie odświeżają się tutaj samoczynnie.",
       "dataBasis": "Oficjalne dane zbiorcze Eurostatu (źródło: Eurostat)",
       "whyVisible": "Pokazywane jako oficjalny europejski kontekst rynku pracy.",

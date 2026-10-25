@@ -65,6 +65,8 @@ export default async function ServicesPage({
     cancel: t("cancel"),
     edit: t("edit"),
     remove: t("remove"),
+    removeQuestion: t("removeQuestion"),
+    removeYes: t("removeYes"),
     activate: t("activate"),
     pause: t("pause"),
     errorTitleRequired: t("errorTitleRequired"),

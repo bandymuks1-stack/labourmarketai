@@ -2846,7 +2846,8 @@
       "alreadyAccepted": "Arbetstagaren har redan accepterat detta förslag — överenskomna villkor skrivs inte över här. Kom överens om ändringar i samtalet.",
       "refusedNotReachable": "Den här personen kan inte få ett bokningsförslag härifrån — profilen är inte synlig för arbetsgivare och det finns ingen arbetsrelation med dig.",
       "refusedNeedClosed": "Det här behovet är stängt — öppna det igen innan du föreslår en bokning.",
-      "refusedAnswered": "Arbetstagaren har avböjt förslaget, så det öppnas inte igen utan arbetstagarens nya samtycke. Fortsätt i samtalet eller hitta en annan arbetstagare."
+      "refusedAnswered": "Arbetstagaren har avböjt förslaget, så det öppnas inte igen utan arbetstagarens nya samtycke. Fortsätt i samtalet eller hitta en annan arbetstagare.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -3020,9 +3021,9 @@
       "coveredShort": "[EN] {count} covered"
     },
     "notes": {
-      "assignmentsPending": "[EN] Assignment data is prepared and joins this view after owner activation.",
-      "languagesPending": "[EN] Language coverage is prepared and joins this view after owner activation.",
-      "brigadesPending": "[EN] Brigade coverage is prepared and joins this view after owner activation.",
+      "assignmentsPending": "[EN] Assignment data is not shown in this view yet.",
+      "languagesPending": "[EN] Language coverage is not shown in this view yet.",
+      "brigadesPending": "[EN] Brigade coverage is not shown in this view yet.",
       "demandError": "[EN] Work needs could not be read right now.",
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
@@ -3056,7 +3057,7 @@
     },
     "stateNote": {
       "insufficientData": "Det finns ännu inte tillräckligt med riktiga data för den här signalen — en ärlig lucka visas i stället för en påhittad siffra.",
-      "needsMigration": "Datalagret bakom den här signalen är förberett och kopplas på efter ägarens aktivering. Fram till dess uppskattas ingenting.",
+      "needsMigration": "Den här signalen är ännu inte påslagen. Fram till dess uppskattas ingenting.",
       "stale": "Underlaget bakom den här signalen är äldre än färskhetsfönstret — betrakta det som inaktuellt."
     },
     "valueClass": {
@@ -3108,7 +3109,7 @@
         "agencyAggregate": "Aggregat över kunder"
       },
       "state": {
-        "needsMigration": "Den här signalen är förberedd och väntar på ägarens aktivering."
+        "needsMigration": "Den här signalen är ännu inte påslagen."
       },
       "salary": {
         "noBenchmark": "Det finns ännu inget lönereferensvärde för ditt yrke och land.",
@@ -3143,7 +3144,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Ägaraktiverat datalager (ännu inte påslaget)",
+      "gatedMigration": "Datalager ännu inte påslaget",
       "marketRateAverages": "Admin-kurerade marknadssatsgenomsnitt",
       "journalEvidence": "Dina egna arbetsjournalbevis",
       "fillTimeMeasurementsMissing": "Tillsättningstidsmätningar (samlas ännu inte in)",
@@ -3201,14 +3202,14 @@
       },
       "terms": {
         "internal": "Intern härledning från kanoniska plattformstabeller; kohortpolicyn skyddar enskilda.",
-        "adminCurated": "Ägarangivna genomsnitt med en källnot i stället för en urvalsstorlek.",
-        "statGovLt": "Officiell statistik; källhänvisning krävs; aktivering väntar på ägarens bekräftelse.",
-        "eurostat": "Officiell EU-statistik; källhänvisning krävs; aktivering väntar på ägarens bekräftelse.",
+        "adminCurated": "Kurerade genomsnitt med en källnot i stället för en urvalsstorlek.",
+        "statGovLt": "Officiell statistik; källhänvisning krävs. Ännu inte i bruk.",
+        "eurostat": "Aktiv källa. Officiell EU-statistik; källhänvisning krävs.",
         "arbetsformedlingen": "Aktiv källa. Användningsvillkor bekräftade: en kostnadsfri offentlig datakälla (CC0). Källan visas vid varje annons, och varje annons länkar tillbaka till den ursprungliga annonsen.",
         "nav": "Aktiv källa. NAV:s API-villkor är godkända och åtkomst har beviljats. De löpande skyldigheterna följs: en indragen annons tas bort omedelbart, en uppdaterad uppdateras snabbt och ansökningslänken leder till den ursprungliga annonsen.",
-        "cvbankas": "Endast ett förslag — användningstillstånd obekräftat; blandas aldrig med interna siffror.",
-        "eures": "Föreslagen källa. Användarvillkoren har inte granskats ännu — aktivering kräver ägarens bekräftelse. Inget hämtas i dag.",
-        "uztLt": "Föreslagen källa. Användarvillkoren har inte granskats ännu — aktivering kräver ägarens bekräftelse. Inget hämtas i dag."
+        "cvbankas": "Föreslagen källa — inte i bruk; blandas aldrig med interna siffror.",
+        "eures": "Föreslagen källa. Inte i bruk — inget hämtas i dag.",
+        "uztLt": "Föreslagen källa. Inte i bruk — inget hämtas i dag."
       },
       "status": {
         "active": "Aktiv (intern)",
@@ -3220,7 +3221,7 @@
     "methodology": {
       "title": "Metodik",
       "deterministic": "Alla värden är deterministiska och beräknade ur poster med källor — inget uppskattas av AI och ingen siffra hittas någonsin på.",
-      "externalOff": "Externa källor är av: varje extern referens är ett förslag som väntar på ägarens juridiska bekräftelse. Interna och externa siffror blandas aldrig.",
+      "externalOff": "Externa källor är av. Interna och externa siffror blandas aldrig.",
       "cohort": "Små kohorter grupperas eller döljs för att skydda enskilda."
     },
     "contextual": {
@@ -3335,7 +3336,7 @@
       },
       "unavailable": {
         "requirementTitle": "Vad som krävs",
-        "sourcesTitle": "Källor som väntar på ägarens godkännande"
+        "sourcesTitle": "Källor som ännu inte används"
       },
       "reason": {
         "salaryNoBenchmark": "Det finns ingen lönesiffra här eftersom det ännu inte finns någon kurerad marknadsnivå för ditt yrke och land, och ingen extern lönekälla är godkänd för användning.",
@@ -3348,14 +3349,14 @@
         "salaryInputsMissing": "Det finns ingen lönesiffra här eftersom det finns en kurerad marknadsnivå, men din egen förväntade lön saknas, så det finns inget att jämföra med."
       },
       "requirement": {
-        "ownerEnableStore": "Plattformens ägare måste slå på observationslagret och godkänna minst en datakälla.",
-        "salaryBenchmark": "En administratör måste ange en kurerad marknadsnivå för ditt yrke och land, eller så måste plattformens ägare godkänna en extern lönekälla.",
+        "ownerEnableStore": "Observationslagret måste slås på och minst en datakälla godkännas.",
+        "salaryBenchmark": "En kurerad marknadsnivå för ditt yrke och land måste anges, eller en extern lönekälla godkännas.",
         "demandOwnRows": "Lägg till arbetsförfrågningar — kortet fylls med er egen organisations data så snart poster finns.",
         "salaryBasis": "Lönebasis (brutto eller netto) måste vara registrerad för både din förväntade lön och den kurerade marknadsnivån innan en ärlig jämförelse kan visas.",
         "salaryInputs": "Ange din förväntade lön i din arbetstagarprofil — jämförelsen visas så snart den finns."
       },
       "after": {
-        "activation": "När ägaren har godkänt och aktiverat en datakälla fylls detta kort med underbyggda, daterade siffror — var och en med tillförlitlighet, färskhet, källa och steg-för-steg-ursprung."
+        "activation": "När en datakälla har slagits på fylls detta kort med underbyggda, daterade siffror — var och en med tillförlitlighet, färskhet, källa och steg-för-steg-ursprung."
       }
     },
     "drawer": {

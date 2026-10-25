@@ -124,7 +124,7 @@ let contactAskCreatedHere = false;
 let draftCreated = false;
 let supplyGrantedHere = false;
 let locationRow: { created: boolean; activeBefore: boolean; visibilityBefore: string } | null = null;
-let visibilityInitial: "granted" | "withdrawn" | "choice" | "" = "";
+let visibilityInitial: "granted" | "choice" | "" = "";
 let visibilityTouched = false;
 
 test("A-0. the synthetic workers' own ids (own rows, own tokens)", async () => {
@@ -735,30 +735,24 @@ test("P-7 (9.10). rate limiting — not walked", async () => {
   );
 });
 
-/** Employer visibility: grant from the choice screen or from a reopened withdrawal, and prove it on a fresh load. */
+/** Employer visibility: ONE tap on the choice screen (never decided or withdrawn — the text and the
+ *  grant are already on screen), the result is said, and it holds on a fresh load. */
 async function grantVisibility(page: Page): Promise<void> {
-  const withdrawn = page.getByTestId("discoverability-withdrawn");
-  if (await withdrawn.isVisible().catch(() => false)) {
-    await page.getByTestId("discoverability-reopen").click();
-  } else {
-    await page.getByTestId("discoverability-open").click();
-  }
-  await expect(page.getByTestId("discoverability-grant"), "the screen offers the grant").toBeVisible({
+  await expect(page.getByTestId("discoverability-grant"), "the choice screen offers the grant directly").toBeVisible({
     timeout: 30_000,
   });
   await page.getByTestId("discoverability-grant").click();
-  await expect(page.getByTestId("discoverability-granted")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("discoverability-granted-note"), "the result is said").toBeVisible({ timeout: 30_000 });
   await page.reload();
   await expect(page.getByTestId("discoverability-granted"), "the grant persisted").toBeVisible({ timeout: 60_000 });
 }
 
-/** Employer visibility: withdraw from the granted screen, and prove it on a fresh load. */
+/** Employer visibility: ONE tap on the granted screen, the result is said, and it holds on a fresh load. */
 async function withdrawVisibility(page: Page): Promise<void> {
-  await page.getByTestId("discoverability-manage").click();
   await page.getByTestId("discoverability-withdraw").click();
-  await expect(page.getByTestId("discoverability-withdrawn")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("discoverability-withdrawn-note"), "the result is said").toBeVisible({ timeout: 30_000 });
   await page.reload();
-  await expect(page.getByTestId("discoverability-withdrawn"), "the withdrawal persisted").toBeVisible({
+  await expect(page.getByTestId("discoverability-choice"), "the withdrawal persisted").toBeVisible({
     timeout: 60_000,
   });
 }
@@ -770,19 +764,16 @@ test("P-8 (2.35 / 4.17). the worker turns employer visibility off, it persists, 
   const { ctx, page } = await as(browser, "worker2");
   await page.goto("/lt/dashboard/privacy#visibility");
   const granted = page.getByTestId("discoverability-granted");
-  const withdrawn = page.getByTestId("discoverability-withdrawn");
   const choice = page.getByTestId("discoverability-choice");
-  await expect(granted.or(withdrawn).or(choice).first()).toBeVisible({ timeout: 60_000 });
-  visibilityInitial = (await granted.isVisible()) ? "granted" : (await withdrawn.isVisible()) ? "withdrawn" : "choice";
+  await expect(granted.or(choice).first()).toBeVisible({ timeout: 60_000 });
+  // A withdrawn consent is the choice screen too (one tap back on, 2026-10-24).
+  visibilityInitial = (await granted.isVisible()) ? "granted" : "choice";
   console.info(`P-8: starting state = ${visibilityInitial}`);
   visibilityTouched = true;
 
   if (visibilityInitial === "granted") {
     await withdrawVisibility(page);
     await grantVisibility(page); // restored: visible
-  } else if (visibilityInitial === "withdrawn") {
-    await grantVisibility(page);
-    await withdrawVisibility(page); // restored: hidden
   } else {
     await grantVisibility(page);
     await withdrawVisibility(page);
@@ -895,7 +886,7 @@ test.afterAll(async ({ browser }) => {
       run: async (page) => {
         await page.goto("/lt/dashboard/privacy#visibility");
         const granted = page.getByTestId("discoverability-granted");
-        const hidden = page.getByTestId("discoverability-withdrawn").or(page.getByTestId("discoverability-choice"));
+        const hidden = page.getByTestId("discoverability-choice");
         await expect(granted.or(hidden).first()).toBeVisible({ timeout: 60_000 });
         const isGranted = await granted.isVisible();
         if (visibilityInitial === "granted" && !isGranted) await grantVisibility(page);
