@@ -121,6 +121,37 @@ describe("DATA: hiding is never deletion", () => {
   });
 });
 
+describe("RED half (20261024100000, human-gated): listing outcome + discarded-draft guard", () => {
+  const sql = () =>
+    readFileSync(
+      join(REPO, "supabase", "migrations", "20261024100000_market_lifecycle_listing_outcome_and_discard_guard_v1.sql"),
+      "utf8",
+    );
+
+  it("v3 keeps every v2 check (one publish policy) and refuses to publish a discarded draft", () => {
+    expect(sql()).toMatch(/perform public\.set_marketplace_listing_status_v2\(p_id, p_status\);/);
+    expect(sql()).toMatch(/a discarded draft cannot be published/);
+    expect(sql()).toMatch(/grant\s+execute on function public\.set_marketplace_listing_status_v3\(uuid, text, text\) to authenticated;/);
+    expect(sql()).toMatch(/revoke execute on function public\.set_marketplace_listing_status_v3\(uuid, text, text\) from anon;/);
+  });
+
+  it("the demand trigger adds exactly the discarded refusal and keeps every owner transition", () => {
+    const s = sql();
+    expect(s).toMatch(/old\.closed_outcome = 'discarded'/);
+    expect(s).toMatch(/\(old\.status = 'draft' and new\.status in \('submitted', 'closed'\)\)/);
+    expect(s).toMatch(/\(old\.status = 'closed' and new\.status = 'submitted'\)/);
+    expect(s).toMatch(/set search_path = public/);
+  });
+
+  it("the listing status door tries v3 and falls back to v2 while v3 is absent", () => {
+    const src = read("lib/marketplace/listings.ts");
+    const v3 = src.indexOf('rpc("set_marketplace_listing_status_v3"');
+    const v2 = src.indexOf('rpc("set_marketplace_listing_status_v2"');
+    expect(v3).toBeGreaterThan(0);
+    expect(v2).toBeGreaterThan(v3);
+  });
+});
+
 describe("SEARCH: the discovery SQL is the contract's visibility rule", () => {
   it("listings and services are discoverable only while active (and, for listings, unexpired)", () => {
     const dir = join(REPO, "supabase", "migrations");
