@@ -270,7 +270,10 @@ lines as this decision's reading — never a second ledger, never stored.
   `reported` (an organization's figure over a span whose method the source did not state — claimed
   neither actual nor estimated). CONFIRMATION: `unconfirmed` · `self_attested` · `confirmed`. A
   person's own attestation never upgrades the state; only someone else's confirmation does.
-- **Confidence** is a versioned deterministic table with reasons per line — never a score of the person.
+- **Confidence** is a band per line (high · medium · low) with the facts it rests on — never a score
+  of the person. The weights behind it are not public material (AGENTS.md "outcomes, not
+  mechanisms"): the server-side caller injects them from private configuration; without them the
+  band is unrated.
 - **Overlap capacity.** Overlapping counted lines may not exceed 16 h per calendar day across every
   organization. The excess is taken from estimated / reported lines only (actual beats estimate);
   actual records that alone exceed it are flagged, never edited. `hours.capacityExcess` says how much.

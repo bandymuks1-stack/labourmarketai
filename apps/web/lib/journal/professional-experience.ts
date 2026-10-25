@@ -1,5 +1,6 @@
 import {
   deriveHoursLedger,
+  type ConfidenceWeights,
   type HoursLedger,
   type HoursState,
   type LineStateSplit,
@@ -304,6 +305,9 @@ export type ExperienceProject = {
   readonly organizationName: string | null;
   readonly journalHours: number;
   readonly organizationHours: number;
+  /** Hours of this project the overlap-capacity check took from estimates. */
+  readonly capacityExcessHours: number;
+  /** journalHours + organizationHours − capacityExcessHours. */
   readonly totalHours: number;
   /** Counted hours by ledger state. */
   readonly byState: Readonly<Record<HoursState, number>>;
@@ -393,6 +397,9 @@ export function deriveProfessionalExperience(input: {
   readonly projectNames?: ReadonlyMap<string, string> | null;
   /** Skill links per line key (P_ij), for the ledger's skill split. */
   readonly skillLinks?: readonly SkillLink[] | null;
+  /** Private confidence weights, injected by the server-side caller from
+   *  configuration outside this repository; absent = bands unrated. */
+  readonly confidenceWeights?: ConfidenceWeights | null;
 }): ProfessionalExperience {
   const relationships = input.relationships ?? [];
   const projectNames = input.projectNames ?? new Map<string, string>();
@@ -443,6 +450,9 @@ export function deriveProfessionalExperience(input: {
 
   const wi = input.wi;
   const lines: ExperienceHourLine[] = [];
+  // The ACTUAL work days behind each day-made line (journal, organization
+  // day records), for the ledger's capacity check only — never on a line.
+  const daysByKey = new Map<string, { day: string; hours: number }[]>();
 
   if (wi) {
     const liveEntryIds = new Set(wi.entryIds);
@@ -469,6 +479,7 @@ export function deriveProfessionalExperience(input: {
       selfAttested: number;
       contested: boolean;
       records: number;
+      days: Map<string, number>;
       from: string | null;
       to: string | null;
     };
@@ -495,6 +506,7 @@ export function deriveProfessionalExperience(input: {
           selfAttested: 0,
           contested: false,
           records: 0,
+          days: new Map<string, number>(),
           from: null,
           to: null,
         };
@@ -506,10 +518,12 @@ export function deriveProfessionalExperience(input: {
       else if (att.self) a.selfAttested += r.hours;
       if (att.contested) a.contested = true;
       a.records += 1;
+      a.days.set(r.workDate, (a.days.get(r.workDate) ?? 0) + r.hours);
       a.from = minDay(a.from, r.workDate);
       a.to = maxDay(a.to, r.workDate);
     }
     for (const [key, a] of dayAcc) {
+      daysByKey.set(`day:${key}`, [...a.days].map(([day, h]) => ({ day, hours: h })));
       lines.push({
         key: `day:${key}`,
         source: "organization_day",
@@ -589,8 +603,10 @@ export function deriveProfessionalExperience(input: {
     ): ExperienceHourLine => {
       const hours = round2(days.reduce((s, d) => s + d.hours, 0));
       const confirmed = round2(days.reduce((s, d) => s + d.confirmedHours, 0));
+      const key = `journal:${l.engagementContextId ?? ""}|${l.projectId ?? ""}|${counted ? "c" : "p"}`;
+      daysByKey.set(key, days.map((d) => ({ day: d.day, hours: d.hours })));
       return {
-        key: `journal:${l.engagementContextId ?? ""}|${l.projectId ?? ""}|${counted ? "c" : "p"}`,
+        key,
         source: "journal",
         evidence: confirmed > 0 ? "manager_confirmed" : "own_record",
         organizationId: org.organizationId,
@@ -628,7 +644,11 @@ export function deriveProfessionalExperience(input: {
   }
 
   // ── the one hours ledger over the same lines ─────────────────────────
-  const ledger = deriveHoursLedger({ lines, skillLinks: input.skillLinks ?? null });
+  const ledger = deriveHoursLedger({
+    lines: lines.map((l) => (daysByKey.has(l.key) ? { ...l, days: daysByKey.get(l.key) } : l)),
+    skillLinks: input.skillLinks ?? null,
+    confidenceWeights: input.confidenceWeights ?? null,
+  });
 
   // ── totals ───────────────────────────────────────────────────────────
   let hours: ProfessionalExperienceHours | null = null;
@@ -877,6 +897,7 @@ export function deriveProfessionalExperience(input: {
       organizationName: l.organizationName,
       journalHours: 0,
       organizationHours: 0,
+      capacityExcessHours: 0,
       totalHours: 0,
       byState: zeroStates(),
       from: null,
@@ -887,6 +908,7 @@ export function deriveProfessionalExperience(input: {
       projectName: p.projectName ?? l.projectName,
       journalHours: p.journalHours + (l.source === "journal" ? l.hours : 0),
       organizationHours: p.organizationHours + (l.source === "journal" ? 0 : l.hours),
+      capacityExcessHours: p.capacityExcessHours + (cutOfLine.get(l.key) ?? 0),
       totalHours: 0,
       byState: addStates(p.byState, l),
       from: minDay(p.from, l.from),
@@ -898,7 +920,8 @@ export function deriveProfessionalExperience(input: {
       ...p,
       journalHours: round2(p.journalHours),
       organizationHours: round2(p.organizationHours),
-      totalHours: round2(p.journalHours + p.organizationHours),
+      capacityExcessHours: round2(p.capacityExcessHours),
+      totalHours: round2(p.journalHours + p.organizationHours - p.capacityExcessHours),
       byState: roundStates(p.byState),
     }))
     .sort((x, y) => y.totalHours - x.totalHours || (x.projectName ?? "").localeCompare(y.projectName ?? ""));

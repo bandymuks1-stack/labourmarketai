@@ -12,6 +12,7 @@ import {
   monthsInclusive,
   skillSplit,
   workingDays,
+  type ConfidenceWeights,
   type LedgerLine,
 } from "@/lib/journal/hours-ledger";
 
@@ -20,6 +21,19 @@ import {
  * Every rule of hours-ledger.ts, pinned: deterministic, versioned,
  * explainable; actual beats estimate; never an invented hour.
  */
+
+/** Test-only weights: the production weights are private configuration,
+ *  never in this repository. These exist to pin the MECHANICS (injection,
+ *  ordering of facts, bands), not any real value. */
+const TEST_WEIGHTS: ConfidenceWeights = {
+  base: { journalActual: 0.6, organizationActual: 0.6, reported: 0.5, estimated: 0.3 },
+  independentConfirmation: 0.3,
+  spanChosenByPerson: -0.1,
+  spanDerived: -0.1,
+  contestedFactor: 0.5,
+  ceiling: 1,
+  bands: { high: 0.8, medium: 0.45 },
+};
 
 const line = (over: Partial<LedgerLine> & Pick<LedgerLine, "key" | "hours">): LedgerLine => ({
   source: "organization_period",
@@ -121,18 +135,33 @@ describe("states and confidence", () => {
     );
     expect(s.confirmation).toBe("self_attested");
     expect(s.byState).toEqual({ actual: 0, reported: 0, estimated: 800, confirmed: 0 });
-    expect(s.confidence).toBe(0.3); // 0.4 − 0.1 (span chosen by a person)
-    expect(s.reasons.join(" ")).toMatch(/attested by the person themselves/);
+    expect(s.facts).toEqual(["organization_record", "basis_estimated", "self_attested", "span_chosen_by_person"]);
+    expect(lineState(line({ key: "p", hours: 800, hoursBasis: { value: "estimated", method: "m", note: null } }), TEST_WEIGHTS).confidenceBand).toBe("low");
   });
 
-  it("an independent attestation makes the hours confirmed and raises confidence", () => {
-    const s = lineState(line({ key: "d", source: "organization_day", hours: 40, attestedHours: 40 }));
+  it("without injected weights there is no band — unrated, never a default", () => {
+    expect(lineState(line({ key: "d", source: "organization_day", hours: 40, attestedHours: 40 })).confidenceBand).toBeNull();
+  });
+
+  it("an independent attestation makes the hours confirmed and lifts the band", () => {
+    const plain = lineState(line({ key: "d", source: "organization_day", hours: 40 }), TEST_WEIGHTS);
+    const s = lineState(line({ key: "d", source: "organization_day", hours: 40, attestedHours: 40 }), TEST_WEIGHTS);
     expect(s.byState.confirmed).toBe(40);
-    expect(s.confidence).toBe(0.95);
+    expect(plain.confidenceBand).toBe("medium");
+    expect(s.confidenceBand).toBe("high");
+    expect(s.facts).toContain("independently_confirmed");
   });
 
-  it("a contested line halves its confidence", () => {
-    expect(lineState(line({ key: "d", source: "organization_day", hours: 8, contested: true })).confidence).toBe(0.38);
+  it("a contested line drops a band", () => {
+    const s = lineState(line({ key: "d", source: "organization_day", hours: 8, contested: true }), TEST_WEIGHTS);
+    expect(s.confidenceBand).toBe("low");
+    expect(s.facts).toContain("contested");
+  });
+
+  it("the public module carries no confidence weights", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync(new URL("./hours-ledger.ts", import.meta.url), "utf8");
+    expect(src).not.toMatch(/CONFIDENCE_TABLE|base:\s*\{\s*journalActual:\s*0\.\d/);
   });
 });
 
@@ -164,6 +193,28 @@ describe("overlap capacity — overlapping periods never double count", () => {
     ]);
     expect(c.reductions).toEqual([{ key: "est", hours: 60 }]);
     expect(c.implausible).toEqual([]);
+  });
+
+  it("day-made lines are checked on their ACTUAL days — no hours invented on days without work", () => {
+    // 16 h on Jan 1 and 16 h on Jan 31 (journal), 16 h period figure on Jan 15: no day exceeds 16 h.
+    const l = deriveHoursLedger({
+      lines: [
+        line({
+          key: "j",
+          source: "journal",
+          hours: 32,
+          from: "2025-01-01",
+          to: "2025-01-31",
+          days: [
+            { day: "2025-01-01", hours: 16 },
+            { day: "2025-01-31", hours: 16 },
+          ],
+        }),
+        line({ key: "p", hours: 16, from: "2025-01-15", to: "2025-01-15" }),
+      ],
+    });
+    expect(l.capacity.excessHours).toBe(0);
+    expect(l.total).toBe(48);
   });
 
   it("actual records that alone exceed the calendar are flagged, never edited", () => {

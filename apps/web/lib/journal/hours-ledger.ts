@@ -15,15 +15,21 @@
  *     statement and never upgrades the state. `reported` is an organization's
  *     figure over a span whose method the source did not state — claimed
  *     neither actual nor estimated (UNKNOWN is never dressed up).
- *  2. CONFIDENCE. A deterministic table (`CONFIDENCE_TABLE`), one value per
- *     line with its reasons — never a score of the person.
+ *  2. CONFIDENCE. A BAND per line (high · medium · low) with the facts it
+ *     rests on — never a score of the person. The weights behind the band
+ *     are NOT public material (AGENTS.md "outcomes, not mechanisms"): they
+ *     are injected (`ConfidenceWeights`) by the server-side caller from
+ *     private configuration kept outside this repository; without them the
+ *     band is null (unrated), never a guess.
  *  3. OVERLAP CAPACITY. Overlapping counted lines may not add up to more
  *     hours than the calendar holds (`MAX_HOURS_PER_CALENDAR_DAY`). Where
  *     they would, the excess is taken from ESTIMATED / REPORTED lines only —
  *     actual records beat estimates and are never reduced; actual records
  *     that alone exceed the calendar are flagged as implausible, unchanged.
- *     For this check alone a span's hours are treated as evenly spread; that
- *     assumption is never shown and no day is ever invented from it.
+ *     Lines made of dated days (journal, organization day records) are
+ *     checked on their ACTUAL days; only a genuine period figure (no days)
+ *     is treated, for this check alone, as evenly spread over its span —
+ *     never shown, and no day is ever invented from it.
  *  4. ESTIMATION. For a period without timesheets: H = D × h × K − A, where D
  *     is the working days of the span by the calendar minus the known
  *     non-working days, h the standard daily hours, K the workload
@@ -285,6 +291,11 @@ export type LedgerLine = {
   /** Who did the work: the person (default) or an AI agent acting
    *  autonomously — the latter is project history only. */
   readonly actor?: "person" | "ai_agent";
+  /** The line's ACTUAL hours per work day, when the line is made of dated
+   *  days (journal entries, organization day records). The capacity check
+   *  reads these exact days; only a genuine period figure (no days) is
+   *  treated as spread over its span. */
+  readonly days?: readonly { readonly day: string; readonly hours: number }[];
 };
 
 export function basisOf(line: LedgerLine): HoursBasis {
@@ -294,16 +305,38 @@ export function basisOf(line: LedgerLine): HoursBasis {
   return "reported";
 }
 
-/** Base confidence by basis and source; adjustments are additive and capped.
- *  Versioned with the ledger: a change here is a new version. */
-export const CONFIDENCE_TABLE = {
-  base: { journal_actual: 0.7, organization_actual: 0.75, reported: 0.55, estimated: 0.4 },
-  independentConfirmation: 0.2,
-  spanChosenByPerson: -0.1,
-  spanDerived: -0.05,
-  contestedFactor: 0.5,
-  ceiling: 0.95,
-} as const;
+/** The private weights behind the confidence band. Never committed: the
+ *  server-side caller injects them from private configuration kept outside
+ *  this repository; tests inject their own. */
+export type ConfidenceWeights = {
+  readonly base: {
+    readonly journalActual: number;
+    readonly organizationActual: number;
+    readonly reported: number;
+    readonly estimated: number;
+  };
+  readonly independentConfirmation: number;
+  readonly spanChosenByPerson: number;
+  readonly spanDerived: number;
+  readonly contestedFactor: number;
+  readonly ceiling: number;
+  /** Lower edges of the bands: value >= high → high, >= medium → medium. */
+  readonly bands: { readonly high: number; readonly medium: number };
+};
+
+export type ConfidenceBand = "high" | "medium" | "low";
+
+/** The facts a line's confidence rests on — stated, never weighted here. */
+export type ConfidenceFact =
+  | "own_record"
+  | "organization_record"
+  | "basis_reported"
+  | "basis_estimated"
+  | "independently_confirmed"
+  | "self_attested"
+  | "span_chosen_by_person"
+  | "span_derived"
+  | "contested";
 
 export type LineStateSplit = {
   readonly key: string;
@@ -311,11 +344,12 @@ export type LineStateSplit = {
   readonly confirmation: HoursConfirmation;
   /** Hours by displayed state; sums to the line's counted hours. */
   readonly byState: Readonly<Record<HoursState, number>>;
-  readonly confidence: number;
-  readonly reasons: readonly string[];
+  /** null = no weights configured (unrated) — never a default band. */
+  readonly confidenceBand: ConfidenceBand | null;
+  readonly facts: readonly ConfidenceFact[];
 };
 
-export function lineState(line: LedgerLine): LineStateSplit {
+export function lineState(line: LedgerLine, weights?: ConfidenceWeights | null): LineStateSplit {
   const basis = basisOf(line);
   const hours = Math.max(0, line.hours);
   const confirmed =
@@ -328,42 +362,35 @@ export function lineState(line: LedgerLine): LineStateSplit {
   const byState: Record<HoursState, number> = { actual: 0, reported: 0, estimated: 0, confirmed: round2(confirmed) };
   byState[basis] = round2(hours - confirmed);
 
-  const reasons: string[] = [];
-  const t = CONFIDENCE_TABLE;
-  let c =
-    basis === "estimated"
-      ? t.base.estimated
-      : basis === "reported"
-        ? t.base.reported
-        : line.source === "journal"
-          ? t.base.journal_actual
-          : t.base.organization_actual;
-  reasons.push(`basis ${basis}${line.source === "journal" ? " (own record)" : " (organization record)"}`);
-  if (hours > 0 && confirmed / hours > 0.5) {
-    c += t.independentConfirmation;
-    reasons.push("confirmed by someone other than the person");
-  } else if (selfAttested > EPS) {
-    reasons.push("attested by the person themselves — recorded, not an independent confirmation");
+  const facts: ConfidenceFact[] = [line.source === "journal" ? "own_record" : "organization_record"];
+  if (basis === "reported") facts.push("basis_reported");
+  if (basis === "estimated") facts.push("basis_estimated");
+  const mostlyConfirmed = hours > 0 && confirmed / hours > 0.5;
+  if (mostlyConfirmed) facts.push("independently_confirmed");
+  else if (selfAttested > EPS) facts.push("self_attested");
+  if (line.spanProvenance === "human_choice") facts.push("span_chosen_by_person");
+  else if (line.spanProvenance === "derived") facts.push("span_derived");
+  if (line.contested) facts.push("contested");
+
+  let confidenceBand: ConfidenceBand | null = null;
+  if (weights) {
+    const w = weights;
+    let c =
+      basis === "estimated"
+        ? w.base.estimated
+        : basis === "reported"
+          ? w.base.reported
+          : line.source === "journal"
+            ? w.base.journalActual
+            : w.base.organizationActual;
+    if (mostlyConfirmed) c += w.independentConfirmation;
+    if (line.spanProvenance === "human_choice") c += w.spanChosenByPerson;
+    else if (line.spanProvenance === "derived") c += w.spanDerived;
+    if (line.contested) c *= w.contestedFactor;
+    c = Math.min(w.ceiling, Math.max(0, c));
+    confidenceBand = c >= w.bands.high - EPS ? "high" : c >= w.bands.medium - EPS ? "medium" : "low";
   }
-  if (line.spanProvenance === "human_choice") {
-    c += t.spanChosenByPerson;
-    reasons.push("span chosen by a person at import, not stated by the source");
-  } else if (line.spanProvenance === "derived") {
-    c += t.spanDerived;
-    reasons.push("span derived, not stated by the source");
-  }
-  if (line.contested) {
-    c *= t.contestedFactor;
-    reasons.push("contested");
-  }
-  return {
-    key: line.key,
-    basis,
-    confirmation,
-    byState,
-    confidence: round2(Math.min(t.ceiling, Math.max(0, c))),
-    reasons,
-  };
+  return { key: line.key, basis, confirmation, byState, confidenceBand, facts };
 }
 
 // ── overlap capacity ────────────────────────────────────────────────────
@@ -378,16 +405,68 @@ export type CapacityReading = {
   readonly implausible: readonly { readonly from: string; readonly to: string; readonly hours: number; readonly capacity: number }[];
 };
 
+/** One line's hours inside [s, e] (day numbers, inclusive): its ACTUAL
+ *  days when it has them, otherwise its span figure spread evenly (genuine
+ *  period figures only — for this check, never shown). */
+type CapacityShape =
+  | { readonly kind: "days"; readonly days: readonly number[]; readonly prefix: readonly number[] }
+  | { readonly kind: "span"; readonly a: number; readonly b: number; readonly hours: number };
+
+function shapeOf(l: LedgerLine): CapacityShape | null {
+  const days = (l.days ?? []).filter((d) => isIsoDay(d.day) && Number.isFinite(d.hours) && d.hours > 0);
+  if (days.length > 0) {
+    const byDay = new Map<number, number>();
+    for (const d of days) byDay.set(dayNumber(d.day), (byDay.get(dayNumber(d.day)) ?? 0) + d.hours);
+    const sorted = [...byDay.keys()].sort((x, y) => x - y);
+    const prefix: number[] = [0];
+    for (const n of sorted) prefix.push(prefix[prefix.length - 1] + byDay.get(n)!);
+    return { kind: "days", days: sorted, prefix };
+  }
+  if (!isIsoDay(l.from) || !isIsoDay(l.to) || dayNumber(l.to!) < dayNumber(l.from!)) return null;
+  return { kind: "span", a: dayNumber(l.from!), b: dayNumber(l.to!), hours: l.hours };
+}
+
+/** Index of the first element >= n. */
+function lowerBound(xs: readonly number[], n: number): number {
+  let lo = 0;
+  let hi = xs.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (xs[mid] < n) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+function shareIn(shape: CapacityShape, s: number, e: number): number {
+  if (shape.kind === "span") {
+    const from = Math.max(s, shape.a);
+    const to = Math.min(e, shape.b);
+    return to < from ? 0 : (shape.hours * (to - from + 1)) / (shape.b - shape.a + 1);
+  }
+  const i = lowerBound(shape.days, s);
+  const j = lowerBound(shape.days, e + 1);
+  return shape.prefix[j] - shape.prefix[i];
+}
+
 export function capacityOf(lines: readonly LedgerLine[]): CapacityReading {
-  const dated = lines
-    .filter((l) => l.counted && l.hours > 0 && isIsoDay(l.from) && isIsoDay(l.to) && dayNumber(l.to!) >= dayNumber(l.from!))
-    .slice()
-    .sort((x, y) => x.key.localeCompare(y.key));
-  if (dated.length < 2) return { excessHours: 0, reductions: [], implausible: [] };
+  const shaped = lines
+    .filter((l) => l.counted && l.hours > 0)
+    .map((l) => ({ line: l, shape: shapeOf(l) }))
+    .filter((x): x is { line: LedgerLine; shape: CapacityShape } => x.shape !== null)
+    .sort((x, y) => x.line.key.localeCompare(y.line.key));
+  if (shaped.length < 2) return { excessHours: 0, reductions: [], implausible: [] };
   const bounds = new Set<number>();
-  for (const l of dated) {
-    bounds.add(dayNumber(l.from!));
-    bounds.add(dayNumber(l.to!) + 1);
+  for (const { shape } of shaped) {
+    if (shape.kind === "span") {
+      bounds.add(shape.a);
+      bounds.add(shape.b + 1);
+    } else {
+      for (const n of shape.days) {
+        bounds.add(n);
+        bounds.add(n + 1);
+      }
+    }
   }
   const cuts = [...bounds].sort((a, b) => a - b);
   const reduction = new Map<string, number>();
@@ -397,11 +476,9 @@ export function capacityOf(lines: readonly LedgerLine[]): CapacityReading {
     const e = cuts[i + 1] - 1;
     const segDays = e - s + 1;
     const shares: { line: LedgerLine; share: number; reducible: boolean }[] = [];
-    for (const l of dated) {
-      const a = dayNumber(l.from!);
-      const b = dayNumber(l.to!);
-      if (b < s || a > e) continue;
-      shares.push({ line: l, share: (l.hours * segDays) / (b - a + 1), reducible: basisOf(l) !== "actual" });
+    for (const { line, shape } of shaped) {
+      const share = shareIn(shape, s, e);
+      if (share > EPS) shares.push({ line, share, reducible: basisOf(line) !== "actual" });
     }
     if (shares.length < 2) continue;
     const demand = shares.reduce((acc, x) => acc + x.share, 0);
@@ -422,7 +499,7 @@ export function capacityOf(lines: readonly LedgerLine[]): CapacityReading {
   }
   const reductions = [...reduction.entries()]
     .map(([key, h]) => {
-      const line = dated.find((l) => l.key === key)!;
+      const line = shaped.find((x) => x.line.key === key)!.line;
       return { key, hours: round2(Math.min(line.hours, h)) };
     })
     .filter((r) => r.hours > 0)
@@ -534,6 +611,9 @@ export type HoursLedger = {
 export function deriveHoursLedger(input: {
   readonly lines: readonly LedgerLine[];
   readonly skillLinks?: readonly SkillLink[] | null;
+  /** Private confidence weights (server-side configuration); absent =
+   *  every band null (unrated). */
+  readonly confidenceWeights?: ConfidenceWeights | null;
 }): HoursLedger {
   const own = input.lines.filter((l) => (l.actor ?? "person") === "person");
   const projectHistoryOnly = input.lines
@@ -549,7 +629,7 @@ export function deriveHoursLedger(input: {
     before += l.hours;
     const cut = reductionOf.get(l.key) ?? 0;
     const effective: LedgerLine = cut > 0 ? { ...l, hours: Math.max(0, l.hours - cut) } : l;
-    const s = lineState(effective);
+    const s = lineState(effective, input.confidenceWeights ?? null);
     splits.push(s);
     for (const k of Object.keys(byState) as HoursState[]) byState[k] += s.byState[k];
   }

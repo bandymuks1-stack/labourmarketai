@@ -186,6 +186,29 @@ describe("the one total is the ledger's total", () => {
     expect(sum).toBe(160);
   });
 
+  it("project, organization and overall totals reconcile after a capacity reduction", () => {
+    const withProject = (id: string, org: string): WorkIntelligenceOrganizationPeriodRecord => ({
+      ...MANAGEMENT_ESTIMATE,
+      id,
+      organizationId: org,
+      periodStart: "2025-01-01",
+      periodEnd: "2025-01-10",
+      hours: 150,
+      hoursBasis: null,
+      context: { ...proof({}), project: { id: `project-${id}`, name: `Project ${id}` } } as HistoryContext,
+    });
+    const exp = deriveProfessionalExperience({
+      wi: wiOf([withProject("p1", ORG_A), withProject("p2", ORG_N)]),
+      relationships: ownerOf([]),
+    });
+    expect(exp.hours?.total).toBe(160);
+    const projectSum = exp.projects.reduce((s, p) => s + p.totalHours, 0);
+    const orgSum = exp.organizations.reduce((s, o) => s + o.totalHours, 0);
+    expect(projectSum).toBe(160);
+    expect(orgSum).toBe(160);
+    expect(exp.projects.map((p) => p.capacityExcessHours)).toEqual([70, 70]);
+  });
+
   it("a role carries no hours: an owner with no records of their own has 0 h, whatever the company did", () => {
     const exp = deriveProfessionalExperience({ wi: wiOf([]), relationships: ownerOf([ENTITY_V_DATED]) });
     expect(exp.hours?.total).toBe(0);
