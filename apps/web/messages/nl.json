@@ -9263,7 +9263,8 @@
     "clash": {
       "acceptAnyway": "Ik weet dat het overlapt — toch accepteren",
       "stillStands": "Accepteren heft de overlap niet op. Beide boekingen houden hun data, het conflict blijft zichtbaar in je agenda, en je keuze wordt vastgelegd.",
-      "acknowledged": "Geaccepteerd met een bekende overlap. {count} bestaande boeking(en) overlappen nog steeds — er is niets geannuleerd of verborgen, en je keuze staat geregistreerd."
+      "acknowledged": "Geaccepteerd met een bekende overlap. {count} bestaande boeking(en) overlappen nog steeds — er is niets geannuleerd of verborgen, en je keuze staat geregistreerd.",
+      "notRecordable": "Deze data overlappen met een boeking die je al hebt geaccepteerd en die overlap kan nog niet worden vastgelegd, dus je kunt dit aanbod weigeren of het open laten zodat het bedrijf de data kan wijzigen."
     },
     "proposedBy": "Voorgesteld door {name}",
     "termsChanged": "Het bedrijf heeft de voorwaarden gewijzigd. Je ging akkoord met: {previous}. Beslis opnieuw over de nieuwe data."

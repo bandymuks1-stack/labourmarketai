@@ -175,6 +175,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261025120000_",
       // 2026-10-25 (RED, owner-gated, APPLIED): employer party labels for Vivat Rex records.
       "20261025140000_",
+      // 2026-10-25 (GREEN, additive indexes): importer/admin vacancy reads stop walking the heap.
+      "20261025180000_",
       // 2026-10-25 (RED draft, needs-human-gate, NOT applied): clash_acknowledged marker completes RED #5.
       "20261025190000_",
     ];

@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import {
   countOwnerResponsesSince,
+  isOverlapExclusionViolation,
   normalizeBookingReason,
   DECLINE_REASON_KINDS,
   WITHDRAW_REASON_KINDS,
@@ -93,6 +94,20 @@ export type BookingActionResult =
     }
   | { kind: "needs-migration" }
   | { kind: "conflict" }
+  /**
+   * The worker ACKNOWLEDGED the clash and the database still refused to
+   * record the accept (production 2026-10-25, walk orders-bookings O-5).
+   *
+   * v4 skips its own clash check when acknowledged, but the table's exclusion
+   * constraint `booking_requests_no_overlapping_accepted` still forbids two
+   * overlapping `accepted` rows for one worker, so the UPDATE fails with
+   * 23P01 and the booking stays `proposed`. Reporting that as `conflict`
+   * re-showed the very question the person had just answered and made the
+   * "accept anyway" button loop. This is its own answer: the overlap cannot
+   * be recorded YET — the person may decline, or leave the offer open for
+   * the company to change its dates. Never a success, never a plain conflict.
+   */
+  | { kind: "overlap-not-recordable" }
   /** The worker already ACCEPTED this proposal: its terms are an agreement
    *  and are not rewritten by proposing again. */
   | { kind: "already-accepted" }
@@ -447,6 +462,10 @@ export async function respondBookingAction(input: {
       // acknowledged, and reporting that as a plain conflict would hide the
       // real reason. Say the capability is missing.
       if (isAbsentFunction(v4.error)) return { kind: "needs-migration" };
+      // The acknowledgement was given, and the table constraint still refused
+      // the overlapping accept: say exactly that, never the plain conflict the
+      // person has already answered (that is what made the button loop).
+      if (isOverlapExclusionViolation(v4.error)) return { kind: "overlap-not-recordable" };
       return classify(v4.error);
     }
 

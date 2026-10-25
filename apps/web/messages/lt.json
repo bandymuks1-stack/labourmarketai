@@ -9263,7 +9263,8 @@
     "clash": {
       "acceptAnyway": "Žinau, kad persidengia — vis tiek priimti",
       "stillStands": "Priėmimas persidengimo nepanaikins. Abi rezervacijos išlaiko savo datas, konfliktas lieka matomas kalendoriuje, o tavo sprendimas užfiksuojamas.",
-      "acknowledged": "Priimta žinant apie persidengimą. Vis dar persidengia esamų rezervacijų: {count}. Niekas neatšaukta ir nepaslėpta, o tavo sprendimas užfiksuotas."
+      "acknowledged": "Priimta žinant apie persidengimą. Vis dar persidengia esamų rezervacijų: {count}. Niekas neatšaukta ir nepaslėpta, o tavo sprendimas užfiksuotas.",
+      "notRecordable": "Šios datos persidengia su rezervacija, kurią jau priėmei, o tokio persidengimo kol kas įrašyti negalima, todėl gali šį pasiūlymą atmesti arba palikti atvirą, kad įmonė galėtų pakeisti datas."
     },
     "proposedBy": "Siūlo: {name}",
     "termsChanged": "Įmonė pakeitė sąlygas. Anksčiau sutikai: {previous}. Nuspręsk dėl naujų datų iš naujo."
