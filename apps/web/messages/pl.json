@@ -15,7 +15,8 @@
     "capacity": "Zdolności",
     "work": "Praca i godziny",
     "results": "Wyniki",
-    "history": "Historia"
+    "history": "Historia",
+    "areasTitle": "Obszary firmy"
   },
   "publicDemand": {
     "title": "Aktualny popyt na rynku",
@@ -7687,7 +7688,9 @@
       "menu": "Nawigacja",
       "areas": "Obszary pracy",
       "close": "Zamknij",
-      "youAreHere": "Jesteś tutaj"
+      "youAreHere": "Jesteś tutaj",
+      "previous": "Poprzedni obszar",
+      "next": "Następny obszar"
     }
   },
   "workerInvitations": {

@@ -15,7 +15,8 @@
     "capacity": "Capaciteit",
     "work": "Werk & uren",
     "results": "Resultaten",
-    "history": "Geschiedenis"
+    "history": "Geschiedenis",
+    "areasTitle": "Bedrijfsgebieden"
   },
   "publicDemand": {
     "title": "Actuele marktvraag",
@@ -7687,7 +7688,9 @@
       "menu": "Navigatie",
       "areas": "Werkgebieden",
       "close": "Sluiten",
-      "youAreHere": "Je bent hier"
+      "youAreHere": "Je bent hier",
+      "previous": "Vorig gebied",
+      "next": "Volgend gebied"
     }
   },
   "workerInvitations": {

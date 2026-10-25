@@ -578,7 +578,9 @@
       "menu": "Navigation",
       "areas": "Arbejdsområder",
       "close": "Luk",
-      "youAreHere": "Du er her"
+      "youAreHere": "Du er her",
+      "previous": "Forrige område",
+      "next": "Næste område"
     }
   },
   "companies": {

@@ -15,7 +15,8 @@
     "capacity": "Kapazität",
     "work": "Arbeit & Stunden",
     "results": "Ergebnisse",
-    "history": "Verlauf"
+    "history": "Verlauf",
+    "areasTitle": "Unternehmensbereiche"
   },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
@@ -7687,7 +7688,9 @@
       "menu": "Menü",
       "areas": "Arbeitsbereiche",
       "close": "Schließen",
-      "youAreHere": "Du bist hier"
+      "youAreHere": "Du bist hier",
+      "previous": "Vorheriger Bereich",
+      "next": "Nächster Bereich"
     }
   },
   "workerInvitations": {

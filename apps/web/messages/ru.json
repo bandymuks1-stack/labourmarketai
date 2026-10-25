@@ -15,7 +15,8 @@
     "capacity": "Мощности",
     "work": "Работа и часы",
     "results": "Результаты",
-    "history": "История"
+    "history": "История",
+    "areasTitle": "Разделы компании"
   },
   "publicDemand": {
     "title": "Текущий спрос рынка",
@@ -7687,7 +7688,9 @@
       "menu": "Меню",
       "areas": "Рабочие разделы",
       "close": "Закрыть",
-      "youAreHere": "Вы здесь"
+      "youAreHere": "Вы здесь",
+      "previous": "Предыдущий раздел",
+      "next": "Следующий раздел"
     }
   },
   "workerInvitations": {

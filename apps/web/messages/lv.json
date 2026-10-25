@@ -578,7 +578,9 @@
       "menu": "Izvēlne",
       "areas": "Darba jomas",
       "close": "Aizvērt",
-      "youAreHere": "Tu esi šeit"
+      "youAreHere": "Tu esi šeit",
+      "previous": "Iepriekšējā joma",
+      "next": "Nākamā joma"
     }
   },
   "companies": {

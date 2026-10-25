@@ -578,7 +578,9 @@
       "menu": "Meny",
       "areas": "Arbetsområden",
       "close": "Stäng",
-      "youAreHere": "Du är här"
+      "youAreHere": "Du är här",
+      "previous": "Föregående område",
+      "next": "Nästa område"
     }
   },
   "companies": {

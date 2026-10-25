@@ -578,7 +578,9 @@
       "menu": "Menüü",
       "areas": "Tööalad",
       "close": "Sulge",
-      "youAreHere": "Sa oled siin"
+      "youAreHere": "Sa oled siin",
+      "previous": "Eelmine ala",
+      "next": "Järgmine ala"
     }
   },
   "companies": {
