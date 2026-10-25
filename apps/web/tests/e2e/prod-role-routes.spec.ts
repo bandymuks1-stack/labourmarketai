@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Page } from "./prod-walk";
+import { COMMON_ROUTES, EMPLOYER_ROUTES } from "./prod-walk-routes";
 
 /**
  * PRODUCTION ROLE ROUTES — owner programme 2026-10-12 §7: every main role can
@@ -25,38 +26,9 @@ test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted 
 // merely slow run. Slow surfaces stay visible by name (SLOW in the log).
 test.describe.configure({ retries: 0 });
 
-const COMMON = [
-  "/lt/dashboard",
-  "/lt/dashboard/journal",
-  "/lt/dashboard/planning",
-  "/lt/dashboard/communication",
-  "/lt/dashboard/profile",
-  "/lt/dashboard/network",
-  "/lt/dashboard/activity",
-  "/lt/dashboard/learning",
-  "/lt/dashboard/services",
-  "/lt/dashboard/market-map",
-  "/lt/dashboard/opportunities",
-  "/lt/dashboard/work-in-numbers",
-  "/lt/dashboard/documents",
-  "/lt/dashboard/absences",
-  "/lt/dashboard/tasks",
-];
-const EMPLOYER = [
-  "/lt/dashboard/company",
-  "/lt/dashboard/company/people",
-  "/lt/dashboard/company/needs",
-  "/lt/dashboard/company/projects/new",
-  "/lt/dashboard/company/planning",
-  "/lt/dashboard/company/scouting",
-  "/lt/dashboard/company/partners",
-  "/lt/dashboard/buyer",
-  "/lt/dashboard/projects",
-  "/lt/dashboard/hours",
-  "/lt/dashboard/candidates",
-  "/lt/dashboard/talent",
-  "/lt/dashboard/reports",
-];
+// The route lists are shared with the ux-metrics walk (one copy: ./prod-walk-routes).
+const COMMON = COMMON_ROUTES;
+const EMPLOYER = EMPLOYER_ROUTES;
 
 const CAST: readonly { slot: string; role: string; routes: readonly string[] }[] = [
   { slot: "worker", role: "worker", routes: COMMON },
