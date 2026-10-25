@@ -435,7 +435,7 @@ export default async function JobsPage({
   }
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       {/* Anonymous-safe structured data (owner 2026-10-14 §8; port of #1433):
           a CollectionPage/ItemList of positions by occupation label, built
           ONLY from the anonymous preview shape — employer, location, title,
@@ -670,7 +670,7 @@ export default async function JobsPage({
           )}
         </>
       )}
-    </main>
+    </div>
   );
 }
 

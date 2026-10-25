@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { FolderPlus, History, UserPlus, UserSearch } from "lucide-react";
 
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -271,13 +272,7 @@ export default async function CompanyDashboardPage({
       />
       <header className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Link
-            href="/dashboard"
-            className="shrink-0 text-xs font-medium text-brand-blue transition-colors hover:underline"
-            data-testid="back-to-action-center"
-          >
-            ← {tRooms("backToActions")}
-          </Link>
+          <PageBack href="/dashboard" data-testid="back-to-action-center">{tRooms("backToActions")}</PageBack>
           <Link
             href="/dashboard"
             className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"

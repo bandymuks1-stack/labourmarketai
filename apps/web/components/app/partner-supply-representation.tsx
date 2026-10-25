@@ -500,7 +500,7 @@ export function PartnerSupplyRepresentation({
           </p>
           <div className="flex flex-wrap justify-between gap-2">
             <dt className="text-text-muted">{labels.currentIntent}</dt>
-            <dd className="text-text-primary" data-testid="partner-supply-current-intent">
+            <dd className="text-text-primary" data-testid="partner-supply-current-intent" data-intent={declaration?.intentState ?? ""}>
               {intentLabelFor(declaration?.intentState, labels)}
             </dd>
           </div>

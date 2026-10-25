@@ -286,9 +286,16 @@
       "waiting": "Czeka na przegląd przez człowieka — może go przejrzeć kierownik lub właściciel Twojej organizacji; do tego czasu pozostaje wpisem, który wprowadziłeś",
       "approved": "Zweryfikowano",
       "changes_requested": "Poproszono o zmiany",
-      "rejected": "Zwrócono",
+      "rejected": "Odrzucono",
       "reasonLabel": "Powód",
-      "notEnabled": "Zapisano — przełożony nie włączył jeszcze potwierdzania, więc nikt nie sprawdza tego wpisu; do tego czasu pozostaje Twoim własnym stwierdzeniem"
+      "notEnabled": "Zapisano — przełożony nie włączył jeszcze potwierdzania, więc nikt nie sprawdza tego wpisu; do tego czasu pozostaje Twoim własnym stwierdzeniem",
+      "correctedFrom": {
+        "changes_requested": "Poprawiono po zwróceniu",
+        "rejected": "Poprawiono po odrzuceniu",
+        "approved": "Poprawiono po weryfikacji",
+        "earlierVersion": "Wcześniejsza wersja zostaje w Twojej historii razem z tą decyzją; godziny liczą się raz — przez tę poprawkę."
+      },
+      "quotedNote": "„{note}”"
     },
     "delete": "Usuń wpis",
     "deleting": "Usuwanie...",

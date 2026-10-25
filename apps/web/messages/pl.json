@@ -15,7 +15,8 @@
     "capacity": "Zdolności",
     "work": "Praca i godziny",
     "results": "Wyniki",
-    "history": "Historia"
+    "history": "Historia",
+    "areasTitle": "Obszary firmy"
   },
   "publicDemand": {
     "title": "Aktualny popyt na rynku",
@@ -4702,7 +4703,7 @@
         "marketplace": "Rynek usług",
         "marketMap": "Mapa",
         "profile": "Profil",
-        "journal": "Moje CV",
+        "journal": "Dziennik pracy",
         "communication": "Wiadomości",
         "discover": "Odkrywaj",
         "search": "Szukaj",
@@ -6130,6 +6131,8 @@
       "asksTitle": "Projekt nadal potrzebuje od Ciebie",
       "ledger": {
         "ratio": "{have} z {total} gotowych",
+        "ratioNone": "Na razie nie ma czego sprawdzić",
+        "ratioUnknown": "jeszcze nieznane: {count}",
         "availability": "Dostępność",
         "state": {
           "valid": "posiadasz to",
@@ -6161,7 +6164,7 @@
           "none": "jeszcze nic nie zapisano"
         },
         "managerStatus": {
-          "needed": "oczekiwanie",
+          "needed": "do uzgodnienia przed umową",
           "missing": "oznaczone jako brakujące",
           "received": "otrzymane",
           "checked": "sprawdzone",
@@ -6170,7 +6173,7 @@
         },
         "resolution": {
           "addDocument": "Zarejestruj dokument",
-          "issuingAuthority": "Wydane przez: {title}",
+          "informationSource": "Źródło informacji: {title}",
           "trainingProgram": "Kurs: {title}",
           "serviceOffering": "Usługa: {title}",
           "serviceOfferingRate": "Usługa: {title} ({rate})",
@@ -7679,7 +7682,16 @@
     "backHome": "Powrót na stronę główną",
     "dashboardSections": "Sekcje panelu",
     "skipToContent": "Przejdź do treści",
-    "loading": "Ładowanie…"
+    "loading": "Ładowanie…",
+    "nav": {
+      "more": "Więcej",
+      "menu": "Nawigacja",
+      "areas": "Obszary pracy",
+      "close": "Zamknij",
+      "youAreHere": "Jesteś tutaj",
+      "previous": "Poprzedni obszar",
+      "next": "Następny obszar"
+    }
   },
   "workerInvitations": {
     "title": "Oczekujące zaproszenia",
@@ -8066,7 +8078,8 @@
       "mine": "Najpierw kraje, w których chcesz pracować.",
       "unknown": "Lista wymagań dla kraju {country} nie została jeszcze opracowana — nie pokazujemy niczego zamiast zgadywać.",
       "next": "Jeśli będziesz pracować w tym kraju, uzgodnij to z pracodawcą przed porozumieniem: {doc}. Nic nie trzeba przesyłać.",
-      "ok": "Wszystkie opracowane wymagania dla kraju {country} są spełnione."
+      "ok": "Wszystkie opracowane wymagania dla kraju {country} są spełnione.",
+      "postingNeedsBase": "Zaświadczenie A1 i zgłoszenie delegowania są pokazywane tylko wtedy, gdy znany jest Twój kraj bazowy i różni się od kraju pracy. Kraj bazowy nie został jeszcze podany."
     },
     "types": {
       "cv": "CV",
@@ -9250,7 +9263,8 @@
     "clash": {
       "acceptAnyway": "Wiem, że się pokrywa — mimo to akceptuję",
       "stillStands": "Akceptacja nie usunie nakładania się. Obie rezerwacje zachowują swoje daty, konflikt pozostaje widoczny w kalendarzu, a Twoja decyzja zostaje zapisana.",
-      "acknowledged": "Zaakceptowano ze znanym nakładaniem. Nadal koliduje rezerwacji: {count}. Nic nie zostało anulowane ani ukryte, a Twoja decyzja jest zapisana."
+      "acknowledged": "Zaakceptowano ze znanym nakładaniem. Nadal koliduje rezerwacji: {count}. Nic nie zostało anulowane ani ukryte, a Twoja decyzja jest zapisana.",
+      "notRecordable": "Te daty pokrywają się z już zaakceptowaną rezerwacją, a takiego nakładania się nie można jeszcze zapisać, więc możesz odrzucić tę ofertę albo zostawić ją otwartą, aby firma mogła zmienić daty."
     },
     "proposedBy": "Proponuje: {name}",
     "termsChanged": "Firma zmieniła warunki. Wcześniej zgodziłeś się na: {previous}. Zdecyduj ponownie co do nowych dat."
@@ -11507,7 +11521,7 @@
     },
     "utilisation": {
       "title": "Zaangażowany udział w nadchodzących tygodniach",
-      "committedDays": "{committed} z {counted} dni-osób zaangażowanych — {workers} osób w ciągu {days} dni",
+      "committedDays": "{committed} z {counted, plural, one {# dnia-osoby} other {# dni-osób}} zaangażowanych — {workers, plural, one {# osoba} few {# osoby} many {# osób} other {# osoby}} w ciągu {days, plural, one {# dnia} few {# dni} many {# dni} other {# dnia}}",
       "noneCounted": "Dla tego okresu nie udało się policzyć zaangażowania żadnego pracownika.",
       "partial": "{count} z nich nie udało się policzyć w pełni — coś realnego nie ma dat, więc powyższa liczba jest wartością minimalną.",
       "unknown": "{count} w ogóle nie udało się odczytać. To nie to samo, co wolny.",

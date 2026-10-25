@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -277,12 +278,7 @@ export default async function CompanyStartPage({
         <PageTitle>{t("pageTitle")}</PageTitle>
       </header>
 
-      <Link
-        href={"/dashboard/start" as "/dashboard"}
-        className="self-start text-sm text-text-secondary hover:underline"
-      >
-        ← {t("backToStart")}
-      </Link>
+      <PageBack href={"/dashboard/start" as "/dashboard"}>{t("backToStart")}</PageBack>
 
       {safeNotice === AGENCY_CONNECTION_PENDING_NOTICE ? (
         <p
