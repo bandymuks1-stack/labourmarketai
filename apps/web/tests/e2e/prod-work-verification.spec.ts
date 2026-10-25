@@ -300,10 +300,26 @@ test("V-4 (2.21). the worker reads 'returned', answers with a correction, and th
   await expect(sheet).toBeVisible({ timeout: 30_000 });
   await sheet.getByTestId("journal-compact-text").fill(E1_FIX);
   await sheet.getByTestId("journal-compact-save").click();
-  await expect(sheet.getByTestId("journal-compact-saved").or(sheet.getByTestId("journal-compact-error")).first()).toBeVisible({
-    timeout: 60_000,
-  });
-  await expect(sheet.getByTestId("journal-compact-error"), "the correction was saved").toHaveCount(0);
+  // A successful correction revalidates the journal, and the original's
+  // correction launcher (and so this sheet) unmounts once the correction
+  // exists (`correctedOriginalIds`) — the saved line may never paint. Wait for
+  // the outcome either way: an error stays in the open sheet and fails here;
+  // success is the saved line or the sheet going away. The fresh load below
+  // is the proof.
+  let outcome = "waiting";
+  await expect
+    .poll(
+      async () => {
+        if ((await sheet.getByTestId("journal-compact-error").count()) > 0) outcome = "error";
+        else if ((await sheet.count()) === 0) outcome = "closed";
+        else if (await sheet.getByTestId("journal-compact-saved").isVisible().catch(() => false)) outcome = "saved";
+        return outcome;
+      },
+      { timeout: 60_000, intervals: [500] },
+    )
+    .not.toBe("waiting");
+  expect(outcome, "the correction was saved").not.toBe("error");
+  console.info(`[verification] correction answered by ${outcome === "closed" ? "the sheet closing" : "its saved line"}`);
   // Persistence on a fresh document: a NEW entry, pending; the original keeps its decision.
   await journal(page);
   ids.e1fix = (await card(page, `${TAG} [v1-fix]:`)).id;
