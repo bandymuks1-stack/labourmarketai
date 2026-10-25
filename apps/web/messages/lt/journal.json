@@ -288,7 +288,14 @@
       "changes_requested": "Paprašyta pataisymų",
       "rejected": "Atmesta",
       "reasonLabel": "Priežastis",
-      "notEnabled": "Užfiksuota — vadovas dar neįjungė patvirtinimo, todėl niekas šio įrašo neperžiūri; iki tol tai lieka tavo nurodytas įrašas"
+      "notEnabled": "Užfiksuota — vadovas dar neįjungė patvirtinimo, todėl niekas šio įrašo neperžiūri; iki tol tai lieka tavo nurodytas įrašas",
+      "correctedFrom": {
+        "changes_requested": "Pataisyta po grąžinimo",
+        "rejected": "Pataisyta po atmetimo",
+        "approved": "Pataisyta po peržiūros",
+        "earlierVersion": "Ankstesnė versija lieka tavo istorijoje su šiuo sprendimu; valandos skaičiuojamos vieną kartą — pagal šį pataisymą."
+      },
+      "quotedNote": "„{note}“"
     },
     "delete": "Pašalinti įrašą",
     "deleting": "Šalinama...",

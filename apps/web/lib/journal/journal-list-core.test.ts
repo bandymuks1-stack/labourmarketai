@@ -193,6 +193,58 @@ describe("listJournalEntries — every live row, in 1000-row pages, with coverag
     expect(r.correctedOriginals[0].journal_entry_confirmations).toEqual([decision]);
   });
 
+  it("the correction CARRIES its original's decision provenance — and the chain still counts once", async () => {
+    // Walk work-verification 2026-10-25 / PR #2786: once answered, the
+    // returned or rejected original was nowhere on screen. The list core now
+    // hands the correction's card what it answered (decision, role, date,
+    // real note) — from the rows it already read, without listing or
+    // counting the original.
+    const returned = {
+      confirmation_scope: { decision: "changes_requested", note: "nurodyk kvadratus" },
+      created_at: "2026-10-25T10:00:00Z",
+      confirmer_role: "owner",
+    };
+    const rejected = {
+      confirmation_scope: { decision: "rejected", note: "ne tas objektas" },
+      created_at: "2026-10-25T11:00:00Z",
+      confirmer_role: "owner",
+    };
+    const base = rows(1)[0];
+    const data = [
+      { ...base, id: "fix-a", correction_of: "orig-a" },
+      { ...base, id: "orig-a", journal_entry_confirmations: [returned] as never[] },
+      { ...base, id: "fix-b", correction_of: "orig-b" },
+      { ...base, id: "orig-b", journal_entry_confirmations: [rejected] as never[] },
+      { ...base, id: "plain" },
+    ];
+    const { caller } = pagedClient(data);
+    const r = await listJournalEntries(caller, { workerId: "w-1" });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    // Count once: three cards, three counted entries — never five.
+    expect(r.entries.map((e) => e.id)).toEqual(["fix-a", "fix-b", "plain"]);
+    expect(r.coverage.entriesRead).toBe(3);
+    expect(r.correctedOriginals.map((e) => e.id)).toEqual(["orig-a", "orig-b"]);
+    // The provenance rides on the correction's id, and only there.
+    expect(r.correctionProvenance).toEqual({
+      "fix-a": [
+        { originalId: "orig-a", result: "changes_requested", role: "owner", at: "2026-10-25T10:00:00Z", note: "nurodyk kvadratus" },
+      ],
+      "fix-b": [
+        { originalId: "orig-b", result: "rejected", role: "owner", at: "2026-10-25T11:00:00Z", note: "ne tas objektas" },
+      ],
+    });
+    expect(Object.keys(r.correctionProvenance).every((id) => r.entries.some((e) => e.id === id))).toBe(true);
+    // The correction's own evidence stays its own: it inherits no decision row.
+    expect(r.entries.find((e) => e.id === "fix-a")?.journal_entry_confirmations).toEqual([]);
+  });
+
+  it("the legacy projection carries no provenance (nothing it could read)", async () => {
+    const { caller } = pagedClient(rows(3), { failSelectContaining: "superseded_by" });
+    const r = await listJournalEntries(caller, { workerId: "w-1" });
+    expect(r.ok && r.correctionProvenance).toEqual({});
+  });
+
   it("a caller-bounded read is ONE `.limit()` page and says whether the bound was hit", async () => {
     const full = pagedClient(rows(50));
     const r1 = await listJournalEntries(full.caller, { workerId: "w-1", limit: 20 });

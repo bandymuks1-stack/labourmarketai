@@ -21,7 +21,11 @@ import { answerNoProjectIfAsked, chooseWorkContextIfAsked } from "./worklog-cont
  *                           is ONE card, read by its live correction
  *                           (counted once — lib/journal/journal-list-core.ts
  *                           `countedOnce`), so nothing is listed or counted
- *                           twice. "Returned" is read BEFORE the answer.
+ *                           twice. "Returned" is read BEFORE the answer;
+ *                           after it, the correction's card names the return
+ *                           and quotes the owner's note (`journal-entry-
+ *                           corrected-from-<id>`, V-4 and V-6) — provenance,
+ *                           not a second state.
  *   verified              — the owner confirms the correction (V-5, V-6)
  *   disputed              — the owner rejects the second entry (V-5, V-6)
  *
@@ -340,8 +344,22 @@ test("V-4 (2.21). the worker reads 'returned', answers with a correction, and th
     inMain(page).locator(`[data-testid="journal-entry-card-${ids.e1}"]`),
     "the corrected original is not listed beside its correction",
   ).toHaveCount(0);
+  // ...but what it answered is read on the correction's own card: the return,
+  // its date and the owner's note (provenance, not a second state — the chip
+  // above still reads the correction's own "Išsiųsta vadovui").
+  await expectCorrectedFrom(page, ids.e1fix, "Pataisyta po grąžinimo");
   await ctx.close();
 });
+
+/** The correction's card names the decision it answered and quotes the owner's V-3 note. */
+async function expectCorrectedFrom(page: Page, id: string, label: string): Promise<void> {
+  await card(page, `${TAG} [v1-fix]:`);
+  const line = inMain(page).getByTestId(`journal-entry-corrected-from-${id}`);
+  await expect(line, "the correction says what it answered").toBeVisible({ timeout: 30_000 });
+  await expect(line).toHaveAttribute("data-result", "changes_requested");
+  await expect(line).toContainText(label);
+  await expect(line, "the owner's note is quoted").toContainText("nurodyk, kiek kvadratinių metrų nutinkavai.");
+}
 
 test("V-5 (2.21). the owner confirms the correction and rejects the second entry; both leave the queue", async ({ browser }) => {
   test.skip(!ids.e2, "V-1 did not record the entries");
@@ -387,6 +405,7 @@ test("V-6 (2.21). the worker reads every state after a fresh load — in Lithuan
     if (decided.has(ids.e1fix)) {
       await expect(inMain(page).getByTestId(`journal-entry-status-${ids.e1fix}`).locator('li[data-step="approved"]')).toHaveCount(1);
     }
+    if (ids.e1fix) await expectCorrectedFrom(page, ids.e1fix, "Pataisyta po grąžinimo");
     await ctx.close();
   }
   {
@@ -397,6 +416,7 @@ test("V-6 (2.21). the worker reads every state after a fresh load — in Lithuan
       await card(page, `${TAG} ${e.marker}`);
       await expectVerification(page, e.id, e.state, e.en);
     }
+    if (ids.e1fix) await expectCorrectedFrom(page, ids.e1fix, "Corrected after it was returned");
     await ctx.close();
   }
   {
