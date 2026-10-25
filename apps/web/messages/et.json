@@ -2811,6 +2811,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -2846,7 +2847,8 @@
       "alreadyAccepted": "Töötaja on selle pakkumise juba vastu võtnud — kokkulepitud tingimusi siin üle ei kirjutata. Leppige muudatustes kokku vestluses.",
       "refusedNotReachable": "Sellele inimesele ei saa siit broneeringut pakkuda — profiil ei ole tööandjatele nähtav ja teil puudub tööalane suhe.",
       "refusedNeedClosed": "See vajadus on suletud — ava see uuesti enne broneeringu pakkumist.",
-      "refusedAnswered": "Töötaja lükkas selle pakkumise tagasi, seega ilma tema uue nõusolekuta seda uuesti ei avata. Jätka vestluses või leia teine töötaja."
+      "refusedAnswered": "Töötaja lükkas selle pakkumise tagasi, seega ilma tema uue nõusolekuta seda uuesti ei avata. Jätka vestluses või leia teine töötaja.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -3020,9 +3022,9 @@
       "coveredShort": "[EN] {count} covered"
     },
     "notes": {
-      "assignmentsPending": "[EN] Assignment data is prepared and joins this view after owner activation.",
-      "languagesPending": "[EN] Language coverage is prepared and joins this view after owner activation.",
-      "brigadesPending": "[EN] Brigade coverage is prepared and joins this view after owner activation.",
+      "assignmentsPending": "[EN] Assignment data is not shown in this view yet.",
+      "languagesPending": "[EN] Language coverage is not shown in this view yet.",
+      "brigadesPending": "[EN] Brigade coverage is not shown in this view yet.",
       "demandError": "[EN] Work needs could not be read right now.",
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
@@ -3056,7 +3058,7 @@
     },
     "stateNote": {
       "insufficientData": "Selle signaali jaoks pole veel piisavalt päris andmeid — väljamõeldud numbri asemel näidatakse ausat lünka.",
-      "needsMigration": "Selle signaali andmehoidla on ette valmistatud ja liitub pärast omaniku aktiveerimist. Seni midagi ei hinnata.",
+      "needsMigration": "See signaal pole veel sisse lülitatud. Seni midagi ei hinnata.",
       "stale": "Selle signaali tõendid on värskusaknast vanemad — käsitle neid aegununa."
     },
     "valueClass": {
@@ -3108,7 +3110,7 @@
         "agencyAggregate": "Klientideülene koond"
       },
       "state": {
-        "needsMigration": "See signaal on ette valmistatud ja ootab omaniku aktiveerimist."
+        "needsMigration": "See signaal pole veel sisse lülitatud."
       },
       "salary": {
         "noBenchmark": "Sinu ameti ja riigi jaoks pole võrdlusväärtust veel saadaval.",
@@ -3143,7 +3145,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Omaniku aktiveeritav andmehoidla (pole veel sisse lülitatud)",
+      "gatedMigration": "Andmehoidla pole veel sisse lülitatud",
       "marketRateAverages": "Administraatori kureeritud turumäärade keskmised",
       "journalEvidence": "Sinu enda tööpäeviku tõendid",
       "fillTimeMeasurementsMissing": "Täitmisaja mõõtmised (veel kogumata)",
@@ -3201,14 +3203,14 @@
       },
       "terms": {
         "internal": "Sisemine tuletus kanoonilistest platvormitabelitest; kohordipoliitika kaitseb üksikisikuid.",
-        "adminCurated": "Omaniku sisestatud keskmised koos allikamärkega valimi suuruse asemel.",
-        "statGovLt": "Ametlik statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
-        "eurostat": "Ametlik ELi statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
+        "adminCurated": "Kureeritud keskmised koos allikamärkega valimi suuruse asemel.",
+        "statGovLt": "Ametlik statistika; allikaviide nõutav. Veel pole kasutusel.",
+        "eurostat": "Aktiivne allikas. Ametlik ELi statistika; allikaviide nõutav.",
         "arbetsformedlingen": "Aktiivne allikas. Kasutustingimused kinnitatud: tasuta avalik andmeallikas (CC0). Iga kuulutuse juures näidatakse allikat ja iga kuulutus viib algse kuulutuse juurde.",
         "nav": "Aktiivne allikas. NAV-i API tingimused on vastu võetud ja juurdepääs antud. Jooksvaid kohustusi täidetakse: tagasi võetud kuulutus eemaldatakse kohe, uuendatud kuulutus värskendatakse kiiresti ja kandideerimislink viib algse kuulutuseni.",
-        "cvbankas": "Ainult ettepanek — kasutusluba kinnitamata; ei segata kunagi sisemiste numbritega.",
-        "eures": "Kavandatud allikas. Kasutustingimusi pole veel üle vaadatud — aktiveerimine nõuab omaniku kinnitust. Täna midagi ei laadita.",
-        "uztLt": "Kavandatud allikas. Kasutustingimusi pole veel üle vaadatud — aktiveerimine nõuab omaniku kinnitust. Täna midagi ei laadita."
+        "cvbankas": "Kavandatud allikas — pole kasutusel; ei segata kunagi sisemiste numbritega.",
+        "eures": "Kavandatud allikas. Pole kasutusel — täna midagi ei laadita.",
+        "uztLt": "Kavandatud allikas. Pole kasutusel — täna midagi ei laadita."
       },
       "status": {
         "active": "Aktiivne (sisemine)",
@@ -3220,7 +3222,7 @@
     "methodology": {
       "title": "Metoodika",
       "deterministic": "Kõik väärtused on deterministlikud ja arvutatud allikatega kirjetest — midagi ei hinda tehisintellekt ja ühtegi numbrit ei mõelda kunagi välja.",
-      "externalOff": "Välised allikad on väljas: iga väline võrdlus on ettepanek, mis ootab omaniku õiguslikku kinnitust. Sisemisi ja väliseid numbreid ei segata kunagi.",
+      "externalOff": "Välised allikad on väljas. Sisemisi ja väliseid numbreid ei segata kunagi.",
       "cohort": "Väikesed kohordid rühmitatakse või peidetakse üksikisikute kaitseks."
     },
     "contextual": {
@@ -3335,7 +3337,7 @@
       },
       "unavailable": {
         "requirementTitle": "Mida on vaja",
-        "sourcesTitle": "Omaniku kinnitust ootavad allikad"
+        "sourcesTitle": "Allikad, mis pole veel kasutusel"
       },
       "reason": {
         "salaryNoBenchmark": "Siin pole palganumbrit, sest sinu ametile ja riigile pole veel sisestatud kureeritud turumäära ning ühtki välist palgaallikat pole kasutamiseks heaks kiidetud.",
@@ -3348,14 +3350,14 @@
         "salaryInputsMissing": "Siin pole palganumbrit, sest kureeritud turumäär on sisestatud, kuid sinu enda soovitud palk puudub, seega pole millegagi võrrelda."
       },
       "requirement": {
-        "ownerEnableStore": "Platvormi omanik peab vaatluste hoidla sisse lülitama ja kinnitama vähemalt ühe andmeallika.",
-        "salaryBenchmark": "Administraator peab sisestama sinu ametile ja riigile kureeritud turumäära või platvormi omanik peab kinnitama välise palgaallika.",
+        "ownerEnableStore": "Vaatluste hoidla tuleb sisse lülitada ja kinnitada vähemalt üks andmeallikas.",
+        "salaryBenchmark": "Sinu ametile ja riigile tuleb sisestada kureeritud turumäär või kinnitada väline palgaallikas.",
         "demandOwnRows": "Lisa tööpäringuid — kaart täitub sinu organisatsiooni enda andmetega niipea, kui kirjed on olemas.",
         "salaryBasis": "Enne ausa võrdluse näitamist peab olema fikseeritud, kas sinu soovitud palk ja kureeritud turumäär on bruto või neto.",
         "salaryInputs": "Sisesta oma soovitud palk töötajaprofiili — võrdlus ilmub kohe, kui see on olemas."
       },
       "after": {
-        "activation": "Pärast seda, kui omanik on andmeallika kinnitanud ja aktiveerinud, täitub see kaart allikapõhiste, dateeritud numbritega — igaühel usaldusväärsus, värskus, allikas ja samm-sammuline päritolu."
+        "activation": "Kui andmeallikas on sisse lülitatud, täitub see kaart allikapõhiste, dateeritud numbritega — igaühel usaldusväärsus, värskus, allikas ja samm-sammuline päritolu."
       }
     },
     "drawer": {
@@ -6940,7 +6942,9 @@
       "managesInvitations": "Haldab kutseid",
       "grantInvitations": "Luba kutseid hallata",
       "withdrawInvitations": "Võta kutsete haldamine ära",
-      "unavailable": "Liikmete nimekirja ei õnnestunud praegu lugeda. See ei tähenda, et organisatsioonil pole liikmeid."
+      "unavailable": "Liikmete nimekirja ei õnnestunud praegu lugeda. See ei tähenda, et organisatsioonil pole liikmeid.",
+      "noAccountHint": "Liikmerolli saab anda ainult inimesele, kellel on juba konto. Kutsu kontota inimene kutselingiga — kui ta registreerub ja organisatsiooniga liitub, saad talle siin rolli anda.",
+      "noAccountCta": "Loo kutselink"
     },
     "start": {
       "membersMoved": "Organisatsiooni {workspace} liikmeid ja kutseid hallatakse selle Seadetes.",

@@ -88,6 +88,8 @@ export async function getMembershipLabels(): Promise<MembershipLabels> {
       managesInvitations: t("members.managesInvitations"),
       grantInvitations: t("members.grantInvitations"),
       withdrawInvitations: t("members.withdrawInvitations"),
+      noAccountHint: t("members.noAccountHint"),
+      noAccountCta: t("members.noAccountCta"),
       outcomes,
     },
   };

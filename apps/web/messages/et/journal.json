@@ -148,7 +148,7 @@
     "pageTitle": "Häälsisestus",
     "pageIntro": "Räägi oma tööpäevast — vaatad teksti üle ja parandad seda enne, kui midagi salvestatakse.",
     "backToJournal": "Tagasi päevikusse",
-    "unavailable": "Häältranskriptsioon pole veel seadistatud. Platvormi omanik pole transkriptsiooniserverit veel ühendanud — salvestamine on seni keelatud. Sissekande saad alati kirjutada tekstina.",
+    "unavailable": "Häältranskriptsioon pole veel saadaval — salvestamine on praegu välja lülitatud. Sissekande saad alati kirjutada tekstina.",
     "disclosureTitle": "Enne salvestamist",
     "disclosureProcessing": "Sinu salvestis saadetakse LabourMarket.ai hallatavasse töötlusserverisse, et muuta see tekstiks. Kolmandate osapoolte kõneteenuseid ei kasutata.",
     "disclosureWhy": "Seda kasutatakse ainult alloleva teksti loomiseks — mitte millekski muuks.",
