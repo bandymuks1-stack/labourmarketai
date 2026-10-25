@@ -302,9 +302,9 @@ test("T-1 (11.8). Alfa's owner adds a course to the organization's register", as
   let reg = await register(page);
   test.skip((await reg.getByTestId("training-not-available").count()) > 0, "the training layer is not installed in production (honest absence)");
   const org = reg.getByTestId("training-org");
-  // The register shows its organization half only when the reader can already
-  // read a course or an assignment (components/app/training-register.tsx
-  // `canManage`); an organization's very FIRST course has no form to start it.
+  // The add-a-course form follows the reader's AUTHORITY
+  // (`getTrainingAuthority()` — the predicates create_training_program_v1
+  // enforces), so the owner sees it even on an empty register.
   await expect(org, "the organization half of the register, with its add-a-course form").toBeVisible({ timeout: 30_000 });
   const create = org.locator("form").filter({ hasNot: page.locator('input[name="programId"]') }).first();
   await create.locator('input[name="title"]').fill(COURSE);
