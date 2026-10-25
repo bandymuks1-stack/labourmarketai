@@ -20,6 +20,7 @@ import {
 } from "@/lib/booking/booking-state";
 import { ActionCard } from "@/components/app/action-card";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
 
 /**
  * Bookings (Stage 6) — the worker's incoming proposals (accept/decline) and the
@@ -82,6 +83,9 @@ export default async function BookingsPage({
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
+      {/* Mutual, neutral pre-agreement recommendation — advice to both
+          parties, never a gate (decision 0021 extension, 2026-10-24). */}
+      <CollaborationChecksNote context={{ dealKind: "work_engagement" }} testId="bookings-collaboration-checks" />
 
       {/* Planning hub connections (§8.3): a booking is one part of the plan —
           surface the real, existing surfaces it links to (Marketplace orders,

@@ -275,6 +275,20 @@ any future grant is capped at `LOW_RISK_PROJECT_DATA`).
 | Gemini (metered) | `AI_GEMINI_ENABLED`, **secret** `GEMINI_API_KEY`, `AI_GEMINI_PAID_TIER_CONFIRMED=1` | none usable: the free tier may not serve EEA users | paid tier: not used for training |
 | Run modes | `AI_PROVIDER_MODE=live`, `AI_PROVIDER=cloudflare` (or `mistral` / `groq`: whichever key exists), `AI_DAILY_RUN_BUDGET=200` | | |
 
+Every vendor considered (Kimi, DeepSeek, OpenRouter, NVIDIA, Meta, Qwen,
+Scaleway, OVHcloud, Hugging Face, DeepL Free/Pro, LibreTranslate, …), its terms,
+sources and integration state live in ONE place:
+`apps/web/lib/ai/runtime/provider-catalogue.ts`. Its `termsCeiling` is enforced
+by `data-egress.ts` (Kimi / DeepSeek / NVIDIA trial / Meta API: excluded; DeepL
+Free, Mistral free mode, OpenRouter: PUBLIC only, whatever a grant says).
+
+**Translation** (`translate_message`): self-hosted LibreTranslate → Cloudflare
+m2m100 → DeepL → the LLM chain → the original. Message text is
+`SENSITIVE_FREE_TEXT`, so only a self-hosted engine (or a provider holding an
+owner grant) ever receives it; the original is stored and one tap away, and a
+rendering is labelled "Machine translation from …". A DeepL key ending `:fx`
+is DeepL Free (`deepl_free`): its terms forbid personal data, so it is PUBLIC-only.
+
 Owner commands on the VPS — each secret from a hidden prompt, never argv; one
 `--restart` at the very end (`S=/root/lm-prod/bin/lm-env-set.sh`):
 

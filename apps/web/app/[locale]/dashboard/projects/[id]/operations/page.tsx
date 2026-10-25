@@ -10,7 +10,8 @@ import {
   type OperationalStatus,
   type ReadinessStatus,
 } from "@/lib/projects/operations-derive";
-import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
+import { suggestedReadinessItemKeys } from "@/lib/projects/readiness-items";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
 import { getOperationsCentre } from "@/lib/projects/operations-centre";
 import { isProjectStatus } from "@/lib/projects/project-lifecycle-model";
 import {
@@ -346,6 +347,7 @@ export default async function ProjectOperationsPage({
       seed: t("checklist.seed"),
       addItem: t("checklist.addItem"),
       addPlaceholder: t("checklist.addPlaceholder"),
+      toAgree: t("checklist.toAgree"),
       missing: t("checklist.missing"),
       received: t("checklist.received"),
       checked: t("checklist.checked"),
@@ -356,7 +358,11 @@ export default async function ProjectOperationsPage({
       READINESS_STATUSES.map((s) => [s, t(`readinessStatuses.${s}`)]),
     ) as Record<ReadinessStatus, string>,
     defaultItemLabels: Object.fromEntries(
-      DEFAULT_READINESS_ITEM_KEYS.map((k) => [k, t(`defaults.${k}`)]),
+      // SUGGESTIONS for this job, not a universal list (decision 0021,
+      // extended 2026-10-24). Whether the work crosses a border is not known
+      // on this board, so cross-border rows (A1 / posting) are left to the
+      // manager to add when they apply.
+      suggestedReadinessItemKeys({ crossBorder: false }).map((k) => [k, t(`defaults.${k}`)]),
     ) as Record<string, string>,
     // v2 — filters
     filters: {
@@ -438,9 +444,20 @@ export default async function ProjectOperationsPage({
         </p>
       ) : null}
 
-      {/* ARENA rhythm (TASK 07 slice 2): the S3.5 one-tap confirm queue
-          pulse — the real gated reviewable count, one tap to confirm. */}
-      <ConfirmPulse />
+      {/* WHICH PROJECT this is, first. The page used to open on the
+          organization-wide confirm pulse ("25 entries wait") with the
+          project's own name ~2,000px further down in the board header, so a
+          phone landed on a global banner instead of the project (UX review
+          2026-10-24). A plain line, not a second <h1> — the board keeps the
+          page heading. */}
+      <header className="flex min-w-0 flex-col gap-0.5" data-testid="ops-project-context">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("eyebrow")}
+        </span>
+        <p className="break-words font-display text-xl font-semibold tracking-tight text-text-primary">
+          {ops.project.title ?? t("untitledProject")}
+        </p>
+      </header>
 
       {/* P4 — the Field: the primary operational view, ADDED on the page
           (§1.5). Every control is a registered canonical action the chat
@@ -554,6 +571,13 @@ export default async function ProjectOperationsPage({
             : ""}
         </p>
       </section>
+
+      {/* ARENA rhythm (TASK 07 slice 2): the S3.5 one-tap confirm queue
+          pulse — the real gated reviewable count, one tap to confirm. It is
+          the ORGANIZATION's queue, so it follows this project's own facts
+          rather than leading the page (same placement as the project page,
+          where it sits after the project's own panels). */}
+      <ConfirmPulse />
 
       {/* ── Train D: project management strip — derived progress (never a
             stored number), the accountable person, and the applied W11
@@ -804,6 +828,12 @@ export default async function ProjectOperationsPage({
       </Link>
 
       <div id={OPS_BOARD_ANCHOR.slice(1)} className="flex flex-col gap-6">
+        {/* The mutual pre-agreement recommendation — advice for both sides,
+            never a gate (decision 0021 extension, 2026-10-24). */}
+        <CollaborationChecksNote
+          context={{ dealKind: "work_engagement", workCountry: ops.project.country }}
+          countryName={ops.project.country}
+        />
         <ProjectOperationsBoard
           ops={{ ...ops, project: { ...ops.project, status: projectStatusText } }}
           labels={labels}

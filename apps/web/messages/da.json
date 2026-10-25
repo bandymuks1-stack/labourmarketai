@@ -7,7 +7,7 @@
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "[EN] Created",
     "scoutLink": "[EN] Matched workers & interest for this need",
-    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "manageHelp": "[EN] Complete an inquiry, remove it from the market or publish it again right here in the list; a draft can be continued or discarded. Confirming its recognized skills is done from its scouting view. Editing submitted text is not available yet.",
     "syntheticTitle": {
       "hiringWorkers": "Søger medarbejdere",
       "agencyPartnership": "Partnerskabstilbud"
@@ -1717,7 +1717,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -3702,8 +3702,8 @@
           "description": "Et listepunkt for en projektmedarbejder markeres med en reel status — kræves, modtaget, tjekket."
         },
         "seedReadinessChecklist": {
-          "label": "Start dokumentlisten",
-          "description": "Standardlisten for parathed / dokumenter startes for alle på projektet."
+          "label": "Tilføj forslag til aftale",
+          "description": "Foreslåede punkter at aftale før aftalen tilføjes for alle på projektet. Det er ikke en obligatorisk liste og ikke en vurdering af parathed."
         },
         "requestReadiness": {
           "label": "Bed om det manglende",
@@ -4281,8 +4281,8 @@
       "missingDeclaredSkills": "angivne færdigheder",
       "missingEvidence": "arbejdsdokumentation",
       "blockedSuffix": "(afvist / udløbet)",
-      "readinessSeedChip": "Start dokumentlisten ({count} pers.)",
-      "readinessSeeded": "Liste startet: {count} pers. × {items} punkter — alle “kræves”.",
+      "readinessSeedChip": "Tilføj forslag til aftale ({count} pers.)",
+      "readinessSeeded": "Forslag tilføjet: {count} pers. × {items} punkter — alle “aftales før aftalen”.",
       "readinessGotChip": "Modtaget: {label} ({name})",
       "readinessGotDone": "Markeret som modtaget: {label} ({name}).",
       "readinessCheckedChip": "Kontrolleret: {label} ({name})",
@@ -4323,7 +4323,7 @@
       "moveAskProject": "Hvor skal {name} flyttes hen? Vælg:",
       "moveWhatIfTitle": "Hvis {name} flyttes fra “{from}” til “{to}”:",
       "moveFromLine": "• “{from}”: personer {before} → {after}; {tasks} af hans åbne arbejdspakker bliver der; paratheds-tjekliste der: {checked}/{total}.",
-      "moveToLine": "• “{to}”: personer {before} → {after}; paratheds-tjeklisten der starter på 0/{total}.",
+      "moveToLine": "• “{to}”: personer {before} → {after}; hvad der skal aftales der, er ikke valgt endnu (op til {total} punkter foreslået).",
       "moveCountryLine": "• Landet skifter: {from} → {to} — andre dokumentkrav.",
       "moveNoDatesLine": "• “{to}” har ingen datoer — fravær kan ikke tjekkes.",
       "moveAvailabilityUnknownLine": "• Fravær ukendt.",
