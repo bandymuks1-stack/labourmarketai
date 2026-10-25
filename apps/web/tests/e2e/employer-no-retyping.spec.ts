@@ -1,5 +1,7 @@
 import { expect as baseExpect, test, type Page } from "@playwright/test";
 
+import { activeLocales, type ActiveLocale } from "../../lib/i18n/config";
+
 /**
  * "The employer must not type their need twice." — browser proof.
  *
@@ -17,7 +19,8 @@ import { expect as baseExpect, test, type Page } from "@playwright/test";
  *   2. land on the demand form and find that need ALREADY in the description;
  *   3. confirm the row behind it is a DRAFT — nothing published, nothing
  *      matchable, nobody contacted;
- *   4. do it again in EN / RU / NL, because the point is that the need survives
+ *   4. do it again in every ACTIVE locale (`activeLocales`, lib/i18n/config.ts),
+ *      because the point is that the need survives
  *      the language it was written in;
  *   5. and — the negative control, run FIRST — prove the wizard is genuinely
  *      empty when the employer did NOT come through the recognizer, so step 2
@@ -106,16 +109,18 @@ async function carryNeed(page: Page, locale: string, text: string) {
   await demandForm(page).waitFor({ timeout: 40_000 });
 }
 
-/** The employer's need, in each language the pilot actually serves. */
-const NEEDS: { locale: string; text: string }[] = [
-  { locale: "lt", text: "Reikia 4 suvirintoju Vokietijoje nuo rugsejo" },
-  { locale: "en", text: "We need 4 welders in Germany from September" },
-  { locale: "ru", text: "Нужны 4 сварщика в Германии с сентября" },
-  {
-    locale: "nl",
-    text: "Wij hebben 4 lassers nodig in Duitsland vanaf september",
-  },
-];
+/** The employer's need, in each ACTIVE locale. Keyed by `ActiveLocale` so a
+ *  newly activated locale fails typecheck here until it has its own sentence;
+ *  the loop is derived from the canonical registry, never a hard-coded list. */
+const NEED_TEXT: Record<ActiveLocale, string> = {
+  lt: "Reikia 4 suvirintoju Vokietijoje nuo rugsejo",
+  en: "We need 4 welders in Germany from September",
+  ru: "Нужны 4 сварщика в Германии с сентября",
+  nl: "Wij hebben 4 lassers nodig in Duitsland vanaf september",
+  de: "Wir brauchen 4 Schweißer in Deutschland ab September",
+  pl: "Potrzebujemy 4 spawaczy w Niemczech od września",
+};
+const NEEDS = activeLocales.map((locale) => ({ locale, text: NEED_TEXT[locale] }));
 
 test.describe("the recognised need reaches the demand form", () => {
   test.skip(
@@ -139,7 +144,8 @@ test.describe("the recognised need reaches the demand form", () => {
    * with no draft, the description box is EMPTY.
    */
   test("without the recognizer the demand form opens empty", async ({ page }) => {
-    await page.goto("/lt/dashboard/company#demand-intake");
+    // The intake lives on the Needs door since #1746 (organization doors).
+    await page.goto("/lt/dashboard/company/needs#demand-intake");
     await demandForm(page).waitFor({ timeout: 40_000 });
     await expect(demandDescription(page)).toHaveValue("");
   });

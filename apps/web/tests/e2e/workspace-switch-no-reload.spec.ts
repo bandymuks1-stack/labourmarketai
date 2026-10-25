@@ -37,6 +37,12 @@ const HOME = "/en/dashboard";
  *  matters: the switch must drop it. */
 const STALE_DEMAND = "d0000000-0000-4000-8000-00000000dead";
 
+/** THE chip a person sees. The SAME `WorkspaceChip` is mounted in the full
+ *  dashboard chrome (W8 slice 1) and in the conversation header, and only one
+ *  of them is visible on a given surface — a bare testid locator matches both
+ *  and trips Playwright's strict mode. Still strict over the VISIBLE ones. */
+const visibleChip = (page: Page) => page.getByTestId("workspace-chip").filter({ visible: true });
+
 async function signIn(page: Page): Promise<void> {
   await page.goto("/en/auth/login");
   await page.locator('input[type="email"]').fill(EMAIL);
@@ -46,7 +52,7 @@ async function signIn(page: Page): Promise<void> {
 }
 
 async function openChipMenu(page: Page) {
-  const chip = page.getByTestId("workspace-chip");
+  const chip = visibleChip(page);
   await expect(chip).toBeVisible({ timeout: 60_000 });
   const menu = page.getByTestId("workspace-chip-menu");
   for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -80,7 +86,7 @@ async function expectSameDocument(page: Page): Promise<void> {
 async function pick(page: Page, label: RegExp | string): Promise<void> {
   const menu = await openChipMenu(page);
   await menu.getByRole("button", { name: label }).first().click();
-  const chip = page.getByTestId("workspace-chip");
+  const chip = visibleChip(page);
   // No switch left pending (the chip shows its pending copy while it runs).
   await expect(chip.getByRole("button").first()).not.toHaveAttribute("aria-busy", "true", {
     timeout: 60_000,
@@ -93,7 +99,7 @@ async function pick(page: Page, label: RegExp | string): Promise<void> {
 const thread = (page: Page) => page.getByTestId("conversation-thread");
 
 async function expectOrgContext(page: Page, org: string, other: string): Promise<void> {
-  await expect(page.getByTestId("workspace-chip")).toContainText(org, { timeout: 60_000 });
+  await expect(visibleChip(page)).toContainText(org, { timeout: 60_000 });
   // The OPENING of a fresh conversation names the organization it acts for.
   await expect(thread(page)).toContainText(org, { timeout: 60_000 });
   // …and nothing of the previous organization's opening survived.
@@ -101,7 +107,7 @@ async function expectOrgContext(page: Page, org: string, other: string): Promise
 }
 
 async function expectPersonalContext(page: Page): Promise<void> {
-  const chip = page.getByTestId("workspace-chip");
+  const chip = visibleChip(page);
   await expect(chip).not.toContainText(ORG_A, { timeout: 60_000 });
   await expect(chip).not.toContainText(ORG_B);
   await expect(thread(page)).not.toContainText(ORG_A);
@@ -156,7 +162,7 @@ test.describe.serial("a workspace switch is visible without a reload", () => {
     await signIn(page);
     await page.goto(HOME);
     await pick(page, ORG_A);
-    const trigger = page.getByTestId("workspace-chip").getByRole("button").first();
+    const trigger = visibleChip(page).getByRole("button").first();
     await expect(trigger).toHaveAttribute("aria-label", new RegExp(ORG_A));
     // Owned organizations carry no relationship sub-label; a non-owned row
     // would (`workspace-relationship-<id>`) — asserted only where it exists.

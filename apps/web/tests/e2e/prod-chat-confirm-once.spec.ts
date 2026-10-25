@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect } from "./prod-walk";
 
-import { chooseWorkContextIfAsked } from "./worklog-context";
+import { answerNoProjectIfAsked, chooseWorkContextIfAsked } from "./worklog-context";
 
 /**
  * PRODUCTION CHAT FIRST — ONE CONFIRMATION, ONE FACT (owner programme
@@ -26,21 +26,26 @@ test.use({ actionTimeout: 30_000 });
 const entries = async (page: import("@playwright/test").Page) => {
   await page.goto("/lt/dashboard/journal");
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
-  return page.locator('[data-testid^="journal-entry-card-"]', { hasText: TAG }).count();
+  // Counted inside <main>: the hidden streaming holder outside it can hold a
+  // second copy of every card, which would read as a duplicate entry.
+  return page.getByRole("main").locator('[data-testid^="journal-entry-card-"]', { hasText: TAG }).count();
 };
 
 test("C-1. the day told to the chat is confirmed once and lands in the journal once", async ({ browser }) => {
   const ctx = await browser.newContext({ storageState: state("worker"), locale: "lt-LT" });
   const page = await ctx.newPage();
   await page.goto("/lt/dashboard");
-  const composer = page.getByTestId("composer-input");
+  // Scoped to <main>: the dashboard can hold a second, hidden composer in its
+  // streaming holder (worker-dashboard-suspense-commit.spec.ts, measured).
+  const composer = page.getByRole("main").getByTestId("composer-input");
   await expect(composer).toBeVisible({ timeout: 30_000 });
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   await composer.fill(`${TAG}: šiandien 7 valandas dirbau sandėlyje, komplektavau užsakymus`);
-  await page.getByTestId("composer-send").click();
+  await page.getByRole("main").getByTestId("composer-send").click();
   const flow = page.getByTestId("worklog-flow").last();
   await expect(flow, "the chat recognises a work day and offers to record it").toBeVisible({ timeout: 45_000 });
   await chooseWorkContextIfAsked(page, /QA-SYNTHETIC Alfa/);
+  await answerNoProjectIfAsked(page);
   await flow.getByTestId("worklog-save").click();
   // Double-click the confirmation: a consent gate must be single-use.
   await flow.getByTestId("worklog-confirm").dblclick();
@@ -61,7 +66,7 @@ test("C-2. a new session sees the same single fact, and the conversation remembe
   expect(await entries(page)).toBe(1);
   await page.goto("/lt/dashboard");
   // Earlier turns come back as ONE folded history block above the new chat.
-  const block = page.getByTestId("chat-history-block");
+  const block = page.getByRole("main").getByTestId("chat-history-block");
   await expect(block).toBeVisible({ timeout: 30_000 });
   await block.getByRole("button").first().click();
   await expect(block).toContainText(TAG, { timeout: 30_000 });

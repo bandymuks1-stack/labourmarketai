@@ -317,6 +317,17 @@ describe("the ratio recomputes after a state change — the person's side of the
     const many = Array.from({ length: 60 }, (_, i) => `skill-${i}`);
     const ledger = deriveRequirementLedger(base({ requiredSkillSlugs: many, ownSkills: [] }));
     expect(ledger.rows.length).toBeLessThanOrEqual(REQUIREMENT_LEDGER_ROW_LIMIT);
-    expect(ledger.ratio.total).toBe(ledger.rows.length);
+    // country-law rows are listed but never part of the person's N of M
+    expect(ledger.ratio.total).toBe(ledger.rows.filter((r) => r.reason !== "country_requirement").length);
+  });
+
+  it("a country's document rules are information, never a gap in the ratio (decision 0021 extension, 2026-10-24)", () => {
+    const ledger = deriveRequirementLedger(PROJECT);
+    const countryRows = ledger.rows.filter((r) => r.reason === "country_requirement");
+    const counted = ledger.rows.filter((r) => r.reason !== "country_requirement");
+    expect(ledger.ratio.total).toBe(counted.length);
+    // removing every country row leaves the ratio unchanged
+    expect(deriveLedgerRatio(counted)).toEqual(ledger.ratio);
+    expect(deriveLedgerRatio([...counted, ...countryRows])).toEqual(ledger.ratio);
   });
 });

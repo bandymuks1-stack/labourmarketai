@@ -37,7 +37,11 @@ const PASSWORD = "Pw-chain-qa-1!";
  *  after the UTC "today" as future and leaves it out (a product gap for people east of UTC between local and UTC midnight,
  *  recorded in the QA report). The run pins the browser zone to UTC so the proof does not depend on the clock hour. */
 const QA_TZ = "UTC";
-const TAG = process.env.CHAIN_TAG ?? randomBytes(3).toString("hex");
+/** The run tag lives in DATA, never in a test title: Playwright re-imports this file in every worker and finds
+ *  tests by title, so a title carrying a fresh random tag is "not found in the worker". Writing the tag back to
+ *  process.env also hands the collecting process's tag to the workers it forks (CLI runs collect in-process),
+ *  so all steps share one run. */
+const TAG = (process.env.CHAIN_TAG ??= randomBytes(3).toString("hex"));
 const SHOTS = resolve(process.cwd(), "../../qa-shots");
 const STATE_FILE = resolve(process.cwd(), `../../qa-state/chain-${TAG}.json`);
 
@@ -276,10 +280,11 @@ async function hydrated(page: Page, selector: string) {
 
 test.describe.configure({ mode: "serial", timeout: 900_000 });
 
-test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
+test.describe("INTEGRATED PRODUCT CHAIN", () => {
   test.skip(!HAS, "local Supabase env absent - run with the local stack env (see header)");
 
   test.beforeAll(() => {
+    console.log(`[integrated product chain] run tag ${TAG} (re-run one step with CHAIN_TAG=${TAG})`);
     loadState();
   });
 
@@ -482,7 +487,9 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
 
     // WORK OBJECT (site) through its own form
     if (!S.OBJECT) {
-      await go(own, "/en/dashboard/projects", '[data-testid="work-object-add-form"]');
+      // Sites live inside the collapsed "More tools" fold since #2255; the page's own deep link
+      // (#company-locations, opened by DetailsHashOpener) is how a person reaches the form.
+      await go(own, "/en/dashboard/projects#company-locations", '[data-testid="work-object-add-form"]');
       const wo = own.getByTestId("work-object-add-form");
       await wo.locator('input[name="name"]').fill(`QA${TAG} Block A`);
       const sel = wo.locator('select[name="projectId"]');
@@ -1417,7 +1424,10 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
 
     // The manager OFFERS the link to the real person (the UI-registered worker); they have no invitation yet.
     const ownPage = await loginUi(browser, "own");
-    await go(ownPage, "/en/dashboard/company/people", `[data-testid="organization-roster-person-${personId}"]`);
+    // The roster sits in the people page's "More tools" fold since #2255; its own deep link
+    // (#people-import-section, opened by DetailsHashOpener) is how a person reaches it.
+    const ROSTER = "/en/dashboard/company/people#people-import-section";
+    await go(ownPage, ROSTER, `[data-testid="organization-roster-person-${personId}"]`);
     const sel = ownPage.getByTestId(`roster-link-worker-${personId}`);
     if ((await rows(`engagement_contexts?profile_id=eq.${reg.id}&organization_id=eq.${S.ORG}&status=eq.active&select=id`)).length === 0) {
       // the worker must be on the roster as an engagement first: invite them through the roster-claim control
@@ -1441,7 +1451,9 @@ test.describe(`INTEGRATED PRODUCT CHAIN (tag ${TAG})`, () => {
     expect((await rows(`organization_people?id=eq.${personId}&select=link_state`))[0].link_state).toBe("unlinked");
     expect((await asUser(reg.jwt, "GET", `organization_evidence_records?select=id&organization_id=eq.${S.ORG}`)).json).toEqual([]);
 
-    await go(ownPage, "/en/dashboard/company/people", `[data-testid="roster-link-worker-${personId}"]`);
+    // Same URL incl. the fragment would be a same-document jump (no fresh server read), so reload.
+    await ownPage.reload({ waitUntil: "domcontentloaded" });
+    await go(ownPage, ROSTER, `[data-testid="roster-link-worker-${personId}"]`);
     await ownPage.getByTestId(`roster-link-worker-${personId}`).selectOption({ value: `${reg.workerId}:${reg.id}` });
     await ownPage.getByTestId(`roster-link-offer-${personId}`).locator('button[type="submit"]').click();
     await expect(ownPage.getByTestId(`organization-roster-person-${personId}`).locator('[data-link-state="link_proposed"]')).toBeVisible({ timeout: 60_000 });

@@ -25,6 +25,7 @@ import {
   type ChainDispatchContext,
 } from "./runtime/run-core";
 import type { AiProviderState } from "./runtime/provider-chain";
+import type { ProviderCooldown } from "./runtime/provider-cooldown";
 import { providerKindFor, type AiRuntimeConfig, type AiDisabledReason } from "./runtime/config-core";
 import type { AiCompletionRequest, AiCompletionResult, AiLocale, AiErrorCode } from "./runtime/types";
 import type { PromptRegistryEntry, AiAgentKey } from "./registry/types";
@@ -129,6 +130,11 @@ export interface RunAgentOptions {
    * test stays on the path it was written for.
    */
   readonly providerStates?: readonly AiProviderState[];
+  /**
+   * Runtime provider health from real failures (runtime/provider-cooldown.ts).
+   * The server wrapper passes the process-wide instance; absent = no cooldown.
+   */
+  readonly providerCooldown?: ProviderCooldown;
   /** Test seam: replaces the real run-core dispatcher. */
   readonly dispatchOverride?: AiDispatcher;
 }
@@ -387,7 +393,7 @@ export async function runAiAgentCore<T = unknown>(
   // Without it run-core keeps its legacy single-provider behaviour.
   const chainFor = (d: TaskRouteDecision): ChainDispatchContext | undefined =>
     opts.providerStates
-      ? { decision: d, states: opts.providerStates }
+      ? { decision: d, states: opts.providerStates, cooldown: opts.providerCooldown }
       : undefined;
 
   let effectiveDecision = decision;

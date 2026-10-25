@@ -55,6 +55,38 @@ export function isP256PublicKey(bytes: Uint8Array): boolean {
   return bytes.length === 65 && bytes[0] === 0x04;
 }
 
+/**
+ * The raw P-256 private scalar as exactly 32 bytes, or null.
+ *
+ * A scalar whose leading byte is zero is the same key with that byte dropped:
+ * Node's `createECDH().getPrivateKey()` and several key generators emit it
+ * unpadded (~1 key in 256 comes out 31 bytes). Rejecting it would leave a valid
+ * owner-entered key silently OFF, so it is left-padded here, once, for both the
+ * config check and the signer.
+ */
+export function vapidPrivateKeyBytes(privateKey: string): Buffer | null {
+  const raw = base64UrlToBuffer(privateKey);
+  if (raw.length === 0 || raw.length > 32) return null;
+  if (raw.length === 32) return raw;
+  return Buffer.concat([Buffer.alloc(32 - raw.length), raw]);
+}
+
+/** True only when the private scalar really derives the given public point —
+ *  padding makes any short string decodable, so a pair check is what keeps a
+ *  truncated or mismatched key OFF. */
+export function isVapidKeyPair(publicKey: string, privateKey: string): boolean {
+  const pub = base64UrlToBuffer(publicKey);
+  const priv = vapidPrivateKeyBytes(privateKey);
+  if (!isP256PublicKey(pub) || !priv) return false;
+  try {
+    const ecdh = createECDH("prime256v1");
+    ecdh.setPrivateKey(priv);
+    return ecdh.getPublicKey().equals(pub);
+  } catch {
+    return false;
+  }
+}
+
 export interface PushSubscriptionKeys {
   /** Browser's P-256 public key, base64url (65 bytes uncompressed). */
   readonly p256dh: string;
@@ -155,8 +187,8 @@ export function decryptWebPushPayloadForTest(
 /** Build the ES256 signing key from the raw VAPID key pair (base64url). */
 export function vapidSigningKey(publicKey: string, privateKey: string): KeyObject {
   const pub = base64UrlToBuffer(publicKey);
-  const priv = base64UrlToBuffer(privateKey);
-  if (!isP256PublicKey(pub) || priv.length !== 32) throw new Error("invalid_vapid_keys");
+  const priv = vapidPrivateKeyBytes(privateKey);
+  if (!isP256PublicKey(pub) || !priv) throw new Error("invalid_vapid_keys");
   return createPrivateKey({
     key: {
       kty: "EC",
