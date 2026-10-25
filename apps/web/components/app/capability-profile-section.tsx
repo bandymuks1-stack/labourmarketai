@@ -24,6 +24,7 @@ import {
   skillGroupLabelKey,
 } from "@/lib/skills/skill-groups";
 import { formatUtcDate } from "@/lib/time/display";
+import { visibleSkillClaims } from "@/lib/profile/visible-skill-claims";
 
 /**
  * Unified CV / capability surface (replaces the disconnected
@@ -87,8 +88,11 @@ export function CapabilityProfileSection({
     new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(h);
 
   const router = useRouter();
-  const [savedClaims, setSavedClaims] =
-    useState<ProfileSkillClaimRow[]>(claims);
+  // Derived from the prop on every render (lib/profile/visible-skill-claims):
+  // a refresh after an add must show the new chip. Only the ids removed in
+  // this session are local state, hidden until the refresh drops them.
+  const [removedClaimIds, setRemovedClaimIds] = useState<ReadonlySet<string>>(() => new Set());
+  const savedClaims: ProfileSkillClaimRow[] = visibleSkillClaims(claims, removedClaimIds);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, startDelete] = useTransition();
   const [manualLabel, setManualLabel] = useState("");
@@ -99,7 +103,7 @@ export function CapabilityProfileSection({
     startDelete(() => {
       deleteProfileSkillClaimAction(id)
         .then(() =>
-          setSavedClaims((prev) => prev.filter((c) => c.id !== id)),
+          setRemovedClaimIds((prev) => new Set(prev).add(id)),
         )
         .catch((e: unknown) => {
           console.error("[capability-profile] delete failed", e);
