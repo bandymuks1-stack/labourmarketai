@@ -59,6 +59,7 @@ import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-histo
 import {
   deriveReviewResult,
   deriveReviewTimeline,
+  isSelfConfirmedOnly,
 } from "@/lib/journal/review-status";
 import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
 import { EntryReviewPanel } from "@/components/app/entry-review-panel";
@@ -1076,6 +1077,9 @@ export default async function JournalPage({
           context: e.engagement_context_id
             ? (contextFacts.get(e.engagement_context_id) ?? null)
             : null,
+          // The signed-in person IS the subject: their own approval is
+          // `self_confirmed`, never "manager confirmed" (review-status.ts).
+          selfConfirmedOnly: isSelfConfirmedOnly(e.journal_entry_confirmations, user.id),
         });
         const org = e.engagement_context_id
           ? engagementChips.get(e.engagement_context_id)?.label
@@ -1840,6 +1844,15 @@ export default async function JournalPage({
                         context: e.engagement_context_id
                           ? (contextFacts.get(e.engagement_context_id) ?? null)
                           : null,
+                        // A SELF-approval (the signed-in subject approved their
+                        // own entry) reads `self_confirmed` — never "Vadovo
+                        // patvirtinta". The reader selects `confirmer_id`
+                        // (JOURNAL_ENTRY_CONFIRMATIONS_EMBED), so this is
+                        // answerable here.
+                        selfConfirmedOnly: isSelfConfirmedOnly(
+                          e.journal_entry_confirmations,
+                          user.id,
+                        ),
                       });
                       const explainVerification = !explainedStates.has(verification.state);
                       explainedStates.add(verification.state);
