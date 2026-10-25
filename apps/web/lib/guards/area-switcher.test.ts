@@ -75,11 +75,34 @@ describe("the switcher is a chooser, not a sideways strip", () => {
   it("keyboard: arrows move the selection, focus brings a card to the front, far cards leave the tab order", () => {
     expect(switcher).toMatch(/"ArrowLeft"/);
     expect(switcher).toMatch(/"ArrowRight"/);
-    expect(switcher).toMatch(/onFocus=\{\(\) => setSelected\(i\)\}/);
+    expect(switcher).toMatch(/if \(!pointerDown\.current\) setSelected\(i\);/);
     expect(switcher).toMatch(/tabIndex=\{untabbable \? -1 : undefined\}/);
     expect(switcher).toMatch(/const untabbable = slot < -1 \|\| slot > visible;/);
     expect(switcher).toMatch(/aria-label=\{prevLabel\}/);
     expect(switcher).toMatch(/aria-label=\{nextLabel\}/);
+  });
+
+  it("arrow-key focus never scrolls the clipped track, and a native scroll is undone", () => {
+    // Codex P2 (#2783): focus() scrolled the overflow-hidden track and its
+    // scrollLeft drifted outside the positioned geometry.
+    expect(switcher).toMatch(/focus\(\{ preventScroll: true \}\)/);
+    expect(switcher).not.toMatch(/\.focus\(\);/);
+    expect(switcher).toMatch(/onScroll=\{\(e\) => \{\s*e\.currentTarget\.scrollLeft = 0;/);
+  });
+
+  it("the 3D plane never swallows a press meant for a card behind it", () => {
+    // Real-mouse walk: cards at translateZ(-28px) sat behind the <ul> plane,
+    // so elementFromPoint (and every click) resolved to the list.
+    expect(switcher).toMatch(/<ul className="pointer-events-none relative h-full \[transform-style:preserve-3d\]">/);
+    expect(switcher).toMatch(/pointerEvents: far \? "none" : "auto"/);
+  });
+
+  it("a pointer press does not move the window before the click lands", () => {
+    // Codex P2 (#2783): mouse-down focus repositioned the window mid-press,
+    // so the pressed card glided away and the click never activated it.
+    expect(switcher).toMatch(/pointerDown\.current = true;/);
+    expect(switcher).toMatch(/onPointerUp=[\s\S]{0,200}pointerDown\.current = false;/);
+    expect(switcher).toMatch(/onPointerCancel=[\s\S]{0,120}pointerDown\.current = false;/);
   });
 
   it("reduced motion: no rotation and no transitions (pure CSS)", () => {

@@ -70,6 +70,12 @@ export function AreaSwitcher({
   /** Set when a pointer gesture was a swipe, so the click it ends with does
    *  not also open the card under the finger. */
   const swiped = useRef(false);
+  /** True between a pointer press and its release. A press focuses the card
+   *  on mouse-down; if that focus moved the window, the card would glide out
+   *  from under the pointer and the click would never land on it. So focus
+   *  selects (and repositions) only when it comes from the keyboard — a
+   *  pointer opens the card it pressed. */
+  const pointerDown = useRef(false);
 
   useIsoLayoutEffect(() => {
     const el = trackRef.current;
@@ -147,15 +153,20 @@ export function AreaSwitcher({
           const target = trackRef.current?.querySelector<HTMLElement>(
             `[data-area-index="${Math.max(0, Math.min(last, next))}"]`,
           );
-          target?.focus();
+          // preventScroll: the track is overflow-hidden but still scrollable
+          // by script — a default focus() would scroll it natively and push
+          // the geometry out of line with the positioned cards.
+          target?.focus({ preventScroll: true });
         }}
         onPointerDown={(e) => {
           drag.current = { x: e.clientX };
           swiped.current = false;
+          pointerDown.current = true;
         }}
         onPointerUp={(e) => {
           const d = drag.current;
           drag.current = null;
+          pointerDown.current = false;
           if (!d) return;
           const dx = e.clientX - d.x;
           if (Math.abs(dx) > 40) {
@@ -165,8 +176,16 @@ export function AreaSwitcher({
         }}
         onPointerCancel={() => {
           drag.current = null;
+          pointerDown.current = false;
         }}
         onDragStart={(e) => e.preventDefault()}
+        // Tabbing onto an edge card (or any focus without preventScroll) can
+        // still scroll the clipped track natively; the cards are positioned,
+        // so the track itself must never keep a scroll offset.
+        onScroll={(e) => {
+          e.currentTarget.scrollLeft = 0;
+          e.currentTarget.scrollTop = 0;
+        }}
         onClickCapture={(e) => {
           // A swipe that ended on a card is a swipe, not a tap.
           if (swiped.current) {
@@ -175,7 +194,11 @@ export function AreaSwitcher({
           }
         }}
       >
-        <ul className="relative h-full [transform-style:preserve-3d]">
+        {/* pointer-events-none on the 3D plane: the cards that settle back
+            (translateZ < 0) sit BEHIND the list's own plane, which would
+            otherwise take every press meant for them — measured: a real
+            mouse click on an unselected card hit the <ul>, not the link. */}
+        <ul className="pointer-events-none relative h-full [transform-style:preserve-3d]">
           {items.map((item, i) => {
             const slot = i - start;
             const far = slot < 0 || slot >= visible;
@@ -209,7 +232,7 @@ export function AreaSwitcher({
                   zIndex: isSelected ? 20 : 10,
                   // The card just past an edge peeks, faded: there is more this way.
                   opacity: slot === -1 || slot === visible ? 0.35 : far ? 0 : isSelected ? 1 : 0.88,
-                  pointerEvents: far ? "none" : undefined,
+                  pointerEvents: far ? "none" : "auto",
                 }}
               >
                 <Link
@@ -222,7 +245,9 @@ export function AreaSwitcher({
                   // A link is natively draggable: the browser's drag would
                   // cancel the swipe (pointercancel) after the first card.
                   draggable={false}
-                  onFocus={() => setSelected(i)}
+                  onFocus={() => {
+                    if (!pointerDown.current) setSelected(i);
+                  }}
                   className={cn(
                     "flex h-32 flex-col justify-between rounded-xl border p-3.5 outline-none transition-[box-shadow,border-color,background-color] duration-300 focus-visible:ring-2 focus-visible:ring-brand-blue motion-reduce:transition-none",
                     isSelected
