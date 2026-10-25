@@ -5761,6 +5761,7 @@
             "Stripe — betalingsverwerking voor betaalde platformdiensten. Wanneer een organisatie een betaling start, ontvangt Stripe het e-mailadres van de betalende gebruiker en een interne accountidentificatie; kaartgegevens worden ingevoerd op de eigen betaalpagina van Stripe en niet door het platform opgeslagen.",
             "Google, Facebook (Meta) en LinkedIn — alleen als je ervoor kiest met hen in te loggen, zoals hierboven beschreven.",
             "Google (Gemini API) — alleen zoals hieronder beschreven in het onderdeel over AI.",
+            "Cloudflare (Workers AI), Mistral AI en Groq — wanneer ingeschakeld, alleen AI-formulering van openbare, geaggregeerde arbeidsmarktstatistieken (bijvoorbeeld hoeveel vacatures een beroep heeft). Er worden geen berichtteksten en geen persoonsgegevens naar hen gestuurd.",
             "De volledige lijst van infrastructuurleveranciers staat op de pagina „Gegevensbescherming”."
           ]
         },
@@ -5872,6 +5873,7 @@
             "Cloudflare — het netwerk vóór de website: domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen. Elk verzoek aan de website loopt erdoorheen.",
             "GitHub — opslag van de broncode. Er worden daar geen gebruikersgegevens bewaard.",
             "Google (Gemini API) — AI-verwerking voor het vertalen van berichten en vacatures en voor het voorstellen waar een getypte chatzin om vraagt. Alleen de tekst die de taak nodig heeft, wordt verstuurd.",
+            "Cloudflare (Workers AI), Mistral AI en Groq — wanneer ingeschakeld, alleen AI-formulering van openbare, geaggregeerde arbeidsmarktstatistieken (bijvoorbeeld hoeveel vacatures een beroep heeft). Er worden geen berichtteksten en geen persoonsgegevens naar hen gestuurd.",
             "Stripe — betalingsverwerking. Een klantrecord ontstaat alleen wanneer een organisatie een abonnementsbetaling start.",
             "Geen andere e-mail-, AI-, vertaal- of betalingsleverancier is actief. Wordt er een geactiveerd, dan wordt eerst deze lijst bijgewerkt."
           ]
@@ -7030,7 +7032,7 @@
       "send": "Verzenden",
       "sent": "Antwoord verzonden."
     },
-    "translatedFrom": "Vertaald uit {lang}",
+    "translatedFrom": "Machinevertaling uit {lang}",
     "showOriginal": "Origineel ({lang})",
     "translationUnavailable": "Origineel ({lang}) — geen vertaling beschikbaar",
     "loadError": "Berichten konden nu niet worden geladen. Wat je ziet is niet het volledige beeld — probeer het opnieuw."

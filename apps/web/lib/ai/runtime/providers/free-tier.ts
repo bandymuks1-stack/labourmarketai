@@ -25,10 +25,11 @@
  *   Mistral (free "Experiment" API plan) — rate-limited, $0. API data MAY be
  *     used for training unless the opt-out is switched off in the Admin
  *     console (help.mistral.ai article 455207). EU vendor.
- *   Groq (free plan) — rate-limited, $0; inference inputs not retained by
- *     default, logs ≤ 30 days, Zero Data Retention available; storage in GCP
- *     US (console.groq.com/docs/your-data). Training is not stated on Groq's
- *     own pages, so it is treated exactly like a tier that may train.
+ *   Groq (free plan) — rate-limited, $0; Services Agreement §4.2: no training
+ *     on inputs or outputs, DPA incorporated; inputs not retained by default,
+ *     logs ≤ 30 days, Zero Data Retention available; storage in GCP US
+ *     (console.groq.com/docs/your-data). Free-plan commercial use is not
+ *     stated, so it stays a `free_tier` provider like the other two.
  *
  * None of that changes what may be SENT: that is `data-egress.ts`, and every
  * one of these is a `free_tier` external provider there.

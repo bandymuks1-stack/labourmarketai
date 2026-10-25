@@ -216,8 +216,8 @@ export interface SecondaryTranslationProvider {
  */
 export const SECONDARY_TRANSLATION_PROVIDERS: readonly SecondaryTranslationProvider[] = [
   { id: "libretranslate", adapter: libretranslateCompletionProvider, profile: libretranslateEgressProfile },
-  { id: "deepl", adapter: deeplCompletionProvider, profile: () => DEEPL_PROFILE },
   { id: "cloudflare", adapter: cloudflareCompletionProvider, profile: cloudflareEgressProfile },
+  { id: "deepl", adapter: deeplCompletionProvider, profile: () => deeplEgressProfile() },
 ];
 
 /**
@@ -269,6 +269,21 @@ const DEEPL_PROFILE = {
   locality: "cloud",
   costClass: "paid",
 } as const;
+
+/**
+ * DeepL's egress identity, by PLAN. A Free / Developer key (suffix ":fx") is a
+ * different contract: DeepL "reserves the right to perpetually store any
+ * Content" and forbids personal data on it (pro-license §3.3.2, §8.3.11). It is
+ * therefore its own catalogue id, `deepl_free`, capped at PUBLIC by its terms —
+ * a grant written for DeepL Pro can never be stretched over a free key.
+ */
+export function deeplEgressProfile(
+  key: string | undefined = process.env.DEEPL_API_KEY,
+): { readonly id: string; readonly locality: "cloud"; readonly costClass: string } {
+  return key?.trim().endsWith(":fx")
+    ? { id: "deepl_free", locality: "cloud", costClass: "free_tier" }
+    : DEEPL_PROFILE;
+}
 
 /**
  * What this request's payload carries, for the egress gate.

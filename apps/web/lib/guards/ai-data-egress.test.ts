@@ -272,7 +272,10 @@ describe("the gate is on the PATH, not in an optional argument", () => {
     );
     expect(secondary).toContain("egressPermitted");
     expect(src).toContain("DEEPL_PROFILE");
-    expect(src).toMatch(/id: "deepl", adapter: deeplCompletionProvider, profile: \(\) => DEEPL_PROFILE/);
+    // 2026-10-25: the profile is chosen by PLAN — a ":fx" key is `deepl_free`
+    // (terms cap PUBLIC), any other key the paid DEEPL_PROFILE.
+    expect(src).toMatch(/id: "deepl", adapter: deeplCompletionProvider, profile: \(\) => deeplEgressProfile\(\)/);
+    expect(src).toMatch(/\? \{ id: "deepl_free", locality: "cloud", costClass: "free_tier" \}\s*: DEEPL_PROFILE/);
     // The refusal must happen BEFORE the adapter call, not after it.
     expect(secondary.indexOf("egressPermitted")).toBeLessThan(
       secondary.indexOf("secondary.adapter.complete"),

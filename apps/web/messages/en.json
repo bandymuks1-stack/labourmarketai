@@ -5761,6 +5761,7 @@
             "Stripe — payment processing for paid platform services. When an organisation starts a checkout, Stripe receives the paying user's email address and an internal account identifier; card details are entered on Stripe's own payment page and are not stored by the platform.",
             "Google, Facebook (Meta) and LinkedIn — only if you choose to sign in with them, as described above.",
             "Google (Gemini API) — only as described in the section on AI below.",
+            "Cloudflare (Workers AI), Mistral AI and Groq — when switched on, AI phrasing of public, aggregate job-market statistics only (for example how many open positions a profession has). No message text and no personal data is sent to them.",
             "The full list of infrastructure providers is on the page “Data protection”."
           ]
         },
@@ -5872,6 +5873,7 @@
             "Cloudflare — the network in front of the website: domain name service, encryption in transit, caching and protection against attacks. Every request to the website passes through it.",
             "GitHub — source code hosting. No user data is stored there.",
             "Google (Gemini API) — AI processing for translating messages and job ads and for suggesting what a typed chat sentence asks for. Only the text the task needs is sent.",
+            "Cloudflare (Workers AI), Mistral AI and Groq — when switched on, AI phrasing of public, aggregate job-market statistics only (for example how many open positions a profession has). No message text and no personal data is sent to them.",
             "Stripe — payment processing. A customer record is created only when an organisation starts a subscription checkout.",
             "No other email, AI, translation or payment provider is active. If one is activated, this list is updated first."
           ]
@@ -7030,7 +7032,7 @@
       "send": "Send",
       "sent": "Reply sent."
     },
-    "translatedFrom": "Translated from {lang}",
+    "translatedFrom": "Machine translation from {lang}",
     "showOriginal": "Original ({lang})",
     "translationUnavailable": "Original ({lang}) — no translation available",
     "loadError": "Could not load messages right now. What you see is not the full picture — try again."

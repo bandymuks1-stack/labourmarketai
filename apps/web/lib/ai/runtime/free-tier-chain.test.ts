@@ -285,7 +285,9 @@ describe("egress: free tiers receive PUBLIC payloads only", () => {
       expect(maxPermittedSensitivity(p), id).toBe("PUBLIC");
       expect(AI_EGRESS_GRANTS.some((g) => g.provider === id), id).toBe(false);
       const generous = [{ provider: id, maxSensitivity: "SENSITIVE_FREE_TEXT" as const, basis: "t", grantedOn: "2026-10-25" }];
-      expect(maxPermittedSensitivity(p, generous), id).toBe("LOW_RISK_PROJECT_DATA");
+      // Free-tier cap LOW_RISK; Mistral's free mode trains by default, so its
+      // own terms cap it lower still (provider-catalogue.ts).
+      expect(maxPermittedSensitivity(p, generous), id).toBe(id === "mistral" ? "PUBLIC" : "LOW_RISK_PROJECT_DATA");
       expect(egressPermitted(p, "PERSONAL", generous).permitted, id).toBe(false);
     }
     expect(sensitivityForTask("explain_market_demand")).toBe("PUBLIC");
@@ -375,7 +377,8 @@ describe("Gemini: free tier is not a lawful option for an EEA-facing product", (
 describe("cost: every free-tier model is priced, sourced and inside the PUBLIC task's ceiling", () => {
   it("is selectable only with a first-hand source and a date", () => {
     const free = MODEL_REGISTRY.filter((e) => ["cloudflare", "mistral", "groq"].includes(e.provider));
-    expect(free.length).toBe(6);
+    // 6 tier models + Llama 3.3 and Nemotron registered under their host.
+    expect(free.length).toBe(8);
     for (const e of free) {
       expect(isSelectable(e), e.model).toBe(true);
       expect(e.freeTier, e.model).toBe(true);
