@@ -3932,7 +3932,7 @@
       "evidenceRecs": "Referenzen — helfen, Ihre Zuverlässigkeit zu belegen.",
       "evidenceLegal": "Ausweis- oder Rechtsdokumente — werden nur verwendet, wenn sie für eine Einstellung oder ein rechtliches Verfahren benötigt werden.",
       "privacyNote": "Ihre Dokumente bleiben privat. Sie werden ohne klare Grundlage keinem Arbeitgeber oder Kunden gezeigt.",
-      "uploadCostNote": "Das Hochladen eines Lebenslaufs ist kostenlos — es wird kein LMC abgebucht. Das System kommt mit der Dateigröße selbst zurecht."
+      "uploadCostNote": "Das Hochladen eines Lebenslaufs ist kostenlos — es werden keine Plattform-Guthaben (LMC) abgebucht. Das System kommt mit der Dateigröße selbst zurecht."
     }
   },
   "live": {
@@ -8803,7 +8803,7 @@
     "candidate": "Kandidat",
     "privacy": {
       "contactsHidden": "Kontaktdaten bleiben verborgen — keine Telefonnummer, E-Mail oder Name.",
-      "profileSafe": "Sie sehen nur profilsichere Signale: Fähigkeitsnachweise, Standort, Verfügbarkeit und Satz. Die Kontaktaufnahme erfolgt später, über einen expliziten Schritt."
+      "profileSafe": "Sie sehen nur profilsichere Signale: Fähigkeitsnachweise, Standort, Verfügbarkeit und Satz. Name und Kontaktdaten erscheinen erst, wenn die Person es erlaubt."
     },
     "fields": {
       "location": "Standort",
@@ -8821,9 +8821,10 @@
     "rateFrom": "ab {min} €/Monat",
     "noRate": "Nicht angegeben",
     "comms": {
-      "eligible": "Diese Arbeitskraft hat eine offene Verfügbarkeit — das Messaging wird in einem späteren Schritt geöffnet.",
+      "eligible": "Diese Arbeitskraft hat eine offene Verfügbarkeit — Sie können sie über die Plattform kontaktieren.",
       "inConversation": "Sie sind mit dieser Arbeitskraft bereits im Gespräch — setzen Sie es unter Nachrichten fort.",
-      "blocked": "Die Kommunikation wird verfügbar, wenn die Arbeitskraft eine offene Verfügbarkeit oder ein Verfügbar-ab-Datum hat."
+      "blocked": "Die Kommunikation wird verfügbar, wenn die Arbeitskraft eine offene Verfügbarkeit oder ein Verfügbar-ab-Datum hat.",
+      "interestDoor": "Diese Person hat selbst Interesse gezeigt — Sie können ihr schon jetzt schreiben, mit „In der Plattform kontaktieren“."
     },
     "request": {
       "button": "Kommunikation anfragen",
@@ -9538,7 +9539,7 @@
       "users": "Personen und Aktivität",
       "teams": "Brigaden und Einladungen",
       "b2b": "B2B-Markt",
-      "work": "Arbeitsjournal und Living CV",
+      "work": "Arbeitsjournal und lebendiger Lebenslauf",
       "technical": "Technik"
     },
     "col": {
@@ -10121,7 +10122,7 @@
     },
     "personal": {
       "title": "Ihre Möglichkeiten",
-      "subtitle": "Die besten derzeit gefundenen Möglichkeiten auf Grundlage Ihrer Angaben und Ihres Living CV.",
+      "subtitle": "Die besten derzeit gefundenen Möglichkeiten auf Grundlage Ihrer Angaben und Ihres lebendigen Lebenslaufs.",
       "discoverTitle": "Mehr für Sie",
       "discoverSubtitle": "Bis zu {count} passende Möglichkeiten aus den heute für Sie geprüften.",
       "status": {
@@ -19658,9 +19659,9 @@
       "approvedAutomatic": "Automatisch per Regel bestätigt",
       "rejected": "Abgelehnt",
       "changesRequested": "Änderung angefragt",
-      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bestätigter Eintrag} other {# bestätigte Einträge}}} other {Living CV ergänzt: {skills}}}",
-      "cvUnlinked": "Living CV: bestätigte Arbeit, noch keiner Fähigkeit zugeordnet",
-      "cvUnknown": "Living CV: konnte nicht gelesen werden",
+      "cv": "{count, plural, one {Lebendiger Lebenslauf: {skills} · {entries, plural, one {# bestätigter Eintrag} other {# bestätigte Einträge}}} other {Lebendiger Lebenslauf ergänzt: {skills}}}",
+      "cvUnlinked": "Lebendiger Lebenslauf: bestätigte Arbeit, noch keiner Fähigkeit zugeordnet",
+      "cvUnknown": "Lebendiger Lebenslauf: konnte nicht gelesen werden",
       "matching": "Das Matching sieht bestätigte Arbeit: {skills}",
       "matchingRepeated": "Das Matching sieht wiederholt bestätigte Arbeit: {skills}"
     },
@@ -19730,7 +19731,7 @@
       "returned": "Zur Korrektur zurück: {count}",
       "confirmed": "Von zweiter Seite bestätigt: {count}",
       "confirmedUnknown": "Die Zahl der Bestätigungen ließ sich nicht ermitteln",
-      "livingCv": "Bestätigte Arbeit zählt im Living CV der Mitarbeitenden"
+      "livingCv": "Bestätigte Arbeit zählt im lebendigen Lebenslauf der Mitarbeitenden"
     },
     "review": "Wartende prüfen ({count})",
     "stageDone": "Etappe „{name}“ abgeschlossen",

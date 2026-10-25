@@ -442,7 +442,16 @@ export function ProjectAssignmentManager({
       }
     });
   };
-  const preResult = pre && pre.key === precheckKey && pre.result.ok ? pre.result : null;
+  // Once THIS project + person is assigned, the pre-save advisory is over: it
+  // said "nothing is assigned yet" beside "Assigned", and repeated the
+  // post-save reservation notice word for word (UX review 2026-10-24, 3.6).
+  // The post-save notice below is then the one place the verdict is stated.
+  const justAssigned =
+    assignState?.ok === true &&
+    assignState.assigned !== undefined &&
+    `${assignState.assigned.projectId}:${assignState.assigned.workerProfileId}` === precheckKey;
+  const preResult =
+    !justAssigned && pre && pre.key === precheckKey && pre.result.ok ? pre.result : null;
   const preLabels: ReservationLabels | null =
     labels.precheckCollidesTitle && labels.precheckChoose && labels.precheckAssignAnyway
       ? {
