@@ -546,9 +546,9 @@ export async function readVacancySourceHealth(
     // exact count of ~50k active ads can hit the 8 s statement_timeout (HTTP
     // 500, production 2026-10-25), and throwing here took the whole admin
     // home down with it. A failed count is UNKNOWN (null), never 0 and never
-    // a crash; a missing table stays 0 (not provisioned).
+    // a crash; a missing table stays 0 (not provisioned). No log line: this
+    // module never logs (nav-inbound-scaffold guard), the null says enough.
     if (countError && countError.code !== "42P01") {
-      console.error(`[vacancy-health] count unavailable for ${provider.key}: ${countError.code ?? "unknown"}`);
       countsByProvider.set(provider.key, null);
       continue;
     }
