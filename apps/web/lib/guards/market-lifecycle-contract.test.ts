@@ -71,8 +71,19 @@ describe("UI: every own-entry surface uses the ONE shared lifecycle face", () =>
 
   it("a row only claims workers can see a need when the company is verified", () => {
     const page = read("app/[locale]/dashboard/company/needs/page.tsx");
-    expect(page).toMatch(/workersSeeNeeds=\{companyRow\.verificationStatus === "verified"\}/);
-    expect(read("components/app/demand-requests-readback.tsx")).toMatch(/workersSeeNeeds = false/);
+    // Display only: the page passes the status; it never compares it to
+    // "verified" itself (first-work-request-clarity forbids a gate there).
+    expect(page).toMatch(/companyVerificationStatus=\{companyRow\.verificationStatus\}/);
+    const readback = read("components/app/demand-requests-readback.tsx");
+    expect(readback).toMatch(/const workersSeeNeeds = companyVerificationStatus === "verified";/);
+    expect(readback).toMatch(/companyVerificationStatus = null/);
+  });
+
+  it("a colleague's draft offers no edit / discard to the viewer (creator-only acts)", () => {
+    expect(read("lib/buyer/customer-requests.ts")).toMatch(/ownedByCaller: r\.profile_id === user\.id/);
+    expect(read("components/app/demand-entry-lifecycle.tsx")).toMatch(
+      /status === "draft" && !ownedByCaller \? \["publish", "edit", "withdraw"\] : \["publish"\]/,
+    );
   });
 });
 

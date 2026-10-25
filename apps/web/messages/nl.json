@@ -1917,7 +1917,7 @@
     "workerVisibilityNote": "Eerlijke status: personeelsaanvragen van geverifieerde bedrijven worden aan werknemers getoond op hun kansenbord. Verificatie is een handmatige beoordeling — totdat je bedrijf geverifieerd is, blijven je aanvragen privé voor jou en het beoordelingsteam.",
     "empty": "Nog geen aanvragen ingediend. Dien je aanvraag hierboven in en die verschijnt hier met de status.",
     "created": "Aangemaakt",
-    "manageHelp": "Rond een behoefte af, haal haar van de markt of publiceer haar opnieuw, direct in deze lijst; een concept kun je voortzetten of verwerpen. Het bevestigen van de herkende vaardigheden doe je vanuit de scoutingweergave. Ingediende tekst bewerken is nog niet mogelijk.",
+    "manageHelp": "Rond een aanvraag af, haal haar van de markt of publiceer haar opnieuw, direct in deze lijst; een concept kun je voortzetten of verwerpen. Het bevestigen van de herkende vaardigheden doe je vanuit de scoutingweergave. Ingediende tekst bewerken is nog niet mogelijk.",
     "detailsLabel": "Ingediende gegevens",
     "fields": {
       "description": "Beschrijving",

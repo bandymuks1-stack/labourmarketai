@@ -29,6 +29,7 @@ export function DemandEntryLifecycle({
   closedOutcome,
   showVisibility,
   gateMet,
+  ownedByCaller,
 }: {
   locale: string;
   requestId: string;
@@ -38,6 +39,10 @@ export function DemandEntryLifecycle({
   showVisibility: boolean;
   /** Workers see a need only when its company is verified. */
   gateMet: boolean;
+  /** The viewer created the row. A colleague's draft is theirs to continue
+   *  or discard (the wizard loads the viewer's own draft, discard is
+   *  creator-only); close / reopen of a published need stay colleague acts. */
+  ownedByCaller: boolean;
 }) {
   const router = useRouter();
   const t = useTranslations("marketLifecycle");
@@ -73,7 +78,7 @@ export function DemandEntryLifecycle({
         facts={facts}
         onAction={onAction}
         pending={pending}
-        hide={["publish"]}
+        hide={status === "draft" && !ownedByCaller ? ["publish", "edit", "withdraw"] : ["publish"]}
         testIdFor={(action) => `demand-${action}-${requestId}`}
       />
       {failed ? <span className="text-meta text-state-warning">{t("error")}</span> : null}

@@ -213,6 +213,7 @@ function RequestRow({
           closedOutcome={r.closedOutcome ?? null}
           showVisibility={r.direction === "demand"}
           gateMet={gateMet}
+          ownedByCaller={r.ownedByCaller !== false}
         />
       ) : null}
       {/* The need as capacity (work-world CapacityBand): how many positions,
@@ -309,13 +310,14 @@ export function DemandRequestsReadback({
   labels,
   pendingInterest,
   locale,
-  workersSeeNeeds = false,
+  companyVerificationStatus = null,
 }: {
   result: CustomerRequestsListResult;
   labels: DemandRequestsReadbackLabels;
-  /** The company is verified, so a published need reaches the worker board.
-   *  Default false: a row never claims a visibility it cannot prove. */
-  workersSeeNeeds?: boolean;
+  /** The company's verification status: the worker board shows a published
+   *  inquiry only for a verified company. Absent → a row never claims a
+   *  visibility it cannot prove. Display only — never a gate on the flow. */
+  companyVerificationStatus?: string | null;
   /** requestId → how many people are still waiting, with the localized line.
    *  Absent entry = nobody waiting; the row renders exactly as before. */
   pendingInterest?: ReadonlyMap<string, { count: number; label: string }>;
@@ -324,6 +326,7 @@ export function DemandRequestsReadback({
   // needs-migration / error → render nothing (graceful; on prod the
   // 0028 migration is applied so this resolves to a real list).
   if (result.kind !== "ok") return null;
+  const workersSeeNeeds = companyVerificationStatus === "verified";
 
   // The row's own direction decides its section — nothing here re-derives it
   // from a title or a kind string. A row that is neither direction belongs to

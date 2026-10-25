@@ -72,6 +72,9 @@ export interface CustomerRequestRow {
   /** Why a closed row is closed (lifecycle contract: completed / withdrawn /
    *  discarded); null when open or closed before outcomes were recorded. */
   readonly closedOutcome?: string | null;
+  /** The viewer created this row. The organization-scoped list also shows
+   *  colleagues' rows, whose DRAFTS only their creator can edit or discard. */
+  readonly ownedByCaller?: boolean;
 }
 
 export type CustomerRequestsListResult =
@@ -193,7 +196,7 @@ export async function listOwnCustomerRequests(
     return { kind: "error", message: error.message };
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = (data ?? []).map((r: any) => mapRow(r));
+  const rows = (data ?? []).map((r: any) => ({ ...mapRow(r), ownedByCaller: r.profile_id === user.id }));
   return { kind: "ok", rows };
 }
 

@@ -1917,7 +1917,7 @@
     "workerVisibilityNote": "Sąžininga būsena: patvirtintų (verifikuotų) įmonių užklausas darbuotojai mato savo galimybių lentoje. Verifikacija — rankinė peržiūra; kol jūsų įmonė neverifikuota, užklausos matomos tik jums ir peržiūros komandai.",
     "empty": "Dar nepateikėte nė vienos užklausos. Pateikite užklausą viršuje ir ji atsiras čia su savo būsena.",
     "created": "Sukurta",
-    "manageHelp": "Užbaik poreikį, pašalink jį iš rinkos arba paskelbk iš naujo tiesiai šiame sąraše; juodraštį gali tęsti arba atmesti. Atpažintų įgūdžių patvirtinimas atliekamas jo kandidatų atrankos vaizde. Pateikto teksto redagavimas dar negalimas.",
+    "manageHelp": "Užbaik užklausą, pašalink ją iš rinkos arba paskelbk iš naujo tiesiai šiame sąraše; juodraštį gali tęsti arba atmesti. Atpažintų įgūdžių patvirtinimas atliekamas jos kandidatų atrankos vaizde. Pateikto teksto redagavimas dar negalimas.",
     "detailsLabel": "Pateikti duomenys",
     "fields": {
       "description": "Aprašymas",
