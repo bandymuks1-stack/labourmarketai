@@ -1717,7 +1717,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -3702,8 +3702,8 @@
           "description": "En listpunkt för en projektmedarbetare markeras med en verklig status — krävs, mottaget, kontrollerat."
         },
         "seedReadinessChecklist": {
-          "label": "Starta dokumentlistan",
-          "description": "Standardlistan för beredskap / dokument startas för alla på projektet."
+          "label": "Lägg till förslag att komma överens om",
+          "description": "Föreslagna punkter att komma överens om före avtalet läggs till för alla i projektet. Det är ingen obligatorisk lista och ingen bedömning av beredskap."
         },
         "requestReadiness": {
           "label": "Be om det som saknas",
@@ -4281,8 +4281,8 @@
       "missingDeclaredSkills": "angivna färdigheter",
       "missingEvidence": "arbetsbevis",
       "blockedSuffix": "(avvisad / utgången)",
-      "readinessSeedChip": "Starta dokumentlistan ({count} pers.)",
-      "readinessSeeded": "Lista startad: {count} pers. × {items} punkter — alla ”krävs”.",
+      "readinessSeedChip": "Lägg till förslag att komma överens om ({count} pers.)",
+      "readinessSeeded": "Förslag tillagda: {count} pers. × {items} punkter — alla ”att komma överens om före avtalet”.",
       "readinessGotChip": "Mottaget: {label} ({name})",
       "readinessGotDone": "Markerat som mottaget: {label} ({name}).",
       "readinessCheckedChip": "Kontrollerad: {label} ({name})",
@@ -4323,7 +4323,7 @@
       "moveAskProject": "Vart ska {name} flyttas? Välj:",
       "moveWhatIfTitle": "Om {name} flyttas från “{from}” till “{to}”:",
       "moveFromLine": "• “{from}”: personer {before} → {after}; {tasks} av hans öppna arbetspaket stannar där; beredskapslista där: {checked}/{total}.",
-      "moveToLine": "• “{to}”: personer {before} → {after}; beredskapslistan där börjar på 0/{total}.",
+      "moveToLine": "• “{to}”: personer {before} → {after}; vad som ska avtalas där är inte valt ännu (upp till {total} punkter föreslagna).",
       "moveCountryLine": "• Landet byts: {from} → {to} — andra dokumentkrav.",
       "moveNoDatesLine": "• “{to}” saknar datum — frånvaro kan inte kontrolleras.",
       "moveAvailabilityUnknownLine": "• Frånvaro okänd.",

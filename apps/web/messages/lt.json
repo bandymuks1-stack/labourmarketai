@@ -6417,7 +6417,7 @@
       "totalAssigned": "Priskirta",
       "viaTeam": "Per komandą",
       "ready": "Pasiruošę",
-      "readyBasis": "Tik pagal čia patikrintus laukus.",
+      "readyBasis": "Tik pagal patikrintus laukus: įgūdžius ir darbo įrodymus. Dokumentai pasirengimo nemažina.",
       "needsDeclaredSkills": "Nėra nurodytų įgūdžių",
       "needsEvidence": "Nėra darbo įrodymų",
       "needsFollowUp": "Reikia susisiekti",
@@ -6436,7 +6436,7 @@
     "workersTitle": "Šio projekto darbuotojai",
     "noWorkers": "Šiam projektui dar nepriskirta darbuotojų. Priskirkite darbuotojus iš savo komandos, kad pradėtumėte operacijas.",
     "worker": {
-      "readyChip": "Pasiruošęs (patikrinti laukai)",
+      "readyChip": "Pasiruošęs: įgūdžiai ir darbo įrodymai",
       "notReadyChip": "Dar nepasiruošęs",
       "declaredSkills": "Nurodyti įgūdžiai",
       "confirmedSkills": "Patvirtinti įgūdžiai",
@@ -6456,8 +6456,8 @@
     },
     "notesTitle": "Ką reiškia šie skaičiai",
     "notes": {
-      "readiness": "„Pasiruošęs“ reiškia tik tai, kad yra čia tikrinami laukai (vardas, bent vienas nurodytas įgūdis, bent vienas darbo įrodymo įrašas). Tai nėra patvirtinimas, dokumento priėmimas ar dirbtinio intelekto vertinimas.",
-      "documents": "Dokumentai dar nesekami — jokioje šios lentos vietoje dokumentas nerodomas kaip priimtas ar patvirtintas.",
+      "readiness": "„Pasiruošęs“ reiškia, kad yra vardas, bent vienas nurodytas įgūdis ir bent vienas darbo įrodymo įrašas. Dokumentai į pasirengimą neįskaičiuojami ir jo nemažina — tai, ką reikia patikrinti šiam darbui, sutariama prieš galutinį susitarimą. Tai nėra patvirtinimas ar dirbtinio intelekto vertinimas.",
+      "documents": "Dokumentų įkelti nereikia. Jokioje šios lentos vietoje dokumentas nerodomas kaip priimtas ar patvirtintas, kol to nepažymi vadovas.",
       "candidateSkill": "Įgūdžių patikslinimai yra privatūs kiekvienam darbuotojui; jie rodomi paties darbuotojo profesiniame profilyje, o ne čia."
     },
     "report": {
@@ -6482,20 +6482,21 @@
       "rejected": "Atmesta"
     },
     "checklist": {
-      "title": "Pasirengimas / dokumentai",
-      "empty": "Dar nesekama. Pridėkite standartinį sąrašą arba savo punktus.",
-      "seed": "Pridėti standartinį sąrašą",
+      "title": "Ką sutarti prieš susitarimą",
+      "empty": "Nieko nesekama — dokumentų įkelti nereikia. Jei šiam darbui ką nors verta patikrinti, pridėk pasiūlymus arba savo punktą.",
+      "seed": "Pridėti pasiūlymus šiam darbui",
       "addItem": "Pridėti punktą",
       "addPlaceholder": "Naujo punkto pavadinimas",
-      "missing": "Trūksta",
+      "missing": "Pažymėta: trūksta",
       "received": "Gauta",
       "checked": "Patikrinta",
       "blocked": "Atmesta / pasibaigę",
-      "helper": "„Patikrinta“ reiškia, kad vadovas čia pažymėjo kaip patikrintą — tai nėra teisinis patvirtinimas. Dokumentas yra „gautas“ ar „patikrintas“ tik kai vadovas tai nustato; niekas nepriimama automatiškai."
+      "helper": "„Patikrinta“ reiškia, kad vadovas čia pažymėjo kaip patikrintą — tai nėra teisinis patvirtinimas. Dokumentas yra „gautas“ ar „patikrintas“ tik kai vadovas tai nustato; niekas nepriimama automatiškai.",
+      "toAgree": "Aptarti"
     },
     "readinessStatuses": {
       "not_required": "Nereikalingas",
-      "needed": "Reikalingas",
+      "needed": "Aptarti prieš susitarimą",
       "missing": "Trūksta",
       "received": "Gauta",
       "checked": "Patikrinta",
@@ -6516,8 +6517,8 @@
       "all": "Visi",
       "byStatus": "Būsena",
       "anyStatus": "Bet kuri būsena",
-      "missingDocs": "Trūksta dokumentų/info",
-      "ready": "Paruošta (patikrinti laukai)",
+      "missingDocs": "Pažymėta: trūksta",
+      "ready": "Pasiruošę: įgūdžiai ir darbo įrodymai",
       "needsSkillInfo": "Reikia įgūdžių info",
       "needsEvidence": "Nėra darbo įrodymų",
       "docsChecked": "Patikrinta dokumentų",
@@ -6525,7 +6526,7 @@
       "none": "Nėra darbuotojų pagal šį filtrą.",
       "showAll": "Rodyti visus",
       "empty": {
-        "missingDocs": "Šiuo metu nė vienam darbuotojui netrūksta dokumentų ar informacijos.",
+        "missingDocs": "Vadovas nė vienam darbuotojui nepažymėjo, kad ko nors trūksta.",
         "ready": "Nė vienas darbuotojas dar neatitinka visų čia tikrinamų laukų. Pasirinkite „Visi“ ir pažiūrėkite, ko kiekvienam trūksta.",
         "needsSkillInfo": "Visi priskirti darbuotojai yra nurodę savo įgūdžius.",
         "needsEvidence": "Visi priskirti darbuotojai turi bent vieną darbo įrodymą.",
@@ -6534,7 +6535,7 @@
       }
     },
     "counters2": {
-      "withMissingDocs": "Trūksta dokumentų/info",
+      "withMissingDocs": "Pažymėta: trūksta",
       "docsReceived": "Gauta dokumentų",
       "docsChecked": "Patikrinta dokumentų",
       "docsBlocked": "Atmesta/pasibaigę"
@@ -7849,8 +7850,8 @@
     "readinessPanel": {
       "title": "Kaip pagerinti pasirengimą",
       "intro": "Štai ką dar verta sutvarkyti, kad tavo kortelė būtų stipresnė.",
-      "allReady": "Tavo kortelė užpildyta. Dokumentai darbui konkrečioje šalyje skaičiuojami atskirai — žr. žemiau.",
-      "countryFit": "Darbui kitoje šalyje reikia atitinkamų dokumentų. Be jų tavo kortelė nerodoma kaip pasiruošusi darbui užsienyje — matai tik teisėtus kelius (įmonė tvarko dokumentus, pagalba su dokumentais). Sistema nežada teisės dirbti be dokumentų."
+      "allReady": "Tavo kortelė užpildyta. Dokumentai į pasirengimą neįskaičiuojami — darbui konkrečioje šalyje jie aptariami su darbdaviu prieš susitarimą.",
+      "countryFit": "Dirbant kitoje šalyje jos įstatymai gali reikalauti tam tikrų dokumentų (pvz., komandiruojant — A1, ne ES / EEE piliečiams — leidimo dirbti). Jų įkelti čia nereikia ir jų nebuvimas nemažina tavo pasirengimo: konkrečius dokumentus abi šalys patikrina prieš galutinį susitarimą. Sistema nežada teisės dirbti ten, kur įstatymas reikalauja leidimo."
     },
     "readinessSteps": {
       "pillar": {
@@ -8064,7 +8065,7 @@
       "help": "Pasirink paskirties šalį ir matysi, kokių dokumentų ji prašo.",
       "mine": "Pirmiausia — šalys, kuriose nori dirbti.",
       "unknown": "Šalies {country} reikalavimų sąrašas dar nesuvestas — nerodome nieko, vietoj spėliojimo.",
-      "next": "Kitas žingsnis: pasirūpink — {doc}.",
+      "next": "Jei dirbsi šioje šalyje, prieš susitarimą aptark su darbdaviu: {doc}. Įkelti nieko nereikia.",
       "ok": "Visi suvesti {country} reikalavimai padengti."
     },
     "types": {
@@ -8103,7 +8104,7 @@
     },
     "overall": {
       "not_enough_information": "Kol kas per mažai informacijos",
-      "missing_documents": "Trūksta dokumentų",
+      "missing_documents": "Ne visi šios šalies taisyklių dokumentai pažymėti",
       "needs_verification": "Pasiruošę po patikrinimo",
       "almost_ready": "Beveik pasiruošę",
       "ready_for_country": "Pasiruošę šiai šaliai",
@@ -13687,8 +13688,8 @@
           "description": "Projekto darbuotojo sąrašo punktas pažymimas tikra būsena — reikia, gauta, patikrinta."
         },
         "seedReadinessChecklist": {
-          "label": "Pradėti dokumentų sąrašą",
-          "description": "Visiems projekto žmonėms pradedamas standartinis pasirengimo / dokumentų sąrašas."
+          "label": "Pridėti pasiūlymus, ką aptarti",
+          "description": "Kiekvienam projekto žmogui pridedami pasiūlyti punktai, ką aptarti prieš susitarimą. Tai ne privalomas sąrašas ir ne pasirengimo vertinimas."
         },
         "requestReadiness": {
           "label": "Paprašyti trūkstamų dokumentų",
@@ -14046,7 +14047,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# klientas dar nepatvirtino} few {# klientai dar nepatvirtino} other {# klientų dar nepatvirtino}} ryšio.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# studento pakvietimas dar nepriimtas} few {# studentų pakvietimai dar nepriimti} other {# studentų pakvietimų dar nepriimta}}.",
       "briefDocumentsExpiring": "{count, plural, one {# dokumentas baigia galioti} few {# dokumentai baigia galioti} other {# dokumentų baigia galioti}}.",
-      "briefDocumentsMissing": "{count, plural, one {Tavo nurodytose šalyse reikia dar # dokumento} few {Tavo nurodytose šalyse reikia dar # dokumentų} other {Tavo nurodytose šalyse reikia dar # dokumentų}}: {list}.",
+      "briefDocumentsMissing": "{count, plural, one {Tavo nurodytų šalių taisyklės gali reikalauti # dokumento} few {Tavo nurodytų šalių taisyklės gali reikalauti # dokumentų} other {Tavo nurodytų šalių taisyklės gali reikalauti # dokumentų}}: {list}. Įkelti nieko nereikia — juos aptarsi su darbdaviu prieš susitarimą.",
       "briefEmployerInterestWaiting": "{count, plural, one {# kandidatas laukia tavo atsakymo} few {# kandidatai laukia tavo atsakymo} other {# kandidatų laukia tavo atsakymo}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# agentūros pasiūlymas laukia tavo sprendimo} few {# agentūrų pasiūlymai laukia tavo sprendimo} other {# agentūrų pasiūlymų laukia tavo sprendimo}}.",
       "briefInterestContacted": "{count, plural, one {# įmonė nori su tavimi susisiekti dėl tavo susidomėjimo} few {# įmonės nori su tavimi susisiekti dėl tavo susidomėjimo} other {# įmonių nori su tavimi susisiekti dėl tavo susidomėjimo}}.",
@@ -14537,8 +14538,8 @@
       "missingDeclaredSkills": "nurodytų įgūdžių",
       "missingEvidence": "darbo įrodymų",
       "blockedSuffix": "(atmesta / pasibaigė)",
-      "readinessSeedChip": "Pradėti dokumentų sąrašą ({count} žm.)",
-      "readinessSeeded": "Sąrašas pradėtas: {count} žm. × {items} punktai — visi „reikia“.",
+      "readinessSeedChip": "Pridėti pasiūlymus, ką aptarti ({count} žm.)",
+      "readinessSeeded": "Pasiūlymai pridėti: {count} žm. × {items} punktai — visi „aptarti prieš susitarimą“.",
       "readinessGotChip": "Gauta: {label} ({name})",
       "readinessGotDone": "Pažymėta gauta: {label} ({name}).",
       "readinessCheckedChip": "Patikrinta: {label} ({name})",
@@ -14581,7 +14582,7 @@
       "moveAskProject": "Kur perkelti {name}? Pasirink:",
       "moveWhatIfTitle": "Jei {name} pereitų iš „{from}“ į „{to}“:",
       "moveFromLine": "• „{from}“: žmonių {before} → {after}; jo atvirų užduočių ten lieka {tasks}; pasirengimo sąrašas ten: {checked}/{total}.",
-      "moveToLine": "• „{to}“: žmonių {before} → {after}; pasirengimo sąrašas ten prasidės nuo 0/{total}.",
+      "moveToLine": "• „{to}“: žmonių {before} → {after}; ką aptarti prieš susitarimą, ten dar nepasirinkta (siūloma iki {total} punktų).",
       "moveCountryLine": "• Šalis keičiasi: {from} → {to} — dokumentų reikalavimai kitokie.",
       "moveNoDatesLine": "• „{to}“ neturi datų — nebuvimų sutikrinti negaliu.",
       "moveAvailabilityUnknownLine": "• Nebuvimai nežinomi.",
@@ -19839,6 +19840,30 @@
     "invite": {
       "line": "Sumokėk 1 € vieną kartą ir gauk mokamą Organizacijos planą {days} dienoms. Niekas neatsinaujina.",
       "cta": "Atidaryti pilotą"
+    }
+  },
+  "collaborationChecks": {
+    "title": "Prieš galutinį susitarimą",
+    "lead": "Prieš sudarydami galutinį susitarimą rekomenduojame abiem šalims patikrinti šiam darbui ar sandoriui aktualius dokumentus, kvalifikacijas, leidimus ir bendradarbiavimo sąlygas.",
+    "context": "Kas aktualu, priklauso nuo darbo, profesijos, šalies ir projekto sąlygų — vieno privalomo sąrašo visiems nėra.",
+    "countryRules": "Taisyklės priklauso nuo šalies, kurioje dirbama: {country}.",
+    "privacy": "Dokumentų įkelti į LabourMarket.ai nereikia. Jei jais dalijatės, tai darote patys — platforma jų niekam automatiškai neperduoda ir netvirtina, kad jie patikrinti.",
+    "basis": {
+      "law": "Privaloma pagal įstatymą",
+      "law_if": "Įstatymas reikalauja tam tikrais atvejais",
+      "agreement": "Šalių susitarimo reikalas"
+    },
+    "topic": {
+      "terms": "Darbo apimtis, terminai, užmokestis, darbo laikas ir mokėjimo sąlygos.",
+      "identity_right_to_work": "Asmens tapatybė ir teisė dirbti — įdarbinant tai dažnai privaloma patikrinti pagal darbo vietos šalies taisykles.",
+      "posting_a1": "Komandiruojant darbuotoją į kitą ES / EEE šalį įstatymas reikalauja A1 pažymos ir komandiravimo deklaracijos.",
+      "work_permit": "Leidimas dirbti ar gyventi — privalomas pagal įstatymą, jei žmogus neturi teisės dirbti toje šalyje dėl pilietybės ar laisvo judėjimo (pvz., ES / EEE).",
+      "site_safety": "Darbuotojų saugos instruktažas ir statybvietės reikalavimai — prieš pradedant darbą tai įstatyminė darbdavio pareiga.",
+      "driving_licence": "Galiojantis tinkamos kategorijos vairuotojo pažymėjimas — vairuoti darbo tikslais privaloma pagal įstatymą.",
+      "professional_qualification": "Kvalifikacija ar profesinis pažymėjimas, aktualus šiam darbui — kai kuriose šalyse kai kurioms profesijoms tai privaloma pagal įstatymą.",
+      "business_details": "Įmonės ar veiklos registracijos ir sąskaitų išrašymo duomenys.",
+      "insurance": "Civilinės atsakomybės ar kitas draudimas, jei jo reikia šiam darbui.",
+      "client_requirements": "Konkretūs užsakovo ar objekto reikalavimai, jei tokių yra."
     }
   }
 }

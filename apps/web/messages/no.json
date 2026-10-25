@@ -1717,7 +1717,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -3702,8 +3702,8 @@
           "description": "Et listepunkt for en prosjektmedarbeider merkes med en reell status — kreves, mottatt, sjekket."
         },
         "seedReadinessChecklist": {
-          "label": "Start dokumentlisten",
-          "description": "Standardlisten for beredskap / dokumenter startes for alle på prosjektet."
+          "label": "Legg til forslag til avtale",
+          "description": "Foreslåtte punkter å avtale før avtalen legges til for alle på prosjektet. Det er ikke en obligatorisk liste og ikke en vurdering av beredskap."
         },
         "requestReadiness": {
           "label": "Be om det som mangler",
@@ -4281,8 +4281,8 @@
       "missingDeclaredSkills": "oppgitte ferdigheter",
       "missingEvidence": "arbeidsbevis",
       "blockedSuffix": "(avvist / utløpt)",
-      "readinessSeedChip": "Start dokumentlisten ({count} pers.)",
-      "readinessSeeded": "Liste startet: {count} pers. × {items} punkter — alle «kreves».",
+      "readinessSeedChip": "Legg til forslag til avtale ({count} pers.)",
+      "readinessSeeded": "Forslag lagt til: {count} pers. × {items} punkter — alle «avtales før avtalen».",
       "readinessGotChip": "Mottatt: {label} ({name})",
       "readinessGotDone": "Merket som mottatt: {label} ({name}).",
       "readinessCheckedChip": "Kontrollert: {label} ({name})",
@@ -4323,7 +4323,7 @@
       "moveAskProject": "Hvor skal {name} flyttes? Velg:",
       "moveWhatIfTitle": "Hvis {name} flyttes fra “{from}” til “{to}”:",
       "moveFromLine": "• “{from}”: personer {before} → {after}; {tasks} av hans åpne arbeidspakker blir der; beredskapsliste der: {checked}/{total}.",
-      "moveToLine": "• “{to}”: personer {before} → {after}; beredskapslisten der starter på 0/{total}.",
+      "moveToLine": "• “{to}”: personer {before} → {after}; hva som skal avtales der, er ikke valgt ennå (opptil {total} punkter foreslått).",
       "moveCountryLine": "• Landet endres: {from} → {to} — andre dokumentkrav.",
       "moveNoDatesLine": "• “{to}” har ingen datoer — fravær kan ikke sjekkes.",
       "moveAvailabilityUnknownLine": "• Fravær ukjent.",
