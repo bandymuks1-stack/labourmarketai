@@ -2138,6 +2138,10 @@
           "title": "Start je bedrijfsprofiel",
           "body": "Je hebt nog geen bedrijfsprofiel. Maak er een aan — het is direct actief en bruikbaar, zonder te wachten op goedkeuring.",
           "cta": "Bedrijf instellen"
+        },
+        "personalSpace": {
+          "title": "Je bent nu in je persoonlijke omgeving",
+          "body": "Bedrijfstools openen in de werkomgeving van die organisatie — een tweede organisatie aanmaken is niet nodig. Open de jouwe:"
         }
       },
       "typeNotes": {
@@ -11706,7 +11710,10 @@
       "docExpiring": "Documenten die binnen 30 dagen verlopen",
       "docMissing": "Ontbrekende of verlopen documenten",
       "docReview": "Documenten in beoordeling of teruggestuurd",
-      "financeOverdue": "Achterstallige financiële registraties"
+      "financeOverdue": "Achterstallige financiële registraties",
+      "journalReviews": "Werkregistraties die op je goedkeuring wachten",
+      "journalClientDecide": "Werkregistraties die op je beslissing als opdrachtgever wachten",
+      "partial": "De beoordelingswachtrij voor werkregistraties kon nu niet worden gelezen. Dat betekent niet dat er niets wacht."
     },
     "sources": {
       "label": "Bronnen",
@@ -11717,7 +11724,8 @@
       "workJournal": "Je werkdagboek",
       "managerConfirmations": "Bevestigingen van leidinggevenden",
       "projects": "Je projecten",
-      "assignments": "Actieve werknemerstoewijzingen"
+      "assignments": "Actieve werknemerstoewijzingen",
+      "journalReviewQueue": "Beoordelingswachtrij werkregistraties"
     },
     "summaries": {
       "title": "Samenvattingen uit je gegevens",
@@ -18330,7 +18338,9 @@
       "managesInvitations": "Beheert uitnodigingen",
       "grantInvitations": "Uitnodigingen laten beheren",
       "withdrawInvitations": "Uitnodigingsbeheer intrekken",
-      "unavailable": "De ledenlijst kon nu niet worden gelezen. Dat betekent niet dat de organisatie geen leden heeft."
+      "unavailable": "De ledenlijst kon nu niet worden gelezen. Dat betekent niet dat de organisatie geen leden heeft.",
+      "noAccountHint": "Een lidmaatschapsrol kan alleen worden gegeven aan iemand die al een account heeft. Nodig iemand zonder account uit met een uitnodigingslink — zodra die persoon zich registreert en bij de organisatie aansluit, kun je hier een rol geven.",
+      "noAccountCta": "Uitnodigingslink maken"
     },
     "start": {
       "membersMoved": "Leden en uitnodigingen van {workspace} worden beheerd in de Instellingen van de organisatie.",

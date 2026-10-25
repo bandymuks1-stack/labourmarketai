@@ -2138,6 +2138,10 @@
           "title": "Starten Sie Ihr Unternehmensprofil",
           "body": "Sie haben noch kein Unternehmensprofil. Erstellen Sie eines — es ist sofort aktiv und nutzbar, ohne Warten auf eine Freigabe.",
           "cta": "Unternehmenseinrichtung starten"
+        },
+        "personalSpace": {
+          "title": "Sie sind gerade in Ihrem persönlichen Bereich",
+          "body": "Die Unternehmenswerkzeuge öffnen sich im Arbeitsbereich dieser Organisation — eine zweite Organisation anzulegen ist nicht nötig. Öffnen Sie Ihre:"
         }
       },
       "typeNotes": {
@@ -11706,7 +11710,10 @@
       "docExpiring": "Dokumente, die innerhalb von 30 Tagen ablaufen",
       "docMissing": "Fehlende oder abgelaufene Dokumente",
       "docReview": "Dokumente in Prüfung oder zurückgegeben",
-      "financeOverdue": "Überfällige Finanzeinträge"
+      "financeOverdue": "Überfällige Finanzeinträge",
+      "journalReviews": "Arbeitseinträge, die auf Ihre Bestätigung warten",
+      "journalClientDecide": "Arbeitseinträge, die auf Ihre Entscheidung als Auftraggeber warten",
+      "partial": "Die Prüfliste der Arbeitseinträge konnte gerade nicht gelesen werden. Das heißt nicht, dass nichts wartet."
     },
     "sources": {
       "label": "Quellen",
@@ -11717,7 +11724,8 @@
       "workJournal": "Ihr Arbeitsjournal",
       "managerConfirmations": "Bestätigungen von Verantwortlichen",
       "projects": "Ihre Projekte",
-      "assignments": "Aktive Zuweisungen von Arbeitskräften"
+      "assignments": "Aktive Zuweisungen von Arbeitskräften",
+      "journalReviewQueue": "Prüfliste Arbeitseinträge"
     },
     "summaries": {
       "title": "Zusammenfassungen aus Ihren Daten",
@@ -18330,7 +18338,9 @@
       "managesInvitations": "Verwaltet Einladungen",
       "grantInvitations": "Einladungen verwalten erlauben",
       "withdrawInvitations": "Einladungsverwaltung entziehen",
-      "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat."
+      "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat.",
+      "noAccountHint": "Eine Mitgliedsrolle kann nur jemandem gegeben werden, der bereits ein Konto hat. Laden Sie eine Person ohne Konto mit einem Einladungslink ein — sobald sie sich registriert und der Organisation beitritt, können Sie ihr hier eine Rolle geben.",
+      "noAccountCta": "Einladungslink erstellen"
     },
     "start": {
       "membersMoved": "Mitglieder und Einladungen von {workspace} werden in den Einstellungen der Organisation verwaltet.",

@@ -6942,7 +6942,9 @@
       "managesInvitations": "Håndterer invitasjoner",
       "grantInvitations": "Tillat å håndtere invitasjoner",
       "withdrawInvitations": "Trekk tilbake håndtering av invitasjoner",
-      "unavailable": "Medlemslisten kunne ikke leses akkurat nå. Det betyr ikke at organisasjonen ikke har medlemmer."
+      "unavailable": "Medlemslisten kunne ikke leses akkurat nå. Det betyr ikke at organisasjonen ikke har medlemmer.",
+      "noAccountHint": "En medlemsrolle kan bare gis til noen som allerede har en konto. Inviter en person uten konto med en invitasjonslenke — når personen registrerer seg og blir med i organisasjonen, kan du gi en rolle her.",
+      "noAccountCta": "Lag en invitasjonslenke"
     },
     "start": {
       "membersMoved": "Medlemmer og invitasjoner for {workspace} administreres i organisasjonens Innstillinger.",
