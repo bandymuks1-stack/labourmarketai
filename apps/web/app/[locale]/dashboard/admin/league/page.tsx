@@ -1,7 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { Thermometer, Trophy, Users } from "lucide-react";
 
-import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { getLeague, type LeagueCell } from "@/lib/admin/league";
 import { UNKNOWN_BUCKET } from "@/lib/admin/market-analysis";
@@ -59,12 +59,7 @@ export default async function AdminLeaguePage({
         >
           {t("methodNote")}
         </p>
-        <Link
-          href={"/dashboard/admin" as "/dashboard"}
-          className="mt-1 self-start text-xs text-text-secondary hover:underline"
-        >
-          ← {t("back")}
-        </Link>
+        <PageBack href={"/dashboard/admin" as "/dashboard"}>{t("back")}</PageBack>
       </header>
 
       {countryOrder.length === 0 ? (

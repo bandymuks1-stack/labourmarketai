@@ -53,10 +53,12 @@ export type ConversationNavLabels = {
  * laid over "Mano erdvė", the logo cut to "Labour…"). Nothing in this bar
  * scrolls or truncates a label:
  *   · from `md` one row. The active destination is a filled pill and, from
- *     `lg`, shows its label (that is "where am I"); the others are 44px icons
- *     with their label as the accessible name and tooltip, and show their
- *     label too once the bar is wide enough (≥1800px) for every locale's
- *     longest set. The place crumb joins at `2xl`, the wordmark at `xl`.
+ *     `lg`, shows its label (that is "where am I"); the other core items are
+ *     44px icons with their label as the accessible name and tooltip, and
+ *     name themselves too from `xl` (1280px — measured to fit the longest
+ *     locale, ru, with the chip at full width). The place crumb joins at
+ *     `2xl`; the "More" label and the wordmark beside the mark at ≥1800px.
+ *     Below that the mark alone is the logo — never a cut wordmark.
  *   · below `md` two rows: identity + utilities, then the workspace chip and
  *     ONE area button that names where the person is and opens every
  *     destination in a bottom sheet.
@@ -131,7 +133,7 @@ export function ConversationHeader({
           {/* The canonical mark (owner §19) — never a letter standing in for
               it. Decorative: the Link's aria-label already names the product. */}
           <LmLogo title="" className="h-6 w-auto shrink-0" />
-          <span className={`whitespace-nowrap font-display text-card-title font-bold tracking-tightest text-text-primary ${mobile ? "hidden" : "hidden xl:inline"}`}>{title}</span>
+          <span className={`whitespace-nowrap font-display text-card-title font-bold tracking-tightest text-text-primary ${mobile ? "hidden" : "hidden min-[1800px]:inline"}`}>{title}</span>
         </Link>
       </span>
 
@@ -250,6 +252,8 @@ export function ConversationHeader({
 
 /** Label shown beside the icon on every item once the bar fits every locale. */
 const WIDE_LABEL = "hidden min-[1800px]:inline";
+/** The core loop names itself from `xl`: three-second clarity on a laptop. */
+const CORE_LABEL = "hidden xl:inline";
 /** The ACTIVE destination names itself as soon as the row has room for one
  *  label (`lg`); below that its filled pill is the "you are here" mark and the
  *  page title right under the bar names it. */
@@ -305,7 +309,7 @@ function HeaderNavLink({
         <NavBadge id={item.id} count={badge} />
       </span>
       {/* The ACTIVE destination always names itself — that is "where am I". */}
-      <span className={active ? ACTIVE_LABEL : WIDE_LABEL}>{label}</span>
+      <span className={active ? ACTIVE_LABEL : CORE_LABEL}>{label}</span>
       <NavLinkPending />
     </Link>
   );

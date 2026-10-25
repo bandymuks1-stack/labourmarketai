@@ -115,9 +115,9 @@ describe("ONE home — the conversation; ŠIANDIEN is its opening context (owner
     const page = read("app/[locale]/dashboard/page.tsx");
     expect(page).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
     expect(page).not.toMatch(/dashboardRootSurface|rootSurface === "today"/);
-    // The bottom-nav primitive is the catalogue bar again — no caller-composed
-    // tab set, no `placement`/`visibility` variants kept "just in case".
-    expect(read("components/app/bottom-nav.tsx")).not.toMatch(/WorkerNavIconKey|explicitItems|placement/);
+    // The bottom-nav primitive retired with the one header (2026-10-25): no
+    // caller-composed tab set survives anywhere.
+    expect(existsSync(join(root, "components/app/bottom-nav.tsx"))).toBe(false);
   });
 
   it("ŠIANDIEN renders no page quick-nav strip (a second nav strip is card soup)", () => {

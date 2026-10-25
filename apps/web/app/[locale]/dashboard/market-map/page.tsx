@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageTitle } from "@/components/app/premium/page-title";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
@@ -184,12 +185,7 @@ export default async function MarketMapPage({
         event={FUNNEL_EVENTS.preferredLocationViewed}
         metadata={{ surface: "market_map" }}
       />
-      <h1
-        className="font-display text-2xl font-bold tracking-tightest text-text-primary"
-        data-testid="market-map-page-header"
-      >
-        {tMap("pageTitle")}
-      </h1>
+      <PageTitle data-testid="market-map-page-header">{tMap("pageTitle")}</PageTitle>
 
       {/* ONE map: layers, location + radius, the map, its places. */}
       <WorldDiscovery

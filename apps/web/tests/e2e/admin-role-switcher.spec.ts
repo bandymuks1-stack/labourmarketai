@@ -64,9 +64,9 @@ test("the admin console is reachable from the one header's More menu and highlig
   await page.goto("/lt/dashboard", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/lt\/dashboard/);
 
-  // Exactly one workspace selector; the retired role switcher is absent.
+  // Exactly one workspace selector (the retired role switcher's file is gone —
+  // lib/guards/one-header-navigation.test.ts pins it).
   await expect(page.getByTestId("workspace-chip")).toHaveCount(1);
-  await expect(page.getByTestId("role-switcher-toggle")).toHaveCount(0);
 
   await page.getByTestId("header-nav-more").click();
   const entry = page.getByTestId("header-nav-more-admin");

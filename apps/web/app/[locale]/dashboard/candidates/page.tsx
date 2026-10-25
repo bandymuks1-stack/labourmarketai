@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { readHeldProfileRoles } from "@/lib/auth/profile-roles";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
@@ -101,13 +101,7 @@ export default async function CandidatesPage({
       {/* Company action framing: this is the "Hire" action under the company
           identity, not a separate system. */}
       <div className="flex flex-col gap-1">
-        <Link
-          href="/dashboard"
-          className="self-start text-xs font-medium text-brand-blue transition-colors hover:underline"
-          data-testid="back-to-action-center"
-        >
-          ← {tRooms("backToActions")}
-        </Link>
+        <PageBack href="/dashboard" data-testid="back-to-action-center">{tRooms("backToActions")}</PageBack>
         <p
           className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="company-context"
