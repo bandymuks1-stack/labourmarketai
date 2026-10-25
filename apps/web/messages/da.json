@@ -2820,6 +2820,7 @@
     }
   },
   "bookings": {
+    "readFailed": "Dine bookinger kunne ikke indlæses lige nu — det betyder ikke, at du ikke har nogen. Prøv igen.",
     "endsOn": "Indtil {date}",
     "noRole": "Arbejdsaftale",
     "displayState": {
@@ -6950,7 +6951,9 @@
       "managesInvitations": "Håndterer invitationer",
       "grantInvitations": "Tillad at håndtere invitationer",
       "withdrawInvitations": "Tilbagekald håndtering af invitationer",
-      "unavailable": "Medlemslisten kunne ikke læses lige nu. Det betyder ikke, at organisationen ingen medlemmer har."
+      "unavailable": "Medlemslisten kunne ikke læses lige nu. Det betyder ikke, at organisationen ingen medlemmer har.",
+      "noAccountHint": "En medlemsrolle kan kun gives til en person, der allerede har en konto. Invitér en person uden konto med et invitationslink — når personen tilmelder sig og slutter sig til organisationen, kan du give en rolle her.",
+      "noAccountCta": "Opret et invitationslink"
     },
     "start": {
       "membersMoved": "Medlemmer og invitationer for {workspace} administreres i organisationens Indstillinger.",

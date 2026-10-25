@@ -2138,6 +2138,10 @@
           "title": "Start your company profile",
           "body": "You don't have a company profile yet. Create one — it's active and usable straight away, no waiting for approval.",
           "cta": "Start company setup"
+        },
+        "personalSpace": {
+          "title": "You are in your personal space",
+          "body": "Company tools open in that organisation's workspace — there is no need to create a second organisation. Open yours:"
         }
       },
       "typeNotes": {
@@ -9118,6 +9122,7 @@
     "intro": "Proposed engagements. A booking is confirmed only when the worker accepts.",
     "notAuthed": "Please sign in to see your bookings.",
     "unavailable": "Couldn’t complete the action. Please try again.",
+    "readFailed": "Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "noDate": "No start date set",
     "noRole": "Work engagement",
     "startsOn": "Starts {date}",
@@ -11711,7 +11716,10 @@
       "docExpiring": "Documents expiring within 30 days",
       "docMissing": "Documents missing or expired",
       "docReview": "Documents in review or returned",
-      "financeOverdue": "Overdue finance records"
+      "financeOverdue": "Overdue finance records",
+      "journalReviews": "Work entries waiting for your approval",
+      "journalClientDecide": "Work entries waiting for your decision as the client",
+      "partial": "The work-entry review queue could not be read just now. That does not mean nothing is waiting."
     },
     "sources": {
       "label": "Sources",
@@ -11722,7 +11730,8 @@
       "workJournal": "Your work journal",
       "managerConfirmations": "Manager confirmations",
       "projects": "Your projects",
-      "assignments": "Active worker assignments"
+      "assignments": "Active worker assignments",
+      "journalReviewQueue": "Work-entry review queue"
     },
     "summaries": {
       "title": "Summaries from your data",
@@ -18335,7 +18344,9 @@
       "managesInvitations": "Manages invitations",
       "grantInvitations": "Allow to manage invitations",
       "withdrawInvitations": "Withdraw invitation management",
-      "unavailable": "The member directory could not be read right now. This is not a claim that the organization has no members."
+      "unavailable": "The member directory could not be read right now. This is not a claim that the organization has no members.",
+      "noAccountHint": "A membership role can only be given to someone who already has an account. Invite a person without an account with an invitation link — once they sign up and join the organisation, you can give them a role here.",
+      "noAccountCta": "Create an invitation link"
     },
     "start": {
       "membersMoved": "Members and invitations of {workspace} are managed in the organization's Settings.",

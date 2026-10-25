@@ -2138,6 +2138,10 @@
           "title": "Pradėkite įmonės profilį",
           "body": "Dar neturite įmonės profilio. Sukurkite jį — jis iškart aktyvus ir naudojamas, nereikia laukti patvirtinimo.",
           "cta": "Pradėti įmonės nustatymą"
+        },
+        "personalSpace": {
+          "title": "Dabar esi asmeninėje erdvėje",
+          "body": "Įmonės įrankiai atsidaro tos organizacijos darbo erdvėje — antros organizacijos kurti nereikia. Atverk savo organizaciją:"
         }
       },
       "typeNotes": {
@@ -9118,6 +9122,7 @@
     "intro": "Pasiūlytos darbo galimybės. Rezervacija patvirtinama tik darbuotojui sutikus.",
     "notAuthed": "Prisijunk, kad matytum savo rezervacijas.",
     "unavailable": "Nepavyko atlikti veiksmo. Bandyk dar kartą.",
+    "readFailed": "Šiuo metu nepavyko įkelti tavo rezervacijų — tai nereiškia, kad jų nėra. Bandyk dar kartą.",
     "noDate": "Pradžios data nenurodyta",
     "noRole": "Darbo susitarimas",
     "startsOn": "Pradžia {date}",
@@ -11711,7 +11716,10 @@
       "docExpiring": "Dokumentai, kurių galiojimas baigsis per 30 dienų",
       "docMissing": "Trūkstami arba nebegaliojantys dokumentai",
       "docReview": "Dokumentai peržiūroje arba grąžinti",
-      "financeOverdue": "Vėluojantys finansų įrašai"
+      "financeOverdue": "Vėluojantys finansų įrašai",
+      "journalReviews": "Darbo įrašai, laukiantys tavo patvirtinimo",
+      "journalClientDecide": "Darbo įrašai, laukiantys tavo sprendimo kaip užsakovo",
+      "partial": "Darbo įrašų peržiūros eilės dabar nepavyko perskaityti. Tai nereiškia, kad niekas nelaukia."
     },
     "sources": {
       "label": "Šaltiniai",
@@ -11722,7 +11730,8 @@
       "workJournal": "Tavo darbo žurnalas",
       "managerConfirmations": "Vadovų patvirtinimai",
       "projects": "Tavo projektai",
-      "assignments": "Aktyvūs darbuotojų priskyrimai"
+      "assignments": "Aktyvūs darbuotojų priskyrimai",
+      "journalReviewQueue": "Darbo įrašų peržiūros eilė"
     },
     "summaries": {
       "title": "Santraukos iš tavo duomenų",
@@ -18335,7 +18344,9 @@
       "managesInvitations": "Valdo kvietimus",
       "grantInvitations": "Leisti valdyti kvietimus",
       "withdrawInvitations": "Atšaukti kvietimų valdymą",
-      "unavailable": "Narių sąrašo dabar nepavyko perskaityti. Tai nereiškia, kad organizacija narių neturi."
+      "unavailable": "Narių sąrašo dabar nepavyko perskaityti. Tai nereiškia, kad organizacija narių neturi.",
+      "noAccountHint": "Narystės rolę galima skirti tik žmogui, kuris jau turi paskyrą. Žmogų be paskyros pakviesk kvietimo nuoroda — kai jis užsiregistruos ir prisijungs prie organizacijos, čia galėsi suteikti jam rolę.",
+      "noAccountCta": "Sukurti kvietimo nuorodą"
     },
     "start": {
       "membersMoved": "Organizacijos „{workspace}“ nariai ir pakvietimai tvarkomi jos Nustatymuose.",

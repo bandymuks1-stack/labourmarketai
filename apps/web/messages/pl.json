@@ -2138,6 +2138,10 @@
           "title": "Rozpocznij profil firmy",
           "body": "Nie masz jeszcze profilu firmy. Utwórz go — jest od razu aktywny i użyteczny, bez czekania na zatwierdzenie.",
           "cta": "Rozpocznij zakładanie firmy"
+        },
+        "personalSpace": {
+          "title": "Jesteś teraz w przestrzeni osobistej",
+          "body": "Narzędzia firmy otwierają się w przestrzeni tej organizacji — nie trzeba zakładać drugiej organizacji. Otwórz swoją:"
         }
       },
       "typeNotes": {
@@ -9118,6 +9122,7 @@
     "intro": "Zaproponowane zaangażowania. Rezerwacja jest potwierdzona dopiero, gdy pracownik ją zaakceptuje.",
     "notAuthed": "Zaloguj się, aby zobaczyć swoje rezerwacje.",
     "unavailable": "Nie udało się wykonać akcji. Spróbuj ponownie.",
+    "readFailed": "Nie udało się teraz wczytać Twoich rezerwacji — to nie znaczy, że ich nie masz. Spróbuj ponownie.",
     "noDate": "Nie ustawiono daty rozpoczęcia",
     "noRole": "Zaangażowanie w pracę",
     "startsOn": "Rozpoczyna się {date}",
@@ -11711,7 +11716,10 @@
       "docExpiring": "Dokumenty wygasające w ciągu 30 dni",
       "docMissing": "Dokumenty brakujące lub wygasłe",
       "docReview": "Dokumenty w trakcie sprawdzania lub zwrócone",
-      "financeOverdue": "Zaległe zapisy finansowe"
+      "financeOverdue": "Zaległe zapisy finansowe",
+      "journalReviews": "Wpisy pracy czekające na twoje zatwierdzenie",
+      "journalClientDecide": "Wpisy pracy czekające na twoją decyzję jako zleceniodawcy",
+      "partial": "Nie udało się teraz odczytać kolejki przeglądu wpisów pracy. To nie znaczy, że nic nie czeka."
     },
     "sources": {
       "label": "Źródła",
@@ -11722,7 +11730,8 @@
       "workJournal": "Twój dziennik pracy",
       "managerConfirmations": "Potwierdzenia kierownika",
       "projects": "Twoje projekty",
-      "assignments": "Aktywne przypisania pracowników"
+      "assignments": "Aktywne przypisania pracowników",
+      "journalReviewQueue": "Kolejka przeglądu wpisów pracy"
     },
     "summaries": {
       "title": "Podsumowania z Twoich danych",
@@ -18335,7 +18344,9 @@
       "managesInvitations": "Zarządza zaproszeniami",
       "grantInvitations": "Zezwól na zarządzanie zaproszeniami",
       "withdrawInvitations": "Cofnij zarządzanie zaproszeniami",
-      "unavailable": "Nie udało się teraz odczytać listy członków. To nie znaczy, że organizacja nie ma członków."
+      "unavailable": "Nie udało się teraz odczytać listy członków. To nie znaczy, że organizacja nie ma członków.",
+      "noAccountHint": "Rolę członka można nadać tylko osobie, która ma już konto. Osobę bez konta zaproś linkiem z zaproszeniem — gdy się zarejestruje i dołączy do organizacji, nadasz jej tu rolę.",
+      "noAccountCta": "Utwórz link z zaproszeniem"
     },
     "start": {
       "membersMoved": "Członkowie i zaproszenia organizacji {workspace} są zarządzane w jej Ustawieniach.",

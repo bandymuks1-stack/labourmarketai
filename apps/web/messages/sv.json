@@ -2820,6 +2820,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -6950,7 +6951,9 @@
       "managesInvitations": "Hanterar inbjudningar",
       "grantInvitations": "Tillåt att hantera inbjudningar",
       "withdrawInvitations": "Återkalla hantering av inbjudningar",
-      "unavailable": "Medlemslistan kunde inte läsas just nu. Det betyder inte att organisationen saknar medlemmar."
+      "unavailable": "Medlemslistan kunde inte läsas just nu. Det betyder inte att organisationen saknar medlemmar.",
+      "noAccountHint": "En medlemsroll kan bara ges till någon som redan har ett konto. Bjud in en person utan konto med en inbjudningslänk — när personen registrerar sig och ansluter till organisationen kan du ge en roll här.",
+      "noAccountCta": "Skapa en inbjudningslänk"
     },
     "start": {
       "membersMoved": "Medlemmar och inbjudningar för {workspace} hanteras i organisationens Inställningar.",
