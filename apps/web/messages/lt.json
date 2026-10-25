@@ -9188,7 +9188,8 @@
       "alreadyAccepted": "Darbuotojas šį pasiūlymą jau priėmė — sutartos sąlygos čia neperrašomos. Pakeitimus aptarkite pokalbyje.",
       "refusedNotReachable": "Šiam žmogui rezervacijos iš čia pasiūlyti negalima — jis nėra atvėręs profilio darbdaviams ir neturi su tavimi darbo ryšio.",
       "refusedNeedClosed": "Šis poreikis uždarytas — prieš siūlydamas rezervaciją, atidaryk jį iš naujo.",
-      "refusedAnswered": "Darbuotojas šį pasiūlymą atmetė, todėl be jo naujo sutikimo jis iš naujo neatveriamas. Tęsk pokalbyje arba rask kitą darbuotoją."
+      "refusedAnswered": "Darbuotojas šį pasiūlymą atmetė, todėl be jo naujo sutikimo jis iš naujo neatveriamas. Tęsk pokalbyje arba rask kitą darbuotoją.",
+      "unconfirmed": "Serveris dar neatsakė. Pasiūlymas galėjo būti jau išsiųstas — patikrink skiltį „Rezervacijos“ arba siųsk dar kartą (tas pats pasiūlymas nedubliuojamas)."
     },
     "reason": {
       "optionalTitle": "Priežastis (nebūtina)",

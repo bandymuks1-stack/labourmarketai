@@ -9188,7 +9188,8 @@
       "alreadyAccepted": "De werknemer heeft dit voorstel al geaccepteerd — afgesproken voorwaarden worden hier niet overschreven. Spreek wijzigingen af in het gesprek.",
       "refusedNotReachable": "Deze persoon kan hier geen boekingsvoorstel krijgen — het profiel is niet zichtbaar voor werkgevers en er is geen werkrelatie met jou.",
       "refusedNeedClosed": "Deze behoefte is gesloten — heropen hem voordat je een boeking voorstelt.",
-      "refusedAnswered": "De werknemer heeft dit voorstel geweigerd; zonder nieuwe toestemming wordt het niet heropend. Ga verder in het gesprek of zoek een andere werknemer."
+      "refusedAnswered": "De werknemer heeft dit voorstel geweigerd; zonder nieuwe toestemming wordt het niet heropend. Ga verder in het gesprek of zoek een andere werknemer.",
+      "unconfirmed": "Nog geen antwoord van de server. Het voorstel is mogelijk al verstuurd — kijk bij Boekingen of verstuur het opnieuw (hetzelfde voorstel wordt nooit dubbel aangemaakt)."
     },
     "reason": {
       "optionalTitle": "Reden (optioneel)",

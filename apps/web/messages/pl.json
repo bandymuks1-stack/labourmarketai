@@ -9188,7 +9188,8 @@
       "alreadyAccepted": "Pracownik już przyjął tę propozycję — uzgodnione warunki nie są tu nadpisywane. Zmiany ustalcie w rozmowie.",
       "refusedNotReachable": "Tej osobie nie można stąd zaproponować rezerwacji — nie udostępniła profilu pracodawcom i nie łączy jej z Tobą relacja zawodowa.",
       "refusedNeedClosed": "To zapotrzebowanie jest zamknięte — otwórz je ponownie, zanim zaproponujesz rezerwację.",
-      "refusedAnswered": "Pracownik odrzucił tę propozycję, więc bez jego nowej zgody nie zostanie ona ponownie otwarta. Kontynuuj w rozmowie lub znajdź innego pracownika."
+      "refusedAnswered": "Pracownik odrzucił tę propozycję, więc bez jego nowej zgody nie zostanie ona ponownie otwarta. Kontynuuj w rozmowie lub znajdź innego pracownika.",
+      "unconfirmed": "Serwer jeszcze nie odpowiedział. Propozycja mogła już zostać wysłana — sprawdź sekcję Rezerwacje albo wyślij ją ponownie (ta sama propozycja nigdy nie jest dublowana)."
     },
     "reason": {
       "optionalTitle": "Powód (opcjonalnie)",
