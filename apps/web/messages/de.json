@@ -3621,7 +3621,8 @@
     "reviewBanner": {
       "title": "Einige Fähigkeiten benötigen eine Prüfung",
       "body": "Einige Einträge sind noch nicht eindeutig klassifiziert. Prüfen Sie sie oder fügen Sie weitere Informationen hinzu, damit Ihr Profil genauer gematcht werden kann.",
-      "cta": "Fähigkeiten prüfen"
+      "cta": "Fähigkeiten prüfen",
+      "noteLead": "{count, plural, one {Fähigkeit ist noch nicht durch Arbeitseinträge belegt.} other {Fähigkeiten sind noch nicht durch Arbeitseinträge belegt.}}"
     },
     "pageTitle": "Mein Profil",
     "pageSubtitle": "Was Sie tun, was Sie können und was das zeigt — alles an einem Ort.",
@@ -7973,7 +7974,7 @@
       "confirmed": "Std. mit Eintrag der Leitung",
       "organizationHistory": "Std. in der Organisationshistorie",
       "experienceTotal": "Std. Berufserfahrung insgesamt",
-      "days": "{count, plural, one {Arbeitstag} other {Arbeitstage}}",
+      "days": "{count, plural, one {Tag mit Stunden} other {Tage mit Stunden}}",
       "modes": {
         "label": "Teile der Karte",
         "work": "Arbeit",
