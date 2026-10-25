@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { CameraCaptureButton } from "@/components/app/camera-capture-button";
 import { useLocale, useTranslations } from "next-intl";
+import { quoteText } from "@/lib/i18n/quote";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { DarkListbox } from "@/components/ui/DarkListbox";
@@ -1694,7 +1695,7 @@ export function JournalEntryComposer({
                               data-testid="journal-unresolved-chip"
                             >
                               <span className="text-xs font-semibold text-text-primary">
-                                „{u.text}“
+                                {quoteText(locale, u.text)}
                               </span>
                               {state === "named" ? (
                                 <span
@@ -2376,7 +2377,7 @@ export function JournalEntryComposer({
                   <DetectedSuggestionCard
                     key={`${idx}-${f.rawPhrase}`}
                     label={`${timeLabel} · ${activityName}`}
-                    hint={`„${f.rawPhrase}"`}
+                    hint={quoteText(locale, f.rawPhrase)}
                     status={f.status}
                     onConfirm={() => setFragmentStatus(idx, "confirmed")}
                     onDiscard={() => setFragmentStatus(idx, "discarded")}
