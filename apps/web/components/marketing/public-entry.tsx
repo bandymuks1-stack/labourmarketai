@@ -182,6 +182,17 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
     if (showAllExamples) firstMoreRef.current?.focus();
   }, [showAllExamples]);
 
+  // TEXT TYPED BEFORE HYDRATION COUNTS. The box is server-rendered, so a
+  // visitor can type into it before React attaches; the browser keeps those
+  // characters in the DOM while `draft` is still "", and no change event
+  // replays them — the submit stayed disabled until the visitor typed again
+  // (production walk 2026-10-25). On mount, adopt whatever the field already
+  // holds; the submit below reads the field itself for the same reason.
+  useEffect(() => {
+    const typed = inputRef.current?.value ?? "";
+    if (typed.length > 0) setDraft(typed);
+  }, []);
+
   const ask = useCallback((text: string) => {
     const next = readPublicEntry(text);
     setChosen(null);
@@ -272,7 +283,11 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
           className="flex flex-col gap-2"
           onSubmit={(e) => {
             e.preventDefault();
-            ask(draft);
+            // The field is the truth for what was typed (see the mount
+            // effect above); `draft` mirrors it once React holds it.
+            const typed = inputRef.current?.value ?? draft;
+            if (typed !== draft) setDraft(typed);
+            ask(typed);
           }}
         >
           <label
