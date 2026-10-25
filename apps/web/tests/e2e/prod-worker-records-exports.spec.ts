@@ -93,7 +93,12 @@ async function fitsPhone(page: Page, label: string): Promise<void> {
 
 /** Click a control that downloads a file and return the file's text; the file is deleted after. */
 async function downloadText(page: Page, control: Locator): Promise<{ name: string; text: string }> {
-  const [download] = await Promise.all([page.waitForEvent("download", { timeout: 60_000 }), control.click()]);
+  // The link answers with an attachment, so the "navigation" never completes:
+  // the click must not wait for it (the download event is the answer).
+  const [download] = await Promise.all([
+    page.waitForEvent("download", { timeout: 90_000 }),
+    control.click({ noWaitAfter: true }),
+  ]);
   try {
     expect(await download.failure(), "the file downloaded").toBeNull();
     const text = readFileSync(await download.path(), "utf8");
@@ -141,9 +146,14 @@ test("P-1 (2.22). the worker records the day with a photo, and the upload's outc
   await page.goto("/lt/dashboard/journal");
   await rendered(page, "journal");
   const main = inMain(page);
-  await main.getByTestId("journal-quick-record-text").fill(ENTRY);
-  await main.getByTestId("journal-quick-record-understand").click();
-  await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  // Hydration-safe: text typed before React attaches is not in its state, and
+  // the click then does nothing — retype until the work-log form opens.
+  await expect(async () => {
+    await main.getByTestId("journal-quick-record-text").fill("");
+    await main.getByTestId("journal-quick-record-text").fill(ENTRY);
+    await main.getByTestId("journal-quick-record-understand").click({ timeout: 5_000 });
+    await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 15_000 });
+  }).toPass({ timeout: 90_000 });
   await chooseWorkContextIfAsked(page);
   await answerNoProjectIfAsked(page);
 
@@ -295,8 +305,20 @@ test("S-1 (4.9). on the phone the worker filters the board and saves the questio
     await openStrip(page);
   }
   await fitsPhone(page, "opportunities with the saved-search strip");
-  await strip!.getByTestId("saved-search-label").fill(SEARCH_LABEL);
-  await strip!.getByTestId("saved-search-save").click();
+  // Hydration-safe typing: the button is enabled only once React holds the name.
+  const label = strip!.getByTestId("saved-search-label");
+  const save = strip!.getByTestId("saved-search-save");
+  await expect(async () => {
+    await label.fill("");
+    await label.fill(SEARCH_LABEL);
+    await expect(save).toBeEnabled({ timeout: 3_000 });
+  }).toPass({ timeout: 60_000 });
+  await save.click();
+  const outcome = strip!.getByRole("status");
+  await expect(outcome, "the save answers in words").toBeVisible({ timeout: 30_000 });
+  const said = (await outcome.innerText()).trim();
+  console.info(`[saved-search] save answered: ${said}`);
+  expect(said, "the search was saved").toBe("Išsaugota.");
   // Persistence: a fresh load lists the named question, once.
   await expect
     .poll(
@@ -324,8 +346,14 @@ test("S-2 (4.9). the saved search is there in English, opens the filtered board,
   const open = strip!.getByTestId("saved-search-open").filter({ hasText: SEARCH_LABEL });
   await expect(open).toHaveCount(1, { timeout: 30_000 });
   // ACT: opening the search lands on the board with its filter in the address.
+  // The click marks the search seen, THEN navigates (client push): wait for
+  // the address to change, or the next navigation races that push.
+  const before = page.url();
   await open.click();
-  await page.waitForURL(/[?&](profession|country|start|accommodation|transport|tool|opportunityType)=/, { timeout: 30_000 });
+  await page.waitForURL((u) => u.href !== before && /[?&](profession|country|start|accommodation|transport|tool|opportunityType)=/.test(u.search), {
+    timeout: 30_000,
+  });
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   await rendered(page, "saved search opened");
   // ACT: delete it; a fresh load no longer lists it.
   const removed = await deleteSaved(page, SEARCH_LABEL);

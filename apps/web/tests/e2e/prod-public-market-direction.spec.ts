@@ -79,14 +79,20 @@ async function visitor(browser: Browser, locale: Locale, width: (typeof WIDTHS)[
 async function readSentence(page: Page, sentence: string): Promise<{ intent: string; understood: string }> {
   const input = page.getByTestId("entry-input");
   const submit = page.getByTestId("entry-submit");
-  // Hydration gate: the box accepts typing before React attaches; retype until
-  // the reading for THIS sentence is on screen.
+  // Hydration gate: the box accepts typing before React attaches, and the
+  // button stays disabled until React holds the text — so "enabled" proves
+  // React received THIS sentence. Retype until it is, then read the answer.
+  // Cleared first: text typed before hydration stays in the box while React's
+  // state is still empty, and re-filling the SAME value fires no change event
+  // (measured on the local stack: the button stayed disabled for 70 s).
   const understanding = page.getByTestId("entry-understanding");
   await expect(async () => {
+    await input.fill("");
     await input.fill(sentence);
-    await submit.click();
-    await expect(understanding).toContainText(sentence, { timeout: 3_000 });
-  }).toPass({ timeout: 60_000 });
+    await expect(submit).toBeEnabled({ timeout: 3_000 });
+    await submit.click({ timeout: 5_000 });
+    await expect(understanding).toContainText(sentence, { timeout: 5_000 });
+  }).toPass({ timeout: 90_000 });
   return {
     intent: (await understanding.getAttribute("data-intent")) ?? "",
     understood: (await understanding.locator("p").nth(2).innerText().catch(() => "")).trim(),
