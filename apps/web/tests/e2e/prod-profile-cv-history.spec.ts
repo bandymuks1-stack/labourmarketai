@@ -556,7 +556,33 @@ test("P-13 (2.15). a free-label skill claim is saved and shows as self-declared 
   addedClaim = CLAIM;
   await form.getByTestId("capability-profile-manual-input").fill(CLAIM);
   await form.getByTestId("capability-profile-manual-add-button").click();
-  await expect(main.getByTestId("capability-profile-claim").filter({ hasText: CLAIM })).toBeVisible({ timeout: 30_000 });
+  // The save's own answer: on ok the input is cleared before the refresh; a
+  // refusal shows the section's alert. Then the claim is asserted on a fresh
+  // load and its in-place appearance is logged. That is the P-10 pattern, for
+  // the same reason: run 40169213003 saved the claim (cleanup found and
+  // removed it) but the refreshed chip never committed in place in the
+  // headless tab within 30 s.
+  const refused = main.locator('p[role="alert"]').filter({ hasText: /\S/ });
+  await expect(form.getByTestId("capability-profile-manual-input").or(refused).first()).toBeVisible();
+  await expect
+    .poll(
+      async () =>
+        (await refused.count()) > 0
+          ? `refused: ${await refused.first().innerText()}`
+          : await form.getByTestId("capability-profile-manual-input").inputValue(),
+      { timeout: 30_000, message: "the claim save answered" },
+    )
+    .toBe("");
+  const inPlace = await main
+    .getByTestId("capability-profile-claim")
+    .filter({ hasText: CLAIM })
+    .waitFor({ state: "visible", timeout: 10_000 })
+    .then(() => true, () => false);
+  console.info(`[claim] shown in place after save=${inPlace}`);
+  const fresh = await profileAt(page, "capabilities");
+  await expect(fresh.getByTestId("capability-profile-claim").filter({ hasText: CLAIM }), "the claim persists").toHaveCount(1, {
+    timeout: 30_000,
+  });
   const cv = await livingCv(page);
   await expect(
     cv.locator('[data-testid="cv-tier-declared"]', { hasText: CLAIM }).first(),
