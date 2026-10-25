@@ -304,9 +304,21 @@ test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browse
     await expect(responded).toBeVisible({ timeout: 30_000 });
   }
   await page.reload();
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "accepted", {
-    timeout: 30_000,
-  });
+  // Run 40200190351: after this reload the row matched TWICE (identical
+  // <li>s). Count where the copies live: a hidden streamed holder (#418
+  // symptom) sits outside <main>; a real double render would be inside it.
+  const copies = await page.evaluate((id) => {
+    const all = [...document.querySelectorAll(`[data-testid="booking-${id}"]`)];
+    return {
+      total: all.length,
+      inMain: all.filter((e) => e.closest("main")).length,
+      inHiddenHolder: all.filter((e) => e.closest("[hidden][id^='S:']")).length,
+    };
+  }, bookingId);
+  console.info(`[bookings] accepted row copies after reload: ${JSON.stringify(copies)}`);
+  const inMainRow = page.getByRole("main").getByTestId(`booking-${bookingId}`);
+  await expect(inMainRow, "the booking renders once on the page").toHaveCount(1, { timeout: 30_000 });
+  await expect(inMainRow).toHaveAttribute("data-status", "accepted", { timeout: 30_000 });
   await ctx.close();
 });
 

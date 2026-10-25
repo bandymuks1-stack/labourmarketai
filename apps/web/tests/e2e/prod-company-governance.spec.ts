@@ -39,7 +39,10 @@ const ALFA = "QA-SYNTHETIC Alfa";
 const GAMA = "QA-SYNTHETIC Gama";
 const TAG = `QA-SYNTHETIC ${RUN}`;
 /** Alfa's published approval template — the same one prod-documents-approvals keeps. */
-const TEMPLATE = "QA-SYNTHETIC patvirtinimas";
+// Its OWN template: decisions offer only `management_decision` templates
+// (lib/decisions/decisions.ts), and prod-documents-approvals keeps a
+// `generic_request` template under the old shared name (run 40195373623 D-2).
+const TEMPLATE = "QA-SYNTHETIC sprendimų patvirtinimas";
 const DECISION = `${TAG} sprendimas dėl įrankių`;
 const DECISION_EDITED = `${TAG} sprendimas dėl įrankių nuomos`;
 const RESULT = `${TAG}: nuomojamės, ne perkame`;
@@ -170,6 +173,7 @@ async function ensureTemplate(page: Page): Promise<void> {
     const value = await org.locator("option", { hasText: ALFA }).first().getAttribute("value");
     expect(value, "Alfa is one of the organizations the owner governs").toBeTruthy();
     await org.selectOption(value!);
+    await create.locator('select[name="contextEntityType"]').selectOption("management_decision");
     await create.locator('input[name="name"]').fill(TEMPLATE);
     await create.locator('input[name="step1Name"]').fill("QA-SYNTHETIC vadovo patvirtinimas");
     await act(page, inMain(page).getByTestId("approvals-create-template-submit"), "wf", ["created", "already_exists"]);

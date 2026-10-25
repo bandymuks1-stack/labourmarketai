@@ -247,8 +247,21 @@ test("U-1 (3.18). the owner commits Vytas to the dated project; the committed da
     await expect(form, "the assign form (owner sees the roster)").toBeVisible({ timeout: 30_000 });
     await form.locator('select[name="project_id"]').selectOption(projectId);
     await form.getByTestId("assign-worker-select").selectOption(workerProfileId);
+    // Diagnose, don't guess (run 40210443242: no assignment was written and
+    // the row never appeared). Record what the form submits, whether the
+    // server action is posted and any message the form shows.
+    const chosenProject = await form.locator('select[name="project_id"]').inputValue();
+    const chosenWorker = await form.getByTestId("assign-worker-select").inputValue();
+    console.info(`[U-1] form values: project=${chosenProject === projectId ? "the walk project" : chosenProject || "(none)"} worker=${chosenWorker === workerProfileId ? "Vytas" : chosenWorker || "(none)"}`);
+    const actionPost = page
+      .waitForResponse((r) => r.request().method() === "POST" && !!r.request().headers()["next-action"], { timeout: 30_000 })
+      .then((r) => `posted, HTTP ${r.status()}`)
+      .catch(() => "NOT posted within 30 s");
     await form.locator("#assign-worker-submit").click();
     assignedHere = true;
+    console.info(`[U-1] server action: ${await actionPost}`);
+    const said = await inMain(page).locator('[role="alert"], [role="status"]').allInnerTexts().catch(() => []);
+    console.info(`[U-1] form messages: ${JSON.stringify(said.map((t) => t.replace(/\s+/g, " ").slice(0, 120)))}`);
     await expect.poll(async () => {
       await fresh(page, "/lt/dashboard/projects");
       return assignmentRow(page).count();

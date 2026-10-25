@@ -147,6 +147,8 @@ describe("one visual consumer — the instructions page, ordinary words, honest 
   it("no architecture vocabulary and no banned words reach the person; the copy lands in every active locale with the same keys", () => {
     const REQUIRED_KEYS = [
       "ratio",
+      "ratioNone",
+      "ratioUnknown",
       "availability",
       "state.valid",
       "state.expiring",
@@ -174,7 +176,7 @@ describe("one visual consumer — the instructions page, ordinary words, honest 
       "managerStatus.rejected",
       "managerStatus.expired",
       "resolution.addDocument",
-      "resolution.issuingAuthority",
+      "resolution.informationSource",
       "resolution.trainingProgram",
       "resolution.serviceOffering",
       "resolution.serviceOfferingRate",
@@ -198,6 +200,20 @@ describe("one visual consumer — the instructions page, ordinary words, honest 
       expect(get(ledger, "ratio")).toMatch(/\{have\}[\s\S]*\{total\}/);
       expect(get(ledger, "rejected")).toContain("{count}");
       expect(get(ledger, "why.country_requirement")).toContain("{country}");
+      expect(get(ledger, "ratioUnknown")).toContain("{count}");
+      expect(get(ledger, "resolution.informationSource")).toContain("{title}");
+      // An EU information page is where to READ about a rule, never its
+      // issuer (walk-spec 2026-10-25: "Išduoda: Your Europe").
+      expect(get(ledger, "resolution.issuingAuthority"), locale).toBeUndefined();
+      expect(get(ledger, "resolution.informationSource") as string).not.toMatch(
+        /Išduoda|Issued by|Выдаёт|Afgegeven door|Ausgestellt von|Wydane przez/i,
+      );
     }
+  });
+
+  it("'0 of 0' is never rendered and unknown rows are said apart (walk-spec 2026-10-25)", () => {
+    expect(COMPONENT).toMatch(/ledger\.ratio\.total === 0\s*\?\s*labels\.ratioNone/);
+    expect(COMPONENT).toMatch(/ledger\.ratio\.unknown > 0 \? ` · \$\{labels\.ratioUnknown\(ledger\.ratio\.unknown\)\}`/);
+    expect(COMPONENT).toContain('r.kind === "information_source"');
   });
 });

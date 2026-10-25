@@ -293,7 +293,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profiil",
-        "journal": "Minu CV",
+        "journal": "Tööpäevik",
         "search": "[EN] Search",
         "advanced": "Täpsem haldus",
         "playerCard": "Minu ametiprofiil",
@@ -572,7 +572,16 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Laadimine…",
-    "dashboardSections": "Töölaua jaotised"
+    "dashboardSections": "Töölaua jaotised",
+    "nav": {
+      "more": "Veel",
+      "menu": "Menüü",
+      "areas": "Tööalad",
+      "close": "Sulge",
+      "youAreHere": "Sa oled siin",
+      "previous": "Eelmine ala",
+      "next": "Järgmine ala"
+    }
   },
   "companies": {
     "cta": {

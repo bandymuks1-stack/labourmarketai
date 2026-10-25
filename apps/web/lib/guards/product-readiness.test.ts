@@ -274,9 +274,11 @@ describe("confirmation-required copy is present", () => {
 // ── 11. Role switcher exposes the non-locking intro inside the menu ─────
 
 describe("role switcher honest framing", () => {
-  it("RoleSwitcher renders the rolesIntro copy in its menu", () => {
-    const txt = readWeb("components/app/role-switcher.tsx");
-    expect(txt).toMatch(/tAccount\("rolesIntro"\)/);
+  it("the account page renders the rolesIntro copy", () => {
+    // RE-ANCHORED 2026-10-25: the role switcher was retired with the one
+    // header; the non-locking framing lives on the account page.
+    const txt = readWeb("app/[locale]/dashboard/account/page.tsx");
+    expect(txt).toMatch(/t\("account\.rolesIntro"\)/);
   });
 });
 
@@ -297,10 +299,8 @@ describe("central config drives role + suggestion + activity surfaces", () => {
       .filter((id): id is string => !!id);
     expect(new Set(active)).toEqual(new Set(["worker"]));
   });
-  it("RoleSwitcher + account page read availability from the catalogue", () => {
-    const rs = readWeb("components/app/role-switcher.tsx");
+  it("the account page reads availability from the catalogue", () => {
     const acct = readWeb("app/[locale]/dashboard/account/page.tsx");
-    expect(rs).toMatch(/ROLE_BY_ID|LABOUR_MARKET_ROLES/);
     expect(acct).toMatch(/ROLE_BY_ID/);
   });
   it("suggestion-statuses config exists and externally_confirmed is preparing", () => {
@@ -596,14 +596,13 @@ describe("catalogue-driven primary nav", () => {
     expect(txt).toMatch(/TAB_META/);
   });
 
-  it("BottomNav + DashboardTabs read VISIBLE_PRIMARY_NAV_ITEMS", () => {
-    const bn = readWeb("components/app/bottom-nav.tsx");
-    const dt = readWeb("components/app/dashboard-tabs.tsx");
-    expect(bn).toMatch(/getAdvancedNavItems|VISIBLE_PRIMARY_NAV_ITEMS/);
-    expect(dt).toMatch(/getAdvancedNavItems|VISIBLE_PRIMARY_NAV_ITEMS/);
+  it("the one header reads the catalogue-derived nav items", () => {
+    // RE-ANCHORED 2026-10-25: BottomNav + DashboardTabs retired with the one header.
+    const header = readWeb("components/app/conversation/chat/conversation-header.tsx");
+    expect(header).toMatch(/getCoreNavItems\(\)/);
+    expect(header).toMatch(/getHeaderOverflowNavItems\(/);
     // No hardcoded TABS arrays left behind.
-    expect(bn).not.toMatch(/^const TABS\s*=/m);
-    expect(dt).not.toMatch(/^const TABS\s*=/m);
+    expect(header).not.toMatch(/^const TABS\s*=/m);
   });
 
   it("only the expected active surfaces become primary nav tabs", () => {
@@ -744,11 +743,10 @@ describe("role catalogue + shared role-card model", () => {
     expect(txt).not.toMatch(/getVisibleRoleOptions/);
   });
 
-  it("RoleSwitcher + account page still consume the role catalogue", () => {
-    const rs = readWeb("components/app/role-switcher.tsx");
+  it("the account page still consumes the role catalogue", () => {
     const acct = readWeb("app/[locale]/dashboard/account/page.tsx");
-    // PR #35 wired both through ROLE_BY_ID — this guard prevents drift.
-    expect(rs).toMatch(/ROLE_BY_ID|LABOUR_MARKET_ROLES/);
+    // PR #35 wired it through ROLE_BY_ID — this guard prevents drift. (The
+    // header role switcher it was paired with retired 2026-10-25.)
     expect(acct).toMatch(/ROLE_BY_ID/);
   });
 

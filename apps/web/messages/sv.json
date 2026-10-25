@@ -293,7 +293,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profil",
-        "journal": "Mitt CV",
+        "journal": "Arbetsjournal",
         "search": "[EN] Search",
         "advanced": "Avancerad hantering",
         "playerCard": "Min yrkesprofil",
@@ -572,7 +572,16 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Laddar…",
-    "dashboardSections": "Översiktens avsnitt"
+    "dashboardSections": "Översiktens avsnitt",
+    "nav": {
+      "more": "Mer",
+      "menu": "Meny",
+      "areas": "Arbetsområden",
+      "close": "Stäng",
+      "youAreHere": "Du är här",
+      "previous": "Föregående område",
+      "next": "Nästa område"
+    }
   },
   "companies": {
     "cta": {

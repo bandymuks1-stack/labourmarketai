@@ -7,21 +7,11 @@ import { Suspense } from "react";
 
 import { pickClientMessages } from "@/lib/i18n/client-messages";
 import { AmbientGlow } from "@/components/decor/ambient-glow";
-import { BottomNav } from "@/components/app/bottom-nav";
-import { DashboardTabs } from "@/components/app/dashboard-tabs";
-import { HeaderSearch } from "@/components/app/header-search";
 import { LanguageFeedbackWidget } from "@/components/app/language-feedback-widget";
-import { NotificationPanel } from "@/components/app/notification-panel";
-import { RoleSwitcher } from "@/components/app/role-switcher";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { SpineStream } from "@/components/app/spine-stream";
-import { AccountMenu } from "@/components/app/account-menu";
-import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
-import { LmLogo } from "@/components/ui/lm-logo";
 import { DashboardChrome } from "@/components/app/dashboard-chrome";
-import { WorkspaceChip } from "@/components/app/conversation/chat/workspace-chip";
 import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
-import { Link } from "@/lib/i18n/navigation";
 import { AuthProvider } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
 import { deriveIsAdmin } from "@/lib/auth/admin-signal";
@@ -46,24 +36,26 @@ const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
  * Authenticated shell for the whole `/dashboard` tree.
  *
  * Resolves user + profile + roles ONCE, server-side, and hands them to the
- * client `AuthProvider` so every downstream widget (RoleSwitcher,
- * NotificationPanel, DashboardTabs, the simple-mode header) stays in sync. The
+ * client `AuthProvider` so every downstream widget (the one header's
+ * workspace chip, nav and NotificationPanel, the pages) stays in sync. The
  * chrome itself is chosen per-route by the client `<DashboardChrome>`:
  *   - `/dashboard` (EVERY identity)              → the conversation — the ONE
  *                                                  authenticated home (bare; the
  *                                                  chat supplies the one top bar)
  *   - every other product route                  → panel: the same one top bar
  *                                                  over a contextual workspace
- *   - `/dashboard/admin/*`                       → the full module chrome (the
- *                                                  internal operator console only;
- *                                                  `/dashboard/advanced` itself was
- *                                                  deleted by W3 Package 4)
+ *   - `/dashboard/admin/*`                       → the internal operator console
+ *                                                  — the SAME one top bar since
+ *                                                  2026-10-25 (one navigation
+ *                                                  system; `/dashboard/advanced`
+ *                                                  was deleted by W3 Package 4)
  *
- * This is the real replacement for the previous `fixed inset-0` overlay: the
- * wide navbar is not painted over in simple mode — it is simply never rendered
- * there (its DOM is absent), while Advanced mode keeps the full chrome verbatim.
- * No route files move, so the dashboard file-path contract the guard suite pins
- * stays intact. Doctrine §18 (real, not overlay illusions).
+ * No header markup lives here any more: the operator console's private header
+ * (sideways-scrolling tabs, a second workspace selector in the role switcher)
+ * and its phone bottom bar were retired for the ONE header
+ * (`components/app/conversation/chat/conversation-header.tsx`). No route files
+ * move, so the dashboard file-path contract the guard suite pins stays intact.
+ * Doctrine §18 (real, not overlay illusions).
  */
 
 /**
@@ -252,12 +244,11 @@ export default async function DashboardLayout({
     null;
   const activeOrgName: string | null = activeWorkspace?.name ?? null;
   const activeOrganizationId: string | null = activeWorkspace?.id ?? null;
-  // The full list is passed; `<RoleSwitcher>` applies the SAME
+  // The full list is passed to the auth context; consumers apply the SAME
   // `shouldOfferOrganizationSwitch` rule (>1) the layout used to duplicate.
   const organizations: SwitchableOrganization[] = organizationWorkspaces.map(
     (w) => ({ id: w.id, name: w.name }),
   );
-
   // Simple-mode nav labels + the Rexora footer credit, resolved once and passed
   // to the client chrome selector (which needs no data fetch of its own).
   const tChat = await getTranslations("conversation.chat");
@@ -270,71 +261,6 @@ export default async function DashboardLayout({
     profile: tChat("navProfile"),
   };
 
-  // Full (Advanced-mode) chrome, authored here so the shell contract the guard
-  // suite pins (logo → /dashboard, DashboardTabs, AccountMenu, BottomNav, the
-  // Rexora credit) stays in the layout source. `<DashboardChrome>` renders these
-  // slots only on module routes; simple mode never mounts them.
-  const fullHeader = (
-    <header className="sticky top-0 z-30 border-b border-ink-600/60 bg-ink-900/85 backdrop-blur-md md:relative md:z-20 md:bg-transparent md:backdrop-blur-none">
-      <div className="mx-auto flex h-14 max-w-container items-center gap-3 px-3 md:h-auto md:py-3 md:gap-6 sm:px-12">
-        {/* App-shell logo links to the dashboard, NOT the public home. */}
-        <Link
-          href="/dashboard"
-          data-testid="shell-logo-home"
-          className="flex min-w-0 shrink items-center gap-2 font-display text-lg font-bold tracking-tightest text-text-primary"
-        >
-          {/* The canonical mark beside the wordmark — the auth shell's
-              pattern. Decorative: the wordmark names the product. */}
-          <LmLogo title="" className="h-6 w-auto shrink-0 sm:h-7" />
-          <span className="truncate">
-            LabourMarket<span className="text-gradient-accent">.ai</span>
-          </span>
-        </Link>
-        {/* W8 slice 1 — THE ACTIVE WORKSPACE, in the FULL chrome too.
-            Every employer surface (/dashboard/company, …/scouting,
-            /dashboard/bookings, /dashboard/projects) renders here, and until
-            now the chip existed only in the conversation header — so the
-            employer had no organization indicator on exactly the screens where
-            they work, while the data behind those screens ignored the
-            workspace entirely (audit P0-1). This is the SAME component reading
-            the SAME auth-context workspace state; it is not a second switcher,
-            and `min-w-0` lets it truncate on a phone instead of pushing the
-            right-hand controls off screen. */}
-        <span className="flex min-w-0">
-          <WorkspaceChip />
-        </span>
-        {/* `min-w-0` is LOAD-BEARING, and `overflow-x-auto` is what makes it
-            safe. A flex item's default `min-width: auto` floors this nav at
-            its max-content width, so from the md breakpoint — where the tabs
-            first appear — it claimed 492px and refused to give any back. The
-            row then measured 999px inside a 768px viewport, and because
-            `html`/`body` are `overflow-x: hidden` the page could NOT be
-            scrolled sideways to reach the rest.
-            What that cost, measured at 768px:
-              brand              0px wide  (squeezed out of existence)
-              account menu   955..999px    entirely off-screen, so LOGOUT and
-                                           the report-a-problem entry point
-                                           were unreachable
-              notifications / role switcher / search / locale — same
-            `document.documentElement.scrollWidth` still read exactly 768,
-            which is why nothing ever reported it; `document.body.scrollWidth`
-            read 999.
-            With `min-w-0` the nav shrinks to 141px and the account menu comes
-            back to 676..720. `overflow-x-auto` then keeps the tabs themselves
-            reachable by scrolling instead of letting them spill over the
-            controls — the same treatment the company page's chip strip uses.
-            Broken range was 768px up to ~999px: tablets and small laptops. */}
-        <DashboardTabs className="hidden min-w-0 overflow-x-auto md:flex [-webkit-overflow-scrolling:touch]" />
-        <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
-          <HeaderSearch />
-          <LocaleSwitcher className="hidden md:flex" />
-          <NotificationPanel />
-          <RoleSwitcher />
-          <AccountMenu />
-        </div>
-      </div>
-    </header>
-  );
   const rexora = (
     // WHO BUILDS THIS — quiet product credit (owner directive 2026-07-14;
     // meaning corrected 2026-09-27). Pinned by legal-entity-truth.test.ts.
@@ -412,8 +338,6 @@ export default async function DashboardLayout({
         <DashboardChrome
           nav={nav}
           headerTitle={tChat("headerTitle")}
-          fullHeader={fullHeader}
-          fullBottomNav={<BottomNav />}
           rexora={rexora}
         >
           {/* Same reason: after a switch the shell and the chip commit as soon

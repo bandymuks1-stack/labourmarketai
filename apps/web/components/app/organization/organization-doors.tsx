@@ -29,7 +29,8 @@ import { cn } from "@/lib/utils";
  * server-side (`loadOrganizationDoors`) from what the organization IS; this
  * component renders the list it is handed and highlights the active one.
  *
- * Horizontal, wrapping on wide screens and scrolling on a phone, so no door
+ * Horizontal and WRAPPING at every width (owner order 2026-10-25: no
+ * sideways-scrolling navigation strips — the phone used to scroll), so no door
  * is ever hidden behind a menu (constitution §13).
  */
 export type OrganizationDoorItem = {
@@ -79,7 +80,7 @@ export function OrganizationDoors({
       aria-label={ariaLabel}
       data-testid="organization-doors"
       className={cn(
-        "-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 [-webkit-overflow-scrolling:touch] sm:flex-wrap",
+        "flex flex-wrap gap-1.5 pb-1",
         className,
       )}
     >

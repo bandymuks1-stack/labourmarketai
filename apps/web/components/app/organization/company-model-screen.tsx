@@ -1,22 +1,9 @@
 import { getTranslations } from "next-intl/server";
-import {
-  Activity,
-  BarChart3,
-  Briefcase,
-  CalendarDays,
-  FolderKanban,
-  Gauge,
-  Handshake,
-  History,
-  MessageSquare,
-  Package,
-  Store,
-  UserSearch,
-  UsersRound,
-} from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
+import { AreaSwitcher } from "@/components/app/area-switcher";
+import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 
 /**
  * THE COMPANY CONTEXT'S CENTRE (owner order 2026-10-01): the company home is
@@ -28,55 +15,22 @@ import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
  *   people & team · projects & objects · candidates · messages · calendar ·
  *   capacity · work & hours · results · history
  *
- * ONE obvious next action leads (publish a need); the rest is progressive
- * disclosure — the first six entries are visible, the others sit behind
- * "More". Server component, props-free of identity: it renders only inside
- * an organization workspace (the dashboard decides), and each destination
- * re-checks its own rights under RLS. The calendar entry is the ONE calendar
- * (/dashboard/planning); "capacity" is the workforce zone, which the
- * context-parity guard records as a different capability, not a calendar.
+ * ONE obvious next action leads (publish a need); every door follows in the
+ * light 3D area switcher, by priority (the everyday six first) — the doors
+ * themselves live in the ONE area model (`ORGANIZATION_WORK_AREAS`,
+ * lib/navigation/work-areas.ts). Server component, props-free of identity:
+ * it renders only inside an organization workspace (the dashboard decides),
+ * and each destination re-checks its own rights under RLS. The calendar
+ * entry is the ONE calendar (/dashboard/planning); "capacity" is the
+ * workforce zone, which the context-parity guard records as a different
+ * capability, not a calendar.
  */
-type Entry = {
-  readonly id: string;
-  readonly href: string;
-  readonly Icon: React.ComponentType<{ className?: string }>;
-};
-
-const PRIMARY: readonly Entry[] = [
-  { id: "need", href: "/dashboard/company/needs", Icon: UserSearch },
-  { id: "offer", href: "/dashboard/services", Icon: Package },
-  { id: "market", href: "/dashboard/listings", Icon: Store },
-  { id: "people", href: "/dashboard/company/people", Icon: UsersRound },
-  { id: "projects", href: "/dashboard/projects", Icon: FolderKanban },
-  { id: "messages", href: "/dashboard/communication", Icon: MessageSquare },
-];
-
-const MORE: readonly Entry[] = [
-  { id: "clients", href: "/dashboard/company/partners", Icon: Handshake },
-  { id: "candidates", href: "/dashboard/company/scouting", Icon: Briefcase },
-  { id: "calendar", href: "/dashboard/planning", Icon: CalendarDays },
-  { id: "capacity", href: "/dashboard/company/planning", Icon: Gauge },
-  { id: "work", href: "/dashboard/hours", Icon: Activity },
-  { id: "results", href: "/dashboard/reports", Icon: BarChart3 },
-  { id: "history", href: "/dashboard/company/history", Icon: History },
-];
-
-function Tile({ entry, label }: { entry: Entry; label: string }) {
-  return (
-    <Link
-      href={entry.href as "/dashboard"}
-      data-testid={`company-model-${entry.id}`}
-      className="flex min-h-11 items-center gap-2 rounded-lg border border-ink-500 bg-ink-800/40 px-3 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-text-secondary"
-    >
-      <entry.Icon className="size-4 flex-none text-text-secondary" />
-      {/* Wraps, never truncates (2026-10-18, 390 px): "Ko mums rei…" told nobody what the door does. */}
-      <span className="min-w-0 break-words leading-tight">{label}</span>
-    </Link>
-  );
-}
-
 export async function CompanyModelScreen() {
-  const t = await getTranslations("companyModel");
+  const [t, tAll, tNav] = await Promise.all([
+    getTranslations("companyModel"),
+    getTranslations(),
+    getTranslations("common.nav"),
+  ]);
   return (
     <section
       aria-label={t("title")}
@@ -97,21 +51,24 @@ export async function CompanyModelScreen() {
       >
         {t("primary")}
       </Link>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {PRIMARY.map((e) => (
-          <Tile key={e.id} entry={e} label={t(e.id)} />
-        ))}
-      </div>
-      <details className="group" data-testid="company-model-more">
-        <summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-medium text-text-secondary hover:text-text-primary">
-          {t("more")}
-        </summary>
-        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {MORE.map((e) => (
-            <Tile key={e.id} entry={e} label={t(e.id)} />
-          ))}
-        </div>
-      </details>
+      {/* Every door of the company, by priority (the everyday six first),
+          as the light 3D area switcher — one source: ORGANIZATION_WORK_AREAS.
+          The carousel replaces the six-tile grid + "More" disclosure: the
+          rest is one arrow, swipe or Tab away instead of behind a fold. */}
+      <AreaSwitcher
+        title={t("areasTitle")}
+        prevLabel={tNav("previous")}
+        nextLabel={tNav("next")}
+        hereLabel={tNav("youAreHere")}
+        testId="company-model-areas"
+        items={ORGANIZATION_WORK_AREAS.map((a) => ({
+          id: a.id,
+          href: a.href,
+          iconKey: a.iconKey,
+          label: tAll(a.labelKey),
+          testId: `company-model-${a.id}`,
+        }))}
+      />
     </section>
   );
 }

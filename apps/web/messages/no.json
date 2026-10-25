@@ -293,7 +293,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profil",
-        "journal": "Min CV",
+        "journal": "Arbeidsjournal",
         "search": "[EN] Search",
         "advanced": "Avansert styring",
         "playerCard": "Min profesjonelle profil",
@@ -572,7 +572,16 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Laster inn…",
-    "dashboardSections": "Oversiktens seksjoner"
+    "dashboardSections": "Oversiktens seksjoner",
+    "nav": {
+      "more": "Mer",
+      "menu": "Meny",
+      "areas": "Arbeidsområder",
+      "close": "Lukk",
+      "youAreHere": "Du er her",
+      "previous": "Forrige område",
+      "next": "Neste område"
+    }
   },
   "companies": {
     "cta": {

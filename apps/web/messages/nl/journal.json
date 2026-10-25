@@ -286,7 +286,7 @@
       "waiting": "Wacht op beoordeling door een mens — de manager of eigenaar van je organisatie kan het beoordelen; tot die tijd blijft het de registratie die jij hebt ingevoerd",
       "approved": "Beoordeeld",
       "changes_requested": "Wijzigingen gevraagd",
-      "rejected": "Teruggestuurd",
+      "rejected": "Afgewezen",
       "reasonLabel": "Reden",
       "notEnabled": "Vastgelegd — je leidinggevende heeft bevestiging nog niet ingeschakeld, dus niemand beoordeelt deze registratie; tot dan blijft het jouw eigen opgave"
     },
