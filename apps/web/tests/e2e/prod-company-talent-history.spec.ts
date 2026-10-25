@@ -121,6 +121,13 @@ async function ownIds(slot: string): Promise<{ workerId: string; profileId: stri
   return { workerId: rows[0].id, profileId: rows[0].profile_id };
 }
 
+/**
+ * Let the page hydrate before a click that only React handles: a click that
+ * lands before React attaches does nothing (found smoking these walks on the
+ * local stack). Network idle is the cheap proxy; never fatal.
+ */
+const settle = (page: Page) => page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+
 const firstLine = (e: unknown) => ((e as Error).message ?? String(e)).split("\n")[0].slice(0, 160);
 
 let workerId = "";
@@ -224,6 +231,7 @@ test("K-2 (4.12). the worker raises a hand on that need", async ({ browser }) =>
   await expect(inMain(page).getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const card = page.locator(`li[id="opp-${requestId}"]`);
   await expect(card.locator('[data-testid^="interest-"]').first(), "the need's card offers interest").toBeVisible({ timeout: 60_000 });
+  await settle(page);
   const withdraw = card.getByTestId("interest-withdraw");
   if (await withdraw.isVisible().catch(() => false)) {
     await withdraw.click();
@@ -240,6 +248,7 @@ let noteWritten = false;
 async function shortlistBlock(page: Page): Promise<Locator> {
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
   await rendered(page, "scouting");
+  await settle(page);
   const block = inMain(page).getByTestId(`scout-shortlist-${workerId}`);
   await expect(block, "the hand-raiser's card carries the shortlist controls").toBeVisible({ timeout: 60_000 });
   return block;
@@ -377,6 +386,7 @@ test("H-1 (1.15). Alfa's roster holds the person card before anyone claims it", 
 async function profileOffer(page: Page): Promise<Locator> {
   await page.goto("/lt/dashboard/profile");
   await rendered(page, "profile");
+  await settle(page);
   return inMain(page).locator(`[data-testid="roster-link-offer"][data-person-id="${personId}"]`);
 }
 
@@ -384,6 +394,7 @@ async function profileOffer(page: Page): Promise<Locator> {
 async function profileConfirmed(page: Page): Promise<Locator> {
   await page.goto("/lt/dashboard/profile");
   await rendered(page, "profile");
+  await settle(page);
   const disclosure = inMain(page).getByTestId("organization-history-disclosure");
   if ((await disclosure.count()) > 0 && (await disclosure.first().getAttribute("open")) === null) {
     await disclosure.first().locator("summary").first().click();
@@ -419,6 +430,7 @@ test("H-2 (1.15). Alfa offers the roster record to its employee", async ({ brows
   await page.goto("/lt/dashboard/company/people#people-more");
   const row = page.getByTestId(`organization-roster-person-${personId}`);
   await expect(row).toBeVisible({ timeout: 30_000 });
+  await settle(page);
   await expect(row.locator("[data-link-state]").first()).toHaveAttribute("data-link-state", "unlinked", { timeout: 30_000 });
   const select = row.getByTestId(`roster-link-worker-${personId}`);
   await expect(select, "the offer names a person in a relationship with Alfa").toBeVisible({ timeout: 30_000 });
@@ -525,6 +537,7 @@ test("T-1 (6.19). Alfa's owner forms a team", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await expect(page.getByTestId("team-brigades-panel")).toBeVisible({ timeout: 30_000 });
+  await settle(page);
   await page.getByTestId("team-create-name").fill(TEAM);
   await page.getByTestId("team-create-submit").click();
   await expect(teamCard(page), "the new team is listed").toBeVisible({ timeout: 30_000 });
@@ -546,6 +559,7 @@ test("T-2 (6.19). Gama finds the team in the network directory and sends a struc
   await page.waitForURL(/[?&]q=/, { timeout: 30_000 });
   const row = inMain(page).getByTestId(`network-company-${teamId}`);
   await expect(row, "the team is findable by its name").toBeVisible({ timeout: 30_000 });
+  await settle(page);
   await row.getByTestId(`team-enquiry-open-${teamId}`).click();
   await row.getByTestId(`team-enquiry-message-${teamId}`).fill(ENQUIRY);
   await row.getByTestId(`team-enquiry-submit-${teamId}`).click();
@@ -565,6 +579,7 @@ async function teamInbox(page: Page): Promise<Locator> {
   await page.goto("/lt/dashboard/company/people");
   const card = page.getByTestId(`team-brigade-${teamId}`);
   await expect(card).toBeVisible({ timeout: 30_000 });
+  await settle(page);
   const fold = card.locator("details").filter({ has: page.locator('[data-testid^="team-enquir"]') }).first();
   if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
   const off = page.getByTestId(`team-enquiries-not-enabled-${teamId}`);
@@ -623,6 +638,7 @@ async function disbandSyntheticTeams(page: Page): Promise<number> {
   for (let i = 0; i < 10; i += 1) {
     await page.goto("/lt/dashboard/company/people");
     await expect(page.getByTestId("team-brigades-panel")).toBeVisible({ timeout: 30_000 });
+    await settle(page);
     let id = "";
     for (const c of await page.locator('[data-testid^="team-brigade-"]', { hasText: TEAM_PREFIX }).all()) {
       const tid = ((await c.getAttribute("data-testid")) ?? "").replace(/^team-brigade-/, "");

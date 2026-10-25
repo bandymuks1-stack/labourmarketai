@@ -101,7 +101,9 @@ async function useWorkspace(page: Page, orgName: string): Promise<void> {
  */
 async function act(page: Page, control: Locator, param: string, ok: readonly string[]): Promise<string> {
   await control.click();
-  await page.waitForURL(new RegExp(`[?&]${param}=`), { timeout: 30_000 });
+  // "commit": the notice is in the address as soon as the redirect lands; the
+  // page behind it is re-read by the next step anyway.
+  await page.waitForURL(new RegExp(`[?&]${param}=`), { timeout: 60_000, waitUntil: "commit" });
   const notice = new URL(page.url()).searchParams.get(param) ?? "";
   expect(ok, `the ${param} action answered "${notice}"`).toContain(notice);
   return notice;
