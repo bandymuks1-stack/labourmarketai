@@ -9,6 +9,8 @@ import {
   DOCUMENTS_READINESS_ENABLED,
 } from "@/lib/config/documents";
 import { matrixRequirementRows } from "@/lib/country-readiness/requirement-rows";
+import type { ReadinessScope } from "@/lib/country-readiness/types";
+import { readinessScopeFor } from "@/lib/readiness/context-requirements";
 
 /**
  * Worker documents → country readiness derivation (S3, design doc §2).
@@ -157,11 +159,38 @@ export type DocumentsListResult =
       typeSlugs: readonly string[];
       /** availability_status==='available' OR an available_from date set. */
       availabilitySet: boolean;
+      /**
+       * The person's own base country (`workers.current_location_country`),
+       * the fact that decides whether work in a country is a POSTING. Null =
+       * not stated. Optional so a caller built on the older shape still reads.
+       */
+      homeCountry?: string | null;
     }
   | { kind: "disabled" }
   | { kind: "needs-migration" }
   | { kind: "no-worker" }
   | { kind: "error"; message: string };
+
+/**
+ * WHICH MATRIX SCOPE APPLIES TO THIS PERSON IN THIS COUNTRY (walk-spec
+ * 2026-10-25). The list used to apply `worker_posted` to EVERY country, so a
+ * Lithuanian working in Lithuania was told the A1 certificate and the posting
+ * notification were missing. Posting-only requirements apply only when the
+ * work actually crosses a border — the person's base country is known and
+ * differs from the work country (decision 0021 extension, point 3: a
+ * cross-border row is suggested only when the countries are known to differ).
+ *
+ * Base country unknown → `worker_solo`: the rules for anyone working there.
+ * A posting cannot be asserted from nothing, and the documents page says the
+ * posting papers appear once the base country is stated.
+ */
+export function documentReadinessScope(
+  workCountry: string,
+  homeCountry: string | null | undefined,
+): Extract<ReadinessScope, "worker_solo" | "worker_posted"> {
+  const scope = readinessScopeFor(workCountry, homeCountry);
+  return scope === "worker_posted" ? "worker_posted" : "worker_solo";
+}
 
 export async function listMyDocuments(): Promise<DocumentsListResult> {
   if (!DOCUMENTS_READINESS_ENABLED) return { kind: "disabled" };
@@ -173,13 +202,18 @@ export async function listMyDocuments(): Promise<DocumentsListResult> {
 
   const { data: worker } = await asAny(supabase)
     .from("workers")
-    .select("id, availability_status, available_from")
+    .select("id, availability_status, available_from, current_location_country")
     .eq("profile_id", user.id)
     .maybeSingle();
   if (!worker) return { kind: "no-worker" };
   const availabilitySet =
     worker.availability_status === "available" ||
     Boolean(worker.available_from);
+  const homeCountry =
+    typeof worker.current_location_country === "string" &&
+    /^[A-Za-z]{2}$/.test(worker.current_location_country.trim())
+      ? worker.current_location_country.trim().toUpperCase()
+      : null;
 
   const { data: docs, error } = await asAny(supabase)
     .from("worker_documents")
@@ -213,13 +247,14 @@ export async function listMyDocuments(): Promise<DocumentsListResult> {
 
   // The DB country_document_requirements table is the admin OVERRIDE surface
   // and ships empty. Where a country has NO curated DB rows, supply the
-  // canonical, guard-enforced matrix rows (worker_posted scope — the platform's
-  // cross-border core) so the worker gets a real, sourced checklist now.
+  // canonical, guard-enforced matrix rows so the worker gets a real, sourced
+  // checklist now — in the scope that applies to THIS person there:
+  // `worker_posted` only across a known border, `worker_solo` otherwise.
   const dbCountries = new Set(dbRequirements.map((r) => r.country));
   const matrixRequirements: RequirementRow[] = [];
   for (const country of DOCUMENT_COUNTRIES) {
     if (dbCountries.has(country)) continue;
-    for (const m of matrixRequirementRows(country, "worker_posted")) {
+    for (const m of matrixRequirementRows(country, documentReadinessScope(country, homeCountry))) {
       matrixRequirements.push({
         country: m.country,
         documentTypeSlug: m.documentTypeSlug,
@@ -250,5 +285,6 @@ export async function listMyDocuments(): Promise<DocumentsListResult> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     typeSlugs: ((types ?? []) as any[]).map((t) => t.slug as string),
     availabilitySet,
+    homeCountry,
   };
 }

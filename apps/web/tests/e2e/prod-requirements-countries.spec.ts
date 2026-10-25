@@ -350,6 +350,30 @@ test("C-4 (8.6). REFUSED: a signed-out visitor is sent to sign in, never shown a
   await ctx.close();
 });
 
+test("C-5 (10.11). the plain-language reading answers honestly while AI is off, and the requirements stay the answer", async ({ browser }) => {
+  // #2765 integrated `country_readiness` as a labelled AI reading AFTER the
+  // sourced matrix. Production AI is off, so a signed-in reader must get the
+  // named off-state — never a made-up explanation — with every scope intact.
+  const { ctx, page } = await as(browser, "worker");
+  await page.goto("/lt/labour-market/nl");
+  const matrix = inMain(page).locator('[data-testid="country-readiness-NL"]');
+  await expect(matrix).toBeVisible({ timeout: 30_000 });
+  const scopes = matrix.locator('[data-testid^="country-readiness-scope-"]');
+  const before = await scopes.count();
+  expect(before, "the sourced requirements render").toBeGreaterThan(0);
+  const reading = inMain(page).getByTestId("country-readiness-reading");
+  await expect(reading).toBeVisible({ timeout: 30_000 });
+  await reading.getByRole("button").first().click();
+  const off = inMain(page).getByTestId("country-readiness-reading-off");
+  const result = inMain(page).getByTestId("country-readiness-reading-result");
+  await expect(off.or(result)).toBeVisible({ timeout: 30_000 });
+  const reason = (await off.count()) ? await off.getAttribute("data-reason") : "result";
+  console.info(`[C-5] reading with AI off: ${reason}`);
+  expect(reason, "with AI off the reading names its state instead of inventing one").toBe("ai_off");
+  expect(await scopes.count(), "the requirements are unchanged by the reading").toBe(before);
+  await ctx.close();
+});
+
 // ══════════════════════════════════════════════════ cleanup, pass or fail
 
 test.afterAll(async ({ browser }) => {

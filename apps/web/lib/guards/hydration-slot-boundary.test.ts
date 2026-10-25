@@ -27,8 +27,13 @@ describe("DashboardChrome keeps RSC slots behind a non-DOM boundary", () => {
     }
   });
 
-  it("the full-mode header and bottom-nav slots are wrapped too", () => {
-    expect(src).toMatch(/<SlotBoundary>\{fullHeader\}<\/SlotBoundary>/);
-    expect(src).toMatch(/<SlotBoundary>\{fullBottomNav\}<\/SlotBoundary>/);
+  it("no server-authored header or bottom-nav slot is left to wrap", () => {
+    // The full-mode header and bottom-nav slots used to arrive from the RSC
+    // payload and had to sit behind SlotBoundary too. Since 2026-10-25 every
+    // mode renders the ONE client header (`<ConversationHeader>`) directly,
+    // so those slots no longer exist; if a server-authored slot comes back it
+    // must be wrapped again.
+    expect(src).not.toMatch(/fullHeader|fullBottomNav/);
+    expect(src).toMatch(/<ConversationHeader title=\{headerTitle\} nav=\{nav\} \/>/);
   });
 });

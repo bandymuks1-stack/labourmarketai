@@ -15,7 +15,8 @@
     "capacity": "Capacity",
     "work": "Work & hours",
     "results": "Results",
-    "history": "History"
+    "history": "History",
+    "areasTitle": "Company areas"
   },
   "publicDemand": {
     "title": "Current market demand",
@@ -6130,6 +6131,8 @@
       "asksTitle": "The project still needs from you",
       "ledger": {
         "ratio": "{have} of {total} in place",
+        "ratioNone": "Nothing here can be checked yet",
+        "ratioUnknown": "not known yet: {count}",
         "availability": "Availability",
         "state": {
           "valid": "you have it",
@@ -6161,7 +6164,7 @@
           "none": "nothing recorded yet"
         },
         "managerStatus": {
-          "needed": "waiting for it",
+          "needed": "to agree before the agreement",
           "missing": "marked missing",
           "received": "received",
           "checked": "checked",
@@ -6170,7 +6173,7 @@
         },
         "resolution": {
           "addDocument": "Record the document",
-          "issuingAuthority": "Issued by: {title}",
+          "informationSource": "Information source: {title}",
           "trainingProgram": "Course: {title}",
           "serviceOffering": "Service: {title}",
           "serviceOfferingRate": "Service: {title} ({rate})",
@@ -7679,7 +7682,16 @@
     "backHome": "Back to home",
     "dashboardSections": "Dashboard sections",
     "skipToContent": "Skip to content",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "nav": {
+      "more": "More",
+      "menu": "Menu",
+      "areas": "Work areas",
+      "close": "Close",
+      "youAreHere": "You are here",
+      "previous": "Previous area",
+      "next": "Next area"
+    }
   },
   "workerInvitations": {
     "title": "Pending invitations",
@@ -8066,7 +8078,8 @@
       "mine": "Your preferred countries come first.",
       "unknown": "The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
       "next": "If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
-      "ok": "All curated requirements for {country} are covered."
+      "ok": "All curated requirements for {country} are covered.",
+      "postingNeedsBase": "The A1 certificate and the posting notification are listed only when your base country is known and differs from the country of work. Your base country is not stated yet."
     },
     "types": {
       "cv": "CV",
@@ -9250,7 +9263,8 @@
     "clash": {
       "acceptAnyway": "I know it overlaps — accept anyway",
       "stillStands": "Accepting will not remove the overlap. Both bookings keep their dates, the clash stays visible in your calendar, and it is recorded that you chose it.",
-      "acknowledged": "Accepted with a known overlap. {count} existing booking(s) still clash — nothing was cancelled or hidden, and your decision is on file."
+      "acknowledged": "Accepted with a known overlap. {count} existing booking(s) still clash — nothing was cancelled or hidden, and your decision is on file.",
+      "notRecordable": "These dates overlap a booking you've already accepted, and that overlap can't be recorded yet, so you can decline this offer or leave it open for the company to change the dates."
     },
     "proposedBy": "Proposed by {name}",
     "termsChanged": "The company changed the terms. You had agreed to: {previous}. Decide again on the new dates."
@@ -11479,7 +11493,7 @@
     },
     "utilisation": {
       "title": "Committed share of the next weeks",
-      "committedDays": "{committed} of {counted} worker-days committed — {workers} people over {days} days",
+      "committedDays": "{committed} of {counted, plural, one {# worker-day} other {# worker-days}} committed — {workers, plural, one {# person} other {# people}} over {days, plural, one {# day} other {# days}}",
       "noneCounted": "No worker's commitments could be counted for this window.",
       "partial": "{count} of them could not be counted in full — something real has no dates, so the figure above is a floor.",
       "unknown": "{count} could not be read at all. That is not the same as free.",

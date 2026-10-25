@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageTitle } from "@/components/app/premium/page-title";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { JobDemandCard, type JobDemandCardEntity } from "@/components/visual/job-demand-card";
@@ -126,9 +127,9 @@ export default async function TalentPage({
   return (
     <div className="flex flex-col gap-6" data-testid="talent-preview-page">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+        <PageTitle>
           {t("tabs.discover")} · {tp("previewSuffix")}
-        </h1>
+        </PageTitle>
         <p className="text-sm text-text-secondary">{tp("intro")}</p>
         <div
           className="card-border inline-flex w-fit items-center gap-2 px-3 py-1 text-xs"

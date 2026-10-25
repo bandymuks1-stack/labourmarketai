@@ -363,12 +363,15 @@ describe("3. CommandFinder stays registry-first and accessible", () => {
 
   it("every dashboard page reaches the ONE finder (one search truth; no separate search page)", () => {
     // W3 Package 4 deleted the second dashboard's inline mount; the finder's
-    // surviving presentation is the header-search overlay the layout mounts
-    // on every dashboard page.
+    // surviving presentation is the header-search overlay THE ONE header
+    // mounts, and every dashboard chrome mode renders that header (2026-10-25:
+    // the operator console's private header, which mounted its own copy, is
+    // gone).
     const headerSearch = read("components/app/header-search.tsx");
     expect(headerSearch).toContain('from "@/components/app/command-finder"');
     expect(headerSearch).toMatch(/<CommandFinder \/>/);
-    expect(read("app/[locale]/dashboard/layout.tsx")).toMatch(/<HeaderSearch/);
+    expect(read("components/app/conversation/chat/conversation-header.tsx")).toMatch(/<HeaderSearch/);
+    expect(read("components/app/dashboard-chrome.tsx")).toMatch(/<ConversationHeader/);
     // The removed /dashboard/search router page must not come back.
     expect(
       existsSync(join(ROOT, "app", "[locale]", "dashboard", "search", "page.tsx")),

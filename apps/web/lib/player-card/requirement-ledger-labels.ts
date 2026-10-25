@@ -31,6 +31,8 @@ export async function buildRequirementLedgerLabels(): Promise<InstructionLedgerL
 
   return {
     ratio: (have, total) => t("card.ledger.ratio", { have, total }),
+    ratioNone: t("card.ledger.ratioNone"),
+    ratioUnknown: (count) => t("card.ledger.ratioUnknown", { count }),
     state: {
       valid: t("card.ledger.state.valid"),
       expiring: t("card.ledger.state.expiring"),
@@ -81,8 +83,8 @@ export async function buildRequirementLedgerLabels(): Promise<InstructionLedgerL
       switch (r.kind) {
         case "add_document":
           return t("card.ledger.resolution.addDocument");
-        case "issuing_authority":
-          return t("card.ledger.resolution.issuingAuthority", { title: r.title });
+        case "information_source":
+          return t("card.ledger.resolution.informationSource", { title: r.title });
         case "training_program":
           return t("card.ledger.resolution.trainingProgram", { title: r.title });
         case "service_offering":

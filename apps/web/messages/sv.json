@@ -293,7 +293,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profil",
-        "journal": "Mitt CV",
+        "journal": "Arbetsjournal",
         "search": "[EN] Search",
         "advanced": "Avancerad hantering",
         "playerCard": "Min yrkesprofil",
@@ -572,7 +572,16 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Laddar…",
-    "dashboardSections": "Översiktens avsnitt"
+    "dashboardSections": "Översiktens avsnitt",
+    "nav": {
+      "more": "Mer",
+      "menu": "Meny",
+      "areas": "Arbetsområden",
+      "close": "Stäng",
+      "youAreHere": "Du är här",
+      "previous": "Föregående område",
+      "next": "Nästa område"
+    }
   },
   "companies": {
     "cta": {
@@ -2906,7 +2915,8 @@
     "clash": {
       "acceptAnyway": "Jag vet att det överlappar — acceptera ändå",
       "stillStands": "Att acceptera tar inte bort överlappet. Båda bokningarna behåller sina datum, konflikten syns fortfarande i kalendern, och ditt val registreras.",
-      "acknowledged": "Accepterad med känd överlappning. {count} befintlig(a) bokning(ar) överlappar fortfarande — inget avbokades eller doldes, och ditt val är registrerat."
+      "acknowledged": "Accepterad med känd överlappning. {count} befintlig(a) bokning(ar) överlappar fortfarande — inget avbokades eller doldes, och ditt val är registrerat.",
+      "notRecordable": "De här datumen överlappar en bokning som du redan har accepterat, och överlappet kan inte registreras ännu, så du kan tacka nej till erbjudandet eller låta det stå öppet så att företaget kan ändra datumen."
     },
     "proposedBy": "Föreslagen av {name}",
     "termsChanged": "Företaget ändrade villkoren. Du hade godkänt: {previous}. Bestäm igen om de nya datumen."
