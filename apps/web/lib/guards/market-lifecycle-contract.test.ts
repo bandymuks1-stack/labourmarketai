@@ -75,7 +75,7 @@ describe("UI: every own-entry surface uses the ONE shared lifecycle face", () =>
     // "verified" itself (first-work-request-clarity forbids a gate there).
     expect(page).toMatch(/companyVerificationStatus=\{companyRow\.verificationStatus\}/);
     const readback = read("components/app/demand-requests-readback.tsx");
-    expect(readback).toMatch(/const workersSeeNeeds = companyVerificationStatus === "verified";/);
+    expect(readback).toMatch(/const workersSeeNeeds = demandReachesWorkers\(companyVerificationStatus\);/);
     expect(readback).toMatch(/companyVerificationStatus = null/);
   });
 

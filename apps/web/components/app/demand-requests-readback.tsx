@@ -13,7 +13,7 @@ import { DemandLocationCapture } from "@/components/app/demand-location-capture"
 import { Card } from "@/components/ui/Card";
 import { MarketEntryChip } from "@/components/app/market-entry-lifecycle";
 import { DemandEntryLifecycle } from "@/components/app/demand-entry-lifecycle";
-import { demandAdapter } from "@/lib/market-lifecycle/adapters";
+import { demandAdapter, demandReachesWorkers } from "@/lib/market-lifecycle/adapters";
 
 /** The statuses the owner moves (lifecycle contract); the rest are the admin
  *  review pipeline and keep their own honest label. */
@@ -132,7 +132,7 @@ function RequestRow({
   labels: DemandRequestsReadbackLabels;
   locale: string;
   pendingInterest?: ReadonlyMap<string, { count: number; label: string }>;
-  /** Workers see this organisation's needs (verified company). */
+  /** Workers see this organisation's inquiries (the demand visibility gate). */
   gateMet: boolean;
   /** Scouting answers "who could fill this need". That question is meaningless
    *  over an OFFER, so the supply section renders no link rather than sending
@@ -314,8 +314,8 @@ export function DemandRequestsReadback({
 }: {
   result: CustomerRequestsListResult;
   labels: DemandRequestsReadbackLabels;
-  /** The company's verification status: the worker board shows a published
-   *  inquiry only for a verified company. Absent → a row never claims a
+  /** The company's verification status, read through the demand adapter's
+   *  `demandReachesWorkers`. Absent → a row never claims a
    *  visibility it cannot prove. Display only — never a gate on the flow. */
   companyVerificationStatus?: string | null;
   /** requestId → how many people are still waiting, with the localized line.
@@ -326,7 +326,7 @@ export function DemandRequestsReadback({
   // needs-migration / error → render nothing (graceful; on prod the
   // 0028 migration is applied so this resolves to a real list).
   if (result.kind !== "ok") return null;
-  const workersSeeNeeds = companyVerificationStatus === "verified";
+  const workersSeeNeeds = demandReachesWorkers(companyVerificationStatus);
 
   // The row's own direction decides its section — nothing here re-derives it
   // from a title or a kind string. A row that is neither direction belongs to

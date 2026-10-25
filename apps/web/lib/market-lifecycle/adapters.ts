@@ -71,6 +71,15 @@ export function demandAdapter(opts: { closedOutcomeStored: boolean }): MarketAda
   };
 }
 
+/**
+ * The demand domain's visibility gate (`isPubliclyVisible`'s `accessGateMet`):
+ * the worker board serves a published inquiry only when its company's
+ * verification status is "verified". Display only — never a gate on posting.
+ */
+export function demandReachesWorkers(companyVerificationStatus: string | null | undefined): boolean {
+  return companyVerificationStatus === "verified";
+}
+
 /** `service_offerings`: draft | active | paused, plus closed once stored. */
 export function serviceAdapter(opts: { closedSupported: boolean }): MarketAdapter {
   return {
