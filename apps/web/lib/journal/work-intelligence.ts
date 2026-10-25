@@ -226,6 +226,10 @@ export type WorkIntelligenceOrganizationPeriodRecord = {
    *  A span that is not the source's is shown at month precision with this
    *  label, and never split (owner rule 2026-09-23). */
   readonly provenance: "source" | "human_choice" | "derived";
+  /** The figure's stated basis (`derived.hoursBasis`: actual / estimated,
+   *  with its method), when a source or a correction stated one. Absent =
+   *  not stated — read as an organization-reported figure, never as actual. */
+  readonly hoursBasis?: { readonly value: string; readonly method: string | null; readonly note: string | null } | null;
   /** The same context the day records carry (imported evidence only). */
   readonly context?: HistoryContext;
 };

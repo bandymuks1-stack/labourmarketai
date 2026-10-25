@@ -1717,7 +1717,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -2014,6 +2014,15 @@
       "pending": "Apvieno…",
       "done": "Apvienots. Rindas un to ieraksti saglabāti; projektu sarakstā tagad redzams saglabātais projekts.",
       "failed": "Nav apvienots. Neapstrādātajām rindām nekas nav mainīts — pārlādējiet un mēģiniet vēlreiz."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {
@@ -2811,6 +2820,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -2846,7 +2856,8 @@
       "alreadyAccepted": "Darbinieks šo piedāvājumu jau ir pieņēmis — saskaņotie nosacījumi šeit netiek pārrakstīti. Izmaiņas saskaņojiet sarunā.",
       "refusedNotReachable": "Šai personai no šejienes nevar piedāvāt rezervāciju — profils nav redzams darba devējiem, un jums nav darba attiecību.",
       "refusedNeedClosed": "Šī vajadzība ir slēgta — atver to no jauna, pirms piedāvā rezervāciju.",
-      "refusedAnswered": "Darbinieks šo piedāvājumu noraidīja, tāpēc bez viņa jaunas piekrišanas tas netiek atvērts no jauna. Turpiniet sarunā vai atrodiet citu darbinieku."
+      "refusedAnswered": "Darbinieks šo piedāvājumu noraidīja, tāpēc bez viņa jaunas piekrišanas tas netiek atvērts no jauna. Turpiniet sarunā vai atrodiet citu darbinieku.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -3691,8 +3702,8 @@
           "description": "Projekta darbinieka saraksta punkts tiek atzīmēts ar reālu statusu — nepieciešams, saņemts, pārbaudīts."
         },
         "seedReadinessChecklist": {
-          "label": "Sākt dokumentu sarakstu",
-          "description": "Visiem projekta cilvēkiem tiek sākts standarta gatavības / dokumentu saraksts."
+          "label": "Pievienot ierosinājumus, par ko vienoties",
+          "description": "Visiem projekta cilvēkiem tiek pievienoti ieteiktie punkti, par ko vienoties pirms līguma. Tas nav obligāts saraksts un nav gatavības vērtējums."
         },
         "requestReadiness": {
           "label": "Pieprasīt trūkstošo",
@@ -4270,8 +4281,8 @@
       "missingDeclaredSkills": "norādīto prasmju",
       "missingEvidence": "darba pierādījumu",
       "blockedSuffix": "(noraidīts / beidzies)",
-      "readinessSeedChip": "Sākt dokumentu sarakstu ({count} cilv.)",
-      "readinessSeeded": "Saraksts sākts: {count} cilv. × {items} punkti — visi „nepieciešams“.",
+      "readinessSeedChip": "Pievienot ierosinājumus, par ko vienoties ({count} cilv.)",
+      "readinessSeeded": "Ierosinājumi pievienoti: {count} cilv. × {items} punkti — visi „vienoties pirms līguma“.",
       "readinessGotChip": "Saņemts: {label} ({name})",
       "readinessGotDone": "Atzīmēts kā saņemts: {label} ({name}).",
       "readinessCheckedChip": "Pārbaudīts: {label} ({name})",
@@ -4312,7 +4323,7 @@
       "moveAskProject": "Kur pārcelt {name}? Izvēlieties:",
       "moveWhatIfTitle": "Ja {name} pārietu no „{from}“ uz „{to}“:",
       "moveFromLine": "• „{from}“: cilvēku {before} → {after}; viņa atvērto darba pakotņu tur paliek {tasks}; gatavības saraksts tur: {checked}/{total}.",
-      "moveToLine": "• „{to}“: cilvēku {before} → {after}; gatavības saraksts tur sāksies no 0/{total}.",
+      "moveToLine": "• „{to}“: cilvēku {before} → {after}; par ko tur vienoties, vēl nav izvēlēts (ieteikti līdz {total} punktiem).",
       "moveCountryLine": "• Mainās valsts: {from} → {to} — citas dokumentu prasības.",
       "moveNoDatesLine": "• „{to}“ nav datumu — prombūtnes nevar pārbaudīt.",
       "moveAvailabilityUnknownLine": "• Prombūtnes nav zināmas.",
@@ -6940,7 +6951,9 @@
       "managesInvitations": "Pārvalda ielūgumus",
       "grantInvitations": "Atļaut pārvaldīt ielūgumus",
       "withdrawInvitations": "Atsaukt ielūgumu pārvaldību",
-      "unavailable": "Dalībnieku sarakstu šobrīd neizdevās nolasīt. Tas nenozīmē, ka organizācijai nav dalībnieku."
+      "unavailable": "Dalībnieku sarakstu šobrīd neizdevās nolasīt. Tas nenozīmē, ka organizācijai nav dalībnieku.",
+      "noAccountHint": "Dalībnieka lomu var piešķirt tikai tam, kam jau ir konts. Personu bez konta uzaicini ar uzaicinājuma saiti — kad tā reģistrēsies un pievienosies organizācijai, šeit varēsi piešķirt lomu.",
+      "noAccountCta": "Izveidot uzaicinājuma saiti"
     },
     "start": {
       "membersMoved": "Organizācijas {workspace} dalībnieki un uzaicinājumi tiek pārvaldīti tās Iestatījumos.",

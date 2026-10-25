@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
 
 /**
  * Work-instructions read service (slice work-instructions-v1).
@@ -92,6 +93,21 @@ export async function listWorkerInstructions(): Promise<InstructionRead> {
     authorName:
       (r.author as { full_name: string | null } | null)?.full_name ?? null,
   }));
+  // The embedded `profiles` read is RLS-scoped: a worker may not read their
+  // manager's profile row, so the sender came back null and the card said
+  // "—" (UX review 2026-10-24, 3.26). An instruction lives in a 2-person
+  // direct thread whose OTHER participant is its author (only messages not
+  // written by the viewer are read), so the permission-gated counterpart
+  // reader names the sender — the same name the Messages thread shows.
+  const unnamed = instructions.filter((i) => !i.authorName).map((i) => i.conversationId);
+  if (unnamed.length > 0) {
+    const names = await readCounterpartIdentities(unnamed).catch(
+      () => new Map<string, string>() as ReadonlyMap<string, string>,
+    );
+    for (const i of instructions) {
+      if (!i.authorName) i.authorName = names.get(i.conversationId) ?? null;
+    }
+  }
   return { kind: "ok", instructions };
 }
 

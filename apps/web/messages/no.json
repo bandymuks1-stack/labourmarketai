@@ -1717,7 +1717,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -2014,6 +2014,15 @@
       "pending": "Slår sammen…",
       "done": "Slått sammen. Radene og postene beholdes; prosjektlisten viser nå det beholdte prosjektet.",
       "failed": "Ikke slått sammen. Ingenting ble endret for rader som ikke gikk gjennom — last inn på nytt og prøv igjen."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {
@@ -2811,6 +2820,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -2846,7 +2856,8 @@
       "alreadyAccepted": "Arbeidstakeren har allerede akseptert dette forslaget — avtalte vilkår overskrives ikke her. Avtal endringer i samtalen.",
       "refusedNotReachable": "Denne personen kan ikke få et bookingforslag herfra — profilen er ikke synlig for arbeidsgivere, og det finnes ingen arbeidsrelasjon med deg.",
       "refusedNeedClosed": "Dette behovet er lukket — åpne det igjen før du foreslår en booking.",
-      "refusedAnswered": "Arbeidstakeren avslo dette forslaget, så det åpnes ikke på nytt uten ny samtykke fra arbeidstakeren. Fortsett i samtalen eller finn en annen arbeidstaker."
+      "refusedAnswered": "Arbeidstakeren avslo dette forslaget, så det åpnes ikke på nytt uten ny samtykke fra arbeidstakeren. Fortsett i samtalen eller finn en annen arbeidstaker.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -3691,8 +3702,8 @@
           "description": "Et listepunkt for en prosjektmedarbeider merkes med en reell status — kreves, mottatt, sjekket."
         },
         "seedReadinessChecklist": {
-          "label": "Start dokumentlisten",
-          "description": "Standardlisten for beredskap / dokumenter startes for alle på prosjektet."
+          "label": "Legg til forslag til avtale",
+          "description": "Foreslåtte punkter å avtale før avtalen legges til for alle på prosjektet. Det er ikke en obligatorisk liste og ikke en vurdering av beredskap."
         },
         "requestReadiness": {
           "label": "Be om det som mangler",
@@ -4270,8 +4281,8 @@
       "missingDeclaredSkills": "oppgitte ferdigheter",
       "missingEvidence": "arbeidsbevis",
       "blockedSuffix": "(avvist / utløpt)",
-      "readinessSeedChip": "Start dokumentlisten ({count} pers.)",
-      "readinessSeeded": "Liste startet: {count} pers. × {items} punkter — alle «kreves».",
+      "readinessSeedChip": "Legg til forslag til avtale ({count} pers.)",
+      "readinessSeeded": "Forslag lagt til: {count} pers. × {items} punkter — alle «avtales før avtalen».",
       "readinessGotChip": "Mottatt: {label} ({name})",
       "readinessGotDone": "Merket som mottatt: {label} ({name}).",
       "readinessCheckedChip": "Kontrollert: {label} ({name})",
@@ -4312,7 +4323,7 @@
       "moveAskProject": "Hvor skal {name} flyttes? Velg:",
       "moveWhatIfTitle": "Hvis {name} flyttes fra “{from}” til “{to}”:",
       "moveFromLine": "• “{from}”: personer {before} → {after}; {tasks} av hans åpne arbeidspakker blir der; beredskapsliste der: {checked}/{total}.",
-      "moveToLine": "• “{to}”: personer {before} → {after}; beredskapslisten der starter på 0/{total}.",
+      "moveToLine": "• “{to}”: personer {before} → {after}; hva som skal avtales der, er ikke valgt ennå (opptil {total} punkter foreslått).",
       "moveCountryLine": "• Landet endres: {from} → {to} — andre dokumentkrav.",
       "moveNoDatesLine": "• “{to}” har ingen datoer — fravær kan ikke sjekkes.",
       "moveAvailabilityUnknownLine": "• Fravær ukjent.",
@@ -6940,7 +6951,9 @@
       "managesInvitations": "Håndterer invitasjoner",
       "grantInvitations": "Tillat å håndtere invitasjoner",
       "withdrawInvitations": "Trekk tilbake håndtering av invitasjoner",
-      "unavailable": "Medlemslisten kunne ikke leses akkurat nå. Det betyr ikke at organisasjonen ikke har medlemmer."
+      "unavailable": "Medlemslisten kunne ikke leses akkurat nå. Det betyr ikke at organisasjonen ikke har medlemmer.",
+      "noAccountHint": "En medlemsrolle kan bare gis til noen som allerede har en konto. Inviter en person uten konto med en invitasjonslenke — når personen registrerer seg og blir med i organisasjonen, kan du gi en rolle her.",
+      "noAccountCta": "Lag en invitasjonslenke"
     },
     "start": {
       "membersMoved": "Medlemmer og invitasjoner for {workspace} administreres i organisasjonens Innstillinger.",

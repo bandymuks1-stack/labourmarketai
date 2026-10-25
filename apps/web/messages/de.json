@@ -2138,6 +2138,10 @@
           "title": "Starten Sie Ihr Unternehmensprofil",
           "body": "Sie haben noch kein Unternehmensprofil. Erstellen Sie eines — es ist sofort aktiv und nutzbar, ohne Warten auf eine Freigabe.",
           "cta": "Unternehmenseinrichtung starten"
+        },
+        "personalSpace": {
+          "title": "Sie sind gerade in Ihrem persönlichen Bereich",
+          "body": "Die Unternehmenswerkzeuge öffnen sich im Arbeitsbereich dieser Organisation — eine zweite Organisation anzulegen ist nicht nötig. Öffnen Sie Ihre:"
         }
       },
       "typeNotes": {
@@ -3941,7 +3945,7 @@
       "evidenceRecs": "Referenzen — helfen, Ihre Zuverlässigkeit zu belegen.",
       "evidenceLegal": "Ausweis- oder Rechtsdokumente — werden nur verwendet, wenn sie für eine Einstellung oder ein rechtliches Verfahren benötigt werden.",
       "privacyNote": "Ihre Dokumente bleiben privat. Sie werden ohne klare Grundlage keinem Arbeitgeber oder Kunden gezeigt.",
-      "uploadCostNote": "Das Hochladen eines Lebenslaufs ist kostenlos — es wird kein LMC abgebucht. Das System kommt mit der Dateigröße selbst zurecht."
+      "uploadCostNote": "Das Hochladen eines Lebenslaufs ist kostenlos — es werden keine Plattform-Guthaben (LMC) abgebucht. Das System kommt mit der Dateigröße selbst zurecht."
     }
   },
   "live": {
@@ -6259,6 +6263,11 @@
           "trip": "Dienstreise",
           "absence": "Nicht verfügbar",
           "plan": "Geplante Arbeit"
+        },
+        "unknownWhy": {
+          "undated_window": "Dieses Projekt hat keine Daten, daher lassen sich Überschneidungen mit anderen Verpflichtungen nicht prüfen.",
+          "undated_commitment": "Eine andere Verpflichtung dieser Person hat keine Daten, daher lassen sich freie Tage nicht bestätigen.",
+          "source_unreadable": "Ein Teil des Kalenders konnte gerade nicht gelesen werden, daher lassen sich freie Tage nicht bestätigen."
         }
       }
     },
@@ -6408,7 +6417,7 @@
       "totalAssigned": "Zugewiesen",
       "viaTeam": "Über Team",
       "ready": "Bereit",
-      "readyBasis": "Basiert nur auf den hier geprüften Feldern.",
+      "readyBasis": "Nach Fähigkeiten und Arbeitsnachweisen. Dokumente senken die Bereitschaft nie.",
       "needsDeclaredSkills": "Keine angegebenen Fähigkeiten",
       "needsEvidence": "Keine Arbeitsnachweise",
       "needsFollowUp": "Nachfassen nötig",
@@ -6427,7 +6436,7 @@
     "workersTitle": "Arbeitskräfte in diesem Projekt",
     "noWorkers": "Diesem Projekt sind noch keine Arbeitskräfte zugewiesen. Weisen Sie Arbeitskräfte aus Ihrem Team zu, um den Einsatz zu starten.",
     "worker": {
-      "readyChip": "Bereit (geprüfte Felder)",
+      "readyChip": "Bereit: Fähigkeiten und Arbeitsnachweise",
       "notReadyChip": "Noch nicht bereit",
       "declaredSkills": "Angegebene Fähigkeiten",
       "confirmedSkills": "Bestätigte Fähigkeiten",
@@ -6447,8 +6456,8 @@
     },
     "notesTitle": "Was diese Zahlen bedeuten",
     "notes": {
-      "readiness": "\"Bereit\" bedeutet nur, dass die hier geprüften Felder vorhanden sind (Name, mindestens eine angegebene Fähigkeit, mindestens ein Arbeitsnachweis-Eintrag). Es ist keine Verifizierung, keine Dokumentenfreigabe und kein KI-Urteil.",
-      "documents": "Dokumente werden noch nicht erfasst — kein Dokument wird irgendwo auf diesem Board als freigegeben oder verifiziert angezeigt.",
+      "readiness": "„Bereit“ heißt: Es gibt einen Namen, mindestens eine angegebene Fähigkeit und mindestens einen Arbeitsnachweis. Dokumente zählen nicht zur Bereitschaft und senken sie nie — was für diese Arbeit geprüft werden muss, wird vor der endgültigen Vereinbarung abgestimmt. Es ist weder eine Verifizierung noch eine KI-Bewertung.",
+      "documents": "Es müssen keine Dokumente hochgeladen werden. Nirgends auf dieser Tafel gilt ein Dokument als erhalten oder geprüft, solange eine Führungskraft es nicht so markiert.",
       "candidateSkill": "Klärungen zu Kandidaten-Fähigkeiten sind für jede Arbeitskraft privat; sie werden im eigenen Berufsprofil der Arbeitskraft angezeigt, nicht hier."
     },
     "report": {
@@ -6473,20 +6482,21 @@
       "rejected": "Abgelehnt"
     },
     "checklist": {
-      "title": "Bereitschaft / Dokumente",
-      "empty": "Noch nicht erfasst. Fügen Sie die Standard-Checkliste oder eigene Punkte hinzu.",
-      "seed": "Standard-Checkliste hinzufügen",
+      "title": "Vor der Vereinbarung abzustimmen",
+      "empty": "Nichts erfasst — es müssen keine Dokumente hochgeladen werden. Wenn für diese Arbeit etwas zu prüfen ist, fügen Sie die Vorschläge oder einen eigenen Punkt hinzu.",
+      "seed": "Vorschläge für diese Arbeit hinzufügen",
       "addItem": "Punkt hinzufügen",
       "addPlaceholder": "Bezeichnung des neuen Punkts",
-      "missing": "Fehlt",
+      "missing": "Als fehlend markiert",
       "received": "Erhalten",
       "checked": "Geprüft",
       "blocked": "Abgelehnt / abgelaufen",
-      "helper": "\"Geprüft\" bedeutet, dass ein Manager es hier als geprüft markiert hat — keine rechtliche Verifizierung. Ein Dokument ist nur dann \"erhalten\" oder \"geprüft\", wenn ein Manager es so setzt; nichts wird automatisch freigegeben."
+      "helper": "\"Geprüft\" bedeutet, dass ein Manager es hier als geprüft markiert hat — keine rechtliche Verifizierung. Ein Dokument ist nur dann \"erhalten\" oder \"geprüft\", wenn ein Manager es so setzt; nichts wird automatisch freigegeben.",
+      "toAgree": "Abzustimmen"
     },
     "readinessStatuses": {
       "not_required": "Nicht erforderlich",
-      "needed": "Erforderlich",
+      "needed": "Vor der Vereinbarung abzustimmen",
       "missing": "Fehlt",
       "received": "Erhalten",
       "checked": "Geprüft",
@@ -6507,8 +6517,8 @@
       "all": "Alle",
       "byStatus": "Status",
       "anyStatus": "Beliebiger Status",
-      "missingDocs": "Fehlende Dokumente/Infos",
-      "ready": "Bereit (geprüfte Felder)",
+      "missingDocs": "Als fehlend markiert",
+      "ready": "Bereit: Fähigkeiten und Arbeitsnachweise",
       "needsSkillInfo": "Fähigkeitsinfo nötig",
       "needsEvidence": "Keine Arbeitsnachweise",
       "docsChecked": "Dokumente geprüft",
@@ -6516,7 +6526,7 @@
       "none": "Keine Arbeitskräfte entsprechen diesem Filter.",
       "showAll": "Alle anzeigen",
       "empty": {
-        "missingDocs": "Derzeit fehlen bei keinem Arbeiter Dokumente oder Informationen.",
+        "missingDocs": "Keine Führungskraft hat bei jemandem etwas als fehlend markiert.",
         "ready": "Noch kein Arbeiter erfüllt alle hier geprüften Felder. Wählen Sie „Alle“, um zu sehen, was jeweils fehlt.",
         "needsSkillInfo": "Alle zugewiesenen Arbeiter haben ihre Fähigkeiten angegeben.",
         "needsEvidence": "Alle zugewiesenen Arbeiter haben mindestens einen Arbeitsnachweis.",
@@ -6525,7 +6535,7 @@
       }
     },
     "counters2": {
-      "withMissingDocs": "Fehlende Dokumente/Infos",
+      "withMissingDocs": "Als fehlend markiert",
       "docsReceived": "Dokumente erhalten",
       "docsChecked": "Dokumente geprüft",
       "docsBlocked": "Abgelehnt/abgelaufen"
@@ -7021,7 +7031,7 @@
       "send": "Senden",
       "sent": "Antwort gesendet."
     },
-    "translatedFrom": "Übersetzt aus {lang}",
+    "translatedFrom": "Maschinelle Übersetzung aus {lang}",
     "showOriginal": "Originaltext ({lang})",
     "translationUnavailable": "Original ({lang}) — keine Übersetzung verfügbar",
     "loadError": "Nachrichten konnten gerade nicht geladen werden. Was Sie sehen, ist nicht das vollständige Bild — bitte erneut versuchen."
@@ -7840,8 +7850,8 @@
     "readinessPanel": {
       "title": "So verbessern Sie Ihre Bereitschaft",
       "intro": "Das sollten Sie als Nächstes vervollständigen, um Ihre Karte zu stärken.",
-      "allReady": "Ihre Profilkarte ist vollständig. Dokumente für die Arbeit in einem bestimmten Land werden separat gezählt — siehe unten.",
-      "countryFit": "Für die Arbeit in einem anderen Land sind die richtigen Dokumente nötig. Ohne sie werden Sie nicht als bereit für Arbeit im Ausland angezeigt — Sie sehen nur legale Wege (Unternehmen übernimmt den Papierkram, Dokumentenunterstützung). Das System verspricht niemals das Recht auf Arbeit ohne Dokumente."
+      "allReady": "Ihre Profilkarte ist vollständig. Dokumente zählen nicht zur Bereitschaft — für die Arbeit in einem bestimmten Land werden sie vor der Vereinbarung mit dem Arbeitgeber abgestimmt.",
+      "countryFit": "Bei Arbeit in einem anderen Land können dessen Gesetze bestimmte Dokumente verlangen (zum Beispiel A1 bei einer Entsendung oder eine Arbeitserlaubnis für Nicht-EU- / EWR-Bürger). Sie müssen sie hier nicht hochladen, und ohne sie sinkt Ihre Bereitschaft nicht: Beide Seiten prüfen die konkreten Dokumente vor der endgültigen Vereinbarung. Das System verspricht nie ein Recht auf Arbeit, wo das Gesetz eine Erlaubnis verlangt."
     },
     "readinessSteps": {
       "pillar": {
@@ -8055,7 +8065,7 @@
       "help": "Wählen Sie ein Zielland, um zu sehen, welche Dokumente dort verlangt werden.",
       "mine": "Ihre Wunschländer stehen zuerst.",
       "unknown": "Die Anforderungsliste für {country} wurde noch nicht kuratiert — wir zeigen lieber nichts an, statt zu raten.",
-      "next": "Nächster Schritt: kümmern Sie sich um — {doc}.",
+      "next": "Wenn Sie in diesem Land arbeiten, stimmen Sie dies vor der Vereinbarung mit dem Arbeitgeber ab: {doc}. Hochladen ist nicht nötig.",
       "ok": "Alle kuratierten Anforderungen für {country} sind abgedeckt."
     },
     "types": {
@@ -8094,7 +8104,7 @@
     },
     "overall": {
       "not_enough_information": "Noch nicht genügend Informationen",
-      "missing_documents": "Fehlende Dokumente",
+      "missing_documents": "Nicht jedes Dokument aus den Regeln dieses Landes ist erfasst",
       "needs_verification": "Bereit nach Verifizierung",
       "almost_ready": "Fast bereit",
       "ready_for_country": "Bereit für dieses Land",
@@ -8805,7 +8815,7 @@
     "candidate": "Kandidat",
     "privacy": {
       "contactsHidden": "Kontaktdaten bleiben verborgen — keine Telefonnummer, E-Mail oder Name.",
-      "profileSafe": "Sie sehen nur profilsichere Signale: Fähigkeitsnachweise, Standort, Verfügbarkeit und Satz. Die Kontaktaufnahme erfolgt später, über einen expliziten Schritt."
+      "profileSafe": "Sie sehen nur profilsichere Signale: Fähigkeitsnachweise, Standort, Verfügbarkeit und Satz. Name und Kontaktdaten erscheinen erst, wenn die Person es erlaubt."
     },
     "fields": {
       "location": "Standort",
@@ -8823,9 +8833,10 @@
     "rateFrom": "ab {min} €/Monat",
     "noRate": "Nicht angegeben",
     "comms": {
-      "eligible": "Diese Arbeitskraft hat eine offene Verfügbarkeit — das Messaging wird in einem späteren Schritt geöffnet.",
+      "eligible": "Diese Arbeitskraft hat eine offene Verfügbarkeit — Sie können sie über die Plattform kontaktieren.",
       "inConversation": "Sie sind mit dieser Arbeitskraft bereits im Gespräch — setzen Sie es unter Nachrichten fort.",
-      "blocked": "Die Kommunikation wird verfügbar, wenn die Arbeitskraft eine offene Verfügbarkeit oder ein Verfügbar-ab-Datum hat."
+      "blocked": "Die Kommunikation wird verfügbar, wenn die Arbeitskraft eine offene Verfügbarkeit oder ein Verfügbar-ab-Datum hat.",
+      "interestDoor": "Diese Person hat selbst Interesse gezeigt — Sie können ihr schon jetzt schreiben, mit „In der Plattform kontaktieren“."
     },
     "request": {
       "button": "Kommunikation anfragen",
@@ -9112,6 +9123,7 @@
     "intro": "Vorgeschlagene Einsätze. Eine Buchung ist erst bestätigt, wenn die Arbeitskraft annimmt.",
     "notAuthed": "Bitte melden Sie sich an, um Ihre Buchungen zu sehen.",
     "unavailable": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+    "readFailed": "Ihre Buchungen konnten gerade nicht geladen werden — das heißt nicht, dass Sie keine haben. Versuchen Sie es erneut.",
     "noDate": "Kein Startdatum festgelegt",
     "noRole": "Arbeitsvereinbarung",
     "startsOn": "Beginnt am {date}",
@@ -9188,7 +9200,8 @@
       "alreadyAccepted": "Die Arbeitskraft hat diesen Vorschlag bereits angenommen — vereinbarte Bedingungen werden hier nicht überschrieben. Änderungen im Gespräch abstimmen.",
       "refusedNotReachable": "Dieser Person kann hier keine Buchung vorgeschlagen werden — ihr Profil ist für Arbeitgeber nicht sichtbar und es besteht keine Arbeitsbeziehung mit Ihnen.",
       "refusedNeedClosed": "Dieser Bedarf ist geschlossen — öffnen Sie ihn erneut, bevor Sie eine Buchung vorschlagen.",
-      "refusedAnswered": "Die Arbeitskraft hat diesen Vorschlag abgelehnt; ohne ihre neue Zustimmung wird er nicht wieder geöffnet. Schreiben Sie im Gespräch weiter oder finden Sie eine andere Arbeitskraft."
+      "refusedAnswered": "Die Arbeitskraft hat diesen Vorschlag abgelehnt; ohne ihre neue Zustimmung wird er nicht wieder geöffnet. Schreiben Sie im Gespräch weiter oder finden Sie eine andere Arbeitskraft.",
+      "unconfirmed": "Noch keine Antwort vom Server. Der Vorschlag wurde möglicherweise schon gesendet — prüfen Sie Buchungen oder senden Sie ihn erneut (derselbe Vorschlag wird nie doppelt angelegt)."
     },
     "reason": {
       "optionalTitle": "Grund (optional)",
@@ -9540,7 +9553,7 @@
       "users": "Personen und Aktivität",
       "teams": "Brigaden und Einladungen",
       "b2b": "B2B-Markt",
-      "work": "Arbeitsjournal und Living CV",
+      "work": "Arbeitsjournal und lebendiger Lebenslauf",
       "technical": "Technik"
     },
     "col": {
@@ -10123,7 +10136,7 @@
     },
     "personal": {
       "title": "Ihre Möglichkeiten",
-      "subtitle": "Die besten derzeit gefundenen Möglichkeiten auf Grundlage Ihrer Angaben und Ihres Living CV.",
+      "subtitle": "Die besten derzeit gefundenen Möglichkeiten auf Grundlage Ihrer Angaben und Ihres lebendigen Lebenslaufs.",
       "discoverTitle": "Mehr für Sie",
       "discoverSubtitle": "Bis zu {count} passende Möglichkeiten aus den heute für Sie geprüften.",
       "status": {
@@ -11704,7 +11717,10 @@
       "docExpiring": "Dokumente, die innerhalb von 30 Tagen ablaufen",
       "docMissing": "Fehlende oder abgelaufene Dokumente",
       "docReview": "Dokumente in Prüfung oder zurückgegeben",
-      "financeOverdue": "Überfällige Finanzeinträge"
+      "financeOverdue": "Überfällige Finanzeinträge",
+      "journalReviews": "Arbeitseinträge, die auf Ihre Bestätigung warten",
+      "journalClientDecide": "Arbeitseinträge, die auf Ihre Entscheidung als Auftraggeber warten",
+      "partial": "Die Prüfliste der Arbeitseinträge konnte gerade nicht gelesen werden. Das heißt nicht, dass nichts wartet."
     },
     "sources": {
       "label": "Quellen",
@@ -11715,7 +11731,8 @@
       "workJournal": "Ihr Arbeitsjournal",
       "managerConfirmations": "Bestätigungen von Verantwortlichen",
       "projects": "Ihre Projekte",
-      "assignments": "Aktive Zuweisungen von Arbeitskräften"
+      "assignments": "Aktive Zuweisungen von Arbeitskräften",
+      "journalReviewQueue": "Prüfliste Arbeitseinträge"
     },
     "summaries": {
       "title": "Zusammenfassungen aus Ihren Daten",
@@ -13671,8 +13688,8 @@
           "description": "Ein Listenpunkt eines Projektmitarbeiters erhält einen echten Status — benötigt, erhalten, geprüft."
         },
         "seedReadinessChecklist": {
-          "label": "Dokumentenliste beginnen",
-          "description": "Für alle Personen im Projekt wird die Standard-Bereitschafts-/Dokumentenliste begonnen."
+          "label": "Vorschläge zum Abstimmen hinzufügen",
+          "description": "Für alle im Projekt werden vorgeschlagene Punkte hinzugefügt, die vor der Vereinbarung abzustimmen sind. Es ist keine Pflichtliste und keine Bereitschaftsbewertung."
         },
         "requestReadiness": {
           "label": "Fehlendes anfragen",
@@ -14030,7 +14047,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# Kunde hat} other {# Kunden haben}} die Verbindung noch nicht bestätigt.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# Einladung eines Lernenden ist} other {# Einladungen von Lernenden sind}} noch nicht angenommen.",
       "briefDocumentsExpiring": "{count, plural, one {# Dokument läuft bald ab} other {# Dokumente laufen bald ab}}.",
-      "briefDocumentsMissing": "{count, plural, one {Für Ihre genannten Länder fehlt noch # Dokument} other {Für Ihre genannten Länder fehlen noch # Dokumente}}: {list}.",
+      "briefDocumentsMissing": "{count, plural, one {Die Regeln Ihrer angegebenen Länder können # Dokument verlangen} other {Die Regeln Ihrer angegebenen Länder können # Dokumente verlangen}}: {list}. Hochladen ist nicht nötig — Sie stimmen sie vor einer Vereinbarung mit dem Arbeitgeber ab.",
       "briefEmployerInterestWaiting": "{count, plural, one {# Kandidat wartet auf Ihre Antwort} other {# Kandidaten warten auf Ihre Antwort}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# Agenturangebot wartet auf Ihre Entscheidung} other {# Agenturangebote warten auf Ihre Entscheidung}}.",
       "briefInterestContacted": "{count, plural, one {# Unternehmen möchte Sie wegen Ihres Interesses kontaktieren} other {# Unternehmen möchten Sie wegen Ihres Interesses kontaktieren}}.",
@@ -14521,8 +14538,8 @@
       "missingDeclaredSkills": "angegebene Fähigkeiten",
       "missingEvidence": "Arbeitsnachweise",
       "blockedSuffix": "(abgelehnt / abgelaufen)",
-      "readinessSeedChip": "Dokumentenliste beginnen ({count} Pers.)",
-      "readinessSeeded": "Liste begonnen: {count} Pers. × {items} Punkte — alle „benötigt“.",
+      "readinessSeedChip": "Vorschläge zum Abstimmen hinzufügen ({count} Personen)",
+      "readinessSeeded": "Vorschläge hinzugefügt: {count} Personen × {items} Punkte — alle „vor der Vereinbarung abzustimmen“.",
       "readinessGotChip": "Erhalten: {label} ({name})",
       "readinessGotDone": "Als erhalten markiert: {label} ({name}).",
       "readinessCheckedChip": "Geprüft: {label} ({name})",
@@ -14565,7 +14582,7 @@
       "moveAskProject": "Wohin soll {name} versetzt werden? Bitte wählen:",
       "moveWhatIfTitle": "Wenn {name} von „{from}“ nach „{to}“ wechselt:",
       "moveFromLine": "• „{from}“: Personen {before} → {after}; {tasks} offene Arbeitspakete bleiben dort bei ihm; Bereitschaftsliste dort: {checked}/{total}.",
-      "moveToLine": "• „{to}“: Personen {before} → {after}; die Bereitschaftsliste dort beginnt bei 0/{total}.",
+      "moveToLine": "• „{to}“: Personen {before} → {after}; was dort abzustimmen ist, ist noch nicht gewählt (bis zu {total} Punkte vorgeschlagen).",
       "moveCountryLine": "• Das Land wechselt: {from} → {to} — andere Dokumentanforderungen.",
       "moveNoDatesLine": "• „{to}“ hat keine Daten — Abwesenheiten können nicht geprüft werden.",
       "moveAvailabilityUnknownLine": "• Abwesenheiten unbekannt.",
@@ -18328,7 +18345,9 @@
       "managesInvitations": "Verwaltet Einladungen",
       "grantInvitations": "Einladungen verwalten erlauben",
       "withdrawInvitations": "Einladungsverwaltung entziehen",
-      "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat."
+      "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat.",
+      "noAccountHint": "Eine Mitgliedsrolle kann nur jemandem gegeben werden, der bereits ein Konto hat. Laden Sie eine Person ohne Konto mit einem Einladungslink ein — sobald sie sich registriert und der Organisation beitritt, können Sie ihr hier eine Rolle geben.",
+      "noAccountCta": "Einladungslink erstellen"
     },
     "start": {
       "membersMoved": "Mitglieder und Einladungen von {workspace} werden in den Einstellungen der Organisation verwaltet.",
@@ -19667,9 +19686,9 @@
       "approvedAutomatic": "Automatisch per Regel bestätigt",
       "rejected": "Abgelehnt",
       "changesRequested": "Änderung angefragt",
-      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bestätigter Eintrag} other {# bestätigte Einträge}}} other {Living CV ergänzt: {skills}}}",
-      "cvUnlinked": "Living CV: bestätigte Arbeit, noch keiner Fähigkeit zugeordnet",
-      "cvUnknown": "Living CV: konnte nicht gelesen werden",
+      "cv": "{count, plural, one {Lebendiger Lebenslauf: {skills} · {entries, plural, one {# bestätigter Eintrag} other {# bestätigte Einträge}}} other {Lebendiger Lebenslauf ergänzt: {skills}}}",
+      "cvUnlinked": "Lebendiger Lebenslauf: bestätigte Arbeit, noch keiner Fähigkeit zugeordnet",
+      "cvUnknown": "Lebendiger Lebenslauf: konnte nicht gelesen werden",
       "matching": "Das Matching sieht bestätigte Arbeit: {skills}",
       "matchingRepeated": "Das Matching sieht wiederholt bestätigte Arbeit: {skills}"
     },
@@ -19739,7 +19758,7 @@
       "returned": "Zur Korrektur zurück: {count}",
       "confirmed": "Von zweiter Seite bestätigt: {count}",
       "confirmedUnknown": "Die Zahl der Bestätigungen ließ sich nicht ermitteln",
-      "livingCv": "Bestätigte Arbeit zählt im Living CV der Mitarbeitenden"
+      "livingCv": "Bestätigte Arbeit zählt im lebendigen Lebenslauf der Mitarbeitenden"
     },
     "review": "Wartende prüfen ({count})",
     "stageDone": "Etappe „{name}“ abgeschlossen",
@@ -19821,6 +19840,30 @@
     "invite": {
       "line": "Zahle einmal 1 € für {days} Tage des kostenpflichtigen Organisationsplans. Nichts verlängert sich.",
       "cta": "Pilot öffnen"
+    }
+  },
+  "collaborationChecks": {
+    "title": "Vor der endgültigen Vereinbarung",
+    "lead": "Bevor Sie die endgültige Vereinbarung treffen, empfehlen wir beiden Seiten, die für diese Arbeit oder dieses Geschäft relevanten Dokumente, Qualifikationen, Genehmigungen und Bedingungen der Zusammenarbeit zu prüfen.",
+    "context": "Was relevant ist, hängt von der Arbeit, dem Beruf, dem Land und den Projektbedingungen ab — eine Pflichtliste für alle gibt es nicht.",
+    "countryRules": "Die Regeln hängen vom Land ab, in dem gearbeitet wird: {country}.",
+    "privacy": "Dokumente müssen nie in LabourMarket.ai hochgeladen werden. Wenn Sie sie teilen, tun Sie das selbst — die Plattform gibt sie nicht automatisch weiter und behauptet nicht, dass sie geprüft sind.",
+    "basis": {
+      "law": "Gesetzlich vorgeschrieben",
+      "law_if": "In bestimmten Fällen gesetzlich vorgeschrieben",
+      "agreement": "Sache der Vereinbarung beider Seiten"
+    },
+    "topic": {
+      "terms": "Arbeitsumfang, Termine, Vergütung, Arbeitszeit und Abrechnung.",
+      "identity_right_to_work": "Identität und Arbeitsberechtigung — bei einer Anstellung verlangen die Regeln des Arbeitslandes diese Prüfung oft.",
+      "posting_a1": "Wer Beschäftigte in ein anderes EU- / EWR-Land entsendet, braucht gesetzlich eine A1-Bescheinigung und eine Entsendemeldung.",
+      "work_permit": "Eine Arbeits- oder Aufenthaltserlaubnis — gesetzlich vorgeschrieben, wenn die Person nicht durch Staatsangehörigkeit oder Freizügigkeit (z. B. EU / EWR) in diesem Land arbeiten darf.",
+      "site_safety": "Arbeitsschutzunterweisung und Baustellenregeln — vor Arbeitsbeginn eine gesetzliche Pflicht des Arbeitgebers.",
+      "driving_licence": "Ein gültiger Führerschein der passenden Klasse — gesetzlich vorgeschrieben, um beruflich zu fahren.",
+      "professional_qualification": "Eine für diese Arbeit relevante Qualifikation oder Berufsbescheinigung — manche Länder schreiben sie für manche Berufe gesetzlich vor.",
+      "business_details": "Angaben zur Unternehmens- oder Gewerberegistrierung und zur Rechnungsstellung.",
+      "insurance": "Eine Haftpflicht- oder andere Versicherung, falls diese Arbeit sie braucht.",
+      "client_requirements": "Besondere Anforderungen des Auftraggebers oder der Baustelle, falls vorhanden."
     }
   }
 }
