@@ -7030,7 +7030,7 @@
       "send": "Senden",
       "sent": "Antwort gesendet."
     },
-    "translatedFrom": "Übersetzt aus {lang}",
+    "translatedFrom": "Maschinelle Übersetzung aus {lang}",
     "showOriginal": "Originaltext ({lang})",
     "translationUnavailable": "Original ({lang}) — keine Übersetzung verfügbar",
     "loadError": "Nachrichten konnten gerade nicht geladen werden. Was Sie sehen, ist nicht das vollständige Bild — bitte erneut versuchen."

@@ -7030,7 +7030,7 @@
       "send": "Siųsti",
       "sent": "Atsakymas išsiųstas."
     },
-    "translatedFrom": "Išversta iš {lang}",
+    "translatedFrom": "Mašininis vertimas iš {lang}",
     "showOriginal": "Originalas ({lang})",
     "translationUnavailable": "Originalas ({lang}) — vertimo nėra",
     "loadError": "Šiuo metu žinučių įkelti nepavyko. Tai, ką matai, nėra visas vaizdas — bandyk dar kartą."

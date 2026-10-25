@@ -7030,7 +7030,7 @@
       "send": "Verzenden",
       "sent": "Antwoord verzonden."
     },
-    "translatedFrom": "Vertaald uit {lang}",
+    "translatedFrom": "Machinevertaling uit {lang}",
     "showOriginal": "Origineel ({lang})",
     "translationUnavailable": "Origineel ({lang}) — geen vertaling beschikbaar",
     "loadError": "Berichten konden nu niet worden geladen. Wat je ziet is niet het volledige beeld — probeer het opnieuw."
