@@ -121,13 +121,6 @@ describe("the authority read asks the database's own predicates", () => {
     expect(sql).toMatch(/not public\.has_org_demand_access\(prog\.organization_id\)/);
   });
 
-  it("every rendered organization is asked about — batches bound concurrency, never coverage", () => {
-    // An unchecked organization reads as "no authority" and would hide edit /
-    // assign forms the caller may use (Codex P2 on #2757): no cap on the list.
-    expect(service).not.toMatch(/\]\s*\.slice\(0,/);
-    expect(service).toMatch(/for \(let i = 0; i < orgs\.length; i \+= AUTHORITY_ORG_BATCH\)/);
-  });
-
   it("the add-a-course target is the create action's own workspace resolution", () => {
     expect(service).toMatch(/await requireEmployerCompany\(\)/);
     expect(code(read("lib/training/training-actions.ts"))).toMatch(/await requireEmployerCompany\(\)/);

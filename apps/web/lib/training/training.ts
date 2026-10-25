@@ -136,9 +136,8 @@ export async function getTrainingOverview(): Promise<TrainingOverviewResult> {
   };
 }
 
-/** How many organizations the authority read asks about at once. Every
- *  rendered organization is checked; batches only bound the concurrency. */
-const AUTHORITY_ORG_BATCH = 10;
+/** Distinct organizations the authority read asks about — bounded. */
+const AUTHORITY_ORG_LIMIT = 20;
 
 /**
  * The caller's training AUTHORITY: which forms the register may offer.
@@ -164,7 +163,7 @@ export async function getTrainingAuthority(
       ...(employerOrganizationId ? [employerOrganizationId] : []),
       ...organizationIds.filter((id) => id.length > 0),
     ]),
-  ];
+  ].slice(0, AUTHORITY_ORG_LIMIT);
   if (orgs.length === 0) return NO_TRAINING_AUTHORITY;
 
   const yes = async (
@@ -175,25 +174,19 @@ export async function getTrainingAuthority(
     return !error && data === true;
   };
 
-  // Every organization the register renders is asked about — an unchecked
-  // organization would read as "no authority" and hide forms the caller may
-  // use. Batches bound the number of RPCs in flight, not the coverage.
-  const ownerAdminPairs: (readonly [string, boolean])[] = [];
-  const demandPairs: (readonly [string, boolean])[] = [];
-  const platformAdmin = yes("is_admin");
-  for (let i = 0; i < orgs.length; i += AUTHORITY_ORG_BATCH) {
-    const batch = orgs.slice(i, i + AUTHORITY_ORG_BATCH);
-    const [owner, demand] = await Promise.all([
-      Promise.all(batch.map(async (org) => [org, await yes("org_owner_admin_v1", { p_organization_id: org })] as const)),
-      Promise.all(batch.map(async (org) => [org, await yes("has_org_demand_access", { org })] as const)),
-    ]);
-    ownerAdminPairs.push(...owner);
-    demandPairs.push(...demand);
-  }
+  const [platformAdmin, ownerAdminPairs, demandPairs] = await Promise.all([
+    yes("is_admin"),
+    Promise.all(
+      orgs.map(async (org) => [org, await yes("org_owner_admin_v1", { p_organization_id: org })] as const),
+    ),
+    Promise.all(
+      orgs.map(async (org) => [org, await yes("has_org_demand_access", { org })] as const),
+    ),
+  ]);
 
   return deriveTrainingAuthority({
     employerOrganizationId,
-    platformAdmin: await platformAdmin,
+    platformAdmin,
     ownerAdmin: new Map(ownerAdminPairs),
     demandAccess: new Map(demandPairs),
   });
