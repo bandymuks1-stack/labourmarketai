@@ -1917,7 +1917,7 @@
     "workerVisibilityNote": "Rzetelny status: zapytania od zweryfikowanych firm są pokazywane pracownikom na ich tablicy ofert. Weryfikacja to ręczny przegląd — dopóki Twoja firma nie zostanie zweryfikowana, Twoje zapytania pozostają widoczne tylko dla Ciebie i zespołu przeglądającego.",
     "empty": "Nie przesłano jeszcze żadnych zapytań. Prześlij zapytanie powyżej, a pojawi się tutaj wraz ze statusem.",
     "created": "Utworzono",
-    "manageHelp": "Zakończ zapotrzebowanie, usuń je z rynku lub opublikuj ponownie bezpośrednio na tej liście; szkic możesz kontynuować lub odrzucić. Potwierdzenie rozpoznanych umiejętności odbywa się w widoku scoutingu. Edycja przesłanego tekstu nie jest jeszcze dostępna.",
+    "manageHelp": "Zakończ zapytanie, usuń je z rynku lub opublikuj ponownie bezpośrednio na tej liście; szkic możesz kontynuować lub odrzucić. Potwierdzenie rozpoznanych umiejętności odbywa się w widoku scoutingu. Edycja przesłanego tekstu nie jest jeszcze dostępna.",
     "detailsLabel": "Przesłane szczegóły",
     "fields": {
       "description": "Opis",

@@ -1917,7 +1917,7 @@
     "workerVisibilityNote": "Ehrlicher Status: Anfragen verifizierter Unternehmen werden Arbeitskräften auf ihrem Chancen-Board angezeigt. Die Verifizierung ist eine manuelle Prüfung — bis Ihr Unternehmen verifiziert ist, bleiben Ihre Anfragen privat für Sie und das Prüfteam.",
     "empty": "Noch keine Anfragen eingereicht. Reichen Sie Ihre Anfrage oben ein — sie erscheint hier mit ihrem Status.",
     "created": "Erstellt",
-    "manageHelp": "Schließe einen Bedarf ab, nimm ihn vom Markt oder veröffentliche ihn erneut direkt in dieser Liste; einen Entwurf kannst du fortsetzen oder verwerfen. Das Bestätigen der erkannten Fähigkeiten erfolgt über die Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
+    "manageHelp": "Schließe eine Anfrage ab, nimm sie vom Markt oder veröffentliche sie erneut direkt in dieser Liste; einen Entwurf kannst du fortsetzen oder verwerfen. Das Bestätigen der erkannten Fähigkeiten erfolgt über die Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
     "detailsLabel": "Eingereichte Angaben",
     "fields": {
       "description": "Beschreibung",
