@@ -5,6 +5,11 @@ import { getReviewReport } from "@/lib/journal/review-report";
 import { PrintButton } from "@/components/app/print-button";
 import { formatUtcDate } from "@/lib/time/display";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/inbox/report");
+
 
 /**
  * Company review report preview (v1). Read-only summary of the entries the

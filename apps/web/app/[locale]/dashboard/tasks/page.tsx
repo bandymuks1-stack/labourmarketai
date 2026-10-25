@@ -88,6 +88,11 @@ import { listOrganizationMembers } from "@/lib/company/memberships";
 import { createUtcFormatter } from "@/lib/time/display";
 import { taskAnchorId } from "@/lib/projects/stage-gantt";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/tasks", "tasks.title");
+
 
 /**
  * Work tasks (control room PR D, capability gap map §3) — the role-aware

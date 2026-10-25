@@ -21,6 +21,11 @@ import {
 import { ActionCard } from "@/components/app/action-card";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/bookings", "bookings.title");
+
 
 /**
  * Bookings (Stage 6) — the worker's incoming proposals (accept/decline) and the
