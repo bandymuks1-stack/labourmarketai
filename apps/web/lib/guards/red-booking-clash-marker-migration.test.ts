@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 /**
  * Pinning tests for
- * `supabase/migrations/20261025180000_booking_clash_acknowledged_marker_v1.sql`
+ * `supabase/migrations/20261025190000_booking_clash_acknowledged_marker_v1.sql`
  * — completes RED #5. PREPARED, NOT APPLIED; owner-gated.
  *
  * Production 2026-10-25 (walk orders-bookings O-5): v4 skipped its own clash
@@ -25,7 +25,7 @@ import { join } from "node:path";
  */
 
 const REPO_ROOT = join(process.cwd(), "..", "..");
-const NAME = "20261025180000_booking_clash_acknowledged_marker_v1";
+const NAME = "20261025190000_booking_clash_acknowledged_marker_v1";
 const read = (rel: string) => readFileSync(join(REPO_ROOT, rel), "utf-8");
 const UP = read(`supabase/migrations/${NAME}.sql`);
 const DOWN = read(`supabase/rollbacks/${NAME}.down.sql`);

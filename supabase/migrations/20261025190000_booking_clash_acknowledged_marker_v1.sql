@@ -1,5 +1,5 @@
 -- ============================================================================
--- 20261025180000 — COMPLETE RED #5: an acknowledged booking clash can be
+-- 20261025190000 — COMPLETE RED #5: an acknowledged booking clash can be
 -- recorded.
 --
 -- RED (owner-gated). PREPARED, NOT APPLIED. Draft PR + `needs-human-gate`;
@@ -92,7 +92,7 @@
 --   `booking-clash-acknowledged` is shown, the booking is 'accepted', and one
 --   `clash_acknowledged` event per counterpart exists.
 --
--- ROLLBACK: supabase/rollbacks/20261025180000_booking_clash_acknowledged_marker_v1.down.sql
+-- ROLLBACK: supabase/rollbacks/20261025190000_booking_clash_acknowledged_marker_v1.down.sql
 -- ============================================================================
 
 begin;

@@ -351,7 +351,7 @@ describe("no new employment-record model", () => {
       // The SAME v4, re-stated to set the clash_acknowledged marker in its
       // accept UPDATE (completes RED #5). The engagement insert is byte-
       // identical. RED, PREPARED not applied.
-      "20261025180000_booking_clash_acknowledged_marker_v1.sql",
+      "20261025190000_booking_clash_acknowledged_marker_v1.sql",
     ]);
     const offenders = MIGRATIONS.filter(
       (m) =>

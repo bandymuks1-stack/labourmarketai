@@ -1,5 +1,5 @@
 -- ============================================================================
--- ROLLBACK for 20261025180000_booking_clash_acknowledged_marker_v1
+-- ROLLBACK for 20261025190000_booking_clash_acknowledged_marker_v1
 --
 -- Restores, exactly:
 --   * `booking_requests_no_overlapping_accepted` with its ORIGINAL predicate
