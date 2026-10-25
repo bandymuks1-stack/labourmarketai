@@ -9112,6 +9112,7 @@
     "intro": "Voorgestelde opdrachten. Een boeking is pas bevestigd wanneer de werknemer accepteert.",
     "notAuthed": "Log in om je boekingen te zien.",
     "unavailable": "Kon de actie niet voltooien. Probeer het opnieuw.",
+    "readFailed": "Je boekingen konden nu niet worden geladen — dat betekent niet dat je er geen hebt. Probeer het opnieuw.",
     "noDate": "Geen startdatum ingesteld",
     "noRole": "Werkafspraak",
     "startsOn": "Start {date}",
@@ -9188,7 +9189,8 @@
       "alreadyAccepted": "De werknemer heeft dit voorstel al geaccepteerd — afgesproken voorwaarden worden hier niet overschreven. Spreek wijzigingen af in het gesprek.",
       "refusedNotReachable": "Deze persoon kan hier geen boekingsvoorstel krijgen — het profiel is niet zichtbaar voor werkgevers en er is geen werkrelatie met jou.",
       "refusedNeedClosed": "Deze behoefte is gesloten — heropen hem voordat je een boeking voorstelt.",
-      "refusedAnswered": "De werknemer heeft dit voorstel geweigerd; zonder nieuwe toestemming wordt het niet heropend. Ga verder in het gesprek of zoek een andere werknemer."
+      "refusedAnswered": "De werknemer heeft dit voorstel geweigerd; zonder nieuwe toestemming wordt het niet heropend. Ga verder in het gesprek of zoek een andere werknemer.",
+      "unconfirmed": "Nog geen antwoord van de server. Het voorstel is mogelijk al verstuurd — kijk bij Boekingen of verstuur het opnieuw (hetzelfde voorstel wordt nooit dubbel aangemaakt)."
     },
     "reason": {
       "optionalTitle": "Reden (optioneel)",

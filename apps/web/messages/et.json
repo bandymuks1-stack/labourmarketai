@@ -2811,6 +2811,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -2846,7 +2847,8 @@
       "alreadyAccepted": "Töötaja on selle pakkumise juba vastu võtnud — kokkulepitud tingimusi siin üle ei kirjutata. Leppige muudatustes kokku vestluses.",
       "refusedNotReachable": "Sellele inimesele ei saa siit broneeringut pakkuda — profiil ei ole tööandjatele nähtav ja teil puudub tööalane suhe.",
       "refusedNeedClosed": "See vajadus on suletud — ava see uuesti enne broneeringu pakkumist.",
-      "refusedAnswered": "Töötaja lükkas selle pakkumise tagasi, seega ilma tema uue nõusolekuta seda uuesti ei avata. Jätka vestluses või leia teine töötaja."
+      "refusedAnswered": "Töötaja lükkas selle pakkumise tagasi, seega ilma tema uue nõusolekuta seda uuesti ei avata. Jätka vestluses või leia teine töötaja.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",

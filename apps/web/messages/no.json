@@ -2811,6 +2811,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -2846,7 +2847,8 @@
       "alreadyAccepted": "Arbeidstakeren har allerede akseptert dette forslaget — avtalte vilkår overskrives ikke her. Avtal endringer i samtalen.",
       "refusedNotReachable": "Denne personen kan ikke få et bookingforslag herfra — profilen er ikke synlig for arbeidsgivere, og det finnes ingen arbeidsrelasjon med deg.",
       "refusedNeedClosed": "Dette behovet er lukket — åpne det igjen før du foreslår en booking.",
-      "refusedAnswered": "Arbeidstakeren avslo dette forslaget, så det åpnes ikke på nytt uten ny samtykke fra arbeidstakeren. Fortsett i samtalen eller finn en annen arbeidstaker."
+      "refusedAnswered": "Arbeidstakeren avslo dette forslaget, så det åpnes ikke på nytt uten ny samtykke fra arbeidstakeren. Fortsett i samtalen eller finn en annen arbeidstaker.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",

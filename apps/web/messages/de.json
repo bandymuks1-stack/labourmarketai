@@ -9112,6 +9112,7 @@
     "intro": "Vorgeschlagene Einsätze. Eine Buchung ist erst bestätigt, wenn die Arbeitskraft annimmt.",
     "notAuthed": "Bitte melden Sie sich an, um Ihre Buchungen zu sehen.",
     "unavailable": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+    "readFailed": "Ihre Buchungen konnten gerade nicht geladen werden — das heißt nicht, dass Sie keine haben. Versuchen Sie es erneut.",
     "noDate": "Kein Startdatum festgelegt",
     "noRole": "Arbeitsvereinbarung",
     "startsOn": "Beginnt am {date}",
@@ -9188,7 +9189,8 @@
       "alreadyAccepted": "Die Arbeitskraft hat diesen Vorschlag bereits angenommen — vereinbarte Bedingungen werden hier nicht überschrieben. Änderungen im Gespräch abstimmen.",
       "refusedNotReachable": "Dieser Person kann hier keine Buchung vorgeschlagen werden — ihr Profil ist für Arbeitgeber nicht sichtbar und es besteht keine Arbeitsbeziehung mit Ihnen.",
       "refusedNeedClosed": "Dieser Bedarf ist geschlossen — öffnen Sie ihn erneut, bevor Sie eine Buchung vorschlagen.",
-      "refusedAnswered": "Die Arbeitskraft hat diesen Vorschlag abgelehnt; ohne ihre neue Zustimmung wird er nicht wieder geöffnet. Schreiben Sie im Gespräch weiter oder finden Sie eine andere Arbeitskraft."
+      "refusedAnswered": "Die Arbeitskraft hat diesen Vorschlag abgelehnt; ohne ihre neue Zustimmung wird er nicht wieder geöffnet. Schreiben Sie im Gespräch weiter oder finden Sie eine andere Arbeitskraft.",
+      "unconfirmed": "Noch keine Antwort vom Server. Der Vorschlag wurde möglicherweise schon gesendet — prüfen Sie Buchungen oder senden Sie ihn erneut (derselbe Vorschlag wird nie doppelt angelegt)."
     },
     "reason": {
       "optionalTitle": "Grund (optional)",

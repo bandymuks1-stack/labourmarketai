@@ -80,7 +80,7 @@ async function useWorkspace(page: Page, orgName: string): Promise<void> {
  *  can briefly render a second copy outside `main`, so everything is scoped. */
 async function profileAt(page: Page, hash: string): Promise<Locator> {
   await page.goto(`/lt/dashboard/profile#${hash}`);
-  const main = page.locator("main");
+  const main = inMain(page);
   await expect(main.locator(`#${hash}`).first()).toBeVisible({ timeout: 30_000 });
   return main;
 }
@@ -93,7 +93,9 @@ async function pick(page: Page, scope: Locator, testId: string, option: string):
 
 async function livingCv(page: Page): Promise<Locator> {
   await page.goto("/lt/cv");
-  const main = page.locator("main");
+  // The Living CV's own <main> (added for runs 40086140120 / 40153545718,
+  // which found none). By role, so a hidden streaming copy never counts.
+  const main = inMain(page);
   await expect(main.locator("h1").first()).toBeVisible({ timeout: 30_000 });
   return main;
 }
