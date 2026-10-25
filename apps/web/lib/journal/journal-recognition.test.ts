@@ -701,3 +701,35 @@ describe("summarizeJournalPipelineResult — counts derive from lists", () => {
     });
   });
 });
+
+describe("comma prose vs work-item lists — no capability shadowed (AGENTS.md 0023)", () => {
+  it("an anchor-less trade-noun list is kept whole but every skill is still recognised", () => {
+    // "mūrijimas, tinkavimas" has no verb/time anchor, so the fragmenter keeps
+    // it as one fragment — the recogniser scans the whole phrase and finds
+    // both trades. Joining must not shadow either (decision 0023).
+    const r = derive("mūrijimas, tinkavimas");
+    expect(r.recognizedSkills.map((s) => s.slug).sort()).toEqual([
+      "bricklaying",
+      "plastering",
+    ]);
+  });
+
+  it("a work sentence (verb/gerund present) splits so a second trade is not downgraded", () => {
+    // Codex P1 regression: "tiling" is a gerund → the sentence describes work →
+    // split → warehouse-operations stays a RECOGNISED skill, not just a claim.
+    const r = derive("tiling, warehouse logistics");
+    expect(r.recognizedSkills.map((s) => s.slug).sort()).toEqual([
+      "tiling",
+      "warehouse-operations",
+    ]);
+  });
+
+  it("descriptive prose stays one unresolved fragment instead of many noun scraps", () => {
+    const r = derive(
+      "privatumo, sutikimų, pasitikėjimo ir duomenų valdymo reikalavimų analizė",
+    );
+    expect(r.unresolvedFragments).toHaveLength(1);
+    // the invariant still holds: nothing silently lost
+    expect(r.coverage.silentlyLostFragmentCount).toBe(0);
+  });
+});

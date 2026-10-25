@@ -308,11 +308,19 @@ describe("LT descriptive prose — a comma enumeration is ONE fragment, not noun
     ).toEqual(["tvarkiau dokumentus", "analizavau reikalavimus"]);
   });
 
-  it("a timed item followed by a trailing noun note joins the note to the item", () => {
-    // "4 val. dažiau" is a work item; the bare note after it is not a second
-    // item, so the whole stays one fragment (no "pastabos" scrap).
-    const out = meaningful("dažiau sienas 4 val, papildomos pastabos");
-    expect(out).toHaveLength(1);
+  it("a sentence with ANY work anchor splits every comma (never shadows a second skill)", () => {
+    // Codex P1: "tiling" is a gerund (verb-like), so the sentence describes
+    // work and MUST split — otherwise the recogniser reads only `tiling` on a
+    // joined fragment and the warehouse trade is downgraded. Split keeps both.
+    expect(
+      meaningful("tiling, warehouse logistics").map((f) => f.text),
+    ).toEqual(["tiling", "warehouse logistics"]);
+    // A real timed item followed by a bare note still splits the note off — a
+    // lone unresolved scrap is honest and shadows nothing (vs. risking a
+    // merge that hides a capability).
+    expect(
+      meaningful("dažiau sienas 4 val, papildomos pastabos"),
+    ).toHaveLength(2);
   });
 });
 

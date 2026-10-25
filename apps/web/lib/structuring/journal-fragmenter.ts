@@ -289,38 +289,35 @@ function segmentHasWorkAnchor(guardedSegment: string): boolean {
 }
 
 /**
- * Split ONE hard part on COMMAS — but ONLY where the comma sits between two
- * real work items: the text accumulated since the last boundary AND the
- * segment after the comma each carry a verb or a time/quantity expression
- * (`segmentHasWorkAnchor`). A comma with a bare noun phrase on either side is
- * NOT a boundary, so a descriptive clause — the kind a Lithuanian worker
- * writes to summarise analysis work ("privatumo, sutikimų, pasitikėjimo …
- * analizė, dokumentacijos spragų identifikavimas") — stays ONE fragment
- * instead of shattering into noun scraps that each surface as their own
- * `unresolved_fragment`; and a bare note trailing a real item ("dažiau sienas
- * 4 val, papildomos pastabos") joins that item rather than becoming a scrap.
- * Timed/quantified lists ("30 min pertrauka, 2 val dažiau") and verb-clause
- * lists ("kroviau paletes, valiau langus") still split exactly as before.
+ * Decide whether ONE hard part's commas are work-item boundaries.
+ *
+ * The comma splits items only in a sentence that actually describes
+ * measured/active work — at least one comma-segment carries a verb or a
+ * time/quantity anchor (`segmentHasWorkAnchor`). Such a sentence splits on
+ * EVERY comma, exactly as before, so each item is recognised on its own
+ * fragment (e.g. "klijavau plyteles 2 val, sandėlio logistika" →
+ * tiling + warehouse-operations, nothing shadowed).
+ *
+ * A sentence of bare noun phrases with NO anchor anywhere ("privatumo,
+ * sutikimų, pasitikėjimo … analizė, dokumentacijos spragų identifikavimas")
+ * is descriptive prose, not a work-item list. Splitting it on commas shattered
+ * it into noun scraps that each surfaced as their own `unresolved_fragment`.
+ * It now stays ONE fragment — and because the skill recogniser scans the whole
+ * phrase, every capability in such a list is still found (e.g. "mūrijimas,
+ * tinkavimas" → bricklaying + plastering), so no direct or indirect capability
+ * discovery is lost (AGENTS.md decision 0023). Only genuinely unrecognised
+ * prose is kept whole, as one honest unresolved fragment instead of many.
+ *
  * Operates on GUARDED text so decimal commas (\x01) are never split on.
- * Data-driven: extend the signals, never add a sentence-specific branch.
+ * Data-driven (verb/time signals), never a sentence-specific branch.
  */
-function splitOnWorkItemCommas(guardedPart: string): string[] {
+function splitHardPartOnCommas(guardedPart: string): string[] {
   if (!guardedPart.includes(",")) return [guardedPart];
   const segments = guardedPart.split(",");
-  const out: string[] = [];
-  let buffer = segments[0];
-  for (let i = 1; i < segments.length; i++) {
-    const next = segments[i];
-    if (segmentHasWorkAnchor(buffer) && segmentHasWorkAnchor(next)) {
-      out.push(buffer);
-      buffer = next;
-    } else {
-      // A bare noun phrase on one side — the comma joins, it does not bound.
-      buffer = `${buffer},${next}`;
-    }
-  }
-  out.push(buffer);
-  return out;
+  // Any measured/active work in the sentence → the commas list work items,
+  // split every one (original behaviour). Otherwise the sentence is
+  // descriptive prose — keep it whole.
+  return segments.some(segmentHasWorkAnchor) ? segments : [guardedPart];
 }
 
 /** Strip trailing time/quantity expressions + separators (folded input). */
@@ -370,9 +367,10 @@ export function fragmentJournalText(text: string): JournalFragment[] {
   // Hard boundaries are sentence punctuation, the itemising-colon-derived ';'
   // and newlines — NOT the comma. The comma was an unconditional boundary,
   // which shattered comma-separated descriptive prose into bare noun scraps
-  // (each an unresolved_fragment). It is now split only where it ends a real
-  // work item (`splitOnWorkItemCommas`). Both splits run on the GUARDED text
-  // so decimal commas are never boundaries; decimals are restored per piece.
+  // (each an unresolved_fragment). It now splits items only in a sentence that
+  // describes measured/active work (`splitHardPartOnCommas`). Both splits run
+  // on the GUARDED text so decimal commas are never boundaries; decimals are
+  // restored per piece.
   const hardParts = guarded
     .split(/[.!?;\n]+/)
     .filter((p) => p.trim().length > 0);
@@ -380,7 +378,7 @@ export function fragmentJournalText(text: string): JournalFragment[] {
   const out: JournalFragment[] = [];
   const seenIds = new Set<string>();
   for (const guardedPart of hardParts) {
-    for (const guardedItem of splitOnWorkItemCommas(guardedPart)) {
+    for (const guardedItem of splitHardPartOnCommas(guardedPart)) {
       const part = restoreDecimals(guardedItem);
       for (const piece of splitOnConjunctions(part)) {
         const textPiece = piece
