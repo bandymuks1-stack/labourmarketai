@@ -38,6 +38,7 @@ type CandidateRow = {
   last_signal_at: string | null;
   max_signal_id: number | string | null;
   last_forecast: ProjectForecast | null;
+  project_status: string | null;
 };
 
 export function createForecastStore(client: SupabaseClient = createAdminClient() as unknown as SupabaseClient): ForecastStore {
@@ -61,6 +62,7 @@ export function createForecastStore(client: SupabaseClient = createAdminClient()
           lastSignalAt: r.last_signal_at,
           maxSignalId: r.max_signal_id === null ? null : Number(r.max_signal_id),
           lastForecast: r.last_forecast,
+          projectStatus: r.project_status,
         }),
       );
     },

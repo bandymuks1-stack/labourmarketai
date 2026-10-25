@@ -100,7 +100,7 @@ create table if not exists public.project_forecasts (
   organization_id uuid references public.organizations(id) on delete set null,
   version         integer not null check (version >= 1),
   mode            text not null check (mode in ('weekly','daily','hourly','live')),
-  reason          text not null check (reason in ('first','schedule','signal','signal_max_wait','daily_baseline','manual')),
+  reason          text not null check (reason in ('first','schedule','signal','signal_max_wait','daily_baseline','final','manual')),
   engine_version  text not null check (char_length(engine_version) between 1 and 64),
   computed_at     timestamptz not null,
   as_of           date not null,
@@ -401,7 +401,8 @@ returns table (
   first_signal_at  timestamptz,
   last_signal_at   timestamptz,
   max_signal_id    bigint,
-  last_forecast    jsonb
+  last_forecast    jsonb,
+  project_status   text
 )
 language sql
 stable
@@ -414,7 +415,7 @@ as $$
      group by s.project_id
   ),
   base as (
-    select p.id, p.organization_id,
+    select p.id, p.organization_id, p.status,
            coalesce(st.mode, 'weekly') as mode,
            coalesce(st.enabled, true) as enabled,
            fs.last_computed_at, fs.last_version, fs.last_inputs_hash,
@@ -423,7 +424,11 @@ as $$
       left join public.organization_forecast_settings st on st.organization_id = p.organization_id
       left join public.project_forecast_state fs on fs.project_id = p.id
       left join sig on sig.project_id = p.id
-     where p.status in ('live', 'paused')
+     where (p.status in ('live', 'paused')
+            -- A project completed since its last forecast: ONE final run
+            -- (its status change raised a signal), so the history ends with
+            -- the actual and the error can be measured.
+            or (p.status = 'completed' and fs.last_version is not null and sig.max_id is not null))
        and coalesce(p.record_state, 'active') <> 'duplicate'
        and coalesce(st.enabled, true)
   ),
@@ -433,9 +438,11 @@ as $$
   select b.id, b.organization_id, b.mode, b.enabled, b.last_computed_at, b.last_version,
          b.last_inputs_hash, b.first_at, b.last_at, b.max_id,
          (select f.forecast from public.project_forecasts f
-           where f.project_id = b.id and f.version = b.last_version) as last_forecast
+           where f.project_id = b.id and f.version = b.last_version) as last_forecast,
+         b.status
     from base b, clock c
-   where (b.mode = 'live' and (b.last_computed_at is null or b.max_id is not null
+   where b.status = 'completed'
+      or (b.mode = 'live' and (b.last_computed_at is null or b.max_id is not null
             or (b.last_computed_at at time zone 'utc')::date < c.utc_now::date))
       or (b.mode = 'hourly' and (b.last_computed_at is null
             or date_trunc('hour', b.last_computed_at at time zone 'utc') < date_trunc('hour', c.utc_now)))
