@@ -73,6 +73,9 @@ export function DarkListbox({
   searchPlaceholder,
   searchEmptyLabel,
   filter = defaultFilter,
+  invalid = false,
+  describedBy,
+  buttonId,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -94,6 +97,17 @@ export function DarkListbox({
     options: readonly DarkListboxOption[],
     query: string,
   ) => readonly DarkListboxOption[];
+  /** The field failed validation: the toggle carries the danger border and
+   *  (with `describedBy`) points at the message right under it, so the error
+   *  is AT the field. `aria-invalid` is not a supported state of the `button`
+   *  role this trigger has (jsx-a11y/role-supports-aria-props), so the
+   *  message is linked through `aria-describedby` and announced by its own
+   *  `role="alert"`. */
+  invalid?: boolean;
+  /** id(s) of the message that explains the field (e.g. its error). */
+  describedBy?: string;
+  /** id for the toggle button, so a form can move focus to it. */
+  buttonId?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -195,10 +209,16 @@ export function DarkListbox({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={ariaLabel}
+        aria-describedby={describedBy}
+        data-invalid={invalid ? "true" : undefined}
+        id={buttonId}
         data-testid={testId}
         onClick={() => !disabled && setOpen((v) => !v)}
         onKeyDown={onNavKeyDown}
-        className="flex w-full items-center justify-between gap-2 rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-left text-sm text-text-primary outline-none transition-colors focus:border-brand-blue disabled:opacity-50"
+        className={cn(
+          "flex w-full items-center justify-between gap-2 rounded-md border bg-ink-700 px-4 py-3 text-left text-sm text-text-primary outline-none transition-colors focus:border-brand-blue disabled:opacity-50",
+          invalid ? "border-state-danger" : "border-ink-500",
+        )}
       >
         <span className={cn("truncate", !selected && "text-text-muted")}>
           {buttonLabel}

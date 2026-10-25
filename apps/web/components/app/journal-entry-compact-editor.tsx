@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { quoteText } from "@/lib/i18n/quote";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -607,7 +608,7 @@ export function JournalEntryCompactEditor({
                 data-testid="journal-compact-add-freetext"
                 className="w-fit rounded-md border border-ink-500 inline-flex min-h-[2.5rem] items-center justify-center px-3 py-2 text-xs text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
               >
-                {t("compactEdit.addAsClaim")}: „{addQuery.trim()}“
+                {t("compactEdit.addAsClaim")}: {quoteText(locale, addQuery.trim())}
               </button>
             )}
             <button

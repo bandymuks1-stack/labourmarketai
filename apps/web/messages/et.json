@@ -1717,7 +1717,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -2014,6 +2014,15 @@
       "pending": "Liidan…",
       "done": "Liidetud. Read ja nende kirjed säilivad; projektide loend näitab nüüd säilitatud projekti.",
       "failed": "Ei liidetud. Läbi minemata ridade puhul ei muudetud midagi — laadige uuesti ja proovige veel."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {
@@ -3693,8 +3702,8 @@
           "description": "Projekti töötaja nimekirja punkt märgitakse tegeliku olekuga — vajalik, saadud, kontrollitud."
         },
         "seedReadinessChecklist": {
-          "label": "Alusta dokumentide nimekirja",
-          "description": "Kõigile projekti inimestele alustatakse standardset valmisoleku / dokumentide nimekirja."
+          "label": "Lisa kokkuleppimise ettepanekud",
+          "description": "Kõigile projekti inimestele lisatakse soovitatud punktid, milles enne kokkulepet kokku leppida. See ei ole kohustuslik nimekiri ega valmisoleku hinnang."
         },
         "requestReadiness": {
           "label": "Küsi puuduvat",
@@ -4272,8 +4281,8 @@
       "missingDeclaredSkills": "märgitud oskused",
       "missingEvidence": "töö tõendid",
       "blockedSuffix": "(tagasi lükatud / aegunud)",
-      "readinessSeedChip": "Alusta dokumentide nimekirja ({count} in.)",
-      "readinessSeeded": "Nimekiri alustatud: {count} in. × {items} punkti — kõik „vajalik“.",
+      "readinessSeedChip": "Lisa kokkuleppimise ettepanekud ({count} in.)",
+      "readinessSeeded": "Ettepanekud lisatud: {count} in. × {items} punkti — kõik „kokku leppida enne kokkulepet“.",
       "readinessGotChip": "Saadud: {label} ({name})",
       "readinessGotDone": "Märgitud saaduks: {label} ({name}).",
       "readinessCheckedChip": "Kontrollitud: {label} ({name})",
@@ -4314,7 +4323,7 @@
       "moveAskProject": "Kuhu {name} liigutada? Vali:",
       "moveWhatIfTitle": "Kui {name} liiguks projektist „{from}“ projekti „{to}“:",
       "moveFromLine": "• „{from}“: inimesi {before} → {after}; tema avatud tööpakette jääb sinna {tasks}; valmisoleku loend seal: {checked}/{total}.",
-      "moveToLine": "• „{to}“: inimesi {before} → {after}; valmisoleku loend seal algab 0/{total}.",
+      "moveToLine": "• „{to}“: inimesi {before} → {after}; mida seal kokku leppida, pole veel valitud (soovitatud kuni {total} punkti).",
       "moveCountryLine": "• Riik muutub: {from} → {to} — dokumendinõuded on teised.",
       "moveNoDatesLine": "• Projektil „{to}“ pole kuupäevi — puudumisi ei saa kontrollida.",
       "moveAvailabilityUnknownLine": "• Puudumised teadmata.",
