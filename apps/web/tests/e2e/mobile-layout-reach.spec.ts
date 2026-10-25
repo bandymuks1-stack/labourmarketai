@@ -84,6 +84,86 @@ async function expectReachable(page: Page, path: string) {
   ).toEqual([]);
 }
 
+/**
+ * HYDRATION CLAIMS THE SERVER HTML ONCE — no #418, no orphaned stream holder.
+ *
+ * A failed claim makes React throw #418 and client-render the tree, which
+ * leaves Next's streamed segment behind in `<div hidden id="S:n">` — a second,
+ * invisible copy of the page (production walks, 2026-10-24). The cause was a
+ * vendored-React replay bug (guard: lib/guards/react-hydration-host-replay
+ * .test.ts); it is intermittent (~1 in 8 cold loads of /jobs), so each path is
+ * loaded several times in fresh contexts.
+ */
+async function watchHydration(page: Page) {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __hydrationErrors: string[] };
+    w.__hydrationErrors = [];
+    const Orig = window.Error;
+    function Wrapped(this: unknown, ...args: unknown[]) {
+      const e = new Orig(...(args as [string?]));
+      const m = String(args[0] ?? "");
+      if (/#418|#423|#425|[Hh]ydrat/.test(m)) w.__hydrationErrors.push(m.slice(0, 160));
+      return e;
+    }
+    Wrapped.prototype = Orig.prototype;
+    Object.setPrototypeOf(Wrapped, Orig);
+    (window as unknown as { Error: unknown }).Error = Wrapped;
+  });
+}
+
+async function expectHydratedOnce(page: Page, path: string) {
+  const state = (await page.evaluate(() => ({
+    errors: (window as unknown as { __hydrationErrors?: string[] }).__hydrationErrors ?? [],
+    holders: document.querySelectorAll("[hidden][id^='S:']").length,
+  }))) as { errors: string[]; holders: number };
+  expect(state.errors, `${path}: hydration failed`).toEqual([]);
+  expect(state.holders, `${path}: streamed segment left behind in a hidden S:n holder`).toBe(0);
+}
+
+test.describe("hydration — public pages claim the server HTML once", () => {
+  test.use({ viewport: PHONE, isMobile: true, hasTouch: true });
+  test.setTimeout(240_000);
+  for (const path of ["/ru/jobs", "/nl/jobs", "/de/jobs", "/lt/jobs"]) {
+    test(`${path} ×4 cold loads`, async ({ browser }) => {
+      for (let i = 0; i < 4; i++) {
+        const ctx = await browser.newContext({ viewport: PHONE, isMobile: true, hasTouch: true });
+        const page = await ctx.newPage();
+        await watchHydration(page);
+        await page.goto(path, { waitUntil: "networkidle" });
+        await page.waitForTimeout(1500);
+        await expectHydratedOnce(page, `${path} (load ${i + 1})`);
+        await ctx.close();
+      }
+    });
+  }
+});
+
+test.describe("hydration — signed-in pages claim the server HTML once", () => {
+  test.skip(!LOCAL, "needs the local stack (pnpm -C apps/web e2e:local)");
+  test.setTimeout(240_000);
+  const PAGES: { state: string; path: string }[] = [
+    { state: WORKER, path: "/lt/dashboard" },
+    { state: WORKER, path: "/lt/dashboard/journal" },
+    { state: WORKER, path: "/lt/cv" },
+    { state: COMPANY, path: "/lt/dashboard/hours" },
+    { state: COMPANY, path: "/lt/dashboard/projects" },
+    { state: COMPANY, path: "/lt/dashboard/company/planning" },
+  ];
+  for (const { state, path } of PAGES) {
+    test(`${path} ×3 cold loads`, async ({ browser }) => {
+      for (let i = 0; i < 3; i++) {
+        const ctx = await browser.newContext({ storageState: state, viewport: PHONE, isMobile: true, hasTouch: true });
+        const page = await ctx.newPage();
+        await watchHydration(page);
+        await page.goto(path, { waitUntil: "networkidle" });
+        await page.waitForTimeout(1500);
+        await expectHydratedOnce(page, `${path} (load ${i + 1})`);
+        await ctx.close();
+      }
+    });
+  }
+});
+
 test.describe("390px — worker surfaces keep every box inside the phone", () => {
   test.skip(!LOCAL, "needs the local stack (pnpm -C apps/web e2e:local)");
   test.use({ storageState: WORKER, viewport: PHONE, isMobile: true, hasTouch: true });
