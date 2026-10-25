@@ -9263,7 +9263,8 @@
     "clash": {
       "acceptAnyway": "Wiem, że się pokrywa — mimo to akceptuję",
       "stillStands": "Akceptacja nie usunie nakładania się. Obie rezerwacje zachowują swoje daty, konflikt pozostaje widoczny w kalendarzu, a Twoja decyzja zostaje zapisana.",
-      "acknowledged": "Zaakceptowano ze znanym nakładaniem. Nadal koliduje rezerwacji: {count}. Nic nie zostało anulowane ani ukryte, a Twoja decyzja jest zapisana."
+      "acknowledged": "Zaakceptowano ze znanym nakładaniem. Nadal koliduje rezerwacji: {count}. Nic nie zostało anulowane ani ukryte, a Twoja decyzja jest zapisana.",
+      "notRecordable": "Te daty pokrywają się z już zaakceptowaną rezerwacją, a takiego nakładania się nie można jeszcze zapisać, więc możesz odrzucić tę ofertę albo zostawić ją otwartą, aby firma mogła zmienić daty."
     },
     "proposedBy": "Proponuje: {name}",
     "termsChanged": "Firma zmieniła warunki. Wcześniej zgodziłeś się na: {previous}. Zdecyduj ponownie co do nowych dat."

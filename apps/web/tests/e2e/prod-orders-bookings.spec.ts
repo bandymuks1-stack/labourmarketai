@@ -301,7 +301,20 @@ test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browse
     // own answer is one deliberate second action, recorded as such.
     console.info("[bookings] accept met a date clash; the worker accepts knowingly");
     await row.getByTestId("booking-accept-anyway").click();
-    await expect(responded).toBeVisible({ timeout: 30_000 });
+    // Run 40216243755: the database refused the acknowledged accept (the
+    // overlap constraint still held) and the UI re-showed the same conflict,
+    // so the button visibly did nothing. That refusal is now its own answer.
+    const notRecordable = row.getByTestId("booking-overlap-not-recordable");
+    await expect(responded.or(notRecordable)).toBeVisible({ timeout: 30_000 });
+    if (await notRecordable.isVisible()) {
+      // Honest, and not a loop: the acknowledgement control is gone.
+      await expect(row.getByTestId("booking-accept-anyway")).toHaveCount(0);
+      expect(
+        false,
+        "the acknowledged overlap could not be recorded: the clash-marker migration " +
+          "(20261025180000, RED) is not applied yet — the UI says so and offers decline",
+      ).toBe(true);
+    }
   }
   await page.reload();
   // Run 40200190351: after this reload the row matched TWICE (identical

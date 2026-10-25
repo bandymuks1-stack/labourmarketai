@@ -9263,7 +9263,8 @@
     "clash": {
       "acceptAnyway": "I know it overlaps — accept anyway",
       "stillStands": "Accepting will not remove the overlap. Both bookings keep their dates, the clash stays visible in your calendar, and it is recorded that you chose it.",
-      "acknowledged": "Accepted with a known overlap. {count} existing booking(s) still clash — nothing was cancelled or hidden, and your decision is on file."
+      "acknowledged": "Accepted with a known overlap. {count} existing booking(s) still clash — nothing was cancelled or hidden, and your decision is on file.",
+      "notRecordable": "These dates overlap a booking you've already accepted, and that overlap can't be recorded yet, so you can decline this offer or leave it open for the company to change the dates."
     },
     "proposedBy": "Proposed by {name}",
     "termsChanged": "The company changed the terms. You had agreed to: {previous}. Decide again on the new dates."
