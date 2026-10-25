@@ -13,8 +13,11 @@
 --   * grant-or-revoke — v4's grants are restated EXACTLY as production has
 --     them (EXECUTE to authenticated; public + anon revoked). Nothing widens.
 --   * create-trigger — the marker-scope trigger below.
---   * drop constraint — `booking_requests_no_overlapping_accepted` is dropped
---     and re-added in the SAME transaction with a narrower WHERE.
+--   * data-dml (x2) — the classifier matching `update public.booking_requests`
+--     INSIDE the v4 body (the accept itself, as before). This migration
+--     performs ZERO statement-level DML.
+--   * (not flagged, named anyway) `booking_requests_no_overlapping_accepted`
+--     is dropped and re-added in the SAME transaction with a narrower WHERE.
 --
 -- NO `@human-gate-approved` MARKER: the owner has not approved this yet, so
 -- migration-safety reports it RED and this PR stays a draft with
