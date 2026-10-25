@@ -6259,6 +6259,11 @@
           "trip": "Dienstreis",
           "absence": "Niet beschikbaar",
           "plan": "Gepland werk"
+        },
+        "unknownWhy": {
+          "undated_window": "Dit project heeft geen data, dus overlap met andere verplichtingen kan niet worden gecontroleerd.",
+          "undated_commitment": "Een andere verplichting van deze persoon heeft geen data, dus vrije dagen kunnen niet worden bevestigd.",
+          "source_unreadable": "Een deel van de agenda kon nu niet worden gelezen, dus vrije dagen kunnen niet worden bevestigd."
         }
       }
     },

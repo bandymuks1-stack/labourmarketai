@@ -6259,6 +6259,11 @@
           "trip": "Podróż służbowa",
           "absence": "Niedostępny",
           "plan": "Zaplanowana praca"
+        },
+        "unknownWhy": {
+          "undated_window": "Ten projekt nie ma dat, więc nie da się sprawdzić nakładania z innymi zobowiązaniami.",
+          "undated_commitment": "Inne zobowiązanie tej osoby nie ma dat, więc nie da się potwierdzić wolnych dni.",
+          "source_unreadable": "Części kalendarza nie udało się teraz odczytać, więc nie da się potwierdzić wolnych dni."
         }
       }
     },

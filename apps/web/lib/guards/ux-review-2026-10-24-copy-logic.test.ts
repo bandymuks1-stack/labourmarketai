@@ -75,3 +75,40 @@ describe("4.28 supply declaration: a saved intent reads in words, never as its c
     expect(src).not.toMatch(/\{declaration\?\.intentState \?\? labels\.unknown\}/);
   });
 });
+
+describe("3.6 assignment: an unconfirmed calendar says WHY, beside 'Assigned'", () => {
+  it("the unknown verdict names its first gap when the caller passes the reasons", async () => {
+    const { unknownReason } = await import("@/lib/workforce/reservation-unknown-reason");
+    type L = Parameters<typeof unknownReason>[1];
+    type V = Parameters<typeof unknownReason>[0];
+    const labels = {
+      reservationUnknown: "generic",
+      reservationUnknownWhy: {
+        undated_window: "no dates",
+        source_unreadable: "unreadable",
+        undated_commitment: "other undated",
+      },
+    } as unknown as L;
+    const v = (gaps: unknown[]) => ({ state: "unknown", collisions: [], gaps }) as unknown as V;
+    expect(unknownReason(v([{ reason: "undated_window" }]), labels)).toBe("no dates");
+    expect(
+      unknownReason(
+        v([
+          { reason: "undated_commitment", source: "project", sourceId: "x", label: null },
+          { reason: "source_unreadable", source: "trip" },
+        ]),
+        labels,
+      ),
+    ).toBe("unreadable");
+    expect(unknownReason(v([]), { ...labels, reservationUnknownWhy: undefined } as L)).toBe("generic");
+  });
+  it.each(ACTIVE)("%s: every unknown reason has its own sentence", (l) => {
+    const r = (catalog(l).projects as { assign: { reservation: { unknownWhy: Record<string, string> } } })
+      .assign.reservation.unknownWhy;
+    for (const k of ["undated_window", "undated_commitment", "source_unreadable"]) expect(r[k]).toBeTruthy();
+  });
+  it("the notice renders the reason and the projects page passes it", () => {
+    expect(read("components/app/project-assignment-manager.tsx")).toContain("{unknownReason(verdict, labels)}");
+    expect(read("app/[locale]/dashboard/projects/page.tsx")).toMatch(/reservationUnknownWhy: \{/);
+  });
+});

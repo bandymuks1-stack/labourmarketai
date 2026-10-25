@@ -22,10 +22,12 @@ import type { ManagedProject, ProjectAssignment } from "@/lib/projects/projects"
 import type { ManagedWorker } from "@/lib/instructions/instructions";
 import type { EngagementWorker } from "@/lib/projects/booking-engagement-workers";
 import type {
+  ReservationGap,
   ReservationSource,
   ReservationVerdict,
 } from "@/lib/workforce/commitment-reservation";
 import { playerInitials } from "@/lib/identity/player-identity";
+import { unknownReason } from "@/lib/workforce/reservation-unknown-reason";
 import { Link } from "@/lib/i18n/navigation";
 import { offersRosterWorker } from "@/lib/projects/assignment-authority";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
@@ -89,6 +91,11 @@ export interface ProjectManagerLabels {
   reservationCollidesTitle: string;
   reservationNotBlocking: string;
   reservationUnknown: string;
+  /** WHY the free days could not be confirmed, by the verdict's first gap —
+   *  "the project has no dates" next to "Assigned" reads as an explanation,
+   *  the bare "could not confirm" read as a failure (UX review 2026-10-24, 3.6).
+   *  Optional: a caller without it keeps the generic line. */
+  reservationUnknownWhy?: Partial<Record<ReservationGap["reason"], string>>;
   reservationSource: Record<ReservationSource, string>;
   /** The conflict flow's decision step: who is confirmed free, swap, undo. */
   reservationAlternativesTitle: string;
@@ -129,6 +136,7 @@ export type ReservationLabels = Pick<
   | "reservationCollidesTitle"
   | "reservationNotBlocking"
   | "reservationUnknown"
+  | "reservationUnknownWhy"
   | "reservationSource"
   | "reservationAlternativesTitle"
   | "reservationSwap"
@@ -213,7 +221,7 @@ export function ReservationNotice({
   if (verdict.state === "unknown") {
     return (
       <p className="text-xs text-text-muted" role="status" data-testid="assign-reservation-unknown">
-        {labels.reservationUnknown}
+        {unknownReason(verdict, labels)}
       </p>
     );
   }

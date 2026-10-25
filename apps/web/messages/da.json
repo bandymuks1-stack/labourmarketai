@@ -2014,6 +2014,15 @@
       "pending": "Lægger sammen…",
       "done": "Lagt sammen. Rækkerne og deres poster bevares; projektlisten viser nu det beholdte projekt.",
       "failed": "Ikke lagt sammen. Intet blev ændret for rækker, der ikke gik igennem — genindlæs og prøv igen."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {

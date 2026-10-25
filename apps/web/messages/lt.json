@@ -3214,7 +3214,7 @@
       "eyebrow": "ADMIN · PHASE 3",
       "title": "Atitikimo darbastalis",
       "subtitle": "Atviri poreikiai šalia darbuotojų pasiūlos — peržiūrėk, nuspręsk, užfiksuok.",
-      "humanNote": "Kiekvienas match čia parinktas žmogaus, ne algoritmo. Sistema nereitinguoja ir nesiūlo — ji tik rodo realius duomenis ir užfiksuoja tavo sprendimą su grįžtamojo ryšio pastaba.",
+      "humanNote": "Kiekvieną atitikimą čia parenka žmogus, ne algoritmas. Sistema nereitinguoja ir nesiūlo — ji tik rodo realius duomenis ir užfiksuoja tavo sprendimą su grįžtamojo ryšio pastaba.",
       "back": "Grįžti į admin",
       "migrationBlocker": "Suvedimo darbastalis laikinai nepasiekiamas, kol ruošiami jo duomenys.",
       "demand": {
@@ -3249,7 +3249,7 @@
         "reviewNote": "Peržiūros pastaba"
       },
       "log": {
-        "title": "Žmogaus match žurnalas"
+        "title": "Žmogaus atitikimų žurnalas"
       },
       "supply": {
         "title": "Darbuotojų pasiūla",
@@ -3274,7 +3274,7 @@
         "workerPlaceholder": "Pasirink darbuotoją…",
         "noteLabel": "Grįžtamojo ryšio pastaba (kas tiko, ko trūko)",
         "notePlaceholder": "Pvz. profesija tinka, dar trūksta A1 dokumento…",
-        "recordInReview": "Užfiksuoti match · peržiūrima",
+        "recordInReview": "Užfiksuoti atitikimą · peržiūrima",
         "recordFollowup": "Užfiksuoti · reikia patikslinti",
         "recordApproved": "Užfiksuoti · patvirtinta"
       },
@@ -6237,7 +6237,7 @@
         "precheckAdvisory": "Tik perspėjimas: patikrinta ką tik ir nepatikrinama iš naujo išsaugant. Kol kas nieko nepriskirta.",
         "reasonLabel": "Palikimo priežastis (nebūtina)",
         "reasonNone": "Priežastis nenurodyta",
-        "keepFailed": "Išimties kvito nepavyko įrašyti. Niekas neišsaugota - bandykite dar kartą.",
+        "keepFailed": "Išimties kvito nepavyko įrašyti. Niekas neišsaugota — bandyk dar kartą.",
         "reason": {
           "agreed_with_worker": "Suderinta su darbuotoju",
           "agreed_with_client": "Suderinta su užsakovu",
@@ -6246,7 +6246,7 @@
           "other": "Kita"
         },
         "collidesTitle": "Šiomis dienomis jau turi įsipareigojimų",
-        "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas jūsų.",
+        "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas tavo.",
         "alternativesTitle": "Laisvi šiomis dienomis",
         "swap": "Priskirti vietoj to",
         "undo": "Atšaukti priskyrimą",
@@ -6259,6 +6259,11 @@
           "trip": "Komandiruotė",
           "absence": "Nepasiekiama",
           "plan": "Suplanuotas darbas"
+        },
+        "unknownWhy": {
+          "undated_window": "Projektas neturi datų, todėl persidengimų su kitais įsipareigojimais patikrinti negalima.",
+          "undated_commitment": "Kitas šio žmogaus įsipareigojimas neturi datų, todėl laisvų dienų patvirtinti negalima.",
+          "source_unreadable": "Dalies kalendoriaus dabar nepavyko perskaityti, todėl laisvų dienų patvirtinti negalima."
         }
       }
     },
@@ -8692,7 +8697,7 @@
     },
     "demand": {
       "title": "Atvira paklausa",
-      "humanNote": "„Galim pasiūlyti“ — tai tavo pasiūlymas prie užklausos; galutinį match visada užfiksuoja žmogus platformos pusėje.",
+      "humanNote": "„Galim pasiūlyti“ — tai tavo pasiūlymas prie užklausos; galutinį atitikimą visada užfiksuoja žmogus platformos pusėje.",
       "needsGate": "Šiuo metu nepasiekiama.",
       "empty": "Šiuo metu atvirų užklausų nėra.",
       "noRole": "Rolė nenurodyta",
@@ -10713,7 +10718,7 @@
         "Darbo įrodymai",
         "Patvirtinimai",
         "Įgūdžiai ir kompetencijos",
-        "Living CV — gyvas profesinis CV",
+        "Gyvas CV — gyva profesinė istorija",
         "Naujos galimybės",
         "Komandos",
         "Įmonės gebėjimai",
@@ -10733,7 +10738,7 @@
           "Fiksuoti atliktą darbą",
           "Išsaugoti įrodymus",
           "Gauti patvirtinimus, kai taikoma",
-          "Kaupti profesinę istoriją — Living CV",
+          "Kaupti profesinę istoriją — gyvas CV",
           "Naudoti sukauptą patirtį naujoms galimybėms"
         ],
         "pointsLabel": "Ką atspindi profesinis profilis",
@@ -10806,7 +10811,7 @@
         "Įgūdžiai ir kompetencijos",
         "Šaltinis / įrodymas",
         "Patvirtinimas",
-        "Profesinė istorija — Living CV"
+        "Profesinė istorija — gyvas CV"
       ],
       "projectionsLabel": "Tas pats įrašas — keli vaizdai",
       "projections": [
@@ -10828,7 +10833,7 @@
       ],
       "platformPoints": [
         "Kiekvienas tikras darbo laikotarpis prideda prie profesinės istorijos.",
-        "Auga įrodymai, kompetencijos ir Living CV.",
+        "Auga įrodymai, kompetencijos ir gyvas CV.",
         "Kartu auga komandos ir įmonės realiai atlikto darbo istorija.",
         "Sukaupta patirtis tampa kontekstu naujoms galimybėms."
       ],

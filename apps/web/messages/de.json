@@ -6259,6 +6259,11 @@
           "trip": "Dienstreise",
           "absence": "Nicht verfügbar",
           "plan": "Geplante Arbeit"
+        },
+        "unknownWhy": {
+          "undated_window": "Dieses Projekt hat keine Daten, daher lassen sich Überschneidungen mit anderen Verpflichtungen nicht prüfen.",
+          "undated_commitment": "Eine andere Verpflichtung dieser Person hat keine Daten, daher lassen sich freie Tage nicht bestätigen.",
+          "source_unreadable": "Ein Teil des Kalenders konnte gerade nicht gelesen werden, daher lassen sich freie Tage nicht bestätigen."
         }
       }
     },
