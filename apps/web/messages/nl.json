@@ -18196,6 +18196,29 @@
       "company_posting_registration": "Registratie van de detachering door het bedrijf. Dit is een verplichting van de werkgever, los van wat de werknemer zelf indient.",
       "company_tax_vat": "Btw-, belasting- en socialezekerheidsregistratie voor het bedrijf. Of dit geldt, hangt af van wat het werk is en hoe lang het duurt.",
       "national_specifics": "Landspecifieke papieren — sector- of bouwpassen, lokale registratie, nationale belasting- en socialezekerheidsstappen. Die bestaan in de meeste landen, maar de details zijn nationaal, dus controleer ze op de officiële site."
+    },
+    "reading": {
+      "title": "In gewone taal",
+      "intro": "Kies je situatie en vraag een korte uitleg van de eisen hierboven, in volgorde. AI schrijft die als suggestie: elke stap noemt de eis waar hij vandaan komt, en de eisen hierboven blijven het antwoord.",
+      "scopeLabel": "Jouw situatie",
+      "cta": "Leg uit in gewone taal",
+      "pending": "De eisen worden gelezen...",
+      "resultTitle": "AI-lezing van de eisen hierboven",
+      "attribution": "Geschreven door {provider} {model} op basis van de eisen hierboven. Een suggestie, geen juridisch advies en geen vastgelegd feit.",
+      "stepsTitle": "Wat telt, in volgorde",
+      "stepSource": "Bron:",
+      "stepLegalCheck": "juridische check nodig",
+      "legalCheck": "Een deel hiervan is nationaal en niet EU-breed, en is voor dit land niet gecontroleerd. Controleer het bij de nationale instantie voordat je erop vertrouwt.",
+      "limitationsTitle": "Wat deze lezing je niet kan vertellen",
+      "reviewNote": "Vergelijk deze lezing met de eisen hierboven voordat je iets doet.",
+      "off": {
+        "not_authenticated": "Log in om een uitleg in gewone taal te vragen. De eisen hierboven zijn ook zonder die uitleg volledig.",
+        "rate_limited": "Je hebt dit zojuist een paar keer gevraagd. Probeer het over enkele minuten opnieuw.",
+        "no_research": "Voor deze situatie zijn hier geen onderzochte eisen, dus er valt niets uit te leggen.",
+        "ai_off": "AI staat op deze dienst op dit moment uit, dus er is geen uitleg in gewone taal. De eisen hierboven zijn ook zonder die uitleg volledig.",
+        "ai_unavailable": "De uitleg kon nu niet worden gemaakt. De eisen hierboven blijven ongewijzigd.",
+        "unsourced": "De uitleg noemde een eis die niet in de lijst hierboven staat, dus is hij weggegooid in plaats van getoond. De eisen hierboven blijven ongewijzigd."
+      }
     }
   },
   "organizationDoors": {
