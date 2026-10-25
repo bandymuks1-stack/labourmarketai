@@ -1066,11 +1066,11 @@ test.describe("INTEGRATED FIXES", () => {
     await go(page, "/en/dashboard/listings", '[data-testid="market-actor-filter"], main h1');
     const row = page.locator("li, article, tr").filter({ hasText: nm("b8 removable") }).first();
     await expect(row).toBeVisible({ timeout: 120_000 });
-    await row.getByRole("button", { name: /^(Remove|Delete)$/i }).first().click();
-    await expect(page.getByTestId(`listing-remove-confirm-${id}`)).toBeVisible();
+    await row.getByTestId(`listing-remove-${id}`).click();
+    await expect(page.getByTestId(`listing-remove-${id}-yes`)).toBeVisible();
     await page.waitForTimeout(1_000);
     expect(await rows(`marketplace_listings?id=eq.${id}&select=id`), "one click does not delete").toHaveLength(1);
-    await page.getByTestId(`listing-remove-confirm-${id}`).click();
+    await page.getByTestId(`listing-remove-${id}-yes`).click();
     await expect.poll(async () => (await rows(`marketplace_listings?id=eq.${id}&select=id`)).length, { timeout: 60_000 }).toBe(0);
     void ind;
   });

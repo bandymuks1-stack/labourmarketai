@@ -157,17 +157,15 @@
     "cancel": "Atšaukti",
     "edit": "Redaguoti",
     "remove": "Ištrinti",
-    "removeConfirm": "Ištrinti šį skelbimą negrįžtamai?",
     "activate": "Paskelbti",
-    "close": "Uždaryti",
-    "reopen": "Grąžinti į juodraštį",
+    "close": "Užbaigti",
     "errorTitleRequired": "Reikia bent 3 simbolių pavadinimo.",
     "errorCountry": "Naudok 2 raidžių šalies kodą (pvz. DE).",
     "errorGeneric": "Įvyko klaida. Bandyk dar kartą.",
     "status": {
       "draft": "Juodraštis",
       "active": "Aktyvus",
-      "closed": "Uždarytas",
+      "closed": "Užbaigtas",
       "paused": "Pristabdytas"
     },
     "kinds": {
@@ -270,7 +268,18 @@
     "formPublisherLabel": "Skelbia",
     "publisherSelf": "Aš asmeniškai",
     "publishedAs": "Kaip {name}",
-    "publishedAsOrganization": "Kaip organizacija"
+    "publishedAsOrganization": "Kaip organizacija",
+    "republish": "Paskelbti iš naujo",
+    "removeForever": "Ištrinti visam laikui",
+    "removeQuestion": "Ištrinti visam laikui? Atkurti nebus galima. Jei nori tik paslėpti iš paieškos, pristabdyk arba užbaik.",
+    "removeYes": "Taip, ištrinti",
+    "searchState": {
+      "draft": "Juodraštis — kiti dar nemato. Paskelbk, kai bus paruoštas.",
+      "active": "Matomas paieškoje — kiti gali rasti ir tau parašyti.",
+      "paused": "Pristabdytas — paslėptas iš paieškos. Paskelbk iš naujo, kai vėl bus aktualu.",
+      "closed": "Užbaigtas — paslėptas iš paieškos, pokalbiai ir istorija išsaugoti.",
+      "expired": "Pasibaigęs — paslėptas iš paieškos. Pakeisk galiojimo datą ir paskelbk iš naujo."
+    }
   },
   "quality": {
     "title": "Defektai ir kokybė",
@@ -3560,7 +3569,7 @@
     "opportunities": "Galimybės: matai tau tinkančius darbus. Matomumas priklauso nuo tinklo dydžio ir tavo pasirengimo.",
     "marketplaceMap": "Rinkos žemėlapis: darbo rinkos signalai pagal šalį ir regioną. Tikslesnė vieta atsiranda, kai ją nustatai.",
     "adminReview": "Sistemos priežiūra: skirta tik administratoriui. Paprastas vartotojas šių ekranų nemato.",
-    "paymentReadiness": "Mokėjimai ruošiami: mokama prieiga dar neaktyvi. Kol kas pirmi vartotojai jungiami rankiniu / owner-review būdu. Stripe bus prijungtas kitame etape.",
+    "paymentReadiness": "Mokėjimai ruošiami: mokama prieiga dar neaktyvi.",
     "identityModel": "Dvi bazinės tapatybės: asmuo ir įmonė. Pirkimas, pardavimas, samdymas ir agentūrinė veikla yra veiksmai, ne atskiros tapatybės."
   },
   "profileIdentityNotice": {
@@ -6875,7 +6884,7 @@
     "saving": "Saugoma...",
     "cancel": "Atšaukti",
     "edit": "Redaguoti",
-    "remove": "Pašalinti",
+    "remove": "Ištrinti visam laikui",
     "activate": "Aktyvuoti",
     "pause": "Pristabdyti",
     "errorTitleRequired": "Įvesk paslaugos pavadinimą.",
@@ -6893,7 +6902,9 @@
       "paused": "Pristabdyta — nariams nematoma. Aktyvuok, kad vėl būtų randama."
     },
     "linkToRequests": "Peržiūrėk užklausas dėl savo paslaugų",
-    "errorHasRequests": "Šis pasiūlymas turi užklausų, todėl jo ištrinti negalima – užklausų istorija turi išlikti. Galite jį sustabdyti."
+    "errorHasRequests": "Šis pasiūlymas turi užklausų, todėl jo ištrinti negalima – užklausų istorija turi išlikti. Galite jį sustabdyti.",
+    "removeQuestion": "Ištrinti paslaugą visam laikui? Atkurti nebus galima. Jei nori tik paslėpti iš paieškos, pristabdyk.",
+    "removeYes": "Taip, ištrinti"
   },
   "communication": {
     "origin": {
@@ -8009,19 +8020,10 @@
     "disclaimer": "Statusai pagrįsti viešai skelbiamais reikalavimais ir tavo paties įvestimi. Galutinį atitikimą tikrina institucijos arba teisininkas — tai nėra teisinė garantija.",
     "needsMigration": "Šiuo metu nepasiekiama.",
     "guidance": {
-      "title": "Dokumentų gairės pagal šalį (juodraštis)",
+      "title": "Dokumentų gairės pagal šalį",
       "intro": "Informacinio pobūdžio gairės, kokių dokumentų gali reikėti pagal darbuotojo registracijos šalį, įmonės registracijos šalį, darbo šalį ir darbo pobūdį. Tai nėra teisinė konsultacija.",
-      "pendingNotice": "Teisinės / dokumentų gairės ruošiamos iš lietuviško pagrindinio teksto.",
-      "draftDisclaimer": "JUODRAŠTIS: visos šios gairės yra informacinio pobūdžio ir dar laukia savininko bei teisininko peržiūros. Jos nieko negarantuoja — kiekvienu atveju reikia pasitikrinti oficialiuose šaltiniuose.",
-      "statusSummary": "Įrašų: {total} · laukia teisininko peržiūros: {awaiting}",
-      "status": {
-        "LT_DRAFT_READY": "LT juodraštis paruoštas",
-        "OWNER_EDITING": "Savininkas redaguoja",
-        "OWNER_APPROVED_LT": "LT patvirtinta savininko",
-        "TRANSLATION_READY": "Paruošta vertimui",
-        "TRANSLATED": "Išversta"
-      },
-      "needsLegalReview": "Laukia teisininko peržiūros",
+      "pendingNotice": "Dokumentų gairės pagal šalį kol kas pateikiamos tik lietuvių kalba.",
+      "officialSources": "Kiekvienu atveju reikia pasitikrinti oficialiuose šaltiniuose.",
       "whoProvides": "Kas dažniausiai pasirūpina",
       "groupAll": "Bendra (visos šalys)",
       "helpInfoNote": "Tai informacinės gairės. Dokumentų, buhalterijos ar teisinės pagalbos užklausą galima pateikti iš įmonės darbo aplinkos.",
@@ -8098,7 +8100,7 @@
       "ready_for_country": "Pasiruošę šiai šaliai",
       "availabilityHint": "Nurodyk savo prieinamumą, kad užbaigtum pasirengimą."
     },
-    "needsLegalReview": "reikia teisinės peržiūros",
+    "needsLegalReview": "šaltinis nepatvirtintas",
     "sourceLink": "šaltinis",
     "scopeNote": "Remiamasi oficialiais ES komandiruojamų darbuotojų šaltiniais — nacionalines detales pasitikslink kompetentingoje institucijoje. Tai informacija, ne teisinė konsultacija.",
     "editor": {
@@ -9056,8 +9058,8 @@
       "contact": "Suderinama individualiai"
     },
     "readiness": {
-      "draft_pricing": "Planai parengti, bet jų įsigyti negalima. Kainos — dar savininko juodraštis: nė viena kaina nėra galutinė ir nieko negalima nusipirkti.",
-      "owner_confirmed": "Kainos patvirtintos savininko, tačiau planai lieka tik parengti — nieko negalima nusipirkti, kol mokėjimai neįjungti."
+      "draft_pricing": "Planai parengti, bet jų įsigyti negalima. Nė viena kaina nėra galutinė ir nieko negalima nusipirkti.",
+      "owner_confirmed": "Planai kol kas tik parengti — nieko negalima nusipirkti, kol mokėjimai neįjungti."
     },
     "featuresLabel": "Ką apima ši riba",
     "limitValue": "iki {count}",
@@ -9110,6 +9112,7 @@
     "intro": "Pasiūlytos darbo galimybės. Rezervacija patvirtinama tik darbuotojui sutikus.",
     "notAuthed": "Prisijunk, kad matytum savo rezervacijas.",
     "unavailable": "Nepavyko atlikti veiksmo. Bandyk dar kartą.",
+    "readFailed": "Šiuo metu nepavyko įkelti tavo rezervacijų — tai nereiškia, kad jų nėra. Bandyk dar kartą.",
     "noDate": "Pradžios data nenurodyta",
     "noRole": "Darbo susitarimas",
     "startsOn": "Pradžia {date}",
@@ -9186,7 +9189,8 @@
       "alreadyAccepted": "Darbuotojas šį pasiūlymą jau priėmė — sutartos sąlygos čia neperrašomos. Pakeitimus aptarkite pokalbyje.",
       "refusedNotReachable": "Šiam žmogui rezervacijos iš čia pasiūlyti negalima — jis nėra atvėręs profilio darbdaviams ir neturi su tavimi darbo ryšio.",
       "refusedNeedClosed": "Šis poreikis uždarytas — prieš siūlydamas rezervaciją, atidaryk jį iš naujo.",
-      "refusedAnswered": "Darbuotojas šį pasiūlymą atmetė, todėl be jo naujo sutikimo jis iš naujo neatveriamas. Tęsk pokalbyje arba rask kitą darbuotoją."
+      "refusedAnswered": "Darbuotojas šį pasiūlymą atmetė, todėl be jo naujo sutikimo jis iš naujo neatveriamas. Tęsk pokalbyje arba rask kitą darbuotoją.",
+      "unconfirmed": "Serveris dar neatsakė. Pasiūlymas galėjo būti jau išsiųstas — patikrink skiltį „Rezervacijos“ arba siųsk dar kartą (tas pats pasiūlymas nedubliuojamas)."
     },
     "reason": {
       "optionalTitle": "Priežastis (nebūtina)",
@@ -11168,6 +11172,13 @@
         "unknown": "Nepavyko patikrinti, ar įmonės mato tavo profilį. Tai nereiškia, kad matomumas išjungtas — atidaryk privatumo nustatymus.",
         "noWorker": "Matomumas darbdaviams taikomas darbuotojo profiliui, o šioje paskyroje jo dar nėra."
       }
+    },
+    "switch": {
+      "privateLine": "Šis nustatymas niekada nerodo: tavo vardo, telefono numerio, el. pašto, Darbo žurnalo įrašų ir išorinių profilių nuorodų.",
+      "turnOn": "Perskaityti sąlygas ir įjungti",
+      "details": "Ką mato įmonės ir visos sąlygos",
+      "grantedNote": "Atlikta — įmonės dabar gali rasti tavo profesinį profilį su anonimine žyma.",
+      "withdrawnNote": "Atlikta — tavo profilis nebebus rodomas naujose įmonių paieškose."
     }
   },
   "planning": {
@@ -11409,9 +11420,9 @@
       "coveredShort": "padengta {count}"
     },
     "notes": {
-      "assignmentsPending": "Priskyrimų duomenys paruošti ir šiame vaizde atsiras po savininko aktyvavimo.",
-      "languagesPending": "Kalbų aprėptis paruošta ir šiame vaizde atsiras po savininko aktyvavimo.",
-      "brigadesPending": "Brigadų aprėptis paruošta ir šiame vaizde atsiras po savininko aktyvavimo.",
+      "assignmentsPending": "Priskyrimų duomenys šiame vaizde dar nerodomi.",
+      "languagesPending": "Kalbų aprėptis šiame vaizde dar nerodoma.",
+      "brigadesPending": "Brigadų aprėptis šiame vaizde dar nerodoma.",
       "demandError": "Darbo poreikių šiuo metu nepavyko nuskaityti.",
       "projectError": "Projektų šiuo metu nepavyko nuskaityti.",
       "capacityError": "Dalies pajėgumo duomenų šiuo metu nepavyko nuskaityti."
@@ -12828,7 +12839,7 @@
     },
     "stateNote": {
       "insufficientData": "Šiam signalui dar nepakanka tikrų duomenų — rodome sąžiningą spragą, o ne išgalvotą skaičių.",
-      "needsMigration": "Šio signalo duomenų saugykla parengta ir bus įjungta po savininko aktyvavimo. Iki tol niekas nespėjama.",
+      "needsMigration": "Šis signalas dar neįjungtas. Iki tol niekas nespėjama.",
       "stale": "Šio signalo įrodymai senesni nei šviežumo langas — vertink juos kaip pasenusius."
     },
     "valueClass": {
@@ -12880,7 +12891,7 @@
         "agencyAggregate": "Suvestinė tarp klientų"
       },
       "state": {
-        "needsMigration": "Šis signalas parengtas ir laukia savininko aktyvavimo."
+        "needsMigration": "Šis signalas dar neįjungtas."
       },
       "salary": {
         "noBenchmark": "Tavo profesijai ir šaliai atskaitos rodiklio dar nėra.",
@@ -12915,7 +12926,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Savininko aktyvuojama duomenų saugykla (dar neįjungta)",
+      "gatedMigration": "Duomenų saugykla dar neįjungta",
       "marketRateAverages": "Administratoriaus kuruojami rinkos įkainių vidurkiai",
       "journalEvidence": "Tavo darbo žurnalo įrodymai",
       "fillTimeMeasurementsMissing": "Užpildymo trukmės matavimai (dar nerenkami)",
@@ -12973,14 +12984,14 @@
       },
       "terms": {
         "internal": "Vidinis skaičiavimas iš kanoninių platformos lentelių; kohortų taisyklė saugo asmenis.",
-        "adminCurated": "Savininko įvesti vidurkiai su šaltinio pastaba vietoj imties dydžio.",
-        "statGovLt": "Oficiali statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
-        "eurostat": "Oficiali ES statistika; būtina nuoroda į šaltinį; aktyvavimas laukia savininko patvirtinimo.",
+        "adminCurated": "Kuruojami vidurkiai su šaltinio pastaba vietoj imties dydžio.",
+        "statGovLt": "Oficiali statistika; būtina nuoroda į šaltinį. Kol kas nenaudojama.",
+        "eurostat": "Aktyvus šaltinis. Oficiali ES statistika; būtina nuoroda į šaltinį.",
         "arbetsformedlingen": "Aktyvus šaltinis. Naudojimo sąlygos patvirtintos: nemokamas viešas duomenų šaltinis (CC0). Prie kiekvieno skelbimo nurodomas šaltinis, o skelbimas veda atgal į originalų skelbimą.",
         "nav": "Aktyvus šaltinis. NAV API sąlygos priimtos, gauta prieiga. Nuolatiniai įsipareigojimai vykdomi: pašalintas skelbimas iškart išimamas, atnaujintas – greitai atnaujinamas, o paraiška nukreipiama į originalų skelbimą.",
-        "cvbankas": "Tik pasiūlymas — naudojimo leidimas nepatvirtintas; niekada nemaišoma su vidiniais skaičiais.",
-        "eures": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama.",
-        "uztLt": "Siūlomas šaltinis. Naudojimo sąlygos dar neperžiūrėtos — aktyvavimui reikia savininko patvirtinimo. Šiandien niekas neatsiunčiama."
+        "cvbankas": "Siūlomas šaltinis — nenaudojamas; niekada nemaišomas su vidiniais skaičiais.",
+        "eures": "Siūlomas šaltinis. Nenaudojamas — šiandien niekas neatsiunčiama.",
+        "uztLt": "Siūlomas šaltinis. Nenaudojamas — šiandien niekas neatsiunčiama."
       },
       "status": {
         "active": "Aktyvus (vidinis)",
@@ -12992,7 +13003,7 @@
     "methodology": {
       "title": "Metodika",
       "deterministic": "Visos reikšmės deterministinės ir apskaičiuotos iš įrašų su šaltiniais — nieko nesprendžia DI ir joks skaičius niekada neišgalvojamas.",
-      "externalOff": "Išoriniai šaltiniai išjungti: kiekvienas išorinis atskaitos šaltinis — tik pasiūlymas, laukiantis savininko teisinio patvirtinimo. Vidiniai ir išoriniai skaičiai niekada nemaišomi.",
+      "externalOff": "Išoriniai šaltiniai išjungti. Vidiniai ir išoriniai skaičiai niekada nemaišomi.",
       "cohort": "Mažos kohortos apibendrinamos arba slepiamos, kad apsaugotume asmenis."
     },
     "contextual": {
@@ -13111,7 +13122,7 @@
       },
       "unavailable": {
         "requirementTitle": "Ko reikia",
-        "sourcesTitle": "Šaltiniai, laukiantys savininko patvirtinimo"
+        "sourcesTitle": "Dar nenaudojami šaltiniai"
       },
       "reason": {
         "salaryNoBenchmark": "Atlygio skaičiaus čia nėra, nes tavo profesijai ir šaliai dar neįvesta kuruojama rinkos gairė, o joks išorinis atlygio šaltinis nėra patvirtintas naudoti.",
@@ -13125,15 +13136,15 @@
         "eurostatNeedsActivation": "Oficialus Eurostato kontekstas paruoštas; pirmasis oficialus importas dar nevykdytas, todėl reikšmės nėra."
       },
       "requirement": {
-        "ownerEnableStore": "Platformos savininkas turi įjungti stebėjimų duomenų saugyklą ir patvirtinti bent vieną duomenų šaltinį.",
-        "salaryBenchmark": "Administratorius turi įvesti kuruojamą rinkos gairę tavo profesijai ir šaliai arba platformos savininkas turi patvirtinti išorinį atlygio šaltinį.",
+        "ownerEnableStore": "Turi būti įjungta stebėjimų duomenų saugykla ir patvirtintas bent vienas duomenų šaltinis.",
+        "salaryBenchmark": "Turi būti įvesta kuruojama rinkos gairė tavo profesijai ir šaliai arba patvirtintas išorinis atlygio šaltinis.",
         "demandOwnRows": "Pridėk darbo užklausų — ši kortelė užsipildo iš tavo organizacijos duomenų, vos tik atsiranda įrašų.",
         "salaryBasis": "Prieš rodant sąžiningą palyginimą turi būti užfiksuota, ar tavo pageidaujamas atlygis ir kuruojama rinkos gairė nurodyti bruto, ar neto.",
         "salaryInputs": "Įvesk pageidaujamą atlygį savo darbuotojo profilyje — palyginimas atsiras vos tik jis bus įvestas.",
         "eurostatActivation": "Įvykdomas apribotas oficialus Eurostato importas."
       },
       "after": {
-        "activation": "Savininkui patvirtinus ir įjungus duomenų įvestį, ši kortelė užsipildo šaltiniais pagrįstais, datuotais skaičiais — kiekvienas turės patikimumą, šviežumą, šaltinį ir žingsnis po žingsnio kilmę."
+        "activation": "Įjungus duomenų įvestį, ši kortelė užsipildo šaltiniais pagrįstais, datuotais skaičiais — kiekvienas turės patikimumą, šviežumą, šaltinį ir žingsnis po žingsnio kilmę."
       }
     },
     "drawer": {
@@ -13281,7 +13292,7 @@
         "labourCostIndex": "Tai nėra atlyginimo pasiūlymas ir niekada nėra pagrindas nustatyti asmens atlygį."
       },
       "sectionTitle": "Europos darbo rinkos kontekstas",
-      "sectionIntro": "Oficialūs Eurostato agregatai ES ir pasirinktoms Europos rinkoms. Paruošta, laukiama savininko aktyvavimo.",
+      "sectionIntro": "Oficialūs Eurostato agregatai ES ir pasirinktoms Europos rinkoms.",
       "asOf": "Eurostato publikacija: {date} — šie rodikliai čia patys neatsinaujina.",
       "dataBasis": "Oficialus Eurostato agregatas (šaltinis: Eurostatas)",
       "whyVisible": "Rodoma kaip oficialus Europos darbo rinkos kontekstas.",

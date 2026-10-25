@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { HomeTrace } from "@/components/app/home/home-trace";
-import { EmployerVisibilityAsk } from "@/components/app/employer-visibility-ask";
+import { HomeEmployerVisibility } from "@/components/app/home/home-employer-visibility";
 import {
   HomeAvailability,
   HomeBecause,
@@ -97,9 +97,8 @@ export function TodayScreen({ locale }: { locale: ActiveLocale }) {
 }
 
 async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
-  const [t, tCard, tProf, head] = await Promise.all([
+  const [t, tProf, head] = await Promise.all([
     getTranslations("todayScreen.home"),
-    getTranslations("auth.dashboard.workCard"),
     getTranslations("professions"),
     loadTodayHead(),
   ]);
@@ -159,6 +158,18 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
             <HomeWaiting locale={locale} />
           </Suspense>
 
+          {/* CAN EMPLOYERS FIND ME? — the status line and its ONE action, on
+              every visit, directly under the one primary action (which stays
+              first on a phone — IA 2026-09-13 §5). Owner goal 2026-10-24,
+              "matchability". It replaced the once-only ask, which vanished
+              after any decision: a findable worker never saw on the home that
+              they were findable, and "not now" removed the question for good.
+              The SAME consent component as every other door (compact, source
+              "home"); streams on its own, never blocks the regions. */}
+          <Suspense fallback={null}>
+            <HomeEmployerVisibility locale={locale} />
+          </Suspense>
+
           {/* KAS PASIKEITĖ — the consequence trace (Future Experience A,
               owner 2026-10-14): what the person did → what changed → what it
               opened, from the ONE read-only trace reader. Directly under the
@@ -166,24 +177,6 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
             <HomeTrace locale={locale} />
           </Suspense>
-
-          {/* THE EMPLOYER-VISIBILITY ASK — the SAME once-only door the
-              work-card save shows (never a consent of its own: it opens the
-              canonical consent screen; "not now" ends it on this device). On
-              the home too, because the save-only moment never reached the
-              workers who onboarded before the consent step existed (prod
-              2026-10-10: 0 of 18 real workers had ever been asked). Renders
-              nothing once decided. */}
-          <div className="empty:hidden">
-            <EmployerVisibilityAsk
-              labels={{
-                title: tCard("visibilityAsk.title"),
-                body: t("visibilityAskBody"),
-                open: tCard("visibilityAsk.open"),
-                dismiss: tCard("visibilityAsk.dismiss"),
-              }}
-            />
-          </div>
 
           <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
             <HomeRunning locale={locale} />

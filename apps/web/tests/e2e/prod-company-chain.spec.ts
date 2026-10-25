@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
+import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 
@@ -59,6 +59,17 @@ async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx
   return { ctx, page: await ctx.newPage() };
 }
 
+/**
+ * The page content, never the streaming holder. Dashboard pages stream through
+ * a hidden `<div id="S:n">` whose reveal is rAF-driven; in a never-painting
+ * headless tab that hidden copy sits outside <main> beside the rendered one,
+ * so a bare testid fails strict mode at once and a count reads double
+ * (project-execution 40081437313 E-11 `hours-worker-select`, and its cleanup
+ * `toHaveCount(0)`; calendar-journal-history.spec.ts). Strict inside <main>
+ * still fails if a page really renders something twice.
+ */
+const inMain = (page: Page): Locator => page.getByRole("main");
+
 /** Make `orgName` the active workspace through the real header chip. */
 async function useWorkspace(page: Page, orgName: string): Promise<void> {
   await page.goto("/lt/dashboard/company/people");
@@ -95,15 +106,15 @@ function requestIdOf(href: string | null): string {
  */
 async function submitNeed(page: Page, role: string, description: string): Promise<"done" | "limit"> {
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
-  await page.getByTestId("demand-role").fill(role);
-  await page.getByTestId("demand-description").fill(description);
-  await page.getByTestId("demand-next").click();
-  const size = page.getByTestId("demand-team-size");
+  await inMain(page).getByTestId("demand-role").fill(role);
+  await inMain(page).getByTestId("demand-description").fill(description);
+  await inMain(page).getByTestId("demand-next").click();
+  const size = inMain(page).getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
-  await page.getByTestId("demand-next").click();
-  await page.getByTestId("demand-create").click();
-  const done = page.getByTestId("demand-done");
-  const limit = page.getByTestId("demand-open-need-limit");
+  await inMain(page).getByTestId("demand-next").click();
+  await inMain(page).getByTestId("demand-create").click();
+  const done = inMain(page).getByTestId("demand-done");
+  const limit = inMain(page).getByTestId("demand-open-need-limit");
   await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
   return (await limit.isVisible()) ? "limit" : "done";
 }
@@ -151,8 +162,8 @@ async function postNeed(page: Page, role: string, description: string, marker: s
 /** Close one need through its own lifecycle controls (Gama is the active workspace). */
 async function closeNeed(page: Page, id: string): Promise<"closed" | "already-closed"> {
   await page.goto(`/lt/dashboard/company/scouting?request=${id}`);
-  const controls = page.getByTestId("demand-lifecycle-controls").first();
-  const unstructured = page.getByTestId("scouting-not-structured").first();
+  const controls = inMain(page).getByTestId("demand-lifecycle-controls").first();
+  const unstructured = inMain(page).getByTestId("scouting-not-structured").first();
   await expect(controls.or(unstructured).first()).toBeVisible({ timeout: 30_000 });
   if (await controls.isVisible()) {
     if ((await controls.getAttribute("data-demand-status")) === "closed") return "already-closed";
@@ -166,12 +177,12 @@ async function closeNeed(page: Page, id: string): Promise<"closed" | "already-cl
   // for every submitted need — the chat workspace's candidates result
   // (`?result=candidates&demand=`, `company.close-demand`).
   await page.goto(`/lt/dashboard?result=candidates&demand=${id}`);
-  const close = page.getByTestId("candidates-close-demand").filter({ visible: true }).first();
-  const reopen = page.getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
+  const close = inMain(page).getByTestId("candidates-close-demand").filter({ visible: true }).first();
+  const reopen = inMain(page).getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
   await expect(close.or(reopen).first(), "the need's own close/reopen action").toBeVisible({ timeout: 60_000 });
   if (await reopen.isVisible()) return "already-closed";
   await close.click();
-  const error = page.getByTestId("candidates-close-demand-error").first();
+  const error = inMain(page).getByTestId("candidates-close-demand-error").first();
   await expect(reopen.or(error).first()).toBeVisible({ timeout: 30_000 });
   if (await error.isVisible()) throw new Error(`close refused: ${(await error.innerText()).slice(0, 120)}`);
   closedHere.add(id);
@@ -184,7 +195,7 @@ const closedHere = new Set<string>();
 /** The worker raises a hand on need `id` from the full opportunities board (from "not interested"). */
 async function raiseHand(page: Page, id: string): Promise<void> {
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const card = page.locator(`li[id="opp-${id}"]`);
   await expect(card.locator('[data-testid^="interest-"]').first(), "the need's card offers interest").toBeVisible({
     timeout: 60_000,
@@ -218,7 +229,7 @@ test("C-1. the worker raises a hand on Gama's need from the opportunities board"
   // The pristine page is the worker's PERSONAL first view (owner addendum
   // 2026-10-09); the whole board, with every need's card, is `?view=all`.
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const cards = page
     .locator(`li[id="opp-${requestId}"]`)
     .filter({ has: page.getByTestId("opportunity-company").filter({ hasText: GAMA }) })
@@ -233,7 +244,7 @@ test("C-1. the worker raises a hand on Gama's need from the opportunities board"
     .catch(() => false);
   if (!appeared) {
     const allCards = await page.locator('li[id^="opp-"]').count();
-    const companies = await page.getByTestId("opportunity-company").allInnerTexts();
+    const companies = await inMain(page).getByTestId("opportunity-company").allInnerTexts();
     const buttons = await page.locator('[data-testid^="interest-"]').count();
     // Counts only — never company names: the board can show real customers,
     // and this log is a public artefact.
@@ -263,7 +274,7 @@ test("C-2 (4.11). Gama opens its need and sees the person who raised a hand", as
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  const candidate = page.getByTestId(`scout-candidate-${workerId}`);
+  const candidate = inMain(page).getByTestId(`scout-candidate-${workerId}`);
   await expect(candidate, "the hand-raiser is in Gama's candidate list").toBeVisible({ timeout: 60_000 });
   await expect(candidate.getByTestId(`scout-interest-${workerId}`)).toBeVisible();
   await expect(candidate.getByTestId(`interest-ack-${workerId}`)).toHaveAttribute("data-interest-status", "interested");
@@ -274,7 +285,7 @@ test("C-3 (4.16). Gama contacts them: a real thread opens", async ({ browser }) 
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  const ack = page.getByTestId(`interest-ack-${workerId}`);
+  const ack = inMain(page).getByTestId(`interest-ack-${workerId}`);
   await expect(ack).toBeVisible({ timeout: 60_000 });
   await ack.getByTestId("interest-ack-contacted").click();
   await page.waitForURL(/\/dashboard\/communication\/[0-9a-f-]{36}/, { timeout: 60_000 });
@@ -310,11 +321,11 @@ async function siteReady(page: Page, org: string): Promise<void> {
     console.info(`[hours] ${org}: no site yet, following the page's own door`);
     await main.getByTestId("hours-no-objects-add-site").click();
     await page.waitForURL(/\/dashboard\/projects/, { timeout: 60_000 });
-    const form = page.getByTestId("work-object-add-form");
+    const form = inMain(page).getByTestId("work-object-add-form");
     await expect(form).toBeVisible({ timeout: 30_000 });
     await form.locator('input[name="name"]').fill(SITE);
     await form.getByTestId("work-object-add-submit").click();
-    await expect(page.getByTestId("work-object-row").filter({ hasText: SITE }).first()).toBeVisible({
+    await expect(inMain(page).getByTestId("work-object-row").filter({ hasText: SITE }).first()).toBeVisible({
       timeout: 30_000,
     });
     await page.goto("/lt/dashboard/hours");
@@ -397,7 +408,7 @@ test("U-3 (#2680). Gama sees the hand-raiser, labelled not assessed, with the co
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${untradedId}`);
-  const section = page.getByTestId("scouting-hand-raisers-unassessed");
+  const section = inMain(page).getByTestId("scouting-hand-raisers-unassessed");
   await expect(section, "the unassessed hand-raisers section renders on a need with no trade").toBeVisible({
     timeout: 60_000,
   });

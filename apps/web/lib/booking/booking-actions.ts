@@ -663,7 +663,9 @@ export interface BookingRow {
 export type BookingsListResult =
   | { kind: "ok"; incoming: BookingRow[]; outgoing: BookingRow[] }
   | { kind: "needs-migration" }
-  | { kind: "not-authed" };
+  | { kind: "not-authed" }
+  /** The read itself failed — the bookings are UNKNOWN, never "none". */
+  | { kind: "read-failed" };
 
 // Column lists for the tolerant read: the extended list ALSO asks for the
 // owner-gated lifecycle-v2 deadline column; while it is not applied the
@@ -726,7 +728,13 @@ async function readMyBookings(): Promise<BookingsListResult> {
   const { data, error } = res!;
   if (error) {
     if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
-    return { kind: "ok", incoming: [], outgoing: [] };
+    // UNKNOWN is not ZERO: a failed read used to come back as an empty "ok"
+    // list, so the worker saw "no proposals yet" while a proposal sat
+    // unreadable — a delivery failure disguised as an empty inbox (row 5.13
+    // follow-up, 2026-10-25). Every consumer already treats a non-ok kind as
+    // unknown; the bookings page says so and offers a retry.
+    console.error("[bookings] list read failed", { code: error.code ?? null });
+    return { kind: "read-failed" };
   }
 
   const incoming: BookingRow[] = [];

@@ -184,6 +184,7 @@ export async function readOwnExperienceRelationships(
       (r) => r.organizationId === o.organizationId && r.relationship === o.relationship,
     );
     if (already) continue;
+    if (managerMembershipIsAccessOnly(o.relationship, o.organizationId, out)) continue;
     out.push({
       engagementContextId: null,
       organizationId: o.organizationId,
@@ -227,6 +228,33 @@ export async function readOwnExperienceRelationships(
     }
   }
   return out;
+}
+
+/**
+ * ACCESS IS NOT A PROFESSIONAL ROLE (owner order 2026-10-24). A `manager`
+ * MEMBERSHIP is an administrative grant to a workspace. When the person ALSO
+ * has a recorded engagement with that organization (consultant, employee,
+ * freelancer …), the engagement is what they professionally are there, and
+ * the grant is not printed as "manager" in their history — a consultant who
+ * administers the operator's workspace is not its manager. Without such an
+ * engagement the membership stays a role (the manager appointed by
+ * membership only, decision 0025 §4). An OWNER membership is never dropped:
+ * ownership is a legal fact, not an access grant. Nothing is written; the
+ * membership and its access stay exactly as they are.
+ */
+export function managerMembershipIsAccessOnly(
+  relationship: string,
+  organizationId: string,
+  recorded: readonly Pick<ExperienceRelationship, "organizationId" | "relationship" | "source">[],
+): boolean {
+  if (relationship !== "manager") return false;
+  return recorded.some(
+    (r) =>
+      r.source === "engagement" &&
+      r.organizationId === organizationId &&
+      r.relationship !== "manager" &&
+      (PROFESSIONAL_HISTORY_RELATIONSHIPS as readonly string[]).includes(r.relationship),
+  );
 }
 
 /** Roster kinds that are a working relationship, as the canonical history
