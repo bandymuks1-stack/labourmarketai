@@ -6130,6 +6130,8 @@
       "asksTitle": "Projektui iš tavęs dar reikia",
       "ledger": {
         "ratio": "Yra {have} iš {total}",
+        "ratioNone": "Patikrinamų reikalavimų dar nėra",
+        "ratioUnknown": "dar nežinoma: {count}",
         "availability": "Laisvumas",
         "state": {
           "valid": "turi",
@@ -6161,7 +6163,7 @@
           "none": "dar nieko neįrašyta"
         },
         "managerStatus": {
-          "needed": "laukiama",
+          "needed": "suderinti prieš susitarimą",
           "missing": "pažymėta kaip trūkstama",
           "received": "gauta",
           "checked": "patikrinta",
@@ -6170,7 +6172,7 @@
         },
         "resolution": {
           "addDocument": "Įrašyti dokumentą",
-          "issuingAuthority": "Išduoda: {title}",
+          "informationSource": "Informacijos šaltinis: {title}",
           "trainingProgram": "Kursas: {title}",
           "serviceOffering": "Paslauga: {title}",
           "serviceOfferingRate": "Paslauga: {title} ({rate})",
@@ -8066,7 +8068,8 @@
       "mine": "Pirmiausia — šalys, kuriose nori dirbti.",
       "unknown": "Šalies {country} reikalavimų sąrašas dar nesuvestas — nerodome nieko, vietoj spėliojimo.",
       "next": "Jei dirbsi šioje šalyje, prieš susitarimą aptark su darbdaviu: {doc}. Įkelti nieko nereikia.",
-      "ok": "Visi suvesti {country} reikalavimai padengti."
+      "ok": "Visi suvesti {country} reikalavimai padengti.",
+      "postingNeedsBase": "A1 pažymėjimas ir pranešimas apie komandiravimą rodomi tik tada, kai žinoma tavo bazinė šalis ir ji skiriasi nuo darbo šalies. Bazinė šalis dar nenurodyta."
     },
     "types": {
       "cv": "CV",
@@ -11460,10 +11463,10 @@
     },
     "utilisation": {
       "title": "Užimta artimiausių savaičių dalis",
-      "committedDays": "Užimta {committed} iš {counted} žmogaus dienų — {workers} žmonės per {days} d.",
+      "committedDays": "Užimta {committed} iš {counted, plural, one {# žmogaus dienos} few {# žmogaus dienų} many {# žmogaus dienos} other {# žmogaus dienų}} — {workers, plural, one {# žmogus} few {# žmonės} many {# žmogaus} other {# žmonių}} per {days} d.",
       "noneCounted": "Šiam laikotarpiui nepavyko suskaičiuoti nė vieno darbuotojo įsipareigojimų.",
       "partial": "{count} iš jų nepavyko suskaičiuoti iki galo — kai kas neturi datų, todėl skaičius viršuje yra minimumas.",
-      "unknown": "{count} iš vis nepavyko perskaityti. Tai nėra tas pat, kas laisva.",
+      "unknown": "{count} išvis nepavyko perskaityti. Tai nėra tas pat, kas laisva.",
       "denominatorNote": "Skaičiuojama kalendorinėmis dienomis. Sutartų valandų nefiksuojame, todėl tai nėra etatų rodiklis."
     },
     "rosterTimeline": {

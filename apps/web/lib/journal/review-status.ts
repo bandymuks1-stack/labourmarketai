@@ -380,3 +380,44 @@ export function countConfirmedEntries(
   return confirmedEntriesOf(liveRows, subjectProfileId, correctedOriginalIds).length;
 }
 
+/**
+ * CONFIRMED ENTRIES FROM A FLAT ROW READ — for a reviewer surface that reads
+ * `journal_entry_confirmations` directly (the manager inbox) instead of
+ * entries with their rows embedded.
+ *
+ * The inbox counted ROWS: an entry approved, sent back and approved again was
+ * "2 confirmed", and an entry approved and then sent back still counted as
+ * confirmed (walk-spec 2026-10-25). Here the rows are grouped by entry and the
+ * SAME latest-wins rule (`deriveReviewResult`, counterparty rows excluded)
+ * decides each entry once. `automatic` counts the confirmed entries whose
+ * deciding row was written by the auto-confirm policy, so an automatic
+ * confirmation never hides inside the confirmed figure.
+ */
+export function countConfirmedEntriesFromRows(
+  rows: readonly (ConfirmationRow & { readonly entry_id?: string | null })[],
+): { confirmed: number; automatic: number } {
+  const byEntry = new Map<string, ConfirmationRow[]>();
+  for (const r of rows) {
+    if (!r.entry_id) continue;
+    const list = byEntry.get(r.entry_id) ?? [];
+    list.push(r);
+    byEntry.set(r.entry_id, list);
+  }
+  let confirmed = 0;
+  let automatic = 0;
+  for (const list of byEntry.values()) {
+    if (deriveReviewResult(list) !== "approved") continue;
+    confirmed += 1;
+    const latest = employerRowsOnly(list)
+      .filter((r) => rowDecision(r) !== null)
+      .sort(
+        (a, b) =>
+          (a.created_at ? Date.parse(a.created_at) : 0) -
+          (b.created_at ? Date.parse(b.created_at) : 0),
+      )
+      .at(-1);
+    if (latest && rowIsAutomatic(latest)) automatic += 1;
+  }
+  return { confirmed, automatic };
+}
+

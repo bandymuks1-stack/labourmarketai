@@ -286,7 +286,7 @@
       "waiting": "Czeka na przegląd przez człowieka — może go przejrzeć kierownik lub właściciel Twojej organizacji; do tego czasu pozostaje wpisem, który wprowadziłeś",
       "approved": "Zweryfikowano",
       "changes_requested": "Poproszono o zmiany",
-      "rejected": "Zwrócono",
+      "rejected": "Odrzucono",
       "reasonLabel": "Powód",
       "notEnabled": "Zapisano — przełożony nie włączył jeszcze potwierdzania, więc nikt nie sprawdza tego wpisu; do tego czasu pozostaje Twoim własnym stwierdzeniem"
     },
