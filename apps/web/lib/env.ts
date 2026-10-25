@@ -122,7 +122,7 @@ const schema = z.object({
   // NEVER committed, NEVER in the client). Safety logic: lib/ai/runtime/config-core.ts.
   AI_PROVIDER_MODE: z.enum(["disabled", "mock", "live"]).default("disabled"),
   AI_PROVIDER: z
-    .enum(["local", "anthropic", "openai", "gemini", "xai"])
+    .enum(["local", "anthropic", "openai", "gemini", "xai", "cloudflare", "mistral", "groq"])
     .default("anthropic"),
   AI_API_KEY: z.string().optional(),
   AI_MODEL: z.string().optional(),
@@ -152,6 +152,15 @@ const schema = z.object({
   AI_CLOUDFLARE_ENABLED: z.enum(["true", "false"]).default("false"),
   CLOUDFLARE_ACCOUNT_ID: z.string().optional(),
   CLOUDFLARE_API_TOKEN: z.string().optional(),
+  // ── Free API tiers (2026-10-25; ALL OFF by default) ─────────────────────────
+  // OpenAI-compatible bindings in lib/ai/runtime/providers/free-tier.ts. Each is
+  // DOUBLE gated (flag + key) and is a `free_tier` external provider for the
+  // data-egress gate: PUBLIC payloads only. Cloudflare's general LLMs reuse
+  // AI_CLOUDFLARE_ENABLED + CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN above.
+  AI_MISTRAL_ENABLED: z.enum(["true", "false"]).default("false"),
+  MISTRAL_API_KEY: z.string().optional(),
+  AI_GROQ_ENABLED: z.enum(["true", "false"]).default("false"),
+  GROQ_API_KEY: z.string().optional(),
   // ── Local OpenAI-compatible runtime (free_local; OFF by default) ───────────
   // The ONE provider that needs no key: it authenticates by network location.
   // Its proof of configuration is instead a VALIDATED base URL plus an explicit
@@ -255,6 +264,10 @@ const parsed = schema.safeParse({
   AI_CLOUDFLARE_ENABLED: process.env.AI_CLOUDFLARE_ENABLED,
   CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
   CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN,
+  AI_MISTRAL_ENABLED: process.env.AI_MISTRAL_ENABLED,
+  MISTRAL_API_KEY: process.env.MISTRAL_API_KEY,
+  AI_GROQ_ENABLED: process.env.AI_GROQ_ENABLED,
+  GROQ_API_KEY: process.env.GROQ_API_KEY,
   AI_LOCAL_ENABLED: process.env.AI_LOCAL_ENABLED,
   AI_LOCAL_BASE_URL: process.env.AI_LOCAL_BASE_URL,
   AI_LOCAL_MODEL: process.env.AI_LOCAL_MODEL,
