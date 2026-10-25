@@ -52,6 +52,7 @@ const RETURNED = {
   role: "owner",
   at: "2026-10-25T10:00:00Z",
   note: "nurodyk, kiek kvadratinių metrų nutinkavai.",
+  automatic: false,
 };
 
 describe("the journal page renders the provenance of a corrected chain", () => {
@@ -101,6 +102,21 @@ describe("what the worker reads (rendered over the real catalogues)", () => {
     // state of its own: the correction still reads "waiting".
     expect(timeline.indexOf('data-step="corrected-from"')).toBeLessThan(timeline.indexOf('data-step="created"'));
     expect(timeline).toContain('data-step="waiting"');
+  });
+
+  it("an automatic approval carries the auto-confirm qualifier on the face and in the timeline", async () => {
+    currentLocale = "lt";
+    const auto = { ...RETURNED, result: "approved" as const, role: null, note: null, automatic: true };
+    const face = renderToStaticMarkup(await CorrectionProvenanceLine({ entryId: "fix", steps: [auto] }));
+    expect(face).toContain('data-automatic="true"');
+    expect(face).toContain('data-testid="corrected-from-auto-confirm-qualifier"');
+    const timeline = renderToStaticMarkup(
+      await EvidenceDecisionTimeline({ createdAt: "2026-10-25T12:00:00Z", events: [], correctedFrom: [auto] }),
+    );
+    expect(timeline).toContain('data-testid="timeline-auto-confirm-qualifier"');
+    // A hand decision carries no qualifier.
+    const hand = renderToStaticMarkup(await CorrectionProvenanceLine({ entryId: "fix", steps: [RETURNED] }));
+    expect(hand).not.toContain("auto-confirm-qualifier");
   });
 
   it("no provenance → nothing rendered", async () => {

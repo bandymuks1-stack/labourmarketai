@@ -46,6 +46,9 @@ export type CorrectionProvenanceStep = {
   readonly at: string | null;
   /** The reviewer's REAL note, trimmed; null when none was given. */
   readonly note: string | null;
+  /** The decision was written by the auto-confirm policy RPC (W6): its
+   *  provenance must never read like a hand decision. */
+  readonly automatic: boolean;
 };
 
 type ChainRow = {
@@ -85,6 +88,7 @@ export function deriveCorrectionProvenance(
           role: latest.role,
           at: latest.at,
           note: latest.note,
+          automatic: latest.automatic,
         });
       }
       nextId = original.correction_of ?? null;

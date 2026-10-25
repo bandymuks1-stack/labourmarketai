@@ -31,6 +31,7 @@ describe("deriveCorrectionProvenance", () => {
           role: "owner",
           at: "2026-10-25T10:00:00Z",
           note: "nurodyk kvadratus",
+          automatic: false,
         },
       ],
     });
@@ -49,8 +50,23 @@ describe("deriveCorrectionProvenance", () => {
       ],
     );
     expect(p.fix).toEqual([
-      { originalId: "orig", result: "rejected", role: "manager", at: "2026-10-25T11:00:00Z", note: null },
+      { originalId: "orig", result: "rejected", role: "manager", at: "2026-10-25T11:00:00Z", note: null, automatic: false },
     ]);
+  });
+
+  it("an AUTOMATIC approval keeps its marker — it never reads like a hand decision (Codex #2788)", () => {
+    const p = deriveCorrectionProvenance(
+      [{ id: "fix", correction_of: "orig" }],
+      [
+        {
+          id: "orig",
+          journal_entry_confirmations: [
+            { confirmation_scope: { action: "auto_confirm", decision: "approved" }, created_at: "2026-10-24T08:00:00Z", confirmer_role: null },
+          ],
+        },
+      ],
+    );
+    expect(p.fix?.map((s) => [s.result, s.automatic])).toEqual([["approved", true]]);
   });
 
   it("the LATEST employer decision of the original speaks; a client (counterparty) row never does", () => {
