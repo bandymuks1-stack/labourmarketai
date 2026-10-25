@@ -176,6 +176,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261024090000_",
       // 2026-10-25 (RED, owner-gated, APPLIED): Vivat Rex + Labour Market AI business-history period bounds.
       "20261025120000_",
+      // 2026-10-25 (RED, owner-gated, APPLIED): employer party labels for Vivat Rex records.
+      "20261025140000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
