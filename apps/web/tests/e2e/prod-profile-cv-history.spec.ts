@@ -79,7 +79,18 @@ async function useWorkspace(page: Page, orgName: string): Promise<void> {
 /** The profile opened at one section: the hash opens its closed fold. Streaming
  *  can briefly render a second copy outside `main`, so everything is scoped. */
 async function profileAt(page: Page, hash: string): Promise<Locator> {
+  // Always a REAL load. A goto to the page the tab is already on, differing
+  // only by hash, is a same-document navigation: nothing is re-read, and a
+  // "fresh" check would read the old tree (run 40175731734 P-13; #2702 P-4).
+  const already = (() => {
+    try {
+      return new URL(page.url()).pathname === "/lt/dashboard/profile";
+    } catch {
+      return false;
+    }
+  })();
   await page.goto(`/lt/dashboard/profile#${hash}`);
+  if (already) await page.reload();
   const main = inMain(page);
   await expect(main.locator(`#${hash}`).first()).toBeVisible({ timeout: 30_000 });
   return main;
@@ -557,11 +568,10 @@ test("P-13 (2.15). a free-label skill claim is saved and shows as self-declared 
   await form.getByTestId("capability-profile-manual-input").fill(CLAIM);
   await form.getByTestId("capability-profile-manual-add-button").click();
   // The save's own answer: on ok the input is cleared before the refresh; a
-  // refusal shows the section's alert. Then the claim is asserted on a fresh
-  // load and its in-place appearance is logged. That is the P-10 pattern, for
-  // the same reason: run 40169213003 saved the claim (cleanup found and
-  // removed it) but the refreshed chip never committed in place in the
-  // headless tab within 30 s.
+  // refusal shows the section's alert. Then the chip must show in place AND
+  // persist on a real reload. Runs 40169213003 and 40175731734 saved the claim
+  // (cleanup found and removed it), but the chip never showed: the section
+  // seeded its list with useState(claims) and ignored the refreshed prop.
   const refused = main.locator('p[role="alert"]').filter({ hasText: /\S/ });
   await expect(form.getByTestId("capability-profile-manual-input").or(refused).first()).toBeVisible();
   await expect
@@ -573,12 +583,11 @@ test("P-13 (2.15). a free-label skill claim is saved and shows as self-declared 
       { timeout: 30_000, message: "the claim save answered" },
     )
     .toBe("");
-  const inPlace = await main
-    .getByTestId("capability-profile-claim")
-    .filter({ hasText: CLAIM })
-    .waitFor({ state: "visible", timeout: 10_000 })
-    .then(() => true, () => false);
-  console.info(`[claim] shown in place after save=${inPlace}`);
+  // In place, as the person sees it. The section used to seed its list from
+  // the first prop and ignore the refresh (fixed with visibleSkillClaims).
+  await expect(main.getByTestId("capability-profile-claim").filter({ hasText: CLAIM }), "the new chip shows in place").toBeVisible({
+    timeout: 30_000,
+  });
   const fresh = await profileAt(page, "capabilities");
   await expect(fresh.getByTestId("capability-profile-claim").filter({ hasText: CLAIM }), "the claim persists").toHaveCount(1, {
     timeout: 30_000,

@@ -168,7 +168,9 @@ export async function MarketExplanationPanel({
             cta: t("cta"),
             pending: t("pending"),
             resultTitle: t("resultTitle"),
-            attribution: t("attribution"),
+            // RAW: keeps {provider} / {model} for the client to fill from the
+            // run (formatted without values, next-intl returns the key).
+            attribution: t.raw("attribution") as string,
             whereTitle: t("whereTitle"),
             skillsTitle: t("aiSkillsTitle"),
             actionsTitle: t("actionsTitle"),

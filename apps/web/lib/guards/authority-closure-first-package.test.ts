@@ -173,6 +173,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261024090000_",
       // 2026-10-25 (RED, needs-human-gate): free-worker default visibility (one ledger, switch OFF).
       "20261025100000_",
+      // 2026-10-25 (RED, owner-gated, APPLIED): Vivat Rex + Labour Market AI business-history period bounds.
+      "20261025120000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

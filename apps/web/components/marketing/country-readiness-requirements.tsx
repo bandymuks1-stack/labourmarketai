@@ -1,4 +1,5 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { CountryReadinessReading } from "./country-readiness-reading";
 import {
   READINESS_SCOPES,
   getCountryReadinessOrNull,
@@ -98,6 +99,45 @@ export async function CountryReadinessRequirements({
           <ScopeBlock key={scope} scope={scope} items={items} t={t} />
         ))}
       </div>
+
+      {/* Registry row 10.11 (owner decision 2026-10-25): the ONE AI layer on
+          this page, and it comes AFTER the matrix. It reads one scope's rows
+          back in plain language as a labelled suggestion that cites them; the
+          rows above stay the answer, and are complete when AI is off. */}
+      <CountryReadinessReading
+        country={readiness.country}
+        locale={await getLocale()}
+        scopes={byScope.map(({ scope }) => ({
+          value: scope,
+          label: t(`scope.${scope}.label`),
+        }))}
+        labels={{
+          title: t("reading.title"),
+          intro: t("reading.intro"),
+          scopeLabel: t("reading.scopeLabel"),
+          cta: t("reading.cta"),
+          pending: t("reading.pending"),
+          resultTitle: t("reading.resultTitle"),
+          // RAW, not formatted: the template keeps its {provider} / {model}
+          // placeholders for the client to fill from the actual run. Formatting
+          // it here without values makes next-intl return the key fallback.
+          attribution: t.raw("reading.attribution") as string,
+          stepsTitle: t("reading.stepsTitle"),
+          stepSource: t("reading.stepSource"),
+          stepLegalCheck: t("reading.stepLegalCheck"),
+          legalCheck: t("reading.legalCheck"),
+          limitationsTitle: t("reading.limitationsTitle"),
+          reviewNote: t("reading.reviewNote"),
+          off: {
+            not_authenticated: t("reading.off.not_authenticated"),
+            rate_limited: t("reading.off.rate_limited"),
+            no_research: t("reading.off.no_research"),
+            ai_off: t("reading.off.ai_off"),
+            ai_unavailable: t("reading.off.ai_unavailable"),
+            unsourced: t("reading.off.unsourced"),
+          },
+        }}
+      />
 
       {readiness.nationalPostingInfoUrl ? (
         <p className="mt-8 rounded-card border border-border-subtle bg-surface-1 p-4 text-xs leading-relaxed text-text-secondary">

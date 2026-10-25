@@ -18201,6 +18201,29 @@
       "company_posting_registration": "Anmeldung der Entsendung durch das Unternehmen. Das ist eine Pflicht des Arbeitgebers, getrennt von dem, was die einzelne Arbeitskraft einreicht.",
       "company_tax_vat": "Umsatzsteuer-, Steuer- und Sozialversicherungsanmeldung des Unternehmens. Ob das gilt, hängt davon ab, worin die Arbeit besteht und wie lange sie dauert.",
       "national_specifics": "Länderspezifische Unterlagen — Branchen- oder Bauausweise, örtliche Registrierung, nationale Steuer- und Sozialversicherungsschritte. Die gibt es in den meisten Ländern, aber die Details sind national — prüfen Sie sie auf der offiziellen Seite."
+    },
+    "reading": {
+      "title": "In einfachen Worten",
+      "intro": "Wählen Sie Ihre Situation und fordern Sie eine kurze, geordnete Erklärung der Anforderungen oben an. Sie wird von KI als Vorschlag geschrieben: Jeder Schritt nennt die Anforderung, aus der er stammt, und die Anforderungen oben bleiben die Antwort.",
+      "scopeLabel": "Ihre Situation",
+      "cta": "In einfachen Worten erklären",
+      "pending": "Die Anforderungen werden gelesen...",
+      "resultTitle": "KI-Lesart der Anforderungen oben",
+      "attribution": "Geschrieben von {provider} {model} auf Basis der Anforderungen oben. Ein Vorschlag, keine Rechtsberatung und keine feststehende Tatsache.",
+      "stepsTitle": "Was zählt, der Reihe nach",
+      "stepSource": "Quelle:",
+      "stepLegalCheck": "rechtliche Prüfung nötig",
+      "legalCheck": "Ein Teil davon ist national und nicht EU-weit geregelt und wurde für dieses Land nicht geprüft. Klären Sie es bei der nationalen Behörde, bevor Sie sich darauf verlassen.",
+      "limitationsTitle": "Was diese Lesart nicht sagen kann",
+      "reviewNote": "Gleichen Sie diese Lesart mit den Anforderungen oben ab, bevor Sie handeln.",
+      "off": {
+        "not_authenticated": "Melden Sie sich an, um eine Erklärung in einfachen Worten anzufordern. Die Anforderungen oben sind auch ohne sie vollständig.",
+        "rate_limited": "Sie haben das gerade mehrfach angefragt. Versuchen Sie es in ein paar Minuten erneut.",
+        "no_research": "Für diese Situation gibt es hier keine recherchierten Anforderungen, daher gibt es nichts zu erklären.",
+        "ai_off": "KI ist in diesem Dienst derzeit ausgeschaltet, daher gibt es keine Erklärung in einfachen Worten. Die Anforderungen oben sind auch ohne sie vollständig.",
+        "ai_unavailable": "Die Erklärung konnte gerade nicht erstellt werden. Die Anforderungen oben bleiben unverändert.",
+        "unsourced": "Die Erklärung nannte eine Anforderung, die nicht in der Liste oben steht, und wurde deshalb verworfen statt angezeigt. Die Anforderungen oben bleiben unverändert."
+      }
     }
   },
   "organizationDoors": {
