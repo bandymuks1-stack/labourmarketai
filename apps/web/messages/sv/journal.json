@@ -148,7 +148,7 @@
     "pageTitle": "Röstinmatning",
     "pageIntro": "Berätta om din arbetsdag — du granskar och rättar texten innan något sparas.",
     "backToJournal": "Tillbaka till dagboken",
-    "unavailable": "Rösttranskribering är inte konfigurerad ännu. Transkriberingsservern har inte anslutits av plattformsägaren — inspelning är avstängd tills vidare. Du kan alltid skriva ditt inlägg som text.",
+    "unavailable": "Rösttranskribering är inte tillgänglig ännu — inspelning är avstängd tills vidare. Du kan alltid skriva ditt inlägg som text.",
     "disclosureTitle": "Innan du spelar in",
     "disclosureProcessing": "Din inspelning skickas till en bearbetningsserver som kontrolleras av LabourMarket.ai för att omvandlas till text. Ingen tredjeparts rösttjänst används.",
     "disclosureWhy": "Den används bara för att skapa texten nedan — inget annat.",

@@ -157,17 +157,15 @@
     "cancel": "Cancel",
     "edit": "Edit",
     "remove": "Delete",
-    "removeConfirm": "Delete this listing permanently?",
     "activate": "Publish",
-    "close": "Close",
-    "reopen": "Reopen as draft",
+    "close": "Complete",
     "errorTitleRequired": "A title of at least 3 characters is required.",
     "errorCountry": "Use a 2-letter country code (e.g. DE).",
     "errorGeneric": "Something went wrong. Please try again.",
     "status": {
       "draft": "Draft",
       "active": "Active",
-      "closed": "Closed",
+      "closed": "Completed",
       "paused": "Paused"
     },
     "kinds": {
@@ -270,7 +268,18 @@
     "formPublisherLabel": "Published by",
     "publisherSelf": "Me personally",
     "publishedAs": "As {name}",
-    "publishedAsOrganization": "As an organization"
+    "publishedAsOrganization": "As an organization",
+    "republish": "Publish again",
+    "removeForever": "Delete permanently",
+    "removeQuestion": "Delete permanently? This cannot be undone. To only hide it from search, pause or complete it instead.",
+    "removeYes": "Yes, delete",
+    "searchState": {
+      "draft": "Draft — not visible to others yet. Publish it when it is ready.",
+      "active": "Visible in search — others can find it and message you.",
+      "paused": "Paused — hidden from search. Publish it again when it is relevant.",
+      "closed": "Completed — hidden from search; conversations and history are kept.",
+      "expired": "Expired — hidden from search. Change the expiry date and publish it again."
+    }
   },
   "quality": {
     "title": "Defects & quality",
@@ -3560,7 +3569,7 @@
     "opportunities": "Opportunities: see work that fits you. Visibility depends on network size and your readiness.",
     "marketplaceMap": "Market map: labour-market signals by country and region. A more precise point appears once a location is set.",
     "adminReview": "System maintenance: for the administrator only. Normal users never see these screens.",
-    "paymentReadiness": "Payments are being prepared: paid access is not active yet. For now the first users are onboarded manually / via owner review. Stripe is connected in the next stage.",
+    "paymentReadiness": "Payments are being prepared: paid access is not active yet.",
     "identityModel": "Two base identities: a person and a company. Buying, selling, hiring and agency activity are actions, not separate identities."
   },
   "profileIdentityNotice": {
@@ -6875,7 +6884,7 @@
     "saving": "Saving...",
     "cancel": "Cancel",
     "edit": "Edit",
-    "remove": "Remove",
+    "remove": "Delete permanently",
     "activate": "Activate",
     "pause": "Pause",
     "errorTitleRequired": "Add a service title.",
@@ -6893,7 +6902,9 @@
       "paused": "Paused — hidden from members. Activate to make it findable again."
     },
     "linkToRequests": "See requests for your services",
-    "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead."
+    "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead.",
+    "removeQuestion": "Delete this service permanently? This cannot be undone. To only hide it from search, pause it instead.",
+    "removeYes": "Yes, delete"
   },
   "communication": {
     "origin": {
@@ -8009,19 +8020,10 @@
     "disclaimer": "Statuses are based on publicly listed requirements and your own input. Final conformity is checked by the authorities or a lawyer — this is not a legal guarantee.",
     "needsMigration": "Not available right now.",
     "guidance": {
-      "title": "Document guidance by country (draft)",
+      "title": "Document guidance by country",
       "intro": "Informational guidance about documents that may be needed. Not legal advice.",
-      "pendingNotice": "Legal/document guidance is being prepared from the Lithuanian master version.",
-      "draftDisclaimer": "DRAFT: informational only, awaiting owner and legal review. Always check official sources.",
-      "statusSummary": "Items: {total} · awaiting legal review: {awaiting}",
-      "status": {
-        "LT_DRAFT_READY": "LT draft ready",
-        "OWNER_EDITING": "Owner editing",
-        "OWNER_APPROVED_LT": "LT approved by owner",
-        "TRANSLATION_READY": "Ready for translation",
-        "TRANSLATED": "Translated"
-      },
-      "needsLegalReview": "Awaiting legal review",
+      "pendingNotice": "Document guidance by country is available in Lithuanian only for now.",
+      "officialSources": "Always check official sources.",
       "whoProvides": "Who usually arranges it",
       "groupAll": "General (all countries)",
       "helpInfoNote": "This is informational guidance. Requests for document, accounting or legal help can be submitted from the company workspace.",
@@ -8098,7 +8100,7 @@
       "ready_for_country": "Ready for this country",
       "availabilityHint": "Set your availability to complete readiness."
     },
-    "needsLegalReview": "needs legal review",
+    "needsLegalReview": "source not confirmed",
     "sourceLink": "source",
     "scopeNote": "Based on official EU posted-worker sources — confirm the national specifics with the competent authority. This is information, not legal advice.",
     "editor": {
@@ -9056,8 +9058,8 @@
       "contact": "Arranged individually"
     },
     "readiness": {
-      "draft_pricing": "Plans are prepared, not purchasable. Pricing is still an owner draft — no price here is final and nothing can be bought.",
-      "owner_confirmed": "Prices are owner-confirmed, but plans remain prepared only — nothing can be bought until payments are enabled."
+      "draft_pricing": "Plans are prepared, not purchasable. No price here is final and nothing can be bought.",
+      "owner_confirmed": "Plans are prepared only — nothing can be bought until payments are enabled."
     },
     "featuresLabel": "Included in this boundary",
     "limitValue": "up to {count}",
@@ -11169,6 +11171,13 @@
         "unknown": "Could not check whether companies can see your profile. That does not mean visibility is off — open your privacy settings.",
         "noWorker": "Visibility to employers applies to a worker profile, and this account does not have one yet."
       }
+    },
+    "switch": {
+      "privateLine": "Never shown by this setting: your name, phone number, email, Work Journal entries and external profile links.",
+      "turnOn": "Read the terms and turn on",
+      "details": "What companies see and the full terms",
+      "grantedNote": "Done — companies can now find your professional profile, under an anonymous label.",
+      "withdrawnNote": "Done — your profile no longer appears in new company searches."
     }
   },
   "planning": {
@@ -11410,9 +11419,9 @@
       "coveredShort": "{count} covered"
     },
     "notes": {
-      "assignmentsPending": "Assignment data is prepared and joins this view after owner activation.",
-      "languagesPending": "Language coverage is prepared and joins this view after owner activation.",
-      "brigadesPending": "Brigade coverage is prepared and joins this view after owner activation.",
+      "assignmentsPending": "Assignment data is not shown in this view yet.",
+      "languagesPending": "Language coverage is not shown in this view yet.",
+      "brigadesPending": "Brigade coverage is not shown in this view yet.",
       "demandError": "Work needs could not be read right now.",
       "projectError": "Projects could not be read right now.",
       "capacityError": "Part of the capacity data could not be read right now."
@@ -12829,7 +12838,7 @@
     },
     "stateNote": {
       "insufficientData": "There is not enough real data for this signal yet — an honest gap is shown instead of an invented number.",
-      "needsMigration": "The data store behind this signal is prepared and joins the view after owner activation. Nothing is estimated in the meantime.",
+      "needsMigration": "This signal is not switched on yet. Nothing is estimated in the meantime.",
       "stale": "The evidence behind this signal is older than the freshness window — treat it as out of date."
     },
     "valueClass": {
@@ -12881,7 +12890,7 @@
         "agencyAggregate": "Cross-client aggregate"
       },
       "state": {
-        "needsMigration": "This signal is prepared and awaits owner activation."
+        "needsMigration": "This signal is not switched on yet."
       },
       "salary": {
         "noBenchmark": "No salary benchmark is available for your profession and country yet.",
@@ -12916,7 +12925,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Owner-gated data store (not yet activated)",
+      "gatedMigration": "Data store not switched on yet",
       "marketRateAverages": "Admin-curated market rate averages",
       "journalEvidence": "Your own work-journal evidence",
       "fillTimeMeasurementsMissing": "Fill-time measurements (not collected yet)",
@@ -12974,14 +12983,14 @@
       },
       "terms": {
         "internal": "Internal derivation from canonical platform tables; the cohort policy protects individuals.",
-        "adminCurated": "Owner-entered averages with a source note instead of a sample size.",
-        "statGovLt": "Official statistics; attribution required; activation awaits owner confirmation.",
-        "eurostat": "Official EU statistics; attribution required; activation awaits owner confirmation.",
+        "adminCurated": "Curated averages with a source note instead of a sample size.",
+        "statGovLt": "Official statistics; attribution required. Not in use yet.",
+        "eurostat": "Active source. Official EU statistics; attribution required.",
         "arbetsformedlingen": "Active source. Usage terms confirmed: a free public data source (CC0). Attribution is shown with every advertisement, and each advertisement links back to the original posting.",
         "nav": "Active source. NAV's API terms are accepted and production access is granted. Ongoing duties are applied: a withdrawn advertisement is removed immediately, an updated one is refreshed promptly, and the apply link leads to the original posting.",
-        "cvbankas": "Proposal only — usage permission unconfirmed; never blended with internal figures.",
-        "eures": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today.",
-        "uztLt": "Proposed source. Usage terms not reviewed yet — activation requires owner confirmation. Nothing is fetched today."
+        "cvbankas": "Proposed source — not in use; never blended with internal figures.",
+        "eures": "Proposed source. Not in use — nothing is fetched today.",
+        "uztLt": "Proposed source. Not in use — nothing is fetched today."
       },
       "status": {
         "active": "Active (internal)",
@@ -12993,7 +13002,7 @@
     "methodology": {
       "title": "Methodology",
       "deterministic": "All values are deterministic and computed from sourced records — nothing is estimated by AI and no number is ever invented.",
-      "externalOff": "External sources are off: every external benchmark is a proposal awaiting the owner's legal confirmation. Internal and external figures are never blended.",
+      "externalOff": "External sources are off. Internal and external figures are never blended.",
       "cohort": "Small cohorts are banded or suppressed to protect individuals."
     },
     "contextual": {
@@ -13112,7 +13121,7 @@
       },
       "unavailable": {
         "requirementTitle": "What is needed",
-        "sourcesTitle": "Sources awaiting owner approval"
+        "sourcesTitle": "Sources not in use yet"
       },
       "reason": {
         "salaryNoBenchmark": "There is no salary figure here because no curated market rate exists yet for your profession and country, and no external salary source is approved for use.",
@@ -13126,15 +13135,15 @@
         "eurostatNeedsActivation": "Official Eurostat context is prepared; the first official import has not run yet, so no figure is available."
       },
       "requirement": {
-        "ownerEnableStore": "The platform owner must switch on the observations data store and approve at least one data source.",
-        "salaryBenchmark": "An administrator must enter a curated market rate for your profession and country, or the platform owner must approve an external salary source.",
+        "ownerEnableStore": "The observations data store must be switched on and at least one data source approved.",
+        "salaryBenchmark": "A curated market rate for your profession and country must be entered, or an external salary source approved.",
         "demandOwnRows": "Add work requests — this card fills from your organisation's own data as soon as entries exist.",
         "salaryBasis": "The pay basis (gross or net) must be recorded for both your expected salary and the curated market rate before an honest comparison can be shown.",
         "salaryInputs": "Enter your expected salary in your worker profile — the comparison appears as soon as it exists.",
         "eurostatActivation": "A bounded official Eurostat import runs."
       },
       "after": {
-        "activation": "After the owner approves and activates an input, this card fills with sourced, dated figures — each carrying its confidence, freshness, source and step-by-step derivation."
+        "activation": "Once an input is switched on, this card fills with sourced, dated figures — each carrying its confidence, freshness, source and step-by-step derivation."
       }
     },
     "drawer": {
@@ -13282,7 +13291,7 @@
         "labourCostIndex": "Not a salary offer and never a basis to infer an individual's pay."
       },
       "sectionTitle": "European labour-market context",
-      "sectionIntro": "Official Eurostat aggregates for the EU and selected European markets. Prepared, pending owner activation.",
+      "sectionIntro": "Official Eurostat aggregates for the EU and selected European markets.",
       "asOf": "Eurostat publication of {date} — these figures do not refresh here on their own.",
       "dataBasis": "Official Eurostat aggregate (source: Eurostat)",
       "whyVisible": "Shown as official European labour-market context.",
