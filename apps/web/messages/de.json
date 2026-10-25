@@ -1917,7 +1917,7 @@
     "workerVisibilityNote": "Ehrlicher Status: Anfragen verifizierter Unternehmen werden Arbeitskräften auf ihrem Chancen-Board angezeigt. Die Verifizierung ist eine manuelle Prüfung — bis Ihr Unternehmen verifiziert ist, bleiben Ihre Anfragen privat für Sie und das Prüfteam.",
     "empty": "Noch keine Anfragen eingereicht. Reichen Sie Ihre Anfrage oben ein — sie erscheint hier mit ihrem Status.",
     "created": "Erstellt",
-    "manageHelp": "Entwürfe können gelöscht werden. Das Schließen oder Wiedereröffnen einer eingereichten Anfrage — und das Bestätigen ihrer erkannten Fähigkeiten — erfolgt über ihre Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
+    "manageHelp": "Schließe eine Anfrage ab, nimm sie vom Markt oder veröffentliche sie erneut direkt in dieser Liste; einen Entwurf kannst du fortsetzen oder verwerfen. Das Bestätigen der erkannten Fähigkeiten erfolgt über die Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
     "detailsLabel": "Eingereichte Angaben",
     "fields": {
       "description": "Beschreibung",
@@ -19841,6 +19841,46 @@
       "line": "Zahle einmal 1 € für {days} Tage des kostenpflichtigen Organisationsplans. Nichts verlängert sich.",
       "cta": "Pilot öffnen"
     }
+  },
+  "marketLifecycle": {
+    "actions": {
+      "publish": "Veröffentlichen",
+      "edit": "Bearbeiten",
+      "pause": "Pausieren",
+      "resume": "Fortsetzen",
+      "publishAgain": "Erneut veröffentlichen",
+      "complete": "Abschließen",
+      "withdraw": "Vom Markt nehmen",
+      "discard": "Entwurf verwerfen"
+    },
+    "states": {
+      "draft": "Entwurf",
+      "active": "Aktiv",
+      "paused": "Pausiert",
+      "completed": "Abgeschlossen",
+      "withdrawn": "Vom Markt genommen",
+      "discarded": "Verworfener Entwurf",
+      "closed": "Geschlossen",
+      "locked": "In Prüfung"
+    },
+    "visibility": {
+      "visible": "In der Suche sichtbar — andere können es finden und dir schreiben.",
+      "draft": "Entwurf — für andere noch nicht sichtbar. Veröffentliche es, wenn es fertig ist.",
+      "paused": "Pausiert — aus der Suche ausgeblendet, keine neuen Anfragen. Setze es fort, wenn es wieder aktuell ist.",
+      "completed": "Abgeschlossen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
+      "withdrawn": "Vom Markt genommen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
+      "discarded": "Verworfener Entwurf — er wurde nie veröffentlicht.",
+      "closed": "Geschlossen — aus der Suche ausgeblendet; der Verlauf bleibt erhalten.",
+      "expired": "Abgelaufen — aus der Suche ausgeblendet. Ändere das Ablaufdatum und veröffentliche es erneut.",
+      "gated": "Noch nicht sichtbar — es erscheint in der Suche, sobald die Organisation bestätigt ist.",
+      "locked": "In Prüfung — während der Prüfung lässt es sich nicht ändern."
+    },
+    "deleteForever": "Endgültig löschen",
+    "deleteQuestion": "Endgültig löschen? Das lässt sich nicht rückgängig machen. Um es nur aus der Suche zu nehmen, pausiere es, schließe es ab oder nimm es vom Markt.",
+    "deleteYes": "Ja, löschen",
+    "cancel": "Abbrechen",
+    "error": "Das hat nicht geklappt. Versuche es erneut.",
+    "notAllowed": "In diesem Zustand ist diese Aktion nicht möglich."
   },
   "collaborationChecks": {
     "title": "Vor der endgültigen Vereinbarung",

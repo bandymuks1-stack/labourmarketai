@@ -1917,7 +1917,7 @@
     "workerVisibilityNote": "Rzetelny status: zapytania od zweryfikowanych firm są pokazywane pracownikom na ich tablicy ofert. Weryfikacja to ręczny przegląd — dopóki Twoja firma nie zostanie zweryfikowana, Twoje zapytania pozostają widoczne tylko dla Ciebie i zespołu przeglądającego.",
     "empty": "Nie przesłano jeszcze żadnych zapytań. Prześlij zapytanie powyżej, a pojawi się tutaj wraz ze statusem.",
     "created": "Utworzono",
-    "manageHelp": "Szkice można usunąć. Zamknięcie lub ponowne otwarcie przesłanego zapytania — oraz potwierdzenie rozpoznanych umiejętności — odbywa się z jego widoku scoutingu. Edycja przesłanego tekstu nie jest jeszcze dostępna.",
+    "manageHelp": "Zakończ zapytanie, usuń je z rynku lub opublikuj ponownie bezpośrednio na tej liście; szkic możesz kontynuować lub odrzucić. Potwierdzenie rozpoznanych umiejętności odbywa się w widoku scoutingu. Edycja przesłanego tekstu nie jest jeszcze dostępna.",
     "detailsLabel": "Przesłane szczegóły",
     "fields": {
       "description": "Opis",
@@ -19841,6 +19841,46 @@
       "line": "Zapłać 1 € jednorazowo za {days} dni płatnego planu Organizacja. Nic się nie odnawia.",
       "cta": "Otwórz pilotaż"
     }
+  },
+  "marketLifecycle": {
+    "actions": {
+      "publish": "Opublikuj",
+      "edit": "Edytuj",
+      "pause": "Wstrzymaj",
+      "resume": "Wznów",
+      "publishAgain": "Opublikuj ponownie",
+      "complete": "Zakończ",
+      "withdraw": "Usuń z rynku",
+      "discard": "Odrzuć szkic"
+    },
+    "states": {
+      "draft": "Szkic",
+      "active": "Aktywne",
+      "paused": "Wstrzymane",
+      "completed": "Zakończone",
+      "withdrawn": "Usunięte z rynku",
+      "discarded": "Odrzucony szkic",
+      "closed": "Zamknięte",
+      "locked": "W weryfikacji"
+    },
+    "visibility": {
+      "visible": "Widoczne w wyszukiwaniu — inni mogą je znaleźć i do ciebie napisać.",
+      "draft": "Szkic — inni jeszcze go nie widzą. Opublikuj, gdy będzie gotowe.",
+      "paused": "Wstrzymane — ukryte w wyszukiwaniu, bez nowych zapytań. Wznów, gdy znów będzie aktualne.",
+      "completed": "Zakończone — ukryte w wyszukiwaniu; rozmowy i historia zostają zachowane.",
+      "withdrawn": "Usunięte z rynku — ukryte w wyszukiwaniu; rozmowy i historia zostają zachowane.",
+      "discarded": "Odrzucony szkic — nigdy nie został opublikowany.",
+      "closed": "Zamknięte — ukryte w wyszukiwaniu; historia zostaje zachowana.",
+      "expired": "Wygasło — ukryte w wyszukiwaniu. Zmień datę ważności i opublikuj ponownie.",
+      "gated": "Jeszcze niewidoczne — pojawi się w wyszukiwaniu po weryfikacji organizacji.",
+      "locked": "W weryfikacji — w trakcie weryfikacji nie można go zmienić."
+    },
+    "deleteForever": "Usuń na zawsze",
+    "deleteQuestion": "Usunąć na zawsze? Tego nie da się cofnąć. Aby tylko ukryć w wyszukiwaniu, wstrzymaj, zakończ lub usuń z rynku.",
+    "deleteYes": "Tak, usuń",
+    "cancel": "Anuluj",
+    "error": "Nie udało się. Spróbuj ponownie.",
+    "notAllowed": "W tym stanie ta akcja jest niedostępna."
   },
   "collaborationChecks": {
     "title": "Przed ostatecznym porozumieniem",
