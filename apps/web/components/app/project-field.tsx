@@ -211,8 +211,11 @@ export function ProjectField({
         </div>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="flex flex-col gap-4 lg:col-span-2">
+      {/* grid-cols-1 = minmax(0,1fr): without it the phone's implicit `auto`
+          track grows to the widest truncated row and both columns end past a
+          390px screen (production walk mobile-surfaces M-4, 2026-10-25). */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="flex min-w-0 flex-col gap-4 lg:col-span-2">
           {view === "field" ? (
             <Scene field={field} isSel={isSel} toggle={toggle} />
           ) : (
@@ -221,7 +224,7 @@ export function ProjectField({
         </div>
 
         <aside
-          className="flex flex-col gap-3 rounded-md border border-ink-600 p-4"
+          className="flex min-w-0 flex-col gap-3 rounded-md border border-ink-600 p-4"
           aria-live="polite"
           aria-label={t("contextLabel")}
           data-testid="project-field-context"
