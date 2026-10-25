@@ -439,11 +439,27 @@ test("H-2 (1.15). Alfa offers the roster record to its employee", async ({ brows
     .evaluateAll((opts, w) => (opts as HTMLOptionElement[]).map((o) => o.value).find((v) => v.startsWith(`${w}:`)) ?? "", workerId);
   expect(value, "Alfa's employee is offered as a link candidate").not.toBe("");
   await select.selectOption(value);
+  // Diagnose, don't guess (run 40187168804: the click wrote nothing and showed
+  // neither state). Record the value the form will submit and whether the
+  // server action was actually posted, so a failure names its class.
+  const chosen = await select.inputValue();
+  console.info(`[H-2] select value before click: ${chosen === value ? "the chosen employee" : `"${chosen}" (reset!)`}`);
+  const actionPost = page
+    .waitForResponse((r) => r.request().method() === "POST" && !!r.request().headers()["next-action"], { timeout: 30_000 })
+    .then((r) => `posted, HTTP ${r.status()}`)
+    .catch(() => "NOT posted within 30 s");
   await row.getByTestId(`roster-link-offer-${personId}`).getByRole("button").click();
   linkTouched = true;
   const offered = row.getByTestId(`roster-link-offered-${personId}`);
   const error = row.getByTestId(`roster-link-error-${personId}`);
-  await expect(offered.or(error)).toBeVisible({ timeout: 30_000 });
+  const outcome = await expect(offered.or(error))
+    .toBeVisible({ timeout: 30_000 })
+    .then(() => "shown")
+    .catch(() => "neither shown");
+  const posted = await actionPost;
+  const stillThere = (await select.count()) ? await select.inputValue().catch(() => "?") : "form gone";
+  console.info(`[H-2] server action: ${posted}; outcome: ${outcome}; select after: ${stillThere === value ? "unchanged" : stillThere}`);
+  expect(outcome, `offer gave no answer (server action ${posted}; select after click: ${stillThere})`).toBe("shown");
   if (await error.isVisible()) throw new Error(`offer refused: ${(await error.getAttribute("data-code")) ?? "?"}`);
   // Persistence: the roster now says the link is proposed.
   await page.goto("/lt/dashboard/company/people#people-more");
