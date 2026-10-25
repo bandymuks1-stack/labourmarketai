@@ -228,10 +228,10 @@ describe("listJournalEntries — every live row, in 1000-row pages, with coverag
     // The provenance rides on the correction's id, and only there.
     expect(r.correctionProvenance).toEqual({
       "fix-a": [
-        { originalId: "orig-a", result: "changes_requested", role: "owner", at: "2026-10-25T10:00:00Z", note: "nurodyk kvadratus" },
+        { originalId: "orig-a", result: "changes_requested", role: "owner", at: "2026-10-25T10:00:00Z", note: "nurodyk kvadratus", automatic: false },
       ],
       "fix-b": [
-        { originalId: "orig-b", result: "rejected", role: "owner", at: "2026-10-25T11:00:00Z", note: "ne tas objektas" },
+        { originalId: "orig-b", result: "rejected", role: "owner", at: "2026-10-25T11:00:00Z", note: "ne tas objektas", automatic: false },
       ],
     });
     expect(Object.keys(r.correctionProvenance).every((id) => r.entries.some((e) => e.id === id))).toBe(true);

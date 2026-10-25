@@ -59,6 +59,7 @@ export async function CorrectionProvenanceLine({
   const nearest = steps?.[0];
   if (!nearest) return null;
   const t = await getTranslations("journal");
+  const tTier = await getTranslations("evidenceTier");
   const note =
     nearest.note && nearest.note.length > INLINE_NOTE_MAX
       ? `${nearest.note.slice(0, INLINE_NOTE_MAX).trimEnd()}…`
@@ -68,10 +69,17 @@ export async function CorrectionProvenanceLine({
       className="flex flex-wrap items-baseline gap-x-1.5 text-meta leading-relaxed text-text-muted"
       data-testid={`journal-entry-corrected-from-${entryId}`}
       data-result={nearest.result}
+      data-automatic={nearest.automatic ? "true" : undefined}
     >
       <span className={`font-medium ${TEXT[nearest.result]}`}>
         {t(`entry.timeline.correctedFrom.${nearest.result}`)}
       </span>
+      {/* An automatic confirmation never reads like a hand one (W6). */}
+      {nearest.automatic ? (
+        <span data-testid="corrected-from-auto-confirm-qualifier">
+          · {tTier("autoConfirmQualifier")}
+        </span>
+      ) : null}
       {nearest.at ? (
         <span className="font-mono text-meta">· {nearest.at.slice(0, 10)}</span>
       ) : null}
@@ -137,6 +145,14 @@ export async function EvidenceDecisionTimeline({
                 {roleLabel ? (
                   <span className="text-text-muted">
                     · {t("entry.reviewedBy")} {roleLabel}
+                  </span>
+                ) : null}
+                {step.automatic ? (
+                  <span
+                    className="text-text-muted"
+                    data-testid="timeline-auto-confirm-qualifier"
+                  >
+                    · {tTier("autoConfirmQualifier")}
                   </span>
                 ) : null}
                 {step.at ? (
