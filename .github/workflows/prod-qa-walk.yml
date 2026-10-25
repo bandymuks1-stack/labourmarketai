@@ -79,6 +79,12 @@ on:
           - public-market-direction
           # AI-dependent rows proven with the AI runtime OFF (deterministic path or the honest off state).
           - ai-off-honesty
+          # Second batch of registry rows with no production walk (2026-10-25): 2.11 + 8.6, 2.21, 3.18 + 3.19,
+          # 7.25 + 9.11. Dispatch only, never in the rotation.
+          - requirements-countries
+          - work-verification
+          - utilisation-planned-actual
+          - lmc-csrf
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -370,6 +376,10 @@ jobs:
             company-governance) SPEC=tests/e2e/prod-company-governance.spec.ts ;;
             public-market-direction) SPEC=tests/e2e/prod-public-market-direction.spec.ts ;;
             ai-off-honesty) SPEC=tests/e2e/prod-ai-off-honesty.spec.ts ;;
+            requirements-countries) SPEC=tests/e2e/prod-requirements-countries.spec.ts ;;
+            work-verification) SPEC=tests/e2e/prod-work-verification.spec.ts ;;
+            utilisation-planned-actual) SPEC=tests/e2e/prod-utilisation-planned-actual.spec.ts ;;
+            lmc-csrf) SPEC=tests/e2e/prod-lmc-csrf.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
