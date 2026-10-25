@@ -77,6 +77,7 @@ function render(myRole: string, myProfileId: string, loc = "lt") {
       members: MEMBERS as never,
       myRole: myRole as never,
       myProfileId,
+      organizationId: "org-test",
       labels: labels(loc) as never,
     }),
   );

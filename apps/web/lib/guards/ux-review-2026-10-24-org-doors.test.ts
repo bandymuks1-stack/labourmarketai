@@ -92,6 +92,13 @@ describe("1.9 a member invite to an e-mail with no account points to the invitat
     expect(src).toMatch(/NO_ACCOUNT_INVITE_HREF/);
   });
 
+  it("the door keeps the organization the invite was for (multi-org admin never lands on another org)", () => {
+    expect(src).toMatch(/noAccountInviteHref\(organizationId\)/);
+    expect(src).toMatch(/&org=\$\{encodeURIComponent\(organizationId\)\}/);
+    const page = code(read("app/[locale]/dashboard/company/settings/page.tsx"));
+    expect(page).toMatch(/organizationId=\{memberOrgId \?\? null\}/);
+  });
+
   it("the door opens the canonical invite panel with 'join my organization' pre-selected", () => {
     expect(src).toMatch(
       /"\/dashboard\/network\?invite=1&type=join_organization#network-invite"/,

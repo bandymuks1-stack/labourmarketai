@@ -73,6 +73,14 @@ export type MembersSectionLabels = {
 export const NO_ACCOUNT_INVITE_HREF =
   "/dashboard/network?invite=1&type=join_organization#network-invite";
 
+/** The same door, bound to the organization the membership invite was for —
+ *  an administrator of several organizations must not land on another one
+ *  (the invite panel otherwise preselects the first organization). */
+export function noAccountInviteHref(organizationId: string | null): string {
+  if (!organizationId) return NO_ACCOUNT_INVITE_HREF;
+  return `/dashboard/network?invite=1&type=join_organization&org=${encodeURIComponent(organizationId)}#network-invite`;
+}
+
 function outcomeText(
   labels: MembersSectionLabels,
   state: MembershipActionState | null,
@@ -94,9 +102,12 @@ export function OrganizationMembersSection({
   members,
   myRole,
   myProfileId,
+  organizationId,
   labels,
 }: {
   members: readonly OrganizationMember[];
+  /** The organization these members belong to (the active workspace). */
+  organizationId: string | null;
   myRole: MembershipRole | null;
   myProfileId: string;
   labels: MembersSectionLabels;
@@ -366,7 +377,7 @@ export function OrganizationMembersSection({
               {labels.noAccountHint}
             </p>
             <Link
-              href={NO_ACCOUNT_INVITE_HREF as "/dashboard"}
+              href={noAccountInviteHref(organizationId) as "/dashboard"}
               className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/40 px-4 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
               data-testid="org-members-invite-no-account-cta"
             >
