@@ -11,7 +11,7 @@
 
 ## 1. Why not consent, and why not contract
 
-- **Consent cannot be the basis of a default.** Consent must be an unambiguous affirmative act. A pre-set switch is not consent (Art. 4(11), Art. 7; CJEU C-673/17 *Planet49*). Keeping consent would keep the product's core purpose behind an opt-in. In production, 54 of 86 real worker profiles have never been asked or never decided.
+- **Consent cannot be the basis of a default.** Consent must be an unambiguous affirmative act. A pre-set switch is not consent (Art. 4(11), Art. 7; CJEU C-673/17 *Planet49*). Keeping consent would keep the product's core purpose behind an opt-in. In production most real worker profiles have never been asked or never decided (counts reported to the controller, not in this public repository).
 - **Contract (Art. 6(1)(b)) is not chosen.** Being found by third-party companies is arguably the service a job-seeker signs up for. But the account, CV and Work Journal all work without discovery, so discovery is not strictly necessary to perform the contract. EDPB Guidelines 2/2019 read "necessary" narrowly. Contract is therefore not relied on.
 - **Legitimate interest (Art. 6(1)(f)) fits** because the interest is real, the processing is limited to what that interest needs, and the person can stop it in one tap. The three-part test follows.
 
@@ -32,7 +32,7 @@
   - `worker_external_profiles_select` and `worker_documents_select` allow only the owner or an admin.
 - **First contact goes through platform messaging.** Name and contacts reach a company only through the person's separate per-company disclosure (consent, `employer_data_disclosure`).
 - **Less intrusive alternatives were considered:**
-  - An opt-in only model is already in place. It reaches the purpose for only about a third of workers, so it does not achieve the purpose.
+  - An opt-in only model is already in place. It reaches the purpose for only a minority of workers, so it does not achieve the purpose.
   - Showing names, or contact on discovery, was rejected as more intrusive.
   - The default is therefore limited to the anonymous summary and to people for whom being found is the expected outcome (free workers, section 4).
 

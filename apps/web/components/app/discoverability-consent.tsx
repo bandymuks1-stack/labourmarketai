@@ -177,9 +177,15 @@ export function DiscoverabilityConsent({
   // database rule (or, for an existing account, from the date it names).
   const noticeShown = st.kind === "ok" && st.noticeDue === true && notice !== null && confirmed === null;
   const noticeRecorded = useRef(false);
+  // Once on screen, the notice STAYS on screen for this visit (local walk
+  // 2026-10-25: re-reading after the record swapped it for the ON screen within
+  // a second — a notice nobody had time to read). The status line above it
+  // follows the server; a switch-off replaces it.
+  const [noticeSticky, setNoticeSticky] = useState(false);
   useEffect(() => {
     if (!noticeShown || noticeRecorded.current) return;
     noticeRecorded.current = true;
+    setNoticeSticky(true);
     void recordVisibilityDefaultNotice({ locale, source }).then((res) => {
       if (res.kind === "ok") void reconcile();
     });
@@ -335,12 +341,25 @@ export function DiscoverabilityConsent({
   }
 
   // THE DEFAULT NOTICE — a free worker who never decided, the switch armed.
-  // The status is still OFF here (the default applies once this display is
-  // recorded); the switch-off is offered right away.
-  if (noticeShown && notice) {
+  // Before its display is recorded the status is OFF; after it, the line
+  // follows the server (ON for a new account, the start date for an existing
+  // one). The switch-off is offered right away and grants nothing.
+  if ((noticeShown || noticeSticky) && notice && confirmed === null) {
+    const on = status === "default_on";
+    const from = status === "default_pending" && st.defaultFrom ? st.defaultFrom.slice(0, 10) : null;
     return (
       <div data-testid="discoverability-notice">
-        {statusLine(false)}
+        {statusLine(on)}
+        {on && (
+          <p className="mt-1 text-sm text-text-secondary" data-testid="discoverability-default-note">
+            {labels.defaultOnNote}
+          </p>
+        )}
+        {from && (
+          <p className="mt-1 text-sm text-text-secondary" data-testid="discoverability-pending-note">
+            {labels.defaultPendingNote.replace("{date}", from)}
+          </p>
+        )}
         <h3 className="mt-3 text-sm font-semibold text-text-primary">{notice.title}</h3>
         {textBlock(notice)}
         {!compact && previewBlock}
