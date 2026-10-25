@@ -105,6 +105,15 @@ describe("the switcher is a chooser, not a sideways strip", () => {
     expect(switcher).toMatch(/onPointerCancel=[\s\S]{0,120}pointerDown\.current = false;/);
   });
 
+  it("a press released OFF the track still clears the press flag", () => {
+    // Codex P2 (#2787): releasing outside the track fired neither the track's
+    // pointerup nor pointercancel, so the flag stuck and Tab stopped moving
+    // the window. The window-level listeners always see the release.
+    expect(switcher).toMatch(/window\.addEventListener\("pointerup", release, true\);/);
+    expect(switcher).toMatch(/window\.addEventListener\("pointercancel", release, true\);/);
+    expect(switcher).toMatch(/const release = \(\) => \{\s*pointerDown\.current = false;\s*window\.removeEventListener\("pointerup", release, true\);\s*window\.removeEventListener\("pointercancel", release, true\);/);
+  });
+
   it("reduced motion: no rotation and no transitions (pure CSS)", () => {
     // The default pose includes the rotation; the motion-reduce pose is the
     // same transform WITHOUT rotateY.

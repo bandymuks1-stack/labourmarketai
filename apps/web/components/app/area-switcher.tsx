@@ -162,6 +162,17 @@ export function AreaSwitcher({
           drag.current = { x: e.clientX };
           swiped.current = false;
           pointerDown.current = true;
+          // A press can be released OFF the track (the pointer moved away), in
+          // which case neither onPointerUp nor onPointerCancel below fires.
+          // The window always sees the release, so it clears the flag —
+          // otherwise keyboard focus would stop advancing the window for good.
+          const release = () => {
+            pointerDown.current = false;
+            window.removeEventListener("pointerup", release, true);
+            window.removeEventListener("pointercancel", release, true);
+          };
+          window.addEventListener("pointerup", release, true);
+          window.addEventListener("pointercancel", release, true);
         }}
         onPointerUp={(e) => {
           const d = drag.current;
