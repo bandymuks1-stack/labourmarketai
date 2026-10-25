@@ -1917,7 +1917,7 @@
     "workerVisibilityNote": "Honest status: inquiries from verified companies are shown to workers on their opportunities board. Verification is a manual review — until your company is verified, your inquiries stay private to you and the review team.",
     "empty": "No inquiries submitted yet. Submit your inquiry above and it will appear here with its status.",
     "created": "Created",
-    "manageHelp": "Drafts can be deleted. Closing or reopening a submitted inquiry — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "manageHelp": "Complete an inquiry, remove it from the market or publish it again right here in the list; a draft can be continued or discarded. Confirming its recognized skills is done from its scouting view. Editing submitted text is not available yet.",
     "detailsLabel": "Submitted details",
     "fields": {
       "description": "Description",
@@ -19841,6 +19841,46 @@
       "line": "Pay 1 € once for {days} days of the paid Organization plan. Nothing renews.",
       "cta": "Open the pilot"
     }
+  },
+  "marketLifecycle": {
+    "actions": {
+      "publish": "Publish",
+      "edit": "Edit",
+      "pause": "Pause",
+      "resume": "Resume",
+      "publishAgain": "Publish again",
+      "complete": "Complete",
+      "withdraw": "Remove from market",
+      "discard": "Discard draft"
+    },
+    "states": {
+      "draft": "Draft",
+      "active": "Active",
+      "paused": "Paused",
+      "completed": "Completed",
+      "withdrawn": "Removed from market",
+      "discarded": "Discarded draft",
+      "closed": "Closed",
+      "locked": "Under review"
+    },
+    "visibility": {
+      "visible": "Visible in search — others can find it and message you.",
+      "draft": "Draft — not visible to others yet. Publish it when it is ready.",
+      "paused": "Paused — hidden from search, no new requests. Resume it when it is relevant again.",
+      "completed": "Completed — hidden from search; conversations and history are kept.",
+      "withdrawn": "Removed from market — hidden from search; conversations and history are kept.",
+      "discarded": "Discarded draft — it was never published.",
+      "closed": "Closed — hidden from search; history is kept.",
+      "expired": "Expired — hidden from search. Change the expiry date and publish it again.",
+      "gated": "Not visible yet — it appears in search once the organization is verified.",
+      "locked": "Under review — it cannot be changed while the review runs."
+    },
+    "deleteForever": "Delete permanently",
+    "deleteQuestion": "Delete permanently? This cannot be undone. To only hide it from search, pause it, complete it or remove it from the market.",
+    "deleteYes": "Yes, delete",
+    "cancel": "Cancel",
+    "error": "That did not work. Try again.",
+    "notAllowed": "This action is not available in this state."
   },
   "collaborationChecks": {
     "title": "Before the final agreement",

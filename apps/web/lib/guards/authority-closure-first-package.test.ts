@@ -168,6 +168,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-23 (RED, needs-human-gate, NOT applied): journal evidence integrity v1
       // (server-side hash chain + immutable evidence; renumbered from 20261016190000).
       "20261023132610_",
+      // 2026-10-24 (GREEN strict superset): one market lifecycle contract —
+      // closed_outcome on customer_requests + service_offerings, services closed.
+      "20261024090000_",
       // 2026-10-24 (RED, needs-human-gate, NOT applied): Stage 7 forecast storage, mode settings
       // and the significant-change signal (owner integrated-architecture order 2026-10-24).
       "20261024130000_",
