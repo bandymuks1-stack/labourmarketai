@@ -2014,6 +2014,15 @@
       "pending": "Slår ihop…",
       "done": "Sammanslaget. Raderna och deras poster finns kvar; projektlistan visar nu det behållna projektet.",
       "failed": "Inte sammanslaget. Inget ändrades för rader som inte gick igenom — ladda om och försök igen."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {
@@ -2811,6 +2820,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -2846,7 +2856,8 @@
       "alreadyAccepted": "Arbetstagaren har redan accepterat detta förslag — överenskomna villkor skrivs inte över här. Kom överens om ändringar i samtalet.",
       "refusedNotReachable": "Den här personen kan inte få ett bokningsförslag härifrån — profilen är inte synlig för arbetsgivare och det finns ingen arbetsrelation med dig.",
       "refusedNeedClosed": "Det här behovet är stängt — öppna det igen innan du föreslår en bokning.",
-      "refusedAnswered": "Arbetstagaren har avböjt förslaget, så det öppnas inte igen utan arbetstagarens nya samtycke. Fortsätt i samtalet eller hitta en annan arbetstagare."
+      "refusedAnswered": "Arbetstagaren har avböjt förslaget, så det öppnas inte igen utan arbetstagarens nya samtycke. Fortsätt i samtalet eller hitta en annan arbetstagare.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -6940,7 +6951,9 @@
       "managesInvitations": "Hanterar inbjudningar",
       "grantInvitations": "Tillåt att hantera inbjudningar",
       "withdrawInvitations": "Återkalla hantering av inbjudningar",
-      "unavailable": "Medlemslistan kunde inte läsas just nu. Det betyder inte att organisationen saknar medlemmar."
+      "unavailable": "Medlemslistan kunde inte läsas just nu. Det betyder inte att organisationen saknar medlemmar.",
+      "noAccountHint": "En medlemsroll kan bara ges till någon som redan har ett konto. Bjud in en person utan konto med en inbjudningslänk — när personen registrerar sig och ansluter till organisationen kan du ge en roll här.",
+      "noAccountCta": "Skapa en inbjudningslänk"
     },
     "start": {
       "membersMoved": "Medlemmar och inbjudningar för {workspace} hanteras i organisationens Inställningar.",

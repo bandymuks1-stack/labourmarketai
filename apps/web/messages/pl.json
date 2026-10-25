@@ -2138,6 +2138,10 @@
           "title": "Rozpocznij profil firmy",
           "body": "Nie masz jeszcze profilu firmy. Utwórz go — jest od razu aktywny i użyteczny, bez czekania na zatwierdzenie.",
           "cta": "Rozpocznij zakładanie firmy"
+        },
+        "personalSpace": {
+          "title": "Jesteś teraz w przestrzeni osobistej",
+          "body": "Narzędzia firmy otwierają się w przestrzeni tej organizacji — nie trzeba zakładać drugiej organizacji. Otwórz swoją:"
         }
       },
       "typeNotes": {
@@ -3941,7 +3945,7 @@
       "evidenceRecs": "Referencje — pomagają potwierdzić Twoją wiarygodność.",
       "evidenceLegal": "Dowód tożsamości lub dokumenty prawne — używane tylko wtedy, gdy są potrzebne do zatrudnienia lub procesu prawnego.",
       "privacyNote": "Twoje dokumenty pozostają prywatne. Nie są pokazywane pracodawcy ani klientowi bez jasnej podstawy.",
-      "uploadCostNote": "Przesłanie CV jest darmowe — nie pobiera się LMC. System sam obsługuje rozmiar pliku."
+      "uploadCostNote": "Przesłanie CV jest darmowe — nie pobieramy kredytów platformy (LMC). System sam obsługuje rozmiar pliku."
     }
   },
   "live": {
@@ -6259,6 +6263,11 @@
           "trip": "Podróż służbowa",
           "absence": "Niedostępny",
           "plan": "Zaplanowana praca"
+        },
+        "unknownWhy": {
+          "undated_window": "Ten projekt nie ma dat, więc nie da się sprawdzić nakładania z innymi zobowiązaniami.",
+          "undated_commitment": "Inne zobowiązanie tej osoby nie ma dat, więc nie da się potwierdzić wolnych dni.",
+          "source_unreadable": "Części kalendarza nie udało się teraz odczytać, więc nie da się potwierdzić wolnych dni."
         }
       }
     },
@@ -8806,7 +8815,7 @@
     "candidate": "Kandydat",
     "privacy": {
       "contactsHidden": "Dane kontaktowe pozostają ukryte — bez telefonu, e-maila i imienia.",
-      "profileSafe": "Widzisz wyłącznie bezpieczne dla profilu sygnały: dowody umiejętności, lokalizację, dostępność i stawkę. Kontakt następuje później, poprzez wyraźny krok."
+      "profileSafe": "Widzisz wyłącznie bezpieczne dla profilu sygnały: dowody umiejętności, lokalizację, dostępność i stawkę. Imię i dane kontaktowe pojawiają się dopiero, gdy osoba na to pozwoli."
     },
     "fields": {
       "location": "Lokalizacja",
@@ -8824,9 +8833,10 @@
     "rateFrom": "od {min} €/mies.",
     "noRate": "Nie podano",
     "comms": {
-      "eligible": "Ten pracownik ma otwartą dostępność — wysyłanie wiadomości otworzy się w kolejnym kroku.",
+      "eligible": "Ten pracownik ma otwartą dostępność — możesz skontaktować się z nim na platformie.",
       "inConversation": "Rozmawiasz już z tym pracownikiem — kontynuuj w Wiadomościach.",
-      "blocked": "Komunikacja stanie się dostępna, gdy pracownik będzie miał otwartą dostępność lub datę dostępności od."
+      "blocked": "Komunikacja stanie się dostępna, gdy pracownik będzie miał otwartą dostępność lub datę dostępności od.",
+      "interestDoor": "Ta osoba sama zgłosiła zainteresowanie — możesz napisać do niej już teraz przyciskiem „Skontaktuj się w platformie”."
     },
     "request": {
       "button": "Poproś o kontakt",
@@ -9113,6 +9123,7 @@
     "intro": "Zaproponowane zaangażowania. Rezerwacja jest potwierdzona dopiero, gdy pracownik ją zaakceptuje.",
     "notAuthed": "Zaloguj się, aby zobaczyć swoje rezerwacje.",
     "unavailable": "Nie udało się wykonać akcji. Spróbuj ponownie.",
+    "readFailed": "Nie udało się teraz wczytać Twoich rezerwacji — to nie znaczy, że ich nie masz. Spróbuj ponownie.",
     "noDate": "Nie ustawiono daty rozpoczęcia",
     "noRole": "Zaangażowanie w pracę",
     "startsOn": "Rozpoczyna się {date}",
@@ -9189,7 +9200,8 @@
       "alreadyAccepted": "Pracownik już przyjął tę propozycję — uzgodnione warunki nie są tu nadpisywane. Zmiany ustalcie w rozmowie.",
       "refusedNotReachable": "Tej osobie nie można stąd zaproponować rezerwacji — nie udostępniła profilu pracodawcom i nie łączy jej z Tobą relacja zawodowa.",
       "refusedNeedClosed": "To zapotrzebowanie jest zamknięte — otwórz je ponownie, zanim zaproponujesz rezerwację.",
-      "refusedAnswered": "Pracownik odrzucił tę propozycję, więc bez jego nowej zgody nie zostanie ona ponownie otwarta. Kontynuuj w rozmowie lub znajdź innego pracownika."
+      "refusedAnswered": "Pracownik odrzucił tę propozycję, więc bez jego nowej zgody nie zostanie ona ponownie otwarta. Kontynuuj w rozmowie lub znajdź innego pracownika.",
+      "unconfirmed": "Serwer jeszcze nie odpowiedział. Propozycja mogła już zostać wysłana — sprawdź sekcję Rezerwacje albo wyślij ją ponownie (ta sama propozycja nigdy nie jest dublowana)."
     },
     "reason": {
       "optionalTitle": "Powód (opcjonalnie)",
@@ -9541,7 +9553,7 @@
       "users": "Ludzie i aktywność",
       "teams": "Brygady i zaproszenia",
       "b2b": "Rynek B2B",
-      "work": "Dziennik pracy i Living CV",
+      "work": "Dziennik pracy i Żywe CV",
       "technical": "Techniczne"
     },
     "col": {
@@ -10124,7 +10136,7 @@
     },
     "personal": {
       "title": "Twoje możliwości",
-      "subtitle": "Najlepsze obecnie znalezione możliwości na podstawie Twoich danych i Living CV.",
+      "subtitle": "Najlepsze obecnie znalezione możliwości na podstawie Twoich danych i Żywego CV.",
       "discoverTitle": "Więcej dla Ciebie",
       "discoverSubtitle": "Do {count} pasujących możliwości spośród sprawdzonych dla Ciebie dzisiaj.",
       "status": {
@@ -11709,7 +11721,10 @@
       "docExpiring": "Dokumenty wygasające w ciągu 30 dni",
       "docMissing": "Dokumenty brakujące lub wygasłe",
       "docReview": "Dokumenty w trakcie sprawdzania lub zwrócone",
-      "financeOverdue": "Zaległe zapisy finansowe"
+      "financeOverdue": "Zaległe zapisy finansowe",
+      "journalReviews": "Wpisy pracy czekające na twoje zatwierdzenie",
+      "journalClientDecide": "Wpisy pracy czekające na twoją decyzję jako zleceniodawcy",
+      "partial": "Nie udało się teraz odczytać kolejki przeglądu wpisów pracy. To nie znaczy, że nic nie czeka."
     },
     "sources": {
       "label": "Źródła",
@@ -11720,7 +11735,8 @@
       "workJournal": "Twój dziennik pracy",
       "managerConfirmations": "Potwierdzenia kierownika",
       "projects": "Twoje projekty",
-      "assignments": "Aktywne przypisania pracowników"
+      "assignments": "Aktywne przypisania pracowników",
+      "journalReviewQueue": "Kolejka przeglądu wpisów pracy"
     },
     "summaries": {
       "title": "Podsumowania z Twoich danych",
@@ -18333,7 +18349,9 @@
       "managesInvitations": "Zarządza zaproszeniami",
       "grantInvitations": "Zezwól na zarządzanie zaproszeniami",
       "withdrawInvitations": "Cofnij zarządzanie zaproszeniami",
-      "unavailable": "Nie udało się teraz odczytać listy członków. To nie znaczy, że organizacja nie ma członków."
+      "unavailable": "Nie udało się teraz odczytać listy członków. To nie znaczy, że organizacja nie ma członków.",
+      "noAccountHint": "Rolę członka można nadać tylko osobie, która ma już konto. Osobę bez konta zaproś linkiem z zaproszeniem — gdy się zarejestruje i dołączy do organizacji, nadasz jej tu rolę.",
+      "noAccountCta": "Utwórz link z zaproszeniem"
     },
     "start": {
       "membersMoved": "Członkowie i zaproszenia organizacji {workspace} są zarządzane w jej Ustawieniach.",
@@ -19672,9 +19690,9 @@
       "approvedAutomatic": "Potwierdzone automatycznie według reguły",
       "rejected": "Odrzucono",
       "changesRequested": "Poproszono o poprawki",
-      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# potwierdzony wpis} few {# potwierdzone wpisy} many {# potwierdzonych wpisów} other {# potwierdzonego wpisu}}} other {Living CV uzupełnione: {skills}}}",
-      "cvUnlinked": "Living CV: potwierdzona praca, jeszcze niepowiązana z umiejętnością",
-      "cvUnknown": "Living CV: nie udało się odczytać",
+      "cv": "{count, plural, one {Żywe CV: {skills} · {entries, plural, one {# potwierdzony wpis} few {# potwierdzone wpisy} many {# potwierdzonych wpisów} other {# potwierdzonego wpisu}}} other {Żywe CV uzupełnione: {skills}}}",
+      "cvUnlinked": "Żywe CV: potwierdzona praca, jeszcze niepowiązana z umiejętnością",
+      "cvUnknown": "Żywe CV: nie udało się odczytać",
       "matching": "Dopasowanie widzi potwierdzoną pracę: {skills}",
       "matchingRepeated": "Dopasowanie widzi wielokrotnie potwierdzoną pracę: {skills}"
     },
@@ -19744,7 +19762,7 @@
       "returned": "Zwrócono do poprawy: {count}",
       "confirmed": "Potwierdzone przez drugą stronę: {count}",
       "confirmedUnknown": "Nie udało się ustalić liczby potwierdzeń",
-      "livingCv": "Potwierdzona praca liczy się w Living CV pracowników"
+      "livingCv": "Potwierdzona praca liczy się w Żywym CV pracowników"
     },
     "review": "Sprawdź oczekujące ({count})",
     "stageDone": "Etap „{name}” zakończony",

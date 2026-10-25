@@ -55,6 +55,12 @@ import {
 } from "./providers/cloudflare";
 import { localCompletionProvider } from "./providers/local";
 import {
+  cloudflareLlmCompletionProvider,
+  groqCompletionProvider,
+  mistralCompletionProvider,
+} from "./providers/free-tier";
+import type { ProviderCooldown } from "./provider-cooldown";
+import {
   advancePolicyFor,
   classifyCompletionFailure,
   resolveProviderChain,
@@ -85,6 +91,12 @@ export function selectCompletionProvider(
       return geminiCompletionProvider;
     case "xai":
       return xaiCompletionProvider;
+    case "cloudflare":
+      return cloudflareLlmCompletionProvider;
+    case "mistral":
+      return mistralCompletionProvider;
+    case "groq":
+      return groqCompletionProvider;
     case "disabled":
     default:
       return disabledCompletionProvider;
@@ -126,6 +138,11 @@ const ADAPTER_BY_PROVIDER: Readonly<Record<string, AiCompletionProvider>> = {
   openai: openaiCompletionProvider,
   gemini: geminiCompletionProvider,
   xai: xaiCompletionProvider,
+  // Free API tiers (2026-10-25): each its OWN binding on the shared
+  // OpenAI-compatible wire — own endpoint, own key, own model table.
+  cloudflare: cloudflareLlmCompletionProvider,
+  mistral: mistralCompletionProvider,
+  groq: groqCompletionProvider,
 };
 
 function adapterForChainId(id: AiChainProviderId): AiCompletionProvider | null {
@@ -160,6 +177,15 @@ export interface ChainDispatchContext {
    * adapters to prove the fallback order (a controlled hook, never an env flag).
    */
   readonly secondaries?: readonly SecondaryTranslationProvider[];
+  /**
+   * Runtime health from REAL failures (provider-cooldown.ts). The server
+   * boundary passes the process-wide instance; absent (tests, evals) = no
+   * cooldown, so the chain behaves exactly as before. A cooling provider is
+   * tried LAST, never removed — a cooldown reorders, it cannot empty a chain.
+   */
+  readonly cooldown?: ProviderCooldown;
+  /** Clock seam for the cooldown; defaults to Date.now. */
+  readonly now?: () => number;
 }
 
 /**
@@ -349,7 +375,11 @@ export async function dispatchAiCompletion(
   const preferred = await tryPreferredSecondary(request, cfg, chain.grants, chain.secondaries);
   if (preferred) return preferred;
 
-  const candidates: ChainCandidate[] = [outcome.selected, ...outcome.remaining];
+  const clock = chain.now ?? Date.now;
+  const ordered: ChainCandidate[] = [outcome.selected, ...outcome.remaining];
+  const candidates: ChainCandidate[] = chain.cooldown
+    ? chain.cooldown.order(ordered, clock())
+    : ordered;
   let invalidOutputRetries = 0;
   let last: AiCompletionResult = {
     status: "error",
@@ -408,7 +438,10 @@ export async function dispatchAiCompletion(
       continue;
     }
     const result = await adapter.complete(candidateRequest, cfg);
-    if (result.status === "ok") return result;
+    if (result.status === "ok") {
+      chain.cooldown?.noteSuccess(candidate.id);
+      return result;
+    }
 
     // Attribute the failure to the provider that produced it, so an audit
     // record cannot claim the primary provider failed when a different
@@ -417,6 +450,12 @@ export async function dispatchAiCompletion(
 
     const failure = classifyCompletionFailure(result);
     if (failure === null) return result;
+    chain.cooldown?.noteFailure(
+      candidate.id,
+      failure,
+      result.status === "error" ? result.message : undefined,
+      clock(),
+    );
     const policy = advancePolicyFor(failure);
     if (policy === "stop") break;
     if (policy === "advance_once") {

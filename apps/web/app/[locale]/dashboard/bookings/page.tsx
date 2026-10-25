@@ -8,6 +8,7 @@ import { BookingWithdrawButton } from "@/components/app/booking-withdraw-button"
 import { BookingManageControls } from "@/components/app/booking-manage-controls";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { MarkBookingsSeen } from "@/components/app/mark-bookings-seen";
+import { HomeRetry } from "@/components/app/home/home-retry";
 import { Link } from "@/lib/i18n/navigation";
 import {
   canProposeAgain,
@@ -62,6 +63,8 @@ export default async function BookingsPage({
   // its field/submit labels are reused verbatim from `scouting.booking` (one
   // flow, one wording) instead of duplicating seven keys per locale.
   const tProposeForm = await getTranslations("scouting.booking");
+  // The "read again" wording is the home regions' own (one retry, one wording).
+  const tRetry = await getTranslations("homeRegions");
   const result = await listMyBookings();
   // One consistent "now" for the whole render — the derived display states
   // (awaiting / stale) are computed against it, read-only.
@@ -97,6 +100,22 @@ export default async function BookingsPage({
         >
           {t("unavailable")}
         </p>
+      ) : result.kind === "read-failed" ? (
+        // UNKNOWN is not ZERO: a failed read is named and can be retried —
+        // never rendered as "no proposals yet" (row 5.13 follow-up).
+        <div
+          className="flex flex-col gap-2 rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+          role="status"
+        >
+          <p className="text-sm text-text-secondary" data-testid="bookings-read-failed">
+            {t("readFailed")}
+          </p>
+          <HomeRetry
+            label={tRetry("retry")}
+            pendingLabel={tRetry("retrying")}
+            testid="bookings-read-failed-retry"
+          />
+        </div>
       ) : (
         <>
           <Section

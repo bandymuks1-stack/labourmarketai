@@ -94,6 +94,7 @@ export default async function CompanySettingsPage({
             members={membersRes.members}
             myRole={membersRes.myRole}
             myProfileId={userId}
+            organizationId={memberOrgId ?? null}
             labels={membershipLabels.members}
           />
         </div>

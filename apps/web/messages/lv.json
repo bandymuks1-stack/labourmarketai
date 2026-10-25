@@ -2014,6 +2014,15 @@
       "pending": "Apvieno…",
       "done": "Apvienots. Rindas un to ieraksti saglabāti; projektu sarakstā tagad redzams saglabātais projekts.",
       "failed": "Nav apvienots. Neapstrādātajām rindām nekas nav mainīts — pārlādējiet un mēģiniet vēlreiz."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {
@@ -2811,6 +2820,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -2846,7 +2856,8 @@
       "alreadyAccepted": "Darbinieks šo piedāvājumu jau ir pieņēmis — saskaņotie nosacījumi šeit netiek pārrakstīti. Izmaiņas saskaņojiet sarunā.",
       "refusedNotReachable": "Šai personai no šejienes nevar piedāvāt rezervāciju — profils nav redzams darba devējiem, un jums nav darba attiecību.",
       "refusedNeedClosed": "Šī vajadzība ir slēgta — atver to no jauna, pirms piedāvā rezervāciju.",
-      "refusedAnswered": "Darbinieks šo piedāvājumu noraidīja, tāpēc bez viņa jaunas piekrišanas tas netiek atvērts no jauna. Turpiniet sarunā vai atrodiet citu darbinieku."
+      "refusedAnswered": "Darbinieks šo piedāvājumu noraidīja, tāpēc bez viņa jaunas piekrišanas tas netiek atvērts no jauna. Turpiniet sarunā vai atrodiet citu darbinieku.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -6940,7 +6951,9 @@
       "managesInvitations": "Pārvalda ielūgumus",
       "grantInvitations": "Atļaut pārvaldīt ielūgumus",
       "withdrawInvitations": "Atsaukt ielūgumu pārvaldību",
-      "unavailable": "Dalībnieku sarakstu šobrīd neizdevās nolasīt. Tas nenozīmē, ka organizācijai nav dalībnieku."
+      "unavailable": "Dalībnieku sarakstu šobrīd neizdevās nolasīt. Tas nenozīmē, ka organizācijai nav dalībnieku.",
+      "noAccountHint": "Dalībnieka lomu var piešķirt tikai tam, kam jau ir konts. Personu bez konta uzaicini ar uzaicinājuma saiti — kad tā reģistrēsies un pievienosies organizācijai, šeit varēsi piešķirt lomu.",
+      "noAccountCta": "Izveidot uzaicinājuma saiti"
     },
     "start": {
       "membersMoved": "Organizācijas {workspace} dalībnieki un uzaicinājumi tiek pārvaldīti tās Iestatījumos.",

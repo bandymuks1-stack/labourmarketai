@@ -271,6 +271,8 @@ export function organizationLedgerFrom(
           organizationId: r.organizationId,
           // How the SPAN came to be travels with it (owner rule 2026-09-23).
           provenance: r.provenance,
+          // The figure's stated basis travels with it (one hours ledger).
+          hoursBasis: r.hoursBasis ?? null,
           context: r.context,
         }));
   return { records: [...fromAllocations, ...fromEvidence], periodRecords };

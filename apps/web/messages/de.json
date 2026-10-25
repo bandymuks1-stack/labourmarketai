@@ -2138,6 +2138,10 @@
           "title": "Starten Sie Ihr Unternehmensprofil",
           "body": "Sie haben noch kein Unternehmensprofil. Erstellen Sie eines — es ist sofort aktiv und nutzbar, ohne Warten auf eine Freigabe.",
           "cta": "Unternehmenseinrichtung starten"
+        },
+        "personalSpace": {
+          "title": "Sie sind gerade in Ihrem persönlichen Bereich",
+          "body": "Die Unternehmenswerkzeuge öffnen sich im Arbeitsbereich dieser Organisation — eine zweite Organisation anzulegen ist nicht nötig. Öffnen Sie Ihre:"
         }
       },
       "typeNotes": {
@@ -3941,7 +3945,7 @@
       "evidenceRecs": "Referenzen — helfen, Ihre Zuverlässigkeit zu belegen.",
       "evidenceLegal": "Ausweis- oder Rechtsdokumente — werden nur verwendet, wenn sie für eine Einstellung oder ein rechtliches Verfahren benötigt werden.",
       "privacyNote": "Ihre Dokumente bleiben privat. Sie werden ohne klare Grundlage keinem Arbeitgeber oder Kunden gezeigt.",
-      "uploadCostNote": "Das Hochladen eines Lebenslaufs ist kostenlos — es wird kein LMC abgebucht. Das System kommt mit der Dateigröße selbst zurecht."
+      "uploadCostNote": "Das Hochladen eines Lebenslaufs ist kostenlos — es werden keine Plattform-Guthaben (LMC) abgebucht. Das System kommt mit der Dateigröße selbst zurecht."
     }
   },
   "live": {
@@ -6259,6 +6263,11 @@
           "trip": "Dienstreise",
           "absence": "Nicht verfügbar",
           "plan": "Geplante Arbeit"
+        },
+        "unknownWhy": {
+          "undated_window": "Dieses Projekt hat keine Daten, daher lassen sich Überschneidungen mit anderen Verpflichtungen nicht prüfen.",
+          "undated_commitment": "Eine andere Verpflichtung dieser Person hat keine Daten, daher lassen sich freie Tage nicht bestätigen.",
+          "source_unreadable": "Ein Teil des Kalenders konnte gerade nicht gelesen werden, daher lassen sich freie Tage nicht bestätigen."
         }
       }
     },
@@ -8806,7 +8815,7 @@
     "candidate": "Kandidat",
     "privacy": {
       "contactsHidden": "Kontaktdaten bleiben verborgen — keine Telefonnummer, E-Mail oder Name.",
-      "profileSafe": "Sie sehen nur profilsichere Signale: Fähigkeitsnachweise, Standort, Verfügbarkeit und Satz. Die Kontaktaufnahme erfolgt später, über einen expliziten Schritt."
+      "profileSafe": "Sie sehen nur profilsichere Signale: Fähigkeitsnachweise, Standort, Verfügbarkeit und Satz. Name und Kontaktdaten erscheinen erst, wenn die Person es erlaubt."
     },
     "fields": {
       "location": "Standort",
@@ -8824,9 +8833,10 @@
     "rateFrom": "ab {min} €/Monat",
     "noRate": "Nicht angegeben",
     "comms": {
-      "eligible": "Diese Arbeitskraft hat eine offene Verfügbarkeit — das Messaging wird in einem späteren Schritt geöffnet.",
+      "eligible": "Diese Arbeitskraft hat eine offene Verfügbarkeit — Sie können sie über die Plattform kontaktieren.",
       "inConversation": "Sie sind mit dieser Arbeitskraft bereits im Gespräch — setzen Sie es unter Nachrichten fort.",
-      "blocked": "Die Kommunikation wird verfügbar, wenn die Arbeitskraft eine offene Verfügbarkeit oder ein Verfügbar-ab-Datum hat."
+      "blocked": "Die Kommunikation wird verfügbar, wenn die Arbeitskraft eine offene Verfügbarkeit oder ein Verfügbar-ab-Datum hat.",
+      "interestDoor": "Diese Person hat selbst Interesse gezeigt — Sie können ihr schon jetzt schreiben, mit „In der Plattform kontaktieren“."
     },
     "request": {
       "button": "Kommunikation anfragen",
@@ -9113,6 +9123,7 @@
     "intro": "Vorgeschlagene Einsätze. Eine Buchung ist erst bestätigt, wenn die Arbeitskraft annimmt.",
     "notAuthed": "Bitte melden Sie sich an, um Ihre Buchungen zu sehen.",
     "unavailable": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+    "readFailed": "Ihre Buchungen konnten gerade nicht geladen werden — das heißt nicht, dass Sie keine haben. Versuchen Sie es erneut.",
     "noDate": "Kein Startdatum festgelegt",
     "noRole": "Arbeitsvereinbarung",
     "startsOn": "Beginnt am {date}",
@@ -9189,7 +9200,8 @@
       "alreadyAccepted": "Die Arbeitskraft hat diesen Vorschlag bereits angenommen — vereinbarte Bedingungen werden hier nicht überschrieben. Änderungen im Gespräch abstimmen.",
       "refusedNotReachable": "Dieser Person kann hier keine Buchung vorgeschlagen werden — ihr Profil ist für Arbeitgeber nicht sichtbar und es besteht keine Arbeitsbeziehung mit Ihnen.",
       "refusedNeedClosed": "Dieser Bedarf ist geschlossen — öffnen Sie ihn erneut, bevor Sie eine Buchung vorschlagen.",
-      "refusedAnswered": "Die Arbeitskraft hat diesen Vorschlag abgelehnt; ohne ihre neue Zustimmung wird er nicht wieder geöffnet. Schreiben Sie im Gespräch weiter oder finden Sie eine andere Arbeitskraft."
+      "refusedAnswered": "Die Arbeitskraft hat diesen Vorschlag abgelehnt; ohne ihre neue Zustimmung wird er nicht wieder geöffnet. Schreiben Sie im Gespräch weiter oder finden Sie eine andere Arbeitskraft.",
+      "unconfirmed": "Noch keine Antwort vom Server. Der Vorschlag wurde möglicherweise schon gesendet — prüfen Sie Buchungen oder senden Sie ihn erneut (derselbe Vorschlag wird nie doppelt angelegt)."
     },
     "reason": {
       "optionalTitle": "Grund (optional)",
@@ -9541,7 +9553,7 @@
       "users": "Personen und Aktivität",
       "teams": "Brigaden und Einladungen",
       "b2b": "B2B-Markt",
-      "work": "Arbeitsjournal und Living CV",
+      "work": "Arbeitsjournal und lebendiger Lebenslauf",
       "technical": "Technik"
     },
     "col": {
@@ -10124,7 +10136,7 @@
     },
     "personal": {
       "title": "Ihre Möglichkeiten",
-      "subtitle": "Die besten derzeit gefundenen Möglichkeiten auf Grundlage Ihrer Angaben und Ihres Living CV.",
+      "subtitle": "Die besten derzeit gefundenen Möglichkeiten auf Grundlage Ihrer Angaben und Ihres lebendigen Lebenslaufs.",
       "discoverTitle": "Mehr für Sie",
       "discoverSubtitle": "Bis zu {count} passende Möglichkeiten aus den heute für Sie geprüften.",
       "status": {
@@ -11709,7 +11721,10 @@
       "docExpiring": "Dokumente, die innerhalb von 30 Tagen ablaufen",
       "docMissing": "Fehlende oder abgelaufene Dokumente",
       "docReview": "Dokumente in Prüfung oder zurückgegeben",
-      "financeOverdue": "Überfällige Finanzeinträge"
+      "financeOverdue": "Überfällige Finanzeinträge",
+      "journalReviews": "Arbeitseinträge, die auf Ihre Bestätigung warten",
+      "journalClientDecide": "Arbeitseinträge, die auf Ihre Entscheidung als Auftraggeber warten",
+      "partial": "Die Prüfliste der Arbeitseinträge konnte gerade nicht gelesen werden. Das heißt nicht, dass nichts wartet."
     },
     "sources": {
       "label": "Quellen",
@@ -11720,7 +11735,8 @@
       "workJournal": "Ihr Arbeitsjournal",
       "managerConfirmations": "Bestätigungen von Verantwortlichen",
       "projects": "Ihre Projekte",
-      "assignments": "Aktive Zuweisungen von Arbeitskräften"
+      "assignments": "Aktive Zuweisungen von Arbeitskräften",
+      "journalReviewQueue": "Prüfliste Arbeitseinträge"
     },
     "summaries": {
       "title": "Zusammenfassungen aus Ihren Daten",
@@ -18333,7 +18349,9 @@
       "managesInvitations": "Verwaltet Einladungen",
       "grantInvitations": "Einladungen verwalten erlauben",
       "withdrawInvitations": "Einladungsverwaltung entziehen",
-      "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat."
+      "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat.",
+      "noAccountHint": "Eine Mitgliedsrolle kann nur jemandem gegeben werden, der bereits ein Konto hat. Laden Sie eine Person ohne Konto mit einem Einladungslink ein — sobald sie sich registriert und der Organisation beitritt, können Sie ihr hier eine Rolle geben.",
+      "noAccountCta": "Einladungslink erstellen"
     },
     "start": {
       "membersMoved": "Mitglieder und Einladungen von {workspace} werden in den Einstellungen der Organisation verwaltet.",
@@ -19672,9 +19690,9 @@
       "approvedAutomatic": "Automatisch per Regel bestätigt",
       "rejected": "Abgelehnt",
       "changesRequested": "Änderung angefragt",
-      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bestätigter Eintrag} other {# bestätigte Einträge}}} other {Living CV ergänzt: {skills}}}",
-      "cvUnlinked": "Living CV: bestätigte Arbeit, noch keiner Fähigkeit zugeordnet",
-      "cvUnknown": "Living CV: konnte nicht gelesen werden",
+      "cv": "{count, plural, one {Lebendiger Lebenslauf: {skills} · {entries, plural, one {# bestätigter Eintrag} other {# bestätigte Einträge}}} other {Lebendiger Lebenslauf ergänzt: {skills}}}",
+      "cvUnlinked": "Lebendiger Lebenslauf: bestätigte Arbeit, noch keiner Fähigkeit zugeordnet",
+      "cvUnknown": "Lebendiger Lebenslauf: konnte nicht gelesen werden",
       "matching": "Das Matching sieht bestätigte Arbeit: {skills}",
       "matchingRepeated": "Das Matching sieht wiederholt bestätigte Arbeit: {skills}"
     },
@@ -19744,7 +19762,7 @@
       "returned": "Zur Korrektur zurück: {count}",
       "confirmed": "Von zweiter Seite bestätigt: {count}",
       "confirmedUnknown": "Die Zahl der Bestätigungen ließ sich nicht ermitteln",
-      "livingCv": "Bestätigte Arbeit zählt im Living CV der Mitarbeitenden"
+      "livingCv": "Bestätigte Arbeit zählt im lebendigen Lebenslauf der Mitarbeitenden"
     },
     "review": "Wartende prüfen ({count})",
     "stageDone": "Etappe „{name}“ abgeschlossen",

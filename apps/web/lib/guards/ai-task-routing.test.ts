@@ -155,7 +155,7 @@ describe("(d) adapter registry — anthropic is the only active adapter", () => 
 // The fetch-based adapters are the ONLY files that may reference the external
 // provider API hosts — business logic can never call a vendor directly.
 const PROVIDER_HOSTS =
-  /api\.openai\.com|api\.deepl\.com|api-free\.deepl\.com|generativelanguage\.googleapis\.com|api\.x\.ai/;
+  /api\.openai\.com|api\.deepl\.com|api-free\.deepl\.com|generativelanguage\.googleapis\.com|api\.x\.ai|api\.cloudflare\.com\/client\/v4\/accounts\/[^"'`]*\/ai\/|api\.mistral\.ai|api\.groq\.com/;
 const PROVIDER_HOST_ALLOWLIST_PREFIX = "lib/ai/runtime/providers/";
 
 describe("(f) provider API hosts appear ONLY under lib/ai/runtime/providers", () => {
@@ -197,6 +197,12 @@ describe("(f) provider API hosts appear ONLY under lib/ai/runtime/providers", ()
       PROVIDER_HOSTS.test("https://generativelanguage.googleapis.com/v1beta/models"),
     ).toBe(true);
     expect(PROVIDER_HOSTS.test("https://api.x.ai/v1/chat/completions")).toBe(true);
+    // Free API tiers (2026-10-25): pinned to runtime/providers like the rest.
+    expect(PROVIDER_HOSTS.test("https://api.mistral.ai/v1/chat/completions")).toBe(true);
+    expect(PROVIDER_HOSTS.test("https://api.groq.com/openai/v1/chat/completions")).toBe(true);
+    expect(
+      PROVIDER_HOSTS.test("https://api.cloudflare.com/client/v4/accounts/${a}/ai/v1/chat/completions"),
+    ).toBe(true);
     expect(PROVIDER_HOSTS.test("https://example.com/api")).toBe(false);
   });
 });

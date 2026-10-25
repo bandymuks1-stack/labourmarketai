@@ -2138,6 +2138,10 @@
           "title": "Start your company profile",
           "body": "You don't have a company profile yet. Create one — it's active and usable straight away, no waiting for approval.",
           "cta": "Start company setup"
+        },
+        "personalSpace": {
+          "title": "You are in your personal space",
+          "body": "Company tools open in that organisation's workspace — there is no need to create a second organisation. Open yours:"
         }
       },
       "typeNotes": {
@@ -3941,7 +3945,7 @@
       "evidenceRecs": "References — help back up your reliability.",
       "evidenceLegal": "ID or legal documents — used only when needed for hiring or a legal process.",
       "privacyNote": "Your documents stay private. They are not shown to an employer or client without a clear basis.",
-      "uploadCostNote": "Uploading a CV is free — no LMC is charged. The system handles the file size itself."
+      "uploadCostNote": "Uploading a CV is free — no platform credits (LMC) are charged. The system handles the file size itself."
     }
   },
   "live": {
@@ -6259,6 +6263,11 @@
           "trip": "Business trip",
           "absence": "Unavailable",
           "plan": "Planned work"
+        },
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
     },
@@ -8806,7 +8815,7 @@
     "candidate": "Candidate",
     "privacy": {
       "contactsHidden": "Contacts stay hidden — no phone, email, or name.",
-      "profileSafe": "You see only profile-safe signals: skill evidence, location, availability and rate. Reaching out happens later, through an explicit step."
+      "profileSafe": "You see only profile-safe signals: skill evidence, location, availability and rate. Name and contact details appear only when the person allows it."
     },
     "fields": {
       "location": "Location",
@@ -8824,9 +8833,10 @@
     "rateFrom": "from €{min}/mo",
     "noRate": "Not stated",
     "comms": {
-      "eligible": "This worker has open availability — messaging opens in a later step.",
+      "eligible": "This worker has open availability — you can reach them in the platform.",
       "inConversation": "You are already in a conversation with this worker — continue it in Messages.",
-      "blocked": "Communication becomes available when the worker has open availability or an available-from date."
+      "blocked": "Communication becomes available when the worker has open availability or an available-from date.",
+      "interestDoor": "This person raised their hand for this need — you can write to them now with “Contact in the platform”."
     },
     "request": {
       "button": "Request to communicate",
@@ -9113,6 +9123,7 @@
     "intro": "Proposed engagements. A booking is confirmed only when the worker accepts.",
     "notAuthed": "Please sign in to see your bookings.",
     "unavailable": "Couldn’t complete the action. Please try again.",
+    "readFailed": "Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "noDate": "No start date set",
     "noRole": "Work engagement",
     "startsOn": "Starts {date}",
@@ -9189,7 +9200,8 @@
       "alreadyAccepted": "The worker has already accepted this proposal — agreed terms are not rewritten here. Agree any changes in the conversation.",
       "refusedNotReachable": "This person can't be offered a booking from here — they haven't made their profile visible to employers and have no working relationship with you.",
       "refusedNeedClosed": "This need is closed — reopen it before proposing a booking.",
-      "refusedAnswered": "The worker declined this proposal, so it is not reopened without their new consent. Continue in the conversation or find another worker."
+      "refusedAnswered": "The worker declined this proposal, so it is not reopened without their new consent. Continue in the conversation or find another worker.",
+      "unconfirmed": "No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "Reason (optional)",
@@ -11709,7 +11721,10 @@
       "docExpiring": "Documents expiring within 30 days",
       "docMissing": "Documents missing or expired",
       "docReview": "Documents in review or returned",
-      "financeOverdue": "Overdue finance records"
+      "financeOverdue": "Overdue finance records",
+      "journalReviews": "Work entries waiting for your approval",
+      "journalClientDecide": "Work entries waiting for your decision as the client",
+      "partial": "The work-entry review queue could not be read just now. That does not mean nothing is waiting."
     },
     "sources": {
       "label": "Sources",
@@ -11720,7 +11735,8 @@
       "workJournal": "Your work journal",
       "managerConfirmations": "Manager confirmations",
       "projects": "Your projects",
-      "assignments": "Active worker assignments"
+      "assignments": "Active worker assignments",
+      "journalReviewQueue": "Work-entry review queue"
     },
     "summaries": {
       "title": "Summaries from your data",
@@ -15502,7 +15518,7 @@
       "suggestOverdue": "{count, plural, one {# task is past its due day} other {# tasks are past their due day}}.",
       "suggestLogToday": "You are working today and nothing is logged yet.",
       "suggestReserve": "A deadline lands tomorrow, and tomorrow is nearly free.",
-      "suggestReserveNamed": "„{label}“ is due tomorrow, and tomorrow is nearly free.",
+      "suggestReserveNamed": "“{label}” is due tomorrow, and tomorrow is nearly free.",
       "suggestBasis": "From your own calendar and tasks."
     },
     "ai": {
@@ -18333,7 +18349,9 @@
       "managesInvitations": "Manages invitations",
       "grantInvitations": "Allow to manage invitations",
       "withdrawInvitations": "Withdraw invitation management",
-      "unavailable": "The member directory could not be read right now. This is not a claim that the organization has no members."
+      "unavailable": "The member directory could not be read right now. This is not a claim that the organization has no members.",
+      "noAccountHint": "A membership role can only be given to someone who already has an account. Invite a person without an account with an invitation link — once they sign up and join the organisation, you can give them a role here.",
+      "noAccountCta": "Create an invitation link"
     },
     "start": {
       "membersMoved": "Members and invitations of {workspace} are managed in the organization's Settings.",

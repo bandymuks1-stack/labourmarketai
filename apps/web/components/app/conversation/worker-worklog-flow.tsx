@@ -53,6 +53,7 @@ import { formatUtcDate } from "@/lib/time/display";
 import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { personCalendarDay } from "@/lib/time/person-calendar-day";
+import { quoteText } from "@/lib/i18n/quote";
 
 export type WorkLogLabels = {
   understood: string;
@@ -1067,7 +1068,7 @@ export function WorkerWorkLogFlow({
         )}
       </dl>
 
-      <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} />
+      <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} locale={locale} />
 
       <label className="flex flex-col gap-1 text-support">
         <span className="text-text-muted">{labels.labelSite}</span>
@@ -1128,7 +1129,7 @@ export function WorkerWorkLogFlow({
               className="text-meta leading-relaxed text-state-warning"
               data-testid="worklog-context-ended-org"
             >
-              {labels.contextEndedOrg} „{endedOrgNamed}“
+              {labels.contextEndedOrg} {quoteText(locale, endedOrgNamed)}
             </span>
           ) : null}
           {mustChooseEngagement && !engagementId && !endedOrgNamed ? (
@@ -1274,10 +1275,13 @@ function RecordedTimePreview({
   notes,
   workDate,
   labels,
+  locale,
 }: {
   notes: string;
   workDate: string;
   labels: WorkLogLabels;
+  /** The reader's quote pair around the person's own words (UX review 2026-10-24). */
+  locale: string;
 }) {
   // The SAME derivation the executor runs on save, over the notes as the
   // person has edited them — never a second parser, never a cached figure.
@@ -1313,7 +1317,7 @@ function RecordedTimePreview({
         <ul className="flex flex-col gap-0.5">
           {record.fragments.map((f, i) => (
             <li key={`${i}-${f.rawPhrase}`} className="flex justify-between gap-3">
-              <span className="min-w-0 truncate text-text-primary">„{f.rawPhrase}“</span>
+              <span className="min-w-0 truncate text-text-primary">{quoteText(locale, f.rawPhrase)}</span>
               <span className="shrink-0 text-right font-medium text-text-primary">
                 {fragmentTimeLabel(f.timeValue, f.timeUnit, labels)}
                 {f.activitySlug === null && f.activityLabel === null ? (
