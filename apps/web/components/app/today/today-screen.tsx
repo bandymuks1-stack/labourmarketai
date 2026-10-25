@@ -143,9 +143,18 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
 
       {/* THE FOUR REGIONS — two columns from lg (01+02 | 03+04), one column
           on a phone in DOM order 01→04 (the one primary action first). Each
-          streams from its own loader. */}
-      <div className="grid items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
-        <div className="flex flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
+          streams from its own loader.
+
+          `grid-cols-1` is load-bearing, not decoration: without an explicit
+          template the phone gets ONE IMPLICIT `auto` column, which grows to
+          the min-content of its widest child. A `truncate`d trace title is
+          min-content = the whole unwrapped line, so the column (and every
+          region in it) rendered 816px wide inside a 390px phone and the
+          clipped overflow hid the buttons, counts and "Visa veikla"
+          (UX review 2026-10-24). `grid-cols-1` is `minmax(0, 1fr)`; the
+          columns carry `min-w-0` for the same reason on lg. */}
+      <div className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
           <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
             <HomeWaiting locale={locale} />
           </Suspense>
@@ -181,7 +190,7 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           </Suspense>
         </div>
 
-        <div className="flex flex-col gap-4 sm:gap-5 lg:col-span-5 lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-5 lg:gap-6">
           <Suspense fallback={null}>
             <HomeOutside />
           </Suspense>

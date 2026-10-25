@@ -1122,9 +1122,14 @@ export default async function VerifiedCvPage({
               {summary.map((s) => (
                 <div
                   key={s.key}
-                  className="rounded-lg border border-ink-600 p-3 text-center"
+                  className="min-w-0 rounded-lg border border-ink-600 p-2 text-center sm:p-3"
                 >
-                  <dt className="text-meta uppercase tracking-wide text-text-muted">
+                  {/* A third of a phone is ~100px: one long compound word
+                      ("Dagboekregistraties", "Tagebucheinträge") overflowed
+                      the tile and the page slid 21px sideways (UX review
+                      2026-10-24). It hyphenates where the locale's dictionary
+                      can, and breaks inside the word where it cannot. */}
+                  <dt className="hyphens-auto break-words text-meta uppercase tracking-wide text-text-muted">
                     {t(`summary.${s.key}`)}
                   </dt>
                   <dd className="mt-1 font-display text-2xl font-bold">
