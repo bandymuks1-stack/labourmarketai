@@ -14,7 +14,7 @@ against committed production, for the continuing-business organization (Labour
 market ai Sp. z o.o), separating **data origin / holder** (the continuing
 business) from **historical legal employer** (Vivat Rex, then Labour Market AI
 Sp. z o.o from the documented 2026-02-23 company change) from **client**
-(De Klusbaas B.V.) from **Nonstop Group** (a separate organization). No worker or
+(a Dutch main contractor) from **Nonstop Group** (a separate organization). No worker or
 hour is attributed to a company without a source. No records were moved or
 rewritten; corrections are append-only.
 
@@ -39,7 +39,7 @@ staged rows, the repository and its git history, and the owner's Drive/mailbox.
   subsystem and are not importable as work history. No foreign workers or hours are
   attributed to Nonstop.
 - **Open, evidence-dependent (inside the committed set):** a set of records with an
-  unresolved site, and the "Hoofdgracht 45" label (no such work object exists; none
+  unresolved site, and one disputed site label (no matching work object exists; none
   are wrongly linked — the fuzzy suggestion is read-time only, never committed).
   Resolving these needs the original weekly timesheets; no committed error exists to
   undo and no site may be assigned without the source.
