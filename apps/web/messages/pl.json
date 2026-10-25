@@ -6412,7 +6412,7 @@
       "totalAssigned": "Przypisano",
       "viaTeam": "Przez zespół",
       "ready": "Gotowi",
-      "readyBasis": "Na podstawie wyłącznie pól sprawdzanych tutaj.",
+      "readyBasis": "Na podstawie umiejętności i dowodów pracy. Dokumenty nigdy nie obniżają gotowości.",
       "needsDeclaredSkills": "Brak zadeklarowanych umiejętności",
       "needsEvidence": "Brak dowodów pracy",
       "needsFollowUp": "Wymaga kontaktu",
@@ -6431,7 +6431,7 @@
     "workersTitle": "Pracownicy w tym projekcie",
     "noWorkers": "Do tego projektu nie przypisano jeszcze żadnych pracowników. Przypisz pracowników ze swojego zespołu, aby rozpocząć operacje.",
     "worker": {
-      "readyChip": "Gotowy (sprawdzone pola)",
+      "readyChip": "Gotowy: umiejętności i dowody pracy",
       "notReadyChip": "Jeszcze niegotowy",
       "declaredSkills": "Zadeklarowane umiejętności",
       "confirmedSkills": "Potwierdzone umiejętności",
@@ -6451,8 +6451,8 @@
     },
     "notesTitle": "Co oznaczają te liczby",
     "notes": {
-      "readiness": "„Gotowy” oznacza wyłącznie, że pola sprawdzane tutaj są uzupełnione (imię i nazwisko, co najmniej jedna zadeklarowana umiejętność, co najmniej jeden wpis z dowodem pracy). To nie jest weryfikacja, zatwierdzenie dokumentu ani ocena AI.",
-      "documents": "Dokumenty nie są jeszcze śledzone — żaden dokument nie jest nigdzie na tej tablicy pokazywany jako zatwierdzony lub zweryfikowany.",
+      "readiness": "„Gotowy” oznacza, że jest imię, co najmniej jedna zadeklarowana umiejętność i co najmniej jeden wpis dowodu pracy. Dokumenty nie wchodzą w gotowość i nigdy jej nie obniżają — to, co trzeba sprawdzić dla tej pracy, uzgadnia się przed ostatecznym porozumieniem. To nie jest weryfikacja ani ocena AI.",
+      "documents": "Nie trzeba przesyłać dokumentów. Nigdzie na tej tablicy dokument nie jest pokazany jako otrzymany lub sprawdzony, dopóki kierownik tego nie oznaczy.",
       "candidateSkill": "Wyjaśnienia umiejętności kandydatów są prywatne dla każdego pracownika; są pokazywane w profilu zawodowym pracownika, nie tutaj."
     },
     "report": {
@@ -6477,20 +6477,21 @@
       "rejected": "Odrzucony"
     },
     "checklist": {
-      "title": "Gotowość / dokumenty",
-      "empty": "Jeszcze nieśledzone. Dodaj standardową listę kontrolną lub własne pozycje.",
-      "seed": "Dodaj standardową listę kontrolną",
+      "title": "Do uzgodnienia przed porozumieniem",
+      "empty": "Nic nie jest śledzone — nie trzeba przesyłać dokumentów. Jeśli dla tej pracy warto coś sprawdzić, dodaj propozycje lub własny punkt.",
+      "seed": "Dodaj propozycje dla tej pracy",
       "addItem": "Dodaj pozycję",
       "addPlaceholder": "Nazwa nowej pozycji",
-      "missing": "Brakuje",
+      "missing": "Oznaczono: brak",
       "received": "Otrzymano",
       "checked": "Sprawdzono",
       "blocked": "Odrzucone / wygasłe",
-      "helper": "„Sprawdzono” oznacza, że kierownik oznaczył to tutaj jako sprawdzone — nie jest to weryfikacja prawna. Dokument jest „otrzymany” lub „sprawdzony” tylko wtedy, gdy ustawi to kierownik; nic nie jest zatwierdzane automatycznie."
+      "helper": "„Sprawdzono” oznacza, że kierownik oznaczył to tutaj jako sprawdzone — nie jest to weryfikacja prawna. Dokument jest „otrzymany” lub „sprawdzony” tylko wtedy, gdy ustawi to kierownik; nic nie jest zatwierdzane automatycznie.",
+      "toAgree": "Do uzgodnienia"
     },
     "readinessStatuses": {
       "not_required": "Niewymagane",
-      "needed": "Potrzebne",
+      "needed": "Do uzgodnienia przed porozumieniem",
       "missing": "Brakuje",
       "received": "Otrzymano",
       "checked": "Sprawdzono",
@@ -6511,8 +6512,8 @@
       "all": "Wszyscy",
       "byStatus": "Stan",
       "anyStatus": "Dowolny status",
-      "missingDocs": "Brak dokumentów/informacji",
-      "ready": "Gotowi (sprawdzone pola)",
+      "missingDocs": "Oznaczono: brak",
+      "ready": "Gotowi: umiejętności i dowody pracy",
       "needsSkillInfo": "Potrzebne informacje o umiejętnościach",
       "needsEvidence": "Brak dowodów pracy",
       "docsChecked": "Dokumenty sprawdzone",
@@ -6520,7 +6521,7 @@
       "none": "Żaden pracownik nie pasuje do tego filtra.",
       "showAll": "Pokaż wszystkich",
       "empty": {
-        "missingDocs": "Żadnemu przypisanemu pracownikowi obecnie nie brakuje dokumentów ani informacji.",
+        "missingDocs": "Żaden kierownik nie oznaczył u nikogo braku.",
         "ready": "Żaden pracownik nie spełnia jeszcze wszystkich pól sprawdzanych tutaj. Wybierz „Wszyscy”, aby zobaczyć, czego każdemu brakuje.",
         "needsSkillInfo": "Każdy przypisany pracownik zadeklarował swoje umiejętności.",
         "needsEvidence": "Każdy przypisany pracownik ma co najmniej jeden dowód pracy.",
@@ -6529,7 +6530,7 @@
       }
     },
     "counters2": {
-      "withMissingDocs": "Brak dokumentów/informacji",
+      "withMissingDocs": "Oznaczono: brak",
       "docsReceived": "Dokumenty otrzymane",
       "docsChecked": "Dokumenty sprawdzone",
       "docsBlocked": "Odrzucone/wygasłe"
@@ -7844,8 +7845,8 @@
     "readinessPanel": {
       "title": "Jak poprawić swoją gotowość",
       "intro": "Oto, co warto uzupełnić, aby wzmocnić swoją kartę.",
-      "allReady": "Twoja karta profilu jest kompletna. Dokumenty potrzebne do pracy w danym kraju liczone są osobno — zobacz poniżej.",
-      "countryFit": "Praca w innym kraju wymaga odpowiednich dokumentów. Bez nich Twój profil nie jest oznaczany jako gotowy do pracy za granicą — widoczne są tylko legalne ścieżki (firma zajmuje się formalnościami, wsparcie w dokumentach). System nigdy nie obiecuje prawa do pracy bez dokumentów."
+      "allReady": "Twoja karta jest uzupełniona. Dokumenty nie wchodzą w gotowość — przy pracy w konkretnym kraju uzgadnia się je z pracodawcą przed porozumieniem.",
+      "countryFit": "Przy pracy w innym kraju jego prawo może wymagać określonych dokumentów (np. A1 przy delegowaniu lub zezwolenia na pracę dla obywateli spoza UE / EOG). Nie musisz ich tu przesyłać, a ich brak nie obniża Twojej gotowości: konkretne dokumenty obie strony sprawdzają przed ostatecznym porozumieniem. System nigdy nie obiecuje prawa do pracy tam, gdzie prawo wymaga zezwolenia."
     },
     "readinessSteps": {
       "pillar": {
@@ -8059,7 +8060,7 @@
       "help": "Wybierz kraj docelowy, aby zobaczyć, jakich dokumentów wymaga.",
       "mine": "Najpierw kraje, w których chcesz pracować.",
       "unknown": "Lista wymagań dla kraju {country} nie została jeszcze opracowana — nie pokazujemy niczego zamiast zgadywać.",
-      "next": "Następny krok: zajmij się — {doc}.",
+      "next": "Jeśli będziesz pracować w tym kraju, uzgodnij to z pracodawcą przed porozumieniem: {doc}. Nic nie trzeba przesyłać.",
       "ok": "Wszystkie opracowane wymagania dla kraju {country} są spełnione."
     },
     "types": {
@@ -8098,7 +8099,7 @@
     },
     "overall": {
       "not_enough_information": "Za mało jeszcze informacji",
-      "missing_documents": "Brakujące dokumenty",
+      "missing_documents": "Nie wszystkie dokumenty z przepisów tego kraju są odnotowane",
       "needs_verification": "Gotowe po weryfikacji",
       "almost_ready": "Prawie gotowe",
       "ready_for_country": "Gotowe dla tego kraju",
@@ -13681,8 +13682,8 @@
           "description": "Pozycja listy pracownika projektu otrzymuje rzeczywisty status — potrzebne, otrzymane, sprawdzone."
         },
         "seedReadinessChecklist": {
-          "label": "Rozpocznij listę dokumentów",
-          "description": "Dla wszystkich osób w projekcie rozpoczyna się standardowa lista gotowości / dokumentów."
+          "label": "Dodaj propozycje do uzgodnienia",
+          "description": "Każdej osobie w projekcie dodawane są proponowane punkty do uzgodnienia przed porozumieniem. To nie jest obowiązkowa lista ani ocena gotowości."
         },
         "requestReadiness": {
           "label": "Poproś o brakujące",
@@ -14040,7 +14041,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# klient nie potwierdził} few {# klientów nie potwierdziło} many {# klientów nie potwierdziło} other {# klienta nie potwierdziło}} jeszcze połączenia.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# zaproszenie ucznia jest} few {# zaproszenia uczniów są} many {# zaproszeń uczniów jest} other {# zaproszenia ucznia są}} wciąż nieprzyjęte.",
       "briefDocumentsExpiring": "{count, plural, one {# dokument traci ważność} few {# dokumenty tracą ważność} many {# dokumentów traci ważność} other {# dokumentu tracą ważność}}.",
-      "briefDocumentsMissing": "{count, plural, one {W Twoich wskazanych krajach nadal brakuje # dokumentu} few {W Twoich wskazanych krajach nadal brakuje # dokumentów} many {W Twoich wskazanych krajach nadal brakuje # dokumentów} other {W Twoich wskazanych krajach nadal brakuje # dokumentu}}: {list}.",
+      "briefDocumentsMissing": "{count, plural, one {Przepisy wskazanych krajów mogą wymagać # dokumentu} few {Przepisy wskazanych krajów mogą wymagać # dokumentów} many {Przepisy wskazanych krajów mogą wymagać # dokumentów} other {Przepisy wskazanych krajów mogą wymagać # dokumentu}}: {list}. Nic nie trzeba przesyłać — uzgodnisz je z pracodawcą przed porozumieniem.",
       "briefEmployerInterestWaiting": "{count, plural, one {# kandydat czeka} few {# kandydatów czeka} many {# kandydatów czeka} other {# kandydata czekają}} na Twoją odpowiedź.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# oferta agencji czeka} few {# oferty agencji czekają} many {# ofert agencji czeka} other {# oferty agencji czekają}} na Twoją decyzję.",
       "briefInterestContacted": "{count, plural, one {# firma chce skontaktować się} few {# firmy chcą skontaktować się} many {# firm chce skontaktować się} other {# firmy chcą skontaktować się}} w sprawie Twojego zainteresowania.",
@@ -14531,8 +14532,8 @@
       "missingDeclaredSkills": "zadeklarowanych umiejętności",
       "missingEvidence": "dowodów pracy",
       "blockedSuffix": "(odrzucone / wygasłe)",
-      "readinessSeedChip": "Rozpocznij listę dokumentów ({count} os.)",
-      "readinessSeeded": "Lista rozpoczęta: {count} os. × {items} pozycji — wszystkie „potrzebne”.",
+      "readinessSeedChip": "Dodaj propozycje do uzgodnienia ({count} os.)",
+      "readinessSeeded": "Dodano propozycje: {count} os. × {items} punktów — wszystkie „do uzgodnienia przed porozumieniem”.",
       "readinessGotChip": "Otrzymano: {label} ({name})",
       "readinessGotDone": "Oznaczono jako otrzymane: {label} ({name}).",
       "readinessCheckedChip": "Sprawdzone: {label} ({name})",
@@ -14575,7 +14576,7 @@
       "moveAskProject": "Dokąd przenieść {name}? Wybierz:",
       "moveWhatIfTitle": "Jeśli {name} przejdzie z „{from}” do „{to}”:",
       "moveFromLine": "• „{from}”: osób {before} → {after}; jego otwartych zadań zostaje tam {tasks}; lista gotowości tam: {checked}/{total}.",
-      "moveToLine": "• „{to}”: osób {before} → {after}; lista gotowości tam zacznie się od 0/{total}.",
+      "moveToLine": "• „{to}”: osób {before} → {after}; co tam uzgodnić, nie zostało jeszcze wybrane (proponowanych do {total} punktów).",
       "moveCountryLine": "• Zmienia się kraj: {from} → {to} — inne wymagania dokumentowe.",
       "moveNoDatesLine": "• „{to}” nie ma dat — nieobecności nie można sprawdzić.",
       "moveAvailabilityUnknownLine": "• Nieobecności nieznane.",
@@ -19833,6 +19834,30 @@
     "invite": {
       "line": "Zapłać 1 € jednorazowo za {days} dni płatnego planu Organizacja. Nic się nie odnawia.",
       "cta": "Otwórz pilotaż"
+    }
+  },
+  "collaborationChecks": {
+    "title": "Przed ostatecznym porozumieniem",
+    "lead": "Przed zawarciem ostatecznego porozumienia zalecamy obu stronom sprawdzenie dokumentów, kwalifikacji, zezwoleń i warunków współpracy istotnych dla tej pracy lub transakcji.",
+    "context": "To, co istotne, zależy od pracy, zawodu, kraju i warunków projektu — nie ma jednej obowiązkowej listy dla wszystkich.",
+    "countryRules": "Zasady zależą od kraju, w którym wykonywana jest praca: {country}.",
+    "privacy": "Nie trzeba przesyłać dokumentów do LabourMarket.ai. Jeśli się nimi dzielicie, robicie to sami — platforma nie przekazuje ich automatycznie i nie twierdzi, że zostały sprawdzone.",
+    "basis": {
+      "law": "Wymagane przez prawo",
+      "law_if": "W niektórych przypadkach wymagane przez prawo",
+      "agreement": "Kwestia porozumienia stron"
+    },
+    "topic": {
+      "terms": "Zakres prac, terminy, wynagrodzenie, czas pracy i sposób rozliczeń.",
+      "identity_right_to_work": "Tożsamość i prawo do pracy — przy zatrudnieniu przepisy kraju pracy często wymagają takiego sprawdzenia.",
+      "posting_a1": "Przy delegowaniu pracownika do innego kraju UE / EOG prawo wymaga zaświadczenia A1 i zgłoszenia delegowania.",
+      "work_permit": "Zezwolenie na pracę lub pobyt — wymagane przez prawo, jeśli osoba nie ma prawa do pracy w tym kraju z tytułu obywatelstwa lub swobodnego przepływu (np. UE / EOG).",
+      "site_safety": "Szkolenie BHP i zasady budowy — przed rozpoczęciem pracy to ustawowy obowiązek pracodawcy.",
+      "driving_licence": "Ważne prawo jazdy właściwej kategorii — do prowadzenia pojazdu w pracy wymagane przez prawo.",
+      "professional_qualification": "Kwalifikacje lub zaświadczenie zawodowe istotne dla tej pracy — w niektórych krajach dla niektórych zawodów wymagane przez prawo.",
+      "business_details": "Dane rejestracyjne firmy lub działalności oraz dane do faktur.",
+      "insurance": "Ubezpieczenie OC lub inne, jeśli ta praca go wymaga.",
+      "client_requirements": "Szczególne wymagania zleceniodawcy lub obiektu, jeśli są."
     }
   }
 }

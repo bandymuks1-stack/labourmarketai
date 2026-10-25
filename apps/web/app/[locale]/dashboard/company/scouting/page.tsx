@@ -64,6 +64,7 @@ import {
 import { loadDemandPipelineFacts } from "@/lib/pipeline/candidate-pipeline-facts";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Card } from "@/components/ui/Card";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
 
 const READINESS_TONE: Record<CompanyCandidateLabel, string> = {
   can_be_considered: "border-state-success/40 bg-state-success/10 text-state-success",
@@ -534,6 +535,13 @@ export default async function CompanyScoutingPage({
 
       {result?.kind === "ok" ? (
         <AutoMatchReceiptNote receipt={autoMatchReceipt} locale={locale} />
+      ) : null}
+
+      {/* Before any offer or booking for this need: the mutual, neutral
+          pre-agreement recommendation (decision 0021 extension, 2026-10-24) —
+          advice to both sides, never a filter on the candidates below. */}
+      {result?.kind === "ok" ? (
+        <CollaborationChecksNote context={{ dealKind: "work_engagement" }} testId="scouting-collaboration-checks" />
       ) : null}
 
       {result?.kind === "ok" && result.retrieval.historySignalsUnavailable ? (

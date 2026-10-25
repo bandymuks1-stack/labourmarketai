@@ -1717,7 +1717,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -3693,8 +3693,8 @@
           "description": "Projekta darbinieka saraksta punkts tiek atzīmēts ar reālu statusu — nepieciešams, saņemts, pārbaudīts."
         },
         "seedReadinessChecklist": {
-          "label": "Sākt dokumentu sarakstu",
-          "description": "Visiem projekta cilvēkiem tiek sākts standarta gatavības / dokumentu saraksts."
+          "label": "Pievienot ierosinājumus, par ko vienoties",
+          "description": "Visiem projekta cilvēkiem tiek pievienoti ieteiktie punkti, par ko vienoties pirms līguma. Tas nav obligāts saraksts un nav gatavības vērtējums."
         },
         "requestReadiness": {
           "label": "Pieprasīt trūkstošo",
@@ -4272,8 +4272,8 @@
       "missingDeclaredSkills": "norādīto prasmju",
       "missingEvidence": "darba pierādījumu",
       "blockedSuffix": "(noraidīts / beidzies)",
-      "readinessSeedChip": "Sākt dokumentu sarakstu ({count} cilv.)",
-      "readinessSeeded": "Saraksts sākts: {count} cilv. × {items} punkti — visi „nepieciešams“.",
+      "readinessSeedChip": "Pievienot ierosinājumus, par ko vienoties ({count} cilv.)",
+      "readinessSeeded": "Ierosinājumi pievienoti: {count} cilv. × {items} punkti — visi „vienoties pirms līguma“.",
       "readinessGotChip": "Saņemts: {label} ({name})",
       "readinessGotDone": "Atzīmēts kā saņemts: {label} ({name}).",
       "readinessCheckedChip": "Pārbaudīts: {label} ({name})",
@@ -4314,7 +4314,7 @@
       "moveAskProject": "Kur pārcelt {name}? Izvēlieties:",
       "moveWhatIfTitle": "Ja {name} pārietu no „{from}“ uz „{to}“:",
       "moveFromLine": "• „{from}“: cilvēku {before} → {after}; viņa atvērto darba pakotņu tur paliek {tasks}; gatavības saraksts tur: {checked}/{total}.",
-      "moveToLine": "• „{to}“: cilvēku {before} → {after}; gatavības saraksts tur sāksies no 0/{total}.",
+      "moveToLine": "• „{to}“: cilvēku {before} → {after}; par ko tur vienoties, vēl nav izvēlēts (ieteikti līdz {total} punktiem).",
       "moveCountryLine": "• Mainās valsts: {from} → {to} — citas dokumentu prasības.",
       "moveNoDatesLine": "• „{to}“ nav datumu — prombūtnes nevar pārbaudīt.",
       "moveAvailabilityUnknownLine": "• Prombūtnes nav zināmas.",
