@@ -665,8 +665,17 @@ export function deriveRequirementLedger(input: RequirementLedgerInput): Requirem
  *  "N of M" the manager's readiness line shows; recomputed from rows. */
 export function deriveLedgerRatio(rows: readonly RequirementLedgerRow[]): { have: number; total: number } {
   let have = 0;
-  for (const r of rows) if (r.state === "valid" || r.state === "expiring") have += 1;
-  return { have, total: rows.length };
+  let total = 0;
+  for (const r of rows) {
+    // A country's document rules are INFORMATION about the law, listed so the
+    // person knows them — never a gap in the person's own "N of M" (decision
+    // 0021 extension, 2026-10-24: not uploading documents never lowers a
+    // readiness figure). The rows stay in the ledger, outside the ratio.
+    if (r.reason === "country_requirement") continue;
+    total += 1;
+    if (r.state === "valid" || r.state === "expiring") have += 1;
+  }
+  return { have, total };
 }
 
 /** The rows that still need something from the person, in ledger order. */

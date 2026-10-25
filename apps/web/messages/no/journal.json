@@ -148,7 +148,7 @@
     "pageTitle": "Stemmeinnføring",
     "pageIntro": "Fortell om arbeidsdagen din — du gjennomgår og retter teksten før noe lagres.",
     "backToJournal": "Tilbake til dagboken",
-    "unavailable": "Stemmetranskripsjon er ikke satt opp ennå. Transkripsjonsserveren er ikke koblet til av plattformeieren — opptak er deaktivert inntil videre. Du kan alltid skrive innlegget som tekst.",
+    "unavailable": "Stemmetranskripsjon er ikke tilgjengelig ennå — opptak er slått av inntil videre. Du kan alltid skrive innlegget som tekst.",
     "disclosureTitle": "Før du tar opp",
     "disclosureProcessing": "Opptaket ditt sendes til en behandlingsserver kontrollert av LabourMarket.ai for å gjøres om til tekst. Ingen tredjeparts taletjeneste brukes.",
     "disclosureWhy": "Det brukes bare til å lage teksten nedenfor — ikke noe annet.",

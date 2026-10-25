@@ -88,6 +88,13 @@ test("PDF work report → upload → draft → review → confirm → journal", 
   await expect(notes).toContainText(/stoga|valand/i);
   // The human edits before confirming — imported ≠ verified.
   await notes.fill(`${REPORT_TEXT} (patikrinta ir pataisyta ranka)`);
+  // #2118: the work date is an explicit, required, empty-by-default field — a
+  // document never silently decides WHEN the work happened. Yesterday (UTC) is
+  // a real past day in every zone, so the not-in-the-future rule holds.
+  const workDate = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  const workDateField = review.locator('[data-testid="doc-journal-draft-work-date"]');
+  await expect(workDateField).toHaveValue("");
+  await workDateField.fill(workDate);
 
   // Confirm — only now does it become journal history.
   await review.locator('[data-testid="doc-journal-draft-save"]').click();
@@ -97,7 +104,9 @@ test("PDF work report → upload → draft → review → confirm → journal", 
 
   // The canonical journal shows the confirmed entry — read back from a fresh
   // navigation, so this is server state and not the client's memory.
-  await page.goto("/lt/dashboard/journal", { waitUntil: "domcontentloaded" });
+  // The journal opens on the newest day with entries; the entry lives on the
+  // work day the person stated, so the readback opens THAT day (?date=).
+  await page.goto(`/lt/dashboard/journal?date=${workDate}`, { waitUntil: "domcontentloaded" });
   await expect(page.locator('[data-testid="journal-entries"]')).toContainText(
     "patikrinta ir pataisyta ranka",
     { timeout: 30_000 },

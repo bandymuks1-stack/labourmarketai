@@ -34,6 +34,8 @@
  */
 import type { AiTaskType, TaskRouteDecision } from "./task-routing";
 import type { AiEgressGrant } from "./data-egress";
+import { AI_MODEL_CANDIDATES } from "./model-candidates";
+import { pricingForModel } from "./model-pricing";
 import {
   providerEligibleForSensitivity,
   sensitivityForTask,
@@ -157,6 +159,22 @@ const COST_RANK: Record<AiProviderCostClass, number> = {
  * network the operator controls. That is the single property the old config
  * could not express.
  */
+/** Every LLM task, declared for the free API tiers. Declaring a capability
+ *  CONNECTS NOTHING: the egress gate still decides what may leave. */
+const FREE_TIER_LLM_CAPABILITIES: readonly AiTaskType[] = [
+  "structure_future_work",
+  "derive_workforce_requirements",
+  "normalize_work_scope",
+  "normalize_external_profile",
+  "extract_cv",
+  "explain_match",
+  "translate_message",
+  "draft_follow_up",
+  "explain_market_demand",
+  "propose_conversation_intent",
+  "translate_vacancy",
+];
+
 export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
   {
     id: "local",
@@ -190,6 +208,47 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
     // cloud models do, so the runtime keeps its JSON repair pass for them.
     structuredOutput: false,
     priority: 0,
+  },
+  // ── FREE API TIERS (owner order 2026-10-25) ──────────────────────────────
+  // External, `free_tier`: tried after a configured local runtime and BEFORE
+  // anything metered. The egress gate sends them PUBLIC payloads only (no
+  // grant names them) and caps any future grant at LOW_RISK_PROJECT_DATA, so
+  // declaring a capability here connects nothing a person wrote. Order inside
+  // the class: Cloudflare first — the only one whose terms say "does not
+  // train" and "not retained" — then Mistral (EU vendor, strongest Lithuanian
+  // of the three, trains by default), then Groq (US storage, training not
+  // stated). Each is inert without its own flag + key (providers/free-tier.ts).
+  {
+    id: "cloudflare",
+    displayName: "Cloudflare Workers AI (free allocation)",
+    costClass: "free_tier",
+    requiresKey: true,
+    locality: "cloud",
+    capabilities: FREE_TIER_LLM_CAPABILITIES,
+    // `response_format` is undocumented on its compatibility endpoint, so the
+    // JSON contract relies on the prompt hint + repair, like the local runtime.
+    structuredOutput: false,
+    priority: 1,
+  },
+  {
+    id: "mistral",
+    displayName: "Mistral AI (free Experiment plan)",
+    costClass: "free_tier",
+    requiresKey: true,
+    locality: "cloud",
+    capabilities: FREE_TIER_LLM_CAPABILITIES,
+    structuredOutput: true,
+    priority: 2,
+  },
+  {
+    id: "groq",
+    displayName: "Groq (free plan)",
+    costClass: "free_tier",
+    requiresKey: true,
+    locality: "cloud",
+    capabilities: FREE_TIER_LLM_CAPABILITIES,
+    structuredOutput: true,
+    priority: 3,
   },
   {
     id: "gemini",
@@ -322,9 +381,47 @@ export function profileFor(
  * Capability is checked before health so an unconfigured provider that could
  * never serve the task is not reported as a near miss.
  */
+/**
+ * Reference token shape for comparing METERED prices: a short structured task.
+ * Only the ratio between vendors matters, so a fixed shape is honest here.
+ */
+const PRICE_SHAPE = { input: 2_000, output: 600 } as const;
+
+/**
+ * What the provider's model for this tier costs at the reference shape, or
+ * +Infinity when it has no owner-reviewed price (it then sorts last — and the
+ * router would refuse it as `cost_unpriced` anyway).
+ */
+export function tierPriceUsd(providerId: string, modelAlias: string | null | undefined): number {
+  if (!modelAlias) return Number.POSITIVE_INFINITY;
+  const model = AI_MODEL_CANDIDATES[providerId]?.[modelAlias];
+  const price = model ? pricingForModel(model) : null;
+  if (!price) return Number.POSITIVE_INFINITY;
+  return (
+    (price.inputUsdPerMTok * PRICE_SHAPE.input +
+      price.outputUsdPerMTok * PRICE_SHAPE.output) /
+    1_000_000
+  );
+}
+
+/**
+ * Providers that could serve this task, cheapest class first.
+ *
+ * CHEAPEST SUFFICIENT (owner order 2026-10-25). The task policy fixes the
+ * QUALITY TIER (task-routing.ts → alias); this picks the vendor:
+ *   - free_local, then free_tier, then paid (unchanged);
+ *   - inside `paid`, the vendor whose model FOR THAT TIER is cheapest goes
+ *     first — a metered bill is the one place price should decide;
+ *   - inside the free classes `priority` decides, because the vendor charges
+ *     nothing there and the order encodes terms (no-training first) and quota,
+ *     not a list price nobody pays.
+ * Capability is checked before health so an unconfigured provider that could
+ * never serve the task is not reported as a near miss.
+ */
 export function orderedCandidatesFor(
   taskType: AiTaskType,
   profiles: readonly AiProviderProfile[] = AI_PROVIDER_PROFILES,
+  modelAlias?: string | null,
 ): readonly AiProviderProfile[] {
   return profiles
     .filter(
@@ -334,6 +431,9 @@ export function orderedCandidatesFor(
     .sort(
       (a, b) =>
         COST_RANK[a.costClass] - COST_RANK[b.costClass] ||
+        (a.costClass === "paid" && modelAlias
+          ? tierPriceUsd(a.id, modelAlias) - tierPriceUsd(b.id, modelAlias) || 0
+          : 0) ||
         a.priority - b.priority,
     );
 }
@@ -390,7 +490,7 @@ export function resolveProviderChain(
   }
 
   const byId = new Map(states.map((s) => [s.id, s]));
-  const ordered = orderedCandidatesFor(decision.taskType, profiles);
+  const ordered = orderedCandidatesFor(decision.taskType, profiles, decision.modelAlias);
   const sensitivity = sensitivityForTask(decision.taskType);
   const skipped: SkippedCandidate[] = [];
   const eligible: AiProviderProfile[] = [];

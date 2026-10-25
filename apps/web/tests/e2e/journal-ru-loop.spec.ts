@@ -69,7 +69,10 @@ for (const theme of ["dark", "light"] as Theme[]) {
 
       // ── Worker (RU locale): log in, write the entry, see detection ────
       const worker = await loginAs(browser, WORKER, theme, "ru");
-      await worker.goto("/ru/dashboard/journal");
+      // The explicit organize step lives in the FULL composer, behind the
+      // "detaliau" door (?compose=full) since #1724; the compact recorder
+      // is the default first screen.
+      await worker.goto("/ru/dashboard/journal?compose=full#journal-composer");
       const textarea = worker.locator("#journal-composer textarea");
       await expect(textarea).toBeVisible({ timeout: 15_000 });
       await textarea.fill(entryText);

@@ -111,8 +111,72 @@ const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|ho
 // site after "objekte X" / "statyboje X" / "site X" / "на объекте в X" —
 // the locative forms only: "Statyba" inside a company name is a NAME, not
 // a place word (the context rules below read it)
+//
+// THE WORD AFTER A PLACE WORD IS NOT ALWAYS A PLACE (local UX review
+// 2026-10-24, row 8.2): "on site for 6 hours" filled the site with "for",
+// "… auf der Baustelle gemauert" with "gemauert" — a function word and a
+// verb, saved unless the person noticed. So the place word may be followed
+// by one preposition ("auf der Baustelle in Berlin", "на объекте в Kaunas",
+// "na budowie w Gdańsku"), and the captured word must pass `isSiteWord`: not
+// a function word, not a time word, not a number, not a verb form.
+// `(?<!\p{L})` keeps "website" from reading as "site".
 const SITE_RE =
-  /(?:objekt\w*|statybo(?:je|se)|site|на\s+объекте(?:\s+в)?|op\s+de\s+locatie|auf\s+der\s+baustelle)\s+([A-Za-zÀ-ÿА-Яа-яĀ-ž][\wÀ-ÿА-Яа-яĀ-ž-]{1,40})/iu;
+  /(?<!\p{L})(?:objekt\p{L}*|statybo(?:je|se)|site|на\s+объекте|op\s+de\s+locatie|op\s+de\s+bouwplaats|auf\s+der\s+baustelle|na\s+budowie|na\s+obiekcie)(?:\s+(?:in|at|в|w|we|im|in\s+der|bei|op|te|ant|prie))?\s+(\p{L}[\p{L}\p{N}'’-]{1,40})/giu;
+/** Words that follow a place word in ordinary work sentences and are never
+ *  the place itself: prepositions, articles, conjunctions, day words, the
+ *  hours units and generic quantifiers, in the six active languages. */
+const SITE_STOP_WORDS: ReadonlySet<string> = new Set([
+  // en
+  "for", "at", "in", "on", "the", "a", "an", "with", "from", "to", "until", "till", "and", "or",
+  "today", "yesterday", "all", "whole", "day", "morning", "afternoon", "evening", "hours", "hour",
+  "doing", "working", "again", "too", "also",
+  // lt
+  "ir", "su", "nuo", "iki", "per", "visą", "visa", "šiandien", "vakar", "valandas", "valandų",
+  "val", "dieną", "rytą", "vakare", "dar", "taip", "pat",
+  // ru
+  "и", "с", "до", "для", "весь", "всю", "сегодня", "вчера", "часов", "часа", "час", "день",
+  "утром", "вечером", "тоже", "ещё", "еще",
+  // nl
+  "en", "met", "van", "tot", "voor", "de", "het", "een", "vandaag", "gisteren", "uur", "uren",
+  "hele", "dag", "ook",
+  // de
+  "und", "mit", "von", "bis", "für", "den", "die", "das", "der", "ein", "eine", "heute",
+  "gestern", "stunden", "stunde", "ganzen", "tag", "auch",
+  // pl
+  "i", "z", "od", "do", "przez", "dla", "dzisiaj", "dziś", "wczoraj", "godzin", "godziny",
+  "cały", "dzień", "też", "także",
+]);
+/** A past-tense / participle shape (LT -au, EN -ed/-ing, DE/NL ge…t/en,
+ *  RU -л/-ла/-ли, PL -łem/-łam/-ł…) — a verb, never a place. A lower-case
+ *  LT word ending in -au is a first-person verb ("mūrijau", "dirbau"), not a
+ *  locative place (-e, -oje, -uose, -yje). */
+const SITE_VERB_SHAPE_RE =
+  /^(?:\p{L}{2,}(?:au|ome|ėme)|[a-z]{2,}(?:ed|ing)|ge\p{L}{3,}(?:t|en)|\p{L}{2,}(?:ал|ала|али|ил|ила|или|ял|яла|яли|ел|ела|ели)|\p{L}{2,}(?:łem|łam|łeś|łaś|ł|ła|li|ły))$/iu;
+
+/** True when the word after a place word can be a site name. A capitalised
+ *  word ("Berlin", "Roterdame", "Kaunas") always can; a lower-case one only
+ *  when it is no function word, time word or verb form. */
+function isSiteWord(word: string): boolean {
+  const w = word.toLowerCase();
+  if (SITE_STOP_WORDS.has(w)) return false;
+  // A word that NAMES WORK is the work, not the place — German capitalises
+  // every noun, so "auf der Baustelle Fliesen verlegt" must not read
+  // "Fliesen" as the site. Exact / synonym tiers only: a fuzzy guess never
+  // takes a real place name away.
+  if (recognizeSkills(word, 1).some((s) => s.via !== "fuzzy")) return false;
+  if (/^\p{Lu}/u.test(word)) return true;
+  if (SITE_VERB_SHAPE_RE.test(word)) return false;
+  return w.length >= 3;
+}
+
+/** The first place-word reading whose word passes `isSiteWord`. */
+function siteAfterPlaceWord(raw: string): string | null {
+  for (const m of raw.matchAll(SITE_RE)) {
+    const word = trimName(m[1] ?? "");
+    if (word && isSiteWord(word)) return word;
+  }
+  return null;
+}
 // ── the CONTEXT slot (issue #1689, re-audit line 0) ────────────────────────
 // The entry carries ONE free context — `site_name`, "Objektas / vieta": the
 // object, place, project or client the work was for. The owner's own
@@ -247,8 +311,11 @@ export function extractWorkLog(
 
   // ── site ──────────────────────────────────────────────────────────────────
   let site: string | null = null;
-  const siteM = raw.match(SITE_RE) ?? raw.match(SITE_PLACE_NOUN_RE) ?? raw.match(SITE_AFTER_WORK_VERB_RE);
-  if (siteM) site = trimName(siteM[1]!) || null;
+  site = siteAfterPlaceWord(raw);
+  if (site === null) {
+    const siteM = raw.match(SITE_PLACE_NOUN_RE) ?? raw.match(SITE_AFTER_WORK_VERB_RE);
+    if (siteM) site = trimName(siteM[1]!) || null;
+  }
 
   // ── task (best effort, display only) ──────────────────────────────────────
   // Trailing clause after the last comma, when it looks like an activity
