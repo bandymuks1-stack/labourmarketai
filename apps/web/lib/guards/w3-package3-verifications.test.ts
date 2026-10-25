@@ -21,9 +21,12 @@ const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
 describe("row 20 — the command finder survives at the layout level", () => {
-  it("header-search mounts CommandFinder and the dashboard layout mounts header-search", () => {
+  it("header-search mounts CommandFinder and the ONE dashboard header mounts header-search", () => {
     expect(read("components/app/header-search.tsx")).toMatch(/<CommandFinder\s*\/?>/);
-    expect(read("app/[locale]/dashboard/layout.tsx")).toMatch(/HeaderSearch|header-search/);
+    // Every dashboard chrome mode renders the one header (2026-10-25), which
+    // carries the search on every route and width.
+    expect(read("components/app/conversation/chat/conversation-header.tsx")).toMatch(/<HeaderSearch/);
+    expect(read("components/app/dashboard-chrome.tsx")).toMatch(/<ConversationHeader/);
   });
 });
 

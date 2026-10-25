@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { createTranslator } from "next-intl";
 import { activeLocales } from "@/lib/i18n/config";
 
 /**
@@ -92,13 +93,32 @@ describe("the denominator is measured, never assumed", () => {
     expect(c).toMatch(/utilisation\.denominatorNote/);
     expect(c).toMatch(/utilisation\.committedDays/);
     for (const loc of activeLocales) {
-      const u = JSON.parse(read(`messages/${loc}.json`)).workforcePlanning?.utilisation;
+      const messages = JSON.parse(read(`messages/${loc}.json`));
+      const u = messages.workforcePlanning?.utilisation;
       expect(u?.committedDays, `${loc}.committedDays`).toBeTruthy();
-      // Both halves of the fraction, always — never a bare percentage.
-      expect(u.committedDays, `${loc} must render both numerator and denominator`).toContain(
-        "{committed}",
-      );
-      expect(u.committedDays, loc).toContain("{counted}");
+      // Both halves of the fraction are ARGUMENTS of the message — a plain
+      // `{counted}` or an ICU `{counted, plural, …}` (the noun agrees with
+      // the count since 2026-10-25), never a hard-coded number.
+      expect(u.committedDays, `${loc} must carry the numerator`).toMatch(/\{committed[,}]/);
+      expect(u.committedDays, `${loc} must carry the denominator`).toMatch(/\{counted[,}]/);
+      // …and the RENDERED line shows both, for singular and plural counts
+      // alike — never a bare percentage, never an unrendered placeholder.
+      const t = createTranslator({ locale: loc, messages });
+      for (const [committed, counted] of [
+        [1, 1],
+        [17, 43],
+        [3, 21],
+      ] as const) {
+        const line = t("workforcePlanning.utilisation.committedDays" as never, {
+          committed,
+          counted,
+          workers: 2,
+          days: 28,
+        } as never);
+        expect(line, `${loc} (${committed}/${counted}): ${line}`).toContain(String(committed));
+        expect(line, `${loc} (${committed}/${counted}): ${line}`).toContain(String(counted));
+        expect(line, `${loc}: ${line}`).not.toMatch(/[{}%]/);
+      }
       expect(u.denominatorNote, `${loc}.denominatorNote`).toBeTruthy();
     }
   });

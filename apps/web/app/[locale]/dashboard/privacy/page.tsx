@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ContactDisclosureRequests } from "@/components/app/contact-disclosure-requests";
@@ -552,12 +553,7 @@ export default async function PrivacyPage({
         </section>
       )}
 
-      <Link
-        href="/dashboard/account"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
-      >
-        ← {t("backToAccount")}
-      </Link>
+      <PageBack href="/dashboard/account">{t("backToAccount")}</PageBack>
     </div>
   );
 }

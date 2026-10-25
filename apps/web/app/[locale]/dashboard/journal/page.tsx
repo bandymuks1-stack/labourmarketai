@@ -59,8 +59,12 @@ import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-histo
 import {
   deriveReviewResult,
   deriveReviewTimeline,
+  isSelfConfirmedOnly,
 } from "@/lib/journal/review-status";
-import { EvidenceDecisionTimeline } from "@/components/app/evidence-decision-timeline";
+import {
+  CorrectionProvenanceLine,
+  EvidenceDecisionTimeline,
+} from "@/components/app/evidence-decision-timeline";
 import { EntryReviewPanel } from "@/components/app/entry-review-panel";
 import { readEntryReviewStates } from "@/lib/journal/counterparty-review";
 import {
@@ -759,6 +763,13 @@ export default async function JournalPage({
   const entries: JournalEntryRow[] | null = entriesRead.ok
     ? entriesRead.entries
     : null;
+  // What each listed correction ANSWERED (walk work-verification 2026-10-25):
+  // the decided original is not a card (counted once), so its decision and
+  // note reach the worker only through its correction's card. Provenance
+  // from the same read — no second query, no second count.
+  const correctionProvenance = entriesRead.ok
+    ? entriesRead.correctionProvenance
+    : {};
 
   // ── Client review state (EVID-2 slice 2) ─────────────────────────────────
   // Per entry: submitted? accepted / correction requested / disputed? and which
@@ -1076,6 +1087,9 @@ export default async function JournalPage({
           context: e.engagement_context_id
             ? (contextFacts.get(e.engagement_context_id) ?? null)
             : null,
+          // The signed-in person IS the subject: their own approval is
+          // `self_confirmed`, never "manager confirmed" (review-status.ts).
+          selfConfirmedOnly: isSelfConfirmedOnly(e.journal_entry_confirmations, user.id),
         });
         const org = e.engagement_context_id
           ? engagementChips.get(e.engagement_context_id)?.label
@@ -1840,6 +1854,15 @@ export default async function JournalPage({
                         context: e.engagement_context_id
                           ? (contextFacts.get(e.engagement_context_id) ?? null)
                           : null,
+                        // A SELF-approval (the signed-in subject approved their
+                        // own entry) reads `self_confirmed` — never "Vadovo
+                        // patvirtinta". The reader selects `confirmer_id`
+                        // (JOURNAL_ENTRY_CONFIRMATIONS_EMBED), so this is
+                        // answerable here.
+                        selfConfirmedOnly: isSelfConfirmedOnly(
+                          e.journal_entry_confirmations,
+                          user.id,
+                        ),
                       });
                       const explainVerification = !explainedStates.has(verification.state);
                       explainedStates.add(verification.state);
@@ -1881,8 +1904,20 @@ export default async function JournalPage({
                       // be able to answer it. Before, only the client-review
                       // phase offered the correction control, so this request
                       // was a dead end (walk 2026-10-09).
+                      // A REJECTION is answerable the same way (walk-spec
+                      // 2026-10-25): it was a dead end — no edit, no delete,
+                      // no correction. The correction is a NEW entry
+                      // (`correction_of`); the rejected one stays as history
+                      // with its decision (journal_entry_supersede_v2 keeps a
+                      // decided original untouched). The original is then no
+                      // card of its own (counted once); its decision and note
+                      // are read on the correction's card
+                      // (`correctionProvenance` → CorrectionProvenanceLine and
+                      // the timeline's "corrected-from" step).
+                      const latestEmployerDecision = timeline.at(-1)?.result;
                       const employerAskedChanges =
-                        timeline.at(-1)?.result === "changes_requested" &&
+                        (latestEmployerDecision === "changes_requested" ||
+                          latestEmployerDecision === "rejected") &&
                         !correctedOriginalIds.has(e.id) &&
                         reviewPhase !== "correction_requested" &&
                         reviewPhase !== "disputed";
@@ -1958,6 +1993,15 @@ export default async function JournalPage({
                             verification.state,
                           )}
                           standingSolid={spineNodeSolid(verification.state)}
+                          provenanceSlot={
+                            correctionProvenance[e.id] ? (
+                              <CorrectionProvenanceLine
+                                key="corrected-from"
+                                entryId={e.id}
+                                steps={correctionProvenance[e.id]}
+                              />
+                            ) : undefined
+                          }
                           needsAttention={
                             employerAskedChanges ||
                             (!!reviewState && reviewPhase !== "none")
@@ -2029,6 +2073,7 @@ export default async function JournalPage({
                               <EvidenceDecisionTimeline
                                 createdAt={e.created_at}
                                 events={timeline}
+                                correctedFrom={correctionProvenance[e.id]}
                                 awaiting={
                                   verification.state !== "verifier_available" &&
                                   verification.state !== "verifier_not_identified"

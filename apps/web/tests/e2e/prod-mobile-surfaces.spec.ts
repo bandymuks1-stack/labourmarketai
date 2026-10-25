@@ -274,3 +274,76 @@ test("M-5. hydration claims the server HTML once: no #418, no hidden S:n copy", 
   ];
   expect(failures, `hydration failed:\n${failures.join("\n")}`).toEqual([]);
 });
+
+// ── One navigation system (#2775, #2781, #2783/#2787) in production ─────────
+// Owner order 2026-10-25: no chaotic horizontal menus, one header, clear
+// names, the light 3D area switcher. Measured, not eyeballed: no element in
+// the header or the page that SCROLLS SIDEWAYS as a navigation strip, no
+// overlapping header controls, the core nav labels visible from 1280 px, and
+// the area switcher's cards are real links.
+async function navReading(page: Page, where: string): Promise<{ strips: string[]; overlaps: number; labels: string[] }> {
+  const r = await page.evaluate(() => {
+    const strips = [...document.querySelectorAll("header *, main *")]
+      .filter((e) => {
+        const cs = getComputedStyle(e);
+        const h = e.getBoundingClientRect().height;
+        return (cs.overflowX === "auto" || cs.overflowX === "scroll") && e.scrollWidth > e.clientWidth + 1 && h > 0 && h < 120;
+      })
+      .map((e) => e.getAttribute("data-testid") || e.tagName.toLowerCase())
+      .slice(0, 6);
+    const header = document.querySelector("header");
+    const els = header ? [...header.querySelectorAll("a,button")].filter((e) => e.getBoundingClientRect().width > 0) : [];
+    let overlaps = 0;
+    for (let i = 0; i < els.length; i++)
+      for (let j = i + 1; j < els.length; j++) {
+        if (els[i].contains(els[j]) || els[j].contains(els[i])) continue;
+        const a = els[i].getBoundingClientRect();
+        const b = els[j].getBoundingClientRect();
+        if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) overlaps++;
+      }
+    const labels = header
+      ? [...header.querySelectorAll("nav a")].filter((a) => a.getBoundingClientRect().width > 0).map((a) => (a as HTMLElement).innerText.trim()).filter(Boolean)
+      : [];
+    return { strips, overlaps, labels };
+  });
+  console.info(`[nav] ${where}: strips=${JSON.stringify(r.strips)} overlaps=${r.overlaps} labels=${JSON.stringify(r.labels)}`);
+  return r;
+}
+
+test("M-6. one navigation system: no sideways strips, no header overlap, labels at 1280, the area switcher links", async ({ browser }) => {
+  test.setTimeout(300_000);
+  for (const [slot, paths] of [
+    ["worker", ["/lt/dashboard", "/lt/dashboard/journal"]],
+    ["owner", ["/lt/dashboard", "/lt/dashboard/projects", "/lt/dashboard/company"]],
+  ] as const) {
+    for (const vp of [PHONE, { width: 1280, height: 900 }]) {
+      const ctx = await browser.newContext({ storageState: state(slot), locale: "lt-LT", viewport: vp, isMobile: vp.width < 768, hasTouch: vp.width < 768 });
+      const page = await ctx.newPage();
+      if (slot === "owner") {
+        await page.goto("/lt/dashboard");
+        await settle(page);
+        await workspace(page, ALFA);
+      }
+      for (const path of paths) {
+        await page.goto(path);
+        await settle(page);
+        const r = await navReading(page, `${slot} ${path} @${vp.width}`);
+        expect(r.strips, `${path} @${vp.width}: no sideways-scrolling navigation strip`).toEqual([]);
+        expect(r.overlaps, `${path} @${vp.width}: no overlapping header controls`).toBe(0);
+        if (vp.width >= 1280) expect(r.labels.length, `${path} @1280: the core nav items carry visible names`).toBeGreaterThanOrEqual(4);
+      }
+      // The area switcher on the home: present, and every card is a real link.
+      await page.goto("/lt/dashboard");
+      await settle(page);
+      const sw = page.getByRole("main").locator('[aria-roledescription="carousel"]').first();
+      if (await sw.count()) {
+        const cards = await sw.locator("a[href]").count();
+        console.info(`[nav] ${slot} home @${vp.width}: area switcher cards (links)=${cards}`);
+        expect(cards, "the area switcher's cards are links").toBeGreaterThanOrEqual(3);
+      } else {
+        console.info(`[nav] ${slot} home @${vp.width}: no area switcher on this home`);
+      }
+      await ctx.close();
+    }
+  }
+});

@@ -672,6 +672,12 @@ export const SCOPED_OWNER_WAIVERS = [
       //         phone row beside the search button. No route, projection,
       //         auth, schema, data-source or member-field change.
       2467,
+      // OWNER APPROVAL 2026-10-25, verbatim: "Patvirtinu PR #2771 įtraukimą į `public-acquisition-route-jobs` išimties `pullRequests` sąrašą. Pridėk tik `#2771`, nekeisk kitų išimties sąlygų ir nesilpnink saugiklių."
+      // #2771 — one <main> landmark: the /jobs and /jobs/[id] page wrappers
+      // become <div> inside the marketing layout's <main id="main-content">
+      // (found by the ai-off-honesty production walk). Markup only; the
+      // axiom, codes, surfaces, files, expiry and subset rule are unchanged.
+      2771,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.

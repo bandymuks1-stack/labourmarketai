@@ -415,7 +415,17 @@ async function resetLink(browser: Browser): Promise<void> {
     if (await confirmed.isVisible({ timeout: 10_000 }).catch(() => false)) {
       await confirmed.getByTestId("roster-link-withdraw-open").click();
       await confirmed.getByTestId("roster-link-withdraw-confirm").click();
-      await expect(confirmed.getByTestId("roster-link-withdrawn")).toBeVisible({ timeout: 30_000 });
+      // Run 40217117255: the withdraw saved (respond_to_roster_link_v1 → 200)
+      // and the re-render removed the whole confirmed block, so the
+      // "withdrawn" line inside it never stayed. Either answer is the answer.
+      await expect
+        .poll(
+          async () =>
+            (await confirmed.getByTestId("roster-link-withdrawn").isVisible().catch(() => false)) ||
+            (await confirmed.count()) === 0,
+          { timeout: 30_000, intervals: [1_000] },
+        )
+        .toBe(true);
     }
   } finally {
     await ctx.close();
@@ -452,9 +462,25 @@ test("H-2 (1.15). Alfa offers the roster record to its employee", async ({ brows
   linkTouched = true;
   const offered = row.getByTestId(`roster-link-offered-${personId}`);
   const error = row.getByTestId(`roster-link-error-${personId}`);
-  const outcome = await expect(offered.or(error))
-    .toBeVisible({ timeout: 30_000 })
-    .then(() => "shown")
+  // Run 40211337581: the action posted (200) and the offer WAS saved (edge
+  // log PATCH organization_people … link_state=eq.unlinked → 200), but the
+  // roster re-rendered straight into the row's `link_proposed` state, which
+  // has no form, so the form's own "offered" line unmounted with it. The
+  // row's state IS the answer; the form's line is the other.
+  const rowState = row.locator("[data-link-state]").first();
+  const outcome = await expect
+    .poll(
+      async () => {
+        if (await error.isVisible().catch(() => false)) return "error";
+        if (await offered.isVisible().catch(() => false)) return "shown";
+        const st = await rowState.getAttribute("data-link-state").catch(() => null);
+        return st === "link_proposed" ? "shown" : "waiting";
+      },
+      { timeout: 30_000, intervals: [1_000] },
+    )
+    .not.toBe("waiting")
+    .then(() => (error.isVisible().catch(() => false)))
+    .then((isError) => (isError ? "error shown" : "shown"))
     .catch(() => "neither shown");
   const posted = await actionPost;
   const stillThere = (await select.count()) ? await select.inputValue().catch(() => "?") : "form gone";

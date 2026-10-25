@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -74,12 +74,7 @@ export default async function AdminUserPage({
       data-testid="admin-user-detail"
     >
       <header className="flex flex-col gap-1">
-        <Link
-          href="/dashboard/admin"
-          className="self-start text-xs text-text-secondary hover:text-text-primary"
-        >
-          ← {t("back")}
-        </Link>
+        <PageBack href="/dashboard/admin">{t("back")}</PageBack>
         <PageTitle>{profile.full_name ?? profile.email ?? id}</PageTitle>
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {profile.active_role ?? "—"} ·{" "}
