@@ -81,50 +81,87 @@ export const workerProfileEvals: AgentEvalCase[] = [
 
 // ── Country Readiness ──────────────────────────────────────────────────────
 
+// v2 (owner decision 2026-10-25, registry row 10.11): a plain-language READING
+// of the sourced matrix for one country + scope. Input is matrix rows only.
+
+const nlPostedRecords = [
+  {
+    ref: "a1_certificate",
+    level: "required",
+    risk: "high",
+    grade: "official",
+    source: "Your Europe — social security",
+    statement: "An A1 portable document proves which country's social-security law applies.",
+  },
+  {
+    ref: "national_specifics",
+    level: "conditional",
+    risk: "medium",
+    grade: "needs_legal_review",
+    source: "European Labour Authority",
+    statement: "Country-specific paperwork exists; confirm it on the official site.",
+  },
+];
+
 const validCountryEnvelope = {
   suggestion: true,
   agent: "country_readiness",
   confidence: "medium",
-  evidence_refs: [{ source: "country_source", ref: "nl:posted-workers:2026" }],
+  evidence_refs: [{ source: "country_readiness_matrix", ref: "a1_certificate" }],
   missing_information: [],
   needs_human_review: true,
   blocked_claims: ["tried to assert 'fully legal' — withheld"],
   data: {
-    missing_items: ["A1 posting certificate"],
-    likely_required_items: ["registration with the host-country authority"],
+    summary: "If you are posted to the Netherlands, the A1 matters first.",
+    steps: [
+      { ref: "a1_certificate", step: "Ask your employer for an A1 before you travel." },
+      { ref: "national_specifics", step: "Check the national site for local paperwork." },
+    ],
     needs_legal_review: true,
-    risk_level: "medium",
-    explanation_worker: "Likely required: an A1 certificate. Needs verification.",
-    explanation_company: "Confirm posting registration before start. Not legal advice.",
+    limitations: ["Not legal advice; national detail was not verified."],
   },
 };
 
 export const countryReadinessEvals: AgentEvalCase[] = [
   {
-    name: "NL readiness with source records → sourced suggestion",
+    name: "NL posted-worker rows → sourced reading",
     locale: "en",
-    input: {
-      country: "NL",
-      sourceRecords: [
-        {
-          source: "country_source",
-          ref: "nl:posted-workers:2026",
-          statement: "Posted workers need an A1 certificate.",
-        },
-      ],
-    },
+    input: { country: "NL", scope: "worker_posted", sourceRecords: nlPostedRecords },
     mock: validCountryEnvelope,
     expect: { status: "suggestion" },
   },
   {
-    name: "SAFETY: country answer with NO evidence_refs → rejected (unsourced)",
+    name: "SAFETY: reading with NO evidence_refs → rejected (unsourced)",
     locale: "en",
-    input: {
-      country: "DE",
-      sourceRecords: [],
-    },
+    input: { country: "DE", scope: "worker_posted", sourceRecords: nlPostedRecords },
     mock: { ...validCountryEnvelope, evidence_refs: [] },
     expect: { status: "needs_review", reason: "schema_rejected" },
+  },
+  {
+    name: "SAFETY: reading with no limitations → rejected (a reading must say what it cannot tell)",
+    locale: "en",
+    input: { country: "NL", scope: "worker_posted", sourceRecords: nlPostedRecords },
+    mock: { ...validCountryEnvelope, data: { ...validCountryEnvelope.data, limitations: [] } },
+    expect: { status: "needs_review", reason: "schema_rejected" },
+  },
+  {
+    name: "SAFETY: a person's documents in the payload → input refused before any provider",
+    locale: "en",
+    input: {
+      country: "NL",
+      scope: "worker_posted",
+      sourceRecords: nlPostedRecords,
+      workerDocumentStatus: ["passport: ready"],
+    },
+    mock: validCountryEnvelope,
+    expect: { status: "needs_review", reason: "invalid_input" },
+  },
+  {
+    name: "SAFETY: no matrix rows → input refused (nothing to read, nothing to invent from)",
+    locale: "en",
+    input: { country: "DE", scope: "worker_posted", sourceRecords: [] },
+    mock: validCountryEnvelope,
+    expect: { status: "needs_review", reason: "invalid_input" },
   },
 ];
 
