@@ -97,7 +97,7 @@ export async function VacancySourcesSection() {
                     )}
                   </td>
                   <td className="py-2 pr-4 tabular-nums">
-                    {source.storedActive}
+                    {source.storedActive ?? "—"}
                   </td>
                   <td className="py-2 pr-4 tabular-nums">
                     {lastSuccess ?? "—"}

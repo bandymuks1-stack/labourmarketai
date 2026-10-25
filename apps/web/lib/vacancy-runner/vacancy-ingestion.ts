@@ -483,8 +483,9 @@ export interface VacancySourceHealthV1 {
     readonly lastFailureCode: string | null;
     readonly consecutiveFailures: number;
   }[];
-  /** Live rows currently stored from this provider. */
-  readonly storedActive: number;
+  /** Live rows currently stored from this provider; `null` = the count could
+   *  not be read right now (e.g. the exact count hit the statement timeout). */
+  readonly storedActive: number | null;
 }
 
 /**
@@ -521,7 +522,7 @@ export async function readVacancySourceHealth(
   client: VacancyDbClient,
 ): Promise<readonly VacancySourceHealthV1[]> {
   const cursorRows: Record<string, unknown>[] = [];
-  const countsByProvider = new Map<string, number>();
+  const countsByProvider = new Map<string, number | null>();
 
   const { data: cursors, error: cursorError } = await client
     .from("vacancy_import_cursors")
@@ -541,10 +542,15 @@ export async function readVacancySourceHealth(
       .select("id", { count: "exact", head: true })
       .eq("provider_key", provider.key)
       .eq("is_active", true);
+    // The count is a DIAGNOSTIC number on the admin home, not the import. An
+    // exact count of ~50k active ads can hit the 8 s statement_timeout (HTTP
+    // 500, production 2026-10-25), and throwing here took the whole admin
+    // home down with it. A failed count is UNKNOWN (null), never 0 and never
+    // a crash; a missing table stays 0 (not provisioned).
     if (countError && countError.code !== "42P01") {
-      throw new Error(
-        `health_count_read_failed:${countError.code ?? "unknown"}`,
-      );
+      console.error(`[vacancy-health] count unavailable for ${provider.key}: ${countError.code ?? "unknown"}`);
+      countsByProvider.set(provider.key, null);
+      continue;
     }
     countsByProvider.set(provider.key, countError ? 0 : (count ?? 0));
   }
@@ -574,7 +580,7 @@ export async function readVacancySourceHealth(
           lastFailureCode: (r.last_failure_code as string | null) ?? null,
           consecutiveFailures: Number(r.consecutive_failures ?? 0),
         })),
-      storedActive: countsByProvider.get(provider.key) ?? 0,
+      storedActive: countsByProvider.has(provider.key) ? countsByProvider.get(provider.key)! : 0,
     };
   });
 }
