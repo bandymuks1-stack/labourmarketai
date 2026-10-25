@@ -6,7 +6,7 @@ import { getEmployerWorkerAvailability, unavailabilityOverlaps } from "@/lib/pla
 import { deriveProjectReadinessRatio } from "@/lib/projects/operations-centre-model";
 import { getProjectOperations } from "@/lib/projects/operations";
 import { loadProjectsForResult } from "@/lib/projects/project-workspace";
-import { DEFAULT_READINESS_ITEM_KEYS } from "@/lib/projects/readiness-items";
+import { suggestedReadinessItemKeys } from "@/lib/projects/readiness-items";
 import { OPEN_WORK_TASK_STATUSES } from "@/lib/tasks/task-model";
 import { listProjectTasks } from "@/lib/tasks/tasks";
 
@@ -130,7 +130,11 @@ export async function loadProjectMoveWhatIfForChat(input: {
         headcountAfter: alreadyThere ? to.workers.length : to.workers.length + 1,
         startDate: to.project.startDate,
         endDate: to.project.endDate,
-        readinessTotal: DEFAULT_READINESS_ITEM_KEYS.length,
+        // How many rows the target project would SUGGEST to agree — not a
+        // universal list; A1 / posting only when the move changes country.
+        readinessTotal: suggestedReadinessItemKeys({
+          crossBorder: (from.project.country ?? null) !== (to.project.country ?? null),
+        }).length,
         unavailabilitySpans,
       },
       countryChanges: (from.project.country ?? null) !== (to.project.country ?? null),

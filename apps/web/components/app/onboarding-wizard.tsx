@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { type ReactNode, useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
@@ -266,6 +266,16 @@ export function OnboardingWizard({
   const [educationTypeSlug, setEducationTypeSlug] = useState<string>("other");
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // A field that failed validation is named AT the field (aria-invalid +
+  // aria-describedby + the message right under it) and focused — the error
+  // line above the submit button sat ~700 px below the country field on a
+  // phone, with the field itself unmarked (UX review 2026-10-24, 1.4).
+  const [fieldError, setFieldError] = useState<"name" | "country" | null>(null);
+  const fieldIds = useId();
+  const nameInputId = `${fieldIds}-name`;
+  const nameErrorId = `${fieldIds}-name-error`;
+  const countryButtonId = `${fieldIds}-country`;
+  const countryErrorId = `${fieldIds}-country-error`;
 
   // Activation funnel (P0-A): the wizard mounting = onboarding started.
   const startedRef = useRef(false);
@@ -297,12 +307,17 @@ export function OnboardingWizard({
   function submit() {
     if (roles.size === 0) return;
     setError(null);
+    setFieldError(null);
     if (!displayName.trim()) {
-      setError(t("error_name_required"));
+      setFieldError("name");
+      document.getElementById(nameInputId)?.focus();
       return;
     }
     if (!country) {
-      setError(t("error_country_required"));
+      setFieldError("country");
+      const toggle = document.getElementById(countryButtonId);
+      toggle?.scrollIntoView({ block: "center" });
+      toggle?.focus({ preventScroll: true });
       return;
     }
     // NO profession check. A person may not be working right now, may hold
@@ -623,12 +638,25 @@ export function OnboardingWizard({
       <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
         {t("display_name_label")}
         <input
+          id={nameInputId}
           name="display_name"
           value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
+          onChange={(e) => {
+            setDisplayName(e.target.value);
+            if (fieldError === "name") setFieldError(null);
+          }}
           required
-          className={inputCls}
+          autoComplete="name"
+          aria-invalid={fieldError === "name" ? true : undefined}
+          aria-describedby={fieldError === "name" ? nameErrorId : undefined}
+          className={fieldError === "name" ? inputCls.replace("border-ink-500", "border-state-danger") : inputCls}
+          data-testid="onboarding-display-name"
         />
+        {fieldError === "name" ? (
+          <span id={nameErrorId} role="alert" className="text-xs text-state-danger" data-testid="onboarding-name-error">
+            {t("error_name_required")}
+          </span>
+        ) : null}
       </label>
 
       {/* SEARCHABLE (owner direction 2026-09-27). The list is every ISO
@@ -654,7 +682,10 @@ export function OnboardingWizard({
         <DarkListbox
           name="country"
           value={country}
-          onChange={setCountry}
+          onChange={(next) => {
+            setCountry(next);
+            if (fieldError === "country") setFieldError(null);
+          }}
           options={countryOptions}
           placeholder={t("country_placeholder")}
           ariaLabel={t("country_label")}
@@ -663,7 +694,15 @@ export function OnboardingWizard({
           searchPlaceholder={t("country_search_placeholder")}
           searchEmptyLabel={t("country_search_empty")}
           testId="onboarding-country"
+          buttonId={countryButtonId}
+          invalid={fieldError === "country"}
+          describedBy={fieldError === "country" ? countryErrorId : undefined}
         />
+        {fieldError === "country" ? (
+          <span id={countryErrorId} role="alert" className="text-xs text-state-danger" data-testid="onboarding-country-error">
+            {t("error_country_required")}
+          </span>
+        ) : null}
       </div>
 
       {/* WHAT WORK THIS PERSON DOES — asked here because this is the moment
