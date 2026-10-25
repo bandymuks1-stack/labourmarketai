@@ -506,7 +506,7 @@
     "pageTitle": "Spraakinvoer",
     "pageIntro": "Vertel over je werkdag — je controleert en corrigeert de tekst voordat er iets wordt opgeslagen.",
     "backToJournal": "Terug naar dagboek",
-    "unavailable": "Spraaktranscriptie is nog niet ingesteld. De transcriptieserver is nog niet gekoppeld door de platformeigenaar — opnemen is tot die tijd uitgeschakeld. Je kunt je invoer altijd als tekst schrijven.",
+    "unavailable": "Spraaktranscriptie is nog niet beschikbaar — opnemen is voorlopig uitgeschakeld. Je kunt je invoer altijd als tekst schrijven.",
     "disclosureTitle": "Voordat je opneemt",
     "disclosureProcessing": "Je opname wordt naar een door LabourMarket.ai beheerde verwerkingsserver gestuurd om in tekst te worden omgezet. Er wordt geen spraakdienst van derden gebruikt.",
     "disclosureWhy": "De opname wordt alleen gebruikt om de onderstaande tekst te maken — nergens anders voor.",

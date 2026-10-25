@@ -506,7 +506,7 @@
     "pageTitle": "Spracheintrag",
     "pageIntro": "Erzählen Sie von Ihrem Arbeitstag — Sie prüfen und korrigieren den Text, bevor etwas gespeichert wird.",
     "backToJournal": "Zurück zum Tagebuch",
-    "unavailable": "Die Sprachtranskription ist noch nicht eingerichtet. Der Transkriptionsserver wurde vom Plattforminhaber noch nicht verbunden — die Aufnahme ist bis dahin deaktiviert. Sie können Ihren Eintrag jederzeit als Text schreiben.",
+    "unavailable": "Die Sprachtranskription ist noch nicht verfügbar — die Aufnahme ist vorerst deaktiviert. Sie können Ihren Eintrag jederzeit als Text schreiben.",
     "disclosureTitle": "Vor der Aufnahme",
     "disclosureProcessing": "Ihre Aufnahme wird an einen von LabourMarket.ai kontrollierten Verarbeitungsserver gesendet, um in Text umgewandelt zu werden. Es wird kein Sprachdienst von Drittanbietern genutzt.",
     "disclosureWhy": "Sie wird nur zur Erstellung des folgenden Textes verwendet — für nichts anderes.",

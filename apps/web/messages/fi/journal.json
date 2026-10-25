@@ -290,7 +290,7 @@
     "pageTitle": "Puhesyöttö",
     "pageIntro": "Kerro työpäivästäsi — tarkistat ja korjaat tekstin ennen kuin mitään tallennetaan.",
     "backToJournal": "Takaisin päiväkirjaan",
-    "unavailable": "Puheen transkriptiota ei ole vielä määritetty. Alustan omistaja ei ole vielä yhdistänyt transkriptiopalvelinta — tallennus on siihen asti pois käytöstä. Voit aina kirjoittaa merkinnän tekstinä.",
+    "unavailable": "Puheen transkriptio ei ole vielä käytettävissä — tallennus on toistaiseksi pois käytöstä. Voit aina kirjoittaa merkinnän tekstinä.",
     "disclosureTitle": "Ennen tallennusta",
     "disclosureProcessing": "Äänitteesi lähetetään LabourMarket.ai:n hallinnoimalle käsittelypalvelimelle tekstiksi muuntamista varten. Kolmannen osapuolen puhepalveluja ei käytetä.",
     "disclosureWhy": "Sitä käytetään vain alla olevan tekstin luomiseen — ei mihinkään muuhun.",
