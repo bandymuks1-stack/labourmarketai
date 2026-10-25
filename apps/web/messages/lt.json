@@ -15,7 +15,8 @@
     "capacity": "Pajėgumai",
     "work": "Darbas ir valandos",
     "results": "Rezultatai",
-    "history": "Istorija"
+    "history": "Istorija",
+    "areasTitle": "Įmonės sritys"
   },
   "publicDemand": {
     "title": "Dabartinė rinkos paklausa",
@@ -7687,7 +7688,9 @@
       "menu": "Meniu",
       "areas": "Darbo sritys",
       "close": "Uždaryti",
-      "youAreHere": "Čia esi"
+      "youAreHere": "Čia esi",
+      "previous": "Ankstesnė sritis",
+      "next": "Kita sritis"
     }
   },
   "workerInvitations": {
