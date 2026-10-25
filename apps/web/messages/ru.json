@@ -7681,7 +7681,14 @@
     "backHome": "Вернуться на главную",
     "dashboardSections": "Разделы панели",
     "skipToContent": "Перейти к содержимому",
-    "loading": "Загрузка…"
+    "loading": "Загрузка…",
+    "nav": {
+      "more": "Ещё",
+      "menu": "Меню",
+      "areas": "Рабочие разделы",
+      "close": "Закрыть",
+      "youAreHere": "Вы здесь"
+    }
   },
   "workerInvitations": {
     "title": "Ожидающие приглашения",

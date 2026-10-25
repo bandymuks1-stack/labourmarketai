@@ -7681,7 +7681,14 @@
     "backHome": "Back to home",
     "dashboardSections": "Dashboard sections",
     "skipToContent": "Skip to content",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "nav": {
+      "more": "More",
+      "menu": "Menu",
+      "areas": "Work areas",
+      "close": "Close",
+      "youAreHere": "You are here"
+    }
   },
   "workerInvitations": {
     "title": "Pending invitations",

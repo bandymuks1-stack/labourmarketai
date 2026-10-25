@@ -7681,7 +7681,14 @@
     "backHome": "Zurück zur Startseite",
     "dashboardSections": "Dashboard-Bereiche",
     "skipToContent": "Zum Inhalt springen",
-    "loading": "Wird geladen…"
+    "loading": "Wird geladen…",
+    "nav": {
+      "more": "Mehr",
+      "menu": "Menü",
+      "areas": "Arbeitsbereiche",
+      "close": "Schließen",
+      "youAreHere": "Du bist hier"
+    }
   },
   "workerInvitations": {
     "title": "Ausstehende Einladungen",

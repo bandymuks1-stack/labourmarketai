@@ -271,7 +271,13 @@ describe("bell, badges and layout consume the one spine source", () => {
   });
 
   it("the header actually renders the bell", () => {
-    expect(LAYOUT).toMatch(/<NotificationPanel \/>/);
+    // THE ONE header renders the bell on every dashboard route (the operator
+    // console's private header, which mounted its own, retired 2026-10-25).
+    const header = read("components/app/conversation/chat/conversation-header.tsx");
+    expect(header).toMatch(/<NotificationPanel \/>/);
+    expect(read("components/app/dashboard-chrome.tsx")).toMatch(/<ConversationHeader/);
+    // ...and its nav reads the SAME streamed spine badges as every nav surface.
+    expect(header).toMatch(/const badges = auth\?\.badges \?\? \{\}/);
   });
 
   it("BOTH nav surfaces (desktop tabs + mobile bottom nav) read the spine badges", () => {

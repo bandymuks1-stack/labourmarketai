@@ -26,9 +26,11 @@ import {
  *     conversation (opportunities, journal, profile, a project, a need…),
  *     reached from the conversation, from search, or by deep link — never
  *     from a parallel tab system. No bottom bar exists here for anyone.
- *   • full (`/dashboard/admin/*` only) — the legacy module chrome (wide tab
- *     row + role switcher + bottom nav), kept for the INTERNAL operator
- *     console, which is not the user-facing product.
+ *   • full (`/dashboard/admin/*` only) — the INTERNAL operator console. Since
+ *     2026-10-25 it renders the SAME one top bar as every other route (owner
+ *     order: one navigation system); only its <main> differs. Its former
+ *     module chrome (a sideways-scrolling tab row, the role switcher as a
+ *     second workspace selector, a phone bottom bar) is no longer mounted.
  *
  * RETIRED HERE (2026-09-22): the fourth mode `today` and the worker's 3-tab
  * bar ŠIANDIEN · PASAULIS · PAKLAUSK. Three bottom tabs read as three
@@ -75,9 +77,9 @@ import {
  * `usePathname()` (locale-stripped) is client-reactive, so switching modes on a
  * client navigation flips the chrome correctly — no overlay, no file moves.
  *
- * The FULL-mode chrome is still authored in `dashboard/layout.tsx` and handed
- * in as slots, so the chrome markup stays where the guard suite pins it; this
- * component only decides WHICH chrome renders.
+ * Every mode now renders `<ConversationHeader>` — there is no header markup
+ * left in `dashboard/layout.tsx`; this component only decides WHICH shell
+ * (bare conversation, contextual panel, operator console) renders.
  */
 /** The ONLY subtree that keeps the legacy module chrome is the internal
  *  operator console; the rule itself is `dashboardChromeMode` in
@@ -113,16 +115,11 @@ export function DashboardChrome({
   children,
   headerTitle,
   nav,
-  fullHeader,
-  fullBottomNav,
   rexora,
 }: {
   children: React.ReactNode;
   headerTitle: string;
   nav: ConversationNavLabels;
-  /** Full-mode chrome slots, authored server-side in the layout. */
-  fullHeader: React.ReactNode;
-  fullBottomNav: React.ReactNode;
   rexora: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -171,17 +168,22 @@ export function DashboardChrome({
     );
   }
 
-  // Full: the Advanced-mode chrome, rendered from the layout-authored slots.
+  // Full: the internal operator console. It renders THE SAME one top bar
+  // (owner order 2026-10-25: one navigation system). Its former private
+  // header — a sideways-scrolling tab row, the role switcher as a SECOND
+  // workspace selector, a truncating logo — and its phone bottom bar are
+  // gone: the admin console is one more destination in the header's "More",
+  // highlighted while the operator works inside it, and the phone sheet
+  // carries every destination at once.
   return (
-    <div className="relative min-h-screen" data-chrome="full">
-      <SlotBoundary>{fullHeader}</SlotBoundary>
-      <main className="relative z-10 mx-auto max-w-container px-4 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
+    <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="full" data-surface={mode}>
+      <ConversationHeader title={headerTitle} nav={nav} />
+      <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
         <SlotBoundary>
           {children}
           {rexora}
         </SlotBoundary>
       </main>
-      <SlotBoundary>{fullBottomNav}</SlotBoundary>
     </div>
   );
 }

@@ -572,7 +572,14 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Indlæser…",
-    "dashboardSections": "Oversigtens sektioner"
+    "dashboardSections": "Oversigtens sektioner",
+    "nav": {
+      "more": "Mere",
+      "menu": "Navigation",
+      "areas": "Arbejdsområder",
+      "close": "Luk",
+      "youAreHere": "Du er her"
+    }
   },
   "companies": {
     "cta": {

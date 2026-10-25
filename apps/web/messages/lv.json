@@ -572,7 +572,14 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Ielādē…",
-    "dashboardSections": "Paneļa sadaļas"
+    "dashboardSections": "Paneļa sadaļas",
+    "nav": {
+      "more": "Vairāk",
+      "menu": "Izvēlne",
+      "areas": "Darba jomas",
+      "close": "Aizvērt",
+      "youAreHere": "Tu esi šeit"
+    }
   },
   "companies": {
     "cta": {

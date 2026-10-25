@@ -7681,7 +7681,14 @@
     "backHome": "Grįžti į pradžią",
     "dashboardSections": "Valdymo skydelio skiltys",
     "skipToContent": "Pereiti į turinį",
-    "loading": "Kraunama…"
+    "loading": "Kraunama…",
+    "nav": {
+      "more": "Daugiau",
+      "menu": "Meniu",
+      "areas": "Darbo sritys",
+      "close": "Uždaryti",
+      "youAreHere": "Čia esi"
+    }
   },
   "workerInvitations": {
     "title": "Laukiantys pakvietimai",

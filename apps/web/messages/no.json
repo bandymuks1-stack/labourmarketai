@@ -572,7 +572,14 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Laster inn…",
-    "dashboardSections": "Oversiktens seksjoner"
+    "dashboardSections": "Oversiktens seksjoner",
+    "nav": {
+      "more": "Mer",
+      "menu": "Meny",
+      "areas": "Arbeidsområder",
+      "close": "Lukk",
+      "youAreHere": "Du er her"
+    }
   },
   "companies": {
     "cta": {

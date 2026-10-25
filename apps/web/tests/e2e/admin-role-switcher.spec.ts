@@ -1,19 +1,21 @@
 /**
- * Browser smoke for the admin role-switcher badge — captures the
- * before/after evidence the owner asked for.
+ * Browser smoke for the admin entry in the ONE header — captures the
+ * evidence the owner asked for.
  *
- * Pre-state: production `profiles.active_role='admin'` for the
- * minted-session user (the prior Path-A activation set this).
+ * Pre-state: the minted-session user is an admin (`profile_roles.admin` or
+ * `profiles.active_role='admin'`).
  *
- * After this PR ships, the dashboard header renders TWO distinct
- * widgets when isAdmin:
- *   - an Admin Mode badge (brand-orange) linking to /dashboard/admin
- *   - the workspace role switcher (worker/company/agency/customer)
+ * HISTORY. This spec used to assert the role switcher's "Admin režimas"
+ * badge in the dashboard header. The role switcher was retired from every
+ * header on 2026-10-25 (owner order: ONE navigation system — it was a second
+ * workspace selector naming the same organization as the workspace chip).
+ * The admin console is now one more destination in the header's "More"
+ * menu, shown ONLY to admins; while the operator works inside it the "More"
+ * trigger itself names it and carries the active state. The avatar menu
+ * keeps its own gated "Platformos administravimas" link.
  *
- * Negative case: when isAdmin=false (any normal user), the admin
- * badge is absent. We can't easily flip the session user's
- * active_role from this spec without service-role writes (forbidden),
- * so the negative path is covered by the source-level guards instead.
+ * Negative case: for a non-admin the entry is absent — covered by the
+ * source-level guard `lib/guards/one-header-navigation.test.ts`.
  */
 import { test, expect, type Page } from "@playwright/test";
 import { existsSync, mkdirSync } from "node:fs";
@@ -39,7 +41,7 @@ test.skip(
 );
 test.skip(
   process.env.E2E_EXPECT_ADMIN !== "1",
-  "Set E2E_EXPECT_ADMIN=1 (and ensure the session user has active_role='admin' in prod).",
+  "Set E2E_EXPECT_ADMIN=1 (and ensure the session user is an admin).",
 );
 
 test.use({ storageState: STORAGE_STATE });
@@ -53,40 +55,28 @@ async function shot(page: Page, name: string): Promise<void> {
   });
 }
 
-test("admin badge renders in the dashboard header AND links to /dashboard/admin", async ({
+test("the admin console is reachable from the one header's More menu and highlighted inside it", async ({
   page,
 }) => {
   test.setTimeout(60_000);
+  await page.setViewportSize({ width: 1280, height: 900 });
 
   await page.goto("/lt/dashboard", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/lt\/dashboard/);
 
-  // The admin badge must be visible in the header.
-  const badge = page.getByTestId("role-switcher-admin-badge");
-  await expect(badge).toBeVisible();
+  // Exactly one workspace selector; the retired role switcher is absent.
+  await expect(page.getByTestId("workspace-chip")).toHaveCount(1);
+  await expect(page.getByTestId("role-switcher-toggle")).toHaveCount(0);
 
-  // Label is the new "Admin režimas" copy, NOT a user-facing role.
-  await expect(badge).toContainText(/admin režimas/i);
-  // Negative: the badge does NOT contain any user-facing role label.
-  for (const userRole of [
-    "darbuotojas",
-    "įmonė",
-    "agentūra",
-    "pirkėjas",
-  ]) {
-    await expect(badge).not.toContainText(new RegExp(userRole, "i"));
-  }
+  await page.getByTestId("header-nav-more").click();
+  const entry = page.getByTestId("header-nav-more-admin");
+  await expect(entry).toBeVisible();
+  expect(await entry.getAttribute("href")).toMatch(/\/lt\/dashboard\/admin$/);
+  await shot(page, "01-admin-entry-in-more-menu");
 
-  await shot(page, "01-admin-badge-in-header");
-
-  // The badge is a link to /dashboard/admin.
-  const href = await badge.getAttribute("href");
-  expect(href).toBeTruthy();
-  expect(href).toMatch(/\/lt\/dashboard\/admin/);
-
-  // Clicking navigates to the pilot panel (the admin gate already
-  // passed in the prior smoke; here we just verify the link works).
-  await badge.click();
+  await entry.click();
   await expect(page).toHaveURL(/\/lt\/dashboard\/admin/);
-  await shot(page, "02-admin-badge-click-navigates");
+  // Inside the console the More trigger names it and carries the active state.
+  await expect(page.getByTestId("header-nav-more")).toHaveAttribute("aria-current", "page");
+  await shot(page, "02-admin-console-active-in-header");
 });
