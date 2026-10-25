@@ -58,6 +58,7 @@
  */
 import {
   fragmentJournalText,
+  isVerbLikeToken,
   type JournalFragment,
 } from "@/lib/structuring/journal-fragmenter";
 import {
@@ -234,6 +235,33 @@ export function deriveJournalRecognition(
   const rejectedSlugSet = opts.entryRejections.slugs;
   const rejectedClaimSet = opts.entryRejections.claimLabels;
 
+  // ── Shared-sentence verb context (P1/P2 recognition accuracy) ─────────────
+  // Splitting a comma list separates a governing verb from its objects
+  // ("ploviau sienas, grindis" → "ploviau sienas" + "grindis"). A bare OBJECT
+  // fragment ("grindis") then has no verb for the recogniser's suppression
+  // guards, so a washed floor reads as the flooring trade. We give such a
+  // verbless fragment the verb(s) from its OWN sentence's siblings (same
+  // `groupId`) — and ONLY to the suppression guards, never to term matching,
+  // so context can VETO a wrong trade (washing → not flooring) but never
+  // fabricate one. A fragment that has its own verb is judged alone (its verb,
+  // e.g. "klojau"/"ploviau", already decides install vs cleaning), so a
+  // sibling's unrelated verb can never flip it. Context is per-sentence, never
+  // cross-sentence.
+  const hasVerbLikeToken = (s: string): boolean =>
+    foldText(s)
+      .split(/[^\p{L}\p{N}']+/u)
+      .filter(Boolean)
+      .some(isVerbLikeToken);
+  const groupVerbContext = new Map<number, string>();
+  for (const fr of fragments) {
+    if (fr.meaningful && hasVerbLikeToken(fr.text)) {
+      groupVerbContext.set(
+        fr.groupId,
+        `${groupVerbContext.get(fr.groupId) ?? ""} ${fr.text}`.trim(),
+      );
+    }
+  }
+
   const recognizedMap = new Map<
     string,
     {
@@ -345,7 +373,14 @@ export function deriveJournalRecognition(
       // the WORK part of the phrase: a trailing where-phrase is context, never
       // a second trade (#1689 — "5 hours tiling in the kitchen" is tiling)
       const workText = workPartOf(f.text);
-      for (const r of describesWhere ? [] : recognizeSkills(workText, 8)) {
+      // A verbless object fragment borrows its sentence's governing verb (see
+      // `groupVerbContext`); a fragment with its own verb is judged alone so a
+      // sibling's verb can never flip its reading. Suppression-only — never
+      // fabricates a skill.
+      const sharedContext = hasVerbLikeToken(f.text)
+        ? ""
+        : groupVerbContext.get(f.groupId) ?? "";
+      for (const r of describesWhere ? [] : recognizeSkills(workText, 8, sharedContext)) {
         if (rejectedSlugSet.has(r.slug)) {
           pushRejected("skill", r.slug, r.slug, "user_rejected", f.id);
           outcomes.push({ kind: "rejected", ref: r.slug });

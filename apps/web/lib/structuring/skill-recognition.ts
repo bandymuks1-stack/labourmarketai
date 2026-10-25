@@ -245,9 +245,24 @@ export function isWarehousePlaceOnlyContext(
 export function recognizeSkills(
   text: string,
   limit: number = RECOGNITION_LIMIT,
+  contextText?: string,
 ): RecognizedSkill[] {
   if (!text || text.trim().length === 0) return [];
   const folded = foldText(text);
+  // Shared-sentence context: a governing verb can live in a SIBLING fragment
+  // once a comma list is split ("ploviau sienas, grindis" → "ploviau sienas" +
+  // "grindis"), and the bare object fragment then loses the verb its guards
+  // need. `contextText` carries that sibling text so the TEXT-BASED SUPPRESSION
+  // guards (cleaning-floor, power-tool-electrical) still see the washing / tool
+  // verb. It is used ONLY to SUPPRESS a wrong signal, NEVER by term matching —
+  // a skill is still recognised solely from this fragment's own words, so
+  // context can never fabricate a capability. The cross-trade warehouse guard
+  // deliberately stays fragment-scoped (`folded`), so a genuinely separate
+  // "warehouse logistics" item is not suppressed by a sibling trade.
+  const guardText =
+    contextText && contextText.trim().length > 0
+      ? `${folded} ${foldText(contextText)}`
+      : folded;
   const originalTokens = text.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   const foldedTokens = originalTokens.map(foldText);
 
@@ -299,14 +314,16 @@ export function recognizeSkills(
   }
 
   // Cleaning-context guard: drop a flooring suggestion that exists only because
-  // a floor was named in a washing/cleaning context (e.g. "ploviau grindis").
-  if (best.has("flooring") && isCleaningFloorContext(folded)) {
+  // a floor was named in a washing/cleaning context (e.g. "ploviau grindis",
+  // or "ploviau sienas, grindis" where the verb is now a sibling fragment —
+  // hence `guardText`, which folds in the shared-sentence context).
+  if (best.has("flooring") && isCleaningFloorContext(guardText)) {
     best.delete("flooring");
   }
 
   // Power-tool guard: drop an electrical-install suggestion that exists only
   // because a power tool was named (e.g. "naudojau elektrinius įrankius").
-  if (best.has("electrical-install") && isPowerToolOnlyElectricalContext(folded)) {
+  if (best.has("electrical-install") && isPowerToolOnlyElectricalContext(guardText)) {
     best.delete("electrical-install");
   }
 

@@ -733,3 +733,49 @@ describe("comma prose vs work-item lists — no capability shadowed (AGENTS.md 0
     expect(r.coverage.silentlyLostFragmentCount).toBe(0);
   });
 });
+
+describe("shared-sentence verb context — P1/P2 recognition accuracy (no fabrication)", () => {
+  const recOf = (t: string) => derive(t).recognizedSkills.map((s) => s.slug).sort();
+
+  it("P2: a washed floor in a split object list is NOT the flooring trade", () => {
+    expect(recOf("ploviau sienas, grindis")).not.toContain("flooring");
+    expect(recOf("valiau langus, grindis, duris")).not.toContain("flooring");
+  });
+
+  it("P1: a trade + warehouse-logistics list recognises BOTH, directly", () => {
+    expect(recOf("tiling, warehouse logistics")).toEqual([
+      "tiling",
+      "warehouse-operations",
+    ]);
+  });
+
+  it("an INSTALL verb governing the floor keeps flooring", () => {
+    expect(recOf("klojau plyteles, grindis")).toEqual(["flooring", "tiling"]);
+    expect(recOf("klojau grindis, dažiau sienas")).toEqual([
+      "flooring",
+      "painting",
+    ]);
+  });
+
+  it("each verb-bearing clause is judged on its OWN verb (no sibling bleed)", () => {
+    // washed floor + laid tiles in one sentence: tiling yes, flooring NO.
+    const r = recOf("ryte ploviau grindis, po pietų klijavau plyteles");
+    expect(r).toContain("tiling");
+    expect(r).not.toContain("flooring");
+  });
+
+  it("mixed cleaning + install across items keeps each correct", () => {
+    expect(recOf("klojau parketą, ploviau langus")).toEqual([
+      "flooring",
+      "window-cleaning",
+    ]);
+  });
+
+  it("context never fabricates: suppression only, from the sentence's own verb", () => {
+    // No install/clean verb anywhere → the bare floor noun is not forced either
+    // way by a sibling; recognition rests only on the fragment's own words.
+    const r = derive("tiling, warehouse logistics");
+    // warehouse-operations came from its own fragment's words, not from "tiling"
+    expect(r.recognizedSkills.map((s) => s.slug)).toContain("warehouse-operations");
+  });
+});

@@ -250,3 +250,27 @@ describe("a warehouse as the PLACE of other work is not warehouse operations (wa
     expect(s(t)).toContain("warehouse-operations");
   });
 });
+
+describe("recognizeSkills — shared-sentence context (P2 suppression only)", () => {
+  it("a governing cleaning verb in context suppresses flooring on a bare floor noun", () => {
+    // Split sibling: "ploviau sienas, grindis" → this fragment is "grindis".
+    expect(recognizeSkills("grindis").map((s) => s.slug)).toContain("flooring");
+    expect(
+      recognizeSkills("grindis", 8, "ploviau sienas").map((s) => s.slug),
+    ).not.toContain("flooring");
+  });
+
+  it("a governing INSTALL verb in context keeps flooring (laid floor)", () => {
+    expect(
+      recognizeSkills("grindis", 8, "klojau plyteles").map((s) => s.slug),
+    ).toContain("flooring");
+  });
+
+  it("context never ADDS a skill — only the fragment's own words are matched", () => {
+    // The verb/skill lives only in context; the fragment itself is empty of it.
+    expect(recognizeSkills("", 8, "ploviau langus")).toEqual([]);
+    expect(
+      recognizeSkills("grindis", 8, "klijavau plyteles").map((s) => s.slug),
+    ).not.toContain("tiling");
+  });
+});

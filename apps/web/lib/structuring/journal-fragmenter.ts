@@ -49,6 +49,11 @@ export type JournalFragment = {
   normalized: string;
   /** False for pure time/stopword scraps — coverage counts skip them. */
   meaningful: boolean;
+  /** Index of the hard part (sentence / `. ! ? ; newline` unit) this fragment
+   *  came from. Comma- and conjunction-split siblings of ONE sentence share it,
+   *  so a later stage can give a bare object fragment the governing verb from
+   *  its own sentence — never from a different one. Deterministic. */
+  groupId: number;
 };
 
 /** FNV-1a 32-bit hex — tiny pure hash; stable across runtimes (no crypto). */
@@ -377,7 +382,7 @@ export function fragmentJournalText(text: string): JournalFragment[] {
 
   const out: JournalFragment[] = [];
   const seenIds = new Set<string>();
-  for (const guardedPart of hardParts) {
+  for (const [groupId, guardedPart] of hardParts.entries()) {
     for (const guardedItem of splitHardPartOnCommas(guardedPart)) {
       const part = restoreDecimals(guardedItem);
       for (const piece of splitOnConjunctions(part)) {
@@ -396,6 +401,7 @@ export function fragmentJournalText(text: string): JournalFragment[] {
           text: textPiece,
           normalized,
           meaningful: isMeaningful(normalized),
+          groupId,
         });
       }
     }
