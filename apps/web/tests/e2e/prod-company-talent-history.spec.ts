@@ -415,7 +415,17 @@ async function resetLink(browser: Browser): Promise<void> {
     if (await confirmed.isVisible({ timeout: 10_000 }).catch(() => false)) {
       await confirmed.getByTestId("roster-link-withdraw-open").click();
       await confirmed.getByTestId("roster-link-withdraw-confirm").click();
-      await expect(confirmed.getByTestId("roster-link-withdrawn")).toBeVisible({ timeout: 30_000 });
+      // Run 40217117255: the withdraw saved (respond_to_roster_link_v1 → 200)
+      // and the re-render removed the whole confirmed block, so the
+      // "withdrawn" line inside it never stayed. Either answer is the answer.
+      await expect
+        .poll(
+          async () =>
+            (await confirmed.getByTestId("roster-link-withdrawn").isVisible().catch(() => false)) ||
+            (await confirmed.count()) === 0,
+          { timeout: 30_000, intervals: [1_000] },
+        )
+        .toBe(true);
     }
   } finally {
     await ctx.close();
