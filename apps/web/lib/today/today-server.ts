@@ -146,9 +146,7 @@ export const loadTodayAttention = cache(async (): Promise<TodayAttention> => {
           : null,
       )
       .catch((): number | null => null),
-    listInvitationsAddressedToMe()
-      .then((res) => (res.status === "ok" ? res.total : null))
-      .catch((): number | null => null),
+    listInvitationsAddressedToMe().catch(() => null),
     // The RESULT reader: a failed read is `null` (UNKNOWN), a successful
     // empty read is a zero count. The lossy `getUnreadConversationIds` could
     // never report a failure, which made this door's `null` unreachable.
@@ -160,7 +158,15 @@ export const loadTodayAttention = cache(async (): Promise<TodayAttention> => {
       )
       .catch((): TodayAttention["unread"] => null),
   ]);
-  return { offers, invitations, unread };
+  return {
+    offers,
+    // An unproven mailbox still counts the account-keyed invitations; only a
+    // real failure is unknown (null).
+    invitations:
+      invitations?.status === "ok" || invitations?.status === "email_unverified" ? invitations.total : null,
+    unread,
+    invitationsMailboxUnproven: invitations?.status === "email_unverified",
+  };
 });
 
 export const loadTodayOpportunities = cache(async (): Promise<OpportunitiesResultView | null> => {

@@ -29,7 +29,7 @@ export type DiscoverabilityPhase = "idle" | "declined" | "needs-migration" | "er
 /** The outcome of the last successful write in this session, if any. */
 export type ConfirmedVisibility = "on" | "off" | null;
 
-export type DiscoverabilityScreen = "granted" | "choice";
+export type DiscoverabilityScreen = "granted" | "choice" | "pending";
 
 export function discoverabilityScreen(input: {
   status: DiscoverabilityStatus;
@@ -42,5 +42,11 @@ export function discoverabilityScreen(input: {
   // Only a CURRENT-version grant is ON — the same rule as the RLS predicate
   // `worker_profile_discoverable`. Never decided, withdrawn and a grant under a
   // superseded text are all OFF: the choice screen.
-  return status === "granted" ? "granted" : "choice";
+  // The free-worker DEFAULT in force (20261025100000) is ON too: the screen
+  // shows the switch-off, never a consent to something already on.
+  if (status === "granted" || status === "default_on") return "granted";
+  // The default is coming (an existing account's notice period): not visible
+  // yet, and the person can object before it starts.
+  if (status === "default_pending") return "pending";
+  return "choice";
 }

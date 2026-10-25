@@ -200,6 +200,115 @@ export const PROFILE_DISCOVERABILITY_V1: ConsentDefinition = {
   },
 };
 
+/**
+ * THE DEFAULT-VISIBILITY INFORMATION NOTICE (owner decision 2026-10-25: free
+ * workers are discoverable by default; GDPR Art. 13/14 information + Art. 21
+ * objection). NOT a consent and NOT in `CONSENT_DEFINITIONS`: nothing is
+ * granted with it. It is shown to a free worker who has never decided, and its
+ * display is recorded in the ledger as `notice_shown` (version + this hash,
+ * pinned in `privacy_consent_purposes.default_notice_*` by migration
+ * 20261025100000). The default applies only after that record exists AND the
+ * owner switch is armed. Legal basis and balancing:
+ * docs/legal/gdpr-2026-10-15/internal/lia-free-worker-discoverability-v1.md.
+ *
+ * The block names reuse `ConsentTextBlocks` so the hash and rendering are the
+ * consent's own: `freedom` carries the basis and scope, `withdrawal` the
+ * objection. The controller line is the consent's, verbatim.
+ */
+export const PROFILE_DISCOVERABILITY_DEFAULT_NOTICE_V1: ConsentDefinition = {
+  purpose: "profile_discoverability",
+  version: "2026-10-25.notice.v1",
+  recipientCategory: PROFILE_DISCOVERABILITY_V1.recipientCategory,
+  dataCategories: PROFILE_DISCOVERABILITY_V1.dataCategories,
+  privacyNoticeRoute: "/privacy",
+  texts: {
+    lt: {
+      title: "Įmonės gali rasti jūsų profesinį profilį",
+      summary:
+        "LabourMarket.ai skirta sujungti žmones, ieškančius darbo, su įmonėmis, kurioms jų reikia. Kol nedirbate įmonėje per LabourMarket.ai, registruotos įmonės ir agentūros gali rasti jūsų profesinį profilį savo paieškose — su anonimine žyma, niekada ne jūsų vardu.",
+      visibleData:
+        "Jos mato jūsų profesiją, patirtį, įgūdžius, bendrą darbo regioną, prieinamumą, kalbas ir kitą peržiūroje nurodytą profesinę informaciją.",
+      invisibleData:
+        "Jos nemato jūsų vardo ir pavardės, telefono numerio, el. pašto adreso, Darbo žurnalo įrašų, dokumentų ir išorinių profilių nuorodų. Įmonė gali parašyti tik per LabourMarket.ai žinutes; vardas ir kontaktai perduodami tik jums nusprendus.",
+      freedom:
+        "Tai darome remdamiesi teisėtu interesu sujungti darbuotojus su darbu (BDAR 6 str. 1 d. f p.). Tai netaikoma, kol dirbate įmonėje per LabourMarket.ai arba esate užsiregistravę kaip mokinys, studentas ar praktikantas. Paskyra, CV ir Darbo žurnalas veikia taip pat ir išjungus matomumą.",
+      withdrawal:
+        "Matomumą galite bet kada išjungti vienu paspaudimu — tai jūsų teisė nesutikti. Išjungtas matomumas lieka išjungtas, kol patys jo neįjungsite.",
+      controller: PROFILE_DISCOVERABILITY_V1.texts.lt.controller,
+    },
+    en: {
+      title: "Companies can find your professional profile",
+      summary:
+        "LabourMarket.ai exists to connect people looking for work with the companies that need them. While you do not work for a company through LabourMarket.ai, registered companies and agencies can find your professional profile in their searches — under an anonymous label, never under your name.",
+      visibleData:
+        "They see your profession, experience, skills, general work region, availability, languages and the other professional information listed in the preview.",
+      invisibleData:
+        "They do not see your name, phone number, email address, Work Journal entries, documents or external profile links. A company can write to you only through LabourMarket.ai messages; your name and contacts are shared only when you decide to share them.",
+      freedom:
+        "We do this on the basis of our legitimate interest in connecting workers with work (GDPR Art. 6(1)(f)). It does not apply while you work for a company through LabourMarket.ai, or while you are registered as a pupil, student or intern. Your account, CV and Work Journal work the same with visibility off.",
+      withdrawal:
+        "You can switch visibility off at any time with one tap — this is your right to object. Once switched off, it stays off until you switch it on yourself.",
+      controller: PROFILE_DISCOVERABILITY_V1.texts.en.controller,
+    },
+    ru: {
+      title: "Компании могут найти ваш профессиональный профиль",
+      summary:
+        "LabourMarket.ai создан, чтобы соединять людей, которые ищут работу, с компаниями, которым они нужны. Пока вы не работаете в компании через LabourMarket.ai, зарегистрированные компании и агентства могут найти ваш профессиональный профиль в своих поисках — под анонимной меткой, никогда под вашим именем.",
+      visibleData:
+        "Они видят вашу профессию, опыт, навыки, общий регион работы, доступность, языки и другую профессиональную информацию, указанную в предпросмотре.",
+      invisibleData:
+        "Они не видят ваше имя и фамилию, номер телефона, адрес электронной почты, записи Рабочего журнала, документы и ссылки на внешние профили. Компания может написать вам только через сообщения LabourMarket.ai; имя и контакты передаются только по вашему решению.",
+      freedom:
+        "Мы делаем это на основании законного интереса соединять работников с работой (ст. 6(1)(f) GDPR). Это не применяется, пока вы работаете в компании через LabourMarket.ai или зарегистрированы как ученик, студент или практикант. Аккаунт, CV и Рабочий журнал работают так же и при выключенной видимости.",
+      withdrawal:
+        "Вы можете выключить видимость в любой момент одним нажатием — это ваше право на возражение. Выключенная видимость остаётся выключенной, пока вы сами её не включите.",
+      controller: PROFILE_DISCOVERABILITY_V1.texts.ru.controller,
+    },
+    nl: {
+      title: "Bedrijven kunnen uw professionele profiel vinden",
+      summary:
+        "LabourMarket.ai bestaat om mensen die werk zoeken te verbinden met de bedrijven die hen nodig hebben. Zolang u niet via LabourMarket.ai voor een bedrijf werkt, kunnen geregistreerde bedrijven en uitzendbureaus uw professionele profiel in hun zoekopdrachten vinden — onder een anoniem label, nooit onder uw naam.",
+      visibleData:
+        "Zij zien uw beroep, ervaring, vaardigheden, algemene werkregio, beschikbaarheid, talen en de overige professionele informatie die in de voorvertoning staat.",
+      invisibleData:
+        "Zij zien niet uw naam, telefoonnummer, e-mailadres, werkdagboekregels, documenten of links naar externe profielen. Een bedrijf kan u alleen via LabourMarket.ai-berichten schrijven; uw naam en contactgegevens worden alleen gedeeld als u daartoe besluit.",
+      freedom:
+        "Wij doen dit op grond van ons gerechtvaardigd belang om werkenden met werk te verbinden (AVG art. 6, lid 1, onder f). Het geldt niet zolang u via LabourMarket.ai voor een bedrijf werkt, of als scholier, student of stagiair bent geregistreerd. Uw account, cv en werkdagboek werken hetzelfde met zichtbaarheid uit.",
+      withdrawal:
+        "U kunt de zichtbaarheid op elk moment met één tik uitzetten — dat is uw recht van bezwaar. Eenmaal uitgezet, blijft zij uit totdat u haar zelf weer aanzet.",
+      controller: PROFILE_DISCOVERABILITY_V1.texts.nl.controller,
+    },
+    de: {
+      title: "Unternehmen können Ihr berufliches Profil finden",
+      summary:
+        "LabourMarket.ai verbindet Menschen, die Arbeit suchen, mit den Unternehmen, die sie brauchen. Solange Sie nicht über LabourMarket.ai für ein Unternehmen arbeiten, können registrierte Unternehmen und Agenturen Ihr berufliches Profil in ihren Suchen finden — unter einer anonymen Kennung, nie unter Ihrem Namen.",
+      visibleData:
+        "Sie sehen Ihren Beruf, Ihre Erfahrung, Fähigkeiten, die allgemeine Arbeitsregion, Verfügbarkeit, Sprachen und die weiteren in der Vorschau aufgeführten beruflichen Angaben.",
+      invisibleData:
+        "Sie sehen nicht Ihren Namen, Ihre Telefonnummer, E-Mail-Adresse, Einträge im Arbeitstagebuch, Dokumente oder Links zu externen Profilen. Ein Unternehmen kann Ihnen nur über LabourMarket.ai-Nachrichten schreiben; Name und Kontaktdaten werden nur weitergegeben, wenn Sie das entscheiden.",
+      freedom:
+        "Wir tun dies auf Grundlage unseres berechtigten Interesses, Arbeitskräfte mit Arbeit zu verbinden (Art. 6 Abs. 1 lit. f DSGVO). Es gilt nicht, solange Sie über LabourMarket.ai für ein Unternehmen arbeiten oder als Schüler, Student oder Praktikant registriert sind. Konto, Lebenslauf und Arbeitstagebuch funktionieren auch bei ausgeschalteter Sichtbarkeit gleich.",
+      withdrawal:
+        "Sie können die Sichtbarkeit jederzeit mit einem Tippen ausschalten — das ist Ihr Widerspruchsrecht. Einmal ausgeschaltet, bleibt sie aus, bis Sie sie selbst wieder einschalten.",
+      controller: PROFILE_DISCOVERABILITY_V1.texts.de.controller,
+    },
+    pl: {
+      title: "Firmy mogą znaleźć Twój profil zawodowy",
+      summary:
+        "LabourMarket.ai łączy osoby szukające pracy z firmami, które ich potrzebują. Dopóki nie pracujesz dla firmy przez LabourMarket.ai, zarejestrowane firmy i agencje mogą znaleźć Twój profil zawodowy w swoich wyszukiwaniach — pod anonimowym oznaczeniem, nigdy pod Twoim imieniem i nazwiskiem.",
+      visibleData:
+        "Widzą Twój zawód, doświadczenie, umiejętności, ogólny region pracy, dostępność, języki oraz pozostałe informacje zawodowe wymienione w podglądzie.",
+      invisibleData:
+        "Nie widzą Twojego imienia i nazwiska, numeru telefonu, adresu e-mail, wpisów w Dzienniku pracy, dokumentów ani linków do profili zewnętrznych. Firma może napisać do Ciebie tylko przez wiadomości LabourMarket.ai; imię, nazwisko i dane kontaktowe są udostępniane tylko wtedy, gdy sam(a) tak zdecydujesz.",
+      freedom:
+        "Robimy to na podstawie naszego prawnie uzasadnionego interesu w łączeniu pracowników z pracą (art. 6 ust. 1 lit. f RODO). Nie dotyczy to okresu, gdy pracujesz dla firmy przez LabourMarket.ai, ani osób zarejestrowanych jako uczeń, student lub praktykant. Konto, CV i Dziennik pracy działają tak samo przy wyłączonej widoczności.",
+      withdrawal:
+        "Możesz wyłączyć widoczność w każdej chwili jednym dotknięciem — to Twoje prawo sprzeciwu. Wyłączona widoczność pozostaje wyłączona, dopóki sam(a) jej nie włączysz.",
+      controller: PROFILE_DISCOVERABILITY_V1.texts.pl.controller,
+    },
+  },
+};
+
 export const EMPLOYER_DATA_DISCLOSURE_V1: ConsentDefinition = {
   purpose: "employer_data_disclosure",
   version: "2026-07-11.v2",

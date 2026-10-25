@@ -147,6 +147,8 @@ export async function HomeWaitingView({
         return t("open.invitations", { n: item.count });
       case "unread":
         return t("open.unread", { n: item.count });
+      case "verifyEmail":
+        return t("open.verifyEmail");
       case "untimed":
         return t("open.untimed", { n: item.entries });
       case "unlabelled":

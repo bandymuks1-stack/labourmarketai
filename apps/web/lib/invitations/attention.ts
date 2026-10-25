@@ -53,6 +53,11 @@ export interface AttentionInvitation {
 
 export type InvitationsAddressedToMe =
   | { readonly status: "ok"; readonly items: readonly AttentionInvitation[]; readonly total: number }
+  /** The caller's mailbox is not PROVEN yet: invitations addressed to the e-mail
+   *  stay hidden (fail-closed, 20261003151000), the roster invitations — keyed
+   *  on the account, not the e-mail — are still read and counted. Distinct from
+   *  "error": nothing failed, there is one thing the person can do. */
+  | { readonly status: "email_unverified"; readonly items: readonly AttentionInvitation[]; readonly total: number }
   /** The canonical invitations migration is not applied — an honest "not enabled". */
   | { readonly status: "unavailable" }
   | { readonly status: "error" };
@@ -65,18 +70,24 @@ function refKey(ref: InvitationRef): string {
  *  see every pending row, not only the display slice. */
 async function readAll(): Promise<
   | { readonly status: "ok"; readonly items: readonly AttentionInvitation[] }
+  | { readonly status: "email_unverified"; readonly items: readonly AttentionInvitation[] }
   | { readonly status: "unavailable" }
   | { readonly status: "error" }
 > {
   const [canonical, roster] = await Promise.all([listInvitationsForMe(), listMyPendingWorkerInvitations()]);
   if (canonical.status === "needs-migration") return { status: "unavailable" };
-  // `email_unverified` (the caller's address has not been proved) deliberately
-  // takes the honest "could not read" path here: chat / brief / today never
-  // claim "no invitations" for a mailbox that was simply not proven. The
-  // network page, which has room for it, renders the progressive proof prompt.
-  if (canonical.status !== "ok") return { status: "error" };
+  // `email_unverified` (the caller's address has not been proved) is its OWN
+  // answer, never "no invitations" and never "could not read": the e-mail-
+  // addressed invitations stay hidden (fail-closed), the account-keyed roster
+  // invitations are still read. It used to collapse into "error", so every new
+  // password signup (unverified until the proof flow, 20261003151000) saw
+  // "Open items could not be read" on the home — a failure that never
+  // happened (owner 2026-10-25). The home now says what to do (prove the
+  // mailbox on the network page, which renders the progressive proof).
+  if (canonical.status !== "ok" && canonical.status !== "email_unverified") return { status: "error" };
+  const canonicalItems = canonical.status === "ok" ? canonical.items : [];
   const items: AttentionInvitation[] = [
-    ...canonical.items.map((i) => ({
+    ...canonicalItems.map((i) => ({
       ref: { source: "invitation" as const, invitationId: i.id },
       invitationType: i.invitationType,
       relationshipSlug: i.relationshipSlug,
@@ -100,6 +111,7 @@ async function readAll(): Promise<
     })),
   ];
   items.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  if (canonical.status === "email_unverified") return { status: "email_unverified", items };
   return { status: "ok", items };
 }
 
@@ -107,6 +119,9 @@ async function readAll(): Promise<
  *  display; `total` is the real count behind the cap. */
 export async function listInvitationsAddressedToMe(): Promise<InvitationsAddressedToMe> {
   const all = await readAll();
+  if (all.status === "email_unverified") {
+    return { status: "email_unverified", items: all.items.slice(0, INVITATIONS_ATTENTION_LIMIT), total: all.items.length };
+  }
   if (all.status !== "ok") return all;
   return { status: "ok", items: all.items.slice(0, INVITATIONS_ATTENTION_LIMIT), total: all.items.length };
 }

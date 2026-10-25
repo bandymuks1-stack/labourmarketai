@@ -5707,7 +5707,7 @@
             "Treści, które wprowadzasz samodzielnie: dane profilu i CV, umiejętności, wpisy w dzienniku pracy, zdjęcia dołączane do wpisów oraz dokumenty wymienione w Twoim wykazie dokumentów.",
             "Informacje o firmie wprowadzane przez użytkowników firmowych: dane firmy, zapotrzebowania na pracowników, projekty i rezerwacje.",
             "Wiadomości, które wysyłasz i otrzymujesz na platformie.",
-            "Zapisy zgód: gdy udzielasz lub wycofujesz zgodę, zapisywane są czynność i jej czas.",
+            "Zapisy zgód i widoczności: gdy udzielasz lub wycofujesz zgodę, wyłączasz lub włączasz widoczność dla pracodawców, wybierasz „nie teraz” albo wyświetlamy Ci informację o widoczności dla pracodawców, zapisywane są czynność, wersja tekstu i czas.",
             "Dane techniczne potrzebne do działania usługi, takie jak pliki cookie logowania (zobacz Politykę plików cookie)."
           ]
         },
@@ -5733,8 +5733,8 @@
           "heading": "Kto może zobaczyć Twoje dane",
           "items": [
             "Dostęp jest domyślnie zamknięty: dane, które wprowadzasz, należą do Twojego konta, a inni użytkownicy nie widzą niczego, chyba że pozwala na to konkretna reguła.",
-            "Twój profil zawodowy NIE jest domyślnie widoczny dla firm ani agencji. Może pojawić się w wyszukiwaniach firm dopiero po tym, jak sam włączysz widoczność dla pracodawców w swoich ustawieniach prywatności — rejestracja, akceptacja warunków ani wypełnienie profilu nigdy nie czynią go widocznym.",
-            "Nawet przy włączonej widoczności firmy widzą jedynie ograniczone podsumowanie zawodowe (zawód, doświadczenie, umiejętności, przybliżony region, dostępność, języki, oczekiwania płacowe, jeśli je podałeś). Twoje nazwisko, telefon, e-mail, dokładny adres, plik CV i dokumenty nigdy nie są jego częścią.",
+            "Wolnych pracowników — osoby szukające pracy, które nie pracują dla firmy przez LabourMarket.ai — zarejestrowane firmy i agencje mogą znaleźć w swoich wyszukiwaniach pod anonimowym oznaczeniem, gdy platforma wyświetli im informację o tym. Podstawą prawną jest nasz prawnie uzasadniony interes w łączeniu pracowników z pracą (art. 6 ust. 1 lit. f RODO). Nie dotyczy to okresu, gdy pracujesz dla firmy przez LabourMarket.ai, ani osób zarejestrowanych jako uczeń, student lub praktykant: wtedy Twój profil pojawia się w wyszukiwaniach firm tylko wtedy, gdy sam(a) włączysz widoczność dla pracodawców. Możesz wyłączyć widoczność w każdej chwili jednym dotknięciem; wyłączona pozostaje wyłączona, dopóki sam(a) jej nie włączysz.",
+            "Firmy widzą jedynie ograniczone podsumowanie zawodowe (zawód, doświadczenie, umiejętności, przybliżony region, dostępność, języki, oczekiwania płacowe, jeśli je podałeś). Twoje imię i nazwisko, telefon, e-mail, dokładny adres, wpisy w Dzienniku pracy, plik CV, dokumenty i linki do profili zewnętrznych nigdy nie są jego częścią. Firma może napisać do Ciebie tylko przez wiadomości LabourMarket.ai.",
             "Twoje CV, dane kontaktowe lub dokumenty trafiają do konkretnej firmy dopiero po Twoim odrębnym potwierdzeniu dla tej firmy i tego zapotrzebowania. Każde zrealizowane przekazanie jest zapisywane w rejestrze udostępnień, który możesz zobaczyć.",
             "Dokumenty pracownika nie są pokazywane pracodawcom ani agencjom bez zgody pracownika, a pracodawcy nie mogą odczytywać zapisanych lokalizacji pracownika.",
             "Wiadomości są widoczne wyłącznie dla uczestników rozmowy."
@@ -5743,8 +5743,8 @@
         {
           "heading": "Zgoda",
           "items": [
-            "Cele zgód są rozdzielone: widoczność Twojego profilu zawodowego dla pracodawców oraz przekazanie danych konkretnej firmie to dwie różne decyzje — żadna z nich nie jest połączona z Warunkami, zaznaczona z góry ani wymagana do korzystania z Twojego konta, CV czy dziennika pracy.",
-            "Każdy ekran zgody pokazuje dokładny tekst z numerem wersji, to, co staje się widoczne, to, co pozostaje prywatne, oraz obie możliwości obok siebie (włącz / nie teraz). Odmowa niczego nie zmienia w Twoim koncie.",
+            "Cele zgód są rozdzielone: samodzielne włączenie widoczności dla pracodawców i przekazanie danych konkretnej firmie to dwa różne wybory — żaden nie jest powiązany z Regulaminem, zaznaczony z góry ani wymagany do korzystania z konta, CV czy dziennika pracy.",
+            "Każdy ekran zgody pokazuje dokładny tekst z numerem wersji, to, co staje się widoczne, to, co pozostaje prywatne, oraz obie możliwości obok siebie (włącz / nie teraz). „Nie teraz” zapisujemy jako Twój wybór i niczego więcej nie zmienia w Twoim koncie.",
             "Możesz wycofać każdą zgodę w dowolnym momencie w swoich ustawieniach prywatności, w jednym kroku. Po wycofaniu Twój profil natychmiast przestaje pojawiać się w nowych wyszukiwaniach firm; dane, które firma już zgodnie z prawem otrzymała w czasie obowiązywania zezwolenia, mogą nadal pozostawać w jej posiadaniu.",
             "Historia zgód jest trwała: każde udzielenie i każde wycofanie jest przechowywane jako osobny, niezmienialny zapis z wersją tekstu, językiem, czasem i celem. Nikt — również administratorzy — nie może go edytować ani usunąć, a żaden administrator nie może udzielić zgody w Twoim imieniu."
           ]
@@ -5765,7 +5765,7 @@
           "items": [
             "Możesz poprosić o wgląd w dane, które Cię dotyczą, o ich poprawienie, o otrzymanie ich kopii, o ograniczenie ich wykorzystania lub o ich usunięcie.",
             "Kopię swoich danych w pliku JSON oraz dziennik pracy w pliku CSV możesz pobrać samodzielnie ze swojego konta. O usunięcie konta możesz poprosić na stronie Prywatność na swoim koncie i potwierdzić wniosek po ponownym zalogowaniu; system usuwa wtedy konto automatycznie i wysyła potwierdzenie na adres e-mail konta. Jeśli dane muszą być przechowywane na mocy prawa lub dotyczą innych osób, wniosek jest rozpatrywany, a decyzję otrzymujesz w ciągu jednego miesiąca. Możesz też skontaktować się z nami — zob. stronę „Usunięcie konta i danych”.",
-            "Gdy przetwarzanie opiera się na zgodzie, możesz tę zgodę wycofać w dowolnym momencie."
+            "Gdy przetwarzanie opiera się na zgodzie, możesz tę zgodę wycofać w dowolnym momencie. Gdy opiera się na naszym prawnie uzasadnionym interesie — na przykład widoczność wolnych pracowników dla pracodawców — możesz w każdej chwili wnieść sprzeciw; w przypadku widoczności jej wyłączenie jest takim sprzeciwem i działa natychmiast."
           ]
         },
         {
@@ -8620,7 +8620,8 @@
         "unknown": "Nie udało się odczytać otwartych pozycji.",
         "offers": "{n, plural, one {# propozycja rezerwacji czeka} few {# propozycje rezerwacji czekają} many {# propozycji rezerwacji czeka} other {# propozycji rezerwacji czeka}} na Twoją odpowiedź",
         "invitations": "{n, plural, one {# zaproszenie czeka} few {# zaproszenia czekają} many {# zaproszeń czeka} other {# zaproszenia czeka}} na Twoją odpowiedź",
-        "unread": "{n, plural, one {# rozmowa} few {# rozmowy} many {# rozmów} other {# rozmowy}} z nieprzeczytanymi wiadomościami"
+        "unread": "{n, plural, one {# rozmowa} few {# rozmowy} many {# rozmów} other {# rozmowy}} z nieprzeczytanymi wiadomościami",
+        "verifyEmail": "Potwierdź adres e-mail, aby zobaczyć wysłane na niego zaproszenia"
       },
       "growth": {
         "title": "Rozwój",
@@ -11032,7 +11033,9 @@
       "empty": "Na razie brak zapisów. Każda zgoda i każde wycofanie będą tu wymienione.",
       "action": {
         "granted": "Udzielona",
-        "withdrawn": "Wycofana"
+        "withdrawn": "Wycofana",
+        "declined": "Nie teraz",
+        "notice_shown": "Wyświetlono informację o widoczności"
       },
       "purpose": {
         "profile_discoverability": "Widoczność dla pracodawców",
@@ -11176,7 +11179,9 @@
       "turnOn": "Przeczytaj warunki i włącz",
       "details": "Co widzą firmy i pełne warunki",
       "grantedNote": "Gotowe — firmy mogą teraz znaleźć Twój profil zawodowy pod anonimowym oznaczeniem.",
-      "withdrawnNote": "Gotowe — Twój profil nie pojawia się już w nowych wyszukiwaniach firm."
+      "withdrawnNote": "Gotowe — Twój profil nie pojawia się już w nowych wyszukiwaniach firm.",
+      "defaultOnNote": "Domyślnie włączone, bo szukasz pracy i nie pracujesz dla firmy przez LabourMarket.ai. Wyłącz jednym dotknięciem — wtedy pozostanie wyłączone, dopóki sam(a) go nie włączysz.",
+      "defaultPendingNote": "Firmy będą mogły znaleźć Twój profil zawodowy od {date}. Jeśli tego nie chcesz, wyłącz teraz — wtedy pozostanie wyłączone."
     }
   },
   "planning": {

@@ -1721,6 +1721,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-23: owner approved #2719 in chat (apply before deploy, then merge). Runtime
       // stall sampler evidence table — numbers only, service_role only, 14-day retention.
       "20261023190000_ops_runtime_samples_v1.sql",
+      // 2026-10-25 (RED, needs-human-gate, applied by main after the owner's one confirmation):
+      // free workers discoverable by default — derived from the one consent ledger, switch OFF.
+      "20261025100000_free_worker_visibility_default_v1.sql",
 ]);
   });
 

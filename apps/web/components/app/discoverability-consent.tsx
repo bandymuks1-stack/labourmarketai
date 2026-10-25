@@ -4,7 +4,10 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 import {
+  declineProfileDiscoverability,
+  getMyDiscoverabilityState,
   grantProfileDiscoverability,
+  recordVisibilityDefaultNotice,
   withdrawProfileDiscoverability,
   type DiscoverabilityState,
 } from "@/lib/privacy/discoverability-actions";
@@ -16,41 +19,44 @@ import {
 } from "@/lib/privacy/discoverability-screen";
 
 /**
- * Profile-discoverability consent control (GDPR Art. 7; EDPB 05/2020) — and
- * the worker's MATCHABILITY SWITCH (owner goal 2026-10-24: a worker must see
- * at once whether employers can find them and change it in ONE action).
+ * Profile-discoverability control (GDPR Art. 7 consent; Art. 13 notice and
+ * Art. 21 objection for the free-worker default) — the worker's MATCHABILITY
+ * SWITCH (owner goals 2026-10-24/25: a worker sees at once whether employers
+ * can find them and changes it in ONE action; free workers are discoverable by
+ * default once informed).
  *
  * Deliberate UX properties (guarded by consent-ux-honesty.test.ts,
- * employer-visibility-doors.test.ts, discoverability-screen.test.ts):
+ * employer-visibility-doors.test.ts, discoverability-screen.test.ts,
+ * free-worker-default-visibility.test.ts):
  * - ONE STATUS LINE FIRST: "Visible to employers · On / Off", icon + word,
  *   never colour alone, then what stays private whatever the switch says;
  * - NO checkbox exists at all — nothing can be "pre-ticked";
- * - OFF: the FULL versioned legal text (title/summary/visible/invisible/
- *   freedom/withdrawal/controller — the exact hashed wording) and the
- *   employer preview are already on screen, with two EQUAL buttons under
- *   them: enable ("Sutinku ir įjungiu matomumą") and decline ("Dabar
- *   neįjungti") — same size, same visual weight, no red scare block. Turning
- *   visibility on is ONE tap, after the text, never before it;
- * - declining performs NO server write and never blocks the private profile,
- *   CV or work journal;
- * - ON: the switch-off button is right under the status — ONE tap, never
- *   more than granting took; the terms and the preview stay one tap down;
- * - THE RESULT IS SAID: after a grant or a withdrawal a status note says
- *   what changed, so the person never has to infer it from a re-render;
- * - `compact` (the worker home): the status line and the one action only;
- *   the OFF side opens the same full text in place before its grant button
- *   exists — the consent is never given from a line the person did not read;
- * - honest degradation: needs-migration / error states are plain text,
- *   never a fake success;
+ * - OFF: the FULL versioned consent text and the employer preview are on
+ *   screen, with two EQUAL buttons under them (enable / not now). Turning
+ *   visibility on is ONE tap, after the text, never before it. "Not now" is
+ *   recorded as a decision (it used to write nothing, so it could not be told
+ *   apart from "never asked"); it never blocks the profile, CV or journal;
+ * - THE DEFAULT NOTICE (free worker, never decided, owner switch armed): the
+ *   versioned notice text is shown with the switch-off right under it; its
+ *   display is recorded in the ledger — the default applies only after that
+ *   record. Nothing here grants anything;
+ * - ON (a grant or the default): switch-off is right under the status — ONE
+ *   tap; once off it stays off until the person turns it on;
+ * - THE RESULT IS SAID: after a grant or a withdrawal a status note says what
+ *   changed;
+ * - SERVER TRUTH: the screen is derived from the last server read and the last
+ *   SUCCESSFUL write only; a failed write re-reads the server and shows that
+ *   state with its button for a retry — never a guess (#2730 review);
+ * - `compact` (the worker home): the status line and the one action only; the
+ *   OFF side opens the same full text in place before its grant button exists;
+ * - honest degradation: needs-migration / error states are plain text;
  * - SEP-7: a state that could not be READ renders as unknown — never as the
- *   "not visible" choice screen, which would tell the person their profile is
- *   hidden because a query failed.
+ *   "not visible" choice screen.
  *
  * ONE component, several doors: the privacy screen (its canonical home), the
- * profile, the worker home, onboarding and the conversation ("kas mato mano
- * profilį?") render THIS component with the same server-built labels
- * (lib/privacy/discoverability-view.ts). `source` only names which door the
- * decision was made at, for the consent ledger.
+ * profile, the worker home, onboarding and the conversation render THIS
+ * component with the same server-built labels (lib/privacy/discoverability-
+ * view.ts). `source` only names which door the decision was made at.
  */
 
 export interface ConsentLegalTexts {
@@ -92,6 +98,10 @@ export interface DiscoverabilityConsentLabels {
   /** The visible result of a grant / a withdrawal. */
   grantedNote: string;
   withdrawnNote: string;
+  /** ON by the free-worker default (not a consent) — and how to switch it off. */
+  defaultOnNote: string;
+  /** The default starts on a date (an existing account's notice period); `{date}`. */
+  defaultPendingNote: string;
   previewTitle: string;
   previewEmpty: string;
   decidedAtLabel: string;
@@ -107,6 +117,7 @@ export function DiscoverabilityConsent({
   locale,
   state,
   legal,
+  notice = null,
   preview,
   labels,
   source = "dashboard_privacy_screen",
@@ -115,6 +126,8 @@ export function DiscoverabilityConsent({
   locale: string;
   state: DiscoverabilityState;
   legal: ConsentLegalTexts;
+  /** The default-visibility notice text (registry, hashed) — shown when due. */
+  notice?: ConsentLegalTexts | null;
   preview: PreviewField[];
   labels: DiscoverabilityConsentLabels;
   /** Where this copy of the consent is rendered — recorded with the decision. */
@@ -128,21 +141,50 @@ export function DiscoverabilityConsent({
   // The outcome of the last SUCCESSFUL grant / withdrawal in this session.
   // Wins over the server read, which some doors never refresh (#2730 review).
   const [confirmed, setConfirmed] = useState<ConfirmedVisibility>(null);
+  // A fresher server read than the props (after a failure, or after the
+  // notice was recorded). The props are the first read; this is the latest.
+  const [live, setLive] = useState<DiscoverabilityState | null>(null);
   // Which result note to show — set only by a success, cleared by a new try.
   const [note, setNote] = useState<"granted" | "withdrawn" | null>(null);
   // compact only: the person asked to read the terms before deciding.
   const [opened, setOpened] = useState(false);
   const [pending, startTransition] = useTransition();
-  // The result note of a grant / withdrawal. Granting collapses the terms
-  // above the person's scroll position (compact) and the server re-render
-  // can move the block, so the note is brought into view: the result is SEEN,
-  // not left above the fold (local walk 2026-10-24, 1280 px).
+  // The result note of a grant / withdrawal is brought into view: the result
+  // is SEEN, not left above the fold (local walk 2026-10-24, 1280 px).
   const resultRef = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
     if (note) resultRef.current?.scrollIntoView({ block: "nearest" });
   }, [note]);
 
-  const status = state.status;
+  const st = live ?? state;
+  const status = st.status;
+
+  /** After a failed write: ask the server what is TRUE and show that. */
+  async function reconcile() {
+    try {
+      const fresh = await getMyDiscoverabilityState();
+      if (fresh.kind === "ok") {
+        setLive(fresh);
+        setConfirmed(null);
+      }
+    } catch {
+      /* the read failed too: keep the last confirmed screen and the error */
+    }
+  }
+
+  // THE NOTICE IS RECORDED WHILE IT IS ON SCREEN — once per mount, never from
+  // anywhere else. Then the server is re-read: the default applies by the
+  // database rule (or, for an existing account, from the date it names).
+  const noticeShown = st.kind === "ok" && st.noticeDue === true && notice !== null && confirmed === null;
+  const noticeRecorded = useRef(false);
+  useEffect(() => {
+    if (!noticeShown || noticeRecorded.current) return;
+    noticeRecorded.current = true;
+    void recordVisibilityDefaultNotice({ locale, source }).then((res) => {
+      if (res.kind === "ok") void reconcile();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noticeShown]);
 
   function onGrant() {
     setNote(null);
@@ -154,9 +196,12 @@ export function DiscoverabilityConsent({
         setNote("granted");
         setPhase("idle");
       } else if (res.kind === "needs-migration") setPhase("needs-migration");
-      // A failure changes NOTHING about the visibility shown: the screen stays
-      // the last confirmed one, with its button for a retry.
-      else setPhase("error");
+      // A failure changes NOTHING about the visibility shown: the server is
+      // re-read and the true screen keeps its button for a retry.
+      else {
+        setPhase("error");
+        await reconcile();
+      }
     });
   }
 
@@ -170,23 +215,27 @@ export function DiscoverabilityConsent({
         setNote("withdrawn");
         setPhase("idle");
       } else if (res.kind === "needs-migration") setPhase("needs-migration");
-      else setPhase("error");
+      else {
+        setPhase("error");
+        await reconcile();
+      }
     });
   }
 
-  const legalBlock = (
+  const textBlock = (t: ConsentLegalTexts) => (
     <div className="mt-3 flex flex-col gap-2 text-sm leading-relaxed text-text-primary">
-      <p>{legal.summary}</p>
-      <p>{legal.visibleData}</p>
-      <p>{legal.invisibleData}</p>
-      <p className="text-text-secondary">{legal.freedom}</p>
-      <p className="text-text-secondary">{legal.withdrawal}</p>
-      {/* GDPR Art. 13(1)(a): controller identity shown WITH the consent text. */}
+      <p>{t.summary}</p>
+      <p>{t.visibleData}</p>
+      <p>{t.invisibleData}</p>
+      <p className="text-text-secondary">{t.freedom}</p>
+      <p className="text-text-secondary">{t.withdrawal}</p>
+      {/* GDPR Art. 13(1)(a): controller identity shown WITH the text. */}
       <p className="text-text-secondary" data-testid="consent-controller">
-        {legal.controller}
+        {t.controller}
       </p>
     </div>
   );
+  const legalBlock = textBlock(legal);
 
   const previewBlock = (
     <div
@@ -243,7 +292,26 @@ export function DiscoverabilityConsent({
     </p>
   );
 
-  if (phase === "needs-migration" || state.kind === "needs-migration") {
+  const withdrawButton = (
+    <button
+      type="button"
+      onClick={onWithdraw}
+      disabled={pending}
+      className="mt-3 inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue disabled:opacity-60"
+      data-testid="discoverability-withdraw"
+    >
+      {labels.withdraw}
+    </button>
+  );
+
+  const errorLine =
+    phase === "error" ? (
+      <p role="alert" className="mt-2 text-sm text-text-secondary" data-testid="discoverability-error">
+        {labels.errorGeneric}
+      </p>
+    ) : null;
+
+  if (phase === "needs-migration" || st.kind === "needs-migration") {
     return (
       <p className="text-sm text-text-secondary" data-testid="discoverability-unavailable">
         {labels.needsMigration}
@@ -254,7 +322,7 @@ export function DiscoverabilityConsent({
   // SEP-7: the read failed (or there is no signed-in reader). The choice
   // screen below would say "Profilis darbdaviams nematomas" — a claim about
   // this person's profile made from a failed query. Say it could not be read.
-  if (state.kind === "error" || state.kind === "not-authed") {
+  if (st.kind === "error" || st.kind === "not-authed") {
     return (
       <p
         role="status"
@@ -266,15 +334,37 @@ export function DiscoverabilityConsent({
     );
   }
 
-  const screen = discoverabilityScreen({ status, confirmed });
+  // THE DEFAULT NOTICE — a free worker who never decided, the switch armed.
+  // The status is still OFF here (the default applies once this display is
+  // recorded); the switch-off is offered right away.
+  if (noticeShown && notice) {
+    return (
+      <div data-testid="discoverability-notice">
+        {statusLine(false)}
+        <h3 className="mt-3 text-sm font-semibold text-text-primary">{notice.title}</h3>
+        {textBlock(notice)}
+        {!compact && previewBlock}
+        {withdrawButton}
+        {errorLine}
+      </div>
+    );
+  }
 
-  // ON — the switch-off is ONE tap, right under the status.
+  const screen = discoverabilityScreen({ status, confirmed });
+  const byDefault = confirmed === null && status === "default_on";
+
+  // ON — a grant or the free-worker default. Switch-off is ONE tap.
   if (screen === "granted") {
     return (
-      <div data-testid="discoverability-granted">
+      <div data-testid="discoverability-granted" data-default={byDefault ? "true" : undefined}>
         {statusLine(true)}
         <p className="mt-1 text-sm text-text-secondary">{labels.statusVisibleBody}</p>
         {privateLine}
+        {byDefault && (
+          <p className="mt-2 text-sm text-text-secondary" data-testid="discoverability-default-note">
+            {labels.defaultOnNote}
+          </p>
+        )}
         {note === "granted" && (
           <p
             ref={resultRef}
@@ -285,15 +375,7 @@ export function DiscoverabilityConsent({
             {labels.grantedNote}
           </p>
         )}
-        <button
-          type="button"
-          onClick={onWithdraw}
-          disabled={pending}
-          className="mt-3 inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue disabled:opacity-60"
-          data-testid="discoverability-withdraw"
-        >
-          {labels.withdraw}
-        </button>
+        {withdrawButton}
         {!compact && (
           <details className="group mt-3" data-testid="discoverability-details">
             <summary className="inline-flex min-h-11 cursor-pointer list-none items-center text-sm font-medium text-text-secondary hover:text-text-primary">
@@ -302,24 +384,48 @@ export function DiscoverabilityConsent({
                 ›
               </span>
             </summary>
-            {state.decidedAt && confirmed === null && (
+            {st.decidedAt && confirmed === null && !byDefault && (
               <p className="mt-1 text-xs text-text-muted">
-                {labels.decidedAtLabel}: {state.decidedAt.slice(0, 10)}
-                {state.version ? ` · ${labels.versionLabel}: ${state.version}` : null}
+                {labels.decidedAtLabel}: {st.decidedAt.slice(0, 10)}
+                {st.version ? ` · ${labels.versionLabel}: ${st.version}` : null}
               </p>
             )}
             {previewBlock}
-            {legalBlock}
+            {byDefault && notice ? textBlock(notice) : legalBlock}
           </details>
         )}
-        {phase === "error" && (
-          <p className="mt-2 text-sm text-text-secondary">{labels.errorGeneric}</p>
-        )}
+        {errorLine}
       </div>
     );
   }
 
-  // OFF — never decided, withdrawn, or granted under a superseded text.
+  // The default starts on a date (an existing account's notice period): not
+  // visible yet; the person can object now.
+  if (screen === "pending") {
+    const from = st.defaultFrom ? st.defaultFrom.slice(0, 10) : "";
+    return (
+      <div data-testid="discoverability-pending">
+        {statusLine(false)}
+        <p className="mt-1 text-sm text-text-secondary" data-testid="discoverability-pending-note">
+          {labels.defaultPendingNote.replace("{date}", from)}
+        </p>
+        {privateLine}
+        {withdrawButton}
+        {!compact && notice && (
+          <details className="group mt-3" data-testid="discoverability-details">
+            <summary className="inline-flex min-h-11 cursor-pointer list-none items-center text-sm font-medium text-text-secondary hover:text-text-primary">
+              {labels.details}
+            </summary>
+            {previewBlock}
+            {textBlock(notice)}
+          </details>
+        )}
+        {errorLine}
+      </div>
+    );
+  }
+
+  // OFF — never decided, withdrawn, declined, or granted under a superseded text.
   const stale = status === "granted_stale_version" && confirmed === null;
   const why = stale
     ? labels.statusStale
@@ -365,8 +471,8 @@ export function DiscoverabilityConsent({
           <h3 className="mt-4 text-sm font-semibold text-text-primary">{legal.title}</h3>
           {legalBlock}
           {previewBlock}
-          {/* Two EQUAL choices — same classes, same weight. Declining writes
-              nothing and removes nothing. */}
+          {/* Two EQUAL choices — same classes, same weight. "Not now" is
+              recorded as a decision and removes nothing. */}
           <div className="mt-4 flex flex-wrap gap-3">
             <button
               type="button"
@@ -379,7 +485,10 @@ export function DiscoverabilityConsent({
             </button>
             <button
               type="button"
-              onClick={() => setPhase("declined")}
+              onClick={() => {
+                setPhase("declined");
+                void declineProfileDiscoverability({ locale, source });
+              }}
               disabled={pending}
               className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue disabled:opacity-60"
               data-testid="discoverability-decline"
@@ -389,9 +498,7 @@ export function DiscoverabilityConsent({
           </div>
         </div>
       )}
-      {phase === "error" && (
-        <p className="mt-2 text-sm text-text-secondary">{labels.errorGeneric}</p>
-      )}
+      {errorLine}
     </div>
   );
 }

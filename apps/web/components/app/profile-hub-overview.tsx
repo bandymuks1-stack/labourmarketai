@@ -31,6 +31,7 @@ import { getMyDiscoverabilityState } from "@/lib/privacy/discoverability-actions
 import { PROFILE_DISCOVERABILITY_V1 } from "@/lib/privacy/consent-definitions";
 import { buildOwnDiscoverabilityPreview } from "@/lib/privacy/discoverability-preview";
 import {
+  defaultVisibilityNotice,
   discoverabilityConsentLabels,
   discoverabilityPreviewFields,
   toConsentLocale,
@@ -548,6 +549,7 @@ export async function ProfileHubOverview({
             source="profile"
             state={discoverability}
             legal={PROFILE_DISCOVERABILITY_V1.texts[toConsentLocale(locale)]}
+            notice={defaultVisibilityNotice(locale)}
             preview={discoverabilityPreviewFields(visibilityPreview, tConsent)}
             labels={discoverabilityConsentLabels(tConsent)}
           />
