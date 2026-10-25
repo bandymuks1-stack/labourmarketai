@@ -149,7 +149,10 @@ describe("1. exactly one migration owns finance_records — the human-gated I2 p
       for (const f of readdirSync(abs).filter((f) => f.endsWith(".sql"))) {
         if (f.startsWith(I2) || f.startsWith(ORG_AUTHORITY)) continue;
         const src = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
-        if (TRAIN_J.some((p) => f.startsWith(p))) {
+        // 20261024130000 (Stage 7 forecasts, owner order 2026-10-24) READS finance_records (the
+        // actual cost in the service-only facts door) and hangs the AFTER-row forecast_signal
+        // trigger on it. Held to the SAME extension rule: never create/drop it, never a v1 RPC.
+        if (TRAIN_J.some((p) => f.startsWith(p)) || f.startsWith("20261024130000_project_forecasts_v1")) {
           // An EXTENSION may name the table (alter/insert/select) but must
           // never create or drop it, and must never (re)define a v1 RPC.
           expect(

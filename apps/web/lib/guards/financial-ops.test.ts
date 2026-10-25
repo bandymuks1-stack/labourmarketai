@@ -234,6 +234,21 @@ describe("1. exactly three human-gated migration pairs own the financial-ops sli
       for (const f of readdirSync(abs).filter((n) => n.endsWith(".sql"))) {
         if (TRAIN_J.some((p) => f.startsWith(p))) continue;
         const src = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
+        if (f.startsWith("20261024130000_project_forecasts_v1")) {
+          // Stage 7 forecasts (owner order 2026-10-24): names procurement_inquiries ONLY to hang
+          // the AFTER-row forecast_signal trigger on it (a new/changed order or a supply status
+          // change marks the project's forecast stale). Never creates, alters or writes it, and
+          // names nothing else this slice owns.
+          const code = src.replace(/\r/g, "").replace(/--.*$/gm, "");
+          for (const m of code.matchAll(/procurement_inquiries\b/g)) {
+            const before = code.slice(Math.max(0, m.index! - 40), m.index!);
+            expect(/(on public\.|tg_table_name = ')$/.test(before), `${f}: procurement_inquiries used outside a trigger position`).toBe(true);
+          }
+          for (const name of OWNED.filter((n) => n !== "procurement_inquiries")) {
+            expect(src, `${dir}/${f} must not define ${name}`).not.toContain(name);
+          }
+          continue;
+        }
         if (TRIP_READERS.some((p) => f.startsWith(p))) {
           // A reader may name business_trips ONLY to read it: `to_regclass(...)`
           // or `from public.business_trips`. Nothing else it names may be owned.

@@ -168,6 +168,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-23 (RED, needs-human-gate, NOT applied): journal evidence integrity v1
       // (server-side hash chain + immutable evidence; renumbered from 20261016190000).
       "20261023132610_",
+      // 2026-10-24 (RED, needs-human-gate, NOT applied): Stage 7 forecast storage, mode settings
+      // and the significant-change signal (owner integrated-architecture order 2026-10-24).
+      "20261024130000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

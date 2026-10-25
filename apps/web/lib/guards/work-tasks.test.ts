@@ -162,6 +162,10 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
    */
   const CONSUMERS = [
     LIFECYCLE_READER,
+    // 20261024130000 — Stage 7 forecasts (owner order 2026-10-24): the service-only facts door
+    // READS work_tasks (status, parent, resolved_at) and an AFTER-row forecast_signal trigger
+    // notes scope / completion changes. Creates, alters, writes and policies nothing on it.
+    "20261024130000_project_forecasts_v1",
     "20260817232000_management_decisions_v1",
     // 20261003150600 — team_assignments (WRK-6): holds an FK to public.work_tasks and reads it to
     // check a task belongs to the project a team is assigned to. Creates/alters/writes nothing on it.
