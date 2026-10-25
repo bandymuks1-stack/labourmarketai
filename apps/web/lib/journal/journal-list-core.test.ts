@@ -173,6 +173,26 @@ describe("listJournalEntries — every live row, in 1000-row pages, with coverag
     expect(r.coverage).toEqual({ entriesRead: 1197, truncated: false });
   });
 
+  it("a RETURNED original answered by its correction is one card: the correction (walk work-verification V-4)", async () => {
+    // Production walk 2026-10-25 (run 40209944686): after the worker answered
+    // "changes requested" with a correction, the original's card was gone from
+    // the diary. That is this rule, not a lost decision: the original keeps its
+    // decision row and rides in `correctedOriginals`; the diary (built from
+    // `entries`) lists the chain once, by its live correction.
+    const decision = { confirmation_scope: { decision: "changes_requested" }, created_at: "2026-10-25T10:00:00Z" };
+    const data = [
+      { ...rows(1)[0], id: "fix", correction_of: "orig" },
+      { ...rows(1)[0], id: "orig", journal_entry_confirmations: [decision] as never[] },
+    ];
+    const { caller } = pagedClient(data);
+    const r = await listJournalEntries(caller, { workerId: "w-1" });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.entries.map((e) => e.id)).toEqual(["fix"]);
+    expect(r.correctedOriginals.map((e) => e.id)).toEqual(["orig"]);
+    expect(r.correctedOriginals[0].journal_entry_confirmations).toEqual([decision]);
+  });
+
   it("a caller-bounded read is ONE `.limit()` page and says whether the bound was hit", async () => {
     const full = pagedClient(rows(50));
     const r1 = await listJournalEntries(full.caller, { workerId: "w-1", limit: 20 });

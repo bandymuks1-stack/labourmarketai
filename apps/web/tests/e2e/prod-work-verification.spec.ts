@@ -16,7 +16,12 @@ import { answerNoProjectIfAsked, chooseWorkContextIfAsked } from "./worklog-cont
  *   verification_pending  — saved in Alfa's employee context, review on (V-1)
  *   returned              — the owner asks for changes in the inbox (V-3, V-4)
  *   verification_pending  — the worker's correction is a NEW entry back in
- *                           the queue; the original keeps its decision (V-4)
+ *                           the queue; the original keeps its decision row
+ *                           and leaves the diary (V-4): one correction chain
+ *                           is ONE card, read by its live correction
+ *                           (counted once — lib/journal/journal-list-core.ts
+ *                           `countedOnce`), so nothing is listed or counted
+ *                           twice. "Returned" is read BEFORE the answer.
  *   verified              — the owner confirms the correction (V-5, V-6)
  *   disputed              — the owner rejects the second entry (V-5, V-6)
  *
@@ -44,7 +49,8 @@ import { answerNoProjectIfAsked, chooseWorkContextIfAsked } from "./worklog-cont
  * `already_confirmed_use_correction_request`; decisions are append-only
  * evidence), so three entries tagged `QA-SYNTHETIC <run>` stay in Vytas's
  * journal: the returned original, its confirmed correction and the disputed
- * one, with their three decision rows. `afterAll`, pass or fail, deletes every
+ * one, with their three decision rows (the diary lists two cards: the
+ * returned original reads through its correction). `afterAll`, pass or fail, deletes every
  * entry of this run that is still undecided (a red step part-way). Failure
  * messages carry states only.
  */
@@ -325,7 +331,15 @@ test("V-4 (2.21). the worker reads 'returned', answers with a correction, and th
   ids.e1fix = (await card(page, `${TAG} [v1-fix]:`)).id;
   expect(ids.e1fix, "the correction is its own entry").not.toBe(ids.e1);
   await expectVerification(page, ids.e1fix, "verification_pending", "Išsiųsta vadovui");
-  await expectVerification(page, ids.e1, "returned", "Grąžinta");
+  // The answered original is not a second card: the chain is counted once by
+  // its live correction (walk 2026-10-25 run 40209944686 read the original's
+  // verification line here and found no card — the canonical list read had
+  // moved it to `correctedOriginals`, by design since #1689). Its decision row
+  // is append-only and stays; the delete check above proved it was decided.
+  await expect(
+    inMain(page).locator(`[data-testid="journal-entry-card-${ids.e1}"]`),
+    "the corrected original is not listed beside its correction",
+  ).toHaveCount(0);
   await ctx.close();
 });
 
@@ -347,8 +361,11 @@ test("V-5 (2.21). the owner confirms the correction and rejects the second entry
 
 test("V-6 (2.21). the worker reads every state after a fresh load — in Lithuanian, in English and on the phone", async ({ browser }) => {
   test.skip(!decided.has(ids.e2), "V-5 did not decide the entries");
+  // The returned original was answered in V-4, so its chain reads by the
+  // correction (counted once); "returned" itself is read in V-4 before the
+  // answer. Without a correction the original is still the chain's card.
   const expected: { id: string; marker: string; state: string; lt: string; en: string }[] = [
-    { id: ids.e1, marker: "[v1]:", state: "returned", lt: "Grąžinta", en: "Returned" },
+    ...(ids.e1fix ? [] : [{ id: ids.e1, marker: "[v1]:", state: "returned", lt: "Grąžinta", en: "Returned" }]),
     { id: ids.e2, marker: "[v2]:", state: "disputed", lt: "Ginčijama", en: "Disputed" },
     ...(decided.has(ids.e1fix) ? [{ id: ids.e1fix, marker: "[v1-fix]:", state: "verified", lt: "Vadovo patvirtinta", en: "Manager confirmed" }] : []),
   ];
@@ -361,6 +378,12 @@ test("V-6 (2.21). the worker reads every state after a fresh load — in Lithuan
       await expect(inMain(page).getByTestId(`journal-entry-delete-${e.id}`), "a decided entry is not deletable").toHaveCount(0);
     }
     await expect(inMain(page).getByTestId(`journal-entry-status-${ids.e2}`).locator('li[data-step="rejected"]')).toHaveCount(1);
+    if (ids.e1fix) {
+      await expect(
+        inMain(page).locator(`[data-testid="journal-entry-card-${ids.e1}"]`),
+        "the corrected original is not listed beside its correction",
+      ).toHaveCount(0);
+    }
     if (decided.has(ids.e1fix)) {
       await expect(inMain(page).getByTestId(`journal-entry-status-${ids.e1fix}`).locator('li[data-step="approved"]')).toHaveCount(1);
     }
