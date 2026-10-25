@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
+import { Card } from "@/components/ui/Card";
 import { TrackedLink } from "@/components/app/tracked-link";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import type { CompanyRow, CompanyVerificationStatus } from "@/lib/company/company-setup";
@@ -217,10 +218,8 @@ export async function CompanyNoProfileGuide({
       const tChat = await getTranslations("conversation.chat");
       const tOpen = await getTranslations("companyWorkHistory.business.workspace");
       return (
-        <section
-          className="card-border flex flex-col gap-3 p-6"
-          data-testid="company-personal-space-guide"
-        >
+        <section data-testid="company-personal-space-guide">
+          <Card className="flex flex-col gap-3">
           <h2 className="font-display text-xl font-semibold text-text-primary">
             {t("personalSpace.title")}
           </h2>
@@ -242,6 +241,7 @@ export async function CompanyNoProfileGuide({
               );
             })}
           </ul>
+          </Card>
         </section>
       );
     }
