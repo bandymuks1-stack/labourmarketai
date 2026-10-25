@@ -66,6 +66,12 @@ import { PageTitle } from "@/components/app/premium/page-title";
 import { Card } from "@/components/ui/Card";
 import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
 
+/** A worker's own standing interest in this need — the signal the interest
+ *  card's in-app contact action is server-gated on. */
+function hasStandingInterest(status: string | null | undefined): boolean {
+  return status === "interested" || status === "reviewed" || status === "contacted";
+}
+
 const READINESS_TONE: Record<CompanyCandidateLabel, string> = {
   can_be_considered: "border-state-success/40 bg-state-success/10 text-state-success",
   limited_information: "border-state-amber/40 bg-state-amber/10 text-state-amber",
@@ -777,6 +783,11 @@ export default async function CompanyScoutingPage({
                 conversationExists: pipelineFacts?.conversationByWorker.has(h.workerId) ?? false,
               });
               const inConversation = pipelineFacts?.conversationByWorker.has(h.workerId) ?? false;
+              // The worker raised their hand: the interest card below opens the
+              // in-app thread NOW (contactInterestedWorkerAction), so this box
+              // must not say messaging comes later or demand a shortlist first
+              // (UX review 2026-10-24, 4.16).
+              const interestDoor = hasStandingInterest(h.interestStatus);
               return (
                 <li
                   key={h.workerId}
@@ -871,9 +882,11 @@ export default async function CompanyScoutingPage({
                               <span aria-hidden>{h.canContact ? "💬" : "⏳"}</span>
                               {inConversation
                                 ? t("comms.inConversation")
-                                : h.canContact
-                                  ? t("comms.eligible")
-                                  : t("comms.blocked")}
+                                : interestDoor
+                                  ? t("comms.interestDoor")
+                                  : h.canContact
+                                    ? t("comms.eligible")
+                                    : t("comms.blocked")}
                             </p>
                             {h.canContact ? (
                               <div className="flex flex-col gap-2">
@@ -888,7 +901,7 @@ export default async function CompanyScoutingPage({
                                       error: t("request.error"), limitReached: t("request.limitReached"),
                                     }}
                                   />
-                                ) : inConversation ? null : (
+                                ) : inConversation || interestDoor ? null : (
                                   <p className="text-meta text-text-muted" data-testid={`scout-shortlist-first-${h.workerId}`}>
                                     {t("request.shortlistFirst")}
                                   </p>
@@ -1155,6 +1168,9 @@ export default async function CompanyScoutingPage({
                 pipelineFacts?.conversationByWorker.has(c.workerId) ?? false,
             });
             const inConversation = pipelineFacts?.conversationByWorker.has(c.workerId) ?? false;
+            // A candidate who raised their hand is reachable now through the
+            // interest card (UX review 2026-10-24, 4.16) — see the hand-raiser list.
+            const interestDoor = !actsForClient && hasStandingInterest(result.interestByWorker[c.workerId]);
             const nextAction = nextActionForStage(stage, {
               locale,
               requestId: result.demand.id,
@@ -1329,9 +1345,11 @@ export default async function CompanyScoutingPage({
                       ? t("lifecycle.closedNote")
                       : inConversation
                         ? t("comms.inConversation")
-                        : c.canContact
-                          ? t("comms.eligible")
-                          : t("comms.blocked")}
+                        : interestDoor
+                          ? t("comms.interestDoor")
+                          : c.canContact
+                            ? t("comms.eligible")
+                            : t("comms.blocked")}
                   </p>
                   {c.canContact && needOpen ? (
                     <div className="flex flex-col gap-2">
@@ -1354,9 +1372,10 @@ export default async function CompanyScoutingPage({
                             limitReached: t("request.limitReached"),
                           }}
                         />
-                      ) : inConversation ? null : (
+                      ) : inConversation || interestDoor ? null : (
                         // A conversation that already exists is the fact: no
-                        // "shortlist first" under it (scouting walk 2026-10-09).
+                        // "shortlist first" under it (scouting walk 2026-10-09);
+                        // nor under a raised hand, whose card opens the thread.
                         <p
                           className="text-meta text-text-muted"
                           data-testid={`scout-shortlist-first-${c.workerId}`}

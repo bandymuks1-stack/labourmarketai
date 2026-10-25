@@ -3945,7 +3945,7 @@
       "evidenceRecs": "References — help back up your reliability.",
       "evidenceLegal": "ID or legal documents — used only when needed for hiring or a legal process.",
       "privacyNote": "Your documents stay private. They are not shown to an employer or client without a clear basis.",
-      "uploadCostNote": "Uploading a CV is free — no LMC is charged. The system handles the file size itself."
+      "uploadCostNote": "Uploading a CV is free — no platform credits (LMC) are charged. The system handles the file size itself."
     }
   },
   "live": {
@@ -6263,6 +6263,11 @@
           "trip": "Business trip",
           "absence": "Unavailable",
           "plan": "Planned work"
+        },
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
     },
@@ -8810,7 +8815,7 @@
     "candidate": "Candidate",
     "privacy": {
       "contactsHidden": "Contacts stay hidden — no phone, email, or name.",
-      "profileSafe": "You see only profile-safe signals: skill evidence, location, availability and rate. Reaching out happens later, through an explicit step."
+      "profileSafe": "You see only profile-safe signals: skill evidence, location, availability and rate. Name and contact details appear only when the person allows it."
     },
     "fields": {
       "location": "Location",
@@ -8828,9 +8833,10 @@
     "rateFrom": "from €{min}/mo",
     "noRate": "Not stated",
     "comms": {
-      "eligible": "This worker has open availability — messaging opens in a later step.",
+      "eligible": "This worker has open availability — you can reach them in the platform.",
       "inConversation": "You are already in a conversation with this worker — continue it in Messages.",
-      "blocked": "Communication becomes available when the worker has open availability or an available-from date."
+      "blocked": "Communication becomes available when the worker has open availability or an available-from date.",
+      "interestDoor": "This person raised their hand for this need — you can write to them now with “Contact in the platform”."
     },
     "request": {
       "button": "Request to communicate",
@@ -15508,7 +15514,7 @@
       "suggestOverdue": "{count, plural, one {# task is past its due day} other {# tasks are past their due day}}.",
       "suggestLogToday": "You are working today and nothing is logged yet.",
       "suggestReserve": "A deadline lands tomorrow, and tomorrow is nearly free.",
-      "suggestReserveNamed": "„{label}“ is due tomorrow, and tomorrow is nearly free.",
+      "suggestReserveNamed": "“{label}” is due tomorrow, and tomorrow is nearly free.",
       "suggestBasis": "From your own calendar and tasks."
     },
     "ai": {

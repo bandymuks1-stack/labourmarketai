@@ -157,6 +157,22 @@ const COST_RANK: Record<AiProviderCostClass, number> = {
  * network the operator controls. That is the single property the old config
  * could not express.
  */
+/** Every LLM task, declared for the free API tiers. Declaring a capability
+ *  CONNECTS NOTHING: the egress gate still decides what may leave. */
+const FREE_TIER_LLM_CAPABILITIES: readonly AiTaskType[] = [
+  "structure_future_work",
+  "derive_workforce_requirements",
+  "normalize_work_scope",
+  "normalize_external_profile",
+  "extract_cv",
+  "explain_match",
+  "translate_message",
+  "draft_follow_up",
+  "explain_market_demand",
+  "propose_conversation_intent",
+  "translate_vacancy",
+];
+
 export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
   {
     id: "local",
@@ -190,6 +206,47 @@ export const AI_PROVIDER_PROFILES: readonly AiProviderProfile[] = [
     // cloud models do, so the runtime keeps its JSON repair pass for them.
     structuredOutput: false,
     priority: 0,
+  },
+  // ── FREE API TIERS (owner order 2026-10-25) ──────────────────────────────
+  // External, `free_tier`: tried after a configured local runtime and BEFORE
+  // anything metered. The egress gate sends them PUBLIC payloads only (no
+  // grant names them) and caps any future grant at LOW_RISK_PROJECT_DATA, so
+  // declaring a capability here connects nothing a person wrote. Order inside
+  // the class: Cloudflare first — the only one whose terms say "does not
+  // train" and "not retained" — then Mistral (EU vendor, strongest Lithuanian
+  // of the three, trains by default), then Groq (US storage, training not
+  // stated). Each is inert without its own flag + key (providers/free-tier.ts).
+  {
+    id: "cloudflare",
+    displayName: "Cloudflare Workers AI (free allocation)",
+    costClass: "free_tier",
+    requiresKey: true,
+    locality: "cloud",
+    capabilities: FREE_TIER_LLM_CAPABILITIES,
+    // `response_format` is undocumented on its compatibility endpoint, so the
+    // JSON contract relies on the prompt hint + repair, like the local runtime.
+    structuredOutput: false,
+    priority: 1,
+  },
+  {
+    id: "mistral",
+    displayName: "Mistral AI (free Experiment plan)",
+    costClass: "free_tier",
+    requiresKey: true,
+    locality: "cloud",
+    capabilities: FREE_TIER_LLM_CAPABILITIES,
+    structuredOutput: true,
+    priority: 2,
+  },
+  {
+    id: "groq",
+    displayName: "Groq (free plan)",
+    costClass: "free_tier",
+    requiresKey: true,
+    locality: "cloud",
+    capabilities: FREE_TIER_LLM_CAPABILITIES,
+    structuredOutput: true,
+    priority: 3,
   },
   {
     id: "gemini",

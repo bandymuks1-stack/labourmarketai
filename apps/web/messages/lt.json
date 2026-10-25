@@ -2104,7 +2104,7 @@
       },
       "title": "Įmonės darbo erdvė",
       "subtitle": "Įmonės kontekstas yra įėjimo taškas, ne apribojimas. Galite turėti ir kitas roles bei jas pridėti vėliau iš vaidmens perjungiklio.",
-      "pilotDisclaimer": "Atitikimas / matching dar nesiūlomas. Niekas netampa viešu automatiškai. Galite ramiai paruošti pirmą poreikį — jis iškart išsaugomas ir lieka privatus.",
+      "pilotDisclaimer": "Atitikimas dar nesiūlomas. Niekas netampa viešu automatiškai. Gali ramiai paruošti pirmą poreikį — jis iškart išsaugomas ir lieka privatus.",
       "profileLink": "Mano įgūdžiai (jei esate ir asmuo, ne tik įmonė)",
       "nextActions": {
         "heading": "Tolesni žingsniai",
@@ -2626,7 +2626,7 @@
       "backToActions": "Veiksmų centras",
       "title": "Mano užklausos",
       "subtitle": "Pateikti užklausą — tai veiksmas; jį gali atlikti ir žmogus, ir įmonė. Įėjimo taškas, ne atskiras produktas. Galite vėliau pridėti ir kitus vaidmenis.",
-      "pilotDisclaimer": "Nepateikiame netikrų pasiūlymų. Jūsų užklausa lieka privati, kol nenuspręsite kitaip.",
+      "pilotDisclaimer": "Nepateikiame netikrų pasiūlymų. Tavo užklausa lieka privati, kol nenuspręsi kitaip.",
       "firstAction": {
         "title": "Papildoma: privatūs juodraščio užrašai",
         "body": "Užsirašykite, ko jums reikia. Šis juodraštis privatus — komandą pasiekia užklausos forma aukščiau."
@@ -2713,7 +2713,7 @@
       },
       "requests": {
         "heading": "Pirkėjo užklausos",
-        "subheading": "Pateikite struktūruotą darbo / komandos paklausą. Užklausa lieka privati ir matoma tik jums ir administratoriui. Jokio automatinio matching, jokios atviros rinkos.",
+        "subheading": "Pateik struktūruotą darbo / komandos paklausą. Užklausa lieka privati ir matoma tik tau ir administratoriui. Jokio automatinio atitikimo, jokios atviros rinkos.",
         "manualReviewBanner": "Rankinio peržiūros režimas: nesiūlome kandidatų automatiškai. Operatorius peržiūri pateiktas užklausas ir grįžta su tolesniais žingsniais.",
         "listHeading": "Mano užklausos",
         "emptyStateHeading": "Dar nėra pirkėjo užklausų — sukurkite užklausą",
@@ -3027,7 +3027,7 @@
       "communication": "Pokalbiai",
       "support": "Pagalbos pokalbiai",
       "companyVerification": "Įmonių patvirtinimas",
-      "matching": "Matching darbastalis",
+      "matching": "Atitikimo darbastalis",
       "market": "Rinkos situacija",
       "league": "Šalių darbo rinka",
       "readiness": "Pasiruošimo centras",
@@ -3216,9 +3216,9 @@
     },
     "matching": {
       "eyebrow": "ADMIN · PHASE 3",
-      "title": "Matching darbastalis",
+      "title": "Atitikimo darbastalis",
       "subtitle": "Atviri poreikiai šalia darbuotojų pasiūlos — peržiūrėk, nuspręsk, užfiksuok.",
-      "humanNote": "Kiekvienas match čia parinktas žmogaus, ne algoritmo. Sistema nereitinguoja ir nesiūlo — ji tik rodo realius duomenis ir užfiksuoja tavo sprendimą su grįžtamojo ryšio pastaba.",
+      "humanNote": "Kiekvieną atitikimą čia parenka žmogus, ne algoritmas. Sistema nereitinguoja ir nesiūlo — ji tik rodo realius duomenis ir užfiksuoja tavo sprendimą su grįžtamojo ryšio pastaba.",
       "back": "Grįžti į admin",
       "migrationBlocker": "Suvedimo darbastalis laikinai nepasiekiamas, kol ruošiami jo duomenys.",
       "demand": {
@@ -3253,7 +3253,7 @@
         "reviewNote": "Peržiūros pastaba"
       },
       "log": {
-        "title": "Žmogaus match žurnalas"
+        "title": "Žmogaus atitikimų žurnalas"
       },
       "supply": {
         "title": "Darbuotojų pasiūla",
@@ -3278,7 +3278,7 @@
         "workerPlaceholder": "Pasirink darbuotoją…",
         "noteLabel": "Grįžtamojo ryšio pastaba (kas tiko, ko trūko)",
         "notePlaceholder": "Pvz. profesija tinka, dar trūksta A1 dokumento…",
-        "recordInReview": "Užfiksuoti match · peržiūrima",
+        "recordInReview": "Užfiksuoti atitikimą · peržiūrima",
         "recordFollowup": "Užfiksuoti · reikia patikslinti",
         "recordApproved": "Užfiksuoti · patvirtinta"
       },
@@ -3945,7 +3945,7 @@
       "evidenceRecs": "Rekomendacijos — padeda pagrįsti patikimumą.",
       "evidenceLegal": "Asmens ar teisiniai dokumentai — naudojami tik tada, kai reikia įdarbinimo ar teisiniam procesui.",
       "privacyNote": "Tavo dokumentai privatūs. Jie nerodomi darbdaviui ar klientui be aiškaus pagrindo.",
-      "uploadCostNote": "CV įkėlimas nemokamas — LMC nenuskaitoma. Sistema pati susitvarko su failo dydžiu."
+      "uploadCostNote": "CV įkėlimas nemokamas — platformos kreditų (LMC) nenuskaitome. Sistema pati susitvarko su failo dydžiu."
     }
   },
   "live": {
@@ -4757,8 +4757,8 @@
         "account_intro": "Tvarkyk savo el. paštą ir vaidmenis."
       },
       "customer": {
-        "offerHint": "Nori siūlyti paslaugas? Pridėk Worker vaidmenį.",
-        "offerHintCta": "Pridėti Worker vaidmenį"
+        "offerHint": "Nori siūlyti paslaugas? Pridėk darbuotojo vaidmenį.",
+        "offerHintCta": "Pridėti darbuotojo vaidmenį"
       },
       "account": {
         "adminUi": {
@@ -6241,7 +6241,7 @@
         "precheckAdvisory": "Tik perspėjimas: patikrinta ką tik ir nepatikrinama iš naujo išsaugant. Kol kas nieko nepriskirta.",
         "reasonLabel": "Palikimo priežastis (nebūtina)",
         "reasonNone": "Priežastis nenurodyta",
-        "keepFailed": "Išimties kvito nepavyko įrašyti. Niekas neišsaugota - bandykite dar kartą.",
+        "keepFailed": "Išimties kvito nepavyko įrašyti. Niekas neišsaugota — bandyk dar kartą.",
         "reason": {
           "agreed_with_worker": "Suderinta su darbuotoju",
           "agreed_with_client": "Suderinta su užsakovu",
@@ -6250,7 +6250,7 @@
           "other": "Kita"
         },
         "collidesTitle": "Šiomis dienomis jau turi įsipareigojimų",
-        "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas jūsų.",
+        "notBlocking": "Tai neužkerta kelio priskyrimui — sprendimas tavo.",
         "alternativesTitle": "Laisvi šiomis dienomis",
         "swap": "Priskirti vietoj to",
         "undo": "Atšaukti priskyrimą",
@@ -6263,6 +6263,11 @@
           "trip": "Komandiruotė",
           "absence": "Nepasiekiama",
           "plan": "Suplanuotas darbas"
+        },
+        "unknownWhy": {
+          "undated_window": "Projektas neturi datų, todėl persidengimų su kitais įsipareigojimais patikrinti negalima.",
+          "undated_commitment": "Kitas šio žmogaus įsipareigojimas neturi datų, todėl laisvų dienų patvirtinti negalima.",
+          "source_unreadable": "Dalies kalendoriaus dabar nepavyko perskaityti, todėl laisvų dienų patvirtinti negalima."
         }
       }
     },
@@ -8697,7 +8702,7 @@
     },
     "demand": {
       "title": "Atvira paklausa",
-      "humanNote": "„Galim pasiūlyti“ — tai tavo pasiūlymas prie užklausos; galutinį match visada užfiksuoja žmogus platformos pusėje.",
+      "humanNote": "„Galim pasiūlyti“ — tai tavo pasiūlymas prie užklausos; galutinį atitikimą visada užfiksuoja žmogus platformos pusėje.",
       "needsGate": "Šiuo metu nepasiekiama.",
       "empty": "Šiuo metu atvirų užklausų nėra.",
       "noRole": "Rolė nenurodyta",
@@ -8735,32 +8740,32 @@
     },
     "missingSide": {
       "worker": "Kandidatas nenurodė: {criterion}",
-      "demand": "Jūsų užklausoje nenurodyta: {criterion}"
+      "demand": "Tavo užklausoje nenurodyta: {criterion}"
     },
     "statusNote": {
       "title": "Kaip veikia atitikimas šiandien",
       "signals": "Pagal šiuo metu turimus profilio ir darbo žurnalo signalus sistema parodo pasirengimą ir galimą atitikimą.",
       "stream": "Aktyvus kandidatų srautas dar priklauso nuo realiai užpildytų profilių ir poreikių.",
-      "fill": "Užpildykite poreikį, kad sistema galėtų palyginti jį su turimais signalais.",
+      "fill": "Užpildyk poreikį, kad sistema galėtų palyginti jį su turimais signalais.",
       "disclaimer": "Tai nereiškia įdarbinimo ar patvirtinto atitikimo."
     },
     "title": "Kandidatų atranka",
-    "intro": "Pasirinkite vieną iš savo struktūruotų poreikių, kad matytumėte tinkamus darbuotojus, kodėl jie tinka, ir įtrauktumėte juos į trumpąjį sąrašą.",
+    "intro": "Pasirink vieną iš savo struktūruotų poreikių, kad matytum tinkamus darbuotojus, kodėl jie tinka, ir įtrauktum juos į trumpąjį sąrašą.",
     "visibilityNote": "Matomumas remiasi pasirengimu, patikimumu ir leidimais — ne mokėjimu. Mokama platesnė prieiga dar neaktyvi (mokėjimai ruošiami). Rodomos tik saugios, anonimizuotos peržiūros — jokių netikrų skelbimų.",
     "pickDemand": "Pasirink poreikį",
-    "noDemands": "Kol kas neturite poreikių. Sukurkite poreikį skydelyje — po peržiūros komanda sustruktūruos reikalingus gebėjimus.",
+    "noDemands": "Kol kas neturi poreikių. Sukurk poreikį skydelyje — po peržiūros komanda sustruktūruos reikalingus gebėjimus.",
     "noDemandsCta": "Sukurti poreikį",
-    "teamOffersWaiting": "{count, plural, one {# komandos pasiūlymas laukia jūsų atsakymo} few {# komandų pasiūlymai laukia jūsų atsakymo} other {# komandų pasiūlymų laukia jūsų atsakymo}}",
+    "teamOffersWaiting": "{count, plural, one {# komandos pasiūlymas laukia tavo atsakymo} few {# komandų pasiūlymai laukia tavo atsakymo} other {# komandų pasiūlymų laukia tavo atsakymo}}",
     "unstructuredTag": "reikalavimai nepatvirtinti",
-    "notStructured": "Šio poreikio reikalingi gebėjimai dar nesustruktūruoti, todėl atitiktis neskaičiuojama. Naujus poreikius peržiūri ir struktūruoja administratoriai — jums nieko daryti nereikia.",
+    "notStructured": "Šio poreikio reikalingi gebėjimai dar nesustruktūruoti, todėl atitiktis neskaičiuojama. Naujus poreikius peržiūri ir struktūruoja administratoriai — tau nieko daryti nereikia.",
     "handRaisers": {
       "title": "Žmonės, pakėlę ranką dėl šio poreikio",
       "notAssessed": "Profesijos atitiktis nevertinta. Šis poreikis neįvardija profesijos, todėl niekas su juo nebuvo lygintas. Šie žmonės rodomi, nes patys paprašė susisiekti, o ne todėl, kad tinka; jokie gebėjimai, kvalifikacija ar tinkamumas nėra teigiami.",
       "badge": "Profesijos atitiktis nevertinta",
       "ownWords": "Viskas, kas rodoma apie šį žmogų, paimta iš jo paties profilio; niekas čia nebuvo lygintas su poreikiu."
     },
-    "needsSetup": "Nepavyko įkelti. Bandykite dar kartą.",
-    "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų. Atitikmenų atsiras darbuotojams pildant žurnalu pagrįstus gebėjimus — užsukite vėliau arba praplėskite poreikį.",
+    "needsSetup": "Nepavyko įkelti. Bandyk dar kartą.",
+    "noCandidates": "Šiam poreikiui kol kas nėra tinkamų darbuotojų. Atitikmenų atsiras darbuotojams pildant žurnalu pagrįstus gebėjimus — užsuk vėliau arba praplėsk poreikį.",
     "namePlaceholder": "Darbuotojas",
     "skillFit": "{matched}/{total} reikalaujamų įgūdžių, {confirmed} patvirtinti vadovo",
     "evidence": "Įrodymai — patvirtinti: {confirmed} · žurnalas: {journal} · savideklaruoti: {self}",
@@ -8810,7 +8815,7 @@
     "candidate": "Kandidatas",
     "privacy": {
       "contactsHidden": "Kontaktai lieka paslėpti — jokio telefono, el. pašto ar vardo.",
-      "profileSafe": "Matote tik saugius profilio signalus: įgūdžių įrodymus, vietą, prieinamumą ir įkainį. Susisiekimas vyksta vėliau, atskiru žingsniu."
+      "profileSafe": "Matai tik saugius profilio signalus: įgūdžių įrodymus, vietą, prieinamumą ir įkainį. Vardas ir kontaktai rodomi tik tada, kai žmogus tai leidžia."
     },
     "fields": {
       "location": "Vieta",
@@ -8828,31 +8833,32 @@
     "rateFrom": "nuo {min} €/mėn.",
     "noRate": "Nenurodyta",
     "comms": {
-      "eligible": "Šis darbuotojas turi laisvą prieinamumą — žinutės atsiras vėliau, atskiru žingsniu.",
-      "inConversation": "Su šiuo darbuotoju jau kalbatės — tęskite pokalbį Žinutėse.",
-      "blocked": "Komunikacija taps prieinama, kai darbuotojas turės laisvą prieinamumą arba datą „laisvas nuo“."
+      "eligible": "Šis darbuotojas turi laisvą prieinamumą — gali su juo susisiekti platformoje.",
+      "inConversation": "Su šiuo darbuotoju jau kalbiesi — tęsk pokalbį Žinutėse.",
+      "blocked": "Komunikacija taps prieinama, kai darbuotojas turės laisvą prieinamumą arba datą „laisvas nuo“.",
+      "interestDoor": "Šis žmogus pats parodė susidomėjimą — gali jam parašyti jau dabar, mygtuku „Susisiekti platformoje“."
     },
     "request": {
       "button": "Prašyti susisiekti",
       "opening": "Atidaroma…",
-      "opened": "Pokalbis atvertas — parašykite darbuotojui žinutę.",
+      "opened": "Pokalbis atvertas — parašyk darbuotojui žinutę.",
       "view": "Atverti pokalbį",
-      "error": "Pokalbio atverti nepavyko. Bandykite dar kartą.",
-      "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandykite rytoj.",
-      "shortlistFirst": "Pirmiausia įtraukite darbuotoją į trumpąjį sąrašą, tada galėsite prašyti pokalbio."
+      "error": "Pokalbio atverti nepavyko. Bandyk dar kartą.",
+      "limitReached": "Pasiektas dienos naujų pokalbių limitas. Bandyk rytoj.",
+      "shortlistFirst": "Pirmiausia įtrauk darbuotoją į trumpąjį sąrašą, tada galėsi prašyti pokalbio."
     },
     "how": {
       "title": "Kaip veikia atitikimas",
       "intro": "Atitikimas yra deterministinis ir skirtas būtent šiam poreikiui — jokio DI, jokio bendro balo, jokių išgalvotų kandidatų. Kiekvienas darbuotojas rodomas tik kaip anonimizuota, saugi profilio peržiūra.",
       "legend": {
         "strong": "Stiprus atitikimas — patvirtinti įrodymai apima didžiąją dalį poreikio.",
-        "possible": "Galimas atitikimas — dalinė atitiktis; peržiūrėkite spragas po kiekvienu kandidatu.",
+        "possible": "Galimas atitikimas — dalinė atitiktis; peržiūrėk spragas po kiekvienu kandidatu.",
         "weak": "Silpnas atitikimas — mažai sutapimo su šiuo poreikiu.",
         "insufficient_data": "Nepakanka duomenų — poreikis arba darbuotojas dar neturi struktūruotų įgūdžių."
       },
       "evidence": "Įrodymų lygiai, nuo stipriausio: vadovo patvirtinta, tada darbų žurnalas, tada paties nurodyta. Skaičiai tikri — 0 reiškia 0.",
-      "contacts": "Darbuotojų kontaktai lieka paslėpti. Susisiekiate programėlėje ir tik kai darbuotojas turi laisvą prieinamumą.",
-      "next": "Toliau: įtraukite patikusius darbuotojus į sąrašą ir paprašykite susisiekti, kai jie bus laisvi."
+      "contacts": "Darbuotojų kontaktai lieka paslėpti. Susisieki programėlėje ir tik kai darbuotojas turi laisvą prieinamumą.",
+      "next": "Toliau: įtrauk patikusius darbuotojus į sąrašą ir paprašyk susisiekti, kai jie bus laisvi."
     },
     "readiness": {
       "label": {
@@ -8875,17 +8881,17 @@
       "send": "Siųsti pasiūlymą",
       "sending": "Siunčiama…",
       "sent": "Pasiūlymas išsiųstas",
-      "unavailable": "Nepavyko atlikti veiksmo. Bandykite dar kartą.",
+      "unavailable": "Nepavyko atlikti veiksmo. Bandyk dar kartą.",
       "error": "Kažkas nepavyko.",
       "cancel": "Atšaukti",
       "notEntitled": "Tavo planas neapima rezervacijų — pradėk testinį apmokėjimą arba paprašyk piloto prieigos."
     },
-    "recognizedNote": "Žemiau esantys reikalingi įgūdžiai atpažinti iš jūsų poreikio teksto neprisijungus prie išorinių sistemų — tai pažymėtas pasiūlymas, ne patvirtinta struktūra. Peržiūrėkite atitikmenis; galutinius reikalavimus patvirtina arba pakoreguoja administratorius.",
+    "recognizedNote": "Žemiau esantys reikalingi įgūdžiai atpažinti iš tavo poreikio teksto neprisijungus prie išorinių sistemų — tai pažymėtas pasiūlymas, ne patvirtinta struktūra. Peržiūrėk atitikmenis; galutinius reikalavimus patvirtina arba pakoreguoja administratorius.",
     "nextAction": {
-      "review_and_shortlist": "Toliau: peržiūrėkite ir įtraukite į atranką",
-      "review_gaps": "Toliau: peržiūrėkite trūkstamus įgūdžius",
-      "confirm_recognized_need": "Toliau: patvirtinkite atpažintus reikalavimus",
-      "structure_demand": "Toliau: aprašykite poreikį, kad įgūdžius būtų galima struktūruoti"
+      "review_and_shortlist": "Toliau: peržiūrėk ir įtrauk į atranką",
+      "review_gaps": "Toliau: peržiūrėk trūkstamus įgūdžius",
+      "confirm_recognized_need": "Toliau: patvirtink atpažintus reikalavimus",
+      "structure_demand": "Toliau: aprašyk poreikį, kad įgūdžius būtų galima struktūruoti"
     },
     "interestBadge": "Išreiškė susidomėjimą",
     "ack": {
@@ -8897,7 +8903,7 @@
       "markReviewed": "Žymėti kaip peržiūrėtą",
       "markContacted": "Susisiekti platformoje",
       "internalNote": "„Peržiūrėta“ — vidinis įrašas. „Susisiekti“ atidaro pokalbį platformoje; už platformos ribų niekas nesiunčiama.",
-      "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+      "error": "Nepavyko išsaugoti. Bandyk dar kartą.",
       "notAvailable": "Šiuo metu nepasiekiama."
     },
     "lifecycle": {
@@ -8906,10 +8912,10 @@
       "close": "Uždaryti šį poreikį",
       "reopen": "Atidaryti iš naujo",
       "closedNote": "Uždaryta — darbuotojams nerodoma.",
-      "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
-      "limitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn.) organizacijos paskyroje.",
-      "limitIndividual": "Ši organizacija pasiekė savo plano aktyvių pozicijų ribą. Niekas nenuskaičiuota ir nepakeista. Susisiekite su mumis.",
-      "closedCandidatesHistory": "Šis poreikis uždarytas. Žemiau — kas buvo palyginta ir nuspręsta, kol jis buvo atviras: istorija, ne veiksmų sąrašas. Norėdami vėl vertinti kandidatus, atidarykite poreikį iš naujo."
+      "error": "Nepavyko išsaugoti. Bandyk dar kartą.",
+      "limitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždaryk vieną arba aktyvuok planą „Organizacija“ (99 €/mėn.) organizacijos paskyroje.",
+      "limitIndividual": "Ši organizacija pasiekė savo plano aktyvių pozicijų ribą. Niekas nenuskaičiuota ir nepakeista. Susisiek su mumis.",
+      "closedCandidatesHistory": "Šis poreikis uždarytas. Žemiau — kas buvo palyginta ir nuspręsta, kol jis buvo atviras: istorija, ne veiksmų sąrašas. Norėdamas vėl vertinti kandidatus, atidaryk poreikį iš naujo."
     },
     "freshness": {
       "active": "Neseniai atnaujintas",
@@ -8923,9 +8929,9 @@
       "noMatches": "Nė vienas kandidatas neatitinka pasirinktų filtrų."
     },
     "pool": {
-      "factsUnreadable": "Kai ko iš to, ką šie žmonės yra užfiksavę, dabar nepavyko perskaityti, todėl ši eilė nėra patikima. Niekas čia nėra parodytas turintis mažiau, nei turi — tiesiog trūksta faktų, pagal kuriuos lyginama. Perkraukite po akimirkos.",
+      "factsUnreadable": "Kai ko iš to, ką šie žmonės yra užfiksavę, dabar nepavyko perskaityti, todėl ši eilė nėra patikima. Niekas čia nėra parodytas turintis mažiau, nei turi — tiesiog trūksta faktų, pagal kuriuos lyginama. Perkrauk po akimirkos.",
       "historyUnavailable": "Organizacijų pateiktos istorijos dabar nepavyko perskaityti, todėl ji nerodoma. Tai nereiškia, kad jos nėra, o aukščiau pateikta tvarka nuo jos nepriklauso.",
-      "capped": "Palyginti ne visi. Šį poreikį atitinka daugiau matomų darbuotojų, nei telpa į vieną sąrašą, todėl pirmiausia paimti {count} darbuotojai, kurių įgūdžiai, profesija ir šalis labiausiai atitinka poreikį, o ne naujausiai užsiregistravusieji. Patikslinkite poreikį, kad būtų palyginti tinkami žmonės.",
+      "capped": "Palyginti ne visi. Šį poreikį atitinka daugiau matomų darbuotojų, nei telpa į vieną sąrašą, todėl pirmiausia paimti {count} darbuotojai, kurių įgūdžiai, profesija ir šalis labiausiai atitinka poreikį, o ne naujausiai užsiregistravusieji. Patikslink poreikį, kad būtų palyginti tinkami žmonės.",
       "complete": "Su šiuo poreikiu palyginti visi {count} matomi darbuotojai."
     },
     "contactRequest": {
@@ -8936,25 +8942,25 @@
       "declined": "Darbuotojas atmetė ankstesnį prašymą.",
       "expired": "Ankstesnis prašymas nebegalioja.",
       "unavailable": "Šiuo metu nepasiekiama.",
-      "rateLimited": "Pasiektas prašymų limitas (10 atvirų, 30 per dieną). Bandykite vėliau.",
-      "noOrganization": "Pirmiausia sukurkite savo įmonės organizaciją.",
+      "rateLimited": "Pasiektas prašymų limitas (10 atvirų, 30 per dieną). Bandyk vėliau.",
+      "noOrganization": "Pirmiausia sukurk savo įmonės organizaciją.",
       "fieldsNote": "Darbuotojo prašoma pasidalinti vardu, telefonu ir el. paštu. Sprendžia darbuotojas — be jo patvirtinimo niekas nerodoma.",
-      "error": "Prašymo išsiųsti nepavyko. Bandykite dar kartą.",
+      "error": "Prašymo išsiųsti nepavyko. Bandyk dar kartą.",
       "accepted": "Darbuotojas priėmė prašymą — kontaktų perdavimas dar neleistas.",
       "withdraw": "Atšaukti užklausą",
       "withdrawing": "Atšaukiama…",
-      "withdrawn": "Jūs atšaukėte šią užklausą.",
+      "withdrawn": "Šią užklausą atšaukei.",
       "withdrawNotOpen": "Ši užklausa nebėra atvira — jos atšaukti nebegalima.",
-      "withdrawError": "Užklausos atšaukti nepavyko. Bandykite dar kartą."
+      "withdrawError": "Užklausos atšaukti nepavyko. Bandyk dar kartą."
     },
     "shortlistNote": {
       "label": "Pastaba",
-      "internalHint": "matoma tik jūsų įmonei",
+      "internalHint": "matoma tik tavo įmonei",
       "add": "Pridėti pastabą",
       "edit": "Redaguoti pastabą",
-      "placeholder": "Trumpa pastaba apie šį kandidatą jūsų komandai.",
+      "placeholder": "Trumpa pastaba apie šį kandidatą tavo komandai.",
       "reasonTitle": "Kodėl netinka?",
-      "reasonPlaceholder": "Trumpai įrašykite priežastį, pvz.: trūksta patirties su šiuo darbu.",
+      "reasonPlaceholder": "Trumpai įrašyk priežastį, pvz.: trūksta patirties su šiuo darbu.",
       "reasonRequired": "Žymint „Netinka“ reikia trumpos priežasties.",
       "save": "Išsaugoti",
       "cancel": "Atšaukti"
@@ -8973,10 +8979,10 @@
     "editNeedCta": "Patikslinti arba pridėti poreikį",
     "availableSupply": {
       "title": "Laisva darbo jėga",
-      "intro": "Brigados ir specialistai, kuriuos agentūros ir įmonės nurodė kaip laisvus. Matote pajėgumo pobūdį ir kur jis yra — ne kas jį siūlo.",
+      "intro": "Brigados ir specialistai, kuriuos agentūros ir įmonės nurodė kaip laisvus. Matai pajėgumo pobūdį ir kur jis yra — ne kas jį siūlo.",
       "notEnabled": "Šiuo metu nepasiekiama.",
       "readFailed": "Laisvos darbo jėgos sąrašo nepavyko perskaityti. Tai sistemos problema, o ne tuščia rinka.",
-      "empty": "Kol kas niekas nenurodė laisvos darbo jėgos, kurią galėtumėte matyti.",
+      "empty": "Kol kas niekas nenurodė laisvos darbo jėgos, kurią galėtum matyti.",
       "unstatedRole": "Darbo pobūdis nenurodytas",
       "people": "{count} žmonių",
       "from": "Nuo",
@@ -8990,7 +8996,7 @@
     },
     "sharedNeed": "Kliento pasidalintas poreikis: {title}",
     "agencyPresent": {
-      "note": "Šį poreikį jums pasidalino klientas. Kandidatus klientui pristatote iš savo darbuotojų sąrašo.",
+      "note": "Šį poreikį tau pasidalino klientas. Kandidatus klientui pristatai iš savo darbuotojų sąrašo.",
       "link": "Pasiūlyti kandidatą"
     },
     "journey": {
@@ -9029,7 +9035,7 @@
     "autoMatchReceipt": {
       "ran": "Paskutinė automatinė tinkamų kandidatų paieška LabourMarket.ai: {when}. Įvertinta kandidatų: {count}, tinkamų: {relevant}. Niekas nebuvo kontaktuotas.",
       "none": "Paskutinė automatinė tinkamų kandidatų paieška LabourMarket.ai: {when}. Įvertinta kandidatų: {count}, tinkamų kol kas nėra. Niekas nebuvo kontaktuotas.",
-      "notStructured": "Automatinė paieška {when}: poreikis dar per menkai aprašytas. Pridėkite įgūdžių ar profesiją.",
+      "notStructured": "Automatinė paieška {when}: poreikis dar per menkai aprašytas. Pridėk įgūdžių ar profesiją.",
       "failed": "Automatinė paieška {when} nebaigta. Žemiau esantis sąrašas vis tiek skaičiuojamas gyvai.",
       "capped": "Kandidatų kiekis buvo apribotas."
     }
@@ -9547,7 +9553,7 @@
       "users": "Žmonės ir aktyvumas",
       "teams": "Brigados ir kvietimai",
       "b2b": "B2B rinka",
-      "work": "Darbo žurnalas ir Living CV",
+      "work": "Darbo žurnalas ir gyvas CV",
       "technical": "Techninės"
     },
     "col": {
@@ -10130,7 +10136,7 @@
     },
     "personal": {
       "title": "Tavo galimybės",
-      "subtitle": "Geriausios šiuo metu rastos galimybės pagal tavo pateiktą informaciją ir suformuotą Living CV.",
+      "subtitle": "Geriausios šiuo metu rastos galimybės pagal tavo pateiktą informaciją ir tavo gyvąjį CV.",
       "discoverTitle": "Daugiau tau",
       "discoverSubtitle": "Iki {count} tinkamų galimybių iš šiandien tau patikrintų.",
       "status": {
@@ -10718,7 +10724,7 @@
         "Darbo įrodymai",
         "Patvirtinimai",
         "Įgūdžiai ir kompetencijos",
-        "Living CV — gyvas profesinis CV",
+        "Gyvas CV — gyva profesinė istorija",
         "Naujos galimybės",
         "Komandos",
         "Įmonės gebėjimai",
@@ -10738,7 +10744,7 @@
           "Fiksuoti atliktą darbą",
           "Išsaugoti įrodymus",
           "Gauti patvirtinimus, kai taikoma",
-          "Kaupti profesinę istoriją — Living CV",
+          "Kaupti profesinę istoriją — gyvas CV",
           "Naudoti sukauptą patirtį naujoms galimybėms"
         ],
         "pointsLabel": "Ką atspindi profesinis profilis",
@@ -10811,7 +10817,7 @@
         "Įgūdžiai ir kompetencijos",
         "Šaltinis / įrodymas",
         "Patvirtinimas",
-        "Profesinė istorija — Living CV"
+        "Profesinė istorija — gyvas CV"
       ],
       "projectionsLabel": "Tas pats įrašas — keli vaizdai",
       "projections": [
@@ -10833,7 +10839,7 @@
       ],
       "platformPoints": [
         "Kiekvienas tikras darbo laikotarpis prideda prie profesinės istorijos.",
-        "Auga įrodymai, kompetencijos ir Living CV.",
+        "Auga įrodymai, kompetencijos ir gyvas CV.",
         "Kartu auga komandos ir įmonės realiai atlikto darbo istorija.",
         "Sukaupta patirtis tampa kontekstu naujoms galimybėms."
       ],
@@ -19680,9 +19686,9 @@
       "approvedAutomatic": "Patvirtinta automatiškai pagal taisyklę",
       "rejected": "Atmesta",
       "changesRequested": "Prašoma pataisyti",
-      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# patvirtintas įrašas} few {# patvirtinti įrašai} other {# patvirtintų įrašų}}} other {Living CV papildytas: {skills}}}",
-      "cvUnlinked": "Living CV: patvirtintas darbas, dar nesusietas su įgūdžiu",
-      "cvUnknown": "Living CV: nepavyko nuskaityti",
+      "cv": "{count, plural, one {Gyvas CV: {skills} · {entries, plural, one {# patvirtintas įrašas} few {# patvirtinti įrašai} other {# patvirtintų įrašų}}} other {Gyvas CV papildytas: {skills}}}",
+      "cvUnlinked": "Gyvas CV: patvirtintas darbas, dar nesusietas su įgūdžiu",
+      "cvUnknown": "Gyvas CV: nepavyko nuskaityti",
       "matching": "Atranka mato kaip patvirtintą darbą: {skills}",
       "matchingRepeated": "Atranka mato kaip pakartotinai patvirtintą darbą: {skills}"
     },
@@ -19752,7 +19758,7 @@
       "returned": "Grąžinta taisyti: {count}",
       "confirmed": "Patvirtino antra šalis: {count}",
       "confirmedUnknown": "Patvirtintų skaičiaus nepavyko nustatyti",
-      "livingCv": "Patvirtintas darbas įskaitomas į darbuotojų Living CV"
+      "livingCv": "Patvirtintas darbas įskaitomas į darbuotojų gyvąjį CV"
     },
     "review": "Peržiūrėti laukiančius ({count})",
     "stageDone": "Etapas „{name}“ baigtas",

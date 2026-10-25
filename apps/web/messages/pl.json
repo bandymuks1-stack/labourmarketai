@@ -3945,7 +3945,7 @@
       "evidenceRecs": "Referencje — pomagają potwierdzić Twoją wiarygodność.",
       "evidenceLegal": "Dowód tożsamości lub dokumenty prawne — używane tylko wtedy, gdy są potrzebne do zatrudnienia lub procesu prawnego.",
       "privacyNote": "Twoje dokumenty pozostają prywatne. Nie są pokazywane pracodawcy ani klientowi bez jasnej podstawy.",
-      "uploadCostNote": "Przesłanie CV jest darmowe — nie pobiera się LMC. System sam obsługuje rozmiar pliku."
+      "uploadCostNote": "Przesłanie CV jest darmowe — nie pobieramy kredytów platformy (LMC). System sam obsługuje rozmiar pliku."
     }
   },
   "live": {
@@ -6263,6 +6263,11 @@
           "trip": "Podróż służbowa",
           "absence": "Niedostępny",
           "plan": "Zaplanowana praca"
+        },
+        "unknownWhy": {
+          "undated_window": "Ten projekt nie ma dat, więc nie da się sprawdzić nakładania z innymi zobowiązaniami.",
+          "undated_commitment": "Inne zobowiązanie tej osoby nie ma dat, więc nie da się potwierdzić wolnych dni.",
+          "source_unreadable": "Części kalendarza nie udało się teraz odczytać, więc nie da się potwierdzić wolnych dni."
         }
       }
     },
@@ -8810,7 +8815,7 @@
     "candidate": "Kandydat",
     "privacy": {
       "contactsHidden": "Dane kontaktowe pozostają ukryte — bez telefonu, e-maila i imienia.",
-      "profileSafe": "Widzisz wyłącznie bezpieczne dla profilu sygnały: dowody umiejętności, lokalizację, dostępność i stawkę. Kontakt następuje później, poprzez wyraźny krok."
+      "profileSafe": "Widzisz wyłącznie bezpieczne dla profilu sygnały: dowody umiejętności, lokalizację, dostępność i stawkę. Imię i dane kontaktowe pojawiają się dopiero, gdy osoba na to pozwoli."
     },
     "fields": {
       "location": "Lokalizacja",
@@ -8828,9 +8833,10 @@
     "rateFrom": "od {min} €/mies.",
     "noRate": "Nie podano",
     "comms": {
-      "eligible": "Ten pracownik ma otwartą dostępność — wysyłanie wiadomości otworzy się w kolejnym kroku.",
+      "eligible": "Ten pracownik ma otwartą dostępność — możesz skontaktować się z nim na platformie.",
       "inConversation": "Rozmawiasz już z tym pracownikiem — kontynuuj w Wiadomościach.",
-      "blocked": "Komunikacja stanie się dostępna, gdy pracownik będzie miał otwartą dostępność lub datę dostępności od."
+      "blocked": "Komunikacja stanie się dostępna, gdy pracownik będzie miał otwartą dostępność lub datę dostępności od.",
+      "interestDoor": "Ta osoba sama zgłosiła zainteresowanie — możesz napisać do niej już teraz przyciskiem „Skontaktuj się w platformie”."
     },
     "request": {
       "button": "Poproś o kontakt",
@@ -9547,7 +9553,7 @@
       "users": "Ludzie i aktywność",
       "teams": "Brygady i zaproszenia",
       "b2b": "Rynek B2B",
-      "work": "Dziennik pracy i Living CV",
+      "work": "Dziennik pracy i Żywe CV",
       "technical": "Techniczne"
     },
     "col": {
@@ -10130,7 +10136,7 @@
     },
     "personal": {
       "title": "Twoje możliwości",
-      "subtitle": "Najlepsze obecnie znalezione możliwości na podstawie Twoich danych i Living CV.",
+      "subtitle": "Najlepsze obecnie znalezione możliwości na podstawie Twoich danych i Żywego CV.",
       "discoverTitle": "Więcej dla Ciebie",
       "discoverSubtitle": "Do {count} pasujących możliwości spośród sprawdzonych dla Ciebie dzisiaj.",
       "status": {
@@ -19680,9 +19686,9 @@
       "approvedAutomatic": "Potwierdzone automatycznie według reguły",
       "rejected": "Odrzucono",
       "changesRequested": "Poproszono o poprawki",
-      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# potwierdzony wpis} few {# potwierdzone wpisy} many {# potwierdzonych wpisów} other {# potwierdzonego wpisu}}} other {Living CV uzupełnione: {skills}}}",
-      "cvUnlinked": "Living CV: potwierdzona praca, jeszcze niepowiązana z umiejętnością",
-      "cvUnknown": "Living CV: nie udało się odczytać",
+      "cv": "{count, plural, one {Żywe CV: {skills} · {entries, plural, one {# potwierdzony wpis} few {# potwierdzone wpisy} many {# potwierdzonych wpisów} other {# potwierdzonego wpisu}}} other {Żywe CV uzupełnione: {skills}}}",
+      "cvUnlinked": "Żywe CV: potwierdzona praca, jeszcze niepowiązana z umiejętnością",
+      "cvUnknown": "Żywe CV: nie udało się odczytać",
       "matching": "Dopasowanie widzi potwierdzoną pracę: {skills}",
       "matchingRepeated": "Dopasowanie widzi wielokrotnie potwierdzoną pracę: {skills}"
     },
@@ -19752,7 +19758,7 @@
       "returned": "Zwrócono do poprawy: {count}",
       "confirmed": "Potwierdzone przez drugą stronę: {count}",
       "confirmedUnknown": "Nie udało się ustalić liczby potwierdzeń",
-      "livingCv": "Potwierdzona praca liczy się w Living CV pracowników"
+      "livingCv": "Potwierdzona praca liczy się w Żywym CV pracowników"
     },
     "review": "Sprawdź oczekujące ({count})",
     "stageDone": "Etap „{name}” zakończony",
