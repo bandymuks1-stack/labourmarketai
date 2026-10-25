@@ -96,7 +96,10 @@ describe("SERVER: every status door re-checks the contract (UI, MCP, any caller)
 
   it("listings: the status door refuses what no contract action produces", () => {
     const src = read("lib/marketplace/listings.ts");
-    expect(src).toMatch(/if \(!actionForStatus\(adapter, adapter\.facts\(\{ status: String\(row\.status\) \}\), status\)\)/);
+    // The facts include the stored closed outcome, so a discarded draft has
+    // no `resume` here either.
+    expect(src).toMatch(/adapter\.facts\(\{ status: String\(row\.status\), closedOutcome: row\.closed_outcome \?\? null \}\)/);
+    expect(src).toMatch(/if \(!actionForStatus\(adapter, facts, status, outcomeForClose\)\)/);
   });
 
   it("demand: reopen refuses a discarded draft by the contract", () => {
