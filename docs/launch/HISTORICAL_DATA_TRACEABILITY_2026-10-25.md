@@ -27,12 +27,23 @@ staged rows, the repository and its git history, and the owner's Drive/mailbox.
 "Absent from the current database" was never treated as proof of non-provision.
 
 ## Outcome
-- **Every previously-provided Vivat Rex worker-timesheet package (2022–2026) is
-  fully imported**, and the committed totals reconcile **exactly** to the owner's
-  own confirmed package figures.
+> **Scope of this statement.** "Fully imported" below refers ONLY to the specific
+> **worker-timesheet import packages** that were reconciled against production. It
+> is **not** a claim that every document the owner has historically provided is
+> imported: the owner's full document set is broader (it includes commercial,
+> contractual, legal and other records that are not worker-timesheet import
+> packages and do not belong in the worker-evidence subsystem). The search for
+> any further previously-provided **worker** documents — in particular Nonstop
+> Group worker timesheets — **remains OPEN**; absence from current sources is not
+> treated as proof they were never provided.
+
+- **Every reconciled Vivat Rex worker-timesheet import package (2022–2026) is
+  fully imported**, and the committed totals of those packages reconcile
+  **exactly** to the owner's own confirmed package figures.
 - **The only non-imported rows are verified exact duplicates**, held to prevent
   double-counting (each has a matching committed record on person + date + hours +
-  object). **No unique, evidence-backed worker data is missing.**
+  object). **No unique, evidence-backed worker data is missing from the reconciled
+  packages.**
 - **Nonstop Group has no worker-timesheet dataset in any accessible source.** Its
   import sessions are empty shells; the Nonstop documents that exist are commercial
   (contract, invoices, bank statement), which do not belong in the worker-evidence
