@@ -7,7 +7,7 @@
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "[EN] Created",
     "scoutLink": "[EN] Matched workers & interest for this need",
-    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "manageHelp": "[EN] Complete an inquiry, remove it from the market or publish it again right here in the list; a draft can be continued or discarded. Confirming its recognized skills is done from its scouting view. Editing submitted text is not available yet.",
     "syntheticTitle": {
       "hiringWorkers": "Söker medarbetare",
       "agencyPartnership": "Partnerskapserbjudande"
@@ -1717,7 +1717,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -2014,6 +2014,15 @@
       "pending": "Slår ihop…",
       "done": "Sammanslaget. Raderna och deras poster finns kvar; projektlistan visar nu det behållna projektet.",
       "failed": "Inte sammanslaget. Inget ändrades för rader som inte gick igenom — ladda om och försök igen."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {
@@ -3693,8 +3702,8 @@
           "description": "En listpunkt för en projektmedarbetare markeras med en verklig status — krävs, mottaget, kontrollerat."
         },
         "seedReadinessChecklist": {
-          "label": "Starta dokumentlistan",
-          "description": "Standardlistan för beredskap / dokument startas för alla på projektet."
+          "label": "Lägg till förslag att komma överens om",
+          "description": "Föreslagna punkter att komma överens om före avtalet läggs till för alla i projektet. Det är ingen obligatorisk lista och ingen bedömning av beredskap."
         },
         "requestReadiness": {
           "label": "Be om det som saknas",
@@ -4272,8 +4281,8 @@
       "missingDeclaredSkills": "angivna färdigheter",
       "missingEvidence": "arbetsbevis",
       "blockedSuffix": "(avvisad / utgången)",
-      "readinessSeedChip": "Starta dokumentlistan ({count} pers.)",
-      "readinessSeeded": "Lista startad: {count} pers. × {items} punkter — alla ”krävs”.",
+      "readinessSeedChip": "Lägg till förslag att komma överens om ({count} pers.)",
+      "readinessSeeded": "Förslag tillagda: {count} pers. × {items} punkter — alla ”att komma överens om före avtalet”.",
       "readinessGotChip": "Mottaget: {label} ({name})",
       "readinessGotDone": "Markerat som mottaget: {label} ({name}).",
       "readinessCheckedChip": "Kontrollerad: {label} ({name})",
@@ -4314,7 +4323,7 @@
       "moveAskProject": "Vart ska {name} flyttas? Välj:",
       "moveWhatIfTitle": "Om {name} flyttas från “{from}” till “{to}”:",
       "moveFromLine": "• “{from}”: personer {before} → {after}; {tasks} av hans öppna arbetspaket stannar där; beredskapslista där: {checked}/{total}.",
-      "moveToLine": "• “{to}”: personer {before} → {after}; beredskapslistan där börjar på 0/{total}.",
+      "moveToLine": "• “{to}”: personer {before} → {after}; vad som ska avtalas där är inte valt ännu (upp till {total} punkter föreslagna).",
       "moveCountryLine": "• Landet byts: {from} → {to} — andra dokumentkrav.",
       "moveNoDatesLine": "• “{to}” saknar datum — frånvaro kan inte kontrolleras.",
       "moveAvailabilityUnknownLine": "• Frånvaro okänd.",
@@ -6942,7 +6951,9 @@
       "managesInvitations": "Hanterar inbjudningar",
       "grantInvitations": "Tillåt att hantera inbjudningar",
       "withdrawInvitations": "Återkalla hantering av inbjudningar",
-      "unavailable": "Medlemslistan kunde inte läsas just nu. Det betyder inte att organisationen saknar medlemmar."
+      "unavailable": "Medlemslistan kunde inte läsas just nu. Det betyder inte att organisationen saknar medlemmar.",
+      "noAccountHint": "En medlemsroll kan bara ges till någon som redan har ett konto. Bjud in en person utan konto med en inbjudningslänk — när personen registrerar sig och ansluter till organisationen kan du ge en roll här.",
+      "noAccountCta": "Skapa en inbjudningslänk"
     },
     "start": {
       "membersMoved": "Medlemmar och inbjudningar för {workspace} hanteras i organisationens Inställningar.",

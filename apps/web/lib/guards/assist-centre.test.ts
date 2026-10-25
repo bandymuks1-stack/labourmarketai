@@ -7,6 +7,9 @@ import {
   ASSIST_PROJECT_STATUSES,
   EVIDENCE_REPORT_HREF,
   FINANCE_OVERDUE_HREF,
+  JOURNAL_CLIENT_DECIDE_HREF,
+  JOURNAL_REVIEW_HREF,
+  attentionPartlyUnreadable,
   buildAiProviderView,
   buildAttentionItems,
   buildProjectStatusRow,
@@ -331,6 +334,77 @@ describe("3. attention is a deterministic composition of real counts", () => {
       expect(item.count).toBeGreaterThan(0);
     }
   });
+
+  // Local UX review 2026-10-24 (row 10.13): the page said "nothing waits for
+  // you" while 17–31 work entries waited for the owner's approval — the
+  // journal review queue was never part of the answer.
+  it("work entries waiting on the caller's decision are attention, first, with the queue's own hrefs", () => {
+    const items = buildAttentionItems({
+      counts: { ...ZERO, unreadConversations: 1 },
+      journalReviews: { pending: 17, clientToDecide: 2 },
+      documents: null,
+      finance: null,
+    });
+    expect(items.map((i) => i.id)).toEqual([
+      "journal-reviews",
+      "journal-client-decide",
+      "spine-unread-messages",
+    ]);
+    const byId = new Map(items.map((i) => [i.id, i]));
+    expect(byId.get("journal-reviews")!.count).toBe(17);
+    expect(byId.get("journal-reviews")!.href).toBe(JOURNAL_REVIEW_HREF);
+    expect(byId.get("journal-client-decide")!.href).toBe(JOURNAL_CLIENT_DECIDE_HREF);
+    expect(byId.get("journal-reviews")!.sourceKey).toBe("journalReviewQueue");
+  });
+
+  it("an empty review queue adds nothing; an UNREADABLE one is flagged, never read as calm", () => {
+    expect(
+      buildAttentionItems({
+        counts: ZERO,
+        journalReviews: { pending: 0, clientToDecide: 0 },
+        documents: null,
+        finance: null,
+      }),
+    ).toEqual([]);
+    expect(attentionPartlyUnreadable({ journalReviews: { pending: 0, clientToDecide: 0 } })).toBe(false);
+    expect(attentionPartlyUnreadable({ journalReviews: null })).toBe(false);
+    expect(
+      buildAttentionItems({
+        counts: ZERO,
+        journalReviews: { pending: null, clientToDecide: 0 },
+        documents: null,
+        finance: null,
+      }),
+    ).toEqual([]);
+    expect(attentionPartlyUnreadable({ journalReviews: { pending: null, clientToDecide: 0 } })).toBe(true);
+    expect(attentionPartlyUnreadable({ journalReviews: { pending: 3, clientToDecide: null } })).toBe(true);
+  });
+
+  it("the server composition reads the review queues and the page never shows the calm line over an unreadable one", () => {
+    expect(code(READS)).toMatch(/countReviewablePendingEntries\(\)/);
+    expect(code(READS)).toMatch(/countCounterpartyToDecide\(\)/);
+    expect(code(READS)).toMatch(/journalReviews/);
+    const partial = PAGE.indexOf('data-testid="assist-attention-partial"');
+    const empty = PAGE.indexOf('data-testid="assist-attention-empty"');
+    expect(partial).toBeGreaterThan(-1);
+    expect(empty).toBeGreaterThan(partial);
+    expect(PAGE.slice(partial, empty)).toMatch(/view\.attentionPartlyUnreadable \? null/);
+  });
+
+  for (const loc of activeLocales) {
+    it(`${loc}: the review-queue rows, their source chip and the partial note resolve`, () => {
+      const msgs = JSON.parse(read(`messages/${loc}.json`)) as unknown;
+      for (const key of [
+        "assist.attention.journalReviews",
+        "assist.attention.journalClientDecide",
+        "assist.attention.partial",
+        "assist.sources.journalReviewQueue",
+      ]) {
+        const v = resolveKey(msgs, key);
+        expect(typeof v === "string" && v.trim().length > 0, `${loc}: ${key}`).toBe(true);
+      }
+    });
+  }
 
   for (const loc of activeLocales) {
     it(`${loc}: every attention label + source chip resolves`, () => {

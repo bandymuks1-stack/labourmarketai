@@ -106,13 +106,26 @@ export default async function AssistPage({
         </h2>
         <p className="text-xs text-text-muted">{t("attention.note")}</p>
 
-        {view.attention.length === 0 ? (
+        {view.attentionPartlyUnreadable ? (
+          // UNKNOWN IS NOT ZERO: a review queue that could not be read is
+          // said out loud, and the calm "nothing waits" line is not shown.
           <p
-            className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-secondary"
-            data-testid="assist-attention-empty"
+            role="status"
+            className="rounded-md border border-state-warning/40 bg-state-warning/5 p-3 text-sm text-text-secondary"
+            data-testid="assist-attention-partial"
           >
-            {t("attention.empty")}
+            {t("attention.partial")}
           </p>
+        ) : null}
+        {view.attention.length === 0 ? (
+          view.attentionPartlyUnreadable ? null : (
+            <p
+              className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-secondary"
+              data-testid="assist-attention-empty"
+            >
+              {t("attention.empty")}
+            </p>
+          )
         ) : (
           <ul className="flex flex-col gap-2">
             {view.attention.map((item) => (

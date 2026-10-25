@@ -99,7 +99,18 @@ export const TIER_MODEL_ALIAS: Record<AiModelTier, AiModelAlias | null> = {
 };
 
 /** Providers with a per-alias candidate table (AI_MODEL_CANDIDATES keys). */
-export type AiModelProvider = "anthropic" | "openai" | "gemini" | "xai";
+export type AiModelProvider =
+  | "anthropic"
+  | "openai"
+  | "gemini"
+  | "xai"
+  // Free API tiers (2026-10-25). A provider may register fewer than three
+  // tiers; an absent tier resolves to undefined, which prices as `null` →
+  // `cost_unpriced` / the policy's priced fallback tier — never another
+  // vendor's model id.
+  | "cloudflare"
+  | "mistral"
+  | "groq";
 
 /**
  * Every provider a run can be costed against — the candidate-table providers
@@ -116,7 +127,7 @@ export function modelIdForAlias(
   alias: AiModelAlias,
   provider: AiModelProvider = "anthropic",
 ): string {
-  return AI_MODEL_CANDIDATES[provider][alias];
+  return (AI_MODEL_CANDIDATES[provider] ?? {})[alias];
 }
 
 // ── Task policies ───────────────────────────────────────────────────────────

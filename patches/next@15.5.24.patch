@@ -16,10 +16,25 @@ index e69cf2b2c0496351f73255552fe07acd306f6f22..1b6b4160580cee4e37071eac0d0c17fb
                  // if the page has dynamicParams: false and this pathname wasn't
                  // prerendered trigger the no fallback handling
 diff --git a/dist/compiled/react-dom/cjs/react-dom-client.development.js b/dist/compiled/react-dom/cjs/react-dom-client.development.js
-index 4376913076151ad78dcc4059ad4152fad25478da..4995c843e0dcb901efc61832ddb0e8728bd08885 100644
+index 4376913076151ad78dcc4059ad4152fad25478da..2e3b8819e6e497b3f600a5e1606b369ae52d7f54 100644
 --- a/dist/compiled/react-dom/cjs/react-dom-client.development.js
 +++ b/dist/compiled/react-dom/cjs/react-dom-client.development.js
-@@ -16469,8 +16469,9 @@
+@@ -15776,6 +15776,14 @@
+           break;
+         case 5:
+           resetHooksOnUnwind(unitOfWork);
++          // labourmarketai patch (#418): the first attempt CLAIMED this host
++          // instance and moved the hydration cursor to its first child before
++          // its children suspended; rewind the cursor to the claimed instance
++          // so the replay claims the same node instead of mismatching.
++          null === current &&
++            isHydrating &&
++            null !== unitOfWork.stateNode &&
++            (nextHydratableInstance = unitOfWork.stateNode);
+         default:
+           unwindInterruptedWork(current, unitOfWork),
+             (unitOfWork = workInProgress =
+@@ -16469,8 +16477,9 @@
            (workInProgressRootRenderLanes & 62914560) ===
              workInProgressRootRenderLanes &&
            now$1() - globalMostRecentFallbackTime < FALLBACK_THROTTLE_MS)
@@ -32,10 +47,25 @@ index 4376913076151ad78dcc4059ad4152fad25478da..4995c843e0dcb901efc61832ddb0e872
          workInProgressSuspendedRetryLanes === workInProgressRootRenderLanes &&
            (workInProgressSuspendedRetryLanes = 0));
 diff --git a/dist/compiled/react-dom/cjs/react-dom-client.production.js b/dist/compiled/react-dom/cjs/react-dom-client.production.js
-index 755076a5cf15273f024c18fdc6a8805f1e36860b..8ba86221b864cfa4b416dec9af6023219835eab9 100644
+index 755076a5cf15273f024c18fdc6a8805f1e36860b..4fda16bea3c510d19f9d0b114e4f56c75798cf52 100644
 --- a/dist/compiled/react-dom/cjs/react-dom-client.production.js
 +++ b/dist/compiled/react-dom/cjs/react-dom-client.production.js
-@@ -11733,7 +11733,9 @@ function pingSuspendedRoot(root, wakeable, pingedLanes) {
+@@ -11210,6 +11210,14 @@ function replaySuspendedUnitOfWork(unitOfWork) {
+       break;
+     case 5:
+       resetHooksOnUnwind(next);
++      // labourmarketai patch (#418): the first attempt CLAIMED this host
++      // instance and moved the hydration cursor to its first child before its
++      // children suspended; rewind the cursor to the claimed instance so the
++      // replay claims the same node instead of mismatching on its child.
++      null === current &&
++        isHydrating &&
++        null !== next.stateNode &&
++        (nextHydratableInstance = next.stateNode);
+     default:
+       unwindInterruptedWork(current, next),
+         (next = workInProgress =
+@@ -11733,7 +11741,9 @@ function pingSuspendedRoot(root, wakeable, pingedLanes) {
        (workInProgressRootRenderLanes & 62914560) ===
          workInProgressRootRenderLanes &&
        300 > now() - globalMostRecentFallbackTime)
@@ -47,10 +77,25 @@ index 755076a5cf15273f024c18fdc6a8805f1e36860b..8ba86221b864cfa4b416dec9af602321
      workInProgressSuspendedRetryLanes === workInProgressRootRenderLanes &&
        (workInProgressSuspendedRetryLanes = 0));
 diff --git a/dist/compiled/react-dom/cjs/react-dom-profiling.development.js b/dist/compiled/react-dom/cjs/react-dom-profiling.development.js
-index 43d0363849598f796873fffaf33117d54b76de19..a03eab081f3b7250ca271b28955b0901908590c0 100644
+index 43d0363849598f796873fffaf33117d54b76de19..4e167c91400401dccdb1cfe2817eb11a8641be93 100644
 --- a/dist/compiled/react-dom/cjs/react-dom-profiling.development.js
 +++ b/dist/compiled/react-dom/cjs/react-dom-profiling.development.js
-@@ -16477,8 +16477,9 @@
+@@ -15784,6 +15784,14 @@
+           break;
+         case 5:
+           resetHooksOnUnwind(unitOfWork);
++          // labourmarketai patch (#418): the first attempt CLAIMED this host
++          // instance and moved the hydration cursor to its first child before
++          // its children suspended; rewind the cursor to the claimed instance
++          // so the replay claims the same node instead of mismatching.
++          null === current &&
++            isHydrating &&
++            null !== unitOfWork.stateNode &&
++            (nextHydratableInstance = unitOfWork.stateNode);
+         default:
+           unwindInterruptedWork(current, unitOfWork),
+             (unitOfWork = workInProgress =
+@@ -16477,8 +16485,9 @@
            (workInProgressRootRenderLanes & 62914560) ===
              workInProgressRootRenderLanes &&
            now$1() - globalMostRecentFallbackTime < FALLBACK_THROTTLE_MS)
@@ -63,10 +108,25 @@ index 43d0363849598f796873fffaf33117d54b76de19..a03eab081f3b7250ca271b28955b0901
          workInProgressSuspendedRetryLanes === workInProgressRootRenderLanes &&
            (workInProgressSuspendedRetryLanes = 0));
 diff --git a/dist/compiled/react-dom/cjs/react-dom-profiling.profiling.js b/dist/compiled/react-dom/cjs/react-dom-profiling.profiling.js
-index 85185b07d38d122ada8ed308523b181da102ccad..3001351b0223532891beb0dff9c26af8172878c4 100644
+index 85185b07d38d122ada8ed308523b181da102ccad..12a015924ed336c34ac2aba3da1acd7bccd68327 100644
 --- a/dist/compiled/react-dom/cjs/react-dom-profiling.profiling.js
 +++ b/dist/compiled/react-dom/cjs/react-dom-profiling.profiling.js
-@@ -12404,7 +12404,9 @@ function pingSuspendedRoot(root, wakeable, pingedLanes) {
+@@ -11814,6 +11814,14 @@ function replaySuspendedUnitOfWork(unitOfWork) {
+       break;
+     case 5:
+       resetHooksOnUnwind(next);
++      // labourmarketai patch (#418): the first attempt CLAIMED this host
++      // instance and moved the hydration cursor to its first child before its
++      // children suspended; rewind the cursor to the claimed instance so the
++      // replay claims the same node instead of mismatching on its child.
++      null === current &&
++        isHydrating &&
++        null !== next.stateNode &&
++        (nextHydratableInstance = next.stateNode);
+     default:
+       unwindInterruptedWork(current, next),
+         (next = workInProgress =
+@@ -12404,7 +12412,9 @@ function pingSuspendedRoot(root, wakeable, pingedLanes) {
        (workInProgressRootRenderLanes & 62914560) ===
          workInProgressRootRenderLanes &&
        300 > now$1() - globalMostRecentFallbackTime)
