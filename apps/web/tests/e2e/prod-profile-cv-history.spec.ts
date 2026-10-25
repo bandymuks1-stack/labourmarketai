@@ -400,9 +400,14 @@ test("P-7 (2.5). an employment row is added on the profile and shows on the Livi
 test("P-8 (2.6). a volunteering period told through the chat form lands under practice on the Living CV", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker2");
   await page.goto("/lt/dashboard");
-  await say(page, "Ką dar turiu padaryti?");
-  await expect(inMain(page).getByTestId("msg-profile-summary").last()).toBeVisible({ timeout: 45_000 });
-  await inMain(page).getByTestId("chat-chip-f:worker.add-work-history").last().click();
+  // A dated past period told to the chat opens the self-declared history form
+  // with its years (`professionStatement` → `readPastWorkPeriod`, the
+  // 2026-09-29 production fix). That door does not depend on profile state.
+  // The old door, "Ką dar turiu padaryti?" plus the `add-work-history` chip,
+  // offers that chip only while something is missing. P-7 has just added a
+  // history row, so the chat rightly answered with its starter chips
+  // (run 40163027393).
+  await say(page, "2020–2021 dirbau savanoriu maisto banke");
   const form = inMain(page).getByTestId("inline-action-form-worker.add-work-history").last();
   await expect(form).toBeVisible({ timeout: 30_000 });
   await form.getByTestId("field-title").fill(PRACTICE);
