@@ -59,6 +59,22 @@ describe("the AI part is labelled, attributed and optional", () => {
     expect(src).toMatch(/country-readiness-reading-off/);
   });
 
+  it("the attribution template reaches the client RAW, placeholders intact", () => {
+    // Formatting a {provider}/{model} message with no values makes next-intl
+    // return its key fallback; the client's .replace() then has nothing to
+    // fill (Codex review, PR #2765).
+    const matrix = stripComments(read(MATRIX));
+    expect(matrix).toMatch(/t\.raw\("reading\.attribution"\)/);
+    expect(matrix).not.toMatch(/\bt\("reading\.attribution"\)/);
+  });
+
+  it("a pending reading can never land under a different scope", () => {
+    // Codex review, PR #2765: the selector is locked while pending, AND a
+    // response is dropped unless it was asked for the current selection.
+    expect(src).toMatch(/disabled=\{pending\}/);
+    expect(src).toMatch(/requested\.current !== asked/);
+  });
+
   it("each step shows the official source resolved from the matrix", () => {
     expect(src).toMatch(/s\.sourceUrl/);
     expect(src).toMatch(/s\.sourceTitle/);

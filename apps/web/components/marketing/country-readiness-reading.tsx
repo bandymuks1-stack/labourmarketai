@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useRef, useState, useTransition } from "react";
 
 import {
   explainCountryReadiness,
@@ -62,9 +62,18 @@ export function CountryReadinessReading({
     | null
   >(null);
 
+  // The scope each request was made for. A response is installed only while
+  // it still matches the selection, so a reading can never appear under a
+  // situation it was not written for (the selector is also locked while a
+  // request is pending — this is the second wall, not the only one).
+  const requested = useRef<string | null>(null);
+
   const run = () => {
+    const asked = scope;
+    requested.current = asked;
     startTransition(async () => {
-      const outcome = await explainCountryReadiness(country, scope, locale);
+      const outcome = await explainCountryReadiness(country, asked, locale);
+      if (requested.current !== asked) return;
       if (outcome.status === "ok") {
         setResult({
           kind: "ok",
@@ -99,7 +108,9 @@ export function CountryReadinessReading({
           <select
             id={selectId}
             value={scope}
+            disabled={pending}
             onChange={(e) => {
+              requested.current = null;
               setScope(e.target.value);
               setResult(null);
             }}

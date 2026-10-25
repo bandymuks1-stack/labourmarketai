@@ -118,7 +118,10 @@ export async function CountryReadinessRequirements({
           cta: t("reading.cta"),
           pending: t("reading.pending"),
           resultTitle: t("reading.resultTitle"),
-          attribution: t("reading.attribution"),
+          // RAW, not formatted: the template keeps its {provider} / {model}
+          // placeholders for the client to fill from the actual run. Formatting
+          // it here without values makes next-intl return the key fallback.
+          attribution: t.raw("reading.attribution") as string,
           stepsTitle: t("reading.stepsTitle"),
           stepSource: t("reading.stepSource"),
           stepLegalCheck: t("reading.stepLegalCheck"),
