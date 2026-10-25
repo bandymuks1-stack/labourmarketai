@@ -2014,6 +2014,15 @@
       "pending": "Liidan…",
       "done": "Liidetud. Read ja nende kirjed säilivad; projektide loend näitab nüüd säilitatud projekti.",
       "failed": "Ei liidetud. Läbi minemata ridade puhul ei muudetud midagi — laadige uuesti ja proovige veel."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {

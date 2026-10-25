@@ -949,7 +949,7 @@
       },
       "totals": "{count, plural, one {Totaal · # werker} other {Totaal · # werkers}}",
       "basisLabel": "Basis",
-      "basis": "Geteld uit werkregistraties die leden binnen de arbeidsrelaties van deze organisatie in het gekozen venster hebben vastgelegd. Uren zijn de eigen vastgelegde duur van elke registratie, één keer geteld; bevestigde uren het deel op registraties die een manager heeft goedgekeurd; dagen zijn kalenderdagen met minstens één registratie met duur (in het totaal liddagen). „Bevestigd“ telt goedgekeurde registraties, „teruggestuurd“ afgewezen of teruggestuurde, de rest wacht op beoordeling. Het ontbreken van registraties bewijst niet dat er geen werk was, en niets hier beoordeelt of scoort iemand.",
+      "basis": "Geteld uit werkregistraties die leden binnen de arbeidsrelaties van deze organisatie in het gekozen venster hebben vastgelegd. Uren zijn de eigen vastgelegde duur van elke registratie, één keer geteld; bevestigde uren het deel op registraties die een manager heeft goedgekeurd; dagen zijn kalenderdagen met minstens één registratie met duur (in het totaal liddagen). „Bevestigd” telt goedgekeurde registraties, „teruggestuurd” afgewezen of teruggestuurde, de rest wacht op beoordeling. Het ontbreken van registraties bewijst niet dat er geen werk was, en niets hier beoordeelt of scoort iemand.",
       "hours": "{hours} u",
       "dayUnits": "+ {days} d in dagen vastgelegd",
       "mainly": "vooral {activity} · {hours} u",
@@ -3945,7 +3945,7 @@
       "evidenceRecs": "Referenties — helpen je betrouwbaarheid te onderbouwen.",
       "evidenceLegal": "Identiteits- of juridische documenten — alleen gebruikt wanneer nodig voor aanname of een juridisch proces.",
       "privacyNote": "Je documenten blijven privé. Ze worden niet aan een werkgever of klant getoond zonder duidelijke grondslag.",
-      "uploadCostNote": "Een cv uploaden is gratis — er wordt geen LMC afgeschreven. Het systeem regelt de bestandsgrootte zelf."
+      "uploadCostNote": "Een cv uploaden is gratis — er worden geen platformtegoeden (LMC) afgeschreven. Het systeem regelt de bestandsgrootte zelf."
     }
   },
   "live": {
@@ -6263,6 +6263,11 @@
           "trip": "Dienstreis",
           "absence": "Niet beschikbaar",
           "plan": "Gepland werk"
+        },
+        "unknownWhy": {
+          "undated_window": "Dit project heeft geen data, dus overlap met andere verplichtingen kan niet worden gecontroleerd.",
+          "undated_commitment": "Een andere verplichting van deze persoon heeft geen data, dus vrije dagen kunnen niet worden bevestigd.",
+          "source_unreadable": "Een deel van de agenda kon nu niet worden gelezen, dus vrije dagen kunnen niet worden bevestigd."
         }
       }
     },
@@ -8809,7 +8814,7 @@
     "candidate": "Kandidaat",
     "privacy": {
       "contactsHidden": "Contactgegevens blijven verborgen — geen telefoon, e-mail of naam.",
-      "profileSafe": "Je ziet alleen profielveilige signalen: vaardigheidsbewijs, locatie, beschikbaarheid en tarief. Contact opnemen gebeurt later, via een expliciete stap."
+      "profileSafe": "Je ziet alleen profielveilige signalen: vaardigheidsbewijs, locatie, beschikbaarheid en tarief. Naam en contactgegevens verschijnen pas als de persoon dat toestaat."
     },
     "fields": {
       "location": "Locatie",
@@ -8827,9 +8832,10 @@
     "rateFrom": "vanaf €{min}/mnd",
     "noRate": "Niet opgegeven",
     "comms": {
-      "eligible": "Deze werknemer heeft open beschikbaarheid — berichten sturen wordt in een latere stap mogelijk.",
+      "eligible": "Deze werknemer heeft open beschikbaarheid — je kunt via het platform contact opnemen.",
       "inConversation": "U bent al in gesprek met deze werknemer — ga verder in Berichten.",
-      "blocked": "Communicatie wordt beschikbaar wanneer de werknemer open beschikbaarheid of een beschikbaar-vanaf-datum heeft."
+      "blocked": "Communicatie wordt beschikbaar wanneer de werknemer open beschikbaarheid of een beschikbaar-vanaf-datum heeft.",
+      "interestDoor": "Deze persoon heeft zelf interesse getoond — je kunt nu al schrijven met ‘Contact opnemen in het platform’."
     },
     "request": {
       "button": "Communicatie aanvragen",
@@ -9546,7 +9552,7 @@
       "users": "Mensen en activiteit",
       "teams": "Ploegen en uitnodigingen",
       "b2b": "B2B-markt",
-      "work": "Werkjournaal en Living CV",
+      "work": "Werkjournaal en levend cv",
       "technical": "Technisch"
     },
     "col": {
@@ -10129,7 +10135,7 @@
     },
     "personal": {
       "title": "Jouw mogelijkheden",
-      "subtitle": "De beste mogelijkheden die nu zijn gevonden op basis van je gegevens en je Living CV.",
+      "subtitle": "De beste mogelijkheden die nu zijn gevonden op basis van je gegevens en je levende cv.",
       "discoverTitle": "Meer voor jou",
       "discoverSubtitle": "Tot {count} passende mogelijkheden uit wat we vandaag voor je hebben bekeken.",
       "status": {
@@ -14248,7 +14254,7 @@
       "openConversationWhich": "Welke persoon bedoel je?",
       "openConversationNoPermission": "Ik kan geen gesprek met {name} openen — daarvoor heb je geen toestemming.",
       "openConversationFailed": "Het gesprek kon niet worden geopend. Probeer het opnieuw of open je berichten.",
-      "journalAskWhatYouDid": "Wat heb je vandaag gedaan? Schrijf het in het veld „Wat je deed“ in je eigen woorden — bijv. „ramen gemonteerd op de locatie Kaunas van 8 tot 17“. Het verzoek zelf wordt niet in het dagboek opgeslagen.",
+      "journalAskWhatYouDid": "Wat heb je vandaag gedaan? Schrijf het in het veld „Wat je deed” in je eigen woorden — bijv. „ramen gemonteerd op de locatie Kaunas van 8 tot 17”. Het verzoek zelf wordt niet in het dagboek opgeslagen.",
       "alsoWorkLog": "Ik begreep ook dat je vandaag hebt gewerkt — controleer het en sla het op in je werkjournaal:",
       "serviceNeedHint": "Dat is een klus — ik laat je zien wie die dienst aanbiedt.",
       "chipServiceRequests": "Een dienst zoeken",
@@ -14685,7 +14691,7 @@
       "saved": "Vermelding opgeslagen in je werkjournaal.",
       "errorGeneric": "Opslaan mislukt. Probeer het opnieuw.",
       "minutesUnit": "min",
-      "errorNoWorkContent": "Een invoer heeft het werk nodig: wat je deed, waar of hoe lang. Schrijf het in je eigen woorden, bijv. „ramen gemonteerd van 8 tot 17“.",
+      "errorNoWorkContent": "Een invoer heeft het werk nodig: wat je deed, waar of hoe lang. Schrijf het in je eigen woorden, bijv. „ramen gemonteerd van 8 tot 17”.",
       "errorNotesTooLong": "De invoer is te lang — kort hem in tot 4000 tekens.",
       "noWorkSignalHint": "Ik herkende geen tijd, plaats of werkzaamheid in de tekst — de invoer wordt precies zo opgeslagen als je hem schreef.",
       "recordTitle": "Wordt vastgelegd als werktijd",
@@ -15507,7 +15513,7 @@
       "suggestOverdue": "{count, plural, one {# taak is over de einddatum heen} other {# taken zijn over hun einddatum heen}}.",
       "suggestLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
       "suggestReserve": "Er valt morgen een deadline en morgen is bijna vrij.",
-      "suggestReserveNamed": "„{label}“ moet morgen af, en morgen is bijna vrij.",
+      "suggestReserveNamed": "„{label}” moet morgen af, en morgen is bijna vrij.",
       "suggestBasis": "Uit je eigen agenda en taken."
     },
     "ai": {
@@ -15546,8 +15552,8 @@
       "blockedNoProjects": "Je beheert geen projecten op dit account.",
       "blockedNotEmployer": "Dat is een werkgeversactie. Schakel naar je bedrijfsruimte en vraag het opnieuw.",
       "unsupportedDimension": "Op {dimension} kan ik nog niet filteren.",
-      "noSuchValue": "Ik begreep „{asked}“, maar daar is nu niets voor jou zichtbaar.",
-      "noSuchValueWithAlternatives": "Ik begreep „{asked}“, maar daar is nu niets voor jou zichtbaar. Wel: {available}.",
+      "noSuchValue": "Ik begreep „{asked}”, maar daar is nu niets voor jou zichtbaar.",
+      "noSuchValueWithAlternatives": "Ik begreep „{asked}”, maar daar is nu niets voor jou zichtbaar. Wel: {available}.",
       "internshipChooseDirection": "Kies eerst een werkrichting — zonder die kan de stagezoektocht niet worden verfijnd.",
       "internshipAskInstitution": "Vraag het aan je onderwijsinstelling ({institution}): die ziet de marktvraag van de opleiding en kan een werkgever uitnodigen om een stage te plaatsen.",
       "internshipCompass": "Het kompas laat zien wat nu bij je past en wat ontbreekt.",
@@ -17780,11 +17786,11 @@
         "time_conflicts_source": "{count} regels — de periode die u koos wijkt af van de woorden van de bron"
       },
       "issueWhy": {
-        "impossible_hours": "Het brongetal blijft zoals het is (bv. een maandtotaal op één dag). Na „laten staan“ wordt de regel vastgelegd als bronfeit en blijft de dagduur onbekend — nergens opgeteld.",
+        "impossible_hours": "Het brongetal blijft zoals het is (bv. een maandtotaal op één dag). Na „laten staan” wordt de regel vastgelegd als bronfeit en blijft de dagduur onbekend — nergens opgeteld.",
         "week_conflicts": "De datum geldt als feit, het weeknummer als groepering van de auteur. Beide worden getoond; niets wordt herschreven.",
         "ambiguous_place": "Meer dan één plaats past bij deze spelling. Uw antwoord geldt voor elke regel ermee.",
         "ambiguous_person": "Meer dan één persoon op de lijst draagt deze naam. Kies in de regel hieronder.",
-        "site_unknown": "Noch de plaatscel noch de tekst noemt een locatie. De regel blijft zonder — onbekend, niet „geen“.",
+        "site_unknown": "Noch de plaatscel noch de tekst noemt een locatie. De regel blijft zonder — onbekend, niet „geen”.",
         "duplicates": "Een vergelijkbare regel voor dezelfde persoon en dag bestaat al. Controleer in de regels.",
         "conflicts": "Zelfde persoon, dag en plaats — andere uren. Beide regels blijven zichtbaar.",
         "allocation_unknown": "Het dagtotaal blijft exact; uren worden niet op gok over plaatsen verdeeld.",
@@ -19679,9 +19685,9 @@
       "approvedAutomatic": "Automatisch bevestigd volgens een regel",
       "rejected": "Afgewezen",
       "changesRequested": "Aanpassing gevraagd",
-      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bevestigde registratie} other {# bevestigde registraties}}} other {Living CV bijgewerkt: {skills}}}",
-      "cvUnlinked": "Living CV: bevestigd werk, nog niet aan een vaardigheid gekoppeld",
-      "cvUnknown": "Living CV: kon niet lezen",
+      "cv": "{count, plural, one {Levend cv: {skills} · {entries, plural, one {# bevestigde registratie} other {# bevestigde registraties}}} other {Levend cv bijgewerkt: {skills}}}",
+      "cvUnlinked": "Levend cv: bevestigd werk, nog niet aan een vaardigheid gekoppeld",
+      "cvUnknown": "Levend cv: kon niet lezen",
       "matching": "Matching ziet bevestigd werk: {skills}",
       "matchingRepeated": "Matching ziet herhaald bevestigd werk: {skills}"
     },
@@ -19751,7 +19757,7 @@
       "returned": "Teruggestuurd voor correctie: {count}",
       "confirmed": "Bevestigd door een tweede partij: {count}",
       "confirmedUnknown": "Het aantal bevestigingen kon niet worden bepaald",
-      "livingCv": "Bevestigd werk telt mee in het Living CV van de medewerkers"
+      "livingCv": "Bevestigd werk telt mee in het levende cv van de medewerkers"
     },
     "review": "Bekijk de wachtende ({count})",
     "stageDone": "Fase ‘{name}’ afgerond",

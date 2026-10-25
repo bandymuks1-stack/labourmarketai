@@ -144,6 +144,30 @@ const INTENTS = [
 ] as const;
 type Intent = (typeof INTENTS)[number];
 
+/** The person's words for a stored intent code — the form and the saved
+ *  answers read the SAME label, so a saved declaration never shows the raw
+ *  code ("OPEN_TO_OFFERS", UX review 2026-10-24, 4.28). An unknown code reads
+ *  as unknown, never as the code itself. */
+export function intentLabelFor(
+  value: string | null | undefined,
+  labels: PartnerSupplyLabels,
+): string {
+  switch (value) {
+    case "AVAILABLE_NOW":
+      return labels.intentAvailableNow;
+    case "AVAILABLE_FROM":
+      return labels.intentAvailableFrom;
+    case "OPEN_TO_OFFERS":
+      return labels.intentOpenToOffers;
+    case "LOOKING_FOR_WORK":
+      return labels.intentLookingForWork;
+    case "LOOKING_FOR_PROJECTS":
+      return labels.intentLookingForProjects;
+    default:
+      return labels.unknown;
+  }
+}
+
 /** "LT, de , NL" -> ["LT","DE","NL"]. Rejection of a bad code is the RPC's job,
  *  and it REFUSES rather than dropping — silently discarding a country a person
  *  typed would narrow their reach without telling them. */
@@ -477,7 +501,7 @@ export function PartnerSupplyRepresentation({
           <div className="flex flex-wrap justify-between gap-2">
             <dt className="text-text-muted">{labels.currentIntent}</dt>
             <dd className="text-text-primary" data-testid="partner-supply-current-intent">
-              {declaration?.intentState ?? labels.unknown}
+              {intentLabelFor(declaration?.intentState, labels)}
             </dd>
           </div>
           {declaration?.availableFrom && (
@@ -580,15 +604,7 @@ export function PartnerSupplyRepresentation({
                     data-testid={`partner-supply-intent-${value}`}
                   />
                   <span className="text-text-primary">
-                    {value === "AVAILABLE_NOW"
-                      ? labels.intentAvailableNow
-                      : value === "AVAILABLE_FROM"
-                        ? labels.intentAvailableFrom
-                        : value === "OPEN_TO_OFFERS"
-                          ? labels.intentOpenToOffers
-                          : value === "LOOKING_FOR_WORK"
-                            ? labels.intentLookingForWork
-                            : labels.intentLookingForProjects}
+                    {intentLabelFor(value, labels)}
                   </span>
                 </label>
               ))}

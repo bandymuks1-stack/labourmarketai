@@ -401,6 +401,11 @@ export default async function ProjectsPage({
     reservationCollidesTitle: t("assign.reservation.collidesTitle"),
     reservationNotBlocking: t("assign.reservation.notBlocking"),
     reservationUnknown: t("assign.reservation.unknown"),
+    reservationUnknownWhy: {
+      undated_window: t("assign.reservation.unknownWhy.undated_window"),
+      undated_commitment: t("assign.reservation.unknownWhy.undated_commitment"),
+      source_unreadable: t("assign.reservation.unknownWhy.source_unreadable"),
+    },
     reservationAlternativesTitle: t("assign.reservation.alternativesTitle"),
     reservationSwap: t("assign.reservation.swap"),
     reservationUndo: t("assign.reservation.undo"),
