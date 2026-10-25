@@ -487,6 +487,10 @@ test("C-1 (4.26). signed out: the match preview computes the fit and says the AI
       const none = locale === "lt" ? "Paaiškinimas nesukurtas" : "No explanation was produced";
       if (!said.includes(score)) failures.push(`${locale}${phone ? " 390" : ""}: no fit score`);
       if (!said.includes(off) && !said.includes(none)) failures.push(`${locale}${phone ? " 390" : ""}: the AI box does not say it was not generated`);
+      // No AI ran, so nothing may claim one (doctrine §7): no "AI suggestion" badge.
+      if ((said.includes(off) || said.includes(none)) && (await result.getByTestId("match-preview-ai-badge").count()) > 0) {
+        failures.push(`${locale}${phone ? " 390" : ""}: the AI badge shows although no AI explanation was generated`);
+      }
       if (phone) await fitsPhone(page, "match preview");
       console.info(`[ai-off] match preview ${locale}${phone ? " 390" : " 1280"}: score=${said.includes(score)} off=${said.includes(off) || said.includes(none)}`);
     } finally {
