@@ -3621,7 +3621,8 @@
     "reviewBanner": {
       "title": "Some skills need review",
       "body": "Some entries aren't clear yet. Add a bit more detail or review your skills so employers can find you more accurately.",
-      "cta": "Review skills"
+      "cta": "Review skills",
+      "noteLead": "{count, plural, one {skill is not yet backed by work entries.} other {skills are not yet backed by work entries.}}"
     },
     "pageTitle": "My profile",
     "pageSubtitle": "What you do, what you can do, and what shows it — all in one place.",
@@ -7973,7 +7974,7 @@
       "confirmed": "h with a manager's record",
       "organizationHistory": "h in organization history",
       "experienceTotal": "h of professional experience in total",
-      "days": "{count, plural, one {day worked} other {days worked}}",
+      "days": "{count, plural, one {day with hours} other {days with hours}}",
       "modes": {
         "label": "Card sections",
         "work": "Work",

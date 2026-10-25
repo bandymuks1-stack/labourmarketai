@@ -3621,7 +3621,8 @@
     "reviewBanner": {
       "title": "Niektóre umiejętności wymagają sprawdzenia",
       "body": "Niektóre wpisy nie są jeszcze jasne. Dodaj trochę więcej szczegółów lub sprawdź swoje umiejętności, aby pracodawcy mogli Cię trafniej znaleźć.",
-      "cta": "Sprawdź umiejętności"
+      "cta": "Sprawdź umiejętności",
+      "noteLead": "{count, plural, one {umiejętność nie jest jeszcze poparta wpisami o pracy.} few {umiejętności nie są jeszcze poparte wpisami o pracy.} many {umiejętności nie jest jeszcze popartych wpisami o pracy.} other {umiejętności nie jest jeszcze popartych wpisami o pracy.}}"
     },
     "pageTitle": "Mój profil",
     "pageSubtitle": "Co robisz, co potrafisz i co to potwierdza — wszystko w jednym miejscu.",
@@ -7973,7 +7974,7 @@
       "confirmed": "godz. z wpisem przełożonego",
       "organizationHistory": "godz. w historii organizacji",
       "experienceTotal": "godz. doświadczenia zawodowego łącznie",
-      "days": "{count, plural, one {dzień pracy} few {dni pracy} many {dni pracy} other {dnia pracy}}",
+      "days": "{count, plural, one {dzień z godzinami} few {dni z godzinami} many {dni z godzinami} other {dnia z godzinami}}",
       "modes": {
         "label": "Części karty",
         "work": "Praca",

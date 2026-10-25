@@ -3621,7 +3621,8 @@
     "reviewBanner": {
       "title": "Dalis įgūdžių laukia peržiūros",
       "body": "Kai kurie įrašai dar neaiškūs. Papildyk informaciją arba peržiūrėk įgūdžius, kad darbdaviai tave rastų tiksliau.",
-      "cta": "Peržiūrėti įgūdžius"
+      "cta": "Peržiūrėti įgūdžius",
+      "noteLead": "{count, plural, one {įgūdis dar nepagrįstas darbo įrašais.} few {įgūdžiai dar nepagrįsti darbo įrašais.} other {įgūdžių dar nepagrįsta darbo įrašais.}}"
     },
     "pageTitle": "Mano profilis",
     "pageSubtitle": "Ką dirbi, ką moki ir kuo gali tai parodyti — viskas vienoje vietoje.",
@@ -7973,7 +7974,7 @@
       "confirmed": "val. su vadovo įrašu",
       "organizationHistory": "val. organizacijų istorijoje",
       "experienceTotal": "val. profesinės patirties iš viso",
-      "days": "{count, plural, one {darbo diena} few {darbo dienos} other {darbo dienų}}",
+      "days": "{count, plural, one {diena su valandomis} few {dienos su valandomis} other {dienų su valandomis}}",
       "modes": {
         "label": "Kortelės dalys",
         "work": "Darbas",
