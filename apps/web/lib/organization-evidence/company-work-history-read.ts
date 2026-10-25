@@ -207,6 +207,8 @@ type PeriodRow = {
   statement: string | null;
   supersedes_id: string | null;
   created_at: string;
+  period_start_precision: HistoryPeriodStatement["periodStartPrecision"];
+  period_end_precision: HistoryPeriodStatement["periodEndPrecision"];
 };
 
 /**
@@ -236,7 +238,7 @@ async function readBusinessHistory(
     db(supabase)
       .from("organization_history_periods")
       .select(
-        "id, period_label, legal_entity_label, source_labels, period_start, period_end, continuity, legal_entity_relation, basis, basis_reference, statement, supersedes_id, created_at",
+        "id, period_label, legal_entity_label, source_labels, period_start, period_end, continuity, legal_entity_relation, basis, basis_reference, statement, supersedes_id, created_at, period_start_precision, period_end_precision",
       )
       .eq("organization_id", organizationId)
       .order("created_at", { ascending: true })
@@ -266,6 +268,8 @@ async function readBusinessHistory(
       statement: p.statement,
       createdAt: p.created_at,
       supersedesId: p.supersedes_id,
+      periodStartPrecision: p.period_start_precision ?? null,
+      periodEndPrecision: p.period_end_precision ?? null,
     })),
   );
   const labelOf = new Map(labels.rows.map((r) => [r.id, r.source_sheet?.trim() || null]));
