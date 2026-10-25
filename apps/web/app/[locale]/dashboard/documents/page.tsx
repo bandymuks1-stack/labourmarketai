@@ -945,9 +945,9 @@ export default async function WorkerDocumentsPage({
       <DocsConsentToggle current={docsConsent} />
 
       {/* WAGON 9 (area 17) — Lithuanian-master jurisdiction/document
-          guidance. LT locale renders the full draft registry; other locales
-          see only the "being prepared from the Lithuanian master" notice
-          (owner correction 2026-07-05). */}
+          guidance. LT locale renders the full registry; other locales see
+          only the "available in Lithuanian only" notice (owner correction
+          2026-07-05). */}
       <LtDocumentGuidance locale={locale} />
     </div>
   );

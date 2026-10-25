@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/env", () => ({
   env: {
@@ -60,6 +60,21 @@ const verify = (
   relationship = "employee",
 ) => verifyPeopleCommitToken({ token, organizationId: ORG, relationship, userId, plan: p });
 
+// A token is a pure function of (action, input, caller, state, issuedAtMs) —
+// no nonce — so two tests minting the same batch within one millisecond get
+// the SAME token. With one ledger shared across the file, the second test's
+// first, legitimate verify answered `already_spent` (CI, 2026-10-23). Each
+// test gets its own empty ledger, and the clock is frozen so every mint in
+// the file collides: any leak between tests fails every run, not one in N.
+const FROZEN_NOW_MS = 1_790_000_000_000;
+beforeEach(() => {
+  spent.clear();
+  vi.spyOn(Date, "now").mockReturnValue(FROZEN_NOW_MS);
+});
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe("the people commit token", () => {
   it("accepts exactly the batch the preview showed", async () => {
     const p = plan(["Jonas Petraitis", "Ona Kazlauskienė"]);
@@ -90,6 +105,18 @@ describe("the people commit token", () => {
     const [a, b] = await Promise.all([verify(token, p), verify(token, p)]);
     expect([a.ok, b.ok].filter(Boolean)).toHaveLength(1);
     expect((await verify(token, p)).ok).toBe(false);
+  });
+
+  it("two previews of one batch in the same millisecond are ONE permit — committing one spends the other", async () => {
+    // Same caller, action, organization, relationship and people at the same
+    // instant is the same authorization of the same transition; a second
+    // commit of it is a double commit, never a fresh one.
+    const p = plan(["Jonas Petraitis"]);
+    const first = mint(p);
+    const second = mint(p);
+    expect(second).toBe(first);
+    expect((await verify(first, p)).ok).toBe(true);
+    expect((await verify(second, p)).ok).toBe(false);
   });
 
   it("REFUSES a widened batch — an assistant cannot smuggle in an extra person", async () => {

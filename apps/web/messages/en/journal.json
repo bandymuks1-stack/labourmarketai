@@ -506,7 +506,7 @@
     "pageTitle": "Voice entry",
     "pageIntro": "Speak about your work day — you will review and edit the text before anything is saved.",
     "backToJournal": "Back to journal",
-    "unavailable": "Voice transcription is not configured yet. The transcription server has not been connected by the platform owner — recording is disabled until then. You can always write your entry as text.",
+    "unavailable": "Voice transcription is not available yet — recording is off for now. You can always write your entry as text.",
     "disclosureTitle": "Before you record",
     "disclosureProcessing": "Your audio is sent to a LabourMarket.ai-controlled processing server to be turned into text. No third-party speech service is used.",
     "disclosureWhy": "It is used only to create the text below — nothing else.",

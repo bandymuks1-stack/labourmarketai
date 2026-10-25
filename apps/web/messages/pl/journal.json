@@ -506,7 +506,7 @@
     "pageTitle": "Wpis głosowy",
     "pageIntro": "Opowiedz o swoim dniu pracy — sprawdzisz i poprawisz tekst, zanim cokolwiek zostanie zapisane.",
     "backToJournal": "Powrót do dziennika",
-    "unavailable": "Transkrypcja głosu nie jest jeszcze skonfigurowana. Właściciel platformy nie podłączył jeszcze serwera transkrypcji — nagrywanie jest do tego czasu wyłączone. Wpis zawsze możesz napisać tekstem.",
+    "unavailable": "Transkrypcja głosu nie jest jeszcze dostępna — nagrywanie jest na razie wyłączone. Wpis zawsze możesz napisać tekstem.",
     "disclosureTitle": "Przed nagraniem",
     "disclosureProcessing": "Twoje nagranie jest wysyłane na serwer przetwarzania kontrolowany przez LabourMarket.ai w celu zamiany na tekst. Nie są używane zewnętrzne usługi głosowe.",
     "disclosureWhy": "Nagranie służy wyłącznie do utworzenia poniższego tekstu — niczemu innemu.",

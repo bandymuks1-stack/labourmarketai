@@ -506,7 +506,7 @@
     "pageTitle": "Įrašas balsu",
     "pageIntro": "Papasakok apie savo darbo dieną — tekstą peržiūrėsi ir pataisysi prieš ką nors išsaugant.",
     "backToJournal": "Grįžti į dienoraštį",
-    "unavailable": "Balso transkribavimas dar nesukonfigūruotas. Platformos savininkas dar neprijungė transkribavimo serverio — įrašymas kol kas išjungtas. Įrašą visada gali parašyti tekstu.",
+    "unavailable": "Balso transkribavimas dar neprieinamas — įrašymas kol kas išjungtas. Įrašą visada gali parašyti tekstu.",
     "disclosureTitle": "Prieš įrašant",
     "disclosureProcessing": "Tavo garso įrašas siunčiamas į LabourMarket.ai valdomą apdorojimo serverį, kad būtų paverstas tekstu. Jokia trečiųjų šalių balso paslauga nenaudojama.",
     "disclosureWhy": "Įrašas naudojamas tik žemiau esančiam tekstui sukurti — niekam kitam.",

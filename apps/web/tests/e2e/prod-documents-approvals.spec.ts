@@ -65,6 +65,17 @@ async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx
   return { ctx, page: await ctx.newPage() };
 }
 
+/**
+ * The page content, never the streaming holder. Dashboard pages stream through
+ * a hidden `<div id="S:n">` whose reveal is rAF-driven; in a never-painting
+ * headless tab that hidden copy sits outside <main> beside the rendered one,
+ * so a bare testid fails strict mode at once and a count reads double
+ * (project-execution 40081437313 E-11 `hours-worker-select`, and its cleanup
+ * `toHaveCount(0)`; calendar-journal-history.spec.ts). Strict inside <main>
+ * still fails if a page really renders something twice.
+ */
+const inMain = (page: Page): Locator => page.getByRole("main");
+
 /** Make `orgName` the active workspace through the real header chip. */
 async function useWorkspace(page: Page, orgName: string): Promise<void> {
   await page.goto("/lt/dashboard/company/people");
@@ -98,7 +109,7 @@ async function act(page: Page, control: Locator, param: string): Promise<string>
 test("D-1 (2.18). a worker records a credential that runs out in 20 days; the inventory says expiring", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker2", true);
   await page.goto("/lt/dashboard/documents");
-  const form = page.getByTestId("worker-document-form");
+  const form = inMain(page).getByTestId("worker-document-form");
   await expect(form).toBeVisible({ timeout: 30_000 });
   const type = form.locator('select[name="document_type_slug"]');
   const slug = (await type.locator("option").first().getAttribute("value")) ?? "";
@@ -109,9 +120,9 @@ test("D-1 (2.18). a worker records a credential that runs out in 20 days; the in
   await form.locator('input[name="valid_from"]').fill(dayFromToday(-300));
   await form.locator('input[name="valid_until"]').fill(dayFromToday(20));
   await form.locator('[name="note"]').fill(NOTE);
-  await page.getByTestId("worker-document-save").click();
-  const saved = page.getByTestId("worker-document-saved");
-  const error = page.getByTestId("worker-document-error");
+  await inMain(page).getByTestId("worker-document-save").click();
+  const saved = inMain(page).getByTestId("worker-document-saved");
+  const error = inMain(page).getByTestId("worker-document-error");
   await expect(saved.or(error)).toBeVisible({ timeout: 30_000 });
   if (await error.isVisible()) throw new Error(`document not saved: ${await error.innerText()}`);
 
@@ -131,23 +142,23 @@ test("R-1 (3.29). Alfa's owner registers a document, finds it by search, and arc
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/documents#org-register");
-  const register = page.getByTestId("org-documents-register");
+  const register = inMain(page).getByTestId("org-documents-register");
   await expect(register).toBeVisible({ timeout: 30_000 });
-  const create = page.getByTestId("org-documents-create");
+  const create = inMain(page).getByTestId("org-documents-create");
   await create.locator("summary").click();
   await create.locator('select[name="typeSlug"]').selectOption("org_instruction");
   await create.locator('[name="title"]').fill(ORG_DOC);
   await create.locator('input[name="expiresOn"]').fill(dayFromToday(365));
-  expect(await act(page, page.getByTestId("org-documents-create-submit"), "docNotice")).toMatch(/created/);
+  expect(await act(page, inMain(page).getByTestId("org-documents-create-submit"), "docNotice")).toMatch(/created/);
 
   await page.goto(`/lt/dashboard/documents?regQ=${encodeURIComponent(RUN)}#org-register`);
-  const row = page.getByTestId("org-document-row").filter({ hasText: ORG_DOC });
+  const row = inMain(page).getByTestId("org-document-row").filter({ hasText: ORG_DOC });
   await expect(row, "the search finds exactly this run's document").toHaveCount(1, { timeout: 30_000 });
   await expect(row).toHaveAttribute("data-status", "active");
 
   await act(page, row.getByTestId("org-document-archive"), "docNotice");
   await page.goto(`/lt/dashboard/documents?regQ=${encodeURIComponent(RUN)}&regStatus=archived#org-register`);
-  await expect(page.getByTestId("org-document-row").filter({ hasText: ORG_DOC })).toHaveAttribute(
+  await expect(inMain(page).getByTestId("org-document-row").filter({ hasText: ORG_DOC })).toHaveAttribute(
     "data-status",
     "archived",
     { timeout: 30_000 },
@@ -161,18 +172,24 @@ test("A-1 (3.24). Alfa keeps a published approval template", async ({ browser })
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/network?area=approvals");
-  await expect(page.getByTestId("approvals-admin")).toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId("approvals-admin")).toBeVisible({ timeout: 30_000 });
   let template = page.locator('[data-testid^="approvals-template-"]', { hasText: TEMPLATE }).first();
   if (!(await template.isVisible().catch(() => false))) {
     console.info("[approvals] creating the synthetic template once");
-    const create = page.getByTestId("approvals-create-template");
+    const create = inMain(page).getByTestId("approvals-create-template");
     await create.locator("summary").click();
     const org = create.locator('select[name="organizationId"]');
     const value = await org.locator("option", { hasText: ALFA }).first().getAttribute("value");
     expect(value, "Alfa is one of the organizations the owner governs").toBeTruthy();
     await org.selectOption(value!);
     await create.locator('input[name="name"]').fill(TEMPLATE);
-    await act(page, page.getByTestId("approvals-create-template-submit"), "wf");
+    // A template needs at least one approval step: step 1's name is a
+    // `required` field (since #1170), so without it the browser's own
+    // validation keeps the form from submitting and no `?wf=` ever arrives
+    // (run 40053712526 A-1: the first time this create branch ran in
+    // production). The step keeps the defaults: single approver, owner/admin.
+    await create.locator('input[name="step1Name"]').fill("QA-SYNTHETIC vadovo patvirtinimas");
+    await act(page, inMain(page).getByTestId("approvals-create-template-submit"), "wf");
     await page.goto("/lt/dashboard/network?area=approvals");
     template = page.locator('[data-testid^="approvals-template-"]', { hasText: TEMPLATE }).first();
     await expect(template).toBeVisible({ timeout: 30_000 });
@@ -195,7 +212,7 @@ let instanceId = "";
 test("A-2 (3.24). the employee files a request with that template", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/network?area=approvals");
-  const start = page.getByTestId("approvals-start");
+  const start = inMain(page).getByTestId("approvals-start");
   await expect(start, "the employee is offered a request form").toBeVisible({ timeout: 30_000 });
   await start.locator("summary").click();
   const definition = start.locator('select[name="definitionId"]');
@@ -204,12 +221,12 @@ test("A-2 (3.24). the employee files a request with that template", async ({ bro
   await definition.selectOption(value!);
   await start.locator('input[name="title"]').fill(REQUEST_TITLE);
   await start.locator('textarea[name="details"]').fill(`${NOTE}: synthetic approval request.`);
-  await act(page, page.getByTestId("approvals-start-submit"), "wf");
+  await act(page, inMain(page).getByTestId("approvals-start-submit"), "wf");
   await page.goto("/lt/dashboard/network?area=approvals");
   const mine = page.locator('[data-testid^="approvals-request-"]', { hasText: REQUEST_TITLE });
   await expect(mine).toHaveCount(1, { timeout: 30_000 });
   instanceId = ((await mine.getAttribute("data-testid")) ?? "").replace(/^approvals-request-/, "");
-  await expect(page.getByTestId(`approvals-withdraw-${instanceId}`), "the request is pending").toBeVisible();
+  await expect(inMain(page).getByTestId(`approvals-withdraw-${instanceId}`), "the request is pending").toBeVisible();
   await ctx.close();
 });
 
@@ -217,20 +234,20 @@ test("A-3 (3.24). Alfa's owner approves the request from the inbox", async ({ br
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/network?area=approvals");
-  const item = page.getByTestId(`approvals-inbox-${instanceId}`);
+  const item = inMain(page).getByTestId(`approvals-inbox-${instanceId}`);
   await expect(item, "the request reached the approver's inbox").toBeVisible({ timeout: 30_000 });
   await act(page, item.getByTestId(`approvals-approve-${instanceId}`), "wf");
   await page.goto("/lt/dashboard/network?area=approvals");
-  await expect(page.getByTestId(`approvals-inbox-${instanceId}`)).toHaveCount(0, { timeout: 30_000 });
+  await expect(inMain(page).getByTestId(`approvals-inbox-${instanceId}`)).toHaveCount(0, { timeout: 30_000 });
   await ctx.close();
 });
 
 test("A-4 (3.24). the employee sees the decision; the request is no longer open", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker", true);
   await page.goto("/lt/dashboard/network?area=approvals");
-  const mine = page.getByTestId(`approvals-request-${instanceId}`);
+  const mine = inMain(page).getByTestId(`approvals-request-${instanceId}`);
   await expect(mine).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId(`approvals-withdraw-${instanceId}`)).toHaveCount(0);
+  await expect(inMain(page).getByTestId(`approvals-withdraw-${instanceId}`)).toHaveCount(0);
   await ctx.close();
 });
 
@@ -244,21 +261,21 @@ test("C-1 (6.6). Alfa's owner records a proposal and moves it to accepted", asyn
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/commercial");
-  await expect(page.getByTestId("proposals-panel")).toBeVisible({ timeout: 30_000 });
-  await page.getByTestId("proposal-title").fill(PROPOSAL);
-  await page.getByTestId("proposal-amount").fill("1200.00");
-  await page.getByTestId("proposal-create").click();
-  const row = page.getByTestId("proposal-row").filter({ hasText: PROPOSAL });
+  await expect(inMain(page).getByTestId("proposals-panel")).toBeVisible({ timeout: 30_000 });
+  await inMain(page).getByTestId("proposal-title").fill(PROPOSAL);
+  await inMain(page).getByTestId("proposal-amount").fill("1200.00");
+  await inMain(page).getByTestId("proposal-create").click();
+  const row = inMain(page).getByTestId("proposal-row").filter({ hasText: PROPOSAL });
   await expect(row).toHaveCount(1, { timeout: 30_000 });
   for (const status of ["sent", "accepted"]) {
     await row.getByTestId("proposal-status").selectOption(status);
-    await expect(page.getByTestId("commercial-msg")).toBeVisible({ timeout: 30_000 });
+    await expect(inMain(page).getByTestId("commercial-msg")).toBeVisible({ timeout: 30_000 });
     // Persistence: a fresh load shows the status (reloaded until the write lands).
     await expect
       .poll(
         async () => {
           await page.reload();
-          return page.getByTestId("proposal-row").filter({ hasText: PROPOSAL }).getByTestId("proposal-status").inputValue();
+          return inMain(page).getByTestId("proposal-row").filter({ hasText: PROPOSAL }).getByTestId("proposal-status").inputValue();
         },
         { timeout: 30_000 },
       )
@@ -271,18 +288,18 @@ test("C-2 (6.6). the owner records the contract, then removes both synthetic row
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/commercial");
-  await page.getByTestId("contract-title").fill(CONTRACT);
-  await page.getByTestId("contract-value").fill("1200.00");
-  await page.getByTestId("contract-create").click();
-  const contract = page.getByTestId("contract-row").filter({ hasText: CONTRACT });
+  await inMain(page).getByTestId("contract-title").fill(CONTRACT);
+  await inMain(page).getByTestId("contract-value").fill("1200.00");
+  await inMain(page).getByTestId("contract-create").click();
+  const contract = inMain(page).getByTestId("contract-row").filter({ hasText: CONTRACT });
   await expect(contract).toHaveCount(1, { timeout: 30_000 });
   await page.reload();
-  await expect(page.getByTestId("contract-row").filter({ hasText: CONTRACT })).toHaveCount(1, { timeout: 30_000 });
+  await expect(inMain(page).getByTestId("contract-row").filter({ hasText: CONTRACT })).toHaveCount(1, { timeout: 30_000 });
 
-  await page.getByTestId("contract-row").filter({ hasText: CONTRACT }).getByTestId("contract-delete").click();
-  await expect(page.getByTestId("contract-row").filter({ hasText: CONTRACT })).toHaveCount(0, { timeout: 30_000 });
-  await page.getByTestId("proposal-row").filter({ hasText: PROPOSAL }).getByTestId("proposal-delete").click();
-  await expect(page.getByTestId("proposal-row").filter({ hasText: PROPOSAL })).toHaveCount(0, { timeout: 30_000 });
+  await inMain(page).getByTestId("contract-row").filter({ hasText: CONTRACT }).getByTestId("contract-delete").click();
+  await expect(inMain(page).getByTestId("contract-row").filter({ hasText: CONTRACT })).toHaveCount(0, { timeout: 30_000 });
+  await inMain(page).getByTestId("proposal-row").filter({ hasText: PROPOSAL }).getByTestId("proposal-delete").click();
+  await expect(inMain(page).getByTestId("proposal-row").filter({ hasText: PROPOSAL })).toHaveCount(0, { timeout: 30_000 });
   await ctx.close();
 });
 
@@ -290,17 +307,17 @@ test("C-3 (6.6). the agreement register: draft → active record → terminated"
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/commercial");
-  const create = page.getByTestId("agreements-create");
+  const create = inMain(page).getByTestId("agreements-create");
   await expect(create).toBeVisible({ timeout: 30_000 });
   await create.locator("summary").click();
   await create.locator('select[name="agreementType"]').selectOption({ index: 0 });
   await create.locator('input[name="title"]').fill(AGREEMENT);
   await create.locator('input[name="counterpartyName"]').fill("QA-SYNTHETIC kontrahentas");
-  await act(page, page.getByTestId("agreements-create-submit"), "agr");
+  await act(page, inMain(page).getByTestId("agreements-create-submit"), "agr");
 
   const find = async () => {
     await page.goto(`/lt/dashboard/commercial?agrSearch=${encodeURIComponent(RUN)}`);
-    return page.getByTestId("agreement-row").filter({ hasText: AGREEMENT });
+    return inMain(page).getByTestId("agreement-row").filter({ hasText: AGREEMENT });
   };
   let row = await find();
   await expect(row).toHaveCount(1, { timeout: 30_000 });
@@ -329,8 +346,8 @@ function requestIdOf(href: string | null): string {
 
 async function closeNeed(page: Page, id: string): Promise<"closed" | "already-closed"> {
   await page.goto(`/lt/dashboard/company/scouting?request=${id}`);
-  const controls = page.getByTestId("demand-lifecycle-controls").first();
-  const unstructured = page.getByTestId("scouting-not-structured").first();
+  const controls = inMain(page).getByTestId("demand-lifecycle-controls").first();
+  const unstructured = inMain(page).getByTestId("scouting-not-structured").first();
   await expect(controls.or(unstructured).first()).toBeVisible({ timeout: 30_000 });
   if (await controls.isVisible()) {
     if ((await controls.getAttribute("data-demand-status")) === "closed") return "already-closed";
@@ -343,12 +360,12 @@ async function closeNeed(page: Page, id: string): Promise<"closed" | "already-cl
   // for every submitted need — the chat workspace's candidates result
   // (`?result=candidates&demand=`, `company.close-demand`).
   await page.goto(`/lt/dashboard?result=candidates&demand=${id}`);
-  const close = page.getByTestId("candidates-close-demand").filter({ visible: true }).first();
-  const reopen = page.getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
+  const close = inMain(page).getByTestId("candidates-close-demand").filter({ visible: true }).first();
+  const reopen = inMain(page).getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
   await expect(close.or(reopen).first(), "the need's own close/reopen action").toBeVisible({ timeout: 60_000 });
   if (await reopen.isVisible()) return "already-closed";
   await close.click();
-  const error = page.getByTestId("candidates-close-demand-error").first();
+  const error = inMain(page).getByTestId("candidates-close-demand-error").first();
   await expect(reopen.or(error).first()).toBeVisible({ timeout: 30_000 });
   if (await error.isVisible()) throw new Error(`close refused: ${(await error.innerText()).slice(0, 120)}`);
   return "closed";
@@ -357,15 +374,15 @@ async function closeNeed(page: Page, id: string): Promise<"closed" | "already-cl
 /** Fill Gama's demand intake for this run's need; "limit" when the open-need limit answers. */
 async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
-  await page.getByTestId("demand-role").fill(NEED_ROLE);
-  await page.getByTestId("demand-description").fill(`${NOTE}: synthetic need for the production disclosure walk.`);
-  await page.getByTestId("demand-next").click();
-  const size = page.getByTestId("demand-team-size");
+  await inMain(page).getByTestId("demand-role").fill(NEED_ROLE);
+  await inMain(page).getByTestId("demand-description").fill(`${NOTE}: synthetic need for the production disclosure walk.`);
+  await inMain(page).getByTestId("demand-next").click();
+  const size = inMain(page).getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
-  await page.getByTestId("demand-next").click();
-  await page.getByTestId("demand-create").click();
-  const done = page.getByTestId("demand-done");
-  const limit = page.getByTestId("demand-open-need-limit");
+  await inMain(page).getByTestId("demand-next").click();
+  await inMain(page).getByTestId("demand-create").click();
+  const done = inMain(page).getByTestId("demand-done");
+  const limit = inMain(page).getByTestId("demand-open-need-limit");
   await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
   return (await limit.isVisible()) ? "limit" : "done";
 }
@@ -441,7 +458,7 @@ test("G-2 (4.18). Gama asks the hand-raiser for contact details", async ({ brows
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  const candidate = page.getByTestId(`scout-candidate-${workerId}`);
+  const candidate = inMain(page).getByTestId(`scout-candidate-${workerId}`);
   await expect(candidate).toBeVisible({ timeout: 60_000 });
   await candidate.getByTestId(`contact-request-open-${workerId}`).click();
   await expect(candidate.getByTestId(`contact-request-status-${workerId}`)).toHaveAttribute("data-status", "created", {
@@ -466,7 +483,7 @@ test("G-3 (4.18). the worker accepts the ask and grants the disclosure with the 
   await ask.getByTestId(`contact-request-grant-${askId}`).click();
   await expect(ask.getByTestId(`contact-request-granted-${askId}`)).toBeVisible({ timeout: 30_000 });
   await page.reload();
-  await expect(page.getByTestId(`contact-request-granted-${askId}`), "the grant persists").toBeVisible({ timeout: 30_000 });
+  await expect(inMain(page).getByTestId(`contact-request-granted-${askId}`), "the grant persists").toBeVisible({ timeout: 30_000 });
   await ctx.close();
 });
 
@@ -474,7 +491,7 @@ test("G-4 (4.18). Gama sees the disclosure granted", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  const status = page.getByTestId(`contact-request-status-${workerId}`);
+  const status = inMain(page).getByTestId(`contact-request-status-${workerId}`);
   await expect(status).toHaveAttribute("data-status", "accepted", { timeout: 60_000 });
   await expect(status).toHaveAttribute("data-disclosure-granted", "true");
   await ctx.close();
@@ -483,18 +500,18 @@ test("G-4 (4.18). Gama sees the disclosure granted", async ({ browser }) => {
 test("G-5 (4.18). the worker withdraws the grant; Gama sees it withdrawn; the need is closed (cleanup)", async ({ browser }) => {
   const worker = await as(browser, "worker");
   await worker.page.goto("/lt/dashboard/privacy#contact-requests");
-  await worker.page.getByTestId(`contact-request-withdraw-${askId}`).click();
-  await expect(worker.page.getByTestId(`contact-request-withdrawn-${askId}`)).toBeVisible({ timeout: 30_000 });
+  await inMain(worker.page).getByTestId(`contact-request-withdraw-${askId}`).click();
+  await expect(inMain(worker.page).getByTestId(`contact-request-withdrawn-${askId}`)).toBeVisible({ timeout: 30_000 });
   // The person may change their mind again: the grant is offered anew.
-  await expect(worker.page.getByTestId(`contact-request-grant-${askId}`)).toBeVisible();
+  await expect(inMain(worker.page).getByTestId(`contact-request-grant-${askId}`)).toBeVisible();
   await worker.page.reload();
-  await expect(worker.page.getByTestId(`contact-request-granted-${askId}`)).toHaveCount(0, { timeout: 30_000 });
+  await expect(inMain(worker.page).getByTestId(`contact-request-granted-${askId}`)).toHaveCount(0, { timeout: 30_000 });
   await worker.ctx.close();
 
   const gama = await as(browser, "manager");
   await useWorkspace(gama.page, GAMA);
   await gama.page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  await expect(gama.page.getByTestId(`contact-request-status-${workerId}`)).toHaveAttribute(
+  await expect(inMain(gama.page).getByTestId(`contact-request-status-${workerId}`)).toHaveAttribute(
     "data-disclosure-granted",
     "false",
     { timeout: 60_000 },

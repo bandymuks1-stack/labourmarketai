@@ -148,7 +148,7 @@ export default async function VerifiedCvPage({
     // Honest worker-only gate: the Verified CV is built from the worker's
     // journal/skills chain; other roles have no such data to export.
     return (
-      <div className="cv-doc min-h-screen bg-ink-900 px-6 py-10 text-text-primary">
+      <main className="cv-doc min-h-screen bg-ink-900 px-6 py-10 text-text-primary">
         <div className="mx-auto flex max-w-2xl flex-col gap-4">
           <p className="text-sm text-text-secondary" data-testid="cv-not-worker">
             {t("notWorker")}
@@ -160,7 +160,7 @@ export default async function VerifiedCvPage({
             {t("back")}
           </Link>
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -897,8 +897,10 @@ export default async function VerifiedCvPage({
     stationMeta: journeyMeta,
   };
 
+  // The page's one <main> landmark (WCAG 2.4.1 bypass blocks): /cv renders
+  // outside the dashboard chrome, which is what supplies <main> elsewhere.
   return (
-    <div className="cv-doc min-h-screen bg-ink-900 px-6 py-8 text-text-primary print:p-0">
+    <main className="cv-doc min-h-screen bg-ink-900 px-6 py-8 text-text-primary print:p-0">
       <div className={`mx-auto flex max-w-3xl flex-col ${pageGap}`}>
         {/* Screen-only toolbar — never printed. */}
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
@@ -1122,9 +1124,14 @@ export default async function VerifiedCvPage({
               {summary.map((s) => (
                 <div
                   key={s.key}
-                  className="rounded-lg border border-ink-600 p-3 text-center"
+                  className="min-w-0 rounded-lg border border-ink-600 p-2 text-center sm:p-3"
                 >
-                  <dt className="text-meta uppercase tracking-wide text-text-muted">
+                  {/* A third of a phone is ~100px: one long compound word
+                      ("Dagboekregistraties", "Tagebucheinträge") overflowed
+                      the tile and the page slid 21px sideways (UX review
+                      2026-10-24). It hyphenates where the locale's dictionary
+                      can, and breaks inside the word where it cannot. */}
+                  <dt className="hyphens-auto break-words text-meta uppercase tracking-wide text-text-muted">
                     {t(`summary.${s.key}`)}
                   </dt>
                   <dd className="mt-1 font-display text-2xl font-bold">
@@ -1789,6 +1796,6 @@ export default async function VerifiedCvPage({
           </>
         )}
       </div>
-    </div>
+    </main>
   );
 }

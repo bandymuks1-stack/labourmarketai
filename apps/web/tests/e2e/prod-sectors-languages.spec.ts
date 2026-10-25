@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect } from "./prod-walk";
 
-import { chooseWorkContextIfAsked } from "./worklog-context";
+import { answerNoProjectIfAsked, chooseWorkContextIfAsked } from "./worklog-context";
 
 /**
  * PRODUCTION SECTORS × LANGUAGES — owner programme 2026-10-12 §3E: the same
@@ -40,18 +40,24 @@ for (const day of DAYS) {
     const tag = `QA-SYNTHETIC ${RUN} ${day.sector}`;
     await page.goto(`/${day.locale}/dashboard/journal`);
     await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
-    await page.getByTestId("journal-quick-record-text").fill(`${tag}: ${day.text}`);
-    await page.getByTestId("journal-quick-record-understand").click();
-    await expect(page.getByTestId("worklog-flow")).toBeVisible({ timeout: 45_000 });
+    // Scoped to <main>: dashboard pages stream through a hidden `<div id="S:n">`
+    // holder outside <main>; in a never-painting headless tab it can sit beside
+    // the rendered copy, and a bare testid then fails strict mode or counts twice
+    // (journal-confirm 40080278940 step 3; calendar-journal-history.spec.ts).
+    const main = page.getByRole("main");
+    await main.getByTestId("journal-quick-record-text").fill(`${tag}: ${day.text}`);
+    await main.getByTestId("journal-quick-record-understand").click();
+    await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 45_000 });
     await chooseWorkContextIfAsked(page, /QA-SYNTHETIC Alfa/);
-    await page.getByTestId("worklog-save").click();
-    await page.getByTestId("worklog-confirm").click();
-    const done = page.getByTestId("worklog-done");
-    const failed = page.getByTestId("worklog-error").or(page.getByTestId("worklog-blocked"));
+    await answerNoProjectIfAsked(page);
+    await main.getByTestId("worklog-save").click();
+    await main.getByTestId("worklog-confirm").click();
+    const done = main.getByTestId("worklog-done");
+    const failed = main.getByTestId("worklog-error").or(main.getByTestId("worklog-blocked"));
     await expect(done.or(failed)).toBeVisible({ timeout: 45_000 });
     if (!(await done.isVisible())) throw new Error(`${day.sector}/${day.locale} not saved: ${await failed.innerText()}`);
     await page.goto(`/${day.locale}/dashboard/journal`);
-    const card = page.locator('[data-testid^="journal-entry-card-"]', { hasText: tag }).first();
+    const card = main.locator('[data-testid^="journal-entry-card-"]', { hasText: tag }).first();
     await expect(card).toBeVisible({ timeout: 30_000 });
     // The page chrome speaks the chosen language (no LT leaking into EN/RU/PL).
     const lang = await page.locator("html").getAttribute("lang");

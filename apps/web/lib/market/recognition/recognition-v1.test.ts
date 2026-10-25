@@ -66,7 +66,7 @@ describe("recognition: a vague post is not treated as match-ready", () => {
     expect(risks).toContain("accommodation_terms_unclear");
     // Important details are missing → the card points at completing them.
     expect(card.nextAction.code).toBe("complete_missing_fields");
-    expect(card.nextAction.href).toBe("/dashboard/company");
+    expect(card.nextAction.href).toBe("/dashboard/company/needs#demand-intake");
     // The structured identity still recognized work type + country.
     expect(card.structured.workType).toBe("carpenter");
     expect(card.structured.country).toBe("NO");

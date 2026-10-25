@@ -65,6 +65,7 @@
  * Pure. No IO, no env, no server-only, no SDK import.
  */
 import type { AiDataSensitivity } from "./data-sensitivity";
+import { termsCeilingFor } from "./provider-catalogue";
 
 /** Ordered least → most restricted. Local copy so this module stays standalone. */
 const SENSITIVITY_RANK: Record<AiDataSensitivity, number> = {
@@ -218,17 +219,30 @@ export function maxPermittedSensitivity(
   if (profile.locality === "local") return "SENSITIVE_FREE_TEXT";
 
   const grant = egressGrantFor(profile.id, grants, task);
-  if (!grant) return "PUBLIC";
+  let ceiling: AiDataSensitivity = grant ? grant.maxSensitivity : "PUBLIC";
 
   // A free tier's ceiling is capped regardless of what the grant claims.
   if (
     profile.costClass === "free_tier" &&
-    SENSITIVITY_RANK[grant.maxSensitivity] >
-      SENSITIVITY_RANK[MAX_GRANTABLE_FOR_FREE_TIER]
+    SENSITIVITY_RANK[ceiling] > SENSITIVITY_RANK[MAX_GRANTABLE_FOR_FREE_TIER]
   ) {
-    return MAX_GRANTABLE_FOR_FREE_TIER;
+    ceiling = MAX_GRANTABLE_FOR_FREE_TIER;
   }
-  return grant.maxSensitivity;
+
+  // THE VENDOR'S OWN TERMS (provider-catalogue.ts, 2026-10-25) cap it again:
+  // DeepL Free forbids personal data, Mistral's free mode trains by default,
+  // OpenRouter's free routes may log — none of them can be raised past PUBLIC
+  // by a grant. An EXCLUDED vendor is handled in `egressPermitted` (it gets
+  // nothing, not even PUBLIC).
+  const terms = termsCeilingFor(profile.id);
+  if (
+    terms !== null &&
+    terms !== "EXCLUDED" &&
+    SENSITIVITY_RANK[ceiling] > SENSITIVITY_RANK[terms]
+  ) {
+    ceiling = terms;
+  }
+  return ceiling;
 }
 
 export type EgressVerdict =
@@ -243,6 +257,13 @@ export function egressPermitted(
   task?: string,
 ): EgressVerdict {
   if (profile.locality === "local") return { permitted: true };
+
+  if (termsCeilingFor(profile.id) === "EXCLUDED") {
+    return {
+      permitted: false,
+      reason: `data egress gate: "${profile.id}" is excluded by its own terms (provider-catalogue.ts) — it may receive nothing, not even PUBLIC data`,
+    };
+  }
 
   const ceiling = maxPermittedSensitivity(profile, grants, task);
   if (SENSITIVITY_RANK[sensitivity] <= SENSITIVITY_RANK[ceiling]) {

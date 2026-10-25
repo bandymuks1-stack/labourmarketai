@@ -148,7 +148,7 @@
     "pageTitle": "Balss ievade",
     "pageIntro": "Pastāstiet par savu darba dienu — jūs pārskatīsiet un izlabosiet tekstu, pirms kaut kas tiks saglabāts.",
     "backToJournal": "Atpakaļ uz dienasgrāmatu",
-    "unavailable": "Balss transkripcija vēl nav konfigurēta. Platformas īpašnieks vēl nav pievienojis transkripcijas serveri — ierakstīšana līdz tam ir atspējota. Ierakstu vienmēr varat uzrakstīt kā tekstu.",
+    "unavailable": "Balss transkripcija vēl nav pieejama — ierakstīšana pagaidām ir atspējota. Ierakstu vienmēr varat uzrakstīt kā tekstu.",
     "disclosureTitle": "Pirms ierakstīšanas",
     "disclosureProcessing": "Jūsu ieraksts tiek nosūtīts uz LabourMarket.ai kontrolētu apstrādes serveri, lai to pārvērstu tekstā. Trešo pušu balss pakalpojumi netiek izmantoti.",
     "disclosureWhy": "Tas tiek izmantots tikai zemāk redzamā teksta izveidei — nekam citam.",

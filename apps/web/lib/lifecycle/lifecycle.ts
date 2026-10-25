@@ -23,6 +23,7 @@ import { createClient } from "@/lib/supabase/server";
  * faked.
  */
 
+import { workerDisplayNamesByProfile } from "@/lib/operations/member-display-names";
 import {
   LIFECYCLE_READ_LIMIT,
   deriveLifecycleStage,
@@ -198,13 +199,26 @@ export async function getLifecycleOverview(
     offboardingByEc.set(String(r.engagement_context_id), String(r.id));
   }
 
-  const members: LifecycleMemberRow[] = ((ecRes.data ?? []) as RawRow[]).map(
+  // An owner/manager cannot read another person's `profiles` row, so the
+  // embed is empty for everyone but the caller and the employee read "—"
+  // (local UX review 2026-10-24, row 3.23). Same fallback as the members
+  // panel on this page: the worker row's own display name.
+  const ecRows = (ecRes.data ?? []) as RawRow[];
+  const displayByProfile = await workerDisplayNamesByProfile(
+    supabase,
+    ecRows
+      .filter((r) => profName(r.profiles) === "—" && r.profile_id)
+      .map((r) => String(r.profile_id)),
+  );
+
+  const members: LifecycleMemberRow[] = ecRows.map(
     (r) => {
       const endedReason = String(r.ended_reason ?? "");
+      const ownName = profName(r.profiles);
       return {
         engagementId: String(r.id),
         profileId: String(r.profile_id),
-        name: profName(r.profiles),
+        name: ownName === "—" ? (displayByProfile.get(String(r.profile_id)) ?? "—") : ownName,
         relationshipSlug: String(r.relationship_slug ?? "other"),
         engagementStatus: String(r.status ?? "active"),
         stage: deriveLifecycleStage(
