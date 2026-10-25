@@ -59,7 +59,7 @@ and there is **no Labour Market AI period** at all.
 
 ## 4. Correction — through the existing auditable architecture
 
-### Phase A — period bounds (this PR; append-only; owner-gated apply)
+### Phase A — period bounds (APPLIED to production 2026-10-25 + verified)
 `supabase/migrations/20261025120000_business_history_periods_vivatrex_lmai_bounds_v1.sql`:
 1. Supersede the `Vivat Rex` row to add `period_end = 2026-02-22` (documented) and
    `period_start = 2022-01-17` (**OWNER DECISION — earliest evidence day; 2022
@@ -117,8 +117,29 @@ batches after an impact preview, owner-gated.
    employer name on their pre-2026-02-23 work, RLS unchanged.
 4. No record's `supplied_by_organization_id` changed; count of records = 2944.
 
-## Status
-Phase A prepared (migration + rollback + this plan). **NOT COMPLETED**: production
-apply is owner-gated (RED — business-history/legal statement + the flagged start
-date), and the real benefit is proven only after apply + §6 verification. Phases
-B–D are follow-ups. No record moved; no history rewritten; no unaudited SQL.
+## Status — Phase A DONE in production (verified 2026-10-25)
+Applied via Supabase MCP `apply_migration` on project `gorgitwvdzxbnaxhrsrw`
+(migration `business_history_periods_vivatrex_lmai_bounds_v1`), under the owner's
+explicit 2026-10-25 instruction and the standing 2026-09-30 decision.
+
+Production verification (composition replicated from `business-history.ts` over all
+2944 records):
+
+| Period | Records | by label | by date | not placed |
+|---|---|---|---|---|
+| Vivat Rex `[2022-01-17..2026-02-22]` | 2932 | 800 | 2132 | 0 |
+| Labour Market AI Sp. z o.o `[2026-02-23..2026-03-29]` | 12 | 0 | 12 | 0 |
+
+- 2932 + 12 = **2944 — every record placed exactly once, 0 not placed, 0 undated**.
+- `supplied_by_organization_id` unchanged on all 2944 — **no record moved**.
+- `organization_history_periods`: 3 rows (original null-bound Vivat Rex preserved
+  and superseded; 2 live periods) — **append-only, provenance intact**.
+- Nonstop Group org (`20b2c802`): **0 historical evidence records, 0 periods** —
+  no separate Nonstop dataset; the 125 `Nonstop-Vivat Rex PL` records stay in the
+  Vivat Rex period as dataset provenance (2026-09-30 decision).
+
+**Remaining (follow-ups, do not block the product):** Phase B employer-party
+labels (854 labelled records); Phase C date-provenance reclassification (2944,
+batched); Phase D objects — 851 missing work-object links + "Hoofdgracht 45"
+(no 45 object exists; stays `proposed`, needs the weekly timesheets read to decide
+distinct-vs-typo). No history rewritten; no unaudited SQL.
