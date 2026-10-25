@@ -20,9 +20,8 @@ import {
   type FeatureKey,
 } from "./feature-availability";
 
-/** Icon ids — concrete icon imports live in the nav components
- *  (`BottomNav`, `DashboardTabs`), so this config stays
- *  framework-agnostic. */
+/** Icon ids — concrete icon imports live in `components/app/nav-icons.ts`
+ *  (read by the one header), so this config stays framework-agnostic. */
 export type NavIconKey =
   | "home"
   | "store"

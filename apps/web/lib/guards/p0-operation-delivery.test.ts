@@ -43,13 +43,11 @@ describe("P0.1 request delivery: communication is a reachable primary-nav surfac
     expect(() => read("app/[locale]/dashboard/communication/page.tsx")).not.toThrow();
   });
 
-  it("both nav surfaces render an unread badge (desktop tabs + mobile bottom-nav)", () => {
-    const tabs = read("components/app/dashboard-tabs.tsx");
-    const bottom = read("components/app/bottom-nav.tsx");
-    expect(tabs).toMatch(/badges\?:/);
-    expect(tabs).toMatch(/dashboard-tab-badge-/);
-    expect(bottom).toMatch(/badges\?:/);
-    expect(bottom).toMatch(/bottom-nav-badge-/);
+  it("the one header renders an unread badge on every width", () => {
+    // RE-ANCHORED 2026-10-25: desktop tabs + phone bar retired with the one header.
+    const header = read("components/app/conversation/chat/conversation-header.tsx");
+    expect(header).toMatch(/data-testid=\{`header-nav-badge-\$\{id\}`\}/);
+    expect(header).toMatch(/<NavBadge id=\{item\.id\} count=\{badge\} \/>/);
   });
 
   it("the dashboard layout feeds a REAL unread count into the badges", () => {

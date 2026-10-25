@@ -28,7 +28,7 @@ const EMOJI =
 
 const CHROME_FILES = [
   "app/[locale]/dashboard/account/page.tsx",
-  "components/app/role-switcher.tsx",
+  "components/app/conversation/chat/conversation-header.tsx",
   "components/app/account-menu.tsx",
   "components/app/notification-panel.tsx",
   "components/app/onboarding-wizard.tsx",

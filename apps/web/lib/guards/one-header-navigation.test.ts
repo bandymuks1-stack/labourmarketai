@@ -68,7 +68,8 @@ describe("one header for every dashboard route", () => {
     expect(header).toMatch(/data-testid="header-nav-sheet-trigger"/);
     expect(header).toMatch(/<MobileSheet\b/);
     // The active destination always names itself ("where am I").
-    expect(header).toMatch(/active \? ACTIVE_LABEL : WIDE_LABEL/);
+    expect(header).toMatch(/active \? ACTIVE_LABEL : CORE_LABEL/);
+    expect(header).toMatch(/const CORE_LABEL = "hidden xl:inline"/);
     expect(header).toMatch(/const ACTIVE_LABEL = "hidden lg:inline"/);
     expect(header).toMatch(/aria-current=\{active \? "page" : undefined\}/);
   });
