@@ -9,7 +9,7 @@
 > This file keeps only the governance method and the outcome.
 
 ## Scope
-A read-only reconciliation of every previously-provided historical work package
+A read-only reconciliation of the identified historical worker-timesheet import packages
 against committed production, for the continuing-business organization (Labour
 market ai Sp. z o.o), separating **data origin / holder** (the continuing
 business) from **historical legal employer** (Vivat Rex, then Labour Market AI
@@ -22,8 +22,9 @@ rewritten; corrections are append-only.
 For each provided package: locate its import session, compare staged rows to
 committed leaf records, and classify any non-committed row (duplicate vs genuinely
 missing) by matching person + date + hours + object against committed records.
-Sources checked and exhausted: the production database, import sessions and their
-staged rows, the repository and its git history, and the owner's Drive/mailbox.
+Sources checked for this audit: the production database, import sessions and their
+staged rows, the repository and its git history, and available owner Drive/mailbox records.
+This does not establish an exhaustive inventory of every historically shared document.
 "Absent from the current database" was never treated as proof of non-provision.
 
 ## Outcome
@@ -44,7 +45,7 @@ staged rows, the repository and its git history, and the owner's Drive/mailbox.
   double-counting (each has a matching committed record on person + date + hours +
   object). **No unique, evidence-backed worker data is missing from the reconciled
   packages.**
-- **Nonstop Group has no worker-timesheet dataset in any accessible source.** Its
+- **No separate Nonstop Group worker-timesheet dataset was identified in the sources checked for this audit.** Its
   import sessions are empty shells; the Nonstop documents that exist are commercial
   (contract, invoices, bank statement), which do not belong in the worker-evidence
   subsystem and are not importable as work history. No foreign workers or hours are
@@ -56,8 +57,10 @@ staged rows, the repository and its git history, and the owner's Drive/mailbox.
   undo and no site may be assigned without the source.
 
 ## Conclusion
-No evidence-backed historical worker data is missing, so there is nothing to
-restore without new source documents. Detailed figures and the full traceability
+No unique worker-history records are missing from the specifically reconciled import
+packages. Other previously shared source documents, particularly Nonstop worker
+records, remain subject to further discovery and reconciliation; do not require
+new uploads before checking existing historical sources. Detailed figures and the full traceability
 table are held privately with the owner (Internal Brain), not in this public repo.
 This is the complete, evidence-based status of the historical-data import; it is
 not a COMPLETED claim for the broader product.
