@@ -2915,7 +2915,8 @@
     "clash": {
       "acceptAnyway": "Jag vet att det överlappar — acceptera ändå",
       "stillStands": "Att acceptera tar inte bort överlappet. Båda bokningarna behåller sina datum, konflikten syns fortfarande i kalendern, och ditt val registreras.",
-      "acknowledged": "Accepterad med känd överlappning. {count} befintlig(a) bokning(ar) överlappar fortfarande — inget avbokades eller doldes, och ditt val är registrerat."
+      "acknowledged": "Accepterad med känd överlappning. {count} befintlig(a) bokning(ar) överlappar fortfarande — inget avbokades eller doldes, och ditt val är registrerat.",
+      "notRecordable": "De här datumen överlappar en bokning som du redan har accepterat, och överlappet kan inte registreras ännu, så du kan tacka nej till erbjudandet eller låta det stå öppet så att företaget kan ändra datumen."
     },
     "proposedBy": "Föreslagen av {name}",
     "termsChanged": "Företaget ändrade villkoren. Du hade godkänt: {previous}. Bestäm igen om de nya datumen."

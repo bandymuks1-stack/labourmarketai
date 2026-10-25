@@ -9263,7 +9263,8 @@
     "clash": {
       "acceptAnyway": "Ich weiß, dass es sich überschneidet — trotzdem annehmen",
       "stillStands": "Die Annahme beseitigt die Überschneidung nicht. Beide Buchungen behalten ihre Termine, der Konflikt bleibt im Kalender sichtbar, und Ihre Entscheidung wird festgehalten.",
-      "acknowledged": "Mit bekannter Überschneidung angenommen. {count} bestehende Buchung(en) überschneiden sich weiterhin — nichts wurde storniert oder ausgeblendet, Ihre Entscheidung ist dokumentiert."
+      "acknowledged": "Mit bekannter Überschneidung angenommen. {count} bestehende Buchung(en) überschneiden sich weiterhin — nichts wurde storniert oder ausgeblendet, Ihre Entscheidung ist dokumentiert.",
+      "notRecordable": "Diese Termine überschneiden sich mit einer Buchung, die Sie bereits angenommen haben, und diese Überschneidung kann noch nicht erfasst werden – Sie können dieses Angebot ablehnen oder es offen lassen, damit das Unternehmen die Termine ändern kann."
     },
     "proposedBy": "Vorgeschlagen von {name}",
     "termsChanged": "Das Unternehmen hat die Bedingungen geändert. Sie hatten zugestimmt: {previous}. Entscheiden Sie neu über die neuen Daten."
