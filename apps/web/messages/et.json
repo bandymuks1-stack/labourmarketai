@@ -2811,6 +2811,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -6941,7 +6942,9 @@
       "managesInvitations": "Haldab kutseid",
       "grantInvitations": "Luba kutseid hallata",
       "withdrawInvitations": "Võta kutsete haldamine ära",
-      "unavailable": "Liikmete nimekirja ei õnnestunud praegu lugeda. See ei tähenda, et organisatsioonil pole liikmeid."
+      "unavailable": "Liikmete nimekirja ei õnnestunud praegu lugeda. See ei tähenda, et organisatsioonil pole liikmeid.",
+      "noAccountHint": "Liikmerolli saab anda ainult inimesele, kellel on juba konto. Kutsu kontota inimene kutselingiga — kui ta registreerub ja organisatsiooniga liitub, saad talle siin rolli anda.",
+      "noAccountCta": "Loo kutselink"
     },
     "start": {
       "membersMoved": "Organisatsiooni {workspace} liikmeid ja kutseid hallatakse selle Seadetes.",
