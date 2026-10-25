@@ -6130,6 +6130,8 @@
       "asksTitle": "Projekt nadal potrzebuje od Ciebie",
       "ledger": {
         "ratio": "{have} z {total} gotowych",
+        "ratioNone": "Na razie nie ma czego sprawdzić",
+        "ratioUnknown": "jeszcze nieznane: {count}",
         "availability": "Dostępność",
         "state": {
           "valid": "posiadasz to",
@@ -6161,7 +6163,7 @@
           "none": "jeszcze nic nie zapisano"
         },
         "managerStatus": {
-          "needed": "oczekiwanie",
+          "needed": "do uzgodnienia przed umową",
           "missing": "oznaczone jako brakujące",
           "received": "otrzymane",
           "checked": "sprawdzone",
@@ -6170,7 +6172,7 @@
         },
         "resolution": {
           "addDocument": "Zarejestruj dokument",
-          "issuingAuthority": "Wydane przez: {title}",
+          "informationSource": "Źródło informacji: {title}",
           "trainingProgram": "Kurs: {title}",
           "serviceOffering": "Usługa: {title}",
           "serviceOfferingRate": "Usługa: {title} ({rate})",
@@ -8066,7 +8068,8 @@
       "mine": "Najpierw kraje, w których chcesz pracować.",
       "unknown": "Lista wymagań dla kraju {country} nie została jeszcze opracowana — nie pokazujemy niczego zamiast zgadywać.",
       "next": "Jeśli będziesz pracować w tym kraju, uzgodnij to z pracodawcą przed porozumieniem: {doc}. Nic nie trzeba przesyłać.",
-      "ok": "Wszystkie opracowane wymagania dla kraju {country} są spełnione."
+      "ok": "Wszystkie opracowane wymagania dla kraju {country} są spełnione.",
+      "postingNeedsBase": "Zaświadczenie A1 i zgłoszenie delegowania są pokazywane tylko wtedy, gdy znany jest Twój kraj bazowy i różni się od kraju pracy. Kraj bazowy nie został jeszcze podany."
     },
     "types": {
       "cv": "CV",
@@ -11460,7 +11463,7 @@
     },
     "utilisation": {
       "title": "Zaangażowany udział w nadchodzących tygodniach",
-      "committedDays": "{committed} z {counted} dni-osób zaangażowanych — {workers} osób w ciągu {days} dni",
+      "committedDays": "{committed} z {counted, plural, one {# dnia-osoby} other {# dni-osób}} zaangażowanych — {workers, plural, one {# osoba} few {# osoby} many {# osób} other {# osoby}} w ciągu {days, plural, one {# dnia} few {# dni} many {# dni} other {# dnia}}",
       "noneCounted": "Dla tego okresu nie udało się policzyć zaangażowania żadnego pracownika.",
       "partial": "{count} z nich nie udało się policzyć w pełni — coś realnego nie ma dat, więc powyższa liczba jest wartością minimalną.",
       "unknown": "{count} w ogóle nie udało się odczytać. To nie to samo, co wolny.",

@@ -286,7 +286,7 @@
       "waiting": "Laukia žmogaus peržiūros — peržiūrėti gali tavo organizacijos vadovas ar savininkas; iki tol tai lieka tavo nurodytas įrašas",
       "approved": "Peržiūrėta",
       "changes_requested": "Paprašyta pataisymų",
-      "rejected": "Grąžinta",
+      "rejected": "Atmesta",
       "reasonLabel": "Priežastis",
       "notEnabled": "Užfiksuota — vadovas dar neįjungė patvirtinimo, todėl niekas šio įrašo neperžiūri; iki tol tai lieka tavo nurodytas įrašas"
     },
@@ -393,7 +393,7 @@
     },
     "showOriginal": "Rodyti originalą",
     "skills": "Įgūdžiai",
-    "title": "Patvirtinti įrašai",
+    "title": "Įrašai, laukiantys patvirtinimo",
     "quick": {
       "openQuick": "Greitas patvirtinimas →",
       "title": "Greitas patvirtinimas",

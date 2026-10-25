@@ -1894,8 +1894,16 @@ export default async function JournalPage({
                       // be able to answer it. Before, only the client-review
                       // phase offered the correction control, so this request
                       // was a dead end (walk 2026-10-09).
+                      // A REJECTION is answerable the same way (walk-spec
+                      // 2026-10-25): it was a dead end — no edit, no delete,
+                      // no correction. The correction is a NEW entry
+                      // (`correction_of`); the rejected one stays as history
+                      // with its decision (journal_entry_supersede_v2 keeps a
+                      // decided original untouched).
+                      const latestEmployerDecision = timeline.at(-1)?.result;
                       const employerAskedChanges =
-                        timeline.at(-1)?.result === "changes_requested" &&
+                        (latestEmployerDecision === "changes_requested" ||
+                          latestEmployerDecision === "rejected") &&
                         !correctedOriginalIds.has(e.id) &&
                         reviewPhase !== "correction_requested" &&
                         reviewPhase !== "disputed";
