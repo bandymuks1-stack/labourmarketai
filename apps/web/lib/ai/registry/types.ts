@@ -10,19 +10,22 @@
  */
 import type { z } from "zod";
 
-/** The twelve product agents (the 13th — audit/registry/eval — is infra). */
+/**
+ * The product agents. Nine since 2026-10-25: `admin_risk`, `booking_risk`,
+ * `document_assistant`, `skill_evidence` and `support_onboarding` were
+ * RETIRED by owner decision (registry row 10.11) — each duplicated a
+ * connected deterministic answer. See `RETIRED_AGENT_KEYS` in ./registry.ts
+ * and docs/ai/INTERNAL_LLM_AGENTS_V1.md §4.1.
+ */
 export type AiAgentKey =
   | "worker_profile"
-  | "skill_evidence"
   | "work_journal"
   | "company_need"
+  /** A labelled plain-language reading of the sourced country-readiness
+   *  matrix for one country and one scope. See agents/country-readiness.ts. */
   | "country_readiness"
-  | "document_assistant"
   | "matching_explanation"
-  | "booking_risk"
-  | "admin_risk"
   | "translation_copy"
-  | "support_onboarding"
   /** The first agent whose payload carries no data subject — aggregate
    *  public labour-market statistics. See agents/market-explanation.ts. */
   | "market_explanation"

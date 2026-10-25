@@ -18243,6 +18243,29 @@
       "company_posting_registration": "Įmonės atliekama komandiravimo registracija. Tai darbdavio prievolė, atskira nuo to, ką pateikia pats darbuotojas.",
       "company_tax_vat": "Įmonės PVM, mokesčių ir socialinio draudimo registracija. Ar tai taikoma, priklauso nuo darbo pobūdžio ir trukmės.",
       "national_specifics": "Šaliai būdingi dokumentai — sektoriaus ar statybų kortelės, vietinė registracija, nacionaliniai mokesčių ir socialinio draudimo veiksmai. Jų yra daugumoje šalių, bet specifika nacionalinė, todėl pasitikrink oficialiame puslapyje."
+    },
+    "reading": {
+      "title": "Paaiškink paprastai",
+      "intro": "Pasirink savo situaciją ir paprašyk trumpo, eilės tvarka išdėstyto aukščiau esančių reikalavimų paaiškinimo. Jį kaip pasiūlymą parašo DI: kiekvienas žingsnis nurodo reikalavimą, iš kurio jis kilo, o atsakymas lieka aukščiau esantys reikalavimai.",
+      "scopeLabel": "Tavo situacija",
+      "cta": "Paaiškinti paprastai",
+      "pending": "Skaitomi reikalavimai...",
+      "resultTitle": "DI aukščiau esančių reikalavimų skaitymas",
+      "attribution": "Parašė {provider} {model} pagal aukščiau esančius reikalavimus. Tai pasiūlymas, ne teisinė konsultacija ir ne oficialus faktas.",
+      "stepsTitle": "Kas svarbu, eilės tvarka",
+      "stepSource": "Šaltinis:",
+      "stepLegalCheck": "reikia teisinio patikrinimo",
+      "legalCheck": "Dalis to yra nacionalinė, o ne visos ES taisyklė, ir šiai šaliai nepatikrinta. Prieš tuo remdamasis pasitikrink nacionalinėje institucijoje.",
+      "limitationsTitle": "Ko šis skaitymas negali pasakyti",
+      "reviewNote": "Prieš ką nors darydamas palygink šį skaitymą su aukščiau esančiais reikalavimais.",
+      "off": {
+        "not_authenticated": "Prisijunk, kad galėtum paprašyti paprasto paaiškinimo. Aukščiau esantys reikalavimai išsamūs ir be jo.",
+        "rate_limited": "Ką tik to prašei kelis kartus. Pabandyk po kelių minučių.",
+        "no_research": "Šiai situacijai čia nėra ištirtų reikalavimų, todėl nėra ką paaiškinti.",
+        "ai_off": "DI šiuo metu šioje paslaugoje išjungtas, todėl paprasto paaiškinimo nėra. Aukščiau esantys reikalavimai išsamūs ir be jo.",
+        "ai_unavailable": "Paaiškinimo šiuo metu nepavyko parengti. Aukščiau esantys reikalavimai nepakito.",
+        "unsourced": "Paaiškinime buvo nurodytas reikalavimas, kurio nėra aukščiau esančiame sąraše, todėl jis atmestas, o ne parodytas. Aukščiau esantys reikalavimai nepakito."
+      }
     }
   },
   "organizationDoors": {

@@ -177,6 +177,19 @@ either payload.
 >
 > That is still worth doing — see below — but it must not be granted in the
 > expectation that the assistant switches on.
+>
+> **UPDATE 2026-10-25 (owner decision, registry row 10.11) — this changes what
+> a LOW_RISK grant would do.** `document_assistant` was RETIRED (its output is
+> `lib/conversation/documents-gap.ts`), and `country_readiness` now HAS a
+> product caller: `lib/country-readiness/readiness-reading-actions.ts`, a
+> click-to-ask plain-language reading on `/[locale]/labour-market/[country]`.
+> Its task is still `derive_workforce_requirements` at `LOW_RISK_PROJECT_DATA`,
+> and its payload is the researched matrix rows only (country, scope, row key,
+> level, risk, provenance grade, source title, the localized statement) — no
+> person, no document, no typed text. So a grant row raising Gemini to
+> `LOW_RISK_PROJECT_DATA` (task-scoped or not) WOULD now switch one
+> user-visible feature on: that reading. No such grant exists, and this PR did
+> not add one.
 
 **What it still refuses.** Everything at `PERSONAL` or above: CV extraction,
 match explanations, work-scope normalisation from journal entries, follow-up
@@ -264,7 +277,8 @@ different from the other two.
 **Route C — build a surface for the tasks the free tier may serve.** Wire
 `company_need` or `document_assistant` to a real employer-facing flow. This is
 product work rather than a decision, and it is the only route where the free
-Gemini tier reaches a user at all.
+Gemini tier reaches a user at all. *(2026-10-25: `document_assistant` was
+retired; `country_readiness` is now that surface — see the update above.)*
 
 These are not ranked here. Which one is right depends on whether the owner
 wants AI value fastest (A), cheapest and most private (B), or wants the free

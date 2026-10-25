@@ -18243,6 +18243,29 @@
       "company_posting_registration": "Registration of the posting by the company. This is the employer's obligation, separate from anything the individual worker files.",
       "company_tax_vat": "VAT, tax and social-security registration for the company. Whether these apply depends on what the work is and how long it lasts.",
       "national_specifics": "Country-specific paperwork — sector ID or construction cards, local registration, national tax and social-security steps. These exist in most countries but the specifics are national, so confirm them on the official site."
+    },
+    "reading": {
+      "title": "Read it in plain language",
+      "intro": "Pick your situation and ask for a short, ordered explanation of the requirements above. It is written by AI as a suggestion: every step names the requirement it comes from, and the requirements above stay the answer.",
+      "scopeLabel": "Your situation",
+      "cta": "Explain in plain language",
+      "pending": "Reading the requirements...",
+      "resultTitle": "AI reading of the requirements above",
+      "attribution": "Written by {provider} {model} from the requirements above. A suggestion, not legal advice and not a fact of record.",
+      "stepsTitle": "What matters, in order",
+      "stepSource": "Source:",
+      "stepLegalCheck": "needs a legal check",
+      "legalCheck": "Part of this is national rather than EU-wide and has not been verified for this country. Confirm it with the national authority before you rely on it.",
+      "limitationsTitle": "What this reading cannot tell you",
+      "reviewNote": "Check this reading against the requirements above before you act on it.",
+      "off": {
+        "not_authenticated": "Sign in to ask for a plain-language reading. The requirements above are complete without it.",
+        "rate_limited": "You have asked for this a few times just now. Try again in a few minutes.",
+        "no_research": "There are no researched requirements for this situation here, so there is nothing to explain.",
+        "ai_off": "AI is switched off on this service right now, so there is no plain-language reading. The requirements above are complete without it.",
+        "ai_unavailable": "The reading could not be produced just now. The requirements above are unaffected.",
+        "unsourced": "The reading cited a requirement that is not in the list above, so it was discarded rather than shown. The requirements above are unaffected."
+      }
     }
   },
   "organizationDoors": {
