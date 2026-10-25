@@ -18221,6 +18221,29 @@
       "company_posting_registration": "Zgłoszenie delegowania przez firmę. To obowiązek pracodawcy, niezależny od tego, co zgłasza indywidualny pracownik.",
       "company_tax_vat": "Rejestracja VAT, podatkowa i ubezpieczeń społecznych dla firmy. To, czy mają zastosowanie, zależy od rodzaju pracy i jej czasu trwania.",
       "national_specifics": "Dokumentacja specyficzna dla danego kraju — identyfikatory branżowe lub karty budowlane, rejestracja lokalna, krajowe kroki podatkowe i ubezpieczeniowe. Istnieją w większości krajów, ale szczegóły są krajowe, więc potwierdź je na oficjalnej stronie."
+    },
+    "reading": {
+      "title": "Prostymi słowami",
+      "intro": "Wybierz swoją sytuację i poproś o krótkie, uporządkowane wyjaśnienie powyższych wymagań. Pisze je AI jako sugestię: każdy krok wskazuje wymaganie, z którego pochodzi, a odpowiedzią pozostają wymagania powyżej.",
+      "scopeLabel": "Twoja sytuacja",
+      "cta": "Wyjaśnij prostymi słowami",
+      "pending": "Czytanie wymagań...",
+      "resultTitle": "Odczytanie powyższych wymagań przez AI",
+      "attribution": "Napisane przez {provider} {model} na podstawie powyższych wymagań. To sugestia, nie porada prawna i nie fakt zarejestrowany.",
+      "stepsTitle": "Co ważne, po kolei",
+      "stepSource": "Źródło:",
+      "stepLegalCheck": "wymaga sprawdzenia prawnego",
+      "legalCheck": "Część z tego to przepis krajowy, a nie ogólnounijny, i nie został sprawdzony dla tego kraju. Zanim na nim polegasz, potwierdź go w organie krajowym.",
+      "limitationsTitle": "Czego to odczytanie nie powie",
+      "reviewNote": "Zanim coś zrobisz, porównaj to odczytanie z wymaganiami powyżej.",
+      "off": {
+        "not_authenticated": "Zaloguj się, aby poprosić o wyjaśnienie prostymi słowami. Wymagania powyżej są kompletne i bez niego.",
+        "rate_limited": "Prosiłeś/aś o to już kilka razy przed chwilą. Spróbuj ponownie za kilka minut.",
+        "no_research": "Dla tej sytuacji nie ma tu zbadanych wymagań, więc nie ma czego wyjaśniać.",
+        "ai_off": "AI jest obecnie wyłączone w tej usłudze, więc nie ma wyjaśnienia prostymi słowami. Wymagania powyżej są kompletne i bez niego.",
+        "ai_unavailable": "Nie udało się teraz przygotować wyjaśnienia. Wymagania powyżej pozostają bez zmian.",
+        "unsourced": "Wyjaśnienie powołało się na wymaganie, którego nie ma na liście powyżej, więc zostało odrzucone zamiast pokazane. Wymagania powyżej pozostają bez zmian."
+      }
     }
   },
   "organizationDoors": {
