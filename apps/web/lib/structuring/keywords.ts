@@ -138,6 +138,8 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
         "кладка стен",
         "кладку стен",
         "кладкой стен",
+        "клал стен",
+        "клали стен",
         "кирпич",
       ],
     },
@@ -1470,10 +1472,24 @@ export const SKILL_HINTS_LT: SkillHintRow[] = [
       needles: [
         "blockwork",
         "block laying",
+        // EN / RU sentences the UX review of 2026-10-24 typed (row 8.2): "laid a
+        // block wall" and "клал стену из блоков" carried their hours as "kind
+        // of work not recognised" while the LT "mūrijau blokelių sieną" read.
+        "block wall",
+        "blockwall",
+        "laid a block",
+        "laid block",
+        "laying block",
+        "concrete block",
         "blokeli",
         "газоблок",
         "пеноблок",
         "клал блок",
+        "из блоков",
+        "из блока",
+        "блочную стен",
+        "кладка блок",
+        "кладку блок",
       ],
     },
     {
