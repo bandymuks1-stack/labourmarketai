@@ -174,6 +174,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-24 (RED draft, needs-human-gate, NOT applied): bound precision, per-bound
       // basis and register id on the existing period statement table (Stage 3).
       "20261024100000_",
+      // 2026-10-25 (RED, owner-gated, APPLIED): Vivat Rex + Labour Market AI business-history period bounds.
+      "20261025120000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

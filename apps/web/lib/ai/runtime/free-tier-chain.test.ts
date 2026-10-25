@@ -259,7 +259,10 @@ describe("egress: free tiers receive PUBLIC payloads only", () => {
     { task: "extract_cv", agentKey: "worker_profile" },
     { task: "normalize_work_scope", agentKey: "work_journal" },
     { task: "explain_match", agentKey: "matching_explanation" },
-    { task: "draft_follow_up", agentKey: "support_onboarding" },
+    // draft_follow_up has no agent since support_onboarding was retired
+    // (2026-10-25, row 10.11); the task's refusal is still pinned — the agent
+    // key in the request is only a label here.
+    { task: "draft_follow_up", agentKey: "draft_follow_up" },
     { task: "translate_message", agentKey: "translation_copy" },
     { task: "propose_conversation_intent", agentKey: "conversation_intent" },
     { task: "translate_vacancy", agentKey: "vacancy_translation" },
