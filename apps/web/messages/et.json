@@ -572,7 +572,14 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Laadimine…",
-    "dashboardSections": "Töölaua jaotised"
+    "dashboardSections": "Töölaua jaotised",
+    "nav": {
+      "more": "Veel",
+      "menu": "Menüü",
+      "areas": "Tööalad",
+      "close": "Sulge",
+      "youAreHere": "Sa oled siin"
+    }
   },
   "companies": {
     "cta": {

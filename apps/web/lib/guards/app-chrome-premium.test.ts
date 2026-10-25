@@ -37,11 +37,14 @@ const CHROME_FILES = [
 
 describe("app chrome — logo navigation + premium icons", () => {
   it("dashboard app-shell logo links to /dashboard, not public root", () => {
-    const layout = read("app/[locale]/dashboard/layout.tsx");
+    // THE ONE header carries the app-shell logo for every chrome mode
+    // (2026-10-25: the layout no longer authors a header of its own).
+    const header = read("components/app/conversation/chat/conversation-header.tsx");
     // The <Link href="/dashboard"> for the logo must exist...
-    expect(layout).toMatch(/href="\/dashboard"/);
+    expect(header).toMatch(/href="\/dashboard"/);
     // ...and there must be no logo Link straight to the public root.
-    expect(layout).not.toMatch(/<Link\s+href="\/"/);
+    expect(header).not.toMatch(/<Link\s+href="\/"/);
+    expect(read("app/[locale]/dashboard/layout.tsx")).not.toMatch(/<Link\s+href="\/"/);
   });
 
   it("a shared lucide RoleIcon component exists", () => {

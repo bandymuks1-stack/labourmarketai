@@ -20,48 +20,43 @@ function read(p: string): string {
 }
 
 describe("mobile layout invariants", () => {
-  describe("dashboard header (apps/web/app/[locale]/dashboard/layout.tsx)", () => {
-    const src = read("app/[locale]/dashboard/layout.tsx");
+  // RE-ANCHORED 2026-10-25 (owner order: one navigation system). The module
+  // header these invariants used to pin lived in `dashboard/layout.tsx`; every
+  // chrome mode now renders THE ONE header, so the same invariants are pinned
+  // on it. The brand rule changed on purpose: the owner's production
+  // screenshot showed the old rule's outcome — a logo truncated to "Labour…" —
+  // so the brand no longer shrinks at all; the wordmark appears only where it
+  // fits whole, and the workspace chip is the element that gives width back.
+  describe("dashboard header (components/app/conversation/chat/conversation-header.tsx)", () => {
+    const src = read("components/app/conversation/chat/conversation-header.tsx");
 
-    it("header inner flex tightens gap and padding on mobile", () => {
-      // Header inner flex must NOT use the desktop gap/padding on mobile —
-      // 360px viewport breaks if we keep gap-6 + px-6.
-      expect(src).toMatch(/gap-3[^"]*md:gap-6/);
-      expect(src).toMatch(/px-3[^"]*sm:px-12/);
+    it("header flex tightens gap on a phone and wraps into two rows there", () => {
+      expect(src).toMatch(/flex flex-none flex-wrap items-center gap-x-2 gap-y-2[^"]*px-4/);
+      expect(src).toMatch(/md:flex-nowrap md:gap-x-3/);
     });
 
-    it("brand link can shrink + truncate so it never pushes the cluster off-screen", () => {
-      // Re-anchored 2026-09-23 (owner §19): the canonical mark now sits
-      // beside the wordmark, so the Link is a flex row and `truncate` moved
-      // to the wordmark SPAN — `text-overflow: ellipsis` only applies to a
-      // block's inline content, never to a flex container. The invariant is
-      // the same: the Link shrinks (`min-w-0 shrink`), the TEXT truncates,
-      // and the mark (`shrink-0`) never collapses into the wordmark.
+    it("the brand never shrinks or truncates; its wordmark shows only where it fits whole", () => {
       const link = src.match(
         /<Link\s+href="\/dashboard"\s+data-testid="shell-logo-home"[\s\S]*?<\/Link>/,
       );
       expect(link, "the brand Link").not.toBeNull();
-      expect(link![0]).toMatch(/className="[^"]*min-w-0[^"]*shrink[^"]*"/);
-      expect(link![0]).toMatch(/<span className="[^"]*truncate[^"]*">\s*LabourMarket/);
+      expect(link![0]).toMatch(/className="flex flex-none items-center/);
+      expect(link![0]).not.toMatch(/truncate/);
+      expect(link![0]).toMatch(/whitespace-nowrap[^`]*"hidden xl:inline"/);
       expect(link![0]).toMatch(/<LmLogo[^>]*className="[^"]*shrink-0[^"]*"/);
-      // Negative control: the retired single-line Link (no mark, `truncate`
-      // on the Link) passed the OLD pattern and must fail the new one.
-      const retired =
-        '<Link href="/dashboard" data-testid="shell-logo-home" className="min-w-0 shrink truncate font-display">LabourMarket<span className="text-gradient-accent">.ai</span></Link>';
-      expect(retired).not.toMatch(/<span className="[^"]*truncate[^"]*">\s*LabourMarket/);
     });
 
-    it("right-side cluster does not shrink (header items stay tappable, brand truncates instead)", () => {
-      expect(src).toMatch(/ml-auto[^"]*flex[^"]*shrink-0/);
+    it("right-side cluster does not shrink (header items stay tappable, the chip truncates instead)", () => {
+      expect(src).toMatch(/ml-auto flex flex-none items-center/);
     });
 
-    it("main element clears the fixed bottom nav with safe-area padding", () => {
-      // The dashboard <main> must include env(safe-area-inset-bottom) in pb
-      // so the BottomNav cannot occlude content on iOS. The <main> lives in the
-      // chrome selector (which picks the per-route shell); its safe-area padding
-      // is asserted there.
+    it("main element keeps safe-area padding at the bottom", () => {
+      // No chrome mode carries a fixed bottom bar any more (the phone's
+      // destinations live in the header's bottom sheet), but the <main>
+      // still clears the iOS home indicator.
       const chrome = read("components/app/dashboard-chrome.tsx");
-      expect(chrome).toMatch(/pb-\[calc\(5rem\+env\(safe-area-inset-bottom\)\)\]/);
+      expect(chrome).toMatch(/pb-\[calc\(2\.5rem\+env\(safe-area-inset-bottom\)\)\]/);
+      expect(chrome).not.toMatch(/<BottomNav\b/);
     });
   });
 

@@ -7679,7 +7679,14 @@
     "backHome": "Powrót na stronę główną",
     "dashboardSections": "Sekcje panelu",
     "skipToContent": "Przejdź do treści",
-    "loading": "Ładowanie…"
+    "loading": "Ładowanie…",
+    "nav": {
+      "more": "Więcej",
+      "menu": "Nawigacja",
+      "areas": "Obszary pracy",
+      "close": "Zamknij",
+      "youAreHere": "Jesteś tutaj"
+    }
   },
   "workerInvitations": {
     "title": "Oczekujące zaproszenia",

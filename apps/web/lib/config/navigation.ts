@@ -168,6 +168,25 @@ export function getAdvancedNavItems(): readonly NavItem[] {
 }
 
 /**
+ * THE ONE HEADER'S "More" (owner order 2026-10-25: priority + overflow, never
+ * a sideways-scrolling tab row). The header shows the core loop by priority
+ * and puts every OTHER destination the person may open here: the catalogue's
+ * module extras (map, network) in catalogue order, then the permission-gated
+ * admin console for an admin. Same lists on every route and every width —
+ * the phone sheet renders core + these, so nothing is reachable on one screen
+ * size and missing on another.
+ */
+export function getHeaderOverflowNavItems({
+  isAdmin,
+}: {
+  isAdmin: boolean;
+}): readonly NavItem[] {
+  const coreIds = new Set<string>(CORE_NAV_IDS);
+  const extras = getAdvancedNavItems().filter((i) => !coreIds.has(i.id));
+  return isAdmin ? [...extras, ADMIN_NAV_ITEM] : extras;
+}
+
+/**
  * Admin nav item. NOT sourced from the feature catalogue — admin is a
  * permission dimension, not a product feature (see dashboard layout's
  * `deriveIsAdmin`). The nav components append it ONLY when the auth context

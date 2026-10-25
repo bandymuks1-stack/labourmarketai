@@ -7679,7 +7679,14 @@
     "backHome": "Terug naar home",
     "dashboardSections": "Dashboardsecties",
     "skipToContent": "Direct naar inhoud",
-    "loading": "Laden…"
+    "loading": "Laden…",
+    "nav": {
+      "more": "Meer",
+      "menu": "Navigatie",
+      "areas": "Werkgebieden",
+      "close": "Sluiten",
+      "youAreHere": "Je bent hier"
+    }
   },
   "workerInvitations": {
     "title": "Openstaande uitnodigingen",
