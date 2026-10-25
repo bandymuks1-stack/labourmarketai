@@ -438,9 +438,20 @@ export default async function ProjectOperationsPage({
         </p>
       ) : null}
 
-      {/* ARENA rhythm (TASK 07 slice 2): the S3.5 one-tap confirm queue
-          pulse — the real gated reviewable count, one tap to confirm. */}
-      <ConfirmPulse />
+      {/* WHICH PROJECT this is, first. The page used to open on the
+          organization-wide confirm pulse ("25 entries wait") with the
+          project's own name ~2,000px further down in the board header, so a
+          phone landed on a global banner instead of the project (UX review
+          2026-10-24). A plain line, not a second <h1> — the board keeps the
+          page heading. */}
+      <header className="flex min-w-0 flex-col gap-0.5" data-testid="ops-project-context">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("eyebrow")}
+        </span>
+        <p className="break-words font-display text-xl font-semibold tracking-tight text-text-primary">
+          {ops.project.title ?? t("untitledProject")}
+        </p>
+      </header>
 
       {/* P4 — the Field: the primary operational view, ADDED on the page
           (§1.5). Every control is a registered canonical action the chat
@@ -554,6 +565,13 @@ export default async function ProjectOperationsPage({
             : ""}
         </p>
       </section>
+
+      {/* ARENA rhythm (TASK 07 slice 2): the S3.5 one-tap confirm queue
+          pulse — the real gated reviewable count, one tap to confirm. It is
+          the ORGANIZATION's queue, so it follows this project's own facts
+          rather than leading the page (same placement as the project page,
+          where it sits after the project's own panels). */}
+      <ConfirmPulse />
 
       {/* ── Train D: project management strip — derived progress (never a
             stored number), the accountable person, and the applied W11
