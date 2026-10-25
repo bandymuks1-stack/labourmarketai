@@ -28,6 +28,12 @@ export interface CloudProviderObservation {
   readonly enabled: boolean;
   /** Key PRESENCE only — no value ever reaches this module. */
   readonly hasKey: boolean;
+  /**
+   * Set when the provider is configured but may NOT be used, for a reason the
+   * operator must read (e.g. a vendor's terms forbid this tier for EEA users).
+   * Wins over a present key: the state is `disabled` with this sentence.
+   */
+  readonly disabledReason?: string;
 }
 
 /** What the operator set up for the local runtime. */
@@ -76,6 +82,9 @@ function cloudState(
   }
   if (!o.hasKey) {
     return { id, health: "unconfigured", reason: "no API key is set" };
+  }
+  if (o.disabledReason) {
+    return { id, health: "disabled", reason: o.disabledReason };
   }
   return { id, health: "ready" };
 }

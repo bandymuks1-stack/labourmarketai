@@ -108,7 +108,7 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
 | ChatGPT MCP connector | endpoint ON (PRM, AS metadata, 229 tools public count) — **authenticated test pending owner Refresh** | same authorization server → no re-link expected |
 | E-mail invitations + notifications (`INVITE_EMAIL_PROVIDER=smtp` over `LM_SMTP_*`, the info@ mailbox) | OFF until `LM_SMTP_PASS` is set — invites work by link | owner sets the mailbox password with `lm-env-set.sh` (§9.2) |
 | Supabase auth e-mails | Supabase built-in SMTP (rate-limited) | custom SMTP = owner decision |
-| AI (Gemini adapter, assistant, journal suggestions, CV structuring, market explanations) | **OFF** (`AI_PROVIDER_MODE=disabled`; every `ai_runs` row since 10-19 has `provider = 'disabled'`, monitor signal `ai-runtime-disabled`) | owner GO + `GEMINI_API_KEY` (§7.6, §9.3) |
+| AI (free-first provider chain: Cloudflare Workers AI → Mistral → Groq; Gemini only on a billed key) | **OFF** (`AI_PROVIDER_MODE=disabled`; every `ai_runs` row since 10-19 has `provider = 'disabled'`, monitor signal `ai-runtime-disabled`) | owner creates free keys + GO (§9.3) |
 | Stripe payments | OFF (`PAYMENTS_ENABLED=false`) — pricing shows the honest off state | owner supplies live secret + new webhook secret + price id; publishable key needs a rebuild |
 | Telegram owner alerts | OFF | bot token + chat id, or the Agentai OS alert bridge |
 | Nonstop handoff + referral | OFF (no tokens on either side) | new token pair, both sides (separate approval) |
@@ -128,19 +128,17 @@ pair tokens) stay OFF until the owner re-supplies or regenerates them (§6).
    it no backup can be decrypted). Then the nightly schedule is live; legacy LABMA cron stays.
 4. nginx per-domain access log.
 5. Supabase dashboard: enable **leaked-password protection** (free toggle; advisor WARN).
-6. **AI on, 0 €, privacy-safe by construction.** The code already encodes the free-tier rule
-   (`lib/ai/runtime/data-egress.ts`): without `AI_GEMINI_PAID_TIER_CONFIRMED=1` a Gemini key is
-   treated as free tier and may receive only `PUBLIC` / `LOW_RISK_PROJECT_DATA` tasks —
-   `explain_market_demand`, `structure_future_work`, `derive_workforce_requirements`,
-   `detect_capacity_gap`, `detect_skill_gap`. Personal and free-text tasks (`extract_cv`,
-   `explain_match`, `normalize_*`, `draft_follow_up`, `translate_*`, `propose_conversation_intent`)
-   are refused with a typed privacy refusal that never counts as a run. Enable with
-   `lm-env-set.sh` (value from a 600 file, never argv): `AI_PROVIDER_MODE=live`, `AI_PROVIDER=gemini`,
-   `AI_GEMINI_ENABLED=true`, `GEMINI_API_KEY` (from the owner's local env file via scp),
-   `AI_DAILY_RUN_BUDGET=200` (global cap; per-org default cap 100/day), then `--restart`.
-   Zero-cost guarantee = the key's Google project has **no billing account** (owner checks in
-   AI Studio: plan "Free of charge"); then over-quota answers 429 and costs nothing. The
-   Cloudflare adapter is translation-only (`@cf/meta/m2m100-1.2b`), not a general LLM.
+6. **AI on, 0 €, privacy-safe by construction.** See §9.3 for the exact keys and commands.
+   Corrected 2026-10-25: (a) the Gemini **free** tier is not an option for this product — the Gemini
+   API Additional Terms (effective 2026-03-23) say "You may use only Paid Services when making API
+   Clients available to users in the European Economic Area, Switzerland, or the United Kingdom", so
+   the code now keeps Gemini disabled unless `AI_GEMINI_PAID_TIER_CONFIRMED=1`; (b) the earlier note
+   that a free key may also receive `LOW_RISK_PROJECT_DATA` tasks was wrong — with no egress grant an
+   external provider receives `PUBLIC` only (`lib/ai/runtime/data-egress.ts`). Today that is
+   `explain_market_demand`. `structure_future_work` / `derive_workforce_requirements` need an owner
+   egress grant; personal and free-text tasks (`extract_cv`, `explain_match`, `normalize_*`,
+   `draft_follow_up`, `translate_*`, `propose_conversation_intent`) stay refused for every free tier
+   with a typed privacy refusal that never counts as a run.
 
 ## 8. Defect found by the first production walks (fixed in this PR)
 
@@ -251,21 +249,52 @@ e-mail on (default OFF). GDPR erasure notices also need the VPS cron (§7.1).
 ### 9.3 AI runtime
 
 Since 10-19 every `ai_runs` row has `provider = 'disabled'`: people reach AI
-surfaces and no provider answers. The hourly monitor now raises
-`ai-runtime-disabled` (P2) for that state.
+surfaces and no provider answers. The hourly monitor raises
+`ai-runtime-disabled` (P2) for that state and `ai-failing` when > 30 % of runs fail.
 
-| Setting | Kind |
-|---|---|
-| `GEMINI_API_KEY` | **secret** (Google AI Studio key; a project without billing = free of charge) |
-| `AI_PROVIDER_MODE=live`, `AI_PROVIDER=gemini`, `AI_GEMINI_ENABLED=true`, `AI_DAILY_RUN_BUDGET=200` | plain modes (owner GO) |
-| `AI_GEMINI_PAID_TIER_CONFIRMED=1` | owner decision, only for a billed key: lets personal-data tasks reach the vendor |
+**Routing (one router, `lib/ai/runtime/`; no second one).** Task → policy tier
+(`task-routing.ts`; deterministic tasks never call a model) → privacy veto per
+provider (`data-egress.ts`) → free-first order (`provider-chain.ts`): a configured
+local runtime, then **Cloudflare Workers AI → Mistral → Groq** (all `free_tier`),
+then metered vendors (Gemini only on a billed key). On 429 / 5xx / timeout the
+next candidate is tried (each at most once per run; per-request timeout =
+min(`AI_REQUEST_TIMEOUT_MS`, the task's latency ceiling)); a provider that just
+failed is tried last for the vendor's `retry-after` or 30–60 s, doubling up to
+15 min (`provider-cooldown.ts`). Nothing ready → the surface shows its honest
+"AI unavailable" state, never a fabricated answer. Budgets unchanged:
+`AI_DAILY_RUN_BUDGET` (global) + per-organization daily cap.
 
-Owner commands on the VPS (one `--restart` at the end):
-`read -rs V; printf '%s' "$V" | sh /root/lm-prod/bin/lm-env-set.sh GEMINI_API_KEY; unset V`, then
-`printf live | sh …/lm-env-set.sh AI_PROVIDER_MODE`, `printf gemini | sh …/lm-env-set.sh AI_PROVIDER`,
-`printf true | sh …/lm-env-set.sh AI_GEMINI_ENABLED`, `printf 200 | sh …/lm-env-set.sh AI_DAILY_RUN_BUDGET --restart`.
-Observe: the next `ai_runs` rows carry `provider = 'gemini'`; the monitor issue
-closes itself once 7 days hold no `disabled` run.
+**What a free tier may receive: `PUBLIC` only** (no egress grant names one;
+any future grant is capped at `LOW_RISK_PROJECT_DATA`).
+
+| Provider (priority) | Env names (names only) | Free quota (read 2026-10-25) | Data terms |
+|---|---|---|---|
+| Cloudflare Workers AI (1) | `AI_CLOUDFLARE_ENABLED`, `CLOUDFLARE_ACCOUNT_ID`, **secret** `CLOUDFLARE_API_TOKEN` (Workers AI read+edit) | 10,000 Neurons/day on Workers **Free** (no card); past it requests fail, never billed | no training on customer content; not retained after the request |
+| Mistral, free Experiment plan (2) | `AI_MISTRAL_ENABLED`, **secret** `MISTRAL_API_KEY` | rate-limited, $0 (phone verification) | may train unless the Admin → Privacy opt-out is switched off |
+| Groq, free plan (3) | `AI_GROQ_ENABLED`, **secret** `GROQ_API_KEY` | per-model RPM/RPD limits shown in the Groq console | not retained by default (logs ≤ 30 d; ZDR switch), US storage |
+| Gemini (metered) | `AI_GEMINI_ENABLED`, **secret** `GEMINI_API_KEY`, `AI_GEMINI_PAID_TIER_CONFIRMED=1` | none usable: the free tier may not serve EEA users | paid tier: not used for training |
+| Run modes | `AI_PROVIDER_MODE=live`, `AI_PROVIDER=cloudflare` (or `mistral` / `groq`: whichever key exists), `AI_DAILY_RUN_BUDGET=200` | | |
+
+Owner commands on the VPS — each secret from a hidden prompt, never argv; one
+`--restart` at the very end (`S=/root/lm-prod/bin/lm-env-set.sh`):
+
+```sh
+read -rs V; printf '%s' "$V" | sh $S CLOUDFLARE_API_TOKEN; unset V
+read -rs V; printf '%s' "$V" | sh $S CLOUDFLARE_ACCOUNT_ID; unset V
+printf true | sh $S AI_CLOUDFLARE_ENABLED
+read -rs V; printf '%s' "$V" | sh $S MISTRAL_API_KEY; unset V
+printf true | sh $S AI_MISTRAL_ENABLED
+read -rs V; printf '%s' "$V" | sh $S GROQ_API_KEY; unset V
+printf true | sh $S AI_GROQ_ENABLED
+printf cloudflare | sh $S AI_PROVIDER
+printf 200 | sh $S AI_DAILY_RUN_BUDGET
+printf live | sh $S AI_PROVIDER_MODE --restart
+```
+
+Observe: the next `ai_runs` rows for `market_explanation` carry
+`provider = 'cloudflare'` (or the next free tier); personal tasks carry
+`blocked_reason = 'egress_refused'` and no cost. Rollback:
+`printf disabled | sh $S AI_PROVIDER_MODE --restart`.
 
 ### 9.4 Authorized admin testing
 
