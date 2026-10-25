@@ -8630,7 +8630,7 @@
         "offers": "{n, plural, one {# booking offer} other {# booking offers}} waiting for your answer",
         "invitations": "{n, plural, one {# invitation} other {# invitations}} waiting for your answer",
         "unread": "{n, plural, one {# conversation} other {# conversations}} with unread messages",
-        "verifyEmail": "Confirm your email address to see invitations sent to it"
+        "verifyEmail": "Open the link we emailed you to see invitations sent to that address"
       },
       "growth": {
         "title": "Growth",

@@ -8630,7 +8630,7 @@
         "offers": "{n, plural, one {# Buchungsangebot wartet} other {# Buchungsangebote warten}} auf Ihre Antwort",
         "invitations": "{n, plural, one {# Einladung wartet} other {# Einladungen warten}} auf Ihre Antwort",
         "unread": "{n, plural, one {# Unterhaltung} other {# Unterhaltungen}} mit ungelesenen Nachrichten",
-        "verifyEmail": "Bestätigen Sie Ihre E-Mail-Adresse, um an sie gesendete Einladungen zu sehen"
+        "verifyEmail": "Öffnen Sie den Link aus unserer E-Mail, um an diese Adresse gesendete Einladungen zu sehen"
       },
       "growth": {
         "title": "Wachstum",

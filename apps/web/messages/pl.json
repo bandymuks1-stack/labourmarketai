@@ -8630,7 +8630,7 @@
         "offers": "{n, plural, one {# propozycja rezerwacji czeka} few {# propozycje rezerwacji czekają} many {# propozycji rezerwacji czeka} other {# propozycji rezerwacji czeka}} na Twoją odpowiedź",
         "invitations": "{n, plural, one {# zaproszenie czeka} few {# zaproszenia czekają} many {# zaproszeń czeka} other {# zaproszenia czeka}} na Twoją odpowiedź",
         "unread": "{n, plural, one {# rozmowa} few {# rozmowy} many {# rozmów} other {# rozmowy}} z nieprzeczytanymi wiadomościami",
-        "verifyEmail": "Potwierdź adres e-mail, aby zobaczyć wysłane na niego zaproszenia"
+        "verifyEmail": "Otwórz link z naszej wiadomości e-mail, aby zobaczyć zaproszenia wysłane na ten adres"
       },
       "growth": {
         "title": "Rozwój",

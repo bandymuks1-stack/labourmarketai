@@ -8630,7 +8630,7 @@
         "offers": "{n, plural, one {# užsakymo pasiūlymas laukia} few {# užsakymo pasiūlymai laukia} other {# užsakymo pasiūlymų laukia}} tavo atsakymo",
         "invitations": "{n, plural, one {# kvietimas laukia} few {# kvietimai laukia} other {# kvietimų laukia}} tavo atsakymo",
         "unread": "{n, plural, one {# pokalbis} few {# pokalbiai} other {# pokalbių}} su neskaitytomis žinutėmis",
-        "verifyEmail": "Patvirtink el. pašto adresą, kad matytum į jį atsiųstus kvietimus"
+        "verifyEmail": "Atidaryk nuorodą, kurią atsiuntėme el. paštu, kad matytum į tą adresą atsiųstus kvietimus"
       },
       "growth": {
         "title": "Augimas",

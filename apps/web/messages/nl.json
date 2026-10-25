@@ -8630,7 +8630,7 @@
         "offers": "{n, plural, one {# boekingsaanbod wacht} other {# boekingsaanbiedingen wachten}} op je antwoord",
         "invitations": "{n, plural, one {# uitnodiging wacht} other {# uitnodigingen wachten}} op je antwoord",
         "unread": "{n, plural, one {# gesprek} other {# gesprekken}} met ongelezen berichten",
-        "verifyEmail": "Bevestig je e-mailadres om uitnodigingen te zien die ernaar zijn gestuurd"
+        "verifyEmail": "Open de link uit onze e-mail om uitnodigingen te zien die naar dat adres zijn gestuurd"
       },
       "growth": {
         "title": "Groei",
