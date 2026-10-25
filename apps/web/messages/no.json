@@ -3020,9 +3020,9 @@
       "coveredShort": "[EN] {count} covered"
     },
     "notes": {
-      "assignmentsPending": "[EN] Assignment data is prepared and joins this view after owner activation.",
-      "languagesPending": "[EN] Language coverage is prepared and joins this view after owner activation.",
-      "brigadesPending": "[EN] Brigade coverage is prepared and joins this view after owner activation.",
+      "assignmentsPending": "[EN] Assignment data is not shown in this view yet.",
+      "languagesPending": "[EN] Language coverage is not shown in this view yet.",
+      "brigadesPending": "[EN] Brigade coverage is not shown in this view yet.",
       "demandError": "[EN] Work needs could not be read right now.",
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
@@ -3056,7 +3056,7 @@
     },
     "stateNote": {
       "insufficientData": "Det finnes ennå ikke nok ekte data for dette signalet — et ærlig hull vises i stedet for et oppdiktet tall.",
-      "needsMigration": "Datalageret bak dette signalet er forberedt og kobles på etter eierens aktivering. Inntil da estimeres ingenting.",
+      "needsMigration": "Dette signalet er ennå ikke slått på. Inntil da estimeres ingenting.",
       "stale": "Bevisene bak dette signalet er eldre enn ferskhetsvinduet — betrakt dem som utdaterte."
     },
     "valueClass": {
@@ -3108,7 +3108,7 @@
         "agencyAggregate": "Aggregat på tvers av kunder"
       },
       "state": {
-        "needsMigration": "Dette signalet er forberedt og venter på eierens aktivering."
+        "needsMigration": "Dette signalet er ennå ikke slått på."
       },
       "salary": {
         "noBenchmark": "Det finnes ennå ingen lønnsreferanse for ditt yrke og land.",
@@ -3143,7 +3143,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Eier-aktivert datalager (ennå ikke slått på)",
+      "gatedMigration": "Datalager ennå ikke slått på",
       "marketRateAverages": "Admin-kuraterte markedssats-gjennomsnitt",
       "journalEvidence": "Dine egne arbeidsjournal-bevis",
       "fillTimeMeasurementsMissing": "Ansettelsestidsmålinger (ennå ikke samlet inn)",
@@ -3201,14 +3201,14 @@
       },
       "terms": {
         "internal": "Intern utledning fra kanoniske plattformtabeller; kohortpolitikken beskytter enkeltpersoner.",
-        "adminCurated": "Eier-angitte gjennomsnitt med en kildenotis i stedet for en utvalgsstørrelse.",
-        "statGovLt": "Offisiell statistikk; kildeangivelse kreves; aktivering venter på eierens bekreftelse.",
-        "eurostat": "Offisiell EU-statistikk; kildeangivelse kreves; aktivering venter på eierens bekreftelse.",
+        "adminCurated": "Kuraterte gjennomsnitt med en kildenotis i stedet for en utvalgsstørrelse.",
+        "statGovLt": "Offisiell statistikk; kildeangivelse kreves. Ennå ikke i bruk.",
+        "eurostat": "Aktiv kilde. Offisiell EU-statistikk; kildeangivelse kreves.",
         "arbetsformedlingen": "Aktiv kilde. Bruksvilkår bekreftet: en gratis offentlig datakilde (CC0). Kilden vises ved hver annonse, og hver annonse lenker tilbake til den opprinnelige utlysningen.",
         "nav": "Aktiv kilde. NAVs API-vilkår er akseptert og tilgang er gitt. De løpende pliktene følges: en trukket annonse fjernes umiddelbart, en oppdatert annonse oppdateres raskt, og søknadslenken går til den opprinnelige annonsen.",
-        "cvbankas": "Kun et forslag — brukstillatelse ubekreftet; blandes aldri med interne tall.",
-        "eures": "Foreslått kilde. Bruksvilkår ennå ikke vurdert — aktivering krever eierens bekreftelse. Ingenting hentes i dag.",
-        "uztLt": "Foreslått kilde. Bruksvilkår ennå ikke vurdert — aktivering krever eierens bekreftelse. Ingenting hentes i dag."
+        "cvbankas": "Foreslått kilde — ikke i bruk; blandes aldri med interne tall.",
+        "eures": "Foreslått kilde. Ikke i bruk — ingenting hentes i dag.",
+        "uztLt": "Foreslått kilde. Ikke i bruk — ingenting hentes i dag."
       },
       "status": {
         "active": "Aktiv (intern)",
@@ -3220,7 +3220,7 @@
     "methodology": {
       "title": "Metodikk",
       "deterministic": "Alle verdier er deterministiske og beregnet fra registreringer med kilder — ingenting estimeres av KI, og ingen tall blir noensinne oppdiktet.",
-      "externalOff": "Eksterne kilder er av: hver eksterne referanse er et forslag som venter på eierens juridiske bekreftelse. Interne og eksterne tall blandes aldri.",
+      "externalOff": "Eksterne kilder er av. Interne og eksterne tall blandes aldri.",
       "cohort": "Små kohorter grupperes eller skjules for å beskytte enkeltpersoner."
     },
     "contextual": {
@@ -3335,7 +3335,7 @@
       },
       "unavailable": {
         "requirementTitle": "Hva som kreves",
-        "sourcesTitle": "Kilder som venter på eierens godkjenning"
+        "sourcesTitle": "Kilder som ennå ikke er i bruk"
       },
       "reason": {
         "salaryNoBenchmark": "Det er ingen lønnstall her fordi det ennå ikke finnes en kuratert markedssats for ditt yrke og land, og ingen ekstern lønnskilde er godkjent for bruk.",
@@ -3348,14 +3348,14 @@
         "salaryInputsMissing": "Det er ingen lønnstall her fordi det finnes en kuratert markedssats, men din egen forventede lønn mangler, så det er ingenting å sammenligne med."
       },
       "requirement": {
-        "ownerEnableStore": "Plattformeieren må slå på observasjonslageret og godkjenne minst én datakilde.",
-        "salaryBenchmark": "En administrator må legge inn en kuratert markedssats for ditt yrke og land, eller plattformeieren må godkjenne en ekstern lønnskilde.",
+        "ownerEnableStore": "Observasjonslageret må slås på, og minst én datakilde må godkjennes.",
+        "salaryBenchmark": "Det må legges inn en kuratert markedssats for ditt yrke og land, eller en ekstern lønnskilde må godkjennes.",
         "demandOwnRows": "Legg til arbeidsforespørsler — kortet fylles med organisasjonens egne data så snart oppføringer finnes.",
         "salaryBasis": "Lønnsbasis (brutto eller netto) må være registrert for både din forventede lønn og den kuraterte markedssatsen før en ærlig sammenligning kan vises.",
         "salaryInputs": "Legg inn din forventede lønn i arbeidstakerprofilen din — sammenligningen vises så snart den finnes."
       },
       "after": {
-        "activation": "Etter at eieren har godkjent og aktivert en datakilde, fylles dette kortet med dokumenterte, daterte tall — hvert med pålitelighet, ferskhet, kilde og trinnvis opprinnelse."
+        "activation": "Når en datakilde er slått på, fylles dette kortet med dokumenterte, daterte tall — hvert med pålitelighet, ferskhet, kilde og trinnvis opprinnelse."
       }
     },
     "drawer": {
