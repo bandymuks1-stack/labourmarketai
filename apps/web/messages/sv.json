@@ -2846,7 +2846,8 @@
       "alreadyAccepted": "Arbetstagaren har redan accepterat detta förslag — överenskomna villkor skrivs inte över här. Kom överens om ändringar i samtalet.",
       "refusedNotReachable": "Den här personen kan inte få ett bokningsförslag härifrån — profilen är inte synlig för arbetsgivare och det finns ingen arbetsrelation med dig.",
       "refusedNeedClosed": "Det här behovet är stängt — öppna det igen innan du föreslår en bokning.",
-      "refusedAnswered": "Arbetstagaren har avböjt förslaget, så det öppnas inte igen utan arbetstagarens nya samtycke. Fortsätt i samtalet eller hitta en annan arbetstagare."
+      "refusedAnswered": "Arbetstagaren har avböjt förslaget, så det öppnas inte igen utan arbetstagarens nya samtycke. Fortsätt i samtalet eller hitta en annan arbetstagare.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",

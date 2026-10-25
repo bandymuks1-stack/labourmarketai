@@ -9186,7 +9186,8 @@
       "alreadyAccepted": "The worker has already accepted this proposal — agreed terms are not rewritten here. Agree any changes in the conversation.",
       "refusedNotReachable": "This person can't be offered a booking from here — they haven't made their profile visible to employers and have no working relationship with you.",
       "refusedNeedClosed": "This need is closed — reopen it before proposing a booking.",
-      "refusedAnswered": "The worker declined this proposal, so it is not reopened without their new consent. Continue in the conversation or find another worker."
+      "refusedAnswered": "The worker declined this proposal, so it is not reopened without their new consent. Continue in the conversation or find another worker.",
+      "unconfirmed": "No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "Reason (optional)",
