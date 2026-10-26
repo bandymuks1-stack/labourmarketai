@@ -39,4 +39,20 @@ describe("IT administrator compounds stay out of office_administrator", () => {
       expect(detectNeedProfession(label)).toBe("office_administrator");
     }
   });
+
+  it("a title never overrides a publisher label the catalogue knows it lacks", () => {
+    // Production 2026-10-26: "Systemadministratör" ads titled "Administratör"
+    // fell back to office_administrator, one to receptionist.
+    for (const titleRaw of ["Administratör", "Linuxadministratör", "Receptionist och IT-stöd"]) {
+      const r = categorizeVacancy({ titleRaw, descriptionRaw: "", occupationRaw: "Systemadministratör" });
+      expect(r.professionSlug, titleRaw).toBeNull();
+    }
+  });
+
+  it("the title fallback still works where the label is empty or simply unmapped", () => {
+    expect(categorizeVacancy({ titleRaw: "Administratör", descriptionRaw: "", occupationRaw: null }).professionSlug).toBe(
+      "office_administrator",
+    );
+    expect(categorizeVacancy({ titleRaw: "Kock", descriptionRaw: "", occupationRaw: "Okänd yrkesroll" }).professionSlug).toBe("cook");
+  });
 });
