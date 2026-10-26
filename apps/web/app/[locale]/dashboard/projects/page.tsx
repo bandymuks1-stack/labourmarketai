@@ -479,7 +479,7 @@ export default async function ProjectsPage({
           card leads to an existing route or to the section that does the
           work; nothing was removed. */}
       {ownCompanyId || employerCtx?.kind === "ok" ? (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2 sm:gap-3">
           <PremiumActionDeck
             ariaLabel={t("deck.label")}
             testId="projects-action-deck"

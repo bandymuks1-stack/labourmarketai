@@ -48,8 +48,7 @@ export interface PremiumActionCardProps {
   readonly active?: boolean;
   readonly emphasis?: "primary" | "default";
   readonly size?: "feature" | "compact";
-  /** Lay a feature card out horizontally on a phone too (a full-width
-   *  primary). */
+  /** Span the full phone width (the primary), with its hint shown there. */
   readonly wide?: boolean;
   readonly testId?: string;
 }
@@ -69,7 +68,6 @@ export function PremiumActionCard({
 }: PremiumActionCardProps) {
   const primary = emphasis === "primary";
   const compact = size === "compact";
-  const horizontal = compact || wide;
   return (
     <Link
       href={href as "/dashboard"}
@@ -80,11 +78,12 @@ export function PremiumActionCard({
       className={cn(
         "lm-card3d group relative flex w-full rounded-[1.25rem] border",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900",
+        // Phone first (owner review 2026-10-26: shorter cards, the list sooner):
+        // a feature card is a 68 px row, a compact tool a 72 px tile in a row
+        // of three; from `sm` up both open into roomier rows.
         compact
-          ? "lm-card3d--flat min-h-14 flex-row items-center gap-3 px-4 py-3 text-left"
-          : horizontal
-            ? "min-h-24 flex-row items-center gap-4 px-5 py-4 text-left"
-            : "min-h-[7.5rem] flex-col items-center justify-center gap-2.5 px-3 py-4 text-center sm:min-h-24 sm:flex-row sm:justify-start sm:gap-4 sm:px-5 sm:text-left",
+          ? "lm-card3d--flat min-h-[4.5rem] flex-col items-center justify-center gap-1.5 px-2 py-2.5 text-center sm:min-h-14 sm:flex-row sm:justify-start sm:gap-3 sm:px-4 sm:py-3 sm:text-left"
+          : "min-h-[4.25rem] flex-row items-center gap-3 px-3 py-3 text-left sm:min-h-24 sm:gap-4 sm:px-5 sm:py-4",
         active
           ? "border-brand-blue ring-1 ring-brand-blue/60"
           : primary
@@ -113,19 +112,21 @@ export function PremiumActionCard({
         aria-hidden
         className={cn(
           "flex shrink-0 items-center justify-center border",
-          compact ? "h-9 w-9 rounded-xl" : "h-12 w-12 rounded-2xl",
+          compact ? "h-8 w-8 rounded-lg sm:h-9 sm:w-9 sm:rounded-xl" : "h-10 w-10 rounded-xl sm:h-12 sm:w-12 sm:rounded-2xl",
+          // The primary's icon is a small solid gold object (a lit top edge,
+          // a soft drop) — no glow.
           primary
-            ? "border-transparent bg-gradient-cta text-text-on-brand shadow-cta-glow"
-            : "border-brand-blue/20 bg-brand-blue/10 text-brand-blue",
+            ? "border-transparent bg-gradient-cta text-text-on-brand shadow-[inset_0_1px_0_rgb(255_255_255/0.35),0_2px_4px_-1px_rgb(0_0_0/0.45)]"
+            : "border-brand-blue/25 bg-brand-blue/10 text-brand-blue",
         )}
       >
-        <Icon className={compact ? "h-[1.125rem] w-[1.125rem]" : "h-6 w-6"} strokeWidth={1.75} aria-hidden />
+        <Icon className={compact ? "h-4 w-4 sm:h-[1.125rem] sm:w-[1.125rem]" : "h-5 w-5 sm:h-6 sm:w-6"} strokeWidth={1.75} aria-hidden />
       </span>
-      <span className={cn("flex min-w-0 flex-col gap-0.5", !horizontal && "items-center sm:items-start")}>
+      <span className={cn("flex min-w-0 flex-col gap-0.5", compact && "items-center sm:items-start")}>
         <span
           className={cn(
-            "text-balance font-semibold leading-snug text-text-primary",
-            compact ? "text-sm" : "text-base",
+            "text-balance font-semibold text-text-primary",
+            compact ? "text-xs leading-tight sm:text-sm sm:leading-snug" : "text-sm leading-snug sm:text-base",
           )}
         >
           {label}
@@ -134,7 +135,7 @@ export function PremiumActionCard({
           <span
             className={cn(
               "text-balance text-xs leading-snug text-text-muted",
-              hintAlways || horizontal ? "block" : "hidden sm:block",
+              hintAlways || wide ? "block" : "hidden sm:block",
             )}
           >
             {hint}
@@ -149,8 +150,8 @@ type DeckItem = PremiumActionCardProps & { readonly key: string };
 
 /**
  * A deck of action cards. `feature`: two columns on a phone (a `wide` card
- * spans both), three from `sm` up. `compact`: one column on a phone, three
- * from `sm` up. Both wrap — never a sideways strip.
+ * spans both), three from `sm` up. `compact`: three small tiles in one row on
+ * a phone, three rows-cards from `sm` up. Both wrap — never a sideways strip.
  */
 export function PremiumActionDeck({
   ariaLabel,
@@ -170,7 +171,7 @@ export function PremiumActionDeck({
       <ul
         className={cn(
           "grid",
-          size === "compact" ? "grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3" : "auto-rows-fr grid-cols-2 gap-3 sm:grid-cols-3",
+          size === "compact" ? "auto-rows-fr grid-cols-3 gap-2 sm:gap-3" : "auto-rows-fr grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3",
         )}
       >
         {items.map(({ key, ...card }) => (

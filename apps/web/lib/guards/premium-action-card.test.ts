@@ -35,14 +35,25 @@ describe("the card: depth without weight", () => {
   it("has a light-theme lighting of its own", () => {
     expect(CSS).toMatch(/:root\[data-theme="light"\] \.lm-card3d \{/);
   });
+
+  it("depth is a physical object — bevel and layered shadow — never a glow", () => {
+    const block = CSS.slice(CSS.indexOf(".lm-card3d {"), CSS.indexOf("/* ── A DISABLED BRAND CONTROL"));
+    expect(block).toMatch(/inset 0 1px 0 rgb\(255 255 255/); // lit top edge
+    expect(block).toMatch(/inset 0 -1px 0 rgb\(0 0 0/); // shaded bottom edge
+    expect(block).not.toMatch(/rgb\(var\(--c-brand-blue\) \/ 0\.\d+\)\s*[,;]/); // no gold halo
+    expect(CARD).not.toMatch(/shadow-cta-glow/);
+  });
 });
 
 describe("the card: reachable and honest", () => {
   it("is a link with a visible focus ring and a tap area of at least 44 px", () => {
     expect(CARD).toMatch(/<Link\s+href=\{href as "\/dashboard"\}/);
     expect(CARD).toMatch(/focus-visible:ring-2 focus-visible:ring-brand-cyan/);
-    expect(CARD).toMatch(/min-h-14 flex-row/); // compact: 56 px
-    expect(CARD).toMatch(/min-h-24 flex-row/); // feature, horizontal: 96 px
+    // Phone: feature 68 px rows, compact 72 px tiles; from sm: 96 / 56 px.
+    expect(CARD).toMatch(/min-h-\[4\.25rem\] flex-row/);
+    expect(CARD).toMatch(/min-h-\[4\.5rem\] flex-col/);
+    expect(CARD).toMatch(/sm:min-h-24/);
+    expect(CARD).toMatch(/sm:min-h-14/);
   });
 
   it("marks where you are with aria-current, and a badge is spoken in words", () => {
@@ -52,8 +63,8 @@ describe("the card: reachable and honest", () => {
 
   it("two sizes — feature and compact — and the decks wrap, never a sideways strip", () => {
     expect(CARD).toMatch(/readonly size\?: "feature" \| "compact";/);
-    expect(CARD).toMatch(/auto-rows-fr grid-cols-2 gap-3 sm:grid-cols-3/);
-    expect(CARD).toMatch(/grid-cols-1 gap-2 sm:grid-cols-3/);
+    expect(CARD).toMatch(/auto-rows-fr grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3/);
+    expect(CARD).toMatch(/auto-rows-fr grid-cols-3 gap-2 sm:gap-3/);
     expect(CARD).not.toMatch(/overflow-x-auto|snap-x/);
   });
 });
