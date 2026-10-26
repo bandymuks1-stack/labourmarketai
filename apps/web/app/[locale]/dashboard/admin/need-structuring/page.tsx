@@ -4,6 +4,11 @@ import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { loadUnstructuredNeeds } from "@/lib/admin/need-backfill";
 import { NeedStructureRow } from "@/components/app/need-structure-row";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/need-structuring");
+
 
 /**
  * Admin need-structuring backfill (superadmin-only). Lists SUBMITTED demands

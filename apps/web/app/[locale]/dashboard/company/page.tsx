@@ -35,6 +35,11 @@ import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company", "roleDashboards.company.title");
+
 
 // The employer demand kinds the home field's "what we are missing" reads —
 // a dual-role user's buyer service requests stay in the buyer room.

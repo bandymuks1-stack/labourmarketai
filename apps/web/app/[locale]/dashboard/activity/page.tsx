@@ -14,6 +14,11 @@ import {
   getSpineCounts,
 } from "@/lib/notifications/spine";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/activity", "activityCentre.title");
+
 
 /**
  * Unified activity centre (control room PR C) — ONE cross-module surface

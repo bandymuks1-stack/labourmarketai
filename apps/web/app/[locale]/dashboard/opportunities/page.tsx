@@ -120,6 +120,11 @@ import type {
 } from "@/lib/opportunities/opportunity-fit";
 import { createUtcFormatter } from "@/lib/time/display";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/opportunities", "opportunities.world.title");
+
 
 /**
  * PASAULIS — the worker's discovery-and-matching destination
