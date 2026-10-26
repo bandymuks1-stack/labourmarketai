@@ -34,8 +34,8 @@ export const AXE_SOURCE: string | null = (() => {
 
 /** Performance buffers, installed before any page script runs. */
 export function installObservers(): void {
-  type Ux = { lcp: number; cls: number; lt: number[][]; loaf: number[][]; clsTop: string; clsTopValue: number };
-  const ux: Ux = { lcp: 0, cls: 0, lt: [], loaf: [], clsTop: "", clsTopValue: 0 };
+  type Ux = { lcp: number; cls: number; lt: number[][]; loaf: number[][]; clsTop: string; clsTopValue: number; clsTopDy: number };
+  const ux: Ux = { lcp: 0, cls: 0, lt: [], loaf: [], clsTop: "", clsTopValue: 0, clsTopDy: 0 };
   (window as unknown as { __ux: Ux }).__ux = ux;
   const observe = (type: string, onEntry: (e: PerformanceEntry) => void) => {
     try {
@@ -48,7 +48,12 @@ export function installObservers(): void {
     ux.lcp = e.startTime;
   });
   observe("layout-shift", (e) => {
-    const s = e as unknown as { value: number; hadRecentInput: boolean; sources?: { node?: Node | null }[] };
+    type Rect = { y: number; height: number };
+    const s = e as unknown as {
+      value: number;
+      hadRecentInput: boolean;
+      sources?: { node?: Node | null; previousRect?: Rect; currentRect?: Rect }[];
+    };
     if (s.hadRecentInput) return;
     ux.cls += s.value; // plain sum, not the session-window CLS (approximate)
     // WHICH block moved most: the nearest data-testid (or tag) of the largest
@@ -59,6 +64,13 @@ export function installObservers(): void {
       const named = el?.closest("[data-testid]");
       ux.clsTop = named?.getAttribute("data-testid") ?? el?.tagName.toLowerCase() ?? "";
       ux.clsTopValue = s.value;
+      // HOW FAR it moved (px, largest vertical move among the sources): with
+      // the block's final height (measure) this sizes a pending reserve from
+      // a measurement instead of a guess.
+      ux.clsTopDy = Math.max(
+        0,
+        ...(s.sources ?? []).map((x) => Math.abs((x.currentRect?.y ?? 0) - (x.previousRect?.y ?? 0))),
+      );
     }
   });
   observe("longtask", (e) => ux.lt.push([e.startTime, e.duration]));
@@ -355,7 +367,9 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
 
   // Web vitals + long tasks / long animation frames AFTER the load event (the observation window).
   const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
-  const ux = (window as unknown as { __ux?: { lcp: number; cls: number; lt: number[][]; loaf: number[][]; clsTopValue: number } }).__ux;
+  const ux = (window as unknown as {
+    __ux?: { lcp: number; cls: number; lt: number[][]; loaf: number[][]; clsTop: string; clsTopValue: number; clsTopDy: number };
+  }).__ux;
   const loadEnd = nav?.loadEventEnd || performance.now();
   out.ttfb_ms = nav ? nav.responseStart : 0;
   out.dcl_ms = nav ? nav.domContentLoadedEventEnd : 0;
@@ -364,6 +378,10 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
   out.lcp_ms = ux?.lcp ?? 0;
   out.cls_x10000 = Math.round((ux?.cls ?? 0) * 10_000);
   out.cls_top_x10000 = Math.round((ux?.clsTopValue ?? 0) * 10_000);
+  out.cls_top_dy_px = Math.round(ux?.clsTopDy ?? 0);
+  // The final height of the block named by cls_top (0 when it is not a testid).
+  const topBlock = ux?.clsTop ? document.querySelector(`[data-testid="${CSS.escape(ux.clsTop)}"]`) : null;
+  out.cls_top_h_px = topBlock ? Math.round(topBlock.getBoundingClientRect().height) : 0;
   const lt = (ux?.lt ?? []).filter(([s]) => s! >= loadEnd);
   out.longtasks_total = ux?.lt.length ?? 0;
   out.longtasks_after = lt.length;
