@@ -1732,7 +1732,10 @@ export default async function JournalPage({
             // flow, not on the generic greeting. "Create your first entry"
             // that drops the worker on the home screen is the exact
             // interaction the tester read as being thrown out of the journal.
-            cta={{ label: t("listEmptyCta"), href: "/dashboard?intent=log-work" }}
+            // SECONDARY (activation audit fix #7): the ONE primary on an empty
+            // journal is the recorder ABOVE this list; this door LEAVES the
+            // page, so it is bordered, never a second gradient button.
+            cta={{ label: t("listEmptyCta"), href: "/dashboard?intent=log-work", variant: "secondary" }}
           />
         ) : (
           <div className="flex flex-col gap-4">

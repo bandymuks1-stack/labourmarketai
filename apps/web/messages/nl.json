@@ -4641,6 +4641,7 @@
           "location": "Dit helpt voorkomen dat je ongeschikte aanbiedingen te zien krijgt.",
           "pay": "Dit helpt je verwachte tarief te onderbouwen.",
           "evidence": "Registraties bouwen vertrouwen op, maar je kunt ze ook later toevoegen.",
+          "evidenceFirst": "Eén zin over het werk dat je deed is genoeg — je levend cv groeit uit zulke registraties.",
           "complete": "Je werkkaart is compleet — werkvermeldingen maken hem steeds sterker."
         },
         "stale": {
@@ -14704,6 +14705,7 @@
       "contextAmbiguous": "Dit werk kan bij meer dan één context horen. Kies vóór het opslaan bij welke.",
       "contextEndedOrg": "De zin noemt een organisatie waarmee je werkrelatie is beëindigd — deze invoer telt niet als werk voor haar. Kies waar je dit deed:",
       "save": "Opslaan",
+      "continue": "Verder",
       "cancel": "Bewerken",
       "working": "Opslaan…",
       "confirmTitle": "Vermelding bevestigen?",
@@ -14732,6 +14734,9 @@
       "strengthenedSkillPrefix": "Vaardigheid versterkt",
       "pendingConfirmPrefix": "Wacht op je bevestiging",
       "cvUpdatedNote": "Je cv bevat nu de vaardigheden uit deze registratie.",
+      "livingCvNote": "Deze registratie telt nu mee in je levend cv als vastgelegd werk — door jou ingevoerd, nog door niemand bevestigd.",
+      "viewLivingCv": "Je levend cv openen",
+      "comeBackNote": "Voeg morgen ook het werk van die dag toe — één zin is genoeg.",
       "matchingNote": "Vacature-aanbevelingen worden bij de volgende weergave herberekend op basis van je bijgewerkte vaardigheden.",
       "viewOpportunities": "Bekijk bijgewerkte kansen",
       "pipelineFailedNote": "Vaardigheidsherkenning is deze keer mislukt — de registratie is opgeslagen; je kunt de herkenning in het logboek opnieuw uitvoeren."

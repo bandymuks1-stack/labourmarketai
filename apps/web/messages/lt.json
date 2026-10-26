@@ -4641,6 +4641,7 @@
           "location": "Tai padeda nerodyti tau netinkamų pasiūlymų.",
           "pay": "Tai padeda pagrįsti tavo pageidaujamą tarifą.",
           "evidence": "Įrašai didina pasitikėjimą, bet gali juos pridėti vėliau.",
+          "evidenceFirst": "Užtenka vieno sakinio apie tai, ką dirbai — iš tokių įrašų auga tavo gyvas CV.",
           "complete": "Tavo darbo kortelė pilna — toliau ją stiprina darbo įrašai."
         },
         "stale": {
@@ -14704,6 +14705,7 @@
       "contextAmbiguous": "Šis darbas gali priklausyti daugiau nei vienam kontekstui. Prieš išsaugant pasirink, kuriam.",
       "contextEndedOrg": "Sakinyje minima organizacija, su kuria darbo santykis baigtas — šis įrašas nebus jos darbo įrodymas. Pasirink, kur tai dirbai:",
       "save": "Išsaugoti",
+      "continue": "Toliau",
       "cancel": "Taisyti",
       "working": "Saugoma…",
       "confirmTitle": "Patvirtinti įrašą?",
@@ -14732,6 +14734,9 @@
       "strengthenedSkillPrefix": "Sustiprintas įgūdis",
       "pendingConfirmPrefix": "Laukia patvirtinimo",
       "cvUpdatedNote": "CV papildytas šio įrašo įgūdžiais.",
+      "livingCvNote": "Šis įrašas jau skaičiuojamas tavo gyvame CV kaip užfiksuotas darbas — įrašytas tavo, dar niekieno nepatvirtintas.",
+      "viewLivingCv": "Atidaryti gyvą CV",
+      "comeBackNote": "Rytoj užrašyk ir tos dienos darbą — užtenka vieno sakinio.",
       "matchingNote": "Darbo rekomendacijos skaičiuojamos pagal atnaujintą įgūdžių sąrašą kitą kartą jas peržiūrint.",
       "viewOpportunities": "Peržiūrėti atnaujintus pasiūlymus",
       "pipelineFailedNote": "Įgūdžių atpažinimas šįkart nepavyko — įrašas išsaugotas, atpažinimą gali pakartoti žurnale."

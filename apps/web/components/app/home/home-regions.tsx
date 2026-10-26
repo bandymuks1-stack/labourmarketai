@@ -264,6 +264,19 @@ export async function HomeWaitingView({
                 {tCard("stale.body")}
               </p>
             ) : null}
+            {/* EVIDENCE FIRST keeps what it displaced reachable: the
+                profession / profile (or another unmet card dimension) as a
+                QUIET text link — never a second gold action. */}
+            {next.next.secondary ? (
+              <Link
+                href={next.next.secondary.href as "/dashboard"}
+                data-testid="today-next-secondary"
+                data-dim={next.next.secondary.dim}
+                className="mt-1 inline-flex min-h-11 items-center text-support font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline"
+              >
+                {tCard(`next.${next.next.secondary.dim}`)} →
+              </Link>
+            ) : null}
           </div>
           {/* THE ONE GOLD ACTION on the whole home. */}
           <Link

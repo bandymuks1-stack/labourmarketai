@@ -4641,6 +4641,7 @@
           "location": "This helps avoid showing you unsuitable offers.",
           "pay": "This helps justify your expected rate.",
           "evidence": "Records builds trust, but you can add it later.",
+          "evidenceFirst": "One sentence about the work you did is enough — your Living CV grows from entries like this.",
           "complete": "Your work card is complete — work entries keep making it stronger."
         },
         "stale": {
@@ -14704,6 +14705,7 @@
       "contextAmbiguous": "This work could belong to more than one context. Choose which one before saving.",
       "contextEndedOrg": "The sentence names an organization your work relationship with has ended — this entry won't count as work for it. Choose where you did this:",
       "save": "Save",
+      "continue": "Continue",
       "cancel": "Edit",
       "working": "Saving…",
       "confirmTitle": "Confirm the entry?",
@@ -14732,6 +14734,9 @@
       "strengthenedSkillPrefix": "Skill strengthened",
       "pendingConfirmPrefix": "Awaiting your confirmation",
       "cvUpdatedNote": "Your CV now includes the skills from this entry.",
+      "livingCvNote": "This entry now counts in your Living CV as recorded work — written by you, not yet confirmed by anyone.",
+      "viewLivingCv": "Open your Living CV",
+      "comeBackNote": "Tomorrow, add that day's work too — one sentence is enough.",
       "matchingNote": "Job recommendations are recalculated from your updated skills the next time you view them.",
       "viewOpportunities": "View updated opportunities",
       "pipelineFailedNote": "Skill recognition failed this time — the entry is saved; you can rerun recognition in the journal."

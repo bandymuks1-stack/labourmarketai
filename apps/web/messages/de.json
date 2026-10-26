@@ -4641,6 +4641,7 @@
           "location": "Das hilft zu vermeiden, dass Ihnen unpassende Angebote angezeigt werden.",
           "pay": "Das hilft, Ihren erwarteten Satz zu begründen.",
           "evidence": "Nachweise schaffen Vertrauen, aber Sie können sie später hinzufügen.",
+          "evidenceFirst": "Ein Satz über Ihre Arbeit genügt — aus solchen Einträgen wächst Ihr lebender Lebenslauf.",
           "complete": "Ihre Arbeitskarte ist vollständig — Arbeitseinträge machen sie weiter stärker."
         },
         "stale": {
@@ -14704,6 +14705,7 @@
       "contextAmbiguous": "Diese Arbeit könnte zu mehr als einem Kontext gehören. Wählen Sie vor dem Speichern aus, zu welchem.",
       "contextEndedOrg": "Der Satz nennt eine Organisation, mit der Ihr Arbeitsverhältnis beendet ist — dieser Eintrag zählt nicht als Arbeit für sie. Wählen Sie, wo Sie das gemacht haben:",
       "save": "Speichern",
+      "continue": "Weiter",
       "cancel": "Bearbeiten",
       "working": "Wird gespeichert…",
       "confirmTitle": "Eintrag bestätigen?",
@@ -14732,6 +14734,9 @@
       "strengthenedSkillPrefix": "Fähigkeit gestärkt",
       "pendingConfirmPrefix": "Wartet auf Ihre Bestätigung",
       "cvUpdatedNote": "Ihr Lebenslauf enthält jetzt die Fähigkeiten aus diesem Eintrag.",
+      "livingCvNote": "Dieser Eintrag zählt jetzt in Ihrem lebenden Lebenslauf als erfasste Arbeit — von Ihnen eingetragen, noch von niemandem bestätigt.",
+      "viewLivingCv": "Lebenden Lebenslauf öffnen",
+      "comeBackNote": "Tragen Sie morgen auch die Arbeit dieses Tages ein — ein Satz genügt.",
       "matchingNote": "Job-Empfehlungen werden beim nächsten Ansehen anhand Ihrer aktualisierten Fähigkeiten neu berechnet.",
       "viewOpportunities": "Aktualisierte Möglichkeiten ansehen",
       "pipelineFailedNote": "Die Fähigkeits-Erkennung ist diesmal fehlgeschlagen — der Eintrag ist gespeichert; Sie können die Erkennung im Journal wiederholen."
