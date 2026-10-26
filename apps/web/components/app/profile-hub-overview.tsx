@@ -608,10 +608,14 @@ export async function ProfileHubOverview({
               className="text-xs leading-relaxed text-text-secondary"
               data-testid="profile-hub-review-note"
             >
+              {/* The count is of SKILLS not yet backed by work entries — say
+                  so in the same sentence (production 2026-10-25 read
+                  "24 — Kai kurie įrašai dar neaiškūs", a count of skills
+                  glued to a sentence about entries). */}
               <span data-testid="profile-hub-review-count">
                 {skillEvidence.unsupported}
               </span>{" "}
-              — {tReview("body")}{" "}
+              {tReview("noteLead", { count: skillEvidence.unsupported })}{" "}
               <a
                 href="#profile-edit"
                 className="font-medium text-text-primary underline underline-offset-4 hover:no-underline"

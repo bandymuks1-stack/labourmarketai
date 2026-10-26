@@ -3621,7 +3621,8 @@
     "reviewBanner": {
       "title": "Sommige vaardigheden moeten worden beoordeeld",
       "body": "Sommige vermeldingen zijn nog niet duidelijk geclassificeerd. Beoordeel ze of voeg meer informatie toe, zodat je profiel nauwkeuriger gematcht kan worden.",
-      "cta": "Vaardigheden beoordelen"
+      "cta": "Vaardigheden beoordelen",
+      "noteLead": "{count, plural, one {vaardigheid wordt nog niet onderbouwd door werkregistraties.} other {vaardigheden worden nog niet onderbouwd door werkregistraties.}}"
     },
     "pageTitle": "Mijn profiel",
     "pageSubtitle": "Wat je doet, wat je kunt en wat dat laat zien — alles op één plek.",
@@ -7973,7 +7974,7 @@
       "confirmed": "u met registratie van leidinggevende",
       "organizationHistory": "u in organisatiehistorie",
       "experienceTotal": "u beroepservaring in totaal",
-      "days": "{count, plural, one {werkdag} other {werkdagen}}",
+      "days": "{count, plural, one {dag met uren} other {dagen met uren}}",
       "modes": {
         "label": "Onderdelen van de kaart",
         "work": "Werk",
