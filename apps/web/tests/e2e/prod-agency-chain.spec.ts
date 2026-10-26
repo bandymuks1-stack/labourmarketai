@@ -113,7 +113,14 @@ test("A-1b. the agency saves an offer and finds it on its home, one click from t
   await page.waitForURL(/\/dashboard\/company\/needs/, { timeout: 30_000 });
   const list = page.getByTestId("supply-offers-readback");
   await expect(list).toBeVisible({ timeout: 30_000 });
-  await expect(list.getByTestId("demand-readback-row").filter({ hasText: RUN }).first()).toBeVisible({ timeout: 30_000 });
+  const row = list.getByTestId("demand-readback-row").filter({ hasText: RUN }).first();
+  await expect(row).toBeVisible({ timeout: 30_000 });
+
+  // Cleanup: take this run's synthetic offer off the market through the row's
+  // own lifecycle control (reversible, no confirmation) — runs must not pile
+  // up open offers on the synthetic agency.
+  await row.locator('[data-testid^="demand-withdraw-"]').first().click();
+  await expect(row.getByTestId("demand-entry-lifecycle")).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
   await close();
 });
 
