@@ -90,10 +90,21 @@ export const PROD_QA_AGENCY_EMAIL = "qa.agency+multiw@labourmarket.ai" as const;
 export const PROD_QA_FRESH_WORKER_EMAIL = "qa.freshworker+act1@labourmarket.ai" as const;
 export const PROD_QA_FRESH_COMPANY_EMAIL = "qa.freshcompany+act1@labourmarket.ai" as const;
 
-/** The fresh identities — minted only if the owner has created them. */
+/**
+ * Owner decision 2026-10-26 ("6.4 PIRKĖJO TESTO LEIDIMAS"): ONE synthetic
+ * buyer (customer role) for the buyer-workspace test — no existing synthetic
+ * identity holds the customer role, and adding it to one would change that
+ * account's active role for every other walk. Created by the owner only, with
+ * the customer role in its sign-up metadata (the ordinary profile trigger
+ * writes it; no privileged grant).
+ */
+export const PROD_QA_BUYER_EMAIL = "qa.buyer+act1@labourmarket.ai" as const;
+
+/** The owner-created identities — minted only if the owner has created them. */
 export const PROD_QA_FRESH_IDENTITIES: readonly string[] = [
   PROD_QA_FRESH_WORKER_EMAIL,
   PROD_QA_FRESH_COMPANY_EMAIL,
+  PROD_QA_BUYER_EMAIL,
 ];
 
 /** Every allowlisted synthetic identity — equality-matched, never by prefix

@@ -47,6 +47,7 @@ import { createClient } from "@supabase/supabase-js";
 
 import {
   PROD_QA_AGENCY_EMAIL,
+  PROD_QA_BUYER_EMAIL,
   PROD_QA_FRESH_IDENTITIES,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
@@ -149,11 +150,17 @@ async function main(): Promise<void> {
     app_metadata: {
       qa_synthetic: true,
       qa_purpose: fresh
-        ? "labourmarket.ai production E2E — fresh activation (owner decision 2026-10-26)"
+        ? target.email === PROD_QA_BUYER_EMAIL
+          ? "labourmarket.ai production E2E — buyer workspace 6.4 (owner decision 2026-10-26)"
+          : "labourmarket.ai production E2E — fresh activation (owner decision 2026-10-26)"
         : "labourmarket.ai production E2E — EMPLOYEE_BETA_PRODUCTION_GATE",
       qa_provisioned_by: "owner",
     },
-    user_metadata: fresh
+    // The buyer carries the customer role exactly as a customer sign-up does
+    // (the profile trigger reads `role`); the fresh pair carries none.
+    user_metadata: target.email === PROD_QA_BUYER_EMAIL
+      ? { role: "customer" }
+      : fresh
       ? {}
       : {
           role: target.email === PROD_QA_AGENCY_EMAIL ? "agency" : "worker",
