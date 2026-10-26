@@ -18875,22 +18875,23 @@
   },
   "workLifecycle": {
     "pending": "Dar ne",
-    "title": "Kas nutinka su jūsų darbu",
+    "title": "Kas nutinka su tavo darbu",
     "titleCompany": "Kas nutinka su jūsų vykdomu darbu",
     "example": "Pavyzdys — ne tikras žmogus ir ne tikri duomenys",
     "hint": "Pasirinkite žingsnį. Kiekvienas atveria tikrą vietą jūsų darbo erdvėje.",
+    "hintWorkers": "Pasirink žingsnį. Kiekvienas atveria tikrą vietą tavo darbo erdvėje.",
     "open": "Atidaryti darbo erdvėje",
     "list": "Darbo gyvavimo ciklo žingsniai",
     "workers": {
       "person": {
-        "label": "Jūs",
+        "label": "Tu",
         "fact": "Virėja · profesinė tapatybė",
-        "detail": "Viena profesinė tapatybė, kuri priklauso jums — ne vienam darbdaviui."
+        "detail": "Viena profesinė tapatybė, kuri priklauso tau — ne vienam darbdaviui."
       },
       "team": {
         "label": "Komanda",
         "fact": "Virtuvės komanda",
-        "detail": "Prisijungiate prie tikros komandos — matote, su kuo dirbate ir kas ją vadovauja."
+        "detail": "Prisijungi prie tikros komandos — matai, su kuo dirbi ir kas jai vadovauja."
       },
       "project": {
         "label": "Projektas",
@@ -18900,7 +18901,7 @@
       "work": {
         "label": "Darbas",
         "fact": "Vakaro pamaina · 8 val.",
-        "detail": "Ką padarėte, kada ir kiek laiko — užfiksuota tada, kai vyksta."
+        "detail": "Ką padarei, kada ir kiek laiko — užfiksuota tada, kai vyksta."
       },
       "evidence": {
         "label": "Įrodymas",
@@ -18915,7 +18916,7 @@
       "history": {
         "label": "Istorija",
         "fact": "Įtraukta į jūsų istoriją",
-        "detail": "Patvirtintas darbas kuria jūsų profesinę istoriją — ji lieka su jumis kitam darbui."
+        "detail": "Patvirtintas darbas kuria tavo profesinę istoriją — ji lieka su tavimi kitam darbui."
       }
     },
     "companies": {

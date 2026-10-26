@@ -18879,6 +18879,7 @@
     "titleCompany": "What happens to the work you run",
     "example": "Example — not a real person or real data",
     "hint": "Select a step. Every step opens the real place in your workspace.",
+    "hintWorkers": "Select a step. Every step opens the real place in your workspace.",
     "open": "Open in your workspace",
     "list": "Work lifecycle steps",
     "workers": {

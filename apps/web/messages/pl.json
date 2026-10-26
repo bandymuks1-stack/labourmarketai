@@ -18879,6 +18879,7 @@
     "titleCompany": "Co dzieje się z pracą, którą prowadzisz",
     "example": "Przykład — to nie jest prawdziwa osoba ani prawdziwe dane",
     "hint": "Wybierz krok. Każdy krok otwiera prawdziwe miejsce w Twojej przestrzeni roboczej.",
+    "hintWorkers": "Wybierz krok. Każdy krok otwiera prawdziwe miejsce w Twojej przestrzeni roboczej.",
     "open": "Otwórz w przestrzeni roboczej",
     "list": "Etapy cyklu życia pracy",
     "workers": {

@@ -7086,6 +7086,7 @@
     "titleCompany": "Kas notiek ar jūsu vadīto darbu",
     "example": "Piemērs — nav īsts cilvēks un nav īsti dati",
     "hint": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
+    "hintWorkers": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
     "open": "Atvērt darba telpā",
     "list": "Darba dzīves cikla soļi",
     "workers": {
