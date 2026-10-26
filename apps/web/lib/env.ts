@@ -58,6 +58,20 @@ const schema = z.object({
   // by nearly every module), not just the confirm steps.
   CONVERSATION_TOKEN_SECRET: z.preprocess(blankAsAbsent, z.string().min(16).optional()),
   /**
+   * B1b door proof (lib/api/door-proof.ts). The MCP door signs a per-token
+   * proof header for third-party OAuth callers so the database gate
+   * (`door_gate.pre_request`, migration 20261026090000) can tell "through our
+   * server" from "straight to /rest/v1". Both come from ONE owner step:
+   * `select door_gate_private.generate_key('<kid>')` in the SQL editor returns
+   * the hex secret once. Server-only, NEVER NEXT_PUBLIC, never committed.
+   * Optional: unset → no proof header, which is harmless while the gate is
+   * `off`/`log` and refuses OAuth tools under `enforce` (the gate refuses to
+   * enter `enforce` without an active key; the runbook requires `proof_ok`
+   * evidence first). A malformed value fails the boot, like every other var.
+   */
+  LM_DOOR_KEY_ID: z.preprocess(blankAsAbsent, z.string().regex(/^[a-z0-9]{1,16}$/).optional()),
+  LM_DOOR_SECRET: z.preprocess(blankAsAbsent, z.string().regex(/^[0-9a-fA-F]{64}$/).optional()),
+  /**
    * The public https origin a self-hosted deployment advertises to OAuth and
    * MCP clients when its hostname is not one of ours (lib/mcp/public-origin.ts).
    * Unset on Vercel and on production: the request host decides there.
@@ -224,6 +238,8 @@ const parsed = schema.safeParse({
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_DB_PASSWORD: process.env.SUPABASE_DB_PASSWORD,
   CONVERSATION_TOKEN_SECRET: process.env.CONVERSATION_TOKEN_SECRET,
+  LM_DOOR_KEY_ID: process.env.LM_DOOR_KEY_ID,
+  LM_DOOR_SECRET: process.env.LM_DOOR_SECRET,
   PUBLIC_ORIGIN: process.env.PUBLIC_ORIGIN,
   NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS:
     process.env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS,

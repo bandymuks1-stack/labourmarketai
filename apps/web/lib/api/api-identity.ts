@@ -10,6 +10,8 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types";
 
+import { doorProofFor, serverDoorKey, withDoorProof } from "./door-proof";
+
 /**
  * AUTH-CORE API BOUNDARY — the one door into `app/api/**`.
  *
@@ -253,8 +255,22 @@ async function identityFromBearer(
     "@supabase/supabase-js"
   );
 
+  // B1b DOOR PROOF. Only a token that CLAIMS a third-party OAuth client gets
+  // the proof-adding fetch; every other bearer client is built exactly as
+  // before (no `fetch` option at all). The claim read here is unverified and
+  // only decides the wiring — the proof itself is computed below, and only
+  // after the auth server has accepted the token. Until then `doorProof` is
+  // null and the wrapper adds nothing. See lib/api/door-proof.ts.
+  const doorKey = tokenClientOf(token).kind === "oauth" ? serverDoorKey() : null;
+  let doorProof: string | null = null;
+
   const supabase = createSupabaseJsClient<Database>(url, anonKey, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
+    global: {
+      headers: { Authorization: `Bearer ${token}` },
+      ...(doorKey
+        ? { fetch: withDoorProof((input, init) => globalThis.fetch(input, init), url, () => doorProof) }
+        : {}),
+    },
     auth: {
       // A route handler is not a browser: nothing to persist, nothing to
       // refresh, no URL to read a session out of.
@@ -276,6 +292,10 @@ async function identityFromBearer(
     if (!data?.user) return { ok: false, reason: "invalid-bearer" };
     const client = tokenClientOf(token);
     if (client.kind === "malformed") return { ok: false, reason: "invalid-bearer" };
+    // Verified third-party token: from now on every Data API call on this
+    // client carries the proof (null if the claims cannot form one → no
+    // header → the database gate logs/refuses, i.e. fail closed).
+    if (client.kind === "oauth" && doorKey !== null) doorProof = doorProofFor(token, doorKey);
     // The no-argument `auth.getUser()` of a session-less client has no session
     // to read and answers "no user" — so any domain helper that asks the
     // client who is calling (the cookie client's own idiom) would see an
