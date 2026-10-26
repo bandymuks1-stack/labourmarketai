@@ -12631,6 +12631,8 @@
     "noShared": "Nog geen klant heeft een aanvraag gedeeld.",
     "workerLabel": "Uw rosterwerknemer",
     "workerPlaceholder": "Kies een werknemer…",
+    "noteLabel": "Notitie voor de klant (optioneel)",
+    "inviteLinkLabel": "Uitnodigingslink",
     "offerButton": "Kandidaat aanbieden",
     "noRoster": "Voeg eerst een actieve werknemer toe.",
     "progressHeading": "Uw aanbiedingen",
