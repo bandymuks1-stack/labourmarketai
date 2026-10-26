@@ -119,7 +119,7 @@ test("A-1b. the agency saves an offer and finds it on its home, one click from t
   // Cleanup: take this run's synthetic offer off the market through the row's
   // own lifecycle control (reversible, no confirmation) — runs must not pile
   // up open offers on the synthetic agency.
-  await row.locator('[data-testid^="demand-withdraw-"]').first().click();
+  await row.getByTestId("market-entry-actions").locator('button[data-action="withdraw"]').first().click();
   await expect(row.getByTestId("demand-entry-lifecycle")).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
   // Earlier runs' leftovers (a run before this cleanup existed, or one that
   // stopped mid-step): every other open QA-SYNTHETIC offer goes off the market too.
@@ -130,7 +130,7 @@ test("A-1b. the agency saves an offer and finds it on its home, one click from t
       .filter({ has: page.locator('[data-testid="demand-entry-lifecycle"]:not([data-demand-status="closed"])') })
       .first();
     if (!(await open.isVisible().catch(() => false))) break;
-    const withdraw = open.locator('[data-testid^="demand-withdraw-"]').first();
+    const withdraw = open.getByTestId("market-entry-actions").locator('button[data-action="withdraw"]').first();
     if (!(await withdraw.isVisible().catch(() => false))) break;
     await withdraw.click();
     await expect(open.getByTestId("demand-entry-lifecycle")).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 }).catch(() => undefined);
