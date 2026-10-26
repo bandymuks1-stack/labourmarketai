@@ -4287,6 +4287,7 @@
       "country_search_placeholder": "Поиск страны",
       "country_search_empty": "Страна не найдена. Попробуйте другое название.",
       "error_country_required": "Пожалуйста, выберите страну.",
+      "error_role_required": "Сначала выберите, для чего вы хотите использовать LabourMarket.ai, — затем заполните профиль.",
       "profession_label": "Какая у вас профессия или опыт работы?",
       "profession_placeholder": "Введите профессию или сферу работы",
       "profession_add": "Добавить",

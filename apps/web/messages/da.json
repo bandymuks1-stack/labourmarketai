@@ -416,6 +416,7 @@
       "country_search_placeholder": "Søg efter et land",
       "country_search_empty": "Intet land fundet. Prøv et andet navn.",
       "error_country_required": "Vælg venligst et land.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Hvad er dit fag eller din erhvervserfaring?",
       "profession_placeholder": "Skriv et fag eller arbejdsområde",
       "profession_add": "Tilføj",
