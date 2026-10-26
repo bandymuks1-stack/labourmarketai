@@ -554,6 +554,25 @@ test.describe("signed in as the synthetic owner of Alfa", () => {
     expect(failures, failures.join("\n")).toEqual([]);
   });
 
+  test("S-12 (8.16). a signed-in person reports a language problem from the account menu", async ({ browser }) => {
+    const { ctx, page } = await owner(browser);
+    await openInAlfa(page, "/lt/dashboard/journal");
+    await page.getByTestId("account-menu-trigger").first().click();
+    await page.getByTestId("language-feedback-open").click();
+    const comment = page.getByTestId("language-feedback-comment");
+    await expect(comment, "the report form opens with its comment box").toBeVisible({ timeout: 30_000 });
+    // Marked synthetic, so the admin inbox reads it as a walk's trace.
+    await comment.fill(`QA-SYNTHETIC ${RUN}: production walk language report (ignore).`);
+    await page.getByRole("button", { name: "Išsiųsti" }).click();
+    const ok = page.getByTestId("language-feedback-success");
+    const err = page.getByTestId("language-feedback-error");
+    await expect(ok.or(err)).toBeVisible({ timeout: 30_000 });
+    const failed = (await err.isVisible()) ? await err.innerText() : "";
+    console.info(`[lang-feedback] ${RUN} submitted=${failed === ""}${failed ? ` error="${failed.slice(0, 80)}"` : ""}`);
+    expect(failed, "the language report was refused").toBe("");
+    await ctx.close();
+  });
+
   // ── 8.13 / 8.16: the language switch persists for the user ──────────────
   const OTHER: Record<Locale, Locale> = { lt: "en", en: "lt", ru: "lt" };
   /** The owner's language before the walk touched it (own row). null = not readable here. */
