@@ -1,0 +1,97 @@
+== throwaway cluster: postgres (PostgreSQL) 16.13 on localhost:55441 ==
+
+== harness (stubs documented in the prelude) ==
+  seeded: 2 organizations, 23 profiles, 4 programmes
+
+== 1. BASELINE — the production body (loaded from the rollback file) ==
+  PASS  baseline md5(prosrc) = production's                                            74795f98243e2ce340c424cf3c0ee0a5
+  PASS  baseline proacl = production's                                                 {postgres=X/postgres,authenticated=X/postgres}
+  PASS  governance member (role member) of the same org                                assigned
+  PASS  ACTIVE CONFIRMED EMPLOYEE of the same org  <- the defect                       invalid_assignee
+  PASS  active employee, e-mail typed in other case + spaces                           invalid_assignee
+  PASS  manager (governance) assigns another active employee                           invalid_assignee
+  PASS  duplicate (same programme, same employee)                                      invalid_assignee
+  PASS  employee of ANOTHER organization                                               invalid_assignee
+  PASS  ex-employee of this org, now employee of another                               invalid_assignee
+  PASS  ended employment (status ended)                                                invalid_assignee
+  PASS  paused employment                                                              invalid_assignee
+  PASS  status active but end date passed (ended_at = yesterday)                       invalid_assignee
+  PASS  status active, end date = today (end_roster_link stamp)                        invalid_assignee
+  PASS  employment not started yet (started_at = tomorrow)                             invalid_assignee
+  PASS  invited, not accepted (membership invited + pending invitation)                invalid_assignee
+  PASS  revoked governance membership                                                  invalid_assignee
+  PASS  collaborator relation (not employment)                                         invalid_assignee
+  PASS  student relation                                                               invalid_assignee
+  PASS  freelancer relation                                                            invalid_assignee
+  PASS  'manager' engagement slug without governance membership                        invalid_assignee
+  PASS  self-declared / personal employee row (organization NULL)                      invalid_assignee
+  PASS  unknown e-mail (no account)                                                    invalid_assignee
+  PASS  UNVERIFIED e-mail of an active employee                                        invalid_assignee
+  PASS  ambiguous e-mail (two verified profiles, same address)                         invalid_assignee
+  PASS  other org's owner -> Org A programme (no demand access)                        not_found
+  PASS  other org's owner -> own programme, Org A's employee                           invalid_assignee
+  PASS  an EMPLOYEE (no governance) tries to assign                                    not_found
+  PASS  governance role 'member' tries to assign (not a demand role)                   not_found
+  PASS  retired programme                                                              inactive_program
+  PASS  anon has no EXECUTE                                                            DENIED:permission denied for function assign_training_v1
+  PASS  authenticated without a uid -> Not authenticated                               DENIED:Not authenticated
+
+== 2. FIXED — the migration applied verbatim ==
+  PASS  signature / definer / search_path / owner / acl / result unchanged             assign_training_v1(text,text,text)|true|search_path=public|postgres|{postgres=X/postgres,authenticated=X/postgres}|text|p_program_id text, p_assignee_email text, p_required_by text DEFAULT NULL::text
+  PASS  only the body changed (md5 differs)                                            changed
+  PASS  exactly one assign_training_v1 overload                                        1
+  PASS  governance member (role member) of the same org                                assigned
+  PASS  ACTIVE CONFIRMED EMPLOYEE of the same org  <- the defect                       assigned
+  PASS  active employee, e-mail typed in other case + spaces                           assigned
+  PASS  manager (governance) assigns another active employee                           assigned
+  PASS  duplicate (same programme, same employee)                                      already_assigned
+  PASS  employee of ANOTHER organization                                               invalid_assignee
+  PASS  ex-employee of this org, now employee of another                               invalid_assignee
+  PASS  ended employment (status ended)                                                invalid_assignee
+  PASS  paused employment                                                              invalid_assignee
+  PASS  status active but end date passed (ended_at = yesterday)                       invalid_assignee
+  PASS  status active, end date = today (end_roster_link stamp)                        invalid_assignee
+  PASS  employment not started yet (started_at = tomorrow)                             invalid_assignee
+  PASS  invited, not accepted (membership invited + pending invitation)                invalid_assignee
+  PASS  revoked governance membership                                                  invalid_assignee
+  PASS  collaborator relation (not employment)                                         invalid_assignee
+  PASS  student relation                                                               invalid_assignee
+  PASS  freelancer relation                                                            invalid_assignee
+  PASS  'manager' engagement slug without governance membership                        invalid_assignee
+  PASS  self-declared / personal employee row (organization NULL)                      invalid_assignee
+  PASS  unknown e-mail (no account)                                                    invalid_assignee
+  PASS  UNVERIFIED e-mail of an active employee                                        invalid_assignee
+  PASS  ambiguous e-mail (two verified profiles, same address)                         invalid_assignee
+  PASS  other org's owner -> Org A programme (no demand access)                        not_found
+  PASS  other org's owner -> own programme, Org A's employee                           invalid_assignee
+  PASS  an EMPLOYEE (no governance) tries to assign                                    not_found
+  PASS  governance role 'member' tries to assign (not a demand role)                   not_found
+  PASS  retired programme                                                              inactive_program
+  PASS  anon has no EXECUTE                                                            DENIED:permission denied for function assign_training_v1
+  PASS  authenticated without a uid -> Not authenticated                               DENIED:Not authenticated
+
+== 3. CHAIN — the employee receives, sees and completes; the owner reads it ==
+  PASS  the assignment row: org A, assigned by the owner, due 2026-12-01               00000000-0000-4000-8000-000000009001|00000000-0000-4000-8000-000000001001|2026-12-01|assigned
+  PASS  one 'assigned' event, actor = owner                                            1
+  PASS  employee RECEIVES it (RLS read of own assignments, A1+A2)                      2
+  PASS  employee SEES the course title (programme readable)                            QA kursas A1
+  PASS  another org's employee sees none of it                                         0
+  PASS  another org's employee cannot complete it                                      not_found
+  PASS  the owner cannot complete it on the employee's behalf                          not_found
+  PASS  employee COMPLETES it                                                          completed
+  PASS  second completion refused                                                      already_completed
+  PASS  owner READS it completed                                                       completed
+  PASS  another org's owner reads nothing of Org A                                     0
+
+== 4. ROLLBACK — the production body returns, byte for byte ==
+  PASS  md5(prosrc) after rollback = production's                                      74795f98243e2ce340c424cf3c0ee0a5
+  PASS  catalog after rollback = baseline                                              assign_training_v1(text,text,text)|true|search_path=public|postgres|{postgres=X/postgres,authenticated=X/postgres}|text|p_program_id text, p_assignee_email text, p_required_by text DEFAULT NULL::text
+  PASS  existing employee assignment survives the rollback (history)                   completed
+  PASS  after rollback a NEW employee assignment is refused again                      invalid_assignee
+
+== 5. RE-APPLY — idempotent ==
+  PASS  md5(prosrc) after re-apply = first apply                                       ff82ff62a8cb0153964c78784c039f8f
+  PASS  catalog after re-apply = baseline                                              assign_training_v1(text,text,text)|true|search_path=public|postgres|{postgres=X/postgres,authenticated=X/postgres}|text|p_program_id text, p_assignee_email text, p_required_by text DEFAULT NULL::text
+  PASS  employee assignable again after re-apply                                       assigned
+
+== RESULT: 81 passed, 0 failed ==
