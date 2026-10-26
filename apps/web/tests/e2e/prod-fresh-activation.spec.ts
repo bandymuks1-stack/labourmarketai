@@ -211,6 +211,16 @@ test("fresh worker: onboarding keeps its place, then the first journal entry rea
     console.info(`[fresh] save confirmation: Living CV link=${hasCvLink} come-back line=${comeBack}`);
     expect(hasCvLink, "the save confirmation names the Living CV").toBe(true);
     expect(comeBack, "the save confirmation gives no next step").toBe(true);
+
+    // Saved ONCE: the journal holds exactly one entry of this run (no double write).
+    await page.goto("/lt/dashboard/journal");
+    await settle(page);
+    // Each entry prints its own words once, in one paragraph (journal/page.tsx).
+    const ofThisRun = await inMain(page).locator("p.whitespace-pre-wrap", { hasText: RUN }).count();
+    console.info(`[fresh] journal entries of this run=${ofThisRun}`);
+    expect(ofThisRun, "the first entry was written more than once (or not at all)").toBe(1);
+    await page.goBack();
+    await settle(page);
     await cvLink.click();
     await page.waitForURL(/\/cv/, { timeout: 30_000 });
     await settle(page);
