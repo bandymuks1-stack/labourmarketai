@@ -373,8 +373,15 @@ export async function POST(req: Request) {
       // scope below are untouched. `off` (default) evaluates nothing; the
       // person's own web / mobile session is never scoped.
       const scopeMode = scopeEnforcementModeOf(env.MCP_SCOPE_ENFORCEMENT);
-      if (scopeMode !== "off" && descriptor) {
-        const grant = scopeGrantOf(auth.identity.oauthClient);
+      const grant = scopeGrantOf(auth.identity.oauthClient);
+      // A scoped grant is checked even with the flag `off` (decideScope); the
+      // flag only governs unscoped tokens. A tool with no descriptor can
+      // never satisfy a scope, so it fails closed for any checked grant.
+      const checked = grant.kind === "oauth_scoped" || (scopeMode !== "off" && grant.kind !== "first_party");
+      if (checked && !descriptor) {
+        return { isError: true, payload: { ok: false, code: "unknown_capability" } };
+      }
+      if (checked && descriptor) {
         const decision = decideScope(scopeMode, grant, descriptor);
         if (decision.outcome !== "allow") {
           logEvent({
@@ -382,7 +389,7 @@ export async function POST(req: Request) {
             door: DOOR,
             tool: name,
             outcome: decision.outcome === "refuse" ? "refused" : "would_refuse",
-            mode: scopeMode === "enforce" ? "enforce" : "log",
+            mode: decision.outcome === "refuse" ? "enforce" : "log",
             grant: decision.grantKind,
             required_scope: decision.requiredScope,
             oauth_client: decision.clientId,

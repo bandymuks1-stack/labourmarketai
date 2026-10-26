@@ -139,24 +139,40 @@ describe("MCP_SCOPE_ENFORCEMENT=off (the default) changes nothing", () => {
   }
 });
 
+describe("a SCOPED grant is held to its scopes whatever the flag says (B2)", () => {
+  for (const value of [undefined, "off", "log"]) {
+    it(`flag ${String(value)}: a read:journal client calling a journal write is refused, nothing ran`, async () => {
+      mockEnv.MCP_SCOPE_ENFORCEMENT = value;
+      identity = OAUTH_READ_JOURNAL;
+      const { body } = await callTool("journal_confirm");
+      expect(result(body).isError).toBe(true);
+      expect(ran).toEqual([]);
+      expect(scopeLines()).toEqual([
+        {
+          event: "external_client.scope",
+          door: "/api/mcp",
+          tool: "journal_confirm",
+          outcome: "refused",
+          mode: "enforce",
+          grant: "oauth_scoped",
+          required_scope: "write:journal",
+          oauth_client: "client-abc",
+        },
+      ]);
+      expect(receipts.refusal).toHaveBeenCalledTimes(1);
+    });
+  }
+});
+
 describe("MCP_SCOPE_ENFORCEMENT=log records would-be refusals and refuses nothing", () => {
-  it("a read:journal client calling a journal write: the write runs, one log line, no receipt", async () => {
+  it("an unscoped client calling a journal write: the write runs, one log line, no receipt", async () => {
     mockEnv.MCP_SCOPE_ENFORCEMENT = "log";
-    identity = OAUTH_READ_JOURNAL;
+    identity = OAUTH_UNSCOPED;
     const { body } = await callTool("journal_confirm");
     expect(result(body).isError).toBe(false);
     expect(ran).toEqual(["journal.confirm"]);
-    expect(scopeLines()).toEqual([
-      {
-        event: "external_client.scope",
-        door: "/api/mcp",
-        tool: "journal_confirm",
-        outcome: "would_refuse",
-        mode: "log",
-        grant: "oauth_scoped",
-        required_scope: "write:journal",
-        oauth_client: "client-abc",
-      },
+    expect(scopeLines()).toMatchObject([
+      { event: "external_client.scope", outcome: "would_refuse", mode: "log", grant: "oauth_unscoped", required_scope: "write:journal" },
     ]);
     expect(receipts.refusal).not.toHaveBeenCalled();
   });

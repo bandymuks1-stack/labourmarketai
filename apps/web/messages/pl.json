@@ -17325,13 +17325,13 @@
     "errorUnresolved": "Nie udało się rozwiązać żądania autoryzacji. Mogło wygasnąć (żądania są ważne kilka minut) lub zostało już użyte. Wróć do aplikacji i połącz się ponownie.",
     "scope": {
       "readProfile": "Widzieć Twój profil i Living CV",
-      "writeProfile": "Zmieniać Twój profil, Living CV, preferencje i powiadomienia",
+      "writeProfile": "Zmieniać Twój profil, żywe CV, dokumenty, ustawienia i powiadomienia; przyjmować rezerwacje i zaproszenia; przełączać obszar roboczy",
       "readJournal": "Widzieć Twój dziennik pracy, godziny, nieobecności i dowody",
-      "writeJournal": "Dodawać i zmieniać wpisy w dzienniku pracy, dowody i wnioski o nieobecność",
-      "readDemand": "Widzieć zapotrzebowania, oferty pracy, kandydatów i listy wybranych",
-      "writeDemand": "Publikować i zamykać zapotrzebowania, zgłaszać zainteresowanie i zarządzać listami wybranych",
-      "readOrganization": "Widzieć projekty, osoby, rezerwacje, kalendarz i raporty Twojej organizacji",
-      "writeOrganization": "Wprowadzać zmiany w Twojej organizacji: projekty, przydziały, zespoły, rezerwacje i zadania",
+      "writeJournal": "Dodawać i zmieniać wpisy dziennika pracy, dowody i wnioski o nieobecność — a tam, gdzie kierujesz ludźmi, decydować o ich wpisach i nieobecnościach",
+      "readDemand": "Widzieć potrzeby, oferty pracy, profile kandydatów i listy wyboru",
+      "writeDemand": "Publikować i zamykać potrzeby, wyrażać zainteresowanie, zarządzać listami wyboru i proponować kandydatów klientom",
+      "readOrganization": "Widzieć projekty, ludzi, rezerwacje, kalendarz, raporty i zapisy finansowe Twojej organizacji",
+      "writeOrganization": "Wprowadzać zmiany w organizacji: projekty, przydziały, zespoły, rezerwacje, zadania, potwierdzanie pracy, zapraszanie ludzi, masowy import ludzi i publikowanie jej publicznego profilu",
       "messages": "Czytać Twoje rozmowy i wysyłać wiadomości",
       "marketplace": "Widzieć i zarządzać ogłoszeniami na rynku, ofertami usług, propozycjami i umowami",
       "oidcOpenid": "Potwierdzić, kim jesteś (identyfikator Twojego konta)",
@@ -17345,7 +17345,7 @@
     "noProductScopes": "Ta aplikacja nie poprosiła o konkretne uprawnienia LabourMarket.ai. Jeśli zezwolisz, będzie mogła używać każdej akcji asystenta, na którą pozwala Twoje konto, zawsze jako Ty.",
     "noProductScopesEnforced": "Ta aplikacja nie poprosiła o konkretne uprawnienia LabourMarket.ai, więc nie będzie mogła tutaj niczego zobaczyć ani zmienić. Poproś aplikację o zażądanie potrzebnych uprawnień.",
     "scopesNotEnforced": "Te uprawnienia jeszcze nie ograniczają aplikacji. Jeśli zezwolisz, aplikacja będzie mogła używać każdej akcji asystenta, na którą pozwala Twoje konto, zawsze jako Ty.",
-    "importantChangesConfirm": "Ważne zmiany nadal czekają na Twoje potwierdzenie."
+    "importantChangesConfirm": "Aplikacja będzie mogła korzystać tylko z wymienionych wyżej uprawnień. Zmiany przechodzą przez szkic i potwierdzenie, ale aplikacja może sama wykonać oba kroki — zezwalaj tylko aplikacjom, którym ufasz."
   },
   "capabilities": {
     "interestChooseDemand": "Wybierz zapotrzebowanie, którym jesteś zainteresowany: {options}.",

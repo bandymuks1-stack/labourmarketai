@@ -127,18 +127,22 @@ describe("the flag", () => {
   const readOnly = scopeGrantOf({ clientId: "c", scopeClaim: ["read:journal"] });
   const unscoped = scopeGrantOf({ clientId: "c", scopeClaim: [] });
 
-  it("off decides nothing, for anyone", () => {
-    expect(decideScope("off", readOnly, write)).toEqual({ outcome: "allow" });
+  it("off decides nothing for unscoped tokens", () => {
     expect(decideScope("off", unscoped, write)).toEqual({ outcome: "allow" });
   });
-  it("log marks would_refuse; enforce marks refuse — same requirement, same grant", () => {
-    expect(decideScope("log", readOnly, write)).toEqual({
-      outcome: "would_refuse",
-      requiredScope: "write:journal",
-      grantKind: "oauth_scoped",
-      clientId: "c",
-    });
-    expect(decideScope("enforce", readOnly, write)).toMatchObject({ outcome: "refuse", requiredScope: "write:journal" });
+  it("a SCOPED grant is held to its scopes in every mode — the flag can never widen it (B2)", () => {
+    for (const m of ["off", "log", "enforce"] as const) {
+      expect(decideScope(m, readOnly, write)).toEqual({
+        outcome: "refuse",
+        requiredScope: "write:journal",
+        grantKind: "oauth_scoped",
+        clientId: "c",
+      });
+      expect(decideScope(m, readOnly, cap("journal.list", "read"))).toEqual({ outcome: "allow" });
+    }
+  });
+  it("log marks would_refuse; enforce marks refuse — for unscoped tokens", () => {
+    expect(decideScope("log", unscoped, write)).toMatchObject({ outcome: "would_refuse", grantKind: "oauth_unscoped" });
     expect(decideScope("enforce", unscoped, cap("journal.list", "read"))).toMatchObject({
       outcome: "refuse",
       grantKind: "oauth_unscoped",

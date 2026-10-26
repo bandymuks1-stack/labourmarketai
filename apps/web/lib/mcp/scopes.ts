@@ -264,13 +264,18 @@ export function decideScope(
   grant: ScopeGrant,
   capability: Pick<CapabilityDescriptor, "id" | "kind" | "annotations">,
 ): ScopeDecision {
-  if (mode === "off" || grant.kind === "first_party") return { outcome: "allow" };
+  if (grant.kind === "first_party") return { outcome: "allow" };
+  // A grant that CARRIES product scopes is always held to them — whatever the
+  // flag says. The flag governs only legacy/unscoped tokens, so switching it
+  // (or rolling it back) can never silently widen what a client was granted.
+  const effective: ScopeEnforcementMode = grant.kind === "oauth_scoped" ? "enforce" : mode;
+  if (effective === "off") return { outcome: "allow" };
   const requiredScope = requiredScopeFor(capability);
   const allowed =
     grant.kind === "oauth_scoped" && requiredScope !== null && scopeSatisfies(grant.scopes, requiredScope);
   if (allowed) return { outcome: "allow" };
   return {
-    outcome: mode === "enforce" ? "refuse" : "would_refuse",
+    outcome: effective === "enforce" ? "refuse" : "would_refuse",
     requiredScope,
     grantKind: grant.kind,
     clientId: grant.clientId,
