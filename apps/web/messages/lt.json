@@ -5401,9 +5401,9 @@
   "pages": {
     "workers": {
       "eyebrow": "Darbuotojams",
-      "title": "Jūsų įgūdžiai —",
+      "title": "Tavo įgūdžiai —",
       "titleAccent": "matomi.",
-      "subcopy": "Sukurkite vieną profilį, nustatykite prieinamumą ir leiskite realiai paklausai jus surasti — be tarpininkų.",
+      "subcopy": "Susikurk vieną profilį, nurodyk, kada esi laisvas, ir leisk realiai paklausai tave surasti — be tarpininkų.",
       "benefits": [
         {
           "title": "Vienas profilis visoms rinkoms",
@@ -5411,15 +5411,15 @@
         },
         {
           "title": "Reali paklausa",
-          "body": "Matykite atvirus darbo poreikius, atitinkančius jūsų profesiją, įgūdžius ir miestą — ir vienu paspaudimu pareikškite susidomėjimą."
+          "body": "Matyk atvirus darbo poreikius, atitinkančius tavo profesiją, įgūdžius ir miestą — ir vienu paspaudimu pareikšk susidomėjimą."
         },
         {
           "title": "Sąžiningi signalai",
           "body": "Skaidrūs, kontekstiniai atitikimo signalai — be išpūstų pažadų, be universalaus įvertinimo, be mokamų reitingų."
         },
         {
-          "title": "Auga, kol dirbate",
-          "body": "Fiksuokite atliktus darbus ir rezultatus — jūsų profesinė istorija turtėja, o galimybių paieška darosi vis tikslesnė, net kai aktyviai naujo darbo neieškote."
+          "title": "Auga, kol dirbi",
+          "body": "Fiksuok atliktus darbus ir rezultatus — tavo profesinė istorija turtėja, o galimybių paieška darosi vis tikslesnė, net kai aktyviai naujo darbo neieškai."
         }
       ],
       "screenshot": "Darbuotojo profilio srautas",
@@ -9598,49 +9598,49 @@
   },
   "workAbroad": {
     "eyebrow": "Darbas užsienyje",
-    "title": "Jūsų kelias dirbti užsienyje,",
+    "title": "Tavo kelias dirbti užsienyje,",
     "titleAccent": "žingsnis po žingsnio",
-    "subcopy": "Darbas Europoje — viena iš galimybių, kurias atveria LabourMarket.ai. Susikurkite vieną darbo profilį, pamatykite, ko reikia kiekvienoje šalyje, ir leiskite darbdaviams jus rasti, kai būsite pasiruošę. Mes niekada nežadame darbo ar atlyginimo — padedame pasiruošti ir būti suderintiems.",
+    "subcopy": "Darbas Europoje — viena iš galimybių, kurias atveria LabourMarket.ai. Susikurk vieną darbo profilį, pamatyk, ko reikia kiekvienoje šalyje, ir leisk darbdaviams tave rasti, kai būsi pasiruošęs. Mes niekada nežadame darbo ar atlyginimo — padedame pasiruošti ir būti suderintiems.",
     "stepsTitle": "Kaip tai veikia",
     "steps": [
       {
-        "title": "1. Nurodykite savo profesiją",
-        "body": "Pridėkite profesiją, patirtį ir laisvumą. Užtrunka kelias minutes."
+        "title": "1. Nurodyk savo profesiją",
+        "body": "Pridėk profesiją, patirtį ir laisvumą. Užtrunka kelias minutes."
       },
       {
         "title": "2. DI paruošia juodraštį",
-        "body": "Asistentas jūsų žodžius paverčia struktūruotu profiliu ir gyvenimo aprašymo juodraščiu — pasiūlymu, kurį peržiūrite ir redaguojate. Jis niekada neišgalvoja patirties."
+        "body": "Asistentas tavo žodžius paverčia struktūruotu profiliu ir gyvenimo aprašymo juodraščiu — pasiūlymu, kurį peržiūri ir redaguoji. Jis niekada neišgalvoja patirties."
       },
       {
-        "title": "3. Patikrinkite šalies pasirengimą",
-        "body": "Pamatykite, kokių dokumentų ir žingsnių tikėtina prireiks norimoje šalyje — su šaltiniais ir ne kaip teisinė konsultacija."
+        "title": "3. Patikrink šalies pasirengimą",
+        "body": "Pamatyk, kokių dokumentų ir žingsnių tikėtina prireiks norimoje šalyje — su šaltiniais ir ne kaip teisinė konsultacija."
       },
       {
-        "title": "4. Būkite suderinti",
-        "body": "Kai darbdavio poreikis atitinka jūsų profesiją, prieinamumą, apgyvendinimą, transportą ir kalbą, jis atsiranda jūsų galimybių lentoje su sąžiningu atitikimo paaiškinimu."
+        "title": "4. Būk suderintas",
+        "body": "Kai darbdavio poreikis atitinka tavo profesiją, prieinamumą, apgyvendinimą, transportą ir kalbą, jis atsiranda tavo galimybių lentoje su sąžiningu atitikimo paaiškinimu."
       },
       {
         "title": "5. Susidomėjimas ir kontaktas",
-        "body": "Pareikškite susidomėjimą tinkančiu poreikiu. Įmonė jį peržiūri, o jūs matote sąžiningą statusą — peržiūrėta arba susisiekta. Sutartys ir apmokėjimas kol kas lieka už platformos ribų."
+        "body": "Pareikšk susidomėjimą tinkančiu poreikiu. Įmonė jį peržiūri, o tu matai sąžiningą statusą — peržiūrėta arba susisiekta. Sutartys ir apmokėjimas kol kas lieka už platformos ribų."
       }
     ],
     "needTitle": "Ko gali prireikti",
     "needItems": [
-      "Profesijos, kurioje dirbate",
-      "Jūsų laisvumo nuo datos",
-      "Ar reikia apgyvendinimo, ar turite savo",
+      "Profesijos, kurioje dirbi",
+      "Tavo laisvumo nuo datos",
+      "Ar reikia apgyvendinimo, ar turi savo",
       "Transporto: savo, vairuotojo pažymėjimo ar paėmimo",
       "Dokumentų, kurių gali prireikti šaliai"
     ],
     "directionsTitle": "Kur žmonės dirba",
-    "directionsNote": "Atverkite šalių puslapius ir pamatykite darbo rinkos signalus su šaltiniais.",
+    "directionsNote": "Atverk šalių puslapius ir pamatyk darbo rinkos signalus su šaltiniais.",
     "directionsCta": "Žiūrėti šalis",
-    "aiNote": "DI padeda paruošti gyvenimo aprašymą ir profilį. Jis pats netikrina jūsų įgūdžių ar dokumentų — tai daro žmogus ir jūsų dokumentai.",
+    "aiNote": "DI padeda paruošti gyvenimo aprašymą ir profilį. Jis pats netikrina tavo įgūdžių ar dokumentų — tai daro žmogus ir tavo dokumentai.",
     "ctaProfile": "Sukurti darbuotojo profilį",
     "ctaReadiness": "Patikrinti šalies pasirengimą",
     "ctaTrades": "Žiūrėti profesijas, su kuriomis dirbame",
     "disclaimer": "Mes nežadame darbo ar uždarbio, o pasirengimo informacija nėra teisinė konsultacija.",
-    "structuredNote": "Perskaitome jūsų CV ir paruošiame profilį, kurį galite peržiūrėti — kiekvieną pasiūlymą tikrinate ir sprendžiate jūs."
+    "structuredNote": "Perskaitome tavo CV ir paruošiame profilį, kurį gali peržiūrėti — kiekvieną pasiūlymą tikrini ir sprendi tu."
   },
   "needStructuring": {
     "pageTitle": "Užklausų struktūrinimas",
