@@ -7086,6 +7086,7 @@
     "titleCompany": "Mis saab teie juhitud tööst",
     "example": "Näide — mitte päris inimene ega päris andmed",
     "hint": "Valige samm. Iga samm avab päris koha teie töökeskkonnas.",
+    "hintWorkers": "Valige samm. Iga samm avab päris koha teie töökeskkonnas.",
     "open": "Ava töökeskkonnas",
     "list": "Töö elutsükli sammud",
     "workers": {

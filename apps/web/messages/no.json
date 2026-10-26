@@ -7086,6 +7086,7 @@
     "titleCompany": "Hva som skjer med arbeidet du driver",
     "example": "Eksempel — ikke en ekte person eller ekte data",
     "hint": "Velg et trinn. Hvert trinn åpner det virkelige stedet i arbeidsområdet ditt.",
+    "hintWorkers": "Velg et trinn. Hvert trinn åpner det virkelige stedet i arbeidsområdet ditt.",
     "open": "Åpne i arbeidsområdet ditt",
     "list": "Trinn i arbeidets livssyklus",
     "workers": {

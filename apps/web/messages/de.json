@@ -18879,6 +18879,7 @@
     "titleCompany": "Was mit der Arbeit passiert, die Sie leiten",
     "example": "Beispiel — keine echte Person und keine echten Daten",
     "hint": "Wählen Sie einen Schritt. Jeder Schritt öffnet den echten Ort in Ihrem Arbeitsbereich.",
+    "hintWorkers": "Wählen Sie einen Schritt. Jeder Schritt öffnet den echten Ort in Ihrem Arbeitsbereich.",
     "open": "In Ihrem Arbeitsbereich öffnen",
     "list": "Schritte im Arbeitsverlauf",
     "workers": {

@@ -7086,6 +7086,7 @@
     "titleCompany": "Vad som händer med arbetet du driver",
     "example": "Exempel — inte en riktig person eller riktiga data",
     "hint": "Välj ett steg. Varje steg öppnar den verkliga platsen i din arbetsyta.",
+    "hintWorkers": "Välj ett steg. Varje steg öppnar den verkliga platsen i din arbetsyta.",
     "open": "Öppna i din arbetsyta",
     "list": "Steg i arbetets livscykel",
     "workers": {
