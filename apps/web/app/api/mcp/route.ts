@@ -18,11 +18,14 @@ import {
   recordScopeRefusalReceipt,
 } from "@/lib/capabilities/external-receipt";
 import { env } from "@/lib/env";
+import { productGrantForRequest } from "@/lib/mcp/product-grant";
 import {
   decideScope,
   insufficientScopeResult,
+  permissionCheckUnavailableResult,
   scopeEnforcementModeOf,
   scopeGrantOf,
+  type ScopeGrant,
 } from "@/lib/mcp/scopes";
 import {
   handleMcpMessage,
@@ -326,6 +329,11 @@ export async function POST(req: Request) {
   };
 
   const marks: Record<string, number> = { auth: authMs };
+  // B3: the person's recorded permission choice for THIS OAuth client, read
+  // at most once per request and only when a tool is actually called
+  // (lib/mcp/product-grant.ts). First-party callers never read it.
+  const oauthClientId = auth.identity.oauthClientId;
+  const productGrant = oauthClientId ? productGrantForRequest(auth.identity.supabase) : null;
   const response = await handleMcpMessage(message, {
     // 2026-07-28 carries the protocol version per request. `Mcp-Session-Id`
     // is deliberately NOT read: the revision removed protocol-level sessions,
@@ -373,7 +381,28 @@ export async function POST(req: Request) {
       // scope below are untouched. `off` (default) evaluates nothing; the
       // person's own web / mobile session is never scoped.
       const scopeMode = scopeEnforcementModeOf(env.MCP_SCOPE_ENFORCEMENT);
-      const grant = scopeGrantOf(auth.identity.oauthClient);
+      let grant: ScopeGrant = { kind: "first_party" };
+      if (oauthClientId && productGrant) {
+        const tGrant = performance.now();
+        const recorded = await productGrant();
+        marks.grant = performance.now() - tGrant;
+        if (recorded.state === "unavailable") {
+          // FAIL CLOSED: an OAuth client whose permissions cannot be read is
+          // refused, whatever the flag says — never run as "unscoped".
+          logEvent({
+            event: "external_client.scope",
+            door: DOOR,
+            tool: name,
+            outcome: "refused",
+            mode: "enforce",
+            grant: "oauth_unavailable",
+            required_scope: null,
+            oauth_client: oauthClientId,
+          });
+          return { isError: true, payload: permissionCheckUnavailableResult(capabilityId) };
+        }
+        grant = scopeGrantOf(oauthClientId, recorded);
+      }
       // A scoped grant is checked even with the flag `off` (decideScope); the
       // flag only governs unscoped tokens. A tool with no descriptor can
       // never satisfy a scope, so it fails closed for any checked grant.
