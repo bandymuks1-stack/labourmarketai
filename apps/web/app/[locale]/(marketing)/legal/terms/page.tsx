@@ -8,9 +8,8 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
  * Renders the mandatory, entity-accurate core (contracting party = UAB
  * „Nonstop Group“; Lithuanian law with mandatory-rights carve-outs; IP owner
  * = Labour Market AI Sp. z o.o. as licensor only; no employment guarantee)
- * from `legal.terms.sections`, and keeps the honest note that the FULL
- * lawyer-reviewed terms text is still being finalised — no fake legal
- * finality. Guarded by legal-entity-truth.test.ts.
+ * from `legal.terms.sections`, followed by the contact line. Guarded by
+ * legal-entity-truth.test.ts.
  */
 export async function generateMetadata({
   params,
@@ -51,7 +50,7 @@ export default async function LegalPage({
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-16 sm:px-12" data-testid="legal-terms">
-      <h1 className="font-display text-4xl font-bold tracking-tightest text-text-primary">
+      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary break-words hyphens-auto sm:text-4xl">
         {t("terms.title")}
       </h1>
 
@@ -75,9 +74,7 @@ export default async function LegalPage({
         ))}
       </div>
 
-      {/* Honest pending note: the full binding terms await legal review. */}
-      <div className="mt-10 flex flex-col gap-3 border-t border-ink-600/60 pt-6 text-sm leading-relaxed text-text-secondary">
-        <p>{t("preparing.body")}</p>
+      <div className="mt-10 border-t border-ink-600/60 pt-6 text-sm leading-relaxed text-text-secondary">
         <p className="text-text-muted">{t("preparing.contact")}</p>
       </div>
     </article>

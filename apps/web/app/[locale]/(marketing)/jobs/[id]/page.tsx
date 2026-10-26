@@ -716,7 +716,7 @@ export default async function JobDetailPage({
   const factChips = vacancyFactChips(preview, active);
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
       {/* Anonymous-safe structured data (owner 2026-10-14 §8; port of #1433):
           a WebPage about an Occupation with the salary band, built ONLY from
           the anonymous `preview` — never from `member`, even for a signed-in
@@ -1164,6 +1164,6 @@ export default async function JobDetailPage({
       {attribution && (
         <p className="mt-8 text-xs text-text-muted">{attribution}</p>
       )}
-    </main>
+    </div>
   );
 }

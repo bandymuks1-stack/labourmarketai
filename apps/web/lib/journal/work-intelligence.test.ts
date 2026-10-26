@@ -1145,3 +1145,23 @@ describe("one time scope (issue #1689, lane B) — range focus, first day, conte
     expect(organizationHoursPerDay(undefined).size).toBe(0);
   });
 });
+
+describe("a recorded confirmation the standing read could not judge (Codex #2608)", () => {
+  it("stays journal-level evidence — never confirmed, never erased to self-declared", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: "2026-10-22",
+      focus: "all",
+      entries: [],
+      skills: [
+        // the standing mapping keeps the source and marks the row UNKNOWN
+        { skillId: "s-a", slug: "tiling", verified: false, source: "manager_confirmed", confirmation: "unknown" },
+        { skillId: "s-b", slug: "painting", verified: false, source: null, confirmation: "withdrawn" },
+        { skillId: "s-c", slug: "plaster", verified: true, source: "manager_confirmed", confirmation: "standing" },
+      ],
+    });
+    const tier = (slug: string) => wi.skills.find((s) => s.slug === slug)?.tier;
+    expect(tier("tiling")).toBe("work_journal");
+    expect(tier("painting")).toBe("self_declared");
+    expect(tier("plaster")).toBe("manager_confirmed");
+  });
+});

@@ -1695,10 +1695,32 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261021095000_demand_interest_org_managers_v1.sql",
       "20261021095100_demand_interest_worker_writes_v1.sql",
       "20261021095200_booking_propose_reachable_open_v1.sql",
+      // 2026-10-22: owner approved #2608 in chat ("I approve PR #2608 migration
+      // 20261021095500_worker_skill_confirmation_standing_v1.sql, including its
+      // reviewed SECURITY DEFINER function and GRANT permissions").
+      "20261021095500_worker_skill_confirmation_standing_v1.sql",
       // 2026-10-21 (owner-approved #2613): a brigade whose only offer is on a closed need can be disbanded
       "20261021120000_team_disband_closed_need_offers_v1.sql",
       // 2026-10-21 (RED, needs-human-gate): stale booking proposals expire daily (system function + pg_cron).
       "20261021130000_booking_expiry_system_schedule_v1.sql",
+      // 2026-10-22 (RED, needs-human-gate): aggregate counts for the Agentai OS capability readback (SECURITY DEFINER + GRANT).
+      "20261022150000_agentai_capability_readback_counts_v1.sql",
+      // 2026-10-23: owner approved #2439 in chat (same approval as #2709/#2712; owner decision N-9;
+      // authorized GDPR erasure must keep working): server-side journal hash
+      // chain + immutable evidence, erasure-executor-v3 compatible (renumbered from 20261016190000).
+      "20261023132610_journal_evidence_integrity_v1.sql",
+      // 2026-10-23: owner approved #2709 in chat ("I APPROVE deploying the features of
+      // #2709, #2439 and #2712 and their required migrations"; conflicts warn, never block).
+      // CAL-8 shift patterns — one nullable column on work_plan_entries,
+      // create_work_plan_entry_v2, plan branch of the override validator.
+      "20261023160000_work_plan_shift_patterns_v1.sql",
+      // 2026-10-23: owner approved #2712 in chat (same approval as #2709; WEB_PUSH_ENABLED stays
+      // false until keys + a real delivery test). COM-3 web push channel — device
+      // subscriptions table, register command, 'push' value on the preferences channel CHECK.
+      "20261023171500_web_push_subscriptions_v1.sql",
+      // 2026-10-23: owner approved #2719 in chat (apply before deploy, then merge). Runtime
+      // stall sampler evidence table — numbers only, service_role only, 14-day retention.
+      "20261023190000_ops_runtime_samples_v1.sql",
 ]);
   });
 

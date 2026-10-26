@@ -115,9 +115,9 @@ describe("ONE home — the conversation; ŠIANDIEN is its opening context (owner
     const page = read("app/[locale]/dashboard/page.tsx");
     expect(page).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
     expect(page).not.toMatch(/dashboardRootSurface|rootSurface === "today"/);
-    // The bottom-nav primitive is the catalogue bar again — no caller-composed
-    // tab set, no `placement`/`visibility` variants kept "just in case".
-    expect(read("components/app/bottom-nav.tsx")).not.toMatch(/WorkerNavIconKey|explicitItems|placement/);
+    // The bottom-nav primitive retired with the one header (2026-10-25): no
+    // caller-composed tab set survives anywhere.
+    expect(existsSync(join(root, "components/app/bottom-nav.tsx"))).toBe(false);
   });
 
   it("ŠIANDIEN renders no page quick-nav strip (a second nav strip is card soup)", () => {
@@ -128,7 +128,10 @@ describe("ONE home — the conversation; ŠIANDIEN is its opening context (owner
     expect(read("app/[locale]/dashboard/page.tsx")).not.toMatch(/PageQuickNav/);
   });
 
-  it("the stations are text links, one tap from ŠIANDIEN — opportunities (the former PASAULIS) first", () => {
+  it("the stations are one tap from ŠIANDIEN — opportunities (the former PASAULIS) first", () => {
+    // Since 2026-10-25 the stations render as the light 3D area switcher's
+    // cards (still real links, one tap each), from the ONE area model that
+    // derives from TODAY_STATIONS.
     expect(TODAY_STATIONS.map((s) => s.href)).toEqual([
       "/dashboard/opportunities",
       "/dashboard/journal",
@@ -138,7 +141,8 @@ describe("ONE home — the conversation; ŠIANDIEN is its opening context (owner
       "/dashboard/gallery",
     ]);
     const screen = read("components/app/today/today-screen.tsx");
-    expect(screen).toMatch(/TODAY_STATIONS\.map/);
+    expect(screen).toMatch(/PERSONAL_WORK_AREAS\.map/);
+    expect(read("lib/navigation/work-areas.ts")).toMatch(/TODAY_STATIONS\.map/);
     expect(screen).toMatch(/today-station-\$\{s\.id\}/);
     // Every station has a human label in LT and EN (the former tab label
     // "Pasaulis" / "World" moved here, so nothing was retyped by a machine).

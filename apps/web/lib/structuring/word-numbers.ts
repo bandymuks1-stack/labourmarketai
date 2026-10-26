@@ -42,6 +42,12 @@ const WORD_NUMBERS: Record<string, number> = {
   keturiasdesimt: 40, penkiasdesimt: 50, sesiasdesimt: 60,
   septyniasdesimt: 70, astuoniasdesimt: 80, devyniasdesimt: 90,
   simtas: 100, simto: 100,
+  // Collective numerals, dative — the count of a plural-only noun: "dvejiems
+  // metams" (for two years). The cardinal "du" cannot count "metai".
+  vieneriems: 1, vienerioms: 1, dvejiems: 2, dvejoms: 2, trejiems: 3, trejoms: 3,
+  ketveriems: 4, ketverioms: 4, penkeriems: 5, penkerioms: 5,
+  seseriems: 6, seserioms: 6, septyneriems: 7, septynerioms: 7,
+  astuoneriems: 8, astuonerioms: 8, devyneriems: 9, devynerioms: 9,
   // ── English ──
   one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8,
   nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14,

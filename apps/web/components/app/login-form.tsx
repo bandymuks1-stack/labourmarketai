@@ -472,7 +472,9 @@ export function LoginForm({
                 ? `/auth/signup?next=${encodeURIComponent(nextPath)}`
                 : "/auth/signup"
             }
-            className="text-brand-blue hover:text-brand-champagne"
+            // Underlined for the same reason as the signup page's sign-in
+            // link: in a sentence, colour alone does not mark a link (WCAG 1.4.1).
+            className="text-brand-blue underline underline-offset-2 hover:text-brand-champagne"
             data-testid="login-signup-link"
           >
             {t("signup_link")}

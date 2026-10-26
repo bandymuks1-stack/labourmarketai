@@ -1,6 +1,6 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-import { billingTrialEnabled, getBillingConfigFor } from "@/lib/billing/config";
+import { billingPilotPassEnabled, billingTrialEnabled, getBillingConfigFor } from "@/lib/billing/config";
 import { getEffectiveEntitlements } from "@/lib/billing/effective-entitlements";
 import { findBillingCustomer } from "@/lib/billing/customer-store";
 import { BillingPortalButton } from "@/components/app/billing-portal-button";
@@ -65,6 +65,7 @@ export async function AccountBillingSection({
           : null;
 
   const status = ent.subscriptionStatus ?? "none";
+  const endsOnDate = formatPeriodEnd(ent.currentPeriodEnd, await getLocale());
   const hasSubscription = ent.source === "subscription";
   // D3: the section is live for BOTH adapter states; the TEST badge only in test.
   const billingOn = cfg.state === "stripe_test" || cfg.state === "stripe_live";
@@ -102,7 +103,11 @@ export async function AccountBillingSection({
     Boolean(subject && subject.subject?.type === "organization" && subject.billingAuthority) &&
     !hasSubscription &&
     !subscriptionBlocksCheckout(status) &&
-    !syncing;
+    !syncing &&
+    // While the owner runs the 1 € pilot pass, the pass IS the way into the
+    // paid plan: a recurring €99 order beside it invites the one purchase the
+    // owner ruled out for the pilot (no automatic €99 renewal, 2026-10-22).
+    !billingPilotPassEnabled();
 
   // "Refresh billing status": a calm optional control, shown ONLY while the page
   // is waiting on the payment provider (redirect says paid but no row yet) or
@@ -159,6 +164,13 @@ export async function AccountBillingSection({
               </p>
               {ent.grace ? (
                 <p className="text-xs text-state-warning">{t("graceNotice")}</p>
+              ) : null}
+              {/* Cancelled in the portal "at period end": still entitled until then,
+                  and said so, with the date the provider reported (registry 7.18). */}
+              {ent.cancelAtPeriodEnd && ent.active ? (
+                <p className="text-sm text-text-secondary" data-testid="account-billing-ends-on">
+                  {endsOnDate ? t("endsOn", { date: endsOnDate }) : t("endsAtPeriodEnd")}
+                </p>
               ) : null}
             </>
           ) : (
@@ -226,4 +238,12 @@ export async function AccountBillingSection({
       </section>
     </Card>
   );
+}
+
+/** The provider's period end as a calendar date in the page's language; null if absent or unparsable. */
+export function formatPeriodEnd(iso: string | null, locale: string): string | null {
+  if (!iso) return null;
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return null;
+  return new Intl.DateTimeFormat(locale, { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }).format(at);
 }

@@ -7,13 +7,18 @@
  * `80 minutes` to a worker is hostile — the same number reads as
  * `1 val. 20 min.` in LT and `1 h 20 min` in EN.
  *
- * This module is rule-based and locale-aware (LT / EN). It never coerces
- * a value into a finer unit than the input carried — `5 valandos` stays
- * `5 val.`, not `300 min`.
+ * This module is rule-based and works for ANY UI locale: LT and RU carry
+ * their own unit abbreviations, every other locale reads the neutral
+ * international unit symbols (h / min / d) with its OWN decimal separator.
+ * It never coerces a value into a finer unit than the input carried —
+ * `5 valandos` stays `5 val.`, not `300 min`.
  */
 export type DurationUnit = "hours" | "minutes" | "days";
 
-export type DurationFormatLocale = "lt" | "en" | "ru";
+/** A UI locale code. Deliberately open (not a closed `"lt" | "en" | "ru"`
+ *  union): a locale without hand-written abbreviations still formats
+ *  correctly, so activating a locale needs no edit here. */
+export type DurationFormatLocale = string;
 
 export type FormatDurationOpts = {
   /** When false, the formatter returns the raw value + the localized unit
@@ -22,12 +27,14 @@ export type FormatDurationOpts = {
   splitFractions?: boolean;
 };
 
-/** The duration labels a UI locale reads. LT and RU have their own
+/** The duration locale a UI locale reads. LT and RU have their own
  *  abbreviations; every other locale (de / nl / pl and the inactive ones)
  *  reads the neutral international "h / min" — never the LT "val." that a
- *  Russian, Polish or German reader cannot parse. */
+ *  Russian, Polish or German reader cannot parse — and keeps its own code,
+ *  so a German reader gets "1,5 h", not the English "1.5 h". */
 export function durationLocale(locale: string): DurationFormatLocale {
-  return locale === "lt" || locale === "ru" ? locale : "en";
+  const code = (locale ?? "").trim().toLowerCase();
+  return code === "" ? "en" : code;
 }
 
 /** Format a duration value + canonical unit into a human-readable string.
@@ -52,7 +59,9 @@ export function formatDuration(
   opts: FormatDurationOpts = {},
 ): string {
   const split = opts.splitFractions !== false;
-  const labels = LABELS[locale] ?? LABELS.lt;
+  // A locale without its own abbreviations reads the international symbols —
+  // never another language's ("val." is Lithuanian, not a default).
+  const labels = LABELS[locale] ?? LABELS.en;
 
   if (!Number.isFinite(value) || value < 0) {
     return `${value} ${labels.minutes}`;
@@ -105,17 +114,33 @@ export function formatDuration(
   );
 }
 
-/** Locale-aware number formatting — keeps integers as integers and uses a
- *  comma decimal separator for LT, dot for EN. */
+/** Locale-aware number formatting — keeps integers as integers and writes
+ *  the decimal separator the locale itself uses (comma for LT / RU / DE /
+ *  NL / PL, dot for EN), read from Intl rather than a hand-kept list. */
 function formatNumber(n: number, locale: DurationFormatLocale): string {
   if (Number.isInteger(n)) return String(n);
   const fixed = n.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
-  // LT and RU both write decimals with a comma.
-  if (locale === "lt" || locale === "ru") return fixed.replace(".", ",");
-  return fixed;
+  return decimalSeparator(locale) === "," ? fixed.replace(".", ",") : fixed;
 }
 
-const LABELS: Record<DurationFormatLocale, Record<DurationUnit, string>> = {
+const SEPARATORS = new Map<string, string>();
+
+function decimalSeparator(locale: string): string {
+  const cached = SEPARATORS.get(locale);
+  if (cached !== undefined) return cached;
+  let sep = ".";
+  try {
+    sep =
+      new Intl.NumberFormat(locale).formatToParts(1.5).find((p) => p.type === "decimal")?.value ??
+      ".";
+  } catch {
+    // Not a valid BCP-47 tag — the international dot.
+  }
+  SEPARATORS.set(locale, sep);
+  return sep;
+}
+
+const LABELS: Readonly<Record<string, Record<DurationUnit, string>>> = {
   lt: {
     hours: "val.",
     minutes: "min.",

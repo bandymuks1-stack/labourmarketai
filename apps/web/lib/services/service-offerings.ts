@@ -15,6 +15,8 @@ import {
   type ServiceOfferingRow,
   type ServiceOfferingStatus,
 } from "@/lib/services/service-offerings-shared";
+import { actionForStatus, serviceAdapter } from "@/lib/market-lifecycle/adapters";
+import { transition, type EntryAction } from "@/lib/market-lifecycle/contract";
 
 /**
  * Service offerings (W8 — services real model, Phase 1) — provider-owned supply
@@ -53,6 +55,54 @@ function clean(v: unknown, max: number): string | null {
 
 function isAbsent(error: { code?: string } | null): boolean {
   return !!error?.code && ABSENT.has(error.code);
+}
+
+/** `closed_outcome` not there yet: the lifecycle migration is unapplied. */
+function isMissingColumn(error: { code?: string } | null): boolean {
+  return error?.code === "42703";
+}
+
+const OWN_COLUMNS =
+  "id, title, description, category_slug, location_country, remote, rate_text, status, created_at, updated_at";
+
+/**
+ * The caller's own offering as the lifecycle contract reads it. `closedSupported`
+ * is false while the closed-outcome migration is unapplied: the contract then
+ * offers no complete / withdraw, and nothing pretends a service can close.
+ */
+async function readOwnLifecycle(
+  supabase: SupabaseClient,
+  id: string,
+  userId: string,
+): Promise<
+  | { kind: "ok"; status: string; closedOutcome: string | null; closedSupported: boolean }
+  | { kind: "not-found" }
+  | { kind: "error"; message: string; absent: boolean }
+> {
+  let closedSupported = true;
+  let res = await asAny(supabase)
+    .from("service_offerings")
+    .select("status, closed_outcome")
+    .eq("id", id)
+    .eq("provider_id", userId)
+    .maybeSingle();
+  if (res.error && isMissingColumn(res.error)) {
+    closedSupported = false;
+    res = await asAny(supabase)
+      .from("service_offerings")
+      .select("status")
+      .eq("id", id)
+      .eq("provider_id", userId)
+      .maybeSingle();
+  }
+  if (res.error) return { kind: "error", message: res.error.message ?? "unknown", absent: isAbsent(res.error) };
+  if (!res.data) return { kind: "not-found" };
+  return {
+    kind: "ok",
+    status: String(res.data.status),
+    closedOutcome: (res.data.closed_outcome as string | null | undefined) ?? null,
+    closedSupported,
+  };
 }
 
 /** Validate shared input. Returns the cleaned column values or an invalid tag. */
@@ -98,13 +148,20 @@ export async function listOwnServiceOfferings(): Promise<ServiceOfferingListResu
   } = await supabase.auth.getUser();
   if (!user) return { kind: "not-authed" };
 
-  const { data, error } = await asAny(supabase)
+  let closedSupported = true;
+  let { data, error } = await asAny(supabase)
     .from("service_offerings")
-    .select(
-      "id, title, description, category_slug, location_country, remote, rate_text, status, created_at, updated_at",
-    )
+    .select(`${OWN_COLUMNS}, closed_outcome`)
     .eq("provider_id", user.id)
     .order("created_at", { ascending: false });
+  if (error && isMissingColumn(error)) {
+    closedSupported = false;
+    ({ data, error } = await asAny(supabase)
+      .from("service_offerings")
+      .select(OWN_COLUMNS)
+      .eq("provider_id", user.id)
+      .order("created_at", { ascending: false }));
+  }
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
     // Any other read failure is UNAVAILABLE — never an empty list that reads
@@ -122,10 +179,11 @@ export async function listOwnServiceOfferings(): Promise<ServiceOfferingListResu
     remote: r.remote === true,
     rateText: (r.rate_text as string | null) ?? null,
     status: (r.status as ServiceOfferingStatus) ?? "draft",
+    closedOutcome: (r.closed_outcome as string | null | undefined) ?? null,
     createdAt: String(r.created_at ?? ""),
     updatedAt: String(r.updated_at ?? ""),
   }));
-  return { kind: "ok", rows };
+  return { kind: "ok", rows, closedSupported };
 }
 
 /**
@@ -254,9 +312,71 @@ export async function updateServiceOffering(
   return { kind: "ok", id };
 }
 
+/**
+ * Move an offering through the ONE lifecycle contract
+ * (`lib/market-lifecycle/contract.ts`): publish, pause, resume, complete,
+ * withdraw. The contract decides whether the action applies to the row's
+ * current state; a forbidden move changes nothing (`invalid`).
+ */
+export async function applyServiceOfferingAction(
+  id: string,
+  action: EntryAction,
+): Promise<ServiceOfferingMutateResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+  if (!id) return { kind: "invalid", field: "id" };
+
+  const current = await readOwnLifecycle(supabase, id, user.id);
+  if (current.kind === "not-found") return { kind: "not-found" };
+  if (current.kind === "error") {
+    return current.absent ? { kind: "needs-migration" } : { kind: "error", message: current.message };
+  }
+  const adapter = serviceAdapter({ closedSupported: current.closedSupported });
+  const target = action === "edit" ? null : transition(adapter.support, adapter.facts(current), action);
+  if (!target) return { kind: "invalid", field: "action" };
+
+  const patch: Record<string, unknown> = {
+    status: adapter.statusFor(target.state),
+    updated_at: new Date().toISOString(),
+  };
+  if (current.closedSupported) patch.closed_outcome = target.closedOutcome;
+  // `.eq("status", current)`: a concurrent change wins; this one touches nothing.
+  const { data: touched, error } = await asAny(supabase)
+    .from("service_offerings")
+    .update(patch)
+    .eq("id", id)
+    .eq("provider_id", user.id)
+    .eq("status", current.status)
+    .select("id");
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    return { kind: "error", message: error.message ?? "unknown" };
+  }
+  if (!touchedAny(touched)) return { kind: "not-found" };
+  // Funnel "offer side": only the FIRST publication (draft -> active) counts.
+  if (action === "publish") {
+    emitServerFunnelEvent(FUNNEL_EVENTS.offerCreated, {
+      source: "services",
+      metadata: { surface: "service_offering", entity_type: "service_offering" },
+    });
+  }
+  revalidatePath("/[locale]/dashboard/services", "page");
+  return { kind: "ok", id };
+}
+
+/**
+ * The status-shaped door older callers and the MCP `status_set` tool use. It
+ * is translated into the contract action that produces `status` from the
+ * row's current state, never written raw, so every door obeys the same
+ * transitions.
+ */
 export async function setServiceOfferingStatus(
   id: string,
   status: ServiceOfferingStatus,
+  closedOutcome: "completed" | "withdrawn" = "completed",
 ): Promise<ServiceOfferingMutateResult> {
   const supabase = await createClient();
   const {
@@ -267,40 +387,16 @@ export async function setServiceOfferingStatus(
   if (!SERVICE_OFFERING_STATUSES.includes(status)) {
     return { kind: "invalid", field: "status" };
   }
-
-  // Funnel "offer side": only the FIRST publication (draft -> active) counts.
-  // The prior status is read first; if that read fails the transition is
-  // unknown and nothing is emitted (ambiguity is never counted).
-  let wasDraft = false;
-  if (status === "active") {
-    const { data: prior } = await asAny(supabase)
-      .from("service_offerings")
-      .select("status")
-      .eq("id", id)
-      .eq("provider_id", user.id)
-      .maybeSingle();
-    wasDraft = prior?.status === "draft";
+  const current = await readOwnLifecycle(supabase, id, user.id);
+  if (current.kind === "not-found") return { kind: "not-found" };
+  if (current.kind === "error") {
+    return current.absent ? { kind: "needs-migration" } : { kind: "error", message: current.message };
   }
-
-  const { data: touched, error } = await asAny(supabase)
-    .from("service_offerings")
-    .update({ status, updated_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("provider_id", user.id)
-    .select("id");
-  if (error) {
-    if (isAbsent(error)) return { kind: "needs-migration" };
-    return { kind: "error", message: error.message ?? "unknown" };
-  }
-  if (!touchedAny(touched)) return { kind: "not-found" };
-  if (wasDraft) {
-    emitServerFunnelEvent(FUNNEL_EVENTS.offerCreated, {
-      source: "services",
-      metadata: { surface: "service_offering", entity_type: "service_offering" },
-    });
-  }
-  revalidatePath("/[locale]/dashboard/services", "page");
-  return { kind: "ok", id };
+  if (current.status === status) return { kind: "ok", id };
+  const adapter = serviceAdapter({ closedSupported: current.closedSupported });
+  const action = actionForStatus(adapter, adapter.facts(current), status, closedOutcome);
+  if (!action) return { kind: "invalid", field: "status" };
+  return applyServiceOfferingAction(id, action);
 }
 
 export async function deleteServiceOffering(

@@ -9,6 +9,11 @@ import { ORG_SUMMARY_SOURCE_KEYS } from "@/lib/assist/assist-model";
 import type { Role } from "@/lib/auth/actions";
 import { createUtcFormatter } from "@/lib/time/display";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/assist");
+
 
 /**
  * AI assistance centre (control room PR J, capability gap map §10) — ONE
@@ -106,13 +111,26 @@ export default async function AssistPage({
         </h2>
         <p className="text-xs text-text-muted">{t("attention.note")}</p>
 
-        {view.attention.length === 0 ? (
+        {view.attentionPartlyUnreadable ? (
+          // UNKNOWN IS NOT ZERO: a review queue that could not be read is
+          // said out loud, and the calm "nothing waits" line is not shown.
           <p
-            className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-secondary"
-            data-testid="assist-attention-empty"
+            role="status"
+            className="rounded-md border border-state-warning/40 bg-state-warning/5 p-3 text-sm text-text-secondary"
+            data-testid="assist-attention-partial"
           >
-            {t("attention.empty")}
+            {t("attention.partial")}
           </p>
+        ) : null}
+        {view.attention.length === 0 ? (
+          view.attentionPartlyUnreadable ? null : (
+            <p
+              className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-secondary"
+              data-testid="assist-attention-empty"
+            >
+              {t("attention.empty")}
+            </p>
+          )
         ) : (
           <ul className="flex flex-col gap-2">
             {view.attention.map((item) => (

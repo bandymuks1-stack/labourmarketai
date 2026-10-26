@@ -22,7 +22,10 @@ permissions:
 
 concurrency:
   group: quality-${{ github.ref }}
-  cancel-in-progress: true
+  # A PR's older run is superseded by its newer push. A push to MAIN is never cancelled: its result is what
+  # deploy-vps.yml waits for, and cancelling it on every merge starved production of deploys (2026-10-22: three
+  # merges in ten minutes cancelled three main runs, and the merged API never reached the VPS).
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   quality:

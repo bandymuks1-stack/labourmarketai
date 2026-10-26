@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 
@@ -12,7 +12,9 @@ import { bearerOf, qaApi } from "./prod-qa-api";
  *   4.11 Candidates — a company opens a need and sees the person who raised a hand on it;
  *   4.16 Contact    — it contacts that person, and the person sees they were contacted;
  *   3.33 Hours      — the company AND the agency each record a day's hours for
- *                     their worker on a site (the agency path's one open step).
+ *                     their worker on a site (the agency path's one open step);
+ *   #2680           — on a need that names no trade, the hand-raiser is still
+ *                     shown to the company, labelled "not assessed" (U-1..U-3).
  *
  * Cast (`lib/testing/prod-qa-guard.ts`, all synthetic):
  *   worker   qa.worker+multiw — Vytas Darbininkas, employee of Alfa
@@ -33,6 +35,11 @@ const AGENCY = "QA-SYNTHETIC Agentūra";
 const GAMA = "QA-SYNTHETIC Gama";
 const SITE = "QA-SYNTHETIC objektas";
 const NOTE = `QA-SYNTHETIC ${RUN}`;
+// This walk's OWN need. It used to borrow whatever Gama need another walk left
+// open; prod-mcp-agents closes every QA-SYNTHETIC need, so after it ran the
+// board had none (run 39792445120). A trade is named so scouting can
+// structure the need and list the hand-raiser.
+const NEED_ROLE = `QA-SYNTHETIC kandidatai mūrininkai ${RUN}`;
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED =
   process.env.PROD_QA_WALK === "1" &&
@@ -51,6 +58,17 @@ async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx
   });
   return { ctx, page: await ctx.newPage() };
 }
+
+/**
+ * The page content, never the streaming holder. Dashboard pages stream through
+ * a hidden `<div id="S:n">` whose reveal is rAF-driven; in a never-painting
+ * headless tab that hidden copy sits outside <main> beside the rendered one,
+ * so a bare testid fails strict mode at once and a count reads double
+ * (project-execution 40081437313 E-11 `hours-worker-select`, and its cleanup
+ * `toHaveCount(0)`; calendar-journal-history.spec.ts). Strict inside <main>
+ * still fails if a page really renders something twice.
+ */
+const inMain = (page: Page): Locator => page.getByRole("main");
 
 /** Make `orgName` the active workspace through the real header chip. */
 async function useWorkspace(page: Page, orgName: string): Promise<void> {
@@ -77,14 +95,143 @@ test("C-0. the worker's own worker id (own row, own token)", async () => {
   workerId = rows[0].id;
 });
 
+function requestIdOf(href: string | null): string {
+  return /request=([0-9a-f-]{36})/.exec(href ?? "")?.[1] ?? "";
+}
+
+/**
+ * Post a need through Gama's demand intake (Gama is the active workspace) and
+ * return its id, found on the scouting list by `marker` (a run-unique part of
+ * the role the list shows).
+ */
+async function submitNeed(page: Page, role: string, description: string): Promise<"done" | "limit"> {
+  await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
+  await inMain(page).getByTestId("demand-role").fill(role);
+  await inMain(page).getByTestId("demand-description").fill(description);
+  await inMain(page).getByTestId("demand-next").click();
+  const size = inMain(page).getByTestId("demand-team-size");
+  if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await inMain(page).getByTestId("demand-next").click();
+  await inMain(page).getByTestId("demand-create").click();
+  const done = inMain(page).getByTestId("demand-done");
+  const limit = inMain(page).getByTestId("demand-open-need-limit");
+  await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
+  return (await limit.isVisible()) ? "limit" : "done";
+}
+
+/**
+ * Gama is on the free plan (one open need). A walk that stopped before its
+ * cleanup leaves a QA-SYNTHETIC need open and the next walk's intake is refused
+ * (company-chain 39960149411 left one; the limit is the product working). Close
+ * the synthetic leftovers through the scouting page's own controls, never this
+ * run's need.
+ */
+async function closeSyntheticLeftovers(page: Page): Promise<number> {
+  await page.goto("/lt/dashboard/company/scouting");
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+  const ids = new Set<string>();
+  for (const a of await page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: "QA-SYNTHETIC" }).all()) {
+    if ((await a.innerText().catch(() => "")).includes(RUN)) continue;
+    const id = requestIdOf(await a.getAttribute("href"));
+    if (id) ids.add(id);
+  }
+  let closed = 0;
+  // Fails loudly: a leftover that cannot be closed is the reason this run's
+  // need is refused, and the error names it.
+  for (const id of [...ids].slice(0, 5)) {
+    if ((await closeNeed(page, id)) === "closed") closed += 1;
+  }
+  console.info(`[company-chain] synthetic leftovers seen=${ids.size} closed=${closed}`);
+  return closed;
+}
+
+async function postNeed(page: Page, role: string, description: string, marker: string): Promise<string> {
+  let outcome = await submitNeed(page, role, description);
+  if (outcome === "limit" && (await closeSyntheticLeftovers(page)) > 0) {
+    outcome = await submitNeed(page, role, description);
+  }
+  expect(outcome, "the open-need limit refused this run's need").toBe("done");
+  await page.goto("/lt/dashboard/company/scouting");
+  const link = page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: marker }).first();
+  await expect(link, "this run's need is listed among Gama's needs").toBeVisible({ timeout: 30_000 });
+  const id = requestIdOf(await link.getAttribute("href"));
+  expect(id).toMatch(/^[0-9a-f-]{36}$/);
+  return id;
+}
+
+/** Close one need through its own lifecycle controls (Gama is the active workspace). */
+async function closeNeed(page: Page, id: string): Promise<"closed" | "already-closed"> {
+  await page.goto(`/lt/dashboard/company/scouting?request=${id}`);
+  const controls = inMain(page).getByTestId("demand-lifecycle-controls").first();
+  const unstructured = inMain(page).getByTestId("scouting-not-structured").first();
+  await expect(controls.or(unstructured).first()).toBeVisible({ timeout: 30_000 });
+  if (await controls.isVisible()) {
+    if ((await controls.getAttribute("data-demand-status")) === "closed") return "already-closed";
+    await controls.getByTestId("demand-close").click();
+    await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
+    closedHere.add(id);
+    return "closed";
+  }
+  // A need that names no trade: the scouting page draws its lifecycle controls
+  // only for a structured need, so it is closed where the product offers that
+  // for every submitted need — the chat workspace's candidates result
+  // (`?result=candidates&demand=`, `company.close-demand`).
+  await page.goto(`/lt/dashboard?result=candidates&demand=${id}`);
+  const close = inMain(page).getByTestId("candidates-close-demand").filter({ visible: true }).first();
+  const reopen = inMain(page).getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
+  await expect(close.or(reopen).first(), "the need's own close/reopen action").toBeVisible({ timeout: 60_000 });
+  if (await reopen.isVisible()) return "already-closed";
+  await close.click();
+  const error = inMain(page).getByTestId("candidates-close-demand-error").first();
+  await expect(reopen.or(error).first()).toBeVisible({ timeout: 30_000 });
+  if (await error.isVisible()) throw new Error(`close refused: ${(await error.innerText()).slice(0, 120)}`);
+  closedHere.add(id);
+  return "closed";
+}
+
+/** Needs this run already closed — afterAll never revisits them. */
+const closedHere = new Set<string>();
+
+/** The worker raises a hand on need `id` from the full opportunities board (from "not interested"). */
+async function raiseHand(page: Page, id: string): Promise<void> {
+  await page.goto("/lt/dashboard/opportunities?view=all");
+  await expect(inMain(page).getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  const card = page.locator(`li[id="opp-${id}"]`);
+  await expect(card.locator('[data-testid^="interest-"]').first(), "the need's card offers interest").toBeVisible({
+    timeout: 60_000,
+  });
+  const withdraw = card.getByTestId("interest-withdraw");
+  if (await withdraw.isVisible().catch(() => false)) {
+    await withdraw.click();
+    await expect(card.getByTestId("interest-express")).toBeVisible({ timeout: 30_000 });
+  }
+  await card.getByTestId("interest-express").click();
+  await expect(card.getByTestId("interest-sent")).toHaveAttribute("data-interest-status", "interested", {
+    timeout: 30_000,
+  });
+}
+
+test("C-0b. Gama posts this run's need through the demand intake", async ({ browser }) => {
+  test.setTimeout(480_000); // room for the leftover cleanup
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  requestId = await postNeed(
+    page,
+    NEED_ROLE,
+    `${NOTE}: synthetic need for the production company-chain walk, 1 mūrininkas.`,
+    RUN,
+  );
+  await ctx.close();
+});
+
 test("C-1. the worker raises a hand on Gama's need from the opportunities board", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   // The pristine page is the worker's PERSONAL first view (owner addendum
   // 2026-10-09); the whole board, with every need's card, is `?view=all`.
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  await expect(inMain(page).getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const cards = page
-    .locator('li[id^="opp-"]')
+    .locator(`li[id="opp-${requestId}"]`)
     .filter({ has: page.getByTestId("opportunity-company").filter({ hasText: GAMA }) })
     .filter({ has: page.locator('[data-testid^="interest-"]') });
   // The cards can stream in after the list container appears: wait for them
@@ -97,7 +244,7 @@ test("C-1. the worker raises a hand on Gama's need from the opportunities board"
     .catch(() => false);
   if (!appeared) {
     const allCards = await page.locator('li[id^="opp-"]').count();
-    const companies = await page.getByTestId("opportunity-company").allInnerTexts();
+    const companies = await inMain(page).getByTestId("opportunity-company").allInnerTexts();
     const buttons = await page.locator('[data-testid^="interest-"]').count();
     // Counts only — never company names: the board can show real customers,
     // and this log is a public artefact.
@@ -109,8 +256,6 @@ test("C-1. the worker raises a hand on Gama's need from the opportunities board"
   const n = await cards.count();
   expect(n, `the worker's board shows ${n} of Gama's needs`).toBeGreaterThan(0);
   const card = cards.first();
-  requestId = ((await card.getAttribute("id")) ?? "").replace(/^opp-/, "");
-  expect(requestId).toMatch(/^[0-9a-f-]{36}$/);
 
   // Start from "not interested", so this run proves the ACT, not a leftover row.
   const withdraw = card.getByTestId("interest-withdraw");
@@ -129,7 +274,7 @@ test("C-2 (4.11). Gama opens its need and sees the person who raised a hand", as
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  const candidate = page.getByTestId(`scout-candidate-${workerId}`);
+  const candidate = inMain(page).getByTestId(`scout-candidate-${workerId}`);
   await expect(candidate, "the hand-raiser is in Gama's candidate list").toBeVisible({ timeout: 60_000 });
   await expect(candidate.getByTestId(`scout-interest-${workerId}`)).toBeVisible();
   await expect(candidate.getByTestId(`interest-ack-${workerId}`)).toHaveAttribute("data-interest-status", "interested");
@@ -140,7 +285,7 @@ test("C-3 (4.16). Gama contacts them: a real thread opens", async ({ browser }) 
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  const ack = page.getByTestId(`interest-ack-${workerId}`);
+  const ack = inMain(page).getByTestId(`interest-ack-${workerId}`);
   await expect(ack).toBeVisible({ timeout: 60_000 });
   await ack.getByTestId("interest-ack-contacted").click();
   await page.waitForURL(/\/dashboard\/communication\/[0-9a-f-]{36}/, { timeout: 60_000 });
@@ -162,18 +307,25 @@ test("C-4 (4.16). the worker sees they were contacted, on the phone", async ({ b
 async function siteReady(page: Page, org: string): Promise<void> {
   await useWorkspace(page, org);
   await page.goto("/lt/dashboard/hours");
-  const noSites = page.getByTestId("hours-state-no-objects");
-  const picker = page.getByTestId("hours-object-picker");
+  // Scoped to <main>: the page streams in through a hidden `<div id="S:n">`
+  // whose reveal is rAF-driven; in a never-painting headless tab that hidden
+  // copy sits outside <main> beside the rendered one, and an unscoped testid
+  // fails strict mode at once (run 40050881788 H-1: `hours-object-picker` in
+  // <main> plus `.nth(1)` outside it; calendar-journal-history.spec.ts). The
+  // claim is unchanged: exactly one picker or one no-sites door in <main>.
+  const main = page.getByRole("main");
+  const noSites = main.getByTestId("hours-state-no-objects");
+  const picker = main.getByTestId("hours-object-picker");
   await expect(noSites.or(picker)).toBeVisible({ timeout: 60_000 });
   if (await noSites.isVisible()) {
     console.info(`[hours] ${org}: no site yet, following the page's own door`);
-    await page.getByTestId("hours-no-objects-add-site").click();
+    await main.getByTestId("hours-no-objects-add-site").click();
     await page.waitForURL(/\/dashboard\/projects/, { timeout: 60_000 });
-    const form = page.getByTestId("work-object-add-form");
+    const form = inMain(page).getByTestId("work-object-add-form");
     await expect(form).toBeVisible({ timeout: 30_000 });
     await form.locator('input[name="name"]').fill(SITE);
     await form.getByTestId("work-object-add-submit").click();
-    await expect(page.getByTestId("work-object-row").filter({ hasText: SITE }).first()).toBeVisible({
+    await expect(inMain(page).getByTestId("work-object-row").filter({ hasText: SITE }).first()).toBeVisible({
       timeout: 30_000,
     });
     await page.goto("/lt/dashboard/hours");
@@ -184,19 +336,21 @@ async function siteReady(page: Page, org: string): Promise<void> {
 async function recordHours(page: Page, org: string, note: string): Promise<void> {
   await useWorkspace(page, org);
   await page.goto("/lt/dashboard/hours");
-  await page.getByTestId("hours-worker-select").selectOption(workerId);
-  await page.getByTestId("hours-object-picker").locator('[data-testid^="hours-object-"]').first().click();
-  await page.getByTestId("hours-input").fill("1.5");
-  await page.getByTestId("hours-note").fill(note);
-  await page.getByTestId("hours-save").click();
-  const saved = page.getByTestId("hours-saved");
-  const error = page.getByTestId("hours-error");
+  // Scoped to <main> for the same hidden streaming copy as `siteReady`.
+  const main = page.getByRole("main");
+  await main.getByTestId("hours-worker-select").selectOption(workerId);
+  await main.getByTestId("hours-object-picker").locator('[data-testid^="hours-object-"]').first().click();
+  await main.getByTestId("hours-input").fill("1.5");
+  await main.getByTestId("hours-note").fill(note);
+  await main.getByTestId("hours-save").click();
+  const saved = main.getByTestId("hours-saved");
+  const error = main.getByTestId("hours-error");
   await expect(saved.or(error)).toBeVisible({ timeout: 30_000 });
   if (await error.isVisible()) throw new Error(`hours not saved in ${org}: ${await error.innerText()}`);
-  // Persistence: a fresh load of the day lists the entry.
+  // Persistence: a fresh load of the day lists the entry, exactly once.
   await page.goto("/lt/dashboard/hours");
-  await expect(page.getByTestId("hours-entry").filter({ hasText: note })).toHaveCount(1, { timeout: 30_000 });
-  await expect(page.getByTestId("hours-day-total")).toBeVisible();
+  await expect(main.getByTestId("hours-entry").filter({ hasText: note })).toHaveCount(1, { timeout: 30_000 });
+  await expect(main.getByTestId("hours-day-total")).toBeVisible();
 }
 
 for (const { slot, org, label } of [
@@ -215,3 +369,79 @@ for (const { slot, org, label } of [
     await ctx.close();
   });
 }
+
+// ── U (#2680, owner decision 2026-10-22): a need that names NO trade still
+// shows the people who raised a hand on it, labelled "trade match not
+// assessed", with no score. Before #2680 scouting returned not-structured
+// before reading interest, so the worker saw "interested" and the employer saw
+// nobody (orders-bookings run 39802806873, O-3). Last in the file so a red
+// step here never hides the hours proof above. The label and description are
+// the ones that run proved unstructured; the trade need is closed first so the
+// free plan's one open need is free for this one.
+const UNTRADED_LABEL = "QA-SYNTHETIC rezervacija";
+const UNTRADED_MARKER = `${RUN}-u`;
+let untradedId = "";
+
+test("U-1 (#2680). Gama closes the trade need and posts one that names no trade", async ({ browser }) => {
+  test.skip(!requestId, "C-0b did not create this run's need");
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  await closeNeed(page, requestId);
+  untradedId = await postNeed(
+    page,
+    `${UNTRADED_LABEL} ${UNTRADED_MARKER}`,
+    `${NOTE}: synthetic need for the production company-chain walk, 1 person.`,
+    UNTRADED_MARKER,
+  );
+  await ctx.close();
+});
+
+test("U-2 (#2680). the worker raises a hand on the need that names no trade", async ({ browser }) => {
+  test.skip(!untradedId || !workerId, "U-1 did not create the need");
+  const { ctx, page } = await as(browser, "worker");
+  await raiseHand(page, untradedId);
+  await ctx.close();
+});
+
+test("U-3 (#2680). Gama sees the hand-raiser, labelled not assessed, with the contact door", async ({ browser }) => {
+  test.skip(!untradedId || !workerId, "U-1 did not create the need");
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  await page.goto(`/lt/dashboard/company/scouting?request=${untradedId}`);
+  const section = inMain(page).getByTestId("scouting-hand-raisers-unassessed");
+  await expect(section, "the unassessed hand-raisers section renders on a need with no trade").toBeVisible({
+    timeout: 60_000,
+  });
+  await expect(section.getByTestId("scouting-hand-raisers-not-assessed-note")).toBeVisible();
+  const candidate = section.getByTestId(`scout-candidate-${workerId}`);
+  await expect(candidate, "the hand-raiser is listed").toBeVisible({ timeout: 30_000 });
+  await expect(candidate.getByTestId(`scout-match-not-assessed-${workerId}`), "labelled not assessed").toBeVisible();
+  await expect(candidate.getByTestId(`scout-interest-${workerId}`)).toBeVisible();
+  await expect(candidate.getByTestId(`scout-comms-${workerId}`), "the canonical employer actions stay").toBeVisible();
+  await ctx.close();
+});
+
+// This run's needs are closed after the chain (the worker's board needs them
+// open while it runs), even after a red step; interest and contact rows stay
+// as history. The hook has its own budget: the default 30 s hook timeout ran
+// out on the first need (already closed by U-1) and left the untraded need
+// open, which then refused the next walk's need (run 39960149411). Still-open
+// needs go first, the newest first.
+test.afterAll(async ({ browser }) => {
+  test.setTimeout(180_000);
+  const ids = [untradedId, requestId].filter((id) => id !== "" && !closedHere.has(id));
+  if (ids.length === 0) return;
+  const { ctx, page } = await as(browser, "manager");
+  try {
+    await useWorkspace(page, GAMA);
+    for (const id of ids) {
+      try {
+        await closeNeed(page, id);
+      } catch (e) {
+        console.info(`[company-chain] need cleanup failed: ${(e as Error).message.slice(0, 120)}`);
+      }
+    }
+  } finally {
+    await ctx.close();
+  }
+});

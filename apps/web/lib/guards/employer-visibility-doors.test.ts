@@ -101,31 +101,49 @@ describe("every door opens the ONE existing consent — nothing else grants", ()
     expect(entry).toContain('t("account.employerVisibility")');
   });
 
-  it("the profile hub and the opportunities board render the SAME item from the SAME reader", () => {
-    for (const rel of [
-      "components/app/profile-hub-overview.tsx",
-      "app/[locale]/dashboard/opportunities/page.tsx",
-    ]) {
-      const src = read(rel);
-      expect(src, rel).toContain("<EmployerVisibilityItem");
-      expect(src, rel).toContain("getMyDiscoverabilityState()");
-      expect(src, rel).toContain("employerVisibilityOf(");
-      expect(src, rel).toContain("employerVisibilityItemLabels(tVisibility)");
-    }
-    // The board's read is in the ONE combined await, and a throw is unknown.
+  it("the opportunities board renders the readiness item from the SAME reader", () => {
     const BOARD = read("app/[locale]/dashboard/opportunities/page.tsx");
+    expect(BOARD).toContain("<EmployerVisibilityItem");
+    expect(BOARD).toContain("employerVisibilityOf(");
+    expect(BOARD).toContain("employerVisibilityItemLabels(tVisibility)");
+    // The board's read is in the ONE combined await, and a throw is unknown.
     expect(BOARD).toContain("getMyDiscoverabilityState().catch(() => null)");
-    // The hub asks only for a worker; a non-worker identity gets no item.
-    const HUB = read("components/app/profile-hub-overview.tsx");
-    expect(HUB).toContain("hasWorker ? getMyDiscoverabilityState() : Promise.resolve(null)");
   });
 
-  it("the worker home offers the SAME once-only ask (pre-consent workers were never reached)", () => {
+  it("the profile answers 'can employers find me?' IN PLACE: the SAME consent component, source profile", () => {
+    // Owner goal 2026-10-24 (matchability): status + ONE action where the
+    // person looks, not a door to another page below the fold.
+    const HUB = read("components/app/profile-hub-overview.tsx");
+    expect(HUB).toMatch(/<DiscoverabilityConsent[\s\S]{0,120}source="profile"/);
+    expect(HUB).toContain("labels={discoverabilityConsentLabels(tConsent)}");
+    expect(HUB).toContain("legal={PROFILE_DISCOVERABILITY_V1.texts[toConsentLocale(locale)]}");
+    // The hub asks only for a worker; a non-worker identity gets nothing.
+    expect(HUB).toContain("hasWorker ? getMyDiscoverabilityState() : Promise.resolve(null)");
+    expect(HUB).toContain("{visibility && discoverability && (");
+    // It sits right under the identity, before the checklist — never inside it.
+    expect(HUB.indexOf("<DiscoverabilityConsent")).toBeGreaterThan(HUB.indexOf("</IdentityStage>"));
+    expect(HUB.indexOf("<DiscoverabilityConsent")).toBeLessThan(HUB.indexOf("{/* ── WHAT IS MISSING"));
+  });
+
+  it("the worker home shows the status and its one action on EVERY visit (not a once-only ask)", () => {
     const HOME = read("components/app/today/today-screen.tsx");
-    expect(HOME).toContain("<EmployerVisibilityAsk");
-    expect(HOME).toContain('body: t("visibilityAskBody")');
-    // The home never grants on its own — the ask component is the only door.
-    expect(HOME).not.toMatch(/grantProfileDiscoverability|withdrawProfileDiscoverability/);
+    expect(HOME).toContain("<HomeEmployerVisibility locale={locale} />");
+    expect(HOME).not.toContain("<EmployerVisibilityAsk");
+    // Directly under the one primary action (WAITING stays first on a phone),
+    // before everything else on the screen.
+    expect(HOME.indexOf("<HomeEmployerVisibility")).toBeGreaterThan(HOME.indexOf("<HomeWaiting"));
+    expect(HOME.indexOf("<HomeEmployerVisibility")).toBeLessThan(HOME.indexOf("<HomeTrace"));
+    const LINE = read("components/app/home/home-employer-visibility.tsx");
+    // The ONE loader, the SAME component, compact, recorded as the home.
+    expect(LINE).toContain("await loadEmployerVisibilityForChat()");
+    expect(LINE).toContain('<DiscoverabilityConsent compact locale={locale} source="home"');
+    // No worker row → nothing; unknown → its own line, never the OFF screen.
+    expect(LINE).toContain('if (visibility.kind === "no-worker") return null;');
+    expect(LINE).toContain('data-visibility="unknown"');
+    // The home never grants on its own — the consent component is the only writer.
+    for (const src of [HOME, LINE]) {
+      expect(src).not.toMatch(/grantProfileDiscoverability|withdrawProfileDiscoverability/);
+    }
   });
 
   it("the work-card ask renders after a SUCCESSFUL save only, and is a door with 'not now'", () => {
@@ -147,6 +165,7 @@ describe("every door opens the ONE existing consent — nothing else grants", ()
       "components/app/employer-visibility-ask.tsx",
       "components/app/account-menu.tsx",
       "components/app/profile-hub-overview.tsx",
+      "components/app/home/home-employer-visibility.tsx",
       "app/[locale]/dashboard/opportunities/page.tsx",
       "lib/conversation/employer-visibility-chat.ts",
       "lib/privacy/employer-visibility.ts",
@@ -175,7 +194,9 @@ describe("SEP-7 — a failed read is said as unknown, never as off or empty", ()
     expect(CONSENT.slice(readFailed)).toContain('data-testid="discoverability-read-failed"');
     expect(CONSENT.slice(readFailed)).toContain("{labels.readFailed}");
     // The read-failed branch sits BEFORE the granted / hidden branches.
-    expect(readFailed).toBeLessThan(CONSENT.indexOf('phase === "done" || (status === "granted"'));
+    const screenChoice = CONSENT.indexOf("discoverabilityScreen({ status, confirmed })");
+    expect(screenChoice).toBeGreaterThan(0);
+    expect(readFailed).toBeLessThan(screenChoice);
   });
 
   it("the privacy screen says the history could not be read — never 'nothing yet' — for both ledgers", () => {

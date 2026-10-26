@@ -404,6 +404,12 @@ async function loadBoard(
             ),
         )
         .map((row) => {
+          // W10 P0-1: derived from the ROW, so the match is computed against
+          // the same structured demand this card renders below (`structured:`).
+          // It used to be built from `role_text` alone — the card showed the
+          // employer's engagement form, pay, licence and shifts, and the match
+          // beside them had evaluated none of them.
+          const { need: matchNeed } = needFromDemandRow(row);
           const need: OpportunityNeed = {
             id: String(row.id),
             roleText: (row.role_text as string | null) ?? null,
@@ -428,14 +434,14 @@ async function loadBoard(
             routeStatus: (row.route_status as string | null) ?? null,
             // Whitelisted RPC column — powers the "newest" sort only.
             createdAt: (row.created_at as string | null) ?? null,
+            // The DECLARED type the `opportunityType` discovery filter (and a
+            // saved search holding it) compares against. It was never set on
+            // this object, so `?opportunityType=internship` dropped every
+            // first-party need — internships included. Same source as the
+            // match need: the demand's own structured cluster, never inferred.
+            opportunityType: matchNeed.opportunityType ?? null,
           };
           const fit = computeOpportunityFit(readiness, need);
-          // W10 P0-1: derived from the ROW, so the match is computed against
-          // the same structured demand this card renders below (`structured:`).
-          // It used to be built from `role_text` alone — the card showed the
-          // employer's engagement form, pay, licence and shifts, and the match
-          // beside them had evaluated none of them.
-          const { need: matchNeed } = needFromDemandRow(row);
           const match = matchWorkerToNeed(matchNeed, ctx.subject);
           const nextAction = workerOpportunityNextAction({
             profileFitStatus: fit.status,

@@ -195,3 +195,20 @@ describe("6. new copy resolves in every ACTIVE locale", () => {
     });
   }
 });
+
+describe("a saved notification preference says so (production audit 2026-10-22)", () => {
+  const src = readFileSync(join(__dirname, "..", "..", "components", "app", "notification-preferences-section.tsx"), "utf8");
+  it("one live status line: saving while pending, saved after ok, the refusal otherwise", () => {
+    expect(src).toContain('if (result.kind === "ok") setNotice("saved");');
+    expect(src).toContain('data-state={pending ? "saving" : (notice ?? "idle")}');
+    expect(src).toMatch(/pending\s*\?\s*labels\.saving\s*:\s*notice === "saved"\s*\?\s*labels\.saved/);
+  });
+});
+
+describe("a profile language change says it is saving and that it landed (production audit 2026-10-22)", () => {
+  const src = readFileSync(join(__dirname, "..", "..", "components", "app", "worker-languages-section.tsx"), "utf8");
+  it("a live status line beside the add button", () => {
+    expect(src).toContain('data-testid="worker-languages-status"');
+    expect(src).toContain("{addPending ? labels.adding : addState?.ok ? labels.added : null}");
+  });
+});

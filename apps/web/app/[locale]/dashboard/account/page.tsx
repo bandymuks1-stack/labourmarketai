@@ -18,6 +18,7 @@ import { readActiveProfileRoles } from "@/lib/auth/profile-roles";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { LmcBalanceSection } from "@/components/app/lmc-balance-section";
 import { AccountBillingSection } from "@/components/app/account-billing-section";
+import { PilotPassSection } from "@/components/app/pilot-pass-section";
 import { ConnectedAppsSection } from "@/components/app/connected-apps-section";
 import { parseConnectedAppsFeedback } from "@/lib/auth/connected-apps";
 import { AdminUiToggle } from "@/components/app/admin-ui-toggle";
@@ -34,10 +35,19 @@ import { NOTIFICATION_EMAIL_INCAPABLE_TYPES } from "@/lib/notifications/email-di
 import {
   readNotificationPreferencesFor,
   resolveEffectivePreferences,
+  resolvePushOptIn,
 } from "@/lib/notifications/notification-preferences";
+import { webPushClientConfig } from "@/lib/notifications/web-push-config";
+import { WebPushOptIn } from "@/components/app/web-push-opt-in";
 import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/account", "auth.dashboard.tabs.account");
+
 
 /**
  * Account — SETTINGS ONLY (marketplace IA cleanup 2026-06-25).
@@ -55,7 +65,7 @@ export default async function AccountPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ billing?: string; apps?: string }>;
+  searchParams: Promise<{ billing?: string; apps?: string; pilot_pass?: string; pilot_pass_refused?: string }>;
 }) {
   const { locale } = await params;
   // Native-nav `?billing=` return feedback (same idiom as planning's plain
@@ -63,7 +73,7 @@ export default async function AccountPage({
   // `?billing=test_success` / `portal_return`, and until now nothing read it.
   // `?apps=revoked|error` — the Connected Apps disconnect action's return
   // feedback (same idiom); anything else is ignored.
-  const { billing, apps } = await searchParams;
+  const { billing, apps, pilot_pass, pilot_pass_refused } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("auth.dashboard");
   const tRoot = await getTranslations();
@@ -111,6 +121,10 @@ export default async function AccountPage({
   );
   const tNotifTypes = await getTranslations("auth.notifications.types");
   const tPrefs = await getTranslations("notificationPrefs");
+  // COM-3 push channel: OFF unless the owner switched it on (flag + VAPID
+  // keys). While off, the opt-in below is not rendered at all.
+  const push = webPushClientConfig();
+  const pushOptedIn = prefsRead.kind === "ok" && resolvePushOptIn(prefsRead.rows);
   const prefRows: NotificationPreferenceRowView[] = effectivePrefs.map((p) => ({
     type: p.notificationType,
     label: tNotifTypes.has(`event_${p.notificationType}` as never)
@@ -163,9 +177,26 @@ export default async function AccountPage({
         </p>
       </header>
 
+      {/* Organization pilot pass (1 € once → the paid plan for the pilot
+          period) — first on the page, never inside the collapsed plan fold
+          (owner measured 2026-10-22: the pay control could not be found
+          there). Renders nothing unless the owner switched it on and billing
+          is active for an organization this person can act for. */}
+      <PilotPassSection result={pilot_pass ?? null} refused={pilot_pass_refused ?? null} />
+
       {/* Plan, billing and balance are ONE question ("what am I on?") and
           payments are not live — one line, open on demand (owner 2026-10-10). */}
-      <Fold title={tRoot("accountPlan.title")} testId="account-plan-fold">
+      {/* Open while billing is live: the plan and its order/portal controls are
+          then real, and a closed fold hid them (owner, 2026-10-22). */}
+      {/* `#lmc` lives INSIDE this fold. The chat's "Kiek turiu LMC?" chip and
+          the command finder link `/dashboard/account#lmc`; a client-side
+          navigation never expands a closed <details> (only a full page load
+          does, and only in some browsers), so without the opener the person
+          lands on a shut bar with the balance hidden — measured 2026-10-23 on
+          the local stack with billing off, which is every worker outside the
+          billing pilot. */}
+      <DetailsHashOpener targetId="account-plan" />
+      <Fold id="account-plan" title={tRoot("accountPlan.title")} testId="account-plan-fold" defaultOpen={billingLive}>
         {/* Honest payment readiness — payments are not active yet (billing
             disabled). No pay-now, no subscription-active, no paid unlock. */}
         {!billingLive && (
@@ -187,11 +218,13 @@ export default async function AccountPage({
           <p className="font-mono text-meta uppercase tracking-label text-text-muted">
             {tRoot("accountPlan.title")}
           </p>
-          <p className="mt-2 text-sm text-text-primary">
-            {tRoot("accountPlan.freePilot")}
-          </p>
           {!billingLive && (
             <>
+              {/* "Everything is free" is true only while billing is off; with
+                  live billing the plan state below is the truth. */}
+              <p className="mt-2 text-sm text-text-primary">
+                {tRoot("accountPlan.freePilot")}
+              </p>
               <p className="mt-2 text-xs leading-relaxed text-text-secondary">
                 {tRoot("accountPlan.prepared")}
               </p>
@@ -339,8 +372,28 @@ export default async function AccountPage({
           emailInactiveNote: tPrefs("emailInactiveNote"),
           error: tPrefs("error"),
           unavailable: tPrefs("unavailable"),
+          saving: tPrefs("saving"),
+          saved: tPrefs("saved"),
         }}
       />
+      {push.active && push.publicKey ? (
+        <WebPushOptIn
+          publicKey={push.publicKey}
+          optedIn={pushOptedIn}
+          labels={{
+            title: tPrefs("push.title"),
+            intro: tPrefs("push.intro"),
+            turnOn: tPrefs("push.turnOn"),
+            turnOff: tPrefs("push.turnOff"),
+            working: tPrefs("push.working"),
+            on: tPrefs("push.on"),
+            off: tPrefs("push.off"),
+            unsupported: tPrefs("push.unsupported"),
+            blocked: tPrefs("push.blocked"),
+            error: tPrefs("push.error"),
+          }}
+        />
+      ) : null}
 
       {/* Identity is edited on the Profilis surface; a single settings link
           (not a launcher grid) keeps account = settings while the profile-cv

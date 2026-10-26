@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { HomeTrace } from "@/components/app/home/home-trace";
-import { EmployerVisibilityAsk } from "@/components/app/employer-visibility-ask";
+import { HomeEmployerVisibility } from "@/components/app/home/home-employer-visibility";
 import {
   HomeAvailability,
   HomeBecause,
@@ -12,9 +12,9 @@ import {
   HomeWaiting,
 } from "@/components/app/home/home-regions";
 import type { ActiveLocale } from "@/lib/i18n/config";
-import { Link } from "@/lib/i18n/navigation";
+import { AreaSwitcher } from "@/components/app/area-switcher";
 import { deriveTodayState } from "@/lib/today/today-model";
-import { TODAY_STATIONS } from "@/lib/today/today-route";
+import { PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { loadTodayHead, loadTodayWorkIntelligence } from "@/lib/today/today-server";
 
@@ -97,10 +97,10 @@ export function TodayScreen({ locale }: { locale: ActiveLocale }) {
 }
 
 async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
-  const [t, tCard, tProf, head] = await Promise.all([
+  const [t, tProf, tNav, head] = await Promise.all([
     getTranslations("todayScreen.home"),
-    getTranslations("auth.dashboard.workCard"),
     getTranslations("professions"),
+    getTranslations("common.nav"),
     loadTodayHead(),
   ]);
   // The first profession this person holds that can be named — a registry one
@@ -143,11 +143,32 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
 
       {/* THE FOUR REGIONS — two columns from lg (01+02 | 03+04), one column
           on a phone in DOM order 01→04 (the one primary action first). Each
-          streams from its own loader. */}
-      <div className="grid items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
-        <div className="flex flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
+          streams from its own loader.
+
+          `grid-cols-1` is load-bearing, not decoration: without an explicit
+          template the phone gets ONE IMPLICIT `auto` column, which grows to
+          the min-content of its widest child. A `truncate`d trace title is
+          min-content = the whole unwrapped line, so the column (and every
+          region in it) rendered 816px wide inside a 390px phone and the
+          clipped overflow hid the buttons, counts and "Visa veikla"
+          (UX review 2026-10-24). `grid-cols-1` is `minmax(0, 1fr)`; the
+          columns carry `min-w-0` for the same reason on lg. */}
+      <div className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
           <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
             <HomeWaiting locale={locale} />
+          </Suspense>
+
+          {/* CAN EMPLOYERS FIND ME? — the status line and its ONE action, on
+              every visit, directly under the one primary action (which stays
+              first on a phone — IA 2026-09-13 §5). Owner goal 2026-10-24,
+              "matchability". It replaced the once-only ask, which vanished
+              after any decision: a findable worker never saw on the home that
+              they were findable, and "not now" removed the question for good.
+              The SAME consent component as every other door (compact, source
+              "home"); streams on its own, never blocks the regions. */}
+          <Suspense fallback={null}>
+            <HomeEmployerVisibility locale={locale} />
           </Suspense>
 
           {/* KAS PASIKEITĖ — the consequence trace (Future Experience A,
@@ -158,30 +179,12 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
             <HomeTrace locale={locale} />
           </Suspense>
 
-          {/* THE EMPLOYER-VISIBILITY ASK — the SAME once-only door the
-              work-card save shows (never a consent of its own: it opens the
-              canonical consent screen; "not now" ends it on this device). On
-              the home too, because the save-only moment never reached the
-              workers who onboarded before the consent step existed (prod
-              2026-10-10: 0 of 18 real workers had ever been asked). Renders
-              nothing once decided. */}
-          <div className="empty:hidden">
-            <EmployerVisibilityAsk
-              labels={{
-                title: tCard("visibilityAsk.title"),
-                body: t("visibilityAskBody"),
-                open: tCard("visibilityAsk.open"),
-                dismiss: tCard("visibilityAsk.dismiss"),
-              }}
-            />
-          </div>
-
           <Suspense fallback={<HomeRegionPending label={t("reading")} />}>
             <HomeRunning locale={locale} />
           </Suspense>
         </div>
 
-        <div className="flex flex-col gap-4 sm:gap-5 lg:col-span-5 lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-5 lg:gap-6">
           <Suspense fallback={null}>
             <HomeOutside />
           </Suspense>
@@ -191,24 +194,26 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
         </div>
       </div>
 
-      {/* 6 · STATIONS — the contextual workspaces, one tap each: a compact
-          grid on a phone, one row from sm up. */}
-      <nav aria-label={t("stations.title")} data-testid="today-stations" className="flex flex-col gap-1 border-t border-ink-600/70 pt-4 sm:gap-2 sm:pt-5">
-        <p className="text-support font-medium text-text-muted">{t("stations.title")}</p>
-        <ul className="grid grid-cols-3 gap-x-3 gap-y-0 sm:flex sm:flex-wrap sm:gap-x-6">
-          {TODAY_STATIONS.map((s) => (
-            <li key={s.id}>
-              <Link
-                href={s.href as "/dashboard"}
-                data-testid={`today-station-${s.id}`}
-                className="inline-flex min-h-11 items-center text-support text-text-primary underline-offset-4 hover:underline sm:text-body"
-              >
-                {t(`stations.${s.id}`)}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {/* 6 · STATIONS — the contextual workspaces, one tap each, as the light
+          3D area switcher (owner order 2026-10-25): cards with depth, the
+          chosen one in front, from the ONE area model (`PERSONAL_WORK_AREAS`,
+          derived from TODAY_STATIONS — opportunities first). */}
+      <div data-testid="today-stations" className="border-t border-ink-600/70 pt-4 sm:pt-5">
+        <AreaSwitcher
+          title={t("stations.title")}
+          prevLabel={tNav("previous")}
+          nextLabel={tNav("next")}
+          hereLabel={tNav("youAreHere")}
+          testId="today-area-switcher"
+          items={PERSONAL_WORK_AREAS.map((s) => ({
+            id: s.id,
+            href: s.href,
+            iconKey: s.iconKey,
+            label: t(`stations.${s.id}`),
+            testId: `today-station-${s.id}`,
+          }))}
+        />
+      </div>
     </div>
   );
 }

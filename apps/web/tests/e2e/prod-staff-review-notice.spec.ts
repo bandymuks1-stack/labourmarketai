@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { inviteCapGate } from "./invite-cap";
-import { test, expect, type Browser, type Page } from "@playwright/test";
+import { test, expect, type Browser, type Page } from "./prod-walk";
 
 /**
  * PRODUCTION — THE REVIEW SENTENCE ON EVERY STAFF ACCEPT PATH (owner decision
@@ -69,7 +69,11 @@ async function inviteWorker(browser: Browser, tag: string): Promise<string | nul
   const emailMode = page.getByTestId("invite-mode-email");
   if (await emailMode.isVisible().catch(() => false)) await emailMode.click();
   const org = page.getByTestId("invite-organization");
-  if (await org.isVisible().catch(() => false)) await org.selectOption({ label: ALFA }).catch(() => undefined);
+  if (await org.isVisible().catch(() => false)) {
+    const value = await org.locator("option", { hasText: ALFA }).first().getAttribute("value");
+    expect(value, "Alfa is one of the organizations the owner manages").toBeTruthy();
+    await org.selectOption(value!);
+  }
   const capacity = page.getByTestId("invite-capacity");
   if (await capacity.isVisible().catch(() => false)) {
     const values = await capacity.locator("option").evaluateAll((os) => (os as HTMLOptionElement[]).map((o) => o.value));

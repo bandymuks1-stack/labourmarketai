@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
@@ -39,6 +40,11 @@ import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { formatUtcDate } from "@/lib/time/display";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { ExplainMore } from "@/components/app/premium/disclosure";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/work-in-numbers", "journal.intelligence.numbers.stationTitle");
+
 
 /**
  * MANO VEIKLA SKAIČIAIS — the Work-in-Numbers station (target worker IA
@@ -330,13 +336,7 @@ export default async function WorkInNumbersPage({
         <OrgLedger view={orgLedger(wi)} periodWord={scope} locale={locale} t={t} />
       ) : null}
 
-      <Link
-        href="/dashboard/journal"
-        className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
-        data-testid="wi-back-to-journal"
-      >
-        ← {t("numbers.backToJournal")}
-      </Link>
+      <PageBack href="/dashboard/journal" data-testid="wi-back-to-journal">{t("numbers.backToJournal")}</PageBack>
     </div>
   );
 }

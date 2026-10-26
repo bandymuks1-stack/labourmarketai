@@ -15,7 +15,8 @@
     "capacity": "Kapazität",
     "work": "Arbeit & Stunden",
     "results": "Ergebnisse",
-    "history": "Verlauf"
+    "history": "Verlauf",
+    "areasTitle": "Unternehmensbereiche"
   },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
@@ -157,17 +158,15 @@
     "cancel": "Abbrechen",
     "edit": "Bearbeiten",
     "remove": "Löschen",
-    "removeConfirm": "Diese Anzeige endgültig löschen?",
     "activate": "Veröffentlichen",
-    "close": "Schließen",
-    "reopen": "Als Entwurf wieder öffnen",
+    "close": "Abschließen",
     "errorTitleRequired": "Ein Titel mit mindestens 3 Zeichen ist erforderlich.",
     "errorCountry": "Verwenden Sie einen 2-Buchstaben-Ländercode (z. B. DE).",
     "errorGeneric": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
     "status": {
       "draft": "Entwurf",
       "active": "Aktiv",
-      "closed": "Geschlossen",
+      "closed": "Abgeschlossen",
       "paused": "Pausiert"
     },
     "kinds": {
@@ -270,7 +269,18 @@
     "formPublisherLabel": "Veröffentlicht von",
     "publisherSelf": "Ich persönlich",
     "publishedAs": "Als {name}",
-    "publishedAsOrganization": "Als Organisation"
+    "publishedAsOrganization": "Als Organisation",
+    "republish": "Erneut veröffentlichen",
+    "removeForever": "Endgültig löschen",
+    "removeQuestion": "Endgültig löschen? Das lässt sich nicht rückgängig machen. Um das Inserat nur aus der Suche zu nehmen, pausiere es oder schließe es ab.",
+    "removeYes": "Ja, löschen",
+    "searchState": {
+      "draft": "Entwurf — für andere noch nicht sichtbar. Veröffentliche das Inserat, wenn es fertig ist.",
+      "active": "In der Suche sichtbar — andere können es finden und dir schreiben.",
+      "paused": "Pausiert — aus der Suche ausgeblendet. Veröffentliche es erneut, wenn es wieder aktuell ist.",
+      "closed": "Abgeschlossen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
+      "expired": "Abgelaufen — aus der Suche ausgeblendet. Ändere das Ablaufdatum und veröffentliche es erneut."
+    }
   },
   "quality": {
     "title": "Mängel & Qualität",
@@ -1058,6 +1068,18 @@
     "carryNote": {
       "no_company": "Ihr Text wurde nicht gespeichert: ohne Unternehmens-Arbeitsbereich hat ein Entwurf keine Zugehörigkeit. Das Bedarfsformular öffnet leer — das Unternehmen können Sie dort anlegen.",
       "failed": "Ihr Text konnte nicht gespeichert werden, daher öffnet das Bedarfsformular leer. Die Beschreibung müssen Sie erneut eingeben."
+    },
+    "headcount": {
+      "total": "Arbeitskräfte: {count}",
+      "teams": "Arbeitskräfte: {total} ({teams, plural, one {# Team} other {# Teams}} à {perTeam})"
+    },
+    "clarify": {
+      "title": "Bitte präzisieren",
+      "team_count_range": "Sie haben die Zahl der Teams als Spanne angegeben. Wie viele Teams genau, und wie viele Personen pro Team?",
+      "per_team_range": "Wie viele Personen genau gehören zu jedem Team?",
+      "team_size_missing": "Wie viele Personen gehören zu jedem Team? Bis dahin wird die Zahl der Arbeitskräfte nicht berechnet.",
+      "team_count_missing": "Wie viele Teams brauchen Sie?",
+      "headcount_unclear": "Sie haben mehrere Personen genannt, aber nicht wie viele. Wie viele genau?"
     }
   },
   "quickNav": {
@@ -1596,7 +1618,8 @@
         "no": "Noch nicht festgelegt"
       }
     },
-    "opportunitiesLink": "Passende Möglichkeiten ansehen"
+    "opportunitiesLink": "Passende Möglichkeiten ansehen",
+    "unrecordedHours": "{count, plural, one {# Eintrag nennt Stunden, die nie erfasst wurden} other {# Einträge nennen Stunden, die nie erfasst wurden}} — sie sind nicht in der Summe oben. Öffne den frühesten und trage die Stunden ein."
   },
   "profileState": {
     "readiness": {
@@ -1895,7 +1918,7 @@
     "workerVisibilityNote": "Ehrlicher Status: Anfragen verifizierter Unternehmen werden Arbeitskräften auf ihrem Chancen-Board angezeigt. Die Verifizierung ist eine manuelle Prüfung — bis Ihr Unternehmen verifiziert ist, bleiben Ihre Anfragen privat für Sie und das Prüfteam.",
     "empty": "Noch keine Anfragen eingereicht. Reichen Sie Ihre Anfrage oben ein — sie erscheint hier mit ihrem Status.",
     "created": "Erstellt",
-    "manageHelp": "Entwürfe können gelöscht werden. Das Schließen oder Wiedereröffnen einer eingereichten Anfrage — und das Bestätigen ihrer erkannten Fähigkeiten — erfolgt über ihre Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
+    "manageHelp": "Schließe eine Anfrage ab, nimm sie vom Markt oder veröffentliche sie erneut direkt in dieser Liste; einen Entwurf kannst du fortsetzen oder verwerfen. Das Bestätigen der erkannten Fähigkeiten erfolgt über die Scouting-Ansicht. Das Bearbeiten eingereichter Texte ist noch nicht verfügbar.",
     "detailsLabel": "Eingereichte Angaben",
     "fields": {
       "description": "Beschreibung",
@@ -2116,6 +2139,10 @@
           "title": "Starten Sie Ihr Unternehmensprofil",
           "body": "Sie haben noch kein Unternehmensprofil. Erstellen Sie eines — es ist sofort aktiv und nutzbar, ohne Warten auf eine Freigabe.",
           "cta": "Unternehmenseinrichtung starten"
+        },
+        "personalSpace": {
+          "title": "Sie sind gerade in Ihrem persönlichen Bereich",
+          "body": "Die Unternehmenswerkzeuge öffnen sich im Arbeitsbereich dieser Organisation — eine zweite Organisation anzulegen ist nicht nötig. Öffnen Sie Ihre:"
         }
       },
       "typeNotes": {
@@ -3391,16 +3418,16 @@
         "gapsTitle": "Länderlücken (Nachfrage vs. Angebot)",
         "gapsEmpty": "Noch keine Nachfrage erfasst.",
         "gapLine": "{demand} Anfragen / {supply} Personen",
-        "thermoTitle": "Thermometer (nur wo beide Komponenten existieren)",
-        "thermoEmpty": "Noch keine Thermometerwerte — sie erscheinen, sobald ein belegter Marktdurchschnitt eingetragen ist UND eine Zelle eine Stichprobe von mindestens 2 erklärten Erwartungen hat.",
+        "thermoTitle": "Marktsignale (nur wo beide Komponenten existieren)",
+        "thermoEmpty": "Noch keine Marktsignalwerte — sie erscheinen, sobald ein belegter Marktdurchschnitt eingetragen ist UND eine Zelle eine Stichprobe von mindestens 2 erklärten Erwartungen hat.",
         "smallSample": "n<{n}"
       }
     },
     "league": {
       "eyebrow": "Arbeitsmarkt nach Land",
       "title": "Arbeitsmarkt nach Land",
-      "subtitle": "Berufstabellen pro Land — echte Teams, Verfügbarkeit und das Markt-Thermometer.",
-      "methodNote": "Ein Thermometerwert erscheint NUR dort, wo ein Admin einen belegten Marktdurchschnitt eingetragen hat UND die Stichprobe der erklärten Erwartungen mindestens 2 Personen umfasst. Überall sonst sagt die Zelle „unzureichende Marktdaten“ — die Tabelle bewertet niemals einen Menschen.",
+      "subtitle": "Berufstabellen pro Land — echte Teams, Verfügbarkeit und das Marktsignal.",
+      "methodNote": "Ein Marktsignalwert erscheint NUR dort, wo ein Admin einen belegten Marktdurchschnitt eingetragen hat UND die Stichprobe der erklärten Erwartungen mindestens 2 Personen umfasst. Überall sonst sagt die Zelle „unzureichende Marktdaten“ — die Tabelle bewertet niemals einen Menschen.",
       "back": "Zurück zum Admin-Hub",
       "empty": "Noch keine Daten — Tabellen erscheinen von selbst, sobald Arbeitskräfte ihre Berufe angeben.",
       "unknownCountry": "Land nicht angegeben",
@@ -3547,7 +3574,7 @@
     "opportunities": "Chancen: Sehen Sie Arbeit, die zu Ihnen passt. Die Sichtbarkeit hängt von der Netzwerkgröße und Ihrer Bereitschaft ab.",
     "marketplaceMap": "Marktkarte: Arbeitsmarktsignale nach Land und Region. Ein genauerer Punkt erscheint, sobald ein Standort festgelegt ist.",
     "adminReview": "Systemwartung: nur für den Administrator. Normale Benutzer sehen diese Ansichten nie.",
-    "paymentReadiness": "Zahlungen werden vorbereitet: Der kostenpflichtige Zugang ist noch nicht aktiv. Vorerst werden die ersten Benutzer manuell / über Owner-Prüfung aufgenommen. Stripe wird in der nächsten Phase angebunden.",
+    "paymentReadiness": "Zahlungen werden vorbereitet: Der kostenpflichtige Zugang ist noch nicht aktiv.",
     "identityModel": "Zwei Basisidentitäten: eine Person und ein Unternehmen. Kaufen, Verkaufen, Einstellen und Agenturtätigkeit sind Aktionen, keine separaten Identitäten."
   },
   "profileIdentityNotice": {
@@ -3594,7 +3621,8 @@
     "reviewBanner": {
       "title": "Einige Fähigkeiten benötigen eine Prüfung",
       "body": "Einige Einträge sind noch nicht eindeutig klassifiziert. Prüfen Sie sie oder fügen Sie weitere Informationen hinzu, damit Ihr Profil genauer gematcht werden kann.",
-      "cta": "Fähigkeiten prüfen"
+      "cta": "Fähigkeiten prüfen",
+      "noteLead": "{count, plural, one {Fähigkeit ist noch nicht durch Arbeitseinträge belegt.} other {Fähigkeiten sind noch nicht durch Arbeitseinträge belegt.}}"
     },
     "pageTitle": "Mein Profil",
     "pageSubtitle": "Was Sie tun, was Sie können und was das zeigt — alles an einem Ort.",
@@ -3919,7 +3947,7 @@
       "evidenceRecs": "Referenzen — helfen, Ihre Zuverlässigkeit zu belegen.",
       "evidenceLegal": "Ausweis- oder Rechtsdokumente — werden nur verwendet, wenn sie für eine Einstellung oder ein rechtliches Verfahren benötigt werden.",
       "privacyNote": "Ihre Dokumente bleiben privat. Sie werden ohne klare Grundlage keinem Arbeitgeber oder Kunden gezeigt.",
-      "uploadCostNote": "Das Hochladen eines Lebenslaufs ist kostenlos — es wird kein LMC abgebucht. Das System kommt mit der Dateigröße selbst zurecht."
+      "uploadCostNote": "Das Hochladen eines Lebenslaufs ist kostenlos — es werden keine Plattform-Guthaben (LMC) abgebucht. Das System kommt mit der Dateigröße selbst zurecht."
     }
   },
   "live": {
@@ -4751,10 +4779,10 @@
         "preview_workspace": "Vorschau",
         "comingLater": "Später verfügbar",
         "theme": {
-          "appearance": "Appearance",
-          "help": "Theme",
-          "toDark": "Dark",
-          "toLight": "Light"
+          "appearance": "Darstellung",
+          "help": "Design",
+          "toDark": "Dunkel",
+          "toLight": "Hell"
         },
         "security": {
           "title": "Sicherheit & Zugriff",
@@ -5057,8 +5085,8 @@
           "desc": "Definieren Sie Rollen, Personalstärke und Fähigkeiten."
         },
         {
-          "title": "Sehen, wer passen könnte",
-          "desc": "Sehen Sie Arbeitskräfte und Personalagenturen, deren Angaben zu Ihrem Bedarf passen könnten — Sie entscheiden, nichts wird automatisch bewertet oder gereiht."
+          "title": "Sehen, wer passt",
+          "desc": "Arbeitskräfte und Agenturen, deren Angaben zu Ihrem Bedarf passen, werden nach Passung mit Begründung gelistet — ein Hinweis, keine Garantie. Wen Sie kontaktieren, entscheiden Sie."
         },
         {
           "title": "Direkt Kontakt aufnehmen",
@@ -5552,7 +5580,7 @@
       },
       {
         "q": "Wie wird abgerechnet?",
-        "a": "Kartenzahlung über Stripe, Umsatzsteuer über Stripe Tax; Rechnungen, Kündigung und Änderungen im Organisationskonto."
+        "a": "Kartenzahlung über Stripe. Rechnungen, Zahlungsverlauf und Kündigung finden Sie im Organisationskonto."
       },
       {
         "q": "Gibt es eine Obergrenze für aktive Positionen?",
@@ -5621,7 +5649,6 @@
   },
   "legal": {
     "preparing": {
-      "body": "Die rechtlichen Informationen werden vorbereitet. Bevor kostenpflichtige Dienste oder ein Vertragsverhältnis beginnen, werden sie bereitgestellt und aktualisiert.",
       "contact": "Bei Fragen kontaktieren Sie uns."
     },
     "marketplaceRules": {
@@ -5634,10 +5661,9 @@
         "Öffentliche Angebote erscheinen erst nach Moderation; nicht vertrauenswürdige oder verdächtige Angebote werden ausgeblendet.",
         "Der Handel mit regulierten oder illegalen Waren und Dienstleistungen ist verboten.",
         "Ein Kartenpunkt erscheint nur mit verifizierten Koordinaten — keine gefälschten Markierungen.",
-        "Zahlungen sind noch nicht aktiv; in dieser Phase laufen keine Zahlungen über die Plattform.",
+        "Zahlungen zwischen Nutzern laufen nicht über die Plattform; über sie werden nur Entgelte für Plattformleistungen gezahlt.",
         "Unangemessenes Verhalten oder verdächtige Aktivitäten können gemeldet werden — Moderatoren prüfen sie."
-      ],
-      "reviewNote": "Diese Regeln beschreiben, wie sich die Plattform heute tatsächlich verhält. Die endgültige rechtliche Fassung der verbindlichen Dokumente wird noch vorbereitet und vor Beginn kostenpflichtiger Dienste vom Eigentümer und einem Anwalt geprüft."
+      ]
     },
     "terms": {
       "title": "Nutzungsbedingungen",
@@ -5669,7 +5695,7 @@
     },
     "privacy": {
       "title": "Datenschutzerklärung",
-      "intro": "Diese Seite erklärt in einfacher Sprache, welche personenbezogenen Daten Labour Market AI verwendet, warum sie verwendet werden und welche Rechte Sie haben. Sie beschreibt die Plattform, wie sie heute funktioniert, bevor Zahlungen aktiv sind.",
+      "intro": "Diese Seite erklärt in einfacher Sprache, welche personenbezogenen Daten Labour Market AI verwendet, warum sie verwendet werden und welche Rechte Sie haben. Sie beschreibt die Plattform, wie sie heute funktioniert.",
       "sections": [
         {
           "heading": "Wer für Ihre Daten verantwortlich ist",
@@ -5689,6 +5715,15 @@
             "Nachrichten, die Sie auf der Plattform senden und empfangen.",
             "Einwilligungsaufzeichnungen: Wenn Sie eine Einwilligung erteilen oder widerrufen, werden die Aktion und ihr Zeitpunkt gespeichert.",
             "Technische Daten, die für den Betrieb des Dienstes nötig sind, etwa Anmelde-Cookies (siehe Cookie-Richtlinie)."
+          ]
+        },
+        {
+          "heading": "Anmeldung mit Google, Facebook oder LinkedIn",
+          "items": [
+            "Sie können ein Konto erstellen und sich mit Ihrem Google-, Facebook- oder LinkedIn-Konto anmelden, statt sich mit Ihrer E-Mail-Adresse anzumelden. Dies dient nur Ihrer Anmeldung.",
+            "Wenn Sie einen davon wählen, bestätigt dieser Anbieter Ihre Identität und übermittelt der Plattform Ihre E-Mail-Adresse, Ihren Namen und die Kennung Ihres Kontos bei diesem Anbieter. Die Plattform fordert keine zusätzlichen Berechtigungen an — keinen Zugriff auf Ihre Freunde oder Kontakte, Beiträge oder Seiten — und veröffentlicht nie etwas in Ihrem Namen.",
+            "Ihre E-Mail-Adresse wird zur E-Mail-Adresse Ihres Kontos. Der Name vom Anbieter wird nur verwendet, um einen aus Ihrer E-Mail-Adresse abgeleiteten Platzhalternamen zu ersetzen; ein selbst eingegebener Name wird nie überschrieben. Den Anmeldedatensatz (den Anbieter, Ihre Kontokennung dort und die von ihm übermittelten Angaben) speichert unser Authentifizierungsdienst Supabase, verknüpft mit Ihrem Konto.",
+            "Um diese Daten zu löschen, löschen Sie Ihr LabourMarket.ai-Konto — die Schritte stehen auf der Seite „Konto- und Datenlöschung“. Wenn Sie LabourMarket.ai in Ihren Facebook-, Google- oder LinkedIn-Einstellungen entfernen, werden Ihr LabourMarket.ai-Konto und seine Daten dadurch allein nicht gelöscht."
           ]
         },
         {
@@ -5716,15 +5751,26 @@
           "items": [
             "Einwilligungszwecke sind getrennt: die Arbeitgeber-Sichtbarkeit Ihres beruflichen Profils und eine Datenübermittlung an ein bestimmtes Unternehmen sind zwei verschiedene Entscheidungen — keine ist mit den Bedingungen gebündelt, vorangekreuzt oder für die Nutzung von Konto, Lebenslauf oder Arbeitstagebuch erforderlich.",
             "Jeder Einwilligungsbildschirm zeigt den exakten versionierten Text, was sichtbar wird, was privat bleibt, und beide Optionen nebeneinander (einschalten / jetzt nicht). Eine Ablehnung ändert nichts an Ihrem Konto.",
-            "Sie können jede Einwilligung jederzeit in den Datenschutzeinstellungen in einem Schritt widerrufen. Nach dem Widerruf erscheint Ihr Profil sofort nicht mehr in neuen Unternehmenssuchen; Daten, die ein Unternehmen rechtmäßig erhielt, solange die Erlaubnis galt, können dort verbleiben — das sagen wir ehrlich.",
+            "Sie können jede Einwilligung jederzeit in den Datenschutzeinstellungen in einem Schritt widerrufen. Nach dem Widerruf erscheint Ihr Profil sofort nicht mehr in neuen Unternehmenssuchen; Daten, die ein Unternehmen rechtmäßig erhielt, solange die Erlaubnis galt, können dort verbleiben.",
             "Der Einwilligungsverlauf ist nur-anfügend: jede Erteilung und jeder Widerruf ist ein eigener unveränderlicher Eintrag mit Textversion, Sprache, Zeitpunkt und Zweck. Niemand — auch Administratoren nicht — kann ihn bearbeiten oder löschen, und kein Administrator kann in Ihrem Namen einwilligen."
+          ]
+        },
+        {
+          "heading": "Dienstleister, die Daten für die Plattform verarbeiten",
+          "items": [
+            "Supabase — Datenbank, Nutzeranmeldung und Dateispeicher.",
+            "Cloudflare — das Netzwerk vor der Website (Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen); jede Anfrage an die Website läuft darüber.",
+            "Stripe — Zahlungsabwicklung für kostenpflichtige Plattformleistungen. Wenn eine Organisation einen Checkout beginnt, erhält Stripe die E-Mail-Adresse des zahlenden Nutzers und eine interne Kontokennung; Kartendaten werden auf Stripes eigener Zahlungsseite eingegeben und von der Plattform nicht gespeichert.",
+            "Google, Facebook (Meta) und LinkedIn — nur wenn Sie sich mit ihnen anmelden, wie oben beschrieben.",
+            "Google (Gemini-API) — nur wie unten im Abschnitt über KI beschrieben.",
+            "Die vollständige Liste der Infrastrukturanbieter steht auf der Seite „Datenschutz“."
           ]
         },
         {
           "heading": "Ihre Rechte",
           "items": [
             "Sie können verlangen, die über Sie gespeicherten Daten einzusehen, sie zu berichtigen, eine Kopie davon zu erhalten, ihre Nutzung einzuschränken oder sie löschen zu lassen.",
-            "Ehrlicher aktueller Stand: Sie können eine Kopie Ihrer eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei selbst aus Ihrem Konto herunterladen. Die Löschung ist weiterhin ein Antrag, den ein Mensch prüft — es gibt keinen Sofort-Löschen-Knopf; kontaktieren Sie uns oder stellen Sie den Antrag, und ein Mensch wird ihn bearbeiten.",
+            "Sie können eine Kopie Ihrer eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei selbst aus Ihrem Konto herunterladen. Die Löschung Ihres Kontos können Sie auf der Datenschutz-Seite Ihres Kontos beantragen und nach erneuter Anmeldung bestätigen; das System löscht das Konto dann automatisch und sendet eine Bestätigung an die E-Mail-Adresse des Kontos. Müssen Daten gesetzlich aufbewahrt werden oder betreffen sie andere Personen, wird der Antrag geprüft und Sie erhalten die Entscheidung innerhalb eines Monats. Sie können uns auch kontaktieren — siehe die Seite „Konto- und Datenlöschung“.",
             "Wo die Verarbeitung auf einer Einwilligung beruht, können Sie diese Einwilligung jederzeit widerrufen."
           ]
         },
@@ -5732,8 +5778,7 @@
           "heading": "Wie lange Daten aufbewahrt werden",
           "items": [
             "Daten werden aufbewahrt, solange Ihr Konto aktiv ist und die zugehörige Funktion sie noch verwendet.",
-            "Einwilligungs- und Prüfaufzeichnungen werden als Historie aufbewahrt: Ein Widerruf wird aufgezeichnet, statt den Eintrag zu löschen.",
-            "Genaue Aufbewahrungsfristen sind Teil der endgültigen rechtlichen Fassung, die noch vorbereitet wird."
+            "Einwilligungs- und Prüfaufzeichnungen werden als Historie aufbewahrt: Ein Widerruf wird aufgezeichnet, statt den Eintrag zu löschen."
           ]
         },
         {
@@ -5744,11 +5789,6 @@
             "Was der Anbieter eines KI-Assistenten mit Ihrem Gespräch tut, regeln dessen eigene Datenschutzbestimmungen."
           ]
         }
-      ],
-      "pendingTitle": "Noch ausstehend bis zur endgültigen rechtlichen Fassung:",
-      "pendingItems": [
-        "Genaue Aufbewahrungsfristen je Datenkategorie.",
-        "Die verbindliche, anwaltlich geprüfte Fassung dieser Erklärung und der genannten Rechtsgrundlagen."
       ]
     },
     "cookies": {
@@ -5771,11 +5811,6 @@
       "localStorageNote": "Im eigenen Speicher Ihres Browsers (keine Cookies) liegen einige Einträge: Ihre Wahl des hellen oder dunklen Designs; welche Seite oder Kampagne Sie zuerst hierher geführt hat, einmalig gespeichert, damit eine spätere Registrierung ihr zugeordnet werden kann; eine zufällige Sitzungskennung je Tab, die beim Schließen des Tabs verschwindet; und kleine Annehmlichkeiten wie ausgeblendete Hinweise, zuletzt angesehene Einträge und Ihre Spracheingabesprache. Nichts davon wird an Dritte weitergegeben oder für Werbung genutzt, und Sie können es jederzeit über Ihren Browser löschen.",
       "noTracking": "Es gibt heute keine Analyse-, Werbe- oder Drittanbieter-Tracking-Cookies auf der Plattform. Sollte sich das jemals ändern, wird zuerst diese Seite aktualisiert."
     },
-    "pendingLegal": {
-      "badge": "Endgültige Fassung: Prüfung durch Eigentümer und Anwalt ausstehend",
-      "body": "Diese Seite erklärt in einfacher Sprache, wie die Plattform heute funktioniert. Sie ist nicht das endgültige Rechtsdokument: Die verbindliche Fassung wird noch vorbereitet und vor Beginn kostenpflichtiger Dienste oder eines Vertragsverhältnisses vom Eigentümer und einem Anwalt geprüft."
-    },
-    "disclaimer": "Diese Seite dient nur der Information und stellt keine Rechtsberatung dar.",
     "requestContact": "Um eine Frage zu stellen oder einen Antrag zu Ihren Daten zu stellen, kontaktieren Sie uns — ein Mensch wird ihn prüfen.",
     "related": "Verwandte Seiten",
     "accountSection": {
@@ -5828,7 +5863,7 @@
         {
           "heading": "Export und Löschung",
           "items": [
-            "Sie können Ihre eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei aus Ihrem Konto herunterladen. Die Löschung wird als geprüfter Antrag behandelt: Nichts wird sofort gelöscht — kontaktieren Sie uns und ein Mensch wird ihn bearbeiten."
+            "Sie können Ihre eigenen Daten als JSON-Datei und Ihr Arbeitsjournal als CSV-Datei aus Ihrem Konto herunterladen. Die Kontolöschung wird im Konto beantragt und nach erneuter Anmeldung bestätigt; das System löscht das Konto dann automatisch. Einen Antrag, der Daten betrifft, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen, prüft ein Mensch. Sie können uns auch kontaktieren, und ein Mensch bearbeitet den Antrag."
           ]
         },
         {
@@ -5839,7 +5874,7 @@
             "Cloudflare — das Netzwerk vor der Website: Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen. Jede Anfrage an die Website läuft darüber.",
             "GitHub — Speicherung des Quellcodes. Nutzerdaten werden dort nicht gespeichert.",
             "Google (Gemini-API) — KI-Verarbeitung zum Übersetzen von Nachrichten und Stellenanzeigen und zum Vorschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den die Aufgabe braucht.",
-            "Stripe — Zahlungsabwicklung. Ein Kundendatensatz entsteht nur, wenn eine Organisation einen Abonnement-Checkout beginnt; heute ist kein Abonnement aktiv.",
+            "Stripe — Zahlungsabwicklung. Ein Kundendatensatz entsteht nur, wenn eine Organisation einen Abonnement-Checkout beginnt.",
             "Kein weiterer E-Mail-, KI-, Übersetzungs- oder Zahlungsanbieter ist aktiv. Wird einer aktiviert, wird zuerst diese Liste aktualisiert."
           ]
         },
@@ -5849,12 +5884,6 @@
             "Kein System kann absolute Sicherheit versprechen. Wenn Sie ein Problem bemerken, kontaktieren Sie uns — ein Mensch wird es prüfen."
           ]
         }
-      ],
-      "pendingTitle": "Noch ausstehend bis zur endgültigen rechtlichen Fassung:",
-      "pendingItems": [
-        "Die formale Beschreibung der technischen und organisatorischen Maßnahmen.",
-        "Unterzeichnete Auftragsverarbeitungsverträge mit den oben genannten Infrastrukturanbietern.",
-        "Endgültige Aufbewahrungsfristen."
       ]
     },
     "dataAccess": {
@@ -6032,7 +6061,7 @@
     "dataDeletion": {
       "title": "Konto- und Datenlöschung",
       "description": "So beantragen Sie die Löschung Ihres LabourMarket.ai-Kontos und Ihrer personenbezogenen Daten.",
-      "intro": "Sie können LabourMarket.ai bitten, Ihr Konto und Ihre personenbezogenen Daten zu löschen. Die Löschung wird derzeit als Antrag bearbeitet, den eine Person prüft; es gibt keine Schaltfläche zur sofortigen Kontolöschung. Wenn Sie sich anmelden können, können Sie den Antrag auch selbst stellen: Öffnen Sie die Datenschutz-Seite Ihres Kontos (in der mobilen App: Einstellungen → Datenschutz) und wählen Sie die Kontolöschung. In beiden Fällen antwortet ein Mensch innerhalb eines Monats.",
+      "intro": "Sie können LabourMarket.ai bitten, Ihr Konto und Ihre personenbezogenen Daten zu löschen. Wenn Sie sich anmelden können, können Sie den Antrag selbst stellen: Öffnen Sie die Datenschutz-Seite Ihres Kontos (in der mobilen App: Einstellungen → Datenschutz), wählen Sie die Kontolöschung und bestätigen Sie sie nach erneuter Anmeldung. Das System löscht das Konto dann automatisch und sendet eine Bestätigung an die E-Mail-Adresse des Kontos; müssen Daten gesetzlich aufbewahrt werden oder betreffen sie andere Personen, wird der Antrag geprüft und Sie erhalten die Entscheidung innerhalb eines Monats. Sie können die Löschung auch per E-Mail beantragen, wie unten beschrieben; ein Mensch antwortet innerhalb eines Monats.",
       "howTitle": "So beantragen Sie die Löschung",
       "howSteps": [
         "Schreiben Sie an {email} von der E-Mail-Adresse, die mit Ihrem LabourMarket.ai-Konto verknüpft ist.",
@@ -6103,6 +6132,8 @@
       "asksTitle": "Das Projekt braucht von Ihnen noch",
       "ledger": {
         "ratio": "{have} von {total} vorhanden",
+        "ratioNone": "Noch nichts zu prüfen",
+        "ratioUnknown": "noch nicht bekannt: {count}",
         "availability": "Verfügbarkeit",
         "state": {
           "valid": "Sie haben es",
@@ -6134,7 +6165,7 @@
           "none": "noch nichts erfasst"
         },
         "managerStatus": {
-          "needed": "wird erwartet",
+          "needed": "vor der Vereinbarung abzustimmen",
           "missing": "als fehlend markiert",
           "received": "erhalten",
           "checked": "geprüft",
@@ -6143,7 +6174,7 @@
         },
         "resolution": {
           "addDocument": "Dokument erfassen",
-          "issuingAuthority": "Ausgestellt von: {title}",
+          "informationSource": "Informationsquelle: {title}",
           "trainingProgram": "Kurs: {title}",
           "serviceOffering": "Dienstleistung: {title}",
           "serviceOfferingRate": "Dienstleistung: {title} ({rate})",
@@ -6236,6 +6267,11 @@
           "trip": "Dienstreise",
           "absence": "Nicht verfügbar",
           "plan": "Geplante Arbeit"
+        },
+        "unknownWhy": {
+          "undated_window": "Dieses Projekt hat keine Daten, daher lassen sich Überschneidungen mit anderen Verpflichtungen nicht prüfen.",
+          "undated_commitment": "Eine andere Verpflichtung dieser Person hat keine Daten, daher lassen sich freie Tage nicht bestätigen.",
+          "source_unreadable": "Ein Teil des Kalenders konnte gerade nicht gelesen werden, daher lassen sich freie Tage nicht bestätigen."
         }
       }
     },
@@ -6385,7 +6421,7 @@
       "totalAssigned": "Zugewiesen",
       "viaTeam": "Über Team",
       "ready": "Bereit",
-      "readyBasis": "Basiert nur auf den hier geprüften Feldern.",
+      "readyBasis": "Nach Fähigkeiten und Arbeitsnachweisen. Dokumente senken die Bereitschaft nie.",
       "needsDeclaredSkills": "Keine angegebenen Fähigkeiten",
       "needsEvidence": "Keine Arbeitsnachweise",
       "needsFollowUp": "Nachfassen nötig",
@@ -6404,7 +6440,7 @@
     "workersTitle": "Arbeitskräfte in diesem Projekt",
     "noWorkers": "Diesem Projekt sind noch keine Arbeitskräfte zugewiesen. Weisen Sie Arbeitskräfte aus Ihrem Team zu, um den Einsatz zu starten.",
     "worker": {
-      "readyChip": "Bereit (geprüfte Felder)",
+      "readyChip": "Bereit: Fähigkeiten und Arbeitsnachweise",
       "notReadyChip": "Noch nicht bereit",
       "declaredSkills": "Angegebene Fähigkeiten",
       "confirmedSkills": "Bestätigte Fähigkeiten",
@@ -6424,8 +6460,8 @@
     },
     "notesTitle": "Was diese Zahlen bedeuten",
     "notes": {
-      "readiness": "\"Bereit\" bedeutet nur, dass die hier geprüften Felder vorhanden sind (Name, mindestens eine angegebene Fähigkeit, mindestens ein Arbeitsnachweis-Eintrag). Es ist keine Verifizierung, keine Dokumentenfreigabe und kein KI-Urteil.",
-      "documents": "Dokumente werden noch nicht erfasst — kein Dokument wird irgendwo auf diesem Board als freigegeben oder verifiziert angezeigt.",
+      "readiness": "„Bereit“ heißt: Es gibt einen Namen, mindestens eine angegebene Fähigkeit und mindestens einen Arbeitsnachweis. Dokumente zählen nicht zur Bereitschaft und senken sie nie — was für diese Arbeit geprüft werden muss, wird vor der endgültigen Vereinbarung abgestimmt. Es ist weder eine Verifizierung noch eine KI-Bewertung.",
+      "documents": "Es müssen keine Dokumente hochgeladen werden. Nirgends auf dieser Tafel gilt ein Dokument als erhalten oder geprüft, solange eine Führungskraft es nicht so markiert.",
       "candidateSkill": "Klärungen zu Kandidaten-Fähigkeiten sind für jede Arbeitskraft privat; sie werden im eigenen Berufsprofil der Arbeitskraft angezeigt, nicht hier."
     },
     "report": {
@@ -6450,20 +6486,21 @@
       "rejected": "Abgelehnt"
     },
     "checklist": {
-      "title": "Bereitschaft / Dokumente",
-      "empty": "Noch nicht erfasst. Fügen Sie die Standard-Checkliste oder eigene Punkte hinzu.",
-      "seed": "Standard-Checkliste hinzufügen",
+      "title": "Vor der Vereinbarung abzustimmen",
+      "empty": "Nichts erfasst — es müssen keine Dokumente hochgeladen werden. Wenn für diese Arbeit etwas zu prüfen ist, fügen Sie die Vorschläge oder einen eigenen Punkt hinzu.",
+      "seed": "Vorschläge für diese Arbeit hinzufügen",
       "addItem": "Punkt hinzufügen",
       "addPlaceholder": "Bezeichnung des neuen Punkts",
-      "missing": "Fehlt",
+      "missing": "Als fehlend markiert",
       "received": "Erhalten",
       "checked": "Geprüft",
       "blocked": "Abgelehnt / abgelaufen",
-      "helper": "\"Geprüft\" bedeutet, dass ein Manager es hier als geprüft markiert hat — keine rechtliche Verifizierung. Ein Dokument ist nur dann \"erhalten\" oder \"geprüft\", wenn ein Manager es so setzt; nichts wird automatisch freigegeben."
+      "helper": "\"Geprüft\" bedeutet, dass ein Manager es hier als geprüft markiert hat — keine rechtliche Verifizierung. Ein Dokument ist nur dann \"erhalten\" oder \"geprüft\", wenn ein Manager es so setzt; nichts wird automatisch freigegeben.",
+      "toAgree": "Abzustimmen"
     },
     "readinessStatuses": {
       "not_required": "Nicht erforderlich",
-      "needed": "Erforderlich",
+      "needed": "Vor der Vereinbarung abzustimmen",
       "missing": "Fehlt",
       "received": "Erhalten",
       "checked": "Geprüft",
@@ -6484,8 +6521,8 @@
       "all": "Alle",
       "byStatus": "Status",
       "anyStatus": "Beliebiger Status",
-      "missingDocs": "Fehlende Dokumente/Infos",
-      "ready": "Bereit (geprüfte Felder)",
+      "missingDocs": "Als fehlend markiert",
+      "ready": "Bereit: Fähigkeiten und Arbeitsnachweise",
       "needsSkillInfo": "Fähigkeitsinfo nötig",
       "needsEvidence": "Keine Arbeitsnachweise",
       "docsChecked": "Dokumente geprüft",
@@ -6493,7 +6530,7 @@
       "none": "Keine Arbeitskräfte entsprechen diesem Filter.",
       "showAll": "Alle anzeigen",
       "empty": {
-        "missingDocs": "Derzeit fehlen bei keinem Arbeiter Dokumente oder Informationen.",
+        "missingDocs": "Keine Führungskraft hat bei jemandem etwas als fehlend markiert.",
         "ready": "Noch kein Arbeiter erfüllt alle hier geprüften Felder. Wählen Sie „Alle“, um zu sehen, was jeweils fehlt.",
         "needsSkillInfo": "Alle zugewiesenen Arbeiter haben ihre Fähigkeiten angegeben.",
         "needsEvidence": "Alle zugewiesenen Arbeiter haben mindestens einen Arbeitsnachweis.",
@@ -6502,7 +6539,7 @@
       }
     },
     "counters2": {
-      "withMissingDocs": "Fehlende Dokumente/Infos",
+      "withMissingDocs": "Als fehlend markiert",
       "docsReceived": "Dokumente erhalten",
       "docsChecked": "Dokumente geprüft",
       "docsBlocked": "Abgelehnt/abgelaufen"
@@ -6861,7 +6898,7 @@
     "saving": "Wird gespeichert...",
     "cancel": "Abbrechen",
     "edit": "Bearbeiten",
-    "remove": "Entfernen",
+    "remove": "Endgültig löschen",
     "activate": "Aktivieren",
     "pause": "Pausieren",
     "errorTitleRequired": "Fügen Sie einen Titel für die Dienstleistung hinzu.",
@@ -6879,7 +6916,9 @@
       "paused": "Pausiert — für Mitglieder ausgeblendet. Aktivieren Sie sie, um sie wieder auffindbar zu machen."
     },
     "linkToRequests": "Anfragen zu Ihren Dienstleistungen ansehen",
-    "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren."
+    "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren.",
+    "removeQuestion": "Diese Leistung endgültig löschen? Das lässt sich nicht rückgängig machen. Um sie nur aus der Suche zu nehmen, pausiere sie.",
+    "removeYes": "Ja, löschen"
   },
   "communication": {
     "origin": {
@@ -6996,7 +7035,7 @@
       "send": "Senden",
       "sent": "Antwort gesendet."
     },
-    "translatedFrom": "Übersetzt aus {lang}",
+    "translatedFrom": "Maschinelle Übersetzung aus {lang}",
     "showOriginal": "Originaltext ({lang})",
     "translationUnavailable": "Original ({lang}) — keine Übersetzung verfügbar",
     "loadError": "Nachrichten konnten gerade nicht geladen werden. Was Sie sehen, ist nicht das vollständige Bild — bitte erneut versuchen."
@@ -7644,7 +7683,16 @@
     "backHome": "Zurück zur Startseite",
     "dashboardSections": "Dashboard-Bereiche",
     "skipToContent": "Zum Inhalt springen",
-    "loading": "Wird geladen…"
+    "loading": "Wird geladen…",
+    "nav": {
+      "more": "Mehr",
+      "menu": "Menü",
+      "areas": "Arbeitsbereiche",
+      "close": "Schließen",
+      "youAreHere": "Du bist hier",
+      "previous": "Vorheriger Bereich",
+      "next": "Nächster Bereich"
+    }
   },
   "workerInvitations": {
     "title": "Ausstehende Einladungen",
@@ -7667,16 +7715,16 @@
     "cvBridgeLink": "CV öffnen",
     "inbox": {
       "title": "Arbeitsprüfung",
-      "confirmSkills": "Confirm skills",
-      "confirmSkillsHint": "Tick the skills this entry proves. Confirming verifies them.",
-      "confirmNote": "Optional note",
-      "confirmSubmit": "Confirm & verify",
-      "alreadyVerified": "Already verified",
+      "confirmSkills": "Fähigkeiten bestätigen",
+      "confirmSkillsHint": "Wählen Sie die deklarierten Fähigkeiten aus, die dieser Eintrag belegt — sie werden verifiziert.",
+      "confirmNote": "Notiz (optional)",
+      "confirmSubmit": "Bestätigen",
+      "alreadyVerified": "Bereits verifiziert",
       "noSkillsToConfirm": "Dieser Eintrag hat keine verknüpften Fähigkeiten mehr zu bestätigen. Die Freigabe bestätigt die Arbeit selbst.",
       "result": {
-        "skillsVerified": "Verified {count} skill(s).",
-        "skillNotOwned": "That skill is not declared by this worker.",
-        "noSkillsSelected": "Select at least one skill."
+        "skillsVerified": "Bestätigt. {count} Fähigkeit(en) verifiziert.",
+        "skillNotOwned": "Diese Fähigkeit gehört nicht zu dieser Arbeitskraft.",
+        "noSkillsSelected": "Wählen Sie mindestens eine Fähigkeit aus."
       }
     },
     "cv": {
@@ -7815,8 +7863,8 @@
     "readinessPanel": {
       "title": "So verbessern Sie Ihre Bereitschaft",
       "intro": "Das sollten Sie als Nächstes vervollständigen, um Ihre Karte zu stärken.",
-      "allReady": "Ihre Profilkarte ist vollständig. Dokumente für die Arbeit in einem bestimmten Land werden separat gezählt — siehe unten.",
-      "countryFit": "Für die Arbeit in einem anderen Land sind die richtigen Dokumente nötig. Ohne sie werden Sie nicht als bereit für Arbeit im Ausland angezeigt — Sie sehen nur legale Wege (Unternehmen übernimmt den Papierkram, Dokumentenunterstützung). Das System verspricht niemals das Recht auf Arbeit ohne Dokumente."
+      "allReady": "Ihre Profilkarte ist vollständig. Dokumente zählen nicht zur Bereitschaft — für die Arbeit in einem bestimmten Land werden sie vor der Vereinbarung mit dem Arbeitgeber abgestimmt.",
+      "countryFit": "Bei Arbeit in einem anderen Land können dessen Gesetze bestimmte Dokumente verlangen (zum Beispiel A1 bei einer Entsendung oder eine Arbeitserlaubnis für Nicht-EU- / EWR-Bürger). Sie müssen sie hier nicht hochladen, und ohne sie sinkt Ihre Bereitschaft nicht: Beide Seiten prüfen die konkreten Dokumente vor der endgültigen Vereinbarung. Das System verspricht nie ein Recht auf Arbeit, wo das Gesetz eine Erlaubnis verlangt."
     },
     "readinessSteps": {
       "pillar": {
@@ -7926,7 +7974,7 @@
       "confirmed": "Std. mit Eintrag der Leitung",
       "organizationHistory": "Std. in der Organisationshistorie",
       "experienceTotal": "Std. Berufserfahrung insgesamt",
-      "days": "{count, plural, one {Arbeitstag} other {Arbeitstage}}",
+      "days": "{count, plural, one {Tag mit Stunden} other {Tage mit Stunden}}",
       "modes": {
         "label": "Teile der Karte",
         "work": "Arbeit",
@@ -7995,19 +8043,10 @@
     "disclaimer": "Die Status basieren auf öffentlich aufgeführten Anforderungen und Ihren eigenen Angaben. Die endgültige Konformität wird von den Behörden oder einem Anwalt geprüft — dies ist keine rechtliche Garantie.",
     "needsMigration": "Derzeit nicht verfügbar.",
     "guidance": {
-      "title": "Dokumentenleitfaden nach Land (Entwurf)",
+      "title": "Dokumentenleitfaden nach Land",
       "intro": "Informative Hinweise zu Dokumenten, die benötigt werden könnten. Keine Rechtsberatung.",
-      "pendingNotice": "Der rechtliche/dokumentbezogene Leitfaden wird aus der litauischen Masterversion vorbereitet.",
-      "draftDisclaimer": "ENTWURF: nur informativ, Prüfung durch Eigentümer und Rechtsabteilung steht aus. Prüfen Sie stets offizielle Quellen.",
-      "statusSummary": "Einträge: {total} · rechtliche Prüfung ausstehend: {awaiting}",
-      "status": {
-        "LT_DRAFT_READY": "LT-Entwurf fertig",
-        "OWNER_EDITING": "Eigentümer bearbeitet",
-        "OWNER_APPROVED_LT": "LT vom Eigentümer freigegeben",
-        "TRANSLATION_READY": "Bereit zur Übersetzung",
-        "TRANSLATED": "Übersetzt"
-      },
-      "needsLegalReview": "Rechtliche Prüfung ausstehend",
+      "pendingNotice": "Der Dokumentenleitfaden nach Land ist vorerst nur auf Litauisch verfügbar.",
+      "officialSources": "Prüfen Sie stets offizielle Quellen.",
       "whoProvides": "Wer es üblicherweise organisiert",
       "groupAll": "Allgemein (alle Länder)",
       "helpInfoNote": "Dies sind informative Hinweise. Anfragen zu Dokumenten, Buchhaltung oder rechtlicher Hilfe können aus dem Unternehmensbereich gestellt werden.",
@@ -8039,8 +8078,9 @@
       "help": "Wählen Sie ein Zielland, um zu sehen, welche Dokumente dort verlangt werden.",
       "mine": "Ihre Wunschländer stehen zuerst.",
       "unknown": "Die Anforderungsliste für {country} wurde noch nicht kuratiert — wir zeigen lieber nichts an, statt zu raten.",
-      "next": "Nächster Schritt: kümmern Sie sich um — {doc}.",
-      "ok": "Alle kuratierten Anforderungen für {country} sind abgedeckt."
+      "next": "Wenn Sie in diesem Land arbeiten, stimmen Sie dies vor der Vereinbarung mit dem Arbeitgeber ab: {doc}. Hochladen ist nicht nötig.",
+      "ok": "Alle kuratierten Anforderungen für {country} sind abgedeckt.",
+      "postingNeedsBase": "Die A1-Bescheinigung und die Entsendemeldung werden nur angezeigt, wenn Ihr Herkunftsland bekannt ist und vom Arbeitsland abweicht. Ihr Herkunftsland ist noch nicht angegeben."
     },
     "types": {
       "cv": "Lebenslauf",
@@ -8078,13 +8118,13 @@
     },
     "overall": {
       "not_enough_information": "Noch nicht genügend Informationen",
-      "missing_documents": "Fehlende Dokumente",
+      "missing_documents": "Nicht jedes Dokument aus den Regeln dieses Landes ist erfasst",
       "needs_verification": "Bereit nach Verifizierung",
       "almost_ready": "Fast bereit",
       "ready_for_country": "Bereit für dieses Land",
       "availabilityHint": "Geben Sie Ihre Verfügbarkeit an, um die Bereitschaft abzuschließen."
     },
-    "needsLegalReview": "rechtliche Prüfung erforderlich",
+    "needsLegalReview": "Quelle nicht bestätigt",
     "sourceLink": "Quelle",
     "scopeNote": "Basierend auf offiziellen EU-Quellen zu entsandten Arbeitskräften — bestätigen Sie die nationalen Besonderheiten bei der zuständigen Behörde. Dies ist eine Information, keine Rechtsberatung.",
     "editor": {
@@ -8732,6 +8772,12 @@
     "teamOffersWaiting": "{count, plural, one {# Teamangebot wartet auf Ihre Antwort} other {# Teamangebote warten auf Ihre Antwort}}",
     "unstructuredTag": "Anforderungen nicht bestätigt",
     "notStructured": "Dieser Bedarf hat noch keine strukturierten Fähigkeiten, daher kann kein Match berechnet werden. Strukturiere zuerst die benötigten Fähigkeiten.",
+    "handRaisers": {
+      "title": "Personen, die sich für diesen Bedarf gemeldet haben",
+      "notAssessed": "Berufliche Passung nicht bewertet. Dieser Bedarf nennt keinen Beruf, daher wurde niemand damit verglichen. Diese Personen werden angezeigt, weil sie selbst um Kontakt gebeten haben, nicht weil sie passen; Fähigkeiten, Qualifikationen oder Eignung werden damit nicht behauptet.",
+      "badge": "Berufliche Passung nicht bewertet",
+      "ownWords": "Alles, was über diese Person angezeigt wird, stammt aus ihrem eigenen Profil; nichts davon wurde mit dem Bedarf verglichen."
+    },
     "needsSetup": "Scouting ist in dieser Umgebung noch nicht verfügbar.",
     "noCandidates": "Noch keine passenden Arbeitskräfte für diesen Bedarf.",
     "namePlaceholder": "Arbeitskraft",
@@ -8783,7 +8829,7 @@
     "candidate": "Kandidat",
     "privacy": {
       "contactsHidden": "Kontaktdaten bleiben verborgen — keine Telefonnummer, E-Mail oder Name.",
-      "profileSafe": "Sie sehen nur profilsichere Signale: Fähigkeitsnachweise, Standort, Verfügbarkeit und Satz. Die Kontaktaufnahme erfolgt später, über einen expliziten Schritt."
+      "profileSafe": "Sie sehen nur profilsichere Signale: Fähigkeitsnachweise, Standort, Verfügbarkeit und Satz. Name und Kontaktdaten erscheinen erst, wenn die Person es erlaubt."
     },
     "fields": {
       "location": "Standort",
@@ -8801,9 +8847,10 @@
     "rateFrom": "ab {min} €/Monat",
     "noRate": "Nicht angegeben",
     "comms": {
-      "eligible": "Diese Arbeitskraft hat eine offene Verfügbarkeit — das Messaging wird in einem späteren Schritt geöffnet.",
+      "eligible": "Diese Arbeitskraft hat eine offene Verfügbarkeit — Sie können sie über die Plattform kontaktieren.",
       "inConversation": "Sie sind mit dieser Arbeitskraft bereits im Gespräch — setzen Sie es unter Nachrichten fort.",
-      "blocked": "Die Kommunikation wird verfügbar, wenn die Arbeitskraft eine offene Verfügbarkeit oder ein Verfügbar-ab-Datum hat."
+      "blocked": "Die Kommunikation wird verfügbar, wenn die Arbeitskraft eine offene Verfügbarkeit oder ein Verfügbar-ab-Datum hat.",
+      "interestDoor": "Diese Person hat selbst Interesse gezeigt — Sie können ihr schon jetzt schreiben, mit „In der Plattform kontaktieren“."
     },
     "request": {
       "button": "Kommunikation anfragen",
@@ -9036,8 +9083,8 @@
       "contact": "Individuell vereinbart"
     },
     "readiness": {
-      "draft_pricing": "Die Pläne sind vorbereitet, nicht kaufbar. Die Preise sind noch ein Entwurf des Inhabers — kein Preis hier ist endgültig, und es kann nichts gekauft werden.",
-      "owner_confirmed": "Die Preise sind vom Inhaber bestätigt, aber die Pläne bleiben nur vorbereitet — es kann nichts gekauft werden, bis Zahlungen aktiviert sind."
+      "draft_pricing": "Die Pläne sind vorbereitet, nicht kaufbar. Kein Preis hier ist endgültig, und es kann nichts gekauft werden.",
+      "owner_confirmed": "Die Pläne sind nur vorbereitet — es kann nichts gekauft werden, bis Zahlungen aktiviert sind."
     },
     "featuresLabel": "In dieser Plangrenze enthalten",
     "limitValue": "bis zu {count}",
@@ -9090,6 +9137,7 @@
     "intro": "Vorgeschlagene Einsätze. Eine Buchung ist erst bestätigt, wenn die Arbeitskraft annimmt.",
     "notAuthed": "Bitte melden Sie sich an, um Ihre Buchungen zu sehen.",
     "unavailable": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+    "readFailed": "Ihre Buchungen konnten gerade nicht geladen werden — das heißt nicht, dass Sie keine haben. Versuchen Sie es erneut.",
     "noDate": "Kein Startdatum festgelegt",
     "noRole": "Arbeitsvereinbarung",
     "startsOn": "Beginnt am {date}",
@@ -9166,7 +9214,8 @@
       "alreadyAccepted": "Die Arbeitskraft hat diesen Vorschlag bereits angenommen — vereinbarte Bedingungen werden hier nicht überschrieben. Änderungen im Gespräch abstimmen.",
       "refusedNotReachable": "Dieser Person kann hier keine Buchung vorgeschlagen werden — ihr Profil ist für Arbeitgeber nicht sichtbar und es besteht keine Arbeitsbeziehung mit Ihnen.",
       "refusedNeedClosed": "Dieser Bedarf ist geschlossen — öffnen Sie ihn erneut, bevor Sie eine Buchung vorschlagen.",
-      "refusedAnswered": "Die Arbeitskraft hat diesen Vorschlag abgelehnt; ohne ihre neue Zustimmung wird er nicht wieder geöffnet. Schreiben Sie im Gespräch weiter oder finden Sie eine andere Arbeitskraft."
+      "refusedAnswered": "Die Arbeitskraft hat diesen Vorschlag abgelehnt; ohne ihre neue Zustimmung wird er nicht wieder geöffnet. Schreiben Sie im Gespräch weiter oder finden Sie eine andere Arbeitskraft.",
+      "unconfirmed": "Noch keine Antwort vom Server. Der Vorschlag wurde möglicherweise schon gesendet — prüfen Sie Buchungen oder senden Sie ihn erneut (derselbe Vorschlag wird nie doppelt angelegt)."
     },
     "reason": {
       "optionalTitle": "Grund (optional)",
@@ -9215,7 +9264,8 @@
     "clash": {
       "acceptAnyway": "Ich weiß, dass es sich überschneidet — trotzdem annehmen",
       "stillStands": "Die Annahme beseitigt die Überschneidung nicht. Beide Buchungen behalten ihre Termine, der Konflikt bleibt im Kalender sichtbar, und Ihre Entscheidung wird festgehalten.",
-      "acknowledged": "Mit bekannter Überschneidung angenommen. {count} bestehende Buchung(en) überschneiden sich weiterhin — nichts wurde storniert oder ausgeblendet, Ihre Entscheidung ist dokumentiert."
+      "acknowledged": "Mit bekannter Überschneidung angenommen. {count} bestehende Buchung(en) überschneiden sich weiterhin — nichts wurde storniert oder ausgeblendet, Ihre Entscheidung ist dokumentiert.",
+      "notRecordable": "Diese Termine überschneiden sich mit einer Buchung, die Sie bereits angenommen haben, und diese Überschneidung kann noch nicht erfasst werden – Sie können dieses Angebot ablehnen oder es offen lassen, damit das Unternehmen die Termine ändern kann."
     },
     "proposedBy": "Vorgeschlagen von {name}",
     "termsChanged": "Das Unternehmen hat die Bedingungen geändert. Sie hatten zugestimmt: {previous}. Entscheiden Sie neu über die neuen Daten."
@@ -9432,7 +9482,7 @@
         "body": "Pro eingestellter Arbeitskraft, Kolonne oder Unternehmensvermittlung gilt eine feste Erfolgsgebühr. Eine separate Koordinationsgebühr fällt nur an, wenn Dokumenten- oder Onboarding-Koordination tatsächlich erbracht wird. Der endgültige Preis wird bestätigt, bevor bezahlte Arbeit beginnt."
       }
     ],
-    "note": "Zwei Dinge laufen nebeneinander, und diese Seite beschreibt das zweite. Die Plattform selbst arbeitet automatisch: die Stellenübersicht ist öffentlich, die Match-Vorschau ist ohne Konto zugänglich, und eine gestellte Anfrage ergibt eine sortierte Kandidatenliste mit Begründung, warum jemand passt — eine aktive Position kostenfrei. Der bezahlte Service oben ist der menschliche Teil: ein Mitarbeiter liest Ihre Anfrage, nimmt Kontakt auf und prüft die Liste von Hand, bevor jemand vorgeschlagen wird. Eine ganze Kolonne als eine Einheit anzubieten oder einzusetzen ist noch nicht gebaut — heute wird eine Kolonne Person für Person gematcht.",
+    "note": "Zwei Dinge laufen nebeneinander, und diese Seite beschreibt das zweite. Die Plattform selbst arbeitet automatisch: die Stellenübersicht ist öffentlich, die Match-Vorschau ist ohne Konto zugänglich, und eine gestellte Anfrage ergibt eine sortierte Kandidatenliste mit Begründung, warum jemand passt — eine aktive Position kostenfrei. Der bezahlte Service oben ist der menschliche Teil: ein Mitarbeiter liest Ihre Anfrage, nimmt Kontakt auf und prüft die Liste von Hand, bevor jemand vorgeschlagen wird. Eine ganze Kolonne kann sich bereits als eine Einheit auf Ihre Anfrage anbieten und, sobald beide Seiten einig sind, Ihrem Projekt als ein Team beitreten; die automatische Kandidatenliste schlägt noch nicht ganze Kolonnen vor — sie ordnet Personen einzeln.",
     "ctaLabel": "Personalanfrage einreichen →"
   },
   "adminLaunchReadiness": {
@@ -9518,7 +9568,7 @@
       "users": "Personen und Aktivität",
       "teams": "Brigaden und Einladungen",
       "b2b": "B2B-Markt",
-      "work": "Arbeitsjournal und Living CV",
+      "work": "Arbeitsjournal und lebendiger Lebenslauf",
       "technical": "Technik"
     },
     "col": {
@@ -10101,7 +10151,7 @@
     },
     "personal": {
       "title": "Ihre Möglichkeiten",
-      "subtitle": "Die besten derzeit gefundenen Möglichkeiten auf Grundlage Ihrer Angaben und Ihres Living CV.",
+      "subtitle": "Die besten derzeit gefundenen Möglichkeiten auf Grundlage Ihrer Angaben und Ihres lebendigen Lebenslaufs.",
       "discoverTitle": "Mehr für Sie",
       "discoverSubtitle": "Bis zu {count} passende Möglichkeiten aus den heute für Sie geprüften.",
       "status": {
@@ -10916,6 +10966,8 @@
       "expired": "Abgelaufen"
     },
     "graceNotice": "Die letzte Zahlung ist fehlgeschlagen — das Abonnement befindet sich bis zum erneuten Versuch in einer Kulanzfrist.",
+    "endsOn": "Gekündigt — der Plan bleibt bis {date} aktiv und verlängert sich nicht.",
+    "endsAtPeriodEnd": "Gekündigt — der Plan bleibt bis zum Ende des bezahlten Zeitraums aktiv und verlängert sich nicht.",
     "manage": {
       "open": "Abonnement verwalten",
       "opening": "Wird geöffnet…",
@@ -10978,6 +11030,7 @@
       "salaryExpectation": "Gehaltsvorstellung",
       "skillsCount": "Fähigkeiten",
       "anonymousLabel": "Unternehmen sehen Sie als",
+      "anonymousValue": "Kandidat {token}",
       "currentCountry": "Aktuelles Land",
       "availableFrom": "Verfügbar ab",
       "contractType": "Beschäftigungsform",
@@ -11145,6 +11198,13 @@
         "unknown": "Es konnte nicht geprüft werden, ob Unternehmen Ihr Profil sehen können. Das heißt nicht, dass die Sichtbarkeit aus ist — öffnen Sie Ihre Datenschutzeinstellungen.",
         "noWorker": "Die Sichtbarkeit für Arbeitgeber gilt für ein Arbeitnehmerprofil, und dieses Konto hat noch keines."
       }
+    },
+    "switch": {
+      "privateLine": "Diese Einstellung zeigt niemals: Ihren Namen, Ihre Telefonnummer, Ihre E-Mail-Adresse, Ihre Arbeitsjournal-Einträge und Links zu externen Profilen.",
+      "turnOn": "Bedingungen lesen und einschalten",
+      "details": "Was Unternehmen sehen und die vollständigen Bedingungen",
+      "grantedNote": "Erledigt — Unternehmen können Ihr berufliches Profil jetzt finden, unter einer anonymen Kennung.",
+      "withdrawnNote": "Erledigt — Ihr Profil erscheint nicht mehr in neuen Suchen von Unternehmen."
     }
   },
   "planning": {
@@ -11386,9 +11446,9 @@
       "coveredShort": "{count} gedeckt"
     },
     "notes": {
-      "assignmentsPending": "Zuweisungsdaten sind vorbereitet und erscheinen in dieser Ansicht nach Freischaltung durch den Eigentümer.",
-      "languagesPending": "Die Sprachabdeckung ist vorbereitet und erscheint in dieser Ansicht nach Freischaltung durch den Eigentümer.",
-      "brigadesPending": "Die Kolonnenabdeckung ist vorbereitet und erscheint in dieser Ansicht nach Freischaltung durch den Eigentümer.",
+      "assignmentsPending": "Zuweisungsdaten werden in dieser Ansicht noch nicht angezeigt.",
+      "languagesPending": "Die Sprachabdeckung wird in dieser Ansicht noch nicht angezeigt.",
+      "brigadesPending": "Die Kolonnenabdeckung wird in dieser Ansicht noch nicht angezeigt.",
       "demandError": "Arbeitsbedarfe konnten gerade nicht gelesen werden.",
       "projectError": "Projekte konnten gerade nicht gelesen werden.",
       "capacityError": "Ein Teil der Kapazitätsdaten konnte gerade nicht gelesen werden."
@@ -11415,7 +11475,7 @@
     },
     "utilisation": {
       "title": "Verplanter Anteil der kommenden Wochen",
-      "committedDays": "{committed} von {counted} Personentagen verplant — {workers} Personen über {days} Tage",
+      "committedDays": "{committed} von {counted, plural, one {# Personentag} other {# Personentagen}} verplant — {workers, plural, one {# Person} other {# Personen}} über {days, plural, one {# Tag} other {# Tage}}",
       "noneCounted": "Für diesen Zeitraum konnten von niemandem Verpflichtungen gezählt werden.",
       "partial": "{count} davon konnten nicht vollständig gezählt werden — etwas Reales hat keine Daten, die Zahl oben ist also eine Untergrenze.",
       "unknown": "{count} konnten gar nicht gelesen werden. Das ist nicht dasselbe wie frei.",
@@ -11672,7 +11732,10 @@
       "docExpiring": "Dokumente, die innerhalb von 30 Tagen ablaufen",
       "docMissing": "Fehlende oder abgelaufene Dokumente",
       "docReview": "Dokumente in Prüfung oder zurückgegeben",
-      "financeOverdue": "Überfällige Finanzeinträge"
+      "financeOverdue": "Überfällige Finanzeinträge",
+      "journalReviews": "Arbeitseinträge, die auf Ihre Bestätigung warten",
+      "journalClientDecide": "Arbeitseinträge, die auf Ihre Entscheidung als Auftraggeber warten",
+      "partial": "Die Prüfliste der Arbeitseinträge konnte gerade nicht gelesen werden. Das heißt nicht, dass nichts wartet."
     },
     "sources": {
       "label": "Quellen",
@@ -11683,7 +11746,8 @@
       "workJournal": "Ihr Arbeitsjournal",
       "managerConfirmations": "Bestätigungen von Verantwortlichen",
       "projects": "Ihre Projekte",
-      "assignments": "Aktive Zuweisungen von Arbeitskräften"
+      "assignments": "Aktive Zuweisungen von Arbeitskräften",
+      "journalReviewQueue": "Prüfliste Arbeitseinträge"
     },
     "summaries": {
       "title": "Zusammenfassungen aus Ihren Daten",
@@ -12095,7 +12159,8 @@
     "empty": "Noch keine Sprachen hinzugefügt.",
     "notEnabled": "Derzeit nicht verfügbar. Nichts wurde gespeichert.",
     "error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
-    "invalid": "Wählen Sie eine Sprache und ein Niveau."
+    "invalid": "Wählen Sie eine Sprache und ein Niveau.",
+    "added": "Sprache hinzugefügt."
   },
   "externalProfiles": {
     "title": "Externe Profile",
@@ -12438,6 +12503,7 @@
     }
   },
   "people": {
+    "anonymousName": "Kandidat {token}",
     "eyebrow": "Personenprofil",
     "restrictedTitle": "Profil nicht verfügbar",
     "restrictedBody": "Sie können das Profil dieser Person nicht ansehen: Es besteht keine aktive Arbeitsbeziehung, oder die Person hat der Auffindbarkeit nicht zugestimmt.",
@@ -12803,7 +12869,7 @@
     },
     "stateNote": {
       "insufficientData": "Für dieses Signal gibt es noch nicht genug echte Daten — statt einer erfundenen Zahl wird eine ehrliche Lücke gezeigt.",
-      "needsMigration": "Der Datenspeicher hinter diesem Signal ist vorbereitet und wird nach Freigabe durch den Eigentümer angebunden. Bis dahin wird nichts geschätzt.",
+      "needsMigration": "Dieses Signal ist noch nicht aktiviert. Bis dahin wird nichts geschätzt.",
       "stale": "Die Belege hinter diesem Signal sind älter als das Aktualitätsfenster — betrachten Sie sie als veraltet."
     },
     "valueClass": {
@@ -12855,7 +12921,7 @@
         "agencyAggregate": "Kundenübergreifendes Aggregat"
       },
       "state": {
-        "needsMigration": "Dieses Signal ist vorbereitet und wartet auf die Freigabe durch den Eigentümer."
+        "needsMigration": "Dieses Signal ist noch nicht aktiviert."
       },
       "salary": {
         "noBenchmark": "Für Ihren Beruf und Ihr Land ist noch kein Gehaltsreferenzwert verfügbar.",
@@ -12890,7 +12956,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Vom Eigentümer freizugebender Datenspeicher (noch nicht aktiviert)",
+      "gatedMigration": "Datenspeicher noch nicht aktiviert",
       "marketRateAverages": "Vom Administrator kuratierte Marktsatz-Durchschnitte",
       "journalEvidence": "Ihre eigenen Arbeitsjournal-Nachweise",
       "fillTimeMeasurementsMissing": "Besetzungsdauer-Messungen (noch nicht erhoben)",
@@ -12948,14 +13014,14 @@
       },
       "terms": {
         "internal": "Interne Ableitung aus kanonischen Plattformtabellen; die Kohortenregel schützt Einzelpersonen.",
-        "adminCurated": "Vom Eigentümer eingegebene Durchschnitte mit Quellennotiz statt Stichprobengröße.",
-        "statGovLt": "Amtliche Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
-        "eurostat": "Amtliche EU-Statistik; Quellenangabe erforderlich; Aktivierung wartet auf Bestätigung des Eigentümers.",
+        "adminCurated": "Kuratierte Durchschnitte mit Quellennotiz statt Stichprobengröße.",
+        "statGovLt": "Amtliche Statistik; Quellenangabe erforderlich. Noch nicht in Verwendung.",
+        "eurostat": "Aktive Quelle. Amtliche EU-Statistik; Quellenangabe erforderlich.",
         "arbetsformedlingen": "Aktive Quelle. Nutzungsbedingungen bestätigt: eine kostenlose öffentliche Datenquelle (CC0). Bei jeder Anzeige wird die Quelle genannt, und jede Anzeige verlinkt zurück auf die Originalveröffentlichung.",
         "nav": "Aktive Quelle. Die API-Bedingungen von NAV sind akzeptiert und der Zugang ist erteilt. Die laufenden Pflichten werden umgesetzt: Eine zurückgezogene Anzeige wird sofort entfernt, eine geänderte zeitnah aktualisiert, und die Bewerbung führt zur Originalanzeige.",
-        "cvbankas": "Nur ein Vorschlag — Nutzungserlaubnis unbestätigt; wird nie mit internen Zahlen vermischt.",
-        "eures": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen.",
-        "uztLt": "Vorgeschlagene Quelle. Nutzungsbedingungen noch nicht geprüft — die Aktivierung erfordert die Bestätigung des Inhabers. Heute wird nichts abgerufen."
+        "cvbankas": "Vorgeschlagene Quelle — nicht in Verwendung; wird nie mit internen Zahlen vermischt.",
+        "eures": "Vorgeschlagene Quelle. Nicht in Verwendung — heute wird nichts abgerufen.",
+        "uztLt": "Vorgeschlagene Quelle. Nicht in Verwendung — heute wird nichts abgerufen."
       },
       "status": {
         "active": "Aktiv (intern)",
@@ -12967,7 +13033,7 @@
     "methodology": {
       "title": "Methodik",
       "deterministic": "Alle Werte sind deterministisch und aus Datensätzen mit Quellen berechnet — nichts wird von KI geschätzt, und keine Zahl wird jemals erfunden.",
-      "externalOff": "Externe Quellen sind aus: Jeder externe Referenzwert ist ein Vorschlag, der auf die rechtliche Bestätigung des Eigentümers wartet. Interne und externe Zahlen werden nie vermischt.",
+      "externalOff": "Externe Quellen sind aus. Interne und externe Zahlen werden nie vermischt.",
       "cohort": "Kleine Kohorten werden gebündelt oder unterdrückt, um Einzelpersonen zu schützen."
     },
     "contextual": {
@@ -13086,7 +13152,7 @@
       },
       "unavailable": {
         "requirementTitle": "Was benötigt wird",
-        "sourcesTitle": "Quellen, die auf die Freigabe des Inhabers warten"
+        "sourcesTitle": "Quellen, die noch nicht verwendet werden"
       },
       "reason": {
         "salaryNoBenchmark": "Hier steht keine Gehaltszahl, weil für Ihren Beruf und Ihr Land noch kein kuratierter Marktrichtwert erfasst ist und keine externe Gehaltsquelle zur Nutzung freigegeben wurde.",
@@ -13100,15 +13166,15 @@
         "eurostatNeedsActivation": "Offizieller Eurostat-Kontext ist vorbereitet; der erste offizielle Import wurde noch nicht ausgeführt, daher ist kein Wert verfügbar."
       },
       "requirement": {
-        "ownerEnableStore": "Der Plattforminhaber muss den Beobachtungsspeicher einschalten und mindestens eine Datenquelle freigeben.",
-        "salaryBenchmark": "Ein Administrator muss einen kuratierten Marktrichtwert für Ihren Beruf und Ihr Land erfassen, oder der Plattforminhaber muss eine externe Gehaltsquelle freigeben.",
+        "ownerEnableStore": "Der Beobachtungsspeicher muss eingeschaltet und mindestens eine Datenquelle freigegeben werden.",
+        "salaryBenchmark": "Ein kuratierter Marktrichtwert für Ihren Beruf und Ihr Land muss erfasst oder eine externe Gehaltsquelle freigegeben werden.",
         "demandOwnRows": "Erfassen Sie Arbeitsanfragen — diese Karte füllt sich aus den Daten Ihrer eigenen Organisation, sobald Einträge existieren.",
         "salaryBasis": "Die Gehaltsbasis (brutto oder netto) muss sowohl für Ihr Wunschgehalt als auch für den kuratierten Marktrichtwert erfasst sein, bevor ein ehrlicher Vergleich angezeigt werden kann.",
         "salaryInputs": "Tragen Sie Ihr Wunschgehalt in Ihrem Arbeitnehmerprofil ein — der Vergleich erscheint, sobald es vorliegt.",
         "eurostatActivation": "Ein begrenzter offizieller Eurostat-Import wird ausgeführt."
       },
       "after": {
-        "activation": "Nachdem der Inhaber eine Datenquelle freigegeben und aktiviert hat, füllt sich diese Karte mit belegten, datierten Zahlen — jede mit Verlässlichkeit, Aktualität, Quelle und Schritt-für-Schritt-Herkunft."
+        "activation": "Sobald eine Datenquelle aktiviert ist, füllt sich diese Karte mit belegten, datierten Zahlen — jede mit Verlässlichkeit, Aktualität, Quelle und Schritt-für-Schritt-Herkunft."
       }
     },
     "drawer": {
@@ -13256,7 +13322,7 @@
         "labourCostIndex": "Kein Gehaltsangebot und niemals Grundlage, das Gehalt einer Person abzuleiten."
       },
       "sectionTitle": "Europäischer Arbeitsmarktkontext",
-      "sectionIntro": "Offizielle Eurostat-Aggregate für die EU und ausgewählte europäische Märkte. Vorbereitet, wartet auf Aktivierung durch den Eigentümer.",
+      "sectionIntro": "Offizielle Eurostat-Aggregate für die EU und ausgewählte europäische Märkte.",
       "asOf": "Eurostat-Veröffentlichung vom {date} — diese Zahlen aktualisieren sich hier nicht von selbst.",
       "dataBasis": "Offizielles Eurostat-Aggregat (Quelle: Eurostat)",
       "whyVisible": "Angezeigt als offizieller europäischer Arbeitsmarktkontext.",
@@ -13637,8 +13703,8 @@
           "description": "Ein Listenpunkt eines Projektmitarbeiters erhält einen echten Status — benötigt, erhalten, geprüft."
         },
         "seedReadinessChecklist": {
-          "label": "Dokumentenliste beginnen",
-          "description": "Für alle Personen im Projekt wird die Standard-Bereitschafts-/Dokumentenliste begonnen."
+          "label": "Vorschläge zum Abstimmen hinzufügen",
+          "description": "Für alle im Projekt werden vorgeschlagene Punkte hinzugefügt, die vor der Vereinbarung abzustimmen sind. Es ist keine Pflichtliste und keine Bereitschaftsbewertung."
         },
         "requestReadiness": {
           "label": "Fehlendes anfragen",
@@ -13996,7 +14062,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# Kunde hat} other {# Kunden haben}} die Verbindung noch nicht bestätigt.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# Einladung eines Lernenden ist} other {# Einladungen von Lernenden sind}} noch nicht angenommen.",
       "briefDocumentsExpiring": "{count, plural, one {# Dokument läuft bald ab} other {# Dokumente laufen bald ab}}.",
-      "briefDocumentsMissing": "{count, plural, one {Für Ihre genannten Länder fehlt noch # Dokument} other {Für Ihre genannten Länder fehlen noch # Dokumente}}: {list}.",
+      "briefDocumentsMissing": "{count, plural, one {Die Regeln Ihrer angegebenen Länder können # Dokument verlangen} other {Die Regeln Ihrer angegebenen Länder können # Dokumente verlangen}}: {list}. Hochladen ist nicht nötig — Sie stimmen sie vor einer Vereinbarung mit dem Arbeitgeber ab.",
       "briefEmployerInterestWaiting": "{count, plural, one {# Kandidat wartet auf Ihre Antwort} other {# Kandidaten warten auf Ihre Antwort}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# Agenturangebot wartet auf Ihre Entscheidung} other {# Agenturangebote warten auf Ihre Entscheidung}}.",
       "briefInterestContacted": "{count, plural, one {# Unternehmen möchte Sie wegen Ihres Interesses kontaktieren} other {# Unternehmen möchten Sie wegen Ihres Interesses kontaktieren}}.",
@@ -14064,7 +14130,8 @@
           "location": "Wo (Stadt oder Land)?",
           "window": "Wann — welche Woche oder welcher Monat?",
           "quantity": "Welche Menge?",
-          "headcount": "Wie viele Personen werden benötigt?"
+          "headcount": "Wie viele Personen werden benötigt?",
+          "team_size": "Wie viele Teams und wie viele Personen pro Team?"
         },
         "unclear": "Ich bin nicht sicher, ob Sie etwas anbieten oder etwas suchen. Schreiben Sie, was Sie haben oder was Sie brauchen.",
         "goodsChannelGated": "Sie können dies am Anzeigenbrett unter „Waren“ einstellen — dort sehen es die Personen, die das Brett durchsehen. Nichts wird gespeichert, bis Sie es veröffentlichen.",
@@ -14079,7 +14146,8 @@
         "serviceNext": "Sie können dies als Dienstleistungsangebot veröffentlichen, damit andere es finden.",
         "chipServices": "Dienstleistungen öffnen",
         "corrected": "Aktualisiert: {changes}.",
-        "changeInsteadOf": "{next} (statt {previous})"
+        "changeInsteadOf": "{next} (statt {previous})",
+        "teams": "{teams, plural, one {# Team} other {# Teams}} à {perTeam}"
       },
       "createOrganizationHint": "Ich kann mit Ihnen eine Organisation anlegen — die Angaben und die Verifizierung stehen auf einer Seite.",
       "chipCreateOrganization": "Organisation anlegen",
@@ -14485,8 +14553,8 @@
       "missingDeclaredSkills": "angegebene Fähigkeiten",
       "missingEvidence": "Arbeitsnachweise",
       "blockedSuffix": "(abgelehnt / abgelaufen)",
-      "readinessSeedChip": "Dokumentenliste beginnen ({count} Pers.)",
-      "readinessSeeded": "Liste begonnen: {count} Pers. × {items} Punkte — alle „benötigt“.",
+      "readinessSeedChip": "Vorschläge zum Abstimmen hinzufügen ({count} Personen)",
+      "readinessSeeded": "Vorschläge hinzugefügt: {count} Personen × {items} Punkte — alle „vor der Vereinbarung abzustimmen“.",
       "readinessGotChip": "Erhalten: {label} ({name})",
       "readinessGotDone": "Als erhalten markiert: {label} ({name}).",
       "readinessCheckedChip": "Geprüft: {label} ({name})",
@@ -14529,7 +14597,7 @@
       "moveAskProject": "Wohin soll {name} versetzt werden? Bitte wählen:",
       "moveWhatIfTitle": "Wenn {name} von „{from}“ nach „{to}“ wechselt:",
       "moveFromLine": "• „{from}“: Personen {before} → {after}; {tasks} offene Arbeitspakete bleiben dort bei ihm; Bereitschaftsliste dort: {checked}/{total}.",
-      "moveToLine": "• „{to}“: Personen {before} → {after}; die Bereitschaftsliste dort beginnt bei 0/{total}.",
+      "moveToLine": "• „{to}“: Personen {before} → {after}; was dort abzustimmen ist, ist noch nicht gewählt (bis zu {total} Punkte vorgeschlagen).",
       "moveCountryLine": "• Das Land wechselt: {from} → {to} — andere Dokumentanforderungen.",
       "moveNoDatesLine": "• „{to}“ hat keine Daten — Abwesenheiten können nicht geprüft werden.",
       "moveAvailabilityUnknownLine": "• Abwesenheiten unbekannt.",
@@ -14893,6 +14961,9 @@
       "candidatesNotFound": "Dieser Bedarf wurde nicht gefunden oder gehört nicht Ihnen.",
       "candidatesNeedsMigration": "Derzeit nicht verfügbar.",
       "candidatesNotStructured": "Aus diesem Bedarf lässt sich noch nichts ableiten, es gibt also nichts zum Abgleichen. Das ist nicht dasselbe wie „niemand passt“.",
+      "handRaisersTitle": "Personen, die sich gemeldet haben",
+      "handRaisersNotAssessed": "Berufliche Passung nicht bewertet: Dieser Bedarf nennt keinen Beruf. Sie haben sich selbst gemeldet; Fähigkeiten, Qualifikationen oder Passung werden nicht behauptet.",
+      "handRaiserBadge": "Berufliche Passung nicht bewertet",
       "candidatesRetrievalCapped": "Es waren mehr Menschen erreichbar, als wir diesmal ansehen konnten — diese Liste ist also nicht das gesamte Angebot.",
       "candidatesEmpty": "Im sichtbaren Angebot passt derzeit niemand zu diesem Bedarf.",
       "candidatesCapped": "{shown} von {total} angezeigt.",
@@ -17350,7 +17421,21 @@
     "emailConsentNote": "E-Mail ist standardmäßig aus — gesendet wird nur für die Typen, die Sie hier einschalten.",
     "emailInactiveNote": "Der E-Mail-Versand ist auf der Plattform noch nicht aktiv. Ihre Auswahl wird gespeichert und gilt, sobald er aktiv ist.",
     "error": "Die Änderung konnte nicht gespeichert werden und wurde zurückgesetzt. Bitte versuchen Sie es erneut.",
-    "unavailable": "Benachrichtigungseinstellungen sind derzeit nicht verfügbar."
+    "unavailable": "Benachrichtigungseinstellungen sind derzeit nicht verfügbar.",
+    "saving": "Wird gespeichert…",
+    "saved": "Gespeichert.",
+    "push": {
+      "title": "Push-Benachrichtigungen auf diesem Gerät",
+      "intro": "Erhalten Sie einen kurzen Hinweis auf diesem Telefon oder Computer, wenn etwas Neues eintrifft. Angezeigt wird nur die Art der Benachrichtigung, nie der Nachrichtentext. Oben abgeschaltete Arten werden nie gesendet.",
+      "turnOn": "Push-Benachrichtigungen einschalten",
+      "turnOff": "Auf diesem Gerät ausschalten",
+      "working": "Wird ausgeführt…",
+      "on": "Push-Benachrichtigungen sind auf diesem Gerät eingeschaltet.",
+      "off": "Push-Benachrichtigungen sind auf diesem Gerät ausgeschaltet.",
+      "unsupported": "Dieser Browser kann keine Push-Benachrichtigungen empfangen. Auf dem iPhone fügen Sie die Seite zuerst zum Home-Bildschirm hinzu.",
+      "blocked": "Benachrichtigungen sind für diese Seite in den Browser-Einstellungen blockiert. Erlauben Sie sie dort und kommen Sie zurück.",
+      "error": "Das hat nicht geklappt. Es wurde nichts geändert. Bitte versuchen Sie es erneut."
+    }
   },
   "historyContext": {
     "project": "Projekt",
@@ -18126,6 +18211,29 @@
       "company_posting_registration": "Anmeldung der Entsendung durch das Unternehmen. Das ist eine Pflicht des Arbeitgebers, getrennt von dem, was die einzelne Arbeitskraft einreicht.",
       "company_tax_vat": "Umsatzsteuer-, Steuer- und Sozialversicherungsanmeldung des Unternehmens. Ob das gilt, hängt davon ab, worin die Arbeit besteht und wie lange sie dauert.",
       "national_specifics": "Länderspezifische Unterlagen — Branchen- oder Bauausweise, örtliche Registrierung, nationale Steuer- und Sozialversicherungsschritte. Die gibt es in den meisten Ländern, aber die Details sind national — prüfen Sie sie auf der offiziellen Seite."
+    },
+    "reading": {
+      "title": "In einfachen Worten",
+      "intro": "Wählen Sie Ihre Situation und fordern Sie eine kurze, geordnete Erklärung der Anforderungen oben an. Sie wird von KI als Vorschlag geschrieben: Jeder Schritt nennt die Anforderung, aus der er stammt, und die Anforderungen oben bleiben die Antwort.",
+      "scopeLabel": "Ihre Situation",
+      "cta": "In einfachen Worten erklären",
+      "pending": "Die Anforderungen werden gelesen...",
+      "resultTitle": "KI-Lesart der Anforderungen oben",
+      "attribution": "Geschrieben von {provider} {model} auf Basis der Anforderungen oben. Ein Vorschlag, keine Rechtsberatung und keine feststehende Tatsache.",
+      "stepsTitle": "Was zählt, der Reihe nach",
+      "stepSource": "Quelle:",
+      "stepLegalCheck": "rechtliche Prüfung nötig",
+      "legalCheck": "Ein Teil davon ist national und nicht EU-weit geregelt und wurde für dieses Land nicht geprüft. Klären Sie es bei der nationalen Behörde, bevor Sie sich darauf verlassen.",
+      "limitationsTitle": "Was diese Lesart nicht sagen kann",
+      "reviewNote": "Gleichen Sie diese Lesart mit den Anforderungen oben ab, bevor Sie handeln.",
+      "off": {
+        "not_authenticated": "Melden Sie sich an, um eine Erklärung in einfachen Worten anzufordern. Die Anforderungen oben sind auch ohne sie vollständig.",
+        "rate_limited": "Sie haben das gerade mehrfach angefragt. Versuchen Sie es in ein paar Minuten erneut.",
+        "no_research": "Für diese Situation gibt es hier keine recherchierten Anforderungen, daher gibt es nichts zu erklären.",
+        "ai_off": "KI ist in diesem Dienst derzeit ausgeschaltet, daher gibt es keine Erklärung in einfachen Worten. Die Anforderungen oben sind auch ohne sie vollständig.",
+        "ai_unavailable": "Die Erklärung konnte gerade nicht erstellt werden. Die Anforderungen oben bleiben unverändert.",
+        "unsourced": "Die Erklärung nannte eine Anforderung, die nicht in der Liste oben steht, und wurde deshalb verworfen statt angezeigt. Die Anforderungen oben bleiben unverändert."
+      }
     }
   },
   "organizationDoors": {
@@ -18275,7 +18383,9 @@
       "managesInvitations": "Verwaltet Einladungen",
       "grantInvitations": "Einladungen verwalten erlauben",
       "withdrawInvitations": "Einladungsverwaltung entziehen",
-      "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat."
+      "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat.",
+      "noAccountHint": "Eine Mitgliedsrolle kann nur jemandem gegeben werden, der bereits ein Konto hat. Laden Sie eine Person ohne Konto mit einem Einladungslink ein — sobald sie sich registriert und der Organisation beitritt, können Sie ihr hier eine Rolle geben.",
+      "noAccountCta": "Einladungslink erstellen"
     },
     "start": {
       "membersMoved": "Mitglieder und Einladungen von {workspace} werden in den Einstellungen der Organisation verwaltet.",
@@ -18744,7 +18854,23 @@
       "unavailable": "Planung ist hier noch nicht verfügbar.",
       "error": "Etwas ist schiefgelaufen. Versuch es erneut.",
       "planned_collides": "Geplant, aber diese Person ist an einigen dieser Tage bereits eingeplant. Sie entscheiden; stornieren Sie den Plan unten, falls er nicht passt.",
-      "planned_unknown": "Geplant, aber wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei."
+      "planned_unknown": "Geplant, aber wir konnten nicht bestätigen, dass diese Tage frei sind. Das ist nicht dasselbe wie frei.",
+      "recurrence_invalid": "Prüfen Sie die Wiederholung: Wählen Sie mindestens einen Wochentag oder eine Rotation mit 1–28 Arbeits- und 1–28 Ruhetagen.",
+      "recurrence_empty": "Dieses Muster hat zwischen diesen Daten keinen Arbeitstag. Es wurde nichts geplant.",
+      "recurrence_unavailable": "Wiederkehrende Schichten sind hier noch nicht verfügbar. Planen Sie den Zeitraum ohne Wiederholung."
+    },
+    "repeat": {
+      "legend": "Wiederholung",
+      "none": "Keine Wiederholung",
+      "weekly": "Wöchentliche Schichten",
+      "cycle": "Rotationsplan",
+      "weekdays": "Arbeitstage",
+      "cycleOn": "Arbeitstage am Stück",
+      "cycleOff": "Ruhetage am Stück",
+      "cycleOffset": "Bereits gearbeitete Tage am ersten Tag (0 = beginnt neu)",
+      "hint": "Die Schichten wiederholen sich innerhalb der Daten oben und erscheinen im Kalender als Plan. Eine Schicht, die auf Urlaub oder andere Arbeit fällt, wird gespeichert und markiert – Sie entscheiden.",
+      "summaryWeekly": "Schichten: {days}",
+      "summaryCycle": "Rotation: {on} Arbeit, {off} Ruhe"
     }
   },
   "workLifecycle": {
@@ -19598,9 +19724,9 @@
       "approvedAutomatic": "Automatisch per Regel bestätigt",
       "rejected": "Abgelehnt",
       "changesRequested": "Änderung angefragt",
-      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bestätigter Eintrag} other {# bestätigte Einträge}}} other {Living CV ergänzt: {skills}}}",
-      "cvUnlinked": "Living CV: bestätigte Arbeit, noch keiner Fähigkeit zugeordnet",
-      "cvUnknown": "Living CV: konnte nicht gelesen werden",
+      "cv": "{count, plural, one {Lebendiger Lebenslauf: {skills} · {entries, plural, one {# bestätigter Eintrag} other {# bestätigte Einträge}}} other {Lebendiger Lebenslauf ergänzt: {skills}}}",
+      "cvUnlinked": "Lebendiger Lebenslauf: bestätigte Arbeit, noch keiner Fähigkeit zugeordnet",
+      "cvUnknown": "Lebendiger Lebenslauf: konnte nicht gelesen werden",
       "matching": "Das Matching sieht bestätigte Arbeit: {skills}",
       "matchingRepeated": "Das Matching sieht wiederholt bestätigte Arbeit: {skills}"
     },
@@ -19670,7 +19796,7 @@
       "returned": "Zur Korrektur zurück: {count}",
       "confirmed": "Von zweiter Seite bestätigt: {count}",
       "confirmedUnknown": "Die Zahl der Bestätigungen ließ sich nicht ermitteln",
-      "livingCv": "Bestätigte Arbeit zählt im Living CV der Mitarbeitenden"
+      "livingCv": "Bestätigte Arbeit zählt im lebendigen Lebenslauf der Mitarbeitenden"
     },
     "review": "Wartende prüfen ({count})",
     "stageDone": "Etappe „{name}“ abgeschlossen",
@@ -19729,5 +19855,93 @@
     "error": "Das hat nicht geklappt. Nichts wurde geändert.",
     "notAllowed": "Das kann der Inhaber oder eine Führungskraft der Organisation tun.",
     "notSameWork": "Diese Einträge passen nicht mehr zusammen — laden Sie die Seite neu."
+  },
+  "pilotPass": {
+    "title": "Organisationsplan — {days}-Tage-Pilot für 1 €",
+    "intro": "Zahle einmal 1 €, und deine Organisation erhält {days} Tage lang den kostenpflichtigen Organisationsplan. Was er gegenüber dem kostenlosen Plan hinzufügt: kein Limit für gleichzeitig offene Stellen und Personalbedarfe (im kostenlosen Plan eine). Nachrichten, Kandidatenübersichten, Teamauswahl und Buchungen bleiben wie im kostenlosen Plan verfügbar.",
+    "terms": "Einmalzahlung. Nichts verlängert sich und nichts wird erneut belastet: Nach {days} Tagen endet der Plan von selbst, und die Organisation kehrt zum kostenlosen Plan zurück. Der Plan erscheint unten, sobald Stripe die Zahlung bestätigt.",
+    "pay": "1 € bezahlen — {days}-Tage-Pilot",
+    "status": {
+      "pilot_pass_disabled": "Der Pilot wird derzeit nicht angeboten.",
+      "unauthenticated": "Melde dich an, um den Pilot zu starten.",
+      "no_organization": "Wähle zuerst den Arbeitsbereich deiner Organisation.",
+      "not_billing_authority": "Nur wer die Zahlungen dieser Organisation verwaltet, kann den Pilot starten.",
+      "billing_not_active": "Für diese Organisation sind keine Zahlungen verfügbar.",
+      "plan_active": "Deine Organisation hat bereits einen aktiven Plan.",
+      "checkout_failed": "Stripe hat keine Zahlungsseite erstellt. Es wurde nichts belastet; versuche es später erneut."
+    },
+    "result": {
+      "paid": "Stripe hat die Zahlung erhalten. Der Plan wird aktiv, sobald die Bestätigung eintrifft — lade die Seite gleich neu, falls er noch nicht angezeigt wird.",
+      "cancelled": "Zahlung abgebrochen — es wurde nichts belastet."
+    },
+    "elsewhere": "Wähle {organization} in der Arbeitsbereichsauswahl oben auf der Seite — der Pilot wird im Arbeitsbereich dieser Organisation gestartet.",
+    "invite": {
+      "line": "Zahle einmal 1 € für {days} Tage des kostenpflichtigen Organisationsplans. Nichts verlängert sich.",
+      "cta": "Pilot öffnen"
+    }
+  },
+  "marketLifecycle": {
+    "actions": {
+      "publish": "Veröffentlichen",
+      "edit": "Bearbeiten",
+      "pause": "Pausieren",
+      "resume": "Fortsetzen",
+      "publishAgain": "Erneut veröffentlichen",
+      "complete": "Abschließen",
+      "withdraw": "Vom Markt nehmen",
+      "discard": "Entwurf verwerfen"
+    },
+    "states": {
+      "draft": "Entwurf",
+      "active": "Aktiv",
+      "paused": "Pausiert",
+      "completed": "Abgeschlossen",
+      "withdrawn": "Vom Markt genommen",
+      "discarded": "Verworfener Entwurf",
+      "closed": "Geschlossen",
+      "locked": "In Prüfung"
+    },
+    "visibility": {
+      "visible": "In der Suche sichtbar — andere können es finden und dir schreiben.",
+      "draft": "Entwurf — für andere noch nicht sichtbar. Veröffentliche es, wenn es fertig ist.",
+      "paused": "Pausiert — aus der Suche ausgeblendet, keine neuen Anfragen. Setze es fort, wenn es wieder aktuell ist.",
+      "completed": "Abgeschlossen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
+      "withdrawn": "Vom Markt genommen — aus der Suche ausgeblendet; Gespräche und Verlauf bleiben erhalten.",
+      "discarded": "Verworfener Entwurf — er wurde nie veröffentlicht.",
+      "closed": "Geschlossen — aus der Suche ausgeblendet; der Verlauf bleibt erhalten.",
+      "expired": "Abgelaufen — aus der Suche ausgeblendet. Ändere das Ablaufdatum und veröffentliche es erneut.",
+      "gated": "Noch nicht sichtbar — es erscheint in der Suche, sobald die Organisation bestätigt ist.",
+      "locked": "In Prüfung — während der Prüfung lässt es sich nicht ändern."
+    },
+    "deleteForever": "Endgültig löschen",
+    "deleteQuestion": "Endgültig löschen? Das lässt sich nicht rückgängig machen. Um es nur aus der Suche zu nehmen, pausiere es, schließe es ab oder nimm es vom Markt.",
+    "deleteYes": "Ja, löschen",
+    "cancel": "Abbrechen",
+    "error": "Das hat nicht geklappt. Versuche es erneut.",
+    "notAllowed": "In diesem Zustand ist diese Aktion nicht möglich."
+  },
+  "collaborationChecks": {
+    "title": "Vor der endgültigen Vereinbarung",
+    "lead": "Bevor Sie die endgültige Vereinbarung treffen, empfehlen wir beiden Seiten, die für diese Arbeit oder dieses Geschäft relevanten Dokumente, Qualifikationen, Genehmigungen und Bedingungen der Zusammenarbeit zu prüfen.",
+    "context": "Was relevant ist, hängt von der Arbeit, dem Beruf, dem Land und den Projektbedingungen ab — eine Pflichtliste für alle gibt es nicht.",
+    "countryRules": "Die Regeln hängen vom Land ab, in dem gearbeitet wird: {country}.",
+    "privacy": "Dokumente müssen nie in LabourMarket.ai hochgeladen werden. Wenn Sie sie teilen, tun Sie das selbst — die Plattform gibt sie nicht automatisch weiter und behauptet nicht, dass sie geprüft sind.",
+    "basis": {
+      "law": "Gesetzlich vorgeschrieben",
+      "law_if": "In bestimmten Fällen gesetzlich vorgeschrieben",
+      "agreement": "Sache der Vereinbarung beider Seiten"
+    },
+    "topic": {
+      "terms": "Arbeitsumfang, Termine, Vergütung, Arbeitszeit und Abrechnung.",
+      "identity_right_to_work": "Identität und Arbeitsberechtigung — bei einer Anstellung verlangen die Regeln des Arbeitslandes diese Prüfung oft.",
+      "posting_a1": "Wer Beschäftigte in ein anderes EU- / EWR-Land entsendet, braucht gesetzlich eine A1-Bescheinigung und eine Entsendemeldung.",
+      "work_permit": "Eine Arbeits- oder Aufenthaltserlaubnis — gesetzlich vorgeschrieben, wenn die Person nicht durch Staatsangehörigkeit oder Freizügigkeit (z. B. EU / EWR) in diesem Land arbeiten darf.",
+      "site_safety": "Arbeitsschutzunterweisung und Baustellenregeln — vor Arbeitsbeginn eine gesetzliche Pflicht des Arbeitgebers.",
+      "driving_licence": "Ein gültiger Führerschein der passenden Klasse — gesetzlich vorgeschrieben, um beruflich zu fahren.",
+      "professional_qualification": "Eine für diese Arbeit relevante Qualifikation oder Berufsbescheinigung — manche Länder schreiben sie für manche Berufe gesetzlich vor.",
+      "business_details": "Angaben zur Unternehmens- oder Gewerberegistrierung und zur Rechnungsstellung.",
+      "insurance": "Eine Haftpflicht- oder andere Versicherung, falls diese Arbeit sie braucht.",
+      "client_requirements": "Besondere Anforderungen des Auftraggebers oder der Baustelle, falls vorhanden."
+    }
   }
 }

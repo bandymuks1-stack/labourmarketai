@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import {
   countOwnerResponsesSince,
+  isOverlapExclusionViolation,
   normalizeBookingReason,
   DECLINE_REASON_KINDS,
   WITHDRAW_REASON_KINDS,
@@ -93,6 +94,20 @@ export type BookingActionResult =
     }
   | { kind: "needs-migration" }
   | { kind: "conflict" }
+  /**
+   * The worker ACKNOWLEDGED the clash and the database still refused to
+   * record the accept (production 2026-10-25, walk orders-bookings O-5).
+   *
+   * v4 skips its own clash check when acknowledged, but the table's exclusion
+   * constraint `booking_requests_no_overlapping_accepted` still forbids two
+   * overlapping `accepted` rows for one worker, so the UPDATE fails with
+   * 23P01 and the booking stays `proposed`. Reporting that as `conflict`
+   * re-showed the very question the person had just answered and made the
+   * "accept anyway" button loop. This is its own answer: the overlap cannot
+   * be recorded YET — the person may decline, or leave the offer open for
+   * the company to change its dates. Never a success, never a plain conflict.
+   */
+  | { kind: "overlap-not-recordable" }
   /** The worker already ACCEPTED this proposal: its terms are an agreement
    *  and are not rewritten by proposing again. */
   | { kind: "already-accepted" }
@@ -447,6 +462,10 @@ export async function respondBookingAction(input: {
       // acknowledged, and reporting that as a plain conflict would hide the
       // real reason. Say the capability is missing.
       if (isAbsentFunction(v4.error)) return { kind: "needs-migration" };
+      // The acknowledgement was given, and the table constraint still refused
+      // the overlapping accept: say exactly that, never the plain conflict the
+      // person has already answered (that is what made the button loop).
+      if (isOverlapExclusionViolation(v4.error)) return { kind: "overlap-not-recordable" };
       return classify(v4.error);
     }
 
@@ -663,7 +682,9 @@ export interface BookingRow {
 export type BookingsListResult =
   | { kind: "ok"; incoming: BookingRow[]; outgoing: BookingRow[] }
   | { kind: "needs-migration" }
-  | { kind: "not-authed" };
+  | { kind: "not-authed" }
+  /** The read itself failed — the bookings are UNKNOWN, never "none". */
+  | { kind: "read-failed" };
 
 // Column lists for the tolerant read: the extended list ALSO asks for the
 // owner-gated lifecycle-v2 deadline column; while it is not applied the
@@ -726,7 +747,13 @@ async function readMyBookings(): Promise<BookingsListResult> {
   const { data, error } = res!;
   if (error) {
     if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
-    return { kind: "ok", incoming: [], outgoing: [] };
+    // UNKNOWN is not ZERO: a failed read used to come back as an empty "ok"
+    // list, so the worker saw "no proposals yet" while a proposal sat
+    // unreadable — a delivery failure disguised as an empty inbox (row 5.13
+    // follow-up, 2026-10-25). Every consumer already treats a non-ok kind as
+    // unknown; the bookings page says so and offers a retry.
+    console.error("[bookings] list read failed", { code: error.code ?? null });
+    return { kind: "read-failed" };
   }
 
   const incoming: BookingRow[] = [];
@@ -831,6 +858,17 @@ export async function getPendingIncomingBookingCount(): Promise<number> {
  * booking_requests_seen migration is not applied — both degrade to 0 "new".
  */
 export async function getBookingRequestsSeenAt(): Promise<string | null> {
+  return readBookingRequestsSeenAtOnce();
+}
+
+/** Read ONCE per server render (perf 2026-10-22): the bell's booking-response
+ *  badge and the opening brief's "workers answered" line both asked for the
+ *  same seen timestamp in one company render. Request-scoped like
+ *  `readMyBookingsOnce` above: every navigation re-reads, and a server action
+ *  (no render — e.g. `markBookingRequestsSeen`) never sees a cached value. */
+const readBookingRequestsSeenAtOnce = cache(readBookingRequestsSeenAt);
+
+async function readBookingRequestsSeenAt(): Promise<string | null> {
   const supabase = await createClient();
   const {
     data: { user },

@@ -115,7 +115,9 @@ describe("matching workbench — copy honesty in all 10 locales", () => {
       .humanNote as string;
     const en = JSON.parse(read("messages/en.json")).admin.matching
       .humanNote as string;
-    expect(lt).toMatch(/žmogaus, ne algoritmo/);
+    // Grammatical LT (2026-10-24): "parenka žmogus, ne algoritmas"; the same
+    // human-decision statement, not a weaker one.
+    expect(lt).toMatch(/žmogus, ne algoritmas|žmogaus, ne algoritmo/);
     expect(en).toMatch(/human, not an algorithm/);
   });
 

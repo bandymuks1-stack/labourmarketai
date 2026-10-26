@@ -39,8 +39,13 @@ export interface ScopedOwnerWaiver {
   expectedFindings: readonly ExpectedFinding[];
   reason: string;
   resolvedBy: string;
-  /** ISO date, inclusive. */
-  expiresAt: string;
+  /** ISO date of the owner ruling. The waiver holds the 12-month rolling
+   *  internal term from it (owner P0 2026-10-22,
+   *  `apps/web/lib/authority/internal-authority-validity.mjs`). */
+  approvedAt: string;
+  /** ONLY when the owner set a term for this specific record: inclusive ISO
+   *  date that still expires by the calendar. Never set by an agent. */
+  ownerSetExpiresAt?: string;
   owner: string;
 }
 
@@ -92,3 +97,11 @@ export declare function waiverContextFromEnv(
   env?: Record<string, string | undefined>,
   now?: Date,
 ): WaiverContext;
+
+/** Last valid day (inclusive ISO date) of a waiver as of `today`: the
+ *  owner-set term if any, else the end of the current 12-month rolling term
+ *  from `approvedAt`. `null` = unreadable `approvedAt` (fail closed). */
+export declare function waiverValidUntil(
+  w: Pick<ScopedOwnerWaiver, "approvedAt" | "ownerSetExpiresAt">,
+  today: string,
+): string | null;

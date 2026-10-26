@@ -7,6 +7,7 @@ import {
   PERMISSION_MATRIX,
   type MatrixAccess,
 } from "@/lib/legal/permission-matrix";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Permission-matrix guard (CR train WAGON 7, audit area 12).
@@ -36,7 +37,7 @@ const WEB = join(__dirname, "..", "..");
 const REPO = join(WEB, "..", "..");
 const read = (rel: string): string => readFileSync(join(WEB, rel), "utf8");
 
-const LOCALES = ["en", "lt", "ru"] as const;
+const LOCALES = activeLocales;
 const ACCESS: readonly MatrixAccess[] = ["yes", "own", "limited", "no"];
 
 const ALL_SOURCES: ReadonlyArray<{ owner: string; pointer: string }> = [

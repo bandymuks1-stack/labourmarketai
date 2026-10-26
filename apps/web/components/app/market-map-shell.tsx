@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import {
   Map as MapIcon,
   Users,
@@ -96,13 +97,7 @@ export async function MarketMapShell() {
     <div className="flex flex-col gap-6" data-testid="market-map-shell">
       {/* Hero */}
       <header className="flex flex-col gap-1">
-        <Link
-          href="/dashboard"
-          className="self-start text-xs font-medium text-brand-blue transition-colors hover:underline"
-          data-testid="back-to-action-center"
-        >
-          ← {t("backToActions")}
-        </Link>
+        <PageBack href="/dashboard" data-testid="back-to-action-center">{t("backToActions")}</PageBack>
         <h1 className="flex items-center gap-2 font-display text-3xl font-bold tracking-tightest text-text-primary">
           <MapIcon className="h-7 w-7 text-brand-blue" strokeWidth={1.75} aria-hidden />
           {t("title")}

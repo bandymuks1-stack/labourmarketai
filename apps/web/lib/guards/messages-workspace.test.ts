@@ -51,6 +51,16 @@ describe("the messages page is one workspace frame", () => {
     expect(page).not.toMatch(/<CommunicationComposer/);
   });
 
+  // Local UX review 2026-10-24 (row 5.17): with an empty inbox the pane was
+  // `hidden` below `lg`, so a phone had no support door at all — the only
+  // launcher lived in the desktop-only pane.
+  it("the pane (and with it the support door) is never hidden on a phone", () => {
+    const i = at('data-testid="communication-thread-pane"');
+    const tag = page.slice(i, page.indexOf(">", i));
+    expect(tag).not.toMatch(/\bhidden\b/);
+    expect(page.match(/<SupportConversationLauncher/g)).toHaveLength(1);
+  });
+
   it("no explanatory subtitle above the workspace", () => {
     expect(page).not.toMatch(/t\("subtitle"\)/);
   });

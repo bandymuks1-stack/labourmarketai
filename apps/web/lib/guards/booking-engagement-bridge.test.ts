@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * BOOKING-ENGAGEMENT BRIDGE GUARDS (booking-engagement bridge v1).
@@ -306,7 +307,7 @@ describe("app wiring — honest until applied, roster surfaces untouched", () =>
   });
 
   it("both picker group labels exist in every active locale", () => {
-    for (const locale of ["lt", "en", "de", "nl", "ru"] as const) {
+    for (const locale of activeLocales) {
       const j = JSON.parse(read(`messages/${locale}.json`)) as {
         projects?: { assign?: Record<string, string> };
       };

@@ -8,8 +8,10 @@ import { join } from "node:path";
  * Pins the installable-app baseline: a real manifest with honest fields, a
  * published brand icon, scheme-aware theme color + safe-area viewport, and
  * Apple add-to-home-screen metadata. Also pins what must NOT exist yet: no
- * service worker (offline needs its own explicit cache-policy PR — never
- * cache authenticated HTML by accident) and no create-next-app demo assets.
+ * offline service worker (offline needs its own explicit cache-policy PR —
+ * never cache authenticated HTML by accident) and no create-next-app demo
+ * assets. Since 2026-10-23 a PUSH-ONLY worker exists (`public/sw.js`, COM-3,
+ * flag-gated): it may handle push and notification clicks and nothing else.
  */
 
 const ROOT = join(__dirname, "..", "..");
@@ -40,9 +42,16 @@ describe("web app manifest", () => {
     expect(existsSync(join(ROOT, "app/favicon.ico"))).toBe(true);
   });
 
-  it("makes no offline promise (no SW exists yet)", () => {
-    expect(existsSync(join(ROOT, "public/sw.js"))).toBe(false);
+  it("makes no offline promise (the only SW is push-only: no fetch handler, no cache)", () => {
+    // One worker, push only. A fetch handler or a cache would be an offline
+    // capability, which needs its own cache-policy PR.
     expect(existsSync(join(ROOT, "public/service-worker.js"))).toBe(false);
+    const sw = read("public/sw.js");
+    expect(sw).toMatch(/addEventListener\("push"/);
+    expect(sw).not.toMatch(/addEventListener\(\s*["']fetch["']/);
+    expect(sw).not.toMatch(/\bcaches\b|CacheStorage|importScripts|workbox/i);
+    // The manifest promises no offline mode either.
+    expect(manifest).not.toMatch(/offline_enabled|"offline"/i);
   });
 });
 

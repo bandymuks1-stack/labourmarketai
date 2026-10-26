@@ -7,7 +7,7 @@
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "[EN] Created",
     "scoutLink": "[EN] Matched workers & interest for this need",
-    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "manageHelp": "[EN] Complete an inquiry, remove it from the market or publish it again right here in the list; a draft can be continued or discarded. Confirming its recognized skills is done from its scouting view. Editing submitted text is not available yet.",
     "syntheticTitle": {
       "hiringWorkers": "Søger medarbejdere",
       "agencyPartnership": "Partnerskabstilbud"
@@ -293,7 +293,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profil",
-        "journal": "Mit CV",
+        "journal": "Arbejdsjournal",
         "search": "[EN] Search",
         "advanced": "Avanceret styring",
         "playerCard": "Min faglige profil",
@@ -572,7 +572,16 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Indlæser…",
-    "dashboardSections": "Oversigtens sektioner"
+    "dashboardSections": "Oversigtens sektioner",
+    "nav": {
+      "more": "Mere",
+      "menu": "Navigation",
+      "areas": "Arbejdsområder",
+      "close": "Luk",
+      "youAreHere": "Du er her",
+      "previous": "Forrige område",
+      "next": "Næste område"
+    }
   },
   "companies": {
     "cta": {
@@ -1026,7 +1035,7 @@
       },
       {
         "q": "Hvordan håndteres betaling?",
-        "a": "Kortbetaling via Stripe, hvor Stripe Tax påfører moms; fakturaer, opsigelse og ændringer findes i din organisationskonto."
+        "a": "Kortbetaling via Stripe. Fakturaer, betalingshistorik og opsigelse findes i din organisationskonto."
       },
       {
         "q": "Er der en grænse for aktive stillinger?",
@@ -1717,7 +1726,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -2014,6 +2023,15 @@
       "pending": "Lægger sammen…",
       "done": "Lagt sammen. Rækkerne og deres poster bevares; projektlisten viser nu det beholdte projekt.",
       "failed": "Ikke lagt sammen. Intet blev ændret for rækker, der ikke gik igennem — genindlæs og prøv igen."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {
@@ -2811,6 +2829,7 @@
     }
   },
   "bookings": {
+    "readFailed": "Dine bookinger kunne ikke indlæses lige nu — det betyder ikke, at du ikke har nogen. Prøv igen.",
     "endsOn": "Indtil {date}",
     "noRole": "Arbejdsaftale",
     "displayState": {
@@ -2846,7 +2865,8 @@
       "alreadyAccepted": "Medarbejderen har allerede accepteret dette forslag — aftalte vilkår overskrives ikke her. Aftal ændringer i samtalen.",
       "refusedNotReachable": "Denne person kan ikke få et bookingforslag herfra — profilen er ikke synlig for arbejdsgivere, og der er ingen arbejdsrelation med dig.",
       "refusedNeedClosed": "Dette behov er lukket — genåbn det, før du foreslår en booking.",
-      "refusedAnswered": "Medarbejderen har afvist dette forslag, så det genåbnes ikke uden medarbejderens nye samtykke. Fortsæt i samtalen, eller find en anden medarbejder."
+      "refusedAnswered": "Medarbejderen har afvist dette forslag, så det genåbnes ikke uden medarbejderens nye samtykke. Fortsæt i samtalen, eller find en anden medarbejder.",
+      "unconfirmed": "Intet svar fra serveren endnu. Forslaget kan allerede være sendt — tjek Bookinger, eller send det igen (det samme forslag oprettes aldrig to gange)."
     },
     "reason": {
       "optionalTitle": "Årsag (valgfrit)",
@@ -2895,7 +2915,8 @@
     "clash": {
       "acceptAnyway": "Jeg ved, det overlapper — accepter alligevel",
       "stillStands": "Accept fjerner ikke overlappet. Begge bookinger beholder deres datoer, konflikten forbliver synlig i din kalender, og dit valg registreres.",
-      "acknowledged": "Accepteret med et kendt overlap. {count} eksisterende booking(er) overlapper stadig — intet blev aflyst eller skjult, og dit valg er registreret."
+      "acknowledged": "Accepteret med et kendt overlap. {count} eksisterende booking(er) overlapper stadig — intet blev aflyst eller skjult, og dit valg er registreret.",
+      "notRecordable": "Disse datoer overlapper en booking, du allerede har accepteret, og overlappet kan endnu ikke registreres, så du kan afvise dette tilbud eller lade det stå åbent, så virksomheden kan ændre datoerne."
     },
     "proposedBy": "Foreslået af {name}",
     "termsChanged": "Virksomheden har ændret vilkårene. Du havde accepteret: {previous}. Beslut igen om de nye datoer."
@@ -2908,6 +2929,7 @@
     "loopReadFailed": "Dine forespørgsler kunne ikke indlæses — listen kan være ufuldstændig. Genindlæs siden."
   },
   "people": {
+    "anonymousName": "Kandidat {token}",
     "eyebrow": "Personprofil",
     "restrictedTitle": "Profil ikke tilgængelig",
     "restrictedBody": "Du kan ikke se denne persons profil: der er ingen aktiv arbejdsrelation, eller personen har ikke givet samtykke til at være synlig.",
@@ -3019,9 +3041,9 @@
       "coveredShort": "{count} dækket"
     },
     "notes": {
-      "assignmentsPending": "Tildelingsdata er forberedt og vises i denne visning efter ejerens aktivering.",
-      "languagesPending": "Sprogdækning er forberedt og vises i denne visning efter ejerens aktivering.",
-      "brigadesPending": "Sjakdækning er forberedt og vises i denne visning efter ejerens aktivering.",
+      "assignmentsPending": "Tildelingsdata vises endnu ikke i denne visning.",
+      "languagesPending": "Sprogdækning vises endnu ikke i denne visning.",
+      "brigadesPending": "Sjakdækning vises endnu ikke i denne visning.",
       "demandError": "Arbejdsbehov kunne ikke læses lige nu.",
       "projectError": "Projekter kunne ikke læses lige nu.",
       "capacityError": "En del af kapacitetsdataene kunne ikke læses lige nu."
@@ -3055,7 +3077,7 @@
     },
     "stateNote": {
       "insufficientData": "Der er endnu ikke nok rigtige data til dette signal — der vises et ærligt hul i stedet for et opdigtet tal.",
-      "needsMigration": "Datalageret bag dette signal er forberedt og kobles på efter ejerens aktivering. Indtil da estimeres intet.",
+      "needsMigration": "Dette signal er endnu ikke slået til. Indtil da estimeres intet.",
       "stale": "Beviserne bag dette signal er ældre end friskhedsvinduet — betragt dem som forældede."
     },
     "valueClass": {
@@ -3107,7 +3129,7 @@
         "agencyAggregate": "Aggregat på tværs af kunder"
       },
       "state": {
-        "needsMigration": "Dette signal er forberedt og afventer ejerens aktivering."
+        "needsMigration": "Dette signal er endnu ikke slået til."
       },
       "salary": {
         "noBenchmark": "Der findes endnu ingen lønreference for dit fag og land.",
@@ -3142,7 +3164,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Ejer-aktiveret datalager (endnu ikke slået til)",
+      "gatedMigration": "Datalager endnu ikke slået til",
       "marketRateAverages": "Admin-kuraterede markedssats-gennemsnit",
       "journalEvidence": "Dine egne arbejdsjournal-beviser",
       "fillTimeMeasurementsMissing": "Besættelsestidsmålinger (endnu ikke indsamlet)",
@@ -3200,14 +3222,14 @@
       },
       "terms": {
         "internal": "Intern udledning fra kanoniske platformtabeller; kohortepolitikken beskytter enkeltpersoner.",
-        "adminCurated": "Ejer-indtastede gennemsnit med en kildenote i stedet for en stikprøvestørrelse.",
-        "statGovLt": "Officiel statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
-        "eurostat": "Officiel EU-statistik; kildeangivelse påkrævet; aktivering afventer ejerens bekræftelse.",
+        "adminCurated": "Kuraterede gennemsnit med en kildenote i stedet for en stikprøvestørrelse.",
+        "statGovLt": "Officiel statistik; kildeangivelse påkrævet. Endnu ikke i brug.",
+        "eurostat": "Aktiv kilde. Officiel EU-statistik; kildeangivelse påkrævet.",
         "arbetsformedlingen": "Aktiv kilde. Brugsvilkår bekræftet: en gratis offentlig datakilde (CC0). Kilden vises ved hver annonce, og hver annonce linker tilbage til det oprindelige opslag.",
         "nav": "Aktiv kilde. NAV's API-vilkår er accepteret, og adgang er givet. De løbende pligter overholdes: et tilbagetrukket opslag fjernes straks, et opdateret opslag genopfriskes hurtigt, og ansøgningslinket fører til det oprindelige opslag.",
-        "cvbankas": "Kun et forslag — brugstilladelse ubekræftet; blandes aldrig med interne tal.",
-        "eures": "Foreslået kilde. Brugsvilkår endnu ikke gennemgået — aktivering kræver ejerens bekræftelse. Intet hentes i dag.",
-        "uztLt": "Foreslået kilde. Brugsvilkår endnu ikke gennemgået — aktivering kræver ejerens bekræftelse. Intet hentes i dag."
+        "cvbankas": "Foreslået kilde — ikke i brug; blandes aldrig med interne tal.",
+        "eures": "Foreslået kilde. Ikke i brug — intet hentes i dag.",
+        "uztLt": "Foreslået kilde. Ikke i brug — intet hentes i dag."
       },
       "status": {
         "active": "Aktiv (intern)",
@@ -3219,7 +3241,7 @@
     "methodology": {
       "title": "Metode",
       "deterministic": "Alle værdier er deterministiske og beregnet ud fra registreringer med kilder — intet estimeres af AI, og intet tal opdigtes nogensinde.",
-      "externalOff": "Eksterne kilder er slået fra: enhver ekstern reference er et forslag, der afventer ejerens juridiske bekræftelse. Interne og eksterne tal blandes aldrig.",
+      "externalOff": "Eksterne kilder er slået fra. Interne og eksterne tal blandes aldrig.",
       "cohort": "Små kohorter samles i bånd eller skjules for at beskytte enkeltpersoner."
     },
     "contextual": {
@@ -3334,7 +3356,7 @@
       },
       "unavailable": {
         "requirementTitle": "Hvad der kræves",
-        "sourcesTitle": "Kilder, der afventer ejerens godkendelse"
+        "sourcesTitle": "Kilder, der endnu ikke er i brug"
       },
       "reason": {
         "salaryNoBenchmark": "Der er intet løntal her, fordi der endnu ikke findes en kurateret markedssats for dit erhverv og land, og ingen ekstern lønkilde er godkendt til brug.",
@@ -3347,14 +3369,14 @@
         "salaryInputsMissing": "Der er intet løntal her, fordi der findes en kurateret markedssats, men din egen forventede løn mangler, så der er intet at sammenligne med."
       },
       "requirement": {
-        "ownerEnableStore": "Platformens ejer skal tænde for observationslageret og godkende mindst én datakilde.",
-        "salaryBenchmark": "En administrator skal indtaste en kurateret markedssats for dit erhverv og land, eller platformens ejer skal godkende en ekstern lønkilde.",
+        "ownerEnableStore": "Observationslageret skal slås til, og mindst én datakilde skal godkendes.",
+        "salaryBenchmark": "Der skal indtastes en kurateret markedssats for dit erhverv og land, eller en ekstern lønkilde skal godkendes.",
         "demandOwnRows": "Tilføj arbejdsforespørgsler — kortet fyldes med jeres egen organisations data, så snart der findes poster.",
         "salaryBasis": "Lønbasis (brutto eller netto) skal være registreret for både din forventede løn og den kuraterede markedssats, før en ærlig sammenligning kan vises.",
         "salaryInputs": "Indtast din forventede løn i din arbejdstagerprofil — sammenligningen vises, så snart den findes."
       },
       "after": {
-        "activation": "Når ejeren har godkendt og aktiveret en datakilde, fyldes dette kort med dokumenterede, daterede tal — hver med pålidelighed, friskhed, kilde og trin-for-trin-oprindelse."
+        "activation": "Når en datakilde er slået til, fyldes dette kort med dokumenterede, daterede tal — hver med pålidelighed, friskhed, kilde og trin-for-trin-oprindelse."
       }
     },
     "drawer": {
@@ -3690,8 +3712,8 @@
           "description": "Et listepunkt for en projektmedarbejder markeres med en reel status — kræves, modtaget, tjekket."
         },
         "seedReadinessChecklist": {
-          "label": "Start dokumentlisten",
-          "description": "Standardlisten for parathed / dokumenter startes for alle på projektet."
+          "label": "Tilføj forslag til aftale",
+          "description": "Foreslåede punkter at aftale før aftalen tilføjes for alle på projektet. Det er ikke en obligatorisk liste og ikke en vurdering af parathed."
         },
         "requestReadiness": {
           "label": "Bed om det manglende",
@@ -4269,8 +4291,8 @@
       "missingDeclaredSkills": "angivne færdigheder",
       "missingEvidence": "arbejdsdokumentation",
       "blockedSuffix": "(afvist / udløbet)",
-      "readinessSeedChip": "Start dokumentlisten ({count} pers.)",
-      "readinessSeeded": "Liste startet: {count} pers. × {items} punkter — alle “kræves”.",
+      "readinessSeedChip": "Tilføj forslag til aftale ({count} pers.)",
+      "readinessSeeded": "Forslag tilføjet: {count} pers. × {items} punkter — alle “aftales før aftalen”.",
       "readinessGotChip": "Modtaget: {label} ({name})",
       "readinessGotDone": "Markeret som modtaget: {label} ({name}).",
       "readinessCheckedChip": "Kontrolleret: {label} ({name})",
@@ -4311,7 +4333,7 @@
       "moveAskProject": "Hvor skal {name} flyttes hen? Vælg:",
       "moveWhatIfTitle": "Hvis {name} flyttes fra “{from}” til “{to}”:",
       "moveFromLine": "• “{from}”: personer {before} → {after}; {tasks} af hans åbne arbejdspakker bliver der; paratheds-tjekliste der: {checked}/{total}.",
-      "moveToLine": "• “{to}”: personer {before} → {after}; paratheds-tjeklisten der starter på 0/{total}.",
+      "moveToLine": "• “{to}”: personer {before} → {after}; hvad der skal aftales der, er ikke valgt endnu (op til {total} punkter foreslået).",
       "moveCountryLine": "• Landet skifter: {from} → {to} — andre dokumentkrav.",
       "moveNoDatesLine": "• “{to}” har ingen datoer — fravær kan ikke tjekkes.",
       "moveAvailabilityUnknownLine": "• Fravær ukendt.",
@@ -6939,7 +6961,9 @@
       "managesInvitations": "Håndterer invitationer",
       "grantInvitations": "Tillad at håndtere invitationer",
       "withdrawInvitations": "Tilbagekald håndtering af invitationer",
-      "unavailable": "Medlemslisten kunne ikke læses lige nu. Det betyder ikke, at organisationen ingen medlemmer har."
+      "unavailable": "Medlemslisten kunne ikke læses lige nu. Det betyder ikke, at organisationen ingen medlemmer har.",
+      "noAccountHint": "En medlemsrolle kan kun gives til en person, der allerede har en konto. Invitér en person uden konto med et invitationslink — når personen tilmelder sig og slutter sig til organisationen, kan du give en rolle her.",
+      "noAccountCta": "Opret et invitationslink"
     },
     "start": {
       "membersMoved": "Medlemmer og invitationer for {workspace} administreres i organisationens Indstillinger.",

@@ -38,6 +38,11 @@ import { TripsSection } from "./trips-section";
 import type { ProcurementNotice } from "@/lib/procurement/procurement-model";
 import type { TripNotice } from "@/lib/trips/trips-model";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/finance");
+
 
 /**
  * Operational finance records (control room PR I, capability gap map §9) —

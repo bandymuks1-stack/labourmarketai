@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Player Card unification guard (full-completion train PR 1).
@@ -80,7 +81,7 @@ describe("the evidence levels stay visible but NEUTRAL (silent-trust rule)", () 
 });
 
 describe("readiness copy exists in every active locale", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: playerCard.readiness has level + pillar labels`, () => {
       const m = JSON.parse(read(`messages/${loc}.json`));
       const r = m.playerCard.readiness;

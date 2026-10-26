@@ -7,7 +7,7 @@
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "[EN] Created",
     "scoutLink": "[EN] Matched workers & interest for this need",
-    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "manageHelp": "[EN] Complete an inquiry, remove it from the market or publish it again right here in the list; a draft can be continued or discarded. Confirming its recognized skills is done from its scouting view. Editing submitted text is not available yet.",
     "syntheticTitle": {
       "hiringWorkers": "Meklē darbiniekus",
       "agencyPartnership": "Sadarbības piedāvājums"
@@ -293,7 +293,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profils",
-        "journal": "Mans CV",
+        "journal": "Darba žurnāls",
         "search": "[EN] Search",
         "advanced": "Paplašinātā pārvaldība",
         "playerCard": "Mans profesionālais profils",
@@ -572,7 +572,16 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Ielādē…",
-    "dashboardSections": "Paneļa sadaļas"
+    "dashboardSections": "Paneļa sadaļas",
+    "nav": {
+      "more": "Vairāk",
+      "menu": "Izvēlne",
+      "areas": "Darba jomas",
+      "close": "Aizvērt",
+      "youAreHere": "Tu esi šeit",
+      "previous": "Iepriekšējā joma",
+      "next": "Nākamā joma"
+    }
   },
   "companies": {
     "cta": {
@@ -1026,7 +1035,7 @@
       },
       {
         "q": "Kā tiek apstrādāti maksājumi?",
-        "a": "Maksājums ar karti caur Stripe, PVN piemēro Stripe Tax; rēķini, atcelšana un izmaiņas ir pieejamas jūsu organizācijas kontā."
+        "a": "Maksājums ar karti caur Stripe. Rēķini, maksājumu vēsture un atcelšana ir pieejama jūsu organizācijas kontā."
       },
       {
         "q": "Vai aktīvajām pozīcijām ir ierobežojums?",
@@ -1717,7 +1726,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -2014,6 +2023,15 @@
       "pending": "Apvieno…",
       "done": "Apvienots. Rindas un to ieraksti saglabāti; projektu sarakstā tagad redzams saglabātais projekts.",
       "failed": "Nav apvienots. Neapstrādātajām rindām nekas nav mainīts — pārlādējiet un mēģiniet vēlreiz."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {
@@ -2811,6 +2829,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -2846,7 +2865,8 @@
       "alreadyAccepted": "Darbinieks šo piedāvājumu jau ir pieņēmis — saskaņotie nosacījumi šeit netiek pārrakstīti. Izmaiņas saskaņojiet sarunā.",
       "refusedNotReachable": "Šai personai no šejienes nevar piedāvāt rezervāciju — profils nav redzams darba devējiem, un jums nav darba attiecību.",
       "refusedNeedClosed": "Šī vajadzība ir slēgta — atver to no jauna, pirms piedāvā rezervāciju.",
-      "refusedAnswered": "Darbinieks šo piedāvājumu noraidīja, tāpēc bez viņa jaunas piekrišanas tas netiek atvērts no jauna. Turpiniet sarunā vai atrodiet citu darbinieku."
+      "refusedAnswered": "Darbinieks šo piedāvājumu noraidīja, tāpēc bez viņa jaunas piekrišanas tas netiek atvērts no jauna. Turpiniet sarunā vai atrodiet citu darbinieku.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -2895,7 +2915,8 @@
     "clash": {
       "acceptAnyway": "Zinu, ka pārklājas — tomēr pieņemt",
       "stillStands": "Pieņemšana pārklāšanos nenovērsīs. Abas rezervācijas saglabā savus datumus, konflikts paliek redzams kalendārā, un jūsu lēmums tiek reģistrēts.",
-      "acknowledged": "Pieņemts ar zināmu pārklāšanos. Joprojām pārklājas rezervācijas: {count}. Nekas nav atcelts vai paslēpts, un jūsu lēmums ir reģistrēts."
+      "acknowledged": "Pieņemts ar zināmu pārklāšanos. Joprojām pārklājas rezervācijas: {count}. Nekas nav atcelts vai paslēpts, un jūsu lēmums ir reģistrēts.",
+      "notRecordable": "Šie datumi pārklājas ar jau pieņemtu rezervāciju, un šo pārklāšanos vēl nevar reģistrēt, tāpēc varat šo piedāvājumu noraidīt vai atstāt to atvērtu, lai uzņēmums varētu mainīt datumus."
     },
     "proposedBy": "Piedāvā: {name}",
     "termsChanged": "Uzņēmums mainīja nosacījumus. Jūs bijāt piekritis: {previous}. Izlemiet par jaunajiem datumiem vēlreiz."
@@ -2908,6 +2929,7 @@
     "loopReadFailed": "Neizdevās ielādēt jūsu pieprasījumus — saraksts var būt nepilnīgs. Atsvaidziniet lapu."
   },
   "people": {
+    "anonymousName": "Kandidāts {token}",
     "eyebrow": "Personas profils",
     "restrictedTitle": "Profils nav pieejams",
     "restrictedBody": "Jūs nevarat apskatīt šīs personas profilu: nav aktīvu darba attiecību, vai persona nav piekritusi būt atrodama.",
@@ -3019,9 +3041,9 @@
       "coveredShort": "[EN] {count} covered"
     },
     "notes": {
-      "assignmentsPending": "[EN] Assignment data is prepared and joins this view after owner activation.",
-      "languagesPending": "[EN] Language coverage is prepared and joins this view after owner activation.",
-      "brigadesPending": "[EN] Brigade coverage is prepared and joins this view after owner activation.",
+      "assignmentsPending": "[EN] Assignment data is not shown in this view yet.",
+      "languagesPending": "[EN] Language coverage is not shown in this view yet.",
+      "brigadesPending": "[EN] Brigade coverage is not shown in this view yet.",
       "demandError": "[EN] Work needs could not be read right now.",
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
@@ -3055,7 +3077,7 @@
     },
     "stateNote": {
       "insufficientData": "Šim signālam vēl nepietiek īstu datu — godīga sprauga tiek rādīta izdomāta skaitļa vietā.",
-      "needsMigration": "Šī signāla datu krātuve ir sagatavota un tiks pieslēgta pēc īpašnieka aktivizēšanas. Līdz tam nekas netiek lēsts.",
+      "needsMigration": "Šis signāls vēl nav ieslēgts. Līdz tam nekas netiek lēsts.",
       "stale": "Šī signāla pierādījumi ir vecāki par svaiguma logu — uzskatiet tos par novecojušiem."
     },
     "valueClass": {
@@ -3107,7 +3129,7 @@
         "agencyAggregate": "Kopsavilkums starp klientiem"
       },
       "state": {
-        "needsMigration": "Šis signāls ir sagatavots un gaida īpašnieka aktivizēšanu."
+        "needsMigration": "Šis signāls vēl nav ieslēgts."
       },
       "salary": {
         "noBenchmark": "Jūsu profesijai un valstij atsauces vērtība vēl nav pieejama.",
@@ -3142,7 +3164,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Īpašnieka aktivizējama datu krātuve (vēl nav ieslēgta)",
+      "gatedMigration": "Datu krātuve vēl nav ieslēgta",
       "marketRateAverages": "Administratora kūrētie tirgus likmju vidējie rādītāji",
       "journalEvidence": "Jūsu paša darba žurnāla pierādījumi",
       "fillTimeMeasurementsMissing": "Aizpildīšanas laika mērījumi (vēl netiek vākti)",
@@ -3200,14 +3222,14 @@
       },
       "terms": {
         "internal": "Iekšējs aprēķins no kanoniskajām platformas tabulām; kohortu politika aizsargā personas.",
-        "adminCurated": "Īpašnieka ievadītie vidējie rādītāji ar avota piezīmi izlases lieluma vietā.",
-        "statGovLt": "Oficiālā statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
-        "eurostat": "Oficiālā ES statistika; nepieciešama avota norāde; aktivizēšana gaida īpašnieka apstiprinājumu.",
+        "adminCurated": "Kurēti vidējie rādītāji ar avota piezīmi izlases lieluma vietā.",
+        "statGovLt": "Oficiālā statistika; nepieciešama avota norāde. Pagaidām netiek izmantota.",
+        "eurostat": "Aktīvs avots. Oficiālā ES statistika; nepieciešama avota norāde.",
         "arbetsformedlingen": "Aktīvs avots. Lietošanas noteikumi apstiprināti: bezmaksas publisks datu avots (CC0). Pie katra sludinājuma tiek norādīts avots, un katrs sludinājums ved uz oriģinālo publikāciju.",
         "nav": "Aktīvs avots. NAV API noteikumi ir pieņemti un piekļuve piešķirta. Pastāvīgie pienākumi tiek pildīti: atsaukts sludinājums tiek nekavējoties noņemts, atjaunināts – ātri atjaunināts, un pieteikšanās saite ved uz oriģinālo sludinājumu.",
-        "cvbankas": "Tikai priekšlikums — lietošanas atļauja nav apstiprināta; nekad netiek jaukts ar iekšējiem skaitļiem.",
-        "eures": "Ierosināts avots. Lietošanas noteikumi vēl nav izskatīti — aktivizēšanai nepieciešams īpašnieka apstiprinājums. Šodien nekas netiek ielādēts.",
-        "uztLt": "Ierosināts avots. Lietošanas noteikumi vēl nav izskatīti — aktivizēšanai nepieciešams īpašnieka apstiprinājums. Šodien nekas netiek ielādēts."
+        "cvbankas": "Ierosināts avots — netiek izmantots; nekad netiek jaukts ar iekšējiem skaitļiem.",
+        "eures": "Ierosināts avots. Netiek izmantots — šodien nekas netiek ielādēts.",
+        "uztLt": "Ierosināts avots. Netiek izmantots — šodien nekas netiek ielādēts."
       },
       "status": {
         "active": "Aktīvs (iekšējs)",
@@ -3219,7 +3241,7 @@
     "methodology": {
       "title": "Metodika",
       "deterministic": "Visas vērtības ir deterministiskas un aprēķinātas no ierakstiem ar avotiem — neko nelēš MI, un neviens skaitlis nekad netiek izdomāts.",
-      "externalOff": "Ārējie avoti ir izslēgti: katra ārējā atsauce ir priekšlikums, kas gaida īpašnieka juridisko apstiprinājumu. Iekšējie un ārējie skaitļi nekad netiek jaukti.",
+      "externalOff": "Ārējie avoti ir izslēgti. Iekšējie un ārējie skaitļi nekad netiek jaukti.",
       "cohort": "Mazas kohortas tiek grupētas vai slēptas, lai aizsargātu personas."
     },
     "contextual": {
@@ -3334,7 +3356,7 @@
       },
       "unavailable": {
         "requirementTitle": "Kas ir vajadzīgs",
-        "sourcesTitle": "Avoti, kas gaida īpašnieka apstiprinājumu"
+        "sourcesTitle": "Avoti, kas vēl netiek izmantoti"
       },
       "reason": {
         "salaryNoBenchmark": "Šeit nav algas skaitļa, jo jūsu profesijai un valstij vēl nav ievadīts kurēts tirgus atskaites punkts, un neviens ārējais algu avots nav apstiprināts lietošanai.",
@@ -3347,14 +3369,14 @@
         "salaryInputsMissing": "Šeit nav algas skaitļa, jo kurēts tirgus atskaites punkts ir ievadīts, taču trūkst jūsu norādītās vēlamās algas, tāpēc nav ko salīdzināt."
       },
       "requirement": {
-        "ownerEnableStore": "Platformas īpašniekam jāieslēdz novērojumu krātuve un jāapstiprina vismaz viens datu avots.",
-        "salaryBenchmark": "Administratoram jāievada kurēts tirgus atskaites punkts jūsu profesijai un valstij, vai platformas īpašniekam jāapstiprina ārējais algu avots.",
+        "ownerEnableStore": "Jāieslēdz novērojumu krātuve un jāapstiprina vismaz viens datu avots.",
+        "salaryBenchmark": "Jāievada kurēts tirgus atskaites punkts jūsu profesijai un valstij vai jāapstiprina ārējais algu avots.",
         "demandOwnRows": "Pievienojiet darba pieprasījumus — kartīte piepildīsies ar jūsu organizācijas datiem, tiklīdz būs ieraksti.",
         "salaryBasis": "Pirms godīga salīdzinājuma parādīšanas jābūt fiksētam, vai jūsu vēlamā alga un kurētais tirgus atskaites punkts ir norādīti bruto vai neto.",
         "salaryInputs": "Ievadiet vēlamo algu savā darbinieka profilā — salīdzinājums parādīsies, tiklīdz tā būs ievadīta."
       },
       "after": {
-        "activation": "Kad īpašnieks apstiprinās un aktivizēs datu avotu, šī kartīte piepildīsies ar pamatotiem, datētiem skaitļiem — katram būs uzticamība, svaigums, avots un soli pa solim izsekojama izcelsme."
+        "activation": "Kad datu avots tiks ieslēgts, šī kartīte piepildīsies ar pamatotiem, datētiem skaitļiem — katram būs uzticamība, svaigums, avots un soli pa solim izsekojama izcelsme."
       }
     },
     "drawer": {
@@ -3690,8 +3712,8 @@
           "description": "Projekta darbinieka saraksta punkts tiek atzīmēts ar reālu statusu — nepieciešams, saņemts, pārbaudīts."
         },
         "seedReadinessChecklist": {
-          "label": "Sākt dokumentu sarakstu",
-          "description": "Visiem projekta cilvēkiem tiek sākts standarta gatavības / dokumentu saraksts."
+          "label": "Pievienot ierosinājumus, par ko vienoties",
+          "description": "Visiem projekta cilvēkiem tiek pievienoti ieteiktie punkti, par ko vienoties pirms līguma. Tas nav obligāts saraksts un nav gatavības vērtējums."
         },
         "requestReadiness": {
           "label": "Pieprasīt trūkstošo",
@@ -4269,8 +4291,8 @@
       "missingDeclaredSkills": "norādīto prasmju",
       "missingEvidence": "darba pierādījumu",
       "blockedSuffix": "(noraidīts / beidzies)",
-      "readinessSeedChip": "Sākt dokumentu sarakstu ({count} cilv.)",
-      "readinessSeeded": "Saraksts sākts: {count} cilv. × {items} punkti — visi „nepieciešams“.",
+      "readinessSeedChip": "Pievienot ierosinājumus, par ko vienoties ({count} cilv.)",
+      "readinessSeeded": "Ierosinājumi pievienoti: {count} cilv. × {items} punkti — visi „vienoties pirms līguma“.",
       "readinessGotChip": "Saņemts: {label} ({name})",
       "readinessGotDone": "Atzīmēts kā saņemts: {label} ({name}).",
       "readinessCheckedChip": "Pārbaudīts: {label} ({name})",
@@ -4311,7 +4333,7 @@
       "moveAskProject": "Kur pārcelt {name}? Izvēlieties:",
       "moveWhatIfTitle": "Ja {name} pārietu no „{from}“ uz „{to}“:",
       "moveFromLine": "• „{from}“: cilvēku {before} → {after}; viņa atvērto darba pakotņu tur paliek {tasks}; gatavības saraksts tur: {checked}/{total}.",
-      "moveToLine": "• „{to}“: cilvēku {before} → {after}; gatavības saraksts tur sāksies no 0/{total}.",
+      "moveToLine": "• „{to}“: cilvēku {before} → {after}; par ko tur vienoties, vēl nav izvēlēts (ieteikti līdz {total} punktiem).",
       "moveCountryLine": "• Mainās valsts: {from} → {to} — citas dokumentu prasības.",
       "moveNoDatesLine": "• „{to}“ nav datumu — prombūtnes nevar pārbaudīt.",
       "moveAvailabilityUnknownLine": "• Prombūtnes nav zināmas.",
@@ -6939,7 +6961,9 @@
       "managesInvitations": "Pārvalda ielūgumus",
       "grantInvitations": "Atļaut pārvaldīt ielūgumus",
       "withdrawInvitations": "Atsaukt ielūgumu pārvaldību",
-      "unavailable": "Dalībnieku sarakstu šobrīd neizdevās nolasīt. Tas nenozīmē, ka organizācijai nav dalībnieku."
+      "unavailable": "Dalībnieku sarakstu šobrīd neizdevās nolasīt. Tas nenozīmē, ka organizācijai nav dalībnieku.",
+      "noAccountHint": "Dalībnieka lomu var piešķirt tikai tam, kam jau ir konts. Personu bez konta uzaicini ar uzaicinājuma saiti — kad tā reģistrēsies un pievienosies organizācijai, šeit varēsi piešķirt lomu.",
+      "noAccountCta": "Izveidot uzaicinājuma saiti"
     },
     "start": {
       "membersMoved": "Organizācijas {workspace} dalībnieki un uzaicinājumi tiek pārvaldīti tās Iestatījumos.",

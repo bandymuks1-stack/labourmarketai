@@ -26,7 +26,10 @@ import {
   parseScoutFilterParams,
   type ScoutFilters,
 } from "@/lib/scouting/scout-filters";
-import { getScoutingContactRequestStates } from "@/lib/privacy/contact-disclosure-actions";
+import {
+  getScoutingContactRequestStates,
+  type ScoutingContactRequestStates,
+} from "@/lib/privacy/contact-disclosure-actions";
 import { RequestContactDetailsButton } from "@/components/app/request-contact-details-button";
 import {
   IdentityDisclosure,
@@ -60,6 +63,19 @@ import {
 } from "@/lib/pipeline/candidate-pipeline";
 import { loadDemandPipelineFacts } from "@/lib/pipeline/candidate-pipeline-facts";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { Card } from "@/components/ui/Card";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/scouting", "scouting.title");
+
+
+/** A worker's own standing interest in this need — the signal the interest
+ *  card's in-app contact action is server-gated on. */
+function hasStandingInterest(status: string | null | undefined): boolean {
+  return status === "interested" || status === "reviewed" || status === "contacted";
+}
 
 const READINESS_TONE: Record<CompanyCandidateLabel, string> = {
   can_be_considered: "border-state-success/40 bg-state-success/10 text-state-success",
@@ -189,59 +205,109 @@ export default async function CompanyScoutingPage({
     demands.find((d) => d.structured)?.id ??
     demands[0]?.id ??
     null;
-  const result = selected ? await runScouting(selected, requestedFilters) : null;
-  const autoMatchReceipt =
-    selected && result?.kind === "ok"
-      ? await readLastAutoMatchReceipt(await createSupabaseServerClient(), selected)
-      : null;
+  // READ STAGES, NOT ONE AWAIT PER READ. Every read below depends either on
+  // the selected need alone or on the scouting result, so each group runs as
+  // one batch. Before, up to nine reads ran one after another, so the
+  // employer's "who fits this need" page waited for the sum of their round
+  // trips; now it waits for the slowest read of each of two stages (three
+  // when an accepted team offer needs the project list). Guarded by
+  // lib/guards/scouting-read-stages.test.ts.
+  //
+  // Stage 1 — needs only the selected need.
+  const [result, offeredCandidates, contactRequests] = await Promise.all([
+    selected ? runScouting(selected, requestedFilters) : null,
+    // Agency-proposed candidates for THIS demand (the caller owns it; the RPC
+    // returns rows only to the request owner). Empty until the owner-gated
+    // bridge migration is applied.
+    selected ? listOfferedCandidatesForRequest(selected) : [],
+    // Contact-detail ask states for THIS demand (Wagon 1) — owner-scoped read;
+    // applied:false while the draft-gated model is not applied (honest note,
+    // no dead button).
+    selected
+      ? getScoutingContactRequestStates(selected)
+      : Promise.resolve<ScoutingContactRequestStates>({ applied: false, byWorker: {} }),
+  ]);
   // An AGENCY working on a need its client SHARED (owner decision 2026-09-28
   // B): it may read the need and see who fits, and it presents candidates from
   // its OWN roster (partners page). The client-owner actions — contact,
   // booking, contact-detail ask, shortlist, interest acknowledgement — are
   // refused server-side for it, so they are not offered here either.
   const actsForClient =
-    result?.kind === "ok" && !demands.some((d) => d.id === result.demand.id);
+    (result?.kind === "ok" || result?.kind === "not-structured") &&
+    !demands.some((d) => d.id === result.demand.id);
+  // HAND-RAISERS ON A NEED THAT NAMES NO TRADE (owner decision 2026-10-22):
+  // shown now, never matched. The scouting core already applied the SAME
+  // visibility, fixture and actionability gates as for scouted candidates.
+  const handRaisers = result?.kind === "not-structured" ? result.handRaisers : [];
   // A need that is not closed takes decisions; a closed one shows history.
   const needOpen = result?.kind === "ok" ? result.demand.status !== "closed" : true;
-  // Agency-proposed candidates for THIS demand (the caller owns it; the RPC
-  // returns rows only to the request owner). Empty until the owner-gated bridge
-  // migration is applied.
-  const offeredCandidates = selected ? await listOfferedCandidatesForRequest(selected) : [];
-  // E6 - brigades that offered THEMSELVES as one unit against this need. Team-level
-  // aggregates only (the database never returns a member), matched against the SAME
-  // need the candidates were judged against. An agency acting for a client does not
-  // answer for it, so the section is the owner's. Projects load only when an offer
-  // is accepted and waiting for its assignment.
-  const teamOffers =
-    selected && !actsForClient
-      ? await loadTeamOffersForDemand(selected, result?.kind === "ok" ? (result.need ?? null) : null)
-      : null;
+  // WHO APPLIED (owner order 2026-10-01): for a worker whose application is
+  // on THIS employer's own need, the database (applicant_identity_v1, owner of
+  // the demand + application not withdrawn) may release the name and photo.
+  // Absent function / no standing / agency acting for a client -> null and the
+  // anonymized handle stays. Nothing is guessed.
+  const applied =
+    result?.kind === "ok" && !actsForClient
+      ? result.candidates.filter((c) => {
+          const st = result.interestByWorker[c.workerId];
+          return st === "interested" || st === "reviewed" || st === "contacted";
+        })
+      : !actsForClient
+        ? handRaisers.filter(
+            (h) =>
+              h.interestStatus === "interested" ||
+              h.interestStatus === "reviewed" ||
+              h.interestStatus === "contacted",
+          )
+        : [];
+  // Stage 2 — needs the scouting result (or the stage-1 offers).
+  const [autoMatchReceipt, teamOffers, appliedIdentities, offerBookingStatus, pipelineFacts] =
+    await Promise.all([
+      selected && result?.kind === "ok"
+        ? createSupabaseServerClient().then((client) => readLastAutoMatchReceipt(client, selected))
+        : null,
+      // E6 - brigades that offered THEMSELVES as one unit against this need. Team-level
+      // aggregates only (the database never returns a member), matched against the SAME
+      // need the candidates were judged against. An agency acting for a client does not
+      // answer for it, so the section is the owner's.
+      selected && !actsForClient
+        ? loadTeamOffersForDemand(selected, result?.kind === "ok" ? (result.need ?? null) : null)
+        : null,
+      result?.kind === "ok" || result?.kind === "not-structured"
+        ? Promise.all(
+            applied.map(async (c) => [c.workerId, await getApplicantIdentity(result.demand.id, c.workerId)] as const),
+          )
+        : [],
+      // The worker's own answer to each booking an accepted offer proposed.
+      readOfferBookingStatuses(
+        offeredCandidates.map((oc) => oc.bookingId).filter((id): id is string => Boolean(id)),
+      ),
+      // The two pipeline facts the scouting result does not already carry:
+      // booking status per pair + direct-conversation existence (both real,
+      // RLS-scoped reads; absent tables degrade to empty facts — see the
+      // candidate-pipeline-facts limitation note).
+      result?.kind === "ok" && result.candidates.length > 0
+        ? loadDemandPipelineFacts(
+            result.demand.id,
+            result.candidates.map((c) => c.workerId),
+          )
+        : result?.kind === "not-structured" && handRaisers.length > 0
+          ? loadDemandPipelineFacts(
+              result.demand.id,
+              handRaisers.map((h) => h.workerId),
+            )
+          : null,
+    ]);
+  const applicantIdentity = new Map<string, ApplicantIdentity>();
+  for (const [id, who] of appliedIdentities) if (who) applicantIdentity.set(id, who);
+  // Stage 3 — projects load only when a team offer is accepted and waiting for
+  // its assignment.
   const teamOfferProjects =
     teamOffers && teamOffers.offers.some((o) => o.offer.status === "accepted")
       ? (await listManagedProjects())
           .filter((p) => p.status !== "completed")
           .map((p) => ({ id: p.id, title: p.title }))
       : [];
-  // WHO APPLIED (owner order 2026-10-01): for a worker whose application is
-  // on THIS employer's own need, the database (applicant_identity_v1, owner of
-  // the demand + application not withdrawn) may release the name and photo.
-  // Absent function / no standing / agency acting for a client -> null and the
-  // anonymized handle stays. Nothing is guessed.
-  const applicantIdentity = new Map<string, ApplicantIdentity>();
-  if (result?.kind === "ok" && !actsForClient) {
-    const applied = result.candidates.filter((c) => {
-      const st = result.interestByWorker[c.workerId];
-      return st === "interested" || st === "reviewed" || st === "contacted";
-    });
-    const found = await Promise.all(
-      applied.map(async (c) => [c.workerId, await getApplicantIdentity(result.demand.id, c.workerId)] as const),
-    );
-    for (const [id, who] of found) if (who) applicantIdentity.set(id, who);
-  }
-  // The worker's own answer to each booking an accepted offer proposed.
-  const offerBookingStatus = await readOfferBookingStatuses(
-    offeredCandidates.map((oc) => oc.bookingId).filter((id): id is string => Boolean(id)),
-  );
   // ONE source of truth for the synthetic-title labels — the same catalogue
   // node the company hub and the buyer surface already read.
   const tDemandReadback = await getTranslations("demandReadback");
@@ -250,13 +316,6 @@ export default async function CompanyScoutingPage({
     agencyPartnership: tDemandReadback("syntheticTitle.agencyPartnership"),
   };
   const tOffered = await getTranslations("scoutingAgencyOffers");
-
-  // Contact-detail ask states for THIS demand (Wagon 1) — owner-scoped read;
-  // applied:false while the draft-gated model is not applied (honest note,
-  // no dead button).
-  const contactRequests = selected
-    ? await getScoutingContactRequestStates(selected)
-    : { applied: false as const, byWorker: {} };
 
   // Shareable filter links: preserve the selected demand, toggle one facet.
   const filterHref = (next: Partial<ScoutFilters>): string => {
@@ -269,18 +328,6 @@ export default async function CompanyScoutingPage({
     if (merged.availableNow) params.set("available", "1");
     return `/${locale}/dashboard/company/scouting?${params.toString()}`;
   };
-
-  // The two pipeline facts the scouting result does not already carry:
-  // booking status per pair + direct-conversation existence (both real,
-  // RLS-scoped reads; absent tables degrade to empty facts — see the
-  // candidate-pipeline-facts limitation note).
-  const pipelineFacts =
-    result?.kind === "ok" && result.candidates.length > 0
-      ? await loadDemandPipelineFacts(
-          result.demand.id,
-          result.candidates.map((c) => c.workerId),
-        )
-      : null;
 
   // W10 slice 3: "we did not compare everyone" is true when the pool budget
   // bound OR when a Stage-1 id read was truncated. Either way the employer is
@@ -311,7 +358,7 @@ export default async function CompanyScoutingPage({
   const professionName = (slug: string): string =>
     tProfession.has(slug as never) ? tProfession(slug as never) : slug;
   /** Layer-1 facts of the identity: place, mobility, availability. */
-  const identityMeta = (c: ScoutSafeCandidate): IdentityMeta[] => {
+  const identityMeta = (c: Pick<ScoutSafeCandidate, "preview">): IdentityMeta[] => {
     const p = c.preview;
     const meta: IdentityMeta[] = [];
     if (p.location) meta.push({ key: "loc", kind: "location", label: p.location });
@@ -499,6 +546,13 @@ export default async function CompanyScoutingPage({
 
       {result?.kind === "ok" ? (
         <AutoMatchReceiptNote receipt={autoMatchReceipt} locale={locale} />
+      ) : null}
+
+      {/* Before any offer or booking for this need: the mutual, neutral
+          pre-agreement recommendation (decision 0021 extension, 2026-10-24) —
+          advice to both sides, never a filter on the candidates below. */}
+      {result?.kind === "ok" ? (
+        <CollaborationChecksNote context={{ dealKind: "work_engagement" }} testId="scouting-collaboration-checks" />
       ) : null}
 
       {result?.kind === "ok" && result.retrieval.historySignalsUnavailable ? (
@@ -698,6 +752,249 @@ export default async function CompanyScoutingPage({
           {t("notStructured")}
         </p>
       ) : null}
+      {/* PEOPLE WHO RAISED A HAND on a need that names no trade (owner
+          decision 2026-10-22). Shown NOW, beside the explanation above, and
+          labelled: the trade match was NOT assessed, so there is no status,
+          no skill count, no verdict, no readiness and no order of merit here
+          - only what the person stated about themselves. The employer's own
+          actions (shortlist, conversation, dates, contact-detail ask,
+          acknowledgement) are the same canonical controls, re-checked
+          server-side; none of them depends on a match. */}
+      {result?.kind === "not-structured" && handRaisers.length > 0 ? (
+        <section
+          className="flex flex-col gap-3"
+          data-testid="scouting-hand-raisers-unassessed"
+          data-match-assessed="false"
+        >
+          <header className="flex flex-col gap-1.5">
+            <h2 className="font-display text-base font-semibold text-text-primary">
+              {t("handRaisers.title")}
+            </h2>
+            <p
+              className="rounded-md border border-state-amber/40 bg-state-amber/10 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+              data-testid="scouting-hand-raisers-not-assessed-note"
+            >
+              {t("handRaisers.notAssessed")}
+            </p>
+          </header>
+          <ul className="flex flex-col gap-3">
+            {handRaisers.map((h) => {
+              const p = h.preview;
+              const who = applicantIdentity.get(h.workerId);
+              const stage = deriveCandidatePipelineStage({
+                shortlistStatus: h.shortlistStatus,
+                interestStatus: h.interestStatus,
+                bookingStatus: pipelineFacts?.bookingByWorker.get(h.workerId) ?? null,
+                conversationExists: pipelineFacts?.conversationByWorker.has(h.workerId) ?? false,
+              });
+              const inConversation = pipelineFacts?.conversationByWorker.has(h.workerId) ?? false;
+              // The worker raised their hand: the interest card below opens the
+              // in-app thread NOW (contactInterestedWorkerAction), so this box
+              // must not say messaging comes later or demand a shortlist first
+              // (UX review 2026-10-24, 4.16).
+              const interestDoor = hasStandingInterest(h.interestStatus);
+              return (
+                <li
+                  key={h.workerId}
+                  data-testid={`scout-candidate-${h.workerId}`}
+                  data-match-assessed="false"
+                >
+                  <Card compact>
+                  <PersonIdentityCard
+                    variant="candidate-review"
+                    testid={`scout-identity-${h.workerId}`}
+                    name={who?.name ?? `${t("candidate")} ${anonymizedToken(p.anonymizedLabel)}`}
+                    initials={
+                      who?.name ? personMonogram(who.name) : anonymizedToken(p.anonymizedLabel).slice(0, 2)
+                    }
+                    avatarUrl={who?.avatarUrl ?? null}
+                    professions={h.professionSlug ? [professionName(h.professionSlug)] : []}
+                    meta={identityMeta(h)}
+                    status={
+                      <>
+                        <span
+                          className="rounded-full border border-state-success/40 bg-state-success/10 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-state-success"
+                          data-testid={`scout-interest-${h.workerId}`}
+                        >
+                          {t("interestBadge")}
+                        </span>
+                        <span
+                          className="rounded-full border border-state-amber/40 bg-state-amber/10 px-2.5 py-1 font-mono text-meta uppercase tracking-label text-state-amber"
+                          data-testid={`scout-match-not-assessed-${h.workerId}`}
+                        >
+                          {t("handRaisers.badge")}
+                        </span>
+                        <span
+                          data-testid={`scout-pipeline-${h.workerId}`}
+                          data-stage={stage}
+                          className={`rounded-full border px-2.5 py-1 font-mono text-meta uppercase tracking-label ${PIPELINE_TONE[stage]}`}
+                        >
+                          {tPipe(`stage.${stage}` as never)}
+                        </span>
+                      </>
+                    }
+                    chips={
+                      <>
+                        {h.actionability.kind === "actionable_later" ? (
+                          <span
+                            className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
+                            data-testid="candidate-available-later"
+                          >
+                            {t("actionability.availableFromChip", { date: h.actionability.availableFrom })}
+                          </span>
+                        ) : null}
+                        {p.rate.minEur != null ? (
+                          <span className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
+                            {t("rateFrom", { min: p.rate.minEur })}
+                          </span>
+                        ) : null}
+                        {p.experienceYears != null && p.experienceYears > 0 ? (
+                          <span
+                            className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary"
+                            data-testid={`scout-experience-${h.workerId}`}
+                          >
+                            {t("experienceYearsValue", { years: p.experienceYears })}
+                          </span>
+                        ) : null}
+                        <p className="basis-full text-meta leading-relaxed text-text-muted">
+                          {t("handRaisers.ownWords")}
+                        </p>
+                        <p
+                          className="basis-full text-meta leading-relaxed text-text-muted"
+                          data-testid={who?.name ? "identity-applied-note" : "identity-name-hidden-note"}
+                        >
+                          {who?.name ? t("identity.appliedToYou") : t("identity.nameHidden")}
+                        </p>
+                      </>
+                    }
+                    actions={
+                      <div className="flex flex-col gap-3">
+                      {actsForClient ? (
+                        <p className="text-meta text-text-muted" data-testid={`scout-agency-present-${h.workerId}`}>
+                          {t("agencyPresent.note")}{" "}
+                          <Link href={`/${locale}/dashboard/company/partners`} className="text-brand-blue hover:underline">
+                            {t("agencyPresent.link")} →
+                          </Link>
+                        </p>
+                      ) : (
+                        <>
+                          <div
+                            className="flex flex-col gap-2 rounded-md border border-ink-500/70 bg-ink-800/60 px-2.5 py-2"
+                            data-testid={`scout-comms-${h.workerId}`}
+                            data-can-contact={h.canContact ? "true" : "false"}
+                          >
+                            <p className="flex items-center gap-1.5 text-meta text-text-muted">
+                              <span aria-hidden>{h.canContact ? "💬" : "⏳"}</span>
+                              {inConversation
+                                ? t("comms.inConversation")
+                                : interestDoor
+                                  ? t("comms.interestDoor")
+                                  : h.canContact
+                                    ? t("comms.eligible")
+                                    : t("comms.blocked")}
+                            </p>
+                            {h.canContact ? (
+                              <div className="flex flex-col gap-2">
+                                {isShortlistedForContact(h.shortlistStatus) ? (
+                                  <RequestCommunicationButton
+                                    locale={locale}
+                                    requestId={result.demand.id}
+                                    workerId={h.workerId}
+                                    labels={{
+                                      button: t("request.button"), opening: t("request.opening"),
+                                      opened: t("request.opened"), view: t("request.view"),
+                                      error: t("request.error"), limitReached: t("request.limitReached"),
+                                    }}
+                                  />
+                                ) : inConversation || interestDoor ? null : (
+                                  <p className="text-meta text-text-muted" data-testid={`scout-shortlist-first-${h.workerId}`}>
+                                    {t("request.shortlistFirst")}
+                                  </p>
+                                )}
+                                <ProposeBookingButton
+                                  locale={locale}
+                                  requestId={result.demand.id}
+                                  workerId={h.workerId}
+                                  countryCode={null}
+                                  labels={{
+                                    open: t("booking.open"), startDate: t("booking.startDate"),
+                                    note: t("booking.note"), send: t("booking.send"),
+                                    sending: t("booking.sending"), sent: t("booking.sent"),
+                                    unavailable: t("booking.unavailable"), notEntitled: t("booking.notEntitled"),
+                                    error: t("booking.error"), cancel: t("booking.cancel"),
+                                  }}
+                                />
+                                <RequestContactDetailsButton
+                                  locale={locale}
+                                  requestId={result.demand.id}
+                                  workerId={h.workerId}
+                                  requestRowId={contactRequests.byWorker[h.workerId]?.requestRowId ?? null}
+                                  currentStatus={contactRequests.byWorker[h.workerId]?.status ?? null}
+                                  disclosureGranted={contactRequests.byWorker[h.workerId]?.disclosureGranted ?? false}
+                                  modelApplied={contactRequests.applied}
+                                  labels={{
+                                    button: t("contactRequest.button"), sending: t("contactRequest.sending"),
+                                    pending: t("contactRequest.pending"), accepted: t("contactRequest.accepted"),
+                                    granted: t("contactRequest.granted"), declined: t("contactRequest.declined"),
+                                    expired: t("contactRequest.expired"), unavailable: t("contactRequest.unavailable"),
+                                    rateLimited: t("contactRequest.rateLimited"), noOrganization: t("contactRequest.noOrganization"),
+                                    withdraw: t("contactRequest.withdraw"), withdrawing: t("contactRequest.withdrawing"),
+                                    withdrawn: t("contactRequest.withdrawn"), withdrawNotOpen: t("contactRequest.withdrawNotOpen"),
+                                    withdrawError: t("contactRequest.withdrawError"), fieldsNote: t("contactRequest.fieldsNote"),
+                                    error: t("contactRequest.error"),
+                                  }}
+                                />
+                              </div>
+                            ) : null}
+                          </div>
+                          <CompanyInterestAck
+                            locale={locale}
+                            requestId={result.demand.id}
+                            workerId={h.workerId}
+                            initialStatus={h.interestStatus}
+                            labels={{
+                              statusLabels: Object.fromEntries(
+                                ["interested", "reviewed", "contacted"]
+                                  .filter((s) => t.has(`ack.status.${s}`))
+                                  .map((s) => [s, t(`ack.status.${s}` as never)]),
+                              ),
+                              markReviewed: t("ack.markReviewed"),
+                              markContacted: t("ack.markContacted"),
+                              internalNote: t("ack.internalNote"),
+                              error: t("ack.error"),
+                              notAvailable: t("ack.notAvailable"),
+                            }}
+                          />
+                          <ScoutingShortlistButtons
+                            locale={locale}
+                            requestId={result.demand.id}
+                            workerId={h.workerId}
+                            current={h.shortlistStatus}
+                            currentNote={h.shortlistNote}
+                            labels={{
+                              statuses: shortlistLabels,
+                              error: t("shortlistError"),
+                              note: {
+                                label: t("shortlistNote.label"), internalHint: t("shortlistNote.internalHint"),
+                                add: t("shortlistNote.add"), edit: t("shortlistNote.edit"),
+                                placeholder: t("shortlistNote.placeholder"), reasonTitle: t("shortlistNote.reasonTitle"),
+                                reasonPlaceholder: t("shortlistNote.reasonPlaceholder"), reasonRequired: t("shortlistNote.reasonRequired"),
+                                save: t("shortlistNote.save"), cancel: t("shortlistNote.cancel"),
+                              },
+                            }}
+                          />
+                        </>
+                      )}
+                      </div>
+                    }
+                  />
+                  </Card>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
       {result?.kind === "needs-migration" ? (
         <p className="rounded-md border border-ink-500 px-4 py-6 text-sm text-text-secondary">
           {t("needsSetup")}
@@ -876,6 +1173,9 @@ export default async function CompanyScoutingPage({
                 pipelineFacts?.conversationByWorker.has(c.workerId) ?? false,
             });
             const inConversation = pipelineFacts?.conversationByWorker.has(c.workerId) ?? false;
+            // A candidate who raised their hand is reachable now through the
+            // interest card (UX review 2026-10-24, 4.16) — see the hand-raiser list.
+            const interestDoor = !actsForClient && hasStandingInterest(result.interestByWorker[c.workerId]);
             const nextAction = nextActionForStage(stage, {
               locale,
               requestId: result.demand.id,
@@ -1050,9 +1350,11 @@ export default async function CompanyScoutingPage({
                       ? t("lifecycle.closedNote")
                       : inConversation
                         ? t("comms.inConversation")
-                        : c.canContact
-                          ? t("comms.eligible")
-                          : t("comms.blocked")}
+                        : interestDoor
+                          ? t("comms.interestDoor")
+                          : c.canContact
+                            ? t("comms.eligible")
+                            : t("comms.blocked")}
                   </p>
                   {c.canContact && needOpen ? (
                     <div className="flex flex-col gap-2">
@@ -1075,9 +1377,10 @@ export default async function CompanyScoutingPage({
                             limitReached: t("request.limitReached"),
                           }}
                         />
-                      ) : inConversation ? null : (
+                      ) : inConversation || interestDoor ? null : (
                         // A conversation that already exists is the fact: no
-                        // "shortlist first" under it (scouting walk 2026-10-09).
+                        // "shortlist first" under it (scouting walk 2026-10-09);
+                        // nor under a raised hand, whose card opens the thread.
                         <p
                           className="text-meta text-text-muted"
                           data-testid={`scout-shortlist-first-${c.workerId}`}

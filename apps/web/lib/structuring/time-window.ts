@@ -97,32 +97,41 @@ const KIND_NEEDLES: ReadonlyArray<{ kind: TimeWindowKind; res: RegExp[] }> = [
 ];
 
 /**
- * Month stems, folded, one row per month — LT (genitive as people write
- * dates: "spalio 5"), EN, RU (genitive: "5 октября"), NL, DE, PL. A stem
- * matches a WHOLE word prefix, so "kov" (LT March) cannot fire inside another
- * word and "spal" needs the day beside it. Ordered by month number.
+ * Month WORDS, folded, one row per month — LT (every case people write: the
+ * genitive of "spalio 5", the nominative, accusative and locative), EN (full
+ * name or three-letter abbreviation), RU, NL, DE, PL. Ordered by month number.
+ *
+ * WHOLE WORDS, not prefixes. These used to be stems tested with `startsWith`,
+ * and a stem is a prefix of ordinary words: "vasar" (February) starts
+ * "vasaros" (summer), so "nuo vasaros" read as 1 February; "mar" (March)
+ * starts "Marijampolės", so "20 km nuo Marijampolės" read as a March start;
+ * "spal" starts "spalvos" (colour). A word is now a month only when its
+ * ENDING is one of that month's real inflections. Cyrillic keeps stem + any
+ * ending (those stems do not begin common words), except May, whose does.
  */
-const MONTH_STEMS: ReadonlyArray<readonly string[]> = [
-  ["saus", "jan", "январ", "januari", "januar", "stycz"],
-  ["vasar", "feb", "феврал", "februari", "februar", "lut"],
-  ["kov", "mar", "март", "maart", "marz", "marc"],
-  ["baland", "apr", "апрел", "april", "kwiet"],
-  ["geguz", "may", "мая", "май", "mei", "mai", "maj"],
-  ["birzel", "jun", "июн", "juni", "czerw"],
-  ["liep", "jul", "июл", "juli", "lip"],
-  ["rugpj", "aug", "август", "augustus", "sierp"],
-  ["rugsej", "sep", "сентябр", "september", "wrze"],
-  ["spal", "oct", "октябр", "oktober", "pazdz"],
-  ["lapkri", "nov", "ноябр", "november", "listopad"],
-  ["gruod", "dec", "декабр", "december", "grudn"],
+const MONTH_WORDS: ReadonlyArray<RegExp> = [
+  /^(?:saus(?:is|io|i|yje)|jan(?:uary)?|январ\p{L}*|januari?|stycz(?:en|nia|niu))$/u,
+  /^(?:vasar(?:is|io|i|yje)|feb(?:ruary)?|феврал\p{L}*|februari?|lut(?:y|ego|ym)?)$/u,
+  /^(?:kov(?:as|o|a|e)|mar(?:ch)?|март\p{L}*|maart|marz|marzec|marc(?:a|u))$/u,
+  /^(?:baland(?:is|zio|i|yje)|apr(?:il)?|апрел\p{L}*|kwie(?:cien|tnia|tniu))$/u,
+  /^(?:geguz(?:e|es|eje)|may|ма[йяе]|mei|mai|maj(?:a|u)?)$/u,
+  /^(?:birzel(?:is|io|i|yje)|june?|июн\p{L}*|juni|czerw(?:iec|ca|cu))$/u,
+  /^(?:liep(?:a|os|oje)|july?|июл\p{L}*|juli|lip(?:iec|ca|cu))$/u,
+  /^(?:rugpj(?:utis|ucio|uti|utyje)|aug(?:ust|ustus)?|август\p{L}*|sierp(?:ien|nia|niu))$/u,
+  /^(?:rugsej(?:is|o|i|yje)|sep(?:t|tember)?|сентябр\p{L}*|wrze(?:sien|snia|sniu))$/u,
+  /^(?:spal(?:is|io|i|yje)|oct(?:ober)?|октябр\p{L}*|oktober|pazdziernik(?:a|u)?)$/u,
+  /^(?:lapkri(?:tis|cio|ti|tyje)|nov(?:ember)?|ноябр\p{L}*|listopad(?:a|zie)?)$/u,
+  /^(?:gruod(?:is|zio|i|yje)|dec(?:ember)?|dezember|декабр\p{L}*|grud(?:zien|nia|niu))$/u,
 ];
 
 /** "from" across the locales — the word that turns a date into a START. */
 const FROM_WORD = "(?:nuo|from|starting|с|со|vanaf|ab|od)";
 
-function monthOf(word: string): number | null {
-  for (let m = 0; m < MONTH_STEMS.length; m++) {
-    if (MONTH_STEMS[m].some((stem) => word.startsWith(stem))) return m + 1;
+/** The month (1–12) one FOLDED word names, or `null`. Whole word only — see
+ *  MONTH_WORDS for why a prefix is not enough. */
+export function monthOf(word: string): number | null {
+  for (let m = 0; m < MONTH_WORDS.length; m++) {
+    if (MONTH_WORDS[m].test(word)) return m + 1;
   }
   return null;
 }
@@ -194,6 +203,43 @@ export function parseStartDate(text: string, todayIso: string): string | null {
     return plusDays(todayIso, 1);
   }
   return null;
+}
+
+/** Any fixed day works as the anchor for a yes/no question: whether a start
+ *  date is read never depends on today, only which day it resolves to. */
+const PRESENCE_ANCHOR = "2026-01-01";
+
+/**
+ * Does the sentence STATE when the work starts? A yes/no reading for the
+ * recognizer's "start date" field, built on the same reader as the date
+ * itself — `parseStartDate`, the this/next week/month phrases — plus two
+ * ways an employer writes a start that are too ambiguous to turn into a day
+ * but plainly state one:
+ *   - "lapkričio mėn." (a month word followed by "mėn.", "in November");
+ *   - "nuo 11-01" (a from-word and a two-part numeric date; which part is the
+ *     month differs per country, so `parseStartDate` deliberately does not
+ *     resolve it — but it IS a stated start). Hours ("nuo 08-17 val.") are not.
+ */
+export function mentionsStartTime(text: string): boolean {
+  if (parseStartDate(text ?? "", PRESENCE_ANCHOR) !== null) return true;
+  const folded = foldText(text ?? "");
+  if (KIND_NEEDLES.some(({ res }) => res.some((re) => re.test(folded)))) return true;
+  for (const m of folded.matchAll(/(?:^|[^\p{L}])([\p{L}]+)\s+men(?![\p{L}])/gu)) {
+    if (monthOf(m[1])) return true;
+  }
+  const numeric = folded.match(
+    new RegExp(
+      `(?:^|[^\\p{L}])${FROM_WORD}\\s+(\\d{2})-(\\d{2})(?![\\d-])(?!\\s*(?:val|h(?![\\p{L}])|час|uhr|godz|uur))`,
+      "u",
+    ),
+  );
+  if (numeric) {
+    const a = Number.parseInt(numeric[1], 10);
+    const b = Number.parseInt(numeric[2], 10);
+    const monthDay = (mm: number, dd: number) => mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31;
+    if (monthDay(a, b) || monthDay(b, a)) return true;
+  }
+  return false;
 }
 
 /** "until" across the locales — the word that turns a date into an END. */
@@ -283,16 +329,64 @@ function validIsoDate(y: string, m: string, d: string): string | null {
 /** Duration units, folded stems: weeks / months across the locales. */
 // `\w` is ASCII-only in JS — Cyrillic and Lithuanian endings need `\p{L}`.
 const WEEK_WORD = /^(savait[\p{L}]*|weeks?|недел[\p{L}]*|weken|week|wochen?|tygodn[\p{L}]*)$/u;
-const MONTH_WORD = /^(men[\p{L}]*|months?|месяц[\p{L}]*|maand[\p{L}]*|monat[\p{L}]*|miesi[\p{L}]*)$/u;
+// LT month forms only — "mėn.", "mėnuo", "mėnesį", "mėnesiams" (folded) —
+// never a bare "men…" stem: Dutch "4 mensen" (people) read as four months.
+const MONTH_WORD = /^(men|menuo|menes[\p{L}]*|months?|месяц[\p{L}]*|maand[\p{L}]*|monat[\p{L}]*|miesi[\p{L}]*)$/u;
+/** Years: ONLY the Lithuanian dative "metams" ("for a year", "2 metams").
+ *  Every other year word ("3 metų", "3 years", "3 года") is far more often
+ *  EXPERIENCE than a duration, and must not turn into an end date. */
+const YEAR_DATIVE = /^metams$/u;
+/** Year words, folded — EN, RU, DE, PL, NL (read only after a preposition). */
+const YEAR_WORD = /^(years?|год|года|лет|jahre?n?|lata|lat|rok|jaar|jaren)$/u;
+/** The word that makes "N years" a duration: for / на / für / na / voor. */
+const DURATION_PREPOSITION = /^(for|на|fur|na|voor)$/u;
+/** Dative plural words that sit before "metams" WITHOUT counting it — "for
+ *  the next / this / coming year". Any OTHER dative plural word there is a
+ *  count this module cannot read ("dvejems", a typo), and an unread count
+ *  must stay unresolved: a silent "1 year" would invent an end date. */
+const YEAR_DETERMINERS = new Set(["kitiems", "siems", "tiems", "sitiems", "ateinantiems", "artimiausiems"]);
+const DATIVE_PLURAL_WORD = /^\p{L}+(?:iems|ioms|ems|oms)$/u;
+
+/** Days in a "metams" duration whose preceding token is `prev`; `null` when
+ *  that token is a count this module cannot read. */
+function yearDativeDays(prev: string | undefined): number | null {
+  if (prev === undefined) return 365; // a bare "metams" opens the text: one year
+  if (/^\d+$/.test(prev)) {
+    const n = Number.parseInt(prev, 10);
+    return n >= 1 && n <= 10 ? n * 365 : null;
+  }
+  const word = parseWordNumber(prev);
+  if (word !== null) return word >= 1 && word <= 10 ? word * 365 : null;
+  const folded = foldText(prev);
+  if (YEAR_DETERMINERS.has(folded)) return 365;
+  if (DATIVE_PLURAL_WORD.test(folded)) return null;
+  return 365; // a bare "metams" after an ordinary word: one year
+}
 
 /**
  * A stated DURATION ("3 savaitėms", "for 3 weeks", "на 3 недели", "3 weken",
- * "3 Wochen", "na 3 tygodnie", "2 mėnesiams", "for two months") → the number
- * of days it spans, or `null`. Word-numbers count too.
+ * "3 Wochen", "na 3 tygodnie", "2 mėnesiams", "for two months", "metams",
+ * "2 metams", "dvejiems metams") → the number of days it spans, or `null`.
+ * Word-numbers count too.
  */
 export function parseDurationDays(text: string): number | null {
   const tokens = (text ?? "").split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   const folded = tokens.map(foldText);
+  for (let i = 0; i < folded.length; i++) {
+    if (!YEAR_DATIVE.test(folded[i])) continue;
+    return yearDativeDays(i > 0 ? tokens[i - 1] : undefined);
+  }
+  // Years in the other locales only with the duration preposition right
+  // before the count — "for 2 years", "на 2 года", "für 2 Jahre", "na 2
+  // lata", "voor 2 jaar". Without it ("3 years experience", "опыт 3 года")
+  // a year count is experience, never an end date.
+  for (let i = 2; i < folded.length; i++) {
+    if (!YEAR_WORD.test(folded[i]) || !DURATION_PREPOSITION.test(folded[i - 2])) continue;
+    const candidate = tokens[i - 1];
+    const digits = /^\d{1,2}$/.test(candidate) ? Number.parseInt(candidate, 10) : null;
+    const value = digits ?? parseWordNumber(candidate);
+    if (value !== null && value >= 1 && value <= 10) return value * 365;
+  }
   for (let i = 1; i < folded.length; i++) {
     const unit = WEEK_WORD.test(folded[i]) ? 7 : MONTH_WORD.test(folded[i]) ? 30 : 0;
     if (!unit) continue;

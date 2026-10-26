@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Mic, MicOff, Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { Link } from "@/lib/i18n/navigation";
+import { Link, useRouter } from "@/lib/i18n/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { activeLocales, type ActiveLocale } from "@/lib/i18n/config";
 import {
@@ -150,6 +150,7 @@ function parseRecentIds(rawJson: string | null): string[] {
 
 export function CommandFinder() {
   const t = useTranslations("commandFinder");
+  const router = useRouter();
   const rawLocale = useLocale();
   const locale: ActiveLocale = (activeLocales as readonly string[]).includes(
     rawLocale,
@@ -406,6 +407,40 @@ export function CommandFinder() {
   const rowClass =
     "flex items-center justify-between gap-3 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary transition-colors hover:border-brand-blue";
 
+  // KEYBOARD SELECTION (production audit 2026-10-22: Enter did nothing). The
+  // registry commands first, then the caller's own objects — the order they
+  // render in. ArrowUp/Down move the highlight; Enter opens it. The first
+  // result is selected by default, so "type, Enter" opens the top hit.
+  const navigable = useMemo(
+    () => [
+      ...results.map((entry) => ({ key: `result-${entry.id}`, href: entry.route, commandId: entry.id as string | null })),
+      ...(objectState === "ok"
+        ? objectGroups.flatMap((g) =>
+            g.results.map((r) => ({ key: `object-${g.source}-${r.id}`, href: r.href, commandId: null as string | null })),
+          )
+        : []),
+    ],
+    [results, objectGroups, objectState],
+  );
+  const [activeIndex, setActiveIndex] = useState(0);
+  useEffect(() => setActiveIndex(0), [query]);
+  const selected = navigable[Math.min(activeIndex, navigable.length - 1)] ?? null;
+  const optionId = (key: string) => `command-finder-option-${key}`;
+  const onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (navigable.length === 0) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      setActiveIndex((i) => (Math.min(i, navigable.length - 1) + step + navigable.length) % navigable.length);
+    } else if (e.key === "Enter" && selected) {
+      e.preventDefault();
+      if (selected.commandId) rememberCommand(selected.commandId);
+      router.push(selected.href as "/dashboard");
+    }
+  };
+  const activeClass = (key: string) =>
+    selected?.key === key ? " border-brand-blue bg-ink-700/60" : "";
+
   return (
     <section
       role="search"
@@ -443,6 +478,8 @@ export function CommandFinder() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("placeholder")}
           aria-label={t("inputLabel")}
+          onKeyDown={onInputKeyDown}
+          aria-activedescendant={selected ? optionId(selected.key) : undefined}
           data-testid="command-finder-input"
           className={`w-full rounded-md border border-ink-500 bg-ink-800/60 py-2 pl-9 text-sm text-text-primary placeholder:text-text-muted focus:border-brand-blue focus:outline-none ${
             voiceSupported ? "pr-10" : "pr-3"
@@ -594,8 +631,10 @@ export function CommandFinder() {
                 <Link
                   href={entry.route as "/dashboard"}
                   onClick={() => rememberCommand(entry.id)}
+                  id={optionId(`result-${entry.id}`)}
                   data-testid={`command-finder-result-${entry.id}`}
-                  className={rowClass}
+                  data-active={selected?.key === `result-${entry.id}` ? "true" : undefined}
+                  className={rowClass + activeClass(`result-${entry.id}`)}
                 >
                   <span className="min-w-0 truncate font-medium">
                     {entry.labels[locale]}
@@ -645,8 +684,10 @@ export function CommandFinder() {
                     <li key={r.id}>
                       <Link
                         href={r.href as "/dashboard"}
+                        id={optionId(`object-${group.source}-${r.id}`)}
                         data-testid={`command-finder-object-${group.source}-${r.id}`}
-                        className={rowClass}
+                        data-active={selected?.key === `object-${group.source}-${r.id}` ? "true" : undefined}
+                        className={rowClass + activeClass(`object-${group.source}-${r.id}`)}
                       >
                         <span className="min-w-0 truncate font-medium">
                           {r.label}

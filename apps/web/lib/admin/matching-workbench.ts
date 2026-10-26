@@ -2,6 +2,8 @@ import "server-only";
 
 import { withoutCounterpartyRows } from "@/lib/journal/review-status";
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
+import { withCrossPartyStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readCrossPartyStandingStates } from "@/lib/evidence/skill-confirmation-standing-read";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -128,7 +130,9 @@ export interface SupplyWorkerRow {
   readonly professionSlugs: readonly string[];
   /** Self-declared skills — honest label, never "verified". */
   readonly skillsDeclared: number;
-  /** worker_skills rows with verified=true (manager-confirmed path). */
+  /** worker_skills rows whose recorded confirmation still STANDS
+   *  (lib/evidence/skill-confirmation-standing.ts, cross-party door). An
+   *  UNKNOWN one is not counted — under-stated, never over-stated. */
   readonly skillsConfirmed: number;
   /** Journal evidence — real counts, 0 is a plain 0. */
   readonly journalEntries: number;
@@ -301,18 +305,21 @@ export async function listWorkbench(
   const escoByWorker = new Map<string, Map<string, boolean>>();
 
   if (workerIds.length > 0) {
-    const [profs, skills, entries] = await Promise.all([
+    const [profs, skills, entries, standing] = await Promise.all([
       asAny(supabase)
         .from("worker_professions")
         .select("worker_id, professions ( slug )")
         .in("worker_id", workerIds),
       asAny(supabase)
         .from("worker_skills")
-        .select("worker_id, verified, skills ( esco_uri )")
+        .select("worker_id, skill_id, verified, skills ( esco_uri )")
         .in("worker_id", workerIds),
       liveJournalEntriesOnly(
         asAny(supabase).from("journal_entries").select("id, worker_id").in("worker_id", workerIds),
       ),
+      // The stored `verified` flag is sticky; whether each recorded
+      // confirmation still STANDS is the cross-party door's answer.
+      readCrossPartyStandingStates(supabase, workerIds),
     ]);
 
     for (const p of (profs.data ?? []) as {
@@ -325,11 +332,15 @@ export async function listWorkbench(
       list.push(slug);
       professionsByWorker.set(p.worker_id, list);
     }
-    for (const s of (skills.data ?? []) as {
-      worker_id: string;
-      verified: boolean;
-      skills: { esco_uri: string | null } | null;
-    }[]) {
+    for (const s of withCrossPartyStandingConfirmation(
+      (skills.data ?? []) as {
+        worker_id: string;
+        skill_id: string | null;
+        verified: boolean;
+        skills: { esco_uri: string | null } | null;
+      }[],
+      standing,
+    )) {
       declaredByWorker.set(
         s.worker_id,
         (declaredByWorker.get(s.worker_id) ?? 0) + 1,

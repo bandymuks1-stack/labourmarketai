@@ -11,6 +11,7 @@ import {
 } from "@/lib/config/documents";
 import {
   computeCountryReadiness,
+  documentReadinessScope,
   type DerivedDocumentStatus,
 } from "@/lib/documents/readiness";
 import { unmatchableRequirementRows } from "@/lib/country-readiness/requirement-rows";
@@ -48,6 +49,11 @@ import {
 } from "@/lib/readiness/worker-readiness";
 import type { Role } from "@/lib/auth/actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/documents", "documents.title");
+
 
 /**
  * "Mano dokumentai" — the document & work-proof centre (control room PR H,
@@ -820,6 +826,17 @@ export default async function WorkerDocumentsPage({
                     <p className="text-meta text-text-muted">
                       {t("scopeNote")}
                     </p>
+                    {/* Base country not stated: whether this work would be a
+                        POSTING is unknown, so the posting papers are not
+                        listed as missing — and the page says why. */}
+                    {!inv.readiness.homeCountry ? (
+                      <p
+                        className="text-meta text-text-muted"
+                        data-testid="documents-posting-needs-base"
+                      >
+                        {t("country.postingNeedsBase")}
+                      </p>
+                    ) : null}
 
                     {/* REQUIREMENTS THAT APPLY AND CANNOT BE CHECKED FROM
                         DOCUMENTS. `matrixRequirementRows` keys on a document
@@ -832,9 +849,11 @@ export default async function WorkerDocumentsPage({
                         folded into the status above — this list changes no
                         count and no overall verdict. */}
                     {(() => {
+                      // The SAME scope the checklist above was built in:
+                      // posting-only rules only across a known border.
                       const unmatchable = unmatchableRequirementRows(
                         country,
-                        "worker_posted",
+                        documentReadinessScope(country, inv.readiness.homeCountry),
                       );
                       if (unmatchable.length === 0) return null;
                       return (
@@ -945,9 +964,9 @@ export default async function WorkerDocumentsPage({
       <DocsConsentToggle current={docsConsent} />
 
       {/* WAGON 9 (area 17) — Lithuanian-master jurisdiction/document
-          guidance. LT locale renders the full draft registry; other locales
-          see only the "being prepared from the Lithuanian master" notice
-          (owner correction 2026-07-05). */}
+          guidance. LT locale renders the full registry; other locales see
+          only the "available in Lithuanian only" notice (owner correction
+          2026-07-05). */}
       <LtDocumentGuidance locale={locale} />
     </div>
   );

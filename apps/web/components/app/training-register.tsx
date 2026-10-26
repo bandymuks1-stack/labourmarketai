@@ -10,6 +10,7 @@ import {
 } from "@/lib/training/training-actions";
 import {
   getCertificationRegister,
+  getTrainingAuthority,
   getTrainingOverview,
 } from "@/lib/training/training";
 import {
@@ -50,6 +51,14 @@ import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-wo
  * now opens in place, says whether it is still running, and can be retired or
  * brought back. Nothing is deleted: retiring is a flag, and the assignments
  * already made against a course are untouched by it.
+ *
+ * THE FORMS FOLLOW AUTHORITY, NOT DATA. The register used to open its
+ * organization half only when the reader could already read a course or an
+ * assignment, so an organization with no course could never add its first
+ * one — and every employee of an organization that had one was offered the
+ * add and assign forms the database then refused. Each form now renders from
+ * `getTrainingAuthority()`, which asks the database the same predicates the
+ * write commands enforce. A reader without authority keeps the read view.
  *
  * Pure server component, NATIVE-NAV forms: every submit is a server action
  * that redirects back with an honest `?trn=` outcome.
@@ -92,7 +101,16 @@ export async function TrainingRegister({
   const managed = overview.assignments.filter(
     (a) => a.assigneeProfileId !== overview.viewerProfileId,
   );
-  const canManage = overview.programs.length > 0 || managed.length > 0;
+  const authority = await getTrainingAuthority([
+    ...overview.programs.map((p) => p.organizationId),
+    ...managed.map((a) => a.organizationId),
+  ]);
+  const canCreate = authority.createOrganizationId !== null;
+  // The organization half opens for a reader who may add a course (even to
+  // an empty register — the add form plus an honest empty state), or who can
+  // already read courses or managed assignments (the read view).
+  const showOrganization =
+    canCreate || overview.programs.length > 0 || managed.length > 0;
 
   return (
     <section
@@ -171,15 +189,17 @@ export async function TrainingRegister({
       ) : null}
 
       {/* ── The organization's own register ────────────────────────────── */}
-      {canManage ? (
+      {showOrganization ? (
         <div className="flex flex-col gap-3" data-testid="training-org">
           <h3 className="text-sm font-semibold text-text-primary">
             {t("org.heading")}
           </h3>
 
+          {canCreate ? (
           <form
             action={createTrainingProgramAction}
             className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
+            data-testid="training-create-form"
           >
             <DisplayedWorkspaceField />
             <input type="hidden" name="locale" value={locale} />
@@ -211,6 +231,7 @@ export async function TrainingRegister({
               {t("org.createProgram")}
             </button>
           </form>
+          ) : null}
 
           {overview.programs.length === 0 ? (
             <p
@@ -244,6 +265,7 @@ export async function TrainingRegister({
                     <span className="text-xs text-text-secondary">{p.description}</span>
                   ) : null}
 
+                  {authority.editOrganizationIds.has(p.organizationId) ? (
                   <details data-testid="training-program-edit">
                     <summary className="cursor-pointer text-meta text-text-muted">
                       {t("org.editProgram")}
@@ -291,8 +313,14 @@ export async function TrainingRegister({
                       </button>
                     </form>
                   </details>
+                  ) : null}
 
-                  <form action={assignTrainingAction} className="flex flex-col gap-2 sm:flex-row">
+                  {authority.assignOrganizationIds.has(p.organizationId) ? (
+                  <form
+                    action={assignTrainingAction}
+                    className="flex flex-col gap-2 sm:flex-row"
+                    data-testid="training-assign-form"
+                  >
                     <input type="hidden" name="locale" value={locale} />
                     <input type="hidden" name="programId" value={p.id} />
                     <input
@@ -317,6 +345,7 @@ export async function TrainingRegister({
                       {t("org.assign")}
                     </button>
                   </form>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -334,7 +363,9 @@ export async function TrainingRegister({
                   <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t(`status.${a.status}`)}
                   </span>
-                  {a.status === "completed" && !a.certificateDocumentFileId ? (
+                  {authority.assignOrganizationIds.has(a.organizationId) &&
+                  a.status === "completed" &&
+                  !a.certificateDocumentFileId ? (
                     <form
                       action={attachTrainingCertificateAction}
                       className="flex flex-col gap-2 sm:flex-row"
@@ -370,7 +401,9 @@ export async function TrainingRegister({
                       </button>
                     </form>
                   ) : null}
-                  {a.expiresOn && a.status !== "expired" ? (
+                  {authority.assignOrganizationIds.has(a.organizationId) &&
+                  a.expiresOn &&
+                  a.status !== "expired" ? (
                     <form action={markTrainingExpiredAction}>
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="assignmentId" value={a.id} />

@@ -41,10 +41,11 @@ const EMPTY: ProfileSuggestions = {
 
 function pickSlug(
   haystack: string,
-  table: { slug: string; needles: string[] }[],
+  table: { slug: string; needles: string[]; notWhen?: string[] }[],
 ): string[] {
   const found = new Set<string>();
   for (const row of table) {
+    if (row.notWhen?.some((x) => haystack.includes(x))) continue;
     for (const n of row.needles) {
       if (n && haystack.includes(n)) {
         found.add(row.slug);

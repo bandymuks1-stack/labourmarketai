@@ -50,11 +50,17 @@ function DefectRow({ defect, onDone }: { defect: Defect; onDone: (m: string) => 
       <div className="flex flex-wrap items-center gap-2">
         <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${SEVERITY_TONE[defect.severity]}`}>{t(`severity.${defect.severity}`)}</span>
         <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t(`category.${defect.category}`)}</span>
-        <span className="min-w-0 flex-1 truncate text-sm text-text-primary" title={defect.description}>{defect.description}</span>
         {defect.status === STATUS_ACCEPTED && (
           <span className="font-mono text-meta uppercase tracking-label text-state-success">{t(`status.${defect.status}`)}</span>
         )}
       </div>
+      {/* WHAT IS WRONG is the row's content, not a label: its own line, wrapped
+          in full. It sat truncated beside the chips, which on a phone left
+          "UXV-SY…" — the manager could not read the defect without opening
+          it (UX review 2026-10-24, row 3.10). */}
+      <p className="whitespace-pre-line break-words text-sm text-text-primary" data-testid="defect-description-text">
+        {defect.description}
+      </p>
       {defect.location ? <span className="text-meta text-text-muted">{t("locationLabel")}: {defect.location}</span> : null}
 
       <div className="flex flex-wrap items-center gap-2">

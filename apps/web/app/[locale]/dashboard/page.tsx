@@ -58,6 +58,7 @@ import {
 } from "@/lib/auth/dashboard-role-decision";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { CompanyModelScreen } from "@/components/app/organization/company-model-screen";
+import { PilotPassInvite } from "@/components/app/pilot-pass-invite";
 import { conversationOpeningContext } from "@/lib/today/today-route";
 import { AccessRefusalNotice } from "@/components/app/access-refusal-notice";
 import {
@@ -65,6 +66,11 @@ import {
   accessNoticeOffersSetup,
   parseAccessNotice,
 } from "@/lib/auth/access-notice";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard");
+
 
 /**
  * Dashboard root — the ONE authenticated home: the conversation, for EVERY
@@ -221,6 +227,11 @@ export default async function DashboardHomePage({
   // account with real skills, history or journal entries is no longer told
   // its first step is to upload a CV. Read in the SAME parallel batch as the
   // rest — three bounded head-counts, each degrading to "unknown".
+  //
+  // The pins read (MY SPACE, below) needs only the active workspace, so it
+  // starts here with the starter batch instead of after it (perf 2026-10-23).
+  const pinsPromise = listMyPins(activeOrgWorkspace?.id ?? null);
+  pinsPromise.catch(() => {}); // awaited (and so thrown) in the batch below
   const [{ offers, labels: bookingLabels }, learnerLink, starterContext, personFacts] =
     await Promise.all([
       loadBookingOffers(activeRole),
@@ -247,7 +258,7 @@ export default async function DashboardHomePage({
   // other — one batch, not consecutive awaits (measured: the same reads,
   // issued together).
   const [pinsRead, tChat, tWorkLog, tCountryNames, tRelationships] = await Promise.all([
-    listMyPins(activeOrgWorkspace?.id ?? null),
+    pinsPromise,
     getTranslations("conversation.chat"),
     getTranslations("conversation.worklog"),
     getTranslations("labourMarket"),
@@ -377,8 +388,16 @@ export default async function DashboardHomePage({
   // were stripped from the URL on first consumption, so a remount never
   // re-sends them.
   // The company workspace opens on the company model (existing doors).
-  const companyOpeningContext =
+  const companyModel =
     activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
+  // The pilot pass pointer leads it — the employer home is where an owner
+  // looks first, and it renders nothing unless the pass is theirs to start.
+  const companyOpeningContext = companyModel ? (
+    <>
+      <PilotPassInvite className="mb-4" />
+      {companyModel}
+    </>
+  ) : null;
   const conversationKey = `${rootWorkspace.activeWorkspaceId}:${identity}`;
 
   // No overlay: the thin dashboard layout renders no chrome, so the chat simply

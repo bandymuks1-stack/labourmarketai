@@ -11175,6 +11175,7 @@ export type Database = {
         Args: { p_agency_id: string }
         Returns: string[]
       }
+      agentai_capability_readback_counts_v1: { Args: never; Returns: Json }
       ai_runs_retention_days: { Args: never; Returns: number }
       ai_runs_retention_health: {
         Args: never
