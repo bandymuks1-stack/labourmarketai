@@ -170,10 +170,12 @@ test("fresh worker: onboarding keeps its place, then the first journal entry rea
     await page.goto("/lt/dashboard");
     await settle(page);
     await expectNoSidewaysScroll(page, "worker home (390)");
-    const primary = inMain(page).locator('[data-primary-action="1"], [data-testid="work-card-primary"]').first();
-    const primaryText = (await primary.innerText().catch(() => "")).replace(/\s+/g, " ").trim().slice(0, 80);
-    const primaryHref = (await primary.getAttribute("href").catch(() => null)) ?? "(no link)";
-    console.info(`[fresh] worker home primary="${primaryText || "(not found)"}" href=${primaryHref}`);
+    // The one gold action leads to the first journal entry — not the profession again.
+    const primary = inMain(page).getByTestId("today-next-cta").first();
+    const primaryHref = (await primary.getAttribute("href").catch(() => null)) ?? "(none)";
+    const secondaryDim = (await inMain(page).getByTestId("today-next-secondary").first().getAttribute("data-dim").catch(() => null)) ?? "(none)";
+    console.info(`[fresh] worker home gold action href=${primaryHref} secondary=${secondaryDim}`);
+    expect(primaryHref, "a new worker's gold action is not the first journal entry").toMatch(/\/dashboard\/journal$/);
 
     // The first journal entry — saved with ONE "Save".
     await page.goto("/lt/dashboard/journal");
@@ -181,28 +183,34 @@ test("fresh worker: onboarding keeps its place, then the first journal entry rea
     await inMain(page).getByTestId("journal-quick-record-text").fill(ENTRY);
     await inMain(page).getByTestId("journal-quick-record-understand").click();
     await expect(inMain(page).getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
-    let saves = 0;
+    let presses = 0;
+    const labels: string[] = [];
     const done = inMain(page).getByTestId("worklog-done");
     const failed = inMain(page).getByTestId("worklog-error").or(inMain(page).getByTestId("worklog-blocked"));
     for (const id of ["worklog-save", "worklog-confirm"]) {
       if (await done.isVisible().catch(() => false)) break;
       const button = inMain(page).getByTestId(id);
       if (await button.isVisible().catch(() => false)) {
+        labels.push((await button.innerText()).trim());
         await button.click();
-        saves += 1;
+        presses += 1;
         await expect(done.or(failed).or(inMain(page).getByTestId("worklog-confirm"))).toBeVisible({ timeout: 30_000 });
       }
     }
     await expect(done.or(failed)).toBeVisible({ timeout: 30_000 });
     expect(await failed.isVisible(), "the journal entry was refused").toBe(false);
-    console.info(`[fresh] journal entry saved with ${saves} save click(s)`);
+    // "Save" is said once — on the press that writes (the first press opens the review).
+    const saveWords = labels.filter((l) => /išsaugoti/i.test(l)).length;
+    console.info(`[fresh] journal entry saved with ${presses} press(es); presses labelled "Išsaugoti"=${saveWords}`);
+    expect(saveWords, "the first entry asks for 'Išsaugoti' more than once").toBe(1);
 
-    // After the first entry: a way to the Living CV, and a next step.
-    const cvLink = done.locator('a[href$="/cv"], a[href*="/cv?"]').first();
+    // After the first entry: a way to the Living CV, and a reason to come back.
+    const cvLink = done.getByTestId("worklog-living-cv-link");
     const hasCvLink = await cvLink.isVisible().catch(() => false);
-    console.info(`[fresh] save confirmation links to the Living CV: ${hasCvLink}`);
-    expect(saves, "the first entry takes ONE save").toBe(1);
+    const comeBack = await done.getByTestId("worklog-come-back").isVisible().catch(() => false);
+    console.info(`[fresh] save confirmation: Living CV link=${hasCvLink} come-back line=${comeBack}`);
     expect(hasCvLink, "the save confirmation names the Living CV").toBe(true);
+    expect(comeBack, "the save confirmation gives no next step").toBe(true);
     await cvLink.click();
     await page.waitForURL(/\/cv/, { timeout: 30_000 });
     await settle(page);
