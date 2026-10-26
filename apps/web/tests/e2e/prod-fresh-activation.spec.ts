@@ -33,7 +33,10 @@ const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slo
 const ENABLED =
   process.env.PROD_QA_WALK === "1" && ["freshworker", "freshcompany"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with the owner-created fresh accounts");
-test.describe.configure({ mode: "serial", timeout: 300_000, retries: 0 });
+// Independent tests (two different accounts): a worker failure must not skip
+// the company (run 40377600874 never reached it). Production walks still run
+// one at a time (one worker, #2824).
+test.describe.configure({ mode: "default", timeout: 300_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
 
 const PHONE = { width: 390, height: 844 };
@@ -221,10 +224,17 @@ test("fresh worker: onboarding keeps its place, then the first journal entry rea
     await cvLink.click();
     await page.waitForURL(/\/cv/, { timeout: 30_000 });
     await settle(page);
-    const cvText = await page.locator("body").innerText();
-    const cvReflects = /QA-SYNTHETIC|mūrinink|7\s*val/i.test(cvText);
-    console.info(`[fresh] Living CV reflects the first entry: ${cvReflects}`);
-    expect(cvReflects, "the Living CV shows nothing of the first entry").toBe(true);
+    // The Living CV prints RECORDED work as figures, not the entry's words:
+    // the recorded-hours line (same rule as work-in-numbers) and the facts
+    // paragraph (deriveProfessionalFacts, from one timed entry on). Run
+    // 40386354213 looked for the words and missed "14 val." over two entries.
+    const recorded = page.getByTestId("cv-recorded-hours").filter({ visible: true }).first();
+    const facts = page.getByTestId("cv-professional-facts").filter({ visible: true }).first();
+    const recordedText = (await recorded.innerText().catch(() => "")).replace(/\s+/g, " ");
+    const hoursShown = /\d/.test(recordedText) && !/^\D*0\D*$/.test(recordedText);
+    const factsShown = await facts.isVisible().catch(() => false);
+    console.info(`[fresh] Living CV: recorded-hours line has hours=${hoursShown} facts paragraph=${factsShown}`);
+    expect(hoursShown || factsShown, "the Living CV shows no recorded work after the first entry").toBe(true);
     await expectNoSidewaysScroll(page, "Living CV (390)");
 
     // Saved ONCE: the journal holds exactly one entry of this run (no double write).
