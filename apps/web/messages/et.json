@@ -293,7 +293,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profiil",
-        "journal": "Minu CV",
+        "journal": "Tööpäevik",
         "search": "[EN] Search",
         "advanced": "Täpsem haldus",
         "playerCard": "Minu ametiprofiil",
@@ -572,7 +572,16 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Laadimine…",
-    "dashboardSections": "Töölaua jaotised"
+    "dashboardSections": "Töölaua jaotised",
+    "nav": {
+      "more": "Veel",
+      "menu": "Menüü",
+      "areas": "Tööalad",
+      "close": "Sulge",
+      "youAreHere": "Sa oled siin",
+      "previous": "Eelmine ala",
+      "next": "Järgmine ala"
+    }
   },
   "companies": {
     "cta": {
@@ -2906,7 +2915,8 @@
     "clash": {
       "acceptAnyway": "Tean, et kattub — võtan siiski vastu",
       "stillStands": "Vastuvõtmine ei kõrvalda kattuvust. Mõlemad broneeringud säilitavad oma kuupäevad, konflikt jääb kalendris nähtavaks ja sinu otsus salvestatakse.",
-      "acknowledged": "Vastu võetud teadaoleva kattuvusega. Endiselt kattub broneeringuid: {count}. Midagi ei tühistatud ega peidetud ja sinu otsus on talletatud."
+      "acknowledged": "Vastu võetud teadaoleva kattuvusega. Endiselt kattub broneeringuid: {count}. Midagi ei tühistatud ega peidetud ja sinu otsus on talletatud.",
+      "notRecordable": "Need kuupäevad kattuvad broneeringuga, mille oled juba vastu võtnud, ja seda kattuvust ei saa veel salvestada, seega võid selle pakkumise tagasi lükata või jätta selle avatuks, et ettevõte saaks kuupäevi muuta."
     },
     "proposedBy": "Pakub: {name}",
     "termsChanged": "Ettevõte muutis tingimusi. Olid nõustunud: {previous}. Otsusta uute kuupäevade üle uuesti."

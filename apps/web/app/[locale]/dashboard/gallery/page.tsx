@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageTitle } from "@/components/app/premium/page-title";
 import Link from "next/link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Images, NotebookPen } from "lucide-react";
@@ -42,14 +43,14 @@ export default async function PersonalGalleryPage({
           <Images className="h-3.5 w-3.5" aria-hidden />
           {t("eyebrow")}
         </span>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+        <PageTitle>
           {t("title")}
           {photos.length > 0 ? (
             <span className="ml-2 align-middle font-mono text-sm font-normal text-text-secondary">
               · {photos.length}
             </span>
           ) : null}
-        </h1>
+        </PageTitle>
       </header>
 
       {photos.length === 0 ? (

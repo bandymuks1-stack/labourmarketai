@@ -301,12 +301,37 @@ test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browse
     // own answer is one deliberate second action, recorded as such.
     console.info("[bookings] accept met a date clash; the worker accepts knowingly");
     await row.getByTestId("booking-accept-anyway").click();
-    await expect(responded).toBeVisible({ timeout: 30_000 });
+    // Run 40216243755: the database refused the acknowledged accept (the
+    // overlap constraint still held) and the UI re-showed the same conflict,
+    // so the button visibly did nothing. That refusal is now its own answer.
+    const notRecordable = row.getByTestId("booking-overlap-not-recordable");
+    await expect(responded.or(notRecordable)).toBeVisible({ timeout: 30_000 });
+    if (await notRecordable.isVisible()) {
+      // Honest, and not a loop: the acknowledgement control is gone.
+      await expect(row.getByTestId("booking-accept-anyway")).toHaveCount(0);
+      expect(
+        false,
+        "the acknowledged overlap could not be recorded: the clash-marker migration " +
+          "(20261025180000, RED) is not applied yet — the UI says so and offers decline",
+      ).toBe(true);
+    }
   }
   await page.reload();
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "accepted", {
-    timeout: 30_000,
-  });
+  // Run 40200190351: after this reload the row matched TWICE (identical
+  // <li>s). Count where the copies live: a hidden streamed holder (#418
+  // symptom) sits outside <main>; a real double render would be inside it.
+  const copies = await page.evaluate((id) => {
+    const all = [...document.querySelectorAll(`[data-testid="booking-${id}"]`)];
+    return {
+      total: all.length,
+      inMain: all.filter((e) => e.closest("main")).length,
+      inHiddenHolder: all.filter((e) => e.closest("[hidden][id^='S:']")).length,
+    };
+  }, bookingId);
+  console.info(`[bookings] accepted row copies after reload: ${JSON.stringify(copies)}`);
+  const inMainRow = page.getByRole("main").getByTestId(`booking-${bookingId}`);
+  await expect(inMainRow, "the booking renders once on the page").toHaveCount(1, { timeout: 30_000 });
+  await expect(inMainRow).toHaveAttribute("data-status", "accepted", { timeout: 30_000 });
   await ctx.close();
 });
 

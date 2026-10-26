@@ -15,7 +15,8 @@
     "capacity": "Pajėgumai",
     "work": "Darbas ir valandos",
     "results": "Rezultatai",
-    "history": "Istorija"
+    "history": "Istorija",
+    "areasTitle": "Įmonės sritys"
   },
   "publicDemand": {
     "title": "Dabartinė rinkos paklausa",
@@ -3710,7 +3711,8 @@
     "reviewBanner": {
       "title": "Dalis įgūdžių laukia peržiūros",
       "body": "Kai kurie įrašai dar neaiškūs. Papildyk informaciją arba peržiūrėk įgūdžius, kad darbdaviai tave rastų tiksliau.",
-      "cta": "Peržiūrėti įgūdžius"
+      "cta": "Peržiūrėti įgūdžius",
+      "noteLead": "{count, plural, one {įgūdis dar nepagrįstas darbo įrašais.} few {įgūdžiai dar nepagrįsti darbo įrašais.} other {įgūdžių dar nepagrįsta darbo įrašais.}}"
     },
     "pageTitle": "Mano profilis",
     "pageSubtitle": "Ką dirbi, ką moki ir kuo gali tai parodyti — viskas vienoje vietoje.",
@@ -6220,6 +6222,8 @@
       "asksTitle": "Projektui iš tavęs dar reikia",
       "ledger": {
         "ratio": "Yra {have} iš {total}",
+        "ratioNone": "Patikrinamų reikalavimų dar nėra",
+        "ratioUnknown": "dar nežinoma: {count}",
         "availability": "Laisvumas",
         "state": {
           "valid": "turi",
@@ -6251,7 +6255,7 @@
           "none": "dar nieko neįrašyta"
         },
         "managerStatus": {
-          "needed": "laukiama",
+          "needed": "suderinti prieš susitarimą",
           "missing": "pažymėta kaip trūkstama",
           "received": "gauta",
           "checked": "patikrinta",
@@ -6260,7 +6264,7 @@
         },
         "resolution": {
           "addDocument": "Įrašyti dokumentą",
-          "issuingAuthority": "Išduoda: {title}",
+          "informationSource": "Informacijos šaltinis: {title}",
           "trainingProgram": "Kursas: {title}",
           "serviceOffering": "Paslauga: {title}",
           "serviceOfferingRate": "Paslauga: {title} ({rate})",
@@ -7769,7 +7773,16 @@
     "backHome": "Grįžti į pradžią",
     "dashboardSections": "Valdymo skydelio skiltys",
     "skipToContent": "Pereiti į turinį",
-    "loading": "Kraunama…"
+    "loading": "Kraunama…",
+    "nav": {
+      "more": "Daugiau",
+      "menu": "Meniu",
+      "areas": "Darbo sritys",
+      "close": "Uždaryti",
+      "youAreHere": "Čia esi",
+      "previous": "Ankstesnė sritis",
+      "next": "Kita sritis"
+    }
   },
   "workerInvitations": {
     "title": "Laukiantys pakvietimai",
@@ -8051,7 +8064,7 @@
       "confirmed": "val. su vadovo įrašu",
       "organizationHistory": "val. organizacijų istorijoje",
       "experienceTotal": "val. profesinės patirties iš viso",
-      "days": "{count, plural, one {darbo diena} few {darbo dienos} other {darbo dienų}}",
+      "days": "{count, plural, one {diena su valandomis} few {dienos su valandomis} other {dienų su valandomis}}",
       "modes": {
         "label": "Kortelės dalys",
         "work": "Darbas",
@@ -8156,7 +8169,8 @@
       "mine": "Pirmiausia — šalys, kuriose nori dirbti.",
       "unknown": "Šalies {country} reikalavimų sąrašas dar nesuvestas — nerodome nieko, vietoj spėliojimo.",
       "next": "Jei dirbsi šioje šalyje, prieš susitarimą aptark su darbdaviu: {doc}. Įkelti nieko nereikia.",
-      "ok": "Visi suvesti {country} reikalavimai padengti."
+      "ok": "Visi suvesti {country} reikalavimai padengti.",
+      "postingNeedsBase": "A1 pažymėjimas ir pranešimas apie komandiravimą rodomi tik tada, kai žinoma tavo bazinė šalis ir ji skiriasi nuo darbo šalies. Bazinė šalis dar nenurodyta."
     },
     "types": {
       "cv": "CV",
@@ -9340,7 +9354,8 @@
     "clash": {
       "acceptAnyway": "Žinau, kad persidengia — vis tiek priimti",
       "stillStands": "Priėmimas persidengimo nepanaikins. Abi rezervacijos išlaiko savo datas, konfliktas lieka matomas kalendoriuje, o tavo sprendimas užfiksuojamas.",
-      "acknowledged": "Priimta žinant apie persidengimą. Vis dar persidengia esamų rezervacijų: {count}. Niekas neatšaukta ir nepaslėpta, o tavo sprendimas užfiksuotas."
+      "acknowledged": "Priimta žinant apie persidengimą. Vis dar persidengia esamų rezervacijų: {count}. Niekas neatšaukta ir nepaslėpta, o tavo sprendimas užfiksuotas.",
+      "notRecordable": "Šios datos persidengia su rezervacija, kurią jau priėmei, o tokio persidengimo kol kas įrašyti negalima, todėl gali šį pasiūlymą atmesti arba palikti atvirą, kad įmonė galėtų pakeisti datas."
     },
     "proposedBy": "Siūlo: {name}",
     "termsChanged": "Įmonė pakeitė sąlygas. Anksčiau sutikai: {previous}. Nuspręsk dėl naujų datų iš naujo."
@@ -11550,10 +11565,10 @@
     },
     "utilisation": {
       "title": "Užimta artimiausių savaičių dalis",
-      "committedDays": "Užimta {committed} iš {counted} žmogaus dienų — {workers} žmonės per {days} d.",
+      "committedDays": "Užimta {committed} iš {counted, plural, one {# žmogaus dienos} few {# žmogaus dienų} many {# žmogaus dienos} other {# žmogaus dienų}} — {workers, plural, one {# žmogus} few {# žmonės} many {# žmogaus} other {# žmonių}} per {days} d.",
       "noneCounted": "Šiam laikotarpiui nepavyko suskaičiuoti nė vieno darbuotojo įsipareigojimų.",
       "partial": "{count} iš jų nepavyko suskaičiuoti iki galo — kai kas neturi datų, todėl skaičius viršuje yra minimumas.",
-      "unknown": "{count} iš vis nepavyko perskaityti. Tai nėra tas pat, kas laisva.",
+      "unknown": "{count} išvis nepavyko perskaityti. Tai nėra tas pat, kas laisva.",
       "denominatorNote": "Skaičiuojama kalendorinėmis dienomis. Sutartų valandų nefiksuojame, todėl tai nėra etatų rodiklis."
     },
     "rosterTimeline": {

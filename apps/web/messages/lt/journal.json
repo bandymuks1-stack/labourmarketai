@@ -286,9 +286,16 @@
       "waiting": "Laukia žmogaus peržiūros — peržiūrėti gali tavo organizacijos vadovas ar savininkas; iki tol tai lieka tavo nurodytas įrašas",
       "approved": "Peržiūrėta",
       "changes_requested": "Paprašyta pataisymų",
-      "rejected": "Grąžinta",
+      "rejected": "Atmesta",
       "reasonLabel": "Priežastis",
-      "notEnabled": "Užfiksuota — vadovas dar neįjungė patvirtinimo, todėl niekas šio įrašo neperžiūri; iki tol tai lieka tavo nurodytas įrašas"
+      "notEnabled": "Užfiksuota — vadovas dar neįjungė patvirtinimo, todėl niekas šio įrašo neperžiūri; iki tol tai lieka tavo nurodytas įrašas",
+      "correctedFrom": {
+        "changes_requested": "Pataisyta po grąžinimo",
+        "rejected": "Pataisyta po atmetimo",
+        "approved": "Pataisyta po peržiūros",
+        "earlierVersion": "Ankstesnė versija lieka tavo istorijoje su šiuo sprendimu; valandos skaičiuojamos vieną kartą — pagal šį pataisymą."
+      },
+      "quotedNote": "„{note}“"
     },
     "delete": "Pašalinti įrašą",
     "deleting": "Šalinama...",
@@ -393,7 +400,7 @@
     },
     "showOriginal": "Rodyti originalą",
     "skills": "Įgūdžiai",
-    "title": "Patvirtinti įrašai",
+    "title": "Įrašai, laukiantys patvirtinimo",
     "quick": {
       "openQuick": "Greitas patvirtinimas →",
       "title": "Greitas patvirtinimas",
@@ -980,7 +987,7 @@
     "provenance": "Iš kur valandos: {worker} val. įvedei tu, {extracted} val. atpažinta iš tavo teksto, {corrected} val. patikslino vadovas.",
     "provenanceRule": "Kiekvienas įrašas skaičiuojamas vieną kartą; valanda įgūdžiui priskiriama tik tada, kai įrašas susietas su vienu įgūdžiu arba kai tavo frazė („klijavau plyteles 6 val.“) įvardija tą įgūdį.",
     "dayInferred": "{count, plural, one {# įrašas neturi nurodytos darbo dienos ir priskirtas išsaugojimo dienai.} few {# įrašai neturi nurodytos darbo dienos ir priskirti išsaugojimo dienai.} other {# įrašų neturi nurodytos darbo dienos ir priskirti išsaugojimo dienai.}}",
-    "glance": "{days, plural, one {# diena} few {# dienos} other {# dienų}} · {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
+    "glance": "{days, plural, one {# diena su valandomis} few {# dienos su valandomis} other {# dienų su valandomis}} · {entries, plural, one {# įrašas} few {# įrašai} other {# įrašų}}",
     "glanceNone": "įrašų nėra",
     "periodEmpty": "Laikotarpiu „{period}“ įrašų nėra — žemiau rodomas visas laikas pasirinkus jį viršuje.",
     "mainActivity": "Pagrindinė veikla",

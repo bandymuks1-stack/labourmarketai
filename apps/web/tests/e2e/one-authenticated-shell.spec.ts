@@ -88,25 +88,9 @@ test.describe("the one authenticated shell reaches the whole product", () => {
 
         const label = `${route} @ ${vp.name}`;
 
-        // ── The legacy chrome is ABSENT FROM THE DOM, not merely hidden.
-        // Hiding it with CSS would leave the tab row focusable and would keep
-        // the old duplicate context model alive one media query away.
-        await expect(
-          page.locator('[data-testid^="dashboard-tab-"]'),
-          `${label}: the wide tab row must not exist`,
-        ).toHaveCount(0);
-        await expect(
-          page.locator('[data-testid^="bottom-nav-"]'),
-          `${label}: the third navigation system must not exist`,
-        ).toHaveCount(0);
-
-        // ── DUPLICATE_CONTEXT_PRESENTATION = 0.
-        // The role switcher named the SAME active organization as the
-        // workspace chip, two controls away, in a second vocabulary.
-        await expect(
-          page.locator('[data-testid="role-switcher-toggle"]'),
-          `${label}: a second context control must not exist`,
-        ).toHaveCount(0);
+        // ── The legacy chrome (wide tab row, phone bottom bar, role switcher)
+        // is deleted from the codebase (2026-10-25); the source guards pin
+        // that it never comes back. DUPLICATE_CONTEXT_PRESENTATION = 0:
         await expect(
           page.locator('[data-testid="workspace-chip"]'),
           `${label}: exactly ONE context control`,
@@ -206,7 +190,6 @@ test.describe("the one authenticated shell reaches the whole product", () => {
     await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded" });
     await expect(page.locator('[data-chrome="simple"]')).toHaveCount(0);
     await expect(page.locator('[data-chrome="full"]')).toHaveCount(0);
-    await expect(page.locator('[data-testid^="dashboard-tab-"]')).toHaveCount(0);
   });
 
   test("no capability was removed — every retired destination is still reachable", async ({
