@@ -177,7 +177,7 @@ describe("the first need is the first door", () => {
     expect(card).toBeGreaterThan(-1);
     expect(field).toBeGreaterThan(card);
     expect(src).toMatch(
-      /const needFirst = isFirstNeed\(\{\s*hasCompany: true,\s*audience: resolveNeedsAudience\(\{ companyType, capabilities \}\)\.audience,\s*readback: needs,/,
+      /const needsDoor = resolveNeedsAudience\(\{ companyType, capabilities \}\);\s*const needFirst = isFirstNeed\(\{\s*hasCompany: true,\s*audience: needsDoor\.audience,\s*readback: needs,/,
     );
     // The card: the shared door as the one primary, the calm invite line.
     expect(src).toMatch(/<NeedDoorLink\s+surface="company_home_first"/);

@@ -1885,6 +1885,15 @@
       "interest": "{count, plural, one {# osoba wyraziła zainteresowanie Twoimi potrzebami} few {# osoby wyraziły zainteresowanie Twoimi potrzebami} many {# osób wyraziło zainteresowanie Twoimi potrzebami} other {# osoby wyraziło zainteresowanie Twoimi potrzebami}}",
       "interestCta": "Zobacz kto"
     },
+    "offers": {
+      "heading": "Co oferujesz",
+      "note": "Zapisane w Twojej przestrzeni roboczej. Pracodawcy nie mogą jeszcze wyszukiwać ofert, więc nikt się w tej sprawie nie skontaktował.",
+      "empty": "Nie zapisałeś jeszcze żadnej oferty. Opisz, jakich ludzi lub jaki zespół możesz zapewnić — oferta zostanie zapisana i pokazana tutaj.",
+      "noneOpen": "Brak otwartych ofert — wcześniejsze są zamknięte.",
+      "more": "{count, plural, one {jeszcze # oferta} few {jeszcze # oferty} many {jeszcze # ofert} other {jeszcze # oferty}}",
+      "open": "Zobacz oferty",
+      "unreadable": "Nie udało się teraz odczytać Twoich ofert."
+    },
     "attention": {
       "heading": "Wymaga Ciebie",
       "unavailable": "Nie udało się teraz odczytać — nic tutaj nie jest potwierdzone jako w porządku.",

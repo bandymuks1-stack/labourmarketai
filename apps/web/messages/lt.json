@@ -1885,6 +1885,15 @@
       "interest": "{count, plural, one {# žmogus pareiškė susidomėjimą jūsų poreikiais} few {# žmonės pareiškė susidomėjimą jūsų poreikiais} other {# žmonių pareiškė susidomėjimą jūsų poreikiais}}",
       "interestCta": "Žiūrėti kas"
     },
+    "offers": {
+      "heading": "Ką siūlai",
+      "note": "Išsaugota tavo darbo erdvėje. Darbdaviai kol kas negali ieškoti pasiūlymų, todėl dėl jų dar niekas nesusisiekė.",
+      "empty": "Dar neišsaugojai nė vieno pasiūlymo. Aprašyk, kokius žmones ar komandą gali pasiūlyti — pasiūlymas bus išsaugotas ir matomas čia.",
+      "noneOpen": "Atvirų pasiūlymų nėra — ankstesni uždaryti.",
+      "more": "{count, plural, one {dar # pasiūlymas} few {dar # pasiūlymai} many {dar # pasiūlymo} other {dar # pasiūlymų}}",
+      "open": "Peržiūrėti pasiūlymus",
+      "unreadable": "Pasiūlymų dabar nepavyko perskaityti."
+    },
     "attention": {
       "heading": "Reikia jūsų",
       "unavailable": "Šiuo metu nepavyko nuskaityti — niekas čia nepatvirtinta kaip tvarkoje.",
