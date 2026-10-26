@@ -121,15 +121,29 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
   // Interactive elements: tap size, accessible names, primary CTAs.
   const INTERACTIVE =
     'a[href], button, input:not([type="hidden"]), select, textarea, summary, [role="button"], [role="link"], [role="tab"], [role="checkbox"], [role="radio"], [role="switch"], [role="menuitem"]';
+  const BUTTON_INPUTS = ["button", "submit", "reset", "image"];
   const hasName = (el: Element): boolean => {
     if ((el.getAttribute("aria-label") ?? "").trim()) return true;
     const by = el.getAttribute("aria-labelledby");
     if (by && by.split(/\s+/).some((id) => (document.getElementById(id)?.textContent ?? "").trim())) return true;
-    if ((el.textContent ?? "").trim()) return true;
     if ((el.getAttribute("title") ?? "").trim()) return true;
+    // Form fields are named by their label, never by their content: a
+    // select's option text and a checkbox/radio's default value "on" are not
+    // accessible names (Codex review on #2794).
+    const isField =
+      el instanceof HTMLSelectElement ||
+      el instanceof HTMLTextAreaElement ||
+      (el instanceof HTMLInputElement && !BUTTON_INPUTS.includes(el.type));
+    if (isField) {
+      const labelled = [...((el as HTMLInputElement).labels ?? [])].some((l) => (l.textContent ?? "").trim());
+      if (labelled) return true;
+      // A text-like placeholder is the last-resort name browsers expose.
+      const textLike = el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && !["checkbox", "radio", "range", "color", "file"].includes(el.type));
+      return textLike && !!((el as HTMLInputElement).placeholder ?? "").trim();
+    }
+    if ((el.textContent ?? "").trim()) return true;
     if (el.querySelector('img[alt]:not([alt=""]), svg title, [aria-label]')) return true;
-    if (el instanceof HTMLInputElement && (el.value || el.placeholder || (el.labels?.length ?? 0) > 0)) return true;
-    if ((el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) && (el.labels?.length ?? 0) > 0) return true;
+    if (el instanceof HTMLInputElement && el.value) return true; // button-type inputs
     return false;
   };
   let tapTotal = 0;
