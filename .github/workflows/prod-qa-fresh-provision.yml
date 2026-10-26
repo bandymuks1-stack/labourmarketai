@@ -1,12 +1,12 @@
 name: prod-qa-fresh-provision
-run-name: prod-qa-fresh-provision ${{ inputs.action }}
+run-name: prod-qa-fresh-provision ${{ inputs.action }} ${{ inputs.who }}
 
-# OWNER-DISPATCH ONLY. Creates (or bans) the TWO fresh synthetic production
-# identities of the fresh-activation walk (owner decision 2026-10-26,
-# "AKTYVAVIMO KLIŪČIŲ ŠALINIMAS"):
+# OWNER-DISPATCH ONLY. Creates (or bans) owner-approved synthetic production
+# identities (owner decisions 2026-10-26):
 #
-#   qa.freshworker+act1@labourmarket.ai    a brand-new worker
-#   qa.freshcompany+act1@labourmarket.ai   a brand-new company
+#   who=fresh-pair  qa.freshworker+act1@labourmarket.ai   a brand-new worker
+#                   qa.freshcompany+act1@labourmarket.ai  a brand-new company
+#   who=buyer       qa.buyer+act1@labourmarket.ai         one buyer (customer role) for 6.4
 #
 # Creating an account is an owner action: an agent does not dispatch this
 # workflow. `prod-qa-walk.yml` (spec=fresh-activation) only SIGNS IN to these
@@ -31,12 +31,19 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "provision = create the two fresh synthetic accounts; revoke = ban them"
+        description: "provision = create the synthetic account(s); revoke = ban them"
         type: choice
         default: provision
         options:
           - provision
           - revoke
+      who:
+        description: "fresh-pair = the new worker + company; buyer = the one buyer for the 6.4 test"
+        type: choice
+        default: fresh-pair
+        options:
+          - fresh-pair
+          - buyer
 
 permissions:
   contents: read
@@ -65,12 +72,18 @@ jobs:
         shell: bash
         env:
           ACTION: ${{ inputs.action }}
+          WHO: ${{ inputs.who }}
         run: |
           set -euo pipefail
           cd apps/web
           flag=""
           [ "${ACTION}" = "revoke" ] && flag="--revoke"
-          for who in "qa.freshworker+act1@labourmarket.ai" "qa.freshcompany+act1@labourmarket.ai"; do
+          if [ "${WHO}" = "buyer" ]; then
+            targets="qa.buyer+act1@labourmarket.ai"
+          else
+            targets="qa.freshworker+act1@labourmarket.ai qa.freshcompany+act1@labourmarket.ai"
+          fi
+          for who in ${targets}; do
             PROD_QA_PROVISION_IDENTITY="$who" pnpm exec tsx scripts/prod-qa-provision.ts --i-understand-production ${flag}
           done
-          echo "fresh pair: ${ACTION} done" >> "$GITHUB_STEP_SUMMARY"
+          echo "${WHO}: ${ACTION} done" >> "$GITHUB_STEP_SUMMARY"

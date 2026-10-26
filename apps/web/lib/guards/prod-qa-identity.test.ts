@@ -60,13 +60,14 @@ const FORBIDDEN_PROVISIONING_SQL: readonly RegExp[] = [
 ];
 
 describe("exactly the synthetic cast is allowlisted", () => {
-  it("the allowlist is exactly these seven, each unmistakably synthetic", () => {
+  it("the allowlist is exactly these eight, each unmistakably synthetic", () => {
     // Widening is a reviewed code change (owner decision 2026-09-28 added the
     // three +multiw identities beside the worker; owner decision 2026-10-26
     // added the two fresh-activation identities). Pinned exactly.
     expect([...PROD_QA_IDENTITIES].sort()).toEqual(
       [
         "qa.agency+multiw@labourmarket.ai",
+        "qa.buyer+act1@labourmarket.ai",
         "qa.freshcompany+act1@labourmarket.ai",
         "qa.freshworker+act1@labourmarket.ai",
         "qa.manager+multiw@labourmarket.ai",
@@ -83,6 +84,7 @@ describe("exactly the synthetic cast is allowlisted", () => {
 
   it("a walk can never create a fresh identity — only the owner can", () => {
     expect([...PROD_QA_FRESH_IDENTITIES].sort()).toEqual([
+      "qa.buyer+act1@labourmarket.ai",
       "qa.freshcompany+act1@labourmarket.ai",
       "qa.freshworker+act1@labourmarket.ai",
     ]);
@@ -99,8 +101,12 @@ describe("exactly the synthetic cast is allowlisted", () => {
     expect(fresh).toMatch(/mint_existing "qa\.freshcompany\+act1@labourmarket\.ai"/);
     const body = fresh.slice(0, fresh.indexOf("}"));
     expect(body).not.toMatch(/prod-qa-provision/);
-    // A fresh account starts like a real one: no role in its metadata.
-    expect(read(PROVISION)).toMatch(/user_metadata: fresh\s*\? \{\}/);
+    // A fresh account starts like a real one: no role in its metadata; the
+    // buyer carries only the customer role (never admin).
+    expect(read(PROVISION)).toMatch(/: fresh\s*\? \{\}/);
+    expect(read(PROVISION)).toMatch(/PROD_QA_BUYER_EMAIL\s*\? \{ role: "customer" \}/);
+    expect(read(PROVISION)).not.toMatch(/role: "admin"/);
+    expect(walk).toMatch(/mint_existing "qa\.buyer\+act1@labourmarket\.ai"\s+buyer/);
   });
 
   it("accepts the allowlisted identity against production", () => {

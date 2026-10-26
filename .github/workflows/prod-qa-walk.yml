@@ -96,6 +96,8 @@ on:
           # useful action. Dispatch only, never in the rotation; the two accounts are created by the
           # owner (prod-qa-fresh-provision.yml) — this walk only signs in to them.
           - fresh-activation
+          # Owner decision 2026-10-26: the buyer workspace (6.4) with the one owner-created buyer. Dispatch only.
+          - buyer-workspace
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -343,6 +345,9 @@ jobs:
             mint_existing "qa.freshworker+act1@labourmarket.ai"  freshworker
             mint_existing "qa.freshcompany+act1@labourmarket.ai" freshcompany
           fi
+          if [ "${{ needs.debounce.outputs.spec }}" = "buyer-workspace" ]; then
+            mint_existing "qa.buyer+act1@labourmarket.ai" buyer
+          fi
           # employee-beta-gate.spec.ts reads the original single-worker file.
           install -m 600 tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
 
@@ -404,6 +409,7 @@ jobs:
             lcp-locale-probe) SPEC=tests/e2e/prod-lcp-locale-probe.spec.ts ;;
             concurrency-probe) SPEC=tests/e2e/prod-concurrency-probe.spec.ts ;;
             fresh-activation) SPEC=tests/e2e/prod-fresh-activation.spec.ts ;;
+            buyer-workspace) SPEC=tests/e2e/prod-buyer-workspace.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
