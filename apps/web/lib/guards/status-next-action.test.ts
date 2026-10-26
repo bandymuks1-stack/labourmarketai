@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { countOwnerResponsesSince } from "../booking/booking-state";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Status → next-action guard (root-cause audit PR5).
@@ -23,7 +24,7 @@ import { countOwnerResponsesSince } from "../booking/booking-state";
 
 const root = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(root, rel), "utf8");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 const catalog = (loc: string) =>
   JSON.parse(read(`messages/${loc}.json`)) as never;
 

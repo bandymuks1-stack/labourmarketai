@@ -66,6 +66,11 @@ import {
   accessNoticeOffersSetup,
   parseAccessNotice,
 } from "@/lib/auth/access-notice";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard");
+
 
 /**
  * Dashboard root — the ONE authenticated home: the conversation, for EVERY
@@ -222,6 +227,11 @@ export default async function DashboardHomePage({
   // account with real skills, history or journal entries is no longer told
   // its first step is to upload a CV. Read in the SAME parallel batch as the
   // rest — three bounded head-counts, each degrading to "unknown".
+  //
+  // The pins read (MY SPACE, below) needs only the active workspace, so it
+  // starts here with the starter batch instead of after it (perf 2026-10-23).
+  const pinsPromise = listMyPins(activeOrgWorkspace?.id ?? null);
+  pinsPromise.catch(() => {}); // awaited (and so thrown) in the batch below
   const [{ offers, labels: bookingLabels }, learnerLink, starterContext, personFacts] =
     await Promise.all([
       loadBookingOffers(activeRole),
@@ -248,7 +258,7 @@ export default async function DashboardHomePage({
   // other — one batch, not consecutive awaits (measured: the same reads,
   // issued together).
   const [pinsRead, tChat, tWorkLog, tCountryNames, tRelationships] = await Promise.all([
-    listMyPins(activeOrgWorkspace?.id ?? null),
+    pinsPromise,
     getTranslations("conversation.chat"),
     getTranslations("conversation.worklog"),
     getTranslations("labourMarket"),

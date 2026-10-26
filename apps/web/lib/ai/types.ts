@@ -43,6 +43,8 @@
  * Pure types/constants. No IO.
  */
 
+import type { ActiveLocale } from "@/lib/i18n/config";
+
 /** Provider identities — config CANDIDATES, never an active selection here.
  *  The default is always `noop` while AI is disabled. */
 export type AiProviderId = "noop" | "anthropic" | "openai";
@@ -69,8 +71,10 @@ export type AiAssistKind =
   | "estimate_clarify"
   | "worker_profile_draft";
 
-/** Locale of the assist (active product locales). */
-export type AiLocale = "en" | "lt" | "ru";
+/** Locale of the assist (active product locales) — derived from the one
+ *  routed set, never a hand-written subset. Same declaration as the runtime's,
+ *  made independently (see the header). */
+export type AiLocale = ActiveLocale;
 
 // ── Inputs (read-only context the caller would pass) ───────────────────────
 

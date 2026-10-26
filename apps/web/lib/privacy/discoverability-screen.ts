@@ -3,40 +3,44 @@ import type { DiscoverabilityStatus } from "@/lib/privacy/discoverability-action
 /**
  * WHICH SCREEN the employer-visibility consent shows — the one decision
  * `components/app/discoverability-consent.tsx` renders from, kept pure so the
- * round trip "withdraw → turn it back on" is pinned by a unit test.
+ * round trips are pinned by a unit test.
  *
- * The defect this exists for: after a withdrawal the component kept choosing
- * the WITHDRAWN screen for as long as the stored status said "withdrawn", so
- * its "manage" button only hid itself — the grant button never appeared and
- * the person could not turn visibility back on from the very screen that let
- * them turn it off. `reopened` is that button: the person asked to decide
- * again, so the choice screen (with both equal buttons) is shown even though
- * the stored status is still "withdrawn".
+ * TWO SCREENS, ONE TAP EACH (owner goal 2026-10-24, "matchability"):
+ *  - `granted` — the status says ON and the switch-off button is right there;
+ *  - `choice`  — the status says OFF, the full versioned consent text is
+ *                already on screen and the grant / "not now" buttons sit under
+ *                it, so turning visibility on is ONE tap after reading.
+ *
+ * THE LAST CONFIRMED STATE IS KEPT APART FROM THE REQUEST STATE (#2730 review).
+ * `status` is the server read the component was rendered with — and some doors
+ * never refresh it (the conversation keeps an embed's first props).
+ * `confirmed` is the outcome of the last SUCCESSFUL grant / withdrawal in this
+ * session; a failed request never touches it. So "granted → withdraw OK →
+ * grant FAILS" stays on the OFF screen (the truth: the profile is hidden) with
+ * its grant button for a retry, instead of falling back to the stale
+ * "granted" read and claiming the person is visible.
+ *
+ * There used to be a third, `withdrawn`, screen whose "manage" button had to
+ * be pressed before the choice reappeared: a withdrawal now lands on the
+ * choice screen directly — the way back is as short as the way out.
  */
-export type DiscoverabilityPhase =
-  | "idle"
-  | "expanded"
-  | "declined"
-  | "done"
-  | "withdrawn"
-  | "needs-migration"
-  | "error";
+export type DiscoverabilityPhase = "idle" | "declined" | "needs-migration" | "error";
 
-export type DiscoverabilityScreen = "granted" | "withdrawn" | "choice";
+/** The outcome of the last successful write in this session, if any. */
+export type ConfirmedVisibility = "on" | "off" | null;
+
+export type DiscoverabilityScreen = "granted" | "choice";
 
 export function discoverabilityScreen(input: {
   status: DiscoverabilityStatus;
-  phase: DiscoverabilityPhase;
-  reopened: boolean;
+  confirmed: ConfirmedVisibility;
 }): DiscoverabilityScreen {
-  const { status, phase, reopened } = input;
-  // A grant made in this session wins over a stored status that is not
-  // refreshed yet.
-  if (phase === "done") return "granted";
-  // The person reopened the decision: show the choice again.
-  if (reopened) return "choice";
-  if (phase === "withdrawn") return "withdrawn";
-  if (status === "granted") return "granted";
-  if (status === "withdrawn") return "withdrawn";
-  return "choice";
+  const { status, confirmed } = input;
+  // A successful write in this session wins over a read that may be stale.
+  if (confirmed === "on") return "granted";
+  if (confirmed === "off") return "choice";
+  // Only a CURRENT-version grant is ON — the same rule as the RLS predicate
+  // `worker_profile_discoverable`. Never decided, withdrawn and a grant under a
+  // superseded text are all OFF: the choice screen.
+  return status === "granted" ? "granted" : "choice";
 }

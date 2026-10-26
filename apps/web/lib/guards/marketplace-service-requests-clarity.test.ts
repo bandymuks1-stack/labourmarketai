@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * P0 Real-Use Hardening — /dashboard/service-requests clarity + order (PR #534).
@@ -75,7 +76,7 @@ describe("#533 wiring + honest behaviour preserved", () => {
 });
 
 describe("the removed title/lead keys are gone from all active locales", () => {
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: marketplace no longer defines title/lead`, () => {
       const m = (JSON.parse(read(`messages/${loc}.json`)) as { marketplace?: Record<string, unknown> }).marketplace ?? {};
       expect(m.title, `${loc}.title removed`).toBeUndefined();

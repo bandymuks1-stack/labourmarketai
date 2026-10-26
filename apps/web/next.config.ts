@@ -171,6 +171,8 @@ const ENTRY_SHORTCUT_REDIRECTS = [
   // Commonly guessed legal URLs (and what OAuth app consoles ask for). The
   // canonical pages live under /legal/…; these 404'd before.
   { source: `/${LOCALE}/privacy`, destination: "/:locale/legal/privacy", permanent: true },
+  // The privacy policy URL an OAuth console (e.g. Meta) may hold.
+  { source: `/${LOCALE}/privacy-policy`, destination: "/:locale/legal/privacy", permanent: true },
   { source: `/${LOCALE}/terms`, destination: "/:locale/legal/terms", permanent: true },
 ] as const;
 

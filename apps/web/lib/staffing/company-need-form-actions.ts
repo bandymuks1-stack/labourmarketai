@@ -14,7 +14,7 @@ import { persistPublicCompanyNeed } from "./company-need-public-intake";
 import { aiActionRateLimited } from "../security/ai-action-throttle";
 import { sendCompanyNeedOwnerAlert } from "../notifications/telegram-owner-alerts";
 import { isConstructionWorkType } from "../taxonomy/work-categories";
-import type { AiLocale } from "../ai/runtime/types";
+import { aiLocaleFor, type AiLocale } from "../ai/runtime/types";
 
 export interface CompanyNeedFormState {
   readonly ok: boolean;
@@ -42,9 +42,8 @@ export interface CompanyNeedFormState {
   readonly message?: string;
 }
 
-function toAiLocale(value: string): AiLocale {
-  return value === "lt" || value === "ru" ? value : "en";
-}
+/** Every routed UI locale is an AI locale; anything else is answered in EN. */
+const toAiLocale = (value: string): AiLocale => aiLocaleFor(value);
 
 function str(value: FormDataEntryValue | null): string | undefined {
   const s = String(value ?? "").trim();

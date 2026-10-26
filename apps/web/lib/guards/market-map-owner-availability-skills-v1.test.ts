@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Market Map owner availability + skills hints v1 guard.
@@ -17,7 +18,7 @@ const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 const LIB = read("lib/market-map/owner-readiness.ts");
 const UI = read("components/app/market-map-owner-readiness.tsx");
 const PAGE = read("app/[locale]/dashboard/market-map/page.tsx");
-const LOCALES = ["lt", "en", "ru"] as const;
+const LOCALES = activeLocales;
 const mm = (loc: string) => JSON.parse(read(`messages/${loc}.json`)).marketMap;
 
 function stripComments(src: string): string {

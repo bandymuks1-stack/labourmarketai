@@ -99,7 +99,18 @@ export const TIER_MODEL_ALIAS: Record<AiModelTier, AiModelAlias | null> = {
 };
 
 /** Providers with a per-alias candidate table (AI_MODEL_CANDIDATES keys). */
-export type AiModelProvider = "anthropic" | "openai" | "gemini" | "xai";
+export type AiModelProvider =
+  | "anthropic"
+  | "openai"
+  | "gemini"
+  | "xai"
+  // Free API tiers (2026-10-25). A provider may register fewer than three
+  // tiers; an absent tier resolves to undefined, which prices as `null` →
+  // `cost_unpriced` / the policy's priced fallback tier — never another
+  // vendor's model id.
+  | "cloudflare"
+  | "mistral"
+  | "groq";
 
 /**
  * Every provider a run can be costed against — the candidate-table providers
@@ -116,7 +127,7 @@ export function modelIdForAlias(
   alias: AiModelAlias,
   provider: AiModelProvider = "anthropic",
 ): string {
-  return AI_MODEL_CANDIDATES[provider][alias];
+  return (AI_MODEL_CANDIDATES[provider] ?? {})[alias];
 }
 
 // ── Task policies ───────────────────────────────────────────────────────────
@@ -207,7 +218,7 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
       "locale",
     ],
     prohibitedFields: ["full_cv", ...NEVER_NEEDED],
-    expectedSchema: "countryReadinessOutputSchema | documentAssistantOutputSchema",
+    expectedSchema: "countryReadinessOutputSchema",
     minQuality: 0.6,
     maxEstimatedCostUsd: 0.15,
     expectedOutputTokens: 900,
@@ -507,7 +518,10 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
     riskLevel: "medium",
     allowedFields: ["conversation_summary", "recipient_role", "goal", "locale"],
     prohibitedFields: ["full_cv", ...NEVER_NEEDED],
-    expectedSchema: "supportOnboardingOutputSchema",
+    // No registered agent performs this task since support_onboarding was
+    // retired (owner decision 2026-10-25, row 10.11). The policy stays as
+    // the seam a future drafting agent would route through.
+    expectedSchema: "none registered (support_onboarding retired 2026-10-25)",
     minQuality: 0.6,
     maxEstimatedCostUsd: 0.05,
     expectedOutputTokens: 500,
@@ -522,12 +536,15 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
   },
 };
 
-// ── Agent → task mapping (all 11 registered agents) ────────────────────────
+// ── Agent → task mapping (all 9 registered agents) ─────────────────────────
 
 /**
  * Which program task each existing registry agent performs. Two deterministic
  * tasks (detect_capacity_gap / detect_skill_gap) have NO agent on purpose —
- * they are computed by the pure workforce models, not by an LLM.
+ * they are computed by the pure workforce models, not by an LLM. Two LLM
+ * tasks (normalize_external_profile / draft_follow_up) have no agent since
+ * skill_evidence and support_onboarding were retired (owner decision
+ * 2026-10-25, row 10.11); their policies stay as routing seams.
  *
  * Rationale per row lives in
  * docs/product/cost-aware-ai-task-routing-contract-v1.md.
@@ -535,14 +552,13 @@ export const TASK_POLICIES: Record<AiTaskType, AiTaskPolicy> = {
 export const AGENT_TASK_TYPES: Record<AiAgentKey, AiTaskType> = {
   worker_profile: "extract_cv", // free-text bio/CV → structured profile draft
   work_journal: "normalize_work_scope", // journal free-text → structured work scope
-  skill_evidence: "normalize_external_profile", // evidence text → normalized capability claims
   company_need: "structure_future_work", // company's future work → structured need
-  country_readiness: "derive_workforce_requirements", // what working there requires
-  document_assistant: "derive_workforce_requirements", // documents needed = requirement derivation
+  // A plain-language reading of the sourced country matrix for one scope. The
+  // payload is researched reference data with no data subject; it keeps the
+  // LOW_RISK class it always had — reclassifying it PUBLIC would be an egress
+  // widening, which is an owner act (owner decision 2026-10-25, row 10.11).
+  country_readiness: "derive_workforce_requirements",
   matching_explanation: "explain_match",
-  booking_risk: "explain_match", // risk narrative = explanation over canonical signals
-  admin_risk: "explain_match", // same explanation-class task, admin audience
-  support_onboarding: "draft_follow_up", // guidance / next-step message drafts
   translation_copy: "translate_message",
   market_explanation: "explain_market_demand",
   conversation_intent: "propose_conversation_intent", // one typed sentence → one EXISTING intent id (proposer, not router)

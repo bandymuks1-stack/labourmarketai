@@ -15,7 +15,8 @@
     "capacity": "Capaciteit",
     "work": "Werk & uren",
     "results": "Resultaten",
-    "history": "Geschiedenis"
+    "history": "Geschiedenis",
+    "areasTitle": "Bedrijfsgebieden"
   },
   "publicDemand": {
     "title": "Actuele marktvraag",
@@ -157,17 +158,15 @@
     "cancel": "Annuleren",
     "edit": "Bewerken",
     "remove": "Verwijderen",
-    "removeConfirm": "Deze advertentie definitief verwijderen?",
     "activate": "Publiceren",
-    "close": "Sluiten",
-    "reopen": "Heropenen als concept",
+    "close": "Afronden",
     "errorTitleRequired": "Een titel van minstens 3 tekens is vereist.",
     "errorCountry": "Gebruik een landcode van 2 letters (bijv. DE).",
     "errorGeneric": "Er ging iets mis. Probeer het opnieuw.",
     "status": {
       "draft": "Concept",
       "active": "Actief",
-      "closed": "Gesloten",
+      "closed": "Afgerond",
       "paused": "Gepauzeerd"
     },
     "kinds": {
@@ -270,7 +269,18 @@
     "formPublisherLabel": "Geplaatst door",
     "publisherSelf": "Ikzelf",
     "publishedAs": "Als {name}",
-    "publishedAsOrganization": "Als organisatie"
+    "publishedAsOrganization": "Als organisatie",
+    "republish": "Opnieuw publiceren",
+    "removeForever": "Definitief verwijderen",
+    "removeQuestion": "Definitief verwijderen? Dit kan niet ongedaan worden gemaakt. Wil je de advertentie alleen uit de zoekresultaten halen, pauzeer of rond haar dan af.",
+    "removeYes": "Ja, verwijderen",
+    "searchState": {
+      "draft": "Concept — nog niet zichtbaar voor anderen. Publiceer het wanneer het klaar is.",
+      "active": "Zichtbaar in de zoekresultaten — anderen kunnen het vinden en je een bericht sturen.",
+      "paused": "Gepauzeerd — verborgen in de zoekresultaten. Publiceer het opnieuw wanneer het weer actueel is.",
+      "closed": "Afgerond — verborgen in de zoekresultaten; gesprekken en geschiedenis blijven bewaard.",
+      "expired": "Verlopen — verborgen in de zoekresultaten. Wijzig de vervaldatum en publiceer het opnieuw."
+    }
   },
   "quality": {
     "title": "Gebreken & kwaliteit",
@@ -940,7 +950,7 @@
       },
       "totals": "{count, plural, one {Totaal · # werker} other {Totaal · # werkers}}",
       "basisLabel": "Basis",
-      "basis": "Geteld uit werkregistraties die leden binnen de arbeidsrelaties van deze organisatie in het gekozen venster hebben vastgelegd. Uren zijn de eigen vastgelegde duur van elke registratie, één keer geteld; bevestigde uren het deel op registraties die een manager heeft goedgekeurd; dagen zijn kalenderdagen met minstens één registratie met duur (in het totaal liddagen). „Bevestigd“ telt goedgekeurde registraties, „teruggestuurd“ afgewezen of teruggestuurde, de rest wacht op beoordeling. Het ontbreken van registraties bewijst niet dat er geen werk was, en niets hier beoordeelt of scoort iemand.",
+      "basis": "Geteld uit werkregistraties die leden binnen de arbeidsrelaties van deze organisatie in het gekozen venster hebben vastgelegd. Uren zijn de eigen vastgelegde duur van elke registratie, één keer geteld; bevestigde uren het deel op registraties die een manager heeft goedgekeurd; dagen zijn kalenderdagen met minstens één registratie met duur (in het totaal liddagen). „Bevestigd” telt goedgekeurde registraties, „teruggestuurd” afgewezen of teruggestuurde, de rest wacht op beoordeling. Het ontbreken van registraties bewijst niet dat er geen werk was, en niets hier beoordeelt of scoort iemand.",
       "hours": "{hours} u",
       "dayUnits": "+ {days} d in dagen vastgelegd",
       "mainly": "vooral {activity} · {hours} u",
@@ -1058,6 +1068,18 @@
     "carryNote": {
       "no_company": "Je tekst is niet opgeslagen: zonder bedrijfswerkruimte hoort een concept nergens bij. Het behoefteformulier opent leeg — je kunt het bedrijf daar aanmaken.",
       "failed": "Je tekst kon niet worden opgeslagen, dus het behoefteformulier opent leeg. Je moet de omschrijving opnieuw invoeren."
+    },
+    "headcount": {
+      "total": "Werknemers: {count}",
+      "teams": "Werknemers: {total} ({teams, plural, one {# ploeg} other {# ploegen}} van {perTeam})"
+    },
+    "clarify": {
+      "title": "Graag verduidelijken",
+      "team_count_range": "Je gaf het aantal ploegen als bereik. Hoeveel ploegen precies, en hoeveel mensen per ploeg?",
+      "per_team_range": "Hoeveel mensen precies zitten er in elke ploeg?",
+      "team_size_missing": "Hoeveel mensen zitten er in elke ploeg? Tot dan wordt het aantal werknemers niet berekend.",
+      "team_count_missing": "Hoeveel ploegen heb je nodig?",
+      "headcount_unclear": "Je noemde meerdere mensen, maar niet hoeveel. Hoeveel mensen precies?"
     }
   },
   "quickNav": {
@@ -1896,7 +1918,7 @@
     "workerVisibilityNote": "Eerlijke status: personeelsaanvragen van geverifieerde bedrijven worden aan werknemers getoond op hun kansenbord. Verificatie is een handmatige beoordeling — totdat je bedrijf geverifieerd is, blijven je aanvragen privé voor jou en het beoordelingsteam.",
     "empty": "Nog geen aanvragen ingediend. Dien je aanvraag hierboven in en die verschijnt hier met de status.",
     "created": "Aangemaakt",
-    "manageHelp": "Concepten kunnen worden verwijderd. Het sluiten of heropenen van een ingediende aanvraag — en het bevestigen van de herkende vaardigheden — doe je vanuit de scoutingweergave. Ingediende tekst bewerken is nog niet mogelijk.",
+    "manageHelp": "Rond een aanvraag af, haal haar van de markt of publiceer haar opnieuw, direct in deze lijst; een concept kun je voortzetten of verwerpen. Het bevestigen van de herkende vaardigheden doe je vanuit de scoutingweergave. Ingediende tekst bewerken is nog niet mogelijk.",
     "detailsLabel": "Ingediende gegevens",
     "fields": {
       "description": "Beschrijving",
@@ -2117,6 +2139,10 @@
           "title": "Start je bedrijfsprofiel",
           "body": "Je hebt nog geen bedrijfsprofiel. Maak er een aan — het is direct actief en bruikbaar, zonder te wachten op goedkeuring.",
           "cta": "Bedrijf instellen"
+        },
+        "personalSpace": {
+          "title": "Je bent nu in je persoonlijke omgeving",
+          "body": "Bedrijfstools openen in de werkomgeving van die organisatie — een tweede organisatie aanmaken is niet nodig. Open de jouwe:"
         }
       },
       "typeNotes": {
@@ -3548,7 +3574,7 @@
     "opportunities": "Kansen: zie werk dat bij je past. Zichtbaarheid hangt af van de netwerkgrootte en je gereedheid.",
     "marketplaceMap": "Marktkaart: arbeidsmarktsignalen per land en regio. Een nauwkeuriger punt verschijnt zodra een locatie is ingesteld.",
     "adminReview": "Systeemonderhoud: alleen voor de beheerder. Gewone gebruikers zien deze schermen nooit.",
-    "paymentReadiness": "Betalingen worden voorbereid: betaalde toegang is nog niet actief. Voorlopig worden de eerste gebruikers handmatig / via eigenaarsbeoordeling onboard gebracht. Stripe wordt in de volgende fase aangesloten.",
+    "paymentReadiness": "Betalingen worden voorbereid: betaalde toegang is nog niet actief.",
     "identityModel": "Twee basisidentiteiten: een persoon en een bedrijf. Kopen, verkopen, aannemen en uitzendactiviteit zijn handelingen, geen aparte identiteiten."
   },
   "profileIdentityNotice": {
@@ -3595,7 +3621,8 @@
     "reviewBanner": {
       "title": "Sommige vaardigheden moeten worden beoordeeld",
       "body": "Sommige vermeldingen zijn nog niet duidelijk geclassificeerd. Beoordeel ze of voeg meer informatie toe, zodat je profiel nauwkeuriger gematcht kan worden.",
-      "cta": "Vaardigheden beoordelen"
+      "cta": "Vaardigheden beoordelen",
+      "noteLead": "{count, plural, one {vaardigheid wordt nog niet onderbouwd door werkregistraties.} other {vaardigheden worden nog niet onderbouwd door werkregistraties.}}"
     },
     "pageTitle": "Mijn profiel",
     "pageSubtitle": "Wat je doet, wat je kunt en wat dat laat zien — alles op één plek.",
@@ -3920,7 +3947,7 @@
       "evidenceRecs": "Referenties — helpen je betrouwbaarheid te onderbouwen.",
       "evidenceLegal": "Identiteits- of juridische documenten — alleen gebruikt wanneer nodig voor aanname of een juridisch proces.",
       "privacyNote": "Je documenten blijven privé. Ze worden niet aan een werkgever of klant getoond zonder duidelijke grondslag.",
-      "uploadCostNote": "Een cv uploaden is gratis — er wordt geen LMC afgeschreven. Het systeem regelt de bestandsgrootte zelf."
+      "uploadCostNote": "Een cv uploaden is gratis — er worden geen platformtegoeden (LMC) afgeschreven. Het systeem regelt de bestandsgrootte zelf."
     }
   },
   "live": {
@@ -5637,7 +5664,6 @@
   },
   "legal": {
     "preparing": {
-      "body": "De juridische informatie wordt voorbereid. Voordat betaalde diensten of een contractuele relatie beginnen, wordt deze verstrekt en bijgewerkt.",
       "contact": "Neem contact met ons op als je vragen hebt."
     },
     "marketplaceRules": {
@@ -5650,10 +5676,9 @@
         "Openbare aanbiedingen verschijnen pas na moderatie; niet-vertrouwde of verdachte aanbiedingen worden verborgen.",
         "Handel in gereguleerde of illegale goederen en diensten is verboden.",
         "Een kaartpunt verschijnt alleen met geverifieerde coördinaten — geen valse markeringen.",
-        "Betalingen zijn nog niet actief; in deze fase lopen er geen betalingen via het platform.",
+        "Betalingen tussen gebruikers lopen niet via het platform; via het platform worden alleen vergoedingen voor platformdiensten betaald.",
         "Ongepast gedrag of verdachte activiteit kan worden gemeld — moderators beoordelen het."
-      ],
-      "reviewNote": "Deze regels beschrijven hoe het platform zich vandaag daadwerkelijk gedraagt. De definitieve juridische verwoording van de bindende documenten wordt nog voorbereid en wordt door de eigenaar en een advocaat beoordeeld voordat betaalde diensten beginnen."
+      ]
     },
     "terms": {
       "title": "Gebruiksvoorwaarden",
@@ -5685,7 +5710,7 @@
     },
     "privacy": {
       "title": "Privacybeleid",
-      "intro": "Deze pagina legt in gewone taal uit welke persoonsgegevens Labour Market AI gebruikt, waarom, en welke rechten je hebt. De pagina beschrijft het platform zoals het vandaag werkt, voordat betalingen actief zijn.",
+      "intro": "Deze pagina legt in gewone taal uit welke persoonsgegevens Labour Market AI gebruikt, waarom, en welke rechten je hebt. De pagina beschrijft het platform zoals het vandaag werkt.",
       "sections": [
         {
           "heading": "Wie verantwoordelijk is voor uw gegevens",
@@ -5705,6 +5730,15 @@
             "Berichten die je op het platform verstuurt en ontvangt.",
             "Toestemmingsrecords: wanneer je een toestemming geeft of intrekt, worden de actie en het tijdstip opgeslagen.",
             "Technische gegevens die nodig zijn om de dienst te laten draaien, zoals inlogcookies (zie het cookiebeleid)."
+          ]
+        },
+        {
+          "heading": "Inloggen met Google, Facebook of LinkedIn",
+          "items": [
+            "Je kunt een account aanmaken en inloggen met je Google-, Facebook- of LinkedIn-account in plaats van met je e-mailadres. Dit wordt alleen gebruikt om je in te loggen.",
+            "Als je er een kiest, bevestigt die aanbieder je identiteit en geeft hij het platform je e-mailadres, je naam en de identificatie van je account bij die aanbieder door. Het platform vraagt geen extra machtigingen — geen toegang tot je vrienden of contacten, berichten of pagina's — en plaatst nooit iets namens jou.",
+            "Je e-mailadres wordt het e-mailadres van je account. De naam van de aanbieder wordt alleen gebruikt om een tijdelijke naam te vervangen die uit je e-mailadres is afgeleid; een naam die je zelf hebt ingevoerd, wordt nooit overschreven. Het inlogrecord (de aanbieder, je accountidentificatie daar en de gegevens die hij doorgaf) wordt bewaard door onze authenticatiedienst Supabase, gekoppeld aan je account.",
+            "Om deze gegevens te verwijderen, verwijder je je LabourMarket.ai-account — de stappen staan op de pagina „Account en gegevens verwijderen”. LabourMarket.ai verwijderen uit je Facebook-, Google- of LinkedIn-instellingen verwijdert op zichzelf je LabourMarket.ai-account en de gegevens ervan niet."
           ]
         },
         {
@@ -5732,15 +5766,26 @@
           "items": [
             "Toestemmingsdoelen zijn gescheiden: werkgeverszichtbaarheid van uw professionele profiel en een gegevensoverdracht aan een specifiek bedrijf zijn twee verschillende keuzes — geen van beide is gebundeld met de voorwaarden, vooraf aangevinkt of vereist om uw account, cv of werkdagboek te gebruiken.",
             "Elk toestemmingsscherm toont de exacte geversioneerde tekst, wat zichtbaar wordt, wat privé blijft, en beide keuzes naast elkaar (inschakelen / niet nu). Weigeren verandert niets aan uw account.",
-            "U kunt elke toestemming op elk moment in één stap intrekken in uw privacy-instellingen. Na intrekking verschijnt uw profiel direct niet meer in nieuwe bedrijfszoekopdrachten; gegevens die een bedrijf rechtmatig ontving terwijl de toestemming geldig was, kunnen bij dat bedrijf blijven — dat zeggen wij eerlijk.",
+            "U kunt elke toestemming op elk moment in één stap intrekken in uw privacy-instellingen. Na intrekking verschijnt uw profiel direct niet meer in nieuwe bedrijfszoekopdrachten; gegevens die een bedrijf rechtmatig ontving terwijl de toestemming geldig was, kunnen bij dat bedrijf blijven.",
             "De toestemmingsgeschiedenis is alleen-toevoegen: elke verlening en elke intrekking is een afzonderlijke permanente registratie met tekstversie, taal, tijd en doel. Niemand — ook beheerders niet — kan haar bewerken of verwijderen, en een beheerder kan geen toestemming namens u geven."
+          ]
+        },
+        {
+          "heading": "Dienstverleners die gegevens voor het platform verwerken",
+          "items": [
+            "Supabase — database, gebruikersaanmelding en bestandsopslag.",
+            "Cloudflare — het netwerk vóór de website (domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen); elk verzoek aan de website loopt erdoorheen.",
+            "Stripe — betalingsverwerking voor betaalde platformdiensten. Wanneer een organisatie een betaling start, ontvangt Stripe het e-mailadres van de betalende gebruiker en een interne accountidentificatie; kaartgegevens worden ingevoerd op de eigen betaalpagina van Stripe en niet door het platform opgeslagen.",
+            "Google, Facebook (Meta) en LinkedIn — alleen als je ervoor kiest met hen in te loggen, zoals hierboven beschreven.",
+            "Google (Gemini API) — alleen zoals hieronder beschreven in het onderdeel over AI.",
+            "De volledige lijst van infrastructuurleveranciers staat op de pagina „Gegevensbescherming”."
           ]
         },
         {
           "heading": "Je rechten",
           "items": [
             "Je kunt vragen om de gegevens die over je worden bewaard in te zien, te corrigeren, er een kopie van te ontvangen, het gebruik ervan te beperken of ze te laten verwijderen.",
-            "Eerlijke huidige stand: je kunt zelf vanuit je account een kopie van je eigen gegevens downloaden als JSON-bestand en je werkjournaal als CSV-bestand. Verwijdering is nog steeds een verzoek dat door een persoon wordt beoordeeld — er is geen knop voor directe verwijdering; neem contact met ons op of dien het verzoek in, en een persoon handelt het af.",
+            "Je kunt zelf vanuit je account een kopie van je eigen gegevens downloaden als JSON-bestand en je werkjournaal als CSV-bestand. Je kunt verwijdering van je account aanvragen op de privacypagina van je account en het verzoek bevestigen nadat je opnieuw bent ingelogd; het systeem verwijdert het account dan automatisch en stuurt een bevestiging naar het e-mailadres van het account. Als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Je kunt ook contact met ons opnemen — zie de pagina „Account en gegevens verwijderen”.",
             "Waar verwerking op toestemming is gebaseerd, kun je die toestemming op elk moment intrekken."
           ]
         },
@@ -5748,8 +5793,7 @@
           "heading": "Hoe lang gegevens worden bewaard",
           "items": [
             "Gegevens worden bewaard zolang je account actief is en de functie waar ze bij horen ze nog gebruikt.",
-            "Toestemmings- en auditrecords worden als geschiedenis bewaard: een intrekking wordt vastgelegd in plaats van dat het record wordt gewist.",
-            "Exacte bewaartermijnen maken deel uit van de definitieve juridische verwoording die nog wordt voorbereid."
+            "Toestemmings- en auditrecords worden als geschiedenis bewaard: een intrekking wordt vastgelegd in plaats van dat het record wordt gewist."
           ]
         },
         {
@@ -5760,11 +5804,6 @@
             "Wat de aanbieder van een AI-assistent met je gesprek doet, valt onder de eigen privacyvoorwaarden van die aanbieder."
           ]
         }
-      ],
-      "pendingTitle": "Wacht nog op de definitieve juridische verwoording:",
-      "pendingItems": [
-        "Exacte bewaartermijnen per gegevenscategorie.",
-        "De bindende, door een jurist beoordeelde versie van dit beleid en van de genoemde rechtsgrondslagen."
       ]
     },
     "cookies": {
@@ -5787,11 +5826,6 @@
       "localStorageNote": "In de eigen opslag van je browser (geen cookies) staan enkele zaken: je keuze voor een licht of donker thema; welke pagina of campagne je hier voor het eerst bracht, eenmalig opgeslagen zodat een latere registratie eraan kan worden toegeschreven; een willekeurige sessie-identificatie per tabblad die verdwijnt als het tabblad sluit; en kleine gemakken zoals weggeklikte meldingen, recent bekeken items en je spraakinvoertaal. Niets hiervan wordt met derden gedeeld of voor advertenties gebruikt, en je kunt het op elk moment via je browser wissen.",
       "noTracking": "Er zijn vandaag geen analyse-, advertentie- of trackingcookies van derden op het platform. Als dit ooit verandert, wordt deze pagina als eerste bijgewerkt."
     },
-    "pendingLegal": {
-      "badge": "Definitieve verwoording in afwachting van beoordeling door eigenaar en jurist",
-      "body": "Deze pagina legt in gewone taal uit hoe het platform vandaag werkt. Het is niet het definitieve juridische document: de bindende verwoording wordt nog voorbereid en wordt door de eigenaar en een advocaat beoordeeld voordat betaalde diensten of een contractuele relatie beginnen."
-    },
-    "disclaimer": "Deze pagina is alleen informatief en is geen juridisch advies.",
     "requestContact": "Neem contact met ons op om een vraag te stellen of een verzoek over je gegevens in te dienen — een persoon zal het beoordelen.",
     "related": "Gerelateerde pagina's",
     "accountSection": {
@@ -5844,7 +5878,7 @@
         {
           "heading": "Export en verwijdering",
           "items": [
-            "Je kunt je eigen gegevens als JSON-bestand en je werkjournaal als CSV-bestand downloaden vanuit je account. Verwijdering wordt behandeld als een beoordeeld verzoek: niets wordt direct verwijderd — neem contact met ons op en een persoon zal het verwerken."
+            "Je kunt je eigen gegevens als JSON-bestand en je werkjournaal als CSV-bestand downloaden vanuit je account. Verwijdering van een account wordt in het account aangevraagd en bevestigd na opnieuw inloggen; het systeem verwijdert het account dan automatisch. Een verzoek over gegevens die wettelijk bewaard moeten worden of andere mensen betreffen, wordt door een persoon beoordeeld. Je kunt ook contact met ons opnemen en een persoon zal het verzoek verwerken."
           ]
         },
         {
@@ -5855,7 +5889,7 @@
             "Cloudflare — het netwerk vóór de website: domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen. Elk verzoek aan de website loopt erdoorheen.",
             "GitHub — opslag van de broncode. Er worden daar geen gebruikersgegevens bewaard.",
             "Google (Gemini API) — AI-verwerking voor het vertalen van berichten en vacatures en voor het voorstellen waar een getypte chatzin om vraagt. Alleen de tekst die de taak nodig heeft, wordt verstuurd.",
-            "Stripe — betalingsverwerking. Een klantrecord ontstaat alleen wanneer een organisatie een abonnementsbetaling start; vandaag is geen abonnement actief.",
+            "Stripe — betalingsverwerking. Een klantrecord ontstaat alleen wanneer een organisatie een abonnementsbetaling start.",
             "Geen andere e-mail-, AI-, vertaal- of betalingsleverancier is actief. Wordt er een geactiveerd, dan wordt eerst deze lijst bijgewerkt."
           ]
         },
@@ -5865,12 +5899,6 @@
             "Geen enkel systeem kan absolute veiligheid beloven. Als je een probleem opmerkt, neem dan contact met ons op — een persoon zal het beoordelen."
           ]
         }
-      ],
-      "pendingTitle": "Wacht nog op de definitieve juridische verwoording:",
-      "pendingItems": [
-        "De formele beschrijving van technische en organisatorische maatregelen.",
-        "Ondertekende verwerkersovereenkomsten met de hierboven genoemde infrastructuurleveranciers.",
-        "Definitieve bewaartermijnen."
       ]
     },
     "dataAccess": {
@@ -6048,7 +6076,7 @@
     "dataDeletion": {
       "title": "Account en gegevens verwijderen",
       "description": "Hoe u verwijdering van uw LabourMarket.ai-account en persoonsgegevens aanvraagt.",
-      "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Verwijdering wordt momenteel afgehandeld als een verzoek dat door een persoon wordt beoordeeld; er is geen knop om een account direct te verwijderen. Als je kunt inloggen, kun je het verzoek ook zelf indienen: open de privacypagina van je account (in de mobiele app: Instellingen → Privacy) en kies voor het verwijderen van je account. In beide gevallen antwoordt een mens binnen één maand.",
+      "intro": "U kunt LabourMarket.ai vragen uw account en persoonsgegevens te verwijderen. Als je kunt inloggen, kun je het verzoek zelf indienen: open de privacypagina van je account (in de mobiele app: Instellingen → Privacy), kies voor het verwijderen van je account en bevestig dit nadat je opnieuw bent ingelogd. Het systeem verwijdert het account dan automatisch en stuurt een bevestiging naar het e-mailadres van het account; als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Je kunt verwijdering ook per e-mail aanvragen zoals hieronder beschreven; een mens antwoordt binnen één maand.",
       "howTitle": "Hoe u verwijdering aanvraagt",
       "howSteps": [
         "Stuur een e-mail naar {email} vanaf het e-mailadres dat aan uw LabourMarket.ai-account is gekoppeld.",
@@ -6119,6 +6147,8 @@
       "asksTitle": "Het project heeft van jou nog nodig",
       "ledger": {
         "ratio": "{have} van {total} in orde",
+        "ratioNone": "Nog niets om te controleren",
+        "ratioUnknown": "nog niet bekend: {count}",
         "availability": "Beschikbaarheid",
         "state": {
           "valid": "je hebt het",
@@ -6150,7 +6180,7 @@
           "none": "nog niets vastgelegd"
         },
         "managerStatus": {
-          "needed": "wordt verwacht",
+          "needed": "af te spreken vóór de overeenkomst",
           "missing": "gemarkeerd als ontbrekend",
           "received": "ontvangen",
           "checked": "gecontroleerd",
@@ -6159,7 +6189,7 @@
         },
         "resolution": {
           "addDocument": "Document vastleggen",
-          "issuingAuthority": "Afgegeven door: {title}",
+          "informationSource": "Informatiebron: {title}",
           "trainingProgram": "Cursus: {title}",
           "serviceOffering": "Dienst: {title}",
           "serviceOfferingRate": "Dienst: {title} ({rate})",
@@ -6252,6 +6282,11 @@
           "trip": "Dienstreis",
           "absence": "Niet beschikbaar",
           "plan": "Gepland werk"
+        },
+        "unknownWhy": {
+          "undated_window": "Dit project heeft geen data, dus overlap met andere verplichtingen kan niet worden gecontroleerd.",
+          "undated_commitment": "Een andere verplichting van deze persoon heeft geen data, dus vrije dagen kunnen niet worden bevestigd.",
+          "source_unreadable": "Een deel van de agenda kon nu niet worden gelezen, dus vrije dagen kunnen niet worden bevestigd."
         }
       }
     },
@@ -6401,7 +6436,7 @@
       "totalAssigned": "Toegewezen",
       "viaTeam": "Via ploeg",
       "ready": "Klaar",
-      "readyBasis": "Alleen gebaseerd op de velden die hier worden gecontroleerd.",
+      "readyBasis": "Op basis van vaardigheden en werkbewijs. Documenten verlagen de gereedheid nooit.",
       "needsDeclaredSkills": "Geen opgegeven vaardigheden",
       "needsEvidence": "Geen werkbewijs",
       "needsFollowUp": "Opvolging nodig",
@@ -6420,7 +6455,7 @@
     "workersTitle": "Werknemers op dit project",
     "noWorkers": "Er zijn nog geen werknemers toegewezen aan dit project. Wijs werknemers uit je ploeg toe om de operaties te starten.",
     "worker": {
-      "readyChip": "Klaar (gecontroleerde velden)",
+      "readyChip": "Klaar: vaardigheden en werkbewijs",
       "notReadyChip": "Nog niet klaar",
       "declaredSkills": "Opgegeven vaardigheden",
       "confirmedSkills": "Bevestigde vaardigheden",
@@ -6440,8 +6475,8 @@
     },
     "notesTitle": "Wat deze cijfers betekenen",
     "notes": {
-      "readiness": "\"Klaar\" betekent alleen dat de hier gecontroleerde velden aanwezig zijn (naam, minstens één opgegeven vaardigheid, minstens één werkbewijsvermelding). Het is geen verificatie, geen documentgoedkeuring en geen AI-oordeel.",
-      "documents": "Documenten worden nog niet bijgehouden — nergens op dit bord wordt een document als goedgekeurd of geverifieerd getoond.",
+      "readiness": "„Klaar” betekent dat er een naam is, minstens één opgegeven vaardigheid en minstens één registratie van werkbewijs. Documenten tellen niet mee voor gereedheid en verlagen die nooit — wat voor dit werk gecontroleerd moet worden, spreek je af vóór de definitieve afspraak. Het is geen verificatie en geen AI-oordeel.",
+      "documents": "Je hoeft geen documenten te uploaden. Nergens op dit bord staat een document als ontvangen of gecontroleerd, tenzij een manager dat markeert.",
       "candidateSkill": "Verduidelijkingen van kandidaat-vaardigheden zijn privé voor elke werknemer; ze staan in het eigen professionele profiel van de werknemer, niet hier."
     },
     "report": {
@@ -6466,20 +6501,21 @@
       "rejected": "Afgewezen"
     },
     "checklist": {
-      "title": "Gereedheid / documenten",
-      "empty": "Nog niet bijgehouden. Voeg de standaardchecklist of je eigen items toe.",
-      "seed": "Standaardchecklist toevoegen",
+      "title": "Af te spreken vóór de afspraak",
+      "empty": "Niets gevolgd — er hoeven geen documenten geüpload te worden. Is er voor dit werk iets om te controleren, voeg dan de suggesties of een eigen punt toe.",
+      "seed": "Suggesties voor dit werk toevoegen",
       "addItem": "Item toevoegen",
       "addPlaceholder": "Naam van nieuw item",
-      "missing": "Ontbreekt",
+      "missing": "Als ontbrekend gemarkeerd",
       "received": "Ontvangen",
       "checked": "Gecontroleerd",
       "blocked": "Afgewezen / verlopen",
-      "helper": "\"Gecontroleerd\" betekent dat een manager het hier als gecontroleerd heeft gemarkeerd — geen juridische verificatie. Een document is alleen \"ontvangen\" of \"gecontroleerd\" wanneer een manager dat instelt; niets wordt automatisch goedgekeurd."
+      "helper": "\"Gecontroleerd\" betekent dat een manager het hier als gecontroleerd heeft gemarkeerd — geen juridische verificatie. Een document is alleen \"ontvangen\" of \"gecontroleerd\" wanneer een manager dat instelt; niets wordt automatisch goedgekeurd.",
+      "toAgree": "Af te spreken"
     },
     "readinessStatuses": {
       "not_required": "Niet vereist",
-      "needed": "Nodig",
+      "needed": "Af te spreken vóór de afspraak",
       "missing": "Ontbreekt",
       "received": "Ontvangen",
       "checked": "Gecontroleerd",
@@ -6500,8 +6536,8 @@
       "all": "Alle",
       "byStatus": "Status",
       "anyStatus": "Elke status",
-      "missingDocs": "Ontbrekende documenten/info",
-      "ready": "Klaar (gecontroleerde velden)",
+      "missingDocs": "Als ontbrekend gemarkeerd",
+      "ready": "Klaar: vaardigheden en werkbewijs",
       "needsSkillInfo": "Vaardigheidsinfo nodig",
       "needsEvidence": "Geen werkbewijs",
       "docsChecked": "Documenten gecontroleerd",
@@ -6509,7 +6545,7 @@
       "none": "Geen werknemers voldoen aan dit filter.",
       "showAll": "Alles tonen",
       "empty": {
-        "missingDocs": "Op dit moment ontbreken er bij geen enkele werknemer documenten of informatie.",
+        "missingDocs": "Geen manager heeft bij iemand iets als ontbrekend gemarkeerd.",
         "ready": "Nog geen werknemer voldoet aan alle hier gecontroleerde velden. Kies „Alle” om te zien wat er per persoon ontbreekt.",
         "needsSkillInfo": "Alle toegewezen werknemers hebben hun vaardigheden opgegeven.",
         "needsEvidence": "Alle toegewezen werknemers hebben minstens één werkbewijs.",
@@ -6518,7 +6554,7 @@
       }
     },
     "counters2": {
-      "withMissingDocs": "Ontbrekende documenten/info",
+      "withMissingDocs": "Als ontbrekend gemarkeerd",
       "docsReceived": "Documenten ontvangen",
       "docsChecked": "Documenten gecontroleerd",
       "docsBlocked": "Afgewezen/verlopen"
@@ -6877,7 +6913,7 @@
     "saving": "Opslaan...",
     "cancel": "Annuleren",
     "edit": "Bewerken",
-    "remove": "Verwijderen",
+    "remove": "Definitief verwijderen",
     "activate": "Activeren",
     "pause": "Pauzeren",
     "errorTitleRequired": "Voeg een diensttitel toe.",
@@ -6895,7 +6931,9 @@
       "paused": "Gepauzeerd — verborgen voor leden. Activeer om het weer vindbaar te maken."
     },
     "linkToRequests": "Bekijk aanvragen voor jouw diensten",
-    "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren."
+    "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren.",
+    "removeQuestion": "Deze dienst definitief verwijderen? Dit kan niet ongedaan worden gemaakt. Wil je hem alleen uit de zoekresultaten halen, pauzeer hem dan.",
+    "removeYes": "Ja, verwijderen"
   },
   "communication": {
     "origin": {
@@ -7012,7 +7050,7 @@
       "send": "Verzenden",
       "sent": "Antwoord verzonden."
     },
-    "translatedFrom": "Vertaald uit {lang}",
+    "translatedFrom": "Machinevertaling uit {lang}",
     "showOriginal": "Origineel ({lang})",
     "translationUnavailable": "Origineel ({lang}) — geen vertaling beschikbaar",
     "loadError": "Berichten konden nu niet worden geladen. Wat je ziet is niet het volledige beeld — probeer het opnieuw."
@@ -7660,7 +7698,16 @@
     "backHome": "Terug naar home",
     "dashboardSections": "Dashboardsecties",
     "skipToContent": "Direct naar inhoud",
-    "loading": "Laden…"
+    "loading": "Laden…",
+    "nav": {
+      "more": "Meer",
+      "menu": "Navigatie",
+      "areas": "Werkgebieden",
+      "close": "Sluiten",
+      "youAreHere": "Je bent hier",
+      "previous": "Vorig gebied",
+      "next": "Volgend gebied"
+    }
   },
   "workerInvitations": {
     "title": "Openstaande uitnodigingen",
@@ -7831,8 +7878,8 @@
     "readinessPanel": {
       "title": "Zo verbeter je je gereedheid",
       "intro": "Dit kun je als volgende afronden om je kaart sterker te maken.",
-      "allReady": "Je profielkaart is compleet. Documenten om in een bepaald land te werken tellen apart — zie hieronder.",
-      "countryFit": "Werken in een ander land vereist de juiste documenten. Zonder die documenten word je niet getoond als klaar om in het buitenland te werken — je ziet alleen legale routes (bedrijf regelt het papierwerk, documentondersteuning). Het systeem belooft nooit het recht om te werken zonder documenten."
+      "allReady": "Je profielkaart is compleet. Documenten tellen niet mee voor gereedheid — voor werk in een bepaald land spreek je ze vóór de afspraak met de werkgever af.",
+      "countryFit": "Werk je in een ander land, dan kunnen de wetten daar bepaalde documenten eisen (bijvoorbeeld A1 bij detachering, of een werkvergunning voor wie geen EU- / EER-burger is). Je hoeft ze hier niet te uploaden en zonder verlaagt je gereedheid niet: beide partijen controleren de specifieke documenten vóór de definitieve afspraak. Het systeem belooft nooit het recht om te werken waar de wet een vergunning eist."
     },
     "readinessSteps": {
       "pillar": {
@@ -7942,7 +7989,7 @@
       "confirmed": "u met registratie van leidinggevende",
       "organizationHistory": "u in organisatiehistorie",
       "experienceTotal": "u beroepservaring in totaal",
-      "days": "{count, plural, one {werkdag} other {werkdagen}}",
+      "days": "{count, plural, one {dag met uren} other {dagen met uren}}",
       "modes": {
         "label": "Onderdelen van de kaart",
         "work": "Werk",
@@ -8011,19 +8058,10 @@
     "disclaimer": "Statussen zijn gebaseerd op openbaar vermelde vereisten en je eigen invoer. De uiteindelijke conformiteit wordt gecontroleerd door de autoriteiten of een advocaat — dit is geen juridische garantie.",
     "needsMigration": "Momenteel niet beschikbaar.",
     "guidance": {
-      "title": "Documentrichtlijnen per land (concept)",
+      "title": "Documentrichtlijnen per land",
       "intro": "Informatieve richtlijnen over documenten die nodig kunnen zijn. Geen juridisch advies.",
-      "pendingNotice": "Juridische/documentrichtlijnen worden voorbereid op basis van de Litouwse masterversie.",
-      "draftDisclaimer": "CONCEPT: alleen informatief, in afwachting van beoordeling door eigenaar en jurist. Controleer altijd officiële bronnen.",
-      "statusSummary": "Items: {total} · wacht op juridische beoordeling: {awaiting}",
-      "status": {
-        "LT_DRAFT_READY": "LT-concept klaar",
-        "OWNER_EDITING": "Eigenaar bewerkt",
-        "OWNER_APPROVED_LT": "LT goedgekeurd door eigenaar",
-        "TRANSLATION_READY": "Klaar voor vertaling",
-        "TRANSLATED": "Vertaald"
-      },
-      "needsLegalReview": "Wacht op juridische beoordeling",
+      "pendingNotice": "Documentrichtlijnen per land zijn voorlopig alleen in het Litouws beschikbaar.",
+      "officialSources": "Controleer altijd officiële bronnen.",
       "whoProvides": "Wie het meestal regelt",
       "groupAll": "Algemeen (alle landen)",
       "helpInfoNote": "Dit is informatieve begeleiding. Een verzoek om hulp bij documenten, boekhouding of juridische zaken kan vanuit de bedrijfsomgeving worden ingediend.",
@@ -8055,8 +8093,9 @@
       "help": "Kies een bestemmingsland om te zien welke documenten het vraagt.",
       "mine": "Jouw voorkeurslanden staan vooraan.",
       "unknown": "De lijst met vereisten voor {country} is nog niet samengesteld — we tonen liever niets dan te gokken.",
-      "next": "Volgende stap: regel — {doc}.",
-      "ok": "Alle samengestelde vereisten voor {country} zijn gedekt."
+      "next": "Werk je in dit land, spreek dit dan vóór de afspraak met de werkgever af: {doc}. Je hoeft niets te uploaden.",
+      "ok": "Alle samengestelde vereisten voor {country} zijn gedekt.",
+      "postingNeedsBase": "Het A1-formulier en de detacheringsmelding worden alleen getoond als je basisland bekend is en verschilt van het werkland. Je basisland is nog niet opgegeven."
     },
     "types": {
       "cv": "CV",
@@ -8094,13 +8133,13 @@
     },
     "overall": {
       "not_enough_information": "Nog niet genoeg informatie",
-      "missing_documents": "Ontbrekende documenten",
+      "missing_documents": "Niet elk document uit de regels van dit land is vastgelegd",
       "needs_verification": "Gereed na verificatie",
       "almost_ready": "Bijna gereed",
       "ready_for_country": "Gereed voor dit land",
       "availabilityHint": "Stel je beschikbaarheid in om je gereedheid compleet te maken."
     },
-    "needsLegalReview": "juridische beoordeling nodig",
+    "needsLegalReview": "bron niet bevestigd",
     "sourceLink": "bron",
     "scopeNote": "Gebaseerd op officiële EU-bronnen over gedetacheerde werknemers — controleer de nationale details bij de bevoegde autoriteit. Dit is informatie, geen juridisch advies.",
     "editor": {
@@ -8805,7 +8844,7 @@
     "candidate": "Kandidaat",
     "privacy": {
       "contactsHidden": "Contactgegevens blijven verborgen — geen telefoon, e-mail of naam.",
-      "profileSafe": "Je ziet alleen profielveilige signalen: vaardigheidsbewijs, locatie, beschikbaarheid en tarief. Contact opnemen gebeurt later, via een expliciete stap."
+      "profileSafe": "Je ziet alleen profielveilige signalen: vaardigheidsbewijs, locatie, beschikbaarheid en tarief. Naam en contactgegevens verschijnen pas als de persoon dat toestaat."
     },
     "fields": {
       "location": "Locatie",
@@ -8823,9 +8862,10 @@
     "rateFrom": "vanaf €{min}/mnd",
     "noRate": "Niet opgegeven",
     "comms": {
-      "eligible": "Deze werknemer heeft open beschikbaarheid — berichten sturen wordt in een latere stap mogelijk.",
+      "eligible": "Deze werknemer heeft open beschikbaarheid — je kunt via het platform contact opnemen.",
       "inConversation": "U bent al in gesprek met deze werknemer — ga verder in Berichten.",
-      "blocked": "Communicatie wordt beschikbaar wanneer de werknemer open beschikbaarheid of een beschikbaar-vanaf-datum heeft."
+      "blocked": "Communicatie wordt beschikbaar wanneer de werknemer open beschikbaarheid of een beschikbaar-vanaf-datum heeft.",
+      "interestDoor": "Deze persoon heeft zelf interesse getoond — je kunt nu al schrijven met ‘Contact opnemen in het platform’."
     },
     "request": {
       "button": "Communicatie aanvragen",
@@ -9058,8 +9098,8 @@
       "contact": "Individueel geregeld"
     },
     "readiness": {
-      "draft_pricing": "Plannen zijn voorbereid, niet koopbaar. De prijzen zijn nog een concept van de eigenaar — geen enkele prijs hier is definitief en er kan niets worden gekocht.",
-      "owner_confirmed": "De prijzen zijn door de eigenaar bevestigd, maar de plannen blijven alleen voorbereid — er kan niets worden gekocht totdat betalingen zijn ingeschakeld."
+      "draft_pricing": "Plannen zijn voorbereid, niet koopbaar. Geen enkele prijs hier is definitief en er kan niets worden gekocht.",
+      "owner_confirmed": "De plannen zijn alleen voorbereid — er kan niets worden gekocht totdat betalingen zijn ingeschakeld."
     },
     "featuresLabel": "Inbegrepen in deze afbakening",
     "limitValue": "tot {count}",
@@ -9112,6 +9152,7 @@
     "intro": "Voorgestelde opdrachten. Een boeking is pas bevestigd wanneer de werknemer accepteert.",
     "notAuthed": "Log in om je boekingen te zien.",
     "unavailable": "Kon de actie niet voltooien. Probeer het opnieuw.",
+    "readFailed": "Je boekingen konden nu niet worden geladen — dat betekent niet dat je er geen hebt. Probeer het opnieuw.",
     "noDate": "Geen startdatum ingesteld",
     "noRole": "Werkafspraak",
     "startsOn": "Start {date}",
@@ -9188,7 +9229,8 @@
       "alreadyAccepted": "De werknemer heeft dit voorstel al geaccepteerd — afgesproken voorwaarden worden hier niet overschreven. Spreek wijzigingen af in het gesprek.",
       "refusedNotReachable": "Deze persoon kan hier geen boekingsvoorstel krijgen — het profiel is niet zichtbaar voor werkgevers en er is geen werkrelatie met jou.",
       "refusedNeedClosed": "Deze behoefte is gesloten — heropen hem voordat je een boeking voorstelt.",
-      "refusedAnswered": "De werknemer heeft dit voorstel geweigerd; zonder nieuwe toestemming wordt het niet heropend. Ga verder in het gesprek of zoek een andere werknemer."
+      "refusedAnswered": "De werknemer heeft dit voorstel geweigerd; zonder nieuwe toestemming wordt het niet heropend. Ga verder in het gesprek of zoek een andere werknemer.",
+      "unconfirmed": "Nog geen antwoord van de server. Het voorstel is mogelijk al verstuurd — kijk bij Boekingen of verstuur het opnieuw (hetzelfde voorstel wordt nooit dubbel aangemaakt)."
     },
     "reason": {
       "optionalTitle": "Reden (optioneel)",
@@ -9237,7 +9279,8 @@
     "clash": {
       "acceptAnyway": "Ik weet dat het overlapt — toch accepteren",
       "stillStands": "Accepteren heft de overlap niet op. Beide boekingen houden hun data, het conflict blijft zichtbaar in je agenda, en je keuze wordt vastgelegd.",
-      "acknowledged": "Geaccepteerd met een bekende overlap. {count} bestaande boeking(en) overlappen nog steeds — er is niets geannuleerd of verborgen, en je keuze staat geregistreerd."
+      "acknowledged": "Geaccepteerd met een bekende overlap. {count} bestaande boeking(en) overlappen nog steeds — er is niets geannuleerd of verborgen, en je keuze staat geregistreerd.",
+      "notRecordable": "Deze data overlappen met een boeking die je al hebt geaccepteerd en die overlap kan nog niet worden vastgelegd, dus je kunt dit aanbod weigeren of het open laten zodat het bedrijf de data kan wijzigen."
     },
     "proposedBy": "Voorgesteld door {name}",
     "termsChanged": "Het bedrijf heeft de voorwaarden gewijzigd. Je ging akkoord met: {previous}. Beslis opnieuw over de nieuwe data."
@@ -9540,7 +9583,7 @@
       "users": "Mensen en activiteit",
       "teams": "Ploegen en uitnodigingen",
       "b2b": "B2B-markt",
-      "work": "Werkjournaal en Living CV",
+      "work": "Werkjournaal en levend cv",
       "technical": "Technisch"
     },
     "col": {
@@ -10123,7 +10166,7 @@
     },
     "personal": {
       "title": "Jouw mogelijkheden",
-      "subtitle": "De beste mogelijkheden die nu zijn gevonden op basis van je gegevens en je Living CV.",
+      "subtitle": "De beste mogelijkheden die nu zijn gevonden op basis van je gegevens en je levende cv.",
       "discoverTitle": "Meer voor jou",
       "discoverSubtitle": "Tot {count} passende mogelijkheden uit wat we vandaag voor je hebben bekeken.",
       "status": {
@@ -11170,6 +11213,13 @@
         "unknown": "Kon niet controleren of bedrijven je profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — open je privacyinstellingen.",
         "noWorker": "Zichtbaarheid voor werkgevers geldt voor een werknemersprofiel, en dit account heeft er nog geen."
       }
+    },
+    "switch": {
+      "privateLine": "Deze instelling toont nooit: je naam, telefoonnummer, e-mailadres, je Werklogboek-items en links naar externe profielen.",
+      "turnOn": "Voorwaarden lezen en inschakelen",
+      "details": "Wat bedrijven zien en de volledige voorwaarden",
+      "grantedNote": "Klaar — bedrijven kunnen je beroepsprofiel nu vinden, onder een anoniem label.",
+      "withdrawnNote": "Klaar — je profiel verschijnt niet meer in nieuwe zoekopdrachten van bedrijven."
     }
   },
   "planning": {
@@ -11411,9 +11461,9 @@
       "coveredShort": "{count} gedekt"
     },
     "notes": {
-      "assignmentsPending": "Toewijzingsgegevens zijn voorbereid en verschijnen in dit beeld na activering door de eigenaar.",
-      "languagesPending": "Taaldekking is voorbereid en verschijnt in dit beeld na activering door de eigenaar.",
-      "brigadesPending": "Ploegdekking is voorbereid en verschijnt in dit beeld na activering door de eigenaar.",
+      "assignmentsPending": "Toewijzingsgegevens worden in dit beeld nog niet getoond.",
+      "languagesPending": "Taaldekking wordt in dit beeld nog niet getoond.",
+      "brigadesPending": "Ploegdekking wordt in dit beeld nog niet getoond.",
       "demandError": "Werkbehoeften konden nu niet worden gelezen.",
       "projectError": "Projecten konden nu niet worden gelezen.",
       "capacityError": "Een deel van de capaciteitsgegevens kon nu niet worden gelezen."
@@ -11440,7 +11490,7 @@
     },
     "utilisation": {
       "title": "Vastgelegd deel van de komende weken",
-      "committedDays": "{committed} van {counted} mensdagen vastgelegd — {workers} mensen over {days} dagen",
+      "committedDays": "{committed} van {counted, plural, one {# mensdag} other {# mensdagen}} vastgelegd — {workers, plural, one {# persoon} other {# mensen}} over {days, plural, one {# dag} other {# dagen}}",
       "noneCounted": "Voor dit venster konden van niemand de afspraken worden geteld.",
       "partial": "{count} daarvan konden niet volledig worden geteld — iets echts heeft geen datums, dus het getal hierboven is een ondergrens.",
       "unknown": "{count} konden helemaal niet worden gelezen. Dat is niet hetzelfde als vrij.",
@@ -11697,7 +11747,10 @@
       "docExpiring": "Documenten die binnen 30 dagen verlopen",
       "docMissing": "Ontbrekende of verlopen documenten",
       "docReview": "Documenten in beoordeling of teruggestuurd",
-      "financeOverdue": "Achterstallige financiële registraties"
+      "financeOverdue": "Achterstallige financiële registraties",
+      "journalReviews": "Werkregistraties die op je goedkeuring wachten",
+      "journalClientDecide": "Werkregistraties die op je beslissing als opdrachtgever wachten",
+      "partial": "De beoordelingswachtrij voor werkregistraties kon nu niet worden gelezen. Dat betekent niet dat er niets wacht."
     },
     "sources": {
       "label": "Bronnen",
@@ -11708,7 +11761,8 @@
       "workJournal": "Je werkdagboek",
       "managerConfirmations": "Bevestigingen van leidinggevenden",
       "projects": "Je projecten",
-      "assignments": "Actieve werknemerstoewijzingen"
+      "assignments": "Actieve werknemerstoewijzingen",
+      "journalReviewQueue": "Beoordelingswachtrij werkregistraties"
     },
     "summaries": {
       "title": "Samenvattingen uit je gegevens",
@@ -12830,7 +12884,7 @@
     },
     "stateNote": {
       "insufficientData": "Er zijn nog niet genoeg echte gegevens voor dit signaal — een eerlijke leemte wordt getoond in plaats van een verzonnen getal.",
-      "needsMigration": "De gegevensopslag achter dit signaal is voorbereid en sluit aan na activering door de eigenaar. Tot die tijd wordt niets geschat.",
+      "needsMigration": "Dit signaal is nog niet ingeschakeld. Tot die tijd wordt niets geschat.",
       "stale": "Het bewijs achter dit signaal is ouder dan het actualiteitsvenster — beschouw het als verouderd."
     },
     "valueClass": {
@@ -12882,7 +12936,7 @@
         "agencyAggregate": "Aggregaat over klanten"
       },
       "state": {
-        "needsMigration": "Dit signaal is voorbereid en wacht op activering door de eigenaar."
+        "needsMigration": "Dit signaal is nog niet ingeschakeld."
       },
       "salary": {
         "noBenchmark": "Voor je beroep en land is nog geen salarisreferentie beschikbaar.",
@@ -12917,7 +12971,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Door de eigenaar geactiveerde gegevensopslag (nog niet ingeschakeld)",
+      "gatedMigration": "Gegevensopslag nog niet ingeschakeld",
       "marketRateAverages": "Door de beheerder gecureerde markttariefgemiddelden",
       "journalEvidence": "Je eigen werkdagboekbewijs",
       "fillTimeMeasurementsMissing": "Invultijdmetingen (nog niet verzameld)",
@@ -12975,14 +13029,14 @@
       },
       "terms": {
         "internal": "Interne afleiding uit canonieke platformtabellen; het cohortbeleid beschermt individuen.",
-        "adminCurated": "Door de eigenaar ingevoerde gemiddelden met een bronnotitie in plaats van een steekproefomvang.",
-        "statGovLt": "Officiële statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
-        "eurostat": "Officiële EU-statistiek; bronvermelding vereist; activering wacht op bevestiging van de eigenaar.",
+        "adminCurated": "Gecureerde gemiddelden met een bronnotitie in plaats van een steekproefomvang.",
+        "statGovLt": "Officiële statistiek; bronvermelding vereist. Nog niet in gebruik.",
+        "eurostat": "Actieve bron. Officiële EU-statistiek; bronvermelding vereist.",
         "arbetsformedlingen": "Actieve bron. Gebruiksvoorwaarden bevestigd: een gratis openbare gegevensbron (CC0). Bij elke advertentie wordt de bron vermeld en elke advertentie linkt terug naar de oorspronkelijke publicatie.",
         "nav": "Actieve bron. De API-voorwaarden van NAV zijn geaccepteerd en toegang is verleend. De doorlopende verplichtingen worden nageleefd: een ingetrokken vacature wordt direct verwijderd, een gewijzigde snel bijgewerkt, en solliciteren leidt naar de oorspronkelijke vacature.",
-        "cvbankas": "Alleen een voorstel — gebruikstoestemming onbevestigd; wordt nooit met interne cijfers gemengd.",
-        "eures": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald.",
-        "uztLt": "Voorgestelde bron. Gebruiksvoorwaarden nog niet beoordeeld — activering vereist bevestiging van de eigenaar. Er wordt vandaag niets opgehaald."
+        "cvbankas": "Voorgestelde bron — niet in gebruik; wordt nooit met interne cijfers gemengd.",
+        "eures": "Voorgestelde bron. Niet in gebruik — er wordt vandaag niets opgehaald.",
+        "uztLt": "Voorgestelde bron. Niet in gebruik — er wordt vandaag niets opgehaald."
       },
       "status": {
         "active": "Actief (intern)",
@@ -12994,7 +13048,7 @@
     "methodology": {
       "title": "Methodiek",
       "deterministic": "Alle waarden zijn deterministisch en berekend uit records met bronnen — niets wordt door AI geschat en geen enkel getal wordt ooit verzonnen.",
-      "externalOff": "Externe bronnen staan uit: elke externe referentie is een voorstel dat wacht op de juridische bevestiging van de eigenaar. Interne en externe cijfers worden nooit gemengd.",
+      "externalOff": "Externe bronnen staan uit. Interne en externe cijfers worden nooit gemengd.",
       "cohort": "Kleine cohorten worden gebundeld of onderdrukt om individuen te beschermen."
     },
     "contextual": {
@@ -13113,7 +13167,7 @@
       },
       "unavailable": {
         "requirementTitle": "Wat er nodig is",
-        "sourcesTitle": "Bronnen in afwachting van goedkeuring door de eigenaar"
+        "sourcesTitle": "Bronnen die nog niet in gebruik zijn"
       },
       "reason": {
         "salaryNoBenchmark": "Hier staat geen salariscijfer omdat er nog geen gecureerde markttarief bestaat voor je beroep en land, en geen externe salarisbron is goedgekeurd voor gebruik.",
@@ -13127,15 +13181,15 @@
         "eurostatNeedsActivation": "Officiële Eurostat-context is voorbereid; de eerste officiële import is nog niet uitgevoerd, dus er is geen cijfer beschikbaar."
       },
       "requirement": {
-        "ownerEnableStore": "De platformeigenaar moet de observatie-opslag inschakelen en ten minste één gegevensbron goedkeuren.",
-        "salaryBenchmark": "Een beheerder moet een gecureerd markttarief invoeren voor je beroep en land, of de platformeigenaar moet een externe salarisbron goedkeuren.",
+        "ownerEnableStore": "De observatie-opslag moet worden ingeschakeld en ten minste één gegevensbron goedgekeurd.",
+        "salaryBenchmark": "Er moet een gecureerd markttarief voor je beroep en land worden ingevoerd, of een externe salarisbron goedgekeurd.",
         "demandOwnRows": "Voeg werkaanvragen toe — deze kaart vult zich met de gegevens van je eigen organisatie zodra er registraties bestaan.",
         "salaryBasis": "De salarisbasis (bruto of netto) moet zijn vastgelegd voor zowel je verwachte salaris als het gecureerde markttarief voordat een eerlijke vergelijking kan worden getoond.",
         "salaryInputs": "Voer je verwachte salaris in je werknemersprofiel in — de vergelijking verschijnt zodra het er is.",
         "eurostatActivation": "Een begrensde officiële Eurostat-import wordt uitgevoerd."
       },
       "after": {
-        "activation": "Nadat de eigenaar een gegevensbron heeft goedgekeurd en geactiveerd, vult deze kaart zich met onderbouwde, gedateerde cijfers — elk met betrouwbaarheid, versheid, bron en stapsgewijze herkomst."
+        "activation": "Zodra een gegevensbron is ingeschakeld, vult deze kaart zich met onderbouwde, gedateerde cijfers — elk met betrouwbaarheid, versheid, bron en stapsgewijze herkomst."
       }
     },
     "drawer": {
@@ -13283,7 +13337,7 @@
         "labourCostIndex": "Geen salarisaanbod en nooit een basis om het loon van een individu af te leiden."
       },
       "sectionTitle": "Europese arbeidsmarktcontext",
-      "sectionIntro": "Officiële Eurostat-aggregaten voor de EU en geselecteerde Europese markten. Voorbereid, wacht op activering door de eigenaar.",
+      "sectionIntro": "Officiële Eurostat-aggregaten voor de EU en geselecteerde Europese markten.",
       "asOf": "Eurostat-publicatie van {date} — deze cijfers worden hier niet vanzelf ververst.",
       "dataBasis": "Officieel Eurostat-aggregaat (bron: Eurostat)",
       "whyVisible": "Getoond als officiële Europese arbeidsmarktcontext.",
@@ -13664,8 +13718,8 @@
           "description": "Een lijstpunt van een projectmedewerker krijgt een echte status — nodig, ontvangen, gecontroleerd."
         },
         "seedReadinessChecklist": {
-          "label": "Documentenlijst starten",
-          "description": "Voor iedereen op het project wordt de standaard gereedheids-/documentenlijst gestart."
+          "label": "Suggesties om af te spreken toevoegen",
+          "description": "Voor iedereen op het project worden voorgestelde punten toegevoegd om vóór de afspraak te bespreken. Het is geen verplichte lijst en geen gereedheidsscore."
         },
         "requestReadiness": {
           "label": "Ontbrekende opvragen",
@@ -14023,7 +14077,7 @@
       "briefAgencyClientsPending": "{count, plural, one {# klant heeft} other {# klanten hebben}} de verbinding nog niet bevestigd.",
       "briefEduLearnerInvitesPending": "{count, plural, one {# leerlinguitnodiging is} other {# leerlinguitnodigingen zijn}} nog niet geaccepteerd.",
       "briefDocumentsExpiring": "{count, plural, one {# document verloopt binnenkort} other {# documenten verlopen binnenkort}}.",
-      "briefDocumentsMissing": "{count, plural, one {Voor de landen die je noemde ontbreekt nog # document} other {Voor de landen die je noemde ontbreken nog # documenten}}: {list}.",
+      "briefDocumentsMissing": "{count, plural, one {De regels van je opgegeven landen kunnen # document vereisen} other {De regels van je opgegeven landen kunnen # documenten vereisen}}: {list}. Je hoeft niets te uploaden — je spreekt ze vóór een afspraak met de werkgever af.",
       "briefEmployerInterestWaiting": "{count, plural, one {# kandidaat wacht op je antwoord} other {# kandidaten wachten op je antwoord}}.",
       "briefEmployerAgencyOffersWaiting": "{count, plural, one {# aanbod van een bureau wacht op je beslissing} other {# aanbiedingen van bureaus wachten op je beslissing}}.",
       "briefInterestContacted": "{count, plural, one {# bedrijf wil contact met je over je interesse} other {# bedrijven willen contact met je over je interesse}}.",
@@ -14091,7 +14145,8 @@
           "location": "Waar (stad of land)?",
           "window": "Wanneer — welke week of maand?",
           "quantity": "Hoeveel is het?",
-          "headcount": "Hoeveel mensen zijn er nodig?"
+          "headcount": "Hoeveel mensen zijn er nodig?",
+          "team_size": "Hoeveel ploegen en hoeveel mensen per ploeg?"
         },
         "unclear": "Ik weet niet zeker of je iets aanbiedt of iets zoekt. Schrijf wat je hebt of wat je nodig hebt.",
         "goodsChannelGated": "Je kunt dit op het advertentiebord plaatsen onder Goederen — mensen die het bord bekijken zien het daar. Er wordt niets opgeslagen tot je het publiceert.",
@@ -14106,7 +14161,8 @@
         "serviceNext": "Je kunt dit als dienstenaanbod plaatsen zodat anderen het vinden.",
         "chipServices": "Diensten openen",
         "corrected": "Bijgewerkt: {changes}.",
-        "changeInsteadOf": "{next} (in plaats van {previous})"
+        "changeInsteadOf": "{next} (in plaats van {previous})",
+        "teams": "{teams, plural, one {# ploeg} other {# ploegen}} van {perTeam}"
       },
       "createOrganizationHint": "Ik kan samen met jou een organisatie aanmaken — de gegevens en de verificatie staan op één pagina.",
       "chipCreateOrganization": "Organisatie aanmaken",
@@ -14229,7 +14285,7 @@
       "openConversationWhich": "Welke persoon bedoel je?",
       "openConversationNoPermission": "Ik kan geen gesprek met {name} openen — daarvoor heb je geen toestemming.",
       "openConversationFailed": "Het gesprek kon niet worden geopend. Probeer het opnieuw of open je berichten.",
-      "journalAskWhatYouDid": "Wat heb je vandaag gedaan? Schrijf het in het veld „Wat je deed“ in je eigen woorden — bijv. „ramen gemonteerd op de locatie Kaunas van 8 tot 17“. Het verzoek zelf wordt niet in het dagboek opgeslagen.",
+      "journalAskWhatYouDid": "Wat heb je vandaag gedaan? Schrijf het in het veld „Wat je deed” in je eigen woorden — bijv. „ramen gemonteerd op de locatie Kaunas van 8 tot 17”. Het verzoek zelf wordt niet in het dagboek opgeslagen.",
       "alsoWorkLog": "Ik begreep ook dat je vandaag hebt gewerkt — controleer het en sla het op in je werkjournaal:",
       "serviceNeedHint": "Dat is een klus — ik laat je zien wie die dienst aanbiedt.",
       "chipServiceRequests": "Een dienst zoeken",
@@ -14512,8 +14568,8 @@
       "missingDeclaredSkills": "opgegeven vaardigheden",
       "missingEvidence": "werkbewijs",
       "blockedSuffix": "(afgewezen / verlopen)",
-      "readinessSeedChip": "Documentenlijst starten ({count} pers.)",
-      "readinessSeeded": "Lijst gestart: {count} pers. × {items} punten — alle “nodig”.",
+      "readinessSeedChip": "Suggesties om af te spreken toevoegen ({count} mensen)",
+      "readinessSeeded": "Suggesties toegevoegd: {count} mensen × {items} punten — allemaal „af te spreken vóór de afspraak”.",
       "readinessGotChip": "Ontvangen: {label} ({name})",
       "readinessGotDone": "Gemarkeerd als ontvangen: {label} ({name}).",
       "readinessCheckedChip": "Gecontroleerd: {label} ({name})",
@@ -14556,7 +14612,7 @@
       "moveAskProject": "Waarheen {name} verplaatsen? Kies:",
       "moveWhatIfTitle": "Als {name} van “{from}” naar “{to}” gaat:",
       "moveFromLine": "• “{from}”: mensen {before} → {after}; {tasks} open werkpakketten blijven daar bij hem; gereedheidslijst daar: {checked}/{total}.",
-      "moveToLine": "• “{to}”: mensen {before} → {after}; de gereedheidslijst daar begint op 0/{total}.",
+      "moveToLine": "• „{to}”: mensen {before} → {after}; wat daar af te spreken is, is nog niet gekozen (tot {total} punten voorgesteld).",
       "moveCountryLine": "• Het land verandert: {from} → {to} — andere documenteisen.",
       "moveNoDatesLine": "• “{to}” heeft geen datums — afwezigheden kunnen niet worden gecontroleerd.",
       "moveAvailabilityUnknownLine": "• Afwezigheden onbekend.",
@@ -14666,7 +14722,7 @@
       "saved": "Vermelding opgeslagen in je werkjournaal.",
       "errorGeneric": "Opslaan mislukt. Probeer het opnieuw.",
       "minutesUnit": "min",
-      "errorNoWorkContent": "Een invoer heeft het werk nodig: wat je deed, waar of hoe lang. Schrijf het in je eigen woorden, bijv. „ramen gemonteerd van 8 tot 17“.",
+      "errorNoWorkContent": "Een invoer heeft het werk nodig: wat je deed, waar of hoe lang. Schrijf het in je eigen woorden, bijv. „ramen gemonteerd van 8 tot 17”.",
       "errorNotesTooLong": "De invoer is te lang — kort hem in tot 4000 tekens.",
       "noWorkSignalHint": "Ik herkende geen tijd, plaats of werkzaamheid in de tekst — de invoer wordt precies zo opgeslagen als je hem schreef.",
       "recordTitle": "Wordt vastgelegd als werktijd",
@@ -15488,7 +15544,7 @@
       "suggestOverdue": "{count, plural, one {# taak is over de einddatum heen} other {# taken zijn over hun einddatum heen}}.",
       "suggestLogToday": "Je werkt vandaag en er is nog niets vastgelegd.",
       "suggestReserve": "Er valt morgen een deadline en morgen is bijna vrij.",
-      "suggestReserveNamed": "„{label}“ moet morgen af, en morgen is bijna vrij.",
+      "suggestReserveNamed": "„{label}” moet morgen af, en morgen is bijna vrij.",
       "suggestBasis": "Uit je eigen agenda en taken."
     },
     "ai": {
@@ -15527,8 +15583,8 @@
       "blockedNoProjects": "Je beheert geen projecten op dit account.",
       "blockedNotEmployer": "Dat is een werkgeversactie. Schakel naar je bedrijfsruimte en vraag het opnieuw.",
       "unsupportedDimension": "Op {dimension} kan ik nog niet filteren.",
-      "noSuchValue": "Ik begreep „{asked}“, maar daar is nu niets voor jou zichtbaar.",
-      "noSuchValueWithAlternatives": "Ik begreep „{asked}“, maar daar is nu niets voor jou zichtbaar. Wel: {available}.",
+      "noSuchValue": "Ik begreep „{asked}”, maar daar is nu niets voor jou zichtbaar.",
+      "noSuchValueWithAlternatives": "Ik begreep „{asked}”, maar daar is nu niets voor jou zichtbaar. Wel: {available}.",
       "internshipChooseDirection": "Kies eerst een werkrichting — zonder die kan de stagezoektocht niet worden verfijnd.",
       "internshipAskInstitution": "Vraag het aan je onderwijsinstelling ({institution}): die ziet de marktvraag van de opleiding en kan een werkgever uitnodigen om een stage te plaatsen.",
       "internshipCompass": "Het kompas laat zien wat nu bij je past en wat ontbreekt.",
@@ -17415,7 +17471,19 @@
     "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
     "unavailable": "Meldingsinstellingen zijn momenteel niet beschikbaar.",
     "saving": "Opslaan…",
-    "saved": "Opgeslagen."
+    "saved": "Opgeslagen.",
+    "push": {
+      "title": "Pushmeldingen op dit apparaat",
+      "intro": "Krijg een korte melding op deze telefoon of computer als er iets nieuws binnenkomt. Alleen het soort melding wordt getoond, nooit de tekst van een bericht. Soorten die u hierboven uitzette, worden nooit gepusht.",
+      "turnOn": "Pushmeldingen aanzetten",
+      "turnOff": "Uitzetten op dit apparaat",
+      "working": "Bezig…",
+      "on": "Pushmeldingen staan aan op dit apparaat.",
+      "off": "Pushmeldingen staan uit op dit apparaat.",
+      "unsupported": "Deze browser kan geen pushmeldingen ontvangen. Voeg op een iPhone de site eerst toe aan het beginscherm.",
+      "blocked": "Meldingen voor deze site zijn geblokkeerd in uw browserinstellingen. Sta ze daar toe en kom terug.",
+      "error": "Dat lukte niet. Er is niets gewijzigd. Probeer het opnieuw."
+    }
   },
   "historyContext": {
     "project": "Werkproject",
@@ -17782,11 +17850,11 @@
         "time_conflicts_source": "{count} regels — de periode die u koos wijkt af van de woorden van de bron"
       },
       "issueWhy": {
-        "impossible_hours": "Het brongetal blijft zoals het is (bv. een maandtotaal op één dag). Na „laten staan“ wordt de regel vastgelegd als bronfeit en blijft de dagduur onbekend — nergens opgeteld.",
+        "impossible_hours": "Het brongetal blijft zoals het is (bv. een maandtotaal op één dag). Na „laten staan” wordt de regel vastgelegd als bronfeit en blijft de dagduur onbekend — nergens opgeteld.",
         "week_conflicts": "De datum geldt als feit, het weeknummer als groepering van de auteur. Beide worden getoond; niets wordt herschreven.",
         "ambiguous_place": "Meer dan één plaats past bij deze spelling. Uw antwoord geldt voor elke regel ermee.",
         "ambiguous_person": "Meer dan één persoon op de lijst draagt deze naam. Kies in de regel hieronder.",
-        "site_unknown": "Noch de plaatscel noch de tekst noemt een locatie. De regel blijft zonder — onbekend, niet „geen“.",
+        "site_unknown": "Noch de plaatscel noch de tekst noemt een locatie. De regel blijft zonder — onbekend, niet „geen”.",
         "duplicates": "Een vergelijkbare regel voor dezelfde persoon en dag bestaat al. Controleer in de regels.",
         "conflicts": "Zelfde persoon, dag en plaats — andere uren. Beide regels blijven zichtbaar.",
         "allocation_unknown": "Het dagtotaal blijft exact; uren worden niet op gok over plaatsen verdeeld.",
@@ -18191,6 +18259,29 @@
       "company_posting_registration": "Registratie van de detachering door het bedrijf. Dit is een verplichting van de werkgever, los van wat de werknemer zelf indient.",
       "company_tax_vat": "Btw-, belasting- en socialezekerheidsregistratie voor het bedrijf. Of dit geldt, hangt af van wat het werk is en hoe lang het duurt.",
       "national_specifics": "Landspecifieke papieren — sector- of bouwpassen, lokale registratie, nationale belasting- en socialezekerheidsstappen. Die bestaan in de meeste landen, maar de details zijn nationaal, dus controleer ze op de officiële site."
+    },
+    "reading": {
+      "title": "In gewone taal",
+      "intro": "Kies je situatie en vraag een korte uitleg van de eisen hierboven, in volgorde. AI schrijft die als suggestie: elke stap noemt de eis waar hij vandaan komt, en de eisen hierboven blijven het antwoord.",
+      "scopeLabel": "Jouw situatie",
+      "cta": "Leg uit in gewone taal",
+      "pending": "De eisen worden gelezen...",
+      "resultTitle": "AI-lezing van de eisen hierboven",
+      "attribution": "Geschreven door {provider} {model} op basis van de eisen hierboven. Een suggestie, geen juridisch advies en geen vastgelegd feit.",
+      "stepsTitle": "Wat telt, in volgorde",
+      "stepSource": "Bron:",
+      "stepLegalCheck": "juridische check nodig",
+      "legalCheck": "Een deel hiervan is nationaal en niet EU-breed, en is voor dit land niet gecontroleerd. Controleer het bij de nationale instantie voordat je erop vertrouwt.",
+      "limitationsTitle": "Wat deze lezing je niet kan vertellen",
+      "reviewNote": "Vergelijk deze lezing met de eisen hierboven voordat je iets doet.",
+      "off": {
+        "not_authenticated": "Log in om een uitleg in gewone taal te vragen. De eisen hierboven zijn ook zonder die uitleg volledig.",
+        "rate_limited": "Je hebt dit zojuist een paar keer gevraagd. Probeer het over enkele minuten opnieuw.",
+        "no_research": "Voor deze situatie zijn hier geen onderzochte eisen, dus er valt niets uit te leggen.",
+        "ai_off": "AI staat op deze dienst op dit moment uit, dus er is geen uitleg in gewone taal. De eisen hierboven zijn ook zonder die uitleg volledig.",
+        "ai_unavailable": "De uitleg kon nu niet worden gemaakt. De eisen hierboven blijven ongewijzigd.",
+        "unsourced": "De uitleg noemde een eis die niet in de lijst hierboven staat, dus is hij weggegooid in plaats van getoond. De eisen hierboven blijven ongewijzigd."
+      }
     }
   },
   "organizationDoors": {
@@ -18340,7 +18431,9 @@
       "managesInvitations": "Beheert uitnodigingen",
       "grantInvitations": "Uitnodigingen laten beheren",
       "withdrawInvitations": "Uitnodigingsbeheer intrekken",
-      "unavailable": "De ledenlijst kon nu niet worden gelezen. Dat betekent niet dat de organisatie geen leden heeft."
+      "unavailable": "De ledenlijst kon nu niet worden gelezen. Dat betekent niet dat de organisatie geen leden heeft.",
+      "noAccountHint": "Een lidmaatschapsrol kan alleen worden gegeven aan iemand die al een account heeft. Nodig iemand zonder account uit met een uitnodigingslink — zodra die persoon zich registreert en bij de organisatie aansluit, kun je hier een rol geven.",
+      "noAccountCta": "Uitnodigingslink maken"
     },
     "start": {
       "membersMoved": "Leden en uitnodigingen van {workspace} worden beheerd in de Instellingen van de organisatie.",
@@ -18809,7 +18902,23 @@
       "unavailable": "Plannen is hier nog niet beschikbaar.",
       "error": "Er ging iets mis. Probeer opnieuw.",
       "planned_collides": "Gepland, maar deze persoon heeft op sommige van deze dagen al iets. U beslist; annuleer het plan hieronder als het niet klopt.",
-      "planned_unknown": "Gepland, maar we konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij."
+      "planned_unknown": "Gepland, maar we konden niet bevestigen dat deze dagen vrij zijn. Dat is niet hetzelfde als vrij.",
+      "recurrence_invalid": "Controleer de herhaling: kies minstens één weekdag, of een rotatie van 1–28 werkdagen en 1–28 rustdagen.",
+      "recurrence_empty": "Dit patroon heeft tussen deze data geen enkele werkdag. Er is niets gepland.",
+      "recurrence_unavailable": "Terugkerende diensten zijn hier nog niet beschikbaar. Plan de periode zonder herhaling."
+    },
+    "repeat": {
+      "legend": "Herhaling",
+      "none": "Herhaalt niet",
+      "weekly": "Wekelijkse diensten",
+      "cycle": "Rotatie",
+      "weekdays": "Werkdagen",
+      "cycleOn": "Werkdagen achter elkaar",
+      "cycleOff": "Rustdagen achter elkaar",
+      "cycleOffset": "Al gewerkte dagen op de eerste dag (0 = begint opnieuw)",
+      "hint": "Diensten herhalen zich binnen de data hierboven en staan in de agenda als planning. Een dienst die op verlof of ander werk valt, wordt opgeslagen en gemarkeerd; u beslist.",
+      "summaryWeekly": "Diensten: {days}",
+      "summaryCycle": "Rotatie: {on} werk, {off} rust"
     }
   },
   "workLifecycle": {
@@ -18818,6 +18927,7 @@
     "titleCompany": "Wat er met het werk gebeurt dat je aanstuurt",
     "example": "Voorbeeld — geen echt persoon en geen echte gegevens",
     "hint": "Kies een stap. Elke stap opent de echte plek in je werkruimte.",
+    "hintWorkers": "Kies een stap. Elke stap opent de echte plek in je werkruimte.",
     "open": "Openen in je werkruimte",
     "list": "Stappen in de levenscyclus van werk",
     "workers": {
@@ -19663,9 +19773,9 @@
       "approvedAutomatic": "Automatisch bevestigd volgens een regel",
       "rejected": "Afgewezen",
       "changesRequested": "Aanpassing gevraagd",
-      "cv": "{count, plural, one {Living CV: {skills} · {entries, plural, one {# bevestigde registratie} other {# bevestigde registraties}}} other {Living CV bijgewerkt: {skills}}}",
-      "cvUnlinked": "Living CV: bevestigd werk, nog niet aan een vaardigheid gekoppeld",
-      "cvUnknown": "Living CV: kon niet lezen",
+      "cv": "{count, plural, one {Levend cv: {skills} · {entries, plural, one {# bevestigde registratie} other {# bevestigde registraties}}} other {Levend cv bijgewerkt: {skills}}}",
+      "cvUnlinked": "Levend cv: bevestigd werk, nog niet aan een vaardigheid gekoppeld",
+      "cvUnknown": "Levend cv: kon niet lezen",
       "matching": "Matching ziet bevestigd werk: {skills}",
       "matchingRepeated": "Matching ziet herhaald bevestigd werk: {skills}"
     },
@@ -19735,7 +19845,7 @@
       "returned": "Teruggestuurd voor correctie: {count}",
       "confirmed": "Bevestigd door een tweede partij: {count}",
       "confirmedUnknown": "Het aantal bevestigingen kon niet worden bepaald",
-      "livingCv": "Bevestigd werk telt mee in het Living CV van de medewerkers"
+      "livingCv": "Bevestigd werk telt mee in het levende cv van de medewerkers"
     },
     "review": "Bekijk de wachtende ({count})",
     "stageDone": "Fase ‘{name}’ afgerond",
@@ -19817,6 +19927,70 @@
     "invite": {
       "line": "Betaal eenmalig 1 € voor {days} dagen van het betaalde Organisatieplan. Er wordt niets verlengd.",
       "cta": "Pilot openen"
+    }
+  },
+  "marketLifecycle": {
+    "actions": {
+      "publish": "Publiceren",
+      "edit": "Bewerken",
+      "pause": "Pauzeren",
+      "resume": "Hervatten",
+      "publishAgain": "Opnieuw publiceren",
+      "complete": "Afronden",
+      "withdraw": "Van de markt halen",
+      "discard": "Concept verwerpen"
+    },
+    "states": {
+      "draft": "Concept",
+      "active": "Actief",
+      "paused": "Gepauzeerd",
+      "completed": "Afgerond",
+      "withdrawn": "Van de markt gehaald",
+      "discarded": "Verworpen concept",
+      "closed": "Gesloten",
+      "locked": "In beoordeling"
+    },
+    "visibility": {
+      "visible": "Zichtbaar in de zoekresultaten — anderen kunnen het vinden en je een bericht sturen.",
+      "draft": "Concept — nog niet zichtbaar voor anderen. Publiceer het wanneer het klaar is.",
+      "paused": "Gepauzeerd — verborgen in de zoekresultaten, geen nieuwe aanvragen. Hervat het wanneer het weer actueel is.",
+      "completed": "Afgerond — verborgen in de zoekresultaten; gesprekken en geschiedenis blijven bewaard.",
+      "withdrawn": "Van de markt gehaald — verborgen in de zoekresultaten; gesprekken en geschiedenis blijven bewaard.",
+      "discarded": "Verworpen concept — het is nooit gepubliceerd.",
+      "closed": "Gesloten — verborgen in de zoekresultaten; de geschiedenis blijft bewaard.",
+      "expired": "Verlopen — verborgen in de zoekresultaten. Wijzig de vervaldatum en publiceer het opnieuw.",
+      "gated": "Nog niet zichtbaar — het verschijnt in de zoekresultaten zodra de organisatie is bevestigd.",
+      "locked": "In beoordeling — tijdens de beoordeling kan het niet worden gewijzigd."
+    },
+    "deleteForever": "Definitief verwijderen",
+    "deleteQuestion": "Definitief verwijderen? Dit kan niet ongedaan worden gemaakt. Wil je het alleen uit de zoekresultaten halen, pauzeer het, rond het af of haal het van de markt.",
+    "deleteYes": "Ja, verwijderen",
+    "cancel": "Annuleren",
+    "error": "Dat is niet gelukt. Probeer het opnieuw.",
+    "notAllowed": "In deze status is deze actie niet beschikbaar."
+  },
+  "collaborationChecks": {
+    "title": "Vóór de definitieve afspraak",
+    "lead": "Voordat jullie de definitieve afspraak maken, raden we beide partijen aan de documenten, kwalificaties, vergunningen en samenwerkingsvoorwaarden te controleren die voor dit werk of deze deal belangrijk zijn.",
+    "context": "Wat belangrijk is, hangt af van het werk, het beroep, het land en het project — er is geen verplichte lijst die voor iedereen geldt.",
+    "countryRules": "De regels hangen af van het land waar het werk plaatsvindt: {country}.",
+    "privacy": "Je hoeft nooit documenten naar LabourMarket.ai te uploaden. Als jullie ze delen, doen jullie dat zelf — het platform geeft ze niet automatisch door en beweert niet dat ze gecontroleerd zijn.",
+    "basis": {
+      "law": "Wettelijk verplicht",
+      "law_if": "In sommige gevallen wettelijk verplicht",
+      "agreement": "Aan de partijen om af te spreken"
+    },
+    "topic": {
+      "terms": "Omvang van het werk, data, loon, werktijden en hoe er wordt betaald.",
+      "identity_right_to_work": "Identiteit en het recht om te werken — bij een dienstverband vereisen de regels van het werkland vaak deze controle.",
+      "posting_a1": "Wie een werknemer naar een ander EU- / EER-land detacheert, heeft volgens de wet een A1-verklaring en een detacheringsmelding nodig.",
+      "work_permit": "Een werk- of verblijfsvergunning — wettelijk verplicht als de persoon niet via nationaliteit of vrij verkeer (bv. EU / EER) in dat land mag werken.",
+      "site_safety": "Veiligheidsinstructie en bouwplaatsregels — vóór de start is dit een wettelijke plicht van de werkgever.",
+      "driving_licence": "Een geldig rijbewijs van de juiste categorie — wettelijk verplicht om voor het werk te rijden.",
+      "professional_qualification": "Een kwalificatie of beroepscertificaat voor dit werk — sommige landen eisen dat wettelijk voor sommige beroepen.",
+      "business_details": "Gegevens over de inschrijving van het bedrijf en voor facturatie.",
+      "insurance": "Een aansprakelijkheids- of andere verzekering, als dit werk die nodig heeft.",
+      "client_requirements": "Specifieke eisen van de opdrachtgever of de locatie, als die er zijn."
     }
   }
 }

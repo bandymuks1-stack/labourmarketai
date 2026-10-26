@@ -43,14 +43,18 @@ const MOBILE_WIDTHS = [320, 375, 768] as const;
 /** Apple/WCAG 2.2 minimum. A 0.5px sub-pixel rounding slack, nothing more. */
 const MIN_TOUCH_PX = 43.5;
 
-/** The canonical public IA — the links a visitor must be able to reach. */
+/** The canonical public IA — the links a visitor must be able to reach
+ *  (`ALL_LINKS` in components/layouts/site-nav.tsx). The three audience pages
+ *  (/for-workers, /for-companies, /for-agencies) left the header in #1609
+ *  (owner window 11 §16) and stay reachable from the footer and the landing's
+ *  starting contexts; this spec follows the header's own list. */
 const EXPECTED_LINKS: ReadonlyArray<{ href: string }> = [
-  { href: "/for-workers" },
-  { href: "/for-companies" },
-  { href: "/for-agencies" },
+  { href: "/jobs" },
   { href: "/pricing" },
   { href: "/about" },
 ];
+/** Same-page landing anchors, matched by fragment (the locale prefix varies). */
+const EXPECTED_ANCHORS = ["#market", "#how-it-works"] as const;
 
 test.beforeAll(() => mkdirSync(SHOTS, { recursive: true }));
 
@@ -147,17 +151,21 @@ for (const width of MOBILE_WIDTHS) {
         const link = menu.locator(`a[href$="${href}"]`);
         await expect(link, `${href} reachable at ${width}px`).toBeVisible();
       }
-      // The landing anchor is same-page, so it is matched separately.
-      await expect(
-        menu.locator('a[href*="#how-it-works"]'),
-        `#how-it-works reachable at ${width}px`,
-      ).toBeVisible();
+      // The landing anchors are same-page, so they are matched separately.
+      for (const anchor of EXPECTED_ANCHORS) {
+        await expect(
+          menu.locator(`a[href*="${anchor}"]`),
+          `${anchor} reachable at ${width}px`,
+        ).toBeVisible();
+      }
 
       // Every marketing row is a >= 44px touch target, measured live. Scoped
       // to DIRECT children: the auth section below is a nested div that is
       // display:none from `sm` up, and a hidden element has no box to measure.
       const rows = await menu.locator("> a").all();
-      expect(rows.length, "menu row count").toBeGreaterThanOrEqual(6);
+      expect(rows.length, "menu row count").toBeGreaterThanOrEqual(
+        EXPECTED_LINKS.length + EXPECTED_ANCHORS.length,
+      );
       for (const row of rows) {
         const rb = await row.boundingBox();
         expect(rb, "row bounding box").not.toBeNull();
@@ -244,7 +252,7 @@ test.describe("@1280px desktop", () => {
     await page.goto("/lt");
 
     // The links live in the header's own nav at this width...
-    await expect(page.locator("header nav a[href$='/for-workers']")).toBeVisible();
+    await expect(page.locator("header nav a[href$='/pricing']")).toBeVisible();
     // ...and the disclosure button must not be offered alongside them.
     await expect(page.getByTestId("mobile-nav-toggle")).toBeHidden();
     expect(await headerOverflow(page), "desktop header overflow").toEqual([]);

@@ -35,7 +35,7 @@ describe("the LMC balance is reachable and honest", () => {
     // The ANCHOR is the point: "how much LMC do I have" answered by dropping
     // somebody at the top of a settings page is not an answer.
     expect(entry?.route).toBe("/dashboard/account#lmc");
-    for (const locale of ["lt", "en", "ru"] as const) {
+    for (const locale of activeLocales) {
       const terms = entry?.synonyms[locale] ?? [];
       expect(terms.length, `${locale} synonyms`).toBeGreaterThan(3);
       expect(terms).toContain("lmc");

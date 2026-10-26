@@ -3,6 +3,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { extractJournalSuggestions } from "@/lib/structuring/extract-journal-suggestions";
 import { SKILL_HINTS_LT } from "@/lib/structuring/keywords";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Journal stale/wrong-skill review state guard (PR B).
@@ -102,7 +103,7 @@ describe("Guard: entry card surfaces review state + safe actions, not a profile-
 });
 
 describe("Guard: honest-source i18n exists in all active locales", () => {
-  for (const loc of ["lt", "en", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}: journalSkillLinks source + review keys present`, () => {
       const j = JSON.parse(read(`messages/${loc}.json`)) as Record<string, unknown>;
       const jsl = j.journalSkillLinks as Record<string, unknown>;

@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { CoreRead, DomainCaller } from "@/lib/domain/caller";
 
 /**
@@ -168,6 +170,38 @@ export async function readActiveProfileRoles<T extends RoleRow>(
 }
 
 /**
+ * The ACTIVE `profile_roles` rows of one profile, read ONCE per server render
+ * per client and profile (perf 2026-10-23). The dashboard shell and the page
+ * gate under it (`requireRoleOrRedirect`), the held-roles context read and the
+ * dispatcher each issued this same query in one render. Same error semantics
+ * as `readActiveProfileRoles` — one bounded retry, then a THROW — shared by
+ * every caller of the render: an unanswered read is unknown for all of them,
+ * never an empty role set.
+ *
+ * Keyed by the CLIENT, never by a caller object: a bearer transport or another
+ * identity reads for itself. React `cache()` is request-scoped — a role change
+ * is a server action, and the render after it reads again. Each caller gets
+ * its own copy of the rows.
+ */
+const readActiveRoleRowsOnce = cache(
+  (supabase: DomainCaller["supabase"], profileId: string): Promise<RoleRow[]> =>
+    readActiveProfileRoles<RoleRow>(() =>
+      supabase
+        .from("profile_roles")
+        .select("role")
+        .eq("profile_id", profileId)
+        .eq("is_active", true),
+    ),
+);
+
+export async function readActiveRoleRows(
+  supabase: DomainCaller["supabase"],
+  profileId: string,
+): Promise<RoleRow[]> {
+  return (await readActiveRoleRowsOnce(supabase, profileId)).map((r) => ({ ...r }));
+}
+
+/**
  * THE canonical `profile_roles` read as an explicit caller (G4 bridge).
  *
  * WHY THIS EXISTS. `readActiveProfileRoles` above is the ERROR-SEMANTICS
@@ -207,13 +241,7 @@ export async function readHeldProfileRoles(
   caller: DomainCaller,
 ): Promise<CoreRead<HeldProfileRole[]>> {
   try {
-    const rows = await readActiveProfileRoles<{ role: string }>(() =>
-      caller.supabase
-        .from("profile_roles")
-        .select("role")
-        .eq("profile_id", caller.userId)
-        .eq("is_active", true),
-    );
+    const rows = await readActiveRoleRows(caller.supabase, caller.userId);
     return { ok: true, value: rows.map((r) => r.role as HeldProfileRole) };
   } catch {
     // `readActiveProfileRoles` already retried and logged. A throw means the

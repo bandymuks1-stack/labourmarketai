@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * SALES / LEAD-INTAKE PANEL guards (product-tree branch 23, train §8.14 —
@@ -191,7 +192,7 @@ describe("sales intake — read-only, app-side only (no migration, no CRM writes
 });
 
 describe("i18n — salesIntake namespace present in en/lt/ru", () => {
-  for (const locale of ["en", "lt", "ru"]) {
+  for (const locale of activeLocales) {
     it(`${locale} carries the full salesIntake catalogue`, () => {
       const messages = JSON.parse(readWeb(`messages/${locale}.json`));
       const ns = messages.salesIntake;

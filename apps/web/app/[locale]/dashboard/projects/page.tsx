@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -55,6 +56,11 @@ import { type Role } from "@/lib/auth/actions";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/projects");
+
 
 export const dynamic = "force-dynamic";
 
@@ -401,6 +407,11 @@ export default async function ProjectsPage({
     reservationCollidesTitle: t("assign.reservation.collidesTitle"),
     reservationNotBlocking: t("assign.reservation.notBlocking"),
     reservationUnknown: t("assign.reservation.unknown"),
+    reservationUnknownWhy: {
+      undated_window: t("assign.reservation.unknownWhy.undated_window"),
+      undated_commitment: t("assign.reservation.unknownWhy.undated_commitment"),
+      source_unreadable: t("assign.reservation.unknownWhy.source_unreadable"),
+    },
     reservationAlternativesTitle: t("assign.reservation.alternativesTitle"),
     reservationSwap: t("assign.reservation.swap"),
     reservationUndo: t("assign.reservation.undo"),
@@ -436,13 +447,7 @@ export default async function ProjectsPage({
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       {ownCompanyId ? <OrganizationDoorsServer ariaLabel={tDoors("label")} /> : null}
       <header className="flex flex-col gap-1">
-        <Link
-          href="/dashboard"
-          className="self-start text-xs font-medium text-brand-blue transition-colors hover:underline"
-          data-testid="back-to-action-center"
-        >
-          ← {tRooms("backToActions")}
-        </Link>
+        <PageBack href="/dashboard" data-testid="back-to-action-center">{tRooms("backToActions")}</PageBack>
         <p
           className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="company-context"

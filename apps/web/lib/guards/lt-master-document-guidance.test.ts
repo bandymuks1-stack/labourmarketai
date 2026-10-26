@@ -7,6 +7,7 @@ import {
   PRE_APPROVAL_STATUSES,
   guidanceStatusCounts,
 } from "@/lib/documents/lt-master-guidance";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * WAGON 9 guard (CR train area 17, owner correction 2026-07-05) — the
@@ -107,11 +108,44 @@ describe("LT-only master — no translated guidance anywhere", () => {
       }
     }
   });
-  it("EN/RU pending notice mentions the Lithuanian master", () => {
+  it("EN/RU pending notice says the guidance is in Lithuanian", () => {
     const en = JSON.parse(read("messages/en.json")).documents.guidance;
     const ru = JSON.parse(read("messages/ru.json")).documents.guidance;
-    expect(en.pendingNotice).toMatch(/Lithuanian master/i);
+    expect(en.pendingNotice).toMatch(/Lithuanian/i);
     expect(ru.pendingNotice).toMatch(/литовск/i);
+  });
+});
+
+describe("no drafting meta-text on the page (owner P0 2026-10-23)", () => {
+  // The guidance is presented as information. Review pipeline, owner/lawyer
+  // review and "draft" labels are registry data only — never rendered.
+  const META_TEXT: ReadonlyArray<RegExp> = [
+    /\bdraft\b/i,
+    /\bowner\b/i,
+    /lawyer|legal review/i,
+    /juodrašt|savinink|teisinink|peržiūr/i,
+    /черновик|владел|юрист/i,
+    /\bconcept\b|eigenaar|jurist|beoordeling/i,
+    /entwurf|eigentümer|inhaber|rechtsabteilung|prüfung durch/i,
+    /szkic|właściciel|przegląd/i,
+  ];
+  it("the surface renders no review status or legal-review badge", () => {
+    // Only executable code is scanned — the header comment names the
+    // registry fields it deliberately does not render.
+    const code = surface
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/^\s*\/\/.*$/gm, "");
+    expect(code).not.toMatch(/item\.status|needsLegalReview|statusSummary|isSuperadmin/);
+    expect(code).not.toMatch(/t\(`status\./);
+  });
+  it("guidance chrome in every active locale carries no drafting meta-text", () => {
+    for (const loc of activeLocales) {
+      const g = JSON.parse(read(`messages/${loc}.json`)).documents.guidance;
+      const strings = JSON.stringify(g);
+      for (const rx of META_TEXT) {
+        expect(rx.test(strings), `${loc} documents.guidance matches ${rx}`).toBe(false);
+      }
+    }
   });
 });
 
@@ -139,23 +173,18 @@ describe("information-only, no duplicate system, no payments", () => {
     expect(surface).not.toMatch(/country_document_requirements/);
   });
   it("i18n chrome keys present with parity (lt/en/ru)", () => {
-    for (const loc of ["lt", "en", "ru"] as const) {
+    for (const loc of activeLocales) {
       const g = JSON.parse(read(`messages/${loc}.json`)).documents.guidance;
       for (const k of [
         "title",
         "intro",
         "pendingNotice",
-        "draftDisclaimer",
-        "statusSummary",
-        "needsLegalReview",
+        "officialSources",
         "whoProvides",
         "groupAll",
         "helpInfoNote",
       ]) {
         expect(typeof g?.[k] === "string" && g[k].length > 0, `${loc} ${k}`).toBe(true);
-      }
-      for (const s of GUIDANCE_STATUSES) {
-        expect(typeof g.status?.[s] === "string", `${loc} status.${s}`).toBe(true);
       }
       for (const d of [
         "worker_country",

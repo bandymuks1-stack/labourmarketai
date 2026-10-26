@@ -139,13 +139,33 @@ test.describe("CHAT VISIBILITY — hostile negative tests (§4 default-closed)",
     if (convErr) throw new Error(`conversation insert: ${convErr.message}`);
     const conversationId = conv!.id as string;
 
-    for (const profile of [ids.creator, ids.partner]) {
+    // The creator's session may add ONLY ITS OWN participant row
+    // (20261006100100, conversation participants = server authority). Every
+    // OTHER person is added by the server, after the §8.1 contact gate — the
+    // service role here stands in for createConversationCore.
+    {
       const { error } = await creator.from("conversation_participants").insert({
         conversation_id: conversationId,
-        profile_id: profile,
+        profile_id: ids.creator,
         added_by: ids.creator,
       });
-      if (error) throw new Error(`participant insert: ${error.message}`);
+      if (error) throw new Error(`own participant insert: ${error.message}`);
+    }
+    {
+      const refused = await creator.from("conversation_participants").insert({
+        conversation_id: conversationId,
+        profile_id: ids.partner,
+        added_by: ids.creator,
+      });
+      if (!refused.error) {
+        throw new Error("a user session added ANOTHER profile to its conversation - 20261006100100 is not in force");
+      }
+      const { error } = await service.from("conversation_participants").insert({
+        conversation_id: conversationId,
+        profile_id: ids.partner,
+        added_by: ids.creator,
+      });
+      if (error) throw new Error(`server-side participant insert: ${error.message}`);
     }
     const { error: msgErr } = await creator.from("conversation_messages").insert({
       conversation_id: conversationId,
@@ -327,11 +347,28 @@ test.describe("CHAT VISIBILITY — hostile negative tests (§4 default-closed)",
     expect(before.error).toBeNull();
     expect(before.data).toHaveLength(0);
 
-    // Creator grants access (explicit participant/grant row — §4.3).
-    const grant = await s.creator.from("conversation_participants").insert({
+    // Access is granted by an explicit participant/grant row (§4.3). Since
+    // 20261006100100 only the SERVER writes a row for another person: the
+    // creator's own session is refused, the server-side add (service role,
+    // standing in for createConversationCore after the §8.1 gate) succeeds.
+    const creatorId = (await s.creator.auth.getUser()).data.user!.id;
+    const direct = await s.creator.from("conversation_participants").insert({
       conversation_id: s.conversationId,
       profile_id: s.customerId,
-      added_by: (await s.creator.auth.getUser()).data.user!.id,
+      added_by: creatorId,
+    });
+    expect(direct.error, "a user session must not add another profile").not.toBeNull();
+    const stillHidden = await s.customer
+      .from("conversations")
+      .select("id")
+      .eq("id", s.conversationId);
+    expect(stillHidden.data).toHaveLength(0);
+
+    const server = createClient(URL_, SERVICE, { auth: { persistSession: false } });
+    const grant = await server.from("conversation_participants").insert({
+      conversation_id: s.conversationId,
+      profile_id: s.customerId,
+      added_by: creatorId,
     });
     expect(grant.error).toBeNull();
 

@@ -1,9 +1,15 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { listPilots } from "@/lib/admin/pilots";
 import { CreatePilotForm } from "@/components/app/admin-pilots-forms";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/pilots");
+
 
 /**
  * Pilot cohort administration — list + create (Pilot Onboarding and
@@ -120,12 +126,7 @@ export default async function AdminPilotsPage({
         </>
       )}
 
-      <Link
-        href="/dashboard/admin"
-        className="self-start text-xs text-text-secondary hover:text-text-primary"
-      >
-        ← {t("back")}
-      </Link>
+      <PageBack href="/dashboard/admin">{t("back")}</PageBack>
     </div>
   );
 }

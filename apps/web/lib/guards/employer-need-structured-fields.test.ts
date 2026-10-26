@@ -4,6 +4,7 @@ import { join, resolve } from "node:path";
 
 import { MARKET_COUNTRIES, isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
 import { isIsoCountry } from "@/lib/location/country-model";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Locks the structured employer-need intake → worker-board contract:
@@ -77,7 +78,7 @@ describe("market countries are all valid + named", () => {
     for (const c of ["VN", "IE", "US"]) expect(isIsoCountry(c)).toBe(true);
   });
   it("every market country has a localized name in lt/en/ru", () => {
-    for (const loc of ["lt", "en", "ru"]) {
+    for (const loc of activeLocales) {
       const names = JSON.parse(read(`messages/${loc}/labour-market.json`)).countryNames as Record<string, string>;
       for (const c of MARKET_COUNTRIES) {
         expect(names[c], `${loc} missing countryNames.${c}`).toBeTruthy();

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { refusalStatus, resolveApiIdentity } from "@/lib/api/api-identity";
+import { firstPartyRefusalStatus, resolveFirstPartyIdentity } from "@/lib/api/api-identity";
 import { extractCvText, MAX_CV_BYTES } from "@/lib/cv/extract";
 import { rateLimit } from "@/lib/security/rate-limit";
 
@@ -28,9 +28,9 @@ export async function POST(req: Request) {
   // SHARED AUTHENTICATED API: cookie session OR `Authorization: Bearer`.
   // One resolver for every route (lib/api/api-identity.ts) — the header is
   // never parsed here, and a failed resolution is 401, never anonymous.
-  const auth = await resolveApiIdentity(req);
+  const auth = await resolveFirstPartyIdentity(req);
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, code: "unauthorized" }, { status: refusalStatus(auth.reason) });
+    return NextResponse.json({ ok: false, code: "unauthorized" }, { status: firstPartyRefusalStatus(auth.reason) });
   }
   const { userId } = auth.identity;
 

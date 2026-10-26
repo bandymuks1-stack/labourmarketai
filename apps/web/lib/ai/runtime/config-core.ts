@@ -45,7 +45,18 @@ export type AiRuntimeState = "disabled" | "mock" | "live";
  * `local` is the keyless self-hosted seam. It is a first-class provider kind —
  * NOT a cloud vendor with the key check relaxed.
  */
-export type AiProviderKind = "local" | "anthropic" | "openai" | "gemini" | "xai";
+export type AiProviderKind =
+  | "local"
+  | "anthropic"
+  | "openai"
+  | "gemini"
+  | "xai"
+  /** Free API tiers (2026-10-25) — OpenAI-compatible bindings in
+   *  providers/free-tier.ts. A valid PRIMARY so a deployment holding only free
+   *  keys can be `live` at all; still key-gated like every cloud vendor. */
+  | "cloudflare"
+  | "mistral"
+  | "groq";
 /** Secondary (task-specific) providers reachable only via routing preference —
  *  never a primary AI_PROVIDER value. */
 export type AiSecondaryProviderKind = "deepl" | "libretranslate" | "cloudflare";
@@ -62,7 +73,12 @@ export type AiDisabledReason =
   | "invalid_base_url"
   /** Local provider selected with no AI_LOCAL_MODEL — a local server hosts
    *  whatever the operator pulled, so the id can never be defaulted. */
-  | "missing_local_model";
+  | "missing_local_model"
+  /** Gemini key present but the owner has not confirmed it is on the PAID tier.
+   *  Gemini API Additional Terms (effective 2026-03-23): "You may use only Paid
+   *  Services when making API Clients available to users in the European
+   *  Economic Area, Switzerland, or the United Kingdom." */
+  | "paid_tier_unconfirmed";
 
 export interface AiRuntimeConfig {
   readonly state: AiRuntimeState;
@@ -116,6 +132,9 @@ const KNOWN_PROVIDERS: readonly AiProviderKind[] = [
   "openai",
   "gemini",
   "xai",
+  "cloudflare",
+  "mistral",
+  "groq",
 ];
 
 /** Cloud vendors — the providers for which a key IS the proof of configuration. */
@@ -124,6 +143,9 @@ const CLOUD_PROVIDERS: readonly AiProviderKind[] = [
   "openai",
   "gemini",
   "xai",
+  "cloudflare",
+  "mistral",
+  "groq",
 ];
 
 export function isCloudProvider(p: AiProviderKind): boolean {

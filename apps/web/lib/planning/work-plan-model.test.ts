@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   projectWorkPlanItem,
+  projectWorkPlanItems,
   validateWorkPlanInput,
   type WorkPlanEntry,
 } from "./work-plan-model";
@@ -17,7 +18,7 @@ describe("validateWorkPlanInput — mirrors the database checks", () => {
     const v = validateWorkPlanInput({ ...base, endDate: "" });
     expect(v).toEqual({
       ok: true,
-      value: { ...base, endDate: "2026-09-07", projectId: null, workObjectId: null, startTime: null, endTime: null, note: null },
+      value: { ...base, endDate: "2026-09-07", projectId: null, workObjectId: null, startTime: null, endTime: null, note: null, recurrence: null },
     });
   });
 
@@ -74,5 +75,66 @@ describe("projectWorkPlanItem — a plan is a calendar SOURCE, never a copy", ()
     const managed = projectWorkPlanItem(unreadableProject, "managed");
     expect(managed?.label).toBe(entry.workerName);
     expect(managed?.detail).toBe(entry.workerName);
+  });
+});
+
+describe("CAL-8 — a shift pattern is a property of the plan window", () => {
+  // 2026-10-26 is a Monday.
+  const week = { organizationId: ORG, workerId: WORKER, startDate: "2026-10-26", endDate: "2026-11-08" };
+
+  it("no repeat fields keep today's one-off window", () => {
+    expect(validateWorkPlanInput(week)).toMatchObject({ ok: true, value: { recurrence: null } });
+    expect(validateWorkPlanInput({ ...week, repeat: "none" })).toMatchObject({ ok: true, value: { recurrence: null } });
+  });
+
+  it("weekly and rotation patterns validate into the canonical rule", () => {
+    expect(validateWorkPlanInput({ ...week, repeat: "weekly", weekdays: ["5", "1", "3"] })).toMatchObject({
+      ok: true,
+      value: { recurrence: { kind: "weekly", days: [1, 3, 5] } },
+    });
+    expect(validateWorkPlanInput({ ...week, repeat: "cycle", cycleOn: "4", cycleOff: "2", cycleOffset: "1" })).toMatchObject({
+      ok: true,
+      value: { recurrence: { kind: "cycle", on: 4, off: 2, offset: 1 } },
+    });
+  });
+
+  it("an incomplete pattern and a pattern with no working day are named, never 'every day'", () => {
+    expect(validateWorkPlanInput({ ...week, repeat: "weekly", weekdays: [] })).toMatchObject({ ok: false, code: "recurrence" });
+    expect(validateWorkPlanInput({ ...week, repeat: "cycle", cycleOn: "4" })).toMatchObject({ ok: false, code: "recurrence" });
+    expect(
+      validateWorkPlanInput({ ...week, endDate: "2026-10-30", repeat: "weekly", weekdays: ["6", "7"] }),
+    ).toMatchObject({ ok: false, code: "recurrence_empty" });
+  });
+
+  const rota: WorkPlanEntry = {
+    id: "r1", organizationId: ORG, workerId: WORKER, workerName: "Jonas", projectId: PROJECT, projectTitle: "Vilniaus objektas",
+    workObjectId: null, workObjectName: null, startDate: "2026-10-26", endDate: "2026-11-08", startTime: "07:00", endTime: "19:00",
+    note: null, status: "planned", createdAt: "2026-10-23T12:00:00Z", recurrence: { kind: "cycle", on: 4, off: 2, offset: 0 },
+  };
+
+  it("projects one band per run of shift days, each linking to its own day", () => {
+    const items = projectWorkPlanItems(rota, "managed");
+    expect(items.map((i) => [i.startDate, i.endDate])).toEqual([
+      ["2026-10-26", "2026-10-29"],
+      ["2026-11-01", "2026-11-04"],
+      ["2026-11-07", "2026-11-08"],
+    ]);
+    expect(new Set(items.map((i) => i.id)).size).toBe(3);
+    expect(items.every((i) => i.sourceId === "r1" && i.sourceType === "plan")).toBe(true);
+    expect(items[1]?.href).toBe("/dashboard/planning?view=day&date=2026-11-01");
+  });
+
+  it("clips to the calendar range being drawn", () => {
+    const items = projectWorkPlanItems(rota, "assigned", { startDate: "2026-10-28", endDate: "2026-11-01" });
+    expect(items.map((i) => [i.startDate, i.endDate])).toEqual([
+      ["2026-10-28", "2026-10-29"],
+      ["2026-11-01", "2026-11-01"],
+    ]);
+  });
+
+  it("a window without a pattern projects exactly like projectWorkPlanItem; a cancelled rota projects nothing", () => {
+    const oneOff = { ...rota, recurrence: null };
+    expect(projectWorkPlanItems(oneOff, "managed")).toEqual([projectWorkPlanItem(oneOff, "managed")]);
+    expect(projectWorkPlanItems({ ...rota, status: "cancelled" }, "managed")).toEqual([]);
   });
 });
