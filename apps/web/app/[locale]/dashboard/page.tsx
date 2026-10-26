@@ -224,7 +224,7 @@ export default async function DashboardHomePage({
     signedIn: Boolean(session.user),
     workspaceKind:
       rootWorkspace.activeWorkspaceId === PERSONAL_WORKSPACE_ID ? "personal" : "organization",
-    identity: baseIdentityForRole(session.profile?.active_role ?? "worker"),
+    identity,
     replacedByToday: workerToday,
   });
   const personalIntroPayload: Promise<PersonalIntroPayload> | null = workerToday

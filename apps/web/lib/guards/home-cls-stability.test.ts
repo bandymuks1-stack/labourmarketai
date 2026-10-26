@@ -130,11 +130,11 @@ describe("the S2 intro reserves its space only when it will render", () => {
     const page = stripComments(PAGE);
     expect(page).toMatch(/const introMayShow = personalIntroMayShow\(\{/);
     expect(page).toMatch(/: introMayShow\s*\? loadPersonalIntroPayload\(\)\s*: null;/);
-    // The identity rule is the loader's own, or the two could disagree.
-    expect(page).toMatch(/identity: baseIdentityForRole\(session\.profile\?\.active_role \?\? "worker"\)/);
-    expect(read("lib/workspace/personal-workspace-intro-server.ts")).toMatch(
-      /baseIdentityForRole\(session\.profile\?\.active_role \?\? "worker"\)/,
-    );
+    // The page's OWN decided identity (never a `?? "worker"` fallback on the
+    // page — w6-honesty-small-fixes). For a missing role both it and the
+    // loader's rule land on "person", so the two cannot disagree.
+    expect(page).toMatch(/personalIntroMayShow\(\{[\s\S]*?\n\s*identity,\n/);
+    expect(page).toMatch(/const identity = baseIdentityForRole\(activeRole\) \?\? "person";/);
   });
 
   it("#1011 holds: the payload is still never awaited by the page", () => {
