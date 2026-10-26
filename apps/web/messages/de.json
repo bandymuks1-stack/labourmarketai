@@ -6366,6 +6366,17 @@
       "pending": "Wird zusammengeführt…",
       "done": "Zusammengeführt. Zeilen und Nachweise bleiben erhalten; die Projektliste zeigt jetzt das beibehaltene Projekt.",
       "failed": "Nicht zusammengeführt. Für nicht verarbeitete Zeilen wurde nichts geändert — neu laden und erneut versuchen."
+    },
+    "deck": {
+      "label": "Was du tun kannst",
+      "new": "Neues Projekt",
+      "newHint": "Anlegen und loslegen",
+      "assign": "Arbeitskraft zuweisen",
+      "assignHint": "Einem Projekt",
+      "teams": "Team zuweisen",
+      "teamsHint": "Eine Kolonne für Projekt oder Aufgabe",
+      "chat": "Gespräche",
+      "toolsLabel": "Weitere Werkzeuge"
     }
   },
   "projectOps": {

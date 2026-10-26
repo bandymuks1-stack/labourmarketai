@@ -6366,6 +6366,17 @@
       "pending": "Jungiama…",
       "done": "Sujungta. Eilutės ir jų įrašai išsaugoti; projektų sąraše dabar rodomas išlaikomas projektas.",
       "failed": "Nesujungta. Nepavykusioms eilutėms niekas nepakeista — atnaujinkite ir bandykite dar kartą."
+    },
+    "deck": {
+      "label": "Ką gali padaryti",
+      "new": "Naujas projektas",
+      "newHint": "Sukurk ir pradėk dirbti",
+      "assign": "Priskirti darbuotoją",
+      "assignHint": "Prie projekto",
+      "teams": "Paskirti komandą",
+      "teamsHint": "Brigada projektui ar užduočiai",
+      "chat": "Pokalbiai",
+      "toolsLabel": "Kiti įrankiai"
     }
   },
   "projectOps": {

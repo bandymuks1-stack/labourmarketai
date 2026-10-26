@@ -50,7 +50,8 @@ import {
   getAssignableTeams,
   getProjectTeamAssignments,
 } from "@/lib/projects/team-assignment";
-import { MapPin } from "lucide-react";
+import { Archive, FolderKanban, FolderPlus, Images, MapPin, MessagesSquare, UserPlus, UsersRound } from "lucide-react";
+import { PremiumActionDeck } from "@/components/ui/premium-action-card";
 import { getAvatarForVisibleWorker } from "@/lib/profile/avatar";
 import { type Role } from "@/lib/auth/actions";
 import { PageTitle } from "@/components/app/premium/page-title";
@@ -91,6 +92,9 @@ export default async function ProjectsPage({
   const t = await getTranslations("projects");
   const tRooms = await getTranslations("companyActionRooms");
   const tDisclosure = await getTranslations("common.disclosure");
+  // The deck names a section with the SECTION'S OWN title (one name per thing).
+  const tObjects = await getTranslations("workObjects");
+  const tGallery = await getTranslations("companyGallery");
 
   const supabase = await createClient();
   const {
@@ -455,7 +459,8 @@ export default async function ProjectsPage({
           {tRooms("projects.context")}
         </p>
         <PageTitle>{t("title")}</PageTitle>
-        <p className="text-sm leading-relaxed text-text-secondary">
+        {/* The intro is for the wider screen; on a phone the cards say it. */}
+        <p className="hidden text-sm leading-relaxed text-text-secondary sm:block">
           {t("intro")}
         </p>
       </header>
@@ -466,9 +471,38 @@ export default async function ProjectsPage({
           error (a platform admin, whom `is_admin()` admits, reads nothing). */}
       {employerCtx?.kind === "ok" ? <ManagerScopeNotice role={employerCtx.role} /> : null}
 
+      {/* WHAT YOU CAN DO HERE (owner design direction + review 2026-10-26).
+          Two tiers, never one flat grid: the three things a person comes here
+          to do as raised FEATURE cards (one primary — a new project), and the
+          secondary tools as low COMPACT cards. The active/finished switch is
+          navigation, so it stays a segmented control by the list below. Every
+          card leads to an existing route or to the section that does the
+          work; nothing was removed. */}
+      {ownCompanyId || employerCtx?.kind === "ok" ? (
+        <div className="flex flex-col gap-3">
+          <PremiumActionDeck
+            ariaLabel={t("deck.label")}
+            testId="projects-action-deck"
+            items={[
+              { key: "new", href: "/dashboard/company/projects/new", icon: FolderPlus, label: t("deck.new"), hint: t("deck.newHint"), emphasis: "primary", wide: true, testId: "company-action-primary" },
+              { key: "assign", href: rosterAssignable ? "#assign-worker" : "#project-teams", icon: UserPlus, label: t("deck.assign"), hint: t("deck.assignHint"), testId: "projects-deck-assign" },
+              { key: "teams", href: "#project-teams", icon: UsersRound, label: t("deck.teams"), hint: t("deck.teamsHint"), testId: "projects-deck-teams" },
+            ]}
+          />
+          <PremiumActionDeck
+            ariaLabel={t("deck.toolsLabel")}
+            size="compact"
+            testId="projects-tools-deck"
+            items={[
+              { key: "chat", href: "/dashboard/communication", icon: MessagesSquare, label: t("deck.chat"), testId: "projects-deck-chat" },
+              { key: "places", href: "#company-locations", icon: MapPin, label: tObjects("title"), testId: "projects-deck-places" },
+              { key: "gallery", href: "#company-gallery", icon: Images, label: tGallery("title"), testId: "projects-deck-gallery" },
+            ]}
+          />
+        </div>
+      ) : null}
       <CompanyActionNextActions
         room="projects"
-        primaryHref="/dashboard/company/projects/new"
         extra={
           /* WAGON 6 operating-model line, in the room's ONE disclosure. */
             <p
@@ -506,13 +540,6 @@ export default async function ProjectsPage({
           <p className="text-meta leading-relaxed text-text-muted" data-testid="company-ops-projects-linking">
             {tOps("projectsLinkingNote")}
           </p>
-          <Link
-            href="/dashboard/company/projects/new"
-            className="w-fit rounded-md border border-brand-blue/40 px-3 py-1 text-xs font-medium text-brand-blue hover:bg-brand-blue/10"
-            data-testid="company-ops-projects-create"
-          >
-            {tOps("createProject.entryCta")}
-          </Link>
         </div>
       ) : null}
 
@@ -520,30 +547,32 @@ export default async function ProjectsPage({
       <ConfirmPulse />
 
       {/* Train D — active/archived switch: finished work stays reachable,
-          never mixed into the operating map. */}
+          never mixed into the operating map. Navigation, so a segmented
+          control — not an action card. */}
       <nav
-        className="flex flex-wrap items-center gap-3"
+        className="inline-flex w-fit items-center gap-1 rounded-full border border-ink-600 bg-ink-800/60 p-1"
         aria-label={t("archiveToggle.label")}
         data-testid="projects-archive-toggle"
       >
         <Link
           href="/dashboard/projects"
-          aria-current={!showArchived ? "true" : undefined}
-          className={`text-xs font-semibold ${!showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
+          aria-current={!showArchived ? "page" : undefined}
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${!showArchived ? "bg-brand-blue/15 text-text-primary ring-1 ring-brand-blue/50" : "text-text-muted hover:text-text-primary"}`}
           data-testid="projects-view-active"
         >
-          {t("archiveToggle.active")} ({activeTotal})
+          <FolderKanban className="h-4 w-4" aria-hidden />
+          {t("archiveToggle.active")} <span className="tabular-nums text-text-muted">{activeTotal}</span>
         </Link>
         <Link
           href={"/dashboard/projects?archived=1" as "/dashboard"}
-          aria-current={showArchived ? "true" : undefined}
-          className={`text-xs font-semibold ${showArchived ? "text-brand-blue" : "text-text-muted hover:text-brand-blue"}`}
+          aria-current={showArchived ? "page" : undefined}
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${showArchived ? "bg-brand-blue/15 text-text-primary ring-1 ring-brand-blue/50" : "text-text-muted hover:text-text-primary"}`}
           data-testid="projects-view-archived"
         >
-          {t("archiveToggle.archived")} ({archivedTotal})
+          <Archive className="h-4 w-4" aria-hidden />
+          {t("archiveToggle.archived")} <span className="tabular-nums text-text-muted">{archivedTotal}</span>
         </Link>
       </nav>
-
       {partialView ? (
         <p
           className="text-xs text-text-muted"
@@ -598,7 +627,7 @@ export default async function ProjectsPage({
       />
 
       {/* DRAFT — the gated create/assign flow (human decision, RPC writes). */}
-      <section className="flex flex-col gap-3" data-testid="draft-section">
+      <section id="project-teams" className="flex scroll-mt-20 flex-col gap-3" data-testid="draft-section">
         <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t("draft.title")}
         </h2>

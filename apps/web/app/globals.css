@@ -691,9 +691,88 @@ a {
   .glow-hover,
   .glow-hover:hover,
   .ua-press,
-  .ua-press:active {
+  .ua-press:active,
+  .lm-card3d,
+  .lm-card3d:hover,
+  .lm-card3d:active {
     transition: none !important;
     transform: none !important;
+  }
+}
+
+/* ── PREMIUM ACTION CARD (components/ui/premium-action-card.tsx) ──────────────
+ * Owner design direction 2026-10-26: calm, clean cards with a SUBTLE physical
+ * depth. Depth is light + shadow (a lit top edge, a soft drop) and a 3° lean
+ * with a 3 px lift on hover; a press settles it. Only `transform` and
+ * `box-shadow` move — compositor work, no 3D library, no WebGL, no filters.
+ * Hover is gated on `(hover: hover)` so a phone never sticks in the lifted
+ * state; reduced motion is in the canonical block above. Light theme: the lit
+ * top becomes white and the shadow a soft grey instead of black. */
+.lm-card3d {
+  /* A warm light from above: a faint champagne bloom over the graphite ramp. */
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgb(var(--c-brand-champagne) / 0.07) 0%, transparent 60%),
+    linear-gradient(180deg, rgb(var(--c-ink-700)) 0%, rgb(var(--c-ink-800)) 100%);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.06) inset,
+    0 12px 24px -14px rgb(0 0 0 / 0.7),
+    0 3px 6px -3px rgb(0 0 0 / 0.45);
+  transform: perspective(900px) rotateX(0deg) translateY(0);
+  transition:
+    transform var(--motion-fast) var(--motion-ease-out),
+    box-shadow var(--motion-fast) var(--motion-ease-out),
+    border-color var(--motion-fast) var(--motion-ease-out);
+}
+:root[data-theme="light"] .lm-card3d {
+  background: linear-gradient(180deg, rgb(var(--c-ink-800)) 0%, rgb(var(--c-ink-700)) 100%);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.9) inset,
+    0 12px 24px -14px rgb(17 24 39 / 0.28),
+    0 3px 6px -3px rgb(17 24 39 / 0.14);
+}
+@media (hover: hover) {
+  .lm-card3d:hover {
+    transform: perspective(900px) rotateX(3deg) translateY(-3px);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.08) inset,
+      0 22px 34px -18px rgb(0 0 0 / 0.75),
+      0 6px 12px -6px rgb(0 0 0 / 0.5);
+  }
+  :root[data-theme="light"] .lm-card3d:hover {
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.9) inset,
+      0 22px 34px -18px rgb(17 24 39 / 0.32),
+      0 6px 12px -6px rgb(17 24 39 / 0.16);
+  }
+}
+.lm-card3d:active {
+  transform: perspective(900px) translateY(0) scale(0.98);
+  transition-duration: var(--motion-instant);
+}
+/* The screen's ONE primary: a soft gold halo under the lift. */
+.lm-card3d--primary {
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.07) inset,
+    0 14px 30px -16px rgb(var(--c-brand-blue) / 0.35),
+    0 3px 6px -3px rgb(0 0 0 / 0.45);
+}
+/* Secondary tools: lower and flatter — a 1 px lift, no lean. */
+.lm-card3d--flat {
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.05) inset,
+    0 6px 14px -10px rgb(0 0 0 / 0.6);
+}
+:root[data-theme="light"] .lm-card3d--flat {
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.9) inset,
+    0 6px 14px -10px rgb(17 24 39 / 0.22);
+}
+@media (hover: hover) {
+  .lm-card3d--flat:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.06) inset,
+      0 10px 18px -12px rgb(0 0 0 / 0.65);
   }
 }
 
