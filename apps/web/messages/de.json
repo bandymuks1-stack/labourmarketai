@@ -12646,6 +12646,8 @@
     "noShared": "Noch kein Kunde hat eine Anfrage geteilt.",
     "workerLabel": "Ihr Roster-Mitarbeiter",
     "workerPlaceholder": "Mitarbeiter wählen…",
+    "noteLabel": "Notiz für den Kunden (optional)",
+    "inviteLinkLabel": "Einladungslink",
     "offerButton": "Kandidat anbieten",
     "noRoster": "Fügen Sie zuerst einen aktiven Mitarbeiter hinzu.",
     "progressHeading": "Ihre Angebote",

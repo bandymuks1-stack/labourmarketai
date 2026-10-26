@@ -12646,6 +12646,8 @@
     "noShared": "Żaden klient nie udostępnił jeszcze zapytania.",
     "workerLabel": "Twój pracownik z listy",
     "workerPlaceholder": "Wybierz pracownika…",
+    "noteLabel": "Notatka dla klienta (opcjonalnie)",
+    "inviteLinkLabel": "Link z zaproszeniem",
     "offerButton": "Zaproponuj kandydata",
     "noRoster": "Najpierw dodaj aktywnego pracownika do swojej listy.",
     "progressHeading": "Twoje propozycje",

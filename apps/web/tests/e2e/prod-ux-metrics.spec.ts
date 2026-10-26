@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
 import { COMMON_ROUTES, EMPLOYER_ROUTES } from "./prod-walk-routes";
-import { AXE_SOURCE, installObservers, measure, runAxe } from "./ux-probes";
+import { AXE_SOURCE, clsTopSource, installObservers, measure, runAxe } from "./ux-probes";
 
 /**
  * PRODUCTION UX MEASUREMENTS — NUMBERS ONLY (spec=ux-metrics, dispatch only).
@@ -157,12 +157,14 @@ async function measureRoute(page: Page, slot: string, vpLabel: string, vp: Viewp
     return { measured: false, navFailed: true, metrics: {}, defects: [] };
   }
   const axe = await runAxe(page);
+  const clsTop = await page.evaluate(clsTopSource).catch(() => "none");
   const kv: Kv[] = [...head, ["measured", "1"]];
   // min_font_px keeps one decimal (11.5 px must not print as 12); every other value is an integer.
   for (const [k, v] of Object.entries(m)) kv.push([k, k === "min_font_px" ? v.toFixed(1) : n(v)]);
   if (axe) {
     kv.push(["axe_critical", n(axe.critical)], ["axe_serious", n(axe.serious)], ["axe_moderate", n(axe.moderate)], ["axe_minor", n(axe.minor)], ["axe_nodes", n(axe.nodes)]);
   } else kv.push(["axe", "na"]);
+  kv.push(["cls_top", clsTop]);
   console.info(line(slot, vpLabel, locale, url, kv));
 
   const where = `${slot} ${vpLabel} ${url}`;

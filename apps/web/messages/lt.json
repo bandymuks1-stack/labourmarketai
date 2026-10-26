@@ -12646,6 +12646,8 @@
     "noShared": "Nė vienas klientas dar nepasidalino poreikiu.",
     "workerLabel": "Jūsų darbuotojas",
     "workerPlaceholder": "Pasirinkite darbuotoją…",
+    "noteLabel": "Pastaba klientui (neprivaloma)",
+    "inviteLinkLabel": "Kvietimo nuoroda",
     "offerButton": "Pasiūlyti kandidatą",
     "noRoster": "Pirmiausia pridėkite aktyvų darbuotoją į komandą.",
     "progressHeading": "Jūsų pasiūlymai",
