@@ -286,9 +286,16 @@
       "waiting": "Wartet auf die Überprüfung durch einen Menschen — der Manager oder Inhaber Ihrer Organisation kann ihn überprüfen; bis dahin bleibt er der von Ihnen eingegebene Eintrag",
       "approved": "Überprüft",
       "changes_requested": "Änderungen angefordert",
-      "rejected": "Zurückgegeben",
+      "rejected": "Abgelehnt",
       "reasonLabel": "Grund",
-      "notEnabled": "Erfasst – Ihre Führungskraft hat die Bestätigung noch nicht aktiviert, daher prüft niemand diesen Eintrag; bis dahin bleibt es Ihre eigene Angabe"
+      "notEnabled": "Erfasst – Ihre Führungskraft hat die Bestätigung noch nicht aktiviert, daher prüft niemand diesen Eintrag; bis dahin bleibt es Ihre eigene Angabe",
+      "correctedFrom": {
+        "changes_requested": "Korrigiert nach Rückgabe",
+        "rejected": "Korrigiert nach Ablehnung",
+        "approved": "Korrigiert nach Überprüfung",
+        "earlierVersion": "Die frühere Fassung bleibt mit dieser Entscheidung in Ihrem Verlauf; die Stunden zählen einmal – über diese Korrektur."
+      },
+      "quotedNote": "„{note}“"
     },
     "delete": "Eintrag löschen",
     "deleting": "Wird gelöscht...",
@@ -980,7 +987,7 @@
     "provenance": "Woher die Stunden stammen: {worker} Std. von Ihnen eingegeben, {extracted} Std. aus Ihrem Text erkannt, {corrected} Std. von einer Führungskraft korrigiert.",
     "provenanceRule": "Jeder Eintrag zählt einmal; eine Stunde wird einer Fähigkeit nur zugeordnet, wenn der Eintrag mit genau einer Fähigkeit verknüpft ist oder Ihre eigene Formulierung („6 h Fliesen gelegt“) diese Fähigkeit nennt.",
     "dayInferred": "{count, plural, one {# Eintrag hat keinen angegebenen Arbeitstag und ist dem Speichertag zugeordnet.} other {# Einträge haben keinen angegebenen Arbeitstag und sind dem Speichertag zugeordnet.}}",
-    "glance": "{days, plural, one {# Tag} other {# Tage}} · {entries, plural, one {# Eintrag} other {# Einträge}}",
+    "glance": "{days, plural, one {# Tag mit Stunden} other {# Tage mit Stunden}} · {entries, plural, one {# Eintrag} other {# Einträge}}",
     "glanceNone": "keine Einträge",
     "periodEmpty": "Keine Einträge im Zeitraum „{period}“ — wählen Sie oben einen anderen Zeitraum.",
     "mainActivity": "Haupttätigkeit",

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { PrintButton } from "@/components/app/print-button";
@@ -69,7 +70,7 @@ export default async function EvidenceReportPage({
     <div className="mx-auto flex w-full max-w-content flex-col gap-6" data-testid="evidence-report">
       <header className="flex flex-wrap items-start justify-between gap-3 print:hidden">
         <div className="flex flex-col gap-1">
-          <Link href="/dashboard/profile" className="self-start text-xs font-medium text-brand-blue hover:underline">← {t("back")}</Link>
+          <PageBack href="/dashboard/profile">{t("back")}</PageBack>
           <PageTitle>{t("title")}</PageTitle>
           <p className="max-w-2xl text-sm leading-relaxed text-text-secondary">{t("subtitle")}</p>
         </div>

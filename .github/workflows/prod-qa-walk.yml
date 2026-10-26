@@ -85,6 +85,9 @@ on:
           - work-verification
           - utilisation-planned-actual
           - lmc-csrf
+          # Numbers-only UX/UI measurements (worker/owner/agency x desktop/phone + active-locale sweep, ~115 page
+          # loads, read-only) for the per-function UX audit. Prints [ux] lines; no screenshots. Dispatch only.
+          - ux-metrics
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -380,6 +383,7 @@ jobs:
             work-verification) SPEC=tests/e2e/prod-work-verification.spec.ts ;;
             utilisation-planned-actual) SPEC=tests/e2e/prod-utilisation-planned-actual.spec.ts ;;
             lmc-csrf) SPEC=tests/e2e/prod-lmc-csrf.spec.ts ;;
+            ux-metrics) SPEC=tests/e2e/prod-ux-metrics.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that

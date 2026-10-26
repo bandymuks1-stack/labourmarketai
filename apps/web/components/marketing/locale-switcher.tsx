@@ -66,6 +66,7 @@ export const NATIVE_LOCALE_NAMES: Record<string, string> = {
 export function LocaleSwitcher({
   className,
   compactBelowSm = false,
+  compactUntilWide = false,
   inline = false,
 }: {
   className?: string;
@@ -91,6 +92,13 @@ export function LocaleSwitcher({
    * the full name.
    */
   compactBelowSm?: boolean;
+  /**
+   * Show the locale CODE until the host bar is wide enough for every label
+   * (≥1800px), then the native name. OPT-IN for the ONE authenticated header,
+   * whose row carries the logo, the workspace chip, the nav and four controls
+   * and must never scroll or overlap (owner order 2026-10-25).
+   */
+  compactUntilWide?: boolean;
 }) {
   const pathname = usePathname();
   const active = useLocale();
@@ -140,7 +148,14 @@ export function LocaleSwitcher({
         <Globe aria-hidden className="h-3.5 w-3.5 text-text-muted" />
         {/* The button keeps its `localeSwitch` aria-label in both modes, so
             the ACCESSIBLE name never shrinks with the visible text. */}
-        {compactBelowSm ? (
+        {compactUntilWide ? (
+          <>
+            <span className="hidden min-[1800px]:inline">
+              {NATIVE_LOCALE_NAMES[active] ?? active.toUpperCase()}
+            </span>
+            <span className="min-[1800px]:hidden">{active.toUpperCase()}</span>
+          </>
+        ) : compactBelowSm ? (
           <>
             <span className="hidden sm:inline">
               {NATIVE_LOCALE_NAMES[active] ?? active.toUpperCase()}

@@ -15,7 +15,8 @@
     "capacity": "Capaciteit",
     "work": "Werk & uren",
     "results": "Resultaten",
-    "history": "Geschiedenis"
+    "history": "Geschiedenis",
+    "areasTitle": "Bedrijfsgebieden"
   },
   "publicDemand": {
     "title": "Actuele marktvraag",
@@ -3620,7 +3621,8 @@
     "reviewBanner": {
       "title": "Sommige vaardigheden moeten worden beoordeeld",
       "body": "Sommige vermeldingen zijn nog niet duidelijk geclassificeerd. Beoordeel ze of voeg meer informatie toe, zodat je profiel nauwkeuriger gematcht kan worden.",
-      "cta": "Vaardigheden beoordelen"
+      "cta": "Vaardigheden beoordelen",
+      "noteLead": "{count, plural, one {vaardigheid wordt nog niet onderbouwd door werkregistraties.} other {vaardigheden worden nog niet onderbouwd door werkregistraties.}}"
     },
     "pageTitle": "Mijn profiel",
     "pageSubtitle": "Wat je doet, wat je kunt en wat dat laat zien — alles op één plek.",
@@ -6130,6 +6132,8 @@
       "asksTitle": "Het project heeft van jou nog nodig",
       "ledger": {
         "ratio": "{have} van {total} in orde",
+        "ratioNone": "Nog niets om te controleren",
+        "ratioUnknown": "nog niet bekend: {count}",
         "availability": "Beschikbaarheid",
         "state": {
           "valid": "je hebt het",
@@ -6161,7 +6165,7 @@
           "none": "nog niets vastgelegd"
         },
         "managerStatus": {
-          "needed": "wordt verwacht",
+          "needed": "af te spreken vóór de overeenkomst",
           "missing": "gemarkeerd als ontbrekend",
           "received": "ontvangen",
           "checked": "gecontroleerd",
@@ -6170,7 +6174,7 @@
         },
         "resolution": {
           "addDocument": "Document vastleggen",
-          "issuingAuthority": "Afgegeven door: {title}",
+          "informationSource": "Informatiebron: {title}",
           "trainingProgram": "Cursus: {title}",
           "serviceOffering": "Dienst: {title}",
           "serviceOfferingRate": "Dienst: {title} ({rate})",
@@ -7679,7 +7683,16 @@
     "backHome": "Terug naar home",
     "dashboardSections": "Dashboardsecties",
     "skipToContent": "Direct naar inhoud",
-    "loading": "Laden…"
+    "loading": "Laden…",
+    "nav": {
+      "more": "Meer",
+      "menu": "Navigatie",
+      "areas": "Werkgebieden",
+      "close": "Sluiten",
+      "youAreHere": "Je bent hier",
+      "previous": "Vorig gebied",
+      "next": "Volgend gebied"
+    }
   },
   "workerInvitations": {
     "title": "Openstaande uitnodigingen",
@@ -7961,7 +7974,7 @@
       "confirmed": "u met registratie van leidinggevende",
       "organizationHistory": "u in organisatiehistorie",
       "experienceTotal": "u beroepservaring in totaal",
-      "days": "{count, plural, one {werkdag} other {werkdagen}}",
+      "days": "{count, plural, one {dag met uren} other {dagen met uren}}",
       "modes": {
         "label": "Onderdelen van de kaart",
         "work": "Werk",
@@ -8066,7 +8079,8 @@
       "mine": "Jouw voorkeurslanden staan vooraan.",
       "unknown": "De lijst met vereisten voor {country} is nog niet samengesteld — we tonen liever niets dan te gokken.",
       "next": "Werk je in dit land, spreek dit dan vóór de afspraak met de werkgever af: {doc}. Je hoeft niets te uploaden.",
-      "ok": "Alle samengestelde vereisten voor {country} zijn gedekt."
+      "ok": "Alle samengestelde vereisten voor {country} zijn gedekt.",
+      "postingNeedsBase": "Het A1-formulier en de detacheringsmelding worden alleen getoond als je basisland bekend is en verschilt van het werkland. Je basisland is nog niet opgegeven."
     },
     "types": {
       "cv": "CV",
@@ -9251,7 +9265,8 @@
     "clash": {
       "acceptAnyway": "Ik weet dat het overlapt — toch accepteren",
       "stillStands": "Accepteren heft de overlap niet op. Beide boekingen houden hun data, het conflict blijft zichtbaar in je agenda, en je keuze wordt vastgelegd.",
-      "acknowledged": "Geaccepteerd met een bekende overlap. {count} bestaande boeking(en) overlappen nog steeds — er is niets geannuleerd of verborgen, en je keuze staat geregistreerd."
+      "acknowledged": "Geaccepteerd met een bekende overlap. {count} bestaande boeking(en) overlappen nog steeds — er is niets geannuleerd of verborgen, en je keuze staat geregistreerd.",
+      "notRecordable": "Deze data overlappen met een boeking die je al hebt geaccepteerd en die overlap kan nog niet worden vastgelegd, dus je kunt dit aanbod weigeren of het open laten zodat het bedrijf de data kan wijzigen."
     },
     "proposedBy": "Voorgesteld door {name}",
     "termsChanged": "Het bedrijf heeft de voorwaarden gewijzigd. Je ging akkoord met: {previous}. Beslis opnieuw over de nieuwe data."
@@ -11465,7 +11480,7 @@
     },
     "utilisation": {
       "title": "Vastgelegd deel van de komende weken",
-      "committedDays": "{committed} van {counted} mensdagen vastgelegd — {workers} mensen over {days} dagen",
+      "committedDays": "{committed} van {counted, plural, one {# mensdag} other {# mensdagen}} vastgelegd — {workers, plural, one {# persoon} other {# mensen}} over {days, plural, one {# dag} other {# dagen}}",
       "noneCounted": "Voor dit venster konden van niemand de afspraken worden geteld.",
       "partial": "{count} daarvan konden niet volledig worden geteld — iets echts heeft geen datums, dus het getal hierboven is een ondergrens.",
       "unknown": "{count} konden helemaal niet worden gelezen. Dat is niet hetzelfde als vrij.",

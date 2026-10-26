@@ -156,10 +156,16 @@ describe("APPLIED_LEDGER carries both deferred entries", () => {
 // ── 4. switcher honesty (source pins) ───────────────────────────────────────
 
 describe("company switcher wiring", () => {
-  it("visibility comes from the ONE pure helper (multi-company only)", () => {
-    const sw = read("components/app/role-switcher.tsx");
-    expect(sw).toMatch(/shouldOfferOrganizationSwitch/);
-    expect(sw).toMatch(/data-testid="org-switcher-list"/);
+  it("a switcher renders ONLY for a real multi-workspace person", () => {
+    // RE-ANCHORED 2026-10-25: the role switcher's organization list was the
+    // second workspace selector and is deleted; the ONE selector is the
+    // workspace chip. A single-workspace person gets a pure indicator — no
+    // fake multi-tenancy chrome — and the pure helper still decides the
+    // server-side `canSwitch` flag.
+    const chip = read("components/app/conversation/chat/workspace-chip.tsx");
+    expect(chip).toMatch(/if \(workspaces\.length === 1\) \{/);
+    expect(chip).toMatch(/data-testid="workspace-chip-menu"/);
+    expect(read("lib/company/active-organization.ts")).toMatch(/canSwitch: shouldOfferOrganizationSwitch\(/);
     const helper = read("lib/company/organization-switch.ts");
     expect(helper).toMatch(/organizations\.length\s*>\s*1/);
   });

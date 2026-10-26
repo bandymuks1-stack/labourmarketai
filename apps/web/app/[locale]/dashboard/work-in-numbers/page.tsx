@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Card } from "@/components/ui/Card";
@@ -330,13 +331,7 @@ export default async function WorkInNumbersPage({
         <OrgLedger view={orgLedger(wi)} periodWord={scope} locale={locale} t={t} />
       ) : null}
 
-      <Link
-        href="/dashboard/journal"
-        className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
-        data-testid="wi-back-to-journal"
-      >
-        ← {t("numbers.backToJournal")}
-      </Link>
+      <PageBack href="/dashboard/journal" data-testid="wi-back-to-journal">{t("numbers.backToJournal")}</PageBack>
     </div>
   );
 }

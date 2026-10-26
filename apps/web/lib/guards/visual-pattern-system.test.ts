@@ -95,11 +95,15 @@ describe("44px touch targets on decision controls", () => {
   });
 });
 
-describe("bottom nav: selected state is an indicator, icons are unambiguous", () => {
-  const nav = read("components/app/bottom-nav.tsx");
+describe("nav: selected state is an indicator, icons are unambiguous", () => {
+  // RE-ANCHORED 2026-10-25: the bottom nav retired with the one header; the
+  // selected-state rule (never colour alone) is pinned on the header's pill.
+  const nav = read("components/app/conversation/chat/conversation-header.tsx");
 
-  it("active tab renders a real indicator bar, not color alone", () => {
-    expect(nav).toMatch(/data-testid="bottom-nav-active-indicator"/);
+  it("the active destination renders a real indicator, not color alone", () => {
+    // A filled pill with an inset ring, plus aria-current for assistive tech.
+    expect(nav).toMatch(/bg-brand-blue\/10 text-brand-blue ring-1 ring-inset ring-brand-blue\/40/);
+    expect(nav).toMatch(/aria-current=\{active \? "page" : undefined\}/);
   });
 
   it("one icon per destination: journal=NotebookPen, messages=MessageSquare, map=MapPin", () => {
@@ -115,7 +119,6 @@ describe("bottom nav: selected state is an indicator, icons are unambiguous", ()
     expect(icons).toMatch(/calendar: CalendarDays/);
     // Every nav surface must take its icons from there, never re-declare them.
     for (const surface of [
-      "components/app/bottom-nav.tsx",
       "components/app/conversation/chat/conversation-header.tsx",
     ]) {
       expect(read(surface)).toMatch(/NAV_ICONS/);

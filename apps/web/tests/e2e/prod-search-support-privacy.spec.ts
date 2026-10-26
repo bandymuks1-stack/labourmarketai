@@ -360,7 +360,11 @@ test("P-6 (4.28). the worker declares their own supply, sees it persist, and wit
   await expect(page.getByTestId("partner-supply-error")).toHaveCount(0);
   // Persistence: a fresh load reads the declaration back.
   await page.reload();
-  await expect(page.getByTestId("partner-supply-current-intent")).toContainText("OPEN_TO_OFFERS", { timeout: 60_000 });
+  // The stored intent, not its wording: #2741 replaced the raw code on screen
+  // with a readable label (run 40199732022 still looked for "OPEN_TO_OFFERS").
+  const current = page.getByTestId("partner-supply-current-intent");
+  await expect(current).toHaveAttribute("data-intent", "OPEN_TO_OFFERS", { timeout: 60_000 });
+  await expect(current, "the label is words, never the raw code").not.toContainText("OPEN_TO_OFFERS");
   await expect(page.getByTestId("partner-supply-current-markets")).toContainText("LT");
   // Withdraw it again — the declaration, then the permission.
   await page.getByTestId("partner-supply-withdraw-declaration").click();

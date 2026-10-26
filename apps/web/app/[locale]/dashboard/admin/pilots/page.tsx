@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { listPilots } from "@/lib/admin/pilots";
@@ -120,12 +121,7 @@ export default async function AdminPilotsPage({
         </>
       )}
 
-      <Link
-        href="/dashboard/admin"
-        className="self-start text-xs text-text-secondary hover:text-text-primary"
-      >
-        ← {t("back")}
-      </Link>
+      <PageBack href="/dashboard/admin">{t("back")}</PageBack>
     </div>
   );
 }
