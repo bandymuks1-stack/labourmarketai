@@ -1,7 +1,6 @@
 {
   "companyModel": {
     "title": "Įmonės valdymas",
-    "primary": "Paskelbti poreikį",
     "need": "Ko mums reikia",
     "offer": "Ką siūlome",
     "market": "Rinka",
@@ -1872,7 +1871,6 @@
       "openNeed": "Atidaryti poreikį",
       "gapsRow": "{count, plural, one {# žmogui projekte „{project}“ trūksta dokumentų} few {# žmonėms projekte „{project}“ trūksta dokumentų} many {# žmogaus projekte „{project}“ trūksta dokumentų} other {# žmonių projekte „{project}“ trūksta dokumentų}}",
       "gapsCta": "Patikrinti dokumentus",
-      "needsCta": "Aprašyti poreikį",
       "noOneFrom": "Nuo {date} laisvų žmonių nėra",
       "unclear": "{count, plural, one {# žmogus turi darbą be datų — laisvo laiko gali būti mažiau} few {# žmonės turi darbą be datų — laisvo laiko gali būti mažiau} other {# žmonių turi darbą be datų — laisvo laiko gali būti mažiau}}",
       "fit": {
@@ -2443,6 +2441,13 @@
         "conflicts": "Darbuotojai su planavimo konfliktu (susikerta darbai ar atostogos)",
         "unreadable": "nepavyko perskaityti",
         "clientReview": "Darbas, laukiantis jūsų sprendimo kaip užsakovo"
+      },
+      "needDoor": {
+        "label": "Aprašyti poreikį",
+        "firstTitle": "Pradėkite nuo to, ko jums reikia",
+        "firstBody": "Savais žodžiais parašykite, kokį darbą reikia atlikti, kur ir kada. Poreikis išsaugomas jūsų įmonei, o tada galėsite peržiūrėti, kas galėtų jį atlikti.",
+        "noNeedYet": "Šiuo metu nieko nereikia?",
+        "noNeedYetInvite": "Pakvieskite savo žmones"
       }
     },
     "agency": {
@@ -14039,7 +14044,7 @@
       "agendaConflicts": "⚠ {count, plural, one {Rastas # persidengiantis įsipareigojimas} few {Rasti # persidengiantys įsipareigojimai} other {Rasta # persidengiančių įsipareigojimų}} — to fiziškai suplanuoti neįmanoma, patikrink kalendorių.",
       "chipAgenda": "Mano planas",
       "userAgenda": "Parodyk mano planą",
-      "chipNeedWorkers": "Reikia darbuotojų",
+      "chipNeedWorkers": "Aprašyti poreikį",
       "chipCandidates": "Kandidatai",
       "chipCompanyHub": "Įmonės erdvė",
       "chipEduInviteLearner": "Pakviesti besimokantįjį",
@@ -18255,7 +18260,6 @@
       "now": {
         "subtitle": "Kas vyksta, kam reikia jūsų sprendimo ir kur eiti toliau.",
         "primaryActions": "Pagrindiniai veiksmai",
-        "newNeed": "Naujas darbuotojų poreikis",
         "newProject": "Naujas projektas",
         "invite": "Pakviesti žmogų",
         "importHistory": "Įkelti istorinius duomenis"

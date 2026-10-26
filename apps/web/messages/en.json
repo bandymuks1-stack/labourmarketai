@@ -1,7 +1,6 @@
 {
   "companyModel": {
     "title": "Company management",
-    "primary": "Publish a need",
     "need": "What we need",
     "offer": "What we offer",
     "market": "Marketplace",
@@ -1872,7 +1871,6 @@
       "openNeed": "Open the need",
       "gapsRow": "{count, plural, =1 {1 person on {project} has missing documents} other {# people on {project} have missing documents}}",
       "gapsCta": "Check documents",
-      "needsCta": "Describe a need",
       "noOneFrom": "No one is free from {date}",
       "unclear": "{count, plural, =1 {1 person has work with no dates — free time may be lower} other {# people have work with no dates — free time may be lower}}",
       "fit": {
@@ -2443,6 +2441,13 @@
         "conflicts": "People with a planning conflict (overlapping work or leave)",
         "unreadable": "could not be read",
         "clientReview": "Work waiting for your decision as the client"
+      },
+      "needDoor": {
+        "label": "Describe a need",
+        "firstTitle": "Start with what you need",
+        "firstBody": "Say in your own words what work needs doing, where and when. The need is saved for your company, and then you can check who could do it.",
+        "noNeedYet": "No need right now?",
+        "noNeedYetInvite": "Invite your people"
       }
     },
     "agency": {
@@ -14039,7 +14044,7 @@
       "agendaConflicts": "⚠ {count, plural, one {# overlapping commitment found} other {# overlapping commitments found}} — this plan is physically impossible; check the calendar.",
       "chipAgenda": "My plan",
       "userAgenda": "Show my plan",
-      "chipNeedWorkers": "I need workers",
+      "chipNeedWorkers": "Describe a need",
       "chipCandidates": "Candidates",
       "chipCompanyHub": "Company workspace",
       "chipEduInviteLearner": "Invite a learner",
@@ -18255,7 +18260,6 @@
       "now": {
         "subtitle": "What is happening, what needs your decision, and where to go next.",
         "primaryActions": "Primary actions",
-        "newNeed": "New workforce need",
         "newProject": "New project",
         "invite": "Invite a person",
         "importHistory": "Import historical data"

@@ -1,7 +1,6 @@
 {
   "companyModel": {
     "title": "Unternehmensführung",
-    "primary": "Bedarf veröffentlichen",
     "need": "Was wir brauchen",
     "offer": "Was wir anbieten",
     "market": "Marktplatz",
@@ -1872,7 +1871,6 @@
       "openNeed": "Bedarf öffnen",
       "gapsRow": "{count, plural, =1 {1 Person auf {project} hat fehlende Dokumente} other {# Personen auf {project} haben fehlende Dokumente}}",
       "gapsCta": "Dokumente prüfen",
-      "needsCta": "Bedarf beschreiben",
       "noOneFrom": "Ab {date} ist niemand frei",
       "unclear": "{count, plural, =1 {1 Person hat Arbeit ohne Termine — freie Zeit kann geringer sein} other {# Personen haben Arbeit ohne Termine — freie Zeit kann geringer sein}}",
       "fit": {
@@ -2443,6 +2441,13 @@
         "conflicts": "Personen mit Planungskonflikt (Einsätze oder Urlaub überschneiden sich)",
         "unreadable": "konnte nicht gelesen werden",
         "clientReview": "Arbeit, die auf Ihre Entscheidung als Auftraggeber wartet"
+      },
+      "needDoor": {
+        "label": "Bedarf beschreiben",
+        "firstTitle": "Beginnen Sie mit dem, was Sie brauchen",
+        "firstBody": "Beschreiben Sie in eigenen Worten, welche Arbeit wo und wann zu erledigen ist. Der Bedarf wird für Ihr Unternehmen gespeichert; danach können Sie prüfen, wer ihn übernehmen könnte.",
+        "noNeedYet": "Gerade kein Bedarf?",
+        "noNeedYetInvite": "Laden Sie Ihre Leute ein"
       }
     },
     "agency": {
@@ -14039,7 +14044,7 @@
       "agendaConflicts": "⚠ {count, plural, one {# überlappende Verpflichtung gefunden} other {# überlappende Verpflichtungen gefunden}} — dieser Plan ist physisch unmöglich; prüfe den Kalender.",
       "chipAgenda": "Mein Plan",
       "userAgenda": "Zeig meinen Plan",
-      "chipNeedWorkers": "Ich brauche Arbeitskräfte",
+      "chipNeedWorkers": "Bedarf beschreiben",
       "chipCandidates": "Kandidaten",
       "chipCompanyHub": "Unternehmensbereich",
       "chipEduInviteLearner": "Lernende einladen",
@@ -18255,7 +18260,6 @@
       "now": {
         "subtitle": "Was passiert, was Ihre Entscheidung braucht und wo es weitergeht.",
         "primaryActions": "Hauptaktionen",
-        "newNeed": "Neuer Personalbedarf",
         "newProject": "Neues Projekt",
         "invite": "Person einladen",
         "importHistory": "Historische Daten importieren"

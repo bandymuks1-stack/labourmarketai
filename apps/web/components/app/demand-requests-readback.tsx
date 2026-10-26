@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import { TrackedLink } from "@/components/app/tracked-link";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+
 import type {
   CustomerRequestRow,
   CustomerRequestStatus,
@@ -249,14 +252,20 @@ function RequestRow({
           lifecycle controls. Real route, no new page. */}
       {/* NEXT DEMAND (2026-09-19): a past ask as the starting point for a new
           one. Structure only — the old row keeps every execution fact. */}
+      {/* A new need started from a past one is a need door too (activation
+          audit 2026-10-26 §2): the same event and a surface of its own. Its
+          label stays "repeat" — it names a different start, not a second
+          wording of "describe a need". */}
       {scoutable && r.status !== "draft" ? (
-        <Link
+        <TrackedLink
+          event={FUNNEL_EVENTS.companyDemandActionClicked}
+          eventMetadata={{ surface: "company_needs_repeat", role_context: "company" }}
           href={`/${locale}/dashboard/company/needs?repeat=${r.id}#demand-intake`}
           className="inline-flex w-fit items-center gap-1 text-xs font-medium text-text-secondary transition-colors hover:text-brand-blue"
           data-testid="demand-readback-repeat-link"
         >
           ↻ {labels.repeatLink}
-        </Link>
+        </TrackedLink>
       ) : null}
       {scoutable ? (
         <Link

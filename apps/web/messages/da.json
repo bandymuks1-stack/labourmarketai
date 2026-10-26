@@ -6792,7 +6792,6 @@
       "openNeed": "Åbn behovet",
       "gapsRow": "{count, plural, =1 {1 person på {project} mangler dokumenter} other {# personer på {project} mangler dokumenter}}",
       "gapsCta": "Tjek dokumenter",
-      "needsCta": "Beskriv et behov",
       "noOneFrom": "Ingen er ledig fra {date}",
       "unclear": "{count, plural, =1 {1 person har arbejde uden datoer — ledig tid kan være mindre} other {# personer har arbejde uden datoer — ledig tid kan være mindre}}",
       "fit": {
