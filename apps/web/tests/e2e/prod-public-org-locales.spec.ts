@@ -509,14 +509,18 @@ test.describe("signed in as the synthetic owner of Alfa", () => {
     await openInAlfa(page, "/lt/dashboard");
     await expect(page.getByTestId("composer-input")).toBeVisible({ timeout: 30_000 });
     const text = "Pagaminome 500 medinių palečių ir norime jas parduoti.";
-    const before = (await page.locator("body").innerText()).length;
+    // The product's own channel readback (conversation.chat.valueIntent.*).
+    const channel = /Tavo teigimu:|skelbimų lentoje|Atidaryti skelbimus|paslaugos pasiūlymą|Šito per platformą pasiūlyti negalima/g;
+    const hits = async () => ((await page.locator("body").innerText()).match(channel) ?? []).length;
+    // Count, not offset: starting a conversation folds the home intro, so the
+    // page text SHRINKS and an offset into it cut the answer to its last word
+    // (run 40363282539 logged "skelbimus" — the tail of "Atidaryti skelbimus").
+    const before = await hits();
     await page.getByTestId("composer-input").fill(text);
     await page.getByTestId("composer-send").click();
-    // The product's own channel readback (conversation.chat.valueIntent.*).
-    const channel = /Tavo teigimu:|skelbimų lentoje|Atidaryti skelbimus|paslaugos pasiūlymą|Šito per platformą pasiūlyti negalima/;
-    const tail = async () => (await page.locator("body").innerText()).slice(Math.max(0, before - 50));
+    const tail = async () => (await page.locator("body").innerText()).slice(-1200);
     const answered = await expect
-      .poll(async () => channel.test(await tail()), { timeout: 45_000, intervals: [1_000] })
+      .poll(async () => (await hits()) > before, { timeout: 45_000, intervals: [1_000] })
       .toBe(true)
       .then(() => true)
       .catch(() => false);
