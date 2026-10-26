@@ -177,6 +177,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261025140000_",
       // 2026-10-25 (GREEN, additive indexes): importer/admin vacancy reads stop walking the heap.
       "20261025180000_",
+      // 2026-10-26 (RED draft, needs-human-gate, NOT applied): OAuth product grants (B3).
+      "20261026080400_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
