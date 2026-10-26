@@ -1,5 +1,5 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
@@ -39,21 +39,20 @@ function lookup(messages: Record<string, unknown>, key: string): unknown {
 }
 
 /**
- * Pages the title helper may not touch yet. /dashboard/hours sits under the
- * owner's scoped product-gate waiver `work-hours-allocation-surface`, which
- * lists the exact pull requests allowed to modify it — adding a PR there is
- * the owner's call (decision 0015 / owner-waivers.mjs), so its title waits
- * for that approval instead of widening the waiver.
+ * Pages titled by a metadata-only segment layout instead of the page file.
+ * /dashboard/hours sits under the owner's scoped product-gate waiver
+ * `work-hours-allocation-surface` (exact PR list), so its page.tsx is left
+ * alone and `hours/layout.tsx` names it (owner 2026-10-26: separate minimal
+ * change, no widened waiver).
  */
-const NOT_YET: Record<string, string> = {
-  "/dashboard/hours": "owner-scoped product-gate waiver work-hours-allocation-surface",
-};
+const VIA_LAYOUT = new Set(["/dashboard/hours"]);
 
 const WIRED = /export const generateMetadata = dashboardPageMetadata\("([^"]+)"(?:, "([^"]+)")?\);/;
 
 const all = pages(DASH).map((file) => {
   const route = "/" + relative(join(WEB, "app/[locale]"), file).replace(/\\/g, "/").replace(/\/page\.tsx$/, "");
-  const m = readFileSync(file, "utf8").match(WIRED);
+  const source = VIA_LAYOUT.has(route) ? join(dirname(file), "layout.tsx") : file;
+  const m = readFileSync(source, "utf8").match(WIRED);
   return { file, route, wired: m?.[1] ?? null, heading: m?.[2] };
 });
 
@@ -62,21 +61,20 @@ describe("every dashboard page names itself in the document title", () => {
     expect(all.length).toBeGreaterThan(50);
   });
 
-  it("a page left out names its reason and is really not wired", () => {
-    for (const [route, reason] of Object.entries(NOT_YET)) {
-      expect(reason.length).toBeGreaterThan(10);
-      expect(all.find((p) => p.route === route)?.wired ?? null, route).toBeNull();
+  it("a layout-titled page leaves its page file untouched", () => {
+    for (const p of all.filter((x) => VIA_LAYOUT.has(x.route))) {
+      expect(readFileSync(p.file, "utf8"), p.route).not.toMatch(/dashboardPageMetadata/);
     }
   });
 
-  it.each(all.filter((p) => !NOT_YET[p.route]).map((p) => [p.route, p] as const))("%s is wired with its own route", (_route, p) => {
+  it.each(all.map((p) => [p.route, p] as const))("%s is wired with its own route", (_route, p) => {
     expect(p.wired, `${p.route} does not export generateMetadata via dashboardPageMetadata`).not.toBeNull();
     expect(p.wired).toBe(p.route);
   });
 
   it.each(ACTIVE.map((l) => [l] as const))("every title resolves to real copy in %s", (locale) => {
     const messages = catalogue(locale);
-    for (const p of all.filter((x) => !NOT_YET[x.route])) {
+    for (const p of all) {
       const key = dashboardTitleKey(p.route, p.heading);
       const value = lookup(messages, key);
       expect(typeof value, `${locale}: ${p.route} → ${key}`).toBe("string");
