@@ -34,7 +34,7 @@ describe("the company context's centre is the company model, over existing surfa
   it("copy exists in every routed locale", () => {
     for (const loc of ["lt", "en", "de", "nl", "pl", "ru"]) {
       const m = JSON.parse(read(`messages/${loc}.json`)) as { companyModel: Record<string, string> };
-      for (const k of ["title", "areasTitle", "primary", "need", "offer", "market", "people", "projects", "messages", "more", "clients", "candidates", "calendar", "capacity", "work", "results", "history"]) {
+      for (const k of ["title", "areasTitle", "need", "offer", "market", "people", "projects", "messages", "more", "clients", "candidates", "calendar", "capacity", "work", "results", "history"]) {
         expect(m.companyModel[k], `${loc}.${k}`).toBeTruthy();
       }
     }

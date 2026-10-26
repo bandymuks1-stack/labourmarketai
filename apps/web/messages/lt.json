@@ -1,7 +1,6 @@
 {
   "companyModel": {
     "title": "Įmonės valdymas",
-    "primary": "Paskelbti poreikį",
     "need": "Ko mums reikia",
     "offer": "Ką siūlome",
     "market": "Rinka",
@@ -1872,7 +1871,6 @@
       "openNeed": "Atidaryti poreikį",
       "gapsRow": "{count, plural, one {# žmogui projekte „{project}“ trūksta dokumentų} few {# žmonėms projekte „{project}“ trūksta dokumentų} many {# žmogaus projekte „{project}“ trūksta dokumentų} other {# žmonių projekte „{project}“ trūksta dokumentų}}",
       "gapsCta": "Patikrinti dokumentus",
-      "needsCta": "Aprašyti poreikį",
       "noOneFrom": "Nuo {date} laisvų žmonių nėra",
       "unclear": "{count, plural, one {# žmogus turi darbą be datų — laisvo laiko gali būti mažiau} few {# žmonės turi darbą be datų — laisvo laiko gali būti mažiau} other {# žmonių turi darbą be datų — laisvo laiko gali būti mažiau}}",
       "fit": {
@@ -1886,6 +1884,15 @@
       "opportunityCta": "Ieškoti darbo",
       "interest": "{count, plural, one {# žmogus pareiškė susidomėjimą jūsų poreikiais} few {# žmonės pareiškė susidomėjimą jūsų poreikiais} other {# žmonių pareiškė susidomėjimą jūsų poreikiais}}",
       "interestCta": "Žiūrėti kas"
+    },
+    "offers": {
+      "heading": "Ką siūlai",
+      "note": "Išsaugota tavo darbo erdvėje. Darbdaviai kol kas negali ieškoti pasiūlymų, todėl dėl jų dar niekas nesusisiekė.",
+      "empty": "Dar neišsaugojai nė vieno pasiūlymo. Aprašyk, kokius žmones ar komandą gali pasiūlyti — pasiūlymas bus išsaugotas ir matomas čia.",
+      "noneOpen": "Atvirų pasiūlymų nėra — ankstesni uždaryti.",
+      "more": "{count, plural, one {dar # pasiūlymas} few {dar # pasiūlymai} many {dar # pasiūlymo} other {dar # pasiūlymų}}",
+      "open": "Peržiūrėti pasiūlymus",
+      "unreadable": "Pasiūlymų dabar nepavyko perskaityti."
     },
     "attention": {
       "heading": "Reikia jūsų",
@@ -2443,6 +2450,13 @@
         "conflicts": "Darbuotojai su planavimo konfliktu (susikerta darbai ar atostogos)",
         "unreadable": "nepavyko perskaityti",
         "clientReview": "Darbas, laukiantis jūsų sprendimo kaip užsakovo"
+      },
+      "needDoor": {
+        "label": "Aprašyti poreikį",
+        "firstTitle": "Pradėkite nuo to, ko jums reikia",
+        "firstBody": "Savais žodžiais parašykite, kokį darbą reikia atlikti, kur ir kada. Poreikis išsaugomas jūsų įmonei, o tada galėsite peržiūrėti, kas galėtų jį atlikti.",
+        "noNeedYet": "Šiuo metu nieko nereikia?",
+        "noNeedYetInvite": "Pakvieskite savo žmones"
       }
     },
     "agency": {
@@ -4438,7 +4452,8 @@
             "notesLabel": "Papildomos pastabos",
             "notesPlaceholder": "Bet kas, ką dar svarbu žinoti",
             "submittedHeading": "Ką pateikei:",
-            "doneScoutingLink": "Peržiūrėti užklausą ir atitikmenis"
+            "doneScoutingLink": "Peržiūrėti užklausą ir atitikmenis",
+            "doneOffersLink": "Peržiūrėti savo pasiūlymus"
           },
           "hire": {
             "title": "Ieškoti darbuotojo ar komandos",
@@ -4641,6 +4656,7 @@
           "location": "Tai padeda nerodyti tau netinkamų pasiūlymų.",
           "pay": "Tai padeda pagrįsti tavo pageidaujamą tarifą.",
           "evidence": "Įrašai didina pasitikėjimą, bet gali juos pridėti vėliau.",
+          "evidenceFirst": "Užtenka vieno sakinio apie tai, ką dirbai — iš tokių įrašų auga tavo gyvas CV.",
           "complete": "Tavo darbo kortelė pilna — toliau ją stiprina darbo įrašai."
         },
         "stale": {
@@ -14039,7 +14055,7 @@
       "agendaConflicts": "⚠ {count, plural, one {Rastas # persidengiantis įsipareigojimas} few {Rasti # persidengiantys įsipareigojimai} other {Rasta # persidengiančių įsipareigojimų}} — to fiziškai suplanuoti neįmanoma, patikrink kalendorių.",
       "chipAgenda": "Mano planas",
       "userAgenda": "Parodyk mano planą",
-      "chipNeedWorkers": "Reikia darbuotojų",
+      "chipNeedWorkers": "Aprašyti poreikį",
       "chipCandidates": "Kandidatai",
       "chipCompanyHub": "Įmonės erdvė",
       "chipEduInviteLearner": "Pakviesti besimokantįjį",
@@ -14704,6 +14720,7 @@
       "contextAmbiguous": "Šis darbas gali priklausyti daugiau nei vienam kontekstui. Prieš išsaugant pasirink, kuriam.",
       "contextEndedOrg": "Sakinyje minima organizacija, su kuria darbo santykis baigtas — šis įrašas nebus jos darbo įrodymas. Pasirink, kur tai dirbai:",
       "save": "Išsaugoti",
+      "continue": "Toliau",
       "cancel": "Taisyti",
       "working": "Saugoma…",
       "confirmTitle": "Patvirtinti įrašą?",
@@ -14732,6 +14749,9 @@
       "strengthenedSkillPrefix": "Sustiprintas įgūdis",
       "pendingConfirmPrefix": "Laukia patvirtinimo",
       "cvUpdatedNote": "CV papildytas šio įrašo įgūdžiais.",
+      "livingCvNote": "Šis įrašas jau skaičiuojamas tavo gyvame CV kaip užfiksuotas darbas — įrašytas tavo, dar niekieno nepatvirtintas.",
+      "viewLivingCv": "Atidaryti gyvą CV",
+      "comeBackNote": "Rytoj užrašyk ir tos dienos darbą — užtenka vieno sakinio.",
       "matchingNote": "Darbo rekomendacijos skaičiuojamos pagal atnaujintą įgūdžių sąrašą kitą kartą jas peržiūrint.",
       "viewOpportunities": "Peržiūrėti atnaujintus pasiūlymus",
       "pipelineFailedNote": "Įgūdžių atpažinimas šįkart nepavyko — įrašas išsaugotas, atpažinimą gali pakartoti žurnale."
@@ -18255,7 +18275,6 @@
       "now": {
         "subtitle": "Kas vyksta, kam reikia jūsų sprendimo ir kur eiti toliau.",
         "primaryActions": "Pagrindiniai veiksmai",
-        "newNeed": "Naujas darbuotojų poreikis",
         "newProject": "Naujas projektas",
         "invite": "Pakviesti žmogų",
         "importHistory": "Įkelti istorinius duomenis"

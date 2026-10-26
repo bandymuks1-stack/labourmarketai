@@ -135,6 +135,7 @@ import type { AgencyChatRosterWorker } from "@/lib/conversation/agency-workspace
 import { STARTER_CAP, personStarters, type StarterChipSpec } from "@/lib/conversation/starters";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { NEED_DOOR_HREF } from "@/lib/company/need-door";
 import type { BaseIdentity } from "@/lib/config/roles";
 import { useRouter } from "@/lib/i18n/navigation";
 import {
@@ -1488,6 +1489,15 @@ export function ConversationChat({
         const actionId = spec.actionId;
         const isEmployer =
           actionId.startsWith("company.") || actionId.startsWith("agency.");
+        // The chat's demand intake rendered (activation audit 2026-10-26 §2):
+        // the same `demand_form_viewed` the Needs door's intake sends, with
+        // the chat as its surface — whichever chip or sentence opened it.
+        if (actionId === "company.create-demand") {
+          trackFunnel(FUNNEL_EVENTS.demandFormViewed, {
+            surface: "chat",
+            role_context: "company",
+          });
+        }
         const render = (values?: Record<string, string | boolean>) => pushEmbed(
           <InlineActionForm
             spec={spec}
@@ -5499,6 +5509,17 @@ export function ConversationChat({
     (chip: ChoiceChip) => {
       if (runPinChip(chip.id)) return;
       noteUsage(chip.id, chip.label);
+      // A "describe a need" door was tapped — the starter chip, the follow-up
+      // after a saved need, or the employer bridge's link to the Needs door.
+      // Same event and the same bounded surface as every other need door
+      // (`lib/company/need-door.ts`); the form's own view is counted in
+      // `openForm`.
+      if (chip.id.split("?")[0] === "f:company.create-demand" || chip.id === `link:${NEED_DOOR_HREF}`) {
+        trackFunnel(FUNNEL_EVENTS.companyDemandActionClicked, {
+          surface: "chat",
+          role_context: "company",
+        });
+      }
       // PERSONAL ACTS ARE NOT COMPANY ACTS (owner 2026-10-01). The CV, the
       // personal profile and the person's own work log belong to the PERSON;
       // in a company workspace the chip says so and offers the personal space

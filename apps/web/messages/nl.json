@@ -1,7 +1,6 @@
 {
   "companyModel": {
     "title": "Bedrijfsbeheer",
-    "primary": "Behoefte publiceren",
     "need": "Wat we nodig hebben",
     "offer": "Wat we aanbieden",
     "market": "Marktplaats",
@@ -1872,7 +1871,6 @@
       "openNeed": "Behoefte openen",
       "gapsRow": "{count, plural, =1 {1 persoon op {project} mist documenten} other {# mensen op {project} missen documenten}}",
       "gapsCta": "Documenten controleren",
-      "needsCta": "Een behoefte beschrijven",
       "noOneFrom": "Vanaf {date} is niemand vrij",
       "unclear": "{count, plural, =1 {1 persoon heeft werk zonder data — vrije tijd kan lager zijn} other {# personen hebben werk zonder data — vrije tijd kan lager zijn}}",
       "fit": {
@@ -1886,6 +1884,15 @@
       "opportunityCta": "Zoek werk",
       "interest": "{count, plural, =1 {1 persoon toonde interesse in uw vraag} other {# personen toonden interesse in uw vraag}}",
       "interestCta": "Bekijk wie"
+    },
+    "offers": {
+      "heading": "Wat je aanbiedt",
+      "note": "Opgeslagen in je werkruimte. Werkgevers kunnen aanbod nog niet doorzoeken, dus hierover heeft nog niemand contact opgenomen.",
+      "empty": "Je hebt nog geen aanbod opgeslagen. Beschrijf welke mensen of welke ploeg je kunt leveren — het aanbod wordt opgeslagen en hier getoond.",
+      "noneOpen": "Geen open aanbod — het eerdere aanbod is gesloten.",
+      "more": "{count, plural, =1 {nog 1 aanbod} other {nog # aanbiedingen}}",
+      "open": "Bekijk je aanbod",
+      "unreadable": "Je aanbod kon nu niet worden gelezen."
     },
     "attention": {
       "heading": "Heeft u nodig",
@@ -2443,6 +2450,13 @@
         "conflicts": "Mensen met een planningsconflict (overlappend werk of verlof)",
         "unreadable": "kon niet worden gelezen",
         "clientReview": "Werk dat wacht op uw beslissing als opdrachtgever"
+      },
+      "needDoor": {
+        "label": "Een behoefte beschrijven",
+        "firstTitle": "Begin met wat je nodig hebt",
+        "firstBody": "Beschrijf in je eigen woorden welk werk er moet gebeuren, waar en wanneer. De behoefte wordt voor je bedrijf opgeslagen; daarna kun je bekijken wie het zou kunnen doen.",
+        "noNeedYet": "Op dit moment niets nodig?",
+        "noNeedYetInvite": "Nodig je mensen uit"
       }
     },
     "agency": {
@@ -4438,7 +4452,8 @@
             "notesLabel": "Extra opmerkingen",
             "notesPlaceholder": "Alles wat verder nog nuttig is om te weten",
             "submittedHeading": "Wat je hebt ingediend:",
-            "doneScoutingLink": "Bekijk de aanvraag en de bijbehorende matches"
+            "doneScoutingLink": "Bekijk de aanvraag en de bijbehorende matches",
+            "doneOffersLink": "Bekijk je aanbiedingen"
           },
           "hire": {
             "title": "Vind een werknemer of ploeg",
@@ -4641,6 +4656,7 @@
           "location": "Dit helpt voorkomen dat je ongeschikte aanbiedingen te zien krijgt.",
           "pay": "Dit helpt je verwachte tarief te onderbouwen.",
           "evidence": "Registraties bouwen vertrouwen op, maar je kunt ze ook later toevoegen.",
+          "evidenceFirst": "Eén zin over het werk dat je deed is genoeg — je levend cv groeit uit zulke registraties.",
           "complete": "Je werkkaart is compleet — werkvermeldingen maken hem steeds sterker."
         },
         "stale": {
@@ -14039,7 +14055,7 @@
       "agendaConflicts": "⚠ {count, plural, one {# overlappende verplichting gevonden} other {# overlappende verplichtingen gevonden}} — dit plan is fysiek onmogelijk; controleer de kalender.",
       "chipAgenda": "Mijn planning",
       "userAgenda": "Toon mijn planning",
-      "chipNeedWorkers": "Ik zoek werknemers",
+      "chipNeedWorkers": "Een behoefte beschrijven",
       "chipCandidates": "Kandidaten",
       "chipCompanyHub": "Bedrijfsruimte",
       "chipEduInviteLearner": "Een cursist uitnodigen",
@@ -14704,6 +14720,7 @@
       "contextAmbiguous": "Dit werk kan bij meer dan één context horen. Kies vóór het opslaan bij welke.",
       "contextEndedOrg": "De zin noemt een organisatie waarmee je werkrelatie is beëindigd — deze invoer telt niet als werk voor haar. Kies waar je dit deed:",
       "save": "Opslaan",
+      "continue": "Verder",
       "cancel": "Bewerken",
       "working": "Opslaan…",
       "confirmTitle": "Vermelding bevestigen?",
@@ -14732,6 +14749,9 @@
       "strengthenedSkillPrefix": "Vaardigheid versterkt",
       "pendingConfirmPrefix": "Wacht op je bevestiging",
       "cvUpdatedNote": "Je cv bevat nu de vaardigheden uit deze registratie.",
+      "livingCvNote": "Deze registratie telt nu mee in je levend cv als vastgelegd werk — door jou ingevoerd, nog door niemand bevestigd.",
+      "viewLivingCv": "Je levend cv openen",
+      "comeBackNote": "Voeg morgen ook het werk van die dag toe — één zin is genoeg.",
       "matchingNote": "Vacature-aanbevelingen worden bij de volgende weergave herberekend op basis van je bijgewerkte vaardigheden.",
       "viewOpportunities": "Bekijk bijgewerkte kansen",
       "pipelineFailedNote": "Vaardigheidsherkenning is deze keer mislukt — de registratie is opgeslagen; je kunt de herkenning in het logboek opnieuw uitvoeren."
@@ -18255,7 +18275,6 @@
       "now": {
         "subtitle": "Wat er gebeurt, wat uw beslissing vraagt en waar u verder gaat.",
         "primaryActions": "Belangrijkste acties",
-        "newNeed": "Nieuwe personeelsbehoefte",
         "newProject": "Nieuw project",
         "invite": "Iemand uitnodigen",
         "importHistory": "Historische gegevens importeren"

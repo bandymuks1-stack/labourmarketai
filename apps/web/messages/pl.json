@@ -1,7 +1,6 @@
 {
   "companyModel": {
     "title": "Zarządzanie firmą",
-    "primary": "Opublikuj potrzebę",
     "need": "Czego potrzebujemy",
     "offer": "Co oferujemy",
     "market": "Rynek",
@@ -1872,7 +1871,6 @@
       "openNeed": "Otwórz potrzebę",
       "gapsRow": "{count, plural, one {# osobie w projekcie „{project}” brakuje dokumentów} few {# osobom w projekcie „{project}” brakuje dokumentów} many {# osobom w projekcie „{project}” brakuje dokumentów} other {# osobom w projekcie „{project}” brakuje dokumentów}}",
       "gapsCta": "Sprawdź dokumenty",
-      "needsCta": "Opisz potrzebę",
       "noOneFrom": "Od {date} nikt nie jest wolny",
       "unclear": "{count, plural, one {# osoba ma pracę bez dat — wolnego czasu może być mniej} few {# osoby mają pracę bez dat — wolnego czasu może być mniej} many {# osób ma pracę bez dat — wolnego czasu może być mniej} other {# osoby ma pracę bez dat — wolnego czasu może być mniej}}",
       "fit": {
@@ -1886,6 +1884,15 @@
       "opportunityCta": "Szukaj pracy",
       "interest": "{count, plural, one {# osoba wyraziła zainteresowanie Twoimi potrzebami} few {# osoby wyraziły zainteresowanie Twoimi potrzebami} many {# osób wyraziło zainteresowanie Twoimi potrzebami} other {# osoby wyraziło zainteresowanie Twoimi potrzebami}}",
       "interestCta": "Zobacz kto"
+    },
+    "offers": {
+      "heading": "Co oferujesz",
+      "note": "Zapisane w Twojej przestrzeni roboczej. Pracodawcy nie mogą jeszcze wyszukiwać ofert, więc nikt się w tej sprawie nie skontaktował.",
+      "empty": "Nie zapisałeś jeszcze żadnej oferty. Opisz, jakich ludzi lub jaki zespół możesz zapewnić — oferta zostanie zapisana i pokazana tutaj.",
+      "noneOpen": "Brak otwartych ofert — wcześniejsze są zamknięte.",
+      "more": "{count, plural, one {jeszcze # oferta} few {jeszcze # oferty} many {jeszcze # ofert} other {jeszcze # oferty}}",
+      "open": "Zobacz oferty",
+      "unreadable": "Nie udało się teraz odczytać Twoich ofert."
     },
     "attention": {
       "heading": "Wymaga Ciebie",
@@ -2443,6 +2450,13 @@
         "conflicts": "Osoby z konfliktem planowania (nakładająca się praca lub urlop)",
         "unreadable": "nie udało się odczytać",
         "clientReview": "Praca czekająca na Twoją decyzję jako zleceniodawcy"
+      },
+      "needDoor": {
+        "label": "Opisz potrzebę",
+        "firstTitle": "Zacznij od tego, czego potrzebujesz",
+        "firstBody": "Opisz własnymi słowami, jaką pracę trzeba wykonać, gdzie i kiedy. Potrzeba zostaje zapisana dla Twojej firmy, a potem możesz sprawdzić, kto mógłby ją wykonać.",
+        "noNeedYet": "Na razie niczego nie potrzebujesz?",
+        "noNeedYetInvite": "Zaproś swoich ludzi"
       }
     },
     "agency": {
@@ -4438,7 +4452,8 @@
             "notesLabel": "Dodatkowe uwagi",
             "notesPlaceholder": "Wszystko, co jeszcze warto wiedzieć",
             "submittedHeading": "Co zostało zgłoszone:",
-            "doneScoutingLink": "Zobacz zgłoszenie i jego dopasowania"
+            "doneScoutingLink": "Zobacz zgłoszenie i jego dopasowania",
+            "doneOffersLink": "Zobacz swoje oferty"
           },
           "hire": {
             "title": "Znajdź pracownika lub zespół",
@@ -4641,6 +4656,7 @@
           "location": "Dzięki temu nie pokazujemy Ci nieodpowiednich ofert.",
           "pay": "Dzięki temu łatwiej uzasadnić oczekiwaną stawkę.",
           "evidence": "Dowody budują zaufanie, ale możesz je dodać później.",
+          "evidenceFirst": "Wystarczy jedno zdanie o wykonanej pracy — z takich wpisów rośnie Twoje żywe CV.",
           "complete": "Twoja karta pracy jest kompletna — wpisy o pracy dalej ją wzmacniają."
         },
         "stale": {
@@ -14039,7 +14055,7 @@
       "agendaConflicts": "⚠ {count, plural, one {Znaleziono # nakładające się zobowiązanie} few {Znaleziono # nakładające się zobowiązania} other {Znaleziono # nakładających się zobowiązań}} — taki plan jest fizycznie niemożliwy; sprawdź kalendarz.",
       "chipAgenda": "Mój plan",
       "userAgenda": "Pokaż mój plan",
-      "chipNeedWorkers": "Potrzebuję pracowników",
+      "chipNeedWorkers": "Opisz potrzebę",
       "chipCandidates": "Kandydaci",
       "chipCompanyHub": "Przestrzeń firmy",
       "chipEduInviteLearner": "Zaproś ucznia",
@@ -14704,6 +14720,7 @@
       "contextAmbiguous": "Ta praca może należeć do więcej niż jednego kontekstu. Wybierz, do którego, przed zapisaniem.",
       "contextEndedOrg": "Zdanie wymienia organizację, z którą Twoja współpraca się zakończyła — ten wpis nie będzie pracą dla niej. Wybierz, gdzie to robiłeś:",
       "save": "Zapisz",
+      "continue": "Dalej",
       "cancel": "Edytuj",
       "working": "Zapisywanie…",
       "confirmTitle": "Potwierdzić wpis?",
@@ -14732,6 +14749,9 @@
       "strengthenedSkillPrefix": "Wzmocniono umiejętność",
       "pendingConfirmPrefix": "Czeka na Twoje potwierdzenie",
       "cvUpdatedNote": "Twoje CV zostało uzupełnione o umiejętności z tego wpisu.",
+      "livingCvNote": "Ten wpis liczy się już w Twoim żywym CV jako zapisana praca — wpisana przez Ciebie, jeszcze przez nikogo niepotwierdzona.",
+      "viewLivingCv": "Otwórz żywe CV",
+      "comeBackNote": "Jutro dodaj też pracę z tego dnia — wystarczy jedno zdanie.",
       "matchingNote": "Rekomendacje pracy są przeliczane na podstawie zaktualizowanych umiejętności przy następnym wyświetleniu.",
       "viewOpportunities": "Zobacz zaktualizowane oferty",
       "pipelineFailedNote": "Rozpoznawanie umiejętności tym razem się nie powiodło — wpis został zapisany; rozpoznawanie można powtórzyć w dzienniku."
@@ -18255,7 +18275,6 @@
       "now": {
         "subtitle": "Co się dzieje, co wymaga Twojej decyzji i dokąd pójść dalej.",
         "primaryActions": "Główne czynności",
-        "newNeed": "Nowe zapotrzebowanie na pracowników",
         "newProject": "Nowy projekt",
         "invite": "Zaproś osobę",
         "importHistory": "Importuj dane historyczne"

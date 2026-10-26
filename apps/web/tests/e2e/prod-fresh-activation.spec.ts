@@ -82,7 +82,8 @@ async function expectNoSidewaysScroll(page: Page, where: string): Promise<void> 
 /** Pick a country through the searchable list (the language on screen is LT). */
 async function pickCountry(page: Page, query: string, name: RegExp): Promise<void> {
   await page.getByTestId("onboarding-country").click();
-  await page.getByTestId("onboarding-country-search").fill(query);
+  // The list's own search box (its testid is generated, so it is found inside the field).
+  await page.getByTestId("onboarding-country-field").locator('input:not([type="hidden"])').first().fill(query);
   await page.getByRole("option", { name }).first().click();
 }
 
