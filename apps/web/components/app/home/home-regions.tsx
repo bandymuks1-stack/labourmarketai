@@ -96,11 +96,68 @@ function Reading({ label }: { readonly label: string }) {
   );
 }
 
-/** The streaming placeholder a region shows while its reader is read. */
-export function HomeRegionPending({ label }: { readonly label: string }) {
+/**
+ * HEIGHTS A PENDING REGION RESERVES (home CLS P0, 2026-10-26).
+ *
+ * The placeholder used to be one line in a padded box (~62 px). Every region
+ * that then resolved grew by its whole body and pushed everything under it —
+ * the next region, the stations, the greeting — while the person was reading
+ * (production: CLS ≈ 0.55 on a phone, ≈ 0.31 on a desktop). Each placeholder
+ * now has the region's own frame (the same padding and title row as
+ * `Region`) and reserves the height of the region's SMALLEST usual answer,
+ * so arriving data only ever adds the lines beyond it:
+ *
+ *   action  WAITING with its one next action — title, the action's sentence
+ *           and its "why", and the full-width gold button on a phone (one row
+ *           with the button beside it from md);
+ *   region  a region with a title and two rows (TRACE, RUNNING, OUTSIDE,
+ *           BECAUSE) — RUNNING usually grows past it, but it sits last in its
+ *           column, so what it pushes is below it;
+ *
+ * and `HomeLinePending` reserves the compact employer-visibility line.
+ * Minimum heights only: nothing is clipped, nothing is hidden.
+ */
+const PENDING_RESERVE = {
+  action: "min-h-48 md:min-h-36",
+  region: "min-h-36 sm:min-h-40",
+} as const;
+
+/** The streaming placeholder a region shows while its reader is read — the
+ *  region's own frame at its reserved height. With a `label` it says that a
+ *  read is in progress (the region boundaries); without one it is a silent
+ *  shape (the frame-level pending, `TodayScreenPending`). */
+export function HomeRegionPending({
+  label,
+  size = "region",
+}: {
+  readonly label?: string;
+  readonly size?: keyof typeof PENDING_RESERVE;
+}) {
   return (
-    <div className="rounded-card border border-ink-600/70 bg-ink-800/40 p-5">
-      <Reading label={label} />
+    <div
+      data-testid="home-region-pending"
+      data-reserve={size}
+      className={cn(
+        "flex flex-col gap-3 rounded-card border border-ink-600/70 bg-ink-800/40 p-4 sm:gap-4 sm:p-6",
+        PENDING_RESERVE[size],
+      )}
+    >
+      <span aria-hidden className="h-6 w-40 animate-pulse rounded bg-ink-700/70 motion-reduce:animate-none sm:h-7" />
+      {label ? <Reading label={label} /> : null}
+    </div>
+  );
+}
+
+/** The pending state of the compact employer-visibility line (a compact
+ *  `Card`: a status sentence and its one 44 px control). */
+export function HomeLinePending() {
+  return (
+    <div
+      aria-hidden
+      data-testid="home-line-pending"
+      className="min-h-24 rounded-card border border-ink-600/70 bg-ink-800/40 p-4"
+    >
+      <span className="block h-5 w-3/4 animate-pulse rounded bg-ink-700/70 motion-reduce:animate-none" />
     </div>
   );
 }

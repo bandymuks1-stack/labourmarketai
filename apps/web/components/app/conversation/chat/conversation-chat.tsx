@@ -276,6 +276,25 @@ function PersonalWorkspaceIntroStream({
   return <PersonalWorkspaceIntro intro={intro} labels={labels} onAction={onAction} />;
 }
 
+/** The S2 block's place while its slow readiness read streams (home CLS P0,
+ *  2026-10-26). It used to be `fallback={null}`: the block (a compact card,
+ *  ~250–300 px) then appeared out of nothing above the greeting and pushed
+ *  the greeting and the centred composer down. The page hands a payload ONLY
+ *  when the block can render at all (`personalIntroMayShow`, decided from
+ *  facts it already holds), so this reservation is drawn only where a block
+ *  is genuinely coming — never a placeholder for something that cannot. */
+function PersonalWorkspaceIntroPending() {
+  return (
+    <div
+      aria-hidden
+      data-testid="personal-workspace-intro-pending"
+      className="min-h-64 rounded-card border border-ink-600/70 bg-ink-800/40 p-4"
+    >
+      <SkeletonText lines={4} />
+    </div>
+  );
+}
+
 /**
  * An e-mail address the person already typed in the sentence ("pakviesk
  * klientą jonas@imone.lt"). Chat-first rule: never ask for a fact the sentence
@@ -8256,11 +8275,13 @@ export function ConversationChat({
                 openingContext && !script ? (
                   openingContext
                 ) : personalIntroPayload && !script ? (
-                  /* Invisible boundary (#1011): the intro's slow readiness
-                     reads stream in AFTER the shell — the opening composition
-                     renders immediately and the block appears when known,
-                     exactly like the layout's SpineStream. */
-                  <Suspense fallback={null}>
+                  /* Own boundary (#1011): the intro's slow readiness reads
+                     stream in AFTER the shell — the opening composition
+                     renders immediately, exactly like the layout's
+                     SpineStream. The pending state RESERVES the block's
+                     space (home CLS P0): a payload only exists when the
+                     block can render, so nothing is reserved in vain. */
+                  <Suspense fallback={<PersonalWorkspaceIntroPending />}>
                     <PersonalWorkspaceIntroStream
                       payload={personalIntroPayload}
                       onAction={handlePanelChip}
