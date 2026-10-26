@@ -90,6 +90,8 @@ on:
           - ux-metrics
           # Owner decision 2026-10-26 §5: locale vs server load behind the slow non-LT pages. Dispatch only.
           - lcp-locale-probe
+          # Owner-approved 2026-10-26: two synthetic sessions at once vs one (read-only). Dispatch only.
+          - concurrency-probe
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -387,6 +389,7 @@ jobs:
             lmc-csrf) SPEC=tests/e2e/prod-lmc-csrf.spec.ts ;;
             ux-metrics) SPEC=tests/e2e/prod-ux-metrics.spec.ts ;;
             lcp-locale-probe) SPEC=tests/e2e/prod-lcp-locale-probe.spec.ts ;;
+            concurrency-probe) SPEC=tests/e2e/prod-concurrency-probe.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
