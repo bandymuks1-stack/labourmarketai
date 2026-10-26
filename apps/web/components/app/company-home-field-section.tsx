@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Ban,
   Bell,
+  Briefcase,
   CheckCircle2,
   CircleDashed,
   FileWarning,
@@ -23,15 +24,21 @@ import { PersonIdentityCard } from "@/components/app/identity/person-identity-ca
 import { personMonogram } from "@/lib/visual/avatar-monogram";
 import { createUtcFormatter } from "@/lib/time/display";
 import { CAPABILITY_CHOICES } from "@/lib/organizations/capability-choices";
+import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 import type { CustomerRequestRow } from "@/lib/buyer/customer-requests";
 import type { ClientConnectionInvite } from "@/lib/agency/bridge-model";
 import type { AgencyClient } from "@/lib/agency/clients-model";
 import {
   COMPANY_HOME_BLOCK_LIMIT,
+  COMPANY_OFFERS_HREF,
+  COMPANY_OFFER_INTAKE_HREF,
   attentionChipHref,
+  deriveHomeOffers,
   deriveNeedFit,
   deriveOutlookGaps,
   selectOpenNeeds,
+  type HomeOffersState,
+  type HomeReadbackSlice,
   type RiskSignal,
 } from "@/lib/company/company-home-field-model";
 import type { CompanyHomeField, HomeProjectRow } from "@/lib/company/company-home-field";
@@ -106,6 +113,94 @@ export async function CompanyFirstNeedCard() {
   );
 }
 
+/**
+ * WHAT YOU OFFER (activation audit 2026-10-26 §2) — an agency's saved item is
+ * an OFFER, and until now its home showed only needs, so after saving it found
+ * nothing where it landed. The rows are the SAME canonical read the Needs door
+ * lists (`listOwnCustomerRequests`, direction `supply`), handed down by the
+ * page — no second read, no second store. Each state says what is true; the
+ * links are quiet (the screen keeps one primary action) and lead to the Needs
+ * door's own list of offers, or, with none yet, to the offer intake.
+ */
+export async function CompanyHomeOffers({ state }: { readonly state: HomeOffersState }) {
+  if (state.kind === "hidden") return null;
+  const t = await getTranslations("companyHome");
+  const tReadback = await getTranslations("demandReadback");
+  // The offer intake keeps the ONE label it already has on the Needs door.
+  const tOffer = await getTranslations("auth.dashboard.wow.demand.partner");
+  const synthetic = {
+    hiringWorkers: tReadback("syntheticTitle.hiringWorkers"),
+    agencyPartnership: tReadback("syntheticTitle.agencyPartnership"),
+  };
+  return (
+    <section
+      aria-labelledby="company-home-offers-title"
+      data-testid="company-home-offers"
+      data-state={state.kind}
+      className="flex min-w-0 flex-col gap-2 rounded-card border border-ink-600 bg-ink-800/40 p-3"
+    >
+      <h3 id="company-home-offers-title" className="inline-flex items-center gap-1.5 font-display text-sm font-semibold text-text-primary">
+        <Briefcase className="h-4 w-4 text-brand-cyan" aria-hidden />
+        {t("offers.heading")}
+      </h3>
+      {state.kind === "unreadable" ? (
+        <p className="text-sm text-text-muted" data-testid="company-home-offers-unreadable">{t("offers.unreadable")}</p>
+      ) : state.kind === "none" ? (
+        <>
+          <p className="text-sm text-text-secondary" data-testid="company-home-offers-empty">{t("offers.empty")}</p>
+          <Link href={COMPANY_OFFER_INTAKE_HREF as "/dashboard"} className={`${ACTION_LINK} w-fit`} data-testid="company-home-offers-new">
+            {tOffer("cta")}
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+        </>
+      ) : (
+        <>
+          <p className="text-meta leading-relaxed text-text-secondary" data-testid="company-home-offers-note">{t("offers.note")}</p>
+          {state.kind === "none-open" ? (
+            <p className="text-sm text-text-secondary" data-testid="company-home-offers-none-open">
+              {t("offers.noneOpen")}
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-1">
+              {state.rows.map((o) => (
+                <li
+                  key={o.id}
+                  className={`flex flex-col gap-1 rounded-control bg-ink-900/40 px-2.5 py-1.5 ${TONE_EDGE.now}`}
+                  data-testid="company-home-offer"
+                  data-status={o.status}
+                >
+                  <span className="min-w-0 break-words text-sm text-text-primary">
+                    {resolveDemandTitle(o.title, synthetic)}
+                  </span>
+                  <span className="font-mono text-meta text-text-muted">
+                    {[
+                      t(`missing.status.${o.status}`),
+                      o.teamSize ? t("missing.people", { count: o.teamSize }) : null,
+                      o.startPeriod ? t("missing.from", { period: o.startPeriod }) : null,
+                      o.location ?? null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {state.kind === "list" && state.more > 0 ? (
+            <p className="text-meta text-text-muted" data-testid="company-home-offers-more">
+              {t("offers.more", { count: state.more })}
+            </p>
+          ) : null}
+          <Link href={COMPANY_OFFERS_HREF as "/dashboard"} className={`${ACTION_LINK} w-fit`} data-testid="company-home-offers-open">
+            {t("offers.open")}
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+        </>
+      )}
+    </section>
+  );
+}
+
 export interface CompanyHomePartners {
   /** Agencies connected to (or inviting) this company — client side of the bridge. */
   readonly agencies: readonly ClientConnectionInvite[] | null;
@@ -120,6 +215,7 @@ export async function CompanyHomeFieldSection({
   capabilities,
   field,
   needs,
+  offers,
   partners,
   companyType = null,
 }: {
@@ -133,6 +229,8 @@ export async function CompanyHomeFieldSection({
     | { readonly kind: "ok"; readonly rows: readonly CustomerRequestRow[] }
     | { readonly kind: "needs-migration" }
     | { readonly kind: "error" };
+  /** The SAME read's supply rows — the organisation's own saved offers. */
+  readonly offers: HomeReadbackSlice;
   readonly partners: CompanyHomePartners;
 }) {
   const t = await getTranslations("companyHome");
@@ -140,11 +238,18 @@ export async function CompanyHomeFieldSection({
   // field and holds the screen's ONE primary action, so the field's own need
   // door and "create the first project" step down to the quiet grammar —
   // both stay, neither competes. A failed needs read keeps the field as is.
+  const needsDoor = resolveNeedsAudience({ companyType, capabilities });
   const needFirst = isFirstNeed({
     hasCompany: true,
-    audience: resolveNeedsAudience({ companyType, capabilities }).audience,
+    audience: needsDoor.audience,
     readback: needs,
   });
+  // WHAT YOU OFFER: the same audience rule decides whether the block shows.
+  const offersState = deriveHomeOffers({ ...needsDoor, offers });
+  // An organisation whose Needs door opens on an OFFER is not shown a door
+  // labelled "Aprašyti poreikį" that lands on the offer form — its door to the
+  // offer form lives in the offers block (one label, one meaning).
+  const showNeedDoor = needsDoor.audience !== "offer";
   const tRoot = await getTranslations();
   const tStatus = await getTranslations("projects.map.status");
   // UTC-pinned (W12): the canonical formatter handles date-only strings and
@@ -247,6 +352,9 @@ export async function CompanyHomeFieldSection({
           </a>
         </div>
       </header>
+
+      {/* ── what this organisation offers: an agency's saved offers ── */}
+      <CompanyHomeOffers state={offersState} />
 
       {/* ── projects in time: one row per active project ── */}
       <div className="flex flex-col gap-2" data-testid="company-home-projects">
@@ -829,11 +937,13 @@ export async function CompanyHomeFieldSection({
               </Link>
             </div>
           ) : null}
-          <NeedDoorLink
-            surface="company_home_field"
-            testId="company-home-need-new"
-            className={`${needFirst ? ACTION_LINK : PRIMARY_LINK} mt-auto w-fit`}
-          />
+          {showNeedDoor ? (
+            <NeedDoorLink
+              surface="company_home_field"
+              testId="company-home-need-new"
+              className={`${needFirst ? ACTION_LINK : PRIMARY_LINK} mt-auto w-fit`}
+            />
+          ) : null}
         </section>
 
         {/* needs you — the chat's opening brief, without the chat */}

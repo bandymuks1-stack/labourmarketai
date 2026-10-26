@@ -1885,6 +1885,15 @@
       "interest": "{count, plural, =1 {1 person showed interest in your needs} other {# people showed interest in your needs}}",
       "interestCta": "See who"
     },
+    "offers": {
+      "heading": "What you offer",
+      "note": "Saved in your workspace. Employers cannot search offers yet, so nobody has been contacted about them.",
+      "empty": "You have not saved an offer yet. Describe the people or team you can provide — the offer is saved and shown here.",
+      "noneOpen": "No open offers — the earlier ones are closed.",
+      "more": "{count, plural, =1 {1 more offer} other {# more offers}}",
+      "open": "See your offers",
+      "unreadable": "Your offers could not be read right now."
+    },
     "attention": {
       "heading": "Needs you",
       "unavailable": "Could not be read right now — nothing here is confirmed as clear.",
@@ -4443,7 +4452,8 @@
             "notesLabel": "Extra notes",
             "notesPlaceholder": "Anything else worth knowing",
             "submittedHeading": "What you submitted:",
-            "doneScoutingLink": "View the request and its matches"
+            "doneScoutingLink": "View the request and its matches",
+            "doneOffersLink": "View your offers"
           },
           "hire": {
             "title": "Find a worker or team",

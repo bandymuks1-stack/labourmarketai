@@ -15,7 +15,8 @@ import { test, expect, type Browser, type Page } from "./prod-walk";
  *   worker  qa.worker+multiw  — Vytas Darbininkas, joins the agency roster
  *   owner   qa.owner+multiw   — QA-SYNTHETIC Alfa, the client
  * Every step is idempotent: a rerun finds the org, roster link and active
- * connection from earlier runs and continues from there.
+ * connection from earlier runs and continues from there. A-1b saves one
+ * synthetic offer per run (offers are not metered against the open-need limit).
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const AGENCY = "QA-SYNTHETIC Agentūra";
@@ -23,6 +24,7 @@ const ALFA = "QA-SYNTHETIC Alfa";
 const OWNER_EMAIL = "qa.owner+multiw@labourmarket.ai";
 const WORKER_EMAIL = "qa.worker+multiw@labourmarket.ai";
 const NEED_ROLE = `QA-SYNTHETIC suvirintojai ${RUN}`;
+const OFFER_ROLE = `QA-SYNTHETIC montuotojų komanda ${RUN}`;
 const MSG = `QA-SYNTHETIC ${RUN}: kada galėtų pradėti?`;
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["agency", "worker", "owner"].every((s) => existsSync(state(s)));
@@ -81,6 +83,37 @@ test("A-1. the agency has its own organization (set up once, through the product
   await page.goto("/lt/dashboard/company/partners");
   await expect(page.getByTestId("agency-bridge-section")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("agency-bridge-gated")).toHaveCount(0);
+  await close();
+});
+
+test("A-1b. the agency saves an offer and finds it on its home, one click from the Needs door's list", async ({ browser }) => {
+  const { page, close } = await as(browser, "agency");
+  await page.goto("/lt/dashboard");
+  await workspace(page, AGENCY);
+  // The Needs door opens on the OFFER for an agency (resolveNeedsAudience).
+  await page.goto("/lt/dashboard/company/needs?audience=offer#demand-intake");
+  await page.getByTestId("demand-role").fill(OFFER_ROLE);
+  await page.getByTestId("demand-description").fill(`QA-SYNTHETIC ${RUN}: synthetic offer for the production agency walk, 2 people.`);
+  await page.getByTestId("demand-next").click();
+  const size = page.getByTestId("demand-team-size");
+  if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await page.getByTestId("demand-next").click();
+  await page.getByTestId("demand-create").click();
+  await expect(page.getByTestId("demand-done")).toBeVisible({ timeout: 30_000 });
+
+  // Where the agency lands: its home names the saved offer.
+  await page.goto("/lt/dashboard/company");
+  const block = page.getByTestId("company-home-offers");
+  await expect(block).toBeVisible({ timeout: 30_000 });
+  await expect(block).toHaveAttribute("data-state", "list");
+  await expect(block.getByTestId("company-home-offer").filter({ hasText: RUN }).first()).toBeVisible({ timeout: 30_000 });
+
+  // The block's link opens the Needs door's own list of offers.
+  await block.getByTestId("company-home-offers-open").click();
+  await page.waitForURL(/\/dashboard\/company\/needs/, { timeout: 30_000 });
+  const list = page.getByTestId("supply-offers-readback");
+  await expect(list).toBeVisible({ timeout: 30_000 });
+  await expect(list.getByTestId("demand-readback-row").filter({ hasText: RUN }).first()).toBeVisible({ timeout: 30_000 });
   await close();
 });
 

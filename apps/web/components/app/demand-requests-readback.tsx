@@ -402,13 +402,15 @@ export function DemandRequestsReadback({
           offered capacity — an empty supply section would be noise for every
           employer who never offers any. The note states the honest gap: the
           offer is stored and readable here, and employer-facing discovery of
-          it is not live yet. */}
+          it is not live yet. `#agency-offers` is the address the company
+          home's "what you offer" block links to (COMPANY_OFFERS_HREF). */}
       {offers.length > 0 && (
         <Card compact>
         <section
+          id="agency-offers"
           aria-labelledby="supply-readback-title"
           data-testid="supply-offers-readback"
-          className="flex flex-col gap-3"
+          className="flex scroll-mt-20 flex-col gap-3"
         >
           <div className="flex flex-col gap-1">
             <h2

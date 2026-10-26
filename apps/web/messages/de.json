@@ -1885,6 +1885,15 @@
       "interest": "{count, plural, =1 {1 Person hat Interesse an Ihrem Bedarf gezeigt} other {# Personen haben Interesse an Ihrem Bedarf gezeigt}}",
       "interestCta": "Ansehen"
     },
+    "offers": {
+      "heading": "Was Sie anbieten",
+      "note": "In Ihrem Arbeitsbereich gespeichert. Arbeitgeber können Angebote noch nicht durchsuchen, daher hat sich dazu noch niemand gemeldet.",
+      "empty": "Sie haben noch kein Angebot gespeichert. Beschreiben Sie, welche Menschen oder welches Team Sie stellen können — das Angebot wird gespeichert und hier angezeigt.",
+      "noneOpen": "Keine offenen Angebote — die früheren sind geschlossen.",
+      "more": "{count, plural, =1 {1 weiteres Angebot} other {# weitere Angebote}}",
+      "open": "Angebote ansehen",
+      "unreadable": "Ihre Angebote konnten gerade nicht gelesen werden."
+    },
     "attention": {
       "heading": "Braucht Sie",
       "unavailable": "Konnte gerade nicht gelesen werden — nichts hier ist als erledigt bestätigt.",
@@ -4443,7 +4452,8 @@
             "notesLabel": "Zusätzliche Hinweise",
             "notesPlaceholder": "Alles Weitere, das wissenswert ist",
             "submittedHeading": "Was Sie übermittelt haben:",
-            "doneScoutingLink": "Anfrage und zugehörige Matches ansehen"
+            "doneScoutingLink": "Anfrage und zugehörige Matches ansehen",
+            "doneOffersLink": "Deine Angebote ansehen"
           },
           "hire": {
             "title": "Arbeitskraft oder Team finden",
