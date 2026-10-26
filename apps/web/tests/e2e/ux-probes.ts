@@ -34,8 +34,8 @@ export const AXE_SOURCE: string | null = (() => {
 
 /** Performance buffers, installed before any page script runs. */
 export function installObservers(): void {
-  type Ux = { lcp: number; cls: number; lt: number[][]; loaf: number[][] };
-  const ux: Ux = { lcp: 0, cls: 0, lt: [], loaf: [] };
+  type Ux = { lcp: number; cls: number; lt: number[][]; loaf: number[][]; clsTop: string; clsTopValue: number };
+  const ux: Ux = { lcp: 0, cls: 0, lt: [], loaf: [], clsTop: "", clsTopValue: 0 };
   (window as unknown as { __ux: Ux }).__ux = ux;
   const observe = (type: string, onEntry: (e: PerformanceEntry) => void) => {
     try {
@@ -48,8 +48,18 @@ export function installObservers(): void {
     ux.lcp = e.startTime;
   });
   observe("layout-shift", (e) => {
-    const s = e as unknown as { value: number; hadRecentInput: boolean };
-    if (!s.hadRecentInput) ux.cls += s.value; // plain sum, not the session-window CLS (approximate)
+    const s = e as unknown as { value: number; hadRecentInput: boolean; sources?: { node?: Node | null }[] };
+    if (s.hadRecentInput) return;
+    ux.cls += s.value; // plain sum, not the session-window CLS (approximate)
+    // WHICH block moved most: the nearest data-testid (or tag) of the largest
+    // shift's first source — a component name, never page text.
+    if (s.value > ux.clsTopValue) {
+      const node = s.sources?.find((x) => x.node)?.node;
+      const el = node instanceof Element ? node : node?.parentElement ?? null;
+      const named = el?.closest("[data-testid]");
+      ux.clsTop = named?.getAttribute("data-testid") ?? el?.tagName.toLowerCase() ?? "";
+      ux.clsTopValue = s.value;
+    }
   });
   observe("longtask", (e) => ux.lt.push([e.startTime, e.duration]));
   observe("long-animation-frame", (e) =>
@@ -330,7 +340,7 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
 
   // Web vitals + long tasks / long animation frames AFTER the load event (the observation window).
   const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
-  const ux = (window as unknown as { __ux?: { lcp: number; cls: number; lt: number[][]; loaf: number[][] } }).__ux;
+  const ux = (window as unknown as { __ux?: { lcp: number; cls: number; lt: number[][]; loaf: number[][]; clsTopValue: number } }).__ux;
   const loadEnd = nav?.loadEventEnd || performance.now();
   out.ttfb_ms = nav ? nav.responseStart : 0;
   out.dcl_ms = nav ? nav.domContentLoadedEventEnd : 0;
@@ -338,6 +348,7 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
   out.html_kb = nav ? nav.encodedBodySize / 1024 : 0;
   out.lcp_ms = ux?.lcp ?? 0;
   out.cls_x10000 = Math.round((ux?.cls ?? 0) * 10_000);
+  out.cls_top_x10000 = Math.round((ux?.clsTopValue ?? 0) * 10_000);
   const lt = (ux?.lt ?? []).filter(([s]) => s! >= loadEnd);
   out.longtasks_total = ux?.lt.length ?? 0;
   out.longtasks_after = lt.length;
@@ -387,4 +398,11 @@ export async function runAxe(page: Page): Promise<AxeCounts | null> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+/** The largest layout shift's source, as a component name only: the nearest
+ *  data-testid (or a tag), reduced to [A-Za-z0-9_-] so no page text can leak. */
+export function clsTopSource(): string {
+  const ux = (window as unknown as { __ux?: { clsTop?: string } }).__ux;
+  return (ux?.clsTop ?? "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 60) || "none";
 }
