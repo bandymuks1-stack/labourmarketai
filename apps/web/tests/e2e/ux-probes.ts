@@ -156,6 +156,15 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
     if (el instanceof HTMLInputElement && el.value) return true; // button-type inputs
     return false;
   };
+  // WHICH components hold the small targets / primary CTAs: nearest
+  // data-testid (else tag), counted — component names only, never text.
+  const smallBy = new Map<string, number>();
+  const ctaBy = new Map<string, number>();
+  const componentTally = (el: Element, m: Map<string, number>) => {
+    const k = el.closest("[data-testid]")?.getAttribute("data-testid") ?? el.tagName.toLowerCase();
+    m.set(k, (m.get(k) ?? 0) + 1);
+  };
+  (window as unknown as { __uxComponents?: unknown }).__uxComponents = { smallBy, ctaBy };
   let tapTotal = 0;
   let tapSmall = 0;
   let unlabeled = 0;
@@ -180,7 +189,10 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
       const lr = lab?.getBoundingClientRect();
       if (lr && lr.width >= tapMin && lr.height >= tapMin) small = false;
     }
-    if (small) tapSmall++;
+    if (small) {
+      tapSmall++;
+      componentTally(el, smallBy);
+    }
     const isField = el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && !["button", "submit", "reset", "image"].includes(el.type));
     if (!hasName(el)) {
       if (isField) unlabeledFields++;
@@ -190,7 +202,10 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
     if (el.tagName === "A" || el.tagName === "BUTTON") {
       // Design system: Button variant="primary" and buttonLinkClassName() carry `bg-gradient-cta`
       // (components/ui/Button.tsx); a solid brand fill is the other "primary-looking" pattern.
-      if (/\bbg-gradient-cta\b/.test(cls)) primary++;
+      if (/\bbg-gradient-cta\b/.test(cls)) {
+        primary++;
+        componentTally(el, ctaBy);
+      }
       else if (/(^|\s)bg-brand-blue(\s|$)/.test(cls)) brandFill++;
     }
   }
@@ -405,4 +420,20 @@ export async function runAxe(page: Page): Promise<AxeCounts | null> {
 export function clsTopSource(): string {
   const ux = (window as unknown as { __ux?: { clsTop?: string } }).__ux;
   return (ux?.clsTop ?? "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 60) || "none";
+}
+
+/** Top components holding small tap targets and primary CTAs, as
+ *  `name:count,name:count` — names reduced to [A-Za-z0-9_-], no page text. */
+export function componentTops(): { small: string; cta: string } {
+  const c = (window as unknown as { __uxComponents?: { smallBy: Map<string, number>; ctaBy: Map<string, number> } }).__uxComponents;
+  const fmt = (m: Map<string, number> | undefined, n: number) =>
+    m && m.size
+      ? [...m]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, n)
+          // 500–504 are zero-padded: walk-brakes reads a bare 50x as an HTTP 5xx.
+          .map(([k, v]) => `${k.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 40) || "x"}:${v >= 500 && v <= 504 ? `0${v}` : v}`)
+          .join(",")
+      : "none";
+  return { small: fmt(c?.smallBy, 3), cta: fmt(c?.ctaBy, 8) };
 }
