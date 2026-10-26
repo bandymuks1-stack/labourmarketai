@@ -4452,7 +4452,8 @@
             "notesLabel": "Extra opmerkingen",
             "notesPlaceholder": "Alles wat verder nog nuttig is om te weten",
             "submittedHeading": "Wat je hebt ingediend:",
-            "doneScoutingLink": "Bekijk de aanvraag en de bijbehorende matches"
+            "doneScoutingLink": "Bekijk de aanvraag en de bijbehorende matches",
+            "doneOffersLink": "Bekijk je aanbiedingen"
           },
           "hire": {
             "title": "Vind een werknemer of ploeg",

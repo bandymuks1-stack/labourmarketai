@@ -4452,7 +4452,8 @@
             "notesLabel": "Extra notes",
             "notesPlaceholder": "Anything else worth knowing",
             "submittedHeading": "What you submitted:",
-            "doneScoutingLink": "View the request and its matches"
+            "doneScoutingLink": "View the request and its matches",
+            "doneOffersLink": "View your offers"
           },
           "hire": {
             "title": "Find a worker or team",

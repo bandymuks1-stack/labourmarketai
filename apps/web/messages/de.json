@@ -4452,7 +4452,8 @@
             "notesLabel": "Zusätzliche Hinweise",
             "notesPlaceholder": "Alles Weitere, das wissenswert ist",
             "submittedHeading": "Was Sie übermittelt haben:",
-            "doneScoutingLink": "Anfrage und zugehörige Matches ansehen"
+            "doneScoutingLink": "Anfrage und zugehörige Matches ansehen",
+            "doneOffersLink": "Deine Angebote ansehen"
           },
           "hire": {
             "title": "Arbeitskraft oder Team finden",

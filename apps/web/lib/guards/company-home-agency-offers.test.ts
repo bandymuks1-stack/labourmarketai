@@ -249,3 +249,12 @@ describe("an offer-first organisation is never shown a need door that opens the 
     expect(resolveNeedsAudience({ companyType: "construction", capabilities: [] }).audience).toBe("need");
   });
 });
+
+describe("a saved offer's next step is the offers list, not scouting", () => {
+  it("the form's success link follows the intent", () => {
+    const form = strip(read("components/app/demand-request-button.tsx"));
+    expect(form).toMatch(/intent === "hire_workers" \? \(\s*<Link\s+href=\{"\/dashboard\/company\/scouting" as "\/dashboard"\}/);
+    expect(form).toMatch(/href=\{"\/dashboard\/company\/needs#agency-offers" as "\/dashboard"\}[\s\S]{0,200}data-testid="demand-done-offers-link"/);
+    expect(strip(read(READBACK))).toMatch(/id="agency-offers"/);
+  });
+});

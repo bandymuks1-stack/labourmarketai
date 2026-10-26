@@ -4452,7 +4452,8 @@
             "notesLabel": "Dodatkowe uwagi",
             "notesPlaceholder": "Wszystko, co jeszcze warto wiedzieć",
             "submittedHeading": "Co zostało zgłoszone:",
-            "doneScoutingLink": "Zobacz zgłoszenie i jego dopasowania"
+            "doneScoutingLink": "Zobacz zgłoszenie i jego dopasowania",
+            "doneOffersLink": "Zobacz swoje oferty"
           },
           "hire": {
             "title": "Znajdź pracownika lub zespół",

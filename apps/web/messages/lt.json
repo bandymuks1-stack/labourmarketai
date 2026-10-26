@@ -4452,7 +4452,8 @@
             "notesLabel": "Papildomos pastabos",
             "notesPlaceholder": "Bet kas, ką dar svarbu žinoti",
             "submittedHeading": "Ką pateikei:",
-            "doneScoutingLink": "Peržiūrėti užklausą ir atitikmenis"
+            "doneScoutingLink": "Peržiūrėti užklausą ir atitikmenis",
+            "doneOffersLink": "Peržiūrėti savo pasiūlymus"
           },
           "hire": {
             "title": "Ieškoti darbuotojo ar komandos",

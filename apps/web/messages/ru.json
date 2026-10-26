@@ -4452,7 +4452,8 @@
             "notesLabel": "Дополнительные заметки",
             "notesPlaceholder": "Что ещё важно знать",
             "submittedHeading": "Что вы отправили:",
-            "doneScoutingLink": "Открыть заявку и совпадения"
+            "doneScoutingLink": "Открыть заявку и совпадения",
+            "doneOffersLink": "Открыть ваши предложения"
           },
           "hire": {
             "title": "Найти работника или команду",
