@@ -1,7 +1,6 @@
 {
   "companyModel": {
     "title": "Bedrijfsbeheer",
-    "primary": "Behoefte publiceren",
     "need": "Wat we nodig hebben",
     "offer": "Wat we aanbieden",
     "market": "Marktplaats",
@@ -1872,7 +1871,6 @@
       "openNeed": "Behoefte openen",
       "gapsRow": "{count, plural, =1 {1 persoon op {project} mist documenten} other {# mensen op {project} missen documenten}}",
       "gapsCta": "Documenten controleren",
-      "needsCta": "Een behoefte beschrijven",
       "noOneFrom": "Vanaf {date} is niemand vrij",
       "unclear": "{count, plural, =1 {1 persoon heeft werk zonder data — vrije tijd kan lager zijn} other {# personen hebben werk zonder data — vrije tijd kan lager zijn}}",
       "fit": {
@@ -2443,6 +2441,13 @@
         "conflicts": "Mensen met een planningsconflict (overlappend werk of verlof)",
         "unreadable": "kon niet worden gelezen",
         "clientReview": "Werk dat wacht op uw beslissing als opdrachtgever"
+      },
+      "needDoor": {
+        "label": "Een behoefte beschrijven",
+        "firstTitle": "Begin met wat je nodig hebt",
+        "firstBody": "Beschrijf in je eigen woorden welk werk er moet gebeuren, waar en wanneer. De behoefte wordt voor je bedrijf opgeslagen; daarna kun je bekijken wie het zou kunnen doen.",
+        "noNeedYet": "Op dit moment niets nodig?",
+        "noNeedYetInvite": "Nodig je mensen uit"
       }
     },
     "agency": {
@@ -14040,7 +14045,7 @@
       "agendaConflicts": "⚠ {count, plural, one {# overlappende verplichting gevonden} other {# overlappende verplichtingen gevonden}} — dit plan is fysiek onmogelijk; controleer de kalender.",
       "chipAgenda": "Mijn planning",
       "userAgenda": "Toon mijn planning",
-      "chipNeedWorkers": "Ik zoek werknemers",
+      "chipNeedWorkers": "Een behoefte beschrijven",
       "chipCandidates": "Kandidaten",
       "chipCompanyHub": "Bedrijfsruimte",
       "chipEduInviteLearner": "Een cursist uitnodigen",
@@ -18260,7 +18265,6 @@
       "now": {
         "subtitle": "Wat er gebeurt, wat uw beslissing vraagt en waar u verder gaat.",
         "primaryActions": "Belangrijkste acties",
-        "newNeed": "Nieuwe personeelsbehoefte",
         "newProject": "Nieuw project",
         "invite": "Iemand uitnodigen",
         "importHistory": "Historische gegevens importeren"

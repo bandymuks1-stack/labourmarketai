@@ -34,6 +34,7 @@ import { countRosterConflicts } from "@/lib/planning/roster-conflicts";
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
+import { NeedDoorLink } from "@/components/app/need-door-link";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 
@@ -244,12 +245,6 @@ export default async function CompanyDashboardPage({
 
   const primaryActions = [
     {
-      key: "need",
-      href: "/dashboard/company/needs#demand-intake",
-      label: tDoors("newNeed"),
-      icon: <UserSearch className="h-4 w-4" aria-hidden />,
-    },
-    {
       key: "project",
       href: "/dashboard/company/projects/new",
       label: tDoors("newProject"),
@@ -364,6 +359,7 @@ export default async function CompanyDashboardPage({
       {rHomeField ? (
         <CompanyHomeFieldSection
           locale={locale}
+          companyType={companyRow?.companyType ?? null}
           capabilities={declaredCapabilities}
           field={rHomeField}
           needs={
@@ -401,6 +397,10 @@ export default async function CompanyDashboardPage({
         data-testid="company-primary-actions"
         className="flex flex-wrap gap-2"
       >
+        <NeedDoorLink surface="company_home_actions" testId="company-primary-action-need"
+          icon={<UserSearch className="h-4 w-4" aria-hidden />}
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 py-2 text-sm font-semibold text-brand-blue transition-colors hover:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+        />
         {primaryActions.map((a) => (
           <Link
             key={a.key}
