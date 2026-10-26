@@ -47,11 +47,13 @@ import { createClient } from "@supabase/supabase-js";
 
 import {
   PROD_QA_AGENCY_EMAIL,
+  PROD_QA_FRESH_IDENTITIES,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
   assertProdQaTarget,
   describeProdQaTarget,
 } from "../lib/testing/prod-qa-guard";
+import { findAuthUserByEmail } from "../lib/testing/prod-qa-find-user";
 
 const ACK = "--i-understand-production";
 
@@ -105,7 +107,7 @@ async function main(): Promise<void> {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const existing = await findByEmail(admin, target.email);
+  const existing = await findAuthUserByEmail(admin, target.email);
 
   if (revoke) {
     if (!existing) {
@@ -135,6 +137,10 @@ async function main(): Promise<void> {
     return;
   }
 
+  // A FRESH identity starts exactly like a real new account: no role and no
+  // locale in its metadata, so the profile trigger leaves `active_role` empty
+  // and the onboarding wizard — the thing being proven — asks for everything.
+  const fresh = PROD_QA_FRESH_IDENTITIES.includes(target.email);
   const { data, error } = await admin.auth.admin.createUser({
     email: target.email,
     // No password. Sessions are minted through a magic-link OTP, so this
@@ -142,13 +148,17 @@ async function main(): Promise<void> {
     email_confirm: true,
     app_metadata: {
       qa_synthetic: true,
-      qa_purpose: "labourmarket.ai production E2E — EMPLOYEE_BETA_PRODUCTION_GATE",
+      qa_purpose: fresh
+        ? "labourmarket.ai production E2E — fresh activation (owner decision 2026-10-26)"
+        : "labourmarket.ai production E2E — EMPLOYEE_BETA_PRODUCTION_GATE",
       qa_provisioned_by: "owner",
     },
-    user_metadata: {
-      role: target.email === PROD_QA_AGENCY_EMAIL ? "agency" : "worker",
-      locale: "lt",
-    },
+    user_metadata: fresh
+      ? {}
+      : {
+          role: target.email === PROD_QA_AGENCY_EMAIL ? "agency" : "worker",
+          locale: "lt",
+        },
   });
 
   if (error || !data?.user) {
@@ -164,29 +174,6 @@ async function main(): Promise<void> {
     "[prod-qa] next: mint a session with scripts/prod-qa-mint-session.ts, " +
       "then run tests/e2e/employee-beta-gate.spec.ts.",
   );
-}
-
-/** Page through users to find one by email. The Admin API has no direct
- *  get-by-email, and a wrong-user match here would be the worst possible bug,
- *  so the comparison is exact and case-normalised. */
-async function findByEmail(
-  // The Admin API surface only; typing this as the full generic client fights
-  // supabase-js's schema generics for no benefit in a one-shot script.
-  admin: { auth: { admin: { listUsers: (o: { page: number; perPage: number }) => Promise<{
-    data: { users: { id: string; email?: string | null }[] } | null;
-    error: { message: string } | null;
-  }> } } },
-  email: string,
-): Promise<{ id: string } | null> {
-  for (let page = 1; page <= 20; page += 1) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
-    if (error) throw new Error(`listUsers failed: ${error.message}`);
-    const users = data?.users ?? [];
-    const hit = users.find((u) => (u.email ?? "").trim().toLowerCase() === email);
-    if (hit) return { id: hit.id };
-    if (users.length < 200) return null;
-  }
-  return null;
 }
 
 function fail(message: string): void {
