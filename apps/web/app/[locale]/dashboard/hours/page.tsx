@@ -7,11 +7,6 @@ import { WorkHoursQuickEntry } from "@/components/app/work-hours-quick-entry";
 import { getHoursPageData } from "@/lib/work-hours/hours-page-data";
 import { isValidWorkDate } from "@/lib/work-hours/allocations-model";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
-import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
-
-// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
-export const generateMetadata = dashboardPageMetadata("/dashboard/hours", "workHours.title");
-
 
 /**
  * WORK HOURS — the operator's daily surface.

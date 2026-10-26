@@ -624,11 +624,6 @@ export type PageMetaInput = {
   description?: string;
 };
 
-/** "<page> · LabourMarket.ai" — the one title shape, public and signed-in. */
-export function brandedTitle(title: string): string {
-  return `${title} · ${BRAND_NAME}`;
-}
-
 /**
  * Build a complete, SEO-correct Metadata object for a public page:
  * brand-aware title, canonical on the apex, hreflang alternates,
@@ -642,7 +637,7 @@ export function buildPageMetadata({
 }: PageMetaInput): Metadata {
   const active = resolveActiveLocale(locale);
   const brand = BRAND_SEO[active];
-  const resolvedTitle = title ? brandedTitle(title) : brand.title;
+  const resolvedTitle = title ? `${title} · ${BRAND_NAME}` : brand.title;
   const resolvedDescription = description ?? brand.description;
   const url = localizedUrl(active, path);
   // Brand share card (social-acquisition readiness v1): every public page

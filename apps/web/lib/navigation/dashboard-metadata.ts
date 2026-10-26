@@ -18,9 +18,12 @@ import { getTranslations } from "next-intl/server";
 
 import { getCoreNavItems, getHeaderOverflowNavItems } from "@/lib/config/navigation";
 import { activeNavItem, headerPlaceLabelKey } from "@/lib/navigation/header-place";
-import { brandedTitle } from "@/lib/seo/metadata";
+import { BRAND_NAME } from "@/lib/seo/metadata";
 
 const NAV_ITEMS = [...getCoreNavItems(), ...getHeaderOverflowNavItems({ isAdmin: true })];
+
+/** The public title shape ("Santechnikas · LabourMarket.ai", lib/seo/metadata.ts). */
+const brandedTitle = (title: string): string => `${title} · ${BRAND_NAME}`;
 
 /** The message key that names the page at `route` (a `/dashboard…` path). */
 export function dashboardTitleKey(route: string, headingKey?: string): string {

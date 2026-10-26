@@ -38,6 +38,17 @@ function lookup(messages: Record<string, unknown>, key: string): unknown {
   return key.split(".").reduce<unknown>((o, k) => (o && typeof o === "object" ? (o as Record<string, unknown>)[k] : undefined), messages);
 }
 
+/**
+ * Pages the title helper may not touch yet. /dashboard/hours sits under the
+ * owner's scoped product-gate waiver `work-hours-allocation-surface`, which
+ * lists the exact pull requests allowed to modify it — adding a PR there is
+ * the owner's call (decision 0015 / owner-waivers.mjs), so its title waits
+ * for that approval instead of widening the waiver.
+ */
+const NOT_YET: Record<string, string> = {
+  "/dashboard/hours": "owner-scoped product-gate waiver work-hours-allocation-surface",
+};
+
 const WIRED = /export const generateMetadata = dashboardPageMetadata\("([^"]+)"(?:, "([^"]+)")?\);/;
 
 const all = pages(DASH).map((file) => {
@@ -51,14 +62,21 @@ describe("every dashboard page names itself in the document title", () => {
     expect(all.length).toBeGreaterThan(50);
   });
 
-  it.each(all.map((p) => [p.route, p] as const))("%s is wired with its own route", (_route, p) => {
+  it("a page left out names its reason and is really not wired", () => {
+    for (const [route, reason] of Object.entries(NOT_YET)) {
+      expect(reason.length).toBeGreaterThan(10);
+      expect(all.find((p) => p.route === route)?.wired ?? null, route).toBeNull();
+    }
+  });
+
+  it.each(all.filter((p) => !NOT_YET[p.route]).map((p) => [p.route, p] as const))("%s is wired with its own route", (_route, p) => {
     expect(p.wired, `${p.route} does not export generateMetadata via dashboardPageMetadata`).not.toBeNull();
     expect(p.wired).toBe(p.route);
   });
 
   it.each(ACTIVE.map((l) => [l] as const))("every title resolves to real copy in %s", (locale) => {
     const messages = catalogue(locale);
-    for (const p of all) {
+    for (const p of all.filter((x) => !NOT_YET[x.route])) {
       const key = dashboardTitleKey(p.route, p.heading);
       const value = lookup(messages, key);
       expect(typeof value, `${locale}: ${p.route} → ${key}`).toBe("string");
