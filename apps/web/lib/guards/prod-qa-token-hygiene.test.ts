@@ -122,6 +122,12 @@ describe("6. sessions are revoked and deleted after every walk", () => {
     expect(step).toMatch(/scripts\/prod-qa-revoke-sessions\.ts/);
     expect(step).toMatch(/a session file survived cleanup/);
     expect(workflow.indexOf("Revoke and delete the synthetic sessions")).toBeLessThan(workflow.indexOf("- name: Upload result"));
+    // The revoke needs the session files: nothing may delete them before it
+    // (until 2026-10-26 a destroy step ran first and every revoke saw files=0).
+    const revokeAt = workflow.indexOf("- name: Revoke and delete the synthetic sessions");
+    const destroyAt = workflow.indexOf("- name: Destroy session files");
+    expect(destroyAt, "the belt-and-braces destroy runs after the revoke").toBeGreaterThan(revokeAt);
+    expect(workflow.slice(workflow.indexOf("- name: Walk"), revokeAt)).not.toMatch(/rm -f \S*storage-state/);
   });
   it("the revoke script logs each session out (scope=local) and deletes the file whatever the answer", () => {
     expect(revoke).toMatch(/\/auth\/v1\/logout\?scope=local/);
