@@ -320,6 +320,7 @@ jobs:
         run: node .github/scripts/walk-brakes.mjs health
 
       - name: Provision + mint the synthetic cast (allowlist only)
+        id: mint
         shell: bash
         run: |
           set -euo pipefail
@@ -440,11 +441,6 @@ jobs:
           fi
           exit "${code}"
 
-      - name: Destroy session files (always)
-        if: always()
-        shell: bash
-        run: rm -f apps/web/tests/e2e/.storage-state.prod-qa*.json
-
       # The repository is PUBLIC, so its artifacts are readable by any signed-in
       # GitHub user. Screenshots of production pages can show real companies'
       # open needs next to the synthetic cast, so they are NOT published — only
@@ -458,10 +454,23 @@ jobs:
       - name: Revoke and delete the synthetic sessions
         if: always()
         shell: bash
+        env:
+          # The mint step ran: session files MUST be here for the revoke. If
+          # none are, the revoke fails instead of reporting a clean 0/0.
+          PROD_QA_REVOKE_EXPECT_FILES: ${{ steps.mint.outcome == 'success' && '1' || '0' }}
         run: |
           cd apps/web
           pnpm exec tsx scripts/prod-qa-revoke-sessions.ts
           ls tests/e2e/.storage-state.prod-qa*.json 2>/dev/null && { echo "::error::a session file survived cleanup"; exit 1; } || echo "no session file left"
+
+      # AFTER the revoke, never before it: the revoke reads each session file to
+      # log that session out at Supabase, then deletes the file. When this step
+      # ran first (until 2026-10-26) the revoke found files=0 and revoked
+      # nothing, so every walk left one live session per minted identity.
+      - name: Destroy session files (always, belt and braces)
+        if: always()
+        shell: bash
+        run: rm -f apps/web/tests/e2e/.storage-state.prod-qa*.json
 
       - name: Upload result (no screenshots, no traces, no sessions)
         if: always()
