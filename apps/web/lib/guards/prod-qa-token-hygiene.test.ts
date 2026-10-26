@@ -128,6 +128,12 @@ describe("6. sessions are revoked and deleted after every walk", () => {
     const destroyAt = workflow.indexOf("- name: Destroy session files");
     expect(destroyAt, "the belt-and-braces destroy runs after the revoke").toBeGreaterThan(revokeAt);
     expect(workflow.slice(workflow.indexOf("- name: Walk"), revokeAt)).not.toMatch(/rm -f \S*storage-state/);
+    // A cleanup that did not do its job fails the run (no quiet 0/0 pass).
+    expect(workflow).toMatch(/PROD_QA_REVOKE_EXPECT_FILES: \$\{\{ steps\.mint\.outcome == 'success' && '1' \|\| '0' \}\}/);
+    expect(revoke).toMatch(/if \(revoked < seen\.size\) problems\.push/);
+    expect(revoke).toMatch(/PROD_QA_REVOKE_EXPECT_FILES === "1" && files\.length === 0/);
+    expect(revoke).toMatch(/process\.exitCode = 1;/);
+    expect(revoke).not.toMatch(/Never fail the run on cleanup/);
   });
   it("the revoke script logs each session out (scope=local) and deletes the file whatever the answer", () => {
     expect(revoke).toMatch(/\/auth\/v1\/logout\?scope=local/);

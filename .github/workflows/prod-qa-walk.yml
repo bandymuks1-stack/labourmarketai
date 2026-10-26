@@ -320,6 +320,7 @@ jobs:
         run: node .github/scripts/walk-brakes.mjs health
 
       - name: Provision + mint the synthetic cast (allowlist only)
+        id: mint
         shell: bash
         run: |
           set -euo pipefail
@@ -453,6 +454,10 @@ jobs:
       - name: Revoke and delete the synthetic sessions
         if: always()
         shell: bash
+        env:
+          # The mint step ran: session files MUST be here for the revoke. If
+          # none are, the revoke fails instead of reporting a clean 0/0.
+          PROD_QA_REVOKE_EXPECT_FILES: ${{ steps.mint.outcome == 'success' && '1' || '0' }}
         run: |
           cd apps/web
           pnpm exec tsx scripts/prod-qa-revoke-sessions.ts
