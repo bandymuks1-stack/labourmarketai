@@ -4641,6 +4641,7 @@
           "location": "Dzięki temu nie pokazujemy Ci nieodpowiednich ofert.",
           "pay": "Dzięki temu łatwiej uzasadnić oczekiwaną stawkę.",
           "evidence": "Dowody budują zaufanie, ale możesz je dodać później.",
+          "evidenceFirst": "Wystarczy jedno zdanie o wykonanej pracy — z takich wpisów rośnie Twoje żywe CV.",
           "complete": "Twoja karta pracy jest kompletna — wpisy o pracy dalej ją wzmacniają."
         },
         "stale": {
@@ -14704,6 +14705,7 @@
       "contextAmbiguous": "Ta praca może należeć do więcej niż jednego kontekstu. Wybierz, do którego, przed zapisaniem.",
       "contextEndedOrg": "Zdanie wymienia organizację, z którą Twoja współpraca się zakończyła — ten wpis nie będzie pracą dla niej. Wybierz, gdzie to robiłeś:",
       "save": "Zapisz",
+      "continue": "Dalej",
       "cancel": "Edytuj",
       "working": "Zapisywanie…",
       "confirmTitle": "Potwierdzić wpis?",
@@ -14732,6 +14734,9 @@
       "strengthenedSkillPrefix": "Wzmocniono umiejętność",
       "pendingConfirmPrefix": "Czeka na Twoje potwierdzenie",
       "cvUpdatedNote": "Twoje CV zostało uzupełnione o umiejętności z tego wpisu.",
+      "livingCvNote": "Ten wpis liczy się już w Twoim żywym CV jako zapisana praca — wpisana przez Ciebie, jeszcze przez nikogo niepotwierdzona.",
+      "viewLivingCv": "Otwórz żywe CV",
+      "comeBackNote": "Jutro dodaj też pracę z tego dnia — wystarczy jedno zdanie.",
       "matchingNote": "Rekomendacje pracy są przeliczane na podstawie zaktualizowanych umiejętności przy następnym wyświetleniu.",
       "viewOpportunities": "Zobacz zaktualizowane oferty",
       "pipelineFailedNote": "Rozpoznawanie umiejętności tym razem się nie powiodło — wpis został zapisany; rozpoznawanie można powtórzyć w dzienniku."
