@@ -1,4 +1,6 @@
 import { Suspense } from "react";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { PageBack } from "@/components/app/premium/page-back";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -187,13 +189,8 @@ export default async function ConversationDetailPage({
     <div className="flex flex-col gap-5">
       <header className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <Link
-            href="/dashboard/communication"
-            className="font-mono text-meta uppercase tracking-label text-text-secondary hover:text-brand-blue"
-          >
-            ← {t("backToList")}
-          </Link>
-          <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+          <PageBack href="/dashboard/communication">{t("backToList")}</PageBack>
+          <PageTitle>
             {/* Real title fallback — never "(be temos)": subject, then the
                 permitted counterpart name, then the live source title, then
                 the support label / a neutral "Pokalbis". */}
@@ -203,7 +200,7 @@ export default async function ConversationDetailPage({
               (conversation.kind === "support"
                 ? t("counterparty.support")
                 : t("conversationFallback"))}
-          </h1>
+          </PageTitle>
           <span
             className="font-mono text-meta uppercase tracking-label text-text-muted"
             data-testid="thread-type"

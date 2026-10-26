@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { workspaceDisplayLabels } from "@/lib/company/organization-switch";
 import { redirect } from "next/navigation";
 
@@ -316,13 +317,7 @@ export default async function NetworkPage({
     return (
       <div className="flex flex-col gap-6" data-testid="network-page">
         <header className="flex flex-col gap-1">
-          <Link
-            href={"/dashboard/network" as "/dashboard"}
-            className="inline-flex min-h-11 items-center gap-1 self-start font-mono text-meta uppercase tracking-label text-text-muted transition-colors hover:text-text-primary"
-            data-testid="network-admin-back"
-          >
-            ← {t("admin.back")}
-          </Link>
+          <PageBack href={"/dashboard/network" as "/dashboard"} data-testid="network-admin-back">{t("admin.back")}</PageBack>
         </header>
         {openArea === "approvals" && (
           <ApprovalsSection

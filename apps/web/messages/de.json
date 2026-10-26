@@ -15,7 +15,8 @@
     "capacity": "Kapazität",
     "work": "Arbeit & Stunden",
     "results": "Ergebnisse",
-    "history": "Verlauf"
+    "history": "Verlauf",
+    "areasTitle": "Unternehmensbereiche"
   },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
@@ -3620,7 +3621,8 @@
     "reviewBanner": {
       "title": "Einige Fähigkeiten benötigen eine Prüfung",
       "body": "Einige Einträge sind noch nicht eindeutig klassifiziert. Prüfen Sie sie oder fügen Sie weitere Informationen hinzu, damit Ihr Profil genauer gematcht werden kann.",
-      "cta": "Fähigkeiten prüfen"
+      "cta": "Fähigkeiten prüfen",
+      "noteLead": "{count, plural, one {Fähigkeit ist noch nicht durch Arbeitseinträge belegt.} other {Fähigkeiten sind noch nicht durch Arbeitseinträge belegt.}}"
     },
     "pageTitle": "Mein Profil",
     "pageSubtitle": "Was Sie tun, was Sie können und was das zeigt — alles an einem Ort.",
@@ -6130,6 +6132,8 @@
       "asksTitle": "Das Projekt braucht von Ihnen noch",
       "ledger": {
         "ratio": "{have} von {total} vorhanden",
+        "ratioNone": "Noch nichts zu prüfen",
+        "ratioUnknown": "noch nicht bekannt: {count}",
         "availability": "Verfügbarkeit",
         "state": {
           "valid": "Sie haben es",
@@ -6161,7 +6165,7 @@
           "none": "noch nichts erfasst"
         },
         "managerStatus": {
-          "needed": "wird erwartet",
+          "needed": "vor der Vereinbarung abzustimmen",
           "missing": "als fehlend markiert",
           "received": "erhalten",
           "checked": "geprüft",
@@ -6170,7 +6174,7 @@
         },
         "resolution": {
           "addDocument": "Dokument erfassen",
-          "issuingAuthority": "Ausgestellt von: {title}",
+          "informationSource": "Informationsquelle: {title}",
           "trainingProgram": "Kurs: {title}",
           "serviceOffering": "Dienstleistung: {title}",
           "serviceOfferingRate": "Dienstleistung: {title} ({rate})",
@@ -7679,7 +7683,16 @@
     "backHome": "Zurück zur Startseite",
     "dashboardSections": "Dashboard-Bereiche",
     "skipToContent": "Zum Inhalt springen",
-    "loading": "Wird geladen…"
+    "loading": "Wird geladen…",
+    "nav": {
+      "more": "Mehr",
+      "menu": "Menü",
+      "areas": "Arbeitsbereiche",
+      "close": "Schließen",
+      "youAreHere": "Du bist hier",
+      "previous": "Vorheriger Bereich",
+      "next": "Nächster Bereich"
+    }
   },
   "workerInvitations": {
     "title": "Ausstehende Einladungen",
@@ -7961,7 +7974,7 @@
       "confirmed": "Std. mit Eintrag der Leitung",
       "organizationHistory": "Std. in der Organisationshistorie",
       "experienceTotal": "Std. Berufserfahrung insgesamt",
-      "days": "{count, plural, one {Arbeitstag} other {Arbeitstage}}",
+      "days": "{count, plural, one {Tag mit Stunden} other {Tage mit Stunden}}",
       "modes": {
         "label": "Teile der Karte",
         "work": "Arbeit",
@@ -8066,7 +8079,8 @@
       "mine": "Ihre Wunschländer stehen zuerst.",
       "unknown": "Die Anforderungsliste für {country} wurde noch nicht kuratiert — wir zeigen lieber nichts an, statt zu raten.",
       "next": "Wenn Sie in diesem Land arbeiten, stimmen Sie dies vor der Vereinbarung mit dem Arbeitgeber ab: {doc}. Hochladen ist nicht nötig.",
-      "ok": "Alle kuratierten Anforderungen für {country} sind abgedeckt."
+      "ok": "Alle kuratierten Anforderungen für {country} sind abgedeckt.",
+      "postingNeedsBase": "Die A1-Bescheinigung und die Entsendemeldung werden nur angezeigt, wenn Ihr Herkunftsland bekannt ist und vom Arbeitsland abweicht. Ihr Herkunftsland ist noch nicht angegeben."
     },
     "types": {
       "cv": "Lebenslauf",
@@ -9250,7 +9264,8 @@
     "clash": {
       "acceptAnyway": "Ich weiß, dass es sich überschneidet — trotzdem annehmen",
       "stillStands": "Die Annahme beseitigt die Überschneidung nicht. Beide Buchungen behalten ihre Termine, der Konflikt bleibt im Kalender sichtbar, und Ihre Entscheidung wird festgehalten.",
-      "acknowledged": "Mit bekannter Überschneidung angenommen. {count} bestehende Buchung(en) überschneiden sich weiterhin — nichts wurde storniert oder ausgeblendet, Ihre Entscheidung ist dokumentiert."
+      "acknowledged": "Mit bekannter Überschneidung angenommen. {count} bestehende Buchung(en) überschneiden sich weiterhin — nichts wurde storniert oder ausgeblendet, Ihre Entscheidung ist dokumentiert.",
+      "notRecordable": "Diese Termine überschneiden sich mit einer Buchung, die Sie bereits angenommen haben, und diese Überschneidung kann noch nicht erfasst werden – Sie können dieses Angebot ablehnen oder es offen lassen, damit das Unternehmen die Termine ändern kann."
     },
     "proposedBy": "Vorgeschlagen von {name}",
     "termsChanged": "Das Unternehmen hat die Bedingungen geändert. Sie hatten zugestimmt: {previous}. Entscheiden Sie neu über die neuen Daten."
@@ -11460,7 +11475,7 @@
     },
     "utilisation": {
       "title": "Verplanter Anteil der kommenden Wochen",
-      "committedDays": "{committed} von {counted} Personentagen verplant — {workers} Personen über {days} Tage",
+      "committedDays": "{committed} von {counted, plural, one {# Personentag} other {# Personentagen}} verplant — {workers, plural, one {# Person} other {# Personen}} über {days, plural, one {# Tag} other {# Tage}}",
       "noneCounted": "Für diesen Zeitraum konnten von niemandem Verpflichtungen gezählt werden.",
       "partial": "{count} davon konnten nicht vollständig gezählt werden — etwas Reales hat keine Daten, die Zahl oben ist also eine Untergrenze.",
       "unknown": "{count} konnten gar nicht gelesen werden. Das ist nicht dasselbe wie frei.",
