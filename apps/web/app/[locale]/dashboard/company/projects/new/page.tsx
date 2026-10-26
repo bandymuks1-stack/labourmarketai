@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/lib/i18n/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { ProjectContextCreateForm } from "@/components/app/project-context-create-form";
 import { PageTitle } from "@/components/app/premium/page-title";
@@ -24,12 +24,7 @@ export default async function NewProjectContextPage({
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <Link
-          href="/dashboard/company"
-          className="w-fit text-xs font-medium text-brand-blue hover:underline"
-        >
-          ← {t("backToDashboard")}
-        </Link>
+        <PageBack href="/dashboard/company">{t("backToDashboard")}</PageBack>
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>

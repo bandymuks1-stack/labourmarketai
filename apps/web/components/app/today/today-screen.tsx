@@ -12,9 +12,9 @@ import {
   HomeWaiting,
 } from "@/components/app/home/home-regions";
 import type { ActiveLocale } from "@/lib/i18n/config";
-import { Link } from "@/lib/i18n/navigation";
+import { AreaSwitcher } from "@/components/app/area-switcher";
 import { deriveTodayState } from "@/lib/today/today-model";
-import { TODAY_STATIONS } from "@/lib/today/today-route";
+import { PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
 import { loadTodayHead, loadTodayWorkIntelligence } from "@/lib/today/today-server";
 
@@ -97,9 +97,10 @@ export function TodayScreen({ locale }: { locale: ActiveLocale }) {
 }
 
 async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
-  const [t, tProf, head] = await Promise.all([
+  const [t, tProf, tNav, head] = await Promise.all([
     getTranslations("todayScreen.home"),
     getTranslations("professions"),
+    getTranslations("common.nav"),
     loadTodayHead(),
   ]);
   // The first profession this person holds that can be named — a registry one
@@ -193,24 +194,26 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
         </div>
       </div>
 
-      {/* 6 · STATIONS — the contextual workspaces, one tap each: a compact
-          grid on a phone, one row from sm up. */}
-      <nav aria-label={t("stations.title")} data-testid="today-stations" className="flex flex-col gap-1 border-t border-ink-600/70 pt-4 sm:gap-2 sm:pt-5">
-        <p className="text-support font-medium text-text-muted">{t("stations.title")}</p>
-        <ul className="grid grid-cols-3 gap-x-3 gap-y-0 sm:flex sm:flex-wrap sm:gap-x-6">
-          {TODAY_STATIONS.map((s) => (
-            <li key={s.id}>
-              <Link
-                href={s.href as "/dashboard"}
-                data-testid={`today-station-${s.id}`}
-                className="inline-flex min-h-11 items-center text-support text-text-primary underline-offset-4 hover:underline sm:text-body"
-              >
-                {t(`stations.${s.id}`)}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {/* 6 · STATIONS — the contextual workspaces, one tap each, as the light
+          3D area switcher (owner order 2026-10-25): cards with depth, the
+          chosen one in front, from the ONE area model (`PERSONAL_WORK_AREAS`,
+          derived from TODAY_STATIONS — opportunities first). */}
+      <div data-testid="today-stations" className="border-t border-ink-600/70 pt-4 sm:pt-5">
+        <AreaSwitcher
+          title={t("stations.title")}
+          prevLabel={tNav("previous")}
+          nextLabel={tNav("next")}
+          hereLabel={tNav("youAreHere")}
+          testId="today-area-switcher"
+          items={PERSONAL_WORK_AREAS.map((s) => ({
+            id: s.id,
+            href: s.href,
+            iconKey: s.iconKey,
+            label: t(`stations.${s.id}`),
+            testId: `today-station-${s.id}`,
+          }))}
+        />
+      </div>
     </div>
   );
 }

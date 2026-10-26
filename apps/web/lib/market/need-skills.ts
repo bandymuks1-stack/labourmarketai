@@ -78,6 +78,7 @@ export function detectNeedProfession(text: string): string | null {
   if (!folded.trim()) return null;
   let best: { slug: string; len: number } | null = null;
   for (const row of PROFESSION_HINTS_LT) {
+    if (row.notWhen?.some((x) => folded.includes(foldText(x)))) continue;
     for (const n of row.needles) {
       const needle = foldText(n);
       if (needle && folded.includes(needle)) {

@@ -293,7 +293,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profils",
-        "journal": "Mans CV",
+        "journal": "Darba žurnāls",
         "search": "[EN] Search",
         "advanced": "Paplašinātā pārvaldība",
         "playerCard": "Mans profesionālais profils",
@@ -572,7 +572,16 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Ielādē…",
-    "dashboardSections": "Paneļa sadaļas"
+    "dashboardSections": "Paneļa sadaļas",
+    "nav": {
+      "more": "Vairāk",
+      "menu": "Izvēlne",
+      "areas": "Darba jomas",
+      "close": "Aizvērt",
+      "youAreHere": "Tu esi šeit",
+      "previous": "Iepriekšējā joma",
+      "next": "Nākamā joma"
+    }
   },
   "companies": {
     "cta": {
@@ -2906,7 +2915,8 @@
     "clash": {
       "acceptAnyway": "Zinu, ka pārklājas — tomēr pieņemt",
       "stillStands": "Pieņemšana pārklāšanos nenovērsīs. Abas rezervācijas saglabā savus datumus, konflikts paliek redzams kalendārā, un jūsu lēmums tiek reģistrēts.",
-      "acknowledged": "Pieņemts ar zināmu pārklāšanos. Joprojām pārklājas rezervācijas: {count}. Nekas nav atcelts vai paslēpts, un jūsu lēmums ir reģistrēts."
+      "acknowledged": "Pieņemts ar zināmu pārklāšanos. Joprojām pārklājas rezervācijas: {count}. Nekas nav atcelts vai paslēpts, un jūsu lēmums ir reģistrēts.",
+      "notRecordable": "Šie datumi pārklājas ar jau pieņemtu rezervāciju, un šo pārklāšanos vēl nevar reģistrēt, tāpēc varat šo piedāvājumu noraidīt vai atstāt to atvērtu, lai uzņēmums varētu mainīt datumus."
     },
     "proposedBy": "Piedāvā: {name}",
     "termsChanged": "Uzņēmums mainīja nosacījumus. Jūs bijāt piekritis: {previous}. Izlemiet par jaunajiem datumiem vēlreiz."

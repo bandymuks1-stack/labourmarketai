@@ -32,8 +32,6 @@ const read = (rel: string): string => readFileSync(join(APP_ROOT, rel), "utf8");
 
 const chatHeader = read("components/app/conversation/chat/conversation-header.tsx");
 const headerSearch = read("components/app/header-search.tsx");
-const dashboardTabs = read("components/app/dashboard-tabs.tsx");
-const bottomNav = read("components/app/bottom-nav.tsx");
 const navConfig = read("lib/config/navigation.ts");
 
 describe("the chat shell reuses the ONE command search", () => {
@@ -185,11 +183,10 @@ describe("ONE core work loop, rendered identically by BOTH shells (rebuild W5)",
     expect(advanced.slice(0, CORE_NAV_IDS.length)).toEqual([...CORE_NAV_IDS]);
     expect(advanced).toContain("market_map");
     expect(advanced).toContain("network");
-    // Both Advanced surfaces derive from the same list.
-    expect(dashboardTabs).toMatch(/getAdvancedNavItems\(\)/);
-    expect(bottomNav).toMatch(/getAdvancedNavItems\(\)/);
-    expect(dashboardTabs).not.toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
-    expect(bottomNav).not.toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
+    // The header's "More" derives from the same list (the Advanced desktop
+    // tabs and phone bar that used to read it retired 2026-10-25).
+    expect(navConfig).toMatch(/getAdvancedNavItems\(\)\.filter/);
+    expect(chatHeader).not.toMatch(/VISIBLE_PRIMARY_NAV_ITEMS/);
   });
 
   it("the CATALOGUE stays the single source — no demotion", () => {
@@ -267,7 +264,7 @@ describe("nothing became unreachable", () => {
   });
 
   it("admin stays gated by permission, not by navigation", () => {
-    expect(dashboardTabs).toMatch(/isAdmin && !adminUiHidden/);
+    expect(chatHeader).toMatch(/isAdmin && !auth\?\.adminUiHidden/);
     expect(navConfig).toMatch(/ADMIN_NAV_ITEM/);
     // Admin is appended, never part of the de-duplicated primary list.
     expect(getAdvancedNavItems().map((i) => i.id)).not.toContain("admin");
