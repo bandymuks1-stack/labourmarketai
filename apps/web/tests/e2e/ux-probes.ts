@@ -34,8 +34,8 @@ export const AXE_SOURCE: string | null = (() => {
 
 /** Performance buffers, installed before any page script runs. */
 export function installObservers(): void {
-  type Ux = { lcp: number; cls: number; lt: number[][]; loaf: number[][]; clsTop: string; clsTopValue: number; clsTopDy: number };
-  const ux: Ux = { lcp: 0, cls: 0, lt: [], loaf: [], clsTop: "", clsTopValue: 0, clsTopDy: 0 };
+  type Ux = { lcp: number; cls: number; lt: number[][]; loaf: number[][]; clsTop: string; clsTopValue: number; clsTopDy: number; clsGrower: string; clsGrowerDh: number };
+  const ux: Ux = { lcp: 0, cls: 0, lt: [], loaf: [], clsTop: "", clsTopValue: 0, clsTopDy: 0, clsGrower: "", clsGrowerDh: 0 };
   (window as unknown as { __ux: Ux }).__ux = ux;
   const observe = (type: string, onEntry: (e: PerformanceEntry) => void) => {
     try {
@@ -71,6 +71,15 @@ export function installObservers(): void {
         0,
         ...(s.sources ?? []).map((x) => Math.abs((x.currentRect?.y ?? 0) - (x.previousRect?.y ?? 0))),
       );
+    }
+    // WHAT GREW (across every shift): the source whose height changed most —
+    // the block that arrived taller than its reserve and pushed the rest down.
+    for (const x of s.sources ?? []) {
+      const dh = Math.abs((x.currentRect?.height ?? 0) - (x.previousRect?.height ?? 0));
+      if (dh <= ux.clsGrowerDh) continue;
+      const n = x.node instanceof Element ? x.node : x.node?.parentElement ?? null;
+      ux.clsGrower = n?.closest("[data-testid]")?.getAttribute("data-testid") ?? n?.tagName.toLowerCase() ?? "";
+      ux.clsGrowerDh = dh;
     }
   });
   observe("longtask", (e) => ux.lt.push([e.startTime, e.duration]));
@@ -438,6 +447,13 @@ export async function runAxe(page: Page): Promise<AxeCounts | null> {
 export function clsTopSource(): string {
   const ux = (window as unknown as { __ux?: { clsTop?: string } }).__ux;
   return (ux?.clsTop ?? "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 60) || "none";
+}
+
+/** The block whose height changed most across the shifts, as `<testid>:<px>` — names only. */
+export function clsGrowerSource(): string {
+  const ux = (window as unknown as { __ux?: { clsGrower?: string; clsGrowerDh?: number } }).__ux;
+  const name = (ux?.clsGrower ?? "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 60) || "none";
+  return `${name}:${Math.round(ux?.clsGrowerDh ?? 0)}`;
 }
 
 /** Top components holding small tap targets and primary CTAs, as
