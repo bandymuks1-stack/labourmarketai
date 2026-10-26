@@ -12631,6 +12631,8 @@
     "noShared": "No client has shared a request yet.",
     "workerLabel": "Your roster worker",
     "workerPlaceholder": "Choose a worker…",
+    "noteLabel": "Note for the client (optional)",
+    "inviteLinkLabel": "Invitation link",
     "offerButton": "Offer candidate",
     "noRoster": "Add an active worker to your roster first.",
     "progressHeading": "Your offers",
