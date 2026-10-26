@@ -1,0 +1,89 @@
+# Local PG proof of 20261026090000_oauth_door_gate_v1 — run 2026-10-26T08:22Z
+# PostgreSQL 16.13 throwaway cluster on 127.0.0.1:54321 (log_min_messages=warning, as production)
+# bash scripts/db-proof/oauth-door-gate.sh ; bash scripts/db-proof/oauth-door-gate.bench.sh
+
+  PASS  migration applies cleanly
+  PASS  authenticator wired to door_gate.pre_request
+  PASS  shipped mode is off
+  PASS  API roles cannot read door_gate_private
+  PASS  pre_request: invoker, no proconfig; oauth_gate: definer, search_path=''
+  PASS  EXECUTE grants (pre_request: 3 API roles; oauth_gate: authenticated only)
+--- 1. mode OFF (as shipped): nothing changes
+  PASS  first-party GET
+  PASS  OAuth without proof GET
+  PASS  OAuth without proof POST rpc
+  PASS  anon / service_role / no claims
+  PASS  no evidence rows in off
+--- 2. enforce refused while no key exists
+  PASS  set_mode('enforce') without a key fails
+  PASS  generate_key returns 64 hex once
+  PASS  key not stored as text anywhere readable by API roles
+--- 3. mode LOG: nobody refused; evidence recorded
+  PASS  first-party GET (fast path)
+  PASS  first-party with client_id INSIDE user_metadata (slow path, no log)
+  PASS  OAuth no proof GET (read-only tx) allowed
+  PASS  OAuth no proof POST (rw tx) allowed
+  PASS  OAuth valid proof POST allowed
+  PASS  OAuth forged proof POST allowed (log)
+  PASS  OAuth no proof POST again (count++)
+  PASS  evidence: rw only, no read-only row, counted, no user data
+  PASS  evidence columns hold no sub/session/token
+--- 4. mode ENFORCE
+  PASS  first-party GET
+  PASS  first-party POST rpc
+  PASS  anon / service_role / no claims
+  PASS  first-party with client_id in user_metadata
+  PASS  OAuth WITHOUT proof GET  -> 403
+  PASS  OAuth WITHOUT proof RPC  -> 403
+  PASS  OAuth WITH valid proof GET
+  PASS  OAuth WITH valid proof RPC
+  PASS  forged proof (zeros)        -> 403
+  PASS  replay on refreshed token   -> 403
+  PASS  replay on another session   -> 403
+  PASS  unknown kid                 -> 403
+  PASS  retired kid k0              -> 403
+  PASS  uppercase hex / junk header -> 403
+  PASS  client_id not a string      -> 403
+  PASS  token without session_id    -> 403
+  PASS  client_id token under role anon -> permission denied (fail closed)
+  PASS  error carries SQLSTATE PGRST + status 403
+  PASS  enforce leaves no evidence rows (403 rolls back)
+--- 5. rotation
+  PASS  new key k2 accepted
+  PASS  old key k1 still accepted during overlap
+  PASS  third active key refused
+  PASS  k1 refused after retire
+  PASS  retired secret overwritten
+--- 6. kill switch
+  PASS  mode off: OAuth without proof allowed again
+--- 7. retention + cap
+  PASS  prune_hits removes >30 day rows
+  PASS  per-hour cap: new key beyond 1000 rows not inserted
+  PASS  per-hour cap: existing row still counted
+--- 8. log lines are privacy-safe
+  PASS  log lines exist (read-only requests covered by RAISE LOG)
+  PASS  no sub / session_id / proof / email in log lines
+  sample: lm_door_gate outcome=claims_incomplete mode=enforce client=9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d method=GET target=/w;lm_door_gate outcome=claims_malformed mode=enforce client=malformed method=GET target=/w;lm_door_gate outcome=proof_malformed mode=enforce client=9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d method=GET target=/w;lm_door_gate outcome=proof_mismatch mode=enforce client=9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d method=GET target=/workers;
+--- 9. up-migration refuses to clobber a foreign pre-request
+  PASS  guard raises
+--- 10. rollback (two parts) and re-apply
+  PASS  PART B refuses before PART A
+  PASS  PART A applies
+  PASS  PART B applies
+  PASS  authenticator setting removed, schemas gone
+  PASS  re-apply after rollback
+
+RESULT: 59 passed, 0 failed
+
+## per-call cost
+claims sizes: first-party 460 B, oauth 511 B; N=200000 per case
+reference: empty plpgsql function call                        1.07 us/call
+FAST PATH first-party JWT (any mode)                          1.81 us/call
+FAST PATH anon key JWT (any mode)                             1.95 us/call
+comparison: same fast path as one SECDEF+SET fn               3.66 us/call
+OAuth token, mode off                                        35.74 us/call
+OAuth token + valid proof, mode enforce (allowed)            59.29 us/call
+OAuth token, no proof, mode enforce (403 + LOG line)        294.77 us/call
+
+## node --test (door-proof.ts logic, Node v24.14.0, vitest deps not installed locally)
+6 tests, 6 pass: shared vector, refresh changes proof, bad claims, key parsing, env key, wrapper scope (rest only)
