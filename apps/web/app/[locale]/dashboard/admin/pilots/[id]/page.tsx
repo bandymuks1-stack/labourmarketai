@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/lib/i18n/navigation";
 import { requireSuperadmin } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
 import { getPilotDetail } from "@/lib/admin/pilots";
@@ -57,12 +57,7 @@ export default async function AdminPilotDetailPage({
         >
           {t("needsMigration")}
         </p>
-        <Link
-          href="/dashboard/admin/pilots"
-          className="self-start text-xs text-text-secondary hover:text-text-primary"
-        >
-          ← {t("detail.back")}
-        </Link>
+        <PageBack href="/dashboard/admin/pilots">{t("detail.back")}</PageBack>
       </div>
     );
   }
@@ -76,12 +71,7 @@ export default async function AdminPilotDetailPage({
         >
           {t("loadError", { msg: data.message })}
         </p>
-        <Link
-          href="/dashboard/admin/pilots"
-          className="self-start text-xs text-text-secondary hover:text-text-primary"
-        >
-          ← {t("detail.back")}
-        </Link>
+        <PageBack href="/dashboard/admin/pilots">{t("detail.back")}</PageBack>
       </div>
     );
   }
@@ -94,12 +84,7 @@ export default async function AdminPilotDetailPage({
   return (
     <div className="flex flex-col gap-6" data-testid="admin-pilot-detail">
       <header className="flex flex-col gap-1">
-        <Link
-          href="/dashboard/admin/pilots"
-          className="self-start text-xs text-text-secondary hover:text-text-primary"
-        >
-          ← {t("detail.back")}
-        </Link>
+        <PageBack href="/dashboard/admin/pilots">{t("detail.back")}</PageBack>
         <PageTitle>{pilot.name}</PageTitle>
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">
           {t(`kind.${pilot.organisationKind}`)} · {t(`status.${pilot.status}`)} ·{" "}

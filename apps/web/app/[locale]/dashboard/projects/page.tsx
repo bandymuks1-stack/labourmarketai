@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -441,13 +442,7 @@ export default async function ProjectsPage({
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       {ownCompanyId ? <OrganizationDoorsServer ariaLabel={tDoors("label")} /> : null}
       <header className="flex flex-col gap-1">
-        <Link
-          href="/dashboard"
-          className="self-start text-xs font-medium text-brand-blue transition-colors hover:underline"
-          data-testid="back-to-action-center"
-        >
-          ← {tRooms("backToActions")}
-        </Link>
+        <PageBack href="/dashboard" data-testid="back-to-action-center">{tRooms("backToActions")}</PageBack>
         <p
           className="font-mono text-meta uppercase tracking-label text-text-muted"
           data-testid="company-context"
