@@ -26,6 +26,11 @@ import {
 import { MarkServiceRequestsSeen } from "@/components/app/mark-service-requests-seen";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/service-requests");
+
 
 /**
  * Service requests — P0 marketplace request loop (Phase 1). Authenticated

@@ -24,6 +24,11 @@ import { PublicDemandSection } from "@/components/app/public-demand-section";
 import { CompanyScoutingBridge } from "@/components/app/company-scouting-bridge";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/needs", "organizationDoors.pages.needs.title");
+
 
 // W3 rows 7/8/25: the employer demand kinds the owner readback is scoped to —
 // a dual-role user's buyer service requests stay in the buyer room.
