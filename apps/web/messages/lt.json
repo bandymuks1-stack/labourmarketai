@@ -4287,6 +4287,7 @@
       "country_search_placeholder": "Ieškok šalies",
       "country_search_empty": "Šalies nerasta. Pabandyk kitą pavadinimą.",
       "error_country_required": "Pasirink šalį.",
+      "error_role_required": "Pirmiausia pasirink, kuo nori naudotis — tada užpildysi profilį.",
       "profession_label": "Kokia tavo profesija ar darbo patirtis?",
       "profession_placeholder": "Įrašyk profesiją ar darbo sritį",
       "profession_add": "Pridėti",

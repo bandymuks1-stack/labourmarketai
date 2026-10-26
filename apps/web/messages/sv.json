@@ -416,6 +416,7 @@
       "country_search_placeholder": "Sök efter ett land",
       "country_search_empty": "Inget land hittades. Prova ett annat namn.",
       "error_country_required": "Välj ett land.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Vad är ditt yrke eller din arbetslivserfarenhet?",
       "profession_placeholder": "Skriv ett yrke eller arbetsområde",
       "profession_add": "Lägg till",

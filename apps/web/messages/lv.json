@@ -416,6 +416,7 @@
       "country_search_placeholder": "Meklējiet valsti",
       "country_search_empty": "Valsts nav atrasta. Mēģiniet citu nosaukumu.",
       "error_country_required": "Lūdzu, izvēlieties valsti.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Kāda ir jūsu profesija vai darba pieredze?",
       "profession_placeholder": "Ierakstiet profesiju vai darba jomu",
       "profession_add": "Pievienot",

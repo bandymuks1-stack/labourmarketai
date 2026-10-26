@@ -416,6 +416,7 @@
       "country_search_placeholder": "Otsi riiki",
       "country_search_empty": "Riiki ei leitud. Proovi teist nime.",
       "error_country_required": "Palun vali riik.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Mis on sinu amet või töökogemus?",
       "profession_placeholder": "Kirjuta amet või töövaldkond",
       "profession_add": "Lisa",

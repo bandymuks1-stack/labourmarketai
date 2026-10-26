@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 import { RoleIcon } from "@/components/app/role-icon";
-import { trackFunnel } from "@/lib/telemetry/task";
+import { trackFunnel, trackFunnelFailure } from "@/lib/telemetry/task";
 import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { DarkListbox } from "@/components/ui/DarkListbox";
@@ -305,15 +305,28 @@ export function OnboardingWizard({
   }
 
   function submit() {
-    if (roles.size === 0) return;
+    // Production 2026-10-26: 14 of 19 stuck sign-ups opened the profile step
+    // and none submitted it; a failed check here was invisible. Each refusal
+    // now names itself (bounded code, no PII) so the drop-off has a cause.
+    const refuse = (code: string) =>
+      trackFunnelFailure(FUNNEL_EVENTS.onboardingStepProfileCompleted, code, { step: "profile" });
+    if (roles.size === 0) {
+      // Was a silent return: the button did nothing. Say why and go back.
+      refuse("no_role");
+      setError(t("error_role_required"));
+      setStep(1);
+      return;
+    }
     setError(null);
     setFieldError(null);
     if (!displayName.trim()) {
+      refuse("name_missing");
       setFieldError("name");
       document.getElementById(nameInputId)?.focus();
       return;
     }
     if (!country) {
+      refuse("country_missing");
       setFieldError("country");
       const toggle = document.getElementById(countryButtonId);
       toggle?.scrollIntoView({ block: "center" });
@@ -327,6 +340,7 @@ export function OnboardingWizard({
     // (`bestEvidencedProfession`, guard no-mandatory-profession). An empty
     // field means "not stated here", never "has no profession".
     if (asksForCurrentEducation(intentList) && institutionName.trim().length < 2) {
+      refuse("institution_missing");
       setError(t("step2.errorInstitution"));
       return;
     }
@@ -616,6 +630,11 @@ export function OnboardingWizard({
         >
           {t("rolePicker.continue")}
         </Button>
+        {error && (
+          <p className="text-xs text-state-danger" role="alert">
+            {error}
+          </p>
+        )}
       </div>
     );
   }

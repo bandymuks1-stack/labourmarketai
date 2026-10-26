@@ -4287,6 +4287,7 @@
       "country_search_placeholder": "Land suchen",
       "country_search_empty": "Kein Land gefunden. Versuchen Sie einen anderen Namen.",
       "error_country_required": "Bitte wählen Sie ein Land.",
+      "error_role_required": "Wählen Sie zuerst, wofür Sie LabourMarket.ai nutzen möchten — dann füllen Sie Ihr Profil aus.",
       "profession_label": "Was ist Ihr Beruf oder Ihre Berufserfahrung?",
       "profession_placeholder": "Beruf oder Arbeitsbereich eingeben",
       "profession_add": "Hinzufügen",

@@ -4287,6 +4287,7 @@
       "country_search_placeholder": "Zoek een land",
       "country_search_empty": "Geen land gevonden. Probeer een andere naam.",
       "error_country_required": "Kies een land.",
+      "error_role_required": "Kies eerst waarvoor je LabourMarket.ai wilt gebruiken — vul daarna je profiel in.",
       "profession_label": "Wat is je beroep of werkervaring?",
       "profession_placeholder": "Typ een beroep of werkgebied",
       "profession_add": "Toevoegen",
