@@ -69,52 +69,12 @@ export type ApiIdentity = {
   /** The caller's own client. Every query through it is subject to RLS as
    *  that user — exactly as the cookie-backed client always was. */
   readonly supabase: SupabaseClient<Database>;
-  /**
-   * Present ONLY when the verified bearer token was obtained by an OAuth
-   * client (Supabase Auth's OAuth 2.1 server adds the `client_id` claim to
-   * those, and to nothing else). Read off the token AFTER the auth server
-   * verified it, so these are the verified token's own claims, never a header
-   * value. It widens nothing: the MCP door may only NARROW what such a client
-   * may ask for (`lib/mcp/scopes.ts`). Absent for a cookie session and for a
-   * first-party Supabase session bearer (web, Android, iOS).
-   */
-  readonly oauthClient?: OauthClientClaims;
+  /** Set only for a bearer token issued to a THIRD-PARTY OAuth client (the
+   *  verified token carries `client_id`). First-party sessions — cookie, the
+   *  app's own bearer — never carry it. Routes other than the connector door
+   *  refuse such tokens (`resolveFirstPartyIdentity`). */
+  readonly oauthClientId?: string;
 };
-
-/** The OAuth facts on a verified bearer token (consumed by `lib/mcp/scopes.ts`). */
-export type OauthClientClaims = {
-  readonly clientId: string;
-  /** The space-separated `scope` claim (RFC 9068 §2.2.3), split; null when absent. */
-  readonly scopeClaim: readonly string[] | null;
-};
-
-/**
- * Read the OAuth client facts off a token's payload. PURE. Call it ONLY on a
- * token the auth server has already verified — it decodes, it does not
- * verify. A malformed payload, or one without a string `client_id`, is
- * "not an OAuth client token" (undefined), never an error: verification has
- * already decided WHO the caller is; this only labels which kind of client
- * is asking.
- */
-export function oauthClientClaimsOf(token: string): OauthClientClaims | undefined {
-  try {
-    const payload = token.split(".")[1];
-    if (!payload) return undefined;
-    const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as Record<string, unknown>;
-    const clientId = claims.client_id;
-    if (typeof clientId !== "string" || clientId.length === 0 || clientId.length > 200) return undefined;
-    const rawScope = claims.scope;
-    const scopeClaim =
-      typeof rawScope === "string"
-        ? rawScope.split(/\s+/).filter(Boolean)
-        : Array.isArray(rawScope) && rawScope.every((v) => typeof v === "string")
-          ? (rawScope as string[])
-          : null;
-    return { clientId, scopeClaim };
-  } catch {
-    return undefined;
-  }
-}
 
 export type ApiIdentityResult =
   | { readonly ok: true; readonly identity: ApiIdentity }
@@ -236,6 +196,39 @@ function recordBearerFailure(key: string): void {
   rateLimit({ name: BEARER_FAILURE_LIMITER, key, ...BEARER_FAILURE_LIMIT });
 }
 
+/** A client id is short, printable and plain (Supabase issues UUIDs). */
+const CLIENT_ID_RX = /^[A-Za-z0-9._:-]{1,200}$/;
+
+/** What the VERIFIED token says about the OAuth client it was issued to. */
+export type TokenClient =
+  | { readonly kind: "first_party" }
+  | { readonly kind: "oauth"; readonly clientId: string }
+  | { readonly kind: "malformed" };
+
+/**
+ * Read `client_id` from a token the auth server has ALREADY verified (the
+ * signature is not re-checked here — `identityFromBearer` calls this only
+ * after `auth.getUser` accepted the token). FAIL CLOSED: a payload that does
+ * not decode, or a `client_id` that is present but not a plain non-empty
+ * string, is `malformed` and the token is refused — never quietly treated as
+ * the person's own first-party session. Absent `client_id` = first party.
+ */
+export function tokenClientOf(token: string): TokenClient {
+  const payload = token.split(".")[1];
+  if (!payload) return { kind: "malformed" };
+  let claims: unknown;
+  try {
+    claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+  } catch {
+    return { kind: "malformed" };
+  }
+  if (claims === null || typeof claims !== "object" || Array.isArray(claims)) return { kind: "malformed" };
+  if (!Object.prototype.hasOwnProperty.call(claims, "client_id")) return { kind: "first_party" };
+  const clientId = (claims as Record<string, unknown>).client_id;
+  if (typeof clientId !== "string" || !CLIENT_ID_RX.test(clientId)) return { kind: "malformed" };
+  return { kind: "oauth", clientId };
+}
+
 /**
  * Verify a bearer token and build the caller's client.
  *
@@ -281,6 +274,8 @@ async function identityFromBearer(
       return { ok: false, reason: authErrorIsInfrastructure(error) ? "identity-unavailable" : "invalid-bearer" };
     }
     if (!data?.user) return { ok: false, reason: "invalid-bearer" };
+    const client = tokenClientOf(token);
+    if (client.kind === "malformed") return { ok: false, reason: "invalid-bearer" };
     // The no-argument `auth.getUser()` of a session-less client has no session
     // to read and answers "no user" — so any domain helper that asks the
     // client who is calling (the cookie client's own idiom) would see an
@@ -292,14 +287,13 @@ async function identityFromBearer(
     const verified = { data: { user: data.user }, error: null };
     supabase.auth.getUser = ((jwt?: string) =>
       jwt !== undefined ? realGetUser(jwt) : Promise.resolve(verified)) as typeof supabase.auth.getUser;
-    const oauthClient = oauthClientClaimsOf(token);
     return {
       ok: true,
       identity: {
         userId: data.user.id,
         transport: "bearer",
         supabase,
-        ...(oauthClient ? { oauthClient } : {}),
+        ...(client.kind === "oauth" ? { oauthClientId: client.clientId } : {}),
       },
     };
   } catch {
@@ -363,4 +357,33 @@ export async function resolveApiIdentity(
   if (!user) return { ok: false, reason: "no-credentials" };
 
   return { ok: true, identity: { userId: user.id, transport: "cookie", supabase } };
+}
+
+/** Refusal reasons of `resolveFirstPartyIdentity`: everything above, plus a
+ *  valid token that belongs to a third-party OAuth client. */
+export type FirstPartyIdentityFailure = ApiIdentityFailure | "client-not-permitted";
+
+export type FirstPartyIdentityResult =
+  | { readonly ok: true; readonly identity: ApiIdentity }
+  | { readonly ok: false; readonly reason: FirstPartyIdentityFailure };
+
+/**
+ * Identity for every `app/api/**` route EXCEPT the connector door
+ * (`/api/mcp`). A token issued to a third-party OAuth client is accepted only
+ * at that door, where tool-level rules apply; anywhere else it is refused
+ * with 403 — a fact about where the token may be used, not about the token.
+ * Cookie sessions and the app's own bearer tokens are unaffected.
+ */
+export async function resolveFirstPartyIdentity(req: Request): Promise<FirstPartyIdentityResult> {
+  const result = await resolveApiIdentity(req);
+  if (result.ok && result.identity.oauthClientId !== undefined) {
+    return { ok: false, reason: "client-not-permitted" };
+  }
+  return result;
+}
+
+/** HTTP status for a first-party refusal: 403 for a third-party client's
+ *  token, otherwise the ONE mapping in `refusalStatus`. */
+export function firstPartyRefusalStatus(reason: FirstPartyIdentityFailure): 401 | 403 | 429 | 503 {
+  return reason === "client-not-permitted" ? 403 : refusalStatus(reason);
 }

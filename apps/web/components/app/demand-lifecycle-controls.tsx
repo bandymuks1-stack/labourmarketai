@@ -6,6 +6,8 @@ import {
   closeDemandAction,
   reopenDemandAction,
 } from "@/lib/demand/demand-lifecycle-actions";
+import { demandAdapter } from "@/lib/market-lifecycle/adapters";
+import { allowedActions } from "@/lib/market-lifecycle/contract";
 
 /**
  * Company demand lifecycle controls (PR10):
@@ -19,12 +21,15 @@ export function DemandLifecycleControls({
   locale,
   requestId,
   status,
+  closedOutcome = null,
   showConfirm,
   labels,
 }: {
   locale: string;
   requestId: string;
   status: string;
+  /** Why a closed need is closed — a discarded draft never reopens. */
+  closedOutcome?: string | null;
   showConfirm: boolean;
   labels: {
     confirm: string;
@@ -61,6 +66,17 @@ export function DemandLifecycleControls({
       if (r.status) setCurrentStatus(r.status);
     });
 
+  // The ONE lifecycle contract decides what this need offers — the same
+  // rules as the own-needs list, the MCP tools and the server check.
+  const demand = demandAdapter({ closedOutcomeStored: false });
+  const allowed = allowedActions(
+    demand.support,
+    demand.facts({
+      status: currentStatus,
+      closedOutcome: currentStatus === "closed" ? closedOutcome : null,
+    }),
+  );
+
   return (
     <div
       className="flex flex-wrap items-center gap-2"
@@ -79,7 +95,7 @@ export function DemandLifecycleControls({
               else if (r.kind !== "nothing-to-confirm") setFailed(true);
             })
           }
-          className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
+          className="min-h-11 sm:min-h-0 rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
           data-testid="demand-confirm-need"
         >
           {labels.confirm}
@@ -93,12 +109,12 @@ export function DemandLifecycleControls({
           ✓ {labels.confirmed}
         </span>
       ) : null}
-      {currentStatus === "submitted" ? (
+      {allowed.includes("complete") ? (
         <button
           type="button"
           disabled={pending}
           onClick={() => run(() => closeDemandAction(locale, requestId))}
-          className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary hover:border-state-warning hover:text-text-primary disabled:opacity-50"
+          className="min-h-11 sm:min-h-0 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary hover:border-state-warning hover:text-text-primary disabled:opacity-50"
           data-testid="demand-close"
         >
           {labels.close}
@@ -107,21 +123,31 @@ export function DemandLifecycleControls({
       {currentStatus === "closed" ? (
         <>
           <span className="text-meta text-text-muted">{labels.closedNote}</span>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => run(() => reopenDemandAction(locale, requestId))}
-            className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-primary hover:border-brand-blue disabled:opacity-50"
-            data-testid="demand-reopen"
-          >
-            {labels.reopen}
-          </button>
+          {allowed.includes("resume") ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => run(() => reopenDemandAction(locale, requestId))}
+              className="min-h-11 sm:min-h-0 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-primary hover:border-brand-blue disabled:opacity-50"
+              data-testid="demand-reopen"
+            >
+              {labels.reopen}
+            </button>
+          ) : null}
         </>
       ) : null}
-      {failed ? <span className="text-meta text-state-warning">{labels.error}</span> : null}
+      {failed ? (
+        <span className="text-meta text-state-warning">{labels.error}</span>
+      ) : null}
       {limit ? (
-        <span className="text-meta text-state-warning" data-testid="demand-reopen-limit" data-next={limit}>
-          {limit === "individual_plan" ? labels.limitIndividual : labels.limitUpgrade}
+        <span
+          className="text-meta text-state-warning"
+          data-testid="demand-reopen-limit"
+          data-next={limit}
+        >
+          {limit === "individual_plan"
+            ? labels.limitIndividual
+            : labels.limitUpgrade}
         </span>
       ) : null}
     </div>

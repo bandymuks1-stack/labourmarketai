@@ -9,6 +9,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 const APP = resolve(__dirname, "..", "..");
 const read = (rel: string): string => readFileSync(join(APP, rel), "utf8");
@@ -85,7 +86,7 @@ describe("no fake acceptance / booking / contact-unlock language", () => {
 });
 
 describe("i18n parity for the request copy (LT/EN/RU)", () => {
-  for (const loc of ["en", "lt", "ru"] as const) {
+  for (const loc of activeLocales) {
     it(`${loc}.json carries scouting.request.*`, () => {
       const j = JSON.parse(read(`messages/${loc}.json`)) as {
         scouting?: { request?: Record<string, unknown> };

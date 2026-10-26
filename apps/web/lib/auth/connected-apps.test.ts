@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  attachProductPermissions,
   isOauthClientId,
   parseConnectedAppsFeedback,
   presentConnectedApps,
 } from "./connected-apps";
+import type { OwnProductGrant } from "./oauth-product-grants";
 
 const CHATGPT = "3624f6dc-8607-4271-b387-07f3829e09c0";
 const OTHER = "11111111-2222-4333-8444-555555555555";
@@ -73,5 +75,46 @@ describe("isOauthClientId / parseConnectedAppsFeedback", () => {
     expect(parseConnectedAppsFeedback("error")).toBe("error");
     expect(parseConnectedAppsFeedback("<script>")).toBeNull();
     expect(parseConnectedAppsFeedback(undefined)).toBeNull();
+  });
+});
+
+describe("B3: each connected app with the person's own recorded choice", () => {
+  const apps = presentConnectedApps([
+    { client: { id: CHATGPT, name: "A" }, scopes: ["openid"], granted_at: "2026-10-01T00:00:00Z" },
+    { client: { id: OTHER, name: "B" }, scopes: ["openid"], granted_at: "2026-09-01T00:00:00Z" },
+  ]);
+  const row = (over: Partial<OwnProductGrant>): OwnProductGrant => ({
+    clientId: CHATGPT,
+    clientName: "A",
+    hasGrant: true,
+    scopes: ["read:journal"],
+    revoked: false,
+    hasActiveConsent: true,
+    requestedScope: null,
+    updatedAt: null,
+    ...over,
+  });
+
+  it("a recorded choice is shown as granted; no row is legacy, never 'none'", () => {
+    const out = attachProductPermissions(apps, { ok: true, rows: [row({})] });
+    expect(out[0].permissions).toEqual({ state: "granted", scopes: ["read:journal"] });
+    expect(out[1].permissions).toEqual({ state: "legacy" });
+  });
+
+  it("a withdrawn choice is revoked; an empty choice is granted-with-nothing", () => {
+    expect(attachProductPermissions(apps, { ok: true, rows: [row({ hasGrant: false, revoked: true, scopes: [] })] })[0].permissions)
+      .toEqual({ state: "revoked" });
+    expect(attachProductPermissions(apps, { ok: true, rows: [row({ scopes: [] })] })[0].permissions)
+      .toEqual({ state: "granted", scopes: [] });
+  });
+
+  it("a failed read is 'unknown' for every app — never shown as legacy or as no permissions", () => {
+    const out = attachProductPermissions(apps, { ok: false });
+    expect(out.map((a) => a.permissions.state)).toEqual(["unknown", "unknown"]);
+  });
+
+  it("knows the permissions feedback codes", () => {
+    expect(parseConnectedAppsFeedback("permissions_saved")).toBe("permissions_saved");
+    expect(parseConnectedAppsFeedback("none_selected")).toBe("none_selected");
   });
 });

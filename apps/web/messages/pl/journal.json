@@ -286,9 +286,16 @@
       "waiting": "Czeka na przegląd przez człowieka — może go przejrzeć kierownik lub właściciel Twojej organizacji; do tego czasu pozostaje wpisem, który wprowadziłeś",
       "approved": "Zweryfikowano",
       "changes_requested": "Poproszono o zmiany",
-      "rejected": "Zwrócono",
+      "rejected": "Odrzucono",
       "reasonLabel": "Powód",
-      "notEnabled": "Zapisano — przełożony nie włączył jeszcze potwierdzania, więc nikt nie sprawdza tego wpisu; do tego czasu pozostaje Twoim własnym stwierdzeniem"
+      "notEnabled": "Zapisano — przełożony nie włączył jeszcze potwierdzania, więc nikt nie sprawdza tego wpisu; do tego czasu pozostaje Twoim własnym stwierdzeniem",
+      "correctedFrom": {
+        "changes_requested": "Poprawiono po zwróceniu",
+        "rejected": "Poprawiono po odrzuceniu",
+        "approved": "Poprawiono po weryfikacji",
+        "earlierVersion": "Wcześniejsza wersja zostaje w Twojej historii razem z tą decyzją; godziny liczą się raz — przez tę poprawkę."
+      },
+      "quotedNote": "„{note}”"
     },
     "delete": "Usuń wpis",
     "deleting": "Usuwanie...",
@@ -506,7 +513,7 @@
     "pageTitle": "Wpis głosowy",
     "pageIntro": "Opowiedz o swoim dniu pracy — sprawdzisz i poprawisz tekst, zanim cokolwiek zostanie zapisane.",
     "backToJournal": "Powrót do dziennika",
-    "unavailable": "Transkrypcja głosu nie jest jeszcze skonfigurowana. Właściciel platformy nie podłączył jeszcze serwera transkrypcji — nagrywanie jest do tego czasu wyłączone. Wpis zawsze możesz napisać tekstem.",
+    "unavailable": "Transkrypcja głosu nie jest jeszcze dostępna — nagrywanie jest na razie wyłączone. Wpis zawsze możesz napisać tekstem.",
     "disclosureTitle": "Przed nagraniem",
     "disclosureProcessing": "Twoje nagranie jest wysyłane na serwer przetwarzania kontrolowany przez LabourMarket.ai w celu zamiany na tekst. Nie są używane zewnętrzne usługi głosowe.",
     "disclosureWhy": "Nagranie służy wyłącznie do utworzenia poniższego tekstu — niczemu innemu.",
@@ -980,7 +987,7 @@
     "provenance": "Skąd pochodzą godziny: {worker} godz. wprowadzonych przez Ciebie, {extracted} godz. rozpoznanych z Twojego tekstu, {corrected} godz. poprawionych przez kierownika.",
     "provenanceRule": "Każdy wpis liczy się raz; godzina jest przypisywana do umiejętności tylko wtedy, gdy wpis jest powiązany z jedną umiejętnością albo gdy Twoje własne sformułowanie („płytkowanie 6 godz.”) wskazuje tę umiejętność.",
     "dayInferred": "{count, plural, one {# wpis nie ma podanego dnia pracy i jest umieszczony według dnia zapisania.} few {# wpisy nie mają podanego dnia pracy i są umieszczone według dnia zapisania.} many {# wpisów nie ma podanego dnia pracy i są umieszczone według dnia zapisania.} other {# wpisu nie ma podanego dnia pracy i jest umieszczony według dnia zapisania.}}",
-    "glance": "{days, plural, one {# dzień} few {# dni} many {# dni} other {# dnia}} · {entries, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
+    "glance": "{days, plural, one {# dzień z godzinami} few {# dni z godzinami} many {# dni z godzinami} other {# dnia z godzinami}} · {entries, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}",
     "glanceNone": "brak wpisów",
     "periodEmpty": "Brak wpisów w okresie „{period}” — wybierz inny okres powyżej.",
     "mainActivity": "Główna czynność",

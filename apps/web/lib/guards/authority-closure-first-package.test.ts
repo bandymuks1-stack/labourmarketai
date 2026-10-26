@@ -157,6 +157,28 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-21: skill confirmation withdrawal phase B (cross-party
       // standing read door; RED, needs-human-gate, NOT applied).
       "20261021095500_",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): CAL-8 shift patterns
+      // (one nullable column on work_plan_entries + create_work_plan_entry_v2).
+      "20261023160000_",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): COM-3 web push channel
+      // (web_push_subscriptions + register command + push opt-in channel value).
+      "20261023171500_",
+      // 2026-10-23 (RED by GRANT, needs-human-gate, NOT applied): runtime stall sampler evidence table.
+      "20261023190000_",
+      // 2026-10-23 (RED, needs-human-gate, NOT applied): journal evidence integrity v1
+      // (server-side hash chain + immutable evidence; renumbered from 20261016190000).
+      "20261023132610_",
+      // 2026-10-24 (GREEN strict superset): one market lifecycle contract —
+      // closed_outcome on customer_requests + service_offerings, services closed.
+      "20261024090000_",
+      // 2026-10-25 (RED, owner-gated, APPLIED): Vivat Rex + Labour Market AI business-history period bounds.
+      "20261025120000_",
+      // 2026-10-25 (RED, owner-gated, APPLIED): employer party labels for Vivat Rex records.
+      "20261025140000_",
+      // 2026-10-25 (GREEN, additive indexes): importer/admin vacancy reads stop walking the heap.
+      "20261025180000_",
+      // 2026-10-26 (RED draft, needs-human-gate, NOT applied): OAuth product grants (B3).
+      "20261026080400_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

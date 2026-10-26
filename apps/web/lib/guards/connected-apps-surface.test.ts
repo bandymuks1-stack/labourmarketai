@@ -97,6 +97,10 @@ describe("Guard: Connected Apps — reachability", () => {
       "title", "intro", "empty", "unavailable", "unnamed", "grantedAt", "grantedUnknown",
       "scopesLabel", "disconnect", "confirmTitle", "confirmBody", "confirmYes", "cancel",
       "feedbackRevoked", "feedbackError", "note", "pending",
+      // B3 / B4b
+      "identityScopesLabel", "permissionsNone", "permissionsRevoked", "permissionsUnknown",
+      "legacyOpen", "legacyEnforced", "setPermissions", "changePermissions", "chooseLegend",
+      "chooseHint", "save", "savePending", "feedbackPermissionsSaved", "feedbackNoneSelected", "reachNote",
     ];
     for (const locale of ["lt", "en", "ru", "nl", "de", "pl"]) {
       const cat = JSON.parse(read(`messages/${locale}.json`));
@@ -105,5 +109,37 @@ describe("Guard: Connected Apps — reachability", () => {
         expect(ns[k], `${locale} connectedApps.${k}`).toBeTruthy();
       }
     }
+  });
+});
+
+describe("Guard: Connected Apps — B3 permissions", () => {
+  const section = read("components/app/connected-apps-section.tsx");
+  const action = read("lib/auth/connected-apps-actions.ts");
+  const form = read("components/app/connected-app-permissions-form.tsx");
+
+  it("joins GoTrue's list with the person's own recorded choices, and says when they cannot be read", () => {
+    expect(section).toMatch(/readOwnProductGrants\(supabase\)/);
+    expect(section).toMatch(/attachProductPermissions\(/);
+    expect(section).toMatch(/case "unknown":[\s\S]{0,80}t\("permissionsUnknown"\)/);
+  });
+
+  it("describes a legacy connection by the live flag — never claims a limit the server does not apply", () => {
+    expect(section).toMatch(/scopeEnforcementModeOf\(env\.MCP_SCOPE_ENFORCEMENT\)/);
+    expect(section).toMatch(/legacyOpen \? t\("legacyOpen"\) : t\("legacyEnforced"\)/);
+  });
+
+  it("disconnect withdraws the recorded choice BEFORE ending the GoTrue grant", () => {
+    expect(action).toMatch(/revokeProductGrant\(supabase, clientId\)[\s\S]*supabase\.auth\.oauth\.revokeGrant\(\s*\{\s*clientId\s*\}\s*\)/);
+  });
+
+  it("change permissions validates the client id, normalises scopes, and refuses an empty choice", () => {
+    expect(action).toMatch(/export async function changeConnectedAppPermissions/);
+    expect(action).toMatch(/changeConnectedAppPermissions[\s\S]*isOauthClientId\(clientId\)[\s\S]*normalizeProductScopes\(formData\.getAll\("scope"\)\)[\s\S]*none_selected/);
+  });
+
+  it("the permissions form has a pending signal and a status surface", () => {
+    expect(form).toMatch(/disabled=\{pending\}/);
+    expect(form).toMatch(/role="status"/);
+    expect(code(form)).not.toMatch(/window\.confirm|\bconfirm\(/);
   });
 });

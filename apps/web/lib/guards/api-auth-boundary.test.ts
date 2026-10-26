@@ -192,8 +192,10 @@ describe("one resolver, never nine parsers", () => {
     for (const [route, entry] of Object.entries(CLASSIFICATION)) {
       if (entry.class !== "shared") continue;
       const src = read(route);
+      // resolveFirstPartyIdentity is the same boundary minus third-party
+      // OAuth clients (accepted only at /api/mcp — oauth-client-door-only.test.ts).
       expect(src, `${route} must resolve identity through the boundary`).toMatch(
-        /resolveApiIdentity/,
+        /resolveApiIdentity|resolveFirstPartyIdentity/,
       );
       expect(
         src.includes('from "@/lib/supabase/server"'),
@@ -206,7 +208,7 @@ describe("one resolver, never nine parsers", () => {
     for (const [route, entry] of Object.entries(CLASSIFICATION)) {
       if (entry.class === "shared") continue;
       expect(
-        read(route).includes("resolveApiIdentity"),
+        /resolveApiIdentity|resolveFirstPartyIdentity/.test(read(route)),
         `${route} is classified ${entry.class} — widening it is a product decision, so change the table in the same commit`,
       ).toBe(false);
     }

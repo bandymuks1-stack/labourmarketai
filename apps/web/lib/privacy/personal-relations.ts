@@ -143,6 +143,15 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "dashboard_preferences", key: "profile_id" },
   // My Space pins (20261020020000, applied 2026-10-20): the person's own shortcuts, owner-only RLS.
   { table: "workspace_pins", key: "profile_id" },
+  // Push-notification devices (20261023171500, COM-3 push channel): the
+  // person's own browser subscriptions, owner-only RLS. The endpoint and the
+  // time are theirs to see; the browser's encryption key and auth secret are
+  // device credentials, not information about the person, and are left out.
+  { table: "web_push_subscriptions", key: "profile_id", omitColumns: ["p256dh", "auth"] },
+  // Connected-app permission choices (20261026080400, OAuth security B3): which
+  // LabourMarket.ai permissions the person chose for each connected app, own
+  // rows only (an OAuth-client token never sees them). Theirs to see in full.
+  { table: "oauth_product_grants", key: "profile_id", column: "user_id" },
   { table: "preferred_locations", key: "profile_id" },
   { table: "consented_login_location_signals", key: "profile_id" },
   // How the platform classifies the account for reporting (real / test /

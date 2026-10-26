@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { PageTitle } from "@/components/app/premium/page-title";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ArrowLeft } from "lucide-react";
 
@@ -13,6 +14,11 @@ import { EvidenceMediaStrip } from "@/components/app/evidence-media-strip";
 import { LinkedDocuments } from "@/components/app/linked-documents";
 import { HistoricalPersonProfileBlock } from "@/components/app/organization/historical-person-profile";
 import { loadCompanyPerson } from "@/lib/organization-evidence/company-person-read";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/people/[personId]");
+
 
 export const dynamic = "force-dynamic";
 
@@ -94,9 +100,7 @@ export default async function CompanyPersonHistoryPage({
       {back}
       <header className="flex flex-col gap-2">
         <p className="font-mono text-meta uppercase tracking-label text-text-muted">{t("eyebrow")}</p>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary" data-testid="company-person-name">
-          {person.name || "—"}
-        </h1>
+        <PageTitle data-testid="company-person-name">{person.name || "—"}</PageTitle>
         {relationship ? (
           <p className="text-sm text-text-secondary" data-testid="company-person-relationship">
             {relationship}

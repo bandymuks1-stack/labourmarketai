@@ -21,9 +21,8 @@ const ROOT = resolve(__dirname, "../..");
 
 /** Rendered on every authenticated page (or on every nav tap). */
 const CHROME = [
-  "components/app/bottom-nav.tsx",
+  "components/app/conversation/chat/conversation-header.tsx",
   "components/app/nav-link-pending.tsx",
-  "components/app/dashboard-tabs.tsx",
   "components/app/dashboard-chrome.tsx",
   "components/app/account-menu.tsx",
   "components/app/header-search.tsx",
@@ -41,11 +40,13 @@ describe("authenticated nav chrome — accessible names are translated", () => {
     });
   }
 
-  it("the phone bar uses the same landmark name as the desktop tabs", () => {
-    const bottom = readFileSync(resolve(ROOT, "components/app/bottom-nav.tsx"), "utf8");
-    const tabs = readFileSync(resolve(ROOT, "components/app/dashboard-tabs.tsx"), "utf8");
-    expect(tabs).toContain('t("common.dashboardSections")');
-    expect(bottom).toContain('t("common.dashboardSections")');
+  it("the one header's nav landmark and its phone sheet are named from the catalogue", () => {
+    // RE-ANCHORED 2026-10-25: the phone bar and the desktop tabs were retired
+    // with the one header; both landmarks it renders are translated.
+    const header = readFileSync(resolve(ROOT, "components/app/conversation/chat/conversation-header.tsx"), "utf8");
+    expect(header).toContain('aria-label={t("common.dashboardSections")}');
+    expect(header).toContain('sheetTitle={t("common.nav.areas")}');
+    expect(header).toContain('closeLabel={t("common.nav.close")}');
   });
 
   it("the pending-navigation status reads common.loading in every active locale", () => {

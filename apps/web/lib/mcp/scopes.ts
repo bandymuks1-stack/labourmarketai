@@ -1,4 +1,3 @@
-import type { OauthClientClaims } from "@/lib/api/api-identity";
 import type { CapabilityDescriptor } from "@/lib/capabilities/contract";
 
 /**
@@ -35,6 +34,15 @@ import type { CapabilityDescriptor } from "@/lib/capabilities/contract";
  * `client_id` claim on those). The person's own web session, Android and iOS
  * apps (a first-party Supabase session, no `client_id`) are never scoped here —
  * they are the person, not a third party.
+ *
+ * WHERE THE GRANT COMES FROM (B3). Not from the token. Supabase Auth cannot
+ * issue product scopes, so a `scope` claim on the access token can never
+ * carry them, and a scope a client merely REQUESTED is not a scope the person
+ * GRANTED. The grant is the person's own choice on the consent screen (or in
+ * Connected apps → "Change permissions"), stored in
+ * `public.oauth_product_grants` and read by the door once per request
+ * (`lib/mcp/product-grant.ts`). So a change applies on the client's next call,
+ * with no new token, and a refreshed token cannot carry a stale grant.
  *
  * BILLING: NONE. No tool can pay, charge, subscribe or move money
  * (by design, `EXTERNAL_LLM_CLIENTS_PROGRAMME` §E), so there is no billing
@@ -204,39 +212,64 @@ export function isProductScope(value: string): value is ProductScope {
 // ── The grant a caller holds ────────────────────────────────────────────────
 
 /**
+ * The product grant the door read for (this person, this OAuth client) —
+ * `oauth_door_product_grant_v1()`, parsed by `lib/mcp/product-grant.ts`.
+ *
+ *   none         no row: a consent given before B3 (legacy). Unscoped.
+ *   granted      the person's choice; `scopes` may be empty (= no action).
+ *   revoked      the person withdrew it. Scoped to nothing.
+ *   unavailable  the read failed. The door refuses the call before it gets
+ *                here; if it ever does arrive, it is scoped to nothing.
+ */
+export type DoorProductGrant =
+  | { readonly state: "none" }
+  | { readonly state: "granted"; readonly scopes: readonly ProductScope[] }
+  | { readonly state: "revoked" }
+  | { readonly state: "unavailable" };
+
+/**
  * What the verified identity says about WHO is asking, for scoping only.
  *
  *   first_party     the person's own session (web cookie, or a Supabase
  *                   session bearer from the web / Android / iOS app) — no
  *                   OAuth client involved. Never scoped.
- *   oauth_scoped    a token an OAuth client obtained, carrying at least one
- *                   product scope.
- *   oauth_unscoped  a token an OAuth client obtained, carrying NO product
- *                   scope — every token Supabase Auth issues today (it
- *                   supports only openid / email / profile / phone). Allowed
- *                   while the flag is `off` or `log`; refused under `enforce`.
+ *   oauth_scoped    an OAuth client for which the person RECORDED a choice
+ *                   (granted, possibly to nothing, or revoked). Always held
+ *                   to it, whatever the flag says (B2).
+ *   oauth_unscoped  an OAuth client with NO recorded choice — the consents
+ *                   given before B3. Allowed while the flag is `off` or
+ *                   `log`; refused under `enforce` (the legacy sunset).
  */
 export type ScopeGrant =
   | { readonly kind: "first_party" }
   | { readonly kind: "oauth_scoped"; readonly clientId: string; readonly scopes: ReadonlySet<ProductScope> }
   | { readonly kind: "oauth_unscoped"; readonly clientId: string };
 
-/** `oauthClient` is what `resolveApiIdentity` read off a VERIFIED bearer token. */
-export function scopeGrantOf(oauthClient: OauthClientClaims | undefined | null): ScopeGrant {
-  if (!oauthClient) return { kind: "first_party" };
-  const scopes = new Set((oauthClient.scopeClaim ?? []).filter(isProductScope));
-  return scopes.size > 0
-    ? { kind: "oauth_scoped", clientId: oauthClient.clientId, scopes }
-    : { kind: "oauth_unscoped", clientId: oauthClient.clientId };
+/**
+ * `oauthClientId` is what `resolveApiIdentity` read off a VERIFIED bearer
+ * token (B1a, fail closed); `productGrant` is the person's recorded choice
+ * for that client. The token's own `scope` claim plays no part.
+ */
+export function scopeGrantOf(
+  oauthClientId: string | undefined | null,
+  productGrant: DoorProductGrant | null | undefined,
+): ScopeGrant {
+  if (!oauthClientId) return { kind: "first_party" };
+  if (productGrant?.state === "none") return { kind: "oauth_unscoped", clientId: oauthClientId };
+  const scopes =
+    productGrant?.state === "granted" ? new Set(productGrant.scopes.filter(isProductScope)) : new Set<ProductScope>();
+  // granted → its scopes; revoked, unavailable or missing → nothing (fail closed).
+  return { kind: "oauth_scoped", clientId: oauthClientId, scopes };
 }
 
 // ── The enforcement flag ────────────────────────────────────────────────────
 
 /**
- * `MCP_SCOPE_ENFORCEMENT` (lib/env.ts), default `off`:
+ * `MCP_SCOPE_ENFORCEMENT` (lib/env.ts), default `off`. Since B2 it governs
+ * ONLY clients with no recorded choice (`oauth_unscoped`, legacy consents):
  *
- *   off      today's behaviour, byte for byte: nothing is evaluated, logged
- *            or recorded.
+ *   off      today's behaviour for them, byte for byte: nothing is
+ *            evaluated, logged or recorded.
  *   log      every call still runs; a call the scope would refuse writes one
  *            privacy-safe `external_client.scope` log line
  *            (`outcome: "would_refuse"`) and nothing else.
@@ -293,11 +326,64 @@ export function insufficientScopeResult(
     code: "insufficient_scope" as const,
     message:
       `This connection was not granted the permission "${requiredScope ?? "(none available)"}" ` +
-      `that ${capabilityId} needs. NOTHING was read or written. Reconnect the app and allow that ` +
-      "permission, or use LabourMarket.ai directly.",
+      `that ${capabilityId} needs. NOTHING was read or written. The account holder can allow it in ` +
+      "LabourMarket.ai → Account → Connected apps → Change permissions; the change applies to the " +
+      "next call, with no reconnect. Or use LabourMarket.ai directly.",
     requiredScope,
     grantedScopes: grant.kind === "oauth_scoped" ? [...grant.scopes] : [],
   };
+}
+
+/**
+ * The door could not read the person's recorded choice for this client. The
+ * call is refused — never run unscoped — and the client may simply retry.
+ */
+export function permissionCheckUnavailableResult(capabilityId: string) {
+  return {
+    ok: false as const,
+    code: "permission_check_unavailable" as const,
+    message:
+      `LabourMarket.ai could not check this connection's permissions for ${capabilityId} just now. ` +
+      "NOTHING was read or written. Try again in a moment.",
+  };
+}
+
+// ── The person's choice (consent screen, Connected apps) ────────────────────
+
+/**
+ * The wording version a grant was made under, stored with the grant
+ * (`consent_copy_version`). Bump it whenever the meaning of a scope label
+ * changes, so a grant can be traced to the words the person actually saw.
+ */
+export const CONSENT_COPY_VERSION = "b3-2026-10";
+
+/** The four "see" scopes — the convenience preset the person can choose. */
+export const READ_PRODUCT_SCOPES = [
+  "read:profile",
+  "read:journal",
+  "read:demand",
+  "read:organization",
+] as const satisfies readonly ProductScope[];
+
+/**
+ * Untrusted form values → known product scopes, duplicates removed, in
+ * consent-screen order. Anything else is dropped here and refused again by
+ * the database function.
+ */
+export function normalizeProductScopes(values: readonly unknown[]): ProductScope[] {
+  const wanted = new Set(values.filter((v): v is string => typeof v === "string"));
+  return PRODUCT_SCOPES.filter((s) => wanted.has(s));
+}
+
+/** The product scopes named in a raw OAuth `scope` string (what a client asked for). */
+export function requestedProductScopes(scope: string | null | undefined): ProductScope[] {
+  return normalizeProductScopes((scope ?? "").split(/\s+/));
+}
+
+/** Whether `granted` already covers every scope in `requested` (`write:X` covers `read:X`). */
+export function grantCovers(granted: readonly ProductScope[], requested: readonly ProductScope[]): boolean {
+  const set = new Set(granted);
+  return requested.every((r) => scopeSatisfies(set, r));
 }
 
 // ── Discovery and consent ───────────────────────────────────────────────────

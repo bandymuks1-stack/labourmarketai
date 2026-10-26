@@ -13,6 +13,11 @@ import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { HistoryQualitySection } from "@/components/app/organization/history-quality-section";
 import { HistoryDuplicateReview } from "@/components/app/organization/history-duplicate-review";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/history");
+
 
 /**
  * ISTORIJA — the historical import door (owner IA correction 2026-09-16,

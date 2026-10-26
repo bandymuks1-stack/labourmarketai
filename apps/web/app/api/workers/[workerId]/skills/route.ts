@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { refusalStatus, resolveApiIdentity } from "@/lib/api/api-identity";
+import { firstPartyRefusalStatus, resolveFirstPartyIdentity } from "@/lib/api/api-identity";
 import {
   ownsWorker,
   workerProfessionSkillIds,
@@ -27,9 +27,9 @@ export async function GET(
 
   // SHARED AUTHENTICATED API — cookie session OR bearer token, one resolver.
   // Authority is unchanged below: ownsWorker + RLS still decide.
-  const auth = await resolveApiIdentity(req);
+  const auth = await resolveFirstPartyIdentity(req);
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: refusalStatus(auth.reason) });
+    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: firstPartyRefusalStatus(auth.reason) });
   }
   const { userId, supabase } = auth.identity;
   if (!(await ownsWorker(supabase, workerId, userId))) {
@@ -99,9 +99,9 @@ export async function POST(
 
   // SHARED AUTHENTICATED API — cookie session OR bearer token, one resolver.
   // Authority is unchanged below: ownsWorker + RLS still decide.
-  const auth = await resolveApiIdentity(req);
+  const auth = await resolveFirstPartyIdentity(req);
   if (!auth.ok) {
-    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: refusalStatus(auth.reason) });
+    return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: firstPartyRefusalStatus(auth.reason) });
   }
   const { userId, supabase } = auth.identity;
   if (!(await ownsWorker(supabase, workerId, userId))) {

@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { Link } from "@/lib/i18n/navigation";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { DemandDraftForm } from "@/components/app/demand-draft-form";
@@ -10,6 +11,11 @@ import { getOwnCustomer } from "@/lib/buyer/customers";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { listOwnAttachments } from "@/lib/buyer/customer-request-attachments";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/buyer", "roleDashboards.buyer.title");
+
 
 const BUYER_FIELDS = [
   { key: "serviceType" as const, labelKey: "field.serviceType.label", placeholderKey: "field.serviceType.placeholder", variant: "text" as const },
@@ -238,13 +244,7 @@ export default async function BuyerDashboardPage({
     <div className="flex flex-col gap-6" data-testid="buyer-dashboard">
       <header className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Link
-            href="/dashboard"
-            className="shrink-0 text-xs font-medium text-brand-blue transition-colors hover:underline"
-            data-testid="back-to-action-center"
-          >
-            ← {t("backToActions")}
-          </Link>
+          <PageBack href="/dashboard" data-testid="back-to-action-center">{t("backToActions")}</PageBack>
           <Link
             href="/dashboard"
             className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"

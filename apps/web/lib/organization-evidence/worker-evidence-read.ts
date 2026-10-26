@@ -84,7 +84,32 @@ export interface WorkerEvidencePeriodRow {
   readonly periodEnd: string;
   readonly hours: number;
   readonly provenance: PeriodProvenance;
+  /** `derived.hoursBasis` as stated (by the source or a correction); null =
+   *  not stated. Read by the one hours ledger (hours-ledger.ts). */
+  readonly hoursBasis: HoursBasisStatement | null;
   readonly context: HistoryContext;
+}
+
+/** A stated basis of a period figure: `actual` (summed from timesheets) or
+ *  `estimated` (a rate, a reconstruction), with the method that produced it. */
+export type HoursBasisStatement = {
+  readonly value: string;
+  readonly method: string | null;
+  readonly note: string | null;
+};
+
+/** The ONE reading of `derived.hoursBasis` — a derived entry
+ *  `{ value, method, confidence, note }` as a correction writes it. Anything
+ *  else (absent, malformed, an unknown value) is NOT a stated basis. */
+export function hoursBasisFrom(derived: Record<string, unknown> | null | undefined): HoursBasisStatement | null {
+  const e = derived?.hoursBasis as { value?: unknown; method?: unknown; note?: unknown } | undefined;
+  if (!e || typeof e !== "object") return null;
+  if (e.value !== "actual" && e.value !== "estimated") return null;
+  return {
+    value: e.value,
+    method: typeof e.method === "string" ? e.method : null,
+    note: typeof e.note === "string" ? e.note : null,
+  };
 }
 
 export type WorkerEvidenceRead =
@@ -287,6 +312,7 @@ export async function readEvidenceRecordsForPeople(
         hours,
         // From the already-selected `derived.timeSemantics` — the ONE rule.
         provenance: periodProvenance({ activityDate: null, periodStart, factFields: [], derived }),
+        hoursBasis: hoursBasisFrom(derived),
         raw,
       });
       continue;

@@ -286,9 +286,16 @@
       "waiting": "Wacht op beoordeling door een mens — de manager of eigenaar van je organisatie kan het beoordelen; tot die tijd blijft het de registratie die jij hebt ingevoerd",
       "approved": "Beoordeeld",
       "changes_requested": "Wijzigingen gevraagd",
-      "rejected": "Teruggestuurd",
+      "rejected": "Afgewezen",
       "reasonLabel": "Reden",
-      "notEnabled": "Vastgelegd — je leidinggevende heeft bevestiging nog niet ingeschakeld, dus niemand beoordeelt deze registratie; tot dan blijft het jouw eigen opgave"
+      "notEnabled": "Vastgelegd — je leidinggevende heeft bevestiging nog niet ingeschakeld, dus niemand beoordeelt deze registratie; tot dan blijft het jouw eigen opgave",
+      "correctedFrom": {
+        "changes_requested": "Gecorrigeerd nadat het was teruggestuurd",
+        "rejected": "Gecorrigeerd na afwijzing",
+        "approved": "Gecorrigeerd na beoordeling",
+        "earlierVersion": "De eerdere versie blijft met dit besluit in je geschiedenis; de uren tellen één keer — via deze correctie."
+      },
+      "quotedNote": "‘{note}’"
     },
     "delete": "Item verwijderen",
     "deleting": "Verwijderen...",
@@ -506,7 +513,7 @@
     "pageTitle": "Spraakinvoer",
     "pageIntro": "Vertel over je werkdag — je controleert en corrigeert de tekst voordat er iets wordt opgeslagen.",
     "backToJournal": "Terug naar dagboek",
-    "unavailable": "Spraaktranscriptie is nog niet ingesteld. De transcriptieserver is nog niet gekoppeld door de platformeigenaar — opnemen is tot die tijd uitgeschakeld. Je kunt je invoer altijd als tekst schrijven.",
+    "unavailable": "Spraaktranscriptie is nog niet beschikbaar — opnemen is voorlopig uitgeschakeld. Je kunt je invoer altijd als tekst schrijven.",
     "disclosureTitle": "Voordat je opneemt",
     "disclosureProcessing": "Je opname wordt naar een door LabourMarket.ai beheerde verwerkingsserver gestuurd om in tekst te worden omgezet. Er wordt geen spraakdienst van derden gebruikt.",
     "disclosureWhy": "De opname wordt alleen gebruikt om de onderstaande tekst te maken — nergens anders voor.",
@@ -980,7 +987,7 @@
     "provenance": "Waar de uren vandaan komen: {worker} u door jou ingevoerd, {extracted} u uit je tekst herkend, {corrected} u door een leidinggevende gecorrigeerd.",
     "provenanceRule": "Elke registratie telt één keer; een uur wordt alleen aan een vaardigheid toegewezen als de registratie aan één vaardigheid gekoppeld is of als je eigen zin (“6 u getegeld”) die vaardigheid noemt.",
     "dayInferred": "{count, plural, one {# registratie heeft geen opgegeven werkdag en is geplaatst op de dag van opslaan.} other {# registraties hebben geen opgegeven werkdag en zijn geplaatst op de dag van opslaan.}}",
-    "glance": "{days, plural, one {# dag} other {# dagen}} · {entries, plural, one {# registratie} other {# registraties}}",
+    "glance": "{days, plural, one {# dag met uren} other {# dagen met uren}} · {entries, plural, one {# registratie} other {# registraties}}",
     "glanceNone": "geen registraties",
     "periodEmpty": "Geen registraties in “{period}” — kies hierboven een andere periode.",
     "mainActivity": "Hoofdactiviteit",

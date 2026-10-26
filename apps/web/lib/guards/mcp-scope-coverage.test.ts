@@ -87,8 +87,31 @@ describe("the consent screen explains every scope in plain words, in every activ
       for (const key of CONSENT_SCOPE_MESSAGE_KEYS) {
         expect(typeof block.scope?.[key] === "string" && block.scope[key].trim().length > 0, `${locale}: scope.${key}`).toBe(true);
       }
-      for (const key of ["scopeUnknown", "noProductScopes", "noProductScopesEnforced", "scopesNotEnforced", "importantChangesConfirm"]) {
+      // B3/B4b: the chooser and its honest reach note. The four #2707
+      // sentences about unscoped grants are gone: every new connection now
+      // records a choice, so "these permissions do not limit the app" would
+      // be false.
+      for (const key of [
+        "scopeUnknown",
+        "chooseLegend",
+        "chooseHint",
+        "choosePresetRead",
+        "chooseRequested",
+        "errorNoneSelected",
+        "returningUnchosen",
+        "returningMore",
+        "returningSave",
+        "returningDisconnect",
+        "outcomeDisconnected",
+        "outcomeSavedReconnect",
+        "errorSaveFailed",
+        "reachNote",
+        "identityScopesLabel",
+      ]) {
         expect(typeof block[key] === "string" && (block[key] as string).trim().length > 0, `${locale}: ${key}`).toBe(true);
+      }
+      for (const gone of ["noProductScopes", "noProductScopesEnforced", "scopesNotEnforced", "importantChangesConfirm"]) {
+        expect(block[gone], `${locale}: ${gone} must stay removed`).toBeUndefined();
       }
     }
   });

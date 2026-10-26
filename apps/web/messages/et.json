@@ -7,7 +7,7 @@
     "empty": "[EN] No requests submitted yet. Submit your need above and it will appear here with its status.",
     "created": "[EN] Created",
     "scoutLink": "[EN] Matched workers & interest for this need",
-    "manageHelp": "[EN] Drafts can be deleted. Closing or reopening a submitted need — and confirming its recognized skills — is done from its scouting view. Editing submitted text is not available yet.",
+    "manageHelp": "[EN] Complete an inquiry, remove it from the market or publish it again right here in the list; a draft can be continued or discarded. Confirming its recognized skills is done from its scouting view. Editing submitted text is not available yet.",
     "syntheticTitle": {
       "hiringWorkers": "Otsitakse töötajaid",
       "agencyPartnership": "Partnerluspakkumine"
@@ -293,7 +293,7 @@
         "discover": "[EN] Discover",
         "overview": "[EN] Overview",
         "profile": "Profiil",
-        "journal": "Minu CV",
+        "journal": "Tööpäevik",
         "search": "[EN] Search",
         "advanced": "Täpsem haldus",
         "playerCard": "Minu ametiprofiil",
@@ -572,7 +572,16 @@
     "notFound": "[EN] This page does not exist",
     "skipToContent": "[EN] Skip to content",
     "loading": "Laadimine…",
-    "dashboardSections": "Töölaua jaotised"
+    "dashboardSections": "Töölaua jaotised",
+    "nav": {
+      "more": "Veel",
+      "menu": "Menüü",
+      "areas": "Tööalad",
+      "close": "Sulge",
+      "youAreHere": "Sa oled siin",
+      "previous": "Eelmine ala",
+      "next": "Järgmine ala"
+    }
   },
   "companies": {
     "cta": {
@@ -1717,7 +1726,7 @@
       "help": "[EN] Pick a destination country to see which documents it asks for.",
       "mine": "[EN] Your preferred countries come first.",
       "unknown": "[EN] The requirement list for {country} has not been curated yet — we show nothing rather than guessing.",
-      "next": "[EN] Next step: take care of — {doc}.",
+      "next": "[EN] If you work in this country, agree this with the employer before the agreement: {doc}. Nothing needs to be uploaded.",
       "ok": "[EN] All curated requirements for {country} are covered."
     },
     "types": {
@@ -2014,6 +2023,15 @@
       "pending": "Liidan…",
       "done": "Liidetud. Read ja nende kirjed säilivad; projektide loend näitab nüüd säilitatud projekti.",
       "failed": "Ei liidetud. Läbi minemata ridade puhul ei muudetud midagi — laadige uuesti ja proovige veel."
+    },
+    "assign": {
+      "reservation": {
+        "unknownWhy": {
+          "undated_window": "This project has no dates, so overlaps with other commitments can't be checked.",
+          "undated_commitment": "Another of this person's commitments has no dates, so free days can't be confirmed.",
+          "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
+        }
+      }
     }
   },
   "projectOps": {
@@ -2811,6 +2829,7 @@
     }
   },
   "bookings": {
+    "readFailed": "[EN] Couldn't load your bookings just now — this does not mean you have none. Read again.",
     "endsOn": "[EN] Until {date}",
     "noRole": "[EN] Work engagement",
     "displayState": {
@@ -2846,7 +2865,8 @@
       "alreadyAccepted": "Töötaja on selle pakkumise juba vastu võtnud — kokkulepitud tingimusi siin üle ei kirjutata. Leppige muudatustes kokku vestluses.",
       "refusedNotReachable": "Sellele inimesele ei saa siit broneeringut pakkuda — profiil ei ole tööandjatele nähtav ja teil puudub tööalane suhe.",
       "refusedNeedClosed": "See vajadus on suletud — ava see uuesti enne broneeringu pakkumist.",
-      "refusedAnswered": "Töötaja lükkas selle pakkumise tagasi, seega ilma tema uue nõusolekuta seda uuesti ei avata. Jätka vestluses või leia teine töötaja."
+      "refusedAnswered": "Töötaja lükkas selle pakkumise tagasi, seega ilma tema uue nõusolekuta seda uuesti ei avata. Jätka vestluses või leia teine töötaja.",
+      "unconfirmed": "[EN] No answer from the server yet. The proposal may already have been sent — check Bookings, or send it again (the same proposal is never duplicated)."
     },
     "reason": {
       "optionalTitle": "[EN] Reason (optional)",
@@ -2895,7 +2915,8 @@
     "clash": {
       "acceptAnyway": "Tean, et kattub — võtan siiski vastu",
       "stillStands": "Vastuvõtmine ei kõrvalda kattuvust. Mõlemad broneeringud säilitavad oma kuupäevad, konflikt jääb kalendris nähtavaks ja sinu otsus salvestatakse.",
-      "acknowledged": "Vastu võetud teadaoleva kattuvusega. Endiselt kattub broneeringuid: {count}. Midagi ei tühistatud ega peidetud ja sinu otsus on talletatud."
+      "acknowledged": "Vastu võetud teadaoleva kattuvusega. Endiselt kattub broneeringuid: {count}. Midagi ei tühistatud ega peidetud ja sinu otsus on talletatud.",
+      "notRecordable": "Need kuupäevad kattuvad broneeringuga, mille oled juba vastu võtnud, ja seda kattuvust ei saa veel salvestada, seega võid selle pakkumise tagasi lükata või jätta selle avatuks, et ettevõte saaks kuupäevi muuta."
     },
     "proposedBy": "Pakub: {name}",
     "termsChanged": "Ettevõte muutis tingimusi. Olid nõustunud: {previous}. Otsusta uute kuupäevade üle uuesti."
@@ -3020,9 +3041,9 @@
       "coveredShort": "[EN] {count} covered"
     },
     "notes": {
-      "assignmentsPending": "[EN] Assignment data is prepared and joins this view after owner activation.",
-      "languagesPending": "[EN] Language coverage is prepared and joins this view after owner activation.",
-      "brigadesPending": "[EN] Brigade coverage is prepared and joins this view after owner activation.",
+      "assignmentsPending": "[EN] Assignment data is not shown in this view yet.",
+      "languagesPending": "[EN] Language coverage is not shown in this view yet.",
+      "brigadesPending": "[EN] Brigade coverage is not shown in this view yet.",
       "demandError": "[EN] Work needs could not be read right now.",
       "projectError": "[EN] Projects could not be read right now.",
       "capacityError": "[EN] Part of the capacity data could not be read right now."
@@ -3056,7 +3077,7 @@
     },
     "stateNote": {
       "insufficientData": "Selle signaali jaoks pole veel piisavalt päris andmeid — väljamõeldud numbri asemel näidatakse ausat lünka.",
-      "needsMigration": "Selle signaali andmehoidla on ette valmistatud ja liitub pärast omaniku aktiveerimist. Seni midagi ei hinnata.",
+      "needsMigration": "See signaal pole veel sisse lülitatud. Seni midagi ei hinnata.",
       "stale": "Selle signaali tõendid on värskusaknast vanemad — käsitle neid aegununa."
     },
     "valueClass": {
@@ -3108,7 +3129,7 @@
         "agencyAggregate": "Klientideülene koond"
       },
       "state": {
-        "needsMigration": "See signaal on ette valmistatud ja ootab omaniku aktiveerimist."
+        "needsMigration": "See signaal pole veel sisse lülitatud."
       },
       "salary": {
         "noBenchmark": "Sinu ameti ja riigi jaoks pole võrdlusväärtust veel saadaval.",
@@ -3143,7 +3164,7 @@
       }
     },
     "basis": {
-      "gatedMigration": "Omaniku aktiveeritav andmehoidla (pole veel sisse lülitatud)",
+      "gatedMigration": "Andmehoidla pole veel sisse lülitatud",
       "marketRateAverages": "Administraatori kureeritud turumäärade keskmised",
       "journalEvidence": "Sinu enda tööpäeviku tõendid",
       "fillTimeMeasurementsMissing": "Täitmisaja mõõtmised (veel kogumata)",
@@ -3201,14 +3222,14 @@
       },
       "terms": {
         "internal": "Sisemine tuletus kanoonilistest platvormitabelitest; kohordipoliitika kaitseb üksikisikuid.",
-        "adminCurated": "Omaniku sisestatud keskmised koos allikamärkega valimi suuruse asemel.",
-        "statGovLt": "Ametlik statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
-        "eurostat": "Ametlik ELi statistika; allikaviide nõutav; aktiveerimine ootab omaniku kinnitust.",
+        "adminCurated": "Kureeritud keskmised koos allikamärkega valimi suuruse asemel.",
+        "statGovLt": "Ametlik statistika; allikaviide nõutav. Veel pole kasutusel.",
+        "eurostat": "Aktiivne allikas. Ametlik ELi statistika; allikaviide nõutav.",
         "arbetsformedlingen": "Aktiivne allikas. Kasutustingimused kinnitatud: tasuta avalik andmeallikas (CC0). Iga kuulutuse juures näidatakse allikat ja iga kuulutus viib algse kuulutuse juurde.",
         "nav": "Aktiivne allikas. NAV-i API tingimused on vastu võetud ja juurdepääs antud. Jooksvaid kohustusi täidetakse: tagasi võetud kuulutus eemaldatakse kohe, uuendatud kuulutus värskendatakse kiiresti ja kandideerimislink viib algse kuulutuseni.",
-        "cvbankas": "Ainult ettepanek — kasutusluba kinnitamata; ei segata kunagi sisemiste numbritega.",
-        "eures": "Kavandatud allikas. Kasutustingimusi pole veel üle vaadatud — aktiveerimine nõuab omaniku kinnitust. Täna midagi ei laadita.",
-        "uztLt": "Kavandatud allikas. Kasutustingimusi pole veel üle vaadatud — aktiveerimine nõuab omaniku kinnitust. Täna midagi ei laadita."
+        "cvbankas": "Kavandatud allikas — pole kasutusel; ei segata kunagi sisemiste numbritega.",
+        "eures": "Kavandatud allikas. Pole kasutusel — täna midagi ei laadita.",
+        "uztLt": "Kavandatud allikas. Pole kasutusel — täna midagi ei laadita."
       },
       "status": {
         "active": "Aktiivne (sisemine)",
@@ -3220,7 +3241,7 @@
     "methodology": {
       "title": "Metoodika",
       "deterministic": "Kõik väärtused on deterministlikud ja arvutatud allikatega kirjetest — midagi ei hinda tehisintellekt ja ühtegi numbrit ei mõelda kunagi välja.",
-      "externalOff": "Välised allikad on väljas: iga väline võrdlus on ettepanek, mis ootab omaniku õiguslikku kinnitust. Sisemisi ja väliseid numbreid ei segata kunagi.",
+      "externalOff": "Välised allikad on väljas. Sisemisi ja väliseid numbreid ei segata kunagi.",
       "cohort": "Väikesed kohordid rühmitatakse või peidetakse üksikisikute kaitseks."
     },
     "contextual": {
@@ -3335,7 +3356,7 @@
       },
       "unavailable": {
         "requirementTitle": "Mida on vaja",
-        "sourcesTitle": "Omaniku kinnitust ootavad allikad"
+        "sourcesTitle": "Allikad, mis pole veel kasutusel"
       },
       "reason": {
         "salaryNoBenchmark": "Siin pole palganumbrit, sest sinu ametile ja riigile pole veel sisestatud kureeritud turumäära ning ühtki välist palgaallikat pole kasutamiseks heaks kiidetud.",
@@ -3348,14 +3369,14 @@
         "salaryInputsMissing": "Siin pole palganumbrit, sest kureeritud turumäär on sisestatud, kuid sinu enda soovitud palk puudub, seega pole millegagi võrrelda."
       },
       "requirement": {
-        "ownerEnableStore": "Platvormi omanik peab vaatluste hoidla sisse lülitama ja kinnitama vähemalt ühe andmeallika.",
-        "salaryBenchmark": "Administraator peab sisestama sinu ametile ja riigile kureeritud turumäära või platvormi omanik peab kinnitama välise palgaallika.",
+        "ownerEnableStore": "Vaatluste hoidla tuleb sisse lülitada ja kinnitada vähemalt üks andmeallikas.",
+        "salaryBenchmark": "Sinu ametile ja riigile tuleb sisestada kureeritud turumäär või kinnitada väline palgaallikas.",
         "demandOwnRows": "Lisa tööpäringuid — kaart täitub sinu organisatsiooni enda andmetega niipea, kui kirjed on olemas.",
         "salaryBasis": "Enne ausa võrdluse näitamist peab olema fikseeritud, kas sinu soovitud palk ja kureeritud turumäär on bruto või neto.",
         "salaryInputs": "Sisesta oma soovitud palk töötajaprofiili — võrdlus ilmub kohe, kui see on olemas."
       },
       "after": {
-        "activation": "Pärast seda, kui omanik on andmeallika kinnitanud ja aktiveerinud, täitub see kaart allikapõhiste, dateeritud numbritega — igaühel usaldusväärsus, värskus, allikas ja samm-sammuline päritolu."
+        "activation": "Kui andmeallikas on sisse lülitatud, täitub see kaart allikapõhiste, dateeritud numbritega — igaühel usaldusväärsus, värskus, allikas ja samm-sammuline päritolu."
       }
     },
     "drawer": {
@@ -3691,8 +3712,8 @@
           "description": "Projekti töötaja nimekirja punkt märgitakse tegeliku olekuga — vajalik, saadud, kontrollitud."
         },
         "seedReadinessChecklist": {
-          "label": "Alusta dokumentide nimekirja",
-          "description": "Kõigile projekti inimestele alustatakse standardset valmisoleku / dokumentide nimekirja."
+          "label": "Lisa kokkuleppimise ettepanekud",
+          "description": "Kõigile projekti inimestele lisatakse soovitatud punktid, milles enne kokkulepet kokku leppida. See ei ole kohustuslik nimekiri ega valmisoleku hinnang."
         },
         "requestReadiness": {
           "label": "Küsi puuduvat",
@@ -4270,8 +4291,8 @@
       "missingDeclaredSkills": "märgitud oskused",
       "missingEvidence": "töö tõendid",
       "blockedSuffix": "(tagasi lükatud / aegunud)",
-      "readinessSeedChip": "Alusta dokumentide nimekirja ({count} in.)",
-      "readinessSeeded": "Nimekiri alustatud: {count} in. × {items} punkti — kõik „vajalik“.",
+      "readinessSeedChip": "Lisa kokkuleppimise ettepanekud ({count} in.)",
+      "readinessSeeded": "Ettepanekud lisatud: {count} in. × {items} punkti — kõik „kokku leppida enne kokkulepet“.",
       "readinessGotChip": "Saadud: {label} ({name})",
       "readinessGotDone": "Märgitud saaduks: {label} ({name}).",
       "readinessCheckedChip": "Kontrollitud: {label} ({name})",
@@ -4312,7 +4333,7 @@
       "moveAskProject": "Kuhu {name} liigutada? Vali:",
       "moveWhatIfTitle": "Kui {name} liiguks projektist „{from}“ projekti „{to}“:",
       "moveFromLine": "• „{from}“: inimesi {before} → {after}; tema avatud tööpakette jääb sinna {tasks}; valmisoleku loend seal: {checked}/{total}.",
-      "moveToLine": "• „{to}“: inimesi {before} → {after}; valmisoleku loend seal algab 0/{total}.",
+      "moveToLine": "• „{to}“: inimesi {before} → {after}; mida seal kokku leppida, pole veel valitud (soovitatud kuni {total} punkti).",
       "moveCountryLine": "• Riik muutub: {from} → {to} — dokumendinõuded on teised.",
       "moveNoDatesLine": "• Projektil „{to}“ pole kuupäevi — puudumisi ei saa kontrollida.",
       "moveAvailabilityUnknownLine": "• Puudumised teadmata.",
@@ -6940,7 +6961,9 @@
       "managesInvitations": "Haldab kutseid",
       "grantInvitations": "Luba kutseid hallata",
       "withdrawInvitations": "Võta kutsete haldamine ära",
-      "unavailable": "Liikmete nimekirja ei õnnestunud praegu lugeda. See ei tähenda, et organisatsioonil pole liikmeid."
+      "unavailable": "Liikmete nimekirja ei õnnestunud praegu lugeda. See ei tähenda, et organisatsioonil pole liikmeid.",
+      "noAccountHint": "Liikmerolli saab anda ainult inimesele, kellel on juba konto. Kutsu kontota inimene kutselingiga — kui ta registreerub ja organisatsiooniga liitub, saad talle siin rolli anda.",
+      "noAccountCta": "Loo kutselink"
     },
     "start": {
       "membersMoved": "Organisatsiooni {workspace} liikmeid ja kutseid hallatakse selle Seadetes.",
@@ -7063,6 +7086,7 @@
     "titleCompany": "Mis saab teie juhitud tööst",
     "example": "Näide — mitte päris inimene ega päris andmed",
     "hint": "Valige samm. Iga samm avab päris koha teie töökeskkonnas.",
+    "hintWorkers": "Valige samm. Iga samm avab päris koha teie töökeskkonnas.",
     "open": "Ava töökeskkonnas",
     "list": "Töö elutsükli sammud",
     "workers": {

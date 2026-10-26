@@ -129,6 +129,30 @@ export async function ensureDeclaredSkills(count = 3): Promise<string[]> {
   return skills.map((sk) => sk.id);
 }
 
+/**
+ * Link seeded entries to skills, the way the journal flywheel does
+ * (`journal_entry_skills`, provenance `manual` = the worker linked a declared
+ * skill). Since #2271 a manager's confirmation verifies ONLY the skills the
+ * confirmed entry is linked to — an entry with no link approves the entry and
+ * verifies nothing — so a spec that wants a skill verified must link it.
+ * The rows cascade away with their entry in `removeSeeded`.
+ */
+export async function linkEntrySkills(entryId: string, skillIds: string[]): Promise<void> {
+  if (skillIds.length === 0) return;
+  const workerId = await fixtureWorkerId(WORKER_PROFILE);
+  await dbOk(
+    "POST",
+    "journal_entry_skills",
+    skillIds.map((skillId) => ({
+      journal_entry_id: entryId,
+      worker_id: workerId,
+      skill_id: skillId,
+      provenance: "manual",
+    })),
+    "return=minimal",
+  );
+}
+
 /** Remove the declared skills this run created. */
 export async function removeDeclaredSkills(skillIds: string[]): Promise<void> {
   if (skillIds.length === 0) return;

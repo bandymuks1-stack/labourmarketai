@@ -35,10 +35,19 @@ import { NOTIFICATION_EMAIL_INCAPABLE_TYPES } from "@/lib/notifications/email-di
 import {
   readNotificationPreferencesFor,
   resolveEffectivePreferences,
+  resolvePushOptIn,
 } from "@/lib/notifications/notification-preferences";
+import { webPushClientConfig } from "@/lib/notifications/web-push-config";
+import { WebPushOptIn } from "@/components/app/web-push-opt-in";
 import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
+import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/account", "auth.dashboard.tabs.account");
+
 
 /**
  * Account — SETTINGS ONLY (marketplace IA cleanup 2026-06-25).
@@ -112,6 +121,10 @@ export default async function AccountPage({
   );
   const tNotifTypes = await getTranslations("auth.notifications.types");
   const tPrefs = await getTranslations("notificationPrefs");
+  // COM-3 push channel: OFF unless the owner switched it on (flag + VAPID
+  // keys). While off, the opt-in below is not rendered at all.
+  const push = webPushClientConfig();
+  const pushOptedIn = prefsRead.kind === "ok" && resolvePushOptIn(prefsRead.rows);
   const prefRows: NotificationPreferenceRowView[] = effectivePrefs.map((p) => ({
     type: p.notificationType,
     label: tNotifTypes.has(`event_${p.notificationType}` as never)
@@ -175,7 +188,15 @@ export default async function AccountPage({
           payments are not live — one line, open on demand (owner 2026-10-10). */}
       {/* Open while billing is live: the plan and its order/portal controls are
           then real, and a closed fold hid them (owner, 2026-10-22). */}
-      <Fold title={tRoot("accountPlan.title")} testId="account-plan-fold" defaultOpen={billingLive}>
+      {/* `#lmc` lives INSIDE this fold. The chat's "Kiek turiu LMC?" chip and
+          the command finder link `/dashboard/account#lmc`; a client-side
+          navigation never expands a closed <details> (only a full page load
+          does, and only in some browsers), so without the opener the person
+          lands on a shut bar with the balance hidden — measured 2026-10-23 on
+          the local stack with billing off, which is every worker outside the
+          billing pilot. */}
+      <DetailsHashOpener targetId="account-plan" />
+      <Fold id="account-plan" title={tRoot("accountPlan.title")} testId="account-plan-fold" defaultOpen={billingLive}>
         {/* Honest payment readiness — payments are not active yet (billing
             disabled). No pay-now, no subscription-active, no paid unlock. */}
         {!billingLive && (
@@ -355,6 +376,24 @@ export default async function AccountPage({
           saved: tPrefs("saved"),
         }}
       />
+      {push.active && push.publicKey ? (
+        <WebPushOptIn
+          publicKey={push.publicKey}
+          optedIn={pushOptedIn}
+          labels={{
+            title: tPrefs("push.title"),
+            intro: tPrefs("push.intro"),
+            turnOn: tPrefs("push.turnOn"),
+            turnOff: tPrefs("push.turnOff"),
+            working: tPrefs("push.working"),
+            on: tPrefs("push.on"),
+            off: tPrefs("push.off"),
+            unsupported: tPrefs("push.unsupported"),
+            blocked: tPrefs("push.blocked"),
+            error: tPrefs("push.error"),
+          }}
+        />
+      ) : null}
 
       {/* Identity is edited on the Profilis surface; a single settings link
           (not a launcher grid) keeps account = settings while the profile-cv

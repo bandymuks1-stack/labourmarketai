@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
 
 /**
  * Demand-visibility honesty guards (findings F-E1/F-E2/F-E3 of the
@@ -31,7 +32,7 @@ describe("worker-visibility honesty note (F-E1)", () => {
   });
 
   it("the key exists in en/lt/ru and states the verified-only visibility truth", () => {
-    for (const locale of ["en", "lt", "ru"]) {
+    for (const locale of activeLocales) {
       const msgs = JSON.parse(read(`messages/${locale}.json`));
       expect(
         msgs.demandReadback.workerVisibilityNote,

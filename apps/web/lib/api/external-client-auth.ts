@@ -364,7 +364,9 @@ export type ExternalClientAuthEvent =
       readonly tool: string;
       readonly outcome: "would_refuse" | "refused";
       readonly mode: "log" | "enforce";
-      readonly grant: "oauth_scoped" | "oauth_unscoped";
+      /** `oauth_unavailable` (B3): the person's recorded choice could not be
+       *  read, so the call was refused whatever the flag says. */
+      readonly grant: "oauth_scoped" | "oauth_unscoped" | "oauth_unavailable";
       /** Null only for a tool the coverage guard should have caught. */
       readonly required_scope: string | null;
       /** The OAuth client registration id — public client configuration,

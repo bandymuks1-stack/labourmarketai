@@ -12,6 +12,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  *            structured `insufficient_scope` result and an audit receipt
  *
  * and that the person's own (first-party) session is never scoped.
+ *
+ * B3: the grant is the person's RECORDED choice, read once per request through
+ * the caller's own client (`oauth_door_product_grant_v1`, stubbed here as the
+ * identity's `supabase.rpc`). The token's own claims play no part.
  */
 
 const mockEnv = vi.hoisted(() => ({ MCP_SCOPE_ENFORCEMENT: undefined as string | undefined }));
@@ -20,8 +24,13 @@ type Identity = {
   userId: string;
   transport: "bearer" | "cookie";
   supabase: unknown;
-  oauthClient?: { clientId: string; scopeClaim: readonly string[] | null };
+  oauthClientId?: string;
 };
+
+/** A caller client whose door read answers `data` (or `error`). */
+function door(data: unknown, error: unknown = null) {
+  return { rpc: vi.fn(async () => ({ data, error })) };
+}
 let identity: Identity = { userId: "u-1", transport: "bearer", supabase: {} };
 
 vi.mock("@/lib/api/api-identity", async (importOriginal) => {
@@ -93,19 +102,20 @@ function result(body: Record<string, unknown>) {
 
 const scopeLines = () => logLines.filter((l) => l.includes('"external_client.scope"')).map((l) => JSON.parse(l));
 
+/** Legacy: a consent from before B3, no recorded choice. */
 const OAUTH_UNSCOPED: Identity = {
   userId: "u-1",
   transport: "bearer",
-  supabase: {},
-  oauthClient: { clientId: "client-abc", scopeClaim: ["openid", "email"] },
+  supabase: door({ state: "none" }),
+  oauthClientId: "client-abc",
 };
 const OAUTH_READ_JOURNAL: Identity = {
   ...OAUTH_UNSCOPED,
-  oauthClient: { clientId: "client-abc", scopeClaim: ["openid", "read:journal"] },
+  supabase: door({ state: "granted", scopes: ["read:journal"] }),
 };
 const OAUTH_WRITE_JOURNAL: Identity = {
   ...OAUTH_UNSCOPED,
-  oauthClient: { clientId: "client-abc", scopeClaim: ["write:journal"] },
+  supabase: door({ state: "granted", scopes: ["write:journal"] }),
 };
 const FIRST_PARTY: Identity = { userId: "u-1", transport: "bearer", supabase: {} };
 
@@ -246,5 +256,74 @@ describe("MCP_SCOPE_ENFORCEMENT=enforce refuses before the capability runs", () 
     expect(result((await callTool("journal_confirm")).body).isError).toBe(false);
     expect(ran).toEqual(["journal.confirm", "journal.confirm"]);
     expect(scopeLines()).toEqual([]);
+  });
+});
+
+describe("B3: the recorded choice, read once per request, fails closed", () => {
+  for (const value of [undefined, "off", "log", "enforce"]) {
+    it(`flag ${String(value)}: an unreadable grant refuses the call — never runs it unscoped`, async () => {
+      mockEnv.MCP_SCOPE_ENFORCEMENT = value;
+      identity = { ...OAUTH_UNSCOPED, supabase: door(null, { code: "PGRST202" }) };
+      const r = result((await callTool("journal_list")).body);
+      expect(r.isError).toBe(true);
+      expect(r.structuredContent).toMatchObject({ ok: false, code: "permission_check_unavailable" });
+      expect(ran).toEqual([]);
+      expect(scopeLines()).toEqual([
+        expect.objectContaining({ outcome: "refused", grant: "oauth_unavailable", required_scope: null }),
+      ]);
+    });
+
+    it(`flag ${String(value)}: a withdrawn choice refuses even a read`, async () => {
+      mockEnv.MCP_SCOPE_ENFORCEMENT = value;
+      identity = { ...OAUTH_UNSCOPED, supabase: door({ state: "revoked", scopes: [] }) };
+      const r = result((await callTool("journal_list")).body);
+      expect(r.structuredContent).toMatchObject({ code: "insufficient_scope", grantedScopes: [] });
+      expect(ran).toEqual([]);
+    });
+
+    it(`flag ${String(value)}: an empty choice is scoped to nothing, not legacy`, async () => {
+      mockEnv.MCP_SCOPE_ENFORCEMENT = value;
+      identity = { ...OAUTH_UNSCOPED, supabase: door({ state: "granted", scopes: [] }) };
+      expect(result((await callTool("journal_list")).body).isError).toBe(true);
+      expect(ran).toEqual([]);
+    });
+  }
+
+  it("the door read happens once per tool call request, through the caller's own client, with no arguments", async () => {
+    const client = door({ state: "granted", scopes: ["read:journal"] });
+    identity = { ...OAUTH_UNSCOPED, supabase: client };
+    await callTool("journal_list");
+    expect(client.rpc).toHaveBeenCalledTimes(1);
+    expect(client.rpc).toHaveBeenCalledWith("oauth_door_product_grant_v1");
+  });
+
+  it("first-party callers never trigger the read", async () => {
+    const client = door({ state: "granted", scopes: [] });
+    identity = { ...FIRST_PARTY, supabase: client };
+    expect(result((await callTool("journal_confirm")).body).isError).toBe(false);
+    expect(client.rpc).not.toHaveBeenCalled();
+  });
+
+  it("tools/list pays no read", async () => {
+    const client = door({ state: "none" });
+    identity = { ...OAUTH_UNSCOPED, supabase: client };
+    await POST(
+      new Request("https://labourmarket.ai/api/mcp", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: "Bearer a.b.c" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} }),
+      }),
+    );
+    expect(client.rpc).not.toHaveBeenCalled();
+  });
+
+  it("a change between two requests applies to the next call (no caching across requests)", async () => {
+    let state: unknown = { state: "granted", scopes: ["read:journal"] };
+    const client = { rpc: vi.fn(async () => ({ data: state, error: null })) };
+    identity = { ...OAUTH_UNSCOPED, supabase: client };
+    expect(result((await callTool("journal_list")).body).isError).toBe(false);
+    state = { state: "revoked" };
+    expect(result((await callTool("journal_list")).body).isError).toBe(true);
+    expect(client.rpc).toHaveBeenCalledTimes(2);
   });
 });

@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { PageBack } from "@/components/app/premium/page-back";
 import { FolderPlus, History, UserPlus, UserSearch } from "lucide-react";
 
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -34,6 +35,11 @@ import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company", "roleDashboards.company.title");
+
 
 // The employer demand kinds the home field's "what we are missing" reads —
 // a dual-role user's buyer service requests stay in the buyer room.
@@ -84,6 +90,21 @@ export default async function CompanyDashboardPage({
   // organization, the membership notice when there is one that does not act
   // as a company for this person — never empty technical blocks.
   const employerCtx = await resolveEmployerCompanyContext();
+  // The org context and declared capabilities below need the company row only
+  // to CONFIRM which organization it mirrors, and the employer context already
+  // names that company — so they start alongside the company read (perf
+  // 2026-10-23). Request-cached: the reads below reuse these promises.
+  const orgContextRead = getActiveOrganizationContext();
+  if (employerCtx.kind === "ok") {
+    orgContextRead
+      .then((ctx) => {
+        const id =
+          ctx.organizations.find((o) => o.legacyCompanyId === employerCtx.companyId)?.id ??
+          governedActiveOrganizationId(ctx);
+        return id ? readOrganizationCapabilities(id) : null;
+      })
+      .catch(() => null);
+  }
   const companyProfile: CompanyReadResult =
     employerCtx.kind === "ok"
       ? await getAccessibleCompanyById(employerCtx.companyId)
@@ -122,7 +143,7 @@ export default async function CompanyDashboardPage({
 
   // WHAT DOES THIS ORGANIZATION DO? — answered against the `organizations`
   // row this company mirrors; a separate axis from `companyType`.
-  const orgContext = await getActiveOrganizationContext();
+  const orgContext = await orgContextRead;
   const capabilityOrgId =
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow?.id)?.id ??
     // Only a GOVERNED active organization — never an employee-only one.
@@ -256,13 +277,7 @@ export default async function CompanyDashboardPage({
       />
       <header className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Link
-            href="/dashboard"
-            className="shrink-0 text-xs font-medium text-brand-blue transition-colors hover:underline"
-            data-testid="back-to-action-center"
-          >
-            ← {tRooms("backToActions")}
-          </Link>
+          <PageBack href="/dashboard" data-testid="back-to-action-center">{tRooms("backToActions")}</PageBack>
           <Link
             href="/dashboard"
             className="shrink-0 rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"

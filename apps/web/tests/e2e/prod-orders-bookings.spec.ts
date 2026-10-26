@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
+import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 
@@ -100,11 +100,28 @@ function bookingRow(page: Page, direction: "incoming" | "outgoing"): Locator {
 /** Close one need through the scouting page's own lifecycle control. */
 async function closeNeed(page: Page, requestId: string): Promise<"closed" | "already-closed"> {
   await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
-  const controls = page.getByTestId("demand-lifecycle-controls");
-  await expect(controls).toBeVisible({ timeout: 30_000 });
-  if ((await controls.getAttribute("data-demand-status")) === "closed") return "already-closed";
-  await controls.getByTestId("demand-close").click();
-  await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
+  const controls = page.getByTestId("demand-lifecycle-controls").first();
+  const unstructured = page.getByTestId("scouting-not-structured").first();
+  await expect(controls.or(unstructured).first()).toBeVisible({ timeout: 30_000 });
+  if (await controls.isVisible()) {
+    if ((await controls.getAttribute("data-demand-status")) === "closed") return "already-closed";
+    await controls.getByTestId("demand-close").click();
+    await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
+    return "closed";
+  }
+  // A need that names no trade: the scouting page draws its lifecycle controls
+  // only for a structured need, so it is closed where the product offers that
+  // for every submitted need — the chat workspace's candidates result
+  // (`?result=candidates&demand=`, `company.close-demand`).
+  await page.goto(`/lt/dashboard?result=candidates&demand=${requestId}`);
+  const close = page.getByTestId("candidates-close-demand").filter({ visible: true }).first();
+  const reopen = page.getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
+  await expect(close.or(reopen).first(), "the need's own close/reopen action").toBeVisible({ timeout: 60_000 });
+  if (await reopen.isVisible()) return "already-closed";
+  await close.click();
+  const error = page.getByTestId("candidates-close-demand-error").first();
+  await expect(reopen.or(error).first()).toBeVisible({ timeout: 30_000 });
+  if (await error.isVisible()) throw new Error(`close refused: ${(await error.innerText()).slice(0, 120)}`);
   return "closed";
 }
 
@@ -141,9 +158,7 @@ test("O-0. the worker's own worker id (own row, own token)", async () => {
   workerId = rows[0].id;
 });
 
-test("O-1 (5.13). Gama posts this run's need through the demand intake", async ({ browser }) => {
-  const { ctx, page } = await as(browser, "manager");
-  await useWorkspace(page, GAMA);
+async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
   await page.getByTestId("demand-role").fill(NEED_ROLE);
   // Name a trade: a need nothing can be recognised in is "not structured" on
@@ -158,7 +173,34 @@ test("O-1 (5.13). Gama posts this run's need through the demand intake", async (
   const done = page.getByTestId("demand-done");
   const limit = page.getByTestId("demand-open-need-limit");
   await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
-  expect(await limit.isVisible(), "the open-need limit refused this run's need").toBe(false);
+  return (await limit.isVisible()) ? "limit" : "done";
+}
+
+test("O-1 (5.13). Gama posts this run's need through the demand intake", async ({ browser }) => {
+  test.setTimeout(480_000); // room for the leftover cleanup
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  let outcome = await submitNeed(page);
+  // Gama is on the free plan (one open need). Step 0 sweeps only this walk's
+  // leftovers; another walk may hold the slot (brigade-formation keeps its
+  // B2B need open by design, run 39985839991). Close the QA-SYNTHETIC
+  // leftovers through the product's own controls (never this run's need)
+  // and try once more.
+  if (outcome === "limit") {
+    await page.goto("/lt/dashboard/company/scouting");
+    await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+    const ids = new Set<string>();
+    for (const a of await needLinks(page, "QA-SYNTHETIC").all()) {
+      if ((await a.innerText().catch(() => "")).includes(RUN)) continue;
+      const id = requestIdOf(await a.getAttribute("href"));
+      if (id) ids.add(id);
+    }
+    let closed = 0;
+    for (const id of [...ids].slice(0, 5)) if ((await closeNeed(page, id)) === "closed") closed += 1;
+    console.info(`[bookings] open-need limit: synthetic leftovers seen=${ids.size} closed=${closed}`);
+    if (closed > 0) outcome = await submitNeed(page);
+  }
+  expect(outcome, "the open-need limit refused this run's need").toBe("done");
 
   await page.goto("/lt/dashboard/company/scouting");
   const link = needLinks(page, RUN).first();
@@ -259,12 +301,37 @@ test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browse
     // own answer is one deliberate second action, recorded as such.
     console.info("[bookings] accept met a date clash; the worker accepts knowingly");
     await row.getByTestId("booking-accept-anyway").click();
-    await expect(responded).toBeVisible({ timeout: 30_000 });
+    // Run 40216243755: the database refused the acknowledged accept (the
+    // overlap constraint still held) and the UI re-showed the same conflict,
+    // so the button visibly did nothing. That refusal is now its own answer.
+    const notRecordable = row.getByTestId("booking-overlap-not-recordable");
+    await expect(responded.or(notRecordable)).toBeVisible({ timeout: 30_000 });
+    if (await notRecordable.isVisible()) {
+      // Honest, and not a loop: the acknowledgement control is gone.
+      await expect(row.getByTestId("booking-accept-anyway")).toHaveCount(0);
+      expect(
+        false,
+        "the acknowledged overlap could not be recorded: the clash-marker migration " +
+          "(20261025180000, RED) is not applied yet — the UI says so and offers decline",
+      ).toBe(true);
+    }
   }
   await page.reload();
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "accepted", {
-    timeout: 30_000,
-  });
+  // Run 40200190351: after this reload the row matched TWICE (identical
+  // <li>s). Count where the copies live: a hidden streamed holder (#418
+  // symptom) sits outside <main>; a real double render would be inside it.
+  const copies = await page.evaluate((id) => {
+    const all = [...document.querySelectorAll(`[data-testid="booking-${id}"]`)];
+    return {
+      total: all.length,
+      inMain: all.filter((e) => e.closest("main")).length,
+      inHiddenHolder: all.filter((e) => e.closest("[hidden][id^='S:']")).length,
+    };
+  }, bookingId);
+  console.info(`[bookings] accepted row copies after reload: ${JSON.stringify(copies)}`);
+  const inMainRow = page.getByRole("main").getByTestId(`booking-${bookingId}`);
+  await expect(inMainRow, "the booking renders once on the page").toHaveCount(1, { timeout: 30_000 });
+  await expect(inMainRow).toHaveAttribute("data-status", "accepted", { timeout: 30_000 });
   await ctx.close();
 });
 

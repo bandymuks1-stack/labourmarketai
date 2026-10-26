@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- a PostgREST-shaped fake client */
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -215,23 +216,40 @@ describe("monitor signals", () => {
 });
 
 describe("the service-role metrics section stays behind the superadmin gate", () => {
-  it("is rendered only by the launch-readiness page, which calls requireSuperadmin first", () => {
+  /**
+   * This check reads every non-test .ts/.tsx under app/, components/ and lib/
+   * (~2,200 files, ~21 MB). Measured on Windows 2026-10-23: the directory walk
+   * is ~0.2-0.4 s; the READ pass is the cost — 4.2-8.6 s when the files are read
+   * one by one with readFileSync (an antivirus scan on every open), 1.8 s when
+   * they are read concurrently. So the walk uses dirents (no stat per entry)
+   * and the reads run in parallel. The test still reads the whole tree — a
+   * narrower glob would let an importer outside it slip past — so it keeps an
+   * explicit ceiling equal to the guards project's CI ceiling (vitest.config.ts):
+   * it is a whole-tree structural scan like those guards, and under a full
+   * local suite's contention the parallel read can still pass the 5 s unit
+   * default with nothing wrong. A slow scan can only time out; a real importer
+   * still fails on the assertion.
+   */
+  it("is rendered only by the launch-readiness page, which calls requireSuperadmin first", async () => {
     const walk = (d: string, out: string[] = []): string[] => {
-      for (const e of readdirSync(d)) {
-        if (e === "node_modules" || e.startsWith(".")) continue;
-        const p = join(d, e);
-        if (statSync(p).isDirectory()) walk(p, out);
-        else if (/\.tsx?$/.test(e) && !/\.test\./.test(e)) out.push(p);
+      for (const e of readdirSync(d, { withFileTypes: true })) {
+        if (e.name === "node_modules" || e.name.startsWith(".")) continue;
+        const p = join(d, e.name);
+        if (e.isDirectory()) walk(p, out);
+        else if (/\.tsx?$/.test(e.name) && !/\.test\./.test(e.name)) out.push(p);
       }
       return out;
     };
-    const importers = ["app", "components", "lib"]
-      .flatMap((d) => walk(join(WEB, d)))
-      .filter((f) => /from "@\/components\/admin\/product-metrics-section"/.test(readFileSync(f, "utf8")))
+    const files = ["app", "components", "lib"].flatMap((d) => walk(join(WEB, d)));
+    const imports = await Promise.all(
+      files.map(async (f) => /from "@\/components\/admin\/product-metrics-section"/.test(await readFile(f, "utf8"))),
+    );
+    const importers = files
+      .filter((_, i) => imports[i])
       .map((f) => f.slice(WEB.length + 1).split("\\").join("/"));
     expect(importers).toEqual(["app/[locale]/dashboard/admin/launch-readiness/page.tsx"]);
     const page = readFileSync(join(WEB, importers[0]!), "utf8");
     expect(page.indexOf("await requireSuperadmin(locale)")).toBeGreaterThan(-1);
     expect(page.indexOf("await requireSuperadmin(locale)")).toBeLessThan(page.indexOf("<ProductMetricsSection />"));
-  });
+  }, 30_000);
 });

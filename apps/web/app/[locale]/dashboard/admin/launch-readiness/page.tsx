@@ -11,6 +11,11 @@ import { smtpReadiness } from "@/lib/email/smtp";
 import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { ProductMetricsSection } from "@/components/admin/product-metrics-section";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/launch-readiness");
+
 
 /**
  * Operator launch-readiness view (launch repair Scope E).
