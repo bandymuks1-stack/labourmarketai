@@ -32,6 +32,11 @@ import {
 } from "@/lib/market-map/owner-readiness";
 import { getOwnAvatar } from "@/lib/profile/avatar";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/market-map", "marketMap.pageTitle");
+
 
 /**
  * THE ONE MAP (owner target: one map, not several).

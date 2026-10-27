@@ -1,7 +1,6 @@
 {
   "companyModel": {
     "title": "Unternehmensführung",
-    "primary": "Bedarf veröffentlichen",
     "need": "Was wir brauchen",
     "offer": "Was wir anbieten",
     "market": "Marktplatz",
@@ -1872,7 +1871,6 @@
       "openNeed": "Bedarf öffnen",
       "gapsRow": "{count, plural, =1 {1 Person auf {project} hat fehlende Dokumente} other {# Personen auf {project} haben fehlende Dokumente}}",
       "gapsCta": "Dokumente prüfen",
-      "needsCta": "Bedarf beschreiben",
       "noOneFrom": "Ab {date} ist niemand frei",
       "unclear": "{count, plural, =1 {1 Person hat Arbeit ohne Termine — freie Zeit kann geringer sein} other {# Personen haben Arbeit ohne Termine — freie Zeit kann geringer sein}}",
       "fit": {
@@ -1886,6 +1884,15 @@
       "opportunityCta": "Arbeit suchen",
       "interest": "{count, plural, =1 {1 Person hat Interesse an Ihrem Bedarf gezeigt} other {# Personen haben Interesse an Ihrem Bedarf gezeigt}}",
       "interestCta": "Ansehen"
+    },
+    "offers": {
+      "heading": "Was Sie anbieten",
+      "note": "In Ihrem Arbeitsbereich gespeichert. Arbeitgeber können Angebote noch nicht durchsuchen, daher hat sich dazu noch niemand gemeldet.",
+      "empty": "Sie haben noch kein Angebot gespeichert. Beschreiben Sie, welche Menschen oder welches Team Sie stellen können — das Angebot wird gespeichert und hier angezeigt.",
+      "noneOpen": "Keine offenen Angebote — die früheren sind geschlossen.",
+      "more": "{count, plural, =1 {1 weiteres Angebot} other {# weitere Angebote}}",
+      "open": "Angebote ansehen",
+      "unreadable": "Ihre Angebote konnten gerade nicht gelesen werden."
     },
     "attention": {
       "heading": "Braucht Sie",
@@ -2443,6 +2450,13 @@
         "conflicts": "Personen mit Planungskonflikt (Einsätze oder Urlaub überschneiden sich)",
         "unreadable": "konnte nicht gelesen werden",
         "clientReview": "Arbeit, die auf Ihre Entscheidung als Auftraggeber wartet"
+      },
+      "needDoor": {
+        "label": "Bedarf beschreiben",
+        "firstTitle": "Beginnen Sie mit dem, was Sie brauchen",
+        "firstBody": "Beschreiben Sie in eigenen Worten, welche Arbeit wo und wann zu erledigen ist. Der Bedarf wird für Ihr Unternehmen gespeichert; danach können Sie prüfen, wer ihn übernehmen könnte.",
+        "noNeedYet": "Gerade kein Bedarf?",
+        "noNeedYetInvite": "Laden Sie Ihre Leute ein"
       }
     },
     "agency": {
@@ -3621,7 +3635,8 @@
     "reviewBanner": {
       "title": "Einige Fähigkeiten benötigen eine Prüfung",
       "body": "Einige Einträge sind noch nicht eindeutig klassifiziert. Prüfen Sie sie oder fügen Sie weitere Informationen hinzu, damit Ihr Profil genauer gematcht werden kann.",
-      "cta": "Fähigkeiten prüfen"
+      "cta": "Fähigkeiten prüfen",
+      "noteLead": "{count, plural, one {Fähigkeit ist noch nicht durch Arbeitseinträge belegt.} other {Fähigkeiten sind noch nicht durch Arbeitseinträge belegt.}}"
     },
     "pageTitle": "Mein Profil",
     "pageSubtitle": "Was Sie tun, was Sie können und was das zeigt — alles an einem Ort.",
@@ -4286,6 +4301,7 @@
       "country_search_placeholder": "Land suchen",
       "country_search_empty": "Kein Land gefunden. Versuchen Sie einen anderen Namen.",
       "error_country_required": "Bitte wählen Sie ein Land.",
+      "error_role_required": "Wählen Sie zuerst, wofür Sie LabourMarket.ai nutzen möchten — dann füllen Sie Ihr Profil aus.",
       "profession_label": "Was ist Ihr Beruf oder Ihre Berufserfahrung?",
       "profession_placeholder": "Beruf oder Arbeitsbereich eingeben",
       "profession_add": "Hinzufügen",
@@ -4436,7 +4452,8 @@
             "notesLabel": "Zusätzliche Hinweise",
             "notesPlaceholder": "Alles Weitere, das wissenswert ist",
             "submittedHeading": "Was Sie übermittelt haben:",
-            "doneScoutingLink": "Anfrage und zugehörige Matches ansehen"
+            "doneScoutingLink": "Anfrage und zugehörige Matches ansehen",
+            "doneOffersLink": "Deine Angebote ansehen"
           },
           "hire": {
             "title": "Arbeitskraft oder Team finden",
@@ -4639,6 +4656,7 @@
           "location": "Das hilft zu vermeiden, dass Ihnen unpassende Angebote angezeigt werden.",
           "pay": "Das hilft, Ihren erwarteten Satz zu begründen.",
           "evidence": "Nachweise schaffen Vertrauen, aber Sie können sie später hinzufügen.",
+          "evidenceFirst": "Ein Satz über Ihre Arbeit genügt — aus solchen Einträgen wächst Ihr lebender Lebenslauf.",
           "complete": "Ihre Arbeitskarte ist vollständig — Arbeitseinträge machen sie weiter stärker."
         },
         "stale": {
@@ -7973,7 +7991,7 @@
       "confirmed": "Std. mit Eintrag der Leitung",
       "organizationHistory": "Std. in der Organisationshistorie",
       "experienceTotal": "Std. Berufserfahrung insgesamt",
-      "days": "{count, plural, one {Arbeitstag} other {Arbeitstage}}",
+      "days": "{count, plural, one {Tag mit Stunden} other {Tage mit Stunden}}",
       "modes": {
         "label": "Teile der Karte",
         "work": "Arbeit",
@@ -9263,7 +9281,8 @@
     "clash": {
       "acceptAnyway": "Ich weiß, dass es sich überschneidet — trotzdem annehmen",
       "stillStands": "Die Annahme beseitigt die Überschneidung nicht. Beide Buchungen behalten ihre Termine, der Konflikt bleibt im Kalender sichtbar, und Ihre Entscheidung wird festgehalten.",
-      "acknowledged": "Mit bekannter Überschneidung angenommen. {count} bestehende Buchung(en) überschneiden sich weiterhin — nichts wurde storniert oder ausgeblendet, Ihre Entscheidung ist dokumentiert."
+      "acknowledged": "Mit bekannter Überschneidung angenommen. {count} bestehende Buchung(en) überschneiden sich weiterhin — nichts wurde storniert oder ausgeblendet, Ihre Entscheidung ist dokumentiert.",
+      "notRecordable": "Diese Termine überschneiden sich mit einer Buchung, die Sie bereits angenommen haben, und diese Überschneidung kann noch nicht erfasst werden – Sie können dieses Angebot ablehnen oder es offen lassen, damit das Unternehmen die Termine ändern kann."
     },
     "proposedBy": "Vorgeschlagen von {name}",
     "termsChanged": "Das Unternehmen hat die Bedingungen geändert. Sie hatten zugestimmt: {previous}. Entscheiden Sie neu über die neuen Daten."
@@ -12629,6 +12648,8 @@
     "noShared": "Noch kein Kunde hat eine Anfrage geteilt.",
     "workerLabel": "Ihr Roster-Mitarbeiter",
     "workerPlaceholder": "Mitarbeiter wählen…",
+    "noteLabel": "Notiz für den Kunden (optional)",
+    "inviteLinkLabel": "Einladungslink",
     "offerButton": "Kandidat anbieten",
     "noRoster": "Fügen Sie zuerst einen aktiven Mitarbeiter hinzu.",
     "progressHeading": "Ihre Angebote",
@@ -14034,7 +14055,7 @@
       "agendaConflicts": "⚠ {count, plural, one {# überlappende Verpflichtung gefunden} other {# überlappende Verpflichtungen gefunden}} — dieser Plan ist physisch unmöglich; prüfe den Kalender.",
       "chipAgenda": "Mein Plan",
       "userAgenda": "Zeig meinen Plan",
-      "chipNeedWorkers": "Ich brauche Arbeitskräfte",
+      "chipNeedWorkers": "Bedarf beschreiben",
       "chipCandidates": "Kandidaten",
       "chipCompanyHub": "Unternehmensbereich",
       "chipEduInviteLearner": "Lernende einladen",
@@ -14699,6 +14720,7 @@
       "contextAmbiguous": "Diese Arbeit könnte zu mehr als einem Kontext gehören. Wählen Sie vor dem Speichern aus, zu welchem.",
       "contextEndedOrg": "Der Satz nennt eine Organisation, mit der Ihr Arbeitsverhältnis beendet ist — dieser Eintrag zählt nicht als Arbeit für sie. Wählen Sie, wo Sie das gemacht haben:",
       "save": "Speichern",
+      "continue": "Weiter",
       "cancel": "Bearbeiten",
       "working": "Wird gespeichert…",
       "confirmTitle": "Eintrag bestätigen?",
@@ -14727,6 +14749,9 @@
       "strengthenedSkillPrefix": "Fähigkeit gestärkt",
       "pendingConfirmPrefix": "Wartet auf Ihre Bestätigung",
       "cvUpdatedNote": "Ihr Lebenslauf enthält jetzt die Fähigkeiten aus diesem Eintrag.",
+      "livingCvNote": "Dieser Eintrag zählt jetzt in Ihrem lebenden Lebenslauf als erfasste Arbeit — von Ihnen eingetragen, noch von niemandem bestätigt.",
+      "viewLivingCv": "Lebenden Lebenslauf öffnen",
+      "comeBackNote": "Tragen Sie morgen auch die Arbeit dieses Tages ein — ein Satz genügt.",
       "matchingNote": "Job-Empfehlungen werden beim nächsten Ansehen anhand Ihrer aktualisierten Fähigkeiten neu berechnet.",
       "viewOpportunities": "Aktualisierte Möglichkeiten ansehen",
       "pipelineFailedNote": "Die Fähigkeits-Erkennung ist diesmal fehlgeschlagen — der Eintrag ist gespeichert; Sie können die Erkennung im Journal wiederholen."
@@ -18250,7 +18275,6 @@
       "now": {
         "subtitle": "Was passiert, was Ihre Entscheidung braucht und wo es weitergeht.",
         "primaryActions": "Hauptaktionen",
-        "newNeed": "Neuer Personalbedarf",
         "newProject": "Neues Projekt",
         "invite": "Person einladen",
         "importHistory": "Historische Daten importieren"
@@ -18877,6 +18901,7 @@
     "titleCompany": "Was mit der Arbeit passiert, die Sie leiten",
     "example": "Beispiel — keine echte Person und keine echten Daten",
     "hint": "Wählen Sie einen Schritt. Jeder Schritt öffnet den echten Ort in Ihrem Arbeitsbereich.",
+    "hintWorkers": "Wählen Sie einen Schritt. Jeder Schritt öffnet den echten Ort in Ihrem Arbeitsbereich.",
     "open": "In Ihrem Arbeitsbereich öffnen",
     "list": "Schritte im Arbeitsverlauf",
     "workers": {

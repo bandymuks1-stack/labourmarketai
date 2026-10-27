@@ -52,6 +52,33 @@ const variants: Record<CardVariant, string> = {
   disabled: "opacity-50 pointer-events-none select-none",
 };
 
+/**
+ * Utilities a caller writes on <Card> to arrange ITS CONTENT (flex/grid,
+ * direction, gaps, alignment, child spacing). The content lives in the inner
+ * `relative` wrapper (it must stay positioned to paint above the card-border
+ * glow), so on the outer div these utilities arranged one single child and
+ * did nothing — production 2026-10-25: "LietuvaPERŽIŪRĖTI" on
+ * /labour-market, and 44 call sites whose gap/justify never applied. They
+ * now move to the inner wrapper; sizing of the card itself (flex-1, w-*, h-*,
+ * self-*) and surface utilities stay on the outer div.
+ */
+const CONTENT_LAYOUT =
+  /^(?:flex|inline-flex|grid|inline-grid|flex-(?:row|col|wrap|nowrap)(?:-reverse)?|gap(?:-[xy])?-.+|space-[xy]-.+|divide-.+|justify-(?:start|end|center|between|around|evenly|stretch|normal)|items-.+|place-(?:content|items)-.+|grid-(?:cols|rows|flow)-.+)$/;
+
+export function splitCardClassName(className?: string): {
+  surface: string;
+  content: string;
+} {
+  const surface: string[] = [];
+  const content: string[] = [];
+  for (const token of (className ?? "").split(/\s+/).filter(Boolean)) {
+    // Variant prefixes (sm:, hover:, …) — the utility is after the last ":".
+    const utility = token.slice(token.lastIndexOf(":") + 1).replace(/^!/, "");
+    (CONTENT_LAYOUT.test(utility) ? content : surface).push(token);
+  }
+  return { surface: surface.join(" "), content: content.join(" ") };
+}
+
 export function Card({
   label,
   live,
@@ -68,6 +95,7 @@ export function Card({
   className?: string;
   children: React.ReactNode;
 }) {
+  const { surface, content } = splitCardClassName(className);
   return (
     <div
       data-variant={variant === "standard" ? undefined : variant}
@@ -75,7 +103,10 @@ export function Card({
         "card-border",
         compact ? "p-4" : "p-6",
         variants[variant],
-        className,
+        // A content layout makes the card a column so the inner wrapper can
+        // fill it (justify-center on a stretched card keeps working).
+        content && "flex flex-col",
+        surface,
       )}
     >
       {(label || live) && (
@@ -88,7 +119,7 @@ export function Card({
           )}
         </div>
       )}
-      <div className="relative">{children}</div>
+      <div className={cn("relative", content && "min-w-0 flex-1", content)}>{children}</div>
     </div>
   );
 }

@@ -416,6 +416,7 @@
       "country_search_placeholder": "Søk etter et land",
       "country_search_empty": "Fant ingen land. Prøv et annet navn.",
       "error_country_required": "Vennligst velg et land.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Hva er yrket ditt eller arbeidserfaringen din?",
       "profession_placeholder": "Skriv et yrke eller arbeidsområde",
       "profession_add": "Legg til",
@@ -2915,7 +2916,8 @@
     "clash": {
       "acceptAnyway": "Jeg vet at det overlapper — godta likevel",
       "stillStands": "Å godta fjerner ikke overlappet. Begge bookingene beholder datoene sine, konflikten forblir synlig i kalenderen, og valget ditt registreres.",
-      "acknowledged": "Godtatt med kjent overlapp. {count} eksisterende booking(er) overlapper fortsatt — ingenting ble avlyst eller skjult, og valget ditt er registrert."
+      "acknowledged": "Godtatt med kjent overlapp. {count} eksisterende booking(er) overlapper fortsatt — ingenting ble avlyst eller skjult, og valget ditt er registrert.",
+      "notRecordable": "Disse datoene overlapper en booking du allerede har godtatt, og overlappet kan ikke registreres ennå, så du kan avslå dette tilbudet eller la det stå åpent slik at bedriften kan endre datoene."
     },
     "proposedBy": "Foreslått av {name}",
     "termsChanged": "Bedriften endret vilkårene. Du hadde godtatt: {previous}. Bestem deg på nytt for de nye datoene."
@@ -6790,7 +6792,6 @@
       "openNeed": "Åpne behovet",
       "gapsRow": "{count, plural, =1 {1 person på {project} mangler dokumenter} other {# personer på {project} mangler dokumenter}}",
       "gapsCta": "Sjekk dokumenter",
-      "needsCta": "Beskriv et behov",
       "noOneFrom": "Ingen er ledig fra {date}",
       "unclear": "{count, plural, =1 {1 person har arbeid uten datoer — ledig tid kan være mindre} other {# personer har arbeid uten datoer — ledig tid kan være mindre}}",
       "fit": {
@@ -7085,6 +7086,7 @@
     "titleCompany": "Hva som skjer med arbeidet du driver",
     "example": "Eksempel — ikke en ekte person eller ekte data",
     "hint": "Velg et trinn. Hvert trinn åpner det virkelige stedet i arbeidsområdet ditt.",
+    "hintWorkers": "Velg et trinn. Hvert trinn åpner det virkelige stedet i arbeidsområdet ditt.",
     "open": "Åpne i arbeidsområdet ditt",
     "list": "Trinn i arbeidets livssyklus",
     "workers": {

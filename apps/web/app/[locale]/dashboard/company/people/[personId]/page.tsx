@@ -14,6 +14,11 @@ import { EvidenceMediaStrip } from "@/components/app/evidence-media-strip";
 import { LinkedDocuments } from "@/components/app/linked-documents";
 import { HistoricalPersonProfileBlock } from "@/components/app/organization/historical-person-profile";
 import { loadCompanyPerson } from "@/lib/organization-evidence/company-person-read";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/people/[personId]");
+
 
 export const dynamic = "force-dynamic";
 

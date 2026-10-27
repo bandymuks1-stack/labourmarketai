@@ -416,6 +416,7 @@
       "country_search_placeholder": "Otsi riiki",
       "country_search_empty": "Riiki ei leitud. Proovi teist nime.",
       "error_country_required": "Palun vali riik.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Mis on sinu amet või töökogemus?",
       "profession_placeholder": "Kirjuta amet või töövaldkond",
       "profession_add": "Lisa",
@@ -2915,7 +2916,8 @@
     "clash": {
       "acceptAnyway": "Tean, et kattub — võtan siiski vastu",
       "stillStands": "Vastuvõtmine ei kõrvalda kattuvust. Mõlemad broneeringud säilitavad oma kuupäevad, konflikt jääb kalendris nähtavaks ja sinu otsus salvestatakse.",
-      "acknowledged": "Vastu võetud teadaoleva kattuvusega. Endiselt kattub broneeringuid: {count}. Midagi ei tühistatud ega peidetud ja sinu otsus on talletatud."
+      "acknowledged": "Vastu võetud teadaoleva kattuvusega. Endiselt kattub broneeringuid: {count}. Midagi ei tühistatud ega peidetud ja sinu otsus on talletatud.",
+      "notRecordable": "Need kuupäevad kattuvad broneeringuga, mille oled juba vastu võtnud, ja seda kattuvust ei saa veel salvestada, seega võid selle pakkumise tagasi lükata või jätta selle avatuks, et ettevõte saaks kuupäevi muuta."
     },
     "proposedBy": "Pakub: {name}",
     "termsChanged": "Ettevõte muutis tingimusi. Olid nõustunud: {previous}. Otsusta uute kuupäevade üle uuesti."
@@ -6790,7 +6792,6 @@
       "openNeed": "Ava vajadus",
       "gapsRow": "{count, plural, =1 {1 inimesel projektis {project} puuduvad dokumendid} other {# inimesel projektis {project} puuduvad dokumendid}}",
       "gapsCta": "Kontrolli dokumente",
-      "needsCta": "Kirjelda vajadust",
       "noOneFrom": "Alates {date} pole kedagi vaba",
       "unclear": "{count, plural, =1 {1 inimesel on töö ilma kuupäevadeta — vaba aega võib olla vähem} other {# inimesel on töö ilma kuupäevadeta — vaba aega võib olla vähem}}",
       "fit": {
@@ -7085,6 +7086,7 @@
     "titleCompany": "Mis saab teie juhitud tööst",
     "example": "Näide — mitte päris inimene ega päris andmed",
     "hint": "Valige samm. Iga samm avab päris koha teie töökeskkonnas.",
+    "hintWorkers": "Valige samm. Iga samm avab päris koha teie töökeskkonnas.",
     "open": "Ava töökeskkonnas",
     "list": "Töö elutsükli sammud",
     "workers": {

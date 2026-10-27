@@ -158,6 +158,28 @@ test("O-0. the worker's own worker id (own row, own token)", async () => {
   workerId = rows[0].id;
 });
 
+/**
+ * The first day, at least `from` days out, on which the worker has NO accepted
+ * booking. Every run's accepted booking stays history (O-8), and an
+ * open-ended booking occupies its start day, so fixed offsets clashed when the
+ * walk ran twice in a day (run 40216243755 met the overlap constraint on the
+ * second run of 10-25). Read with the worker's own token (own rows only).
+ */
+async function firstFreeDay(from: number): Promise<string> {
+  const res = await qaApi(
+    `/rest/v1/booking_requests?select=start_date,expected_end_date&status=eq.accepted&worker_id=eq.${encodeURIComponent(workerId)}`,
+    bearerOf("worker"),
+  );
+  expect(res.status, "the worker's own accepted bookings answered").toBe(200);
+  const taken = (await res.json()) as { start_date: string; expected_end_date: string | null }[];
+  const busy = (day: string) => taken.some((b) => day >= b.start_date && day <= (b.expected_end_date ?? b.start_date));
+  for (let d = from; d < from + 365; d += 1) {
+    const day = dayFromToday(d);
+    if (!busy(day)) return day;
+  }
+  throw new Error("no free day in a year of accepted bookings");
+}
+
 async function submitNeed(page: Page): Promise<"done" | "limit"> {
   await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
   await page.getByTestId("demand-role").fill(NEED_ROLE);
@@ -248,7 +270,7 @@ test("O-3 (5.13). Gama proposes dates to the hand-raiser from its candidate list
   const open = candidate.getByTestId("propose-booking-open");
   await expect(open, "the candidate card offers a booking proposal").toBeVisible({ timeout: 30_000 });
   await open.click();
-  const outcome = await propose(candidate, dayFromToday(21));
+  const outcome = await propose(candidate, await firstFreeDay(21));
   expect(outcome, "the proposal was sent").toBe("sent");
   await ctx.close();
 });
@@ -272,7 +294,8 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
 
   // The company's own withdrawal may be undone with new dates (repeat actions).
   await withdrawn.getByTestId("propose-again-open").click();
-  const outcome = await propose(withdrawn, dayFromToday(28));
+  // A free day for the proposal the worker will accept in O-5.
+  const outcome = await propose(withdrawn, await firstFreeDay(28));
   expect(outcome, "the second proposal was sent").toBe("sent");
   await page.reload();
   await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "proposed", {
@@ -301,7 +324,20 @@ test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browse
     // own answer is one deliberate second action, recorded as such.
     console.info("[bookings] accept met a date clash; the worker accepts knowingly");
     await row.getByTestId("booking-accept-anyway").click();
-    await expect(responded).toBeVisible({ timeout: 30_000 });
+    // Run 40216243755: the database refused the acknowledged accept (the
+    // overlap constraint still held) and the UI re-showed the same conflict,
+    // so the button visibly did nothing. That refusal is now its own answer.
+    const notRecordable = row.getByTestId("booking-overlap-not-recordable");
+    await expect(responded.or(notRecordable)).toBeVisible({ timeout: 30_000 });
+    if (await notRecordable.isVisible()) {
+      // Honest, and not a loop: the acknowledgement control is gone.
+      await expect(row.getByTestId("booking-accept-anyway")).toHaveCount(0);
+      expect(
+        false,
+        "the acknowledged overlap could not be recorded: the clash-marker migration " +
+          "(20261025180000, RED) is not applied yet — the UI says so and offers decline",
+      ).toBe(true);
+    }
   }
   await page.reload();
   // Run 40200190351: after this reload the row matched TWICE (identical

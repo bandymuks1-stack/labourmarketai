@@ -91,6 +91,16 @@ export function ConversationThread({
    *  Openings that carry their composer inline keep scrolling to it. */
   const holdOpeningTop = isOpening && !composer;
 
+  /** A WIDE intro (ŠIANDIEN — a full working home) sits above the opening
+   *  column. The column is centred ONLY when no such home is above it: under
+   *  the home the greeting simply follows it, top-down. Centred there, every
+   *  late arrival re-centred it — the opening brief landing under the
+   *  greeting, the collapsed history block above it, a region of the home
+   *  growing — and each moved the greeting by half its height (home CLS P0,
+   *  2026-10-26). Without a wide intro the centred first screen is exactly
+   *  as it was (owner audit §4.1, composer in the centre). */
+  const wideIntroAbove = Boolean(intro && introWide);
+
   useEffect(() => {
     if (holdOpeningTop) return;
     // WCAG 2.3.3: a motion-sensitive person gets an instant jump, not a
@@ -134,8 +144,12 @@ export function ConversationThread({
         </div>
       ) : null}
       <div
+        // Named for the layout-shift probe (ux-metrics `cls_top`): without an
+        // id of its own, a shift of this column was attributed to the whole
+        // `conversation-thread` scroller.
+        data-testid="conversation-column"
         className={`mx-auto flex w-full max-w-3xl flex-none flex-col px-4 py-6 ${
-          isOpening ? "my-auto" : ""
+          !wideIntroAbove && isOpening ? "my-auto" : ""
         }`}
       >
         {isOpening && intro && !introWide ? <div className="mb-5">{intro}</div> : null}

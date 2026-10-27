@@ -85,6 +85,19 @@ on:
           - work-verification
           - utilisation-planned-actual
           - lmc-csrf
+          # Numbers-only UX/UI measurements (worker/owner/agency x desktop/phone + active-locale sweep, ~115 page
+          # loads, read-only) for the per-function UX audit. Prints [ux] lines; no screenshots. Dispatch only.
+          - ux-metrics
+          # Owner decision 2026-10-26 §5: locale vs server load behind the slow non-LT pages. Dispatch only.
+          - lcp-locale-probe
+          # Owner-approved 2026-10-26: two synthetic sessions at once vs one (read-only). Dispatch only.
+          - concurrency-probe
+          # Owner decision 2026-10-26: a brand-new worker and company, from onboarding to the first
+          # useful action. Dispatch only, never in the rotation; the two accounts are created by the
+          # owner (prod-qa-fresh-provision.yml) — this walk only signs in to them.
+          - fresh-activation
+          # Owner decision 2026-10-26: the buyer workspace (6.4) with the one owner-created buyer. Dispatch only.
+          - buyer-workspace
       budget_override:
         description: "Run even if the 24 h production-walk budget is used up (owner only)"
         type: boolean
@@ -307,6 +320,7 @@ jobs:
         run: node .github/scripts/walk-brakes.mjs health
 
       - name: Provision + mint the synthetic cast (allowlist only)
+        id: mint
         shell: bash
         run: |
           set -euo pipefail
@@ -323,6 +337,18 @@ jobs:
           mint "qa.worker+multiw@labourmarket.ai"  worker
           mint "qa.worker+goal3@labourmarket.ai"   worker2
           mint "qa.agency+multiw@labourmarket.ai"  agency
+          # The fresh pair: minted ONLY for the fresh-activation walk and WITHOUT the provision step —
+          # the mint refuses an account the owner has not created, so a walk never creates one.
+          mint_existing() {
+            PROD_QA_IDENTITY="$1" PROD_QA_STORAGE_SLOT="$2" pnpm exec tsx scripts/prod-qa-mint-session.ts
+          }
+          if [ "${{ needs.debounce.outputs.spec }}" = "fresh-activation" ]; then
+            mint_existing "qa.freshworker+act1@labourmarket.ai"  freshworker
+            mint_existing "qa.freshcompany+act1@labourmarket.ai" freshcompany
+          fi
+          if [ "${{ needs.debounce.outputs.spec }}" = "buyer-workspace" ]; then
+            mint_existing "qa.buyer+act1@labourmarket.ai" buyer
+          fi
           # employee-beta-gate.spec.ts reads the original single-worker file.
           install -m 600 tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
 
@@ -380,6 +406,11 @@ jobs:
             work-verification) SPEC=tests/e2e/prod-work-verification.spec.ts ;;
             utilisation-planned-actual) SPEC=tests/e2e/prod-utilisation-planned-actual.spec.ts ;;
             lmc-csrf) SPEC=tests/e2e/prod-lmc-csrf.spec.ts ;;
+            ux-metrics) SPEC=tests/e2e/prod-ux-metrics.spec.ts ;;
+            lcp-locale-probe) SPEC=tests/e2e/prod-lcp-locale-probe.spec.ts ;;
+            concurrency-probe) SPEC=tests/e2e/prod-concurrency-probe.spec.ts ;;
+            fresh-activation) SPEC=tests/e2e/prod-fresh-activation.spec.ts ;;
+            buyer-workspace) SPEC=tests/e2e/prod-buyer-workspace.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
           # RESULT HONESTY (2026-10-16). Two defects lived in the two lines that
@@ -410,11 +441,6 @@ jobs:
           fi
           exit "${code}"
 
-      - name: Destroy session files (always)
-        if: always()
-        shell: bash
-        run: rm -f apps/web/tests/e2e/.storage-state.prod-qa*.json
-
       # The repository is PUBLIC, so its artifacts are readable by any signed-in
       # GitHub user. Screenshots of production pages can show real companies'
       # open needs next to the synthetic cast, so they are NOT published — only
@@ -428,10 +454,23 @@ jobs:
       - name: Revoke and delete the synthetic sessions
         if: always()
         shell: bash
+        env:
+          # The mint step ran: session files MUST be here for the revoke. If
+          # none are, the revoke fails instead of reporting a clean 0/0.
+          PROD_QA_REVOKE_EXPECT_FILES: ${{ steps.mint.outcome == 'success' && '1' || '0' }}
         run: |
           cd apps/web
           pnpm exec tsx scripts/prod-qa-revoke-sessions.ts
           ls tests/e2e/.storage-state.prod-qa*.json 2>/dev/null && { echo "::error::a session file survived cleanup"; exit 1; } || echo "no session file left"
+
+      # AFTER the revoke, never before it: the revoke reads each session file to
+      # log that session out at Supabase, then deletes the file. When this step
+      # ran first (until 2026-10-26) the revoke found files=0 and revoked
+      # nothing, so every walk left one live session per minted identity.
+      - name: Destroy session files (always, belt and braces)
+        if: always()
+        shell: bash
+        run: rm -f apps/web/tests/e2e/.storage-state.prod-qa*.json
 
       - name: Upload result (no screenshots, no traces, no sessions)
         if: always()

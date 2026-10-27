@@ -416,6 +416,7 @@
       "country_search_placeholder": "Sök efter ett land",
       "country_search_empty": "Inget land hittades. Prova ett annat namn.",
       "error_country_required": "Välj ett land.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Vad är ditt yrke eller din arbetslivserfarenhet?",
       "profession_placeholder": "Skriv ett yrke eller arbetsområde",
       "profession_add": "Lägg till",
@@ -2915,7 +2916,8 @@
     "clash": {
       "acceptAnyway": "Jag vet att det överlappar — acceptera ändå",
       "stillStands": "Att acceptera tar inte bort överlappet. Båda bokningarna behåller sina datum, konflikten syns fortfarande i kalendern, och ditt val registreras.",
-      "acknowledged": "Accepterad med känd överlappning. {count} befintlig(a) bokning(ar) överlappar fortfarande — inget avbokades eller doldes, och ditt val är registrerat."
+      "acknowledged": "Accepterad med känd överlappning. {count} befintlig(a) bokning(ar) överlappar fortfarande — inget avbokades eller doldes, och ditt val är registrerat.",
+      "notRecordable": "De här datumen överlappar en bokning som du redan har accepterat, och överlappet kan inte registreras ännu, så du kan tacka nej till erbjudandet eller låta det stå öppet så att företaget kan ändra datumen."
     },
     "proposedBy": "Föreslagen av {name}",
     "termsChanged": "Företaget ändrade villkoren. Du hade godkänt: {previous}. Bestäm igen om de nya datumen."
@@ -6790,7 +6792,6 @@
       "openNeed": "Öppna behovet",
       "gapsRow": "{count, plural, =1 {1 person på {project} saknar dokument} other {# personer på {project} saknar dokument}}",
       "gapsCta": "Kontrollera dokument",
-      "needsCta": "Beskriv ett behov",
       "noOneFrom": "Ingen är ledig från {date}",
       "unclear": "{count, plural, =1 {1 person har arbete utan datum — ledig tid kan vara mindre} other {# personer har arbete utan datum — ledig tid kan vara mindre}}",
       "fit": {
@@ -7085,6 +7086,7 @@
     "titleCompany": "Vad som händer med arbetet du driver",
     "example": "Exempel — inte en riktig person eller riktiga data",
     "hint": "Välj ett steg. Varje steg öppnar den verkliga platsen i din arbetsyta.",
+    "hintWorkers": "Välj ett steg. Varje steg öppnar den verkliga platsen i din arbetsyta.",
     "open": "Öppna i din arbetsyta",
     "list": "Steg i arbetets livscykel",
     "workers": {

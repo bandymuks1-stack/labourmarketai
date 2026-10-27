@@ -1724,6 +1724,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-24 (RED, needs-human-gate, #2746): listing closed outcome + a discarded demand draft never
       // reopens (set_marketplace_listing_status_v3 SECURITY DEFINER + GRANT, trigger guard).
       "20261024100000_market_lifecycle_listing_outcome_and_discard_guard_v1.sql",
+      // 2026-10-27: owner approved #2841 in chat (apply + merge). Two service_role-only
+      // SECURITY DEFINER functions that rotate one unsent partner referral token; ledger
+      // 20261027193124.
+      "20261027120000_reissue_external_referral_v1.sql",
 ]);
   });
 

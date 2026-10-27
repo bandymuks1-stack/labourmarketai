@@ -416,6 +416,7 @@
       "country_search_placeholder": "Meklējiet valsti",
       "country_search_empty": "Valsts nav atrasta. Mēģiniet citu nosaukumu.",
       "error_country_required": "Lūdzu, izvēlieties valsti.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Kāda ir jūsu profesija vai darba pieredze?",
       "profession_placeholder": "Ierakstiet profesiju vai darba jomu",
       "profession_add": "Pievienot",
@@ -2915,7 +2916,8 @@
     "clash": {
       "acceptAnyway": "Zinu, ka pārklājas — tomēr pieņemt",
       "stillStands": "Pieņemšana pārklāšanos nenovērsīs. Abas rezervācijas saglabā savus datumus, konflikts paliek redzams kalendārā, un jūsu lēmums tiek reģistrēts.",
-      "acknowledged": "Pieņemts ar zināmu pārklāšanos. Joprojām pārklājas rezervācijas: {count}. Nekas nav atcelts vai paslēpts, un jūsu lēmums ir reģistrēts."
+      "acknowledged": "Pieņemts ar zināmu pārklāšanos. Joprojām pārklājas rezervācijas: {count}. Nekas nav atcelts vai paslēpts, un jūsu lēmums ir reģistrēts.",
+      "notRecordable": "Šie datumi pārklājas ar jau pieņemtu rezervāciju, un šo pārklāšanos vēl nevar reģistrēt, tāpēc varat šo piedāvājumu noraidīt vai atstāt to atvērtu, lai uzņēmums varētu mainīt datumus."
     },
     "proposedBy": "Piedāvā: {name}",
     "termsChanged": "Uzņēmums mainīja nosacījumus. Jūs bijāt piekritis: {previous}. Izlemiet par jaunajiem datumiem vēlreiz."
@@ -6790,7 +6792,6 @@
       "openNeed": "Atvērt vajadzību",
       "gapsRow": "{count, plural, zero {# cilvēkiem projektā „{project}” trūkst dokumentu} one {# cilvēkam projektā „{project}” trūkst dokumentu} other {# cilvēkiem projektā „{project}” trūkst dokumentu}}",
       "gapsCta": "Pārbaudīt dokumentus",
-      "needsCta": "Aprakstīt vajadzību",
       "noOneFrom": "No {date} neviena nav brīva",
       "unclear": "{count, plural, one {# cilvēkam ir darbs bez datumiem — brīvā laika var būt mazāk} other {# cilvēkiem ir darbs bez datumiem — brīvā laika var būt mazāk}}",
       "fit": {
@@ -7085,6 +7086,7 @@
     "titleCompany": "Kas notiek ar jūsu vadīto darbu",
     "example": "Piemērs — nav īsts cilvēks un nav īsti dati",
     "hint": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
+    "hintWorkers": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
     "open": "Atvērt darba telpā",
     "list": "Darba dzīves cikla soļi",
     "workers": {
