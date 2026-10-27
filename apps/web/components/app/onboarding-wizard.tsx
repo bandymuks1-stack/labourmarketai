@@ -17,6 +17,7 @@ import {
 } from "@/lib/location/country-options";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import { acceptInvitationAfterSignup } from "@/lib/invitations/signup-accept-action";
+import { acceptInvitationByIdAction } from "@/lib/invitations/actions";
 import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { StaffReviewNotice } from "@/components/app/staff-review-notice";
 import {
@@ -119,6 +120,7 @@ export function OnboardingWizard({
   defaultIntents = [],
   skipRoleStep = false,
   invitationToken = null,
+  addressedInvitationId = null,
   invitationReviewNotice = null,
   defaultProfessionSlug = null,
   doorIntents = [],
@@ -146,6 +148,10 @@ export function OnboardingWizard({
    *  finish the profile - the e-mail binding still decides; nothing here grants
    *  a consent. Already accepted at signup -> `already_accepted`, harmless. */
   invitationToken?: string | null;
+  /** A pending `join_platform` invitation addressed to this person's verified
+   *  e-mail, found without its token (the person arrived without the link).
+   *  Accepted at the finish through the canonical by-id door. */
+  addressedInvitationId?: string | null;
   /** The review sentence, localized, when finishing here accepts a staff
    *  invitation of a named organization (owner decision 1). Shown right above
    *  the button that accepts; only then does the accept carry the notice. */
@@ -504,6 +510,16 @@ export function OnboardingWizard({
             });
           } catch (e) {
             console.error("[onboarding] invitation auto-accept failed:", e);
+          }
+        } else if (addressedInvitationId) {
+          try {
+            await acceptInvitationByIdAction({
+              invitationId: addressedInvitationId,
+              locale,
+              noticeSurface: "onboarding",
+            });
+          } catch (e) {
+            console.error("[onboarding] addressed invitation accept failed:", e);
           }
         }
         await completeOnboarding(form);
