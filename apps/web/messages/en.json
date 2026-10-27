@@ -6366,6 +6366,17 @@
       "pending": "Merging…",
       "done": "Merged. The rows and their records are kept; the project list now shows the kept project.",
       "failed": "Not merged. Nothing was changed for the rows that did not go through — reload and try again."
+    },
+    "deck": {
+      "label": "What you can do",
+      "new": "New project",
+      "newHint": "Create it and get going",
+      "assign": "Assign a worker",
+      "assignHint": "To a project",
+      "teams": "Assign a team",
+      "teamsHint": "A crew for a project or a task",
+      "chat": "Conversations",
+      "toolsLabel": "Other tools"
     }
   },
   "projectOps": {

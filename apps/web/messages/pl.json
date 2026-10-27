@@ -6366,6 +6366,17 @@
       "pending": "Scalanie…",
       "done": "Scalono. Wiersze i ich wpisy zostają; lista projektów pokazuje teraz zachowany projekt.",
       "failed": "Nie scalono. Dla nieprzetworzonych wierszy nic nie zmieniono — odśwież i spróbuj ponownie."
+    },
+    "deck": {
+      "label": "Co możesz zrobić",
+      "new": "Nowy projekt",
+      "newHint": "Utwórz i zacznij",
+      "assign": "Przypisz pracownika",
+      "assignHint": "Do projektu",
+      "teams": "Przypisz zespół",
+      "teamsHint": "Ekipę do projektu lub zadania",
+      "chat": "Rozmowy",
+      "toolsLabel": "Inne narzędzia"
     }
   },
   "projectOps": {

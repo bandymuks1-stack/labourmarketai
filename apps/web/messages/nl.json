@@ -6366,6 +6366,17 @@
       "pending": "Bezig met samenvoegen…",
       "done": "Samengevoegd. De regels en registraties blijven bewaard; de projectlijst toont nu het behouden project.",
       "failed": "Niet samengevoegd. Voor regels die niet zijn verwerkt is niets gewijzigd — herlaad en probeer opnieuw."
+    },
+    "deck": {
+      "label": "Wat je kunt doen",
+      "new": "Nieuw project",
+      "newHint": "Maak het aan en begin",
+      "assign": "Werknemer toewijzen",
+      "assignHint": "Aan een project",
+      "teams": "Team toewijzen",
+      "teamsHint": "Een ploeg voor een project of taak",
+      "chat": "Gesprekken",
+      "toolsLabel": "Andere hulpmiddelen"
     }
   },
   "projectOps": {
