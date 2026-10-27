@@ -533,15 +533,27 @@ export function DemandRequestButton({
           ✓ {t(`${key}.done`)}
         </p>
         <p className="text-xs text-text-secondary">{t("form.submittedHeading")}</p>
-        {/* The exact next step — the scouting room where matches + interest for
-            this need appear (audit PR4: success used to be a dead-end panel). */}
-        <Link
-          href={"/dashboard/company/scouting" as "/dashboard"}
-          className="w-fit text-sm font-medium text-brand-blue hover:underline"
-          data-testid="demand-done-scouting-link"
-        >
-          {t("form.doneScoutingLink")} →
-        </Link>
+        {/* The exact next step. A NEED: the scouting room where matches +
+            interest for it appear (audit PR4: success used to be a dead-end
+            panel). An OFFER has no matches to scout — its next step is the
+            organisation's own offers list, where the saved offer now stands. */}
+        {intent === "hire_workers" ? (
+          <Link
+            href={"/dashboard/company/scouting" as "/dashboard"}
+            className="w-fit text-sm font-medium text-brand-blue hover:underline"
+            data-testid="demand-done-scouting-link"
+          >
+            {t("form.doneScoutingLink")} →
+          </Link>
+        ) : (
+          <Link
+            href={"/dashboard/company/needs#agency-offers" as "/dashboard"}
+            className="w-fit text-sm font-medium text-brand-blue hover:underline"
+            data-testid="demand-done-offers-link"
+          >
+            {t("form.doneOffersLink")} →
+          </Link>
+        )}
         {summaryList}
         {estimateSummary}
       </div>

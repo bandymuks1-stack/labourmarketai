@@ -34,8 +34,8 @@ export const AXE_SOURCE: string | null = (() => {
 
 /** Performance buffers, installed before any page script runs. */
 export function installObservers(): void {
-  type Ux = { lcp: number; cls: number; lt: number[][]; loaf: number[][] };
-  const ux: Ux = { lcp: 0, cls: 0, lt: [], loaf: [] };
+  type Ux = { lcp: number; cls: number; lt: number[][]; loaf: number[][]; clsTop: string; clsTopValue: number; clsTopDy: number; clsGrower: string; clsGrowerDh: number };
+  const ux: Ux = { lcp: 0, cls: 0, lt: [], loaf: [], clsTop: "", clsTopValue: 0, clsTopDy: 0, clsGrower: "", clsGrowerDh: 0 };
   (window as unknown as { __ux: Ux }).__ux = ux;
   const observe = (type: string, onEntry: (e: PerformanceEntry) => void) => {
     try {
@@ -48,8 +48,39 @@ export function installObservers(): void {
     ux.lcp = e.startTime;
   });
   observe("layout-shift", (e) => {
-    const s = e as unknown as { value: number; hadRecentInput: boolean };
-    if (!s.hadRecentInput) ux.cls += s.value; // plain sum, not the session-window CLS (approximate)
+    type Rect = { y: number; height: number };
+    const s = e as unknown as {
+      value: number;
+      hadRecentInput: boolean;
+      sources?: { node?: Node | null; previousRect?: Rect; currentRect?: Rect }[];
+    };
+    if (s.hadRecentInput) return;
+    ux.cls += s.value; // plain sum, not the session-window CLS (approximate)
+    // WHICH block moved most: the nearest data-testid (or tag) of the largest
+    // shift's first source — a component name, never page text.
+    if (s.value > ux.clsTopValue) {
+      const node = s.sources?.find((x) => x.node)?.node;
+      const el = node instanceof Element ? node : node?.parentElement ?? null;
+      const named = el?.closest("[data-testid]");
+      ux.clsTop = named?.getAttribute("data-testid") ?? el?.tagName.toLowerCase() ?? "";
+      ux.clsTopValue = s.value;
+      // HOW FAR it moved (px, largest vertical move among the sources): with
+      // the block's final height (measure) this sizes a pending reserve from
+      // a measurement instead of a guess.
+      ux.clsTopDy = Math.max(
+        0,
+        ...(s.sources ?? []).map((x) => Math.abs((x.currentRect?.y ?? 0) - (x.previousRect?.y ?? 0))),
+      );
+    }
+    // WHAT GREW (across every shift): the source whose height changed most —
+    // the block that arrived taller than its reserve and pushed the rest down.
+    for (const x of s.sources ?? []) {
+      const dh = Math.abs((x.currentRect?.height ?? 0) - (x.previousRect?.height ?? 0));
+      if (dh <= ux.clsGrowerDh) continue;
+      const n = x.node instanceof Element ? x.node : x.node?.parentElement ?? null;
+      ux.clsGrower = n?.closest("[data-testid]")?.getAttribute("data-testid") ?? n?.tagName.toLowerCase() ?? "";
+      ux.clsGrowerDh = dh;
+    }
   });
   observe("longtask", (e) => ux.lt.push([e.startTime, e.duration]));
   observe("long-animation-frame", (e) =>
@@ -121,17 +152,40 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
   // Interactive elements: tap size, accessible names, primary CTAs.
   const INTERACTIVE =
     'a[href], button, input:not([type="hidden"]), select, textarea, summary, [role="button"], [role="link"], [role="tab"], [role="checkbox"], [role="radio"], [role="switch"], [role="menuitem"]';
+  const BUTTON_INPUTS = ["button", "submit", "reset", "image"];
   const hasName = (el: Element): boolean => {
     if ((el.getAttribute("aria-label") ?? "").trim()) return true;
     const by = el.getAttribute("aria-labelledby");
     if (by && by.split(/\s+/).some((id) => (document.getElementById(id)?.textContent ?? "").trim())) return true;
-    if ((el.textContent ?? "").trim()) return true;
     if ((el.getAttribute("title") ?? "").trim()) return true;
+    // Form fields are named by their label, never by their content: a
+    // select's option text and a checkbox/radio's default value "on" are not
+    // accessible names (Codex review on #2794).
+    const isField =
+      el instanceof HTMLSelectElement ||
+      el instanceof HTMLTextAreaElement ||
+      (el instanceof HTMLInputElement && !BUTTON_INPUTS.includes(el.type));
+    if (isField) {
+      const labelled = [...((el as HTMLInputElement).labels ?? [])].some((l) => (l.textContent ?? "").trim());
+      if (labelled) return true;
+      // A text-like placeholder is the last-resort name browsers expose.
+      const textLike = el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && !["checkbox", "radio", "range", "color", "file"].includes(el.type));
+      return textLike && !!((el as HTMLInputElement).placeholder ?? "").trim();
+    }
+    if ((el.textContent ?? "").trim()) return true;
     if (el.querySelector('img[alt]:not([alt=""]), svg title, [aria-label]')) return true;
-    if (el instanceof HTMLInputElement && (el.value || el.placeholder || (el.labels?.length ?? 0) > 0)) return true;
-    if ((el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) && (el.labels?.length ?? 0) > 0) return true;
+    if (el instanceof HTMLInputElement && el.value) return true; // button-type inputs
     return false;
   };
+  // WHICH components hold the small targets / primary CTAs: nearest
+  // data-testid (else tag), counted — component names only, never text.
+  const smallBy = new Map<string, number>();
+  const ctaBy = new Map<string, number>();
+  const componentTally = (el: Element, m: Map<string, number>) => {
+    const k = el.closest("[data-testid]")?.getAttribute("data-testid") ?? el.tagName.toLowerCase();
+    m.set(k, (m.get(k) ?? 0) + 1);
+  };
+  (window as unknown as { __uxComponents?: unknown }).__uxComponents = { smallBy, ctaBy };
   let tapTotal = 0;
   let tapSmall = 0;
   let unlabeled = 0;
@@ -156,7 +210,10 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
       const lr = lab?.getBoundingClientRect();
       if (lr && lr.width >= tapMin && lr.height >= tapMin) small = false;
     }
-    if (small) tapSmall++;
+    if (small) {
+      tapSmall++;
+      componentTally(el, smallBy);
+    }
     const isField = el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && !["button", "submit", "reset", "image"].includes(el.type));
     if (!hasName(el)) {
       if (isField) unlabeledFields++;
@@ -166,7 +223,10 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
     if (el.tagName === "A" || el.tagName === "BUTTON") {
       // Design system: Button variant="primary" and buttonLinkClassName() carry `bg-gradient-cta`
       // (components/ui/Button.tsx); a solid brand fill is the other "primary-looking" pattern.
-      if (/\bbg-gradient-cta\b/.test(cls)) primary++;
+      if (/\bbg-gradient-cta\b/.test(cls)) {
+        primary++;
+        componentTally(el, ctaBy);
+      }
       else if (/(^|\s)bg-brand-blue(\s|$)/.test(cls)) brandFill++;
     }
   }
@@ -316,7 +376,9 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
 
   // Web vitals + long tasks / long animation frames AFTER the load event (the observation window).
   const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
-  const ux = (window as unknown as { __ux?: { lcp: number; cls: number; lt: number[][]; loaf: number[][] } }).__ux;
+  const ux = (window as unknown as {
+    __ux?: { lcp: number; cls: number; lt: number[][]; loaf: number[][]; clsTop: string; clsTopValue: number; clsTopDy: number };
+  }).__ux;
   const loadEnd = nav?.loadEventEnd || performance.now();
   out.ttfb_ms = nav ? nav.responseStart : 0;
   out.dcl_ms = nav ? nav.domContentLoadedEventEnd : 0;
@@ -324,6 +386,11 @@ export function measure({ tapMin, locale, namespaces }: Probe): Record<string, n
   out.html_kb = nav ? nav.encodedBodySize / 1024 : 0;
   out.lcp_ms = ux?.lcp ?? 0;
   out.cls_x10000 = Math.round((ux?.cls ?? 0) * 10_000);
+  out.cls_top_x10000 = Math.round((ux?.clsTopValue ?? 0) * 10_000);
+  out.cls_top_dy_px = Math.round(ux?.clsTopDy ?? 0);
+  // The final height of the block named by cls_top (0 when it is not a testid).
+  const topBlock = ux?.clsTop ? document.querySelector(`[data-testid="${CSS.escape(ux.clsTop)}"]`) : null;
+  out.cls_top_h_px = topBlock ? Math.round(topBlock.getBoundingClientRect().height) : 0;
   const lt = (ux?.lt ?? []).filter(([s]) => s! >= loadEnd);
   out.longtasks_total = ux?.lt.length ?? 0;
   out.longtasks_after = lt.length;
@@ -373,4 +440,34 @@ export async function runAxe(page: Page): Promise<AxeCounts | null> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+/** The largest layout shift's source, as a component name only: the nearest
+ *  data-testid (or a tag), reduced to [A-Za-z0-9_-] so no page text can leak. */
+export function clsTopSource(): string {
+  const ux = (window as unknown as { __ux?: { clsTop?: string } }).__ux;
+  return (ux?.clsTop ?? "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 60) || "none";
+}
+
+/** The block whose height changed most across the shifts, as `<testid>:<px>` — names only. */
+export function clsGrowerSource(): string {
+  const ux = (window as unknown as { __ux?: { clsGrower?: string; clsGrowerDh?: number } }).__ux;
+  const name = (ux?.clsGrower ?? "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 60) || "none";
+  return `${name}:${Math.round(ux?.clsGrowerDh ?? 0)}`;
+}
+
+/** Top components holding small tap targets and primary CTAs, as
+ *  `name:count,name:count` — names reduced to [A-Za-z0-9_-], no page text. */
+export function componentTops(): { small: string; cta: string } {
+  const c = (window as unknown as { __uxComponents?: { smallBy: Map<string, number>; ctaBy: Map<string, number> } }).__uxComponents;
+  const fmt = (m: Map<string, number> | undefined, n: number) =>
+    m && m.size
+      ? [...m]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, n)
+          // 500–504 are zero-padded: walk-brakes reads a bare 50x as an HTTP 5xx.
+          .map(([k, v]) => `${k.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 40) || "x"}:${v >= 500 && v <= 504 ? `0${v}` : v}`)
+          .join(",")
+      : "none";
+  return { small: fmt(c?.smallBy, 3), cta: fmt(c?.ctaBy, 8) };
 }

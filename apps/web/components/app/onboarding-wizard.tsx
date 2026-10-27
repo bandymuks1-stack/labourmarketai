@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 import { RoleIcon } from "@/components/app/role-icon";
-import { trackFunnel } from "@/lib/telemetry/task";
+import { trackFunnel, trackFunnelFailure } from "@/lib/telemetry/task";
 import { getFirstTouchAttribution } from "@/lib/telemetry/attribution";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { DarkListbox } from "@/components/ui/DarkListbox";
@@ -35,6 +35,41 @@ import {
   nextPathForIntents,
   type FirstRunIntent,
 } from "@/lib/onboarding/first-run-intent";
+
+/** This tab's onboarding draft (step, intents, country) — sessionStorage only,
+ *  never the name or any free text. Every access is guarded: storage may be
+ *  unavailable (private mode, blocked site data) and the wizard must work. */
+const ONBOARDING_DRAFT_KEY = "lm.onboarding.draft.v1";
+type OnboardingDraft = { step: 1 | 2; intents: string[]; country: string };
+function readOnboardingDraft(): OnboardingDraft | null {
+  try {
+    const raw = window.sessionStorage.getItem(ONBOARDING_DRAFT_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw) as Partial<OnboardingDraft>;
+    if (!Array.isArray(d.intents) || (d.step !== 1 && d.step !== 2)) return null;
+    return {
+      step: d.step,
+      intents: d.intents.filter((i): i is string => typeof i === "string").slice(0, 12),
+      country: typeof d.country === "string" ? d.country.slice(0, 8) : "",
+    };
+  } catch {
+    return null;
+  }
+}
+function writeOnboardingDraft(d: OnboardingDraft): void {
+  try {
+    window.sessionStorage.setItem(ONBOARDING_DRAFT_KEY, JSON.stringify(d));
+  } catch {
+    /* storage unavailable: the wizard simply does not remember */
+  }
+}
+function clearOnboardingDraft(): void {
+  try {
+    window.sessionStorage.removeItem(ONBOARDING_DRAFT_KEY);
+  } catch {
+    /* nothing to clear */
+  }
+}
 
 /** Role cards — the START is intentionally simple (owner directive,
  *  company-role-simplicity-v1): a person either WORKS THEMSELVES or
@@ -285,6 +320,41 @@ export function OnboardingWizard({
     trackFunnel(FUNNEL_EVENTS.onboardingStarted);
   }, []);
 
+  // KEEP THE PLACE (activation audit 2026-10-26): step, intents and country
+  // lived only in React state, so a reload, a language switch or Back sent a
+  // person who had reached step 2 to step 1 again — production showed the
+  // people who never finished restarting the wizard ~3x as often as those
+  // who did. The draft rides in sessionStorage (this tab only, no server, no
+  // personal text — the name stays out), is restored once after hydration
+  // and cleared when onboarding completes. Storage can be unavailable
+  // (private mode): every access is guarded and the wizard works without it.
+  const draftRestoredRef = useRef(false);
+  useEffect(() => {
+    if (draftRestoredRef.current) return;
+    draftRestoredRef.current = true;
+    const draft = readOnboardingDraft();
+    if (!draft) return;
+    const restored = draft.intents.filter((i) => (FIRST_RUN_INTENTS as readonly string[]).includes(i)) as FirstRunIntent[];
+    if (restored.length > 0) setIntents(new Set(restored));
+    if (draft.country && countryOptions.some((o) => o.value === draft.country)) setCountry(draft.country);
+    if (draft.step === 2 && restored.length > 0) setStep(2);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- restore exactly once, after hydration
+  }, []);
+  useEffect(() => {
+    if (!draftRestoredRef.current) return;
+    writeOnboardingDraft({ step, intents: [...intents], country });
+  }, [step, intents, country]);
+  // Step 2 opens at its own top, not at step 1's scroll offset (its heading
+  // and first field were off-screen on a phone).
+  const firstStepRenderRef = useRef(true);
+  useEffect(() => {
+    if (firstStepRenderRef.current) {
+      firstStepRenderRef.current = false;
+      return;
+    }
+    if (step === 2) window.scrollTo({ top: 0 });
+  }, [step]);
+
   function toggleIntent(i: FirstRunIntent) {
     setIntents((prev) => {
       const next = new Set(prev);
@@ -305,15 +375,28 @@ export function OnboardingWizard({
   }
 
   function submit() {
-    if (roles.size === 0) return;
+    // Production 2026-10-26: 14 of 19 stuck sign-ups opened the profile step
+    // and none submitted it; a failed check here was invisible. Each refusal
+    // now names itself (bounded code, no PII) so the drop-off has a cause.
+    const refuse = (code: string) =>
+      trackFunnelFailure(FUNNEL_EVENTS.onboardingStepProfileCompleted, code, { step: "profile" });
+    if (roles.size === 0) {
+      // Was a silent return: the button did nothing. Say why and go back.
+      refuse("no_role");
+      setError(t("error_role_required"));
+      setStep(1);
+      return;
+    }
     setError(null);
     setFieldError(null);
     if (!displayName.trim()) {
+      refuse("name_missing");
       setFieldError("name");
       document.getElementById(nameInputId)?.focus();
       return;
     }
     if (!country) {
+      refuse("country_missing");
       setFieldError("country");
       const toggle = document.getElementById(countryButtonId);
       toggle?.scrollIntoView({ block: "center" });
@@ -327,6 +410,7 @@ export function OnboardingWizard({
     // (`bestEvidencedProfession`, guard no-mandatory-profession). An empty
     // field means "not stated here", never "has no profession".
     if (asksForCurrentEducation(intentList) && institutionName.trim().length < 2) {
+      refuse("institution_missing");
       setError(t("step2.errorInstitution"));
       return;
     }
@@ -423,6 +507,7 @@ export function OnboardingWizard({
           }
         }
         await completeOnboarding(form);
+        clearOnboardingDraft();
         // Reached only if the runtime resolves the action instead of
         // throwing NEXT_REDIRECT — exactly one of these two success
         // paths runs, so the event never double-fires.
@@ -444,6 +529,7 @@ export function OnboardingWizard({
         // await — is the reliable success signal. trackFunnel is
         // fire-and-forget, safe before the rethrow.
         if (e instanceof Error && /NEXT_REDIRECT/.test(e.message)) {
+          clearOnboardingDraft();
           trackFunnel(FUNNEL_EVENTS.onboardingCompleted, {
             ...getFirstTouchAttribution(),
             role_context: primaryRole,
@@ -616,6 +702,11 @@ export function OnboardingWizard({
         >
           {t("rolePicker.continue")}
         </Button>
+        {error && (
+          <p className="text-xs text-state-danger" role="alert">
+            {error}
+          </p>
+        )}
       </div>
     );
   }

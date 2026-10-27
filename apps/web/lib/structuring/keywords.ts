@@ -2000,8 +2000,10 @@ export const CONSTRUCTION_SKILL_HINT_SLUGS: ReadonlySet<string> = new Set(
 
 /** Lowercase substrings that map a free-text mention to a profession slug.
  *  RU needles ride the same rows (see SKILL_HINTS_LT note). Construction
- *  professions are one family among many — universal rows sit below them. */
-export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
+ *  professions are one family among many — universal rows sit below them.
+ *  `notWhen`: substrings that, when present, mean the row's needle is part of
+ *  ANOTHER occupation's compound — the row does not match (no guess). */
+export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: string[] }[] = [
   // Swedish needles (2026-08-14, worker-acquisition readiness loop) target the
   // Arbetsförmedlingen OCCUPATION LABELS — a closed publisher vocabulary —
   // and were derived from the measured production label distribution, never
@@ -2196,7 +2198,42 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[] }[] = [
       "programmerare",
     ],
   },
-  { slug: "office_administrator", needles: ["administrator", "администратор"] },
+  {
+    slug: "office_administrator",
+    needles: ["administrator", "администратор"],
+    // "administrator" inside an IT compound is a different occupation:
+    // production /lt/jobs 2026-10-25 headed NAV "Systemadministrator" ads
+    // "Biuro administratorius". The catalogue has no IT-operations
+    // profession, so these stay unrecognized rather than mislabelled.
+    notWhen: [
+      "systemadministrat",
+      "system administrat",
+      "sysadmin",
+      "systemadministratör",
+      "nettverksadministrat",
+      "netzwerkadministrat",
+      "network administrat",
+      "nätverksadministrat",
+      "netwerkbeheer",
+      "databaseadministrat",
+      "datenbankadministrat",
+      "database administrat",
+      "databasadministrat",
+      "it-administrat",
+      "it administrat",
+      "системный администратор",
+      "системного администратора",
+      "администратор баз",
+      "сетевой администратор",
+      "sistemų administrat",
+      "sistemu administrat",
+      "tinklo administrat",
+      "duomenų bazių administrat",
+      "administrator systemów",
+      "administrator sieci",
+      "administrator baz",
+    ],
+  },
   {
     slug: "gardener",
     needles: [
