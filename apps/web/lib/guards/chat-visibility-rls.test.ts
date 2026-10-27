@@ -286,6 +286,15 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    a profile. Reached only after the per-source machine secret
     //    (lib/api/external-referral-auth.ts) and the strict contract passed.
     //    Reads or writes no table directly, touches no chat table.
+    //  - lib/invitations/external-referral-reprocess-run.ts — the owner's
+    //    by-hand reprocess of unsent partner referrals (2026-10-27). The
+    //    caller is the VPS operator script behind CRON_SECRET, no user
+    //    session. It calls exactly three service_role-only RPCs —
+    //    external_referral_reprocess_candidates_v1 (read),
+    //    reissue_external_referral_v1 (re-checks consent, expiry, account,
+    //    delivery and the reissue ceiling) and
+    //    mark_external_referral_delivery_v1. Reads or writes no table
+    //    directly, touches no chat table.
     //  - lib/invitations/public-preview.ts — the logged-out invitation
     //    landing's read (universal network v1). A stranger holding a link has
     //    no session; the alternative — granting a preview function to anon —
@@ -528,6 +537,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/company/claim-public-intake.ts",
       "lib/email/send-ledger-store.ts",
       "lib/invitations/external-referral-receive.ts",
+      "lib/invitations/external-referral-reprocess-run.ts",
       "lib/invitations/public-preview.ts",
       "lib/invitations/signup-bridge.ts",
       "lib/lmc/compensation.ts",
