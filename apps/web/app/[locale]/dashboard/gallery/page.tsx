@@ -6,6 +6,11 @@ import { Images, NotebookPen } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getPersonalGallery } from "@/lib/journal/personal-gallery";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/gallery", "personalGallery.title");
+
 
 export const dynamic = "force-dynamic";
 

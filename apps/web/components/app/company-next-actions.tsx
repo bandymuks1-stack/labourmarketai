@@ -2,8 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { Card } from "@/components/ui/Card";
-import { TrackedLink } from "@/components/app/tracked-link";
-import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { NeedDoorLink } from "@/components/app/need-door-link";
 import type { CompanyRow, CompanyVerificationStatus } from "@/lib/company/company-setup";
 import { runCompanyChecks, type CompanyCheckKey } from "@/lib/company/company-checks";
 import type { EmployerContextReason } from "@/lib/company/employer-company-context";
@@ -25,7 +24,7 @@ import type { WorkspaceInfo } from "@/lib/company/organization-switch";
  * cards (complete details / team / requests / verification) duplicated the
  * page's CompanyActionNextActions room card and were removed — ONE action
  * center per page. Only the data-driven status/fix parts plus the tracked
- * demand CTA (activation funnel P0-A) remain.
+ * door into the demand intake (`NeedDoorLink`) remain.
  *
  * Pure read + render: it receives the already-RLS-scoped company row (the
  * caller only ever passes the signed-in user's own company). No mutations, no
@@ -147,18 +146,16 @@ export async function CompanyNextActions({ company }: { company: CompanyRow }) {
         ) : null}
       </div>
 
-      {/* Activation funnel (P0-A): the tracked demand/requests CTA — real
-          telemetry kept when the duplicate explainer cards were consolidated
-          out (canonical-user-journey v1). Hash href to the real requests
-          section below. */}
-      <TrackedLink
-        event={FUNNEL_EVENTS.companyDemandActionClicked}
-        eventMetadata={{ surface: "company", entity_type: "company_request" }}
-        href={"#company-requests" as "/dashboard"}
-        className="inline-flex w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-meta font-semibold text-text-primary transition-colors hover:border-brand-blue"
-      >
-        {t("cards.requests.cta")} →
-      </TrackedLink>
+      {/* Activation funnel: the tracked door into the demand intake. It used
+          to be a hash to the requests section — which only the Needs door
+          holds, so on this Settings page the click went nowhere and was the
+          ONLY one ever counted (activation audit 2026-10-26 §2). The shared
+          door names the real route, the label and the surface. */}
+      <NeedDoorLink
+        surface="company_settings"
+        testId="company-next-actions-need-door"
+        className="inline-flex min-h-11 w-fit items-center gap-1 rounded-md border border-ink-500 px-2.5 py-1 text-meta font-semibold text-text-primary transition-colors hover:border-brand-blue"
+      />
     </section>
   );
 }

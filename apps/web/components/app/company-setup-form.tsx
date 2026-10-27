@@ -2,9 +2,11 @@
 
 import type { CountryOption } from "@/lib/location/country-options";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useState } from "react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { NeedDoorLink } from "@/components/app/need-door-link";
+import { buttonLinkClassName } from "@/components/ui/Button";
 import {
   saveCompanySetupAction,
   type CompanySetupFormState,
@@ -128,6 +130,17 @@ export function CompanySetupForm({
   const setIntent = (v: "draft" | "submit") => {
     if (intentRef.current) intentRef.current.value = v;
   };
+  // The company type the person just saved — read from the submitted form
+  // (onSubmit runs before the action), so the success state can name the
+  // right first door: a staffing agency's Needs door opens on its OFFER, so
+  // it is not told to "describe a need".
+  const [submittedType, setSubmittedType] = useState<string | null>(null);
+  const savedType = submittedType || existing?.companyType || presetCompanyType || null;
+  // The first door after setup (activation audit 2026-10-26 §2, fix #3): for a
+  // company that hires, describing its first need; the workspace stays one
+  // tap away. An agency or an education institution keeps the workspace as
+  // its door — their first step is clients / learners, not a need.
+  const needFirst = savedType !== "staffing_agency" && presetCapability !== "training_provider";
 
   // Verified companies have LOCKED legal-registry fields (legal name,
   // country, registration code, address): rendered read-only so a normal
@@ -165,6 +178,10 @@ export function CompanySetupForm({
   return (
     <form
       action={formAction}
+      onSubmit={(e) => {
+        const type = new FormData(e.currentTarget).get("company_type");
+        setSubmittedType(typeof type === "string" && type !== "" ? type : null);
+      }}
       className="flex flex-col gap-4"
       data-testid="company-setup-form"
     >
@@ -395,21 +412,34 @@ export function CompanySetupForm({
       {/* "Company saved" used to be a dead end — the person had to find the
           workspace themselves. Offer the one next door, and say plainly when
           the education preset did not land (the capability card in the
-          workspace is where it is declared; nothing is faked). */}
+          workspace is where it is declared; nothing is faked).
+          A company that hires gets its FIRST NEED as the primary door (the
+          shared, tracked need door) with the workspace beside it, secondary
+          — one primary action. Agencies and institutions keep the workspace
+          as their primary door. */}
       {state?.ok ? (
-        <div className="flex flex-col gap-2" data-testid="company-setup-next">
+        <div className="flex flex-col gap-2" data-testid="company-setup-next" data-first-door={needFirst ? "need" : "workspace"}>
           {state.capabilityDeclared === false ? (
             <p className="text-xs leading-relaxed text-state-warning" role="status">
               {labels.capabilityNotDeclared}
             </p>
           ) : null}
-          <Link
-            href="/dashboard/company"
-            className="inline-flex w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90"
-            data-testid="company-setup-go-workspace"
-          >
-            {labels.goToWorkspace} →
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            {needFirst ? (
+              <NeedDoorLink
+                surface="company_setup"
+                testId="company-setup-describe-need"
+                className={`${buttonLinkClassName("primary", "sm")} w-fit max-md:w-full`}
+              />
+            ) : null}
+            <Link
+              href="/dashboard/company"
+              className={`${buttonLinkClassName(needFirst ? "secondary" : "primary", "sm")} w-fit max-md:w-full`}
+              data-testid="company-setup-go-workspace"
+            >
+              {labels.goToWorkspace} →
+            </Link>
+          </div>
         </div>
       ) : null}
     </form>

@@ -12,6 +12,13 @@
  * session's refresh token, and the file is deleted whatever the answer was.
  * Prints counts and HTTP statuses only — never a token, never an e-mail.
  *
+ * FAILS LOUDLY (exit 1) when the cleanup did not do its job, so a walk can
+ * never look green while a session is still live: any session not revoked
+ * with 200/204, any unreadable or unvetted file, or — with
+ * PROD_QA_REVOKE_EXPECT_FILES=1 (the mint ran) — no session file at all.
+ * Until 2026-10-26 it never failed and the files were deleted before it ran,
+ * so it reported a clean 0/0 while every session stayed live.
+ *
  *   PROD_QA_ANON_KEY=… pnpm exec tsx scripts/prod-qa-revoke-sessions.ts
  */
 import { readdirSync, readFileSync, unlinkSync } from "node:fs";
@@ -85,9 +92,21 @@ async function main(): Promise<void> {
     `[prod-qa-revoke] files=${files.length} deleted=${files.length} sessions_revoked=${revoked}/${seen.size} ` +
       `unvetted_or_unreadable=${skipped} statuses=${statuses.join(",") || "none"}`,
   );
+  const problems: string[] = [];
+  if (revoked < seen.size) problems.push(`${seen.size - revoked} session(s) not revoked`);
+  if (skipped > 0) problems.push(`${skipped} unreadable or unvetted session file(s)`);
+  if (process.env.PROD_QA_REVOKE_EXPECT_FILES === "1" && files.length === 0) {
+    problems.push("sessions were minted but no session file reached the revoke");
+  }
+  if (!anon && files.length > 0) problems.push("PROD_QA_ANON_KEY missing: nothing could be revoked");
+  if (problems.length > 0) {
+    console.error(`[prod-qa-revoke] INCOMPLETE: ${problems.join("; ")}`);
+    process.exitCode = 1;
+  }
 }
 
 main().catch((err) => {
-  // Never fail the run on cleanup; say that it did not complete.
-  console.error("[prod-qa-revoke] incomplete:", (err as Error).message);
+  // A cleanup that did not complete is a failed run, never a quiet pass.
+  console.error("[prod-qa-revoke] INCOMPLETE:", (err as Error).message);
+  process.exitCode = 1;
 });

@@ -65,6 +65,11 @@ import { loadDemandPipelineFacts } from "@/lib/pipeline/candidate-pipeline-facts
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Card } from "@/components/ui/Card";
 import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/company/scouting", "scouting.title");
+
 
 /** A worker's own standing interest in this need — the signal the interest
  *  card's in-app contact action is server-gated on. */

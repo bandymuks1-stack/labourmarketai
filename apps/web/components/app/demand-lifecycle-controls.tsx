@@ -95,7 +95,7 @@ export function DemandLifecycleControls({
               else if (r.kind !== "nothing-to-confirm") setFailed(true);
             })
           }
-          className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
+          className="min-h-11 sm:min-h-0 rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
           data-testid="demand-confirm-need"
         >
           {labels.confirm}
@@ -114,7 +114,7 @@ export function DemandLifecycleControls({
           type="button"
           disabled={pending}
           onClick={() => run(() => closeDemandAction(locale, requestId))}
-          className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary hover:border-state-warning hover:text-text-primary disabled:opacity-50"
+          className="min-h-11 sm:min-h-0 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary hover:border-state-warning hover:text-text-primary disabled:opacity-50"
           data-testid="demand-close"
         >
           {labels.close}
@@ -128,7 +128,7 @@ export function DemandLifecycleControls({
               type="button"
               disabled={pending}
               onClick={() => run(() => reopenDemandAction(locale, requestId))}
-              className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-primary hover:border-brand-blue disabled:opacity-50"
+              className="min-h-11 sm:min-h-0 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-primary hover:border-brand-blue disabled:opacity-50"
               data-testid="demand-reopen"
             >
               {labels.reopen}

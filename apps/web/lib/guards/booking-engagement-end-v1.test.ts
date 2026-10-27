@@ -1725,6 +1725,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // non-destructive implementation; still draft + needs-human-gate. Bound precision,
       // per-bound basis and register id on the existing period statement table.
       "20261024100000_history_period_precision_and_registry_v1.sql",
+      // 2026-10-27: owner approved #2841 in chat (apply + merge). Two service_role-only
+      // SECURITY DEFINER functions that rotate one unsent partner referral token; ledger
+      // 20261027193124.
+      "20261027120000_reissue_external_referral_v1.sql",
 ]);
   });
 

@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/lib/i18n/navigation";
 import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
 import { AreaSwitcher } from "@/components/app/area-switcher";
+import { NeedDoorLink } from "@/components/app/need-door-link";
 import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 
 /**
@@ -15,7 +15,9 @@ import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
  *   people & team · projects & objects · candidates · messages · calendar ·
  *   capacity · work & hours · results · history
  *
- * ONE obvious next action leads (publish a need); every door follows in the
+ * ONE obvious next action leads (describe a need — the shared, tracked
+ * `NeedDoorLink`; it saves a need for the company, it publishes nothing, so
+ * the label no longer says "publish"); every door follows in the
  * light 3D area switcher, by priority (the everyday six first) — the doors
  * themselves live in the ONE area model (`ORGANIZATION_WORK_AREAS`,
  * lib/navigation/work-areas.ts). Server component, props-free of identity:
@@ -44,13 +46,11 @@ export async function CompanyModelScreen() {
           unknown when unreadable, calm when empty) — the existing pulse the
           project surfaces already use, not a second counter. */}
       <ConfirmPulse />
-      <Link
-        href={"/dashboard/company/needs#demand-intake" as "/dashboard"}
-        data-testid="company-model-primary"
+      <NeedDoorLink
+        surface="company_model"
+        testId="company-model-primary"
         className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-blue px-5 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
-      >
-        {t("primary")}
-      </Link>
+      />
       {/* Every door of the company, by priority (the everyday six first),
           as the light 3D area switcher — one source: ORGANIZATION_WORK_AREAS.
           The carousel replaces the six-tile grid + "More" disclosure: the
