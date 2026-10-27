@@ -148,6 +148,11 @@ import { experienceFiguresOf } from "@/lib/journal/experience-figures";
 import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
 import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
 import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/journal", "journal.navTitle");
+
 
 // Worker-side relationships that grant access to the Work Journal (§13.1).
 // A worker without an active engagement here has nothing to log against.
@@ -1727,7 +1732,10 @@ export default async function JournalPage({
             // flow, not on the generic greeting. "Create your first entry"
             // that drops the worker on the home screen is the exact
             // interaction the tester read as being thrown out of the journal.
-            cta={{ label: t("listEmptyCta"), href: "/dashboard?intent=log-work" }}
+            // SECONDARY (activation audit fix #7): the ONE primary on an empty
+            // journal is the recorder ABOVE this list; this door LEAVES the
+            // page, so it is bordered, never a second gradient button.
+            cta={{ label: t("listEmptyCta"), href: "/dashboard?intent=log-work", variant: "secondary" }}
           />
         ) : (
           <div className="flex flex-col gap-4">

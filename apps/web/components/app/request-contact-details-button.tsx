@@ -132,7 +132,7 @@ export function RequestContactDetailsButton({
             onClick={withdraw}
             disabled={pending}
             data-testid={`contact-request-withdraw-${workerId}`}
-            className="w-fit rounded-md border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-muted transition-colors hover:bg-ink-500/10 disabled:opacity-60"
+            className="min-h-11 sm:min-h-0 w-fit rounded-md border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-muted transition-colors hover:bg-ink-500/10 disabled:opacity-60"
           >
             {pending ? labels.withdrawing : labels.withdraw}
           </button>
@@ -196,7 +196,7 @@ export function RequestContactDetailsButton({
           onClick={send}
           disabled={pending}
           data-testid={`contact-request-open-${workerId}`}
-          className="w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-meta font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
+          className="min-h-11 sm:min-h-0 w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-meta font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
         >
           {pending ? labels.sending : labels.button}
         </button>

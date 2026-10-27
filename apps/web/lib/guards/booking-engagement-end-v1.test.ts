@@ -1724,6 +1724,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-24: owner integrated-architecture order (Stage 7). Forecast versions, mode
       // settings and the significant-change signal; RED draft, applied via MCP after review.
       "20261024130000_project_forecasts_v1.sql",
+      // 2026-10-27: owner approved #2841 in chat (apply + merge). Two service_role-only
+      // SECURITY DEFINER functions that rotate one unsent partner referral token; ledger
+      // 20261027193124.
+      "20261027120000_reissue_external_referral_v1.sql",
 ]);
   });
 

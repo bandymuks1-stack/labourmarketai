@@ -86,6 +86,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron) once payments are on — absent from it while they are off; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset, so never an open trigger. It only READS Stripe and applies through the canonical subscription-apply primitive; it never creates, changes, cancels or refunds a payment. Answers counts and a reason code only, no ids.",
   },
+  "cron/referral-reprocess/route.ts": {
+    class: "public",
+    why: "Run BY HAND by the owner on the VPS (ops/vps/lm-referral-reprocess.sh) — never in the cron bundle; nginx 404s /api/cron/* from the internet. Identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. POST only; dry_run by default, control = exactly one person, batch = at most 20. Every send goes through the ledgered provider path and the service-role-only reissue function re-checks consent, expiry, account and delivery. Answers counts and reason codes only, no ids, no addresses.",
+  },
   "cron/commercial-handoffs/route.ts": {
     class: "public",
     why: "The VPS cron bundle (ops/vps/labourmarket.cron) delivers it; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. Inert a second time while NONSTOP_HANDOFF_ENDPOINT / NONSTOP_HANDOFF_TOKEN are unset (answers not_configured, calls nothing). Its only outbound target is the configured partner door; the body it returns is counts only.",

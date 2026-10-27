@@ -143,7 +143,7 @@ export function ScoutingShortlistButtons({
             setDraft(note ?? "");
             setError(null);
           }}
-          className="w-fit text-meta font-medium text-brand-blue hover:text-brand-champagne disabled:opacity-50"
+          className="min-h-11 sm:min-h-0 w-fit text-meta font-medium text-brand-blue hover:text-brand-champagne disabled:opacity-50"
           data-testid={`scout-shortlist-note-toggle-${workerId}`}
         >
           {note === null ? labels.note.add : labels.note.edit}
@@ -177,7 +177,7 @@ export function ScoutingShortlistButtons({
                   ? submit("not_fit", draft)
                   : submit(status ?? "saved", draft.trim() === "" ? null : draft)
               }
-              className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
+              className="min-h-11 sm:min-h-0 rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
               data-testid={`scout-shortlist-note-save-${workerId}`}
             >
               {labels.note.save}
@@ -190,7 +190,7 @@ export function ScoutingShortlistButtons({
                 setDraft("");
                 setError(null);
               }}
-              className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
+              className="min-h-11 sm:min-h-0 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
             >
               {labels.note.cancel}
             </button>

@@ -25,6 +25,11 @@ import {
 } from "@/components/app/company-setup-form";
 import { Card } from "@/components/ui/Card";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/start/company");
+
 
 /**
  * Company profile-REQUEST setup (real persistence + honest verification).

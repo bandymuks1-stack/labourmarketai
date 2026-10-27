@@ -7,6 +7,11 @@ import { createClient } from "@/lib/supabase/server";
 import { buildVerifiedCv } from "@/lib/cv-export/verified-cv";
 import { buildEvidenceReport } from "@/lib/reports/evidence-report";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/reports/evidence");
+
 
 /**
  * Evidence Report v1 (PR #479) — a print-ready, honest evidence report built
