@@ -96,10 +96,18 @@ describe("who may receive a fresh link", () => {
 });
 
 describe("sending", () => {
+  it("the dry run reports a missing provider without sending anything (the SMTP check)", async () => {
+    const { d, calls } = deps({ emailConfigured: () => false });
+    const r = await reprocessExternalReferrals(select([row()]), {}, d);
+    expect(r).toMatchObject({ outcome: "dry_run", emailConfigured: false, eligible: 1 });
+    expect(calls.reissue).toEqual([]);
+  });
+
   it("is a DRY RUN by default: nothing rotated, nothing sent", async () => {
     const { d, calls } = deps();
     const r = await reprocessExternalReferrals(select([row(), row()]), {}, d);
     expect(r.outcome).toBe("dry_run");
+    expect(r.emailConfigured).toBe(true);
     expect(r.attempted).toBe(2);
     expect(calls.reissue).toEqual([]);
     expect(calls.send).toEqual([]);
@@ -109,6 +117,7 @@ describe("sending", () => {
     const { d, calls } = deps({ emailConfigured: () => false });
     const r = await reprocessExternalReferrals(select([row()]), { dryRun: false }, d);
     expect(r.outcome).toBe("email_not_configured");
+    expect(r.emailConfigured).toBe(false);
     expect(calls.reissue).toEqual([]);
   });
 

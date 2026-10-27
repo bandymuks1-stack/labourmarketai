@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { authorizeCronRequest } from "@/lib/api/cron-auth";
-import { outboundLinkOrigin } from "@/lib/domain/canonical";
+import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
 import { runExternalReferralReprocess, type ReprocessMode } from "@/lib/invitations/external-referral-reprocess-run";
 
 /**
@@ -17,7 +17,8 @@ import { runExternalReferralReprocess, type ReprocessMode } from "@/lib/invitati
  *   dry_run (default) — counts only, nothing rotated, nothing sent;
  *   control           — exactly ONE referral (the soonest-expiring eligible);
  *   batch             — at most 20 per call.
- * The body is counts and reason codes only — no ids, no addresses.
+ * The body is counts and reason codes only — no ids, no addresses — plus
+ * `emailConfigured` (true/false) so the dry run doubles as an SMTP check.
  */
 const MODES: readonly ReprocessMode[] = ["dry_run", "control", "batch"];
 
@@ -30,11 +31,10 @@ export async function POST(request: Request): Promise<NextResponse> {
   if (!(MODES as readonly string[]).includes(requested)) {
     return NextResponse.json({ ok: false, reason: "invalid_mode" }, { status: 400 });
   }
-  const origin = outboundLinkOrigin(
-    request.headers.get("x-forwarded-host") ?? request.headers.get("host"),
-    request.headers.get("x-forwarded-proto"),
-  );
-  const result = await runExternalReferralReprocess({ mode: requested as ReprocessMode, origin });
+  // The link carries a raw capability token and goes to a real person: it is
+  // built on the canonical origin ALWAYS, never on a request header (the
+  // operator calls this on 127.0.0.1).
+  const result = await runExternalReferralReprocess({ mode: requested as ReprocessMode, origin: CANONICAL_ORIGIN });
   if (result.kind === "needs_migration") {
     return NextResponse.json({ ok: false, reason: "needs_migration" }, { status: 503 });
   }

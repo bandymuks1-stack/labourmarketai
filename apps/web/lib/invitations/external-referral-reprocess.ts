@@ -110,6 +110,8 @@ export type ReprocessOptions = {
 
 export type ReprocessReport = {
   readonly outcome: "dry_run" | "done" | "email_not_configured" | "not_eligible";
+  /** Presence only: whether a provider is configured. Never a credential. */
+  readonly emailConfigured: boolean;
   readonly eligible: number;
   readonly excluded: Selection["excluded"];
   readonly attempted: number;
@@ -129,14 +131,18 @@ export async function reprocessExternalReferrals(
     : selection.eligible;
   const limit = options.onlyInvitationId ? 1 : Math.max(0, Math.min(options.limit ?? MAX_PER_RUN, MAX_PER_RUN));
   const batch = pool.slice(0, limit);
-  const base = { eligible: selection.eligible.length, excluded: selection.excluded };
+  const base = {
+    emailConfigured: deps.emailConfigured(),
+    eligible: selection.eligible.length,
+    excluded: selection.excluded,
+  };
   const empty = { attempted: 0, sent: 0, failed: 0, refused: {} };
 
   if (options.onlyInvitationId && batch.length === 0) return { outcome: "not_eligible", ...base, ...empty };
   if (dryRun) return { outcome: "dry_run", ...base, ...empty, attempted: batch.length };
   // Refuse BEFORE any token is rotated: a rotation without a mail would only
   // invalidate a link nobody holds and spend one of the three reissues.
-  if (!deps.emailConfigured()) return { outcome: "email_not_configured", ...base, ...empty };
+  if (!base.emailConfigured) return { outcome: "email_not_configured", ...base, ...empty };
 
   let sent = 0;
   let failed = 0;
