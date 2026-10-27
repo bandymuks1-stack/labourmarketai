@@ -16,7 +16,9 @@ import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import {
   inviteTokenFromNextPath,
   invitationImpliesWorkerContext,
+  pickAddressedJoinPlatform,
 } from "@/lib/invitations/model";
+import { listInvitationsForMe } from "@/lib/invitations/network";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
 import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
@@ -87,6 +89,25 @@ export default async function OnboardingPage({
     ) {
       const tInvite = await getTranslations({ locale, namespace: "network.invitePage" });
       invitationReviewNotice = tInvite("reviewNotice", { organization: preview.preview.organizationName ?? "" });
+    }
+  }
+
+  // NO TOKEN, STILL INVITED (2026-10-27). A person who registered without the
+  // invitation link in `?next=` — mail opened in one browser, registration in
+  // another, or a later visit — is still the addressee: the pending
+  // `join_platform` invitation for their verified e-mail is found here, so
+  // onboarding uses it exactly as it uses a token (worker implied only for a
+  // partner referral; accepted when the person finishes).
+  let addressedInvitationId: string | null = null;
+  if (!inviteToken) {
+    const mine = await listInvitationsForMe();
+    const addressed = mine.status === "ok" ? pickAddressedJoinPlatform(mine.items) : null;
+    if (addressed) {
+      addressedInvitationId = addressed.id;
+      impliedWorker = invitationImpliesWorkerContext({
+        invitationType: addressed.invitationType,
+        externalSourceSlug: addressed.externalSourceSlug,
+      });
     }
   }
 
@@ -202,6 +223,7 @@ export default async function OnboardingPage({
           defaultIntents={impliedWorker ? ["work"] : handoff.intents}
           skipRoleStep={impliedWorker}
           invitationToken={inviteToken}
+          addressedInvitationId={addressedInvitationId}
           invitationReviewNotice={invitationReviewNotice}
           defaultProfessionSlug={handoff.professionSlug}
           doorIntents={handoff.door}
