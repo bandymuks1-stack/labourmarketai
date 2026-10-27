@@ -369,7 +369,13 @@ test("fresh company: onboarding, the company, a described need, visible where th
     const onHome = inMain(page).getByText(NEED_ROLE).first();
     const visibleOnHome = await onHome.isVisible().catch(() => false);
     console.info(`[fresh] saved need visible on the company home (1280): ${visibleOnHome}`);
-    const link = inMain(page).locator('a[href*="/dashboard/company/scouting?request="]', { hasText: NEED_ROLE }).first();
+    // The home row names the need; its link reads "open need", not the need's
+    // name — so the link is found inside the row that names it.
+    const link = inMain(page)
+      .getByTestId("company-home-need")
+      .filter({ hasText: NEED_ROLE })
+      .first()
+      .getByTestId("company-home-need-open");
     needUrl = (await link.getAttribute("href").catch(() => null)) ?? "";
     expect(visibleOnHome, "the saved need is not visible on the company home").toBe(true);
 
