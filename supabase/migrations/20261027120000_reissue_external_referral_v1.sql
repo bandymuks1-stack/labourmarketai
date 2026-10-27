@@ -18,13 +18,18 @@
 --   * never delivered (`delivery_status <> 'sent'`);
 --   * a consent record that says `given = true`;
 --   * NOT expired — the expiry is kept as it is, never extended;
---   * fewer than 3 reissues (a hard ceiling against loops).
+--   * fewer than 3 reissues (a hard ceiling against loops);
+--   * the address has no account yet.
+-- A second, read-only function lists the partner referrals with an
+-- `has_account` flag so the caller's dry run counts exactly what would be
+-- sent (it returns rows only to service_role; nothing is written).
 -- The caller (lib/invitations/external-referral-reprocess.ts) deduplicates by
 -- address, skips people who already have an account, caps each run and sends
 -- through the existing ledgered provider path.
 --
 -- ROLLBACK:
 --   drop function if exists public.reissue_external_referral_v1(uuid, text);
+--   drop function if exists public.external_referral_reprocess_candidates_v1();
 
 create or replace function public.reissue_external_referral_v1(
   p_invitation_id  uuid,
@@ -61,6 +66,11 @@ begin
   if coalesce(v_row.resend_count, 0) >= 3 then
     return 'resend_limit';
   end if;
+  -- A "join the platform" mail to someone who already has an account is wrong.
+  if exists (select 1 from auth.users u
+              where lower(u.email) = lower(trim(v_row.invited_email))) then
+    return 'has_account';
+  end if;
 
   update public.invitations
      set token_hash   = p_new_token_hash,
@@ -72,4 +82,39 @@ end $$;
 revoke all on function public.reissue_external_referral_v1(uuid, text)
   from public, anon, authenticated;
 grant execute on function public.reissue_external_referral_v1(uuid, text)
+  to service_role;
+
+create or replace function public.external_referral_reprocess_candidates_v1()
+returns table (
+  id uuid,
+  invited_email text,
+  locale text,
+  created_at timestamptz,
+  expires_at timestamptz,
+  status text,
+  delivery_status text,
+  consent_given boolean,
+  external_source_slug text,
+  has_account boolean
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select i.id, i.invited_email, i.locale, i.created_at, i.expires_at, i.status,
+         i.delivery_status,
+         coalesce((i.consent_record ->> 'given')::boolean, false),
+         i.external_source_slug,
+         exists (select 1 from auth.users u
+                  where lower(u.email) = lower(trim(i.invited_email)))
+    from public.invitations i
+   where i.external_source_slug is not null
+     and i.status = 'pending'
+     and i.delivery_status <> 'sent';
+$$;
+
+revoke all on function public.external_referral_reprocess_candidates_v1()
+  from public, anon, authenticated;
+grant execute on function public.external_referral_reprocess_candidates_v1()
   to service_role;
