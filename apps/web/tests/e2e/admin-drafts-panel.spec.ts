@@ -1,7 +1,7 @@
 /**
  * Local credentialed smoke for the pilot admin panel.
  *
- * Uses the standard minted session (sukysdonatas@gmail.com). On a
+ * Uses the standard minted session (the local test account). On a
  * fresh prod DB the test user is NOT yet superadmin (the grant
  * script hasn't been applied), so this spec asserts the NEGATIVE
  * case: /dashboard/admin redirects to /dashboard. After the owner

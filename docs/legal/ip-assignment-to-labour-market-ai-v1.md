@@ -25,7 +25,7 @@ This Intellectual Property Assignment Agreement (the "**Agreement**") is entered
    personal code / date of birth [●], residing at [●] (the "**Contributor**") — the natural person
    who authored the contributions recorded in the git history of the repository
    `github.com/bandymuks1-stack/labourmarketai` under the git identities
-   `bandymuks1-stack <bandymuks1@gmail.com>` and `Mano <mano@local>`;
+   `bandymuks1-stack <[owner contact, kept outside the repository]>` and `Mano <mano@local>`;
 
 2. *(if applicable per the audit findings and counsel's review of any employment / engagement
    arrangements)* **UAB „Nonstop Group“**, a private limited liability company organised under the

@@ -148,7 +148,7 @@ const LABELS = { personal: "Asmenine erdve", unnamedOrganization: UNNAMED };
 
 describe("workspace labels are never ambiguous", () => {
   /**
-   * Reproduces production exactly: bandymuks1@gmail.com is a member of two
+   * Reproduces production exactly: the owner account is a member of two
    * organizations and BOTH have an empty display_name and legal_name, so the
    * switcher showed the same fallback string twice.
    */
