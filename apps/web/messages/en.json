@@ -9436,6 +9436,25 @@
       "done": "Saved",
       "error": "Failed"
     },
+    "vip": {
+      "title": "Organization VIP (free access)",
+      "help": "Owner-approved free access for ONE organization: the Organization plan without payment, whatever the payment setting. Audited (who, when, note); revoke at any time. Never bypasses a worker's consent.",
+      "organizationId": "Organization id",
+      "profileViews": "Profile views",
+      "profileViewsHint": "Empty = no fixed limit",
+      "note": "Note (why)",
+      "grant": "Grant VIP",
+      "revoke": "Revoke VIP",
+      "saving": "Saving…",
+      "done": "Saved",
+      "errors": {
+        "not_admin": "Only a platform admin can do this.",
+        "invalid_input": "Check the organization id and the number of views (1–100000).",
+        "unknown_organization": "No organization with this id.",
+        "needs_migration": "Not available yet: organization VIP cannot be granted yet. Nothing was saved.",
+        "error": "Failed. Nothing was changed."
+      }
+    },
     "events": {
       "title": "Recent webhook events",
       "empty": "No webhook events yet."
@@ -12553,7 +12572,13 @@
     "photoAlt": "Photo of completed work",
     "historyTitle": "Imported history",
     "historyUnavailable": "Imported history could not be read",
-    "currentWork": "Working now"
+    "currentWork": "Working now",
+    "viewLimitTitle": "Profile view limit reached",
+    "viewLimitBody": "The free plan opens {limit} different anonymized profiles per organization. Opened so far: {used}.",
+    "viewLimitReopen": "Profiles you already opened stay open. People you work with never count towards the limit.",
+    "viewLimitPlans": "See plans",
+    "viewNeedsOrgTitle": "Choose an organization",
+    "viewNeedsOrgBody": "You open found people's profiles on behalf of your organization. Pick an organization you manage in the workspace switcher and open the profile again."
   },
   "companyGallery": {
     "title": "Gallery",

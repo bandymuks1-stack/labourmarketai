@@ -228,6 +228,111 @@ describe("explicit caller (bearer / MCP) — no cookie session, the caller's own
   });
 });
 
+describe("owner-granted organization VIP (#2474, matrix 7.27) — an approved organization's LIVE workspace resolves it", () => {
+  const VIP_ROW = { organization_id: "org-1", grant_kind: "vip", scope: { profile_views: null }, revoked_at: null };
+  /** A reader that answers each table only for the exact scope the resolver must ask for. */
+  const vipHandler = (subscriptions: unknown[] = []) => (c: Call): Outcome => {
+    const f = filtersOf(c);
+    if (c.table === "organization_access_grants") {
+      return c.client === "admin" && f.organization_id === "org-1" && f.grant_kind === "vip" && f.revoked_at === null
+        ? { data: [VIP_ROW] }
+        : { data: [] };
+    }
+    if (c.table === "billing_subscriptions") {
+      return f.organization_id === "org-1" && f.test_mode === false ? { data: subscriptions } : { data: [] };
+    }
+    return { data: [] };
+  };
+  const grantReads = () => state.calls.filter((c) => c.table === "organization_access_grants");
+
+  it("LIVE mode: the organization plan as an explicit override, read by the organization id with NO mode filter", async () => {
+    state.handler = vipHandler();
+    const ent = await getEffectiveEntitlements();
+    expect(ent.effectivePlanKey).toBe("company_pilot");
+    expect(ent.source).toBe("manual_override");
+    expect(ent.active).toBe(true);
+    expect(ent.enforced).toBe(true);
+    const reads = grantReads();
+    expect(reads).toHaveLength(1);
+    expect(reads[0]!.client).toBe("admin");
+    expect(filtersOf(reads[0]!)).toEqual({ organization_id: "org-1", grant_kind: "vip", revoked_at: null });
+  });
+
+  it("reproduces the 7.27 defect: the org-less TEST-mode pilot override row never reaches a live organization workspace", async () => {
+    // The admin pilot override writes owner_id + organization_id NULL + test_mode true. The
+    // organization read asks for organization_id = org-1 AND test_mode = false, so it is invisible.
+    const PILOT_OVERRIDE = { plan_key: "company_pilot", status: "active", provider_subscription_id: "manual_x", organization_id: null, test_mode: true };
+    state.handler = (c) => {
+      const f = filtersOf(c);
+      return c.table === "billing_subscriptions" && f.test_mode === true && f.organization_id === undefined
+        ? { data: [PILOT_OVERRIDE] }
+        : { data: [] };
+    };
+    const before = await getEffectiveEntitlements();
+    expect(before.source).toBe("free");
+    expect(before.effectivePlanKey).toBe("free_organization");
+
+    state.calls = [];
+    state.handler = vipHandler();
+    const after = await getEffectiveEntitlements();
+    expect(after.effectivePlanKey).toBe("company_pilot");
+    expect(after.active).toBe(true);
+  });
+
+  it("the same grant holds under stripe_test and with billing off (it is not a payment)", async () => {
+    state.handler = vipHandler();
+    state.config = { state: "stripe_test", reason: "ok", testMode: true, paymentsEnabled: true, mode: "test" };
+    expect((await getEffectiveEntitlements()).effectivePlanKey).toBe("company_pilot");
+    state.config = { state: "disabled", reason: "off", testMode: true, paymentsEnabled: false, mode: "off" };
+    const off = await getEffectiveEntitlements();
+    expect(off.effectivePlanKey).toBe("company_pilot");
+    expect(off.enforced).toBe(false);
+  });
+
+  it("the explicit-caller (MCP / bearer) door resolves the caller organization's grant too", async () => {
+    state.user = null;
+    state.subject = { subject: null };
+    state.handler = (c) =>
+      c.table === "organization_access_grants" && filtersOf(c).organization_id === "org-7"
+        ? { data: [{ ...VIP_ROW, organization_id: "org-7" }] }
+        : { data: [] };
+    const caller = { supabase: fakeClient("user") as never, userId: "manager-1", organizationId: "org-7" };
+    const ctx = await getEffectiveEntitlements(caller);
+    expect(ctx.effectivePlanKey).toBe("company_pilot");
+    expect(ctx.source).toBe("manual_override");
+  });
+
+  it("a real paid subscription still wins over the grant (source subscription)", async () => {
+    state.handler = vipHandler([ORG_ROW]);
+    const ent = await getEffectiveEntitlements();
+    expect(ent.source).toBe("subscription");
+    expect(ent.effectivePlanKey).toBe("company_pilot");
+  });
+
+  it("another organization's grant never entitles this one, even from a sloppy reader", async () => {
+    state.handler = (c) =>
+      c.table === "organization_access_grants"
+        ? { data: [{ ...VIP_ROW, organization_id: "org-2" }] }
+        : { data: [] };
+    const ent = await getEffectiveEntitlements();
+    expect(ent.source).toBe("free");
+  });
+
+  it("the personal workspace never reads organization grants (no entitlement transfer)", async () => {
+    state.subject = personalSubject;
+    state.handler = vipHandler();
+    const ent = await getEffectiveEntitlements();
+    expect(grantReads()).toHaveLength(0);
+    expect(ent.effectivePlanKey).not.toBe("company_pilot");
+  });
+
+  it("an unapplied migration (42P01) or any read error is no grant, never a throw", async () => {
+    state.handler = (c) => (c.table === "organization_access_grants" ? { error: { code: "42P01" } } : { data: [] });
+    const ent = await getEffectiveEntitlements();
+    expect(ent.source).toBe("free");
+  });
+});
+
 describe("organization subject — the fallback plan follows the ORGANIZATION, not a legacy role row", () => {
   it.each([["worker"], ["agency"]])("a member whose profile_roles carry only %s, acting in an organization workspace with no subscription, resolves to ORGANIZATION FREE", async (role) => {
     state.roles = [{ role }];

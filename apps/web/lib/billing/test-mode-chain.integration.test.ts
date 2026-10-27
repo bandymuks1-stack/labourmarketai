@@ -91,6 +91,10 @@ const db = vi.hoisted(() => {
     billing_subscriptions: [],
     payment_webhook_events: [],
     billing_checkout_operations: [],
+    // The organization entitlement read also asks for an owner-granted VIP
+    // (#2474, 20261023170000); none exists in this chain, so the plan comes
+    // from the paid subscription alone.
+    organization_access_grants: [],
   };
   const unknownTables: string[] = [];
   let seq = 0;

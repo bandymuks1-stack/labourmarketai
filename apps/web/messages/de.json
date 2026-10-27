@@ -9436,6 +9436,25 @@
       "done": "Gespeichert",
       "error": "Fehlgeschlagen"
     },
+    "vip": {
+      "title": "Organisations-VIP (kostenloser Zugang)",
+      "help": "Vom Inhaber freigegebener kostenloser Zugang für EINE Organisation: der Organisationsplan ohne Zahlung, unabhängig von der Zahlungseinstellung. Protokolliert (wer, wann, Notiz); jederzeit widerrufbar. Umgeht nie die Zustimmung einer Person.",
+      "organizationId": "Organisations-ID",
+      "profileViews": "Profilaufrufe",
+      "profileViewsHint": "Leer = kein festes Limit",
+      "note": "Notiz (warum)",
+      "grant": "VIP gewähren",
+      "revoke": "VIP widerrufen",
+      "saving": "Wird gespeichert…",
+      "done": "Gespeichert",
+      "errors": {
+        "not_admin": "Das kann nur ein Plattform-Admin.",
+        "invalid_input": "Prüfe die Organisations-ID und die Zahl der Aufrufe (1–100000).",
+        "unknown_organization": "Keine Organisation mit dieser ID.",
+        "needs_migration": "Noch nicht eingeschaltet: Organisations-VIP kann noch nicht vergeben werden. Nichts wurde gespeichert.",
+        "error": "Fehlgeschlagen. Nichts wurde geändert."
+      }
+    },
     "events": {
       "title": "Aktuelle Webhook-Ereignisse",
       "empty": "Noch keine Webhook-Ereignisse."
@@ -12553,7 +12572,13 @@
     "photoAlt": "Foto abgeschlossener Arbeit",
     "historyTitle": "Importierter Verlauf",
     "historyUnavailable": "Importierter Verlauf konnte nicht gelesen werden",
-    "currentWork": "Arbeitet derzeit"
+    "currentWork": "Arbeitet derzeit",
+    "viewLimitTitle": "Limit für Profilansichten erreicht",
+    "viewLimitBody": "Der kostenlose Plan öffnet {limit} verschiedene anonymisierte Profile pro Organisation. Bisher geöffnet: {used}.",
+    "viewLimitReopen": "Bereits geöffnete Profile bleiben offen. Personen, mit denen Sie zusammenarbeiten, zählen nie mit.",
+    "viewLimitPlans": "Pläne ansehen",
+    "viewNeedsOrgTitle": "Organisation wählen",
+    "viewNeedsOrgBody": "Profile gefundener Personen öffnen Sie im Namen Ihrer Organisation. Wählen Sie im Arbeitsbereich eine Organisation, die Sie verwalten, und öffnen Sie das Profil erneut."
   },
   "companyGallery": {
     "title": "Galerie",

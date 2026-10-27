@@ -9436,6 +9436,25 @@
       "done": "Zapisano",
       "error": "Niepowodzenie"
     },
+    "vip": {
+      "title": "VIP organizacji (bezpłatny dostęp)",
+      "help": "Zatwierdzony przez właściciela bezpłatny dostęp dla JEDNEJ organizacji: plan Organizacja bez płatności, niezależnie od ustawień płatności. Rejestrowany (kto, kiedy, notatka); można go cofnąć w każdej chwili. Nigdy nie omija zgody pracownika.",
+      "organizationId": "ID organizacji",
+      "profileViews": "Wyświetlenia profili",
+      "profileViewsHint": "Puste = bez stałego limitu",
+      "note": "Notatka (dlaczego)",
+      "grant": "Przyznaj VIP",
+      "revoke": "Cofnij VIP",
+      "saving": "Zapisywanie…",
+      "done": "Zapisano",
+      "errors": {
+        "not_admin": "Może to zrobić tylko administrator platformy.",
+        "invalid_input": "Sprawdź ID organizacji i liczbę wyświetleń (1–100000).",
+        "unknown_organization": "Brak organizacji o tym ID.",
+        "needs_migration": "Jeszcze niewłączone: VIP organizacji nie można jeszcze przyznać. Nic nie zapisano.",
+        "error": "Nie udało się. Nic nie zostało zmienione."
+      }
+    },
     "events": {
       "title": "Ostatnie zdarzenia webhooków",
       "empty": "Nie ma jeszcze zdarzeń webhooków."
@@ -12553,7 +12572,13 @@
     "photoAlt": "Zdjęcie wykonanej pracy",
     "historyTitle": "Zaimportowana historia",
     "historyUnavailable": "Nie udało się odczytać zaimportowanej historii",
-    "currentWork": "Pracuje teraz"
+    "currentWork": "Pracuje teraz",
+    "viewLimitTitle": "Osiągnięto limit wyświetleń profili",
+    "viewLimitBody": "Darmowy plan pozwala otworzyć {limit} różne zanonimizowane profile na organizację. Otwarto już: {used}.",
+    "viewLimitReopen": "Już otwarte profile pozostają dostępne. Osoby, z którymi pracujesz, nie wliczają się do limitu.",
+    "viewLimitPlans": "Zobacz plany",
+    "viewNeedsOrgTitle": "Wybierz organizację",
+    "viewNeedsOrgBody": "Profile znalezionych osób otwierasz w imieniu swojej organizacji. Wybierz w przestrzeni roboczej organizację, którą zarządzasz, i otwórz profil ponownie."
   },
   "companyGallery": {
     "title": "Galeria",
