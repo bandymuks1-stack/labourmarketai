@@ -24,7 +24,7 @@ OAuth + callback work (owner reached `/lt/onboarding`). The failure is at **boot
 - `profile_roles` + entity row (`workers`/`companies`/`agencies`) — created idempotently by the RPC. `customer` has no entity row in M1 (by design).
 
 ## 5. Does an allowlist exist?
-**No.** Middleware, callback and login carry no email allowlist, domain restriction, or team-membership gate. Any successful Google OAuth user is admitted. So `labourmarket.ai@gmail.com` (and any owner/test email) needs no manual allowlisting — nothing to add.
+**No.** Middleware, callback and login carry no email allowlist, domain restriction, or team-membership gate. Any successful Google OAuth user is admitted. So the owner account (and any owner/test email) needs no manual allowlisting — nothing to add.
 
 ## 6. App domain / callback config
 Code-side is correct: app on `app.labourmarket.ai`, callback at `/[locale]/auth/callback`. The Supabase Google provider's authorized redirect URL + Site URL are external config (not in the repo) — NOT changed here. The owner reaching onboarding indicates the callback domain config is functioning.
