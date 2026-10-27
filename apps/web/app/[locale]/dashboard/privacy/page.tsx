@@ -32,6 +32,11 @@ import {
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/privacy", "privacySelfService.title");
+
 
 /** Never show a worker a raw database code. Turns `chat_message` /
  *  `contact_email` into "Chat message" / "Contact email" as a safe fallback

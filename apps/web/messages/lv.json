@@ -416,6 +416,7 @@
       "country_search_placeholder": "Meklējiet valsti",
       "country_search_empty": "Valsts nav atrasta. Mēģiniet citu nosaukumu.",
       "error_country_required": "Lūdzu, izvēlieties valsti.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Kāda ir jūsu profesija vai darba pieredze?",
       "profession_placeholder": "Ierakstiet profesiju vai darba jomu",
       "profession_add": "Pievienot",
@@ -6791,7 +6792,6 @@
       "openNeed": "Atvērt vajadzību",
       "gapsRow": "{count, plural, zero {# cilvēkiem projektā „{project}” trūkst dokumentu} one {# cilvēkam projektā „{project}” trūkst dokumentu} other {# cilvēkiem projektā „{project}” trūkst dokumentu}}",
       "gapsCta": "Pārbaudīt dokumentus",
-      "needsCta": "Aprakstīt vajadzību",
       "noOneFrom": "No {date} neviena nav brīva",
       "unclear": "{count, plural, one {# cilvēkam ir darbs bez datumiem — brīvā laika var būt mazāk} other {# cilvēkiem ir darbs bez datumiem — brīvā laika var būt mazāk}}",
       "fit": {
@@ -7086,6 +7086,7 @@
     "titleCompany": "Kas notiek ar jūsu vadīto darbu",
     "example": "Piemērs — nav īsts cilvēks un nav īsti dati",
     "hint": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
+    "hintWorkers": "Izvēlieties soli. Katrs solis atver īstu vietu jūsu darba telpā.",
     "open": "Atvērt darba telpā",
     "list": "Darba dzīves cikla soļi",
     "workers": {

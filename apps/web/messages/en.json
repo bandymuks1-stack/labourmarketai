@@ -1,7 +1,6 @@
 {
   "companyModel": {
     "title": "Company management",
-    "primary": "Publish a need",
     "need": "What we need",
     "offer": "What we offer",
     "market": "Marketplace",
@@ -1872,7 +1871,6 @@
       "openNeed": "Open the need",
       "gapsRow": "{count, plural, =1 {1 person on {project} has missing documents} other {# people on {project} have missing documents}}",
       "gapsCta": "Check documents",
-      "needsCta": "Describe a need",
       "noOneFrom": "No one is free from {date}",
       "unclear": "{count, plural, =1 {1 person has work with no dates — free time may be lower} other {# people have work with no dates — free time may be lower}}",
       "fit": {
@@ -1886,6 +1884,15 @@
       "opportunityCta": "Look for work",
       "interest": "{count, plural, =1 {1 person showed interest in your needs} other {# people showed interest in your needs}}",
       "interestCta": "See who"
+    },
+    "offers": {
+      "heading": "What you offer",
+      "note": "Saved in your workspace. Employers cannot search offers yet, so nobody has been contacted about them.",
+      "empty": "You have not saved an offer yet. Describe the people or team you can provide — the offer is saved and shown here.",
+      "noneOpen": "No open offers — the earlier ones are closed.",
+      "more": "{count, plural, =1 {1 more offer} other {# more offers}}",
+      "open": "See your offers",
+      "unreadable": "Your offers could not be read right now."
     },
     "attention": {
       "heading": "Needs you",
@@ -2443,6 +2450,13 @@
         "conflicts": "People with a planning conflict (overlapping work or leave)",
         "unreadable": "could not be read",
         "clientReview": "Work waiting for your decision as the client"
+      },
+      "needDoor": {
+        "label": "Describe a need",
+        "firstTitle": "Start with what you need",
+        "firstBody": "Say in your own words what work needs doing, where and when. The need is saved for your company, and then you can check who could do it.",
+        "noNeedYet": "No need right now?",
+        "noNeedYetInvite": "Invite your people"
       }
     },
     "agency": {
@@ -4287,6 +4301,7 @@
       "country_search_placeholder": "Search for a country",
       "country_search_empty": "No country found. Try another name.",
       "error_country_required": "Please choose a country.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "What is your profession or work experience?",
       "profession_placeholder": "Type a profession or field of work",
       "profession_add": "Add",
@@ -4437,7 +4452,8 @@
             "notesLabel": "Extra notes",
             "notesPlaceholder": "Anything else worth knowing",
             "submittedHeading": "What you submitted:",
-            "doneScoutingLink": "View the request and its matches"
+            "doneScoutingLink": "View the request and its matches",
+            "doneOffersLink": "View your offers"
           },
           "hire": {
             "title": "Find a worker or team",
@@ -4640,6 +4656,7 @@
           "location": "This helps avoid showing you unsuitable offers.",
           "pay": "This helps justify your expected rate.",
           "evidence": "Records builds trust, but you can add it later.",
+          "evidenceFirst": "One sentence about the work you did is enough — your Living CV grows from entries like this.",
           "complete": "Your work card is complete — work entries keep making it stronger."
         },
         "stale": {
@@ -12636,6 +12653,8 @@
     "noShared": "No client has shared a request yet.",
     "workerLabel": "Your roster worker",
     "workerPlaceholder": "Choose a worker…",
+    "noteLabel": "Note for the client (optional)",
+    "inviteLinkLabel": "Invitation link",
     "offerButton": "Offer candidate",
     "noRoster": "Add an active worker to your roster first.",
     "progressHeading": "Your offers",
@@ -14041,7 +14060,7 @@
       "agendaConflicts": "⚠ {count, plural, one {# overlapping commitment found} other {# overlapping commitments found}} — this plan is physically impossible; check the calendar.",
       "chipAgenda": "My plan",
       "userAgenda": "Show my plan",
-      "chipNeedWorkers": "I need workers",
+      "chipNeedWorkers": "Describe a need",
       "chipCandidates": "Candidates",
       "chipCompanyHub": "Company workspace",
       "chipEduInviteLearner": "Invite a learner",
@@ -14706,6 +14725,7 @@
       "contextAmbiguous": "This work could belong to more than one context. Choose which one before saving.",
       "contextEndedOrg": "The sentence names an organization your work relationship with has ended — this entry won't count as work for it. Choose where you did this:",
       "save": "Save",
+      "continue": "Continue",
       "cancel": "Edit",
       "working": "Saving…",
       "confirmTitle": "Confirm the entry?",
@@ -14734,6 +14754,9 @@
       "strengthenedSkillPrefix": "Skill strengthened",
       "pendingConfirmPrefix": "Awaiting your confirmation",
       "cvUpdatedNote": "Your CV now includes the skills from this entry.",
+      "livingCvNote": "This entry now counts in your Living CV as recorded work — written by you, not yet confirmed by anyone.",
+      "viewLivingCv": "Open your Living CV",
+      "comeBackNote": "Tomorrow, add that day's work too — one sentence is enough.",
       "matchingNote": "Job recommendations are recalculated from your updated skills the next time you view them.",
       "viewOpportunities": "View updated opportunities",
       "pipelineFailedNote": "Skill recognition failed this time — the entry is saved; you can rerun recognition in the journal."
@@ -18257,7 +18280,6 @@
       "now": {
         "subtitle": "What is happening, what needs your decision, and where to go next.",
         "primaryActions": "Primary actions",
-        "newNeed": "New workforce need",
         "newProject": "New project",
         "invite": "Invite a person",
         "importHistory": "Import historical data"
@@ -18884,6 +18906,7 @@
     "titleCompany": "What happens to the work you run",
     "example": "Example — not a real person or real data",
     "hint": "Select a step. Every step opens the real place in your workspace.",
+    "hintWorkers": "Select a step. Every step opens the real place in your workspace.",
     "open": "Open in your workspace",
     "list": "Work lifecycle steps",
     "workers": {

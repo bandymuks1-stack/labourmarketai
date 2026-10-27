@@ -147,6 +147,45 @@ const SECONDARY_CANDIDATES: readonly IntroActionId[] = [
   "link:/dashboard/profile",
 ];
 
+/**
+ * CAN THE BLOCK RENDER AT ALL? — decided BEFORE the slow readiness read
+ * (home CLS P0, 2026-10-26).
+ *
+ * The dashboard root streams the S2 payload without awaiting it (#1011). With
+ * nothing known up front, its boundary could only be `fallback={null}`, so a
+ * block that did arrive appeared out of nothing above the greeting and pushed
+ * the screen down. This answers, from facts the page ALREADY holds (session,
+ * the one workspace resolution, the acting identity, its own ŠIANDIEN
+ * decision), whether `derivePersonalWorkspaceIntro` could return anything but
+ * `hidden` — exactly its gates that do not depend on the slow read:
+ *
+ *   signed in · NOT replaced by ŠIANDIEN · personal workspace · person.
+ *
+ * `false` ⇒ the derive below returns `hidden` whatever the worker row and the
+ * readiness say (pinned for every combination in
+ * `personal-intro-may-show.test.ts`), so the page skips the read and reserves
+ * nothing. `true` ⇒ a block is likely and its space is reserved; the only
+ * outcome still decided late is a person with no worker row (`hidden`).
+ *
+ * `identity` must be derived the SAME way the loader derives it
+ * (`baseIdentityForRole(profile.active_role ?? "worker")`), or the two could
+ * disagree.
+ */
+export function personalIntroMayShow(input: {
+  readonly signedIn: boolean;
+  readonly workspaceKind: "personal" | "organization";
+  readonly identity: "person" | "company" | null;
+  /** The dashboard root's own ŠIANDIEN decision (`replaced-by-today`). */
+  readonly replacedByToday: boolean;
+}): boolean {
+  return (
+    input.signedIn &&
+    !input.replacedByToday &&
+    input.workspaceKind === "personal" &&
+    input.identity === "person"
+  );
+}
+
 export function derivePersonalWorkspaceIntro(input: {
   /** Base identity of the ACTIVE role (`baseIdentityForRole`). */
   readonly identity: "person" | "company" | null;

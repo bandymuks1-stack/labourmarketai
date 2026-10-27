@@ -45,6 +45,11 @@ export type TodayNext =
       readonly whyKey: string;
       /** Whether the card is stale (a calm "does this still hold?"). */
       readonly stale: boolean;
+      /** The dimension the engine's evidence-first rule displaced (e.g. the
+       *  profession), with a real route — offered as a QUIET text link beside
+       *  the one gold action so nothing becomes unreachable. Absent when the
+       *  engine displaced nothing. Never a second primary. */
+      readonly secondary?: { readonly dim: WorkDim; readonly href: string };
     }
   | { readonly kind: "unknown" };
 
@@ -188,6 +193,14 @@ export function deriveTodayNext(card: WorkCardDerived | null): TodayNext {
     href: card.next.href ?? WORK_CARD_EDITOR_HREF,
     whyKey: card.next.whyKey,
     stale: card.state === "stale",
+    ...(card.secondary
+      ? {
+          secondary: {
+            dim: card.secondary.dim,
+            href: card.secondary.href ?? WORK_CARD_EDITOR_HREF,
+          },
+        }
+      : {}),
   };
 }
 

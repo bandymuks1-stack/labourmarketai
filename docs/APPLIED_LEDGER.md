@@ -2837,3 +2837,7 @@ versions never match file prefixes by construction, so a push would re-run every
    then the FILE was renamed to `20261020025900_…` because 02:60 is not a valid §16 timestamp
    (migration-safety). Content fingerprint identical (`a8d20a560d277a0b`); the ledger keeps the original
    name string. Not re-applied, not edited.
+
+| Repo file timestamp | Production ledger version | Name | Parity |
+|---|---|---|---|
+| `20261027120000` | `20261027193124` | reissue_external_referral_v1 | CONTENT_ONLY — header comments shortened in the applied text; both function bodies and GRANT/REVOKE identical (owner approval 2026-10-27, #2841) |

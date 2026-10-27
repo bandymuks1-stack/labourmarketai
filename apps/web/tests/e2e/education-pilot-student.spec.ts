@@ -83,7 +83,9 @@ async function loginAsWorker(page: Page): Promise<void> {
  *  simply performs both human steps. */
 async function saveThroughConfirm(page: Page): Promise<void> {
   for (let i = 0; i < 3; i++) {
-    const save = page.getByRole("button", { name: /^Išsaugoti$/ }).last();
+    // "Toliau" opens the confirm step, "Išsaugoti" commits (activation
+    // audit fix #5: the first button saves nothing, so it says so).
+    const save = page.getByRole("button", { name: /^(Toliau|Išsaugoti)$/ }).last();
     if ((await save.count()) === 0) break;
     await save.click();
     await page.waitForTimeout(2_000);

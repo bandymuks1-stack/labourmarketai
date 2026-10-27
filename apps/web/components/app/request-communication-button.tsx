@@ -69,7 +69,7 @@ export function RequestCommunicationButton({
         <button
           type="button"
           onClick={() => router.push(`/${locale}/dashboard/communication/${state.conversationId}`)}
-          className="rounded-md border border-brand-blue/40 px-2.5 py-1 font-medium text-brand-blue hover:bg-brand-blue/10"
+          className="min-h-11 sm:min-h-0 rounded-md border border-brand-blue/40 px-2.5 py-1 font-medium text-brand-blue hover:bg-brand-blue/10"
         >
           {labels.view}
         </button>
@@ -84,7 +84,7 @@ export function RequestCommunicationButton({
         onClick={onRequest}
         disabled={pending}
         data-testid={`request-communication-${workerId}`}
-        className="w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
+        className="min-h-11 sm:min-h-0 w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
       >
         {pending ? labels.opening : labels.button}
       </button>
