@@ -178,14 +178,14 @@ export function ProposeBookingButton({
           disabled={pending}
           onClick={() => void send()}
           data-testid="propose-booking-send"
-          className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+          className="min-h-11 sm:min-h-0 rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
         >
           {pending ? labels.sending : labels.send}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-meta text-text-muted hover:text-text-secondary"
+          className="min-h-11 sm:min-h-0 text-meta text-text-muted hover:text-text-secondary"
         >
           {labels.cancel}
         </button>

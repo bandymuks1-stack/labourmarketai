@@ -10,6 +10,11 @@ import {
   type ServiceOfferingsLabels,
 } from "@/components/app/service-offerings-section";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/services", "serviceOfferings.pageTitle");
+
 
 /**
  * Services — provider-owned service offerings (W8 Phase 1). Authenticated

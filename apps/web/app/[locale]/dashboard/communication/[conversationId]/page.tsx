@@ -25,6 +25,11 @@ import {
 import { isImageAttachmentMime } from "@/lib/communication/attachment-model";
 import { formatUtcDateTime } from "@/lib/time/display";
 import { PersonPresence, PlaceTimeStamp } from "@/components/app/work-world/primitives";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/communication/[conversationId]");
+
 
 type MessageRow = {
   id: string;

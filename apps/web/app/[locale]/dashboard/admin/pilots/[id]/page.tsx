@@ -16,6 +16,11 @@ import {
 } from "@/components/app/admin-pilots-forms";
 import { formatUtcDate, formatUtcDateTime } from "@/lib/time/display";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/pilots/[id]");
+
 
 /**
  * Pilot cohort detail — participants, status and the owner-recorded outcome

@@ -13,6 +13,11 @@ import {
 } from "@/components/app/market-average-form";
 import { MarketPulseBoard } from "@/components/app/market-pulse-board";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/admin/market");
+
 
 /**
  * "Kokia situacija rinkoje" — admin market analysis v1 (S4 item 4).

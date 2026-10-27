@@ -20,6 +20,11 @@ import {
 } from "@/lib/journal/counterparty-review-model";
 import { reviewerHoursOf } from "@/lib/journal/reviewer-hours";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/inbox/counterparty");
+
 
 export const dynamic = "force-dynamic";
 

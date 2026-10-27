@@ -112,6 +112,11 @@ import { experienceFiguresOf } from "@/lib/journal/experience-figures";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { anyRecordedConfirmation, withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
 import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/profile", "skills.pageTitle");
+
 
 type WorkerDirection = { id: string; slug: string; name: string; isPrimary: boolean };
 
