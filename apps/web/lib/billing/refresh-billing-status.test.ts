@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const cfg = vi.hoisted(() => ({ state: "stripe_live" as string, testMode: false }));
-vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => cfg }));
+vi.mock("@/lib/billing/config", () => ({ getBillingConfig: () => cfg, billingStripeTaxEnabled: () => false }));
 vi.mock("@/lib/billing/billing-subject", () => ({ resolveBillingSubject: vi.fn() }));
 vi.mock("@/lib/billing/customer-store", () => ({ findBillingCustomer: vi.fn() }));
 vi.mock("@/lib/billing/subscription-store", () => ({ findScopedSubscription: vi.fn(), hasRecentUserRefreshForSubject: vi.fn() }));

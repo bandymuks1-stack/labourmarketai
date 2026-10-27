@@ -523,6 +523,13 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/billing/effective-entitlements.ts",
       "lib/billing/reconcile.ts",
       "lib/billing/subscription-store.ts",
+      // 2026-10-23 (Stripe Tax, owner order): the tax evidence store. Writes
+      // ONLY billing_tax_evidence from the signed webhook (no user session) —
+      // the same billing-table design: no authenticated write policy, the
+      // service role is the only writer. Its admin review list and "mark
+      // reviewed" re-check isSuperadmin() inside the module. No chat table,
+      // nothing outbound.
+      "lib/billing/tax-evidence-store.ts",
       "lib/commercial/handoff-dispatch.ts",
       "lib/communication/communication-core.ts",
       "lib/company/claim-public-intake.ts",
