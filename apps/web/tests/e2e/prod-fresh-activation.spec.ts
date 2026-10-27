@@ -3,6 +3,8 @@ import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
+import { bearerOf, qaApi } from "./prod-qa-api";
+
 /**
  * PRODUCTION — A BRAND-NEW WORKER AND A BRAND-NEW COMPANY, FROM ONBOARDING TO
  * THE FIRST USEFUL ACTION (owner decision 2026-10-26, "AKTYVAVIMO KLIŪČIŲ
@@ -50,6 +52,41 @@ const NEED_ROLE = `QA-SYNTHETIC mūrininkas ${RUN}`;
 const NEED_TEXT = "[QA-SYNTHETIC] Testinis poreikis: 2 mūrininkai objektui Vilniuje, nuo kito mėnesio.";
 
 const inMain = (page: Page): Locator => page.getByRole("main");
+
+/** The signed-in synthetic identity's own auth user id (from its own token). */
+function subOf(slot: string): string {
+  const token = bearerOf(slot);
+  return JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8")).sub as string;
+}
+
+/** A number as the CV prints it ("14" or "14,5"). */
+const num = (s: string): number => Number(s.replace(",", "."));
+
+/**
+ * The worker's OWN journal facts, read with its own token (RLS: own rows):
+ * entries, recorded hours (fragment_time) and recorded square metres.
+ */
+async function ownJournalFacts(): Promise<{ entries: number; hours: number; m2: number }> {
+  const token = bearerOf("freshworker");
+  const w = await qaApi(`/rest/v1/workers?select=id&profile_id=eq.${encodeURIComponent(subOf("freshworker"))}`, token);
+  expect(w.status, "own worker row answered").toBe(200);
+  const [worker] = (await w.json()) as { id: string }[];
+  const r = await qaApi(
+    `/rest/v1/journal_entries?select=id,journal_entry_metrics(metric_slug,value_numeric,unit_slug)&worker_id=eq.${worker.id}`,
+    token,
+  );
+  expect(r.status, "own journal entries answered").toBe(200);
+  const rows = (await r.json()) as { journal_entry_metrics: { metric_slug: string; value_numeric: number | null; unit_slug: string | null }[] }[];
+  let hours = 0;
+  let m2 = 0;
+  for (const e of rows) {
+    for (const m of e.journal_entry_metrics ?? []) {
+      if (m.metric_slug === "fragment_time" && m.unit_slug === "hours") hours += Number(m.value_numeric ?? 0);
+      if (m.metric_slug === "quantity" && m.unit_slug === "square_meters") m2 += Number(m.value_numeric ?? 0);
+    }
+  }
+  return { entries: rows.length, hours, m2 };
+}
 
 async function open(browser: Browser, slot: string, viewport: { width: number; height: number }, mobile: boolean): Promise<{ ctx: BrowserContext; page: Page }> {
   const ctx = await browser.newContext({
@@ -235,6 +272,18 @@ test("fresh worker: onboarding keeps its place, then the first journal entry rea
     const factsShown = await facts.isVisible().catch(() => false);
     console.info(`[fresh] Living CV: recorded-hours line has hours=${hoursShown} facts paragraph=${factsShown}`);
     expect(hoursShown || factsShown, "the Living CV shows no recorded work after the first entry").toBe(true);
+
+    // EXACT figures against the worker's own journal rows: the CV's recorded
+    // hours equal the entries' recorded time, and NONE of it is shown as
+    // confirmed (nobody has confirmed these entries).
+    const db = await ownJournalFacts();
+    const m = /Užfiksuota darbo: ([\d.,]+) val\..*patvirtinta ([\d.,]+) val/.exec(recordedText);
+    console.info(
+      `[fresh] DB: entries=${db.entries} hours=${db.hours} m2=${db.m2} | CV: recorded=${m?.[1] ?? "?"} confirmed=${m?.[2] ?? "?"}`,
+    );
+    expect(m, "the Living CV's recorded-hours line is not in the expected shape").not.toBeNull();
+    expect(num(m![1]), "the Living CV's recorded hours differ from the journal's recorded time").toBe(db.hours);
+    expect(num(m![2]), "unconfirmed work is shown as confirmed on the Living CV").toBe(0);
     await expectNoSidewaysScroll(page, "Living CV (390)");
 
     // Saved ONCE: the journal holds exactly one entry of this run (no double write).
@@ -323,6 +372,36 @@ test("fresh company: onboarding, the company, a described need, visible where th
     const link = inMain(page).locator('a[href*="/dashboard/company/scouting?request="]', { hasText: NEED_ROLE }).first();
     needUrl = (await link.getAttribute("href").catch(() => null)) ?? "";
     expect(visibleOnHome, "the saved need is not visible on the company home").toBe(true);
+
+    // FREE first need: no plan limit stood in the way (asserted above); the
+    // usage line, when shown, is logged as it reads.
+    // WORKER SEARCH for this need: the candidates room opens for it.
+    const requestId = /request=([0-9a-f-]{36})/.exec(needUrl)?.[1] ?? "";
+    expect(requestId, "the saved need links to its candidates room").not.toBe("");
+    await page.goto(`/lt/dashboard/company/scouting?request=${requestId}`);
+    await settle(page);
+    const room = inMain(page).getByTestId("demand-lifecycle-controls").or(inMain(page).getByTestId("scouting-not-structured")).first();
+    await expect(room, "the candidates room for the new need does not open").toBeVisible({ timeout: 30_000 });
+    const candidates = await inMain(page).locator('[data-testid^="scout-candidate-"]').count();
+    console.info(`[fresh] scouting for the new need: open, candidates listed=${candidates}`);
+
+    // ROLE: the new account is the company's OWNER (its own membership row).
+    const token = bearerOf("freshcompany");
+    const mem = await qaApi(
+      `/rest/v1/company_memberships?select=role,status&profile_id=eq.${encodeURIComponent(subOf("freshcompany"))}`,
+      token,
+    );
+    expect(mem.status, "own membership answered").toBe(200);
+    const memberships = (await mem.json()) as { role: string; status: string }[];
+    console.info(`[fresh] company memberships: ${memberships.map((x) => `${x.role}/${x.status}`).join(",") || "(none)"}`);
+    expect(memberships.some((x) => x.role === "owner" && x.status === "active"), "the new company account is not its active owner").toBe(true);
+
+    // PERMISSION: a company owner is not a platform admin.
+    await page.goto("/lt/dashboard/admin");
+    await settle(page);
+    const adminPath = new URL(page.url()).pathname;
+    console.info(`[fresh] admin area as the company owner -> ${adminPath}`);
+    expect(adminPath, "a company owner reached the admin area").not.toMatch(/\/dashboard\/admin/);
 
     const phone = await open(browser, "freshcompany", PHONE, true);
     try {
