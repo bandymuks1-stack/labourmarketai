@@ -9,6 +9,7 @@ import {
 } from "@/lib/testing/e2e-storage-target";
 import {
   PRODUCTION_ORIGIN,
+  PROD_QA_FRESH_IDENTITIES,
   PROD_QA_IDENTITIES,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
@@ -59,12 +60,16 @@ const FORBIDDEN_PROVISIONING_SQL: readonly RegExp[] = [
 ];
 
 describe("exactly the synthetic cast is allowlisted", () => {
-  it("the allowlist is exactly these five, each unmistakably synthetic", () => {
+  it("the allowlist is exactly these eight, each unmistakably synthetic", () => {
     // Widening is a reviewed code change (owner decision 2026-09-28 added the
-    // three +multiw identities beside the worker). Pinned exactly.
+    // three +multiw identities beside the worker; owner decision 2026-10-26
+    // added the two fresh-activation identities). Pinned exactly.
     expect([...PROD_QA_IDENTITIES].sort()).toEqual(
       [
         "qa.agency+multiw@labourmarket.ai",
+        "qa.buyer+act1@labourmarket.ai",
+        "qa.freshcompany+act1@labourmarket.ai",
+        "qa.freshworker+act1@labourmarket.ai",
         "qa.manager+multiw@labourmarket.ai",
         "qa.owner+multiw@labourmarket.ai",
         "qa.worker+goal3@labourmarket.ai",
@@ -75,6 +80,33 @@ describe("exactly the synthetic cast is allowlisted", () => {
     for (const email of PROD_QA_IDENTITIES) {
       expect(email).toMatch(/^qa\.[a-z]+\+[a-z0-9]+@labourmarket\.ai$/);
     }
+  });
+
+  it("a walk can never create a fresh identity — only the owner can", () => {
+    expect([...PROD_QA_FRESH_IDENTITIES].sort()).toEqual([
+      "qa.buyer+act1@labourmarket.ai",
+      "qa.freshcompany+act1@labourmarket.ai",
+      "qa.freshworker+act1@labourmarket.ai",
+    ]);
+    // The mint looks the account up and refuses before any magic link exists.
+    const mint = read(MINT);
+    const check = mint.indexOf("PROD_QA_FRESH_IDENTITIES.includes(target.email)");
+    expect(check).toBeGreaterThan(-1);
+    expect(check).toBeLessThan(mint.indexOf("generateLink("));
+    expect(mint.slice(check, mint.indexOf("generateLink("))).toMatch(/findAuthUserByEmail\(admin, target\.email\)[\s\S]*fail\(/);
+    // The walk mints the fresh pair WITHOUT the provision step.
+    const walk = readFileSync(join(WEB, "..", "..", ".github", "workflows", "prod-qa-walk.yml"), "utf8");
+    const fresh = walk.slice(walk.indexOf("mint_existing()"), walk.indexOf("- name: Walk"));
+    expect(fresh).toMatch(/mint_existing "qa\.freshworker\+act1@labourmarket\.ai"/);
+    expect(fresh).toMatch(/mint_existing "qa\.freshcompany\+act1@labourmarket\.ai"/);
+    const body = fresh.slice(0, fresh.indexOf("}"));
+    expect(body).not.toMatch(/prod-qa-provision/);
+    // A fresh account starts like a real one: no role in its metadata; the
+    // buyer carries only the customer role (never admin).
+    expect(read(PROVISION)).toMatch(/: fresh\s*\? \{\}/);
+    expect(read(PROVISION)).toMatch(/PROD_QA_BUYER_EMAIL\s*\? \{ role: "customer" \}/);
+    expect(read(PROVISION)).not.toMatch(/role: "admin"/);
+    expect(walk).toMatch(/mint_existing "qa\.buyer\+act1@labourmarket\.ai"\s+buyer/);
   });
 
   it("accepts the allowlisted identity against production", () => {

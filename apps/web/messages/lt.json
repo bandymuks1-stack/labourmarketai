@@ -1,7 +1,6 @@
 {
   "companyModel": {
     "title": "Įmonės valdymas",
-    "primary": "Paskelbti poreikį",
     "need": "Ko mums reikia",
     "offer": "Ką siūlome",
     "market": "Rinka",
@@ -1962,7 +1961,6 @@
       "openNeed": "Atidaryti poreikį",
       "gapsRow": "{count, plural, one {# žmogui projekte „{project}“ trūksta dokumentų} few {# žmonėms projekte „{project}“ trūksta dokumentų} many {# žmogaus projekte „{project}“ trūksta dokumentų} other {# žmonių projekte „{project}“ trūksta dokumentų}}",
       "gapsCta": "Patikrinti dokumentus",
-      "needsCta": "Aprašyti poreikį",
       "noOneFrom": "Nuo {date} laisvų žmonių nėra",
       "unclear": "{count, plural, one {# žmogus turi darbą be datų — laisvo laiko gali būti mažiau} few {# žmonės turi darbą be datų — laisvo laiko gali būti mažiau} other {# žmonių turi darbą be datų — laisvo laiko gali būti mažiau}}",
       "fit": {
@@ -1976,6 +1974,15 @@
       "opportunityCta": "Ieškoti darbo",
       "interest": "{count, plural, one {# žmogus pareiškė susidomėjimą jūsų poreikiais} few {# žmonės pareiškė susidomėjimą jūsų poreikiais} other {# žmonių pareiškė susidomėjimą jūsų poreikiais}}",
       "interestCta": "Žiūrėti kas"
+    },
+    "offers": {
+      "heading": "Ką siūlai",
+      "note": "Išsaugota tavo darbo erdvėje. Darbdaviai kol kas negali ieškoti pasiūlymų, todėl dėl jų dar niekas nesusisiekė.",
+      "empty": "Dar neišsaugojai nė vieno pasiūlymo. Aprašyk, kokius žmones ar komandą gali pasiūlyti — pasiūlymas bus išsaugotas ir matomas čia.",
+      "noneOpen": "Atvirų pasiūlymų nėra — ankstesni uždaryti.",
+      "more": "{count, plural, one {dar # pasiūlymas} few {dar # pasiūlymai} many {dar # pasiūlymo} other {dar # pasiūlymų}}",
+      "open": "Peržiūrėti pasiūlymus",
+      "unreadable": "Pasiūlymų dabar nepavyko perskaityti."
     },
     "attention": {
       "heading": "Reikia jūsų",
@@ -2533,6 +2540,13 @@
         "conflicts": "Darbuotojai su planavimo konfliktu (susikerta darbai ar atostogos)",
         "unreadable": "nepavyko perskaityti",
         "clientReview": "Darbas, laukiantis jūsų sprendimo kaip užsakovo"
+      },
+      "needDoor": {
+        "label": "Aprašyti poreikį",
+        "firstTitle": "Pradėkite nuo to, ko jums reikia",
+        "firstBody": "Savais žodžiais parašykite, kokį darbą reikia atlikti, kur ir kada. Poreikis išsaugomas jūsų įmonei, o tada galėsite peržiūrėti, kas galėtų jį atlikti.",
+        "noNeedYet": "Šiuo metu nieko nereikia?",
+        "noNeedYetInvite": "Pakvieskite savo žmones"
       }
     },
     "agency": {
@@ -4377,6 +4391,7 @@
       "country_search_placeholder": "Ieškok šalies",
       "country_search_empty": "Šalies nerasta. Pabandyk kitą pavadinimą.",
       "error_country_required": "Pasirink šalį.",
+      "error_role_required": "Pirmiausia pasirink, kuo nori naudotis — tada užpildysi profilį.",
       "profession_label": "Kokia tavo profesija ar darbo patirtis?",
       "profession_placeholder": "Įrašyk profesiją ar darbo sritį",
       "profession_add": "Pridėti",
@@ -4527,7 +4542,8 @@
             "notesLabel": "Papildomos pastabos",
             "notesPlaceholder": "Bet kas, ką dar svarbu žinoti",
             "submittedHeading": "Ką pateikei:",
-            "doneScoutingLink": "Peržiūrėti užklausą ir atitikmenis"
+            "doneScoutingLink": "Peržiūrėti užklausą ir atitikmenis",
+            "doneOffersLink": "Peržiūrėti savo pasiūlymus"
           },
           "hire": {
             "title": "Ieškoti darbuotojo ar komandos",
@@ -4730,6 +4746,7 @@
           "location": "Tai padeda nerodyti tau netinkamų pasiūlymų.",
           "pay": "Tai padeda pagrįsti tavo pageidaujamą tarifą.",
           "evidence": "Įrašai didina pasitikėjimą, bet gali juos pridėti vėliau.",
+          "evidenceFirst": "Užtenka vieno sakinio apie tai, ką dirbai — iš tokių įrašų auga tavo gyvas CV.",
           "complete": "Tavo darbo kortelė pilna — toliau ją stiprina darbo įrašai."
         },
         "stale": {
@@ -5491,9 +5508,9 @@
   "pages": {
     "workers": {
       "eyebrow": "Darbuotojams",
-      "title": "Jūsų įgūdžiai —",
+      "title": "Tavo įgūdžiai —",
       "titleAccent": "matomi.",
-      "subcopy": "Sukurkite vieną profilį, nustatykite prieinamumą ir leiskite realiai paklausai jus surasti — be tarpininkų.",
+      "subcopy": "Susikurk vieną profilį, nurodyk, kada esi laisvas, ir leisk realiai paklausai tave surasti — be tarpininkų.",
       "benefits": [
         {
           "title": "Vienas profilis visoms rinkoms",
@@ -5501,15 +5518,15 @@
         },
         {
           "title": "Reali paklausa",
-          "body": "Matykite atvirus darbo poreikius, atitinkančius jūsų profesiją, įgūdžius ir miestą — ir vienu paspaudimu pareikškite susidomėjimą."
+          "body": "Matyk atvirus darbo poreikius, atitinkančius tavo profesiją, įgūdžius ir miestą — ir vienu paspaudimu pareikšk susidomėjimą."
         },
         {
           "title": "Sąžiningi signalai",
           "body": "Skaidrūs, kontekstiniai atitikimo signalai — be išpūstų pažadų, be universalaus įvertinimo, be mokamų reitingų."
         },
         {
-          "title": "Auga, kol dirbate",
-          "body": "Fiksuokite atliktus darbus ir rezultatus — jūsų profesinė istorija turtėja, o galimybių paieška darosi vis tikslesnė, net kai aktyviai naujo darbo neieškote."
+          "title": "Auga, kol dirbi",
+          "body": "Fiksuok atliktus darbus ir rezultatus — tavo profesinė istorija turtėja, o galimybių paieška darosi vis tikslesnė, net kai aktyviai naujo darbo neieškai."
         }
       ],
       "screenshot": "Darbuotojo profilio srautas",
@@ -9688,49 +9705,49 @@
   },
   "workAbroad": {
     "eyebrow": "Darbas užsienyje",
-    "title": "Jūsų kelias dirbti užsienyje,",
+    "title": "Tavo kelias dirbti užsienyje,",
     "titleAccent": "žingsnis po žingsnio",
-    "subcopy": "Darbas Europoje — viena iš galimybių, kurias atveria LabourMarket.ai. Susikurkite vieną darbo profilį, pamatykite, ko reikia kiekvienoje šalyje, ir leiskite darbdaviams jus rasti, kai būsite pasiruošę. Mes niekada nežadame darbo ar atlyginimo — padedame pasiruošti ir būti suderintiems.",
+    "subcopy": "Darbas Europoje — viena iš galimybių, kurias atveria LabourMarket.ai. Susikurk vieną darbo profilį, pamatyk, ko reikia kiekvienoje šalyje, ir leisk darbdaviams tave rasti, kai būsi pasiruošęs. Mes niekada nežadame darbo ar atlyginimo — padedame pasiruošti ir būti suderintiems.",
     "stepsTitle": "Kaip tai veikia",
     "steps": [
       {
-        "title": "1. Nurodykite savo profesiją",
-        "body": "Pridėkite profesiją, patirtį ir laisvumą. Užtrunka kelias minutes."
+        "title": "1. Nurodyk savo profesiją",
+        "body": "Pridėk profesiją, patirtį ir laisvumą. Užtrunka kelias minutes."
       },
       {
         "title": "2. DI paruošia juodraštį",
-        "body": "Asistentas jūsų žodžius paverčia struktūruotu profiliu ir gyvenimo aprašymo juodraščiu — pasiūlymu, kurį peržiūrite ir redaguojate. Jis niekada neišgalvoja patirties."
+        "body": "Asistentas tavo žodžius paverčia struktūruotu profiliu ir gyvenimo aprašymo juodraščiu — pasiūlymu, kurį peržiūri ir redaguoji. Jis niekada neišgalvoja patirties."
       },
       {
-        "title": "3. Patikrinkite šalies pasirengimą",
-        "body": "Pamatykite, kokių dokumentų ir žingsnių tikėtina prireiks norimoje šalyje — su šaltiniais ir ne kaip teisinė konsultacija."
+        "title": "3. Patikrink šalies pasirengimą",
+        "body": "Pamatyk, kokių dokumentų ir žingsnių tikėtina prireiks norimoje šalyje — su šaltiniais ir ne kaip teisinė konsultacija."
       },
       {
-        "title": "4. Būkite suderinti",
-        "body": "Kai darbdavio poreikis atitinka jūsų profesiją, prieinamumą, apgyvendinimą, transportą ir kalbą, jis atsiranda jūsų galimybių lentoje su sąžiningu atitikimo paaiškinimu."
+        "title": "4. Būk suderintas",
+        "body": "Kai darbdavio poreikis atitinka tavo profesiją, prieinamumą, apgyvendinimą, transportą ir kalbą, jis atsiranda tavo galimybių lentoje su sąžiningu atitikimo paaiškinimu."
       },
       {
         "title": "5. Susidomėjimas ir kontaktas",
-        "body": "Pareikškite susidomėjimą tinkančiu poreikiu. Įmonė jį peržiūri, o jūs matote sąžiningą statusą — peržiūrėta arba susisiekta. Sutartys ir apmokėjimas kol kas lieka už platformos ribų."
+        "body": "Pareikšk susidomėjimą tinkančiu poreikiu. Įmonė jį peržiūri, o tu matai sąžiningą statusą — peržiūrėta arba susisiekta. Sutartys ir apmokėjimas kol kas lieka už platformos ribų."
       }
     ],
     "needTitle": "Ko gali prireikti",
     "needItems": [
-      "Profesijos, kurioje dirbate",
-      "Jūsų laisvumo nuo datos",
-      "Ar reikia apgyvendinimo, ar turite savo",
+      "Profesijos, kurioje dirbi",
+      "Tavo laisvumo nuo datos",
+      "Ar reikia apgyvendinimo, ar turi savo",
       "Transporto: savo, vairuotojo pažymėjimo ar paėmimo",
       "Dokumentų, kurių gali prireikti šaliai"
     ],
     "directionsTitle": "Kur žmonės dirba",
-    "directionsNote": "Atverkite šalių puslapius ir pamatykite darbo rinkos signalus su šaltiniais.",
+    "directionsNote": "Atverk šalių puslapius ir pamatyk darbo rinkos signalus su šaltiniais.",
     "directionsCta": "Žiūrėti šalis",
-    "aiNote": "DI padeda paruošti gyvenimo aprašymą ir profilį. Jis pats netikrina jūsų įgūdžių ar dokumentų — tai daro žmogus ir jūsų dokumentai.",
+    "aiNote": "DI padeda paruošti gyvenimo aprašymą ir profilį. Jis pats netikrina tavo įgūdžių ar dokumentų — tai daro žmogus ir tavo dokumentai.",
     "ctaProfile": "Sukurti darbuotojo profilį",
     "ctaReadiness": "Patikrinti šalies pasirengimą",
     "ctaTrades": "Žiūrėti profesijas, su kuriomis dirbame",
     "disclaimer": "Mes nežadame darbo ar uždarbio, o pasirengimo informacija nėra teisinė konsultacija.",
-    "structuredNote": "Perskaitome jūsų CV ir paruošiame profilį, kurį galite peržiūrėti — kiekvieną pasiūlymą tikrinate ir sprendžiate jūs."
+    "structuredNote": "Perskaitome tavo CV ir paruošiame profilį, kurį gali peržiūrėti — kiekvieną pasiūlymą tikrini ir sprendi tu."
   },
   "needStructuring": {
     "pageTitle": "Užklausų struktūrinimas",
@@ -12721,6 +12738,8 @@
     "noShared": "Nė vienas klientas dar nepasidalino poreikiu.",
     "workerLabel": "Jūsų darbuotojas",
     "workerPlaceholder": "Pasirinkite darbuotoją…",
+    "noteLabel": "Pastaba klientui (neprivaloma)",
+    "inviteLinkLabel": "Kvietimo nuoroda",
     "offerButton": "Pasiūlyti kandidatą",
     "noRoster": "Pirmiausia pridėkite aktyvų darbuotoją į komandą.",
     "progressHeading": "Jūsų pasiūlymai",
@@ -14126,7 +14145,7 @@
       "agendaConflicts": "⚠ {count, plural, one {Rastas # persidengiantis įsipareigojimas} few {Rasti # persidengiantys įsipareigojimai} other {Rasta # persidengiančių įsipareigojimų}} — to fiziškai suplanuoti neįmanoma, patikrink kalendorių.",
       "chipAgenda": "Mano planas",
       "userAgenda": "Parodyk mano planą",
-      "chipNeedWorkers": "Reikia darbuotojų",
+      "chipNeedWorkers": "Aprašyti poreikį",
       "chipCandidates": "Kandidatai",
       "chipCompanyHub": "Įmonės erdvė",
       "chipEduInviteLearner": "Pakviesti besimokantįjį",
@@ -14791,6 +14810,7 @@
       "contextAmbiguous": "Šis darbas gali priklausyti daugiau nei vienam kontekstui. Prieš išsaugant pasirink, kuriam.",
       "contextEndedOrg": "Sakinyje minima organizacija, su kuria darbo santykis baigtas — šis įrašas nebus jos darbo įrodymas. Pasirink, kur tai dirbai:",
       "save": "Išsaugoti",
+      "continue": "Toliau",
       "cancel": "Taisyti",
       "working": "Saugoma…",
       "confirmTitle": "Patvirtinti įrašą?",
@@ -14819,6 +14839,9 @@
       "strengthenedSkillPrefix": "Sustiprintas įgūdis",
       "pendingConfirmPrefix": "Laukia patvirtinimo",
       "cvUpdatedNote": "CV papildytas šio įrašo įgūdžiais.",
+      "livingCvNote": "Šis įrašas jau skaičiuojamas tavo gyvame CV kaip užfiksuotas darbas — įrašytas tavo, dar niekieno nepatvirtintas.",
+      "viewLivingCv": "Atidaryti gyvą CV",
+      "comeBackNote": "Rytoj užrašyk ir tos dienos darbą — užtenka vieno sakinio.",
       "matchingNote": "Darbo rekomendacijos skaičiuojamos pagal atnaujintą įgūdžių sąrašą kitą kartą jas peržiūrint.",
       "viewOpportunities": "Peržiūrėti atnaujintus pasiūlymus",
       "pipelineFailedNote": "Įgūdžių atpažinimas šįkart nepavyko — įrašas išsaugotas, atpažinimą gali pakartoti žurnale."
@@ -18342,7 +18365,6 @@
       "now": {
         "subtitle": "Kas vyksta, kam reikia jūsų sprendimo ir kur eiti toliau.",
         "primaryActions": "Pagrindiniai veiksmai",
-        "newNeed": "Naujas darbuotojų poreikis",
         "newProject": "Naujas projektas",
         "invite": "Pakviesti žmogų",
         "importHistory": "Įkelti istorinius duomenis"
@@ -18965,22 +18987,23 @@
   },
   "workLifecycle": {
     "pending": "Dar ne",
-    "title": "Kas nutinka su jūsų darbu",
+    "title": "Kas nutinka su tavo darbu",
     "titleCompany": "Kas nutinka su jūsų vykdomu darbu",
     "example": "Pavyzdys — ne tikras žmogus ir ne tikri duomenys",
     "hint": "Pasirinkite žingsnį. Kiekvienas atveria tikrą vietą jūsų darbo erdvėje.",
+    "hintWorkers": "Pasirink žingsnį. Kiekvienas atveria tikrą vietą tavo darbo erdvėje.",
     "open": "Atidaryti darbo erdvėje",
     "list": "Darbo gyvavimo ciklo žingsniai",
     "workers": {
       "person": {
-        "label": "Jūs",
+        "label": "Tu",
         "fact": "Virėja · profesinė tapatybė",
-        "detail": "Viena profesinė tapatybė, kuri priklauso jums — ne vienam darbdaviui."
+        "detail": "Viena profesinė tapatybė, kuri priklauso tau — ne vienam darbdaviui."
       },
       "team": {
         "label": "Komanda",
         "fact": "Virtuvės komanda",
-        "detail": "Prisijungiate prie tikros komandos — matote, su kuo dirbate ir kas ją vadovauja."
+        "detail": "Prisijungi prie tikros komandos — matai, su kuo dirbi ir kas jai vadovauja."
       },
       "project": {
         "label": "Projektas",
@@ -18990,7 +19013,7 @@
       "work": {
         "label": "Darbas",
         "fact": "Vakaro pamaina · 8 val.",
-        "detail": "Ką padarėte, kada ir kiek laiko — užfiksuota tada, kai vyksta."
+        "detail": "Ką padarei, kada ir kiek laiko — užfiksuota tada, kai vyksta."
       },
       "evidence": {
         "label": "Įrodymas",
@@ -19005,7 +19028,7 @@
       "history": {
         "label": "Istorija",
         "fact": "Įtraukta į jūsų istoriją",
-        "detail": "Patvirtintas darbas kuria jūsų profesinę istoriją — ji lieka su jumis kitam darbui."
+        "detail": "Patvirtintas darbas kuria tavo profesinę istoriją — ji lieka su tavimi kitam darbui."
       }
     },
     "companies": {

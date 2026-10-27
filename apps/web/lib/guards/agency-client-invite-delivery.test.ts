@@ -96,6 +96,8 @@ describe("1. the client invitation is delivered through the one invitation primi
     const ADMIN_RPC_ONLY = new Set([
       "lib/invitations/public-preview.ts",
       "lib/invitations/external-referral-receive.ts",
+      // 2026-10-27: the owner's by-hand reprocess — three service_role-only RPCs, no table read.
+      "lib/invitations/external-referral-reprocess-run.ts",
       "lib/invitations/signup-bridge.ts",
     ]);
     for (const rel of [...walk("lib/invitations"), ...walk("lib/agency")]) {

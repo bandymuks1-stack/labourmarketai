@@ -92,8 +92,11 @@ describe("Guard: the next-actions component is honest + data-driven", () => {
     for (const c of ["completeDetails", "team", "verification"]) {
       expect(src).not.toContain(`cards.${c}.title`);
     }
-    expect(src).toContain("cards.requests.cta");
-    expect(src).toContain("companyDemandActionClicked");
+    // The tracked door is the shared need door (activation audit
+    // 2026-10-26 §2) — real route, real surface, one label.
+    expect(src).toContain("<NeedDoorLink");
+    expect(src).toContain('surface="company_settings"');
+    expect(src).not.toContain("#company-requests");
   });
 
   it("surfaces needs_checks / missing items with a fix link", () => {
@@ -119,7 +122,9 @@ describe("Guard: next-actions i18n is honest + parity-clean (LT/EN)", () => {
 
     it(`${loc}: ships the demand CTA + noCompany + fix headings`, () => {
       expect(na, `${loc} nextActions missing`).toBeTruthy();
-      expect(na.cards?.requests?.cta, `${loc} requests.cta`).toBeTruthy();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const door = ((loadJson(`messages/${loc}.json`).roleDashboards as any)?.company?.needDoor) as any;
+      expect(door?.label, `${loc} needDoor.label`).toBeTruthy();
       expect(na.noCompany?.title && na.noCompany?.body && na.noCompany?.cta).toBeTruthy();
       expect(na.fixHeading && na.missingHeading).toBeTruthy();
     });

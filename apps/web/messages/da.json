@@ -416,6 +416,7 @@
       "country_search_placeholder": "Søg efter et land",
       "country_search_empty": "Intet land fundet. Prøv et andet navn.",
       "error_country_required": "Vælg venligst et land.",
+      "error_role_required": "First choose what you want to use LabourMarket.ai for — then fill in your profile.",
       "profession_label": "Hvad er dit fag eller din erhvervserfaring?",
       "profession_placeholder": "Skriv et fag eller arbejdsområde",
       "profession_add": "Tilføj",
@@ -6791,7 +6792,6 @@
       "openNeed": "Åbn behovet",
       "gapsRow": "{count, plural, =1 {1 person på {project} mangler dokumenter} other {# personer på {project} mangler dokumenter}}",
       "gapsCta": "Tjek dokumenter",
-      "needsCta": "Beskriv et behov",
       "noOneFrom": "Ingen er ledig fra {date}",
       "unclear": "{count, plural, =1 {1 person har arbejde uden datoer — ledig tid kan være mindre} other {# personer har arbejde uden datoer — ledig tid kan være mindre}}",
       "fit": {
@@ -7086,6 +7086,7 @@
     "titleCompany": "Hvad der sker med det arbejde, du driver",
     "example": "Eksempel — ikke en rigtig person eller rigtige data",
     "hint": "Vælg et trin. Hvert trin åbner det rigtige sted i dit arbejdsområde.",
+    "hintWorkers": "Vælg et trin. Hvert trin åbner det rigtige sted i dit arbejdsområde.",
     "open": "Åbn i dit arbejdsområde",
     "list": "Trin i arbejdets forløb",
     "workers": {

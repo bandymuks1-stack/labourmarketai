@@ -74,6 +74,39 @@ export const PROD_QA_SECOND_WORKER_EMAIL = "qa.worker+multiw@labourmarket.ai" as
  *  Agency → Calendar. Synthetic QA only; it changes no real user's rights. */
 export const PROD_QA_AGENCY_EMAIL = "qa.agency+multiw@labourmarket.ai" as const;
 
+/**
+ * Owner decision 2026-10-26 ("AKTYVAVIMO KLIŪČIŲ ŠALINIMAS"): ONE fresh
+ * synthetic worker and ONE fresh synthetic company, to prove the real path
+ * from a brand-new account through onboarding to the first useful action
+ * (journal entry / saved need). Every other identity above is already
+ * onboarded, so none of them can walk that path.
+ *
+ * These two are created ONLY by the owner (`prod-qa-fresh-provision.yml`,
+ * dispatched by the owner, or `scripts/prod-qa-provision.ts` run by hand).
+ * The walk never creates them: `prod-qa-mint-session.ts` refuses a fresh
+ * identity whose account does not exist yet, and `prod-qa-walk.yml` mints
+ * them without the provision step.
+ */
+export const PROD_QA_FRESH_WORKER_EMAIL = "qa.freshworker+act1@labourmarket.ai" as const;
+export const PROD_QA_FRESH_COMPANY_EMAIL = "qa.freshcompany+act1@labourmarket.ai" as const;
+
+/**
+ * Owner decision 2026-10-26 ("6.4 PIRKĖJO TESTO LEIDIMAS"): ONE synthetic
+ * buyer (customer role) for the buyer-workspace test — no existing synthetic
+ * identity holds the customer role, and adding it to one would change that
+ * account's active role for every other walk. Created by the owner only, with
+ * the customer role in its sign-up metadata (the ordinary profile trigger
+ * writes it; no privileged grant).
+ */
+export const PROD_QA_BUYER_EMAIL = "qa.buyer+act1@labourmarket.ai" as const;
+
+/** The owner-created identities — minted only if the owner has created them. */
+export const PROD_QA_FRESH_IDENTITIES: readonly string[] = [
+  PROD_QA_FRESH_WORKER_EMAIL,
+  PROD_QA_FRESH_COMPANY_EMAIL,
+  PROD_QA_BUYER_EMAIL,
+];
+
 /** Every allowlisted synthetic identity — equality-matched, never by prefix
  *  or pattern. */
 export const PROD_QA_IDENTITIES: readonly string[] = [
@@ -82,6 +115,7 @@ export const PROD_QA_IDENTITIES: readonly string[] = [
   PROD_QA_MANAGER_EMAIL,
   PROD_QA_SECOND_WORKER_EMAIL,
   PROD_QA_AGENCY_EMAIL,
+  ...PROD_QA_FRESH_IDENTITIES,
 ];
 
 export const PRODUCTION_ORIGIN = `https://${PRODUCTION_PROJECT_REF}.supabase.co`;

@@ -51,12 +51,21 @@ test("1. the worker records the day's work in the journal", async ({ browser }) 
   await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
   await chooseWorkContextIfAsked(page, /QA-SYNTHETIC Alfa/);
   await answerNoProjectIfAsked(page);
+  // The first press opens the review and writes nothing, so it says "Toliau";
+  // "Išsaugoti" is said once, on the confirm press (activation audit fix #5).
+  await expect(main.getByTestId("worklog-save")).toHaveText(/Toliau/);
   await main.getByTestId("worklog-save").click();
+  await expect(main.getByTestId("worklog-confirm")).toHaveText(/Išsaugoti/);
   await main.getByTestId("worklog-confirm").click();
   const done = main.getByTestId("worklog-done");
   const failed = main.getByTestId("worklog-error").or(main.getByTestId("worklog-blocked"));
   await expect(done.or(failed)).toBeVisible({ timeout: 30_000 });
   if (!(await done.isVisible())) throw new Error(`the entry was not saved: ${await failed.innerText()}`);
+  // The confirmation says where the entry now counts — the Living CV, as
+  // recorded (not confirmed) work — links there, and asks back calmly.
+  await expect(done.getByTestId("worklog-living-cv-note")).toContainText("nepatvirtint");
+  await expect(done.getByTestId("worklog-living-cv-link")).toHaveAttribute("href", /\/lt\/cv$/);
+  await expect(done.getByTestId("worklog-come-back")).toBeVisible();
   await page.goto("/lt/dashboard/journal");
   const card = main.locator('[data-testid^="journal-entry-card-"]', { hasText: RUN }).first();
   await expect(card).toBeVisible({ timeout: 30_000 });
