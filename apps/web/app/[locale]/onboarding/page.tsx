@@ -16,9 +16,8 @@ import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import {
   inviteTokenFromNextPath,
   invitationImpliesWorkerContext,
-  pickAddressedJoinPlatform,
 } from "@/lib/invitations/model";
-import { listInvitationsForMe } from "@/lib/invitations/network";
+import { resolveInvitedWorkerContext } from "@/lib/onboarding/invited-worker-context";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
 import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
@@ -100,15 +99,9 @@ export default async function OnboardingPage({
   // partner referral; accepted when the person finishes).
   let addressedInvitationId: string | null = null;
   if (!inviteToken) {
-    const mine = await listInvitationsForMe();
-    const addressed = mine.status === "ok" ? pickAddressedJoinPlatform(mine.items) : null;
-    if (addressed) {
-      addressedInvitationId = addressed.id;
-      impliedWorker = invitationImpliesWorkerContext({
-        invitationType: addressed.invitationType,
-        externalSourceSlug: addressed.externalSourceSlug,
-      });
-    }
+    const invited = await resolveInvitedWorkerContext(null);
+    addressedInvitationId = invited.addressedInvitationId;
+    impliedWorker = invited.workerImplied;
   }
 
   const supabase = await createClient();

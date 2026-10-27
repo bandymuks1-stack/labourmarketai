@@ -3,6 +3,8 @@
  * server actions, the UI and the guard tests. No IO.
  */
 
+import { findExternalReferralSource } from "@/lib/invitations/external-sources";
+
 export const INVITATION_TYPES = [
   "join_platform",
   "join_organization",
@@ -459,6 +461,22 @@ export function invitationImpliesWorkerContext(input: {
 }): boolean {
   if (input.invitationType === "join_as_employee") return true;
   return input.invitationType === "join_platform" && Boolean(input.externalSourceSlug);
+}
+
+/**
+ * May onboarding skip the role question for an invitation found WITHOUT its
+ * link? Stricter than `invitationImpliesWorkerContext` (the token path, which
+ * stays as it is): only a `join_platform` referral from a REGISTERED partner
+ * whose consent notice is about the person's own job search
+ * (`referredPersonIsWorker`, today Nonstop Group). A missing, unknown or other
+ * partner's source keeps the question.
+ */
+export function addressedReferralImpliesWorker(item: {
+  invitationType: string;
+  externalSourceSlug?: string | null;
+}): boolean {
+  if (item.invitationType !== "join_platform") return false;
+  return findExternalReferralSource(item.externalSourceSlug ?? null)?.referredPersonIsWorker === true;
 }
 
 /**
