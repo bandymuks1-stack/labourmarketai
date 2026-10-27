@@ -31,6 +31,14 @@ describe("pickAddressedJoinPlatform", () => {
     expect(pickAddressedJoinPlatform([])).toBeNull();
   });
 
+  it("two or more join_platform invitations → the platform does not choose", () => {
+    expect(pickAddressedJoinPlatform([row({ id: "a" }), row({ id: "b", externalSourceSlug: "nonstop" })])).toBeNull();
+  });
+
+  it("one join_platform among actor-naming invitations is still exactly one", () => {
+    expect(pickAddressedJoinPlatform([row({ id: "t", invitationType: "join_team" }), row({ id: "p" })])?.id).toBe("p");
+  });
+
   it("only a PARTNER referral lets onboarding skip the role question", () => {
     const partner = pickAddressedJoinPlatform([row({ externalSourceSlug: "nonstop" })])!;
     const person = pickAddressedJoinPlatform([row()])!;

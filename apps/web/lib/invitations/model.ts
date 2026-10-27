@@ -485,5 +485,9 @@ export function invitationImpliesWorkerContext(input: {
 export function pickAddressedJoinPlatform<
   T extends { id: string; invitationType: string; externalSourceSlug?: string | null },
 >(items: readonly T[]): T | null {
-  return items.find((i) => i.invitationType === "join_platform") ?? null;
+  // EXACTLY ONE. Two or more pending join_platform invitations for the same
+  // person are ambiguous (which inviter? which partner?) — the platform does
+  // not pick one on the person's behalf; each stays on its own page.
+  const candidates = items.filter((i) => i.invitationType === "join_platform");
+  return candidates.length === 1 ? candidates[0] : null;
 }
