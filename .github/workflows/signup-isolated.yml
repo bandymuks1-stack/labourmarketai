@@ -30,6 +30,8 @@ on:
       - "apps/web/lib/onboarding/**"
       - "apps/web/lib/invitations/signup-*"
       - "apps/web/components/app/login-form.tsx"
+      - "apps/web/components/app/invite-panel.tsx"
+      - "apps/web/app/*/invite/**"
       - "apps/web/components/app/reset-password-form.tsx"
       - "apps/web/app/*/dashboard/journal/**"
       - "supabase/config.toml"
