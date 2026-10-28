@@ -1737,6 +1737,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-28: owner approved #2858 in chat (apply + merge, at d0159eb).
       // Recovery counts only this reservation's ledger row; ledger 20261028091725.
       "20261028090000_resolve_reservation_exact_window_v1.sql",
+      // 2026-10-28: owner approved #2876 in chat (conditional apply, at a3a10eb7d).
+      // Synthetic QA needs out of the three cross-org demand readers.
+      "20261028123000_synthetic_demand_cross_org_readers_v1.sql",
 ]);
   });
 

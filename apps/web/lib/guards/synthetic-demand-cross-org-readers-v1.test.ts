@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 
 import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
 
-// Pins 20261028123000_synthetic_demand_cross_org_readers_v1 (RED, NOT applied
-// until the owner approves the PR by name): the three cross-organization SQL
+// Pins 20261028123000_synthetic_demand_cross_org_readers_v1 (RED, owner-approved
+// 2026-10-28 and applied through Supabase MCP): the three cross-organization SQL
 // demand readers keep OTHER organizations' synthetic QA needs out, with the
 // SAME markers as lib/qa/synthetic-fixture.ts, and change nothing else.
 const ROOT = join(__dirname, "..", "..", "..", "..");
@@ -151,8 +151,8 @@ describe("synthetic QA needs stay out of the cross-organization SQL readers", ()
     }
   });
 
-  it("is not owner-approved yet: no human-gate annotation, writes no row", () => {
-    expect(up).not.toContain("@human-gate-approved");
+  it("carries the owner's approval for this migration only, and writes no row", () => {
+    expect(up).toMatch(/^-- @human-gate-approved \(owner, 2026-10-28, .*#2876.*covers this migration only\)$/m);
     expect(up).not.toMatch(/^\s*(update|delete|insert)\b/im);
   });
 });

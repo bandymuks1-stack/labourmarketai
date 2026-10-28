@@ -1,10 +1,10 @@
 -- 20261028123000_synthetic_demand_cross_org_readers_v1
+-- @human-gate-approved (owner, 2026-10-28, in chat: conditional approval of #2876 at a3a10eb7d — apply in production after the five security conditions are verified against the live schema; covers this migration only)
 --
 -- RED tier (needs-human-gate): replaces THREE authenticated SECURITY DEFINER
 -- readers (same signatures, same return shapes, same search_path, same
--- grants) and adds three small helpers. NOT applied — production apply
--- requires the owner's approval naming this PR. Deliberately carries NO
--- human-gate annotation: nothing is approved yet.
+-- grants) and adds three small helpers. Owner-approved in chat (2026-10-28,
+-- see the annotation above); applied through Supabase MCP apply_migration.
 --
 -- WHY (isolation audit 2026-10-28, production read-only): synthetic QA
 -- organizations (owner-approved write proofs) are named with the documented
