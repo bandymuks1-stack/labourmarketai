@@ -96,6 +96,25 @@ async function readAs<T>(address: string, path: string): Promise<T> {
   return (await r.json()) as T;
 }
 
+const MAIL = "http://127.0.0.1:54324"; // the local stack's mail catcher (Mailpit)
+
+/** The newest link in the newest local mail to `address` (nothing leaves the runner). */
+async function lastMailLink(address: string): Promise<string> {
+  for (let i = 0; i < 30; i += 1) {
+    const r = await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${address}`)}`);
+    const list = (await r.json()) as { messages?: Array<{ ID: string }> };
+    const id = list.messages?.[0]?.ID;
+    if (id) {
+      const m = (await (await fetch(`${MAIL}/api/v1/message/${id}`)).json()) as { Text?: string; HTML?: string };
+      const urls = `${m.Text ?? ""} ${m.HTML ?? ""}`.match(/https?:\/\/[^\s"'<>]+/g) ?? [];
+      const link = urls.find((u) => /verify|callback|token/.test(u));
+      if (link) return link.replace(/&amp;/g, "&");
+    }
+    await new Promise((res) => setTimeout(res, 1000));
+  }
+  throw new Error(`no mail for ${address} arrived in the local mail catcher`);
+}
+
 /** The public sign-up form → the onboarding wizard (Confirm email is OFF locally). */
 async function signUp(page: Page, address: string): Promise<void> {
   await page.goto(`${BASE}/en/auth/signup`);
@@ -242,6 +261,26 @@ test("A-2. the owner invites a person by link; they register through it and acce
     `invitations?organization_id=eq.${state.orgId}&invitation_type=eq.join_organization&select=status,accepted_by_profile_id`,
   );
   expect(invites.map((i) => i.accepted_by_profile_id), "the link was used by that person").toContain(state.memberId);
+
+  // A governance seat is addressed by e-mail, and the database resolves only a
+  // VERIFIED address (20261003151000_email_verified_boundary_v1: with Confirm
+  // email off, a typed address proves nothing). The person proves their
+  // mailbox the product's own way: the prompt on the network page → the mail
+  // (local catcher) → the callback.
+  await page.goto(`${BASE}/en/dashboard/network`);
+  const prompt = page.getByTestId("network-email-unverified");
+  await expect(prompt, "a new account is asked to confirm its address").toBeVisible({ timeout: 30_000 });
+  await prompt.getByTestId("verify-email-send").click();
+  await expect(prompt.getByTestId("verify-email-sent")).toBeVisible({ timeout: 30_000 });
+  const proof = await lastMailLink(MEMBER);
+  await page.goto(proof);
+  await page.waitForURL((url) => url.host === new URL(BASE).host && !url.pathname.includes("/auth/callback"), {
+    timeout: 60_000,
+  });
+  await page.goto(`${BASE}/en/dashboard/network`);
+  await expect(page.getByTestId("network-email-unverified"), "the address is now proven").toHaveCount(0, {
+    timeout: 30_000,
+  });
 
   // The owner gives that person a LIMITED governance seat: member.
   await owner.page.goto(`${BASE}/en/dashboard/company/settings#organization-members`);
