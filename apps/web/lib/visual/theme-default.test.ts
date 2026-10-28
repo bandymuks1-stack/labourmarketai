@@ -56,3 +56,14 @@ describe("the pre-paint bootstrap runs the same rule", () => {
     expect(bootstrap("/lt/onboarding", null, true)).toBe("dark");
   });
 });
+
+describe("client-side navigation re-resolves the default (review on #2849)", () => {
+  it("ThemeReapply re-runs on every pathname change, so workspace -> public opens light", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const src = readFileSync(join(__dirname, "..", "..", "components", "app", "theme-reapply.tsx"), "utf8");
+    expect(src).toMatch(/const pathname = usePathname\(\);/);
+    expect(src).toMatch(/\}, \[pathname\]\);/);
+    expect(src).toMatch(/resolveTheme\(localStorage\.getItem\("theme"\), window\.location\.pathname\)/);
+  });
+});

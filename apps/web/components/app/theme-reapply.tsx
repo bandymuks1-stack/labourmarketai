@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 import { defaultThemeForPath, resolveTheme } from "@/lib/visual/theme-default";
 
@@ -24,6 +25,10 @@ import { defaultThemeForPath, resolveTheme } from "@/lib/visual/theme-default";
  * is missing — a user toggle sets the attribute, never removes it.
  */
 export function ThemeReapply() {
+  // Re-resolved on every client-side route change (review on #2849): a
+  // person with no saved choice who follows an in-app link from the
+  // workspace to the public site gets that page's default, and back.
+  const pathname = usePathname();
   useEffect(() => {
     // Resolves to the PAGE'S DEFAULT (lib/visual/theme-default.ts: public site
     // light, workspace dark) rather than null, so a stripped attribute is
@@ -55,6 +60,6 @@ export function ThemeReapply() {
       attributeFilter: ["data-theme"],
     });
     return () => observer.disconnect();
-  }, []);
+  }, [pathname]);
   return null;
 }
