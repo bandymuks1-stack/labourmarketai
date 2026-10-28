@@ -64,8 +64,14 @@ describe("theme storage is locale-independent", () => {
 });
 
 describe("pre-paint theme bootstrap", () => {
-  const BOOTSTRAP =
-    /localStorage\.getItem\('theme'\)[\s\S]*document\.documentElement\.dataset\.theme=t/;
+  // 2026-10-28: the bootstrap is ONE shared script (lib/visual/theme-default.ts,
+  // per-page default, saved choice wins); the pages inline that script.
+  const BOOTSTRAP = /__html:\s*THEME_BOOTSTRAP_SCRIPT/;
+  it("the shared bootstrap reads the saved theme and stamps it before paint", () => {
+    expect(read("lib/visual/theme-default.ts")).toMatch(
+      /localStorage\.getItem\('theme'\)[\s\S]*document\.documentElement\.dataset\.theme=t/,
+    );
+  });
 
   it("the [locale] layout applies the saved theme before paint", () => {
     expect(read("app/[locale]/layout.tsx")).toMatch(BOOTSTRAP);

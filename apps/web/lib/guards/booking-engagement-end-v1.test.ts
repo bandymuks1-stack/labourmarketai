@@ -1727,6 +1727,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // SECURITY DEFINER functions that rotate one unsent partner referral token; ledger
       // 20261027193124.
       "20261027120000_reissue_external_referral_v1.sql",
+      // 2026-10-28: owner approved #2843 in chat (apply + merge). Read-only service_role
+      // candidate list that flags already-mailed addresses; ledger 20261028044705.
+      "20261027210000_external_referral_reprocess_candidates_v2.sql",
       // 2026-10-28: owner approved #2846 in chat (apply + merge). The caller-scoped
       // invitations read carries the partner source; ledger 20261028034356.
       "20261027231000_list_invitations_for_me_source_slug_v1.sql",
