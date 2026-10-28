@@ -141,7 +141,7 @@ jobs:
             maestro test \
               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
-              apps/mobile/.maestro/signed-in-journey.yaml
+              apps/mobile/.maestro/signed-in-journey.yaml &&             maestro test               -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"               -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"               apps/mobile/.maestro/jobs-need-journey.yaml
           }
           if journey || { echo "::warning::attempt 1 failed - retrying once (driver)"; sleep 15; journey; }; then
             echo "IOS_SIGNED_IN_JOURNEY_PROVEN: sign-in, Today figures read, journal entry drafted and confirmed, profile skills read, sign-out"

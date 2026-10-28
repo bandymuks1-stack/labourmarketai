@@ -1,0 +1,113 @@
+# JOBS + NEED JOURNEY — the beta screens from #2871, on a device, signed in.
+#
+# Runs ONLY from the dispatch jobs that run signed-in-journey.yaml (production-qa
+# environment, the owner's ONE synthetic review identity). Expects to start on the
+# sign-in form after signed-in-journey.yaml signed out.
+#
+# What a green run proves:
+#   1. sign-in lands on Today; Today opens the Jobs board;
+#   2. a search runs through jobs.search and the board renders a LOADED read
+#      (testID jobs-loaded renders only on a loaded read — a failed read renders
+#      capability-retry and the step fails);
+#   3. Today opens Post a need; an empty need is refused in place (need-failure),
+#      nothing is drafted;
+#   4. a filled need is drafted (demand.create_draft), previewed, confirmed
+#      (demand.create_confirm) and the sent state renders.
+# The need it posts is marked QA-SYNTHETIC in its text, so the walk cleanup and the
+# owner can find and close it. Navigation is by testID only.
+appId: ai.labourmarket.app
+name: jobs-need-journey
+---
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- tapOn:
+    id: "email"
+- inputText: ${MOBILE_QA_EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${MOBILE_QA_PASSWORD}
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- tapOn:
+    id: "submit"
+- extendedWaitUntil:
+    visible:
+      id: "today-open-jobs"
+    timeout: 60000
+
+# --- 1–2. Jobs: search, a loaded board ---
+- tapOn:
+    id: "today-open-jobs"
+- extendedWaitUntil:
+    visible:
+      id: "jobs-query"
+    timeout: 30000
+- tapOn:
+    id: "jobs-query"
+- inputText: "builder"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- tapOn:
+    id: "jobs-search"
+- extendedWaitUntil:
+    visible:
+      id: "jobs-loaded"
+    timeout: 60000
+- back
+
+# --- 3. Need: an empty need is refused in place ---
+- extendedWaitUntil:
+    visible:
+      id: "today-open-need"
+    timeout: 30000
+- tapOn:
+    id: "today-open-need"
+- extendedWaitUntil:
+    visible:
+      id: "need-write"
+    timeout: 30000
+- tapOn:
+    id: "need-review"
+- extendedWaitUntil:
+    visible:
+      id: "need-failure"
+    timeout: 30000
+
+# --- 4. Need: fill, draft, preview, confirm, sent ---
+- tapOn:
+    id: "need-description"
+- inputText: "QA-SYNTHETIC mobile journey: two tilers for a bathroom renovation, three weeks."
+- tapOn:
+    id: "need-role"
+- inputText: "Tiler"
+- tapOn:
+    id: "need-location"
+- inputText: "Vilnius"
+- tapOn:
+    id: "need-team-size"
+- inputText: "2"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- tapOn:
+    id: "need-review"
+- extendedWaitUntil:
+    visible:
+      id: "need-preview"
+    timeout: 60000
+- tapOn:
+    id: "need-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "need-sent"
+    timeout: 60000
