@@ -123,7 +123,8 @@ const jobsSearch: CapabilityDescriptor = {
         page,
         pageSize: PUBLIC_VACANCY_PAGE_SIZE,
         totalCount: result.totalCount,
-        hasMore: result.hasMore,
+        // Never point a client at a page this capability's own schema refuses.
+        hasMore: result.hasMore && page < MAX_PAGE,
         jobs: result.vacancies.map((v) => jobOf(caller, v)),
       },
     };

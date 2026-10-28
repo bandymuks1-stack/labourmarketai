@@ -92,6 +92,15 @@ describe("jobs.search / jobs.get — the public board through the door", () => {
     });
   });
 
+  it("the last allowed page never advertises a next page the schema would refuse", async () => {
+    __resetPublicVacancyCache();
+    const c = callerWith({
+      search_public_vacancy_previews_v1: { data: [{ ...ROW, total_count: "5000" }], error: null },
+    });
+    const r = await runCapability("jobs.search", c, { page: 100 });
+    expect(r).toMatchObject({ ok: true, data: { page: 100, totalCount: 5000, hasMore: false } });
+  });
+
   it("a page beyond the bound, or an unknown argument, is refused before any read", async () => {
     const c = callerWith({});
     expect(await runCapability("jobs.search", c, { page: 101 })).toMatchObject({ ok: false, code: "invalid" });
