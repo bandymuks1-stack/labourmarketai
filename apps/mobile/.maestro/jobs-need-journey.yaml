@@ -39,7 +39,12 @@ name: jobs-need-journey
     id: "submit"
 - extendedWaitUntil:
     visible:
+      id: "tab-today"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
       id: "today-open-jobs"
+    direction: DOWN
     timeout: 60000
 
 # --- 1–2. Jobs: search, a loaded board ---
@@ -83,12 +88,15 @@ name: jobs-need-journey
           visible:
             id: "jobs-loaded"
           timeout: 30000
-- back
+# Back to Today by its tab (Maestro's `back` is Android-only; this flow runs on iOS too).
+- tapOn:
+    id: "tab-today"
 
 # --- 3. Need: an empty need is refused in place ---
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: "today-open-need"
+    direction: DOWN
     timeout: 30000
 - tapOn:
     id: "today-open-need"
