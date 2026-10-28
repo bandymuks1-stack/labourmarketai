@@ -179,8 +179,12 @@ test("S-6. a forgotten password: the reset mail arrives, the new password works,
   await page.goto(`${BASE}/en/auth/login`);
   await page.locator('input[name="email"]').fill(address);
   await page.locator('input[name="password"]').fill(PASSWORD);
+  const refused = page.waitForResponse((r) => r.url().includes("/auth/v1/token") && r.request().method() === "POST", {
+    timeout: 30_000,
+  });
   await page.locator('form button[type="submit"]').first().click();
-  await expect(page).toHaveURL(/\/en\/auth\/login/, { timeout: 15_000 });
+  expect((await refused).status(), "the old password is refused by auth").toBe(400);
+  await expect(page).toHaveURL(/\/en\/auth\/login/);
   // …the new one works.
   await signIn(page, address, NEW_PASSWORD);
 });
