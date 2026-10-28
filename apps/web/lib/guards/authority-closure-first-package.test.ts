@@ -190,6 +190,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261028070000_",
       // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028091725): recovery counts only this reservation's ledger row.
       "20261028090000_",
+      // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028161106): synthetic QA needs out of the three cross-org demand readers.
+      "20261028123000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

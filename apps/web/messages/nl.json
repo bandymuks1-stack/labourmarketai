@@ -18376,7 +18376,7 @@
       "not_a_member": "Je bent geen lid.",
       "not_found": "Record niet beschikbaar.",
       "not_authorized": "Je bent hiervoor niet gemachtigd.",
-      "no_such_user": "Geen gebruiker met dit e-mailadres.",
+      "no_such_user": "Nog geen bevestigd account met dit e-mailadres.",
       "cannot_invite_self": "Je kunt jezelf niet uitnodigen.",
       "invalid_role": "Ongeldige rol.",
       "last_owner": "De laatste eigenaar kan niet terugtreden — activeer eerst een andere eigenaar.",
@@ -18406,7 +18406,7 @@
       "grantInvitations": "Uitnodigingen laten beheren",
       "withdrawInvitations": "Uitnodigingsbeheer intrekken",
       "unavailable": "De ledenlijst kon nu niet worden gelezen. Dat betekent niet dat de organisatie geen leden heeft.",
-      "noAccountHint": "Een lidmaatschapsrol kan alleen worden gegeven aan iemand die al een account heeft. Nodig iemand zonder account uit met een uitnodigingslink — zodra die persoon zich registreert en bij de organisatie aansluit, kun je hier een rol geven.",
+      "noAccountHint": "Een lidmaatschapsrol kan alleen worden gegeven aan iemand met een bevestigd account. Heeft de persoon nog geen account of is het e-mailadres nog niet bevestigd, stuur dan een uitnodigingslink of vraag om het e-mailadres te bevestigen — zodra de persoon is aangesloten, kun je hier de rol geven.",
       "noAccountCta": "Uitnodigingslink maken"
     },
     "start": {

@@ -21,6 +21,7 @@ const BANNED_LT = [
   "Pateikti poreikį",
   "Tvarkyti poreikius",
   "Jūsų poreikių erdvė",
+  "Tavo poreikių erdvė",
   "Poreikių erdvė",
 ];
 
