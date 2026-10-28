@@ -11004,7 +11004,7 @@
       "title": "Organization plan",
       "cta": "Activate the Organization plan",
       "note": "You will be taken to Stripe Checkout; the subscription is bound to this organization.",
-      "chargedToday": "No free trial: the first month is charged at Stripe Checkout today, then monthly until you cancel. Stripe shows the exact amount with VAT before you pay."
+      "chargedToday": "No free trial: the first month is charged at Stripe Checkout today, then monthly until you cancel. Stripe shows the exact amount before you pay."
     }
   },
   "accountPlan": {
