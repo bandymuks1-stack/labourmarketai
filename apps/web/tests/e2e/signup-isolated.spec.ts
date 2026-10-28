@@ -256,7 +256,7 @@ test("S-9. an invited person opens the link, registers through it, and the invit
   await page.goto(link);
   await page.getByTestId("invite-register").click();
   await page.waitForURL(/\/en\/auth\/signup/, { timeout: 30_000 });
-  const addressed = page.getByTestId("signup-invited-email");
+  const addressed = page.locator('input[aria-describedby="invited-email-note"]');
   if (await addressed.isVisible().catch(() => false)) {
     await expect(addressed, "the address comes from the invitation").not.toBeEditable();
   } else {
