@@ -207,8 +207,22 @@ closes them on the coordinator's say-so.
 | Marketplace walk 6/6 | LIVE_VERIFIED | run 40200714397 (10-25, `d9b1a38f5`); earlier 40072913099, 40047419163 |
 | Brigade + B2B 13/13 | LIVE_VERIFIED | run 38231306190 (10-12, `e68a59876`); `company-chain` last green 40315387466 (10-26); `brigade-formation` 39985839991 (10-23) |
 | 275-function matrix | PASS rows LIVE_VERIFIED; the rest as counted in D-7 | local matrix (D-7); 149 PASS rows cite a prod-qa run id |
-| Last walk failures | — | `company-governance` 40296167812 (D-6); weekly rotation 40177765214 (10-25); `billing-test-mode` 39884833436 (10-23); manual `role-routes` 39978076973 (10-23) |
-| No run in the last 400 | NOT_VERIFIED | `admin-console`; `invited-worker` (owner: parked) |
+**Status classes (owner, 2026-10-28, binding):** `LIVE_VERIFIED` = really checked in production ·
+`REGRESSION` = a new defect appeared · `NOT_VERIFIED` = not checked yet · `OPTIONAL_TEST` = an extra test
+that does not block launch. A finished, LIVE_VERIFIED item is not re-checked without a new concrete defect,
+regression or a change that could affect it.
+
+| Item | Class | Evidence |
+|---|---|---|
+| Payments — Stripe LIVE chain (checkout → webhook → pilot plan) | **LIVE_VERIFIED** | real 1 € LIVE payment 2026-10-23, webhook fired, Nonstop Group pilot plan active 30 days (owner-confirmed) |
+| `billing-test-mode` walk (Stripe TEST scenario) | **OPTIONAL_TEST** | never executed (pilot org not armed in TEST; production stays LIVE, owner 10-28: do not switch, no staging for it). Not a payment defect |
+| `invited-worker` walk | OPTIONAL_TEST | owner-parked 2026-10-28; do not re-ask |
+| rota-repeat 40659497014 · chat-continuity 40662743591 · documents-approvals 40663181329 (2026-10-28) | LIVE_VERIFIED | after #2855/#2857 deploys |
+| jobs-search J-1..J-6 40645813917 | LIVE_VERIFIED | D-8 not reproduced |
+| `company-governance` | NOT_VERIFIED (T-5 defect fixed by #2857, deployed) | 40654524480: D-1..D-5, T-1..T-4 PASS, T-5 FAIL → #2857; re-run queued after the walk cool-down |
+| `admin-console` 40668817886 | NOT_VERIFIED | owner refusal ✓; worker → `/lt/dashboard/admin` timed out 45 s (cause open: slow refusal vs network) |
+| Self-serve sign-up (worker / company / agency) | NOT_VERIFIED | isolated CI walk #2861 (local Supabase) in progress; no production synthetic accounts (owner) |
+| Agency roles/permissions | NOT_VERIFIED | no walk covers it |
 
 | Regression queue 2026-10-28 (`…16CYcDu`) | LIVE_VERIFIED / PARTIAL | living-cv-growth 40634954858 ✓, calendar-planning 40635527214 ✓, notifications-inapp 40639605465 ✓, jobs-search 40640097643 (J-6 ✗, D-8); project-execution 40640668466 ✓, search-support-privacy 40641351546 ✓; rota-repeat started (result not collected); chat-continuity, documents-approvals not run (queue stopped at handover) |
 
@@ -236,19 +250,21 @@ are NOT evidence that functions failed.
 
 ## 5. Open owner items (collected once)
 
-- **#2858 (RED):** approve by name → apply; until then `resolve_reservations` is not run.
-- **D-10:** VPS inbound reachability (provider/network) — owner check, or read-only SSH for the coordinator.
-- **UX P1-3:** public job page `/jobs/[id]` shows title, contract and date only (no country, employer, description, apply path) — access policy is the owner's call.
-- **Worktrees:** 75 registered vs the 20 limit (`workspace-guard.ps1`) → no parallel executor worktrees can be created; approve a policy cleanup of merged/closed-PR worktrees (4-point check, `git worktree remove` without `--force`).
+Only items that genuinely need the owner. Resolved or reclassified items are removed (2026-10-28).
 
-- Approve or reject each RED draft individually (§3.3); D-1 first (merge #2738/#2739 as already applied — SQL verified identical).
-- D-3 hardening (RED): DB-level address lock in `reissue_external_referral_v1` before any future reprocess run.
-- D-6 product question: training for engaged (non-member) workers.
-- #2844 legal wording.
-- `prod-qa-invited-provision` dispatch — parked by owner 2026-10-28; do not re-ask.
-- `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2,
-  EVID-2, MKT-7, COM-6, COM-8 (see `product-truth.mjs`).
-- Stale PR keep/close (§3.4).
+- **Hostinger:** send the drafted inbound-loss ticket (D-10; provider network fault = probable, not proven).
+- **Executor worktrees:** owner approved up to 3 temporary worktrees over the 20 limit; the guard has no
+  override, so the owner creates them (lt-informal-tu, agency-roles-isolated, ux-p1-p2-batch). The
+  permanent limit stays.
+- **UX P1-3:** public job page `/jobs/[id]` shows title, contract and date only — access policy is the owner's call.
+- Remaining RED drafts, each on its own (§3.3); D-1 (#2738/#2739 as already applied) first.
+- D-6 product question: training for engaged (non-member) workers (RED #2816).
+- #2844 legal wording; #2842 paid terms (legal).
+- `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2, EVID-2, MKT-7, COM-6, COM-8.
+
+Removed as resolved: #2855 and #2858 (APPLIED, LIVE_VERIFIED 2026-10-28, ledgers 20261028081810 /
+20261028091725); D-3 hardening (= #2855); Stripe TEST arming (OPTIONAL_TEST, not a launch blocker);
+VPS read-only access (granted, diagnosis done); worktree policy cleanup (done within policy: 75 → ~68).
 
 ## 6. How to update
 
