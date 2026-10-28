@@ -96,12 +96,12 @@ independent work or launch of other features (owner order 2026-10-28).
 | Lane | Holder | Since | What |
 |---|---|---|---|
 | migration (prod DB) | — free — | | last: `external_referral_reprocess_candidates_v2` applied 2026-10-28 04:47Z by session `…AygGqFo3aoB76NrV` (#2843) |
-| live sends (e-mail to real people) | session `…AygGqFo3aoB76NrV` | 2026-10-27 | partner referral reprocess: 41/45 sent; control + last 3 pending after #2843 merge |
-| deploy | — serial via `deploy-vps.yml` — | | production = `51a3518` (#2846), deployed 2026-10-28 04:26Z |
+| live sends (e-mail to real people) | **CLOSED — no further run until D-3 hardening is approved** | 2026-10-28 05:46Z | partner referral reprocess finished: 48 invitation mails / 48 distinct recipients (ledger), 0 addresses mailed on two rows; 15 rows still `pending/not_sent` |
+| deploy | — serial via `deploy-vps.yml` — | | production = `c3f440f` (#2843, #2849, #2850), deployed 2026-10-28 05:34Z |
 
 ---
 
-## 3. Work register — snapshot 2026-10-28 ~05:10Z
+## 3. Work register — snapshot 2026-10-28 ~06:00Z
 
 Sources: GitHub PRs/Actions, production migration ledger, session list and
 transcripts readable from the coordinator session. Status per §1.4.
@@ -110,9 +110,9 @@ transcripts readable from the coordinator session. Status per §1.4.
 
 | Session | Where | Doing | State |
 |---|---|---|---|
-| `session_016CYcDuhGGEA75ruJ3zXD99` "projekto perėmimas" | owner's computer | #2849 merge after CI; platform functional + UX audit (owner order 04:48Z); RED-draft conflict upkeep | IN_PROGRESS |
-| `session_011vBC1iAygGqFo3aoB76NrV` "darbų perimimas" | owner's computer | #2843 merge → dry run → 1 control → 3 sends; read-only journey audit | IN_PROGRESS |
-| `session_011vBC1hnVKqGvExp129bfjT` coordinator | cloud | this register, inventory, plan | IN_PROGRESS |
+| `session_016CYcDuhGGEA75ruJ3zXD99` "projekto perėmimas" | owner's computer | platform functional + UX audit (owner order 04:48Z): Work Journal, Living CV, profiles, calendar, mobile/design, 11 languages; RED-draft conflict upkeep | IN_PROGRESS |
+| `session_011vBC1iAygGqFo3aoB76NrV` "darbų perimimas" | owner's computer | received the same coordinator order as the cloud coordinator (see D-6): D-1 proof, #2839/#2840 review, company-governance QA root cause, QA-evidence recovery | IN_PROGRESS |
+| `session_011vBC1hnVKqGvExp129bfjT` coordinator | cloud | this register; D-1 and D-3 evidence; QA-evidence recovery (read-only) | IN_PROGRESS |
 | `session_011vBC1hntPRyoM4yRJKKcG2` | owner's computer | other repository (Agentai OS) — not this repo | n/a here |
 
 ~45 older sessions are idle; most end with an owner question (merge, secret, billing).
@@ -127,11 +127,12 @@ Those questions are collected in §5, not re-asked per session.
 | #2846 | invitations-for-me carries partner source (RED, approved for this one) | `…16CYcDu` | DONE | live, `51a3518` |
 | #2847 | synthetic invited-worker provision/revoke/purge mechanism | `…16CYcDu` | DONE (code) | workflow `prod-qa-invited-provision` never run → invited-worker E2E **NOT_VERIFIED** (owner: parked, do not ask again) |
 | #2848 | public header brand not cut on phones | `…16CYcDu` | DONE | LIVE_VERIFIED 320/360/375 |
-| #2843 | never re-mail an address from an older duplicate referral (RED) | `…AygGqFo3` | WAITING (CI) | migration v2 already applied 04:47Z; see §4 D-3 |
-| #2849 | public site opens light; one-sentence sign-up intro (11 locales) | `…16CYcDu` | WAITING (CI → merge, owner-authorized) | not yet |
-| #2844 | synthetic data instead of personal e-mails in tests/docs | unknown | WAITING (review) | — |
-| #2840 | zero paid AI budget — metered providers off unless owner opens | unknown | WAITING (review) | — |
-| #2839 | DB restore procedure doc | unknown | WAITING (review) | — |
+| #2843 | never re-mail an address from an older duplicate referral (RED) | `…AygGqFo3` | DONE | live `c3f440f`; sends finished 05:46Z; DB-level hardening still open (§4 D-3) |
+| #2849 | public site opens light; one-sentence sign-up intro (11 locales) | `…16CYcDu` | DONE | live `c3f440f`; post-deploy visual check 320/375/768/1280 not yet recorded |
+| #2850 | this coordination register | coordinator | DONE | live `c3f440f` |
+| #2844 | synthetic data instead of personal e-mails in tests/docs (touches legal docs) | unknown | WAITING (OWNER — legal wording) | — |
+| #2840 | zero paid AI budget — metered providers off unless owner opens | reviewed by `…AygGqFo3` | WAITING (merge `main` in, re-run CI) | CI green on a 2026-10-27 base (10 commits behind); env flag unset on VPS → defaults to off, same as today |
+| #2839 | DB restore procedure doc (docs only) | reviewed by `…AygGqFo3` | WAITING (merge) | CI green 2026-10-27; no runtime effect |
 | #2842 | paid-terms legal draft | unknown | WAITING (legal/owner) | — |
 | #2828 | premium action cards visual proposal | unknown | WAITING (owner visual) | — |
 
@@ -155,11 +156,12 @@ closes them on the coordinator's say-so.
 
 | Id | Finding | Risk | Next step |
 |---|---|---|---|
-| D-1 | **Production holds `project_forecasts_v1` (ledger `20261025045152`) and `history_period_precision_and_registry_v1` (`20261025050302`) but `main` has neither file**; their PRs #2738 / #2739 are still RED drafts. No `APPLIED_LEDGER.md` entry on `main`. | re-run hazard; guards on `main` don't know the objects; a third PR could collide | owner: either approve merging #2738/#2739 as-applied, or record why they were applied ahead. No re-apply, no rollback without owner. |
+| D-1 | **Production holds `project_forecasts_v1` (ledger `20261025045152`) and `history_period_precision_and_registry_v1` (`20261025050302`) but `main` has neither file**; their PRs #2738 / #2739 are still RED drafts. No `APPLIED_LEDGER.md` entry on `main`. **Proven identical (2026-10-28, independently by the coordinator and by `…AygGqFo3`):** md5 of the production statement with `--` comments and all whitespace removed equals the md5 of the branch file (`supabase/migrations/20261024130000_project_forecasts_v1.sql`, `…20261024100000_history_period_precision_and_registry_v1.sql`) after also removing its `begin;`/`commit;` wrapper — `1db83314…` and `214d501f…`. The branch files were last changed before the apply (03:37Z / 03:48Z vs 04:51Z / 05:03Z on 2026-10-25). | re-run hazard; guards on `main` don't know the objects; a third PR could collide | **Safe reconciliation (needs one owner approval naming #2738 and #2739, merge only):** merge both PRs **as-applied**, never re-apply; add `APPLIED_LEDGER.md` rows with the production versions above. #2738 also adds a `forecast-recompute` cron line, which takes effect only when the owner re-runs `lm-cron-install.sh` on the VPS. Merge them one after the other (shared guard pin files, §1.6). |
 | D-2 | `market_lifecycle_closed_outcome_v1` is applied and its file is on `main`, but #2746's title still says "NOT applied". | misleading status | fix the PR title/body when #2746 is next touched |
-| D-3 | #2843: owner conditions given in session `…16CYcDu` (atomic DB guard in `reissue_external_referral_v1`, normalized e-mail, concurrency tests). The #2843 diff adds a read-only candidate list with `lower(trim())` matching and a TS exclusion; no lock/unique guard inside the reissue function and no concurrency test seen. VPS `flock` serializes runs. | possible second mail to one address under concurrent runs | owner confirms whether `flock` + candidate exclusion satisfies the condition before the last sends |
+| D-3 | #2843 referral re-mail protection. **Outcome so far (read-only, 2026-10-28 ~06:00Z):** 48 `invitation` sends in `email_send_ledger_v1` since 2026-10-27 = 48 distinct recipient hashes (hash = sha256 of salted `trim().toLowerCase()` address); 0 normalized addresses with `delivery_status='sent'` on more than one partner row; max `resend_count` = 1. So **no duplicate mail happened.** The last sends ran at 05:46Z, before the owner's "do not send" order reached any session. **What protects a future run, and what does not:** (1) `reissue_external_referral_v1` locks the row (`FOR UPDATE`) and refuses `delivery_status='sent'`, but the row is marked sent only after the mail goes out, so two overlapping runs could both reissue and mail the same row (bounded by `resend_count < 3`); (2) the cross-row rule "one mail per address" exists only in `external_referral_reprocess_candidates_v2` + TypeScript, **not inside the reissue function**; (3) **no `flock` in the repo** — `ops/vps/lm-referral-reprocess.sh` calls the route directly, and the route has no in-process lock; serialization depended on the operator running one step at a time; (4) no concurrency test exists. | a future or overlapping run could mail one address twice | **Live-send lane closed (§2)** until a RED follow-up (owner approval naming it) adds, inside `reissue_external_referral_v1`: `pg_advisory_xact_lock(hashtext(lower(trim(invited_email))))`, a refusal when any partner row with the same normalized address is `sent` or has `last_sent_at` within 24 h, and a concurrency test; plus `flock -n` in `lm-referral-reprocess.sh`. Owner rule "the session that started a fix finishes it" → proposed to `…AygGqFo3`. |
 | D-4 | Both active sessions edit the same migration pin/guard files (`APPLIED_LEDGER.md`, `booking-engagement-end-v1.test.ts`, baseline guards). #2846 and #2843 already conflicted. | merge conflicts | §1.6 lane rule |
-| D-5 | Two read-only platform audits are running at once (one per active session). | duplicated effort | split by area (§5 plan) |
+| D-5 | Two read-only platform audits are running at once (one per active session). | duplicated effort | split by area: `…16CYcDu` = Journal/CV/profiles/calendar/mobile/languages; `…AygGqFo3` = orders/search/marketplace/notifications/payments/permissions |
+| D-6 | **The 2026-10-28 coordinator order reached two sessions** (cloud coordinator and `…AygGqFo3`); both started D-1, #2839/#2840, company-governance and QA-evidence recovery within minutes. The cloud coordinator cannot message sessions on the owner's computer (platform trust rule). | duplicated work; two writers on this file | until the owner decides: `…AygGqFo3` keeps company-governance and #2839/#2840 (it has VPS and `gh` access); the cloud coordinator does not start those and keeps D-1/D-3 evidence and this register. A second writer of this file merges `main` in first. |
 
 ---
 
