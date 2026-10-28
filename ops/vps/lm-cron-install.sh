@@ -15,7 +15,7 @@ grep -q '^CRON_SECRET=.\{32,\}' /root/lm-prod/env || { echo "STOP: CRON_SECRET m
 [ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$(cat /root/lm-prod/active-port 2>/dev/null || echo 3200)/api/health)" = "200" ] || { echo "STOP: container health not 200"; exit 1; }
 # cron syntax: every non-comment line must have 5 fields + user + command
 awk '!/^(#|SHELL=|$)/ { if (NF < 7) { print "STOP: bad cron line: " $0; bad=1 } } END { exit bad }' "$SRC"
-for r in weekly-digest commercial-handoffs job-alerts privacy-erasure; do
+for r in weekly-digest commercial-handoffs job-alerts privacy-erasure forecast-recompute; do
   grep -q " $r\$" "$SRC" || { echo "STOP: $r not scheduled in $SRC"; exit 1; }
   noauth=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: labourmarket.ai' "http://127.0.0.1:$(cat /root/lm-prod/active-port 2>/dev/null || echo 3200)/api/cron/$r")
   [ "$noauth" = "401" ] || { echo "STOP: /api/cron/$r without secret answered $noauth (expected 401)"; exit 1; }
@@ -26,5 +26,5 @@ if [ "$MODE" = "--dry-run" ]; then echo "dry-run OK: nothing installed (authenti
 install -m 644 -o root -g root "$SRC" "$DST"
 echo "installed $DST:"; grep -v '^#' "$DST"
 # One authenticated call per route now, so the first scheduled run is not the first real test.
-for r in commercial-handoffs job-alerts privacy-erasure; do sh "$RUN" "$r" && echo "$r: authenticated run OK" || echo "$r: authenticated run returned non-200 (see /root/lm-prod/cron.log)"; done
+for r in commercial-handoffs job-alerts privacy-erasure forecast-recompute; do sh "$RUN" "$r" && echo "$r: authenticated run OK" || echo "$r: authenticated run returned non-200 (see /root/lm-prod/cron.log)"; done
 tail -3 /root/lm-prod/cron.log

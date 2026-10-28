@@ -536,6 +536,9 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/communication/communication-core.ts",
       "lib/company/claim-public-intake.ts",
       "lib/email/send-ledger-store.ts",
+      // 2026-10-24: the forecast scheduler (cron forecast-recompute). ONLY the
+      // three service-role forecast doors; no chat table; nothing outbound.
+      "lib/forecast/forecast-store.ts",
       "lib/invitations/external-referral-receive.ts",
       "lib/invitations/external-referral-reprocess-run.ts",
       "lib/invitations/public-preview.ts",
