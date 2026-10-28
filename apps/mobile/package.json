@@ -17,7 +17,7 @@
   "dependencies": {
     "@expo/metro-runtime": "~57.0.14",
     "@labourmarket/client-core": "workspace:*",
-    "@supabase/supabase-js": "^2.112.4",
+    "@supabase/supabase-js": "^2.115.0",
     "expo": "~57.0.18",
     "expo-constants": "~57.0.16",
     "expo-linking": "~57.0.8",
