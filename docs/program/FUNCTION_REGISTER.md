@@ -44,14 +44,14 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 1.3 | Password reset | NOT_VERIFIED | 2026-10-25 | profile-cv-history P-1 run 40166272659 10-25: reset form renders; mail delivery still unproven (SMTP) | unproven |  |
 | 1.4 | Onboarding + setup hub | LIVE_VERIFIED | — | fresh-activation walks (owner-created accounts) PASS; invited-worker path: onboarding finds the invitation without the link (#2845, live 2e4ae2b4b), server settles the role and accepts after it (#2846, live 51a35183, mig… | yes |  |
 | 1.5 | Multi-role identity | LIVE_VERIFIED | 2026-10-22 | role-routes run 39783147517 (green) 10-22; 5 roles | yes |  |
-| 1.6 | Organization creation + identity | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): S-1 organization identity page shows Alfa's own record | yes |  |
+| 1.6 | Organization creation + identity | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): S-[volume withheld] identity page shows Alfa's own record | yes |  |
 | 1.7 | Organization verification | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): S-2 verification status shown, honest | yes |  |
 | 1.8 | Multi-capability organization | BLOCKED | — | owner decision ORG-2 | unproven |  |
 | 1.9 | Memberships, invitations, roles | LIVE_VERIFIED | 2026-10-22 | brigade-formation 39795574869 10-22 | yes |  |
 | 1.10 | Workspace context + switching | LIVE_VERIFIED | 2026-10-23 | org-roster R-7 workspace switching run 39969976834 10-23 | yes |  |
 | 1.11 | Cross-org isolation | LIVE_VERIFIED | — | worker-identity-split 39602569732; anon 401 | yes |  |
-| 1.12 | Invitation / referral network | LIVE_VERIFIED | 2026-10-28 | #2855 (ledger 20261028081810) + #2858 (20261028091725) applied, verified, deployed a4cbc9b9; send ledger 51 mails / 51 recipients, 0 duplicates; earlier: 2026-10-27 production: partner referrals arrive through the referral door (pending join_platform with consent, latest 2026-10-27), are e-mailed (4 | yes |  |
-| 1.13 | Transactional e-mail | LIVE_VERIFIED | 2026-10-28 | 51 partner invitation mails delivered via the ledgered provider path (10-27/28); earlier: 2026-10-27 production: owner configured SMTP (LM_SMTP_PASS + INVITE_EMAIL_PROVIDER=smtp); 41 partner invitation e-mails accepted by the provider 20:11-20:13 UTC (email_send_ledger_v1 41 rows, delivery_status=se | yes |  |
+| 1.12 | Invitation / referral network | LIVE_VERIFIED | 2026-10-28 | #2855 (ledger 20261028081810) + #2858 (20261028091725) applied, verified, deployed a4cbc9b9; send ledger shows no duplicate recipient; earlier: 2026-10-27 production: partner referrals arrive through the referral door (pending join_platform with consent, latest 2026-10-27), are e-mailed (41 sent) an | yes |  |
+| 1.13 | Transactional e-mail | LIVE_VERIFIED | 2026-10-28 | partner invitation mails delivered via the ledgered provider path (10-27/28); earlier: 2026-10-27 production: owner configured SMTP (LM_SMTP_PASS + INVITE_EMAIL_PROVIDER=smtp); [volume withheld] e-mails accepted by the provider 20:11-20:13 UTC (email_send_ledger_v1 [volume withheld], delivery_status | yes |  |
 | 1.14 | Staff review notice | LIVE_VERIFIED | 2026-10-21 | staff-review-notice 39604913210 10-21 | yes |  |
 | 1.15 | Org history before claim + claim | LIVE_VERIFIED | 2026-10-25 | company-talent-history run 40217117255 10-25: H-1 roster holds the unclaimed person card; H-2 offer saved (PATCH 200); H-3 employee accepts on the phone; H-4 roster reads linked (LT+EN); H-5 another org + another worker … | yes |  |
 
@@ -114,7 +114,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 3.13 | Operations board + export | LIVE_VERIFIED | 2026-10-23 | project-execution E-2 run 39968362991 10-23: owner downloads the operations report | yes | outsider-refusal step E-13 still to re-run (spec fixed #2702) |
 | 3.14 | Employer planning / calendar | LIVE_VERIFIED | 2026-10-21 | calendar-planning 39571666417 10-21 | yes |  |
 | 3.15 | Absences / leave | LIVE_VERIFIED | 2026-10-23 | calendar-planning run 40007491242 (green) 10-23 | yes |  |
-| 3.16 | Capacity / gap timeline | LIVE_VERIFIED | 2026-10-23 | owner session 10-23: workforce planning shows active team 2, capacity 0/28 person-days, honest partial count | yes |  |
+| 3.16 | Capacity / gap timeline | LIVE_VERIFIED | 2026-10-23 | owner session 10-23: workforce planning shows active team 2, capacity [volume withheld]-days, honest partial count | yes |  |
 | 3.17 | Capacity reservation | LIVE_VERIFIED | 2026-10-23 | project-execution E-6 run 39968362991 10-23 | yes |  |
 | 3.18 | Utilisation | LIVE_VERIFIED | 2026-10-26 | prod walk utilisation-planned-actual run 40295307338 (2026-10-26): U-0..U-3 8/8 — owner commits worker to dated project, committed days move on fresh load; EN + phone; employee and other org refused | yes |  |
 | 3.19 | Planned vs actual | LIVE_VERIFIED | 2026-10-26 | prod walk run 40295307338 (2026-10-26): P-1..P-4 — three stages planned 5 days, started+finished; fresh load shows planned vs actual gap; EN + phone; other org + employee refused | yes |  |
@@ -139,9 +139,9 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 |---|---|---|---|---|---|---|
 | 4.1 | Canonical demand intake | LIVE_VERIFIED | 2026-10-27 | fresh-activation run 40546035425 2026-10-27 on 429b106bc (after #2837+#2838): brand-new company saves its first need (no plan limit) in 4 clicks; visible on company home 1280+390 px; scouting room for the need opens with… | yes |  |
 | 4.2 | Demand != supply direction | LIVE_VERIFIED | 2026-10-25 | public-market-direction run 40186517027 (green) 10-25: demand vs supply direction on public market, LT/EN/RU at 390+1280 px; anon refused from scouting + journal export | yes |  |
-| 4.3 | Worker opportunity board + interest | LIVE_VERIFIED | 2026-10-26 | company-chain C-1 run 40315387466 10-26 (success; replaces 39960149411, which concluded failure — register D-7) | yes |  |
+| 4.3 | Worker opportunity board + interest | LIVE_VERIFIED | 2026-10-26 | company-chain C-1 run 40315387466 (success; replaces 39960149411, which concluded failure — register D-7) | yes |  |
 | 4.4 | Public /jobs board | LIVE_VERIFIED | 2026-10-28 | jobs-search 40645813917 J-1..J-6 6/6 (board, filter, page bounds, job page, signed-in save → saved view → remove); earlier: public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-4 public job board renders a vacancy count | yes |  |
-| 4.5 | Matching engine both directions | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): M-1 worker sees why Gama's need fits (rule-based) | yes |  |
+| 4.5 | Matching engine both directions | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): M-[volume withheld] sees why Gama's need fits (rule-based) | yes |  |
 | 4.6 | Team matching + team offer | LIVE_VERIFIED | 2026-10-22 | brigade-formation run 39795574869 (green) 10-22 | yes | pricing note fixed #2687 |
 | 4.7 | B2B negotiation | LIVE_VERIFIED | 2026-10-22 | brigade-formation run 39795574869 (green) 10-22 | yes |  |
 | 4.8 | Anonymous public need intake | NOT_VERIFIED | — | form renders; submit needs permission | unproven |  |
@@ -152,7 +152,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 4.13 | Auto-match + receipt | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): M-3 the need carries its automatic-matching receipt | yes |  |
 | 4.14 | Candidate drafts | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): M-5 candidate draft created, seen after reload, deleted | yes |  |
 | 4.15 | Agency-client bridge | LIVE_VERIFIED | 2026-10-26 | agency-chain run 40357361254 2026-10-26: 8/8 incl. A-1b (saved offer on the agency home, list one click away) + cleanup: this run's and the earlier run's synthetic offers withdrawn - production check: the synthetic agenc… | yes |  |
-| 4.16 | Interested-worker contact | LIVE_VERIFIED | 2026-10-26 | company-chain C-3/C-4 run 40315387466 10-26 (success; replaces 39960149411, which concluded failure — register D-7) | yes |  |
+| 4.16 | Interested-worker contact | LIVE_VERIFIED | 2026-10-26 | company-chain C-3/C-4 run 40315387466 (success; replaces 39960149411 — register D-7) | yes |  |
 | 4.17 | Discoverability consent | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): P-8 employer visibility off, persists, back on | yes |  |
 | 4.18 | Employer data disclosure grant | BLOCKED | — | owner #2471 | unproven |  |
 | 4.19 | Contact disclosure requests | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): M-4 contact-details ask pending, then withdrawn | yes |  |
@@ -161,7 +161,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 4.22 | 3 free profile views + VIP | NOT_IMPLEMENTED | — | built only in RED draft #2474, not merged/applied | no | owner approval + figures |
 | 4.25 | Admin matching workbench | LIVE_VERIFIED | 2026-10-25 | owner admin session 2026-10-25 12:30 LT, read-only Chromium (Claude in Chrome): /admin/matching workbench renders open needs beside supply (read path; no decision written) | yes |  |
 | 4.26 | /match-preview public fit | LIVE_VERIFIED | 2026-10-25 | ai-off-honesty run 40191899327 10-25 (12/13 green): C-1 signed out: match preview computes the fit, says AI explanation not generated (LT+EN, 390+1280) | yes |  |
-| 4.28 | First-party supply declaration | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): P-6 worker declares own supply, persists after reload, withdraws (data-intent check) | yes |  |
+| 4.28 | First-party supply declaration | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): P-[volume withheld] declares own supply, persists after reload, withdraws (data-intent check) | yes |  |
 | 4.29 | Interest->vacancy hand-off | LIVE_VERIFIED | 2026-10-23 | prod DB 10-23: 3/3 consented hand-offs delivered ~2 s (partner 201/200); 10 non-consented withheld by design; cron 06:00 call 200 | yes |  |
 
 ## Chat & communication
@@ -184,7 +184,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 5.14 | Command finder + voice | LIVE_VERIFIED | — | owner #2673/#2679 (finder only) | yes |  |
 | 5.15 | Voice as equal door | NOT_VERIFIED | — | COM-8 corrected to PARTIAL/CODE_PROVEN (#2714): voice capture panel + turn policy exist | unproven | no prod voice walk |
 | 5.16 | Owner Telegram alerts | BLOCKED | — | owner bot token | unproven |  |
-| 5.17 | Support conversations | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): S-1 worker opens a support conversation, finds it in own inbox | yes |  |
+| 5.17 | Support conversations | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): S-[volume withheld] opens a support conversation, finds it in own inbox | yes |  |
 | 5.18 | Global dashboard search | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): S-2 global dashboard search finds the conversation and opens it | yes |  |
 | 5.19 | Inbox report view | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): S-5 company review inbox + printable report | yes |  |
 
@@ -195,7 +195,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 6.1 | Service offerings + request loop | LIVE_VERIFIED | 2026-10-25 | marketplace-goods-services run 40164310896 10-25: service made discoverable, requested by another org, accepted with a note, requester sees acceptance, both sides message | yes |  |
 | 6.2 | Listings goods/rental/wanted | LIVE_VERIFIED | 2026-10-25 | marketplace-goods-services run 40164310896 10-25 (14/14): private sale listing, company rental published as the company, private 'looking for' listing, discovery, cross-org Q&A thread; cleanup closed all synthetic listin… | yes |  |
 | 6.3 | One discovery index | LIVE_VERIFIED | 2026-10-25 | marketplace-goods-services run 40164310896 10-25: listings and services found in the one market discovery | yes |  |
-| 6.4 | Buyer workspace | LIVE_VERIFIED | 2026-10-26 | buyer-workspace run 40377604733 2026-10-26 (owner-created synthetic buyer): B-0 onboarding via shipped wizard, B-1 customer record saves + reads back, B-2 DRAFT request listed once, B-3 390 px no sideways scroll; DB: 1 c… | yes | open security/permission item — details kept out of the public repository (owner rule) |
+| 6.4 | Buyer workspace | LIVE_VERIFIED | 2026-10-26 | buyer-workspace run 40377604733 2026-10-26 (owner-created synthetic buyer): B-0 onboarding via shipped wizard, B-[volume withheld] record saves + reads back, B-2 DRAFT request listed once, B-3 390 px no sideways scroll; … | yes | open security/permission item — details kept out of the public repository (owner rule) |
 | 6.6 | Proposals/contracts | LIVE_VERIFIED | 2026-10-25 | documents-approvals 40152566232 10-25 (walk passed) | yes |  |
 | 6.7 | Procurement | LIVE_VERIFIED | 2026-10-26 | orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes |  |
 | 6.8 | Business trips | LIVE_VERIFIED | 2026-10-26 | orders-bookings run 40361384432 2026-10-26 PASS (re-proven) | yes | fixed by #2706 (rpc .catch crash) |
@@ -220,7 +220,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 7.2 | Free organization limit 1 open need | PASS_CI_ONLY | 2026-10-23 | brigade walk 10-12; pilot lifted limit 10-23 | unproven |  |
 | 7.3 | Entitlement resolver | LIVE_VERIFIED | 2026-10-23 | pilot payment changed effective entitlements live 10-23 | yes |  |
 | 7.4 | Stripe TEST checkout/portal/webhook | OPTIONAL_TEST | 2026-10-28 | billing-test-mode never executed: the pilot organization is not armed in Stripe TEST; production stays LIVE (owner 10-28) | — | extra TEST scenario; does not block launch and is not a payment defect |
-| 7.5 | Live charging | LIVE_VERIFIED | 2026-10-23 | real 1 € Stripe LIVE payment, webhook fired, the pilot organization plan active 30 days (owner-confirmed) | yes |  |
+| 7.5 | Live charging | LIVE_VERIFIED | 2026-10-23 | real Stripe LIVE payment, webhook fired, pilot plan activated (owner-confirmed) | yes |  |
 | 7.6 | Billing recovery cron | BLOCKED | — | #2696 removed the GH cadence that hit nginx-404; recovery still needs the VPS cron line + BILLING_RECOVERY_ENABLED | unproven | owner VPS step |
 | 7.7 | Manual pilot grant (admin) | BLOCKED | — | no admin session | unproven |  |
 | 7.8 | LMC credit ledger | BLOCKED | — | owner design | unproven |  |
@@ -238,7 +238,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 7.20 | Invoices inside LM | NOT_IMPLEMENTED | — | in-app invoices/payment history not built (Stripe portal invoice exists; RED draft #2682 adds plan name+amount only) | no | build Stripe invoice read for the org |
 | 7.21 | Billing portal for every billing manager | NOT_VERIFIED | 2026-10-23 | payer opened the Stripe portal (10-23) | unproven | missing evidence: a second billing manager of the same org opens the portal |
 | 7.22 | Paid-feature rights and limits | NOT_VERIFIED | — | plan limits enforced for needs + bookings (pilot lifted the open-need limit live) | unproven | missing evidence: the other paid-feature limits (profile views #2474, VIP) are not built/applied |
-| 7.23 | LMC top-up | NOT_IMPLEMENTED | — | registry NOT_BUILT: LMC one-time top-up (1 LMC = 1 EUR) | no | owner: packages, VAT, refund; LMC owner-locked |
+| 7.23 | LMC top-up | NOT_IMPLEMENTED | — | registry NOT_BUILT: LMC one-time top-up (1 LMC = [amount withheld]) | no | owner: packages, VAT, refund; LMC owner-locked |
 | 7.24 | LMC granted once per payment | NOT_IMPLEMENTED | — | registry NOT_BUILT: LMC grant tied to one confirmed payment | no | depends on 7.23 |
 | 7.25 | LMC balance and history | NOT_VERIFIED | 2026-10-25 | lmc-csrf run 40210854856 10-25: chat 'Kiek turiu LMC?' door opens the balance section (LT/EN, 390 px), signed-out refused; both synthetic accounts read state=no_account honestly — a measured balance/history not yet seen | unproven | open security/permission item — details kept out of the public repository (owner rule) |
 | 7.26 | LMC spend + reversal | NOT_IMPLEMENTED | — | registry NOT_BUILT: LMC spend + refund reversal (functions exist, no caller) | no | depends on 7.23 |
@@ -255,7 +255,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 8.3 | Machine translation | BLOCKED | 2026-10-26 | ai-off-honesty run 40191899327 10-25: A-4 no machine translation, original kept and labelled; re-proven 2026-10-26 prod walk ai-off-honesty run 40301607964 13/13 (honest off state; #2771 one <main> on job pages) | unproven | AI provider keys (owner) — honest off-state proven, the AI function itself not |
 | 8.4 | Country labour-market pages | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-5 country labour-market page renders | yes |  |
 | 8.5 | Nine priority launch markets | BLOCKED | 2026-10-28 | 2026-10-28 catalog audit: active locales lt/en/ru/nl/de/pl complete (15191 strings, 0 '[EN]' placeholders); inactive da/et/lv/no/sv are PARTIAL (5817 of 15191 keys) and 22-44% of their strings are '[EN]' placeholders (da… | unproven | Activating the 5 markets needs ~9400 missing keys per locale plus the [EN] placeholders translated and reviewed (owner: translation source/budget decision; zero paid AI policy) |
-| 8.6 | Country requirement matrix | LIVE_VERIFIED | 2026-10-25 | requirements-countries run 40209522348 10-25: C-1/C-2 DE+NL matrices from the country index (LT, EN, 390 px) with europa.eu sources; C-3 worker documents view with sources, no upload; C-4 signed-out refused | yes |  |
+| 8.6 | Country requirement matrix | LIVE_VERIFIED | 2026-10-25 | requirements-countries run 40209522348 10-25: C-1/C-2 DE+NL matrices from the country index (LT, EN, 390 px) with europa.eu sources; C-[volume withheld] documents view with sources, no upload; C-4 signed-out refused | yes |  |
 | 8.7 | Public answer engine + llms.txt | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-8 /llms.txt plain text naming the product | yes |  |
 | 8.8 | SEO plumbing | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-9 robots, sitemap, canonical + hreflang to the apex | yes |  |
 | 8.9 | Public org profile | BLOCKED | 2026-10-26 | public-org-locales run 40205429467 10-25: S-10 skipped honestly - no organization has a published public profile (production count 0, 2026-10-26); publishing the synthetic Alfa profile would put a test object on a public… | unproven | owner: allow a synthetic public profile for the walk, or wait for a real organization to opt in |
@@ -275,7 +275,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 9.2 | Admin pilots/telemetry/league | LIVE_VERIFIED | 2026-10-25 | owner admin session 2026-10-25 12:30 LT, read-only Chromium (Claude in Chrome): /admin/pilots, /admin/telemetry and /admin/league render real data | yes |  |
 | 9.3 | Admin user inspect | LIVE_VERIFIED | 2026-10-25 | owner admin session 2026-10-25, read-only: /admin/users/<synthetic QA id> renders role, state, profile text, suggested skills, drafts with honest empty states | yes |  |
 | 9.4 | Privacy request intake | LIVE_VERIFIED | 2026-10-19 | prod DB: erasure request received + executed via intake 2026-10-19 (receipt requested_at) | yes |  |
-| 9.5 | GDPR export | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40199732022 10-25: P-2 worker downloads own data bundle (measured, never read, deleted) | yes |  |
+| 9.5 | GDPR export | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40199732022 10-25: P-[volume withheld] downloads own data bundle (measured, never read, deleted) | yes |  |
 | 9.6 | GDPR erasure executor | LIVE_VERIFIED | 2026-10-19 | prod DB: privacy_erasure_receipts_v3 executed receipt 2026-10-19 15:23 UTC | yes |  |
 | 9.7 | Worker row access identity split | LIVE_VERIFIED | 2026-10-21 | worker-identity-split 39602569732 10-21 | yes |  |
 | 9.8 | RLS on every table | LIVE_VERIFIED | 2026-10-23 | prod catalog 10-23: 243/243 public tables RLS on; 15 no-policy tables sealed; anon probes 401/404 | yes | cleanup candidate backfill snapshot (RED) |
@@ -318,7 +318,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 10.17 | External action receipts | LIVE_VERIFIED | 2026-10-23 | mcp-agents run 39885097311 (green) 10-23; audit_logs rows observed | yes |  |
 | 10.18 | Vacancy source SE | LIVE_VERIFIED | 2026-10-23 | cursor 06:03 10-23; 49,731 live | yes |  |
 | 10.19 | Vacancy source NAV | LIVE_VERIFIED | 2026-10-23 | cursor 07:27 10-23; 9,266 live | yes |  |
-| 10.20 | Vacancy retention | FAIL | 2026-10-23 | dry run 39936626534 10-23 fails closed: service_role lacks SELECT on 2 protected-id tables; would purge 110,481/170,172 rows | no | open security/permission item — details kept out of the public repository (owner rule) |
+| 10.20 | Vacancy retention | FAIL | 2026-10-23 | dry run 39936626534 10-23 fails closed: service_role lacks SELECT on 2 protected-id tables; would purge 110,481/[volume withheld] | no | open security/permission item — details kept out of the public repository (owner rule) |
 | 10.21 | Eurostat import | BLOCKED | — | gates on but no scheduler calls runEurostatImport; data from 07-15 | unproven | owner: allow scheduled import |
 | 10.22 | the partner organization integration | BLOCKED | — | owner | unproven |  |
 | 10.23 | Agentai supply feed | LIVE_VERIFIED | 2026-10-24 | prod edge logs 2026-10-24/25: rpc first_party_supply_feed_v1 200 x4 (last 09:32 UTC) = authorized feed pulls served; anon 401 (earlier probe) | yes |  |
@@ -357,7 +357,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
-| 13.1 | VPS hosting + auto-deploy | FAIL | 2026-10-28 | deploys green; 10-28 inbound loss from GitHub-hosted networks (06:20–06:31, ~06:59, ~07:57 UTC): eth0 ~8 pkt/s, host idle, no local block; earlier: external monitor 10-23: 4 of 15 anonymous requests stalled; NOT reproduced 10-26: lcp-locale-probe run 40328663291 (48 pages + 48 health) and concurrenc | no | provider network fault probable, not proven (register D-10); Hostinger ticket drafted |
+| 13.1 | VPS hosting + auto-deploy | FAIL | 2026-10-28 | deploys green; 10-28 intermittent inbound loss from GitHub-hosted networks, host healthy; earlier: external monitor 10-23: 4 of 15 anonymous requests stalled; NOT reproduced 10-26: lcp-locale-probe run 40328663291 (48 pages + 48 health) and concurrency-probe run 40342223134 (36 pages + 36 health, tw | no | provider network fault probable, not proven (register D-10); Hostinger ticket drafted |
 | 13.2 | Health probe + monitor | LIVE_VERIFIED | — | live | yes |  |
 | 13.3 | Prod QA walk harness | LIVE_VERIFIED | 2026-10-22 | role-routes run 39783147517 (green) 10-22 | yes |  |
 | 13.4 | Supabase capacity | PASS_CI_ONLY | 2026-10-25 | Supabase org plan=pro (get_organization 2026-10-25) | unproven |  |
