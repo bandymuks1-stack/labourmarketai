@@ -1,4 +1,5 @@
 -- 20261027210000_external_referral_reprocess_candidates_v2
+-- @human-gate-approved (owner, 2026-10-28, in chat: apply + merge #2843)
 --
 -- RED tier: a new read-only SECURITY DEFINER function, service_role only.
 -- Owner approval required before it is applied. No table, column, RLS policy,
