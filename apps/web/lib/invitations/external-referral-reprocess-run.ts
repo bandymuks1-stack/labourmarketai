@@ -41,7 +41,9 @@ export async function runExternalReferralReprocess(input: {
   readonly origin: string;
 }): Promise<ReprocessRunResult> {
   const admin = createAdminClient();
-  const { data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v1");
+  // v2 adds `address_already_sent`: an older duplicate row of an address that
+  // was already mailed must never be mailed again.
+  const { data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v2");
   if (error) {
     return error.code === "42883" || error.code === "PGRST202"
       ? { kind: "needs_migration" }
@@ -64,7 +66,16 @@ export async function runExternalReferralReprocess(input: {
       .filter((r) => r.has_account === true && typeof r.invited_email === "string")
       .map((r) => (r.invited_email as string).trim().toLowerCase()),
   );
-  const selection = selectReprocessCandidates(rows, { now: new Date(), existingAccountEmails });
+  const alreadyMailedEmails = new Set(
+    raw
+      .filter((r) => r.address_already_sent === true && typeof r.invited_email === "string")
+      .map((r) => (r.invited_email as string).trim().toLowerCase()),
+  );
+  const selection = selectReprocessCandidates(rows, {
+    now: new Date(),
+    existingAccountEmails,
+    alreadyMailedEmails,
+  });
   // The control test is the soonest-expiring eligible referral: one person,
   // chosen by the same rule the batch would use first.
   const control = selection.eligible[0]?.id;
