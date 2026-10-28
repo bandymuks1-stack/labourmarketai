@@ -29,6 +29,10 @@ on:
       - "apps/web/app/*/dashboard/start/**"
       - "apps/web/lib/onboarding/**"
       - "apps/web/lib/invitations/signup-*"
+      - "apps/web/components/app/login-form.tsx"
+      - "apps/web/components/app/reset-password-form.tsx"
+      - "apps/web/app/*/dashboard/journal/**"
+      - "supabase/config.toml"
 
 permissions:
   contents: read
