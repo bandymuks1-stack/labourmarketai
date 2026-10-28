@@ -96,12 +96,12 @@ independent work or launch of other features (owner order 2026-10-28).
 | Lane | Holder | Since | What |
 |---|---|---|---|
 | migration (prod DB) | — free — | | last: `external_referral_reprocess_candidates_v2` applied 2026-10-28 04:47Z by session `…AygGqFo3aoB76NrV` (#2843) |
-| live sends (e-mail to real people) | session `…AygGqFo3aoB76NrV` | 2026-10-27 | partner referral reprocess: 41/45 sent; control + last 3 pending after #2843 merge |
-| deploy | — serial via `deploy-vps.yml` — | | production = `51a3518` (#2846), deployed 2026-10-28 04:26Z |
+| live sends (e-mail to real people) | — free — | | last: partner referral reprocess DONE 2026-10-28 05:46Z — 45/45 unique addresses sent, 0 failed, 0 duplicates (see D-3) |
+| deploy | — serial via `deploy-vps.yml` — | | production = `c3f440fc` (#2850, contains #2843), healthy 2026-10-28 05:45Z |
 
 ---
 
-## 3. Work register — snapshot 2026-10-28 ~05:10Z
+## 3. Work register — snapshot 2026-10-28 ~06:20Z
 
 Sources: GitHub PRs/Actions, production migration ledger, session list and
 transcripts readable from the coordinator session. Status per §1.4.
@@ -127,11 +127,11 @@ Those questions are collected in §5, not re-asked per session.
 | #2846 | invitations-for-me carries partner source (RED, approved for this one) | `…16CYcDu` | DONE | live, `51a3518` |
 | #2847 | synthetic invited-worker provision/revoke/purge mechanism | `…16CYcDu` | DONE (code) | workflow `prod-qa-invited-provision` never run → invited-worker E2E **NOT_VERIFIED** (owner: parked, do not ask again) |
 | #2848 | public header brand not cut on phones | `…16CYcDu` | DONE | LIVE_VERIFIED 320/360/375 |
-| #2843 | never re-mail an address from an older duplicate referral (RED) | `…AygGqFo3` | WAITING (CI) | migration v2 already applied 04:47Z; see §4 D-3 |
+| #2843 | never re-mail an address from an older duplicate referral (RED, approved 10-28) | `…AygGqFo3` | DONE | merged `7e64b332`, deployed `c3f440fc`; ledger `20261028044705`; sends finished (D-3) |
 | #2849 | public site opens light; one-sentence sign-up intro (11 locales) | `…16CYcDu` | WAITING (CI → merge, owner-authorized) | not yet |
-| #2844 | synthetic data instead of personal e-mails in tests/docs | unknown | WAITING (review) | — |
-| #2840 | zero paid AI budget — metered providers off unless owner opens | unknown | WAITING (review) | — |
-| #2839 | DB restore procedure doc | unknown | WAITING (review) | — |
+| #2844 | synthetic data instead of personal e-mails in tests/docs | unknown | WAITING (owner: legal wording) | CI green; touches `docs/legal/*` — owner decides |
+| #2840 | zero paid AI budget — metered providers off unless owner opens | unknown | WAITING (review) | CI green, mergeable, 9 behind `main`. Risk checked: `AI_PAID_PROVIDERS_ALLOWED` unset on the VPS → default `false` passes the env schema; `AI_GEMINI_ENABLED=false` already, so no production behaviour change. An empty value would fail env validation at boot — never set it to "". |
+| #2839 | DB restore procedure doc | unknown | WAITING (review) | CI green, docs-only (runbook), no regression risk |
 | #2842 | paid-terms legal draft | unknown | WAITING (legal/owner) | — |
 | #2828 | premium action cards visual proposal | unknown | WAITING (owner visual) | — |
 
@@ -155,17 +155,34 @@ closes them on the coordinator's say-so.
 
 | Id | Finding | Risk | Next step |
 |---|---|---|---|
-| D-1 | **Production holds `project_forecasts_v1` (ledger `20261025045152`) and `history_period_precision_and_registry_v1` (`20261025050302`) but `main` has neither file**; their PRs #2738 / #2739 are still RED drafts. No `APPLIED_LEDGER.md` entry on `main`. | re-run hazard; guards on `main` don't know the objects; a third PR could collide | owner: either approve merging #2738/#2739 as-applied, or record why they were applied ahead. No re-apply, no rollback without owner. |
+| D-1 | Production holds `project_forecasts_v1` (ledger `20261025045152`) and `history_period_precision_and_registry_v1` (`20261025050302`); `main` has neither file; #2738 / #2739 are RED drafts. **Verified 2026-10-28:** the applied SQL equals the PR files exactly once comments and the `begin;`/`commit;` wrapper are removed (normalized md5 `c82d17ef…` and `f4c1f2cd…` on both sides) — CONTENT_ONLY, nothing extra in production. | re-run hazard only if someone applies the files again | **No re-apply, no rollback.** Safe path: owner approves merging #2738 and #2739 *as already applied* (no `apply_migration` step); the merge adds the `APPLIED_LEDGER.md` rows (CONTENT_ONLY) and the guard pins. #2738 also ships app code (forecast cron route, VPS cron entries) — that part is a feature launch the owner approves with it. |
 | D-2 | `market_lifecycle_closed_outcome_v1` is applied and its file is on `main`, but #2746's title still says "NOT applied". | misleading status | fix the PR title/body when #2746 is next touched |
-| D-3 | #2843: owner conditions given in session `…16CYcDu` (atomic DB guard in `reissue_external_referral_v1`, normalized e-mail, concurrency tests). The #2843 diff adds a read-only candidate list with `lower(trim())` matching and a TS exclusion; no lock/unique guard inside the reissue function and no concurrency test seen. VPS `flock` serializes runs. | possible second mail to one address under concurrent runs | owner confirms whether `flock` + candidate exclusion satisfies the condition before the last sends |
+| D-3 | #2843 duplicate protection. **Sends finished 2026-10-28 05:45–05:46Z**, before the stricter conditions written in session `…16CYcDu` reached the sending session. Protection used: v2 candidate list (`lower(trim())` address match, already-sent addresses excluded), `reissue_external_referral_v1` row lock (`FOR UPDATE`) + `already_sent` / `has_account` / expiry / consent re-check + resend cap 3, every run under `flock -n` on the VPS, script manual-only (no cron, no timer). Proven in DB: 45 unique addresses sent, ledger 0 duplicate recipients, 0 rows resent twice, the duplicate row never mailed; eligible now 0. | Residual: the DB itself has no address-level lock between `reissue` and `mark` — two concurrent runs outside `flock` could mail one address twice. No send is pending. | Before ANY future reprocess run: keep `flock` as the only entry, or (owner-approved RED) move the address check + an advisory lock on the normalized address into `reissue_external_referral_v1`, with a concurrency test. |
 | D-4 | Both active sessions edit the same migration pin/guard files (`APPLIED_LEDGER.md`, `booking-engagement-end-v1.test.ts`, baseline guards). #2846 and #2843 already conflicted. | merge conflicts | §1.6 lane rule |
-| D-5 | Two read-only platform audits are running at once (one per active session). | duplicated effort | split by area (§5 plan) |
+| D-5 | Two read-only platform audits ran at once (one per active session). The `…AygGqFo3` audit (2026-10-28) covered signed-out journeys + invite/signup code: 3×P1, 7×P2, no fixes yet. | duplicated effort | the session that fixes invite/signup claims it in §3 first; the other audit skips that area |
+| D-6 | `company-governance` prod walk never passed (3 runs). Last 40296167812 (10-26): T-2 `invalid_assignee`. Cause verified in prod DB: the trainee slot (`qa.worker+multiw`) is engaged by Alfa but has **0 company memberships**; `assign_training_v1` assigns only active members. Spec defect, not a production defect. | walk red; T-* unproven | GREEN spec fix: trainee = the QA manager (active manager member of Alfa) — branch `fix/cc/governance-walk-trainee`. Owner question: should engaged (non-member) workers be assignable to training? (RED if yes.) |
+| D-7 | Two counts of the function matrix: local 275-row matrix (`_agent-workspaces/labourmarketai/matrix/functionality-matrix-2026-10-23.md`, not in git) PASS 194 / FAIL 8 / BLOCKED 39 / NOT_VERIFIED 18 / NOT_IMPLEMENTED 16; public `docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md` 71/274 LIVE_PROVEN (stale since #2640, 10-21). Matrix rows 4.3/4.16 cite run 39960149411, which concluded failure. | two truths | regenerate the public summary from the matrix (counts and run ids only); re-cite 4.3/4.16 to 40315387466 |
 
 ---
 
+## 4a. QA evidence (prod walks, `prod-qa-walk.yml`)
+
+| Claim | Level | Evidence |
+|---|---|---|
+| Marketplace walk 6/6 | LIVE_VERIFIED | run 40200714397 (10-25, `d9b1a38f5`); earlier 40072913099, 40047419163 |
+| Brigade + B2B 13/13 | LIVE_VERIFIED | run 38231306190 (10-12, `e68a59876`); `company-chain` last green 40315387466 (10-26); `brigade-formation` 39985839991 (10-23) |
+| 275-function matrix | PASS rows LIVE_VERIFIED; the rest as counted in D-7 | local matrix (D-7); 149 PASS rows cite a prod-qa run id |
+| Last walk failures | — | `company-governance` 40296167812 (D-6); weekly rotation 40177765214 (10-25); `billing-test-mode` 39884833436 (10-23); manual `role-routes` 39978076973 (10-23) |
+| No run in the last 400 | NOT_VERIFIED | `admin-console`; `invited-worker` (owner: parked) |
+
+Every other walk spec: last run green between 10-23 and 10-28.
+
 ## 5. Open owner items (collected once)
 
-- Approve or reject each RED draft individually (§3.3); D-1 and D-3 first.
+- Approve or reject each RED draft individually (§3.3); D-1 first (merge #2738/#2739 as already applied — SQL verified identical).
+- D-3 hardening (RED): DB-level address lock in `reissue_external_referral_v1` before any future reprocess run.
+- D-6 product question: training for engaged (non-member) workers.
+- #2844 legal wording.
 - `prod-qa-invited-provision` dispatch — parked by owner 2026-10-28; do not re-ask.
 - `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2,
   EVID-2, MKT-7, COM-6, COM-8 (see `product-truth.mjs`).
