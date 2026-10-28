@@ -20,6 +20,8 @@
 appId: ai.labourmarket.app
 name: jobs-need-journey
 ---
+# A tap during scroll momentum only stops the scroll on Android, so every
+# scrollUntilVisible is followed by waitForAnimationToEnd before the tap.
 - extendedWaitUntil:
     visible:
       id: "email"
@@ -46,6 +48,7 @@ name: jobs-need-journey
       id: "today-open-jobs"
     direction: DOWN
     timeout: 60000
+- waitForAnimationToEnd
 
 # --- 1–2. Jobs: search, a loaded board ---
 - tapOn:
@@ -98,6 +101,7 @@ name: jobs-need-journey
       id: "today-open-need"
     direction: DOWN
     timeout: 30000
+- waitForAnimationToEnd
 - tapOn:
     id: "today-open-need"
 - extendedWaitUntil:
@@ -110,6 +114,7 @@ name: jobs-need-journey
       id: "need-review"
     direction: DOWN
     timeout: 20000
+- waitForAnimationToEnd
 - tapOn:
     id: "need-review"
 # The empty need is refused ON THE PHONE (need-local-error), before any request.
@@ -118,6 +123,7 @@ name: jobs-need-journey
       id: "need-local-error"
     direction: UP
     timeout: 30000
+- waitForAnimationToEnd
 
 # --- 4. Need: fill, draft, preview, confirm, sent ---
 # OFF unless NEED_SUBMIT=1: a confirmed need is a real production row, and cross-org
@@ -142,6 +148,7 @@ name: jobs-need-journey
             id: "need-location"
           direction: DOWN
           timeout: 20000
+      - waitForAnimationToEnd
       - tapOn:
           id: "need-location"
       - inputText: "Vilnius"
@@ -155,6 +162,7 @@ name: jobs-need-journey
             id: "need-team-size"
           direction: DOWN
           timeout: 20000
+      - waitForAnimationToEnd
       - tapOn:
           id: "need-team-size"
       - inputText: "2"
@@ -168,6 +176,7 @@ name: jobs-need-journey
             id: "need-review"
           direction: DOWN
           timeout: 20000
+      - waitForAnimationToEnd
       - tapOn:
           id: "need-review"
       - extendedWaitUntil:
@@ -179,6 +188,7 @@ name: jobs-need-journey
             id: "need-confirm"
           direction: DOWN
           timeout: 20000
+      - waitForAnimationToEnd
       - tapOn:
           id: "need-confirm"
       - extendedWaitUntil:

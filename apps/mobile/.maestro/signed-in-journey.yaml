@@ -23,6 +23,8 @@
 appId: ai.labourmarket.app
 name: signed-in-journey
 ---
+# A tap during scroll momentum only stops the scroll on Android, so every
+# scrollUntilVisible is followed by waitForAnimationToEnd before the tap.
 - launchApp:
     clearState: true
 - extendedWaitUntil:
@@ -90,6 +92,7 @@ name: signed-in-journey
       id: "journal-compose-site"
     direction: DOWN
     timeout: 20000
+- waitForAnimationToEnd
 - tapOn:
     id: "journal-compose-site"
 - inputText: "CI site"
@@ -103,6 +106,7 @@ name: signed-in-journey
       id: "journal-compose-review"
     direction: DOWN
     timeout: 20000
+- waitForAnimationToEnd
 - tapOn:
     id: "journal-compose-review"
 # When the identity holds more than one work context the server asks the
@@ -119,6 +123,7 @@ name: signed-in-journey
       id: "journal-compose-save"
     direction: DOWN
     timeout: 60000
+- waitForAnimationToEnd
 - tapOn:
     id: "journal-compose-save"
 - extendedWaitUntil:
@@ -130,6 +135,7 @@ name: signed-in-journey
       id: "journal-compose-back"
     direction: DOWN
     timeout: 20000
+- waitForAnimationToEnd
 - tapOn:
     id: "journal-compose-back"
 
@@ -149,6 +155,7 @@ name: signed-in-journey
       id: "sign-out"
     direction: DOWN
     timeout: 30000
+- waitForAnimationToEnd
 - tapOn:
     id: "sign-out"
 - extendedWaitUntil:
