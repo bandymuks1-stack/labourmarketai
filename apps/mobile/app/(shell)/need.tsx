@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -13,11 +13,21 @@ import { theme } from "../../src/ui/theme";
 export default function Screen() {
   const { t } = useLocale();
   const router = useRouter();
+  // This station stays mounted in the Tabs navigator, so a finished (or
+  // cancelled) need would greet the next visit with its old state. A new key
+  // mounts a fresh form for the next need.
+  const [intake, setIntake] = useState(0);
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Title>{t("need.title")}</Title>
-        <NeedIntakeScreen onDone={() => router.push("/(shell)/today")} />
+        <NeedIntakeScreen
+          key={intake}
+          onDone={() => {
+            setIntake((n) => n + 1);
+            router.push("/(shell)/today");
+          }}
+        />
       </ScrollView>
     </SafeAreaView>
   );

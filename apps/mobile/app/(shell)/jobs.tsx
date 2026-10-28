@@ -42,6 +42,17 @@ export default function Screen() {
     [query, page],
   );
   const search = useCapability<JobsSearchData>("jobs.search", args);
+  // Submitting the SAME search again (after "unavailable", say) must read
+  // again: unchanged state would not rerun the read, and a known refusal
+  // shows no retry button of its own.
+  const submit = () => {
+    const next = draftQuery.trim();
+    if (next === query && page === 1) search.reload();
+    else {
+      setPage(1);
+      setQuery(next);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
@@ -59,16 +70,14 @@ export default function Screen() {
           autoCapitalize="none"
           returnKeyType="search"
           onSubmitEditing={() => {
-            setPage(1);
-            setQuery(draftQuery.trim());
+            submit();
           }}
         />
         <Button
           testID="jobs-search"
           label={t("jobs.search")}
           onPress={() => {
-            setPage(1);
-            setQuery(draftQuery.trim());
+            submit();
           }}
         />
         <CapabilityGate
