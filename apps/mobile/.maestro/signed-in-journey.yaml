@@ -144,9 +144,10 @@ name: signed-in-journey
 # --- 5. Sign out, back to the form ---
 - tapOn:
     id: "tab-settings"
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: "sign-out"
+    direction: DOWN
     timeout: 30000
 - tapOn:
     id: "sign-out"

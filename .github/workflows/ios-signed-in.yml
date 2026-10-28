@@ -31,6 +31,11 @@ concurrency:
 jobs:
   signed-in:
     name: Simulator build (production public config) + signed-in journey
+    # ONE review identity, ONE password at a time: every job that issues and
+    # scrambles it (Android and iOS, any ref) waits for the others.
+    concurrency:
+      group: mobile-qa-review-identity
+      cancel-in-progress: false
     runs-on: macos-26
     environment: production-qa
     timeout-minutes: 60
