@@ -8,6 +8,7 @@ deploy lanes, and hand-offs. It is shared project data, not one chat's memory.
 
 | Truth | Canonical home |
 |---|---|
+| **Status of every function (LIVE_VERIFIED / PASS_CI_ONLY / FAIL / BLOCKED / NOT_VERIFIED / NOT_IMPLEMENTED / OPTIONAL_TEST)** | [`FUNCTION_REGISTER.md`](FUNCTION_REGISTER.md) — the ONE per-function register; read before every task |
 | What the product is, capability status, broken journeys, open owner decisions | `node .github/scripts/product-truth.mjs` → `docs/CAPABILITY_INVENTORY.md`, `docs/OWNER_TARGET_ARCHITECTURE_V1.md` |
 | Which migration is applied in production | `docs/APPLIED_LEDGER.md` + `supabase_migrations.schema_migrations` (match on `name`, never `version`) |
 | Owner decisions | `docs/DECISIONS/` |
@@ -23,6 +24,8 @@ or private commercial detail.
 ## 1. Protocol (binding for every session working on labourmarketai)
 
 ### 1.1 Before starting — is it already being done?
+0. Read [`FUNCTION_REGISTER.md`](FUNCTION_REGISTER.md): a `LIVE_VERIFIED` function is not re-tested or re-built
+   without a concrete regression or a change that can affect it (owner order 2026-10-28).
 1. `git fetch origin` and read §3 of this file on `main` **and** on open PR branches
    that edit it.
 2. Search open PRs and branches for the area (title, touched files).
