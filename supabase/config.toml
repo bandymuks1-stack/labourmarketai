@@ -32,3 +32,8 @@ enable_signup = true
 [auth.email]
 enable_signup = true
 enable_confirmations = false
+
+# LOCAL STACK ONLY (never pushed to a hosted project): the isolated CI walks send several auth mails per run
+# (confirmation, password reset) to the local mail catcher; the CLI default of 2 per hour leaves no headroom.
+[auth.rate_limit]
+email_sent = 60
