@@ -163,11 +163,25 @@ async function as(browser: Browser, address: string): Promise<{ page: Page; clos
   return { page, close: () => ctx.close() };
 }
 
-/** Everything the main region renders, folded sections included. */
+/** Everything the main region renders, folded sections included — read only
+ *  once the page's own content has streamed in (until then `main` holds just
+ *  the dashboard's quiet credit line, and an absence check would prove
+ *  nothing). */
 async function mainText(page: Page): Promise<string> {
   const main = page.getByRole("main");
   await expect(main).toBeVisible({ timeout: 30_000 });
-  return (await main.textContent()) ?? "";
+  await page.waitForLoadState("networkidle").catch(() => {});
+  let text = "";
+  await expect
+    .poll(
+      async () => {
+        text = ((await main.textContent()) ?? "").replace(/Built together:.*$/s, "").trim();
+        return text.length;
+      },
+      { message: "the page content rendered", timeout: 30_000 },
+    )
+    .toBeGreaterThan(40);
+  return text;
 }
 
 // ── A-1 ─────────────────────────────────────────────────────────────────────
@@ -414,7 +428,10 @@ test("A-4. another organization sees none of the agency's people or needs", asyn
   await main.getByTestId("demand-create").click();
   await expect(main.getByTestId("demand-done")).toBeVisible({ timeout: 30_000 });
   await owner.page.goto(`${BASE}/en/dashboard/company/needs`);
-  expect(await mainText(owner.page), "the agency sees its own need").toContain(AGENCY_NEED);
+  await mainText(owner.page);
+  await expect(owner.page.getByRole("main"), "the agency sees its own need").toContainText(AGENCY_NEED, {
+    timeout: 30_000,
+  });
   await owner.close();
 
   // A separate company signs up through the form.
@@ -464,7 +481,10 @@ test("A-5. the agency sees the person linked to it and never an unlinked worker"
   const owner = await as(browser, OWNER);
   await owner.page.goto(`${BASE}/en/dashboard/company/people`);
   const people = await mainText(owner.page);
-  expect(people, "the linked person is on the agency's people door").toContain(MEMBER_NAME);
+  await expect(owner.page.getByRole("main"), "the linked person is on the agency's people door").toContainText(
+    MEMBER_NAME,
+    { timeout: 30_000 },
+  );
   expect(people, "an unlinked worker is not").not.toContain(UNLINKED_NAME);
   expect(people).not.toContain(UNLINKED);
   await owner.page.goto(`${BASE}/en/dashboard/company/settings`);
