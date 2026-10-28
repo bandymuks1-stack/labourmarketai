@@ -183,7 +183,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261027231000_",
       // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028044705): candidates v2 flags already-mailed addresses.
       "20261027210000_",
-      // 2026-10-28 (RED, needs-human-gate, NOT applied): address lock + send reservation in the referral reissue.
+      // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028081810): address lock + send reservation in the referral reissue.
       "20261028070000_",
     ];
     const before = names.filter(
