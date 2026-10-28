@@ -169,6 +169,9 @@ export function LocaleSwitcher({
           aria-hidden
           className={cn(
             "h-3 w-3 text-text-muted transition-transform",
+            // Compact phone header: the globe already marks the control, and
+            // the 18px the arrow takes is what keeps the brand name whole.
+            compactBelowSm && "hidden sm:block",
             open && "rotate-180",
           )}
         />

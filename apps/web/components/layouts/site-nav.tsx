@@ -129,12 +129,17 @@ export async function SiteNav() {
       <div className="mx-auto flex max-w-container items-center gap-2 px-4 py-4 sm:gap-6 sm:px-12">
         <Link
           href="/"
-          className="flex min-w-0 shrink items-center gap-2 font-display text-base font-bold tracking-tightest text-text-primary sm:text-lg"
+          className="flex min-w-0 shrink items-center gap-1.5 font-display text-[15px] font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
         >
           {/* The mark is decorative here — the wordmark beside it already
               names the product, so announcing both would read it twice. */}
           <LmLogo title="" className="h-6 w-auto shrink-0 sm:h-7" />
-          <span className="truncate">
+          {/* NEVER A CUT BRAND (measured 2026-10-28): at 375px the 16px
+              wordmark was 3px too wide and rendered "LabourMarket…". 15px below
+              `sm` fits from 360px up; under 360px there is no room for the
+              whole name beside the three header controls, so only the mark
+              shows and the name stays for screen readers. */}
+          <span className="truncate max-[359px]:sr-only">
             LabourMarket<span className="text-gradient-accent">.ai</span>
           </span>
         </Link>
