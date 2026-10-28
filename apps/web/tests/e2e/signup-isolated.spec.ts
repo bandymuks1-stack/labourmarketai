@@ -49,11 +49,11 @@ async function userId(address: string): Promise<string> {
 }
 
 /** The public sign-up form → the onboarding wizard (Confirm email is OFF locally). */
-async function signUp(page: Page, address: string): Promise<void> {
+async function signUp(page: Page, address: string, password: string = PASSWORD): Promise<void> {
   await page.goto(`${BASE}/en/auth/signup`);
   await page.locator('input[type="email"]').fill(address);
-  await page.locator('input[name="password"]').fill(PASSWORD);
-  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('input[name="password"]').fill(password);
+  await page.locator('input[name="confirm_password"]').fill(password);
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/onboarding/, { timeout: 60_000 });
   await expect(page.getByTestId("onboarding-intents")).toBeVisible({ timeout: 30_000 });
@@ -117,8 +117,8 @@ test("S-3. an agency signs up through the form and its organization is an agency
 test("S-4. an address that already has an account is sent to sign in, not to a mail that never comes", async ({ page }) => {
   await page.goto(`${BASE}/en/auth/signup`);
   await page.locator('input[type="email"]').fill(email("worker"));
-  await page.locator('input[name="password"]').fill(PASSWORD);
-  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('input[name="password"]').fill(password);
+  await page.locator('input[name="confirm_password"]').fill(password);
   await page.locator('form button[type="submit"]').click();
   await expect(page.getByTestId("signup-login-instead")).toBeVisible({ timeout: 30_000 });
 });
@@ -285,4 +285,31 @@ test("S-9. an invited person opens the link, registers through it, and the invit
   expect(rows[0]?.status, "the invitation is accepted").toBe("accepted");
   expect(rows[0]?.accepted_by_profile_id, "by the person who registered through it").toBe(id);
   await b.close();
+});
+
+// ── M-0: the company the ISOLATED Android need journey signs in as ────────
+// Runs only from android-need-isolated.yml (MOBILE_NEED_SEED_EMAIL set): the
+// same real sign-up form and company setup as S-2, with QA-SYNTHETIC names and
+// the server-set qa_synthetic marker; the app then posts its need on device.
+test("M-0. seed: a synthetic company for the isolated mobile need journey", async ({ page }) => {
+  const address = process.env.MOBILE_NEED_SEED_EMAIL ?? "";
+  const password = process.env.MOBILE_NEED_SEED_PASSWORD ?? "";
+  test.skip(!address || !password, "android-need-isolated.yml only");
+  await signUp(page, address, password);
+  await onboard(page, "hire", "QA-SYNTHETIC Mobile Need Owner");
+  await page.waitForURL(/\/en\/dashboard\/start\/company/, { timeout: 60_000 });
+  await expect(page.getByTestId("company-setup-form")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("company-setup-legal-name").fill("QA-SYNTHETIC Mobile Need Co");
+  await page.getByTestId("company-setup-country").selectOption("LT");
+  await page.getByTestId("company-setup-save-draft").click();
+  await expect(page.getByTestId("company-setup-result")).toBeVisible({ timeout: 30_000 });
+  const id = await userId(address);
+  const r = await fetch(`${SB_URL}/auth/v1/admin/users/${id}`, {
+    method: "PUT",
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "content-type": "application/json" },
+    body: JSON.stringify({ app_metadata: { qa_synthetic: true } }),
+  });
+  expect(r.ok, "the seed carries the server-set qa_synthetic marker").toBe(true);
+  const needs = await db<Array<{ id: string }>>(`customer_requests?profile_id=eq.${id}&select=id`);
+  expect(needs.length, "the seed company starts with no need").toBe(0);
 });

@@ -1,0 +1,271 @@
+name: Android need journey (isolated local stack)
+
+# THE MOBILE NEED SUBMIT, end to end, with NOTHING in production: the Android
+# app on an emulator posts a need to a throwaway LOCAL Supabase + web app that
+# live and die inside this job. Owner decision 2026-10-28: the need submit is
+# proven in an isolated environment, never against production data.
+#
+# Same isolation contract as signup-isolated.yml:
+#   - reads NO secrets and NO variables (the first step fails the job if this
+#     file ever does);
+#   - production hostnames resolve to 0.0.0.0 on the runner before anything is
+#     built or started; no project is linked;
+#   - the web app runs with LM_ACCEPTANCE_MODE=1 and refuses a non-local target;
+#   - payments, AI providers and outbound alerts stay off;
+#   - nothing from the signed-in session is uploaded (public repository).
+#
+# The APK is built HERE, by the shared build script, pointed at the emulator's
+# alias for this runner (10.0.2.2). Cleartext to that one address is allowed in
+# the GENERATED android project of this job only (apps/mobile/android is not
+# committed), so no store or internal build ever carries it.
+#
+# Claim token: ANDROID_NEED_SUBMIT_ISOLATED_PROVEN — printed only after the
+# local database holds exactly one submitted need with the journey's marker,
+# owned by the seeded synthetic company.
+
+on:
+  workflow_dispatch:
+  # Safe on a PR: no secrets, no production. Runs when the journey changes.
+  pull_request:
+    paths:
+      - ".github/workflows/android-need-isolated.yml"
+      - ".github/scripts/android-emulator-need-isolated.sh"
+      - ".github/scripts/android-assemble-release.sh"
+      - "apps/mobile/.maestro/jobs-need-journey.yaml"
+      - "apps/mobile/src/screens/need-intake.tsx"
+      - "packages/client-core/src/config.ts"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-need-isolated-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  need-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      APP_ORIGIN: http://127.0.0.1:3000
+      SKIP_MIGRATION: 20261025120000_business_history_periods_vivatrex_lmai_bounds_v1.sql
+      SKIP_MIGRATION_SHA256: e4dea150dbd1c344ab7319af74066f12090f764ccdb5511571be65e8244b233e
+      PAYMENTS_ENABLED: "false"
+      BILLING_PROVIDER: none
+      AI_PROVIDER_MODE: disabled
+      OWNER_TELEGRAM_ALERTS_ENABLED: "false"
+      AGENTAI_OS_ALERTS_ENABLED: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Guard — this workflow reads no secrets or variables; no linked project or env files
+        run: |
+          set -euo pipefail
+          if grep -nE '(secrets|vars)\.' .github/workflows/android-need-isolated.yml | grep -v 'grep -nE'; then
+            echo "::error title=Secret reference::android-need-isolated.yml must never read a secret or variable"; exit 1
+          fi
+          if [ -e supabase/.temp/project-ref ]; then echo "::error::linked project present"; exit 1; fi
+          for f in apps/web/.env apps/web/.env.local apps/web/.env.production apps/web/.env.production.local .env .env.local apps/mobile/.env apps/mobile/.env.local; do
+            if [ -e "$f" ]; then echo "::error::$f exists in the checkout"; exit 1; fi
+          done
+          grep -qE '^enable_confirmations = false' supabase/config.toml || { echo "::error::local Confirm email must be off for this walk"; exit 1; }
+
+      - name: Guard — production hosts resolve to nowhere on this runner
+        run: |
+          set -euo pipefail
+          printf '0.0.0.0 %s\n' gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app | sudo tee -a /etc/hosts >/dev/null
+          for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai; do
+            getent hosts "$h" | grep -q '^0\.0\.0\.0' || { echo "::error::$h still resolves"; exit 1; }
+          done
+
+      - name: Free runner disk
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /usr/local/lib/node_modules/@aws-cdk || true
+          df -h /
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Set up Java 17 (Temurin)
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@b60b5899c73b63a2d2d651b1e90db8d4c9392f51 # v1.6.0
+        with:
+          version: 2.116.0
+
+      - name: Install Playwright chromium (seeds the company through the real web form)
+        run: pnpm -F web exec playwright install --with-deps chromium
+
+      - name: Set aside the one non-replayable migration (hash-pinned)
+        run: |
+          set -euo pipefail
+          f="supabase/migrations/$SKIP_MIGRATION"
+          if [ ! -e "$f" ]; then echo "::notice::$SKIP_MIGRATION is gone — replay runs every file."; exit 0; fi
+          echo "$SKIP_MIGRATION_SHA256  $f" | sha256sum -c - || { echo "::error::$SKIP_MIGRATION changed — re-decide"; exit 1; }
+          mv "$f" "$RUNNER_TEMP/"
+
+      - name: Start local Supabase (migrations replayed from scratch)
+        run: |
+          set -uo pipefail
+          supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
+          rc=$?
+          grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 60
+          exit $rc
+
+      - name: Export the LOCAL stack env (masked; refuses anything non-local)
+        run: |
+          set -euo pipefail
+          supabase status -o env > "$RUNNER_TEMP/sb.env"
+          get() { sed -n "s/^$1=\"\{0,1\}\([^\"]*\)\"\{0,1\}$/\1/p" "$RUNNER_TEMP/sb.env" | head -1; }
+          API_URL="$(get API_URL)"; ANON="$(get ANON_KEY)"; SERVICE="$(get SERVICE_ROLE_KEY)"
+          [ -n "$ANON" ] || ANON="$(get PUBLISHABLE_KEY)"; [ -n "$SERVICE" ] || SERVICE="$(get SECRET_KEY)"
+          rm -f "$RUNNER_TEMP/sb.env"
+          for v in "$ANON" "$SERVICE"; do [ -n "$v" ] && echo "::add-mask::$v"; done
+          [ "$API_URL" = "http://127.0.0.1:54321" ] || { echo "::error::API_URL is not the local stack"; exit 1; }
+          [ -n "$ANON" ] && [ -n "$SERVICE" ] || { echo "::error::supabase status returned no keys"; exit 1; }
+          for k in "$ANON" "$SERVICE"; do
+            node -e 'const p=JSON.parse(Buffer.from((process.argv[1].split(".")[1]||""),"base64url").toString()||"{}");if(p.ref){console.error("cloud key");process.exit(1)}' "$k"
+          done
+          CTS="$(openssl rand -hex 32)"; echo "::add-mask::$CTS"
+          CRON="$(openssl rand -hex 24)"; echo "::add-mask::$CRON"
+          SEED_PW="Qa-$(openssl rand -hex 16)-1a!"; echo "::add-mask::$SEED_PW"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE"
+            echo "E2E_SUPABASE_URL=$API_URL"
+            echo "E2E_SUPABASE_SERVICE_ROLE_KEY=$SERVICE"
+            echo "CONVERSATION_TOKEN_SECRET=$CTS"
+            echo "CRON_SECRET=$CRON"
+            echo "LM_ACCEPTANCE_MODE=1"
+            # The app on the emulator reaches this runner as 10.0.2.2.
+            echo "EXPO_PUBLIC_SUPABASE_URL=http://10.0.2.2:54321"
+            echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$ANON"
+            echo "EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:3000"
+            echo "MOBILE_NEED_SEED_EMAIL=qa.mobile.need.${GITHUB_RUN_ID}@local.test"
+            echo "MOBILE_NEED_SEED_PASSWORD=$SEED_PW"
+          } >> "$GITHUB_ENV"
+
+      - name: Prove the replay — ledger rows equal migration files
+        run: |
+          set -euo pipefail
+          files=$(ls supabase/migrations/*.sql | wc -l)
+          rows=$(docker exec supabase_db_labourmarketai psql -U postgres -tAc "select count(*) from supabase_migrations.schema_migrations")
+          echo "migration files=$files ledger rows=$rows"
+          [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
+
+      - name: Build web
+        run: pnpm -F web build
+
+      - name: Start web app (acceptance mode — refuses a non-local target)
+        run: |
+          set -euo pipefail
+          pnpm -F web exec next start -H 127.0.0.1 -p 3000 > "$RUNNER_TEMP/next.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/next.pid"
+          for i in $(seq 1 60); do curl -fsS -o /dev/null "$APP_ORIGIN/en" && break; sleep 2; done
+          curl -fsS -o /dev/null "$APP_ORIGIN/en"
+
+      - name: Seed the synthetic company through the real sign-up form (local only)
+        working-directory: apps/web
+        env:
+          SIGNUP_ISOLATED: "1"
+          E2E_BASE_URL: http://127.0.0.1:3000
+          E2E_NO_SERVER: "1"
+          E2E_LOCAL_STACK: "1"
+        run: pnpm exec playwright test tests/e2e/signup-isolated.spec.ts -g "M-0" --reporter=list --trace=off
+
+      - name: Expo prebuild (Android)
+        working-directory: apps/mobile
+        run: pnpm exec expo prebuild --platform android --no-install
+
+      # TEST-ONLY network allowance, in this job's GENERATED project: cleartext
+      # to the emulator's host alias and nothing else. Release builds block
+      # cleartext; a committed config would ship to every phone.
+      - name: Allow cleartext to 10.0.2.2 only (this job's generated project)
+        working-directory: apps/mobile/android/app/src/main
+        run: |
+          set -euo pipefail
+          grep -q 'networkSecurityConfig' AndroidManifest.xml && { echo "::error::the generated manifest already names a network security config — re-decide"; exit 1; }
+          mkdir -p res/xml
+          cat > res/xml/network_security_config.xml <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <network-security-config>
+            <domain-config cleartextTrafficPermitted="true">
+              <domain includeSubdomains="false">10.0.2.2</domain>
+            </domain-config>
+          </network-security-config>
+          XML
+          sed -i '0,/<application /s//<application android:networkSecurityConfig="@xml\/network_security_config" /' AndroidManifest.xml
+          grep -q 'android:networkSecurityConfig="@xml/network_security_config"' AndroidManifest.xml
+
+      - name: Gradle assembleRelease (the shared build)
+        working-directory: apps/mobile/android
+        env:
+          NODE_ENV: production
+        run: bash ../../../.github/scripts/android-assemble-release.sh
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Maestro CLI
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+          "$HOME/.maestro/bin/maestro" --version
+
+      - name: Emulator — sign in, search jobs, post ONE need (local stack)
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        env:
+          MAESTRO_CLI_NO_ANALYTICS: "1"
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
+          MOBILE_QA_EMAIL: ${{ env.MOBILE_NEED_SEED_EMAIL }}
+          MOBILE_QA_PASSWORD: ${{ env.MOBILE_NEED_SEED_PASSWORD }}
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash .github/scripts/android-emulator-need-isolated.sh apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Prove the stored row — exactly one submitted marked need, owned by the seed
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          SEED="$(q "select id from auth.users where email = '$MOBILE_NEED_SEED_EMAIL'")"
+          [ -n "$SEED" ] || { echo "::error::seed user missing"; exit 1; }
+          N="$(q "select count(*) from public.customer_requests where profile_id = '$SEED' and status = 'submitted' and (coalesce(role_or_work_type,'') || ' ' || coalesce(title,'') || ' ' || coalesce(payload::text,'')) like '%QA-SYNTHETIC mobile%'")"
+          ALL="$(q "select count(*) from public.customer_requests")"
+          echo "submitted marked needs by the seed=$N; all needs in the local database=$ALL"
+          [ "$N" = "1" ] || { echo "::error::expected exactly one submitted need from the journey, found $N"; exit 1; }
+          echo "ANDROID_NEED_SUBMIT_ISOLATED_PROVEN: on-device draft + confirm stored ONE submitted need for the synthetic company (local stack, production untouched)"
+          echo "- ANDROID_NEED_SUBMIT_ISOLATED_PROVEN: sign-in → jobs search → empty need refused → need draft + confirm → one submitted row (local stack)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: App log tail on failure (no secrets are printed by the app)
+        if: failure()
+        run: grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/next.log" | tail -n 80 || true
+
+      - name: Stop app and local Supabase
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/next.pid" ]; then kill "$(cat "$RUNNER_TEMP/next.pid")" 2>/dev/null || true; fi
+          supabase stop --no-backup || true
