@@ -157,7 +157,7 @@ export async function receiveExternalReferral(input: {
       to: email,
       subject: buildInvitationSubject(tEmail, "join_platform"),
       text: buildInvitationBody(tEmail, { link: inviteUrl, personalMessage: null }),
-    }, { kind: "invitation" });
+    }, { kind: "invitation", requireLedger: true });
     delivery = sent.status === "sent" ? "sent" : "delivery_failed";
     await asAny(admin).rpc("mark_external_referral_delivery_v1", {
       p_invitation_id: invitationId,

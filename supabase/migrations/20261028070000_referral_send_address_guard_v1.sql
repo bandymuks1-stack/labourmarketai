@@ -50,8 +50,13 @@
 --         never started: clear the reservation ('released');
 --       younger than 15 minutes → may still be in flight: nothing ('in_flight').
 --     The caller passes the ledger hash of the row's own address (the salt
---     lives in the app); service_role only.
---   * All five functions pin `search_path = public, pg_temp` (pg_temp last).
+--     lives in the app); service_role only. "No ledger row" proves "no provider
+--     call" because partner referral sends fail CLOSED when the ledger cannot be
+--     written (`requireLedger` in lib/email/send-ledger-store.ts).
+--   * `external_referral_reserved_rows_v1()` — EVERY partner row holding a
+--     reservation, whatever its status (a person may accept or decline before
+--     recovery runs), so recovery never misses one.
+--   * All six functions pin `search_path = public, pg_temp` (pg_temp last).
 --
 -- HISTORY: no existing row is updated. The 48 sent rows keep their
 -- delivery_status, last_sent_at, resend_count and token_hash; the new column
@@ -238,6 +243,30 @@ $$;
 revoke all on function public.external_referral_reprocess_candidates_v3()
   from public, anon, authenticated;
 grant execute on function public.external_referral_reprocess_candidates_v3()
+  to service_role;
+
+create or replace function public.external_referral_reserved_rows_v1()
+returns table (
+  id uuid,
+  invited_email text,
+  status text,
+  delivery_status text,
+  delivery_reserved_at timestamptz
+)
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select i.id, i.invited_email, i.status, i.delivery_status, i.delivery_reserved_at
+    from public.invitations i
+   where i.external_source_slug is not null
+     and i.delivery_reserved_at is not null;
+$$;
+
+revoke all on function public.external_referral_reserved_rows_v1()
+  from public, anon, authenticated;
+grant execute on function public.external_referral_reserved_rows_v1()
   to service_role;
 
 create or replace function public.resolve_external_referral_reservation_v1(

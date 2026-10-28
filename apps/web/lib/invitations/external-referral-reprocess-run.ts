@@ -78,7 +78,7 @@ export async function runExternalReferralReprocess(input: {
       .filter((r) => r.address_already_sent === true && typeof r.invited_email === "string")
       .map((r) => (r.invited_email as string).trim().toLowerCase()),
   );
-  if (input.mode === "resolve_reservations") return resolveReservations(admin, raw);
+  if (input.mode === "resolve_reservations") return resolveReservations(admin);
   const reservedEmails = new Set(
     raw
       .filter((r) => r.address_reserved === true && typeof r.invited_email === "string")
@@ -123,7 +123,7 @@ export async function runExternalReferralReprocess(input: {
             subject: buildInvitationSubject(t, "join_platform"),
             text: buildInvitationBody(t, { link, personalMessage: null }),
           },
-          { kind: "invitation" },
+          { kind: "invitation", requireLedger: true },
         );
         return sent.status === "sent";
       },
@@ -142,16 +142,25 @@ export async function runExternalReferralReprocess(input: {
 
 /**
  * Recovery of reservations a stopped run left behind — never a second mail.
- * Each reserved row goes to `resolve_external_referral_reservation_v1` with the
+ * Each reserved row (`external_referral_reserved_rows_v1`, any status) goes
+ * to `resolve_external_referral_reservation_v1` with the
  * ledger hash of its OWN address: a ledger row at/after the reservation marks
  * it sent; none, and older than 15 minutes, releases it; younger stays.
  * Nothing is sent here.
  */
-async function resolveReservations(
-  admin: SupabaseClient,
-  raw: ReadonlyArray<Record<string, unknown>>,
-): Promise<ReprocessRunResult> {
-  const reserved = raw.filter((r) => r.delivery_reserved_at != null && typeof r.invited_email === "string");
+async function resolveReservations(admin: SupabaseClient): Promise<ReprocessRunResult> {
+  // Every reserved partner row, whatever its status: the person may have
+  // accepted or declined before recovery runs (the candidate read is
+  // pending-only and would miss that row).
+  const { data, error } = await asAny(admin).rpc("external_referral_reserved_rows_v1");
+  if (error) {
+    return error.code === "42883" || error.code === "PGRST202"
+      ? { kind: "needs_migration" }
+      : { kind: "unavailable" };
+  }
+  const reserved = ((data ?? []) as Array<Record<string, unknown>>).filter(
+    (r) => typeof r.invited_email === "string",
+  );
   const outcomes: Record<string, number> = {};
   for (const r of reserved) {
     const res = await asAny(admin).rpc("resolve_external_referral_reservation_v1", {

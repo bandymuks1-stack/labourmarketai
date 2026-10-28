@@ -91,6 +91,7 @@ grant execute on function public.mark_external_referral_delivery_v1(uuid, text)
 drop function if exists public.reserve_external_referral_send_v1(uuid);
 drop function if exists public.external_referral_reprocess_candidates_v3();
 drop function if exists public.resolve_external_referral_reservation_v1(uuid, text);
+drop function if exists public.external_referral_reserved_rows_v1();
 
 do $$
 begin

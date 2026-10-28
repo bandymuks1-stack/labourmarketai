@@ -67,7 +67,7 @@ describe("referral send address guard (D-3)", () => {
   });
 
   it("every replaced function pins search_path with pg_temp last", () => {
-    expect(up.match(/security definer\nset search_path = public, pg_temp\nas \$\$/g)).toHaveLength(5);
+    expect(up.match(/security definer\nset search_path = public, pg_temp\nas \$\$/g)).toHaveLength(6);
   });
 
   it("recovery never mails: ledger row → sent, none and older than 15 min → released, else in flight", () => {
@@ -94,6 +94,23 @@ describe("referral send address guard (D-3)", () => {
     expect(run).toContain("reservedEmails,");
     expect(down).toContain("drop function if exists public.external_referral_reprocess_candidates_v3();");
     expect(down).toContain("drop function if exists public.resolve_external_referral_reservation_v1(uuid, text);");
+  });
+
+  it("referral sends fail closed without a ledger row; recovery lists reserved rows of any status", () => {
+    for (const f of ["external-referral-receive.ts", "external-referral-reprocess-run.ts"]) {
+      expect(read(`apps/web/lib/invitations/${f}`)).toContain('{ kind: "invitation", requireLedger: true }');
+    }
+    const store = read("apps/web/lib/email/send-ledger-store.ts");
+    expect(store).toContain('if (requireLedger && decision.degraded) return { status: "failed", reason: "ledger_unavailable" };');
+    const rows = up.slice(
+      up.indexOf("function public.external_referral_reserved_rows_v1"),
+      up.indexOf("function public.resolve_external_referral_reservation_v1"),
+    );
+    expect(rows).toMatch(/where i\.external_source_slug is not null\s+and i\.delivery_reserved_at is not null;/);
+    expect(rows).not.toContain("status = 'pending'");
+    const run = read("apps/web/lib/invitations/external-referral-reprocess-run.ts");
+    expect(run.slice(run.indexOf("async function resolveReservations"))).toContain('rpc("external_referral_reserved_rows_v1")');
+    expect(down).toContain("drop function if exists public.external_referral_reserved_rows_v1();");
   });
 
   it("the VPS script runs under a non-blocking flock", () => {
