@@ -122,3 +122,110 @@ test("S-4. an address that already has an account is sent to sign in, not to a m
   await page.locator('form button[type="submit"]').click();
   await expect(page.getByTestId("signup-login-instead")).toBeVisible({ timeout: 30_000 });
 });
+
+// ── Returning person: sign out, sign in, forgotten password ─────────────────
+
+const MAIL = "http://127.0.0.1:54324"; // the local stack's mail catcher (Mailpit)
+const NEW_PASSWORD = "Synthetic-Pass-2026-Reset!";
+
+async function signIn(page: Page, address: string, password: string): Promise<void> {
+  await page.goto(`${BASE}/en/auth/login`);
+  await page.locator('input[name="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(password);
+  await page.locator('form button[type="submit"]').first().click();
+  await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+}
+
+/** The newest link in the newest local mail to `address` (nothing leaves the runner). */
+async function lastMailLink(address: string): Promise<string> {
+  for (let i = 0; i < 30; i += 1) {
+    const r = await fetch(`${MAIL}/api/v1/search?query=${encodeURIComponent(`to:${address}`)}`);
+    const list = (await r.json()) as { messages?: Array<{ ID: string }> };
+    const id = list.messages?.[0]?.ID;
+    if (id) {
+      const m = (await (await fetch(`${MAIL}/api/v1/message/${id}`)).json()) as { Text?: string; HTML?: string };
+      const urls = `${m.Text ?? ""} ${m.HTML ?? ""}`.match(/https?:\/\/[^\s"'<>]+/g) ?? [];
+      const link = urls.find((u) => /verify|callback|token/.test(u));
+      if (link) return link.replace(/&amp;/g, "&");
+    }
+    await new Promise((res) => setTimeout(res, 1000));
+  }
+  throw new Error("no reset mail arrived in the local mail catcher");
+}
+
+test("S-5. a person signs out and signs back in; the session is gone after sign-out", async ({ page }) => {
+  const address = email("worker");
+  await signIn(page, address, PASSWORD);
+  await page.goto(`${BASE}/en/auth/logout`);
+  await page.goto(`${BASE}/en/dashboard`);
+  await page.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+  await signIn(page, address, PASSWORD);
+});
+
+test("S-6. a forgotten password: the reset mail arrives, the new password works, the old one does not", async ({ page }) => {
+  const address = email("company");
+  await page.goto(`${BASE}/en/auth/forgot-password`);
+  await page.locator('input[type="email"][name="email"]').fill(address);
+  await page.locator('form button[type="submit"]').first().click();
+  const link = await lastMailLink(address);
+  await page.goto(link);
+  await page.waitForURL(/reset-password/, { timeout: 60_000 });
+  await page.locator('input[name="password"]').fill(NEW_PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(NEW_PASSWORD);
+  await page.locator('form button[type="submit"]').first().click();
+  await page.waitForURL(/\/en\/(auth\/login|dashboard)/, { timeout: 60_000 });
+  await page.goto(`${BASE}/en/auth/logout`);
+  // The old password is refused…
+  await page.goto(`${BASE}/en/auth/login`);
+  await page.locator('input[name="email"]').fill(address);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  const refused = page.waitForResponse((r) => r.url().includes("/auth/v1/token") && r.request().method() === "POST", {
+    timeout: 30_000,
+  });
+  await page.locator('form button[type="submit"]').first().click();
+  expect((await refused).status(), "the old password is refused by auth").toBe(400);
+  await expect(page).toHaveURL(/\/en\/auth\/login/);
+  // …the new one works.
+  await signIn(page, address, NEW_PASSWORD);
+});
+
+// ── Worker: Work Journal → Living CV ────────────────────────────────────────
+
+test("S-7. a worker records work in the Work Journal; it is stored and the Living CV door opens", async ({ page }) => {
+  const address = email("worker");
+  await signIn(page, address, PASSWORD);
+  await page.goto(`${BASE}/en/dashboard/journal`);
+  const main = page.getByRole("main");
+  await main.getByTestId("journal-quick-record-text").fill(`Installed 12 kitchen cabinets on site, 7 hours (${RUN})`);
+  await main.getByTestId("journal-quick-record-understand").click();
+  await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  await main.getByTestId("worklog-save").click();
+  await main.getByTestId("worklog-confirm").click();
+  const done = main.getByTestId("worklog-done");
+  await expect(done.or(main.getByTestId("worklog-error")).or(main.getByTestId("worklog-blocked"))).toBeVisible({ timeout: 30_000 });
+  await expect(done, "the entry is saved").toBeVisible();
+  await expect(done.getByTestId("worklog-living-cv-link")).toHaveAttribute("href", /\/en\/cv$/);
+  const entries = await db<Array<{ id: string }>>(
+    `journal_entries?original_text=ilike.*${encodeURIComponent(RUN)}*&select=id`,
+  );
+  expect(entries.length, "the journal entry is stored").toBeGreaterThan(0);
+  await page.goto(`${BASE}/en/cv`);
+  await expect(page.getByRole("main")).toBeVisible({ timeout: 30_000 });
+});
+
+// ── Company: free need ──────────────────────────────────────────────────────
+
+test("S-8. a company publishes its first need for free", async ({ page }) => {
+  const address = email("company");
+  await signIn(page, address, NEW_PASSWORD);
+  await page.goto(`${BASE}/en/dashboard/company/needs?audience=need#demand-intake`);
+  const main = page.getByRole("main");
+  await main.getByTestId("demand-role").fill(`Tiler ${RUN}`);
+  await main.getByTestId("demand-description").fill("Two tilers for a 3-week bathroom renovation in Vilnius.");
+  await main.getByTestId("demand-next").click();
+  const size = main.getByTestId("demand-team-size");
+  if (await size.isVisible().catch(() => false)) await size.fill("2");
+  await main.getByTestId("demand-next").click();
+  await main.getByTestId("demand-create").click();
+  await expect(main.getByTestId("demand-done"), "the first need is accepted on the free plan").toBeVisible({ timeout: 30_000 });
+});
