@@ -225,3 +225,58 @@ test("S-8. a company publishes its first need for free", async ({ page }) => {
   await main.getByTestId("demand-create").click();
   await expect(main.getByTestId("demand-done"), "the first need is accepted on the free plan").toBeVisible({ timeout: 30_000 });
 });
+
+// ── Invited worker: invitation → link → sign-up → accepted ─────────────────
+
+test("S-9. an invited person opens the link, registers through it, and the invitation is accepted", async ({ browser }) => {
+  const invitee = email("invited");
+  // The inviter: the worker from S-1 invites a new person to the platform.
+  const a = await browser.newContext();
+  const inviter = await a.newPage();
+  await signIn(inviter, email("worker"), PASSWORD);
+  await inviter.goto(`${BASE}/en/dashboard/network`);
+  const panel = inviter.getByTestId("invite-panel");
+  await expect(panel).toBeVisible({ timeout: 30_000 });
+  const open = panel.getByTestId("invite-panel-open");
+  if (await open.isVisible().catch(() => false)) await open.click();
+  await panel.getByTestId("invite-emails").fill(invitee);
+  await panel.getByTestId("invite-submit").click();
+  const copy = panel.getByTestId("invite-copy-link").first();
+  await expect(copy, "the invitation is created and its link is handed over").toBeVisible({ timeout: 30_000 });
+  const raw = await copy.getAttribute("data-invite-link");
+  expect(raw, "an invitation link").toBeTruthy();
+  // The link carries the canonical origin; this walk serves the same path locally.
+  const u = new URL(raw!);
+  const link = `${BASE}${u.pathname}${u.search}`;
+  await a.close();
+
+  // The invited person: a fresh browser, no session.
+  const b = await browser.newContext();
+  const page = await b.newPage();
+  await page.goto(link);
+  await page.getByTestId("invite-register").click();
+  await page.waitForURL(/\/en\/auth\/signup/, { timeout: 30_000 });
+  const addressed = page.getByTestId("signup-invited-email");
+  if (await addressed.isVisible().catch(() => false)) {
+    await expect(addressed, "the address comes from the invitation").not.toBeEditable();
+  } else {
+    await page.locator('input[type="email"]').fill(invitee);
+  }
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
+  if (/\/onboarding/.test(page.url())) await onboard(page, "work", "Synthetic Invited Worker");
+  await page.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
+  if (/\/invite\//.test(page.url())) {
+    const accept = page.getByTestId("invite-accept");
+    if (await accept.isVisible().catch(() => false)) await accept.click();
+  }
+  const id = await userId(invitee);
+  const rows = await db<Array<{ status: string; accepted_by_profile_id: string | null }>>(
+    `invitations?invited_email=eq.${encodeURIComponent(invitee)}&select=status,accepted_by_profile_id`,
+  );
+  expect(rows[0]?.status, "the invitation is accepted").toBe("accepted");
+  expect(rows[0]?.accepted_by_profile_id, "by the person who registered through it").toBe(id);
+  await b.close();
+});
