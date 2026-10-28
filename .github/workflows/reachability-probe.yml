@@ -1,0 +1,78 @@
+name: Reachability probe (GitHub runner → production)
+
+# DIAGNOSTIC ONLY (register D-10, 2026-10-28). Production walks from GitHub-hosted
+# runners time out intermittently (deploy SSH, /api/health, JS chunk loads) while
+# the server answers normally. This job measures the runner side of that path so
+# the cause can be told apart: runner network, Cloudflare (challenge, rate limit,
+# cache miss) or the origin.
+#
+# Reads NO secrets, signs in nowhere, writes nothing: anonymous GETs of the public
+# health endpoint and of public static chunks, every 5 s for 8 minutes. The log
+# and the summary carry only status codes, timings and Cloudflare/cache headers.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/reachability-probe.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Runner identity (public egress, resolver view)
+        run: |
+          set -u
+          echo "runner egress: $(curl -s -m 10 https://api.ipify.org || echo unknown)"
+          getent ahosts labourmarket.ai | awk '{print $1}' | sort -u | sed 's/^/resolves: /'
+
+      - name: Probe health and static chunks for 8 minutes
+        run: |
+          set -u
+          O=https://labourmarket.ai
+          UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0 Safari/537.36"
+          page=$(curl -s -m 30 -A "$UA" "$O/lt/auth/login")
+          mapfile -t CH < <(printf '%s' "$page" | grep -oE '/_next/static/chunks/[^"'"'"']+\.js' | sort -u | head -6)
+          echo "chunks under test: ${#CH[@]}"
+          printf 'time\ttarget\thttp\ttotal_s\tconnect_s\tttfb_s\tcf_cache\tcf_mitigated\tcf_ray_colo\tbuild\n' > probe.tsv
+          end=$(( $(date +%s) + 480 ))
+          i=0
+          while [ "$(date +%s)" -lt "$end" ]; do
+            i=$((i+1))
+            for t in "/api/health?probe=$i" "${CH[$(( i % ${#CH[@]} ))]}"; do
+              h=$(mktemp)
+              line=$(curl -s -o /tmp/body -D "$h" -m 30 -A "$UA" -w '%{http_code}\t%{time_total}\t%{time_connect}\t%{time_starttransfer}' "$O$t" || echo "000\t30\t-\t-")
+              cache=$(grep -i '^cf-cache-status:' "$h" | tr -d '\r' | awk '{print $2}')
+              mit=$(grep -i '^cf-mitigated:' "$h" | tr -d '\r' | awk '{print $2}')
+              colo=$(grep -i '^cf-ray:' "$h" | tr -d '\r' | awk -F- '{print $NF}')
+              build=$(case "$t" in /api/health*) grep -oE '"build":"[0-9a-f]+"' /tmp/body | cut -d'"' -f4;; esac)
+              kind=$(case "$t" in /api/health*) echo health;; *) echo chunk;; esac)
+              printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$(date -u +%H:%M:%S)" "$kind" "$line" "${cache:--}" "${mit:--}" "${colo:--}" "${build:--}" >> probe.tsv
+              rm -f "$h"
+            done
+            sleep 5
+          done
+          echo "samples: $(($(wc -l < probe.tsv)-1))"
+
+      - name: Summary
+        if: always()
+        run: |
+          set -u
+          awk -F'\t' 'NR>1{n[$2]++; if($3!="200")bad[$2]++; if($4+0>5)slow[$2]++; if($8!="-")mit[$2]++; s[$2]+=$4; if($4+0>mx[$2])mx[$2]=$4}
+            END{for(k in n) printf "%s: n=%d non200=%d slow>5s=%d cf-mitigated=%d avg=%.3fs max=%.3fs\n",k,n[k],bad[k]+0,slow[k]+0,mit[k]+0,s[k]/n[k],mx[k]}' probe.tsv | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "status codes:"; awk -F'\t' 'NR>1{print $2" "$3}' probe.tsv | sort | uniq -c
+          echo "cache status:"; awk -F'\t' 'NR>1{print $2" "$7}' probe.tsv | sort | uniq -c
+          echo "edge colo:"; awk -F'\t' 'NR>1{print $9}' probe.tsv | sort | uniq -c
+          echo "non-200 or slow samples:"; awk -F'\t' 'NR==1 || $3!="200" || $4+0>5' probe.tsv | head -40
+
+      - name: Keep the samples (3 days)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: reachability-probe
+          path: probe.tsv
+          retention-days: 3
