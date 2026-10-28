@@ -172,7 +172,7 @@ jobs:
           E2E_BASE_URL: http://127.0.0.1:3000
           E2E_NO_SERVER: "1"
           E2E_LOCAL_STACK: "1"
-        run: pnpm exec playwright test "$SPEC" --reporter=list --trace=off --screenshot=off
+        run: pnpm exec playwright test "$SPEC" --reporter=list --trace=off
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()
