@@ -100,11 +100,21 @@ export const PROD_QA_FRESH_COMPANY_EMAIL = "qa.freshcompany+act1@labourmarket.ai
  */
 export const PROD_QA_BUYER_EMAIL = "qa.buyer+act1@labourmarket.ai" as const;
 
+/**
+ * Owner decision 2026-10-28 ("P0 E2E, ONBOARDING IR UX/UI"): ONE synthetic
+ * INVITED worker. The owner's `prod-qa-invited-provision.yml` first stores a
+ * synthetic partner referral addressed to it (marked `QA-SYNTHETIC-…`), then
+ * creates the account — confirmed, passwordless, no role — so the walk proves
+ * the path a real referred person takes when they register WITHOUT the link.
+ */
+export const PROD_QA_INVITED_EMAIL = "qa.invited+act1@labourmarket.ai" as const;
+
 /** The owner-created identities — minted only if the owner has created them. */
 export const PROD_QA_FRESH_IDENTITIES: readonly string[] = [
   PROD_QA_FRESH_WORKER_EMAIL,
   PROD_QA_FRESH_COMPANY_EMAIL,
   PROD_QA_BUYER_EMAIL,
+  PROD_QA_INVITED_EMAIL,
 ];
 
 /** Every allowlisted synthetic identity — equality-matched, never by prefix

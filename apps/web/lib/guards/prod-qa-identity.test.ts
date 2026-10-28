@@ -60,16 +60,18 @@ const FORBIDDEN_PROVISIONING_SQL: readonly RegExp[] = [
 ];
 
 describe("exactly the synthetic cast is allowlisted", () => {
-  it("the allowlist is exactly these eight, each unmistakably synthetic", () => {
+  it("the allowlist is exactly these nine, each unmistakably synthetic", () => {
     // Widening is a reviewed code change (owner decision 2026-09-28 added the
     // three +multiw identities beside the worker; owner decision 2026-10-26
-    // added the two fresh-activation identities). Pinned exactly.
+    // added the two fresh-activation identities; owner decision 2026-10-28 the
+    // one invited worker). Pinned exactly.
     expect([...PROD_QA_IDENTITIES].sort()).toEqual(
       [
         "qa.agency+multiw@labourmarket.ai",
         "qa.buyer+act1@labourmarket.ai",
         "qa.freshcompany+act1@labourmarket.ai",
         "qa.freshworker+act1@labourmarket.ai",
+        "qa.invited+act1@labourmarket.ai",
         "qa.manager+multiw@labourmarket.ai",
         "qa.owner+multiw@labourmarket.ai",
         "qa.worker+goal3@labourmarket.ai",
@@ -87,6 +89,7 @@ describe("exactly the synthetic cast is allowlisted", () => {
       "qa.buyer+act1@labourmarket.ai",
       "qa.freshcompany+act1@labourmarket.ai",
       "qa.freshworker+act1@labourmarket.ai",
+      "qa.invited+act1@labourmarket.ai",
     ]);
     // The mint looks the account up and refuses before any magic link exists.
     const mint = read(MINT);
