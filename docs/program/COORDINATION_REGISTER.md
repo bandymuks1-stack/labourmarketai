@@ -95,101 +95,114 @@ independent work or launch of other features (owner order 2026-10-28).
 
 | Lane | Holder | Since | What |
 |---|---|---|---|
-| coordination (this file) | session `…16CYcDu` "projekto perėmimas" | 2026-10-28 ~06:00Z (owner order) | keeps §2–§5 current; does not steer other sessions without their agreement |
-| migration (prod DB) | — free — | | last: `external_referral_reprocess_candidates_v2` (ledger `20261028044705`, #2843) |
-| live sends (e-mail to real people) | session `…AygGqFo3aoB76NrV` | 2026-10-27 | partner referral reprocess 41/45 done; **last sends frozen until D-3 is closed** |
-| deploy | — serial via `deploy-vps.yml` — | | `/api/health` `build` is the truth (a run title can name a newer SHA than the one it deploys) |
+| coordination (this file) | session `…AygGqFo3` "darbų perimimas" | 2026-10-28 ~06:30Z (owner order: handover) | keeps §2–§5 current. `…16CYcDu` held it ~06:00–06:30Z, handed over (§2a), now idle |
+| migration (prod DB) | — free — | | last: `external_referral_reprocess_candidates_v2` applied 2026-10-28 04:47Z by session `…AygGqFo3aoB76NrV` (#2843) |
+| live sends (e-mail to real people) | — free — | | last: partner referral reprocess DONE 2026-10-28 05:46Z — 45/45 unique addresses sent, 0 failed, 0 duplicates (see D-3) |
+| deploy | — serial via `deploy-vps.yml` — | | production = `c3f440fc` (#2850, contains #2843), healthy 2026-10-28 05:45Z |
+
+
+### 2a. Handover `…16CYcDu` → `…AygGqFo3` (owner order, 2026-10-28 ~06:30Z)
+
+- **#2843**: merged 05:04Z (`7e64b332`); migration `external_referral_reprocess_candidates_v2` = ledger `20261028044705`; production `/api/health` build `c3f440fc` (06:31Z, contains #2843; #2849 and #2852 not deployed yet).
+- **45 vs 48** (production DB, read-only, 06:30Z): `email_send_ledger_v1` kind `invitation` since 10-26 = **48 events, 48 unique recipient hashes, 0 duplicates** (20:11Z 10-27 → 05:46Z 10-28). Partner referral rows `nonstop`: 74 rows / 72 unique addresses; `sent` = 48 rows = 48 unique addresses. Of these, **45 went through `reissue` (`resend_count` = 1)** — the reprocess batch, "45/45" — and **3 are first sends (`resend_count` = 0)**, never reissued. 0 rows resent twice; the 2 addresses with duplicate rows were mailed once each. 48 = 45 reissued + 3 first sends; no address received two mails. Which path sent the 3 first sends is not distinguishable from the DB alone.
+- **#2852**: auto-merge (enabled 05:55Z by the owner account) completed — **merged 06:08Z (`b0747e50`)** before the handover order, so it could not be switched off; result left for the coordinator to check.
+- **#2738 / #2739**: NOT merged, untouched. #2738 ships the forecast recompute route + VPS cron entries — merging it can **activate the forecast cron** → needs its own owner decision on that effect, separate from the as-applied ledger fix (D-1).
+- **D-3**: see the D-3 row: the remaining gap is no address-level DB lock between `reissue` and mark-sent, plus the repo script missing `flock`. Proposed fix (RED, owner approval by name): advisory lock on `lower(trim(email))` inside `reissue_external_referral_v1`, an in-flight refusal, a same-address-sent refusal, `flock` in the repo script, and a two-session concurrency test.
+- **Governance walk (D-6)**: spec defect — trainee slot has 0 company memberships; `assign_training_v1` assigns active members only. Fix shipped in #2852 (trainee = Alfa member); no walk run since its merge. Owner product question = RED #2816.
+- **`…16CYcDu` stopped**: regression queue halted after search-support-privacy (rota-repeat run had already started on Actions); D-8 jobs-search re-run NOT started. #2840 / #2839 not merged (left to coordinator). No new PRs, migrations or sends started.
 
 ---
 
-## 3. Work register — snapshot 2026-10-28 ~06:00Z
+## 3. Work register — snapshot 2026-10-28 ~06:20Z
 
-Sources: GitHub PRs/Actions, production migration ledger, `/api/health`, session list.
+Sources: GitHub PRs/Actions, production migration ledger, session list and
+transcripts readable from the coordinator session. Status per §1.4.
 
 ### 3.1 Active executors
 
-| Session | Doing | Area it owns (no overlap) | State |
+| Session | Where | Doing | State |
 |---|---|---|---|
-| `…16CYcDu` "projekto perėmimas" (owner's computer) | coordination; whole-platform functional + UX audit and regression walks; RED-draft conflict upkeep; onboarding/invitation app code | §3.5 journeys, `apps/web` UX, design, guard baselines | IN_PROGRESS |
-| `…AygGqFo3` "darbų perimimas" (owner's computer) | partner-referral reprocess and live-send lane (#2841/#2843) | `lib/invitations/external-referral-*`, `ops/vps/lm-referral-reprocess.sh`, reissue migrations | IN_PROGRESS |
-| `…hnVKqGvExp` coordinator (cloud) | created this register (#2850) | handed over to `…16CYcDu` | DONE |
-| other-repo sessions (Agentai OS, Nonstop) | not this repository | — | n/a |
+| `session_016CYcDuhGGEA75ruJ3zXD99` "projekto perėmimas" | owner's computer | #2849 merge after CI; platform functional + UX audit (owner order 04:48Z); RED-draft conflict upkeep | IN_PROGRESS |
+| `session_011vBC1iAygGqFo3aoB76NrV` "darbų perimimas" | owner's computer | #2843 merge → dry run → 1 control → 3 sends; read-only journey audit | IN_PROGRESS |
+| `session_011vBC1hnVKqGvExp129bfjT` coordinator | cloud | this register, inventory, plan (2026-10-28 ~06:30Z: coordination handed to `…16CYcDu` by owner order) | HANDED OVER |
+| `session_011vBC1hntPRyoM4yRJKKcG2` | owner's computer | other repository (Agentai OS) — not this repo | n/a here |
+
+~45 older sessions are idle; most end with an owner question (merge, secret, billing).
+Those questions are collected in §5, not re-asked per session.
 
 ### 3.2 Recent work (last 48 h)
 
-| PR | Goal | Session | State | Production |
+| PR | Goal | Owner of work | State | Prod |
 |---|---|---|---|---|
 | #2841 | safe reprocess of unsent partner referrals (RED, approved) | `…AygGqFo3` | DONE | migration + code live |
-| #2843 | never re-mail an address from an older duplicate referral (RED) | `…AygGqFo3` | DONE (merged `7e64b33`, migration `20261028044705`) | live; **D-3 open** |
-| #2845 | invited person arriving without the link is still the addressee | `…16CYcDu` | DONE | live `2e4ae2b` |
-| #2846 | invitations-for-me carries the partner source; server settles the role (RED, approved for this one) | `…16CYcDu` | DONE | live `51a3518`, ledger `20261028034356` |
-| #2847 | synthetic invited-worker provision/walk/revoke/purge | `…16CYcDu` | DONE (code) | invited-worker E2E **NOT_VERIFIED** (owner parked; do not re-ask) |
-| #2848 | public header brand never cut on phones | `…16CYcDu` | DONE | LIVE_VERIFIED 320/360/375 |
-| #2849 | public site opens light; short sign-up intro (11 catalogs); theme follows in-app navigation | `…16CYcDu` | merged `5c8e61b` | WAITING (deploy) → visual check |
-| #2850 | this register | coordinator | DONE | docs |
-| #2840 | zero paid AI budget | `…16CYcDu` | READY: CI green, CLEAN, no overlap with `main` since its base | owner merge decision |
-| #2839 | DB restore procedure (+ `docker rm -fv` volume fix from review) | `…16CYcDu` | READY after CI on `b2d449a` | owner merge decision |
-| #2844 | synthetic data instead of personal e-mails in tests/docs | unknown | CI green, CLEAN | owner/legal decision (not touched) |
-| #2842 | paid-terms legal draft | `…16CYcDu` | WAITING (legal/owner) | — |
+| #2845 | invited person arriving without link is still the addressee | `…16CYcDu` | DONE | live |
+| #2846 | invitations-for-me carries partner source (RED, approved for this one) | `…16CYcDu` | DONE | live, `51a3518` |
+| #2847 | synthetic invited-worker provision/revoke/purge mechanism | `…16CYcDu` | DONE (code) | workflow `prod-qa-invited-provision` never run → invited-worker E2E **NOT_VERIFIED** (owner: parked, do not ask again) |
+| #2848 | public header brand not cut on phones | `…16CYcDu` | DONE | LIVE_VERIFIED 320/360/375 |
+| #2843 | never re-mail an address from an older duplicate referral (RED, approved 10-28) | `…AygGqFo3` | DONE | merged `7e64b332`, deployed `c3f440fc`; ledger `20261028044705`; sends finished (D-3) |
+| #2849 | public site opens light; one-sentence sign-up intro (11 locales); theme follows in-app navigation | `…16CYcDu` | merged `5c8e61b3` | NOT DEPLOYED: production `c3f440fc` at 06:31Z → visual check after deploy |
+| #2844 | synthetic data instead of personal e-mails in tests/docs | unknown | WAITING (owner: legal wording) | CI green; touches `docs/legal/*` — owner decides |
+| #2840 | zero paid AI budget — metered providers off unless owner opens | unknown | WAITING (review) | CI green, mergeable, 9 behind `main`. Risk checked: `AI_PAID_PROVIDERS_ALLOWED` unset on the VPS → default `false` passes the env schema; `AI_GEMINI_ENABLED=false` already, so no production behaviour change. An empty value would fail env validation at boot — never set it to "". |
+| #2839 | DB restore procedure doc | `…16CYcDu` | WAITING (CI on `b2d449a`) | docs-only; review fix: drill cleanup `docker rm -fv` (the postgres anonymous volume kept a plaintext copy) |
+| #2842 | paid-terms legal draft | unknown | WAITING (legal/owner) | — |
+| #2828 | premium action cards visual proposal | unknown | WAITING (owner visual) | — |
 
-### 3.3 Owner-gated (RED, draft, `needs-human-gate`)
+### 3.3 Owner-gated (RED, draft, `needs-human-gate`) — 33 open
 
-List unchanged (see this file's git history). `…16CYcDu` keeps #2693 #2713 #2738 #2739 #2747 #2795
-mergeable (counter-only merges; all MERGEABLE at 2026-10-28 06:00Z). `migration-safety` stays red on
-them by design until the owner approves each one by name.
+Kept mergeable by `…16CYcDu` (conflict upkeep only). None may be applied or merged
+without an owner approval naming it.
+#2816 #2812 #2811 #2809 #2806 #2795 #2752 #2747 #2746 #2739 #2738 #2713 #2707 #2704
+#2701 #2693 #2685 #2682 #2647 #2474 #2471 #2463 #2454 #2441 #2440 #2420 #2418 #2410
+#2362 #2235 #2227 #2209 #2203.
 
-### 3.4 Stale non-draft PRs — unchanged (owner keep/close).
+### 3.4 Stale non-draft PRs (`STALE?`, >7 days no push)
 
-### 3.5 QA evidence by user journey (production walks; run id = GitHub Actions run)
-
-| Journey | Evidence | Level |
-|---|---|---|
-| Worker: onboarding → Work Journal → Living CV | fresh-activation `40546035425` (2/2; CV hours = own DB hours, 0 confirmed); living-cv-growth `40634954858` (2026-10-28) | LIVE_VERIFIED |
-| Invited worker without the link | code live (#2845/#2846); walk mechanism #2847 | NOT_VERIFIED (owner-parked) |
-| Company: need → candidates → owner/admin isolation | fresh-activation `40546035425`; company-chain `40315387466` **13/13** | LIVE_VERIFIED |
-| Marketplace | marketplace `40200714397` **6/6**; marketplace-goods-services `40164310896` 14/14 | LIVE_VERIFIED (10-25) |
-| Orders / bookings | orders-bookings `40361384432` O-0..O-8 | LIVE_VERIFIED (10-26) |
-| Calendar / shifts | calendar-planning `40635527214` (2026-10-28); rota-repeat queued | LIVE_VERIFIED |
-| Notifications (in-app) | notifications-inapp `40639605465` (2026-10-28) | LIVE_VERIFIED |
-| Job search | jobs-search `40640097643`: J-1..J-5 pass; **J-6 save-job fails (D-6)** | PARTIAL |
-| Profile / CV history | profile-cv-history `40182648408` 21/21 | LIVE_VERIFIED (10-25) |
-| Agency chain | agency-chain `40357361254` 8/8 | LIVE_VERIFIED (10-26) |
-| Work verification | work-verification `40300016332` 6/6 | LIVE_VERIFIED (10-26) |
-| Governance (decisions / training) | company-governance `40296167812`: D-1..D-5 + T-1 pass; **T-2 fails (D-7)** | PARTIAL |
-| Mobile surfaces | mobile-surfaces `40195784343` 5/5; public pages 320–1280 checked 2026-10-28 | LIVE_VERIFIED |
-| Languages | active 6 catalogs (lt/en/ru/nl/de/pl) complete, 0 placeholders, no untranslated prose; inactive 5 partial (D-8) | VERIFIED (catalog audit) |
-| 275-function matrix | PASS 194 · FAIL 8 · BLOCKED 39 · NOT_VERIFIED 18 · NOT_IMPLEMENTED 16 (owner-private file; counts only here) | — |
-
-Pending walks (queued by `…16CYcDu`): project-execution, search-support-privacy, rota-repeat,
-chat-continuity, documents-approvals; jobs-search re-run for D-6.
+#2642 (owner waiver needed), #2455, #2449, #2447 (draft, owner hold), #2438, #2419,
+#2403 (waiver), #2377, #2370, #2356 (dependabot). Owner decides keep/close; nobody
+closes them on the coordinator's say-so.
 
 ---
 
 ## 4. Duplicates, conflicts, drift
 
-| Id | Finding | Class | Next step |
+| Id | Finding | Risk | Next step |
 |---|---|---|---|
-| D-1 | #2738 / #2739 migrations are **already in production** (`20261025045152`, `20261025050302`) and **content-identical** to the PR files: forecast trigger body md5 equal after removing comments (`346feb54…`), 15 triggers, 4 RLS tables, 3 policies; all 7 history columns present. `main` lacks the files. | drift (re-run hazard) | owner: approve merging #2738/#2739 **as applied** (no re-apply; `APPLIED_LEDGER.md` CONTENT_ONLY rows). Both PRs also ship app code (forecast recompute route + VPS cron lines installed by hand; Living CV experience read) — a product decision, not only a ledger fix. |
-| D-2 | #2746 title says "NOT applied" though applied | misleading status | fix when touched |
-| D-3 | `reissue_external_referral_v1` (production) locks only the ROW (`for update`) and refuses only if THAT row is `sent`; `sent` is written after the mail, outside the transaction. Two concurrent runs: the second waits, still sees `not_sent`, rotates again → **two mails possible**. Cross-row duplicates are excluded only in the read (candidates_v2 + TS). `ops/vps/lm-referral-reprocess.sh` on `main` has **no `flock`**. One run at a time is safe. | SECURITY/DATA (duplicate mail) | lane owner `…AygGqFo3` (or `…16CYcDu` if handed over): RED follow-up — inside `reissue`, `pg_advisory_xact_lock` on `lower(trim(email))`; refuse `in_flight` when `resend_count > 0 and delivery_status = 'not_sent'`; refuse when another referral to the same normalized address is `sent` or in flight; `flock` in the script; local two-session concurrency test. **No further sends until done.** |
-| D-4 | shared guard pin files conflict between DB PRs | merge conflicts | §1.6 lane rule; `…16CYcDu` resolves counters |
-| D-5 | two audits ran in parallel | duplicated effort | split: `…16CYcDu` = whole-platform functional/UX/walks; `…AygGqFo3` = referral/send lane only |
-| D-6 | jobs-search J-6: signed-in "save job" stays disabled > 30 s and no row is written (the action never returned); last green 2026-10-23 | P1 functional (cause NOT_VERIFIED) | `…16CYcDu`: re-run to separate a flake from a regression, then fix |
-| D-7 | governance T-2: `assign_training_v1` accepts an assignee only with an active `company_memberships` row; ordinary employees are `engagement_contexts` → `invalid_assignee` | product gap | owner: RED #2816 (accept an active employee engagement) |
-| D-8 | inactive locales da/et/lv/no/sv: 5 817 of 15 191 keys, 22–44 % `[EN]` placeholders | blocks those 5 markets only (they redirect to /en) | owner: translation source decision (zero paid AI) |
+| D-1 | Production holds `project_forecasts_v1` (ledger `20261025045152`) and `history_period_precision_and_registry_v1` (`20261025050302`); `main` has neither file; #2738 / #2739 are RED drafts. **Verified 2026-10-28:** the applied SQL equals the PR files exactly once comments and the `begin;`/`commit;` wrapper are removed (normalized md5 `c82d17ef…` and `f4c1f2cd…` on both sides) — CONTENT_ONLY, nothing extra in production. | re-run hazard only if someone applies the files again | **No re-apply, no rollback.** Safe path: owner approves merging #2738 and #2739 *as already applied* (no `apply_migration` step); the merge adds the `APPLIED_LEDGER.md` rows (CONTENT_ONLY) and the guard pins. #2738 also ships app code (forecast cron route, VPS cron entries) — that part is a feature launch the owner approves with it. |
+| D-2 | `market_lifecycle_closed_outcome_v1` is applied and its file is on `main`, but #2746's title still says "NOT applied". | misleading status | fix the PR title/body when #2746 is next touched |
+| D-3 | #2843 duplicate protection. **Sends finished 2026-10-28 05:45–05:46Z**, before the stricter conditions written in session `…16CYcDu` reached the sending session. Protection used: v2 candidate list (`lower(trim())` address match, already-sent addresses excluded), `reissue_external_referral_v1` row lock (`FOR UPDATE`) + `already_sent` / `has_account` / expiry / consent re-check + resend cap 3, every run under `flock -n` on the VPS, script manual-only (no cron, no timer). Proven in DB: 45 unique addresses sent, ledger 0 duplicate recipients, 0 rows resent twice, the duplicate row never mailed; eligible now 0. | Residual: the DB itself has no address-level lock between `reissue` and `mark` — two concurrent runs outside `flock` could mail one address twice. No send is pending. | Drift: `ops/vps/lm-referral-reprocess.sh` on `main` has **no `flock`** — the VPS copy does (installed by hand); bring the repo script in line before the next run. Before ANY future reprocess run: keep `flock` as the only entry, or (owner-approved RED) move the address check + an advisory lock on the normalized address into `reissue_external_referral_v1`, with a concurrency test. |
+| D-4 | Both active sessions edit the same migration pin/guard files (`APPLIED_LEDGER.md`, `booking-engagement-end-v1.test.ts`, baseline guards). #2846 and #2843 already conflicted. | merge conflicts | §1.6 lane rule |
+| D-5 | Two read-only platform audits ran at once (one per active session). The `…AygGqFo3` audit (2026-10-28) covered signed-out journeys + invite/signup code: 3×P1, 7×P2, no fixes yet. | duplicated effort | the session that fixes invite/signup claims it in §3 first; the other audit skips that area |
+| D-6 | `company-governance` prod walk never passed (3 runs). Last 40296167812 (10-26): T-2 `invalid_assignee`. Cause verified in prod DB: the trainee slot (`qa.worker+multiw`) is engaged by Alfa but has **0 company memberships**; `assign_training_v1` assigns only active members. Spec defect, not a production defect. | walk red; T-* unproven | GREEN spec fix: trainee = the QA manager (active manager member of Alfa) — branch `fix/cc/governance-walk-trainee`. Owner question: should engaged (non-member) workers be assignable to training? (RED if yes.) |
+| D-7 | Two counts of the function matrix: local 275-row matrix (`_agent-workspaces/labourmarketai/matrix/functionality-matrix-2026-10-23.md`, not in git) PASS 194 / FAIL 8 / BLOCKED 39 / NOT_VERIFIED 18 / NOT_IMPLEMENTED 16; public `docs/master/LABOURMARKET-FUNCTIONAL-AUDIT.md` 71/274 LIVE_PROVEN (stale since #2640, 10-21). Matrix rows 4.3/4.16 cite run 39960149411, which concluded failure. | two truths | regenerate the public summary from the matrix (counts and run ids only); re-cite 4.3/4.16 to 40315387466 |
+| D-8 | `jobs-search` 40640097643 (2026-10-28): J-1..J-5 pass; **J-6** signed-in "save job" stays disabled > 30 s and no `worker_saved_opportunities` row is written (the server action never returned). Last green 40041395932 (10-23). | P1 functional — cause NOT_VERIFIED (flake vs regression) | coordinator: re-run NOT started (handover); if it reproduces, trace button → `saveVacancyAction` → `savePublicVacancy` → row, fix as P1 |
+| D-9 | Inactive locales da/et/lv/no/sv: 5 817 of 15 191 keys, 22–44 % `[EN]` placeholders. Active six (lt/en/ru/nl/de/pl) complete, 0 placeholders, no untranslated prose (catalog audit 2026-10-28). | blocks only those five markets (they redirect to /en) | coordinator: translation pipeline without paid APIs (owner order 2026-10-28), with placeholder/ICU/length QC — not started |
 
 ---
 
+## 4a. QA evidence (prod walks, `prod-qa-walk.yml`)
+
+| Claim | Level | Evidence |
+|---|---|---|
+| Marketplace walk 6/6 | LIVE_VERIFIED | run 40200714397 (10-25, `d9b1a38f5`); earlier 40072913099, 40047419163 |
+| Brigade + B2B 13/13 | LIVE_VERIFIED | run 38231306190 (10-12, `e68a59876`); `company-chain` last green 40315387466 (10-26); `brigade-formation` 39985839991 (10-23) |
+| 275-function matrix | PASS rows LIVE_VERIFIED; the rest as counted in D-7 | local matrix (D-7); 149 PASS rows cite a prod-qa run id |
+| Last walk failures | — | `company-governance` 40296167812 (D-6); weekly rotation 40177765214 (10-25); `billing-test-mode` 39884833436 (10-23); manual `role-routes` 39978076973 (10-23) |
+| No run in the last 400 | NOT_VERIFIED | `admin-console`; `invited-worker` (owner: parked) |
+
+| Regression queue 2026-10-28 (`…16CYcDu`) | LIVE_VERIFIED / PARTIAL | living-cv-growth 40634954858 ✓, calendar-planning 40635527214 ✓, notifications-inapp 40639605465 ✓, jobs-search 40640097643 (J-6 ✗, D-8); project-execution 40640668466 ✓, search-support-privacy 40641351546 ✓; rota-repeat started (result not collected); chat-continuity, documents-approvals not run (queue stopped at handover) |
+
+Every other walk spec: last run green between 10-23 and 10-28.
+
 ## 5. Open owner items (collected once)
 
-1. D-1: approve #2738/#2739 merge as applied (or record why they were applied ahead).
-2. D-3: confirm who implements the reissue concurrency guard (RED, approval by name).
-3. D-7: RED #2816.
-4. Merge decisions: #2840 (zero paid AI), #2839 (restore doc), #2844 (legal), #2842 (legal draft).
-5. D-8: translation source for the 5 inactive locales.
-6. Parked (do not re-ask): `prod-qa-invited-provision`.
-7. Workspace default theme (public is light since #2849; workspace still dark).
-8. Supabase dashboard: enable leaked-password protection (security advisor WARN).
+- Approve or reject each RED draft individually (§3.3); D-1 first (merge #2738/#2739 as already applied — SQL verified identical).
+- D-3 hardening (RED): DB-level address lock in `reissue_external_referral_v1` before any future reprocess run.
+- D-6 product question: training for engaged (non-member) workers.
+- #2844 legal wording.
+- `prod-qa-invited-provision` dispatch — parked by owner 2026-10-28; do not re-ask.
+- `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2,
+  EVID-2, MKT-7, COM-6, COM-8 (see `product-truth.mjs`).
+- Stale PR keep/close (§3.4).
 
 ## 6. How to update
 
