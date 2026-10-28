@@ -12,6 +12,7 @@ import type {
   WorkIntelligenceOrganizationPeriodRecord,
   WorkIntelligenceOrganizationRecord,
 } from "@/lib/journal/work-intelligence";
+import { innerPeriodBound } from "@/lib/organization-evidence/business-history";
 import type { HistoryContext } from "@/lib/organization-evidence/professional-history-context";
 
 /**
@@ -118,21 +119,6 @@ export function periodFor(
   return periods.find((p) => p.sourceLabels.some((l) => normLabel(l) === key)) ?? null;
 }
 
-/** The bound of a stated period that work can CERTAINLY be inside of: for
- *  the start the latest plausible day, for the end the earliest plausible
- *  one (the inner span), given the precision the bound is known to. */
-function innerBound(iso: string, precision: "day" | "month" | "year" | null | undefined, side: "from" | "to"): string {
-  if (!precision || precision === "day") return iso;
-  const y = iso.slice(0, 4);
-  if (precision === "year") return side === "from" ? `${y}-12-31` : `${y}-01-01`;
-  const m = Number(iso.slice(5, 7));
-  const yn = Number(y);
-  const leap = (yn % 4 === 0 && yn % 100 !== 0) || yn % 400 === 0;
-  const last = m === 2 ? (leap ? 29 : 28) : [4, 6, 9, 11].includes(m) ? 30 : 31;
-  const mm = String(m).padStart(2, "0");
-  return side === "from" ? `${y}-${mm}-${String(last).padStart(2, "0")}` : `${y}-${mm}-01`;
-}
-
 /** The ONE stated dated period whose span certainly holds [from, to], or
  *  null. A period with an unknown bound places nothing by date; when two
  *  dated periods hold the span (overlapping statements) none is chosen — the
@@ -145,8 +131,8 @@ export function periodForDates(
   if (!from || !to) return null;
   const holding = periods.filter((p) => {
     if (!p.from || !p.to) return false;
-    const a = innerBound(p.from, p.fromPrecision, "from");
-    const b = innerBound(p.to, p.toPrecision, "to");
+    const a = innerPeriodBound(p.from, p.fromPrecision, "start");
+    const b = innerPeriodBound(p.to, p.toPrecision, "end");
     return a <= b && from >= a && to <= b;
   });
   return holding.length === 1 ? holding[0] : null;

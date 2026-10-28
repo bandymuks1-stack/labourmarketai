@@ -43,7 +43,37 @@ export type HistoryPeriodStatement = {
   readonly basisReference: string | null;
   readonly statement: string | null;
   readonly createdAt: string;
+  /** How precisely each bound is known (migration 20261024100000); absent /
+   *  null = as stated, to the day. */
+  readonly periodStartPrecision?: PeriodBoundPrecision | null;
+  readonly periodEndPrecision?: PeriodBoundPrecision | null;
 };
+
+export type PeriodBoundPrecision = "day" | "month" | "year";
+
+/**
+ * The bound of a stated period that work can CERTAINLY be inside of, given
+ * the precision the bound is known to: for the start the latest plausible
+ * day, for the end the earliest plausible one (the INNER span). "January
+ * 2026" as an end certainly covers work only up to 2026-01-01. Pure, no
+ * clock — the ONE rule, shared by the company view and the person's
+ * professional history.
+ */
+export function innerPeriodBound(
+  iso: string,
+  precision: PeriodBoundPrecision | null | undefined,
+  side: "start" | "end",
+): string {
+  if (!precision || precision === "day") return iso;
+  const y = iso.slice(0, 4);
+  if (precision === "year") return side === "start" ? `${y}-12-31` : `${y}-01-01`;
+  const m = Number(iso.slice(5, 7));
+  const yn = Number(y);
+  const leap = (yn % 4 === 0 && yn % 100 !== 0) || yn % 400 === 0;
+  const last = m === 2 ? (leap ? 29 : 28) : [4, 6, 9, 11].includes(m) ? 30 : 31;
+  const mm = String(m).padStart(2, "0");
+  return side === "start" ? `${y}-${mm}-${String(last).padStart(2, "0")}` : `${y}-${mm}-01`;
+}
 
 export type BusinessHistoryRecord = {
   readonly id: string;
@@ -156,12 +186,17 @@ export function buildBusinessHistory(
       perPeriod[byLabel].acc.add(r);
       perPeriod[byLabel].byLabel += 1;
     } else {
-      // 2. by DOCUMENTED bounds (both ends known)
+      // 2. by DOCUMENTED bounds (both ends known), only work CERTAINLY
+      //    inside them (a bound known to the month covers its inner span).
       const d = dayOf(r);
       const e = lastDayOf(r);
       const i = d
         ? periods.findIndex(
-            (p) => p.periodStart !== null && p.periodEnd !== null && d >= p.periodStart && (e ?? d) <= p.periodEnd,
+            (p) =>
+              p.periodStart !== null &&
+              p.periodEnd !== null &&
+              d >= innerPeriodBound(p.periodStart, p.periodStartPrecision, "start") &&
+              (e ?? d) <= innerPeriodBound(p.periodEnd, p.periodEndPrecision, "end"),
           )
         : -1;
       if (i >= 0) {
