@@ -258,7 +258,10 @@ decision → (only then) production**. Never restore over production to "test".
    window and a fresh dump of the current state taken first. Supabase's own
    Pro backups (Dashboard → Database → Backups, 7 days) are the alternative for
    a whole-project point-in-time restore.
-6. **Clean up** the plaintext: `shred -u /root/lm-restore/lm.dump; docker rm -f lm-restore-check`.
+6. **Clean up** the plaintext: `shred -u /root/lm-restore/lm.dump; docker rm -fv lm-restore-check` —
+   `-v` also removes the container's anonymous data volume (`/var/lib/postgresql/data`), which
+   otherwise keeps a second plaintext copy of the restored database on the VPS. Confirm with
+   `docker volume ls -qf dangling=true` (no volume from the drill may remain).
 
 ### 9.2 Outbound e-mail
 
