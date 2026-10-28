@@ -95,7 +95,11 @@ jobs:
         working-directory: apps/mobile/ios
         run: |
           WS=$(ls -d *.xcworkspace | head -1)
-          SCHEME=$(xcodebuild -workspace "$WS" -list -json | python3 -c 'import json,sys; s=json.load(sys.stdin)["workspace"]["schemes"]; print([x for x in s if x!="Pods"][0])')
+          # NOT the first listed scheme: the workspace lists every Pods library
+          # scheme too, and building one "succeeds" with no .app. The app scheme
+          # matches the .xcodeproj name (the same rule as ios.yml).
+          SCHEME=$(basename "$(ls -d *.xcodeproj | head -1)" .xcodeproj)
+          echo "workspace=$WS scheme=$SCHEME"
           echo "workspace=$WS" >> "$GITHUB_OUTPUT"
           echo "scheme=$SCHEME" >> "$GITHUB_OUTPUT"
 
