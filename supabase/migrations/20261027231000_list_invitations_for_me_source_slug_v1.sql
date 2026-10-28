@@ -1,4 +1,5 @@
 -- 20261027231000_list_invitations_for_me_source_slug_v1
+-- @human-gate-approved (owner, 2026-10-28, in chat: "šią konkrečią migraciją leidžiu vykdyti ir PR sujungti" — #2846 only, after re-checking SQL, grants, RLS, rights, rollback and numbering)
 --
 -- RED tier: CREATE OR REPLACE of a SECURITY DEFINER function. Owner approval
 -- required before it is applied. Signature, return type, grants, filters,
