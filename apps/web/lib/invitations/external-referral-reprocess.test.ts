@@ -88,6 +88,20 @@ describe("who may receive a fresh link", () => {
     expect(s.excluded.duplicate_address).toBe(1);
   });
 
+  it("an address already mailed is never mailed again from an older duplicate row", () => {
+    // 2026-10-27: after the newest row was sent it left the candidate list,
+    // and the older duplicate of the same address became the first candidate.
+    const older = row({ invitedEmail: "Same@Mail.lt", expiresAt: "2026-11-01T00:00:00Z" });
+    const other = row({ invitedEmail: "other@mail.lt" });
+    const s = selectReprocessCandidates([older, other], {
+      now: NOW,
+      existingAccountEmails: new Set(),
+      alreadyMailedEmails: new Set(["same@mail.lt"]),
+    });
+    expect(s.eligible.map((r) => r.id)).toEqual([other.id]);
+    expect(s.excluded.already_mailed_address).toBe(1);
+  });
+
   it("the soonest-expiring referrals come first", () => {
     const late = row({ expiresAt: "2026-11-25T00:00:00Z" });
     const soon = row({ expiresAt: "2026-10-29T00:00:00Z" });
