@@ -30,7 +30,7 @@ a security/permission row says only that an item is open.
 
 | LIVE_VERIFIED | PASS_CI_ONLY | FAIL | BLOCKED | NOT_VERIFIED | NOT_IMPLEMENTED | OPTIONAL_TEST |
 |---|---|---|---|---|---|---|
-| 189 | 4 | 8 | 39 | 18 | 16 | 1 |
+| 189 | 5 | 8 | 39 | 17 | 16 | 1 |
 
 Seeded 2026-10-28 from the 275-row QA matrix of 2026-10-23…28 plus the 2026-10-28 production results; a `PASS` row
 whose evidence names a production run or production use became `LIVE_VERIFIED`, any other `PASS` became `PASS_CI_ONLY`.
@@ -39,15 +39,15 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
-| 1.1 | E-mail+password sign-up / sign-in | LIVE_VERIFIED | 2026-10-28 | role-routes 39849107061; #2854 deployed f5c0e88f (sign-up skeleton LIVE; closed-invite / existing-address branches deployed, not walked); isolated CI sign-up walk #2861 in progress; earlier: role-routes 39849107061 10-22; live 6 locales 10-23 | yes | self-serve sign-up through the form not walked in production (owner: no synthetic production accounts); covered by #2861 in CI |
+| 1.1 | E-mail+password sign-up / sign-in | LIVE_VERIFIED | 2026-10-28 | isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-1..S-3 form sign-up worker/company/agency, S-4 existing address → sign-in, S-5 sign-out/sign-in; role-routes 39849107061; #2854 deployed f5c0e88f (sign-up skeleton LIVE; closed-invite / existing-address  | yes | self-serve sign-up through the form proven in CI only (no synthetic production accounts, owner rule) |
 | 1.2 | Google OAuth | LIVE_VERIFIED | 2026-10-18 | owner Google sign-in 10-18/19; buttons x6 live | yes |  |
-| 1.3 | Password reset | NOT_VERIFIED | 2026-10-25 | profile-cv-history P-1 run 40166272659 10-25: reset form renders; mail delivery still unproven (SMTP) | unproven |  |
+| 1.3 | Password reset | PASS_CI_ONLY | 2026-10-28 | isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-6 reset mail → link → new password works, old refused (HTTP 400); profile-cv-history P-1 run 40166272659 10-25: reset form renders; mail delivery still unproven (SMTP) | unproven | production reset-mail delivery not walked |
 | 1.4 | Onboarding + setup hub | LIVE_VERIFIED | — | fresh-activation walks (owner-created accounts) PASS; invited-worker path: onboarding finds the invitation without the link (#2845, live 2e4ae2b4b), server settles the role and accepts after it (#2846, live 51a35183, mig… | yes |  |
 | 1.5 | Multi-role identity | LIVE_VERIFIED | 2026-10-22 | role-routes run 39783147517 (green) 10-22; 5 roles | yes |  |
 | 1.6 | Organization creation + identity | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): S-[volume withheld] identity page shows Alfa's own record | yes |  |
 | 1.7 | Organization verification | LIVE_VERIFIED | 2026-10-25 | public-org-locales run 40205429467 10-25 (19 green, 2 skipped): S-2 verification status shown, honest | yes |  |
 | 1.8 | Multi-capability organization | BLOCKED | — | owner decision ORG-2 | unproven |  |
-| 1.9 | Memberships, invitations, roles | LIVE_VERIFIED | 2026-10-22 | brigade-formation 39795574869 10-22 | yes |  |
+| 1.9 | Memberships, invitations, roles | LIVE_VERIFIED | 2026-10-28 | isolated CI walk signup-isolated (#2861/#2864/#2865, local Supabase, Chromium) 9/9 2026-10-28: S-9 invitation link → sign-up through it → stored accepted by that person; brigade-formation 39795574869 10-22 | yes |  |
 | 1.10 | Workspace context + switching | LIVE_VERIFIED | 2026-10-23 | org-roster R-7 workspace switching run 39969976834 10-23 | yes |  |
 | 1.11 | Cross-org isolation | LIVE_VERIFIED | — | worker-identity-split 39602569732; anon 401 | yes |  |
 | 1.12 | Invitation / referral network | LIVE_VERIFIED | 2026-10-28 | #2855 (ledger 20261028081810) + #2858 (20261028091725) applied, verified, deployed a4cbc9b9; send ledger shows no duplicate recipient; earlier: 2026-10-27 production: partner referrals arrive through the referral door (pending join_platform with consent, latest 2026-10-27), are e-mailed (41 sent) an | yes |  |
@@ -357,7 +357,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
-| 13.1 | VPS hosting + auto-deploy | FAIL | 2026-10-28 | deploys green; 10-28 intermittent inbound loss from GitHub-hosted networks, host healthy; earlier: external monitor 10-23: 4 of 15 anonymous requests stalled; NOT reproduced 10-26: lcp-locale-probe run 40328663291 (48 pages + 48 health) and concurrency-probe run 40342223134 (36 pages + 36 health, tw | no | provider network fault probable, not proven (register D-10); Hostinger ticket drafted |
+| 13.1 | VPS hosting + auto-deploy | FAIL | 2026-10-28 | 10-28 recurrence: admin-console 40668817886 (worker page timeout) and company-governance 40678088257 (D-1 chunk load timeout, ChunkLoadError in the app log) while the server answered normally; deploys green; 10-28 intermittent inbound loss from GitHub-hosted networks, host healthy; earlier: external | no | REGRESSION-class infra: GitHub-runner → VPS inbound loss now fails production walks; provider network fault probable, not proven; Hostinger ticket pending owner |
 | 13.2 | Health probe + monitor | LIVE_VERIFIED | — | live | yes |  |
 | 13.3 | Prod QA walk harness | LIVE_VERIFIED | 2026-10-22 | role-routes run 39783147517 (green) 10-22 | yes |  |
 | 13.4 | Supabase capacity | PASS_CI_ONLY | 2026-10-25 | Supabase org plan=pro (get_organization 2026-10-25) | unproven |  |
