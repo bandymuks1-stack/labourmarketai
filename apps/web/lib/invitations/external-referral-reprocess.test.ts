@@ -171,4 +171,95 @@ describe("sending", () => {
     expect(r).toMatchObject({ sent: 0, failed: 1, refused: { expired: 1 } });
     expect(calls.mark).toEqual([`${b.id}:delivery_failed`]);
   });
+
+  it("a mark that does not land stops the batch (the DB reservation then blocks a retry)", async () => {
+    const a = row();
+    const b = row();
+    const { d, calls } = deps({
+      mark: async () => {
+        throw new Error("mark_failed");
+      },
+    });
+    const r = await reprocessExternalReferrals(select([a, b]), { dryRun: false }, d);
+    expect(calls.send).toHaveLength(1);
+    expect(r).toMatchObject({ sent: 1, refused: { mark_failed: 1 } });
+  });
+});
+
+/**
+ * A model of the database side after 20261028070000: the address lock makes
+ * reissue + its checks atomic per normalized address; a successful reissue
+ * RESERVES the row; mark clears it. Two runs that overlap over the same
+ * address (even through two duplicate rows) must mail it once.
+ */
+function fakeDb(rows: ReferralRow[]) {
+  const state = new Map(rows.map((r) => [r.id, { ...r, reserved: false }]));
+  const norm = (r: ReferralRow) => r.invitedEmail!.trim().toLowerCase();
+  const sameAddress = (id: string) => [...state.values()].filter((o) => norm(o) === norm(state.get(id)!));
+  return {
+    reissue: async (id: string) => {
+      if (state.get(id)!.deliveryStatus === "sent") return "already_sent";
+      if (sameAddress(id).some((o) => o.deliveryStatus === "sent")) return "address_already_sent";
+      if (sameAddress(id).some((o) => o.reserved)) return "address_reserved";
+      state.get(id)!.reserved = true;
+      return "ok";
+    },
+    mark: async (id: string, outcome: "sent" | "delivery_failed") => {
+      const r = state.get(id)!;
+      r.deliveryStatus = outcome;
+      r.reserved = false;
+    },
+    reservedCount: () => [...state.values()].filter((o) => o.reserved).length,
+  };
+}
+
+describe("address-level send guard (concurrency, idempotency)", () => {
+  it("two overlapping runs over two rows of one address mail it exactly once", async () => {
+    const a = row({ invitedEmail: "same@mail.lt" });
+    const b = row({ invitedEmail: " SAME@mail.lt " });
+    const db = fakeDb([a, b]);
+    const mailed: string[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const mk = () =>
+      deps({
+        reissue: db.reissue,
+        mark: db.mark,
+        send: async (to) => {
+          mailed.push(to.toLowerCase());
+          await gate; // the first send is still in flight when the second run reaches the address
+          return true;
+        },
+      }).d;
+    // Each run holds its own stale candidate row, as two overlapping runs would.
+    const run1 = reprocessExternalReferrals(select([a]), { dryRun: false }, mk());
+    const run2 = reprocessExternalReferrals(select([b]), { dryRun: false }, mk());
+    await new Promise((r) => setTimeout(r, 0));
+    release();
+    const [r1, r2] = await Promise.all([run1, run2]);
+    expect(mailed).toEqual(["same@mail.lt"]);
+    expect(r1.sent + r2.sent).toBe(1);
+    expect({ ...r1.refused, ...r2.refused }).toEqual({ address_reserved: 1 });
+    expect(db.reservedCount()).toBe(0);
+  });
+
+  it("re-running after a finished run sends nothing (idempotent)", async () => {
+    const a = row();
+    const db = fakeDb([a]);
+    const { d, calls } = deps({ reissue: db.reissue, mark: db.mark });
+    await reprocessExternalReferrals(select([a]), { dryRun: false }, d);
+    const again = await reprocessExternalReferrals(select([a]), { dryRun: false }, d);
+    expect(calls.send).toHaveLength(1);
+    expect(again).toMatchObject({ sent: 0, refused: { already_sent: 1 } });
+  });
+
+  it("a run that died mid-send leaves a reservation no later run can pass", async () => {
+    const a = row();
+    const db = fakeDb([a]);
+    await db.reissue(a.id); // reserved, never marked: outcome unknown
+    const { d, calls } = deps({ reissue: db.reissue, mark: db.mark });
+    const r = await reprocessExternalReferrals(select([a]), { dryRun: false }, d);
+    expect(calls.send).toHaveLength(0);
+    expect(r.refused).toEqual({ address_reserved: 1 });
+  });
 });

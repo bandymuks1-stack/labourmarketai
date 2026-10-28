@@ -9,6 +9,10 @@
 set -eu
 case "${1:-}" in dry_run|control|batch) ;; *) echo "usage: sh lm-referral-reprocess.sh dry_run|control|batch"; exit 2;; esac
 umask 077
+# One run at a time, ever: a second invocation while one is running exits at once (no wait, no queue).
+# The database refuses a second mail per address on its own (20261028070000); this lock keeps runs from overlapping.
+exec 9>/root/lm-prod/.referral-reprocess.lock
+flock -n 9 || { echo "another referral reprocess run is active — nothing done"; exit 3; }
 D=$(mktemp -d /root/lm-prod/.reprocess.XXXXXX)
 trap 'rm -rf "$D"' EXIT INT TERM
 printf 'Authorization: Bearer %s\n' "$(sed -n 's/^CRON_SECRET=//p' /root/lm-prod/env)" > "$D/h"

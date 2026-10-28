@@ -114,10 +114,11 @@ export async function runExternalReferralReprocess(input: {
         return sent.status === "sent";
       },
       mark: async (id, outcome) => {
-        await asAny(admin).rpc("mark_external_referral_delivery_v1", {
+        const r = await asAny(admin).rpc("mark_external_referral_delivery_v1", {
           p_invitation_id: id,
           p_outcome: outcome,
         });
+        if (r.error || r.data !== "ok") throw new Error("mark_failed");
       },
       resolveLocale: (l) => ((activeLocales as readonly string[]).includes(l ?? "") ? (l as string) : "en"),
     },

@@ -105,7 +105,7 @@ export type ReprocessDeps = {
   readonly buildLink: (locale: string, token: string) => string;
   /** Sends ONE invitation mail in `locale`; true only on a provider ack. */
   readonly send: (to: string, locale: string, link: string) => Promise<boolean>;
-  /** `mark_external_referral_delivery_v1`. */
+  /** `mark_external_referral_delivery_v1` — throws when the outcome was not stored. */
   readonly mark: (invitationId: string, outcome: "sent" | "delivery_failed") => Promise<void>;
   readonly resolveLocale: (locale: string | null) => string;
 };
@@ -171,9 +171,18 @@ export async function reprocessExternalReferrals(
     } catch {
       ok = false;
     }
-    await deps.mark(row.id, ok ? "sent" : "delivery_failed");
     if (ok) sent += 1;
     else failed += 1;
+    // A mark that does not land leaves the row reserved in the database
+    // (`delivery_reserved_at`, migration 20261028070000), so no later run can
+    // mail that address again; stop here instead of sending more while the
+    // stored state is uncertain.
+    try {
+      await deps.mark(row.id, ok ? "sent" : "delivery_failed");
+    } catch {
+      refused.mark_failed = (refused.mark_failed ?? 0) + 1;
+      break;
+    }
   }
   return { outcome: "done", ...base, attempted: batch.length, sent, failed, refused };
 }
