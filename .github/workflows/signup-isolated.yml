@@ -1,0 +1,185 @@
+name: Signup Isolated (local Supabase)
+
+# SELF-SERVE SIGN-UP, end to end, against a throwaway LOCAL Supabase stack that
+# lives and dies inside this job (apps/web/tests/e2e/signup-isolated.spec.ts):
+# a worker, a company and an agency each fill the real sign-up form, onboard,
+# and reach their first surface; the stored rows are checked.
+#
+# Owner decision 2026-10-28: sign-up tests run in an isolated CI environment;
+# no synthetic accounts are created in production without separate approval.
+# Same isolation contract as the OAuth isolated job (#2809):
+#   - reads NO secrets (the first step fails the job if this file ever does);
+#   - production hostnames resolve to 0.0.0.0 on the runner before anything
+#     is built or started; no project is linked, no access token is used;
+#   - the app runs with LM_ACCEPTANCE_MODE=1 and refuses a non-local target;
+#   - payments, AI providers and outbound alerts stay off;
+#   - only Playwright's list output is kept (no traces, no screenshots).
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/signup-isolated.yml"
+      - "apps/web/tests/e2e/signup-isolated.spec.ts"
+      - "apps/web/components/app/signup-form.tsx"
+      - "apps/web/components/app/onboarding-wizard.tsx"
+      - "apps/web/components/app/company-setup-form.tsx"
+      - "apps/web/app/*/auth/**"
+      - "apps/web/app/*/onboarding/**"
+      - "apps/web/app/*/dashboard/start/**"
+      - "apps/web/lib/onboarding/**"
+      - "apps/web/lib/invitations/signup-*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signup-isolated-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signup-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      APP_ORIGIN: http://127.0.0.1:3000
+      SPEC: tests/e2e/signup-isolated.spec.ts
+      # One production DATA migration is not replayable on an empty database
+      # (see the OAuth isolated job); pinned by hash, set aside, and the job
+      # fails if it changes so a human re-decides.
+      SKIP_MIGRATION: 20261025120000_business_history_periods_vivatrex_lmai_bounds_v1.sql
+      SKIP_MIGRATION_SHA256: e4dea150dbd1c344ab7319af74066f12090f764ccdb5511571be65e8244b233e
+      PAYMENTS_ENABLED: "false"
+      BILLING_PROVIDER: none
+      AI_PROVIDER_MODE: disabled
+      OWNER_TELEGRAM_ALERTS_ENABLED: "false"
+      AGENTAI_OS_ALERTS_ENABLED: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Guard — this workflow reads no secrets; no linked project or env files
+        run: |
+          set -euo pipefail
+          if grep -nE 'secrets\.' .github/workflows/signup-isolated.yml | grep -v 'grep -nE'; then
+            echo "::error title=Secret reference::signup-isolated.yml must never read a repository secret"; exit 1
+          fi
+          if [ -e supabase/.temp/project-ref ]; then echo "::error::linked project present"; exit 1; fi
+          for f in apps/web/.env apps/web/.env.local apps/web/.env.production apps/web/.env.production.local .env .env.local; do
+            if [ -e "$f" ]; then echo "::error::$f exists in the checkout"; exit 1; fi
+          done
+          grep -qE '^enable_confirmations = false' supabase/config.toml || { echo "::error::local Confirm email must be off for this walk"; exit 1; }
+
+      - name: Guard — production hosts resolve to nowhere on this runner
+        run: |
+          set -euo pipefail
+          printf '0.0.0.0 %s\n' gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app | sudo tee -a /etc/hosts >/dev/null
+          for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai; do
+            getent hosts "$h" | grep -q '^0\.0\.0\.0' || { echo "::error::$h still resolves"; exit 1; }
+          done
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter=!mobile
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@b60b5899c73b63a2d2d651b1e90db8d4c9392f51 # v1.6.0
+        with:
+          version: 2.116.0
+
+      - name: Install Playwright chromium
+        run: pnpm -F web exec playwright install --with-deps chromium
+
+      - name: Set aside the one non-replayable migration (hash-pinned)
+        run: |
+          set -euo pipefail
+          f="supabase/migrations/$SKIP_MIGRATION"
+          if [ ! -e "$f" ]; then echo "::notice::$SKIP_MIGRATION is gone — replay runs every file."; exit 0; fi
+          echo "$SKIP_MIGRATION_SHA256  $f" | sha256sum -c - || { echo "::error::$SKIP_MIGRATION changed — re-decide"; exit 1; }
+          mv "$f" "$RUNNER_TEMP/"
+
+      - name: Start local Supabase (migrations replayed from scratch)
+        run: |
+          set -uo pipefail
+          supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
+          rc=$?
+          grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 60
+          exit $rc
+
+      - name: Export the LOCAL stack env (masked; refuses anything non-local)
+        run: |
+          set -euo pipefail
+          supabase status -o env > "$RUNNER_TEMP/sb.env"
+          get() { sed -n "s/^$1=\"\{0,1\}\([^\"]*\)\"\{0,1\}$/\1/p" "$RUNNER_TEMP/sb.env" | head -1; }
+          API_URL="$(get API_URL)"; ANON="$(get ANON_KEY)"; SERVICE="$(get SERVICE_ROLE_KEY)"
+          [ -n "$ANON" ] || ANON="$(get PUBLISHABLE_KEY)"; [ -n "$SERVICE" ] || SERVICE="$(get SECRET_KEY)"
+          rm -f "$RUNNER_TEMP/sb.env"
+          for v in "$ANON" "$SERVICE"; do [ -n "$v" ] && echo "::add-mask::$v"; done
+          [ "$API_URL" = "http://127.0.0.1:54321" ] || { echo "::error::API_URL is not the local stack"; exit 1; }
+          [ -n "$ANON" ] && [ -n "$SERVICE" ] || { echo "::error::supabase status returned no keys"; exit 1; }
+          for k in "$ANON" "$SERVICE"; do
+            node -e 'const p=JSON.parse(Buffer.from((process.argv[1].split(".")[1]||""),"base64url").toString()||"{}");if(p.ref){console.error("cloud key");process.exit(1)}' "$k"
+          done
+          CTS="$(openssl rand -hex 32)"; echo "::add-mask::$CTS"
+          CRON="$(openssl rand -hex 24)"; echo "::add-mask::$CRON"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE"
+            echo "E2E_SUPABASE_URL=$API_URL"
+            echo "E2E_SUPABASE_SERVICE_ROLE_KEY=$SERVICE"
+            echo "CONVERSATION_TOKEN_SECRET=$CTS"
+            echo "CRON_SECRET=$CRON"
+            echo "LM_ACCEPTANCE_MODE=1"
+          } >> "$GITHUB_ENV"
+
+      - name: Prove the replay — ledger rows equal migration files
+        run: |
+          set -euo pipefail
+          files=$(ls supabase/migrations/*.sql | wc -l)
+          rows=$(docker exec supabase_db_labourmarketai psql -U postgres -tAc "select count(*) from supabase_migrations.schema_migrations")
+          echo "migration files=$files ledger rows=$rows"
+          [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
+
+      - name: Build
+        run: pnpm -F web build
+
+      - name: Guard — the build inlined the local Supabase URL
+        run: grep -rqF "127.0.0.1:54321" apps/web/.next/static apps/web/.next/server || { echo "::error::build lacks the local Supabase URL"; exit 1; }
+
+      - name: Start app (acceptance mode — refuses a non-local target)
+        run: |
+          set -euo pipefail
+          pnpm -F web exec next start -H 127.0.0.1 -p 3000 > "$RUNNER_TEMP/next.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/next.pid"
+          for i in $(seq 1 60); do curl -fsS -o /dev/null "$APP_ORIGIN/en" && break; sleep 2; done
+          curl -fsS -o /dev/null "$APP_ORIGIN/en"
+
+      - name: Run the sign-up walk
+        working-directory: apps/web
+        env:
+          SIGNUP_ISOLATED: "1"
+          E2E_BASE_URL: http://127.0.0.1:3000
+          E2E_NO_SERVER: "1"
+          E2E_LOCAL_STACK: "1"
+        run: pnpm exec playwright test "$SPEC" --reporter=list --trace=off
+
+      - name: App log tail on failure (no secrets are printed by the app)
+        if: failure()
+        run: grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/next.log" | tail -n 60 || true
+
+      - name: Stop app and local Supabase
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/next.pid" ]; then kill "$(cat "$RUNNER_TEMP/next.pid")" 2>/dev/null || true; fi
+          supabase stop --no-backup || true
