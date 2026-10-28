@@ -1731,6 +1731,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-28: owner approved #2846 in chat (apply + merge). The caller-scoped
       // invitations read carries the partner source; ledger 20261028034356.
       "20261027231000_list_invitations_for_me_source_slug_v1.sql",
+      // 2026-10-28: owner approved #2855 in chat (apply + merge, at 35e749fc3).
+      // Address lock + send reservation for partner referral sends; ledger 20261028081810.
+      "20261028070000_referral_send_address_guard_v1.sql",
 ]);
   });
 
