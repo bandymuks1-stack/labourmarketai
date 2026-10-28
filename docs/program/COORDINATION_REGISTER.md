@@ -95,81 +95,101 @@ independent work or launch of other features (owner order 2026-10-28).
 
 | Lane | Holder | Since | What |
 |---|---|---|---|
-| migration (prod DB) | — free — | | last: `external_referral_reprocess_candidates_v2` applied 2026-10-28 04:47Z by session `…AygGqFo3aoB76NrV` (#2843) |
-| live sends (e-mail to real people) | session `…AygGqFo3aoB76NrV` | 2026-10-27 | partner referral reprocess: 41/45 sent; control + last 3 pending after #2843 merge |
-| deploy | — serial via `deploy-vps.yml` — | | production = `51a3518` (#2846), deployed 2026-10-28 04:26Z |
+| coordination (this file) | session `…16CYcDu` "projekto perėmimas" | 2026-10-28 ~06:00Z (owner order) | keeps §2–§5 current; does not steer other sessions without their agreement |
+| migration (prod DB) | — free — | | last: `external_referral_reprocess_candidates_v2` (ledger `20261028044705`, #2843) |
+| live sends (e-mail to real people) | session `…AygGqFo3aoB76NrV` | 2026-10-27 | partner referral reprocess 41/45 done; **last sends frozen until D-3 is closed** |
+| deploy | — serial via `deploy-vps.yml` — | | `/api/health` `build` is the truth (a run title can name a newer SHA than the one it deploys) |
 
 ---
 
-## 3. Work register — snapshot 2026-10-28 ~05:10Z
+## 3. Work register — snapshot 2026-10-28 ~06:00Z
 
-Sources: GitHub PRs/Actions, production migration ledger, session list and
-transcripts readable from the coordinator session. Status per §1.4.
+Sources: GitHub PRs/Actions, production migration ledger, `/api/health`, session list.
 
 ### 3.1 Active executors
 
-| Session | Where | Doing | State |
+| Session | Doing | Area it owns (no overlap) | State |
 |---|---|---|---|
-| `session_016CYcDuhGGEA75ruJ3zXD99` "projekto perėmimas" | owner's computer | #2849 merge after CI; platform functional + UX audit (owner order 04:48Z); RED-draft conflict upkeep | IN_PROGRESS |
-| `session_011vBC1iAygGqFo3aoB76NrV` "darbų perimimas" | owner's computer | #2843 merge → dry run → 1 control → 3 sends; read-only journey audit | IN_PROGRESS |
-| `session_011vBC1hnVKqGvExp129bfjT` coordinator | cloud | this register, inventory, plan | IN_PROGRESS |
-| `session_011vBC1hntPRyoM4yRJKKcG2` | owner's computer | other repository (Agentai OS) — not this repo | n/a here |
-
-~45 older sessions are idle; most end with an owner question (merge, secret, billing).
-Those questions are collected in §5, not re-asked per session.
+| `…16CYcDu` "projekto perėmimas" (owner's computer) | coordination; whole-platform functional + UX audit and regression walks; RED-draft conflict upkeep; onboarding/invitation app code | §3.5 journeys, `apps/web` UX, design, guard baselines | IN_PROGRESS |
+| `…AygGqFo3` "darbų perimimas" (owner's computer) | partner-referral reprocess and live-send lane (#2841/#2843) | `lib/invitations/external-referral-*`, `ops/vps/lm-referral-reprocess.sh`, reissue migrations | IN_PROGRESS |
+| `…hnVKqGvExp` coordinator (cloud) | created this register (#2850) | handed over to `…16CYcDu` | DONE |
+| other-repo sessions (Agentai OS, Nonstop) | not this repository | — | n/a |
 
 ### 3.2 Recent work (last 48 h)
 
-| PR | Goal | Owner of work | State | Prod |
+| PR | Goal | Session | State | Production |
 |---|---|---|---|---|
 | #2841 | safe reprocess of unsent partner referrals (RED, approved) | `…AygGqFo3` | DONE | migration + code live |
-| #2845 | invited person arriving without link is still the addressee | `…16CYcDu` | DONE | live |
-| #2846 | invitations-for-me carries partner source (RED, approved for this one) | `…16CYcDu` | DONE | live, `51a3518` |
-| #2847 | synthetic invited-worker provision/revoke/purge mechanism | `…16CYcDu` | DONE (code) | workflow `prod-qa-invited-provision` never run → invited-worker E2E **NOT_VERIFIED** (owner: parked, do not ask again) |
-| #2848 | public header brand not cut on phones | `…16CYcDu` | DONE | LIVE_VERIFIED 320/360/375 |
-| #2843 | never re-mail an address from an older duplicate referral (RED) | `…AygGqFo3` | WAITING (CI) | migration v2 already applied 04:47Z; see §4 D-3 |
-| #2849 | public site opens light; one-sentence sign-up intro (11 locales) | `…16CYcDu` | WAITING (CI → merge, owner-authorized) | not yet |
-| #2844 | synthetic data instead of personal e-mails in tests/docs | unknown | WAITING (review) | — |
-| #2840 | zero paid AI budget — metered providers off unless owner opens | unknown | WAITING (review) | — |
-| #2839 | DB restore procedure doc | unknown | WAITING (review) | — |
-| #2842 | paid-terms legal draft | unknown | WAITING (legal/owner) | — |
-| #2828 | premium action cards visual proposal | unknown | WAITING (owner visual) | — |
+| #2843 | never re-mail an address from an older duplicate referral (RED) | `…AygGqFo3` | DONE (merged `7e64b33`, migration `20261028044705`) | live; **D-3 open** |
+| #2845 | invited person arriving without the link is still the addressee | `…16CYcDu` | DONE | live `2e4ae2b` |
+| #2846 | invitations-for-me carries the partner source; server settles the role (RED, approved for this one) | `…16CYcDu` | DONE | live `51a3518`, ledger `20261028034356` |
+| #2847 | synthetic invited-worker provision/walk/revoke/purge | `…16CYcDu` | DONE (code) | invited-worker E2E **NOT_VERIFIED** (owner parked; do not re-ask) |
+| #2848 | public header brand never cut on phones | `…16CYcDu` | DONE | LIVE_VERIFIED 320/360/375 |
+| #2849 | public site opens light; short sign-up intro (11 catalogs); theme follows in-app navigation | `…16CYcDu` | merged `5c8e61b` | WAITING (deploy) → visual check |
+| #2850 | this register | coordinator | DONE | docs |
+| #2840 | zero paid AI budget | `…16CYcDu` | READY: CI green, CLEAN, no overlap with `main` since its base | owner merge decision |
+| #2839 | DB restore procedure (+ `docker rm -fv` volume fix from review) | `…16CYcDu` | READY after CI on `b2d449a` | owner merge decision |
+| #2844 | synthetic data instead of personal e-mails in tests/docs | unknown | CI green, CLEAN | owner/legal decision (not touched) |
+| #2842 | paid-terms legal draft | `…16CYcDu` | WAITING (legal/owner) | — |
 
-### 3.3 Owner-gated (RED, draft, `needs-human-gate`) — 33 open
+### 3.3 Owner-gated (RED, draft, `needs-human-gate`)
 
-Kept mergeable by `…16CYcDu` (conflict upkeep only). None may be applied or merged
-without an owner approval naming it.
-#2816 #2812 #2811 #2809 #2806 #2795 #2752 #2747 #2746 #2739 #2738 #2713 #2707 #2704
-#2701 #2693 #2685 #2682 #2647 #2474 #2471 #2463 #2454 #2441 #2440 #2420 #2418 #2410
-#2362 #2235 #2227 #2209 #2203.
+List unchanged (see this file's git history). `…16CYcDu` keeps #2693 #2713 #2738 #2739 #2747 #2795
+mergeable (counter-only merges; all MERGEABLE at 2026-10-28 06:00Z). `migration-safety` stays red on
+them by design until the owner approves each one by name.
 
-### 3.4 Stale non-draft PRs (`STALE?`, >7 days no push)
+### 3.4 Stale non-draft PRs — unchanged (owner keep/close).
 
-#2642 (owner waiver needed), #2455, #2449, #2447 (draft, owner hold), #2438, #2419,
-#2403 (waiver), #2377, #2370, #2356 (dependabot). Owner decides keep/close; nobody
-closes them on the coordinator's say-so.
+### 3.5 QA evidence by user journey (production walks; run id = GitHub Actions run)
+
+| Journey | Evidence | Level |
+|---|---|---|
+| Worker: onboarding → Work Journal → Living CV | fresh-activation `40546035425` (2/2; CV hours = own DB hours, 0 confirmed); living-cv-growth `40634954858` (2026-10-28) | LIVE_VERIFIED |
+| Invited worker without the link | code live (#2845/#2846); walk mechanism #2847 | NOT_VERIFIED (owner-parked) |
+| Company: need → candidates → owner/admin isolation | fresh-activation `40546035425`; company-chain `40315387466` **13/13** | LIVE_VERIFIED |
+| Marketplace | marketplace `40200714397` **6/6**; marketplace-goods-services `40164310896` 14/14 | LIVE_VERIFIED (10-25) |
+| Orders / bookings | orders-bookings `40361384432` O-0..O-8 | LIVE_VERIFIED (10-26) |
+| Calendar / shifts | calendar-planning `40635527214` (2026-10-28); rota-repeat queued | LIVE_VERIFIED |
+| Notifications (in-app) | notifications-inapp `40639605465` (2026-10-28) | LIVE_VERIFIED |
+| Job search | jobs-search `40640097643`: J-1..J-5 pass; **J-6 save-job fails (D-6)** | PARTIAL |
+| Profile / CV history | profile-cv-history `40182648408` 21/21 | LIVE_VERIFIED (10-25) |
+| Agency chain | agency-chain `40357361254` 8/8 | LIVE_VERIFIED (10-26) |
+| Work verification | work-verification `40300016332` 6/6 | LIVE_VERIFIED (10-26) |
+| Governance (decisions / training) | company-governance `40296167812`: D-1..D-5 + T-1 pass; **T-2 fails (D-7)** | PARTIAL |
+| Mobile surfaces | mobile-surfaces `40195784343` 5/5; public pages 320–1280 checked 2026-10-28 | LIVE_VERIFIED |
+| Languages | active 6 catalogs (lt/en/ru/nl/de/pl) complete, 0 placeholders, no untranslated prose; inactive 5 partial (D-8) | VERIFIED (catalog audit) |
+| 275-function matrix | PASS 194 · FAIL 8 · BLOCKED 39 · NOT_VERIFIED 18 · NOT_IMPLEMENTED 16 (owner-private file; counts only here) | — |
+
+Pending walks (queued by `…16CYcDu`): project-execution, search-support-privacy, rota-repeat,
+chat-continuity, documents-approvals; jobs-search re-run for D-6.
 
 ---
 
 ## 4. Duplicates, conflicts, drift
 
-| Id | Finding | Risk | Next step |
+| Id | Finding | Class | Next step |
 |---|---|---|---|
-| D-1 | **Production holds `project_forecasts_v1` (ledger `20261025045152`) and `history_period_precision_and_registry_v1` (`20261025050302`) but `main` has neither file**; their PRs #2738 / #2739 are still RED drafts. No `APPLIED_LEDGER.md` entry on `main`. | re-run hazard; guards on `main` don't know the objects; a third PR could collide | owner: either approve merging #2738/#2739 as-applied, or record why they were applied ahead. No re-apply, no rollback without owner. |
-| D-2 | `market_lifecycle_closed_outcome_v1` is applied and its file is on `main`, but #2746's title still says "NOT applied". | misleading status | fix the PR title/body when #2746 is next touched |
-| D-3 | #2843: owner conditions given in session `…16CYcDu` (atomic DB guard in `reissue_external_referral_v1`, normalized e-mail, concurrency tests). The #2843 diff adds a read-only candidate list with `lower(trim())` matching and a TS exclusion; no lock/unique guard inside the reissue function and no concurrency test seen. VPS `flock` serializes runs. | possible second mail to one address under concurrent runs | owner confirms whether `flock` + candidate exclusion satisfies the condition before the last sends |
-| D-4 | Both active sessions edit the same migration pin/guard files (`APPLIED_LEDGER.md`, `booking-engagement-end-v1.test.ts`, baseline guards). #2846 and #2843 already conflicted. | merge conflicts | §1.6 lane rule |
-| D-5 | Two read-only platform audits are running at once (one per active session). | duplicated effort | split by area (§5 plan) |
+| D-1 | #2738 / #2739 migrations are **already in production** (`20261025045152`, `20261025050302`) and **content-identical** to the PR files: forecast trigger body md5 equal after removing comments (`346feb54…`), 15 triggers, 4 RLS tables, 3 policies; all 7 history columns present. `main` lacks the files. | drift (re-run hazard) | owner: approve merging #2738/#2739 **as applied** (no re-apply; `APPLIED_LEDGER.md` CONTENT_ONLY rows). Both PRs also ship app code (forecast recompute route + VPS cron lines installed by hand; Living CV experience read) — a product decision, not only a ledger fix. |
+| D-2 | #2746 title says "NOT applied" though applied | misleading status | fix when touched |
+| D-3 | `reissue_external_referral_v1` (production) locks only the ROW (`for update`) and refuses only if THAT row is `sent`; `sent` is written after the mail, outside the transaction. Two concurrent runs: the second waits, still sees `not_sent`, rotates again → **two mails possible**. Cross-row duplicates are excluded only in the read (candidates_v2 + TS). `ops/vps/lm-referral-reprocess.sh` on `main` has **no `flock`**. One run at a time is safe. | SECURITY/DATA (duplicate mail) | lane owner `…AygGqFo3` (or `…16CYcDu` if handed over): RED follow-up — inside `reissue`, `pg_advisory_xact_lock` on `lower(trim(email))`; refuse `in_flight` when `resend_count > 0 and delivery_status = 'not_sent'`; refuse when another referral to the same normalized address is `sent` or in flight; `flock` in the script; local two-session concurrency test. **No further sends until done.** |
+| D-4 | shared guard pin files conflict between DB PRs | merge conflicts | §1.6 lane rule; `…16CYcDu` resolves counters |
+| D-5 | two audits ran in parallel | duplicated effort | split: `…16CYcDu` = whole-platform functional/UX/walks; `…AygGqFo3` = referral/send lane only |
+| D-6 | jobs-search J-6: signed-in "save job" stays disabled > 30 s and no row is written (the action never returned); last green 2026-10-23 | P1 functional (cause NOT_VERIFIED) | `…16CYcDu`: re-run to separate a flake from a regression, then fix |
+| D-7 | governance T-2: `assign_training_v1` accepts an assignee only with an active `company_memberships` row; ordinary employees are `engagement_contexts` → `invalid_assignee` | product gap | owner: RED #2816 (accept an active employee engagement) |
+| D-8 | inactive locales da/et/lv/no/sv: 5 817 of 15 191 keys, 22–44 % `[EN]` placeholders | blocks those 5 markets only (they redirect to /en) | owner: translation source decision (zero paid AI) |
 
 ---
 
 ## 5. Open owner items (collected once)
 
-- Approve or reject each RED draft individually (§3.3); D-1 and D-3 first.
-- `prod-qa-invited-provision` dispatch — parked by owner 2026-10-28; do not re-ask.
-- `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2,
-  EVID-2, MKT-7, COM-6, COM-8 (see `product-truth.mjs`).
-- Stale PR keep/close (§3.4).
+1. D-1: approve #2738/#2739 merge as applied (or record why they were applied ahead).
+2. D-3: confirm who implements the reissue concurrency guard (RED, approval by name).
+3. D-7: RED #2816.
+4. Merge decisions: #2840 (zero paid AI), #2839 (restore doc), #2844 (legal), #2842 (legal draft).
+5. D-8: translation source for the 5 inactive locales.
+6. Parked (do not re-ask): `prod-qa-invited-provision`.
+7. Workspace default theme (public is light since #2849; workspace still dark).
+8. Supabase dashboard: enable leaked-password protection (security advisor WARN).
 
 ## 6. How to update
 
