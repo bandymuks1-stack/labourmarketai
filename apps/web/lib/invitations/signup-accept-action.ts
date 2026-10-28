@@ -105,3 +105,32 @@ export async function signUpAddressedInviteAction(input: {
   });
   return { status: "session", accepted: accepted.accepted };
 }
+
+/**
+ * Resend the sign-up confirmation for an ADDRESSED invitation. The form only
+ * holds the masked address (x***@domain) — a resend from the browser went to
+ * that masked string and reached nobody. The real address is resolved here
+ * from the invitation token and never leaves the server.
+ */
+export async function resendAddressedInviteConfirmationAction(input: {
+  token: string;
+  emailRedirectTo: string;
+}): Promise<{ status: "sent" } | { status: "unavailable" } | { status: "error"; code: string | null; message: string; httpStatus: number | null }> {
+  const context = await readInvitationSignupContext(String(input.token ?? "") || null);
+  if (context.kind !== "addressed") return { status: "unavailable" };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: context.email,
+    options: { emailRedirectTo: input.emailRedirectTo },
+  });
+  if (error) {
+    return {
+      status: "error",
+      code: (error as { code?: string }).code ?? null,
+      message: error.message.split(context.email).join("the invited address"),
+      httpStatus: error.status ?? null,
+    };
+  }
+  return { status: "sent" };
+}
