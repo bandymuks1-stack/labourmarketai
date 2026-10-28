@@ -267,7 +267,9 @@ test("S-9. an invited person opens the link, registers through it, and the invit
     await page.locator('input[type="email"]').fill(invitee);
   }
   await page.locator('input[name="password"]').fill(PASSWORD);
-  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
+  // The addressed form may ask for the password once (the address is already known).
+  const confirm = page.locator('input[name="confirm_password"]');
+  if (await confirm.count()) await confirm.fill(PASSWORD);
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
   if (/\/onboarding/.test(page.url())) await onboard(page, "work", "Synthetic Invited Worker");
