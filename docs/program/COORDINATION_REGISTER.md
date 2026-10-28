@@ -95,10 +95,10 @@ independent work or launch of other features (owner order 2026-10-28).
 
 | Lane | Holder | Since | What |
 |---|---|---|---|
-| coordination (this file) | session `…AygGqFo3` "darbų perimimas" | 2026-10-28 ~06:30Z (owner order: handover) | keeps §2–§5 current. `…16CYcDu` held it ~06:00–06:30Z, handed over (§2a), now idle |
+| coordination (this file) | **session `local_8d793dee` "LabourMarket.ai projekto koordinavimas" — the ONE main coordinator** | 2026-10-28 06:37Z (owner order: single control centre) | keeps §2–§5 current, integrates PRs into `main`, owns deploy follow-up. Earlier holders `…16CYcDu` / `…AygGqFo3` / cloud `…hnVKqGvExp` handed over (§2b) and become executors only on this coordinator's assignment |
 | migration (prod DB) | — free — | | last: `external_referral_reprocess_candidates_v2` applied 2026-10-28 04:47Z by session `…AygGqFo3aoB76NrV` (#2843) |
-| live sends (e-mail to real people) | — free — | | last: partner referral reprocess DONE 2026-10-28 05:46Z — 45/45 unique addresses sent, 0 failed, 0 duplicates (see D-3) |
-| deploy | — serial via `deploy-vps.yml` — | | production = `c3f440fc` (#2850, contains #2843), healthy 2026-10-28 05:45Z |
+| live sends (e-mail to real people) | **CLOSED — no referral run until the D-3 RED hardening is approved and applied** | 2026-10-28 05:46Z | partner referral reprocess DONE — 48 invitation mails / 48 distinct recipients (45 reissued + 3 first sends), 0 duplicates; 15 rows still `pending/not_sent` (D-3) |
+| deploy | — serial via `deploy-vps.yml` — | | production = `c3f440fc` (healthy 06:38Z). Deploy of `b0747e50` (#2849 + #2852) **failed 06:26Z: SSH connect timeout to the VPS**; the same window (≈06:23–06:36Z) the rota-repeat walk brake saw `/api/health` time out. Re-run started 06:40Z by the coordinator |
 
 
 ### 2a. Handover `…16CYcDu` → `…AygGqFo3` (owner order, 2026-10-28 ~06:30Z)
@@ -111,9 +111,22 @@ independent work or launch of other features (owner order 2026-10-28).
 - **Governance walk (D-6)**: spec defect — trainee slot has 0 company memberships; `assign_training_v1` assigns active members only. Fix shipped in #2852 (trainee = Alfa member); no walk run since its merge. Owner product question = RED #2816.
 - **`…16CYcDu` stopped**: regression queue halted after search-support-privacy (rota-repeat run had already started on Actions); D-8 jobs-search re-run NOT started. #2840 / #2839 not merged (left to coordinator). No new PRs, migrations or sends started.
 
+### 2b. Single control centre (owner order, 2026-10-28 06:37Z)
+
+- Session `local_8d793dee` "LabourMarket.ai projekto koordinavimas" (owner's computer, worktree
+  `labourmarket-project-coordination-6df501`) is the **only** main coordinator: PR integration into
+  `main`, deploy follow-up, executor assignment, this register. No competing coordination process.
+- Previous coordinators: "LabourMarket.ai darbų perimimas" (`…AygGqFo3`, idle), "LabourMarket.ai
+  projekto perėmimas" (`…16CYcDu`), cloud coordinator (`…hnVKqGvExp`, handed over). Their results are
+  taken over here (§2a, #2851 content merged into this file); they start no new work without an
+  assignment from this coordinator. Cloud sessions cannot be messaged from here → coordination with
+  them goes through GitHub and this file.
+- Status vocabulary (owner, binding): `CODE_COMPLETE` ≠ `MERGED` ≠ `DEPLOYED` ≠ `LIVE_VERIFIED`.
+  A green synthetic walk is not a real-user journey confirmation.
+
 ---
 
-## 3. Work register — snapshot 2026-10-28 ~06:20Z
+## 3. Work register — snapshot 2026-10-28 ~06:45Z
 
 Sources: GitHub PRs/Actions, production migration ledger, session list and
 transcripts readable from the coordinator session. Status per §1.4.
@@ -122,9 +135,10 @@ transcripts readable from the coordinator session. Status per §1.4.
 
 | Session | Where | Doing | State |
 |---|---|---|---|
-| `session_016CYcDuhGGEA75ruJ3zXD99` "projekto perėmimas" | owner's computer | #2849 merge after CI; platform functional + UX audit (owner order 04:48Z); RED-draft conflict upkeep | IN_PROGRESS |
-| `session_011vBC1iAygGqFo3aoB76NrV` "darbų perimimas" | owner's computer | #2843 merge → dry run → 1 control → 3 sends; read-only journey audit | IN_PROGRESS |
-| `session_011vBC1hnVKqGvExp129bfjT` coordinator | cloud | this register, inventory, plan (2026-10-28 ~06:30Z: coordination handed to `…16CYcDu` by owner order) | HANDED OVER |
+| `session_016CYcDuhGGEA75ruJ3zXD99` "projekto perėmimas" | owner's computer | was: platform functional + UX audit, regression queue (stopped at handover §2a) | HANDED OVER — executor on assignment only |
+| `session_011vBC1iAygGqFo3aoB76NrV` "darbų perimimas" | owner's computer | was: #2843 sends (done), D-1 proof, #2839/#2840 review | HANDED OVER — idle |
+| `session_011vBC1hnVKqGvExp129bfjT` coordinator | cloud | was: this register, D-1/D-3 evidence, QA-evidence recovery (#2851, folded in here) | HANDED OVER |
+| `local_8d793dee` "projekto koordinavimas" | owner's computer | **main coordinator** (§2b): PR integration, deploy, P1 fixes, executor assignment | IN_PROGRESS |
 | `session_011vBC1hntPRyoM4yRJKKcG2` | owner's computer | other repository (Agentai OS) — not this repo | n/a here |
 
 ~45 older sessions are idle; most end with an owner question (merge, secret, billing).
@@ -167,7 +181,7 @@ closes them on the coordinator's say-so.
 
 | Id | Finding | Risk | Next step |
 |---|---|---|---|
-| D-1 | Production holds `project_forecasts_v1` (ledger `20261025045152`) and `history_period_precision_and_registry_v1` (`20261025050302`); `main` has neither file; #2738 / #2739 are RED drafts. **Verified 2026-10-28:** the applied SQL equals the PR files exactly once comments and the `begin;`/`commit;` wrapper are removed (normalized md5 `c82d17ef…` and `f4c1f2cd…` on both sides) — CONTENT_ONLY, nothing extra in production. | re-run hazard only if someone applies the files again | **No re-apply, no rollback.** Safe path: owner approves merging #2738 and #2739 *as already applied* (no `apply_migration` step); the merge adds the `APPLIED_LEDGER.md` rows (CONTENT_ONLY) and the guard pins. #2738 also ships app code (forecast cron route, VPS cron entries) — that part is a feature launch the owner approves with it. |
+| D-1 | Production holds `project_forecasts_v1` (ledger `20261025045152`) and `history_period_precision_and_registry_v1` (`20261025050302`); `main` has neither file; #2738 / #2739 are RED drafts. **Verified 2026-10-28:** the applied SQL equals the PR files exactly once comments and the `begin;`/`commit;` wrapper are removed (normalized md5 `c82d17ef…` and `f4c1f2cd…` on both sides) — CONTENT_ONLY, nothing extra in production. Independently confirmed by the cloud coordinator with a stricter normalization (all whitespace removed): `1db83314…` / `214d501f…`; branch files last changed before the apply (03:37Z / 03:48Z vs 04:51Z / 05:03Z, 2026-10-25). | re-run hazard only if someone applies the files again | **No re-apply, no rollback.** Safe path: owner approves merging #2738 and #2739 *as already applied* (no `apply_migration` step); the merge adds the `APPLIED_LEDGER.md` rows (CONTENT_ONLY) and the guard pins. #2738 also ships app code (forecast cron route, VPS cron entries) — that part is a feature launch the owner approves with it. |
 | D-2 | `market_lifecycle_closed_outcome_v1` is applied and its file is on `main`, but #2746's title still says "NOT applied". | misleading status | fix the PR title/body when #2746 is next touched |
 | D-3 | #2843 duplicate protection. **Sends finished 2026-10-28 05:45–05:46Z**, before the stricter conditions written in session `…16CYcDu` reached the sending session. Protection used: v2 candidate list (`lower(trim())` address match, already-sent addresses excluded), `reissue_external_referral_v1` row lock (`FOR UPDATE`) + `already_sent` / `has_account` / expiry / consent re-check + resend cap 3, every run under `flock -n` on the VPS, script manual-only (no cron, no timer). Proven in DB: 45 unique addresses sent, ledger 0 duplicate recipients, 0 rows resent twice, the duplicate row never mailed; eligible now 0. | Residual: the DB itself has no address-level lock between `reissue` and `mark` — two concurrent runs outside `flock` could mail one address twice. No send is pending. | Drift: `ops/vps/lm-referral-reprocess.sh` on `main` has **no `flock`** — the VPS copy does (installed by hand); bring the repo script in line before the next run. Before ANY future reprocess run: keep `flock` as the only entry, or (owner-approved RED) move the address check + an advisory lock on the normalized address into `reissue_external_referral_v1`, with a concurrency test. |
 | D-4 | Both active sessions edit the same migration pin/guard files (`APPLIED_LEDGER.md`, `booking-engagement-end-v1.test.ts`, baseline guards). #2846 and #2843 already conflicted. | merge conflicts | §1.6 lane rule |
@@ -192,6 +206,26 @@ closes them on the coordinator's say-so.
 | Regression queue 2026-10-28 (`…16CYcDu`) | LIVE_VERIFIED / PARTIAL | living-cv-growth 40634954858 ✓, calendar-planning 40635527214 ✓, notifications-inapp 40639605465 ✓, jobs-search 40640097643 (J-6 ✗, D-8); project-execution 40640668466 ✓, search-support-privacy 40641351546 ✓; rota-repeat started (result not collected); chat-continuity, documents-approvals not run (queue stopped at handover) |
 
 Every other walk spec: last run green between 10-23 and 10-28.
+
+## 4a. QA evidence (recovered 2026-10-28 by the cloud coordinator, #2851; counts and pointers only)
+
+The 275-function matrix rows are **private** (owner decision, issue #2659 report 11). They live in
+`_agent-workspaces/labourmarketai/matrix/results-A.tsv … results-F.tsv` (+ `set_result.py`,
+`build_matrix.py`) on the owner's computer. This file records only the public summary and run ids.
+
+| Evidence | Source | Level |
+|---|---|---|
+| **275-function matrix, 2026-10-28 04:37Z:** PASS 194 · FAIL 8 · BLOCKED 39 · NOT_VERIFIED 18 · NOT_IMPLEMENTED 16 | session `…16CYcDu` report | private rows; summary only |
+| per direction (PASS/FAIL/BLOCKED/NOT_VERIFIED/NOT_IMPLEMENTED) — A 42/0/6/2/0 · B 29/1/2/2/2 · C 46/0/3/3/0 · D 30/1/12/2/6 · E 40/4/9/3/1 · F 7/2/7/6/7 | `build_matrix.py` output | sums to the totals |
+| last changes: 1.12 referral network BLOCKED→PASS; 1.13 transactional e-mail BLOCKED→PASS; 5.7 notification e-mail BLOCKED→NOT_VERIFIED; 8.5 nine markets stays BLOCKED; 1.4 invited worker NOT_VERIFIED | same | |
+| Marketplace production walk 6/6 PASS | run 40200714397, 2026-10-25, `d9b1a38` | LIVE_VERIFIED (synthetic) |
+| Company-chain production walk 13/13 PASS | run 40203656710, 2026-10-25, `fb77433` | LIVE_VERIFIED (synthetic) |
+| 5 open QA-SYNTHETIC needs left by walks that do not close their own needs: 3 × `agency-chain`, 1 × `brigade-formation`, 1 × failed `orders-bookings` run 40200190351 | session `…F5h3jc1d`, 2026-10-25 | cleanup fix NOT started — free |
+| Marketplace lifecycle not walked in production: edit, resume, withdraw, permanent delete | same | NOT_VERIFIED |
+
+Rule: each change of a row's status from a merged PR or a production walk is reported here as a
+one-line delta (row id, old → new, evidence id). Missing intermediate matrix versions (10-23 → 10-28)
+are NOT evidence that functions failed.
 
 ## 5. Open owner items (collected once)
 
