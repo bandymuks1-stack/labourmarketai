@@ -110,7 +110,10 @@ test("I-0. API: exactly one pending join_platform invitation is addressed to the
 test("I-1. 390 px: onboarding WITHOUT the link, from where a new person lands", async ({ browser }) => {
   const { ctx, page } = await open(browser, PHONE, true);
   try {
-    await page.goto("/en/dashboard");
+    // The synthetic referral is Lithuanian (locale lt), so the person arrives on
+    // the LT site: the wizard's country list is then labelled in Lithuanian
+    // ("Lietuva"). From /en it would read "Lithuania" (review on #2847).
+    await page.goto("/lt/dashboard");
     await settle(page);
     const url = new URL(page.url());
     console.info(`[invited] landed on ${url.pathname}${url.search}`);
