@@ -18376,7 +18376,7 @@
       "not_a_member": "Sie sind kein Mitglied.",
       "not_found": "Eintrag nicht verfügbar.",
       "not_authorized": "Dazu sind Sie nicht berechtigt.",
-      "no_such_user": "Kein Nutzer mit dieser E-Mail-Adresse.",
+      "no_such_user": "Noch kein bestätigtes Konto mit dieser E-Mail-Adresse.",
       "cannot_invite_self": "Sie können sich nicht selbst einladen.",
       "invalid_role": "Ungültige Rolle.",
       "last_owner": "Der letzte Inhaber kann nicht zurücktreten — aktivieren Sie zuerst einen weiteren Inhaber.",
@@ -18406,7 +18406,7 @@
       "grantInvitations": "Einladungen verwalten erlauben",
       "withdrawInvitations": "Einladungsverwaltung entziehen",
       "unavailable": "Die Mitgliederliste konnte gerade nicht gelesen werden. Das heißt nicht, dass die Organisation keine Mitglieder hat.",
-      "noAccountHint": "Eine Mitgliedsrolle kann nur jemandem gegeben werden, der bereits ein Konto hat. Laden Sie eine Person ohne Konto mit einem Einladungslink ein — sobald sie sich registriert und der Organisation beitritt, können Sie ihr hier eine Rolle geben.",
+      "noAccountHint": "Eine Mitgliedsrolle kann nur jemandem mit einem bestätigten Konto gegeben werden. Hat die Person noch kein Konto oder ihre E-Mail-Adresse noch nicht bestätigt, schicken Sie ihr einen Einladungslink oder bitten Sie sie, die E-Mail-Adresse zu bestätigen — sobald sie beigetreten ist, können Sie ihr hier die Rolle geben.",
       "noAccountCta": "Einladungslink erstellen"
     },
     "start": {

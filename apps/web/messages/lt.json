@@ -18376,7 +18376,7 @@
       "not_a_member": "Nesi šios organizacijos narys.",
       "not_found": "Įrašas neberastas.",
       "not_authorized": "Neturi teisės šiam veiksmui.",
-      "no_such_user": "Tokio naudotojo nėra.",
+      "no_such_user": "Patvirtintos paskyros su šiuo el. paštu dar nėra.",
       "cannot_invite_self": "Savęs pakviesti negalima.",
       "invalid_role": "Netinkama rolė.",
       "last_owner": "Paskutinis savininkas negali pasitraukti — pirmiau paskirk kitą savininką.",
@@ -18406,7 +18406,7 @@
       "grantInvitations": "Leisti valdyti kvietimus",
       "withdrawInvitations": "Atšaukti kvietimų valdymą",
       "unavailable": "Narių sąrašo dabar nepavyko perskaityti. Tai nereiškia, kad organizacija narių neturi.",
-      "noAccountHint": "Narystės rolę galima skirti tik žmogui, kuris jau turi paskyrą. Žmogų be paskyros pakviesk kvietimo nuoroda — kai jis užsiregistruos ir prisijungs prie organizacijos, čia galėsi suteikti jam rolę.",
+      "noAccountHint": "Narystės rolę galima skirti tik žmogui, kurio paskyra patvirtinta. Jei žmogus dar neturi paskyros arba nepatvirtino el. pašto, nusiųsk jam kvietimo nuorodą arba paprašyk patvirtinti el. paštą — kai jis prisijungs, čia galėsi suteikti rolę.",
       "noAccountCta": "Sukurti kvietimo nuorodą"
     },
     "start": {
