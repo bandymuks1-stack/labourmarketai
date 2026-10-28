@@ -83,9 +83,12 @@ name: jobs-need-journey
           timeout: 20000
       - launchApp:
           clearState: false
+      # The app is back in the foreground and still signed in (its tab bar).
+      # Relaunching may land on Today rather than the board, so the tab bar,
+      # not the board, is the proof of return.
       - extendedWaitUntil:
           visible:
-            id: "jobs-loaded"
+            id: "tab-today"
           timeout: 30000
 # Back to Today by its tab (Maestro's `back` is Android-only; this flow runs on iOS too).
 - tapOn:
