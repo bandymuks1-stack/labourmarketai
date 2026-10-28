@@ -45,7 +45,15 @@ name: signed-in-journey
 - tapOn:
     id: "submit"
 
-# --- 1–2. Today, with figures actually read through the door ---
+# --- 1. Signed in: the shell's tab bar renders only for a live session ---
+# (split from step 2 so a red run says WHICH failed — sign-in, or Today's read —
+# without any debug output from a signed-in session)
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 60000
+
+# --- 2. Today, with figures actually read through the door ---
 - extendedWaitUntil:
     visible:
       id: "today-figures"
