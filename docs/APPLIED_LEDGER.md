@@ -2842,3 +2842,4 @@ versions never match file prefixes by construction, so a push would re-run every
 |---|---|---|---|
 | `20261027120000` | `20261027193124` | reissue_external_referral_v1 | CONTENT_ONLY — header comments shortened in the applied text; both function bodies and GRANT/REVOKE identical (owner approval 2026-10-27, #2841) |
 | `20261027231000` | `20261028034356` | list_invitations_for_me_source_slug_v1 | CONTENT_ONLY — the approval comment is not in the applied text; function body (production body + one `external_source_slug` key, verified by md5 of the body without it) and REVOKE/GRANT identical (owner approval 2026-10-28, #2846) |
+| `20261027210000` | `20261028044705` | external_referral_reprocess_candidates_v2 | CONTENT_ONLY — header comments shortened in the applied text; function body and REVOKE/GRANT identical (owner approval 2026-10-28, #2843) |

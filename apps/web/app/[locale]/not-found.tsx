@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/visual/theme-default";
 import { Link } from "@/lib/i18n/navigation";
 import { ThemeReapply } from "@/components/app/theme-reapply";
 
@@ -26,7 +27,7 @@ export default async function NotFound() {
       <script
         dangerouslySetInnerHTML={{
           __html:
-            "(function(){try{var s=localStorage.getItem('theme');var t=s==='light'?'light':'dark';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='dark';}})();",
+            THEME_BOOTSTRAP_SCRIPT,
         }}
       />
       <ThemeReapply />
