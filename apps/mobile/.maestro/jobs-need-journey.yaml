@@ -1,0 +1,193 @@
+# JOBS + NEED JOURNEY — the beta screens from #2871, on a device, signed in.
+#
+# Runs ONLY from the dispatch jobs that run signed-in-journey.yaml (production-qa
+# environment, the owner's ONE synthetic review identity). Expects to start on the
+# sign-in form after signed-in-journey.yaml signed out.
+#
+# What a green run proves:
+#   1. sign-in lands on Today; Today opens the Jobs board;
+#   2. the board is read through jobs.search and renders a LOADED read; opening
+#      the first job hands its page to the browser and the app comes back;
+#      (testID jobs-loaded renders only on a loaded read — a failed read renders
+#      capability-retry and the step fails);
+#   3. Today opens Post a need; an empty need is refused in place (need-local-error),
+#      nothing is drafted;
+#   4. ONLY with NEED_SUBMIT=1 (isolated runs): a filled need is drafted
+#      (demand.create_draft), previewed, confirmed (demand.create_confirm) and the
+#      sent state renders.
+# The need it posts is marked QA-SYNTHETIC in its text, so the walk cleanup and the
+# owner can find and close it. Navigation is by testID only.
+appId: ai.labourmarket.app
+name: jobs-need-journey
+---
+# A tap during scroll momentum only stops the scroll on Android, so every
+# scrollUntilVisible is followed by waitForAnimationToEnd before the tap.
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- tapOn:
+    id: "email"
+- inputText: ${MOBILE_QA_EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${MOBILE_QA_PASSWORD}
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- tapOn:
+    id: "submit"
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "today-open-jobs"
+    direction: DOWN
+    timeout: 60000
+- waitForAnimationToEnd
+
+# --- 1–2. Jobs: search, a loaded board ---
+- tapOn:
+    id: "today-open-jobs"
+- extendedWaitUntil:
+    visible:
+      id: "jobs-query"
+    timeout: 30000
+# The board itself, unfiltered: the newest public vacancies, so the job-open
+# step below has a real job. (A free-text word is matched against the job's
+# SOURCE-language occupation, so an English word can rightly find nothing;
+# the free-text path is proven by the production web walk jobs-search.)
+- tapOn:
+    id: "jobs-search"
+- extendedWaitUntil:
+    visible:
+      id: "jobs-loaded"
+    timeout: 60000
+
+# --- 2b. Open a job: the app hands the job page to the browser, then comes back ---
+# (the job page itself is proven by the production web walk jobs-search J-5)
+- runFlow:
+    when:
+      visible:
+        id: "jobs-open-0"
+    commands:
+      - tapOn:
+          id: "jobs-open-0"
+      - extendedWaitUntil:
+          notVisible:
+            id: "jobs-loaded"
+          timeout: 20000
+      - launchApp:
+          clearState: false
+      - extendedWaitUntil:
+          visible:
+            id: "jobs-loaded"
+          timeout: 30000
+# Back to Today by its tab (Maestro's `back` is Android-only; this flow runs on iOS too).
+- tapOn:
+    id: "tab-today"
+
+# --- 3. Need: an empty need is refused in place ---
+- scrollUntilVisible:
+    element:
+      id: "today-open-need"
+    direction: DOWN
+    timeout: 30000
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-need"
+- extendedWaitUntil:
+    visible:
+      id: "need-write"
+    timeout: 30000
+# The form is taller than a phone screen and tapOn does not scroll.
+- scrollUntilVisible:
+    element:
+      id: "need-review"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    id: "need-review"
+# The empty need is refused ON THE PHONE (need-local-error), before any request.
+- scrollUntilVisible:
+    element:
+      id: "need-local-error"
+    direction: UP
+    timeout: 30000
+- waitForAnimationToEnd
+
+# --- 4. Need: fill, draft, preview, confirm, sent ---
+# OFF unless NEED_SUBMIT=1: a confirmed need is a real production row, and cross-org
+# readers are not yet proven to exclude synthetic needs (isolation audit 2026-10-28).
+- runFlow:
+    when:
+      true: ${NEED_SUBMIT == '1'}
+    commands:
+      - tapOn:
+          id: "need-description"
+      - inputText: "QA-SYNTHETIC mobile journey: two tilers for a bathroom renovation, three weeks."
+      - tapOn:
+          id: "need-role"
+      - inputText: "QA-SYNTHETIC mobile tiler"
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - hideKeyboard
+      - scrollUntilVisible:
+          element:
+            id: "need-location"
+          direction: DOWN
+          timeout: 20000
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "need-location"
+      - inputText: "Vilnius"
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - hideKeyboard
+      - scrollUntilVisible:
+          element:
+            id: "need-team-size"
+          direction: DOWN
+          timeout: 20000
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "need-team-size"
+      - inputText: "2"
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - hideKeyboard
+      - scrollUntilVisible:
+          element:
+            id: "need-review"
+          direction: DOWN
+          timeout: 20000
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "need-review"
+      - extendedWaitUntil:
+          visible:
+            id: "need-preview"
+          timeout: 60000
+      - scrollUntilVisible:
+          element:
+            id: "need-confirm"
+          direction: DOWN
+          timeout: 20000
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "need-confirm"
+      - extendedWaitUntil:
+          visible:
+            id: "need-sent"
+          timeout: 60000

@@ -12,7 +12,7 @@
     "bundle:android": "expo export --platform android --output-dir .expo-export",
     "prebuild:android": "expo prebuild --platform android --no-install",
     "prebuild:ios": "expo prebuild --platform ios --no-install",
-    "doctor": "expo-doctor"
+    "doctor": "npx --yes expo-doctor@latest"
   },
   "dependencies": {
     "@expo/metro-runtime": "~57.0.14",

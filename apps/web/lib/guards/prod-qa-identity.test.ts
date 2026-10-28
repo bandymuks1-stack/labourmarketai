@@ -341,6 +341,10 @@ describe("the production path is a SCRIPT, never a reachable surface", () => {
       "lib/guards/prod-qa-identity.test.ts",
       // Another guard TEST (never shipped): pins the walk-token rules (#2537).
       "lib/guards/prod-qa-token-hygiene.test.ts",
+      // Another guard TEST (never shipped): pins the mobile review identity's
+      // one-run password script to the allowlisted owner (#2871). Reads the
+      // guard as text, imports nothing from it.
+      "lib/guards/mobile-qa-credential.test.ts",
     ]);
     const offenders: string[] = [];
     for (const dir of ["app", "components", "lib"]) {

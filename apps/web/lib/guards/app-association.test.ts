@@ -181,7 +181,20 @@ describe("deep-link claim — exactly the screens the app has", () => {
     // Sanity: the table this pin was written against. A shrink here is a
     // removed screen and must be a deliberate change on both sides.
     expect(routes).toEqual(
-      ["/", "/journal", "/log-work", "/profile", "/register", "/settings", "/sign-in", "/today"],
+      [
+        "/",
+        "/availability",
+        "/jobs",
+        "/journal",
+        "/log-work",
+        "/need",
+        "/opportunities",
+        "/profile",
+        "/register",
+        "/settings",
+        "/sign-in",
+        "/today",
+      ],
     );
   });
 
