@@ -230,6 +230,39 @@ GitHub job is then the only backup.
 installed copy is current). Keep the offline copy of `backup.age.key` — without
 it no backup can be decrypted.
 
+### 9.1.1 Restoring a backup (verify first; production only with owner approval)
+
+The nightly job proves every dump restores (the drill), but a real recovery
+is a separate, owner-approved act. Order: **verify in isolation → owner
+decision → (only then) production**. Never restore over production to "test".
+
+1. **Pick the file** on the VPS: `ls -l /root/lm-prod/backups/`
+   (`lm-db-<UTC stamp>.dump.age`, 600; 14 days kept). Note its sha256.
+2. **Decrypt on the VPS into a 700 scratch directory** (the private key never
+   leaves the VPS):
+   `umask 077; mkdir -p /root/lm-restore && age -d -i /root/lm-prod/backup.age.key -o /root/lm-restore/lm.dump /root/lm-prod/backups/<file>`
+3. **Restore into a throw-away database first** — a local `postgres:17`
+   container on the VPS, never the production project:
+   `docker run -d --name lm-restore-check -e POSTGRES_PASSWORD=<local-only> -p 127.0.0.1:55433:5432 postgres:17`
+   then `pg_restore -h 127.0.0.1 -p 55433 -U postgres -d postgres --no-owner --no-privileges /root/lm-restore/lm.dump`.
+   The dump is custom format (`-Fc`), schemas `public` + `auth` (or `public`
+   only when the job's summary said `scope=public`). Errors about Supabase
+   roles/extensions (`authenticated`, `anon`, `supabase_*`, `pg_graphql`…) are
+   expected outside Supabase; table-data errors are not.
+4. **Check what came back** (counts only, nothing printed from rows):
+   number of `public` tables, `select count(*) from auth.users`, and the newest
+   `created_at` of a busy table — that is the point in time the backup holds.
+5. **Owner decision.** Prefer the narrowest recovery: copy back only the
+   affected rows/tables. A whole-database restore into the production project
+   replaces newer data and needs the owner's explicit approval, a maintenance
+   window and a fresh dump of the current state taken first. Supabase's own
+   Pro backups (Dashboard → Database → Backups, 7 days) are the alternative for
+   a whole-project point-in-time restore.
+6. **Clean up** the plaintext: `shred -u /root/lm-restore/lm.dump; docker rm -fv lm-restore-check` —
+   `-v` also removes the container's anonymous data volume (`/var/lib/postgresql/data`), which
+   otherwise keeps a second plaintext copy of the restored database on the VPS. Confirm with
+   `docker volume ls -qf dangling=true` (no volume from the drill may remain).
+
 ### 9.2 Outbound e-mail
 
 | Setting | Kind | Owner action |
