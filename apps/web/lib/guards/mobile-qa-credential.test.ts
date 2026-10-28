@@ -3,8 +3,6 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { PRODUCTION_PROJECT_REF } from "../testing/local-supabase-guard";
-import { PROD_QA_OWNER_EMAIL } from "../testing/prod-qa-guard";
 
 // The mobile review identity's ONE-RUN password (owner approval 2026-10-28).
 // The script may touch exactly one synthetic account, only on the production
@@ -12,9 +10,17 @@ import { PROD_QA_OWNER_EMAIL } from "../testing/prod-qa-guard";
 const ROOT = join(__dirname, "..", "..", "..", "..");
 const read = (p: string) => readFileSync(join(ROOT, p), "utf8").replace(/\r\n/g, "\n");
 const script = read(".github/scripts/mobile-qa-credential.mjs");
+// Read as TEXT, not imported: only the allowlisted files may import the production QA
+// guard (prod-qa-identity.test.ts). The constants are matched from their source.
+const guardSrc = read("apps/web/lib/testing/prod-qa-guard.ts");
+const localSrc = read("apps/web/lib/testing/local-supabase-guard.ts");
+const PROD_QA_OWNER_EMAIL = /PROD_QA_OWNER_EMAIL = "([^"]+)"/.exec(guardSrc)?.[1] ?? "";
+const PRODUCTION_PROJECT_REF = /PRODUCTION_PROJECT_REF = "([^"]+)"/.exec(localSrc)?.[1] ?? "";
 
 describe("mobile review identity credential (one-run password)", () => {
   it("touches exactly the allowlisted synthetic owner, on the production project only", () => {
+    expect(PROD_QA_OWNER_EMAIL).toMatch(/^qa\.owner\+multiw@/);
+    expect(PRODUCTION_PROJECT_REF).toMatch(/^[a-z0-9]{20}$/);
     expect(script).toContain(`const QA_EMAIL = "${PROD_QA_OWNER_EMAIL}";`);
     expect(script).toContain(`const PROJECT_REF = "${PRODUCTION_PROJECT_REF}";`);
     expect(script).toMatch(/claims\.ref !== PROJECT_REF \|\| claims\.role !== "service_role"/);
