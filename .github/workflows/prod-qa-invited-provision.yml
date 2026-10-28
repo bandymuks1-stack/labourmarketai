@@ -1,0 +1,70 @@
+name: prod-qa-invited-provision
+run-name: prod-qa-invited-provision ${{ inputs.action }}
+
+# OWNER-DISPATCH ONLY (owner decision 2026-10-28). The synthetic INVITED worker
+# `qa.invited+act1@labourmarket.ai` for the "registers without the link" walk
+# (prod-qa-walk.yml spec=invited-worker):
+#
+#   provision-invited  one synthetic partner referral addressed to that address
+#                      (reference QA-SYNTHETIC-invited-act1, through the partner
+#                      door's own database function — nobody is contacted), then
+#                      the account: confirmed, passwordless, qa_synthetic, NO role.
+#   revoke-invited     bans the account (sessions die). The account and its rows
+#                      are deleted by the owner's guarded SQL
+#                      (docs/qa/invited-worker-purge.sql), then checked with the
+#                      read-only docs/qa/invited-worker-orphans.sql.
+#
+# An agent never dispatches this workflow. The script is
+# apps/web/scripts/prod-qa-invited.ts; it refuses every other address.
+# Needs (names only): secrets.NEXT_PUBLIC_SUPABASE_URL,
+# secrets.SUPABASE_SERVICE_ROLE_KEY. Nothing is printed but origin, address and
+# a short id prefix — never a key, token or link.
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "provision-invited = referral + account; revoke-invited = ban the account"
+        type: choice
+        default: provision-invited
+        options:
+          - provision-invited
+          - revoke-invited
+
+permissions:
+  contents: read
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production-qa
+    concurrency:
+      group: prod-qa-walk
+      cancel-in-progress: false
+    env:
+      PROD_QA_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Provision or revoke the synthetic invited worker (allowlist only)
+        shell: bash
+        env:
+          ACTION: ${{ inputs.action }}
+        run: |
+          set -euo pipefail
+          cd apps/web
+          case "${ACTION}" in
+            provision-invited) flag="--provision" ;;
+            revoke-invited)    flag="--revoke" ;;
+            *) echo "::error::unknown action"; exit 1 ;;
+          esac
+          pnpm exec tsx scripts/prod-qa-invited.ts --i-understand-production ${flag}
+          echo "invited worker: ${ACTION} done" >> "$GITHUB_STEP_SUMMARY"
