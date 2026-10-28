@@ -385,10 +385,11 @@ jobs:
           retention-days: 14
 
   # SIGNED-IN JOURNEY — workflow_dispatch ONLY, never on a PR or a push.
-  # The ONE synthetic review identity's password lives in the `production-qa`
-  # GitHub environment (secrets MOBILE_QA_EMAIL / MOBILE_QA_PASSWORD, owner
-  # gate O1); PR runs never receive environment secrets, and this job refuses
-  # to run without them. The flow signs in, reads Today through /api/mcp,
+  # The ONE synthetic review identity (qa.owner+multiw, owner approval
+  # 2026-10-28) gets a ONE-RUN password at the start of the job and a scrambled
+  # one at the end (.github/scripts/mobile-qa-credential.mjs, `production-qa`
+  # environment); no password is stored anywhere. PR runs never receive
+  # environment secrets. The flow signs in, reads Today through /api/mcp,
   # drafts and confirms ONE journal entry for the synthetic identity, reads
   # the profile and signs out; nothing from the session is uploaded (public
   # repository). Claim token: ANDROID_SIGNED_IN_JOURNEY_PROVEN.
@@ -421,6 +422,11 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      - name: Issue a one-run password for the mobile review identity (masked)
+        env:
+          SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node .github/scripts/mobile-qa-credential.mjs issue
+
       - name: Install Maestro CLI
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
@@ -432,8 +438,6 @@ jobs:
         env:
           MAESTRO_CLI_NO_ANALYTICS: "1"
           MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
-          MOBILE_QA_EMAIL: ${{ secrets.MOBILE_QA_EMAIL }}
-          MOBILE_QA_PASSWORD: ${{ secrets.MOBILE_QA_PASSWORD }}
         with:
           api-level: 34
           arch: x86_64
@@ -444,7 +448,11 @@ jobs:
       - name: Cleanup — close the synthetic needs this journey posted (always, also on failure)
         if: always()
         env:
-          MOBILE_QA_EMAIL: ${{ secrets.MOBILE_QA_EMAIL }}
-          MOBILE_QA_PASSWORD: ${{ secrets.MOBILE_QA_PASSWORD }}
           ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
         run: node .github/scripts/mobile-qa-close-synthetic-needs.mjs
+
+      - name: Scramble the review identity's password (always, also on failure)
+        if: always()
+        env:
+          SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node .github/scripts/mobile-qa-credential.mjs scramble
