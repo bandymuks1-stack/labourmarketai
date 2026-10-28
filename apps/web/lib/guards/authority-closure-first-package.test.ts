@@ -163,6 +163,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-10-23 (RED, needs-human-gate, NOT applied): COM-3 web push channel
       // (web_push_subscriptions + register command + push opt-in channel value).
       "20261023171500_",
+      // 2026-10-23 (RED by SECURITY DEFINER + GRANT, needs-human-gate): goods purchase lifecycle (6.13 + 6.14).
+      "20261023161500_",
       // 2026-10-23 (RED by GRANT, needs-human-gate, NOT applied): runtime stall sampler evidence table.
       "20261023190000_",
       // 2026-10-23 (RED, needs-human-gate, NOT applied): journal evidence integrity v1

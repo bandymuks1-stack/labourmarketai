@@ -35,6 +35,7 @@ import {
   LISTING_DOMAINS,
 } from "@/lib/marketplace/market-model";
 import { assessPublish } from "@/lib/marketplace/publish-policy";
+import { isPurchasableListing } from "@/lib/marketplace/listing-purchase-model";
 import { readFederatedMarketRows } from "@/lib/marketplace/federation";
 import { actionForStatus, listingAdapter } from "@/lib/market-lifecycle/adapters";
 import { transition, type EntryAction } from "@/lib/market-lifecycle/contract";
@@ -259,6 +260,46 @@ async function attachActors(
   }
 }
 
+/**
+ * Mark the goods SALES the caller may request to buy (registry 6.13). The
+ * index derives `direction` and drops the listing kind (sale and rental are
+ * both `offer`), so the kind is read back for the candidate rows only — the
+ * caller's own RLS on marketplace_listings already admits every active row it
+ * sees in the index. A failed read marks nothing purchasable (the purchase
+ * door stays hidden; the enquiry still works), never a guess.
+ */
+async function attachPurchasable(
+  supabase: SupabaseClient,
+  rows: MarketplaceDiscoveryRow[],
+): Promise<void> {
+  const candidates = rows.filter(
+    (r) =>
+      r.sourceTable === "marketplace_listings" &&
+      r.direction === "offer" &&
+      !r.isMine &&
+      isPurchasableListing({ listingKind: "sale", subject: r.subject }),
+  );
+  if (candidates.length === 0) return;
+  const { data, error } = await asAny(supabase)
+    .from("marketplace_listings")
+    .select("id, listing_kind")
+    .in(
+      "id",
+      candidates.map((r) => r.id),
+    );
+  if (error) return;
+  const sale = new Set(
+    ((data ?? []) as { id: string; listing_kind: string }[])
+      .filter((r) => r.listing_kind === "sale")
+      .map((r) => r.id),
+  );
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i].sourceTable === "marketplace_listings" && sale.has(rows[i].id)) {
+      rows[i] = { ...rows[i], purchasable: true };
+    }
+  }
+}
+
 async function discoverIndexRows(filters?: {
   domain?: string;
   category?: string;
@@ -327,6 +368,7 @@ async function discoverIndexRows(filters?: {
       }),
     );
     await attachActors(supabase, rows);
+    await attachPurchasable(supabase, rows);
     return {
       kind: "ok",
       rows: hideQaMarked(rows, isQaViewer(user), (r) => [r.title, r.description]),
@@ -383,6 +425,9 @@ async function discoverIndexRows(filters?: {
         destinationPath: destinationPathFor("marketplace_listings", m.id),
         contactAction: contactActionFor("marketplace_listings"),
         isMine: m.ownerId === user.id,
+        purchasable:
+          m.ownerId !== user.id &&
+          isPurchasableListing({ listingKind: m.listingKind, subject: m.category }),
         visibility: "signed_in" as const,
         provenance: "platform" as const,
         publisherName: null,

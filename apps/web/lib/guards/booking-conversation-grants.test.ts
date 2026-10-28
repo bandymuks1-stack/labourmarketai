@@ -89,6 +89,11 @@ const GRANT_ONLY_CALLERS: ReadonlyArray<
   // the receiver-gated listing). No stamp: the source set has no offer member
   // yet (owner-gated CHECK widening, residue).
   ["lib/company/team-offer-conversation.ts", "allowed_team_demand_offer"],
+  // Goods purchase thread (registry 6.13, 2026-10-23): a listing_purchases row
+  // read under the caller's own RLS (buyer, seller, or a manager of either
+  // side's organization), status requested / accepted / fulfilled. No stamp:
+  // the source set has no purchase member (owner-gated CHECK widening, residue).
+  ["lib/marketplace/listing-purchase-conversation.ts", "allowed_listing_purchase"],
 ];
 
 /** Where getOrCreateDirectConversation is defined (not a caller). */

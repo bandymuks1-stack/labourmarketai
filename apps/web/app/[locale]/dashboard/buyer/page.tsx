@@ -11,11 +11,12 @@ import { getOwnCustomer } from "@/lib/buyer/customers";
 import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { listOwnAttachments } from "@/lib/buyer/customer-request-attachments";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { ListingPurchasesSection } from "@/components/app/listing-purchases-section";
+import { listMyListingPurchases } from "@/lib/marketplace/listing-purchases";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
 export const generateMetadata = dashboardPageMetadata("/dashboard/buyer", "roleDashboards.buyer.title");
-
 
 const BUYER_FIELDS = [
   { key: "serviceType" as const, labelKey: "field.serviceType.label", placeholderKey: "field.serviceType.placeholder", variant: "text" as const },
@@ -46,6 +47,7 @@ export default async function BuyerDashboardPage({
   const customer = customerRead.kind === "ok" ? customerRead.row : null;
   const migrationNeeded = customerRead.kind === "needs-migration";
   const requestsResult = await listOwnCustomerRequests();
+  const purchasesResult = await listMyListingPurchases();
   const attachmentsResultRaw = await listOwnAttachments();
   type AttachmentItemDto = {
     id: string;
@@ -369,6 +371,11 @@ export default async function BuyerDashboardPage({
         attachmentsResult={attachmentsResult}
         labels={requestsLabels}
       />
+
+      {/* Goods the buyer asked to buy from marketplace listings (6.13) — the
+          same rows the listings page shows; renders nothing until the
+          purchases migration is applied. */}
+      <ListingPurchasesSection result={purchasesResult} sides={["buyer"]} locale={locale} />
 
       <section
         className="card-border flex flex-col gap-4 p-5"
