@@ -24,9 +24,9 @@ on:
       - "apps/web/components/app/signup-form.tsx"
       - "apps/web/components/app/onboarding-wizard.tsx"
       - "apps/web/components/app/company-setup-form.tsx"
-      - "apps/web/app/[[]locale]/auth/**"
-      - "apps/web/app/[[]locale]/onboarding/**"
-      - "apps/web/app/[[]locale]/dashboard/start/**"
+      - "apps/web/app/*/auth/**"
+      - "apps/web/app/*/onboarding/**"
+      - "apps/web/app/*/dashboard/start/**"
       - "apps/web/lib/onboarding/**"
       - "apps/web/lib/invitations/signup-*"
 
