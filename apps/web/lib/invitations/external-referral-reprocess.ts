@@ -10,7 +10,10 @@
  *     (the database function `reissue_external_referral_v1` re-checks each);
  *   - never a synthetic address, never a person who already has an account
  *     (a "join the platform" mail to a member is wrong);
- *   - one mail per address: duplicates collapse onto the newest referral;
+ *   - one mail per address: duplicates collapse onto the newest referral,
+ *     and an address that ALREADY received a partner invitation mail is
+ *     never mailed again from an older duplicate row (2026-10-27 batch: the
+ *     sent row leaves the candidate list, so the older duplicate surfaced);
  *   - a DRY RUN by default — counts only, nothing rotated, nothing sent;
  *   - a control test first (`onlyInvitationId`), then at most `MAX_PER_RUN`
  *     per run; a bulk run is the owner's separate approval, not this code's;
@@ -45,6 +48,7 @@ export type ExclusionReason =
   | "no_address"
   | "synthetic_address"
   | "has_account"
+  | "already_mailed_address"
   | "duplicate_address";
 
 export type Selection = {
@@ -55,7 +59,12 @@ export type Selection = {
 /** Which rows may receive a fresh link, and why every other one may not. */
 export function selectReprocessCandidates(
   rows: readonly ReferralRow[],
-  input: { readonly now: Date; readonly existingAccountEmails: ReadonlySet<string> },
+  input: {
+    readonly now: Date;
+    readonly existingAccountEmails: ReadonlySet<string>;
+    /** Addresses that already received a partner invitation mail (any row). */
+    readonly alreadyMailedEmails?: ReadonlySet<string>;
+  },
 ): Selection {
   const excluded: Partial<Record<ExclusionReason, number>> = {};
   const skip = (r: ExclusionReason) => {
@@ -72,6 +81,7 @@ export function selectReprocessCandidates(
     else if (!address) skip("no_address");
     else if (SYNTHETIC_ADDRESS.test(address)) skip("synthetic_address");
     else if (input.existingAccountEmails.has(address)) skip("has_account");
+    else if (input.alreadyMailedEmails?.has(address)) skip("already_mailed_address");
     else {
       const seen = newestByAddress.get(address);
       if (!seen) newestByAddress.set(address, row);

@@ -179,10 +179,12 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261025140000_",
       // 2026-10-25 (GREEN, additive indexes): importer/admin vacancy reads stop walking the heap.
       "20261025180000_",
-      // 2026-10-27 (RED, needs-human-gate, NOT applied): reissue one unsent partner referral.
+      // 2026-10-27 (RED, owner-approved, APPLIED ledger 20261027193124): reissue one unsent partner referral.
       "20261027120000_",
       // 2026-10-27 (RED, needs-human-gate, NOT applied): invitations-for-me read carries the partner source.
       "20261027231000_",
+      // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028044705): candidates v2 flags already-mailed addresses.
+      "20261027210000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
