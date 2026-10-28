@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+
+import { defaultThemeForPath, resolveTheme } from "@/lib/visual/theme-default";
 
 /**
  * Keeps the user's saved theme applied for the whole client session.
@@ -17,20 +20,25 @@ import { useEffect } from "react";
  * MutationObserver that restores it the moment anything removes the
  * attribute — observer callbacks run before the next paint, so the user
  * never sees the wrong theme. Same storage contract as ThemeToggle:
- * the single shared localStorage "theme" key, DARK default. Deliberate
+ * the single shared localStorage "theme" key; the default is per page. Deliberate
  * theme CHANGES keep working: the observer only reacts when the attribute
  * is missing — a user toggle sets the attribute, never removes it.
  */
 export function ThemeReapply() {
+  // Re-resolved on every client-side route change (review on #2849): a
+  // person with no saved choice who follows an in-app link from the
+  // workspace to the public site gets that page's default, and back.
+  const pathname = usePathname();
   useEffect(() => {
-    // Resolves to the PRODUCT DEFAULT (dark) rather than null, so a stripped
-    // attribute is always restored to a definite value — the same resolution
-    // the pre-paint bootstrap performs.
+    // Resolves to the PAGE'S DEFAULT (lib/visual/theme-default.ts: public site
+    // light, workspace dark) rather than null, so a stripped attribute is
+    // always restored to a definite value — the same resolution the pre-paint
+    // bootstrap performs. A saved choice always wins.
     const saved = (): "light" | "dark" => {
       try {
-        return localStorage.getItem("theme") === "light" ? "light" : "dark";
+        return resolveTheme(localStorage.getItem("theme"), window.location.pathname);
       } catch {
-        return "dark"; /* no storage → the product default */
+        return defaultThemeForPath(window.location.pathname); /* no storage */
       }
     };
 
@@ -52,6 +60,6 @@ export function ThemeReapply() {
       attributeFilter: ["data-theme"],
     });
     return () => observer.disconnect();
-  }, []);
+  }, [pathname]);
   return null;
 }
