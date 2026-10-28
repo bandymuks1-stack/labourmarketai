@@ -31,19 +31,28 @@ jobs:
           getent ahosts labourmarket.ai | awk '{print $1}' | sort -u | sed 's/^/resolves: /'
 
       - name: Probe health and static chunks for 8 minutes
+        shell: bash --noprofile --norc {0}
         run: |
           set -u
           O=https://labourmarket.ai
           UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0 Safari/537.36"
-          page=$(curl -s -m 30 -A "$UA" "$O/lt/auth/login")
-          mapfile -t CH < <(printf '%s' "$page" | grep -oE '/_next/static/chunks/[^"'"'"']+\.js' | sort -u | head -6)
-          echo "chunks under test: ${#CH[@]}"
+          discover() {
+            local page
+            page=$(curl -s -m 30 -A "$UA" "$O/lt/auth/login" || true)
+            mapfile -t CH < <(printf '%s' "$page" | grep -oE '/_next/static/chunks/[^"'"'"']+\.js' | sort -u | head -6 || true)
+          }
+          CH=()
+          discover
+          echo "chunks under test: ${#CH[@]} (health-only until discovery succeeds)"
           printf 'time\ttarget\thttp\ttotal_s\tconnect_s\tttfb_s\tcf_cache\tcf_mitigated\tcf_ray_colo\tbuild\n' > probe.tsv
           end=$(( $(date +%s) + 480 ))
           i=0
           while [ "$(date +%s)" -lt "$end" ]; do
             i=$((i+1))
-            for t in "/api/health?probe=$i" "${CH[$(( i % ${#CH[@]} ))]}"; do
+            [ ${#CH[@]} -eq 0 ] && discover
+            targets=("/api/health?probe=$i")
+            [ ${#CH[@]} -gt 0 ] && targets+=("${CH[$(( i % ${#CH[@]} ))]}")
+            for t in "${targets[@]}"; do
               h=$(mktemp)
               line=$(curl -s -o /tmp/body -D "$h" -m 30 -A "$UA" -w '%{http_code}\t%{time_total}\t%{time_connect}\t%{time_starttransfer}' "$O$t" || echo "000\t30\t-\t-")
               cache=$(grep -i '^cf-cache-status:' "$h" | tr -d '\r' | awk '{print $2}')
