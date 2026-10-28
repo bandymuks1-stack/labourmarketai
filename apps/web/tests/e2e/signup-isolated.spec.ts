@@ -117,8 +117,8 @@ test("S-3. an agency signs up through the form and its organization is an agency
 test("S-4. an address that already has an account is sent to sign in, not to a mail that never comes", async ({ page }) => {
   await page.goto(`${BASE}/en/auth/signup`);
   await page.locator('input[type="email"]').fill(email("worker"));
-  await page.locator('input[name="password"]').fill(password);
-  await page.locator('input[name="confirm_password"]').fill(password);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.locator('input[name="confirm_password"]').fill(PASSWORD);
   await page.locator('form button[type="submit"]').click();
   await expect(page.getByTestId("signup-login-instead")).toBeVisible({ timeout: 30_000 });
 });
