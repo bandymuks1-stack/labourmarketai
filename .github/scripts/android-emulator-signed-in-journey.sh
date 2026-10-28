@@ -35,6 +35,24 @@ esac
 wipe() { adb shell pm clear "$PKG" >/dev/null 2>&1 || true; }
 trap wipe EXIT
 
+# On a failed flow, print ONLY the test ids on screen (our own testID strings,
+# never text, field values or a screenshot), so a failure says where the app was.
+on_screen_ids() {
+  echo "::group::test ids on screen at the failure"
+  maestro hierarchy 2>/dev/null | node -e '
+    let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
+      const ids = new Set();
+      const walk = (n) => {
+        const id = n?.attributes?.["resource-id"];
+        if (id) ids.add(String(id).split("/").pop());
+        (n?.children ?? []).forEach(walk);
+      };
+      try { walk(JSON.parse(s.slice(s.indexOf("{")))); } catch { console.log("(no hierarchy)"); }
+      console.log([...ids].sort().join("\n"));
+    });' || true
+  echo "::endgroup::"
+}
+
 summary "## Android signed-in journey (API 34, x86_64, production-qa)"
 
 adb wait-for-device
@@ -45,7 +63,7 @@ echo "ANDROID_APK_INSTALLED"
 maestro test \
   -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
   -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
-  "$FLOW"
+  "$FLOW" || { on_screen_ids; exit 1; }
 
 # The beta screens: jobs search → loaded board → open a job; an empty need is refused.
 # The need SUBMIT runs only with NEED_SUBMIT=1 (isolated runs): cross-org readers are not
@@ -54,7 +72,7 @@ maestro test \
   -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
   -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
   -e NEED_SUBMIT="${NEED_SUBMIT:-0}" \
-  apps/mobile/.maestro/jobs-need-journey.yaml
+  apps/mobile/.maestro/jobs-need-journey.yaml || { on_screen_ids; exit 1; }
 if [ "${NEED_SUBMIT:-0}" = "1" ]; then
   echo "ANDROID_JOBS_NEED_JOURNEY_PROVEN: jobs.search loaded; job opened; empty need refused; need drafted, confirmed, sent"
   summary "- ANDROID_JOBS_NEED_JOURNEY_PROVEN: jobs search (read) → job opened → empty need refused → need draft + confirm (write)"
