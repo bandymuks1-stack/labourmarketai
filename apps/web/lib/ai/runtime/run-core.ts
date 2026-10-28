@@ -74,6 +74,7 @@ import { taskTypeForAgent, type TaskRouteDecision, type AiTaskType } from "./tas
 import { AI_MODEL_CANDIDATES } from "./model-candidates";
 import { registryEntryForModel } from "./model-registry";
 import type { AiAgentKey } from "../registry/types";
+import { blockedByZeroPaidBudget, paidProvidersAllowed, ZERO_PAID_BUDGET_REASON } from "./paid-budget";
 
 export function selectCompletionProvider(
   kind: ReturnType<typeof providerKindFor>,
@@ -236,7 +237,11 @@ async function tryPreferredSecondary(
 ): Promise<AiCompletionResult | null> {
   // The policy marker names a dedicated engine class, not one vendor.
   if (!request.preferredProvider) return null;
+  const allowPaid = paidProvidersAllowed();
   for (const secondary of secondaries) {
+    // ZERO PAID API BUDGET: a metered engine (DeepL Pro) is skipped, a free
+    // one (`deepl_free`, LibreTranslate, Cloudflare m2m100) may still serve.
+    if (blockedByZeroPaidBudget(secondary.profile().costClass, allowPaid)) continue;
     // Each secondary is an EXTERNAL provider (unless it declares itself local)
     // and this call sits ahead of the chain's candidate loop, so the chain's
     // veto never saw it. Without this check the one task that prefers a
@@ -347,6 +352,13 @@ export async function dispatchAiCompletion(
      * check moved onto the PATH: it now runs whether or not a chain was
      * supplied, and the grant table is consulted either way.
      */
+    // ZERO PAID API BUDGET: the single configured provider is refused before
+    // any payload is built for it when it is metered and the owner has not
+    // opened the paid budget.
+    const legacyCost = AI_PROVIDER_PROFILES.find((p) => p.id === kind)?.costClass ?? (kind === "local" ? "free_local" : "paid");
+    if (blockedByZeroPaidBudget(legacyCost, paidProvidersAllowed())) {
+      return { status: "error", code: "unsupported", message: ZERO_PAID_BUDGET_REASON, provider: kind };
+    }
     const verdict = legacyEgressVerdict(request, kind);
     if (!verdict.permitted) {
       return { status: "error", code: "unsupported", message: verdict.reason, provider: kind };
@@ -362,6 +374,7 @@ export async function dispatchAiCompletion(
     chain.states,
     chain.profiles ?? AI_PROVIDER_PROFILES,
     chain.grants,
+    paidProvidersAllowed(),
   );
 
   if (outcome.kind === "deterministic") {
