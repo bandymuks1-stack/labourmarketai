@@ -7,6 +7,24 @@ signed-in journey, finish App Links and release configuration, define the
 minimum useful beta, prepare incremental capability PRs; no publishing,
 purchases or deploys without approval; no second codebase.
 
+## 0. Status on 2026-10-28 (re-landed on current `main`)
+
+The sections below are the 2026-10-16 record and stay as written. What has
+changed since, for anyone reading them now:
+
+| 2026-10-16 statement | 2026-10-28 fact |
+|---|---|
+| Production answers HTTP 402 (Vercel account blocked); no reachable API for the app | Production runs on the VPS behind Cloudflare and answers 200 (#2456 deploy path). Vercel is no longer a deploy or CI dependency. |
+| `CONVERSATION_TOKEN_SECRET` on no host; #2444 must wait for it | #2451 merged (dedicated secret, no service-role fallback anywhere; folds #2448, supersedes #2444); the hosting session set the secret on the VPS. |
+| Merge order #2437 → … → #2438 under the owner's merge hold (N-11) | Most of that list has merged or been closed since; the blanket hold of 2026-10-16 no longer governs routine merges. Merging THIS mobile scope still waits for the owner's explicit go. |
+| `jobs.search` / `jobs.get` → toolset `0.1.0+t231.6abffb4c` | Same two tools on current `main` → `0.1.0+t231.5cae2918` (registry grew in between). Not in production until this branch merges and deploys; ChatGPT then needs a connector Refresh. |
+| `android.yml` hard-codes the production origin | `workflow_dispatch` input `origin` (from #2449), host-shape checked before the native build. |
+
+Still owner-held, unchanged: the review identity with a password and
+`MOBILE_QA_EMAIL` / `MOBILE_QA_PASSWORD` in the `production-qa` environment
+(O1), and every store-account step in
+`SIGNING_AND_SUBMISSION_RUNBOOK_2026-10-15.md` (A7–A13, I7–I11).
+
 ## 1. CI results — commit `2cab9ad` (PR #2447), read from the check runs
 
 | Check | Result | Note |
