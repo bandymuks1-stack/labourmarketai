@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { activeLocales } from "@/lib/i18n/config";
 import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
 import { resolveInvitedWorkerContext } from "@/lib/onboarding/invited-worker-context";
+import { acceptInvitationByIdAction } from "@/lib/invitations/actions";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import {
   parseSelfDeclaredProfessions,
@@ -362,6 +363,26 @@ export async function completeOnboarding(formData: FormData): Promise<void> {
           message: eduErr.message,
         });
       }
+    }
+  }
+
+  // THE ADDRESSED INVITATION IS ACCEPTED HERE, on the server, AFTER the role
+  // was settled from it while it was still pending (review on #2846: when the
+  // wizard accepted it first, it left the pending read and the role override
+  // above never ran). Same canonical by-id door as the network page: verified
+  // e-mail, address binding, accept_invitation_apply_v2. A failure is logged,
+  // not fatal — the person is onboarded and the home still offers it.
+  if (invited.addressedInvitationId) {
+    try {
+      await acceptInvitationByIdAction({
+        invitationId: invited.addressedInvitationId,
+        locale,
+        noticeSurface: "onboarding",
+      });
+    } catch (e) {
+      console.error("[completeOnboarding] addressed invitation accept failed", {
+        message: e instanceof Error ? e.message : String(e),
+      });
     }
   }
 

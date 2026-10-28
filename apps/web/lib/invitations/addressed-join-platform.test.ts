@@ -52,22 +52,30 @@ describe("onboarding wiring", () => {
   const APP = join(__dirname, "..", "..");
   const page = readFileSync(join(APP, "app/[locale]/onboarding/page.tsx"), "utf8");
   const wizard = readFileSync(join(APP, "components/app/onboarding-wizard.tsx"), "utf8");
+  const actions = readFileSync(join(APP, "lib/auth/actions.ts"), "utf8");
+  const complete = actions.slice(actions.indexOf("export async function completeOnboarding"));
 
   it("looks the invitation up ONLY when no token came in ?next=", () => {
-    expect(page).toMatch(/if \(!inviteToken\) \{\s*const invited = await resolveInvitedWorkerContext\(null\);/);
-    expect(page).toMatch(/addressedInvitationId=\{addressedInvitationId\}/);
+    expect(page).toMatch(/if \(!inviteToken\) \{[\s\S]{0,200}const invited = await resolveInvitedWorkerContext\(null\);/);
   });
 
-  it("accepts it at the finish through the canonical by-id door, never a new path", () => {
-    expect(wizard).toMatch(/else if \(addressedInvitationId\) \{[\s\S]{0,200}acceptInvitationByIdAction\(\{/);
-    expect(wizard).toMatch(/noticeSurface: "onboarding"/);
+  it("the wizard never accepts an addressed invitation itself — the server does", () => {
+    expect(wizard).not.toMatch(/acceptInvitationByIdAction/);
+    expect(wizard).not.toMatch(/addressedInvitationId/);
   });
 
-  it("the token path keeps precedence", () => {
-    const at = wizard.indexOf("if (invitationToken) {");
-    const by = wizard.indexOf("else if (addressedInvitationId)");
-    expect(at).toBeGreaterThan(-1);
-    expect(by).toBeGreaterThan(at);
+  it("completeOnboarding accepts it AFTER settling the role and BEFORE redirecting (review on #2846)", () => {
+    const settle = complete.indexOf('if (invited.workerImplied) roles = ["worker"];');
+    const accept = complete.indexOf("await acceptInvitationByIdAction({");
+    const firstRedirect = complete.indexOf("redirect(");
+    expect(settle).toBeGreaterThan(-1);
+    expect(accept).toBeGreaterThan(settle);
+    expect(accept).toBeLessThan(firstRedirect);
+    expect(complete).toMatch(/invitationId: invited\.addressedInvitationId,[\s\S]{0,80}noticeSurface: "onboarding"/);
+  });
+
+  it("the token path keeps its own accept in the wizard (its preview survives acceptance)", () => {
+    expect(wizard).toMatch(/if \(invitationToken\) \{[\s\S]{0,200}acceptInvitationAfterSignup\(/);
   });
 });
 

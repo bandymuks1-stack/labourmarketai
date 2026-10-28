@@ -97,10 +97,10 @@ export default async function OnboardingPage({
   // `join_platform` invitation for their verified e-mail is found here, so
   // onboarding uses it exactly as it uses a token (worker implied only for a
   // partner referral; accepted when the person finishes).
-  let addressedInvitationId: string | null = null;
   if (!inviteToken) {
+    // The role question is skipped from the same server decision that
+    // completeOnboarding enforces (and that accepts the invitation there).
     const invited = await resolveInvitedWorkerContext(null);
-    addressedInvitationId = invited.addressedInvitationId;
     impliedWorker = invited.workerImplied;
   }
 
@@ -216,7 +216,6 @@ export default async function OnboardingPage({
           defaultIntents={impliedWorker ? ["work"] : handoff.intents}
           skipRoleStep={impliedWorker}
           invitationToken={inviteToken}
-          addressedInvitationId={addressedInvitationId}
           invitationReviewNotice={invitationReviewNotice}
           defaultProfessionSlug={handoff.professionSlug}
           doorIntents={handoff.door}
