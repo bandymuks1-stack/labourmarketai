@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { defaultThemeForPath, resolveTheme } from "@/lib/visual/theme-default";
+
 /**
  * Keeps the user's saved theme applied for the whole client session.
  *
@@ -17,20 +19,21 @@ import { useEffect } from "react";
  * MutationObserver that restores it the moment anything removes the
  * attribute — observer callbacks run before the next paint, so the user
  * never sees the wrong theme. Same storage contract as ThemeToggle:
- * the single shared localStorage "theme" key, DARK default. Deliberate
+ * the single shared localStorage "theme" key; the default is per page. Deliberate
  * theme CHANGES keep working: the observer only reacts when the attribute
  * is missing — a user toggle sets the attribute, never removes it.
  */
 export function ThemeReapply() {
   useEffect(() => {
-    // Resolves to the PRODUCT DEFAULT (dark) rather than null, so a stripped
-    // attribute is always restored to a definite value — the same resolution
-    // the pre-paint bootstrap performs.
+    // Resolves to the PAGE'S DEFAULT (lib/visual/theme-default.ts: public site
+    // light, workspace dark) rather than null, so a stripped attribute is
+    // always restored to a definite value — the same resolution the pre-paint
+    // bootstrap performs. A saved choice always wins.
     const saved = (): "light" | "dark" => {
       try {
-        return localStorage.getItem("theme") === "light" ? "light" : "dark";
+        return resolveTheme(localStorage.getItem("theme"), window.location.pathname);
       } catch {
-        return "dark"; /* no storage → the product default */
+        return defaultThemeForPath(window.location.pathname); /* no storage */
       }
     };
 
