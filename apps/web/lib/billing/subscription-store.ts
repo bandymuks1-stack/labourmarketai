@@ -152,6 +152,12 @@ function safetyColumnsFor(u: SubscriptionUpsert): Record<string, unknown> {
     cols.provider_price_id = u.providerPriceId;
     cols.unit_amount_cents = u.unitAmountCents ?? null;
     cols.currency = u.currency ?? null;
+  } else if (typeof u.unitAmountCents === "number" && u.currency) {
+    // A one-time payment (the pilot pass) has no Stripe price but a real
+    // paid amount: record it, or the plan row says nothing about the money
+    // (measured 2026-10-23: the 1 € pass row had amount and currency null).
+    cols.unit_amount_cents = u.unitAmountCents;
+    cols.currency = u.currency;
   }
   return cols;
 }

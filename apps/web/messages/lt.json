@@ -11005,7 +11005,9 @@
       "cta": "Aktyvuoti planą „Organizacija“",
       "note": "Būsite nukreipti į Stripe Checkout; prenumerata susiejama su šia organizacija.",
       "chargedToday": "Be nemokamo bandomojo laikotarpio: pirmas mėnuo apmokamas šiandien per Stripe Checkout, vėliau kas mėnesį, kol atšauksite. Prieš mokėdami Stripe parodys tikslią sumą su PVM."
-    }
+    },
+    "pilotPassEndsOn": "Pilotinis planas galioja iki {date}. Jis baigiasi savaime ir niekada nepratęsiamas bei daugiau nenuskaičiuojamas.",
+    "pilotPassEnds": "Pilotinis planas galioja iki savo termino pabaigos. Jis baigiasi savaime ir niekada nepratęsiamas bei daugiau nenuskaičiuojamas."
   },
   "accountPlan": {
     "title": "Jūsų planas",

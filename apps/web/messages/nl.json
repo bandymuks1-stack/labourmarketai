@@ -11005,7 +11005,9 @@
       "cta": "Plan Organisatie activeren",
       "note": "U gaat naar Stripe Checkout; het abonnement is gekoppeld aan deze organisatie.",
       "chargedToday": "Geen gratis proefperiode: de eerste maand wordt vandaag bij Stripe Checkout afgerekend, daarna maandelijks tot je opzegt. Stripe toont vóór betaling het exacte bedrag met btw."
-    }
+    },
+    "pilotPassEndsOn": "Pilotplan geldig tot {date}. Het eindigt vanzelf en wordt nooit verlengd of opnieuw afgeschreven.",
+    "pilotPassEnds": "Pilotplan geldig tot het einde van de looptijd. Het eindigt vanzelf en wordt nooit verlengd of opnieuw afgeschreven."
   },
   "accountPlan": {
     "title": "Jouw abonnement",

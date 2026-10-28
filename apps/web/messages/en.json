@@ -11005,7 +11005,9 @@
       "cta": "Activate the Organization plan",
       "note": "You will be taken to Stripe Checkout; the subscription is bound to this organization.",
       "chargedToday": "No free trial: the first month is charged at Stripe Checkout today, then monthly until you cancel. Stripe shows the exact amount with VAT before you pay."
-    }
+    },
+    "pilotPassEndsOn": "Pilot plan valid until {date}. It ends by itself and is never renewed or charged again.",
+    "pilotPassEnds": "Pilot plan valid until the end of its term. It ends by itself and is never renewed or charged again."
   },
   "accountPlan": {
     "title": "Your plan",
