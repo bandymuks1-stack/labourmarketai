@@ -74,9 +74,9 @@ name: signed-in-journey
     timeout: 30000
 - tapOn:
     id: "journal-compose-yesterday"
-- tapOn:
-    id: "journal-compose-site"
-- inputText: "CI site"
+# The form is taller than a phone screen (the notes box is six lines), and
+# tapOn does not scroll: each lower field is scrolled into view first, the way
+# a person reaches it.
 - tapOn:
     id: "journal-compose-notes"
 - inputText: "Signed-in CI journey: laid floor tiles in two rooms and cleaned the site."
@@ -85,6 +85,24 @@ name: signed-in-journey
       platform: Android
     commands:
       - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "journal-compose-site"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "journal-compose-site"
+- inputText: "CI site"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "journal-compose-review"
+    direction: DOWN
+    timeout: 20000
 - tapOn:
     id: "journal-compose-review"
 # When the identity holds more than one work context the server asks the
@@ -96,9 +114,10 @@ name: signed-in-journey
     commands:
       - tapOn:
           id: "journal-compose-option-0"
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: "journal-compose-save"
+    direction: DOWN
     timeout: 60000
 - tapOn:
     id: "journal-compose-save"
@@ -106,6 +125,11 @@ name: signed-in-journey
     visible:
       id: "journal-compose-saved"
     timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "journal-compose-back"
+    direction: DOWN
+    timeout: 20000
 - tapOn:
     id: "journal-compose-back"
 

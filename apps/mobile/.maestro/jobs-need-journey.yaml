@@ -96,8 +96,19 @@ name: jobs-need-journey
     visible:
       id: "need-write"
     timeout: 30000
+# The form is taller than a phone screen and tapOn does not scroll.
+- scrollUntilVisible:
+    element:
+      id: "need-review"
+    direction: DOWN
+    timeout: 20000
 - tapOn:
     id: "need-review"
+- scrollUntilVisible:
+    element:
+      id: "need-failure"
+    direction: UP
+    timeout: 30000
 - extendedWaitUntil:
     visible:
       id: "need-failure"
@@ -116,9 +127,29 @@ name: jobs-need-journey
       - tapOn:
           id: "need-role"
       - inputText: "QA-SYNTHETIC mobile tiler"
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - hideKeyboard
+      - scrollUntilVisible:
+          element:
+            id: "need-location"
+          direction: DOWN
+          timeout: 20000
       - tapOn:
           id: "need-location"
       - inputText: "Vilnius"
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - hideKeyboard
+      - scrollUntilVisible:
+          element:
+            id: "need-team-size"
+          direction: DOWN
+          timeout: 20000
       - tapOn:
           id: "need-team-size"
       - inputText: "2"
@@ -127,12 +158,22 @@ name: jobs-need-journey
             platform: Android
           commands:
             - hideKeyboard
+      - scrollUntilVisible:
+          element:
+            id: "need-review"
+          direction: DOWN
+          timeout: 20000
       - tapOn:
           id: "need-review"
       - extendedWaitUntil:
           visible:
             id: "need-preview"
           timeout: 60000
+      - scrollUntilVisible:
+          element:
+            id: "need-confirm"
+          direction: DOWN
+          timeout: 20000
       - tapOn:
           id: "need-confirm"
       - extendedWaitUntil:
