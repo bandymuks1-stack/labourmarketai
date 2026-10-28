@@ -165,9 +165,41 @@ closes them on the coordinator's say-so.
 
 ---
 
+## 4a. QA evidence (recovered 2026-10-28; counts and pointers only)
+
+The full function matrix is **private** (owner decision, issue #2659 report 11: "the rows
+themselves stay in the private registry; this is the public summary"). It lives as
+`matrix/results-A.tsv … results-F.tsv` (+ `set_result.py`, `build_matrix.py`) in the
+`_agent-workspaces/labourmarketai/` folder on the owner's computer, maintained by session
+`…16CYcDu`. This file records only the public summary and run ids.
+
+| Evidence | Source | Level |
+|---|---|---|
+| **275-function matrix, 2026-10-28 04:37Z:** PASS 194 · FAIL 8 · BLOCKED 39 · NOT_VERIFIED 18 · NOT_IMPLEMENTED 16 | session `…16CYcDu` report | private rows; summary only |
+| per direction — A: 42/0/6/2/0 · B: 29/1/2/2/2 · C: 46/0/3/3/0 · D: 30/1/12/2/6 · E: 40/4/9/3/1 · F: 7/2/7/6/7 (PASS/FAIL/BLOCKED/NOT_VERIFIED/NOT_IMPLEMENTED) | `build_matrix.py` output, same report | sums to the totals |
+| last changes: 1.12 referral network BLOCKED→PASS; 1.13 transactional e-mail BLOCKED→PASS; 5.7 notification e-mail BLOCKED→NOT_VERIFIED; 8.5 nine markets stays BLOCKED; 1.4 invited worker = **NOT_VERIFIED** | same | |
+| history: 2026-10-23 report 11 = 86/2/59/128/–; report 12 = 98/3/50/104/20 | issue #2659 | public |
+| **Marketplace production walk 6/6 PASS** | `prod-qa-walk marketplace` run 40200714397, 2026-10-25, sha `d9b1a38` | LIVE_VERIFIED (synthetic accounts); listing/service closed after |
+| **Company-chain production walk 13/13 PASS** | run 40203656710, 2026-10-25, sha `fb77433` | LIVE_VERIFIED (synthetic) |
+| later walks: company-chain success 2026-10-26; fresh-activation success 2026-10-27; **company-governance FAILURE 2026-10-26** (root cause being traced by `…AygGqFo3`) | prod-qa-walk runs | |
+| **5 open QA-SYNTHETIC needs** left by walks that don't close their own needs: 3 × `agency-chain`, 1 × `brigade-formation`, 1 × failed `orders-bookings` run 40200190351 | session `…F5h3jc1d` 2026-10-25 | cleanup fix proposed, **not started** — owner of work: free |
+| marketplace lifecycle not yet walked in production: edit, resume, withdraw, permanent delete | same | NOT_VERIFIED |
+
+Tracking rule for the 275 functions: the private matrix stays the row-level source. Each
+change of a row's status that comes from a merged PR or a production walk is reported here
+as a one-line delta (row id, old → new, evidence id); grouping by journey, security,
+commercial value and dependency is a column to add in the private matrix (owner's file),
+not a second public copy. Intermediate matrix versions between 10-23 and 10-28 were not
+recovered; their absence is NOT evidence that functions failed.
+
 ## 5. Open owner items (collected once)
 
-- Approve or reject each RED draft individually (§3.3); D-1 and D-3 first.
+- **D-1:** one approval naming #2738 and #2739 → merge as-applied (no re-apply).
+- **D-3:** approve a RED hardening of `reissue_external_referral_v1` + `flock` (to be
+  built by `…AygGqFo3`) before any further referral run; 15 rows remain unsent.
+- **D-6:** confirm which session is the coordinator; the other stays an executor.
+- #2844 legal wording; #2842 paid terms; #2828 visual.
+- Approve or reject each other RED draft individually (§3.3).
 - `prod-qa-invited-provision` dispatch — parked by owner 2026-10-28; do not re-ask.
 - `GOV-1` read-only DB secret for CI gates; product-truth owner decisions ORG-2,
   EVID-2, MKT-7, COM-6, COM-8 (see `product-truth.mjs`).
