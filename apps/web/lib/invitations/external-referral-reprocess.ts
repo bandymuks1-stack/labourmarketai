@@ -49,6 +49,7 @@ export type ExclusionReason =
   | "synthetic_address"
   | "has_account"
   | "already_mailed_address"
+  | "reserved_address"
   | "duplicate_address";
 
 export type Selection = {
@@ -64,6 +65,10 @@ export function selectReprocessCandidates(
     readonly existingAccountEmails: ReadonlySet<string>;
     /** Addresses that already received a partner invitation mail (any row). */
     readonly alreadyMailedEmails?: ReadonlySet<string>;
+    /** Addresses with a send reservation on any row (outcome unknown until
+     *  resolved): left out BEFORE the control row or the batch is chosen, so a
+     *  stuck reservation never occupies a slot. */
+    readonly reservedEmails?: ReadonlySet<string>;
   },
 ): Selection {
   const excluded: Partial<Record<ExclusionReason, number>> = {};
@@ -82,6 +87,7 @@ export function selectReprocessCandidates(
     else if (SYNTHETIC_ADDRESS.test(address)) skip("synthetic_address");
     else if (input.existingAccountEmails.has(address)) skip("has_account");
     else if (input.alreadyMailedEmails?.has(address)) skip("already_mailed_address");
+    else if (input.reservedEmails?.has(address)) skip("reserved_address");
     else {
       const seen = newestByAddress.get(address);
       if (!seen) newestByAddress.set(address, row);

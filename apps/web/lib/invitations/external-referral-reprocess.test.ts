@@ -213,6 +213,34 @@ function fakeDb(rows: ReferralRow[]) {
   };
 }
 
+describe("a stuck reservation never occupies a slot", () => {
+  it("a reserved address is left out before the control row and the batch are chosen", async () => {
+    const stuck = row({ invitedEmail: "stuck@mail.lt", expiresAt: "2026-10-30T00:00:00Z" }); // soonest-expiring
+    const next = row({ invitedEmail: "next@mail.lt" });
+    const s = selectReprocessCandidates([stuck, next], {
+      now: NOW,
+      existingAccountEmails: new Set(),
+      reservedEmails: new Set(["stuck@mail.lt"]),
+    });
+    expect(s.eligible.map((r) => r.id)).toEqual([next.id]);
+    expect(s.excluded).toMatchObject({ reserved_address: 1 });
+    const { d, calls } = deps();
+    await reprocessExternalReferrals(s, { dryRun: false, onlyInvitationId: s.eligible[0]!.id }, d);
+    expect(calls.send).toEqual(["next@mail.lt"]);
+  });
+
+  it("twenty reserved addresses do not block the twenty-first person", () => {
+    const reserved = Array.from({ length: 20 }, (_, i) => row({ invitedEmail: `r${i}@mail.lt`, expiresAt: "2026-10-29T00:00:00Z" }));
+    const free = row({ invitedEmail: "free@mail.lt" });
+    const s = selectReprocessCandidates([...reserved, free], {
+      now: NOW,
+      existingAccountEmails: new Set(),
+      reservedEmails: new Set(reserved.map((r) => r.invitedEmail!)),
+    });
+    expect(s.eligible.map((r) => r.invitedEmail)).toEqual(["free@mail.lt"]);
+  });
+});
+
 describe("address-level send guard (concurrency, idempotency)", () => {
   it("two overlapping runs over two rows of one address mail it exactly once", async () => {
     const a = row({ invitedEmail: "same@mail.lt" });

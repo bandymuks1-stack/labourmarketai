@@ -16,11 +16,14 @@ import { runExternalReferralReprocess, type ReprocessMode } from "@/lib/invitati
  * POST only (it can send mail). `?mode=`:
  *   dry_run (default) — counts only, nothing rotated, nothing sent;
  *   control           — exactly ONE referral (the soonest-expiring eligible);
- *   batch             — at most 20 per call.
+ *   batch             — at most 20 per call;
+ *   resolve_reservations — sends NOTHING: settles reservations a stopped run
+ *                       left behind against the send ledger (sent / released
+ *                       after 15 min / still in flight).
  * The body is counts and reason codes only — no ids, no addresses — plus
  * `emailConfigured` (true/false) so the dry run doubles as an SMTP check.
  */
-const MODES: readonly ReprocessMode[] = ["dry_run", "control", "batch"];
+const MODES: readonly ReprocessMode[] = ["dry_run", "control", "batch", "resolve_reservations"];
 
 export async function POST(request: Request): Promise<NextResponse> {
   const auth = authorizeCronRequest(request);
@@ -40,6 +43,9 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
   if (result.kind === "unavailable") {
     return NextResponse.json({ ok: false, reason: "unavailable" }, { status: 503 });
+  }
+  if (result.kind === "resolved") {
+    return NextResponse.json({ ok: true, reserved: result.reserved, outcomes: result.outcomes }, { status: 200 });
   }
   const { report } = result;
   const status = report.outcome === "email_not_configured" ? 503 : 200;

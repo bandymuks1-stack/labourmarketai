@@ -67,7 +67,33 @@ describe("referral send address guard (D-3)", () => {
   });
 
   it("every replaced function pins search_path with pg_temp last", () => {
-    expect(up.match(/security definer\nset search_path = public, pg_temp\nas \$\$/g)).toHaveLength(3);
+    expect(up.match(/security definer\nset search_path = public, pg_temp\nas \$\$/g)).toHaveLength(5);
+  });
+
+  it("recovery never mails: ledger row → sent, none and older than 15 min → released, else in flight", () => {
+    const resolve = up.slice(
+      up.indexOf("function public.resolve_external_referral_reservation_v1"),
+      up.indexOf("function public.mark_external_referral_delivery_v1"),
+    );
+    expect(resolve.indexOf("pg_advisory_xact_lock(hashtextextended('referral_send:' || v_email, 0))")).toBeLessThan(
+      resolve.indexOf("for update"),
+    );
+    expect(resolve).toMatch(/l\.kind = 'invitation'\s+and l\.recipient_hash = p_ledger_hash\s+and l\.sent_at >= v_row\.delivery_reserved_at - interval '1 minute'/);
+    expect(resolve.indexOf("return 'resolved_sent'")).toBeLessThan(resolve.indexOf("return 'in_flight'"));
+    expect(resolve.indexOf("return 'in_flight'")).toBeLessThan(resolve.indexOf("return 'released'"));
+    expect(resolve).toContain("interval '15 minutes'");
+    const run = read("apps/web/lib/invitations/external-referral-reprocess-run.ts");
+    const rec = run.slice(run.indexOf("async function resolveReservations"));
+    expect(rec).not.toMatch(/guardedSendTransactionalEmail|send\(/);
+    expect(rec).toContain("hashRecipient(r.invited_email as string)");
+  });
+
+  it("the runner leaves reserved addresses out before choosing (v3, falls back to v2)", () => {
+    const run = read("apps/web/lib/invitations/external-referral-reprocess-run.ts");
+    expect(run).toContain('rpc("external_referral_reprocess_candidates_v3")');
+    expect(run).toContain("reservedEmails,");
+    expect(down).toContain("drop function if exists public.external_referral_reprocess_candidates_v3();");
+    expect(down).toContain("drop function if exists public.resolve_external_referral_reservation_v1(uuid, text);");
   });
 
   it("the VPS script runs under a non-blocking flock", () => {
