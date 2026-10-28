@@ -96,6 +96,11 @@ on:
           # useful action. Dispatch only, never in the rotation; the two accounts are created by the
           # owner (prod-qa-fresh-provision.yml) — this walk only signs in to them.
           - fresh-activation
+          # The synthetic INVITED worker registers WITHOUT the link (owner
+          # decision 2026-10-28). Dispatch only, never in the rotation; the
+          # account and its referral are created by the owner
+          # (prod-qa-invited-provision.yml).
+          - invited-worker
           # Owner decision 2026-10-26: the buyer workspace (6.4) with the one owner-created buyer. Dispatch only.
           - buyer-workspace
       budget_override:
@@ -349,6 +354,9 @@ jobs:
           if [ "${{ needs.debounce.outputs.spec }}" = "buyer-workspace" ]; then
             mint_existing "qa.buyer+act1@labourmarket.ai" buyer
           fi
+          if [ "${{ needs.debounce.outputs.spec }}" = "invited-worker" ]; then
+            mint_existing "qa.invited+act1@labourmarket.ai" invited
+          fi
           # employee-beta-gate.spec.ts reads the original single-worker file.
           install -m 600 tests/e2e/.storage-state.prod-qa.worker2.json tests/e2e/.storage-state.prod-qa.json
 
@@ -410,6 +418,7 @@ jobs:
             lcp-locale-probe) SPEC=tests/e2e/prod-lcp-locale-probe.spec.ts ;;
             concurrency-probe) SPEC=tests/e2e/prod-concurrency-probe.spec.ts ;;
             fresh-activation) SPEC=tests/e2e/prod-fresh-activation.spec.ts ;;
+            invited-worker) SPEC=tests/e2e/prod-invited-worker.spec.ts ;;
             buyer-workspace) SPEC=tests/e2e/prod-buyer-workspace.spec.ts ;;
             *) echo "::error::unknown walk '${{ needs.debounce.outputs.spec }}'"; exit 1 ;;
           esac
