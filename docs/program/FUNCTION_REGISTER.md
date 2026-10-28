@@ -139,7 +139,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 |---|---|---|---|---|---|---|
 | 4.1 | Canonical demand intake | LIVE_VERIFIED | 2026-10-27 | fresh-activation run 40546035425 2026-10-27 on 429b106bc (after #2837+#2838): brand-new company saves its first need (no plan limit) in 4 clicks; visible on company home 1280+390 px; scouting room for the need opens with… | yes |  |
 | 4.2 | Demand != supply direction | LIVE_VERIFIED | 2026-10-25 | public-market-direction run 40186517027 (green) 10-25: demand vs supply direction on public market, LT/EN/RU at 390+1280 px; anon refused from scouting + journal export | yes |  |
-| 4.3 | Worker opportunity board + interest | LIVE_VERIFIED | 2026-10-23 | company-chain C-1 run 39960149411 10-23 (after #2608) | yes |  |
+| 4.3 | Worker opportunity board + interest | LIVE_VERIFIED | 2026-10-26 | company-chain C-1 run 40315387466 10-26 (success; replaces 39960149411, which concluded failure — register D-7) | yes |  |
 | 4.4 | Public /jobs board | LIVE_VERIFIED | 2026-10-28 | jobs-search 40645813917 J-1..J-6 6/6 (board, filter, page bounds, job page, signed-in save → saved view → remove); earlier: public-org-locales run 40205429467 10-25 (19 green, 2 skipped): U-4 public job board renders a vacancy count | yes |  |
 | 4.5 | Matching engine both directions | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): M-1 worker sees why Gama's need fits (rule-based) | yes |  |
 | 4.6 | Team matching + team offer | LIVE_VERIFIED | 2026-10-22 | brigade-formation run 39795574869 (green) 10-22 | yes | pricing note fixed #2687 |
@@ -152,7 +152,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 4.13 | Auto-match + receipt | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): M-3 the need carries its automatic-matching receipt | yes |  |
 | 4.14 | Candidate drafts | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): M-5 candidate draft created, seen after reload, deleted | yes |  |
 | 4.15 | Agency-client bridge | LIVE_VERIFIED | 2026-10-26 | agency-chain run 40357361254 2026-10-26: 8/8 incl. A-1b (saved offer on the agency home, list one click away) + cleanup: this run's and the earlier run's synthetic offers withdrawn - production check: the synthetic agenc… | yes |  |
-| 4.16 | Interested-worker contact | LIVE_VERIFIED | 2026-10-23 | company-chain C-3/C-4 run 39960149411 10-23 | yes |  |
+| 4.16 | Interested-worker contact | LIVE_VERIFIED | 2026-10-26 | company-chain C-3/C-4 run 40315387466 10-26 (success; replaces 39960149411, which concluded failure — register D-7) | yes |  |
 | 4.17 | Discoverability consent | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): P-8 employer visibility off, persists, back on | yes |  |
 | 4.18 | Employer data disclosure grant | BLOCKED | — | owner #2471 | unproven |  |
 | 4.19 | Contact disclosure requests | LIVE_VERIFIED | 2026-10-25 | search-support-privacy run 40215640433 10-25 (20 green, 2 planned skips): M-4 contact-details ask pending, then withdrawn | yes |  |
