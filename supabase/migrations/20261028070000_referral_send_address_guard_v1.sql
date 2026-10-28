@@ -1,4 +1,5 @@
 -- 20261028070000_referral_send_address_guard_v1
+-- @human-gate-approved (owner, 2026-10-28, in chat: APPROVED #2855 at commit 35e749fc3 — apply + merge; covers this migration only)
 --
 -- RED tier (needs-human-gate): adds one nullable column and replaces two
 -- service_role-only SECURITY DEFINER functions (same signatures, same grants).
