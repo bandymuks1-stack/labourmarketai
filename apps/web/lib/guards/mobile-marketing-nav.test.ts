@@ -73,7 +73,10 @@ describe("the mobile menu covers exactly the viewports the desktop nav hides", (
     // actually truncates, and the mark is `shrink-0` so it degrades to the
     // logo alone instead of squashing into an unreadable sliver.
     expect(navSrc).toMatch(/min-w-0 shrink items-center/);
-    expect(navSrc).toMatch(/<span className="truncate">/);
+    // 2026-10-28: a cut brand ("LabourMarket…") is worse than the mark alone —
+    // under 360px the wordmark becomes screen-reader only; it still truncates
+    // rather than push the controls, from 360px up it fits whole.
+    expect(navSrc).toMatch(/<span className="truncate max-\[359px\]:sr-only">/);
     expect(navSrc).toMatch(/<LmLogo[^/]*shrink-0/);
     // The locale switcher shows the CODE below sm here, and ONLY here.
     expect(navSrc).toMatch(/<LocaleSwitcher[^/]*compactBelowSm/);
