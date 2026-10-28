@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { useFocusEffect } from "expo-router";
 
 import { useAuth } from "../auth-context";
 import type {
@@ -77,6 +78,20 @@ export function OpportunitiesScreen() {
   const board = useCapability<InterestDraftData>("interest.express_draft", NO_ARGS);
   const [flow, setFlow] = useState<FlowState>({ kind: "listing" });
   const [note, setNote] = useState("");
+
+  // Coming back to this station reads the board again while it is only being
+  // listed: a "no visible needs" answer is a finding with no retry button, and
+  // an employer may have published since. A draft in progress is never reset.
+  const flowKind = useRef(flow.kind);
+  flowKind.current = flow.kind;
+  const focusedBefore = useRef(false);
+  const reloadBoard = board.reload;
+  useFocusEffect(
+    useCallback(() => {
+      if (focusedBefore.current && flowKind.current === "listing") reloadBoard();
+      focusedBefore.current = true;
+    }, [reloadBoard]),
+  );
 
   const live = useRef(true);
   useEffect(() => {
