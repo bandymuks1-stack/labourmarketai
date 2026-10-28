@@ -12,8 +12,9 @@
 #      capability-retry and the step fails);
 #   3. Today opens Post a need; an empty need is refused in place (need-failure),
 #      nothing is drafted;
-#   4. a filled need is drafted (demand.create_draft), previewed, confirmed
-#      (demand.create_confirm) and the sent state renders.
+#   4. ONLY with NEED_SUBMIT=1 (isolated runs): a filled need is drafted
+#      (demand.create_draft), previewed, confirmed (demand.create_confirm) and the
+#      sent state renders.
 # The need it posts is marked QA-SYNTHETIC in its text, so the walk cleanup and the
 # owner can find and close it. Navigation is by testID only.
 appId: ai.labourmarket.app
@@ -103,32 +104,38 @@ name: jobs-need-journey
     timeout: 30000
 
 # --- 4. Need: fill, draft, preview, confirm, sent ---
-- tapOn:
-    id: "need-description"
-- inputText: "QA-SYNTHETIC mobile journey: two tilers for a bathroom renovation, three weeks."
-- tapOn:
-    id: "need-role"
-- inputText: "QA-SYNTHETIC mobile tiler"
-- tapOn:
-    id: "need-location"
-- inputText: "Vilnius"
-- tapOn:
-    id: "need-team-size"
-- inputText: "2"
+# OFF unless NEED_SUBMIT=1: a confirmed need is a real production row, and cross-org
+# readers are not yet proven to exclude synthetic needs (isolation audit 2026-10-28).
 - runFlow:
     when:
-      platform: Android
+      true: ${NEED_SUBMIT == '1'}
     commands:
-      - hideKeyboard
-- tapOn:
-    id: "need-review"
-- extendedWaitUntil:
-    visible:
-      id: "need-preview"
-    timeout: 60000
-- tapOn:
-    id: "need-confirm"
-- extendedWaitUntil:
-    visible:
-      id: "need-sent"
-    timeout: 60000
+      - tapOn:
+          id: "need-description"
+      - inputText: "QA-SYNTHETIC mobile journey: two tilers for a bathroom renovation, three weeks."
+      - tapOn:
+          id: "need-role"
+      - inputText: "QA-SYNTHETIC mobile tiler"
+      - tapOn:
+          id: "need-location"
+      - inputText: "Vilnius"
+      - tapOn:
+          id: "need-team-size"
+      - inputText: "2"
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - hideKeyboard
+      - tapOn:
+          id: "need-review"
+      - extendedWaitUntil:
+          visible:
+            id: "need-preview"
+          timeout: 60000
+      - tapOn:
+          id: "need-confirm"
+      - extendedWaitUntil:
+          visible:
+            id: "need-sent"
+          timeout: 60000

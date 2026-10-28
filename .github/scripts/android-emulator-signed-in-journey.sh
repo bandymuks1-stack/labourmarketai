@@ -47,10 +47,21 @@ maestro test \
   -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
   "$FLOW"
 
-# The beta screens: jobs search → loaded board; need refused when empty → drafted → confirmed.
-maestro test   -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL"   -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD"   apps/mobile/.maestro/jobs-need-journey.yaml
-echo "ANDROID_JOBS_NEED_JOURNEY_PROVEN: jobs.search loaded; empty need refused; need drafted, confirmed, sent"
-summary "- ANDROID_JOBS_NEED_JOURNEY_PROVEN: jobs search (read) → empty need refused → need draft + confirm (write)"
+# The beta screens: jobs search → loaded board → open a job; an empty need is refused.
+# The need SUBMIT runs only with NEED_SUBMIT=1 (isolated runs): cross-org readers are not
+# yet proven to exclude synthetic needs, so production writes no need.
+maestro test \
+  -e MOBILE_QA_EMAIL="$MOBILE_QA_EMAIL" \
+  -e MOBILE_QA_PASSWORD="$MOBILE_QA_PASSWORD" \
+  -e NEED_SUBMIT="${NEED_SUBMIT:-0}" \
+  apps/mobile/.maestro/jobs-need-journey.yaml
+if [ "${NEED_SUBMIT:-0}" = "1" ]; then
+  echo "ANDROID_JOBS_NEED_JOURNEY_PROVEN: jobs.search loaded; job opened; empty need refused; need drafted, confirmed, sent"
+  summary "- ANDROID_JOBS_NEED_JOURNEY_PROVEN: jobs search (read) → job opened → empty need refused → need draft + confirm (write)"
+else
+  echo "ANDROID_JOBS_READ_JOURNEY_PROVEN: jobs.search loaded; job opened; empty need refused (no need written)"
+  summary "- ANDROID_JOBS_READ_JOURNEY_PROVEN: jobs search (read) → job opened → empty need refused; need submit NOT run (NEED_SUBMIT=0)"
+fi
 
 echo "ANDROID_SIGNED_IN_JOURNEY_PROVEN: sign-in, Today figures read, journal entry drafted and confirmed, profile skills read, sign-out"
 summary "- ANDROID_SIGNED_IN_JOURNEY_PROVEN: sign-in → Today figures (read) → journal draft + confirm (write) → profile skills (read) → sign-out"
