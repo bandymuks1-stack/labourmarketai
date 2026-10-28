@@ -1,4 +1,5 @@
 -- 20261028090000_resolve_reservation_exact_window_v1
+-- @human-gate-approved (owner, 2026-10-28, in chat: APPROVED #2858 at commit d0159eb — apply + merge; covers this migration only)
 --
 -- RED tier (needs-human-gate): replaces ONE service_role-only SECURITY DEFINER
 -- function (same signature, same grants, same search_path). NOT applied —
