@@ -62,7 +62,7 @@ jobs:
         run: |
           set -euo pipefail
           if grep -nE 'secrets\.' .github/workflows/signup-isolated.yml | grep -v 'grep -nE'; then
-            echo "::error title=Secret reference::signup-isolated.yml must never read secrets."; exit 1
+            echo "::error title=Secret reference::signup-isolated.yml must never read a repository secret"; exit 1
           fi
           if [ -e supabase/.temp/project-ref ]; then echo "::error::linked project present"; exit 1; fi
           for f in apps/web/.env apps/web/.env.local apps/web/.env.production apps/web/.env.production.local .env .env.local; do
