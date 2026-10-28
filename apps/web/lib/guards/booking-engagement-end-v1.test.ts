@@ -1721,6 +1721,16 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-23: owner approved #2719 in chat (apply before deploy, then merge). Runtime
       // stall sampler evidence table — numbers only, service_role only, 14-day retention.
       "20261023190000_ops_runtime_samples_v1.sql",
+      // 2026-10-27: owner approved #2841 in chat (apply + merge). Two service_role-only
+      // SECURITY DEFINER functions that rotate one unsent partner referral token; ledger
+      // 20261027193124.
+      "20261027120000_reissue_external_referral_v1.sql",
+      // 2026-10-28: owner approved #2843 in chat (apply + merge). Read-only service_role
+      // candidate list that flags already-mailed addresses; ledger 20261028044705.
+      "20261027210000_external_referral_reprocess_candidates_v2.sql",
+      // 2026-10-28: owner approved #2846 in chat (apply + merge). The caller-scoped
+      // invitations read carries the partner source; ledger 20261028034356.
+      "20261027231000_list_invitations_for_me_source_slug_v1.sql",
 ]);
   });
 

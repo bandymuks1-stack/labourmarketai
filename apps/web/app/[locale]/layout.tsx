@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/visual/theme-default";
 import { Bricolage_Grotesque, Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
@@ -175,7 +176,7 @@ export default async function LocaleLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var s=localStorage.getItem('theme');var t=s==='light'?'light':'dark';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='dark';}})();",
+              THEME_BOOTSTRAP_SCRIPT,
           }}
         />
       </head>
