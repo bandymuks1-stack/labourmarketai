@@ -6,7 +6,7 @@
 #
 # What a green run proves:
 #   1. sign-in lands on Today; Today opens the Jobs board;
-#   2. a search runs through jobs.search and the board renders a LOADED read; opening
+#   2. the board is read through jobs.search and renders a LOADED read; opening
 #      the first job hands its page to the browser and the app comes back;
 #      (testID jobs-loaded renders only on a loaded read — a failed read renders
 #      capability-retry and the step fails);
@@ -57,14 +57,10 @@ name: jobs-need-journey
     visible:
       id: "jobs-query"
     timeout: 30000
-- tapOn:
-    id: "jobs-query"
-- inputText: "builder"
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - hideKeyboard
+# The board itself, unfiltered: the newest public vacancies, so the job-open
+# step below has a real job. (A free-text word is matched against the job's
+# SOURCE-language occupation, so an English word can rightly find nothing;
+# the free-text path is proven by the production web walk jobs-search.)
 - tapOn:
     id: "jobs-search"
 - extendedWaitUntil:
