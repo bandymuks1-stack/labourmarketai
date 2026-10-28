@@ -6,7 +6,8 @@
 #
 # What a green run proves:
 #   1. sign-in lands on Today; Today opens the Jobs board;
-#   2. a search runs through jobs.search and the board renders a LOADED read
+#   2. a search runs through jobs.search and the board renders a LOADED read; opening
+#      the first job hands its page to the browser and the app comes back;
 #      (testID jobs-loaded renders only on a loaded read — a failed read renders
 #      capability-retry and the step fails);
 #   3. Today opens Post a need; an empty need is refused in place (need-failure),
@@ -61,6 +62,26 @@ name: jobs-need-journey
     visible:
       id: "jobs-loaded"
     timeout: 60000
+
+# --- 2b. Open a job: the app hands the job page to the browser, then comes back ---
+# (the job page itself is proven by the production web walk jobs-search J-5)
+- runFlow:
+    when:
+      visible:
+        id: "jobs-open-0"
+    commands:
+      - tapOn:
+          id: "jobs-open-0"
+      - extendedWaitUntil:
+          notVisible:
+            id: "jobs-loaded"
+          timeout: 20000
+      - launchApp:
+          clearState: false
+      - extendedWaitUntil:
+          visible:
+            id: "jobs-loaded"
+          timeout: 30000
 - back
 
 # --- 3. Need: an empty need is refused in place ---
@@ -87,7 +108,7 @@ name: jobs-need-journey
 - inputText: "QA-SYNTHETIC mobile journey: two tilers for a bathroom renovation, three weeks."
 - tapOn:
     id: "need-role"
-- inputText: "Tiler"
+- inputText: "QA-SYNTHETIC mobile tiler"
 - tapOn:
     id: "need-location"
 - inputText: "Vilnius"

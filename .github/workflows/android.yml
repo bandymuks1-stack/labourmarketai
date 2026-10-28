@@ -441,3 +441,10 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: bash .github/scripts/android-emulator-signed-in-journey.sh "dist-apk/${{ needs.build.outputs.apk_file }}" "${{ needs.build.outputs.config_mode }}"
+      - name: Cleanup — close the synthetic needs this journey posted (always, also on failure)
+        if: always()
+        env:
+          MOBILE_QA_EMAIL: ${{ secrets.MOBILE_QA_EMAIL }}
+          MOBILE_QA_PASSWORD: ${{ secrets.MOBILE_QA_PASSWORD }}
+          ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
+        run: node .github/scripts/mobile-qa-close-synthetic-needs.mjs
