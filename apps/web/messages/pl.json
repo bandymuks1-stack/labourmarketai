@@ -18376,7 +18376,7 @@
       "not_a_member": "Nie jesteś członkiem.",
       "not_found": "Wpis niedostępny.",
       "not_authorized": "Nie masz uprawnień do tej czynności.",
-      "no_such_user": "Brak użytkownika z tym adresem e-mail.",
+      "no_such_user": "Nie ma jeszcze potwierdzonego konta z tym adresem e-mail.",
       "cannot_invite_self": "Nie możesz zaprosić samego siebie.",
       "invalid_role": "Nieprawidłowa rola.",
       "last_owner": "Ostatni właściciel nie może ustąpić — najpierw aktywuj innego właściciela.",
@@ -18406,7 +18406,7 @@
       "grantInvitations": "Zezwól na zarządzanie zaproszeniami",
       "withdrawInvitations": "Cofnij zarządzanie zaproszeniami",
       "unavailable": "Nie udało się teraz odczytać listy członków. To nie znaczy, że organizacja nie ma członków.",
-      "noAccountHint": "Rolę członka można nadać tylko osobie, która ma już konto. Osobę bez konta zaproś linkiem z zaproszeniem — gdy się zarejestruje i dołączy do organizacji, nadasz jej tu rolę.",
+      "noAccountHint": "Rolę członka można nadać tylko osobie z potwierdzonym kontem. Jeśli osoba nie ma jeszcze konta albo nie potwierdziła adresu e-mail, wyślij jej link z zaproszeniem lub poproś o potwierdzenie adresu — gdy dołączy, nadasz jej rolę tutaj.",
       "noAccountCta": "Utwórz link z zaproszeniem"
     },
     "start": {

@@ -18376,7 +18376,7 @@
       "not_a_member": "You are not a member.",
       "not_found": "Record not available.",
       "not_authorized": "You are not authorized for this.",
-      "no_such_user": "No user with this email.",
+      "no_such_user": "No confirmed account with this email yet.",
       "cannot_invite_self": "You cannot invite yourself.",
       "invalid_role": "Invalid role.",
       "last_owner": "The last owner cannot step down — activate another owner first.",
@@ -18406,7 +18406,7 @@
       "grantInvitations": "Allow to manage invitations",
       "withdrawInvitations": "Withdraw invitation management",
       "unavailable": "The member directory could not be read right now. This is not a claim that the organization has no members.",
-      "noAccountHint": "A membership role can only be given to someone who already has an account. Invite a person without an account with an invitation link — once they sign up and join the organisation, you can give them a role here.",
+      "noAccountHint": "A membership role can only be given to someone with a confirmed account. If the person has no account yet, or has not confirmed their email, send them an invitation link — or ask them to confirm their email — and give the role here once they have joined.",
       "noAccountCta": "Create an invitation link"
     },
     "start": {
