@@ -30,6 +30,17 @@
 --                                ledger and clears it by hand).
 --     Every earlier refusal (not_pending, already_sent, consent, expiry,
 --     resend limit, has_account) stays as it was.
+--   * `reserve_external_referral_send_v1(id)` — the SAME address lock and the
+--     same two refusals for the partner INTAKE path
+--     (lib/invitations/external-referral-receive.ts), which creates a row per
+--     partner lead id and mails it at once. Without it, a partner sending the
+--     same person under a new lead id would mail that address again (74 rows
+--     held 72 addresses on 2026-10-28). Intake now mails only after 'ok'.
+--   * All three functions pin `search_path = public, pg_temp` (pg_temp last).
+--
+-- HISTORY: no existing row is updated. The 48 sent rows keep their
+-- delivery_status, last_sent_at, resend_count and token_hash; the new column
+-- starts NULL everywhere.
 --
 -- ROLLBACK: supabase/rollbacks/20261028070000_referral_send_address_guard_v1.down.sql
 
@@ -47,7 +58,7 @@ create or replace function public.reissue_external_referral_v1(
 ) returns text
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   v_email text;
@@ -117,13 +128,62 @@ revoke all on function public.reissue_external_referral_v1(uuid, text)
 grant execute on function public.reissue_external_referral_v1(uuid, text)
   to service_role;
 
+create or replace function public.reserve_external_referral_send_v1(
+  p_invitation_id uuid
+) returns text
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_email text;
+  v_row public.invitations%rowtype;
+begin
+  select lower(trim(invited_email)) into v_email
+    from public.invitations where id = p_invitation_id;
+  if v_email is null or v_email = '' then
+    return 'not_found';
+  end if;
+  perform pg_advisory_xact_lock(hashtextextended('referral_send:' || v_email, 0));
+
+  select * into v_row from public.invitations where id = p_invitation_id for update;
+  if not found or v_row.external_source_slug is null then
+    return 'not_found';
+  end if;
+  if v_row.delivery_status = 'sent' then
+    return 'already_sent';
+  end if;
+  if exists (select 1 from public.invitations o
+              where o.external_source_slug is not null
+                and lower(trim(o.invited_email)) = v_email
+                and o.delivery_status = 'sent') then
+    return 'address_already_sent';
+  end if;
+  if exists (select 1 from public.invitations o
+              where o.external_source_slug is not null
+                and lower(trim(o.invited_email)) = v_email
+                and o.delivery_reserved_at is not null) then
+    return 'address_reserved';
+  end if;
+
+  update public.invitations
+     set delivery_reserved_at = now()
+   where id = p_invitation_id;
+  return 'ok';
+end $$;
+
+revoke all on function public.reserve_external_referral_send_v1(uuid)
+  from public, anon, authenticated;
+grant execute on function public.reserve_external_referral_send_v1(uuid)
+  to service_role;
+
 create or replace function public.mark_external_referral_delivery_v1(
   p_invitation_id uuid,
   p_outcome       text
 ) returns text
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   if p_outcome not in ('sent','delivery_failed') then

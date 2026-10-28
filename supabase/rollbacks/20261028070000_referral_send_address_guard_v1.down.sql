@@ -88,6 +88,8 @@ revoke all on function public.mark_external_referral_delivery_v1(uuid, text)
 grant execute on function public.mark_external_referral_delivery_v1(uuid, text)
   to service_role;
 
+drop function if exists public.reserve_external_referral_send_v1(uuid);
+
 do $$
 begin
   if exists (select 1 from public.invitations where delivery_reserved_at is not null) then

@@ -49,6 +49,27 @@ describe("referral send address guard (D-3)", () => {
     expect(down.indexOf("raise exception")).toBeLessThan(down.indexOf("drop column if exists delivery_reserved_at"));
   });
 
+  it("partner intake passes the same address lock before it mails", () => {
+    const reserve = up.slice(
+      up.indexOf("function public.reserve_external_referral_send_v1"),
+      up.indexOf("function public.mark_external_referral_delivery_v1"),
+    );
+    expect(reserve.indexOf("pg_advisory_xact_lock(hashtextextended('referral_send:' || v_email, 0))")).toBeLessThan(
+      reserve.indexOf("for update"),
+    );
+    expect(reserve).toContain("return 'address_already_sent'");
+    expect(reserve).toContain("return 'address_reserved'");
+    expect(reserve).toContain("set delivery_reserved_at = now()");
+    const intake = read("apps/web/lib/invitations/external-referral-receive.ts");
+    expect(intake).toContain('rpc("reserve_external_referral_send_v1"');
+    expect(intake).toMatch(/isTransactionalEmailConfigured\(\) && \(await mayMailAddress\(admin, invitationId\)\)/);
+    expect(down).toContain("drop function if exists public.reserve_external_referral_send_v1(uuid);");
+  });
+
+  it("every replaced function pins search_path with pg_temp last", () => {
+    expect(up.match(/security definer\nset search_path = public, pg_temp\nas \$\$/g)).toHaveLength(3);
+  });
+
   it("the VPS script runs under a non-blocking flock", () => {
     const sh = read("ops/vps/lm-referral-reprocess.sh");
     expect(sh).toMatch(/exec 9>\S+\nflock -n 9 \|\|/);
