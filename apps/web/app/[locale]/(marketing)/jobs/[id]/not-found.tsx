@@ -14,7 +14,7 @@ export default async function JobNotFound() {
     getTranslations("marketplaceListings"),
   ]);
   return (
-    <main
+    <section
       className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center gap-4 px-6 text-center"
       data-testid="job-not-found"
     >
@@ -37,6 +37,6 @@ export default async function JobNotFound() {
           {t("cta")}
         </Link>
       </div>
-    </main>
+    </section>
   );
 }
