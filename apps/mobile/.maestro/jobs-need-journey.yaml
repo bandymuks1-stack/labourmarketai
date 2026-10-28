@@ -126,9 +126,25 @@ name: jobs-need-journey
     when:
       true: ${NEED_SUBMIT == '1'}
     commands:
+      # The refusal above left the form scrolled down; the first field is at the top.
+      - scrollUntilVisible:
+          element:
+            id: "need-description"
+          direction: UP
+          timeout: 20000
       - tapOn:
           id: "need-description"
       - inputText: "QA-SYNTHETIC mobile journey: two tilers for a bathroom renovation, three weeks."
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - hideKeyboard
+      - scrollUntilVisible:
+          element:
+            id: "need-role"
+          direction: DOWN
+          timeout: 20000
       - tapOn:
           id: "need-role"
       - inputText: "QA-SYNTHETIC mobile tiler"
