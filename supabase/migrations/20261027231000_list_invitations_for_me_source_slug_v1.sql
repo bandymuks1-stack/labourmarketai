@@ -64,3 +64,8 @@ begin
     ) sub;
   return jsonb_build_object('items', v_items);
 end $function$;
+
+-- Grants exactly as production holds them (postgres + authenticated), stated explicitly
+-- so a fresh environment never inherits a default anon EXECUTE.
+revoke all on function public.list_invitations_for_me_v1() from public, anon;
+grant execute on function public.list_invitations_for_me_v1() to authenticated;
