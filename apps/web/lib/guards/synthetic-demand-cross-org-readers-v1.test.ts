@@ -107,7 +107,7 @@ describe("synthetic QA needs stay out of the cross-organization SQL readers", ()
       "is_synthetic_viewer_v1()",
     ]) {
       expect(up).toContain(`revoke all on function public.${sig} from public, anon, authenticated;`);
-      expect(up).not.toMatch(new RegExp(`grant execute on function public\\.${sig.replace(/[()[\]]/g, "\\$&")}`));
+      expect(up.toLowerCase()).not.toContain(`grant execute on function public.${sig}`);
     }
   });
 
