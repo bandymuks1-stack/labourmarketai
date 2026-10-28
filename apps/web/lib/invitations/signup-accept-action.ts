@@ -91,6 +91,11 @@ export async function signUpAddressedInviteAction(input: {
       httpStatus: error.status ?? null,
     };
   }
+  // Confirm email ON + an address that already has an account: no error, no
+  // mail, a user with no identities. The form then shows the sign-in door.
+  if (!data.session && data.user && data.user.identities?.length === 0) {
+    return { status: "error", code: "user_already_exists", message: "", httpStatus: null };
+  }
   if (!data.session) return { status: "check_email" };
   const accepted = await acceptInvitationAfterSignup({
     token,

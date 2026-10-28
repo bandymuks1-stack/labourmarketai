@@ -41,6 +41,7 @@ import {
   sensitivityForTask,
   type AiDataSensitivity,
 } from "./data-sensitivity";
+import { blockedByZeroPaidBudget, ZERO_PAID_BUDGET_REASON } from "./paid-budget";
 
 /** Provider ids the chain can order. `local` is the keyless self-hosted seam. */
 /**
@@ -473,6 +474,10 @@ export function resolveProviderChain(
   states: readonly AiProviderState[],
   profiles: readonly AiProviderProfile[] = AI_PROVIDER_PROFILES,
   grants?: readonly AiEgressGrant[],
+  /** ZERO PAID API BUDGET (`paid-budget.ts`). The runtime passes the owner
+   *  switch explicitly; the default keeps this pure function's callers that
+   *  only study ordering unchanged. */
+  allowPaid = true,
 ): ChainOutcome {
   if (decision.tier === "deterministic") {
     return {
@@ -498,6 +503,13 @@ export function resolveProviderChain(
   // Pass 1 — the privacy veto. Ineligible providers leave the chain entirely;
   // they are not candidates for the first attempt OR for a later retry.
   for (const p of ordered) {
+    // Pass 0 — the budget. A metered provider is not a fallback while the
+    // owner keeps the paid budget at zero: it leaves the chain like a privacy
+    // exclusion, named, whether or not it happens to be configured.
+    if (blockedByZeroPaidBudget(p.costClass, allowPaid)) {
+      skipped.push({ id: p.id, reason: ZERO_PAID_BUDGET_REASON });
+      continue;
+    }
     const verdict = providerEligibleForSensitivity(p, sensitivity, grants, decision.taskType);
     if (verdict.eligible) {
       eligible.push(p);
@@ -540,7 +552,9 @@ export function resolveProviderChain(
       ordered.length === 0
         ? `no provider declares capability for task "${decision.taskType}"`
         : eligible.length === 0
-          ? `no provider may receive ${sensitivity} data for task "${decision.taskType}"`
+          ? skipped.every((s) => s.reason === ZERO_PAID_BUDGET_REASON)
+            ? `${ZERO_PAID_BUDGET_REASON} — no free provider declares task "${decision.taskType}"`
+            : `no provider may receive ${sensitivity} data for task "${decision.taskType}"`
           : `every provider for task "${decision.taskType}" is unusable`,
     skipped,
   };

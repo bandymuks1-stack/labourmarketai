@@ -3,6 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getTranslations } from "next-intl/server";
 
+import { hashRecipient } from "@/lib/email/durable-send-guard";
 import { guardedSendTransactionalEmail } from "@/lib/email/send-ledger-store";
 import { isTransactionalEmailConfigured } from "@/lib/email/transactional";
 import { activeLocales } from "@/lib/i18n/config";
@@ -29,12 +30,13 @@ function asAny(c: SupabaseClient): any {
   return c;
 }
 
-export type ReprocessMode = "dry_run" | "control" | "batch";
+export type ReprocessMode = "dry_run" | "control" | "batch" | "resolve_reservations";
 
 export type ReprocessRunResult =
   | { readonly kind: "needs_migration" }
   | { readonly kind: "unavailable" }
-  | { readonly kind: "report"; readonly report: ReprocessReport };
+  | { readonly kind: "report"; readonly report: ReprocessReport }
+  | { readonly kind: "resolved"; readonly reserved: number; readonly outcomes: Readonly<Record<string, number>> };
 
 export async function runExternalReferralReprocess(input: {
   readonly mode: ReprocessMode;
@@ -42,8 +44,13 @@ export async function runExternalReferralReprocess(input: {
 }): Promise<ReprocessRunResult> {
   const admin = createAdminClient();
   // v2 adds `address_already_sent`: an older duplicate row of an address that
-  // was already mailed must never be mailed again.
-  const { data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v2");
+  // was already mailed must never be mailed again. v3 (20261028070000) adds the
+  // send reservation; before it is applied the runner reads v2 as before.
+  let { data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v3");
+  if (error && (error.code === "42883" || error.code === "PGRST202")) {
+    if (input.mode === "resolve_reservations") return { kind: "needs_migration" };
+    ({ data, error } = await asAny(admin).rpc("external_referral_reprocess_candidates_v2"));
+  }
   if (error) {
     return error.code === "42883" || error.code === "PGRST202"
       ? { kind: "needs_migration" }
@@ -71,10 +78,17 @@ export async function runExternalReferralReprocess(input: {
       .filter((r) => r.address_already_sent === true && typeof r.invited_email === "string")
       .map((r) => (r.invited_email as string).trim().toLowerCase()),
   );
+  if (input.mode === "resolve_reservations") return resolveReservations(admin);
+  const reservedEmails = new Set(
+    raw
+      .filter((r) => r.address_reserved === true && typeof r.invited_email === "string")
+      .map((r) => (r.invited_email as string).trim().toLowerCase()),
+  );
   const selection = selectReprocessCandidates(rows, {
     now: new Date(),
     existingAccountEmails,
     alreadyMailedEmails,
+    reservedEmails,
   });
   // The control test is the soonest-expiring eligible referral: one person,
   // chosen by the same rule the batch would use first.
@@ -109,18 +123,52 @@ export async function runExternalReferralReprocess(input: {
             subject: buildInvitationSubject(t, "join_platform"),
             text: buildInvitationBody(t, { link, personalMessage: null }),
           },
-          { kind: "invitation" },
+          { kind: "invitation", requireLedger: true },
         );
         return sent.status === "sent";
       },
       mark: async (id, outcome) => {
-        await asAny(admin).rpc("mark_external_referral_delivery_v1", {
+        const r = await asAny(admin).rpc("mark_external_referral_delivery_v1", {
           p_invitation_id: id,
           p_outcome: outcome,
         });
+        if (r.error || r.data !== "ok") throw new Error("mark_failed");
       },
       resolveLocale: (l) => ((activeLocales as readonly string[]).includes(l ?? "") ? (l as string) : "en"),
     },
   );
   return { kind: "report", report };
+}
+
+/**
+ * Recovery of reservations a stopped run left behind — never a second mail.
+ * Each reserved row (`external_referral_reserved_rows_v1`, any status) goes
+ * to `resolve_external_referral_reservation_v1` with the
+ * ledger hash of its OWN address: a ledger row at/after the reservation marks
+ * it sent; none, and older than 15 minutes, releases it; younger stays.
+ * Nothing is sent here.
+ */
+async function resolveReservations(admin: SupabaseClient): Promise<ReprocessRunResult> {
+  // Every reserved partner row, whatever its status: the person may have
+  // accepted or declined before recovery runs (the candidate read is
+  // pending-only and would miss that row).
+  const { data, error } = await asAny(admin).rpc("external_referral_reserved_rows_v1");
+  if (error) {
+    return error.code === "42883" || error.code === "PGRST202"
+      ? { kind: "needs_migration" }
+      : { kind: "unavailable" };
+  }
+  const reserved = ((data ?? []) as Array<Record<string, unknown>>).filter(
+    (r) => typeof r.invited_email === "string",
+  );
+  const outcomes: Record<string, number> = {};
+  for (const r of reserved) {
+    const res = await asAny(admin).rpc("resolve_external_referral_reservation_v1", {
+      p_invitation_id: String(r.id),
+      p_ledger_hash: hashRecipient(r.invited_email as string),
+    });
+    const key = res.error ? "error" : String(res.data ?? "error");
+    outcomes[key] = (outcomes[key] ?? 0) + 1;
+  }
+  return { kind: "resolved", reserved: reserved.length, outcomes };
 }
