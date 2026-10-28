@@ -185,6 +185,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261027210000_",
       // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028081810): address lock + send reservation in the referral reissue.
       "20261028070000_",
+      // 2026-10-28 (RED, owner-approved, APPLIED ledger 20261028091725): recovery counts only this reservation's ledger row.
+      "20261028090000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
