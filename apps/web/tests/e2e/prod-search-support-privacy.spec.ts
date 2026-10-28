@@ -788,6 +788,116 @@ test("P-8 (2.35 / 4.17). the worker turns employer visibility off, it persists, 
   await ctx.close();
 });
 
+// MATCHABILITY (owner 2026-10-24/25): the status is visible on the HOME and the
+// PROFILE in one look and changes in one tap each way there, it survives a
+// reload, and while the worker is findable an UNRELATED employer reaches only
+// the anonymous discovery projection — never the raw row, the name, the
+// contacts, the external links or the documents. Ends where it started.
+test("P-8b (2.35 matchability). home and profile: one look, one tap each way; an unrelated employer gets no contacts", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker2");
+  const statusOf = (scope: ReturnType<Page["getByTestId"]>) =>
+    scope.getByTestId("discoverability-status").first().getAttribute("data-visibility");
+
+  // 1. HOME — the status line is there on every visit.
+  await page.goto("/lt/dashboard");
+  const home = page.getByTestId("home-employer-visibility");
+  await expect(home).toBeVisible({ timeout: 60_000 });
+  const initial = await statusOf(home);
+  expect(["on", "off"], "the home states on or off").toContain(initial ?? "");
+  visibilityInitial = initial === "on" ? "granted" : "choice";
+  visibilityTouched = true;
+  console.info(`P-8b: starting state on the home = ${initial}`);
+
+  // 2. Make it ON from the home (read the terms in place, then ONE grant tap).
+  if (initial === "off") {
+    await home.getByTestId("discoverability-open").click();
+    await expect(home.getByTestId("consent-controller"), "the terms are on screen before the grant").toBeVisible();
+    await home.getByTestId("discoverability-grant").click();
+    await expect(home.getByTestId("discoverability-granted-note"), "the result is said").toBeVisible({ timeout: 30_000 });
+  }
+  await page.reload();
+  await expect(page.getByTestId("home-employer-visibility").getByTestId("discoverability-status")).toHaveAttribute(
+    "data-visibility",
+    "on",
+    { timeout: 60_000 },
+  );
+
+  // 3. While findable: an UNRELATED employer reads only the anonymous projection.
+  let viewer = "";
+  for (const slot of ["agency", "manager", "owner"]) {
+    const res = await qaApi("/rest/v1/rpc/caller_has_worker_relation_v1", bearerOf(slot), {
+      method: "POST",
+      body: { p_worker_id: worker2Id },
+    });
+    expect(res.status, `${slot}: relationship predicate answered`).toBe(200);
+    if ((await res.json()) === false) {
+      viewer = slot;
+      break;
+    }
+  }
+  if (viewer === "") {
+    console.info("P-8b: every synthetic organization works with worker2 — the contact check is not walked");
+  } else {
+    const token = bearerOf(viewer);
+    const raw = await qaApi(`/rest/v1/workers?select=id,display_name&id=eq.${worker2Id}`, token);
+    expect(raw.status).toBe(200);
+    expect(((await raw.json()) as unknown[]).length, "no raw worker row (name, free text) for an unrelated employer").toBe(0);
+    for (const table of ["worker_external_profiles", "worker_documents"]) {
+      const res = await qaApi(`/rest/v1/${table}?select=worker_id&worker_id=eq.${worker2Id}`, token);
+      expect(res.status, `${table} answered`).toBe(200);
+      expect(((await res.json()) as unknown[]).length, `${table}: nothing for an unrelated employer`).toBe(0);
+    }
+    const proj = await qaApi("/rest/v1/rpc/list_discoverable_worker_profiles_v1", token, {
+      method: "POST",
+      body: { p_worker_ids: [worker2Id] },
+    });
+    expect(proj.status, "the discovery projection answered").toBe(200);
+    const rows = (await proj.json()) as Record<string, unknown>[];
+    console.info(`P-8b: projection rows for the findable worker = ${rows.length} (viewer ${viewer})`);
+    for (const row of rows) {
+      for (const key of ["display_name", "full_name", "email", "phone", "profile_id", "headline"]) {
+        expect(key in row, `the projection carries no ${key}`).toBe(false);
+      }
+    }
+  }
+
+  // 4. HOME — ONE tap off, the result said, and it holds after a reload.
+  await page.getByTestId("home-employer-visibility").getByTestId("discoverability-withdraw").click();
+  await expect(page.getByTestId("discoverability-withdrawn-note")).toBeVisible({ timeout: 30_000 });
+  await page.reload();
+  await expect(page.getByTestId("home-employer-visibility").getByTestId("discoverability-status")).toHaveAttribute(
+    "data-visibility",
+    "off",
+    { timeout: 60_000 },
+  );
+
+  // 5. PROFILE — the same status in place; ONE tap on (the terms are already shown), reload, ONE tap off.
+  await page.goto("/lt/dashboard/profile");
+  const prof = page.getByTestId("profile-hub-employer-visibility");
+  await expect(prof).toBeVisible({ timeout: 60_000 });
+  await expect(prof.getByTestId("discoverability-status")).toHaveAttribute("data-visibility", "off");
+  await prof.getByTestId("discoverability-grant").click();
+  await expect(prof.getByTestId("discoverability-granted-note")).toBeVisible({ timeout: 30_000 });
+  await page.reload();
+  await expect(page.getByTestId("profile-hub-employer-visibility").getByTestId("discoverability-status")).toHaveAttribute(
+    "data-visibility",
+    "on",
+    { timeout: 60_000 },
+  );
+  if (visibilityInitial !== "granted") {
+    await page.getByTestId("profile-hub-employer-visibility").getByTestId("discoverability-withdraw").click();
+    await expect(page.getByTestId("discoverability-withdrawn-note")).toBeVisible({ timeout: 30_000 });
+    await page.reload();
+    await expect(page.getByTestId("profile-hub-employer-visibility").getByTestId("discoverability-status")).toHaveAttribute(
+      "data-visibility",
+      "off",
+      { timeout: 60_000 },
+    );
+  }
+  visibilityTouched = false;
+  await ctx.close();
+});
+
 // `afterAll`, not a last test: a serial walk stops at its first red step, and
 // a run that failed half-way must still undo what it did. Each item is undone
 // on its own and a failure is logged, never thrown over the result.

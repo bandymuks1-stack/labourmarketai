@@ -17,6 +17,7 @@ import {
 } from "@/lib/privacy/discoverability-actions";
 import { buildOwnDiscoverabilityPreview } from "@/lib/privacy/discoverability-preview";
 import {
+  defaultVisibilityNotice,
   discoverabilityConsentLabels,
   discoverabilityPreviewFields,
   toConsentLocale,
@@ -53,6 +54,8 @@ import { createClient } from "@/lib/supabase/server";
 export type EmployerVisibilityChatConsent = {
   readonly state: DiscoverabilityState;
   readonly legal: ConsentLegalTexts;
+  /** The free-worker default notice text, shown when the default is due. */
+  readonly notice: ConsentLegalTexts;
   readonly preview: PreviewField[];
   readonly labels: DiscoverabilityConsentLabels;
 };
@@ -109,6 +112,7 @@ export async function loadEmployerVisibilityForChat(): Promise<EmployerVisibilit
     consent: {
       state,
       legal: PROFILE_DISCOVERABILITY_V1.texts[toConsentLocale(locale)],
+      notice: defaultVisibilityNotice(locale),
       preview: discoverabilityPreviewFields(preview, tc),
       labels: discoverabilityConsentLabels(tc),
     },

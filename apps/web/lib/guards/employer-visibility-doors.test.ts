@@ -189,7 +189,7 @@ describe("every door opens the ONE existing consent — nothing else grants", ()
 describe("SEP-7 — a failed read is said as unknown, never as off or empty", () => {
   it("the consent component says 'could not read' for error / not-authed, before any choice screen", () => {
     const CONSENT = read("components/app/discoverability-consent.tsx");
-    const readFailed = CONSENT.indexOf('state.kind === "error" || state.kind === "not-authed"');
+    const readFailed = CONSENT.indexOf('st.kind === "error" || st.kind === "not-authed"');
     expect(readFailed).toBeGreaterThan(0);
     expect(CONSENT.slice(readFailed)).toContain('data-testid="discoverability-read-failed"');
     expect(CONSENT.slice(readFailed)).toContain("{labels.readFailed}");

@@ -5730,7 +5730,7 @@
             "Content you enter yourself: profile and CV details, skills, work journal entries, photos you attach to entries, and the documents you list in your document inventory.",
             "Company information entered by company users: company details, needs, projects and bookings.",
             "Messages you send and receive on the platform.",
-            "Consent records: when you give or revoke a consent, the action and its time are stored.",
+            "Consent and visibility records: when you give or withdraw a consent, switch employer visibility off or on, choose \"not now\", or are shown the employer-visibility notice, the action, its text version and its time are stored.",
             "Technical data needed to run the service, such as sign-in cookies (see the Cookie Policy)."
           ]
         },
@@ -5756,8 +5756,8 @@
           "heading": "Who can see your data",
           "items": [
             "Access is closed by default: data you enter belongs to your account, and other users see nothing unless a specific rule allows it.",
-            "Your professional profile is NOT visible to companies or agencies by default. It can appear in company searches only after you yourself switch on employer visibility in your privacy settings — registration, accepting the terms or filling in your profile never makes it visible.",
-            "Even with visibility on, companies see only a limited professional summary (profession, experience, skills, approximate region, availability, languages, pay expectation if you entered it). Your surname, phone, email, exact address, CV file and documents are never part of it.",
+            "Free workers — people looking for work who do not work for a company through LabourMarket.ai — can be found by registered companies and agencies in their searches, under an anonymous label, once the product has shown them a notice about it. The legal basis is our legitimate interest in connecting workers with work (GDPR Art. 6(1)(f)). It does not apply while you work for a company through LabourMarket.ai or are registered as a pupil, student or intern: then your profile appears in company searches only if you switch employer visibility on yourself. You can switch visibility off at any time with one tap; once off, it stays off until you switch it on yourself.",
+            "Companies see only a limited professional summary (profession, experience, skills, approximate region, availability, languages, pay expectation if you entered it). Your name, phone, email, exact address, Work Journal entries, CV file, documents and external profile links are never part of it. A company can write to you only through LabourMarket.ai messages.",
             "Your CV, contact details or documents reach a specific company only after your separate confirmation for that company and that need. Every completed transfer is recorded in a disclosure log you can see.",
             "Worker documents are not shown to employers or agencies without the worker's consent, and employers cannot read a worker's saved locations.",
             "Messages are visible only to the participants of the conversation."
@@ -5766,8 +5766,8 @@
         {
           "heading": "Consent",
           "items": [
-            "Consent purposes are separate: employer visibility of your professional profile and a data transfer to a specific company are two different choices — neither is bundled with the Terms, pre-ticked, or required to use your account, CV or work journal.",
-            "Every consent screen shows the exact versioned text, what becomes visible, what stays private, and both choices side by side (enable / not now). Declining changes nothing about your account.",
+            "Consent purposes are separate: switching employer visibility on yourself and a data transfer to a specific company are two different choices — neither is bundled with the Terms, pre-ticked, or required to use your account, CV or work journal.",
+            "Every consent screen shows the exact versioned text, what becomes visible, what stays private, and both choices side by side (enable / not now). \"Not now\" is kept as your choice and changes nothing else about your account.",
             "You can withdraw any consent at any time in your privacy settings, in one step. After withdrawal your profile stops appearing in new company searches immediately; data a company already lawfully received while the permission was valid may still be held by that company.",
             "The consent history is permanent: every grant and every withdrawal is kept as a separate unchangeable record with its text version, language, time and purpose. Nobody — including administrators — can edit or delete it, and no administrator can give consent on your behalf."
           ]
@@ -5788,7 +5788,7 @@
           "items": [
             "You can ask to see the data held about you, to correct it, to receive a copy of it, to restrict how it is used, or to have it deleted.",
             "You can download a copy of your own data as a JSON file and your work journal as a CSV file yourself, from your account. You can request deletion of your account on your account's Privacy page and confirm it after signing in again; the system then deletes the account automatically and sends a confirmation to your account email. If data must be kept by law or concerns other people, the request is reviewed and you receive the decision within one month. You can also contact us — see the page “Account and data deletion”.",
-            "Where processing is based on consent, you can withdraw that consent at any time."
+            "Where processing is based on consent, you can withdraw that consent at any time. Where it is based on our legitimate interest — such as the employer visibility of free workers — you can object at any time; for visibility, switching it off is that objection and takes effect immediately."
           ]
         },
         {
@@ -8661,7 +8661,8 @@
         "unknown": "Open items could not be read.",
         "offers": "{n, plural, one {# booking offer} other {# booking offers}} waiting for your answer",
         "invitations": "{n, plural, one {# invitation} other {# invitations}} waiting for your answer",
-        "unread": "{n, plural, one {# conversation} other {# conversations}} with unread messages"
+        "unread": "{n, plural, one {# conversation} other {# conversations}} with unread messages",
+        "verifyEmail": "Open the link we emailed you to see invitations sent to that address"
       },
       "growth": {
         "title": "Growth",
@@ -11077,7 +11078,9 @@
       "empty": "No records yet. Every consent and withdrawal will be listed here.",
       "action": {
         "granted": "Granted",
-        "withdrawn": "Withdrawn"
+        "withdrawn": "Withdrawn",
+        "declined": "Not now",
+        "notice_shown": "Visibility notice shown"
       },
       "purpose": {
         "profile_discoverability": "Employer visibility",
@@ -11221,7 +11224,9 @@
       "turnOn": "Read the terms and turn on",
       "details": "What companies see and the full terms",
       "grantedNote": "Done — companies can now find your professional profile, under an anonymous label.",
-      "withdrawnNote": "Done — your profile no longer appears in new company searches."
+      "withdrawnNote": "Done — your profile no longer appears in new company searches.",
+      "defaultOnNote": "On by default because you are looking for work and do not work for a company through LabourMarket.ai. Switch it off with one tap — it then stays off until you switch it on.",
+      "defaultPendingNote": "Companies will be able to find your professional profile from {date}. If you do not want that, switch it off now — it then stays off."
     }
   },
   "planning": {

@@ -5730,7 +5730,7 @@
             "Inhoud die je zelf invoert: profiel- en cv-gegevens, vaardigheden, werkjournaalregistraties, foto's die je aan registraties toevoegt en de documenten die je in je documentenoverzicht opneemt.",
             "Bedrijfsinformatie die door bedrijfsgebruikers is ingevoerd: bedrijfsgegevens, behoeften, projecten en boekingen.",
             "Berichten die je op het platform verstuurt en ontvangt.",
-            "Toestemmingsrecords: wanneer je een toestemming geeft of intrekt, worden de actie en het tijdstip opgeslagen.",
+            "Toestemmings- en zichtbaarheidsrecords: wanneer je een toestemming geeft of intrekt, zichtbaarheid voor werkgevers uit- of aanzet, \"niet nu\" kiest of de melding over zichtbaarheid voor werkgevers te zien krijgt, worden de actie, de tekstversie en het tijdstip opgeslagen.",
             "Technische gegevens die nodig zijn om de dienst te laten draaien, zoals inlogcookies (zie het cookiebeleid)."
           ]
         },
@@ -5756,8 +5756,8 @@
           "heading": "Wie je gegevens kan zien",
           "items": [
             "Toegang is standaard gesloten: gegevens die u invoert horen bij uw account; andere gebruikers zien niets tenzij een specifieke regel dat toestaat.",
-            "Uw professionele profiel is standaard NIET zichtbaar voor bedrijven of bureaus. Het kan alleen in bedrijfszoekopdrachten verschijnen nadat u zelf de werkgeverszichtbaarheid inschakelt in uw privacy-instellingen — registratie, het accepteren van de voorwaarden of het invullen van uw profiel maakt het nooit zichtbaar.",
-            "Ook met zichtbaarheid aan zien bedrijven alleen een beperkte professionele samenvatting (beroep, ervaring, vaardigheden, globale regio, beschikbaarheid, talen, loonverwachting als u die invulde). Uw achternaam, telefoon, e-mail, exacte adres, cv-bestand en documenten horen daar nooit bij.",
+            "Vrije werkenden — mensen die werk zoeken en niet via LabourMarket.ai voor een bedrijf werken — kunnen door geregistreerde bedrijven en uitzendbureaus in hun zoekopdrachten worden gevonden, onder een anoniem label, nadat het platform hun daarover een melding heeft getoond. De rechtsgrond is ons gerechtvaardigd belang om werkenden met werk te verbinden (AVG art. 6, lid 1, onder f). Dit geldt niet zolang u via LabourMarket.ai voor een bedrijf werkt of als scholier, student of stagiair bent geregistreerd: dan verschijnt uw profiel alleen in zoekopdrachten van bedrijven als u de zichtbaarheid voor werkgevers zelf aanzet. U kunt de zichtbaarheid op elk moment met één tik uitzetten; eenmaal uit, blijft zij uit totdat u haar zelf aanzet.",
+            "Bedrijven zien alleen een beperkte professionele samenvatting (beroep, ervaring, vaardigheden, globale regio, beschikbaarheid, talen, loonverwachting als u die invulde). Uw naam, telefoon, e-mail, exacte adres, werkdagboekregels, cv-bestand, documenten en links naar externe profielen horen daar nooit bij. Een bedrijf kan u alleen via LabourMarket.ai-berichten schrijven.",
             "Uw cv, contactgegevens of documenten bereiken een specifiek bedrijf pas na uw afzonderlijke bevestiging voor dat bedrijf en die aanvraag. Elke uitgevoerde overdracht wordt vastgelegd in een voor u zichtbaar overdrachtenlogboek.",
             "Werknemersdocumenten worden niet aan werkgevers of bureaus getoond zonder toestemming van de werknemer, en werkgevers kunnen de opgeslagen locaties van een werknemer niet inzien.",
             "Berichten zijn alleen zichtbaar voor de deelnemers aan het gesprek."
@@ -5766,8 +5766,8 @@
         {
           "heading": "Toestemming",
           "items": [
-            "Toestemmingsdoelen zijn gescheiden: werkgeverszichtbaarheid van uw professionele profiel en een gegevensoverdracht aan een specifiek bedrijf zijn twee verschillende keuzes — geen van beide is gebundeld met de voorwaarden, vooraf aangevinkt of vereist om uw account, cv of werkdagboek te gebruiken.",
-            "Elk toestemmingsscherm toont de exacte geversioneerde tekst, wat zichtbaar wordt, wat privé blijft, en beide keuzes naast elkaar (inschakelen / niet nu). Weigeren verandert niets aan uw account.",
+            "Toestemmingsdoelen zijn gescheiden: zelf de zichtbaarheid voor werkgevers aanzetten en een gegevensoverdracht aan een specifiek bedrijf zijn twee verschillende keuzes — geen van beide is gekoppeld aan de Voorwaarden, vooraf aangevinkt of vereist om uw account, cv of werkdagboek te gebruiken.",
+            "Elk toestemmingsscherm toont de exacte geversioneerde tekst, wat zichtbaar wordt, wat privé blijft, en beide keuzes naast elkaar (inschakelen / niet nu). \"Niet nu\" wordt als uw keuze bewaard en verandert verder niets aan uw account.",
             "U kunt elke toestemming op elk moment in één stap intrekken in uw privacy-instellingen. Na intrekking verschijnt uw profiel direct niet meer in nieuwe bedrijfszoekopdrachten; gegevens die een bedrijf rechtmatig ontving terwijl de toestemming geldig was, kunnen bij dat bedrijf blijven.",
             "De toestemmingsgeschiedenis is alleen-toevoegen: elke verlening en elke intrekking is een afzonderlijke permanente registratie met tekstversie, taal, tijd en doel. Niemand — ook beheerders niet — kan haar bewerken of verwijderen, en een beheerder kan geen toestemming namens u geven."
           ]
@@ -5788,7 +5788,7 @@
           "items": [
             "Je kunt vragen om de gegevens die over je worden bewaard in te zien, te corrigeren, er een kopie van te ontvangen, het gebruik ervan te beperken of ze te laten verwijderen.",
             "Je kunt zelf vanuit je account een kopie van je eigen gegevens downloaden als JSON-bestand en je werkjournaal als CSV-bestand. Je kunt verwijdering van je account aanvragen op de privacypagina van je account en het verzoek bevestigen nadat je opnieuw bent ingelogd; het systeem verwijdert het account dan automatisch en stuurt een bevestiging naar het e-mailadres van het account. Als gegevens wettelijk bewaard moeten worden of andere mensen betreffen, wordt het verzoek beoordeeld en ontvang je het besluit binnen één maand. Je kunt ook contact met ons opnemen — zie de pagina „Account en gegevens verwijderen”.",
-            "Waar verwerking op toestemming is gebaseerd, kun je die toestemming op elk moment intrekken."
+            "Waar verwerking op toestemming is gebaseerd, kun je die toestemming op elk moment intrekken. Waar zij op ons gerechtvaardigd belang is gebaseerd — zoals de zichtbaarheid van vrije werkenden voor werkgevers — kun je op elk moment bezwaar maken; voor zichtbaarheid is uitzetten dat bezwaar, en het werkt meteen."
           ]
         },
         {
@@ -8661,7 +8661,8 @@
         "unknown": "Open punten konden niet worden gelezen.",
         "offers": "{n, plural, one {# boekingsaanbod wacht} other {# boekingsaanbiedingen wachten}} op je antwoord",
         "invitations": "{n, plural, one {# uitnodiging wacht} other {# uitnodigingen wachten}} op je antwoord",
-        "unread": "{n, plural, one {# gesprek} other {# gesprekken}} met ongelezen berichten"
+        "unread": "{n, plural, one {# gesprek} other {# gesprekken}} met ongelezen berichten",
+        "verifyEmail": "Open de link uit onze e-mail om uitnodigingen te zien die naar dat adres zijn gestuurd"
       },
       "growth": {
         "title": "Groei",
@@ -11077,7 +11078,9 @@
       "empty": "Nog geen registraties. Elke toestemming en intrekking verschijnt hier.",
       "action": {
         "granted": "Verleend",
-        "withdrawn": "Ingetrokken"
+        "withdrawn": "Ingetrokken",
+        "declined": "Niet nu",
+        "notice_shown": "Melding over zichtbaarheid getoond"
       },
       "purpose": {
         "profile_discoverability": "Zichtbaarheid voor werkgevers",
@@ -11221,7 +11224,9 @@
       "turnOn": "Voorwaarden lezen en inschakelen",
       "details": "Wat bedrijven zien en de volledige voorwaarden",
       "grantedNote": "Klaar — bedrijven kunnen je beroepsprofiel nu vinden, onder een anoniem label.",
-      "withdrawnNote": "Klaar — je profiel verschijnt niet meer in nieuwe zoekopdrachten van bedrijven."
+      "withdrawnNote": "Klaar — je profiel verschijnt niet meer in nieuwe zoekopdrachten van bedrijven.",
+      "defaultOnNote": "Standaard aan, omdat je werk zoekt en niet via LabourMarket.ai voor een bedrijf werkt. Zet het met één tik uit — dan blijft het uit totdat je het zelf weer aanzet.",
+      "defaultPendingNote": "Bedrijven kunnen je beroepsprofiel vinden vanaf {date}. Wil je dat niet, zet het dan nu uit — dan blijft het uit."
     }
   },
   "planning": {

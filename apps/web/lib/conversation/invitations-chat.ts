@@ -19,6 +19,9 @@ import type { InvitationsChatResult } from "@/lib/conversation/invitations-chat-
 export async function loadInvitationsForChat(): Promise<InvitationsChatResult> {
   try {
     const read = await listInvitationsAddressedToMe();
+    // An unproven mailbox keeps the chat's earlier answer (it cannot list the
+    // e-mail-addressed invitations); the home names the proof step instead.
+    if (read.status === "email_unverified") return { kind: "error" };
     if (read.status !== "ok") return { kind: read.status };
     const items = read.items.map((i) => ({
       ref: i.ref,

@@ -5730,7 +5730,7 @@
             "Turinys, kurį įvedate patys: profilio ir CV informacija, įgūdžiai, darbo žurnalo įrašai, prie įrašų pridėtos nuotraukos ir jūsų dokumentų sąraše nurodyti dokumentai.",
             "Įmonių naudotojų įvesta įmonės informacija: įmonės duomenys, poreikiai, projektai ir rezervacijos.",
             "Žinutės, kurias siunčiate ir gaunate platformoje.",
-            "Sutikimų įrašai: kai duodate ar atšaukiate sutikimą, išsaugomas veiksmas ir jo laikas.",
+            "Sutikimų ir matomumo įrašai: kai duodate ar atšaukiate sutikimą, išjungiate ar įjungiate matomumą darbdaviams, pasirenkate „dabar neįjungti“ arba jums parodomas pranešimas apie matomumą darbdaviams, išsaugomas veiksmas, teksto versija ir laikas.",
             "Techniniai duomenys, reikalingi paslaugai veikti, pavyzdžiui, prisijungimo slapukai (žr. Slapukų politiką)."
           ]
         },
@@ -5756,8 +5756,8 @@
           "heading": "Kas gali matyti jūsų duomenis",
           "items": [
             "Prieiga uždara pagal nutylėjimą: jūsų įvesti duomenys priklauso jūsų paskyrai, kiti vartotojai nemato nieko, nebent tai leidžia konkreti taisyklė.",
-            "Jūsų profesinis profilis pagal nutylėjimą NĖRA matomas įmonėms ar agentūroms. Įmonių paieškoje jis gali atsirasti tik jums patiems įjungus darbdavių matomumą privatumo nustatymuose — registracija, taisyklių priėmimas ar profilio užpildymas matomumo nesuteikia.",
-            "Net įjungus matomumą, įmonės mato tik ribotą profesinę santrauką (profesiją, patirtį, įgūdžius, apytikslį regioną, prieinamumą, kalbas, atlygio lūkestį, jei jį įvedėte). Pavardė, telefonas, el. paštas, tikslus adresas, CV failas ir dokumentai niekada į ją nepatenka.",
+            "Laisvus darbuotojus — darbo ieškančius žmones, kurie nedirba įmonėje per LabourMarket.ai — registruotos įmonės ir agentūros gali rasti savo paieškose su anonimine žyma, kai platforma jiems apie tai parodo pranešimą. Teisinis pagrindas — mūsų teisėtas interesas sujungti darbuotojus su darbu (BDAR 6 str. 1 d. f p.). Tai netaikoma, kol dirbate įmonėje per LabourMarket.ai arba esate užsiregistravę kaip mokinys, studentas ar praktikantas: tada jūsų profilis įmonių paieškose rodomas tik jums patiems įjungus matomumą darbdaviams. Matomumą galite bet kada išjungti vienu paspaudimu; išjungtas jis lieka išjungtas, kol patys jo neįjungsite.",
+            "Įmonės mato tik ribotą profesinę santrauką (profesiją, patirtį, įgūdžius, apytikslį regioną, prieinamumą, kalbas, atlygio lūkestį, jei jį įvedėte). Vardas ir pavardė, telefonas, el. paštas, tikslus adresas, Darbo žurnalo įrašai, CV failas, dokumentai ir išorinių profilių nuorodos niekada į ją nepatenka. Įmonė gali jums parašyti tik per LabourMarket.ai žinutes.",
             "Jūsų CV, kontaktai ar dokumentai konkrečiai įmonei perduodami tik po atskiro jūsų patvirtinimo tai įmonei ir tam poreikiui. Kiekvienas įvykdytas perdavimas fiksuojamas jums matomame perdavimų žurnale.",
             "Darbuotojo dokumentai nerodomi darbdaviams ar agentūroms be darbuotojo sutikimo, o darbdaviai negali matyti darbuotojo išsaugotų vietų.",
             "Žinutės matomos tik pokalbio dalyviams."
@@ -5766,8 +5766,8 @@
         {
           "heading": "Sutikimas",
           "items": [
-            "Sutikimų tikslai atskirti: profesinio profilio matomumas darbdaviams ir duomenų perdavimas konkrečiai įmonei yra du skirtingi pasirinkimai — nė vienas nesujungtas su taisyklėmis, nepažymėtas iš anksto ir nebūtinas paskyrai, CV ar darbo žurnalui naudoti.",
-            "Kiekviename sutikimo ekrane rodomas tikslus versijuotas tekstas, kas taps matoma, kas liks privatu, ir abu pasirinkimai greta (įjungti / dabar neįjungti). Atsisakymas nieko nekeičia jūsų paskyroje.",
+            "Sutikimų tikslai atskiri: patiems įjungti matomumą darbdaviams ir perduoti duomenis konkrečiai įmonei — du skirtingi pasirinkimai; nė vienas nesujungtas su Sąlygomis, nėra iš anksto pažymėtas ir nėra būtinas paskyrai, CV ar darbo žurnalui naudoti.",
+            "Kiekviename sutikimo ekrane rodomas tikslus versijuotas tekstas, kas taps matoma, kas liks privatu, ir abu pasirinkimai greta (įjungti / dabar neįjungti). „Dabar neįjungti“ išsaugomas kaip jūsų pasirinkimas ir nieko kito jūsų paskyroje nekeičia.",
             "Bet kurį sutikimą galite atšaukti bet kada privatumo nustatymuose vienu žingsniu. Po atšaukimo profilis iškart nustoja rodytis naujose įmonių paieškose; duomenys, kuriuos įmonė teisėtai gavo leidimo galiojimo metu, gali likti pas tą įmonę.",
             "Sutikimų istorija yra tik pildoma: kiekvienas suteikimas ir atšaukimas — atskiras nekintamas įrašas su teksto versija, kalba, laiku ir tikslu. Niekas — įskaitant administratorius — negali jo redaguoti ar ištrinti, o administratorius negali duoti sutikimo jūsų vardu."
           ]
@@ -5788,7 +5788,7 @@
           "items": [
             "Galite prašyti susipažinti su apie jus saugomais duomenimis, juos ištaisyti, gauti jų kopiją, apriboti jų naudojimą arba juos ištrinti.",
             "Savo duomenų kopiją JSON failu ir darbo žurnalą CSV failu galite atsisiųsti patys iš savo paskyros. Paskyros ištrynimo galite paprašyti paskyros puslapyje „Privatumas“ ir patvirtinti prašymą prisijungę iš naujo; tada sistema paskyrą ištrina automatiškai ir išsiunčia patvirtinimą į paskyros el. paštą. Jei duomenis privaloma saugoti pagal įstatymą arba jie susiję su kitais žmonėmis, prašymas peržiūrimas, o sprendimą gaunate per vieną mėnesį. Taip pat galite susisiekti su mumis — žr. puslapį „Paskyros ir duomenų ištrynimas“.",
-            "Kai tvarkymas grindžiamas sutikimu, sutikimą galite bet kada atšaukti."
+            "Kai tvarkymas grindžiamas sutikimu, sutikimą galite bet kada atšaukti. Kai jis grindžiamas mūsų teisėtu interesu — pavyzdžiui, laisvų darbuotojų matomumas darbdaviams — galite bet kada nesutikti; matomumo atveju jo išjungimas ir yra toks nesutikimas ir įsigalioja iš karto."
           ]
         },
         {
@@ -8661,7 +8661,8 @@
         "unknown": "Atvirų punktų perskaityti nepavyko.",
         "offers": "{n, plural, one {# užsakymo pasiūlymas laukia} few {# užsakymo pasiūlymai laukia} other {# užsakymo pasiūlymų laukia}} tavo atsakymo",
         "invitations": "{n, plural, one {# kvietimas laukia} few {# kvietimai laukia} other {# kvietimų laukia}} tavo atsakymo",
-        "unread": "{n, plural, one {# pokalbis} few {# pokalbiai} other {# pokalbių}} su neskaitytomis žinutėmis"
+        "unread": "{n, plural, one {# pokalbis} few {# pokalbiai} other {# pokalbių}} su neskaitytomis žinutėmis",
+        "verifyEmail": "Atidaryk nuorodą, kurią atsiuntėme el. paštu, kad matytum į tą adresą atsiųstus kvietimus"
       },
       "growth": {
         "title": "Augimas",
@@ -11077,7 +11078,9 @@
       "empty": "Įrašų dar nėra. Čia matysi kiekvieną savo sutikimą ir atšaukimą.",
       "action": {
         "granted": "Suteikta",
-        "withdrawn": "Atšaukta"
+        "withdrawn": "Atšaukta",
+        "declined": "Dabar neįjungta",
+        "notice_shown": "Parodytas pranešimas apie matomumą"
       },
       "purpose": {
         "profile_discoverability": "Darbdavių matomumas",
@@ -11221,7 +11224,9 @@
       "turnOn": "Perskaityti sąlygas ir įjungti",
       "details": "Ką mato įmonės ir visos sąlygos",
       "grantedNote": "Atlikta — įmonės dabar gali rasti tavo profesinį profilį su anonimine žyma.",
-      "withdrawnNote": "Atlikta — tavo profilis nebebus rodomas naujose įmonių paieškose."
+      "withdrawnNote": "Atlikta — tavo profilis nebebus rodomas naujose įmonių paieškose.",
+      "defaultOnNote": "Įjungta pagal numatytuosius nustatymus, nes ieškai darbo ir nedirbi įmonėje per LabourMarket.ai. Išjungti gali vienu paspaudimu — tada liks išjungta, kol pats neįjungsi.",
+      "defaultPendingNote": "Įmonės galės rasti tavo profesinį profilį nuo {date}. Jei to nenori, išjunk dabar — tada liks išjungta."
     }
   },
   "planning": {
