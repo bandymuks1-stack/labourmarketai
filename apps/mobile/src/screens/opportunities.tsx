@@ -13,6 +13,7 @@ import { useLocale } from "../i18n/locale-context";
 import { Body, Button, Divider, Field, NotAvailable } from "../ui/primitives";
 import { theme } from "../ui/theme";
 import { useCapability } from "../use-capability";
+import { useReloadOnReturn } from "../use-reload-on-return";
 import { CapabilityFailureNotice } from "./capability-failure";
 import { CapabilityGate } from "./capability-gate";
 
@@ -77,6 +78,11 @@ export function OpportunitiesScreen() {
   const board = useCapability<InterestDraftData>("interest.express_draft", NO_ARGS);
   const [flow, setFlow] = useState<FlowState>({ kind: "listing" });
   const [note, setNote] = useState("");
+
+  // Coming back to this station reads the board again while it is only being
+  // listed: a "no visible needs" answer is a finding with no retry button, and
+  // an employer may have published since. A draft in progress is never reset.
+  useReloadOnReturn(board.reload, () => flow.kind === "listing");
 
   const live = useRef(true);
   useEffect(() => {

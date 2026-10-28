@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocale } from "../../src/i18n/locale-context";
 import { OpportunitiesScreen } from "../../src/screens/opportunities";
 import { Title } from "../../src/ui/primitives";
+import { useWorkspaceEpoch } from "../../src/workspace-epoch";
 import { theme } from "../../src/ui/theme";
 
 /**
@@ -14,11 +15,14 @@ import { theme } from "../../src/ui/theme";
  */
 export default function Screen() {
   const { t } = useLocale();
+  // A drafted interest (preview + token) belongs to the workspace that drafted
+  // it; a switch starts the station over.
+  const { epoch } = useWorkspaceEpoch();
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Title>{t("opportunities.title")}</Title>
-        <OpportunitiesScreen />
+        <OpportunitiesScreen key={epoch} />
       </ScrollView>
     </SafeAreaView>
   );

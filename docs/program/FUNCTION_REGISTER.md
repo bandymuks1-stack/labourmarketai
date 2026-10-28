@@ -123,7 +123,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 3.22 | People import | LIVE_VERIFIED | 2026-10-24 | org-roster run 40052543761 (green) 10-24 | yes | spec fault fixed #2667 |
 | 3.23 | On/offboarding runs | LIVE_VERIFIED | 2026-10-23 | org-roster R-3 run 39969976834 10-23 | yes |  |
 | 3.24 | Approvals / workflows | LIVE_VERIFIED | 2026-10-28 | documents-approvals 40663181329; earlier: documents-approvals 40152566232 10-25 (walk passed) | yes |  |
-| 3.25 | Management decisions + reviews | LIVE_VERIFIED | 2026-10-26 | prod walk company-governance run 40296167812 (2026-10-26): D-1..D-5 — decision draft, sent via approval template, approved in inbox, outcome persists RU + phone, employee and other org refused | yes |  |
+| 3.25 | Management decisions + reviews | LIVE_VERIFIED | 2026-10-28 | company-governance 40687308231 (2026-10-28) D-1..D-5 green; prod walk company-governance run 40296167812 (2026-10-26): D-1..D-5 — decision draft, sent via approval template, approved in inbox, outcome persists RU + phone, employee and other org refused | yes |  |
 | 3.26 | Instructions | LIVE_VERIFIED | 2026-10-24 | org-roster run 40052543761 (green) 10-24 | yes |  |
 | 3.27 | Company history + data quality | LIVE_VERIFIED | 2026-10-25 | profile-cv-history run 40182648408 10-25 (21/21 green): P-20 company history opens in Alfa workspace | yes |  |
 | 3.28 | Manager chat answers | LIVE_VERIFIED | 2026-10-24 | manager-chat run 40054481359 10-24 (5/5) | yes |  |
@@ -271,7 +271,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 
 | ID | Function | Status | Last checked | Evidence (PR / commit / run) | In production | Remaining issue |
 |---|---|---|---|---|---|---|
-| 9.1 | Superadmin console | LIVE_VERIFIED | 2026-10-25 | owner admin session 2026-10-25 ~13:50 LT on build 3f552e0d (#2761): /lt/dashboard/admin renders all sections (buyer requests, privacy, sales pipeline, moderation, people, launch readiness), no error boundary; before the … | yes |  |
+| 9.1 | Superadmin console | LIVE_VERIFIED | 2026-10-28 | admin-console 40688059945 (2026-10-28) green: non-admins refused, operator pages render; owner admin session 2026-10-25 ~13:50 LT on build 3f552e0d (#2761): /lt/dashboard/admin renders all sections (buyer requests, privacy, sales pipeline, moderation, people, launch readiness), no error boundary; be | yes |  |
 | 9.2 | Admin pilots/telemetry/league | LIVE_VERIFIED | 2026-10-25 | owner admin session 2026-10-25 12:30 LT, read-only Chromium (Claude in Chrome): /admin/pilots, /admin/telemetry and /admin/league render real data | yes |  |
 | 9.3 | Admin user inspect | LIVE_VERIFIED | 2026-10-25 | owner admin session 2026-10-25, read-only: /admin/users/<synthetic QA id> renders role, state, profile text, suggested skills, drafts with honest empty states | yes |  |
 | 9.4 | Privacy request intake | LIVE_VERIFIED | 2026-10-19 | prod DB: erasure request received + executed via intake 2026-10-19 (receipt requested_at) | yes |  |
@@ -338,7 +338,7 @@ whose evidence names a production run or production use became `LIVE_VERIFIED`, 
 | 11.5 | Learner outcomes | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
 | 11.6 | Institution reporting + export | LIVE_VERIFIED | 2026-10-25 | learning-practice run 40154033299 (green) 10-25 | yes |  |
 | 11.7 | Practice->competency recognition | LIVE_VERIFIED | 2026-10-21 | recognition-chain 39602983862 10-21 | yes |  |
-| 11.8 | Training & certification register | FAIL | 2026-10-28 | company-governance 40654524480: T-1..T-4 PASS; T-5 workspace scoping fixed by #2857 (deployed 10-28), re-run pending; earlier: prod walk company-governance run 40296167812 (2026-10-26): T-1 course added PASS; T-2 assign to Alfa's employee → invalid_assignee | no | engaged non-member workers cannot be assigned training (owner product decision, RED #2816) |
+| 11.8 | Training & certification register | FAIL | 2026-10-28 | company-governance 40687308231 (2026-10-28 12:28Z) green incl. T-5 — #2857 workspace scoping LIVE_VERIFIED; course register, assign, complete, see completed, retire all pass | yes | engaged non-member workers cannot be assigned training (owner product decision, RED #2816) |
 | 11.9 | Human-in-loop learning review | BLOCKED | — | owner parked nav door | unproven |  |
 | 11.10 | RPL equivalence structure | NOT_IMPLEMENTED | — | registry NOT_BUILT: RPL equivalence structure (ARCH-2) | no | owner, RED schema |
 

@@ -3,7 +3,9 @@ name: Signup Isolated (local Supabase)
 # SELF-SERVE SIGN-UP, end to end, against a throwaway LOCAL Supabase stack that
 # lives and dies inside this job (apps/web/tests/e2e/signup-isolated.spec.ts):
 # a worker, a company and an agency each fill the real sign-up form, onboard,
-# and reach their first surface; the stored rows are checked.
+# and reach their first surface; the stored rows are checked. The same stack
+# then walks agency roles and permissions (agency-roles-isolated.spec.ts):
+# invite by link, a limited governance seat, refusals, cross-org isolation.
 #
 # Owner decision 2026-10-28: sign-up tests run in an isolated CI environment;
 # no synthetic accounts are created in production without separate approval.
@@ -21,6 +23,20 @@ on:
     paths:
       - ".github/workflows/signup-isolated.yml"
       - "apps/web/tests/e2e/signup-isolated.spec.ts"
+      - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
+      - "apps/web/app/*/dashboard/company/people/**"
+      - "apps/web/app/*/dashboard/company/settings/**"
+      - "apps/web/app/*/dashboard/network/**"
+      - "apps/web/components/app/organization-members-section.tsx"
+      - "apps/web/components/app/membership-invitations-panel.tsx"
+      - "apps/web/components/app/company-workers-section.tsx"
+      - "apps/web/components/app/company-next-actions.tsx"
+      - "apps/web/components/app/conversation/chat/workspace-chip.tsx"
+      - "apps/web/lib/company/*authority*"
+      - "apps/web/lib/company/*membership*"
+      - "apps/web/lib/company/role-capabilities.ts"
+      - "apps/web/lib/company/employer-company-context.ts"
+      - "apps/web/lib/company/active-organization.ts"
       - "apps/web/components/app/signup-form.tsx"
       - "apps/web/components/app/onboarding-wizard.tsx"
       - "apps/web/components/app/company-setup-form.tsx"
@@ -49,7 +65,9 @@ jobs:
     timeout-minutes: 45
     env:
       APP_ORIGIN: http://127.0.0.1:3000
-      SPEC: tests/e2e/signup-isolated.spec.ts
+      # Both walks share this one throwaway stack: self-serve sign-up and the
+      # agency roles / permissions walk (agency-roles-isolated.spec.ts).
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -178,7 +196,7 @@ jobs:
           E2E_BASE_URL: http://127.0.0.1:3000
           E2E_NO_SERVER: "1"
           E2E_LOCAL_STACK: "1"
-        run: pnpm exec playwright test "$SPEC" --reporter=list --trace=off
+        run: pnpm exec playwright test $SPEC --reporter=list --trace=off
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()
