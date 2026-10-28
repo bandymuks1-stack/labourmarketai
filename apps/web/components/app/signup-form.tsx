@@ -254,6 +254,14 @@ export function SignupForm({
         },
       });
       if (err) throw err;
+      // With "Confirm email" ON, an address that already has an account gets
+      // NO error either: Supabase returns a user with an empty identities
+      // list and sends nothing. Treat it as "already registered" so the
+      // person sees the sign-in door instead of waiting for a mail that never
+      // comes.
+      if (!data.session && data.user && data.user.identities?.length === 0) {
+        throw { code: "user_already_exists", message: "", status: undefined };
+      }
       // "Confirm email" ON (production since 2026-09-02): signUp returns NO
       // session and no error. Show the explicit "check your email" state —
       // the callback finishes the signup when the link is opened. Without
