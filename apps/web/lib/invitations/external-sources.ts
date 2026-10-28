@@ -21,6 +21,11 @@
  *     old version is no longer acceptable.
  *   - `controller`: who collected the consent (the data controller named in
  *     the notice the person saw).
+ *   - `referredPersonIsWorker`: the partner's consent notice is about the
+ *     person's OWN job search, so onboarding may skip the role question for a
+ *     `join_platform` referral from this source when the person arrives
+ *     WITHOUT the link (2026-10-27). A new partner defaults to `false`: the
+ *     question stays until someone reads that partner's notice.
  *
  * A source without a configured secret is NOT live: the door answers 401
  * `not_configured` for it. Adding a slug here enables nothing by itself.
@@ -33,6 +38,7 @@ export interface ExternalReferralSource {
   readonly tokenEnv: string;
   readonly consentVersion: string;
   readonly controller: string;
+  readonly referredPersonIsWorker: boolean;
 }
 
 export const EXTERNAL_REFERRAL_SOURCES: readonly ExternalReferralSource[] = [
@@ -43,6 +49,7 @@ export const EXTERNAL_REFERRAL_SOURCES: readonly ExternalReferralSource[] = [
     // `BROADER_SEARCH_CONSENT_VERSION` in the partner's careers intake.
     consentVersion: "worker-broader-search-v1",
     controller: "UAB Nonstop Group",
+    referredPersonIsWorker: true,
   },
 ] as const;
 
