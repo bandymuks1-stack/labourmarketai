@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const signUp = vi.fn();
+const resend = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: async () => ({ auth: { signUp } }),
+  createClient: async () => ({ auth: { signUp, resend } }),
 }));
 vi.mock("@/lib/invitations/signup-bridge", () => ({
   readInvitationSignupContext: async () => ({ kind: "addressed", email: "invited@example.test" }),
@@ -11,7 +12,7 @@ vi.mock("@/lib/invitations/actions", () => ({
   acceptInvitationAction: vi.fn(),
 }));
 
-import { signUpAddressedInviteAction } from "./signup-accept-action";
+import { resendAddressedInviteConfirmationAction, signUpAddressedInviteAction } from "./signup-accept-action";
 
 const input = { token: "t", password: "long-enough-password", locale: "lt", emailRedirectTo: "https://x/cb" };
 
@@ -34,5 +35,19 @@ describe("addressed invitation signup", () => {
       error: null,
     });
     await expect(signUpAddressedInviteAction(input)).resolves.toEqual({ status: "check_email" });
+  });
+});
+
+describe("addressed invitation — resend the confirmation", () => {
+  it("resends to the INVITED address resolved on the server, never the masked one", async () => {
+    resend.mockResolvedValue({ error: null });
+    await expect(resendAddressedInviteConfirmationAction({ token: "t", emailRedirectTo: "https://x/cb" })).resolves.toEqual({
+      status: "sent",
+    });
+    expect(resend).toHaveBeenCalledWith({
+      type: "signup",
+      email: "invited@example.test",
+      options: { emailRedirectTo: "https://x/cb" },
+    });
   });
 });

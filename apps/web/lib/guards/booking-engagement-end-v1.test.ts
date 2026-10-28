@@ -1737,6 +1737,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-28: owner approved #2855 in chat (apply + merge, at 35e749fc3).
       // Address lock + send reservation for partner referral sends; ledger 20261028081810.
       "20261028070000_referral_send_address_guard_v1.sql",
+      // 2026-10-28: owner approved #2858 in chat (apply + merge, at d0159eb).
+      // Recovery counts only this reservation's ledger row; ledger 20261028091725.
+      "20261028090000_resolve_reservation_exact_window_v1.sql",
 ]);
   });
 
