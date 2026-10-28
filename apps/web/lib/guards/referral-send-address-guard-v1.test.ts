@@ -113,6 +113,16 @@ describe("referral send address guard (D-3)", () => {
     expect(down).toContain("drop function if exists public.external_referral_reserved_rows_v1();");
   });
 
+  it("follow-up 20261028090000: recovery counts only THIS reservation's ledger row (no backward window)", () => {
+    const fix = read("supabase/migrations/20261028090000_resolve_reservation_exact_window_v1.sql");
+    expect(fix).toContain("and l.sent_at >= v_row.delivery_reserved_at;");
+    expect(fix).not.toContain("interval '1 minute'");
+    expect(fix).toContain("set search_path = public, pg_temp");
+    expect(fix).toContain("revoke all on function public.resolve_external_referral_reservation_v1(uuid, text)\n  from public, anon, authenticated;");
+    const back = read("supabase/rollbacks/20261028090000_resolve_reservation_exact_window_v1.down.sql");
+    expect(back).toContain("delivery_reserved_at - interval '1 minute'");
+  });
+
   it("the VPS script runs under a non-blocking flock", () => {
     const sh = read("ops/vps/lm-referral-reprocess.sh");
     expect(sh).toMatch(/exec 9>\S+\nflock -n 9 \|\|/);
