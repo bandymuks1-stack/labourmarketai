@@ -15,7 +15,10 @@ import {
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { mapAuthError } from "@/lib/auth-errors";
-import { signUpAddressedInviteAction } from "@/lib/invitations/signup-accept-action";
+import {
+  resendAddressedInviteConfirmationAction,
+  signUpAddressedInviteAction,
+} from "@/lib/invitations/signup-accept-action";
 import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { StaffReviewNotice } from "@/components/app/staff-review-notice";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
@@ -142,13 +145,27 @@ export function SignupForm({
     setResendState("sending");
     setResendError(null);
     try {
-      const supabase = createClient();
-      const { error: err } = await supabase.auth.resend({
-        type: "signup",
-        email: email.trim(),
-        options: { emailRedirectTo: emailRedirectTo() },
-      });
-      if (err) throw err;
+      if (invitation) {
+        // The form holds only the masked address; the server resolves the
+        // invited one from the token (a browser resend to "x***@…" reached nobody).
+        const res = await resendAddressedInviteConfirmationAction({
+          token: invitation.token,
+          emailRedirectTo: emailRedirectTo(),
+        });
+        if (res.status === "error") throw { code: res.code, message: res.message, status: res.httpStatus };
+        if (res.status === "unavailable") {
+          window.location.assign(`/${locale}/auth/signup`);
+          return;
+        }
+      } else {
+        const supabase = createClient();
+        const { error: err } = await supabase.auth.resend({
+          type: "signup",
+          email: email.trim(),
+          options: { emailRedirectTo: emailRedirectTo() },
+        });
+        if (err) throw err;
+      }
       setResendState("sent");
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (e) {
