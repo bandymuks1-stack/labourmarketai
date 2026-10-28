@@ -10,7 +10,7 @@
 #      the first job hands its page to the browser and the app comes back;
 #      (testID jobs-loaded renders only on a loaded read — a failed read renders
 #      capability-retry and the step fails);
-#   3. Today opens Post a need; an empty need is refused in place (need-failure),
+#   3. Today opens Post a need; an empty need is refused in place (need-local-error),
 #      nothing is drafted;
 #   4. ONLY with NEED_SUBMIT=1 (isolated runs): a filled need is drafted
 #      (demand.create_draft), previewed, confirmed (demand.create_confirm) and the
@@ -112,14 +112,11 @@ name: jobs-need-journey
     timeout: 20000
 - tapOn:
     id: "need-review"
+# The empty need is refused ON THE PHONE (need-local-error), before any request.
 - scrollUntilVisible:
     element:
-      id: "need-failure"
+      id: "need-local-error"
     direction: UP
-    timeout: 30000
-- extendedWaitUntil:
-    visible:
-      id: "need-failure"
     timeout: 30000
 
 # --- 4. Need: fill, draft, preview, confirm, sent ---

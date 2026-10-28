@@ -245,7 +245,13 @@ export function NeedIntakeScreen({ onDone }: { onDone: () => void }) {
           />
         ))}
       </View>
-      {flow.kind === "writing" && flow.localError ? <Body>{t(flow.localError)}</Body> : null}
+      {/* need-local-error: a refusal checked on the phone, before any request (the
+          Maestro journey asserts it; need-failure is the server's refusal). */}
+      {flow.kind === "writing" && flow.localError ? (
+        <View testID="need-local-error">
+          <Body>{t(flow.localError)}</Body>
+        </View>
+      ) : null}
       {flow.kind === "draft_failed" ? (
         <CapabilityFailureNotice
           failure={flow.failure}

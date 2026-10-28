@@ -395,6 +395,11 @@ jobs:
   # repository). Claim token: ANDROID_SIGNED_IN_JOURNEY_PROVEN.
   signed-in:
     name: Signed-in journey (dispatch only, production-qa)
+    # ONE review identity, ONE password at a time: every job that issues and
+    # scrambles it (Android and iOS, any ref) waits for the others.
+    concurrency:
+      group: mobile-qa-review-identity
+      cancel-in-progress: false
     if: github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
