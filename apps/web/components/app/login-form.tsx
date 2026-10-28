@@ -245,7 +245,7 @@ export function LoginForm({
          /lt/auth/login?email=…&password=…
        Reproduced in a real browser on 2026-08-07. POST keeps the values in a
        request body that nothing here reads. */
-    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-6" noValidate>
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-5 sm:gap-6" noValidate>
       <header>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("headline")}

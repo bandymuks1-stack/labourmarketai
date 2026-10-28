@@ -43,7 +43,7 @@ export default async function AuthLayout({
             landing on a login/registration screen in the wrong language had
             no way out (the switcher lived only on marketing + dashboard
             chrome). Same compact mode the public header uses at 320px. */}
-        <header className="relative z-10 mx-auto flex max-w-container items-center justify-between gap-3 px-6 py-6 sm:px-12">
+        <header className="relative z-10 mx-auto flex max-w-container items-center justify-between gap-3 px-6 py-4 sm:px-12 sm:py-6">
           <Link
             href="/"
             className="flex items-center gap-2 font-display text-lg font-bold tracking-tightest text-text-primary"

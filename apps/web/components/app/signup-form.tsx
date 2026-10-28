@@ -372,7 +372,7 @@ export function SignupForm({
   return (
     /* `method="post"` — pre-hydration fallback only. See login-form.tsx: without
        it an early submit GETs the password into the URL. */
-    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-6" noValidate>
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-5 sm:gap-6" noValidate>
       <header>
         <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
           {t("headline")}
