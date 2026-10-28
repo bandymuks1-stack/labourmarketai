@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { useFocusEffect } from "expo-router";
 
 import { useAuth } from "../auth-context";
 import type {
@@ -14,6 +13,7 @@ import { useLocale } from "../i18n/locale-context";
 import { Body, Button, Divider, Field, NotAvailable } from "../ui/primitives";
 import { theme } from "../ui/theme";
 import { useCapability } from "../use-capability";
+import { useReloadOnReturn } from "../use-reload-on-return";
 import { CapabilityFailureNotice } from "./capability-failure";
 import { CapabilityGate } from "./capability-gate";
 
@@ -82,16 +82,7 @@ export function OpportunitiesScreen() {
   // Coming back to this station reads the board again while it is only being
   // listed: a "no visible needs" answer is a finding with no retry button, and
   // an employer may have published since. A draft in progress is never reset.
-  const flowKind = useRef(flow.kind);
-  flowKind.current = flow.kind;
-  const focusedBefore = useRef(false);
-  const reloadBoard = board.reload;
-  useFocusEffect(
-    useCallback(() => {
-      if (focusedBefore.current && flowKind.current === "listing") reloadBoard();
-      focusedBefore.current = true;
-    }, [reloadBoard]),
-  );
+  useReloadOnReturn(board.reload, () => flow.kind === "listing");
 
   const live = useRef(true);
   useEffect(() => {

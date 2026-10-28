@@ -8,6 +8,7 @@ import { CapabilityGate } from "../../src/screens/capability-gate";
 import { Body, Divider, Title } from "../../src/ui/primitives";
 import { theme } from "../../src/ui/theme";
 import { useCapability } from "../../src/use-capability";
+import { useReloadOnReturn } from "../../src/use-reload-on-return";
 
 const NO_ARGS = {} as const;
 
@@ -25,6 +26,9 @@ const NO_ARGS = {} as const;
 export default function Screen() {
   const { t } = useLocale();
   const read = useCapability<WorkforceAvailabilityData>("workforce.availability", NO_ARGS);
+  // Availability changes on the website too (an assignment, an absence): coming
+  // back to this station reads it again rather than showing a stale "free".
+  useReloadOnReturn(read.reload);
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
