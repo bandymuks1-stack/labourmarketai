@@ -348,6 +348,10 @@ describe("no new employment-record model", () => {
       // path: the engagement is minted on an accept and nowhere else, and v3
       // is untouched beside it. RED #4+#5, PREPARED not applied.
       "20260915180000_subject_contest_and_clash_receipt.sql",
+      // The SAME v4, re-stated to set the clash_acknowledged marker in its
+      // accept UPDATE (completes RED #5). The engagement insert is byte-
+      // identical. RED, PREPARED not applied.
+      "20261025190000_booking_clash_acknowledged_marker_v1.sql",
     ]);
     const offenders = MIGRATIONS.filter(
       (m) =>
