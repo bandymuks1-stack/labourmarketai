@@ -296,9 +296,10 @@ async function mainText(page: Page): Promise<string> {
   return text;
 }
 
-/** Open a folded section (`<details data-testid=…>`) when the hash did not. */
-async function openFold(page: Page, testId: string): Promise<void> {
-  const fold = page.getByRole("main").locator(`details[data-testid="${testId}"]`).first();
+/** Open the People page's folded "more tools" section (`<details>`) when the
+ *  hash did not; the member list (#org-members) lives inside it. */
+async function openPeopleFold(page: Page): Promise<void> {
+  const fold = page.getByRole("main").getByTestId("people-more").first();
   await expect(fold).toBeAttached({ timeout: 30_000 });
   if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
   await expect(fold).toHaveAttribute("open", /.*/);
@@ -696,7 +697,7 @@ test("J-WRK. the placed worker records work on the company's project; the compan
 
   // The company opens that relationship's journal for review.
   await co.goto(`${BASE}/en/dashboard/company/people#org-members`);
-  await openFold(co, "people-more");
+  await openPeopleFold(co);
   const toggle = co.getByRole("main").getByTestId(`toggle-review-${s.collabEngagementId}`);
   await expect(toggle, "journal review is offered for the placed worker").toBeVisible({ timeout: 30_000 });
   await toggle.click();
@@ -802,7 +803,7 @@ test("J-ISO. an unrelated company sees nothing of it; ending the employee's memb
   expect(before.length, "before: the employee holds an active relationship").toBeGreaterThan(0);
   const co = as(CO);
   await co.goto(`${BASE}/en/dashboard/company/people#org-members`);
-  await openFold(co, "people-more");
+  await openPeopleFold(co);
   const main = co.getByRole("main");
   await main.getByTestId(`remove-member-${s.empEngagementId}`).click();
   await main.getByTestId(`remove-reason-${s.empEngagementId}`).fill(`QA-SYNTHETIC ${RUN}: contract ended`);
