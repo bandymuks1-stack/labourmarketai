@@ -122,7 +122,8 @@ name: signed-in-journey
 # swipe here — a drag that also put the keyboard away (keyboardDismissMode
 # on-drag) — was followed by no tap ever reaching the app again (the form's
 # touch trace held only swipe start points, 201,437). A tap on the screen
-# title (not an input) puts the keyboard away without a drag.
+# title (not an input) puts the keyboard away without a drag. The app no
+# longer closes the keyboard on drag at all.
 - runFlow:
     when:
       platform: iOS
@@ -153,12 +154,6 @@ name: signed-in-journey
       platform: iOS
     commands:
       - pressKey: Enter
-# The composer's test id carries -kb0 once the keyboard is down.
-- extendedWaitUntil:
-    visible:
-      id: "journal-compose-form-.*-kb0"
-    timeout: 5000
-    optional: true
 # Android: scroll to the button BELOW Review, so Review sits clear of the
 # bottom edge.
 - runFlow:
@@ -271,45 +266,6 @@ name: signed-in-journey
             id: "journal-compose-save"
           timeout: 20000
           optional: true
-# iOS evidence only (the journey has already failed if Review never answered):
-# do OTHER controls low on the screen take a tap? Back (below Review), then the
-# Today tab. Each result is logged as COMPLETED or WARNED; the test ids then
-# carry the app-root touch count (src/request-trace.ts).
-- runFlow:
-    when:
-      platform: iOS
-      notVisible:
-        id: "journal-compose-save"
-    commands:
-      # Does a tap HIGH on the screen still reach the app? (30% down, where the
-      # last touch the app did receive began.) The app-root trace then ends
-      # "at<x>x2<yy>" — logged COMPLETED if it arrived, WARNED if not.
-      - tapOn:
-          point: "50%,30%"
-      - extendedWaitUntil:
-          visible:
-            id: "journal-compose-form-.*-rt[0-9]+at[0-9]+x2[0-9][0-9]"
-          timeout: 5000
-          optional: true
-      - tapOn:
-          id: "journal-compose-back"
-      - extendedWaitUntil:
-          visible:
-            id: "journal-log-work"
-          timeout: 10000
-          optional: true
-      - runFlow:
-          when:
-            notVisible:
-              id: "journal-log-work"
-          commands:
-            - tapOn:
-                id: "tab-today"
-            - extendedWaitUntil:
-                visible:
-                  id: "today-figures"
-                timeout: 10000
-                optional: true
 - scrollUntilVisible:
     element:
       id: "journal-compose-save"

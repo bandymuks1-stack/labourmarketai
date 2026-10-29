@@ -56,7 +56,7 @@ export default function Screen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Title>{t("jobs.title")}</Title>
         <Body muted>{t("jobs.intro")}</Body>
         {linkedId !== null ? <LinkedJob id={linkedId} /> : null}

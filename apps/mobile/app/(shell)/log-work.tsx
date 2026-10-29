@@ -40,11 +40,12 @@ export default function Screen() {
       >
         <ScrollView
           contentContainerStyle={styles.content}
+          // A tap outside the boxes puts the keyboard away ("handled"); the
+          // site box's Return says Done. NOT keyboardDismissMode="on-drag": on
+          // iOS, after a drag put the keyboard away, no tap reached the app
+          // again in CI (runs 40846299984..40904991200) — a possible real-user
+          // freeze outweighs closing the keyboard by scrolling.
           keyboardShouldPersistTaps="handled"
-          // Scrolling closes the keyboard. On iOS a multi-line box's Return adds
-          // a line and a number pad has no Return at all, so without this the
-          // keyboard can cover Review with no obvious way to put it away.
-          keyboardDismissMode="on-drag"
         >
           {/* A plain, non-input spot to tap: with keyboardShouldPersistTaps
               "handled", a tap here puts the keyboard away (the iOS journeys

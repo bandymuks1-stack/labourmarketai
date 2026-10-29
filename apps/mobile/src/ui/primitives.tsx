@@ -50,15 +50,12 @@ export function Button({
   busy = false,
   variant = "primary",
   testID,
-  onPressIn,
 }: {
   label: string;
   onPress: () => void;
   busy?: boolean;
   variant?: "primary" | "quiet";
   testID?: string;
-  /** A touch began on the button (diagnostics; see request-trace.ts). */
-  onPressIn?: () => void;
 }) {
   const disabled = busy;
   return (
@@ -69,7 +66,6 @@ export function Button({
       testID={testID}
       disabled={disabled}
       onPress={onPress}
-      onPressIn={onPressIn}
       style={({ pressed }) => [
         styles.button,
         variant === "quiet" && styles.buttonQuiet,

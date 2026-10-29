@@ -1,11 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Keyboard,
-  StyleSheet,
-  Text,
-  View,
-  type GestureResponderEvent,
-} from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../auth-context";
 import type {
@@ -111,55 +105,6 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
   const { locale } = useLocale();
   const { accessToken } = useAuth();
   const trace = useRequestTrace();
-  // How many times Review reached our code — with the trace below, the CI
-  // journey can tell a tap that never landed from a request that never came
-  // back (state words and a count only; see request-trace.ts).
-  const [reviewPresses, setReviewPresses] = useState(0);
-  // Touches that began on Review (i) and anywhere on this form (t): with the
-  // press count they say whether a tap never arrived, landed beside Review,
-  // or reached Review and was cancelled before it became a press.
-  const [reviewPressIns, setReviewPressIns] = useState(0);
-  const [formTouches, setFormTouches] = useState(0);
-  // Geometry only (points, rounded): where the last touch on the form began
-  // and where Review sits in the window at that moment.
-  const reviewBox = useRef<View>(null);
-  const [touchAt, setTouchAt] = useState("none");
-  // The last ten touch points on this form, run-length coded
-  // (`201x589.201x437n7`), so a run can see which taps arrived and when the
-  // losses began.
-  const [touchHistory, setTouchHistory] = useState<
-    ReadonlyArray<{ at: string; n: number }>
-  >([]);
-  const [reviewAt, setReviewAt] = useState("none");
-  const onFormTouch = useCallback((event: GestureResponderEvent) => {
-    const { pageX, pageY } = event.nativeEvent;
-    setFormTouches((n) => n + 1);
-    const at = `${Math.round(pageX)}x${Math.round(pageY)}`;
-    setTouchAt(at);
-    setTouchHistory((history) => {
-      const last = history[history.length - 1];
-      if (last !== undefined && last.at === at) {
-        return [...history.slice(0, -1), { at, n: last.n + 1 }];
-      }
-      return [...history, { at, n: 1 }].slice(-10);
-    });
-    reviewBox.current?.measureInWindow((x, y, w, h) =>
-      setReviewAt(
-        `${Math.round(x)}x${Math.round(y)}x${Math.round(w)}x${Math.round(h)}`,
-      ),
-    );
-  }, []);
-  // Whether the software keyboard is up — on iOS it sits in its own window, so
-  // a control "visible" in the app's layout can still be under it.
-  const [keyboardUp, setKeyboardUp] = useState(() => Keyboard.isVisible());
-  useEffect(() => {
-    const shown = Keyboard.addListener("keyboardDidShow", () => setKeyboardUp(true));
-    const hidden = Keyboard.addListener("keyboardDidHide", () => setKeyboardUp(false));
-    return () => {
-      shown.remove();
-      hidden.remove();
-    };
-  }, []);
 
   const [workDate, setWorkDate] = useState(() => deviceDay(0));
   const [notes, setNotes] = useState("");
@@ -393,21 +338,12 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
       style={styles.stack}
       testID={`journal-compose-form-${state.kind}${
         state.kind === "draft_failed" ? `-${state.failure.kind}` : ""
-      }-p${reviewPresses}-i${reviewPressIns}-t${formTouches}-kb${keyboardUp ? 1 : 0}-at${touchAt}-rv${reviewAt}`}
-      onTouchStart={onFormTouch}
+      }`}
     >
-      <View
-        testID={`journal-compose-touches-${
-          touchHistory
-            .map((h) => (h.n > 1 ? `${h.at}n${h.n}` : h.at))
-            .join(".") || "none"
-        }`}
-      >
       <View testID={traceTestId(trace, "journal.create_draft")}>
         <View testID={traceTestId(trace, "journal.list")}>
           <Body muted>{t("journal.compose.intro")}</Body>
         </View>
-      </View>
       </View>
 
       <Field
@@ -483,18 +419,12 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
         />
       ) : null}
 
-      <View ref={reviewBox} collapsable={false}>
-        <Button
-          testID="journal-compose-review"
-          busy={state.kind === "drafting"}
-          label={t("journal.compose.review")}
-          onPressIn={() => setReviewPressIns((n) => n + 1)}
-          onPress={() => {
-            setReviewPresses((n) => n + 1);
-            void draft();
-          }}
-        />
-      </View>
+      <Button
+        testID="journal-compose-review"
+        busy={state.kind === "drafting"}
+        label={t("journal.compose.review")}
+        onPress={() => void draft()}
+      />
       <Button
         variant="quiet"
         testID="journal-compose-back"
