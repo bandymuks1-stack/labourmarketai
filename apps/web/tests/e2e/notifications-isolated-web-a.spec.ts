@@ -248,7 +248,8 @@ test("M-4. a saved search is stored and reopens from the board", async ({ page }
     .first()
     .getByTestId("saved-search-open");
   await expect(reopen, "the saved search is listed").toBeVisible({ timeout: 30_000 });
-  await expect(reopen).toHaveAttribute("href", /country=LT/);
+  await reopen.click();
+  await page.waitForURL(/country=LT/, { timeout: 30_000 });
 });
 
 test("M-5. a saved-search alert: a new matching need appears and the worker is notified and e-mailed", async ({ browser }) => {
