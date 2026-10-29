@@ -20,6 +20,8 @@
 appId: ai.labourmarket.app
 name: jobs-need-journey
 ---
+# The keyboard is hidden on BOTH platforms after typing: on iOS it otherwise
+# stays up and covers the buttons below the field.
 # A tap during scroll momentum only stops the scroll on Android, so every
 # scrollUntilVisible is followed by waitForAnimationToEnd before the tap.
 - extendedWaitUntil:
@@ -32,11 +34,7 @@ name: jobs-need-journey
 - tapOn:
     id: "password"
 - inputText: ${MOBILE_QA_PASSWORD}
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - hideKeyboard
+- hideKeyboard
 - tapOn:
     id: "submit"
 - extendedWaitUntil:
@@ -152,11 +150,7 @@ name: jobs-need-journey
       - tapOn:
           id: "need-role"
       - inputText: "QA-SYNTHETIC mobile tiler"
-      - runFlow:
-          when:
-            platform: Android
-          commands:
-            - hideKeyboard
+      - hideKeyboard
       - scrollUntilVisible:
           element:
             id: "need-location"
@@ -166,11 +160,7 @@ name: jobs-need-journey
       - tapOn:
           id: "need-location"
       - inputText: "Vilnius"
-      - runFlow:
-          when:
-            platform: Android
-          commands:
-            - hideKeyboard
+      - hideKeyboard
       - scrollUntilVisible:
           element:
             id: "need-team-size"
@@ -180,11 +170,7 @@ name: jobs-need-journey
       - tapOn:
           id: "need-team-size"
       - inputText: "2"
-      - runFlow:
-          when:
-            platform: Android
-          commands:
-            - hideKeyboard
+      - hideKeyboard
       - scrollUntilVisible:
           element:
             id: "need-review"

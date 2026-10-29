@@ -23,6 +23,8 @@
 appId: ai.labourmarket.app
 name: signed-in-journey
 ---
+# The keyboard is hidden on BOTH platforms after typing: on iOS it otherwise
+# stays up and covers the buttons below the field.
 # A tap during scroll momentum only stops the scroll on Android, so every
 # scrollUntilVisible is followed by waitForAnimationToEnd before the tap.
 - launchApp:
@@ -39,11 +41,7 @@ name: signed-in-journey
 - inputText: ${MOBILE_QA_PASSWORD}
 # hideKeyboard is a mid-screen swipe on iOS (it scrolled the auth form in an
 # earlier journey); Android dismisses the soft keyboard honestly.
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - hideKeyboard
+- hideKeyboard
 - tapOn:
     id: "submit"
 
@@ -97,11 +95,7 @@ name: signed-in-journey
 - tapOn:
     id: "journal-compose-notes"
 - inputText: "Signed-in CI journey: laid floor tiles in two rooms and cleaned the site."
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - hideKeyboard
+- hideKeyboard
 - scrollUntilVisible:
     element:
       id: "journal-compose-site"
@@ -111,11 +105,7 @@ name: signed-in-journey
 - tapOn:
     id: "journal-compose-site"
 - inputText: "CI site"
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - hideKeyboard
+- hideKeyboard
 - scrollUntilVisible:
     element:
       id: "journal-compose-review"
