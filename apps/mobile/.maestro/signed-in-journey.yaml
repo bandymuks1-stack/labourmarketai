@@ -53,13 +53,26 @@ name: signed-in-journey
 # --- 1. Signed in: the shell's tab bar renders only for a live session ---
 # (split from step 2 so a red run says WHICH failed — sign-in, or Today's read —
 # without any debug output from a signed-in session)
+# iOS offers to save the password after a sign-in ("Save Password?"), a system
+# sheet over the whole app (the on-screen ids show only the status bar under
+# it). It is useful to people and stays; the journey answers it "Not Now".
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible:
+            text: "Not Now"
+          timeout: 10000
+          optional: true
+      - tapOn:
+          text: "Not Now"
+          optional: true
 - extendedWaitUntil:
     visible:
       id: "tab-today"
     timeout: 60000
-# iOS offers to save the password after a sign-in ("Save Password?"), a system
-# sheet over the whole app (the on-screen ids show only the status bar under
-# it). It is useful to people and stays; the journey answers it "Not Now".
+# …and again if it only appeared after Today rendered.
 - runFlow:
     when:
       platform: iOS
@@ -139,17 +152,36 @@ name: signed-in-journey
     direction: DOWN
     timeout: 20000
 - waitForAnimationToEnd
-- tapOn:
-    id: "journal-compose-review"
-# When the identity holds more than one work context the server asks the
-# human to choose; the first option is as good as any for a synthetic cast.
-- runFlow:
-    when:
-      visible:
-        id: "journal-compose-choose"
+# Closing the keyboard moves the layout, so a tap can land where Review used to
+# be. Tap until the next state shows (a preview to save, or a context to
+# choose), at most three times.
+- repeat:
+    times: 3
+    while:
+      notVisible:
+        id: "journal-compose-save"
     commands:
-      - tapOn:
-          id: "journal-compose-option-0"
+      # When the identity holds more than one work context the server asks the
+      # human to choose; the first option is as good as any for a synthetic cast.
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-choose"
+          commands:
+            - tapOn:
+                id: "journal-compose-option-0"
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-review"
+          commands:
+            - tapOn:
+                id: "journal-compose-review"
+      - extendedWaitUntil:
+          visible:
+            id: "journal-compose-save"
+          timeout: 20000
+          optional: true
 - scrollUntilVisible:
     element:
       id: "journal-compose-save"
