@@ -492,8 +492,9 @@ test("J-AGY. an agency sees the shared need, proposes its worker; the company ac
   await ag.getByTestId("company-workers-invite-email").fill(PW);
   await ag.getByTestId("company-workers-invite-submit").click();
   await expect(ag.getByTestId("company-workers-invite-result")).toBeVisible({ timeout: 30_000 });
-  await pw.goto(`${BASE}/en/dashboard/journal`);
-  const accept = pw.locator(`[data-testid^="worker-invitation-accept-company-"]`).first();
+  // A pending invitation leads the worker's home context panel (W3 row 6).
+  await pw.goto(`${BASE}/en/dashboard`);
+  const accept = pw.locator(`[data-testid^="worker-invitation-accept-company-"]`).filter({ visible: true }).first();
   await expect(accept, "the worker sees the agency's invitation").toBeVisible({ timeout: 30_000 });
   await accept.click();
   await expect
