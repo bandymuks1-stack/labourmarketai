@@ -6,7 +6,7 @@
 -- so it reports REGISTERED as NEPAMATUOTA. This function is what GET /api/internal/growth-daily/v1 reads; the route
 -- applies the small-cell rule (lib/api/growth-daily.ts) before anything leaves this product.
 --
--- WHY SECURITY DEFINER. It reads auth.users (confirmation time + the bounded first-touch utm_* keys the signup form
+-- WHY SECURITY DEFINER. It reads auth.users (creation + first sign-in + the bounded first-touch utm_* keys the signup form
 -- already writes into raw_user_meta_data) and workers / journal_entries, which the service role is not granted SELECT on
 -- in this database — the same reason ops_product_metrics_v1 and agentai_capability_readback_counts_v1 are definer
 -- functions. Pinned empty search_path, EXECUTE revoked from everyone and granted to service_role only.
@@ -18,8 +18,10 @@
 -- DEFINITIONS (definitionVersion lm-growth-daily/v1 — flagged for owner confirmation in the PR):
 --   REAL person      = the population rule of ops_product_metrics_v1 verbatim (QA-synthetic / test domains → TEST,
 --                      @labourmarket.ai or admin → INTERNAL, everyone else REAL). Guarded identical by a test.
---   registration     = a REAL auth user whose e-mail was CONFIRMED during the day (UTC). An unconfirmed signup is not a
---                      registration (production requires e-mail confirmation); an invitation sent never is.
+--   registration     = a REAL account CREATED during the day (UTC) that has SIGNED IN at least once. An abandoned signup
+--                      (never confirmed, never signed in) is not a registration; an invitation sent never is. The account's
+--                      confirmation column is deliberately not read: it is not a trusted signal in this database
+--                      (lib/guards/email-verified-boundary.test.ts), and sign-in is what every real path ends in.
 --   ACTIVE Living CV = a REAL person with a worker profile who RECORDED at least one live (not deleted) journal entry in
 --                      the 30 days ending with the day (UTC). A signup, onboarding, CV upload or self-declared skill alone
 --                      is not activity.
@@ -41,7 +43,8 @@ bounds as (
 ),
 people as (
   select u.id,
-         u.email_confirmed_at,
+         u.created_at,
+         u.last_sign_in_at,
          u.raw_user_meta_data as meta,
          case
            when coalesce(u.raw_app_meta_data ->> 'qa_synthetic', '') = 'true'
@@ -62,8 +65,9 @@ registered as (
          nullif(btrim(pp.meta ->> 'utm_content'), '')  as utm_content
     from people pp, bounds b
    where pp.pop = 'REAL'
-     and pp.email_confirmed_at >= b.day_start
-     and pp.email_confirmed_at <  b.day_end
+     and pp.created_at >= b.day_start
+     and pp.created_at <  b.day_end
+     and pp.last_sign_in_at is not null
 ),
 groups as (
   select utm_source, utm_medium, utm_campaign, utm_content, count(*)::int as n

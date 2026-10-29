@@ -1740,6 +1740,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-28: owner approved #2876 in chat (conditional apply, at a3a10eb7d).
       // Synthetic QA needs out of the three cross-org demand readers.
       "20261028123000_synthetic_demand_cross_org_readers_v1.sql",
+      // 2026-10-29 (RED, needs-human-gate, NOT applied): aggregate daily growth counts for Agentai OS (SECURITY DEFINER + GRANT).
+      "20261029120000_agentai_daily_growth_aggregate_v1.sql",
 ]);
   });
 

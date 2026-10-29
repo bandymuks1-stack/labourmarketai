@@ -54,9 +54,11 @@ Authorization: Bearer <SUPPLY_FEED_BEARER_TOKEN>
 - **REAL person.** The population rule of `ops_product_metrics_v1`, verbatim (guarded identical by a test): QA-synthetic
   accounts and test domains are TEST, `@labourmarket.ai` and admins are INTERNAL, everyone else is REAL. Only REAL
   people are counted anywhere in this export.
-- **Registration on day D.** A REAL account whose e-mail was **confirmed** during D (UTC). Production requires e-mail
-  confirmation, so an unconfirmed signup is not a registration. An invitation sent never is. OAuth signups count on
-  confirmation like everyone else.
+- **Registration on day D.** A REAL account **created** during D (UTC) that has **signed in at least once** (through
+  the e-mail confirmation link, OAuth, or a password). An abandoned signup that never confirmed or signed in is not a
+  registration. An invitation sent never is. The account's e-mail confirmation timestamp is deliberately not read,
+  because it is not a trusted signal in this database. A person who signs up on D but first signs in on D+1 appears in
+  D from D+1 on (see Drift).
 - **Attribution.** The first-touch `utm_source / utm_medium / utm_campaign / utm_content` the signup form stores on
   the account (`components/app/signup-form.tsx` → `getFirstTouchAttribution()`). First touch on the browser that signed
   up: an invitee who first visited untagged, or signed up on another device or through Google/Apple sign-in, shows as
@@ -85,7 +87,7 @@ always rolled up to its campaign. **Agentai should read campaign-level results, 
 
 ## Drift
 
-Day D is computed from current data each time it is read. A later account erasure removes that person from every
+Day D is computed from current data each time it is read. A late first sign-in adds to its creation day, and an account erasure removes that person from every
 past day, so re-reading an old day can give a smaller number. Agentai should store the value it read for D, with
 `generatedAt`, rather than expect it to stay fixed.
 

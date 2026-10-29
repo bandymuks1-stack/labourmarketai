@@ -31,8 +31,7 @@ export const GROWTH_DAILY_MAX_LOOKBACK_DAYS = 92;
 export const SUPPRESSED = "(suppressed)" as const;
 export const UNRECOGNISED = "(unrecognised)" as const;
 
-const UTM_KEYS = ["utmSource", "utmMedium", "utmCampaign", "utmContent"] as const;
-type UtmKey = (typeof UTM_KEYS)[number];
+type UtmKey = "utmSource" | "utmMedium" | "utmCampaign" | "utmContent";
 
 /** One attribution group. `null` = the registration carried no such tag (organic / untagged). */
 export type AttributionGroup = Readonly<Record<UtmKey, string | null>> & { readonly count: number };
