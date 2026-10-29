@@ -3,6 +3,10 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   BASE,
   PASSWORD,
+  SB_ANON,
+  SB_SERVICE,
+  SB_URL,
+  accessToken,
   isolatedStack,
   lit,
   mailsTo,
@@ -269,14 +273,35 @@ test("M-5. a saved-search alert: a new matching need appears and the worker is n
   expect(need?.country, "the need states its country").toBe("LT");
   expect(need?.status).toBe("submitted");
   // The worker board serves needs of VERIFIED companies only
-  // (list_open_demand_for_workers). Verification is an operator act with no
-  // self-serve door, so the walk records it in the THROWAWAY database — the
-  // same single column the operator's verification sets.
-  sqlExec(
-    `update public.companies set verification_status = 'verified'
-      where id in (select legacy_company_id from public.organizations where owner_profile_id = ${lit(companyOwner)})
-         or profile_id = ${lit(companyOwner)}`,
+  // (list_open_demand_for_workers), and only an admin may verify (a trigger
+  // refuses anyone else, even the database superuser). The walk takes the
+  // operator's own door: a LOCAL admin identity (the one seeded step — a
+  // profile_roles row in the throwaway database) calls
+  // admin_set_company_verification with its own session.
+  const adminAddress = `notify.admin.${RUN}@local.test`;
+  const created = await fetch(`${SB_URL}/auth/v1/admin/users`, {
+    method: "POST",
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: adminAddress, password: PASSWORD, email_confirm: true }),
+  });
+  expect(created.ok, "a local admin identity is created").toBe(true);
+  const adminId = await userId(adminAddress);
+  sqlExec(`insert into public.profile_roles (profile_id, role) values (${lit(adminId)}, 'admin')`);
+  const [company] = sql<{ id: string }>(
+    `select c.id from public.companies c where c.profile_id = ${lit(companyOwner)}
+      union select o.legacy_company_id from public.organizations o
+       where o.owner_profile_id = ${lit(companyOwner)} and o.legacy_company_id is not null`,
   );
+  expect(company?.id, "the company record exists").toBeTruthy();
+  const verify = await fetch(`${SB_URL}/rest/v1/rpc/admin_set_company_verification`, {
+    method: "POST",
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${await accessToken(adminAddress)}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_company_id: company.id, p_status: "verified", p_note: "isolated walk" }),
+  });
+  expect(verify.ok, `the operator verification is accepted (${verify.status})`).toBe(true);
+  expect(
+    sql<{ v: string }>(`select verification_status as v from public.companies where id = ${lit(company.id)}`)[0]?.v,
+  ).toBe("verified");
 
   // The worker's own board render counts the new match and records the alert.
   const w = await browser.newContext();
