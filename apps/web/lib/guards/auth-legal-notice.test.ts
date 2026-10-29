@@ -99,10 +99,20 @@ const renderNotice = (locale: string, variant: "signup" | "googleLogin") => {
   );
 };
 
+/** Tags removed until none is left (one pass can expose a new one: "<<a>b>"). */
+const stripTags = (s: string): string => {
+  let prev: string;
+  do {
+    prev = s;
+    s = s.replace(/<[^>]*>/g, "");
+  } while (s !== prev);
+  return s;
+};
+
 const anchorsOf = (html: string): Array<{ href: string; text: string }> =>
   [...html.matchAll(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g)].map((m) => ({
     href: m[1],
-    text: m[2].replace(/<[^>]+>/g, "").trim(),
+    text: stripTags(m[2]).trim(),
   }));
 
 // ---------------------------------------------------------------------------
