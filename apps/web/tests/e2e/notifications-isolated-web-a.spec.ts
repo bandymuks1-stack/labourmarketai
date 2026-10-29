@@ -217,6 +217,8 @@ test("M-4. a saved search is stored and reopens from the board", async ({ page }
   await page.goto(`${APP}/en/dashboard/opportunities?view=all&country=LT`);
   const strip = page.getByTestId("saved-searches");
   await expect(strip, "the saved-search strip is offered on a filtered board").toBeVisible({ timeout: 30_000 });
+  // A closed disclosure while nothing is saved yet (phone-first): open it.
+  if ((await strip.getAttribute("open")) === null) await strip.locator("summary").click();
   await strip.getByTestId("saved-search-label").fill(`Lithuania ${RUN}`);
   await strip.getByTestId("saved-search-save").click();
   await expect
@@ -239,7 +241,7 @@ test("M-4. a saved search is stored and reopens from the board", async ({ page }
   expect(JSON.stringify(row.criteria)).toContain("LT");
   state.searchId = row.id;
 
-  await page.goto(`${APP}/en/dashboard/opportunities`);
+  await page.goto(`${APP}/en/dashboard/opportunities?view=all`);
   const reopen = page.getByTestId(`saved-search-${row.id}`).getByTestId("saved-search-open");
   await expect(reopen, "the saved search is listed").toBeVisible({ timeout: 30_000 });
   await expect(reopen).toHaveAttribute("href", /country=LT/);
