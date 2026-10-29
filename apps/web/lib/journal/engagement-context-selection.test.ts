@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  activeOrganizationOf,
   isApplicableOn,
+  orderContextsForChoice,
   requiresExplicitChoice,
   resolveEngagementContext,
   type EngagementCandidate,
@@ -191,5 +193,213 @@ describe("the invariant that makes B safe", () => {
       const r = resolveEngagementContext({ candidates: cands, sourceContextId: src });
       if (r.selectedId !== null) expect(ids.has(r.selectedId)).toBe(true);
     }
+  });
+});
+
+/**
+ * RULE W — THE ACTIVE WORKSPACE (owner P0 2026-10-29): "automatic context
+ * determination when enough data exists". Generic replay of the case that
+ * produced the rule: an owner with a personal context, an owned company and
+ * an UNNAMED self-owned agency, acting for a fourth organization where they
+ * hold only a membership — every resolution was rule C, and an unexplained
+ * choice is how work landed in the unnamed agency.
+ */
+describe("rule W — the active workspace is a preselect signal", () => {
+  const OWNED_COMPANY = ctx({ id: "ownCo", organizationId: "orgCo", relationshipSlug: "owner" });
+  const UNNAMED_AGENCY = ctx({ id: "ownAg", organizationId: "orgAg", relationshipSlug: "owner" });
+
+  it("one person, one organization: the single org context is preselected (B), with or without the signal", () => {
+    expect(resolveEngagementContext({ candidates: [PERSONAL, EMPLOYER_A] })).toEqual({
+      rule: "B",
+      selectedId: "empA",
+    });
+    expect(
+      resolveEngagementContext({ candidates: [PERSONAL, EMPLOYER_A], activeOrganizationId: "orgA" }),
+    ).toEqual({ rule: "W", selectedId: "empA" });
+  });
+
+  it("several organizations: acting for one of them preselects ITS context instead of asking", () => {
+    const r = resolveEngagementContext({
+      candidates: [PERSONAL, OWNED_COMPANY, UNNAMED_AGENCY],
+      activeOrganizationId: "orgCo",
+    });
+    expect(r).toEqual({ rule: "W", selectedId: "ownCo" });
+    expect(requiresExplicitChoice(r)).toBe(false);
+  });
+
+  it("CONTROL: the same contexts without the signal still ask — behaviour unchanged", () => {
+    const r = resolveEngagementContext({ candidates: [PERSONAL, OWNED_COMPANY, UNNAMED_AGENCY] });
+    expect(r.rule).toBe("C");
+    expect(r.activeWorkspaceWithoutContext).toBeUndefined();
+    const personalSpace = resolveEngagementContext({
+      candidates: [PERSONAL, OWNED_COMPANY, UNNAMED_AGENCY],
+      activeOrganizationId: null,
+    });
+    expect(personalSpace).toEqual(r);
+  });
+
+  it("several roles at once at the ACTIVE organization (employee AND owner) is still ambiguity → C", () => {
+    const empHere = ctx({ id: "empHere", organizationId: "orgCo" });
+    const r = resolveEngagementContext({
+      candidates: [PERSONAL, OWNED_COMPANY, empHere],
+      activeOrganizationId: "orgCo",
+    });
+    expect(r.rule).toBe("C");
+    expect(r.activeWorkspaceWithoutContext).toBeUndefined();
+  });
+
+  it("several roles across organizations: W picks the active one and nothing else", () => {
+    const r = resolveEngagementContext({
+      candidates: [PERSONAL, EMPLOYER_A, OWNED_COMPANY, UNNAMED_AGENCY],
+      activeOrganizationId: "orgA",
+    });
+    expect(r).toEqual({ rule: "W", selectedId: "empA" });
+  });
+
+  it("A still wins: a source-determined context outranks the active workspace", () => {
+    const r = resolveEngagementContext({
+      candidates: [PERSONAL, OWNED_COMPANY, UNNAMED_AGENCY],
+      sourceContextId: "ownAg",
+      activeOrganizationId: "orgCo",
+    });
+    expect(r).toEqual({ rule: "A", selectedId: "ownAg" });
+  });
+
+  it("bounds by work day: an active-org context that ENDED before the day is not W", () => {
+    const endedHere = ctx({ id: "endedHere", organizationId: "orgCo", endedAt: "2026-06-30" });
+    const r = resolveEngagementContext({
+      candidates: [PERSONAL, endedHere, UNNAMED_AGENCY, EMPLOYER_A],
+      activeOrganizationId: "orgCo",
+      workDay: "2026-08-10",
+    });
+    expect(r.rule).toBe("C");
+    expect(r.activeWorkspaceWithoutContext).toBe(true);
+    // …and on a day inside its bounds it IS the answer.
+    const inside = resolveEngagementContext({
+      candidates: [PERSONAL, endedHere, UNNAMED_AGENCY, EMPLOYER_A],
+      activeOrganizationId: "orgCo",
+      workDay: "2026-05-02",
+    });
+    expect(inside).toEqual({ rule: "W", selectedId: "endedHere" });
+  });
+
+  it("a context that starts AFTER the work day is not W either", () => {
+    const future = ctx({ id: "future", organizationId: "orgCo", startedAt: "2026-09-01" });
+    const r = resolveEngagementContext({
+      candidates: [PERSONAL, future],
+      activeOrganizationId: "orgCo",
+      workDay: "2026-08-10",
+    });
+    expect(r).toEqual({ rule: "D", selectedId: "personal", activeWorkspaceWithoutContext: true });
+  });
+
+  it("W never returns a context outside the active organization", () => {
+    const cands = [PERSONAL, EMPLOYER_A, EMPLOYER_B, OWNED_COMPANY, UNNAMED_AGENCY];
+    for (const org of ["orgA", "orgB", "orgCo", "orgAg", "orgNone"]) {
+      const r = resolveEngagementContext({ candidates: cands, activeOrganizationId: org });
+      if (r.rule === "W") {
+        expect(cands.find((c) => c.id === r.selectedId)?.organizationId).toBe(org);
+      }
+    }
+  });
+});
+
+describe("membership WITHOUT a work relationship at the active organization", () => {
+  const OWNED_COMPANY = ctx({ id: "ownCo", organizationId: "orgCo", relationshipSlug: "owner" });
+  const UNNAMED_AGENCY = ctx({ id: "ownAg", organizationId: "orgAg", relationshipSlug: "owner" });
+
+  it("is SAID (activeWorkspaceWithoutContext) and the choice proceeds — nothing invented", () => {
+    const r = resolveEngagementContext({
+      candidates: [PERSONAL, OWNED_COMPANY, UNNAMED_AGENCY],
+      activeOrganizationId: "orgActing",
+    });
+    expect(r.rule).toBe("C");
+    expect(r.activeWorkspaceWithoutContext).toBe(true);
+    if (r.rule !== "C") throw new Error("expected C");
+    // The acting organization is never fabricated into the candidates.
+    expect(r.candidateIds).toEqual(["ownCo", "ownAg", "personal"]);
+  });
+
+  it("with one other organization context, B still preselects it — and the fact is still carried", () => {
+    const r = resolveEngagementContext({
+      candidates: [PERSONAL, OWNED_COMPANY],
+      activeOrganizationId: "orgActing",
+    });
+    expect(r).toEqual({ rule: "B", selectedId: "ownCo", activeWorkspaceWithoutContext: true });
+  });
+
+  it("personal stays valid (rule D) when no organization context applies", () => {
+    const r = resolveEngagementContext({ candidates: [PERSONAL], activeOrganizationId: "orgActing" });
+    expect(r).toEqual({ rule: "D", selectedId: "personal", activeWorkspaceWithoutContext: true });
+  });
+
+  it("no fact without an organization workspace", () => {
+    for (const active of [null, undefined]) {
+      const r = resolveEngagementContext({ candidates: [PERSONAL], activeOrganizationId: active });
+      expect(r).toEqual({ rule: "D", selectedId: "personal" });
+    }
+  });
+});
+
+describe("the ONE choice order — active organization first, personal last", () => {
+  const rows = [
+    { id: "p", org: null },
+    { id: "a", org: "orgA" },
+    { id: "b", org: "orgB" },
+    { id: "p2", org: null },
+    { id: "c", org: "orgC" },
+  ];
+
+  it("active first, other organizations in their own order, personal last", () => {
+    expect(orderContextsForChoice(rows, "orgB", (r) => r.org).map((r) => r.id)).toEqual([
+      "b",
+      "a",
+      "c",
+      "p",
+      "p2",
+    ]);
+  });
+
+  it("without an active organization: organizations first, personal last, order otherwise kept", () => {
+    expect(orderContextsForChoice(rows, null, (r) => r.org).map((r) => r.id)).toEqual([
+      "a",
+      "b",
+      "c",
+      "p",
+      "p2",
+    ]);
+  });
+
+  it("never drops or duplicates a row, and does not mutate its input", () => {
+    const copy = [...rows];
+    const out = orderContextsForChoice(rows, "orgC", (r) => r.org);
+    expect(out).toHaveLength(rows.length);
+    expect(new Set(out.map((r) => r.id)).size).toBe(rows.length);
+    expect(rows).toEqual(copy);
+  });
+
+  it("rule C hands its candidates over in that order", () => {
+    const r = resolveEngagementContext({
+      candidates: [PERSONAL, EMPLOYER_A, EMPLOYER_B],
+      activeOrganizationId: "orgOther",
+    });
+    if (r.rule !== "C") throw new Error("expected C");
+    expect(r.candidateIds).toEqual(["empA", "empB", "personal"]);
+  });
+});
+
+describe("activeOrganizationOf — the personal sentinel is never an organization id", () => {
+  const ws = [
+    { id: "personal", kind: "personal" },
+    { id: "orgA", kind: "organization" },
+  ];
+  it("organization workspace → its id", () => {
+    expect(activeOrganizationOf({ activeWorkspaceId: "orgA", workspaces: ws })).toBe("orgA");
+  });
+  it("personal workspace → null", () => {
+    expect(activeOrganizationOf({ activeWorkspaceId: "personal", workspaces: ws })).toBeNull();
+  });
+  it("an id not among the memberships → null (never trusted)", () => {
+    expect(activeOrganizationOf({ activeWorkspaceId: "orgX", workspaces: ws })).toBeNull();
   });
 });

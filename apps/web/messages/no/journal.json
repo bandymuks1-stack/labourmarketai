@@ -30,6 +30,12 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Velg tilknytning…",
   "engagementAmbiguous": "Dette arbeidet kan høre til mer enn én tilknytning. Velg hvilken før du lagrer.",
+  "unnamedOrganization": {
+    "company": "Virksomhet uten navn",
+    "agency": "Byrå uten navn",
+    "other": "Organisasjon uten navn"
+  },
+  "activeWorkspaceNoRelationship": "Du handler på vegne av {org}, men det er ikke registrert noe arbeidsforhold med {org}, så det tilbys ikke her. Velg konteksten arbeidet egentlig hører til.",
   "project": "Prosjekt",
   "projectChoose": "Velg prosjekt…",
   "projectNone": "Ikke prosjektarbeid",

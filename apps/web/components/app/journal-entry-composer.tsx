@@ -121,7 +121,7 @@ export type JournalEngagement = {
  *  legitimately possible, so nothing is preselected and the worker must pick
  *  before the entry can be submitted. */
 export type JournalContextResolution = {
-  rule: "A" | "B" | "C" | "D" | "NONE";
+  rule: "A" | "W" | "B" | "C" | "D" | "NONE";
   selectedId: string | null;
 };
 export type JournalDirection = {
@@ -194,6 +194,7 @@ export type { JournalEditingEntry };
 export function JournalEntryComposer({
   engagements,
   contextResolution,
+  activeWorkspaceNotice = null,
   directions,
   workerSkills,
   editingEntry,
@@ -204,6 +205,10 @@ export function JournalEntryComposer({
 }: {
   engagements: JournalEngagement[];
   contextResolution?: JournalContextResolution;
+  /** Server-localized sentence when the person acts for an organization where
+   *  no work relationship is recorded (owner P0 2026-10-29) — shown under the
+   *  context picker so that organization is never silently missing. */
+  activeWorkspaceNotice?: string | null;
   directions: JournalDirection[];
   workerSkills: JournalSkill[];
   /** When set, the composer opens in EDIT mode: textarea is prefilled
@@ -2196,6 +2201,14 @@ export function JournalEntryComposer({
               data-testid="journal-engagement-must-choose"
             >
               {t("engagementAmbiguous")}
+            </p>
+          ) : null}
+          {activeWorkspaceNotice ? (
+            <p
+              className="text-meta leading-relaxed text-text-secondary"
+              data-testid="journal-engagement-active-workspace-notice"
+            >
+              {activeWorkspaceNotice}
             </p>
           ) : null}
         </label>

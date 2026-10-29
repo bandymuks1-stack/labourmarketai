@@ -258,6 +258,12 @@
   "engagement": "Kontekstas",
   "engagementChoose": "Pasirink darbo kontekstą…",
   "engagementAmbiguous": "Šis darbas gali priklausyti daugiau nei vienam darbo kontekstui. Prieš išsaugant pasirink, kuriam.",
+  "unnamedOrganization": {
+    "company": "Įmonė be pavadinimo",
+    "agency": "Agentūra be pavadinimo",
+    "other": "Organizacija be pavadinimo"
+  },
+  "activeWorkspaceNoRelationship": "Veiki „{org}“ vardu, bet darbo santykis su „{org}“ neužregistruotas, todėl jo čia nėra. Pasirink kontekstą, kuriam šis darbas iš tikrųjų priklauso.",
   "project": "Projektas",
   "projectChoose": "Pasirink projektą…",
   "projectNone": "Ne projekto darbas",

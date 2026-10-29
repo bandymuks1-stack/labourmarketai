@@ -1,8 +1,13 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+
+import { activeLocales } from "@/lib/i18n/config";
 
 import {
   composeDistinctEngagementLabels,
   composeEngagementLabel,
+  unnamedOrganizationKind,
   yearMonthOf,
   type EngagementLabelInput,
 } from "./engagement-label";
@@ -169,5 +174,72 @@ describe("composeDistinctEngagementLabels — a list", () => {
     const superseded = `${base} — ${REL}`;
     expect(superseded).toBe("Darbuotojas — Darbuotojas");
     expect(superseded).toMatch(/Darbuotojas\s*—\s*Darbuotojas/);
+  });
+});
+
+/**
+ * AN ORGANIZATION WITHOUT A NAME SAYS SO (owner P0 2026-10-29). A self-owned
+ * agency created at sign-up carried neither a display nor a legal name and
+ * was labelled by its bare type — "Agentūra · Savininkas" — which read like a
+ * real, named choice; work was filed there that belonged elsewhere.
+ */
+describe("unnamed organizations", () => {
+  it("unnamedOrganizationKind: agency, company, else other", () => {
+    expect(unnamedOrganizationKind("agency")).toBe("agency");
+    expect(unnamedOrganizationKind("company")).toBe("company");
+    expect(unnamedOrganizationKind("team")).toBe("other");
+    expect(unnamedOrganizationKind(null)).toBe("other");
+    expect(unnamedOrganizationKind(undefined)).toBe("other");
+  });
+
+  const journal = (loc: string) =>
+    JSON.parse(readFileSync(join(__dirname, "..", "..", "messages", loc, "journal.json"), "utf8"));
+  const relationships = (loc: string) =>
+    JSON.parse(
+      readFileSync(join(__dirname, "..", "..", "messages", loc, "relationship-types.json"), "utf8"),
+    );
+
+  for (const loc of activeLocales) {
+    it(`${loc}: the label says the organization has no name, and still names the relationship`, () => {
+      const j = journal(loc);
+      const unnamed = j.unnamedOrganization.agency as string;
+      const owner = (relationships(loc).owner as string | undefined) ?? "owner";
+      const label = composeEngagementLabel({
+        orgName: null,
+        orgTypeLabel: unnamed,
+        title: null,
+        relationshipLabel: owner,
+        personalEntryLabel: j.personalEntry,
+        isPersonal: false,
+        startedAt: null,
+      });
+      expect(label).toBe(`${unnamed} · ${owner}`);
+      // A real name always wins over the phrase.
+      expect(
+        composeEngagementLabel({
+          orgName: "Dev Statyba",
+          orgTypeLabel: unnamed,
+          title: null,
+          relationshipLabel: owner,
+          personalEntryLabel: j.personalEntry,
+          isPersonal: false,
+          startedAt: null,
+        }),
+      ).toBe(`Dev Statyba · ${owner}`);
+    });
+  }
+
+  it("a named company, an unnamed agency and the personal context are three distinct, readable labels", () => {
+    const base = { title: null, personalEntryLabel: "Personal worker entry", startedAt: null } as const;
+    const labels = composeDistinctEngagementLabels([
+      { ...base, orgName: "Dev Statyba", orgTypeLabel: "Company without a name", relationshipLabel: "Owner", isPersonal: false },
+      { ...base, orgName: null, orgTypeLabel: "Agency without a name", relationshipLabel: "Owner", isPersonal: false },
+      { ...base, orgName: null, orgTypeLabel: null, relationshipLabel: "Employee", isPersonal: true },
+    ]);
+    expect(labels).toEqual([
+      "Dev Statyba · Owner",
+      "Agency without a name · Owner",
+      "Personal worker entry",
+    ]);
   });
 });

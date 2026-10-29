@@ -350,6 +350,9 @@ export function WorkerWorkLogFlow({
   const [mustChooseEngagement, setMustChooseEngagement] = useState(false);
   /** The sentence named an organization whose relationship has ENDED. */
   const [endedOrgNamed, setEndedOrgNamed] = useState<string | null>(null);
+  // Acting for an organization with no recorded work relationship (owner P0
+  // 2026-10-29): the server's localized sentence, shown under the picker.
+  const [activeWorkspaceNotice, setActiveWorkspaceNotice] = useState<string | null>(null);
   const [workDate, setWorkDate] = useState(draft.date);
   const [site, setSite] = useState(draft.site ?? "");
   const [notes, setNotes] = useState(draft.notes);
@@ -508,6 +511,7 @@ export function WorkerWorkLogFlow({
             ? null
             : ((res.endedOrgNames ?? []).find((n) => mentionsOrganization(said, n)) ?? null);
           setEndedOrgNamed(endedNamed);
+          setActiveWorkspaceNotice(res.activeWorkspaceNotice ?? null);
           setEngagementId(named ? named.id : endedNamed ? "" : (res.resolution.selectedId ?? ""));
           setMustChooseEngagement(!named && (endedNamed !== null || res.resolution.rule === "C"));
           setPhase({ kind: "ready", token: null });
@@ -1190,6 +1194,14 @@ export function WorkerWorkLogFlow({
           ) : null}
         </label>
       )}
+      {activeWorkspaceNotice ? (
+        <p
+          className="text-meta leading-relaxed text-text-secondary"
+          data-testid="worklog-context-active-workspace-notice"
+        >
+          {activeWorkspaceNotice}
+        </p>
+      ) : null}
 
       {projectPrompt === "ask" ? (
         <label className="flex flex-col gap-1 text-support">

@@ -234,6 +234,40 @@ describe("CIE integration — the workspace resolves defaults, the user re-picks
     }
   });
 
+  it("UI, chat and MCP resolve the context with the SAME active-workspace signal (rule W, owner P0 2026-10-29)", () => {
+    // One resolver, one signal. If one surface stopped passing the active
+    // organization, identical work would be preselected on the web and asked
+    // about over MCP (or the reverse) — the divergence this rule exists to end.
+    const callers = {
+      journalPage: read("app/[locale]/dashboard/journal/page.tsx"),
+      worklog: read("lib/conversation/worklog-engagements.ts"),
+      capability: read("lib/capabilities/registry.ts"),
+    };
+    for (const [name, src] of Object.entries(callers)) {
+      const call = src.slice(src.indexOf("resolveEngagementContext({"));
+      const args = call.slice(0, call.indexOf("});"));
+      expect(args, name).toMatch(/activeOrganizationId/);
+      // The organization comes from the ONE workspace resolution, through the
+      // helper that can never hand the personal sentinel over as an org id.
+      expect(src, name).toMatch(/activeOrganizationOf\(/);
+      // The ONE choice order (active first, personal last).
+      expect(src, name).toMatch(/orderContextsForChoice\(/);
+      // Membership without a work relationship is SAID, not omitted.
+      expect(src, name).toMatch(/activeWorkspaceWithoutContext/);
+      expect(src, name).toMatch(/activeWorkspaceNoRelationship/);
+    }
+    // The MCP path takes the workspace from the transport-neutral core.
+    expect(callers.capability).toMatch(/resolveActiveWorkspaceForCaller\(caller, null\)/);
+    // The web surfaces from the same resolution the header chip shows.
+    expect(callers.journalPage).toMatch(/getWorkspaceContext\(\)/);
+    expect(callers.worklog).toMatch(/getWorkspaceContext\(\)/);
+    // And the sentence reaches the person on both web surfaces.
+    expect(read("components/app/journal-entry-composer.tsx")).toMatch(/activeWorkspaceNotice/);
+    expect(read("components/app/conversation/worker-worklog-flow.tsx")).toMatch(
+      /setActiveWorkspaceNotice\(res\.activeWorkspaceNotice/,
+    );
+  });
+
   it("the brief's suggestions render through EXISTING chip mechanisms only", () => {
     const chat = read("components/app/conversation/chat/conversation-chat.tsx");
     expect(chat).toMatch(/id: "logwork"/);

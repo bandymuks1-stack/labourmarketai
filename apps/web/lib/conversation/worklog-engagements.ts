@@ -8,10 +8,15 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import {
+  activeOrganizationOf,
+  orderContextsForChoice,
   resolveEngagementContext,
   type ContextResolution,
 } from "@/lib/journal/engagement-context-selection";
-import { composeDistinctEngagementLabels } from "@/lib/journal/engagement-label";
+import {
+  composeDistinctEngagementLabels,
+  unnamedOrganizationKind,
+} from "@/lib/journal/engagement-label";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { projectsForContext, type AssignedProject } from "@/lib/journal/project-attribution";
@@ -59,6 +64,11 @@ export type WorkLogEngagementsResult =
        *  active) — names only, through the narrow historical-names read. A
        *  sentence naming one of these must not be filed under another org. */
       endedOrgNames?: string[];
+      /** Localized sentence when the person ACTS FOR an organization where no
+       *  work relationship is recorded (a membership is access, not a work
+       *  relationship — owner P0 2026-10-29). Null otherwise. The flow shows
+       *  it so that organization is never silently missing from the choice. */
+      activeWorkspaceNotice?: string | null;
     }
   | { kind: "no-worker" }
   | { kind: "no-context" }
@@ -145,7 +155,6 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
    * The relationship word still comes from `canonicalRelationship` above —
    * the ONE catalogue, with the older worklog wording as its fallback.
    */
-  const tRole = await getTranslations("auth.signup.role");
   const tJournal = await getTranslations("journal");
   const personalEntryLabel = tJournal("personalEntry");
   const rows = (ecRows ?? []).map((e) => {
@@ -154,12 +163,11 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
       legal_name: string | null;
       organization_type: string | null;
     } | null;
-    const orgTypeLabel =
-      org?.organization_type === "company"
-        ? tRole("company")
-        : org?.organization_type === "agency"
-          ? tRole("agency")
-          : null;
+    // An organization with no display/legal name says so ("Agency without a
+    // name"), never its bare type — that read like a real, named choice.
+    const orgTypeLabel = org
+      ? tJournal(`unnamedOrganization.${unnamedOrganizationKind(org.organization_type)}`)
+      : null;
     return {
       row: e,
       input: {
@@ -193,21 +201,18 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
   // ask "which project?" instead of the hours landing against none.
   const projectsByOrg = await readActiveProjectsByOrg(supabase, worker.id);
 
-  // Context Intelligence (rebuild phase 3): the ACTIVE WORKSPACE resolves the
-  // default context — the engagement belonging to the active workspace's org
-  // sorts FIRST (then is_primary, preserved by the stable sort), so the flow
-  // preselects the context the user is already working in and only ASKS when
-  // real ambiguity remains. Request-cached read; honest no-op when the
-  // workspace is personal or matches nothing.
+  // Context Intelligence (rebuild phase 3): the ACTIVE WORKSPACE orders the
+  // choice — the ONE order (owner P0 2026-10-29): the active workspace's
+  // organization first, other organizations next, personal last (is_primary
+  // preserved within a group by the stable sort) — and is a resolution SIGNAL
+  // (rule W): exactly one applicable context at the organization the person
+  // acts for is preselected. Request-cached read; honest no-op when the
+  // workspace is personal.
   // The SAME resolution the chip renders — no caller-chosen identity, so the
   // default here can never name a different workspace than the header does.
   const workspace = await getWorkspaceContext();
-  const activeOrgId = workspace.activeWorkspaceId;
-  const ordered = [...engagements].sort(
-    (a, b) =>
-      Number(b.organizationId === activeOrgId) -
-      Number(a.organizationId === activeOrgId),
-  );
+  const activeOrgId = activeOrganizationOf(workspace);
+  const ordered = orderContextsForChoice(engagements, activeOrgId, (e) => e.organizationId);
 
   // The DEFAULT is the resolution, not the first row. Ordering above only
   // decides how the list reads; which context the work belongs to is decided
@@ -236,7 +241,23 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
         isPrimary: r.is_primary === true,
       };
     }),
+    activeOrganizationId: activeOrgId,
   });
+
+  // Acting for an organization with no recorded work relationship there: say
+  // it plainly. Nothing is created — the person picks among their real
+  // contexts (or records the relationship where the product offers it).
+  let activeWorkspaceNotice: string | null = null;
+  if (resolution.activeWorkspaceWithoutContext) {
+    const acting = workspace.workspaces.find((w) => w.id === activeOrgId) ?? null;
+    activeWorkspaceNotice = tJournal("activeWorkspaceNoRelationship", {
+      org:
+        acting?.name ||
+        tJournal(
+          `unnamedOrganization.${unnamedOrganizationKind(acting?.organizationType)}`,
+        ),
+    });
+  }
 
   // ENDED relationships, named (2026-09-29): "…betonavau pamatus Alfa
   // objekte" by a worker whose Alfa relationship had ended preselected their
@@ -281,5 +302,6 @@ export async function listWorkLogEngagements(): Promise<WorkLogEngagementsResult
     })),
     resolution,
     endedOrgNames,
+    activeWorkspaceNotice,
   };
 }
