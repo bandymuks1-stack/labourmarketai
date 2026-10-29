@@ -287,20 +287,20 @@ test("M-5. a saved-search alert: a new matching need appears and the worker is n
   expect(created.ok, "a local admin identity is created").toBe(true);
   const adminId = await userId(adminAddress);
   sqlExec(`insert into public.profile_roles (profile_id, role) values (${lit(adminId)}, 'admin')`);
-  const [company] = sql<{ id: string }>(
+  const [companyRow] = sql<{ id: string }>(
     `select c.id from public.companies c where c.profile_id = ${lit(companyOwner)}
       union select o.legacy_company_id from public.organizations o
        where o.owner_profile_id = ${lit(companyOwner)} and o.legacy_company_id is not null`,
   );
-  expect(company?.id, "the company record exists").toBeTruthy();
+  expect(companyRow?.id, "the company record exists").toBeTruthy();
   const verify = await fetch(`${SB_URL}/rest/v1/rpc/admin_set_company_verification`, {
     method: "POST",
     headers: { apikey: SB_ANON, Authorization: `Bearer ${await accessToken(adminAddress)}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ p_company_id: company.id, p_status: "verified", p_note: "isolated walk" }),
+    body: JSON.stringify({ p_company_id: companyRow.id, p_status: "verified", p_note: "isolated walk" }),
   });
   expect(verify.ok, `the operator verification is accepted (${verify.status})`).toBe(true);
   expect(
-    sql<{ v: string }>(`select verification_status as v from public.companies where id = ${lit(company.id)}`)[0]?.v,
+    sql<{ v: string }>(`select verification_status as v from public.companies where id = ${lit(companyRow.id)}`)[0]?.v,
   ).toBe("verified");
 
   // The worker's own board render counts the new match and records the alert.
