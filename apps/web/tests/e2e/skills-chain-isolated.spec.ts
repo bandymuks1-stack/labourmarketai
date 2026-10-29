@@ -8,8 +8,8 @@ import { verifyCompanyAsLocalAdmin } from "./isolated-web-a-helpers";
  * the same job as signup-isolated.spec.ts). Owner requirement 2026-10-29: the
  * Work Journal is the primary source of real professional experience.
  *
- *   K-1 a tiler and K-2 a welder (two people, two trades, NO stated
- *       profession or title) sign up, let employers find them (the
+ *   K-1 a person whose OFFICIAL title is "warehouse worker" but whose journal
+ *       shows tiling, and K-2 a welder (no title at all) sign up, let employers find them (the
  *       profile_discoverability consent) and record one day of work each in
  *       the journal; the skills the work shows land as journal evidence —
  *       never as confirmed, never as a qualification;
@@ -20,8 +20,8 @@ import { verifyCompanyAsLocalAdmin } from "./isolated-web-a-helpers";
  *       company finds the tiler by skill, without the private journal text,
  *       the name, or any row of the journal under its own row-level security;
  *   K-5 an agency posts a welding need and finds the welder the same way;
- *   K-6 the tiler's work points at professional directions their skills
- *       already apply to (tiler: tiling + flooring from the journal);
+ *   K-6 the work, not the title, names the fitting profession (tiler) on the
+ *       work view and on the Living CV's career horizon;
  *   K-7 the tiler disputes one reading of their entry ("flooring"): the
  *       dispute is recorded on the entry (basis kept), the evidence link is
  *       withdrawn, the tier falls back, a re-run of recognition does not put
@@ -105,6 +105,27 @@ async function readAs<T>(address: string, path: string): Promise<T> {
   });
   if (!r.ok) throw new Error(`rls read ${path.split("?")[0]} → ${r.status}`);
   return (await r.json()) as T;
+}
+
+/** A REST write AS the person (their own token, their own row-level security). */
+async function writeAs(address: string, path: string, body: unknown): Promise<void> {
+  const t = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: { apikey: SB_ANON, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: address, password: PASSWORD }),
+  });
+  const { access_token } = (await t.json()) as { access_token: string };
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    method: "POST",
+    headers: {
+      apikey: SB_ANON,
+      Authorization: `Bearer ${access_token}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(`own write ${path.split("?")[0]} → ${r.status}`);
 }
 
 async function skillId(slug: string): Promise<string> {
@@ -313,8 +334,17 @@ test("K-1. a tiler records a day of work; the skills it shows land as journal ev
   const [worker] = await db<Array<{ id: string }>>(`workers?profile_id=eq.${profileId}&select=id`);
   expect(worker?.id, "a worker record exists without any company").toBeTruthy();
   state.tilerWorker = worker!.id;
-  // No stated profession or title: anything found later is found by work.
-  expect(await db<unknown[]>(`worker_professions?worker_id=eq.${worker!.id}&select=worker_id`)).toEqual([]);
+  // The OFFICIAL title this person states is "Warehouse worker" — their own
+  // declaration under their own row-level security (the same row the profile
+  // trade picker writes). The journal will show tiling: everything found
+  // later must be found by the demonstrated work, not by this title.
+  const [warehouse] = await db<Array<{ id: string }>>(`professions?slug=eq.warehouse_worker&select=id`);
+  expect(warehouse?.id, "the catalogue knows the title").toBeTruthy();
+  await writeAs(TILER, "worker_professions", { worker_id: worker!.id, profession_id: warehouse!.id, is_primary: true });
+  const titles = await db<Array<{ professions: { slug: string } | null }>>(
+    `worker_professions?worker_id=eq.${worker!.id}&select=professions(slug)`,
+  );
+  expect(titles.map((t) => t.professions?.slug), "the stated title is warehouse worker, not tiler").toEqual(["warehouse_worker"]);
 
   await recordWork(page, TILER_TEXT);
   await expect(page.getByTestId("worklog-added-tiling").first(), "the person is told what the work showed").toBeVisible();
@@ -433,14 +463,23 @@ test("K-5. an agency needs a 'steel structure crew member' and finds the welder 
 
 // ── K-6 ─────────────────────────────────────────────────────────────────────
 
-test("K-6. the tiler's recorded work points at professional directions the skills already apply to", async ({ browser }) => {
+test("K-6. the work, not the title, points at the professions it fits — on the work view and on the Living CV", async ({ browser }) => {
   const tiler = await as(browser, TILER);
+  // The person's stated title is warehouse worker; their journal shows
+  // tiling + flooring: the suitability reading names TILER (two shared
+  // skills, MIN_SHARED = 2 in lib/opportunities/adjacent-directions.ts).
   await tiler.page.goto(`${BASE}/en/dashboard/work-in-numbers`);
   const directions = tiler.page.getByTestId("wi-directions").first();
   await expect(directions, "suitable directions are derived from the work, not from a title").toBeVisible({
     timeout: 60_000,
   });
-  await expect(directions.locator('[data-testid^="wi-direction-"]').first()).toBeVisible();
+  await expect(directions.getByTestId("wi-direction-tiler"), "tiler is named from the journal evidence").toBeVisible();
+  // The same derivation reaches the Living CV's career horizon (the person's
+  // own view; labelled derived, never printed).
+  await tiler.page.goto(`${BASE}/en/cv`);
+  const journey = tiler.page.getByTestId("cv-journey").first();
+  await expect(journey).toBeVisible({ timeout: 60_000 });
+  await expect(journey, "the Living CV horizon names the fitting profession").toContainText("Tiler");
   await tiler.close();
 });
 
