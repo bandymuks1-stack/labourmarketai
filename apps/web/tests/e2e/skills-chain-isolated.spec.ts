@@ -79,6 +79,30 @@ async function db<T>(path: string): Promise<T> {
   return (await r.json()) as T;
 }
 
+/** The platform's company verification, done here as the admin would. The
+ *  worker board shows needs of VERIFIED companies only (the
+ *  list_open_demand_for_workers rule); verifying is an admin act and not what
+ *  this walk proves, so it is the one service-role write in this spec, on the
+ *  local stack only. */
+async function verifyCompanyOf(address: string): Promise<void> {
+  const owner = await userId(address);
+  const [org] = await db<Array<{ legacy_company_id: string | null }>>(
+    `organizations?owner_profile_id=eq.${owner}&select=legacy_company_id`,
+  );
+  if (!org?.legacy_company_id) throw new Error("the company has no company record");
+  const r = await fetch(`${SB_URL}/rest/v1/companies?id=eq.${org.legacy_company_id}`, {
+    method: "PATCH",
+    headers: {
+      apikey: SB_SERVICE,
+      Authorization: `Bearer ${SB_SERVICE}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({ verification_status: "verified" }),
+  });
+  if (!r.ok) throw new Error(`local company verification → ${r.status}`);
+}
+
 async function userId(address: string): Promise<string> {
   const r = await fetch(`${SB_URL}/auth/v1/admin/users?per_page=200`, {
     headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}` },
@@ -384,7 +408,9 @@ test("K-4. a company needs a 'wet-room finishing specialist': the tiler sees the
   await setUpCompany(page, `Synthetic Bathrooms Co ${RUN}`);
   state.companyNeed = await postNeed(page, COMPANY_ROLE, "Tiling and waterproofing of bathrooms in Vilnius");
 
-  // WORKER → JOB: the tiler sees the need as a fitting opportunity.
+  // WORKER → JOB: the tiler sees the need as a fitting opportunity (on the
+  // board once the platform has verified the company).
+  await verifyCompanyOf(COMPANY);
   const tiler = await as(browser, TILER);
   await tiler.page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
   const card = tiler.page.locator(`li[id="opp-${state.companyNeed}"]`).first();
