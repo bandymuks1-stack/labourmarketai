@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Keyboard, StyleSheet, Text, View } from "react-native";
+import {
+  Keyboard,
+  StyleSheet,
+  Text,
+  View,
+  type GestureResponderEvent,
+} from "react-native";
 
 import { useAuth } from "../auth-context";
 import type {
@@ -114,6 +120,21 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
   // or reached Review and was cancelled before it became a press.
   const [reviewPressIns, setReviewPressIns] = useState(0);
   const [formTouches, setFormTouches] = useState(0);
+  // Geometry only (points, rounded): where the last touch on the form began
+  // and where Review sits in the window at that moment.
+  const reviewBox = useRef<View>(null);
+  const [touchAt, setTouchAt] = useState("none");
+  const [reviewAt, setReviewAt] = useState("none");
+  const onFormTouch = useCallback((event: GestureResponderEvent) => {
+    const { pageX, pageY } = event.nativeEvent;
+    setFormTouches((n) => n + 1);
+    setTouchAt(`${Math.round(pageX)}x${Math.round(pageY)}`);
+    reviewBox.current?.measureInWindow((x, y, w, h) =>
+      setReviewAt(
+        `${Math.round(x)}x${Math.round(y)}x${Math.round(w)}x${Math.round(h)}`,
+      ),
+    );
+  }, []);
   // Whether the software keyboard is up — on iOS it sits in its own window, so
   // a control "visible" in the app's layout can still be under it.
   const [keyboardUp, setKeyboardUp] = useState(() => Keyboard.isVisible());
@@ -358,8 +379,8 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
       style={styles.stack}
       testID={`journal-compose-form-${state.kind}${
         state.kind === "draft_failed" ? `-${state.failure.kind}` : ""
-      }-p${reviewPresses}-i${reviewPressIns}-t${formTouches}-kb${keyboardUp ? 1 : 0}`}
-      onTouchStart={() => setFormTouches((n) => n + 1)}
+      }-p${reviewPresses}-i${reviewPressIns}-t${formTouches}-kb${keyboardUp ? 1 : 0}-at${touchAt}-rv${reviewAt}`}
+      onTouchStart={onFormTouch}
     >
       <View testID={traceTestId(trace, "journal.create_draft")}>
         <View testID={traceTestId(trace, "journal.list")}>
@@ -440,16 +461,18 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
         />
       ) : null}
 
-      <Button
-        testID="journal-compose-review"
-        busy={state.kind === "drafting"}
-        label={t("journal.compose.review")}
-        onPressIn={() => setReviewPressIns((n) => n + 1)}
-        onPress={() => {
-          setReviewPresses((n) => n + 1);
-          void draft();
-        }}
-      />
+      <View ref={reviewBox} collapsable={false}>
+        <Button
+          testID="journal-compose-review"
+          busy={state.kind === "drafting"}
+          label={t("journal.compose.review")}
+          onPressIn={() => setReviewPressIns((n) => n + 1)}
+          onPress={() => {
+            setReviewPresses((n) => n + 1);
+            void draft();
+          }}
+        />
+      </View>
       <Button
         variant="quiet"
         testID="journal-compose-back"

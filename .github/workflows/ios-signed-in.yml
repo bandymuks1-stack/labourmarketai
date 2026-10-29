@@ -173,9 +173,17 @@ jobs:
                 const walk = (n) => {
                   const id = n?.attributes?.["resource-id"] ?? n?.attributes?.identifier;
                   if (id) ids.add(String(id).split("/").pop());
+                  // Geometry of the controls a tap aims at (our own ids only).
+                  const short = id ? String(id).split("/").pop() : "";
+                  const aimed = ["journal-compose-review", "journal-compose-back", "journal-compose-site", "tab-today"];
+                  if (aimed.includes(short) && n?.attributes?.bounds) ids.add(short + " bounds=" + n.attributes.bounds);
                   (n?.children ?? []).forEach(walk);
                 };
-                try { walk(JSON.parse(s.slice(s.indexOf("{")))); } catch { console.log("(no hierarchy)"); }
+                try {
+                  const root = JSON.parse(s.slice(s.indexOf("{")));
+                  if (root?.attributes?.bounds) ids.add("(root) bounds=" + root.attributes.bounds);
+                  walk(root);
+                } catch { console.log("(no hierarchy)"); }
                 console.log([...ids].sort().join("\n"));
               });' || true
             echo "::endgroup::"
