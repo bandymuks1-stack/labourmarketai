@@ -270,7 +270,11 @@ jobs:
           T="$(q "select count(*) from public.customer_requests cr where cr.profile_id = '$SEED' and cr.status = 'submitted' and row_to_json(cr)::text ilike '%two tilers%'")"
           E="$(q "select count(*) from public.customer_requests cr where cr.profile_id = '$SEED' and cr.status = 'submitted' and row_to_json(cr)::text ilike '%one electrician%'")"
           echo "first need rows=$T; second need rows=$E"
-          [ "$T" = "1" ] && [ "$E" = "1" ] || { echo "::error::expected the first and the second need once each (first=$T second=$E)"; exit 1; }
+          if ! { [ "$T" = "1" ] && [ "$E" = "1" ]; }; then
+            # Local, synthetic rows only: say WHICH columns carry the marker text.
+            echo "columns carrying the marker: $(q "select string_agg(distinct key, ',') from public.customer_requests cr, json_each_text(row_to_json(cr)) where cr.profile_id = '$SEED' and value ilike '%QA-SYNTHETIC%'")"
+            echo "::error::expected the first and the second need once each (first=$T second=$E)"; exit 1
+          fi
           echo "ANDROID_NEED_SUBMIT_ISOLATED_PROVEN: on-device draft + confirm stored the first AND the second need (two distinct rows, one each) for the synthetic company (local stack, production untouched)"
           echo "- ANDROID_NEED_SUBMIT_ISOLATED_PROVEN: sign-in → jobs search → empty need refused → first need sent → Done → fresh form → second need sent → two submitted rows (local stack)" >> "$GITHUB_STEP_SUMMARY"
 
