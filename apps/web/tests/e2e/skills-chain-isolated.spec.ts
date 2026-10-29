@@ -20,12 +20,12 @@ import { verifyCompanyAsLocalAdmin } from "./isolated-web-a-helpers";
  *       company finds the tiler by skill, without the private journal text,
  *       the name, or any row of the journal under its own row-level security;
  *   K-5 an agency posts a welding need and finds the welder the same way;
- *   K-6 the tiler disputes one reading of their entry ("flooring"): the
+ *   K-6 the tiler's work points at professional directions their skills
+ *       already apply to (tiler: tiling + flooring from the journal);
+ *   K-7 the tiler disputes one reading of their entry ("flooring"): the
  *       dispute is recorded on the entry (basis kept), the evidence link is
  *       withdrawn, the tier falls back, a re-run of recognition does not put
- *       it back, and the Living CV no longer shows it as recorded work;
- *   K-7 the tiler's work points at professional directions their skills
- *       already apply to.
+ *       it back, and the Living CV no longer shows it as recorded work.
  *
  * It refuses to run anywhere but the local stack (owner decision 2026-10-28:
  * no synthetic accounts in production). Outcomes are read back from that
@@ -433,7 +433,20 @@ test("K-5. an agency needs a 'steel structure crew member' and finds the welder 
 
 // ── K-6 ─────────────────────────────────────────────────────────────────────
 
-test("K-6. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the basis is kept, and it stays withdrawn", async ({ browser }) => {
+test("K-6. the tiler's recorded work points at professional directions the skills already apply to", async ({ browser }) => {
+  const tiler = await as(browser, TILER);
+  await tiler.page.goto(`${BASE}/en/dashboard/work-in-numbers`);
+  const directions = tiler.page.getByTestId("wi-directions").first();
+  await expect(directions, "suitable directions are derived from the work, not from a title").toBeVisible({
+    timeout: 60_000,
+  });
+  await expect(directions.locator('[data-testid^="wi-direction-"]').first()).toBeVisible();
+  await tiler.close();
+});
+
+// ── K-7 ─────────────────────────────────────────────────────────────────────
+
+test("K-7. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the basis is kept, and it stays withdrawn", async ({ browser }) => {
   const flooring = await skillId("flooring");
   const tiler = await as(browser, TILER);
   const page = tiler.page;
@@ -504,18 +517,5 @@ test("K-6. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
   await expect(caps).toBeVisible({ timeout: 60_000 });
   await expect(caps.locator('li[data-level="recorded"]', { hasText: /^\s*Flooring/ })).toHaveCount(0);
   await expect(caps.locator('li[data-level="recorded"]', { hasText: /^\s*Tiling/ })).toHaveCount(1);
-  await tiler.close();
-});
-
-// ── K-7 ─────────────────────────────────────────────────────────────────────
-
-test("K-7. the tiler's recorded work points at professional directions the skills already apply to", async ({ browser }) => {
-  const tiler = await as(browser, TILER);
-  await tiler.page.goto(`${BASE}/en/dashboard/work-in-numbers`);
-  const directions = tiler.page.getByTestId("wi-directions").first();
-  await expect(directions, "suitable directions are derived from the work, not from a title").toBeVisible({
-    timeout: 60_000,
-  });
-  await expect(directions.locator('[data-testid^="wi-direction-"]').first()).toBeVisible();
   await tiler.close();
 });
