@@ -78,10 +78,12 @@ name: jobs-need-journey
 # scroll found a button, the layout grows and the button moves off screen
 # before the tap ("today-open-jobs not found" right after the scroll found it:
 # android.yml 40922440308, android-need-isolated 40869901855 / 40904995024).
-# Wait for the figures (or their failure) to settle first.
+# Wait for the figures — or their failure notice — to settle first (iOS
+# 40934266154: the figures read failed, the retry notice arrived after the
+# scroll, and the tap meant for Jobs opened Profile).
 - extendedWaitUntil:
     visible:
-      id: "today-figures"
+      id: "today-figures|capability-retry"
     timeout: 30000
     optional: true
 - scrollUntilVisible:
@@ -118,10 +120,14 @@ name: jobs-need-journey
     commands:
       - tapOn:
           id: "jobs-open-0"
+      # Optional: on iOS the driver can keep answering from the app it left
+      # (40934266154: Safari's own ids on screen, the board still "visible").
+      # The browser hand-off is the web walk's proof; the return below is ours.
       - extendedWaitUntil:
           notVisible:
             id: "jobs-loaded"
           timeout: 20000
+          optional: true
       - launchApp:
           clearState: false
       # The app is back in the foreground and still signed in (its tab bar).
@@ -138,7 +144,7 @@ name: jobs-need-journey
 # --- 3. Need: an empty need is refused in place ---
 - extendedWaitUntil:
     visible:
-      id: "today-figures"
+      id: "today-figures|capability-retry"
     timeout: 30000
     optional: true
 - scrollUntilVisible:
