@@ -52,10 +52,24 @@ export default function ShellLayout() {
         tabBarLabelStyle: { fontSize: theme.font.small },
       }}
     >
-      <Tabs.Screen name="today" options={{ title: t("nav.today") }} />
-      <Tabs.Screen name="journal" options={{ title: t("nav.journal") }} />
-      <Tabs.Screen name="profile" options={{ title: t("nav.profile") }} />
-      <Tabs.Screen name="settings" options={{ title: t("nav.settings") }} />
+      {/* tabBarButtonTestID: the signed-in Maestro journey navigates by these
+          ids, never by a label that changes with the device language. */}
+      <Tabs.Screen
+        name="today"
+        options={{ title: t("nav.today"), tabBarButtonTestID: "tab-today" }}
+      />
+      <Tabs.Screen
+        name="journal"
+        options={{ title: t("nav.journal"), tabBarButtonTestID: "tab-journal" }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{ title: t("nav.profile"), tabBarButtonTestID: "tab-profile" }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{ title: t("nav.settings"), tabBarButtonTestID: "tab-settings" }}
+      />
       {/*
         Log work is an ACTION, not a fifth destination: it is reached from the
         journal and returns there, so `href: null` keeps it out of the tab bar
@@ -67,6 +81,17 @@ export default function ShellLayout() {
         name="log-work"
         options={{ href: null, title: t("journal.compose.title") }}
       />
+      {/* Two more STATIONS reached from Today, for the same reason: */}
+      <Tabs.Screen
+        name="opportunities"
+        options={{ href: null, title: t("opportunities.title") }}
+      />
+      <Tabs.Screen
+        name="availability"
+        options={{ href: null, title: t("availability.title") }}
+      />
+      <Tabs.Screen name="jobs" options={{ href: null, title: t("jobs.title") }} />
+      <Tabs.Screen name="need" options={{ href: null, title: t("need.title") }} />
     </Tabs>
   );
 }

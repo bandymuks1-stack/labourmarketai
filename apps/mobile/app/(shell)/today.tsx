@@ -88,6 +88,30 @@ export default function Screen() {
             label={t("today.openProfile")}
             onPress={() => router.push("/(shell)/profile")}
           />
+          <Button
+            variant="quiet"
+            testID="today-open-jobs"
+            label={t("today.openJobs")}
+            onPress={() => router.push("/(shell)/jobs")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-opportunities"
+            label={t("today.openOpportunities")}
+            onPress={() => router.push("/(shell)/opportunities")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-availability"
+            label={t("today.openAvailability")}
+            onPress={() => router.push("/(shell)/availability")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-need"
+            label={t("today.openNeed")}
+            onPress={() => router.push("/(shell)/need")}
+          />
         </View>
         <Divider />
         <Title>{t("today.recentWork")}</Title>

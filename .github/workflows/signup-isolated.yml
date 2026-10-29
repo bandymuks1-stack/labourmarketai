@@ -24,6 +24,11 @@ on:
       - ".github/workflows/signup-isolated.yml"
       - "apps/web/tests/e2e/signup-isolated.spec.ts"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
+      - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
+      - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
+      - "apps/web/lib/journal/entry-skill-retraction.ts"
+      - "apps/web/lib/journal/journal-entry-skills-actions.ts"
+      - "apps/web/lib/journal/skill-pipeline-actions.ts"
       - "apps/web/app/*/dashboard/company/people/**"
       - "apps/web/app/*/dashboard/company/settings/**"
       - "apps/web/app/*/dashboard/network/**"
@@ -51,6 +56,24 @@ on:
       - "apps/web/components/app/reset-password-form.tsx"
       - "apps/web/app/*/dashboard/journal/**"
       - "supabase/config.toml"
+      - "apps/web/tests/e2e/*-isolated-web-a.spec.ts"
+      - "apps/web/tests/e2e/isolated-web-a-helpers.ts"
+      - "apps/web/lib/notifications/**"
+      - "apps/web/lib/email/**"
+      - "apps/web/app/api/cron/weekly-digest/**"
+      - "apps/web/lib/opportunities/saved-search*"
+      - "apps/web/components/app/saved-searches-strip.tsx"
+      - "apps/web/components/app/notification-preferences-section.tsx"
+      - "apps/web/components/app/company-need-form.tsx"
+      - "apps/web/lib/staffing/company-need-*"
+      - "apps/web/lib/demand/demand-lifecycle*"
+      - "apps/web/tests/e2e/job-fit-evidence-isolated.spec.ts"
+      - "apps/web/tests/e2e/job-fit-main-compat-isolated.spec.ts"
+      - "apps/web/lib/opportunities/opportunity-need.ts"
+      - "apps/web/lib/opportunities/formal-requirements.ts"
+      - "apps/web/lib/market/need-skills*"
+      - "apps/web/lib/demand/demand-request.ts"
+      - "supabase/migrations/20261029190000_worker_board_need_skill_slugs_v1.sql"
 
 permissions:
   contents: read
@@ -65,9 +88,12 @@ jobs:
     timeout-minutes: 45
     env:
       APP_ORIGIN: http://127.0.0.1:3000
-      # Both walks share this one throwaway stack: self-serve sign-up and the
-      # agency roles / permissions walk (agency-roles-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts
+      # The walks share this one throwaway stack: self-serve sign-up, the
+      # agency roles / permissions walk (agency-roles-isolated.spec.ts), the
+      # Web A walks, the role journeys, and the journal -> skills -> Living CV
+      # -> matching -> dispute chain (skills-chain-isolated.spec.ts), and job fit from evidence
+      # (job-fit-evidence-isolated.spec.ts).
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -97,9 +123,15 @@ jobs:
       - name: Guard — production hosts resolve to nowhere on this runner
         run: |
           set -euo pipefail
-          printf '0.0.0.0 %s\n' gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app | sudo tee -a /etc/hosts >/dev/null
+          HOSTS="gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app"
+          # Leading newline: a hosts file without a trailing newline would glue the
+          # first entry onto its last line (and that line's address). IPv4 AND IPv6
+          # blackholes, so neither address family reaches real DNS.
+          { printf '\n'; for h in $HOSTS; do printf '0.0.0.0 %s\n:: %s\n' "$h" "$h"; done; } | sudo tee -a /etc/hosts >/dev/null
           for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai; do
-            getent hosts "$h" | grep -q '^0\.0\.0\.0' || { echo "::error::$h still resolves"; exit 1; }
+            addrs="$(getent ahosts "$h" | awk '{print $1}' | sort -u)"
+            bad="$(printf '%s\n' "$addrs" | grep -vxE '0\.0\.0\.0|::' || true)"
+            [ -n "$addrs" ] && [ -z "$bad" ] || { echo "::error::$h still resolves (${bad:-no answer})"; exit 1; }
           done
 
       - name: Set up pnpm
@@ -134,7 +166,9 @@ jobs:
 
       - name: Start local Supabase (migrations replayed from scratch)
         run: |
-          set -uo pipefail
+          # The runner shell is `bash -e`: without +e a failed start exits before
+          # its log is printed and the cause (e.g. a migration error) is lost.
+          set +e -uo pipefail
           supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
           rc=$?
           grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 60
@@ -189,6 +223,41 @@ jobs:
           for i in $(seq 1 60); do curl -fsS -o /dev/null "$APP_ORIGIN/en" && break; sleep 2; done
           curl -fsS -o /dev/null "$APP_ORIGIN/en"
 
+      # APP MAIL (notifications-isolated-web-a.spec.ts). The product sends its
+      # own mail over SMTP with implicit TLS on 465 (lib/email/smtp.ts). A
+      # CI-only catcher — the stack's own Mailpit image, a second container —
+      # listens on 127.0.0.1:465 with a throwaway self-signed certificate and
+      # accepts any login; it relays nothing. Only a SECOND app instance (3001)
+      # is pointed at it, so the walks on 3000 keep the "no mailbox" product.
+      - name: App mail catcher — local Mailpit over implicit TLS (relays nothing)
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/mailtls"; mkdir -p "$d"
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout "$d/key.pem" -out "$d/cert.pem" -days 1 \
+            -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" 2>/dev/null
+          chmod 644 "$d/key.pem" "$d/cert.pem"
+          img="$(docker inspect supabase_inbucket_labourmarketai --format '{{.Config.Image}}')"
+          docker run -d --name ci_app_mailpit -p 127.0.0.1:465:1025 -p 127.0.0.1:54334:8025 -v "$d:/certs:ro" \
+            -e MP_SMTP_TLS_CERT=/certs/cert.pem -e MP_SMTP_TLS_KEY=/certs/key.pem \
+            -e MP_SMTP_REQUIRE_TLS=true -e MP_SMTP_AUTH_ACCEPT_ANY=true "$img" >/dev/null
+          for i in $(seq 1 30); do curl -fsS -o /dev/null http://127.0.0.1:54334/api/v1/info && break; sleep 1; done
+          curl -fsS -o /dev/null http://127.0.0.1:54334/api/v1/info
+
+      - name: Start the mail-enabled app instance (3001 — app mail to the local catcher only)
+        env:
+          INVITE_EMAIL_PROVIDER: smtp
+          LM_SMTP_HOST: localhost
+          LM_SMTP_PORT: "465"
+          LM_SMTP_USER: ci-catcher
+          LM_SMTP_PASS: ci-catcher-accepts-any-login
+          LM_SMTP_FROM: "LabourMarket.ai CI <noreply@ci.labourmarket.test>"
+        run: |
+          set -euo pipefail
+          NODE_EXTRA_CA_CERTS="$RUNNER_TEMP/mailtls/cert.pem" pnpm -F web exec next start -H 127.0.0.1 -p 3001 > "$RUNNER_TEMP/next-mail.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/next-mail.pid"
+          for i in $(seq 1 60); do curl -fsS -o /dev/null "http://127.0.0.1:3001/en" && break; sleep 2; done
+          curl -fsS -o /dev/null "http://127.0.0.1:3001/en"
+
       - name: Run the sign-up walk
         working-directory: apps/web
         env:
@@ -196,14 +265,55 @@ jobs:
           E2E_BASE_URL: http://127.0.0.1:3000
           E2E_NO_SERVER: "1"
           E2E_LOCAL_STACK: "1"
+          MAIL_APP_BASE: http://127.0.0.1:3001
+          APP_MAIL_API: http://127.0.0.1:54334
         run: pnpm exec playwright test $SPEC --reporter=list --trace=off
+
+      # PRODUCTION-CODE COMPATIBILITY (owner gate for 20261029190000, deploy order
+      # migration -> app): the CURRENT production code (origin/main) is built
+      # and run against this stack, whose database now carries the migrated
+      # reader (job-fit-evidence-isolated.spec.ts G-3 re-applied it). Same
+      # local-only env; nothing leaves the runner.
+      - name: Production-code compatibility — build origin/main against the migrated stack
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin main
+          echo "origin/main = $(git rev-parse FETCH_HEAD)"
+          mkdir -p "$RUNNER_TEMP/main"
+          git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/main"
+          cd "$RUNNER_TEMP/main"
+          pnpm install --frozen-lockfile --filter=!mobile > "$RUNNER_TEMP/main-install.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/main-install.log"; exit 1; }
+          pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
+          grep -rqF "127.0.0.1:54321" apps/web/.next/static apps/web/.next/server || { echo "::error::main build lacks the local Supabase URL"; exit 1; }
+          pnpm -F web exec next start -H 127.0.0.1 -p 3002 > "$RUNNER_TEMP/next-main.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/next-main.pid"
+          for i in $(seq 1 60); do curl -fsS -o /dev/null "http://127.0.0.1:3002/en" && break; sleep 2; done
+          curl -fsS -o /dev/null "http://127.0.0.1:3002/en"
+
+      - name: Run the compatibility walk (production code, migrated database)
+        working-directory: apps/web
+        env:
+          SIGNUP_ISOLATED: "1"
+          JOBFIT_COMPAT: "1"
+          E2E_BASE_URL: http://127.0.0.1:3002
+          E2E_NO_SERVER: "1"
+          E2E_LOCAL_STACK: "1"
+        run: pnpm exec playwright test tests/e2e/job-fit-main-compat-isolated.spec.ts --reporter=list --trace=off
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()
-        run: grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/next.log" | tail -n 60 || true
+        run: |
+          grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/next.log" | tail -n 60 || true
+          echo "--- mail-enabled instance"
+          grep -viE 'key|secret|jwt|token|password|eyJ|@' "$RUNNER_TEMP/next-mail.log" | tail -n 40 || true
+          echo "--- production-code instance"
+          grep -viE 'key|secret|jwt|token|password|eyJ|@' "$RUNNER_TEMP/next-main.log" 2>/dev/null | tail -n 40 || true
 
       - name: Stop app and local Supabase
         if: always()
         run: |
           if [ -f "$RUNNER_TEMP/next.pid" ]; then kill "$(cat "$RUNNER_TEMP/next.pid")" 2>/dev/null || true; fi
+          if [ -f "$RUNNER_TEMP/next-mail.pid" ]; then kill "$(cat "$RUNNER_TEMP/next-mail.pid")" 2>/dev/null || true; fi
+          if [ -f "$RUNNER_TEMP/next-main.pid" ]; then kill "$(cat "$RUNNER_TEMP/next-main.pid")" 2>/dev/null || true; fi
+          docker rm -f ci_app_mailpit >/dev/null 2>&1 || true
           supabase stop --no-backup || true

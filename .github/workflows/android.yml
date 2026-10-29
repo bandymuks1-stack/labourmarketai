@@ -69,6 +69,11 @@ on:
       - ".github/workflows/android.yml"
       - ".github/scripts/android-emulator-journey.sh"
   workflow_dispatch:
+    inputs:
+      origin:
+        description: "API origin the app talks to: https scheme + host only (production, or an isolated staging that shares production Supabase). Empty = https://labourmarket.ai"
+        required: false
+        default: "https://labourmarket.ai"
 
 permissions:
   contents: read
@@ -89,6 +94,7 @@ jobs:
     outputs:
       artifact: ${{ steps.apk.outputs.artifact }}
       apk_file: ${{ steps.apk.outputs.apk_file }}
+      config_mode: ${{ steps.cfg.outputs.mode }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -126,13 +132,36 @@ jobs:
         id: cfg
         env:
           ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
+          # Dispatch-only input; empty on push/pull_request, so the fallback
+          # keeps every PR build pointed at production. https only: the app
+          # refuses cleartext and a typo here must fail before a 40-minute build.
+          ORIGIN_INPUT: ${{ inputs.origin }}
         run: |
+          ORIGIN="${ORIGIN_INPUT:-https://labourmarket.ai}"
+          # An ORIGIN only: scheme + host (+ port). A path would be baked into every
+          # API URL the app builds. The Supabase project stays the one behind
+          # vars.PROD_QA_ANON_KEY: a staging origin must share production Supabase
+          # (read-only anon), or this build signs people in to the wrong project.
+          case "$ORIGIN" in
+            https://*) ;;
+            *) echo "::error::origin must start with https:// (got: $ORIGIN)"; exit 1;;
+          esac
+          ORIGIN="${ORIGIN%/}"
+          case "${ORIGIN#https://}" in
+            */*|*\?*|*\#*) echo "::error::origin must be scheme + host only, no path, query or fragment (got: $ORIGIN)"; exit 1;;
+          esac
+          # The host itself must be a DNS name (+ optional port): an empty host
+          # ("https://"), whitespace or any other character fails here, before
+          # the native build, not inside the app's config reader afterwards.
+          if ! printf '%s' "${ORIGIN#https://}" | grep -Eq '^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*(:[0-9]{1,5})?$'; then
+            echo "::error::origin host is not a DNS name with an optional port (got: $ORIGIN)"; exit 1
+          fi
           if [ -n "$ANON_KEY" ]; then
             REF=$(node -e 'const p=JSON.parse(Buffer.from(process.env.ANON_KEY.split(".")[1],"base64url").toString());if(p.role!=="anon"){console.error("refusing: key role is "+p.role);process.exit(1)}process.stdout.write(p.ref)')
             echo "EXPO_PUBLIC_SUPABASE_URL=https://${REF}.supabase.co" >> "$GITHUB_ENV"
             echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY}" >> "$GITHUB_ENV"
-            echo "EXPO_PUBLIC_API_BASE_URL=https://labourmarket.ai" >> "$GITHUB_ENV"
-            echo "mode=production public config (anon key from vars.PROD_QA_ANON_KEY)" >> "$GITHUB_OUTPUT"
+            echo "EXPO_PUBLIC_API_BASE_URL=${ORIGIN}" >> "$GITHUB_ENV"
+            echo "mode=production public config (anon key from vars.PROD_QA_ANON_KEY; origin ${ORIGIN})" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::vars.PROD_QA_ANON_KEY not set — building with PLACEHOLDER config; the APK cannot sign anyone in"
             echo "EXPO_PUBLIC_SUPABASE_URL=https://example.supabase.co" >> "$GITHUB_ENV"
@@ -145,41 +174,12 @@ jobs:
         working-directory: apps/mobile
         run: pnpm exec expo prebuild --platform android --no-install
 
-      # Two ABIs, not the template's four: arm64-v8a for real phones, x86_64
-      # for the emulator job. 32-bit ABIs only double the C++ build time.
+      # The build itself is ONE script, shared with android-need-isolated.yml.
       - name: Gradle assembleRelease (debug-signed internal test build)
         working-directory: apps/mobile/android
         env:
           NODE_ENV: production
-        run: |
-          # Leading newline: the generated gradle.properties has NO trailing
-          # newline, and a bare append glued this onto the last property
-          # (expo.inlineModules.watchedDirectories) — run 3 proved it.
-          printf '\norg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m\n' >> gradle.properties
-          # pipefail: the diagnostic greps below pipe into tail/head; the
-          # build's own status is captured explicitly in STATUS either way.
-          set -o pipefail
-          set +e
-          ./gradlew :app:assembleRelease \
-            -PreactNativeArchitectures=arm64-v8a,x86_64 \
-            --no-daemon --stacktrace --info > gradle.log 2>&1
-          STATUS=$?
-          if [ $STATUS -ne 0 ]; then
-            # A failing configuration-time `node` call prints its stderr BEFORE
-            # the FAILURE block — show what led up to it, not just the trace.
-            echo "===== configuration-time node invocations ====="
-            grep -n -A 3 "Starting process 'command 'node''" gradle.log | tail -40
-            echo "===== output leading up to FAILURE ====="
-            sed -n '1,/FAILURE:/p' gradle.log | tail -150
-            echo "===== error regions ====="
-            grep -n -B 3 -A 25 -E "FAILURE:|error:|What went wrong" gradle.log | head -400
-            echo "===== last 120 lines ====="
-            tail -120 gradle.log
-          else
-            tail -30 gradle.log
-            echo "ANDROID_RELEASE_APK_BUILT"
-          fi
-          exit $STATUS
+        run: bash ../../../.github/scripts/android-assemble-release.sh
 
       - name: Upload Gradle log on failure
         if: failure()
@@ -354,3 +354,81 @@ jobs:
           if-no-files-found: ignore
           include-hidden-files: true
           retention-days: 14
+
+  # SIGNED-IN JOURNEY — workflow_dispatch ONLY, never on a PR or a push.
+  # The ONE synthetic review identity (qa.owner+multiw, owner approval
+  # 2026-10-28) gets a ONE-RUN password at the start of the job and a scrambled
+  # one at the end (.github/scripts/mobile-qa-credential.mjs, `production-qa`
+  # environment); no password is stored anywhere. PR runs never receive
+  # environment secrets. The flow signs in, reads Today through /api/mcp,
+  # drafts and confirms ONE journal entry for the synthetic identity, reads
+  # the profile and signs out; nothing from the session is uploaded (public
+  # repository). Claim token: ANDROID_SIGNED_IN_JOURNEY_PROVEN.
+  signed-in:
+    name: Signed-in journey (dispatch only, production-qa)
+    # ONE review identity, ONE password at a time: every job that issues and
+    # scrambles it (Android and iOS, any ref) waits for the others.
+    concurrency:
+      group: mobile-qa-review-identity
+      cancel-in-progress: false
+    if: github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production-qa
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download APK
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ${{ needs.build.outputs.artifact }}
+          path: dist-apk
+
+      - name: Set up Java 17 (Temurin)
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Issue a one-run password for the mobile review identity (masked)
+        env:
+          SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node .github/scripts/mobile-qa-credential.mjs issue
+
+      - name: Install Maestro CLI
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+          "$HOME/.maestro/bin/maestro" --version
+
+      - name: Emulator — install, sign in, read, write, sign out
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        env:
+          MAESTRO_CLI_NO_ANALYTICS: "1"
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash .github/scripts/android-emulator-signed-in-journey.sh "dist-apk/${{ needs.build.outputs.apk_file }}" "${{ needs.build.outputs.config_mode }}"
+      - name: Cleanup — close the synthetic needs this journey posted (always, also on failure)
+        if: always()
+        env:
+          ANON_KEY: ${{ vars.PROD_QA_ANON_KEY }}
+        run: node .github/scripts/mobile-qa-close-synthetic-needs.mjs
+
+      - name: Scramble the review identity's password (always, also on failure)
+        if: always()
+        env:
+          SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node .github/scripts/mobile-qa-credential.mjs scramble

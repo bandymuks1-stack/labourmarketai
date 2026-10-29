@@ -250,6 +250,11 @@ export type ParsedFragmentInput = {
    *  be skill-linked by the save; the composer's parser-derived slugs never
    *  set it, so confirming a time parse can't silently declare a skill. */
   selected?: boolean;
+  /** True ONLY for a skill row the person ADDED (or re-ticked) in THIS edit
+   *  session — never for a row preloaded from the saved entry. Only such a
+   *  row may supersede an earlier dispute of its skill (an untouched re-save
+   *  must never silently reverse one). */
+  reselected?: boolean;
   /** Provenance of the fragment's rows. `worker_input` (default) when the
    *  person reviewed the parse fragment by fragment (the composer);
    *  `ai_extracted` when a transport persisted the deterministic parse of the
@@ -322,6 +327,7 @@ export function parseFragments(raw: string | null): ParsedFragmentInput[] {
             ? r.userLabel.trim().slice(0, 200)
             : null,
         selected: r.selected === true,
+        reselected: r.selected === true && r.reselected === true,
         source: r.source === "ai_extracted" ? "ai_extracted" : "worker_input",
       });
     }

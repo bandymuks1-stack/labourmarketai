@@ -135,8 +135,10 @@ export {
 } from "@/lib/journal/entry-recognition-markers";
 import {
   ENTRY_MARKER_SLUGS,
+  latestSkillDecisions,
   readEntryRecognitionMarkers,
 } from "@/lib/journal/entry-recognition-markers";
+import { readEntryChainDecisionRows } from "@/lib/journal/entry-skill-disputes";
 
 function newTrace(): string {
   return randomBytes(6).toString("hex");
@@ -236,6 +238,7 @@ export async function loadEntryRecognitionInputs(
       .eq("entry_id", entryId)
       .in("metric_slug", [
         ENTRY_MARKER_SLUGS.skillRejected,
+        ENTRY_MARKER_SLUGS.skillReaffirmed,
         ENTRY_MARKER_SLUGS.claimRejected,
         ENTRY_MARKER_SLUGS.claim,
         ENTRY_MARKER_SLUGS.unresolvedFragment,
@@ -269,6 +272,17 @@ export async function loadEntryRecognitionInputs(
   // ONE reader of the entry's markers — the journal page reads the same one
   // at render time for the entry card's pending candidates.
   const markers = readEntryRecognitionMarkers(metricRows);
+  // The person's skill decisions are judged across the entry's EDIT CHAIN:
+  // an edit carries a rejection onto the new entry but not a later re-link,
+  // so the newest entry's own copies alone could revive a superseded dispute.
+  const chainDecisions = await readEntryChainDecisionRows(sb, entryId);
+  if (chainDecisions) {
+    markers.rejectedSlugs = new Set(
+      [...latestSkillDecisions(chainDecisions)]
+        .filter(([, d]) => d === "rejected")
+        .map(([slug]) => slug),
+    );
+  }
 
   return {
     declaredSlugs,
@@ -387,6 +401,8 @@ export async function processJournalEntrySkills(opts: {
           metric_slug: ENTRY_MARKER_SLUGS.skillRejected,
           source: "worker_input",
           value_text: slug,
+          // decision time: latest decision per (entry, slug) wins
+          value_numeric: Date.now(),
         })),
       );
       if (ins.error) {
@@ -531,6 +547,41 @@ export async function processJournalEntrySkills(opts: {
               .map((r) => ({ slug: r.slug }));
             writeSuccesses += 1;
           }
+        }
+      }
+    }
+
+    // ── 6b. The person's disputes win over any leftover link ──────────────
+    // A `skill_rejected` marker is the source of truth for this entry: a
+    // link for a disputed skill that is still here (a withdrawal that did
+    // not land, or a link written before the dispute) is removed on every
+    // run, so "refresh recognition" also repairs a half-finished dispute.
+    if (rejectedSlugUnion.size > 0) {
+      const [{ data: disputedRows, error: disputedErr }, { data: present, error: presentErr }] =
+        await Promise.all([
+          supabase.from("skills").select("id, slug").in("slug", [...rejectedSlugUnion]),
+          sb.from("journal_entry_skills").select("skill_id").eq("journal_entry_id", entryId),
+        ]);
+      const presentIds = new Set(((present ?? []) as { skill_id: string }[]).map((r) => r.skill_id));
+      const disputedIds = ((disputedRows ?? []) as { id: string; slug: string | null }[])
+        .filter((r) => typeof r.slug === "string" && rejectedSlugUnion.has(r.slug))
+        .map((r) => r.id)
+        .filter((id) => presentIds.has(id)); // only a link that is really still there
+      if (disputedErr || presentErr) {
+        logError(trace, "resolve_disputed", disputedErr ?? presentErr);
+        writeFailures += 1;
+      } else if (disputedIds.length > 0) {
+        const del = await sb
+          .from("journal_entry_skills")
+          .delete()
+          .eq("journal_entry_id", entryId)
+          .eq("worker_id", worker.id)
+          .in("skill_id", disputedIds);
+        if (del.error) {
+          logError(trace, "withdraw_disputed_links", del.error);
+          writeFailures += 1;
+        } else {
+          writeSuccesses += 1;
         }
       }
     }

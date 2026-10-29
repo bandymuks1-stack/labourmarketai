@@ -9914,7 +9914,11 @@
       },
       "basis": "Atitinka {matched} iš {total} reikalingų įgūdžių ({confirmed} patvirtinti vadovo)",
       "recognizedNote": "reikalavimai atpažinti iš užklausos teksto — dar nepatvirtinti",
-      "missingPrefix": "trūksta:"
+      "missingPrefix": "trūksta:",
+      "formalTitle": "Formalūs reikalavimai",
+      "formalLicence": "Vairuotojo pažymėjimas {categories}: formalus reikalavimas. Užfiksuotas darbas jo nepakeičia.",
+      "formalLicenceHeld": "Vairuotojo pažymėjimas {categories}: nurodei, kad jį turi (nepatikrinta).",
+      "formalQualification": "Šiam darbui gali būti teisiškai reikalinga profesinė kvalifikacija ar licencija. Užfiksuotas darbas jos nepakeičia."
     },
     "recommendations": {
       "basisCompact": "{matched} iš {total} įgūdžių, {confirmed} patvirtinti",

@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, type Dirent } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -341,6 +341,10 @@ describe("the production path is a SCRIPT, never a reachable surface", () => {
       "lib/guards/prod-qa-identity.test.ts",
       // Another guard TEST (never shipped): pins the walk-token rules (#2537).
       "lib/guards/prod-qa-token-hygiene.test.ts",
+      // Another guard TEST (never shipped): pins the mobile review identity's
+      // one-run password script to the allowlisted owner (#2871). Reads the
+      // guard as text, imports nothing from it.
+      "lib/guards/mobile-qa-credential.test.ts",
     ]);
     const offenders: string[] = [];
     for (const dir of ["app", "components", "lib"]) {
@@ -419,21 +423,18 @@ describe("the gate refuses to run rather than pass for the wrong reason", () => 
 
 function grepTree(dir: string, rx: RegExp): string[] {
   const out: string[] = [];
-  let entries: string[];
+  // Dirents, not a stat per path: the type comes with the listing, so there is
+  // no check-then-use window on a path another process may be rewriting.
+  let entries: Dirent[];
   try {
-    entries = readdirSync(dir);
+    entries = readdirSync(dir, { withFileTypes: true });
   } catch {
     return out;
   }
-  for (const entry of entries) {
+  for (const dirent of entries) {
+    const entry = dirent.name;
     const p = join(dir, entry);
-    let s;
-    try {
-      s = statSync(p);
-    } catch {
-      continue;
-    }
-    if (s.isDirectory()) {
+    if (dirent.isDirectory()) {
       // Build and test ARTEFACTS. Skipped both because they cannot contain a
       // source import and because walking a directory another process is
       // actively writing makes this assertion intermittently unreliable — the

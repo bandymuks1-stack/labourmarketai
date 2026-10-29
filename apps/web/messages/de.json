@@ -9914,7 +9914,11 @@
       },
       "basis": "{matched} von {total} erforderlichen Fähigkeiten passen ({confirmed} vom Manager bestätigt)",
       "recognizedNote": "Anforderungen aus dem Anfragetext erkannt — noch nicht bestätigt",
-      "missingPrefix": "fehlend:"
+      "missingPrefix": "fehlend:",
+      "formalTitle": "Formale Anforderungen",
+      "formalLicence": "Führerschein {categories}: eine formale Anforderung. Erfasste Arbeit ersetzt ihn nicht.",
+      "formalLicenceHeld": "Führerschein {categories}: du hast angegeben, ihn zu besitzen (nicht geprüft).",
+      "formalQualification": "Für diese Arbeit kann eine berufliche Qualifikation oder Lizenz gesetzlich vorgeschrieben sein. Erfasste Arbeit ersetzt sie nicht."
     },
     "recommendations": {
       "basisCompact": "{matched} von {total} Fähigkeiten, {confirmed} bestätigt",
