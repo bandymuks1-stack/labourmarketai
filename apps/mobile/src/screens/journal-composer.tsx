@@ -19,12 +19,7 @@ import { useLocale } from "../i18n/locale-context";
 import type { MessageKey } from "../i18n/messages";
 import { Body, Button, Divider, Field, NotAvailable } from "../ui/primitives";
 import { theme } from "../ui/theme";
-import {
-  traceTestId,
-  useRequestTrace,
-  useRootTouchHistory,
-  useRootTouchTrace,
-} from "../request-trace";
+import { traceTestId, useRequestTrace } from "../request-trace";
 import { CapabilityFailureNotice } from "./capability-failure";
 
 /**
@@ -116,8 +111,6 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
   const { locale } = useLocale();
   const { accessToken } = useAuth();
   const trace = useRequestTrace();
-  const rootTouch = useRootTouchTrace();
-  const touchHistory = useRootTouchHistory();
   // How many times Review reached our code — with the trace below, the CI
   // journey can tell a tap that never landed from a request that never came
   // back (state words and a count only; see request-trace.ts).
@@ -131,11 +124,25 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
   // and where Review sits in the window at that moment.
   const reviewBox = useRef<View>(null);
   const [touchAt, setTouchAt] = useState("none");
+  // The last ten touch points on this form, run-length coded
+  // (`201x589.201x437n7`), so a run can see which taps arrived and when the
+  // losses began.
+  const [touchHistory, setTouchHistory] = useState<
+    ReadonlyArray<{ at: string; n: number }>
+  >([]);
   const [reviewAt, setReviewAt] = useState("none");
   const onFormTouch = useCallback((event: GestureResponderEvent) => {
     const { pageX, pageY } = event.nativeEvent;
     setFormTouches((n) => n + 1);
-    setTouchAt(`${Math.round(pageX)}x${Math.round(pageY)}`);
+    const at = `${Math.round(pageX)}x${Math.round(pageY)}`;
+    setTouchAt(at);
+    setTouchHistory((history) => {
+      const last = history[history.length - 1];
+      if (last !== undefined && last.at === at) {
+        return [...history.slice(0, -1), { at, n: last.n + 1 }];
+      }
+      return [...history, { at, n: 1 }].slice(-10);
+    });
     reviewBox.current?.measureInWindow((x, y, w, h) =>
       setReviewAt(
         `${Math.round(x)}x${Math.round(y)}x${Math.round(w)}x${Math.round(h)}`,
@@ -386,10 +393,16 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
       style={styles.stack}
       testID={`journal-compose-form-${state.kind}${
         state.kind === "draft_failed" ? `-${state.failure.kind}` : ""
-      }-p${reviewPresses}-i${reviewPressIns}-t${formTouches}-kb${keyboardUp ? 1 : 0}-at${touchAt}-rv${reviewAt}-${rootTouch}`}
+      }-p${reviewPresses}-i${reviewPressIns}-t${formTouches}-kb${keyboardUp ? 1 : 0}-at${touchAt}-rv${reviewAt}`}
       onTouchStart={onFormTouch}
     >
-      <View testID={touchHistory}>
+      <View
+        testID={`journal-compose-touches-${
+          touchHistory
+            .map((h) => (h.n > 1 ? `${h.at}n${h.n}` : h.at))
+            .join(".") || "none"
+        }`}
+      >
       <View testID={traceTestId(trace, "journal.create_draft")}>
         <View testID={traceTestId(trace, "journal.list")}>
           <Body muted>{t("journal.compose.intro")}</Body>

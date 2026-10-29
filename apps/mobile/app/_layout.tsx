@@ -1,7 +1,6 @@
 import React from "react";
 import { Stack, type ErrorBoundaryProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AuthProvider } from "../src/auth-context";
@@ -9,7 +8,6 @@ import { ActorContextProvider } from "../src/context-provider";
 import { ProfileProvider } from "../src/profile-provider";
 import { WorkspaceEpochProvider } from "../src/workspace-epoch";
 import { LocaleProvider } from "../src/i18n/locale-context";
-import { traceRootTouch } from "../src/request-trace";
 import { CONFIG_PROBLEMS } from "../src/config";
 import { CrashScreen } from "../src/screens/crash";
 import { MisconfiguredScreen } from "../src/screens/misconfigured";
@@ -59,23 +57,12 @@ export default function RootLayout() {
                 read the same answer instead of fetching their own. */}
             <ProfileProvider>
               <ActorContextProvider>
-              {/* Every touch that reaches React Native passes here (touch
-                  events bubble): a count and a point, nothing else — the CI
-                  journeys' way to tell a tap the app never received from one
-                  a view inside it took (src/request-trace.ts). */}
-              <View
-                style={{ flex: 1 }}
-                onTouchStart={(e) =>
-                  traceRootTouch(e.nativeEvent.pageX, e.nativeEvent.pageY)
-                }
-              >
               <Stack
                 screenOptions={{
                   headerShown: false,
                   contentStyle: { backgroundColor: "#070706" },
                 }}
               />
-              </View>
               </ActorContextProvider>
             </ProfileProvider>
             </WorkspaceEpochProvider>

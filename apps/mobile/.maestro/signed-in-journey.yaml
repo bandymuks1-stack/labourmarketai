@@ -118,13 +118,18 @@ name: signed-in-journey
       platform: Android
     commands:
       - hideKeyboard
+# iOS: NOT a swipe. In every run from 40846299984 to 40904991200 the first
+# swipe here — a drag that also put the keyboard away (keyboardDismissMode
+# on-drag) — was followed by no tap ever reaching the app again (the form's
+# touch trace held only swipe start points, 201,437). A tap on the screen
+# title (not an input) puts the keyboard away without a drag.
 - runFlow:
     when:
       platform: iOS
     commands:
-      - swipe:
-          direction: UP
-          duration: 400
+      - tapOn:
+          id: "journal-compose-title"
+      - waitForAnimationToEnd
 - scrollUntilVisible:
     element:
       id: "journal-compose-site"
