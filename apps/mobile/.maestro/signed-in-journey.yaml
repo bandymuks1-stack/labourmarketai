@@ -154,13 +154,32 @@ name: signed-in-journey
       id: "journal-compose-form-.*-kb0"
     timeout: 5000
     optional: true
-# Scroll to the button BELOW Review, so Review sits clear of the bottom edge
-# (on iOS the tab bar covers the last strip of the screen).
-- scrollUntilVisible:
-    element:
-      id: "journal-compose-back"
-    direction: DOWN
-    timeout: 20000
+# Android: scroll to the button BELOW Review, so Review sits clear of the
+# bottom edge.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "journal-compose-back"
+          direction: DOWN
+          timeout: 20000
+# iOS: scroll only until Review itself shows. Runs 40846299984..40889181123:
+# after the driver's swipe that carried the form to its END (Back at the
+# bottom, rubber-band bounce), not one later tap reached the app — the
+# app-root touch count stayed at that swipe's start (201,437), on Review,
+# Back, the Today tab and a tap 30% down alike, while the screen showed the
+# app untouched (band colours: dark background, the gold Review band).
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "journal-compose-review"
+          direction: DOWN
+          timeout: 20000
 - waitForAnimationToEnd
 # Closing the keyboard moves the layout, so a tap can land where Review used to
 # be. Tap until the next state shows (a preview to save, or a context to
