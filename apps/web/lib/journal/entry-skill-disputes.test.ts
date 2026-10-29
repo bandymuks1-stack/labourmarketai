@@ -1,0 +1,91 @@
+import { describe, expect, it } from "vitest";
+import { disputeKey, readDisputedEntrySkills, withoutDisputedLinks } from "./entry-skill-disputes";
+
+/**
+ * The person's disputes are read COMPLETELY: PostgREST caps an unbounded
+ * select at max_rows (1000) without a word, so a marker past the first page
+ * would let its leftover link resurface as evidence (Codex review on #2885).
+ */
+
+type Marker = { entry_id: string; value_text: string };
+
+function markerClient(markers: Marker[], opts: { failPage?: number } = {}) {
+  const ranges: [number, number][] = [];
+  const client = {
+    from(table: string) {
+      const filters: Array<(r: Record<string, unknown>) => boolean> = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const q: any = {
+        select: () => q,
+        eq: () => q,
+        order: () => q,
+        in(col: string, vs: unknown[]) {
+          filters.push((r) => vs.includes(r[col]));
+          return q;
+        },
+        range: async (from: number, to: number) => {
+          ranges.push([from, to]);
+          if (opts.failPage !== undefined && from === opts.failPage * 1000) {
+            return { data: null, error: { code: "57014" } };
+          }
+          return { data: markers.slice(from, to + 1), error: null };
+        },
+        then(resolve: (v: unknown) => void) {
+          // skills catalogue
+          const rows = table === "skills" ? SKILLS.filter((r) => filters.every((f) => f(r))) : [];
+          resolve({ data: rows, error: null });
+        },
+      };
+      return q;
+    },
+  };
+  return { client, ranges };
+}
+
+const SKILLS = [
+  { id: "s-tiling", slug: "tiling" },
+  { id: "s-flooring", slug: "flooring" },
+];
+
+function manyMarkers(n: number, last: Marker): Marker[] {
+  const out: Marker[] = Array.from({ length: n }, (_, i) => ({
+    entry_id: `e-${String(i).padStart(5, "0")}`,
+    value_text: "tiling",
+  }));
+  out.push(last);
+  return out;
+}
+
+describe("readDisputedEntrySkills", () => {
+  it("a marker beyond the first 1000 rows still excludes its link", async () => {
+    const late = { entry_id: "e-late", value_text: "flooring" };
+    const { client, ranges } = markerClient(manyMarkers(1100, late));
+    const disputed = await readDisputedEntrySkills(client, "w1");
+    expect(ranges).toEqual([
+      [0, 999],
+      [1000, 1999],
+    ]);
+    expect(disputed?.has(disputeKey("e-late", "s-flooring"))).toBe(true);
+    expect(disputed?.has(disputeKey("e-00000", "s-tiling"))).toBe(true);
+    const kept = withoutDisputedLinks(
+      [
+        { journal_entry_id: "e-late", skill_id: "s-flooring" },
+        { journal_entry_id: "e-late", skill_id: "s-tiling" },
+      ],
+      disputed,
+    );
+    expect(kept).toEqual([{ journal_entry_id: "e-late", skill_id: "s-tiling" }]);
+  });
+
+  it("a page that fails makes the whole read UNKNOWN (null), never a partial set", async () => {
+    const { client } = markerClient(manyMarkers(1100, { entry_id: "e-late", value_text: "flooring" }), {
+      failPage: 1,
+    });
+    expect(await readDisputedEntrySkills(client, "w1")).toBeNull();
+  });
+
+  it("no markers → an empty set (nothing disputed)", async () => {
+    const { client } = markerClient([]);
+    expect(await readDisputedEntrySkills(client, "w1")).toEqual(new Set());
+  });
+});

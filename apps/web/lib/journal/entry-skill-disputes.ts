@@ -1,5 +1,6 @@
 import "server-only";
 import { ENTRY_MARKER_SLUGS } from "@/lib/journal/entry-recognition-markers";
+import { readAllPages } from "@/lib/journal/journal-list-core";
 
 /**
  * THE PERSON'S DISPUTE IS THE SOURCE OF TRUTH for what an entry evidences.
@@ -29,13 +30,20 @@ export async function readDisputedEntrySkills(
   workerId: string,
 ): Promise<DisputedEntrySkills | null> {
   try {
-    const { data: markers, error } = await sb
-      .from("journal_entry_metrics")
-      .select("entry_id, value_text, journal_entries!inner(worker_id)")
-      .eq("metric_slug", ENTRY_MARKER_SLUGS.skillRejected)
-      .eq("journal_entries.worker_id", workerId);
-    if (error) return null;
-    const rows = ((markers ?? []) as { entry_id: string; value_text: string | null }[]).filter(
+    // PAGED under a total order (PostgREST caps an unbounded select at
+    // max_rows without a word — a marker past it would let its link
+    // resurface). A read that hit the page ceiling is UNKNOWN, not complete.
+    const read = await readAllPages<{ entry_id: string; value_text: string | null }>(() =>
+      sb
+        .from("journal_entry_metrics")
+        .select("entry_id, value_text, journal_entries!inner(worker_id)")
+        .eq("metric_slug", ENTRY_MARKER_SLUGS.skillRejected)
+        .eq("journal_entries.worker_id", workerId)
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true }),
+    );
+    if (read.error || read.truncated) return null;
+    const rows = read.rows.filter(
       (m) => typeof m.entry_id === "string" && typeof m.value_text === "string" && m.value_text !== "",
     );
     if (rows.length === 0) return new Set();

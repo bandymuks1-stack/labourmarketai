@@ -31,6 +31,13 @@ function fakeDb(tables: Record<string, Row[]>) {
         filters.push((r) => vs.includes(r[col]));
         return q;
       },
+      order() {
+        return q;
+      },
+      range(from: number, to: number) {
+        const rows = (tables[table] ?? []).filter((r) => filters.every((f) => f(r)));
+        return Promise.resolve({ data: rows.slice(from, to + 1), error: null });
+      },
       delete() {
         op = "delete";
         return q;

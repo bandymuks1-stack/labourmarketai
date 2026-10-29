@@ -38,6 +38,8 @@ function pagedClient(data: LinkRow[], opts: { extendedSelectFails?: boolean } = 
       };
       for (const m of ["eq", "order"]) b[m] = () => b;
       b.range = async (from: number, to: number) => {
+        // The dispute-marker read (entry-skill-disputes.ts) is not a link page.
+        if (select.startsWith("entry_id")) return { data: [], error: null };
         ranges.push([from, to]);
         if (opts.extendedSelectFails && select.includes("provenance")) {
           return { data: null, error: { message: "undefined_column" } };
