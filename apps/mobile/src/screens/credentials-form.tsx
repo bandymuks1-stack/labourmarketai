@@ -82,6 +82,7 @@ export function CredentialsForm({ mode }: { mode: "sign-in" | "register" }) {
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           <Title>{isSignIn ? t("auth.signIn.title") : t("auth.register.title")}</Title>
 

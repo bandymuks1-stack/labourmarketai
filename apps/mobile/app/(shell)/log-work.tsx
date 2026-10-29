@@ -40,6 +40,10 @@ export default function Screen() {
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          // Scrolling closes the keyboard. On iOS a multi-line box's Return adds
+          // a line and a number pad has no Return at all, so without this the
+          // keyboard can cover Review with no obvious way to put it away.
+          keyboardDismissMode="on-drag"
         >
           <Title>{t("journal.compose.title")}</Title>
           <JournalComposer

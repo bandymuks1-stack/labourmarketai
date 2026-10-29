@@ -20,7 +20,7 @@ export default function Screen() {
   const { epoch } = useWorkspaceEpoch();
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <Title>{t("opportunities.title")}</Title>
         <OpportunitiesScreen key={epoch} />
       </ScrollView>
