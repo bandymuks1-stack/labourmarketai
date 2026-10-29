@@ -177,7 +177,8 @@ export function notificationSubjects(keyPrefix: string): Set<string> {
       auth?: { notifications?: { types?: Record<string, unknown> } };
     };
     for (const [k, v] of Object.entries(tree.auth?.notifications?.types ?? {})) {
-      if ((k === keyPrefix || k.startsWith(`${keyPrefix}_`) || k === `event_${keyPrefix}`) && typeof v === "string") {
+      const key = k.startsWith("event_") ? k.slice("event_".length) : k;
+      if ((key === keyPrefix || key.startsWith(`${keyPrefix}_`)) && typeof v === "string") {
         subjects.add(v);
       }
     }
