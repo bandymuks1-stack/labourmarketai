@@ -201,3 +201,37 @@ export async function accessToken(address: string): Promise<string> {
   if (!body.access_token) throw new Error(`local sign-in → ${r.status}`);
   return body.access_token;
 }
+
+/**
+ * The platform's company verification through the operator's own door: a
+ * LOCAL admin identity (the one seeded step — a profile_roles row in the
+ * throwaway database) calls admin_set_company_verification with its own
+ * session. The worker board serves needs of VERIFIED companies only
+ * (list_open_demand_for_workers), and a trigger refuses anyone but an admin.
+ */
+export async function verifyCompanyAsLocalAdmin(companyOwnerAddress: string, adminAddress: string): Promise<string> {
+  const created = await fetch(`${SB_URL}/auth/v1/admin/users`, {
+    method: "POST",
+    headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: adminAddress, password: PASSWORD, email_confirm: true }),
+  });
+  if (!created.ok) throw new Error(`local admin identity → ${created.status}`);
+  const adminId = await userId(adminAddress);
+  sqlExec(`insert into public.profile_roles (profile_id, role) values (${lit(adminId)}, 'admin')`);
+  const owner = await userId(companyOwnerAddress);
+  const [companyRow] = sql<{ id: string }>(
+    `select c.id from public.companies c where c.profile_id = ${lit(owner)}
+      union select o.legacy_company_id from public.organizations o
+       where o.owner_profile_id = ${lit(owner)} and o.legacy_company_id is not null`,
+  );
+  if (!companyRow?.id) throw new Error("the company record does not exist");
+  const verify = await fetch(`${SB_URL}/rest/v1/rpc/admin_set_company_verification`, {
+    method: "POST",
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${await accessToken(adminAddress)}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_company_id: companyRow.id, p_status: "verified", p_note: "isolated walk" }),
+  });
+  if (!verify.ok) throw new Error(`operator verification → ${verify.status}`);
+  const v = sql<{ v: string }>(`select verification_status as v from public.companies where id = ${lit(companyRow.id)}`)[0]?.v;
+  if (v !== "verified") throw new Error("the company is not verified after the operator act");
+  return companyRow.id;
+}
