@@ -22,6 +22,7 @@ import { theme } from "../ui/theme";
 import {
   traceTestId,
   useRequestTrace,
+  useRootTouchHistory,
   useRootTouchTrace,
 } from "../request-trace";
 import { CapabilityFailureNotice } from "./capability-failure";
@@ -116,6 +117,7 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
   const { accessToken } = useAuth();
   const trace = useRequestTrace();
   const rootTouch = useRootTouchTrace();
+  const touchHistory = useRootTouchHistory();
   // How many times Review reached our code — with the trace below, the CI
   // journey can tell a tap that never landed from a request that never came
   // back (state words and a count only; see request-trace.ts).
@@ -387,10 +389,12 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
       }-p${reviewPresses}-i${reviewPressIns}-t${formTouches}-kb${keyboardUp ? 1 : 0}-at${touchAt}-rv${reviewAt}-${rootTouch}`}
       onTouchStart={onFormTouch}
     >
+      <View testID={touchHistory}>
       <View testID={traceTestId(trace, "journal.create_draft")}>
         <View testID={traceTestId(trace, "journal.list")}>
           <Body muted>{t("journal.compose.intro")}</Body>
         </View>
+      </View>
       </View>
 
       <Field

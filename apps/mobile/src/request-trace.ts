@@ -90,14 +90,17 @@ export function useRequestTrace(): Readonly<Record<string, Entry>> {
 
 // ── touches that reached React Native at all ───────────────────────────────
 
-let rootTouches = { count: 0, at: "none" };
+let rootTouches = { count: 0, at: "none", recent: [] as string[] };
 const touchListeners = new Set<() => void>();
 
-/** Record one touch at the app root: a count and a rounded point only. */
+/** Record one touch at the app root: a count and rounded points only (the
+ *  last eight, so a run can see which taps arrived and in what order). */
 export function traceRootTouch(pageX: number, pageY: number) {
+  const at = `${Math.round(pageX)}x${Math.round(pageY)}`;
   rootTouches = {
     count: rootTouches.count + 1,
-    at: `${Math.round(pageX)}x${Math.round(pageY)}`,
+    at,
+    recent: [...rootTouches.recent, at].slice(-8),
   };
   for (const listener of touchListeners) listener();
 }
@@ -115,6 +118,21 @@ export function useRootTouchTrace(): string {
     () => rootTouches,
   );
   return `rt${value.count}at${value.at}`;
+}
+
+/** `rh201x437.201x589...` — the last eight touch points, oldest first. */
+export function useRootTouchHistory(): string {
+  const value = useSyncExternalStore(
+    (listener) => {
+      touchListeners.add(listener);
+      return () => {
+        touchListeners.delete(listener);
+      };
+    },
+    () => rootTouches,
+    () => rootTouches,
+  );
+  return `rh${value.recent.join(".") || "none"}`;
 }
 
 /** Test-only: forget every call. */
