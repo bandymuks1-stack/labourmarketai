@@ -19,6 +19,7 @@ import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-appl
 import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
 import {
   appendEntryMarker,
+  recordEntrySkillDecision,
   retractEntrySkillEvidence,
 } from "@/lib/journal/entry-skill-retraction";
 import {
@@ -564,12 +565,8 @@ export async function rejectJournalSkillCandidate(
     return finished.ok ? { ok: true } : { ok: false, code: "write_failed" };
   }
 
-  const ok = await appendEntryMarker(
-    ctx.sb,
-    ctx.entryId,
-    ENTRY_MARKER_SLUGS.skillRejected,
-    slug,
-  );
+  // ENTRY_MARKER_SLUGS.skillRejected, as the person's latest decision.
+  const ok = await recordEntrySkillDecision(ctx.sb, ctx.entryId, slug, "rejected");
   if (!ok) return { ok: false, code: "write_failed" };
   // A rejected RECOGNISED skill was already linked to this entry as
   // evidence by the pipeline: the dispute withdraws that link and lets the

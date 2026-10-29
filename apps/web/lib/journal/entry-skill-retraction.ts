@@ -1,6 +1,11 @@
 import "server-only";
 import { normalizeClaimLabel } from "@/lib/profile/skill-claim-extractor";
-import { ENTRY_MARKER_SLUGS } from "@/lib/journal/entry-recognition-markers";
+import {
+  ENTRY_MARKER_SLUGS,
+  latestSkillDecisions,
+  type EntryMarkerRow,
+  type EntrySkillDecision,
+} from "@/lib/journal/entry-recognition-markers";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
 
 /**
@@ -69,6 +74,52 @@ export async function appendEntryMarker(
   return !ins.error;
 }
 
+/**
+ * Record the person's decision on a skill reading of ONE entry, in the same
+ * append-only marker lane: `skill_rejected` (a dispute) or `skill_reaffirmed`
+ * (their own later re-link). The LATEST decision per (entry, slug) wins
+ * (`latestSkillDecisions`), ordered by the decision time in value_numeric.
+ * Idempotent: nothing is written when the latest decision already says so,
+ * and a re-affirmation is written only over a standing rejection.
+ * Only the person's explicit act calls this — recognition never does.
+ */
+export async function recordEntrySkillDecision(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sb: any,
+  entryId: string,
+  slug: string,
+  decision: EntrySkillDecision,
+): Promise<boolean> {
+  const { data, error } = await sb
+    .from("journal_entry_metrics")
+    .select("metric_slug, value_text, value_numeric")
+    .eq("entry_id", entryId)
+    .in("metric_slug", [ENTRY_MARKER_SLUGS.skillRejected, ENTRY_MARKER_SLUGS.skillReaffirmed]);
+  if (error) return false;
+  const rows = ((data ?? []) as EntryMarkerRow[]).filter(
+    (r) =>
+      r.metric_slug === ENTRY_MARKER_SLUGS.skillRejected ||
+      r.metric_slug === ENTRY_MARKER_SLUGS.skillReaffirmed,
+  );
+  const latest = latestSkillDecisions(rows).get(slug) ?? null;
+  if (latest === decision) return true;
+  if (decision === "reaffirmed" && latest !== "rejected") return true;
+  const lastAt = rows
+    .filter((r) => r.value_text?.trim() === slug)
+    .reduce((m, r) => Math.max(m, typeof r.value_numeric === "number" ? r.value_numeric : 0), 0);
+  const ins = await sb.from("journal_entry_metrics").insert([
+    {
+      entry_id: entryId,
+      metric_slug:
+        decision === "rejected" ? ENTRY_MARKER_SLUGS.skillRejected : ENTRY_MARKER_SLUGS.skillReaffirmed,
+      source: "worker_input",
+      value_text: slug,
+      value_numeric: Math.max(Date.now(), lastAt + 1),
+    },
+  ]);
+  return !ins.error;
+}
+
 export type EntrySkillRetraction = {
   ok: boolean;
   /** Catalogue slugs whose dispute is now recorded on the entry. */
@@ -114,12 +165,7 @@ export async function retractEntrySkillEvidence(
   let ok = true;
   const markedSlugs: string[] = [];
   for (const slug of markSlugs) {
-    const marked = await appendEntryMarker(
-      sb,
-      opts.entryId,
-      ENTRY_MARKER_SLUGS.skillRejected,
-      slug,
-    );
+    const marked = await recordEntrySkillDecision(sb, opts.entryId, slug, "rejected");
     if (marked) markedSlugs.push(slug);
     else ok = false;
   }

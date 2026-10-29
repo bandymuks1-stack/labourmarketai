@@ -1,5 +1,9 @@
 import "server-only";
-import { ENTRY_MARKER_SLUGS } from "@/lib/journal/entry-recognition-markers";
+import {
+  ENTRY_MARKER_SLUGS,
+  latestSkillDecisions,
+  type EntryMarkerRow,
+} from "@/lib/journal/entry-recognition-markers";
 import { readAllPages } from "@/lib/journal/journal-list-core";
 
 /**
@@ -33,19 +37,36 @@ export async function readDisputedEntrySkills(
     // PAGED under a total order (PostgREST caps an unbounded select at
     // max_rows without a word — a marker past it would let its link
     // resurface). A read that hit the page ceiling is UNKNOWN, not complete.
-    const read = await readAllPages<{ entry_id: string; value_text: string | null }>(() =>
+    const read = await readAllPages<{
+      entry_id: string;
+      metric_slug: string | null;
+      value_text: string | null;
+      value_numeric: number | null;
+    }>(() =>
       sb
         .from("journal_entry_metrics")
-        .select("entry_id, value_text, journal_entries!inner(worker_id)")
-        .eq("metric_slug", ENTRY_MARKER_SLUGS.skillRejected)
+        .select("entry_id, metric_slug, value_text, value_numeric, journal_entries!inner(worker_id)")
+        .in("metric_slug", [ENTRY_MARKER_SLUGS.skillRejected, ENTRY_MARKER_SLUGS.skillReaffirmed])
         .eq("journal_entries.worker_id", workerId)
         .order("created_at", { ascending: true })
         .order("id", { ascending: true }),
     );
     if (read.error || read.truncated) return null;
-    const rows = read.rows.filter(
-      (m) => typeof m.entry_id === "string" && typeof m.value_text === "string" && m.value_text !== "",
-    );
+    // The person's LATEST decision per (entry, slug) wins: a later explicit
+    // re-link supersedes an earlier dispute (never recognition alone).
+    const byEntry = new Map<string, EntryMarkerRow[]>();
+    for (const m of read.rows) {
+      if (typeof m.entry_id !== "string") continue;
+      const list = byEntry.get(m.entry_id) ?? [];
+      list.push({ metric_slug: m.metric_slug ?? ENTRY_MARKER_SLUGS.skillRejected, value_text: m.value_text, value_numeric: m.value_numeric ?? null });
+      byEntry.set(m.entry_id, list);
+    }
+    const rows: { entry_id: string; value_text: string }[] = [];
+    for (const [entryId, list] of byEntry) {
+      for (const [slug, decision] of latestSkillDecisions(list)) {
+        if (decision === "rejected") rows.push({ entry_id: entryId, value_text: slug });
+      }
+    }
     if (rows.length === 0) return new Set();
     const slugs = [...new Set(rows.map((m) => m.value_text as string))];
     const { data: skills, error: skillErr } = await sb.from("skills").select("id, slug").in("slug", slugs);

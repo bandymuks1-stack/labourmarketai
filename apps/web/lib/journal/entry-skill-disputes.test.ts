@@ -7,7 +7,7 @@ import { disputeKey, readDisputedEntrySkills, withoutDisputedLinks } from "./ent
  * would let its leftover link resurface as evidence (Codex review on #2885).
  */
 
-type Marker = { entry_id: string; value_text: string };
+type Marker = { entry_id: string; value_text: string; metric_slug?: string };
 
 function markerClient(markers: Marker[], opts: { failPage?: number } = {}) {
   const ranges: [number, number][] = [];
@@ -50,6 +50,7 @@ const SKILLS = [
 function manyMarkers(n: number, last: Marker): Marker[] {
   const out: Marker[] = Array.from({ length: n }, (_, i) => ({
     entry_id: `e-${String(i).padStart(5, "0")}`,
+    metric_slug: "skill_rejected",
     value_text: "tiling",
   }));
   out.push(last);
@@ -58,7 +59,7 @@ function manyMarkers(n: number, last: Marker): Marker[] {
 
 describe("readDisputedEntrySkills", () => {
   it("a marker beyond the first 1000 rows still excludes its link", async () => {
-    const late = { entry_id: "e-late", value_text: "flooring" };
+    const late = { entry_id: "e-late", metric_slug: "skill_rejected", value_text: "flooring" };
     const { client, ranges } = markerClient(manyMarkers(1100, late));
     const disputed = await readDisputedEntrySkills(client, "w1");
     expect(ranges).toEqual([
@@ -78,10 +79,22 @@ describe("readDisputedEntrySkills", () => {
   });
 
   it("a page that fails makes the whole read UNKNOWN (null), never a partial set", async () => {
-    const { client } = markerClient(manyMarkers(1100, { entry_id: "e-late", value_text: "flooring" }), {
+    const { client } = markerClient(manyMarkers(1100, { entry_id: "e-late", metric_slug: "skill_rejected", value_text: "flooring" }), {
       failPage: 1,
     });
     expect(await readDisputedEntrySkills(client, "w1")).toBeNull();
+  });
+
+  it("a later explicit re-link supersedes the dispute (latest decision wins)", async () => {
+    const markers = [
+      { entry_id: "e1", metric_slug: "skill_rejected", value_text: "flooring", value_numeric: 100 },
+      { entry_id: "e1", metric_slug: "skill_reaffirmed", value_text: "flooring", value_numeric: 200 },
+      { entry_id: "e2", metric_slug: "skill_rejected", value_text: "flooring", value_numeric: 150 },
+    ] as unknown as Marker[];
+    const { client } = markerClient(markers);
+    const disputed = await readDisputedEntrySkills(client, "w1");
+    expect(disputed?.has(disputeKey("e1", "s-flooring"))).toBe(false);
+    expect(disputed?.has(disputeKey("e2", "s-flooring"))).toBe(true);
   });
 
   it("no markers → an empty set (nothing disputed)", async () => {

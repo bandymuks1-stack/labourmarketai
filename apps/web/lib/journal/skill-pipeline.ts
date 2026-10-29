@@ -236,6 +236,7 @@ export async function loadEntryRecognitionInputs(
       .eq("entry_id", entryId)
       .in("metric_slug", [
         ENTRY_MARKER_SLUGS.skillRejected,
+        ENTRY_MARKER_SLUGS.skillReaffirmed,
         ENTRY_MARKER_SLUGS.claimRejected,
         ENTRY_MARKER_SLUGS.claim,
         ENTRY_MARKER_SLUGS.unresolvedFragment,
@@ -387,6 +388,8 @@ export async function processJournalEntrySkills(opts: {
           metric_slug: ENTRY_MARKER_SLUGS.skillRejected,
           source: "worker_input",
           value_text: slug,
+          // decision time: latest decision per (entry, slug) wins
+          value_numeric: Date.now(),
         })),
       );
       if (ins.error) {

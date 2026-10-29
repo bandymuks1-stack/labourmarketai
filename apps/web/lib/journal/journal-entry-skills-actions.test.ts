@@ -13,8 +13,10 @@ vi.mock("@/lib/journal/skill-source-apply", () => ({
   applyWorkerSkillSourceReconcile: vi.fn(async () => true),
 }));
 const retract = vi.fn();
+const decide = vi.fn(async (..._a: unknown[]) => true);
 vi.mock("@/lib/journal/entry-skill-retraction", () => ({
   retractEntrySkillEvidence: (...a: unknown[]) => retract(...a),
+  recordEntrySkillDecision: (...a: unknown[]) => decide(...a),
 }));
 
 let calls: string[] = [];
@@ -44,8 +46,9 @@ function client() {
           let data: unknown = [];
           if (table === "workers") data = { id: "w1" };
           if (table === "journal_entries") data = { id: "e1", worker_id: "w1" };
-          if (table === "worker_skills") data = LINKED.map((skill_id) => ({ skill_id }));
+          if (table === "worker_skills") data = [...LINKED, "s-mosaic"].map((skill_id) => ({ skill_id }));
           if (table === "journal_entry_skills" && op === "select") data = LINKED.map((skill_id) => ({ skill_id }));
+          if (table === "skills") data = [{ id: "s-mosaic", slug: "mosaic-tiling" }];
           resolve({ data, error: null });
         },
       };
@@ -60,6 +63,11 @@ import { setJournalEntrySkillLinks } from "./journal-entry-skills-actions";
 beforeEach(() => {
   calls = [];
   retract.mockReset();
+  decide.mockReset();
+  decide.mockImplementation(async () => {
+    calls.push("reaffirm-recorded");
+    return true;
+  });
 });
 
 describe("setJournalEntrySkillLinks — a removed link is a recorded dispute", () => {
@@ -93,6 +101,21 @@ describe("setJournalEntrySkillLinks — a removed link is a recorded dispute", (
     const res = await setJournalEntrySkillLinks("e1", ["s-tiling"]);
     expect(res).toMatchObject({ ok: false });
     expect(calls).not.toContain("delete:journal_entry_skills");
+  });
+
+  it("an explicit RE-LINK records the person's superseding decision before the link is written", async () => {
+    const res = await setJournalEntrySkillLinks("e1", [...LINKED, "s-mosaic"]);
+    expect(res).toMatchObject({ ok: true });
+    expect(decide).toHaveBeenCalledWith(expect.anything(), "e1", "mosaic-tiling", "reaffirmed");
+    expect(calls.indexOf("reaffirm-recorded")).toBeLessThan(calls.indexOf("insert:journal_entry_skills"));
+  });
+
+  it("a failed superseding decision writes no link", async () => {
+    decide.mockResolvedValue(false);
+    const res = await setJournalEntrySkillLinks("e1", [...LINKED, "s-mosaic"]);
+    expect(res).toMatchObject({ ok: false, message: "decision_not_recorded" });
+    expect(calls).not.toContain("delete:journal_entry_skills");
+    expect(calls).not.toContain("insert:journal_entry_skills");
   });
 
   it("adding links only records no dispute", async () => {

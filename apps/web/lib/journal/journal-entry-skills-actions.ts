@@ -7,7 +7,10 @@ import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { applyWorkerSkillSourceReconcile } from "@/lib/journal/skill-source-apply";
 import { writeEntrySkillLinks } from "@/lib/journal/entry-skill-link-write";
-import { retractEntrySkillEvidence } from "@/lib/journal/entry-skill-retraction";
+import {
+  recordEntrySkillDecision,
+  retractEntrySkillEvidence,
+} from "@/lib/journal/entry-skill-retraction";
 import { recognizeSkills } from "@/lib/structuring/skill-recognition";
 
 /**
@@ -111,6 +114,28 @@ export async function setJournalEntrySkillLinks(
     });
     if (!recorded.ok || recorded.markedSlugs.length !== removed.length) {
       return { ok: false, code: "link_write_failed", message: "dispute_not_recorded" };
+    }
+  }
+
+  // The person's explicit RE-LINK of a skill they disputed on this entry
+  // supersedes that dispute — recorded as their later decision in the same
+  // marker lane (`skill_reaffirmed`; latest decision per entry+slug wins),
+  // so neither the readers nor a recognition re-run hide or remove the link
+  // they just chose. Recognition alone never writes it.
+  const had = new Set(((before ?? []) as { skill_id: string }[]).map((r) => r.skill_id));
+  const added = unique.filter((id) => !had.has(id));
+  if (added.length > 0) {
+    const { data: addedSkills, error: addedErr } = await supabase
+      .from("skills")
+      .select("id, slug")
+      .in("id", added);
+    if (addedErr) return { ok: false, code: "link_write_failed", message: addedErr.message };
+    for (const row of (addedSkills ?? []) as { id: string; slug: string | null }[]) {
+      if (!row.slug || !added.includes(row.id)) continue;
+      const reaffirmed = await recordEntrySkillDecision(supabase, entryId, row.slug, "reaffirmed");
+      if (!reaffirmed) {
+        return { ok: false, code: "link_write_failed", message: "decision_not_recorded" };
+      }
     }
   }
 

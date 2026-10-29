@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { retractEntrySkillEvidence } from "./entry-skill-retraction";
+import { recordEntrySkillDecision, retractEntrySkillEvidence } from "./entry-skill-retraction";
 import { applyWorkerSkillSourceReconcile } from "./skill-source-apply";
 import { withoutDisputedLinks, disputeKey } from "./entry-skill-disputes";
 
@@ -204,6 +204,29 @@ describe("retractEntrySkillEvidence", () => {
       { journal_entry_id: "e2", skill_id: "s-blue" },
     ]);
     expect(withoutDisputedLinks(links, null)).toEqual(links);
+  });
+
+  it("a re-affirmation is written only over a standing rejection, and later than it", async () => {
+    const db = fakeDb(seed());
+    expect(await recordEntrySkillDecision(db.client, ENTRY, "welding-blueprint", "reaffirmed")).toBe(true);
+    expect(db.tables.journal_entry_metrics).toHaveLength(0); // nothing to supersede
+    const future = Date.now() + 60_000;
+    db.tables.journal_entry_metrics.push({
+      entry_id: ENTRY,
+      metric_slug: "skill_rejected",
+      value_text: "welding-blueprint",
+      value_numeric: future,
+    });
+    expect(await recordEntrySkillDecision(db.client, ENTRY, "welding-blueprint", "reaffirmed")).toBe(true);
+    const reaf = db.tables.journal_entry_metrics.find((r) => r.metric_slug === "skill_reaffirmed")!;
+    expect(reaf).toMatchObject({ entry_id: ENTRY, value_text: "welding-blueprint", source: "worker_input" });
+    expect(reaf.value_numeric as number).toBeGreaterThan(future);
+    // …and a second re-affirmation is a no-op (already the latest decision).
+    await recordEntrySkillDecision(db.client, ENTRY, "welding-blueprint", "reaffirmed");
+    expect(db.tables.journal_entry_metrics.filter((r) => r.metric_slug === "skill_reaffirmed")).toHaveLength(1);
+    // A dispute after the re-link is recorded again (decisions alternate).
+    await recordEntrySkillDecision(db.client, ENTRY, "welding-blueprint", "rejected");
+    expect(db.tables.journal_entry_metrics.filter((r) => r.metric_slug === "skill_rejected")).toHaveLength(2);
   });
 
   it("both dispute doors route through it (no second copy of the rule)", () => {
