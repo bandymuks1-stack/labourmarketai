@@ -30,6 +30,12 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Izvēlieties iesaisti…",
   "engagementAmbiguous": "Šis darbs var piederēt vairāk nekā vienai iesaistei. Pirms saglabāšanas izvēlieties, kurai.",
+  "unnamedOrganization": {
+    "company": "Uzņēmums bez nosaukuma",
+    "agency": "Aģentūra bez nosaukuma",
+    "other": "Organizācija bez nosaukuma"
+  },
+  "activeWorkspaceNoRelationship": "Jūs darbojaties {org} vārdā, bet darba attiecības ar {org} nav reģistrētas, tāpēc tās šeit netiek piedāvātas. Izvēlieties kontekstu, kuram šis darbs patiešām pieder.",
   "project": "Projekts",
   "projectChoose": "Izvēlieties projektu…",
   "projectNone": "Nav projekta darbs",

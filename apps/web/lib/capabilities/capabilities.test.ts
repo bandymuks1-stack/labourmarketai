@@ -1405,7 +1405,7 @@ describe("journal draft → confirm", () => {
         projectId: null,
         // The named context — the human sees WHERE the entry lands before
         // confirming.
-        engagementLabel: "Dev Statyba",
+        engagementLabel: "Dev Statyba · employee",
       });
       expect(typeof r.data?.confirmationToken).toBe("string");
     }
@@ -1422,7 +1422,7 @@ describe("journal draft → confirm", () => {
     if (r.ok) {
       const preview = r.data?.preview as Record<string, unknown>;
       expect(preview.engagementContextId).toBe(DRAFT.engagementContextId);
-      expect(preview.engagementLabel).toBe("Dev Statyba");
+      expect(preview.engagementLabel).toBe("Dev Statyba · employee");
       expect(typeof r.data?.confirmationToken).toBe("string");
     }
   });
@@ -1474,8 +1474,8 @@ describe("journal draft → confirm", () => {
       expect(r.data?.status).toBe("engagement_choice_required");
       expect(r.data?.confirmationToken).toBeUndefined();
       expect(r.data?.options).toEqual([
-        { id: EC_ROW.id, label: "Dev Statyba" },
-        { id: second.id, label: "Nonstop Group" },
+        { id: EC_ROW.id, label: "Dev Statyba · employee" },
+        { id: second.id, label: "Nonstop Group · employee" },
       ]);
     }
   });
@@ -1493,7 +1493,7 @@ describe("journal draft → confirm", () => {
       expect(r.data?.status).toBe("engagement_choice_required");
       expect(r.data?.confirmationToken).toBeUndefined();
       expect(r.data?.preview).toBeUndefined();
-      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba" }]);
+      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba · employee" }]);
       expect(String(r.data?.note)).toMatch(/not one of this account's active work contexts/);
     }
   });
@@ -1510,7 +1510,7 @@ describe("journal draft → confirm", () => {
     if (r.ok) {
       expect(r.data?.status).toBe("engagement_choice_required");
       expect(r.data?.confirmationToken).toBeUndefined();
-      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba" }]);
+      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba · employee" }]);
     }
   });
 
@@ -1529,10 +1529,10 @@ describe("journal draft → confirm", () => {
     expect(r).toMatchObject({ ok: false, code: "no_engagement_context" });
   });
 
-  it("duplicate option labels are qualified by relationship — two contexts at the same org stay tellable apart", async () => {
+  it("two contexts at the same org stay tellable apart — the ONE composer names the relationship", async () => {
     // The education case from the web selector (worklog-engagements.ts):
-    // employed at the org that also hosts the placement. Both bases render
-    // as the org name, so each gets its relationship as a qualifier.
+    // employed at the org that also hosts the placement. The shared composer
+    // reads "Org · Relationship", so the two are distinct by construction.
     const placement = {
       ...EC_ROW,
       id: "00000000-0000-4000-8000-0000000000ed",
@@ -1551,12 +1551,117 @@ describe("journal draft → confirm", () => {
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.data?.status).toBe("engagement_choice_required");
-      // The translation mock has() => false, so the qualifier is the raw
+      // The translation mock has() => false, so the relationship is the raw
       // slug here; in the app it is the localized relationshipTypes word.
       expect(r.data?.options).toEqual([
-        { id: EC_ROW.id, label: "Dev Statyba — employee" },
-        { id: placement.id, label: "Dev Statyba — student" },
+        { id: EC_ROW.id, label: "Dev Statyba · employee" },
+        { id: placement.id, label: "Dev Statyba · student" },
       ]);
+    }
+  });
+
+  // ── ACTIVE WORKSPACE (owner P0 2026-10-29) — the MCP draft resolves with the
+  // SAME signal the web composer and the chat work-log pass: the pointer from
+  // the one transport-neutral workspace core.
+  const ORG_A = "00000000-0000-4000-8000-00000000aa01";
+  const ORG_B = "00000000-0000-4000-8000-00000000bb01";
+  const ORG_ACTING = "00000000-0000-4000-8000-00000000cc01";
+  const ctxAt = (id: string, org: string | null, name: string | null, extra: Record<string, unknown> = {}) => ({
+    ...EC_ROW,
+    id,
+    is_primary: false,
+    organization_id: org,
+    organizations: org
+      ? { display_name: name, legal_name: null, organization_type: "company" }
+      : null,
+    ...extra,
+  });
+  const CTX_A = ctxAt("00000000-0000-4000-8000-0000000000a1", ORG_A, "Alfa");
+  const CTX_B = ctxAt("00000000-0000-4000-8000-0000000000b1", ORG_B, "Beta");
+  const CTX_PERSONAL = ctxAt("00000000-0000-4000-8000-0000000000p1", null, null, { is_primary: true });
+  /** A world where the caller ACTS FOR `pointer` — a governance membership
+   *  lists it (access), and the durable pointer names it. */
+  const actingWorld = (contexts: unknown[], pointer: string, memberOrgName = "Acting Org"): TableScript => ({
+    ...journalState("h0"),
+    engagement_contexts: { data: contexts, error: null },
+    organizations: { data: [], error: null },
+    company_memberships: {
+      data: [
+        {
+          organization_id: pointer,
+          role: "member",
+          organizations: { display_name: memberOrgName, legal_name: null, organization_type: "company" },
+        },
+      ],
+      error: null,
+    },
+    profiles: { data: { active_organization_id: pointer }, error: null },
+  });
+
+  it("rule W: acting for an organization with exactly one context there preselects it — no choice, still NAMED", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller(actingWorld([CTX_PERSONAL, CTX_A, CTX_B], ORG_B)),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const preview = r.data?.preview as Record<string, unknown>;
+      expect(preview.engagementContextId).toBe(CTX_B.id);
+      expect(preview.engagementLabel).toBe("Beta · employee");
+      expect(typeof r.data?.confirmationToken).toBe("string");
+      expect(r.data?.activeWorkspaceNotice).toBeUndefined();
+    }
+  });
+
+  it("CONTROL: the same contexts with NO active organization still ask (rule C) — the signal, not the data, decided", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({ ...journalState("h0"), engagement_contexts: { data: [CTX_PERSONAL, CTX_A, CTX_B], error: null } }),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data?.status).toBe("engagement_choice_required");
+  });
+
+  it("membership WITHOUT a work relationship: the choice says so plainly, orders active-first/personal-last, creates nothing", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller(actingWorld([CTX_PERSONAL, CTX_A, CTX_B], ORG_ACTING)),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("engagement_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      // The mock renders keys; in the app this is the localized sentence
+      // "You are acting for {org}, but no work relationship … is recorded".
+      expect(r.data?.activeWorkspaceNotice).toBe("activeWorkspaceNoRelationship");
+      const ids = (r.data?.options as { id: string }[]).map((o) => o.id);
+      // The acting org is NOT invented as an option; personal reads last.
+      expect(ids).toEqual([CTX_A.id, CTX_B.id, CTX_PERSONAL.id]);
+    }
+  });
+
+  it("an organization WITHOUT a name says so in the option label — never its bare type or relationship", async () => {
+    const unnamedAgency = ctxAt("00000000-0000-4000-8000-0000000000u1", ORG_B, null, {
+      relationship_slug: "owner",
+      organizations: { display_name: null, legal_name: null, organization_type: "agency" },
+    });
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({ ...journalState("h0"), engagement_contexts: { data: [CTX_PERSONAL, CTX_A, unnamedAgency], error: null } }),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const labels = (r.data?.options as { id: string; label: string }[]).map((o) => o.label);
+      expect(labels).toContain("unnamedOrganization.agency · owner");
+      expect(labels).not.toContain("owner");
     }
   });
 

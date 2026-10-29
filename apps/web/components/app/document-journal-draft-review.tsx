@@ -64,6 +64,8 @@ export async function DocumentJournalDraftReview({
             initialText={draft.text}
             engagements={eng.engagements}
             defaultEngagementId={eng.resolution.selectedId ?? null}
+            contextCandidates={eng.candidates}
+            activeOrganizationId={eng.activeOrganizationId ?? null}
             labels={{
               notesLabel: t("journalDraft.notesLabel"),
               engagementLabel: t("journalDraft.engagementLabel"),

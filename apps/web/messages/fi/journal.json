@@ -12,6 +12,12 @@
   "noContextCta": "Siirry hallintapaneeliin",
   "noContextProfileCta": "Vahvista profiiliasi sillä välin",
   "personalEntry": "Henkilökohtainen työntekijäkirjaus",
+  "unnamedOrganization": {
+    "company": "Nimetön yritys",
+    "agency": "Nimetön toimisto",
+    "other": "Nimetön organisaatio"
+  },
+  "activeWorkspaceNoRelationship": "Toimit organisaation {org} puolesta, mutta työsuhdetta organisaatioon {org} ei ole kirjattu, joten sitä ei tarjota tässä. Valitse konteksti, johon tämä työ todella kuuluu.",
   "reviewNotEnabledNote": "Tarkastusta ei ole vielä otettu käyttöön. Voit kirjata työsi nyt — mutta jotta kirjaukset voidaan tarkastaa, organisaation omistajan täytyy ottaa työpäiväkirjan tarkastus käyttöön sinulle.",
   "chooseWorkType": "Valitse työn tyyppi",
   "whatDidYouDo": "Mitä teit tänään töissä?",
