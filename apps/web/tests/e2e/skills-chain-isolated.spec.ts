@@ -1,4 +1,4 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 
 /**
  * WORK JOURNAL → SKILLS → LIVING CV → TWO-WAY MATCHING → DISPUTE, end to end,
@@ -172,16 +172,13 @@ async function as(browser: Browser, address: string): Promise<{ page: Page; clos
   return { page, close: () => ctx.close() };
 }
 
-/** React owns the element (a fill before hydration is a silent no-op). */
-async function hydrated(page: Page, selector: string): Promise<void> {
-  await page.waitForFunction(
-    (sel) => {
-      const el = document.querySelector(sel);
-      return !!el && Object.keys(el).some((k) => k.startsWith("__reactProps") || k.startsWith("__reactFiber"));
-    },
-    selector,
-    { timeout: 120_000 },
-  );
+/** Click until the expected result shows: a click that lands before the page
+ *  hydrated is a silent no-op, so the click is retried, never assumed. */
+async function clickUntil(target: Locator, result: Locator, timeout = 60_000): Promise<void> {
+  await expect(async () => {
+    if (!(await result.isVisible().catch(() => false))) await target.click({ timeout: 5_000 });
+    await expect(result).toBeVisible({ timeout: 5_000 });
+  }).toPass({ timeout });
 }
 
 /** Everything the main region renders, once the page's own content streamed in. */
@@ -214,26 +211,28 @@ async function newDiscoverableWorker(browser: Browser, address: string, name: st
   await page.goto(`${BASE}/en/dashboard/privacy#visibility`);
   const section = page.getByTestId("privacy-visibility");
   await expect(section).toBeVisible({ timeout: 30_000 });
-  await hydrated(page, '[data-testid="discoverability-open"]');
-  await section.getByTestId("discoverability-open").click();
+  await clickUntil(section.getByTestId("discoverability-open"), section.getByTestId("discoverability-grant"));
   await section.getByTestId("discoverability-grant").click();
   await expect(section.getByTestId("discoverability-granted")).toBeVisible({ timeout: 30_000 });
   return page;
 }
 
-/** One day of work through the journal composer: read back → save → confirm. */
+/** One day of work through the journal: read back → save → confirm (the same
+ *  quick-record door signup-isolated.spec.ts S-7 walks). */
 async function recordWork(page: Page, text: string): Promise<void> {
   await page.goto(`${BASE}/en/dashboard/journal`);
-  const box = page.locator("#journal-composer textarea").first();
-  await expect(box).toBeVisible({ timeout: 120_000 });
-  await hydrated(page, "#journal-composer textarea");
+  const main = page.getByRole("main");
+  const box = main.getByTestId("journal-quick-record-text");
+  await expect(box).toBeVisible({ timeout: 60_000 });
   await box.fill(text);
-  await page.getByRole("button", { name: /Read it back/i }).first().click();
-  const save = page.getByTestId("worklog-save").first();
-  await expect(save, "the read-back offers to save").toBeVisible({ timeout: 60_000 });
-  await save.click();
-  await page.getByTestId("worklog-confirm").first().click();
-  await expect(page.getByTestId("worklog-done").first(), "the entry is saved").toBeVisible({ timeout: 90_000 });
+  await clickUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+  await main.getByTestId("worklog-save").click();
+  await main.getByTestId("worklog-confirm").click();
+  const done = main.getByTestId("worklog-done");
+  await expect(done.or(main.getByTestId("worklog-error")).or(main.getByTestId("worklog-blocked"))).toBeVisible({
+    timeout: 60_000,
+  });
+  await expect(done, "the entry is saved").toBeVisible();
 }
 
 async function onlyEntry(workerId: string, privateWord: string): Promise<string> {
@@ -432,8 +431,10 @@ test("K-6. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
   await expect(chip, "the reading is shown on the entry it came from").toHaveAttribute("aria-pressed", "true", {
     timeout: 60_000,
   });
-  await hydrated(page, `[data-testid="entry-skill-toggle-${state.tilerEntry}-${flooring}"]`);
-  await chip.click();
+  await expect(async () => {
+    if ((await chip.getAttribute("aria-pressed")) === "true") await chip.click({ timeout: 5_000 });
+    await expect(chip).toHaveAttribute("aria-pressed", "false", { timeout: 5_000 });
+  }).toPass({ timeout: 60_000 });
 
   // Recorded: the dispute is an append-only marker on THIS entry.
   await expect
@@ -463,15 +464,12 @@ test("K-6. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
   // It STAYS withdrawn: a re-run of recognition over the same text.
   await page.goto(`${BASE}/en/dashboard/journal`);
   await page.getByTestId(`journal-entry-more-${state.tilerEntry}`).first().evaluate((d) => ((d as HTMLDetailsElement).open = true));
+  // The re-run must really HAPPEN: only the success result counts (a failed
+  // run would only re-check the earlier unlink, proving nothing).
   const rerun = page.getByTestId(`journal-entry-reprocess-${state.tilerEntry}`).first();
-  await hydrated(page, `[data-testid="journal-entry-reprocess-${state.tilerEntry}"]`);
-  await rerun.click();
-  await expect(
-    page
-      .getByTestId(`journal-entry-reprocess-result-${state.tilerEntry}`)
-      .or(page.getByTestId(`journal-entry-reprocess-failed-${state.tilerEntry}`))
-      .first(),
-  ).toBeVisible({ timeout: 60_000 });
+  await clickUntil(rerun, page.getByTestId(`journal-entry-reprocess-result-${state.tilerEntry}`).first());
+  await expect(page.getByTestId(`journal-entry-reprocess-failed-${state.tilerEntry}`)).toHaveCount(0);
+  await expect(page.getByTestId(`journal-entry-reprocess-error-${state.tilerEntry}`)).toHaveCount(0);
   links = await entryLinks(state.tilerEntry);
   expect(links.has("flooring"), "re-running recognition does not bring the disputed reading back").toBe(false);
   expect((await workerSkills(state.tilerWorker)).get("flooring")?.source).toBe("self_declared");
