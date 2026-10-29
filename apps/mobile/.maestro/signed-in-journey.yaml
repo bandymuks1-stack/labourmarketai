@@ -266,6 +266,16 @@ name: signed-in-journey
       notVisible:
         id: "journal-compose-save"
     commands:
+      # Does a tap HIGH on the screen still reach the app? (30% down, where the
+      # last touch the app did receive began.) The app-root trace then ends
+      # "at<x>x2<yy>" — logged COMPLETED if it arrived, WARNED if not.
+      - tapOn:
+          point: "50%,30%"
+      - extendedWaitUntil:
+          visible:
+            id: "journal-compose-form-.*-rt[0-9]+at[0-9]+x2[0-9][0-9]"
+          timeout: 5000
+          optional: true
       - tapOn:
           id: "journal-compose-back"
       - extendedWaitUntil:
