@@ -215,7 +215,7 @@ test("M-4. a saved search is stored and reopens from the board", async ({ page }
   expect(state.workerId, "M-1 created the worker").toBeTruthy();
   await signIn(page, APP, WORKER);
   await page.goto(`${APP}/en/dashboard/opportunities?view=all&country=LT`);
-  const strip = page.getByTestId("saved-searches");
+  const strip = page.getByTestId("saved-searches").filter({ visible: true }).first();
   await expect(strip, "the saved-search strip is offered on a filtered board").toBeVisible({ timeout: 30_000 });
   // A closed disclosure while nothing is saved yet (phone-first): open it.
   if ((await strip.getAttribute("open")) === null) await strip.locator("summary").click();
@@ -242,7 +242,11 @@ test("M-4. a saved search is stored and reopens from the board", async ({ page }
   state.searchId = row.id;
 
   await page.goto(`${APP}/en/dashboard/opportunities?view=all`);
-  const reopen = page.getByTestId(`saved-search-${row.id}`).getByTestId("saved-search-open");
+  const reopen = page
+    .getByTestId(`saved-search-${row.id}`)
+    .filter({ visible: true })
+    .first()
+    .getByTestId("saved-search-open");
   await expect(reopen, "the saved search is listed").toBeVisible({ timeout: 30_000 });
   await expect(reopen).toHaveAttribute("href", /country=LT/);
 });
@@ -263,7 +267,7 @@ test("M-5. a saved-search alert: a new matching need appears and the worker is n
   const page = await w.newPage();
   await signIn(page, APP, WORKER);
   await page.goto(`${APP}/en/dashboard/opportunities?view=all&country=LT`);
-  await expect(page.getByTestId(`saved-search-${state.searchId}`)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId(`saved-search-${state.searchId}`).filter({ visible: true }).first()).toBeVisible({ timeout: 30_000 });
   await expect
     .poll(
       async () => {
