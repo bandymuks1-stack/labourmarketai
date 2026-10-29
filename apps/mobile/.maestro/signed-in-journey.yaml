@@ -173,10 +173,10 @@ name: signed-in-journey
 - waitForAnimationToEnd
 # Closing the keyboard moves the layout, so a tap can land where Review used to
 # be. Tap until the next state shows (a preview to save, or a context to
-# choose), at most three times.
-- repeat:
-    times: 3
-    while:
+# choose), at most three times — written out, because a Maestro `repeat`
+# with `while` stopped after one pass on iOS (runs 40846299984, 40852141743).
+- runFlow:
+    when:
       notVisible:
         id: "journal-compose-save"
     commands:
@@ -194,6 +194,61 @@ name: signed-in-journey
             visible:
               id: "journal-compose-review"
           commands:
+            - waitForAnimationToEnd
+            - tapOn:
+                id: "journal-compose-review"
+      - extendedWaitUntil:
+          visible:
+            id: "journal-compose-save"
+          timeout: 20000
+          optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: "journal-compose-save"
+    commands:
+      # When the identity holds more than one work context the server asks the
+      # human to choose; the first option is as good as any for a synthetic cast.
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-choose"
+          commands:
+            - tapOn:
+                id: "journal-compose-option-0"
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-review"
+          commands:
+            - waitForAnimationToEnd
+            - tapOn:
+                id: "journal-compose-review"
+      - extendedWaitUntil:
+          visible:
+            id: "journal-compose-save"
+          timeout: 20000
+          optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: "journal-compose-save"
+    commands:
+      # When the identity holds more than one work context the server asks the
+      # human to choose; the first option is as good as any for a synthetic cast.
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-choose"
+          commands:
+            - tapOn:
+                id: "journal-compose-option-0"
+      - runFlow:
+          when:
+            visible:
+              id: "journal-compose-review"
+          commands:
+            - waitForAnimationToEnd
             - tapOn:
                 id: "journal-compose-review"
       - extendedWaitUntil:

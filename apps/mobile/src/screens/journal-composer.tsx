@@ -109,6 +109,11 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
   // journey can tell a tap that never landed from a request that never came
   // back (state words and a count only; see request-trace.ts).
   const [reviewPresses, setReviewPresses] = useState(0);
+  // Touches that began on Review (i) and anywhere on this form (t): with the
+  // press count they say whether a tap never arrived, landed beside Review,
+  // or reached Review and was cancelled before it became a press.
+  const [reviewPressIns, setReviewPressIns] = useState(0);
+  const [formTouches, setFormTouches] = useState(0);
   // Whether the software keyboard is up — on iOS it sits in its own window, so
   // a control "visible" in the app's layout can still be under it.
   const [keyboardUp, setKeyboardUp] = useState(() => Keyboard.isVisible());
@@ -353,7 +358,8 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
       style={styles.stack}
       testID={`journal-compose-form-${state.kind}${
         state.kind === "draft_failed" ? `-${state.failure.kind}` : ""
-      }-p${reviewPresses}-kb${keyboardUp ? 1 : 0}`}
+      }-p${reviewPresses}-i${reviewPressIns}-t${formTouches}-kb${keyboardUp ? 1 : 0}`}
+      onTouchStart={() => setFormTouches((n) => n + 1)}
     >
       <View testID={traceTestId(trace, "journal.create_draft")}>
         <View testID={traceTestId(trace, "journal.list")}>
@@ -438,6 +444,7 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
         testID="journal-compose-review"
         busy={state.kind === "drafting"}
         label={t("journal.compose.review")}
+        onPressIn={() => setReviewPressIns((n) => n + 1)}
         onPress={() => {
           setReviewPresses((n) => n + 1);
           void draft();
