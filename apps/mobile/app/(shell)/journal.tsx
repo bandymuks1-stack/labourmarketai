@@ -5,7 +5,11 @@ import { useRouter } from "expo-router";
 
 import type { JournalListData } from "../../src/capability-shapes";
 import { useLocale } from "../../src/i18n/locale-context";
-import { traceTestId, useRequestTrace } from "../../src/request-trace";
+import {
+  traceTestId,
+  useRequestTrace,
+  useRootTouchTrace,
+} from "../../src/request-trace";
 import { CapabilityGate } from "../../src/screens/capability-gate";
 import { JournalEntryList } from "../../src/screens/journal-entries";
 import { Button, Title } from "../../src/ui/primitives";
@@ -29,6 +33,7 @@ export default function Screen() {
   const journal = useCapability<JournalListData>("journal.list", PAGE);
   // State words only, for the CI journeys (src/request-trace.ts).
   const trace = useRequestTrace();
+  const rootTouch = useRootTouchTrace();
   const readState =
     journal.state.status === "failed"
       ? `failed-${journal.state.failure.kind}`
@@ -37,7 +42,7 @@ export default function Screen() {
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <View testID={`journal-read-${readState}`}>
+        <View testID={`journal-read-${readState}-${rootTouch}`}>
           <View testID={traceTestId(trace, "journal.list")}>
             <Title>{t("nav.journal")}</Title>
           </View>
