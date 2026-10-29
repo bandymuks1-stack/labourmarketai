@@ -121,6 +121,11 @@ $function$;
 
 revoke all on function public.list_open_demand_for_workers() from public, anon;
 grant execute on function public.list_open_demand_for_workers() to authenticated;
+-- Same ACL everywhere: production has no public-schema default privilege for
+-- functions, so a recreated function gets no service_role grant there (ACL
+-- {postgres=X/postgres,authenticated=X/postgres}); a stack whose defaults add
+-- one (the local CLI stack) is brought to that same ACL. No-op on production.
+revoke all on function public.list_open_demand_for_workers() from service_role;
 
 -- The worker-insert policy, exactly as 20261021095100 created it.
 create policy demand_interest_signals_worker_insert

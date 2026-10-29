@@ -1,6 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
@@ -439,9 +438,9 @@ test("F-5. the board: a real fit band from the work; the licence is a missing FO
 //       policy still lets a worker register interest in a visible real need
 //       and refuses a synthetic or closed one;
 //   G-5 the reader's only SQL dependant is that policy (pg_depend);
-//   G-6 the walk's identities and needs are handed to the production-code
-//       compatibility walk (job-fit-main-compat-isolated.spec.ts, run against
-//       a build of origin/main on the migrated database).
+// The production-code compatibility walk (job-fit-main-compat-isolated.spec.ts)
+// then runs a build of origin/main on this migrated database; it finds these
+// needs by their run-unique titles in the local database (no hand-off file).
 // ════════════════════════════════════════════════════════════════════════════
 
 const PROD_FN_MD5 = "964b1b5405c59fa9578e4a7a2aefe27b";
@@ -654,10 +653,4 @@ test("G-5. the reader's only SQL dependant is the worker-insert policy (pg_depen
       where refobjid = '${FN}'::regprocedure and deptype = 'n' order by 1`,
   ).map((r) => r.d);
   expect(deps).toEqual(["policy demand_interest_signals_worker_insert on table demand_interest_signals"]);
-});
-
-test("G-6. hand the identities and needs to the production-code compatibility walk", async () => {
-  const file = join(process.env.RUNNER_TEMP ?? tmpdir(), "jobfit-compat-state.json");
-  writeFileSync(file, JSON.stringify({ RUN, WORKER, PASSWORD, ...state, fitsBefore: before.fits }));
-  expect(existsSync(file)).toBe(true);
 });

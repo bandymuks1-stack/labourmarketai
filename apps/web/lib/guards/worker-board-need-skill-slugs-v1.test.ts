@@ -28,6 +28,7 @@ const GRANTS = [
   "revoke all on function public.list_open_demand_for_workers() from public, anon;",
   "grant execute on function public.list_open_demand_for_workers() to authenticated;",
 ].join("\n");
+const NO_SERVICE_ROLE = "revoke all on function public.list_open_demand_for_workers() from service_role;";
 
 const PREDICATE = [
   "     and (v_sees_fixtures",
@@ -49,6 +50,7 @@ describe(`${NAME} — the forward migration`, () => {
       body.indexOf("drop function if exists"),
     );
     expect(body).toContain(GRANTS);
+    expect(body, "the same ACL as production, whatever the default privileges").toContain(NO_SERVICE_ROLE);
     expect(body.trimEnd().endsWith("commit;")).toBe(true);
   });
 
@@ -104,6 +106,7 @@ describe(`${NAME} — the rollback`, () => {
     expect(down.indexOf("drop function if exists")).toBeLessThan(down.indexOf("CREATE OR REPLACE FUNCTION"));
     expect(workersBlock(down)).toBe(priorBlock);
     expect(down).toContain(`${priorBlock}\n\n${GRANTS}`);
+    expect(down).toContain(NO_SERVICE_ROLE);
     expect(down.trimEnd().endsWith("commit;")).toBe(true);
     expect(down.replace(/^--.*$/gm, "")).not.toContain("need_skill");
   });
